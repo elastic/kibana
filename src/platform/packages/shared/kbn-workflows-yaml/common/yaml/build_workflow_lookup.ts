@@ -15,6 +15,8 @@ export interface StepInfo {
   stepId: string;
   stepType: string;
   stepYamlNode: YAML.YAMLMap<unknown, unknown>;
+  /** Path of the step in the document, e.g. `['steps', 1, 'steps', 0]`. */
+  path: Array<string | number>;
   lineStart: number;
   lineEnd: number;
   propInfos: Record<string, StepPropInfo>;
@@ -53,7 +55,7 @@ export interface WorkflowLookup {
   triggersLineStart?: number;
   /** Line where the last item in the triggers block ends; undefined when there are no triggers. */
   triggersLineEnd?: number;
-  /** Line where the first recognised step starts; undefined when there are no steps. */
+  /** Line where the first step under `steps` starts; undefined when there are none. */
   stepsLineStart?: number;
 }
 
@@ -71,7 +73,24 @@ export function buildWorkflowLookup(
 
   const stepsNode = (yamlDocument.contents as any).get('steps');
   if (stepsNode) {
-    Object.assign(steps, inspectStep(stepsNode, lineCounter));
+    Object.assign(steps, inspectStep(stepsNode, lineCounter, undefined, undefined, ['steps']));
+  }
+  const stepLineStarts = Object.values(steps).map((s) => s.lineStart);
+  const stepsLineStart = stepLineStarts.length > 0 ? Math.min(...stepLineStarts) : undefined;
+
+  const settingsFallbackPath = ['settings', 'on-failure', 'fallback'];
+  const settingsFallbackNode = yamlDocument.getIn(settingsFallbackPath, true);
+  if (settingsFallbackNode) {
+    Object.assign(
+      steps,
+      inspectStep(
+        settingsFallbackNode,
+        lineCounter,
+        undefined,
+        'on-failure.fallback',
+        settingsFallbackPath
+      )
+    );
   }
 
   let triggersLineStart: number | undefined;
@@ -81,9 +100,6 @@ export function buildWorkflowLookup(
     triggersLineStart = lineCounter.linePos(triggersNode.range[0]).line;
     triggersLineEnd = lineCounter.linePos(triggersNode.range[2] - 1).line;
   }
-
-  const stepLineStarts = Object.values(steps).map((s) => s.lineStart);
-  const stepsLineStart = stepLineStarts.length > 0 ? Math.min(...stepLineStarts) : undefined;
 
   return {
     steps,
@@ -143,7 +159,10 @@ export function inspectStep(
   node: any,
   lineCounter: LineCounter,
   parentStepId?: string,
-  branchKey?: string
+  branchKey?: string,
+  // Shared across the recursion: each level pushes its segment and pops it on
+  // return, so a copy is made only for each step found.
+  path: Array<string | number> = []
 ): Record<string, StepInfo> {
   const result: Record<string, StepInfo> = {};
 
@@ -151,27 +170,14 @@ export function inspectStep(
   let stepType: string | undefined;
 
   if (YAML.isMap(node)) {
+    // Pass 1: read the step's own name and type. Values under other keys
+    // (e.g. `with`, `retry`) are data, not steps, so they are not walked.
     node.items.forEach((item) => {
-      if (YAML.isPair(item)) {
-        if (YAML.isScalar(item.key) && YAML.isScalar(item.value)) {
-          if (item.key.value === 'name') {
-            stepId = item.value.value as string;
-          } else if (item.key.value === 'type') {
-            stepType = item.value.value as string;
-          }
-        }
-
-        // Pass 1 (catch-all): descend into non-container keys carrying the
-        // current branchKey through (e.g. `with:` block, `retry:` config).
-        // Use the wider STEP_CHILD_CONTAINER_KEY_SET so branches/cases/default
-        // are excluded from catch-all descent — they are handled in Pass 2.
-        const keyValue = YAML.isScalar(item.key) ? item.key.value : undefined;
-        if (typeof keyValue !== 'string' || !STEP_CHILD_CONTAINER_KEY_SET.has(keyValue)) {
-          const currentParentStepId = stepId ?? parentStepId;
-          Object.assign(
-            result,
-            inspectStep(item.value, lineCounter, currentParentStepId, branchKey)
-          );
+      if (YAML.isPair(item) && YAML.isScalar(item.key) && YAML.isScalar(item.value)) {
+        if (item.key.value === 'name') {
+          stepId = item.value.value as string;
+        } else if (item.key.value === 'type') {
+          stepType = item.value.value as string;
         }
       }
     });
@@ -195,15 +201,18 @@ export function inspectStep(
             if (YAML.isMap(seqItem)) {
               const innerSteps = seqItem.get('steps', true);
               if (innerSteps) {
+                path.push(nestedKeyValue, idx, 'steps');
                 Object.assign(
                   result,
                   inspectStep(
                     innerSteps,
                     lineCounter,
                     childParentStepId,
-                    `${nestedKeyValue}[${idx}].steps`
+                    `${nestedKeyValue}[${idx}].steps`,
+                    path
                   )
                 );
+                path.splice(-3);
               }
             }
           });
@@ -219,16 +228,20 @@ export function inspectStep(
             (branchKey === 'on-failure' || branchKey === 'iteration-on-failure')
               ? `${branchKey}.fallback`
               : nestedKeyValue;
+          path.push(nestedKeyValue);
           Object.assign(
             result,
-            inspectStep(item.value, lineCounter, childParentStepId, childBranchKey)
+            inspectStep(item.value, lineCounter, childParentStepId, childBranchKey, path)
           );
+          path.pop();
         }
       }
     });
   } else if (YAML.isSeq(node)) {
-    node.items.forEach((subItem) => {
-      Object.assign(result, inspectStep(subItem, lineCounter, parentStepId, branchKey));
+    node.items.forEach((subItem, idx) => {
+      path.push(idx);
+      Object.assign(result, inspectStep(subItem, lineCounter, parentStepId, branchKey, path));
+      path.pop();
     });
   }
 
@@ -252,6 +265,7 @@ export function inspectStep(
       lineStart,
       lineEnd,
       propInfos: propNodes,
+      path: [...path],
       parentStepId,
       branchKey,
     };

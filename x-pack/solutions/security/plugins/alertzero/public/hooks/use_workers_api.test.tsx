@@ -89,6 +89,18 @@ describe('notifyWorkerUpdateError', () => {
       toastMessage: 'Alert Triage cannot be turned on because no AI model is available.',
     });
   });
+
+  it.each([
+    [409, 'conflict'],
+    [403, 'forbidden'],
+    [500, 'server'],
+  ] as const)('reports a %d toast once, as %s', (status, errorClass) => {
+    const reportShown = jest.fn();
+
+    notifyWorkerUpdateError(toasts, httpError(status), reportShown);
+
+    expect(reportShown.mock.calls).toEqual([[errorClass]]);
+  });
 });
 
 describe('useUpdateWorker', () => {

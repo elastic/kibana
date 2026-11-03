@@ -21,6 +21,8 @@ import { registerOwner } from './managed_workflows/register_owner';
 import { registerRoutes } from './routes/register_routes';
 import { ensureAgentSafe, registerAgentType } from './agent';
 import { registerAlertZeroInferenceFeatures } from './inference_features';
+import { ALERTZERO_TELEMETRY_EVENT_TYPES } from './telemetry';
+import { ReportWorkerOutcomeStepId } from '../common/step_types';
 
 jest.mock('./managed_workflows/register_owner', () => ({
   registerOwner: jest.fn(),
@@ -110,7 +112,10 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         coreMock.createSetup() as never,
         {
           features: { registerKibanaFeature: jest.fn() },
-          workflowsExtensions: { registerManagedWorkflowOwner: jest.fn() },
+          workflowsExtensions: {
+            registerManagedWorkflowOwner: jest.fn(),
+            registerStepDefinition: jest.fn(),
+          },
           workflowsManagement: undefined,
         } as never
       );
@@ -138,11 +143,49 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       expect(contextEngine.registerAiIndex).not.toHaveBeenCalled();
     });
 
-    it('does not install managed worker workflows on start', () => {
+    it('does not register any telemetry event type', () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: false })));
+      const coreSetup = coreMock.createSetup();
+
+      plugin.setup(
+        coreSetup as never,
+        {
+          features: { registerKibanaFeature: jest.fn() },
+          workflowsExtensions: {
+            registerManagedWorkflowOwner: jest.fn(),
+            registerStepDefinition: jest.fn(),
+          },
+          workflowsManagement: undefined,
+        } as never
+      );
+
+      expect(coreSetup.analytics.registerEventType).not.toHaveBeenCalled();
+    });
+
+    it('does not register the reportWorkerOutcome workflow step', () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: false })));
+      const workflowsExtensions = {
+        registerManagedWorkflowOwner: jest.fn(),
+        registerStepDefinition: jest.fn(),
+      };
+
+      plugin.setup(
+        coreMock.createSetup() as never,
+        {
+          features: { registerKibanaFeature: jest.fn() },
+          workflowsExtensions,
+          workflowsManagement: undefined,
+        } as never
+      );
+
+      expect(workflowsExtensions.registerStepDefinition).not.toHaveBeenCalled();
+    });
+
+    it('does not install managed worker workflows on start', async () => {
       const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: false })));
       const coreStart = coreMock.createStart();
 
-      plugin.start(coreStart, {
+      await plugin.start(coreStart, {
         spaces: undefined,
         workflowsExtensions: { initManagedWorkflowsClient: jest.fn() },
       } as never);
@@ -155,7 +198,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
   describe('when xpack.alertzero.enabled is true', () => {
     it.each(['agentBuilder', 'proposals', 'agenticInvestigations'] as const)(
       'preserves workflow ownership without starting feature work when %s is absent',
-      (missingDependency) => {
+      async (missingDependency) => {
         const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
         const coreSetup = coreMock.createSetup();
         const workflowsExtensions = {
@@ -172,13 +215,16 @@ describe('AlertZeroPlugin feature-flag gating', () => {
           [missingDependency]: undefined,
         };
         const result = plugin.setup(coreSetup, dependencies as never);
-        plugin.start(coreMock.createStart(), {} as never);
+        await plugin.start(coreMock.createStart(), {} as never);
         expect(result.isEnabled).toBe(true);
         expect(registerRoutes).toHaveBeenCalled();
         expect(registerOwner).toHaveBeenCalledWith({ workflowsExtensions });
         // Step definitions register regardless: an installed workflow that reaches one of these
         // steps must fail on the named missing dependency, not on an unregistered step type.
-        expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalled();
+        // The outcome step too, since the browser offers it whenever AlertZero is enabled.
+        expect(
+          workflowsExtensions.registerStepDefinition.mock.calls.map(([definition]) => definition.id)
+        ).toContain('alertzero.reportWorkerOutcome');
         expect(registerAgentType).not.toHaveBeenCalled();
         expect(initializeManagedWorkflows).not.toHaveBeenCalled();
         expect(ensureAgentSafe).not.toHaveBeenCalled();
@@ -204,11 +250,17 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         } as never
       );
 
-      expect(contextEngine.registerAiIndex).toHaveBeenCalledTimes(1);
+      expect(contextEngine.registerAiIndex).toHaveBeenCalledTimes(2);
       expect(contextEngine.registerAiIndex).toHaveBeenCalledWith(
         'security-investigations',
         expect.objectContaining({
           dest: { type: 'index', value: 'ai-index-idx-security-investigations' },
+        })
+      );
+      expect(contextEngine.registerAiIndex).toHaveBeenCalledWith(
+        'security-attack-fingerprints',
+        expect.objectContaining({
+          dest: { type: 'index', value: 'ai-index-idx-security-attack-fingerprints' },
         })
       );
     });
@@ -294,7 +346,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       expect(registerAgentType).toHaveBeenCalled();
     });
 
-    it('grants the agentic investigations and escalations API privileges with the feature', () => {
+    it('grants no agentic investigations or escalations API privileges with the feature', () => {
       const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
       const features = { registerKibanaFeature: jest.fn() };
 
@@ -311,21 +363,67 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       );
 
       const { privileges } = features.registerKibanaFeature.mock.calls[0][0];
-      // String literals, as the agenticInvestigations feature declares them, so a rename there
-      // fails here rather than silently leaving AlertZero users without the shared routes.
+      // Investigation and escalation privileges come only from Agentic Investigations.
       expect(privileges.all.api).toEqual([
         ALERTZERO_API_PRIVILEGE_READ,
         ALERTZERO_API_PRIVILEGE_WRITE,
-        'read_investigations',
-        'manage_investigations',
-        'read_escalations',
-        'manage_escalations',
       ]);
-      expect(privileges.read.api).toEqual([
-        ALERTZERO_API_PRIVILEGE_READ,
-        'read_investigations',
-        'read_escalations',
-      ]);
+      expect(privileges.read.api).toEqual([ALERTZERO_API_PRIVILEGE_READ]);
+    });
+
+    it('registers every AlertZero telemetry event type during setup', () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+      const coreSetup = coreMock.createSetup();
+
+      plugin.setup(
+        coreSetup as never,
+        {
+          features: { registerKibanaFeature: jest.fn() },
+          workflowsExtensions: {
+            registerManagedWorkflowOwner: jest.fn(),
+            registerStepDefinition: jest.fn(),
+          },
+          workflowsManagement: { management: {} },
+          agentBuilder: {
+            tools: { register: jest.fn() },
+            skills: { register: jest.fn() },
+            attachments: { registerType: jest.fn() },
+          },
+        } as never
+      );
+
+      expect(coreSetup.analytics.registerEventType.mock.calls.map(([opts]) => opts)).toEqual(
+        ALERTZERO_TELEMETRY_EVENT_TYPES
+      );
+    });
+
+    it('registers the reportWorkerOutcome workflow step during setup', () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+      const workflowsExtensions = {
+        registerManagedWorkflowOwner: jest.fn(),
+        registerStepDefinition: jest.fn(),
+      };
+
+      plugin.setup(
+        coreMock.createSetup() as never,
+        {
+          features: { registerKibanaFeature: jest.fn() },
+          workflowsExtensions,
+          workflowsManagement: { management: {} },
+          proposals: {},
+          agenticInvestigations: {},
+          agentBuilder: {
+            tools: { register: jest.fn() },
+            skills: { register: jest.fn() },
+            attachments: { registerType: jest.fn() },
+            conversations: { enableUpdatedTrigger: jest.fn() },
+          },
+        } as never
+      );
+
+      expect(
+        workflowsExtensions.registerStepDefinition.mock.calls.map(([def]) => def.id)
+      ).toContain(ReportWorkerOutcomeStepId);
     });
 
     it('registers the per-space enablement advanced setting', () => {
@@ -512,12 +610,12 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       );
     });
 
-    it('does not install managed worker workflows when service accounts are disabled', () => {
+    it('does not install managed worker workflows when service accounts are disabled', async () => {
       const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
       const coreStart = coreMock.createStart();
       jest.spyOn(coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(false);
 
-      plugin.start(coreStart, {
+      await plugin.start(coreStart, {
         spaces: undefined,
         agentBuilder: { agents: { ensure: jest.fn() } },
         workflowsExtensions: { initManagedWorkflowsClient: jest.fn() },
@@ -530,13 +628,13 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       expect(ensureAgentSafe).not.toHaveBeenCalled();
     });
 
-    it('installs managed worker workflows during start', () => {
+    it('installs managed worker workflows during start', async () => {
       const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
       const coreStart = coreMock.createStart();
       jest.spyOn(coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
       const workflowsExtensions = { initManagedWorkflowsClient: jest.fn() };
 
-      plugin.start(coreStart, {
+      await plugin.start(coreStart, {
         spaces: undefined,
         agentBuilder: { agents: { ensure: jest.fn() } },
         workflowsExtensions,
@@ -554,13 +652,13 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       );
     });
 
-    it('ensures the thin agent in the default space', () => {
+    it('ensures the thin agent in the default space', async () => {
       const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
       const coreStart = coreMock.createStart();
       jest.spyOn(coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
       const agentBuilder = { agents: { ensure: jest.fn() } };
 
-      plugin.start(coreStart, {
+      await plugin.start(coreStart, {
         spaces: undefined,
         workflowsExtensions: { initManagedWorkflowsClient: jest.fn() },
         agentBuilder,

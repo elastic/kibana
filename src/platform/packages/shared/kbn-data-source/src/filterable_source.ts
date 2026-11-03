@@ -7,7 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewBase } from '@kbn/es-query';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+
+/**
+ * The part of a field that filtering reads. A `DataViewField` satisfies it, and so does a field of
+ * any other source. The label and spec members are optional capabilities.
+ */
+export type FilterableField = DataViewFieldBase & {
+  readonly searchable?: boolean;
+  readonly aggregatable?: boolean;
+  readonly filterable?: boolean;
+  readonly customLabel?: string;
+  readonly displayName?: string;
+  toSpec?(): unknown;
+};
 
 /**
  * What filtering needs from a data source: unified search, KQL, filter pills and the helpers behind
@@ -17,6 +30,9 @@ import type { DataViewBase } from '@kbn/es-query';
  * read them (`'getFormatterForField' in indexPattern`).
  */
 export interface FilterableSource extends DataViewBase {
+  readonly fields: FilterableField[];
+  readonly name?: string;
   readonly timeFieldName?: string;
+  getName?(): string;
   isTimeBased(): boolean;
 }

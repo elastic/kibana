@@ -9,6 +9,7 @@ import sinon from 'sinon';
 import { errors } from '@elastic/elasticsearch';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import type { SavedObject } from '@kbn/core/server';
+import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type {
   RuleExecutorOptions,
   RuleTypeParams,
@@ -4569,6 +4570,7 @@ describe('Task Runner', () => {
       mockGetRuleFromRaw.mockReturnValue({ ...(mockedRuleTypeSavedObject as Rule), actions: [] });
       alertsService.createAlertsClient.mockImplementation(() => alertsClient);
       alertsClient.getProcessedAlerts.mockReturnValue({});
+      alertsClient.getBuiltActiveAlertDataByInstanceId.mockReset();
     });
 
     afterEach(() => {
@@ -4750,11 +4752,78 @@ describe('Task Runner', () => {
               status: 'active',
               actionGroup: 'default',
               start: '2024-01-01T00:00:00.000Z',
+              severity: null,
             },
           },
         },
         expect.anything()
       );
+    });
+
+    describe('severity', () => {
+      const newAlertProcessed = () => {
+        const alert = makeMockAlert({ id: 'alert-1', uuid: 'uuid-1', actionGroup: 'default' });
+        alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+          type === 'new' ? { 'alert-1': alert } : {}
+        );
+      };
+
+      test('reports the severity the alerts client built for a new alert', async () => {
+        newAlertProcessed();
+        alertsClient.getBuiltActiveAlertDataByInstanceId.mockImplementation((instanceId: string) =>
+          instanceId === 'alert-1' ? { [ALERT_SEVERITY]: 'critical' } : undefined
+        );
+
+        await createRunnerWithBus().run();
+
+        expect(mockBus.publish).toHaveBeenCalledTimes(1);
+        expect(mockBus.publish.mock.calls[0][0].payload.alert.severity).toBe('critical');
+      });
+
+      test('reports severity read from a nested alert document', async () => {
+        newAlertProcessed();
+        alertsClient.getBuiltActiveAlertDataByInstanceId.mockReturnValue({
+          kibana: { alert: { severity: 'low' } },
+        });
+
+        await createRunnerWithBus().run();
+
+        expect(mockBus.publish.mock.calls[0][0].payload.alert.severity).toBe('low');
+      });
+
+      test('reports null when the rule type sets no severity', async () => {
+        newAlertProcessed();
+        alertsClient.getBuiltActiveAlertDataByInstanceId.mockReturnValue({
+          'kibana.alert.reason': 'x',
+        });
+
+        await createRunnerWithBus().run();
+
+        expect(mockBus.publish.mock.calls[0][0].payload.alert.severity).toBeNull();
+      });
+
+      test('reports null when the alerts client has no built document for the alert', async () => {
+        newAlertProcessed();
+        alertsClient.getBuiltActiveAlertDataByInstanceId.mockReturnValue(undefined);
+
+        await createRunnerWithBus().run();
+
+        expect(mockBus.publish.mock.calls[0][0].payload.alert.severity).toBeNull();
+      });
+
+      test('reports null for a recovered alert', async () => {
+        const alert = makeMockAlert({ id: 'alert-2', uuid: 'uuid-2', lastGroup: 'default' });
+        alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+          type === 'recovered' ? { 'alert-2': alert } : {}
+        );
+        alertsClient.getBuiltActiveAlertDataByInstanceId.mockReturnValue({
+          [ALERT_SEVERITY]: 'critical',
+        });
+
+        await createRunnerWithBus().run();
+
+        expect(mockBus.publish.mock.calls[0][0].payload.alert.severity).toBeNull();
+      });
     });
 
     test('payload built in task_runner passes alertStatusChangedV1EventSchema.parse()', async () => {

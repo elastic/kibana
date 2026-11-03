@@ -33,15 +33,11 @@ import * as i18n from '../translations';
 import { useActions } from './use_actions';
 import { useCasesColumnsConfiguration } from './use_cases_columns_configuration';
 import { useApplicationCapabilities, useCasesConfig, useKibana } from '../../../common/lib/kibana';
-import {
-  getExtendedFieldColumnKey,
-  getExtendedFieldTableColumn,
-} from '../components/extended_field_columns';
+import { getFieldColumns } from '../utils/get_field_columns';
 import { useGlobalInlineFields } from './use_global_inline_fields';
 import { TruncatedText } from '../../truncated_text';
 import { getConnectorIcon } from '../../utils';
 import { AssigneesColumn } from '../components/assignees_column';
-import { builderMap as customFieldsBuilderMap } from '../../custom_fields/builder';
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 import { IncrementalIdText } from '../../incremental_id';
 import { severities } from '../../severity/config';
@@ -368,42 +364,18 @@ export const useCasesColumns = ({
     [assignCaseAction, casesColumnsConfig, connectors, isSelectorView, userProfiles, disabledCases]
   );
 
-  const allColumnsDict = useMemo(() => {
-    const dict = { ...columnsDict };
-
-    // With templates v2, columns come from global field definitions and read live values from
-    // `extendedFields`; otherwise they come from the legacy customFields config.
-    if (templatesEnabled) {
-      globalInlineFields.forEach((field) => {
-        dict[getExtendedFieldColumnKey(field)] = getExtendedFieldTableColumn(field, userProfiles);
-      });
-
-      return dict;
-    }
-
-    customFields.forEach(({ key, type, label }) => {
-      if (type in customFieldsBuilderMap) {
-        const columnDefinition = customFieldsBuilderMap[type]().getEuiTableColumn({ label });
-
-        dict[key] = {
-          ...columnDefinition,
-          render: (theCase: CaseUI) => {
-            const customField = theCase.customFields.find(
-              (element) => element.key === key && element.value !== null
-            );
-
-            if (!customField) {
-              return getEmptyCellValue();
-            }
-
-            return columnDefinition.render(customField);
-          },
-        };
-      }
-    });
-
-    return dict;
-  }, [columnsDict, customFields, templatesEnabled, globalInlineFields, userProfiles]);
+  const allColumnsDict = useMemo(
+    () => ({
+      ...columnsDict,
+      ...getFieldColumns<CaseUI>({
+        templatesEnabled,
+        globalInlineFields,
+        customFields,
+        userProfiles,
+      }),
+    }),
+    [columnsDict, customFields, templatesEnabled, globalInlineFields, userProfiles]
+  );
 
   const columns: CasesColumns[] = [];
 
@@ -427,7 +399,7 @@ export const useCasesColumns = ({
 };
 
 interface Props {
-  theCase: CaseUI;
+  theCase: Pick<CaseUI, 'externalService' | 'updatedAt'>;
   connectors: ActionConnector[];
 }
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DummyRuleMap } from 'oxlint';
+import type { DummyRuleMap, OxlintOverride } from 'oxlint';
 
 export const typescriptRules: DummyRuleMap = {
   '@typescript-eslint/explicit-member-accessibility': [
@@ -35,15 +35,6 @@ export const typescriptRules: DummyRuleMap = {
   '@typescript-eslint/adjacent-overload-signatures': 'error',
   // '@typescript-eslint/array-type': 'error',
   '@typescript-eslint/consistent-type-assertions': 'error',
-  // '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
-  // '@typescript-eslint/consistent-type-imports': [
-  //   'error',
-  //   {
-  //     'prefer': 'type-imports',
-  //     'disallowTypeAnnotations': false,
-  //     'fixStyle': 'separate-type-imports'
-  //   }
-  // ],
   // '@typescript-eslint/member-ordering': [
   //   'error',
   //   {
@@ -136,21 +127,11 @@ export const typescriptRules: DummyRuleMap = {
   '@typescript-eslint/no-extra-non-null-assertion': 'error',
   '@typescript-eslint/no-misused-new': 'error',
   '@typescript-eslint/no-namespace': 'error',
-  // '@typescript-eslint/no-shadow': 'error',
   // '@typescript-eslint/no-undef': 'error',
   // '@typescript-eslint/no-unsafe-function-type': 'error',
-  // '@typescript-eslint/no-unused-expressions': ['error', { 'allowTaggedTemplates': true }],
   // '@typescript-eslint/no-var-requires': 'error',
   // '@typescript-eslint/no-wrapper-object-types': 'error',
   '@typescript-eslint/prefer-function-type': 'error',
-  // '@typescript-eslint/triple-slash-reference': [
-  //   'error',
-  //   {
-  //     'path': 'never',
-  //     'types': 'never',
-  //     'lib': 'never'
-  //   }
-  // ],
   '@typescript-eslint/unified-signatures': 'error',
   // 'ban/ban': [
   //   2,
@@ -161,3 +142,39 @@ export const typescriptRules: DummyRuleMap = {
   //   { 'name': ['testErrorsAndWarnings', 'only'], 'message': 'No exclusive tests.' }
   // ],
 };
+
+/** `@kbn/eslint-config`'s TypeScript-only rules. */
+export const typescriptOverrides: OxlintOverride[] = [
+  {
+    files: ['**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          prefer: 'type-imports',
+          disallowTypeAnnotations: false,
+          fixStyle: 'separate-type-imports',
+        },
+      ],
+      '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
+      '@typescript-eslint/no-shadow': 'error',
+      '@typescript-eslint/triple-slash-reference': [
+        'error',
+        { path: 'never', types: 'never', lib: 'never' },
+      ],
+      eqeqeq: ['error', 'always', { null: 'ignore' }],
+      'max-classes-per-file': ['error', 1],
+      'no-bitwise': 'error',
+      'no-console': 'error',
+      'no-throw-literal': 'error',
+      'no-unsafe-finally': 'error',
+      '@typescript-eslint/no-unused-expressions': ['error', { allowTaggedTemplates: true }],
+      'no-var': 'error',
+      'object-shorthand': 'error',
+      'one-var': ['error', 'never'],
+      'prefer-const': 'error',
+      'prefer-rest-params': 'error',
+      radix: 'error',
+    },
+  },
+];

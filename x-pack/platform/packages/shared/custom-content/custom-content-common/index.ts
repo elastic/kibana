@@ -22,8 +22,13 @@ export {
   customContentPanelUpdateSchema,
   readEsqlQuery,
   toEsqlQueryState,
-  resolveEsqlQueryEdit,
 } from './schema';
-export type { ResolvedEsqlQueryEdit, CustomContentState } from './schema';
+export type { CustomContentState } from './schema';
+
+export { resolveCustomContentQuery } from './resolve_custom_content_query';
+export type {
+  ResolveCustomContentQueryParams,
+  ResolvedCustomContentQuery,
+} from './resolve_custom_content_query';
 
 export { stripMarkdownFences } from './strip_markdown_fences';

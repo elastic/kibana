@@ -22,6 +22,14 @@ import {
   MAX_KI_TITLE_LENGTH,
 } from '@kbn/context-engine-plugin/common/step_types/ki';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
+import {
+  getKiRevision,
+  isKiDeleted,
+  putKiRevision,
+  type KiRevision,
+  type KiWriter,
+  type StoredKi,
+} from '@kbn/context-engine-plugin/server/ai_indices/ki_revision';
 import type { CoreStart } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { isoDateTime, z } from '@kbn/zod/v4';
@@ -32,6 +40,7 @@ import { getWritableMemoryAiIndex } from '../get_writable_memory_ai_index';
 import {
   createConversationReferences,
   createMemoryWriter,
+  isMemoryDocument,
   type StoredMemoryDocument,
   updateMemoryProvenance,
 } from '../memory_document';
@@ -168,68 +177,58 @@ export const createRememberTool = ({
         currentDate.getTime() + DEFAULT_MEMORY_EXPIRATION_MS
       ).toISOString();
       const logicalId = params.id ?? generateId();
-      const writer = createMemoryWriter({
+      const writer: KiWriter = createMemoryWriter({
         toolId: contextEngineMemoryTools.remember,
         runId: runContext.runId,
         agentId: agent?.agentId,
       });
-      let existingBackingIndex: string | undefined;
-      let existingSeqNo: number | undefined;
-      let existingPrimaryTerm: number | undefined;
       let existingDocument: StoredMemoryDocument | undefined;
+      let existingRevision:
+        | Pick<KiRevision, 'index' | 'documentId' | 'seqNo' | 'primaryTerm'>
+        | undefined;
 
       if (params.id) {
-        const searchResponse = await currentUserClient.search<StoredMemoryDocument>({
-          index: aiIndex.dest.value,
-          ignore_unavailable: true,
-          allow_no_indices: true,
-          ...(aiIndex.dest.type === 'data_stream'
-            ? {
-                query: { term: { id: params.id } },
-                sort: [{ '@timestamp': 'desc' as const }],
-                size: 1,
-              }
-            : {
-                query: { ids: { values: [params.id] } },
-                seq_no_primary_term: true,
-                size: 2,
-              }),
+        const abortSignal = new AbortController().signal;
+        const revision = await getKiRevision({
+          esClient: currentUserClient,
+          aiIndexId: params.aiIndexId,
+          dest: aiIndex.dest,
+          kiId: params.id,
+          abortSignal,
+          includeSource: true,
         });
 
-        if (aiIndex.dest.type === 'index' && searchResponse.hits.hits.length > 1) {
-          throw new Error(
-            `Memory '${params.id}' exists in multiple indices matched by AI index '${params.aiIndexId}'.`
-          );
-        }
-
-        const [existingHit] = searchResponse.hits.hits;
-        if (!existingHit?._source) {
-          throw new Error(`Memory '${params.id}' was not found in AI index '${params.aiIndexId}'.`);
-        }
-        if (
-          existingHit._source.type !== 'memory.session' &&
-          existingHit._source.type !== 'memory.session_fact'
-        ) {
+        if (!isMemoryDocument(revision.source)) {
           throw new Error(
             `Document '${params.id}' in AI index '${params.aiIndexId}' is not a memory.`
           );
         }
-        if (existingHit._source.type !== params.type) {
+        if (revision.source.type !== params.type) {
           throw new Error(
-            `Memory '${params.id}' has type '${existingHit._source.type}' and cannot be revised as '${params.type}'.`
+            `Memory '${params.id}' has type '${revision.source.type}' and cannot be revised as '${params.type}'.`
           );
         }
-        if (existingHit._source.governance?.lifecycle?.status === 'deleted') {
+        if (isKiDeleted(revision.source)) {
           throw new Error(`Memory '${params.id}' was deleted and cannot be revised.`);
         }
 
-        existingBackingIndex = existingHit._index;
-        existingSeqNo = existingHit._seq_no;
-        existingPrimaryTerm = existingHit._primary_term;
-        existingDocument = existingHit._source;
+        existingDocument = revision.source;
+        existingRevision = {
+          index: revision.index,
+          documentId: revision.documentId,
+          seqNo: revision.seqNo,
+          primaryTerm: revision.primaryTerm,
+        };
       }
 
-      const document: StoredMemoryDocument = {
+      let tags: string[] | undefined;
+      if (params.tags !== undefined) {
+        tags = params.tags;
+      } else if (existingDocument?.tags !== undefined) {
+        tags = existingDocument.tags;
+      }
+
+      const document: StoredKi = {
         '@timestamp':
           aiIndex.dest.type === 'data_stream' ? now : existingDocument?.['@timestamp'] ?? now,
         id: logicalId,
@@ -237,11 +236,7 @@ export const createRememberTool = ({
         title: params.title,
         description: params.description,
         content: params.content,
-        ...(params.tags !== undefined
-          ? { tags: params.tags }
-          : existingDocument?.tags !== undefined
-          ? { tags: existingDocument.tags }
-          : {}),
+        ...(tags !== undefined ? { tags } : {}),
         ...(params.expires_at === null
           ? {}
           : {
@@ -266,25 +261,20 @@ export const createRememberTool = ({
       if (
         aiIndex.dest.type === 'index' &&
         existingDocument &&
-        (existingSeqNo === undefined || existingPrimaryTerm === undefined)
+        (existingRevision?.seqNo === undefined || existingRevision?.primaryTerm === undefined)
       ) {
         throw new Error(`Memory '${logicalId}' is missing concurrency metadata.`);
       }
 
-      await currentUserClient.index({
-        index:
-          aiIndex.dest.type === 'index' && existingBackingIndex
-            ? existingBackingIndex
-            : aiIndex.dest.value,
-        ...(aiIndex.dest.type === 'index' && { id: logicalId }),
+      await putKiRevision({
+        esClient: currentUserClient,
+        aiIndexId: params.aiIndexId,
+        dest: aiIndex.dest,
+        kiId: logicalId,
         document,
-        ...(aiIndex.dest.type === 'data_stream' || !existingDocument
-          ? { op_type: 'create' as const }
-          : {
-              if_seq_no: existingSeqNo,
-              if_primary_term: existingPrimaryTerm,
-            }),
-        refresh: 'wait_for',
+        existing: aiIndex.dest.type === 'index' ? existingRevision : undefined,
+        failIfExists: !existingDocument,
+        refresh: true,
       });
 
       return {

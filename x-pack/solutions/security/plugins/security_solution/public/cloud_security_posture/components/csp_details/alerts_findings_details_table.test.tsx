@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
+import { decode } from '@kbn/rison';
 import { AlertsDetailsTable } from './alerts_findings_details_table';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
@@ -18,8 +19,12 @@ import { useQueryAlerts } from '../../../detections/containers/detection_engine/
 import {
   ENTITY_ANALYTICS_TABLE_ID,
   ENTITY_ANALYTICS_ALERTS_FROM,
-  ENTITY_ANALYTICS_ALERTS_TO,
+  ENTITY_ANALYTICS_DEFAULT_TIMERANGE_TO,
 } from '../../../entity_analytics/components/home/constants';
+import { getEntityAnalyticsNewHomeScopeId } from '../../../entity_analytics/common/scope_time_ranges';
+import { useNavigateToAlertsPageWithFilters } from '../../../common/hooks/use_navigate_to_alerts_page_with_filters';
+
+const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
 jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({
   uiMetricService: { trackUiMetric: jest.fn() },
@@ -167,7 +172,7 @@ describe('AlertsDetailsTable', () => {
       expect(useNonClosedAlerts).toHaveBeenCalledWith(
         expect.objectContaining({
           from: ENTITY_ANALYTICS_ALERTS_FROM,
-          to: ENTITY_ANALYTICS_ALERTS_TO,
+          to: ENTITY_ANALYTICS_DEFAULT_TIMERANGE_TO,
         })
       );
     });
@@ -178,6 +183,43 @@ describe('AlertsDetailsTable', () => {
       expect(useNonClosedAlerts).toHaveBeenCalledWith(
         expect.objectContaining({ from: '2022-01-01', to: '2023-01-01' })
       );
+    });
+
+    describe('alerts page link', () => {
+      const getLinkTimerange = (scopeId?: string) => {
+        const { getByTestId } = renderWithScopeId(scopeId);
+        fireEvent.click(getByTestId('securitySolutionFlyoutInsightsAlertsCount'));
+        const openAlertsPageWithFilters = (useNavigateToAlertsPageWithFilters as jest.Mock)();
+        expect(openAlertsPageWithFilters).toHaveBeenCalledTimes(1);
+        const [, openInNewTab, timerange] = openAlertsPageWithFilters.mock.calls[0];
+        expect(openInNewTab).toBe(true);
+        return decode(timerange);
+      };
+
+      it('passes the global time range as an absolute range', () => {
+        expect(getLinkTimerange()).toEqual({
+          global: { timerange: { kind: 'absolute', from: '2022-01-01', to: '2023-01-01' } },
+        });
+      });
+
+      it.each([
+        [ENTITY_ANALYTICS_TABLE_ID, ENTITY_ANALYTICS_ALERTS_FROM],
+        [getEntityAnalyticsNewHomeScopeId('24h'), 'now-24h'],
+        [getEntityAnalyticsNewHomeScopeId('7d'), 'now-7d'],
+        [getEntityAnalyticsNewHomeScopeId('30d'), 'now-30d'],
+      ])('passes the %s scope time range as a relative range', (scopeId, fromStr) => {
+        expect(getLinkTimerange(scopeId)).toEqual({
+          global: {
+            timerange: {
+              kind: 'relative',
+              fromStr,
+              toStr: ENTITY_ANALYTICS_DEFAULT_TIMERANGE_TO,
+              from: expect.stringMatching(ISO_DATE_REGEX),
+              to: expect.stringMatching(ISO_DATE_REGEX),
+            },
+          },
+        });
+      });
     });
   });
 

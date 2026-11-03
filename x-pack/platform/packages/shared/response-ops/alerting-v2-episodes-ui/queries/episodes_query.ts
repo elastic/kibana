@@ -71,6 +71,11 @@ export interface AlertEpisode extends BaseAlertEpisode {
    * Used to render grouping tags on source alert rows. Native episodes never set this.
    */
   source_grouping?: Record<string, unknown>;
+  /**
+   * Ids of the maintenance windows the alert was created under.
+   * Only set for source alert rows; native episodes never set this yet.
+   */
+  maintenance_window_ids?: string[];
 }
 
 /** True when the row came from an additional episode data source, not the v2 pipeline. */

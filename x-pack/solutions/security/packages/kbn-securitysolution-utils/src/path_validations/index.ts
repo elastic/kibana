@@ -38,6 +38,7 @@ export enum EntryFieldType {
   EXECUTABLE = '.executable.caseless',
   PATH = '.path',
   SIGNER = '.code_signature',
+  FILENAME = 'file.name',
 }
 
 export type TrustedAppConditionEntryField =
@@ -50,7 +51,9 @@ export type BlocklistConditionEntryField =
   | 'file.hash.*'
   | 'file.path'
   | 'file.Ext.code_signature'
-  | 'file.path.caseless';
+  | 'file.path.caseless'
+  | 'file.name'
+  | 'file.name.caseless';
 export type AllConditionEntryFields =
   | TrustedAppConditionEntryField
   | BlocklistConditionEntryField

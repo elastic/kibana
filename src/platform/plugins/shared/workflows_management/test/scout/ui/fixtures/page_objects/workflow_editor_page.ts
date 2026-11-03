@@ -408,22 +408,26 @@ export class WorkflowEditorPage {
   }
 
   async openServiceAccountRoles(): Promise<void> {
-    await this.page.testSubj.locator('serviceAccountRolesSelector').click();
+    await this.page.getByRole('combobox', { name: 'Set privileges' }).click();
+    await this.page
+      .getByRole('listbox', { name: 'Choose from the following options' })
+      .waitFor({ state: 'visible' });
   }
 
   async closeServiceAccountRoles(): Promise<void> {
-    await this.page.getByRole('listbox', { name: 'Select roles' }).press('Escape');
-    await this.page.getByRole('listbox', { name: 'Select roles' }).waitFor({ state: 'hidden' });
+    await this.page.getByRole('combobox', { name: 'Set privileges' }).press('Escape');
+    await this.page
+      .getByRole('listbox', { name: 'Choose from the following options' })
+      .waitFor({ state: 'hidden' });
   }
 
   async fillServiceAccount(name: string, description: string): Promise<void> {
     const flyout = this.page.testSubj.locator('createServiceAccountFlyout');
     await this.page.testSubj.locator('serviceAccountNameInput').fill(name);
     await this.page.testSubj.locator('createServiceAccountDescription').fill(description);
-    await flyout.getByRole('button', { name: 'Set privileges' }).click();
-    await this.page.getByRole('listbox', { name: 'Select roles' }).press('End');
-    await this.page.testSubj.locator('roleOption-viewer').click();
-    await this.closeServiceAccountRoles();
+    await this.page.components
+      .comboBox('serviceAccountRolesSelector', flyout)
+      .setSelectedOptions(['viewer']);
   }
 
   async submitServiceAccount(): Promise<void> {

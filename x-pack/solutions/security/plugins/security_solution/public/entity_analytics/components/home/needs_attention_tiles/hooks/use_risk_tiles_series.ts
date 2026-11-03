@@ -7,10 +7,9 @@
 
 import { useMemo } from 'react';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { useTileQueryInputs } from './use_tile_query_inputs';
 import type { EntityFilters, TimeRange } from '../../entities_grid/common';
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
-import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 import {
   buildRiskTilesSeriesQuery,
   newlyHighCriticalSeriesColumn,
@@ -58,21 +57,17 @@ export const useRiskTilesSeries = ({
   newlyHighCriticalTrend: number[] | undefined;
   isTrendLoading: boolean;
 } => {
-  const { data: resolvedIndex, isLoading: isIndexLoading } =
-    useResolvedLatestEntitiesIndexName(spaceId);
+  const {
+    data: resolvedIndex,
+    isLoading: isIndexLoading,
+    entityFilterClauses,
+  } = useTileQueryInputs(spaceId, entityFilters);
   const index = resolvedIndex?.indexName;
 
   const query = useMemo(
     () =>
-      index
-        ? buildRiskTilesSeriesQuery(
-            spaceId,
-            index,
-            timeRange,
-            buildEntityFilterClauses(entityFilters)
-          )
-        : null,
-    [spaceId, index, timeRange, entityFilters]
+      index ? buildRiskTilesSeriesQuery(spaceId, index, timeRange, entityFilterClauses) : null,
+    [spaceId, index, timeRange, entityFilterClauses]
   );
 
   const moversGate = getSeriesGate({

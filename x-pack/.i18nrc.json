@@ -9,7 +9,6 @@
       "platform/packages/shared/ml/aiops_log_rate_analysis",
       "platform/plugins/shared/aiops"
     ],
-    "xpack.aiAnonymization": "platform/packages/shared/ai-infra/ai-anonymization-server",
     "xpack.aiAnonymizationSettings": "platform/plugins/private/ai_anonymization_settings",
     "xpack.aiAssistant": [
       "platform/packages/shared/kbn-ai-assistant",
@@ -21,7 +20,9 @@
     "xpack.alertingV2": [
       "platform/packages/shared/response-ops/alerting-v2-utils",
       "platform/packages/shared/response-ops/alerting-v2-browser-shared",
-      "platform/packages/shared/response-ops/alerting-v2-constants"
+      "platform/packages/shared/response-ops/alerting-v2-constants",
+      "platform/packages/shared/response-ops/alerting-v2-rule-form",
+      "platform/plugins/shared/alerting_v2"
     ],
     "xpack.eventLog": "platform/plugins/shared/event_log",
     "xpack.stackAlerts": "platform/plugins/shared/stack_alerts",
@@ -38,7 +39,7 @@
     "xpack.cloudDefend": "solutions/security/plugins/cloud_defend",
     "xpack.cloudLinks": "platform/plugins/private/cloud_integrations/cloud_links",
     "xpack.cloudDataMigration": "platform/plugins/private/cloud_integrations/cloud_data_migration",
-    "xpack.contentConnectors": "solutions/search/plugins/content_connectors",
+    "xpack.contentConnectors": "platform/plugins/shared/content_connectors",
     "xpack.contextEngine": [
       "platform/plugins/shared/context_engine",
       "platform/plugins/shared/context_engine_agent_builder"
@@ -59,6 +60,7 @@
     "xpack.dataQuality": "platform/plugins/shared/data_quality",
     "xpack.datasetQuality": "platform/plugins/shared/dataset_quality",
     "xpack.dataUsage": "platform/plugins/private/data_usage",
+    "xpack.digitalExperience": "solutions/observability/plugins/digital_experience",
     "xpack.discover": "platform/plugins/private/discover_enhanced",
     "xpack.createClassicStreamFlyout": "platform/packages/shared/kbn-classic-stream-flyout",
     "xpack.crossClusterReplication": "platform/plugins/private/cross_cluster_replication",
@@ -76,7 +78,10 @@
     "xpack.dataFederation": "platform/plugins/private/data_federation",
     "xpack.dataVisualizer": "platform/plugins/private/data_visualizer",
     "xpack.exploratoryView": "solutions/observability/plugins/exploratory_view",
-    "xpack.fileUpload": "platform/plugins/private/file_upload",
+    "xpack.fileUpload": [
+      "platform/plugins/private/file_upload",
+      "platform/packages/shared/file-upload"
+    ],
     "xpack.globalSearch": ["platform/plugins/shared/global_search"],
     "xpack.globalSearchBar": ["platform/plugins/private/global_search_bar"],
     "xpack.graph": ["platform/plugins/private/graph"],
@@ -187,7 +192,8 @@
     "xpack.streams": [
       "platform/plugins/shared/streams_app",
       "platform/packages/shared/kbn-streams-ai",
-      "platform/plugins/shared/streams"
+      "platform/plugins/shared/streams",
+      "platform/packages/shared/kbn-ingest-pipeline-json-editor"
     ],
     "xpack.slo": "solutions/observability/plugins/slo",
     "xpack.snapshotRestore": "platform/plugins/private/snapshot_restore",
@@ -227,36 +233,32 @@
     "xpack.inbox": "platform/plugins/shared/inbox",
     "xpack.ingestHub": "platform/plugins/shared/ingest_hub",
     "xpack.maintenanceWindows": "platform/plugins/shared/maintenance_windows",
-    "xpack.responseOps": "platform/packages/shared/response-ops/detections-close-reason",
+    "xpack.responseOps": [
+      "platform/packages/shared/response-ops/detections-close-reason",
+      "platform/packages/shared/response-ops/rule_params"
+    ],
     "xpack.responseOpsOAuthHooks": "platform/packages/shared/response-ops/oauth-hooks",
     "xpack.sampleDataIngest": "platform/plugins/shared/sample_data_ingest",
     "xpack.serverlessWorkplaceAI": "solutions/workplaceai/plugins/serverless_workplace_ai",
     "xpack.sloShared": "platform/plugins/shared/slo_shared",
-    "xpack.workplaceai": "solutions/workplaceai/plugins/workplace_ai_app"
+    "xpack.workplaceai": "solutions/workplaceai/plugins/workplace_ai_app",
+    "xpack.entityInventoryApp": ["solutions/observability/plugins/entity_inventory_app"],
+    "xpack.agentBuilderDashboards": "platform/plugins/shared/agent_builder_dashboards",
+    "xpack.alertingV2EpisodesUi": "platform/packages/shared/response-ops/alerting-v2-episodes-ui",
+    "xpack.embeddableAlertsTable": "platform/plugins/shared/embeddable_alerts_table",
+    "xpack.productIntercept": "platform/plugins/private/product_intercept",
+    "xpack.queryRules": "solutions/search/plugins/search_query_rules",
+    "xpack.responseOpsAlertsApis": "platform/packages/shared/response-ops/alerts-apis",
+    "xpack.responseOpsAlertsTable": "platform/packages/shared/response-ops/alerts-table",
+    "xpack.searchCodeExamples": "solutions/search/packages/kbn-search-code-examples",
+    "xpack.searchIndexDocuments": "platform/packages/shared/kbn-search-index-documents",
+    "xpack.searchSynonyms": "solutions/search/plugins/search_synonyms",
+    "xpack.streamlang": [
+      "platform/packages/shared/kbn-streamlang",
+      "platform/packages/shared/kbn-streamlang-yaml-editor"
+    ]
   },
-  "exclude": [
-    "examples",
-    "platform/plugins/shared/agent_builder_workflows",
-    "platform/packages/shared/file-upload",
-    "platform/packages/shared/kbn-ingest-pipeline-json-editor",
-    "platform/packages/shared/kbn-search-index-documents",
-    "platform/packages/shared/kbn-streamlang",
-    "platform/packages/shared/kbn-streamlang-yaml-editor",
-    "platform/packages/shared/response-ops/alerting-v2-episodes-ui",
-    "platform/packages/shared/response-ops/alerting-v2-rule-form",
-    "platform/packages/shared/response-ops/alerts-apis",
-    "platform/packages/shared/response-ops/alerts-table",
-    "platform/packages/shared/response-ops/form-generator",
-    "platform/packages/shared/response-ops/rule_params",
-    "platform/plugins/private/product_intercept",
-    "platform/plugins/shared/agent_builder_dashboards",
-    "platform/plugins/shared/alerting_v2",
-    "platform/plugins/shared/content_connectors",
-    "platform/plugins/shared/embeddable_alerts_table",
-    "solutions/search/packages/kbn-search-code-examples",
-    "solutions/search/plugins/search_query_rules",
-    "solutions/search/plugins/search_synonyms"
-  ],
+  "exclude": ["examples"],
   "translations": [
     "@kbn/translations-plugin/translations/zh-CN.json",
     "@kbn/translations-plugin/translations/ja-JP.json",

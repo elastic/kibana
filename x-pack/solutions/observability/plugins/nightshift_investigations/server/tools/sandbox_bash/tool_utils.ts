@@ -7,7 +7,8 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { AgentConfiguration } from '@kbn/agent-builder-common';
-import type { RunContextStackEntry } from '@kbn/agent-builder-server';
+import type { RunContextStackEntry, ToolHandlerContext } from '@kbn/agent-builder-server';
+import type { ResolvedSandboxCredentials } from './connector_credentials';
 
 export const getConversationId = (context: {
   runContext: { stack: unknown[] };
@@ -59,12 +60,27 @@ export interface SandboxCallContext {
   request: KibanaRequest;
   /** Per-agent connector allow-list; credentials are never injected for connectors outside it. */
   allowedConnectorIds: readonly string[];
+  /** Per-call memo of connector credential lookups, keyed by connector id. */
+  readonly resolvedCredentials: Map<string, Promise<ResolvedSandboxCredentials>>;
 }
 
-export const getSandboxCallContext = (context: {
-  request: KibanaRequest;
-  agentConfiguration?: AgentConfiguration;
-}): SandboxCallContext => ({
-  request: context.request,
-  allowedConnectorIds: context.agentConfiguration?.connector_ids ?? [],
-});
+/** Tool handler context that may carry the call context created by the output redaction wrapper. */
+export type SandboxToolHandlerContext = ToolHandlerContext & {
+  sandboxCallContext?: SandboxCallContext;
+};
+
+/**
+ * The output redaction wrapper creates the call context once and passes it down through
+ * `sandboxCallContext`, so it and the tool it wraps share per-call state (e.g. resolved
+ * connector credentials). Tools receive it through this function.
+ */
+export const getSandboxCallContext = (
+  context: Pick<SandboxToolHandlerContext, 'request' | 'sandboxCallContext'> & {
+    agentConfiguration?: AgentConfiguration;
+  }
+): SandboxCallContext =>
+  context.sandboxCallContext ?? {
+    request: context.request,
+    allowedConnectorIds: context.agentConfiguration?.connector_ids ?? [],
+    resolvedCredentials: new Map(),
+  };

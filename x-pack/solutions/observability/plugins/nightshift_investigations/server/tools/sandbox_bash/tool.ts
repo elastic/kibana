@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -14,6 +15,7 @@ import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/ser
 import type { ResolveConnectorCredentials } from './connector_credentials';
 import { redactSecrets } from './connector_credentials';
 import { getConversationId, getSandboxCallContext } from './tool_utils';
+import { SANDBOX_VIEW_FILE_TOOL_ID } from './view_file_tool';
 import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
 import {
   MAX_SANDBOX_SECRETS,
@@ -29,6 +31,42 @@ export const SANDBOX_BASH_TOOL_ID = 'nightshift_sandbox_bash';
  * 5 minutes; a slow command returns "Command timed out." with its partial output.
  */
 export const MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS = 290;
+
+/**
+ * Longest stdout or stderr returned inline. Longer output is saved in the sandbox and only its
+ * head and tail are returned, so one large result does not inflate every later model call.
+ */
+export const MAX_INLINE_OUTPUT_CHARS = 16_000;
+const INLINE_HEAD_CHARS = 10_000;
+const INLINE_TAIL_CHARS = 4_000;
+const TOOL_OUTPUT_DIR = '/workspace/.tool-output';
+
+const capOutput = async (
+  session: SandboxSession,
+  stream: 'stdout' | 'stderr',
+  text: string
+): Promise<string> => {
+  if (text.length <= MAX_INLINE_OUTPUT_CHARS) return text;
+
+  const path = `${TOOL_OUTPUT_DIR}/${randomUUID()}.${stream}.txt`;
+  const saved = await session
+    .mkdirs([TOOL_OUTPUT_DIR])
+    .then(() => session.writeFiles([{ path, content: Buffer.from(text, 'utf8') }]))
+    .then(([result]) => result?.success === true)
+    .catch(() => false);
+  const pointer = saved
+    ? `full ${stream} saved to ${path}; grep it or open a line range with ${SANDBOX_VIEW_FILE_TOOL_ID}`
+    : `full ${stream} could not be saved; rerun with output redirected to a file and grep it`;
+  const omitted = text.length - INLINE_HEAD_CHARS - INLINE_TAIL_CHARS;
+
+  return `${text.slice(
+    0,
+    INLINE_HEAD_CHARS
+  )}\n[... ${omitted} chars omitted; ${pointer} ...]\n${text.slice(-INLINE_TAIL_CHARS)}`;
+};
+
+const RESOURCE_EXHAUSTED_HINT =
+  ' The output was too large for the sandbox transport; redirect it to a file, then grep or summarize it.';
 
 const sandboxBashSchema = z.object({
   command: z
@@ -52,7 +90,7 @@ const sandboxBashSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Connector whose credentials this command needs (see /workspace/connectors.md). Its config and secrets are exposed to this command only, as CONNECTOR_CONFIG_<KEY> / CONNECTOR_SECRET_<KEY> environment variables, and are gone when the command exits.'
+      'Connector whose credentials this command needs (see /workspace/connectors.md). Its config and auth headers are exposed to this command only, as CONNECTOR_CONFIG_<KEY> / CONNECTOR_HEADER_<NAME> environment variables, and are gone when the command exits.'
     ),
   secret_keys: z
     .array(z.string().max(MAX_SANDBOX_SECRET_KEY_LENGTH))
@@ -79,7 +117,7 @@ export const createSandboxBashTool = ({
   id: SANDBOX_BASH_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Execute a bash command inside a sandboxed container. Use this to run shell commands, scripts, or any computation that requires a shell environment. Python 3 is available as `python` (via /home/appuser/.venv/bin/python). The default working directory is /workspace. To call an external service through a Kibana connector, read /workspace/connectors.md and pass the connector id as `connector_id`: the connector credentials are then available to that single command as CONNECTOR_* environment variables (e.g. `curl -H "Authorization: Bearer $CONNECTOR_SECRET_TOKEN" "$CONNECTOR_CONFIG_APIURL/..."`). To use a sandbox secret listed in /workspace/connectors.md, pass its name in `secret_keys`: it is then available to that single command as an environment variable of the same name (e.g. `secret_keys: ["GITHUB_TOKEN"]` with `curl -H "Authorization: Bearer $GITHUB_TOKEN" ...`).',
+    'Execute a bash command inside a sandboxed container. Use this to run shell commands, scripts, or any computation that requires a shell environment. Python 3 is available as `python` (via /home/appuser/.venv/bin/python). The default working directory is /workspace. To call an external service through a Kibana connector, read /workspace/connectors.md and pass the connector id as `connector_id`: the connector credentials are then available to that single command as CONNECTOR_* environment variables (e.g. `curl -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" "$CONNECTOR_CONFIG_APIURL/..."`). To use a sandbox secret listed in /workspace/connectors.md, pass its name in `secret_keys`: it is then available to that single command as an environment variable of the same name (e.g. `secret_keys: ["GITHUB_TOKEN"]` with `curl -H "Authorization: Bearer $GITHUB_TOKEN" ...`).',
   tags: ['sandbox', 'bash'],
   schema: sandboxBashSchema,
   annotations: {
@@ -203,8 +241,8 @@ export const createSandboxBashTool = ({
       });
 
       const { exit_code, timed_out } = result;
-      const stdout = redactSecrets(result.stdout, secretValues);
-      const stderr = redactSecrets(result.stderr, secretValues);
+      const stdout = await capOutput(session, 'stdout', redactSecrets(result.stdout, secretValues));
+      const stderr = await capOutput(session, 'stderr', redactSecrets(result.stderr, secretValues));
 
       if (timed_out || exit_code !== 0) {
         const message = [
@@ -234,15 +272,13 @@ export const createSandboxBashTool = ({
       // is already redacted.
       const errorType = error instanceof Error ? error.constructor.name : typeof error;
       logger.error(`Sandbox bash tool failed (${errorType}).`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const hint = errorMessage.includes('RESOURCE_EXHAUSTED') ? RESOURCE_EXHAUSTED_HINT : '';
       return {
         results: [
           {
             type: ToolResultType.error,
-            data: {
-              message: `Failed to execute sandbox command: ${
-                error instanceof Error ? error.message : String(error)
-              }`,
-            },
+            data: { message: `Failed to execute sandbox command: ${errorMessage}${hint}` },
           },
         ],
       };

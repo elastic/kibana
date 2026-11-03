@@ -63,9 +63,26 @@ export class DatasetQualityPage {
     return { [DATA_QUALITY_URL_STATE_KEY]: rison.encode(state) };
   }
 
-  async goto(pageState: ListPageState = {}): Promise<void> {
+  async goto(pageState: ListPageState = {}, { waitForStats = true } = {}): Promise<void> {
     await this.page.gotoApp(DATA_QUALITY_APP_PATH, { params: this.buildUrlParams(pageState) });
-    await this.waitUntilTableLoaded();
+    await (waitForStats ? this.waitUntilTableLoaded() : this.waitUntilPrivilegesResolved());
+  }
+
+  /**
+   * Waits for the data set privileges to resolve — the point where the app has decided
+   * between the no-privileges prompt and its content, and where the Types filter knows how
+   * many types the user may read. Specs asserting only on those can wait for this instead
+   * of {@link waitUntilTableLoaded}, which additionally covers the four requests feeding
+   * the rows and KPIs and so fails on a stall in data none of their assertions read.
+   */
+  async waitUntilPrivilegesResolved(): Promise<void> {
+    // Same budget as the table's stats wait: a privilege-scoped user on a busy cluster can
+    // take longer than the 10s default to get through the two privilege-bearing requests.
+    await expect(this.page.testSubj.locator('datasetQualityPage')).toHaveAttribute(
+      'data-privileges-resolved',
+      'true',
+      { timeout: 30_000 }
+    );
   }
 
   /**

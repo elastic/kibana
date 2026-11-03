@@ -13,7 +13,6 @@ import {
   assertValidBulkWriteSize,
   createBulkWriteItemError,
   createBulkWriteOutcomeUnknownError,
-  createBulkWriteValidationError,
 } from '../bulk_write';
 import type { CompactBulkError } from '../bulk_write';
 import { assessMembers } from '../../../lib/significant_events/events/event_members';
@@ -165,8 +164,7 @@ const keepKnownEvents = ({
 /**
  * Keeps the items that have a status to write. An item states one only when its caller owns the
  * decision (`event_create`); otherwise the lifecycle decides from the members' verdicts once this
- * write is merged. When it has nothing to write, a closed event is set aside as unchanged; a new
- * event without a breach is not an event (the tool's schema rejects it), so that throws.
+ * write is merged. When it has nothing to write, a closed event is set aside as unchanged.
  */
 const decideStatuses = ({
   candidates,
@@ -192,11 +190,16 @@ const decideStatuses = ({
       input.event_id === undefined || !isLive
         ? input.signals ?? []
         : mergeSignalsLatestPerRule(priorDocs, input.signals ?? [], timestamp);
+    const outcome = assessMembers(signals);
     const decision = decideLifecycle({
       state: { status: latest?.status },
-      change: StatusChange.assessed(assessMembers(signals)),
+      change: StatusChange.assessed(outcome),
     });
-    if (decision.write) {
+    // A continuation names an event that exists. Only a breach may open one under an id it names;
+    // a healthy or unjudged item for an unknown id is set aside, never created.
+    const continuesUnknownEvent =
+      latest === undefined && input.event_id !== undefined && outcome !== 'breached';
+    if (decision.write && !continuesUnknownEvent) {
       stage.kept.push({ ...candidate, status: decision.status });
       return;
     }
@@ -216,17 +219,12 @@ const decideStatuses = ({
       });
       return;
     }
-    if (latest === undefined) {
-      // Invariant: the tool schema rejects this input, so only an internal caller can reach it.
-      throw createBulkWriteValidationError(
-        `events_write: item ${candidate.index} would open a new event without a breaching member.`
-      );
-    }
-
+    // Nothing was written: a new event is not born from healthy evidence, and an existing one
+    // already says what this write would.
     stage.skipped.push({
       index: candidate.index,
       event_id: candidate.eventId,
-      status: latest.status,
+      ...(latest ? { status: latest.status } : {}),
       written: false,
       skipped: true,
       reason: 'unchanged_outcome',

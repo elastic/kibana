@@ -6,9 +6,10 @@
  */
 
 import { parse } from 'yaml';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { IUiSettingsClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import {
   RULE_TUNING_DEFAULT_EXTRAS,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
@@ -23,7 +24,12 @@ import {
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
-import type { ThreatIntelSupplyService } from '../threat_intel_supply';
+import { ThreatIntelSupplyService } from '../threat_intel_supply';
+import type { SupplyDocumentStates } from '../threat_intel_supply/keyed_supply_store.mock';
+import {
+  createHardGateEsClient,
+  createKeyedSupplyStore,
+} from '../threat_intel_supply/keyed_supply_store.mock';
 import {
   ThreatIntelSupplyHardGateError,
   ThreatIntelSupplyNotInstalledError,
@@ -1600,6 +1606,223 @@ describe('WorkersService', () => {
       );
 
       expect(threatIntelSupply.assertHardGate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Hunt Watch threat intel supply end state with a real supply service', () => {
+    const SPACE_A = 'space-a';
+    const SPACE_B = 'space-b';
+    const ENABLE = {
+      enabled: true,
+      settings: { serviceAccountId: 'sa-1' },
+      settingsRevision: null,
+    } as const;
+    const tiOff: SupplyDocumentStates = {
+      ingest: false,
+      enrich: false,
+      attrA: false,
+      attrB: false,
+    };
+
+    interface Row {
+      name: string;
+      seed: SupplyDocumentStates;
+      /** Space B already hunts. */
+      bHunts?: boolean;
+      hardGateOk?: boolean;
+      /** Hunt is turned on in A first, then `operation` runs. */
+      operation: 'enable' | 'disable' | 'disableWithForbiddenGlobal';
+      enableWritesFail?: boolean;
+      expectedResult: string;
+      expectedDocs: Record<string, boolean | undefined>;
+    }
+
+    const rows: Row[] = [
+      {
+        name: 'enable A with B off: all supply turns on and Hunt is on',
+        seed: tiOff,
+        operation: 'enable',
+        expectedResult: 'updated',
+        expectedDocs: {
+          ingest: true,
+          enrich: true,
+          attrA: true,
+          attrB: false,
+          cthA: true,
+          cthB: false,
+        },
+      },
+      {
+        name: 'enable A while B hunts: globals stay on and Hunt is on in both',
+        seed: { ...tiOff, ingest: true, enrich: true, attrB: true },
+        bHunts: true,
+        operation: 'enable',
+        expectedResult: 'updated',
+        expectedDocs: {
+          ingest: true,
+          enrich: true,
+          attrA: true,
+          attrB: true,
+          cthA: true,
+          cthB: true,
+        },
+      },
+      {
+        name: 'enable A with the hard gate blocked: nothing is written and Hunt stays off',
+        seed: tiOff,
+        hardGateOk: false,
+        operation: 'enable',
+        expectedResult: 'blocked: huntSupplyPrerequisitesUnmet',
+        expectedDocs: {
+          ingest: false,
+          enrich: false,
+          attrA: false,
+          attrB: false,
+          cthA: false,
+          cthB: false,
+        },
+      },
+      {
+        name: 'enable A with enrich missing: nothing is left changed and Hunt stays off',
+        seed: { ingest: false, attrA: false, attrB: false },
+        operation: 'enable',
+        expectedResult: 'blocked: huntSupplyNotInstalled',
+        expectedDocs: { ingest: false, attrA: false, attrB: false, cthA: false, cthB: false },
+      },
+      {
+        name: 'enable A when the Hunt write fails: supply is torn down again',
+        seed: tiOff,
+        operation: 'enable',
+        enableWritesFail: true,
+        expectedResult: 'throws: enable write failed',
+        expectedDocs: {
+          ingest: false,
+          enrich: false,
+          attrA: false,
+          attrB: false,
+          cthA: false,
+          cthB: false,
+        },
+      },
+      {
+        name: 'disable A with B off: all supply and Hunt turn off',
+        seed: tiOff,
+        operation: 'disable',
+        expectedResult: 'updated',
+        expectedDocs: {
+          ingest: false,
+          enrich: false,
+          attrA: false,
+          attrB: false,
+          cthA: false,
+          cthB: false,
+        },
+      },
+      {
+        name: 'disable A while B hunts: only attribute-A and Hunt-A turn off',
+        seed: { ...tiOff, ingest: true, enrich: true, attrB: true },
+        bHunts: true,
+        operation: 'disable',
+        expectedResult: 'updated',
+        expectedDocs: {
+          ingest: true,
+          enrich: true,
+          attrA: false,
+          attrB: true,
+          cthA: false,
+          cthB: true,
+        },
+      },
+      {
+        name: 'disable A when the global update is forbidden: Hunt-A is off and the disable still succeeds',
+        seed: tiOff,
+        operation: 'disableWithForbiddenGlobal',
+        expectedResult: 'updated',
+        expectedDocs: {
+          ingest: true,
+          enrich: true,
+          attrA: false,
+          attrB: false,
+          cthA: false,
+          cthB: false,
+        },
+      },
+    ];
+
+    const run = async (row: Row) => {
+      const harness = createPersistentHarness();
+      const huntDocument = (spaceId: string) => harness.documents.get(`${HUNT}-${spaceId}`);
+      if (row.bHunts) {
+        harness.documents.set(`${HUNT}-${SPACE_B}`, {
+          id: `${HUNT}-${SPACE_B}`,
+          enabled: true,
+          values: null,
+          yaml: '',
+          version: 1,
+        });
+      }
+      const fake = createKeyedSupplyStore({
+        seed: row.seed,
+        getHuntEnabled: (spaceId) => huntDocument(spaceId)?.enabled === true,
+      });
+      const supply = new ThreatIntelSupplyService({
+        management: fake.management,
+        managedWorkflows: Promise.resolve(fake.managedWorkflows),
+        logger: loggingSystemMock.createLogger() as Logger,
+        getEsClient: async () => createHardGateEsClient(row.hardGateOk !== false),
+        enumerateSpaceIds: async () => ['default', SPACE_A, SPACE_B],
+        getInference: () => ({ getDefaultConnector: jest.fn() } as unknown as InferenceServerStart),
+        getUiSettingsClient: () => ({ get: jest.fn() } as unknown as IUiSettingsClient),
+      });
+      const service = new WorkersService(
+        harness.management,
+        Promise.resolve(harness.managedWorkflows),
+        loggingSystemMock.createLogger() as Logger,
+        {},
+        async (_request, registration, options) => {
+          await harness.install(registration.id, options);
+        },
+        async () => [],
+        supply
+      );
+
+      if (row.operation !== 'enable') {
+        await service.update(HUNT, ENABLE, SPACE_A, request);
+      }
+      if (row.operation === 'disableWithForbiddenGlobal') {
+        fake.forbid('ingest');
+      }
+      if (row.enableWritesFail) {
+        harness.updateWorkflow.mockRejectedValueOnce(new Error('enable write failed'));
+      }
+
+      const result = await (row.operation === 'enable'
+        ? service.update(HUNT, ENABLE, SPACE_A, request)
+        : service.update(HUNT, { enabled: false }, SPACE_A, request)
+      ).then(
+        (outcome) =>
+          outcome.outcome === 'blocked' ? `blocked: ${outcome.reason}` : outcome.outcome,
+        (error: Error) => `throws: ${error.message}`
+      );
+
+      return {
+        result,
+        docs: {
+          ...fake.snapshot(),
+          cthA: huntDocument(SPACE_A)?.enabled ?? false,
+          cthB: huntDocument(SPACE_B)?.enabled ?? false,
+        },
+      };
+    };
+
+    describe.each(rows)('$name', (row) => {
+      it('leaves the documents in the expected end state', async () => {
+        expect((await run(row)).docs).toEqual(row.expectedDocs);
+      });
+
+      it('returns the expected result', async () => {
+        expect((await run(row)).result).toEqual(row.expectedResult);
+      });
     });
   });
 });

@@ -22,11 +22,13 @@ describe('createMarkStepAsRespondedUpdater', () => {
   };
 
   it('writes hitl audit fields and nulls token fields so a doc merge removes them', () => {
-    const updater = createMarkStepAsRespondedUpdater(audit, 'default');
+    const updater = createMarkStepAsRespondedUpdater(audit, 'default', 'run-1');
 
     expect(
       updater({
         spaceId: 'default',
+        workflowRunId: 'run-1',
+        stepType: 'waitForInput',
         finishedAt: undefined,
         status: ExecutionStatus.WAITING_FOR_INPUT,
         hitl: undefined,
@@ -51,15 +53,63 @@ describe('createMarkStepAsRespondedUpdater', () => {
   });
 
   it('no-ops when spaceId does not match', () => {
-    const updater = createMarkStepAsRespondedUpdater(audit, 'default');
-    expect(updater({ spaceId: 'other', status: ExecutionStatus.WAITING_FOR_INPUT })).toBe('noop');
+    const updater = createMarkStepAsRespondedUpdater(audit, 'default', 'run-1');
+    expect(
+      updater({
+        spaceId: 'other',
+        workflowRunId: 'run-1',
+        stepType: 'waitForInput',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+      })
+    ).toBe('noop');
   });
 
-  it('no-ops when finishedAt is set', () => {
-    const updater = createMarkStepAsRespondedUpdater(audit, 'default');
+  it('no-ops when the step belongs to a different execution', () => {
+    const updater = createMarkStepAsRespondedUpdater(audit, 'default', 'run-1');
     expect(
       updater({
         spaceId: 'default',
+        workflowRunId: 'other-run',
+        stepType: 'waitForInput',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+      })
+    ).toBe('noop');
+  });
+
+  it.each(['foreach', 'if'])(
+    'no-ops for a running %s container step of the same execution',
+    (stepType) => {
+      const updater = createMarkStepAsRespondedUpdater(audit, 'default', 'run-1');
+      expect(
+        updater({
+          spaceId: 'default',
+          workflowRunId: 'run-1',
+          stepType,
+          status: ExecutionStatus.RUNNING,
+        })
+      ).toBe('noop');
+    }
+  );
+
+  it('claims a waitForApproval step', () => {
+    const updater = createMarkStepAsRespondedUpdater(audit, 'default', 'run-1');
+    expect(
+      updater({
+        spaceId: 'default',
+        workflowRunId: 'run-1',
+        stepType: 'waitForApproval',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+      })
+    ).toEqual(expect.objectContaining({ hitl: expect.objectContaining({ respondedBy: 'alice' }) }));
+  });
+
+  it('no-ops when finishedAt is set', () => {
+    const updater = createMarkStepAsRespondedUpdater(audit, 'default', 'run-1');
+    expect(
+      updater({
+        spaceId: 'default',
+        workflowRunId: 'run-1',
+        stepType: 'waitForInput',
         finishedAt: '2026-04-29T10:00:00.000Z',
         status: ExecutionStatus.WAITING_FOR_INPUT,
       })
@@ -67,17 +117,25 @@ describe('createMarkStepAsRespondedUpdater', () => {
   });
 
   it('no-ops when status is terminal', () => {
-    const updater = createMarkStepAsRespondedUpdater(audit, 'default');
+    const updater = createMarkStepAsRespondedUpdater(audit, 'default', 'run-1');
     expect(
-      updater({ spaceId: 'default', status: ExecutionStatus.COMPLETED, finishedAt: undefined })
+      updater({
+        spaceId: 'default',
+        workflowRunId: 'run-1',
+        stepType: 'waitForInput',
+        status: ExecutionStatus.COMPLETED,
+        finishedAt: undefined,
+      })
     ).toBe('noop');
   });
 
   it('no-ops when hitl.respondedAt is already set', () => {
-    const updater = createMarkStepAsRespondedUpdater(audit, 'default');
+    const updater = createMarkStepAsRespondedUpdater(audit, 'default', 'run-1');
     expect(
       updater({
         spaceId: 'default',
+        workflowRunId: 'run-1',
+        stepType: 'waitForInput',
         status: ExecutionStatus.WAITING_FOR_INPUT,
         hitl: { respondedAt: '2026-04-29T09:00:00.000Z', respondedBy: 'bob' },
       })

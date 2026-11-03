@@ -26,6 +26,8 @@ export interface ConversationsActionsGroupProps {
    * be able to resolve one; the control still works as a button without it.
    */
   chatHref?: string;
+  /** When false the chat control and the menu are disabled, with a tooltip naming the privilege. */
+  canOpenInvestigationDetails?: boolean;
   /** When true escalation actions are shown. Requires the manage escalations capability. */
   canManageEscalations?: boolean;
   /**
@@ -49,6 +51,7 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
     onClickAction,
     onOpenChat,
     chatHref,
+    canOpenInvestigationDetails = true,
     canManageEscalations,
     canCloseInvestigation,
     onCopyLink,
@@ -76,8 +79,14 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
             size="s"
             iconType="productAgent"
             withToolTip
+            toolTipContent={
+              canOpenInvestigationDetails
+                ? undefined
+                : ACTIONS_TRANSLATIONS.tooltips.proposalsAgentBuilderPrivilegeRequired
+            }
+            isDisabled={!canOpenInvestigationDetails}
             aria-label={ACTIONS_TRANSLATIONS.tooltips.openInChat}
-            href={chatHref}
+            href={canOpenInvestigationDetails ? chatHref : undefined}
             onClick={handleChatClick}
             data-test-subj="conversationCardOpenInChat"
           />
@@ -90,6 +99,7 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
             canManageEscalations={canManageEscalations}
             canCloseInvestigation={canCloseInvestigation}
             onCopyLink={onCopyLink}
+            canOpenInvestigationDetails={canOpenInvestigationDetails}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

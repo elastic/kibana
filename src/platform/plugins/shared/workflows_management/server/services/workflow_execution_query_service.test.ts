@@ -295,96 +295,6 @@ describe('WorkflowExecutionQueryService', () => {
     });
   });
 
-  describe('getWorkflowExecutionHistory', () => {
-    it('queries step executions by executionId and spaceId', async () => {
-      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
-
-      await service.getWorkflowExecutionHistory('exec-1', 'default');
-
-      const call = mockEsClient.search.mock.calls[0][0] as any;
-      expect(call.index).toBe('.workflows-step-executions');
-      expect(call.query.bool.must).toContainEqual({ term: { executionId: 'exec-1' } });
-      expect(call.query.bool.must).toContainEqual({ term: { spaceId: 'default' } });
-      expect(call.sort).toEqual([{ timestamp: { order: 'asc' } }]);
-    });
-
-    it('calculates duration from startedAt and finishedAt', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            {
-              _source: {
-                stepId: 'step-1',
-                status: 'completed',
-                startedAt: '2024-01-01T10:00:00.000Z',
-                finishedAt: '2024-01-01T10:00:05.000Z',
-              },
-            },
-          ],
-        },
-      } as any);
-
-      const result = await service.getWorkflowExecutionHistory('exec-1', 'default');
-
-      expect(result).toHaveLength(1);
-      expect(result[0].duration).toBe(5000);
-      expect(result[0].finishedAt).toBe('2024-01-01T10:00:05.000Z');
-    });
-
-    it('handles endedAt as alias for finishedAt (backward compat)', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            {
-              _source: {
-                stepId: 'step-1',
-                status: 'completed',
-                startedAt: '2024-01-01T10:00:00.000Z',
-                endedAt: '2024-01-01T10:00:03.000Z',
-              },
-            },
-          ],
-        },
-      } as any);
-
-      const result = await service.getWorkflowExecutionHistory('exec-1', 'default');
-
-      expect(result[0].duration).toBe(3000);
-      expect(result[0].finishedAt).toBe('2024-01-01T10:00:03.000Z');
-    });
-
-    it('sets duration to 0 when no finish timestamp', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            {
-              _source: {
-                stepId: 'step-1',
-                status: 'running',
-                startedAt: '2024-01-01T10:00:00.000Z',
-              },
-            },
-          ],
-        },
-      } as any);
-
-      const result = await service.getWorkflowExecutionHistory('exec-1', 'default');
-
-      expect(result[0].duration).toBe(0);
-      expect(result[0].finishedAt).toBe('');
-    });
-
-    it('throws when hit has no _source', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [{ _id: 'bad' }] },
-      } as any);
-
-      await expect(service.getWorkflowExecutionHistory('exec-1', 'default')).rejects.toThrow(
-        'Missing _source in search result'
-      );
-    });
-  });
-
   describe('searchStepExecutions', () => {
     it('excludes input and output when not requested', async () => {
       mockEsClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } } as any);
@@ -1518,7 +1428,7 @@ describe('WorkflowExecutionQueryService', () => {
         items: [{ id: 'step-exec-1', index: '.workflows-step-executions', result: 'updated' }],
       });
 
-      const ok = await service.markStepAsResponded('step-exec-1', audit, 'default');
+      const ok = await service.markStepAsResponded('step-exec-1', 'run-1', audit, 'default');
 
       expect(ok).toBe(true);
       expect(mockStepDataClient.bulk).toHaveBeenCalledWith(
@@ -1529,11 +1439,34 @@ describe('WorkflowExecutionQueryService', () => {
               operation: 'update',
               documentId: 'step-exec-1',
               retryOnConflict: 3,
+              sourceFields: expect.arrayContaining(['spaceId', 'workflowRunId']),
               updater: expect.any(Function),
             }),
           ],
         })
       );
+    });
+
+    it('scopes the claim to the given execution so a step of another run is not stamped', async () => {
+      mockStepDataClient.bulk.mockResolvedValueOnce({
+        errors: false,
+        items: [{ id: 'step-exec-1', index: '.workflows-step-executions', result: 'updated' }],
+      });
+
+      await service.markStepAsResponded('step-exec-1', 'run-1', audit, 'default');
+
+      const { updater } = mockStepDataClient.bulk.mock.calls[0][0].items[0] as unknown as {
+        updater: (current: Record<string, unknown>) => unknown;
+      };
+      const waitingStep = {
+        spaceId: 'default',
+        stepType: 'waitForInput',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+      };
+      expect(updater({ ...waitingStep, workflowRunId: 'run-1' })).toEqual(
+        expect.objectContaining({ hitl: expect.objectContaining({ respondedBy: 'alice' }) })
+      );
+      expect(updater({ ...waitingStep, workflowRunId: 'run-2' })).toBe('noop');
     });
 
     it('returns false when the bulk updater no-ops', async () => {
@@ -1542,7 +1475,7 @@ describe('WorkflowExecutionQueryService', () => {
         items: [{ id: 'step-exec-1', index: '.workflows-step-executions', result: 'noop' }],
       });
 
-      const ok = await service.markStepAsResponded('step-exec-1', audit, 'default');
+      const ok = await service.markStepAsResponded('step-exec-1', 'run-1', audit, 'default');
 
       expect(ok).toBe(false);
     });
@@ -1562,7 +1495,7 @@ describe('WorkflowExecutionQueryService', () => {
         ],
       });
 
-      const ok = await service.markStepAsResponded('step-exec-gone', audit, 'default');
+      const ok = await service.markStepAsResponded('step-exec-gone', 'run-1', audit, 'default');
 
       expect(ok).toBe(false);
     });
@@ -1579,9 +1512,9 @@ describe('WorkflowExecutionQueryService', () => {
         ],
       });
 
-      await expect(service.markStepAsResponded('step-exec-1', audit, 'default')).rejects.toThrow(
-        'Bulk updater write failed'
-      );
+      await expect(
+        service.markStepAsResponded('step-exec-1', 'run-1', audit, 'default')
+      ).rejects.toThrow('Bulk updater write failed');
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to mark step execution step-exec-1 as responded')
       );

@@ -49,6 +49,12 @@ export interface EpisodeAction {
   showWhenDisabled?: (ctx: EpisodeActionContext) => boolean;
   disabledTooltip?: string;
   /**
+   * The reason why the action cannot run on the current bulk selection, or `undefined` when it
+   * can. Renders it disabled with the reason as its tooltip. A reason shows the action even when
+   * `isCompatible` is false, so return one only when the action is relevant to the selection.
+   */
+  getBulkDisabledReason?: (episodes: AlertEpisode[]) => string | undefined;
+  /**
    * Whether this action is supported in multi-selection bulk contexts.
    * Defaults to `true` when omitted.
    */
@@ -57,4 +63,10 @@ export interface EpisodeAction {
    * Whether this action is a workflow action grouped with lifecycle operations.
    */
   isWorkflowAction?: boolean;
+  /**
+   * Whether privileges for this action are enforced by the system it hands off
+   * to, so it stays visible without alerting write privilege. Defaults to
+   * `false` when omitted, which hides the action from read-only users.
+   */
+  enforcesOwnPrivileges?: boolean;
 }

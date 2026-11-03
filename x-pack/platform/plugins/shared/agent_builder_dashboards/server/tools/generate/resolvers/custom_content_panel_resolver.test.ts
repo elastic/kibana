@@ -26,9 +26,8 @@ const addRequest = (
   overrides: Partial<CustomContentPanelAddRequest> = {}
 ): CustomContentPanelAddRequest => ({
   renderer: 'custom_content',
-  operationType: 'add_panels',
-  identifier: 'Show KPI',
   nlQuery: 'Show KPI',
+  hasData: false,
   ...overrides,
 });
 
@@ -37,19 +36,20 @@ const editRequest = (
   overrides: Partial<CustomContentPanelEditRequest> = {}
 ): CustomContentPanelEditRequest => ({
   renderer: 'custom_content',
-  operationType: 'edit_panels',
-  identifier: existingPanel.id,
   existingPanel,
   ...overrides,
 });
 
 describe('createCustomContentPanelResolver', () => {
   const resolveTemplate = jest.fn();
-  const resolve = createCustomContentPanelResolver({ resolveTemplate });
+  const generateEsql = jest.fn();
+  const resolve = createCustomContentPanelResolver({ resolveTemplate, generateEsql });
 
   beforeEach(() => {
     resolveTemplate.mockReset();
     resolveTemplate.mockResolvedValue({ template: '<div>resolved</div>', height: 320 });
+    generateEsql.mockReset();
+    generateEsql.mockResolvedValue('FROM logs-* | STATS count = COUNT(*) BY host');
   });
 
   describe('new panels', () => {
@@ -78,20 +78,63 @@ describe('createCustomContentPanelResolver', () => {
       });
     });
 
-    it('returns a failure attributed to the operation when template generation throws', async () => {
+    it('does not generate a query when hasData is false', async () => {
+      await resolve(addRequest({ hasData: false }));
+
+      expect(generateEsql).not.toHaveBeenCalled();
+      expect(resolveTemplate).toHaveBeenCalledWith({ prompt: 'Show KPI', esqlQuery: undefined });
+    });
+
+    it('generates, samples and stores a query when hasData is true', async () => {
+      const result = await resolve(addRequest({ hasData: true, index: 'logs-*' }));
+
+      expect(generateEsql).toHaveBeenCalledWith({
+        nlQuery: 'Show KPI',
+        index: 'logs-*',
+        existingQueries: [],
+      });
+      expect(resolveTemplate).toHaveBeenCalledWith({
+        prompt: 'Show KPI',
+        esqlQuery: 'FROM logs-* | STATS count = COUNT(*) BY host',
+      });
+      expect(result).toMatchObject({
+        panelContent: {
+          config: { esql_query: ['FROM logs-* | STATS count = COUNT(*) BY host'] },
+        },
+      });
+    });
+
+    it('uses an explicit query instead of generating one', async () => {
+      await resolve(addRequest({ esql: 'FROM metrics-*', hasData: true }));
+
+      expect(generateEsql).not.toHaveBeenCalled();
+      expect(resolveTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ esqlQuery: 'FROM metrics-*' })
+      );
+    });
+
+    it('fails the panel, without a template, when the query cannot be generated', async () => {
+      generateEsql.mockRejectedValue(new Error('Could not generate an ES|QL query for this panel'));
+
+      const result = await resolve(addRequest({ hasData: true }));
+
+      expect(resolveTemplate).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        type: 'failure',
+        error: 'Could not generate an ES|QL query for this panel',
+      });
+    });
+
+    it('returns a failure when template generation throws', async () => {
       resolveTemplate.mockRejectedValue(
         new Error('Generated template was rejected: contains a <script> tag.')
       );
 
-      const result = await resolve(addRequest({ operationType: 'add_section' }));
+      const result = await resolve(addRequest());
 
       expect(result).toEqual({
         type: 'failure',
-        failure: {
-          type: 'add_section',
-          identifier: 'Show KPI',
-          error: 'Generated template was rejected: contains a <script> tag.',
-        },
+        error: 'Generated template was rejected: contains a <script> tag.',
       });
     });
   });
@@ -141,6 +184,93 @@ describe('createCustomContentPanelResolver', () => {
       expect(result).toMatchObject({
         panelContent: { config: { esql_query: ['FROM metrics-*'] } },
       });
+    });
+
+    it('does not generate a query for a style-only edit', async () => {
+      await resolve(
+        editRequest(customContentPanel({ esql_query: ['FROM logs-*'], template: '<div/>' }), {
+          nlQuery: 'Make the badges blue',
+        })
+      );
+
+      expect(generateEsql).not.toHaveBeenCalled();
+    });
+
+    it('regenerates the query from the existing one when regenerateESQL is set', async () => {
+      const result = await resolve(
+        editRequest(customContentPanel({ esql_query: ['FROM logs-*'], template: '<div/>' }), {
+          nlQuery: 'Also show the error rate',
+          regenerateESQL: true,
+          index: 'logs-*',
+        })
+      );
+
+      expect(generateEsql).toHaveBeenCalledWith({
+        nlQuery: 'Also show the error rate',
+        index: 'logs-*',
+        existingQueries: ['FROM logs-*'],
+      });
+      expect(resolveTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esqlQuery: 'FROM logs-* | STATS count = COUNT(*) BY host',
+          hasExistingQuery: false,
+        })
+      );
+      expect(result).toMatchObject({
+        panelContent: {
+          config: { esql_query: ['FROM logs-* | STATS count = COUNT(*) BY host'] },
+        },
+      });
+    });
+
+    it('lets an explicit query win over regenerateESQL', async () => {
+      await resolve(
+        editRequest(customContentPanel({ esql_query: ['FROM logs-*'] }), {
+          nlQuery: 'Change the data',
+          regenerateESQL: true,
+          esql: 'FROM metrics-*',
+        })
+      );
+
+      expect(generateEsql).not.toHaveBeenCalled();
+      expect(resolveTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ esqlQuery: 'FROM metrics-*' })
+      );
+    });
+
+    it('generates a query for a static panel when hasData is true', async () => {
+      await resolve(
+        editRequest(customContentPanel({ template: '<div>banner</div>' }), {
+          nlQuery: 'Show request counts per host',
+          hasData: true,
+        })
+      );
+
+      expect(generateEsql).toHaveBeenCalledWith(
+        expect.objectContaining({ nlQuery: 'Show request counts per host', existingQueries: [] })
+      );
+    });
+
+    it('keeps the stored query when hasData is true and the panel already has one', async () => {
+      await resolve(
+        editRequest(customContentPanel({ esql_query: ['FROM logs-*'], template: '<div/>' }), {
+          nlQuery: 'Restyle',
+          hasData: true,
+        })
+      );
+
+      expect(generateEsql).not.toHaveBeenCalled();
+    });
+
+    it('removes the query when hasData is false', async () => {
+      const result = await resolve(
+        editRequest(customContentPanel({ esql_query: ['FROM logs-*'] }), {
+          nlQuery: 'Make it a static banner',
+          hasData: false,
+        })
+      );
+
+      expect(result).toMatchObject({ panelContent: { config: { esql_query: undefined } } });
     });
 
     it('removes the query when esql is null', async () => {

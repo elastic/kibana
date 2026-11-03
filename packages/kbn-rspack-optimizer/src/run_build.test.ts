@@ -79,6 +79,21 @@ describe('IGNORED_WATCH_PATTERNS', () => {
       ['jest.config.ts', p('repo', 'pkg', 'jest.config.ts')],
       ['jest.integration.config.js', p('repo', 'pkg', 'jest.integration.config.js')],
 
+      ['scout source directory', p('repo', 'pkg', 'test', 'scout')],
+      ['custom scout source directory', p('repo', 'pkg', 'test', 'scout_custom')],
+      ['scout fixture', p('repo', 'pkg', 'test', 'scout', 'ui', 'fixtures', 'index.ts')],
+      [
+        'scout page object',
+        p('repo', 'pkg', 'test', 'scout', 'ui', 'fixtures', 'page_objects', 'console_page.ts'),
+      ],
+      ['scout config', p('repo', 'pkg', 'test', 'scout', 'ui', 'playwright.config.ts')],
+      [
+        'custom scout fixture',
+        p('repo', 'pkg', 'test', 'scout_custom', 'api', 'fixtures', 'index.ts'),
+      ],
+      ['Windows scout fixture', 'C:\\repo\\pkg\\test\\scout\\ui\\fixtures\\index.ts'],
+      ['Windows custom scout source directory', 'C:\\repo\\pkg\\test\\scout_custom'],
+
       [
         'scout test artifacts',
         p('repo', 'pkg', 'test', 'scout', 'ui', '.scout', 'test-artifacts', 'failed.png'),
@@ -116,8 +131,11 @@ describe('IGNORED_WATCH_PATTERNS', () => {
       // the watcher seeing it is harmless and we don't want a too-greedy regex).
       ['storybook main.ts', p('repo', 'pkg', '.storybook', 'main.ts')],
 
-      // "scout" in a path is fine when it is not the `.scout` output dir
-      ['scout test source dir', p('repo', 'pkg', 'test', 'scout', 'ui', 'fixtures', 'index.ts')],
+      ['scout outside a test directory', p('repo', 'pkg', 'src', 'scout', 'index.ts')],
+      ['scout filename', p('repo', 'pkg', 'test', 'scout.ts')],
+      ['scouting directory', p('repo', 'pkg', 'test', 'scouting', 'index.ts')],
+      ['plugin public entry', p('repo', 'pkg', 'public', 'index.ts')],
+      ['plugin manifest', p('repo', 'pkg', 'kibana.jsonc')],
     ])('keeps %s', (_label, filePath) => {
       expect(matchesIgnored(filePath)).toBe(false);
     });

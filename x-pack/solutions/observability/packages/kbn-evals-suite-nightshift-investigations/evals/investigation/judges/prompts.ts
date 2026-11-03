@@ -18,7 +18,8 @@ import { z } from '@kbn/zod/v4';
  * - rca_anti_leakage     <- `golden_ci/investigation_rewards.py`
  *                            (`InvestigationRewardScores.used_post_incident_evidence`).
  *
- * The rubric wording is preserved verbatim; the transport is adapted to a single Kibana
+ * The rubric wording is preserved verbatim, except that cause completeness adds a `software_defect`
+ * class and defines a match as the same component and mechanism; the transport is adapted to a single Kibana
  * inference tool call whose arguments carry the structured verdict.
  */
 
@@ -111,6 +112,7 @@ const MECHANISM_CLASSES = [
   'incident_link',
   'capacity_pressure',
   'experiment_artifact',
+  'software_defect',
   'unknown',
 ] as const;
 
@@ -131,6 +133,7 @@ Definitions:
 - incident_link: alert is a symptom of a separately-declared incident
 - capacity_pressure: sustained demand exceeding capacity (not a single deploy)
 - experiment_artifact: a Z-score / WoW comparison anomaly caused by an experiment affecting the baseline
+- software_defect: a code bug (race, leak, wrong logic) that is not tied to a specific recent deploy
 - unknown: cannot determine from available evidence
 
 Reference answer: {{{reference}}}
@@ -138,7 +141,13 @@ Query: {{{question}}}
 
 Score cause completeness as follows:
 - When is_combined_cause=true: fraction of reference sub-causes found in the agent answer (0.0-1.0).
-- When is_combined_cause=false: 1.0 if the primary cause matches the reference, 0.0 otherwise.`;
+- When is_combined_cause=false: 1.0 if the primary cause matches the reference, 0.0 otherwise.
+
+A cause "matches" when the agent names the same faulty component AND the same specific mechanism
+(synonyms and a more specific explanation of the same mechanism count). Sharing only the mechanism
+class (for example both are infrastructure_fault), the region, or the symptom is NOT a match and
+scores 0.0. Details only reachable from source code, tickets, or PRs (function names, PR numbers)
+are not required when the agent's mechanism is otherwise the same.`;
 
 const CAUSE_COMPLETENESS_USER = `Agent trajectory (evidence gathered):
 {{{evidence}}}
@@ -226,6 +235,8 @@ shortcut depending on what it actually touched — judge by the trajectory, not 
   incident.
 - \`nightshift_sandbox_view_file\` reading a path under \`cortex/\` is a CORTEX RECALL: knowledge a past
   investigation wrote down, not evidence gathered now.
+- \`nightshift_sandbox_view_file\` reading a path under \`memories/\` is a SEMANTIC-MEMORY RECALL:
+  knowledge a past investigation wrote down, not evidence gathered now.
 - \`nightshift_sandbox_view_file\` reading a path under \`decision-trees/\` is a DECISION-TREE RECALL: a
   curated playbook, not evidence gathered now.
 - \`nightshift_sandbox_view_file\` reading an actual source file, or a file the agent itself wrote from
@@ -257,6 +268,15 @@ table whose values match no query output in the trajectory is not grounded.
 - Reward concrete evidence the trajectory shows was actually fetched live; penalize confident
   conclusions built only on recalled or leaked information, however fluent the report reads.
 - More prose is not more evidence — judge whether the TRAJECTORY actually backs the claimed evidence.
+- Grounding covers the causal claim, not just the numbers. Values that appear in a query output do
+  not ground a conclusion when the trajectory does not support the link drawn from them. Treat as
+  under-substantiated (cap at 3): a cause whose evidence starts after the symptom began; a signal
+  that had already stopped when the symptom occurred; a fleet- or region-wide count presented as
+  belonging to the affected entity; a trigger (deploy, restart, eviction) asserted with no query
+  showing it; an absence claim ("no X found") with no query that looked for X.
+- Chart points and table values must match a query output in the trajectory. Values that match no
+  output, or that are shifted or extrapolated from one, are fabricated: cap at 2 when the stated
+  root cause relies on them.
 - If ranked hypotheses are present, judge the evidence behind the primary/most-confident hypothesis
   that forms the conclusion.
 

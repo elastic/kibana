@@ -18,8 +18,10 @@ import type {
   Worker,
 } from '@kbn/alertzero-common';
 import { retryOnTransientError } from './retry_on_transient_error';
-import { invalidateHuntThreatIntelSupplyStatus } from './use_hunt_threat_intel_supply';
+import { invalidateHuntThreatIntelSupplyStatus } from './hunt/use_hunt_threat_intel_supply';
 import { queryKeys } from '../query_keys';
+import type { ReportToastError } from '../telemetry';
+import { classifyError, useReportToastError } from '../telemetry';
 
 export const useWorkers = () => {
   const { services } = useKibana();
@@ -49,7 +51,13 @@ const WORKER_UPDATE_ERROR_TITLE = i18n.translate('xpack.alertzero.workerUpdateEr
   defaultMessage: 'Unable to update the worker',
 });
 
-export const notifyWorkerUpdateError = (toasts: IToasts, error: unknown): void => {
+/** Shows the toast for a failed Worker update, and reports it when given `reportShown`. */
+export const notifyWorkerUpdateError = (
+  toasts: IToasts,
+  error: unknown,
+  reportShown?: ReportToastError
+): void => {
+  reportShown?.(classifyError(error));
   const status = isHttpFetchError(error) ? error.response?.status : undefined;
   if (status === 409) {
     toasts.addWarning(WORKER_SETTINGS_CONFLICT_MESSAGE);
@@ -93,6 +101,8 @@ export const useUpdateWorker = () => {
   const { services } = useKibana();
   const queryClient = useQueryClient();
   const queryKey = queryKeys.workers.list();
+  // Only the Watch settings page updates Workers through this hook.
+  const reportShown = useReportToastError('watch_settings');
 
   return useMutation({
     mutationFn: ({
@@ -111,7 +121,7 @@ export const useUpdateWorker = () => {
       replaceWorkerInList(queryClient, queryKey, data.worker);
     },
     onError: (error) => {
-      notifyWorkerUpdateError(services.notifications!.toasts, error);
+      notifyWorkerUpdateError(services.notifications!.toasts, error, reportShown);
     },
     // Awaited so mutateAsync resolves after the reload attempt. A failed reload surfaces as the
     // workers query error, which the Watch page uses to block Save.

@@ -103,6 +103,12 @@ export const policyFactory = ({
         credential_hardening: {
           enabled: true,
         },
+        registry_credential_hardening: {
+          enabled: true,
+        },
+      },
+      ai_data_collection: {
+        enabled: true,
       },
     },
     mac: {
@@ -164,6 +170,9 @@ export const policyFactory = ({
       advanced: {
         capture_env_vars: 'DYLD_INSERT_LIBRARIES,DYLD_FRAMEWORK_PATH,DYLD_LIBRARY_PATH,LD_PRELOAD',
       },
+      ai_data_collection: {
+        enabled: true,
+      },
     },
     linux: {
       events: {
@@ -217,6 +226,9 @@ export const policyFactory = ({
       advanced: {
         capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',
       },
+      ai_data_collection: {
+        enabled: true,
+      },
     },
   };
   policy.meta.billable = isBillablePolicy(policy);
@@ -237,6 +249,20 @@ const clearedCustomYaraSignatures = ({
   customYaraSignatures === undefined ? {} : { custom_yara_signatures: false };
 
 /**
+ * Registry credential hardening must end up off below Enterprise. An absent field means never
+ * configured and is already treated as disabled, so a downgrade keeps it absent instead of
+ * materializing `false`.
+ */
+const clearedRegistryCredentialHardening = ({
+  registry_credential_hardening: registryCredentialHardening,
+}: {
+  registry_credential_hardening?: { enabled: boolean };
+}): { registry_credential_hardening?: { enabled: boolean } } =>
+  registryCredentialHardening === undefined
+    ? {}
+    : { registry_credential_hardening: { enabled: false } };
+
+/**
  * Strips paid features from an existing or new `PolicyConfig` for license below enterprise
  */
 
@@ -255,6 +281,10 @@ export const policyFactoryWithoutPaidEnterpriseFeatures = (
       memory_protection: {
         ...policy.windows.memory_protection,
         ...clearedCustomYaraSignatures(policy.windows.memory_protection),
+      },
+      attack_surface_reduction: {
+        ...policy.windows.attack_surface_reduction,
+        ...clearedRegistryCredentialHardening(policy.windows.attack_surface_reduction),
       },
       popup: {
         ...policy.windows.popup,
@@ -343,9 +373,11 @@ export const policyFactoryWithoutPaidFeatures = (
         supported: false,
       },
       attack_surface_reduction: {
+        ...policy.windows.attack_surface_reduction,
         credential_hardening: {
           enabled: false,
         },
+        ...clearedRegistryCredentialHardening(policy.windows.attack_surface_reduction),
       },
       device_control: {
         enabled: false,

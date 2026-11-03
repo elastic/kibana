@@ -6,6 +6,7 @@
  */
 
 import { EntityType } from '../../../../../common/entity_analytics/types';
+import { RiskSeverity } from '../../../../../common/search_strategy';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { toDsl, toEsql } from './active_filters';
 import type { ActiveFilters } from './active_filters';
@@ -55,6 +56,20 @@ describe('toEsql', () => {
     });
   });
 
+  it('tests the risk level of a resolved entity on resolved rows, and the own level on individual rows', () => {
+    const filters = {
+      ...NONE,
+      entityFilters: { ...EMPTY_ENTITY_FILTERS, riskLevels: [RiskSeverity.High] },
+    };
+
+    expect(toEsql(filters).entityExpression).toBe(
+      '(entity.relationships.resolution.risk.calculated_level IN ("High") OR (entity.relationships.resolution.risk.calculated_level IS NULL AND entity.risk.calculated_level IN ("High")))'
+    );
+    expect(toEsql({ ...filters, rowsMode: 'individual' }).entityExpression).toBe(
+      'entity.risk.calculated_level IN ("High")'
+    );
+  });
+
   it('keeps the tile entities and their records in individual rows', () => {
     expect(toEsql({ ...NONE, tileEntityIds: ['host:a'], rowsMode: 'individual' })).toEqual({
       searchExpression: undefined,
@@ -90,6 +105,59 @@ describe('toDsl', () => {
         should: [],
       },
     });
+  });
+
+  it('tests the risk level of a resolved entity on resolved rows, and the own level on individual rows', () => {
+    const filters = {
+      ...NONE,
+      entityFilters: { ...EMPTY_ENTITY_FILTERS, riskLevels: [RiskSeverity.High] },
+    };
+
+    expect(toDsl(filters)?.bool.filter).toEqual([
+      {
+        bool: {
+          should: [
+            { terms: { 'entity.relationships.resolution.risk.calculated_level': ['High'] } },
+            {
+              bool: {
+                filter: [{ terms: { 'entity.risk.calculated_level': ['High'] } }],
+                must_not: [
+                  { exists: { field: 'entity.relationships.resolution.risk.calculated_level' } },
+                ],
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    ]);
+    expect(toDsl({ ...filters, rowsMode: 'individual' })?.bool.filter).toEqual([
+      { terms: { 'entity.risk.calculated_level': ['High'] } },
+    ]);
+  });
+
+  it('adds and removes the resolved entities the overrides give, around the dropdowns and the tile', () => {
+    expect(toDsl(ALL, { include: ['host:g'], exclude: ['host:x'] })?.bool.filter).toEqual([
+      SEARCH_DSL,
+      {
+        bool: {
+          should: [
+            {
+              bool: {
+                filter: [
+                  { terms: { 'entity.EngineMetadata.Type': ['host'] } },
+                  { terms: { 'entity.attributes.watchlists': ['w1'] } },
+                  { terms: { 'entity.id': ['host:a', 'host:b'] } },
+                ],
+                must_not: [{ terms: { 'entity.id': ['host:x'] } }],
+              },
+            },
+            { terms: { 'entity.id': ['host:g'] } },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    ]);
   });
 
   it('matches nothing for a tile without entities', () => {

@@ -62,7 +62,7 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
           css={css`
             box-sizing: border-box;
             overflow: hidden;
-            border-radius: ${euiTheme.size.s};
+            border-radius: ${euiTheme.border.radius.panel};
           `}
         >
           <EuiText textAlign="center" color="subdued" size="s">

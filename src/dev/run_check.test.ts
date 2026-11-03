@@ -56,7 +56,7 @@ jest.mock('@kbn/tooling-log', () => ({
 
 const mockRunJestViaMoon = jest.fn();
 
-jest.mock('@kbn/test', () => ({
+jest.mock('@kbn/jest', () => ({
   runJestViaMoon: (...args: unknown[]) => mockRunJestViaMoon(...args),
   JEST_CONFIG_NAMES: [
     'jest.config.dev.js',
@@ -322,13 +322,16 @@ describe('run_check', () => {
       ...baseContext,
       runContext: {
         ...baseContext.runContext,
-        changedFiles: ['src/core/server/integration_tests/user_storage/remove.test.ts'],
+        changedFiles: [
+          'src/core/packages/core/server/integration_tests/user_storage/remove.test.ts',
+        ],
       },
     });
 
     mockExistsSync.mockImplementation(
       (p: string) =>
-        p === '/repo/src/core/server/integration_tests/user_storage/jest.integration.config.js'
+        p ===
+        '/repo/src/core/packages/core/server/integration_tests/user_storage/jest.integration.config.js'
     );
 
     await handler(createArgs());

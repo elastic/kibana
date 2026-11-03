@@ -1,12 +1,12 @@
 # @kbn/evals-suite-alerting-v2
 
 Evaluation suite for Alerting V2 agent skills, built on top of
-[`@kbn/evals`](../kbn-evals/README.md). The first specs target the **rule-management**
+[`@kbn/evals`](../kbn-evals/README.md). The first specs target the **rule-authoring**
 skill; additional Alerting V2 skills can be added under `evals/`.
 
 ## Overview
 
-The rule-management skill lets users compose, discover, and modify Alerting V2 rules and
+The rule-authoring skill lets users compose, discover, and modify Alerting V2 rules and
 action policies (notification policies) from within an Agent Builder conversation. It is
 backed by two tools:
 
@@ -97,8 +97,8 @@ node scripts/jest x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2
 
 ## Spec layout
 
-- `evals/rule_management/rule_management.spec.ts` — skill routing + rule composition
-- `evals/rule_management/action_policy.spec.ts` — notification / action-policy flow
+- `evals/rule_authoring/rule_authoring.spec.ts` — skill routing + rule composition
+- `evals/rule_authoring/action_policy.spec.ts` — notification / action-policy flow
 
 Example ground truth lives entirely under `output` (skills, tools, attachments, criteria).
 Evaluators receive that object as `expected`. Omit a field to skip the matching scorer.

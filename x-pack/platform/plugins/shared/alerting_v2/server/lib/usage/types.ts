@@ -20,7 +20,6 @@ export interface AlertingV2Usage {
   // rule stats
   count_total?: number;
   count_enabled?: number;
-  count_agent_builder_assisted?: number;
   count_by_kind?: { alert?: number; signal?: number };
   count_by_schedule?: NameValuePair[];
   count_by_lookback?: NameValuePair[];

@@ -9,13 +9,15 @@ import { renderHook } from '@testing-library/react';
 import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
+import type { EntityFilters } from '../../entities_grid/common';
 import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
-import { getEntityFilterESQL } from '../../use_entity_filters_param';
 import { useAlertBasedTilesDelta } from './use_alert_based_tiles_delta';
 import { useEntitiesWithAnomaliesDelta } from './use_entities_with_anomalies_delta';
 import { useNewEntityDelta } from './use_new_entity_delta';
 import { useNewlyHighCriticalDelta, useRiskMoversDelta } from './use_risk_tiles_delta';
 import { usePreviousPeriod } from './use_previous_period';
+import { useTileQueryInputs } from './use_tile_query_inputs';
+import { RISK_MOVER_MIN_SCORE_CHANGE } from '../queries/risk_history';
 
 jest.mock('./use_previous_period', () => ({
   ...jest.requireActual('./use_previous_period'),
@@ -27,6 +29,7 @@ jest.mock('../../../../../common/components/ml/hooks/use_installed_security_jobs
 jest.mock('../../../../../common/hooks/use_resolved_latest_entities_index_name', () => ({
   useResolvedLatestEntitiesIndexName: jest.fn(),
 }));
+jest.mock('./use_tile_query_inputs', () => ({ useTileQueryInputs: jest.fn() }));
 
 const mockPreviousPeriod = usePreviousPeriod as jest.Mock;
 const lastOptions = () =>
@@ -48,6 +51,14 @@ beforeEach(() => {
     data: { indexName: '.entities-v1' },
     isLoading: false,
   });
+  // The index as the index hook resolves it, and the plain filter clauses: the group overrides of the
+  // filters have their own tests (use_tile_query_inputs.test.ts).
+  (useTileQueryInputs as jest.Mock).mockImplementation(
+    (spaceId: string, entityFilters: EntityFilters) => ({
+      ...(useResolvedLatestEntitiesIndexName as jest.Mock)(spaceId),
+      entityFilterClauses: buildEntityFilterClauses(entityFilters),
+    })
+  );
   (useInstalledSecurityJobsIds as jest.Mock).mockReturnValue({ jobIds: ['job_a'], loading: false });
   returns();
 });
@@ -193,7 +204,7 @@ describe('useEntitiesWithAnomaliesDelta', () => {
 describe('useNewEntityDelta', () => {
   it('runs on the local cluster only, like the count, and applies the entity filters', () => {
     const entityFilters = { ...EMPTY_ENTITY_FILTERS, assetCriticality: ['high_impact'] };
-    const clauses = getEntityFilterESQL(entityFilters);
+    const clauses = buildEntityFilterClauses(entityFilters);
     expect(clauses.length).toBeGreaterThan(0);
     renderHook(() => useNewEntityDelta({ ...base, count: 3, entityFilters }));
     expect(lastOptions().localOnly).toBe(true);
@@ -221,7 +232,9 @@ describe('the risk tile deltas', () => {
 
   it('read the previous period of their own tile', () => {
     renderHook(() => useRiskMoversDelta({ ...base, count: 3 }));
-    expect(lastOptions().previousQuery).toContain('current_score - boundary_score >= 10');
+    expect(lastOptions().previousQuery).toContain(
+      `current_score - boundary_score >= ${RISK_MOVER_MIN_SCORE_CHANGE}`
+    );
     renderHook(() => useNewlyHighCriticalDelta({ ...base, count: 3 }));
     expect(lastOptions().previousQuery).toContain('current_level_num >= 3');
   });

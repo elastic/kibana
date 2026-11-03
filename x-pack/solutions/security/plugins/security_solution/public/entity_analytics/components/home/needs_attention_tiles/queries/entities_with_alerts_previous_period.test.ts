@@ -22,9 +22,7 @@ describe('buildAlertBasedTilesQuery for the previous period', () => {
 
   it('keeps the alerts inside the previous period', () => {
     const query = buildAlertBasedTilesQuery(INDEX, 'default', '30d', [], 'previous');
-    expect(query).toContain(
-      '| WHERE @timestamp >= NOW() - 60 days AND @timestamp < NOW() - 30 days'
-    );
+    expect(query).toContain('@timestamp >= NOW() - 60 days AND @timestamp < NOW() - 30 days');
   });
 
   // The last STATS is the tile aggregate; everything before it is shared with the current period.

@@ -26,6 +26,7 @@ plugins:
     - dashboard_markdown
     - data
     - data_federation
+    - data_usage
     - data_view_editor
     - data_view_field_editor
     - data_view_management
@@ -34,6 +35,7 @@ plugins:
     - data_visualizer
     - dataset_quality
     - dev_tools
+    - digital_experience
     - discover
     - discoverCustomizationExamples
     - discoveries
@@ -133,7 +135,6 @@ packages:
     - kbn-scout
     - kbn-security-hardening
     - kbn-streamlang-tests
-    - user-storage
   disabled:
     - kbn-scout-release-testing # Release tests will run separately as part of the release process
 

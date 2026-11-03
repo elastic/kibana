@@ -804,11 +804,11 @@ describe('EscalationsService.list', () => {
           [
             'inv-1',
             [
-              { id: 'host-1', type: 'host' },
-              { id: 'user-1', type: 'user' },
+              { id: 'host-1', type: 'host', name: 'web-01' },
+              { id: 'user-1', type: 'user', name: 'it.admin' },
             ],
           ],
-          ['inv-2', [{ id: 'host-1', type: 'host' }, { id: 'svc-1' }]],
+          ['inv-2', [{ id: 'host-1', type: 'host', name: 'later' }, { id: 'svc-1' }]],
         ])
       );
 
@@ -823,6 +823,7 @@ describe('EscalationsService.list', () => {
       ]);
       expect(result.results[0].entity_ids).toEqual(['host-1', 'user-1', 'svc-1']);
       expect(result.results[0].entity_types).toEqual({ 'host-1': 'host', 'user-1': 'user' });
+      expect(result.results[0].entity_names).toEqual({ 'host-1': 'web-01', 'user-1': 'it.admin' });
       expect(result.results[1]).not.toHaveProperty('entity_ids');
     });
 

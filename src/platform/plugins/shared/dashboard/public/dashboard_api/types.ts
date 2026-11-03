@@ -56,6 +56,7 @@ import type { BehaviorSubject, Observable, Subject } from 'rxjs';
 
 import type { DashboardState, GridData } from '@kbn/as-code-dashboard-schema';
 import type { DashboardLocatorParams } from '../../common';
+import type { DashboardChangeSource } from '../../common/change_sources';
 import type { DashboardRedirect } from '../dashboard_app/types';
 import type { ReadBodyWithResolve } from '../dashboard_client/dashboard_client';
 import type { DashboardLayout } from './layout_manager/types';
@@ -79,6 +80,15 @@ export interface PublishesOnSave {
   onSave$: Observable<DashboardSaveEvent>;
 }
 
+export interface DashboardSetStateOptions {
+  /**
+   * Labels for the integrations making this change, e.g. `agent`. They are reported with the
+   * next save that includes this change, so a change that is undone, reset to the last saved
+   * state, or discarded before a save is not reported.
+   */
+  changedBy?: DashboardChangeSource[];
+}
+
 export const ReservedLayoutItemTypes: readonly string[] = ['section'] as const;
 
 export type DashboardInitializationState = Partial<
@@ -96,6 +106,12 @@ export interface DashboardCreationOptions {
    * e.g. default state, saved object state, session backup state.
    */
   getInitialInput?: () => DashboardInitializationState;
+
+  /**
+   * Labels for the integrations that supplied the initial state, e.g. `agent`. They are reported
+   * with the next save that includes this state, like `DashboardSetStateOptions.changedBy`.
+   */
+  changedBy?: DashboardChangeSource[];
 
   /** Returns embeddables to add to the dashboard on load. */
   getIncomingEmbeddables?: () => EmbeddablePackageState[] | undefined;
@@ -214,7 +230,7 @@ export type DashboardApi = CanExpandPanels &
     isManaged: boolean;
     locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
     runInteractiveSave: (redirectTo?: DashboardRedirect) => Promise<{ id: string } | undefined>;
-    runQuickSave: () => Promise<void>;
+    runQuickSave: (options?: { restored?: boolean }) => Promise<void>;
     scrollToPanel: (panelRef: HTMLDivElement) => void;
     scrollToPanelId$: PublishingSubject<string | undefined>;
     scrollToTop: () => void;
@@ -230,7 +246,7 @@ export type DashboardApi = CanExpandPanels &
     setSettings: (settings: Partial<DashboardSettings>) => void;
     setTags: (tags: string[]) => void;
     setTimeRange: (timeRange?: TimeRange | undefined) => void;
-    setState: (state: DashboardState) => void;
+    setState: (state: DashboardState, options?: DashboardSetStateOptions) => Promise<void>;
 
     publishedChildFilters$: PublishingSubject<Filter[] | undefined>;
     unpublishedChildFilters$: PublishingSubject<Filter[] | undefined>;
@@ -275,5 +291,6 @@ export type DashboardInternalApi = ReturnType<
 
 export interface DashboardUser {
   uid: string;
+  name?: string;
   hasGlobalAccessControlPrivilege: boolean;
 }

@@ -57,6 +57,4 @@ fileGroups:
     - server/**/*
     - integration_tests/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

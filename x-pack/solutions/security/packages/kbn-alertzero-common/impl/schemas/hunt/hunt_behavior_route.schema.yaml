@@ -41,6 +41,12 @@ paths:
                   maxItems: 100
                   items:
                     $ref: '#/components/schemas/HuntBehaviorIoc'
+                excluded_iocs:
+                  type: array
+                  description: Adjudicated-out IOCs the run must not search.
+                  maxItems: 100
+                  items:
+                    $ref: '#/components/schemas/HuntBehaviorIoc'
                 article_context:
                   $ref: '#/components/schemas/HuntBehaviorArticleContext'
       responses:

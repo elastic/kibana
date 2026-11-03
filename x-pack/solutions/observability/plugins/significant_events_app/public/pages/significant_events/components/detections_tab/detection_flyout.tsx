@@ -33,6 +33,7 @@ import { InfoPanel } from '../../../../components/info_panel';
 import { useFetchDetectionHistory } from '../../../../hooks/use_fetch_detections';
 import { useSourcesById } from '../../../../hooks/use_sources_by_id';
 import { formatTimestamp } from '../../../../util/formatters';
+import { DetectionDiscoveryStatus } from './detection_discovery_status';
 import { changeTypeLabel } from '../shared/translations';
 
 const formatPValue = (pValue?: number | string): string => {
@@ -64,14 +65,6 @@ export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) =>
   const { getSourceTitle } = useSourcesById();
   const { data: historyData, isLoading: isHistoryLoading } = useFetchDetectionHistory(
     detection.rule_uuid
-  );
-
-  const status = useMemo(
-    () =>
-      detection.processed
-        ? { label: STATUS_PROCESSED_LABEL, color: 'success' as const }
-        : { label: STATUS_PENDING_LABEL, color: 'hollow' as const },
-    [detection.processed]
   );
 
   const generalInfoItems = useMemo(() => {
@@ -134,11 +127,15 @@ export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) =>
         <EuiFlexGroup gutterSize="s" responsive={false} wrap>
           <EuiFlexItem>
             <FlyoutMetadataCard title={STATUS_LABEL}>
-              <EuiToolTip content={STATUS_TOOLTIP}>
-                <EuiBadge color={status.color} tabIndex={0}>
-                  {status.label}
-                </EuiBadge>
-              </EuiToolTip>
+              {detection.skip ? (
+                <DetectionDiscoveryStatus detection={detection} />
+              ) : (
+                <EuiToolTip content={STATUS_TOOLTIP}>
+                  <span tabIndex={0}>
+                    <DetectionDiscoveryStatus detection={detection} />
+                  </span>
+                </EuiToolTip>
+              )}
             </FlyoutMetadataCard>
           </EuiFlexItem>
           {detection.source_id && (
@@ -213,9 +210,7 @@ export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) =>
                       <EuiBadge color="hollow">{entryLabel}</EuiBadge>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiBadge color={entry.processed ? 'success' : 'hollow'}>
-                        {entry.processed ? STATUS_PROCESSED_LABEL : STATUS_PENDING_LABEL}
-                      </EuiBadge>
+                      <DetectionDiscoveryStatus detection={entry} />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiText size="xs" color="subdued">
@@ -270,18 +265,4 @@ const CHANGE_LABEL = i18n.translate('xpack.significantEventsApp.detectionFlyout.
 const STATISTICAL_SIGNIFICANCE_LABEL = i18n.translate(
   'xpack.significantEventsApp.detectionFlyout.statisticalSignificanceLabel',
   { defaultMessage: 'Statistical significance' }
-);
-
-const STATUS_PROCESSED_LABEL = i18n.translate(
-  'xpack.significantEventsApp.detectionFlyout.status.processed',
-  {
-    defaultMessage: 'Processed',
-  }
-);
-
-const STATUS_PENDING_LABEL = i18n.translate(
-  'xpack.significantEventsApp.detectionFlyout.status.pending',
-  {
-    defaultMessage: 'Pending',
-  }
 );

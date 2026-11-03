@@ -24,7 +24,7 @@ import {
 import {
   getInvestigationStatusLabel,
   isEventInvestigated,
-} from '../event/significant_event_status';
+} from '../components/entities/significant_event/significant_event_status';
 import { nightshiftReducedMotionStyles } from '../common/transition';
 
 // Staggered offsets so the dots pulse in sequence (typing-indicator effect).

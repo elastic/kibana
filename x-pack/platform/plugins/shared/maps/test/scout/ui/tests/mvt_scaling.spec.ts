@@ -167,8 +167,8 @@ test.describe('Maps - MVT scaling', { tag: '@local-stateful-classic' }, () => {
       const { maps } = pageObjects;
 
       // Tile URL of every MVT source, keyed by source id.
-      const getTileUrls = async () => {
-        const { sources } = await maps.getMapboxStyle();
+      const getTileUrls = async (waitForFocusQuiet: boolean = false) => {
+        const { sources } = await maps.getMapboxStyle(waitForFocusQuiet);
         return Object.fromEntries(
           Object.entries<any>(sources)
             .filter(([, source]) => Array.isArray(source.tiles))
@@ -177,33 +177,14 @@ test.describe('Maps - MVT scaling', { tag: '@local-stateful-classic' }, () => {
       };
       const getTileUrl = async () => (await getTileUrls())[MVT_DOCUMENTS_SOURCE_ID];
 
-      const getControlTileUrl = async () => (await getTileUrls())[CONTROL_LAYER_SOURCE_ID];
-
-      // Closing the inspector restores focus to its trigger twice, the second time ~40ms later.
-      // If that lands while the action is typing, the remaining keys go to the trigger button
-      // and a space re-opens the inspector. Wait for focus to be quiet before acting.
-      const waitForFocusQuiet = () =>
-        page.evaluate(
-          () =>
-            new Promise<void>((resolve) => {
-              const onFocus = () => {
-                clearTimeout(timer);
-                timer = setTimeout(done, 150);
-              };
-              const done = () => {
-                document.removeEventListener('focusin', onFocus, true);
-                resolve();
-              };
-              let timer = setTimeout(done, 150);
-              document.addEventListener('focusin', onFocus, true);
-            })
-        );
+      const getControlTileUrl = async (waitForFocusQuiet: boolean = false) =>
+        (await getTileUrls(waitForFocusQuiet))[CONTROL_LAYER_SOURCE_ID];
 
       // Captures the current tile URLs, runs `action`, and returns the captured URLs.
       const runAction = async (action: () => Promise<void>) => {
         const prevTileUrl = await getTileUrl();
-        const prevControlTileUrl = await getControlTileUrl();
-        await waitForFocusQuiet();
+        // Last inspector close before the action, so wait for focus to settle.
+        const prevControlTileUrl = await getControlTileUrl(true);
         await action();
         return { prevTileUrl, prevControlTileUrl };
       };

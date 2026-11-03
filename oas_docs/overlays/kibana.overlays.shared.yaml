@@ -158,6 +158,14 @@ actions:
     description: Change displayName
     update:
       x-displayName: "Data views"
+  - target: '$.tags[?(@.name=="data-views-v2")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
+        Use these endpoints to list, retrieve, create, replace, and delete data views with the
+        as-code data view definition.
+      x-displayName: "Data views v2"
   - target: '$.tags[?(@.name=="slo")]'
     description: Change displayName
     update:

@@ -6,7 +6,13 @@
  */
 
 import { ALERT_FETCH_LIMIT, BATCH_ALERT_CAP, RULE_FETCH_LIMIT } from '../../alert_triage/constants';
-import { fetchTriageAlerts, listLiveExecutionIds, loadAlertsByIds, tagAlerts } from './ports';
+import {
+  fetchTriageAlerts,
+  listLiveExecutionIds,
+  loadAlertsByIds,
+  tagAlerts,
+  type TriageFilters,
+} from './ports';
 
 const tagWith = (body: Record<string, unknown>) => {
   const callKibanaApi = jest.fn().mockResolvedValue({ status: 200, headers: {}, body });
@@ -120,6 +126,12 @@ describe('loadAlertsByIds', () => {
   });
 });
 
+const NO_FILTERS: TriageFilters = {
+  minSeverity: 'low',
+  excludeBuildingBlocks: false,
+  excludedRuleTags: [],
+};
+
 describe('fetchTriageAlerts', () => {
   const hit = (id: string, ruleId: string, riskScore: number) => ({
     _id: id,
@@ -133,7 +145,12 @@ describe('fetchTriageAlerts', () => {
     },
   });
 
-  const fetchWith = (rules: Array<{ hits: unknown[] }>, claimedHits: unknown[] = []) => {
+  const fetchWith = (
+    rules: Array<{ hits: unknown[] }>,
+    claimedHits: unknown[] = [],
+    filters: Partial<TriageFilters> = {},
+    excludedClaimHits: unknown[] = []
+  ) => {
     const callKibanaApi = jest.fn().mockImplementation(async ({ body }) => ({
       status: 200,
       headers: {},
@@ -143,11 +160,22 @@ describe('fetchTriageAlerts', () => {
               rules: { buckets: rules.map(({ hits }) => ({ top: { hits: { hits } } })) },
             },
           }
-        : { hits: { hits: claimedHits } },
+        : {
+            hits: {
+              // Only the excluded-claims search negates conditions, so `must_not` tells them apart.
+              hits: JSON.stringify(body.query).includes('must_not')
+                ? excludedClaimHits
+                : claimedHits,
+            },
+          },
     }));
     return {
       callKibanaApi,
-      run: () => fetchTriageAlerts({ callKibanaApi }, 'alert_analysis:', Date.parse('2026-10-12')),
+      run: () =>
+        fetchTriageAlerts({ callKibanaApi }, 'alert_analysis:', Date.parse('2026-10-12'), {
+          ...NO_FILTERS,
+          ...filters,
+        }),
     };
   };
 
@@ -209,13 +237,136 @@ describe('fetchTriageAlerts', () => {
     expect(JSON.stringify(claimed.query)).not.toContain('range');
   });
 
+  // A claim left by a failed or canceled batch is re-planned when its batch is gone. If the user has
+  // since raised the severity floor or excluded the rule's tag, that must not start a new batch.
+  it('flags a claimed alert the settings now exclude, and leaves the other claims alone', async () => {
+    const stale = hit('claimed-low', 'rule-1', 10);
+    const kept = hit('claimed-high', 'rule-2', 90);
+    const { run, callKibanaApi } = fetchWith(
+      [{ hits: [] }],
+      [stale, kept],
+      { minSeverity: 'high' },
+      [stale]
+    );
+
+    const alerts = await run();
+
+    expect(alerts.map(({ id, excludedBySettings }) => [id, excludedBySettings])).toEqual([
+      ['claimed-low', true],
+      ['claimed-high', undefined],
+    ]);
+    const excludedSearch = callKibanaApi.mock.calls
+      .map(([request]) => request.body)
+      .find(({ aggs, query }) => aggs === undefined && JSON.stringify(query).includes('must_not'));
+    expect(excludedSearch.query.bool.filter).toContainEqual({
+      term: { 'kibana.alert.workflow_tags': 'az:triage_pending' },
+    });
+    expect(excludedSearch.query.bool.must_not).toEqual([
+      {
+        bool: {
+          filter: [{ terms: { 'kibana.alert.severity': ['high', 'critical'] } }],
+          must_not: [],
+        },
+      },
+    ]);
+  });
+
+  it('flags claims of excluded rule tags and building blocks the same way', async () => {
+    const stale = hit('claimed-tagged', 'rule-1', 10);
+    const { run } = fetchWith(
+      [{ hits: [] }],
+      [stale],
+      { excludeBuildingBlocks: true, excludedRuleTags: ['in-development'] },
+      [stale]
+    );
+
+    const [claimed] = await run();
+
+    expect(claimed.excludedBySettings).toBe(true);
+  });
+
+  it('does not run the excluded-claims search when the settings exclude nothing', async () => {
+    const { run, callKibanaApi } = fetchWith([{ hits: [] }], [hit('claimed-1', 'rule-1', 10)]);
+
+    await run();
+
+    const claimSearches = callKibanaApi.mock.calls
+      .map(([request]) => request.body)
+      .filter(({ aggs }) => aggs === undefined);
+    expect(claimSearches).toHaveLength(1);
+  });
+
+  // Low severity is a signal, not something to triage: a minimum must keep those alerts from ever
+  // reaching a Worker, while the default must not hide any alert that has no severity.
+  it.each([
+    ['medium', ['medium', 'high', 'critical']],
+    ['high', ['high', 'critical']],
+    ['critical', ['critical']],
+  ] as const)('triages only %s and above when that is the minimum', async (min, expected) => {
+    const { run, callKibanaApi } = fetchWith([{ hits: [] }], [], { minSeverity: min });
+
+    await run();
+
+    const unclaimed = callKibanaApi.mock.calls
+      .map(([request]) => request.body)
+      .find(({ aggs }) => aggs !== undefined);
+    expect(unclaimed.query.bool.filter).toContainEqual({
+      terms: { 'kibana.alert.severity': expected },
+    });
+  });
+
+  it('adds no severity clause at the lowest minimum, and never filters claimed alerts', async () => {
+    const { run, callKibanaApi } = fetchWith([{ hits: [] }]);
+
+    await run();
+
+    expect(JSON.stringify(callKibanaApi.mock.calls.map(([{ body }]) => body.query))).not.toContain(
+      'kibana.alert.severity'
+    );
+    const medium = fetchWith([{ hits: [] }], [], { minSeverity: 'medium' });
+    await medium.run();
+    const claimed = medium.callKibanaApi.mock.calls
+      .map(([request]) => request.body)
+      .find(({ aggs }) => aggs === undefined);
+    expect(JSON.stringify(claimed.query)).not.toContain('kibana.alert.severity');
+  });
+
+  // A sequence's own alert is not a building block, so excluding them leaves sequences triaged.
+  it('keeps building-block alerts and tagged rules out of the unclaimed search only when asked', async () => {
+    const off = fetchWith([{ hits: [] }]);
+    await off.run();
+    const on = fetchWith([{ hits: [] }], [], {
+      excludeBuildingBlocks: true,
+      excludedRuleTags: ['SEND_TO_DEV'],
+    });
+    await on.run();
+
+    const bodies = (calls: jest.Mock['mock']['calls']) => calls.map(([{ body }]) => body);
+    const unclaimed = (calls: jest.Mock['mock']['calls']) =>
+      bodies(calls).find(({ aggs }) => aggs !== undefined);
+    const claimed = (calls: jest.Mock['mock']['calls']) =>
+      bodies(calls).find(({ aggs }) => aggs === undefined);
+    expect(JSON.stringify(unclaimed(off.callKibanaApi.mock.calls).query)).not.toContain(
+      'building_block_type'
+    );
+    expect(unclaimed(on.callKibanaApi.mock.calls).query.bool.must_not).toEqual(
+      expect.arrayContaining([
+        { exists: { field: 'kibana.alert.building_block_type' } },
+        { terms: { 'kibana.alert.rule.tags': ['SEND_TO_DEV'] } },
+      ])
+    );
+    expect(JSON.stringify(claimed(on.callKibanaApi.mock.calls).query)).not.toContain(
+      'building_block_type'
+    );
+  });
+
   it('fails rather than reading a response without the per-rule alerts as an idle queue', async () => {
     const callKibanaApi = jest
       .fn()
       .mockResolvedValue({ status: 200, headers: {}, body: { hits: { hits: [] } } });
 
     await expect(
-      fetchTriageAlerts({ callKibanaApi }, 'alert_analysis:', Date.parse('2026-10-12'))
+      fetchTriageAlerts({ callKibanaApi }, 'alert_analysis:', Date.parse('2026-10-12'), NO_FILTERS)
     ).rejects.toThrow('Per-rule alerts missing');
   });
 });

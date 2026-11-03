@@ -138,6 +138,8 @@ describe('reconcileSourceCatalog', () => {
         );
       }),
       write: jest.fn(),
+      retire: jest.fn(),
+      listSourceIds: jest.fn(),
     };
 
     await expect(
@@ -169,6 +171,8 @@ describe('reconcileSourceCatalog', () => {
         });
       }),
       write: jest.fn(),
+      retire: jest.fn(),
+      listSourceIds: jest.fn(),
     };
     const scheduleSourceOnboarding = jest.fn(async () => true);
 
@@ -206,6 +210,8 @@ describe('reconcileSourceCatalog', () => {
         return run({ revision: undefined, onboardingScheduled: false, lease: null }, jest.fn());
       }),
       write: jest.fn(),
+      retire: jest.fn(),
+      listSourceIds: jest.fn(),
     };
 
     const disabled = makeSource({ id: 'disabled-source', enabled: false });
@@ -360,6 +366,91 @@ describe('reconcileSourceCatalog', () => {
     expect(kiClient.deleteAllQueries).toHaveBeenCalledWith('gone-source');
     expect(kiClient.deleteIndicators).toHaveBeenCalledWith('gone-source');
     expect(kiClient.deleteOwnedRules).not.toHaveBeenCalledWith('enabled-source');
+  });
+
+  it('retires the state object of a deleted source that has no indicators or rules left', async () => {
+    const retire = jest.fn(async ({ run }: { run: () => Promise<void> }) => run());
+    const sourceKnowledgeState: SourceKnowledgeStateClient = {
+      runExclusive: jest.fn(),
+      write: jest.fn(),
+      retire,
+      listSourceIds: jest.fn().mockResolvedValue(['live-source', 'gone-source']),
+    };
+
+    await reconcileSourceCatalog({
+      sourcesClient: makeSourcesClient([makeSource({ id: 'live-source' })]),
+      kiClient: makeKiClient([]),
+      sourceKnowledgeState,
+      maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
+      request,
+    });
+
+    expect(retire).toHaveBeenCalledTimes(1);
+    expect(retire).toHaveBeenCalledWith(expect.objectContaining({ sourceId: 'gone-source' }));
+  });
+
+  it('skips a deleted source whose lease is held and still retires the others', async () => {
+    const retire = jest.fn(
+      async ({ sourceId, run }: { sourceId: string; run: () => Promise<void> }) => {
+        if (sourceId === 'busy-gone') {
+          throw new StatusError('A write is in progress', 409);
+        }
+        return run();
+      }
+    );
+    const sourceKnowledgeState: SourceKnowledgeStateClient = {
+      runExclusive: jest.fn(),
+      write: jest.fn(),
+      retire,
+      listSourceIds: jest.fn().mockResolvedValue(['busy-gone', 'idle-gone']),
+    };
+    const kiClient = makeKiClient([]);
+
+    await expect(
+      reconcileSourceCatalog({
+        sourcesClient: makeSourcesClient([]),
+        kiClient,
+        sourceKnowledgeState,
+        maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
+        request,
+      })
+    ).resolves.toEqual(expect.objectContaining({ reconcileIds: [] }));
+
+    expect(kiClient.deleteIndicators).toHaveBeenCalledWith('idle-gone');
+    expect(kiClient.deleteIndicators).not.toHaveBeenCalledWith('busy-gone');
+  });
+
+  it('does not retire a source created after its state object was listed', async () => {
+    const retire = jest.fn(async ({ run }: { run: () => Promise<void> }) => run());
+    const catalog: NightshiftSource[] = [];
+    const sourceKnowledgeState: SourceKnowledgeStateClient = {
+      runExclusive: jest.fn(),
+      write: jest.fn(),
+      retire,
+      // The source and its state object appear while the sweep is listing state objects.
+      listSourceIds: jest.fn(async () => {
+        catalog.push(makeSource({ id: 'new-source' }));
+        return ['new-source'];
+      }),
+    };
+
+    const sourcesClient = makeSourcesClient([]);
+    jest.mocked(sourcesClient.list).mockImplementation(async () => ({
+      sources: [...catalog],
+      total: catalog.length,
+      page: 1,
+      per_page: 100,
+    }));
+
+    await reconcileSourceCatalog({
+      sourcesClient,
+      kiClient: makeKiClient([]),
+      sourceKnowledgeState,
+      maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
+      request,
+    });
+
+    expect(retire).not.toHaveBeenCalled();
   });
 
   it('marks the detections of an id that is no longer in the catalog as processed', async () => {
@@ -605,6 +696,8 @@ describe('durable source revision reconciliation', () => {
     const sourceKnowledgeState: SourceKnowledgeStateClient = {
       runExclusive: jest.fn(async ({ run }) => run({ ...state }, checkpoint)),
       write: jest.fn(),
+      retire: jest.fn(),
+      listSourceIds: jest.fn(),
     };
     const scheduleSourceOnboarding = jest.fn(async () => true);
     const kiClient = makeKiClient();

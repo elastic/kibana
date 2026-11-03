@@ -39,6 +39,11 @@ jest.mock('../../../../lib/significant_events/fetch_query_occurrences_from_alert
   }),
 }));
 
+const mockGetLiveEntities = jest.fn();
+jest.mock('../../../../lib/significant_events/entities/get_live_entities', () => ({
+  getLiveEntities: (...args: unknown[]) => mockGetLiveEntities(...args),
+}));
+
 jest.mock('../../../../lib/significant_events/ki_queries_generation_service', () => ({
   generateKIQueries: (...args: unknown[]) => mockGenerateKIQueries(...args),
 }));
@@ -419,10 +424,12 @@ describe('getDiscoveryQueriesRoute source resolution', () => {
     per_page: 100,
   });
   const kiClient = {};
+  const findRuleEnabledStates = jest.fn().mockResolvedValue(new Map<string, boolean>());
   const assertReadable = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    findRuleEnabledStates.mockResolvedValue(new Map<string, boolean>());
     assertReadable.mockResolvedValue(undefined);
     list.mockResolvedValue({
       sources: [{ id: 'logs.a' }, { id: 'logs.b' }],
@@ -447,7 +454,10 @@ describe('getDiscoveryQueriesRoute source resolution', () => {
         licensing: {},
         scopedClusterClient: { asCurrentUser: {} },
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
-        getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ alertsReader: {} }),
+        getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({
+          alertsReader: {},
+          rulesClient: { findRuleEnabledStates },
+        }),
       }),
       getSpaceId: jest.fn().mockResolvedValue('default'),
       server: makeServer(),
@@ -501,6 +511,17 @@ describe('getDiscoveryQueriesRoute source resolution', () => {
     );
   });
 
+  it('narrows the read to the requested query ids', async () => {
+    await discoveryQueriesRoute.handler(
+      makeDiscoveryHandlerParams({ ...discoveryBaseQuery, queryIds: ['q1'] })
+    );
+
+    expect(mockFetchQueryLinks).toHaveBeenCalledWith(
+      expect.objectContaining({ filters: expect.objectContaining({ queryIds: ['q1'] }) }),
+      kiClient
+    );
+  });
+
   it('searches only the sources the caller can read', async () => {
     assertReadable.mockImplementation(async (id: string) => {
       if (id === 'logs.b') {
@@ -533,6 +554,79 @@ describe('getDiscoveryQueriesRoute source resolution', () => {
       expect.objectContaining({ sourceIds: ['logs.a'] }),
       expect.anything()
     );
+  });
+  it('reports enabled states for live rules and false for missing rules', async () => {
+    mockFetchQueryLinks.mockResolvedValue([makeQueryLink('q1', 80), makeQueryLink('q2', 60)]);
+    findRuleEnabledStates.mockResolvedValue(new Map([['rule-q1', true]]));
+    const result = await discoveryQueriesRoute.handler(
+      makeDiscoveryHandlerParams(discoveryBaseQuery)
+    );
+    expect(findRuleEnabledStates).toHaveBeenCalledWith(['rule-q1', 'rule-q2']);
+    expect(result.queries.map(({ rule_enabled }) => rule_enabled)).toEqual([true, false]);
+  });
+
+  describe('entity selection', () => {
+    const linkTo = (id: string, entityId: string): QueryLink => {
+      const link = makeQueryLink(id, 50);
+      return { ...link, query: { ...link.query, features: [{ id: entityId, run_id: 'run' }] } };
+    };
+
+    beforeEach(() => {
+      mockFetchQueryLinks.mockResolvedValue([
+        linkTo('q1', 'checkout'),
+        linkTo('q2', 'payment'),
+        linkTo('q3', 'expired'),
+      ]);
+      mockGetLiveEntities.mockResolvedValue({
+        entities: [{ id: 'checkout' }, { id: 'payment' }],
+        truncated: false,
+      });
+    });
+
+    it.each([
+      ['a selected entity', { entityIds: ['checkout'] }, ['q1']],
+      ['Unassigned', { unassignedEntities: true }, ['q3']],
+      [
+        'an entity plus Unassigned',
+        { entityIds: ['checkout'], unassignedEntities: true },
+        ['q1', 'q3'],
+      ],
+    ])('keeps queries for %s before paging', async (_, selection, ids) => {
+      const result = await discoveryQueriesRoute.handler(
+        makeDiscoveryHandlerParams({ ...discoveryBaseQuery, ...selection })
+      );
+      expect(result.queries.map(({ id }) => id)).toEqual(ids);
+      expect(result.total).toBe(ids.length);
+    });
+
+    it('filters before paging, so a match past the first unfiltered page is returned', async () => {
+      const result = await discoveryQueriesRoute.handler(
+        makeDiscoveryHandlerParams({
+          ...discoveryBaseQuery,
+          page: 1,
+          perPage: 1,
+          entityIds: ['expired'],
+        })
+      );
+      expect(result.queries.map(({ id }) => id)).toEqual(['q3']);
+      expect(result.total).toBe(1);
+    });
+
+    it('ignores Unassigned when the live entity list is truncated', async () => {
+      mockGetLiveEntities.mockResolvedValue({ entities: [{ id: 'checkout' }], truncated: true });
+      const result = await discoveryQueriesRoute.handler(
+        makeDiscoveryHandlerParams({ ...discoveryBaseQuery, unassignedEntities: true })
+      );
+      expect(result.total).toBe(3);
+    });
+  });
+
+  it('returns the list without enabled states if the lookup fails', async () => {
+    findRuleEnabledStates.mockRejectedValue(new Error('no permission'));
+    const params = makeDiscoveryHandlerParams(discoveryBaseQuery);
+    const result = await discoveryQueriesRoute.handler(params);
+    expect(result.queries[0]).not.toHaveProperty('rule_enabled');
+    expect(params.logger.warn).toHaveBeenCalled();
   });
 });
 

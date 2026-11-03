@@ -133,6 +133,8 @@ export type EscalationConversationSummary = ConversationWithoutRoundsWithPermiss
   entity_ids?: string[];
   /** Entity type (`host`, `user`, …) by entity id, for the ids that have one. */
   entity_types?: Record<string, string>;
+  /** Display name by entity id, for the ids that have one. */
+  entity_names?: Record<string, string>;
 };
 
 export interface ListEscalationsResponse {

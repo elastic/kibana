@@ -446,6 +446,14 @@ components:
             coordinator itself found nothing to report here.
           items:
             $ref: '../components/hunt.schema.yaml#/components/schemas/HuntIncompleteness'
+        excluded_report_iocs:
+          type: object
+          description: Report IOCs excluded by adjudication, not searched by this run.
+          required: [count]
+          properties:
+            count:
+              type: integer
+              minimum: 1
         recommendations:
           type: array
           maxItems: 8

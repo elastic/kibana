@@ -6,10 +6,9 @@
  */
 
 import { useMemo } from 'react';
-import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { useTileQueryInputs } from './use_tile_query_inputs';
 import type { EntityFilters, TimeRange } from '../../entities_grid/common';
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
-import { getEntityFilterESQL } from '../../use_entity_filters_param';
 import {
   buildNewEntitySeriesQuery,
   newEntitySeriesColumn,
@@ -46,16 +45,16 @@ export const useNewEntitySeries = ({
   reachesBack,
   count,
 }: NewEntitySeriesOptions): { trend: number[] | undefined; isTrendLoading: boolean } => {
-  const { data: resolvedIndex, isLoading: isIndexLoading } =
-    useResolvedLatestEntitiesIndexName(spaceId);
+  const {
+    data: resolvedIndex,
+    isLoading: isIndexLoading,
+    entityFilterClauses,
+  } = useTileQueryInputs(spaceId, entityFilters);
   const index = resolvedIndex?.indexName;
 
   const query = useMemo(
-    () =>
-      index
-        ? buildNewEntitySeriesQuery(index, timeRange, getEntityFilterESQL(entityFilters))
-        : null,
-    [index, timeRange, entityFilters]
+    () => (index ? buildNewEntitySeriesQuery(index, timeRange, entityFilterClauses) : null),
+    [index, timeRange, entityFilterClauses]
   );
 
   const { canRun, isHidden } = getSeriesGate({ isReady, reachesBack, count });

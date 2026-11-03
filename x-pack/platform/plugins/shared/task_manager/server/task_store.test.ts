@@ -427,6 +427,41 @@ describe('TaskStore', () => {
       });
     });
 
+    test('passes refreshApiKey false to grantApiKeys', async () => {
+      const task = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+      };
+
+      const request = httpServerMock.createKibanaRequest();
+      const grantApiKeys = jest
+        .spyOn(EsApiKeyStrategy.prototype, 'grantApiKeys')
+        .mockResolvedValueOnce(new Map());
+
+      coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
+      scopedSavedObjectsClient.create.mockImplementation(
+        async (type: string, attributes: unknown) => ({
+          id: 'testid',
+          type,
+          attributes,
+          references: [],
+          version: '123',
+        })
+      );
+
+      await store.schedule(task as TaskInstance, { request, refreshApiKey: false });
+
+      const calls = [...grantApiKeys.mock.calls];
+      grantApiKeys.mockRestore();
+
+      expect(calls).toEqual([
+        [[task], request, coreStart.security, expect.objectContaining({ refreshApiKey: false })],
+      ]);
+    });
+
     test('errors when scheduling a task with API key if unable to encrypt SO', async () => {
       store = new TaskStore({
         logger: mockLogger(),
@@ -3814,6 +3849,32 @@ describe('TaskStore', () => {
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
 
+    test('removes nothing when a task has invalid JSON', async () => {
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          mockTask1,
+          { ...mockTask2, attributes: { ...mockTask2.attributes, params: '{invalid' } },
+        ],
+      });
+      await expect(store.bulkRemove(['task1', 'task2'])).rejects.toThrow(
+        `Task "task2"'s params field has invalid JSON: {invalid`
+      );
+      expect(invalidationSoClientMock.bulkCreate).not.toHaveBeenCalled();
+      expect(savedObjectsClient.bulkDelete).not.toHaveBeenCalled();
+    });
+
+    test('removes nothing when the API keys cannot be decrypted', async () => {
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [mockTask1, mockTask2],
+      });
+      esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest
+        .fn()
+        .mockRejectedValue(new Error('Decryption unavailable'));
+      await expect(store.bulkRemove(['task1', 'task2'])).rejects.toThrow('Decryption unavailable');
+      expect(invalidationSoClientMock.bulkCreate).not.toHaveBeenCalled();
+      expect(savedObjectsClient.bulkDelete).not.toHaveBeenCalled();
+    });
+
     test('marks API keys for invalidation when task has uiamApiKey but no apiKey', async () => {
       const getApiKeyIdsForInvalidation = jest
         .fn()
@@ -4440,6 +4501,66 @@ describe('TaskStore', () => {
           'Refreshing index to get recently created API keys for tasks'
         );
         expect(logger.error).toHaveBeenCalledWith('Error refreshing index tasky: bad refresh');
+      });
+
+      test('returns an unreadable task error for a task with invalid JSON, and the other tasks', async () => {
+        const unreadableTask = taskWithApiKey('task2', 'encryptedKey2');
+        savedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            taskWithApiKey('task1', 'encryptedKey1'),
+            { ...unreadableTask, attributes: { ...unreadableTask.attributes, params: '{invalid' } },
+          ],
+        });
+        mockDecryptedApiKeys([{ task1: 'decryptedKey1' }]);
+
+        const result = await decryptingStore.bulkGet(['task1', 'task2']);
+
+        expect(apiKeysOf(result)).toEqual(['decryptedKey1', undefined]);
+        expect(result[1]).toEqual(
+          asErr({
+            type: 'task',
+            id: 'task2',
+            error: {
+              error: 'Internal Server Error',
+              message: `Task "task2"'s params field has invalid JSON: {invalid`,
+              statusCode: 500,
+              metadata: { isUnreadableTask: true },
+            },
+          })
+        );
+      });
+
+      test('returns errors for tasks with API keys when the API keys cannot be decrypted, and the other tasks', async () => {
+        const taskWithoutApiKey = taskWithApiKey('task2', '');
+        savedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            taskWithApiKey('task1', 'encryptedKey1'),
+            {
+              ...taskWithoutApiKey,
+              attributes: _.omit(taskWithoutApiKey.attributes, 'apiKey', 'userScope'),
+            },
+          ],
+        });
+        esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest
+          .fn()
+          .mockRejectedValue(new Error('Decryption unavailable'));
+        const firstErrorPromise = decryptingStore.errors$.pipe(first()).toPromise();
+
+        const result = await decryptingStore.bulkGet(['task1', 'task2']);
+
+        expect(result[0]).toEqual(
+          asErr({
+            type: 'task',
+            id: 'task1',
+            error: {
+              error: 'Internal Server Error',
+              message: "Unable to decrypt the task's API keys: Decryption unavailable",
+              statusCode: 500,
+            },
+          })
+        );
+        expect(isOk(result[1]) && result[1].value.id).toBe('task2');
+        expect(await firstErrorPromise).toEqual(new Error('Decryption unavailable'));
       });
     });
   });

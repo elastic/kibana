@@ -15,6 +15,7 @@ import { INDEX_MANAGEMENT_LOCATOR_ID } from '@kbn/index-management-shared-types'
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -73,6 +74,15 @@ jest.mock('@kbn/workflows-ui', () => ({
     mgetWorkflows: mockMgetWorkflows,
     createWorkflow: mockCreateWorkflow,
   }),
+  useWorkflowsCapabilities: () => ({
+    canExecuteWorkflow: true,
+  }),
+  useRunWorkflow: () => ({
+    mutate: jest.fn(),
+    isLoading: false,
+  }),
+  RunWorkflowInputsModal: () => null,
+  requiresUserSuppliedInputs: () => false,
 }));
 
 const mockUseListKi = jest.fn();
@@ -554,50 +564,6 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ)).toBeInTheDocument();
   });
 
-  it('saves edited traces and refetches the AI index', async () => {
-    const services = createServices();
-    services.http.get.mockResolvedValue(aiIndex);
-    services.http.put.mockResolvedValue({ status: 'updated' });
-
-    renderWithProviders(services);
-
-    await waitForAiIndexDetailLoaded();
-    expect(services.http.get).toHaveBeenCalledTimes(1);
-
-    fireEvent.click(screen.getByTestId('contextAddTracesButton'));
-
-    fireEvent.change(screen.getByTestId('contextTraceAgentComboBox').querySelector('input')!, {
-      target: { value: 'Loyalty' },
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText('Loyalty Support Agent')).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByText('Loyalty Support Agent'));
-    fireEvent.click(screen.getByTestId('contextTracesSaveButton'));
-
-    await waitFor(() => {
-      expect(services.http.put).toHaveBeenCalledWith(
-        '/api/context_engine/ai_index/my-ai-index',
-        expect.objectContaining({
-          body: JSON.stringify({
-            memory_enabled: false,
-            dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
-            automations: [],
-            sources: [{ type: 'esql', value: 'FROM My view' }],
-            traces: [{ type: 'elastic_agent', value: 'agent-1' }],
-          }),
-        })
-      );
-    });
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('contextTraceAgentComboBox')).not.toBeInTheDocument();
-    });
-    expect(services.http.get).toHaveBeenCalledTimes(2);
-  });
-
   it('edits the description and refetches the AI index', async () => {
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
@@ -767,7 +733,10 @@ describe('AiIndexDetailPage', () => {
       'My workflow'
     );
     expect(screen.getByTestId('contextAiIndexAutomationRow')).toHaveTextContent('Enabled');
-    expect(mockMgetWorkflows).toHaveBeenCalledWith({ ids: ['wf-1'] });
+    expect(mockMgetWorkflows).toHaveBeenCalledWith({
+      ids: ['wf-1'],
+      source: ['id', 'name', 'enabled', 'definition'],
+    });
   });
 
   it('creates a workflow, attaches it, and opens the editor', async () => {
@@ -912,6 +881,10 @@ describe('AiIndexDetailPage', () => {
     services.application.capabilities = {
       ...services.application.capabilities,
       discover_v2: { show: true },
+      index_management: {
+        ...services.application.capabilities.index_management,
+        monitor: true,
+      },
     };
     const history = createMemoryHistory({
       initialEntries: [{ pathname: getAiIndexDetailPath(aiIndex.id) }],
@@ -954,6 +927,17 @@ describe('AiIndexDetailPage', () => {
     );
     expect(screen.getByTestId('contextListKiPanel')).toBeInTheDocument();
     expect(history.location.pathname).toBe(getAiIndexKnowledgeIndicatorsPath(aiIndex.id));
+    await openAppMenuOverflow();
+    await waitFor(() => {
+      expect(screen.getByTestId('contextListKiPanelDestLink')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('contextListKiDiscoverLink')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextListKiPanelSummary')).not.toBeInTheDocument();
+
+    expect(screen.getByTestId('contextListKiDiscoverLink')).toHaveAttribute(
+      'href',
+      '/app/discover'
+    );
   });
 
   it('hides the Knowledge Indicators tab when there are no KIs', async () => {

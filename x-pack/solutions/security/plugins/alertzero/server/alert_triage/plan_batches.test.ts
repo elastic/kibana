@@ -72,6 +72,27 @@ describe('planBatches', () => {
     });
   });
 
+  describe('claims on alerts the settings now exclude', () => {
+    it('releases an orphaned claim without planning it again', () => {
+      const excluded = { ...claimedBy('exec-gone', 'rule-x'), excludedBySettings: true };
+
+      const result = plan({ claimed: [excluded] });
+
+      expect(result.reclaimAlertIds).toEqual([excluded.id]);
+      expect(result.batches).toEqual([]);
+      expect(result.skipReason).toBe('nothing_pending');
+    });
+
+    it('still re-plans an orphaned claim the settings allow', () => {
+      const allowed = claimedBy('exec-gone', 'rule-y');
+
+      const result = plan({ claimed: [allowed] });
+
+      expect(result.reclaimAlertIds).toEqual([allowed.id]);
+      expect(result.batches.map(({ ruleId }) => ruleId)).toEqual(['rule-y']);
+    });
+  });
+
   describe('linking claimed alerts to live batches', () => {
     it('does not plan a second batch for a rule whose claimed alert names a live execution', () => {
       const result = plan({

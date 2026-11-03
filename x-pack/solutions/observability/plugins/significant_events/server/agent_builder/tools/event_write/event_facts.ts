@@ -7,8 +7,10 @@
 
 import {
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
+  UNCONFIRMED_EVENT_MAX_CONFIDENCE,
   type Severity,
   type SignalEntry,
+  type SignalVerdict,
   type SignificantEvent,
 } from '@kbn/significant-events-schema';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
@@ -106,10 +108,32 @@ const changesMemberVerdict = (
   );
 };
 
+const ruleOf = (signal: SignalEntry): string | undefined => signal.metadata?.rule_uuid;
+
+/** Does this write confirm a rule the stored event did not hold as confirmed? */
+const escalatesStoredVerdict = ({
+  submitted,
+  latest,
+}: {
+  submitted: SignificantEvent['signals'];
+  latest: SignificantEvent | undefined;
+}): boolean => {
+  const stored = new Map((latest?.signals ?? []).map((signal) => [ruleOf(signal), signal.verdict]));
+  return (submitted ?? []).some(
+    (signal) => signal.verdict === 'confirms' && stored.get(ruleOf(signal)) !== 'confirms'
+  );
+};
+
+/** A confirming signal, or an off-topic row with its own observed error: both are rated on what they show. */
+export const hasConfirmingSignal = (
+  signals: ReadonlyArray<{ verdict: SignalVerdict }> | undefined
+): boolean =>
+  (signals ?? []).some(({ verdict }) => verdict === 'confirms' || verdict === 'off_topic');
+
 /**
  * The agent decides the tier under the `severity` field contract; the writer stores it. An inactive
- * event is `low`, and a signal-less write (chat create) keeps its explicit severity, or `low` when
- * it gave none.
+ * event is `low`, so is one where no signal confirms anything, and a signal-less write (chat
+ * create) keeps its explicit severity, or `low` when it gave none.
  */
 const decideSeverity = ({
   proposed,
@@ -125,6 +149,9 @@ const decideSeverity = ({
   }
   if ((signals ?? []).length === 0) {
     return proposed ?? 'low';
+  }
+  if (!hasConfirmingSignal(signals)) {
+    return 'low';
   }
   if (proposed === undefined) {
     throw new Error('events_write: an event with signals needs a proposed severity.');
@@ -196,13 +223,16 @@ export const computeEventFacts = ({
   });
 
   // For continuations: if no new rule UUIDs are introduced, freeze title and symptom_hypothesis to prevent identity hijack
-  const frozenNarrative = isContinuation
-    ? preserveStableNarrative(
-        extractRuleUuids(candidate.input.signals),
-        latest,
-        extractRuleUuidsFromEvents([...priorDocs, latest])
-      )
-    : undefined;
+  // A rule that now confirms what the event stored as unconfirmed changes what the event is about:
+  // its title and hypothesis must be free to say so.
+  const frozenNarrative =
+    isContinuation && !escalatesStoredVerdict({ submitted: candidate.input.signals, latest })
+      ? preserveStableNarrative(
+          extractRuleUuids(candidate.input.signals),
+          latest,
+          extractRuleUuidsFromEvents([...priorDocs, latest])
+        )
+      : undefined;
 
   return {
     candidate,
@@ -212,7 +242,11 @@ export const computeEventFacts = ({
     status,
     severity,
     frozenNarrative,
-    confidence: episodeContext.confidence,
+    // Nothing confirmed, so nothing to be confident about; a signal-less write keeps its own.
+    confidence:
+      signals.length === 0 || hasConfirmingSignal(signals)
+        ? episodeContext.confidence
+        : Math.min(episodeContext.confidence, UNCONFIRMED_EVENT_MAX_CONFIDENCE),
   };
 };
 

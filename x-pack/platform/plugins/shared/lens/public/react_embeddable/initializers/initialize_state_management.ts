@@ -13,6 +13,7 @@ import {
   type PublishesRendered,
 } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
+import { isPlainObject } from 'lodash';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type {
@@ -37,6 +38,23 @@ export interface StateManagementConfig {
   getLatestState: () => Pick<LensRuntimeState, 'attributes' | 'ref_id'>;
   cleanup: () => void;
 }
+
+/**
+ * Drops object keys holding `undefined`, which are lost once state is persisted as JSON.
+ */
+const omitUndefinedKeys = (value: unknown): unknown => {
+  if (Array.isArray(value)) {
+    return value.map(omitUndefinedKeys);
+  }
+  if (isPlainObject(value)) {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>)
+        .filter(([, entryValue]) => entryValue !== undefined)
+        .map(([key, entryValue]) => [key, omitUndefinedKeys(entryValue)])
+    );
+  }
+  return value;
+};
 
 /**
  * Due to inline editing we need something advanced to handle the state
@@ -92,7 +110,10 @@ export function initializeStateManagement(
             ? (lastValue, currentValue, lastState, currentState) => {
                 const lastAttributes = resolveAttributes(lastValue, lastState);
                 const currentAttributes = resolveAttributes(currentValue, currentState);
-                return deepEqual(lastAttributes, currentAttributes);
+                return deepEqual(
+                  omitUndefinedKeys(lastAttributes),
+                  omitUndefinedKeys(currentAttributes)
+                );
               }
             : 'skip',
         ref_id: 'skip',
@@ -106,6 +127,8 @@ export function initializeStateManagement(
     },
     reinitializeRuntimeState: (lastSavedRuntimeState: LensRuntimeState) => {
       internalApi.updateAttributes(lastSavedRuntimeState.attributes);
+      // clear error from a previous load
+      internalApi.updateLoadError(lastSavedRuntimeState.loadError);
     },
     cleanup: () => {
       renderCountSubscription.unsubscribe();

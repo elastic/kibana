@@ -10,6 +10,7 @@ import type { NightshiftSource } from '@kbn/nightshift-shared';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
+import { LoadingPanel } from '../components/ui/loading_panel';
 import { useAIFeatures } from '../data/connectors/use_ai_features';
 import { useKibana } from '../hooks/use_kibana';
 import { useSourcesApi } from '../data/sources/use_sources_api';
@@ -65,6 +66,7 @@ export function SourcesView() {
     featuresConnectors,
     queriesConnectors,
     generatingSourceIds,
+    awaitingRunSourceIds,
     sourceStatusMap,
     cancelOnboarding,
     bulkScheduleOnboarding,
@@ -167,7 +169,7 @@ export function SourcesView() {
 
   // With cached sources, a failed refetch keeps the table; the toast already reports it.
   const hasSourcesLoadFailed = isSourcesError && sources.length === 0;
-  const hasNoSources = !isSourcesLoading && !isSourcesError && sources.length === 0;
+  const hasNoSources = !isSourcesError && sources.length === 0;
 
   return (
     <>
@@ -243,7 +245,11 @@ export function SourcesView() {
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        {hasSourcesLoadFailed ? (
+        {isSourcesLoading ? (
+          <EuiFlexItem data-test-subj="significantEventsAppSourcesLoading">
+            <LoadingPanel size="l" />
+          </EuiFlexItem>
+        ) : hasSourcesLoadFailed ? (
           <EuiFlexItem>
             <EuiEmptyPrompt
               data-test-subj="significantEventsAppSourcesLoadErrorPrompt"
@@ -291,10 +297,10 @@ export function SourcesView() {
               <SourcesTable
                 sources={sources}
                 onboardingResultMap={sourceStatusMap}
-                loading={isSourcesLoading}
                 searchText={searchText}
                 blocksActivity={blocksActivity}
                 generatingSourceIds={generatingSourceIds}
+                awaitingRunSourceIds={awaitingRunSourceIds}
                 activityBlockTooltip={activityBlockTooltip}
                 canManage={canManage}
                 selection={

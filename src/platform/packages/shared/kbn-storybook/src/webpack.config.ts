@@ -55,7 +55,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
       extensions: ['.js', '.mjs', '.ts', '.tsx', '.json', '.mdx'],
       mainFields: ['browser', 'main'],
       alias: {
-        core_styles: resolve(REPO_ROOT, 'src/core/public/index.scss'),
+        core_styles: resolve(REPO_ROOT, 'src/core/packages/core/public/index.scss'),
       },
     },
     stats: 'errors-only',

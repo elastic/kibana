@@ -85,6 +85,17 @@ export interface HttpSelfFetchOptions<TRequestBody = unknown> {
    */
   timeout?: number;
   /**
+   * Timeout in milliseconds for receiving the response headers, applied to each request
+   * including followed same-origin redirects. Maps to Undici's per-request
+   * `headersTimeout` (5 minutes by default); must be a positive integer or `0`, which
+   * disables it. Enforced with roughly one-second granularity (Undici fast timers), so
+   * sub-second values may never fire — intended for timeouts on the order of seconds or
+   * minutes. Note the whole-call `timeout` (60 seconds by default) still applies: raise
+   * it as well when setting a `headersTimeout` beyond that budget, or the call aborts
+   * first.
+   */
+  headersTimeout?: number;
+  /**
    * When `true` (default), prefix `path` with the scoped request's base path (server
    * base path plus space). Fake requests use `server.basePath` and the request's space.
    * When `false`, `path` is used as-is and must already include `server.basePath` when

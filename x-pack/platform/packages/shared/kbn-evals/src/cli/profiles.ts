@@ -8,8 +8,17 @@
 import Fs from 'fs';
 import Path from 'path';
 import type { FlagsReader } from '@kbn/dev-cli-runner';
-import { KBN_EVALS_VAULT_PATHS, KBN_EVALS_VAULT_CONFIG_FIELD, safeExec } from './utils';
-import { validateKbnEvalsConfig } from '../../scripts/vault/manage_secrets';
+import {
+  KBN_EVALS_VAULT_PATHS,
+  KBN_EVALS_VAULT_CONFIG_FIELD,
+  getKbnEvalsVaultPath,
+  safeExec,
+} from './utils';
+import {
+  validateKbnEvalsConfig,
+  validateSuiteVaultConfig,
+  type SuiteVaultConfig,
+} from '../../scripts/vault/manage_secrets';
 
 export const VAULT_CONFIG_DIR = 'x-pack/platform/packages/shared/kbn-evals/scripts/vault';
 
@@ -91,15 +100,27 @@ export const readVaultConfigFromFile = (
   return JSON.parse(raw) as VaultConfig;
 };
 
-const readDevVaultConfigUncached = (): VaultConfig | undefined => {
-  const stdout = safeExec('vault', [
-    'read',
-    `-field=${KBN_EVALS_VAULT_CONFIG_FIELD}`,
-    KBN_EVALS_VAULT_PATHS.dev,
-  ]);
+interface DevVaultSecret<T> {
+  vaultPath: string;
+  /** Names the config in log lines, e.g. `dev-vault config`. */
+  label: string;
+  /** What a failed read leaves the caller with, e.g. `the dev-vault profile is empty`. */
+  fallback: string;
+  schemaName: string;
+  validate: (config: unknown) => T;
+}
+
+const readDevVaultSecretUncached = <T>({
+  vaultPath,
+  label,
+  fallback,
+  schemaName,
+  validate,
+}: DevVaultSecret<T>): T | undefined => {
+  const stdout = safeExec('vault', ['read', `-field=${KBN_EVALS_VAULT_CONFIG_FIELD}`, vaultPath]);
   if (!stdout) {
     process.stderr.write(
-      `[kbn-evals] Could not read ${KBN_EVALS_VAULT_PATHS.dev} from Vault; the dev-vault profile is empty. ` +
+      `[kbn-evals] Could not read ${vaultPath} from Vault; ${fallback}. ` +
         'Check `vault login --method oidc`.\n'
     );
     return undefined;
@@ -107,9 +128,7 @@ const readDevVaultConfigUncached = (): VaultConfig | undefined => {
 
   // Fixed messages only: parser and validator errors can quote the config, which holds credentials.
   const ignore = (reason: string): undefined => {
-    process.stderr.write(
-      `[kbn-evals] Ignoring dev-vault config (${reason}); the dev-vault profile is empty.\n`
-    );
+    process.stderr.write(`[kbn-evals] Ignoring ${label} (${reason}); ${fallback}.\n`);
     return undefined;
   };
 
@@ -121,9 +140,9 @@ const readDevVaultConfigUncached = (): VaultConfig | undefined => {
   }
 
   try {
-    return validateKbnEvalsConfig(parsed);
+    return validate(parsed);
   } catch {
-    return ignore('does not match the evals config schema');
+    return ignore(`does not match the ${schemaName}`);
   }
 };
 
@@ -131,15 +150,39 @@ const readDevVaultConfigUncached = (): VaultConfig | undefined => {
 // and a later read that failed transiently would otherwise silently drop part of it. Failures are
 // not cached, so a read after `vault login` can still succeed.
 let devVaultConfig: VaultConfig | undefined;
+const devVaultSuiteSecrets = new Map<string, SuiteVaultConfig>();
 
 export const readVaultConfigFromDevVault = (): VaultConfig | undefined => {
-  devVaultConfig ??= readDevVaultConfigUncached();
+  devVaultConfig ??= readDevVaultSecretUncached({
+    vaultPath: KBN_EVALS_VAULT_PATHS.dev,
+    label: 'dev-vault config',
+    fallback: 'the dev-vault profile is empty',
+    schemaName: 'evals config schema',
+    validate: validateKbnEvalsConfig,
+  });
   return devVaultConfig;
 };
 
-/** Clears the cached dev-vault read; for tests. */
+/** Reads a suite's own secret (its `vaultSecret` in `evals.suites.json`) from dev Vault. */
+export const readSuiteSecretFromDevVault = (secret: string): SuiteVaultConfig | undefined => {
+  const cached = devVaultSuiteSecrets.get(secret);
+  if (cached) return cached;
+
+  const config = readDevVaultSecretUncached({
+    vaultPath: getKbnEvalsVaultPath('dev', secret),
+    label: `dev-vault "${secret}" suite config`,
+    fallback: "the suite's scoutHook gets an empty config",
+    schemaName: 'suite config shape (a JSON object)',
+    validate: validateSuiteVaultConfig,
+  });
+  if (config) devVaultSuiteSecrets.set(secret, config);
+  return config;
+};
+
+/** Clears the cached dev-vault reads; for tests. */
 export const resetDevVaultConfigCache = (): void => {
   devVaultConfig = undefined;
+  devVaultSuiteSecrets.clear();
 };
 
 /**

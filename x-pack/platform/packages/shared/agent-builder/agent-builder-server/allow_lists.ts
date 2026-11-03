@@ -9,6 +9,7 @@ import {
   platformCoreTools,
   platformCoreCasesTools,
   platformSignificantEventsTools,
+  observabilityNightshiftSourceTools,
   contextEngineAiIndexTools,
   contextEngineMemoryTools,
   contextEngineAutomationTools,
@@ -29,6 +30,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   ...Object.values(platformCoreCasesTools),
   // Streams / Significant Events
   ...Object.values(platformSignificantEventsTools),
+  // Nightshift sources, registered by the Significant Events plugin
+  ...Object.values(observabilityNightshiftSourceTools),
 
   // Alerting
   `${internalNamespaces.platformAlerting}.manage_rule`,
@@ -195,6 +198,7 @@ export const isAllowedBuiltinAgent = (agentName: string): agentName is AgentBuil
 export const AGENT_BUILDER_AGENT_TYPES = [
   chatAgentTypeId,
   `${internalNamespaces.platformNightshift}.investigation-type`,
+  `${internalNamespaces.platformNightshift}.assistant-type`,
   `${internalNamespaces.platformSignificantEvents}.decision-tree-reinforcement-type`,
   `${internalNamespaces.platformSignificantEvents}.discovery-type`,
   `${internalNamespaces.security}.alertzero-type`,
@@ -226,8 +230,8 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'cases-analytics',
 
   // Platform – Alerting
-  'rule-management',
-  'action-policy-management',
+  'rule-authoring',
+  'action-policy-authoring',
 
   // Platform – Dashboard
   'dashboards',
@@ -242,8 +246,8 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'significant-events-changepoint-analysis',
   'significant-events-ki-grounding',
   'significant-events-assessment',
-  'streams-investigation-management',
   'knowledge-indicators-management',
+  'nightshift-sources-management',
   'ki-identification-management',
   'feature-identification',
   'ki-query-generation',
@@ -395,6 +399,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'security.alerts',
   'security.entity',
   'security.entity_analytics_dashboard',
+  'security.entity_analytics_ai_brief',
   'security.entity_graph',
   'security.entity_risk_score_history',
   'security.exception',

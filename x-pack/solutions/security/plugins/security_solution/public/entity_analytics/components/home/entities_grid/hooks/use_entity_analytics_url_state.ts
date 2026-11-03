@@ -7,6 +7,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { encode, safeDecode } from '@kbn/rison';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import { getEntityAnalyticsEntityTypes } from '../../../../../../common/entity_analytics/utils';
 import type { RiskSeverity } from '../../../../../../common/search_strategy';
@@ -57,7 +58,7 @@ export const MAX_EXPANDED_ENTITY_IDS = 20;
 // ── defaults ──────────────────────────────────────────────────────────────────
 
 const DEFAULTS = {
-  timeRange: '30d',
+  timeRange: '24h',
   rowsMode: 'resolved',
   sortField: RISK_SCORE_NORM_FIELD,
   sortDirection: 'desc',
@@ -89,13 +90,21 @@ const isCriticality = (v: string): boolean => VALID_CRITICALITY.has(v);
 
 const getParamValues = (raw: string) => raw.split(',').filter(Boolean);
 
-/** Expanded ids, one `eaExpanded` param each: ids can contain commas. */
-const getExpandedIds = (params: URLSearchParams): string[] =>
-  params.getAll(PARAM.EXPANDED).filter(Boolean).slice(-MAX_EXPANDED_ENTITY_IDS);
+/**
+ * Expanded ids as one rison list: the app's URL sync joins repeated params with commas, and ids can
+ * contain commas.
+ */
+const getExpandedIds = (params: URLSearchParams): string[] => {
+  const ids = safeDecode(params.get(PARAM.EXPANDED) ?? '');
+  if (!Array.isArray(ids)) return [];
+  return ids
+    .filter((id): id is string => typeof id === 'string' && id !== '')
+    .slice(-MAX_EXPANDED_ENTITY_IDS);
+};
 
 const setExpandedIds = (params: URLSearchParams, ids: string[]) => {
-  params.delete(PARAM.EXPANDED);
-  for (const id of ids.slice(-MAX_EXPANDED_ENTITY_IDS)) params.append(PARAM.EXPANDED, id);
+  if (ids.length === 0) params.delete(PARAM.EXPANDED);
+  else params.set(PARAM.EXPANDED, encode(ids.slice(-MAX_EXPANDED_ENTITY_IDS)));
 };
 
 // ── types ─────────────────────────────────────────────────────────────────────
@@ -119,7 +128,7 @@ export interface EntityAnalyticsUrlStateResult extends EntityAnalyticsUrlState {
   setEntityFilters: (filters: EntityFilters) => void;
   /** Pass null to clear. */
   setActiveTile: (tile: SignalCardId | null) => void;
-  /** Clears entity filters, active tile, and sort (foreign sorts can yield 0 rows). */
+  /** Clears entity filters, active tile, and sort (computed column sorts can yield 0 rows). */
   resetGridQuery: () => void;
   /** Toggles an entity id in `eaExpanded` without pushing history. */
   toggleExpandedId: (entityId: string) => void;

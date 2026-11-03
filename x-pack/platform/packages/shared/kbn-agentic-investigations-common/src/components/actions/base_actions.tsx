@@ -75,7 +75,7 @@ const useContextMenuItems = (
   );
 };
 
-export type CardActionType = 'createEscalation' | 'attachToEscalation' | 'close';
+export type CardActionType = 'createEscalation' | 'attachToEscalation' | 'close' | 'reopen';
 
 export interface BaseActionsProps {
   investigation: Investigation;
@@ -85,13 +85,15 @@ export interface BaseActionsProps {
   /** When true the escalation actions (create / add-to) appear in the menu. Requires the manage capability. */
   canManageEscalations?: boolean;
   /**
-   * When true the "Close investigation" action appears in the menu.
-   * Should only be true when the caller supplies a real close handler that performs
-   * the HTTP mutation. Without it the fallback modal does nothing.
+   * When true the menu offers "Close investigation", or "Open investigation" once the
+   * investigation is closed. Should only be true when the caller handles both actions and
+   * performs the HTTP mutation. Without it the fallback modal does nothing.
    */
   canCloseInvestigation?: boolean;
   /** Always offered, including on a decided investigation, so the menu is never empty. */
   onCopyLink: (id: Investigation['id']) => void;
+  /** When false the menu trigger is disabled and its tooltip names the missing privilege. */
+  canOpenInvestigationDetails?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -104,6 +106,7 @@ export const BaseActions = memo<BaseActionsProps>(
     canManageEscalations = false,
     canCloseInvestigation = false,
     onCopyLink,
+    canOpenInvestigationDetails = true,
     'data-test-subj': dataTestSubj,
   }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -117,6 +120,7 @@ export const BaseActions = memo<BaseActionsProps>(
         fill
         iconType="chevronSingleDown"
         iconSide="right"
+        isDisabled={!canOpenInvestigationDetails}
         onClick={handleToggle}
         data-test-subj={dataTestSubj ? `${dataTestSubj}-button` : undefined}
       >
@@ -126,7 +130,12 @@ export const BaseActions = memo<BaseActionsProps>(
       <ActionButton
         data-test-subj={dataTestSubj ? `${dataTestSubj}-button` : undefined}
         iconType="boxesVertical"
-        tooltipContent={ACTIONS_TRANSLATIONS.tooltips.openMenu}
+        tooltipContent={
+          canOpenInvestigationDetails
+            ? ACTIONS_TRANSLATIONS.tooltips.openMenu
+            : ACTIONS_TRANSLATIONS.tooltips.proposalsAgentBuilderPrivilegeRequired
+        }
+        isDisabled={!canOpenInvestigationDetails}
         onClick={handleToggle}
       />
     );
@@ -176,6 +185,16 @@ export const BaseActions = memo<BaseActionsProps>(
           onClick: () => onCopyLink(investigation.id),
           separator: true,
         },
+        ...(canCloseInvestigation && investigation.conversationStatus === 'closed'
+          ? [
+              {
+                key: 'reopen',
+                icon: 'refresh' as IconType,
+                name: ACTIONS_TRANSLATIONS.buttons.reopen,
+                onClick: () => onClickAction('reopen', investigation.recordId),
+              },
+            ]
+          : []),
         ...(decided
           ? []
           : [
@@ -183,7 +202,9 @@ export const BaseActions = memo<BaseActionsProps>(
               // already closed. Flyout investigations are conversation-derived and have no
               // `recommendedAction`, so `isDecided` alone is not a reliable gate; we also
               // check `status` to prevent offering a Close that would submit a redundant mutation.
-              ...(canCloseInvestigation && investigation.status !== 'closed'
+              ...(canCloseInvestigation &&
+              investigation.conversationStatus !== 'closed' &&
+              investigation.status !== 'closed'
                 ? [
                     {
                       key: 'close',

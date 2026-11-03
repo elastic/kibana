@@ -10,6 +10,7 @@ import type {
   PackageReportBehavior,
   PackageReportMintPayload,
 } from '../../../../../common/step_types/package_report';
+import type { CapabilitiesSource } from '../../../fleet/resolve_host_enrollment';
 
 /** One host observed on the current-run SSE, with enrollment resolution applied. */
 export interface CurrentRunHost {
@@ -17,8 +18,13 @@ export interface CurrentRunHost {
   /** Elastic Defend agent id when enrolled; absent when unenrolled or unknown. */
   agentId?: string;
   enrolled: boolean;
-  /** `Endpoint.capabilities` from the endpoint metadata document; `[]` when unknown. */
+  /** `Endpoint.capabilities` from the endpoint metadata document. */
   capabilities: string[];
+  /**
+   * Set for enrolled hosts. `'unavailable'` when the metadata could not be read, so an empty
+   * `capabilities` means nothing is known rather than that the endpoint reports none.
+   */
+  capabilitiesSource?: CapabilitiesSource;
 }
 
 /** Process selector fillable into kill/suspend `parameters`. */

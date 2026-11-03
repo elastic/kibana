@@ -25,7 +25,8 @@
       "ruleRegistry",
       "security",
       "usageCollection",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "taskManager"
     ],
     "optionalPlugins": [
       "agentBuilder",

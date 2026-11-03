@@ -125,6 +125,35 @@ admin:
       privileges: ['*']
       resources: ['*']
 
+# Predefined role for the Nightshift agent's service account, defined in elasticsearch-controller
+_nightshift_agent:
+  description: 'Privileges for the service account of the Nightshift agent. Assigned by Kibana; do not assign to users.'
+  metadata:
+    _public: true
+    _reserved: true
+  cluster:
+    - 'monitor_inference'
+    - 'read_project_routing'
+  indices:
+    - names: ['logs-*', 'metrics-*', 'traces-*', 'apm-*']
+      privileges: ['read', 'view_index_metadata']
+      allow_restricted_indices: false
+    - names:
+        - 'ai-index-idx-nightshift-cortex'
+        - 'ai-index-idx-nightshift-semantic-memory'
+        - 'ai-index-idx-nightshift-decision-trees'
+      privileges: ['read', 'view_index_metadata', 'write', 'auto_configure']
+      allow_restricted_indices: false
+  applications:
+    - application: 'kibana-.kibana'
+      privileges:
+        - 'feature_nightshift.minimal_all'
+        - 'feature_agentBuilder.minimal_all'
+        - 'feature_actions.read'
+        - 'feature_workflowsManagement.read'
+      resources: ['*']
+  run_as: []
+
 # temporarily added for testing purpose
 system_indices_superuser:
   cluster: ['all']

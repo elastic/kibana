@@ -69,6 +69,7 @@ export const STEP_EXECUTION_REASONS: Readonly<Record<string, RuleExecutionReason
   create_alert_events: RULE_EXECUTION_REASONS.UNEXPECTED_ERROR,
   classify_absent_groups: RULE_EXECUTION_REASONS.UNEXPECTED_ERROR,
   director: RULE_EXECUTION_REASONS.DIRECTOR_FAILED,
+  suppress_redundant_no_data_events: RULE_EXECUTION_REASONS.UNEXPECTED_ERROR,
   store_alert_events: RULE_EXECUTION_REASONS.STORE_FAILED,
 };
 

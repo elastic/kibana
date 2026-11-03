@@ -219,6 +219,62 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
 
+      it('should store and return the integration name and description', async () => {
+        const { body } = await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            provider: 'aws',
+            authMethod: 'static_keys',
+            mechanisms: ['managed_integration'],
+            services: ['cloudtrail'],
+            integrationName: 'my-aws',
+            description: 'Production AWS',
+          })
+          .expect(200);
+
+        expect(body.item.integrationName).to.equal('my-aws');
+        expect(body.item.description).to.equal('Production AWS');
+        createdIds.push(body.item.id);
+
+        const { body: fetched } = await supertest
+          .get(`${BASE_URL}/${body.item.id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        expect(fetched.item.integrationName).to.equal('my-aws');
+        expect(fetched.item.description).to.equal('Production AWS');
+      });
+
+      it('should accept an integration name of exactly the limit (160)', async () => {
+        const { body } = await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            provider: 'aws',
+            authMethod: 'static_keys',
+            mechanisms: ['managed_integration'],
+            services: ['cloudtrail'],
+            integrationName: 'a'.repeat(160),
+          })
+          .expect(200);
+
+        createdIds.push(body.item.id);
+      });
+
+      it('should reject an integration name over the limit shared with the UI (160)', async () => {
+        await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            provider: 'aws',
+            authMethod: 'static_keys',
+            mechanisms: ['managed_integration'],
+            services: ['cloudtrail'],
+            integrationName: 'a'.repeat(161),
+          })
+          .expect(400);
+      });
+
       it('should create an agent-based deployment with authMethod and no connectorId', async () => {
         const { body } = await supertest
           .post(BASE_URL)

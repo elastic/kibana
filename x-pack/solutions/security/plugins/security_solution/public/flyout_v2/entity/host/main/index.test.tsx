@@ -31,7 +31,7 @@ jest.mock('../../../../common/components/visualization_actions/visualization_emb
 jest.mock('../../../use_flyout_api');
 const mockFlyoutApi = createFlyoutApiMock();
 
-// Wrap the real content with trigger buttons so `openDetailsPanel` can be exercised for the CSP tools.
+// Wrap the real content with trigger buttons so `openDetailsPanel` can be exercised for the tools.
 jest.mock('./content', () => {
   const actual = jest.requireActual('./content');
   const { CspInsightLeftPanelSubTab, EntityDetailsLeftPanelTab } = jest.requireActual(
@@ -39,6 +39,11 @@ jest.mock('./content', () => {
   );
   const Content = (props: { openDetailsPanel: (path: EntityDetailsPath) => void }) => (
     <>
+      <button
+        type="button"
+        data-test-subj="openAnomalyInsights"
+        onClick={() => props.openDetailsPanel({ tab: EntityDetailsLeftPanelTab.ANOMALIES })}
+      />
       {Object.values(CspInsightLeftPanelSubTab).map((subTab) => (
         <button
           key={subTab as string}
@@ -285,6 +290,25 @@ describe('<Host />', () => {
       );
     });
 
+    it('counts every group member in the badge even when the loaded aliases are capped', () => {
+      mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+      withStoreRecords(targetRecord, [aliasRecord]);
+      mockedUseEntityFromStore.mockReturnValue({
+        ...mockedUseEntityFromStore(),
+        aliasCount: 250,
+      });
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <Host {...mockProps} entityId={targetEntityId} mode="resolved" />
+        </TestProviders>
+      );
+
+      expect(getByTestId('host-panel-header-observed-badge')).toHaveTextContent(
+        'Resolved from 251 records'
+      );
+    });
+
     describe('header risk level', () => {
       const recordWithResolutionRisk: HostEntity = {
         ...targetRecord,
@@ -386,12 +410,10 @@ describe('<Host />', () => {
 
         expect(getByTestId('risk-summary-table')).toBeInTheDocument();
         expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
-        expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent(
-          'Entity risk contributions'
-        );
+        expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent('Risk contributions');
       });
     });
-    describe('CSP insights tools', () => {
+    describe('detail tools', () => {
       const renderResolved = () => {
         mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
         withStoreRecords(targetRecord, [aliasRecord]);
@@ -401,6 +423,13 @@ describe('<Host />', () => {
           </TestProviders>
         );
       };
+
+      it('passes the panel mode and scope to the anomaly insights tool', () => {
+        fireEvent.click(renderResolved().getByTestId('openAnomalyInsights'));
+        expect(mockFlyoutApi.openEntityAnomalyInsights).toHaveBeenCalledWith(
+          expect.objectContaining({ value: 'test', mode: 'resolved', scopeId: 'test-scope-id' })
+        );
+      });
 
       it('passes the panel mode and scope to the alerts insights tool', () => {
         fireEvent.click(renderResolved().getByTestId('openCspInsights-alertsTabId'));

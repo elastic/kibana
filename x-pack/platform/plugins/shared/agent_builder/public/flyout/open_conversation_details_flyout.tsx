@@ -7,6 +7,7 @@
 
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator } from '@elastic/eui';
 import type { EuiFlyoutMenuAction } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -15,6 +16,13 @@ import type { ConversationsService } from '../services/conversations/conversatio
 import type { ConversationTemplatesService } from '../services/conversation_templates';
 import { ConversationDetailsFlyoutSnapshot, FLYOUT_TITLE } from './conversation_details_flyout';
 import { flyoutMenuRowStyles } from './flyout_menu_row_styles';
+
+const notFoundMessage = (conversationId: string) =>
+  i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.notFoundToast', {
+    defaultMessage:
+      'Conversation with id {conversationId} does not exist. Try with an existing conversation id.',
+    values: { conversationId },
+  });
 
 const generateTitleId = htmlIdGenerator('agentBuilderConversationDetailsFlyoutTitle');
 
@@ -38,6 +46,11 @@ export const openConversationDetailsFlyout = async ({
   const titleId = generateTitleId();
   const queryClient = new QueryClient();
 
+  const onNotFound = () => {
+    flyoutRef.close();
+    core.notifications.toasts.addDanger(notFoundMessage(conversationId));
+  };
+
   const flyoutRef = core.overlays.openSystemFlyout(
     <QueryClientProvider client={queryClient}>
       <ConversationDetailsFlyoutSnapshot
@@ -45,6 +58,7 @@ export const openConversationDetailsFlyout = async ({
         conversationsService={conversationsService}
         conversationTemplatesService={conversationTemplatesService}
         titleId={titleId}
+        onNotFound={onNotFound}
       />
     </QueryClientProvider>,
     {

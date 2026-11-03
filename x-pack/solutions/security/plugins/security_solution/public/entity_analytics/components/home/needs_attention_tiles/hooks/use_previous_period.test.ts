@@ -11,6 +11,7 @@ import { useQuery } from '@kbn/react-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { isDeltaStillComing, parseReachesBack, usePreviousPeriod } from './use_previous_period';
+import { retryUnlessTimedOut } from './tile_query_timeout';
 
 jest.mock('@kbn/react-query', () => ({ useQuery: jest.fn() }));
 jest.mock('../../../../../common/lib/kibana', () => ({ useKibana: jest.fn() }));
@@ -159,7 +160,8 @@ describe('usePreviousPeriod', () => {
           cacheTime: 60 * 60_000,
           refetchOnWindowFocus: false,
           keepPreviousData: true,
-          retry: 1,
+          // One retry, but none after a timeout.
+          retry: retryUnlessTimedOut,
         })
       )
     );

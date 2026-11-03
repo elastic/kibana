@@ -22,6 +22,7 @@ import { getRouteConfig } from '../get_route_config';
 import { TransformPanelsInError } from '../transforms/in/transform_panels_in_error';
 import { getUpdateResponseBodySchema } from './schemas';
 import { update } from './update';
+import { spacesService } from '../../kibana_services';
 
 export function registerUpdateRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -95,8 +96,11 @@ export function registerUpdateRoute(
             getCachedDashboardStateSchema(),
             req.params.id,
             req.body,
-            req.serverTiming,
-            isDashboardAppRequest
+            {
+              serverTiming: req.serverTiming,
+              spaceId: spacesService?.getSpaceId(req),
+              isDashboardAppRequest,
+            }
           );
           if (operation === 'create') {
             // do not await tracking actions

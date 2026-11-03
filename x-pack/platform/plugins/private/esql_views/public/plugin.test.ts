@@ -33,12 +33,7 @@ jest.mock('@kbn/esql-utils', () => ({
   }),
 }));
 
-const createPlugin = (enabled: boolean) =>
-  new EsqlViewsPlugin(
-    coreMock.createPluginInitializerContext({
-      managementUi: { enabled },
-    })
-  );
+const createPlugin = () => new EsqlViewsPlugin();
 
 const mountApp = async (capabilities: Record<string, boolean>) => {
   const core = coreMock.createSetup();
@@ -52,7 +47,7 @@ const mountApp = async (capabilities: Record<string, boolean>) => {
   const share = sharePluginMock.createStartContract();
   core.getStartServices.mockResolvedValue([coreStart, { data, share }, undefined]);
 
-  createPlugin(true).setup(core, { management });
+  createPlugin().setup(core, { management });
 
   const registerApp = management.sections.section.data.registerApp as jest.MockedFunction<
     typeof management.sections.section.data.registerApp
@@ -76,15 +71,7 @@ const mountApp = async (capabilities: Record<string, boolean>) => {
 };
 
 describe('EsqlViewsPlugin', () => {
-  it('does not register the management application when the UI is disabled', () => {
-    const management = managementPluginMock.createSetupContract();
-
-    createPlugin(false).setup(coreMock.createSetup(), { management });
-
-    expect(management.sections.section.data.registerApp).not.toHaveBeenCalled();
-  });
-
-  it('registers and mounts the management application when the UI is enabled', async () => {
+  it('registers and mounts the management application', async () => {
     const core = coreMock.createSetup();
     const coreStart = coreMock.createStart();
     const data = dataPluginMock.createStartContract();
@@ -93,7 +80,7 @@ describe('EsqlViewsPlugin', () => {
     const getLocator = jest.spyOn(share.url.locators, 'get');
     core.getStartServices.mockResolvedValue([coreStart, { data, share }, undefined]);
 
-    createPlugin(true).setup(core, { management });
+    createPlugin().setup(core, { management });
 
     expect(management.sections.section.data.registerApp).toHaveBeenCalledWith({
       id: MANAGEMENT_APP_ID,
@@ -138,7 +125,7 @@ describe('EsqlViewsPlugin', () => {
       const share = sharePluginMock.createStartContract();
       core.getStartServices.mockResolvedValue([coreStart, { data, share }, undefined]);
 
-      createPlugin(true).setup(core, { management });
+      createPlugin().setup(core, { management });
 
       const registerApp = management.sections.section.data.registerApp as jest.MockedFunction<
         typeof management.sections.section.data.registerApp

@@ -13,7 +13,7 @@ describe('getTriggerDisplay', () => {
       label: 'Alert triggered',
       icon: 'logoElastic',
     });
-    expect(getTriggerDisplay({ kind: 'schedule' })).toEqual({
+    expect(getTriggerDisplay({ kind: 'schedule', schedulePreset: 'hourly' })).toEqual({
       label: 'Scheduled',
       icon: 'calendar',
     });

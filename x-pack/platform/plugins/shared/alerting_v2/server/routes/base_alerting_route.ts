@@ -127,7 +127,9 @@ export abstract class BaseAlertingRoute implements RouteHandler {
    * {@link ErrorResponse} shape so validation errors are indistinguishable from
    * the domain errors produced by {@link BaseAlertingRoute.onError}. `details.errors`
    * mirrors the tree the domain-level parsers attach, so a caller reads one
-   * shape whichever layer rejected the body. Wired into
+   * shape whichever layer rejected the body. Only `details.source` is a stable
+   * key; `details.errors` is `treeifyError` output, owned by the validation
+   * library and not part of the public contract (see the errors README). Wired into
    * `validate.onRequestValidationError` by the `validate` getter for routes that
    * declare request schemas. `bypassErrorFormat` keeps the flat body verbatim,
    * matching `errorResponseSchema` (see `onError` for the rationale).

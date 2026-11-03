@@ -23,9 +23,18 @@ export const registerGetDataViewsAsCodeRoute = ({
   router.versioned
     .get({
       path: BASE_PATH,
-      access: 'internal',
+      access: 'public',
       enableQueryVersion: true,
-      description: 'Get all data views paginated',
+      summary: 'Search data views',
+      description:
+        'Returns a paginated list of the data views in the current space. Each item includes only the name, index pattern, and time field. To get the full definition, use `GET /api/data_views/v2/{id}`.',
+      options: {
+        tags: ['oas-tag:data-views-v2'],
+        availability: {
+          stability: 'stable',
+          since: '9.6.0',
+        },
+      },
       security: {
         authz: {
           enabled: false,
@@ -36,6 +45,10 @@ export const registerGetDataViewsAsCodeRoute = ({
     .addVersion(
       {
         version: INITIAL_REST_VERSION,
+        options: {
+          oasOperationObject: async () =>
+            (await import('./oas_examples')).getDataViewsOASOperationObject,
+        },
         validate: {
           request: {
             query: asCodePaginationParamsSchema.extend({
@@ -48,6 +61,7 @@ export const registerGetDataViewsAsCodeRoute = ({
           response: {
             200: {
               body: () => asCodePaginatedResponseSchema,
+              description: 'OK',
             },
             400: {
               description: 'bad request',

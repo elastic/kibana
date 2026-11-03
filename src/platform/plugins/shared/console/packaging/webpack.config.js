@@ -158,7 +158,7 @@ module.exports = [
                       loaderContext.context || loaderContext.rootContext,
                       path.resolve(
                         kibanaRoot,
-                        'src/core/public/styles/core_app/_globals_borealislight.scss'
+                        'src/core/packages/core/public/styles/core_app/_globals_borealislight.scss'
                       )
                     )
                   );

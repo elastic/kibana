@@ -17,6 +17,7 @@ import type {
   LensPublicStart,
   TypedLensByValueInput,
   LensEmbeddableInput,
+  LensTelemetrySource,
   Suggestion,
 } from '@kbn/lens-plugin/public';
 import type { DataViewField, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -330,4 +331,18 @@ export interface ChartSectionProps {
    * Indicates whether the current tab is selected/active.
    */
   isTabSelected: boolean;
+}
+
+/**
+ * Options forwarded to Lens by the chart's Lens actions
+ */
+export interface UnifiedHistogramLensActionsOptions {
+  /**
+   * Navigation options used when opening the chart in the Lens editor
+   */
+  navigation?: Parameters<LensPublicStart['navigateToPrefilledEditor']>[1];
+  /**
+   * Source reported to Lens telemetry when the chart is saved. Nothing is reported when omitted.
+   */
+  telemetrySource?: LensTelemetrySource;
 }

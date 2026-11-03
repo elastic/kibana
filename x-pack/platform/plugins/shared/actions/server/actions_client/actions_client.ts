@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import url from 'url';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { i18n } from '@kbn/i18n';
@@ -18,6 +17,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
@@ -122,7 +122,7 @@ export interface ConstructorOptions {
   /**
    * Optional space override. When set, connector operations and executions will be scoped to this spaceId
    */
-  spaceId?: string;
+  spaceId?: SpaceId;
   authorization: ActionsAuthorization;
   auditLogger?: AuditLogger;
   usageCounter?: UsageCounter;
@@ -152,7 +152,7 @@ export interface ActionsClientContext {
   inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
   request: KibanaRequest;
-  spaceId?: string;
+  spaceId?: SpaceId;
   authorization: ActionsAuthorization;
   bulkExecutionEnqueuer: BulkExecutionEnqueuer<ExecutionResponse>;
   auditLogger?: AuditLogger;
@@ -427,13 +427,14 @@ export class ActionsClient {
     }
 
     // Verify that token url contains a hostname and uses https
-    const parsedUrl = url.parse(
-      options.tokenUrl,
-      false /* parseQueryString */,
-      true /* slashesDenoteHost */
-    );
+    let parsedUrl: URL | undefined;
+    try {
+      parsedUrl = new URL(options.tokenUrl);
+    } catch (err) {
+      parsedUrl = undefined;
+    }
 
-    if (!parsedUrl.hostname) {
+    if (!parsedUrl?.hostname) {
       throw Boom.badRequest(`Token URL must contain hostname`);
     }
 

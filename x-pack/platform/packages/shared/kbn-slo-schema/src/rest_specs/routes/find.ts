@@ -6,7 +6,7 @@
  */
 import { BooleanFromString } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
-import { sloWithDataResponseSchemaZod } from '../slo';
+import { sloWithDataResponseSchema } from '../slo';
 
 const sortDirectionSchema = z.union([z.literal('asc'), z.literal('desc')]);
 const sortBySchema = z.union([
@@ -70,7 +70,7 @@ const findSLOResponseSchema = z.object({
   page: z.number(),
   perPage: z.number(),
   total: z.number(),
-  results: z.array(sloWithDataResponseSchemaZod),
+  results: z.array(sloWithDataResponseSchema),
   searchAfter: searchAfterArraySchema.optional(),
   size: z.number().optional(),
 });

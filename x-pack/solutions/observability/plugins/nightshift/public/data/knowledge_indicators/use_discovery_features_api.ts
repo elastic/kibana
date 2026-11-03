@@ -12,7 +12,15 @@ import { useKibana } from '../../hooks/use_kibana';
 export interface BulkOperationResult {
   succeededCount: number;
   failedCount: number;
+  /** Operations not applied because their source was busy; the same request can succeed later. */
+  conflictCount: number;
 }
+
+export const EMPTY_BULK_OPERATION_RESULT: BulkOperationResult = {
+  succeededCount: 0,
+  failedCount: 0,
+  conflictCount: 0,
+};
 
 type CrossStreamOp =
   | { delete: { id: string } }
@@ -37,16 +45,20 @@ export function useDiscoveryFeaturesApi(): DiscoveryFeaturesApi {
     // partially-applied mutation.
     const runBulk = async (features: Feature[], buildOp: BuildOp): Promise<BulkOperationResult> => {
       if (features.length === 0) {
-        return { succeededCount: 0, failedCount: 0 };
+        return EMPTY_BULK_OPERATION_RESULT;
       }
-      const { succeeded, failed } = await significantEventsRepositoryClient.fetch(
+      const { succeeded, failed, conflicts } = await significantEventsRepositoryClient.fetch(
         'POST /internal/streams/features/_bulk',
         {
           signal: null,
           params: { body: { operations: features.map(buildOp) } },
         }
       );
-      return { succeededCount: succeeded, failedCount: failed };
+      return {
+        succeededCount: succeeded,
+        failedCount: failed,
+        conflictCount: conflicts,
+      };
     };
 
     return {

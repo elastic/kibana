@@ -84,6 +84,7 @@ import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observabil
 import type { CPSPluginStart } from '@kbn/cps/public/types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { NightshiftInvestigationsPublicStart } from '@kbn/nightshift-investigations-plugin/public';
+import type { EntityInventoryAppPublicStart } from '@kbn/entity-inventory-app-plugin/public';
 import { isAlertingV2Enabled, shouldShowV1ObservabilityAlertsTable } from '@kbn/alerting-v2-utils';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import { getObservabilityAlertType } from './cases/attachments/alert';
@@ -106,6 +107,7 @@ import {
   CaseDetailsLocatorDefinition,
   CasesOverviewLocatorDefinition,
 } from '../common/locators/cases';
+import { AlertsLocatorDefinition } from '../common/locators/alerts';
 import { TelemetryService } from './services/telemetry/telemetry_service';
 
 export interface ConfigSchema {
@@ -195,6 +197,7 @@ export interface ObservabilityPublicPluginsStart {
   cps?: CPSPluginStart;
   ingestHub?: IngestHubStart;
   nightshiftInvestigations?: NightshiftInvestigationsPublicStart;
+  entityInventoryApp?: EntityInventoryAppPublicStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
@@ -275,6 +278,7 @@ export class Plugin
 
     pluginsSetup.share.url.locators.create(CaseDetailsLocatorDefinition());
     pluginsSetup.share.url.locators.create(CasesOverviewLocatorDefinition());
+    pluginsSetup.share.url.locators.create(new AlertsLocatorDefinition());
 
     const logsLocator =
       pluginsSetup.share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);

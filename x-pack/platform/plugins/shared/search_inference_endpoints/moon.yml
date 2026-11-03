@@ -63,6 +63,7 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/core-chrome-browser-context-mocks'
   - '@kbn/ui-callout'
+  - '@kbn/core-http-server-mocks'
 tags:
   - plugin
   - prod
@@ -77,6 +78,4 @@ fileGroups:
     - server/**/*
     - test/scout_inference_test/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

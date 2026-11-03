@@ -50,13 +50,14 @@ const PAGE_SIZE_OPTIONS = [25, 50, 100];
 interface ISourcesTableProps {
   sources: NightshiftSource[];
   onboardingResultMap: Record<string, SignificantEventsWorkflowStatusResult>;
-  loading?: boolean;
   searchText: string;
   selection?: EuiTableSelectionType<NightshiftSource>;
   /** When true, per-row onboard actions are disabled (global pause / status loading). */
   blocksActivity?: boolean;
   /** Sources whose onboard request is in flight or accepted and not yet reflected in status. */
   generatingSourceIds?: readonly string[];
+  /** Created or edited sources whose new run is not reported yet; their counts are stale. */
+  awaitingRunSourceIds?: readonly string[];
   /** Explains why onboard actions are disabled (loading / error / paused). */
   activityBlockTooltip?: string;
   canManage: boolean;
@@ -72,13 +73,13 @@ interface ISourcesTableProps {
 
 /** Catalog table with selection, inline enable switch, onboarding status and row actions. */
 export function SourcesTable({
-  loading,
   sources,
   onboardingResultMap,
   searchText,
   selection,
   blocksActivity = false,
   generatingSourceIds = [],
+  awaitingRunSourceIds = [],
   activityBlockTooltip,
   canManage,
   pendingEnabledSourceId,
@@ -90,12 +91,14 @@ export function SourcesTable({
 }: ISourcesTableProps) {
   const { cps } = useKibana().services;
   const isCpsMultiProject = useIsCpsMultiProject(cps?.cpsManager);
-  const items = filterSourcesByQuery(sources, searchText);
+  // Surrounding whitespace is ignored, for both the filter and the title highlight.
+  const searchTerm = searchText.trim();
+  const items = filterSourcesByQuery(sources, searchTerm);
   // Controlled: EuiInMemoryTable goes back to page 1 whenever `items` is a new array, which happens
   // after every toggle, save, delete or status poll. A new search still starts from page 1.
-  const [page, setPage] = useState({ index: 0, size: PAGE_SIZE_OPTIONS[0], searchText });
+  const [page, setPage] = useState({ index: 0, size: PAGE_SIZE_OPTIONS[0], searchTerm });
   const lastPageIndex = Math.max(0, Math.ceil(items.length / page.size) - 1);
-  const pageIndex = page.searchText === searchText ? Math.min(page.index, lastPageIndex) : 0;
+  const pageIndex = page.searchTerm === searchTerm ? Math.min(page.index, lastPageIndex) : 0;
 
   const onboardTooltip = getOnboardSourceTooltip({ activityBlockTooltip, isCpsMultiProject });
 
@@ -126,7 +129,7 @@ export function SourcesTable({
           data-test-subj={`significantEventsAppSourcesTableTitleLink-${source.id}`}
           onClick={() => onOpenSource(source)}
         >
-          <EuiHighlight search={searchText}>{title}</EuiHighlight>
+          <EuiHighlight search={searchTerm}>{title}</EuiHighlight>
         </EuiLink>
       ),
     },
@@ -202,6 +205,7 @@ export function SourcesTable({
         <KnowledgeIndicatorsColumn
           sourceId={source.id}
           streamOnboardingResult={onboardingResultMap[source.id]}
+          isAwaitingRun={awaitingRunSourceIds.includes(source.id)}
         />
       ),
     },
@@ -213,6 +217,7 @@ export function SourcesTable({
         <QueriesColumn
           sourceId={source.id}
           streamOnboardingResult={onboardingResultMap[source.id]}
+          isAwaitingRun={awaitingRunSourceIds.includes(source.id)}
         />
       ),
     },
@@ -244,14 +249,13 @@ export function SourcesTable({
       itemId="id"
       items={items}
       columns={columns}
-      loading={loading}
       selection={selection}
       noItemsMessage={NO_SOURCES_MESSAGE}
       sorting={{ sort: { field: 'title', direction: 'asc' } }}
       pagination={{ pageIndex, pageSize: page.size, pageSizeOptions: PAGE_SIZE_OPTIONS }}
       onTableChange={({ page: nextPage }: Criteria<NightshiftSource>) => {
         if (nextPage) {
-          setPage({ index: nextPage.index, size: nextPage.size, searchText });
+          setPage({ index: nextPage.index, size: nextPage.size, searchTerm });
         }
       }}
     />

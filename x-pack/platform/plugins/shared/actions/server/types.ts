@@ -20,6 +20,7 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type * as z4 from '@kbn/zod/v4';
 import type { AuthMode, ConnectorSpec } from '@kbn/connector-specs';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { ConnectorTokenClient } from './lib/connector_token_client';
 import type { ActionTypeExecutorResult, SubFeature, ActionTypeSource } from '../common';
 import type { ActionTypeRegistry } from './action_type_registry';
@@ -269,6 +270,27 @@ export interface ActionTypeCoreFields<
    */
   sandboxSupportedAuthTypes?: readonly string[];
   /**
+   * Per-instance check for stack connectors that are not driven by sandboxSupportedAuthTypes.
+   * Also called when listing connectors, where secrets are not decrypted and are passed as an
+   * empty object, so implementations should decide from config alone when possible.
+   */
+  isSandboxCapable?: (args: {
+    config: Record<string, unknown>;
+    secrets: Record<string, unknown>;
+  }) => boolean;
+  /**
+   * Builds auth headers for sandbox credential injection from the decrypted secrets of a
+   * stack connector. Headers from secretHeaders take precedence over these.
+   */
+  getSandboxAuthHeaders?: (args: {
+    config: Record<string, unknown>;
+    secrets: Record<string, unknown>;
+    connectorId: string;
+    connectorTokenClient?: ConnectorTokenClientContract;
+    configurationUtilities: ActionsConfigurationUtilities;
+    logger: Logger;
+  }) => Record<string, string> | Promise<Record<string, string>>;
+  /**
    * Additional Kibana privileges to be checked by the actions framework.
    * Use it if you want to perform extra authorization checks based on a Kibana feature.
    * For example, you can define the privileges a users needs to have to execute
@@ -359,7 +381,7 @@ export interface ActionTaskParams extends SavedObjectAttributes {
 }
 
 export interface ActionTaskExecutorParams {
-  spaceId: string;
+  spaceId: SpaceId;
   actionTaskParamsId: string;
 }
 

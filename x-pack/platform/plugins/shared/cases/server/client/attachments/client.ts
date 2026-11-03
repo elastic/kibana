@@ -59,7 +59,8 @@ export interface AttachmentsSubClient {
    */
   delete(deleteArgs: DeleteArgs): Promise<void>;
   /**
-   * Deletes multiple attachments of any type for a specific case.
+   * Deletes multiple attachments of any type for a specific case, recording one user action per
+   * attachment type.
    */
   bulkDelete(deleteArgs: BulkDeleteArgs): Promise<void>;
   bulkDeleteFileAttachments(deleteArgs: BulkDeleteFileArgs): Promise<void>;

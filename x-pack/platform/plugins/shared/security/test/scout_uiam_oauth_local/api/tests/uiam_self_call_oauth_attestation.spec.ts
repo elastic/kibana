@@ -42,7 +42,12 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(200);
-        expect(response.body).toStrictEqual(expect.objectContaining({ username: '1234567890' }));
+        expect(response.body).toStrictEqual(
+          expect.objectContaining({
+            username: '1234567890',
+            receivedHeaders: { clientAuthentication: 'absent', attestation: true },
+          })
+        );
       }
     );
 
@@ -62,7 +67,12 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(200);
-        expect(response.body).toStrictEqual(expect.objectContaining({ username: TEST_USERNAME }));
+        expect(response.body).toStrictEqual(
+          expect.objectContaining({
+            username: TEST_USERNAME,
+            receivedHeaders: { clientAuthentication: 'other', attestation: false },
+          })
+        );
       }
     );
 

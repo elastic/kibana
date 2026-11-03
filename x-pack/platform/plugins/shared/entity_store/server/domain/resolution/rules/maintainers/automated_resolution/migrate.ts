@@ -71,6 +71,19 @@ const sanitizeRule = (value: unknown, logger: Logger): PerRuleState => {
   return {
     lastProcessedTimestamp: toWatermark(record.lastProcessedTimestamp, logger),
     lastRun: sanitizeLastRun(record.lastRun),
+    // Custom rules only. Dropping any of these is safe: the rule rescans, or
+    // runs in a different position next tick.
+    ...(typeof record.definitionFingerprint === 'string' && {
+      definitionFingerprint: record.definitionFingerprint,
+    }),
+    ...(typeof record.lastAttemptAt === 'string' && { lastAttemptAt: record.lastAttemptAt }),
+    ...(typeof record.lastStartedFirstAt === 'string' && {
+      lastStartedFirstAt: record.lastStartedFirstAt,
+    }),
+    ...(typeof record.lastError === 'string' && { lastError: record.lastError }),
+    ...(typeof record.deferredByDeadline === 'boolean' && {
+      deferredByDeadline: record.deferredByDeadline,
+    }),
   };
 };
 

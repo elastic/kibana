@@ -96,8 +96,10 @@ export const AgentDashboardLink: React.FunctionComponent<{
   const { isInstalled, link, isLoading } = useAgentDashboardLink(agent, packageName);
   const { getHref } = useLink();
 
+  // agent metrics are not supported for agentless agents, even if the policy has metrics monitoring on
   const isMetricsEnabled =
-    agentPolicy?.monitoring_enabled?.includes('metrics') || agent.type === 'OPAMP';
+    !agentPolicy?.supports_agentless &&
+    (agentPolicy?.monitoring_enabled?.includes('metrics') || agent.type === 'OPAMP');
 
   const buttonArgs =
     !isInstalled || isLoading || !isMetricsEnabled ? { disabled: true } : { href: link };
@@ -121,10 +123,17 @@ export const AgentDashboardLink: React.FunctionComponent<{
     return (
       <EuiToolTip
         content={
-          <FormattedMessage
-            id="xpack.fleet.agentDetails.viewDashboardButton.disabledNoMetricsTooltip"
-            defaultMessage="Metrics for agent are not enabled in the agent policy."
-          />
+          agentPolicy.supports_agentless ? (
+            <FormattedMessage
+              id="xpack.fleet.agentDetails.viewDashboardButton.disabledAgentlessMetricsTooltip"
+              defaultMessage="Agent metrics are not supported for managed agents."
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.fleet.agentDetails.viewDashboardButton.disabledNoMetricsTooltip"
+              defaultMessage="Metrics for agent are not enabled in the agent policy."
+            />
+          )
         }
       >
         <EuiButtonCompressed
@@ -132,7 +141,7 @@ export const AgentDashboardLink: React.FunctionComponent<{
           isLoading={isLoading}
           color="primary"
           href={getHref('policy_details', { policyId: agentPolicy.id, tabId: 'settings' })}
-          isDisabled={agentPolicy?.is_managed}
+          isDisabled={!!agentPolicy?.is_managed || !!agentPolicy?.supports_agentless}
         >
           <FormattedMessage
             id="xpack.fleet.agentDetails.enableMetricsLabel"

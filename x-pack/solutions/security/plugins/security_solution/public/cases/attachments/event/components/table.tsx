@@ -25,8 +25,19 @@ import type { DeprecatedRowRenderer } from '@kbn/timelines-plugin/common';
 import React, { type FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 
-import { EuiEmptyPrompt, EuiProgress, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiCheckbox,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiProgress,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+import type { CommonAttachmentListViewProps } from '@kbn/cases-plugin/public';
 import { SECURITY_CELL_ACTIONS_CASE_EVENTS } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { checkBoxControlColumn } from '../../../../common/components/control_columns';
 import { RowAction } from '../../../../common/components/control_columns/row_action';
 import { buildBrowserFields } from '../../../../data_view_manager/utils/build_browser_fields';
 import { getDefaultControlColumn } from '../../../../timelines/components/timeline/body/control_columns';
@@ -35,10 +46,21 @@ import { DefaultCellRenderer } from '../../../../timelines/components/timeline/c
 import type { State } from '../../../../common/store/types';
 import { useGetEvents } from '../hooks/use_get_events';
 import { useCaseEventsDataView } from '../hooks/use_events_data_view';
-import { TABLE_UNIT, NO_EVENTS_TITLE } from '../translations';
+import { useEventsSelection } from '../hooks/use_events_selection';
+import { getPageIndexInRange } from '../utils';
+import {
+  TABLE_UNIT,
+  NO_EVENTS_TITLE,
+  REMOVE_EVENTS,
+  SELECTED_EVENTS,
+  SELECT_ALL_EVENTS,
+} from '../translations';
 
 export interface CaseViewEventsTableProps {
   events: Event[];
+  /** Enables row selection and removing the selected events from the case. */
+  onRemove?: CommonAttachmentListViewProps['onRemove'];
+  isRemoving?: CommonAttachmentListViewProps['isRemoving'];
 }
 export interface Event {
   eventId: string | string[];
@@ -48,9 +70,11 @@ export interface Event {
 export const EVENTS_TABLE_FOR_CASES_ID = 'EVENTS_TABLE_FOR_CASES_ID' as const;
 export const EMPTY_EVENTS_TABLE_FOR_CASES_ID = `EMPTY_${EVENTS_TABLE_FOR_CASES_ID}` as const;
 export const LOADING_EVENTS_TABLE_FOR_CASES_ID = `LOADING_${EVENTS_TABLE_FOR_CASES_ID}` as const;
+export const SELECT_ALL_EVENTS_FOR_CASES_ID = 'select-all-case-events' as const;
+export const SELECTED_EVENTS_FOR_CASES_ID = 'case-events-selected-count' as const;
+export const REMOVE_EVENTS_FOR_CASES_ID = 'case-events-remove-selected' as const;
 
 const noop = () => {};
-const emptyObject = {} as const;
 
 const MAX_ACTION_BUTTON_COUNT = 4;
 const DEFAULT_MODEL: SubsetDataTableModel = structuredClone(tableDefaults);
@@ -58,6 +82,8 @@ const DEFAULT_MODEL: SubsetDataTableModel = structuredClone(tableDefaults);
 const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTableProps> = ({
   dataView,
   events,
+  onRemove,
+  isRemoving = false,
 }) => {
   const selectTableById = useMemo(() => getTableByIdSelector(), []);
 
@@ -70,7 +96,12 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
 
   const browserFields = useMemo(() => buildBrowserFields(dataView.fields), [dataView.fields]);
 
-  const controlColumns = useMemo(() => getDefaultControlColumn(MAX_ACTION_BUTTON_COUNT), []);
+  const isSelectable = onRemove != null;
+
+  const controlColumns = useMemo(() => {
+    const actionColumns = getDefaultControlColumn(MAX_ACTION_BUTTON_COUNT);
+    return isSelectable ? [checkBoxControlColumn, ...actionColumns] : actionColumns;
+  }, [isSelectable]);
 
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
 
@@ -88,9 +119,25 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
 
   const { euiTheme } = useEuiTheme();
 
+  const eventIds = useMemo(() => {
+    return events.flatMap((event) =>
+      Array.isArray(event.eventId) ? event.eventId : [event.eventId]
+    );
+  }, [events]);
+
+  const pageIndex = getPageIndexInRange({
+    pageIndex: currentPageIndex,
+    totalItems: eventIds.length,
+    pageSize: itemsPerPage,
+  });
+
+  useEffect(() => {
+    setCurrentPageIndex(pageIndex);
+  }, [pageIndex]);
+
   const pagination: EuiDataGridPaginationProps & { pageSize: number } = useMemo(
     () => ({
-      pageIndex: currentPageIndex,
+      pageIndex,
       pageSize: itemsPerPage,
       pageSizeOptions: itemsPerPageOptions,
       onChangeItemsPerPage: (perPage) =>
@@ -102,19 +149,13 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
         ),
       onChangePage: setCurrentPageIndex,
     }),
-    [currentPageIndex, dispatch, itemsPerPage, itemsPerPageOptions]
+    [pageIndex, dispatch, itemsPerPage, itemsPerPageOptions]
   );
-
-  const eventIds = useMemo(() => {
-    return events.flatMap((event) =>
-      Array.isArray(event.eventId) ? event.eventId : [event.eventId]
-    );
-  }, [events]);
 
   const { data = [], isFetching: isFetchingEvents } = useGetEvents(dataView, {
     eventIds,
     sort,
-    pageIndex: currentPageIndex,
+    pageIndex,
     itemsPerPage,
   });
 
@@ -123,11 +164,32 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
     setCurrentPageIndex(0);
   }, [sort]);
 
+  const pageIds = useMemo(() => data.map(({ _id }) => _id), [data]);
+
+  const {
+    selectedIds,
+    selectedEventIds,
+    isPageSelected,
+    onRowSelected,
+    onSelectPage,
+    onRemoveSelected,
+    onRemoveEvent,
+  } = useEventsSelection({ pageIds, onRemove });
+
   const leadingControlColumns = useMemo(
     () =>
-      getDefaultControlColumn(MAX_ACTION_BUTTON_COUNT).map((column, i) => ({
+      controlColumns.map((column, i) => ({
         ...column,
-        headerCellRender: () => null,
+        headerCellRender: () =>
+          column.id === checkBoxControlColumn.id ? (
+            <EuiCheckbox
+              id={SELECT_ALL_EVENTS_FOR_CASES_ID}
+              data-test-subj={SELECT_ALL_EVENTS_FOR_CASES_ID}
+              aria-label={SELECT_ALL_EVENTS}
+              checked={isPageSelected}
+              onChange={onSelectPage}
+            />
+          ) : null,
         rowCellRender: ({
           isDetails,
           isExpandable,
@@ -162,12 +224,13 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
               isEventViewer={false}
               isExpandable={isExpandable}
               loadingEventIds={loadingEventIds}
-              onRowSelected={noop}
+              onRemoveFromCase={onRemoveEvent}
+              onRowSelected={onRowSelected}
               onRuleChange={noop}
               pageRowIndex={pageRowIndex}
-              selectedEventIds={emptyObject}
+              selectedEventIds={selectedEventIds}
               setCellProps={setCellProps}
-              showCheckboxes={false}
+              showCheckboxes={isSelectable}
               tableId={EVENTS_TABLE_FOR_CASES_ID}
               width={100}
               setEventsLoading={noop}
@@ -176,8 +239,45 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
           );
         },
       })),
-    [controlColumns, data, euiTheme, itemsPerPage, loadingEventIds]
+    [
+      controlColumns,
+      data,
+      euiTheme,
+      isPageSelected,
+      isSelectable,
+      itemsPerPage,
+      loadingEventIds,
+      onRemoveEvent,
+      onRowSelected,
+      onSelectPage,
+      selectedEventIds,
+    ]
   );
+
+  const removeSelectedControls =
+    isSelectable && selectedIds.size > 0 ? (
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued" data-test-subj={SELECTED_EVENTS_FOR_CASES_ID}>
+            {SELECTED_EVENTS(selectedIds.size)}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="xs"
+            color="danger"
+            iconType="trash"
+            flush="left"
+            onClick={onRemoveSelected}
+            isLoading={isRemoving}
+            isDisabled={isRemoving}
+            data-test-subj={REMOVE_EVENTS_FOR_CASES_ID}
+          >
+            {REMOVE_EVENTS}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ) : null;
 
   const getFieldSpec = useCallback(
     (fieldName: string) => dataView.fields.getByName(fieldName)?.toSpec(),
@@ -201,6 +301,7 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
 
   return (
     <DataTableComponent
+      additionalControls={removeSelectedControls}
       browserFields={browserFields}
       data={data}
       getFieldSpec={getFieldSpec}
@@ -217,7 +318,7 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
   );
 };
 
-export const EventsTableForCases = ({ events }: CaseViewEventsTableProps) => {
+export const EventsTableForCases = ({ events, onRemove, isRemoving }: CaseViewEventsTableProps) => {
   const patterns = useMemo(
     () =>
       [
@@ -234,5 +335,12 @@ export const EventsTableForCases = ({ events }: CaseViewEventsTableProps) => {
     return null;
   }
 
-  return <EventsTableForCasesBody dataView={dataView} events={events} />;
+  return (
+    <EventsTableForCasesBody
+      dataView={dataView}
+      events={events}
+      onRemove={onRemove}
+      isRemoving={isRemoving}
+    />
+  );
 };

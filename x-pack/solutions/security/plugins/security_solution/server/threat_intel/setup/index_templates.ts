@@ -103,6 +103,8 @@ const threatReportsTemplate = {
               type: 'keyword' as const,
               ignore_above: FEED_TEXT_IGNORE_ABOVE,
             },
+            // Feed publication date when the source supplies one; `@timestamp` stays ingest time.
+            published_at: { type: 'date' as const },
           },
         },
         severity: {
@@ -136,10 +138,10 @@ const threatReportsTemplate = {
                 tier_basis: { type: 'keyword' as const },
                 // Port from socket extraction (v17): ip:port / domain:port → integer.
                 port: { type: 'integer' as const },
-                // Per-IOC nearest-ref URL from Maltrail trail files (v19). The promote_threat_indicators
+                // Per-IOC nearest-ref URL from indicator-list files (v19). The promote_threat_indicators
                 // task copies this into sources[].reference for the indicators companion index.
                 reference: { type: 'keyword' as const, ignore_above: FEED_TEXT_IGNORE_ABOVE },
-                // Index of the Maltrail block this IOC belongs to (v19). Used by the sync task
+                // Index of the indicator-list block this IOC belongs to (v19). Used by the sync task
                 // to associate each IOC with its source reference URL.
                 block_index: { type: 'integer' as const },
                 // Semantic review did not run (batch/overflow budget). Heuristic tier is kept
@@ -919,6 +921,46 @@ const migrateExistingContentScrubbedMapping = async (
   }
 };
 
+/** `content.published_at` for clusters created before publish-date lookback existed. */
+const migrateExistingPublishedAtMapping = async (
+  esClient: ElasticsearchClient,
+  reportIndices: readonly string[],
+  logger: Logger
+): Promise<void> => {
+  const log = logger.get('published-at-mapping-migration');
+
+  for (const indexName of reportIndices) {
+    try {
+      const { [indexName]: indexMappings } = await esClient.indices.getMapping({
+        index: indexName,
+      });
+      const contentProps = (
+        (
+          indexMappings?.mappings?.properties as
+            | Record<string, { properties?: Record<string, unknown> }>
+            | undefined
+        )?.content as { properties?: Record<string, unknown> } | undefined
+      )?.properties;
+
+      if (!contentProps?.published_at) {
+        await esClient.indices.putMapping({
+          index: indexName,
+          properties: {
+            content: { properties: { published_at: { type: 'date' } } },
+          },
+        });
+        log.info(`Migrated content.published_at on ${indexName}`);
+      }
+    } catch (err) {
+      log.error(
+        `Failed to migrate content.published_at on ${indexName}: ${
+          (err as Error).message
+        }. The mapping is dynamic: strict, so writes of reports carrying published_at will be rejected and ingest will fail until the mapping is updated.`
+      );
+    }
+  }
+};
+
 /**
  * Index templates only apply at creation time, so clusters that created these
  * indices before `index.hidden` was set still expose them to index patterns and
@@ -1586,6 +1628,7 @@ interface RequiredMapping {
 
 const REQUIRED_REPORT_FIELDS: readonly RequiredMapping[] = [
   { path: 'content.article_url', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
+  { path: 'content.published_at' },
   { path: 'extracted.artifacts' },
   { path: 'extracted.core.model_id' },
   { path: 'extracted.core.context_mode' },
@@ -1611,11 +1654,11 @@ const REQUIRED_REPORT_FIELDS: readonly RequiredMapping[] = [
   { path: 'extracted.iocs.tier' },
   { path: 'extracted.iocs.port' },
   { path: 'extracted.iocs.deferred_unreviewed' },
-  // v19 writes `reference` and `block_index` (Maltrail chunking) in one putMapping, so
+  // v19 writes `reference` and `block_index` (indicator-list chunking) in one putMapping, so
   // this leaf is checked on its own: a failed v19 followed by a successful v26
   // keyword-bounds putMapping re-adds `reference` but not `block_index`, so verifying
-  // `reference` alone would pass while `dynamic: strict` rejects Maltrail reports that
-  // carry `block_index`. Maltrail ships enabled by default, so this is a live path.
+  // `reference` alone would pass while `dynamic: strict` rejects historical indicator-list
+  // reports that carry `block_index`.
   { path: 'extracted.iocs.block_index' },
   { path: 'lineage.content_scrubbed_at' },
   // v30: attribution/feedback merged into evidence, object -> nested. Not
@@ -1833,6 +1876,7 @@ export const installIndexTemplates = async ({
   await backfillKevRankScore(esClient, reportIndices, log);
   await migrateExistingContentScrubbedMapping(esClient, reportIndices, log);
   await migrateExistingCoreEnrichmentMappings(esClient, reportIndices, log);
+  await migrateExistingPublishedAtMapping(esClient, reportIndices, log);
   await migrateExistingIndicesToHidden(esClient, reportIndices, log);
 
   // Fails the install (and therefore bootstrap readiness) when a migration left the

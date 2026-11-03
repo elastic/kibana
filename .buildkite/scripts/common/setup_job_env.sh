@@ -34,14 +34,7 @@ source .buildkite/scripts/common/util.sh
   esac
   export GITHUB_TOKEN
 
-  KIBANA_DOCKER_USERNAME="$(vault_get container-registry username)"
-  KIBANA_DOCKER_PASSWORD="$(vault_get container-registry password)"
-  function docker_login() {
-      if (command -v docker && docker version) &> /dev/null; then
-        echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-      fi
-  }
-  retry 5 15 docker_login
+  retry 5 15 docker_login_for_pipeline
 }
 
 # Set up a custom ES Snapshot Manifest if one has been specified for this build
@@ -150,9 +143,10 @@ EOF
 
     KBN_EVALS_CONFIG_JSON="$(retry 5 5 vault kv get -field=config kv/ci-shared/kbn-evals/golden | base64 -d)"
     # Validate config shape. Guarded because lightweight sparse-checkout steps (pipeline upload, Post-Build)
-    #don't fetch the validator; eval steps run on a full checkout.
+    # don't fetch the validator, and orchestration steps on the minimal image have no node yet (this runs
+    # before setup_node.sh); eval steps run on a full checkout with node available.
     kbn_evals_validator="x-pack/platform/packages/shared/kbn-evals/scripts/vault/validate_config.js"
-    if [[ -f "$kbn_evals_validator" ]]; then
+    if [[ -f "$kbn_evals_validator" ]] && command -v node >/dev/null; then
       node "$kbn_evals_validator" --stdin <<<"$KBN_EVALS_CONFIG_JSON" >/dev/null
     fi
 

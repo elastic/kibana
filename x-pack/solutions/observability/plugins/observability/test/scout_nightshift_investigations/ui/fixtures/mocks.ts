@@ -9,8 +9,12 @@ import type { ScoutPage } from '@kbn/scout-oblt';
 
 export const mockInvestigationApi = async (
   page: ScoutPage,
-  { includeCompletedInvestigation = false }: { includeCompletedInvestigation?: boolean } = {}
+  {
+    includeCompletedInvestigation = false,
+    includeRunningInvestigation = false,
+  }: { includeCompletedInvestigation?: boolean; includeRunningInvestigation?: boolean } = {}
 ) => {
+  const includeInvestigation = includeCompletedInvestigation || includeRunningInvestigation;
   await page.route('**/internal/significant_events/availability', async (route) => {
     await route.fulfill({ status: 200, json: { available: true } });
   });
@@ -22,7 +26,7 @@ export const mockInvestigationApi = async (
     await route.fulfill({
       status: 200,
       json: {
-        results: includeCompletedInvestigation
+        results: includeInvestigation
           ? [
               {
                 id: 'investigation-1',
@@ -32,14 +36,14 @@ export const mockInvestigationApi = async (
                 updated_at: '2026-09-15T12:05:00.000Z',
                 agent_id: 'nightshift.investigation',
                 metadata: { status: 'open', summary: 'Completed alert investigation' },
-                in_progress: false,
+                in_progress: includeRunningInvestigation,
                 subjects: [
                   { type: 'alert', id: 'alert-1', created_at: '2026-09-15T12:00:00.000Z' },
                 ],
               },
             ]
           : [],
-        pagination: { total: includeCompletedInvestigation ? 1 : 0, page: 1, per_page: 10 },
+        pagination: { total: includeInvestigation ? 1 : 0, page: 1, per_page: 10 },
       },
     });
   });

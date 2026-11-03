@@ -13,6 +13,9 @@ tags:
   - action
   - alertzero
 consts:
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Attack Discovery worker"
   # Self-describing catalog metadata, read back by the proposals service when a
   # proposal referencing this workflow is created or rendered. Metadata has to
   # live under `consts`: unknown top-level keys are stripped by the schema.
@@ -197,10 +200,11 @@ steps:
           with:
             workflow-id: "{{ consts.journal_note }}"
             inputs:
+              author_name: "{{ consts.author_name }}"
               conversation_id: "{{ inputs.actionInput.investigation_id }}"
               message: >-
                 Forensics handoff failed: knowledge indicator write failed.
-                {{ steps.write_analyze_endpoint_ki.error }}
+                {{ steps.write_analyze_endpoint_ki.error.message }}
           on-failure:
             continue: true
         - name: fail_handoff
@@ -208,13 +212,14 @@ steps:
           with:
             message: >-
               Forensics handoff failed: knowledge indicator write failed.
-              {{ steps.write_analyze_endpoint_ki.error }}
+              {{ steps.write_analyze_endpoint_ki.error.message }}
 
   - name: journal_handoff_succeeded
     type: workflow.execute
     with:
       workflow-id: "{{ consts.journal_note }}"
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ inputs.actionInput.investigation_id }}"
         message: >-
           Wrote knowledge indicator {{ steps.write_analyze_endpoint_ki.output.id }}

@@ -2,13 +2,17 @@
 id: kibDevDocsOpsEslintPluginImports
 slug: /kibana-dev-docs/ops/kbn-eslint-plugin-imports
 title: "@kbn/eslint-plugin-imports"
-description: Custom ESLint rules for managing `imports` in the Kibana repository
+description: Custom lint rules for managing `imports` in the Kibana repository
 tags: ['kibana', 'dev', 'contributor', 'operations', 'eslint', 'imports']
 ---
 
-`@kbn/eslint-plugin-imports` is an ESLint plugin providing custom rules for validating imports in the Kibana repo with custom logic beyond what's possible with custom config to eslint-plugin-imports and even a custom resolver.
+`@kbn/eslint-plugin-imports` is a lint plugin providing custom rules for validating imports in the Kibana repo with custom logic beyond what's possible with custom config to eslint-plugin-imports and even a custom resolver.
 
-For the purposes of this ESLint plugin "imports" include:
+The rules run in Oxlint: `.oxlint/index.mts` loads `oxlint_plugin.js`, which registers `@kbn/swc-register` so Oxlint can load this TypeScript package, and `.oxlint/imports.mts` configures the rules. They use Oxlint's `createOnce` API and are wrapped with `eslintCompatPlugin`, so ESLint still resolves `@kbn/imports/*` names in disable comments and runs the rule tests. `src/rules/oxlint_rule_parity.test.ts` replays those `RuleTester` suites through Oxlint's `RuleTester`.
+
+Oxlint runs JS plugin rules on a single thread, so keep per-file work in `before()` hooks cheap. The rules share one `ImportResolver` per process (one per linted file in editors), which caches file system lookups and resolved requests.
+
+For the purposes of this plugin "imports" include:
 
  - `import` statements
  - `import()` expressions
@@ -67,4 +71,4 @@ The auto-fixer here covers the vast majority of import styles in the repository 
 
 ## `@kbn/imports/no_unused_imports`
 
-This rule finds imports that are unused and provides an auto-fix to remove them. When ESLint appears to be running in an editor, as defined by [`helpers/running_in_editor.ts`](src/helpers/running_in_editor.ts), this rule provided suggestions instead of fixes so that the removals are not applied automatically in case you are debugging, returning early, or something else which makes ESLint think that the import is unused when it isn't. On CI and in the pre-commit hook though, this fix will be applied automatically.
+This rule finds imports that are unused and provides an auto-fix to remove them. When the linter appears to be running in an editor, as defined by [`helpers/running_in_editor.ts`](src/helpers/running_in_editor.ts), this rule provided suggestions instead of fixes so that the removals are not applied automatically in case you are debugging, returning early, or something else which makes the linter think that the import is unused when it isn't. On CI and in the pre-commit hook though, this fix will be applied automatically.
