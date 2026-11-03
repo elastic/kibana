@@ -58,6 +58,7 @@ import { registerSuggestionsInferenceFeatures } from './register_suggestions_inf
 import type { AttachmentClient } from './lib/streams/attachments/attachment_client';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { createConfigDistributorClient } from './lib/unit_config/config_distributor_client';
+import { createComponentCatalogueService } from './lib/component_catalogue/component_catalogue_service';
 import { createEncryptionKeyStore } from './lib/unit_config/encryption_key_store';
 import { createCredentialPreparer } from './lib/unit_config/seal_credentials';
 import type { UnitConfigHooks } from './lib/unit_config/types';
@@ -315,7 +316,17 @@ export class StreamsPlugin
           })
         : undefined,
     };
+    const componentCatalogue = createComponentCatalogueService({
+      fetchComponentCatalogue: distributorClient.fetchComponentCatalogue,
+      validateComponent: distributorClient.validateComponent,
+      logger: this.logger.get('component-catalogue'),
+    });
 
+    if (this.config.canvas.enabled && !this.config.distributor.url) {
+      this.logger.warn(
+        'xpack.streams.distributor.url is not configured; unit publish and validation and the component catalogue are unavailable.'
+      );
+    }
     this.republishUnitsEnabled = this.config.canvas.enabled && Boolean(this.config.distributor.url);
     registerRepublishUnitsTask({
       taskManager: plugins.taskManager,
@@ -349,6 +360,7 @@ export class StreamsPlugin
         patternExtractionService: this.patternExtractionService,
         getScopedClients: this.streamsGetScopedClients,
         unitConfigHooks,
+        componentCatalogue,
         getSpaceId: async (request: KibanaRequest) => {
           const [, pluginsStart] = await core.getStartServices();
           return pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;

@@ -17,6 +17,7 @@ jest.mock('../onboarding_flow_context', () => ({
 
 jest.mock('./authenticate_and_deploy_step/use_deploy', () => ({
   useDeploy: jest.fn(),
+  toSOServiceVars: jest.fn((vars: Record<string, unknown>) => vars),
 }));
 
 jest.mock('./authenticate_and_deploy_step/deployment_method_card', () => ({
@@ -161,6 +162,7 @@ function makeEcfReturn(
     stackVersions?: Record<string, string>;
     stackArns?: Record<string, string>;
     isStaleByFamily?: Record<string, boolean>;
+    currentConfigsByFamily?: ReturnType<typeof useEcfDeployment>['currentConfigsByFamily'];
   } = {}
 ): ReturnType<typeof useEcfDeployment> {
   return {
@@ -170,6 +172,11 @@ function makeEcfReturn(
     ecfServiceIds: new Set(),
     stackArns: overrides.stackArns ?? {},
     currentServiceIdsByFamily: { unified: [], otel: [], crowdstrike: [] },
+    currentConfigsByFamily: overrides.currentConfigsByFamily ?? {
+      unified: [],
+      otel: [],
+      crowdstrike: [],
+    },
     advanceStaleSnapshots: jest.fn(),
     sectionProps: {
       ecfUnifiedConfigs: [],
@@ -191,6 +198,7 @@ function makeEcfReturn(
         otel: false,
         crowdstrike: false,
       },
+      staleReasonByFamily: { unified: undefined, otel: undefined, crowdstrike: undefined },
       isUpdateOpenedByFamily: {},
       onLaunch: jest.fn(),
       onUpdateOpened: jest.fn(),
@@ -1094,6 +1102,48 @@ describe('AuthenticateAndDeployStep', () => {
           ecfStacks: expect.arrayContaining([
             expect.objectContaining({ family: 'unified', stackArn: SAMPLE_ARN }),
           ]),
+        })
+      );
+    });
+
+    it('includes the current service settings in ecfStacks as serviceConfigs', async () => {
+      const mockUpdate = jest.fn().mockResolvedValue(true);
+      mockUseOnboardingSO.mockReturnValue({
+        createDeployment: jest.fn(),
+        updateDeployment: mockUpdate,
+        persistDeploymentId: jest.fn(),
+      });
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['cloudtrail'] },
+        awsServicesMap: new Map([['cloudtrail', ecfService]]),
+        detectAndReviewStep: { onboardingDeploymentId: 'existing-dep-id' },
+        updateDetectAndReviewStep: jest.fn(),
+      });
+      const serviceConfigs = [
+        { serviceId: 'cloudtrail', bucketArns: ['arn:aws:s3:::trail'], logGroupArns: [] },
+      ];
+      mockUseEcfDeployment.mockReturnValue(
+        makeEcfReturn({
+          hasAnyEcf: true,
+          isDone: true,
+          launchedFamilies: ['unified'],
+          stackVersions: { unified: '1.2.3' },
+          currentConfigsByFamily: { unified: serviceConfigs, otel: [], crowdstrike: [] },
+        })
+      );
+
+      const onContinue = jest.fn();
+      renderStep(onContinue);
+      fireEvent.click(screen.getByTestId('authenticateAndDeployStep-nextButton'));
+      await waitFor(() => expect(onContinue).toHaveBeenCalledTimes(1));
+
+      expect(mockUpdate).toHaveBeenCalledWith(
+        'existing-dep-id',
+        expect.objectContaining({
+          ecfStacks: [expect.objectContaining({ family: 'unified', serviceConfigs })],
+          // The settings baseline must be saved with the snapshot, or a resumed session would
+          // compare the old settings against the new snapshot and report the stack stale.
+          serviceVars: expect.any(Object),
         })
       );
     });
