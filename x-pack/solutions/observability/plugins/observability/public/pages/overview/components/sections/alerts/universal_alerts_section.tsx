@@ -26,7 +26,7 @@ import { useDatePickerContext } from '../../../../../hooks/use_date_picker_conte
 import { useKibana as useObservabilityKibana } from '../../../../../utils/kibana_react';
 import { createObservabilityEpisodeActions } from '../../../../../episode_actions/create_observability_episode_actions';
 
-const OVERVIEW_FILTER_STATE: EpisodesFilterState = {};
+const OVERVIEW_FILTER_STATE: EpisodesFilterState = { status: ['active'] };
 
 const TABLE_MIN_HEIGHT = 200;
 const TABLE_MAX_HEIGHT = 400;

@@ -97,11 +97,13 @@ describe('UniversalAlertsSection', () => {
     expect(getByTestId('episodesTable')).toBeInTheDocument();
   });
 
-  it('shows every alert status, since the Overview has no filter bar to narrow one', () => {
+  it('shows active alerts only, the same set Show alerts lands on', () => {
     render(<UniversalAlertsSection alertingVTwo={alertingVTwo} />);
 
     for (const props of [tableProps, histogramProps, kpisProps]) {
-      expect(props).toHaveBeenCalledWith(expect.objectContaining({ filterState: {} }));
+      expect(props).toHaveBeenCalledWith(
+        expect.objectContaining({ filterState: { status: ['active'] } })
+      );
     }
   });
 
