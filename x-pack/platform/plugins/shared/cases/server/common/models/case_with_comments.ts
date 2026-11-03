@@ -247,7 +247,7 @@ export class CaseCommentModel {
     };
   }
 
-  private newObjectWithInfo(caseInfo: CaseSavedObjectTransformed): CaseCommentModel {
+  public newObjectWithInfo(caseInfo: CaseSavedObjectTransformed): CaseCommentModel {
     return new CaseCommentModel(caseInfo, this.params);
   }
 
