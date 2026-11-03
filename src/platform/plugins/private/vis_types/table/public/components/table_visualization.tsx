@@ -63,7 +63,7 @@ const TableVisualizationComponent = ({
   const hasColumnDirection = direction === 'column';
 
   const className = classNames('tbvChart', {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+    // eslint-disable-next-line @kbn/compat/typescript-naming-convention
     tbvChart__splitColumns: hasColumnDirection,
   });
 

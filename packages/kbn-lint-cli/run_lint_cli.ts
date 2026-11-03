@@ -157,6 +157,10 @@ async function runOxlintShard(args: string[]) {
       preferLocal: true,
       reject: false,
       all: true,
+      // The shards start together and would all write the plugin sources to the same
+      // @kbn/swc-register LMDB cache, which has crashed a shard with `MDB_BAD_TXN`. Transpiling
+      // the plugins without the cache is no slower.
+      env: { DISABLE_SWC_REGISTER_CACHE: 'true' },
     });
     if (result.signal === undefined || !CRASH_SIGNALS[result.signal] || attempt === 2) {
       return result;

@@ -7,7 +7,7 @@
 import { BooleanFromString } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
 
-import { sloHealthSchema } from '../../schema/zod/health';
+import { sloHealthSchema } from '../../schema/health';
 
 const postHealthScanParamsSchema = z.object({
   body: z

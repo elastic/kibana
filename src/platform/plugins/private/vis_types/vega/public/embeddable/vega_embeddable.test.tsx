@@ -201,7 +201,7 @@ describe('vegaEmbeddableFactory', () => {
       spec: { format: 'json', value: { mark: 'point' } },
     });
 
-    await waitFor(() => expect(api.dataViews$.getValue()).toEqual([]));
+    await waitFor(() => expect(api.dataSources$.getValue()).toEqual([]));
     expect(dataViews.getDefault).not.toHaveBeenCalled();
   });
 
@@ -216,7 +216,7 @@ describe('vegaEmbeddableFactory', () => {
       spec: { format: 'json', value: { data: { url: { index: 'logs-*' } } } },
     });
 
-    await waitFor(() => expect(api.dataViews$.getValue()).toEqual(fromSpec));
+    await waitFor(() => expect(api.dataSources$.getValue()).toEqual(fromSpec));
     expect(dataViews.getDefault).not.toHaveBeenCalled();
   });
 

@@ -330,6 +330,9 @@ export interface DocLinks {
     readonly attacksPage: string;
     readonly dashboardsPage: string;
     readonly detectionResponsePage: string;
+    readonly dataQualityPage: string;
+    readonly indicatorsPage: string;
+    readonly alertSummaryPage: string;
     readonly notesPage: string;
     readonly timelinesPage: string;
     readonly runAttackDiscoveryInWorkflow: string;
@@ -409,6 +412,9 @@ export interface DocLinks {
     readonly signalsMigrationApi: string;
     readonly siemMigrations: string;
     readonly llmPerformanceMatrix: string;
+    readonly alertZero: {
+      readonly continuousThreatHunt: string;
+    };
   };
   readonly query: {
     readonly eql: string;
@@ -701,6 +707,9 @@ export interface DocLinks {
   };
   readonly endpoints: {
     readonly troubleshooting: string;
+  };
+  readonly osquery: {
+    readonly guide: string;
   };
   readonly legal: {
     readonly privacyStatement: string;

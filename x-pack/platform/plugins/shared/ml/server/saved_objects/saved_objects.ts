@@ -31,6 +31,7 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
   savedObjects.registerType({
     name: ML_JOB_SAVED_OBJECT_TYPE,
     hidden: false,
+    hiddenFromHttpApis: true,
     namespaceType: 'multiple',
     migrations,
     mappings: mlJob,
@@ -38,6 +39,7 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
   savedObjects.registerType({
     name: ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
     hidden: false,
+    hiddenFromHttpApis: true,
     namespaceType: 'multiple',
     migrations,
     mappings: mlTrainedModel,

@@ -445,6 +445,7 @@ t3_analyst:
         - feature_workflowsManagement.all
         - feature_alertzero.all
         - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
         - feature_proposals.all
         - feature_workflowsManagement.workflow_update_managed
       resources: "*"
@@ -623,6 +624,7 @@ rule_author:
         - feature_workflowsManagement.all
         - feature_alertzero.all
         - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
         - feature_proposals.all
         - feature_workflowsManagement.workflow_update_managed
       resources: "*"
@@ -725,6 +727,7 @@ soc_manager:
         - feature_workflowsManagement.all
         - feature_alertzero.all
         - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
         - feature_proposals.all
         - feature_workflowsManagement.workflow_update_managed
       resources: "*"
@@ -806,6 +809,7 @@ detections_admin:
         - feature_workflowsManagement.all
         - feature_alertzero.all
         - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
         - feature_proposals.all
         - feature_workflowsManagement.workflow_update_managed
       resources: "*"
@@ -894,6 +898,7 @@ platform_engineer:
         - feature_workflowsManagement.all
         - feature_alertzero.all
         - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
         - feature_proposals.all
         - feature_workflowsManagement.workflow_update_managed
       resources: "*"
@@ -1135,6 +1140,8 @@ _alertzero_alert_triage:
     - application: "kibana-.kibana"
       privileges:
         - feature_alertzero.all
+        - feature_agenticInvestigations.minimal_all
+        - feature_agenticInvestigations.investigations_all
         - feature_agentBuilder.read
         - feature_contextEngine.all
         - feature_proposals.all
@@ -1231,6 +1238,8 @@ _alertzero_attack_discovery:
     - application: "kibana-.kibana"
       privileges:
         - feature_alertzero.all
+        - feature_agenticInvestigations.minimal_all
+        - feature_agenticInvestigations.investigations_all
         - feature_agentBuilder.read
         - feature_contextEngine.all
         - feature_proposals.all
@@ -1272,11 +1281,30 @@ _alertzero_endpoint_analysis:
         - ".adhoc.alerts-security.attack.discovery.alerts-*"
       privileges:
         - "read"
+        - "view_index_metadata"
+        - "index"
+        - "maintenance"
+      allow_restricted_indices: false
+    - names:
+        - ".internal.alerts-security.attack.discovery.alerts-*"
+        - ".internal.adhoc.alerts-security.attack.discovery.alerts-*"
+      privileges:
+        - "index"
+        - "maintenance"
       allow_restricted_indices: false
     - names:
         - ".alerts-security.alerts-*"
       privileges:
         - "read"
+        - "view_index_metadata"
+        - "index"
+        - "maintenance"
+      allow_restricted_indices: false
+    - names:
+        - ".internal.alerts-security.alerts-*"
+      privileges:
+        - "index"
+        - "maintenance"
       allow_restricted_indices: false
     - names:
         - "logs-endpoint.events.process-*"
@@ -1291,6 +1319,8 @@ _alertzero_endpoint_analysis:
     - application: "kibana-.kibana"
       privileges:
         - feature_alertzero.all
+        - feature_agenticInvestigations.minimal_all
+        - feature_agenticInvestigations.investigations_all
         - feature_agentBuilder.read
         - feature_contextEngine.all
         - feature_proposals.all
@@ -1299,6 +1329,7 @@ _alertzero_endpoint_analysis:
         - feature_siemV5.host_isolation_all
         - feature_siemV5.process_operations_all
         - feature_siemV5.actions_log_management_read
+        - feature_securitySolutionAlertsV1.all
       resources: "*"
 
 _alertzero_threat_hunt:
@@ -1344,6 +1375,8 @@ _alertzero_threat_hunt:
     - application: "kibana-.kibana"
       privileges:
         - feature_alertzero.all
+        - feature_agenticInvestigations.minimal_all
+        - feature_agenticInvestigations.investigations_all
         - feature_agentBuilder.read
         - feature_contextEngine.all
         - feature_proposals.all
@@ -1413,6 +1446,8 @@ _alertzero_rule_tuning:
     - application: "kibana-.kibana"
       privileges:
         - feature_alertzero.all
+        - feature_agenticInvestigations.minimal_all
+        - feature_agenticInvestigations.investigations_all
         - feature_agentBuilder.read
         - feature_contextEngine.all
         - feature_proposals.all
@@ -1467,6 +1502,8 @@ _alertzero_rule_coverage:
     - application: "kibana-.kibana"
       privileges:
         - feature_alertzero.all
+        - feature_agenticInvestigations.minimal_all
+        - feature_agenticInvestigations.investigations_all
         - feature_agentBuilder.read
         - feature_contextEngine.all
         - feature_proposals.all

@@ -9,7 +9,7 @@ import type { IndicatorType } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import deepmerge from 'deepmerge';
 import { useEffect, useState } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { useFetchApmIndices } from '../../../hooks/use_fetch_apm_indices';
 import {
   APM_AVAILABILITY_DEFAULT_VALUES,
@@ -33,12 +33,10 @@ export function useUnregisterFields({ isEditMode }: { isEditMode: boolean }) {
   const {
     data: { metric: apmIndex },
   } = useFetchApmIndices();
-  const { watch, unregister, reset, resetField } = useFormContext<CreateSLOForm>();
-  const [indicatorTypeState, setIndicatorTypeState] = useState<IndicatorType>(
-    watch('indicator.type')
-  );
+  const { control, unregister, reset, resetField } = useFormContext<CreateSLOForm>();
+  const indicatorType = useWatch({ control, name: 'indicator.type' });
+  const [indicatorTypeState, setIndicatorTypeState] = useState<IndicatorType>(indicatorType);
 
-  const indicatorType = watch('indicator.type');
   useEffect(() => {
     if (indicatorType !== indicatorTypeState && !isEditMode) {
       setIndicatorTypeState(indicatorType);

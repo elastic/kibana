@@ -11,7 +11,9 @@ Specs that need the ux plugin (Classic RUM dashboard, legacy navigation) run on 
 
 ## Data
 
-`scout_digital_experience/ui` loads the ux plugin's `rum_test_data` archive in `global.setup.ts` (service `elastic-co-frontend`, January 2021). Specs pass that time range explicitly.
+The `ui` and `api` configs of `scout_digital_experience/` share their data in `common/fixtures/`. Each `global.setup.ts` indexes the mock EDOT Browser data (`otel_rum_data.ndjson`) and, on stateful, loads the ux plugin's `rum_test_data` archive (service `elastic-co-frontend`, January 2021). Each `global.teardown.ts` deletes the mock documents by id. Specs pass that time range explicitly.
+
+The API specs assert each application's metrics; the UI specs check what the page shows and how its filters and links behave.
 
 ## Running locally
 

@@ -669,6 +669,21 @@ export const RULE_FORM_PAGE_RULE_ACTIONS_NO_PERMISSION_DESCRIPTION = i18n.transl
   }
 );
 
+export const RULE_FORM_PAGE_RULE_NO_PERMISSION_TITLE = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleNoPermissionTitle',
+  {
+    defaultMessage: 'Rule privileges missing',
+  }
+);
+
+export const RULE_FORM_PAGE_RULE_NO_PERMISSION_DESCRIPTION = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleNoPermissionDescription',
+  {
+    defaultMessage:
+      'You must have All privileges for the feature this rule belongs to in order to edit it.',
+  }
+);
+
 export const RULE_FORM_PAGE_RULE_DETAILS_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDetailsTitle',
   {
