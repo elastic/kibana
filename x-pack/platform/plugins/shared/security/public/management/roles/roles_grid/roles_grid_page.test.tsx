@@ -93,6 +93,37 @@ describe('<RolesGridPage />', () => {
     expect(screen.getByTestId('showReservedRolesSwitch')).toBeInTheDocument();
   });
 
+  it('shows deprecated badges for the built-in rollup roles', async () => {
+    apiClientMock.queryRoles.mockResolvedValue({
+      total: 2,
+      count: 2,
+      roles: ['rollup_admin', 'rollup_user'].map((name) => ({
+        name,
+        elasticsearch: { cluster: [], indices: [], run_as: [] },
+        kibana: [{ base: [], spaces: [], feature: {} }],
+        metadata: { _reserved: true, _deprecated: false },
+      })),
+    });
+
+    renderWithIntl(
+      <RolesGridPage
+        rolesAPIClient={apiClientMock}
+        history={history}
+        notifications={notifications}
+        i18n={i18n}
+        buildFlavor={'traditional'}
+        analytics={analytics}
+        theme={theme}
+        userProfile={userProfile}
+        rendering={rendering}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId('roleDeprecated')).toHaveLength(2);
+    });
+  });
+
   it('renders disabled roles as such', async () => {
     renderWithIntl(
       <RolesGridPage

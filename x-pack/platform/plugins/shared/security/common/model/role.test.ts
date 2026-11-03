@@ -122,6 +122,14 @@ describe('role', () => {
       const testRole = {};
       expect(isRoleDeprecated(testRole)).toBe(false);
     });
+
+    test.each(['rollup_admin', 'rollup_user'])(
+      'marks the reserved %s role as deprecated',
+      (name) => {
+        expect(isRoleDeprecated({ name, metadata: { _reserved: true } })).toBe(true);
+        expect(isRoleDeprecated({ name, metadata: { _reserved: false } })).toBe(false);
+      }
+    );
   });
 
   describe('getExtendedRoleDeprecationNotice', () => {
@@ -139,6 +147,14 @@ describe('role', () => {
       };
       expect(getExtendedRoleDeprecationNotice(testRole)).toMatchInlineSnapshot(
         `"The test-role role is deprecated. We just don't like this role anymore"`
+      );
+    });
+
+    test('explains why a reserved rollup role is deprecated', () => {
+      expect(
+        getExtendedRoleDeprecationNotice({ name: 'rollup_admin', metadata: { _reserved: true } })
+      ).toBe(
+        'The rollup_admin role is deprecated. Rollup jobs were deprecated in 8.11. Use downsampling instead.'
       );
     });
   });

@@ -46,13 +46,16 @@ export const isRoleHiddenOnServerless = (role: Partial<Role>): boolean => {
   );
 };
 
+const isDeprecatedRollupRole = (role: Partial<Role>): boolean =>
+  isRoleReserved(role) && (role.name === 'rollup_admin' || role.name === 'rollup_user');
+
 /**
  * Returns whether given role is deprecated or not.
  *
  * @param {role} the Role as returned by roles API
  */
 export function isRoleDeprecated(role: Partial<Role>) {
-  return (role.metadata?._deprecated as boolean) ?? false;
+  return (role.metadata?._deprecated as boolean) || isDeprecatedRollupRole(role);
 }
 
 /**
@@ -142,5 +145,15 @@ export function prepareRoleClone(role: Role): Role {
  * @param role the Role as returned by roles API
  */
 function getRoleDeprecatedReason(role: Partial<Role>) {
-  return role.metadata?._deprecated_reason ?? '';
+  if (role.metadata?._deprecated_reason) {
+    return role.metadata._deprecated_reason;
+  }
+
+  if (isDeprecatedRollupRole(role)) {
+    return i18n.translate('xpack.security.common.rollupRoleDeprecationReasonDescription', {
+      defaultMessage: 'Rollup jobs were deprecated in 8.11. Use downsampling instead.',
+    });
+  }
+
+  return '';
 }
