@@ -974,6 +974,13 @@ describe('WorkflowTemplatingEngine', () => {
       expect(evaluate('consts.secret: {{ inputs.guess }}', secretContext(guess))).toBe(expected);
     });
 
+    it.each(['nil', 'empty', 'blank'])('treats `default: %s` as an empty value', (literal) => {
+      const context = { consts: { empty_value: '' }, inputs: {} };
+      expect(
+        evaluate(`consts.empty_value: {{ inputs.nothing | default: ${literal} }}`, context)
+      ).toBe(true);
+    });
+
     it('does not let a quoted value break out of its quotes', () => {
       expect(
         evaluate('consts.secret: "{{ inputs.guess }}"', secretContext('x" or consts.secret: "s3'))
