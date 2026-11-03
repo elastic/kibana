@@ -10,6 +10,8 @@
 import type {
   DASHBOARD_RESOURCE_TYPE,
   JsonObject,
+  JsonStringPanel,
+  PanelSummary,
   SkippedPanel,
 } from '@kbn/as-code-dashboard-terraform';
 
@@ -23,6 +25,10 @@ export interface DashboardTerraformResponseBody {
   dropped_fields: string[];
   /** Panels left out of `body` because they could not be converted. */
   skipped_panels: SkippedPanel[];
+  /** Converted panels that lost fields; their fields are also in `dropped_fields`. */
+  partial_panels: Array<PanelSummary & { dropped_fields: string[] }>;
+  /** Panels exported whole as a JSON string. */
+  json_panels: JsonStringPanel[];
   /** The provider and version the conversion was verified against. */
   provider: { source: string; version: string };
 }

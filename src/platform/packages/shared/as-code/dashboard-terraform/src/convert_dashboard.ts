@@ -15,11 +15,26 @@ export interface JsonObject {
   [key: string]: JsonValue;
 }
 
-export interface SkippedPanel {
+/** Identifies a panel a conversion reports on. */
+export interface PanelSummary {
   /** API path of the panel, e.g. `panels[2]` or `panels[0].panels[1]` inside a section. */
   path: string;
   type?: string;
+  title?: string;
+}
+
+export interface SkippedPanel extends PanelSummary {
   reason: string;
+}
+
+export interface JsonStringPanel extends PanelSummary {
+  /** Why the panel could not be converted to typed attributes. */
+  reason: string;
+}
+
+export interface PartialPanel extends PanelSummary {
+  /** API paths of the panel's fields the resource has no attribute for. */
+  droppedFields: string[];
 }
 
 export interface DashboardConversion {
@@ -29,6 +44,10 @@ export interface DashboardConversion {
   droppedFields: string[];
   /** Panels that could not be converted and are left out of `body`. */
   skippedPanels: SkippedPanel[];
+  /** Converted panels that lost fields, so they must not read as fully typed; also in `droppedFields`. */
+  partialPanels: PartialPanel[];
+  /** Panels exported whole as a JSON string because they could not be converted to typed attributes. */
+  jsonPanels: JsonStringPanel[];
 }
 
 /** The dashboard itself (not one of its panels) cannot be converted. */
@@ -48,6 +67,17 @@ const expectObject = (value: JsonValue, path: string): JsonObject => {
   return value;
 };
 
+const stringAt = (value: JsonValue | undefined, key: string): string | undefined => {
+  const child = isObject(value) ? value[key] : undefined;
+  return typeof child === 'string' ? child : undefined;
+};
+
+const summarize = (panel: JsonValue, path: string): PanelSummary => {
+  const type = stringAt(panel, 'type');
+  const title = stringAt(isObject(panel) ? panel.config : undefined, 'title');
+  return { path, ...(type !== undefined && { type }), ...(title !== undefined && { title }) };
+};
+
 const childPath = (path: string, key: string) => (path ? `${path}.${key}` : key);
 
 const recognize = (node: KeyedNode, value: JsonObject, path: string): Variant | undefined => {
@@ -61,11 +91,19 @@ const recognize = (node: KeyedNode, value: JsonObject, path: string): Variant | 
   return node.variants.find(({ values }) => values.includes(discriminatorValue));
 };
 
+// What a conversion lost, and which values it wrote under their union's extra JSON-string variant key (and why).
+interface ConversionLog {
+  dropped: string[];
+  jsonVariants: Array<{ path: string; reason: string }>;
+}
+
+const emptyLog = (): ConversionLog => ({ dropped: [], jsonVariants: [] });
+
 const convertValue = (
   node: TNode,
   value: JsonValue,
   path: string,
-  dropped: string[]
+  log: ConversionLog
 ): JsonValue => {
   switch (node.k) {
     case 'prim':
@@ -76,23 +114,23 @@ const convertValue = (
     }
     case 'list':
       if (!Array.isArray(value)) throw new Error(`${path}: expected a list, got ${preview(value)}`);
-      return value.map((item, i) => convertValue(node.items, item, `${path}[${i}]`, dropped));
+      return value.map((item, i) => convertValue(node.items, item, `${path}[${i}]`, log));
     case 'object': {
       const out: JsonObject = {};
       for (const [key, child] of Object.entries(expectObject(value, path))) {
         const prop = node.props.find(({ apiName }) => apiName === key);
         if (!prop) {
-          dropped.push(childPath(path, key));
+          log.dropped.push(childPath(path, key));
           continue;
         }
-        const converted = convertValue(prop.node, child, childPath(path, key), dropped);
+        const converted = convertValue(prop.node, child, childPath(path, key), log);
         if (prop.flatten && isObject(converted)) Object.assign(out, converted);
         else out[prop.tfName] = converted;
       }
       return out;
     }
     case 'keyed':
-      return convertKeyed(node, value, path, dropped);
+      return convertKeyed(node, value, path, log);
   }
 };
 
@@ -100,7 +138,7 @@ const convertKeyed = (
   node: KeyedNode,
   apiValue: JsonValue,
   path: string,
-  dropped: string[]
+  log: ConversionLog
 ): JsonObject => {
   const value = expectObject(apiValue, path);
   const { m, disc, discOutside, outside } = node;
@@ -109,7 +147,7 @@ const convertKeyed = (
   for (const prop of outside) {
     const child = value[prop.apiName];
     if (child !== undefined) {
-      out[prop.tfName] = convertValue(prop.node, child, childPath(path, prop.apiName), dropped);
+      out[prop.tfName] = convertValue(prop.node, child, childPath(path, prop.apiName), log);
     }
     delete rest[prop.apiName];
   }
@@ -121,23 +159,41 @@ const convertKeyed = (
   let content: JsonValue = rest;
   if (m.content) {
     content = value[m.content] ?? {};
-    for (const key of Object.keys(rest)) if (key !== m.content) dropped.push(childPath(path, key));
+    for (const key of Object.keys(rest)) {
+      if (key !== m.content) log.dropped.push(childPath(path, key));
+    }
   }
 
   const discriminatorValue = disc ? value[disc] : undefined;
-  if (
-    !variant &&
-    m.extra_json_variant &&
+  const jsonKey =
     typeof discriminatorValue === 'string' &&
-    m.extra_json_variant.values.includes(discriminatorValue)
-  ) {
-    out[m.extra_json_variant.key] = JSON.stringify(content);
+    m.extra_json_variant?.values.includes(discriminatorValue)
+      ? m.extra_json_variant.key
+      : undefined;
+  const asJson = (key: string, reason: string): JsonObject => {
+    out[key] = JSON.stringify(content);
+    log.jsonVariants.push({ path, reason });
+    return out;
+  };
+
+  if (!variant) {
+    const reason = `${path}: no Terraform variant for ${preview(value)}`;
+    if (jsonKey) return asJson(jsonKey, reason);
+    throw new Error(reason);
+  }
+  if (!jsonKey || !isObject(content)) {
+    out[variant.key] = convertValue(variant.content, content, contentPath, log);
     return out;
   }
-  if (!variant) {
-    throw new Error(`${path}: no Terraform variant for ${preview(value)}`);
+  // The JSON-string variant keeps every field, so a typed conversion that fails falls back to it.
+  const attempt = emptyLog();
+  try {
+    out[variant.key] = convertValue(variant.content, content, contentPath, attempt);
+  } catch (e) {
+    return asJson(jsonKey, messageOf(e));
   }
-  out[variant.key] = convertValue(variant.content, content, contentPath, dropped);
+  log.dropped.push(...attempt.dropped);
+  log.jsonVariants.push(...attempt.jsonVariants);
   return out;
 };
 
@@ -174,17 +230,23 @@ export const createDashboardConverter = (doc: OasDocument): DashboardConverter =
   return (dashboard) => {
     const droppedFields: string[] = [];
     const skippedPanels: SkippedPanel[] = [];
+    const partialPanels: PartialPanel[] = [];
+    const jsonPanels: JsonStringPanel[] = [];
     const { panels = [], pinned_panels: pinnedPanels = [], ...envelope } = dashboard;
 
     const convertPanel = (node: TNode, panel: JsonValue, path: string): JsonValue[] => {
-      const dropped: string[] = [];
+      const log = emptyLog();
       try {
-        const converted = convertValue(node, panel, path, dropped);
-        droppedFields.push(...dropped);
+        const converted = convertValue(node, panel, path, log);
+        droppedFields.push(...log.dropped);
+        if (log.dropped.length) {
+          partialPanels.push({ ...summarize(panel, path), droppedFields: log.dropped });
+        }
+        const asJson = log.jsonVariants.find((variant) => variant.path === path);
+        if (asJson) jsonPanels.push({ ...summarize(panel, path), reason: asJson.reason });
         return [converted];
       } catch (e) {
-        const type = isObject(panel) && typeof panel.type === 'string' ? panel.type : undefined;
-        skippedPanels.push({ path, type, reason: messageOf(e) });
+        skippedPanels.push({ ...summarize(panel, path), reason: messageOf(e) });
         return [];
       }
     };
@@ -195,8 +257,11 @@ export const createDashboardConverter = (doc: OasDocument): DashboardConverter =
 
     // Outside panels, a value the resource cannot hold fails the whole dashboard.
     const convertPart = (node: TNode, value: JsonObject, path: string): JsonObject => {
+      const log = emptyLog();
       try {
-        return expectObject(convertValue(node, value, path, droppedFields), path);
+        const converted = expectObject(convertValue(node, value, path, log), path);
+        droppedFields.push(...log.dropped);
+        return converted;
       } catch (e) {
         throw new DashboardConversionError(messageOf(e));
       }
@@ -226,6 +291,6 @@ export const createDashboardConverter = (doc: OasDocument): DashboardConverter =
     if (tfPinnedPanels.length) body.pinned_panels = tfPinnedPanels;
 
     // Everything in the body is user content; references generated later must not go through this.
-    return { body: escapeObject(body), droppedFields, skippedPanels };
+    return { body: escapeObject(body), droppedFields, skippedPanels, partialPanels, jsonPanels };
   };
 };

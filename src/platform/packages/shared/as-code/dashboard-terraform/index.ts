@@ -14,7 +14,10 @@ export type {
   DashboardConversion,
   DashboardConverter,
   JsonObject,
+  JsonStringPanel,
   JsonValue,
+  PanelSummary,
+  PartialPanel,
   SkippedPanel,
 } from './src/convert_dashboard';
 export { loadDashboardOas } from './src/dashboard_oas';

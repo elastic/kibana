@@ -13,7 +13,10 @@ import { screen, waitFor, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
-import type { DashboardTerraformResponseBody } from '../../../../../server';
+import type {
+  DashboardSanitizeResponseBody,
+  DashboardTerraformResponseBody,
+} from '../../../../../server';
 import { TerraformExportFlyout } from './terraform_export_flyout';
 
 const mockPost = jest.fn();
@@ -34,12 +37,17 @@ const conversion: DashboardTerraformResponseBody = {
   body: { title: 'Web logs', description: 'Costs $${var.env}' },
   dropped_fields: [],
   skipped_panels: [],
+  partial_panels: [],
+  json_panels: [],
   provider: { source: 'elastic/elasticstack', version: '9.9.9' },
 };
 
-const respondWith = (terraform: () => Promise<DashboardTerraformResponseBody>) =>
+const respondWith = (
+  terraform: () => Promise<DashboardTerraformResponseBody>,
+  sanitizeResult: Omit<DashboardSanitizeResponseBody, 'data'> = {}
+) =>
   mockPost.mockImplementation(async (path: string) =>
-    path.endsWith('/_sanitize') ? { data: sanitized, warnings: [] } : terraform()
+    path.endsWith('/_sanitize') ? { data: sanitized, ...sanitizeResult } : terraform()
   );
 
 const renderFlyout = (
@@ -88,6 +96,15 @@ const shownFiles = async (folder: string) => {
 };
 
 const modeButton = (name: string) => screen.getByRole('button', { name });
+
+const problemDetails = async () => {
+  await userEvent.click(await screen.findByRole('button', { name: 'Show details' }));
+  const problems = screen.getByRole('list', { name: 'Problems' });
+  return within(problems)
+    .getAllByRole('listitem')
+    .filter((item) => item.parentElement === problems)
+    .map((item) => item.textContent);
+};
 
 beforeEach(() => {
   mockPost.mockReset();
@@ -198,13 +215,11 @@ describe('TerraformExportFlyout', () => {
     await screen.findByRole('list', { name: 'Module files' });
     expect(modeButton('Adopt this dashboard')).toBeDisabled();
     expect(modeButton('New copy')).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByText('This export includes unsaved changes')).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        'This dashboard has never been saved, so it can only be exported as a new copy. Save it to adopt it.'
-      )
-    ).toBeInTheDocument();
     expect(fileNames()).not.toContain('imports.tf.json');
+    expect(screen.getByText('Check before you apply')).toBeInTheDocument();
+    expect(await problemDetails()).toEqual([
+      'This export includes unsaved changes. This dashboard has never been saved, so it can only be exported as a new copy. Save it to adopt it.',
+    ]);
   });
 
   it('says when the export of a saved dashboard includes unsaved changes', async () => {
@@ -212,8 +227,12 @@ describe('TerraformExportFlyout', () => {
     renderFlyout('Web logs', { dashboardId: 'abc-123', isDirty: true });
 
     await screen.findByRole('list', { name: 'Module files' });
-    expect(screen.getByText('This export includes unsaved changes')).toBeInTheDocument();
     expect(modeButton('Adopt this dashboard')).toBeEnabled();
+    expect(screen.getByText('Check before you apply')).toBeInTheDocument();
+    expect(screen.getByText('1 note about this export.')).toBeInTheDocument();
+    expect(await problemDetails()).toEqual([
+      'This export includes unsaved changes. The files differ from the saved dashboard. If you adopt it, the first plan shows these changes.',
+    ]);
   });
 
   it('says nothing about unsaved changes when the dashboard is saved as shown', async () => {
@@ -221,7 +240,90 @@ describe('TerraformExportFlyout', () => {
     renderFlyout('Web logs', { dashboardId: 'abc-123' });
 
     await screen.findByRole('list', { name: 'Module files' });
-    expect(screen.queryByText('This export includes unsaved changes')).not.toBeInTheDocument();
+    expect(screen.queryByText(/unsaved changes/)).not.toBeInTheDocument();
+  });
+
+  it('lists what did not export cleanly, most severe first', async () => {
+    respondWith(
+      async () => ({
+        ...conversion,
+        skipped_panels: [
+          { path: 'panels[1]', type: 'legacy_tsvb', title: 'Requests', reason: 'no variant' },
+          { path: 'panels[2].panels[0]', type: 'legacy_tsvb', reason: 'no variant' },
+        ],
+        dropped_fields: ['not_an_attribute', 'panels[0].config.not_a_markdown_attribute'],
+        partial_panels: [
+          {
+            path: 'panels[0]',
+            type: 'markdown',
+            title: 'Notes',
+            dropped_fields: ['panels[0].config.not_a_markdown_attribute'],
+          },
+        ],
+        json_panels: [{ path: 'panels[3]', type: 'vis', title: 'Old chart', reason: 'no variant' }],
+      }),
+      {
+        warnings: [
+          { type: 'dropped_property', key: 'options', message: 'Removed an unsupported setting' },
+          {
+            type: 'dropped_panel',
+            message: 'Panel schema not available for panel type: map.',
+            panel_type: 'map',
+            panel_config: { savedObjectId: 'm1' },
+          },
+          {
+            type: 'dropped_panel',
+            message: 'Panel schema not available for panel type: legacy_vis.',
+            panel_type: 'legacy_vis',
+            panel_config: { title: 'Instructions' },
+          },
+        ],
+        related_items: [
+          { type: 'lens', type_label: 'Visualization', id: 'v1' },
+          { type: 'index-pattern', type_label: 'Data view', id: 'd1' },
+          { type: 'lens', type_label: 'Visualization', id: 'v2' },
+        ],
+        related_items_count: 3,
+      }
+    );
+    renderFlyout('Web logs', { dashboardId: 'abc-123', isDirty: true });
+
+    expect(
+      await screen.findByText('Not everything on this dashboard is exported')
+    ).toBeInTheDocument();
+    expect(screen.getByText('7 problems and 3 notes.')).toBeInTheDocument();
+    expect(await problemDetails()).toEqual([
+      'A panel of type map is not exported.',
+      'Panel “Instructions” (legacy_vis) is not exported.',
+      'Panel “Requests” (legacy_tsvb) is not exported.',
+      'Panel panels[2].panels[0] (legacy_tsvb) is not exported.',
+      'Panel “Notes” (markdown) is exported partially. Dropped:panels[0].config.not_a_markdown_attribute',
+      'Dropped not_an_attribute: the resource has no attribute for it.',
+      'Panel “Old chart” (vis) is exported as a JSON string.',
+      'Removed an unsupported setting',
+      'This export includes unsaved changes. The files differ from the saved dashboard. If you adopt it, the first plan shows these changes.',
+      'The dashboard refers to 3 objects that are not exported. They must exist where Terraform runs.Visualization: 2Data view: 1',
+    ]);
+  });
+
+  it('shows no callout when everything on the dashboard is exported', async () => {
+    respondWith(async () => conversion);
+    renderFlyout('Web logs', { dashboardId: 'abc-123' });
+
+    await screen.findByRole('list', { name: 'Module files' });
+    expect(screen.queryByTestId('dashboardTerraformExportProblems')).not.toBeInTheDocument();
+  });
+
+  it('dismisses the callout', async () => {
+    respondWith(async () => ({
+      ...conversion,
+      skipped_panels: [{ path: 'panels[0]', type: 'legacy_tsvb', reason: 'no variant' }],
+    }));
+    renderFlyout('Web logs', { dashboardId: 'abc-123' });
+
+    expect(await screen.findByText('1 problem.')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /dismiss/i }));
+    expect(screen.queryByTestId('dashboardTerraformExportProblems')).not.toBeInTheDocument();
   });
 
   it('writes template sequences in an adopted ID literally', async () => {

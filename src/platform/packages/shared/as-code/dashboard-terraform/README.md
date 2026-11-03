@@ -20,7 +20,9 @@ published OpenAPI file. This package reads only that document.
   `panels[]`, while the provider keeps two lists.
 - `createDashboardConverter` turns a dashboard in the API's shape into the body of the resource in Terraform JSON
   syntax, with the API paths of the fields it dropped and the panels it skipped. Panels are converted one by one, so
-  one unsupported panel does not fail the export. Every string is escaped (`${` → `$${`, `%{` → `%%{`) so Terraform
+  one unsupported panel does not fail the export. A panel that lost fields is reported as partial (even when it lost
+  all of them, so it never reads as fully typed). A panel whose type the resource also accepts as a JSON string
+  (`config_json`) falls back to that when its typed conversion fails, and is reported as a JSON-string panel. Every string is escaped (`${` → `$${`, `%{` → `%%{`) so Terraform
   does not evaluate user text as a template. The dashboard plugin's Export → Terraform route calls it.
 - At runtime the converter reads `src/dashboard_schemas.oas.json`, the dashboard schemas of the published OpenAPI
   file (the whole file is not shipped with Kibana). `TERRAFORM_PROVIDER` is the provider version the mapping was

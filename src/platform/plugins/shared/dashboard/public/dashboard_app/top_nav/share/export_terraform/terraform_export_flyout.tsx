@@ -27,11 +27,13 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  useEuiPaddingSize,
+  useResizeObserver,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { downloadFileAs } from '@kbn/share-plugin/public';
-import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { ExportMode, ModuleFile } from './module_files';
 import {
   MAIN_FILE,
@@ -40,6 +42,7 @@ import {
   toResourceName,
   toZipFilename,
 } from './module_files';
+import { listProblems, ProblemsCallout } from './problems_callout';
 import { useTerraformExport } from './use_terraform_export';
 
 export interface TerraformExportFlyoutProps {
@@ -75,30 +78,6 @@ const modeOptions = (canAdopt: boolean) => [
     'data-test-subj': 'dashboardTerraformExportModeCopy',
   },
 ];
-
-const UnsavedChangesCallout = ({ isSaved }: { isSaved: boolean }) => (
-  <>
-    <KbnInfoCallout
-      size="s"
-      data-test-subj="dashboardTerraformExportUnsavedChanges"
-      title={i18n.translate('dashboard.exportTerraform.unsavedChangesTitle', {
-        defaultMessage: 'This export includes unsaved changes',
-      })}
-      text={
-        isSaved
-          ? i18n.translate('dashboard.exportTerraform.unsavedChangesDescription', {
-              defaultMessage:
-                'The files differ from the saved dashboard. If you adopt it, the first plan shows these changes.',
-            })
-          : i18n.translate('dashboard.exportTerraform.unsavedDashboardDescription', {
-              defaultMessage:
-                'This dashboard has never been saved, so it can only be exported as a new copy. Save it to adopt it.',
-            })
-      }
-    />
-    <EuiSpacer size="m" />
-  </>
-);
 
 const DownloadFileButton = ({ name, content }: Pick<ModuleFile, 'name' | 'content'>) => {
   const label = i18n.translate('dashboard.exportTerraform.downloadFileLabel', {
@@ -181,6 +160,33 @@ export const TerraformExportFlyout = ({
   }, [conversion, dashboardId, modeKind, resourceName, spaceId]);
   const [selectedName, setSelectedName] = useState(MAIN_FILE);
   const selected = files.find(({ name }) => name === selectedName) ?? files[0];
+
+  const [isProblemsDismissed, setIsProblemsDismissed] = useState(false);
+  const problems = useMemo(
+    () =>
+      exportState.status === 'success'
+        ? listProblems({
+            conversion: exportState.conversion,
+            sanitized: exportState.sanitized,
+            isDirty,
+            isSaved: canAdopt,
+          })
+        : [],
+    [canAdopt, exportState, isDirty]
+  );
+
+  const showProblems = problems.length > 0 && !isProblemsDismissed;
+
+  // The body's scroll area holds the problems banner and the files; the code fills what the banner leaves, so the
+  // body itself does not scroll. The banner and the files each have the body padding above them, the files also below.
+  const [scrollArea, setScrollArea] = useState<HTMLDivElement | null>(null);
+  const [banner, setBanner] = useState<HTMLDivElement | null>(null);
+  const { height: scrollAreaHeight } = useResizeObserver(scrollArea, 'height');
+  const { height: bannerHeight } = useResizeObserver(banner, 'height');
+  const bodyPadding = parseFloat(useEuiPaddingSize('l') ?? '0');
+  const bannerSpace = showProblems ? bannerHeight + bodyPadding : 0;
+  const codeHeight =
+    scrollAreaHeight > 0 ? Math.max(scrollAreaHeight - bannerSpace - 2 * bodyPadding, 120) : '65vh';
 
   const onDownload = useCallback(async () => {
     await downloadFileAs(toZipFilename(title), await buildModuleZip(resourceName, files));
@@ -267,8 +273,16 @@ export const TerraformExportFlyout = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>
-        {(isDirty || !canAdopt) && <UnsavedChangesCallout isSaved={canAdopt} />}
+      <EuiFlyoutBody
+        scrollContainerRef={setScrollArea}
+        banner={
+          showProblems ? (
+            <div ref={setBanner}>
+              <ProblemsCallout problems={problems} onDismiss={() => setIsProblemsDismissed(true)} />
+            </div>
+          ) : undefined
+        }
+      >
         {exportState.status === 'loading' && (
           <EuiFlexGroup justifyContent="center" alignItems="center" css={{ height: '100%' }}>
             <EuiLoadingSpinner
@@ -305,7 +319,7 @@ export const TerraformExportFlyout = ({
                 language={selected.language}
                 isCopyable
                 lineNumbers
-                overflowHeight="65vh"
+                overflowHeight={codeHeight}
                 fontSize="s"
                 aria-label={selected.name}
                 data-test-subj="dashboardTerraformExportFileContent"

@@ -153,6 +153,87 @@ describe('createDashboardConverter', () => {
     expect(at(body, 'sections', 0)).toEqual({ title: 'Section', grid: { y: 30 } });
   });
 
+  it('reports a panel with dropped fields as partial, even when all of them were dropped', () => {
+    const { droppedFields, partialPanels } = convert({
+      title: 'Partial panels',
+      panels: [
+        {
+          type: 'markdown',
+          grid: { x: 0, y: 0, w: 24, h: 15 },
+          config: { title: 'Notes', content: 'kept', not_an_attribute: 1 },
+        },
+        {
+          type: 'image',
+          grid: { x: 0, y: 15, w: 24, h: 15 },
+          config: { not_an_attribute: 1, nor_this: 2 },
+        },
+        { type: 'markdown', grid: { x: 0, y: 30, w: 24, h: 15 }, config: { content: 'clean' } },
+      ],
+    });
+
+    expect(partialPanels).toEqual([
+      {
+        path: 'panels[0]',
+        type: 'markdown',
+        title: 'Notes',
+        droppedFields: ['panels[0].config.not_an_attribute'],
+      },
+      {
+        path: 'panels[1]',
+        type: 'image',
+        droppedFields: ['panels[1].config.not_an_attribute', 'panels[1].config.nor_this'],
+      },
+    ]);
+    expect(droppedFields).toEqual([
+      'panels[0].config.not_an_attribute',
+      'panels[1].config.not_an_attribute',
+      'panels[1].config.nor_this',
+    ]);
+  });
+
+  it('exports a panel it cannot type as a JSON string when the resource allows one for its type', () => {
+    const config = { title: 'Old chart', type: 'not_a_chart_type', costs: '${price}' };
+    const { body, jsonPanels, skippedPanels, droppedFields } = convert({
+      title: 'JSON string panels',
+      panels: [{ type: 'vis', grid: { x: 0, y: 0, w: 24, h: 15 }, config }],
+    });
+
+    expect(at(body, 'panels', 0)).toEqual({
+      type: 'vis',
+      grid: { x: 0, y: 0, w: 24, h: 15 },
+      config_json: '{"title":"Old chart","type":"not_a_chart_type","costs":"$${price}"}',
+    });
+    expect(jsonPanels).toEqual([
+      { path: 'panels[0]', type: 'vis', title: 'Old chart', reason: expect.any(String) },
+    ]);
+    expect(skippedPanels).toEqual([]);
+    expect(droppedFields).toEqual([]);
+  });
+
+  it('names skipped panels by title, and keeps converting the rest', () => {
+    const { body, skippedPanels } = convert({
+      title: 'With a panel the provider does not support',
+      panels: [
+        {
+          type: 'legacy_tsvb',
+          grid: { x: 0, y: 0, w: 24, h: 15 },
+          config: { title: 'Requests over time', params: { type: 'timeseries' } },
+        },
+        { type: 'markdown', grid: { x: 0, y: 15, w: 24, h: 15 }, config: { content: 'kept' } },
+      ],
+    });
+
+    expect(skippedPanels).toEqual([
+      {
+        path: 'panels[0]',
+        type: 'legacy_tsvb',
+        title: 'Requests over time',
+        reason: expect.any(String),
+      },
+    ]);
+    expect(at(body, 'panels', 0, 'markdown_config', 'by_value', 'content')).toBe('kept');
+  });
+
   it('puts pinned panels under the variant key of their type and values source', () => {
     const { body: optionsList } = convert(fixture('oas_sections_and_controls'));
     expect(keysAt(optionsList, 'pinned_panels', 0).sort()).toEqual([

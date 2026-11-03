@@ -67,12 +67,19 @@ export function registerTerraformRoute(
           await import('@kbn/as-code-dashboard-terraform');
         try {
           const convert = await getConverter();
-          const { body, droppedFields, skippedPanels } = convert(req.body.dashboard as JsonObject);
+          const { body, droppedFields, skippedPanels, partialPanels, jsonPanels } = convert(
+            req.body.dashboard as JsonObject
+          );
           const responseBody: DashboardTerraformResponseBody = {
             resource_type: DASHBOARD_RESOURCE_TYPE,
             body,
             dropped_fields: droppedFields,
             skipped_panels: skippedPanels,
+            partial_panels: partialPanels.map(({ droppedFields: dropped, ...panel }) => ({
+              ...panel,
+              dropped_fields: dropped,
+            })),
+            json_panels: jsonPanels,
             provider: { ...TERRAFORM_PROVIDER },
           };
           return res.ok({ body: responseBody });
