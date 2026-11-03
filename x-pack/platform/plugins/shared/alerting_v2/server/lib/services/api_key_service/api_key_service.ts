@@ -7,12 +7,16 @@
 
 import Boom from '@hapi/boom';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { Logger as PluginLogger } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
+import {
+  getInvalidationTargets,
+  queueInvalidationTargets,
+  type QueueResult,
+} from '@kbn/response-ops-api-keys';
 import { inject, injectable } from 'inversify';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
 import { getActionPolicyCloudApiKeyNotSupportedMessage } from '../../errors/action_policy_error_messages';
@@ -30,7 +34,7 @@ export interface ApiKeyAttributes {
  * of thrown so a caller invalidating a batch still learns about the keys that
  * did register, and so best-effort callers can keep ignoring the result.
  */
-export type ApiKeyInvalidationResult = { success: true } | { success: false; message: string };
+export type ApiKeyInvalidationResult = QueueResult;
 
 export interface ApiKeyServiceContract {
   create(name: string): Promise<ApiKeyAttributes>;
@@ -70,47 +74,18 @@ export class ApiKeyService implements ApiKeyServiceContract {
   }
 
   public async markApiKeysForInvalidation(apiKeys: string[]): Promise<ApiKeyInvalidationResult[]> {
-    if (apiKeys.length === 0) {
-      return [];
-    }
-    const decodedApiKeys = apiKeys.map((key) => this.decodeApiKey(key));
-    const apiKeysToInvalidate = decodedApiKeys.map(({ apiKeyId, apiKeyValue }) => ({
-      attributes: {
-        apiKeyId,
-        createdAt: new Date().toISOString(),
-        ...(apiKeyValue && isUiamCredential(apiKeyValue) ? { uiamApiKey: apiKeyValue } : {}),
-      },
+    // Each stored `apiKey` yields at most one target; keys with none have nothing to queue.
+    const targetsByKey = apiKeys.map((apiKey) => getInvalidationTargets({ apiKey }));
+    const results = await queueInvalidationTargets(targetsByKey.flat(), {
       type: API_KEY_PENDING_INVALIDATION_TYPE,
-    }));
-
-    let response;
-    try {
-      response = await this.invalidationSavedObjectsClient.bulkCreate(apiKeysToInvalidate);
-    } catch (e) {
-      const message = (e as Error).message;
-      this.logger.error(
-        `Failed to bulk mark list of API keys [${decodedApiKeys
-          .map(({ apiKeyId }) => `"${apiKeyId}"`)
-          .join(', ')}] for invalidation: ${message}`,
-        {
-          error: { stack_trace: (e as Error).stack },
-        }
-      );
-      return apiKeys.map((): ApiKeyInvalidationResult => ({ success: false, message }));
-    }
-
-    return decodedApiKeys.map(({ apiKeyId }, index): ApiKeyInvalidationResult => {
-      const created = response.saved_objects[index];
-      if (created && !isSavedObjectErrorResult(created)) {
-        return { success: true };
-      }
-
-      const message = created
-        ? created.error.message
-        : 'Saved object was not returned by bulkCreate';
-      this.logger.error(`Failed to mark API key "${apiKeyId}" for invalidation: ${message}`);
-      return { success: false, message };
+      savedObjectsClient: this.invalidationSavedObjectsClient,
+      logger: this.logger,
     });
+
+    let next = 0;
+    return targetsByKey.map((targets) =>
+      targets.length > 0 ? results[next++] : { success: true }
+    );
   }
 
   private decodeApiKey(key: string): { apiKeyId: string; apiKeyValue?: string } {

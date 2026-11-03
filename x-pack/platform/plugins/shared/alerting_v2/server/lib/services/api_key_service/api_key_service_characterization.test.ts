@@ -374,7 +374,7 @@ describe('ApiKeyService characterization', () => {
       })),
     });
 
-    it('writes one exact pending-invalidation doc per input form in a single bulkCreate (current behavior)', async () => {
+    it('writes one exact pending-invalidation doc per queueable input form in a single bulkCreate', async () => {
       const { service, invalidationSavedObjectsClient } = setup();
       const apiKeys = [
         toEnvelope('es-id', 'es-secret'),
@@ -383,10 +383,10 @@ describe('ApiKeyService characterization', () => {
         'not a key!!',
         '',
       ];
-      invalidationSavedObjectsClient.bulkCreate.mockResolvedValueOnce(
-        successResponse(apiKeys.length)
-      );
+      invalidationSavedObjectsClient.bulkCreate.mockResolvedValueOnce(successResponse(3));
 
+      // A raw essu_ key carries no id and an empty key has nothing to invalidate, so neither is
+      // written, but both still report success.
       await expect(service.markApiKeysForInvalidation(apiKeys)).resolves.toEqual([
         { success: true },
         { success: true },
@@ -405,21 +405,9 @@ describe('ApiKeyService characterization', () => {
           type: API_KEY_PENDING_INVALIDATION_TYPE,
           attributes: { apiKeyId: 'uiam-id', createdAt: NOW, uiamApiKey: 'essu_uiam-secret' },
         },
-        // A raw essu_ key is base64-decoded like an envelope: garbage id, no uiamApiKey (current behavior).
-        {
-          type: API_KEY_PENDING_INVALIDATION_TYPE,
-          attributes: {
-            apiKeyId: 'z\ufffd.\ufffd\ufffd\ufffd\ufffd\ufffdh\ufffd\u07ecy\ufffd\ufffd',
-            createdAt: NOW,
-          },
-        },
         {
           type: API_KEY_PENDING_INVALIDATION_TYPE,
           attributes: { apiKeyId: '\ufffd\ufffdZ\ufffd\ufffd', createdAt: NOW },
-        },
-        {
-          type: API_KEY_PENDING_INVALIDATION_TYPE,
-          attributes: { apiKeyId: '', createdAt: NOW },
         },
       ]);
     });
