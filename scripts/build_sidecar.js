@@ -7,27 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { execSync } = require('child_process');
-const path = require('path');
+var childProcess = require('child_process');
+var path = require('path');
 
-const REPO_ROOT = path.resolve(__dirname, '..');
-const SIDECAR_DIR = path.join(REPO_ROOT, 'src/platform/sidecar');
-const OUTPUT = path.join(SIDECAR_DIR, 'kbn-sidecar');
+var REPO_ROOT = path.resolve(__dirname, '..');
+var SIDECAR_DIR = path.join(REPO_ROOT, 'src/platform/sidecar');
+var OUTPUT = path.join(SIDECAR_DIR, 'kbn_sidecar');
 
-const goos = process.argv[2] || process.platform === 'win32' ? 'windows' : process.platform;
-const goarch = process.argv[3] || (process.arch === 'arm64' ? 'arm64' : 'amd64');
+var goos = process.argv[2] || (process.platform === 'win32' ? 'windows' : process.platform);
+var goarch = process.argv[3] || (process.arch === 'arm64' ? 'arm64' : 'amd64');
 
-console.log(`Building kbn-sidecar for ${goos}/${goarch}...`);
+console.log('Building kbn_sidecar for ' + goos + '/' + goarch + '...');
 
-execSync(`go build -o ${OUTPUT} ./cmd/kbn-sidecar/`, {
+childProcess.execSync('go build -o ' + OUTPUT + ' ./cmd/kbn_sidecar/', {
   cwd: SIDECAR_DIR,
   stdio: 'inherit',
-  env: {
-    ...process.env,
+  env: Object.assign({}, process.env, {
     GOOS: goos === 'win32' ? 'windows' : goos,
     GOARCH: goarch,
     CGO_ENABLED: '0',
-  },
+  }),
 });
 
-console.log(`Built: ${OUTPUT}`);
+console.log('Built: ' + OUTPUT);
