@@ -23,14 +23,47 @@ export const buildConditionalTermsFilters = (
     return clauses;
   }, []);
 
+// Every word must match, but each word can match a different field (e.g. name + tag).
+// A single multi_match cannot do this: cross_fields does not mix text fields with keyword `tags`.
+const buildAllWordsClause = (query: string): estypes.QueryDslQueryContainer[] => {
+  const words = query.split(/\s+/).filter((word) => /[\p{L}\p{N}]/u.test(word));
+  if (words.length === 0) {
+    return [];
+  }
+  return [
+    {
+      bool: {
+        must: words.map((word) => ({
+          multi_match: {
+            query: word,
+            fields: ['name^2', 'description', 'tags'],
+            type: 'best_fields',
+            operator: 'and',
+          },
+        })),
+        boost: 2,
+      },
+    },
+  ];
+};
+
 /**
  * Builds the full-text search clause used by the workflow list endpoint.
- * Combines phrase matching, best-fields, prefix matching, and wildcard matching
+ * Combines exact-name, phrase, all-words, prefix, and wildcard matching
  * across name, description, and tags fields with appropriate boosts.
  */
 export const buildWorkflowTextSearchClause = (query: string): estypes.QueryDslQueryContainer => ({
   bool: {
     should: [
+      {
+        term: {
+          'name.keyword': {
+            value: query.trim(),
+            case_insensitive: true,
+            boost: 10,
+          },
+        },
+      },
       {
         multi_match: {
           query,
@@ -39,14 +72,7 @@ export const buildWorkflowTextSearchClause = (query: string): estypes.QueryDslQu
           boost: 3,
         },
       },
-      {
-        multi_match: {
-          query,
-          fields: ['name^2', 'description', 'tags'],
-          type: 'best_fields',
-          boost: 2,
-        },
-      },
+      ...buildAllWordsClause(query),
       {
         multi_match: {
           query,

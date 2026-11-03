@@ -10,11 +10,14 @@ export {
   type ComponentDefinitionFormProps,
 } from './component_definition_form';
 export type { ComponentReferenceOption } from './form_context';
-export { validateValues } from './client_validation';
+export { validateItemScopes, validateValues } from './client_validation';
+export { toFieldErrors } from './diagnostic_errors';
+export { SignalPicker } from './controls/signal_picker';
 export {
   createInitialObject,
   fromConfigEntries,
   toConfigEntries,
+  trimItemScopes,
   type ConfigEntry,
 } from './serialize';
 export { isObjectValue, type FieldErrors, type FormValue, type ObjectValue } from './values';

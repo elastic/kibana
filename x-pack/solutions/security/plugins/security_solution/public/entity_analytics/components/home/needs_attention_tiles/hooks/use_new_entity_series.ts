@@ -27,6 +27,8 @@ interface NewEntitySeriesOptions {
   reachesBack: boolean | undefined;
   /** The live count, which replaces the newest dot so the line ends on the number shown. */
   count: number;
+  /** True when the count came back: a failed, timed-out or skipped count has no line to draw. */
+  hasCount: boolean;
   /** From the tile's delta hook (its `previous`): the delta's baseline, which starts the line. */
   deltaBaseline: number | undefined;
 }
@@ -46,6 +48,7 @@ export const useNewEntitySeries = ({
   isReady,
   reachesBack,
   count,
+  hasCount,
   deltaBaseline,
 }: NewEntitySeriesOptions): { trend: number[] | undefined; isTrendLoading: boolean } => {
   const {
@@ -60,7 +63,7 @@ export const useNewEntitySeries = ({
     [index, timeRange, entityFilterClauses]
   );
 
-  const { canRun, isHidden } = getSeriesGate({ isReady, reachesBack, count });
+  const { canRun, isHidden } = getSeriesGate({ isReady, reachesBack, hasCount });
   const { series, isFetching, isError } = useTileSeriesQuery({
     tileKey: 'newEntitySeries',
     query,
