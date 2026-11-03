@@ -191,16 +191,20 @@ export const runMemoryOptimize = async ({
     return undefined;
   }
 
+  const loaded = await loadInvestigationRound({
+    agentBuilder: getAgentBuilder(),
+    request,
+    conversationId,
+    roundId,
+    roundIndex,
+    logger,
+    signal,
+  });
   const investigation =
-    (await loadRoundSteps({
-      agentBuilder: getAgentBuilder(),
-      request,
-      conversationId,
-      roundId,
-      roundIndex,
-      logger,
-      signal,
-    })) ?? stepsFromToolCalls(toolCalls);
+    loaded.source === 'persisted_round'
+      ? stepsFromRound(loaded.rawSteps as Parameters<typeof stepsFromRound>[0])
+      : stepsFromToolCalls(toolCalls);
+  const resolvedRoundId = loaded.roundId || roundId;
 
   const store = createMemoryStore({ esClient, logger, spaceId, signal });
   return optimizeMemory({
@@ -222,6 +226,8 @@ export const runMemoryOptimize = async ({
     investigation,
     agentId,
     conversationId,
+    roundId: resolvedRoundId,
+    workflowExecutionId: interactionId,
     logger,
     signal,
   });

@@ -421,7 +421,7 @@ export const ATTACK_DISCOVERY_STEP_FAILURE_EVENT: EventTypeOpts<{
       type: 'keyword',
       _meta: {
         description:
-          'Category of error (anonymization_error, cluster_health, concurrent_conflict, connector_error, context_length_exceeded, interrupted, network_error, permission_error, rate_limit, step_registration_error, timeout, unknown, validation_error, workflow_deleted, workflow_disabled, workflow_error, workflow_invalid)',
+          'Category of error (anonymization_error, cluster_health, concurrent_conflict, connector_error, content_filter, context_length_exceeded, interrupted, network_error, permission_error, rate_limit, step_registration_error, timeout, unknown, validation_error, workflow_deleted, workflow_disabled, workflow_error, workflow_invalid)',
         optional: false,
       },
     },

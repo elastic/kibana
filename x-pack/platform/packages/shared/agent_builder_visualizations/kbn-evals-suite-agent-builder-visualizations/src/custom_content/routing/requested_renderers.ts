@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID } from '@kbn/custom-content-common';
 import { isRecord } from '../../evaluator_utils';
 
-const GENERATE_DASHBOARD_TOOL_ID = 'platform.dashboard.generate_dashboard';
 const CREATE_VISUALIZATION_TOOL_ID = 'platform.core.create_visualization';
 
 /**
@@ -24,7 +24,10 @@ export const getRequestedRenderers = (
     }
     const { params } = step;
 
-    if (step.tool_id === GENERATE_DASHBOARD_TOOL_ID && Array.isArray(params.panels)) {
+    if (
+      step.tool_id === CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID &&
+      Array.isArray(params.panels)
+    ) {
       return params.panels.flatMap((item: unknown) =>
         isRecord(item) && isRecord(item.content) && item.content.source === 'request'
           ? [typeof item.content.renderer === 'string' ? item.content.renderer : 'lens']
