@@ -76,10 +76,33 @@ isolation and independent scaling.
 
 ## Families
 
-A family is a checked-in manifest next to its owning plugin, e.g.
-`alerting_v2/task_pod.jsonc` (plugin ids whose tasks entries to boot, and the task types it
-serves). Register the owner in `task_pod/family.ts` (`FAMILY_OWNERS`). Boot fails if a listed
-plugin's tasks dependency is missing from the list.
+A family is a checked-in manifest next to its owning plugin (plugin ids whose tasks entries to boot,
+and the task types it serves). Register the owner in `task_pod/family.ts` (`FAMILY_OWNERS`). Boot
+fails if a listed plugin's tasks dependency is missing from the list.
+
+| Family | Manifest | Task types | Notes |
+| --- | --- | --- | --- |
+| `alerting_v2` | `alerting_v2/task_pod.jsonc` | `alerting_v2:*` | rule executor, dispatcher, housekeeping |
+| `connectors` | `actions/task_pod.jsonc` | `actions:.*` | connector executions; `.`-prefixed ids keep the cleanup and telemetry tasks in Kibana |
+| `workflows` | `workflows_execution_engine/task_pod.jsonc` | `workflow:run`, `workflow:resume`, `workflow:scheduled` | includes the connectors plugins, for connector steps |
+
+**What a pod does not run, and how it fails**
+
+- Connector types that need Kibana privileges (system and sub-feature types) get no task definition in a
+  pod, so its `/health` does not list them. When a pod answers 404 to a run, Task Manager runs the task in
+  Kibana (`RemoteTaskRunner`'s `fallback`).
+- Workflow steps that call Kibana (`kibana.*`, custom steps' `callKibanaApi`) fail with an explicit
+  message: a pod has no route back to Kibana. Workflows that run as a service account are refused.
+- A workflow step registered by a plugin that is not in the family fails with `Unknown node type: <step>`.
+  `node scripts/task_pod_coverage.js` lists the plugins that register into a family's registries and
+  whether each has a tasks entry and is in the manifest; most of them do not yet.
+- A task timeout longer than 2^31-1 ms (about 24.8 days, e.g. a workflow's `365d`) is cut at that length on
+  both sides of the call.
+
+**Inputs a pod needs**: the same `xpack.encryptedSavedObjects.encryptionKey` as Kibana; for connectors,
+the same `xpack.actions.preconfigured` connectors (secrets can come from `kibana.keystore`, read by
+`bin/kibana-task-pod`) and any certificate files `customHostSettings` names; per-pod state (email rate
+limit, lease pool, metrics) is not shared between pods.
 
 ## Running
 
@@ -123,5 +146,5 @@ creates no indices. `task_pod.test.ts` covers the wire format.
 ## Known gaps
 
 No authentication between Kibana and the pod. Tasks that run `runAs` a service account, and
-`http.selfClient` calls, are not available in pods. The host still uses hand-built Core stand-ins
+`http.selfClient` calls, are not available in pods. The agent builder family is not onboarded yet. The host still uses hand-built Core stand-ins
 (`host/core/`), over the real saved objects repository and type registry.
