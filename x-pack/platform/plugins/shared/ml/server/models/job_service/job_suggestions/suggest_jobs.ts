@@ -38,6 +38,8 @@ export interface SuggestJobsDeps {
   mlClient: MlClient;
   model: ScopedModel;
   isSecurityDisabled: boolean;
+  /** Stops the work when it is aborted, for example when the request is cancelled. */
+  signal?: AbortSignal;
   findRecognizerMatches?: (index: string) => Promise<RecognizerModuleHit[]>;
 }
 
@@ -80,10 +82,11 @@ const resolveCandidate = async ({
   evidence: IndexEvidence;
   deps: SuggestJobsDeps;
 }): Promise<{ draft: SuggestionDraft; candidate: JobCandidate } | undefined> => {
-  const { client, mlClient, model, isSecurityDisabled } = deps;
+  const { client, mlClient, model, isSecurityDisabled, signal } = deps;
   let candidate = initialCandidate;
 
   for (let attempt = 0; attempt <= MAX_REVISION_ATTEMPTS; attempt++) {
+    signal?.throwIfAborted();
     // The model's answer, and each revision of it, is put in the preferred form before it is checked.
     candidate = preferPartitionFields(candidate);
     let problems = findCandidateProblems(candidate, evidence);
@@ -95,6 +98,7 @@ const resolveCandidate = async ({
         jobId: generateJobId(candidate.title),
       });
       const check = await checkCandidate({ client, mlClient, built, evidence, isSecurityDisabled });
+      signal?.throwIfAborted();
       problems = check.blockingProblems;
 
       if (problems.length === 0) {
@@ -131,8 +135,10 @@ const resolveCandidate = async ({
     }
 
     try {
-      candidate = await reviseCandidate({ model, evidence, candidate, problems });
+      candidate = await reviseCandidate({ model, evidence, candidate, problems, signal });
     } catch (error) {
+      // A cancelled request is not a candidate which could not be revised.
+      if (signal?.aborted) throw error;
       mlLog.debug(`Could not revise suggested job "${candidate.title}": ${errorMessage(error)}`);
       return undefined;
     }
@@ -159,22 +165,26 @@ export const suggestJobs = async (
     throw Boom.badRequest('The start of the time range must be before the end.');
   }
 
-  const { client, model, findRecognizerMatches } = deps;
+  const { client, model, signal, findRecognizerMatches } = deps;
 
   const evidence = await gatherEvidence({
     client,
     index,
     start: rangeStart,
     end: rangeEnd,
+    signal,
     findRecognizerMatches,
   });
 
-  const profile = await interpretData({ model, evidence });
+  signal?.throwIfAborted();
+  const profile = await interpretData({ model, evidence, signal });
+  signal?.throwIfAborted();
   const candidates = await proposeJobs({
     model,
     evidence,
     profile,
     count: maxSuggestions + EXTRA_CANDIDATES,
+    signal,
   });
 
   const resolved = await Promise.all(

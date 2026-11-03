@@ -111,8 +111,19 @@ describe('gatherEvidence', () => {
         query: {
           range: { '@timestamp': { gte: params.start, lte: params.end, format: 'epoch_millis' } },
         },
-      })
+      }),
+      expect.anything()
     );
+  });
+
+  it('lets the requests be cancelled', async () => {
+    const { client, asCurrentUser } = createClient();
+    const { signal } = new AbortController();
+
+    await gatherEvidence({ client, ...params, signal });
+
+    expect(asCurrentUser.fieldCaps).toHaveBeenCalledWith(expect.anything(), { signal });
+    expect(asCurrentUser.search).toHaveBeenCalledWith(expect.anything(), { signal });
   });
 
   it('shortens sample documents', async () => {

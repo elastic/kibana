@@ -18,10 +18,12 @@ import type { IndexEvidence } from './types';
 export const interpretData = async ({
   model,
   evidence,
+  signal,
 }: {
   model: ScopedModel;
   evidence: IndexEvidence;
+  signal?: AbortSignal;
 }): Promise<DataProfile> =>
   model.chatModel
     .withStructuredOutput(dataProfileSchema, { name: 'describe_data' })
-    .invoke(createInterpretDataPrompt(evidence));
+    .invoke(createInterpretDataPrompt(evidence), { signal });

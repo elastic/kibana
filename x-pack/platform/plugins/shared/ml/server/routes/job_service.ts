@@ -11,6 +11,7 @@ import { categorizationExamplesProvider } from '@kbn/ml-category-validator';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { type CompatibleModule, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization } from '../types';
@@ -1198,6 +1199,8 @@ export function jobServiceRoutes(
           getDataViewsService,
           serverless,
         }) => {
+          // Aborted when the client cancels the request, so that the work stops.
+          const signal = getRequestAbortedSignal(request.events.aborted$);
           try {
             const license = mlLicense.getLicenseInfo().license;
             if (license?.status !== 'active' || !license.hasAtLeast('enterprise')) {
@@ -1230,6 +1233,7 @@ export function jobServiceRoutes(
                 mlClient,
                 model,
                 isSecurityDisabled: mlLicense.isSecurityEnabled() === false,
+                signal,
                 findRecognizerMatches: async (indexPattern) => {
                   const soClient = (await context.core).savedObjects.client;
                   const dataViewsService = await getDataViewsService();
@@ -1252,6 +1256,13 @@ export function jobServiceRoutes(
 
             return response.ok({ body: { suggestions } });
           } catch (e) {
+            if (signal.aborted) {
+              // The client has gone, so this is not an error.
+              return response.customError({
+                statusCode: 499,
+                body: { message: 'The request was cancelled.' },
+              });
+            }
             return response.customError(wrapError(e));
           }
         }

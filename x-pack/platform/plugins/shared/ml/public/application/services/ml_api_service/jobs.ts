@@ -419,23 +419,27 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  suggestJobs({
-    index,
-    start,
-    end,
-    maxSuggestions,
-  }: {
-    index: string;
-    start?: number;
-    end?: number;
-    maxSuggestions?: number;
-  }) {
+  suggestJobs(
+    {
+      index,
+      start,
+      end,
+      maxSuggestions,
+    }: {
+      index: string;
+      start?: number;
+      end?: number;
+      maxSuggestions?: number;
+    },
+    signal?: AbortSignal
+  ) {
     const body = JSON.stringify({ index, start, end, maxSuggestions });
     return httpService.http<SuggestJobsResponse>({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/suggest_jobs`,
       method: 'POST',
       body,
       version: '1',
+      signal,
     });
   },
 

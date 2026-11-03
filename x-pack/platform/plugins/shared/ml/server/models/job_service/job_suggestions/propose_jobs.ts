@@ -16,15 +16,17 @@ export const proposeJobs = async ({
   evidence,
   profile,
   count,
+  signal,
 }: {
   model: ScopedModel;
   evidence: IndexEvidence;
   profile: DataProfile;
   count: number;
+  signal?: AbortSignal;
 }): Promise<JobCandidate[]> => {
   const { candidates } = await model.chatModel
     .withStructuredOutput(proposeJobsSchema, { name: 'propose_jobs' })
-    .invoke(createProposeJobsPrompt({ evidence, profile, count }));
+    .invoke(createProposeJobsPrompt({ evidence, profile, count }), { signal });
   return candidates;
 };
 
@@ -34,12 +36,14 @@ export const reviseCandidate = async ({
   evidence,
   candidate,
   problems,
+  signal,
 }: {
   model: ScopedModel;
   evidence: IndexEvidence;
   candidate: JobCandidate;
   problems: string[];
+  signal?: AbortSignal;
 }): Promise<JobCandidate> =>
   model.chatModel
     .withStructuredOutput(jobCandidateSchema, { name: 'revise_job' })
-    .invoke(createReviseCandidatePrompt({ evidence, candidate, problems }));
+    .invoke(createReviseCandidatePrompt({ evidence, candidate, problems }), { signal });

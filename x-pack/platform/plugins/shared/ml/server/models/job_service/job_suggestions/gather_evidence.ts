@@ -114,6 +114,8 @@ export interface GatherEvidenceParams {
   index: string;
   start: number;
   end: number;
+  /** Cancels the requests which are made. */
+  signal?: AbortSignal;
   findRecognizerMatches?: (index: string) => Promise<RecognizerModuleHit[]>;
 }
 
@@ -126,9 +128,10 @@ export const gatherEvidence = async ({
   index,
   start,
   end,
+  signal,
   findRecognizerMatches,
 }: GatherEvidenceParams): Promise<IndexEvidence> => {
-  const fieldCaps = await client.asCurrentUser.fieldCaps({ index, fields: '*' });
+  const fieldCaps = await client.asCurrentUser.fieldCaps({ index, fields: '*' }, { signal });
   const mappedFields = getMappedFields(fieldCaps);
 
   const timeField = chooseTimeField(mappedFields.filter(({ kind }) => kind === 'date'));
@@ -172,16 +175,19 @@ export const gatherEvidence = async ({
   });
 
   const [searchResponse, recognizerModules] = await Promise.all([
-    client.asCurrentUser.search({
-      index,
-      size: SAMPLE_DOC_COUNT,
-      track_total_hits: true,
-      sort: [{ [timeField]: { order: 'desc', unmapped_type: 'date' } }],
-      query: {
-        range: { [timeField]: { gte: start, lte: end, format: 'epoch_millis' } },
+    client.asCurrentUser.search(
+      {
+        index,
+        size: SAMPLE_DOC_COUNT,
+        track_total_hits: true,
+        sort: [{ [timeField]: { order: 'desc', unmapped_type: 'date' } }],
+        query: {
+          range: { [timeField]: { gte: start, lte: end, format: 'epoch_millis' } },
+        },
+        aggs,
       },
-      aggs,
-    }),
+      { signal }
+    ),
     findRecognizerMatches
       ? findRecognizerMatches(index).catch(() => [] as RecognizerModuleHit[])
       : Promise.resolve([] as RecognizerModuleHit[]),

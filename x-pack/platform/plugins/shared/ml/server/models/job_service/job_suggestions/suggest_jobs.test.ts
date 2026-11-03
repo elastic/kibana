@@ -319,6 +319,96 @@ describe('suggestJobs', () => {
     });
   });
 
+  describe('cancelling', () => {
+    it('lets every step be cancelled', async () => {
+      const { signal } = new AbortController();
+      proposeJobsMock.mockResolvedValue([candidate('Broken', { bucket_span: 'soon' })]);
+      reviseCandidateMock.mockResolvedValue(candidate('Fixed'));
+
+      await suggestJobs({ ...deps, signal }, { index: 'logs-*' });
+
+      expect(gatherEvidenceMock).toHaveBeenCalledWith(expect.objectContaining({ signal }));
+      expect(interpretDataMock).toHaveBeenCalledWith(expect.objectContaining({ signal }));
+      expect(proposeJobsMock).toHaveBeenCalledWith(expect.objectContaining({ signal }));
+      expect(reviseCandidateMock).toHaveBeenCalledWith(expect.objectContaining({ signal }));
+    });
+
+    it('stops after gathering evidence when it is cancelled during it', async () => {
+      const controller = new AbortController();
+      gatherEvidenceMock.mockImplementation(async () => {
+        controller.abort();
+        return evidence;
+      });
+
+      await expect(
+        suggestJobs({ ...deps, signal: controller.signal }, { index: 'logs-*' })
+      ).rejects.toMatchObject({ name: 'AbortError' });
+
+      expect(interpretDataMock).not.toHaveBeenCalled();
+      expect(proposeJobsMock).not.toHaveBeenCalled();
+    });
+
+    it('stops before asking for jobs when it is cancelled while the data is interpreted', async () => {
+      const controller = new AbortController();
+      interpretDataMock.mockImplementation(async () => {
+        controller.abort();
+        return profile;
+      });
+
+      await expect(
+        suggestJobs({ ...deps, signal: controller.signal }, { index: 'logs-*' })
+      ).rejects.toMatchObject({ name: 'AbortError' });
+
+      expect(proposeJobsMock).not.toHaveBeenCalled();
+    });
+
+    it('does not validate anything when it is cancelled while jobs are proposed', async () => {
+      const controller = new AbortController();
+      proposeJobsMock.mockImplementation(async () => {
+        controller.abort();
+        return [candidate('Traffic spikes')];
+      });
+
+      await expect(
+        suggestJobs({ ...deps, signal: controller.signal }, { index: 'logs-*' })
+      ).rejects.toMatchObject({ name: 'AbortError' });
+
+      expect(checkCandidateMock).not.toHaveBeenCalled();
+    });
+
+    it('stops when it is cancelled while a candidate is validated', async () => {
+      const controller = new AbortController();
+      proposeJobsMock.mockResolvedValue([candidate('Traffic spikes')]);
+      checkCandidateMock.mockImplementation(async () => {
+        controller.abort();
+        return { blockingProblems: [], warnings: [], modelMemoryLimit: '20MB' };
+      });
+
+      await expect(
+        suggestJobs({ ...deps, signal: controller.signal }, { index: 'logs-*' })
+      ).rejects.toMatchObject({ name: 'AbortError' });
+    });
+
+    it('does not treat a cancelled revision as a candidate which cannot be fixed', async () => {
+      const controller = new AbortController();
+      proposeJobsMock.mockResolvedValue([candidate('Broken', { bucket_span: 'soon' })]);
+      reviseCandidateMock.mockImplementation(async () => {
+        controller.abort();
+        throw new Error('The request was aborted');
+      });
+
+      await expect(
+        suggestJobs({ ...deps, signal: controller.signal }, { index: 'logs-*' })
+      ).rejects.toThrow('The request was aborted');
+    });
+
+    it('works as before without a signal', async () => {
+      proposeJobsMock.mockResolvedValue([candidate('Traffic spikes')]);
+
+      await expect(suggestJobs(deps, { index: 'logs-*' })).resolves.toHaveLength(1);
+    });
+  });
+
   it('passes errors from gathering evidence to the caller', async () => {
     gatherEvidenceMock.mockRejectedValue(new Error('no data'));
 

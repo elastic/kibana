@@ -6,16 +6,14 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiBadge,
+  EuiButton,
   EuiButtonEmpty,
-  EuiCard,
   EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
@@ -24,20 +22,22 @@ import {
   EuiSuperDatePicker,
   EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import { JOB_TYPE } from '../../../../../common/constants/new_job';
 import type { JobSuggestion } from '../../../../../common/types/job_suggestions';
 import {
   useMlKibana,
   useMlManagementLocator,
   useNotifications,
 } from '../../../../application/contexts/kibana';
+import { useJobsApiService } from '../../../../application/services/ml_api_service/jobs';
 import { getWizardPath, stashSuggestion } from '../open_suggestion_in_wizard';
-import { DEFAULT_SUGGESTION_TIME_RANGE, useJobSuggestions } from '../use_job_suggestions';
-import type { SuggestionTimeRange } from '../use_job_suggestions';
+import { DEFAULT_SUGGESTION_TIME_RANGE, JobSuggestionService } from '../job_suggestion_service';
+import type { SuggestionTimeRange } from '../job_suggestion_service';
+import { useSuggestionHistory } from '../use_suggestion_history';
+import { PreviousRun } from './previous_run';
+import { SuggestionCards } from './suggestion_cards';
 
 interface Props {
   onClose: () => void;
@@ -46,30 +46,6 @@ interface Props {
   savedSearchId?: string;
   projectRouting?: string;
 }
-
-const JOB_TYPE_LABELS: Record<JOB_TYPE, string> = {
-  [JOB_TYPE.SINGLE_METRIC]: i18n.translate('xpack.ml.suggestADJobsFlyout.jobType.singleMetric', {
-    defaultMessage: 'Single metric',
-  }),
-  [JOB_TYPE.MULTI_METRIC]: i18n.translate('xpack.ml.suggestADJobsFlyout.jobType.multiMetric', {
-    defaultMessage: 'Multi-metric',
-  }),
-  [JOB_TYPE.POPULATION]: i18n.translate('xpack.ml.suggestADJobsFlyout.jobType.population', {
-    defaultMessage: 'Population',
-  }),
-  [JOB_TYPE.ADVANCED]: i18n.translate('xpack.ml.suggestADJobsFlyout.jobType.advanced', {
-    defaultMessage: 'Advanced',
-  }),
-  [JOB_TYPE.CATEGORIZATION]: i18n.translate('xpack.ml.suggestADJobsFlyout.jobType.categorization', {
-    defaultMessage: 'Categorization',
-  }),
-  [JOB_TYPE.RARE]: i18n.translate('xpack.ml.suggestADJobsFlyout.jobType.rare', {
-    defaultMessage: 'Rare',
-  }),
-  [JOB_TYPE.GEO]: i18n.translate('xpack.ml.suggestADJobsFlyout.jobType.geo', {
-    defaultMessage: 'Geo',
-  }),
-};
 
 export const SuggestADJobsFlyout: FC<Props> = ({
   onClose,
@@ -80,13 +56,31 @@ export const SuggestADJobsFlyout: FC<Props> = ({
 }) => {
   const {
     services: {
-      data: { dataViews },
+      data: {
+        dataViews,
+        query: {
+          timefilter: { timefilter },
+        },
+      },
     },
   } = useMlKibana();
+  const jobsApi = useJobsApiService();
   const { toasts } = useNotifications();
   const mlManagementLocator = useMlManagementLocator();
   const [timeRange, setTimeRange] = useState<SuggestionTimeRange>(DEFAULT_SUGGESTION_TIME_RANGE);
-  const { state, reload } = useJobSuggestions(indexPattern, timeRange);
+  const jobSuggestionService = useMemo(
+    () => new JobSuggestionService(jobsApi, timefilter),
+    [jobsApi, timefilter]
+  );
+  const state = useObservable(jobSuggestionService.state$, jobSuggestionService.state);
+
+  useEffect(() => {
+    void jobSuggestionService.suggest(indexPattern, timeRange);
+    // Closing the flyout, or asking for something else, stops the analysis which is in progress.
+    return () => jobSuggestionService.cancel();
+  }, [jobSuggestionService, indexPattern, timeRange]);
+
+  const previousRun = useSuggestionHistory(indexPattern, state);
 
   const openInWizard = useCallback(
     async (suggestion: JobSuggestion) => {
@@ -164,7 +158,7 @@ export const SuggestADJobsFlyout: FC<Props> = ({
           start={timeRange.from}
           end={timeRange.to}
           onTimeChange={({ start, end }) => setTimeRange({ from: start, to: end })}
-          onRefresh={reload}
+          onRefresh={() => void jobSuggestionService.reload()}
           isDisabled={state.status === 'loading'}
           data-test-subj="mlSuggestADJobsTimeRange"
         />
@@ -191,6 +185,51 @@ export const SuggestADJobsFlyout: FC<Props> = ({
                 />
               </p>
             }
+            actions={
+              <EuiButton
+                size="s"
+                iconType="stop"
+                onClick={() => jobSuggestionService.cancel()}
+                data-test-subj="mlSuggestADJobsStop"
+              >
+                <FormattedMessage
+                  id="xpack.ml.suggestADJobsFlyout.stopButton"
+                  defaultMessage="Stop"
+                />
+              </EuiButton>
+            }
+          />
+        ) : state.status === 'cancelled' ? (
+          <EuiEmptyPrompt
+            data-test-subj="mlSuggestADJobsCancelled"
+            title={
+              <h3>
+                <FormattedMessage
+                  id="xpack.ml.suggestADJobsFlyout.cancelledTitle"
+                  defaultMessage="Analysis stopped"
+                />
+              </h3>
+            }
+            body={
+              <p>
+                <FormattedMessage
+                  id="xpack.ml.suggestADJobsFlyout.cancelledDescription"
+                  defaultMessage="No jobs were suggested from this run."
+                />
+              </p>
+            }
+            actions={
+              <EuiButton
+                size="s"
+                onClick={() => void jobSuggestionService.reload()}
+                data-test-subj="mlSuggestADJobsRunAgain"
+              >
+                <FormattedMessage
+                  id="xpack.ml.suggestADJobsFlyout.runAgainButton"
+                  defaultMessage="Run again"
+                />
+              </EuiButton>
+            }
           />
         ) : state.status === 'error' ? (
           <KbnDangerCallout
@@ -215,57 +254,14 @@ export const SuggestADJobsFlyout: FC<Props> = ({
             }
           />
         ) : (
-          <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="mlSuggestADJobsList">
-            {state.suggestions.map((suggestion) => (
-              <EuiFlexItem key={suggestion.id}>
-                <EuiCard
-                  hasBorder
-                  textAlign="left"
-                  titleSize="xs"
-                  title={suggestion.title}
-                  description={suggestion.description}
-                  onClick={() => openInWizard(suggestion)}
-                  data-test-subj={`mlSuggestADJobsCard-${suggestion.id}`}
-                >
-                  <EuiSpacer size="s" />
-                  <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="hollow">{JOB_TYPE_LABELS[suggestion.jobType]}</EuiBadge>
-                    </EuiFlexItem>
-                    {suggestion.estimatedModelMemoryLimit ? (
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge color="hollow">
-                          <FormattedMessage
-                            id="xpack.ml.suggestADJobsFlyout.memoryBadge"
-                            defaultMessage="Memory: {memory}"
-                            values={{ memory: suggestion.estimatedModelMemoryLimit }}
-                          />
-                        </EuiBadge>
-                      </EuiFlexItem>
-                    ) : null}
-                    {suggestion.validation.status === 'warning' ? (
-                      <EuiFlexItem grow={false}>
-                        <EuiToolTip
-                          content={i18n.translate('xpack.ml.suggestADJobsFlyout.warningTooltip', {
-                            defaultMessage:
-                              'The job validation found something worth reviewing before the job is created.',
-                          })}
-                        >
-                          <EuiBadge color="warning" tabIndex={0}>
-                            <FormattedMessage
-                              id="xpack.ml.suggestADJobsFlyout.warningBadge"
-                              defaultMessage="Review needed"
-                            />
-                          </EuiBadge>
-                        </EuiToolTip>
-                      </EuiFlexItem>
-                    ) : null}
-                  </EuiFlexGroup>
-                </EuiCard>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
+          <SuggestionCards
+            suggestions={state.suggestions}
+            onSelect={openInWizard}
+            testSubjPrefix="mlSuggestADJobs"
+          />
         )}
+
+        {previousRun ? <PreviousRun run={previousRun} onSelect={openInWizard} /> : null}
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
