@@ -4496,28 +4496,72 @@ describe('managed orphan cleanup without a request', () => {
       expect(client.index).not.toHaveBeenCalled();
     });
 
-    it('skips the write when a concurrent write switched the workflow off first', async () => {
-      const { client, source, service } = setup();
+    it('switches a bound workflow off for its registered owner without a binding change', async () => {
+      const { bindings, client, source, service } = setup();
+      source.managedBy = 'ownerPlugin';
+      const owner = { managedBy: 'ownerPlugin', definitionId: 'system-orphan' };
+
+      await expect(
+        service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', owner)
+      ).resolves.toEqual(
+        expect.objectContaining({
+          enabled: false,
+          definition: expect.objectContaining({ settings: { run_as: 'account-a' } }),
+        })
+      );
+      expect(client.index).toHaveBeenCalledTimes(1);
+      expect(bindings.bindWorkload).not.toHaveBeenCalled();
+      expect(bindings.unbindWorkload).not.toHaveBeenCalled();
+    });
+
+    // A lost OCC write re-reads the workflow; the re-read decides whether to write again.
+    const loseFirstWriteThenReread = (
+      { client, source }: ReturnType<typeof setup>,
+      reread: WorkflowProperties | null
+    ) => {
       client.search
         .mockResolvedValueOnce({
           hits: { hits: [{ ...occSearchHit('system-orphan', undefined, 5, 1), _source: source }] },
         })
         .mockResolvedValueOnce({
           hits: {
-            hits: [
-              {
-                ...occSearchHit('system-orphan', undefined, 6, 1),
-                _source: { ...source, enabled: false },
-              },
-            ],
+            hits: reread
+              ? [{ ...occSearchHit('system-orphan', undefined, 6, 1), _source: reread }]
+              : [],
           },
         });
       client.index.mockRejectedValueOnce(Object.assign(new Error('conflict'), { statusCode: 409 }));
+    };
+
+    it('skips the write when the re-read finds the workflow already disabled', async () => {
+      const context = setup();
+      loseFirstWriteThenReread(context, { ...context.source, enabled: false });
 
       await expect(
-        service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN)
+        context.service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN)
       ).resolves.toBeNull();
-      expect(client.index).toHaveBeenCalledTimes(1);
+      expect(context.client.index).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips the write when the re-read no longer finds the workflow because it was soft-deleted', async () => {
+      const context = setup();
+      // The live-only read filters out the tombstone, so the re-read comes back empty.
+      loseFirstWriteThenReread(context, null);
+
+      await expect(
+        context.service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN)
+      ).resolves.toBeNull();
+      expect(context.client.index).toHaveBeenCalledTimes(1);
+    });
+
+    it('refuses the write when the re-read finds the workflow owned by someone else', async () => {
+      const context = setup();
+      loseFirstWriteThenReread(context, { ...context.source, managedBy: 'otherPlugin' });
+
+      await expect(
+        context.service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN)
+      ).rejects.toThrow('observed');
+      expect(context.client.index).toHaveBeenCalledTimes(1);
     });
 
     it('refuses a workflow that no longer matches the sweep snapshot', async () => {

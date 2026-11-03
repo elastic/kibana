@@ -1383,6 +1383,43 @@ describe('ManagedWorkflowsService', () => {
       });
     });
 
+    it('switches a bound workflow off and records it with its service account kept', async () => {
+      mockManagedWorkflowDefinitions = [createDefinition()];
+      const { audit, crudService, service } = createService();
+      const boundAndDisabled = createWorkflowSource({ enabled: false });
+      boundAndDisabled.definition = {
+        version: '1',
+        name: boundAndDisabled.name,
+        enabled: false,
+        triggers: [{ type: 'manual' }],
+        steps: [],
+        settings: { run_as: 'account-a' },
+      };
+      crudService.disableManagedWorkflowWithoutRequest.mockResolvedValue(boundAndDisabled);
+
+      await expect(
+        service.disableManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, PLUGIN_ID)
+      ).resolves.toBe(true);
+
+      expect(crudService.logWorkflowChangesAfterWrite).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflows: [
+            {
+              id: WORKFLOW_ID,
+              document: expect.objectContaining({
+                enabled: false,
+                definition: expect.objectContaining({ settings: { run_as: 'account-a' } }),
+              }),
+            },
+          ],
+        })
+      );
+      expect(audit.logWorkflowUpdated).toHaveBeenCalledWith(
+        undefined,
+        expect.objectContaining({ id: WORKFLOW_ID, reason: 'disable' })
+      );
+    });
+
     it('resolves to false and records nothing when the guarded write finds nothing to switch off', async () => {
       mockManagedWorkflowDefinitions = [createDefinition()];
       const { audit, crudService, service } = createService();
