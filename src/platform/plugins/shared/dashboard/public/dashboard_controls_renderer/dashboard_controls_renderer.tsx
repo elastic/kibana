@@ -7,25 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/as-code-dashboard-schema';
-import type { ControlsLayout } from '@kbn/controls-renderer';
-import { FlexGridLayout, GridLayout } from '@kbn/grid-layout';
-import type { PublishesDataLoading } from '@kbn/presentation-publishing';
-import {
-  apiPublishesDataLoading,
-  useBatchedPublishingSubjects,
-} from '@kbn/presentation-publishing';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { combineLatest, map, of, switchMap } from 'rxjs';
-import type { DashboardLayout } from '../dashboard_api/layout_manager';
+import { DefaultEmbeddableApi, EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { FlexLayout } from '@kbn/grid-layout';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import React, { useCallback, useRef, useState } from 'react';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
+import { useDashboardInternalApi } from '../dashboard_api/use_dashboard_internal_api';
 import {
   DASHBOARD_GRID_HEIGHT,
+  DASHBOARD_MARGIN_SIZE,
   DEFAULT_DASHBOARD_DRAG_TOP_OFFSET,
 } from '../dashboard_renderer/grid/constants';
-import { useDashboardInternalApi } from '../dashboard_api/use_dashboard_internal_api';
-import { css } from '@emotion/react';
-import { DefaultEmbeddableApi, EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 
 export const DashboardPinnedPanelsRenderer = () => {
   const dashboardApi = useDashboardApi();
@@ -43,8 +35,8 @@ export const DashboardPinnedPanelsRenderer = () => {
       const type = panels[id].type;
 
       const panelProps = {
-        isSharedItem: true,
-        showBadges: true,
+        isSharedItem: false,
+        showBadges: false,
         showBorder: false,
         showShadow: false,
       };
@@ -60,6 +52,7 @@ export const DashboardPinnedPanelsRenderer = () => {
             embeddableApiRef.current = api;
             dashboardApi.registerChildApi(api);
           }}
+          hidePanelChrome={true}
         />
       );
     },
@@ -67,11 +60,11 @@ export const DashboardPinnedPanelsRenderer = () => {
   );
 
   return (
-    <GridLayout
+    <FlexLayout
       layout={flexLayout}
       gridSettings={{
-        gutterSize: 0,
-        rowHeight: DASHBOARD_GRID_HEIGHT,
+        gutterSize: DASHBOARD_MARGIN_SIZE,
+        rowHeight: 32,
         columnCount: 12,
         keyboardDragTopLimit: 0,
       }}

@@ -82,6 +82,7 @@ import {
   type DashboardLayoutPanel,
   type DashboardPinnablePanel,
 } from './types';
+import { FlexLayoutData } from '@kbn/grid-layout/flex/types';
 export function initializeLayoutManager(
   viewModeManager: ReturnType<typeof initializeViewModeManager>,
   initialPanels: DashboardState['panels'],
@@ -751,16 +752,14 @@ function getClonedPanelTitle(panelTitles: string[], rawTitle: string) {
 }
 
 const transformPinnedPanelsToGridLayout = (layout: DashboardLayout) => {
-  const newLayout: GridLayoutData = {};
+  const newLayout: FlexLayoutData = {};
   Object.keys(layout.pinnedPanels).forEach((panelId) => {
     const panel = layout.pinnedPanels[panelId];
     const basePanel = {
       id: panelId,
       order: panel.order,
-      width: panel.width === 'large' ? 12 : panel.width === 'medium' ? 6 : 3,
-      height: 1,
-      resizeOptions: { maxHeight: 1, minHeight: 1 },
-    } as unknown as GridLayoutData;
+      width: panel.width === 'large' ? 800 : panel.width === 'medium' ? 400 : 224,
+    };
     newLayout[panelId] = {
       ...basePanel,
       type: 'panel',
