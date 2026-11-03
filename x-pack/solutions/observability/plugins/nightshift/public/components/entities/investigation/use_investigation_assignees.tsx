@@ -26,8 +26,6 @@ const ASSIGNEES_LABELS = {
   }),
 };
 
-const SECTIONS_QUERY_KEY = [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, 'section'];
-
 /**
  * The assignee avatars and picker for each card in a list, with the same rules as the
  * investigation flyout: read-only once the investigation is closed or when the user cannot manage
@@ -41,7 +39,8 @@ export const useInvestigationAssignees = (
   const assignInvestigation = useAssignInvestigation();
 
   const refresh = useCallback(
-    () => queryClient.invalidateQueries({ queryKey: SECTIONS_QUERY_KEY }),
+    // Covers both the home page sections and the onboarding trial investigation.
+    () => queryClient.invalidateQueries({ queryKey: NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY }),
     [queryClient]
   );
 

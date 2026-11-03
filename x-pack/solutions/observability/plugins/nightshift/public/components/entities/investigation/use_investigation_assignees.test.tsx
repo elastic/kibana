@@ -137,7 +137,7 @@ describe('useInvestigationAssignees', () => {
     expect(within(card).queryByTestId('assignToUsersAdd-open')).not.toBeInTheDocument();
   });
 
-  it('assigns through the investigation API and refetches the sections afterwards', async () => {
+  it('assigns through the investigation API and refetches the investigations afterwards', async () => {
     const queryClient = new QueryClient();
     const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
     renderCards([investigation('one')], queryClient);
@@ -150,7 +150,7 @@ describe('useInvestigationAssignees', () => {
 
     await pickerOptions!.refresh();
     expect(invalidateQueries).toHaveBeenCalledWith({
-      queryKey: ['nightshift.investigations', 'section'],
+      queryKey: ['nightshift.investigations'],
     });
   });
 });

@@ -43,6 +43,8 @@ export interface InvestigationCardActionsProps {
   investigation: InvestigationSummary;
   /** The assignee avatars and picker, shown before the divider. */
   assignees?: React.ReactNode;
+  /** Where the card is shown, for click telemetry. */
+  ebtElement?: (typeof NIGHTSHIFT_EBT_ELEMENTS)[keyof typeof NIGHTSHIFT_EBT_ELEMENTS];
 }
 
 /**
@@ -53,6 +55,7 @@ export interface InvestigationCardActionsProps {
 export const InvestigationCardActions = ({
   investigation,
   assignees,
+  ebtElement = NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATIONS_LIST,
 }: InvestigationCardActionsProps): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
   const { notifications } = useKibana().services;
@@ -114,7 +117,7 @@ export const InvestigationCardActions = ({
           // The list item around the card is tagged "view investigation", which a click here is not.
           {...getEbtProps({
             action: NIGHTSHIFT_EBT_ACTIONS.ASSIGN_INVESTIGATION,
-            element: NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATIONS_LIST,
+            element: ebtElement,
           })}
         >
           {assignees}
@@ -142,7 +145,7 @@ export const InvestigationCardActions = ({
             data-test-subj="nightshiftInvestigationCardOpenInChat"
             {...getEbtProps({
               action: NIGHTSHIFT_EBT_ACTIONS.OPEN_IN_CHAT,
-              element: NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATIONS_LIST,
+              element: ebtElement,
             })}
           />
         </EuiToolTip>

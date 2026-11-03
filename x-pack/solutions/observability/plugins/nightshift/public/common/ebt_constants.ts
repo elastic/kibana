@@ -79,6 +79,7 @@ export const NIGHTSHIFT_EBT_ELEMENTS = {
   INVESTIGATIONS_LIST: 'nightshiftInvestigationsList',
   KNOWLEDGE_INDICATOR_FLYOUT: 'nightshiftKnowledgeIndicatorFlyout',
   MARK_SIGNIFICANT_EVENT_INACTIVE_MODAL: 'nightshiftMarkSignificantEventInactiveModal',
+  ONBOARDING_TRIAL_INVESTIGATION: 'nightshiftOnboardingTrialInvestigation',
   DETECTION_FLYOUT: 'nightshiftDetectionFlyout',
   DETECTION_FLYOUT_ENTITIES: 'nightshiftDetectionFlyoutEntities',
   DETECTION_WORKSPACE_TABS: 'nightshiftDetectionWorkspaceTabs',
