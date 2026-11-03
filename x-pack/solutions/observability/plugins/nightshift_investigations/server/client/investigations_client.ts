@@ -41,11 +41,7 @@ import { assertNever } from '@kbn/std';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { installAssistantAgent } from '../lib/install_assistant_agent';
 import { telemetryTargetNameSchema } from '../../common/telemetry_targets';
-import {
-  getTelemetryTargets,
-  resolveTelemetryTarget,
-  type TelemetryTarget,
-} from '../telemetry_targets';
+import { resolveTelemetryTarget, type TelemetryTarget } from '../telemetry_targets';
 import type { NightshiftInvestigationsConfig } from '../config';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import {
@@ -1127,13 +1123,8 @@ export class NightshiftInvestigationsClient {
    * The caller may not be able to read the conversation: the sandbox tools resolve this while the
    * agent runs as the space's service account, and that account cannot see a conversation its
    * owner keeps private - which every conversation started from the Agent Builder UI is, unlike
-   * the public ones the investigation entry point creates. A pinned target only ever reaches a
-   * conversation that entry point created, so an unreadable conversation is an unpinned one.
-   *
-   * INTERIM, until the pinned target is carried by the run instead of read back per tool call:
-   * only a deployment with a single configured target assumes that. With several, an unreadable
-   * conversation keeps failing closed, because guessing the default there could point the sandbox
-   * at a cluster the investigation was pinned away from.
+   * the public ones the investigation entry point creates. Such a conversation gets no telemetry
+   * target at all, so the sandbox never reaches a telemetry cluster on behalf of a private chat.
    */
   async getTelemetryTarget(conversationId: string): Promise<TelemetryTarget> {
     const { agentBuilder } = this.requireWriteDeps();
@@ -1142,12 +1133,10 @@ export class NightshiftInvestigationsClient {
     });
     const conversation = (await conversations.bulkGet([conversationId])).get(conversationId);
     if (!conversation) {
-      const configured = getTelemetryTargets(this.telemetryConfig);
-      if (configured.length > 1) throw new InvestigationNotFoundError(conversationId);
       this.logger.debug(
-        `Conversation "${conversationId}" is not readable by this caller; using the only configured telemetry target`
+        `Conversation "${conversationId}" is not readable by this caller; it gets no telemetry target`
       );
-      return configured[0] ?? {};
+      return {};
     }
     const telemetryTarget = telemetryTargetNameSchema
       .optional()
