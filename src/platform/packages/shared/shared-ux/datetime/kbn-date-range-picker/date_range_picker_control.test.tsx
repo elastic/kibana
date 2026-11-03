@@ -1137,9 +1137,7 @@ describe('DateRangePickerControl', () => {
 
     it('keeps the resolved bounds while nothing signals a refresh', () => {
       const { rerender } = renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
-      expect(hoverTooltipText()).toContain(
-        'Jun 4, 2026, 11:40:00.000 → Jun 4, 2026, 12:00:00.000'
-      );
+      expect(hoverTooltipText()).toContain('Jun 4, 2026, 11:40:00.000 → Jun 4, 2026, 12:00:00.000');
 
       advanceClockBy(5);
       rerender(
@@ -1148,9 +1146,7 @@ describe('DateRangePickerControl', () => {
         </EuiThemeProvider>
       );
 
-      expect(hoverTooltipText()).toContain(
-        'Jun 4, 2026, 11:40:00.000 → Jun 4, 2026, 12:00:00.000'
-      );
+      expect(hoverTooltipText()).toContain('Jun 4, 2026, 11:40:00.000 → Jun 4, 2026, 12:00:00.000');
     });
 
     it('re-resolves the bounds when `resolveEpoch` increments', () => {
@@ -1173,9 +1169,7 @@ describe('DateRangePickerControl', () => {
       const { rerender } = renderWithEuiTheme(
         <DateRangePicker {...defaultProps} refreshEpoch={0} />
       );
-      expect(hoverTooltipText()).toContain(
-        'Jun 4, 2026, 11:40:00.000 → Jun 4, 2026, 12:00:00.000'
-      );
+      expect(hoverTooltipText()).toContain('Jun 4, 2026, 11:40:00.000 → Jun 4, 2026, 12:00:00.000');
 
       advanceClockBy(5);
       rerender(
@@ -1184,9 +1178,7 @@ describe('DateRangePickerControl', () => {
         </EuiThemeProvider>
       );
 
-      expect(hoverTooltipText()).toContain(
-        'Jun 4, 2026, 11:45:00.000 → Jun 4, 2026, 12:05:00.000'
-      );
+      expect(hoverTooltipText()).toContain('Jun 4, 2026, 11:45:00.000 → Jun 4, 2026, 12:05:00.000');
     });
 
     it('re-resolves the bounds when the auto-refresh timer fires', () => {
@@ -1206,18 +1198,14 @@ describe('DateRangePickerControl', () => {
           }}
         />
       );
-      expect(hoverTooltipText()).toContain(
-        'Jun 4, 2026, 11:40:00.000 → Jun 4, 2026, 12:00:00.000'
-      );
+      expect(hoverTooltipText()).toContain('Jun 4, 2026, 11:40:00.000 → Jun 4, 2026, 12:00:00.000');
 
       act(() => {
         jest.advanceTimersByTime(60_000);
       });
 
       expect(onRefresh).toHaveBeenCalledTimes(1);
-      expect(hoverTooltipText()).toContain(
-        'Jun 4, 2026, 11:41:00.000 → Jun 4, 2026, 12:01:00.000'
-      );
+      expect(hoverTooltipText()).toContain('Jun 4, 2026, 11:41:00.000 → Jun 4, 2026, 12:01:00.000');
     });
 
     it('does not reset the auto-refresh countdown when `resolveEpoch` increments', () => {
@@ -1259,9 +1247,7 @@ describe('DateRangePickerControl', () => {
         </EuiThemeProvider>
       );
 
-      expect(hoverTooltipText()).toContain(
-        'Jun 4, 2026, 11:45:00.000 → Jun 4, 2026, 12:05:00.000'
-      );
+      expect(hoverTooltipText()).toContain('Jun 4, 2026, 11:45:00.000 → Jun 4, 2026, 12:05:00.000');
       expect(screen.getByTestId('dateRangePickerAutoRefreshButton')).toHaveTextContent('00:45');
     });
 
@@ -1302,9 +1288,7 @@ describe('DateRangePickerControl', () => {
         </EuiThemeProvider>
       );
 
-      expect(hoverTooltipText()).toContain(
-        'Jun 4, 2026, 11:45:00.000 → Jun 4, 2026, 12:05:00.000'
-      );
+      expect(hoverTooltipText()).toContain('Jun 4, 2026, 11:45:00.000 → Jun 4, 2026, 12:05:00.000');
       expect(screen.getByTestId('dateRangePickerAutoRefreshButton')).toHaveTextContent('01:00');
     });
   });
