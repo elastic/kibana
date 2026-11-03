@@ -115,10 +115,28 @@ describe('buildWorkflowTextSearchClause', () => {
   const getBool = (clause: ReturnType<typeof buildWorkflowTextSearchClause>) =>
     (clause as { bool: { should: unknown[]; minimum_should_match: number } }).bool;
 
-  it('returns a bool query with four should clauses', () => {
+  it('returns a bool query with five should clauses', () => {
     const { should, minimum_should_match } = getBool(buildWorkflowTextSearchClause('my workflow'));
-    expect(should).toHaveLength(4);
+    expect(should).toHaveLength(5);
     expect(minimum_should_match).toBe(1);
+  });
+
+  it('matches the exact name case-insensitively on name.keyword', () => {
+    const { should } = getBool(buildWorkflowTextSearchClause(' system-alert-triage '));
+
+    expect(should).toContainEqual({
+      term: {
+        'name.keyword': { value: 'system-alert-triage', case_insensitive: true, boost: 10 },
+      },
+    });
+  });
+
+  it('requires all query terms across fields in the cross_fields clause', () => {
+    const { should } = getBool(buildWorkflowTextSearchClause('system-alert-triage'));
+    const clauses = should as Array<{ multi_match?: { type: string; operator?: string } }>;
+
+    const crossFields = clauses.find((clause) => clause.multi_match?.type === 'cross_fields');
+    expect(crossFields?.multi_match?.operator).toBe('and');
   });
 
   it('uses the query string in all multi_match clauses', () => {

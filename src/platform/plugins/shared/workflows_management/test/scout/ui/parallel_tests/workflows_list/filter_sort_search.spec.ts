@@ -123,4 +123,26 @@ test.describe('WorkflowsList/FilterSortSearch', { tag: [...tags.stateful.classic
     await expect(pageObjects.workflowList.getWorkflowRow(workflows[1].name)).toBeVisible();
     await expect(pageObjects.workflowList.getWorkflowRow(workflows[2].name)).toBeVisible();
   });
+
+  test('should match only the exact hyphenated name', async ({ pageObjects, apiServices }) => {
+    const target = {
+      name: 'search-test-floor-alert-triage-review',
+      description: 'Target workflow for exact name search',
+      enabled: true,
+    };
+    const similar = {
+      name: 'search-test-floor-alert-translation',
+      description: 'Shares some words with the target name',
+      enabled: true,
+    };
+    await apiServices.workflows.bulkCreate([target, similar].map(getListTestWorkflowYaml));
+
+    await pageObjects.workflowList.navigate();
+
+    const searchField = pageObjects.workflowList.getSearchField();
+    await searchField.fill(target.name);
+    await searchField.press('Enter');
+    await expect(pageObjects.workflowList.getWorkflowRow(target.name)).toBeVisible();
+    await expect(pageObjects.workflowList.getWorkflowRow(similar.name)).toBeHidden();
+  });
 });

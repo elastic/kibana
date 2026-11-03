@@ -25,12 +25,21 @@ export const buildConditionalTermsFilters = (
 
 /**
  * Builds the full-text search clause used by the workflow list endpoint.
- * Combines phrase matching, best-fields, prefix matching, and wildcard matching
+ * Combines exact-name, phrase, cross-fields, prefix, and wildcard matching
  * across name, description, and tags fields with appropriate boosts.
  */
 export const buildWorkflowTextSearchClause = (query: string): estypes.QueryDslQueryContainer => ({
   bool: {
     should: [
+      {
+        term: {
+          'name.keyword': {
+            value: query.trim(),
+            case_insensitive: true,
+            boost: 10,
+          },
+        },
+      },
       {
         multi_match: {
           query,
@@ -43,7 +52,8 @@ export const buildWorkflowTextSearchClause = (query: string): estypes.QueryDslQu
         multi_match: {
           query,
           fields: ['name^2', 'description', 'tags'],
-          type: 'best_fields',
+          type: 'cross_fields',
+          operator: 'and',
           boost: 2,
         },
       },
