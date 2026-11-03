@@ -621,17 +621,15 @@ describe('edotReactNative', () => {
       expect(manualNames).toContain('Cities');
     });
 
-    it('makes requests that start while an iOS screen appears children of its span', () => {
-      const docs = simulate({ platform: 'ios', screenViews: 6 });
-      const spans = docs.filter(isSpan);
-      const views = spans.filter(({ name }) => name === 'Cities - view appearing');
-      const children = spans.filter(({ parent_span_id: parent }) =>
-        views.some(({ span_id: spanId }) => spanId === parent)
-      );
-      expect(children.length).toBeGreaterThan(0);
-      children.forEach((child) => {
-        const parent = views.find(({ span_id: spanId }) => spanId === child.parent_span_id);
-        expect(parent?.trace_id).toBe(child.trace_id);
+    it('makes every HTTP span the root of its own trace', () => {
+      (['ios', 'android'] as const).forEach((platform) => {
+        const spans = simulate({ platform, screenViews: 6 }).filter(isSpan);
+        const httpSpans = spans.filter(({ kind }) => kind === 'Client');
+        expect(httpSpans.length).toBeGreaterThan(0);
+        httpSpans.forEach((span) => {
+          expect(span.parent_span_id).toBeUndefined();
+          expect(spans.filter(({ trace_id: traceId }) => traceId === span.trace_id)).toHaveLength(1);
+        });
       });
     });
 

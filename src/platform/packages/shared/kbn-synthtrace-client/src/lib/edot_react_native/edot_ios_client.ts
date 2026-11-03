@@ -67,7 +67,6 @@ export class EdotIosClient extends EdotReactNativeClientBase {
     responseBodySize,
     traceId,
     spanId,
-    parentSpanId,
   }: HttpRequestOptions): EdotReactNativeSpan {
     const parsedUrl = new URL(url);
     const isError =
@@ -75,7 +74,6 @@ export class EdotIosClient extends EdotReactNativeClientBase {
     return this.span({
       traceId,
       spanId,
-      parentSpanId,
       // EDOT iOS names HTTP spans after the host, without the port
       name: `${method} ${parsedUrl.hostname}`,
       kind: 'Client',

@@ -293,8 +293,7 @@ const sendRequest = (
   { client, health, random }: SessionContext,
   request: EdotReactNativeRequest,
   requestedTime: number,
-  latestEnd: number,
-  parent?: { traceId: string; spanId: string }
+  latestEnd: number
 ): EdotReactNativeEvent[] => {
   // The request, and with it its 1ms minimum duration, must end within the screen view
   const time = Math.min(requestedTime, latestEnd - 1);
@@ -326,8 +325,7 @@ const sendRequest = (
   const requestBodySize =
     bodySizeBytes ?? (hasBody ? Math.round(between(random, 120, 2_000)) : undefined);
   const responseBodySize = Math.round(between(random, 200, 20_000));
-  const { traceId, spanId } = newTraceContext(random);
-  const ids = { traceId: parent?.traceId ?? traceId, spanId };
+  const ids = newTraceContext(random);
   const endTime = Math.floor(time + duration);
 
   const events: EdotReactNativeEvent[] = [
@@ -339,7 +337,6 @@ const sendRequest = (
         errorType: transportError?.type,
         requestBodySize,
         responseBodySize,
-        parentSpanId: parent?.spanId,
         ...ids,
       })
       .timestamp(time)
@@ -421,7 +418,7 @@ const viewScreen = (ctx: SessionContext, view: ScreenViewPlan): EdotReactNativeE
   const { screen, start, appeared, end } = view;
   const events: EdotReactNativeEvent[] = [];
 
-  // On iOS, the view span is current while the screen appears, so its requests become children
+  // Drawn on both platforms, so that the platform doesn't change the rest of the draws
   const viewContext = newTraceContext(random);
   if (client.platform === 'ios') {
     events.push(
@@ -443,9 +440,9 @@ const viewScreen = (ctx: SessionContext, view: ScreenViewPlan): EdotReactNativeE
   }
 
   (screen.requests ?? []).forEach((request) => {
+    // The SDKs never make an HTTP span a child of a view or JS span: requests are their own traces
     const time = Math.round(between(random, start, Math.max(appeared, start + 1)));
-    const parent = client.platform === 'ios' && time < appeared ? viewContext : undefined;
-    events.push(...sendRequest(ctx, request, time, end, parent));
+    events.push(...sendRequest(ctx, request, time, end));
   });
 
   const widgets = screen.widgets ?? [];

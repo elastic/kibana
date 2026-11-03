@@ -70,7 +70,6 @@ export class EdotAndroidClient extends EdotReactNativeClientBase {
     errorType,
     traceId,
     spanId,
-    parentSpanId,
   }: HttpRequestOptions): EdotReactNativeSpan {
     const parsedUrl = new URL(url);
     const serverPort: number | undefined =
@@ -81,7 +80,6 @@ export class EdotAndroidClient extends EdotReactNativeClientBase {
     return this.span({
       traceId,
       spanId,
-      parentSpanId,
       // Renamed at export by EDOT Android; `host` only has the port when it isn't the default
       name: `${method} ${parsedUrl.host}`,
       kind: 'Client',

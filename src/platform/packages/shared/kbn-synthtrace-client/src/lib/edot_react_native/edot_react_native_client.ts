@@ -52,11 +52,6 @@ export interface HttpRequestOptions {
   responseBodySize?: number;
   traceId?: string;
   spanId?: string;
-  /**
-   * Only the iOS session passes one, as EDOT iOS makes requests that start while a screen
-   * appears children of its view span.
-   */
-  parentSpanId?: string;
 }
 
 export interface HttpExceptionEventOptions {
