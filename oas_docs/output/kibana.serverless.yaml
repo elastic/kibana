@@ -41769,13 +41769,14 @@ paths:
           required: false
           schema:
             type: boolean
-        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it.
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
           in: query
           name: onboarding_deployment_id
           required: false
           schema:
             maxLength: 256
             type: string
+            x-state: Experimental; added in 9.7.0
       responses:
         '200':
           content:
@@ -42020,13 +42021,14 @@ paths:
           schema:
             maxLength: 256
             type: string
-        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it.
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
           in: query
           name: onboarding_deployment_id
           required: false
           schema:
             maxLength: 256
             type: string
+            x-state: Experimental; added in 9.7.0
       requestBody:
         content:
           application/json:
@@ -57167,13 +57169,14 @@ paths:
           required: false
           schema:
             type: boolean
-        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it.
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
           in: query
           name: onboarding_deployment_id
           required: false
           schema:
             maxLength: 256
             type: string
+            x-state: Experimental; added in 9.7.0
       responses:
         '200':
           content:
@@ -57418,13 +57421,14 @@ paths:
           schema:
             maxLength: 256
             type: string
-        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it.
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
           in: query
           name: onboarding_deployment_id
           required: false
           schema:
             maxLength: 256
             type: string
+            x-state: Experimental; added in 9.7.0
       requestBody:
         content:
           application/json:
@@ -58937,13 +58941,14 @@ paths:
           required: false
           schema:
             type: boolean
-        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it.
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
           in: query
           name: onboarding_deployment_id
           required: false
           schema:
             maxLength: 256
             type: string
+            x-state: Experimental; added in 9.7.0
       responses:
         '200':
           content:
@@ -59137,13 +59142,14 @@ paths:
               - simplified
               - legacy
             type: string
-        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it.
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
           in: query
           name: onboarding_deployment_id
           required: false
           schema:
             maxLength: 256
             type: string
+            x-state: Experimental; added in 9.7.0
       requestBody:
         content:
           application/json:
@@ -59278,13 +59284,14 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it.
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
           in: query
           name: onboarding_deployment_id
           required: false
           schema:
             maxLength: 256
             type: string
+            x-state: Experimental; added in 9.7.0
       requestBody:
         content:
           application/json:
@@ -158922,6 +158929,7 @@ components:
           description: ID of the cloud onboarding instance that manages this package policy. Set by Fleet, read-only.
           nullable: true
           type: string
+          x-state: Experimental
         output_id:
           nullable: true
           type: string
@@ -159360,6 +159368,7 @@ components:
           description: ID of the cloud onboarding instance that manages this package policy. Set by Fleet, read-only.
           nullable: true
           type: string
+          x-state: Experimental
         output_id:
           nullable: true
           type: string
@@ -169074,6 +169083,7 @@ components:
           description: ID of the cloud onboarding instance that manages this managed integration. Set by Fleet, read-only.
           maxLength: 255
           type: string
+          x-state: Experimental
         package:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_managed_integration_package'
         updated_at:
@@ -176562,6 +176572,7 @@ components:
           description: ID of the cloud onboarding instance that manages this package policy. Set by Fleet, read-only.
           nullable: true
           type: string
+          x-state: Experimental
         output_id:
           nullable: true
           type: string
