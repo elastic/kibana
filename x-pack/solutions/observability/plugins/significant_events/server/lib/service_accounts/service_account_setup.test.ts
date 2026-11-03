@@ -7,9 +7,18 @@
 
 import type { CoreStart } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { createDetectionEngineSetupService } from './service_account_setup';
+import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import { createDetectionEngineSetupService, SETUP_WORKFLOW_IDS } from './service_account_setup';
 
 const request = httpServerMock.createKibanaRequest();
+
+const createWorkflowsExtensions = () => {
+  const install = jest.fn(async (..._args: unknown[]) => undefined);
+  const workflowsExtensions = {
+    getClient: async () => ({ managedWorkflows: { install } }),
+  } as unknown as WorkflowsExtensionsServerPluginStart;
+  return { workflowsExtensions, install };
+};
 
 const createCore = ({
   enabled = true,
@@ -65,10 +74,11 @@ describe('createDetectionEngineSetupService.enable', () => {
     const result = await createDetectionEngineSetupService({
       core,
       spaces: undefined,
+      workflowsExtensions: createWorkflowsExtensions().workflowsExtensions,
       isServerless: true,
     }).enable({ request, spaceId: 'default', serviceAccountId: 'account-1' });
 
-    expect(result).toEqual({ spaceId: 'default', serviceAccountId: 'account-1' });
+    expect(result).toMatchObject({ spaceId: 'default', serviceAccountId: 'account-1' });
     expect(queryRole).toHaveBeenCalledWith({
       query: { term: { name: '_nightshift_detection' } },
       size: 1,
@@ -84,7 +94,12 @@ describe('createDetectionEngineSetupService.enable', () => {
     const { core, bindWorkload } = createCore({ canManageSecurity: false });
 
     await expect(
-      createDetectionEngineSetupService({ core, spaces: undefined, isServerless: false }).enable({
+      createDetectionEngineSetupService({
+        core,
+        spaces: undefined,
+        workflowsExtensions: createWorkflowsExtensions().workflowsExtensions,
+        isServerless: false,
+      }).enable({
         request,
         spaceId: 'default',
         serviceAccountId: 'account-1',
@@ -97,7 +112,12 @@ describe('createDetectionEngineSetupService.enable', () => {
     const { core, bindWorkload } = createCore({ roleCount: 0 });
 
     await expect(
-      createDetectionEngineSetupService({ core, spaces: undefined, isServerless: false }).enable({
+      createDetectionEngineSetupService({
+        core,
+        spaces: undefined,
+        workflowsExtensions: createWorkflowsExtensions().workflowsExtensions,
+        isServerless: false,
+      }).enable({
         request,
         spaceId: 'default',
         serviceAccountId: 'account-1',
@@ -113,7 +133,12 @@ describe('createDetectionEngineSetupService.enable', () => {
     const { core, bindWorkload } = createCore({ enabled: false });
 
     await expect(
-      createDetectionEngineSetupService({ core, spaces: undefined, isServerless: false }).enable({
+      createDetectionEngineSetupService({
+        core,
+        spaces: undefined,
+        workflowsExtensions: createWorkflowsExtensions().workflowsExtensions,
+        isServerless: false,
+      }).enable({
         request,
         spaceId: 'default',
         serviceAccountId: 'account-1',
@@ -131,6 +156,7 @@ describe('createDetectionEngineSetupService.getStatus', () => {
       await createDetectionEngineSetupService({
         core,
         spaces: undefined,
+        workflowsExtensions: createWorkflowsExtensions().workflowsExtensions,
         isServerless: true,
       }).getStatus({ request, spaceId: 'default' })
     ).toEqual({
@@ -149,6 +175,7 @@ describe('createDetectionEngineSetupService.getStatus', () => {
         await createDetectionEngineSetupService({
           core,
           spaces: undefined,
+          workflowsExtensions: createWorkflowsExtensions().workflowsExtensions,
           isServerless: false,
         }).getStatus({ request, spaceId: 'default' })
       ).serviceAccountId
@@ -161,6 +188,7 @@ describe('createDetectionEngineSetupService.getStatus', () => {
     const status = await createDetectionEngineSetupService({
       core,
       spaces: undefined,
+      workflowsExtensions: createWorkflowsExtensions().workflowsExtensions,
       isServerless: false,
     }).getStatus({ request, spaceId: 'default' });
 
@@ -175,8 +203,61 @@ describe('createDetectionEngineSetupService.getStatus', () => {
       await createDetectionEngineSetupService({
         core,
         spaces: undefined,
+        workflowsExtensions: createWorkflowsExtensions().workflowsExtensions,
         isServerless: false,
       }).getStatus({ request, spaceId: 'default' })
     ).toMatchObject({ canSetUp: false });
+  });
+});
+
+describe('createDetectionEngineSetupService.enable workflows', () => {
+  it('installs every setup workflow in the space, bound to the account', async () => {
+    const { core } = createCore();
+    const { workflowsExtensions, install } = createWorkflowsExtensions();
+
+    const result = await createDetectionEngineSetupService({
+      core,
+      spaces: undefined,
+      workflowsExtensions,
+      isServerless: false,
+    }).enable({ request, spaceId: 'marketing', serviceAccountId: 'account-1' });
+
+    expect(result.workflowIds).toEqual([...SETUP_WORKFLOW_IDS]);
+    expect(install.mock.calls.map(([, workflowId]) => workflowId)).toEqual([...SETUP_WORKFLOW_IDS]);
+    expect(install).toHaveBeenCalledWith('significantEvents', SETUP_WORKFLOW_IDS[0], {
+      spaceId: 'marketing',
+      workflowIdSuffix: 'marketing',
+      values: { serviceAccountId: 'account-1' },
+    });
+  });
+
+  it('installs nothing when the account cannot be bound', async () => {
+    const { core, bindWorkload } = createCore();
+    bindWorkload.mockRejectedValueOnce(new Error('bind failed'));
+    const { workflowsExtensions, install } = createWorkflowsExtensions();
+
+    await expect(
+      createDetectionEngineSetupService({
+        core,
+        spaces: undefined,
+        workflowsExtensions,
+        isServerless: false,
+      }).enable({ request, spaceId: 'default', serviceAccountId: 'account-1' })
+    ).rejects.toThrow('bind failed');
+    expect(install).not.toHaveBeenCalled();
+  });
+
+  it('refuses with 400 when workflows are not available', async () => {
+    const { core, bindWorkload } = createCore();
+
+    await expect(
+      createDetectionEngineSetupService({
+        core,
+        spaces: undefined,
+        workflowsExtensions: undefined,
+        isServerless: false,
+      }).enable({ request, spaceId: 'default', serviceAccountId: 'account-1' })
+    ).rejects.toMatchObject({ statusCode: 400 });
+    expect(bindWorkload).not.toHaveBeenCalled();
   });
 });

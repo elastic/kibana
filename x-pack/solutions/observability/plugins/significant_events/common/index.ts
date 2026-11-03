@@ -10,6 +10,7 @@ export type { QueryStatus } from './queries';
 export type { PaginatedResponse } from './pagination';
 export type {
   DetectionEngineEnableBody,
+  DetectionEngineEnableResponse,
   DetectionEngineServiceAccountStatus,
 } from './service_account';
 export type { DetectionEntity, DetectionEntitiesResponse } from './detection_entities';

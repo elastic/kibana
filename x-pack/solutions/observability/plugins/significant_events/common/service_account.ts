@@ -14,6 +14,13 @@ export interface DetectionEngineEnableBody {
   serviceAccountId: string;
 }
 
+/** What `POST /internal/significant_events/service_account/_enable` answers. */
+export interface DetectionEngineEnableResponse extends DetectionEngineEnableBody {
+  spaceId: string;
+  /** The type ids of the bound workflows installed in the space. Their documents end in the space id. */
+  workflowIds: string[];
+}
+
 /** What `GET /internal/significant_events/service_account` reports for the current space. */
 export interface DetectionEngineServiceAccountStatus {
   /** Whether the deployment has service accounts at all (`xpack.security.serviceAccounts.enabled`). */

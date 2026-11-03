@@ -133,6 +133,7 @@ import {
 import { createSignificantEventsAvailability } from './agent_builder/tools/significant_events_availability';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
+import { SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER } from './lib/workflows/managed_workflow_owner';
 import { registerDetectionEngineWorkloadType } from './lib/service_accounts/detection_engine_account';
 import { getRequestAbortSignal } from './routes/utils/get_request_abort_signal';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
@@ -140,7 +141,6 @@ import { WorkflowExecutionService } from './lib/workflows/workflow_execution_ser
 import { createSourceChangeListener } from './routes/internal/knowledge_indicators/reconcile_source_catalog';
 import { syncContinuousOnboarding } from './lib/continuous_onboarding/sync_continuous_onboarding';
 
-const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
 const SLACK_CONNECTOR_RECONCILE_INTERVAL_MS = 60_000;
 const RULE_CREATION_APP = 'nightshift';
 

@@ -8,7 +8,7 @@
 import { lazySchema, z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type {
-  DetectionEngineEnableBody,
+  DetectionEngineEnableResponse,
   DetectionEngineServiceAccountStatus,
 } from '../../../../common';
 import { createDetectionEngineSetupService } from '../../../lib/service_accounts/service_account_setup';
@@ -24,7 +24,7 @@ const enableServiceAccountRoute = createServerRoute({
     access: 'internal',
     summary: 'Set up the detection engine in this space to run as its service account',
     description:
-      'Binds the deployment-wide detection service account to this space. Requires the manage_security cluster privilege and an existing role for the account; Nightshift never creates the role.',
+      "Binds the deployment-wide detection service account to this space and installs the space's bound workflows. Requires the manage_security cluster privilege and an existing role for the account; Nightshift never creates the role.",
   },
   // Binding is authorized by Elasticsearch against `manage_security`. Route privileges cannot
   // express a cluster privilege, so the handler checks it and the route only requires a user.
@@ -48,13 +48,14 @@ const enableServiceAccountRoute = createServerRoute({
     server,
     getScopedClients,
     getSpaceId,
-  }): Promise<{ spaceId: string } & DetectionEngineEnableBody> => {
+  }): Promise<DetectionEngineEnableResponse> => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
 
     return createDetectionEngineSetupService({
       core: server.core,
       spaces: server.spaces,
+      workflowsExtensions: server.workflowsExtensions,
       isServerless: server.isServerless,
     }).enable({
       request,
@@ -90,6 +91,7 @@ const getServiceAccountStatusRoute = createServerRoute({
     return createDetectionEngineSetupService({
       core: server.core,
       spaces: server.spaces,
+      workflowsExtensions: server.workflowsExtensions,
       isServerless: server.isServerless,
     }).getStatus({ request, spaceId: await getSpaceId(request) });
   },
