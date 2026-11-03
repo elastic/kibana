@@ -20,6 +20,7 @@ import { ManagedWorkflowReadForbiddenError } from '../../managed_workflow_read_e
 import type { RouteDependencies } from '../types';
 import { handleRouteError } from '../utils/route_error_handlers';
 import {
+  WORKFLOW_CLONE_SECURITY,
   WORKFLOW_READ_WITH_EXECUTION_EXTENDED_SECURITY,
   WORKFLOW_READ_WITH_MANAGED_SECURITY,
   WORKFLOW_UPDATE_SECURITY,
@@ -907,6 +908,10 @@ describe('Workflow routes', () => {
 
     it('should register route handler', () => {
       expect(routeHandlers[key]).toBeDefined();
+    });
+
+    it('should surface managed workflow read via route security', () => {
+      expect(routeSecurity[key]).toEqual(WORKFLOW_CLONE_SECURITY);
     });
 
     it('should load workflow then call api.cloneWorkflow with workflow, space id, and request', async () => {

@@ -27,6 +27,7 @@ import {
 } from '../../../lib/workflow_history_pagination_error';
 import { ManagedWorkflowUpdateForbiddenError } from '../../managed_workflow_errors';
 import type { RouteDependencies } from '../types';
+import { WORKFLOW_READ_WITH_MANAGED_SECURITY } from '../utils/route_security';
 
 describe('Internal Routes', () => {
   type MockRouteHandler = (
@@ -46,6 +47,7 @@ describe('Internal Routes', () => {
   }
 
   let routeHandlers: Record<string, { handler: MockRouteHandler }>;
+  let routeSecurity: Record<string, unknown>;
   let mockApi: {
     disableAllWorkflows: jest.MockedFunction<
       (spaceId: string, request: unknown) => Promise<unknown>
@@ -94,6 +96,7 @@ describe('Internal Routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     routeHandlers = {};
+    routeSecurity = {};
     mockTriggerEventsIsEnabled = true;
     mockSearchTriggerEventLog.mockResolvedValue({
       hits: [],
@@ -143,11 +146,10 @@ describe('Internal Routes', () => {
 
     const mockRouter = {
       versioned: {
-        get: jest
-          .fn()
-          .mockImplementation((config: { path: string }) =>
-            createVersionedRoute('GET', config.path)
-          ),
+        get: jest.fn().mockImplementation((config: { path: string; security?: unknown }) => {
+          routeSecurity[`GET:${config.path}`] = config.security;
+          return createVersionedRoute('GET', config.path);
+        }),
         post: jest
           .fn()
           .mockImplementation((config: { path: string }) =>
@@ -261,6 +263,12 @@ describe('Internal Routes', () => {
 
   it('should register the workflow history route handler', () => {
     expect(routeHandlers[`GET:/internal/workflows/workflow/{id}/history`]).toBeDefined();
+  });
+
+  it('should surface managed workflow read on the workflow history route security', () => {
+    expect(routeSecurity[`GET:/internal/workflows/workflow/{id}/history`]).toEqual(
+      WORKFLOW_READ_WITH_MANAGED_SECURITY
+    );
   });
 
   it('should register the workflow restore route handler', () => {
