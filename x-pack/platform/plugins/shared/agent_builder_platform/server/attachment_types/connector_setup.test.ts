@@ -20,7 +20,7 @@ import {
   type ConnectorSetupAttachmentData,
 } from '../../common/attachments';
 import { createConnectorSetupAttachmentType } from './connector_setup';
-import { SURFACE_BASE_URL, renderSurface, surfaceContext } from './test_helpers';
+import { SURFACE_BASE_URL, renderSurface, surfaceContext } from './test_utils';
 
 jest.mock('@kbn/connector-specs', () => ({
   getConnectorSpec: jest.fn(),

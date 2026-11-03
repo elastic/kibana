@@ -8,7 +8,7 @@
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { ScreenContextAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { createScreenContextAttachmentType } from './screen_context';
-import { renderSurface, surfaceContext } from './test_helpers';
+import { renderSurface, surfaceContext } from './test_utils';
 
 const toComposition = (data: ScreenContextAttachmentData) =>
   createScreenContextAttachmentType().toSurfaceComposition?.(

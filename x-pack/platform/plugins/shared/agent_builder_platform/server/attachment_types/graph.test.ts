@@ -8,7 +8,7 @@
 import type { GraphAttachmentData } from '../../common/attachments';
 import { GRAPH_ATTACHMENT_TYPE } from '../../common/attachments';
 import { createGraphAttachmentType } from './graph';
-import { renderSurface, surfaceContext } from './test_helpers';
+import { renderSurface, surfaceContext } from './test_utils';
 
 const node = (id: string, label: string) => ({ id, position: { x: 0, y: 0 }, data: { label } });
 const edge = (source: string, target: string, label?: string) => ({

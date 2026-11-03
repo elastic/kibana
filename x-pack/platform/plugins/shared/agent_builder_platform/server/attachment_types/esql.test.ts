@@ -7,7 +7,7 @@
 
 import { AttachmentType, type EsqlAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { createEsqlAttachmentType, type DiscoverEsqlLocator } from './esql';
-import { SURFACE_BASE_URL, renderSurface, surfaceContext } from './test_helpers';
+import { SURFACE_BASE_URL, renderSurface, surfaceContext } from './test_utils';
 
 jest.mock('@kbn/esql-language', () => ({ validateQuery: jest.fn() }));
 

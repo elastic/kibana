@@ -16,7 +16,7 @@ import { getConnectorSpec } from '@kbn/connector-specs';
 import { formatSchemaForLlm } from '@kbn/agent-builder-server';
 import { z } from '@kbn/zod/v4';
 import { createConnectorAttachmentType } from './connector';
-import { renderSurface, surfaceContext } from './test_helpers';
+import { renderSurface, surfaceContext } from './test_utils';
 
 jest.mock('@kbn/connector-specs', () => ({
   ...jest.requireActual('@kbn/connector-specs'),

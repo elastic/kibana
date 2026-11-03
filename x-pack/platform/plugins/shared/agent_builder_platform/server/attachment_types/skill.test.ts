@@ -8,7 +8,7 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { createSkillAttachmentType } from './skill';
-import { SURFACE_BASE_URL, renderSurface, surfaceContext } from './test_helpers';
+import { SURFACE_BASE_URL, renderSurface, surfaceContext } from './test_utils';
 import { SKILL_ATTACHMENT_TYPE, type SkillAttachmentData } from '../../common/attachments';
 
 const validSkill: SkillAttachmentData = {
