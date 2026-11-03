@@ -76,7 +76,9 @@ export const useServiceMap = ({
   const isGroupingEnabled = useServiceMapGroupingEnabled();
 
   // With grouping enabled, the service stats are read from the same source as the service
-  // inventory, and like the inventory, the map isn't fetched until there is one.
+  // inventory, and like the inventory, the map isn't fetched until there is one. The source comes
+  // from the nearest time range metadata provider, not from these arguments, so the provider must
+  // be set up with the same range and kuery as the map.
   const preferred = usePreferredServicesDataSource({ start, end, kuery });
   const source = isGroupingEnabled ? preferred?.source : undefined;
 
