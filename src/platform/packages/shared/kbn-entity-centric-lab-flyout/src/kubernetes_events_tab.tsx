@@ -20,8 +20,55 @@ import {
   type EuiBasicTableColumn,
   type Criteria,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useEntityFlyoutServices } from './services_context';
+
+const KUBERNETES_EVENTS_TABLE_NO_TRUNCATE_CELL_CLASS = 'kubernetesEventsTable-noTruncateCell';
+const KUBERNETES_EVENTS_TABLE_MESSAGE_CELL_CLASS = 'kubernetesEventsTable-messageCell';
+
+const kubernetesEventsTableCss = css`
+  width: 100%;
+  min-width: 0;
+
+  .euiTableRowCell {
+    vertical-align: top;
+  }
+
+  .${KUBERNETES_EVENTS_TABLE_NO_TRUNCATE_CELL_CLASS} .euiTableCellContent {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: nowrap;
+  }
+
+  .${KUBERNETES_EVENTS_TABLE_NO_TRUNCATE_CELL_CLASS} .euiBadge {
+    max-width: none;
+  }
+
+  .${KUBERNETES_EVENTS_TABLE_MESSAGE_CELL_CLASS} .euiTableCellContent {
+    overflow: visible;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+`;
+
+const kubernetesEventTypeBadgeCss = css`
+  max-width: none;
+  white-space: nowrap;
+`;
+
+const kubernetesEventsCountBadgeCss = css`
+  max-width: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+`;
+
+const kubernetesEventMessageCss = css`
+  display: block;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+`;
 
 type KubernetesEventType = 'Normal' | 'Warning';
 
@@ -133,8 +180,7 @@ export const generatePodKubernetesEvents = (podName: string): readonly Kubernete
   for (let index = 0; index < templateCount; index++) {
     const template = EVENT_TEMPLATES[(start + index) % EVENT_TEMPLATES.length];
     const jitterSec = (seed + index * 17) % 90;
-    const lastSeenMs =
-      now - template.minutesAgo * 60 * 1000 - jitterSec * 1000 + index * 1000;
+    const lastSeenMs = now - template.minutesAgo * 60 * 1000 - jitterSec * 1000;
     rows.push({
       id: `${podName}-${template.reason}-${index}`,
       lastSeenMs,
@@ -171,9 +217,18 @@ const formatLastSeen = (lastSeenMs: number): string => {
   });
 };
 
+const compareEventsNewestFirst = (
+  a: KubernetesPodEvent,
+  b: KubernetesPodEvent
+): number => b.lastSeenMs - a.lastSeenMs;
+
 export const KubernetesEventsTab = ({ podName }: KubernetesEventsTabProps) => {
   const { density } = useEntityFlyoutServices();
   const events = useMemo(() => generatePodKubernetesEvents(podName), [podName]);
+  const sortedEvents = useMemo(
+    () => [...events].sort(compareEventsNewestFirst),
+    [events]
+  );
   const [{ pageIndex, pageSize }, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
 
   const columns = useMemo<Array<EuiBasicTableColumn<KubernetesPodEvent>>>(
@@ -184,7 +239,9 @@ export const KubernetesEventsTab = ({ podName }: KubernetesEventsTabProps) => {
           defaultMessage: 'Last seen',
         }),
         render: (lastSeenMs: number) => formatLastSeen(lastSeenMs),
-        width: '110px',
+        sortable: false,
+        width: '84px',
+        className: KUBERNETES_EVENTS_TABLE_NO_TRUNCATE_CELL_CLASS,
       },
       {
         field: 'type',
@@ -192,30 +249,39 @@ export const KubernetesEventsTab = ({ podName }: KubernetesEventsTabProps) => {
           defaultMessage: 'Type',
         }),
         render: (type: KubernetesEventType) => (
-          <EuiBadge color={type === 'Warning' ? 'warning' : 'hollow'}>{type}</EuiBadge>
+          <EuiBadge
+            css={kubernetesEventTypeBadgeCss}
+            color={type === 'Warning' ? 'warning' : 'hollow'}
+          >
+            {type}
+          </EuiBadge>
         ),
-        width: '100px',
+        width: '96px',
+        className: KUBERNETES_EVENTS_TABLE_NO_TRUNCATE_CELL_CLASS,
       },
       {
         field: 'reason',
         name: i18n.translate('entityCentricLabFlyout.flyout.kubernetesEvents.reasonColumn', {
           defaultMessage: 'Reason',
         }),
-        width: '120px',
+        width: '104px',
+        className: KUBERNETES_EVENTS_TABLE_NO_TRUNCATE_CELL_CLASS,
       },
       {
         field: 'message',
         name: i18n.translate('entityCentricLabFlyout.flyout.kubernetesEvents.messageColumn', {
           defaultMessage: 'Message',
         }),
-        truncateText: true,
+        className: KUBERNETES_EVENTS_TABLE_MESSAGE_CELL_CLASS,
+        render: (message: string) => <span css={kubernetesEventMessageCss}>{message}</span>,
       },
       {
         field: 'source',
         name: i18n.translate('entityCentricLabFlyout.flyout.kubernetesEvents.sourceColumn', {
           defaultMessage: 'Source',
         }),
-        width: '140px',
+        width: '152px',
+        className: KUBERNETES_EVENTS_TABLE_NO_TRUNCATE_CELL_CLASS,
       },
       {
         field: 'count',
@@ -223,7 +289,8 @@ export const KubernetesEventsTab = ({ podName }: KubernetesEventsTabProps) => {
           defaultMessage: 'Count',
         }),
         align: 'right' as const,
-        width: '72px',
+        width: '64px',
+        className: KUBERNETES_EVENTS_TABLE_NO_TRUNCATE_CELL_CLASS,
       },
     ],
     []
@@ -268,7 +335,7 @@ export const KubernetesEventsTab = ({ podName }: KubernetesEventsTabProps) => {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">
+          <EuiBadge color="hollow" css={kubernetesEventsCountBadgeCss}>
             {i18n.translate('entityCentricLabFlyout.flyout.kubernetesEvents.countBadge', {
               defaultMessage:
                 '{count} {count, plural, one {event} other {events}}',
@@ -278,18 +345,16 @@ export const KubernetesEventsTab = ({ podName }: KubernetesEventsTabProps) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EuiBasicTable
-        items={events.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize)}
-        columns={columns}
-        tableLayout="auto"
-        compressed={density === 'compact'}
-        sorting={{
-          sort: { field: 'lastSeenMs', direction: 'desc' },
-        }}
+      <div css={kubernetesEventsTableCss}>
+        <EuiBasicTable
+          items={sortedEvents.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize)}
+          columns={columns}
+          tableLayout="auto"
+          compressed={density === 'compact'}
         pagination={{
           pageIndex,
           pageSize,
-          totalItemCount: events.length,
+          totalItemCount: sortedEvents.length,
           pageSizeOptions: [10, 25, 50],
         }}
         onChange={({ page }: Criteria<KubernetesPodEvent>) => {
@@ -298,7 +363,8 @@ export const KubernetesEventsTab = ({ podName }: KubernetesEventsTabProps) => {
           }
         }}
         data-test-subj="entityCentricLabKubernetesEventsTable"
-      />
+        />
+      </div>
     </>
   );
 };
