@@ -105,6 +105,11 @@ node scripts/task_pod_entry_cost.js <module> [--baseline] [--trace]   # fresh pr
 node scripts/task_pod_budget.js                                      # against src/cli/task_pod/budgets.yml
 ```
 
+A whole alerting v2 pod measures about 240 MB RSS from the built (transpiled, unbundled) tree,
+against about 180 MB for the earlier esbuild bundle. The difference is code volume rather than
+barrels, and is accepted for now; a release-time bundle of `bin/kibana-task-pod` is the option if it
+needs to shrink.
+
 Imports from a tasks entry must stay light: never import a plugin's barrel (use its `server/tasks`
 leaves), and the `no_boundary_crossing` lint rule rejects tasks files importing another plugin's
 non-tasks server code or tasks entries it did not declare.

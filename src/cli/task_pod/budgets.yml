@@ -1,3 +1,7 @@
+# Fresh-process RSS budgets (MB) for what a pod loads, from source with the swc transpiler; see
+# `node scripts/task_pod_budget.js`. A whole alerting_v2 pod measured ~240 MB RSS from the built
+# (transpiled, unbundled) tree with --max-semi-space-size=8, against ~180 MB for the earlier esbuild
+# bundle. That gap is accepted for now; a release-time bundle is the lever if it needs to shrink.
 ./x-pack/platform/plugins/shared/task_manager/server/task_pod/host/boot_tasks_plugins: 59
 ./x-pack/platform/plugins/shared/alerting_v2/server/tasks: 149
 ./x-pack/platform/plugins/shared/task_manager/server/tasks: 28
