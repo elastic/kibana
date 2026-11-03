@@ -49,6 +49,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./internal/observables'));
     // observable writes are mirrored to the cases-owned observables index
     loadTestFile(require.resolve('./internal/observables_index'));
+    loadTestFile(require.resolve('./internal/observables_sync'));
     // end-to-end observable extraction via the attachment bulkCreate side effect
     loadTestFile(require.resolve('./internal/extract_observables'));
 

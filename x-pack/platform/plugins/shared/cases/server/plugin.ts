@@ -42,7 +42,7 @@ import type {
   CloseReasonValidator,
 } from './types';
 import { CasesClientFactory } from './client/factory';
-import { createObservablesStorage } from './services/observables';
+import { createObservablesStorage, ObservablesService } from './services/observables';
 import type { CasesClientSource, GetCasesClientOptions } from './client/types';
 import { getCasesKibanaFeatures } from './features';
 import { registerRoutes } from './routes/api/register_routes';
@@ -65,6 +65,7 @@ import { SERVERLESS_PROJECT_TYPES } from '../common/constants/owners';
 
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 import { TemplatesMigrationTaskManager } from './tasks/templates_migration/templates_migration_task_manager';
+import { ObservablesSyncTaskManager } from './tasks/observables_sync/observables_sync_task_manager';
 import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
 import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task';
 import {
@@ -101,6 +102,7 @@ export class CasePlugin
   private userProfileService: UserProfileService;
   private incrementalIdTaskManager?: IncrementalIdTaskManager;
   private templatesMigrationTaskManager?: TemplatesMigrationTaskManager;
+  private observablesSyncTaskManager?: ObservablesSyncTaskManager;
   private usageCounter?: IUsageCounter;
   private readonly isServerless: boolean;
   private casesEventBus?: CasesEventBus;
@@ -222,6 +224,12 @@ export class CasePlugin
           () => this.casesAnalyticsV2Service?.triggerBackfillReconciliation()
         );
       }
+
+      this.observablesSyncTaskManager = new ObservablesSyncTaskManager(
+        plugins.taskManager,
+        this.logger,
+        plugins.usageCollection
+      );
     }
 
     const router = core.http.createRouter<CasesRequestHandlerContext>();
@@ -361,6 +369,13 @@ export class CasePlugin
   public start(core: CoreStart, plugins: CasesServerStartDependencies): CasesServerStart {
     this.logger.debug(`Starting Case Workflow`);
 
+    // The adapter creates the index lazily on the first observable write, so building it here
+    // installs nothing in Elasticsearch.
+    const observablesStorageClient = createObservablesStorage({
+      esClient: core.elasticsearch.client.asInternalUser,
+      logger: this.logger,
+    }).getClient();
+
     if (plugins.taskManager) {
       scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
 
@@ -379,6 +394,25 @@ export class CasePlugin
             )
           );
       }
+      // Not removed at startup, unlike the templates migration: the task state holds the record that a
+      // full sync pass completed.
+      void this.observablesSyncTaskManager
+        ?.scheduleSyncTask({
+          taskManager: plugins.taskManager,
+          core,
+          observablesService: new ObservablesService({
+            storageClient: observablesStorageClient,
+            logger: this.logger,
+          }),
+        })
+        .catch((err) =>
+          this.logger.error(
+            `Failed to initialize observables sync task: ${
+              err instanceof Error ? err.message : String(err)
+            }`
+          )
+        );
+
       if (this.caseConfig.analytics.index?.enabled) {
         const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
           CASE_SAVED_OBJECT,
@@ -541,12 +575,7 @@ export class CasePlugin
       // service calls it fire-and-forget after every template mutation.
       analyticsV2DataViewRefresher:
         this.casesAnalyticsV2Service?.getDataViewRefresher() ?? V2_NOOP_DATA_VIEW_REFRESHER,
-      // The adapter creates the index lazily on the first observable write, so building it here
-      // installs nothing in Elasticsearch.
-      observablesStorageClient: createObservablesStorage({
-        esClient: core.elasticsearch.client.asInternalUser,
-        logger: this.logger,
-      }).getClient(),
+      observablesStorageClient,
     });
 
     return {
