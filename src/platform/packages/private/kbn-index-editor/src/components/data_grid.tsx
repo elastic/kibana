@@ -332,8 +332,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         isInMemorySortEnabled={false}
         showMultiFields={false}
         showColumnTokens
-        // Treat the time field as a regular column so it can be hidden via the Fields selector;
-        // otherwise UnifiedDataTable always prepends it back when the user removes it.
         showTimeCol={false}
         enableComparisonMode={false}
         isPaginationEnabled
