@@ -239,7 +239,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     onboardingDeploymentId ? (
       <EuiContextMenuItem
         data-test-subj="PackagePolicyActionsManageInOnboardingItem"
-        icon="popout"
+        icon="external"
         href={onboardingInstanceUrl}
         disabled={!onboardingInstanceUrl}
         toolTipContent={

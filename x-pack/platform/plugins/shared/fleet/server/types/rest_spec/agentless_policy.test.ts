@@ -36,12 +36,15 @@ describe('ListAgentlessPoliciesRequestSchema', () => {
     expect(() => validateQuery({ sortOrder: 'sideways' })).toThrow();
   });
 
-  it.each(['name:foo', 'namespace:default', 'package.name:test_agentless'])(
-    'accepts a kuery filtering on the allowed field %s',
-    (kuery) => {
-      expect(() => validateQuery({ kuery })).not.toThrow();
-    }
-  );
+  it.each([
+    'name:foo',
+    'namespace:default',
+    'package.name:test_agentless',
+    // Used to leave out the policies managed by a cloud onboarding instance.
+    'NOT onboarding_deployment_id:*',
+  ])('accepts a kuery filtering on the allowed field %s', (kuery) => {
+    expect(() => validateQuery({ kuery })).not.toThrow();
+  });
 
   it('accepts a kuery combining several allowed fields', () => {
     expect(() =>
@@ -60,7 +63,12 @@ describe('ListAgentlessPoliciesRequestSchema', () => {
   });
 
   it('derives the allowed filter fields from the mapping', () => {
-    expect(ALLOWED_AGENTLESS_POLICY_FILTER_FIELDS).toEqual(['name', 'namespace', 'package.name']);
+    expect(ALLOWED_AGENTLESS_POLICY_FILTER_FIELDS).toEqual([
+      'name',
+      'namespace',
+      'package.name',
+      'onboarding_deployment_id',
+    ]);
   });
 
   it('returns a self-correcting 400 that enumerates the allowed fields', () => {

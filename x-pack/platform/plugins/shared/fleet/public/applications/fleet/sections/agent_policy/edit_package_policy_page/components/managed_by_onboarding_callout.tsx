@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import { useOnboardingInstanceUrl } from '../../../../hooks';
 import { ONBOARDING_DISABLED_MANAGED_POLICY_MESSAGE } from '../../../../../../services/aws_onboarding_override';
@@ -22,38 +22,40 @@ export const ManagedByOnboardingCallout: React.FunctionComponent<{
   const onboardingInstanceUrl = useOnboardingInstanceUrl()(onboardingDeploymentId);
 
   return (
-    <EuiCallOut
+    <KbnInfoCallout
       data-test-subj="editPackagePolicyManagedByOnboardingCallout"
-      iconType="lock"
       title={
         <FormattedMessage
           id="xpack.fleet.editPackagePolicy.managedByOnboardingTitle"
           defaultMessage="This integration policy is managed by AWS onboarding"
         />
       }
-    >
-      {onboardingInstanceUrl ? (
-        <>
-          <p>
-            <FormattedMessage
-              id="xpack.fleet.editPackagePolicy.managedByOnboardingDescription"
-              defaultMessage="It was created by an AWS onboarding instance and can only be changed or deleted from there."
-            />
-          </p>
-          <EuiButton
-            data-test-subj="editPackagePolicyManageInOnboardingButton"
-            iconType="popout"
-            href={onboardingInstanceUrl}
-          >
-            <FormattedMessage
-              id="xpack.fleet.editPackagePolicy.manageInOnboardingButton"
-              defaultMessage="Manage in AWS onboarding"
-            />
-          </EuiButton>
-        </>
-      ) : (
-        <p>{ONBOARDING_DISABLED_MANAGED_POLICY_MESSAGE}</p>
-      )}
-    </EuiCallOut>
+      text={
+        onboardingInstanceUrl ? (
+          <FormattedMessage
+            id="xpack.fleet.editPackagePolicy.managedByOnboardingDescription"
+            defaultMessage="It was created by an AWS onboarding instance and can only be changed or deleted from there."
+          />
+        ) : (
+          ONBOARDING_DISABLED_MANAGED_POLICY_MESSAGE
+        )
+      }
+      actionProps={
+        onboardingInstanceUrl
+          ? {
+              primary: {
+                'data-test-subj': 'editPackagePolicyManageInOnboardingButton',
+                href: onboardingInstanceUrl,
+                children: (
+                  <FormattedMessage
+                    id="xpack.fleet.editPackagePolicy.manageInOnboardingButton"
+                    defaultMessage="Manage in AWS onboarding"
+                  />
+                ),
+              },
+            }
+          : undefined
+      }
+    />
   );
 };
