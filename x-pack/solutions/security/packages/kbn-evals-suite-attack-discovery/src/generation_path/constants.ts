@@ -9,6 +9,7 @@
 // functional-tests package takes no runtime dependency on them. They mirror:
 //   - the managed workflow id (@kbn/workflows/managed, attack_discovery_batched_generation.yaml)
 //   - the workflows_management public API version
+//   - ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND (@kbn/elastic-assistant-common)
 //   - ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID / ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID (@kbn/alertzero-common)
 
 export const BATCHED_GENERATION_WORKFLOW_ID = 'system-security-attack-discovery-batched-generation';
@@ -22,3 +23,9 @@ export const ADHOC_DISCOVERIES_INDEX = '.adhoc.alerts-security.attack.discovery.
 
 /** Data stream the inference plugin writes one document per model call to. */
 export const TOKEN_USAGE_INDEX = '.kibana-inference-token-usage';
+
+export const ANONYMIZATION_FIELDS_FIND_ROUTE =
+  '/api/security_ai_assistant/anonymization_fields/_find';
+
+export const anonymizationFieldsIndexForSpace = (space: string): string =>
+  `.kibana-elastic-ai-assistant-anonymization-fields-${space}`;

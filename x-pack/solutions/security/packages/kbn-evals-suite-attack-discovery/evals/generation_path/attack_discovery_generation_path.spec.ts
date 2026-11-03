@@ -34,6 +34,7 @@ import { createAttackDiscoveryBasicEvaluator } from '../../src/evaluators/attack
 import { createAttackDiscoveryCriteriaEvaluator } from '../../src/evaluators/attack_discovery_criteria_evaluator';
 import { createAttackDiscoveryRubricEvaluator } from '../../src/evaluators/attack_discovery_rubric_evaluator';
 import type { AttackDiscoveryDatasetExample } from '../../src/types';
+import { ensureAnonymizationFields } from '../../src/generation_path/anonymization_fields';
 import {
   ALERTS_INDEX,
   BATCHED_GENERATION_WORKFLOW_ID,
@@ -78,11 +79,13 @@ baseEvaluate.describe(
 
     baseEvaluate.beforeAll(
       async ({
+        esClient,
         fetch,
         kbnClient,
         connector,
         log,
       }: {
+        esClient: EsClient;
         fetch: HttpHandler;
         kbnClient: InferenceSettingsClient;
         connector: EvalConnector;
@@ -108,6 +111,8 @@ baseEvaluate.describe(
         if (!workflow.enabled) {
           throw new Error(`Managed workflow "${BATCHED_GENERATION_WORKFLOW_ID}" is disabled.`);
         }
+
+        await ensureAnonymizationFields({ esClient, fetch });
 
         restoreInferenceSettings = await pinInferenceFeatures({
           kbnClient,
