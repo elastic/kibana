@@ -232,6 +232,7 @@ export class HttpService
     this.internalSetup = {
       ...serverContract,
       config,
+      sidecarSecret: this.sidecar?.secret,
       rateLimiter: config.rateLimiter,
       registerOnPostValidation: (cb) => {
         Router.on('onPostValidate', cb);

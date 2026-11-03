@@ -39,7 +39,7 @@ func main() {
 	}
 
 	proxy := newNodeProxy(config.SocketPath)
-	handler := newProxyHandler(proxy, config.Secret)
+	handler := newProxyHandler(proxy, config.Secret, config.SocketPath)
 
 	addr := fmt.Sprintf("%s:%d", config.Host, config.Port)
 	listener, err := createListener(addr, config.TLS)
@@ -144,9 +144,18 @@ func newNodeProxy(socketPath string) *httputil.ReverseProxy {
 	return proxy
 }
 
-func newProxyHandler(proxy *httputil.ReverseProxy, secret string) http.Handler {
+func newProxyHandler(proxy *httputil.ReverseProxy, secret string, socketPath string) http.Handler {
+	nodeClient := NewNodeClient(socketPath, secret)
+	statusHandler := NewStatusHandler(nodeClient, proxy)
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		stripSidecarHeaders(r)
+
+		if r.Method == http.MethodGet && r.URL.Path == "/api/status" {
+			statusHandler.ServeHTTP(w, r)
+			return
+		}
+
 		proxy.ServeHTTP(w, r)
 	})
 }
