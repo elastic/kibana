@@ -96,7 +96,7 @@ const validateSourceQueryRoute = createNightshiftSourcesServerRoute({
     access: 'internal',
     summary: 'Validate a Nightshift source query',
     description:
-      'Runs the checks create runs on the ES|QL query, as the calling user, without storing anything. A query create would reject comes back with `valid: false` and the reason.',
+      'Runs the checks create runs on the ES|QL query, as the calling user, without storing anything. A structurally invalid query comes back with `valid: false` and the reason. A query the user cannot read is a 403, as on create.',
   },
   security: {
     authz: {
@@ -114,6 +114,7 @@ const validateSourceQueryRoute = createNightshiftSourcesServerRoute({
       const { type, indexExists } = await client.validateQuery(params.body);
       return { valid: true, type, index_exists: indexExists };
     } catch (error) {
+      // 403 and 503 are about the caller or Elasticsearch, not the query, so they propagate.
       if (isBoom(error) && error.output.statusCode === 400) {
         return { valid: false, error: error.message };
       }

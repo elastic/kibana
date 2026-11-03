@@ -118,6 +118,13 @@ const setup = ({ spaceId = SPACE_ID }: { spaceId?: string } = {}) => {
 
   soClient.find.mockResolvedValue(emptyFind);
   dataEsClient.esql.query.mockResponse(withColumns);
+  dataEsClient.security.hasPrivileges.mockResolvedValue({
+    username: 'marco',
+    has_all_requested: true,
+    cluster: {},
+    index: {},
+    application: {},
+  });
 
   return {
     client,
@@ -346,6 +353,23 @@ describe('SourcesClient', () => {
   });
 
   describe('validateQuery', () => {
+    it('refuses a query the user cannot read before running it', async () => {
+      const { client, dataEsClient } = setup();
+      dataEsClient.security.hasPrivileges.mockResolvedValue({
+        username: 'marco',
+        has_all_requested: false,
+        cluster: {},
+        index: { 'logs-secret-*': { read: false } },
+        application: {},
+      });
+
+      await expect(client.validateQuery({ esql: 'FROM logs-secret-*' })).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+
+      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
+    });
+
     it('reports whether any index exists yet behind an accepted query', async () => {
       const { client, dataEsClient } = setup();
 
