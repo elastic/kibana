@@ -43,7 +43,6 @@ import {
 } from '../../common/url_params';
 import { useDetectionOverview } from '../../data/detection_overview/use_detection_overview';
 import { useMaintenanceStatus } from '../../data/maintenance/use_significant_events_maintenance';
-import { useFetchSources } from '../../data/sources/use_fetch_sources';
 import { useKibana } from '../../hooks/use_kibana';
 import { useDeveloperMode } from '../../hooks/use_developer_mode';
 import type { DetectionTabId } from './detection_tabs';
@@ -53,10 +52,6 @@ import { EntitiesPanel } from './entities/entities_panel';
 import { PAGE_QUERY_PARAM } from './constants';
 import { RunLimitsBanner } from './run_limits_banner';
 import { useEntitySelection } from './use_entity_selection';
-import {
-  INITIAL_RECOMMENDED_SOURCES_CREATION_STATE,
-  type RecommendedSourcesCreationState,
-} from '../../sources/recommended_sources/recommended_sources_table';
 import {
   HISTORY_LOOKUP_ERROR_DESCRIPTION,
   HISTORY_LOOKUP_ERROR_TITLE,
@@ -69,9 +64,7 @@ import {
 } from './use_detection_time_range';
 import { DetectionOnboarding } from './onboarding/detection_onboarding';
 import { NoSourcesCallout } from './onboarding/no_sources_callout';
-
-const NO_SOURCES_HISTORY_RANGE = { from: 'now-10y', to: 'now' } as const;
-type NoSourcesHistoryState = 'unknown' | 'empty' | 'has_history';
+import { useDetectionOnboardingState } from './use_detection_onboarding_state';
 
 const EventsTab = lazy(() =>
   import('./events/events_tab').then(({ EventsTab: Tab }) => ({ default: Tab }))
@@ -110,82 +103,11 @@ export const DetectionPage = ({
   const { isDeveloperMode } = useDeveloperMode();
   const { timeRange, setTimeRange } = useDetectionTimeRange();
   const overview = useDetectionOverview(timeRange);
-  const sources = useFetchSources({ select: (sourceList) => sourceList.length });
-  const historyOverview = useDetectionOverview(NO_SOURCES_HISTORY_RANGE, {
-    enabled: sources.data === 0,
-    showErrorToast: false,
-    refetchOnWindowFocus: false,
-  });
-  const [sourceCreationState, setSourceCreationState] = useState<RecommendedSourcesCreationState>(
-    INITIAL_RECOMMENDED_SOURCES_CREATION_STATE
-  );
+  const { view, onCreationStateChange, retryHistoryLookup } = useDetectionOnboardingState();
   const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
-  const hasNoSources = sources.data === 0;
-  const hasConfiguredSources = (sources.data ?? 0) > 0;
-  const isDetectionEnabled =
-    hasConfiguredSources ||
-    (sourceCreationState.hasCreatedSources &&
-      (sources.isLoading || sources.isFetching || sources.isError));
-  const hasHistory =
-    (historyOverview.data?.detections ?? 0) + (historyOverview.data?.significant_events ?? 0) > 0;
-  const hasFreshSuccessfulHistoryLookup =
-    historyOverview.data !== undefined && !historyOverview.isError && !historyOverview.isFetching;
-  const [resolvedNoSourcesHistoryState, setResolvedNoSourcesHistoryState] =
-    useState<NoSourcesHistoryState>('unknown');
-  const noSourcesHistoryState = hasFreshSuccessfulHistoryLookup
-    ? hasHistory
-      ? 'has_history'
-      : 'empty'
-    : resolvedNoSourcesHistoryState;
-  const hasHistoryLookupFailed = hasNoSources && historyOverview.isError;
-  const shouldRetainSourceCreation =
-    sourceCreationState.isCreating || sourceCreationState.hasFailedDrafts;
-  const isOnboardingStateLoading =
-    !shouldRetainSourceCreation &&
-    (sources.isLoading ||
-      (hasNoSources &&
-        (historyOverview.isLoading ||
-          (historyOverview.isFetching && resolvedNoSourcesHistoryState === 'unknown'))));
-  const showInitialOnboarding =
-    hasNoSources && noSourcesHistoryState === 'empty' && !isDetectionEnabled;
-  const showSourceCreation = showInitialOnboarding || shouldRetainSourceCreation;
-  const showNoSourcesCallout = hasNoSources && noSourcesHistoryState === 'has_history';
   const selection = useEntitySelection();
   const [isOverviewCompact, setIsOverviewCompact] = useState(false);
   const fullOverviewSlotRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!hasNoSources) {
-      setResolvedNoSourcesHistoryState('unknown');
-      return;
-    }
-    if (hasFreshSuccessfulHistoryLookup) {
-      setResolvedNoSourcesHistoryState(hasHistory ? 'has_history' : 'empty');
-    }
-  }, [hasFreshSuccessfulHistoryLookup, hasHistory, hasNoSources]);
-  useEffect(() => {
-    if (
-      !sourceCreationState.hasCreatedSources ||
-      sources.isLoading ||
-      sources.isFetching ||
-      sources.isError
-    ) {
-      return;
-    }
-    if ((sources.data ?? 0) > 0 && !shouldRetainSourceCreation) {
-      setSourceCreationState(INITIAL_RECOMMENDED_SOURCES_CREATION_STATE);
-      return;
-    }
-    if (sources.data === 0) {
-      setSourceCreationState((current) => ({ ...current, hasCreatedSources: false }));
-    }
-  }, [
-    shouldRetainSourceCreation,
-    sourceCreationState.hasCreatedSources,
-    sources.data,
-    sources.isError,
-    sources.isFetching,
-    sources.isLoading,
-  ]);
   useEffect(() => setIsOverviewCompact(false), [tab]);
   const handleTabBodyScroll = useCallback(
     (event: UIEvent<HTMLDivElement>) => {
@@ -281,7 +203,7 @@ export const DetectionPage = ({
         }}
       >
         <RunLimitsBanner />
-        {isOnboardingStateLoading ? (
+        {view.type === 'loading' ? (
           <EuiFlexGroup
             justifyContent="center"
             alignItems="center"
@@ -293,7 +215,7 @@ export const DetectionPage = ({
           </EuiFlexGroup>
         ) : (
           <>
-            {hasHistoryLookupFailed && (
+            {view.hasHistoryLookupFailed && (
               <>
                 <KbnDangerCallout
                   announceOnMount
@@ -305,7 +227,7 @@ export const DetectionPage = ({
                     primary: {
                       children: HISTORY_LOOKUP_RETRY_LABEL,
                       iconType: 'refresh',
-                      onClick: () => void historyOverview.refetch(),
+                      onClick: retryHistoryLookup,
                       'data-test-subj': 'nightshiftDetectionHistoryLookupRetryButton',
                     },
                   }}
@@ -313,26 +235,26 @@ export const DetectionPage = ({
                 <EuiSpacer size="m" />
               </>
             )}
-            {showSourceCreation && (
+            {view.sourceCreation !== 'hidden' && (
               <div
                 css={css`
-                  flex: ${isDetectionEnabled ? '0 1 auto' : '1 1 auto'};
-                  max-block-size: ${isDetectionEnabled ? '40vh' : 'none'};
+                  flex: ${view.sourceCreation === 'enabled' ? '0 1 auto' : '1 1 auto'};
+                  max-block-size: ${view.sourceCreation === 'enabled' ? '40vh' : 'none'};
                   min-height: 0;
                   overflow: auto;
-                  margin-block-end: ${isDetectionEnabled ? euiTheme.size.m : 0};
+                  margin-block-end: ${view.sourceCreation === 'enabled' ? euiTheme.size.m : 0};
                 `}
               >
                 <DetectionOnboarding
                   canManage={canManage}
-                  isDetectionEnabled={isDetectionEnabled}
-                  onCreationStateChange={setSourceCreationState}
+                  isDetectionEnabled={view.sourceCreation === 'enabled'}
+                  onCreationStateChange={onCreationStateChange}
                 />
               </div>
             )}
-            {!showInitialOnboarding && (
+            {view.type === 'workspace' && (
               <>
-                {showNoSourcesCallout && (
+                {view.showNoSourcesCallout && (
                   <>
                     <NoSourcesCallout />
                     <EuiSpacer size="m" />
