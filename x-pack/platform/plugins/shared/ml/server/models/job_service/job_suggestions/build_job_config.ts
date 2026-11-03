@@ -150,6 +150,36 @@ export const findCandidateProblems = (
   return problems;
 };
 
+// These functions are defined by the field they are split by, so it cannot be a partition field.
+const BY_FIELD_FUNCTIONS = new Set(['rare', 'freq_rare']);
+
+/**
+ * Splits with partition_field_name where the model used by_field_name.
+ * Population jobs (any detector with an over_field_name) are left as they are, as are the cases
+ * where a by field is part of the meaning of the detector: rare and freq_rare, and categorization.
+ */
+export const preferPartitionFields = (candidate: JobCandidate): JobCandidate => {
+  if (candidate.detectors.some(({ over_field_name: over }) => over !== undefined)) {
+    return candidate;
+  }
+
+  return {
+    ...candidate,
+    detectors: candidate.detectors.map((detector) => {
+      const { by_field_name: by, partition_field_name: partition, function: fn } = detector;
+      if (
+        by === undefined ||
+        partition !== undefined ||
+        by === MLCATEGORY ||
+        BY_FIELD_FUNCTIONS.has(fn)
+      ) {
+        return detector;
+      }
+      return { ...detector, by_field_name: undefined, partition_field_name: by };
+    }),
+  };
+};
+
 /**
  * Works out which job wizard produces a configuration. A type is only claimed when the
  * wizard can represent the configuration, otherwise it falls back to advanced.

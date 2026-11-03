@@ -191,6 +191,59 @@ describe('suggestJobs', () => {
     expect(suggestions[1].estimatedModelMemoryLimit).toBeUndefined();
   });
 
+  describe('split fields', () => {
+    it('uses a partition field where the model used a by field', async () => {
+      proposeJobsMock.mockResolvedValue([
+        candidate('By host', {
+          detectors: [{ function: 'high_mean', field_name: 'bytes', by_field_name: 'host.name' }],
+        }),
+      ]);
+
+      const [suggestion] = await suggestJobs(deps, { index: 'logs-*' });
+
+      expect(suggestion.job.analysis_config.detectors).toEqual([
+        expect.objectContaining({ function: 'high_mean', partition_field_name: 'host.name' }),
+      ]);
+      expect(suggestion.job.analysis_config.detectors?.[0]).not.toHaveProperty('by_field_name');
+      expect(suggestion.jobType).toBe('multi_metric');
+    });
+
+    it('uses a partition field in a revised candidate too', async () => {
+      proposeJobsMock.mockResolvedValue([candidate('Broken', { bucket_span: 'soon' })]);
+      reviseCandidateMock.mockResolvedValue(
+        candidate('Fixed', { detectors: [{ function: 'high_count', by_field_name: 'host.name' }] })
+      );
+
+      const [suggestion] = await suggestJobs(deps, { index: 'logs-*' });
+
+      expect(suggestion.job.analysis_config.detectors?.[0]).toMatchObject({
+        partition_field_name: 'host.name',
+      });
+    });
+
+    it('keeps by and over fields in population jobs', async () => {
+      proposeJobsMock.mockResolvedValue([
+        candidate('Population', {
+          detectors: [
+            {
+              function: 'high_mean',
+              field_name: 'bytes',
+              by_field_name: 'host.name',
+              over_field_name: 'host.name',
+            },
+          ],
+        }),
+      ]);
+
+      const [suggestion] = await suggestJobs(deps, { index: 'logs-*' });
+
+      expect(suggestion.job.analysis_config.detectors?.[0]).toMatchObject({
+        by_field_name: 'host.name',
+        over_field_name: 'host.name',
+      });
+    });
+  });
+
   describe('candidates which fail', () => {
     it('sends structural problems back to the model and uses the fixed candidate', async () => {
       const broken = candidate('Broken', {

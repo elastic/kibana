@@ -40,6 +40,8 @@ const DETECTOR_GUIDANCE = `
 - by_field_name compares each entity with its own history.
 - over_field_name (population analysis) compares each entity with its peers in the same bucket.
 - partition_field_name builds a fully independent model for each value, with its own score normalisation.
+- Prefer partition_field_name to by_field_name when splitting. Use by_field_name only for rare and freq_rare, for
+  mlcategory, and together with over_field_name in population jobs.
 - Only split on keyword or ip fields. Never split on text fields.
 - Avoid splitting on a field with more than ${HIGH_CARDINALITY_THRESHOLD} distinct values, because the model memory
   needed becomes very large.
@@ -128,6 +130,9 @@ the data you are shown.
 Write the title and description for people who do not know machine learning terminology.
 ${DETECTOR_GUIDANCE}
 ## Worked examples of complete jobs
+
+These examples are for the structure of a job. Where they split with by_field_name, you should instead use
+partition_field_name, unless the rules above say by_field_name is needed.
 
 ${recipeExamples}`,
   ],

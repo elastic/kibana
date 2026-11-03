@@ -14,7 +14,12 @@ import type {
 } from '../../../../common/types/job_suggestions';
 import { mlLog } from '../../../lib/log';
 import type { MlClient } from '../../../lib/ml_client';
-import { buildJobAndDatafeed, findCandidateProblems, generateJobId } from './build_job_config';
+import {
+  buildJobAndDatafeed,
+  findCandidateProblems,
+  generateJobId,
+  preferPartitionFields,
+} from './build_job_config';
 import {
   DEFAULT_MAX_SUGGESTIONS,
   DEFAULT_TIME_RANGE_MS,
@@ -79,6 +84,8 @@ const resolveCandidate = async ({
   let candidate = initialCandidate;
 
   for (let attempt = 0; attempt <= MAX_REVISION_ATTEMPTS; attempt++) {
+    // The model's answer, and each revision of it, is put in the preferred form before it is checked.
+    candidate = preferPartitionFields(candidate);
     let problems = findCandidateProblems(candidate, evidence);
 
     if (problems.length === 0) {

@@ -12,6 +12,7 @@ import {
   findCandidateProblems,
   generateJobId,
   normalizeDatafeedQuery,
+  preferPartitionFields,
 } from './build_job_config';
 import type { JobCandidate } from './schemas';
 import type { IndexEvidence } from './types';
@@ -167,6 +168,80 @@ describe('findCandidateProblems', () => {
       );
       expect(problems[0]).toContain('not a field in the index');
     });
+  });
+});
+
+describe('preferPartitionFields', () => {
+  const withDetectors = (detectors: JobCandidate['detectors']) => candidate({ detectors });
+
+  it('splits with a partition field in place of a by field', () => {
+    const { detectors } = preferPartitionFields(
+      withDetectors([
+        { function: 'high_mean', field_name: 'http.response.bytes', by_field_name: 'host.name' },
+        { function: 'count', by_field_name: 'source.ip' },
+      ])
+    );
+
+    expect(detectors).toEqual([
+      {
+        function: 'high_mean',
+        field_name: 'http.response.bytes',
+        partition_field_name: 'host.name',
+      },
+      { function: 'count', partition_field_name: 'source.ip' },
+    ]);
+    expect(detectors.every((detector) => detector.by_field_name === undefined)).toBe(true);
+  });
+
+  it('leaves rare and freq_rare detectors alone', () => {
+    const detectors = [
+      { function: 'rare', by_field_name: 'user.name' },
+      { function: 'freq_rare', by_field_name: 'user.name', over_field_name: 'host.name' },
+    ];
+    expect(preferPartitionFields(withDetectors([detectors[0]])).detectors).toEqual([detectors[0]]);
+    expect(preferPartitionFields(withDetectors([detectors[1]])).detectors).toEqual([detectors[1]]);
+  });
+
+  it('leaves mlcategory alone', () => {
+    const detectors = [{ function: 'count', by_field_name: 'mlcategory' }];
+    expect(
+      preferPartitionFields(
+        candidate({ detectors, categorization_field_name: 'message', influencers: [] })
+      ).detectors
+    ).toEqual(detectors);
+  });
+
+  it('keeps the by field when the detector already has a partition field', () => {
+    const detectors = [
+      { function: 'high_count', by_field_name: 'host.name', partition_field_name: 'source.ip' },
+    ];
+    expect(preferPartitionFields(withDetectors(detectors)).detectors).toEqual(detectors);
+  });
+
+  it('leaves population jobs as they are', () => {
+    const detectors = [
+      { function: 'high_mean', field_name: 'http.response.bytes', over_field_name: 'source.ip' },
+      { function: 'count', by_field_name: 'host.name', over_field_name: 'source.ip' },
+      // not part of a population detector itself, but the job is a population job
+      { function: 'high_sum', field_name: 'http.response.bytes', by_field_name: 'host.name' },
+    ];
+    expect(preferPartitionFields(withDetectors(detectors)).detectors).toEqual(detectors);
+  });
+
+  it('does not change the candidate it is given', () => {
+    const original = withDetectors([{ function: 'count', by_field_name: 'host.name' }]);
+    preferPartitionFields(original);
+    expect(original.detectors).toEqual([{ function: 'count', by_field_name: 'host.name' }]);
+  });
+
+  it('makes jobs which share a partition field fit the multi-metric wizard', () => {
+    const { detectors } = preferPartitionFields(
+      withDetectors([
+        { function: 'high_mean', field_name: 'http.response.bytes', by_field_name: 'host.name' },
+        { function: 'count', by_field_name: 'host.name' },
+      ])
+    );
+    expect(classifyJobType({ detectors })).toBe(JOB_TYPE.MULTI_METRIC);
   });
 });
 
