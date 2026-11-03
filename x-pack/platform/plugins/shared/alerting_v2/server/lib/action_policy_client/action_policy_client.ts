@@ -330,7 +330,11 @@ export class ActionPolicyClient {
         id: params.options?.id,
       }));
     } catch (e) {
-      this.markApiKeysForInvalidation(attributes.apiKey, false, params.options?.id);
+      this.markApiKeysForInvalidation(
+        attributes.apiKey,
+        apiKeyAttrs.createdByUser,
+        params.options?.id
+      );
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';
         throw Boom.conflict(getActionPolicyAlreadyExistsMessage(conflictId), {
@@ -426,7 +430,7 @@ export class ActionPolicyClient {
         version: existingVersion,
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, params.id);
+      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, apiKeyAttrs.createdByUser, params.id);
       throw e;
     }
 
@@ -585,7 +589,7 @@ export class ActionPolicyClient {
         version,
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, id);
+      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, apiKeyAttrs.createdByUser, id);
       throw e;
     }
 
@@ -1053,7 +1057,7 @@ export class ActionPolicyClient {
         version: existingVersion,
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, id);
+      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, apiKeyAttrs.createdByUser, id);
       throw e;
     }
 
