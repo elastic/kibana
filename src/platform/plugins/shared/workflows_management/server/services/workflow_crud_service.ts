@@ -1402,7 +1402,9 @@ export class WorkflowCrudService {
     id: string,
     spaceId: string,
     expectedOwnership: ManagedWorkflowOrphan
-  ): Promise<WorkflowProperties> {
+  ): Promise<{ document: WorkflowProperties; switchedOff: boolean }> {
+    // Read on the attempt that wins the OCC write, so a concurrent switch-off is not reported as ours.
+    let switchedOff = false;
     const { document } = await this.runOccWrite(id, async () => {
       const writer = this.getReadModifyWriteOccWriter(
         spaceId,
@@ -1413,11 +1415,14 @@ export class WorkflowCrudService {
       );
       return writer.readModifyWrite({
         id,
-        mutate: (existing) => applyWorkflowVersion(mutateWorkflowToDisabled(existing), existing),
+        mutate: (existing) => {
+          switchedOff = existing.enabled;
+          return applyWorkflowVersion(mutateWorkflowToDisabled(existing), existing);
+        },
       });
     });
     await unscheduleWorkflowTasks([id], this.deps.getTaskScheduler());
-    return document;
+    return { document, switchedOff };
   }
 
   /**

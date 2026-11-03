@@ -647,7 +647,7 @@ const disabled = await managed.disable(MY_WORKFLOW_ID, { spaceId: 'my-space' });
 
 It takes the same identity options as `getWorkflowStatus` and changes nothing but `enabled`, so it also works on workflows bound to a service account (`settings.run_as`). Turning a bound workflow back on still requires a user with `manage_security`.
 
-It resolves to `true` when this call switched the workflow off, and to `false` when the workflow is missing, not managed, already off, or Workflows is unavailable. It throws for an unknown id, a workflow managed by another plugin or definition (`403`), or a workflow deleted during the call.
+It resolves to `true` when this call switched the workflow off, and to `false` when the workflow is missing, not managed, already off (including switched off or soft-deleted during the call), or Workflows is unavailable. It throws for an unknown id, a workflow managed by another plugin or definition (`403`), or a workflow permanently deleted during the call.
 
 ## 11) Executing managed workflows
 

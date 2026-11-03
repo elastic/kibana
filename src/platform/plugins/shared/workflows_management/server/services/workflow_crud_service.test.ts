@@ -4440,7 +4440,9 @@ describe('managed orphan cleanup without a request', () => {
     it('disables a bound orphan with OCC without a request or binding change', async () => {
       const { core, bindings, client, service } = setup();
 
-      await service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN);
+      await expect(
+        service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN)
+      ).resolves.toEqual(expect.objectContaining({ switchedOff: true }));
 
       expect(client.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -4458,6 +4460,38 @@ describe('managed orphan cleanup without a request', () => {
       expect(bindings.bindWorkload).not.toHaveBeenCalled();
       expect(bindings.unbindWorkload).not.toHaveBeenCalled();
       expect(core.elasticsearch.client.asScoped).not.toHaveBeenCalled();
+    });
+
+    it('reports it did not switch the workflow off when a concurrent write did so first', async () => {
+      const { client, source, service } = setup();
+      const switchedOffConcurrently = {
+        ...source,
+        enabled: false,
+        yaml: 'name: Test Workflow\nenabled: false',
+        definition: { ...source.definition, enabled: false },
+      };
+      client.search
+        .mockResolvedValueOnce({
+          hits: { hits: [{ ...occSearchHit('system-orphan', undefined, 5, 1), _source: source }] },
+        })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                ...occSearchHit('system-orphan', undefined, 6, 1),
+                _source: switchedOffConcurrently,
+              },
+            ],
+          },
+        });
+      client.index.mockRejectedValueOnce(Object.assign(new Error('conflict'), { statusCode: 409 }));
+
+      await expect(
+        service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN)
+      ).resolves.toEqual(expect.objectContaining({ switchedOff: false }));
+      expect(client.index).toHaveBeenLastCalledWith(
+        expect.objectContaining({ if_seq_no: 6, if_primary_term: 1 })
+      );
     });
 
     it('refuses a workflow that no longer matches the sweep snapshot', async () => {

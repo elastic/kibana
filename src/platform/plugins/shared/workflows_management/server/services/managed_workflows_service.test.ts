@@ -242,9 +242,10 @@ const createCrudServiceMock = () => {
       })
     ),
     deleteManagedOrphan: jest.fn().mockResolvedValue(true),
-    disableManagedWorkflowWithoutRequest: jest.fn(async () =>
-      createWorkflowSource({ enabled: false })
-    ),
+    disableManagedWorkflowWithoutRequest: jest.fn(async () => ({
+      document: createWorkflowSource({ enabled: false }),
+      switchedOff: true,
+    })),
     logWorkflowChangesAfterWrite: jest.fn().mockResolvedValue(undefined),
     prepareWorkflowDocumentForStorage: jest.fn(
       async ({
@@ -1400,6 +1401,25 @@ describe('ManagedWorkflowsService', () => {
       ).resolves.toBe(false);
 
       expect(crudService.disableManagedWorkflowWithoutRequest).not.toHaveBeenCalled();
+      expect(crudService.logWorkflowChangesAfterWrite).not.toHaveBeenCalled();
+      expect(audit.logWorkflowUpdated).not.toHaveBeenCalled();
+    });
+
+    it('resolves to false and records nothing when a concurrent write switched it off first', async () => {
+      mockManagedWorkflowDefinitions = [createDefinition()];
+      const { audit, crudService, service } = createService();
+      crudService.getWorkflowDocumentSource.mockResolvedValue(
+        createWorkflowSource({ enabled: true })
+      );
+      crudService.disableManagedWorkflowWithoutRequest.mockResolvedValue({
+        document: createWorkflowSource({ enabled: false }),
+        switchedOff: false,
+      });
+
+      await expect(
+        service.disableManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, PLUGIN_ID)
+      ).resolves.toBe(false);
+
       expect(crudService.logWorkflowChangesAfterWrite).not.toHaveBeenCalled();
       expect(audit.logWorkflowUpdated).not.toHaveBeenCalled();
     });

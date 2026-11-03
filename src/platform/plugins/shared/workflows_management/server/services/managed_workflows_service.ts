@@ -426,14 +426,18 @@ export class ManagedWorkflowsService {
       return false;
     }
 
-    const document = await this.deps.crudService.disableManagedWorkflowWithoutRequest(
-      workflowDocumentId,
-      spaceId,
-      {
-        managedBy: registeredPluginId,
-        definitionId: id,
-      }
-    );
+    const { document, switchedOff } =
+      await this.deps.crudService.disableManagedWorkflowWithoutRequest(
+        workflowDocumentId,
+        spaceId,
+        {
+          managedBy: registeredPluginId,
+          definitionId: id,
+        }
+      );
+    if (!switchedOff) {
+      return false;
+    }
     await this.deps.crudService.logWorkflowChangesAfterWrite({
       workflows: [{ id: workflowDocumentId, document }],
       action: WorkflowChangeHistoryAction.workflowUpdate,
