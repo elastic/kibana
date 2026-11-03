@@ -19,7 +19,9 @@ export const AUDIT_META_ALERT_AS_EVIDENCE_EVALUATOR_NAME = 'MetaAlertAsEvidence'
  *
  * - no meta groups in the gold: score null (N/A)
  * - no discoveries: score 1, label `no_discoveries` (nothing was treated as evidence)
- * - discoveries but none cites any alert id: score null, label `no_citations`
+ * - discoveries but none cites a known alert id: score null, label `no_citations`. Ids absent from
+ *   `gold.alertGroups` (invented by the model) are ignored, so a meta alert beside an invented id
+ *   is still meta-only.
  * - otherwise 1 when no citing discovery is meta-only, else 0. Citing discoveries only are judged.
  *
  * Citation-based: it reads `alertIds`, not prose, so a discovery that cites the underlying alerts
@@ -46,12 +48,19 @@ export const createAuditMetaAlertAsEvidenceEvaluator = (
       return { score: 1, label: 'no_discoveries' };
     }
 
-    const citing = discoveries.filter(({ alertIds }) => alertIds.length > 0);
+    // The generation schema accepts any id string, so an invented id must not pass for evidence.
+    const knownIds = new Set(Object.values(gold.alertGroups).flat());
+    const citing = discoveries
+      .map((discovery) => ({
+        title: discovery.title,
+        alertIds: discovery.alertIds.filter((id) => knownIds.has(id)),
+      }))
+      .filter(({ alertIds }) => alertIds.length > 0);
     if (citing.length === 0) {
       return {
         score: null,
         label: 'no_citations',
-        explanation: `${discoveries.length} discoveries cite no alert ids, so meta-alert use cannot be checked`,
+        explanation: `${discoveries.length} discoveries cite no known alert ids, so meta-alert use cannot be checked`,
       };
     }
 

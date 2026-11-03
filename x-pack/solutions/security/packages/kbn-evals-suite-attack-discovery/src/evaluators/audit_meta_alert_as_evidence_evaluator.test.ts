@@ -74,4 +74,15 @@ describe('MetaAlertAsEvidence evaluator', () => {
     expect(await run([[], ['u1']])).toMatchObject({ score: 1 });
     expect(await run([[], ['m1']])).toMatchObject({ score: 0 });
   });
+
+  it('ignores invented alert ids: a meta alert beside an unknown id is still meta-only', async () => {
+    expect(await run([['m1', 'invented']])).toMatchObject({
+      score: 0,
+      label: 'meta_alert_as_evidence',
+    });
+  });
+
+  it('is null with no_citations when every cited id is unknown', async () => {
+    expect(await run([['invented']])).toMatchObject({ score: null, label: 'no_citations' });
+  });
 });
