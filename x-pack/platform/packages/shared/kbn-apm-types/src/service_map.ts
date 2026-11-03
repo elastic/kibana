@@ -60,10 +60,22 @@ export interface ServiceMapRawResponse {
 
 export type ServiceMapResponse = Pick<ServiceMapTelemetry, 'tracesCount'> & ServiceMapRawResponse;
 
+/** Stats of a service's main transaction type. */
+export interface ServiceMapServiceStats {
+  transactionType: string;
+  throughput: number;
+  failedTransactionRate: number;
+  /** In microseconds */
+  latency: number | null;
+  requestCount: number;
+}
+
 export interface ServicesResponse {
   [SERVICE_NAME]: string;
   [AGENT_NAME]: string;
   [SERVICE_ENVIRONMENT]: string | null;
+  /** Only set when service map grouping is enabled and the service has transactions */
+  stats?: ServiceMapServiceStats;
 }
 
 export interface ServiceConnectionNode extends ServicesResponse {

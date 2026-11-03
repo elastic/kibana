@@ -32,7 +32,10 @@ export const serviceMapRoute = defineRoute<ServiceMapRouteResponse>()({
               return z.NEVER;
             }
           }),
-          // When not provided, the server picks the source. Only read when service map grouping is enabled.
+          // The data source (`documentType`, `rollupInterval` and `useDurationSummary`) is optional only
+          // while service map grouping (`apm.serviceMapGroupingEnabled`) is rolled out: the server
+          // requires it when the flag is on and ignores it when it's off. Once the flag is removed
+          // (https://github.com/elastic/kibana/issues/300607), make it required, as in `GET /internal/apm/services`.
           useDurationSummary: BooleanFromString,
         })
         .merge(serviceTransactionDataSourceSchema)
