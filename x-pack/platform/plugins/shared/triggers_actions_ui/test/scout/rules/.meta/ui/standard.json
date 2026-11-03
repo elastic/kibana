@@ -1,5 +1,5 @@
 {
-  "sha1": "09f3d7ca0fabdbe510bbc6757e57fd5aef9f7612",
+  "sha1": "df7dd38ef36f1f09bcb5e668c49812dc0ae93adb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/global.setup.ts",
-        "line": 6,
+        "line": 13,
         "column": 1
       }
     },
@@ -489,8 +489,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/global.teardown.ts",
-        "line": 5,
-        "column": 1
+        "line": 11,
+        "column": 31
       }
     }
   ]
