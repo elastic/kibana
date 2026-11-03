@@ -145,6 +145,85 @@ describe('useBulkActionItems', () => {
   });
 
   describe('workflow actions', () => {
+    it('passes only id pairs for the selected rows, not their sources', () => {
+      renderUseBulkActionItems({
+        eventIds: ['selected-1', 'selected-2'],
+        data: [
+          {
+            _id: 'selected-1',
+            _index: 'test-index',
+            data: [],
+            ecs: { _id: 'selected-1', host: { name: ['host-1'] } },
+          },
+          {
+            _id: 'selected-2',
+            _index: 'test-index',
+            data: [],
+            ecs: { _id: 'selected-2', host: { name: ['host-2'] } },
+          },
+          {
+            _id: 'not-selected',
+            _index: 'test-index',
+            data: [],
+            ecs: { _id: 'not-selected' },
+          },
+        ],
+      });
+
+      expect(mockUseRunDocumentWorkflowPanel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          documentIds: [
+            { _id: 'selected-1', _index: 'test-index' },
+            { _id: 'selected-2', _index: 'test-index' },
+          ],
+        })
+      );
+    });
+
+    it('drops selected rows without an index', () => {
+      renderUseBulkActionItems({
+        eventIds: ['selected-1', 'no-index'],
+        data: [
+          {
+            _id: 'selected-1',
+            _index: 'test-index',
+            data: [],
+            ecs: { _id: 'selected-1' },
+          },
+          {
+            _id: 'no-index',
+            data: [],
+            ecs: { _id: 'no-index' },
+          },
+        ],
+      });
+
+      expect(mockUseRunDocumentWorkflowPanel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          documentIds: [{ _id: 'selected-1', _index: 'test-index' }],
+        })
+      );
+    });
+
+    // Without the scope a "select all" would silently run on the loaded rows only.
+    it('forwards the select-all flag and selection scope so a run is not capped to the page', () => {
+      const selectionScope = {
+        dataViewId: 'security-solution-default',
+        indexNames: ['logs-*'],
+        filterQuery: '{"bool":{}}',
+        from: '2026-01-01T00:00:00.000Z',
+        to: '2026-01-02T00:00:00.000Z',
+        runtimeMappings: {},
+        queryId: 'test-table-run-workflow-selection',
+      };
+
+      renderUseBulkActionItems({ isAllSelected: true, selectionScope, totalItems: 1234 });
+
+      expect(mockUseRunDocumentWorkflowPanel).toHaveBeenCalledWith(
+        expect.objectContaining({ isAllSelected: true, selectionScope, totalItems: 1234 })
+      );
+    });
+
     it('should include workflow menu items when useRunDocumentWorkflowPanel returns items', () => {
       const mockMenuItem = {
         key: 'run-document-workflow-action',

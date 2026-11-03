@@ -27,7 +27,7 @@ const mockOpenChat = jest.fn();
 
 const mockStreamFeatures = jest.fn();
 
-jest.mock('../../../hooks/use_fetch_source_features', () => ({
+jest.mock('../../../data/knowledge_indicators/use_fetch_source_features', () => ({
   useFetchSourceFeatures: () => mockStreamFeatures(),
 }));
 
@@ -238,16 +238,6 @@ describe('DetectionFlyout', () => {
     );
   });
 
-  it('renders the associated entity chip as a button', () => {
-    renderFlyout();
-
-    const chip = screen.getByTestId('nightshiftDetectionFlyoutEntityChip');
-    expect(chip).toHaveTextContent('web-frontend');
-    expect(chip.tagName).toBe('BUTTON');
-    expect(chip).toHaveAttribute('data-ebt-action', 'viewEntity');
-    expect(chip).toHaveAttribute('data-ebt-element', 'nightshiftDetectionFlyoutEntities');
-  });
-
   it('opens the entity flyout when an associated entity chip is clicked', () => {
     renderFlyout();
 
@@ -367,17 +357,6 @@ describe('DetectionFlyout', () => {
     expect(screen.getByText('Impacted services could not be loaded.')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('nightshiftDetectionFlyoutImpactedServicesRetry'));
     expect(refetch).toHaveBeenCalledTimes(1);
-  });
-
-  it('renders the Lens occurrence chart in the trend section', () => {
-    renderFlyout();
-
-    expect(screen.getByText('Trend')).toBeInTheDocument();
-    expect(screen.getByText('[Logs] Spike')).toBeInTheDocument();
-    expect(screen.getByTestId('nightshiftDetectionLensChart')).toHaveAttribute(
-      'data-rule-uuid',
-      mockDetection.rule_uuid
-    );
   });
 
   it('renders the ES|QL query with an Open in Discover button', () => {

@@ -1,0 +1,31 @@
+{
+  "version": "1.0",
+  "sources": ["model"],
+  "maven": {
+    "dependencies": ["software.amazon.smithy:smithy-aws-protocol-tests:1.74.1"]
+  },
+  "projections": {
+    "json10": {
+      "transforms": [
+        {
+          "name": "includeShapesBySelector",
+          "args": {
+            "selector": ":is([trait|trait], [trait|trait] ~> *, service[id = aws.protocoltests.json10#JsonRpc10], service[id = aws.protocoltests.json10#JsonRpc10] ~> *)"
+          }
+        },
+        { "name": "excludeTraits", "args": { "traits": ["smithy.api#documentation"] } }
+      ]
+    },
+    "json11": {
+      "transforms": [
+        {
+          "name": "includeShapesBySelector",
+          "args": {
+            "selector": ":is([trait|trait], [trait|trait] ~> *, service[id = aws.protocoltests.json#JsonProtocol], service[id = aws.protocoltests.json#JsonProtocol] ~> *)"
+          }
+        },
+        { "name": "excludeTraits", "args": { "traits": ["smithy.api#documentation"] } }
+      ]
+    }
+  }
+}

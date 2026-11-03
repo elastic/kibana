@@ -20,6 +20,17 @@ jest.mock('../utils', () => ({
   }),
 }));
 
+// Use a per-process TMP_DIR: the sibling type-check CLI package's suite shares the real one,
+// and both suites delete it after each test, so running them concurrently races.
+jest.mock('../constants', () => {
+  const Os = jest.requireActual<typeof import('os')>('os');
+  const Path = jest.requireActual<typeof import('path')>('path');
+  return {
+    ...jest.requireActual<typeof import('../constants')>('../constants'),
+    TMP_DIR: Path.join(Os.tmpdir(), `kibana-ts-type-check-cache-test-${process.pid}`),
+  };
+});
+
 const { cleanTypeCheckArtifacts } = jest.requireMock('../utils') as {
   cleanTypeCheckArtifacts: jest.MockedFunction<(log: SomeDevLog) => Promise<void>>;
 };

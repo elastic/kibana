@@ -13,7 +13,7 @@ import type {
   MapAttachmentData,
   MapAttachmentMetadata,
   MapAttributesSnapshot,
-} from '../../../../common/types/domain_zod/attachment/map/v2';
+} from '../../../../common/types/domain/attachment/map/v2';
 import type { UnifiedReferenceAttachmentViewProps } from '../../../client/attachment_framework/types';
 import { useKibana } from '../../../common/lib/kibana';
 

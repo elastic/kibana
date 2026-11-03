@@ -5,62 +5,31 @@
  * 2.0.
  */
 
-import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import { CaseStatuses } from '@kbn/cases-components';
+import Boom from '@hapi/boom';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
-import type { CasesBulkGetResponse } from '@kbn/cases-plugin/common/types/api';
-import { fetchEntityCaseCounts } from './fetch_entity_case_counts';
+import { fetchEntityCaseCounts, isCasesForbiddenError } from './fetch_entity_case_counts';
 
-/** A repository whose attachments aggregation answers with the case ids of each entity. */
-const buildRepository = (caseIdsByEntity: Record<string, string[]>) => {
-  const repository = savedObjectsRepositoryMock.create();
-  repository.find.mockResolvedValue({
-    saved_objects: [],
-    total: 0,
-    per_page: 1,
-    page: 1,
-    aggregations: {
-      by_entity: {
-        buckets: Object.entries(caseIdsByEntity).map(([key, caseIds]) => ({
-          key,
-          doc_count: caseIds.length,
-          references: { cases: { buckets: caseIds.map((id) => ({ key: id, doc_count: 1 })) } },
-        })),
-      },
-    },
-  });
-  return repository;
-};
-
-/** A cases client that knows the cases of `statuses`; other ids are errors, as when deleted. */
-const buildCasesClient = (statuses: Record<string, CaseStatuses>) => {
+/** A cases client whose lookup answers with the case ids of each attachment id it knows. */
+const buildCasesClient = (caseIdsByAttachment: Record<string, string[]>) => {
   const casesClient = createCasesClientMock();
-  casesClient.cases.bulkGet.mockImplementation(
-    async ({ ids }) =>
-      ({
-        cases: ids.flatMap((id) => (statuses[id] ? [{ id, status: statuses[id] }] : [])),
-        errors: [],
-      } as unknown as CasesBulkGetResponse)
+  casesClient.cases.getCasesByAttachmentIDs.mockImplementation(async ({ attachmentIds }) =>
+    attachmentIds.flatMap((attachmentId) =>
+      caseIdsByAttachment[attachmentId]
+        ? [{ attachmentId, caseIds: caseIdsByAttachment[attachmentId] }]
+        : []
+    )
   );
   return casesClient;
 };
 
 describe('fetchEntityCaseCounts', () => {
-  it('counts the open and in-progress cases of each entity, not the closed ones', async () => {
-    const repository = buildRepository({
-      'host:a': ['open', 'in-progress', 'closed'],
-      'host:b': ['open'],
-    });
+  it('counts the cases of each entity, asking only for the open and in-progress ones', async () => {
     const casesClient = buildCasesClient({
-      open: CaseStatuses.open,
-      'in-progress': CaseStatuses['in-progress'],
-      closed: CaseStatuses.closed,
+      'host:a': ['case-1', 'case-2'],
+      'host:b': ['case-1'],
     });
 
-    const counts = await fetchEntityCaseCounts(repository, casesClient, 'default', [
-      'host:a',
-      'host:b',
-    ]);
+    const counts = await fetchEntityCaseCounts(casesClient, ['host:a', 'host:b', 'host:c']);
 
     expect(counts).toEqual(
       new Map([
@@ -68,119 +37,73 @@ describe('fetchEntityCaseCounts', () => {
         ['host:b', 1],
       ])
     );
-    // A case shared by entities is read once.
-    expect(casesClient.cases.bulkGet).toHaveBeenCalledWith({
-      ids: ['open', 'in-progress', 'closed'],
+    expect(casesClient.cases.getCasesByAttachmentIDs).toHaveBeenCalledWith({
+      type: 'security.entity',
+      owner: 'securitySolution',
+      attachmentIds: ['host:a', 'host:b', 'host:c'],
+      status: ['open', 'in-progress'],
     });
   });
 
-  it('leaves out an entity whose cases are all closed or missing', async () => {
-    const repository = buildRepository({ 'host:a': ['closed', 'deleted'] });
-    const casesClient = buildCasesClient({ closed: CaseStatuses.closed });
+  it('looks the ids up in batches the cases client accepts', async () => {
+    const entityIds = Array.from({ length: 2500 }, (_, i) => `host:${i}`);
+    const casesClient = buildCasesClient({ 'host:2400': ['case'] });
 
-    const counts = await fetchEntityCaseCounts(repository, casesClient, 'default', ['host:a']);
+    const counts = await fetchEntityCaseCounts(casesClient, entityIds);
 
-    expect(counts).toEqual(new Map());
-  });
-
-  it('reads the cases in batches the cases client accepts', async () => {
-    const caseIds = Array.from({ length: 2500 }, (_, i) => `case-${i}`);
-    const repository = buildRepository({ 'host:a': caseIds });
-    const casesClient = buildCasesClient(
-      Object.fromEntries(caseIds.map((id) => [id, CaseStatuses.open]))
-    );
-
-    const counts = await fetchEntityCaseCounts(repository, casesClient, 'default', ['host:a']);
-
-    expect(counts).toEqual(new Map([['host:a', 2500]]));
-    expect(casesClient.cases.bulkGet.mock.calls.map(([{ ids }]) => ids.length)).toEqual([
-      1000, 1000, 500,
-    ]);
+    expect(counts).toEqual(new Map([['host:2400', 1]]));
+    expect(
+      casesClient.cases.getCasesByAttachmentIDs.mock.calls.map(
+        ([{ attachmentIds }]) => attachmentIds.length
+      )
+    ).toEqual([1000, 1000, 500]);
   });
 
   describe('for a group', () => {
     it('counts the distinct cases of the entity and its members, a shared case once', async () => {
-      const repository = buildRepository({
+      const casesClient = buildCasesClient({
         'host:head': ['shared', 'own'],
         'host:alias-1': ['shared', 'alias-1-only'],
         'host:alias-2': ['alias-2-only'],
       });
-      const casesClient = buildCasesClient({
-        shared: CaseStatuses.open,
-        own: CaseStatuses.open,
-        'alias-1-only': CaseStatuses.open,
-        'alias-2-only': CaseStatuses['in-progress'],
-      });
 
-      const counts = await fetchEntityCaseCounts(
-        repository,
-        casesClient,
-        'default',
-        ['host:head'],
-        {
-          'host:head': ['host:alias-1', 'host:alias-2'],
-        }
-      );
+      const counts = await fetchEntityCaseCounts(casesClient, ['host:head'], {
+        'host:head': ['host:alias-1', 'host:alias-2'],
+      });
 
       expect(counts).toEqual(new Map([['host:head', 4]]));
     });
 
     it('counts the cases of the members of an entity that has none of its own', async () => {
-      const repository = buildRepository({ 'host:alias': ['case'] });
-      const casesClient = buildCasesClient({ case: CaseStatuses.open });
+      const casesClient = buildCasesClient({ 'host:alias': ['case'] });
 
-      const counts = await fetchEntityCaseCounts(
-        repository,
-        casesClient,
-        'default',
-        ['host:head'],
-        {
-          'host:head': ['host:alias'],
-        }
-      );
-
-      expect(counts).toEqual(new Map([['host:head', 1]]));
-    });
-
-    it('does not count the closed cases of the members', async () => {
-      const repository = buildRepository({ 'host:head': ['open'], 'host:alias': ['closed'] });
-      const casesClient = buildCasesClient({
-        open: CaseStatuses.open,
-        closed: CaseStatuses.closed,
+      const counts = await fetchEntityCaseCounts(casesClient, ['host:head'], {
+        'host:head': ['host:alias'],
       });
 
-      const counts = await fetchEntityCaseCounts(
-        repository,
-        casesClient,
-        'default',
-        ['host:head'],
-        {
-          'host:head': ['host:alias'],
-        }
-      );
-
       expect(counts).toEqual(new Map([['host:head', 1]]));
     });
 
-    it('reads the cases of the entities and of all the members in one query', async () => {
-      const repository = buildRepository({});
+    it('looks up the entities and all the members at once', async () => {
       const casesClient = buildCasesClient({});
 
-      await fetchEntityCaseCounts(repository, casesClient, 'default', ['host:a', 'host:b'], {
+      await fetchEntityCaseCounts(casesClient, ['host:a', 'host:b'], {
         'host:a': ['host:a1'],
         'host:b': ['host:b1', 'host:b2'],
       });
 
-      expect(repository.find).toHaveBeenCalledTimes(1);
-      const [{ aggs }] = repository.find.mock.calls[0];
-      expect(aggs?.by_entity).toMatchObject({ terms: { size: 5 } });
+      expect(casesClient.cases.getCasesByAttachmentIDs).toHaveBeenCalledTimes(1);
+      expect(casesClient.cases.getCasesByAttachmentIDs).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attachmentIds: ['host:a', 'host:b', 'host:a1', 'host:b1', 'host:b2'],
+        })
+      );
     });
 
-    it('counts an entity without members as before', async () => {
-      const repository = buildRepository({ 'host:a': ['case'], 'host:b': ['case'] });
-      const casesClient = buildCasesClient({ case: CaseStatuses.open });
+    it('does not count the cases of the members of another entity', async () => {
+      const casesClient = buildCasesClient({ 'host:a': ['case'], 'host:b': ['case'] });
 
-      const counts = await fetchEntityCaseCounts(repository, casesClient, 'default', ['host:a'], {
+      const counts = await fetchEntityCaseCounts(casesClient, ['host:a'], {
         'host:other': ['host:b'],
       });
 
@@ -189,11 +112,21 @@ describe('fetchEntityCaseCounts', () => {
   });
 
   it('reads nothing without entity ids', async () => {
-    const repository = buildRepository({});
     const casesClient = buildCasesClient({});
 
-    expect(await fetchEntityCaseCounts(repository, casesClient, 'default', [])).toEqual(new Map());
-    expect(repository.find).not.toHaveBeenCalled();
-    expect(casesClient.cases.bulkGet).not.toHaveBeenCalled();
+    expect(await fetchEntityCaseCounts(casesClient, [])).toEqual(new Map());
+    expect(casesClient.cases.getCasesByAttachmentIDs).not.toHaveBeenCalled();
+  });
+});
+
+describe('isCasesForbiddenError', () => {
+  it('recognizes a forbidden error wrapped by the Cases client', () => {
+    expect(isCasesForbiddenError({ wrappedError: Boom.forbidden('no access') })).toBe(true);
+  });
+
+  it('does not take other errors for it', () => {
+    expect(isCasesForbiddenError({ wrappedError: Boom.badRequest('bad') })).toBe(false);
+    expect(isCasesForbiddenError(Boom.forbidden('not wrapped'))).toBe(false);
+    expect(isCasesForbiddenError(new Error('boom'))).toBe(false);
   });
 });

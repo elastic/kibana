@@ -20,14 +20,27 @@ export interface WorkflowSummary {
   name: string;
 }
 
+export interface WorkflowExecution {
+  status: string;
+  workflowId: string;
+  isTestRun?: boolean;
+}
+
 interface WorkflowExecutionListResponse {
   results: Array<{ triggeredBy?: string }>;
 }
 
-interface WaitForSuccessfulExecutionFilter {
+interface WorkflowsApiSpaceOptions {
+  spaceId?: string;
+}
+
+interface WaitForSuccessfulExecutionFilter extends WorkflowsApiSpaceOptions {
   /** What started the execution, e.g. `action_policy` for the dispatcher. */
   triggeredBy: string;
 }
+
+const withSpace = (path: string, spaceId: string | undefined): string =>
+  spaceId ? `/s/${encodeURIComponent(spaceId)}${path}` : path;
 
 /**
  * Minimal workflows client used to seed the destinations that action policies
@@ -37,13 +50,18 @@ interface WaitForSuccessfulExecutionFilter {
  * workflows plugin to return.
  */
 export interface WorkflowsApiService {
-  create: (yaml: string) => Promise<WorkflowSummary>;
-  bulkDelete: (ids: string[]) => Promise<void>;
+  create: (yaml: string, options?: WorkflowsApiSpaceOptions) => Promise<WorkflowSummary>;
+  bulkDelete: (ids: string[], options?: WorkflowsApiSpaceOptions) => Promise<void>;
   /** Polls until the workflow has at least one completed execution started by `triggeredBy`. */
   waitForSuccessfulExecution: (
     workflowId: string,
     filter: WaitForSuccessfulExecutionFilter
   ) => Promise<void>;
+  /** Polls until the execution has completed, then returns it. */
+  waitForCompletedExecution: (
+    executionId: string,
+    options?: WorkflowsApiSpaceOptions
+  ) => Promise<WorkflowExecution>;
 }
 
 export const getWorkflowsApiService = ({
@@ -53,24 +71,24 @@ export const getWorkflowsApiService = ({
   log: ScoutLogger;
   kbnClient: KbnClient;
 }): WorkflowsApiService => ({
-  create: (yaml) =>
+  create: (yaml, options) =>
     measurePerformanceAsync(log, 'workflows.create', async () => {
       const response = await kbnClient.request<WorkflowSummary>({
         method: 'POST',
-        path: `${WORKFLOWS_API_PATH}/workflow`,
+        path: withSpace(`${WORKFLOWS_API_PATH}/workflow`, options?.spaceId),
         headers: COMMON_HEADERS,
         body: { yaml },
       });
       return response.data;
     }),
 
-  bulkDelete: (ids) =>
+  bulkDelete: (ids, options) =>
     measurePerformanceAsync(log, 'workflows.bulkDelete', async () => {
       if (ids.length === 0) return;
 
       await kbnClient.request({
         method: 'DELETE',
-        path: WORKFLOWS_API_PATH,
+        path: withSpace(WORKFLOWS_API_PATH, options?.spaceId),
         headers: COMMON_HEADERS,
         body: { ids },
         ignoreErrors: [404],
@@ -78,12 +96,15 @@ export const getWorkflowsApiService = ({
       });
     }),
 
-  waitForSuccessfulExecution: (workflowId, { triggeredBy }) =>
+  waitForSuccessfulExecution: (workflowId, { triggeredBy, spaceId }) =>
     measurePerformanceAsync(log, 'workflows.waitForSuccessfulExecution', async () => {
       const countSuccessfulExecutions = async (): Promise<number> => {
         const response = await kbnClient.request<WorkflowExecutionListResponse>({
           method: 'GET',
-          path: `${WORKFLOWS_API_PATH}/workflow/${encodeURIComponent(workflowId)}/executions`,
+          path: withSpace(
+            `${WORKFLOWS_API_PATH}/workflow/${encodeURIComponent(workflowId)}/executions`,
+            spaceId
+          ),
           headers: COMMON_HEADERS,
           query: { statuses: 'completed', size: EXECUTIONS_MAX_PAGE_SIZE },
           retries: 0,
@@ -98,5 +119,29 @@ export const getWorkflowsApiService = ({
           intervals: [POLL_INTERVAL_MS],
         })
         .toBeGreaterThanOrEqual(1);
+    }),
+
+  waitForCompletedExecution: (executionId, options) =>
+    measurePerformanceAsync(log, 'workflows.waitForCompletedExecution', async () => {
+      const getExecution = async (): Promise<WorkflowExecution> => {
+        const response = await kbnClient.request<WorkflowExecution>({
+          method: 'GET',
+          path: withSpace(
+            `${WORKFLOWS_API_PATH}/executions/${encodeURIComponent(executionId)}`,
+            options?.spaceId
+          ),
+          headers: COMMON_HEADERS,
+          retries: 0,
+        });
+        return response.data;
+      };
+
+      await expect
+        .poll(async () => (await getExecution()).status, {
+          timeout: POLL_TIMEOUT_MS,
+          intervals: [POLL_INTERVAL_MS],
+        })
+        .toBe('completed');
+      return getExecution();
     }),
 });

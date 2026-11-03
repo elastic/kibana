@@ -1,0 +1,8 @@
+{
+  "listIssues": {
+    "queries": [{ "method": "POST", "path": "/api/projects/{project_id}/error_tracking/query/issues/" }]
+  },
+  "runQuery": {
+    "queries": [{ "method": "POST", "path": "/api/projects/{project_id}/query/" }]
+  }
+}
