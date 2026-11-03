@@ -43,7 +43,7 @@ export const mountApp = async ({
   const queryClient = new QueryClient();
   await services.accessChecker.initAccess();
   const activeSpaceId = (await plugins.spaces?.getActiveSpace())?.id ?? DEFAULT_SPACE_ID;
-  const conversationStreamService = new ConversationStreamService(services.eventsService);
+  const conversationStreamService = new ConversationStreamService();
   const listRefresh = refreshListsOnAgentChanges({
     eventsService: services.eventsService,
     queryClient,

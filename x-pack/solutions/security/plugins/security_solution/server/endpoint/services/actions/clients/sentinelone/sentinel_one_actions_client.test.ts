@@ -1394,7 +1394,7 @@ describe('SentinelOneActionsClient class', () => {
             limit: 1,
             sortBy: 'createdAt',
             sortOrder: 'asc',
-            // eslint-disable-next-line @typescript-eslint/naming-convention
+            // eslint-disable-next-line @kbn/compat/typescript-naming-convention
             createdAt__gte: expect.any(String),
             agentIds: '1-2-3',
           },

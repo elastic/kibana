@@ -1,5 +1,5 @@
 {
-  "sha1": "3e30683deb8a6c60aa55c1d340e35e98fa6370b9",
+  "sha1": "6d159af3e11fa7dcc6ad38afd6db169beef171e1",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -15,6 +15,71 @@
         "file": "src/platform/plugins/private/links/test/scout/ui/tests/add_from_library.spec.ts",
         "line": 19,
         "column": 8
+      }
+    },
+    {
+      "id": "1d6c7ac1e78455d-f527e51fb3d658e",
+      "title": "Links panel - accessibility links panel has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/links/test/scout/ui/tests/links_a11y.spec.ts",
+        "line": 63,
+        "column": 8
+      }
+    },
+    {
+      "id": "1d6c7ac1e78455d-7b6f7654213a4f6",
+      "title": "Links panel - accessibility empty links editor flyout has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/links/test/scout/ui/tests/links_a11y.spec.ts",
+        "line": 67,
+        "column": 11
+      }
+    },
+    {
+      "id": "1d6c7ac1e78455d-3a10be763698595",
+      "title": "Links panel - accessibility non-empty links editor flyout has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/links/test/scout/ui/tests/links_a11y.spec.ts",
+        "line": 73,
+        "column": 5
+      }
+    },
+    {
+      "id": "1d6c7ac1e78455d-219ecca4e32db5c",
+      "title": "Links panel - accessibility add dashboard link flyout has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/links/test/scout/ui/tests/links_a11y.spec.ts",
+        "line": 79,
+        "column": 11
+      }
+    },
+    {
+      "id": "1d6c7ac1e78455d-4e5c53f16845f34",
+      "title": "Links panel - accessibility add external link flyout has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/links/test/scout/ui/tests/links_a11y.spec.ts",
+        "line": 86,
+        "column": 9
       }
     },
     {
