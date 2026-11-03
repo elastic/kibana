@@ -71,8 +71,8 @@ const sanitizeRule = (value: unknown, logger: Logger): PerRuleState => {
   return {
     lastProcessedTimestamp: toWatermark(record.lastProcessedTimestamp, logger),
     lastRun: sanitizeLastRun(record.lastRun),
-    // Custom rules only. Dropping any of these is safe: the rule rescans, or
-    // runs in a different position next tick.
+    // Custom rules (lastError: any rule). Dropping any of these is safe: the rule
+    // rescans, or runs in a different position next tick.
     ...(typeof record.definitionFingerprint === 'string' && {
       definitionFingerprint: record.definitionFingerprint,
     }),
@@ -84,6 +84,12 @@ const sanitizeRule = (value: unknown, logger: Logger): PerRuleState => {
     ...(typeof record.deferredByDeadline === 'boolean' && {
       deferredByDeadline: record.deferredByDeadline,
     }),
+    // Failure backoff, any rule. Dropping these only makes a failing rule retry sooner.
+    ...(typeof record.lastFailedAt === 'string' && { lastFailedAt: record.lastFailedAt }),
+    ...(typeof record.consecutiveFailures === 'number' && {
+      consecutiveFailures: record.consecutiveFailures,
+    }),
+    ...(typeof record.nextAttemptAt === 'string' && { nextAttemptAt: record.nextAttemptAt }),
   };
 };
 

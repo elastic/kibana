@@ -139,6 +139,7 @@ describe('usePreviousPeriod', () => {
       reachesBack: true,
       isHistoryMissing: false,
       isError: true,
+      failure: 'delta',
     });
 
     // A failed history check leaves nothing to follow.
@@ -148,6 +149,7 @@ describe('usePreviousPeriod', () => {
       reachesBack: undefined,
       isHistoryMissing: false,
       isError: true,
+      failure: 'history',
     });
   });
 
@@ -230,7 +232,7 @@ describe('parseReachesBack', () => {
 describe('isDeltaStillComing', () => {
   const base = {
     skip: false,
-    count: 5,
+    hasCount: true,
     isUnavailable: false,
     isError: false,
     isHistoryMissing: false,
@@ -241,9 +243,14 @@ describe('isDeltaStillComing', () => {
     expect(isDeltaStillComing(base)).toBe(true);
   });
 
+  it('does not care how big the count is: a count of 0 that came back is compared too', () => {
+    // `hasCount` is the only thing about the count that matters, so there is no count to pass.
+    expect(isDeltaStillComing({ ...base, hasCount: true })).toBe(true);
+  });
+
   it.each([
     ['skipped', { skip: true }],
-    ['a zero count (the pill is hidden then)', { count: 0 }],
+    ['a count that did not come back', { hasCount: false }],
     ['the query can never run', { isUnavailable: true }],
     ['a failed query', { isError: true }],
     ['the history is too short (the tile says so)', { isHistoryMissing: true }],

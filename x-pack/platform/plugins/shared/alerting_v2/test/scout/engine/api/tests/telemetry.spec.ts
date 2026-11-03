@@ -259,5 +259,37 @@ apiTest.describe('Alerting V2 Telemetry', { tag: testData.API_ENGINE_TAG }, () =
     expect(state.action_policies_workflows_per_policy?.p99).toBeLessThanOrEqual(2);
     expect(state.action_policies_workflows_per_policy?.avg).toBeCloseTo(1.2);
     expect(state.action_policies_count_with_multiple_workflows).toBe(1);
+
+    // Dispatcher stats. Other specs of this config leave dispatcher events in the shared event
+    // log, so only the shape is pinned here; the values are covered by the dispatcher spec.
+    const expectDistribution = (distribution: unknown) => {
+      expect(Object.keys(distribution as object).sort()).toStrictEqual(['avg', 'p50', 'p99']);
+      for (const value of Object.values(distribution as object)) {
+        expect(value === null || typeof value === 'number').toBe(true);
+      }
+    };
+    expect(typeof state.dispatcher_alerts_count_by_outcome_24hr).toBe('object');
+    expect(typeof state.dispatcher_action_groups_count_by_outcome_24hr).toBe('object');
+    expect(state.dispatcher_unique_alerts_dispatched_count_24hr).toBeGreaterThanOrEqual(0);
+    expect(state.dispatcher_workflow_executions_count_24hr).toBeGreaterThanOrEqual(0);
+    expect(state.dispatcher_unique_workflows_triggered_count_24hr).toBeGreaterThanOrEqual(0);
+    expect(state.dispatcher_notifying_executions_count_24hr).toBeGreaterThanOrEqual(0);
+    expect(state.dispatcher_notifying_spaces_count_24hr).toBeGreaterThanOrEqual(0);
+    const activity = state.dispatcher_policies_count_by_activity_24hr ?? {};
+    expect(Object.keys(activity).sort()).toStrictEqual([
+      'broken',
+      'dispatched',
+      'failing',
+      'throttled',
+    ]);
+    for (const value of Object.values(activity)) {
+      expect(value).toBeGreaterThanOrEqual(0);
+    }
+    expectDistribution(state.dispatcher_action_groups_dispatched_per_policy_24hr);
+    expectDistribution(state.dispatcher_alerts_dispatched_per_policy_24hr);
+    expectDistribution(state.dispatcher_workflow_executions_per_policy_24hr);
+    expectDistribution(state.dispatcher_throttle_ratio_per_policy_24hr);
+    expect(state.dispatcher_uncovered_rules_count_24hr).toBeGreaterThanOrEqual(0);
+    expect(typeof state.dispatcher_dispatch_failures_count_by_reason_24hr).toBe('object');
   });
 });
