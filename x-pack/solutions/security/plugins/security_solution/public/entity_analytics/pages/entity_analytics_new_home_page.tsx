@@ -565,6 +565,23 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     dataView,
     filtersOverride: applicableFilters,
   });
+  // The callout stays hidden until a field it did not list is ignored.
+  const [dismissedFields, setDismissedFields] = useState<string[]>([]);
+  useEffect(() => {
+    // Forget the fields no longer ignored, so they show again if they come back.
+    setDismissedFields((prev) => {
+      const stillIgnored = prev.filter((field) => ignoredFilterFields.includes(field));
+      return stillIgnored.length === prev.length ? prev : stillIgnored;
+    });
+  }, [ignoredFilterFields]);
+  const isIgnoredFiltersCalloutVisible = ignoredFilterFields.some(
+    (field) => !dismissedFields.includes(field)
+  );
+  const dismissIgnoredFiltersCallout = useCallback(
+    () => setDismissedFields(ignoredFilterFields),
+    [ignoredFilterFields]
+  );
+
   useEffect(() => {
     if (!mainEntityOnlySearch) return;
 
@@ -1453,12 +1470,14 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
             />
           </div>
 
-          {ignoredFilterFields.length > 0 && (
+          {isIgnoredFiltersCalloutVisible && (
             <EuiCallOut
               announceOnMount
               size="s"
               color="warning"
               iconType="warning"
+              onDismiss={dismissIgnoredFiltersCallout}
+              data-test-subj="entity-analytics-ignored-filters-callout"
               title={i18n.translate(
                 'xpack.securitySolution.entityAnalytics.home.filters.ignoredTitle',
                 {

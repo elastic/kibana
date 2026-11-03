@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import { EntityAnalyticsNewHomePage } from './entity_analytics_new_home_page';
 import * as tileHooks from '../components/home/needs_attention_tiles/hooks';
@@ -881,5 +881,75 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
 
     expect(lastOptions('useSearchedTileEntityIds').isReady).toBe(false);
     expect(getCard('entitiesWithAlerts')?.isLoading).toBe(true);
+  });
+
+  describe('the callout on the ignored filters', () => {
+    const CALLOUT = 'entity-analytics-ignored-filters-callout';
+    const mockIgnoredFields = (ignoredFields: string[]) =>
+      (useSearchBarExpression as jest.Mock).mockReturnValue({
+        isSearchOverridesPending: false,
+        applicableFilters: [],
+        ignoredFields,
+      });
+
+    it('is not shown when no filter was ignored', () => {
+      mockIgnoredFields([]);
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      expect(screen.queryByTestId(CALLOUT)).not.toBeInTheDocument();
+    });
+
+    it('is shown with the ignored fields, and hidden once dismissed', () => {
+      mockIgnoredFields(['kibana.alert.workflow_status']);
+      const { rerender } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      expect(screen.getByTestId(CALLOUT)).toHaveTextContent('kibana.alert.workflow_status');
+
+      fireEvent.click(within(screen.getByTestId(CALLOUT)).getByRole('button'));
+      expect(screen.queryByTestId(CALLOUT)).not.toBeInTheDocument();
+
+      rerender(<EntityAnalyticsNewHomePage />);
+      expect(screen.queryByTestId(CALLOUT)).not.toBeInTheDocument();
+    });
+
+    it('stays hidden when an ignored field is removed after the dismiss', () => {
+      mockIgnoredFields(['kibana.alert.workflow_status']);
+      const { rerender } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+      fireEvent.click(within(screen.getByTestId(CALLOUT)).getByRole('button'));
+
+      mockIgnoredFields(['kibana.alert.workflow_status', 'kibana.alert.severity']);
+      rerender(<EntityAnalyticsNewHomePage />);
+      expect(screen.getByTestId(CALLOUT)).toBeInTheDocument();
+      fireEvent.click(within(screen.getByTestId(CALLOUT)).getByRole('button'));
+
+      mockIgnoredFields(['kibana.alert.workflow_status']);
+      rerender(<EntityAnalyticsNewHomePage />);
+
+      expect(screen.queryByTestId(CALLOUT)).not.toBeInTheDocument();
+    });
+
+    it('is shown again when a dismissed field is removed and added back', () => {
+      mockIgnoredFields(['kibana.alert.workflow_status']);
+      const { rerender } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+      fireEvent.click(within(screen.getByTestId(CALLOUT)).getByRole('button'));
+
+      mockIgnoredFields([]);
+      rerender(<EntityAnalyticsNewHomePage />);
+      mockIgnoredFields(['kibana.alert.workflow_status']);
+      rerender(<EntityAnalyticsNewHomePage />);
+
+      expect(screen.getByTestId(CALLOUT)).toBeInTheDocument();
+    });
+
+    it('is shown again for other ignored fields', () => {
+      mockIgnoredFields(['kibana.alert.workflow_status']);
+      const { rerender } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+      fireEvent.click(within(screen.getByTestId(CALLOUT)).getByRole('button'));
+
+      mockIgnoredFields(['kibana.alert.severity']);
+      rerender(<EntityAnalyticsNewHomePage />);
+
+      expect(screen.getByTestId(CALLOUT)).toHaveTextContent('kibana.alert.severity');
+    });
   });
 });
