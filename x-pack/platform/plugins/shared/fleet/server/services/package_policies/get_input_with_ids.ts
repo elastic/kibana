@@ -80,9 +80,14 @@ export function getInputsWithIds(
 /**
  * Validates the id override values that `storedPackagePolicyToAgentInputs`
  * merges over the base input/stream id when building the full agent policy:
- * `input.config.id.value`, `stream.config.id.value`, and the `id` in
+ * `input.config.id.value`, `stream.config.id.value`, and the ids inside
  * `overrides.inputs[*]`. These replace the validated base id on the
  * Agent-facing policy, so they must be checked on create/update too.
+ *
+ * `overrides.inputs[*]` is `deepMerge`d wholesale into the full input, so an
+ * `id` nested anywhere in the override (top-level or in `streams[*].id`) can
+ * reach Agent. The override body is schema-typed as `any`, so walk it and
+ * validate every `id` property regardless of depth.
  */
 function validateNoTraversalInIdOverrides(packagePolicy: NewPackagePolicy): void {
   for (const input of packagePolicy.inputs) {
@@ -95,7 +100,29 @@ function validateNoTraversalInIdOverrides(packagePolicy: NewPackagePolicy): void
   const overrideInputs = packagePolicy.overrides?.inputs;
   if (overrideInputs) {
     for (const override of Object.values(overrideInputs)) {
-      validateNoPathTraversalId((override as { id?: unknown })?.id);
+      validateNoTraversalInIdFields(override);
+    }
+  }
+}
+
+/**
+ * Recursively validates every `id` property found within an arbitrary override
+ * value (object or array). Used for `overrides.inputs[*]`, whose shape is not
+ * constrained by the schema and is deep-merged into the full agent input.
+ */
+function validateNoTraversalInIdFields(value: unknown): void {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      validateNoTraversalInIdFields(item);
+    }
+    return;
+  }
+  if (value && typeof value === 'object') {
+    for (const [key, nested] of Object.entries(value as Record<string, unknown>)) {
+      if (key === 'id') {
+        validateNoPathTraversalId(nested);
+      }
+      validateNoTraversalInIdFields(nested);
     }
   }
 }
