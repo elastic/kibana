@@ -383,7 +383,26 @@ describe('WorkerSettingsPanel Hunt threat intel supply', () => {
         </KibanaContextProvider>
       </I18nProvider>
     );
+
+    return core;
   };
+
+  it('links the Worker description to the Continuous Threat Hunt docs in a new tab', () => {
+    const core = renderHuntPanel();
+
+    const link = screen.getByTestId(`alertZeroWorkerDocsLink-${HUNT_WORKER_ID}`);
+    expect(link).toHaveTextContent('Learn more');
+    expect(link).toHaveAttribute(
+      'href',
+      core.docLinks.links.securitySolution.alertZero.continuousThreatHunt
+    );
+    expect(link).toHaveAttribute('target', '_blank');
+  });
+
+  it('omits the docs link for non-Hunt workers', () => {
+    renderPanel(WORKFLOW_ID, false);
+    expect(screen.queryByTestId(`alertZeroWorkerDocsLink-${WORKER_ID}`)).not.toBeInTheDocument();
+  });
 
   it('renders the threat intel supply section for Hunt', () => {
     renderHuntPanel();
