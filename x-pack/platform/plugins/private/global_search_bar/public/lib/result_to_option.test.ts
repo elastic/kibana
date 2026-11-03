@@ -149,4 +149,47 @@ describe('resultToOption', () => {
       />
     `);
   });
+  describe('subtitle and trailing label', () => {
+    it('shows the description under the title and the trailing label on the right', () => {
+      const input = createSearchResult({
+        type: 'integration',
+        meta: { description: 'A is part of the B collection', trailingLabel: 'Collection of 3' },
+      });
+      const option = resultToOption(input, []);
+
+      expect(option.meta).toEqual([
+        expect.objectContaining({
+          text: 'A is part of the B collection',
+          highlightSearchString: true,
+          'data-test-subj': 'nav-search-option-description',
+        }),
+      ]);
+      expect(option.append).toEqual(
+        expect.objectContaining({
+          props: expect.objectContaining({
+            'data-test-subj': 'nav-search-option-trailing-label',
+            children: 'Collection of 3',
+          }),
+        })
+      );
+    });
+
+    it('shows only the trailing label when there is no description', () => {
+      const input = createSearchResult({
+        type: 'integration',
+        meta: { trailingLabel: 'Collection of 3' },
+      });
+      const option = resultToOption(input, []);
+
+      expect(option.meta).toEqual([]);
+      expect(option.append).toBeDefined();
+    });
+
+    it('keeps the type as meta when neither is provided', () => {
+      const option = resultToOption(createSearchResult({ type: 'integration' }), []);
+
+      expect(option.meta).toEqual([{ text: 'Integration' }]);
+      expect(option.append).toBeUndefined();
+    });
+  });
 });

@@ -30,31 +30,40 @@ export const getEpisodeHeaderMenu = ({
   episode,
   onSuccess,
 }: EpisodeHeaderMenuArgs): AppHeaderMenu => {
+  const episodes = episode ? [episode] : [];
   const runAction = (action: EpisodeAction) => () =>
     action.execute({
-      episodes: episode ? [episode] : [],
+      episodes,
       onSuccess,
     });
 
   const primaryAction = actions.find((action) => action.id === PRIMARY_ACTION_ITEM_ID);
 
+  const toMenuItem = (action: EpisodeAction) => {
+    const isSecondary = SECONDARY_ACTION_IDS.has(action.id);
+    const compatible = action.isCompatible({ episodes });
+
+    return {
+      id: action.id,
+      label: action.displayName,
+      iconType: action.iconType,
+      run: runAction(action),
+      disableButton: !compatible,
+      tooltipContent: compatible ? undefined : action.disabledTooltip,
+      testId: isSecondary
+        ? `episodeActionsBar-overflow-${action.id}`
+        : `episodeActionsBar-primary-${action.id}`,
+      order: action.order,
+      overflow: isSecondary,
+    };
+  };
+
   return {
     items: actions
       .filter((action) => action.id !== PRIMARY_ACTION_ITEM_ID)
       .map((action) => {
-        const isSecondary = SECONDARY_ACTION_IDS.has(action.id);
-
-        return {
-          id: action.id,
-          label: action.displayName,
-          iconType: action.iconType,
-          run: runAction(action),
-          testId: isSecondary
-            ? `episodeActionsBar-overflow-${action.id}`
-            : `episodeActionsBar-primary-${action.id}`,
-          order: action.order,
-          overflow: isSecondary,
-        };
+        const { overflow, ...item } = toMenuItem(action);
+        return { ...item, overflow };
       }),
     ...(primaryAction
       ? {

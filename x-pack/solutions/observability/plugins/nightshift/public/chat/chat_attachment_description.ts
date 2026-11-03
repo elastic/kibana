@@ -11,7 +11,6 @@ export type NightshiftChatAttachmentType =
   | 'Detection'
   | 'Entity'
   | 'Significant Event'
-  | 'Blind spot'
   | 'Hypothesis'
   | 'Recommendation';
 

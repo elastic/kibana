@@ -55,4 +55,6 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({ unusedFromR
   rewriteCorsSettings,
   rewriteBasePathDeprecation,
   unusedFromRoot('xpack.searchPlayground', { level: 'warning' }),
+  unusedFromRoot('xpack.searchNotebooks', { level: 'warning' }),
+  unusedFromRoot('xpack.search.notebooks', { level: 'warning' }),
 ];

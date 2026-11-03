@@ -21,15 +21,13 @@ import {
   AUTOMATIC_MIGRATION_GENERAL_GUIDELINES,
   MIGRATION_STATE_FRESHNESS_BLOCK,
 } from './rules/content';
-import { RULE_MIGRATION_SKILLS } from './rules/skill_ids';
+import { RULE_MIGRATION_SKILLS } from './rules/skill_catalog';
 
 export const automaticMigrationRulesDeleteMigrationSkill = defineSkillType({
-  id: RULE_MIGRATION_SKILLS.DELETE,
-  name: RULE_MIGRATION_SKILLS.DELETE,
+  id: RULE_MIGRATION_SKILLS.DELETE.id,
+  name: RULE_MIGRATION_SKILLS.DELETE.id,
   basePath: 'skills/security/siem_migrations',
-  description: `Permanently delete an Automatic Rule Migration and all its associated rule items and resources.
-
-This action is irreversible. The skill resolves the migration by name, checks it is not currently running, then deletes it.`,
+  description: RULE_MIGRATION_SKILLS.DELETE.description,
   content: `
 # Delete an Automatic Rule Migration
 
@@ -82,7 +80,7 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 
 ${AUTOMATIC_MIGRATION_NAVIGATION_BLOCK}
 
-To check progress before deciding to delete, route to **${RULE_MIGRATION_SKILLS.SUMMARIZE}**.
+To check progress before deciding to delete, route to **${RULE_MIGRATION_SKILLS.SUMMARIZE.id}**.
 `,
   getRegistryTools: () => [
     SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID,

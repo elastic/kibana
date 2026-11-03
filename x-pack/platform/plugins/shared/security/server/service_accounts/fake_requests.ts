@@ -39,6 +39,12 @@ export const SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS = 5_000;
  */
 export type ServiceAccountMintInterceptor = (mint: () => Promise<string>) => Promise<string>;
 
+/** What a backend is told about the request it mints a credential for. */
+export interface ServiceAccountMintOptions {
+  /** See {@link CreateServiceAccountFakeRequestParams.boundAt}. */
+  boundAt?: string;
+}
+
 export interface CreateServiceAccountFakeRequestParams {
   /** The ID of the service account the request should be bound to. */
   serviceAccountId: string;
@@ -57,6 +63,13 @@ export interface CreateServiceAccountFakeRequestParams {
    * failure is subject to the mint-failure backoff. See {@link ServiceAccountMintInterceptor}.
    */
   mintInterceptor?: ServiceAccountMintInterceptor;
+  /**
+   * When the workload this request runs was bound, as an ISO-8601 timestamp. Every mint is refused
+   * for an account created after this: on Elasticsearch, an account deleted and created again
+   * under the same name keeps its id, and a binding made before the new account existed was not
+   * made for it.
+   */
+  boundAt?: string;
 }
 
 /**
@@ -68,8 +81,11 @@ export interface CreateServiceAccountFakeRequestParams {
  * verification), while a server error or a plain exception is a failure of the check itself — a
  * saved objects read against a briefly unavailable cluster, say — that the next refresh may not
  * hit again. Latching those would kill a still-valid execution over one blip.
+ *
+ * Workload executions audit a mint failure exactly when this says it is terminal, so the two
+ * rules cannot drift apart: a change here changes which failures reach the audit log.
  */
-const isTerminalMintFailure = (
+export const isTerminalMintFailure = (
   err: unknown,
   { raisedByInterceptor }: { raisedByInterceptor: boolean }
 ): boolean => {
@@ -101,6 +117,7 @@ interface ServiceAccountFakeRequestEntry {
   nonRetryableError?: Error;
   maxLifetimeMs: number;
   mintInterceptor?: ServiceAccountMintInterceptor;
+  boundAt?: string;
 }
 
 /**
@@ -130,7 +147,10 @@ export class ServiceAccountFakeRequests {
 
   constructor(
     private readonly logger: Logger,
-    private readonly mintToken: (serviceAccountId: string) => Promise<string>,
+    private readonly mintToken: (
+      serviceAccountId: string,
+      options: ServiceAccountMintOptions
+    ) => Promise<string>,
     private readonly requestLifetimeMs: number
   ) {}
 
@@ -139,6 +159,7 @@ export class ServiceAccountFakeRequests {
     spaceId,
     maxLifetimeMs,
     mintInterceptor,
+    boundAt,
   }: CreateServiceAccountFakeRequestParams): Promise<KibanaRequest> {
     if (maxLifetimeMs !== undefined && !(maxLifetimeMs > 0)) {
       throw new Error(
@@ -154,7 +175,7 @@ export class ServiceAccountFakeRequests {
       );
     }
 
-    const token = await this.mintWithInterceptor(serviceAccountId, mintInterceptor);
+    const token = await this.mintWithInterceptor(serviceAccountId, { boundAt }, mintInterceptor);
 
     // The lowercase `authorization` key is load-bearing: the ES client derives a fake request's
     // credential by picking exact lowercased keys off its headers, so any other casing would
@@ -177,6 +198,7 @@ export class ServiceAccountFakeRequests {
       mintedAt: now,
       maxLifetimeMs: maxLifetimeMs ?? this.requestLifetimeMs,
       mintInterceptor,
+      boundAt,
     });
 
     this.logger.debug(`Created a fake request bound to service account ${serviceAccountId}`);
@@ -249,11 +271,16 @@ export class ServiceAccountFakeRequests {
     // apart from it below: the two are retried under different rules.
     let exchangeFailure: { error: unknown } | undefined;
 
-    entry.inflight = this.mintWithInterceptor(entry.serviceAccountId, entry.mintInterceptor, {
-      onExchangeFailure: (error) => {
-        exchangeFailure = { error };
-      },
-    })
+    entry.inflight = this.mintWithInterceptor(
+      entry.serviceAccountId,
+      { boundAt: entry.boundAt },
+      entry.mintInterceptor,
+      {
+        onExchangeFailure: (error) => {
+          exchangeFailure = { error };
+        },
+      }
+    )
       .then((token) => {
         this.ensureStillRegistered(request, entry);
         this.ensureWithinLifetime(entry);
@@ -322,11 +349,12 @@ export class ServiceAccountFakeRequests {
 
   private mintWithInterceptor(
     serviceAccountId: string,
+    options: ServiceAccountMintOptions,
     mintInterceptor?: ServiceAccountMintInterceptor,
     { onExchangeFailure }: { onExchangeFailure?: (error: unknown) => void } = {}
   ): Promise<string> {
     const mint = () =>
-      this.mintToken(serviceAccountId).catch((error) => {
+      this.mintToken(serviceAccountId, options).catch((error) => {
         onExchangeFailure?.(error);
         throw error;
       });

@@ -21,6 +21,7 @@ import { ServiceAccountCredentialStore } from './credentials';
 import { EsServiceAccounts } from './es_service_accounts';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 import { licenseMock } from '../../common/licensing/index.mock';
+import { auditServiceMock } from '../audit/mocks';
 import { getDetailedErrorMessage } from '../errors';
 import { securityMock } from '../mocks';
 
@@ -68,6 +69,7 @@ const setup = ({ canEncrypt = true, requestLifetimeMs = 600_000 } = {}) => {
     credentialStore,
     canEncrypt,
     checkPrivilegesWithRequest: jest.fn(),
+    audit: auditServiceMock.create(),
     getCurrentUser: jest.fn(),
     getCurrentUserProfileId: jest.fn(),
   });
@@ -128,7 +130,7 @@ describe('Elasticsearch service account token exchange', () => {
     const { backend, credentialStore, exchange } = setup();
     credentialStore.getDecrypted.mockResolvedValue(null);
     await expect(backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID })).rejects.toMatchObject(
-      { retryable: false }
+      { output: { statusCode: 404 } }
     );
     expect(exchange).not.toHaveBeenCalled();
   });
@@ -140,7 +142,10 @@ describe('Elasticsearch service account token exchange', () => {
       credentialStore.getDecrypted.mockResolvedValue({ ...credential, [field]: 'unexpected' });
       await expect(
         backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID })
-      ).rejects.toMatchObject({ retryable: false });
+      ).rejects.toMatchObject({
+        message: 'The stored service account credential is inconsistent.',
+        output: { statusCode: 403 },
+      });
       expect(exchange).not.toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalledWith(
         `Stored credential for service account [${ACCOUNT_ID}] is inconsistent (${field}: expected ${JSON.stringify(
@@ -151,6 +156,41 @@ describe('Elasticsearch service account token exchange', () => {
     }
   );
 
+  it.each([
+    ['at the same moment as', credential.createdAt],
+    ['after', '2026-09-24T00:00:00.000Z'],
+    // The two timestamps come from different Kibana nodes' clocks.
+    ['within the clock skew tolerance before', '2026-09-22T23:59:50.000Z'],
+  ])('exchanges for a workload bound %s the account was created', async (_, boundAt) => {
+    const { backend, exchange } = setup();
+
+    await backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID, boundAt });
+
+    expect(exchange).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    ['before the account was created', '2026-09-22T00:00:00.000Z'],
+    ['just past the clock skew tolerance', '2026-09-22T23:59:49.999Z'],
+    ['at a time that does not parse', 'not-a-timestamp'],
+  ])('refuses a workload bound %s', async (_, boundAt) => {
+    const { backend, exchange, logger } = setup();
+
+    await expect(
+      backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID, boundAt })
+    ).rejects.toMatchObject({
+      message: 'The workload was bound to an earlier service account with the same name.',
+      output: { statusCode: 403 },
+    });
+
+    expect(exchange).not.toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledWith(
+      `Refusing to exchange service account [${ACCOUNT_ID}]: its workload was bound at ` +
+        `[${boundAt}], before the account was created at [${credential.createdAt}]. Bind the ` +
+        'workload again to run it as this account.'
+    );
+  });
+
   it.each([400, 401, 403, 404])(
     'classifies HTTP %s as terminal without logging secrets',
     async (statusCode) => {
@@ -160,8 +200,9 @@ describe('Elasticsearch service account token exchange', () => {
       await expect(
         backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID })
       ).rejects.toMatchObject({
-        message: 'Error occurred during service account token exchange.',
+        message: `Error occurred during service account token exchange (status ${statusCode}).`,
         retryable: false,
+        statusCode,
       });
       expect(JSON.stringify(logger.error.mock.calls)).not.toContain(credential.token);
     }
@@ -305,6 +346,18 @@ describe('Elasticsearch service account token exchange', () => {
     jest.advanceTimersByTime(60_000);
     await expect(backend.reauthenticateFakeRequest(request)).resolves.toBeNull();
     expect(credentialStore.getDecrypted).toHaveBeenCalledTimes(2);
+  });
+
+  it('permanently stops renewal once the stored credential is gone', async () => {
+    const { backend, credentialStore, exchange } = setup();
+    const request = await backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID });
+    jest.advanceTimersByTime(10_000);
+    credentialStore.getDecrypted.mockResolvedValueOnce(null);
+    await expect(backend.reauthenticateFakeRequest(request)).resolves.toBeNull();
+    jest.advanceTimersByTime(60_000);
+    await expect(backend.reauthenticateFakeRequest(request)).resolves.toBeNull();
+    expect(credentialStore.getDecrypted).toHaveBeenCalledTimes(2);
+    expect(exchange).toHaveBeenCalledTimes(1);
   });
 
   it('ends renewal when the configured request lease expires', async () => {

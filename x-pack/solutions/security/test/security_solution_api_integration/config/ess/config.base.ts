@@ -97,7 +97,7 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
           `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
-          '--xpack.eventLog.logEntries=true',
+          '--xpack.eventLog.logEntries=false',
           `--xpack.securitySolution.alertIgnoreFields=${JSON.stringify([
             'testing_ignored.constant',
             '/testing_regex*/',

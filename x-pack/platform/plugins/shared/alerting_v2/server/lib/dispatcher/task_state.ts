@@ -30,7 +30,7 @@ export const stateSchemaByVersion = {
   2: {
     // Adds stuckTicks: counts consecutive ticks in which nextWatermark did not
     // advance. After STUCK_TICK_LIMIT ticks, the dispatcher force-records terminal
-    // `unmatched` docs for the blocking episodes and advances.
+    // `unmatched` docs for the blocking alerts and advances.
     up: (state: Record<string, unknown>) => ({
       eventWatermark: typeof state.eventWatermark === 'string' ? state.eventWatermark : undefined,
       stuckTicks: typeof state.stuckTicks === 'number' ? state.stuckTicks : 0,

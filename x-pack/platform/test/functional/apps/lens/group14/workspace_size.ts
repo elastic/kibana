@@ -237,7 +237,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await assertWorkspaceDimensions('600px', '430px');
 
       await lens.openDimensionEditor('lnsMetric_breakdownByDimensionPanel');
-      await testSubjects.setValue('lnsMetric_max_cols', '2');
+      await lens.retrySetValue('lnsMetric_max_cols', '2');
+      // the editor debounces the change, so it is only safe to unmount it once the grid re-rendered
+      await retry.waitFor(
+        'metric grid to re-render with 2 columns',
+        async () => (await lens.getMetricGridColumnCount()) === 2
+      );
       await lens.closeDimensionEditor();
 
       await assertWorkspaceDimensions('430px', '430px');

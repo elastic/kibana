@@ -10,7 +10,7 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { NonEmptyString } from '../../../../../common/api/model/primitives.gen';
 import { SIEM_RULE_MIGRATION_INSTALL_PATH } from '../../../../../common/siem_migrations/constants';
 import {
@@ -23,20 +23,22 @@ import { createSelfClient, type SelfClient } from '../../../../common/self_clien
 import { createSiemMigrationAvailability } from '../common/availability';
 import { createMissingPrivilegeError, createToolErrorResult } from '../common/tool_results';
 import { hasRuleMigrationPrivileges } from '../common/privileges';
-import { RULE_MIGRATION_SKILLS } from '../../../skills/siem_migration/rules/skill_ids';
+import { RULE_MIGRATION_SKILLS } from '../../../skills/siem_migration/rules/skill_catalog';
 import { SIEM_MIGRATION_INSTALL_RULE_MIGRATION_TOOL_ID } from './tool_ids';
 
-const schema = InstallMigrationRulesRequestBody.extend({
-  migration_id: NonEmptyString.describe('The id of the rule migration whose rules to install.'),
-  ids: z
-    .array(NonEmptyString)
-    .min(1)
-    .max(200)
-    .optional()
-    .describe(
-      'Optional migration rule item ids to install. Omit to install all installable rules.'
-    ),
-});
+const schema = lazySchema(() =>
+  InstallMigrationRulesRequestBody.extend({
+    migration_id: NonEmptyString.describe('The id of the rule migration whose rules to install.'),
+    ids: z
+      .array(NonEmptyString)
+      .min(1)
+      .max(200)
+      .optional()
+      .describe(
+        'Optional migration rule item ids to install. Omit to install all installable rules.'
+      ),
+  })
+);
 
 const buildPath = (migrationId: string): string =>
   SIEM_RULE_MIGRATION_INSTALL_PATH.replace('{migration_id}', encodeURIComponent(migrationId));
@@ -62,7 +64,7 @@ export const installMigrationRulesTool = (
     confirmation: { askUser: 'always' },
     description: `Install fully translated rules from an Automatic Rule Migration. Mutating.
 
-See the ${RULE_MIGRATION_SKILLS.INSTALL} skill for the full workflow.`,
+See the ${RULE_MIGRATION_SKILLS.INSTALL.id} skill for the full workflow.`,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async (input, { request }) => {

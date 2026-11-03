@@ -127,10 +127,30 @@ apiTest.describe(
           counter_aggregation: 'max',
           gauge_aggregation: 'min',
           histogram_percentile: 'p99',
+          grid_sort_field: 'recency',
+          grid_sort_direction: 'desc',
           data_source: {
             type: 'esql',
             query: 'TS metrics-* | LIMIT 10',
           },
+        };
+        const byValueInlineTab = {
+          data_source: {
+            type: 'data_view_spec',
+            index_pattern: 'logs-*',
+            time_field: '@timestamp',
+          },
+          filters: [
+            {
+              type: 'condition',
+              condition: { field: 'service.name', operator: 'is', value: 'checkout' },
+            },
+            {
+              type: 'condition',
+              data_view_id: 'foreign-data-view',
+              condition: { field: 'service.name', operator: 'is', value: 'api' },
+            },
+          ],
         };
 
         const createResponse = await apiTest.step('create source dashboard', async () => {
@@ -164,6 +184,15 @@ apiTest.describe(
                   config: {
                     title: 'Discover by value with metrics state',
                     tabs: [byValueMetricsTab],
+                  },
+                },
+                {
+                  id: 'discover-by-value-inline',
+                  grid: { x: 24, y: 15, w: 24, h: 15 },
+                  type: 'discover_session',
+                  config: {
+                    title: 'Discover by value with inline filters',
+                    tabs: [byValueInlineTab],
                   },
                 },
               ],
@@ -206,6 +235,14 @@ apiTest.describe(
               config: expect.objectContaining({
                 title: 'Discover by value with metrics state',
                 tabs: [expect.objectContaining(byValueMetricsTab)],
+              }),
+            }),
+            expect.objectContaining({
+              id: 'discover-by-value-inline',
+              type: 'discover_session',
+              config: expect.objectContaining({
+                title: 'Discover by value with inline filters',
+                tabs: [expect.objectContaining(byValueInlineTab)],
               }),
             }),
           ]);

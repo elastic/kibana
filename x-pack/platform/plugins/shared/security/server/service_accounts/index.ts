@@ -19,6 +19,11 @@ export type { ServiceAccountCredentialAttributes } from './credentials';
 export { ServiceAccountsService } from './service_accounts_service';
 export type { ServiceAccountsServiceStartParams } from './service_accounts_service';
 export type {
+  DeleteServiceAccountOptions,
+  DeleteServiceAccountResult,
+  ServiceAccountsManagementApi,
+} from './service_accounts_management';
+export type {
   CloudProjectContext,
   ListServiceAccountsParams,
   ServiceAccountsBackend,

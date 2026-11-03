@@ -12,7 +12,7 @@ import type {
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import { getErrorMessage } from '../../common';
+import { getErrorMessage, type RiskScoreDistribution } from '../../common';
 import { TasksConfig } from './config';
 import { EntityStoreTaskType } from './constants';
 import { createAssetManagerClient } from './factories';
@@ -42,6 +42,12 @@ const config = TasksConfig[EntityStoreTaskType.enum.statusReport];
 
 const getStatusReportTaskId = (namespace: string): string => `${config.type}:${namespace}`;
 
+const SOURCE_TERMS_SIZE = 100;
+const MISSING_SOURCE = 'unknown';
+const OTHER_SOURCE = 'other';
+
+const toSourceKey = (source: string): string => source.replaceAll('.', '__');
+
 const getStoreSize = (
   esClient: ElasticsearchClient,
   index: string,
@@ -55,6 +61,189 @@ const getStoreSize = (
     },
     { signal }
   );
+
+interface TermsBucket {
+  key?: string | number;
+  doc_count?: number;
+}
+
+interface EntitySourceAggs {
+  sources?: {
+    buckets?: TermsBucket[];
+    sum_other_doc_count?: number;
+  };
+}
+
+export interface EntitySourceDistribution {
+  sources: Record<string, number>;
+}
+
+/** Counts entities of one type by entity.source. Dots in names become __, and overflow is stored under other. */
+export const getEntitySourceDistribution = async (
+  esClient: ElasticsearchClient,
+  index: string,
+  entityType: EntityType,
+  logger: Logger,
+  signal: AbortSignal
+): Promise<EntitySourceDistribution> => {
+  const sources: Record<string, number> = Object.create(null);
+  try {
+    const response = await esClient.search<unknown, EntitySourceAggs>(
+      {
+        index,
+        size: 0,
+        track_total_hits: false,
+        query: { term: { 'entity.EngineMetadata.Type': entityType } },
+        aggs: {
+          sources: {
+            terms: {
+              field: 'entity.source',
+              size: SOURCE_TERMS_SIZE,
+              missing: MISSING_SOURCE,
+            },
+          },
+        },
+      },
+      { signal }
+    );
+
+    const aggregations = response?.aggregations;
+    for (const bucket of aggregations?.sources?.buckets ?? []) {
+      if (bucket.key !== undefined && typeof bucket.doc_count === 'number') {
+        const key = toSourceKey(String(bucket.key));
+        sources[key] = (sources[key] ?? 0) + bucket.doc_count;
+      }
+    }
+
+    const otherCount = aggregations?.sources?.sum_other_doc_count;
+    if (typeof otherCount === 'number' && otherCount > 0) {
+      sources[OTHER_SOURCE] = (sources[OTHER_SOURCE] ?? 0) + otherCount;
+    }
+
+    return { sources };
+  } catch (err) {
+    logger.warn(
+      `Failed to get entity source distribution telemetry for index ${index} and entity type ${entityType}: ${err}`
+    );
+    return { sources };
+  }
+};
+
+const RISK_SCORE_FIELDS = {
+  base: {
+    level: 'entity.risk.calculated_level',
+    score: 'entity.risk.calculated_score_norm',
+  },
+  resolution: {
+    level: 'entity.relationships.resolution.risk.calculated_level',
+    score: 'entity.relationships.resolution.risk.calculated_score_norm',
+  },
+} as const;
+
+type RiskScoreKind = keyof typeof RISK_SCORE_FIELDS;
+
+const LEVEL_TO_BAND = {
+  Critical: 'critical',
+  High: 'high',
+  Moderate: 'moderate',
+  Low: 'low',
+  Unknown: 'unknown',
+} as const;
+
+type RiskBand = (typeof LEVEL_TO_BAND)[keyof typeof LEVEL_TO_BAND];
+
+interface EntityScoreAggs {
+  bands?: { buckets?: TermsBucket[] };
+  scorePercentiles?: { values?: Record<string, number | string | null> };
+}
+
+const readPercentile = (
+  values: Record<string, number | string | null> | undefined,
+  percent: 50 | 90
+): number | undefined => {
+  const raw = values?.[`${percent}.0`] ?? values?.[String(percent)];
+  if (typeof raw === 'number' && Number.isFinite(raw)) {
+    return raw;
+  }
+  if (typeof raw === 'string') {
+    const parsed = Number(raw);
+    if (Number.isFinite(parsed)) {
+      return parsed;
+    }
+  }
+  return undefined;
+};
+
+/** Counts risk bands and percentiles for one score kind across every entity of one type in the store. */
+export const getEntityRiskScoreDistribution = async (
+  esClient: ElasticsearchClient,
+  index: string,
+  entityType: EntityType,
+  logger: Logger,
+  signal: AbortSignal,
+  scoreKind: RiskScoreKind = 'base'
+): Promise<RiskScoreDistribution> => {
+  try {
+    const { level: levelField, score: scoreField } = RISK_SCORE_FIELDS[scoreKind];
+    const response = await esClient.search<unknown, EntityScoreAggs>(
+      {
+        index,
+        size: 0,
+        track_total_hits: false,
+        query: { term: { 'entity.EngineMetadata.Type': entityType } },
+        aggs: {
+          bands: {
+            terms: {
+              field: levelField,
+              size: 10,
+              missing: 'Unknown',
+            },
+          },
+          scorePercentiles: {
+            percentiles: {
+              field: scoreField,
+              percents: [50, 90],
+            },
+          },
+        },
+      },
+      { signal }
+    );
+
+    const distribution: RiskScoreDistribution = {
+      critical: 0,
+      high: 0,
+      moderate: 0,
+      low: 0,
+      unknown: 0,
+    };
+    for (const bucket of response?.aggregations?.bands?.buckets ?? []) {
+      const level = bucket.key === undefined ? undefined : String(bucket.key);
+      const band: RiskBand =
+        level !== undefined && level in LEVEL_TO_BAND
+          ? LEVEL_TO_BAND[level as keyof typeof LEVEL_TO_BAND]
+          : 'unknown';
+      if (typeof bucket.doc_count === 'number') {
+        distribution[band] = (distribution[band] ?? 0) + bucket.doc_count;
+      }
+    }
+
+    const normP50 = readPercentile(response?.aggregations?.scorePercentiles?.values, 50);
+    const normP90 = readPercentile(response?.aggregations?.scorePercentiles?.values, 90);
+    if (normP50 !== undefined) {
+      distribution.normP50 = normP50;
+    }
+    if (normP90 !== undefined) {
+      distribution.normP90 = normP90;
+    }
+    return distribution;
+  } catch (err) {
+    logger.warn(
+      `Failed to get entity risk score ${scoreKind} distribution telemetry for index ${index} and entity type ${entityType}: ${err}`
+    );
+    return {};
+  }
+};
 
 export const getResolutionState = async (
   esClient: ElasticsearchClient,
@@ -182,11 +371,24 @@ async function runTask({
   await Promise.all(
     ALL_ENTITY_TYPES.map(async (entityType) => {
       try {
-        const { count: storeSize } = await getStoreSize(esClient, index, entityType, signal);
+        const [
+          { count: storeSize },
+          { sources },
+          baseScoreDistribution,
+          resolutionScoreDistribution,
+        ] = await Promise.all([
+          getStoreSize(esClient, index, entityType, signal),
+          getEntitySourceDistribution(esClient, index, entityType, logger, signal),
+          getEntityRiskScoreDistribution(esClient, index, entityType, logger, signal, 'base'),
+          getEntityRiskScoreDistribution(esClient, index, entityType, logger, signal, 'resolution'),
+        ]);
         telemetryReporter.reportEvent(ENTITY_STORE_USAGE_EVENT, {
           storeSize,
           entityType,
           namespace,
+          sources,
+          baseScoreDistribution,
+          resolutionScoreDistribution,
         });
 
         const { resolvedEntities, targetEntities, maxGroupSize, avgGroupSize } =

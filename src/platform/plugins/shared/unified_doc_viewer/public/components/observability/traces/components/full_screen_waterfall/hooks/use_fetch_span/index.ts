@@ -15,9 +15,15 @@ import { getUnifiedDocViewerServices } from '../../../../../../../plugin';
 interface UseFetchSpanParams {
   spanId: string;
   traceId: string;
+  /**
+   * Absolute window to search the span in. Hosts rendered outside the page that owns the global
+   * time filter (e.g. a trace waterfall flyout embedded in a chat) must pass it; defaults to the
+   * global time filter.
+   */
+  timeRange?: { from: string; to: string };
 }
 
-export const useFetchSpan = ({ spanId, traceId }: UseFetchSpanParams) => {
+export const useFetchSpan = ({ spanId, traceId, timeRange }: UseFetchSpanParams) => {
   const { discoverShared, core, data } = getUnifiedDocViewerServices();
 
   const fetchSpanFeature = discoverShared.features.registry.getById(
@@ -30,7 +36,7 @@ export const useFetchSpan = ({ spanId, traceId }: UseFetchSpanParams) => {
         return undefined;
       }
 
-      const timeFilter = data.query.timefilter.timefilter.getAbsoluteTime();
+      const timeFilter = timeRange ?? data.query.timefilter.timefilter.getAbsoluteTime();
 
       return fetchSpanFeature.fetchSpan(
         {
@@ -42,7 +48,7 @@ export const useFetchSpan = ({ spanId, traceId }: UseFetchSpanParams) => {
         signal
       );
     },
-    [fetchSpanFeature, traceId, spanId]
+    [fetchSpanFeature, traceId, spanId, timeRange?.from, timeRange?.to]
   );
 
   useEffect(() => {

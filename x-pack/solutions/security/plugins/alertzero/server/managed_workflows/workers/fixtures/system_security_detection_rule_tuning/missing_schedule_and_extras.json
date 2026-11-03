@@ -1,0 +1,5 @@
+{
+  "settingsVersion": 1,
+  "autonomyLevel": "manual",
+  "serviceAccountId": "kibana/az-worker-1"
+}

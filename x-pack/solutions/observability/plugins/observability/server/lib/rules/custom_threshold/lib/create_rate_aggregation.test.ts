@@ -47,4 +47,35 @@ describe('createRateAggsBuckets', () => {
       maxValue: { max: { field: 'kubernetes.container.status.restarts' } },
     });
   });
+
+  describe('range filters', () => {
+    const timeframe = { start: 0, end: 120_000 };
+
+    it('uses only the time range as the bucket filter when there is no metric filter', () => {
+      const aggs = createRateAggsBuckets(timeframe, 'aggregatedValue_A', '@timestamp', 'metric');
+
+      expect(aggs.aggregatedValue_A_first_bucket.filter).toHaveProperty('range.@timestamp');
+      expect(aggs.aggregatedValue_A_second_bucket.filter).toHaveProperty('range.@timestamp');
+    });
+
+    it('combines the metric filter with the time range of both windows', () => {
+      const filterQuery = { term: { status: '500' } };
+      const aggs = createRateAggsBuckets(
+        timeframe,
+        'aggregatedValue_A',
+        '@timestamp',
+        'metric',
+        filterQuery
+      );
+
+      [aggs.aggregatedValue_A_first_bucket, aggs.aggregatedValue_A_second_bucket].forEach(
+        (bucket) => {
+          expect(bucket.filter).toEqual({
+            bool: { must: [{ range: { '@timestamp': expect.any(Object) } }, filterQuery] },
+          });
+          expect(bucket.aggs).toEqual({ maxValue: { max: { field: 'metric' } } });
+        }
+      );
+    });
+  });
 });

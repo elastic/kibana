@@ -8,6 +8,11 @@
  */
 
 import { getStateColumnActions } from './columns';
+import { popularizeField } from '../../utils/popularize_field';
+
+jest.mock('../../utils/popularize_field', () => ({
+  popularizeField: jest.fn(),
+}));
 import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import type { Capabilities } from '@kbn/core/types';
 import { dataViewsMock } from '../../../__mocks__/data_views';
@@ -68,6 +73,12 @@ describe('Test column actions', () => {
     actions.onRemoveColumn('first');
     expect(setAppState).toHaveBeenCalledWith({
       columns: ['second'],
+      sort: [],
+    });
+    setAppState.mockClear();
+    actions.onRemoveColumns(['first', 'second']);
+    expect(setAppState).toHaveBeenCalledWith({
+      columns: [],
       sort: [],
     });
     setAppState.mockClear();
@@ -171,6 +182,77 @@ describe('Test column actions', () => {
     expect(setAppState).toHaveBeenCalledWith({
       columns: ['second', 'third'],
       settings: { columns: { third: { width: 100 } } },
+    });
+  });
+
+  describe('onRemoveColumns', () => {
+    it('does not update state when passed an empty array', () => {
+      const setAppState = jest.fn();
+      const actions = getStateColumnAction(
+        { columns: ['first'], sort: [['first', 'desc']] },
+        setAppState
+      );
+
+      expect(actions.onRemoveColumns([])).toEqual([]);
+      expect(setAppState).not.toHaveBeenCalled();
+    });
+
+    it('removes sort entries for every removed column and ignores duplicates', () => {
+      const setAppState = jest.fn();
+      const actions = getStateColumnAction(
+        {
+          columns: ['first', 'second', 'third'],
+          sort: [
+            ['first', 'desc'],
+            ['third', 'asc'],
+          ],
+        },
+        setAppState
+      );
+
+      expect(actions.onRemoveColumns(['first', 'second', 'first', 'missing'])).toEqual([
+        'first',
+        'second',
+      ]);
+      expect(setAppState).toHaveBeenCalledWith({
+        columns: ['third'],
+        sort: [['third', 'asc']],
+      });
+    });
+
+    it('adjusts settings when removing multiple columns leaves only fixed-width columns', () => {
+      const setAppState = jest.fn();
+      const actions = getStateColumnAction(
+        {
+          columns: ['first', 'second', 'third'],
+          settings: {
+            columns: { second: { width: 100 }, third: { width: 100, display: 'test' } },
+          },
+        },
+        setAppState
+      );
+
+      actions.onRemoveColumns(['first', 'second']);
+
+      expect(setAppState).toHaveBeenCalledWith({
+        columns: ['third'],
+        settings: { columns: { third: { display: 'test' } } },
+        sort: [],
+      });
+    });
+
+    it('does not popularize field removal', () => {
+      const setAppState = jest.fn();
+      const actions = getStateColumnAction({ columns: ['first', 'second'] }, setAppState);
+      jest.mocked(popularizeField).mockClear();
+
+      actions.onAddColumn('third');
+      expect(popularizeField).toHaveBeenCalledTimes(1);
+
+      jest.mocked(popularizeField).mockClear();
+      actions.onRemoveColumn('first');
+      actions.onRemoveColumns(['first', 'second']);
+      expect(popularizeField).not.toHaveBeenCalled();
     });
   });
 

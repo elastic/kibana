@@ -11,4 +11,8 @@ import { createPlaywrightEvalsConfig } from '@kbn/evals';
 export default createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals'),
   repetitions: 1,
+  // The whole dataset runs in a single test, so the timeout must cover every
+  // example serially (each costs several minutes); the default 5 min is not
+  // enough. Mirrors the visualization suite.
+  timeout: 45 * 60_000,
 });

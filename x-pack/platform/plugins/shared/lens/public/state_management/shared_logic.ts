@@ -23,7 +23,7 @@ import {
 } from '@kbn/lens-common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import { INDEX_PATTERN_TYPE } from '../../common/constants';
-import { applyLegacySecondaryLabelIfMetric } from '../visualizations/metric/runtime_state/apply_legacy_secondary_label';
+import { applyStateHydration } from '../state_hydration';
 
 // This piece of logic is shared between the main editor code base and the inline editor one within the embeddable
 export function mergeToNewDoc(
@@ -55,14 +55,19 @@ export function mergeToNewDoc(
     return;
   }
 
-  const { visualizationState: syncedVisualizationState, datasourceStates: syncedDatasourceStates } =
-    applyLegacySecondaryLabelIfMetric(
-      visualization.activeId,
-      visualization.state,
-      datasourceStates
-    );
+  const {
+    visualizationState: hydratedVisualizationState,
+    datasourceStates: hydratedDatasourceStates,
+  } = applyStateHydration({
+    visualizationId: visualization.activeId,
+    visualizationState: visualization.state,
+    datasourceStates,
+    context: 'editor',
+  });
 
-  const activeDatasources: Record<string, Datasource> = Object.keys(syncedDatasourceStates).reduce(
+  const activeDatasources: Record<string, Datasource> = Object.keys(
+    hydratedDatasourceStates
+  ).reduce(
     (acc, datasourceId) => ({
       ...acc,
       [datasourceId]: datasourceMap[datasourceId],
@@ -75,7 +80,7 @@ export function mergeToNewDoc(
   const internalReferences: Reference[] = [];
   Object.entries(activeDatasources).forEach(([id, datasource]) => {
     const { state: persistableState, references: persistableReferences } =
-      datasource.getPersistableState(syncedDatasourceStates[id].state);
+      datasource.getPersistableState(hydratedDatasourceStates[id].state);
     persistibleDatasourceStates[id] = persistableState;
     persistableReferences.forEach((r) => {
       if (r.type === INDEX_PATTERN_TYPE && adHocDataViews[r.id]) {
@@ -86,13 +91,13 @@ export function mergeToNewDoc(
     });
   });
 
-  let persistibleVisualizationState = syncedVisualizationState;
+  let persistibleVisualizationState = hydratedVisualizationState;
   if (activeVisualization.getPersistableState) {
     const { state: persistableState, references: persistableReferences } =
       activeVisualization.getPersistableState(
-        syncedVisualizationState,
+        hydratedVisualizationState,
         activeDatasource,
-        syncedDatasourceStates[activeDatasource.id]
+        hydratedDatasourceStates[activeDatasource.id]
       );
     persistibleVisualizationState = persistableState;
     persistableReferences.forEach((r) => {

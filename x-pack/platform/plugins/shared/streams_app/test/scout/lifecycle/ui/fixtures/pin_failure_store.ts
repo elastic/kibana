@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import type { ApiServicesFixture } from '@kbn/scout';
 import type { FailureStore } from '@kbn/streams-schema';
 
@@ -22,11 +23,22 @@ export async function pinFailureStore(
 ): Promise<void> {
   const definition = await apiServices.streams.getStreamDefinition(streamName);
   const { updated_at: _updatedAt, ...processing } = definition.stream.ingest.processing;
-  await apiServices.streams.updateStream(streamName, {
-    ingest: {
-      ...definition.stream.ingest,
-      processing,
-      failure_store: failureStore,
-    },
-  });
+
+  const writeFailureStore = (value: FailureStore) =>
+    apiServices.streams.updateStream(streamName, {
+      ingest: {
+        ...definition.stream.ingest,
+        processing,
+        failure_store: value,
+      },
+    });
+
+  // The ingest upsert only touches Elasticsearch when the stored definition changes, so pin through a different value first to guarantee the data stream options are rewritten.
+  if (isEqual(definition.stream.ingest.failure_store, failureStore)) {
+    await writeFailureStore(
+      isEqual(failureStore, { disabled: {} }) ? { lifecycle: { enabled: {} } } : { disabled: {} }
+    );
+  }
+
+  await writeFailureStore(failureStore);
 }

@@ -117,6 +117,7 @@ export const TabbedTableListView = ({
       )}
       <KibanaPageTemplate.Section
         aria-labelledby={hasInitialFetchReturned && title ? headingId : undefined}
+        paddingSize="m"
       >
         {/* Any children passed to the component */}
         {children}

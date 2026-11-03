@@ -34,6 +34,24 @@ export interface CloudBasicUrls {
    */
   deploymentUrl?: string;
   /**
+   * The full URL to the edit page of the deployment to which the Kibana instance belongs.
+   *
+   * @example `{deploymentUrl}/edit`
+   */
+  deploymentEditUrl?: string;
+  /**
+   * The full URL to the security page of the deployment to which the Kibana instance belongs.
+   *
+   * @example `{deploymentUrl}/security`
+   */
+  deploymentSecurityUrl?: string;
+  /**
+   * The full URL to the deployment page with the upgrade flow open.
+   *
+   * @example `{deploymentUrl}?show_upgrade=true`
+   */
+  deploymentUpgradeUrl?: string;
+  /**
    * This is the path to the Cloud deployment creation page. The value is already prepended with `baseUrl`.
    *
    * @example `{baseUrl}/deployments/create`

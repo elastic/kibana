@@ -38,6 +38,7 @@ export class InterceptPublicPlugin implements Plugin {
       analytics: core.analytics,
       rendering: core.rendering,
       userAllowsFeedback: core.notifications.feedback.isEnabled(),
+      isChromeVisible$: core.chrome.getIsVisible$(),
       targetDomElement: this.interceptsTargetDomElement,
     });
 

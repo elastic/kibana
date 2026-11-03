@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 import {
   PackName,
@@ -22,13 +22,15 @@ import {
   EnabledOrUndefined,
   PolicyIdsOrUndefined,
   Shards,
-  ObjectQueries,
+  ObjectQueriesInput,
   ScheduleType,
   PackInterval,
   RRuleScheduleConfig,
-  MinOsqueryVersion,
+  MinOsqueryVersionInput,
   ResultType,
   PackPlatform,
+  ObjectQueries,
+  MinOsqueryVersion,
 } from '../model/schema/common_attributes.gen';
 
 export const CreatePacksRequestBody = lazySchema(() =>
@@ -38,11 +40,11 @@ export const CreatePacksRequestBody = lazySchema(() =>
     enabled: EnabledOrUndefined.optional(),
     policy_ids: PolicyIdsOrUndefined.optional(),
     shards: Shards.optional(),
-    queries: ObjectQueries.optional(),
+    queries: ObjectQueriesInput.optional(),
     schedule_type: ScheduleType.optional(),
     interval: PackInterval.optional(),
     rrule_schedule: RRuleScheduleConfig.optional(),
-    min_osquery_version: MinOsqueryVersion.optional(),
+    min_osquery_version: MinOsqueryVersionInput.optional(),
     result_type: ResultType.optional(),
     platform: PackPlatform.optional(),
   })
@@ -70,11 +72,7 @@ export const CreatePacksResponse = lazySchema(() =>
       /**
        * The date and time the pack was created.
        */
-      created_at: z
-        .string()
-        .datetime()
-        .optional()
-        .describe('The date and time the pack was created.'),
+      created_at: isoDateTime().optional().describe('The date and time the pack was created.'),
       /**
        * The user who created the pack.
        */
@@ -89,11 +87,7 @@ export const CreatePacksResponse = lazySchema(() =>
       /**
        * The date and time the pack was last updated.
        */
-      updated_at: z
-        .string()
-        .datetime()
-        .optional()
-        .describe('The date and time the pack was last updated.'),
+      updated_at: isoDateTime().optional().describe('The date and time the pack was last updated.'),
       /**
        * The user who last updated the pack.
        */

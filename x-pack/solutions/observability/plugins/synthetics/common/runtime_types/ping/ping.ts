@@ -6,8 +6,8 @@
  */
 
 import type { SchemaOutput } from '../schema_output';
-import type { SummaryCodec } from '../zod/ping';
-import {
+import type { SummaryCodec } from '../schemas/ping';
+import type {
   PingErrorType,
   MonitorDetailsType,
   HttpResponseBodyType,
@@ -16,32 +16,12 @@ import {
   TlsType,
   MonitorType,
   PingHeadersType,
-  AgentType,
-  UrlType,
   PingType,
   PingStateType,
   PingsResponseType,
   GetPingsParamsType,
   MonitorStatusHeatmapBucketType,
-} from '../zod/ping';
-
-export {
-  PingErrorType,
-  MonitorDetailsType,
-  HttpResponseBodyType,
-  X509ExpiryType,
-  X509Type,
-  TlsType,
-  MonitorType,
-  PingHeadersType,
-  AgentType,
-  UrlType,
-  PingType,
-  PingStateType,
-  PingsResponseType,
-  GetPingsParamsType,
-  MonitorStatusHeatmapBucketType,
-};
+} from '../schemas/ping';
 
 export type PingError = SchemaOutput<typeof PingErrorType>;
 export type MonitorDetails = SchemaOutput<typeof MonitorDetailsType>;

@@ -6,6 +6,7 @@
  */
 
 import { getImportRulesSchemaMock } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
+import { RULE_IMPORT_BATCH_SIZE } from '../../constants';
 import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { validateRuleImportResponseActions } from '../../../../../../endpoint/services';
 import { configMock, requestContextMock, serverMock } from '../../../../routes/__mocks__';
@@ -100,6 +101,7 @@ describe('Import rules route', () => {
       successes: [
         {
           rule_id: rule.rule_id,
+          outcome: 'created',
           telemetry: { id: 'id-1', type: 'query', rule_source: { type: 'internal' } },
         },
       ],
@@ -114,6 +116,14 @@ describe('Import rules route', () => {
 
     expect(response.status).toEqual(400);
     expect(response.body).toEqual({ message: 'Invalid file extension .html', status_code: 400 });
+    expect(clients.detectionRulesClient.importRules).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 when the file field is missing', async () => {
+    const response = await inject(getImportRulesRequest());
+
+    expect(response.status).toEqual(400);
+    expect(response.body).toEqual({ message: 'file is required', status_code: 400 });
     expect(clients.detectionRulesClient.importRules).not.toHaveBeenCalled();
   });
 
@@ -144,10 +154,12 @@ describe('Import rules route', () => {
       },
       overwriteRules: true,
       allowMissingConnectorSecrets: false,
+      batchSize: RULE_IMPORT_BATCH_SIZE,
     });
     expect(response.body).toEqual({
       success: true,
       success_count: 1,
+      rules_summary: { created: 1, updated: 0, skipped: 0, failed: 0 },
       rules_count: 1,
       errors: [],
       exceptions_errors: [],
@@ -205,6 +217,13 @@ describe('Import rules route', () => {
     expect(response.status).toEqual(200);
     expect(response.body.success).toEqual(false);
     expect(response.body.success_count).toEqual(0);
+    expect(response.body.rules_count).toEqual(1);
+    expect(response.body.rules_summary).toEqual({
+      created: 0,
+      updated: 0,
+      skipped: 0,
+      failed: 1,
+    });
     expect(response.body.errors).toEqual([
       { error: { status_code: 400, message: 'bad json' } },
       { rule_id: 'rule-1', error: { status_code: 400, message: 'duplicate' } },
@@ -215,12 +234,96 @@ describe('Import rules route', () => {
     ]);
   });
 
+  it('chunks at RULE_IMPORT_BATCH_SIZE and keeps leftover batchSize at 200', async () => {
+    const total = RULE_IMPORT_BATCH_SIZE + 1;
+    const rules = Array.from({ length: total }, (_, i) =>
+      getImportRulesSchemaMock({ rule_id: `rule-${i}` })
+    );
+    stream.mockResolvedValue([{ exceptions: [], rules, actionConnectors: [] }]);
+    dedupe.mockReturnValue([[], rules]);
+    migrate.mockResolvedValue(rules);
+    actions.mockResolvedValue({ validatedActionRules: rules, missingActionErrors: [] });
+    responseActions.mockResolvedValue({ valid: rules, errors: [] });
+    clients.detectionRulesClient.importRules
+      .mockResolvedValueOnce({
+        successes: [
+          {
+            rule_id: 'rule-0',
+            outcome: 'created',
+            telemetry: { id: 'id-0', type: 'query', rule_source: { type: 'internal' } },
+          },
+        ],
+        errors: [createRuleImportErrorObject({ ruleId: 'rule-1', message: 'first batch' })],
+      })
+      .mockResolvedValueOnce({
+        successes: [
+          {
+            rule_id: `rule-${RULE_IMPORT_BATCH_SIZE}`,
+            outcome: 'created',
+            telemetry: { id: 'id-last', type: 'query', rule_source: { type: 'internal' } },
+          },
+        ],
+        errors: [
+          createRuleImportErrorObject({
+            ruleId: 'rule-2',
+            message: 'second batch',
+            type: 'conflict',
+          }),
+        ],
+      });
+
+    const response = await inject();
+
+    expect(response.status).toEqual(200);
+    expect(response.body.success).toEqual(false);
+    expect(response.body.success_count).toEqual(2);
+    expect(response.body.errors).toEqual([
+      { rule_id: 'rule-1', error: { status_code: 400, message: 'first batch' } },
+      { rule_id: 'rule-2', error: { status_code: 409, message: 'second batch' } },
+    ]);
+    expect(clients.detectionRulesClient.importRules).toHaveBeenCalledTimes(2);
+    expect(clients.detectionRulesClient.importRules.mock.calls[0][0].rules).toHaveLength(
+      RULE_IMPORT_BATCH_SIZE
+    );
+    expect(clients.detectionRulesClient.importRules.mock.calls[1][0].rules).toHaveLength(1);
+    expect(clients.detectionRulesClient.importRules.mock.calls[0][0].batchSize).toBe(
+      RULE_IMPORT_BATCH_SIZE
+    );
+    expect(clients.detectionRulesClient.importRules.mock.calls[1][0].batchSize).toBe(
+      RULE_IMPORT_BATCH_SIZE
+    );
+    expect(clients.detectionRulesClient.importRules.mock.calls[0][0].changeTracking).toEqual({
+      action: SecurityRuleChangeTrackingAction.ruleImport,
+      metadata: { bulkCount: total },
+    });
+    expect(clients.detectionRulesClient.importRules.mock.calls[1][0].changeTracking).toEqual({
+      action: SecurityRuleChangeTrackingAction.ruleImport,
+      metadata: { bulkCount: total },
+    });
+  });
+
   it('maps mixed import successes and errors to success_count plus 400/409', async () => {
+    stream.mockResolvedValue([
+      {
+        exceptions: [],
+        rules: ['rule-a', 'rule-b', 'rule-c', 'rule-d'].map((ruleId) => ({
+          ...rule,
+          rule_id: ruleId,
+        })),
+        actionConnectors: [],
+      },
+    ]);
     clients.detectionRulesClient.importRules.mockResolvedValue({
       successes: [
         {
           rule_id: 'rule-b',
+          outcome: 'updated',
           telemetry: { id: 'id-rule-b', type: 'query', rule_source: { type: 'internal' } },
+        },
+        {
+          rule_id: 'rule-d',
+          outcome: 'skipped',
+          telemetry: { id: 'id-rule-d', type: 'query', rule_source: { type: 'internal' } },
         },
       ],
       errors: [
@@ -237,7 +340,14 @@ describe('Import rules route', () => {
 
     expect(response.status).toEqual(200);
     expect(response.body.success).toEqual(false);
-    expect(response.body.success_count).toEqual(1);
+    expect(response.body.success_count).toEqual(2);
+    expect(response.body.rules_count).toEqual(4);
+    expect(response.body.rules_summary).toEqual({
+      created: 0,
+      updated: 1,
+      skipped: 1,
+      failed: 2,
+    });
     expect(response.body.errors).toEqual([
       { rule_id: 'rule-a', error: { status_code: 400, message: 'boom' } },
       { rule_id: 'rule-c', error: { status_code: 409, message: 'conflict' } },

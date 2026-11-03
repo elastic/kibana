@@ -11,6 +11,8 @@ applies_to:
 
 The Google Calendar connector enables searching and accessing events and calendars in Google Calendar.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-google-calendar-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
@@ -20,7 +22,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 Google Calendar connectors support the following authentication types:
 
 Quick Connect OAuth 2.0 (recommended) {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6`
-:   Elastic’s managed OAuth flow for Google Calendar. Grants `calendar.readonly` access. No app setup is required — select this option and authorize access through Elastic.
+:   Elastic’s managed OAuth flow for Google Calendar. Grants `calendar.readonly` access. No app setup is required — select this option and authorize access through Elastic. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
 
 Bearer Token
 :   A Google OAuth 2.0 access token with Google Calendar API scopes. See **Get API credentials**.

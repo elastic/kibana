@@ -10,6 +10,7 @@
 import { createMcpClientType } from '../mcp/client/client_type';
 import type { ClientTypeSpecs } from './client_registry';
 import { mongodbClientType } from './mongodb_client_type';
+import { mssqlClientType } from './mssql';
 import { mysqlClientType } from './mysql';
 
 export type {
@@ -27,5 +28,6 @@ export type { ClientRegistry, ClientTypeId, ClientTypeSpecs } from './client_reg
 export const clientTypes: ClientTypeSpecs = {
   mcp: createMcpClientType(),
   mongodb: mongodbClientType,
+  mssql: mssqlClientType,
   mysql: mysqlClientType,
 };

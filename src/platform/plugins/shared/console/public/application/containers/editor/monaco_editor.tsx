@@ -13,7 +13,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip, useEuiTheme } fro
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor/code_editor';
 import type { monaco } from '@kbn/monaco';
-import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, ConsoleLang } from '@kbn/monaco';
+import { CONSOLE_LANG_ID, ConsoleLang } from '@kbn/monaco';
 
 import { i18n } from '@kbn/i18n';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
@@ -98,6 +98,7 @@ export const MonacoEditor = ({
   const actionsProvider = useRef<MonacoEditorActionsProvider | null>(null);
   const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
   const [selectedRequestsCount, setSelectedRequestsCount] = useState(0);
+  const [hasAutocompleteEntities, setHasAutocompleteEntities] = useState(false);
 
   const setInputEditor = useSetInputEditor();
   const styles = useStyles();
@@ -201,6 +202,16 @@ export const MonacoEditor = ({
 
   useSetupAutocompletePolling({ autocompleteInfo, settingsService });
 
+  // Cluster-derived suggestions (indices, aliases, templates) only exist once the first
+  // autocomplete_entities response has been merged, so surface that in the DOM.
+  useEffect(() => {
+    const subscription = autocompleteInfo.entitiesRefreshGeneration$.subscribe((generation) =>
+      setHasAutocompleteEntities(generation > 0)
+    );
+
+    return () => subscription.unsubscribe();
+  }, [autocompleteInfo]);
+
   useSetupAutosave({ value });
 
   // Restore the request from history if there is one
@@ -222,8 +233,12 @@ export const MonacoEditor = ({
   }, [fileToImport, requestToRestoreFromHistory, dispatch, context, editorDispatch]);
 
   useEffect(() => {
-    updateEditor();
-  }, [updateEditor]);
+    // `editorInstance` is set right after the actions provider, so gating on it keeps a
+    // request that arrived before the editor mounted pending instead of clearing it unapplied.
+    if (editorInstance) {
+      updateEditor();
+    }
+  }, [updateEditor, editorInstance]);
 
   return (
     <div
@@ -234,6 +249,7 @@ export const MonacoEditor = ({
       ref={divRef}
       data-test-subj="consoleMonacoEditorContainer"
       data-currently-selected-requests={selectedRequestsCount}
+      data-autocomplete-entities-loaded={hasAutocompleteEntities}
     >
       <EuiFlexGroup
         css={styles.editorActions}
@@ -284,7 +300,6 @@ export const MonacoEditor = ({
         options={{
           fontSize: settings.fontSize,
           wordWrap: settings.wrapMode === true ? 'on' : 'off',
-          theme: CONSOLE_THEME_ID,
           // Only let Enter accept an auto-triggered suggestion when accepting it would actually
           // change the text. Without this, a fully typed term (e.g. `?pretty`) keeps the widget
           // open and Enter gets consumed by a no-op acceptance instead of inserting a new line.

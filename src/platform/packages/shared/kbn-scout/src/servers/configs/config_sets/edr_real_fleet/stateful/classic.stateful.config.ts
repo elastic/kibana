@@ -66,6 +66,9 @@ export const servers: ScoutServerConfig = {
           hosts: [`http://${hostIp}:${EDR_REAL_FLEET_ES_PORT}`],
         },
       ])}`,
+      // This set only serves the real-fleet pipeline. The default 60s interval
+      // makes the artifact revision check wait a full packager cycle.
+      '--xpack.securitySolution.packagerTaskInterval=5s',
     ],
   },
 };

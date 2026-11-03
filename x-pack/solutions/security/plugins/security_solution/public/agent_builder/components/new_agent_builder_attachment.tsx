@@ -7,7 +7,7 @@
 
 import type { EuiButtonColor } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
-import { AiButton } from '@kbn/shared-ux-ai-components';
+import { AiButton, type AiButtonIconType } from '@kbn/shared-ux-ai-components';
 import React, { memo, useCallback } from 'react';
 import type { EuiButtonEmptySizes } from '@elastic/eui/src/components/button/button_empty/button_empty';
 import type { AgentBuilderAddToChatTelemetry } from '../hooks/use_report_add_to_chat';
@@ -34,6 +34,16 @@ export interface NewAgentBuilderAttachmentProps {
    */
   disabled?: boolean;
   /**
+   * Optionally override the button text.
+   * @default 'Add to chat'
+   */
+  label?: string;
+  /**
+   * Icon shown beside the label.
+   * @default 'productAgent'
+   */
+  iconType?: AiButtonIconType;
+  /**
    * Telemetry data for tracking "Add to Chat" clicks
    */
   telemetry?: AgentBuilderAddToChatTelemetry;
@@ -48,6 +58,8 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
   onClick,
   size = 'm',
   disabled = false,
+  label,
+  iconType = 'productAgent',
   telemetry: telemetryData,
 }: NewAgentBuilderAttachmentProps) {
   const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled, hasValidAgentBuilderLicense } =
@@ -59,6 +71,7 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
       reportAddToChatClick({
         pathway: telemetryData.pathway,
         attachments: telemetryData.attachments,
+        item_count: telemetryData.item_count,
       });
     }
     onClick();
@@ -66,6 +79,7 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
 
   const isDisabled = disabled || !hasValidAgentBuilderLicense;
   const shouldShowLicenseTooltip = !hasValidAgentBuilderLicense;
+  const buttonLabel = label ?? i18n.ADD_TO_CHAT;
 
   if (!hasAgentBuilderPrivilege || !isAgentChatExperienceEnabled) {
     return null;
@@ -73,15 +87,15 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
 
   const button = (
     <AiButton
-      aria-label={i18n.ADD_TO_CHAT}
+      aria-label={buttonLabel}
       variant="empty"
       data-test-subj="newAgentBuilderAttachment"
       onClick={handleClick}
       size={size}
-      iconType="productAgent"
+      iconType={iconType}
       isDisabled={isDisabled}
     >
-      {i18n.ADD_TO_CHAT}
+      {buttonLabel}
     </AiButton>
   );
 

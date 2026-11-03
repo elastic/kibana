@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -21,9 +21,11 @@ import { createMissingPrivilegeError, createToolErrorResult } from '../common/to
 import { MigrationId } from '../common/schemas';
 import { SIEM_MIGRATION_GET_MISSING_RULE_MIGRATION_RESOURCES_TOOL_ID } from './tool_ids';
 
-const schema = z.object({
-  migration_id: MigrationId,
-});
+const schema = lazySchema(() =>
+  z.object({
+    migration_id: MigrationId,
+  })
+);
 
 const buildPath = (migrationId: string): string =>
   SIEM_RULE_MIGRATION_RESOURCES_MISSING_PATH.replace(

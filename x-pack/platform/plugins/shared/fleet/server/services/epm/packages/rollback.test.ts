@@ -8,11 +8,15 @@
 import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
 import { agentPolicyService, appContextService, packagePolicyService } from '../..';
 import type { PackagePolicyClient } from '../../package_policy_service';
-import { getAgentsByKuery } from '../../agents';
+import { getAgentsByKuery, reassignAgents } from '../../agents';
 
 import { sendTelemetryEvents } from '../../upgrade_sender';
 
 import { fetchInfo } from '../registry';
+import {
+  buildAgentVersionVariantsEsFilter,
+  buildAgentVersionVariantsKueryFragment,
+} from '../../../../common/services/version_specific_policies_utils';
 
 import { installPackage } from './install';
 import { removeInstallation } from './remove';
@@ -1030,6 +1034,96 @@ describe('rollbackInstallation - version-specific policy cleanup (enableVersionS
       { bumpRevision: false, skipValidation: true }
     );
     expect(mockEsClient.deleteByQuery).toHaveBeenCalled();
+  });
+
+  it('only matches the agent version variants of the policy, not #sentinel or other policies', async () => {
+    const soClient = buildSoClient();
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+      soClient
+    );
+    packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'pp-1',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: '1.5.0' },
+            revision: 2,
+            latest_revision: true,
+            policy_ids: ['policy-a'],
+          },
+        },
+        {
+          id: 'pp-1:prev',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: '1.0.0' },
+            revision: 1,
+            latest_revision: false,
+            policy_ids: ['policy-a'],
+          },
+        },
+      ],
+    } as any);
+    packagePolicyServiceMock.rollback.mockResolvedValue({
+      updatedPolicies: {
+        default: [
+          {
+            id: 'pp-1',
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            namespaces: ['default'],
+            attributes: { policy_ids: ['policy-a'] },
+            references: [],
+            score: 0,
+          },
+        ],
+      },
+      copiedPolicies: { default: [] },
+      previousVersionPolicies: { default: [] },
+    } as any);
+    packagePolicyServiceMock.findAllForAgentPolicy.mockResolvedValue([]);
+    (agentPolicyService.update as jest.Mock).mockResolvedValue({
+      has_agent_version_conditions: false,
+    });
+    (getAgentsByKuery as jest.Mock).mockResolvedValueOnce({ total: 2, agents: [] });
+
+    await rollbackInstallation({
+      esClient: mockEsClient,
+      currentUserPolicyIds: ['pp-1', 'pp-1:prev'],
+      pkgName,
+      spaceId,
+    });
+
+    // agents on the variants are moved back to the policy: `policy-a#*` but not `policy-a#sentinel`
+    const expectedKuery = buildAgentVersionVariantsKueryFragment('policy-a');
+    expect(expectedKuery).toBe('(policy_id:policy-a#* and not policy_id:"policy-a#sentinel")');
+    expect(getAgentsByKuery).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({ kuery: expectedKuery })
+    );
+    expect(reassignAgents).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({ kuery: expectedKuery }),
+      'policy-a'
+    );
+
+    // variant docs are deleted with the same matcher
+    const { query } = mockEsClient.deleteByQuery.mock.calls[0][0];
+    expect(query).toEqual(buildAgentVersionVariantsEsFilter('policy-a'));
+
+    // the delete filter does not match the sentinel or a policy sharing the prefix
+    const matches = (policyId: string) =>
+      query.bool.filter.every((f: any) => policyId.startsWith(f.prefix.policy_id)) &&
+      !query.bool.must_not.some((f: any) => f.term.policy_id === policyId);
+    expect(matches('policy-a#9.4')).toBe(true);
+    expect(matches('policy-a#sentinel')).toBe(false);
+    expect(matches('policy-a')).toBe(false);
+    expect(matches('policy-a-other#9.4')).toBe(false);
+    expect(matches('policy-a-other')).toBe(false);
   });
 
   it('skips variant deletion when rolled-back package still has version conditions', async () => {

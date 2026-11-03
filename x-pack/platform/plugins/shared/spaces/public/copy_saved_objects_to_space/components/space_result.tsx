@@ -91,6 +91,7 @@ export const SpaceResult = (props: Props) => {
     <EuiAccordion
       id={`copyToSpace-${space.id}`}
       data-test-subj={`cts-space-result-${space.id}`}
+      buttonProps={{ 'data-test-subj': `cts-space-result-toggle-${space.id}` }}
       css={css`
         padding-bottom: ${euiTheme.size.s};
         border-bottom: ${euiTheme.border.thin};

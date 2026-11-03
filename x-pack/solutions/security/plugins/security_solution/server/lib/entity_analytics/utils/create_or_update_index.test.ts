@@ -115,6 +115,30 @@ describe('createOrUpdateIndex', () => {
       expect(esClient.indices.putSettings).not.toHaveBeenCalled();
     });
 
+    it('preserves the original error (e.g. `.meta`) so callers can classify it, rather than throwing a plain Error', async () => {
+      const securityException = Object.assign(new Error('security_exception'), {
+        meta: { body: { error: { type: 'security_exception', reason: 'access denied' } } },
+      });
+      esClient.indices.create.mockRejectedValue(securityException);
+
+      let caught: unknown;
+      try {
+        await createOrUpdateIndex({
+          esClient,
+          logger,
+          options: { index: 'my-index', settings: { hidden: true } },
+        });
+      } catch (e) {
+        caught = e;
+      }
+
+      type CaughtError = Error & { meta?: { body?: { error?: { type?: string } } } };
+
+      expect(caught).toBe(securityException);
+      expect((caught as CaughtError).meta?.body?.error?.type).toBe('security_exception');
+      expect((caught as CaughtError).message).toContain('Failed to create index: my-index');
+    });
+
     it('treats resource_already_exists_exception as success and still applies auto_expand_replicas', async () => {
       esClient.indices.create.mockRejectedValue({
         meta: { body: { error: { type: 'resource_already_exists_exception' } } },

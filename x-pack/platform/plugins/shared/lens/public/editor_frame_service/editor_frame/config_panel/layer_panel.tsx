@@ -24,7 +24,7 @@ import type { AggregateQuery } from '@kbn/es-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import { isTextBasedAttributes, LENS_LAYER_TYPES } from '@kbn/lens-common';
+import { isTextBasedAttributes, LENS_LAYER_TYPES, LENS_DATASOURCE_ID } from '@kbn/lens-common';
 import { getTabIdAttribute } from '@kbn/unified-tabs';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -356,11 +356,11 @@ export function LayerPanel(props: LayerPanelProps) {
         return;
       }
 
-      const reconciledColumns = reconcileQueryColumns(
-        layer.columns,
-        columns,
-        new Set(allAccessors)
-      );
+      const queryColumns = reconcileQueryColumns(layer.columns, columns, new Set(allAccessors));
+      const reconciledColumns =
+        layerType === LENS_LAYER_TYPES.REFERENCELINE
+          ? queryColumns.filter(({ columnId }) => allAccessors.includes(columnId))
+          : queryColumns;
       const reconciledColumnIds = new Set(reconciledColumns.map(({ columnId }) => columnId));
       const hasMissingDimension = allAccessors.some(
         (columnId) => !reconciledColumnIds.has(columnId)
@@ -409,7 +409,7 @@ export function LayerPanel(props: LayerPanelProps) {
         layers: updatedLayers,
       });
     },
-    [allAccessors, datasourceId, layerId, textBasedDatasourceState, updateDatasource]
+    [allAccessors, datasourceId, layerId, layerType, textBasedDatasourceState, updateDatasource]
   );
 
   const visualizationLayerSettings = useMemo(
@@ -422,11 +422,17 @@ export function LayerPanel(props: LayerPanelProps) {
     [activeVisualization, layerId, props.framePublicAPI, visualizationState]
   );
 
-  const hasLayerSettings = Boolean(
-    (Object.values(visualizationLayerSettings).some(Boolean) &&
-      activeVisualization.LayerSettingsComponent) ||
-      layerDatasource?.LayerSettingsComponent
-  );
+  const isStaticReferenceLineOnEsqlChart =
+    layerType === LENS_LAYER_TYPES.REFERENCELINE &&
+    datasourceId === LENS_DATASOURCE_ID.FORM_BASED &&
+    isEsqlChart(props.framePublicAPI.datasourceLayers);
+  const hasLayerSettings =
+    !isStaticReferenceLineOnEsqlChart &&
+    Boolean(
+      (Object.values(visualizationLayerSettings).some(Boolean) &&
+        activeVisualization.LayerSettingsComponent) ||
+        layerDatasource?.LayerSettingsComponent
+    );
 
   const layerSettingsAction = useMemo(
     () =>
@@ -883,6 +889,7 @@ export function LayerPanel(props: LayerPanelProps) {
       {(layerDatasource?.LayerSettingsComponent || activeVisualization?.LayerSettingsComponent) && (
         <FlyoutContainer
           panelRef={(el) => (settingsPanelRef.current = el)}
+          dataTestSubj="lnsLayerSettingsFlyout"
           isFullscreen={false}
           label={i18n.translate('xpack.lens.editorFrame.layerSettingsTitle', {
             defaultMessage: 'Settings',

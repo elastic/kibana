@@ -19,6 +19,10 @@ import {
   syntheticsParamSavedObjectType,
 } from './synthetics_param';
 import {
+  SYNTHETICS_SECRET_CONNECTION_ENCRYPTED_TYPE,
+  syntheticsSecretConnectionSavedObjectType,
+} from './synthetics_secret_connection';
+import {
   LEGACY_PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE,
   PRIVATE_LOCATION_SAVED_OBJECT_TYPE,
 } from './private_locations';
@@ -59,4 +63,8 @@ export const registerSyntheticsSavedObjects = (
   // global params saved object type
   savedObjectsService.registerType(syntheticsParamSavedObjectType);
   encryptedSavedObjects.registerType(SYNTHETICS_PARAMS_SECRET_ENCRYPTED_TYPE);
+
+  // HashiCorp Vault connection saved object type
+  savedObjectsService.registerType(syntheticsSecretConnectionSavedObjectType);
+  encryptedSavedObjects.registerType(SYNTHETICS_SECRET_CONNECTION_ENCRYPTED_TYPE);
 };

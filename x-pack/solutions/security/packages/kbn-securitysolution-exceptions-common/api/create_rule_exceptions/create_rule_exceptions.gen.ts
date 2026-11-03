@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 import { UUID, NonEmptyString } from '@kbn/openapi-common/schemas/primitives.gen';
 import {
@@ -58,7 +58,7 @@ export const CreateRuleExceptionListItemProps = lazySchema(() =>
     os_types: ExceptionListItemOsTypeArray.optional().default([]),
     tags: ExceptionListItemTags.optional().default([]),
     meta: ExceptionListItemMeta.optional(),
-    expire_time: z.string().datetime().optional(),
+    expire_time: isoDateTime().optional(),
     comments: CreateRuleExceptionListItemCommentArray.optional().default([]),
   })
 );

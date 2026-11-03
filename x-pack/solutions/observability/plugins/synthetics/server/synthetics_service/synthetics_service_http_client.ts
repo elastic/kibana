@@ -1,0 +1,475 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios from 'axios';
+import type { Observable } from 'rxjs';
+import { concat, forkJoin, from as rxjsFrom, of } from 'rxjs';
+import { catchError, tap } from 'rxjs';
+import * as https from 'https';
+import { SslConfig } from '@kbn/server-http-tools';
+import type { Logger } from '@kbn/core/server';
+import type { LicenseGetLicenseInformation } from '@elastic/elasticsearch/lib/api/types';
+import type { SyntheticsServerSetup } from '../types';
+import type { DataStreamConfig } from './formatters/public_formatters/convert_to_data_stream';
+import { convertToDataStreamFormat } from './formatters/public_formatters/convert_to_data_stream';
+import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
+import type {
+  MonitorFields,
+  PublicLocations,
+  ServiceLocation,
+  ServiceLocationErrors,
+} from '../../common/runtime_types';
+import type { ServiceConfig } from '../config';
+import { getSanitizedError } from './utils/sanitize_error';
+
+const TEST_SERVICE_USERNAME = 'localKibanaIntegrationTestsUser';
+
+export interface ServiceData {
+  monitors: Array<Partial<MonitorFields>>;
+  output: {
+    hosts: string[];
+    api_key: string;
+  };
+  endpoint?: 'monitors' | 'runOnce' | 'sync';
+  isEdit?: boolean;
+  license: LicenseGetLicenseInformation;
+  location?: ServiceLocation;
+}
+
+export interface ServicePayload {
+  monitors: DataStreamConfig[];
+  output: {
+    hosts: string[];
+    api_key: string;
+  };
+  stack_version: string;
+  is_edit?: boolean;
+  license_level: string;
+  license_issued_to: string;
+  deployment_id?: string;
+  cloud_id?: string;
+}
+
+/** The only fields the service needs to keep an already-cached monitor alive. */
+export interface RetainedMonitor {
+  id: string;
+  type: string;
+}
+
+export type RetainPayload = Omit<ServicePayload, 'monitors' | 'is_edit'> & {
+  monitors: RetainedMonitor[];
+};
+
+interface RetainErrorBody {
+  // A failure that is not about one monitor, such as a batch the service could not read, has no id.
+  failed_monitors?: Array<{ id?: string; message: string }> | null;
+}
+
+export interface RetainData {
+  monitors: RetainedMonitor[];
+  output: ServiceData['output'];
+  license: LicenseGetLicenseInformation;
+  locationId: string;
+}
+
+// A service that does not know the retain endpoint is probed again after this long, so a
+// service upgrade is picked up without restarting Kibana.
+const RETAIN_UNSUPPORTED_RETRY_MS = 24 * 60 * 60 * 1000;
+
+export class SyntheticsServiceHttpClient {
+  private readonly username?: string;
+  private readonly authorization: string;
+  public locations: PublicLocations;
+  private logger: Logger;
+  private readonly config?: ServiceConfig;
+  private readonly stackVersion: string;
+  private readonly server: SyntheticsServerSetup;
+  private readonly retainUnsupportedSince = new Map<string, number>();
+
+  constructor(logger: Logger, config: ServiceConfig, server: SyntheticsServerSetup) {
+    this.config = config;
+    const { username, password } = config ?? {};
+    this.username = username;
+    this.stackVersion = server.stackVersion;
+
+    if (username && password) {
+      this.authorization = 'Basic ' + Buffer.from(`${username}:${password}`).toString('base64');
+    } else {
+      this.authorization = '';
+    }
+
+    this.logger = logger;
+    this.locations = [];
+    this.server = server;
+  }
+
+  private addVersionHeader(req: AxiosRequestConfig) {
+    req.headers = { ...req.headers, 'x-kibana-version': this.stackVersion };
+    return req;
+  }
+
+  async checkAccountAccessStatus() {
+    if (this.authorization || !this.config?.manifestUrl) {
+      // in case username/password is provided, we assume it's always allowed
+      return { allowed: true, signupUrl: null };
+    }
+
+    if (this.locations.length > 0) {
+      // get a url from a random location
+      const url = this.locations[Math.floor(Math.random() * this.locations.length)].url;
+
+      /* url is required for service locations, but omitted for private locations.
+      /* this.locations is only service locations */
+      const httpsAgent = this.getHttpsAgent(url);
+
+      if (httpsAgent) {
+        try {
+          const { data } = await axios(
+            this.addVersionHeader({
+              method: 'GET',
+              url: url + '/allowed',
+              httpsAgent,
+            })
+          );
+
+          const { allowed, signupUrl } = data;
+          return { allowed, signupUrl };
+        } catch (error) {
+          this.logger.error(`Error getting isAllowed status, Error: ${error.message}`, {
+            error: getSanitizedError(error),
+          });
+        }
+      }
+    } else {
+      this.logger.debug(
+        'Failed to fetch isAllowed status. Locations were not fetched from manifest.'
+      );
+    }
+
+    return { allowed: false, signupUrl: null };
+  }
+
+  getHttpsAgent(targetUrl: string) {
+    const parsedTargetUrl = new URL(targetUrl);
+
+    const rejectUnauthorized = parsedTargetUrl.hostname !== 'localhost' || !this.server.isDev;
+    const baseHttpsAgent = new https.Agent({ rejectUnauthorized });
+
+    const config = this.config ?? {};
+
+    // If using basic-auth, ignore certificate configs
+    if (this.authorization) return baseHttpsAgent;
+
+    if (config.tls && config.tls.certificate && config.tls.key) {
+      const tlsConfig = new SslConfig(config.tls);
+
+      return new https.Agent({
+        rejectUnauthorized,
+        cert: tlsConfig.certificate,
+        key: tlsConfig.key,
+      });
+    } else if (!this.server.isDev) {
+      this.logger.warn(
+        'TLS certificate and key are not provided. Falling back to default HTTPS agent.'
+      );
+    }
+
+    return baseHttpsAgent;
+  }
+
+  async inspectMonitors(data: ServiceData) {
+    const monitorsByLocation = this.groupMonitorsByLocation(data);
+
+    return monitorsByLocation.map(({ data: payload }) => payload);
+  }
+
+  async addMonitors(data: ServiceData) {
+    return (await this.sendToLocations('POST', data)).pushErrors;
+  }
+
+  async editMonitors(data: ServiceData) {
+    return (await this.sendToLocations('PUT', data)).pushErrors;
+  }
+
+  async deleteMonitors(data: ServiceData) {
+    return (await this.sendToLocations('DELETE', data)).pushErrors;
+  }
+
+  async runOnce(data: ServiceData) {
+    return (await this.sendToLocations('POST', { ...data, endpoint: 'runOnce' })).pushErrors;
+  }
+
+  async syncMonitors(data: ServiceData) {
+    try {
+      return (await this.sendToLocations('PUT', { ...data, endpoint: 'sync' })).pushErrors;
+    } catch (error) {
+      this.logger.error(`Error syncing Synthetics monitors, Error: ${error.message}`, {
+        error: getSanitizedError(error),
+      });
+    }
+  }
+
+  /** Whether the location's service is expected to accept `PUT /monitors/sync/retain`. */
+  supportsRetain(locationId: string) {
+    const unsupportedSince = this.retainUnsupportedSince.get(locationId);
+    return (
+      unsupportedSince === undefined || Date.now() - unsupportedSince > RETAIN_UNSUPPORTED_RETRY_MS
+    );
+  }
+
+  /**
+   * Keeps monitors the service has already cached alive without resending their configuration.
+   * Resolves with the ids of the monitors that were not retained and need a full sync instead.
+   */
+  async retainMonitors({ monitors, output, license, locationId }: RetainData): Promise<string[]> {
+    const ids = monitors.map(({ id }) => id);
+    if (this.username === TEST_SERVICE_USERNAME || monitors.length === 0) {
+      return [];
+    }
+
+    const location = this.locations.find(({ id }) => id === locationId);
+    if (!location) {
+      this.logger.debug(`Cannot retain monitors at unknown service location ${locationId}`);
+      return ids;
+    }
+
+    const payload: RetainPayload = {
+      monitors: monitors.map(({ id, type }) => ({ id, type })),
+      ...this.buildPayloadEnvelope({ output, license }),
+    };
+
+    try {
+      await this.requestEndpoint(payload, 'PUT', location.url, 'retain');
+      this.retainUnsupportedSince.delete(location.id);
+      this.logger.debug(`Retained ${ids.length} monitors at service location ${location.id}`);
+      return [];
+    } catch (error) {
+      const axiosError = error as AxiosError<{ reason: string; status: number } & RetainErrorBody>;
+      const status = axiosError.response?.status;
+      const failedMonitors = axiosError.response?.data?.failed_monitors;
+
+      // On a 404 the service lists the monitors it had not cached, and on a 5xx those it failed to
+      // retain for another reason; it kept the rest of the batch. Any other status, such as a 400 for
+      // a batch it could not read, retained none of them, and its failures need not name a monitor.
+      if (
+        Array.isArray(failedMonitors) &&
+        (status === 404 || (status ?? 0) >= 500) &&
+        failedMonitors.every((failure): failure is { id: string; message: string } =>
+          Boolean(failure.id)
+        )
+      ) {
+        if (status !== 404) {
+          this.logServiceError(axiosError, location.url, 'PUT', ids.length);
+        }
+        this.retainUnsupportedSince.delete(location.id);
+        this.logger.debug(
+          `${failedMonitors.length} of ${ids.length} monitors were not retained by service location ${location.id}`
+        );
+        return failedMonitors.map(({ id }) => id);
+      }
+
+      // The route is not served at all: an older service that only knows the full sync. A 404 that
+      // lists failures comes from the endpoint itself.
+      if (!Array.isArray(failedMonitors) && (status === 404 || status === 405)) {
+        this.retainUnsupportedSince.set(location.id, Date.now());
+        this.logger.debug(
+          `Service location ${location.id} does not support retaining monitors, falling back to full sync`
+        );
+        return ids;
+      }
+
+      this.logServiceError(axiosError, location.url, 'PUT', ids.length);
+      return ids;
+    }
+  }
+
+  groupMonitorsByLocation({ monitors, location, ...restOfData }: ServiceData) {
+    // group monitors by location
+    const monitorsByLocation: Array<{
+      location: { id: string; url: string };
+      monitors: ServiceData['monitors'];
+      data: ServicePayload;
+    }> = [];
+    this.locations.forEach(({ id, url }) => {
+      if (!location || location.id === id) {
+        const locMonitors = monitors.filter(({ locations }) =>
+          locations?.find((loc) => loc.id === id && loc.isServiceManaged)
+        );
+        if (locMonitors.length > 0) {
+          const data = this.buildPayload({ ...restOfData, monitors: locMonitors });
+          monitorsByLocation.push({ location: { id, url }, monitors: locMonitors, data });
+        }
+      }
+    });
+    return monitorsByLocation;
+  }
+
+  async sendToLocations(method: 'POST' | 'PUT' | 'DELETE', serviceData: ServiceData) {
+    const { endpoint } = serviceData;
+    if (this.username === TEST_SERVICE_USERNAME) {
+      // we don't want to call service while local integration tests are running
+      return { result: [] as ServicePayload[], pushErrors: [] };
+    }
+
+    const pushErrors: ServiceLocationErrors = [];
+    const promises: Array<Observable<unknown>> = [];
+
+    const monitorsByLocation = this.groupMonitorsByLocation(serviceData);
+
+    monitorsByLocation.forEach(({ location: { url, id }, data }) => {
+      const sendRequest = (payload: ServicePayload): Observable<any> => {
+        const promise = this.requestEndpoint(payload, method, url, endpoint);
+        return rxjsFrom(promise).pipe(
+          tap((result) => {
+            this.logSuccessMessage(url, method, payload.monitors.length, result);
+          }),
+          catchError((err: AxiosError<{ reason: string; status: number }>) => {
+            if (err.response?.status === 413 && payload.monitors.length > 1) {
+              // If payload is too large, split it and retry
+              const mid = Math.ceil(payload.monitors.length / 2);
+              const firstHalfMonitors = payload.monitors.slice(0, mid);
+              const secondHalfMonitors = payload.monitors.slice(mid);
+
+              this.logger.debug(
+                `Payload of ${payload.monitors.length} monitors is too large for location ${id}, splitting in half, in chunks of ${mid}`
+              );
+
+              return concat(
+                sendRequest({
+                  ...payload,
+                  monitors: firstHalfMonitors,
+                }), // Retry with the first half
+                sendRequest({
+                  ...payload,
+                  monitors: secondHalfMonitors,
+                }) // Retry with the second half
+              );
+            }
+
+            pushErrors.push({ locationId: id, error: err.response?.data! });
+            this.logServiceError(err, url, method, payload.monitors.length);
+
+            // Return an empty observable to prevent unhandled exceptions
+            return of(true);
+          })
+        );
+      };
+
+      // Start with the initial data payload
+      promises.push(sendRequest(data));
+    });
+
+    const result = await forkJoin(promises).toPromise();
+
+    return { pushErrors, result };
+  }
+
+  async requestEndpoint(
+    data: ServicePayload | RetainPayload,
+    // INSPECT is a special case where we don't want to call the service, but just return the data
+    method: 'POST' | 'PUT' | 'DELETE',
+    baseUrl: string,
+    endpoint: string = 'monitors'
+  ) {
+    let url = baseUrl;
+    switch (endpoint) {
+      case 'monitors':
+        url += '/monitors';
+        break;
+      case 'runOnce':
+        url += '/run';
+        break;
+      case 'sync':
+        url += '/monitors/sync';
+        break;
+      case 'retain':
+        url += '/monitors/sync/retain';
+        break;
+    }
+
+    const authHeader = this.authorization ? { Authorization: this.authorization } : undefined;
+
+    return axios(
+      this.addVersionHeader({
+        method,
+        url,
+        data,
+        headers: authHeader,
+        httpsAgent: this.getHttpsAgent(baseUrl),
+      })
+    );
+  }
+
+  private buildPayload({ monitors, output, isEdit, license }: ServiceData) {
+    // don't need to pass locations to heartbeat
+    const monitorsStreams = monitors.map(({ locations, ...rest }) =>
+      convertToDataStreamFormat(rest)
+    );
+
+    return {
+      monitors: monitorsStreams,
+      is_edit: isEdit,
+      ...this.buildPayloadEnvelope({ output, license }),
+    };
+  }
+
+  private buildPayloadEnvelope({ output, license }: Pick<ServiceData, 'output' | 'license'>) {
+    return {
+      output,
+      stack_version: this.stackVersion,
+      license_level: license.type,
+      license_issued_to: license.issued_to,
+      deployment_id: this.server.cloud?.deploymentId,
+      cloud_id: this.server.cloud?.cloudId,
+    };
+  }
+
+  private isLoggable(result: unknown): result is { status?: any; request?: any } {
+    const objCast = result as object;
+    return Object.keys(objCast).some((k) => k === 'status' || k === 'request');
+  }
+
+  private logSuccessMessage(
+    url: string,
+    method: string,
+    numMonitors: number,
+    result: AxiosResponse<unknown> | ServicePayload
+  ) {
+    if (this.isLoggable(result)) {
+      if (result.data) {
+        this.logger.debug(result.data as any);
+      }
+      this.logger.debug(
+        `Successfully called service location ${url}${result.request?.path} with method ${method} with ${numMonitors} monitors`
+      );
+    }
+  }
+
+  private logServiceError(
+    err: AxiosError<{ reason: string; status: number }>,
+    url: string,
+    method: string,
+    numMonitors: number
+  ) {
+    const reason = err.response?.data?.reason ?? '';
+
+    err.message = `Failed to call service location ${url}${
+      err.request?.path ?? ''
+    } with method ${method} with ${numMonitors} monitors:  ${err.message}, ${reason}`;
+    this.logger.error(err);
+    sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
+      reason: err.response?.data?.reason,
+      message: err.message,
+      type: 'syncError',
+      code: err.code,
+      status: err.response?.data?.status,
+      url,
+      stackVersion: this.server.stackVersion,
+    });
+  }
+}

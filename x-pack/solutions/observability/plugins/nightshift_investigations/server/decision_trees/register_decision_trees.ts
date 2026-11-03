@@ -9,6 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { DecisionTreeTurnKind } from '@kbn/nightshift-decision-trees';
 import {
   DECISION_TREE_AI_INDEX_DEST,
   DECISION_TREE_AI_INDEX_ID,
@@ -65,7 +66,7 @@ export const hydrateDecisionTreeWorkspace = async ({
   spaceId: string;
   prompt?: string;
   signal?: AbortSignal;
-}): Promise<number> => {
+}): Promise<number | { treeCount: number; hydratedIds: string[] }> => {
   const store = createDecisionTreeStore({ esClient, logger, spaceId, signal });
   const accessedTreeIds = parseAccessedTreesMarker(prompt);
   const trees = await materializeDecisionTrees({
@@ -75,15 +76,18 @@ export const hydrateDecisionTreeWorkspace = async ({
     signal,
     ...(accessedTreeIds ? { treeIds: accessedTreeIds } : {}),
   });
-  return trees.length;
+  return {
+    treeCount: trees.length,
+    hydratedIds: trees.map((tree) => tree.tree_id),
+  };
 };
 
 /**
- * Builds the reinforcement agent's message for a completed investigation round: the transcript,
- * the trees it may edit, the learnings already on file, and the turn script for this phase.
+ * Builds the closing message for a completed investigation round: the trees the agent may edit,
+ * the learnings already on file, and the turn script for this phase. The round itself is handed
+ * to the agent separately, as conversation history.
  */
 export const prepareReinforcementTurn = async ({
-  prompt,
   response,
   connectorNames,
   esClient,
@@ -92,7 +96,6 @@ export const prepareReinforcementTurn = async ({
   signal,
   toolCalls = [],
 }: {
-  prompt: string;
   response: string;
   connectorNames: string[];
   esClient: ElasticsearchClient;
@@ -100,7 +103,12 @@ export const prepareReinforcementTurn = async ({
   spaceId: string;
   signal?: AbortSignal;
   toolCalls?: InvestigationToolCall[];
-}): Promise<{ message: string; treeCount: number }> => {
+}): Promise<{
+  message: string;
+  treeCount: number;
+  turnKind: DecisionTreeTurnKind;
+  openedTreeIds?: string[];
+}> => {
   const [trees, learnings] = await Promise.all([
     createDecisionTreeStore({ esClient, logger, spaceId, signal }).list(),
     createLearningStore({ esClient, logger, spaceId, signal }).list(),
@@ -110,17 +118,16 @@ export const prepareReinforcementTurn = async ({
   const accessed = trees.filter(
     (tree) => tree.status !== 'archived' && accessedIds.has(tree.tree_id)
   );
+  const { message, turnKind } = buildReinforcementPrompt({
+    trees: accessed,
+    learnings,
+    connectorNames,
+    response,
+  });
   return {
-    message: [
-      embedAccessedTreesMarker(accessed.map((tree) => tree.tree_id)),
-      buildReinforcementPrompt({
-        trees: accessed,
-        learnings,
-        connectorNames,
-        prompt,
-        response,
-      }),
-    ].join('\n'),
+    message: [embedAccessedTreesMarker(accessed.map((tree) => tree.tree_id)), message].join('\n'),
     treeCount: accessed.length,
+    turnKind,
+    openedTreeIds: accessed.map((tree) => tree.tree_id),
   };
 };

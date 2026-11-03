@@ -436,6 +436,7 @@ describe('WorkflowExecutionDetail', () => {
 
       // The component should render without errors when finding child step
       expect(screen.getByTestId('step-details')).toBeInTheDocument();
+      expect(mockStepExecutionDetailsProps.current.resumeExecutionId).toBe('child-exec-1');
     });
   });
 

@@ -26,3 +26,11 @@ export {
   EmbeddableProfilingSearchBar,
   type EmbeddableProfilingSearchBarProps,
 } from './embeddable_profiling_search_bar';
+
+/** Profiling schema selector embeddable key */
+export const EMBEDDABLE_PROFILING_SCHEMA_SELECTOR = 'EMBEDDABLE_PROFILING_SCHEMA_SELECTOR';
+/** Profiling schema selector embeddable */
+export {
+  EmbeddableProfilingSchemaSelector,
+  type EmbeddableProfilingSchemaSelectorProps,
+} from './embeddable_profiling_schema_selector';

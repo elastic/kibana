@@ -19,7 +19,7 @@ test.describe(
   'Stream data routing - reordering routing rules',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
+    test.beforeEach(async ({ apiServices, browserAuth, page, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       // Clear existing rules
       await apiServices.streams.clearStreamChildren('logs.otel');
@@ -32,7 +32,10 @@ test.describe(
         });
       }
 
-      await pageObjects.streams.gotoPartitioningTab('logs.otel');
+      await pageObjects.streams.gotoPartitioningTab('logs.otel', {
+        // A cold Cloud bootstrap can outlast Playwright's navigation timeout.
+        readyWhen: page.getByTestId('routingRuleDragHandle-logs.otel.first'),
+      });
     });
 
     test.afterAll(async ({ apiServices }) => {

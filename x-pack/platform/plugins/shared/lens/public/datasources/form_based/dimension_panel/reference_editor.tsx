@@ -254,6 +254,9 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
               compressed
               isClearable={false}
               data-test-subj="indexPattern-reference-function"
+              // Functional tests wait on the committed sub-function label, not the input value
+              // (setElement types the filter before the option click lands).
+              data-selected-function={selectedOption[0]?.label}
               placeholder={functionPlaceholder}
               options={functionOptions}
               isInvalid={showOperationInvalid || showSelectionFunctionInvalid}

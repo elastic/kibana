@@ -6,19 +6,19 @@
  */
 
 import { startInvestigationRoute } from './start_investigation';
-import { getInvestigationRoute } from './get_investigation';
 import { emitLifecycleEventRoute } from './emit_lifecycle_event';
 import { ensureInvestigationRoute } from './ensure_investigation';
-import { listInvestigationsRoute } from './list_investigations';
-import { updateInvestigationRoute } from './update_investigation';
-import { followInvestigationRoute } from './follow_investigation';
+import { findOrCreateSlackThreadInvestigationRoute } from './find_or_create_slack_thread_investigation';
 import { getInvestigationAvailabilityRoute } from './get_investigation_availability';
 import { listCortexPagesRoute } from './list_cortex_pages';
 import { getCortexPageRoute } from './get_cortex_page';
 import { createCortexPageRoute, updateCortexPageRoute } from './write_cortex_page';
 import { archiveCortexPageRoute } from './archive_cortex_page';
 import { getCortexAvailabilityRoute } from './get_cortex_availability';
-import { sandboxSecretsRoutes } from './sandbox_secrets';
+import { getSandboxConnectorsRoute } from './get_sandbox_connectors';
+import { getSandboxConnectorTypesRoute } from './get_sandbox_connector_types';
+import { customContextRoutes } from './custom_context';
+import { onboardingRoutes } from './onboarding';
 import { getDecisionTreesAvailabilityRoute } from './get_decision_trees_availability';
 import { listDecisionTreesRoute } from './list_decision_trees';
 import { getDecisionTreeRoute } from './get_decision_tree';
@@ -32,15 +32,24 @@ import {
   deleteAutomationRoute,
   listAutomationRunsRoute,
 } from './automations';
+import { getMemoryAvailabilityRoute } from './get_memory_availability';
+import { listMemoryPagesRoute } from './list_memory_pages';
+import { getMemoryPageRoute } from './get_memory_page';
+import { archiveMemoryPageRoute } from './archive_memory_page';
+import { deleteMemoryPageRoute } from './delete_memory_page';
+import { getMemoryLineageRoute } from './get_memory_lineage';
+import {
+  disableInvestigatorServiceAccountRoute,
+  enableInvestigatorServiceAccountRoute,
+  getInvestigatorServiceAccountRoute,
+} from './investigator_service_account';
+import { previewKnowledgePurgeRoute, purgeKnowledgeRoute } from './purge_knowledge';
 
 export const nightshiftInvestigationsRouteRepository = {
   ...startInvestigationRoute,
-  ...getInvestigationRoute,
   ...emitLifecycleEventRoute,
   ...ensureInvestigationRoute,
-  ...listInvestigationsRoute,
-  ...updateInvestigationRoute,
-  ...followInvestigationRoute,
+  ...findOrCreateSlackThreadInvestigationRoute,
   ...getInvestigationAvailabilityRoute,
   ...listCortexPagesRoute,
   ...getCortexPageRoute,
@@ -48,7 +57,10 @@ export const nightshiftInvestigationsRouteRepository = {
   ...updateCortexPageRoute,
   ...archiveCortexPageRoute,
   ...getCortexAvailabilityRoute,
-  ...sandboxSecretsRoutes,
+  ...getSandboxConnectorsRoute,
+  ...getSandboxConnectorTypesRoute,
+  ...customContextRoutes,
+  ...onboardingRoutes,
   ...getDecisionTreesAvailabilityRoute,
   ...listDecisionTreesRoute,
   ...getDecisionTreeRoute,
@@ -60,6 +72,17 @@ export const nightshiftInvestigationsRouteRepository = {
   ...updateAutomationRoute,
   ...deleteAutomationRoute,
   ...listAutomationRunsRoute,
+  ...getMemoryAvailabilityRoute,
+  ...listMemoryPagesRoute,
+  ...getMemoryPageRoute,
+  ...archiveMemoryPageRoute,
+  ...deleteMemoryPageRoute,
+  ...getMemoryLineageRoute,
+  ...getInvestigatorServiceAccountRoute,
+  ...enableInvestigatorServiceAccountRoute,
+  ...disableInvestigatorServiceAccountRoute,
+  ...previewKnowledgePurgeRoute,
+  ...purgeKnowledgeRoute,
 };
 
 export type NightshiftInvestigationsRouteRepository =

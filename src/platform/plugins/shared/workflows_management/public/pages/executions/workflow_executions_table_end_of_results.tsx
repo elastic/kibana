@@ -33,7 +33,7 @@ export const WorkflowExecutionsTableEndOfResults =
           <EuiFlexItem grow={false}>
             <EuiText size="xs">
               <FormattedMessage
-                id="workflowsManagement.executionsPage.table.endOfResults"
+                id="workflows.executionsPage.table.endOfResults"
                 defaultMessage="You've reached the first {maxResults} executions. {timeRangeLink} to see older executions."
                 values={{
                   maxResults: WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW.toLocaleString(),
@@ -43,7 +43,7 @@ export const WorkflowExecutionsTableEndOfResults =
                       data-test-subj="executionsTableNarrowTimeRange"
                     >
                       <FormattedMessage
-                        id="workflowsManagement.executionsPage.table.narrowTimeRange"
+                        id="workflows.executionsPage.table.narrowTimeRange"
                         defaultMessage="Narrow the time range"
                       />
                     </EuiLink>

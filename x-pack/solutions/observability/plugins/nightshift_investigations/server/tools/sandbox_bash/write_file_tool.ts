@@ -42,7 +42,7 @@ export const createSandboxWriteFileTool = ({
   id: SANDBOX_WRITE_FILE_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Write (overwrite) a file in the sandbox. Parent directories are created automatically. Use sandbox_str_replace for partial edits; use this tool for new files or complete rewrites.',
+    'Write (overwrite) a file in the sandbox. Parent directories are created automatically. Use nightshift_sandbox_str_replace for partial edits; use this tool for new files or complete rewrites.',
   tags: ['sandbox', 'file'],
   schema: writeFileSchema,
   annotations: {

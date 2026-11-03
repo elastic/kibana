@@ -209,6 +209,61 @@ describe('FlyoutTemplate', () => {
     });
   });
 
+  it('names the flyout menu from a string header title', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Service inventory" />
+        <FlyoutTemplate.Body>
+          <span>body content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(forwardedProps().flyoutMenuProps).toEqual({ title: 'Service inventory' });
+  });
+
+  it('names the flyout menu from titleText when the header title is a node', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header
+          title={<a href="#service">opbeans-java</a>}
+          titleText="opbeans-java"
+        />
+        <FlyoutTemplate.Body>
+          <span>body content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(forwardedProps().flyoutMenuProps).toEqual({ title: 'opbeans-java' });
+  });
+
+  it('leaves the flyout menu unnamed when a node title has no titleText', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title={<a href="#service">opbeans-java</a>} />
+        <FlyoutTemplate.Body>
+          <span>body content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(forwardedProps().flyoutMenuProps).toBeUndefined();
+  });
+
+  it('lets an explicit flyoutMenuProps title win over titleText', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never" flyoutMenuProps={{ title: 'Chosen' }}>
+        <FlyoutTemplate.Header title={<span>opbeans-java</span>} titleText="opbeans-java" />
+        <FlyoutTemplate.Body>
+          <span>body content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(forwardedProps().flyoutMenuProps).toEqual({ title: 'Chosen' });
+  });
+
   it('keeps flyoutMenuDisplayMode template-owned', () => {
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never">
@@ -219,6 +274,19 @@ describe('FlyoutTemplate', () => {
     );
 
     expect(forwardedProps().flyoutMenuDisplayMode).toBe('auto');
+  });
+
+  it('keeps paddingSize template-owned', () => {
+    renderTemplate(
+      // @ts-expect-error paddingSize is not a root prop
+      <FlyoutTemplate onClose={noop} session="never" paddingSize="l">
+        <FlyoutTemplate.Body>
+          <span>body content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(forwardedProps().paddingSize).toBe('m');
   });
 
   it('does not forward the template-owned tab props to EuiFlyout', () => {

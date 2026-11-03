@@ -11,6 +11,7 @@ import {
   ABSOLUTE_MAX_CASES_PER_RUN,
 } from '../../../common/constants';
 import {
+  CasesConnectorRuleActionParamsSchema,
   CasesConnectorRunParamsSchema,
   resolveCasesConnectorActionSource,
   ZCasesConnectorRunParamsSchema,
@@ -250,6 +251,35 @@ describe('CasesConnectorRunParamsSchema', () => {
     });
   });
 
+  describe('extractObservables', () => {
+    it('defaults to undefined when omitted', () => {
+      expect(
+        CasesConnectorRunParamsSchema.validate(getParams()).extractObservables
+      ).toBeUndefined();
+    });
+
+    it('accepts extractObservables as true', () => {
+      expect(
+        CasesConnectorRunParamsSchema.validate(getParams({ extractObservables: true }))
+          .extractObservables
+      ).toBe(true);
+    });
+
+    it('accepts extractObservables as false', () => {
+      expect(
+        CasesConnectorRunParamsSchema.validate(getParams({ extractObservables: false }))
+          .extractObservables
+      ).toBe(false);
+    });
+
+    it('accepts extractObservables as null', () => {
+      expect(
+        CasesConnectorRunParamsSchema.validate(getParams({ extractObservables: null }))
+          .extractObservables
+      ).toBe(null);
+    });
+  });
+
   describe('groupedAlerts', () => {
     it('defaults the groupedAlerts to null', () => {
       expect(CasesConnectorRunParamsSchema.validate(getParams()).groupedAlerts).toBe(null);
@@ -407,6 +437,44 @@ describe('CasesConnectorRunParamsSchema', () => {
       expect(() =>
         ZCasesConnectorRunParamsSchema.parse({ ...rest, internallyManagedAlerts: true })
       ).not.toThrow();
+    });
+
+    it.each([true, false, null])('accepts an extractObservables of %s', (extractObservables) => {
+      expect(
+        ZCasesConnectorRunParamsSchema.parse(getParams({ extractObservables })).extractObservables
+      ).toBe(extractObservables);
+    });
+
+    it('accepts a payload that omits extractObservables', () => {
+      expect(ZCasesConnectorRunParamsSchema.parse(getParams()).extractObservables).toBeUndefined();
+    });
+  });
+
+  describe('CasesConnectorRuleActionParamsSchema', () => {
+    const getRuleActionParams = (overrides = {}) => ({
+      subAction: 'run' as const,
+      subActionParams: {
+        groupingBy: [],
+        reopenClosedCases: false,
+        timeWindow: '7d',
+        templateId: null,
+        templateVersion: null,
+        ...overrides,
+      },
+    });
+
+    it.each([true, false, null])('accepts an extractObservables of %s', (extractObservables) => {
+      expect(
+        CasesConnectorRuleActionParamsSchema.validate(getRuleActionParams({ extractObservables }))
+          .subActionParams.extractObservables
+      ).toBe(extractObservables);
+    });
+
+    it('accepts params saved before the field existed', () => {
+      expect(
+        CasesConnectorRuleActionParamsSchema.validate(getRuleActionParams()).subActionParams
+          .extractObservables
+      ).toBeUndefined();
     });
   });
 

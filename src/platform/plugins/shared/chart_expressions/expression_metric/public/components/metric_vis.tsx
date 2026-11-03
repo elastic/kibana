@@ -33,6 +33,7 @@ import type {
 } from '@kbn/expressions-plugin/common';
 import type { TextContextTypeConvert } from '@kbn/field-formats-plugin/common';
 
+import { resolveVisIcon } from '@kbn/chart-icons';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import type { MetricVisParam, VisParams } from '../../common';
 import { getThemeService, getFormatService } from '../services';
@@ -60,7 +61,7 @@ const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) =
 const getIcon =
   (type: string) =>
   ({ width, height, color }: { width: number; height: number; color: string }) =>
-    <EuiIcon type={type} fill={color} css={{ width, height }} aria-hidden="true" />;
+    <EuiIcon type={resolveVisIcon(type)} fill={color} css={{ width, height }} aria-hidden="true" />;
 
 const SecondaryMetricLabelTooltip: NonNullable<SecondaryMetricProps['labelTooltip']> = ({
   children,
@@ -208,8 +209,10 @@ export const MetricVis = ({
       : primaryMetricColumn.name;
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
 
+    // Only finite numeric values can use palette bounds: the NaN fallback for empty results
+    // has no backing data row, so resolving its maximum dimension would throw.
     const paletteColor =
-      config.metric.palette?.params && typeof value === 'number'
+      config.metric.palette?.params && typeof value === 'number' && Number.isFinite(value)
         ? getColor(
             value,
             config.metric.palette,

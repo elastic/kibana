@@ -55,7 +55,14 @@ export const resolveAiIndexCatalog = async ({
   return ids.map((id) => {
     const resolved = resolvedById.get(id);
     return resolved
-      ? { id, esqlTarget: resolved.esqlTarget, description: resolved.description }
+      ? {
+          id,
+          esqlTarget: resolved.esqlTarget,
+          description: resolved.description,
+          ...(resolved.memoryEnabled !== undefined
+            ? { memoryEnabled: resolved.memoryEnabled }
+            : {}),
+        }
       : { id };
   });
 };

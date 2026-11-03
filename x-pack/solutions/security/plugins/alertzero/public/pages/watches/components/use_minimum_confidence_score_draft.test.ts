@@ -32,7 +32,7 @@ describe('useMinimumConfidenceScoreDraft', () => {
     expect(result.current.draft).toBe(100);
   });
 
-  it('persists once on blur, not per keystroke', () => {
+  it('publishes each valid keystroke and does not publish again on blur', () => {
     const onChange = jest.fn();
     const { result } = renderHook(() =>
       useMinimumConfidenceScoreDraft({ current: 0.85, onChange })
@@ -41,12 +41,11 @@ describe('useMinimumConfidenceScoreDraft', () => {
     act(() => result.current.onValueChange(changeEvent('9')));
     act(() => result.current.onValueChange(changeEvent('90')));
 
-    expect(onChange).not.toHaveBeenCalled();
+    expect(onChange.mock.calls).toEqual([[0.09], [0.9]]);
 
     act(() => result.current.onBlur());
 
-    expect(onChange).toHaveBeenCalledTimes(1);
-    expect(onChange).toHaveBeenCalledWith(0.9);
+    expect(onChange).toHaveBeenCalledTimes(2);
   });
 
   it('does not persist when blurred on the unchanged value', () => {
@@ -113,12 +112,13 @@ describe('useMinimumConfidenceScoreDraft', () => {
     expect(result.current.draft).toBe(70);
   });
 
-  it('clearing the field and blurring restores the last persisted value instead of writing 0', () => {
+  it('clearing the field and blurring restores the pre-edit value instead of writing 0', () => {
     const onChange = jest.fn();
     const { result } = renderHook(() =>
       useMinimumConfidenceScoreDraft({ current: 0.85, onChange })
     );
 
+    act(() => result.current.onFocus());
     act(() => result.current.onValueChange(changeEvent('')));
     expect(result.current.draft).toBe('');
 
@@ -128,7 +128,22 @@ describe('useMinimumConfidenceScoreDraft', () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
-  it('clearing, typing a new value, then blurring persists the typed value (not 0)', () => {
+  it('restores and re-emits the pre-edit value when a typed value is cleared before blur', () => {
+    const onChange = jest.fn();
+    const { result } = renderHook(() =>
+      useMinimumConfidenceScoreDraft({ current: 0.85, onChange })
+    );
+
+    act(() => result.current.onFocus());
+    act(() => result.current.onValueChange(changeEvent('9')));
+    act(() => result.current.onValueChange(changeEvent('')));
+    act(() => result.current.onBlur());
+
+    expect(result.current.draft).toBe(85);
+    expect(onChange.mock.calls).toEqual([[0.09], [0.85]]);
+  });
+
+  it('clearing then typing a new value publishes only the typed values (never 0)', () => {
     const onChange = jest.fn();
     const { result } = renderHook(() =>
       useMinimumConfidenceScoreDraft({ current: 0.85, onChange })
@@ -137,10 +152,12 @@ describe('useMinimumConfidenceScoreDraft', () => {
     act(() => result.current.onValueChange(changeEvent('')));
     act(() => result.current.onValueChange(changeEvent('9')));
     act(() => result.current.onValueChange(changeEvent('90')));
+    expect(onChange.mock.calls).toEqual([[0.09], [0.9]]);
+
     act(() => result.current.onBlur());
 
-    expect(onChange).toHaveBeenCalledTimes(1);
-    expect(onChange).toHaveBeenCalledWith(0.9);
+    expect(onChange).toHaveBeenCalledTimes(2);
+    expect(onChange).not.toHaveBeenCalledWith(0);
   });
 
   it('does not fire onChange again after a server echo of the same value', () => {
@@ -161,5 +178,23 @@ describe('useMinimumConfidenceScoreDraft', () => {
 
     // No second persist triggered by the echo.
     expect(onChange).toHaveBeenCalledTimes(1);
+  });
+
+  it('restores a value updated from outside while focused, not the value at focus', () => {
+    const onChange = jest.fn();
+    const { result, rerender } = renderHook(
+      (props: { current: number }) =>
+        useMinimumConfidenceScoreDraft({ current: props.current, onChange }),
+      { initialProps: { current: 0.85 } }
+    );
+
+    act(() => result.current.onFocus());
+    // A reload brings in a newer saved value while the field keeps focus.
+    rerender({ current: 0.7 });
+    act(() => result.current.onValueChange(changeEvent('')));
+    act(() => result.current.onBlur());
+
+    expect(result.current.draft).toBe(70);
+    expect(onChange).not.toHaveBeenCalled();
   });
 });

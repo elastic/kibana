@@ -26,6 +26,8 @@ value:
       tags:
         - Template tag 1
   extractObservables: true
+  workflowTags:
+    - soc-triage
   owner: cases
   created_at: 2024-07-01T17:07:17.767Z
   created_by:

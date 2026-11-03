@@ -7,26 +7,15 @@
 
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
-import { EuiModal, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
-import type { ApprovalAction, DeclineParams } from './approval_content';
+import { EuiModal, useGeneratedHtmlId } from '@elastic/eui';
+import type { IBasePath } from '@kbn/core-http-browser';
 import { ApprovalContent } from './approval_content';
-import {
-  getProposalCaption,
-  getProposalDecision,
-  getProposalTone,
-  isProposalExpired,
-} from './proposal_helpers';
-import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
-import type { ApprovalProposal } from './types';
+import type { DeclineParams, AlwaysAllowOption, ApprovalProposal } from './types';
 
 export interface ApprovalModalProps {
+  /** Disables the Approve/Decline actions without hiding them, so a reopened decided-or-expired-looking proposal still reads the same. */
   readOnly?: boolean;
-  alwaysAllow?: {
-    id: string;
-    label: React.ReactNode;
-    checked: boolean;
-    onChange: (checked: boolean) => void;
-  };
+  alwaysAllow?: AlwaysAllowOption;
   proposal: ApprovalProposal;
   onConfirm: () => Promise<void>;
   onClose: () => void;
@@ -45,17 +34,23 @@ export interface ApprovalModalProps {
    * reopened mid-submission.
    */
   isSubmitting?: 'applying' | 'declining';
-  /** Who's approving, for the "Applying"/"Declining" caption before the server confirms a decider. */
+  /** Who's approving, for the "Applying"/"Declining" banner before the server confirms a decider. */
   currentActorName?: string;
+  /** See `ApprovalContentProps.onReopen`. */
+  onReopen?: () => Promise<void>;
+  isReopening?: boolean;
+  /** See `ApprovalContentProps.basePath`. */
+  basePath?: IBasePath;
   'data-test-subj'?: string;
 }
 
 /**
  * Asks for a decision on one proposal.
  *
- * Takes the proposal rather than something adapted from it: the title, tone and expiry all come
- * off the proposal, so this modal and the Agent Builder card derive them the same way instead of
- * from whatever each host happened to keep.
+ * Takes the proposal rather than something adapted from it, and forwards it straight to
+ * `ApprovalContent`: title, tone, caption, decision and expiry are all derived there, the same
+ * way for this modal and for the Agent Builder chat card, instead of each host deriving them
+ * itself.
  *
  * Declining is `ApprovalContent`'s own built-in flow — this modal just forwards `onDismiss` and
  * lets it swap its body and footer in place, rather than closing this modal and opening a second
@@ -72,41 +67,33 @@ export const ApprovalModal = memo<ApprovalModalProps>(
     onDismiss,
     isSubmitting,
     currentActorName,
+    onReopen,
+    isReopening,
+    basePath,
     'data-test-subj': dataTestSubj,
   }) => {
-    const { euiTheme } = useEuiTheme();
-    const titleId = useGeneratedHtmlId({ prefix: 'approvalModalHeader' });
-
-    const { title } = proposal;
-    const isExpired = isProposalExpired(proposal);
-
-    const primaryAction: ApprovalAction = {
-      label: APPROVAL_MODAL_TRANSLATIONS.approve,
-      onClick: onConfirm,
-      isDisabled: isExpired || readOnly,
-      'data-test-subj': dataTestSubj ? `${dataTestSubj}-confirm` : undefined,
-    };
+    const titleId = useGeneratedHtmlId({ prefix: 'ApprovalModal' });
 
     return (
       <EuiModal
         aria-labelledby={titleId}
         onClose={onClose}
-        css={css({ maxWidth: 640, width: '100%', borderRadius: euiTheme.size.xs })}
+        css={css({ maxWidth: 640, width: '100%' })}
         data-test-subj={dataTestSubj}
       >
         <ApprovalContent
-          title={title}
-          tone={getProposalTone(proposal)}
-          comment={proposal.comment}
+          proposal={proposal}
           titleId={titleId}
-          caption={getProposalCaption(proposal, { includeRiskDetails: true })}
-          decision={getProposalDecision(proposal)}
           isSubmitting={isSubmitting}
           currentActorName={currentActorName}
           alwaysAllow={alwaysAllow}
+          readOnly={readOnly}
           data-test-subj={dataTestSubj}
-          primaryAction={primaryAction}
+          onApprove={onConfirm}
           onDismiss={onDismiss}
+          onReopen={onReopen}
+          isReopening={isReopening}
+          basePath={basePath}
         />
       </EuiModal>
     );

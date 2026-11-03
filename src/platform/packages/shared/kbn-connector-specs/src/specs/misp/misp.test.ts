@@ -296,4 +296,34 @@ describe('Misp', () => {
       );
     });
   });
+
+  describe('checkWarninglist input bounds', () => {
+    it.each([
+      [1000, true],
+      [1001, false],
+    ])('%d values valid=%s', (count, expected) => {
+      const values = Array.from(
+        { length: count },
+        (_, i) => `10.0.${Math.floor(i / 256)}.${i % 256}`
+      );
+      expect(Misp.actions.checkWarninglist.input.safeParse({ values }).success).toBe(expected);
+    });
+  });
+
+  describe('attribute value length', () => {
+    const { actions } = Misp;
+    const inputs: Array<[string, (value: string) => Record<string, unknown>]> = [
+      ['searchAttributes', (value) => ({ value })],
+      ['searchEvents', (value) => ({ value })],
+      ['checkIndicator', (value) => ({ value })],
+      ['addSighting', (value) => ({ value })],
+      ['checkWarninglist', (value) => ({ values: [value] })],
+      ['addAttribute', (value) => ({ eventId: '1', type: 'text', value })],
+    ];
+
+    it.each(inputs)('%s accepts values up to the 65,535-character TEXT column', (action, build) => {
+      expect(actions[action].input.safeParse(build('a'.repeat(65_535))).success).toBe(true);
+      expect(actions[action].input.safeParse(build('a'.repeat(65_536))).success).toBe(false);
+    });
+  });
 });

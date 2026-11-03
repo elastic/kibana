@@ -372,6 +372,7 @@ export interface StandardOptionRenderProps {
   count?: number;
   /** Whether the filter is active. */
   isActive: boolean;
+  'data-test-subj'?: string;
 }
 
 /**
@@ -380,9 +381,19 @@ export interface StandardOptionRenderProps {
  * Include/exclude is handled by `SelectableFilterPopover`'s modifier key
  * tracking — no click handler is needed on individual options.
  */
-export const StandardFilterOption = ({ children, count, isActive }: StandardOptionRenderProps) => {
+export const StandardFilterOption = ({
+  children,
+  count,
+  isActive,
+  'data-test-subj': dataTestSubj,
+}: StandardOptionRenderProps) => {
   return (
-    <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
+    <EuiFlexGroup
+      gutterSize="s"
+      justifyContent="spaceBetween"
+      alignItems="center"
+      data-test-subj={dataTestSubj}
+    >
       <EuiFlexItem grow={false}>{children}</EuiFlexItem>
       {count !== undefined && (
         <EuiFlexItem grow={false}>
