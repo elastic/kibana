@@ -12,6 +12,7 @@ import type { Locator } from 'playwright/test';
 import type { ScoutPage } from '..';
 
 const POPOVER_OPEN_TIMEOUT = 2_000;
+const MENU_SETTLE_TIMEOUT = 2_000;
 
 /**
  * Shared page object for the AppHeader action menu.
@@ -96,6 +97,15 @@ export class AppMenu {
   async hasItem(item: Locator | string): Promise<boolean> {
     const locator = this.toLocator(item);
     await this.loadingSkeleton.waitFor({ state: 'hidden', timeout: 30_000 });
+
+    // `isVisible()` does not wait, and the menu re-renders after view/edit mode
+    // switches. Give the item or the overflow button a chance to appear before
+    // concluding the item is absent.
+    await Promise.race([
+      locator.waitFor({ state: 'visible', timeout: MENU_SETTLE_TIMEOUT }),
+      this.overflowButton.waitFor({ state: 'visible', timeout: MENU_SETTLE_TIMEOUT }),
+    ]).catch(() => {});
+
     if (await locator.isVisible()) {
       return true;
     }

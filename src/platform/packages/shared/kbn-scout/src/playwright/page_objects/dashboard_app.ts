@@ -1144,14 +1144,16 @@ export class DashboardApp {
     // The dashboard sometimes flags spurious unsaved changes on initial layout,
     // which triggers a continuous toolbar re-render that nudges the popover by a
     // pixel each frame and defeats Playwright's stability check. The menu item
-    // is visibly clickable, so bypass actionability and retry until the modal opens.
+    // is visibly clickable, so bypass actionability and retry only the click.
+    // The modal wait stays outside the retry: once the click lands, the menu is
+    // closed and a retry would try to click the toolbar behind a loading modal.
     await expect(async () => {
       if (!(await this.interactiveSaveMenuItem.isVisible())) {
         await this.quickSaveSecondaryButton.click();
       }
       await this.interactiveSaveMenuItem.click({ force: true, timeout: 2_000 });
-      await expect(this.savedObjectTitleInput).toBeVisible({ timeout: 3_000 });
     }).toPass({ timeout: 20_000 });
+    await expect(this.savedObjectTitleInput).toBeVisible();
 
     if (dashboardTitle !== undefined) {
       await this.savedObjectTitleInput.fill(dashboardTitle);
