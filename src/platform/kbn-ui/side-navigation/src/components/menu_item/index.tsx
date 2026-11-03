@@ -16,6 +16,7 @@ import { css } from '@emotion/react';
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 import { NewItemIndicator } from '../new_item_indicator';
+import { ShortcutBadge } from '../shortcut_badge';
 
 interface MenuItemBaseProps {
   children: ReactNode;
@@ -27,6 +28,7 @@ interface MenuItemBaseProps {
   isLabelVisible?: boolean;
   isNew?: boolean;
   isTruncated?: boolean;
+  shortcutNumber?: number;
 }
 
 type MenuItemAnchorRestProps = Omit<
@@ -60,6 +62,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       isLabelVisible = true,
       isNew = false,
       isTruncated = true,
+      shortcutNumber,
       ...props
     },
     ref
@@ -165,6 +168,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
             <EuiIcon aria-hidden color="currentColor" type={iconType || 'empty'} />
           </Suspense>
           {isNew && <NewItemIndicator isHighlighted={isHighlighted} />}
+          {typeof shortcutNumber === 'number' && <ShortcutBadge number={shortcutNumber} />}
         </div>
         {isLabelVisible ? (
           <EuiText textAlign="center" css={labelStyles}>
