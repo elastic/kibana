@@ -11,9 +11,10 @@ import Fs from 'fs';
 import Path from 'path';
 import { chromium } from '@playwright/test';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { formatBytes } from '@kbn/es';
 import type { CheckResult, DoctorCheck } from '../types';
 import { fail, pass, warn } from '../types';
-import { braces, formatBytes, getSize, removePaths, tildify } from '../utils';
+import { braces, getSize, removePaths, tildify } from '../utils';
 
 const CHROMIUM_DIR_REGEX = /^(chromium|chromium_headless_shell)-(\d+)$/;
 

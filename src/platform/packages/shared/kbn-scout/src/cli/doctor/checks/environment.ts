@@ -10,9 +10,10 @@
 import Fs from 'fs';
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { formatBytes } from '@kbn/es';
 import type { DoctorCheck } from '../types';
 import { fail, pass, warn } from '../types';
-import { formatAge, formatBytes } from '../utils';
+import { formatAge } from '../utils';
 
 const MIN_FREE_DISK_SPACE = 20 * 1024 ** 3;
 

@@ -30,11 +30,12 @@ export const qafChecks: DoctorCheck[] = [
         return pass(`QAF ${version} · qaf doctor passed`);
       }
 
-      return fail(`QAF ${version} · qaf doctor failed: ${failed.join(', ')}`, {
-        ...(output.includes('Treatment:')
+      return fail(
+        `QAF ${version} · qaf doctor failed: ${failed.join(', ')}`,
+        output.includes('Treatment:')
           ? { fix: { command: 'qaf doctor --treat' } }
-          : { hint: 'run qaf doctor for details' }),
-      });
+          : { hint: 'run qaf doctor for details' }
+      );
     },
   },
 ];

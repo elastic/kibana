@@ -11,9 +11,6 @@ import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
 import execa from 'execa';
-import { formatBytes } from '@kbn/es';
-
-export { formatBytes };
 
 export const formatAge = (date: Date): string => {
   const hours = Math.floor((Date.now() - date.getTime()) / 3_600_000);
@@ -42,11 +39,9 @@ export const tryExec = async (file: string, args: string[]): Promise<string | un
   }
 };
 
-/** Shortens a path for display, e.g. /Users/me/Library -> ~/Library */
 export const tildify = (path: string): string =>
   path.startsWith(Os.homedir()) ? `~${path.slice(Os.homedir().length)}` : path;
 
-/** Shell brace expansion for display, e.g. {a,b} or just a */
 export const braces = (items: string[]): string =>
   items.length > 1 ? `{${items.join(',')}}` : items[0];
 
@@ -54,7 +49,6 @@ export const removePaths = async (paths: string[]) => {
   await Promise.all(paths.map((path) => Fs.promises.rm(path, { recursive: true, force: true })));
 };
 
-/** PIDs of running `node scripts/scout start-server` processes */
 export const getScoutServerPids = async () => {
   const output = await tryExec('ps', ['-ax', '-o', 'pid=,command=']);
   return (output ?? '').split('\n').flatMap((line) => {

@@ -9,16 +9,13 @@
 
 import Fs from 'fs';
 import Path from 'path';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { getSnapshotCacheFilename } from '@kbn/es';
+import { REPO_ROOT, kibanaPackageJson } from '@kbn/repo-info';
+import { formatBytes, getSnapshotCacheFilename } from '@kbn/es';
 import type { DoctorCheck } from '../types';
 import { pass, warn } from '../types';
-import { braces, formatAge, formatBytes, removePaths } from '../utils';
+import { braces, formatAge, removePaths } from '../utils';
 
 const CACHE_DIR = Path.resolve(REPO_ROOT, '.es/cache');
-
-const getKibanaVersion = async (): Promise<string> =>
-  JSON.parse(await Fs.promises.readFile(Path.resolve(REPO_ROOT, 'package.json'), 'utf8')).version;
 
 const readCacheDir = async () =>
   (await Fs.promises.readdir(CACHE_DIR).catch(() => [])).filter(
@@ -30,7 +27,7 @@ export const esSnapshotChecks: DoctorCheck[] = [
     title: 'Cached snapshot',
     arch: 'stateful',
     run: async () => {
-      const version = await getKibanaVersion();
+      const { version } = kibanaPackageJson;
       const filename = getSnapshotCacheFilename(version);
       const path = Path.join(CACHE_DIR, filename);
       const stats = await Fs.promises.stat(path).catch(() => undefined);
@@ -40,7 +37,6 @@ export const esSnapshotChecks: DoctorCheck[] = [
         });
       }
 
-      // kbn-es stores the download time next to the archive
       const meta = await Fs.promises.readFile(`${path}.meta`, 'utf8').catch(() => undefined);
       const downloadedAt = meta ? new Date(JSON.parse(meta).ts) : stats.mtime;
       return pass(
@@ -54,7 +50,7 @@ export const esSnapshotChecks: DoctorCheck[] = [
     title: 'Other cached snapshots',
     arch: 'stateful',
     run: async () => {
-      const current = getSnapshotCacheFilename(await getKibanaVersion());
+      const current = getSnapshotCacheFilename(kibanaPackageJson.version);
       const others = (await readCacheDir()).filter((file) => file !== current);
       if (!others.length) {
         return pass('No snapshots for other versions in cache');

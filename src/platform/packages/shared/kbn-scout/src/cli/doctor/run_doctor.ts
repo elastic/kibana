@@ -31,14 +31,9 @@ import {
 type DoctorTarget = 'qaf' | 'scout' | 'local';
 
 interface DoctorSection {
-  /** Checks for all targets when not set */
   target?: DoctorTarget;
   checks: DoctorCheck[];
-  /** Shown when a check fails or warns */
-  docs?: string;
 }
-
-const CLOUD_DOCS = 'See the Elastic Cloud testing docs for Scout and QAF';
 
 interface ReportedResult extends CheckResult {
   check: DoctorCheck;
@@ -62,24 +57,25 @@ const getRunCommands = (location: DoctorLocation, arch: DoctorArch): string[] =>
     return [`node scripts/scout run-tests --arch ${arch} --domain ${domain} ${CONFIG_PLACEHOLDER}`];
   }
 
-  if (arch === 'serverless') {
-    const customRole = hasQafCustomRoleUser()
+  const create =
+    arch === 'serverless'
       ? [
-          `  --custom-kibana-role-names ${CUSTOM_ROLE} --custom-kibana-role-assignments ${CUSTOM_ROLE}:${CUSTOM_ROLE} && \\`,
+          `qaf elastic-cloud projects create --project-type elasticsearch --project-name ${QAF_NAME}`,
+          ...(hasQafCustomRoleUser()
+            ? [
+                `--custom-kibana-role-names ${CUSTOM_ROLE} --custom-kibana-role-assignments ${CUSTOM_ROLE}:${CUSTOM_ROLE}`,
+              ]
+            : []),
         ]
-      : [];
-    return [
-      `qaf elastic-cloud projects create --project-type elasticsearch --project-name ${QAF_NAME}${
-        customRole.length ? ' \\' : ' && \\'
-      }`,
-      ...customRole,
-      `qaf kibana scout run-config --ec-project-name ${QAF_NAME} --kibana-repo-root . ${CONFIG_PLACEHOLDER}`,
-    ];
-  }
-  // the SAML realm lets custom roles log in without Cloud users
+      : [
+          `qaf elastic-cloud deployments create --stack-version ${kibanaPackageJson.version}-SNAPSHOT --deployment-name ${QAF_NAME} --add-custom-saml-realm`,
+        ];
+  const target = arch === 'serverless' ? '--ec-project-name' : '--ec-deployment-name';
   return [
-    `qaf elastic-cloud deployments create --stack-version ${kibanaPackageJson.version}-SNAPSHOT --deployment-name ${QAF_NAME} --add-custom-saml-realm && \\`,
-    `qaf kibana scout run-config --ec-deployment-name ${QAF_NAME} --kibana-repo-root . ${CONFIG_PLACEHOLDER}`,
+    ...create.map(
+      (line, index) => `${index ? '  ' : ''}${line}${index < create.length - 1 ? ' \\' : ' && \\'}`
+    ),
+    `qaf kibana scout run-config ${target} ${QAF_NAME} --kibana-repo-root . ${CONFIG_PLACEHOLDER}`,
   ];
 };
 
@@ -92,9 +88,8 @@ const TARGETS: Record<DoctorTarget, { title: string; location: DoctorLocation; r
 const getSections = (): DoctorSection[] => [
   { checks: [...environmentChecks, ...playwrightChecks] },
   { target: 'local', checks: [...localServerChecks, ...esSnapshotChecks, ...dockerChecks] },
-  { target: 'qaf', checks: [...qafChecks, ...getQafCloudChecks()], docs: CLOUD_DOCS },
-  // only when the config files for running Scout against Cloud without QAF exist
-  { target: 'scout', checks: getScoutCloudChecks(), docs: CLOUD_DOCS },
+  { target: 'qaf', checks: [...qafChecks, ...getQafCloudChecks()] },
+  { target: 'scout', checks: getScoutCloudChecks() },
 ];
 
 const ICONS: Record<CheckResult['status'], string> = {
@@ -171,7 +166,7 @@ const runChecks = async (log: ToolingLog, sections: DoctorSection[]) => {
   sections.forEach(({ checks }) => checks.forEach(start));
 
   const reported: ReportedResult[] = [];
-  for (const { target, checks, docs } of sections) {
+  for (const { target, checks } of sections) {
     log.write(`\n ${chalk.bold(target ? TARGETS[target].title : 'General')}`);
     const results = await withSpinner(
       () => `Checking ${checks.find((check) => !done.has(check))?.title ?? ''}`,
@@ -184,8 +179,9 @@ const runChecks = async (log: ToolingLog, sections: DoctorSection[]) => {
         log.write(formatResult(result, target && `[${check.arch ?? 'general'}]`));
       }
     });
-    if (docs && results.some((result) => result && result.status !== 'pass')) {
-      log.write(chalk.dim(`   ${docs}`));
+    const isCloud = target && TARGETS[target].location === 'cloud';
+    if (isCloud && results.some((result) => result && result.status !== 'pass')) {
+      log.write(chalk.dim('   See the Elastic Cloud testing docs for Scout and QAF'));
     }
   }
   return reported;

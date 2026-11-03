@@ -21,26 +21,55 @@ import type { CheckResult, DoctorArch, DoctorCheck, Fix } from '../types';
 import { DOCTOR_ARCHS, fail, pass, warn } from '../types';
 import { tildify } from '../utils';
 
-// QAF reads Cloud credentials from this file, and EC_ENV picks the environment (qa by default)
+// QAF reads Cloud credentials from this file, and EC_ENV picks the environment
 const CLOUD_SECRETS_FILE = Path.join(Os.homedir(), '.elastic/cloud.json');
-const getEnvironment = () => process.env.EC_ENV ?? 'qa';
+const CLOUD_SECRETS = tildify(CLOUD_SECRETS_FILE);
 const QAF_ENVIRONMENTS = ['qa', 'staging', 'production'];
-const KIBANA_TIMEOUT_MS = 10_000;
-// Scout logs in with custom roles as custom_role_worker_<n>, and Cloud users are set up for the first
+const getEnvironment = () => process.env.EC_ENV ?? 'qa';
+// Scout logs in with custom roles as custom_role_worker_<n>, Cloud users are set up for the first
 export const CUSTOM_ROLE = 'custom_role_worker_1';
-
-// Used for test setup, tests don't log in with it
+// used for test setup, tests don't log in with it
 const SKIPPED_ROLES = ['system_indices_superuser'];
+
+// Direct Scout runs read these; QAF writes them for a run and refuses to run when they exist
+const SCOUT_CLOUD_CONFIGS: Record<DoctorArch, string> = {
+  stateful: '.scout/servers/cloud_ech.json',
+  serverless: '.scout/servers/cloud_mki.json',
+};
+const SCOUT_ROLE_USERS_FILE = '.scout/role_users.json';
+const FTR_ROLE_USERS_FILE = '.ftr/role_users.json';
+
+type Users = Record<string, { email?: string; password?: string } | undefined>;
+
+interface CloudSecrets {
+  api_key?: Record<string, string>;
+  role_credentials?: Record<string, Users>;
+}
+
+const readJson = <T>(path: string): T | undefined =>
+  Fs.existsSync(path) ? JSON.parse(Fs.readFileSync(path, 'utf8')) : undefined;
+
+const inRepo = (file: string) => Path.resolve(REPO_ROOT, file);
+
+const displayPath = (path: string) =>
+  path.startsWith(REPO_ROOT) ? Path.relative(REPO_ROOT, path) : tildify(path);
+
+const readCloudUsers = (): Users =>
+  readJson<CloudSecrets>(CLOUD_SECRETS_FILE)?.role_credentials?.[getEnvironment()] ?? {};
+
+const getDefinedRoles = (users: Users) =>
+  Object.keys(users).filter((role) => users[role]?.email && users[role]?.password);
+
+const quoteRoles = (roles: string[]) => roles.map((role) => `"${role}"`).join(', ');
 
 const readRoles = (rolesFile: string) =>
   readRolesFromResource(rolesFile).filter((role) => !SKIPPED_ROLES.includes(role));
 
-/** Roles tests can log in with, from the roles.yml files of all project types when none is given */
+/** Roles tests log in with, from the roles.yml files of all project types when none is given */
 const getRoles = (arch: DoctorArch, projectType?: string): string[] => {
   if (arch === 'stateful') {
     return readRoles(Path.join(STATEFUL_ROLES_ROOT_PATH, 'roles.yml'));
   }
-
   const rolesFiles = projectType
     ? [Path.join(projectType, 'roles.yml')]
     : Fs.readdirSync(SERVERLESS_ROLES_ROOT_PATH, { recursive: true, encoding: 'utf8' }).filter(
@@ -53,55 +82,24 @@ const getRoles = (arch: DoctorArch, projectType?: string): string[] => {
   ];
 };
 
-// Direct Scout runs read these; QAF writes them for a run and refuses to run when they exist
-const SCOUT_CLOUD_CONFIGS: Record<DoctorArch, string> = {
-  stateful: '.scout/servers/cloud_ech.json',
-  serverless: '.scout/servers/cloud_mki.json',
-};
-const SCOUT_ROLE_USERS_FILE = '.scout/role_users.json';
-// FTR Cloud runs read users from here, in the same format
-const FTR_ROLE_USERS_FILE = '.ftr/role_users.json';
-
-type Users = Record<string, { email?: string; password?: string } | undefined>;
-
-interface CloudSecrets {
-  api_key?: Record<string, string>;
-  role_credentials?: Record<string, Users>;
-}
-
-const readJson = async <T>(path: string): Promise<T | undefined> => {
-  const content = await Fs.promises.readFile(path, 'utf8').catch(() => undefined);
-  return content === undefined ? undefined : JSON.parse(content);
-};
-
-const existsInRepo = (file: string) => Fs.existsSync(Path.resolve(REPO_ROOT, file));
-
-const displayPath = (path: string) =>
-  path.startsWith(REPO_ROOT) ? Path.relative(REPO_ROOT, path) : tildify(path);
-
-const getDefinedRoles = (users: Users) =>
-  Object.keys(users).filter((role) => users[role]?.email && users[role]?.password);
-
-const quoteRoles = (roles: string[]) => roles.map((role) => `"${role}"`).join(', ');
-
-/** Checks that a users file has a user for every expected role */
 const checkUsers = (
   file: string,
   users: Users,
   expected: string[],
-  remedy?: Fix | string
+  remedy?: Fix | string,
+  label = 'users for'
 ): CheckResult => {
   const roles = [...new Set(expected)];
   const defined = getDefinedRoles(users);
   const missing = roles.filter((role) => !defined.includes(role));
   if (!missing.length) {
     return pass(
-      `${file} has users for ${roles.length > 3 ? `all ${roles.length} roles` : quoteRoles(roles)}`
+      `${file} has ${label} ${roles.length > 3 ? `all ${roles.length} roles` : quoteRoles(roles)}`
     );
   }
 
-  const message = `${file} has no users for ${
-    missing.length === 1 ? quoteRoles(missing) : `${missing.length} roles`
+  const message = `${file} has no ${label} ${
+    missing.length > 1 ? `${missing.length} roles` : quoteRoles(missing)
   }`;
   const result = {
     ...(missing.length > 1 ? { details: quoteRoles(missing) } : {}),
@@ -112,35 +110,9 @@ const checkUsers = (
   return missing.includes('admin') ? fail(message, result) : warn(message, result);
 };
 
-const checkCustomRoleUser = (file: string, users: Users, remedy: Fix | string): CheckResult =>
-  getDefinedRoles(users).includes(CUSTOM_ROLE)
-    ? pass(`${file} has a custom role user ("${CUSTOM_ROLE}")`)
-    : warn(
-        `${file} has no custom role user ("${CUSTOM_ROLE}")`,
-        typeof remedy === 'string'
-          ? { hint: remedy }
-          : { fix: remedy, hint: `only if they are ${getEnvironment()} users` }
-      );
-
-/** For the QAF create command, which assigns the custom role to this user */
-export const hasQafCustomRoleUser = (): boolean => {
-  try {
-    const secrets: CloudSecrets = JSON.parse(Fs.readFileSync(CLOUD_SECRETS_FILE, 'utf8'));
-    return getDefinedRoles(secrets.role_credentials?.[getEnvironment()] ?? {}).includes(
-      CUSTOM_ROLE
-    );
-  } catch {
-    return false;
-  }
-};
-
-const readCloudUsers = async () =>
-  (await readJson<CloudSecrets>(CLOUD_SECRETS_FILE))?.role_credentials?.[getEnvironment()] ?? {};
-
-/** Copies users from the FTR users file when it has some of the expected roles QAF is missing */
-const getCopyFtrUsersFix = async (expected: string[]): Promise<Fix | undefined> => {
-  const ftrUsers = await readJson<Users>(Path.resolve(REPO_ROOT, FTR_ROLE_USERS_FILE));
-  const cloudRoles = getDefinedRoles(await readCloudUsers());
+const copyFtrUsersFix = (expected: string[]): Fix | undefined => {
+  const ftrUsers = readJson<Users>(inRepo(FTR_ROLE_USERS_FILE));
+  const cloudRoles = getDefinedRoles(readCloudUsers());
   // copy every role QAF is missing, so all checks suggest the same command
   const roles = getDefinedRoles(ftrUsers ?? {}).filter((role) => !cloudRoles.includes(role));
   if (!ftrUsers || !roles.some((role) => expected.includes(role))) {
@@ -151,10 +123,10 @@ const getCopyFtrUsersFix = async (expected: string[]): Promise<Fix | undefined> 
   return {
     command: `copy ${roles.join(
       ', '
-    )} from ${FTR_ROLE_USERS_FILE} to role_credentials.${env} in ${tildify(CLOUD_SECRETS_FILE)}`,
+    )} from ${FTR_ROLE_USERS_FILE} to role_credentials.${env} in ${CLOUD_SECRETS}`,
     destructive: true,
     run: async () => {
-      const secrets = (await readJson<CloudSecrets>(CLOUD_SECRETS_FILE)) ?? {};
+      const secrets = readJson<CloudSecrets>(CLOUD_SECRETS_FILE) ?? {};
       const copied = Object.fromEntries(roles.map((role) => [role, ftrUsers[role]]));
       const updated: CloudSecrets = {
         ...secrets,
@@ -171,18 +143,45 @@ const getCopyFtrUsersFix = async (expected: string[]): Promise<Fix | undefined> 
   };
 };
 
+/** For the QAF create command, which assigns the custom role to this user */
+export const hasQafCustomRoleUser = (): boolean => {
+  try {
+    return getDefinedRoles(readCloudUsers()).includes(CUSTOM_ROLE);
+  } catch {
+    return false;
+  }
+};
+
 const environmentCheck: DoctorCheck = {
   title: 'Elastic Cloud environment',
   run: async () => {
     const env = getEnvironment();
-    if (!QAF_ENVIRONMENTS.includes(env)) {
-      return fail(`QAF doesn't support EC_ENV=${env}`, {
-        hint: `use ${QAF_ENVIRONMENTS.join(', ')}`,
+    return QAF_ENVIRONMENTS.includes(env)
+      ? pass(
+          `Elastic Cloud environment ${env} (${
+            process.env.EC_ENV ? 'from EC_ENV' : 'EC_ENV not set'
+          })`
+        )
+      : fail(`QAF doesn't support EC_ENV=${env}`, { hint: `use ${QAF_ENVIRONMENTS.join(', ')}` });
+  },
+};
+
+const apiKeyCheck: DoctorCheck = {
+  title: 'Elastic Cloud API key',
+  dependsOn: environmentCheck,
+  run: async () => {
+    const env = getEnvironment();
+    const secrets = readJson<CloudSecrets>(CLOUD_SECRETS_FILE);
+    if (!secrets) {
+      return fail(`${CLOUD_SECRETS} does not exist`, {
+        hint: `create it with api_key.${env} and role_credentials.${env}`,
       });
     }
-    return pass(
-      `Elastic Cloud environment ${env} (${process.env.EC_ENV ? 'from EC_ENV' : 'EC_ENV not set'})`
-    );
+    return secrets.api_key?.[env]
+      ? pass(`${CLOUD_SECRETS} has API key "${env}"`)
+      : fail(`${CLOUD_SECRETS} has no API key "${env}"`, {
+          hint: `create one in the Elastic Cloud ${env} console (Organization → API keys) and add it as api_key.${env}`,
+        });
   },
 };
 
@@ -193,172 +192,36 @@ const cloudUsersCheck = (arch: DoctorArch): DoctorCheck => ({
   run: async () => {
     const roles = getRoles(arch);
     return checkUsers(
-      `${tildify(CLOUD_SECRETS_FILE)} (${getEnvironment()})`,
-      await readCloudUsers(),
+      `${CLOUD_SECRETS} (${getEnvironment()})`,
+      readCloudUsers(),
       roles,
-      (await getCopyFtrUsersFix(roles)) ??
+      copyFtrUsersFix(roles) ??
         `create Cloud users with these roles and add them under role_credentials.${getEnvironment()}`
     );
   },
 });
 
 const qafCustomRoleCheck: DoctorCheck = {
-  title: 'Cloud user for custom role tests',
+  title: 'Cloud user for custom roles',
   // on ECH custom roles log in through the SAML realm QAF adds, without a Cloud user
   arch: 'serverless',
   dependsOn: environmentCheck,
   run: async () =>
-    checkCustomRoleUser(
-      `${tildify(CLOUD_SECRETS_FILE)} (${getEnvironment()})`,
-      await readCloudUsers(),
-      (await getCopyFtrUsersFix([CUSTOM_ROLE])) ??
-        `create a Cloud user and add it under role_credentials.${getEnvironment()}, QAF assigns it the role when creating a project`
+    checkUsers(
+      `${CLOUD_SECRETS} (${getEnvironment()})`,
+      readCloudUsers(),
+      [CUSTOM_ROLE],
+      copyFtrUsersFix([CUSTOM_ROLE]) ??
+        `create a Cloud user and add it under role_credentials.${getEnvironment()}, QAF assigns it the role when creating a project`,
+      'custom role user'
     ),
 };
-
-const apiKeyCheck: DoctorCheck = {
-  title: 'Elastic Cloud API key',
-  dependsOn: environmentCheck,
-  run: async () => {
-    if (!Fs.existsSync(CLOUD_SECRETS_FILE)) {
-      return fail(`${tildify(CLOUD_SECRETS_FILE)} does not exist`, {
-        hint: `create it with api_key.${getEnvironment()} and role_credentials.${getEnvironment()}`,
-      });
-    }
-
-    const keyName = getEnvironment();
-    const secrets = await readJson<CloudSecrets>(CLOUD_SECRETS_FILE);
-    return secrets?.api_key?.[keyName]
-      ? pass(`${tildify(CLOUD_SECRETS_FILE)} has API key "${keyName}"`)
-      : fail(`${tildify(CLOUD_SECRETS_FILE)} has no API key "${keyName}"`, {
-          hint: `create one in the Elastic Cloud ${getEnvironment()} console (Organization → API keys) and add it as api_key.${keyName}`,
-        });
-  },
-};
-
-/** For checks that run after scoutConfigCheck validated the file */
-const readScoutConfig = async (arch: DoctorArch) =>
-  ScoutTestConfigSchema.parse(await readJson(Path.resolve(REPO_ROOT, SCOUT_CLOUD_CONFIGS[arch])));
-
-/** Validates a direct Scout run config with the schema Scout uses when it loads it */
-const scoutConfigCheck = (arch: DoctorArch): DoctorCheck => ({
-  title: SCOUT_CLOUD_CONFIGS[arch],
-  arch,
-  run: async () => {
-    const configFile = SCOUT_CLOUD_CONFIGS[arch];
-    let raw: unknown;
-    try {
-      raw = await readJson(Path.resolve(REPO_ROOT, configFile));
-    } catch (error) {
-      return fail(`${configFile} is not valid JSON: ${error.message}`);
-    }
-
-    const result = ScoutTestConfigSchema.safeParse(raw);
-    if (!result.success) {
-      const issues = result.error.issues.map(
-        ({ path, message }) => `${path.join('.') || '<root>'} ${message}`
-      );
-      return fail(`${configFile} is invalid: ${issues.join('; ')}`);
-    }
-
-    const config = result.data;
-    // the schema can't tell which file it reads
-    const serverless = arch === 'serverless';
-    if (!config.isCloud || Boolean(config.serverless) !== serverless) {
-      return fail(`${configFile} must set "isCloud": true and "serverless": ${serverless}`);
-    }
-
-    const target = serverless
-      ? `${[config.projectType, config.productTier].filter(Boolean).join(' ')} project`
-      : 'deployment';
-    return pass(`${configFile} is valid: ${target} at ${new URL(config.hosts.kibana).host}`);
-  },
-});
-
-/** Checks the users file a direct Scout run reads, as set by cloudUsersFilePath */
-const scoutUsersCheck = (arch: DoctorArch, configCheck: DoctorCheck): DoctorCheck => ({
-  title: `Scout Cloud users for ${SCOUT_CLOUD_CONFIGS[arch]}`,
-  arch,
-  dependsOn: configCheck,
-  run: async () => {
-    const { cloudUsersFilePath, projectType } = await readScoutConfig(arch);
-    // Scout resolves it against the working directory, which is the repo root
-    const usersFile = Path.resolve(REPO_ROOT, cloudUsersFilePath);
-    const users = await readJson<Users>(usersFile);
-    if (!users) {
-      return fail(`${displayPath(usersFile)} does not exist`, {
-        hint: `set as cloudUsersFilePath in ${SCOUT_CLOUD_CONFIGS[arch]}`,
-      });
-    }
-
-    return checkUsers(displayPath(usersFile), users, getRoles(arch, projectType));
-  },
-});
-
-/** Projects and deployments get deleted, while the config pointing to them stays */
-const scoutKibanaCheck = (arch: DoctorArch, configCheck: DoctorCheck): DoctorCheck => ({
-  title: `Kibana in ${SCOUT_CLOUD_CONFIGS[arch]}`,
-  arch,
-  dependsOn: configCheck,
-  run: async () => {
-    const { hosts, auth } = await readScoutConfig(arch);
-    const { host } = new URL(hosts.kibana);
-    const remedy = { hint: 'the project or deployment may be deleted' };
-    try {
-      const response = await fetch(new URL('/api/status', hosts.kibana), {
-        headers: {
-          Authorization: `Basic ${Buffer.from(`${auth.username}:${auth.password}`).toString(
-            'base64'
-          )}`,
-        },
-        signal: AbortSignal.timeout(KIBANA_TIMEOUT_MS),
-      });
-      if (response.status === 401) {
-        return fail(`Kibana at ${host} rejects the auth credentials`);
-      }
-      if (!response.ok) {
-        return fail(`Kibana at ${host} responds with ${response.status}`, remedy);
-      }
-      const { version } = await response.json();
-      return pass(`Kibana ${version?.number} at ${host} is up`);
-    } catch (error) {
-      return fail(
-        `Kibana at ${host} is not reachable: ${error.cause?.code ?? error.message}`,
-        remedy
-      );
-    }
-  },
-});
-
-const scoutCustomRoleCheck = (arch: DoctorArch, configCheck: DoctorCheck): DoctorCheck => ({
-  title: `Custom role tests with ${SCOUT_CLOUD_CONFIGS[arch]}`,
-  arch,
-  dependsOn: configCheck,
-  run: async () => {
-    const configFile = SCOUT_CLOUD_CONFIGS[arch];
-    const { customSamlProviderName, cloudUsersFilePath } = await readScoutConfig(arch);
-    if (arch === 'stateful') {
-      return customSamlProviderName
-        ? pass(`${configFile} logs in custom roles via SAML provider "${customSamlProviderName}"`)
-        : warn(`${configFile} has no customSamlProviderName for custom roles`, {
-            hint: 'create the deployment with --add-custom-saml-realm, then set "customSamlProviderName": "qaf"',
-          });
-    }
-
-    const usersFile = Path.resolve(REPO_ROOT, cloudUsersFilePath);
-    return checkCustomRoleUser(
-      displayPath(usersFile),
-      (await readJson<Users>(usersFile)) ?? {},
-      'add a user with the custom role in the project'
-    );
-  },
-});
 
 const qafRunFilesCheck: DoctorCheck = {
   title: 'Files that block QAF runs',
   run: async () => {
-    const files = [SCOUT_ROLE_USERS_FILE, ...Object.values(SCOUT_CLOUD_CONFIGS)].filter(
-      existsInRepo
+    const files = [SCOUT_ROLE_USERS_FILE, ...Object.values(SCOUT_CLOUD_CONFIGS)].filter((file) =>
+      Fs.existsSync(inRepo(file))
     );
     return files.length
       ? warn(`QAF won't run while ${files.join(', ')} ${files.length > 1 ? 'exist' : 'exists'}`, {
@@ -377,14 +240,132 @@ export const getQafCloudChecks = (): DoctorCheck[] => [
   qafRunFilesCheck,
 ];
 
-/** Checks for running Scout against Cloud without QAF, only when its config files exist */
+// only called by checks that depend on scoutConfigCheck, so the file is valid
+const readScoutConfig = (arch: DoctorArch) =>
+  ScoutTestConfigSchema.parse(readJson(inRepo(SCOUT_CLOUD_CONFIGS[arch])));
+
+/** Validates a direct Scout run config with the schema Scout uses */
+const scoutConfigCheck = (arch: DoctorArch): DoctorCheck => ({
+  title: SCOUT_CLOUD_CONFIGS[arch],
+  arch,
+  run: async () => {
+    const configFile = SCOUT_CLOUD_CONFIGS[arch];
+    let raw: unknown;
+    try {
+      raw = readJson(inRepo(configFile));
+    } catch (error) {
+      return fail(`${configFile} is not valid JSON: ${error.message}`);
+    }
+
+    const result = ScoutTestConfigSchema.safeParse(raw);
+    if (!result.success) {
+      const issues = result.error.issues.map(
+        ({ path, message }) => `${path.join('.') || '<root>'} ${message}`
+      );
+      return fail(`${configFile} is invalid: ${issues.join('; ')}`);
+    }
+
+    const { isCloud, serverless, projectType, productTier, hosts } = result.data;
+    // the schema can't tell which file it reads
+    if (!isCloud || Boolean(serverless) !== (arch === 'serverless')) {
+      return fail(
+        `${configFile} must set "isCloud": true and "serverless": ${arch === 'serverless'}`
+      );
+    }
+    const target = serverless
+      ? `${[projectType, productTier].filter(Boolean).join(' ')} project`
+      : 'deployment';
+    return pass(`${configFile} is valid: ${target} at ${new URL(hosts.kibana).host}`);
+  },
+});
+
+// projects and deployments get deleted while the config pointing to them stays
+const scoutKibanaCheck = (arch: DoctorArch, configCheck: DoctorCheck): DoctorCheck => ({
+  title: `Kibana in ${SCOUT_CLOUD_CONFIGS[arch]}`,
+  arch,
+  dependsOn: configCheck,
+  run: async () => {
+    const { hosts, auth } = readScoutConfig(arch);
+    const { host } = new URL(hosts.kibana);
+    const remedy = { hint: 'the project or deployment may be deleted' };
+    try {
+      const response = await fetch(new URL('/api/status', hosts.kibana), {
+        headers: {
+          Authorization: `Basic ${Buffer.from(`${auth.username}:${auth.password}`).toString(
+            'base64'
+          )}`,
+        },
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (response.status === 401) {
+        return fail(`Kibana at ${host} rejects the auth credentials`);
+      }
+      if (!response.ok) {
+        return fail(`Kibana at ${host} responds with ${response.status}`, remedy);
+      }
+      const { version } = await response.json();
+      return pass(`Kibana ${version?.number} at ${host} is up`);
+    } catch (error) {
+      return fail(
+        `Kibana at ${host} is not reachable: ${error.cause?.code ?? error.message}`,
+        remedy
+      );
+    }
+  },
+});
+
+const scoutUsersCheck = (arch: DoctorArch, configCheck: DoctorCheck): DoctorCheck => ({
+  title: `Cloud users for ${SCOUT_CLOUD_CONFIGS[arch]}`,
+  arch,
+  dependsOn: configCheck,
+  run: async () => {
+    const { cloudUsersFilePath, projectType } = readScoutConfig(arch);
+    // Scout resolves it against the working directory, which is the repo root
+    const usersFile = inRepo(cloudUsersFilePath);
+    const users = readJson<Users>(usersFile);
+    return users
+      ? checkUsers(displayPath(usersFile), users, getRoles(arch, projectType))
+      : fail(`${displayPath(usersFile)} does not exist`, {
+          hint: `set as cloudUsersFilePath in ${SCOUT_CLOUD_CONFIGS[arch]}`,
+        });
+  },
+});
+
+const scoutCustomRoleCheck = (arch: DoctorArch, configCheck: DoctorCheck): DoctorCheck => ({
+  title: `Custom roles with ${SCOUT_CLOUD_CONFIGS[arch]}`,
+  arch,
+  dependsOn: configCheck,
+  run: async () => {
+    const configFile = SCOUT_CLOUD_CONFIGS[arch];
+    const { customSamlProviderName, cloudUsersFilePath } = readScoutConfig(arch);
+    if (arch === 'serverless') {
+      const usersFile = inRepo(cloudUsersFilePath);
+      return checkUsers(
+        displayPath(usersFile),
+        readJson<Users>(usersFile) ?? {},
+        [CUSTOM_ROLE],
+        'add a user with the custom role in the project',
+        'custom role user'
+      );
+    }
+    return customSamlProviderName
+      ? pass(`${configFile} logs in custom roles via SAML provider "${customSamlProviderName}"`)
+      : warn(`${configFile} has no customSamlProviderName for custom roles`, {
+          hint: 'create the deployment with --add-custom-saml-realm, then set "customSamlProviderName": "qaf"',
+        });
+  },
+});
+
+/** Checks for running Scout against Cloud without QAF, only for config files that exist */
 export const getScoutCloudChecks = (): DoctorCheck[] =>
-  DOCTOR_ARCHS.filter((arch) => existsInRepo(SCOUT_CLOUD_CONFIGS[arch])).flatMap((arch) => {
-    const configCheck = scoutConfigCheck(arch);
-    return [
-      configCheck,
-      scoutKibanaCheck(arch, configCheck),
-      scoutUsersCheck(arch, configCheck),
-      scoutCustomRoleCheck(arch, configCheck),
-    ];
-  });
+  DOCTOR_ARCHS.filter((arch) => Fs.existsSync(inRepo(SCOUT_CLOUD_CONFIGS[arch]))).flatMap(
+    (arch) => {
+      const configCheck = scoutConfigCheck(arch);
+      return [
+        configCheck,
+        scoutKibanaCheck(arch, configCheck),
+        scoutUsersCheck(arch, configCheck),
+        scoutCustomRoleCheck(arch, configCheck),
+      ];
+    }
+  );

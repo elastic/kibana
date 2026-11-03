@@ -55,7 +55,6 @@ const portCheck = (name: string, port: number): DoctorCheck => ({
     }
 
     const scoutServerPids = await getScoutServerPids();
-    const usedBy = owner ? ` by ${owner.command} (PID ${owner.pid})` : '';
     if (scoutServerPids.length) {
       return fail(
         `${name} port ${port} is used by Scout servers (PID ${scoutServerPids.join(', ')})`,
@@ -68,11 +67,12 @@ const portCheck = (name: string, port: number): DoctorCheck => ({
     if (!owner) {
       return fail(`${name} port ${port} is used`);
     }
-    return fail(`${name} port ${port} is used${usedBy}`, {
-      ...(isDocker(owner.command)
+    return fail(
+      `${name} port ${port} is used by ${owner.command} (PID ${owner.pid})`,
+      isDocker(owner.command)
         ? { hint: 'stop the Docker container that publishes it' }
-        : { fix: { command: `kill ${owner.pid}`, destructive: true } }),
-    });
+        : { fix: { command: `kill ${owner.pid}`, destructive: true } }
+    );
   },
 });
 

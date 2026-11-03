@@ -9,10 +9,15 @@
 
 import chalk from 'chalk';
 import execa from 'execa';
-import { ES_SERVERLESS_DEFAULT_IMAGE, SERVERLESS_NODES, getUiamContainers } from '@kbn/es';
+import {
+  ES_SERVERLESS_DEFAULT_IMAGE,
+  SERVERLESS_NODES,
+  formatBytes,
+  getUiamContainers,
+} from '@kbn/es';
 import type { DoctorCheck, Fix } from '../types';
 import { fail, pass, warn } from '../types';
-import { formatAge, formatBytes, getScoutServerPids, tryExec } from '../utils';
+import { formatAge, getScoutServerPids, tryExec } from '../utils';
 
 const RECOMMENDED_CPUS = 12;
 const RECOMMENDED_MEMORY_GB = 15;
@@ -20,7 +25,6 @@ const RECOMMENDED_MEMORY = RECOMMENDED_MEMORY_GB * 1024 ** 3;
 const DOCKER_START_TIMEOUT_MS = 120_000;
 
 const waitForDocker = async () => {
-  // the daemon takes a while to accept connections after the app starts
   const deadline = Date.now() + DOCKER_START_TIMEOUT_MS;
   while (!(await tryExec('docker', ['info']))) {
     if (Date.now() > deadline) {
