@@ -44,7 +44,7 @@ describe('ToolsService', () => {
             scheduledDelay: 1000,
             opik_distributed_tracing: false,
           },
-          decisionModel: { triggerThreshold: 0.5, timeoutMs: 2000 },
+          decisionModel: { triggerThreshold: 0.5, timeoutMs: 1000, fastModelTimeoutMs: 2000 },
         },
       });
 
@@ -65,7 +65,7 @@ describe('ToolsService', () => {
             scheduledDelay: 1000,
             opik_distributed_tracing: false,
           },
-          decisionModel: { triggerThreshold: 0.5, timeoutMs: 2000 },
+          decisionModel: { triggerThreshold: 0.5, timeoutMs: 1000, fastModelTimeoutMs: 2000 },
         },
       });
 

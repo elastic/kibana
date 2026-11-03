@@ -105,6 +105,28 @@ describe('createDecisionService', () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
+  it("uses a provider's own timeout instead of the default", async () => {
+    jest.useFakeTimers();
+
+    const slow = {
+      ...fakeProvider('fast_model', never),
+      timeoutMs: 2000,
+    };
+    const { decide } = setup([slow]);
+
+    let result: DecideResult | undefined;
+
+    decide().then((decided) => {
+      result = decided;
+    });
+
+    await jest.advanceTimersByTimeAsync(1000);
+    expect(result).toBeUndefined();
+
+    await jest.advanceTimersByTimeAsync(1000);
+    expect(result?.status).toBe('failed');
+  });
+
   it('stops the chain when the caller aborts', async () => {
     const controller = new AbortController();
     const first = fakeProvider('openrouter', () => {
@@ -195,6 +217,7 @@ describe('createDecisionProviders', () => {
       config: {
         triggerThreshold: 0.5,
         timeoutMs: 1000,
+        fastModelTimeoutMs: 2000,
         openRouter: {
           apiKey: 'test-key',
           model: 'typesafe/jev-1.13',
@@ -206,11 +229,24 @@ describe('createDecisionProviders', () => {
     expect(providers.map(({ id }) => id)).toEqual(['openrouter', 'eis', 'fast_model']);
   });
 
+  it('gives the fast model its own timeout', () => {
+    const providers = createDecisionProviders({
+      elasticsearch,
+      createModelProvider,
+      config: { triggerThreshold: 0.5, timeoutMs: 1000, fastModelTimeoutMs: 2000 },
+    });
+
+    expect(providers.map(({ id, timeoutMs }) => [id, timeoutMs])).toEqual([
+      ['eis', undefined],
+      ['fast_model', 2000],
+    ]);
+  });
+
   it('leaves out OpenRouter when it is not configured', () => {
     const providers = createDecisionProviders({
       elasticsearch,
       createModelProvider,
-      config: { triggerThreshold: 0.5, timeoutMs: 1000 },
+      config: { triggerThreshold: 0.5, timeoutMs: 1000, fastModelTimeoutMs: 2000 },
     });
 
     expect(providers.map(({ id }) => id)).toEqual(['eis', 'fast_model']);

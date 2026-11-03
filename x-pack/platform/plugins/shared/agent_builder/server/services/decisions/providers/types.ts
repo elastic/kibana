@@ -26,6 +26,8 @@ export interface DecisionProviderResult {
 /** One way of answering decision questions. */
 export interface DecisionProvider {
   id: DecisionProviderId;
+  /** Overrides the service's per-provider timeout. */
+  timeoutMs?: number;
   /**
    * Answers the questions. Throws {@link DecisionProviderUnavailableError} when the provider can
    * never answer on this Kibana instance, and any other error for a failure worth retrying.

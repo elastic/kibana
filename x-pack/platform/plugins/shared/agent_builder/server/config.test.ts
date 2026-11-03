@@ -19,4 +19,11 @@ describe('decisionModel.openRouter config', () => {
       url: 'https://openrouter.ai/api',
     });
   });
+
+  it('gives the fast model a 2s budget and the decision models 1s', () => {
+    const { decisionModel } = configSchema.validate({});
+
+    expect(decisionModel.timeoutMs).toBe(1000);
+    expect(decisionModel.fastModelTimeoutMs).toBe(2000);
+  });
 });

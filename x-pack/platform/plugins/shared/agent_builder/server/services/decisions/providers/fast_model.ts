@@ -98,10 +98,13 @@ const toAnswer = (question: DecisionQuestion, raw: RawAnswer): DecisionAnswer =>
  */
 export const createFastModelDecisionProvider = ({
   createModelProvider,
+  timeoutMs,
 }: {
   createModelProvider: ModelProviderFactoryFn;
+  timeoutMs?: number;
 }): DecisionProvider => ({
   id: 'fast_model',
+  timeoutMs,
   decide: async ({ request, input, questions, signal }) => {
     const { chatModel, connector } = await createModelProvider({ request })
       .selectModel({ effortLevel: EffortLevels.low })

@@ -43,6 +43,8 @@ export const configSchema = schema.object({
     triggerThreshold: schema.number({ defaultValue: 0.5, min: 0, max: 1 }),
     /** How long each decision provider gets before the next one is tried. */
     timeoutMs: schema.number({ defaultValue: 1000, min: 100, max: 30000 }),
+    /** How long the fast model gets: an LLM call is slower than a decision model. */
+    fastModelTimeoutMs: schema.number({ defaultValue: 2000, min: 100, max: 30000 }),
     /**
      * Temporary dev path: ask OpenRouter's Decisions API directly instead of Elasticsearch, until
      * decision models are served by EIS. To be removed once they are.

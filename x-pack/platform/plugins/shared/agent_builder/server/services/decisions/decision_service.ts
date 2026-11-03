@@ -35,7 +35,7 @@ export const createDecisionProviders = ({
 }): DecisionProvider[] => [
   ...(config.openRouter ? [createOpenRouterDecisionProvider(config.openRouter)] : []),
   createEisDecisionProvider({ elasticsearch, inferenceId: config.inferenceId }),
-  createFastModelDecisionProvider({ createModelProvider }),
+  createFastModelDecisionProvider({ createModelProvider, timeoutMs: config.fastModelTimeoutMs }),
 ];
 
 /** Runs one provider with its own timeout, also aborted when the caller aborts. */
@@ -83,7 +83,8 @@ const attempt = async ({
 };
 
 /**
- * Creates the decision service. It tries the providers in order, giving each `timeoutMs`, and
+ * Creates the decision service. It tries the providers in order, giving each its own timeout
+ * (else `timeoutMs`), and
  * moves on when one fails. A provider that reports it can never answer is skipped until Kibana
  * restarts.
  */
@@ -113,7 +114,12 @@ export const createDecisionService = ({
       }
 
       const startedAt = Date.now();
-      const outcome = await attempt({ provider, params, timeoutMs, abortSignal });
+      const outcome = await attempt({
+        provider,
+        params,
+        timeoutMs: provider.timeoutMs ?? timeoutMs,
+        abortSignal,
+      });
       const elapsed = Date.now() - startedAt;
 
       if ('result' in outcome) {
