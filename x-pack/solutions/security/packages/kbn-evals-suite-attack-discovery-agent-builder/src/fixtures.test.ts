@@ -11,6 +11,7 @@ import { seedAttackDiscoveryFixtures } from './fixtures';
 
 interface SeededAlert {
   kibana: { alert: { rule: { name: string; uuid: string } } };
+  process: { name: string; entity_id?: string; parent?: { name: string; entity_id: string } };
 }
 
 const seedAndCollect = async (): Promise<SeededAlert[]> => {
@@ -43,5 +44,16 @@ describe('seedAttackDiscoveryFixtures', () => {
     const ruleNames = new Set(alerts.map(({ kibana }) => kibana.alert.rule.name));
 
     expect(ruleNames.size).toBe(alerts.length);
+  });
+
+  it('links the LSASS access to the encoded PowerShell process as its child', async () => {
+    const [powershell, lsass] = await seedAndCollect();
+
+    expect(lsass.process.parent).toEqual(
+      expect.objectContaining({
+        name: powershell.process.name,
+        entity_id: powershell.process.entity_id,
+      })
+    );
   });
 });

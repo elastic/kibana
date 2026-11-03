@@ -51,6 +51,11 @@ interface FixtureDocument {
   source: Record<string, unknown>;
 }
 
+// The pipeline prompt rejects chains that rest only on a shared host and close
+// timing; it wants a direct link such as a child process of the first alert.
+// The LSASS access therefore runs as a child of the encoded PowerShell process.
+const powershellEntityId = `${attackDiscoveryFixtureMarker}-powershell-process`;
+
 const createDocuments = (): FixtureDocument[] => {
   const now = Date.now();
   return [
@@ -60,7 +65,13 @@ const createDocuments = (): FixtureDocument[] => {
         '@timestamp': new Date(now - 5 * 60 * 1000).toISOString(),
         event: { kind: 'signal', category: ['process'], type: ['start'] },
         host: { name: 'finance-ws-01' },
-        process: { name: 'powershell.exe', command_line: 'powershell.exe -enc SQBFAFgA' },
+        user: { name: 'finance-analyst' },
+        process: {
+          name: 'powershell.exe',
+          pid: 4312,
+          entity_id: powershellEntityId,
+          command_line: 'powershell.exe -enc SQBFAFgA',
+        },
         kibana: {
           alert: {
             rule: {
@@ -85,7 +96,14 @@ const createDocuments = (): FixtureDocument[] => {
         '@timestamp': new Date(now - 4 * 60 * 1000).toISOString(),
         event: { kind: 'signal', category: ['process'], type: ['access'] },
         host: { name: 'finance-ws-01' },
-        process: { name: 'rundll32.exe' },
+        user: { name: 'finance-analyst' },
+        process: {
+          name: 'rundll32.exe',
+          pid: 5120,
+          command_line:
+            'rundll32.exe C:\\Windows\\System32\\comsvcs.dll, MiniDump 724 C:\\Users\\Public\\l.dmp full',
+          parent: { name: 'powershell.exe', pid: 4312, entity_id: powershellEntityId },
+        },
         target: { process: { name: 'lsass.exe' } },
         kibana: {
           alert: {
