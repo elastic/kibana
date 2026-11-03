@@ -1,5 +1,5 @@
 {
-  "sha1": "16fd5daef9f4f8b97555b6033ad4df5b1b083e35",
+  "sha1": "832c2ed5ef1e2bd351fb05ebce12f52d68a5b332",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -430,7 +430,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 75,
+        "line": 83,
         "column": 44
       }
     },
@@ -446,7 +446,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 101,
+        "line": 109,
         "column": 14
       }
     },
@@ -462,7 +462,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 115,
+        "line": 123,
         "column": 29
       }
     },
@@ -478,7 +478,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 139,
+        "line": 147,
         "column": 8
       }
     },
@@ -494,7 +494,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 151,
+        "line": 159,
         "column": 26
       }
     },
@@ -510,7 +510,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 169,
+        "line": 177,
         "column": 21
       }
     },
@@ -526,7 +526,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 183,
+        "line": 191,
         "column": 28
       }
     },
@@ -542,7 +542,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 232,
+        "line": 240,
         "column": 8
       }
     },
@@ -558,7 +558,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 281,
+        "line": 289,
         "column": 28
       }
     },
@@ -574,7 +574,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 295,
+        "line": 303,
         "column": 9
       }
     },
@@ -590,7 +590,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 338,
+        "line": 346,
         "column": 30
       }
     },
@@ -606,7 +606,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 352,
+        "line": 360,
         "column": 9
       }
     },
@@ -622,7 +622,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 364,
+        "line": 372,
         "column": 24
       }
     },
@@ -638,7 +638,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 373,
+        "line": 381,
         "column": 16
       }
     },
@@ -654,8 +654,40 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
-        "line": 386,
+        "line": 394,
         "column": 13
+      }
+    },
+    {
+      "id": "d032a6105294199-b5ace60af807d47",
+      "title": "Agent Builder — conversations API forces the set_title tool for a model that supports it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
+        "line": 455,
+        "column": 14
+      }
+    },
+    {
+      "id": "d032a6105294199-028e57395a709ff",
+      "title": "Agent Builder — conversations API sends tool_choice auto for a Claude model that rejects forced tool choice",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api.spec.ts",
+        "line": 467,
+        "column": 55
       }
     },
     {
