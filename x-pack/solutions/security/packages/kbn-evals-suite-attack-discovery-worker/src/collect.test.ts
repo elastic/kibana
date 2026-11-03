@@ -6,7 +6,13 @@
  */
 
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
-import { analysisUsageOf, generationUsageOf, isParkedAtGate, isReviewSettled } from './collect';
+import {
+  analysisUsageOf,
+  generationUsageOf,
+  isParkedAtGate,
+  isReviewSettled,
+  toInsights,
+} from './collect';
 
 const step = (
   stepId: string,
@@ -148,5 +154,65 @@ describe('generationUsageOf', () => {
       models: ['m'],
       discoveriesWithoutConnector: 1,
     });
+  });
+});
+
+describe('toInsights', () => {
+  const base = {
+    'kibana.alert.uuid': 'attack-1',
+    'kibana.alert.attack_discovery.alert_ids': ['seeded-1'],
+  };
+  const noGold = new Map([['seeded-1', 'gold-1']]);
+
+  it('reads the stored _with_replacements narrative so real entity names are scanned', () => {
+    const { insights } = toInsights(
+      [
+        {
+          ...base,
+          'kibana.alert.attack_discovery.title': 'Activity by tok-user',
+          'kibana.alert.attack_discovery.title_with_replacements': 'Activity by alice',
+          'kibana.alert.attack_discovery.summary_markdown': 'tok-host ran it',
+          'kibana.alert.attack_discovery.summary_markdown_with_replacements': 'web-1 ran it',
+          'kibana.alert.attack_discovery.details_markdown_with_replacements': 'alice on web-1',
+          'kibana.alert.attack_discovery.entity_summary_markdown_with_replacements': 'alice',
+        },
+      ],
+      noGold
+    );
+    expect(insights[0]).toMatchObject({
+      title: 'Activity by alice',
+      summaryMarkdown: 'web-1 ran it',
+      detailsMarkdown: 'alice on web-1',
+      entitySummaryMarkdown: 'alice',
+      alertIds: ['gold-1'],
+    });
+  });
+
+  it('applies the document replacements when no _with_replacements field is stored', () => {
+    const { insights } = toInsights(
+      [
+        {
+          ...base,
+          'kibana.alert.attack_discovery.title': 'Activity by tok-user',
+          'kibana.alert.attack_discovery.summary_markdown': 'tok-host ran it',
+          'kibana.alert.attack_discovery.replacements': [
+            { uuid: 'tok-user', value: 'alice' },
+            { uuid: 'tok-host', value: 'web-1' },
+          ],
+        },
+      ],
+      noGold
+    );
+    expect(insights[0].title).toBe('Activity by alice');
+    expect(insights[0].summaryMarkdown).toBe('web-1 ran it');
+  });
+
+  it('leaves text without replacements untouched', () => {
+    const { insights } = toInsights(
+      [{ ...base, 'kibana.alert.attack_discovery.title': 'Plain' }],
+      noGold
+    );
+    expect(insights[0].title).toBe('Plain');
+    expect(insights[0].entitySummaryMarkdown).toBeUndefined();
   });
 });

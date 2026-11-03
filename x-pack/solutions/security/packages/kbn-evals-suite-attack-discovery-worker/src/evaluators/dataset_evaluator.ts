@@ -103,7 +103,10 @@ export const createCodeEvaluators = (routing: CohortRouting): WorkerEvaluator[] 
     )
   );
 
-/** The audit evaluators score the baseline gold, which is what the runner's alerts carry. */
+/**
+ * The audit evaluators score the baseline gold, which is what the runner's alerts carry. The
+ * discoveries arrive already de-anonymized (see `toInsights`), so no replacements are applied.
+ */
 const baselineResolver: AuditReferenceResolver = (metadata) => {
   const scenarioId =
     typeof metadata === 'object' && metadata !== null

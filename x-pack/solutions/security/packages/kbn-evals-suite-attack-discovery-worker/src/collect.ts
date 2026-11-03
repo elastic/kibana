@@ -6,7 +6,11 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
-import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
+import {
+  replaceAnonymizedValuesWithOriginalValues,
+  type AttackDiscovery,
+  type Replacements,
+} from '@kbn/elastic-assistant-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import {
@@ -97,9 +101,42 @@ export const readField = (doc: Record<string, unknown>, path: string): unknown =
 const strings = (value: unknown): string[] =>
   Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string') : [];
 
+const DISCOVERY_PREFIX = 'kibana.alert.attack_discovery';
+
+/** `{ token: original }` from the stored `replacements` list of `{ uuid, value }` pairs. */
+const replacementsOf = (doc: Record<string, unknown>): Replacements => {
+  const stored = readField(doc, `${DISCOVERY_PREFIX}.replacements`);
+  const pairs = Array.isArray(stored) ? stored : stored === undefined ? [] : [stored];
+  return Object.fromEntries(
+    pairs.flatMap((pair) => {
+      const uuid = asString(asRecord(pair)?.uuid);
+      const value = asString(asRecord(pair)?.value);
+      return uuid && value ? [[uuid, value]] : [];
+    })
+  );
+};
+
+/**
+ * A narrative field as the analyst reads it: the stored `<field>_with_replacements` value when
+ * present, otherwise the anonymized `<field>` with the document's own replacements applied.
+ * Generation sees anonymized tokens, so scanning the raw field would miss the real entity names.
+ */
+const readNarrative = (
+  doc: Record<string, unknown>,
+  field: string,
+  replacements: Replacements
+): string | undefined => {
+  const restored = asString(readField(doc, `${DISCOVERY_PREFIX}.${field}_with_replacements`));
+  if (restored !== undefined) return restored;
+  const raw = asString(readField(doc, `${DISCOVERY_PREFIX}.${field}`));
+  return raw !== undefined && Object.keys(replacements).length > 0
+    ? replaceAnonymizedValuesWithOriginalValues({ messageContent: raw, replacements })
+    : raw;
+};
+
 /**
  * Maps persisted discovery documents to the shape the audit evaluators read, with the seeded
- * alert ids translated back to the scenario's own ids.
+ * alert ids translated back to the scenario's own ids and the narrative de-anonymized.
  */
 export const toInsights = (
   docs: readonly Record<string, unknown>[],
@@ -110,20 +147,17 @@ export const toInsights = (
   for (const doc of docs) {
     const id = asString(readField(doc, 'kibana.alert.uuid'));
     if (id) ids.push(id);
-    const tactics = strings(readField(doc, 'kibana.alert.attack_discovery.mitre_attack_tactics'));
+    const tactics = strings(readField(doc, `${DISCOVERY_PREFIX}.mitre_attack_tactics`));
+    const replacements = replacementsOf(doc);
     insights.push({
       ...(id ? { id } : {}),
-      alertIds: strings(readField(doc, 'kibana.alert.attack_discovery.alert_ids')).map(
+      alertIds: strings(readField(doc, `${DISCOVERY_PREFIX}.alert_ids`)).map(
         (alertId) => goldIdBySeededId.get(alertId) ?? alertId
       ),
-      title: asString(readField(doc, 'kibana.alert.attack_discovery.title')) ?? '',
-      summaryMarkdown:
-        asString(readField(doc, 'kibana.alert.attack_discovery.summary_markdown')) ?? '',
-      detailsMarkdown:
-        asString(readField(doc, 'kibana.alert.attack_discovery.details_markdown')) ?? '',
-      entitySummaryMarkdown: asString(
-        readField(doc, 'kibana.alert.attack_discovery.entity_summary_markdown')
-      ),
+      title: readNarrative(doc, 'title', replacements) ?? '',
+      summaryMarkdown: readNarrative(doc, 'summary_markdown', replacements) ?? '',
+      detailsMarkdown: readNarrative(doc, 'details_markdown', replacements) ?? '',
+      entitySummaryMarkdown: readNarrative(doc, 'entity_summary_markdown', replacements),
       ...(tactics.length > 0 ? { mitreAttackTactics: tactics } : {}),
     });
   }
