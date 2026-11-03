@@ -785,9 +785,8 @@ export class WorkflowsExecutionEnginePlugin
                     execution.context?.pendingInteractiveResume === true &&
                     execution.context?.resumeInput != null;
                 }
-                const accepted = await new WorkflowTaskManager(
-                  pluginsStart.taskManager
-                ).tryRunImmediateResume({
+                const workflowTaskManager = new WorkflowTaskManager(pluginsStart.taskManager);
+                const accepted = await workflowTaskManager.tryRunImmediateResume({
                   executionId: workflowRunId,
                   spaceId,
                   fakeRequest,
@@ -796,7 +795,7 @@ export class WorkflowsExecutionEnginePlugin
                   runAs: getWorkflowTaskRunAs(fakeRequest),
                 });
                 // A request never loads workflow checkpoints or invokes steps. Busy
-                // runners keep their claim; this notification retries durably in TM.
+                // runners keep their claim; the retained wake task retries durably in TM.
                 if (retainedWake) {
                   // Retention closes the ensure-vs-delete race, including approvals written mid-claim.
                   return {
@@ -807,7 +806,16 @@ export class WorkflowsExecutionEnginePlugin
                     priority: getTaskPriority({ isUserInteractive }),
                   };
                 }
-                return accepted ? undefined : { runAt: new Date(Date.now() + 1000), state: {} };
+                if (!accepted) {
+                  // Re-arming this task would let terminal cleanup delete it mid-claim; cleanup skips the wake task.
+                  await workflowTaskManager.handOffToWakeTask({
+                    executionId: workflowRunId,
+                    spaceId,
+                    fakeRequest,
+                    runAs: getWorkflowTaskRunAs(fakeRequest),
+                  });
+                }
+                return;
               }
 
               const currentExecution = await workflowExecutionRepository.getWorkflowExecutionById(
