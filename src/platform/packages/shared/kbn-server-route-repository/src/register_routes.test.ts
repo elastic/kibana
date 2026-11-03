@@ -129,7 +129,7 @@ describe('registerRoutes', () => {
 
     const [versionedRoute] = postAddVersion.mock.calls[0];
     expect(versionedRoute.version).toEqual('version');
-    expect(versionedRoute.validate).toEqual({
+    expect(versionedRoute.validate).toStrictEqual({
       request: noParamsValidationObject,
     });
 
@@ -141,6 +141,65 @@ describe('registerRoutes', () => {
         enabled: false,
         reason: 'whatever',
       },
+    });
+  });
+
+  it('forwards the OAS operation metadata to versioned routes', () => {
+    callRegisterRoutes({
+      'POST /api/public_route version': {
+        endpoint: 'POST /api/public_route version',
+        options: {
+          access: 'public',
+          summary: 'Create a resource',
+          description: 'Creates a resource.',
+          operationId: 'createResourceOp',
+        },
+        handler: jest.fn(),
+        security: disabledAuthz,
+      },
+    } satisfies ServerRouteRepository);
+
+    const [versionedRouteConfig] = postWithVersion.mock.calls[0];
+    expect(versionedRouteConfig).toEqual(
+      expect.objectContaining({
+        summary: 'Create a resource',
+        description: 'Creates a resource.',
+        operationId: 'createResourceOp',
+      })
+    );
+    expect(versionedRouteConfig.options).not.toHaveProperty('operationId');
+  });
+
+  it('forwards response schemas to versioned and unversioned routes', () => {
+    const responses = {
+      200: { description: 'OK', body: () => z.object({ id: z.string() }) },
+    };
+
+    callRegisterRoutes({
+      'POST /internal/route': {
+        endpoint: 'POST /internal/route',
+        handler: jest.fn(),
+        security: disabledAuthz,
+        responses,
+      },
+      'POST /api/public_route version': {
+        endpoint: 'POST /api/public_route version',
+        handler: jest.fn(),
+        security: disabledAuthz,
+        responses,
+      },
+    } satisfies ServerRouteRepository);
+
+    const [internalRoute] = post.mock.calls[0];
+    expect(internalRoute.validate).toEqual({
+      request: noParamsValidationObject,
+      response: responses,
+    });
+
+    const [versionedRoute] = postAddVersion.mock.calls[0];
+    expect(versionedRoute.validate).toEqual({
+      request: noParamsValidationObject,
+      response: responses,
     });
   });
 

@@ -8,6 +8,7 @@
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 
 import { AttackDiscoveryError } from '../../errors/attack_discovery_error';
+import { isContentFilterError } from '../../errors/is_content_filter_error';
 import { isContextLengthExceededError } from '../../errors/is_context_length_exceeded_error';
 import {
   ATTACK_DISCOVERY_STEP_FAILURE_EVENT,
@@ -42,6 +43,12 @@ const CATEGORY_RULES: ReadonlyArray<{
   {
     category: 'context_length_exceeded',
     test: (l) => isContextLengthExceededError(l),
+  },
+  // A model refusal (e.g. `finish_reason: content_filter`) is checked before `timeout`: it is the
+  // cause even when the step later timed out, and retrying or sending fewer alerts does not help.
+  {
+    category: 'content_filter',
+    test: (l) => isContentFilterError(l),
   },
   {
     category: 'timeout',
