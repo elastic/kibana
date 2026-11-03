@@ -7,7 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { attackDiscoveryIndexForSpace } from './constants';
+import { alertsIndexForSpace, attackDiscoveryIndexForSpace } from './constants';
 import type { KbnRequest } from './kbn_request';
 import {
   assertCleanSpace,
@@ -134,6 +134,84 @@ describe('seedScenario', () => {
       spaceId: 's',
     });
     expect([...result.openAlertIds].sort()).toEqual(scenario.alerts.map(({ id }) => id).sort());
+  });
+});
+
+describe('seedScenario partial failure', () => {
+  const log = { info: jest.fn() } as unknown as ToolingLog;
+  const scenario = AUDIT_SCENARIOS[0];
+
+  const deletedIndices = (deleteByQuery: jest.Mock): string[] =>
+    deleteByQuery.mock.calls.map(([{ index }]) => index);
+
+  it('removes the seed when the bulk write rejects some alerts', async () => {
+    const deleteByQuery = jest.fn(async () => ({}));
+    const bulk = jest.fn(async () => ({
+      errors: true,
+      items: [{ index: { error: { type: 'mapper_parsing_exception' } } }],
+    }));
+    await expect(
+      seedScenario({ esClient: esWith({ bulk, deleteByQuery }), log, scenario, spaceId: 's' })
+    ).rejects.toThrow(/Seeding ".*" failed/);
+    expect(deletedIndices(deleteByQuery)).toContain(alertsIndexForSpace('s'));
+    expect(deleteByQuery).toHaveBeenCalledTimes(3);
+  });
+
+  it('removes the seed when reading the open alerts back fails', async () => {
+    const deleteByQuery = jest.fn(async () => ({}));
+    const bulk = jest.fn(async () => ({ errors: false, items: [] }));
+    const search = jest.fn().mockRejectedValue(new Error('search unavailable'));
+    await expect(
+      seedScenario({
+        esClient: esWith({ bulk, search, deleteByQuery }),
+        log,
+        scenario,
+        spaceId: 's',
+      })
+    ).rejects.toThrow(/search unavailable/);
+    expect(deleteByQuery).toHaveBeenCalledTimes(3);
+  });
+
+  it('scopes the alert delete to the failed seed, by its run marker', async () => {
+    const deleteByQuery = jest.fn(async (_args: { index: string; query?: unknown }) => ({}));
+    const bulk = jest.fn(async () => ({ errors: true, items: [{ index: { error: {} } }] }));
+    await seedScenario({
+      esClient: esWith({ bulk, deleteByQuery }),
+      log,
+      scenario,
+      spaceId: 's',
+    }).catch(() => undefined);
+    const alertsDelete = deleteByQuery.mock.calls.find(
+      ([{ index }]) => index === alertsIndexForSpace('s')
+    );
+    expect(alertsDelete?.[0].query).toEqual({ prefix: { tags: expect.stringMatching(/^adw-/) } });
+  });
+
+  it('reports both failures when the partial seed cannot be removed', async () => {
+    const deleteByQuery = jest.fn().mockRejectedValue(new Error('es unavailable'));
+    const bulk = jest.fn(async () => ({ errors: true, items: [{ index: { error: {} } }] }));
+    await expect(
+      seedScenario({ esClient: esWith({ bulk, deleteByQuery }), log, scenario, spaceId: 's' })
+    ).rejects.toThrow(/partial seed could not be removed/);
+  });
+
+  it('deletes nothing when the space is dirty, because the leftovers are not this seed', async () => {
+    const deleteByQuery = jest.fn(async () => ({}));
+    const count = jest.fn(async () => ({ count: 1 }));
+    await expect(
+      seedScenario({ esClient: esWith({ count, deleteByQuery }), log, scenario, spaceId: 's' })
+    ).rejects.toThrow(/not clean/);
+    expect(deleteByQuery).not.toHaveBeenCalled();
+  });
+});
+
+describe('cleanupSeed on a partly seeded space', () => {
+  it('tolerates a missing alerts index', async () => {
+    const deleteByQuery = jest.fn(
+      async (_args: { index: string; ignore_unavailable?: boolean }) => ({})
+    );
+    await cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded });
+    expect(deleteByQuery.mock.calls.every(([args]) => args.ignore_unavailable === true)).toBe(true);
   });
 });
 

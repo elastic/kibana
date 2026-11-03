@@ -7,11 +7,15 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import { computeScoreStats, type ScoreStats } from '../score_stats';
+import {
+  AUDIT_POSITIVE_CONTROL_RECALL_EVALUATOR_NAME,
+  POSITIVE_CONTROL_RECALL_THRESHOLD,
+} from './audit_positive_control_recall_evaluator';
 import type { WorkerEvaluator } from './dataset_evaluator';
 
 export type ScoreSink = Map<string, Array<number | null>>;
 
-/** A CODE evaluator result other than 1 or N/A, with the row it came from. */
+/** A CODE evaluator result below its pass threshold (1 by default), with the row it came from. */
 export interface CodeFailure {
   evaluator: string;
   row: string;
@@ -19,6 +23,29 @@ export interface CodeFailure {
   label?: string | null;
   explanation?: string | null;
 }
+
+/**
+ * Score a CODE evaluator needs to pass when it is not exactly 1. Only graded evaluators appear
+ * here; their own `recalled`/`missed` label uses the same constant, so the gate and the label
+ * cannot disagree.
+ */
+export const CODE_PASS_THRESHOLDS: Readonly<Record<string, number>> = {
+  [AUDIT_POSITIVE_CONTROL_RECALL_EVALUATOR_NAME]: POSITIVE_CONTROL_RECALL_THRESHOLD,
+};
+
+/** N/A is never a miss; a `null` score otherwise is, and so is a score below the pass threshold. */
+export const isCodeMiss = ({
+  evaluator,
+  score,
+  label,
+}: {
+  evaluator: string;
+  score: number | null | undefined;
+  label?: string | null;
+}): boolean => {
+  if (label === 'N/A') return false;
+  return score == null || score < (CODE_PASS_THRESHOLDS[evaluator] ?? 1);
+};
 
 export interface RunCollector {
   scores: ScoreSink;
@@ -47,7 +74,11 @@ export const withScoreCollection = (
       const bucket = collector.scores.get(evaluator.name) ?? [];
       bucket.push(result.score ?? null);
       collector.scores.set(evaluator.name, bucket);
-      const miss = result.score !== 1 && result.label !== 'N/A';
+      const miss = isCodeMiss({
+        evaluator: evaluator.name,
+        score: result.score,
+        label: result.label,
+      });
       if (miss && evaluator.kind === 'CODE') {
         collector.codeFailures.push({
           evaluator: evaluator.name,
@@ -68,9 +99,10 @@ export const withScoreCollection = (
   }));
 
 /**
- * The pass criterion for CODE evaluators: every applicable check scores exactly 1 on every row.
- * A 0 is a pinned behavior that changed; MISSING is an artifact that should exist and does not.
- * Both fail the dataset after the summary is logged. LLM judges are reported, never gated here.
+ * The pass criterion for CODE evaluators: every applicable check scores 1 on every row, except
+ * the graded ones in `CODE_PASS_THRESHOLDS`, which pass at their threshold. A 0 is a pinned
+ * behavior that changed; MISSING is an artifact that should exist and does not. Both fail the
+ * dataset after the summary is logged. LLM judges are reported, never gated here.
  */
 export const assertCodeScoresPass = (datasetName: string, failures: CodeFailure[]): void => {
   if (failures.length === 0) return;
@@ -83,7 +115,9 @@ export const assertCodeScoresPass = (datasetName: string, failures: CodeFailure[
   throw new Error(
     `${datasetName}: ${
       failures.length
-    } CODE evaluator miss(es); every applicable CODE check must score 1\n${lines.join('\n')}`
+    } CODE evaluator miss(es); every applicable CODE check must score 1 (or reach its threshold)\n${lines.join(
+      '\n'
+    )}`
   );
 };
 

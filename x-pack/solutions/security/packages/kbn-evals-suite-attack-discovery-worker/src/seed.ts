@@ -469,30 +469,48 @@ export const seedScenario = async ({
       }),
     ];
   });
-  const response = await esClient.bulk({ refresh: 'wait_for', operations });
-  if (response.errors) {
-    const failed = response.items.find((item) => item.index?.error)?.index?.error;
-    throw new Error(`Seeding "${scenario.id}" failed: ${JSON.stringify(failed)}`);
-  }
-  const open = await esClient.search({
-    index: alertsIndexForSpace(spaceId),
-    query: { term: { 'kibana.alert.workflow_status': 'open' } },
-    _source: false,
-    size: 10_000,
-  });
-  const openAlertIds = open.hits.hits.map(
-    ({ _id }) => goldIdBySeededId.get(String(_id)) ?? String(_id)
-  );
-  log.info(
-    `[ad-worker] seeded ${scenario.alerts.length} alerts for "${scenario.id}" (${runMarker})`
-  );
-  return {
+  const seeded: SeededScenario = {
     runMarker,
     spaceId,
     goldIdBySeededId,
     alertCount: scenario.alerts.length,
-    openAlertIds,
+    openAlertIds: [],
   };
+  // The caller only receives `seeded` when this resolves, so it cannot clean up a seed that fails
+  // midway. A bulk with some rejected items, or a failed read, has already left alerts behind and
+  // the next row would fail `assertCleanSpace`.
+  try {
+    const response = await esClient.bulk({ refresh: 'wait_for', operations });
+    if (response.errors) {
+      const failed = response.items.find((item) => item.index?.error)?.index?.error;
+      throw new Error(`Seeding "${scenario.id}" failed: ${JSON.stringify(failed)}`);
+    }
+    const open = await esClient.search({
+      index: alertsIndexForSpace(spaceId),
+      query: { term: { 'kibana.alert.workflow_status': 'open' } },
+      _source: false,
+      size: 10_000,
+    });
+    seeded.openAlertIds = open.hits.hits.map(
+      ({ _id }) => goldIdBySeededId.get(String(_id)) ?? String(_id)
+    );
+  } catch (seedError) {
+    try {
+      await cleanupSeed({ esClient, seeded });
+    } catch (cleanupError) {
+      throw new AggregateError(
+        [seedError, cleanupError],
+        `Seeding "${scenario.id}" failed (${errorMessage(
+          seedError
+        )}) and the partial seed could not be removed`
+      );
+    }
+    throw seedError;
+  }
+  log.info(
+    `[ad-worker] seeded ${scenario.alerts.length} alerts for "${scenario.id}" (${runMarker})`
+  );
+  return seeded;
 };
 
 /**
@@ -528,8 +546,10 @@ export const assertCleanSpace = async ({
 
 /**
  * Removes a seed's alerts, the space's fingerprints so the next row cannot match an attack from
- * this one, and the space's persisted discoveries. Every delete is attempted; any that fails
- * is thrown, because a space left dirty would poison the next row.
+ * this one, and the space's persisted discoveries. Safe on a partly written seed: each delete is a
+ * query that matches nothing when its target is absent, and a missing index is ignored. Every
+ * delete is attempted; any that fails is thrown, because a space left dirty would poison the next
+ * row.
  */
 export const cleanupSeed = async ({
   esClient,
@@ -548,6 +568,7 @@ export const cleanupSeed = async ({
           query: { prefix: { tags: runMarker } },
           conflicts: 'proceed',
           refresh: true,
+          ignore_unavailable: true,
         }),
     },
     {

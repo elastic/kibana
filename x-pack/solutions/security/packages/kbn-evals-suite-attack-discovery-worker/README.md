@@ -25,7 +25,16 @@ workflows until they park, and scores what happened.
 | Discovery and verdict quality                     | LLM judge (reported, never gates) |
 
 Code scores gate through `assertCodeScoresPass`: a `null` score is never a pass, and `N/A` and
-`MISSING` are distinct outcomes.
+`MISSING` are distinct outcomes. A code check passes at a score of 1, except the graded ones listed
+in `CODE_PASS_THRESHOLDS` (`run_summary.ts`): `PositiveControlRecall` passes at a recall of 0.6 or
+more, the same threshold behind its `recalled`/`missed` label.
+
+Seeding cleans up after itself: if the bulk write or the read-back fails midway, `seedScenario`
+removes what it already wrote before it throws, so the next row starts in a clean space.
+
+`src/config_load_path.test.ts` keeps `playwright.config.ts` and what it imports at config time free
+of `@kbn/workflows/managed`, whose `.yaml` imports Jest transforms but the Playwright loader cannot
+parse.
 
 `StageModelResolved` reads what each stage actually ran on and fails on a mismatch or when it
 cannot be read. Generation is read from `api_config.connector_id` on the persisted discoveries;
