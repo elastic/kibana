@@ -21,18 +21,19 @@ import { localServerChecks } from './checks/local_servers';
 import { esSnapshotChecks } from './checks/es_snapshot';
 import { dockerChecks } from './checks/docker';
 import { qafChecks } from './checks/qaf';
-import { getElasticCloudChecks } from './checks/elastic_cloud';
+import { getQafCloudChecks, getScoutCloudChecks } from './checks/elastic_cloud';
+
+type DoctorTarget = 'qaf' | 'scout' | 'local';
 
 interface DoctorSection {
-  title: string;
-  /** Checks for all locations when not set */
-  location?: DoctorLocation;
+  /** Checks for all targets when not set */
+  target?: DoctorTarget;
   checks: DoctorCheck[];
 }
 
 interface ReportedResult extends CheckResult {
   check: DoctorCheck;
-  location?: DoctorLocation;
+  target?: DoctorTarget;
 }
 
 interface DoctorOptions {
@@ -40,8 +41,6 @@ interface DoctorOptions {
   arch?: DoctorArch;
   fix: boolean;
 }
-
-const LOCATION_LABELS: Record<DoctorLocation, string> = { cloud: 'Cloud', local: 'Local' };
 
 const QAF_NAME = 'scout-tests';
 const CONFIG_PLACEHOLDER = '--config <playwright_config_path>';
@@ -70,19 +69,18 @@ const getRunCommands = (location: DoctorLocation, arch: DoctorArch): string[] =>
   ];
 };
 
-const RUN_LABELS: Record<DoctorLocation, string> = {
-  cloud: 'Run on Cloud',
-  local: 'Run locally',
+const TARGETS: Record<DoctorTarget, { title: string; location: DoctorLocation; run?: string }> = {
+  qaf: { title: 'Cloud with QAF', location: 'cloud', run: 'Run on Cloud with QAF' },
+  scout: { title: 'Cloud with Scout', location: 'cloud' },
+  local: { title: 'Local', location: 'local', run: 'Run locally' },
 };
 
 const getSections = (): DoctorSection[] => [
-  { title: 'General', checks: [...environmentChecks, ...playwrightChecks] },
-  { title: 'Cloud', location: 'cloud', checks: [...qafChecks, ...getElasticCloudChecks()] },
-  {
-    title: 'Local',
-    location: 'local',
-    checks: [...localServerChecks, ...esSnapshotChecks, ...dockerChecks],
-  },
+  { checks: [...environmentChecks, ...playwrightChecks] },
+  { target: 'qaf', checks: [...qafChecks, ...getQafCloudChecks()] },
+  // only when the config files for running Scout against Cloud without QAF exist
+  { target: 'scout', checks: getScoutCloudChecks() },
+  { target: 'local', checks: [...localServerChecks, ...esSnapshotChecks, ...dockerChecks] },
 ];
 
 const ICONS: Record<CheckResult['status'], string> = {
@@ -97,13 +95,18 @@ const MESSAGE_COLORS: Record<CheckResult['status'], (text: string) => string> = 
 };
 const PREFIX_WIDTH = '[serverless] '.length;
 
-const formatResult = ({ status, message, fix, hint }: CheckResult, prefix?: string) => {
+const formatResult = ({ status, message, details, fix, hint }: CheckResult, prefix?: string) => {
   const indent = prefix ? ' '.repeat(PREFIX_WIDTH) : '';
   const line = `   ${ICONS[status]} ${
     prefix ? chalk.dim(prefix.padEnd(PREFIX_WIDTH)) : ''
   }${MESSAGE_COLORS[status](message)}`;
   const remedy = fix ? chalk.cyan(fix.command) : hint && chalk.dim(hint);
-  return remedy ? `${line}\n     ${indent}${remedy}` : line;
+  return [
+    line,
+    ...[details && chalk.dim(details), remedy]
+      .filter(Boolean)
+      .map((text) => `     ${indent}${text}`),
+  ].join('\n');
 };
 
 const SPINNER_FRAMES = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏';
@@ -154,8 +157,8 @@ const runChecks = async (log: ToolingLog, sections: DoctorSection[]) => {
   sections.forEach(({ checks }) => checks.forEach(start));
 
   const reported: ReportedResult[] = [];
-  for (const { title, location, checks } of sections) {
-    log.write(`\n ${chalk.bold(title)}`);
+  for (const { target, checks } of sections) {
+    log.write(`\n ${chalk.bold(target ? TARGETS[target].title : 'General')}`);
     const results = await withSpinner(
       () => `Checking ${checks.find((check) => !done.has(check))?.title ?? ''}`,
       Promise.all(checks.map(start))
@@ -163,8 +166,8 @@ const runChecks = async (log: ToolingLog, sections: DoctorSection[]) => {
     checks.forEach((check, index) => {
       const result = results[index];
       if (result) {
-        reported.push({ ...result, check, location });
-        log.write(formatResult(result, location && `[${check.arch ?? 'general'}]`));
+        reported.push({ ...result, check, target });
+        log.write(formatResult(result, target && `[${check.arch ?? 'general'}]`));
       }
     });
   }
@@ -217,27 +220,33 @@ const applyFixes = async (log: ToolingLog, results: CheckResult[]) => {
   }
 };
 
-const getCell = (results: ReportedResult[], location: DoctorLocation, arch: DoctorArch) => {
+const getCell = (results: ReportedResult[], target: DoctorTarget, arch: DoctorArch) => {
   const relevant = results.filter(
     (result) =>
-      (!result.location || result.location === location) &&
+      (!result.target || result.target === target) &&
       (!result.check.arch || result.check.arch === arch)
   );
+  if (!relevant.some((result) => result.target === target)) {
+    // e.g. there is only a config for running Scout against a stateful deployment
+    return { applies: false, ready: false, text: '–', color: chalk.dim };
+  }
+
   const failed = relevant.filter(({ status }) => status === 'fail').length;
   const warnings = relevant.filter(({ status }) => status === 'warn').length;
   if (failed) {
-    return { ready: false, text: `✖ ${failed} failed`, color: chalk.red };
+    return { applies: true, ready: false, text: `✖ ${failed} failed`, color: chalk.red };
   }
   return warnings
     ? {
+        applies: true,
         ready: true,
         text: `✔ ready, ${warnings} warning${warnings === 1 ? '' : 's'}`,
         color: chalk.yellow,
       }
-    : { ready: true, text: '✔ ready', color: chalk.green };
+    : { applies: true, ready: true, text: '✔ ready', color: chalk.green };
 };
 
-const ROW_LABEL_WIDTH = 12;
+const ROW_LABEL_WIDTH = 18;
 const COLUMN_WIDTH = 22;
 
 const toColumns = (cells: Array<{ text: string; color: (text: string) => string }>) =>
@@ -247,11 +256,11 @@ const toColumns = (cells: Array<{ text: string; color: (text: string) => string 
     )
     .join('');
 
-/** Prints which locations and architectures are ready */
+/** Prints which targets and architectures are ready */
 const printReadiness = (
   log: ToolingLog,
   results: ReportedResult[],
-  locations: DoctorLocation[],
+  targets: DoctorTarget[],
   archs: DoctorArch[]
 ) => {
   log.write(
@@ -259,10 +268,10 @@ const printReadiness = (
       archs.map((arch) => ({ text: arch, color: chalk.bold }))
     )}`
   );
-  return locations.map((location) => {
-    const cells = archs.map((arch) => getCell(results, location, arch));
-    log.write(` ${LOCATION_LABELS[location].padEnd(ROW_LABEL_WIDTH)}${toColumns(cells)}`);
-    return { location, cells };
+  return targets.map((target) => {
+    const cells = archs.map((arch) => getCell(results, target, arch));
+    log.write(` ${TARGETS[target].title.padEnd(ROW_LABEL_WIDTH)}${toColumns(cells)}`);
+    return { target, cells };
   });
 };
 
@@ -277,20 +286,24 @@ export const runDoctor = async (
   const archs = arch ? [arch] : DOCTOR_ARCHS;
   const getChecks = () =>
     getSections()
-      .filter((section) => !section.location || locations.includes(section.location))
+      .filter(({ target }) => !target || locations.includes(TARGETS[target].location))
       .map((section) => ({
         ...section,
         checks: section.checks.filter((check) => !check.arch || archs.includes(check.arch)),
-      }));
+      }))
+      .filter(({ checks }) => checks.length);
 
-  let results = await runChecks(log, getChecks());
+  let sections = getChecks();
+  let results = await runChecks(log, sections);
   if (fix && results.some((result) => result.fix)) {
     await applyFixes(log, results);
     log.write(`\n ${chalk.bold('Checking again')}`);
-    results = await runChecks(log, getChecks());
+    sections = getChecks();
+    results = await runChecks(log, sections);
   }
 
-  const rows = printReadiness(log, results, locations, archs);
+  const targets = sections.flatMap(({ target }) => (target ? [target] : []));
+  const rows = printReadiness(log, results, targets, archs);
 
   if (!fix && results.some((result) => result.fix)) {
     const flags = [
@@ -304,27 +317,31 @@ export const runDoctor = async (
     );
   }
 
-  const readyLocations = rows.filter(({ cells }) => cells.some(({ ready }) => ready));
-  if (!readyLocations.length) {
+  const readyRows = rows.filter(({ cells }) => cells.some(({ ready }) => ready));
+  if (!readyRows.length) {
     log.write(chalk.red.bold('\n ✖ Fix the failed checks before using Scout'));
   }
-  for (const { location: readyLocation, cells } of readyLocations) {
-    const recommended = readyLocation === 'cloud' && locations.length > 1 ? ' (recommended)' : '';
-    log.write(`\n ${chalk.bold(`${RUN_LABELS[readyLocation]}${recommended}`)}`);
+  for (const { target, cells } of readyRows) {
+    const { location: targetLocation, run } = TARGETS[target];
+    if (!run) {
+      continue;
+    }
+    const recommended = target === 'qaf' && locations.length > 1 ? ' (recommended)' : '';
+    log.write(`\n ${chalk.bold(`${run}${recommended}`)}`);
     archs
       .filter((_, index) => cells[index].ready)
       .forEach((readyArch) =>
-        getRunCommands(readyLocation, readyArch).forEach((command, index) =>
+        getRunCommands(targetLocation, readyArch).forEach((command, index) =>
           log.write(`   ${(index ? '' : readyArch).padEnd(PREFIX_WIDTH)}${chalk.cyan(command)}`)
         )
       );
-    if (readyLocation === 'cloud') {
+    if (target === 'qaf') {
       log.write(chalk.dim(`   Next runs reuse ${QAF_NAME}: run only the run-config line`));
     }
   }
   log.write('');
 
-  const cells = rows.flatMap((row) => row.cells);
+  const cells = rows.flatMap((row) => row.cells).filter(({ applies }) => applies);
   // without filters, a target you don't use (e.g. local serverless without Docker) shouldn't fail it
   return filters.length ? cells.every(({ ready }) => ready) : cells.some(({ ready }) => ready);
 };

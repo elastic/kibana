@@ -80,25 +80,26 @@ const getDefinedRoles = (users: Users) =>
 
 const quoteRoles = (roles: string[]) => roles.map((role) => `"${role}"`).join(', ');
 
-/** Checks users by role, e.g. "Cloud users" in ~/.elastic/cloud.json (qa) */
-const checkUsers = (
-  { label, file }: { label: string; file?: string },
-  users: Users,
-  expected: string[],
-  copyFix?: Fix
-): CheckResult => {
+/** Checks that a users file has a user for every expected role */
+const checkUsers = (file: string, users: Users, expected: string[], copyFix?: Fix): CheckResult => {
   const roles = [...new Set(expected)];
   const defined = getDefinedRoles(users);
   const missing = roles.filter((role) => !defined.includes(role));
-  const inFile = file ? ` in ${file}` : '';
-  const remedy = copyFix
-    ? { fix: copyFix, hint: `copy them only if they are ${getEnvironment()} users` }
-    : { hint: 'tests that log in with these roles will fail' };
   if (!missing.length) {
-    return pass(`${label} are defined${inFile}: ${quoteRoles(roles)}`);
+    return pass(
+      `${file} has users for ${roles.length > 3 ? `all ${roles.length} roles` : quoteRoles(roles)}`
+    );
   }
 
-  const message = `Missing ${label}${inFile} for roles: ${quoteRoles(missing)}`;
+  const message = `${file} has no users for ${
+    missing.length === 1 ? quoteRoles(missing) : `${missing.length} roles`
+  }, tests that log in with ${missing.length === 1 ? 'it' : 'them'} will fail`;
+  const remedy = {
+    ...(missing.length > 1 ? { details: quoteRoles(missing) } : {}),
+    ...(copyFix
+      ? { fix: copyFix, hint: `copy them only if they are ${getEnvironment()} users` }
+      : {}),
+  };
   return missing.includes('admin') ? fail(message, remedy) : warn(message, remedy);
 };
 
@@ -153,7 +154,7 @@ const cloudUsersCheck: DoctorCheck = {
       );
     }
     return checkUsers(
-      { label: 'Cloud users', file: `${tildify(CLOUD_SECRETS_FILE)} (${env})` },
+      `${tildify(CLOUD_SECRETS_FILE)} (${env})`,
       await readCloudUsers(),
       ['admin'],
       copyFix
@@ -169,7 +170,7 @@ const cloudRolesCheck = (arch: DoctorArch): DoctorCheck => ({
     // admin is checked for both architectures at once
     const roles = getRoles(arch).filter((role) => role !== 'admin');
     return checkUsers(
-      { label: 'Cloud users' },
+      `${tildify(CLOUD_SECRETS_FILE)} (${getEnvironment()})`,
       await readCloudUsers(),
       roles,
       await getCopyFtrUsersFix(roles)
@@ -183,7 +184,7 @@ const apiKeyCheck: DoctorCheck = {
     const env = getEnvironment();
     const secrets = await readJson<CloudSecrets>(CLOUD_SECRETS_FILE);
     return secrets?.api_key?.[env]
-      ? pass(`Elastic Cloud API key (${env}) is set`)
+      ? pass(`Elastic Cloud API key (${env}) is set in ${tildify(CLOUD_SECRETS_FILE)}`)
       : fail(`No Elastic Cloud API key under api_key.${env} in ${tildify(CLOUD_SECRETS_FILE)}`, {
           hint: 'QAF needs it to create projects and deployments',
         });
@@ -244,11 +245,7 @@ const scoutUsersCheck = (arch: DoctorArch, configCheck: DoctorCheck): DoctorChec
       });
     }
 
-    return checkUsers(
-      { label: 'Scout Cloud users', file: displayPath(usersFile) },
-      users,
-      getRoles(arch, config?.projectType)
-    );
+    return checkUsers(displayPath(usersFile), users, getRoles(arch, config?.projectType));
   },
 });
 
@@ -279,13 +276,16 @@ const getQafRunFileChecks = (): DoctorCheck[] => {
       ];
 };
 
-export const getElasticCloudChecks = (): DoctorCheck[] => [
+export const getQafCloudChecks = (): DoctorCheck[] => [
   apiKeyCheck,
   cloudUsersCheck,
   ...DOCTOR_ARCHS.map(cloudRolesCheck),
-  ...DOCTOR_ARCHS.filter((arch) => existsInRepo(SCOUT_CLOUD_CONFIGS[arch])).flatMap((arch) => {
-    const configCheck = scoutConfigCheck(arch);
-    return [configCheck, scoutUsersCheck(arch, configCheck)];
-  }),
   ...getQafRunFileChecks(),
 ];
+
+/** Checks for running Scout against Cloud without QAF, only when its config files exist */
+export const getScoutCloudChecks = (): DoctorCheck[] =>
+  DOCTOR_ARCHS.filter((arch) => existsInRepo(SCOUT_CLOUD_CONFIGS[arch])).flatMap((arch) => {
+    const configCheck = scoutConfigCheck(arch);
+    return [configCheck, scoutUsersCheck(arch, configCheck)];
+  });

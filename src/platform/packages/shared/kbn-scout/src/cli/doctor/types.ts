@@ -27,6 +27,8 @@ export interface Fix {
 export interface CheckResult {
   status: CheckStatus;
   message: string;
+  /** Shown on its own line, e.g. a long list of roles */
+  details?: string;
   /** Shown when there is no command to fix it */
   hint?: string;
   fix?: Fix;
@@ -41,7 +43,7 @@ export interface DoctorCheck {
   run: () => Promise<CheckResult>;
 }
 
-type Remedy = Pick<CheckResult, 'hint' | 'fix'>;
+type Remedy = Pick<CheckResult, 'details' | 'hint' | 'fix'>;
 
 export const pass = (message: string): CheckResult => ({ status: 'pass', message });
 export const warn = (message: string, remedy?: Remedy): CheckResult => ({
