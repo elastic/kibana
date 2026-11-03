@@ -98,6 +98,8 @@ export default ({ getService }: FtrProviderContext) => {
             frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
           },
         ];
+        // the rule is saved to persist the migration, which increments its revision
+        outputRule.revision = 1;
         expect(bodyToCompare).to.eql(outputRule);
 
         // the migration is persisted on the rule and the sidecar is gone

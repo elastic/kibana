@@ -459,6 +459,8 @@ describe('bulkDelete', () => {
 
   describe('legacy SIEM actions', () => {
     test('migrates the legacy actions in memory so the deleted rules are returned with them', async () => {
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({ statuses: [] });
+
       await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
 
       expect(bulkMigrateLegacyActions).toHaveBeenCalled();
