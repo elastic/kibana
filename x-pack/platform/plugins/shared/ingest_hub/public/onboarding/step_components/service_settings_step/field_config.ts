@@ -30,8 +30,9 @@ export interface FieldMeta {
 
 /**
  * ECF trigger vars are `multi: false` in the upstream package manifest, but ECF can route
- * multiple sources per service. We override `multi: true` so the flyout renders an "Add row"
- * list and buildStreamVars emits a string array.
+ * multiple sources per service. In the ECF view we override `multi: true` so the flyout renders
+ * an "Add row" list. The agent-based view keeps the manifest's `multi`: an array sent to a
+ * single-value var would render as a comma-joined value in the agent config.
  *
  * TODO: remove this override once elastic/integrations sets `multi: true` for these vars
  * in all AWS package data streams that ECF services use.
@@ -70,7 +71,9 @@ export function resolveFieldMeta(
   return {
     def,
     isBool: def.type === 'bool',
-    multi: def.multi === true || ECF_TRIGGER_VAR_NAMES.has(fieldName),
+    multi:
+      def.multi === true ||
+      (service.settingsScope === 'ecf' && ECF_TRIGGER_VAR_NAMES.has(fieldName)),
     showUser: def.show_user === true,
   };
 }
@@ -115,12 +118,12 @@ const SOURCE_VAR_GROUPS: Record<string, string[]> = {
 };
 
 /**
- * Whether the "at least one source" rule applies to `service` right now: ECF-capable services
- * shown in the agent-based view, where Step 2 first collected only the trigger ARN. Widening the
- * rule to more services only needs a change here.
+ * Whether the "at least one source" rule applies to `service` right now: every service shown in
+ * the agent-based view (managed integration or self-managed agent). The ECF view collects only
+ * the trigger ARN, which its own required check covers.
  */
 function appliesSourceRule(service: AwsServiceMatrixEntry): boolean {
-  return !!service.ecfSettings && service.settingsScope !== 'ecf';
+  return service.settingsScope !== 'ecf';
 }
 
 /**
