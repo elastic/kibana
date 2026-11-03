@@ -326,7 +326,7 @@ make kind-delete    # from either repo
 | cert-manager: `selectableFields: field not declared in schema` | kind is older than v0.27.0. Upgrade kind (or create the cluster from `streams-controller`), then `make kind-delete && make kind`. |
 | kind API server TLS handshake timeouts, `streamunit-watch` dies | Docker Desktop is out of memory. Raise it to 16 GB. |
 | Map: "Unable to get streams-configuration" | You logged in with a role that cannot read the Map saved objects. Log in as `elastic_serverless`. |
-| Map: add-source form lists no source types | `xpack.cloud.managed_otlp.url` is missing. Run `setup`, add the printed `xpack.cloud.managed_otlp.url to config/kibana.dev.yml`, and restart Kibana. |
+| Map: add-source form lists no source types | `xpack.cloud.managed_otlp.url` is missing. Run `setup`, add the printed `xpack.cloud.managed_otlp.url` to `config/kibana.dev.yml`, and restart Kibana. |
 | Collector `unknown type: "otlp_http"` | Collector image is too old for user-facing telemetry. Use a newer `STREAMS_COLLECTOR_TAG` from `streams-controller` helm values. |
 | Motel `ImagePullBackOff` / `:latest: not found` | These CI images have no `latest` tag. Re-run this script (it now keeps the motel image already on the cluster). |
 | Collector `x509` / unknown authority | Saving Map republishes the unit and drops the local TLS patch. Re-run `seed` or `test_ui_flow` (they re-apply it). |
