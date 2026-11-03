@@ -166,16 +166,17 @@ const findForRole = (accounts: ListedServiceAccount[], name: string, role: strin
 };
 
 /**
- * Finds the deployment's Nightshift service account of one kind by name, or creates it with its
- * role, as the current user. Returns the id the backend assigned. An existing account is reused,
- * never changed, so setting up a second space reuses the account of the first.
- *
- * Throws a {@link NightshiftServiceAccountSetupError} when the account cannot be used or its role
- * is missing, and the API's own error otherwise.
+ * The account to use for a kind, found among the already listed `accounts` or created with its
+ * role as the current user. An existing account is reused, never changed, so setting up a second
+ * space reuses the account of the first.
  */
-export const ensureNightshiftServiceAccount = async (
+const ensureFromListed = async (
   api: NightshiftServiceAccountsApi,
-  { kind, isServerless }: { kind: NightshiftServiceAccountKind; isServerless: boolean }
+  {
+    accounts,
+    kind,
+    isServerless,
+  }: { accounts: ListedServiceAccount[]; kind: NightshiftServiceAccountKind; isServerless: boolean }
 ): Promise<string> => {
   const name = getNightshiftServiceAccountName(kind);
   const role = getNightshiftRoleName(kind, { isServerless });
@@ -186,7 +187,7 @@ export const ensureNightshiftServiceAccount = async (
     return account.id;
   };
 
-  const { account: existing, nameTaken } = findForRole(await listAll(api), name, role);
+  const { account: existing, nameTaken } = findForRole(accounts, name, role);
   if (existing) return toId(existing);
   if (nameTaken) {
     throw new NightshiftServiceAccountSetupError('role_mismatch', { kind, name, role });
@@ -212,13 +213,33 @@ export const ensureNightshiftServiceAccount = async (
 };
 
 /**
- * Finds or creates the accounts investigations run as: `agent` and `automations`. The detection
- * account is not part of it, see {@link ensureNightshiftServiceAccount}.
+ * Finds the deployment's Nightshift service account of one kind by name, or creates it with its
+ * role, as the current user. Returns the id the backend assigned.
+ *
+ * Throws a {@link NightshiftServiceAccountSetupError} when the account cannot be used or its role
+ * is missing, and the API's own error otherwise.
+ */
+export const ensureNightshiftServiceAccount = async (
+  api: NightshiftServiceAccountsApi,
+  { kind, isServerless }: { kind: NightshiftServiceAccountKind; isServerless: boolean }
+): Promise<string> => ensureFromListed(api, { accounts: await listAll(api), kind, isServerless });
+
+/**
+ * Finds the deployment's Nightshift service accounts by name, and creates the missing ones with
+ * their roles, as the current user. Returns the ids the backend assigned. The accounts are listed
+ * once for both kinds. The detection account is not part of it, see
+ * {@link ensureNightshiftServiceAccount}.
+ *
+ * Throws a {@link NightshiftServiceAccountSetupError} when an account cannot be used or its role
+ * is missing, and the API's own error otherwise.
  */
 export const ensureNightshiftServiceAccounts = async (
   api: NightshiftServiceAccountsApi,
   { isServerless }: { isServerless: boolean }
-): Promise<NightshiftServiceAccountIds> => ({
-  agent: await ensureNightshiftServiceAccount(api, { kind: 'agent', isServerless }),
-  automations: await ensureNightshiftServiceAccount(api, { kind: 'automations', isServerless }),
-});
+): Promise<NightshiftServiceAccountIds> => {
+  const accounts = await listAll(api);
+  return {
+    agent: await ensureFromListed(api, { accounts, kind: 'agent', isServerless }),
+    automations: await ensureFromListed(api, { accounts, kind: 'automations', isServerless }),
+  };
+};
