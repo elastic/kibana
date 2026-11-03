@@ -96,6 +96,8 @@ export const playwrightOverrides: OxlintOverride[] = [
       'playwright/require-to-throw-message': 'error',
       'playwright/require-top-level-describe': 'error',
       // Scout has its own runtime validator for test tags, so `playwright/valid-test-tags` stays off.
+      // `playwright/no-raw-locators` stays off: its `allowed` option only matches whole selectors, so it
+      // can't exempt test IDs and flags every `page.testSubj.locator(...)` call.
     },
   },
   {

@@ -6,8 +6,8 @@
  */
 
 import { chunk } from 'lodash';
+import { CaseStatuses } from '@kbn/cases-components/src/status/types';
 import { isBoom } from '@hapi/boom';
-import { CaseStatuses } from '@kbn/cases-components';
 import { SECURITY_ENTITY_ATTACHMENT_TYPE, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
 import type { CasesClient } from '@kbn/cases-plugin/server';
 
