@@ -18,11 +18,11 @@ export interface ResponseError {
   attributes?: Record<string, unknown>;
 }
 
-/** Kibana path of an Elasticsearch request sent through the es_proxy plugin. */
-export const esProxyPath = (esPath: string) =>
-  `/internal/es_proxy/${esPath.split('/').map(encodeURIComponent).join('/')}`;
+/** Kibana path of an Elasticsearch request sent through the es_client plugin. */
+export const esClientPath = (esPath: string) =>
+  `/internal/es_client/${esPath.split('/').map(encodeURIComponent).join('/')}`;
 
-/** Rejection of a failed es_proxy request, carrying an Elasticsearch error body. */
+/** Rejection of a failed es_client request, carrying an Elasticsearch error body. */
 const toEsFetchError = ({ statusCode, message }: ResponseError) =>
   Object.assign(new Error(String(message)), {
     name: 'HttpFetchError',
@@ -89,7 +89,7 @@ const registerHttpRequestMockHelpers = (
       .get(method)!
       .set(path, error ? defuse(Promise.reject({ body: error })) : Promise.resolve(response));
 
-  /** Mocks an Elasticsearch request sent through the es_proxy plugin. */
+  /** Mocks an Elasticsearch request sent through the es_client plugin. */
   const mockEsResponse = (
     method: HttpMethod,
     esPath: string,
@@ -99,7 +99,7 @@ const registerHttpRequestMockHelpers = (
     mockResponses
       .get(method)!
       .set(
-        esProxyPath(esPath),
+        esClientPath(esPath),
         error ? defuse(Promise.reject(toEsFetchError(error))) : Promise.resolve(response)
       );
 

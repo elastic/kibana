@@ -42,7 +42,7 @@ import {
   testUserStartPrivilegesResponse,
 } from './mocks';
 import { setupEnvironment, WithAppDependencies } from '../helpers/setup_environment';
-import { esProxyPath } from '../helpers/http_requests';
+import { esClientPath } from '../helpers/http_requests';
 import { renderIndexDetailsPage } from './index_details_page.helpers';
 
 jest.mock('@kbn/code-editor');
@@ -272,7 +272,7 @@ describe('<IndexDetailsPage />', () => {
       fireEvent.click(screen.getByTestId('indexDetailsTab-stats'));
       await waitFor(() => {
         expect(httpSetup.fetch).toHaveBeenCalledWith(
-          esProxyPath(`${testIndexName}/_stats`),
+          esClientPath(`${testIndexName}/_stats`),
           expect.objectContaining({ method: 'GET' })
         );
       });
@@ -552,7 +552,7 @@ describe('<IndexDetailsPage />', () => {
       await screen.findByTestId('indexDetailsSettingsCodeBlock');
       await waitFor(() => {
         expect(httpSetup.fetch).toHaveBeenCalledWith(
-          esProxyPath(`${testIndexName}/_settings`),
+          esClientPath(`${testIndexName}/_settings`),
           expect.objectContaining({ method: 'GET' })
         );
       });
@@ -685,7 +685,7 @@ describe('<IndexDetailsPage />', () => {
           expect(getMock.mock.calls.length).toBeGreaterThan(requestsBefore);
         });
         expect(httpSetup.fetch).toHaveBeenCalledWith(
-          esProxyPath(`${testIndexName}/_settings`),
+          esClientPath(`${testIndexName}/_settings`),
           expect.objectContaining({ method: 'GET' })
         );
       });
@@ -750,7 +750,7 @@ describe('<IndexDetailsPage />', () => {
 
       await waitFor(() => {
         expect(httpSetup.fetch).toHaveBeenCalledWith(
-          esProxyPath(`${testIndexName}/_close`),
+          esClientPath(`${testIndexName}/_close`),
           expect.objectContaining({ method: 'POST' })
         );
       });
@@ -775,7 +775,7 @@ describe('<IndexDetailsPage />', () => {
 
       await waitFor(() => {
         expect(httpSetup.fetch).toHaveBeenCalledWith(
-          esProxyPath(`${testIndexName}/_open`),
+          esClientPath(`${testIndexName}/_open`),
           expect.objectContaining({ method: 'POST' })
         );
       });
@@ -798,7 +798,7 @@ describe('<IndexDetailsPage />', () => {
 
       await waitFor(() => {
         expect(httpSetup.fetch).toHaveBeenCalledWith(
-          esProxyPath(`${testIndexName}/_forcemerge`),
+          esClientPath(`${testIndexName}/_forcemerge`),
           expect.objectContaining({
             method: 'POST',
             query: expect.objectContaining({ max_num_segments: 2 }),
@@ -821,7 +821,7 @@ describe('<IndexDetailsPage />', () => {
 
       await waitFor(() => {
         expect(httpSetup.fetch).toHaveBeenCalledWith(
-          esProxyPath(`${testIndexName}/_refresh`),
+          esClientPath(`${testIndexName}/_refresh`),
           expect.objectContaining({ method: 'GET' })
         );
       });
@@ -841,7 +841,7 @@ describe('<IndexDetailsPage />', () => {
 
       await waitFor(() => {
         expect(httpSetup.fetch).toHaveBeenCalledWith(
-          esProxyPath(`${testIndexName}/_cache/clear`),
+          esClientPath(`${testIndexName}/_cache/clear`),
           expect.objectContaining({ method: 'POST' })
         );
       });
@@ -861,7 +861,7 @@ describe('<IndexDetailsPage />', () => {
 
       await waitFor(() => {
         expect(httpSetup.fetch).toHaveBeenCalledWith(
-          esProxyPath(`${testIndexName}/_flush`),
+          esClientPath(`${testIndexName}/_flush`),
           expect.objectContaining({ method: 'GET' })
         );
       });
@@ -882,7 +882,7 @@ describe('<IndexDetailsPage />', () => {
 
       await waitFor(() => {
         expect(httpSetup.fetch).toHaveBeenCalledWith(
-          esProxyPath(testIndexName),
+          esClientPath(testIndexName),
           expect.objectContaining({ method: 'DELETE' })
         );
       });
@@ -918,7 +918,7 @@ describe('<IndexDetailsPage />', () => {
 
       await waitFor(() => {
         expect(httpSetup.fetch).toHaveBeenCalledWith(
-          esProxyPath(`${percentSignName}/_mapping`),
+          esClientPath(`${percentSignName}/_mapping`),
           expect.objectContaining({ method: 'GET' })
         );
       });
@@ -936,7 +936,7 @@ describe('<IndexDetailsPage />', () => {
 
       await waitFor(() => {
         expect(httpSetup.fetch).toHaveBeenCalledWith(
-          esProxyPath(`${percentSignName}/_settings`),
+          esClientPath(`${percentSignName}/_settings`),
           expect.objectContaining({ method: 'GET' })
         );
       });
@@ -996,7 +996,7 @@ describe('<IndexDetailsPage />', () => {
 
       await waitFor(() => {
         expect(httpSetup.fetch).toHaveBeenCalledWith(
-          esProxyPath(`${percentSignName}/_stats`),
+          esClientPath(`${percentSignName}/_stats`),
           expect.objectContaining({ method: 'GET' })
         );
       });
@@ -1297,7 +1297,7 @@ describe('<IndexDetailsPage />', () => {
       // Loads mappings
       await waitFor(() => {
         expect(httpSetup.fetch).toHaveBeenCalledWith(
-          esProxyPath(`${testIndexName}/_mapping`),
+          esClientPath(`${testIndexName}/_mapping`),
           expect.objectContaining({ method: 'GET' })
         );
       });
@@ -1522,7 +1522,7 @@ describe('<IndexDetailsPage />', () => {
 
         await waitFor(() => {
           expect(httpSetup.fetch).toHaveBeenCalledWith(
-            esProxyPath(`${testIndexName}/_mapping`),
+            esClientPath(`${testIndexName}/_mapping`),
             expect.objectContaining({
               method: 'PUT',
               body: '{"properties":{"my_field":{"type":"boolean"}}}',
@@ -1710,7 +1710,7 @@ describe('<IndexDetailsPage />', () => {
 
         await waitFor(() => {
           expect(httpSetup.fetch).toHaveBeenCalledWith(
-            esProxyPath(`${testIndexName}/_mapping`),
+            esClientPath(`${testIndexName}/_mapping`),
             expect.objectContaining({
               method: 'PUT',
               body: JSON.stringify({

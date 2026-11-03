@@ -2098,9 +2098,9 @@ importers:
       '@kbn/es-mappings':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-es-mappings
-      '@kbn/es-proxy-plugin':
+      '@kbn/es-client-plugin':
         specifier: workspace:*
-        version: link:src/platform/plugins/shared/es_proxy
+        version: link:src/platform/plugins/shared/es_client
       '@kbn/es-query':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-es-query
@@ -8725,7 +8725,7 @@ importers:
 
   src/platform/plugins/shared/embeddable: {}
 
-  src/platform/plugins/shared/es_proxy: {}
+  src/platform/plugins/shared/es_client: {}
 
   src/platform/plugins/shared/es_ui_shared: {}
 

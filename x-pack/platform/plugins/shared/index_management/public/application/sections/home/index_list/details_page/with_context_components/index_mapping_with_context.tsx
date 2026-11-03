@@ -9,7 +9,7 @@ import React from 'react';
 import { documentationService } from '../../../../../services';
 import { UIM_APP_NAME } from '../../../../../../../common/constants/ui_metric';
 import { httpService } from '../../../../../services/http';
-import { esProxyService } from '../../../../../services/es_proxy';
+import { esClientService } from '../../../../../services/es_client';
 import { NotificationService } from '../../../../../services/notification';
 import { UiMetricService } from '../../../../../services/ui_metric';
 import type { AppDependencies } from '../../../../..';
@@ -30,8 +30,8 @@ export const IndexMappingWithContext: React.FC<IndexMappingWithContextProps> = (
   if (!httpService.httpClient) {
     httpService.setup(core.http);
   }
-  if (!esProxyService.esProxy) {
-    esProxyService.setup(dependencies.plugins.esProxy);
+  if (!esClientService.esClient) {
+    esClientService.setup(dependencies.plugins.esClient);
   }
   const notificationService = new NotificationService(core.notifications.toasts);
   documentationService.setup(core.docLinks);

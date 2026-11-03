@@ -16,7 +16,7 @@ import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { Index } from '../../../common';
 import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
 import { setupEnvironment } from '../helpers/setup_environment';
-import { esProxyPath } from '../helpers/http_requests';
+import { esClientPath } from '../helpers/http_requests';
 import { renderHome } from '../helpers/render_home';
 import { httpService } from '../../../public/application/services/http';
 import { indexDataEnricher } from '../../../public/services';
@@ -219,7 +219,7 @@ describe('<IndexManagementHome />', () => {
 
       await waitFor(() => {
         expect(httpSetup.fetch).toHaveBeenCalledWith(
-          esProxyPath('testIndexA/_refresh'),
+          esClientPath('testIndexA/_refresh'),
           expect.objectContaining({ method: 'GET' })
         );
       });
@@ -241,7 +241,7 @@ describe('<IndexManagementHome />', () => {
       // a reload server call also.
       await waitFor(() => {
         expect(httpSetup.fetch).toHaveBeenCalledWith(
-          esProxyPath('testIndexA/_close'),
+          esClientPath('testIndexA/_close'),
           expect.objectContaining({ method: 'POST' })
         );
       });
@@ -287,7 +287,7 @@ describe('<IndexManagementHome />', () => {
       // a reload server call also.
       await waitFor(() => {
         expect(httpSetup.fetch).toHaveBeenCalledWith(
-          esProxyPath('testIndexA/_flush'),
+          esClientPath('testIndexA/_flush'),
           expect.objectContaining({ method: 'GET' })
         );
       });
@@ -309,7 +309,7 @@ describe('<IndexManagementHome />', () => {
       // a reload server call also.
       await waitFor(() => {
         expect(httpSetup.fetch).toHaveBeenCalledWith(
-          esProxyPath('testIndexA/_cache/clear'),
+          esClientPath('testIndexA/_cache/clear'),
           expect.objectContaining({ method: 'POST' })
         );
       });
@@ -338,7 +338,7 @@ describe('<IndexManagementHome />', () => {
       // a reload server call also.
       await waitFor(() => {
         expect(httpSetup.fetch).toHaveBeenCalledWith(
-          esProxyPath('testIndexA/_forcemerge'),
+          esClientPath('testIndexA/_forcemerge'),
           expect.objectContaining({ method: 'POST' })
         );
       });
@@ -508,7 +508,7 @@ describe('<IndexManagementHome />', () => {
       // Saves the index with expected name
       await waitFor(() => {
         expect(httpSetup.fetch).toHaveBeenCalledWith(
-          esProxyPath('test-index-b'),
+          esClientPath('test-index-b'),
           expect.objectContaining({
             method: 'PUT',
             body: '{"settings":{"mode":"lookup"}}',

@@ -16,7 +16,7 @@ import type {
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ReindexService } from '@kbn/reindex-service-plugin/public';
-import type { EsProxyClient } from '@kbn/es-proxy-plugin/public';
+import type { EsClient } from '@kbn/es-client-plugin/public';
 import {
   API_BASE_PATH,
   DEFAULT_DOCUMENT_PAGE_SIZE,
@@ -315,7 +315,7 @@ export async function reloadIndices(
 
 const runIndexAction = (
   indices: string[],
-  action: (client: EsProxyClient, index: string[]) => Promise<unknown>
+  action: (client: EsClient, index: string[]) => Promise<unknown>
 ) => esRequest((client) => runForIndexChunks(indices, (index) => action(client, index)));
 
 export async function closeIndices(indices: string[]) {
@@ -592,7 +592,7 @@ export function loadIndex(indexName: string) {
 }
 
 const queryIndexDocCounts = async (
-  client: EsProxyClient,
+  client: EsClient,
   indexNames: string[],
   signal?: AbortSignal
 ): Promise<Record<string, number>> => {

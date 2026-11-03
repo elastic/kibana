@@ -23,7 +23,7 @@ dependsOn:
   - '@kbn/usage-collection-plugin'
   - '@kbn/kibana-react-plugin'
   - '@kbn/es-ui-shared-plugin'
-  - '@kbn/es-proxy-plugin'
+  - '@kbn/es-client-plugin'
   - '@kbn/features-plugin'
   - '@kbn/licensing-plugin'
   - '@kbn/security-plugin'

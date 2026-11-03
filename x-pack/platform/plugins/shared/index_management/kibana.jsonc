@@ -19,7 +19,7 @@
       "management",
       "features",
       "share",
-      "esProxy"
+      "esClient"
     ],
     "optionalPlugins": [
       "security",

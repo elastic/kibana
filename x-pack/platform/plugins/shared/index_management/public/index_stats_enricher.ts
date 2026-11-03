@@ -6,16 +6,16 @@
  */
 
 import type { Enricher, EnricherResponse } from '@kbn/index-management-shared-types';
-import type { EsProxyPluginSetup } from '@kbn/es-proxy-plugin/public';
+import type { EsClientPluginSetup } from '@kbn/es-client-plugin/public';
 import { i18n } from '@kbn/i18n';
 const SOURCE = i18n.translate('xpack.idxMgmt.indexStatsEnricher.source', {
   defaultMessage: 'index stats',
 });
 
-export const createIndexStatsEnricher = (esProxy: EsProxyPluginSetup): Enricher => ({
+export const createIndexStatsEnricher = (esClient: EsClientPluginSetup): Enricher => ({
   name: SOURCE,
   fn: async (_client, signal): Promise<EnricherResponse> => {
-    const client = await esProxy.getClient();
+    const client = await esClient.getClient();
     const response = await client.indices.stats(
       {
         index: '*',

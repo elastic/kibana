@@ -12,7 +12,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { ReindexService, ReindexServicePublicStart } from '@kbn/reindex-service-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { IndexManagementAppMountParams } from '@kbn/index-management-shared-types';
-import type { EsProxyPluginStart } from '@kbn/es-proxy-plugin/public';
+import type { EsClientPluginStart } from '@kbn/es-client-plugin/public';
 import { UIM_APP_NAME } from '../../common/constants';
 import { PLUGIN } from '../../common/constants/plugin';
 import type { AppDependencies } from './app_context';
@@ -24,25 +24,25 @@ import { renderApp } from '.';
 import { setReindexService, setUiMetricService } from './services/api';
 import { NotificationService } from './services/notification';
 import { httpService } from './services/http';
-import { esProxyService } from './services/es_proxy';
+import { esClientService } from './services/es_client';
 import type { ExtensionsService } from '../services/extensions_service';
 import type { StartDependencies } from '../types';
 
 function initSetup({
   usageCollection,
   reindexService,
-  esProxy,
+  esClient,
   core,
 }: {
   core: CoreStart;
   usageCollection: UsageCollectionSetup;
   reindexService: ReindexService;
-  esProxy: EsProxyPluginStart;
+  esClient: EsClientPluginStart;
 }) {
   const { http, notifications } = core;
 
   httpService.setup(http);
-  esProxyService.setup(esProxy);
+  esClientService.setup(esClient);
   const notificationService = new NotificationService(notifications.toasts);
 
   const uiMetricService = new UiMetricService(UIM_APP_NAME);
@@ -104,7 +104,7 @@ export function getIndexManagementDependencies({
       streams: startDependencies.streams,
       licensing: startDependencies.licensing,
       reindexService,
-      esProxy: startDependencies.esProxy,
+      esClient: startDependencies.esClient,
     },
     services: {
       httpService,
@@ -169,7 +169,7 @@ export async function mountManagementSection({
     usageCollection,
     core,
     reindexService: reindexService?.reindexService,
-    esProxy: startDependencies.esProxy,
+    esClient: startDependencies.esClient,
   });
   const appDependencies = getIndexManagementDependencies({
     cloud,

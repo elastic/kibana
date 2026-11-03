@@ -42,7 +42,7 @@ plugins:
     - embeddable_alerts_table
     - entity_store
     - error_boundary_example
-    - es_proxy
+    - es_client
     - esql_views
     - event_annotation_listing
     - exploratory_view

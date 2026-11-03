@@ -137,7 +137,7 @@ export class IndexMgmtUIPlugin
     coreSetup: CoreSetup<StartDependencies>,
     plugins: SetupDependencies
   ): IndexManagementPluginSetup {
-    const { fleet, usageCollection, management, cloud, reindexService, esProxy } = plugins;
+    const { fleet, usageCollection, management, cloud, reindexService, esClient } = plugins;
 
     this.capabilities$.subscribe((capabilities) => {
       const { monitor, manageEnrich, monitorEnrich, manageIndexTemplates } =
@@ -181,7 +181,7 @@ export class IndexMgmtUIPlugin
 
     // disabled in serverless
     if (this.config.enableIndexStats) {
-      this.indexDataEnricher.add(createIndexStatsEnricher(esProxy));
+      this.indexDataEnricher.add(createIndexStatsEnricher(esClient));
     }
 
     return {
@@ -224,7 +224,7 @@ export class IndexMgmtUIPlugin
       ml,
       licensing,
       reindexService,
-      esProxy,
+      esClient,
     } = plugins;
     const { docLinks, fatalErrors, application, uiSettings, executionContext, settings, http } =
       core;
@@ -252,7 +252,7 @@ export class IndexMgmtUIPlugin
         ml,
         licensing,
         reindexService,
-        esProxy,
+        esClient,
       },
       services: {
         extensionsService: this.extensionsService,

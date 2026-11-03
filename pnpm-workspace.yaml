@@ -1116,7 +1116,7 @@ packages:
   - 'src/platform/plugins/shared/discover'
   - 'src/platform/plugins/shared/discover_shared'
   - 'src/platform/plugins/shared/embeddable'
-  - 'src/platform/plugins/shared/es_proxy'
+  - 'src/platform/plugins/shared/es_client'
   - 'src/platform/plugins/shared/es_ui_shared'
   - 'src/platform/plugins/shared/esql'
   - 'src/platform/plugins/shared/esql_datagrid'

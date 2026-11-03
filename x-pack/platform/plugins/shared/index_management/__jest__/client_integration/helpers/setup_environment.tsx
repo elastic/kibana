@@ -40,8 +40,8 @@ import { MAJOR_VERSION } from '../../../common';
 import type { AppDependencies } from '../../../public/application/app_context';
 import { AppContextProvider } from '../../../public/application/app_context';
 import { httpService } from '../../../public/application/services/http';
-import { esProxyService } from '../../../public/application/services/es_proxy';
-import { createEsProxyMock } from '../../../public/application/services/es_proxy.mock';
+import { esClientService } from '../../../public/application/services/es_client';
+import { createEsClientMock } from '../../../public/application/services/es_client.mock';
 import { breadcrumbService } from '../../../public/application/services/breadcrumbs';
 import { documentationService } from '../../../public/application/services/documentation';
 import { NotificationService } from '../../../public/application/services/notification';
@@ -110,7 +110,7 @@ const createAppDependencies = (httpSetup: HttpSetup): AppDependencies => {
       share: sharePluginMock.createStartContract(),
       cloud: cloudMock.createSetup(),
       reindexService: { reindexService: new ReindexService(httpSetup) },
-      esProxy: createEsProxyMock(httpSetup),
+      esClient: createEsClientMock(httpSetup),
     },
     // Default stateful configuration
     config: {
@@ -156,7 +156,7 @@ export const setupEnvironment = () => {
   // This is critical - if httpService.httpClient is undefined, components will crash
   // We set it to a mock here, and it will be set to the actual httpSetup in WithAppDependencies
   httpService.setup(httpServiceMock.createSetupContract());
-  esProxyService.setup(createEsProxyMock(httpServiceMock.createSetupContract()));
+  esClientService.setup(createEsClientMock(httpServiceMock.createSetupContract()));
 
   return initHttpRequests();
 };
@@ -172,7 +172,7 @@ export const WithAppDependencies =
     // The component might try to use httpService.httpClient during render
     // and if it's not set up, the component will crash
     httpService.setup(httpSetup);
-    esProxyService.setup(createEsProxyMock(httpSetup));
+    esClientService.setup(createEsClientMock(httpSetup));
 
     const startServicesMock = {
       i18n: i18nServiceMock.createStartContract(),

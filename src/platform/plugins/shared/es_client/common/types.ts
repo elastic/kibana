@@ -1,0 +1,26 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { HttpFetchQuery, HttpHeadersInit } from '@kbn/core-http-browser';
+
+export type HttpMethod = 'GET' | 'HEAD' | 'PUT' | 'POST' | 'DELETE';
+
+export interface EsClientRequestParams {
+  method: HttpMethod;
+  /**
+   * Unencoded Elasticsearch path, e.g. `my-index/_search`; each `/`-separated segment is URI-encoded.
+   * Pass an array of segments when a segment itself contains `/`, e.g. `['my-index', '_doc', 'a/b']`.
+   */
+  path: string | readonly string[];
+  /** Objects are sent as JSON. Send ndjson as a string with `Content-Type: application/x-ndjson`. */
+  body?: string | object;
+  query?: HttpFetchQuery;
+  headers?: HttpHeadersInit;
+  signal?: AbortSignal;
+}

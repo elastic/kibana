@@ -9,16 +9,16 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { chunk } from 'lodash';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { isHttpFetchError } from '@kbn/core-http-browser';
-import type { EsProxyClient } from '@kbn/es-proxy-plugin/public';
+import type { EsClient } from '@kbn/es-client-plugin/public';
 import { MAX_INDICES_PER_REQUEST } from '../../../common/constants';
 import type {
   Error as EsUiError,
   SendRequestResponse,
   UseRequestResponse,
 } from '../../shared_imports';
-import { esProxyService } from './es_proxy';
+import { esClientService } from './es_client';
 
-export type EsCall<T> = (client: EsProxyClient) => Promise<T>;
+export type EsCall<T> = (client: EsClient) => Promise<T>;
 
 interface EsErrorCause {
   type?: string;
@@ -80,7 +80,7 @@ export class EsRequestError extends Error {
  * Sends a request through the Elasticsearch proxy. Errors with a response reject as `EsRequestError`.
  */
 export const esRequest = async <T>(call: EsCall<T>): Promise<T> => {
-  const client = await esProxyService.esProxy.getClient();
+  const client = await esClientService.esClient.getClient();
   try {
     return await call(client);
   } catch (error) {
