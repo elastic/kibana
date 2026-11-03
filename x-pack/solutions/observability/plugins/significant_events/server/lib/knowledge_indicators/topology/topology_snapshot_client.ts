@@ -8,17 +8,18 @@
 import type { Logger } from '@kbn/core/server';
 import type { Feature, TopologySnapshotProperties } from '@kbn/significant-events-schema';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicator_client';
-import { REVISION_SIZE_LIMIT } from '../knowledge_indicator_client/revision_reader';
 import {
   TOPOLOGY_INPUT_FEATURE_TYPES,
   buildTopologySnapshot,
   topologyNeighborhood,
 } from './build_topology_snapshot';
 
+const TOPOLOGY_FEATURE_PAGE_SIZE = 1_000;
+
 export class TopologySnapshotClient {
   constructor(
     private readonly deps: {
-      reader: Pick<KnowledgeIndicatorClient, 'getFeatures'>;
+      reader: Pick<KnowledgeIndicatorClient, 'getTopologyFeaturesPage'>;
       logger: Logger;
       now?: () => Date;
     }
@@ -28,24 +29,26 @@ export class TopologySnapshotClient {
     const { reader, logger } = this.deps;
     const builtAt = (this.deps.now?.() ?? new Date()).toISOString();
 
-    let features: Feature[] = [];
+    const features: Feature[] = [];
     if (sourceIds.length > 0) {
-      ({ hits: features } = await reader.getFeatures(sourceIds, {
-        type: [...TOPOLOGY_INPUT_FEATURE_TYPES],
-        limit: REVISION_SIZE_LIMIT,
-      }));
-      if (features.length >= REVISION_SIZE_LIMIT) {
-        logger.warn(
-          `Topology read ${features.length} features, the revision read cap; the snapshot may be incomplete.`
-        );
-      }
+      let after: Parameters<KnowledgeIndicatorClient['getTopologyFeaturesPage']>[0]['after'];
+      do {
+        const page = await reader.getTopologyFeaturesPage({
+          sourceIds,
+          featureTypes: [...TOPOLOGY_INPUT_FEATURE_TYPES],
+          asOf: builtAt,
+          after,
+          size: TOPOLOGY_FEATURE_PAGE_SIZE,
+        });
+        features.push(...page.hits);
+        after = page.nextCursor;
+      } while (after);
     }
 
     const snapshot = buildTopologySnapshot({
       features,
       sourceIds,
       builtAt,
-      inputTruncated: features.length >= REVISION_SIZE_LIMIT,
     });
     logger.debug(
       `Topology computed: ${snapshot.node_count} nodes, ${snapshot.edge_count} edges from ${

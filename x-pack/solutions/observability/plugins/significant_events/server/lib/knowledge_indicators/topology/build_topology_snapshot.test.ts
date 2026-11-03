@@ -6,10 +6,7 @@
  */
 
 import type { Feature } from '@kbn/significant-events-schema';
-import {
-  MAX_TOPOLOGY_NODES,
-  topologySnapshotPropertiesSchema,
-} from '@kbn/significant-events-schema';
+import { topologySnapshotPropertiesSchema } from '@kbn/significant-events-schema';
 import { buildTopologySnapshot, topologyNeighborhood } from './build_topology_snapshot';
 
 const BUILT_AT = '2026-10-21T10:00:00.000Z';
@@ -44,7 +41,7 @@ const build = (features: Feature[], sourceIds = ['src-a']) =>
   buildTopologySnapshot({ features, sourceIds, builtAt: BUILT_AT });
 
 describe('buildTopologySnapshot', () => {
-  it('merges same-slug entities across sources with provenance and ignores non-entity types', () => {
+  it('merges same-slug entities with provenance', () => {
     const snapshot = build(
       [
         entity('Checkout', {
@@ -58,8 +55,6 @@ describe('buildTopologySnapshot', () => {
           properties: { name: 'checkout', technology: 'nodejs' },
         }),
         entity('frontend'),
-        dependency('frontend-checkout-name', 'frontend', 'legacy-checkout'),
-        dependency('frontend-checkout-technology', 'frontend', 'express'),
         feature({ id: 'aws', type: 'infrastructure' }),
         feature({ id: 'log4j', type: 'technology' }),
       ],
@@ -72,25 +67,11 @@ describe('buildTopologySnapshot', () => {
     expect(node.name).toBe('checkout');
     expect(node.technology).toBe('nodejs');
     expect(node.provenance.map((p) => p.source_id)).toEqual(['src-b', 'src-a']);
-    expect(snapshot.edges).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          edge_id: 'frontend-checkout-name',
-          target_node_id: 'checkout',
-          target_resolution: 'name',
-        }),
-        expect.objectContaining({
-          edge_id: 'frontend-checkout-technology',
-          target_node_id: 'checkout',
-          target_resolution: 'technology',
-        }),
-      ])
-    );
     expect(snapshot.node_count).toBe(2);
     expect(snapshot.source_ids).toEqual(['src-a', 'src-b']);
   });
 
-  it('resolves endpoints by slug, name, then unique technology, without placeholder nodes', () => {
+  it('resolves endpoints by precedence', () => {
     const snapshot = build([
       entity('checkout'),
       entity('orders-db', { properties: { name: 'Orders Database', technology: 'postgres' } }),
@@ -127,7 +108,7 @@ describe('buildTopologySnapshot', () => {
     expect(topologySnapshotPropertiesSchema.safeParse(snapshot).success).toBe(true);
   });
 
-  it('does not fall through to technology when a name match is ambiguous', () => {
+  it('keeps ambiguous names unresolved', () => {
     const snapshot = build([
       entity('cache-1', { properties: { name: 'redis', technology: 'ioredis' } }),
       entity('cache-2', { properties: { name: 'redis', technology: 'keydb' } }),
@@ -141,7 +122,7 @@ describe('buildTopologySnapshot', () => {
     });
   });
 
-  it('is deterministic regardless of input order', () => {
+  it('is input-order independent', () => {
     const features = [
       entity('b'),
       entity('a'),
@@ -158,16 +139,21 @@ describe('buildTopologySnapshot', () => {
     expect(forward.edges.map((e) => e.edge_id)).toEqual(['a-b', 'b-c']);
   });
 
-  it('truncates past the node bound but keeps the full counts', () => {
-    const features = Array.from({ length: MAX_TOPOLOGY_NODES + 5 }, (_, i) =>
+  it('keeps all nodes and edges', () => {
+    const nodes = Array.from({ length: 2_005 }, (_, i) =>
       entity(`svc-${String(i).padStart(5, '0')}`)
     );
+    const edges = Array.from({ length: 5_005 }, (_, i) =>
+      dependency(`edge-${String(i).padStart(5, '0')}`, 'svc-00000', 'svc-00001')
+    );
 
-    const snapshot = build(features);
+    const snapshot = build([...nodes, ...edges]);
 
-    expect(snapshot.nodes).toHaveLength(MAX_TOPOLOGY_NODES);
-    expect(snapshot.node_count).toBe(MAX_TOPOLOGY_NODES + 5);
-    expect(snapshot.truncated).toBe(true);
+    expect(snapshot.nodes).toHaveLength(2_005);
+    expect(snapshot.edges).toHaveLength(5_005);
+    expect(snapshot.node_count).toBe(2_005);
+    expect(snapshot.edge_count).toBe(5_005);
+    expect(snapshot.truncated).toBe(false);
   });
 });
 
@@ -188,7 +174,7 @@ describe('topologyNeighborhood', () => {
     ['src-a', 'src-b', 'src-c']
   );
 
-  it('expands one hop from a node seed through its edges', () => {
+  it('expands one hop from a node', () => {
     expect(topologyNeighborhood({ snapshot, seedIds: ['Checkout'] })).toEqual([
       'api',
       'api-checkout',
@@ -199,7 +185,7 @@ describe('topologyNeighborhood', () => {
     ]);
   });
 
-  it('seeds from an edge slug and reaches both endpoints', () => {
+  it('expands an edge to both endpoints', () => {
     expect(topologyNeighborhood({ snapshot, seedIds: ['billing-orders'] })).toEqual([
       'billing',
       'billing-orders',
@@ -207,13 +193,13 @@ describe('topologyNeighborhood', () => {
     ]);
   });
 
-  it('keeps unknown seeds so the caller still fetches them directly', () => {
+  it('keeps unknown seeds', () => {
     expect(topologyNeighborhood({ snapshot, seedIds: ['not-in-snapshot'] })).toEqual([
       'not-in-snapshot',
     ]);
   });
 
-  it('expands from an endpoint reference when its entity is absent', () => {
+  it('expands a missing entity reference', () => {
     expect(topologyNeighborhood({ snapshot, seedIds: ['External-API'] })).toEqual([
       'external-api',
       'external-orders',

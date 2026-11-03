@@ -223,7 +223,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     expect(kiClient.getFeatures).not.toHaveBeenCalled();
   });
 
-  it('expands seeds in memory from one unfiltered feature search when the topology is unavailable', async () => {
+  it('falls back to in-memory expansion', async () => {
     topologySnapshotClient.neighborhood.mockRejectedValueOnce(new Error('topology unavailable'));
     kiClient.getFeatures = jest
       .fn()
@@ -276,7 +276,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('topology unavailable'));
   });
 
-  it('expands seeds through the topology and fetches the expanded ids', async () => {
+  it('uses topology-expanded ids', async () => {
     topologySnapshotClient.neighborhood.mockResolvedValueOnce({
       featureIds: ['orders-api', 'orders-api-storage', 'storage'],
       truncated: true,

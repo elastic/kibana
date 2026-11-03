@@ -309,7 +309,6 @@ export async function searchKnowledgeIndicators({
   getSourceIds(): Promise<string[]>;
   /** Slug of a source id, used to order results. Ids sort as is when it is omitted. */
   getSourceSlug?(sourceId: string): string | undefined;
-  /** Returns topology-expanded IDs, or `undefined` to use in-memory expansion. */
   resolveTopologySeeds(seedIds: string[], sourceIds: string[]): Promise<string[] | undefined>;
   getFeatures(
     sourceId: string,
@@ -357,7 +356,6 @@ export async function searchKnowledgeIndicators({
       ? await resolveTopologySeeds(seedIds, sourceIds)
       : undefined;
 
-  // In-memory expansion needs unfiltered dependencies; text search remains seed-scoped.
   const features = normalized.includeFeatures
     ? await fetchFeatureIndicators({
         sourceIds,

@@ -443,7 +443,7 @@ describe('searchKnowledgeIndicators', () => {
       properties: { name: 'identity-service' },
     });
 
-    it('pushes the expanded ids to the feature fetch and matches them exactly', async () => {
+    it('filters with topology-expanded ids', async () => {
       const resolveTopologySeeds = jest
         .fn()
         .mockResolvedValue(['orders-api', 'orders-api-storage', 'storage']);
@@ -473,34 +473,7 @@ describe('searchKnowledgeIndicators', () => {
       expect(ids).toEqual(['orders-api-storage', 'storage']);
     });
 
-    it('falls back to the in-memory one-hop expansion when no snapshot is available', async () => {
-      const resolveTopologySeeds = jest.fn().mockResolvedValue(undefined);
-      const getFeatures = jest.fn(async () => [dependency, storage, byNameOnly, unrelated]);
-
-      const res = await searchKnowledgeIndicators({
-        params: {
-          kind: ['feature'],
-          feature_types: ['dependency', 'entity'],
-          feature_ids: ['orders-api'],
-        },
-        getSourceIds: async () => ['logs.test'],
-        getFeatures,
-        getQueries: async () => [],
-        resolveTopologySeeds,
-      });
-
-      expect(getFeatures).toHaveBeenCalledWith('logs.test', {
-        searchText: undefined,
-        featureTypes: ['dependency', 'entity'],
-        featureIds: undefined,
-      });
-      const ids = res.knowledge_indicators.map((ki) =>
-        ki.kind === 'feature' ? ki.feature.id : null
-      );
-      expect(ids).toEqual(['orders-api-storage', 'storage', 'storage-entity']);
-    });
-
-    it('narrows a text search to the seeds when falling back', async () => {
+    it('keeps text fallback seed-scoped', async () => {
       const getFeatures = jest.fn(async () => [dependency]);
 
       await searchKnowledgeIndicators({

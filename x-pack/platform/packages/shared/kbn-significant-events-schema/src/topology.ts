@@ -8,8 +8,6 @@
 import { isoDateTime, lazySchema, z } from '@kbn/zod/v4';
 import { MAX_ID_LENGTH, MAX_TITLE_LENGTH } from './significant_events/constants';
 
-export const MAX_TOPOLOGY_NODES = 2_000;
-export const MAX_TOPOLOGY_EDGES = 5_000;
 export const MAX_TOPOLOGY_PROVENANCE = 20;
 
 export const TOPOLOGY_NODE_TYPES = ['entity'] as const;
@@ -67,8 +65,8 @@ export const topologySnapshotPropertiesSchema = lazySchema(() =>
   z.object({
     built_at: isoDateTime(),
     source_ids: z.array(z.string().max(MAX_ID_LENGTH)),
-    nodes: z.array(topologyNodeSchema).max(MAX_TOPOLOGY_NODES),
-    edges: z.array(topologyEdgeSchema).max(MAX_TOPOLOGY_EDGES),
+    nodes: z.array(topologyNodeSchema),
+    edges: z.array(topologyEdgeSchema),
     node_count: z.number().int().min(0),
     edge_count: z.number().int().min(0),
     truncated: z.boolean(),

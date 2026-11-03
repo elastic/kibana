@@ -17,8 +17,6 @@ import type {
 } from '@kbn/significant-events-schema';
 import {
   MAX_ID_LENGTH,
-  MAX_TOPOLOGY_EDGES,
-  MAX_TOPOLOGY_NODES,
   MAX_TOPOLOGY_PROVENANCE,
   TOPOLOGY_NODE_TYPES,
   normalizeFeatureSlug,
@@ -125,8 +123,6 @@ interface ResolvedEndpoint {
   resolution: TopologyEdgeResolution;
 }
 
-// Mirrors the KI grounding protocol; ambiguous or missing endpoints stay
-// unresolved rather than producing a placeholder node.
 function resolveEndpoint(ref: string, index: NodeIndex): ResolvedEndpoint {
   const normalized = normalizeFeatureSlug(ref);
   const bySlug = index.bySlug.get(normalized);
@@ -195,28 +191,23 @@ export function buildTopologySnapshot({
   features,
   sourceIds,
   builtAt,
-  inputTruncated = false,
 }: {
   features: Feature[];
   sourceIds: string[];
   builtAt: string;
-  inputTruncated?: boolean;
 }): TopologySnapshotProperties {
   const index = buildNodes(features);
-  const allNodes = [...index.bySlug.values()].sort((a, b) => a.node_id.localeCompare(b.node_id));
-  const allEdges = buildEdges(features, index).sort((a, b) => a.edge_id.localeCompare(b.edge_id));
-
-  const nodes = allNodes.slice(0, MAX_TOPOLOGY_NODES);
-  const edges = allEdges.slice(0, MAX_TOPOLOGY_EDGES);
+  const nodes = [...index.bySlug.values()].sort((a, b) => a.node_id.localeCompare(b.node_id));
+  const edges = buildEdges(features, index).sort((a, b) => a.edge_id.localeCompare(b.edge_id));
 
   return {
     built_at: builtAt,
     source_ids: [...new Set(sourceIds)].sort(),
     nodes,
     edges,
-    node_count: allNodes.length,
-    edge_count: allEdges.length,
-    truncated: inputTruncated || nodes.length < allNodes.length || edges.length < allEdges.length,
+    node_count: nodes.length,
+    edge_count: edges.length,
+    truncated: false,
   };
 }
 

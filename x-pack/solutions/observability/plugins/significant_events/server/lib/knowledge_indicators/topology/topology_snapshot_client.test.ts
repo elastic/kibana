@@ -9,7 +9,6 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { Feature } from '@kbn/significant-events-schema';
 import { TopologySnapshotClient } from './topology_snapshot_client';
 import { buildTopologySnapshot } from './build_topology_snapshot';
-import { REVISION_SIZE_LIMIT } from '../knowledge_indicator_client/revision_reader';
 
 const BUILT_AT = '2026-10-21T10:00:00.000Z';
 
@@ -32,27 +31,55 @@ const inputFeatures: Feature[] = [
   }),
 ];
 
-function makeClient(features = inputFeatures) {
-  const getFeatures = jest.fn(async () => ({ hits: features }));
+function makeClient(
+  pages: Array<{
+    hits: Feature[];
+    nextCursor?: { sourceId: string; type: string; id: string };
+  }> = [{ hits: inputFeatures }]
+) {
+  const getTopologyFeaturesPage = jest.fn();
+  for (const page of pages) {
+    getTopologyFeaturesPage.mockResolvedValueOnce(page);
+  }
   const logger = loggerMock.create();
   const client = new TopologySnapshotClient({
-    reader: { getFeatures },
+    reader: { getTopologyFeaturesPage },
     logger,
     now: () => new Date(BUILT_AT),
   });
-  return { client, getFeatures, logger };
+  return { client, getTopologyFeaturesPage, logger };
 }
 
 describe('TopologySnapshotClient', () => {
-  it('reads the topology features of the given sources in one call', async () => {
-    const { client, getFeatures } = makeClient();
+  it('skips the read when there are no sources', async () => {
+    const { client, getTopologyFeaturesPage } = makeClient();
+
+    const snapshot = await client.get([]);
+
+    expect(getTopologyFeaturesPage).not.toHaveBeenCalled();
+    expect(snapshot).toMatchObject({ nodes: [], edges: [], node_count: 0, edge_count: 0 });
+  });
+
+  it('reads every page at one point in time', async () => {
+    const cursor = { sourceId: 'src-a', type: 'feature', id: inputFeatures[0].uuid };
+    const { client, getTopologyFeaturesPage } = makeClient([
+      { hits: inputFeatures.slice(0, 1), nextCursor: cursor },
+      { hits: inputFeatures.slice(1) },
+    ]);
 
     const snapshot = await client.get(['src-a', 'src-b']);
 
-    expect(getFeatures).toHaveBeenCalledWith(['src-a', 'src-b'], {
-      type: ['entity', 'dependency'],
-      limit: expect.any(Number),
+    expect(getTopologyFeaturesPage).toHaveBeenNthCalledWith(1, {
+      sourceIds: ['src-a', 'src-b'],
+      featureTypes: ['entity', 'dependency'],
+      asOf: BUILT_AT,
+      after: undefined,
+      size: expect.any(Number),
     });
+    expect(getTopologyFeaturesPage).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ after: cursor, asOf: BUILT_AT })
+    );
     expect(snapshot).toEqual(
       buildTopologySnapshot({
         features: inputFeatures,
@@ -60,24 +87,5 @@ describe('TopologySnapshotClient', () => {
         builtAt: BUILT_AT,
       })
     );
-  });
-
-  it('returns an empty snapshot without reading when there are no sources', async () => {
-    const { client, getFeatures } = makeClient();
-
-    const snapshot = await client.get([]);
-
-    expect(getFeatures).not.toHaveBeenCalled();
-    expect(snapshot).toMatchObject({ nodes: [], edges: [], node_count: 0, edge_count: 0 });
-  });
-
-  it('marks the snapshot as truncated when the feature read reaches its limit', async () => {
-    const features = Array.from({ length: REVISION_SIZE_LIMIT }, () => inputFeatures[0]);
-    const { client, logger } = makeClient(features);
-
-    const snapshot = await client.get(['src-a']);
-
-    expect(snapshot).toMatchObject({ node_count: 1, truncated: true });
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('snapshot may be incomplete'));
   });
 });
