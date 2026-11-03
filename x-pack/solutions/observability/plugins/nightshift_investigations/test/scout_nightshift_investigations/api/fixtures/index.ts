@@ -32,7 +32,7 @@ export {
 } from './write_path';
 export type { SharedInvestigation, SharedInvestigationSubject } from './write_path';
 export { NIGHTSHIFT_MANAGE_ROLE, NIGHTSHIFT_READ_ROLE, NIGHTSHIFT_NO_ACCESS_ROLE } from './roles';
-export { ensureNightshiftServiceAccountRoles } from '../../../../common';
+export { ensureNightshiftServiceAccountRoles } from '@kbn/nightshift-shared';
 export {
   getNightshiftServiceAccountStatus,
   setUpNightshiftServiceAccount,
