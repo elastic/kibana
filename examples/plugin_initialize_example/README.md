@@ -37,14 +37,16 @@ contract function decides for itself, through `ctx.initialization`:
 
 This plugin shows both choices:
 
-- `GET /api/plugin_initialize_example/doc` and the contract's `getDoc()` need the document, so they
-  await `initialize()` first.
-- `GET /api/plugin_initialize_example/status` and the contract's `getStatus()` do not, so they
+- `GET /internal/plugin_initialize_example/doc` and the contract's `getDoc()` need the document, so
+  they await `initialize()` first.
+- `GET /internal/plugin_initialize_example/status` and the contract's `getStatus()` do not, so they
   answer at once.
 
 ```sh
-curl -i localhost:5601/api/plugin_initialize_example/status  # answers at once with the status
-curl -i localhost:5601/api/plugin_initialize_example/doc     # waits about initDelayMs after boot, then answers
+# answers at once with the status
+curl -u elastic:changeme -H 'x-elastic-internal-origin: kibana' localhost:5601/internal/plugin_initialize_example/status
+# waits for initialize() after boot, then answers with the document
+curl -u elastic:changeme -H 'x-elastic-internal-origin: kibana' localhost:5601/internal/plugin_initialize_example/doc
 ```
 
 A route that should not keep the client waiting can instead answer `503` while `getStatus()` is not

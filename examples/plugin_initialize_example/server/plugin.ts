@@ -23,8 +23,8 @@ import type { PluginInitializeExampleConfig } from './config';
 
 export const INDEX_NAME = '.kibana_plugin_initialize_example';
 export const DOC_ID = 'initialized';
-export const DOC_ROUTE = '/api/plugin_initialize_example/doc';
-export const STATUS_ROUTE = '/api/plugin_initialize_example/status';
+export const DOC_ROUTE = '/internal/plugin_initialize_example/doc';
+export const STATUS_ROUTE = '/internal/plugin_initialize_example/status';
 
 /** The document `initialize()` writes. */
 export interface PluginInitializeExampleDoc {
