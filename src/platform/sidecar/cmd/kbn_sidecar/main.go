@@ -18,6 +18,8 @@ import (
 	"time"
 
 	"github.com/elastic/go-elasticsearch/v8"
+	"github.com/elastic/kibana/src/platform/sidecar/internal/platform"
+	"github.com/elastic/kibana/src/platform/sidecar/internal/routes"
 )
 
 type TLSConfig struct {
@@ -57,8 +59,9 @@ func main() {
 		log.Fatalf("failed to read bootstrap config: %v", err)
 	}
 
-	proxy := newNodeProxy(config.SocketPath)
-	handler := newProxyHandler(proxy, config)
+	proxy := platform.NewNodeProxy(config.SocketPath)
+	nodeClient := platform.NewNodeClient(config.SocketPath, config.Secret)
+	handler := buildHandler(proxy, nodeClient, config)
 
 	addr := fmt.Sprintf("%s:%d", config.Host, config.Port)
 	listener, err := createListener(addr, config.TLS)
@@ -106,6 +109,68 @@ func main() {
 	log.Println("kbn-sidecar stopped")
 }
 
+func buildHandler(proxy *httputil.ReverseProxy, nodeClient *platform.NodeClient, config *BootstrapConfig) http.Handler {
+	statusHandler := routes.NewStatusHandler(nodeClient, proxy)
+
+	var esqlHandler *routes.ESQLAsyncHandler
+	var eseHandler *routes.ESEHandler
+	if config.Elasticsearch != nil {
+		esClient := buildESClient(config.Elasticsearch)
+		whitelistHeaders := config.Elasticsearch.RequestHeadersWhitelist
+		esqlHandler = routes.NewESQLAsyncHandler(esClient, whitelistHeaders, proxy)
+		eseHandler = routes.NewESEHandler(esClient, whitelistHeaders, proxy)
+		log.Printf("Search handlers enabled (ES hosts: %v)", config.Elasticsearch.Hosts)
+	}
+
+	requireAuth := func(next http.HandlerFunc) http.HandlerFunc {
+		return platform.AuthMiddleware(nodeClient, next)
+	}
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		platform.StripSidecarHeaders(r)
+
+		switch {
+		case r.Method == http.MethodGet && r.URL.Path == "/api/status":
+			log.Printf("[route] %s %s → Go (status)", r.Method, r.URL.Path)
+			statusHandler.ServeHTTP(w, r)
+
+		case esqlHandler != nil && r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/internal/search/esql_async"):
+			id := strings.TrimPrefix(r.URL.Path, "/internal/search/esql_async")
+			id = strings.TrimPrefix(id, "/")
+			log.Printf("[route] %s %s → Go (esql_async)", r.Method, r.URL.Path)
+			requireAuth(func(w http.ResponseWriter, r *http.Request) {
+				esqlHandler.HandleAsync(w, r, id)
+			})(w, r)
+
+		case esqlHandler != nil && r.Method == http.MethodDelete && strings.HasPrefix(r.URL.Path, "/internal/search/esql_async/"):
+			id := strings.TrimPrefix(r.URL.Path, "/internal/search/esql_async/")
+			log.Printf("[route] %s %s → Go (esql_async delete)", r.Method, r.URL.Path)
+			requireAuth(func(w http.ResponseWriter, r *http.Request) {
+				esqlHandler.HandleDelete(w, r, id)
+			})(w, r)
+
+		case eseHandler != nil && r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/internal/search/ese"):
+			id := strings.TrimPrefix(r.URL.Path, "/internal/search/ese")
+			id = strings.TrimPrefix(id, "/")
+			log.Printf("[route] %s %s → Go (ese)", r.Method, r.URL.Path)
+			requireAuth(func(w http.ResponseWriter, r *http.Request) {
+				eseHandler.HandleSearch(w, r, id)
+			})(w, r)
+
+		case eseHandler != nil && r.Method == http.MethodDelete && strings.HasPrefix(r.URL.Path, "/internal/search/ese/"):
+			id := strings.TrimPrefix(r.URL.Path, "/internal/search/ese/")
+			log.Printf("[route] %s %s → Go (ese delete)", r.Method, r.URL.Path)
+			requireAuth(func(w http.ResponseWriter, r *http.Request) {
+				eseHandler.HandleDelete(w, r, id)
+			})(w, r)
+
+		default:
+			log.Printf("[route] %s %s → Node", r.Method, r.URL.Path)
+			proxy.ServeHTTP(w, r)
+		}
+	})
+}
+
 func readBootstrapConfig() (*BootstrapConfig, error) {
 	decoder := json.NewDecoder(os.Stdin)
 	var config BootstrapConfig
@@ -122,6 +187,26 @@ func readBootstrapConfig() (*BootstrapConfig, error) {
 		return nil, fmt.Errorf("port is required")
 	}
 	return &config, nil
+}
+
+func buildESClient(esCfg *ESConfig) *elasticsearch.TypedClient {
+	globalHeaders := http.Header{}
+	for k, v := range esCfg.CustomHeaders {
+		globalHeaders.Set(k, v)
+	}
+	esClient, err := elasticsearch.NewTypedClient(elasticsearch.Config{
+		Addresses: esCfg.Hosts,
+		Header:    globalHeaders,
+		Transport: &http.Transport{
+			TLSClientConfig:     buildESTLSConfig(esCfg.SSL),
+			MaxIdleConnsPerHost: 20,
+			IdleConnTimeout:     90 * time.Second,
+		},
+	})
+	if err != nil {
+		log.Fatalf("failed to create ES client: %v", err)
+	}
+	return esClient
 }
 
 func createListener(addr string, tlsCfg *TLSConfig) (net.Listener, error) {
@@ -141,95 +226,6 @@ func createListener(addr string, tlsCfg *TLSConfig) (net.Listener, error) {
 		MinVersion:   tls.VersionTLS12,
 	}
 	return tls.NewListener(ln, tc), nil
-}
-
-func newNodeProxy(socketPath string) *httputil.ReverseProxy {
-	transport := &http.Transport{
-		DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
-			return (&net.Dialer{}).DialContext(ctx, "unix", socketPath)
-		},
-		MaxIdleConnsPerHost:   100,
-		IdleConnTimeout:       90 * time.Second,
-		ResponseHeaderTimeout: 0, // no timeout — Node controls response timing
-	}
-	proxy := &httputil.ReverseProxy{
-		Director: func(req *http.Request) {
-			req.URL.Scheme = "http"
-			req.URL.Host = "kibana-node"
-		},
-		Transport:     transport,
-		FlushInterval: -1, // stream responses immediately
-	}
-	return proxy
-}
-
-func newProxyHandler(proxy *httputil.ReverseProxy, config *BootstrapConfig) http.Handler {
-	nodeClient := NewNodeClient(config.SocketPath, config.Secret)
-	statusHandler := NewStatusHandler(nodeClient, proxy)
-
-	var esqlHandler *ESQLAsyncHandler
-	var eseHandler *ESEHandler
-	if config.Elasticsearch != nil {
-		esCfg := config.Elasticsearch
-		globalHeaders := http.Header{}
-		for k, v := range esCfg.CustomHeaders {
-			globalHeaders.Set(k, v)
-		}
-		esClient, err := elasticsearch.NewTypedClient(elasticsearch.Config{
-			Addresses: esCfg.Hosts,
-			Header:    globalHeaders,
-			Transport: &http.Transport{
-				TLSClientConfig:     buildESTLSConfig(esCfg.SSL),
-				MaxIdleConnsPerHost: 20,
-				IdleConnTimeout:     90 * time.Second,
-			},
-		})
-		if err != nil {
-			log.Fatalf("failed to create ES client: %v", err)
-		}
-		esqlHandler = NewESQLAsyncHandler(nodeClient, esClient, esCfg.RequestHeadersWhitelist, proxy)
-		eseHandler = NewESEHandler(nodeClient, esClient, esCfg.RequestHeadersWhitelist, proxy)
-		log.Printf("Search handlers enabled (ES hosts: %v)", esCfg.Hosts)
-	}
-
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		stripSidecarHeaders(r)
-
-		switch {
-		case r.Method == http.MethodGet && r.URL.Path == "/api/status":
-			log.Printf("[route] %s %s → Go (status)", r.Method, r.URL.Path)
-			statusHandler.ServeHTTP(w, r)
-		case esqlHandler != nil && r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/internal/search/esql_async"):
-			id := strings.TrimPrefix(r.URL.Path, "/internal/search/esql_async")
-			id = strings.TrimPrefix(id, "/")
-			log.Printf("[route] %s %s → Go (esql_async)", r.Method, r.URL.Path)
-			esqlHandler.HandleAsync(w, r, id)
-		case esqlHandler != nil && r.Method == http.MethodDelete && strings.HasPrefix(r.URL.Path, "/internal/search/esql_async/"):
-			id := strings.TrimPrefix(r.URL.Path, "/internal/search/esql_async/")
-			log.Printf("[route] %s %s → Go (esql_async delete)", r.Method, r.URL.Path)
-			esqlHandler.HandleDelete(w, r, id)
-		case eseHandler != nil && r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/internal/search/ese"):
-			id := strings.TrimPrefix(r.URL.Path, "/internal/search/ese")
-			id = strings.TrimPrefix(id, "/")
-			log.Printf("[route] %s %s → Go (ese)", r.Method, r.URL.Path)
-			eseHandler.HandleSearch(w, r, id)
-		case eseHandler != nil && r.Method == http.MethodDelete && strings.HasPrefix(r.URL.Path, "/internal/search/ese/"):
-			id := strings.TrimPrefix(r.URL.Path, "/internal/search/ese/")
-			log.Printf("[route] %s %s → Go (ese delete)", r.Method, r.URL.Path)
-			eseHandler.HandleDelete(w, r, id)
-		default:
-			log.Printf("[route] %s %s → Node", r.Method, r.URL.Path)
-			proxy.ServeHTTP(w, r)
-		}
-	})
-}
-
-func stripSidecarHeaders(r *http.Request) {
-	for name := range r.Header {
-		if strings.HasPrefix(strings.ToLower(name), "x-kbn-sidecar-") {
-			r.Header.Del(name)
-		}
-	}
 }
 
 func signalReady() {

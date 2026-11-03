@@ -1,4 +1,4 @@
-package main
+package platform
 
 import (
 	"bytes"
@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	statusCacheTTL      = 2 * time.Second
+	StatusCacheTTL      = 2 * time.Second
 	ipcRequestTimeout   = 5 * time.Second
 	sidecarSecretHeader = "x-kbn-sidecar-secret"
 )
@@ -31,7 +31,7 @@ type StatusConfig struct {
 	StatusPageBypassMonitorPrivilege bool        `json:"statusPageBypassMonitorPrivilege"`
 	ServerName                       string      `json:"serverName"`
 	UUID                             string      `json:"uuid"`
-	PackageInfo                      PackageInfo `json:"packageInfo"`
+	PackageInfo PackageInfo           `json:"packageInfo"`
 }
 
 type PackageInfo struct {
@@ -84,7 +84,7 @@ func NewNodeClient(socketPath, secret string) *NodeClient {
 
 func (c *NodeClient) GetStatus(ctx context.Context) (*StatusBlob, error) {
 	c.cacheMu.RLock()
-	if c.cached != nil && time.Since(c.cachedAt) < statusCacheTTL {
+	if c.cached != nil && time.Since(c.cachedAt) < StatusCacheTTL {
 		blob := c.cached
 		c.cacheMu.RUnlock()
 		return blob, nil

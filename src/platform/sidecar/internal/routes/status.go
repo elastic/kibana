@@ -1,4 +1,4 @@
-package main
+package routes
 
 import (
 	"encoding/json"
@@ -6,14 +6,16 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"strings"
+
+	"github.com/elastic/kibana/src/platform/sidecar/internal/platform"
 )
 
 type StatusHandler struct {
-	node  *NodeClient
+	node  *platform.NodeClient
 	proxy *httputil.ReverseProxy
 }
 
-func NewStatusHandler(node *NodeClient, proxy *httputil.ReverseProxy) *StatusHandler {
+func NewStatusHandler(node *platform.NodeClient, proxy *httputil.ReverseProxy) *StatusHandler {
 	return &StatusHandler{node: node, proxy: proxy}
 }
 
@@ -41,17 +43,17 @@ func (h *StatusHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	switch decision {
 	case "unauthenticated", "no-monitor":
-		writeJSON(w, statusCode, redactedResponse{
+		platform.WriteJSON(w, statusCode, redactedResponse{
 			Status: redactedStatus{
 				Overall: redactedOverall{Level: status.CoreOverall.Level},
 			},
 		})
 	case "full":
-		writeJSON(w, statusCode, buildFullResponse(status))
+		platform.WriteJSON(w, statusCode, buildFullResponse(status))
 	}
 }
 
-func (h *StatusHandler) resolveDecision(r *http.Request, config StatusConfig) string {
+func (h *StatusHandler) resolveDecision(r *http.Request, config platform.StatusConfig) string {
 	if config.AllowAnonymous {
 		return "full"
 	}
@@ -111,12 +113,12 @@ type versionInfo struct {
 }
 
 type fullStatus struct {
-	Overall StatusLevel            `json:"overall"`
-	Core    map[string]StatusLevel `json:"core"`
-	Plugins map[string]StatusLevel `json:"plugins"`
+	Overall platform.StatusLevel            `json:"overall"`
+	Core    map[string]platform.StatusLevel `json:"core"`
+	Plugins map[string]platform.StatusLevel `json:"plugins"`
 }
 
-func buildFullResponse(status *StatusBlob) *fullResponse {
+func buildFullResponse(status *platform.StatusBlob) *fullResponse {
 	pkg := status.Config.PackageInfo
 	version := pkg.Version
 	isSnapshot := strings.HasSuffix(version, "-SNAPSHOT")
@@ -140,16 +142,4 @@ func buildFullResponse(status *StatusBlob) *fullResponse {
 		},
 		Metrics: status.Metrics,
 	}
-}
-
-func writeJSON(w http.ResponseWriter, statusCode int, body any) {
-	data, err := json.Marshal(body)
-	if err != nil {
-		log.Printf("failed to marshal JSON response: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(statusCode)
-	_, _ = w.Write(data)
 }

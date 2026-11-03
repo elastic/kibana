@@ -1,4 +1,4 @@
-package main
+package routes
 
 import (
 	"bytes"
@@ -11,17 +11,17 @@ import (
 	"strconv"
 
 	"github.com/elastic/go-elasticsearch/v8"
+	"github.com/elastic/kibana/src/platform/sidecar/internal/platform"
 )
 
 type ESEHandler struct {
-	node             *NodeClient
 	es               *elasticsearch.TypedClient
 	proxy            *httputil.ReverseProxy
 	whitelistHeaders []string
 }
 
-func NewESEHandler(node *NodeClient, es *elasticsearch.TypedClient, whitelistHeaders []string, proxy *httputil.ReverseProxy) *ESEHandler {
-	return &ESEHandler{node: node, es: es, proxy: proxy, whitelistHeaders: whitelistHeaders}
+func NewESEHandler(es *elasticsearch.TypedClient, whitelistHeaders []string, proxy *httputil.ReverseProxy) *ESEHandler {
+	return &ESEHandler{es: es, proxy: proxy, whitelistHeaders: whitelistHeaders}
 }
 
 type eseRequestBody struct {
@@ -47,17 +47,11 @@ type eseSubmitParams struct {
 }
 
 func (h *ESEHandler) HandleSearch(w http.ResponseWriter, r *http.Request, id string) {
-	auth, err := h.node.Authenticate(r.Context(), r)
-	if err != nil || !auth.IsAuthenticated {
-		writeJSON(w, http.StatusUnauthorized, kibanaErrorResponse{
-			StatusCode: 401, Error: "Unauthorized", Message: "Authentication required",
-		})
-		return
-	}
+	auth := platform.AuthFromContext(r.Context())
 
 	var body eseRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		writeJSON(w, http.StatusBadRequest, kibanaErrorResponse{
+		platform.WriteJSON(w, http.StatusBadRequest, platform.KibanaErrorResponse{
 			StatusCode: 400, Error: "Bad Request", Message: "Invalid request body",
 		})
 		return
@@ -71,31 +65,25 @@ func (h *ESEHandler) HandleSearch(w http.ResponseWriter, r *http.Request, id str
 }
 
 func (h *ESEHandler) HandleDelete(w http.ResponseWriter, r *http.Request, id string) {
-	auth, err := h.node.Authenticate(r.Context(), r)
-	if err != nil || !auth.IsAuthenticated {
-		writeJSON(w, http.StatusUnauthorized, kibanaErrorResponse{
-			StatusCode: 401, Error: "Unauthorized", Message: "Authentication required",
-		})
-		return
-	}
+	auth := platform.AuthFromContext(r.Context())
 
 	if id == "" {
-		writeJSON(w, http.StatusBadRequest, kibanaErrorResponse{
+		platform.WriteJSON(w, http.StatusBadRequest, platform.KibanaErrorResponse{
 			StatusCode: 400, Error: "Bad Request", Message: "Missing async search ID",
 		})
 		return
 	}
 
 	builder := h.es.AsyncSearch.Delete(id)
-	for _, header := range h.whitelistHeaders {
-		if v, ok := auth.ESHeaders[header]; ok && v != "" {
-			builder.Header(header, v)
+	for _, hdr := range h.whitelistHeaders {
+		if v, ok := auth.ESHeaders[hdr]; ok && v != "" {
+			builder.Header(hdr, v)
 		}
 	}
 
 	esResp, err := builder.Perform(r.Context())
 	if err != nil {
-		writeJSON(w, http.StatusBadGateway, kibanaErrorResponse{
+		platform.WriteJSON(w, http.StatusBadGateway, platform.KibanaErrorResponse{
 			StatusCode: 502, Error: "Bad Gateway", Message: "Failed to delete async search",
 		})
 		return
@@ -103,17 +91,17 @@ func (h *ESEHandler) HandleDelete(w http.ResponseWriter, r *http.Request, id str
 	defer esResp.Body.Close()
 
 	if esResp.StatusCode >= 400 {
-		relayESError(w, esResp, "DELETE", fmt.Sprintf("/_async_search/%s", id))
+		platform.RelayESError(w, esResp, "DELETE", fmt.Sprintf("/_async_search/%s", id))
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 }
 
-func (h *ESEHandler) submitSearch(w http.ResponseWriter, r *http.Request, body eseRequestBody, auth *AuthResult) {
+func (h *ESEHandler) submitSearch(w http.ResponseWriter, r *http.Request, body eseRequestBody, auth *platform.AuthResult) {
 	var params eseSubmitParams
 	if err := json.Unmarshal(body.Params, &params); err != nil {
-		writeJSON(w, http.StatusBadRequest, kibanaErrorResponse{
+		platform.WriteJSON(w, http.StatusBadRequest, platform.KibanaErrorResponse{
 			StatusCode: 400, Error: "Bad Request", Message: "Invalid params",
 		})
 		return
@@ -156,17 +144,16 @@ func (h *ESEHandler) submitSearch(w http.ResponseWriter, r *http.Request, body e
 	if params.Preference != "" {
 		builder.Preference(params.Preference)
 	}
-
-	for _, header := range h.whitelistHeaders {
-		if v, ok := auth.ESHeaders[header]; ok && v != "" {
-			builder.Header(header, v)
+	for _, hdr := range h.whitelistHeaders {
+		if v, ok := auth.ESHeaders[hdr]; ok && v != "" {
+			builder.Header(hdr, v)
 		}
 	}
 
 	esResp, err := builder.Perform(r.Context())
 	if err != nil {
 		log.Printf("ES /_async_search submit failed: %v", err)
-		writeJSON(w, http.StatusBadGateway, kibanaErrorResponse{
+		platform.WriteJSON(w, http.StatusBadGateway, platform.KibanaErrorResponse{
 			StatusCode: 502, Error: "Bad Gateway", Message: "Failed to submit async search",
 		})
 		return
@@ -180,7 +167,7 @@ func (h *ESEHandler) submitSearch(w http.ResponseWriter, r *http.Request, body e
 	path := fmt.Sprintf("/%s/_async_search", index)
 
 	if esResp.StatusCode >= 400 {
-		relayESError(w, esResp, "POST", path)
+		platform.RelayESError(w, esResp, "POST", path)
 		return
 	}
 
@@ -192,7 +179,7 @@ func (h *ESEHandler) submitSearch(w http.ResponseWriter, r *http.Request, body e
 	writeESEResponse(w, esResp, "POST", path)
 }
 
-func (h *ESEHandler) getSearch(w http.ResponseWriter, r *http.Request, id string, body eseRequestBody, auth *AuthResult) {
+func (h *ESEHandler) getSearch(w http.ResponseWriter, r *http.Request, id string, body eseRequestBody, auth *platform.AuthResult) {
 	var params eseSubmitParams
 	if body.Params != nil {
 		_ = json.Unmarshal(body.Params, &params)
@@ -205,17 +192,16 @@ func (h *ESEHandler) getSearch(w http.ResponseWriter, r *http.Request, id string
 	if params.KeepAlive != "" {
 		builder.KeepAlive(params.KeepAlive)
 	}
-
-	for _, header := range h.whitelistHeaders {
-		if v, ok := auth.ESHeaders[header]; ok && v != "" {
-			builder.Header(header, v)
+	for _, hdr := range h.whitelistHeaders {
+		if v, ok := auth.ESHeaders[hdr]; ok && v != "" {
+			builder.Header(hdr, v)
 		}
 	}
 
 	esResp, err := builder.Perform(r.Context())
 	if err != nil {
 		log.Printf("ES async search get failed: %v", err)
-		writeJSON(w, http.StatusBadGateway, kibanaErrorResponse{
+		platform.WriteJSON(w, http.StatusBadGateway, platform.KibanaErrorResponse{
 			StatusCode: 502, Error: "Bad Gateway", Message: "Failed to get async search",
 		})
 		return
@@ -224,7 +210,7 @@ func (h *ESEHandler) getSearch(w http.ResponseWriter, r *http.Request, id string
 
 	path := fmt.Sprintf("/_async_search/%s", id)
 	if esResp.StatusCode >= 400 {
-		relayESError(w, esResp, "GET", path)
+		platform.RelayESError(w, esResp, "GET", path)
 		return
 	}
 
@@ -240,7 +226,7 @@ func streamESEResponse(w http.ResponseWriter, esResp *http.Response, method, pat
 	asyncID := esResp.Header.Get("X-Elasticsearch-Async-Id")
 	isRunning := esResp.Header.Get("X-Elasticsearch-Async-Is-Running") == "?1"
 
-	reqParams, _ := json.Marshal(requestParams{Method: method, Path: path})
+	reqParams, _ := json.Marshal(platform.RequestParams{Method: method, Path: path})
 	w.Header().Set("kbn-search-is-restored", "?0")
 	w.Header().Set("kbn-search-request-params", string(reqParams))
 	if asyncID != "" {
@@ -259,14 +245,12 @@ func writeESEResponse(w http.ResponseWriter, esResp *http.Response, method, path
 
 	var rawResp json.RawMessage
 	if err := json.NewDecoder(esResp.Body).Decode(&rawResp); err != nil {
-		writeJSON(w, http.StatusBadGateway, kibanaErrorResponse{
+		platform.WriteJSON(w, http.StatusBadGateway, platform.KibanaErrorResponse{
 			StatusCode: 502, Error: "Bad Gateway", Message: "Failed to parse ES response",
 		})
 		return
 	}
 
-	// ESE uses the ES async search response wrapper which has { response: <actual search result>, ... }
-	// Extract the inner "response" field as rawResponse, or use the whole thing if not wrapped
 	var wrapper struct {
 		Response json.RawMessage `json:"response"`
 	}
@@ -284,24 +268,23 @@ func writeESEResponse(w http.ResponseWriter, esResp *http.Response, method, path
 	}
 	_ = json.Unmarshal(innerResponse, &shards)
 
-	resp := kibanaSearchResponse{
+	resp := platform.KibanaSearchResponse{
 		ID:          asyncID,
 		RawResponse: innerResponse,
 		IsRunning:   isRunning,
 		IsPartial:   isRunning,
 		Warning:     esResp.Header.Get("Warning"),
-		RequestParams: &requestParams{Method: method, Path: path},
+		RequestParams: &platform.RequestParams{Method: method, Path: path},
 	}
 
 	data, err := json.Marshal(resp)
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, kibanaErrorResponse{
+		platform.WriteJSON(w, http.StatusInternalServerError, platform.KibanaErrorResponse{
 			StatusCode: 500, Error: "Internal Server Error", Message: "Failed to marshal response",
 		})
 		return
 	}
 
-	// Inject total and loaded at the top level
 	var m map[string]json.RawMessage
 	_ = json.Unmarshal(data, &m)
 	m["total"], _ = json.Marshal(shards.Shards.Total)

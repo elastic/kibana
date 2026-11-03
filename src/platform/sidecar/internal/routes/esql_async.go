@@ -1,4 +1,4 @@
-package main
+package routes
 
 import (
 	"bytes"
@@ -10,17 +10,17 @@ import (
 	"net/http/httputil"
 
 	"github.com/elastic/go-elasticsearch/v8"
+	"github.com/elastic/kibana/src/platform/sidecar/internal/platform"
 )
 
 type ESQLAsyncHandler struct {
-	node             *NodeClient
 	es               *elasticsearch.TypedClient
 	proxy            *httputil.ReverseProxy
 	whitelistHeaders []string
 }
 
-func NewESQLAsyncHandler(node *NodeClient, es *elasticsearch.TypedClient, whitelistHeaders []string, proxy *httputil.ReverseProxy) *ESQLAsyncHandler {
-	return &ESQLAsyncHandler{node: node, es: es, proxy: proxy, whitelistHeaders: whitelistHeaders}
+func NewESQLAsyncHandler(es *elasticsearch.TypedClient, whitelistHeaders []string, proxy *httputil.ReverseProxy) *ESQLAsyncHandler {
+	return &ESQLAsyncHandler{es: es, proxy: proxy, whitelistHeaders: whitelistHeaders}
 }
 
 type esqlRequestBody struct {
@@ -42,40 +42,12 @@ type esqlParams struct {
 	WaitForCompletionTimeout string          `json:"wait_for_completion_timeout,omitempty"`
 }
 
-
-type kibanaSearchResponse struct {
-	ID            string          `json:"id,omitempty"`
-	RawResponse   json.RawMessage `json:"rawResponse"`
-	IsPartial     bool            `json:"isPartial"`
-	IsRunning     bool            `json:"isRunning"`
-	Warning       string          `json:"warning,omitempty"`
-	RequestParams *requestParams  `json:"requestParams,omitempty"`
-}
-
-type requestParams struct {
-	Method string `json:"method"`
-	Path   string `json:"path"`
-}
-
-type kibanaErrorResponse struct {
-	StatusCode int                    `json:"statusCode"`
-	Error      string                 `json:"error"`
-	Message    string                 `json:"message"`
-	Attributes map[string]interface{} `json:"attributes,omitempty"`
-}
-
 func (h *ESQLAsyncHandler) HandleAsync(w http.ResponseWriter, r *http.Request, id string) {
-	auth, err := h.node.Authenticate(r.Context(), r)
-	if err != nil || !auth.IsAuthenticated {
-		writeJSON(w, http.StatusUnauthorized, kibanaErrorResponse{
-			StatusCode: 401, Error: "Unauthorized", Message: "Authentication required",
-		})
-		return
-	}
+	auth := platform.AuthFromContext(r.Context())
 
 	var body esqlRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		writeJSON(w, http.StatusBadRequest, kibanaErrorResponse{
+		platform.WriteJSON(w, http.StatusBadRequest, platform.KibanaErrorResponse{
 			StatusCode: 400, Error: "Bad Request", Message: "Invalid request body",
 		})
 		return
@@ -92,31 +64,25 @@ func (h *ESQLAsyncHandler) HandleAsync(w http.ResponseWriter, r *http.Request, i
 }
 
 func (h *ESQLAsyncHandler) HandleDelete(w http.ResponseWriter, r *http.Request, id string) {
-	auth, err := h.node.Authenticate(r.Context(), r)
-	if err != nil || !auth.IsAuthenticated {
-		writeJSON(w, http.StatusUnauthorized, kibanaErrorResponse{
-			StatusCode: 401, Error: "Unauthorized", Message: "Authentication required",
-		})
-		return
-	}
+	auth := platform.AuthFromContext(r.Context())
 
 	if id == "" {
-		writeJSON(w, http.StatusBadRequest, kibanaErrorResponse{
+		platform.WriteJSON(w, http.StatusBadRequest, platform.KibanaErrorResponse{
 			StatusCode: 400, Error: "Bad Request", Message: "Missing async search ID",
 		})
 		return
 	}
 
 	builder := h.es.Esql.AsyncQueryDelete(id)
-	for _, header := range h.whitelistHeaders {
-		if v, ok := auth.ESHeaders[header]; ok && v != "" {
-			builder.Header(header, v)
+	for _, hdr := range h.whitelistHeaders {
+		if v, ok := auth.ESHeaders[hdr]; ok && v != "" {
+			builder.Header(hdr, v)
 		}
 	}
 
 	esResp, err := builder.Perform(r.Context())
 	if err != nil {
-		writeJSON(w, http.StatusBadGateway, kibanaErrorResponse{
+		platform.WriteJSON(w, http.StatusBadGateway, platform.KibanaErrorResponse{
 			StatusCode: 502, Error: "Bad Gateway", Message: "Failed to cancel ES query",
 		})
 		return
@@ -124,17 +90,17 @@ func (h *ESQLAsyncHandler) HandleDelete(w http.ResponseWriter, r *http.Request, 
 	defer esResp.Body.Close()
 
 	if esResp.StatusCode >= 400 {
-		relayESError(w, esResp, "DELETE", fmt.Sprintf("/_query/async/%s", id))
+		platform.RelayESError(w, esResp, "DELETE", fmt.Sprintf("/_query/async/%s", id))
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 }
 
-func (h *ESQLAsyncHandler) submitAsync(w http.ResponseWriter, r *http.Request, body esqlRequestBody, auth *AuthResult) {
+func (h *ESQLAsyncHandler) submitAsync(w http.ResponseWriter, r *http.Request, body esqlRequestBody, auth *platform.AuthResult) {
 	var params esqlParams
 	if err := json.Unmarshal(body.Params, &params); err != nil {
-		writeJSON(w, http.StatusBadRequest, kibanaErrorResponse{
+		platform.WriteJSON(w, http.StatusBadRequest, platform.KibanaErrorResponse{
 			StatusCode: 400, Error: "Bad Request", Message: "Invalid params",
 		})
 		return
@@ -144,16 +110,16 @@ func (h *ESQLAsyncHandler) submitAsync(w http.ResponseWriter, r *http.Request, b
 	if params.DropNullColumns {
 		builder.DropNullColumns(true)
 	}
-	for _, header := range h.whitelistHeaders {
-		if v, ok := auth.ESHeaders[header]; ok && v != "" {
-			builder.Header(header, v)
+	for _, hdr := range h.whitelistHeaders {
+		if v, ok := auth.ESHeaders[hdr]; ok && v != "" {
+			builder.Header(hdr, v)
 		}
 	}
 
 	esResp, err := builder.Perform(r.Context())
 	if err != nil {
 		log.Printf("ES /_query/async submit failed: %v", err)
-		writeJSON(w, http.StatusBadGateway, kibanaErrorResponse{
+		platform.WriteJSON(w, http.StatusBadGateway, platform.KibanaErrorResponse{
 			StatusCode: 502, Error: "Bad Gateway", Message: "Failed to submit ES query",
 		})
 		return
@@ -161,7 +127,7 @@ func (h *ESQLAsyncHandler) submitAsync(w http.ResponseWriter, r *http.Request, b
 	defer esResp.Body.Close()
 
 	if esResp.StatusCode >= 400 {
-		relayESError(w, esResp, "POST", "/_query/async")
+		platform.RelayESError(w, esResp, "POST", "/_query/async")
 		return
 	}
 
@@ -173,7 +139,7 @@ func (h *ESQLAsyncHandler) submitAsync(w http.ResponseWriter, r *http.Request, b
 	writeAsyncResponse(w, esResp, "POST", "/_query/async")
 }
 
-func (h *ESQLAsyncHandler) getAsync(w http.ResponseWriter, r *http.Request, id string, body esqlRequestBody, auth *AuthResult) {
+func (h *ESQLAsyncHandler) getAsync(w http.ResponseWriter, r *http.Request, id string, body esqlRequestBody, auth *platform.AuthResult) {
 	var params esqlParams
 	if body.Params != nil {
 		_ = json.Unmarshal(body.Params, &params)
@@ -189,16 +155,16 @@ func (h *ESQLAsyncHandler) getAsync(w http.ResponseWriter, r *http.Request, id s
 	if params.DropNullColumns {
 		builder.DropNullColumns(true)
 	}
-	for _, header := range h.whitelistHeaders {
-		if v, ok := auth.ESHeaders[header]; ok && v != "" {
-			builder.Header(header, v)
+	for _, hdr := range h.whitelistHeaders {
+		if v, ok := auth.ESHeaders[hdr]; ok && v != "" {
+			builder.Header(hdr, v)
 		}
 	}
 
 	esResp, err := builder.Perform(r.Context())
 	if err != nil {
 		log.Printf("ES async get failed: %v", err)
-		writeJSON(w, http.StatusBadGateway, kibanaErrorResponse{
+		platform.WriteJSON(w, http.StatusBadGateway, platform.KibanaErrorResponse{
 			StatusCode: 502, Error: "Bad Gateway", Message: "Failed to get ES async query",
 		})
 		return
@@ -207,7 +173,7 @@ func (h *ESQLAsyncHandler) getAsync(w http.ResponseWriter, r *http.Request, id s
 
 	path := fmt.Sprintf("/_query/async/%s", id)
 	if esResp.StatusCode >= 400 {
-		relayESError(w, esResp, "GET", path)
+		platform.RelayESError(w, esResp, "GET", path)
 		return
 	}
 
@@ -219,21 +185,21 @@ func (h *ESQLAsyncHandler) getAsync(w http.ResponseWriter, r *http.Request, id s
 	writeAsyncResponse(w, esResp, "GET", path)
 }
 
-func (h *ESQLAsyncHandler) stopAsync(w http.ResponseWriter, r *http.Request, id string, body esqlRequestBody, auth *AuthResult) {
+func (h *ESQLAsyncHandler) stopAsync(w http.ResponseWriter, r *http.Request, id string, body esqlRequestBody, auth *platform.AuthResult) {
 	builder := h.es.Esql.AsyncQueryStop(id)
 	if params := parseParams(body.Params); params.DropNullColumns {
 		builder.DropNullColumns(true)
 	}
-	for _, header := range h.whitelistHeaders {
-		if v, ok := auth.ESHeaders[header]; ok && v != "" {
-			builder.Header(header, v)
+	for _, hdr := range h.whitelistHeaders {
+		if v, ok := auth.ESHeaders[hdr]; ok && v != "" {
+			builder.Header(hdr, v)
 		}
 	}
 
 	esResp, err := builder.Perform(r.Context())
 	if err != nil {
 		log.Printf("ES async stop failed: %v", err)
-		writeJSON(w, http.StatusBadGateway, kibanaErrorResponse{
+		platform.WriteJSON(w, http.StatusBadGateway, platform.KibanaErrorResponse{
 			StatusCode: 502, Error: "Bad Gateway", Message: "Failed to stop ES async query",
 		})
 		return
@@ -242,7 +208,7 @@ func (h *ESQLAsyncHandler) stopAsync(w http.ResponseWriter, r *http.Request, id 
 
 	path := fmt.Sprintf("/_query/async/%s/_stop", id)
 	if esResp.StatusCode >= 400 {
-		relayESError(w, esResp, "POST", path)
+		platform.RelayESError(w, esResp, "POST", path)
 		return
 	}
 
@@ -263,7 +229,7 @@ func parseParams(raw json.RawMessage) esqlParams {
 }
 
 func streamResponse(w http.ResponseWriter, esResp *http.Response, method, path string) {
-	reqParams, _ := json.Marshal(requestParams{Method: method, Path: path})
+	reqParams, _ := json.Marshal(platform.RequestParams{Method: method, Path: path})
 	w.Header().Set("kbn-search-is-restored", "?0")
 	w.Header().Set("kbn-search-request-params", string(reqParams))
 	w.Header().Set("Content-Type", esResp.Header.Get("Content-Type"))
@@ -274,7 +240,7 @@ func streamResponse(w http.ResponseWriter, esResp *http.Response, method, path s
 func writeAsyncResponse(w http.ResponseWriter, esResp *http.Response, method, path string) {
 	var rawResp json.RawMessage
 	if err := json.NewDecoder(esResp.Body).Decode(&rawResp); err != nil {
-		writeJSON(w, http.StatusBadGateway, kibanaErrorResponse{
+		platform.WriteJSON(w, http.StatusBadGateway, platform.KibanaErrorResponse{
 			StatusCode: 502, Error: "Bad Gateway", Message: "Failed to parse ES async response",
 		})
 		return
@@ -287,46 +253,13 @@ func writeAsyncResponse(w http.ResponseWriter, esResp *http.Response, method, pa
 	}
 	_ = json.Unmarshal(rawResp, &asyncMeta)
 
-	writeJSON(w, http.StatusOK, kibanaSearchResponse{
+	platform.WriteJSON(w, http.StatusOK, platform.KibanaSearchResponse{
 		ID:          asyncMeta.ID,
 		RawResponse: rawResp,
 		IsRunning:   asyncMeta.IsRunning,
 		IsPartial:   asyncMeta.IsPartial,
 		Warning:     esResp.Header.Get("Warning"),
-		RequestParams: &requestParams{Method: method, Path: path},
-	})
-}
-
-
-func relayESError(w http.ResponseWriter, esResp *http.Response, method, path string) {
-	var esBody map[string]json.RawMessage
-	_ = json.NewDecoder(esResp.Body).Decode(&esBody)
-
-	attrs := map[string]interface{}{
-		"requestParams": requestParams{Method: method, Path: path},
-	}
-	if errField, ok := esBody["error"]; ok {
-		attrs["error"] = errField
-	}
-	if respField, ok := esBody["response"]; ok {
-		attrs["rawResponse"] = respField
-	}
-
-	message := fmt.Sprintf("ES returned %d", esResp.StatusCode)
-	if reason, ok := esBody["error"]; ok {
-		var errObj struct {
-			Reason string `json:"reason"`
-		}
-		if json.Unmarshal(reason, &errObj) == nil && errObj.Reason != "" {
-			message = errObj.Reason
-		}
-	}
-
-	writeJSON(w, esResp.StatusCode, kibanaErrorResponse{
-		StatusCode: esResp.StatusCode,
-		Error:      http.StatusText(esResp.StatusCode),
-		Message:    message,
-		Attributes: attrs,
+		RequestParams: &platform.RequestParams{Method: method, Path: path},
 	})
 }
 
@@ -345,12 +278,4 @@ func stripQueryParams(raw json.RawMessage) []byte {
 		return raw
 	}
 	return out
-}
-
-func mustMarshal(v interface{}) []byte {
-	data, err := json.Marshal(v)
-	if err != nil {
-		panic(fmt.Sprintf("json.Marshal failed: %v", err))
-	}
-	return data
 }
