@@ -12,6 +12,7 @@ import { render } from '../../../utils/testing/rtl_helpers';
 import {
   ParameterValuesEditor,
   canUseParameterPairs,
+  hasInvalidParamNames,
   pairsToParamsJson,
   paramsJsonToPairs,
 } from './parameter_values';
@@ -50,29 +51,59 @@ describe('params JSON helpers', () => {
     expect(pairsToParamsJson(pairs)).toBe('{"username":"elastic","password":"changeme"}');
   });
 
-  it('drops keyless pairs and returns an empty string when nothing is left', () => {
-    expect(pairsToParamsJson([['', 'orphan']])).toBe('');
+  it('skips blank rows and returns an empty string when nothing is left', () => {
+    expect(pairsToParamsJson([['', '']])).toBe('');
     expect(
       pairsToParamsJson([
-        ['', 'orphan'],
+        ['', ''],
         ['token', 'abc'],
       ])
     ).toBe('{"token":"abc"}');
   });
 
-  it.each(['', '{}', '{"token":"abc"}'])('uses pairs for flat string params: %s', (params) => {
-    expect(canUseParameterPairs(params)).toBe(true);
+  it('keeps nameless, duplicate and __proto__ names so they are not lost', () => {
+    expect(
+      pairsToParamsJson([
+        ['', 'orphan'],
+        ['token', 'a'],
+        ['token', 'b'],
+        ['__proto__', 'c'],
+      ])
+    ).toBe('{"":"orphan","token":"a","token":"b","__proto__":"c"}');
+    expect(paramsJsonToPairs('{"__proto__":"c"}')).toEqual([['__proto__', 'c']]);
   });
+
+  it.each(['', '{}', '{"token":"abc"}', '{"":"orphan"}'])(
+    'uses pairs for flat string params: %s',
+    (params) => {
+      expect(canUseParameterPairs(params)).toBe(true);
+    }
+  );
 
   it.each([
     '{"retries":3}',
     '{"options":{"mode":"x"}}',
     '["first"]',
     '{"certificate":"first line\\nsecond line"}',
+    '{"token":"a","token":"b"}',
     '{invalid',
   ])('falls back to JSON for other params: %s', (params) => {
     expect(canUseParameterPairs(params)).toBe(false);
   });
+
+  it.each(['{"":"orphan"}', '{"token":"a", "token" :"b"}', '{"a\\"b":"1","a\\"b":"2"}'])(
+    'flags missing or duplicate names: %s',
+    (params) => {
+      expect(hasInvalidParamNames(params)).toBe(true);
+    }
+  );
+
+  it.each(['', '{"token":"a","other":"token"}', '{"a":{"b":1},"c":{"b":2}}', '{invalid'])(
+    'accepts params without name problems: %s',
+    (params) => {
+      expect(hasInvalidParamNames(params)).toBe(false);
+    }
+  );
 });
 
 describe('ParameterValuesEditor', () => {
@@ -166,6 +197,74 @@ describe('ParameterValuesEditor', () => {
     const updated = '{"retries":4,"options":{"mode":"y"}}';
     fireEvent.change(getByTestId('syntheticsParamsJSONEditor'), { target: { value: updated } });
     expect(getByTestId('parameterValuesValue')).toHaveTextContent(updated);
+    expect(getByTestId('syntheticsParamsEditorModeToggle')).toBeDisabled();
+  });
+
+  it('keeps row positions when a name is cleared', () => {
+    const { getByTestId } = render(
+      <ParameterValuesEditorForm defaultParams={'{"first":"one","second":"two"}'} />
+    );
+
+    fireEvent.change(getByTestId('keyValuePairsKey1'), { target: { value: '' } });
+    expect(getByTestId('keyValuePairsKey0')).toHaveValue('first');
+    expect(getByTestId('keyValuePairsKey1')).toHaveValue('');
+    expect(getByTestId('keyValuePairsKey1')).toHaveAttribute('aria-invalid', 'true');
+
+    fireEvent.change(getByTestId('keyValuePairsKey1'), { target: { value: 'third' } });
+    expect(getByTestId('keyValuePairsKey0')).toHaveValue('first');
+    expect(getByTestId('parameterValuesValue')).toHaveTextContent('{"first":"one","third":"two"}');
+  });
+
+  it('keeps both rows and flags them when names collide', () => {
+    const { getByTestId } = render(
+      <ParameterValuesEditorForm defaultParams={'{"first":"one","second":"two"}'} />
+    );
+
+    fireEvent.change(getByTestId('keyValuePairsKey1'), { target: { value: 'first' } });
+    expect(getByTestId('keyValuePairsValue0')).toHaveValue('one');
+    expect(getByTestId('keyValuePairsValue1')).toHaveValue('two');
+    expect(getByTestId('keyValuePairsKey0')).toHaveAttribute('aria-invalid', 'true');
+    expect(getByTestId('keyValuePairsKey1')).toHaveAttribute('aria-invalid', 'true');
+    expect(getByTestId('parameterValuesValue')).toHaveTextContent('{"first":"one","first":"two"}');
+  });
+
+  it('switches a new monitor to JSON for non-string params', () => {
+    const { getByTestId, queryByTestId } = render(<ParameterValuesEditorForm defaultParams="" />);
+
+    fireEvent.click(getByTestId('syntheticsParamsEditorModeToggle'));
+    fireEvent.change(getByTestId('syntheticsParamsJSONEditor'), {
+      target: { value: '{"retries":3}' },
+    });
+
+    expect(getByTestId('parameterValuesValue')).toHaveTextContent('{"retries":3}');
+    expect(queryByTestId('keyValuePairsKey0')).not.toBeInTheDocument();
+  });
+
+  it('stays in JSON mode while typing values that also fit pairs', () => {
+    const { getByTestId, queryByTestId } = render(
+      <ParameterValuesEditorForm defaultParams={'{"retries":3}'} />
+    );
+
+    fireEvent.change(getByTestId('syntheticsParamsJSONEditor'), {
+      target: { value: '{"retries":"3"}' },
+    });
+    expect(getByTestId('syntheticsParamsJSONEditor')).toBeInTheDocument();
+
+    fireEvent.change(getByTestId('syntheticsParamsJSONEditor'), { target: { value: '' } });
+    expect(getByTestId('syntheticsParamsJSONEditor')).toBeInTheDocument();
+    expect(queryByTestId('syntheticsMonitorConfigParams__button')).not.toBeInTheDocument();
+  });
+
+  it('switches JSON back to pairs when the params fit', () => {
+    const { getByTestId } = render(<ParameterValuesEditorForm defaultParams={'{"retries":3}'} />);
+
+    fireEvent.change(getByTestId('syntheticsParamsJSONEditor'), {
+      target: { value: '{"retries":"3"}' },
+    });
+    fireEvent.click(getByTestId('syntheticsParamsEditorModeToggle'));
+
+    expect(getByTestId('keyValuePairsKey0')).toHaveValue('retries');
+    expect(getByTestId('keyValuePairsValue0')).toHaveValue('3');
   });
 });
 

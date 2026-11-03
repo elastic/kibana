@@ -35,6 +35,7 @@ import {
 import { MaintenanceWindowsLink } from '../fields/maintenance_windows/create_maintenance_windows_btn';
 import type { MaintenanceWindowsFieldProps } from '../fields/maintenance_windows/maintenance_windows';
 import type { MonitorSpacesProps } from '../fields/monitor_spaces';
+import { hasInvalidParamNames } from '../fields/parameter_values';
 import { kibanaService } from '../../../../../utils/kibana_service';
 import type { ThrottlingConfigFieldProps } from '../fields/throttling/throttling_config_field';
 import { PROFILE_OPTIONS } from '../fields/throttling/throttling_config_field';
@@ -1553,6 +1554,12 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
 
           return true;
         },
+        validParamNames: (value) =>
+          hasInvalidParamNames(value)
+            ? i18n.translate('xpack.synthetics.monitorConfig.params.nameError', {
+                defaultMessage: 'Parameter names must be unique and cannot be empty',
+              })
+            : true,
       },
     }),
   },

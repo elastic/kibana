@@ -8,6 +8,7 @@
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFieldText,
   EuiFlexGroup,
@@ -17,7 +18,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEqual } from 'lodash';
+import { countBy } from 'lodash';
+import { isJsonObjectString } from '../../../../../../common/utils/is_json_object_string';
 import type { Pair } from './key_value_field';
 import { JSONEditor } from './code_editor';
 
@@ -27,6 +29,54 @@ export interface ParameterValuesEditorProps {
   readOnly?: boolean;
   value?: string;
 }
+
+interface ParameterRow {
+  id: string;
+  key: string;
+  value: string;
+}
+
+// JSON.parse keeps only the last of duplicate keys, so names are read from the raw text.
+const getTopLevelKeys = (json: string): string[] => {
+  const keys: string[] = [];
+  let depth = 0;
+  let index = 0;
+  while (index < json.length) {
+    const char = json[index];
+    if (char === '"') {
+      let end = index + 1;
+      while (end < json.length && json[end] !== '"') {
+        end += json[end] === '\\' ? 2 : 1;
+      }
+      const token = json.slice(index, end + 1);
+      index = end + 1;
+      while (index < json.length && /\s/.test(json[index])) {
+        index++;
+      }
+      if (depth === 1 && json[index] === ':') {
+        keys.push(JSON.parse(token));
+      }
+    } else {
+      if (char === '{' || char === '[') {
+        depth++;
+      } else if (char === '}' || char === ']') {
+        depth--;
+      }
+      index++;
+    }
+  }
+  return keys;
+};
+
+const hasDuplicateKeys = (keys: string[]): boolean => new Set(keys).size !== keys.length;
+
+export const hasInvalidParamNames = (params?: string): boolean => {
+  if (!params || !isJsonObjectString(params)) {
+    return false;
+  }
+  const keys = getTopLevelKeys(params);
+  return keys.includes('') || hasDuplicateKeys(keys);
+};
 
 export const paramsJsonToPairs = (params?: string): Pair[] => {
   if (!params) {
@@ -59,21 +109,21 @@ export const canUseParameterPairs = (params?: string): boolean => {
       parsed !== null &&
       typeof parsed === 'object' &&
       !Array.isArray(parsed) &&
-      Object.values(parsed).every((value) => typeof value === 'string' && !value.includes('\n'))
+      Object.values(parsed).every((value) => typeof value === 'string' && !value.includes('\n')) &&
+      !hasDuplicateKeys(getTopLevelKeys(params))
     );
   } catch {
     return false;
   }
 };
 
+// Serialized by hand so rows with a missing or repeated name reach validation instead of being
+// dropped or merged.
 export const pairsToParamsJson = (pairs: Pair[]): string => {
-  const params: Record<string, string> = {};
-  for (const [key, val] of pairs) {
-    if (key) {
-      params[key] = val;
-    }
-  }
-  return Object.keys(params).length ? JSON.stringify(params) : '';
+  const entries = pairs
+    .filter(([key, val]) => key || val)
+    .map(([key, val]) => `${JSON.stringify(key)}:${JSON.stringify(val)}`);
+  return entries.length ? `{${entries.join(',')}}` : '';
 };
 
 export const ParameterValuesEditor = ({
@@ -82,25 +132,35 @@ export const ParameterValuesEditor = ({
   readOnly,
   value,
 }: ParameterValuesEditorProps): React.ReactElement => {
-  const [visibleRows, setVisibleRows] = useState<Record<number, boolean>>({});
-  const [editingIndex, setEditingIndex] = useState<number>();
-  const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
-  const pairsFromValue = useMemo(() => paramsJsonToPairs(value), [value]);
-  const [pairs, setPairs] = useState<Pair[]>(pairsFromValue);
-  const useParameterPairs = useMemo(() => canUseParameterPairs(value), [value]);
+  const nextRowId = useRef(0);
+  const createRow = useCallback(([key, rowValue]: Pair): ParameterRow => {
+    nextRowId.current += 1;
+    return { id: String(nextRowId.current), key, value: rowValue };
+  }, []);
+  const createRows = useCallback(
+    (params?: string) => paramsJsonToPairs(params).map(createRow),
+    [createRow]
+  );
+  const [isJsonMode, setIsJsonMode] = useState(() => !canUseParameterPairs(value));
+  const [rows, setRows] = useState<ParameterRow[]>(() => createRows(value));
+  const [visibleRows, setVisibleRows] = useState<Record<string, boolean>>({});
+  const [editingId, setEditingId] = useState<string>();
+  const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const lastEmittedValue = useRef(value ?? '');
+  const canUsePairs = useMemo(() => canUseParameterPairs(value), [value]);
 
   useEffect(() => {
-    setPairs((prevPairs) => {
-      const keylessPairs = prevPairs.filter(([key]) => !key);
-      const nextPairs = [...keylessPairs, ...pairsFromValue];
-      return isEqual(prevPairs, nextPairs) ? prevPairs : nextPairs;
-    });
-  }, [pairsFromValue]);
+    if ((value ?? '') === lastEmittedValue.current) {
+      return;
+    }
+    lastEmittedValue.current = value ?? '';
+    setRows(createRows(value));
+    setIsJsonMode(!canUseParameterPairs(value));
+  }, [createRows, value]);
 
-  const updatePairs = useCallback(
-    (nextPairs: Pair[]) => {
-      setPairs(nextPairs);
-      const next = pairsToParamsJson(nextPairs);
+  const emit = useCallback(
+    (next: string) => {
+      lastEmittedValue.current = next;
       if (next !== (value ?? '')) {
         onChange(next);
       }
@@ -108,192 +168,226 @@ export const ParameterValuesEditor = ({
     [onChange, value]
   );
 
+  const updateRows = useCallback(
+    (nextRows: ParameterRow[]) => {
+      setRows(nextRows);
+      emit(pairsToParamsJson(nextRows.map(({ key, value: rowValue }) => [key, rowValue])));
+    },
+    [emit]
+  );
+
+  const invalidRowIds = useMemo(() => {
+    const keyCounts = countBy(rows.filter(({ key }) => key).map(({ key }) => key));
+    return new Set(
+      rows
+        .filter(({ key, value: rowValue }) => (key ? keyCounts[key] > 1 : Boolean(rowValue)))
+        .map(({ id }) => id)
+    );
+  }, [rows]);
+
   useEffect(() => {
-    if (editingIndex === undefined) {
+    if (editingId === undefined) {
       return;
     }
-    inputRefs.current[editingIndex]?.focus();
-  }, [editingIndex]);
+    inputRefs.current[editingId]?.focus();
+  }, [editingId]);
 
-  if (!useParameterPairs) {
-    return (
-      <div data-test-subj="syntheticsMonitorConfigParams">
-        <JSONEditor
-          ariaLabel={PARAMETER_JSON_EDITOR_LABEL}
-          height="100px"
-          id="syntheticsMonitorConfigParams"
-          onChange={onChange}
-          readOnly={readOnly}
-          value={value ?? ''}
-        />
-      </div>
-    );
-  }
+  const modeToggle = isJsonMode ? (
+    <EuiToolTip content={canUsePairs ? undefined : PAIRS_UNAVAILABLE_LABEL}>
+      <EuiButtonEmpty
+        data-test-subj="syntheticsParamsEditorModeToggle"
+        iconType="list"
+        isDisabled={!canUsePairs}
+        onClick={() => {
+          setRows(createRows(value));
+          setIsJsonMode(false);
+        }}
+        size="s"
+      >
+        {EDIT_AS_PAIRS_LABEL}
+      </EuiButtonEmpty>
+    </EuiToolTip>
+  ) : (
+    <EuiButtonEmpty
+      data-test-subj="syntheticsParamsEditorModeToggle"
+      iconType="code"
+      onClick={() => setIsJsonMode(true)}
+      size="s"
+    >
+      {EDIT_AS_JSON_LABEL}
+    </EuiButtonEmpty>
+  );
 
   return (
     <div data-test-subj="syntheticsMonitorConfigParams">
       <EuiSpacer size="s" />
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="syntheticsMonitorConfigParams__button"
-            iconType="plus"
-            isDisabled={readOnly}
-            onClick={() => {
-              setVisibleRows({});
-              updatePairs([['', ''], ...pairs]);
-            }}
-            size="s"
-          >
-            {ADD_PARAMETER_LABEL}
-          </EuiButton>
-        </EuiFlexItem>
+      <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
+        <EuiFlexItem grow={false}>{modeToggle}</EuiFlexItem>
+        {!isJsonMode && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="syntheticsMonitorConfigParams__button"
+              iconType="plus"
+              isDisabled={readOnly}
+              onClick={() => {
+                updateRows([createRow(['', '']), ...rows]);
+              }}
+              size="s"
+            >
+              {ADD_PARAMETER_LABEL}
+            </EuiButton>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      {pairs.length > 0 && (
-        <EuiFormFieldset>
-          <EuiFlexGroup gutterSize="s" responsive={false}>
-            <EuiFlexItem>{PARAMETER_KEY_LABEL}</EuiFlexItem>
-            <EuiFlexItem>{PARAMETER_VALUE_LABEL}</EuiFlexItem>
-            <EuiFlexItem grow={false} />
-          </EuiFlexGroup>
-          {pairs.map(([key, paramValue], index) => {
-            const parameterName = key || String(index + 1);
-            const deleteLabel = i18n.translate(
-              'xpack.synthetics.monitorConfig.params.deleteItem.label',
-              {
-                defaultMessage: 'Delete parameter {key}',
-                values: { key: parameterName },
-              }
-            );
-            const editLabel = i18n.translate(
-              'xpack.synthetics.monitorConfig.params.editItem.label',
-              {
-                defaultMessage: 'Edit parameter {key}',
-                values: { key: parameterName },
-              }
-            );
-            const keyInputLabel = i18n.translate(
-              'xpack.synthetics.monitorConfig.params.keyInput.label',
-              {
-                defaultMessage: 'Parameter {parameterName}',
-                values: { parameterName },
-              }
-            );
-            const valueInputLabel = i18n.translate(
-              'xpack.synthetics.monitorConfig.params.valueInput.label',
-              {
-                defaultMessage: 'Value for parameter {parameterName}',
-                values: { parameterName },
-              }
-            );
-            const isValueVisible = Boolean(visibleRows[index]);
-            const showValue = isValueVisible || editingIndex === index;
-            const visibilityLabel = isValueVisible
-              ? HIDE_PARAMETER_VALUE_LABEL
-              : SHOW_PARAMETER_VALUE_LABEL;
+      {isJsonMode ? (
+        <JSONEditor
+          ariaLabel={PARAMETER_JSON_EDITOR_LABEL}
+          height="100px"
+          id="syntheticsMonitorConfigParams"
+          onChange={emit}
+          readOnly={readOnly}
+          value={value ?? ''}
+        />
+      ) : (
+        rows.length > 0 && (
+          <EuiFormFieldset>
+            <EuiFlexGroup gutterSize="s" responsive={false}>
+              <EuiFlexItem>{PARAMETER_KEY_LABEL}</EuiFlexItem>
+              <EuiFlexItem>{PARAMETER_VALUE_LABEL}</EuiFlexItem>
+              <EuiFlexItem grow={false} />
+            </EuiFlexGroup>
+            {rows.map(({ id, key, value: paramValue }, index) => {
+              const parameterName = key || String(index + 1);
+              const deleteLabel = i18n.translate(
+                'xpack.synthetics.monitorConfig.params.deleteItem.label',
+                {
+                  defaultMessage: 'Delete parameter {key}',
+                  values: { key: parameterName },
+                }
+              );
+              const editLabel = i18n.translate(
+                'xpack.synthetics.monitorConfig.params.editItem.label',
+                {
+                  defaultMessage: 'Edit parameter {key}',
+                  values: { key: parameterName },
+                }
+              );
+              const keyInputLabel = i18n.translate(
+                'xpack.synthetics.monitorConfig.params.keyInput.label',
+                {
+                  defaultMessage: 'Parameter {parameterName}',
+                  values: { parameterName },
+                }
+              );
+              const valueInputLabel = i18n.translate(
+                'xpack.synthetics.monitorConfig.params.valueInput.label',
+                {
+                  defaultMessage: 'Value for parameter {parameterName}',
+                  values: { parameterName },
+                }
+              );
+              const isValueVisible = Boolean(visibleRows[id]);
+              const showValue = isValueVisible || editingId === id;
+              const visibilityLabel = isValueVisible
+                ? HIDE_PARAMETER_VALUE_LABEL
+                : SHOW_PARAMETER_VALUE_LABEL;
+              const updateRow = (nextRow: Partial<ParameterRow>) => {
+                updateRows(rows.map((row) => (row.id === id ? { ...row, ...nextRow } : row)));
+              };
 
-            return (
-              <Fragment key={index}>
-                <EuiSpacer size="xs" />
-                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                  <EuiFlexItem>
-                    <EuiFieldText
-                      aria-label={keyInputLabel}
-                      compressed
-                      data-test-subj={`keyValuePairsKey${index}`}
-                      fullWidth
-                      onBlur={onBlur}
-                      onChange={(event) => {
-                        const nextPairs = [...pairs];
-                        nextPairs[index] = [event.target.value, paramValue];
-                        updatePairs(nextPairs);
-                      }}
-                      readOnly={readOnly}
-                      value={key}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiFieldText
-                      append={
-                        <EuiToolTip content={visibilityLabel} disableScreenReaderOutput>
-                          <EuiButtonIcon
-                            aria-label={visibilityLabel}
-                            data-test-subj={`syntheticsParamValueVisibility${index}`}
-                            iconType={isValueVisible ? 'eyeSlash' : 'eye'}
-                            size="s"
-                            onClick={() => {
-                              setVisibleRows((rows) => ({ ...rows, [index]: !rows[index] }));
-                            }}
-                          />
-                        </EuiToolTip>
-                      }
-                      aria-label={valueInputLabel}
-                      autoComplete="new-password"
-                      compressed
-                      data-test-subj={`keyValuePairsValue${index}`}
-                      fullWidth
-                      icon="lock"
-                      inputRef={(node) => {
-                        inputRefs.current[index] = node;
-                      }}
-                      onBlur={() => {
-                        setEditingIndex((current) => (current === index ? undefined : current));
-                        onBlur?.();
-                      }}
-                      onChange={(event) => {
-                        const nextPairs = [...pairs];
-                        nextPairs[index] = [key, event.target.value];
-                        updatePairs(nextPairs);
-                      }}
-                      readOnly={readOnly || editingIndex !== index}
-                      type={showValue ? 'text' : 'password'}
-                      value={paramValue}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup gutterSize="xs" responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        <EuiToolTip content={editLabel} disableScreenReaderOutput>
-                          <EuiButtonIcon
-                            aria-label={editLabel}
-                            data-test-subj={`syntheticsParamValueEdit${index}`}
-                            display="empty"
-                            iconType="pencil"
-                            isDisabled={readOnly}
-                            size="s"
-                            onClick={() => {
-                              setEditingIndex(index);
-                            }}
-                          />
-                        </EuiToolTip>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiToolTip content={deleteLabel} disableScreenReaderOutput>
-                          <EuiButtonIcon
-                            aria-label={deleteLabel}
-                            color="danger"
-                            data-test-subj="syntheticsKeyValuePairsFieldButton"
-                            display="empty"
-                            iconType="trash"
-                            isDisabled={readOnly}
-                            size="s"
-                            onClick={() => {
-                              setVisibleRows({});
-                              const nextPairs = [...pairs];
-                              nextPairs.splice(index, 1);
-                              updatePairs(nextPairs);
-                            }}
-                          />
-                        </EuiToolTip>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </Fragment>
-            );
-          })}
-        </EuiFormFieldset>
+              return (
+                <Fragment key={id}>
+                  <EuiSpacer size="xs" />
+                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                    <EuiFlexItem>
+                      <EuiFieldText
+                        aria-label={keyInputLabel}
+                        compressed
+                        data-test-subj={`keyValuePairsKey${index}`}
+                        fullWidth
+                        isInvalid={invalidRowIds.has(id)}
+                        onBlur={onBlur}
+                        onChange={(event) => updateRow({ key: event.target.value })}
+                        readOnly={readOnly}
+                        value={key}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiFieldText
+                        append={
+                          <EuiToolTip content={visibilityLabel} disableScreenReaderOutput>
+                            <EuiButtonIcon
+                              aria-label={visibilityLabel}
+                              data-test-subj={`syntheticsParamValueVisibility${index}`}
+                              iconType={isValueVisible ? 'eyeSlash' : 'eye'}
+                              size="s"
+                              onClick={() => {
+                                setVisibleRows((visible) => ({ ...visible, [id]: !visible[id] }));
+                              }}
+                            />
+                          </EuiToolTip>
+                        }
+                        aria-label={valueInputLabel}
+                        autoComplete="new-password"
+                        compressed
+                        data-test-subj={`keyValuePairsValue${index}`}
+                        fullWidth
+                        icon="lock"
+                        inputRef={(node) => {
+                          inputRefs.current[id] = node;
+                        }}
+                        onBlur={() => {
+                          setEditingId((current) => (current === id ? undefined : current));
+                          onBlur?.();
+                        }}
+                        onChange={(event) => updateRow({ value: event.target.value })}
+                        readOnly={readOnly || editingId !== id}
+                        type={showValue ? 'text' : 'password'}
+                        value={paramValue}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiFlexGroup gutterSize="xs" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiToolTip content={editLabel} disableScreenReaderOutput>
+                            <EuiButtonIcon
+                              aria-label={editLabel}
+                              data-test-subj={`syntheticsParamValueEdit${index}`}
+                              display="empty"
+                              iconType="pencil"
+                              isDisabled={readOnly}
+                              size="s"
+                              onClick={() => {
+                                setEditingId(id);
+                              }}
+                            />
+                          </EuiToolTip>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiToolTip content={deleteLabel} disableScreenReaderOutput>
+                            <EuiButtonIcon
+                              aria-label={deleteLabel}
+                              color="danger"
+                              data-test-subj="syntheticsKeyValuePairsFieldButton"
+                              display="empty"
+                              iconType="trash"
+                              isDisabled={readOnly}
+                              size="s"
+                              onClick={() => {
+                                updateRows(rows.filter((row) => row.id !== id));
+                              }}
+                            />
+                          </EuiToolTip>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </Fragment>
+              );
+            })}
+          </EuiFormFieldset>
+        )
       )}
     </div>
   );
@@ -303,6 +397,22 @@ const ADD_PARAMETER_LABEL = i18n.translate(
   'xpack.synthetics.monitorConfig.params.addParameter.label',
   {
     defaultMessage: 'Add parameter',
+  }
+);
+
+const EDIT_AS_JSON_LABEL = i18n.translate('xpack.synthetics.monitorConfig.params.editAsJson', {
+  defaultMessage: 'Edit as JSON',
+});
+
+const EDIT_AS_PAIRS_LABEL = i18n.translate('xpack.synthetics.monitorConfig.params.editAsPairs', {
+  defaultMessage: 'Edit as key-value pairs',
+});
+
+const PAIRS_UNAVAILABLE_LABEL = i18n.translate(
+  'xpack.synthetics.monitorConfig.params.pairsUnavailable',
+  {
+    defaultMessage:
+      'Key-value editing needs a JSON object with unique names and single-line text values.',
   }
 );
 
