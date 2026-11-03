@@ -158,9 +158,7 @@ describe('alertRetrievalBuilderSkill', () => {
       });
 
       it('no longer frames execution as an optional spot check', () => {
-        expect(alertRetrievalBuilderSkill.content).not.toContain(
-          'verify the results look correct'
-        );
+        expect(alertRetrievalBuilderSkill.content).not.toContain('verify the results look correct');
         expect(alertRetrievalBuilderSkill.content).not.toContain(
           'test a query against real data before updating the editor'
         );
