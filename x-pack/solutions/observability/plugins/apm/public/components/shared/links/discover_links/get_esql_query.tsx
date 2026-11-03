@@ -208,7 +208,12 @@ export const getESQLQueryFromIndexPattern = ({
   }
 
   if (kuery) {
-    query = query.pipe`WHERE KQL(${kuery})`;
+    // The kuery comes from the user's query bar and may contain characters that are
+    // significant inside an ES|QL string literal (double quotes, backslashes, escaped
+    // spaces, wildcards). Interpolating it raw into a `.pipe` template produced invalid
+    // ES|QL and threw in the parser. `esql.str` emits a correctly escaped string literal,
+    // mirroring the KQL(${esql.str(...)}) pattern used elsewhere in the codebase.
+    query = query.where`KQL(${esql.str(kuery)})`;
   }
 
   if (sortDirection) {
