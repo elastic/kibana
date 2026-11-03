@@ -36,12 +36,6 @@ export const PackagePolicyUpgradeCell: React.FC<{
     return null;
   }
 
-  // The upgrade page of an agent-based policy edits it, which only the onboarding flow may do for a
-  // policy managed by a cloud onboarding instance. A managed integration upgrades in place.
-  if (packagePolicy.onboarding_deployment_id && !isAgentlessUpgrade) {
-    return null;
-  }
-
   const review = packagePolicy.pendingUpgradeReview;
 
   if (packagePolicy.keepPoliciesUpToDate) {
@@ -56,6 +50,12 @@ export const PackagePolicyUpgradeCell: React.FC<{
         </EuiFlexItem>
       );
     }
+    return null;
+  }
+
+  // The upgrade page of an agent-based policy edits it, which only the onboarding flow may do for a
+  // policy managed by a cloud onboarding instance. A managed integration upgrades in place.
+  if (packagePolicy.onboarding_deployment_id && !isAgentlessUpgrade) {
     return null;
   }
 

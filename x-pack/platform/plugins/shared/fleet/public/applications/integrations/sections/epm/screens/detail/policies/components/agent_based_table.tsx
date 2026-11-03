@@ -171,6 +171,7 @@ export const AgentBasedPackagePoliciesTable = ({
                     policies={agentPolicies}
                     packagePolicyId={packagePolicy.id}
                     onAgentPoliciesChange={refreshPackagePolicies}
+                    onboardingDeploymentId={packagePolicy.onboarding_deployment_id}
                   />
                 ) : (
                   <AgentPolicySummaryLine policy={agentPolicies[0]} />
