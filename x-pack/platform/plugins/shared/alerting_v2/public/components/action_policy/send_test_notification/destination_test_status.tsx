@@ -42,9 +42,9 @@ const STATUS_COLORS: Record<TestRunStatus, string> = {
   failed: 'danger',
 };
 
-const VIEW_EXECUTION_LABEL = i18n.translate(
-  'xpack.alertingV2.actionPolicy.sendTestNotification.viewExecution',
-  { defaultMessage: 'View execution' }
+const VIEW_WORKFLOW_EXECUTION_LABEL = i18n.translate(
+  'xpack.alertingV2.actionPolicy.sendTestNotification.viewWorkflowExecution',
+  { defaultMessage: 'View workflow execution' }
 );
 
 const STATUS_UNAVAILABLE_LABEL = i18n.translate(
@@ -143,7 +143,7 @@ const ExecutionStatusRow = ({
               external
               data-test-subj="sendTestNotificationExecutionLink"
             >
-              {VIEW_EXECUTION_LABEL}
+              {VIEW_WORKFLOW_EXECUTION_LABEL}
             </EuiLink>
           </EuiFlexItem>
         </EuiFlexGroup>

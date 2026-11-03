@@ -12,14 +12,16 @@ import { join } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutServerConfig } from '../../../../types';
 
-// `src/` packages cannot import `@kbn/nightshift-shared` (x-pack), so read the flag from its source
-// to fail if it is renamed again without this config set following (see #292333).
-const NIGHTSHIFT_ENABLED_FLAG = /NIGHTSHIFT_ENABLED_FLAG = '([^']+)'/.exec(
-  readFileSync(
-    join(REPO_ROOT, 'x-pack/solutions/observability/packages/kbn-nightshift-shared/index.ts'),
-    'utf8'
-  )
-)?.[1];
+// `src/` packages cannot import `@kbn/nightshift-shared` (x-pack), so read the flags from its source
+// to fail if one is renamed again without this config set following (see #292333).
+const NIGHTSHIFT_SHARED_SOURCE = readFileSync(
+  join(REPO_ROOT, 'x-pack/solutions/observability/packages/kbn-nightshift-shared/index.ts'),
+  'utf8'
+);
+const readFlag = (constant: string) =>
+  new RegExp(`${constant} =\\s*'([^']+)'`).exec(NIGHTSHIFT_SHARED_SOURCE)?.[1];
+const NIGHTSHIFT_ENABLED_FLAG = readFlag('NIGHTSHIFT_ENABLED_FLAG');
+const NIGHTSHIFT_ONLINE_EVALS_PAUSED_FLAG = readFlag('NIGHTSHIFT_ONLINE_EVALS_PAUSED_FLAG');
 
 const SANDBOX_KIBANA_CONFIG = join(
   REPO_ROOT,
@@ -98,12 +100,18 @@ describe.each([
     expect(args).toContain('--xpack.security.serviceAccounts.enabled=true');
     expect(args).toContain('--xpack.evals.enabled=true');
     expect(args).toContain('--xpack.evals.mode=full');
-    expect(args).toContain('--uiSettings.overrides.agentBuilder:experimentalFeatures=true');
     expect(args.filter((arg: string) => arg.startsWith('--config='))).toEqual([
       `--config=${join(__dirname, 'kibana.tracing.yml')}`,
       `--config=${SANDBOX_KIBANA_CONFIG}`,
     ]);
     expect(args.some((arg: string) => arg.includes('xpack.sandbox'))).toBe(false);
+  });
+
+  it('pauses online evals, so investigations are judged only by the suite', () => {
+    const args = loadServers(configPath, { SANDBOX_KIBANA_CONFIG }).kbnTestServer.serverArgs;
+
+    expect(NIGHTSHIFT_ONLINE_EVALS_PAUSED_FLAG).toBeTruthy();
+    expect(args).toContain(`--feature_flags.overrides.${NIGHTSHIFT_ONLINE_EVALS_PAUSED_FLAG}=true`);
   });
 
   it('fails fast when SANDBOX_KIBANA_CONFIG points at a missing file', () => {

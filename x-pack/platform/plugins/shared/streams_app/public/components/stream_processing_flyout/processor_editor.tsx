@@ -17,34 +17,38 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiText,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
+import { isEqual } from 'lodash';
 import type {
   CatalogueComponentStatus,
   CatalogueComponentSummary,
   ComponentCatalogue,
+  ComponentValidationRequest,
 } from '@kbn/streams-schema';
 import { useDiscardConfirm } from '../../hooks/use_discard_confirm';
-import { getDefinition, listComponents } from '../../services/component_catalogue';
-import type { UnitSignal } from '../../services/unit_pipeline';
+import { BlockDisableOverlay } from '../draggable_steps';
+import type { ComponentChecker } from '../../services/component_catalogue';
+import { allocateComponentId, type UnitSignal } from '../../services/unit_pipeline';
 import type { DraftProcessor } from '../../services/unit_processing';
 import {
   ComponentDefinitionForm,
-  createInitialObject,
-  fromConfigEntries,
-  toConfigEntries,
-  validateValues,
+  SignalPicker,
+  toFieldErrors,
   type ComponentReferenceOption,
-  type FieldErrors,
-  type ObjectValue,
 } from '../component_definition_form';
+import { CheckOutcomeCallout, type CheckOutcome } from './check_outcome_callout';
 import {
   deleteProcessorPromptOptions,
   discardProcessorChangesPromptOptions,
 } from './prompt_options';
 import type { ProcessingStep } from './state_management/processing_flyout_machine';
+import { useComponentCheck } from './use_component_check';
+import { useProcessorForm } from './use_processor_form';
 
 const STATUS_COLORS: Record<CatalogueComponentStatus, string> = {
   stable: 'success',
@@ -57,21 +61,9 @@ const processorLabel = i18n.translate('xpack.streams.processingFlyout.editor.pro
   defaultMessage: 'Processor',
 });
 
-const processorTelemetry = (
-  component: CatalogueComponentSummary | undefined,
-  targetTelemetry: readonly UnitSignal[]
-): UnitSignal[] => {
-  if (!component) {
-    return [...targetTelemetry];
-  }
-  const flowing = targetTelemetry.filter((signal) =>
-    component.supported_telemetry.includes(signal)
-  );
-  // An instance of a `fixed` component must enable every signal the component supports.
-  return component.telemetry_selection === 'fixed' && flowing.length > 0
-    ? [...component.supported_telemetry]
-    : flowing;
-};
+const signalsLabel = i18n.translate('xpack.streams.processingFlyout.editor.signalsLabel', {
+  defaultMessage: 'Signals',
+});
 
 const toOption = (component: CatalogueComponentSummary): EuiComboBoxOptionOption<string> => ({
   label: component.display_name,
@@ -90,11 +82,44 @@ interface ProcessorEditorProps {
   isShared?: boolean;
   telemetry: readonly UnitSignal[];
   componentRefs: readonly ComponentReferenceOption[];
-  onCommit: (processor: DraftProcessor) => void;
+  /** Checks a submitted processor with the configuration service before it commits. */
+  checkComponent: ComponentChecker;
+  /** Ids used in the unit, so a new processor is checked under the id it would get. */
+  componentIds: ReadonlySet<string>;
+  /** `unchecked` when the configuration service could not be reached to check the processor. */
+  onCommit: (processor: DraftProcessor, options?: { unchecked?: boolean }) => void;
   onCancel: () => void;
   /** Deletes the step being edited; omitted when creating a processor. */
   onDelete?: () => void;
 }
+
+const formOverlayStyles = css`
+  position: relative;
+`;
+
+// A disabled fieldset also stops keyboard input, which the overlay alone does not.
+const disabledFormStyles = css`
+  border: 0;
+  margin: 0;
+  min-width: 0;
+  padding: 0;
+`;
+
+/** The processor as a unit entry, under the id it has or would be given when the unit is saved. */
+const toCheckRequest = (
+  { id, type, name, description, supported_telemetry: telemetry, config }: DraftProcessor,
+  componentIds: ReadonlySet<string>
+): ComponentValidationRequest => ({
+  kind: 'processor',
+  component: {
+    id: id ?? allocateComponentId(type, new Set(componentIds)),
+    type,
+    ...(name ? { name } : {}),
+    ...(description ? { description } : {}),
+    supported_telemetry: [...telemetry],
+    ...(config.length > 0 ? { config } : {}),
+  },
+});
 
 export function ProcessorEditor({
   catalogue,
@@ -102,88 +127,93 @@ export function ProcessorEditor({
   isShared = false,
   telemetry,
   componentRefs,
+  checkComponent,
+  componentIds,
   onCommit,
   onCancel,
   onDelete,
 }: ProcessorEditorProps) {
-  const processors = useMemo(() => listComponents(catalogue, 'processor'), [catalogue]);
-  const [type, setType] = useState<string | undefined>(
-    () => step?.processor.type ?? (processors.length === 1 ? processors[0].type : undefined)
-  );
-  const component = processors.find((candidate) => candidate.type === type);
-  const definition = type ? getDefinition(catalogue, 'processor', type) : undefined;
-  const signals = useMemo(
-    () => step?.processor.supported_telemetry ?? processorTelemetry(component, telemetry),
-    [component, step, telemetry]
-  );
-  const context = useMemo(
-    () => ({ metadata: catalogue.metadata, telemetry: signals }),
-    [catalogue.metadata, signals]
-  );
+  const form = useProcessorForm({ catalogue, step, telemetry });
+  const { type, component, definition, signals, doesNotFit } = form;
+  const check = useComponentCheck(checkComponent);
+  const [outcome, setOutcome] = useState<CheckOutcome>();
+  // The processor the warnings were about; "Continue anyway" commits exactly that.
+  const [warnedProcessor, setWarnedProcessor] = useState<DraftProcessor>();
+  const clearWarnings = () => {
+    if (warnedProcessor) {
+      setWarnedProcessor(undefined);
+      setOutcome(undefined);
+    }
+  };
 
-  const initial = useMemo(() => fromConfigEntries(step?.processor.config), [step]);
-  const scopedNames = useMemo(() => new Set(initial.scoped.map(({ name }) => name)), [initial]);
-  const [values, setValues] = useState<ObjectValue>(() =>
-    step || !definition
-      ? initial.values
-      : createInitialObject(definition.fields, undefined, context)
-  );
-  const [errors, setErrors] = useState<FieldErrors>({});
-  const [submitted, setSubmitted] = useState(false);
-  const [isDirty, setIsDirty] = useState(false);
-  const [hasUnparsedInput, setHasUnparsedInput] = useState(false);
-
-  const handleCancel = useDiscardConfirm(onCancel, {
-    enabled: isDirty,
+  const confirmCancel = useDiscardConfirm(onCancel, {
+    enabled: form.isDirty,
     ...discardProcessorChangesPromptOptions,
   });
-  const handleDelete = useDiscardConfirm(() => onDelete?.(), deleteProcessorPromptOptions);
+  const confirmDelete = useDiscardConfirm(() => onDelete?.(), deleteProcessorPromptOptions);
+  // The check stops first, so it cannot commit the processor while the prompt is open.
+  const handleCancel = () => {
+    check.stop();
+    confirmCancel();
+  };
+  const handleDelete = () => {
+    check.stop();
+    confirmDelete();
+  };
 
-  const options = useMemo(() => processors.map(toOption), [processors]);
+  const options = useMemo(() => form.processors.map(toOption), [form.processors]);
   const [isSelectionCleared, setIsSelectionCleared] = useState(false);
   const selectedOptions = isSelectionCleared ? [] : options.filter(({ value }) => value === type);
 
-  const changeType = (nextType: string) => {
-    const nextDefinition = getDefinition(catalogue, 'processor', nextType);
-    const nextComponent = processors.find((candidate) => candidate.type === nextType);
-    setType(nextType);
-    setErrors({});
-    setSubmitted(false);
-    setIsDirty(true);
-    setValues(
-      nextDefinition
-        ? createInitialObject(nextDefinition.fields, undefined, {
-            metadata: catalogue.metadata,
-            telemetry: processorTelemetry(nextComponent, telemetry),
-          })
-        : {}
-    );
-  };
-
-  const onValuesChange = (next: ObjectValue) => {
-    setValues(next);
-    setIsDirty(true);
-    if (submitted && definition) {
-      setErrors(validateValues(definition.fields, next, context, scopedNames));
-    }
-  };
-
-  const submit = () => {
-    if (!definition || !type || hasUnparsedInput) {
+  const submit = async () => {
+    if (check.isChecking) {
       return;
     }
-    const nextErrors = validateValues(definition.fields, values, context, scopedNames);
-    setSubmitted(true);
-    setErrors(nextErrors);
-    if (Object.keys(nextErrors).length > 0) {
+    const processor = form.validate();
+    if (!processor) {
       return;
     }
-    onCommit({
-      ...(step?.processor ?? {}),
-      type,
-      supported_telemetry: signals,
-      config: toConfigEntries(definition.fields, values, initial.scoped, signals),
-    });
+    setOutcome(undefined);
+    setWarnedProcessor(undefined);
+    // A processor saved as it was opened was already checked when it was last committed, and the
+    // unit save checks everything again, so no round trip is spent on it.
+    if (step && isEqual(processor, step.processor)) {
+      onCommit(processor);
+      return;
+    }
+    const result = await check.run(toCheckRequest(processor, componentIds));
+    if (!result) {
+      return;
+    }
+
+    switch (result.status) {
+      case 'valid':
+        // Warnings do not block, but the user sees them before the processor is committed.
+        if (result.diagnostics.length > 0) {
+          setWarnedProcessor(processor);
+          setOutcome({ kind: 'warned', diagnostics: result.diagnostics });
+          return;
+        }
+        onCommit(processor);
+        return;
+      case 'unchecked':
+        onCommit(processor, { unchecked: true });
+        return;
+      case 'invalid': {
+        // Diagnostics that point at a field show on it; editing the field clears them again.
+        const { errors, unmatched } = toFieldErrors(
+          result.diagnostics,
+          processor.config,
+          new Set(definition?.fields.map(({ name }) => name))
+        );
+        form.addErrors(errors);
+        setOutcome({ kind: 'rejected', unmatched, highlightedCount: Object.keys(errors).length });
+        return;
+      }
+      case 'failed':
+        setOutcome({ kind: 'failed', message: result.message });
+        return;
+    }
   };
 
   const isNew = step === undefined;
@@ -213,71 +243,141 @@ export function ProcessorEditor({
               <EuiSpacer size="m" />
             </>
           ) : null}
-          <EuiForm fullWidth>
-            <EuiFormRow
-              fullWidth
-              label={processorLabel}
-              helpText={definition?.help?.summary ?? definition?.description}
-            >
-              <EuiComboBox
-                aria-label={processorLabel}
-                fullWidth
-                compressed
-                isDisabled={!isNew}
-                singleSelection={{ asPlainText: true }}
-                options={options}
-                selectedOptions={selectedOptions}
-                onChange={([selected]) => {
-                  setIsSelectionCleared(selected?.value === undefined);
-                  if (selected?.value !== undefined && selected.value !== type) {
-                    changeType(selected.value);
-                  }
-                }}
-                placeholder={i18n.translate(
-                  'xpack.streams.processingFlyout.editor.processorPlaceholder',
-                  { defaultMessage: 'Select a processor' }
-                )}
-                data-test-subj="streamsProcessingFlyoutProcessorType"
-              />
-            </EuiFormRow>
-            <EuiSpacer size="m" />
-            {type && !definition ? (
-              <KbnWarningCallout
-                announceOnMount
-                size="s"
-                title={i18n.translate('xpack.streams.processingFlyout.editor.unknownTypeTitle', {
-                  defaultMessage: 'This processor type is not available to configure here',
-                })}
-                data-test-subj="streamsProcessingFlyoutUnknownType"
-                text={i18n.translate('xpack.streams.processingFlyout.editor.unknownTypeBody', {
-                  defaultMessage:
-                    'Its configuration is kept as it is. Edit it in the YAML configuration instead.',
-                })}
-              />
-            ) : null}
-            {definition && signals.length === 0 ? (
-              <KbnWarningCallout
-                announceOnMount
-                size="s"
-                title={i18n.translate('xpack.streams.processingFlyout.editor.noTelemetryTitle', {
-                  defaultMessage: '{processor} does not support the signals that flow here',
-                  values: { processor: definition.display_name },
-                })}
-              />
-            ) : null}
-            {definition && signals.length > 0 ? (
-              <ComponentDefinitionForm
-                definition={definition}
-                metadata={catalogue.metadata}
-                telemetry={signals}
-                values={values}
-                errors={errors}
-                componentRefs={componentRefs}
-                onChange={onValuesChange}
-                onUnparsedInputChange={setHasUnparsedInput}
-              />
-            ) : null}
-          </EuiForm>
+          <div css={formOverlayStyles}>
+            {check.isChecking ? <BlockDisableOverlay /> : null}
+            <fieldset disabled={check.isChecking} css={disabledFormStyles}>
+              <EuiForm fullWidth>
+                <EuiFormRow
+                  fullWidth
+                  label={processorLabel}
+                  helpText={definition?.help?.summary ?? definition?.description}
+                >
+                  <EuiComboBox
+                    aria-label={processorLabel}
+                    fullWidth
+                    compressed
+                    isDisabled={!isNew}
+                    singleSelection={{ asPlainText: true }}
+                    options={options}
+                    selectedOptions={selectedOptions}
+                    onChange={([selected]) => {
+                      setIsSelectionCleared(selected?.value === undefined);
+                      if (selected?.value !== undefined && selected.value !== type) {
+                        clearWarnings();
+                        form.changeType(selected.value);
+                      }
+                    }}
+                    placeholder={i18n.translate(
+                      'xpack.streams.processingFlyout.editor.processorPlaceholder',
+                      { defaultMessage: 'Select a processor' }
+                    )}
+                    data-test-subj="streamsProcessingFlyoutProcessorType"
+                  />
+                </EuiFormRow>
+                <EuiSpacer size="m" />
+                {type && !definition ? (
+                  <KbnWarningCallout
+                    announceOnMount
+                    size="s"
+                    title={i18n.translate(
+                      'xpack.streams.processingFlyout.editor.unknownTypeTitle',
+                      {
+                        defaultMessage: 'This processor type is not available to configure here',
+                      }
+                    )}
+                    data-test-subj="streamsProcessingFlyoutUnknownType"
+                    text={i18n.translate('xpack.streams.processingFlyout.editor.unknownTypeBody', {
+                      defaultMessage:
+                        'Its configuration is kept as it is. Edit it in the YAML configuration instead.',
+                    })}
+                  />
+                ) : null}
+                {definition && doesNotFit ? (
+                  <KbnWarningCallout
+                    announceOnMount
+                    size="s"
+                    title={i18n.translate(
+                      'xpack.streams.processingFlyout.editor.noTelemetryTitle',
+                      {
+                        defaultMessage: '{processor} does not support the signals that flow here',
+                        values: { processor: definition.display_name },
+                      }
+                    )}
+                  />
+                ) : null}
+                {definition && form.canChooseSignals ? (
+                  <>
+                    <SignalPicker
+                      label={signalsLabel}
+                      helpText={
+                        definition.max_selected_telemetry !== undefined
+                          ? i18n.translate(
+                              'xpack.streams.processingFlyout.editor.signalsLimitHelp',
+                              {
+                                defaultMessage:
+                                  'Choose up to {limit, plural, one {# signal} other {# signals}} for this processor to apply to.',
+                                values: { limit: definition.max_selected_telemetry },
+                              }
+                            )
+                          : i18n.translate('xpack.streams.processingFlyout.editor.signalsHelp', {
+                              defaultMessage: 'The signals this processor applies to.',
+                            })
+                      }
+                      options={form.signalOptions}
+                      selected={signals}
+                      error={form.signalsError}
+                      onChange={(next) => {
+                        clearWarnings();
+                        form.setSignals(
+                          form.signalOptions.filter((signal) => next.includes(signal))
+                        );
+                      }}
+                      dataTestSubj="streamsProcessingFlyoutEditorSignals"
+                    />
+                    <EuiSpacer size="m" />
+                  </>
+                ) : null}
+                {definition?.telemetry_selection === 'fixed' && !doesNotFit ? (
+                  <>
+                    <EuiText
+                      size="xs"
+                      color="subdued"
+                      data-test-subj="streamsProcessingFlyoutFixedSignals"
+                    >
+                      {i18n.translate('xpack.streams.processingFlyout.editor.fixedSignals', {
+                        defaultMessage: 'Applies to every signal it supports: {signals}.',
+                        values: { signals: signals.join(', ') },
+                      })}
+                    </EuiText>
+                    <EuiSpacer size="m" />
+                  </>
+                ) : null}
+                {definition && !doesNotFit ? (
+                  <ComponentDefinitionForm
+                    definition={definition}
+                    metadata={catalogue.metadata}
+                    telemetry={signals}
+                    values={form.values}
+                    errors={form.errors}
+                    componentRefs={componentRefs}
+                    onChange={(values) => {
+                      clearWarnings();
+                      form.setValues(values);
+                    }}
+                    onUnparsedInputChange={form.setHasUnparsedInput}
+                  />
+                ) : null}
+              </EuiForm>
+            </fieldset>
+          </div>
+          <CheckOutcomeCallout
+            outcome={outcome}
+            onCommitAnyway={() => {
+              if (warnedProcessor) {
+                onCommit(warnedProcessor);
+              }
+            }}
+          />
           <EuiHorizontalRule margin="m" />
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -311,7 +411,8 @@ export function ProcessorEditor({
                   <EuiButton
                     size="s"
                     fill
-                    isDisabled={!definition || signals.length === 0 || hasUnparsedInput}
+                    isLoading={check.isChecking}
+                    isDisabled={!form.canSubmit || check.isChecking}
                     onClick={submit}
                     data-test-subj="streamsProcessingFlyoutEditorSubmit"
                   >
