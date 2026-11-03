@@ -51,7 +51,6 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   SHOW_MORE_INVESTIGATIONS: 'showMoreInvestigations',
   TOGGLE_AUTOMATION: 'toggleAutomation',
   START_INVESTIGATION: EBT_CLICK_ACTIONS.START_INVESTIGATION,
-  TOGGLE_SLACK_CHANNELS: 'toggleSlackChannels',
   VIEW_ALL_SIGNIFICANT_EVENTS: 'viewAllSignificantEvents',
   VIEW_AUTOMATION_RUNS: 'viewAutomationRuns',
   VIEW_AUTOMATIONS: 'viewAutomations',
