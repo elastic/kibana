@@ -11,6 +11,7 @@ import { EuiPanel, EuiProvider } from '@elastic/eui';
 import { PerformanceContext } from '@kbn/ebt-tools';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { NIGHTSHIFT_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import type { StartServices } from '../hooks/use_kibana';
@@ -204,6 +205,13 @@ const createServices = ({
       openChat: () => undefined,
     },
     application: {
+      capabilities: {
+        nightshift: {
+          [NIGHTSHIFT_UI_PRIVILEGES.show]: true,
+          [NIGHTSHIFT_UI_PRIVILEGES.manage]: true,
+          [NIGHTSHIFT_UI_PRIVILEGES.configure]: true,
+        },
+      },
       getUrlForApp: (appId: string, options?: { deepLinkId?: string; path?: string }): string =>
         `/app/${appId}${options?.path ?? ''}`,
     },

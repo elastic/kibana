@@ -56,7 +56,7 @@ export const DetectionSetupBanner = ({
                 <h3>
                   {i18n.translate('xpack.nightshift.detectionSetupBanner.title', {
                     defaultMessage:
-                      'Let Elastic Nightshift discover events that require your attention',
+                      'Let Elastic nightshift discover events that require your attention',
                   })}
                 </h3>
               </EuiTitle>
@@ -66,7 +66,7 @@ export const DetectionSetupBanner = ({
                 <p>
                   {i18n.translate('xpack.nightshift.detectionSetupBanner.description', {
                     defaultMessage:
-                      'Set up your telemetry data sources and Elastic Nightshift will analyze your data, alerts, and existing knowledge to find the events worth investigating, then prioritize them for you.',
+                      'Set up your telemetry data sources and Elastic nightshift will analyze your data, alerts, and existing knowledge to find the events worth investigating, then prioritize them for you.',
                   })}
                 </p>
               </EuiText>

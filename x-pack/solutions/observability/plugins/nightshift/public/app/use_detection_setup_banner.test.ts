@@ -6,7 +6,7 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
-import { NIGHTSHIFT_UI_PRIVILEGES } from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_UI_PRIVILEGES, type NightshiftSource } from '@kbn/nightshift-shared';
 import { useSignificantEventsAvailability } from '../data/availability/use_significant_events_availability';
 import { useFetchSources } from '../data/sources/use_fetch_sources';
 import { useKibana } from '../hooks/use_kibana';
@@ -25,7 +25,7 @@ interface TestCase {
   suppressed?: boolean;
   canManage?: boolean;
   isAvailable?: boolean;
-  sourcesCount?: number;
+  sources?: NightshiftSource[];
   isSourcesLoading?: boolean;
   dismissed?: boolean;
   expected: boolean;
@@ -34,7 +34,7 @@ interface TestCase {
 interface MockDependencies {
   canManage?: boolean;
   isAvailable?: boolean;
-  sourcesCount?: number;
+  sources?: NightshiftSource[];
   isSourcesLoading?: boolean;
   basePath?: string;
 }
@@ -42,7 +42,7 @@ interface MockDependencies {
 const mockDependencies = ({
   canManage = true,
   isAvailable = true,
-  sourcesCount = 0,
+  sources = [],
   isSourcesLoading = false,
   basePath = '/s/team-a',
 }: MockDependencies = {}) => {
@@ -63,19 +63,37 @@ const mockDependencies = ({
     isAvailable,
     isLoading: false,
   });
-  mockUseFetchSources.mockReturnValue({
-    data: sourcesCount,
-    isError: false,
-    isLoading: isSourcesLoading,
-  });
+  mockUseFetchSources.mockImplementation(
+    ({ select }: { select?: (sourceList: NightshiftSource[]) => unknown } = {}) => ({
+      data: select ? select(sources) : sources,
+      isError: false,
+      isLoading: isSourcesLoading,
+    })
+  );
 };
+
+const createSource = (enabled: boolean): NightshiftSource => ({
+  id: enabled ? 'enabled-source' : 'disabled-source',
+  title: enabled ? 'Enabled source' : 'Disabled source',
+  tags: [],
+  esql: 'FROM logs-*',
+  type: 'logs',
+  slug: enabled ? 'enabled-source' : 'disabled-source',
+  view_name: enabled ? '$.nightshift.sources.enabled' : '$.nightshift.sources.disabled',
+  enabled,
+  created_by: 'test-user',
+  created_at: '2026-11-03T00:00:00.000Z',
+  updated_at: '2026-11-03T00:00:00.000Z',
+  esql_updated_at: '2026-11-03T00:00:00.000Z',
+});
 
 const cases: TestCase[] = [
   { name: 'shows when every condition is met', expected: true },
   { name: 'hides when suppressed', suppressed: true, expected: false },
   { name: 'hides without manage privileges', canManage: false, expected: false },
   { name: 'hides when Significant Events is unavailable', isAvailable: false, expected: false },
-  { name: 'hides when a source exists', sourcesCount: 1, expected: false },
+  { name: 'hides when an enabled source exists', sources: [createSource(true)], expected: false },
+  { name: 'hides when a disabled source exists', sources: [createSource(false)], expected: false },
   { name: 'hides while sources load', isSourcesLoading: true, expected: false },
   { name: 'hides after dismissal', dismissed: true, expected: false },
 ];
@@ -90,7 +108,7 @@ describe('useDetectionSetupBanner', () => {
       suppressed = false,
       canManage = true,
       isAvailable = true,
-      sourcesCount = 0,
+      sources = [],
       isSourcesLoading = false,
       dismissed = false,
       expected,
@@ -99,7 +117,7 @@ describe('useDetectionSetupBanner', () => {
     mockDependencies({
       canManage,
       isAvailable,
-      sourcesCount,
+      sources,
       isSourcesLoading,
     });
     if (dismissed) {

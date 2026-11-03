@@ -126,6 +126,8 @@ const getUrlForApp = jest.fn(
 const navigateToUrl = jest.fn();
 const navigateToApp = jest.fn();
 const featureFlags = { useBooleanValue: jest.fn() };
+let nextTestSpace = 1;
+let mockSpaceBasePath: string;
 
 const renderPageContent = (history: ReturnType<typeof createMemoryHistory>) => (
   <I18nProvider>
@@ -145,6 +147,7 @@ function renderPage(initialPath = '/') {
 
 describe('NightshiftPage', () => {
   beforeEach(() => {
+    mockSpaceBasePath = `/s/nightshift-page-test-${nextTestSpace++}`;
     navigateToApp.mockClear();
     navigateToUrl.mockClear();
     featureFlags.useBooleanValue.mockReturnValue(true);
@@ -174,7 +177,12 @@ describe('NightshiftPage', () => {
           },
         },
         featureFlags,
-        http: { basePath: { prepend: (path: string) => path } },
+        http: {
+          basePath: {
+            get: () => mockSpaceBasePath,
+            prepend: (path: string) => path,
+          },
+        },
         serverless: undefined,
         observabilityShared: {
           navigation: {
@@ -321,7 +329,12 @@ describe('NightshiftPage', () => {
           },
         },
         featureFlags,
-        http: { basePath: { prepend: (path: string) => path } },
+        http: {
+          basePath: {
+            get: () => mockSpaceBasePath,
+            prepend: (path: string) => path,
+          },
+        },
         serverless: undefined,
         observabilityShared: {
           navigation: {
@@ -538,7 +551,7 @@ describe('NightshiftPage', () => {
       );
     });
 
-    it('hides the detection setup banner until a reload after onboarding finishes', async () => {
+    it('hides the detection setup banner across app remounts in the same space', async () => {
       withInvestigationsClient();
       mockUseOnboardingVisibility.mockReturnValue({
         isLoading: false,
@@ -561,8 +574,12 @@ describe('NightshiftPage', () => {
       );
 
       unmount();
-      renderPage();
+      const sameSpace = renderPage();
+      expect(screen.getByTestId('nightshiftAppStub')).toHaveTextContent('true');
+      sameSpace.unmount();
 
+      mockSpaceBasePath = '/s/another-space';
+      renderPage();
       expect(screen.getByTestId('nightshiftAppStub')).toHaveTextContent('false');
     });
 

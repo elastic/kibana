@@ -47,6 +47,9 @@ import { KNOWLEDGE_TAB_IDS } from './knowledge/knowledge_tabs';
 /** Onboarding has a second column for the "Get started" card. */
 const ONBOARDING_MAX_WIDTH = '1040px';
 
+// Module-lifetime state survives app remounts but resets on browser reload.
+const onboardingFinishedSpacesThisLoad = new Set<string>();
+
 /** Fixed page names, so ids and query strings never reach execution context. */
 const getExecutionContextPage = (pathname: string, canUseAutomationsPage: boolean): string => {
   const [, section, tab] = pathname.split('/');
@@ -111,6 +114,7 @@ export function NightshiftPage(): React.ReactElement | null {
   const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
   const { pathname, search } = useLocation();
   const history = useHistory();
+  const spaceBasePath = basePath.get() || 'default';
   const { canShow, canManage, canManageAndConfigure } = getNightshiftCapabilities(
     application.capabilities.nightshift
   );
@@ -189,13 +193,19 @@ export function NightshiftPage(): React.ReactElement | null {
   }, [dismissOnboarding, history]);
   const isOnboarding = !canUseAutomationsPage && onboarding.showOnboarding;
   const previousIsOnboarding = useRef(isOnboarding);
-  const [onboardingFinishedThisLoad, setOnboardingFinishedThisLoad] = useState(false);
+  const [onboardingFinishedSpace, setOnboardingFinishedSpace] = useState<string | undefined>(() =>
+    onboardingFinishedSpacesThisLoad.has(spaceBasePath) ? spaceBasePath : undefined
+  );
   useEffect(() => {
     if (previousIsOnboarding.current && !isOnboarding) {
-      setOnboardingFinishedThisLoad(true);
+      onboardingFinishedSpacesThisLoad.add(spaceBasePath);
+      setOnboardingFinishedSpace(spaceBasePath);
     }
     previousIsOnboarding.current = isOnboarding;
-  }, [isOnboarding]);
+  }, [isOnboarding, spaceBasePath]);
+  const onboardingFinishedThisLoad =
+    onboardingFinishedSpace === spaceBasePath ||
+    onboardingFinishedSpacesThisLoad.has(spaceBasePath);
   // Before the first investigation the page is only about onboarding, as in the design.
   const hidesHeaderActions = isOnboarding && !onboarding.latestInvestigation;
 
