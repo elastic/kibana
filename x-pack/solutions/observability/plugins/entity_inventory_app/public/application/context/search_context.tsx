@@ -14,6 +14,7 @@ import { DEFAULT_TIME_RANGE, ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS } from '../con
 import { useKibana } from '../../hooks/use_kibana';
 import { INVALID_QUERY_TOAST_TITLE, TIME_RANGE_CLAMPED_TOAST_TITLE } from '../translations';
 import { clampTimeRange } from '../utils/clamp_time_range';
+import type { FilterControlsSelection } from '../filters/selection';
 
 export interface EntityInventorySearchSubmitPayload {
   dateRange: TimeRange;
@@ -26,11 +27,14 @@ export interface EntityInventorySearchContextValue {
   filters: Filter[];
   dateRange: TimeRange;
   setFilters: (filters: Filter[]) => void;
+  filterSelection: FilterControlsSelection;
+  setFilterSelection: (selection: FilterControlsSelection) => void;
   /** Commits a search and returns the effective date range. An invalid query is not committed. */
   submit: (payload: EntityInventorySearchSubmitPayload) => TimeRange;
 }
 
 const DEFAULT_QUERY: Query = { language: 'kuery', query: '' };
+const DEFAULT_FILTER_SELECTION: FilterControlsSelection = { attributes: {} };
 
 const EntityInventorySearchContext = createContext<EntityInventorySearchContextValue | null>(null);
 
@@ -48,6 +52,18 @@ export const EntityInventorySearchProvider = ({
   const [query, setQuery] = useState<Query>(DEFAULT_QUERY);
   const [filters, setFilters] = useState<Filter[]>([]);
   const [dateRange, setDateRange] = useState<TimeRange>(DEFAULT_TIME_RANGE);
+  const [selectionState, setSelectionState] = useState({
+    entityCategory,
+    selection: DEFAULT_FILTER_SELECTION,
+  });
+  const filterSelection =
+    selectionState.entityCategory === entityCategory
+      ? selectionState.selection
+      : DEFAULT_FILTER_SELECTION;
+  const setFilterSelection = useCallback(
+    (selection: FilterControlsSelection) => setSelectionState({ entityCategory, selection }),
+    [entityCategory]
+  );
 
   const submit = useCallback(
     ({ dateRange: submittedRange, query: submittedQuery }: EntityInventorySearchSubmitPayload) => {
@@ -85,8 +101,17 @@ export const EntityInventorySearchProvider = ({
   );
 
   const value = useMemo(
-    () => ({ entityCategory, query, filters, dateRange, setFilters, submit }),
-    [entityCategory, query, filters, dateRange, submit]
+    () => ({
+      entityCategory,
+      query,
+      filters,
+      dateRange,
+      setFilters,
+      filterSelection,
+      setFilterSelection,
+      submit,
+    }),
+    [entityCategory, query, filters, dateRange, filterSelection, setFilterSelection, submit]
   );
 
   return (
