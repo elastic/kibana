@@ -569,6 +569,9 @@ const renderModelCard = (
               if (trace?.traceFetchFailed) {
                 body +=
                   '<p class="empty">Trace fetch failed — the run exists but its tool calls could not be retrieved.</p>';
+              } else if (trace?.traceEmpty) {
+                body +=
+                  '<p class="empty">Trace unavailable — the run exists but its trace holds no spans.</p>';
               } else if (trace?.answer) {
                 body += `<div class="answer">${mdToHtml(trace.answer)}</div>`;
               } else if (trace?.question || (trace?.stepCount ?? 0) > 0) {

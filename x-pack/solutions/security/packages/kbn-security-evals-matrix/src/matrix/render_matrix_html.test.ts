@@ -1033,3 +1033,35 @@ describe('round 8 regression: self-judged disclosure on not-recommended cells', 
     expect(html).toContain('fail (self-judged)');
   });
 });
+
+describe('dataset-keyed direct traces', () => {
+  it('resolves each datasetIds column to its own trace when example ids collide', () => {
+    const cfg = {
+      ...mockConfig,
+      columns: [{ ...mockConfig.columns[0], datasetIds: ['dataset-a'], suites: ['suite-1'] }],
+    };
+    const traces = {
+      'test-model:direct:suite-1|dataset-b:0': {
+        suiteId: 'suite-1',
+        datasetId: 'dataset-b',
+        question: 'dataset-b question',
+      },
+      'test-model:direct:suite-1|dataset-a:0': {
+        suiteId: 'suite-1',
+        datasetId: 'dataset-a',
+        question: 'dataset-a question',
+      },
+    } as never;
+    const html = renderMatrixHtml(mockMatrix, cfg, {}, traces);
+    expect(html).toContain('dataset-a question');
+    expect(html).not.toContain('dataset-b question');
+  });
+
+  it('renders a span-less trace as unavailable with its own message', () => {
+    const traces = {
+      'test-model:suite-1': { suiteId: 'suite-1', traceEmpty: true, stepCount: 0 },
+    } as never;
+    const html = renderMatrixHtml(mockMatrix, mockConfig, {}, traces);
+    expect(html).toContain('its trace holds no spans');
+  });
+});

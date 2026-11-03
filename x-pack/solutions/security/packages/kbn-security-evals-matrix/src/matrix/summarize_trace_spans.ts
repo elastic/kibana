@@ -26,11 +26,18 @@ const toNumber = (value: unknown): number | undefined => {
   return typeof parsed === 'number' && Number.isFinite(parsed) ? parsed : undefined;
 };
 
-/** Reduces a trace's spans to the tool trail, token totals and root latency. */
+/**
+ * Reduces a trace's spans to the tool trail, token totals and root latency. A trace with
+ * no spans carries no evidence about what the run did, so it yields `undefined` rather than
+ * a summary whose empty trail would read as "the agent called no tools".
+ */
 export const summarizeTraceSpans = ({
   spans,
   duration_ms: durationMs,
-}: GetTraceResponse): TraceSummary => {
+}: GetTraceResponse): TraceSummary | undefined => {
+  if (spans.length === 0) {
+    return undefined;
+  }
   const ordered = [...spans].sort((a, b) => Date.parse(a.start_time) - Date.parse(b.start_time));
 
   const toolIds: string[] = [];

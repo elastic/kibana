@@ -68,12 +68,36 @@ const mapWithConcurrency = async <T, R>(
   return results;
 };
 
+/**
+ * Per trace id: the summary, `null` when the fetch failed, or `EMPTY_TRACE` when the route
+ * answered but the trace holds no spans. Neither non-summary state is evidence of "no tools".
+ */
+const EMPTY_TRACE = 'empty' as const;
+type TraceSummaryState = TraceSummary | null | typeof EMPTY_TRACE;
+type TraceSummaries = ReadonlyMap<string, TraceSummaryState>;
+
+const summaryOf = (
+  summaries: TraceSummaries,
+  traceId: string | null | undefined
+): TraceSummary | undefined => {
+  const state = traceId ? summaries.get(traceId) : undefined;
+  return state && state !== EMPTY_TRACE ? state : undefined;
+};
+
+/** A doc that points at a trace we tried to hydrate but got no usable summary for. */
+const isUnretrievable = (score: EvaluationScoreDocument, summaries: TraceSummaries): boolean => {
+  const traceId = score.task?.trace_id;
+  if (!traceId || score.task?.output != null || !summaries.has(traceId)) return false;
+  return summaryOf(summaries, traceId) === undefined;
+};
+
 const extractTraceFromScore = (
   score: EvaluationScoreDocument,
   summaries: TraceSummaries = new Map()
 ): MatrixTraceEntry => {
   const traceId = score.task?.trace_id;
-  const summary = traceId ? summaries.get(traceId) : undefined;
+  const summary = summaryOf(summaries, traceId);
+  const traceState = traceId && score.task?.output == null ? summaries.get(traceId) : undefined;
   const question = (score.example?.input as { question?: string } | null)?.question;
   const taskOutput = score.task?.output as
     | {
@@ -131,9 +155,8 @@ const extractTraceFromScore = (
     steps: steps.length > 0 ? steps : undefined,
     stepCount: steps.length,
     toolCount: toolTrail.length,
-    ...(traceId && score.task?.output == null && summaries.get(traceId) === null
-      ? { traceFetchFailed: true }
-      : {}),
+    ...(traceState === null ? { traceFetchFailed: true } : {}),
+    ...(traceState === EMPTY_TRACE ? { traceEmpty: true } : {}),
     ...(summary?.inputTokens !== undefined ? { inputTokens: summary.inputTokens } : {}),
     ...(summary?.outputTokens !== undefined ? { outputTokens: summary.outputTokens } : {}),
     ...(summary?.latencyMs !== undefined ? { latencyMs: summary.latencyMs } : {}),
@@ -144,14 +167,14 @@ const extractTraceFromScore = (
  * Aborted runs can write partial docs with a null score or output; those are incomplete.
  * Current evals runs no longer persist `task.output`; a scored doc with a `task.trace_id`
  * is complete because its steps are hydrated from the trace route. A doc whose trace fetch
- * failed (`null` summary) is incomplete: rendering it as complete would show 0 steps, which
- * reads as "the agent called no tools" rather than "the trace could not be retrieved".
+ * failed or came back with no spans is incomplete: rendering it as complete would show 0 steps,
+ * which reads as "the agent called no tools" rather than "the trace could not be retrieved".
  */
 const isCompleteScore = (score: EvaluationScoreDocument, summaries: TraceSummaries): boolean => {
   if (score.evaluator?.score == null) return false;
   if (score.task?.output != null) return true;
   const traceId = score.task?.trace_id;
-  return Boolean(traceId) && summaries.get(traceId as string) !== null;
+  return Boolean(traceId) && !isUnretrievable(score, summaries);
 };
 
 const TRACE_FETCH_CONCURRENCY = 8;
@@ -159,8 +182,6 @@ const TRACE_FETCH_CONCURRENCY = 8;
 /** True when a doc has no stored output but points at a trace we can fetch. */
 const needsTraceHydration = (score: EvaluationScoreDocument): boolean =>
   score.evaluator?.score != null && score.task?.output == null && Boolean(score.task?.trace_id);
-
-type TraceSummaries = ReadonlyMap<string, TraceSummary | null>;
 
 /**
  * Gives docs without a stored `task.output` a synthetic one carrying the hydrated tool
@@ -173,7 +194,7 @@ const withHydratedOutput = (
 ): EvaluationScoreDocument[] =>
   scores.map((score) => {
     const traceId = score.task?.trace_id;
-    const summary = traceId && score.task?.output == null ? summaries.get(traceId) : undefined;
+    const summary = score.task?.output == null ? summaryOf(summaries, traceId) : undefined;
     if (!summary || !score.task) return score;
     return {
       ...score,
@@ -185,6 +206,34 @@ const withHydratedOutput = (
       },
     };
   });
+
+/**
+ * Repetitions whose trace could not be retrieved (failed fetch or no spans) are left out of the
+ * trail/answer lists: an empty trail would be compared against real ones and read as a rep that
+ * called no tools.
+ */
+const retrievableDocs = (
+  docs: EvaluationScoreDocument[],
+  summaries: TraceSummaries
+): EvaluationScoreDocument[] => docs.filter((doc) => !isUnretrievable(doc, summaries));
+
+/**
+ * Direct-cell key for one example. Bare-index example ids are shared by every dataset of a
+ * suite, so the dataset id is part of the key — except for examplePrefixes buckets, whose
+ * example ids are unique and keep their suite-scoped key.
+ */
+const directKeyFor = (
+  modelId: string,
+  suiteId: string,
+  exampleId: string,
+  datasetId: string | undefined,
+  examplePrefixes: ReadonlySet<string>
+): string => {
+  const prefixed = [...examplePrefixes].some(
+    (prefix) => exampleId === prefix || exampleId.startsWith(`${prefix}-`)
+  );
+  return directTraceKey(modelId, suiteId, exampleId, prefixed ? undefined : datasetId);
+};
 
 /** Per-evaluator mean score across one example's score documents. */
 export const exampleScoresByEvaluator = (
@@ -252,6 +301,7 @@ export const overlayRepeatedCacheTrails = (
     executionId: string;
   }
   const best = new Map<string, RepeatedCell>();
+  const datasetByCombo = new Map<string, string | undefined>();
   for (const [cacheKey, docs] of Object.entries(traceCache)) {
     // Keys are `${executionId}::${exampleId}` and executionId itself may contain `::`.
     const split = cacheKey.lastIndexOf('::');
@@ -269,6 +319,7 @@ export const overlayRepeatedCacheTrails = (
         const trails = trailsFromDocs(docs);
         if (trails.length > 1) {
           const combo = `${modelId}\0${suiteId}\0${exampleId}`;
+          datasetByCombo.set(combo, docs[0].example?.dataset?.id);
           const previous = best.get(combo);
           if (!previous || trails.length > previous.trails.length) {
             best.set(combo, {
@@ -286,7 +337,8 @@ export const overlayRepeatedCacheTrails = (
     const [modelId, suiteId, exampleId] = combo.split('\0');
     // Overlay onto the suite-scoped direct cell this cache entry actually came from; a
     // suite-tagged entry no longer falls back to every same-(model, example) key.
-    const key = directTraceKey(modelId, suiteId, exampleId);
+    const qualifiedKey = directTraceKey(modelId, suiteId, exampleId, datasetByCombo.get(combo));
+    const key = traces[qualifiedKey] ? qualifiedKey : directTraceKey(modelId, suiteId, exampleId);
     const measured = {
       repTrails: cell.trails,
       repAnswers: cell.answers,
@@ -302,8 +354,33 @@ export const overlayRepeatedCacheTrails = (
   }
 };
 
-/** Merges one example's score documents for the given model + execution into `traces`. */
+type DatasetBatchRest = Parameters<typeof processDatasetBatch> extends [unknown, ...infer Rest]
+  ? Rest
+  : never;
+
+/**
+ * Merges one example's score documents for the given model + execution into `traces`.
+ * Bare-index example ids are shared by every dataset of a suite, so a batch can mix datasets;
+ * each dataset is merged as its own cell. Returns true when any dataset resolved a trace.
+ */
 const processExampleBatch = (
+  scores: EvaluationScoreDocument[],
+  ...rest: DatasetBatchRest
+): boolean => {
+  const byDataset = new Map<string | undefined, EvaluationScoreDocument[]>();
+  for (const score of scores) {
+    const datasetId = score.example?.dataset?.id;
+    byDataset.set(datasetId, [...(byDataset.get(datasetId) ?? []), score]);
+  }
+  let resolved = false;
+  for (const group of byDataset.values()) {
+    resolved = processDatasetBatch(group, ...rest) || resolved;
+  }
+  return resolved;
+};
+
+/** Merges one dataset's score documents for an example into `traces`. */
+const processDatasetBatch = (
   scores: EvaluationScoreDocument[],
   modelId: string,
   suiteId: string,
@@ -374,16 +451,19 @@ const processExampleBatch = (
   // ID, and a bare (model, example) key would let the last-processed suite's trace
   // overwrite the other's (losing both an HTML column's trace and reliability reps).
   if (exampleId) {
-    const trails = trailsFromDocs(relevant);
+    const repDocs = retrievableDocs(relevant, summaries);
+    const trails = trailsFromDocs(repDocs);
     // The reliability path needs answers and the declared path contract alongside
     // the trails; without them a no-cache run falls back to the legacy prefix
     // heuristic and cannot report answer similarity (see overlayRepeatedCacheTrails).
-    traces[directTraceKey(modelId, suiteId, exampleId)] =
+    traces[
+      directKeyFor(modelId, suiteId, exampleId, relevant[0].example?.dataset?.id, examplePrefixes)
+    ] =
       trails.length > 0
         ? {
             ...entry,
             repTrails: trails,
-            repAnswers: answersFromDocs(relevant),
+            repAnswers: answersFromDocs(repDocs),
             pathContract: pathContractFromDocs(relevant),
           }
         : entry;
@@ -414,7 +494,9 @@ const processExampleBatch = (
       if (fid) {
         const completeDocs = relevant.filter(isComplete);
         const trails = trailsFromDocs(completeDocs);
-        traces[directTraceKey(modelId, suiteId, fid)] =
+        traces[
+          directKeyFor(modelId, suiteId, fid, firstComplete.example?.dataset?.id, examplePrefixes)
+        ] =
           trails.length > 0
             ? {
                 ...fallbackEntry,
@@ -749,13 +831,13 @@ export const queryMatrixTraces = async (
     }
   }
 
-  const summaries = new Map<string, TraceSummary | null>();
+  const summaries = new Map<string, TraceSummaryState>();
   if (traceIds.size > 0) {
     const fetchTrace = async (traceId: string): Promise<void> => {
       // One retry for transient 502/503s, as for example scores.
-      const attempt = async (retriesLeft: number): Promise<TraceSummary> => {
+      const attempt = async (retriesLeft: number): Promise<TraceSummaryState> => {
         try {
-          return summarizeTraceSpans(await evalsClient.getTrace(traceId));
+          return summarizeTraceSpans(await evalsClient.getTrace(traceId)) ?? EMPTY_TRACE;
         } catch (error) {
           if (retriesLeft === 0) throw error;
           await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -774,11 +856,13 @@ export const queryMatrixTraces = async (
       }
     };
     await mapWithConcurrency([...traceIds], TRACE_FETCH_CONCURRENCY, fetchTrace);
-    const failed = [...summaries.values()].filter((summary) => summary === null).length;
+    const states = [...summaries.values()];
+    const failed = states.filter((state) => state === null).length;
+    const empty = states.filter((state) => state === EMPTY_TRACE).length;
     log.info(
-      `Hydrated ${summaries.size - failed}/${
+      `Hydrated ${summaries.size - failed - empty}/${
         summaries.size
-      } traces from the evals trace route (${failed} failed)`
+      } traces from the evals trace route (${failed} failed, ${empty} with no spans)`
     );
   }
 
