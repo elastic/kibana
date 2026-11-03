@@ -23,8 +23,6 @@ export type {
   SignificantEventsSortOrder,
 } from './events_list';
 
-export { SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG } from './feature_flags';
-
 export {
   SIGNIFICANT_EVENT_TIERED_FEATURES,
   SIGNIFICANT_EVENTS_TIERED_FEATURE,

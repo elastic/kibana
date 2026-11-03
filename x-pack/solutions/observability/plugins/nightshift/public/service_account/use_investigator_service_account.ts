@@ -14,11 +14,11 @@ import {
   type UseMutationResult,
   type UseQueryResult,
 } from '@kbn/react-query';
+import type { InvestigatorServiceAccountStatus } from '@kbn/nightshift-investigations-plugin/common';
 import {
   ensureNightshiftServiceAccounts,
   NightshiftServiceAccountSetupError,
-  type InvestigatorServiceAccountStatus,
-} from '@kbn/nightshift-investigations-plugin/common';
+} from '@kbn/nightshift-shared';
 import { isHttpClientError } from '../common/http_error';
 import { useKibana } from '../hooks/use_kibana';
 import { NIGHTSHIFT_ONBOARDING_QUERY_KEY } from '../onboarding/use_onboarding';

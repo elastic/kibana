@@ -219,4 +219,26 @@ describe('registerWriteHuntEvidenceRoute', () => {
       })
     );
   });
+
+  it('passes the gap reasons through, so an environment gap does not count toward the retry bound', async () => {
+    const { handler, context, asInternalUser } = makeDeps();
+
+    await handler(
+      context,
+      requestFor({
+        completeness: 'incomplete_retryable',
+        searchedTechniqueIds: ['T1001'],
+        retryableReasons: ['index_unavailable'],
+      }),
+      httpServerMock.createResponseFactory()
+    );
+
+    expect(asInternalUser.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        script: expect.objectContaining({
+          params: expect.objectContaining({ count_run: false }),
+        }),
+      })
+    );
+  });
 });

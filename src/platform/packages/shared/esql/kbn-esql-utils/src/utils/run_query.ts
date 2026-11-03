@@ -137,6 +137,7 @@ export async function getESQLQueryColumnsRaw({
   variables,
   geoPrecisions = SCHEMA_ONLY_GEO_PRECISIONS,
   includeColumnMetadata,
+  projectRouting,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
@@ -148,6 +149,7 @@ export async function getESQLQueryColumnsRaw({
   /** Values for the `?_geotile_precision`, `?_geohex_precision` and `?_geohash_precision` params. */
   geoPrecisions?: GeoPrecisions;
   includeColumnMetadata?: boolean;
+  projectRouting?: ProjectRouting;
 }): Promise<ESQLColumn[]> {
   try {
     const namedParams = getNamedParams(esqlQuery, timeRange, variables, geoPrecisions);
@@ -165,6 +167,7 @@ export async function getESQLQueryColumnsRaw({
         {
           abortSignal: signal,
           strategy: 'esql_async',
+          ...(projectRouting !== undefined ? { projectRouting } : {}),
         }
       )
     );

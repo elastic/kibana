@@ -5,8 +5,19 @@
  * 2.0.
  */
 
-export type { ComponentCatalogueClient } from './types';
-export { createSnapshotComponentCatalogueClient } from './snapshot_client';
+export type { ComponentCatalogueClient, FetchedComponentCatalogue } from './types';
+export { createComponentCatalogueClient } from './api_client';
+export {
+  createComponentChecker,
+  toComponentChecker,
+  type ComponentCheck,
+  type ComponentChecker,
+} from './component_check';
+export {
+  isCatalogueSupported,
+  isDefinitionUsable,
+  toEditableCatalogue,
+} from './catalogue_compatibility';
 export {
   getDefinition,
   listComponents,
@@ -15,8 +26,4 @@ export {
   supportsAnySignal,
   type PathScope,
 } from './catalogue_selectors';
-export {
-  createComponentCatalogueClient,
-  useComponentCatalogue,
-  type ComponentCatalogueState,
-} from './use_component_catalogue';
+export { useComponentCatalogue, type ComponentCatalogueState } from './use_component_catalogue';
