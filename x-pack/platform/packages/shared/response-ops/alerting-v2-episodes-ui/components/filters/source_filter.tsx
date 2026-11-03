@@ -15,7 +15,6 @@ import {
   EPISODE_SOURCE_FILTER_CLASSIC,
   EPISODE_SOURCE_FILTER_UNIVERSAL,
   isConnectorEpisodeSource,
-  isEpisodeSourceFilterSystemId,
 } from '@kbn/alerting-v2-common-queries';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -116,12 +115,7 @@ export function AlertEpisodesSourceFilter({
       knownValues.add(source);
     }
     const missingSelected = selectedValues
-      .filter(
-        (source) =>
-          !isEpisodeSourceFilterSystemId(source) &&
-          isConnectorEpisodeSource(source) &&
-          !knownValues.has(source)
-      )
+      .filter((source) => isConnectorEpisodeSource(source) && !knownValues.has(source))
       .map((source) => ({
         label: source,
         value: source,
