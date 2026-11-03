@@ -135,7 +135,7 @@ export function SessionWaterfall({
                 type="button"
                 data-test-subj="digitalExperienceSessionWaterfallSegment"
                 {...getEbtProps({
-                  action: DIGITAL_EXPERIENCE_EBT_ACTIONS.VIEW_SESSION,
+                  action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SELECT_PAGE_VISIT,
                   element: SESSIONS_EBT_ELEMENTS.WATERFALL_PAGE,
                 })}
                 aria-label={label}

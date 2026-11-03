@@ -99,7 +99,7 @@ function SessionDetail({
   return (
     <>
       <SessionSummary session={session} formatters={formatters} />
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       {timelineTruncated && (
         <>
           <KbnWarningCallout
@@ -136,15 +136,16 @@ function SessionDetail({
         />
       ) : (
         <>
+          {/* Section titles sit above their content, as the journey's cards are panels. */}
+          <EuiTitle size="xs">
+            <h2>
+              {i18n.translate('xpack.digitalExperience.sessionDetail.timelineTitle', {
+                defaultMessage: 'Timeline',
+              })}
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="m" />
           <EuiPanel hasBorder paddingSize="m">
-            <EuiTitle size="xs">
-              <h2>
-                {i18n.translate('xpack.digitalExperience.sessionDetail.timelineTitle', {
-                  defaultMessage: 'Timeline',
-                })}
-              </h2>
-            </EuiTitle>
-            <EuiSpacer size="s" />
             <SessionWaterfall
               layout={layout}
               pageVisits={pageVisits}

@@ -16,12 +16,14 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiOverflowScroll,
   useEuiTheme,
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { CORE_WEB_VITALS } from '../../../../common/core_web_vitals';
 import type { SessionTimelineEvent, SessionTimelineEventKind } from '../../../../common/sessions';
-import { WebVitalBadges } from '../../../components/web_vital_badges';
+import { WebVitalBadge, WebVitalBadges } from '../../../components/web_vital_badges';
 import type { Formatters } from '../../../hooks/use_formatters';
 import { formatSessionDuration } from '../../../utils/format_session_duration';
 import type { PageVisitEvents } from '../utils/session_timeline';
@@ -49,9 +51,25 @@ const EVENT_KIND_LABELS: Partial<Record<SessionTimelineEventKind, string>> = {
   }),
 };
 
+/** A web vital event as a rated badge, when its name and value are a known vital's. */
+const webVitalOf = ({ kind, name, detail }: SessionTimelineEvent) => {
+  const vital = CORE_WEB_VITALS.find((candidate) => candidate === name.toLowerCase());
+  const value = Number(detail);
+  return kind === 'web_vital' && vital && detail !== null && Number.isFinite(value)
+    ? { vital, value }
+    : null;
+};
+
+/** Page views and clicks read better by kind; errors and vitals keep their type and name. */
+const LABELLED_KINDS: ReadonlySet<SessionTimelineEventKind> = new Set(['page_view', 'click']);
+
 const EventRow = ({ event }: { event: SessionTimelineEvent }) => {
   const { euiTheme } = useEuiTheme();
   const isError = event.kind === 'error';
+  const webVital = webVitalOf(event);
+  const kindLabel = EVENT_KIND_LABELS[event.kind];
+  const labelledByKind = LABELLED_KINDS.has(event.kind) && kindLabel !== undefined;
+  const name = labelledByKind ? kindLabel : event.name;
   return (
     <EuiFlexGroup
       gutterSize="s"
@@ -63,7 +81,11 @@ const EventRow = ({ event }: { event: SessionTimelineEvent }) => {
         <EuiText
           size="xs"
           color="subdued"
-          css={css({ fontVariantNumeric: 'tabular-nums', minWidth: '3.5em', textAlign: 'right' })}
+          css={css({
+            fontVariantNumeric: 'tabular-nums',
+            minWidth: euiTheme.size.xxl,
+            textAlign: 'right',
+          })}
         >
           {formatOffset(event.offsetMs)}
         </EuiText>
@@ -72,15 +94,23 @@ const EventRow = ({ event }: { event: SessionTimelineEvent }) => {
         <EuiIcon
           type={EVENT_ICONS[event.kind] ?? 'dot'}
           color={isError ? 'danger' : 'subdued'}
-          aria-label={EVENT_KIND_LABELS[event.kind]}
+          // The row already reads as its kind when it is labelled by it.
+          aria-label={labelledByKind ? undefined : kindLabel}
+          aria-hidden={labelledByKind || undefined}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s" color={isError ? 'danger' : undefined}>
-          {isError ? <strong>{event.name}</strong> : event.name}
-        </EuiText>
-      </EuiFlexItem>
-      {event.detail && (
+      {webVital ? (
+        <EuiFlexItem grow={false}>
+          <WebVitalBadge vital={webVital.vital} value={webVital.value} />
+        </EuiFlexItem>
+      ) : (
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color={isError ? 'danger' : undefined}>
+            {isError ? <strong>{name}</strong> : name}
+          </EuiText>
+        </EuiFlexItem>
+      )}
+      {!webVital && event.detail && (
         <EuiFlexItem css={css({ minWidth: 0 })}>
           <EuiText
             size="xs"
@@ -105,7 +135,7 @@ export function PageJourney({
   visits,
   colors,
   sessionDurationMs,
-  formatters: { formatDate },
+  formatters: { formatDate, formatPercent },
   registerVisit,
 }: {
   visits: PageVisitEvents[];
@@ -116,12 +146,20 @@ export function PageJourney({
   registerVisit: (index: number, element: HTMLElement | null) => void;
 }) {
   const { euiTheme } = useEuiTheme();
+  const eventsCss = css`
+    max-height: ${euiTheme.base * 20}px;
+    ${useEuiOverflowScroll('y', true)}
+  `;
+  // Clears the fixed (classic) or sticky (grid layout) headers when scrolled to, with a gap.
+  const visitCss = css({
+    scrollMarginTop: `calc(var(--euiFixedHeadersOffset, 0px) + var(--kbn-application--sticky-headers-offset, 0px) + ${euiTheme.size.m})`,
+  });
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="digitalExperiencePageJourney">
       {visits.map(({ visit, events }, index) => (
         <EuiFlexItem key={`${visit.startTime}-${index}`}>
-          <div ref={(element) => registerVisit(index, element)} css={css({ scrollMarginTop: 80 })}>
+          <div ref={(element) => registerVisit(index, element)} css={visitCss}>
             <EuiPanel
               hasBorder
               paddingSize="m"
@@ -163,11 +201,9 @@ export function PageJourney({
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="hollow" iconType="clock">
                     {i18n.translate('xpack.digitalExperience.sessionDetail.journey.shareLabel', {
-                      defaultMessage: '{share}% of the session',
+                      defaultMessage: '{share} of the session',
                       values: {
-                        share: Math.round(
-                          (visit.durationMs / Math.max(1, sessionDurationMs)) * 100
-                        ),
+                        share: formatPercent(visit.durationMs / Math.max(1, sessionDurationMs)),
                       },
                     })}
                   </EuiBadge>
@@ -197,10 +233,17 @@ export function PageJourney({
               {events.length > 0 && (
                 <>
                   <EuiSpacer size="m" />
+                  {/* Focusable, so keyboard users can scroll a long list of events too. */}
                   <EuiFlexGroup
                     direction="column"
                     gutterSize="xs"
-                    css={css({ maxHeight: 320, overflowY: 'auto' })}
+                    css={eventsCss}
+                    tabIndex={0}
+                    role="region"
+                    aria-label={i18n.translate(
+                      'xpack.digitalExperience.sessionDetail.journey.eventsLabel',
+                      { defaultMessage: 'Events on {page}', values: { page: visit.page } }
+                    )}
                   >
                     {events.map((event, eventIndex) => (
                       <EuiFlexItem key={eventIndex} grow={false}>

@@ -22,6 +22,8 @@ export const DIGITAL_EXPERIENCE_EBT_ACTIONS = {
   ENABLE_SESSIONS: 'enableSessions',
   /** The user opens a session's details. */
   VIEW_SESSION: 'viewSession',
+  /** The user jumps from the session timeline to one of its page visits. */
+  SELECT_PAGE_VISIT: 'selectPageVisit',
   /** The user leaves a session for the sessions list. */
   BACK_TO_SESSIONS: 'backToSessions',
   /** The user copies a session's ID. */
