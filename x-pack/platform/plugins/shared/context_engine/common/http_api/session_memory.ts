@@ -19,6 +19,15 @@ export interface SessionMemoryMediaItem {
   format?: SessionMemoryMediaFormat;
 }
 
+/** Suggested memory categories; `type` is free text, so any other value is accepted too. */
+export const SESSION_MEMORY_TYPE_SUGGESTIONS = [
+  'preference',
+  'fact',
+  'statement',
+  'summary',
+  'decision',
+] as const;
+
 /** Body of `POST /_context_engine/session_memory/_remember`. `@timestamp` is never sent; ES assigns it. */
 export interface RememberSessionMemoryBody {
   session_id: string;

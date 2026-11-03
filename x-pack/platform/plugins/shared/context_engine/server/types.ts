@@ -25,6 +25,7 @@ import type { AiIndexDataReadServiceApi } from './ai_indices/data_read_service';
 import type { AiIndexService } from './ai_indices/service';
 import type { ImprovementsServiceApi } from './improvements/service';
 import type { SessionEventsServiceApi } from './session_memory/session_events';
+import type { SessionMemoryServiceApi } from './session_memory/session_memory';
 import type { SignalsServiceApi } from './signals/service';
 
 export interface ContextEnginePluginSetup {
@@ -40,6 +41,8 @@ export interface GetAiIndexDataReadServiceParams {
 
 export interface ContextEnginePluginStart {
   getAiIndexService: () => AiIndexService;
+  /** Session memory (multimodal memories), written and searched as the internal user. */
+  getSessionMemoryService: () => SessionMemoryServiceApi;
   /** Session events (raw round transcripts), written as the internal user. */
   getSessionEventsService: () => SessionEventsServiceApi;
   /** Whether the global `contextEngine:memoryEnabled` setting is on for the request's user. */

@@ -45,6 +45,7 @@ import { AiIndexRegistry } from './ai_indices/registry';
 import { ImprovementsService } from './improvements/service';
 import { installImprovementsIndexTemplate } from './improvements/storage';
 import { SessionEventsService } from './session_memory/session_events';
+import { SessionMemoryService } from './session_memory/session_memory';
 import { SignalsService } from './signals/service';
 import type { SignalsServiceApi } from './signals/service';
 import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from './tasks';
@@ -397,6 +398,7 @@ export class ContextEnginePlugin
     });
     const signalsService = this.signalsService;
 
+    const sessionMemoryService = new SessionMemoryService(this.esClient);
     const sessionEventsService = new SessionEventsService(this.esClient);
 
     const improvementsLogger = this.logger.get('improvements');
@@ -464,6 +466,7 @@ export class ContextEnginePlugin
       getAiIndexDataReadService: (params) => createAiIndexDataReadService(params),
       getSignalsService: () => signalsService,
       getImprovementsService: (esClient, spaceId) => createImprovementsService(esClient, spaceId),
+      getSessionMemoryService: () => sessionMemoryService,
       getSessionEventsService: () => sessionEventsService,
       isMemoryEnabled: async (request) => {
         const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);

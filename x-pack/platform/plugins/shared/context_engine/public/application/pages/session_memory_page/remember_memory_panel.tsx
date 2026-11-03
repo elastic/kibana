@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnSuccessCallout } from '@kbn/ui-callout';
 import React, { useState } from 'react';
+import { SESSION_MEMORY_TYPE_SUGGESTIONS } from '../../../../common/http_api/session_memory';
 import type {
   RememberSessionMemoryBody,
   SessionMemoryMediaItem,
@@ -29,15 +30,6 @@ import { PanelHeader } from './panel_header';
 import { SessionMemoryCard } from './session_memory_card';
 import { hasWriteIdentity, useSessionContext } from './session_context';
 import type { SessionContextValue } from './session_context';
-
-/** Suggested memory categories; free text is accepted too. */
-export const MEMORY_TYPE_SUGGESTIONS = [
-  'preference',
-  'fact',
-  'statement',
-  'summary',
-  'decision',
-] as const;
 
 const labels = {
   type: i18n.translate('xpack.contextEngine.sessionMemory.remember.type', {
@@ -80,7 +72,7 @@ export const buildRememberBody = (
   ...(media ? { media: [media] } : {}),
 });
 
-const typeOptions = MEMORY_TYPE_SUGGESTIONS.map((label) => ({ label }));
+const typeOptions = SESSION_MEMORY_TYPE_SUGGESTIONS.map((label) => ({ label }));
 
 export const RememberMemoryPanel = () => {
   const session = useSessionContext();
