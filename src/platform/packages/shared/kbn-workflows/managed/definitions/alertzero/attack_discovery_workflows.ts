@@ -103,11 +103,12 @@ export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW = {
  * uses the internal-workflow management profile: enablement is enforced rather
  * than restorable.
  *
- * Retrieves the open alerts for `lookback`, plus one minute, in batches. When more
- * alerts qualify than the cap, keeps the highest-risk ones. Skips alerts tagged `az:ad_correlated`
- * or `az:ad_fp_chain`. Passes `generation_source` so these attacks do not dedupe
- * against a manual run by the same user. Reports `alerts_eligible` and
- * `alerts_over_cap` so an alert cap that cut the run is visible.
+ * Retrieves the open alerts for `lookback`, plus one minute, in batches. When
+ * more alerts qualify than the cap, keeps the highest-risk ones. Skips alerts
+ * tagged `az:ad_correlated` or `az:ad_fp_chain`. Passes `generation_source` so
+ * these attacks do not dedupe against a manual run by the same user. Reports
+ * `alerts_eligible` and `alerts_over_cap` so an alert cap that cut the run is
+ * visible.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW = {
   billable: true,

@@ -404,7 +404,9 @@ steps:
           kibana.alert.rule.execution.uuid:
             "${{ steps.generate_batches.output.results | map: 'output' | map: 'execution_uuid' | compact }}"
 
-  # `| plus: 0` coerces the counted strings above back to numbers.
+  # `| plus: 0` coerces the counted strings above back to numbers. The two
+  # nullable counts at the end use `json_parse` instead, so an unknown count
+  # stays null rather than becoming 0.
   - name: emit_result
     type: workflow.output
     status: completed

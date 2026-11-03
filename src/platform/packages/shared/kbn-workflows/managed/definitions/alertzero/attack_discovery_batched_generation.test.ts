@@ -16,6 +16,8 @@ import {
 } from '.';
 import { getManagedWorkflowDefinition, managedWorkflowDefinitions } from '../..';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
+import { convertToWorkflowGraph } from '../../../graph';
+import type { WorkflowYaml } from '../../../spec/schema';
 
 interface ParsedStep {
   name: string;
@@ -607,6 +609,33 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       );
     });
 
+    describe('count_eligible_alerts', () => {
+      const countStep = step('count_eligible_alerts');
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+
+      // The step-level `if` becomes an `if_<step>` node wrapping the step, and
+      // `on-failure: continue` wraps that in an `enterContinue_<step>` node.
+      it('builds an if node and a continue wrapper in the execution graph', () => {
+        const graph = convertToWorkflowGraph(
+          parse(ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW.yaml) as WorkflowYaml
+        );
+
+        expect(graph.hasNode('enterContinue_count_eligible_alerts')).toBe(true);
+        expect(graph.hasNode('enterCondition_if_count_eligible_alerts')).toBe(true);
+      });
+
+      it.each([
+        ['true', true],
+        ['false', false],
+      ])('evaluates its condition with capped=%s to %s', (capped, expected) => {
+        expect(
+          engine.evalValueSync(String(countStep.if).replace(/^\$\{\{|\}\}$/g, ''), {
+            steps: { resolve_cap: { output: { capped } } },
+          })
+        ).toBe(expected);
+      });
+    });
+
     describe('alerts_over_cap', () => {
       const engine = createWorkflowLiquidEngine({ strictFilters: true });
 
@@ -614,20 +643,22 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
         // Rows `retrieve_alert_ids` returned; `limit` is the cap.
         retrieved: number;
         limit: number;
-        // `undefined` models a count step that was skipped or failed.
+        // `undefined` models a skipped count step: no output at all.
         eligible?: number;
+        // The engine stores a failed step as `output: null` (`step_io_service.ts`).
+        countFailed?: boolean;
       }
 
-      const context = ({ retrieved, limit, eligible }: Scenario) => ({
+      const context = ({ retrieved, limit, eligible, countFailed }: Scenario) => ({
         steps: {
           resolve_alert_limit: { output: { alert_limit: String(limit) } },
           resolve_cap: { output: { capped: retrieved >= limit ? 'true' : 'false' } },
           retrieve_alert_ids: {
             output: { values: Array.from({ length: retrieved }, (_, i) => [`alert-${i}`]) },
           },
-          count_eligible_alerts: {
-            output: eligible === undefined ? undefined : { values: [[eligible]] },
-          },
+          count_eligible_alerts: countFailed
+            ? { output: null, error: { message: 'x' } }
+            : { output: eligible === undefined ? undefined : { values: [[eligible]] } },
         },
       });
 
@@ -673,6 +704,18 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
 
         expect(rendered).toBe('null');
         expect(emit('alerts_over_cap', rendered)).toBeNull();
+      });
+
+      it('reports null, not zero, when the count step failed on a capped run', async () => {
+        const scenario = { countFailed: true, limit: 500, retrieved: 500 };
+
+        const overCap = await render('alerts_over_cap', scenario);
+        const eligible = await render('alerts_eligible', scenario);
+
+        expect(overCap).toBe('null');
+        expect(eligible).toBe('null');
+        expect(emit('alerts_over_cap', overCap)).toBeNull();
+        expect(emit('alerts_eligible', eligible)).toBeNull();
       });
 
       it('emits a counted over-cap value as a number', async () => {
