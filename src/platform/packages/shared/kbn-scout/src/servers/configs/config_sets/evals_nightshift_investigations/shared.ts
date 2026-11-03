@@ -72,7 +72,6 @@ const createInvestigationConfig = (
         ...(telemetryConfig ? [`--config=${telemetryConfig}`] : []),
         '--uiSettings.overrides.workflows:ui:enabled=true',
         '--uiSettings.overrides.workflows:aiAgent:enabled=true',
-        '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
         // The tracing config set already lifts the content redaction settings.
         '--uiSettings.overrides.agentBuilder:tracing:enabled=true',
         '--uiSettings.overrides.agentBuilder:tracing:includeUserData=true',
