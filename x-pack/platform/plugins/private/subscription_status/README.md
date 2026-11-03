@@ -15,6 +15,6 @@ On self-managed (`cloud.isCloudEnabled` is false, which includes ECK but not ECE
 - Basic: an outlined badge.
 - Standard, Gold, Platinum, and Enterprise: no badge.
 
-Users with License Management access (`management.stack.license_management`, the `manage` cluster privilege) get a Manage license action that opens License Management. Everyone else gets Start a cloud trial. Everyone also gets Compare license features, which links to the Elastic subscriptions page. In the classic header the badge sits on the dark top bar in the app's color mode, like the user menu.
+Users with License Management access (`management.stack.license_management`, the `manage` cluster privilege) get a Manage license action that opens License Management. Everyone else gets Start Elastic Cloud trial. Everyone also gets Compare license features, which links to the Elastic subscriptions page. In the classic header the badge sits on the dark top bar in the app's color mode, like the user menu.
 
 The plugin registers the `subscription_status_badge_*` EBT event types. Event types can only be registered once, so new deployment types should add a resolver here rather than reporting the same events from another plugin.

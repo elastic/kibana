@@ -1775,7 +1775,7 @@ groups:
 
       - setting: xpack.subscription_status.enabled
         description: |
-          Set this value to false to hide the license badge in the {{kib}} header. The badge shows a trial with the days left, an expired trial, or the Basic license.
+          Set this value to false to hide the license badge in the {{kib}} header. The badge shows trial and Basic license information.
         datatype: bool
         default: true
         applies_to:

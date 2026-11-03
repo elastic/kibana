@@ -29,7 +29,7 @@ const MANAGE_ACTION = {
 
 const CLOUD_TRIAL_ACTION = {
   id: 'start_cloud_trial',
-  label: 'Start a cloud trial',
+  label: 'Start Elastic Cloud trial',
   href: 'https://cloud.elastic.co/registration',
   external: true,
 };
@@ -92,8 +92,7 @@ describe('resolveSelfManagedStatus', () => {
       label: 'Trial expired',
       badgeColor: 'warning',
       title: 'Your trial ended on Oct 25, 2026',
-      description:
-        'Paid features are no longer available. Contact your admin to update the license.',
+      description: 'Paid features are no longer available. Contact your administrator.',
       primaryAction: CLOUD_TRIAL_ACTION,
       primaryActionStyle: 'tinted',
       secondaryAction: COMPARE_ACTION,

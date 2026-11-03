@@ -52,7 +52,7 @@ const getActions = ({
       primaryAction: {
         id: 'start_cloud_trial',
         label: i18n.translate('xpack.subscriptionStatus.selfManaged.startCloudTrialLabel', {
-          defaultMessage: 'Start a cloud trial',
+          defaultMessage: 'Start Elastic Cloud trial',
         }),
         href: START_CLOUD_TRIAL_URL,
         external: true,
@@ -129,8 +129,7 @@ const resolveExpiredTrial = (
           defaultMessage: 'Paid features are no longer available.',
         })
       : i18n.translate('xpack.subscriptionStatus.selfManaged.trialExpiredNoAccessDescription', {
-          defaultMessage:
-            'Paid features are no longer available. Contact your admin to update the license.',
+          defaultMessage: 'Paid features are no longer available. Contact your administrator.',
         }),
     ...getActions(params),
     licenseType: 'trial',
