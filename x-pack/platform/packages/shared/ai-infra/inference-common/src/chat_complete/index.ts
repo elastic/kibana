@@ -16,6 +16,8 @@ export type {
   ChatCompleteStreamResponse,
   ChatCompleteResponse,
   ChatCompleteRetryConfiguration,
+  FeatureChatCompleteAPI,
+  FeatureChatCompleteOptions,
 } from './api';
 export {
   chatCompletionReasoningEfforts,

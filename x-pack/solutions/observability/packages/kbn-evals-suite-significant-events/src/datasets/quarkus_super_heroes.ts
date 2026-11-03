@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/significant-events-schema';
 import {
   GCS_BUCKET,
+  KI_FEATURE_DEDUPLICATION_ITERATIONS,
   QUARKUS_SUPER_HEROES_GCS_BASE_PATH_PREFIX,
   QUARKUS_SUPER_HEROES_NAMESPACE,
 } from '../constants';
@@ -772,7 +772,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
     {
       input: {
         scenario_id: 'healthy-baseline',
-        iterations: DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.max_iterations,
+        iterations: KI_FEATURE_DEDUPLICATION_ITERATIONS,
       },
     },
   ],

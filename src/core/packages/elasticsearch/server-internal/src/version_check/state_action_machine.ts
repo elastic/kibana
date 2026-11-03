@@ -8,15 +8,16 @@
  */
 
 /**
- * A state-action machine driver. A machine is an `initialState`, a `next` that
- * picks the action for a state, and a pure `model` that turns a state and its
- * action's result into the next state plus an event describing the step
- * (Lamport's augmented state, "Computer Science and State Machines", 2008).
- * Models never read a clock; time arrives as the result's `completedAt`.
+ * Runs state-action machines: `next` picks the action for a state, and a pure
+ * `model` turns the state and the action's result into a step: the next state,
+ * an event describing it (Lamport's augmented state), and how long to wait
+ * before the next action. Models never read a clock; time arrives as the
+ * result's `completedAt`.
  */
 
-import { setTimeout as delay } from 'node:timers/promises';
+import { setTimeout as wait } from 'node:timers/promises';
 
+/** Resolves after `duration`, or early once `signal` aborts; never rejects. */
 export type Sleep = (duration: number, signal?: AbortSignal) => Promise<void>;
 
 /** Injectable so tests can run a machine on virtual time. */
@@ -31,14 +32,6 @@ export type ActionResult<R> =
   | { readonly ok: true; readonly value: R; readonly completedAt: number }
   | { readonly ok: false; readonly error: Error; readonly completedAt: number };
 
-export interface Scheduled {
-  readonly nextActionAt: number;
-}
-
-export interface DomainEvent {
-  readonly type: string;
-}
-
 export interface InitialEvent {
   readonly type: 'initial';
 }
@@ -49,44 +42,34 @@ export interface AugmentedState<S, E> {
   readonly event: E;
 }
 
-export interface StateActionMachine<S extends Scheduled, R, E extends DomainEvent> {
-  readonly initialState: (now: number) => S;
-  /** The action to run in `state`, or null once the machine is done. */
-  readonly next: (state: S) => Action<R> | null;
-  readonly model: (state: S, result: ActionResult<R>) => AugmentedState<S, E>;
+export interface Step<S, E> extends AugmentedState<S, E> {
+  /** How long to wait before the next action; zero acts at once. */
+  readonly wait: number;
 }
 
-/** Monotonic, so wall-clock adjustments don't move schedules; unref'd, so it never holds the process open. */
+export interface StateActionMachine<S, R, E> {
+  readonly initialState: S;
+  /** The action to run in `state`, or null once the machine is done. */
+  readonly next: (state: S) => Action<R> | null;
+  readonly model: (state: S, result: ActionResult<R>) => Step<S, E>;
+}
+
+/** Monotonic, so wall-clock adjustments don't move waits; unref'd, so it never holds the process open. */
 export const realClock: Clock = {
   now: () => performance.now(),
-  sleep: (duration, signal) => delay(duration, undefined, { ref: false, signal }),
+  // `wait` rejects only when `signal` aborts.
+  sleep: (duration, signal) =>
+    wait(duration, undefined, { ref: false, signal }).catch(() => undefined),
 };
 
-/**
- * The first point on the `interval` grid from `anchor` (when the last action was due)
- * that is after both `anchor` and `completedAt`; with a zero interval, `completedAt`.
- */
-export const nextOnGrid = (anchor: number, completedAt: number, interval: number): number =>
-  interval > 0
-    ? anchor + Math.max(1, Math.floor((completedAt - anchor) / interval) + 1) * interval
-    : completedAt;
-
-/** Waits until the action is due and runs it; action failures become results, an abort throws. */
-const perform = async <R>(
-  action: Action<R>,
-  state: Scheduled,
-  { now, sleep }: Clock,
+/** Performs the action and stamps its completion; a failure becomes a result too. */
+export const attempt = async <R>(
+  perform: Action<R>,
+  now: Clock['now'],
   signal?: AbortSignal
 ): Promise<ActionResult<R>> => {
-  const waitMs = state.nextActionAt - now();
-  if (waitMs > 0) {
-    await sleep(waitMs, signal);
-  }
-  if (signal?.aborted) {
-    throw signal.reason instanceof Error ? signal.reason : new Error('aborted');
-  }
   try {
-    const value = await action(signal);
+    const value = await perform(signal);
     return { ok: true, value, completedAt: now() };
   } catch (error) {
     return {
@@ -97,36 +80,41 @@ const perform = async <R>(
   }
 };
 
-/** Yields the initial state and then each step, until `next` returns null or `signal` aborts. */
-export async function* run<S extends Scheduled, R, E extends DomainEvent>(
+/**
+ * Yields the initial step, which acts at once, and then each step, until `next` returns
+ * null or `signal` aborts. Returns the last state.
+ */
+export async function* run<S, R, E>(
   { initialState, next, model }: StateActionMachine<S, R, E>,
   clock: Clock = realClock,
   signal?: AbortSignal
-): AsyncGenerator<AugmentedState<S, E | InitialEvent>, S> {
-  let state = initialState(clock.now());
+): AsyncGenerator<Step<S, E | InitialEvent>, S> {
+  let step: Step<S, E | InitialEvent> = {
+    state: initialState,
+    event: { type: 'initial' },
+    wait: 0,
+  };
 
-  yield { state, event: { type: 'initial' } };
+  yield step;
   while (!signal?.aborted) {
+    const { state } = step;
     const action = next(state);
     if (action === null) {
       return state;
     }
-    let result: ActionResult<R>;
-    try {
-      result = await perform(action, state, clock, signal);
-    } catch (error) {
-      if (signal?.aborted) {
-        return state;
-      }
-      throw error;
+    if (step.wait > 0) {
+      await clock.sleep(step.wait, signal);
     }
+    if (signal?.aborted) {
+      return state;
+    }
+    const result = await attempt(action, clock.now, signal);
     if (signal?.aborted) {
       // Drop a result that arrived after the abort.
       return state;
     }
-    const reached = model(state, result);
-    state = reached.state;
-    yield reached;
+    step = model(state, result);
+    yield step;
   }
-  return state;
+  return step.state;
 }

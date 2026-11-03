@@ -27,6 +27,7 @@ import {
   selectTab,
   selectTabRuntimeState,
   useCurrentTabRuntimeState,
+  useCurrentTabSelector,
   useInternalStateDispatch,
   useInternalStateGetState,
   useInternalStateSelector,
@@ -56,6 +57,7 @@ export const DiscoverSessionSaveModalContainer = ({
   const getState = useInternalStateGetState();
   const runtimeStateManager = useRuntimeStateManager();
   const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
+  const controlGroupState = useCurrentTabSelector((tab) => tab.attributes.controlGroupState);
   const allTabs = useInternalStateSelector(selectAllTabs);
   const persistedDiscoverSession = useInternalStateSelector(selectPersistedDiscoverSession);
   const savedDataViews = useInternalStateSelector(selectSavedDataViews);
@@ -141,6 +143,7 @@ export const DiscoverSessionSaveModalContainer = ({
           newPanel: isEmbeddedEditor && userWantsCopy,
           state: {
             savedObjectId: response.discoverSession.id,
+            controlGroupState,
           },
         });
         return;
@@ -174,13 +177,17 @@ export const DiscoverSessionSaveModalContainer = ({
               })
             : undefined;
 
-          services.locator.navigate({
+          // Close the modal only once the URL points at the saved session, since a reload of the
+          // draft URL after local tabs are stored for the new session would open a default tab.
+          await services.locator.navigate({
             savedSearchId: response.discoverSession.id,
             ...(response?.nextSelectedTabId ? { tab: { id: response.nextSelectedTabId } } : {}),
             ...(profileState ? { profileState } : {}),
           });
         } else if (isEmbeddedEditor) {
-          services.embeddableEditor.transferBackToEditor(TransferAction.SaveSession);
+          services.embeddableEditor.transferBackToEditor(TransferAction.SaveSession, {
+            state: { controlGroupState },
+          });
         }
       }
 

@@ -10,7 +10,25 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { NewFleetServerHost, FleetServerHost, SOSecretPath } from '../../../common/types';
 import type { SecretReference } from '../../types';
 
-import { deleteSOSecrets, extractAndWriteSOSecrets, extractAndUpdateSOSecrets } from './common';
+import {
+  deleteSOSecrets,
+  extractAndWriteSOSecrets,
+  extractAndUpdateSOSecrets,
+  withClearedSecretReferences,
+} from './common';
+import type { DeletedSOSecret } from './common';
+import type { SecretFieldDefinition } from './preserve';
+
+/**
+ * The credentials a Fleet Server host can store as a secret, so that an update that does not touch
+ * one of them keeps it (see `withSavedSecrets`). Each one is removed by an explicit `null`, either
+ * of the credential itself or of the whole `ssl` object.
+ */
+export const FLEET_SERVER_HOST_SECRET_FIELDS: SecretFieldDefinition[] = [
+  { secretPath: 'secrets.ssl.key', plainPath: 'ssl.key', clearedBy: ['ssl'] },
+  { secretPath: 'secrets.ssl.es_key', plainPath: 'ssl.es_key', clearedBy: ['ssl'] },
+  { secretPath: 'secrets.ssl.agent_key', plainPath: 'ssl.agent_key', clearedBy: ['ssl'] },
+];
 
 export async function extractAndWriteFleetServerHostsSecrets(opts: {
   fleetServerHost: NewFleetServerHost;
@@ -41,7 +59,7 @@ export async function extractAndUpdateFleetServerHostsSecrets(opts: {
 }): Promise<{
   fleetServerHostUpdate: Partial<NewFleetServerHost>;
   secretReferences: SecretReference[];
-  secretsToDelete: SecretReference[];
+  secretsToDelete: DeletedSOSecret[];
 }> {
   const { oldFleetServerHost, fleetServerHostUpdate, esClient, secretHashes } = opts;
   const oldSecretPaths = getFleetServerHostsSecretPaths(oldFleetServerHost);
@@ -54,7 +72,12 @@ export async function extractAndUpdateFleetServerHostsSecrets(opts: {
     secretHashes,
   });
   return {
-    fleetServerHostUpdate: secretsRes.updatedSoObject,
+    // a deleted secret has its reference removed too, or the host would point at a secret that no
+    // longer exists
+    fleetServerHostUpdate: withClearedSecretReferences(
+      secretsRes.updatedSoObject,
+      secretsRes.secretsToDelete
+    ),
     secretReferences: secretsRes.secretReferences,
     secretsToDelete: secretsRes.secretsToDelete,
   };

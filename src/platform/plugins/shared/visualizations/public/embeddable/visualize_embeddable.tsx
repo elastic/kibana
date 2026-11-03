@@ -119,7 +119,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       }
       return visInstance.data.indexPattern ? [visInstance.data.indexPattern] : [];
     };
-    const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
+    const dataSources$ = new BehaviorSubject<DataView[] | undefined>(
       await getUsedDataViews(initialVisInstance)
     );
 
@@ -152,10 +152,10 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
 
           try {
             const nextDataViews = await getUsedDataViews(vis);
-            const currentDataViewIds = (dataViews$.getValue() ?? []).map(({ id }) => id);
+            const currentDataViewIds = (dataSources$.getValue() ?? []).map(({ id }) => id);
             const nextDataViewIds = nextDataViews.map(({ id }) => id);
             if (!isEqual(currentDataViewIds, nextDataViewIds)) {
-              dataViews$.next(nextDataViews);
+              dataSources$.next(nextDataViews);
             }
           } catch {
             // keep the previously resolved data views if resolution fails
@@ -282,7 +282,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       ...stateApi,
       defaultTitle$,
       dataLoading$,
-      dataViews$,
+      dataSources$,
       projectRoutingOverrides$,
       esql$,
       approximationApplied$,

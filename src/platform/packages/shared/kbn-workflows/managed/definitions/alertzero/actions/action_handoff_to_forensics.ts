@@ -24,10 +24,10 @@ export const ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID =
  * run time.
  */
 export const ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
+  version: 2,
   yaml: ACTION_HANDOFF_TO_FORENSICS_YAML,
 } as const satisfies ManagedWorkflowDefinition;

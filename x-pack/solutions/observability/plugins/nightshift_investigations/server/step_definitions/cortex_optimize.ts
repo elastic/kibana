@@ -14,10 +14,13 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { runCortexOptimize } from '../cortex/register_cortex';
-import { toolCallsSchema, toolResultsSchema } from './tool_calls_schema';
+import {
+  appliedWriteSchema,
+  investigationRoundInputsSchema,
+  withToolResults,
+} from '../investigation_round';
+import { withNightshiftBackgroundSpan } from '../tracing';
 import { withTimeout } from './with_timeout';
-
-const MAX_ROUND_TEXT_LENGTH = 65_536;
 
 /**
  * Bounds the post-round optimizer. It runs non-blocking, so a stall does not hold up an
@@ -25,22 +28,7 @@ const MAX_ROUND_TEXT_LENGTH = 65_536;
  */
 const OPTIMIZE_TIMEOUT_MS = 120_000;
 
-/** Attaches each call's results, matched on `tool_call_id`, so the optimizer sees what it returned. */
-export const withToolResults = (
-  toolCalls: InvestigationToolCall[],
-  toolResults: Array<{ tool_call_id: string; results: unknown[] }>
-): InvestigationToolCall[] => {
-  if (toolResults.length === 0) {
-    return toolCalls;
-  }
-  const resultsById = new Map(
-    toolResults.map(({ tool_call_id: toolCallId, results }) => [toolCallId, results])
-  );
-  return toolCalls.map((call) => {
-    const results = call.tool_call_id ? resultsById.get(call.tool_call_id) : undefined;
-    return results ? { ...call, results } : call;
-  });
-};
+export { withToolResults };
 
 export const cortexOptimizeStepDefinition = ({
   getAgentBuilder,
@@ -68,30 +56,13 @@ export const cortexOptimizeStepDefinition = ({
       'to the Context Engine AI index. sandbox_id identifies the workspace this round used; ' +
       'the optimizer currently reads the transcript, not the sandbox files.',
     inputSchema: z.object({
-      prompt: z
-        .string()
-        .max(MAX_ROUND_TEXT_LENGTH)
-        .describe('The user message that started the round.'),
-      response: z
-        .string()
-        .max(MAX_ROUND_TEXT_LENGTH)
-        .describe("The assistant's final response for the round."),
+      ...investigationRoundInputsSchema,
       agent_id: z.string().max(1024).optional().describe('Agent id that produced the round.'),
       sandbox_id: z
         .string()
         .max(1024)
         .optional()
         .describe('Workspace key from nightshift.obtainSandbox. Already space-scoped.'),
-      conversation_id: z
-        .string()
-        .max(1024)
-        .optional()
-        .describe('Conversation the round belongs to. Recorded on the edit telemetry events.'),
-      round_id: z
-        .string()
-        .max(1024)
-        .optional()
-        .describe('Id of the completed round. Recorded on the edit telemetry events.'),
       connector_id: z
         .string()
         .max(MAX_KEYWORD_LENGTH)
@@ -102,16 +73,23 @@ export const cortexOptimizeStepDefinition = ({
         .max(MAX_KEYWORD_LENGTH)
         .optional()
         .describe('Inference connector the triggering agent used for this round.'),
-      tool_calls: toolCallsSchema.describe(
-        'Investigator tool calls from this round. Shows the optimizer what the investigator queried.'
-      ),
-      tool_results: toolResultsSchema.describe(
-        'Results of the investigator tool calls, keyed by tool_call_id. Shows the optimizer what each query returned.'
-      ),
+      background_trace_id: z
+        .string()
+        .max(128)
+        .optional()
+        .describe('Deterministic T_background trace id from materialize.'),
     }),
     outputSchema: z.object({
       status: z.literal('ok').describe('The optimizer finished without throwing.'),
       skipped: z.boolean().optional(),
+      opened_ids: z
+        .array(z.string())
+        .optional()
+        .describe('Canonical Cortex page ids opened by the investigator this round.'),
+      applied_writes: z
+        .array(appliedWriteSchema)
+        .optional()
+        .describe('Cortex page writes applied during this round.'),
     }),
     handler: async (context) => {
       if (isEnabled && !isEnabled()) {
@@ -123,36 +101,71 @@ export const cortexOptimizeStepDefinition = ({
         `Running Cortex optimize for agent ${context.input.agent_id ?? 'unknown'}`
       );
       const { workflow, execution } = context.contextManager.getContext();
-      await withTimeout(
-        (signal) =>
-          runCortexOptimize({
-            request: context.contextManager.getFakeRequest(),
-            agentId: context.input.agent_id,
-            userMessage: context.input.prompt,
-            assistantMessage: context.input.response,
-            toolCalls: withToolResults(
-              (context.input.tool_calls ?? []) as InvestigationToolCall[],
-              context.input.tool_results ?? []
-            ),
-            esClient: context.contextManager.getScopedEsClient(),
-            spaceId: workflow.spaceId,
-            interactionId: execution.id,
-            signal,
-            analytics,
-            conversationId: context.input.conversation_id,
-            roundId: context.input.round_id,
-            requestedConnectorId: context.input.connector_id,
-            roundConnectorId: context.input.round_connector_id,
-            logger,
-            getAgentBuilder,
-            getInference,
-            getSavedObjects,
-            getUiSettings,
-          }),
-        OPTIMIZE_TIMEOUT_MS,
-        `Cortex optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`
+      const request = context.contextManager.getFakeRequest();
+      const result = await withNightshiftBackgroundSpan(
+        {
+          name: 'nightshift.cortexOptimize',
+          traceId: context.input.background_trace_id || execution.id,
+          roundId: context.input.round_id,
+          conversationId: context.input.conversation_id,
+          spaceId: workflow.spaceId,
+          workflowExecutionId: execution.id,
+          request,
+          getSavedObjects,
+          getUiSettings,
+          logger,
+        },
+        async (span) => {
+          const res = await withTimeout(
+            (signal) =>
+              runCortexOptimize({
+                request,
+                agentId: context.input.agent_id,
+                userMessage: context.input.prompt,
+                assistantMessage: context.input.response,
+                toolCalls: withToolResults(
+                  (context.input.tool_calls ?? []) as InvestigationToolCall[],
+                  context.input.tool_results ?? []
+                ),
+                esClient: context.contextManager.getScopedEsClient(),
+                spaceId: workflow.spaceId,
+                interactionId: execution.id,
+                signal,
+                analytics,
+                conversationId: context.input.conversation_id,
+                roundId: context.input.round_id,
+                roundIndex: context.input.round_index,
+                requestedConnectorId: context.input.connector_id,
+                roundConnectorId: context.input.round_connector_id,
+                logger,
+                getAgentBuilder,
+                getInference,
+                getSavedObjects,
+                getUiSettings,
+              }),
+            OPTIMIZE_TIMEOUT_MS,
+            `Cortex optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`
+          );
+          if (res?.openedIds) {
+            span?.setAttribute('nightshift.opened_ids', JSON.stringify(res.openedIds));
+          }
+          if (res?.appliedWrites) {
+            span?.setAttribute('nightshift.applied_writes', JSON.stringify(res.appliedWrites));
+          }
+          return res;
+        }
       );
 
-      return { output: { status: 'ok' as const } };
+      return {
+        output: {
+          status: 'ok' as const,
+          ...(result?.openedIds && result.openedIds.length > 0
+            ? { opened_ids: result.openedIds }
+            : {}),
+          ...(result?.appliedWrites && result.appliedWrites.length > 0
+            ? { applied_writes: result.appliedWrites }
+            : {}),
+        },
+      };
     },
   });

@@ -476,6 +476,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       attacksPage: `${ELASTIC_DOCS}solutions/security/ai/attack-discovery/manage-discoveries-from-attacks-page`,
       dashboardsPage: `${ELASTIC_DOCS}solutions/security/dashboards`,
       detectionResponsePage: `${ELASTIC_DOCS}solutions/security/dashboards/detection-response-dashboard`,
+      dataQualityPage: `${ELASTIC_DOCS}solutions/security/dashboards/data-quality-dashboard`,
+      indicatorsPage: `${ELASTIC_DOCS}solutions/security/investigate/indicators-of-compromise`,
+      alertSummaryPage: `${ELASTIC_DOCS}solutions/security/ai/ease/ease-alerts`,
       notesPage: `${ELASTIC_DOCS}solutions/security/investigate/notes`,
       timelinesPage: `${ELASTIC_DOCS}solutions/security/investigate/timeline`,
       runAttackDiscoveryInWorkflow: `${ELASTIC_DOCS}solutions/security/ai/attack-discovery/run-attack-discovery-in-a-workflow`,
@@ -559,6 +562,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         : `${KIBANA_SERVERLESS_APIS}group/endpoint-security-detections-api`,
       siemMigrations: `${ELASTIC_DOCS}solutions/security/get-started/automatic-migration`,
       llmPerformanceMatrix: `${ELASTIC_DOCS}solutions/security/ai/large-language-model-performance-matrix`,
+      alertZero: {
+        continuousThreatHunt: `${ELASTIC_DOCS}solutions/security/alertzero/configure-worker-settings#configure-worker-settings-continuous-threat-hunt`,
+      },
     },
     query: {
       eql: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/eql`,
@@ -1075,6 +1081,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     endpoints: {
       troubleshooting: `${ELASTIC_DOCS}troubleshoot/security/elastic-defend#ts-transform-failed`,
+    },
+    osquery: {
+      guide: `${ELASTIC_DOCS}solutions/security/investigate/osquery`,
     },
     legal: {
       privacyStatement: `${ELASTIC_WEBSITE_URL}legal/product-privacy-statement`,
