@@ -457,12 +457,20 @@ export const createInvestigatorServiceAccountService = ({
    * `has` and `setServiceAccount` resolve the agent without checking that it is runnable, unlike
    * `get`: the agent reports itself unavailable while the space's entry point is disabled, and a
    * space in that state is exactly one an admin removes the setup from. Unbinding an agent that is
-   * already unbound is a no-op.
+   * already bound to nothing writes the agent again, which is why the whole call is skipped when
+   * no binding can exist: Agent Builder refuses every binding change while service accounts are
+   * off, and removing the setup must not depend on them being on.
    */
   const unbindAgent = async (request: KibanaRequest, spaceId: string): Promise<void> => {
     const agentBuilder = getAgentBuilder?.();
     if (!agentBuilder) {
       throw Boom.serverUnavailable('Agent Builder is not available; cannot unbind the agent.');
+    }
+    if (!core.security.serviceAccounts.isEnabled()) {
+      logger.warn(
+        `Service accounts are disabled, so the Nightshift agent in space [${spaceId}] keeps the binding it has; it runs as nobody until they are enabled again.`
+      );
+      return;
     }
     const registry = await agentBuilder.agents.getRegistry({ request });
     if (!(await registry.has(NIGHTSHIFT_INVESTIGATION_AGENT_ID))) return;

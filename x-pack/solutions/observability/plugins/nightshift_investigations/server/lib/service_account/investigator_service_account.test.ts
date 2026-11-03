@@ -399,6 +399,19 @@ describe('createInvestigatorServiceAccountService', () => {
     expect(setServiceAccount.mock.calls).toEqual([['nightshift.investigation', null]]);
   });
 
+  // Agent Builder refuses every binding change while service accounts are off, so attempting one
+  // would leave an admin unable to remove the setup at all.
+  it('still uninstalls the workflows on disable while service accounts are disabled', async () => {
+    const { service, setServiceAccount, managedWorkflows } = setup({
+      serviceAccountsEnabled: false,
+    });
+
+    await service.disable(request, SPACE_ID);
+
+    expect(setServiceAccount).not.toHaveBeenCalled();
+    expect(managedWorkflows.uninstall).toHaveBeenCalledTimes(BOUND_WORKFLOW_IDS.length);
+  });
+
   it('uninstalls every bound workflow on disable, entry point first', async () => {
     const { service, managedWorkflows } = setup();
 
