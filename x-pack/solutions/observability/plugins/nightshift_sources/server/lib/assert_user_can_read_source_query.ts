@@ -11,7 +11,7 @@ import { isResponseError } from '@kbn/es-errors';
 import { getSourceReadTargets, type ISourceReadTargets } from '@kbn/nightshift-shared';
 import { toBoom } from './es_errors';
 
-const UNPARSEABLE_QUERY = 'This query could not be parsed, so its data access cannot be checked.';
+const UNPARSEABLE_QUERY = 'This query could not be analyzed, so its data access cannot be checked.';
 const NO_INDEX_TARGET =
   'This query has no FROM or TS index target, so its data access cannot be checked.';
 const PRIVILEGE_CHECK_FAILED = 'Could not check read access to the source data';

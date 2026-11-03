@@ -106,6 +106,17 @@ describe('validateSourceQuery', () => {
       );
     });
 
+    it('a Nightshift source view inside a quoted list', () => {
+      expectRejected(
+        'FROM "logs-a,$.nightshift.sources.default.abc"',
+        'found "$.nightshift.sources.default.abc"'
+      );
+      expectRejected(
+        'FROM "logs-a,$.nightshift.sources.default.abc,-}"',
+        'found "$.nightshift.sources.default.abc"'
+      );
+    });
+
     it('a $ wildcard that overlaps the Nightshift source namespace', () => {
       expectRejected('FROM $.*', 'found "$.*"');
       expectRejected('FROM $.nightshift.*', 'found "$.nightshift.*"');
@@ -254,6 +265,29 @@ describe('getSourceReadTargets', () => {
     expect(
       getSourceReadTargets('FROM "logs-team-a,logs-team-b-*,other:logs-*,-logs-team-a-old"')
     ).toEqual({ indexPatterns: ['logs-team-a', 'logs-team-b-*'], hasRemote: true });
+  });
+
+  it('splits a quoted list that ends in a stray brace instead of reading it as one name', () => {
+    // A lookahead on `}` once kept every comma when any later part held one.
+    expect(getSourceReadTargets('FROM "logs-nginx,secret,-}"')).toEqual({
+      indexPatterns: ['logs-nginx', 'secret'],
+      hasRemote: false,
+    });
+    expect(getSourceReadTargets('FROM "logs-nginx,secret,x}*"')).toEqual({
+      indexPatterns: ['logs-nginx', 'secret', 'x}*'],
+      hasRemote: false,
+    });
+  });
+
+  it('keeps the comma of a date-math format inside a quoted list', () => {
+    expect(getSourceReadTargets('FROM "<logs-{now/d{yyyy,MM}}>,secret"')).toEqual({
+      indexPatterns: ['logs-*', 'secret'],
+      hasRemote: false,
+    });
+  });
+
+  it('has no target for a name that is only a selector', () => {
+    expect(getSourceReadTargets('FROM "::data"')).toEqual({ indexPatterns: [], hasRemote: false });
   });
 
   it('does not let a cluster prefix in one part of a quoted list hide the others', () => {

@@ -64,8 +64,10 @@ const DATE_MATH_BRACES = /\{(?:[^{}]|\{[^{}]*\})*\}/g;
 const NON_DATA_SELECTOR = /::(?!data$)/i;
 const BACKTICK_QUOTES = /^`(.*)`$/;
 
-// A comma outside the braces of a date-math expression (`<logs-{now/d{yyyy,MM}}>`).
-const NAME_SEPARATOR = /,(?![^{]*\})/;
+// One index name of a quoted list: text without a comma. A comma only stays inside a well-formed
+// date-math name (`<logs-{now/d{yyyy,MM}}>`), within its braces. Braces anywhere else are plain
+// text, so a stray `}` or `{` cannot protect a comma and hide the name after it.
+const NAME_TOKEN = /(?:<(?:[^>{,]|\{(?:[^{}]|\{[^{}]*\})*\})*>|[^,])+/g;
 
 /** One index name of a source, with the cluster prefix the parser split off, if any. */
 interface ISourceName {
@@ -88,11 +90,10 @@ const namesOf = (source: ESQLSource, name: string): ISourceName[] => {
     source.index?.valueUnquoted ?? (typeof source.name === 'string' ? source.name : undefined);
   const prefix = source.prefix?.valueUnquoted;
   const hasPrefix = source.prefix !== undefined;
-  if (raw === undefined || !NAME_SEPARATOR.test(raw)) {
+  if (raw === undefined || !raw.includes(',')) {
     return [{ name, raw, prefix, hasPrefix }];
   }
-  return raw
-    .split(NAME_SEPARATOR)
+  return (raw.match(NAME_TOKEN) ?? [])
     .map((part) => part.trim())
     .filter((part) => part !== '')
     .map((part) => ({ name: part, raw: part, prefix, hasPrefix }));
@@ -342,7 +343,9 @@ export interface ISourceReadTargets {
 /**
  * The index patterns a stored source query reads, for checking a caller's own privileges. Excluded
  * indices (`-logs-*`) are not targets. Throws when the query does not parse, so a caller can fail
- * closed instead of treating an unreadable query as readable.
+ * closed instead of treating an unreadable query as readable. It also throws when a name still
+ * holds a comma after splitting, because `has_privileges` would match that whole string against
+ * a role pattern instead of each index.
  */
 export const getSourceReadTargets = (esql: string): ISourceReadTargets => {
   const parsed = Parser.parse(esql);
@@ -356,12 +359,16 @@ export const getSourceReadTargets = (esql: string): ISourceReadTargets => {
     return { indexPatterns: [], hasRemote: false };
   }
   const targets = targetedIndices(firstCommand);
-  return {
-    indexPatterns: [
-      ...new Set(
-        targets.filter(({ remote }) => !remote).map(({ pattern }) => toPrivilegeName(pattern))
-      ),
-    ],
-    hasRemote: targets.some(({ remote }) => remote),
-  };
+  const indexPatterns = [
+    ...new Set(
+      targets
+        .filter(({ remote }) => !remote)
+        .map(({ pattern }) => toPrivilegeName(pattern))
+        .filter((name) => name !== '')
+    ),
+  ];
+  if (indexPatterns.some((name) => name.includes(','))) {
+    throw new Error('An index name could not be split into separate patterns');
+  }
+  return { indexPatterns, hasRemote: targets.some(({ remote }) => remote) };
 };
