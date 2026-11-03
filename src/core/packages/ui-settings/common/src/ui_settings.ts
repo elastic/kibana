@@ -173,6 +173,7 @@ export interface UiSettingsRuntimeEntry {
   type?: UiSettingsType;
   readonly?: boolean;
   readonlyMode?: ReadonlyModeType;
+  sensitive?: boolean;
 }
 
 /**

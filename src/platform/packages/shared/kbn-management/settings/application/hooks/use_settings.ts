@@ -45,6 +45,7 @@ export const useSettings = (scope: UiSettingsScope) => {
 
   useEffect(() => {
     let isCurrent = true;
+    setIsLoading(true);
 
     const refreshSettings = () => {
       getAllowlistedSettings(scope, solutionView).then(

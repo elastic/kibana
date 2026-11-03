@@ -39,6 +39,8 @@ export const useFields = (
     });
 
     if (query) {
+      // Non-category `field:value` clauses become term clauses so that setting
+      // IDs containing `:` can be searched without being parsed as field queries.
       const clauses: Clause[] = query.ast.clauses.map((clause) =>
         clause.type === 'field' && clause.field !== CATEGORY_FIELD
           ? {

@@ -19,7 +19,6 @@ export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
 /** @public */
 export type UiSettingsRuntimeState = Record<string, UiSettingsRuntimeEntry & UserProvidedValues>;
 
-
 export interface ValueValidation {
   successfulValidation: boolean;
   valid?: boolean;

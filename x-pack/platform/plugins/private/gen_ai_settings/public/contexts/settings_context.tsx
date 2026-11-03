@@ -134,11 +134,13 @@ const useSettings = ({ settingsKeys }: { settingsKeys: string[] }) => {
     queryFn: async () => {
       const definitions = await queryClient.fetchQuery({
         queryKey: ['settingsDefinitions'],
-        queryFn: () => settings.metadata.getAll('namespace'),
+        queryFn: () => settings?.metadata.getAll('namespace') ?? Promise.resolve({}),
         staleTime: Infinity,
       });
       return getSettingsFields({ settingsKeys, uiSettings: settings?.client, definitions });
     },
+    enabled: !!settings?.metadata,
+    retry: false,
     refetchOnWindowFocus: true,
   });
 
