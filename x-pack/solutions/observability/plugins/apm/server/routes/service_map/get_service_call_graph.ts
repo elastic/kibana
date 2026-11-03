@@ -18,11 +18,20 @@ import { termQuery } from '../../../common/utils/term_query';
 import type { IEnvOptions } from './get_service_map';
 import { recordByService } from './record_by_service';
 
-/** OpenTelemetry service-destination metrics that are not part of the APM rollup. */
-const OTEL_ONE_MINUTE_DATASET = `service_destination.${RollupInterval.OneMinute}.otel`;
-
 /** How far back the calls reach, ending when the map's own range ends. */
 export const SERVICE_CALL_GRAPH_WINDOW_MS = 24 * 60 * 60 * 1000;
+/** A 60-minute rollup can omit calls from the last hour. */
+const SIXTY_MINUTE_ROLLUP_LAG_MS = 60 * 60 * 1000;
+/** A 10-minute rollup can omit calls from the last 10 minutes. */
+const TEN_MINUTE_ROLLUP_LAG_MS = 10 * 60 * 1000;
+
+function apmDataset(rollupInterval: RollupInterval): string {
+  return `apm.service_destination.${rollupInterval}`;
+}
+
+function otelDataset(rollupInterval: RollupInterval): string {
+  return `service_destination.${rollupInterval}.otel`;
+}
 /** A gateway calls hundreds of destinations. Keep a bounded list per service. */
 const MAX_DESTINATIONS_PER_SERVICE = 1000;
 /** (service, destination) pairs per page, one bucket each. */
@@ -56,7 +65,9 @@ interface ServiceCallAggregate {
 
 /**
  * Reads each service's calls over the last day from the coarsest rollup that has data.
- * OpenTelemetry calls that exist only at 1 minute are added without reading the APM copy.
+ * Pairs already in that rollup keep its count. Two gaps are filled without reading the
+ * rollup's own finer copy: OpenTelemetry calls, which stay on the 1-minute data stream,
+ * and APM calls newer than the rollup's lag.
  */
 export async function getServiceCallGraph(
   options: ServiceCallGraphOptions
@@ -76,8 +87,8 @@ export async function getServiceCallGraph(
 }
 
 /**
- * Returns the rollup, plus 1-minute OpenTelemetry calls it does not already contain.
- * An empty rollup returns undefined so the caller can try a finer interval.
+ * Returns the rollup plus the calls it cannot contain yet. An empty rollup returns
+ * undefined so the caller can try a finer interval.
  */
 async function readCoarseRollup(
   options: ServiceCallGraphOptions,
@@ -88,12 +99,47 @@ async function readCoarseRollup(
     return undefined;
   }
 
-  const otelOnly = await readServiceCalls({
+  return mergeServiceCalls([coarse, ...(await callsMissingFromCoarse(options, rollupInterval))]);
+}
+
+/** OpenTelemetry calls for the whole day, then APM calls from the coarse rollup's lag. */
+async function callsMissingFromCoarse(
+  options: ServiceCallGraphOptions,
+  rollupInterval: RollupInterval.SixtyMinutes | RollupInterval.TenMinutes
+): Promise<ServiceCallGraph[]> {
+  const otelOnly = readServiceCalls({
     ...options,
     rollupInterval: RollupInterval.OneMinute,
-    dataset: OTEL_ONE_MINUTE_DATASET,
+    dataset: otelDataset(RollupInterval.OneMinute),
   });
-  return mergeServiceCalls([coarse, otelOnly]);
+
+  if (rollupInterval === RollupInterval.SixtyMinutes) {
+    return Promise.all([
+      otelOnly,
+      readServiceCalls({
+        ...options,
+        rollupInterval: RollupInterval.TenMinutes,
+        dataset: apmDataset(RollupInterval.TenMinutes),
+        sinceMs: SIXTY_MINUTE_ROLLUP_LAG_MS,
+      }),
+      readServiceCalls({
+        ...options,
+        rollupInterval: RollupInterval.OneMinute,
+        dataset: apmDataset(RollupInterval.OneMinute),
+        sinceMs: TEN_MINUTE_ROLLUP_LAG_MS,
+      }),
+    ]);
+  }
+
+  return Promise.all([
+    otelOnly,
+    readServiceCalls({
+      ...options,
+      rollupInterval: RollupInterval.OneMinute,
+      dataset: apmDataset(RollupInterval.OneMinute),
+      sinceMs: TEN_MINUTE_ROLLUP_LAG_MS,
+    }),
+  ]);
 }
 
 /** Finer rollups only contribute pairs the coarser ones did not already count. */
@@ -130,9 +176,11 @@ async function readServiceCalls({
   serviceGroupKuery,
   rollupInterval,
   dataset,
+  sinceMs = SERVICE_CALL_GRAPH_WINDOW_MS,
 }: ServiceCallGraphOptions & {
   rollupInterval: RollupInterval;
   dataset?: string;
+  sinceMs?: number;
 }): Promise<ServiceCallGraph> {
   const graph = new Map<string, ServiceDestinationCall[]>();
   let after: Record<string, string | number | null> | undefined;
@@ -147,7 +195,7 @@ async function readServiceCalls({
       query: {
         bool: {
           filter: [
-            ...rangeQuery(end - SERVICE_CALL_GRAPH_WINDOW_MS, end),
+            ...rangeQuery(end - sinceMs, end),
             ...environmentQuery(environment),
             ...kqlQuery(serviceGroupKuery),
             ...termQuery(DATASTREAM_DATASET, dataset),
