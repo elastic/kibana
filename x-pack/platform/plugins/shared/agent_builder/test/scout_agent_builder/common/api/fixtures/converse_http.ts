@@ -6,8 +6,11 @@
  */
 
 import type { Conversation } from '@kbn/agent-builder-common';
-import type { ChatRequestBodyPayload } from '../../../../../common/http_api/chat';
-import { API_AGENT_BUILDER, COMMON_HEADERS } from './constants';
+import type {
+  ChatRequestBodyPayload,
+  PostBrowserToolResultRequestBody,
+} from '../../../../../common/http_api/chat';
+import { API_AGENT_BUILDER, COMMON_HEADERS, INTERNAL_AGENT_BUILDER } from './constants';
 
 export type ExecutionMode = 'local' | 'task_manager';
 
@@ -70,4 +73,24 @@ export async function getConversation(
     throw new Error(`getConversation failed: ${res.statusCode} ${JSON.stringify(res.body)}`);
   }
   return res.body as Conversation;
+}
+
+/**
+ * Posts the browser's answer to a pending browser tool call, as the UI does.
+ */
+export async function postBrowserToolResult(
+  apiClient: ScoutAgentBuilderApiClient,
+  authHeaders: Record<string, string>,
+  {
+    executionId,
+    toolCallId,
+    body,
+  }: { executionId: string; toolCallId: string; body: PostBrowserToolResultRequestBody }
+) {
+  return apiClient.post(
+    `${INTERNAL_AGENT_BUILDER}/executions/${encodeURIComponent(
+      executionId
+    )}/browser_tool_results/${encodeURIComponent(toolCallId)}`,
+    { headers: { ...COMMON_HEADERS, ...authHeaders }, body, responseType: 'json' }
+  );
 }

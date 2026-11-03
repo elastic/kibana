@@ -1,5 +1,5 @@
 {
-  "sha1": "dcce18cc43b0c1794b08d9b74f3cf4f6a5ddd23b",
+  "sha1": "d5524c14ba8fadb88cb2c96db92ea67fc0e7b101",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -878,6 +878,132 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_attachments_api.spec.ts",
         "line": 188,
         "column": 18
+      }
+    },
+    {
+      "id": "b8312d0c17867a6-24c0aab0584630c",
+      "title": "Agent Builder — browser tool round trips [local] LLM calls a legacy browser tool, the client posts a result, and the final answer contains it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_browser_tools_api.spec.ts",
+        "line": 257,
+        "column": 37
+      }
+    },
+    {
+      "id": "b8312d0c17867a6-26cf9e5c95bc7d9",
+      "title": "Agent Builder — browser tool round trips [local] times out when nobody answers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_browser_tools_api.spec.ts",
+        "line": 316,
+        "column": 65
+      }
+    },
+    {
+      "id": "b8312d0c17867a6-fe840ea84be86cd",
+      "title": "Agent Builder — browser tool round trips [local] two browser tool calls in one turn",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_browser_tools_api.spec.ts",
+        "line": 349,
+        "column": 21
+      }
+    },
+    {
+      "id": "b8312d0c17867a6-ffa736098116df6",
+      "title": "Agent Builder — browser tool round trips [local] a second user cannot answer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_browser_tools_api.spec.ts",
+        "line": 417,
+        "column": 26
+      }
+    },
+    {
+      "id": "b8312d0c17867a6-34f2f9e487930d3",
+      "title": "Agent Builder — browser tool round trips [task_manager] LLM calls a legacy browser tool, the client posts a result, and the final answer contains it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_browser_tools_api.spec.ts",
+        "line": 257,
+        "column": 37
+      }
+    },
+    {
+      "id": "b8312d0c17867a6-f6af69dcb33077f",
+      "title": "Agent Builder — browser tool round trips [task_manager] times out when nobody answers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_browser_tools_api.spec.ts",
+        "line": 316,
+        "column": 65
+      }
+    },
+    {
+      "id": "b8312d0c17867a6-560b2e19dbf8cda",
+      "title": "Agent Builder — browser tool round trips [task_manager] two browser tool calls in one turn",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_browser_tools_api.spec.ts",
+        "line": 349,
+        "column": 21
+      }
+    },
+    {
+      "id": "b8312d0c17867a6-396ee0f95c5bcdf",
+      "title": "Agent Builder — browser tool round trips [task_manager] a second user cannot answer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_browser_tools_api.spec.ts",
+        "line": 417,
+        "column": 26
+      }
+    },
+    {
+      "id": "b8312d0c17867a6-468fb3de009d4ad",
+      "title": "Agent Builder — browser tool converse validation builtin ids are rejected when unknown",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_browser_tools_api.spec.ts",
+        "line": 478,
+        "column": 15
       }
     },
     {
