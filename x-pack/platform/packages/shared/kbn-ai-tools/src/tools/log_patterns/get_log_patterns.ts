@@ -496,8 +496,7 @@ async function runEsqlCountQuery({
   kql?: string;
 }): Promise<number> {
   const response = (await esClient.esql('count_docs_for_sigevents_log_patterns', {
-    query: buildCountQuery({ index: samplingSource, kql }),
-    filter: { bool: { filter: dateRangeQuery(start, end) } },
+    query: buildCountQuery({ index: samplingSource, start, end, kql }),
     drop_null_columns: true,
   })) as unknown as ESQLSearchResponse;
   const total = response.values[0]?.[0];
