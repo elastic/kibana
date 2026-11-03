@@ -714,8 +714,12 @@ const classifyPullRequest = async ({ github, core, pullNumber }) => {
     }
   }
   candidates.delete(pullNumber);
+  // The cap counts confirmed replacements: a closing comment also cites issues and older PRs.
   const replacementPrs = [];
-  for (const number of [...candidates].slice(0, MAX_REPLACEMENT_PRS)) {
+  for (const number of [...candidates].slice(0, MAX_CITED_PRS)) {
+    if (replacementPrs.length >= MAX_REPLACEMENT_PRS) {
+      break;
+    }
     try {
       const related = await fetchRelatedPr({ github, pullNumber: number });
       if (related.merged && new Date(related.merged_at).getTime() > openedAt) {
@@ -802,9 +806,9 @@ const findPriorFixPrs = async ({ github, core, issue, labeledAt }) => {
     }
   }
 
-  // Resolve every cited PR before picking the newest, or an early citation could crowd out the
-  // fix that actually came back.
-  for (const number of [...new Set(cited)].slice(0, MAX_CITED_PRS)) {
+  // Resolve the latest citations first: the newest investigator comment names the fix that
+  // actually came back, and older comments may reference unrelated issues.
+  for (const number of [...new Set(cited.reverse())].slice(0, MAX_CITED_PRS)) {
     if (found.has(number)) {
       continue;
     }
