@@ -1304,6 +1304,64 @@ describe('queryMatrixTraces trace hydration', () => {
     expect(log.info).toHaveBeenCalledWith(expect.stringContaining('Hydrated 1/1 traces'));
   });
 
+  describe('trace answer hydration', () => {
+    const answerSpan = (model: string, id: string, startOffsetMs: number, content: string) => ({
+      name: `chat ${model}`,
+      span_id: id,
+      parent_span_id: 's1',
+      start_time: new Date(Date.parse('2026-09-05T19:30:58.391Z') + startOffsetMs).toISOString(),
+      duration_ms: 10,
+      attributes: {
+        'gen_ai.output.messages': JSON.stringify([
+          { role: 'assistant', finish_reason: 'stop', parts: [{ type: 'text', content }] },
+        ]),
+      },
+    });
+    const SUBJECT_ANSWER = 'subject final answer that is comfortably longer than fifty characters';
+    const answerTrace = {
+      ...traceResponse,
+      spans: [
+        ...traceResponse.spans,
+        answerSpan('model-x', 'a1', 20000, SUBJECT_ANSWER),
+        answerSpan('helper-model', 'a2', 21000, 'helper text that must not leak'),
+      ],
+    };
+
+    it('fills repAnswers from the subject model stop span when no output is stored', async () => {
+      const traces = await queryMatrixTraces(
+        clientWith(
+          [scoredDoc({ trace_id: 'trace-1' })],
+          jest.fn(async () => answerTrace)
+        ) as never,
+        makeLog() as never,
+        aggregated as never
+      );
+
+      const entry = traces['model-x:direct:suite-1:example-1'];
+      expect(entry.repAnswers).toEqual([SUBJECT_ANSWER]);
+      expect(entry.answer).toBe(SUBJECT_ANSWER);
+    });
+
+    it('keeps the stored task.output answer over the trace answer', async () => {
+      const stored = 'stored answer that is comfortably longer than fifty characters in total';
+      const traces = await queryMatrixTraces(
+        clientWith(
+          [
+            scoredDoc({
+              trace_id: 'trace-1',
+              output: { steps: [], messages: [{ message: stored }] },
+            }),
+          ],
+          jest.fn(async () => answerTrace)
+        ) as never,
+        makeLog() as never,
+        aggregated as never
+      );
+
+      expect(traces['model-x:direct:suite-1:example-1'].repAnswers).toEqual([stored]);
+    });
+  });
+
   it('fetches each trace id once even when several docs share it', async () => {
     const getTrace = jest.fn(async () => traceResponse);
     const docs = [scoredDoc({ trace_id: 'trace-1' }), scoredDoc({ trace_id: 'trace-1' })];

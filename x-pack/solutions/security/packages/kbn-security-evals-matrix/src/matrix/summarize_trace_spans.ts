@@ -16,6 +16,13 @@ export interface TraceSummary {
   outputTokens?: number;
   /** Root span duration in ms. */
   latencyMs?: number;
+  /**
+   * Final answer: the text parts of the last `chat <subjectModelId>` span  that ended with
+   * `finish_reason: stop`. Undefined when no such span exists; never taken from helper-model spans.
+   */
+  answer?: string;
+  /** Number of `chat` spans whose model matches the subject model id (0 = id mismatch). */
+  subjectChatSpans?: number;
 }
 
 const EXECUTE_TOOL_PREFIX = 'execute_tool ';
@@ -27,14 +34,56 @@ const toNumber = (value: unknown): number | undefined => {
 };
 
 /**
+ * Score docs for EIS cells carry `eis-<provider>-<model>-<major>-<minor>` while trace spans are
+ * named `chat <provider>-<model>-<major>.<minor>`. Strip the `eis-` marker and fold `.` into `-`
+ * on both sides; this only ever equates ids that differ by those two characters.
+ */
+const canonicalModelId = (id: string): string => id.replace(/^eis-/, '').replace(/\./g, '-');
+
+interface OutputMessage {
+  finish_reason?: unknown;
+  parts?: unknown;
+}
+
+/**
+ * Text of a `gen_ai.output.messages` attribute when its message finished with `stop`; undefined
+ * for tool-call turns, malformed JSON, or messages without text.
+ */
+const finalTextOf = (raw: unknown): string | undefined => {
+  if (typeof raw !== 'string') return undefined;
+  let messages: unknown;
+  try {
+    messages = JSON.parse(raw);
+  } catch {
+    return undefined;
+  }
+  if (!Array.isArray(messages)) return undefined;
+  const stopped = (messages as OutputMessage[]).filter(
+    (message) => message && typeof message === 'object' && message.finish_reason === 'stop'
+  );
+  const text = stopped
+    .flatMap((message) => (Array.isArray(message.parts) ? message.parts : []))
+    .filter(
+      (part): part is { type: 'text'; content: string } =>
+        Boolean(part) &&
+        part.type === 'text' &&
+        typeof part.content === 'string' &&
+        part.content.length > 0
+    )
+    .map((part) => part.content)
+    .join('');
+  return text.length > 0 ? text : undefined;
+};
+
+/**
  * Reduces a trace's spans to the tool trail, token totals and root latency. A trace with
  * no spans carries no evidence about what the run did, so it yields `undefined` rather than
  * a summary whose empty trail would read as "the agent called no tools".
  */
-export const summarizeTraceSpans = ({
-  spans,
-  duration_ms: durationMs,
-}: GetTraceResponse): TraceSummary | undefined => {
+export const summarizeTraceSpans = (
+  { spans, duration_ms: durationMs }: GetTraceResponse,
+  subjectModelId?: string
+): TraceSummary | undefined => {
   if (spans.length === 0) {
     return undefined;
   }
@@ -43,6 +92,13 @@ export const summarizeTraceSpans = ({
   const toolIds: string[] = [];
   let inputTokens: number | undefined;
   let outputTokens: number | undefined;
+  let answer: string | undefined;
+  let subjectChatSpans = 0;
+  const subjectCanonical = subjectModelId ? canonicalModelId(subjectModelId) : undefined;
+  const isSubjectSpan = (name: string): boolean =>
+    subjectCanonical !== undefined &&
+    name.startsWith(CHAT_PREFIX) &&
+    canonicalModelId(name.slice(CHAT_PREFIX.length)) === subjectCanonical;
 
   for (const span of ordered) {
     if (span.name.startsWith(EXECUTE_TOOL_PREFIX)) {
@@ -57,6 +113,12 @@ export const summarizeTraceSpans = ({
       const output = toNumber(span.attributes?.['gen_ai.usage.output_tokens']);
       if (input !== undefined) inputTokens = (inputTokens ?? 0) + input;
       if (output !== undefined) outputTokens = (outputTokens ?? 0) + output;
+      if (isSubjectSpan(span.name)) {
+        subjectChatSpans++;
+        // Spans are start-ordered, so the last subject `stop` span wins.
+        const text = finalTextOf(span.attributes?.['gen_ai.output.messages']);
+        if (text !== undefined) answer = text;
+      }
     }
   }
 
@@ -71,5 +133,7 @@ export const summarizeTraceSpans = ({
     inputTokens,
     outputTokens,
     latencyMs: rootDuration ?? durationMs,
+    ...(answer !== undefined ? { answer } : {}),
+    ...(subjectModelId ? { subjectChatSpans } : {}),
   };
 };

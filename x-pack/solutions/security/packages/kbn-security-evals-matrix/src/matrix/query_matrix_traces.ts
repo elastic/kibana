@@ -186,7 +186,8 @@ const needsTraceHydration = (score: EvaluationScoreDocument): boolean =>
 /**
  * Gives docs without a stored `task.output` a synthetic one carrying the hydrated tool
  * steps so trail extraction (trace cards, reliability repTrails) works unchanged.
- * Stored output always wins; answers stay empty because the trace holds no final message.
+ * Stored output always wins. The answer is only the subject model's final `stop` message from
+ * the trace and is absent when the trace holds none (e.g. the run ended on a tool call).
  */
 const withHydratedOutput = (
   scores: EvaluationScoreDocument[],
@@ -202,6 +203,7 @@ const withHydratedOutput = (
         ...score.task,
         output: {
           steps: summary.toolIds.map((toolId) => ({ type: 'tool_call', tool_id: toolId })),
+          ...(summary.answer !== undefined ? { messages: [{ message: summary.answer }] } : {}),
         },
       },
     };
@@ -815,6 +817,7 @@ export const queryMatrixTraces = async (
   // Current evals runs persist `task.trace_id` but no `task.output`; hydrate tool trails,
   // tokens and latency from the trace route. Stored output (incl. --trace-cache) wins.
   const traceIds = new Set<string>();
+  const subjectModelByTrace = new Map<string, string>();
   for (const ref of runRefs) {
     for (const exampleId of ref.exampleIds) {
       for (const score of exampleScores.get(cacheKey(ref, exampleId)) ?? []) {
@@ -826,6 +829,7 @@ export const queryMatrixTraces = async (
           score.metadata?.execution_id === ref.executionId
         ) {
           traceIds.add(traceId);
+          subjectModelByTrace.set(traceId, ref.modelId);
         }
       }
     }
@@ -837,7 +841,8 @@ export const queryMatrixTraces = async (
       // One retry for transient 502/503s, as for example scores.
       const attempt = async (retriesLeft: number): Promise<TraceSummaryState> => {
         try {
-          return summarizeTraceSpans(await evalsClient.getTrace(traceId)) ?? EMPTY_TRACE;
+          const response = await evalsClient.getTrace(traceId);
+          return summarizeTraceSpans(response, subjectModelByTrace.get(traceId)) ?? EMPTY_TRACE;
         } catch (error) {
           if (retriesLeft === 0) throw error;
           await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -863,6 +868,15 @@ export const queryMatrixTraces = async (
       `Hydrated ${summaries.size - failed - empty}/${
         summaries.size
       } traces from the evals trace route (${failed} failed, ${empty} with no spans)`
+    );
+    const hydrated = states.filter(
+      (state): state is TraceSummary => state !== null && state !== EMPTY_TRACE
+    );
+    const unmatched = hydrated.filter((state) => state.subjectChatSpans === 0).length;
+    log.info(
+      `Trace answers: ${hydrated.filter((state) => state.answer !== undefined).length}/${
+        hydrated.length
+      } traces ended with a subject-model answer (${unmatched} had no chat span named after the subject model)`
     );
   }
 
