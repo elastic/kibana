@@ -181,10 +181,12 @@ export class Root {
   }
 }
 
-const formatShutdownReason = (reason: any): string => {
-  let message = `Reason: ${reason.message ?? reason}`;
-  if (reason.stack) {
-    message = `${message}\n${reason.stack}`;
-  }
-  return message;
-};
+// Prints the `cause` stack too, since a wrapped error's own stack hides where it was thrown.
+const formatShutdownReason = (reason: any): string =>
+  [
+    `Reason: ${reason.message ?? reason}`,
+    reason.stack,
+    reason.cause?.stack && `Caused by: ${reason.cause.stack}`,
+  ]
+    .filter(Boolean)
+    .join('\n');
