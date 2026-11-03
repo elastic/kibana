@@ -1,6 +1,7 @@
 ---
 name: nightshift-pr-description
 description: Write or rewrite the description of a pull request that touches Nightshift plugins or packages. Scales what the description shows to the change's risk tier, from one sentence for a docs fix to before and after screenshots, flow diagrams and eval results for a prompt or authorization change. Use when opening a Nightshift PR or when asked to improve one's description.
+disable-model-invocation: true
 ---
 
 # Nightshift PR description
