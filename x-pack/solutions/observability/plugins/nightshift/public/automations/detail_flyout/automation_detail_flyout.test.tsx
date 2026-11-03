@@ -25,7 +25,7 @@ jest.mock('../hooks/use_automations', () => ({
   useUpdateAutomation: jest.fn(),
 }));
 jest.mock('../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
-jest.mock('../../hooks/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
+jest.mock('../../data/rules/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
 jest.mock('../../settings/components/apps_section/use_relay_app_bindings', () => ({
   ...jest.requireActual('../../settings/components/apps_section/use_relay_app_bindings'),
   useAllRelayAppBindings: () => ({
@@ -106,6 +106,14 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
   const startEditing = () => fireEvent.click(screen.getByTestId('automationEditButton'));
   const renameTo = (name: string) =>
     fireEvent.change(screen.getByTestId('automationName'), { target: { value: name } });
+
+  it('hides the unsaved limit callout when a limited automation is switched to unlimited', () => {
+    renderFlyout();
+    startEditing();
+    fireEvent.click(screen.getByTestId('automationDailyLimitUnlimited'));
+
+    expect(screen.queryByTestId('automationDailyLimitUnsavedCallout')).not.toBeInTheDocument();
+  });
 
   it('shows edit disabled, with the reason, when only a privilege is missing', async () => {
     renderFlyout({ canManage: false, editDisabledReason: 'Requires manage_security' });

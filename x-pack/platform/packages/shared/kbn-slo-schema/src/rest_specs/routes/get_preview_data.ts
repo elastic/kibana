@@ -6,9 +6,9 @@
  */
 import { z } from '@kbn/zod';
 
-import { boundedProjectRoutingSchema, objectiveSchema } from '../../schema/zod/slo';
-import { indicatorSchema } from '../../schema/zod/indicators';
-import { dateRangeSchema, dateType, groupingsSchema } from '../../schema/zod/common';
+import { boundedProjectRoutingSchema, objectiveSchema } from '../../schema/slo';
+import { indicatorSchema } from '../../schema/indicators';
+import { dateRangeSchema, dateType, groupingsSchema } from '../../schema/common';
 
 const getPreviewDataParamsSchema = z.object({
   body: z.object({

@@ -46,8 +46,7 @@ evaluate.describe(
     const failOnMissingSnapshot = hasExplicitDatasetSelection(process.env.SIGEVENTS_DATASET);
     const availableSnapshotsBySource = new Map<string, Set<string>>();
 
-    evaluate.beforeAll(async ({ esClient, kbnClient, log, uiSettings }) => {
-      await uiSettings.set({ 'agentBuilder:experimentalFeatures': true });
+    evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
       await kbnClient.request({
         path: '/internal/core/_settings',
         method: 'PUT',
@@ -69,8 +68,7 @@ evaluate.describe(
       snapshots.forEach((v, k) => availableSnapshotsBySource.set(k, v));
     });
 
-    evaluate.afterAll(async ({ kbnClient, uiSettings }) => {
-      await uiSettings.unset('agentBuilder:experimentalFeatures');
+    evaluate.afterAll(async ({ kbnClient }) => {
       await kbnClient.request({
         path: '/internal/core/_settings',
         method: 'PUT',

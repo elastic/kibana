@@ -99,6 +99,39 @@ describe('sampleSchema', () => {
     ).toEqual({ id: 0, archived_at: 'string' });
   });
 
+  it('adds entries to maps until they have minProperties', () => {
+    expect(
+      sample({ type: 'object', minProperties: 2, additionalProperties: { type: 'string' } })
+    ).toEqual({ key1: 'string', key2: 'string' });
+    // Generated names skip the declared ones.
+    expect(
+      sample({
+        type: 'object',
+        minProperties: 2,
+        properties: { key2: { type: 'integer' } },
+        required: ['key2'],
+        additionalProperties: { type: 'string' },
+      })
+    ).toEqual({ key2: 0, key1: 'string' });
+    expect(sample({ type: 'object', minProperties: 1 })).toEqual({ key1: 'value' });
+    expect(sample({ type: 'object', minProperties: 1, additionalProperties: false })).toEqual({});
+  });
+
+  it('keeps declared names out of generated map entries, even when the sample omits them', () => {
+    expect(
+      sampleJsonSchema(
+        {
+          type: 'object',
+          minProperties: 2,
+          properties: { id: { type: 'integer' }, key1: { type: 'integer' } },
+          required: ['id'],
+          additionalProperties: { type: 'string' },
+        },
+        { optional: 'required' }
+      )
+    ).toEqual({ id: 0, key2: 'string' });
+  });
+
   it('takes the first non-null variant and merges allOf parts', () => {
     expect(sample({ anyOf: [{ type: 'null' }, { type: 'integer' }] })).toBe(0);
     expect(
