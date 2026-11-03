@@ -14,6 +14,7 @@ import { useResolvedTimeRange } from './use_resolved_time_range';
 
 describe('useResolvedTimeRange', () => {
   const initialNow = new Date('2026-06-04T12:00:00.000Z');
+  const laterNow = new Date('2026-06-04T12:05:00.000Z');
   const transformOptions: TimeRangeTransformOptions = { roundRelativeTime: false };
 
   beforeEach(() => {
@@ -24,47 +25,80 @@ describe('useResolvedTimeRange', () => {
     jest.useRealTimers();
   });
 
-  const renderResolvedTimeRange = (initialProps: { text: string; resolveKey: string }) =>
-    renderHook(({ text, resolveKey }) => useResolvedTimeRange(text, transformOptions, resolveKey), {
-      initialProps,
-    });
+  interface HookProps {
+    text: string;
+    resolveKey: string;
+    options?: TimeRangeTransformOptions;
+  }
+
+  const renderResolvedTimeRange = (initialProps: HookProps) =>
+    renderHook(
+      ({ text, resolveKey, options = transformOptions }: HookProps) =>
+        useResolvedTimeRange(text, options, resolveKey),
+      { initialProps }
+    );
 
   it('keeps the same resolution while the inputs are unchanged', () => {
-    const { result, rerender } = renderHook(() =>
-      useResolvedTimeRange('last 15 minutes', transformOptions, 'a')
-    );
+    const { result, rerender } = renderResolvedTimeRange({
+      text: 'last 15 minutes',
+      resolveKey: 'a',
+    });
     const initial = result.current;
 
-    jest.setSystemTime(new Date('2026-06-04T12:05:00.000Z'));
-    rerender();
+    jest.setSystemTime(laterNow);
+    rerender({ text: 'last 15 minutes', resolveKey: 'a' });
 
     expect(result.current).toBe(initial);
     expect(result.current.endDate).toEqual(initialNow);
   });
 
-  it('re-resolves relative bounds when the resolve key changes', () => {
+  it('re-resolves relative bounds when the resolve key changes and keeps the new resolution', () => {
     const { result, rerender } = renderResolvedTimeRange({
       text: 'last 15 minutes',
       resolveKey: 'a',
     });
     expect(result.current.endDate).toEqual(initialNow);
 
-    const laterNow = new Date('2026-06-04T12:05:00.000Z');
     jest.setSystemTime(laterNow);
     rerender({ text: 'last 15 minutes', resolveKey: 'b' });
 
     expect(result.current.endDate).toEqual(laterNow);
     expect(result.current.startDate).toEqual(new Date('2026-06-04T11:50:00.000Z'));
+
+    // The resolution is stored: a later render with the same key does not hit the clock again.
+    const resolved = result.current;
+    jest.setSystemTime(new Date('2026-06-04T12:10:00.000Z'));
+    rerender({ text: 'last 15 minutes', resolveKey: 'b' });
+
+    expect(result.current).toBe(resolved);
+    expect(result.current.endDate).toEqual(laterNow);
   });
 
-  it('re-resolves when the text changes', () => {
+  it('re-resolves against the current time when the text changes', () => {
     const { result, rerender } = renderResolvedTimeRange({
       text: 'last 15 minutes',
       resolveKey: 'a',
     });
+    expect(result.current.endDate).toEqual(initialNow);
 
+    jest.setSystemTime(laterNow);
     rerender({ text: 'last 30 minutes', resolveKey: 'a' });
 
-    expect(result.current.startDate).toEqual(new Date('2026-06-04T11:30:00.000Z'));
+    expect(result.current.endDate).toEqual(laterNow);
+    expect(result.current.startDate).toEqual(new Date('2026-06-04T11:35:00.000Z'));
+  });
+
+  it('re-resolves when the transform options change', () => {
+    const { result, rerender } = renderResolvedTimeRange({
+      text: 'last 15 minutes',
+      resolveKey: 'a',
+    });
+    expect(result.current.start).toBe('now-15m');
+
+    jest.setSystemTime(laterNow);
+    rerender({ text: 'last 15 minutes', resolveKey: 'a', options: { roundRelativeTime: true } });
+
+    expect(result.current.start).toBe('now-15m/s');
+    expect(result.current.endDate).toEqual(laterNow);
   });
 });
