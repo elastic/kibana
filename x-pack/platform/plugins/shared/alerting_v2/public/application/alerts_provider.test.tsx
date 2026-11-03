@@ -9,7 +9,10 @@ import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import type { EpisodeDataSource } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
 import { useAdditionalEpisodesDataSource } from '@kbn/alerting-v2-episodes-ui/context/episode_data_source_context';
-import { useAlertHost } from '@kbn/alerting-v2-episodes-ui/context/alert_host_context';
+import {
+  useAlertHost,
+  type AlertHostContextValue,
+} from '@kbn/alerting-v2-episodes-ui/context/alert_host_context';
 import { AlertingV2AlertsProvider } from './alerts_provider';
 import { CLASSIC_ALERTS_DATA_SOURCE } from '../alert_sources';
 
@@ -32,12 +35,25 @@ jest.mock('./compose_rule_flyout', () => ({
   },
 }));
 
+const ruleFlyoutRenders: Array<{ ruleId: string; cachedRule?: { id: string } }> = [];
+
 jest.mock('../components/rule/flyouts/rule_summary/rule_summary_flyout_container', () => ({
-  RuleSummaryFlyoutContainer: ({ onEdit }: { onEdit: (rule: { id: string }) => void }) => (
-    <button type="button" data-test-subj="editRule" onClick={() => onEdit({ id: 'rule-1' })}>
-      edit
-    </button>
-  ),
+  RuleSummaryFlyoutContainer: ({
+    ruleId,
+    cachedRule,
+    onEdit,
+  }: {
+    ruleId: string;
+    cachedRule?: { id: string };
+    onEdit: (rule: { id: string }) => void;
+  }) => {
+    ruleFlyoutRenders.push({ ruleId, cachedRule });
+    return (
+      <button type="button" data-test-subj="editRule" onClick={() => onEdit({ id: 'rule-1' })}>
+        edit
+      </button>
+    );
+  },
 }));
 
 jest.mock('./bind_locators_to_host', () => ({
@@ -81,6 +97,7 @@ describe('AlertingV2AlertsProvider', () => {
   beforeEach(() => {
     seen = {};
     composeMounts.length = 0;
+    ruleFlyoutRenders.length = 0;
   });
 
   it("merges Observability's classic alerts by default", () => {
@@ -141,5 +158,24 @@ describe('AlertingV2AlertsProvider', () => {
         { mode: 'edit', ruleId: 'rule-1' },
       ]);
     });
+  });
+
+  it('opens the flyout on a rule the caller already resolved, rather than refetching it', async () => {
+    let host: AlertHostContextValue = {};
+    const Capture = () => {
+      host = useAlertHost();
+      return null;
+    };
+
+    render(
+      <AlertingV2AlertsProvider coreStart={coreStart} container={container} hostApp={{} as never}>
+        <Capture />
+      </AlertingV2AlertsProvider>
+    );
+
+    const cachedRule = { id: 'rule-1' };
+    await act(async () => host.openRuleFlyout!('rule-1', undefined, cachedRule as never));
+
+    expect(ruleFlyoutRenders.at(-1)).toEqual({ ruleId: 'rule-1', cachedRule });
   });
 });

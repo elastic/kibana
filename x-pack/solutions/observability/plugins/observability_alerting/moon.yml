@@ -31,7 +31,6 @@ dependsOn:
   - '@kbn/observability-plugin'
   - '@kbn/observability-shared-plugin'
   - '@kbn/alerting-v2-episodes-ui'
-  - '@kbn/alerts-ui-shared'
   - '@kbn/cases-plugin'
   - '@kbn/security-plugin'
   - '@kbn/kibana-utils-plugin'

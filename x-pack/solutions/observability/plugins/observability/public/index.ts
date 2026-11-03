@@ -132,3 +132,14 @@ export type {
   ObservabilityAlertsTableContext,
   ObservabilityAlertsTableProps,
 } from './components/alerts_table/types';
+
+export { createObservabilityEpisodeActions } from './episode_actions/create_observability_episode_actions';
+export type {
+  ObservabilityEpisodeActionsCases,
+  ObservabilityEpisodeActionsDeps,
+} from './episode_actions/create_observability_episode_actions';
+export {
+  getAlertIdFromEpisode,
+  INVESTIGATE_EPISODE_ACTION_ID,
+} from './episode_actions/investigate_episode_action';
+export { VIEW_V1_ALERT_IN_APP_ACTION_ID } from './episode_actions/view_in_app';

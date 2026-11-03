@@ -178,21 +178,14 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
 
   useEffect(() => {
     async function fetchAlerts() {
-      try {
-        const [alerts, hasUniversalRules] = await Promise.all([
-          getObservabilityAlerts({ http }),
-          shouldCheckUniversalRules
-            ? hasUniversalAlertingRules({ http }).catch(() => false)
-            : Promise.resolve(false),
-        ]);
-        setHasDataMap((prevState) => ({
-          ...prevState,
-          [ALERT_APP]: {
-            hasData: alerts.length > 0 || hasUniversalRules,
-            status: FETCH_STATUS.SUCCESS,
-          },
-        }));
-      } catch (e) {
+      const [classicAlerts, hasUniversalRules] = await Promise.all([
+        getObservabilityAlerts({ http }).catch(() => undefined),
+        shouldCheckUniversalRules
+          ? hasUniversalAlertingRules({ http }).catch(() => false)
+          : Promise.resolve(false),
+      ]);
+
+      if (!classicAlerts && !hasUniversalRules) {
         setHasDataMap((prevState) => ({
           ...prevState,
           [ALERT_APP]: {
@@ -200,7 +193,16 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
             status: FETCH_STATUS.FAILURE,
           },
         }));
+        return;
       }
+
+      setHasDataMap((prevState) => ({
+        ...prevState,
+        [ALERT_APP]: {
+          hasData: (classicAlerts?.length ?? 0) > 0 || hasUniversalRules,
+          status: FETCH_STATUS.SUCCESS,
+        },
+      }));
     }
 
     fetchAlerts();

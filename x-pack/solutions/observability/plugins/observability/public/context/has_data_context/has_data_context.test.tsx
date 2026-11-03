@@ -630,6 +630,36 @@ describe('HasDataContextProvider', () => {
       );
     });
 
+    it('reports alert data from universal rules when the classic request fails', async () => {
+      universalCore.http.get.mockImplementation(async (path) => {
+        if (isUniversalRulesRequest(path)) {
+          return { total: 1 };
+        }
+        throw new Error('forbidden');
+      });
+
+      const { result } = renderHook(() => useHasData(), { wrapper: universalWrapper });
+
+      await waitFor(() =>
+        expect(result.current.hasDataMap.alert).toEqual({ hasData: true, status: 'success' })
+      );
+    });
+
+    it('reports failure when both the classic and universal requests fail', async () => {
+      universalCore.http.get.mockImplementation(async () => {
+        throw new Error('forbidden');
+      });
+
+      const { result } = renderHook(() => useHasData(), { wrapper: universalWrapper });
+
+      await waitFor(() =>
+        expect(result.current.hasDataMap.alert).toEqual({
+          hasData: undefined,
+          status: 'failure',
+        })
+      );
+    });
+
     it('still requests universal rules when the space opts into the classic alerts table', async () => {
       universalCore.settings.client.get.mockReturnValue(true);
       universalCore.http.get.mockImplementation(async (path) =>

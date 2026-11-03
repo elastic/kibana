@@ -28,6 +28,7 @@ import { EpisodeDataSourceProvider } from '@kbn/alerting-v2-episodes-ui/context/
 import {
   AlertHostProvider,
   type AlertHostContextValue,
+  type CachedRule,
 } from '@kbn/alerting-v2-episodes-ui/context/alert_host_context';
 import type { EpisodeDataSource } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
 import type { EpisodeAction, EpisodeActionsDeps } from '@kbn/alerting-v2-episodes-ui/actions';
@@ -78,7 +79,8 @@ const AlertHostScope = ({
   const canWriteAlerts = userCapabilities.canWrite('alerts');
 
   const [openRule, setOpenRule] = useState<
-    { ruleId: string; sourceRuleInfo?: { category?: string } } | undefined
+    | { ruleId: string; sourceRuleInfo?: { category?: string }; cachedRule?: CachedRule }
+    | undefined
   >();
   const [composeTarget, setComposeTarget] = useState<
     (ComposeTarget & { attempt: number }) | undefined
@@ -86,8 +88,8 @@ const AlertHostScope = ({
 
   const closeRuleFlyout = useCallback(() => setOpenRule(undefined), []);
   const openRuleFlyout = useCallback(
-    (ruleId: string, sourceRuleInfo?: { category?: string }) =>
-      setOpenRule({ ruleId, sourceRuleInfo }),
+    (ruleId: string, sourceRuleInfo?: { category?: string }, cachedRule?: CachedRule) =>
+      setOpenRule({ ruleId, sourceRuleInfo, cachedRule }),
     []
   );
 
@@ -110,6 +112,7 @@ const AlertHostScope = ({
             <RuleSummaryFlyout
               ruleId={openRule.ruleId}
               sourceRuleInfo={openRule.sourceRuleInfo}
+              cachedRule={openRule.cachedRule}
               onClose={closeRuleFlyout}
               onEdit={(rule) => compose('edit', rule)}
               onClone={(rule) => compose('clone', rule)}
