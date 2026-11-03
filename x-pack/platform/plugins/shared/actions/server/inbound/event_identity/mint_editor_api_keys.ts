@@ -82,7 +82,7 @@ const grantUiamApiKey = async ({
       name: `uiam-${name}`,
     });
     if (!result) {
-      throw new Error(`Failed to create UIAM API key for connector event identity "${name}"`);
+      throw new Error(`Failed to create a Cloud API key for connector event identity "${name}"`);
     }
     return result;
   } catch (err) {

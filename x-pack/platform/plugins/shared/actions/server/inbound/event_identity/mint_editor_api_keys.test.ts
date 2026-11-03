@@ -260,7 +260,7 @@ describe('mintConnectorEventIdentity', () => {
           logger,
           connectorId,
         })
-      ).rejects.toThrow(`Failed to create UIAM API key for connector event identity "${name}"`);
+      ).rejects.toThrow(`Failed to create a Cloud API key for connector event identity "${name}"`);
       expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
     });
 
