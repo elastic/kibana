@@ -24,6 +24,7 @@ const mockGetStreamSamplingSource = jest.fn();
 const mockGetStreamTypeFromDefinition = jest.fn();
 const mockIdentifyInferredFeatures = jest.fn();
 const mockIdentifyComputedFeatures = jest.fn();
+const mockIdentifyMetricDefinitions = jest.fn();
 const mockShouldIdentifyFeatures = jest.fn();
 const mockResolveNightshiftModelForRequest = jest.fn(
   async ({ requestedId }: { requestedId?: string }) => requestedId ?? 'default-connector'
@@ -44,6 +45,7 @@ jest.mock('../../../../lib/significant_events/features', () => ({
   prepareInferredSampling: jest.fn(),
   identifyInferredFeatures: (...args: unknown[]) => mockIdentifyInferredFeatures(...args),
   identifyComputedFeatures: (...args: unknown[]) => mockIdentifyComputedFeatures(...args),
+  identifyMetricDefinitions: (...args: unknown[]) => mockIdentifyMetricDefinitions(...args),
 }));
 
 jest.mock('../../../../lib/significant_events/features/should_identify_features', () => ({
@@ -64,11 +66,16 @@ const inferredRoute =
   internalIdentifyKIFeaturesRoutes['POST /internal/streams/{sourceId}/features/_identify/inferred'];
 const computedRoute =
   internalIdentifyKIFeaturesRoutes['POST /internal/streams/{sourceId}/features/_identify/computed'];
+const metricDefinitionsRoute =
+  internalIdentifyKIFeaturesRoutes[
+    'POST /internal/streams/{sourceId}/features/_identify/metric_definitions'
+  ];
 const shouldIdentifyRoute =
   internalIdentifyKIFeaturesRoutes['GET /internal/streams/{sourceId}/features/_should_identify'];
 
 type InferredHandlerParams = Parameters<typeof inferredRoute.handler>[0];
 type ComputedHandlerParams = Parameters<typeof computedRoute.handler>[0];
+type MetricDefinitionsHandlerParams = Parameters<typeof metricDefinitionsRoute.handler>[0];
 type ShouldIdentifyHandlerParams = Parameters<typeof shouldIdentifyRoute.handler>[0];
 
 const createInferredParams = (
@@ -574,5 +581,146 @@ describe('should identify features route', () => {
       sourceId: 'logs.test',
       thresholdHours: 24,
     });
+  });
+});
+
+describe('metric definition identification route', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('rejects _identify/metric_definitions with 409 while paused', async () => {
+    const getKnowledgeIndicatorClient = jest.fn();
+    const handlerParams = {
+      params: { path: { sourceId: 'logs.test' }, body: null },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        getKnowledgeIndicatorClient,
+      }),
+      server: {},
+      maintenanceService: makeMaintenanceService('paused'),
+    } as unknown as MetricDefinitionsHandlerParams;
+
+    await expect(metricDefinitionsRoute.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 409 },
+    });
+    expect(getKnowledgeIndicatorClient).not.toHaveBeenCalled();
+    expect(mockResolveNightshiftModelForRequest).not.toHaveBeenCalled();
+    expect(mockIdentifyMetricDefinitions).not.toHaveBeenCalled();
+  });
+
+  it('resolves the extraction connector and returns the written definitions', async () => {
+    const request = makeRequest();
+    const source = {
+      id: 'logs.test',
+      title: 'logs.test',
+      description: 'Checkout logs',
+      esql: 'FROM metrics-system-prod',
+      view_name: '$.nightshift.sources.default.logs',
+    };
+    const kiClient = {};
+    const streamDataEsClient = {};
+    const inferenceClient = { output: jest.fn() };
+    const getClient = jest.fn().mockReturnValue(inferenceClient);
+    const server = {
+      inference: { getClient },
+      core: { savedObjects: {}, uiSettings: {} },
+    };
+    const licensing = {};
+    const maintenanceService = makeMaintenanceService();
+    const identifyResult = {
+      features: [{ id: 'metrics-system-prod:system.cpu.utilization' }],
+      errors: [],
+    };
+    mockIdentifyMetricDefinitions.mockResolvedValue(identifyResult);
+
+    const handlerParams = {
+      params: {
+        path: { sourceId: 'logs.test' },
+        body: { start: 100, end: 200, runId: 'run-1', connectorId: 'connector-1' },
+      },
+      request,
+      getScopedClients: jest.fn().mockResolvedValue({
+        streamDataEsClient,
+        sourcesClient: { get: jest.fn().mockResolvedValue({ source }) },
+        licensing,
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
+      }),
+      server,
+      logger: { get: jest.fn().mockReturnValue(makeRouteLogger()) },
+      maintenanceService,
+    } as unknown as MetricDefinitionsHandlerParams;
+
+    await expect(metricDefinitionsRoute.handler(handlerParams)).resolves.toEqual({
+      metricDefinitions: identifyResult.features,
+      metricDefinitionsCount: 1,
+      errors: [],
+    });
+
+    expect(assertSignificantEventsAccess).toHaveBeenCalledWith({ server, licensing });
+    expect(maintenanceService.getState).toHaveBeenCalledWith({ request });
+    expect(mockResolveNightshiftModelForRequest).toHaveBeenCalledWith(
+      expect.objectContaining({ step: 'kiExtraction', requestedId: 'connector-1' })
+    );
+    expect(getClient).toHaveBeenCalledWith({
+      request,
+      bindTo: { connectorId: 'connector-1' },
+    });
+    expect(mockIdentifyMetricDefinitions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sourceId: 'logs.test',
+        indexPatterns: ['metrics-system-prod'],
+        start: 100,
+        end: 200,
+        esClient: streamDataEsClient,
+        kiClient,
+        inferenceClient,
+        target: {
+          id: 'logs.test',
+          name: 'logs.test',
+          description: 'Checkout logs',
+          sources: ['$.nightshift.sources.default.logs'],
+          samplingSource: '$.nightshift.sources.default.logs',
+        },
+      })
+    );
+  });
+
+  it('still catalogues metrics when the model cannot be resolved', async () => {
+    const request = makeRequest();
+    const source = {
+      id: 'logs.test',
+      title: 'logs.test',
+      esql: 'FROM metrics-system-prod',
+      view_name: '$.nightshift.sources.default.logs',
+    };
+    mockResolveNightshiftModelForRequest.mockRejectedValueOnce(
+      new NightshiftModelNotFoundError('missing-model')
+    );
+    mockIdentifyMetricDefinitions.mockResolvedValue({ features: [], errors: [] });
+    const handlerParams = {
+      params: { path: { sourceId: 'logs.test' }, body: { connectorId: 'missing-model' } },
+      request,
+      getScopedClients: jest.fn().mockResolvedValue({
+        streamDataEsClient: {},
+        sourcesClient: { get: jest.fn().mockResolvedValue({ source }) },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({}),
+      }),
+      server: {
+        inference: { getClient: jest.fn() },
+        core: { savedObjects: {}, uiSettings: {} },
+      },
+      logger: { get: jest.fn().mockReturnValue(makeRouteLogger()) },
+      maintenanceService: makeMaintenanceService(),
+    } as unknown as MetricDefinitionsHandlerParams;
+
+    const response = await metricDefinitionsRoute.handler(handlerParams);
+
+    expect(response.errors).toEqual([expect.objectContaining({ feature: 'metric_definition' })]);
+    expect(mockIdentifyMetricDefinitions).toHaveBeenCalledWith(
+      expect.objectContaining({ inferenceClient: undefined })
+    );
   });
 });

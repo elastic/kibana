@@ -7,8 +7,13 @@
 
 import type { BaseFeature } from './feature';
 import {
+  COMPUTED_FEATURE_TYPES,
   computeFeatureUuid,
+  INFERRED_FEATURE_TYPES,
+  isComputedFeature,
   MAX_FEATURE_ARRAY_ITEMS,
+  METRIC_DEFINITION_FEATURE_TYPE,
+  metricDefinitionFeatureId,
   mergeFeature,
   normalizeFeatureSlugForMatching,
 } from './feature';
@@ -173,4 +178,44 @@ it('evidence does not grow unbounded across repeated merges with distinct values
   expect(feature.evidence?.length ?? 0).toBeLessThanOrEqual(MAX_FEATURE_ARRAY_ITEMS);
   expect(feature.evidence).toContain('iter-19-4');
   expect(feature.evidence).not.toContain('iter-0-0');
+});
+
+describe('metric definition identity', () => {
+  const metricName = 'system.cpu.utilization';
+  const dataStream = 'metrics-system-prod';
+  const id = metricDefinitionFeatureId(dataStream, metricName);
+
+  it('is neither a computed nor an inferred feature type', () => {
+    expect(METRIC_DEFINITION_FEATURE_TYPE).toBe('metric_definition');
+    expect(COMPUTED_FEATURE_TYPES).not.toContain(METRIC_DEFINITION_FEATURE_TYPE);
+    expect(INFERRED_FEATURE_TYPES).not.toContain(METRIC_DEFINITION_FEATURE_TYPE);
+    expect(
+      isComputedFeature({
+        ...createFeature(),
+        id,
+        type: METRIC_DEFINITION_FEATURE_TYPE,
+      })
+    ).toBe(false);
+  });
+
+  it('changes the uuid when the source, data stream, or metric name changes', () => {
+    const sourceId = 'source-a';
+    const original = computeFeatureUuid({ id, source_id: sourceId });
+
+    expect(id).toBe('metrics-system-prod:system.cpu.utilization');
+    expect(computeFeatureUuid({ id, source_id: sourceId })).toBe(original);
+    expect(computeFeatureUuid({ id, source_id: 'source-b' })).not.toBe(original);
+    expect(
+      computeFeatureUuid({
+        id: metricDefinitionFeatureId('metrics-system-staging', metricName),
+        source_id: sourceId,
+      })
+    ).not.toBe(original);
+    expect(
+      computeFeatureUuid({
+        id: metricDefinitionFeatureId(dataStream, 'system.memory.usage'),
+        source_id: sourceId,
+      })
+    ).not.toBe(original);
+  });
 });

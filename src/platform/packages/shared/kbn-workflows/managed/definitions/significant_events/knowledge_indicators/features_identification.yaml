@@ -6,7 +6,7 @@
 #   init → while(iterationCount < max) {
 #     prepare → if(noDocuments) break → identify_inferred → update_state → mark_success
 #     → track_convergence → if(converged) break
-#   } → if(allFailed) fail → identify_computed → output
+#   } → if(allFailed) fail → identify_computed → identify_metric_definitions → output
 #
 # Concurrency is keyed per source slug so only one identification run can be
 # active for a given source in a space at any time; overlapping triggers are
@@ -236,7 +236,31 @@ steps:
         featureTtlDays: "${{ inputs.featureTtlDays }}"
 
   # -----------------------------------------------------------------------
-  # Step 5: Output results.
+  # Step 5: Catalogue metrics. Failure here should not block identification.
+  # -----------------------------------------------------------------------
+  - name: identify_metric_definitions
+    type: kibana.request
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: "5s"
+        strategy: exponential
+      continue: true
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/streams/{{ inputs.sourceId }}/features/_identify/metric_definitions"
+      headers:
+        x-elastic-internal-origin: "kibana"
+        x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
+      body:
+        start: "${{ inputs.start }}"
+        end: "${{ inputs.end }}"
+        runId: "${{ execution.id }}"
+        connectorId: "${{ inputs.connectorId }}"
+        featureTtlDays: "${{ inputs.featureTtlDays }}"
+
+  # -----------------------------------------------------------------------
+  # Step 6: Output results.
   # -----------------------------------------------------------------------
   - name: output_result
     type: workflow.output
@@ -245,6 +269,7 @@ steps:
       connectorId: "${{ variables.connectorId }}"
       discoveredFeatures: "${{ variables.discoveredFeatures }}"
       computedFeaturesCount: "${{ steps.identify_computed.output.computedFeaturesCount }}"
+      metricDefinitionsCount: "${{ steps.identify_metric_definitions.output.metricDefinitionsCount }}"
       tokensUsed:
         completion: "${{ variables.totalCompletionTokens }}"
         prompt: "${{ variables.totalPromptTokens }}"

@@ -32,6 +32,28 @@ export const INFERRED_FEATURE_TYPES = [
   'schema',
 ] as const;
 
+export const METRIC_DEFINITION_FEATURE_TYPE = 'metric_definition' as const;
+
+export const METRIC_DEFINITION_USAGES = ['detection', 'rca'] as const;
+
+export type MetricDefinitionUsage = (typeof METRIC_DEFINITION_USAGES)[number];
+
+export function isMetricDefinitionUsage(value: unknown): value is MetricDefinitionUsage {
+  return value === 'detection' || value === 'rca';
+}
+
+/** Feature slug for one metric on one data stream. The source id is added by `computeFeatureUuid`. */
+export function metricDefinitionFeatureId(dataStream: string, metricName: string): string {
+  const slug = normalizeFeatureSlug(`${dataStream}:${metricName}`);
+  if (slug.length <= MAX_ID_LENGTH) {
+    return slug;
+  }
+
+  const digest = v5(slug, v5.DNS).replaceAll('-', '');
+  const prefixLength = MAX_ID_LENGTH - digest.length - 1;
+  return `${slug.slice(0, prefixLength)}:${digest}`;
+}
+
 // TODO: it would be nice to rename id->slug and uuid->id for consistency with queries
 // The owning source is not part of the write payload: the server stamps it from the
 // route (or tool) it was submitted through. See `featureSchema` for the read shape.
