@@ -336,6 +336,7 @@ describe('IndicatorReader.getTopologyFeaturesPage', () => {
     expect(query).toContain('id > "uuid-0"');
     expect(query).toContain('SORT `source.id` ASC, type ASC, id ASC');
     expect(query).toContain('LIMIT 3');
+    expect(query.indexOf('`source.id` > "src-0"')).toBeLessThan(query.indexOf('INLINE STATS'));
     expect(result.hits.map(({ id }) => id)).toEqual(['one', 'two']);
     expect(result.nextCursor).toEqual({
       sourceId: 'src-a',

@@ -74,7 +74,7 @@ describe('TopologySnapshotClient', () => {
       featureTypes: ['entity', 'dependency'],
       asOf: BUILT_AT,
       after: undefined,
-      size: expect.any(Number),
+      size: 5_000,
     });
     expect(getTopologyFeaturesPage).toHaveBeenNthCalledWith(
       2,
@@ -87,5 +87,21 @@ describe('TopologySnapshotClient', () => {
         builtAt: BUILT_AT,
       })
     );
+  });
+
+  it('stops after three pages and marks the snapshot truncated', async () => {
+    const cursors = ['one', 'two', 'three'].map((id) => ({
+      sourceId: 'src-a',
+      type: 'feature',
+      id,
+    }));
+    const { client, getTopologyFeaturesPage } = makeClient(
+      cursors.map((nextCursor) => ({ hits: [], nextCursor }))
+    );
+
+    const snapshot = await client.get(['src-a']);
+
+    expect(getTopologyFeaturesPage).toHaveBeenCalledTimes(3);
+    expect(snapshot.truncated).toBe(true);
   });
 });

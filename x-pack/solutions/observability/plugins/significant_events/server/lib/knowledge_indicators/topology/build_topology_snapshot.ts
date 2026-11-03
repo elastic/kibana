@@ -191,10 +191,12 @@ export function buildTopologySnapshot({
   features,
   sourceIds,
   builtAt,
+  truncated = false,
 }: {
   features: Feature[];
   sourceIds: string[];
   builtAt: string;
+  truncated?: boolean;
 }): TopologySnapshotProperties {
   const index = buildNodes(features);
   const nodes = [...index.bySlug.values()].sort((a, b) => a.node_id.localeCompare(b.node_id));
@@ -207,7 +209,7 @@ export function buildTopologySnapshot({
     edges,
     node_count: nodes.length,
     edge_count: edges.length,
-    truncated: false,
+    truncated,
   };
 }
 

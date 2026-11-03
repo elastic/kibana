@@ -473,6 +473,23 @@ describe('searchKnowledgeIndicators', () => {
       expect(ids).toEqual(['orders-api-storage', 'storage']);
     });
 
+    it('loads topology-expanded ids in bounded batches', async () => {
+      const expandedIds = Array.from({ length: 5_001 }, (_, index) => `feature-${index}`);
+      const getFeatures = jest.fn(async () => []);
+
+      await searchKnowledgeIndicators({
+        params: { kind: ['feature'], feature_ids: ['seed'] },
+        getSourceIds: async () => ['logs.test'],
+        getFeatures,
+        getQueries: async () => [],
+        resolveTopologySeeds: async () => expandedIds,
+      });
+
+      expect(getFeatures).toHaveBeenCalledTimes(2);
+      expect(getFeatures.mock.calls[0][1].featureIds).toHaveLength(5_000);
+      expect(getFeatures.mock.calls[1][1].featureIds).toEqual(['feature-5000']);
+    });
+
     it('keeps text fallback seed-scoped', async () => {
       const getFeatures = jest.fn(async () => [dependency]);
 

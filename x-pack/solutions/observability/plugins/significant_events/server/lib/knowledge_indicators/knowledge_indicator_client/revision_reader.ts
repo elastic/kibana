@@ -121,21 +121,20 @@ export class RevisionReader {
     }
 
     const atOrBefore = esql.exp`${esql.col('@timestamp')} <= TO_DATETIME(${esql.str(asOf)})`;
-    let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id', '_source']).where`${inSpace(
-      this.space
-    )}`;
-    query = withWhere(query, combineWhere(where, atOrBefore));
-    query = pickLatestPerGroup(query, REVISION_GROUP_KEY);
-    query = withWhere(query, postGroupingWhere);
-    if (after) {
-      const afterCursor = esql.exp`${esql.col(SOURCE_ID)} > ${esql.str(after.sourceId)}
+    const afterCursor = after
+      ? esql.exp`${esql.col(SOURCE_ID)} > ${esql.str(after.sourceId)}
         OR (${esql.col(SOURCE_ID)} == ${esql.str(after.sourceId)}
           AND ${esql.col(TYPE)} > ${esql.str(after.type)})
         OR (${esql.col(SOURCE_ID)} == ${esql.str(after.sourceId)}
           AND ${esql.col(TYPE)} == ${esql.str(after.type)}
-          AND ${esql.col(ID)} > ${esql.str(after.id)})`;
-      query = withWhere(query, afterCursor);
-    }
+          AND ${esql.col(ID)} > ${esql.str(after.id)})`
+      : undefined;
+    let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id', '_source']).where`${inSpace(
+      this.space
+    )}`;
+    query = withWhere(query, combineWhere(where, atOrBefore, afterCursor));
+    query = pickLatestPerGroup(query, REVISION_GROUP_KEY);
+    query = withWhere(query, postGroupingWhere);
     query = query
       .sort([SOURCE_ID, 'ASC'], [TYPE, 'ASC'], [ID, 'ASC'])
       .keep('_source')

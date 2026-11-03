@@ -14,7 +14,8 @@ import {
   topologyNeighborhood,
 } from './build_topology_snapshot';
 
-const TOPOLOGY_FEATURE_PAGE_SIZE = 1_000;
+const TOPOLOGY_FEATURE_PAGE_SIZE = 5_000;
+const MAX_TOPOLOGY_FEATURE_PAGES = 3;
 
 export class TopologySnapshotClient {
   constructor(
@@ -30,9 +31,10 @@ export class TopologySnapshotClient {
     const builtAt = (this.deps.now?.() ?? new Date()).toISOString();
 
     const features: Feature[] = [];
+    let truncated = false;
     if (sourceIds.length > 0) {
       let after: Parameters<KnowledgeIndicatorClient['getTopologyFeaturesPage']>[0]['after'];
-      do {
+      for (let pageNumber = 0; pageNumber < MAX_TOPOLOGY_FEATURE_PAGES; pageNumber++) {
         const page = await reader.getTopologyFeaturesPage({
           sourceIds,
           featureTypes: [...TOPOLOGY_INPUT_FEATURE_TYPES],
@@ -42,13 +44,20 @@ export class TopologySnapshotClient {
         });
         features.push(...page.hits);
         after = page.nextCursor;
-      } while (after);
+        if (!after) {
+          break;
+        }
+        if (pageNumber === MAX_TOPOLOGY_FEATURE_PAGES - 1) {
+          truncated = true;
+        }
+      }
     }
 
     const snapshot = buildTopologySnapshot({
       features,
       sourceIds,
       builtAt,
+      truncated,
     });
     logger.debug(
       `Topology computed: ${snapshot.node_count} nodes, ${snapshot.edge_count} edges from ${

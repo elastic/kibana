@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { compact, intersection, isString, uniq } from 'lodash';
+import { chunk, compact, intersection, isString, uniq } from 'lodash';
 import {
   groupFeaturesAcrossSources,
   type Feature,
@@ -21,6 +21,7 @@ import type {
 import { featureToKnowledgeIndicatorFeature, queryLinkToKnowledgeIndicatorQuery } from './mappers';
 
 export const DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE = 50;
+const FEATURE_ID_FETCH_BATCH_SIZE = 5_000;
 
 interface NormalizedParams {
   searchText: string | undefined;
@@ -192,14 +193,24 @@ async function fetchFeatureIndicators({
   ) => Promise<Feature[]>;
   onFeatureFetchError?: (sourceId: string, error: unknown) => void;
 }): Promise<KnowledgeIndicatorFeature[]> {
-  const results = await Promise.allSettled(
-    sourceIds.map((sourceId) => getFeatures(sourceId, { searchText, featureTypes, featureIds }))
+  const featureIdBatches =
+    featureIds === undefined ? [undefined] : chunk(featureIds, FEATURE_ID_FETCH_BATCH_SIZE);
+  const requests = sourceIds.flatMap((sourceId) =>
+    featureIdBatches.map((batch) => ({
+      sourceId,
+      promise: getFeatures(sourceId, {
+        searchText,
+        featureTypes,
+        featureIds: batch,
+      }),
+    }))
   );
+  const results = await Promise.allSettled(requests.map(({ promise }) => promise));
 
   const features: Feature[] = [];
   results.forEach((result, index) => {
     if (result.status === 'rejected') {
-      onFeatureFetchError?.(sourceIds[index], result.reason);
+      onFeatureFetchError?.(requests[index].sourceId, result.reason);
       return;
     }
     features.push(...result.value);
