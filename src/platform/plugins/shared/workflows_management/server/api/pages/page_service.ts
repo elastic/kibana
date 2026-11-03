@@ -60,7 +60,13 @@ export const resolvePage = async (lookup: PageLookup, ref: PageRef): Promise<Res
     throw notFound;
   }
   const workflow = await lookup.getPageWorkflow(ref.workflowId, ref.spaceId);
-  if (!workflow?.enabled || !workflow.valid || !workflow.definition) {
+  // A page runs only as the workflow's service account, so it is offline without one.
+  if (
+    !workflow?.enabled ||
+    !workflow.valid ||
+    !workflow.definition ||
+    !workflow.definition.settings?.run_as
+  ) {
     throw notFound;
   }
   const trigger = workflow.definition.triggers.find(isPageTrigger);

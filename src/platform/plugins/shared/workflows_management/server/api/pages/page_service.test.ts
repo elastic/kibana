@@ -21,6 +21,7 @@ const pageWorkflow = (overrides: Partial<WorkflowDetailDto> = {}) =>
     enabled: true,
     valid: true,
     definition: {
+      settings: { run_as: 'elastic/workflow-pages' },
       triggers: [
         { type: 'manual' },
         {
@@ -70,7 +71,20 @@ describe('resolvePage', () => {
     await expectHiddenNotFound(
       resolve(
         pageWorkflow({
-          definition: { triggers: [{ type: 'manual' }] },
+          definition: {
+            settings: { run_as: 'elastic/workflow-pages' },
+            triggers: [{ type: 'manual' }],
+          },
+        } as unknown as Partial<WorkflowDetailDto>)
+      )
+    );
+  });
+
+  it('keeps the page offline when the workflow has no service account', async () => {
+    await expectHiddenNotFound(
+      resolve(
+        pageWorkflow({
+          definition: { triggers: [{ type: 'page', title: 'Report an incident' }] },
         } as unknown as Partial<WorkflowDetailDto>)
       )
     );

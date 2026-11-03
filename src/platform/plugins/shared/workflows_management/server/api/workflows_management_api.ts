@@ -823,6 +823,24 @@ export class WorkflowsManagementApi {
   }
 
   /**
+   * Starts a page submission. The visitor has no Kibana identity, so the run is created and
+   * executed as the workflow's bound service account. Fails closed without a binding.
+   */
+  public async runPageWorkflow(
+    workflow: WorkflowExecutionEngineModel,
+    spaceId: string,
+    inputs: Record<string, unknown>,
+    metadata: Record<string, unknown>
+  ): Promise<string> {
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    const { workflowExecutionId } = await workflowsExecutionEngine.executeWorkflowAsServiceAccount(
+      workflow,
+      { spaceId, inputs, metadata }
+    );
+    return workflowExecutionId;
+  }
+
+  /**
    * Expands any compact trigger selection in `inputs` and starts a workflow without waiting for
    * its execution document.
    *

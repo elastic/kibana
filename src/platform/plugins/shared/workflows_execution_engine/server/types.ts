@@ -79,6 +79,7 @@ export interface WorkflowsExecutionEnginePluginStart {
     stepExecutionsDataClient: StepExecutionsDataClient;
   };
   executeWorkflow: ExecuteWorkflow;
+  executeWorkflowAsServiceAccount: ExecuteWorkflowAsServiceAccount;
   executeWorkflowStep: ExecuteWorkflowStep;
   cancelWorkflowExecution: CancelWorkflowExecution;
   cancelAllActiveWorkflowExecutions: CancelAllActiveWorkflowExecutions;
@@ -109,6 +110,12 @@ export type ExecuteWorkflow = (
   workflow: WorkflowExecutionEngineModel,
   context: Record<string, unknown>,
   request: KibanaRequest
+) => Promise<ExecuteWorkflowResponse>;
+
+/** Starts a run of a saved workflow as its bound service account, for callers with no identity. */
+export type ExecuteWorkflowAsServiceAccount = (
+  workflow: WorkflowExecutionEngineModel,
+  context: Record<string, unknown>
 ) => Promise<ExecuteWorkflowResponse>;
 
 export type ExecuteWorkflowStep = (

@@ -21,7 +21,6 @@ import {
   PAGE_SECRET_MAX_LENGTH,
   PAGE_WORKFLOW_ID_MAX_LENGTH,
 } from '../../pages/constants';
-import { buildPageRunRequest } from '../../pages/page_run_identity';
 import {
   buildPageUrl,
   getPageSubmitter,
@@ -65,12 +64,14 @@ const toPageLinkBody = ({
   workflowId,
   secret,
   enabled,
+  serviceAccountId,
 }: {
   basePath: string;
   workflowId: string;
   secret: string;
   enabled: boolean;
-}) => ({ enabled, path: buildPageUrl({ basePath, workflowId, secret }) });
+  serviceAccountId: string | undefined;
+}) => ({ enabled, serviceAccountId, path: buildPageUrl({ basePath, workflowId, secret }) });
 
 /** GET the hosted form for a workflow page. The secret in the URL is the credential. */
 export function registerPageFormRoute(deps: RouteDependencies) {
@@ -98,7 +99,7 @@ export function registerPageFormRoute(deps: RouteDependencies) {
 }
 
 /** POST a page submission, which validates the input and runs the workflow. */
-export function registerPageSubmitRoute(deps: RouteDependencies, runAsApiKey: string) {
+export function registerPageSubmitRoute(deps: RouteDependencies) {
   const { router, api, workflowsService, spaces, logger, audit } = deps;
 
   router.post(
@@ -121,21 +122,15 @@ export function registerPageSubmitRoute(deps: RouteDependencies, runAsApiKey: st
         const inputs = parsePageSubmission(request.body, page.inputsSchema);
         const submitter = getPageSubmitter(request.headers, request.socket?.remoteAddress);
 
-        // The visitor has no Kibana identity, so the run carries the configured one.
-        // Production uses the workflow's `run_as` service account instead.
-        const { workflowExecutionId } = await api.runWorkflowWithAlertPreprocessing({
-          workflow: toWorkflowExecutionEngineModel(page.workflow),
+        // The visitor has no Kibana identity, so the run uses the workflow's `run_as`
+        // service account. Without a binding the page stays offline: no fallback identity.
+        const workflowExecutionId = await api.runPageWorkflow(
+          toWorkflowExecutionEngineModel(page.workflow),
           spaceId,
           inputs,
-          request: buildPageRunRequest(runAsApiKey),
-          preprocessingContext: context,
           // The visitor is anonymous: its values must stay data, never expressions.
-          metadata: {
-            submittedVia: 'page',
-            submitter,
-            [UNTRUSTED_INPUTS_METADATA_KEY]: true,
-          },
-        });
+          { submittedVia: 'page', submitter, [UNTRUSTED_INPUTS_METADATA_KEY]: true }
+        );
 
         audit.logWorkflowRun(request, { workflowId, executionId: workflowExecutionId });
         return htmlSuccess(response);
@@ -178,6 +173,7 @@ export function registerPageLinkRoute(deps: RouteDependencies) {
               workflowId,
               secret,
               enabled: workflow.enabled,
+              serviceAccountId: workflow.definition?.settings?.run_as,
             }),
           });
         } catch (error) {
@@ -216,6 +212,7 @@ export function registerPageRotateRoute(deps: RouteDependencies) {
               workflowId,
               secret,
               enabled: workflow.enabled,
+              serviceAccountId: workflow.definition?.settings?.run_as,
             }),
           });
         } catch (error) {

@@ -38,6 +38,8 @@ import { useKibana } from '../../../hooks/use_kibana';
 
 interface PageLinkResponse {
   enabled: boolean;
+  /** The `run_as` service account submissions run as. The page is offline without one. */
+  serviceAccountId?: string;
   path: string;
 }
 
@@ -132,6 +134,33 @@ export const WorkflowPageShareModal = ({
 
         {data && (
           <>
+            {!data.serviceAccountId && (
+              <>
+                <KbnWarningCallout
+                  size="s"
+                  title={i18n.translate('workflows.pageShare.noServiceAccountTitle', {
+                    defaultMessage: 'The page needs a service account',
+                  })}
+                >
+                  {i18n.translate('workflows.pageShare.noServiceAccountBody', {
+                    defaultMessage:
+                      'Visitors have no Kibana identity, so submissions run as a service account. Set settings.run_as in the workflow to make the link work.',
+                  })}
+                </KbnWarningCallout>
+                <EuiSpacer size="m" />
+              </>
+            )}
+            {data.serviceAccountId && (
+              <>
+                <EuiText size="s" color="subdued">
+                  {i18n.translate('workflows.pageShare.runsAs', {
+                    defaultMessage: 'Submissions run as the service account {serviceAccountId}.',
+                    values: { serviceAccountId: data.serviceAccountId },
+                  })}
+                </EuiText>
+                <EuiSpacer size="m" />
+              </>
+            )}
             {!data.enabled && (
               <>
                 <KbnWarningCallout

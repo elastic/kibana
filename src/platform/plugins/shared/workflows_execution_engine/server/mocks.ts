@@ -39,6 +39,7 @@ export const workflowsExecutionEngineMock = {
     },
     workflowEventLoggerService: createMockWorkflowEventLoggerService(),
     executeWorkflow: jest.fn(),
+    executeWorkflowAsServiceAccount: jest.fn(),
     executeWorkflowStep: jest.fn(),
     cancelWorkflowExecution: jest.fn(),
     cancelAllActiveWorkflowExecutions: jest.fn().mockResolvedValue(undefined),
