@@ -349,7 +349,11 @@ export const runDoctor = async (
         )
       );
     if (target === 'qaf') {
-      log.write(chalk.dim(`   Already created ${QAF_NAME}? Run only the second line`));
+      log.write(
+        chalk.dim(
+          `   The first line creates a Cloud deployment or project named ${QAF_NAME}. Next time, run only the second line.`
+        )
+      );
     }
   }
   log.write('');
