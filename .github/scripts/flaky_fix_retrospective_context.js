@@ -45,6 +45,8 @@ const DEFAULT_OUTPUT_DIR = '/tmp/flaky-fix-retrospective';
 const CLOSING_COMMENT_WINDOW_MS = 15 * 60 * 1000;
 const MAX_REPLACEMENT_PRS = 3;
 const MAX_PRIOR_FIX_PRS = 3;
+// Cited PR numbers resolved before picking the newest prior fixes.
+const MAX_CITED_PRS = 10;
 const MAX_DEVELOPER_COMMITS = 20;
 const MAX_LINKED_ISSUES = 3;
 const MAX_COMMENT_CHARS = 8000;
@@ -63,6 +65,17 @@ const BOT_LOGINS = new Set([
 ]);
 const BOT_NAMES = new Set(['Kibana Machine', 'github-actions[bot]', 'Elastic Machine']);
 const AUTOMATION_CLOSERS = new Set(['github-actions[bot]', 'github-actions']);
+
+// GraphQL reports a GitHub App actor as `github-actions` while REST comments show
+// `github-actions[bot]`: use the REST form everywhere so closer and comment author compare.
+const actorLogin = (actor) => {
+  if (!actor?.login) {
+    return null;
+  }
+  return actor.__typename === 'Bot' && !actor.login.endsWith('[bot]')
+    ? `${actor.login}[bot]`
+    : actor.login;
+};
 
 const OUTCOMES = {
   mergedAsProposed: 'merged-as-proposed',
@@ -285,6 +298,7 @@ const fetchIssueHistory = async ({ github, issueNumber }) => {
     if (pr?.number && pr.merged) {
       prs.set(pr.number, {
         number: pr.number,
+        merged: true,
         mergedAt: pr.mergedAt ?? null,
         author: pr.author?.login ?? null,
         labels: (pr.labels?.nodes ?? []).map((label) => label.name),
@@ -411,7 +425,7 @@ const closedEventQuery = `
     repository(owner: $owner, name: $repo) {
       pullRequest(number: $number) {
         timelineItems(last: 1, itemTypes: [CLOSED_EVENT]) {
-          nodes { ... on ClosedEvent { createdAt actor { login } } }
+          nodes { ... on ClosedEvent { createdAt actor { __typename login } } }
         }
       }
     }
@@ -425,7 +439,7 @@ const fetchCloser = async ({ github, pullNumber }) => {
     variables: { owner: OWNER, repo: REPO, number: pullNumber },
   });
   const event = result.repository.pullRequest.timelineItems.nodes[0];
-  return { login: event?.actor?.login ?? null, at: event?.createdAt ?? null };
+  return { login: actorLogin(event?.actor), at: event?.createdAt ?? null };
 };
 
 /** The comment that explains a closure: the closer's comment nearest to the close event. */
@@ -506,11 +520,18 @@ const trackingIssueBody = (month) =>
 /** The monthly tracking issue the agent comments on, created on the first finding of the month. */
 const findOrCreateTrackingIssue = async ({ github, core, month, dryRun }) => {
   const title = `${TRACKING_ISSUE_TITLE_PREFIX}${month}`;
-  const { data } = await github.rest.search.issuesAndPullRequests({
-    q: `repo:${OWNER}/${REPO} is:issue label:${RETROSPECTIVE_LABEL} in:title "${title}"`,
-    per_page: 10,
+  // The issues list is read-after-write consistent, unlike search, so a run early in the month
+  // sees the tracking issue another run just created.
+  const tracked = await github.paginate(github.rest.issues.listForRepo, {
+    owner: OWNER,
+    repo: REPO,
+    labels: RETROSPECTIVE_LABEL,
+    state: 'all',
+    sort: 'created',
+    direction: 'desc',
+    per_page: 100,
   });
-  const matches = data.items.filter((item) => item.title === title && !item.pull_request);
+  const matches = tracked.filter((item) => item.title === title && !item.pull_request);
   const existing = matches.find((item) => item.state === 'open') ?? matches[0];
   if (existing) {
     return existing.number;
@@ -680,19 +701,19 @@ const classifyPullRequest = async ({ github, core, pullNumber }) => {
   }
 
   const linkedIssues = await fetchLinkedIssues({ github, numbers: linkedIssueNumbers });
-  const candidates = new Set();
+  // A replacement landed after the fixer opened its PR; older merged PRs tied to the issue are
+  // earlier attempts, not what superseded this one. The PR the closer named comes first so the
+  // cap cannot push it out.
+  const openedAt = new Date(pr.created_at).getTime();
+  const candidates = new Set(numbersInText(closingComment?.body));
   for (const issue of linkedIssues) {
     for (const merged of issue.mergedPrs ?? []) {
-      candidates.add(merged.number);
+      if (merged.mergedAt && new Date(merged.mergedAt).getTime() > openedAt) {
+        candidates.add(merged.number);
+      }
     }
   }
-  for (const number of numbersInText(closingComment?.body)) {
-    candidates.add(number);
-  }
   candidates.delete(pullNumber);
-  // A replacement landed after the fixer opened its PR; older merged PRs tied to the issue are
-  // earlier attempts, not what superseded this one.
-  const openedAt = new Date(pr.created_at).getTime();
   const replacementPrs = [];
   for (const number of [...candidates].slice(0, MAX_REPLACEMENT_PRS)) {
     try {
@@ -781,8 +802,10 @@ const findPriorFixPrs = async ({ github, core, issue, labeledAt }) => {
     }
   }
 
-  for (const number of cited) {
-    if (found.has(number) || found.size >= MAX_PRIOR_FIX_PRS) {
+  // Resolve every cited PR before picking the newest, or an early citation could crowd out the
+  // fix that actually came back.
+  for (const number of [...new Set(cited)].slice(0, MAX_CITED_PRS)) {
+    if (found.has(number)) {
       continue;
     }
     try {

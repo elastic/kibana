@@ -18,6 +18,7 @@ const {
   OUTCOMES,
   automationClosureOutcome,
   classifyCommits,
+  classifyDidNotHoldIssue,
   classifyPullRequest,
   findClosingComment,
   linkedIssuesFromBody,
@@ -233,7 +234,15 @@ const createClosedFixture = ({
           repository: {
             pullRequest: {
               timelineItems: {
-                nodes: [{ createdAt: '2026-10-05T00:00:00Z', actor: { login: closer } }],
+                nodes: [
+                  {
+                    createdAt: '2026-10-05T00:00:00Z',
+                    // GraphQL reports a GitHub App without the `[bot]` suffix.
+                    actor: closer.endsWith('[bot]')
+                      ? { __typename: 'Bot', login: closer.slice(0, -'[bot]'.length) }
+                      : { __typename: 'User', login: closer },
+                  },
+                ],
               },
             },
           },
@@ -307,4 +316,44 @@ test('classifyPullRequest asks for analysis when a reviewer requested changes ev
   const result = await classifyPullRequest({ github, core, pullNumber: 100 });
   assert.equal(result.outcome, OUTCOMES.revised);
   assert.equal(result.needsAnalysis, true);
+});
+
+test('classifyDidNotHoldIssue finds the prior fix through the issue history alone', async () => {
+  const { github } = createGithub({ pr: fixerPr(), commits: [] });
+  github.rest.issues.get = async () => ({
+    data: {
+      number: 42,
+      title: 'Failing test: renders',
+      html_url: 'https://github.com/elastic/kibana/issues/42',
+      labels: [{ name: 'failed-test' }, { name: 'failure:fix-did-not-hold' }],
+      body: '',
+      user: { login: 'kibanamachine' },
+    },
+  });
+  github.graphql = async () => ({
+    repository: {
+      issue: {
+        closedByPullRequestsReferences: {
+          nodes: [
+            {
+              number: 100,
+              merged: true,
+              mergedAt: '2026-10-05T00:00:00Z',
+              author: { login: 'kibanamachine' },
+              labels: { nodes: [{ name: 'flaky-test-fixer' }] },
+            },
+          ],
+        },
+        timelineItems: { nodes: [] },
+      },
+    },
+  });
+  const result = await classifyDidNotHoldIssue({
+    github,
+    core,
+    issueNumber: 42,
+    labeledAt: '2026-10-10T00:00:00Z',
+  });
+  assert.equal(result.outcome, OUTCOMES.didNotHold);
+  assert.deepEqual(result.labelTargets, [100]);
 });
