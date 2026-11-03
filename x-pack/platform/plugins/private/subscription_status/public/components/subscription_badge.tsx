@@ -28,7 +28,7 @@ import type {
   SubscriptionStatusActionId,
 } from '../status/types';
 
-const popoverContentStyles = css({ width: 360 });
+const popoverContentStyles = css({ width: 400 });
 
 export interface SubscriptionBadgeProps {
   status: SubscriptionStatus;
