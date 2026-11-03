@@ -13,10 +13,13 @@ import { AlertsTablePage } from './alerts_table';
 import { AgentBuilderPage } from './agent_builder';
 import { AlertDetailsRightPanelPage } from './alert_details_right_panel';
 import { EntityAnalyticsManagementPage } from './entity_analytics_management';
+import { EntityAnalyticsHomePage } from './entity_analytics_home_page';
 import { CspmIntegrationPage } from './cspm_integration_page';
 import { TimelinePage } from './timeline';
 import { DetectionsAttackDiscoveryPage } from './detections_attack_discovery';
 import { RuleCreateWizardPage } from './rule_create_wizard';
+import { RuleDetailsPage } from './rule_details_page';
+import { RulesManagementPage } from './rules_management_page';
 import { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 import { AttackDetailsRightPanelPage } from './attack_details_right_panel';
 import { ServerlessProjectChromePage } from './serverless_project_chrome_page';
@@ -36,6 +39,8 @@ import { SecurityOverviewPage } from './security_overview_page';
 import { RuleEditPage } from './rule_edit_page';
 
 export type { RuleCreateWizardPage } from './rule_create_wizard';
+export type { RuleDetailsPage } from './rule_details_page';
+export type { RulesManagementPage } from './rules_management_page';
 export type { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 export { AddExceptionButtonType } from './add_exception_flyout';
 
@@ -46,11 +51,17 @@ export interface SecurityPageObjects extends PageObjects {
   agentBuilderPage: AgentBuilderPage;
   alertDetailsRightPanelPage: AlertDetailsRightPanelPage;
   entityAnalyticsManagementPage: EntityAnalyticsManagementPage;
+  /** New Entity Analytics home page — Needs attention tiles and entities grid (behind the useNewEntityAnalyticsPage flag). */
+  entityAnalyticsHomePage: EntityAnalyticsHomePage;
   cspmIntegrationPage: CspmIntegrationPage;
   timelinePage: TimelinePage;
   detectionsAttackDiscoveryPage: DetectionsAttackDiscoveryPage;
   /** Custom query rule create wizard — Define → About → Schedule → Actions. */
   ruleCreateWizard: RuleCreateWizardPage;
+  /** Detection rules management page: rules table, row actions and bulk actions. */
+  rulesManagementPage: RulesManagementPage;
+  /** Rule details page: about/definition/schedule sections, execution status and alerts tab. */
+  ruleDetailsPage: RuleDetailsPage;
   /** Indicator match (threat match) rule creation page — threat index and field mapping controls. */
   threatMatchRuleCreatePage: ThreatMatchRuleCreatePage;
   attackDetailsRightPanelPage: AttackDetailsRightPanelPage;
@@ -98,6 +109,7 @@ export function extendPageObjects(
     agentBuilderPage: createLazyPageObject(AgentBuilderPage, page),
     alertDetailsRightPanelPage: createLazyPageObject(AlertDetailsRightPanelPage, page),
     entityAnalyticsManagementPage: createLazyPageObject(EntityAnalyticsManagementPage, page),
+    entityAnalyticsHomePage: createLazyPageObject(EntityAnalyticsHomePage, page),
     cspmIntegrationPage: createLazyPageObject(CspmIntegrationPage, page),
     timelinePage: createLazyPageObject(TimelinePage, page),
     detectionsAttackDiscoveryPage: createLazyPageObject(
@@ -106,6 +118,8 @@ export function extendPageObjects(
       config
     ),
     ruleCreateWizard: createLazyPageObject(RuleCreateWizardPage, page),
+    rulesManagementPage: createLazyPageObject(RulesManagementPage, page),
+    ruleDetailsPage: createLazyPageObject(RuleDetailsPage, page),
     threatMatchRuleCreatePage: createLazyPageObject(ThreatMatchRuleCreatePage, page),
     attackDetailsRightPanelPage: createLazyPageObject(AttackDetailsRightPanelPage, page),
     serverlessProjectChromePage: createLazyPageObject(ServerlessProjectChromePage, page),

@@ -13,7 +13,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES, SPACES_EXTENSION_ID } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
 import { registerRoutes } from '@kbn/server-route-repository';
@@ -37,6 +37,7 @@ import { registerFeatureFlags } from './feature_flags';
 import { ContentService } from './lib/content/content_service';
 import { AttachmentService } from './lib/streams/attachments/attachment_service';
 import { StreamsService } from './lib/streams/service';
+import { UnitStatsService } from './lib/unit_stats/service';
 import { EbtTelemetryService, StatsTelemetryService } from './lib/telemetry';
 import { streamsRouteRepository } from './routes';
 import type { GetScopedClients, RouteHandlerScopedClients } from './routes/types';
@@ -57,7 +58,15 @@ import { registerSuggestionsInferenceFeatures } from './register_suggestions_inf
 import type { AttachmentClient } from './lib/streams/attachments/attachment_client';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { createConfigDistributorClient } from './lib/unit_config/config_distributor_client';
+import { createEncryptionKeyStore } from './lib/unit_config/encryption_key_store';
+import { createCredentialPreparer } from './lib/unit_config/seal_credentials';
 import type { UnitConfigHooks } from './lib/unit_config/types';
+import {
+  registerRepublishUnitsTask,
+  removeRepublishUnitsTask,
+  scheduleRepublishUnitsTask,
+} from './lib/unit_config/republish_units_task';
+import { StreamsUnitService } from './lib/saved_objects/streams_unit_service';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
 const STREAMS_ALLOWED_PROJECT_TYPES = ['observability', 'security'];
@@ -92,6 +101,9 @@ export class StreamsPlugin
   private statsTelemetryService = new StatsTelemetryService();
   private processorSuggestionsService: ProcessorSuggestionsService;
   private patternExtractionService?: PatternExtractionService;
+  private republishUnitsEnabled = false;
+  private readonly republishLogger: Logger;
+  private readonly stopController = new AbortController();
   private attachmentService?: AttachmentService;
   private streamsService?: StreamsService;
   private streamsGetScopedClients?: GetScopedClients;
@@ -103,6 +115,7 @@ export class StreamsPlugin
     this.isDev = context.env.mode.dev;
     this.config = context.config.get();
     this.logger = context.logger.get();
+    this.republishLogger = this.logger.get('republish-units');
     this.processorSuggestionsService = new ProcessorSuggestionsService();
     this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
   }
@@ -144,6 +157,7 @@ export class StreamsPlugin
     this.attachmentService = attachmentService;
     const streamsService = new StreamsService(core, this.logger, this.isDev);
     this.streamsService = streamsService;
+    const unitStatsService = new UnitStatsService(this.logger);
     const contentService = new ContentService(core, this.logger);
 
     this.streamsGetScopedClients = async ({
@@ -204,6 +218,9 @@ export class StreamsPlugin
         canEncrypt: this.canEncrypt,
         attachmentClient,
         streamsClient,
+        unitStatsClient: unitStatsService.getClient({
+          esClient: scopedClusterClient.asCurrentUser,
+        }),
         inferenceClient,
         contentClient,
         fieldsMetadataClient,
@@ -281,13 +298,47 @@ export class StreamsPlugin
     registerFeatureFlags(core);
     core.pricing.registerProductFeatures(STREAMS_TIERED_FEATURES);
 
-    // `encryptCredentials` is the distributor sidecar transform (project public
-    // key → `credentials[]`). It is not wired until the project public key is
-    // available. Publish then omits the credentials sidecar instead of sending
-    // plaintext or failing the unit write. At-rest encryption is Encrypted Saved Objects.
-    const unitConfigHooks: UnitConfigHooks = createConfigDistributorClient({
+    const { path: encryptionKeyPath } = this.config.encryptionKey;
+    const distributorClient = createConfigDistributorClient({
       config: this.config.distributor,
       logger: this.logger.get('config-distributor'),
+      fallbackTargetId: plugins.cloud?.serverless.projectId,
+    });
+    const unitConfigHooks: UnitConfigHooks = {
+      validate: distributorClient.validate,
+      publish: distributorClient.publish,
+      prepareCredentials: encryptionKeyPath
+        ? createCredentialPreparer({
+            store: createEncryptionKeyStore({ path: encryptionKeyPath }),
+            resolveTargetId: distributorClient.resolveTargetId,
+            logger: this.logger.get('credential-sealer'),
+          })
+        : undefined,
+    };
+
+    this.republishUnitsEnabled = this.config.canvas.enabled && Boolean(this.config.distributor.url);
+    registerRepublishUnitsTask({
+      taskManager: plugins.taskManager,
+      logger: this.republishLogger,
+      enabled: this.republishUnitsEnabled,
+      stopSignal: this.stopController.signal,
+      getRepublisher: async () => {
+        const [coreStart, pluginsStart] = await core.getStartServices();
+        return new StreamsUnitService({
+          soClient: coreStart.savedObjects.getUnsafeInternalClient({
+            includedHiddenTypes: [STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE],
+            excludedExtensions: [SPACES_EXTENSION_ID],
+          }),
+          logger: this.republishLogger,
+          validateUnit: unitConfigHooks.validate,
+          publishUnit: unitConfigHooks.publish,
+          prepareCredentials: unitConfigHooks.prepareCredentials,
+          encryptedSavedObjectsClient: pluginsStart.encryptedSavedObjects.getClient({
+            includedHiddenTypes: [STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE],
+          }),
+          canEncrypt: this.canEncrypt,
+        });
+      },
     });
 
     const routeRegistrationOptions = {
@@ -481,10 +532,19 @@ export class StreamsPlugin
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);
 
+    const republishTaskDeps = { taskManager: plugins.taskManager, logger: this.republishLogger };
+    if (this.republishUnitsEnabled) {
+      void scheduleRepublishUnitsTask(republishTaskDeps);
+    } else {
+      // Assumes every node has the same config, so a disabled node never removes a task another node needs.
+      void removeRepublishUnitsTask(republishTaskDeps);
+    }
+
     return {};
   }
 
   public async stop() {
+    this.stopController.abort();
     this.subscriptions.forEach((s) => s.unsubscribe());
     await this.patternExtractionService?.stop();
   }

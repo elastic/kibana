@@ -19,6 +19,7 @@ export type {
   DashboardInitializationState,
 } from './dashboard_api/types';
 export { DASHBOARD_API_TYPE } from './dashboard_api/types';
+export type { DashboardChangeSource } from '../common/change_sources';
 export type { DashboardRendererProps } from './dashboard_renderer/dashboard_renderer';
 export { LazyDashboardRenderer as DashboardRenderer } from './dashboard_renderer/lazy_dashboard_renderer';
 export type { DashboardStart, DashboardSetup } from './plugin';

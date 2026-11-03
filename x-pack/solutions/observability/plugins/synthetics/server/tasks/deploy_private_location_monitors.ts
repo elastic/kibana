@@ -27,6 +27,7 @@ import type {
 import { ConfigKey } from '../../common/runtime_types';
 import { MonitorConfigRepository } from '../services/monitor_config_repository';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import type { FailedPolicyUpdate } from '../synthetics_service/private_location/synthetics_private_location';
 import type { SyntheticsServerSetup } from '../types';
 import {
   formatHeartbeatRequest,
@@ -66,6 +67,18 @@ export const formatFailedCreates = (failedCreatesBySpace: FailedCreatesBySpace[]
     .map(({ spaceId, count }) => `${spaceId} (${count})`)
     .join(', ')}]`;
 
+// Unlike failed creates, nothing else logs failed updates on the background sync paths.
+const formatFailedUpdates = (spaceId: string, failedUpdates: FailedPolicyUpdate[]) =>
+  `[DeployPrivateLocationMonitors] Failed to update ${
+    failedUpdates.length
+  } policies during sync for space ${spaceId}: ${JSON.stringify(
+    failedUpdates.map(({ packagePolicy, config, error }) => ({
+      policyId: packagePolicy?.id,
+      monitorId: config?.id,
+      error: error?.message ?? error,
+    }))
+  )}`;
+
 export class DeployPrivateLocationMonitors {
   constructor(
     public serverSetup: SyntheticsServerSetup,
@@ -89,9 +102,7 @@ export class DeployPrivateLocationMonitors {
       this.debugLog('No private locations found, skipping sync of private location monitors');
       return;
     }
-    const { syntheticsService } = this.syntheticsMonitorClient;
-
-    const paramsBySpace = await syntheticsService.getSyntheticsParams({
+    const paramsBySpace = await this.syntheticsMonitorClient.getSyntheticsParams({
       spaceId: ALL_SPACES_ID,
     });
 
@@ -349,6 +360,10 @@ export class DeployPrivateLocationMonitors {
         if (result?.failedCreates && result.failedCreates.length > 0) {
           failedCreatesBySpace.push({ spaceId, count: result.failedCreates.length });
         }
+
+        if (result?.failedUpdates && result.failedUpdates.length > 0) {
+          this.serverSetup.logger.error(formatFailedUpdates(spaceId, result.failedUpdates));
+        }
       } else {
         this.debugLog(`No privateConfigs to sync for spaceId: ${spaceId}`);
       }
@@ -378,9 +393,8 @@ export class DeployPrivateLocationMonitors {
     modifiedParamKeys?: string[];
     privateLocationId?: string;
   }) {
-    const { syntheticsService } = this.syntheticsMonitorClient;
-    const paramsBySpacePromise = syntheticsService.getSyntheticsParams({ spaceId });
-    const maintenanceWindowsPromise = syntheticsService.getMaintenanceWindows(spaceId);
+    const paramsBySpacePromise = this.syntheticsMonitorClient.getSyntheticsParams({ spaceId });
+    const maintenanceWindowsPromise = this.syntheticsMonitorClient.getMaintenanceWindows(spaceId);
     const monitorConfigRepository = new MonitorConfigRepository(
       soClient,
       encryptedSavedObjects.getClient()

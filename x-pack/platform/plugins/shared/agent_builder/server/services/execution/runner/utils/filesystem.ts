@@ -8,9 +8,8 @@
 import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import { ToolOrigin } from '@kbn/agent-builder-common';
-import { FilesystemService, WorkspaceVolume } from '../../filesystem';
-import { BashService } from '../../run_agent/bash';
-import type { BashToolAccess } from '../../run_agent/bash';
+import type { FilesystemService } from '../../filesystem';
+import type { BashService, BashToolAccess } from '../../run_agent/bash';
 import { WorkspaceClient, createWorkspaceStorage } from '../../../workspaces';
 import type { RunnerManager } from '../runner';
 
@@ -42,6 +41,8 @@ export const createFilesystemServices = async ({
     esClient: elasticsearch.client.asScoped(request).asInternalUser,
   });
   const workspaceClient = new WorkspaceClient({ storage: workspaceStorage, space: spaceId });
+  // The filesystem barrel imports just-bash; load it only for an agent run.
+  const { FilesystemService, WorkspaceVolume } = await import('../../filesystem');
   const workspaceVolume = new WorkspaceVolume({
     workspaceClient,
     initialWorkspaceId: workspaceId,
@@ -59,6 +60,7 @@ export const createFilesystemServices = async ({
     return { filesystemService };
   }
 
+  const { BashService } = await import('../../run_agent/bash');
   const bashService = new BashService({
     filesystemService,
     workspaceVolume,

@@ -29,6 +29,7 @@ export {
   LegendLayout,
   LegendSizeToPixels,
   DEFAULT_LEGEND_SIZE,
+  LENS_DEFAULT_LEGEND_SIZE,
   getLegendLayout,
 } from './legend';
 

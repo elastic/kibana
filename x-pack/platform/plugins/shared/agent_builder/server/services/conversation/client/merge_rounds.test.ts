@@ -186,6 +186,56 @@ describe('mergeModelUsage — per-connector breakdown', () => {
     ]);
   });
 
+  it('sums the reasoning tokens of each connector when either side reports them', () => {
+    const a = withConnectors([
+      connectorUsage('main', 1, 100, 20, { reasoning_tokens: 10 }),
+      connectorUsage('fast', 1, 10, 2),
+      connectorUsage('other', 1, 10, 2),
+    ]);
+    const b = withConnectors([
+      connectorUsage('main', 1, 100, 20, { reasoning_tokens: 5 }),
+      connectorUsage('fast', 1, 10, 2, { reasoning_tokens: 3 }),
+      connectorUsage('other', 1, 10, 2),
+    ]);
+
+    const merged = mergeModelUsage(a, b);
+
+    expect(merged.connectors?.map((connector) => connector.reasoning_tokens)).toEqual([
+      15,
+      3,
+      undefined,
+    ]);
+    // a connector that never reported them has no field, not a zero
+    expect(merged.connectors?.[2]).not.toHaveProperty('reasoning_tokens');
+  });
+
+  it('sums the top-level reasoning tokens when either side reports them', () => {
+    const connectors = [connectorUsage('main', 1, 100, 20)];
+    const reported = (reasoningTokens?: number) =>
+      withConnectors(
+        connectors,
+        reasoningTokens === undefined ? {} : { reasoning_tokens: reasoningTokens }
+      );
+
+    expect(mergeModelUsage(reported(10), reported(5)).reasoning_tokens).toBe(15);
+    expect(mergeModelUsage(reported(10), reported()).reasoning_tokens).toBe(10);
+    expect(mergeModelUsage(reported(), reported(5)).reasoning_tokens).toBe(5);
+    expect(mergeModelUsage(reported(0), reported()).reasoning_tokens).toBe(0);
+    expect(mergeModelUsage(reported(), reported())).not.toHaveProperty('reasoning_tokens');
+  });
+
+  it('keeps the reasoning tokens of the merged usage when the breakdown is dropped', () => {
+    const withBreakdown = withConnectors([connectorUsage('main', 1, 100, 20)], {
+      reasoning_tokens: 10,
+    });
+    const legacy = { ...usage(1, 5, 5), reasoning_tokens: 4 };
+
+    const merged = mergeModelUsage(legacy, withBreakdown);
+
+    expect(merged).not.toHaveProperty('connectors');
+    expect(merged.reasoning_tokens).toBe(14);
+  });
+
   it('drops the breakdown when a side made calls but has none (persisted before it existed)', () => {
     const withBreakdown = withConnectors([connectorUsage('main', 1, 100, 10)]);
     const legacy = usage(1, 5, 5);

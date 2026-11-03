@@ -21,9 +21,16 @@ import { EditorFrameServiceProvider } from '../../../editor_frame_service/editor
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';
 import type { TypedLensSerializedState } from '@kbn/lens-common';
+import { LENS_LAYER_TYPES } from '@kbn/lens-common';
 import * as getApplicationUserMessagesModule from '../../get_application_user_messages';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import { CoreEnvContextProvider } from '@kbn/react-kibana-context-env';
+import { trackCreateUiCounterEvents } from '../../../lens_ui_telemetry';
+
+jest.mock('../../../lens_ui_telemetry', () => ({
+  ...jest.requireActual('../../../lens_ui_telemetry'),
+  trackCreateUiCounterEvents: jest.fn(),
+}));
 
 const createAddContextMock = () => {
   return jest
@@ -240,6 +247,35 @@ describe('LensEditConfigurationFlyout', () => {
     return { container, ...rest };
   }
 
+  describe.each([false, true])('helper layers with ES|QL=%s', (isEsql) => {
+    it.each([LENS_LAYER_TYPES.REFERENCELINE, LENS_LAYER_TYPES.ANNOTATIONS])(
+      'renders %s configuration without the visualization parameters accordion',
+      async (layerType) => {
+        const getLayerTypeMock = jest.mocked(visualizationMap.testVis.getLayerType);
+        const originalImplementation = getLayerTypeMock.getMockImplementation();
+        getLayerTypeMock.mockReturnValue(layerType);
+        try {
+          await renderConfigFlyout(
+            { attributes: isEsql ? esqlLensAttributes : lensAttributes },
+            isEsql ? { esql: 'from index1 | limit 10' } : undefined,
+            { activeDatasourceId: isEsql ? 'textBased' : 'formBased' }
+          );
+          expect(screen.queryByText('Visualization parameters')).not.toBeInTheDocument();
+          expect(screen.getByTestId('lns-layerPanel-0')).toBeInTheDocument();
+          expect(screen.queryByTestId('InlineEditingSuggestions')).not.toBeInTheDocument();
+        } finally {
+          getLayerTypeMock.mockImplementation(originalImplementation!);
+        }
+      }
+    );
+  });
+
+  it('retains the visualization parameters accordion for data layers', async () => {
+    await renderConfigFlyout();
+    expect(screen.getByText('Visualization parameters')).toBeInTheDocument();
+    expect(screen.getByTestId('InlineEditingSuggestions')).toBeInTheDocument();
+  });
+
   it('should display the header and the link to editor if necessary props are given', async () => {
     const navigateToLensEditorSpy = jest.fn();
     await renderConfigFlyout({
@@ -405,6 +441,45 @@ describe('LensEditConfigurationFlyout', () => {
         { type: 'index-pattern', id: 'mockip', name: 'mockip' },
         { type: 'index-pattern', id: 'mockip', name: 'mockip' },
       ],
+    });
+  });
+
+  describe('create telemetry', () => {
+    beforeEach(() => {
+      jest.mocked(trackCreateUiCounterEvents).mockClear();
+    });
+
+    const dashboardParentApi = { executionContext: { type: 'dashboard' } };
+
+    it('should track an ES|QL creation when a new panel is applied', async () => {
+      await renderConfigFlyout(
+        { isNewPanel: true, parentApi: dashboardParentApi, attributes: esqlLensAttributes },
+        { esql: 'from index1 | limit 10' }
+      );
+      await userEvent.click(screen.getByTestId('applyFlyoutButton'));
+      expect(trackCreateUiCounterEvents).toHaveBeenCalledTimes(1);
+      expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('esql', 'dashboards');
+    });
+
+    it('should track a DSL creation when a new form-based panel is applied', async () => {
+      await renderConfigFlyout({ isNewPanel: true, parentApi: dashboardParentApi }, undefined, {
+        datasourceStates: {
+          formBased: { isLoading: false, state: mockFormBasedStateChanged },
+          textBased: { isLoading: false, state: { layers: {} } },
+        },
+      });
+      await userEvent.click(screen.getByTestId('applyFlyoutButton'));
+      expect(trackCreateUiCounterEvents).toHaveBeenCalledTimes(1);
+      expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('dsl', 'dashboards');
+    });
+
+    it('should not track a creation when an existing panel is applied', async () => {
+      await renderConfigFlyout(
+        { attributes: esqlLensAttributes },
+        { esql: 'from index1 | limit 10' }
+      );
+      await userEvent.click(screen.getByTestId('applyFlyoutButton'));
+      expect(trackCreateUiCounterEvents).not.toHaveBeenCalled();
     });
   });
 

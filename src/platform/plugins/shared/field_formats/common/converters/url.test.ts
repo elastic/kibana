@@ -513,6 +513,20 @@ describe('UrlFormat', () => {
       `);
     });
 
+    test('resolves leading-slash relative urls against the base path, including the space prefix', () => {
+      const renderLink = (basePath: string) => {
+        const url = new UrlFormat({ parsedUrl: { origin: 'http://kibana.host.com', basePath } });
+        return renderReactNode(url.convertToReact('/test/hello')).querySelector('a');
+      };
+
+      expect(renderLink('')).toHaveAttribute('href', 'http://kibana.host.com/test/hello');
+      expect(renderLink('/xyz')).toHaveAttribute('href', 'http://kibana.host.com/xyz/test/hello');
+      expect(renderLink('/xyz/s/custom')).toHaveAttribute(
+        'href',
+        'http://kibana.host.com/xyz/s/custom/test/hello'
+      );
+    });
+
     test('should fail gracefully if there are no parsedUrl provided', () => {
       const url = new UrlFormat({});
 

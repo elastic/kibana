@@ -16,19 +16,34 @@ jest.mock('@kbn/agent-builder-genai-utils/tools', () => ({
 
 import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
 import { searchTool } from './search';
+import { createSchemaContext, resolveToolSchema } from './test_utils';
 
 const runSearchToolMock = runSearchTool as jest.MockedFunction<typeof runSearchTool>;
 
-const createTool = () =>
+const createTool = ({ isServerless }: { isServerless?: boolean } = {}) =>
   searchTool({
     coreSetup: coreMock.createSetup(),
     topSnippetsDefaults: {} as TopSnippetsConfig,
+    isServerless,
   });
 
 const createHandlerContext = () => {
   const context = agentBuilderMocks.tools.createHandlerContext();
   context.attachments.getActive.mockReturnValue([]);
   return context;
+};
+
+const run = async ({
+  includeFrozen,
+  includeFrozenByDefault = false,
+  isServerless,
+}: { includeFrozen?: boolean; includeFrozenByDefault?: boolean; isServerless?: boolean } = {}) => {
+  const tool = createTool({ isServerless });
+  const schema = await resolveToolSchema(tool, includeFrozenByDefault);
+  await tool.handler(
+    schema.parse({ query: 'failed logins', include_frozen: includeFrozen }),
+    createHandlerContext()
+  );
 };
 
 describe('searchTool', () => {
@@ -38,7 +53,7 @@ describe('searchTool', () => {
   });
 
   it('excludes frozen tier indices by default', async () => {
-    await createTool().handler({ query: 'failed logins' }, createHandlerContext());
+    await run();
 
     expect(runSearchToolMock).toHaveBeenCalledWith(
       expect.objectContaining({ includeFrozen: false })
@@ -46,13 +61,44 @@ describe('searchTool', () => {
   });
 
   it('includes frozen tier indices when opted in', async () => {
-    await createTool().handler(
-      { query: 'failed logins', include_frozen: true },
-      createHandlerContext()
-    );
+    await run({ includeFrozen: true });
 
     expect(runSearchToolMock).toHaveBeenCalledWith(
       expect.objectContaining({ includeFrozen: true })
     );
+  });
+
+  it('includes frozen tier indices by default when the space setting is enabled', async () => {
+    await run({ includeFrozenByDefault: true });
+
+    expect(runSearchToolMock).toHaveBeenCalledWith(
+      expect.objectContaining({ includeFrozen: true })
+    );
+  });
+
+  it('lets the agent override the default', async () => {
+    await run({ includeFrozen: false, includeFrozenByDefault: true });
+
+    expect(runSearchToolMock).toHaveBeenCalledWith(
+      expect.objectContaining({ includeFrozen: false })
+    );
+  });
+
+  describe('in serverless', () => {
+    it('does not expose include_frozen or read the space setting', async () => {
+      const context = createSchemaContext(true);
+      const schema = await createTool({ isServerless: true }).getSchema(context);
+
+      expect(schema.shape).not.toHaveProperty('include_frozen');
+      expect(context.uiSettings.get).not.toHaveBeenCalled();
+    });
+
+    it('excludes frozen tier indices even when include_frozen is passed', async () => {
+      await run({ includeFrozen: true, includeFrozenByDefault: true, isServerless: true });
+
+      expect(runSearchToolMock).toHaveBeenCalledWith(
+        expect.objectContaining({ includeFrozen: false })
+      );
+    });
   });
 });

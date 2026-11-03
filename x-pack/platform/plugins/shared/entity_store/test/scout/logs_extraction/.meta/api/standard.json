@@ -1,5 +1,5 @@
 {
-  "sha1": "84f7aecf89a3bb54678665144adb5790b9b5d7c2",
+  "sha1": "59036009ee85aab73053ac5486133dbc98dc2f34",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -18,7 +18,7 @@
     {
       "id": "c8588d2004a116a-879855ef4ecd93b",
       "title": "Entity Store dual-process union equivalence flag off: single-process extraction builds the baseline",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -27,14 +27,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 368,
-        "column": 52
+        "line": 372,
+        "column": 15
       }
     },
     {
       "id": "c8588d2004a116a-72f3e03302fc3b9",
       "title": "Entity Store dual-process union equivalence flag on: priority then non-priority matches single-process output",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -43,14 +43,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 382,
-        "column": 7
+        "line": 385,
+        "column": 18
       }
     },
     {
       "id": "c8588d2004a116a-ce4317c5ca9ad92",
       "title": "Entity Store dual-process union equivalence flag on: non-priority then priority gives the same entities and levels as single-process",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -59,14 +59,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 399,
-        "column": 21
+        "line": 401,
+        "column": 23
       }
     },
     {
       "id": "c8588d2004a116a-ec4c198ff60b40c",
       "title": "Entity Store dual-process union equivalence flag on: public stop and start act on both processes",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -75,8 +75,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 420,
-        "column": 36
+        "line": 424,
+        "column": 25
       }
     },
     {
@@ -91,14 +91,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 445,
-        "column": 3
+        "line": 447,
+        "column": 6
       }
     },
     {
       "id": "c8588d2004a116a-2099f470353f8e7",
       "title": "Entity Store dual-process union equivalence flag on: a forced sampling rate samples non-priority only",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -107,14 +107,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 480,
-        "column": 22
+        "line": 483,
+        "column": 19
       }
     },
     {
       "id": "c8588d2004a116a-fa691e94a328f4b",
       "title": "Entity Store dual-process union equivalence flag on: a lowered maxLogsPerWindow engages sampling dynamically, without an override",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -123,8 +123,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 511,
-        "column": 21
+        "line": 514,
+        "column": 15
       }
     },
     {

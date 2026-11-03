@@ -127,6 +127,96 @@ export const readVerdict = (
   return undefined;
 };
 
+/** The `data.set` step that keeps only a batch's own alert ids (alert_analysis_workflow.yaml). */
+const BATCH_FILTER_STEP_ID = 'filter_verdicts_to_batch';
+
+/**
+ * Every verdict the workflow accepted, keyed by alert id. Read from the batch filter's output
+ * rather than the classification replies: a reply can echo an id from another batch, which
+ * production drops, so grading the raw replies could credit an alert whose own batch returned
+ * nothing. A run with no filter step record yields no verdicts, which the evaluators score as a miss.
+ */
+export const readVerdicts = (stepExecutions: WorkflowStepExecutionDto[]): Map<string, Verdict> => {
+  const byId = new Map<string, Verdict>();
+  for (const step of stepExecutions.filter(({ stepId }) => stepId === BATCH_FILTER_STEP_ID)) {
+    const { batch_verdicts: verdicts } = (step.output ?? {}) as { batch_verdicts?: Verdict[] };
+    for (const verdict of verdicts ?? []) {
+      if (verdict.id && verdict.classification && !byId.has(verdict.id)) {
+        byId.set(verdict.id, verdict);
+      }
+    }
+  }
+  return byId;
+};
+
+/** Triggers the workflow for `alertIds` through the `alert` trigger and polls until it finishes. */
+const startAndWait = async ({
+  fetch,
+  log,
+  alertIds,
+  alertIndex,
+  maxWaitMs,
+  pollIntervalMs,
+}: {
+  fetch: HttpHandler;
+  log: ToolingLog;
+  alertIds: string[];
+  alertIndex: string;
+  maxWaitMs: number;
+  pollIntervalMs: number;
+}): Promise<{ workflowExecutionId: string; execution: WorkflowExecutionDto }> => {
+  const { workflowExecutionId } = (await fetch(
+    `/api/workflows/workflow/${ALERT_ANALYSIS_WORKFLOW_ID}/run`,
+    {
+      method: 'POST',
+      version: WORKFLOWS_API_VERSION,
+      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+      body: JSON.stringify({
+        inputs: {
+          event: {
+            triggerType: 'alert',
+            alertIds: alertIds.map((_id) => ({ _id, _index: alertIndex })),
+          },
+        },
+      }),
+    }
+  )) as { workflowExecutionId: string };
+
+  log.info(
+    `Started alert-analysis workflow execution ${workflowExecutionId} for ${alertIds.length} alert(s)`
+  );
+
+  const deadline = Date.now() + maxWaitMs;
+  let execution: WorkflowExecutionDto | undefined;
+
+  while (Date.now() < deadline) {
+    execution = (await fetch(`/api/workflows/executions/${workflowExecutionId}`, {
+      method: 'GET',
+      version: WORKFLOWS_API_VERSION,
+      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+      query: { includeOutput: true },
+    })) as WorkflowExecutionDto;
+
+    if (isTerminal(execution.status)) {
+      break;
+    }
+
+    await sleep(pollIntervalMs);
+  }
+
+  if (!execution) {
+    throw new Error(`No execution returned for workflow run ${workflowExecutionId}`);
+  }
+
+  if (!isTerminal(execution.status)) {
+    log.warning(
+      `Workflow execution ${workflowExecutionId} did not reach a terminal status within ${maxWaitMs}ms (last status: ${execution.status})`
+    );
+  }
+
+  return { workflowExecutionId, execution };
+};
+
 const readAgentToolCalls = async ({
   traceEsClient,
   log,
@@ -180,52 +270,14 @@ export const runAlertAnalysisWorkflow = async ({
   maxWaitMs?: number;
   pollIntervalMs?: number;
 }): Promise<AlertAnalysisVerdict> => {
-  const { workflowExecutionId } = (await fetch(
-    `/api/workflows/workflow/${ALERT_ANALYSIS_WORKFLOW_ID}/run`,
-    {
-      method: 'POST',
-      version: WORKFLOWS_API_VERSION,
-      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
-      body: JSON.stringify({
-        inputs: {
-          event: {
-            triggerType: 'alert',
-            alertIds: [{ _id: alertId, _index: alertIndex }],
-          },
-        },
-      }),
-    }
-  )) as { workflowExecutionId: string };
-
-  log.info(`Started alert-analysis workflow execution ${workflowExecutionId} for alert ${alertId}`);
-
-  const deadline = Date.now() + maxWaitMs;
-  let execution: WorkflowExecutionDto | undefined;
-
-  while (Date.now() < deadline) {
-    execution = (await fetch(`/api/workflows/executions/${workflowExecutionId}`, {
-      method: 'GET',
-      version: WORKFLOWS_API_VERSION,
-      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
-      query: { includeOutput: true },
-    })) as WorkflowExecutionDto;
-
-    if (isTerminal(execution.status)) {
-      break;
-    }
-
-    await sleep(pollIntervalMs);
-  }
-
-  if (!execution) {
-    throw new Error(`No execution returned for workflow run ${workflowExecutionId}`);
-  }
-
-  if (!isTerminal(execution.status)) {
-    log.warning(
-      `Workflow execution ${workflowExecutionId} did not reach a terminal status within ${maxWaitMs}ms (last status: ${execution.status})`
-    );
-  }
+  const { workflowExecutionId, execution } = await startAndWait({
+    fetch,
+    log,
+    alertIds: [alertId],
+    alertIndex,
+    maxWaitMs,
+    pollIntervalMs,
+  });
 
   const structured = readVerdict(execution.stepExecutions, alertId);
 
@@ -258,4 +310,49 @@ export const runAlertAnalysisWorkflow = async ({
     toolCallIds,
     toolCallsUnavailable: unavailable,
   };
+};
+
+/** Verdicts of one batched workflow run, keyed by the alert ids that were seeded. */
+export interface AlertAnalysisBatchResult {
+  verdicts: Record<string, { classification?: Classification; confidenceScore?: number }>;
+  executionId: string;
+  executionStatus: ExecutionStatus;
+}
+
+/** Runs the workflow once over all `alertIds` (it splits them into model calls of up to 50). */
+export const runAlertAnalysisBatch = async ({
+  fetch,
+  log,
+  alertIds,
+  alertIndex,
+  maxWaitMs = 30 * 60_000,
+  pollIntervalMs = 5_000,
+}: {
+  fetch: HttpHandler;
+  log: ToolingLog;
+  alertIds: string[];
+  alertIndex: string;
+  maxWaitMs?: number;
+  pollIntervalMs?: number;
+}): Promise<AlertAnalysisBatchResult> => {
+  const { workflowExecutionId, execution } = await startAndWait({
+    fetch,
+    log,
+    alertIds,
+    alertIndex,
+    maxWaitMs,
+    pollIntervalMs,
+  });
+  const found = readVerdicts(execution.stepExecutions);
+  const verdicts: AlertAnalysisBatchResult['verdicts'] = {};
+  for (const id of alertIds) {
+    const verdict = found.get(id);
+    if (verdict) {
+      verdicts[id] = {
+        classification: verdict.classification,
+        confidenceScore: verdict.confidence_score,
+      };
+    }
+  }
+  return { verdicts, executionId: workflowExecutionId, executionStatus: execution.status };
 };

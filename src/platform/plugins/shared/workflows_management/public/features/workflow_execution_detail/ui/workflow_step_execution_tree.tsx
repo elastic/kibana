@@ -18,6 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import {
   ExecutionStatus,
+  getTriggerName,
   isDangerousStatus,
   isFailedBeforeSteps,
   isInProgressStatus,
@@ -39,6 +40,7 @@ import {
   TREE_ROW_GAP_SIZE,
   TREE_ROW_PADDING_X_SIZE,
 } from './step_execution_tree_row';
+import { type WaitingStepAction } from './waiting_step_action_panel';
 import {
   buildOverviewStepExecutionFromContext,
   buildTriggerStepExecutionFromContext,
@@ -113,6 +115,10 @@ export interface OpenTreeNode {
 
 const isIterationStepType = (stepType: string | undefined): boolean =>
   stepType === 'foreach-iteration' || stepType === 'while-iteration';
+
+/** The engine's `fallback` scope has no step execution of its own. */
+const isFallbackScope = (item: StepExecutionTreeItem): boolean =>
+  item.stepExecutionId == null && item.stepId === 'fallback';
 
 const formatIterationLabel = (n: number): string =>
   i18n.translate('workflows.WorkflowStepExecutionTree.iterationLabel', {
@@ -328,6 +334,7 @@ function convertTreeToOpenNodes(
       onDiagnoseStep: (stepExecution: WorkflowStepExecutionDto) => void;
       isDiagnoseHandoffInFlight?: boolean;
     };
+    waitingAction?: WaitingStepAction;
   }
 ): OpenTreeNode[] {
   return treeItems.flatMap((item) => {
@@ -345,6 +352,9 @@ function convertTreeToOpenNodes(
         ) {
           return options.iterationStatusOverrides.get(iterationIndexEarly);
         }
+        return deriveIterationStatus(item, stepExecutionMap);
+      }
+      if (isFallbackScope(item)) {
         return deriveIterationStatus(item, stepExecutionMap);
       }
       return stepExecution?.status ?? item.status ?? undefined;
@@ -386,20 +396,7 @@ function convertTreeToOpenNodes(
       ? i18n.translate('workflows.WorkflowStepExecutionTree.triggerLabel', {
           defaultMessage: '{type} trigger',
           values: {
-            type:
-              stepType === 'trigger_manual'
-                ? i18n.translate('workflows.WorkflowStepExecutionTree.triggerManual', {
-                    defaultMessage: 'Manual',
-                  })
-                : stepType === 'trigger_alert'
-                ? i18n.translate('workflows.WorkflowStepExecutionTree.triggerAlert', {
-                    defaultMessage: 'Alert',
-                  })
-                : stepType === 'trigger_scheduled'
-                ? i18n.translate('workflows.WorkflowStepExecutionTree.triggerScheduled', {
-                    defaultMessage: 'Scheduled',
-                  })
-                : stepType.replace(/^trigger_/, ''),
+            type: getTriggerName(stepType.replace(/^trigger_/, '')),
           },
         })
       : undefined;
@@ -530,6 +527,7 @@ function convertTreeToOpenNodes(
           }
           const gapId = iterationGapId(foreachParentId, entry.from, entry.to);
           const selectedIteration = selectedId ? parseIterationVirtualId(selectedId) : null;
+          const revealStepId = options?.waitingAction?.stepExecutionId ?? null;
           const selectedInThisGap =
             (selectedIteration != null &&
               selectedIteration.parentStepId === foreachParentStepId &&
@@ -538,7 +536,9 @@ function convertTreeToOpenNodes(
             (selectedId != null &&
               selectedIteration == null &&
               stepTreeContainsExecutionId(gapChildren, selectedId));
-          const isExpanded = expandedGapIds.has(gapId) || selectedInThisGap;
+          const waitingStepInThisGap =
+            revealStepId != null && stepTreeContainsExecutionId(gapChildren, revealStepId);
+          const isExpanded = expandedGapIds.has(gapId) || selectedInThisGap || waitingStepInThisGap;
           nodes.push(
             buildIterationGapNode(
               foreachParentId,
@@ -624,7 +624,7 @@ function convertTreeToOpenNodes(
       const isRetryParent =
         item.retryAttemptCount != null &&
         item.retryAttemptCount > 0 &&
-        item.children.every((c) => c.isRetryAttempt);
+        item.children.some((c) => c.isRetryAttempt);
 
       if (isRetryParent) {
         // Wait annotations between attempts. Attempt lists that exceed the
@@ -634,7 +634,7 @@ function convertTreeToOpenNodes(
         const configuredDelayMs = isValidDuration(delay) ? parseDuration(delay) : null;
         const nodes: OpenTreeNode[] = [];
         for (let i = 0; i < item.children.length; i++) {
-          if (i > 0) {
+          if (i > 0 && item.children[i].isRetryAttempt) {
             const prevExec = stepExecutionMap.get(item.children[i - 1].stepExecutionId ?? '');
             const nextExec = stepExecutionMap.get(item.children[i].stepExecutionId ?? '');
             const waitMs = computeInterAttemptWaitMs(prevExec, nextExec, configuredDelayMs);
@@ -682,13 +682,15 @@ function convertTreeToOpenNodes(
       if (
         item.retryAttemptCount != null &&
         item.retryAttemptCount > 0 &&
+        !item.isRetryAttempt &&
         item.children.length > 0
       ) {
-        const wall = computeRetryWallTimeMs(item.children, stepExecutionMap);
+        const attempts = item.children.filter((c) => c.isRetryAttempt);
+        const wall = computeRetryWallTimeMs(attempts, stepExecutionMap);
         if (wall != null) return wall;
-        return sumSubtreeExecutionTimeMs([item], stepExecutionMap);
+        return sumSubtreeExecutionTimeMs(attempts, stepExecutionMap);
       }
-      if (isIterationStepType(stepType) && item.children.length > 0) {
+      if ((isIterationStepType(stepType) || isFallbackScope(item)) && item.children.length > 0) {
         return sumSubtreeExecutionTimeMs([item], stepExecutionMap);
       }
       return stepExecution?.executionTimeMs ?? null;
@@ -724,10 +726,10 @@ function convertTreeToOpenNodes(
       selectedId != null &&
       (selectedId === stepExecution.id || selectedStepExecution?.stepId === stepExecution.stepId);
     const arrivalPulse =
-      carriesErrorRegion &&
       stepExecution != null &&
       options?.errorArrivalPulseStepId != null &&
-      options.errorArrivalPulseStepId === stepExecution.id;
+      options.errorArrivalPulseStepId === stepExecution.id &&
+      (carriesErrorRegion || status === ExecutionStatus.WAITING_FOR_INPUT);
 
     const isInFlightAttempt =
       status === ExecutionStatus.RUNNING ||
@@ -786,7 +788,7 @@ function convertTreeToOpenNodes(
         isRetryAttempt: item.isRetryAttempt,
         retryAttemptCount: item.isRetryAttempt ? undefined : item.retryAttemptCount,
         retryMaxAttempts,
-        error: errorMessage,
+        error: carriesErrorRegion ? errorMessage : null,
         onViewFailedStepInput:
           status && isDangerousStatus(status) && stepExecution?.id
             ? () => onSelectStepExecution(stepExecution.id)
@@ -821,12 +823,42 @@ function convertTreeToOpenNodes(
         errorPanelMessageOverride: retryLeadIn,
         showDangerSelectionBorder,
         arrivalPulse,
+        waitingAction:
+          options?.waitingAction && stepExecution?.id === options.waitingAction.stepExecutionId
+            ? options.waitingAction
+            : undefined,
       },
     };
 
     return [node];
   });
 }
+
+const getErrorMessage = (error: StepExecutionTreeRowProps['error']): string | undefined =>
+  typeof error === 'string' ? error : error?.message;
+
+const isNodeExpanded = (
+  node: OpenTreeNode,
+  expandedIds: Set<string>,
+  leafList: boolean
+): boolean => {
+  if (leafList) return false;
+  if (node.row?.onToggleExpand) return Boolean(node.row.isExpanded);
+  return node.children.length > 0 && expandedIds.has(node.id);
+};
+
+const hasVisibleDescendantWithError = (
+  nodes: OpenTreeNode[],
+  message: string,
+  expandedIds: Set<string>,
+  leafList: boolean
+): boolean =>
+  nodes.some(
+    (node) =>
+      getErrorMessage(node.row?.error) === message ||
+      (isNodeExpanded(node, expandedIds, leafList) &&
+        hasVisibleDescendantWithError(node.children, message, expandedIds, leafList))
+  );
 
 const OpenTreeNodes = ({
   nodes,
@@ -897,11 +929,15 @@ const OpenTreeNodes = ({
           ? undefined
           : node.row.onToggleExpand ??
             (hasTreeChildren ? () => onToggleExpand(node.id) : undefined);
-        const isExpanded = leafList
-          ? false
-          : node.row.onToggleExpand
-          ? Boolean(node.row.isExpanded)
-          : hasTreeChildren && expandedIds.has(node.id);
+        const isExpanded = isNodeExpanded(node, expandedIds, leafList);
+        const showChildren = isExpanded && hasTreeChildren;
+        const message = getErrorMessage(node.row.error);
+        // The engine copies a failed step's error onto every enclosing scope
+        // (iteration, foreach, ...); show it once, on the deepest visible row.
+        const isErrorShownBelow =
+          showChildren &&
+          message != null &&
+          hasVisibleDescendantWithError(node.children, message, expandedIds, leafList);
 
         return (
           <div
@@ -912,6 +948,7 @@ const OpenTreeNodes = ({
           >
             <StepExecutionTreeRow
               {...node.row}
+              error={isErrorShownBelow ? null : node.row.error}
               isExpanded={isExpanded}
               onToggleExpand={handleToggle}
               isExpandable={isExpandable}
@@ -923,7 +960,7 @@ const OpenTreeNodes = ({
                   : 'step-execution-tree-item-label'
               }
             />
-            {isExpanded && hasTreeChildren && (
+            {showChildren && (
               <div
                 data-test-subj="workflowStepTreeIndentGuide"
                 css={css`
@@ -991,6 +1028,27 @@ const collectContainingIterationIds = (
   return ids;
 };
 
+/** Ancestors that start collapsed (iterations, parallel branches) on the path to `targetId`. */
+const collectCollapsedAncestorIds = (nodes: OpenTreeNode[], targetId: string | null): string[] => {
+  if (!targetId) {
+    return [];
+  }
+  const collapsedTypes = new Set<string>(COLLAPSED_BY_DEFAULT_STEP_TYPES);
+  const ids: string[] = [];
+  const walk = (list: OpenTreeNode[]) => {
+    for (const node of list) {
+      if (nodeContainsId(node, targetId) && node.id !== targetId) {
+        if (node.row?.stepType && collapsedTypes.has(node.row.stepType)) {
+          ids.push(node.id);
+        }
+        walk(node.children);
+      }
+    }
+  };
+  walk(nodes);
+  return ids;
+};
+
 const withSelectedIterationExpanded = (
   base: Set<string>,
   forceExpandIds: string[],
@@ -1010,14 +1068,23 @@ const withSelectedIterationExpanded = (
   return next;
 };
 
-const useTreeExpandedIds = (openNodes: OpenTreeNode[], selectedId: string | null) => {
+const useTreeExpandedIds = (
+  openNodes: OpenTreeNode[],
+  selectedId: string | null,
+  /** Step execution to keep visible even when it is not the selection (active waitForInput). */
+  revealId: string | null = null
+) => {
   const [userExpandedIds, setUserExpandedIds] = useState<Set<string> | null>(null);
   const [collapseOverride, setCollapseOverride] = useState<{
-    selectedId: string;
+    selectedId: string | null;
+    revealId: string | null;
     ids: Set<string>;
   } | null>(null);
 
-  if (collapseOverride && collapseOverride.selectedId !== selectedId) {
+  if (
+    collapseOverride &&
+    (collapseOverride.selectedId !== selectedId || collapseOverride.revealId !== revealId)
+  ) {
     setCollapseOverride(null);
   }
 
@@ -1027,13 +1094,18 @@ const useTreeExpandedIds = (openNodes: OpenTreeNode[], selectedId: string | null
     return ids;
   }, [openNodes]);
 
-  const forceExpandIds = useMemo(
-    () => collectContainingIterationIds(openNodes, selectedId),
-    [openNodes, selectedId]
-  );
+  const forceExpandIds = useMemo(() => {
+    const ids = new Set<string>(collectContainingIterationIds(openNodes, selectedId));
+    for (const id of collectCollapsedAncestorIds(openNodes, revealId)) {
+      ids.add(id);
+    }
+    return [...ids];
+  }, [openNodes, revealId, selectedId]);
 
   const userCollapsedIds =
-    collapseOverride && selectedId && collapseOverride.selectedId === selectedId
+    collapseOverride &&
+    collapseOverride.selectedId === selectedId &&
+    collapseOverride.revealId === revealId
       ? collapseOverride.ids
       : EMPTY_ID_SET;
 
@@ -1056,20 +1128,22 @@ const useTreeExpandedIds = (openNodes: OpenTreeNode[], selectedId: string | null
         }
         return next;
       });
-      if (!selectedId || !forceExpandIds.includes(id)) {
+      if (!forceExpandIds.includes(id)) {
         return;
       }
       setCollapseOverride((prev) => {
-        const ids = new Set(prev?.selectedId === selectedId ? prev.ids : []);
+        const ids = new Set(
+          prev?.selectedId === selectedId && prev.revealId === revealId ? prev.ids : []
+        );
         if (isCurrentlyExpanded) {
           ids.add(id);
         } else {
           ids.delete(id);
         }
-        return { selectedId, ids };
+        return { selectedId, revealId, ids };
       });
     },
-    [defaultExpandedIds, expandedIds, forceExpandIds, selectedId]
+    [defaultExpandedIds, expandedIds, forceExpandIds, revealId, selectedId]
   );
 
   return { expandedIds, onToggleExpand };
@@ -1256,6 +1330,8 @@ export interface WorkflowStepExecutionTreeProps {
   workflowName?: string;
   /** Close step subflyout(s) before opening Agent Builder diagnose chat. */
   onBeforeDiagnose?: () => void;
+  /** Inline Provide action panel for the active waitForInput step. */
+  waitingAction?: WaitingStepAction;
 }
 
 export const WorkflowStepExecutionTree = ({
@@ -1272,6 +1348,7 @@ export const WorkflowStepExecutionTree = ({
   statusPlacement = 'right',
   workflowName,
   onBeforeDiagnose,
+  waitingAction,
 }: WorkflowStepExecutionTreeProps) => {
   const styles = useMemoCss(componentStyles);
   const [expandedGapIds, setExpandedGapIds] = useState<Set<string>>(new Set());
@@ -1433,6 +1510,7 @@ export const WorkflowStepExecutionTree = ({
         isExecutionComplete: isTerminalStatus(execution.status),
         definition,
         diagnose: diagnoseOptions,
+        waitingAction,
       }
     );
   }, [
@@ -1450,9 +1528,14 @@ export const WorkflowStepExecutionTree = ({
     onToggleGap,
     selectedId,
     stepExecutionsUnavailable,
+    waitingAction,
   ]);
 
-  const { expandedIds, onToggleExpand } = useTreeExpandedIds(openNodes, selectedId);
+  const { expandedIds, onToggleExpand } = useTreeExpandedIds(
+    openNodes,
+    selectedId,
+    waitingAction?.stepExecutionId ?? null
+  );
 
   if (error) {
     return (
@@ -1568,7 +1651,7 @@ export const WorkflowStepExecutionTree = ({
       title={
         <h2>
           <FormattedMessage
-            id="workflows.WorkflowStepExecutionTree.errorLoadingStepExecutions"
+            id="workflows.WorkflowStepExecutionTree.errorLoadingExecutionGraph"
             defaultMessage="Error loading execution graph"
           />
         </h2>

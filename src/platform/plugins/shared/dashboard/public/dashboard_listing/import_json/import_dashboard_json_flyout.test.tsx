@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 
@@ -97,5 +97,25 @@ describe('ImportDashboardJsonFlyout', () => {
     expect(
       await screen.findByText(/1 item removed from the imported dashboard/)
     ).toBeInTheDocument();
+  });
+
+  it('shows the server message for a 4xx sanitize error', async () => {
+    const user = userEvent.setup();
+    mockSanitizeDashboard.mockRejectedValue(
+      Object.assign(new Error('Bad Request'), {
+        request: {},
+        response: { status: 400 },
+        body: { message: '[request body]: bad title' },
+      })
+    );
+    renderFlyout();
+    await pickFile(VALID_FILE);
+    await screen.findByTestId('importDashboardJsonServerError');
+    await user.click(
+      within(screen.getByTestId('importDashboardJsonServerErrorDetailsAccordion')).getByRole(
+        'button'
+      )
+    );
+    expect(screen.getAllByText('[request body]: bad title')[0]).toBeInTheDocument();
   });
 });

@@ -9,8 +9,10 @@ import Boom from '@hapi/boom';
 import pMap from 'p-map';
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { ServiceAccountBoundWorkload } from '@kbn/core-security-common';
 import type {
   CoreSecurityDelegateServiceAccounts,
+  DeleteServiceAccountResult,
   ResolvedServiceAccountWorkload,
   ServiceAccountWorkloadBinding,
 } from '@kbn/core-security-server';
@@ -24,20 +26,13 @@ import type { EnsureClusterPrivilegeParams } from './cluster_privilege';
 import { ensureClusterPrivilege } from './cluster_privilege';
 import type { ServiceAccountsBackend } from './types';
 import type { SecurityLicense } from '../../common';
-import type { ServiceAccountBoundWorkload } from '../../common/service_accounts';
 import { ServiceAccountAuditAction, serviceAccountAuditEvent } from '../audit';
 import { getDetailedErrorMessage } from '../errors';
 
 /** How many bindings are re-read at once when checking whether an account can be deleted. */
 const VERIFY_CONCURRENCY = 10;
 
-/**
- * What came of a delete. An account that is still bound to workloads is not deleted unless the
- * caller forces it, and the workloads that stopped it are reported back.
- */
-export type DeleteServiceAccountResult =
-  | { deleted: true; warnings: string[] }
-  | { deleted: false; workloads: [ServiceAccountBoundWorkload, ...ServiceAccountBoundWorkload[]] };
+export type { DeleteServiceAccountResult } from '@kbn/core-security-server';
 
 const isNonEmpty = <T>(items: T[]): items is [T, ...T[]] => items.length > 0;
 

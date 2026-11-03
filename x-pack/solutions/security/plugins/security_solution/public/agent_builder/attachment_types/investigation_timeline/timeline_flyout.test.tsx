@@ -7,13 +7,25 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
+import { useDateFormat, useTimeZone } from '../../../common/lib/kibana';
 import { InvestigationTimelineFlyout } from './timeline_flyout';
 
-const renderFlyout = (events: Array<{ timestamp: string; host: string; description: string }>) =>
+jest.mock('../../../common/lib/kibana');
+
+beforeEach(() => {
+  (useDateFormat as jest.Mock).mockReturnValue('MMM D, YYYY @ HH:mm:ss.SSS');
+  (useTimeZone as jest.Mock).mockReturnValue('UTC');
+});
+
+const renderFlyout = (
+  events: Array<{ timestamp: string; host: string; description: string }>,
+  window?: { start: string; end: string }
+) =>
   render(
     <I18nProvider>
-      <InvestigationTimelineFlyout events={events} />
+      <InvestigationTimelineFlyout events={events} window={window} />
     </I18nProvider>
   );
 
@@ -36,7 +48,7 @@ describe('InvestigationTimelineFlyout', () => {
     expect(screen.getByTestId('investigationTimelineFlyout')).toHaveClass('euiFlyoutBody');
     expect(
       screen.getAllByTestId('investigationTimelineEventTimestamp').map((el) => el.textContent)
-    ).toEqual(['2026-09-11 14:23:32.488Z', '2026-09-11 15:05:32.488Z']);
+    ).toEqual(['Sep 11, 2026 @ 14:23:32', 'Sep 11, 2026 @ 15:05:32']);
     expect(
       screen.getAllByTestId('investigationTimelineEventHost').map((el) => el.textContent)
     ).toEqual(['WKSTN-RECV01', 'SRV-DC01']);
@@ -44,10 +56,33 @@ describe('InvestigationTimelineFlyout', () => {
     expect(screen.getByText('svc.exe created a ransom note')).toBeInTheDocument();
   });
 
+  it('shows the raw timestamp on hover', async () => {
+    renderFlyout([
+      {
+        timestamp: '2026-09-11T14:23:32.488Z',
+        host: 'WKSTN-RECV01',
+        description: 'OUTLOOK.EXE spawned powershell.exe',
+      },
+    ]);
+
+    await userEvent.hover(screen.getByTestId('investigationTimelineEventTimestamp'));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('2026-09-11T14:23:32.488Z');
+  });
+
   it('renders an empty state when there are no events', () => {
     renderFlyout([]);
     expect(
       screen.getByText('No events were reconstructed from the available telemetry.')
     ).toBeInTheDocument();
+    expect(screen.queryByTestId('investigationTimelineWindow')).not.toBeInTheDocument();
+  });
+
+  it('names the searched window under the title when the payload carries one', () => {
+    renderFlyout([], { start: '2026-09-11T12:00:00.000Z', end: '2026-09-11T16:00:00.000Z' });
+
+    expect(screen.getByTestId('investigationTimelineWindow')).toHaveTextContent(
+      'Searched window: Sep 11, 2026 @ 12:00:00 to Sep 11, 2026 @ 16:00:00'
+    );
   });
 });

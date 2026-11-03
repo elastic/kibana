@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { CancelActionResults } from '../../cancel_action_results';
+import { memo, useMemo } from 'react';
 import { useSendCancelRequest } from '../../../hooks/response_actions/use_send_cancel_request';
 import type { CancelActionRequestBody } from '../../../../../common/api/endpoint';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
@@ -39,7 +37,7 @@ export const CancelActionResult = memo<
       : undefined;
   }, [command.args.args, command.commandDefinition?.meta?.agentType, endpointId]);
 
-  const { result, actionDetails } = useConsoleActionSubmitter<CancelActionRequestBody>({
+  return useConsoleActionSubmitter<CancelActionRequestBody>({
     ResultComponent,
     setStore,
     store,
@@ -48,24 +46,7 @@ export const CancelActionResult = memo<
     actionCreator,
     actionRequestBody,
     dataTestSubj: 'cancel',
-    pendingMessage: i18n.translate('xpack.securitySolution.cancelAction.pendingMessage', {
-      defaultMessage: 'Cancel action in progress.',
-    }),
-  });
-
-  if (actionDetails?.isCompleted) {
-    return (
-      <ResultComponent>
-        <CancelActionResults
-          action={actionDetails}
-          agentId={endpointId}
-          data-test-subj="cancelActionResult"
-        />
-      </ResultComponent>
-    );
-  }
-
-  return result;
+  }).result;
 });
 
 CancelActionResult.displayName = 'CancelActionResult';

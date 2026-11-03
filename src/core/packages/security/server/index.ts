@@ -17,6 +17,8 @@ export type { CoreAuditService } from './src/audit';
 export type {
   CoreServiceAccountsService,
   CreateServiceAccountServerParams,
+  DeleteServiceAccountOptions,
+  DeleteServiceAccountResult,
   ServiceAccountPlatformAssumer,
 } from './src/service_accounts';
 export type {
@@ -43,6 +45,7 @@ export type {
   ServiceAccountWorkloadRef,
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRequestParams,
+  ServiceAccountBoundWorkload,
 } from '@kbn/core-security-common';
 export type {
   CoreSecurityDelegateContract,
@@ -81,6 +84,7 @@ export {
   isUiamBearerCredential,
   isMissingApiKey,
   isRevokedApiKey,
+  UIAM_ERROR_CODES,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
   ES_CLIENT_AUTHENTICATION_HEADER,
   deriveInternalCallerAttestation,

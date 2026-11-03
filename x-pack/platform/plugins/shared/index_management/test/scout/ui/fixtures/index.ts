@@ -7,6 +7,7 @@
 
 import { test as base } from '@kbn/scout';
 import type {
+  KibanaUrl,
   ScoutPage,
   ScoutTestFixtures,
   ScoutWorkerFixtures,
@@ -18,7 +19,7 @@ import type { AbstractPageObject } from './page_objects/index_management_page';
 import { IndexManagement } from './page_objects/index_management_page';
 import { CUSTOM_ROLES } from './custom_roles';
 
-type PageObjectClass = new (page: ScoutPage) => AbstractPageObject;
+type PageObjectClass = new (page: ScoutPage, kbnUrl: KibanaUrl) => AbstractPageObject;
 
 export interface IndexManagementBrowserAuthFixture extends BrowserAuthFixture {
   loginAsIndexManagementUser: () => Promise<void>;
@@ -29,11 +30,15 @@ export const createTest = function <PageObjectsExtensions = Record<string, Abstr
 ) {
   type PageObjectsExtended = PageObjectsExtensions & PageObjects;
 
-  function extendPOs(pageObjects: PageObjects, page: ScoutPage): PageObjectsExtended {
+  function extendPOs(
+    pageObjects: PageObjects,
+    page: ScoutPage,
+    kbnUrl: KibanaUrl
+  ): PageObjectsExtended {
     const initedLazyPageObjects = Object.keys(pageObjectClassMap).reduce<
       Record<string, AbstractPageObject>
     >((col, value) => {
-      col[value] = createLazyPageObject(pageObjectClassMap[value], page);
+      col[value] = createLazyPageObject(pageObjectClassMap[value], page, kbnUrl);
       return col;
     }, {});
 
@@ -55,13 +60,15 @@ export const createTest = function <PageObjectsExtensions = Record<string, Abstr
       {
         pageObjects,
         page,
+        kbnUrl,
       }: {
         pageObjects: PageObjectsExtended;
         page: ScoutPage;
+        kbnUrl: KibanaUrl;
       },
       use: (pageObjects: PageObjectsExtended) => Promise<void>
     ) => {
-      const extendedPageObjects = extendPOs(pageObjects, page);
+      const extendedPageObjects = extendPOs(pageObjects, page, kbnUrl);
       await use(extendedPageObjects);
     },
     browserAuth: async (

@@ -67,3 +67,16 @@ responses:
       For browser monitors, a 400 error is returned if the timeout is less than 30 seconds.
   404:
     description: The monitor does not exist.
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X PUT "${KIBANA_URL}/api/synthetics/monitors/monitor-id" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{"type":"http","name":"Website Availability","url":"https://example.com","tags":["website","availability"],"locations":["united_kingdom"]}'
+  - lang: Console
+    source: |
+      PUT kbn://api/synthetics/monitors/monitor-id
+      {"type":"http","name":"Website Availability","url":"https://example.com","tags":["website","availability"],"locations":["united_kingdom"]}

@@ -38,6 +38,7 @@ import {
   WaitStepSchema,
   WorkflowExecuteAsyncStepSchema,
   WorkflowExecuteStepSchema,
+  WorkflowFailStepSchema,
   WorkflowOutputStepSchema,
   WorkflowSchema,
   WorkflowSchemaForAutocomplete,
@@ -313,6 +314,18 @@ describe('WorkflowOutputStepSchema', () => {
     });
 
     expect(result.success).toBe(false);
+  });
+});
+
+describe('WorkflowFailStepSchema', () => {
+  it('keeps the error type, which a parent reads as steps.<name>.error.type', () => {
+    const step = WorkflowFailStepSchema.parse({
+      name: 'fail',
+      type: 'workflow.fail',
+      with: { message: 'The process is no longer running', type: 'NonRetryableError' },
+    });
+
+    expect(step.with?.type).toBe('NonRetryableError');
   });
 });
 
@@ -1623,5 +1636,39 @@ describe('dynamic timeout schema', () => {
     expect(encoded).toMatch(/"anyOf"|"oneOf"/);
     expect(encoded).toContain('\\d+w');
     expect(encoded).toContain('{{');
+  });
+});
+
+describe('workflow child identity allowlist', () => {
+  it.each([
+    [WorkflowExecuteStepSchema, 'allowed-workflow-ids'],
+    [WorkflowExecuteStepSchema, 'allowed-workflow-tags'],
+    [WorkflowExecuteAsyncStepSchema, 'allowed-workflow-ids'],
+    [WorkflowExecuteAsyncStepSchema, 'allowed-workflow-tags'],
+  ] as const)('requires bounded literal entries: %p %s', (schema, field) => {
+    const step = {
+      name: 'child',
+      type: schema.shape.type.value,
+      with: {
+        'workflow-id': '{{ variables.action_workflow_id }}',
+        'run-as-mode': 'inherit',
+        [field]: ['approved-child'],
+      },
+    };
+    expect(schema.safeParse(step).success).toBe(true);
+    for (const allowedIds of [
+      [],
+      [''],
+      ['a'.repeat(1025)],
+      Array.from({ length: 101 }, (_, index) => `child-${index}`),
+      ['{{ variables.child }}'],
+      ['${{ variables.child }}'],
+      ['{% if true %}child{% endif %}'],
+      ['child\n{{ variables.suffix }}'],
+    ]) {
+      expect(
+        schema.safeParse({ ...step, with: { ...step.with, [field]: allowedIds } }).success
+      ).toBe(false);
+    }
   });
 });

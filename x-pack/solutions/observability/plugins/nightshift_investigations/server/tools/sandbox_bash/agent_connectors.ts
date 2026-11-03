@@ -18,7 +18,25 @@ export interface AgentConnector {
 }
 
 /**
- * Returns the connectors assigned to this agent that the current user can access.
+ * Returns the sandbox-capable connectors on the allow-list that the actions client can read.
+ * Errors from the actions client are not caught.
+ */
+export const listSandboxCapableAgentConnectors = async (
+  actionsClient: ActionsClient,
+  allowedConnectorIds: readonly string[]
+): Promise<AgentConnector[]> => {
+  const all = await actionsClient.getAll({
+    includeSystemActions: false,
+    sandboxCapableOnly: true,
+  });
+  const allowedSet = new Set(allowedConnectorIds);
+  return all
+    .filter((c) => allowedSet.has(c.id))
+    .map((c) => ({ id: c.id, name: c.name, actionTypeId: c.actionTypeId }));
+};
+
+/**
+ * Returns sandbox-capable connectors assigned to this agent that the current user can access.
  * Returns [] when actions is not available or the allow-list is empty.
  */
 export const listAgentConnectors = async (
@@ -29,11 +47,7 @@ export const listAgentConnectors = async (
 
   try {
     const actionsClient = await getActionsClient(callContext.request);
-    const all = await actionsClient.getAll({ includeSystemActions: false });
-    const allowedSet = new Set(callContext.allowedConnectorIds);
-    return all
-      .filter((c) => allowedSet.has(c.id))
-      .map((c) => ({ id: c.id, name: c.name, actionTypeId: c.actionTypeId }));
+    return await listSandboxCapableAgentConnectors(actionsClient, callContext.allowedConnectorIds);
   } catch (err) {
     return [];
   }

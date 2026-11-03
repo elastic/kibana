@@ -929,6 +929,41 @@ describe('updateAlertsStatus', () => {
       expect(esClient.search).toHaveBeenCalledTimes(2);
     });
 
+    it('reads attacks from different backing indices of one family in a single search', async () => {
+      esClient.search.mockResolvedValueOnce(
+        searchResponse([
+          { _index: ATTACK_INDEX, _id: 'attack-1', _source: validAttackSource },
+          {
+            _index: '.internal.alerts-security.attack.discovery.alerts-default-000002',
+            _id: 'attack-2',
+            _source: validAttackSource,
+          },
+        ]) as never
+      );
+
+      await expect(
+        alertService.ensureAttacksAuthorized({
+          attacks: [
+            { id: 'attack-1', index: ATTACK_INDEX },
+            {
+              id: 'attack-2',
+              index: '.internal.alerts-security.attack.discovery.alerts-default-000002',
+            },
+          ],
+          spaceId: 'default',
+        })
+      ).resolves.not.toThrow();
+
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: ATTACK_PATTERN,
+          size: 2,
+          query: { ids: { values: ['attack-1', 'attack-2'] } },
+        })
+      );
+    });
+
     it('authorizes an ad-hoc attack discovery alert in the current space', async () => {
       esClient.search.mockResolvedValueOnce(adHocAttackDoc(validAdHocAttackSource) as never);
 
@@ -1006,7 +1041,41 @@ describe('updateAlertsStatus', () => {
       ).resolves.not.toThrow();
 
       expect(alertsClient.ensureAllAlertsAuthorizedRead).toHaveBeenCalledWith({
-        alerts: [{ id: 'attack-1', index: '.alerts-security.attack.discovery.alerts-default' }],
+        alerts: [
+          {
+            id: 'attack-1',
+            index: '.internal.alerts-security.attack.discovery.alerts-default-000007',
+          },
+        ],
+      });
+    });
+
+    it('authorizes the document the search resolved, not the index the attachment named', async () => {
+      // `ensureAllAlertsAuthorizedRead` runs its own internal mget. The caller-supplied index need
+      // not hold the document the search found, so forwarding it would run the alerting
+      // permission check against a different document than the one whose rule type was read.
+      esClient.search.mockResolvedValueOnce(
+        searchResponse([
+          {
+            _index: '.internal.alerts-security.attack.discovery.alerts-default-000042',
+            _id: 'attack-1',
+            _source: validAttackSource,
+          },
+        ]) as never
+      );
+
+      await alertService.ensureAttacksAuthorized({
+        attacks: [{ id: 'attack-1', index: ATTACK_INDEX }],
+        spaceId: 'default',
+      });
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).toHaveBeenCalledWith({
+        alerts: [
+          {
+            id: 'attack-1',
+            index: '.internal.alerts-security.attack.discovery.alerts-default-000042',
+          },
+        ],
       });
     });
 
@@ -1031,6 +1100,35 @@ describe('updateAlertsStatus', () => {
       await expect(
         alertService.ensureAttacksAuthorized({ attacks, spaceId: 'default' })
       ).rejects.toThrow(/Referenced attack\(s\) not found: attack-1/);
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('reports the attack as not found when the caller may not read the pattern', async () => {
+      // A caller with no index privileges at all is refused the search instead of reading nothing.
+      esClient.search.mockRejectedValueOnce({
+        statusCode: 403,
+        body: { error: { type: 'security_exception' } },
+      } as never);
+
+      await expect(
+        alertService.ensureAttacksAuthorized({ attacks, spaceId: 'default' })
+      ).rejects.toThrow(/Referenced attack\(s\) not found: attack-1/);
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('rethrows a read failure that is not an authorization refusal', async () => {
+      esClient.search.mockRejectedValueOnce(
+        Object.assign(new Error('unavailable_shards_exception'), {
+          statusCode: 503,
+          body: { error: { type: 'unavailable_shards_exception' } },
+        }) as never
+      );
+
+      await expect(
+        alertService.ensureAttacksAuthorized({ attacks, spaceId: 'default' })
+      ).rejects.toThrow(/unavailable_shards_exception/);
 
       expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
     });
@@ -1087,6 +1185,29 @@ describe('updateAlertsStatus', () => {
       expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
     });
 
+    it.each([
+      ['.alerts-security.alerts-default'],
+      ['.internal.alerts-security.alerts-default-000001'],
+      ['.kibana'],
+      ['logs-*'],
+    ])(
+      'throws without reading when the index %s is not an attack discovery index',
+      async (index) => {
+        // Without this gate the read is pointed at any index the caller can read, and a document
+        // there whose `_source` claims an attack discovery rule type in the right space would pass
+        // every check that follows.
+        await expect(
+          alertService.ensureAttacksAuthorized({
+            attacks: [{ id: 'attack-1', index }],
+            spaceId: 'default',
+          })
+        ).rejects.toThrow(/not an attack discovery index/);
+
+        expect(esClient.search).not.toHaveBeenCalled();
+        expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+      }
+    );
+
     it('does not read when there are no non-empty attacks', async () => {
       await expect(
         alertService.ensureAttacksAuthorized({
@@ -1106,6 +1227,185 @@ describe('updateAlertsStatus', () => {
       await expect(
         alertService.ensureAttacksAuthorized({ attacks, spaceId: 'default' })
       ).rejects.toThrow(/Failed to authorize attacks/);
+    });
+  });
+
+  describe('confirmAlertIndices', () => {
+    const ALIAS = '.alerts-security.alerts-default';
+    const BACKING_INDEX = '.internal.alerts-security.alerts-default-000001';
+    const NEWER_BACKING_INDEX = '.internal.alerts-security.alerts-default-000002';
+
+    const claim = (id: string, index = BACKING_INDEX, attachedIndex = ALIAS) => ({
+      id,
+      index,
+      attachedIndex,
+    });
+
+    const searchHits = (...hits: Array<{ _id: string; _index: string }>) =>
+      ({ hits: { hits } } as never);
+
+    const claimedPairsQuery = (...pairs: Array<[string, string[]]>) => ({
+      bool: {
+        should: pairs.map(([index, ids]) => ({
+          bool: { filter: [{ term: { _index: index } }, { ids: { values: ids } }] },
+        })),
+        minimum_should_match: 1,
+      },
+    });
+
+    it('searches the attached index for exactly the claimed pairs', async () => {
+      esClient.search.mockResolvedValueOnce(searchHits({ _id: 'alert-1', _index: BACKING_INDEX }));
+
+      await expect(
+        alertService.confirmAlertIndices({ claims: [claim('alert-1')] })
+      ).resolves.toEqual([claim('alert-1')]);
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        index: ALIAS,
+        size: 1,
+        query: claimedPairsQuery([BACKING_INDEX, ['alert-1']]),
+        _source: false,
+        track_total_hits: false,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+      });
+    });
+
+    it('confirms the claimed backing index when the alias exposes the id in several', async () => {
+      // Ids are unique only within an index, so the hit must come from the claimed index.
+      esClient.search.mockResolvedValueOnce(
+        searchHits({ _id: 'alert-1', _index: NEWER_BACKING_INDEX })
+      );
+
+      await expect(
+        alertService.confirmAlertIndices({ claims: [claim('alert-1', NEWER_BACKING_INDEX)] })
+      ).resolves.toEqual([claim('alert-1', NEWER_BACKING_INDEX)]);
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ query: claimedPairsQuery([NEWER_BACKING_INDEX, ['alert-1']]) })
+      );
+    });
+
+    it('does not confirm hits outside the claimed pairs', async () => {
+      // An `_index` filter on an alias or pattern matches every index behind it.
+      esClient.search.mockResolvedValueOnce(
+        searchHits(
+          { _id: 'alert-1', _index: BACKING_INDEX },
+          { _id: 'alert-1', _index: NEWER_BACKING_INDEX },
+          { _id: 'alert-2', _index: BACKING_INDEX }
+        )
+      );
+
+      await expect(
+        alertService.confirmAlertIndices({ claims: [claim('alert-1', NEWER_BACKING_INDEX)] })
+      ).resolves.toEqual([claim('alert-1', NEWER_BACKING_INDEX)]);
+    });
+
+    it('searches each attached index once, for its own claims only', async () => {
+      const otherAlias = '.alerts-security.alerts-other';
+      esClient.search
+        .mockResolvedValueOnce(searchHits({ _id: 'alert-1', _index: BACKING_INDEX }))
+        .mockResolvedValueOnce(searchHits());
+
+      await alertService.confirmAlertIndices({
+        claims: [
+          claim('alert-1'),
+          claim('alert-2'),
+          claim('alert-1'),
+          claim('alert-3', NEWER_BACKING_INDEX),
+          claim('alert-4', BACKING_INDEX, otherAlias),
+        ],
+      });
+
+      expect(esClient.search).toHaveBeenCalledTimes(2);
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: ALIAS,
+          size: 3,
+          query: claimedPairsQuery(
+            [BACKING_INDEX, ['alert-1', 'alert-2']],
+            [NEWER_BACKING_INDEX, ['alert-3']]
+          ),
+        })
+      );
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: otherAlias,
+          size: 1,
+          query: claimedPairsQuery([BACKING_INDEX, ['alert-4']]),
+        })
+      );
+    });
+
+    it.each([
+      ['an empty attached index', claim('alert-1', BACKING_INDEX, '')],
+      ['a remote attached index', claim('alert-1', BACKING_INDEX, `remote_cluster:${ALIAS}`)],
+      ['an empty claimed index', claim('alert-1', '')],
+      ['a claimed index containing a colon', claim('alert-1', ':')],
+      ['an empty id', claim('')],
+    ])('does not search for a claim with %s', async (_, invalidClaim) => {
+      // An empty attached index would search every index, and a remote one another cluster. Hits
+      // never report an empty or colon-separated index, so such claims cannot be confirmed.
+      await expect(alertService.confirmAlertIndices({ claims: [invalidClaim] })).resolves.toEqual(
+        []
+      );
+
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['a 403', { statusCode: 403 }, 'the caller cannot read it'],
+      [
+        'a security exception',
+        { body: { error: { type: 'security_exception' } } },
+        'the caller cannot read it',
+      ],
+      [
+        'an invalid attached index name',
+        { statusCode: 400, body: { error: { type: 'invalid_index_name_exception' } } },
+        'Elasticsearch rejected an index name',
+      ],
+      [
+        'an invalid claimed index name',
+        {
+          statusCode: 400,
+          body: {
+            error: {
+              type: 'search_phase_execution_exception',
+              root_cause: [{ type: 'invalid_index_name_exception' }],
+            },
+          },
+        },
+        'Elasticsearch rejected an index name',
+      ],
+      [
+        'a missing index',
+        { statusCode: 404, body: { error: { type: 'index_not_found_exception' } } },
+        'Elasticsearch rejected an index name',
+      ],
+    ])('leaves the claims unconfirmed when the search fails with %s', async (_, error, reason) => {
+      esClient.search.mockRejectedValueOnce(error as never);
+
+      await expect(
+        alertService.confirmAlertIndices({ claims: [claim('alert-1')] })
+      ).resolves.toEqual([]);
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Leaving the alerts claimed through ${ALIAS} unconfirmed because ${reason}: alert-1 in ${BACKING_INDEX}`
+      );
+    });
+
+    it('wraps and rethrows other search failures', async () => {
+      esClient.search.mockRejectedValueOnce(
+        Object.assign(new Error('unavailable_shards_exception'), {
+          statusCode: 503,
+          body: { error: { type: 'unavailable_shards_exception' } },
+        }) as never
+      );
+
+      await expect(
+        alertService.confirmAlertIndices({ claims: [claim('alert-1')] })
+      ).rejects.toThrow(/Failed to confirm alert indices: .*unavailable_shards_exception/);
     });
   });
 });

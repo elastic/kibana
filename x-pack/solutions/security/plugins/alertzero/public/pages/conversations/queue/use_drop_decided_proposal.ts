@@ -9,10 +9,8 @@ import { useCallback } from 'react';
 import type { InfiniteData } from '@kbn/react-query';
 import { useQueryClient } from '@kbn/react-query';
 import type { ProposalsPageResponse } from '../../../../common/proposals/list';
+import { OPEN_PROPOSAL_CATEGORIES } from '../../../../common/proposals/list';
 import { queryKeys } from '../../../query_keys';
-
-/** Closed only ever gains a decided proposal, never loses one. */
-const OPEN_CATEGORIES = ['respond', 'investigate', 'configure'] as const;
 
 const withoutProposal = (data: InfiniteData<ProposalsPageResponse>, proposalId: string) => ({
   ...data,
@@ -29,20 +27,23 @@ const holds = (data: InfiniteData<ProposalsPageResponse> | undefined, proposalId
   Boolean(data?.pages.some((page) => page.proposals.some(({ id }) => id === proposalId)));
 
 /**
- * Takes a just-decided proposal out of its queue. The decision is recorded
- * asynchronously — the route releases the gate and the workflow writes the outcome
- * behind it — so the server still reports it as pending for a moment. The row goes
- * now and the poll reconciles.
+ * Removes a declined proposal from its queue at once. A declined proposal closes straight away.
+ * Do not use it for an approved proposal. That proposal stays in its category while its action
+ * runs.
+ *
+ * The server records the decision after a short delay, so it can still list the proposal as
+ * pending. The row goes now, and the next poll corrects the cache. `entity` is the Impact filter
+ * that the queues use. The caches for that filter hold the rows.
  */
-export const useDropDecidedProposal = () => {
+export const useDropDecidedProposal = (entity?: string | null) => {
   const queryClient = useQueryClient();
 
   return useCallback(
     async (proposalId: string) => {
-      const category = OPEN_CATEGORIES.find((candidate) =>
+      const category = OPEN_PROPOSAL_CATEGORIES.find((candidate) =>
         holds(
           queryClient.getQueryData<InfiniteData<ProposalsPageResponse>>(
-            queryKeys.proposals.byCategory(candidate)
+            queryKeys.proposals.byCategory(candidate, entity)
           ),
           proposalId
         )
@@ -52,8 +53,8 @@ export const useDropDecidedProposal = () => {
         return;
       }
 
-      const pagesKey = queryKeys.proposals.byCategory(category);
-      const countKey = queryKeys.proposals.byCategoryCount(category);
+      const pagesKey = queryKeys.proposals.byCategory(category, entity);
+      const countKey = queryKeys.proposals.byCategoryCount(category, entity);
 
       // Only this bucket's queries: the same decision also refreshes Closed and the
       // header, and cancelling the whole proposals root would abort those too. The
@@ -70,6 +71,6 @@ export const useDropDecidedProposal = () => {
         cached ? { ...cached, total: Math.max(cached.total - 1, 0) } : cached
       );
     },
-    [queryClient]
+    [queryClient, entity]
   );
 };

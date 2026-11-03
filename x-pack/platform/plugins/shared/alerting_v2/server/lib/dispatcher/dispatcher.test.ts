@@ -9,7 +9,11 @@ import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { WorkflowDetailDto } from '@kbn/workflows';
+import type {
+  BulkScheduleWorkflowItem,
+  WorkflowsServerPluginSetup,
+} from '@kbn/workflows-management-plugin/server';
 import moment from 'moment';
 import type { AlertAction } from '../../resources/datastreams/alert_actions';
 import type {
@@ -22,6 +26,7 @@ import type { EventLogServiceContract } from '../services/event_log_service/even
 import { createEventLogService } from '../services/event_log_service/event_log_service.mock';
 import type { LicenseServiceContract } from '../services/license_service/license_service';
 import { createMockLicenseService } from '../services/license_service/license_service.mock';
+import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import type { MaintenanceWindowServiceContract } from '../services/maintenance_window_service/maintenance_window_service';
 import { createMaintenanceWindowServiceMock } from '../services/maintenance_window_service/maintenance_window_service.mock';
@@ -33,11 +38,12 @@ import type { StorageServiceContract } from '../services/storage_service/storage
 import { createStorageService } from '../services/storage_service/storage_service.mock';
 import { createRuleSoAttributes } from '../test_utils';
 import {
+  DISPATCH_CHUNK_SIZE,
   MAX_WINDOW_MINUTES,
   OVERLAP_WINDOW_MINUTES,
   PRE_FETCH_STUCK_ADVANCE_LAG_MS,
   STUCK_TICK_LIMIT,
-  TICK_DEADLINE_MS,
+  getTickDeadlineMs,
 } from './constants';
 import { DispatcherService } from './dispatcher';
 import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
@@ -45,13 +51,22 @@ import {
   createDispatchableAlertEventsResponse,
   createAlertDataResponse,
   createAlertSuppressionsResponse,
+  createAlreadyNotifiedResponse,
   createLastNotifiedTimestampsResponse,
   createSeriesSuppressionsResponse,
+  type DispatchableAlertEventRow,
 } from './fixtures/dispatcher';
-import { createAlert, createAlertSuppressionRow } from './fixtures/test_utils';
-import { AlertScan } from './state';
-import { getDispatchableAlertEventsQuery } from './queries';
 import {
+  createAlert,
+  createAlertSuppressionRow,
+  createDispatcherConfigAccessor,
+  createWorkflowDetailDto,
+  MOCK_KIBANA_BASE_URL,
+} from './fixtures/test_utils';
+import { AlertScan } from './state';
+import { ESQL_QUERY_ROW_LIMIT, getDispatchableAlertEventsQuery } from './queries';
+import {
+  ApplyAlreadyNotifiedStep,
   ApplyMaintenanceWindowStep,
   ApplySuppressionStep,
   ApplyThrottlingStep,
@@ -63,11 +78,10 @@ import {
   FetchRulesStep,
   FetchSuppressionsStep,
   HydrateAlertDataStep,
-  StoreActionsStep,
-  StoreExecutionHistoryStep,
 } from './steps';
 import type {
   Alert,
+  AlreadyNotifiedRecord,
   DispatcherHaltReason,
   AlertSuppressionRow,
   SeriesSuppressionRow,
@@ -89,13 +103,16 @@ function mockRulesFindByIds(
 
 function mockNpFindAllDecrypted(
   spy: jest.SpyInstance,
-  policies: Array<string | { id: string; spaceId: string }>,
+  policies: Array<string | { id: string; spaceId: string; apiKey?: string }>,
   overrides: Partial<ActionPolicySavedObjectAttributes> = {}
 ) {
   spy.mockResolvedValue(
     policies.map((policy) => {
-      const { id, spaceId } =
-        typeof policy === 'string' ? { id: policy, spaceId: 'default' } : policy;
+      const {
+        id,
+        spaceId,
+        apiKey = 'test-api-key',
+      } = typeof policy === 'string' ? { id: policy, spaceId: 'default' } : policy;
 
       return {
         id,
@@ -104,7 +121,7 @@ function mockNpFindAllDecrypted(
           description: `Description for ${id}`,
           enabled: true,
           destinations: [{ type: 'workflow', id: 'workflow-test-id' }],
-          apiKey: 'test-api-key',
+          apiKey,
           apiKeyOwner: 'elastic',
           apiKeyCreatedByUser: false,
           createdBy: null,
@@ -119,16 +136,22 @@ function mockNpFindAllDecrypted(
   );
 }
 
-const createMockWorkflowsManagement = (): jest.Mocked<WorkflowsServerPluginSetup['management']> =>
+const createMockWorkflowsManagement = ({
+  workflows = [],
+  bulkScheduleWorkflow = jest.fn().mockResolvedValue([]),
+}: {
+  workflows?: WorkflowDetailDto[];
+  bulkScheduleWorkflow?: jest.Mock;
+} = {}): jest.Mocked<WorkflowsServerPluginSetup['management']> =>
   ({
     getWorkflowsByIdsForRequests: jest.fn(
       async (
         lookups: Parameters<
           WorkflowsServerPluginSetup['management']['getWorkflowsByIdsForRequests']
         >[0]
-      ) => lookups.map(() => ({ status: 'fulfilled' as const, value: [] }))
+      ) => lookups.map(() => ({ status: 'fulfilled' as const, value: workflows }))
     ),
-    getClient: jest.fn(() => ({ bulkScheduleWorkflow: jest.fn().mockResolvedValue([]) })),
+    getClient: jest.fn(() => ({ bulkScheduleWorkflow })),
   } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>);
 
 function buildDispatcherService(deps: {
@@ -140,9 +163,10 @@ function buildDispatcherService(deps: {
   maintenanceWindowService: MaintenanceWindowServiceContract;
   eventLogService: EventLogServiceContract;
   licenseService?: LicenseServiceContract;
+  loggerService?: LoggerServiceContract;
 }): DispatcherService {
   const pipeline = new DispatcherPipeline([
-    new FetchAlertsStep(deps.queryService),
+    new FetchAlertsStep(deps.queryService, MOCK_KIBANA_BASE_URL, createDispatcherConfigAccessor()),
     new FetchSuppressionsStep(deps.queryService),
     new ApplySuppressionStep(),
     new HydrateAlertDataStep(deps.queryService),
@@ -151,12 +175,21 @@ function buildDispatcherService(deps: {
     new FetchPoliciesStep(deps.npSoService),
     new EvaluateMatchersStep(),
     new BuildGroupsStep(),
+    new ApplyAlreadyNotifiedStep(deps.queryService),
     new ApplyThrottlingStep(deps.queryService),
-    new DispatchStep(deps.workflowsManagement, deps.licenseService ?? createMockLicenseService()),
-    new StoreActionsStep(deps.storageService),
-    new StoreExecutionHistoryStep(deps.eventLogService),
+    new DispatchStep(
+      deps.workflowsManagement,
+      deps.licenseService ?? createMockLicenseService(),
+      deps.storageService,
+      deps.eventLogService
+    ),
   ]);
-  return new DispatcherService(pipeline, deps.storageService, createLoggerService().loggerService);
+  return new DispatcherService(
+    pipeline,
+    deps.storageService,
+    deps.loggerService ?? createLoggerService().loggerService,
+    createDispatcherConfigAccessor()
+  );
 }
 
 describe('DispatcherService', () => {
@@ -173,6 +206,15 @@ describe('DispatcherService', () => {
   let mockMwService: jest.Mocked<MaintenanceWindowServiceContract>;
   let mockEventLogService: EventLogServiceContract;
   let mockLicenseService: ReturnType<typeof createMockLicenseService>;
+
+  const bulkOperations = () =>
+    storageEsClient.bulk.mock.calls.flatMap(([{ operations }]) => operations ?? []);
+  const docsOfBulkCall = (callIndex: number) =>
+    (storageEsClient.bulk.mock.calls[callIndex][0].operations ?? []).filter(
+      (_, index) => index % 2 === 1
+    ) as AlertAction[];
+  const indexedDocs = () =>
+    storageEsClient.bulk.mock.calls.flatMap((_, callIndex) => docsOfBulkCall(callIndex));
 
   beforeEach(() => {
     ({ queryService, mockEsClient: queryEsClient } = createQueryService());
@@ -211,7 +253,7 @@ describe('DispatcherService', () => {
 
   describe('run', () => {
     it('indexes fire actions for dispatchable alerts when no suppressions exist', async () => {
-      const alerts: Alert[] = [
+      const alerts: DispatchableAlertEventRow[] = [
         {
           last_event_timestamp: '2026-01-22T07:10:00.000Z',
           rule_id: 'rule-1',
@@ -261,6 +303,7 @@ describe('DispatcherService', () => {
             { alert_id: 'alert-2', data_json: null },
           ])
         )
+        .mockResolvedValueOnce(createAlreadyNotifiedResponse())
         .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
 
       storageEsClient.bulk.mockResolvedValue({
@@ -270,12 +313,10 @@ describe('DispatcherService', () => {
 
       const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
 
-      const result = await dispatcherService.run({
+      await dispatcherService.run({
         eventWatermark,
         taskId: 'task-1',
       });
-
-      expect(result.startedAt).toBeInstanceOf(Date);
 
       // windowStart = eventWatermark − OVERLAP_WINDOW_MINUTES
       // windowEnd   = windowStart + MAX_WINDOW_MINUTES (< now − settle since watermark is far in the past)
@@ -286,12 +327,13 @@ describe('DispatcherService', () => {
         .add(MAX_WINDOW_MINUTES, 'minutes')
         .toISOString();
 
-      expect(queryEsClient.esql.query).toHaveBeenCalledTimes(5);
+      expect(queryEsClient.esql.query).toHaveBeenCalledTimes(6);
       expect(queryEsClient.esql.query).toHaveBeenCalledWith(
         {
           query: getDispatchableAlertEventsQuery({
             gte: expectedWindowStart,
             lte: expectedWindowEnd,
+            limit: ESQL_QUERY_ROW_LIMIT,
           }).query,
           drop_null_columns: true,
           filter: {
@@ -311,10 +353,8 @@ describe('DispatcherService', () => {
         refresh: false,
       });
 
-      const [{ operations }] = storageEsClient.bulk.mock.calls[0];
-      const safeOperations = operations ?? [];
-      const createOperations = safeOperations.filter((_, index) => index % 2 === 0);
-      const docs = safeOperations.filter((_, index) => index % 2 === 1);
+      const createOperations = bulkOperations().filter((_, index) => index % 2 === 0);
+      const docs = indexedDocs();
       expect(createOperations).toEqual(
         expect.arrayContaining([{ create: { _index: ALERT_ACTIONS_DATA_STREAM } }])
       );
@@ -331,97 +371,6 @@ describe('DispatcherService', () => {
             last_series_event_timestamp: '2026-01-22T07:10:00.000Z',
             actor: { type: 'internal' },
             action_type: 'fire',
-            rule_id: 'rule-1',
-            source: 'internal',
-          }),
-          expect.objectContaining({
-            group_hash: 'hash-2',
-            last_series_event_timestamp: '2026-01-22T07:15:00.000Z',
-            actor: { type: 'internal' },
-            action_type: 'fire',
-            rule_id: 'rule-2',
-            source: 'internal',
-          }),
-        ])
-      );
-    });
-
-    it('indexes suppress actions for suppressed alerts', async () => {
-      const alerts: Alert[] = [
-        {
-          last_event_timestamp: '2026-01-22T07:10:00.000Z',
-          rule_id: 'rule-1',
-          source: 'internal',
-          space_id: 'default',
-          group_hash: 'hash-1',
-          alert_id: 'alert-1',
-          alert_status: 'active',
-        },
-        {
-          last_event_timestamp: '2026-01-22T07:15:00.000Z',
-          rule_id: 'rule-2',
-          source: 'internal',
-          space_id: 'default',
-          group_hash: 'hash-2',
-          alert_id: 'alert-2',
-          alert_status: 'active',
-        },
-      ];
-
-      const suppressions: AlertSuppressionRow[] = [
-        {
-          rule_id: 'rule-1',
-          source: 'internal',
-          space_id: 'default',
-          group_hash: 'hash-1',
-          alert_id: 'alert-1',
-          should_suppress: true,
-        },
-        {
-          rule_id: 'rule-2',
-          source: 'internal',
-          space_id: 'default',
-          group_hash: 'hash-2',
-          alert_id: 'alert-2',
-          should_suppress: false,
-        },
-      ];
-
-      queryEsClient.esql.query
-        .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alerts))
-        .mockResolvedValueOnce(createAlertSuppressionsResponse(suppressions))
-        .mockResolvedValueOnce(createSeriesSuppressionsResponse())
-        .mockResolvedValueOnce(createAlertDataResponse([{ alert_id: 'alert-2', data_json: null }]))
-        .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
-
-      storageEsClient.bulk.mockResolvedValue({
-        items: [{ create: { _id: '1', status: 201 } }, { create: { _id: '2', status: 201 } }],
-        errors: false,
-      } as BulkResponse);
-
-      const result = await dispatcherService.run({
-        eventWatermark: new Date('2026-01-22T07:30:00.000Z'),
-        taskId: 'task-1',
-      });
-
-      expect(result.startedAt).toBeInstanceOf(Date);
-
-      const [{ operations }] = storageEsClient.bulk.mock.calls[0];
-      const safeOperations = operations ?? [];
-      const docs = safeOperations.filter((_, index) => index % 2 === 1);
-
-      const suppressDocs = docs.filter((d: any) => d.action_type === 'suppress');
-      const fireDocs = docs.filter((d: any) => d.action_type === 'fire');
-      expect(suppressDocs).toHaveLength(1);
-      expect(fireDocs).toHaveLength(1);
-
-      expect(docs).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            group_hash: 'hash-1',
-            last_series_event_timestamp: '2026-01-22T07:10:00.000Z',
-            actor: { type: 'internal' },
-            action_type: 'suppress',
             rule_id: 'rule-1',
             source: 'internal',
           }),
@@ -472,6 +421,7 @@ describe('DispatcherService', () => {
         )
         .mockResolvedValueOnce(createSeriesSuppressionsResponse())
         .mockResolvedValueOnce(createAlertDataResponse([{ alert_id: 'alert-2', data_json: null }]))
+        .mockResolvedValueOnce(createAlreadyNotifiedResponse())
         .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
 
       storageEsClient.bulk.mockResolvedValue({
@@ -489,8 +439,7 @@ describe('DispatcherService', () => {
       expect(mockWfm.getWorkflowsByIdsForRequests).not.toHaveBeenCalled();
       expect(mockWfm.getClient).not.toHaveBeenCalled();
 
-      const [{ operations }] = storageEsClient.bulk.mock.calls[0];
-      const docs = (operations ?? []).filter((_, index) => index % 2 === 1);
+      const docs = indexedDocs();
       expect(docs).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ group_hash: 'hash-1', action_type: 'suppress' }),
@@ -525,15 +474,14 @@ describe('DispatcherService', () => {
         taskId: 'task-1',
       });
 
-      expect(result.startedAt).toBeInstanceOf(Date);
       expect(queryEsClient.esql.query).toHaveBeenCalledTimes(1);
       expect(storageEsClient.bulk).not.toHaveBeenCalled();
+      // windowEnd = eventWatermark − OVERLAP_WINDOW_MINUTES + MAX_WINDOW_MINUTES
+      expect(result.nextWatermark.toISOString()).toBe('2026-01-22T07:35:00.000Z');
+      expect(result.nextStuckTicks).toBe(0);
     });
 
     it('dispatches correct fire/suppress actions across 5 rules with ack, unack, snooze, and deactivate suppressions', async () => {
-      const rulesMock = createRulesSavedObjectService();
-      rulesSoService = rulesMock.rulesSavedObjectService;
-      mockFindByIds = rulesMock.mockFindByIds;
       mockRulesFindByIds(mockFindByIds, [
         'rule-001',
         'rule-002',
@@ -541,26 +489,8 @@ describe('DispatcherService', () => {
         'rule-004',
         'rule-005',
       ]);
-
-      const npMock = createActionPolicySavedObjectService();
-      npSoService = npMock.actionPolicySavedObjectService;
-      mockFindAllDecrypted = npMock.mockFindAllDecrypted;
       mockNpFindAllDecrypted(mockFindAllDecrypted, ['policy_456'], {
         throttle: { interval: '1h' },
-      });
-
-      mockWfm = createMockWorkflowsManagement();
-      mockMwService = createMaintenanceWindowServiceMock();
-      ({ eventLogService: mockEventLogService } = createEventLogService());
-
-      dispatcherService = buildDispatcherService({
-        queryService,
-        storageService,
-        rulesSoService,
-        npSoService,
-        workflowsManagement: mockWfm,
-        maintenanceWindowService: mockMwService,
-        eventLogService: mockEventLogService,
       });
 
       // Dataset: 5 rules, 9 alerts total
@@ -569,7 +499,7 @@ describe('DispatcherService', () => {
       // rule-003: two series (series-1 active, series-2 recovered + new alert) → all fire (no actions)
       // rule-004: two series, both snoozed (null alert_id) → both suppress
       // rule-005: two series, series-1 deactivated → suppress; series-2 no actions → fire
-      const alerts: Alert[] = [
+      const alerts: DispatchableAlertEventRow[] = [
         {
           last_event_timestamp: '2026-01-27T16:15:00.000Z',
           rule_id: 'rule-001',
@@ -724,6 +654,7 @@ describe('DispatcherService', () => {
         .mockResolvedValueOnce(createAlertSuppressionsResponse(alertSuppressions))
         .mockResolvedValueOnce(createSeriesSuppressionsResponse(seriesSuppressions))
         .mockResolvedValueOnce(createAlertDataResponse([]))
+        .mockResolvedValueOnce(createAlreadyNotifiedResponse())
         .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
 
       storageEsClient.bulk.mockResolvedValue({
@@ -733,24 +664,29 @@ describe('DispatcherService', () => {
         errors: false,
       } as BulkResponse);
 
-      const result = await dispatcherService.run({
+      await dispatcherService.run({
         eventWatermark: new Date('2026-01-25T00:00:00.000Z'),
         taskId: 'task-1',
       });
 
-      expect(result.startedAt).toBeInstanceOf(Date);
-      expect(queryEsClient.esql.query).toHaveBeenCalledTimes(5);
+      expect(queryEsClient.esql.query).toHaveBeenCalledTimes(6);
 
-      const [{ operations }] = storageEsClient.bulk.mock.calls[0];
-
-      const docs = (operations ?? []).filter((_, index) => index % 2 === 1) as AlertAction[];
+      const docs = indexedDocs();
 
       const fireActions = docs.filter((doc) => doc.action_type === 'fire');
       const suppressActions = docs.filter((doc) => doc.action_type === 'suppress');
       const notifiedActions = docs.filter((doc) => doc.action_type === 'notified');
       expect(fireActions).toHaveLength(6);
       expect(suppressActions).toHaveLength(4);
-      expect(notifiedActions.length).toBeGreaterThan(0);
+      // One notification per alert of each dispatched (non-suppressed) group.
+      expect(notifiedActions.map(({ group_hash: groupHash }) => groupHash).sort()).toEqual([
+        'rule-001-series-1',
+        'rule-003-series-1',
+        'rule-003-series-2',
+        'rule-003-series-2',
+        'rule-003-series-2',
+        'rule-005-series-2',
+      ]);
 
       // rule-001: fire (ack then unack cancels suppression)
       expect(docs).toEqual(
@@ -848,7 +784,7 @@ describe('DispatcherService', () => {
     it('keeps external alerts isolated per space when a vendor group_hash collides', async () => {
       // The same PagerDuty incident is ingested into two spaces: identical source,
       // group_hash and alert_id. Only space-a has acked it.
-      const externalAlert = (spaceId: string): Alert => ({
+      const externalAlert = (spaceId: string): DispatchableAlertEventRow => ({
         last_event_timestamp: '2026-01-22T07:10:00.000Z',
         rule_id: null,
         source: 'pagerduty',
@@ -885,6 +821,7 @@ describe('DispatcherService', () => {
         .mockResolvedValueOnce(createAlertSuppressionsResponse(suppressions))
         .mockResolvedValueOnce(createSeriesSuppressionsResponse())
         .mockResolvedValueOnce(createAlertDataResponse([{ alert_id: 'pd-ep-1', data_json: null }]))
+        .mockResolvedValueOnce(createAlreadyNotifiedResponse())
         .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
 
       storageEsClient.bulk.mockResolvedValue({
@@ -897,8 +834,7 @@ describe('DispatcherService', () => {
         taskId: 'task-1',
       });
 
-      const [{ operations }] = storageEsClient.bulk.mock.calls[0];
-      const docs = (operations ?? []).filter((_, index) => index % 2 === 1) as AlertAction[];
+      const docs = indexedDocs();
 
       expect(docs.filter((doc) => doc.action_type === 'fire')).toEqual([
         expect.objectContaining({
@@ -924,7 +860,7 @@ describe('DispatcherService', () => {
         matcher: { expression: 'data.severity: "critical"' },
       });
 
-      const alerts: Alert[] = [
+      const alerts: DispatchableAlertEventRow[] = [
         {
           last_event_timestamp: '2026-01-22T07:10:00.000Z',
           rule_id: 'rule-1',
@@ -974,6 +910,7 @@ describe('DispatcherService', () => {
             { alert_id: 'alert-low', data_json: JSON.stringify({ severity: 'low' }) },
           ])
         )
+        .mockResolvedValueOnce(createAlreadyNotifiedResponse())
         .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
 
       storageEsClient.bulk.mockResolvedValue({
@@ -986,8 +923,7 @@ describe('DispatcherService', () => {
         taskId: 'task-1',
       });
 
-      const [{ operations }] = storageEsClient.bulk.mock.calls[0];
-      const docs = (operations ?? []).filter((_, index) => index % 2 === 1) as AlertAction[];
+      const docs = indexedDocs();
 
       const fireActions = docs.filter((d: any) => d.action_type === 'fire');
       expect(fireActions).toHaveLength(1);
@@ -1026,7 +962,8 @@ describe('DispatcherService', () => {
       const service = new DispatcherService(
         mockPipeline,
         noopStorage,
-        createLoggerService().loggerService
+        createLoggerService().loggerService,
+        createDispatcherConfigAccessor()
       );
 
       await service.run({
@@ -1043,28 +980,42 @@ describe('DispatcherService', () => {
       expect(firstCall.executionUuid).not.toBe(secondCall.executionUuid);
     });
 
-    it('logs DISPATCHER_COLD_START when no watermark is provided', async () => {
+    const COLD_START_MESSAGE = 'no persisted watermark';
+
+    const hasColdStartInfoLog = (
+      mockLogger: ReturnType<typeof createLoggerService>['mockLogger']
+    ) =>
+      mockLogger.info.mock.calls.some(([message]) =>
+        (typeof message === 'function' ? message() : message).includes(COLD_START_MESSAGE)
+      );
+
+    it('logs cold start at info level when no watermark is provided', async () => {
       const { loggerService, mockLogger } = createLoggerService();
       const { storageService: noopStorage } = createStorageService();
       const mockPipeline = buildMockPipeline();
-      const service = new DispatcherService(mockPipeline, noopStorage, loggerService);
+      const service = new DispatcherService(
+        mockPipeline,
+        noopStorage,
+        loggerService,
+        createDispatcherConfigAccessor()
+      );
 
       await service.run({ taskId: 'task-1' });
 
-      // LoggerService.warn forwards (message, { labels: { code } }) to the raw logger
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.any(Function),
-        expect.objectContaining({
-          labels: expect.objectContaining({ code: 'DISPATCHER_COLD_START' }),
-        })
-      );
+      expect(hasColdStartInfoLog(mockLogger)).toBe(true);
+      expect(mockLogger.warn).not.toHaveBeenCalled();
     });
 
     it('does not log cold start when a watermark is provided', async () => {
       const { loggerService, mockLogger } = createLoggerService();
       const { storageService: noopStorage } = createStorageService();
       const mockPipeline = buildMockPipeline();
-      const service = new DispatcherService(mockPipeline, noopStorage, loggerService);
+      const service = new DispatcherService(
+        mockPipeline,
+        noopStorage,
+        loggerService,
+        createDispatcherConfigAccessor()
+      );
 
       await service.run({
         eventWatermark: new Date(),
@@ -1072,6 +1023,30 @@ describe('DispatcherService', () => {
       });
 
       expect(mockLogger.warn).not.toHaveBeenCalled();
+      expect(hasColdStartInfoLog(mockLogger)).toBe(false);
+    });
+
+    it('logs DISPATCHER_INVALID_WATERMARK when the watermark is an Invalid Date', async () => {
+      const { loggerService, mockLogger } = createLoggerService();
+      const { storageService: noopStorage } = createStorageService();
+      const mockPipeline = buildMockPipeline();
+      const service = new DispatcherService(
+        mockPipeline,
+        noopStorage,
+        loggerService,
+        createDispatcherConfigAccessor()
+      );
+
+      await service.run({ eventWatermark: new Date('invalid'), taskId: 'task-1' });
+
+      // LoggerService.warn forwards (message, { labels: { code } }) to the raw logger
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({
+          labels: expect.objectContaining({ code: 'DISPATCHER_INVALID_WATERMARK' }),
+        })
+      );
+      expect(hasColdStartInfoLog(mockLogger)).toBe(false);
     });
   });
 
@@ -1101,7 +1076,6 @@ describe('DispatcherService', () => {
           finalState: {
             input: mockInput,
             scan: AlertScan.of({ alerts, truncated: true }),
-            recordedAlerts: 2,
           },
         }),
       };
@@ -1114,7 +1088,8 @@ describe('DispatcherService', () => {
       const service = new DispatcherService(
         mockPipeline,
         noopStorage,
-        createLoggerService().loggerService
+        createLoggerService().loggerService,
+        createDispatcherConfigAccessor()
       );
 
       const result = await service.run({
@@ -1123,71 +1098,11 @@ describe('DispatcherService', () => {
       });
 
       expect(result.nextWatermark.toISOString()).toBe(lastAlertTs);
-      // On main (before fix), nextWatermark === startedAt which is ~now — far ahead of lastAlertTs.
-      expect(result.nextWatermark.toISOString()).not.toBe(result.startedAt.toISOString());
-    });
-
-    it('tick 2 starts from the truncation edge and covers the deferred tail', async () => {
-      const { storageService: noopStorage } = createStorageService();
-      const tick1LastAlertTs = '2026-01-22T07:33:00.000Z';
-
-      // Tick 1: truncated — watermark advances to 07:33
-      const pipeline1 = buildMockTruncatedPipeline(tick1LastAlertTs);
-      const service = new DispatcherService(
-        pipeline1,
-        noopStorage,
-        createLoggerService().loggerService
-      );
-      const tick1 = await service.run({
-        eventWatermark: new Date('2026-01-22T07:30:00.000Z'),
-        taskId: 'task-1',
-      });
-
-      expect(tick1.nextWatermark.toISOString()).toBe(tick1LastAlertTs);
-
-      // Tick 2 begins from 07:33 → windowStart = 07:23, windowEnd = 07:38.
-      // The deferred tail (events between 07:33 and 07:35) is within this window.
-      // We verify tick 2 does NOT skip: its windowStart ≤ tick1LastAlertTs.
-      const tick2MockInput = {
-        startedAt: new Date('2026-01-22T08:01:00.000Z'),
-        eventWatermark: tick1.nextWatermark,
-        windowStart: moment(tick1.nextWatermark)
-          .subtract(OVERLAP_WINDOW_MINUTES, 'minutes')
-          .toDate(),
-        windowEnd: moment(tick1.nextWatermark)
-          .subtract(OVERLAP_WINDOW_MINUTES, 'minutes')
-          .add(MAX_WINDOW_MINUTES, 'minutes')
-          .toDate(),
-        executionUuid: 'test-uuid-2',
-        signal: new AbortController().signal,
-      };
-      const pipeline2: jest.Mocked<DispatcherPipelineContract> = {
-        execute: jest.fn().mockResolvedValue({
-          completed: true,
-          finalState: {
-            input: tick2MockInput,
-            scan: AlertScan.empty(),
-            recordedAlerts: 0,
-          },
-        }),
-      };
-      const service2 = new DispatcherService(
-        pipeline2,
-        noopStorage,
-        createLoggerService().loggerService
-      );
-      await service2.run({ eventWatermark: tick1.nextWatermark, taskId: 'task-1' });
-
-      const [[tick2Input]] = pipeline2.execute.mock.calls;
-      expect(tick2Input.windowStart.getTime()).toBeLessThanOrEqual(
-        new Date(tick1LastAlertTs).getTime()
-      );
-      expect(tick2Input.eventWatermark.toISOString()).toBe(tick1LastAlertTs);
     });
   });
 
   // ── Phase 4: soft deadline ───────────────────────────────────────────────────
-  describe('soft deadline (TICK_DEADLINE_MS)', () => {
+  describe('soft deadline (getTickDeadlineMs of the configured timeout)', () => {
     function buildNeverResolvingPipeline(): jest.Mocked<DispatcherPipelineContract> {
       return {
         // Pipeline that fires the deadline by returning an aborted result after
@@ -1207,7 +1122,7 @@ describe('DispatcherService', () => {
                     executionUuid: 'test',
                     signal,
                   },
-                  // recordedAlerts undefined — aborted before StoreActionsStep
+                  // aborted before DispatchStep concluded every group
                 },
               });
             });
@@ -1224,61 +1139,73 @@ describe('DispatcherService', () => {
       jest.useRealTimers();
     });
 
-    it('run() resolves after TICK_DEADLINE_MS even when the pipeline never completes', async () => {
+    it('aborts the pipeline signal at the default 1m-timeout deadline and holds the watermark', async () => {
       const { storageService: noopStorage } = createStorageService();
       const mockPipeline = buildNeverResolvingPipeline();
       const service = new DispatcherService(
         mockPipeline,
         noopStorage,
-        createLoggerService().loggerService
+        createLoggerService().loggerService,
+        createDispatcherConfigAccessor()
+      );
+
+      const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
+      const resultPromise = service.run({ eventWatermark, taskId: 'task-1' });
+      const [[{ signal }]] = mockPipeline.execute.mock.calls;
+
+      jest.advanceTimersByTime(getTickDeadlineMs('1m') - 1);
+      expect(signal.aborted).toBe(false);
+
+      jest.advanceTimersByTime(1);
+      expect(signal.aborted).toBe(true);
+
+      const result = await resultPromise;
+
+      // Aborted → no advance
+      expect(result.nextWatermark.toISOString()).toBe(eventWatermark.toISOString());
+    });
+
+    it('derives the deadline from the configured dispatcher timeout', async () => {
+      const { storageService: noopStorage } = createStorageService();
+      const mockPipeline = buildNeverResolvingPipeline();
+      const service = new DispatcherService(
+        mockPipeline,
+        noopStorage,
+        createLoggerService().loggerService,
+        createDispatcherConfigAccessor({ run: { timeout: '3m' } })
       );
 
       const resultPromise = service.run({
         eventWatermark: new Date('2026-01-22T07:30:00.000Z'),
         taskId: 'task-1',
       });
+      const [[{ signal }]] = mockPipeline.execute.mock.calls;
 
-      // Advance fake timers past the deadline
-      jest.advanceTimersByTime(TICK_DEADLINE_MS + 1);
+      jest.advanceTimersByTime(164_999);
+      expect(signal.aborted).toBe(false);
 
-      const result = await resultPromise;
+      jest.advanceTimersByTime(1);
+      expect(signal.aborted).toBe(true);
 
-      expect(result).toHaveProperty('startedAt');
-      expect(result).toHaveProperty('nextWatermark');
-      expect(result.pipelineResult.haltReason).toBe('aborted');
-    });
-
-    it('watermark does not advance when deadline fires before StoreActionsStep', async () => {
-      const { storageService: noopStorage } = createStorageService();
-      const mockPipeline = buildNeverResolvingPipeline();
-      const service = new DispatcherService(
-        mockPipeline,
-        noopStorage,
-        createLoggerService().loggerService
-      );
-
-      const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
-      const resultPromise = service.run({ eventWatermark, taskId: 'task-1' });
-
-      jest.advanceTimersByTime(TICK_DEADLINE_MS + 1);
-
-      const result = await resultPromise;
-
-      // Aborted before StoreActionsStep → no advance
-      expect(result.nextWatermark.toISOString()).toBe(eventWatermark.toISOString());
+      await resultPromise;
     });
 
     it('logs DISPATCHER_TICK_DEADLINE_EXCEEDED on deadline abort', async () => {
       const { loggerService, mockLogger } = createLoggerService();
       const { storageService: noopStorage } = createStorageService();
       const mockPipeline = buildNeverResolvingPipeline();
-      const service = new DispatcherService(mockPipeline, noopStorage, loggerService);
+      const service = new DispatcherService(
+        mockPipeline,
+        noopStorage,
+        loggerService,
+        createDispatcherConfigAccessor()
+      );
 
       const resultPromise = service.run({
         eventWatermark: new Date('2026-01-22T07:30:00.000Z'),
         taskId: 'task-1',
       });
-      jest.advanceTimersByTime(TICK_DEADLINE_MS + 1);
+      jest.advanceTimersByTime(getTickDeadlineMs('1m') + 1);
       await resultPromise;
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
@@ -1289,13 +1216,15 @@ describe('DispatcherService', () => {
       );
     });
 
-    it('TM signal aborting also halts the pipeline', async () => {
+    it('propagates a TM signal abort to the pipeline without logging a deadline warning', async () => {
+      const { loggerService, mockLogger } = createLoggerService();
       const { storageService: noopStorage } = createStorageService();
       const mockPipeline = buildNeverResolvingPipeline();
       const service = new DispatcherService(
         mockPipeline,
         noopStorage,
-        createLoggerService().loggerService
+        loggerService,
+        createDispatcherConfigAccessor()
       );
 
       const tmController = new AbortController();
@@ -1304,23 +1233,202 @@ describe('DispatcherService', () => {
         signal: tmController.signal,
         taskId: 'task-1',
       });
+      const [[{ signal }]] = mockPipeline.execute.mock.calls;
+      expect(signal.aborted).toBe(false);
 
       // Abort via TM signal before the deadline fires
       tmController.abort();
+      expect(signal.aborted).toBe(true);
 
-      const result = await resultPromise;
+      await resultPromise;
 
-      expect(result.pipelineResult.haltReason).toBe('aborted');
-      // Deadline did not fire — only TM signal aborted
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('abort mid-dispatch', () => {
+    const workflow = createWorkflowDetailDto({ id: 'workflow-test-id' });
+    const alerts = Array.from({ length: DISPATCH_CHUNK_SIZE + 1 }, (_, i) =>
+      createAlert({
+        alert_id: `alert-${i}`,
+        group_hash: `hash-${i}`,
+        last_event_timestamp: '2026-01-22T07:25:00.000Z',
+      })
+    );
+    const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
+
+    const mockTickQueries = (tickAlerts: Alert[], alreadyNotified: AlreadyNotifiedRecord[]) =>
+      queryEsClient.esql.query
+        .mockResolvedValueOnce(createDispatchableAlertEventsResponse(tickAlerts))
+        .mockResolvedValueOnce(createAlertSuppressionsResponse([]))
+        .mockResolvedValueOnce(createSeriesSuppressionsResponse())
+        .mockResolvedValueOnce(createAlertDataResponse([]))
+        .mockResolvedValueOnce(createAlreadyNotifiedResponse(alreadyNotified))
+        .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
+
+    const toAlreadyNotifiedRecords = (docs: AlertAction[]): AlreadyNotifiedRecord[] =>
+      docs
+        .filter((doc) => doc.action_type === 'notified')
+        .map((doc) => ({
+          action_group_id: doc.action_group_id ?? '',
+          alert_id: doc.alert_id ?? '',
+          notified_through: doc.last_series_event_timestamp,
+        }));
+
+    const scheduleAll = (bulkScheduleWorkflow: jest.Mock, onSchedule: () => void = () => {}) =>
+      bulkScheduleWorkflow.mockImplementationOnce(async (items: BulkScheduleWorkflowItem[]) => {
+        onSchedule();
+        return items.map((_, i) => ({ status: 'scheduled', workflowExecutionId: `exec-${i}` }));
+      });
+
+    const buildAbortableService = (
+      bulkScheduleWorkflow: jest.Mock,
+      loggerService?: LoggerServiceContract
+    ) =>
+      buildDispatcherService({
+        queryService,
+        storageService,
+        rulesSoService,
+        npSoService,
+        workflowsManagement: createMockWorkflowsManagement({
+          workflows: [workflow],
+          bulkScheduleWorkflow,
+        }),
+        maintenanceWindowService: mockMwService,
+        eventLogService: mockEventLogService,
+        loggerService,
+      });
+
+    beforeEach(() => {
+      storageEsClient.bulk.mockResolvedValue({ errors: false, items: [], took: 0 });
+    });
+
+    it('keeps the progress of an aborted tick and dispatches only the rest on the next one', async () => {
+      const bulkScheduleWorkflow = jest.fn();
+      const logEventSpy = jest.spyOn(mockEventLogService, 'logEvent');
+      const service = buildAbortableService(bulkScheduleWorkflow);
+
+      // Tick 1: the deadline fires while the first chunk is being scheduled.
+      const controller = new AbortController();
+      scheduleAll(bulkScheduleWorkflow, () => controller.abort());
+      mockTickQueries(alerts, []);
+
+      const tick1 = await service.run({
+        eventWatermark,
+        signal: controller.signal,
+        taskId: 'task-1',
+      });
+
+      expect(tick1.pipelineResult.haltReason).toBe('aborted');
+      expect(tick1.nextWatermark).toEqual(eventWatermark);
+      expect(bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
+      expect(storageEsClient.bulk).toHaveBeenCalledTimes(1);
+      const committed = docsOfBulkCall(0);
+      const notified = committed.filter((doc) => doc.action_type === 'notified');
+      const fired = committed.filter((doc) => doc.action_type === 'fire');
+      expect(notified).toHaveLength(DISPATCH_CHUNK_SIZE);
+      expect(notified.every((doc) => doc.alert_id !== undefined)).toBe(true);
+      expect(fired).toHaveLength(DISPATCH_CHUNK_SIZE);
+      expect(fired.map((doc) => doc.group_hash)).not.toContain(`hash-${DISPATCH_CHUNK_SIZE}`);
+      const dispatchedEvents = logEventSpy.mock.calls.filter(
+        ([event]) => event?.event?.action === 'dispatched'
+      );
+      expect(dispatchedEvents).toHaveLength(1);
+      expect(dispatchedEvents[0][0]?.kibana?.alerting_v2?.dispatcher?.alert_count).toBe(
+        DISPATCH_CHUNK_SIZE
+      );
+
+      // Tick 2: the recorded series are deduped by the scan; only the unconcluded alert returns.
+      scheduleAll(bulkScheduleWorkflow);
+      mockTickQueries([alerts[DISPATCH_CHUNK_SIZE]], []);
+
+      const tick2 = await service.run({ eventWatermark, taskId: 'task-1' });
+
+      expect(tick2.pipelineResult.completed).toBe(true);
+      expect(tick2.nextWatermark.getTime()).toBeGreaterThan(eventWatermark.getTime());
+      expect(bulkScheduleWorkflow).toHaveBeenCalledTimes(2);
+      const [tick2Items] = bulkScheduleWorkflow.mock.calls[1];
+      expect(tick2Items).toHaveLength(1);
+      expect(tick2Items[0].inputs.payload.alerts[0].alert_id).toBe(`alert-${DISPATCH_CHUNK_SIZE}`);
+      expect(docsOfBulkCall(1).map((doc) => doc.action_type)).toEqual(['notified', 'fire']);
+    });
+
+    it('still dispatches a shared alert to the policy the aborted tick never reached', async () => {
+      const sharedAlerts = alerts.slice(0, 2);
+      mockNpFindAllDecrypted(mockFindAllDecrypted, [
+        { id: 'policy-a', spaceId: 'default', apiKey: 'key-a' },
+        { id: 'policy-b', spaceId: 'default', apiKey: 'key-b' },
+      ]);
+      const bulkScheduleWorkflow = jest.fn();
+      const service = buildAbortableService(bulkScheduleWorkflow);
+
+      const controller = new AbortController();
+      scheduleAll(bulkScheduleWorkflow, () => controller.abort());
+      mockTickQueries(sharedAlerts, []);
+
+      await service.run({ eventWatermark, signal: controller.signal, taskId: 'task-1' });
+
+      expect(bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
+      const committed = docsOfBulkCall(0);
+      expect(committed.map((doc) => doc.action_type)).toEqual(['notified', 'notified']);
+      expect(new Set(committed.map((doc) => doc.reason))).toEqual(
+        new Set(['notified by policy policy-a'])
+      );
+
+      scheduleAll(bulkScheduleWorkflow);
+      mockTickQueries(sharedAlerts, toAlreadyNotifiedRecords(committed));
+
+      await service.run({ eventWatermark, taskId: 'task-1' });
+
+      expect(bulkScheduleWorkflow).toHaveBeenCalledTimes(2);
+      const [tick2Items] = bulkScheduleWorkflow.mock.calls[1];
+      expect(
+        tick2Items.map(
+          (item: { inputs: { payload: { policyId: string } } }) => item.inputs.payload.policyId
+        )
+      ).toEqual(['policy-b', 'policy-b']);
+      const fires = docsOfBulkCall(1).filter((doc) => doc.action_type === 'fire');
+      expect(fires.map((doc) => doc.reason).sort()).toEqual([
+        'already notified by policy policy-a',
+        'already notified by policy policy-a',
+        'dispatched by policy policy-b',
+        'dispatched by policy policy-b',
+      ]);
+    });
+
+    it('stops dispatching and holds the watermark when a commit cannot be written', async () => {
+      const bulkScheduleWorkflow = jest.fn();
+      const logEventSpy = jest.spyOn(mockEventLogService, 'logEvent');
+      const { loggerService, mockLogger } = createLoggerService();
+      const service = buildAbortableService(bulkScheduleWorkflow, loggerService);
+      storageEsClient.bulk.mockRejectedValueOnce(new Error('es unavailable'));
+      scheduleAll(bulkScheduleWorkflow);
+      mockTickQueries(alerts, []);
+
+      const result = await service.run({ eventWatermark, stuckTicks: 2, taskId: 'task-1' });
+
+      expect(result.nextWatermark.toISOString()).toBe(eventWatermark.toISOString());
+      expect(result.nextStuckTicks).toBe(3);
+      expect(bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
+      const dispatchedEvents = logEventSpy.mock.calls.filter(
+        ([event]) => event?.event?.action === 'dispatched'
+      );
+      expect(dispatchedEvents).toHaveLength(1);
+      expect(dispatchedEvents[0][0]?.kibana?.alerting_v2?.dispatcher?.alert_count).toBe(
+        DISPATCH_CHUNK_SIZE
+      );
+      const errorCodes = mockLogger.error.mock.calls.map(([, meta]) => meta?.labels?.code);
+      expect(errorCodes.filter((code) => code === 'DISPATCH_COMMIT_FAILED')).toHaveLength(1);
+      expect(errorCodes).not.toContain('DISPATCH_STEP_FAILED');
     });
   });
 
   // ── Phase 5: stuck-watermark escape hatch ────────────────────────────────────
   describe('stuck-watermark escape hatch (STUCK_TICK_LIMIT)', () => {
-    // Returns a pipeline whose watermark stays pinned. `haltReason: 'aborted'` with
-    // no `recordedAlerts` returns `input.eventWatermark` unchanged from
-    // computeNextWatermark — simulating a tick where the pipeline was interrupted
-    // before StoreActionsStep wrote any records. `inline_stats_too_large` pins it too.
+    // Returns a pipeline whose watermark stays pinned. `haltReason: 'aborted'`
+    // returns `input.eventWatermark` unchanged from computeNextWatermark —
+    // simulating a tick where the pipeline was interrupted before DispatchStep
+    // concluded every group. `inline_stats_too_large` pins it too.
     function buildStuckPipeline(
       alerts: Alert[],
       haltReason: DispatcherHaltReason = 'aborted'
@@ -1344,7 +1452,7 @@ describe('DispatcherService', () => {
                 finalState: {
                   input,
                   scan: AlertScan.of({ alerts }),
-                  // recordedAlerts absent → computeNextWatermark returns input.eventWatermark
+                  // aborted → computeNextWatermark returns input.eventWatermark
                 },
               });
             }
@@ -1352,26 +1460,31 @@ describe('DispatcherService', () => {
       };
     }
 
-    it('nextStuckTicks increments on stuck ticks and resets to 0 on advance', async () => {
-      const { storageService: noopStorage } = createStorageService();
-      const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
+    it.each<DispatcherHaltReason>(['aborted', 'commit_failed'])(
+      'nextStuckTicks increments when the watermark does not advance (halt_reason: %s)',
+      async (haltReason) => {
+        const { storageService: noopStorage } = createStorageService();
+        const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
 
-      // Stuck pipeline — alerts present but no recordedAlerts → watermark won't advance
-      const mockPipeline = buildStuckPipeline([
-        createAlert({ alert_id: 'e1', last_event_timestamp: '2026-01-22T07:31:00.000Z' }),
-      ]);
-      const service = new DispatcherService(
-        mockPipeline,
-        noopStorage,
-        createLoggerService().loggerService
-      );
+        // Stuck pipeline — alerts present but the tick halted early → watermark won't advance
+        const mockPipeline = buildStuckPipeline(
+          [createAlert({ alert_id: 'e1', last_event_timestamp: '2026-01-22T07:31:00.000Z' })],
+          haltReason
+        );
+        const service = new DispatcherService(
+          mockPipeline,
+          noopStorage,
+          createLoggerService().loggerService,
+          createDispatcherConfigAccessor()
+        );
 
-      const result = await service.run({ eventWatermark, stuckTicks: 4, taskId: 'task-1' });
+        const result = await service.run({ eventWatermark, stuckTicks: 4, taskId: 'task-1' });
 
-      // Watermark did not advance → stuckTicks was 4 → nextStuckTicks = 5
-      expect(result.nextStuckTicks).toBe(5);
-      expect(result.nextWatermark.toISOString()).toBe(eventWatermark.toISOString());
-    });
+        // Watermark did not advance → stuckTicks was 4 → nextStuckTicks = 5
+        expect(result.nextStuckTicks).toBe(5);
+        expect(result.nextWatermark.toISOString()).toBe(eventWatermark.toISOString());
+      }
+    );
 
     it('nextStuckTicks resets to 0 when watermark advances', async () => {
       const { storageService: noopStorage } = createStorageService();
@@ -1403,7 +1516,8 @@ describe('DispatcherService', () => {
       const service = new DispatcherService(
         advancingPipeline,
         noopStorage,
-        createLoggerService().loggerService
+        createLoggerService().loggerService,
+        createDispatcherConfigAccessor()
       );
 
       // Had 5 stuck ticks before, but this tick advances → reset
@@ -1429,7 +1543,8 @@ describe('DispatcherService', () => {
       const service = new DispatcherService(
         mockPipeline,
         escapeStorage,
-        createLoggerService().loggerService
+        createLoggerService().loggerService,
+        createDispatcherConfigAccessor()
       );
 
       // Pass stuckTicks = STUCK_TICK_LIMIT - 1 so this tick pushes over the limit
@@ -1439,8 +1554,8 @@ describe('DispatcherService', () => {
         taskId: 'task-1',
       });
 
-      // Watermark must advance to windowEnd
-      expect(result.nextWatermark.getTime()).toBeGreaterThan(eventWatermark.getTime());
+      // Watermark must advance to windowEnd (eventWatermark − OVERLAP + MAX_WINDOW)
+      expect(result.nextWatermark.toISOString()).toBe('2026-01-22T07:35:00.000Z');
       // Counter must reset
       expect(result.nextStuckTicks).toBe(0);
       // Terminal unmatched records must have been bulk-indexed
@@ -1471,7 +1586,12 @@ describe('DispatcherService', () => {
       const mockPipeline = buildStuckPipeline([
         createAlert({ alert_id: 'e1', last_event_timestamp: '2026-01-22T07:31:00.000Z' }),
       ]);
-      const service = new DispatcherService(mockPipeline, escapeStorage, loggerService);
+      const service = new DispatcherService(
+        mockPipeline,
+        escapeStorage,
+        loggerService,
+        createDispatcherConfigAccessor()
+      );
 
       await service.run({
         eventWatermark,
@@ -1487,119 +1607,81 @@ describe('DispatcherService', () => {
       );
     });
 
-    it('holds the watermark when pre-fetch hatch fires and lag is within one max window', async () => {
-      const { loggerService, mockLogger } = createLoggerService();
-      const { storageService: escapeStorage, mockEsClient: escapeMockEsClient } =
-        createStorageService();
-      // Lag ≈ 1m, well under PRE_FETCH_STUCK_ADVANCE_LAG_MS (15m).
-      const eventWatermark = new Date(Date.now() - 60_000);
+    it.each<DispatcherHaltReason>(['aborted', 'inline_stats_too_large'])(
+      'holds the watermark when the pre-fetch hatch fires within one max window (halt_reason: %s)',
+      async (haltReason) => {
+        const { loggerService, mockLogger } = createLoggerService();
+        const { storageService: escapeStorage, mockEsClient: escapeMockEsClient } =
+          createStorageService();
+        // Lag ≈ 1m, well under PRE_FETCH_STUCK_ADVANCE_LAG_MS (15m).
+        const eventWatermark = new Date(Date.now() - 60_000);
 
-      const mockPipeline = buildStuckPipeline([]);
-      const service = new DispatcherService(mockPipeline, escapeStorage, loggerService);
+        const mockPipeline = buildStuckPipeline([], haltReason);
+        const service = new DispatcherService(
+          mockPipeline,
+          escapeStorage,
+          loggerService,
+          createDispatcherConfigAccessor()
+        );
 
-      const result = await service.run({
-        eventWatermark,
-        stuckTicks: STUCK_TICK_LIMIT - 1,
-        taskId: 'task-1',
-      });
+        const result = await service.run({
+          eventWatermark,
+          stuckTicks: STUCK_TICK_LIMIT - 1,
+          taskId: 'task-1',
+        });
 
-      expect(result.nextWatermark.toISOString()).toBe(eventWatermark.toISOString());
-      expect(result.nextStuckTicks).toBe(0);
-      expect(escapeMockEsClient.bulk).not.toHaveBeenCalled();
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.any(Function),
-        expect.objectContaining({
-          labels: expect.objectContaining({ code: 'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK' }),
-        })
-      );
-    });
+        expect(result.nextWatermark.toISOString()).toBe(eventWatermark.toISOString());
+        expect(result.nextStuckTicks).toBe(0);
+        expect(escapeMockEsClient.bulk).not.toHaveBeenCalled();
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.any(Function),
+          expect.objectContaining({
+            labels: expect.objectContaining({ code: 'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK' }),
+          })
+        );
+        const [[warnMessage]] = mockLogger.warn.mock.calls;
+        expect(typeof warnMessage === 'function' ? warnMessage() : warnMessage).toContain(
+          `halt_reason: ${haltReason}`
+        );
+      }
+    );
 
-    it('force-advances when pre-fetch hatch fires and lag exceeds one max window', async () => {
-      const { loggerService, mockLogger } = createLoggerService();
-      const { storageService: escapeStorage, mockEsClient: escapeMockEsClient } =
-        createStorageService();
-      const eventWatermark = new Date(Date.now() - PRE_FETCH_STUCK_ADVANCE_LAG_MS - 60_000);
+    it.each<DispatcherHaltReason>(['aborted', 'inline_stats_too_large'])(
+      'force-advances when the pre-fetch hatch fires past one max window (halt_reason: %s)',
+      async (haltReason) => {
+        const { loggerService, mockLogger } = createLoggerService();
+        const { storageService: escapeStorage, mockEsClient: escapeMockEsClient } =
+          createStorageService();
+        const eventWatermark = new Date(Date.now() - PRE_FETCH_STUCK_ADVANCE_LAG_MS - 60_000);
 
-      const mockPipeline = buildStuckPipeline([]);
-      const service = new DispatcherService(mockPipeline, escapeStorage, loggerService);
+        const mockPipeline = buildStuckPipeline([], haltReason);
+        const service = new DispatcherService(
+          mockPipeline,
+          escapeStorage,
+          loggerService,
+          createDispatcherConfigAccessor()
+        );
 
-      const result = await service.run({
-        eventWatermark,
-        stuckTicks: STUCK_TICK_LIMIT - 1,
-        taskId: 'task-1',
-      });
+        const result = await service.run({
+          eventWatermark,
+          stuckTicks: STUCK_TICK_LIMIT - 1,
+          taskId: 'task-1',
+        });
 
-      expect(result.nextWatermark.getTime()).toBeGreaterThan(eventWatermark.getTime());
-      expect(result.nextStuckTicks).toBe(0);
-      expect(escapeMockEsClient.bulk).not.toHaveBeenCalled();
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          labels: expect.objectContaining({
-            code: 'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE',
-          }),
-        })
-      );
-    });
-
-    it('holds the watermark on an inline_stats_too_large tick within one max window and logs the halt reason', async () => {
-      const { loggerService, mockLogger } = createLoggerService();
-      const { storageService: escapeStorage, mockEsClient: escapeMockEsClient } =
-        createStorageService();
-      const eventWatermark = new Date(Date.now() - 60_000);
-
-      const mockPipeline = buildStuckPipeline([], 'inline_stats_too_large');
-      const service = new DispatcherService(mockPipeline, escapeStorage, loggerService);
-
-      const result = await service.run({
-        eventWatermark,
-        stuckTicks: STUCK_TICK_LIMIT - 1,
-        taskId: 'task-1',
-      });
-
-      expect(result.nextWatermark.toISOString()).toBe(eventWatermark.toISOString());
-      expect(result.nextStuckTicks).toBe(0);
-      expect(escapeMockEsClient.bulk).not.toHaveBeenCalled();
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.any(Function),
-        expect.objectContaining({
-          labels: expect.objectContaining({ code: 'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK' }),
-        })
-      );
-      const [[warnMessage]] = mockLogger.warn.mock.calls;
-      expect(typeof warnMessage === 'function' ? warnMessage() : warnMessage).toContain(
-        'halt_reason: inline_stats_too_large'
-      );
-    });
-
-    it('force-advances on an inline_stats_too_large tick past one max window and logs the halt reason', async () => {
-      const { loggerService, mockLogger } = createLoggerService();
-      const { storageService: escapeStorage, mockEsClient: escapeMockEsClient } =
-        createStorageService();
-      const eventWatermark = new Date(Date.now() - PRE_FETCH_STUCK_ADVANCE_LAG_MS - 60_000);
-
-      const mockPipeline = buildStuckPipeline([], 'inline_stats_too_large');
-      const service = new DispatcherService(mockPipeline, escapeStorage, loggerService);
-
-      const result = await service.run({
-        eventWatermark,
-        stuckTicks: STUCK_TICK_LIMIT - 1,
-        taskId: 'task-1',
-      });
-
-      expect(result.nextWatermark.getTime()).toBe(
-        eventWatermark.getTime() + (MAX_WINDOW_MINUTES - OVERLAP_WINDOW_MINUTES) * 60_000
-      );
-      expect(result.nextStuckTicks).toBe(0);
-      expect(escapeMockEsClient.bulk).not.toHaveBeenCalled();
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('halt_reason: inline_stats_too_large'),
-        expect.objectContaining({
-          labels: expect.objectContaining({
-            code: 'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE',
-          }),
-        })
-      );
-    });
+        expect(result.nextWatermark.getTime()).toBe(
+          eventWatermark.getTime() + (MAX_WINDOW_MINUTES - OVERLAP_WINDOW_MINUTES) * 60_000
+        );
+        expect(result.nextStuckTicks).toBe(0);
+        expect(escapeMockEsClient.bulk).not.toHaveBeenCalled();
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          expect.stringContaining(`halt_reason: ${haltReason}`),
+          expect.objectContaining({
+            labels: expect.objectContaining({
+              code: 'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE',
+            }),
+          })
+        );
+      }
+    );
   });
 });

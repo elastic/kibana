@@ -5,17 +5,22 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { isBoom } from '@hapi/boom';
+import { lazySchema, z } from '@kbn/zod/v4';
 import {
   NIGHTSHIFT_API_PRIVILEGES,
   createSourceRequestSchema,
   listSourcesQuerySchema,
   updateSourceRequestSchema,
+  validateSourceQueryRequestSchema,
   type DeleteSourceResponse,
   type ListSourcesResponse,
   type SourceMutationResponse,
   type SourceWithHealth,
+  type ValidateSourceQueryResponse,
 } from '@kbn/nightshift-shared';
+import type { RecommendedSourcesResponse } from '../../../common/recommended_sources';
+import { SourcesRecommendationService } from '../../lib/sources_recommendation_service';
 import { createNightshiftSourcesServerRoute } from '../create_server_route';
 
 const sourceIdPathSchema = z.object({
@@ -44,6 +49,24 @@ const listSourcesRoute = createNightshiftSourcesServerRoute({
   },
 });
 
+const listRecommendedSourcesRoute = createNightshiftSourcesServerRoute({
+  endpoint: 'GET /internal/nightshift/sources/_recommendations',
+  options: {
+    access: 'internal',
+    summary: 'List recommended Nightshift sources',
+    description: 'Returns the preset sources the current space does not have yet.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
+    },
+  },
+  handler: async ({ request, getSourcesClient }): Promise<RecommendedSourcesResponse> => {
+    const client = await getSourcesClient({ request });
+    return { recommendations: await new SourcesRecommendationService(client).list() };
+  },
+});
+
 const createSourceRoute = createNightshiftSourcesServerRoute({
   endpoint: 'POST /internal/nightshift/sources',
   options: {
@@ -64,6 +87,38 @@ const createSourceRoute = createNightshiftSourcesServerRoute({
     const client = await getSourcesClient({ request });
     const source = await client.create(params.body);
     return { source };
+  },
+});
+
+const validateSourceQueryRoute = createNightshiftSourcesServerRoute({
+  endpoint: 'POST /internal/nightshift/sources/_validate',
+  options: {
+    access: 'internal',
+    summary: 'Validate a Nightshift source query',
+    description:
+      'Runs the checks create runs on the ES|QL query, as the calling user, without storing anything. A query create would reject comes back with `valid: false` and the reason.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+    },
+  },
+  params: lazySchema(() =>
+    z.object({
+      body: validateSourceQueryRequestSchema,
+    })
+  ),
+  handler: async ({ params, request, getSourcesClient }): Promise<ValidateSourceQueryResponse> => {
+    const client = await getSourcesClient({ request });
+    try {
+      const { type, indexExists } = await client.validateQuery(params.body);
+      return { valid: true, type, index_exists: indexExists };
+    } catch (error) {
+      if (isBoom(error) && error.output.statusCode === 400) {
+        return { valid: false, error: error.message };
+      }
+      throw error;
+    }
   },
 });
 
@@ -182,7 +237,9 @@ const disableSourceRoute = createNightshiftSourcesServerRoute({
 
 export const sourcesRoutes = {
   ...listSourcesRoute,
+  ...listRecommendedSourcesRoute,
   ...createSourceRoute,
+  ...validateSourceQueryRoute,
   ...getSourceRoute,
   ...updateSourceRoute,
   ...deleteSourceRoute,

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { IRouter, KibanaRequest } from '@kbn/core/server';
+import type { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 
+import { ACTIONS_INBOUND_EVENTS_ENABLED_FLAG } from '../../../common';
 import type {
   IngestEventsRequestBodyV1,
   IngestEventsRequestParamsV1,
@@ -25,16 +27,19 @@ import type { ActionsRequestHandlerContext } from '../../types';
 import {
   INBOUND_EVENTS_API_PATH,
   INBOUND_EVENTS_API_VERSION,
+  INBOUND_EVENTS_DISABLED_MESSAGE,
   INBOUND_EVENTS_SECURITY,
 } from '../../inbound/constants';
 import type { InboundEventsClient } from '../../inbound/client';
+import { logInboundIngressOutcome } from '../../inbound/log_inbound_ingress_outcome';
 import { mapIngestResultToResponse } from '../../inbound/map_ingest_result_to_response';
 
 export interface InboundEventsRouteParams {
   router: IRouter<ActionsRequestHandlerContext>;
   maxBodyBytes: number;
   inboundEventsClient: InboundEventsClient;
-  getSpaceId: (request: KibanaRequest) => string;
+  getSpaceId: (request: KibanaRequest) => SpaceId;
+  logger: Logger;
 }
 
 type InboundEventsHttpRequest = KibanaRequest<
@@ -48,6 +53,7 @@ export function inboundEventsRoute({
   maxBodyBytes,
   inboundEventsClient,
   getSpaceId,
+  logger,
 }: InboundEventsRouteParams): void {
   router.versioned
     .post({
@@ -61,6 +67,8 @@ export function inboundEventsRoute({
         // External vendors cannot send Kibana session XSRF headers (`kbn-xsrf`).
         // Auth is the ingest token (Bearer, or `token` query if Authorization is
         // absent); missing or invalid tokens 404.
+        // Internal only, intentionally not in the public description: Relay may instead send a
+        // service-account bearer plus `x-client-authentication`. See `resolveServiceAccountBearer`.
         xsrfRequired: false,
         tags: ['oas-tag:connectors'],
         availability: {
@@ -99,6 +107,9 @@ export function inboundEventsRoute({
                 'The ingress request was accepted. Downstream emit failures may still be partial; see server logs.',
               body: () => ingestEventsResponseSchemaV1,
             },
+            403: {
+              description: 'Inbound connector events are disabled.',
+            },
             404: {
               description:
                 'Connector, connector type, or ingest token was not found or failed verification.',
@@ -113,17 +124,31 @@ export function inboundEventsRoute({
           },
         },
       },
-      async (_context, request: InboundEventsHttpRequest, response) => {
+      async (context, request: InboundEventsHttpRequest, response) => {
         const { connector_type_id: connectorTypeId, connector_id: connectorId } = request.params;
+        const { featureFlags } = await context.core;
+        const inboundEventsFlagEnabled = await featureFlags.getBooleanValue(
+          ACTIONS_INBOUND_EVENTS_ENABLED_FLAG,
+          true
+        );
+        if (!inboundEventsFlagEnabled) {
+          const spaceId = getSpaceId(request);
+          logInboundIngressOutcome(logger, {
+            outcome: 'disabled',
+            spaceId,
+            connectorId,
+            connectorTypeId,
+            requestId: request.id,
+            detail: 'feature_flag',
+          });
+          return response.forbidden({ body: INBOUND_EVENTS_DISABLED_MESSAGE });
+        }
+
         const result = await inboundEventsClient.ingest({
           connectorTypeId,
           connectorId,
           spaceId: getSpaceId(request),
-          requestId: request.id,
-          headers: request.headers,
-          query: request.query,
-          body: request.body,
-          remoteAddress: request.socket.remoteAddress,
+          request,
         });
         return mapIngestResultToResponse(result, response);
       }

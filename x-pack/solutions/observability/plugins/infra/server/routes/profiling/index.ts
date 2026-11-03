@@ -7,17 +7,24 @@
 
 import { schema } from '@kbn/config-schema';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 import {
   InfraProfilingFlamegraphRequestParamsRT,
   InfraProfilingFunctionsRequestParamsRT,
+  InfraProfilingSchemasRequestParamsRT,
 } from '../../../common/http_api/profiling_api';
 import type { InfraBackendLibs } from '../../lib/infra_types';
 import { fetchProfilingFlamegraph } from './lib/fetch_profiling_flamegraph';
 import { fetchProfilingFunctions } from './lib/fetch_profiling_functions';
+import { fetchProfilingSchemas } from './lib/fetch_profiling_schemas';
 import { fetchProfilingStatus } from './lib/fetch_profiling_status';
 import { getProfilingDataAccess } from './lib/get_profiling_data_access';
 
 const CACHE_CONTROL_HEADER_VALUE = 'private, max-age=3600';
+
+const profilingSchemaParam = schema.maybe(
+  schema.oneOf([schema.literal(ProfilingSchema.ECS), schema.literal(ProfilingSchema.OTEL)])
+);
 
 export function initProfilingRoutes({ framework, getStartServices, logger }: InfraBackendLibs) {
   if (!Object.hasOwn(framework.plugins, 'profilingDataAccess')) {
@@ -61,6 +68,7 @@ export function initProfilingRoutes({ framework, getStartServices, logger }: Inf
           kuery: schema.string({ maxLength: 2048 }),
           from: schema.number(),
           to: schema.number(),
+          schema: profilingSchemaParam,
         }),
       },
     },
@@ -98,6 +106,7 @@ export function initProfilingRoutes({ framework, getStartServices, logger }: Inf
           to: schema.number(),
           startIndex: schema.number(),
           endIndex: schema.number(),
+          schema: profilingSchemaParam,
         }),
       },
     },
@@ -121,6 +130,33 @@ export function initProfilingRoutes({ framework, getStartServices, logger }: Inf
           'cache-control': CACHE_CONTROL_HEADER_VALUE,
         },
       });
+    }
+  );
+
+  framework.registerRoute(
+    {
+      method: 'get',
+      path: '/api/infra/profiling/schemas',
+      validate: {
+        query: schema.object({
+          kuery: schema.string({ maxLength: 2048 }),
+          from: schema.number(),
+          to: schema.number(),
+        }),
+      },
+    },
+    async (requestContext, request, response) => {
+      const params = decodeOrThrow(InfraProfilingSchemasRequestParamsRT)(request.query);
+
+      const [coreRequestContext, profilingDataAccess] = await Promise.all([
+        requestContext.core,
+        getProfilingDataAccess(getStartServices),
+      ]);
+
+      const schemas = await fetchProfilingSchemas(params, profilingDataAccess, coreRequestContext);
+
+      // Not cached like the profiling data, so that data arriving in another schema is offered right away
+      return response.ok({ body: schemas });
     }
   );
 }

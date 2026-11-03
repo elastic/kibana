@@ -14,6 +14,8 @@ import { i18n } from '@kbn/i18n';
 import { asDuration } from '../../utils';
 import { PercentOfParent } from './percent_of_parent';
 
+export { PercentOfParent };
+
 export interface DurationProps {
   duration: number;
   parent?: {

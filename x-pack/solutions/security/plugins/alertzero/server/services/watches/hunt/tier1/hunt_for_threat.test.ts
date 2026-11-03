@@ -415,6 +415,7 @@ describe('huntForThreat', () => {
   it.each([
     ['an empty list', []],
     ['exclusions only', ['-*elastic-cloud-logs-*', '-logs-elastic_agent*']],
+    ['remote exclusions only', ['remote:-logs-elastic_agent*', '-other:*']],
   ])('returns scope_blocked without searching for %s', async (_label, search_patterns) => {
     const esClient = buildEsClient(emptySearchResponse);
 
@@ -789,6 +790,123 @@ describe('huntForThreat', () => {
       });
 
       expect(result.incomplete).toBeUndefined();
+    });
+  });
+
+  describe('host origin', () => {
+    const hostBucket = (
+      name: string,
+      indices: string[],
+      sumOther = 0,
+      /** `null` leaves the field out of the bucket. */
+      docCountError: number | null = 0
+    ): Record<string, unknown> => ({
+      key: name,
+      doc_count: indices.length + sumOther,
+      ...(docCountError === null ? {} : { doc_count_error_upper_bound: docCountError }),
+      by_index: {
+        buckets: indices.map((key) => ({ key, doc_count: 1 })),
+        sum_other_doc_count: sumOther,
+      },
+    });
+
+    const huntWithHosts = async (hostBuckets: Array<Record<string, unknown>>) => {
+      const esClient = buildEsClient({
+        hits: { total: { value: 1 }, hits: [] },
+        aggregations: {
+          per_index: { buckets: [{ key: 'logs-endpoint.events-default', doc_count: 1 }] },
+          affected_hosts: { buckets: hostBuckets },
+          affected_users: { buckets: [] },
+        },
+      });
+      const result = await huntForThreat(esClient, {
+        scope,
+        iocs: [{ type: 'ip', value: '10.0.0.1' }],
+      });
+      return { esClient, hosts: result.affected_assets.hosts };
+    };
+
+    it('breaks each host down by `_index`', async () => {
+      const { esClient } = await huntWithHosts([]);
+
+      const [[searchBody]] = (esClient.search as jest.Mock).mock.calls;
+      expect(searchBody.aggs.affected_hosts.terms).toEqual(
+        expect.objectContaining({ field: 'host.name', show_term_doc_count_error: true })
+      );
+      expect(searchBody.aggs.affected_hosts.aggs).toEqual({
+        by_index: { terms: { field: '_index', size: 20 } },
+      });
+    });
+
+    it('leaves a remote-looking host unknown when a shard may have left it out', async () => {
+      // A shard where the host was rare (possibly a local one) dropped it from its top terms,
+      // and its `_index` breakdown with it, so the remote-only list proves nothing.
+      const { hosts } = await huntWithHosts([hostBucket('web-1', ['cluster_b:logs-a'], 0, 10)]);
+
+      expect(hosts).toEqual([{ name: 'web-1', hit_count: 1 }]);
+    });
+
+    it('leaves a remote-looking host unknown when the response reports no per-bucket error', async () => {
+      const { hosts } = await huntWithHosts([hostBucket('web-1', ['cluster_b:logs-a'], 0, null)]);
+
+      expect(hosts).toEqual([{ name: 'web-1', hit_count: 1 }]);
+    });
+
+    it('still marks a host local when a shard may have left it out', async () => {
+      const { hosts } = await huntWithHosts([
+        hostBucket('web-1', ['logs-endpoint.events-default'], 0, 10),
+      ]);
+
+      expect(hosts).toEqual([{ name: 'web-1', hit_count: 1, local: true, remote_clusters: [] }]);
+    });
+
+    it('marks a host seen on a local index as local, naming any remote cluster too', async () => {
+      const { hosts } = await huntWithHosts([
+        hostBucket('web-1', ['logs-endpoint.events-default', 'cluster_b:logs-endpoint.events-x']),
+      ]);
+
+      expect(hosts).toEqual([
+        { name: 'web-1', hit_count: 2, local: true, remote_clusters: ['cluster_b'] },
+      ]);
+    });
+
+    it('marks a host seen only on remote indices as remote, with its clusters', async () => {
+      const { hosts } = await huntWithHosts([
+        hostBucket('ubuntu', ['cluster_c:logs-a', 'cluster_b:logs-a']),
+      ]);
+
+      expect(hosts).toEqual([
+        { name: 'ubuntu', hit_count: 2, local: false, remote_clusters: ['cluster_b', 'cluster_c'] },
+      ]);
+    });
+
+    it('leaves a remote-looking host unknown when the `_index` breakdown was cut off', async () => {
+      // The buckets past the cap could hold a local index, so "remote only" is not proven.
+      const { hosts } = await huntWithHosts([hostBucket('ubuntu', ['cluster_b:logs-a'], 3)]);
+
+      expect(hosts).toEqual([{ name: 'ubuntu', hit_count: 4 }]);
+    });
+
+    it('still marks a cut-off breakdown local once a local index is in it', async () => {
+      const { hosts } = await huntWithHosts([
+        hostBucket('web-1', ['logs-endpoint.events-default'], 3),
+      ]);
+
+      expect(hosts).toEqual([{ name: 'web-1', hit_count: 4, local: true, remote_clusters: [] }]);
+    });
+
+    it('leaves a host unknown when its breakdown is empty', async () => {
+      const { hosts } = await huntWithHosts([
+        { key: 'web-1', doc_count: 2, by_index: { buckets: [] } },
+      ]);
+
+      expect(hosts).toEqual([{ name: 'web-1', hit_count: 2 }]);
+    });
+
+    it('leaves a host unknown when the response carries no breakdown', async () => {
+      const { hosts } = await huntWithHosts([{ key: 'web-1', doc_count: 2 }]);
+
+      expect(hosts).toEqual([{ name: 'web-1', hit_count: 2 }]);
     });
   });
 });

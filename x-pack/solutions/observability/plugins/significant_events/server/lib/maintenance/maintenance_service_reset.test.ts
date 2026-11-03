@@ -30,7 +30,7 @@ import {
 
 describe('SignificantEventsMaintenanceService', () => {
   describe('reset', () => {
-    it('deletes the snapshot, owned rules, and populated streams while healing registered streams', async () => {
+    it('deletes current-space knowledge, owned rules and documents without replacing streams', async () => {
       const { api, cancelAllActiveWorkflowExecutions } = makeManagementApi();
       const {
         service,
@@ -80,45 +80,42 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(v2RulesClient?.bulkDeleteRules).toHaveBeenCalledWith({
         ids: ['linked-rule', 'owned-rule', 'orphan-rule'],
       });
-      expect(esClient.indices.deleteDataStream).toHaveBeenCalledWith(
-        {
-          name: DETECTIONS_DATA_STREAM,
-        },
-        { ignore: [404] }
-      );
-      expect(esClient.indices.deleteDataStream).toHaveBeenCalledWith(
-        { name: DISCOVERIES_DATA_STREAM },
-        { ignore: [404] }
-      );
-      expect(internalEsClient.indices.createDataStream).toHaveBeenCalledWith({
-        name: DETECTIONS_DATA_STREAM,
-      });
-      expect(internalEsClient.indices.createDataStream).toHaveBeenCalledWith({
-        name: KNOWLEDGE_INDICATORS_DATA_STREAM,
-      });
-      expect(internalEsClient.indices.createDataStream).not.toHaveBeenCalledWith({
-        name: DISCOVERIES_DATA_STREAM,
-      });
+      for (const index of [
+        DETECTIONS_DATA_STREAM,
+        KNOWLEDGE_INDICATORS_DATA_STREAM,
+        DISCOVERIES_DATA_STREAM,
+      ]) {
+        expect(esClient.deleteByQuery).toHaveBeenCalledWith({
+          index,
+          query: { term: { 'kibana.space_ids': 'default' } },
+          refresh: true,
+          conflicts: 'proceed',
+          ignore_unavailable: true,
+          wait_for_completion: true,
+        });
+      }
+      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+      expect(internalEsClient.indices.createDataStream).not.toHaveBeenCalled();
+      expect(internalEsClient.deleteByQuery).not.toHaveBeenCalled();
       expect(streamDocuments.get(DETECTIONS_DATA_STREAM)).toBe(0);
       expect(streamDocuments.get(KNOWLEDGE_INDICATORS_DATA_STREAM)).toBe(0);
-      expect(streamDocuments.has(DISCOVERIES_DATA_STREAM)).toBe(false);
+      expect(streamDocuments.get(DISCOVERIES_DATA_STREAM)).toBe(0);
       expect(esClient.indices.createDataStream).not.toHaveBeenCalled();
       expect(esClient.indices.refresh).toHaveBeenCalledWith({
         index: KNOWLEDGE_INDICATORS_DATA_STREAM,
-        ignore_unavailable: true,
       });
       expect(esClient.indices.refresh.mock.invocationCallOrder[0]).toBeLessThan(
         countKnowledgeIndicators.mock.invocationCallOrder[0]
       );
       expect(asScoped).toHaveBeenCalledWith(REQUEST);
       expect(cancelAllActiveWorkflowExecutions.mock.invocationCallOrder[0]).toBeLessThan(
-        esClient.indices.deleteDataStream.mock.invocationCallOrder[0]
+        esClient.deleteByQuery.mock.invocationCallOrder[0]
       );
       expect(soClient.create.mock.calls[0][1]).toEqual(
         expect.objectContaining({ state: 'paused', updatedBy: 'marco' })
       );
       expect(soClient.create.mock.invocationCallOrder[0]).toBeLessThan(
-        esClient.indices.deleteDataStream.mock.invocationCallOrder[0]
+        esClient.deleteByQuery.mock.invocationCallOrder[0]
       );
       // The space was never paused, so the document reset created to block it is removed
       // again once there is nothing left to restore.
@@ -190,16 +187,15 @@ describe('SignificantEventsMaintenanceService', () => {
         target: `data-stream:${DETECTIONS_DATA_STREAM}:initialize`,
         error: 'template install failed',
       });
-      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalledWith(
-        { name: DETECTIONS_DATA_STREAM },
-        expect.anything()
+      expect(esClient.deleteByQuery).not.toHaveBeenCalledWith(
+        expect.objectContaining({ index: DETECTIONS_DATA_STREAM })
       );
       expect(summary.deleted?.dataStreams).toBe(0);
     });
 
-    it('refreshes a registered stream before counting so unrefreshed writes are wiped', async () => {
+    it('refreshes registered streams before snapshotting and deleting documents', async () => {
       const { api } = makeManagementApi();
-      const { service, esClient, internalEsClient } = makeService({
+      const { service, esClient } = makeService({
         management: api,
         dataStreams: { [DETECTIONS_DATA_STREAM]: 1 },
       });
@@ -207,18 +203,18 @@ describe('SignificantEventsMaintenanceService', () => {
       await service.reset({ request: REQUEST });
 
       expect(esClient.indices.refresh.mock.invocationCallOrder[0]).toBeLessThan(
-        internalEsClient.count.mock.invocationCallOrder[0]
+        esClient.deleteByQuery.mock.invocationCallOrder[0]
       );
     });
 
-    it('still trusts the count when the refresh is denied, so empty streams are not wiped', async () => {
+    it('skips document deletion when refresh is denied', async () => {
       const { api } = makeManagementApi();
       const { service, esClient } = makeService({ management: api });
       esClient.indices.refresh.mockRejectedValue(new Error('refresh denied'));
 
       const summary = await service.reset({ request: REQUEST });
 
-      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+      expect(esClient.deleteByQuery).not.toHaveBeenCalled();
       expect(summary.deleted?.dataStreams).toBe(0);
       expect(summary.partialFailures).toContainEqual({
         target: `data-stream:${DETECTIONS_DATA_STREAM}:refresh`,
@@ -234,7 +230,10 @@ describe('SignificantEventsMaintenanceService', () => {
         knowledgeIndicatorCounts: { [KI_TYPE_FEATURE]: 2, [KI_TYPE_QUERY]: 1 },
         dataStreams: { [KNOWLEDGE_INDICATORS_DATA_STREAM]: 3 },
       });
-      esClient.indices.deleteDataStream.mockRejectedValueOnce(new Error('delete failed'));
+      esClient.deleteByQuery.mockImplementation(async ({ index }) => {
+        if (index === KNOWLEDGE_INDICATORS_DATA_STREAM) throw new Error('delete failed');
+        return { deleted: 0, failures: [], version_conflicts: 0, timed_out: false };
+      });
 
       const summary = await service.reset({ request: REQUEST });
 
@@ -364,7 +363,7 @@ describe('SignificantEventsMaintenanceService', () => {
       ).toBe(false);
     });
 
-    it('restores the continuous onboarding document only in spaces whose toggle is still on', async () => {
+    it('never restores or changes continuous onboarding in a different space', async () => {
       const { api, updateWorkflow } = makeManagementApi();
       const { service, getInternalSpaceUiSettingsClient } = makeService({
         management: api,
@@ -384,7 +383,8 @@ describe('SignificantEventsMaintenanceService', () => {
       const reEnabledIds = updateWorkflow.mock.calls
         .filter(([, patch]) => patch.enabled === true)
         .map(([id]) => id);
-      expect(reEnabledIds).toContain(continuousDocumentId('space-a'));
+      expect(reEnabledIds).not.toContain(continuousDocumentId('space-a'));
+      expect(spaceA.set).not.toHaveBeenCalled();
       expect(reEnabledIds).not.toContain(continuousDocumentId('default'));
     });
 
@@ -532,7 +532,7 @@ describe('SignificantEventsMaintenanceService', () => {
       );
 
       expect(updateWorkflow).not.toHaveBeenCalled();
-      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+      expect(esClient.deleteByQuery).not.toHaveBeenCalled();
     });
 
     it('aborts before destructive work when a toggle cannot be read, instead of treating it as off', async () => {
@@ -547,25 +547,17 @@ describe('SignificantEventsMaintenanceService', () => {
 
       await expect(service.reset({ request: REQUEST })).rejects.toThrow('settings read failed');
 
-      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+      expect(esClient.deleteByQuery).not.toHaveBeenCalled();
     });
 
-    it('rejects a caller who cannot manage every space before changing anything', async () => {
-      const { api, updateWorkflow } = makeManagementApi();
-      const { service, soClient, esClient } = makeService({
-        management: api,
-        spaceIds: ['default', 'space-a'],
-        unauthorizedSpaceIds: ['space-a'],
+    it('does not enumerate or authorize other spaces', async () => {
+      const { api } = makeManagementApi();
+      const { service, savedObjects } = makeService({ management: api, spacesGetAllThrows: true });
+      await expect(service.reset({ request: REQUEST })).resolves.toMatchObject({
+        state: 'enabled',
+        partialFailures: [],
       });
-
-      await expect(service.reset({ request: REQUEST })).rejects.toMatchObject({
-        output: { statusCode: 403 },
-        message: expect.stringContaining('"space-a"'),
-      });
-
-      expect(soClient.create).not.toHaveBeenCalled();
-      expect(updateWorkflow).not.toHaveBeenCalled();
-      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+      expect(savedObjects.createInternalRepository).not.toHaveBeenCalled();
     });
 
     it('persists the swept workflows while still paused before destroying data', async () => {
@@ -586,7 +578,7 @@ describe('SignificantEventsMaintenanceService', () => {
         cleanupDocumentId('default')
       );
       expect(soClient.create.mock.invocationCallOrder[1]).toBeLessThan(
-        esClient.indices.deleteDataStream.mock.invocationCallOrder[0]
+        esClient.deleteByQuery.mock.invocationCallOrder[0]
       );
     });
 
@@ -615,7 +607,7 @@ describe('SignificantEventsMaintenanceService', () => {
         expect.any(String),
         REQUEST
       );
-      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+      expect(esClient.deleteByQuery).not.toHaveBeenCalled();
     });
 
     it('throws when the final maintenance state write fails after destructive side effects', async () => {
@@ -633,15 +625,38 @@ describe('SignificantEventsMaintenanceService', () => {
         .mockResolvedValueOnce({} as never) // swept inventory
         .mockRejectedValueOnce(new Error('reset state write failed'));
 
-      await expect(service.reset({ request: REQUEST })).rejects.toThrow(
-        'Significant Events reset persist failed in space: "default" (reset state write failed). The data was already deleted and these spaces stay paused; run Reset again to return them to enabled'
+      await expect(service.reset({ request: REQUEST })).rejects.toThrow('reset state write failed');
+      expect(esClient.deleteByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: DETECTIONS_DATA_STREAM,
+          query: { term: { 'kibana.space_ids': 'default' } },
+        })
       );
-      expect(esClient.indices.deleteDataStream).toHaveBeenCalledWith(
-        {
-          name: DETECTIONS_DATA_STREAM,
-        },
-        { ignore: [404] }
+    });
+
+    it('falls back to enabled state when removal of a reset-created document fails', async () => {
+      const { service, soClient } = makeService({ management: makeManagementApi().api });
+      soClient.delete.mockRejectedValueOnce(new Error('document removal failed'));
+
+      await service.reset({ request: REQUEST });
+
+      expect(soClient.readDocument('default')).toMatchObject({ state: 'enabled' });
+    });
+
+    it('preserves a preceding pause when reset aborts before cleanup', async () => {
+      const { service, soClient, esClient, getInternalSpaceUiSettingsClient } = makeService({
+        management: makeManagementApi().api,
+      });
+      await service.pause({ request: REQUEST });
+      const before = soClient.readDocument('default');
+      getInternalSpaceUiSettingsClient('default').get.mockRejectedValueOnce(
+        new Error('unreadable toggle')
       );
+
+      await expect(service.reset({ request: REQUEST })).rejects.toThrow('unreadable toggle');
+
+      expect(soClient.readDocument('default')).toEqual(before);
+      expect(esClient.deleteByQuery).not.toHaveBeenCalled();
     });
   });
 });

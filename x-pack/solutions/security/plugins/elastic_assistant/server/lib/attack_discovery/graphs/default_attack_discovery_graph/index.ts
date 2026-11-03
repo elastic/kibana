@@ -11,6 +11,7 @@ import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/i
 import type { BaseLLM } from '@langchain/core/language_models/llms';
 import { END, START, StateGraph } from '@langchain/langgraph';
 
+import type { AttackDiscoveryTemplateCompletion } from '@kbn/discoveries';
 import {
   getGenerateNode,
   getGenerateOrEndEdge,
@@ -40,6 +41,11 @@ export interface GetDefaultAttackDiscoveryGraphParams {
   replacements?: Replacements;
   size: number;
   start?: string;
+  /**
+   * Set when the selected connector requires an EIS prompt template.
+   * Generate and refine then send `{ template }` and skip the messages chain.
+   */
+  completeWithTemplate?: AttackDiscoveryTemplateCompletion;
 }
 
 export type DefaultAttackDiscoveryGraph = ReturnType<typeof getDefaultAttackDiscoveryGraph>;
@@ -64,6 +70,7 @@ export const getDefaultAttackDiscoveryGraph = ({
   replacements,
   size,
   start,
+  completeWithTemplate,
 }: GetDefaultAttackDiscoveryGraphParams) => {
   try {
     const graphState = getDefaultGraphAnnotation({ end, filter, prompts, start });
@@ -87,6 +94,7 @@ export const getDefaultAttackDiscoveryGraph = ({
       getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
       generationSchema,
       responseIsHallucinated,
+      completeWithTemplate,
     });
 
     const refineNode = getRefineNode({
@@ -94,6 +102,7 @@ export const getDefaultAttackDiscoveryGraph = ({
       logger,
       generationSchema,
       responseIsHallucinated,
+      completeWithTemplate,
     });
 
     // get edges:

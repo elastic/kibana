@@ -38,11 +38,15 @@ export const turnOffPolicyProtectionsIfNotSupported = async (
   const isCustomNotificationEnabled = productFeaturesService.isEnabled(
     ProductFeatureSecurityKey.endpointCustomNotification
   );
+  const isRegistryCredentialHardeningFeatureEnabled = productFeaturesService.isEnabled(
+    ProductFeatureSecurityKey.endpointRegistryCredentialHardening
+  );
 
   if (
     isPolicyProtectionsEnabled &&
     isProtectionUpdatesFeatureEnabled &&
-    isCustomNotificationEnabled
+    isCustomNotificationEnabled &&
+    isRegistryCredentialHardeningFeatureEnabled
   ) {
     log.info('All relevant features are enabled. Nothing to do!');
     return;
@@ -75,11 +79,16 @@ export const turnOffPolicyProtectionsIfNotSupported = async (
       const shouldDowngradeCustomNotifications =
         !isCustomNotificationEnabled &&
         checkIfPopupMessagesContainCustomNotifications(policySettings);
+      const shouldDowngradeRegistryCredentialHardening =
+        !isRegistryCredentialHardeningFeatureEnabled &&
+        policySettings.windows.attack_surface_reduction.registry_credential_hardening?.enabled ===
+          true;
 
       if (
         (!isPolicyProtectionsEnabled && !isOnlyCollectingEvents) ||
         shouldDowngradeProtectionUpdates ||
-        shouldDowngradeCustomNotifications
+        shouldDowngradeCustomNotifications ||
+        shouldDowngradeRegistryCredentialHardening
       ) {
         if (!isPolicyProtectionsEnabled && !isOnlyCollectingEvents) {
           messages.push(
@@ -96,6 +105,11 @@ export const turnOffPolicyProtectionsIfNotSupported = async (
             `Policy [${integrationPolicy.id}][${integrationPolicy.name}] updated to reset custom notifications.`
           );
         }
+        if (shouldDowngradeRegistryCredentialHardening) {
+          messages.push(
+            `Policy [${integrationPolicy.id}][${integrationPolicy.name}] updated to disable registry credential hardening.`
+          );
+        }
 
         integrationPolicy.inputs[0].config.policy.value = merge(
           {},
@@ -104,7 +118,14 @@ export const turnOffPolicyProtectionsIfNotSupported = async (
             ? ensureOnlyEventCollectionIsAllowed(policySettings)
             : {},
           shouldDowngradeProtectionUpdates ? { global_manifest_version: 'latest' } : {},
-          shouldDowngradeCustomNotifications ? resetCustomNotifications(policySettings) : {}
+          shouldDowngradeCustomNotifications ? resetCustomNotifications(policySettings) : {},
+          shouldDowngradeRegistryCredentialHardening
+            ? {
+                windows: {
+                  attack_surface_reduction: { registry_credential_hardening: { enabled: false } },
+                },
+              }
+            : {}
         );
 
         updates.push({

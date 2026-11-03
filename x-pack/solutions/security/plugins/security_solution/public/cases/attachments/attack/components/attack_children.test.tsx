@@ -48,7 +48,7 @@ const legacyMetadata: AttackAttachmentMetadata = {
 const renderCard = (attackMetadata: AttackAttachmentMetadata) =>
   render(
     <TestProviders>
-      <AttackChildren id="attack-id-1" metadata={attackMetadata} />
+      <AttackChildren metadata={attackMetadata} />
     </TestProviders>
   );
 
@@ -177,7 +177,7 @@ describe('AttackChildren', () => {
 
     render(
       <TestProviders startServices={kibanaMock}>
-        <AttackChildren id="attack-id-1" metadata={metadata} />
+        <AttackChildren metadata={metadata} />
       </TestProviders>
     );
 

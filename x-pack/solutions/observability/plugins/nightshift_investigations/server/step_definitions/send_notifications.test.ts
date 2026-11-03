@@ -20,7 +20,11 @@ jest.mock('@kbn/workflows-extensions/server', () => ({
   createServerStepDefinition: jest.fn((definition) => definition),
 }));
 
-const setup = (spaceId = 'default', connectorId = 'saved-slack') => {
+const setup = (
+  spaceId = 'default',
+  connectorId = 'saved-slack',
+  params: Record<string, string> = { channel: '#alerts' }
+) => {
   const request = httpServerMock.createKibanaRequest({ spaceId: brandSpaceId(spaceId) });
   const routing = createRoutingTestContext(spaceId);
   const execute = jest.fn(async (_execution: NotificationExecution) => ({
@@ -38,10 +42,10 @@ const setup = (spaceId = 'default', connectorId = 'saved-slack') => {
     },
     conversationId: 'conv-1',
     workflowId: 'system-nightshift-investigation',
-    notificationDestinations: [
-      { type: 'slack', connector_id: connectorId, params: { channel: '#alerts' } },
-    ],
+    notificationDestinations: [{ type: 'slack', connector_id: connectorId, params }],
   }));
+  const recordSlackThreadStatusMessage = jest.fn(async () => {});
+  const claimSlackThread = jest.fn(async () => true);
   const urlService = new MockUrlService();
   const investigationLocator = urlService.locators.create(new InvestigationLocatorDefinition());
   const ensureForFailure = jest.fn(async () => 'conv-1');
@@ -55,6 +59,8 @@ const setup = (spaceId = 'default', connectorId = 'saved-slack') => {
     getInvestigationExecutionContext,
     ensureForFailure,
     getLifecycleSubject,
+    recordSlackThreadStatusMessage,
+    claimSlackThread,
   })) as never;
   const getRoutingClient = jest.fn(async () => routing.client);
   const definition = sendNotificationsStepDefinition({
@@ -97,6 +103,8 @@ const setup = (spaceId = 'default', connectorId = 'saved-slack') => {
     execute,
     getActionsClientWithRequestInSpace,
     getInvestigationExecutionContext,
+    recordSlackThreadStatusMessage,
+    claimSlackThread,
     getRoutingClient,
     context,
     routing,
@@ -144,6 +152,178 @@ describe('nightshift.sendNotifications step', () => {
     expect(execute).toHaveBeenCalledWith(
       expect.objectContaining({ actionId: 'elastic-apps-slack' })
     );
+  });
+
+  describe('Slack thread status message', () => {
+    const threadParams = { channel: 'C123', thread_ts: '1.1' };
+
+    it('records the started reply under the caller-named message as the thread status message', async () => {
+      const { definition, context, recordSlackThreadStatusMessage } = setup(
+        'default',
+        'elastic-apps-slack',
+        threadParams
+      );
+      await definition.handler(context('started'));
+      expect(recordSlackThreadStatusMessage).toHaveBeenCalledWith({
+        investigationId: 'inv-1',
+        channel: 'C123',
+        threadTs: '1.1',
+        messageTs: '1.2',
+      });
+    });
+
+    it('records nothing for a destination that starts its own thread', async () => {
+      const { definition, context, recordSlackThreadStatusMessage } = setup();
+      await definition.handler(context('started'));
+      expect(recordSlackThreadStatusMessage).not.toHaveBeenCalled();
+    });
+
+    it('records nothing for a custom Slack connector', async () => {
+      const { definition, context, recordSlackThreadStatusMessage } = setup(
+        'default',
+        'saved-slack',
+        threadParams
+      );
+      await definition.handler(context('started'));
+      expect(recordSlackThreadStatusMessage).not.toHaveBeenCalled();
+    });
+
+    it('records nothing when the started reply was not confirmed', async () => {
+      const { definition, context, execute, recordSlackThreadStatusMessage } = setup(
+        'default',
+        'elastic-apps-slack',
+        threadParams
+      );
+      execute.mockResolvedValueOnce({ status: 'error', message: 'not_in_channel' } as never);
+      await definition.handler(context('started'));
+      expect(recordSlackThreadStatusMessage).not.toHaveBeenCalled();
+    });
+
+    it('records the result reply when the started reply was not confirmed', async () => {
+      const { definition, context, execute, recordSlackThreadStatusMessage } = setup(
+        'default',
+        'elastic-apps-slack',
+        threadParams
+      );
+      execute
+        .mockResolvedValueOnce({ status: 'error', message: 'rate_limited' } as never)
+        .mockResolvedValueOnce({ status: 'ok', data: { ts: '1.3', channel: 'C123' } });
+      await definition.handler(context('started'));
+      await definition.handler(context('completed'));
+      expect(execute.mock.calls[1][0].params.subAction).toBe('sendMessage');
+      expect(recordSlackThreadStatusMessage).toHaveBeenCalledTimes(1);
+      expect(recordSlackThreadStatusMessage).toHaveBeenCalledWith({
+        investigationId: 'inv-1',
+        channel: 'C123',
+        threadTs: '1.1',
+        messageTs: '1.3',
+      });
+    });
+
+    it('records the started reply only once when the result edits it', async () => {
+      const { definition, context, execute, recordSlackThreadStatusMessage } = setup(
+        'default',
+        'elastic-apps-slack',
+        threadParams
+      );
+      await definition.handler(context('started'));
+      await definition.handler(context('completed'));
+      expect(execute.mock.calls[1][0].params).toMatchObject({
+        subAction: 'updateMessage',
+        subActionParams: {
+          channel: 'C123',
+          messageTs: '1.2',
+          text: expect.any(String),
+          blocks: expect.any(Array),
+        },
+      });
+      expect(recordSlackThreadStatusMessage).toHaveBeenCalledTimes(1);
+      expect(recordSlackThreadStatusMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ messageTs: '1.2' })
+      );
+    });
+
+    it('keeps the delivery result when recording fails', async () => {
+      const { definition, context, recordSlackThreadStatusMessage } = setup(
+        'default',
+        'elastic-apps-slack',
+        threadParams
+      );
+      recordSlackThreadStatusMessage.mockRejectedValueOnce(new Error('boom'));
+      expect(await definition.handler(context('started'))).toEqual({
+        output: { sent: 1, failed: 0, unconfirmed: 0 },
+      });
+    });
+  });
+
+  describe('Slack thread claim for a root post', () => {
+    const rootResponse = {
+      status: 'ok',
+      data: { ts: '1.2', channel: 'C123', externalConversationId: 'slack:T1:C123:1.2' },
+    } as never;
+
+    it('claims the thread the root post started', async () => {
+      const { definition, context, execute, claimSlackThread } = setup(
+        'default',
+        'elastic-apps-slack'
+      );
+      execute.mockResolvedValueOnce(rootResponse);
+      await definition.handler(context('started'));
+      expect(claimSlackThread).toHaveBeenCalledWith({
+        investigationId: 'inv-1',
+        externalConversationId: 'slack:T1:C123:1.2',
+        channel: 'C123',
+        threadTs: '1.2',
+      });
+    });
+
+    it('claims nothing when the post carries no thread key', async () => {
+      const { definition, context, claimSlackThread } = setup('default', 'elastic-apps-slack');
+      await definition.handler(context('started'));
+      expect(claimSlackThread).not.toHaveBeenCalled();
+    });
+
+    it('claims nothing for a custom Slack connector', async () => {
+      const { definition, context, execute, claimSlackThread } = setup('default', 'saved-slack');
+      execute.mockResolvedValueOnce(rootResponse);
+      await definition.handler(context('started'));
+      expect(claimSlackThread).not.toHaveBeenCalled();
+    });
+
+    it('claims nothing for a reply under a caller-named message', async () => {
+      const { definition, context, execute, claimSlackThread } = setup(
+        'default',
+        'elastic-apps-slack',
+        { channel: 'C123', thread_ts: '1.1' }
+      );
+      execute.mockResolvedValueOnce(rootResponse);
+      await definition.handler(context('started'));
+      expect(claimSlackThread).not.toHaveBeenCalled();
+    });
+
+    it('retries a failed claim on the next phase', async () => {
+      const { definition, context, execute, claimSlackThread } = setup(
+        'default',
+        'elastic-apps-slack'
+      );
+      execute.mockResolvedValueOnce(rootResponse);
+      claimSlackThread.mockRejectedValueOnce(new Error('boom'));
+      await definition.handler(context('started'));
+      await definition.handler(context('completed'));
+      expect(claimSlackThread).toHaveBeenCalledTimes(2);
+    });
+
+    it('keeps the delivery result when claiming fails', async () => {
+      const { definition, context, execute, claimSlackThread } = setup(
+        'default',
+        'elastic-apps-slack'
+      );
+      execute.mockResolvedValueOnce(rootResponse);
+      claimSlackThread.mockRejectedValueOnce(new Error('boom'));
+      expect(await definition.handler(context('started'))).toEqual({
+        output: { sent: 1, failed: 0, unconfirmed: 0 },
+      });
+    });
   });
 
   it('validates phase and bounded failure reasons', () => {
@@ -198,7 +378,7 @@ describe('nightshift.handleInvestigationFailure step', () => {
     expect(await failureDefinition.handler(context())).toEqual({
       output: { sent: 1, failed: 0, unconfirmed: 0 },
     });
-    expect(ensureForFailure).toHaveBeenCalledWith('inv-1', 'exec-follow-up');
+    expect(ensureForFailure).toHaveBeenCalledWith('inv-1', 'exec-follow-up', 'Model unavailable');
     expect(getActionsClientWithRequestInSpace).toHaveBeenCalledWith(request, spaceId);
     expect(emitter).toHaveBeenCalledWith(
       'nightshift-investigations.failed',
