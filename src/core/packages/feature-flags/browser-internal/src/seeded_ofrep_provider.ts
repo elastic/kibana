@@ -261,7 +261,8 @@ export class SeededOfrepWebProvider implements Provider {
       if (this.closed || this.delegating) {
         return;
       }
-      void this.activate();
+      // A retry has no caller. Swallow the rejection activate() rethrows when there is no seed; it has already been logged.
+      void this.activate().catch(() => undefined);
     }, this.retryDelayMs);
   }
 

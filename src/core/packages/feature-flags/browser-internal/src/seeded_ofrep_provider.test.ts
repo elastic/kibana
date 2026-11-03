@@ -231,6 +231,50 @@ describe('SeededOfrepWebProvider', () => {
     await provider.onClose();
   });
 
+  test('retries an empty seed without an unhandled rejection', async () => {
+    jest.useFakeTimers();
+    const unhandled: unknown[] = [];
+    const onUnhandled = (reason: unknown) => {
+      unhandled.push(reason);
+    };
+    process.on('unhandledRejection', onUnhandled);
+    try {
+      const { delegate, rejectInit, resolveInit } = createDelegate();
+      const provider = new SeededOfrepWebProvider({
+        ofrep: { ...ofrep, pollInterval: 10_000 },
+        initialFlags: {},
+        createProvider: () => delegate,
+      });
+      const flagsChanged: string[][] = [];
+      provider.events.addHandler(ClientProviderEvents.ConfigurationChanged, (details) => {
+        flagsChanged.push((details?.flagsChanged ?? []) as string[]);
+      });
+
+      const starting = provider.initialize();
+      rejectInit(new Error('network down'));
+      await expect(starting).rejects.toThrow('network down');
+
+      await jest.advanceTimersByTimeAsync(10_000);
+      rejectInit(new Error('still down'));
+      await jest.advanceTimersByTimeAsync(0);
+      expect(delegate.initialize).toHaveBeenCalledTimes(2);
+      expect(unhandled).toEqual([]);
+
+      delegate.flagCache = { 'my.flag': { value: true } };
+      await jest.advanceTimersByTimeAsync(10_000);
+      resolveInit();
+      await Promise.resolve();
+
+      expect(delegate.initialize).toHaveBeenCalledTimes(3);
+      expect(flagsChanged).toEqual([['my.flag']]);
+      expect(unhandled).toEqual([]);
+      await provider.onClose();
+    } finally {
+      process.off('unhandledRejection', onUnhandled);
+      jest.useRealTimers();
+    }
+  });
+
   test('forwards later context changes to the OFREP provider', async () => {
     const { delegate, resolveInit } = createDelegate();
     const provider = new SeededOfrepWebProvider({
