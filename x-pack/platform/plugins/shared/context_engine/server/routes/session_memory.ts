@@ -19,13 +19,14 @@ import {
   ES_SESSION_MEMORY_PATH,
   SESSION_EVENTS_BY_SESSION_PATH,
   SESSION_EVENTS_SAVE_PATH,
-  SESSION_MEMORY_BY_SESSION_PATH,
   SESSION_MEMORY_INTERNAL_API_VERSION,
+  SESSION_MEMORY_LIST_PATH,
   SESSION_MEMORY_REMEMBER_PATH,
   SESSION_MEMORY_SEARCH_PATH,
 } from '../../common/constants';
 import type {
   ListSessionEventsResponse,
+  ListSessionMemoryQuery,
   ListSessionMemoryResponse,
   RememberSessionMemoryResponse,
   SaveSessionEventResponse,
@@ -35,6 +36,7 @@ import type {
 import { apiPrivileges } from '../../common/features';
 import { formatErrorMessage } from '../utils/format_es_error';
 import {
+  listSessionMemoryQuerySchema,
   rememberSessionMemoryBodySchema,
   saveSessionEventBodySchema,
   searchSessionMemoryBodySchema,
@@ -68,11 +70,8 @@ const handleSessionMemoryError = (
   return response.customError({ statusCode: 500, body: { message: formatErrorMessage(error) } });
 };
 
-const toListQuerystring = ({ space, ai_index_id: aiIndexId, size }: SessionScopeQuery) => ({
-  ...(space !== undefined ? { space } : {}),
-  ...(aiIndexId !== undefined ? { ai_index_id: aiIndexId } : {}),
-  ...(size !== undefined ? { size } : {}),
-});
+const toListQuerystring = (query: ListSessionMemoryQuery | SessionScopeQuery) =>
+  Object.fromEntries(Object.entries(query).filter(([, value]) => value !== undefined));
 
 type TransportParams = Parameters<ElasticsearchClient['transport']['request']>[0];
 
@@ -161,16 +160,16 @@ export const registerSessionMemoryRoutes = ({
 
   router.versioned
     .get({
-      path: SESSION_MEMORY_BY_SESSION_PATH,
+      path: SESSION_MEMORY_LIST_PATH,
       security: READ_SECURITY,
       access: 'internal',
       summary: 'List session memories',
-      description: 'Returns the memories stored for a session, newest first.',
+      description: 'Returns the memories matching the filters, newest first.',
     })
     .addVersion(
       {
         version: SESSION_MEMORY_INTERNAL_API_VERSION,
-        validate: { request: { params: sessionIdParamsSchema, query: sessionScopeQuerySchema } },
+        validate: { request: { query: listSessionMemoryQuerySchema } },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         if (!(await isMemoryEnabled(request))) {
@@ -180,7 +179,7 @@ export const registerSessionMemoryRoutes = ({
           const esClient = (await ctx.core).elasticsearch.client.asInternalUser;
           const body = await esRequest<ListSessionMemoryResponse>(esClient, {
             method: 'GET',
-            path: `${ES_SESSION_MEMORY_PATH}/${encodeURIComponent(request.params.sessionId)}`,
+            path: ES_SESSION_MEMORY_PATH,
             querystring: toListQuerystring(request.query),
           });
           return response.ok({ body });

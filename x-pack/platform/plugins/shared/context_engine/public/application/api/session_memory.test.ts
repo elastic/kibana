@@ -8,6 +8,7 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   SESSION_MEMORY_INTERNAL_API_VERSION,
+  SESSION_MEMORY_LIST_PATH,
   SESSION_MEMORY_REMEMBER_PATH,
   SESSION_MEMORY_SEARCH_PATH,
 } from '../../../common/constants';
@@ -48,15 +49,20 @@ describe('searchSessionMemory', () => {
 });
 
 describe('listSessionMemory', () => {
-  it('GETs the session path with only the provided scope filters', async () => {
+  it('GETs the list path with only the provided filters', async () => {
     const http = coreMock.createStart().http;
     http.get.mockResolvedValue({ count: 0, results: [] });
 
-    await listSessionMemory(http, { sessionId: 'session/one', space: 'default', size: 10 });
+    await listSessionMemory(http, {
+      user_id: 'u-1',
+      space: 'default',
+      ai_index_id: undefined,
+      size: 10,
+    });
 
-    expect(http.get).toHaveBeenCalledWith('/internal/context_engine/session_memory/session%2Fone', {
+    expect(http.get).toHaveBeenCalledWith(SESSION_MEMORY_LIST_PATH, {
       version: SESSION_MEMORY_INTERNAL_API_VERSION,
-      query: { space: 'default', size: 10 },
+      query: { user_id: 'u-1', space: 'default', size: 10 },
     });
   });
 });

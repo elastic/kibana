@@ -87,14 +87,25 @@ export const searchSessionMemoryBodySchema = schema.object({
 
 export const sessionIdParamsSchema = schema.object({ sessionId: idSchema });
 
+const listSizeSchema = schema.number({
+  min: 1,
+  max: MAX_SESSION_LIST_SIZE,
+  defaultValue: DEFAULT_SESSION_LIST_SIZE,
+});
+
 export const sessionScopeQuerySchema = schema.object({
   space: optionalIdSchema,
   ai_index_id: optionalIdSchema,
-  size: schema.number({
-    min: 1,
-    max: MAX_SESSION_LIST_SIZE,
-    defaultValue: DEFAULT_SESSION_LIST_SIZE,
-  }),
+  size: listSizeSchema,
+});
+
+export const listSessionMemoryQuerySchema = schema.object({
+  session_id: optionalIdSchema,
+  user_id: optionalIdSchema,
+  agent_id: optionalIdSchema,
+  space: optionalIdSchema,
+  ai_index_id: optionalIdSchema,
+  size: listSizeSchema,
 });
 
 export const saveSessionEventBodySchema = schema.object({

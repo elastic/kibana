@@ -49,11 +49,18 @@ export interface SessionMemory extends RememberSessionMemoryBody {
 
 export type RememberSessionMemoryResponse = SessionMemory;
 
-/** Query of `GET /_context_engine/session_memory/{session_id}` and `GET /_context_engine/session_events/{session_id}`. */
+/** Query of `GET /_context_engine/session_events/{session_id}`. */
 export interface SessionScopeQuery {
   space?: string;
   ai_index_id?: string;
   size?: number;
+}
+
+/** Query of `GET /_context_engine/session_memory`. Every filter is optional; no inference runs. */
+export interface ListSessionMemoryQuery extends SessionScopeQuery {
+  session_id?: string;
+  user_id?: string;
+  agent_id?: string;
 }
 
 export interface ListSessionMemoryResponse {

@@ -7,20 +7,31 @@
 
 import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
-import { useSearchSessionMemory } from '../../hooks/use_session_memory_mutations';
+import {
+  useListSessionMemory,
+  useSearchSessionMemory,
+} from '../../hooks/use_session_memory_mutations';
 import { SearchMemoryPanel } from './search_memory_panel';
 import { buildSessionContext, pdfFile, pngFile, renderWithProviders } from './test_helpers';
 
 jest.mock('../../hooks/use_session_memory_mutations', () => ({
+  useListSessionMemory: jest.fn(),
   useSearchSessionMemory: jest.fn(),
 }));
 
 const mockUseSearchSessionMemory = jest.mocked(useSearchSessionMemory);
+const mockUseListSessionMemory = jest.mocked(useListSessionMemory);
+
+type MutationResult = ReturnType<typeof useSearchSessionMemory> &
+  ReturnType<typeof useListSessionMemory>;
 
 const mutationResult = (overrides = {}) =>
-  ({ mutate: jest.fn(), isLoading: false, data: undefined, ...overrides } as unknown as ReturnType<
-    typeof useSearchSessionMemory
-  >);
+  ({
+    mutate: jest.fn(),
+    isLoading: false,
+    data: undefined,
+    ...overrides,
+  } as unknown as MutationResult);
 
 const memory = {
   id: 'm-1',
@@ -33,6 +44,7 @@ const memory = {
 describe('SearchMemoryPanel', () => {
   beforeEach(() => {
     mockUseSearchSessionMemory.mockReturnValue(mutationResult());
+    mockUseListSessionMemory.mockReturnValue(mutationResult());
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -138,6 +150,47 @@ describe('SearchMemoryPanel', () => {
     });
   });
 
+  it('lists memories matching the filters through the list endpoint', () => {
+    const mutate = jest.fn();
+    mockUseListSessionMemory.mockReturnValue(mutationResult({ mutate }));
+    renderWithProviders(<SearchMemoryPanel />);
+
+    fireEvent.click(screen.getByTestId('contextSessionMemorySearch-mode-list'));
+    expect(screen.queryByTestId('contextSessionMemorySearch-text')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextSessionMemorySearch-submit')).toBeEnabled();
+    fireEvent.click(screen.getByTestId('contextSessionMemorySearch-filter-session'));
+    fireEvent.click(screen.getByTestId('contextSessionMemorySearch-submit'));
+
+    expect(mutate).toHaveBeenCalledWith({
+      user_id: 'kathleen',
+      session_id: 'session-1',
+      space: 'default',
+      size: 10,
+    });
+  });
+
+  it('renders a listing newest first without scores', () => {
+    mockUseListSessionMemory.mockReturnValue(
+      mutationResult({
+        data: {
+          count: 2,
+          results: [
+            { ...memory, content: 'Newer' },
+            { ...memory, id: 'm-2', content: 'Older' },
+          ],
+        },
+      })
+    );
+    renderWithProviders(<SearchMemoryPanel />);
+    fireEvent.click(screen.getByTestId('contextSessionMemorySearch-mode-list'));
+
+    expect(screen.getByTestId('contextSessionMemorySearch-count')).toHaveTextContent(
+      '2 memories, newest first'
+    );
+    expect(screen.getAllByTestId('contextSessionMemoryResult')).toHaveLength(2);
+    expect(screen.queryAllByTestId('contextSessionMemoryResult-score')).toHaveLength(0);
+  });
+
   it('renders each hit with its score, content, and image preview', () => {
     mockUseSearchSessionMemory.mockReturnValue(
       mutationResult({
@@ -159,6 +212,9 @@ describe('SearchMemoryPanel', () => {
     );
     renderWithProviders(<SearchMemoryPanel />);
 
+    expect(screen.getByTestId('contextSessionMemorySearch-count')).toHaveTextContent(
+      '2 matches, best first'
+    );
     expect(screen.getAllByTestId('contextSessionMemoryResult')).toHaveLength(2);
     expect(screen.getAllByTestId('contextSessionMemoryResult-score')[0]).toHaveTextContent('0.912');
     expect(screen.getByTestId('contextSessionMemoryResult-content')).toHaveTextContent(

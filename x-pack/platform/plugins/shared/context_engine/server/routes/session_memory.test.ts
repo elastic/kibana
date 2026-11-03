@@ -11,7 +11,7 @@ import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   SESSION_EVENTS_BY_SESSION_PATH,
   SESSION_EVENTS_SAVE_PATH,
-  SESSION_MEMORY_BY_SESSION_PATH,
+  SESSION_MEMORY_LIST_PATH,
   SESSION_MEMORY_REMEMBER_PATH,
   SESSION_MEMORY_SEARCH_PATH,
 } from '../../common/constants';
@@ -98,7 +98,7 @@ describe('session memory routes', () => {
       access: 'internal',
       security: { authz: { requiredPrivileges: [apiPrivileges.readContextEngine] } },
     });
-    for (const path of [SESSION_MEMORY_BY_SESSION_PATH, SESSION_EVENTS_BY_SESSION_PATH]) {
+    for (const path of [SESSION_MEMORY_LIST_PATH, SESSION_EVENTS_BY_SESSION_PATH]) {
       expect(getRoute('GET', path).config).toMatchObject({
         access: 'internal',
         security: { authz: { requiredPrivileges: [apiPrivileges.readContextEngine] } },
@@ -111,7 +111,7 @@ describe('session memory routes', () => {
 
     await callRoute('POST', SESSION_MEMORY_REMEMBER_PATH, { body: { ...scope, content: 'x' } });
     await callRoute('POST', SESSION_MEMORY_SEARCH_PATH, { body: { query: 'x' } });
-    await callRoute('GET', SESSION_MEMORY_BY_SESSION_PATH, { params: { sessionId: 's-1' } });
+    await callRoute('GET', SESSION_MEMORY_LIST_PATH, { query: { size: 10 } });
     await callRoute('POST', SESSION_EVENTS_SAVE_PATH, { body: { ...scope, transcript: 'x' } });
     await callRoute('GET', SESSION_EVENTS_BY_SESSION_PATH, { params: { sessionId: 's-1' } });
 
@@ -124,7 +124,7 @@ describe('session memory routes', () => {
 
     await callRoute('POST', SESSION_MEMORY_REMEMBER_PATH, { body: { ...scope, content: 'x' } });
     await callRoute('POST', SESSION_MEMORY_SEARCH_PATH, { body: { query: 'x' } });
-    await callRoute('GET', SESSION_MEMORY_BY_SESSION_PATH, { params: { sessionId: 's-1' } });
+    await callRoute('GET', SESSION_MEMORY_LIST_PATH, { query: { size: 10 } });
     await callRoute('POST', SESSION_EVENTS_SAVE_PATH, { body: { ...scope, transcript: 'x' } });
     await callRoute('GET', SESSION_EVENTS_BY_SESSION_PATH, { params: { sessionId: 's-1' } });
 
@@ -162,20 +162,27 @@ describe('session memory routes', () => {
     expect(response.ok).toHaveBeenCalledWith({ body: hits });
   });
 
-  it('lists a session’s memories with the scope filters as a querystring', async () => {
+  it('lists memories with the filters as a querystring', async () => {
     transportRequest.mockResolvedValue({ count: 0, results: [] });
+    const query = { ...scope, space: 'default', ai_index_id: 'idx', size: 10 };
 
-    await callRoute('GET', SESSION_MEMORY_BY_SESSION_PATH, {
-      params: { sessionId: 'session/one' },
-      query: { space: 'default', ai_index_id: 'idx', size: 10 },
-    });
+    await callRoute('GET', SESSION_MEMORY_LIST_PATH, { query });
 
     expect(transportRequest).toHaveBeenCalledWith({
       method: 'GET',
-      path: '/_context_engine/session_memory/session%2Fone',
-      querystring: { space: 'default', ai_index_id: 'idx', size: 10 },
+      path: '/_context_engine/session_memory',
+      querystring: query,
     });
     expect(response.ok).toHaveBeenCalledWith({ body: { count: 0, results: [] } });
+  });
+
+  it('accepts a listing with no filters and defaults the size', () => {
+    const { validate } = getRoute('GET', SESSION_MEMORY_LIST_PATH);
+    const querySchema = (validate as { request: { query: { validate: (v: unknown) => unknown } } })
+      .request.query;
+
+    expect(querySchema.validate({})).toEqual({ size: 100 });
+    expect(() => querySchema.validate({ user_id: 'u-1', size: 1001 })).toThrow();
   });
 
   it('proxies save event and lists a session’s events', async () => {

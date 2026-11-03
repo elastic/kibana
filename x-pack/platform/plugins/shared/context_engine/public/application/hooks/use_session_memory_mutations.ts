@@ -8,12 +8,18 @@
 import { i18n } from '@kbn/i18n';
 import { useMutation } from '@kbn/react-query';
 import type {
+  ListSessionMemoryQuery,
+  ListSessionMemoryResponse,
   RememberSessionMemoryBody,
   RememberSessionMemoryResponse,
   SearchSessionMemoryBody,
   SearchSessionMemoryResponse,
 } from '../../../common/http_api/session_memory';
-import { rememberSessionMemory, searchSessionMemory } from '../api/session_memory';
+import {
+  listSessionMemory,
+  rememberSessionMemory,
+  searchSessionMemory,
+} from '../api/session_memory';
 import { getErrorMessage } from '../utils/get_error_message';
 import { useKibana } from './use_kibana';
 
@@ -54,6 +60,22 @@ export const useSearchSessionMemory = () => {
 
   return useMutation<SearchSessionMemoryResponse, Error, SearchSessionMemoryBody>({
     mutationFn: (body) => searchSessionMemory(http, { body }),
+    onError,
+  });
+};
+
+export const useListSessionMemory = () => {
+  const {
+    services: { http },
+  } = useKibana();
+  const onError = useErrorToast(
+    i18n.translate('xpack.contextEngine.sessionMemory.list.errorTitle', {
+      defaultMessage: 'Unable to list session memory',
+    })
+  );
+
+  return useMutation<ListSessionMemoryResponse, Error, ListSessionMemoryQuery>({
+    mutationFn: (query) => listSessionMemory(http, query),
     onError,
   });
 };

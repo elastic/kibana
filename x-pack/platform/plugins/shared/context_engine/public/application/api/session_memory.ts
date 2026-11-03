@@ -5,32 +5,28 @@
  * 2.0.
  */
 
-import { buildPath } from '@kbn/core-http-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import {
-  SESSION_MEMORY_BY_SESSION_PATH,
   SESSION_MEMORY_INTERNAL_API_VERSION,
+  SESSION_MEMORY_LIST_PATH,
   SESSION_MEMORY_REMEMBER_PATH,
   SESSION_MEMORY_SEARCH_PATH,
 } from '../../../common/constants';
 import type {
+  ListSessionMemoryQuery,
   ListSessionMemoryResponse,
   RememberSessionMemoryBody,
   RememberSessionMemoryResponse,
   SearchSessionMemoryBody,
   SearchSessionMemoryResponse,
-  SessionScopeQuery,
 } from '../../../common/http_api/session_memory';
 
 interface WithSignal {
   signal?: AbortSignal;
 }
 
-const toScopeQuery = ({ space, ai_index_id: aiIndexId, size }: SessionScopeQuery) => ({
-  ...(space !== undefined ? { space } : {}),
-  ...(aiIndexId !== undefined ? { ai_index_id: aiIndexId } : {}),
-  ...(size !== undefined ? { size } : {}),
-});
+const toListQuery = (query: ListSessionMemoryQuery) =>
+  Object.fromEntries(Object.entries(query).filter(([, value]) => value !== undefined));
 
 export const rememberSessionMemory = (
   http: HttpStart,
@@ -54,10 +50,10 @@ export const searchSessionMemory = (
 
 export const listSessionMemory = (
   http: HttpStart,
-  { sessionId, signal, ...query }: { sessionId: string } & SessionScopeQuery & WithSignal
+  { signal, ...query }: ListSessionMemoryQuery & WithSignal
 ): Promise<ListSessionMemoryResponse> =>
-  http.get<ListSessionMemoryResponse>(buildPath(SESSION_MEMORY_BY_SESSION_PATH, { sessionId }), {
+  http.get<ListSessionMemoryResponse>(SESSION_MEMORY_LIST_PATH, {
     version: SESSION_MEMORY_INTERNAL_API_VERSION,
-    query: toScopeQuery(query),
+    query: toListQuery(query),
     ...(signal ? { signal } : {}),
   });
