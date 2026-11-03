@@ -11,6 +11,8 @@ import chalk from 'chalk';
 import execa from 'execa';
 import inquirer from 'inquirer';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { testTargets } from '@kbn/scout-info';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import type { CheckResult, DoctorArch, DoctorCheck, DoctorLocation, Fix } from './types';
 import { DOCTOR_ARCHS, DOCTOR_LOCATIONS, fail } from './types';
 import { environmentChecks } from './checks/environment';
@@ -41,9 +43,36 @@ interface DoctorOptions {
 
 const LOCATION_LABELS: Record<DoctorLocation, string> = { cloud: 'Cloud', local: 'Local' };
 
-const RUN_COMMANDS: Record<DoctorLocation, { label: string; command: string }> = {
-  cloud: { label: 'Run on Cloud', command: 'qaf kibana scout run-config --help' },
-  local: { label: 'Run locally', command: 'node scripts/scout run-tests --help' },
+const QAF_NAME = 'scout-tests';
+const CONFIG_PLACEHOLDER = '--config <playwright_config_path>';
+
+// QAF has no single create-and-run command, so chain them with the same name.
+// Without --kibana-repo-root QAF runs its own Kibana clone, not this checkout.
+const getRunCommands = (location: DoctorLocation, arch: DoctorArch): string[] => {
+  if (location === 'local') {
+    const domain = testTargets.local.find((target) => target.arch === arch)?.domain;
+    return [`node scripts/scout run-tests --arch ${arch} --domain ${domain} ${CONFIG_PLACEHOLDER}`];
+  }
+
+  const [create, target] =
+    arch === 'serverless'
+      ? [
+          `qaf elastic-cloud projects create --project-type elasticsearch --project-name ${QAF_NAME}`,
+          `--ec-project-name ${QAF_NAME}`,
+        ]
+      : [
+          `qaf elastic-cloud deployments create --stack-version ${kibanaPackageJson.version}-SNAPSHOT --deployment-name ${QAF_NAME}`,
+          `--ec-deployment-name ${QAF_NAME}`,
+        ];
+  return [
+    `${create} && \\`,
+    `qaf kibana scout run-config ${target} --kibana-repo-root . ${CONFIG_PLACEHOLDER}`,
+  ];
+};
+
+const RUN_LABELS: Record<DoctorLocation, string> = {
+  cloud: 'Run on Cloud',
+  local: 'Run locally',
 };
 
 const getSections = (): DoctorSection[] => [
@@ -262,7 +291,6 @@ export const runDoctor = async (
   }
 
   const rows = printReadiness(log, results, locations, archs);
-  log.write('');
 
   if (!fix && results.some((result) => result.fix)) {
     const flags = [
@@ -270,7 +298,7 @@ export const runDoctor = async (
       ...(arch ? [`--arch ${arch}`] : []),
     ];
     log.write(
-      ` Let doctor fix them: ${chalk.cyan(
+      `\n Let doctor fix them: ${chalk.cyan(
         ['node scripts/scout doctor', ...flags, '--fix'].join(' ')
       )}`
     );
@@ -278,20 +306,22 @@ export const runDoctor = async (
 
   const readyLocations = rows.filter(({ cells }) => cells.some(({ ready }) => ready));
   if (!readyLocations.length) {
-    log.write(chalk.red.bold(' ✖ Fix the failed checks before using Scout'));
+    log.write(chalk.red.bold('\n ✖ Fix the failed checks before using Scout'));
   }
-  const labels = readyLocations.map(
-    ({ location: readyLocation }) =>
-      `${RUN_COMMANDS[readyLocation].label}${
-        readyLocation === 'cloud' && locations.length > 1 ? ' (recommended)' : ''
-      }:`
-  );
-  const labelWidth = Math.max(0, ...labels.map((label) => label.length));
-  readyLocations.forEach(({ location: readyLocation }, index) =>
-    log.write(
-      ` ${labels[index].padEnd(labelWidth)} ${chalk.cyan(RUN_COMMANDS[readyLocation].command)}`
-    )
-  );
+  for (const { location: readyLocation, cells } of readyLocations) {
+    const recommended = readyLocation === 'cloud' && locations.length > 1 ? ' (recommended)' : '';
+    log.write(`\n ${chalk.bold(`${RUN_LABELS[readyLocation]}${recommended}`)}`);
+    archs
+      .filter((_, index) => cells[index].ready)
+      .forEach((readyArch) =>
+        getRunCommands(readyLocation, readyArch).forEach((command, index) =>
+          log.write(`   ${(index ? '' : readyArch).padEnd(PREFIX_WIDTH)}${chalk.cyan(command)}`)
+        )
+      );
+    if (readyLocation === 'cloud') {
+      log.write(chalk.dim(`   Next runs reuse ${QAF_NAME}: run only the run-config line`));
+    }
+  }
   log.write('');
 
   const cells = rows.flatMap((row) => row.cells);
