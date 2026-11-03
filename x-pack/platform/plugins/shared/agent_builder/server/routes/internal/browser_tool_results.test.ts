@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { AgentExecutionMode } from '@kbn/agent-builder-common';
+import { AgentExecutionMode, createConversationNotFoundError } from '@kbn/agent-builder-common';
 import { internalApiPath } from '../../../common/constants';
 import { registerInternalBrowserToolResultRoutes } from './browser_tool_results';
 
@@ -19,7 +19,9 @@ interface RouteConfig {
 
 const setup = ({
   executionSpaceId = 'default' as string | null,
-  owner = { id: 'user-1', username: 'alice' } as { id?: string; username: string },
+  owner = { id: 'user-1', username: 'alice' } as { id?: string; username: string } | null,
+  executionMode = AgentExecutionMode.conversation as AgentExecutionMode,
+  conversationAccessError = undefined as Error | undefined,
   user = { id: 'user-1', username: 'alice' } as { id?: string; username: string },
   answerOutcome = 'accepted' as 'accepted' | 'not_found' | 'rejected',
 } = {}) => {
@@ -33,12 +35,14 @@ const setup = ({
       : {
           executionId: 'exec-1',
           spaceId: executionSpaceId,
-          executionMode: AgentExecutionMode.conversation,
-          owner,
+          executionMode,
+          owner: owner ?? undefined,
           agentParams: { conversationId: 'conv-1' },
         }
   );
-  const getConversation = jest.fn().mockResolvedValue({ id: 'conv-1' });
+  const getConversation = conversationAccessError
+    ? jest.fn().mockRejectedValue(conversationAccessError)
+    : jest.fn().mockResolvedValue({ id: 'conv-1' });
   const getScopedClient = jest.fn().mockResolvedValue({
     getUser: () => user,
     get: getConversation,
@@ -71,6 +75,10 @@ const setup = ({
         noContent: () => ({ status: 204 }),
         notFound: ({ body }: { body: unknown }) => ({ status: 404, payload: body }),
         forbidden: ({ body }: { body: unknown }) => ({ status: 403, payload: body }),
+        customError: ({ statusCode, body }: { statusCode: number; body: unknown }) => ({
+          status: statusCode,
+          payload: body,
+        }),
         conflict: ({ body }: { body: unknown }) => ({ status: 409, payload: body }),
       }
     );
@@ -129,5 +137,31 @@ describe('POST /internal/agent_builder/executions/{executionId}/browser_tool_res
     const { callHandler } = setup({ answerOutcome: 'rejected' });
 
     expect(await callHandler()).toMatchObject({ status: 409 });
+  });
+
+  it('returns 403 and does not answer when the execution has no recorded owner', async () => {
+    const { callHandler, answer } = setup({ owner: null });
+
+    expect(await callHandler()).toMatchObject({ status: 403 });
+    expect(answer).not.toHaveBeenCalled();
+  });
+
+  it('returns 404 and does not answer when the caller cannot access the conversation', async () => {
+    const { callHandler, answer } = setup({
+      conversationAccessError: createConversationNotFoundError({ conversationId: 'conv-1' }),
+    });
+
+    expect(await callHandler()).toMatchObject({ status: 404 });
+    expect(answer).not.toHaveBeenCalled();
+  });
+
+  it('skips the conversation access check for non-conversation executions', async () => {
+    const { callHandler, answer, getConversation } = setup({
+      executionMode: AgentExecutionMode.standalone,
+    });
+
+    expect(await callHandler()).toEqual({ status: 204 });
+    expect(getConversation).not.toHaveBeenCalled();
+    expect(answer).toHaveBeenCalled();
   });
 });

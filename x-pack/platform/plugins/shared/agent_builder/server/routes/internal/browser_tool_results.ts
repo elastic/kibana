@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { AgentExecutionMode } from '@kbn/agent-builder-common';
-import type { BrowserToolResultPayload } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import { internalApiPath } from '../../../common/constants';
@@ -18,7 +18,7 @@ const MAX_BODY_BYTES = 8 * 1024 * 1024;
 
 const imageSchema = schema.object({
   mime_type: schema.oneOf([schema.literal('image/png'), schema.literal('image/jpeg')]),
-  base64: schema.string(),
+  base64: schema.string({ maxLength: MAX_BODY_BYTES - 1024 * 1024 }),
   name: schema.maybe(schema.string()),
   description: schema.maybe(schema.string()),
 });
@@ -28,13 +28,23 @@ const okSchema = schema.object({
   content: schema.maybe(
     schema.oneOf([schema.string(), schema.recordOf(schema.string(), schema.any())])
   ),
-  images: schema.maybe(schema.arrayOf(imageSchema)),
+  images: schema.maybe(schema.arrayOf(imageSchema, { maxSize: 10 })),
 });
 
 const errorSchema = schema.object({
   status: schema.literal('error'),
   message: schema.string(),
 });
+
+const bodySchema = schema.object({
+  client_id: schema.maybe(schema.string()),
+  result: schema.oneOf([okSchema, errorSchema]),
+});
+
+// Compile-time check that the validated body is assignable to the wire type.
+const _bodyMatchesWireType = (body: TypeOf<typeof bodySchema>): PostBrowserToolResultRequestBody =>
+  body;
+void _bodyMatchesWireType;
 
 export function registerInternalBrowserToolResultRoutes({
   router,
@@ -57,10 +67,7 @@ export function registerInternalBrowserToolResultRoutes({
           executionId: schema.string(),
           toolCallId: schema.string(),
         }),
-        body: schema.object({
-          client_id: schema.maybe(schema.string()),
-          result: schema.oneOf([okSchema, errorSchema]),
-        }),
+        body: bodySchema,
       },
     },
     wrapHandler(async (context, request, response) => {
@@ -70,7 +77,7 @@ export function registerInternalBrowserToolResultRoutes({
         browserTools,
       } = getInternalServices();
       const { executionId, toolCallId } = request.params;
-      const { client_id: clientId, result } = request.body as PostBrowserToolResultRequestBody;
+      const { client_id: clientId, result } = request.body;
 
       const spaceId = (await context.agentBuilder).spaces.getSpaceId();
       const execution = await executionService.getExecution(executionId);
@@ -101,7 +108,7 @@ export function registerInternalBrowserToolResultRoutes({
         executionId,
         toolCallId,
         clientId,
-        result: result as BrowserToolResultPayload,
+        result,
       });
 
       switch (outcome) {
@@ -115,6 +122,8 @@ export function registerInternalBrowserToolResultRoutes({
           return response.conflict({
             body: { message: `Browser tool call is not awaiting a result: ${toolCallId}` },
           });
+        default:
+          throw new Error(`Unexpected browser tool answer outcome: ${outcome as string}`);
       }
     })
   );
