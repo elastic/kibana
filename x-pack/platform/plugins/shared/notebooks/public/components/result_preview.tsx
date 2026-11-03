@@ -82,7 +82,7 @@ export const ResultPreview = ({
           size="s"
           title={i18n.translate('xpack.notebook.resultPreview.truncated', {
             defaultMessage:
-              'Results hit the row limit ({rows} rows). Add or raise a LIMIT to see everything.',
+              'Elasticsearch capped the results at {rows} rows. Narrow the query or add a LIMIT to control how many rows come back.',
             values: { rows: table.rows.length },
           })}
           data-test-subj="notebookResultTruncated"

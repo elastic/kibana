@@ -9,12 +9,16 @@ import type { ISearchStart } from '@kbn/data-plugin/public';
 import type { RunQuery } from './types';
 
 const DEFAULT_ES_QL_LIMIT = 1000;
+const MAX_ES_QL_LIMIT = 10_000;
 
-/** The row cap ES applies to a query: its last `LIMIT`, else the ES|QL default. */
-export const getResultLimit = (query: string): number => {
-  const limits = [...query.matchAll(/\|\s*limit\s+(\d+)/gi)];
-  const last = limits.at(-1);
-  return last ? Number(last[1]) : DEFAULT_ES_QL_LIMIT;
+/**
+ * Whether ES itself cut the rows short: the implicit default limit when the query has no `LIMIT`,
+ * or the hard maximum when its `LIMIT` asks for more. Hitting a `LIMIT` the user wrote is not truncation.
+ */
+export const isResultTruncated = (query: string, rowCount: number): boolean => {
+  const last = [...query.matchAll(/\|\s*limit\s+(\d+)/gi)].at(-1);
+  if (!last) return rowCount >= DEFAULT_ES_QL_LIMIT;
+  return Number(last[1]) > MAX_ES_QL_LIMIT && rowCount >= MAX_ES_QL_LIMIT;
 };
 
 export const createRunQuery =
@@ -34,6 +38,6 @@ export const createRunQuery =
     return {
       table,
       durationMs: Math.round(performance.now() - startedAt),
-      truncated: table.rows.length >= getResultLimit(query),
+      truncated: isResultTruncated(query, table.rows.length),
     };
   };
