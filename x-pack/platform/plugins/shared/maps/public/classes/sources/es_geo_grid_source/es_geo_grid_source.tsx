@@ -24,7 +24,6 @@ import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
 import { type Filter, type ProjectRouting, buildExistsFilter } from '@kbn/es-query';
 import {
-  getGeohexPrecision,
   getGeohexPrecisionDelta,
   getGeotilePrecision,
   getGeotilePrecisionDelta,
@@ -229,14 +228,11 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   }
 
   getGeoGridPrecision(zoom: number): number {
-    if (this.isMvt()) {
-      // The target-precision needs to be determined server side.
-      return 0;
-    }
-
-    return this._descriptor.requestType === RENDER_AS.HEX
-      ? getGeohexPrecision(zoom, this._descriptor.resolution)
-      : getGeotilePrecision(zoom, this._descriptor.resolution);
+    // MVT sources (heatmap, hex, and point/grid at super-fine resolution) do not need a precision
+    // from the client. The tile request sends the resolution delta, and Elasticsearch derives
+    // the precision from each tile's zoom. The tile URL only changes when the delta changes
+    // (resolution or render type), not when the map zoom changes.
+    return this.isMvt() ? 0 : getGeotilePrecision(zoom, this._descriptor.resolution);
   }
 
   async _compositeAggRequest({

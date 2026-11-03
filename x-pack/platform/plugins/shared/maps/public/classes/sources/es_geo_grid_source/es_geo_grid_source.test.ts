@@ -298,6 +298,21 @@ describe('ESGeoGridSource', () => {
       });
       expect(superFineSource.getGeoGridPrecision(10)).toBe(0);
     });
+
+    // Hex is always MVT (there is no non-MVT geohex_grid request path), so the client
+    // does not compute a precision that changes with zoom. The precision is a constant 0.
+    it('Should return constant precision for hex', () => {
+      const hexSource = new ESGeoGridSource({
+        id: 'foobar',
+        indexPatternId: 'fooIp',
+        geoField: geoFieldName,
+        metrics: [],
+        resolution: GRID_RESOLUTION.COARSE,
+        type: SOURCE_TYPES.ES_GEO_GRID,
+        requestType: RENDER_AS.HEX,
+      });
+      expect(hexSource.getGeoGridPrecision(10)).toBe(0);
+    });
   });
 
   describe('IMvtVectorSource', () => {
