@@ -124,25 +124,35 @@ test.describe('WorkflowsList/FilterSortSearch', { tag: [...tags.stateful.classic
     await expect(pageObjects.workflowList.getWorkflowRow(workflows[2].name)).toBeVisible();
   });
 
-  test('should match only the exact hyphenated name', async ({ pageObjects, apiServices }) => {
-    const target = {
+  test('should rank the exact hyphenated name first', async ({ pageObjects, apiServices }) => {
+    const exact = {
       name: 'search-test-floor-alert-triage-review',
       description: 'Target workflow for exact name search',
       enabled: true,
     };
-    const similar = {
+    const newerPrefixMatch = {
+      name: 'search-test-floor-alert-triage-review-v2',
+      description: 'Newer workflow that still matches every word',
+      enabled: true,
+    };
+    const sharesSomeWords = {
       name: 'search-test-floor-alert-translation',
       description: 'Shares some words with the target name',
       enabled: true,
     };
-    await apiServices.workflows.bulkCreate([target, similar].map(getListTestWorkflowYaml));
+    // Create the exact match first so a sort by updated_at would put it last.
+    await apiServices.workflows.create(getListTestWorkflowYaml(exact));
+    await apiServices.workflows.bulkCreate(
+      [newerPrefixMatch, sharesSomeWords].map(getListTestWorkflowYaml)
+    );
 
     await pageObjects.workflowList.navigate();
 
     const searchField = pageObjects.workflowList.getSearchField();
-    await searchField.fill(target.name);
+    await searchField.fill(exact.name);
     await searchField.press('Enter');
-    await expect(pageObjects.workflowList.getWorkflowRow(target.name)).toBeVisible();
-    await expect(pageObjects.workflowList.getWorkflowRow(similar.name)).toBeHidden();
+    await expect
+      .poll(() => pageObjects.workflowList.getVisibleWorkflowNamesInOrder())
+      .toStrictEqual([exact.name, newerPrefixMatch.name]);
   });
 });

@@ -131,12 +131,40 @@ describe('buildWorkflowTextSearchClause', () => {
     });
   });
 
-  it('requires all query terms across fields in the cross_fields clause', () => {
-    const { should } = getBool(buildWorkflowTextSearchClause('system-alert-triage'));
-    const clauses = should as Array<{ multi_match?: { type: string; operator?: string } }>;
+  it('requires every word to match in some field', () => {
+    const { should } = getBool(buildWorkflowTextSearchClause('invoice  production'));
+    const clauses = should as Array<{ bool?: { must?: unknown[] } }>;
 
-    const crossFields = clauses.find((clause) => clause.multi_match?.type === 'cross_fields');
-    expect(crossFields?.multi_match?.operator).toBe('and');
+    expect(clauses.find((clause) => clause.bool?.must)?.bool?.must).toEqual(
+      ['invoice', 'production'].map((word) => ({
+        multi_match: {
+          query: word,
+          fields: ['name^2', 'description', 'tags'],
+          type: 'best_fields',
+          operator: 'and',
+        },
+      }))
+    );
+  });
+
+  it('skips words without letters or digits', () => {
+    const { should } = getBool(buildWorkflowTextSearchClause('Security - Attack'));
+    const clauses = should as Array<{
+      bool?: { must?: Array<{ multi_match: { query: string } }> };
+    }>;
+
+    const words = clauses
+      .find((clause) => clause.bool?.must)
+      ?.bool?.must?.map(({ multi_match }) => multi_match.query);
+    expect(words).toEqual(['Security', 'Attack']);
+  });
+
+  it('omits the all-words clause when no word has letters or digits', () => {
+    const { should } = getBool(buildWorkflowTextSearchClause('-'));
+    const clauses = should as Array<{ bool?: { must?: unknown[] } }>;
+
+    expect(should).toHaveLength(4);
+    expect(clauses.some((clause) => clause.bool?.must)).toBe(false);
   });
 
   it('uses the query string in all multi_match clauses', () => {
@@ -144,7 +172,7 @@ describe('buildWorkflowTextSearchClause', () => {
     const clauses = should as Array<Record<string, unknown>>;
 
     const multiMatches = clauses.filter((clause) => 'multi_match' in clause);
-    expect(multiMatches).toHaveLength(3);
+    expect(multiMatches).toHaveLength(2);
     multiMatches.forEach((clause) => {
       expect((clause.multi_match as { query: string }).query).toBe('test query');
     });
@@ -154,7 +182,9 @@ describe('buildWorkflowTextSearchClause', () => {
     const { should } = getBool(buildWorkflowTextSearchClause('find-me'));
     const clauses = should as Array<Record<string, unknown>>;
 
-    const wildcardClause = clauses.find((clause) => 'bool' in clause);
+    const wildcardClause = clauses.find(
+      (clause) => 'bool' in clause && 'should' in (clause.bool as object)
+    );
     expect(wildcardClause).toBeDefined();
 
     const wildcardShould = (wildcardClause as { bool: { should: unknown[] } }).bool.should;
