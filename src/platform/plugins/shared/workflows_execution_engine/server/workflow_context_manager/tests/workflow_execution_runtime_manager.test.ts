@@ -41,6 +41,7 @@ import type { WorkflowRuntimeGraph } from '../workflow_runtime_graph';
 
 jest.mock('../build_workflow_context', () => {
   return {
+    ...jest.requireActual('../build_workflow_context'),
     buildWorkflowContext: jest.fn(),
   };
 });
@@ -268,6 +269,27 @@ describe('WorkflowExecutionRuntimeManager', () => {
   describe('start', () => {
     beforeEach(() => {
       mockDateNow = new Date('2025-08-05T20:00:00.000Z');
+    });
+
+    it('preserves the name assigned at creation when starting and resuming', async () => {
+      workflowExecution.runName = 'Deploy staging';
+      workflowExecution.workflowDefinition = {
+        name: 'Deploy',
+        version: '1',
+        enabled: true,
+        'run-name': 'A different name',
+        triggers: [{ type: 'manual' }],
+        steps: [],
+      };
+
+      await underTest.start();
+      workflowExecution.currentNodeId = 'node2';
+      await underTest.resume();
+
+      expect(workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalledWith(
+        expect.objectContaining({ runName: expect.anything() })
+      );
+      expect(underTest.getWorkflowExecution().runName).toBe('Deploy staging');
     });
 
     it('should set current step to the first node in the workflow', async () => {

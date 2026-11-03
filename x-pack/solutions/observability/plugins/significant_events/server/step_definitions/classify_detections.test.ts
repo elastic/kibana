@@ -822,6 +822,7 @@ describe('classifyDetectionsStepDefinition', () => {
     review_fresh_minutes: 240,
     baseline_bucket_minutes: 5,
     baseline_window_minutes: 300,
+    live_lookback_days: 90,
   };
 
   const createDefinition = () => {
@@ -859,10 +860,11 @@ describe('classifyDetectionsStepDefinition', () => {
   };
   /** An ES client that answers the live-series lookup, and any other query with `rows`. */
   const esClientWith = (rows: unknown[][]) => {
-    const query = jest.fn(async (request: { query: string }) =>
-      request.query.includes('.rule-events')
-        ? membersResponse
-        : { columns: [{ name: 'x', type: 'keyword' }], values: rows }
+    const query = jest.fn(
+      async (request: { query: string; params?: Array<Record<string, string>> }) =>
+        request.query.includes('.rule-events')
+          ? membersResponse
+          : { columns: [{ name: 'x', type: 'keyword' }], values: rows }
     );
     return { query, esClient: { esql: { query } } };
   };
@@ -892,6 +894,7 @@ describe('classifyDetectionsStepDefinition', () => {
       probe_timeout_ms: [1_000, 30_000],
       budget_ms: [2_000, 60_000],
       max_skip_age_hours: [1, 720],
+      live_lookback_days: [1, 90],
       review_fresh_minutes: [15, 1_440],
       baseline_bucket_minutes: [1, 60],
       baseline_window_minutes: [60, 1_440],
@@ -913,12 +916,14 @@ describe('classifyDetectionsStepDefinition', () => {
       review_fresh_minutes: _fresh,
       baseline_bucket_minutes: _bucket,
       baseline_window_minutes: _window,
+      live_lookback_days: _lookback,
       ...older
     } = settings;
     expect(definition.inputSchema.parse({ ...older, rows: [] })).toMatchObject({
       review_fresh_minutes: 240,
       baseline_bucket_minutes: 5,
       baseline_window_minutes: 300,
+      live_lookback_days: 90,
     });
   });
 
@@ -941,6 +946,31 @@ describe('classifyDetectionsStepDefinition', () => {
     expect(probeRequest?.[0].query).toBe(`${STORED_QUERY}\n| LIMIT 1`);
     expect(logger.info).toHaveBeenCalledTimes(1);
     expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('classifyDetections'));
+  });
+
+  it('reads live memberships from a lookback, not from the last write of the event', async () => {
+    const { definition } = createDefinition();
+    const { query, esClient } = esClientWith([]);
+    const clock = jest.spyOn(Date, 'now').mockReturnValue(NOW);
+
+    try {
+      await runHandler(
+        definition,
+        { ...settings, live_lookback_days: 30, rows: [detectionRow('rule-A')] },
+        esClient
+      );
+    } finally {
+      clock.mockRestore();
+    }
+
+    const [{ query: members, params }] = query.mock.calls
+      .map(([request]) => request)
+      .filter((request) => request.query.includes('INLINE STATS created_at'));
+    const lookback = '@timestamp >= TO_DATETIME(?lookbackIso)';
+    expect(members.indexOf(lookback)).toBeGreaterThan(-1);
+    expect(members.indexOf('INLINE STATS created_at')).toBeLessThan(members.indexOf(lookback));
+    expect(members).not.toContain('?fromIso');
+    expect(params).toContainEqual({ lookbackIso: new Date(NOW - 30 * 24 * HOUR_MS).toISOString() });
   });
 
   it('reads the series once, at the bucket size and window it is given', async () => {

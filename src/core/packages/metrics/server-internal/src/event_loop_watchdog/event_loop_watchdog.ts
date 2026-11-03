@@ -92,6 +92,9 @@ export class EventLoopWatchdog {
       unref: true,
       // Runs on the main thread, so the block the worker died in is over by the time it runs.
       onExit: () => this.reportUnfinishedBlock('the watchdog worker exited during the block'),
+      // Never stays off while the flag is on: restarts back off to ManagedWorker's 1 minute cap.
+      restart: { maxAttempts: Infinity },
+      // Can't fire with unlimited restarts; keeps the heartbeat from outliving a future limit.
       onExhausted: () => this.clearHeartbeat(),
     });
     this.worker.start();

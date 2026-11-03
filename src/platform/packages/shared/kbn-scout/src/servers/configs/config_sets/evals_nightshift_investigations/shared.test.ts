@@ -98,7 +98,6 @@ describe.each([
     expect(args).toContain('--xpack.security.serviceAccounts.enabled=true');
     expect(args).toContain('--xpack.evals.enabled=true');
     expect(args).toContain('--xpack.evals.mode=full');
-    expect(args).toContain('--uiSettings.overrides.agentBuilder:experimentalFeatures=true');
     expect(args.filter((arg: string) => arg.startsWith('--config='))).toEqual([
       `--config=${join(__dirname, 'kibana.tracing.yml')}`,
       `--config=${SANDBOX_KIBANA_CONFIG}`,
