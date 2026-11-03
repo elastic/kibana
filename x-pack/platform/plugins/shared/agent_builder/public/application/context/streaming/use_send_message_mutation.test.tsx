@@ -69,6 +69,7 @@ const setup = () => {
   const conversationStreamService = new ConversationStreamService();
   const bindings = {
     conversationStreamService,
+    clientId: 'client-1',
     setPendingMessage: jest.fn(),
     clearPendingMessage: jest.fn(),
     clearActiveStream: jest.fn(),

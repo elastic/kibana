@@ -6,7 +6,7 @@
  */
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
@@ -23,11 +23,11 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { mutationKeys } from '../../mutation_keys';
 import { subscribeToChatEvents } from './use_subscribe_to_chat_events';
-import { BrowserToolExecutor } from '../../services/browser_tool_executor';
 import { createConversationActions } from '../conversation/use_conversation_actions';
 import type { ConversationStreamService } from '../../../services/events';
 import { releaseLocalContent } from './release_local_content';
 import { isStreamCancelled, requestAbort, type StreamHandle } from './stream_handle';
+import { buildBrowserToolsRequest } from './build_browser_tools_request';
 
 /** Placeholder id of the answer until `execution_started` reveals the saved one. */
 const PENDING_PROMPT_RESPONSE_ID = 'pending::prompt_response';
@@ -37,12 +37,16 @@ export interface ResumeRoundVars {
   conversationId: string;
   agentId: string;
   connectorId?: string;
+  /** Legacy browser API tools, executed alongside the registered ones. */
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
+  /** Ids of the registered browser tools this surface supports. */
+  browserToolIds?: string[];
   promptRequestedEventId: string;
 }
 
 export interface ResumeRoundMutationBindings {
   conversationStreamService: ConversationStreamService;
+  clientId: string;
   clearActiveStream: (conversationId: string) => void;
   markStreamStarted: (conversationId: string) => void;
 }
@@ -55,20 +59,17 @@ type UseResumeRoundMutationProps = ResumeRoundMutationBindings;
  */
 export const useResumeRoundMutation = ({
   conversationStreamService,
+  clientId,
   clearActiveStream,
   markStreamStarted,
 }: UseResumeRoundMutationProps) => {
-  const { chatService, conversationsService } = useAgentBuilderServices();
+  const { chatService, conversationsService, browserToolsService } = useAgentBuilderServices();
   const { services } = useKibana();
   const queryClient = useQueryClient();
   // One controller + executionId per in-flight conversation. Concurrent streams need
   // independent cancel; the executionId is what the abort endpoint uses to stop server-side.
   // `useResumeRoundMutation` is called exactly once — by the `StreamingProvider`.
   const controllersRef = useRef<Map<string, StreamHandle>>(new Map());
-
-  const browserToolExecutor = useMemo(() => {
-    return new BrowserToolExecutor(services.notifications?.toasts);
-  }, [services.notifications?.toasts]);
 
   const { mutate, isLoading } = useMutation({
     mutationKey: mutationKeys.resumeRound,
@@ -118,6 +119,11 @@ export const useResumeRoundMutation = ({
           agentId: vars.agentId,
           connectorId: vars.connectorId,
           browserApiTools: browserApiToolsMetadata,
+          browserTools: buildBrowserToolsRequest({
+            clientId,
+            browserToolIds: vars.browserToolIds,
+            browserApiTools: vars.browserApiTools,
+          }),
           projectRouting: services.plugins.cps?.cpsManager?.getProjectRouting(),
         });
 
@@ -149,8 +155,13 @@ export const useResumeRoundMutation = ({
         await subscribeToChatEvents({
           events$,
           conversationActions: streamActions,
-          browserApiTools: vars.browserApiTools,
-          browserToolExecutor,
+          dispatcher: browserToolsService?.dispatcher,
+          clientId,
+          executionId,
+          agentId: vars.agentId,
+          conversationId: vars.conversationId,
+          legacyTools: vars.browserApiTools,
+          streamSignal: controller.signal,
           isAborted: () => isStreamCancelled(handle),
         }).catch(() => {
           if (!streamEventArrived) {

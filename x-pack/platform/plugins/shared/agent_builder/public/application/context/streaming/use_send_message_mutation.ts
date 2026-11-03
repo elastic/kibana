@@ -6,7 +6,7 @@
  */
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import { firstValueFrom, tap } from 'rxjs';
@@ -33,12 +33,12 @@ import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { useToasts } from '../../hooks/use_toasts';
 import { mutationKeys } from '../../mutation_keys';
 import { subscribeToChatEvents } from './use_subscribe_to_chat_events';
-import { BrowserToolExecutor } from '../../services/browser_tool_executor';
 import { createConversationActions } from '../conversation/use_conversation_actions';
 import type { ConversationStreamService } from '../../../services/events';
 import { releaseLocalContent } from './release_local_content';
 import { isStreamCancelled, requestAbort, type StreamHandle } from './stream_handle';
 import { isDisconnectError } from '../../../services/chat/reattach_on_disconnect';
+import { buildBrowserToolsRequest } from './build_browser_tools_request';
 
 const SCREEN_CONTEXT_ATTACHMENT_ID = 'screen-context';
 
@@ -53,11 +53,15 @@ export interface SendMessageVars {
   attachments?: ConversationAttachment[];
   conversationAttachments?: VersionedAttachment[];
   resetAttachments?: () => void;
+  /** Legacy browser API tools, executed alongside the registered ones. */
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
+  /** Ids of the registered browser tools this surface supports. */
+  browserToolIds?: string[];
 }
 
 export interface SendMessageMutationBindings {
   conversationStreamService: ConversationStreamService;
+  clientId: string;
   setPendingMessage: (
     conversationId: string,
     message: string,
@@ -137,12 +141,13 @@ const withScreenContextAttachment = async ({
  */
 export const useSendMessageMutation = ({
   conversationStreamService,
+  clientId,
   setPendingMessage,
   clearPendingMessage,
   clearActiveStream,
   markStreamStarted,
 }: UseSendMessageMutationProps) => {
-  const { chatService, conversationsService } = useAgentBuilderServices();
+  const { chatService, conversationsService, browserToolsService } = useAgentBuilderServices();
   const { services } = useKibana();
   const { addErrorToast } = useToasts();
   const queryClient = useQueryClient();
@@ -150,10 +155,6 @@ export const useSendMessageMutation = ({
   // independent cancel; the executionId is what the abort endpoint uses to stop server-side.
   // `useSendMessageMutation` is called exactly once — by  the `StreamingProvider`.
   const controllersRef = useRef<Map<string, StreamHandle>>(new Map());
-
-  const browserToolExecutor = useMemo(() => {
-    return new BrowserToolExecutor(services.notifications?.toasts);
-  }, [services.notifications?.toasts]);
 
   const { mutate, isLoading } = useMutation({
     mutationKey: mutationKeys.sendMessage,
@@ -209,6 +210,11 @@ export const useSendMessageMutation = ({
             })),
           ],
           browserApiTools: browserApiToolsMetadata,
+          browserTools: buildBrowserToolsRequest({
+            clientId,
+            browserToolIds: vars.browserToolIds,
+            browserApiTools: vars.browserApiTools,
+          }),
           projectRouting,
         });
 
@@ -233,8 +239,13 @@ export const useSendMessageMutation = ({
         await subscribeToChatEvents({
           events$,
           conversationActions: streamActions,
-          browserApiTools: vars.browserApiTools,
-          browserToolExecutor,
+          dispatcher: browserToolsService?.dispatcher,
+          clientId,
+          executionId,
+          agentId: vars.agentId,
+          conversationId: vars.conversationId,
+          legacyTools: vars.browserApiTools,
+          streamSignal: controller.signal,
           isAborted: () => isStreamCancelled(handle),
         }).catch((error: unknown) => {
           if (!streamEventArrived && isRequestRejectedError(error)) {

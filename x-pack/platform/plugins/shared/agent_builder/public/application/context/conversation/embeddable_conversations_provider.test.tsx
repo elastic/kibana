@@ -109,6 +109,7 @@ const renderEmbeddableProvider = ({
     conversationsService: { get: getConversation },
     eventsService: {},
     startDependencies: {},
+    browserToolsService: { registry: { list: () => [] } },
   } as unknown as AgentBuilderInternalService;
 
   const { unmount } = render(

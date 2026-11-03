@@ -20,6 +20,7 @@ import { useConversationActions } from './use_conversation_actions';
 import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
 import { removeAttachmentFromList } from './remove_attachment_from_list';
 import { ConversationChangeNotifier } from './conversation_change_notifier';
+import { selectBrowserToolIds } from '../../../services/browser_tools';
 
 interface RoutedConversationsProviderProps {
   children: React.ReactNode;
@@ -29,10 +30,15 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
   children,
 }) => {
   const queryClient = useQueryClient();
-  const { conversationsService } = useAgentBuilderServices();
+  const { conversationsService, browserToolsService } = useAgentBuilderServices();
   const {
-    services: { analytics },
+    services: { analytics, uiSettings },
   } = useKibana();
+  const browserToolIds = useMemo(
+    () =>
+      selectBrowserToolIds({ registry: browserToolsService.registry, uiSettings, surface: 'app' }),
+    [browserToolsService.registry, uiSettings]
+  );
   const { conversationId: conversationIdParam, agentId: agentIdParam } = useParams<{
     conversationId?: string;
     agentId?: string;
@@ -129,6 +135,7 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       upsertAttachments,
       resetAttachments,
       removeAttachment,
+      browserToolIds,
     }),
     [
       conversationId,
@@ -140,6 +147,7 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       upsertAttachments,
       resetAttachments,
       removeAttachment,
+      browserToolIds,
     ]
   );
 

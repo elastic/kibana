@@ -9,6 +9,7 @@ import type { CoreStart, ScopedHistory } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { v4 as uuidv4 } from 'uuid';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
@@ -44,6 +45,8 @@ export const mountApp = async ({
   await services.accessChecker.initAccess();
   const activeSpaceId = (await plugins.spaces?.getActiveSpace())?.id ?? DEFAULT_SPACE_ID;
   const conversationStreamService = new ConversationStreamService();
+  // One client per mounted app: browser tool calls are routed back to it.
+  const clientId = uuidv4();
   const listRefresh = refreshListsOnAgentChanges({
     eventsService: services.eventsService,
     queryClient,
@@ -60,7 +63,10 @@ export const mountApp = async ({
                   <RedirectAppLinks coreStart={core}>
                     <PageWrapper>
                       <Router history={history}>
-                        <StreamingProvider conversationStreamService={conversationStreamService}>
+                        <StreamingProvider
+                          conversationStreamService={conversationStreamService}
+                          clientId={clientId}
+                        >
                           <AgentBuilderRoutes />
                         </StreamingProvider>
                       </Router>

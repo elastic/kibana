@@ -6,9 +6,10 @@
  */
 
 import { Subject } from 'rxjs';
-import type { ChatEvent } from '@kbn/agent-builder-common';
+import type { BrowserToolCallEvent, ChatEvent } from '@kbn/agent-builder-common';
 import { ChatEventType, EventActorType, TimelineEventType } from '@kbn/agent-builder-common';
 import type { ConversationActions } from '../conversation/use_conversation_actions';
+import type { BrowserToolDispatcher } from '../../../services/browser_tools';
 import { subscribeToChatEvents } from './use_subscribe_to_chat_events';
 
 const buildActionsMock = (): jest.Mocked<ConversationActions> =>
@@ -23,7 +24,14 @@ const buildActionsMock = (): jest.Mocked<ConversationActions> =>
 const run = async (events: ChatEvent[]) => {
   const events$ = new Subject<ChatEvent>();
   const conversationActions = buildActionsMock();
-  const done = subscribeToChatEvents({ events$, conversationActions, isAborted: () => false });
+  const done = subscribeToChatEvents({
+    events$,
+    conversationActions,
+    executionId: 'exec-1',
+    agentId: 'agent-1',
+    streamSignal: new AbortController().signal,
+    isAborted: () => false,
+  });
   events.forEach((event) => events$.next(event));
   events$.complete();
   await done;
@@ -100,6 +108,9 @@ describe('subscribeToChatEvents', () => {
     const failing = subscribeToChatEvents({
       events$: failing$,
       conversationActions: buildActionsMock(),
+      executionId: 'exec-1',
+      agentId: 'agent-1',
+      streamSignal: new AbortController().signal,
       isAborted: () => false,
     });
     failing$.error(new Error('boom'));
@@ -109,9 +120,77 @@ describe('subscribeToChatEvents', () => {
     const aborted = subscribeToChatEvents({
       events$: aborted$,
       conversationActions: buildActionsMock(),
+      executionId: 'exec-1',
+      agentId: 'agent-1',
+      streamSignal: new AbortController().signal,
       isAborted: () => true,
     });
     aborted$.error(new Error('aborted'));
     await expect(aborted).resolves.toBeUndefined();
+  });
+
+  describe('browser tool calls', () => {
+    const browserToolCall = {
+      type: ChatEventType.browserToolCall,
+      data: {
+        tool_call_id: 'call-1',
+        tool_id: 'my_tool',
+        params: { a: 1 },
+        client_id: 'client-1',
+        expires_at: '2026-01-01T00:01:00.000Z',
+      },
+    } as BrowserToolCallEvent;
+
+    const subscribeWith = async (options: {
+      dispatcher?: BrowserToolDispatcher;
+      clientId?: string;
+    }) => {
+      const events$ = new Subject<ChatEvent>();
+      const streamSignal = new AbortController().signal;
+      const legacyTools = [{ id: 'legacy' }] as unknown as Parameters<
+        typeof subscribeToChatEvents
+      >[0]['legacyTools'];
+      const done = subscribeToChatEvents({
+        events$,
+        conversationActions: buildActionsMock(),
+        executionId: 'exec-1',
+        agentId: 'agent-1',
+        conversationId: 'conv-1',
+        legacyTools,
+        streamSignal,
+        isAborted: () => false,
+        ...options,
+      });
+      events$.next(browserToolCall);
+      events$.complete();
+      await done;
+      return { streamSignal, legacyTools };
+    };
+
+    it('forwards browser_tool_call events to the dispatcher with the stream context', async () => {
+      const dispatch = jest.fn();
+      const dispatcher = { dispatch } as unknown as BrowserToolDispatcher;
+
+      const { streamSignal, legacyTools } = await subscribeWith({
+        dispatcher,
+        clientId: 'client-1',
+      });
+
+      expect(dispatch).toHaveBeenCalledTimes(1);
+      expect(dispatch).toHaveBeenCalledWith(browserToolCall, {
+        clientId: 'client-1',
+        executionId: 'exec-1',
+        conversationId: 'conv-1',
+        agentId: 'agent-1',
+        legacyTools,
+        streamSignal,
+      });
+    });
+
+    it('does not dispatch without a client id', async () => {
+      const dispatch = jest.fn();
+      await subscribeWith({ dispatcher: { dispatch } as unknown as BrowserToolDispatcher });
+      expect(dispatch).not.toHaveBeenCalled();
+    });
   });
 });

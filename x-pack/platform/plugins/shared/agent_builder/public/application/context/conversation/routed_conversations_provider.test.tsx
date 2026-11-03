@@ -26,12 +26,13 @@ jest.mock('@kbn/react-query', () => ({
 jest.mock('../../hooks/use_agent_builder_service', () => ({
   useAgentBuilderServices: jest.fn(() => ({
     conversationsService: {},
+    browserToolsService: { registry: { list: () => [] } },
   })),
 }));
 
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: jest.fn(() => ({
-    services: { analytics: { reportEvent: jest.fn() } },
+    services: { analytics: { reportEvent: jest.fn() }, uiSettings: { get: () => false } },
   })),
 }));
 

@@ -33,7 +33,8 @@ export const useConversationStream = () => {
   const conversationId = useConversationId();
   const agentId = useAgentId();
   const { conversation } = useConversation();
-  const { attachments, resetAttachments, browserApiTools, onSubmit } = useConversationContext();
+  const { attachments, resetAttachments, browserApiTools, browserToolIds, onSubmit } =
+    useConversationContext();
   const { selectedConnector } = useConnectorSelection();
   const { isLocked: isModelSetByAgent } = useAgentModel(agentId);
 
@@ -72,6 +73,7 @@ export const useConversationStream = () => {
         conversationAttachments: conversation?.attachments,
         resetAttachments,
         browserApiTools,
+        browserToolIds,
       });
     },
     [
@@ -82,6 +84,7 @@ export const useConversationStream = () => {
       conversation?.attachments,
       resetAttachments,
       browserApiTools,
+      browserToolIds,
       onSubmit,
     ]
   );
@@ -106,10 +109,11 @@ export const useConversationStream = () => {
         agentId,
         connectorId,
         browserApiTools,
+        browserToolIds,
         promptRequestedEventId,
       });
     },
-    [mutateResumeRound, conversationId, agentId, connectorId, browserApiTools]
+    [mutateResumeRound, conversationId, agentId, connectorId, browserApiTools, browserToolIds]
   );
 
   const cancel = useCallback(() => {

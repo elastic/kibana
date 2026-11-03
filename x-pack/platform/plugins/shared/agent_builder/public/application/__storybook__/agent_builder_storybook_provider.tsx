@@ -58,7 +58,10 @@ export const AgentBuilderStorybookProvider: React.FC<AgentBuilderStorybookProvid
     <QueryClientProvider client={queryClient}>
       <KibanaContextProvider services={mergedKibanaServices}>
         <AgentBuilderServicesContext.Provider value={mergedServices}>
-          <StreamingProvider conversationStreamService={storybookStreamService}>
+          <StreamingProvider
+            conversationStreamService={storybookStreamService}
+            clientId="storybook"
+          >
             <FakeConversationProvider
               conversationId={conversationId}
               agentId={agentId}

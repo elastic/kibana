@@ -50,6 +50,7 @@ const setup = () => {
   const conversationStreamService = new ConversationStreamService();
   const bindings = {
     conversationStreamService,
+    clientId: 'client-1',
     clearActiveStream: jest.fn(),
     markStreamStarted: jest.fn(),
   };
