@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Liquid } from 'liquidjs';
 import { evaluateKql } from './eval_kql';
 import {
   decodeKqlTemplateValues,
@@ -53,6 +54,24 @@ describe('kql template values', () => {
 
     it('leaves malformed tokens untouched', () => {
       expect(decodeKqlTemplateValues('__wftpl_abc_')).toBe('__wftpl_abc_');
+    });
+
+    describe('with Liquid nil, empty and blank', () => {
+      const render = (template: string): string =>
+        decodeKqlTemplateValues(
+          new Liquid({ outputEscape: encodeKqlTemplateValue }).parseAndRenderSync(template)
+        );
+
+      it.each(['nil', 'empty', 'blank'])('renders `default: %s` as an empty string', (literal) => {
+        expect(render(`{{ missing | default: ${literal} }}`)).toBe('');
+      });
+
+      it.each(['nil', 'empty', 'blank'])(
+        'renders %s inside an array as an empty string',
+        (literal) => {
+          expect(render(`{{ "x,y" | split: "," | push: ${literal} }}`)).toBe('xy');
+        }
+      );
     });
   });
 

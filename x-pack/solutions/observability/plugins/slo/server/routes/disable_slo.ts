@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'path';
 import { manageSLOParamsSchema } from '@kbn/slo-schema';
 import { ManageSLO } from '../services/manage_slo';
 import { createSloServerRoute } from './utils/create_slo_server_route';
@@ -12,7 +13,14 @@ import { assertPlatinumLicense } from './utils/assert_platinum_license';
 
 export const disableSLORoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos/{id}/disable 2023-10-31',
-  options: { access: 'public' },
+  options: {
+    access: 'public',
+    summary: 'Disable an SLO',
+    description:
+      'You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.',
+    operationId: 'disableSloOp',
+    oasOperationObject: () => path.join(__dirname, 'examples/disable_slo.yaml'),
+  },
   security: {
     authz: {
       requiredPrivileges: ['slo_write'],

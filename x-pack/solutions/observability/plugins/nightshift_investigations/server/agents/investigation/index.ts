@@ -16,17 +16,18 @@ import {
   SET_HYPOTHESES_TOOL_ID,
   SET_IMPACT_TOOL_ID,
 } from '@kbn/agentic-investigations-plugin/common';
-import { PROPOSALS_CREATE_TOOL_ID } from '@kbn/proposals-common';
 import {
   NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
   getNightshiftBoundHookWorkflowId,
 } from '@kbn/workflows/managed';
+import { PROPOSALS_CREATE_TOOL_ID } from '@kbn/proposals-common';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
 import { getTelemetryTargets } from '../../telemetry_targets';
 import type { NightshiftInvestigationsConfig } from '../../config';
 import instructions from './instructions/investigator.md.text';
 import decisionTreesSection from './instructions/decision_trees.text';
+import { TIME_CONVERTER_TOOL_ID } from '../../tools/time_converter/tool';
 import knowledgeCortexSection from './instructions/knowledge_cortex.text';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
@@ -43,11 +44,7 @@ export const SANDBOX_TOOL_IDS = [
   SANDBOX_WRITE_FILE_TOOL_ID,
 ] as const;
 
-/**
- * The agentic investigations tools the agent records its findings with.
- * `set_conversation_metadata` (summary, verdict, severity) is not listed: Agent Builder adds it to
- * every run on a template conversation, which every investigation is.
- */
+/** The agentic investigations tools earlier versions of the agent recorded findings with. */
 export const INVESTIGATION_TOOL_IDS = [SET_IMPACT_TOOL_ID, SET_HYPOTHESES_TOOL_ID] as const;
 
 export const INVESTIGATION_AGENT_NAME = 'Nightshift Investigator';
@@ -55,16 +52,15 @@ export const INVESTIGATION_AGENT_DESCRIPTION =
   'Answers an arbitrary investigation question by reasoning from cluster telemetry it queries ' +
   'inside a sandbox and, when Cortex is enabled, records what it learns in the Nightshift Cortex wiki.';
 
-/** Interpolated only when the materialize workflow will actually write `/workspace/cortex/`. */
-const CORTEX_LOAD_STEP = ' Also read the Knowledge Cortex — see <knowledge_cortex>.';
-
-/** Interpolated only when hydrate will actually write `/workspace/decision-trees/`. */
-const DECISION_TREES_LOAD_STEP =
-  ' Also check `/workspace/decision-trees/monitors.md` for a prior decision tree matching this symptom — see <decision_trees>.';
-
-const SEMANTIC_MEMORY_LOAD_STEP = ` Also inspect this turn's Semantic Memory paths from
-<system_update>, or /workspace/memories/.index.json when present. Treat memories as historical
-observations and verify them against current telemetry before relying on them.`;
+const SEMANTIC_MEMORY_SECTION = `
+**USING MEMORIES**
+Memories are observations from past tasks — they help steer your investigation but reflect a point in time and may no longer be current.
+- Inspect this turn's Semantic Memory paths from <system_update>, or \`/workspace/memories/.index.json\` when present.
+- Independently verify memory claims against live connector APIs before including them in your reply.
+- Use them to guide where you look, but confirm the details are still accurate.
+- When you cannot confirm a memory claim, note it as a past observation (e.g. 'previously observed that…') so the user knows it needs confirmation.
+- Pay attention to memory age — old memories are more likely to be stale.
+`;
 
 const fillContextInstructions = ({
   includeCortex,
@@ -76,16 +72,14 @@ const fillContextInstructions = ({
   includeMemory: boolean;
 }): string =>
   instructions
-    .replace('{{cortex_load_step}}', includeCortex ? CORTEX_LOAD_STEP : '')
     .replace(
       '{{knowledge_cortex_section}}',
       includeCortex ? `\n${knowledgeCortexSection.trimEnd()}\n` : ''
     )
-    .replace('{{decision_trees_load_step}}', includeDecisionTrees ? DECISION_TREES_LOAD_STEP : '')
-    .replace('{{semantic_memory_load_step}}', includeMemory ? SEMANTIC_MEMORY_LOAD_STEP : '')
+    .replace('{{semantic_memory_section}}', includeMemory ? SEMANTIC_MEMORY_SECTION : '')
     .replace(
       '{{decision_trees_section}}',
-      includeDecisionTrees ? `\n${decisionTreesSection.trimEnd()}\n` : ''
+      includeDecisionTrees ? `${decisionTreesSection.trimEnd()}\n` : ''
     );
 
 export interface InvestigationAgentTypeOptions {
@@ -94,13 +88,19 @@ export interface InvestigationAgentTypeOptions {
   memoryEnabled?: boolean;
   decisionTreesEnabled?: boolean;
   /** The agentic investigations plugin is enabled, so its tools are registered. */
-  investigationToolsEnabled: boolean;
+  investigationToolsEnabled?: boolean;
   /** The proposals plugin is enabled, so `proposals.create` is registered. */
-  proposalsEnabled: boolean;
+  proposalsEnabled?: boolean;
   telemetryConnectorId?: string;
   telemetryConfig?: NightshiftInvestigationsConfig['sandbox'];
   /** Resolves the space's custom context block, appended to the instructions on every run. */
   getCustomContextInstructions?: (ctx: AgentConfigContext) => Promise<string>;
+  /**
+   * Resolves connector ids this type inherits from another agent on every run, in addition to the
+   * telemetry connectors. The assistant inherits the investigator's saved connectors so both
+   * agents share the single allow list users edit on the investigator.
+   */
+  getInheritedConnectorIds?: (ctx: AgentConfigContext) => Promise<string[]>;
   logger?: Logger;
 }
 
@@ -141,6 +141,29 @@ const appendCustomContext = async ({
   }
 };
 
+const inheritConnectorIds = async ({
+  connectorIds,
+  ctx,
+  getInheritedConnectorIds,
+  logger,
+}: {
+  connectorIds: string[];
+  ctx: AgentConfigContext;
+  getInheritedConnectorIds: (ctx: AgentConfigContext) => Promise<string[]>;
+  logger?: Logger;
+}): Promise<string[]> => {
+  try {
+    return [...new Set([...connectorIds, ...(await getInheritedConnectorIds(ctx))])];
+  } catch (error) {
+    // Inherited connectors only widen the allow list, so failing to read them must not block a
+    // run: the agent keeps the telemetry connectors from its own type.
+    logger?.warn(
+      `Failed to resolve inherited connectors for space "${ctx.spaceId}": ${error.message}`
+    );
+    return connectorIds;
+  }
+};
+
 /** Options of the Nightshift agent types that share the investigator's tools and hooks. */
 export type NightshiftAgentTypeOptions = Omit<
   InvestigationAgentTypeOptions,
@@ -150,6 +173,8 @@ export type NightshiftAgentTypeOptions = Omit<
 /**
  * Builds the configuration every Nightshift agent type shares: tools, connectors, the Cortex and
  * Memory hooks and the space's custom context. Only the instructions differ between types.
+ * With `standalone`, the agent lists only its own tools. Agent Builder's own prompt and internal
+ * tools still apply to it.
  */
 export const buildNightshiftAgentConfiguration = ({
   instructions: agentInstructions,
@@ -158,13 +183,28 @@ export const buildNightshiftAgentConfiguration = ({
   memoryEnabled = false,
   investigationToolsEnabled,
   proposalsEnabled,
+  standalone = false,
   telemetryConnectorId,
   telemetryConfig,
   getCustomContextInstructions,
+  getInheritedConnectorIds,
   logger,
 }: NightshiftAgentTypeOptions & {
   instructions: string;
+  standalone?: boolean;
 }): AgentTypeDefinition['baseConfiguration'] => {
+  const telemetryConnectorIds: string[] = telemetryConfig
+    ? [
+        ...new Set(
+          getTelemetryTargets(telemetryConfig).flatMap(({ connectorId }) =>
+            connectorId ? [connectorId] : []
+          )
+        ),
+      ]
+    : telemetryConnectorId
+    ? [telemetryConnectorId]
+    : [];
+
   const configurationFor = ({
     materializeWorkflowId,
     optimizeWorkflowId,
@@ -174,25 +214,17 @@ export const buildNightshiftAgentConfiguration = ({
       skill_ids: [],
       tools: [
         {
-          tool_ids: [
-            ...(investigationToolsEnabled ? [...INVESTIGATION_TOOL_IDS] : []),
-            ...(proposalsEnabled ? [PROPOSALS_CREATE_TOOL_ID] : []),
-            ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
-          ],
+          tool_ids: standalone
+            ? [...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []), TIME_CONVERTER_TOOL_ID]
+            : [
+                ...(investigationToolsEnabled ? [...INVESTIGATION_TOOL_IDS] : []),
+                ...(proposalsEnabled ? [PROPOSALS_CREATE_TOOL_ID] : []),
+                ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
+              ],
         },
       ],
       enable_elastic_capabilities: false,
-      connector_ids: telemetryConfig
-        ? [
-            ...new Set(
-              getTelemetryTargets(telemetryConfig).flatMap(({ connectorId }) =>
-                connectorId ? [connectorId] : []
-              )
-            ),
-          ]
-        : telemetryConnectorId
-        ? [telemetryConnectorId]
-        : [],
+      connector_ids: telemetryConnectorIds,
       ...(() => {
         // Decision trees are no longer a separate before-agent hook: they hydrate as a third
         // parallel branch of the combined materialize workflow, which already carries the
@@ -214,17 +246,29 @@ export const buildNightshiftAgentConfiguration = ({
   // The hooks are per space, so the configuration always resolves per request.
   return async (ctx) => {
     const baseConfiguration = configurationFor(hooksFor(ctx.spaceId));
-    return getCustomContextInstructions
-      ? {
-          ...baseConfiguration,
-          instructions: await appendCustomContext({
+    const [resolvedInstructions, connectorIds] = await Promise.all([
+      getCustomContextInstructions
+        ? appendCustomContext({
             instructions: baseConfiguration.instructions,
             ctx,
             getCustomContextInstructions,
             logger,
-          }),
-        }
-      : baseConfiguration;
+          })
+        : baseConfiguration.instructions,
+      getInheritedConnectorIds
+        ? inheritConnectorIds({
+            connectorIds: baseConfiguration.connector_ids,
+            ctx,
+            getInheritedConnectorIds,
+            logger,
+          })
+        : baseConfiguration.connector_ids,
+    ]);
+    return {
+      ...baseConfiguration,
+      instructions: resolvedInstructions,
+      connector_ids: connectorIds,
+    };
   };
 };
 
@@ -243,6 +287,7 @@ export const getInvestigationAgentType = ({
   avatar_icon: 'logoElastic',
   baseConfiguration: buildNightshiftAgentConfiguration({
     ...options,
+    standalone: true,
     instructions: fillContextInstructions({
       includeCortex: options.sandboxEnabled && options.cortexEnabled,
       includeDecisionTrees: options.sandboxEnabled && decisionTreesEnabled,
@@ -263,6 +308,7 @@ export const registerInvestigationAgentType = (
     telemetryConnectorId,
     telemetryConfig,
     getCustomContextInstructions,
+    getInheritedConnectorIds,
     logger,
   }: InvestigationAgentTypeOptions
 ): void => {
@@ -277,6 +323,7 @@ export const registerInvestigationAgentType = (
       telemetryConnectorId,
       telemetryConfig,
       getCustomContextInstructions,
+      getInheritedConnectorIds,
       logger,
     })
   );
