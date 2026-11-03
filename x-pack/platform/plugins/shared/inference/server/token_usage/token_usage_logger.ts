@@ -48,6 +48,7 @@ const INDEX_TEMPLATE = {
         inference: {
           properties: {
             connector_id: { type: 'keyword' as const },
+            space_id: { type: 'keyword' as const },
             feature_id: { type: 'keyword' as const },
             parent_feature_id: { type: 'keyword' as const },
           },

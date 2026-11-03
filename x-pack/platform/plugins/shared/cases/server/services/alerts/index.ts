@@ -35,7 +35,7 @@ import {
 import { CaseStatuses } from '../../../common/types/domain';
 import { MAX_ALERTS_PER_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
-import type { AlertInfo } from '../../common/types';
+import type { AlertIndexClaim, AlertInfo } from '../../common/types';
 import type {
   RemoveCaseIdFromAlertsRequest,
   UpdateAlertCasesRequest,
@@ -557,12 +557,12 @@ export class AlertService {
   }
 
   /**
-   * Whether Elasticsearch refused a read because the caller holds no privilege on the pattern.
+   * Whether Elasticsearch refused a read because the caller holds no privilege on what it searched.
    *
-   * A caller with read somewhere else gets an empty result for a pattern it cannot see, because
-   * the wildcard resolves to no authorized index. A caller with no index privileges at all is
+   * A caller with read somewhere else gets an empty result for an index or pattern it cannot see,
+   * because it resolves to no authorized index. A caller with no index privileges at all is
    * refused the search action outright, before resolution, so the same absence arrives as an
-   * error instead. Both mean the attack is not readable, so they must be treated alike.
+   * error instead. Both mean the document is not readable, so they must be treated alike.
    */
   private static isUnauthorizedRead(error: unknown): boolean {
     const candidate = error as {
@@ -571,6 +571,26 @@ export class AlertService {
     };
 
     return candidate?.statusCode === 403 || candidate?.body?.error?.type === 'security_exception';
+  }
+
+  /**
+   * Whether Elasticsearch rejected a searched index, or an `_index` value filtered on, as invalid
+   * or missing.
+   *
+   * Attachment and selection indices are free text, so such a rejection means the referenced
+   * documents cannot be found there, not that the search itself failed. Shard-level rejections,
+   * such as an invalid `_index` filter value, arrive as root causes of a search phase failure.
+   */
+  private static isRejectedIndexName(error: unknown): boolean {
+    const candidate = error as {
+      body?: { error?: { type?: string; root_cause?: Array<{ type?: string }> } };
+    };
+    const { type, root_cause: rootCauses = [] } = candidate?.body?.error ?? {};
+
+    return [type, ...rootCauses.map((rootCause) => rootCause.type)].some(
+      (errorType) =>
+        errorType === 'invalid_index_name_exception' || errorType === 'index_not_found_exception'
+    );
   }
 
   /**
@@ -638,6 +658,112 @@ export class AlertService {
     );
 
     return sourcesById;
+  }
+
+  /**
+   * Returns the claims whose alert lives in the claimed index and is reachable through the index
+   * its attachment stores, searching that stored index as the caller.
+   *
+   * Some attach paths store the alerts alias rather than the backing index, and single-document
+   * operations against an alias fail once it spans more than one index. Each claimed pair is
+   * checked exactly, because ids are unique only within an index, so an alias can expose the same
+   * id in several backing indices. Claims the caller cannot read, whose alert no longer exists, or
+   * whose stored index is remote or rejected by Elasticsearch are left out of the result.
+   */
+  public async confirmAlertIndices({
+    claims,
+  }: {
+    claims: AlertIndexClaim[];
+  }): Promise<AlertIndexClaim[]> {
+    try {
+      const idsByIndexByAttachedIndex = new Map<string, Map<string, Set<string>>>();
+
+      for (const { id, index, attachedIndex } of claims) {
+        // Hits report local concrete indices, whose names never contain ':', so such a claim can
+        // never be confirmed, and a value like ':' would fail the `_index` filter outright.
+        const isConfirmable =
+          !isEmpty(id) &&
+          !isEmpty(index) &&
+          !index.includes(':') &&
+          !isEmpty(attachedIndex) &&
+          !isNonLocalIndexName(attachedIndex);
+
+        if (isConfirmable) {
+          const idsByIndex =
+            idsByIndexByAttachedIndex.get(attachedIndex) ?? new Map<string, Set<string>>();
+          const ids = idsByIndex.get(index) ?? new Set<string>();
+          ids.add(id);
+          idsByIndex.set(index, ids);
+          idsByIndexByAttachedIndex.set(attachedIndex, idsByIndex);
+        }
+      }
+
+      const confirmed = await pMap(
+        Array.from(idsByIndexByAttachedIndex.entries()),
+        async ([attachedIndex, idsByIndex]): Promise<AlertIndexClaim[]> => {
+          const claimedPairs = Array.from(idsByIndex.entries(), ([index, ids]) => ({
+            index,
+            ids: Array.from(ids),
+          }));
+          let hits;
+
+          try {
+            ({ hits } = await this.scopedClusterClient.search({
+              index: attachedIndex,
+              // A concrete index holds one document per id at most, so each claimed pair is one hit
+              // at most. A claim naming an alias or pattern can match more, but is never confirmed.
+              size: claimedPairs.reduce((count, { ids }) => count + ids.length, 0),
+              query: {
+                bool: {
+                  should: claimedPairs.map(({ index, ids }) => ({
+                    bool: { filter: [{ term: { _index: index } }, { ids: { values: ids } }] },
+                  })),
+                  minimum_should_match: 1,
+                },
+              },
+              _source: false,
+              track_total_hits: false,
+              // A stored index that no longer resolves to anything holds no alerts.
+              ignore_unavailable: true,
+              allow_no_indices: true,
+            }));
+          } catch (error) {
+            const isUnauthorized = AlertService.isUnauthorizedRead(error);
+            if (!isUnauthorized && !AlertService.isRejectedIndexName(error)) {
+              throw error;
+            }
+
+            const reason = isUnauthorized
+              ? 'the caller cannot read it'
+              : 'Elasticsearch rejected an index name';
+            const claimed = claimedPairs.flatMap(({ index, ids }) =>
+              ids.map((id) => `${id} in ${index}`)
+            );
+            this.logger.debug(
+              `Leaving the alerts claimed through ${attachedIndex} unconfirmed because ${reason}: ${claimed.join(
+                ', '
+              )}`
+            );
+
+            return [];
+          }
+
+          // An `_index` filter also matches aliases and patterns, so only exact pairs are confirmed.
+          return hits.hits.flatMap(({ _id: id, _index: index }) =>
+            id != null && idsByIndex.get(index)?.has(id) ? [{ id, index, attachedIndex }] : []
+          );
+        },
+        { concurrency: MAX_CONCURRENT_SEARCHES }
+      );
+
+      return confirmed.flat();
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to confirm alert indices: ${error}`,
+        error,
+        logger: this.logger,
+      });
+    }
   }
 
   /**
