@@ -228,10 +228,8 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   }
 
   getGeoGridPrecision(zoom: number): number {
-    // MVT sources (heatmap, hex, and point/grid at super-fine resolution) do not need a precision
-    // from the client. The tile request sends the resolution delta, and Elasticsearch derives
-    // the precision from each tile's zoom. The tile URL only changes when the delta changes
-    // (resolution or render type), not when the map zoom changes.
+    // Precision is determined server side for MVT sources
+    // (heatmap, hex, and point/grid at super-fine resolution).
     return this.isMvt() ? 0 : getGeotilePrecision(zoom, this._descriptor.resolution);
   }
 

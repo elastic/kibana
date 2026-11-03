@@ -299,8 +299,7 @@ describe('ESGeoGridSource', () => {
       expect(superFineSource.getGeoGridPrecision(10)).toBe(0);
     });
 
-    // Hex is always MVT (there is no non-MVT geohex_grid request path), so the client
-    // does not compute a precision that changes with zoom. The precision is a constant 0.
+    // Hex is always MVT, so precision is determined server side and the client value is a constant 0.
     it('Should return constant precision for hex', () => {
       const hexSource = new ESGeoGridSource({
         id: 'foobar',
