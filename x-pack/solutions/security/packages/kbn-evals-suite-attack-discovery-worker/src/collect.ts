@@ -39,6 +39,7 @@ const REVIEW_SNAPSHOT_STEP_IDS: readonly string[] = [
   'resolve_analysis',
   'resolve_escalation',
   'escalation_gate',
+  'record_gate_failed',
   'record_decision',
   'emit_result',
 ];
@@ -178,23 +179,37 @@ const attackIdOf = (
   );
 };
 
+const isTruthy = (value: unknown): boolean => value === true || value === 'true';
+
 /**
- * A review is settled once it ends, or once its analysis produced a verdict and it is waiting on
- * the analyst gate: a true-positive or inconclusive review is meant to stay parked there.
+ * A review is parked at the analyst gate only when all of these hold:
+ * - the analysis chose to escalate (`resolve_escalation.output.escalate`);
+ * - the `escalation_gate` step exists and has not ended, so something is still waiting on it;
+ * - the gate did not error (`record_gate_failed` is the step that records a gate error);
+ * - the review itself is waiting rather than ended.
+ * A review that is merely waiting for any other reason is not parked.
  */
-export const isReviewSettled = (review: WorkflowExecutionDto): boolean => {
-  if (isTerminal(review.status)) return true;
-  const analysis = firstStep(review, 'resolve_analysis');
-  return analysis?.status === 'completed' && review.status.startsWith('waiting');
+export const isParkedAtGate = (review: WorkflowExecutionDto): boolean => {
+  if (isTerminal(review.status) || !review.status.startsWith('waiting')) return false;
+  if (!isTruthy(outputOf(firstStep(review, 'resolve_escalation'))?.escalate)) return false;
+  const gate = firstStep(review, 'escalation_gate');
+  if (!gate || isTerminal(gate.status)) return false;
+  return stepsOf(review, 'record_gate_failed').length === 0;
 };
+
+/** A review is settled once it ends or parks at the analyst gate (see `isParkedAtGate`). */
+export const isReviewSettled = (review: WorkflowExecutionDto): boolean =>
+  isTerminal(review.status) || isParkedAtGate(review);
 
 const buildReviewArtifact = async ({
   review,
+  timedOutAfterMs,
   dispatch,
   fetch,
   spaceId,
 }: {
   review: WorkflowExecutionDto;
+  timedOutAfterMs?: number;
   dispatch: WorkflowStepExecutionDto | undefined;
   fetch: HttpHandler;
   spaceId: string;
@@ -218,7 +233,8 @@ const buildReviewArtifact = async ({
     executionId: review.id,
     attackDiscoveryId,
     status: review.status,
-    parked: !isTerminal(review.status) && review.status.startsWith('waiting'),
+    parked: isParkedAtGate(review),
+    ...(timedOutAfterMs !== undefined ? { timedOutAfterMs } : {}),
     verdict:
       asVerdict(analysis?.verdict) ??
       asVerdict(emit?.verdict) ??
@@ -256,6 +272,7 @@ const outcomeEvents = (run: WorkflowExecutionDto): WorkerOutcomeEvent[] =>
 export const collectWorkerArtifacts = async ({
   client,
   run,
+  runTimedOutAfterMs,
   spaceId,
   seeded,
   fetch,
@@ -263,6 +280,7 @@ export const collectWorkerArtifacts = async ({
 }: {
   client: AttackDiscoveryWorkerClient;
   run: WorkflowExecutionDto;
+  runTimedOutAfterMs?: number;
   spaceId: string;
   seeded: SeededScenario;
   fetch: HttpHandler;
@@ -290,13 +308,13 @@ export const collectWorkerArtifacts = async ({
 
   const reviews = await Promise.all(
     dispatches.map(async ({ step, executionId }) => {
-      const review = await client.poll({
+      const { execution: review, timedOutAfterMs } = await client.poll({
         spaceId,
         executionId,
         maxWaitMs: REVIEW_SETTLE_TIMEOUT_MS,
         isDone: isReviewSettled,
       });
-      return buildReviewArtifact({ review, dispatch: step, fetch, spaceId });
+      return buildReviewArtifact({ review, timedOutAfterMs, dispatch: step, fetch, spaceId });
     })
   );
   log.info(
@@ -307,6 +325,8 @@ export const collectWorkerArtifacts = async ({
     runnerExecutionId: run.id,
     runnerStatus: run.status,
     runnerError: run.error?.message,
+    runnerStepCount: run.stepExecutions.length,
+    ...(runTimedOutAfterMs !== undefined ? { runnerTimedOutAfterMs: runTimedOutAfterMs } : {}),
     seededAlertCount: seeded.alertCount,
     alertsAnalyzed: asNumber(generation?.alerts_analyzed) ?? asNumber(emit?.alerts_analyzed),
     attacksGenerated:

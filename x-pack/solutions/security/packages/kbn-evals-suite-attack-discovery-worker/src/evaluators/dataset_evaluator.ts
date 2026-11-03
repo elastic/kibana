@@ -293,7 +293,7 @@ export const createEvaluateDataset =
           const { spaceId } = input;
           const seeded = await seedScenario({ esClient, log, scenario, spaceId });
           try {
-            const run = await client.run({
+            const { execution: run, timedOutAfterMs } = await client.run({
               spaceId,
               inputs: {
                 schedule_interval: SCHEDULE_INTERVAL,
@@ -302,7 +302,15 @@ export const createEvaluateDataset =
                 ...(routing.runnerConnectorId ? { connector_id: routing.runnerConnectorId } : {}),
               },
             });
-            return await collectWorkerArtifacts({ client, run, spaceId, seeded, fetch, log });
+            return await collectWorkerArtifacts({
+              client,
+              run,
+              runTimedOutAfterMs: timedOutAfterMs,
+              spaceId,
+              seeded,
+              fetch,
+              log,
+            });
           } finally {
             // Parked reviews are done being read; cancel them so they do not outlive the row.
             await client.cancelPending();

@@ -24,6 +24,12 @@ import { apiVersion, errorMessage, httpStatus, sleep, spacePath } from './kibana
 export const isTerminal = (status: ExecutionStatus): boolean =>
   TerminalExecutionStatuses.includes(status);
 
+/** An execution as last read, and how long the wait was if it ran out before the execution settled. */
+export interface PolledExecution {
+  execution: WorkflowExecutionDto;
+  timedOutAfterMs?: number;
+}
+
 export interface RunnerInputs {
   schedule_interval: string;
   autonomy: 'manual' | 'supervised';
@@ -57,7 +63,8 @@ export class AttackDiscoveryWorkerClient {
 
   /**
    * Polls until `isDone` accepts the execution or it ends, whichever is first. A timeout
-   * returns the last execution seen rather than throwing, so the evaluators score what exists.
+   * returns the last execution seen with `timedOutAfterMs` set rather than throwing, so the
+   * evaluators score what exists and report the timeout.
    */
   async poll({
     spaceId,
@@ -69,7 +76,7 @@ export class AttackDiscoveryWorkerClient {
     executionId: string;
     maxWaitMs: number;
     isDone?: (execution: WorkflowExecutionDto) => boolean;
-  }): Promise<WorkflowExecutionDto> {
+  }): Promise<PolledExecution> {
     const deadline = Date.now() + maxWaitMs;
     let execution = await this.getExecution(spaceId, executionId);
     while (!isDone(execution) && !isTerminal(execution.status) && Date.now() < deadline) {
@@ -80,11 +87,15 @@ export class AttackDiscoveryWorkerClient {
       this.log.warning(
         `Execution ${executionId} did not settle within ${maxWaitMs}ms (status ${execution.status})`
       );
+      return { execution, timedOutAfterMs: maxWaitMs };
     }
-    return execution;
+    return { execution };
   }
 
-  /** Runs the runner to completion. Throws on an execution that never ran a step. */
+  /**
+   * Runs the runner to completion. A timeout or an execution with no steps is returned, not
+   * thrown, so the row is scored (and fails by name) instead of vanishing from the results.
+   */
   async run({
     spaceId,
     inputs,
@@ -93,7 +104,7 @@ export class AttackDiscoveryWorkerClient {
     spaceId: string;
     inputs: RunnerInputs;
     maxWaitMs?: number;
-  }): Promise<WorkflowExecutionDto> {
+  }): Promise<PolledExecution> {
     const { workflowExecutionId } = await this.fetch<{ workflowExecutionId: string }>(
       spacePath(spaceId, `/api/workflows/workflow/${encodeURIComponent(RUNNER_WORKFLOW_ID)}/run`),
       {
@@ -103,18 +114,11 @@ export class AttackDiscoveryWorkerClient {
       }
     );
     this.pendingExecutions.push({ spaceId, executionId: workflowExecutionId });
-    const execution = await this.poll({ spaceId, executionId: workflowExecutionId, maxWaitMs });
-    if (isTerminal(execution.status)) {
+    const polled = await this.poll({ spaceId, executionId: workflowExecutionId, maxWaitMs });
+    if (isTerminal(polled.execution.status)) {
       this.forget(workflowExecutionId);
     }
-    if (execution.stepExecutions.length === 0) {
-      throw new Error(
-        `Runner execution ${workflowExecutionId} finished ${
-          execution.status
-        } with no step executions: ${execution.error?.message ?? 'no error recorded'}`
-      );
-    }
-    return execution;
+    return polled;
   }
 
   private forget(executionId: string): void {

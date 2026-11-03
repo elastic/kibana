@@ -53,6 +53,7 @@ const outcome = (stepId: string) => ({ stepId, status: 'completed', runOutcome: 
 const quietArtifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifacts => ({
   runnerExecutionId: 'run-1',
   runnerStatus: 'completed',
+  runnerStepCount: 4,
   seededAlertCount: 3,
   alertsAnalyzed: 3,
   insights: [],
@@ -142,7 +143,9 @@ const evaluators = {
 const log = { info: jest.fn(), warning: jest.fn(), debug: jest.fn() } as unknown as ToolingLog;
 
 const client = {
-  run: jest.fn(async () => ({ id: 'run-1', status: 'completed', stepExecutions: [] })),
+  run: jest.fn(async () => ({
+    execution: { id: 'run-1', status: 'completed', stepExecutions: [] },
+  })),
   cancelPending: jest.fn(async () => undefined),
 } as unknown as AttackDiscoveryWorkerClient;
 

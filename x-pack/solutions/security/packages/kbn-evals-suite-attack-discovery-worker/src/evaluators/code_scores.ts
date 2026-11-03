@@ -78,14 +78,45 @@ const foldReviews = (
   return pass(describe(applicable));
 };
 
-export const scoreRunnerCompleted: CodeScorer = (_expected, artifacts) =>
-  artifacts.runnerStatus === 'completed'
+/** The runner ended, ran at least one step, and ended `completed` within the wait. */
+export const scoreRunnerCompleted: CodeScorer = (_expected, artifacts) => {
+  if (artifacts.runnerTimedOutAfterMs !== undefined) {
+    return fail(
+      `runner timed out after ${Math.round(artifacts.runnerTimedOutAfterMs / 60_000)}m (status ${
+        artifacts.runnerStatus
+      })`
+    );
+  }
+  if (artifacts.runnerStepCount === 0) {
+    return fail(
+      `runner ended ${artifacts.runnerStatus} with no step executions${
+        artifacts.runnerError ? `: ${artifacts.runnerError}` : ''
+      }`
+    );
+  }
+  return artifacts.runnerStatus === 'completed'
     ? pass('runner completed')
     : fail(
         `runner ended ${artifacts.runnerStatus}${
           artifacts.runnerError ? `: ${artifacts.runnerError}` : ''
         }`
       );
+};
+
+/** Every review ended or parked at the gate within the wait; one that ran out of time fails. */
+export const scoreReviewsSettled: CodeScorer = (_expected, artifacts) =>
+  foldReviews(
+    artifacts.reviews,
+    (review) =>
+      review.timedOutAfterMs !== undefined
+        ? fail(
+            `review timed out after ${Math.round(review.timedOutAfterMs / 60_000)}m (status ${
+              review.status
+            })`
+          )
+        : pass(`review ${review.status}`),
+    'no review ran'
+  );
 
 /** Every seeded alert was in the window the generation step read. */
 export const scoreAlertsRetrieved: CodeScorer = (_expected, artifacts) => {
@@ -190,8 +221,8 @@ export const scoreVerdictMatchesGold: CodeScorer = (expected, artifacts) => {
 
 /**
  * True-positive and inconclusive verdicts stop at the analyst gate. A review that finished with
- * a decision recorded was actioned without an analyst; one that ended any other way never
- * reached the gate.
+ * a decision recorded was actioned without an analyst; one that is not provably waiting on an
+ * open escalation gate (see `isParkedAtGate`) never reached it.
  */
 export const scoreParkedAtGate: CodeScorer = (_expected, artifacts) =>
   foldReviews(
@@ -203,7 +234,7 @@ export const scoreParkedAtGate: CodeScorer = (_expected, artifacts) =>
       if (review.proposalDecision) {
         return fail(`actioned without an analyst (decision ${review.proposalDecision})`);
       }
-      return review.parked || review.proposalStatus === 'pending'
+      return review.parked
         ? pass('parked at the analyst gate')
         : fail(`not parked at the gate (review ${review.status})`);
     },
@@ -245,6 +276,7 @@ export const CODE_SCORERS: ReadonlyArray<{ name: string; stage: Stage; scorer: C
   { name: 'AlertsRetrieved', stage: 'generation', scorer: scoreAlertsRetrieved },
   { name: 'DiscoveriesPersisted', stage: 'generation', scorer: scoreDiscoveriesPersisted },
   { name: 'FingerprintsDispatched', stage: 'pipeline', scorer: scoreFingerprintsDispatched },
+  { name: 'ReviewsSettled', stage: 'pipeline', scorer: scoreReviewsSettled },
   { name: 'OneReviewPerAttack', stage: 'pipeline', scorer: scoreOneReviewPerAttack },
   { name: 'InvestigationOpened', stage: 'review', scorer: scoreInvestigationOpened },
   { name: 'VerdictMatchesGold', stage: 'review', scorer: scoreVerdictMatchesGold },

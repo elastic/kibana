@@ -62,8 +62,13 @@ export interface ReviewArtifact {
   executionId: string;
   attackDiscoveryId?: string;
   status: string;
-  /** True when the review is waiting on the analyst gate rather than finished. */
+  /**
+   * True only when the analysis chose to escalate and the escalation gate is still open: the
+   * review is waiting on the analyst, not finished and not stuck.
+   */
   parked: boolean;
+  /** Set when the wait for this review ran out before it settled. */
+  timedOutAfterMs?: number;
   verdict?: Verdict;
   investigationId?: string;
   investigationOpened: boolean;
@@ -85,6 +90,10 @@ export interface WorkerArtifacts {
   runnerExecutionId: string;
   runnerStatus: string;
   runnerError?: string;
+  /** Number of step executions the runner recorded; 0 means it never ran a step. */
+  runnerStepCount: number;
+  /** Set when the wait for the runner ran out before it ended. */
+  runnerTimedOutAfterMs?: number;
   seededAlertCount: number;
   alertsAnalyzed?: number;
   attacksGenerated?: number;
