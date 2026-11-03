@@ -124,6 +124,18 @@ describe('When entering data into the Console input', () => {
     expect(getLeftOfCursorText()).toEqual('');
   });
 
+  it('should give the element that receives focus an accessible name', () => {
+    render();
+
+    // `InputCapture` moves focus to a visually hidden `<input>`, so that is the element a screen
+    // reader announces - it needs the same accessible name as the visible input area.
+    const focusTarget = renderResult
+      .getByTestId('test-keyCapture-input')
+      .querySelector('input[name="inputCapture"]');
+
+    expect(focusTarget?.getAttribute('aria-label')).toEqual('Response console input');
+  });
+
   it('should display placeholder text when input area is blank', () => {
     render();
 
