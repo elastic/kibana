@@ -38,3 +38,12 @@ Plugins persist keys in the alerting rule attribute shape, `StoredApiKeys`:
 | UIAM log tags | `src/log_tags.ts` |
 
 The task state schema is versioned. Add a new version instead of editing an existing one.
+
+## Where each plugin keeps its API key code
+
+| Plugin | Location |
+| --- | --- |
+| Task Manager | `x-pack/platform/plugins/shared/task_manager/server/api_keys/` |
+| Alerting | `x-pack/platform/plugins/shared/alerting/server/api_keys/` |
+| Alerting v2 | `x-pack/platform/plugins/shared/alerting_v2/server/lib/services/api_key_service/` and `server/lib/tasks/invalidate_pending_api_keys/` |
+| Actions | `x-pack/platform/plugins/shared/actions/server/api_keys/` |
