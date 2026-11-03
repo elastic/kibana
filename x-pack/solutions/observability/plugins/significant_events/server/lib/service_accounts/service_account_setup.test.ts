@@ -222,8 +222,15 @@ describe('createDetectionEngineSetupService.enable workflows', () => {
       isServerless: false,
     }).enable({ request, spaceId: 'marketing', serviceAccountId: 'account-1' });
 
-    expect(result.workflowIds).toEqual([...SETUP_WORKFLOW_IDS]);
-    expect(install.mock.calls.map(([, workflowId]) => workflowId)).toEqual([...SETUP_WORKFLOW_IDS]);
+    const expectedIds = [
+      'system-sources-ki-onboarding-bound',
+      'system-nightshift-discovery-bound',
+      'system-sources-ki-sync-bound',
+      'system-nightshift-cleanup-bound',
+      'system-nightshift-source-reconciliation-bound',
+    ];
+    expect(result.workflowIds).toEqual(expectedIds);
+    expect(install.mock.calls.map(([, workflowId]) => workflowId)).toEqual(expectedIds);
     expect(install).toHaveBeenCalledWith('significantEvents', SETUP_WORKFLOW_IDS[0], {
       spaceId: 'marketing',
       workflowIdSuffix: 'marketing',
@@ -245,6 +252,24 @@ describe('createDetectionEngineSetupService.enable workflows', () => {
       }).enable({ request, spaceId: 'default', serviceAccountId: 'account-1' })
     ).rejects.toThrow('bind failed');
     expect(install).not.toHaveBeenCalled();
+  });
+
+  it('names the workflow that failed to install and says the space is bound', async () => {
+    const { core } = createCore();
+    const { workflowsExtensions, install } = createWorkflowsExtensions();
+    install.mockRejectedValueOnce(new Error('index not ready'));
+
+    await expect(
+      createDetectionEngineSetupService({
+        core,
+        spaces: undefined,
+        workflowsExtensions,
+        isServerless: false,
+      }).enable({ request, spaceId: 'default', serviceAccountId: 'account-1' })
+    ).rejects.toMatchObject({
+      statusCode: 500,
+      message: expect.stringContaining('[system-sources-ki-onboarding-bound]'),
+    });
   });
 
   it('refuses with 400 when workflows are not available', async () => {

@@ -24,10 +24,10 @@ interface IParsedStep {
   type: string;
   condition?: string;
   steps?: Array<{ type: string }>;
+  with?: Record<string, unknown>;
 }
 
 interface IParsedWorkflow {
-  settings?: { run_as?: string };
   triggers?: Array<{ type: string }>;
   steps: IParsedStep[];
 }
@@ -53,17 +53,13 @@ describe('bound detection engine workflows', () => {
     ...startedBySchedule,
     ...startedByServerCode,
     ['investigation completed', BOUND_INVESTIGATION_COMPLETED_YAML],
-  ])(
-    '%s runs as the service account and refuses direct runs before doing anything',
-    (_name, yaml) => {
-      const { settings, steps }: IParsedWorkflow = parse(yaml);
+  ])('%s refuses direct runs before doing anything', (_name, yaml) => {
+    const { steps }: IParsedWorkflow = parse(yaml);
 
-      expect(settings?.run_as).toBe('__SERVICE_ACCOUNT_ID__');
-      expect(steps[0]).toMatchObject({ name: 'refuse_direct_runs', type: 'if' });
-      expect(steps[0].condition).toContain('execution.triggeredBy');
-      expect(steps[0].steps?.[0].type).toBe('workflow.fail');
-    }
-  );
+    expect(steps[0]).toMatchObject({ name: 'refuse_direct_runs', type: 'if' });
+    expect(steps[0].condition).toMatch(/^not execution\.triggeredBy : /);
+    expect(steps[0].steps?.[0].type).toBe('workflow.fail');
+  });
 
   it.each(startedBySchedule)('%s has no manual trigger', (_name, yaml) => {
     const { triggers }: IParsedWorkflow = parse(yaml);
@@ -76,7 +72,27 @@ describe('bound detection engine workflows', () => {
     (_name, yaml) => {
       const { steps }: IParsedWorkflow = parse(yaml);
 
-      expect(steps[0].condition).toContain(`"${NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE}"`);
+      expect(steps[0].condition).toBe(
+        `not execution.triggeredBy : "${NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE}"`
+      );
     }
   );
+
+  it.each(startedBySchedule)('%s refuses every run but the schedule', (_name, yaml) => {
+    const { steps }: IParsedWorkflow = parse(yaml);
+
+    expect(steps[0].condition).toBe('not execution.triggeredBy : "scheduled"');
+  });
+
+  // A child workflow only runs as the account when the call says so.
+  it.each([
+    ['onboarding', BOUND_ONBOARDING_YAML, 'system-streams-ki-onboarding'],
+    ['discovery', BOUND_ORCHESTRATOR_YAML, 'system-significant-events-orchestrator'],
+  ])('%s hands its work down with the identity of the account', (_name, yaml, childId) => {
+    const { steps }: IParsedWorkflow = parse(yaml);
+
+    expect(steps.find(({ type }) => type === 'workflow.execute')).toMatchObject({
+      with: { 'workflow-id': childId, 'run-as-mode': 'inherit' },
+    });
+  });
 });

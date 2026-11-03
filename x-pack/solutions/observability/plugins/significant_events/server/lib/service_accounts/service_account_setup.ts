@@ -11,7 +11,6 @@ import { getNightshiftRoleName } from '@kbn/nightshift-shared';
 import {
   NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_DISCOVERY_WORKFLOW_ID,
-  NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
@@ -32,16 +31,16 @@ import {
 } from './detection_engine_account';
 
 /**
- * The bound workflows every set-up space gets, installed per space with the space id as suffix. The
- * ones a setting turns on (continuous onboarding, the scheduled discovery pair) are installed by
- * their setting, bound to the space's account.
+ * The bound workflows every set-up space gets, installed per space with the space id as suffix.
+ * Left out until the switch-on: the bound investigation-completed workflow, which reacts to events
+ * the existing global one already handles, so installing it now would attach every investigation
+ * twice, and the ones a setting turns on (continuous onboarding, the scheduled discovery pair).
  */
 export const SETUP_WORKFLOW_IDS = [
   NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_DISCOVERY_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
-  NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
 ] as const;
 
@@ -145,15 +144,21 @@ export function createDetectionEngineSetupService({
       // account rebinds an installed workflow and keeps its enabled state.
       const client = await workflowsExtensions.getClient(request);
       for (const workflowId of SETUP_WORKFLOW_IDS) {
-        await client.managedWorkflows.install(
-          SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER,
-          workflowId,
-          {
-            spaceId,
-            workflowIdSuffix: spaceId,
-            values: { serviceAccountId },
-          }
-        );
+        try {
+          await client.managedWorkflows.install(
+            SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER,
+            workflowId,
+            { spaceId, workflowIdSuffix: spaceId, values: { serviceAccountId } }
+          );
+        } catch (error) {
+          // The space is bound already, and installing is repeatable: calling _enable again retries.
+          throw new StatusError(
+            `Installing workflow [${workflowId}] failed: ${
+              error instanceof Error ? error.message : String(error)
+            }. The space is bound; call _enable again to retry.`,
+            500
+          );
+        }
       }
       return { spaceId, serviceAccountId, workflowIds: [...SETUP_WORKFLOW_IDS] };
     },
