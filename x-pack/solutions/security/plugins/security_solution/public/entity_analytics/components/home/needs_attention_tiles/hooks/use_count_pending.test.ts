@@ -16,13 +16,11 @@ import { useEntitiesWithAnomaliesCount } from './use_entities_with_anomalies_cou
 import { useNewEntityCount } from './use_new_entity_count';
 import { useNewlyHighCriticalCount } from './use_newly_high_critical_count';
 import { useRiskMoversCount } from './use_risk_movers_count';
-import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { TileQueryTimeoutError, retryUnlessTimedOut } from './tile_query_timeout';
 import { useTileQueryInputs } from './use_tile_query_inputs';
 
 jest.mock('@kbn/react-query', () => ({ useQuery: jest.fn() }));
 jest.mock('../../../../../common/lib/kibana', () => ({ useKibana: jest.fn() }));
-jest.mock('../../../../../common/hooks/use_error_toast', () => ({ useErrorToast: jest.fn() }));
 jest.mock('../../../../../common/components/ml/hooks/use_installed_security_jobs', () => ({
   useInstalledSecurityJobsIds: jest.fn(),
 }));
@@ -123,16 +121,14 @@ describe.each([
     expect(pending()).toBe(false);
   });
 
-  it('says it timed out, without a toast of its own (the page shows one for every tile)', () => {
+  it('says it timed out, and is no longer loading', () => {
     query({ error: new TileQueryTimeoutError() });
     const result = renderHook(() => useCount({ spaceId: 'default' })).result.current;
     expect(result.isTimedOut).toBe(true);
     expect(result.isLoading).toBe(false);
-    const toastCalls = (useErrorToast as jest.Mock).mock.calls;
-    expect(toastCalls[toastCalls.length - 1][1]).toBeUndefined();
   });
 
-  it('says it timed out, without a toast, when the group filter lookup timed out', () => {
+  it('says it timed out when the group filter lookup timed out', () => {
     (useTileQueryInputs as jest.Mock).mockReturnValue({
       data: undefined,
       isLoading: false,
@@ -142,8 +138,6 @@ describe.each([
     const result = renderHook(() => useCount({ spaceId: 'default' })).result.current;
     (useTileQueryInputs as jest.Mock).mockImplementation(actualUseTileQueryInputs);
     expect(result.isTimedOut).toBe(true);
-    const toastCalls = (useErrorToast as jest.Mock).mock.calls;
-    expect(toastCalls[toastCalls.length - 1][1]).toBeUndefined();
   });
 
   it('shows no count from an earlier fetch when the refetch timed out', () => {
@@ -175,13 +169,12 @@ describe.each([
     expect(hasCount()).toBe(false);
   });
 
-  it('reports other errors as before, with a toast, and does not call them a timeout', () => {
+  it('reports other errors, and does not call them a timeout', () => {
     const error = new Error('boom');
     query({ error });
     const result = renderHook(() => useCount({ spaceId: 'default' })).result.current;
     expect(result.isTimedOut).toBe(false);
-    const toastCalls = (useErrorToast as jest.Mock).mock.calls;
-    expect(toastCalls[toastCalls.length - 1][1]).toBe(error);
+    expect(result.error).toBe(error);
   });
 
   it('runs its query in the local project only', async () => {
