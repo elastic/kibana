@@ -170,6 +170,32 @@ apiTest.describe('EUID derivation parity', { tag: BACKFILL_TAGS }, () => {
   });
 
   apiTest(
+    'agrees when a multi-valued condition field holds the match after its first value',
+    async ({ esClient }) => {
+      // `includes` must check every value. Doc-values sort `alert` before `asset`, so reading only
+      // the first one misses the asset-discovery namespace mapping; in-memory and `_source` miss it
+      // too when `asset` is not written first.
+      for (const kind of [
+        ['asset', 'alert'],
+        ['alert', 'asset'],
+      ]) {
+        const results = await deriveAllWays(esClient, EntityType.user, {
+          'user.email': 'carol@acme.com',
+          'event.kind': kind,
+          'event.module': 'asset_discovery',
+          'cloud.provider': 'aws',
+        });
+
+        for (const { fromSource, fromDocValues, fromPainlessSource } of results) {
+          expect(fromSource).toBe('user:carol@acme.com@aws');
+          expect(fromDocValues).toBe('user:carol@acme.com@aws');
+          expect(fromPainlessSource).toBe('user:carol@acme.com@aws');
+        }
+      }
+    }
+  );
+
+  apiTest(
     'derives from different array elements when the identity field is multi-valued',
     async ({ esClient }) => {
       // The one case where the derivations disagree, and it predates this backfill: `_source` keeps
