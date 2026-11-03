@@ -22,6 +22,12 @@ import {
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { users, roles, casesAllUser, casesAllUser2 } from '../common';
 
+const LOGSTASH_ES_ARCHIVE = 'x-pack/platform/test/fixtures/es_archives/logstash_functional';
+const LENS_BASIC_KBN_ARCHIVE =
+  'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json';
+// Title of the XY Lens saved object in LENS_BASIC_KBN_ARCHIVE
+const LENS_BASIC_XY_VIS_TITLE = 'lnsXYvis';
+
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
   const testSubjects = getService('testSubjects');
@@ -472,12 +478,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('Lens visualization', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded(
-          'x-pack/platform/test/fixtures/es_archives/logstash_functional'
-        );
-        await kibanaServer.importExport.load(
-          'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
-        );
+        await esArchiver.loadIfNeeded(LOGSTASH_ES_ARCHIVE);
+        await kibanaServer.importExport.load(LENS_BASIC_KBN_ARCHIVE);
         // The inserted lens block records the global time filter, and the
         // chart only renders when that range holds data.
         await kibanaServer.uiSettings.update({
@@ -488,10 +490,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       after(async () => {
         await kibanaServer.uiSettings.unset('timepicker:timeDefaults');
-        await kibanaServer.importExport.unload(
-          'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
-        );
-        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
+        await kibanaServer.importExport.unload(LENS_BASIC_KBN_ARCHIVE);
+        await esArchiver.unload(LOGSTASH_ES_ARCHIVE);
       });
 
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
@@ -516,7 +516,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         );
         await addVisualizationButton.click();
 
-        await cases.singleCase.findAndSaveVisualization('lnsXYvis');
+        await cases.singleCase.findAndSaveVisualization(LENS_BASIC_XY_VIS_TITLE);
 
         await header.waitUntilLoadingHasFinished();
 
@@ -557,7 +557,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         );
         await addVisualizationButton.click();
 
-        await cases.singleCase.findAndSaveVisualization('lnsXYvis');
+        await cases.singleCase.findAndSaveVisualization(LENS_BASIC_XY_VIS_TITLE);
 
         await header.waitUntilLoadingHasFinished();
 
@@ -573,7 +573,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('adds lens visualization in new comment', async () => {
-        await cases.singleCase.addVisualizationToNewComment('lnsXYvis');
+        await cases.singleCase.addVisualizationToNewComment(LENS_BASIC_XY_VIS_TITLE);
 
         await header.waitUntilLoadingHasFinished();
 
