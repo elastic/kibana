@@ -13,8 +13,16 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
 
-const { parseFinding, parseFindingBlock, summarize } = require('./flaky_fix_findings');
+const {
+  collectFlakyFixFindings,
+  parseFinding,
+  parseFindingBlock,
+  summarize,
+} = require('./flaky_fix_findings');
 
 const body = [
   '### 🔧 revised-before-merge: wait on the signal the assertion reads',
@@ -93,4 +101,46 @@ test('summarize counts findings by case and actionable lessons', () => {
   assert.equal(summary.actionable, 2);
   assert.deepEqual(summary.byCase, { closed: 1, 'did-not-hold': 2 });
   assert.deepEqual(summary.byGuideline, { null: 1, none: 1, x: 1 });
+});
+
+test('collectFlakyFixFindings keeps only findings the retrospective recorded in the window', async () => {
+  const now = new Date('2026-11-03T12:00:00Z');
+  const comment = ({ id, login, createdAt }) => ({
+    id,
+    user: { login },
+    created_at: createdAt,
+    updated_at: '2026-11-03T11:00:00Z',
+    html_url: `https://github.com/elastic/kibana/issues/1#issuecomment-${id}`,
+    body,
+  });
+  const github = {
+    paginate: async (method, parameters) => method(parameters),
+    rest: {
+      issues: {
+        listForRepo: async () => [{ number: 1, updated_at: '2026-11-03T11:00:00Z' }],
+        listComments: async () => [
+          comment({ id: 1, login: 'github-actions[bot]', createdAt: '2026-11-01T10:00:00Z' }),
+          // Edited recently, but recorded before the window.
+          comment({ id: 2, login: 'github-actions[bot]', createdAt: '2026-10-01T10:00:00Z' }),
+          // A finding block posted by someone else is not a finding.
+          comment({ id: 3, login: 'someone', createdAt: '2026-11-02T10:00:00Z' }),
+        ],
+      },
+      search: { issuesAndPullRequests: async () => ({ data: { items: [] } }) },
+    },
+  };
+  const outputs = {};
+  const core = { info: () => {}, setOutput: (key, value) => (outputs[key] = value) };
+  const outputDir = fs.mkdtempSync(path.join(os.tmpdir(), 'flaky-fix-curator-'));
+
+  const summary = await collectFlakyFixFindings({ github, core, outputDir, days: 7, now });
+
+  assert.equal(summary.total, 1);
+  assert.equal(outputs.findings, '1');
+  const lines = fs.readFileSync(path.join(outputDir, 'findings.jsonl'), 'utf8').trim().split('\n');
+  assert.equal(lines.length, 1);
+  assert.equal(
+    JSON.parse(lines[0]).comment_url,
+    'https://github.com/elastic/kibana/issues/1#issuecomment-1'
+  );
 });

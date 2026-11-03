@@ -25,6 +25,9 @@ const DEFAULT_OUTPUT_DIR = '/tmp/flaky-fix-curator';
 const DEFAULT_DAYS = 7;
 const CURATOR_PR_LOOKBACK_DAYS = 90;
 const FINDING_BLOCK = /```yaml flaky-fix-finding\n([\s\S]*?)\n```/;
+// The retrospective records findings through gh-aw's add-comment with the workflow token, so
+// this is the only author whose finding blocks count. Anyone can comment on a public issue.
+const FINDING_AUTHORS = new Set(['github-actions[bot]']);
 
 const parseScalar = (raw) => {
   const value = raw.trim();
@@ -139,6 +142,14 @@ const collectFlakyFixFindings = async ({
       per_page: 100,
     });
     for (const comment of comments) {
+      // `since` filters on update time, so an edited old finding would come back; and only the
+      // retrospective's own comments are findings.
+      if (
+        new Date(comment.created_at).getTime() < new Date(since).getTime() ||
+        !FINDING_AUTHORS.has(comment.user?.login)
+      ) {
+        continue;
+      }
       const finding = parseFinding(comment);
       if (finding) {
         findings.push({ ...finding, tracking_issue: issue.number });
