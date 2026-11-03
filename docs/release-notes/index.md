@@ -34,7 +34,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add a conversation sharing option that lets you manage private and public access to a conversation [#286645]({{kib-pull}}286645).
 * Show the conversation title on the left and a **Read-only** indicator on read-only conversations [#286860]({{kib-pull}}286860).
 * Turn on the Agent Builder tools that describe and run {{es}} and {{kib}} APIs by default, so agents can look up an API's parameters and call it on your behalf. Browsing every available API now has its own advanced setting, `agentBuilder:apiDiscovery` [#291541]({{kib-pull}}291541).
-* Let administrators set a default agent for a space. Other users see only that agent in the agent selector [#284512]({{kib-pull}}284512).
+* Enable administrators to set a default agent for a space. Other users see only that agent in the agent selector [#284512]({{kib-pull}}284512).
 * Add an experimental `POST /api/chat/message` endpoint that sends a message to an agent and returns its text answer and conversation ID [#294516]({{kib-pull}}294516).
 * Add streaming support to the agent-to-agent (A2A) endpoint [#287763]({{kib-pull}}287763).
 * Make connectors in Agent Builder available as a technical preview. You no longer need to turn on the `agentBuilder:experimentalFeatures` advanced setting to use them [#286620]({{kib-pull}}286620).
@@ -133,7 +133,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add undo and redo to dashboards, with toolbar buttons and the `Cmd+Z` or `Ctrl+Z` and `Cmd+Y` or `Ctrl+Y` shortcuts [#277103]({{kib-pull}}277103).
 * Add an **Import dashboard** action to the dashboard listing page, and show why a JSON file was rejected when an import fails [#289891]({{kib-pull}}289891), [#298913]({{kib-pull}}298913).
 * Add an **Export JSON** panel action that opens a flyout where you can view and download the panel's JSON definition [#273427]({{kib-pull}}273427).
-* Let the Agent Builder dashboard tool add a visualization or custom content panel that is already in the conversation to a dashboard. The panel you approved in chat is the one that lands on the dashboard [#290219]({{kib-pull}}290219).
+* Enable the Agent Builder dashboard tool to add a visualization or custom content panel that is already in the conversation to a dashboard. The panel you approved in chat is the one that lands on the dashboard [#290219]({{kib-pull}}290219).
 * Rename the built-in Agent Builder dashboards skill from `dashboard-management` to `dashboards`, so you select it with `/dashboards` in chat. Custom agents that list `dashboard-management` no longer load the skill, and the built-in skill overrides a custom skill with the ID `dashboards` [#294574]({{kib-pull}}294574).
 * Filter the results of the dashboards and links list API endpoints by tag name. Use the `tag_names` and `excluded_tag_names` parameters [#278874]({{kib-pull}}278874).
 * Add an API to manage Links panels that you save to the library [#268783]({{kib-pull}}268783).
