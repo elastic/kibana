@@ -285,6 +285,7 @@ export function getDashboardApi({
     ...trackOverlayApi,
     panelFlyoutType,
     esqlVariables$: esqlVariablesManager.api.publishedEsqlVariables$,
+    childrenLoading$: layoutManager.internalApi.childrenLoading$,
     ...timesliceManager.api,
     ...pauseFetchManager.api,
     canCancel$,

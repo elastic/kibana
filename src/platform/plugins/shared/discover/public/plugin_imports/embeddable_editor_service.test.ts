@@ -135,6 +135,22 @@ describe('EmbeddableEditorService', () => {
     expect(service.isEmbeddedEditor()).toBe(false);
   });
 
+  it('treats an editor opened with only dashboard controls as by-reference', () => {
+    const incomingState = createIncomingState({
+      originatingPath: '/app/dashboards',
+      embeddableId: 'panel-1',
+      valueInput: {
+        discoverSessionTab: undefined,
+        dashboardControlGroupState: mockControlState,
+      },
+    });
+    const { service } = createService({ incomingState });
+
+    expect(service.isEmbeddedEditor()).toBe(true);
+    expect(service.isByValueEditor()).toBe(false);
+    expect(service.getByValueTab()).toBeUndefined();
+  });
+
   it('navigates back with no serialized state for cancel', () => {
     const incomingState = createIncomingState({
       originatingPath: '/app/dashboards#/edit',
@@ -178,6 +194,169 @@ describe('EmbeddableEditorService', () => {
       }
     );
   });
+
+  it('sends only the controls missing from the originating dashboard when saving the session', () => {
+    const controlGroupState: ControlPanelsState<OptionsListESQLControlState> = {
+      discoverHostPanel: {
+        ...mockControlState.panel1,
+        variable_name: 'host.name',
+        title: 'Updated host name',
+      },
+      discoverServicePanel: {
+        ...mockControlState.panel1,
+        variable_name: 'service.name',
+        title: 'Service name',
+      },
+    };
+    const incomingState = createIncomingState({
+      originatingPath: '/app/dashboards#/view/dashboard-1',
+      embeddableId: 'panel-1',
+      valueInput: {
+        discoverSessionTab: undefined,
+        dashboardControlGroupState: {
+          dashboardHostPanel: {
+            ...mockControlState.panel1,
+            variable_name: 'host.name',
+            title: 'Original host name',
+          },
+        },
+      },
+    });
+    const { service, embeddableStateTransfer } = createService({ incomingState });
+
+    service.transferBackToEditor(TransferAction.SaveSession, { state: { controlGroupState } });
+
+    expect(embeddableStateTransfer.navigateToWithEmbeddablePackages).toHaveBeenCalledWith(
+      'dashboard',
+      {
+        path: '/app/dashboards#/view/dashboard-1',
+        state: [
+          {
+            type: ESQL_CONTROL,
+            serializedState: controlGroupState.discoverServicePanel,
+            embeddableId: 'discoverServicePanel',
+          },
+          {
+            type: SEARCH_EMBEDDABLE_TYPE,
+            serializedState: {},
+            embeddableId: 'panel-1',
+          },
+        ],
+      }
+    );
+  });
+
+  it('sends SaveByReference controls only to the originating dashboard', () => {
+    const controlGroupState: ControlPanelsState<OptionsListESQLControlState> = {
+      discoverHostPanel: {
+        ...mockControlState.panel1,
+        variable_name: 'host.name',
+        title: 'Host name',
+      },
+      discoverServicePanel: {
+        ...mockControlState.panel1,
+        variable_name: 'service.name',
+        title: 'Service name',
+      },
+    };
+    const incomingState = createIncomingState({
+      originatingPath: '#/view/dashboard-1',
+      embeddableId: 'panel-1',
+      valueInput: {
+        discoverSessionTab: undefined,
+        dashboardControlGroupState: {
+          dashboardHostPanel: {
+            ...mockControlState.panel1,
+            variable_name: 'host.name',
+            title: 'Original host name',
+          },
+        },
+      },
+    });
+    const { service, embeddableStateTransfer } = createService({ incomingState });
+    const expectedSearchPackage = {
+      type: SEARCH_EMBEDDABLE_TYPE,
+      serializedState: { ref_id: 'saved-search-1', overrides: {} },
+      embeddableId: undefined,
+    };
+
+    service.transferBackToEditor(TransferAction.SaveByReference, {
+      app: 'dashboard',
+      path: '#/view/dashboard-1',
+      newPanel: true,
+      state: { savedObjectId: 'saved-search-1', controlGroupState },
+    });
+
+    expect(embeddableStateTransfer.navigateToWithEmbeddablePackages).toHaveBeenLastCalledWith(
+      'dashboard',
+      {
+        path: '#/view/dashboard-1',
+        state: [
+          {
+            type: ESQL_CONTROL,
+            serializedState: controlGroupState.discoverServicePanel,
+            embeddableId: 'discoverServicePanel',
+          },
+          expectedSearchPackage,
+        ],
+      }
+    );
+
+    service.transferBackToEditor(TransferAction.SaveByReference, {
+      app: 'dashboard',
+      path: '#/view/dashboard-2',
+      newPanel: true,
+      state: { savedObjectId: 'saved-search-1', controlGroupState },
+    });
+
+    // Another dashboard's controls are unknown, so the panel adds the missing ones on arrival
+    expect(embeddableStateTransfer.navigateToWithEmbeddablePackages).toHaveBeenLastCalledWith(
+      'dashboard',
+      {
+        path: '#/view/dashboard-2',
+        state: [
+          {
+            ...expectedSearchPackage,
+            serializedState: {
+              ...expectedSearchPackage.serializedState,
+              addMissingSessionControls: true,
+            },
+          },
+        ],
+      }
+    );
+  });
+
+  it.each(['#/view/dashboard-1', '#/create'])(
+    'lets the panel add the missing standalone session controls on arrival at %s',
+    (path) => {
+      const { service, embeddableStateTransfer } = createService();
+
+      service.transferBackToEditor(TransferAction.SaveByReference, {
+        app: 'dashboards',
+        path,
+        state: { savedObjectId: 'saved-search-1', controlGroupState: mockControlState },
+      });
+
+      expect(embeddableStateTransfer.navigateToWithEmbeddablePackages).toHaveBeenCalledWith(
+        'dashboards',
+        {
+          path,
+          state: [
+            {
+              type: SEARCH_EMBEDDABLE_TYPE,
+              serializedState: {
+                ref_id: 'saved-search-1',
+                overrides: {},
+                addMissingSessionControls: true,
+              },
+              embeddableId: undefined,
+            },
+          ],
+        }
+      );
+    }
+  );
 
   it('serializes by-value state and control packages when navigating back to the editor', () => {
     const byValueState = createByValueState();
@@ -341,6 +520,7 @@ describe('EmbeddableEditorService', () => {
             serializedState: {
               ref_id: 'saved-search-1',
               overrides: {},
+              addMissingSessionControls: true,
             },
             embeddableId: undefined,
           },

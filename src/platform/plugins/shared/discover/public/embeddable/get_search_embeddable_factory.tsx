@@ -53,6 +53,7 @@ import { createInMemoryContextAwarenessToolkit } from '../context_awareness';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
 import { isTabDeleted } from './utils/is_tab_deleted';
+import { addMissingSessionControls } from './utils/add_missing_session_controls';
 
 export const getSearchEmbeddableFactory = ({
   startServices,
@@ -344,6 +345,17 @@ export const getSearchEmbeddableFactory = ({
         scopedEbtManager,
         toolkit,
       });
+
+      if ('addMissingSessionControls' in initialState && initialState.addMissingSessionControls) {
+        // Pauses the parent's fetching synchronously, before this panel's first fetch. Not awaited:
+        // the dashboard only finishes loading once this panel's API is returned
+        void addMissingSessionControls({
+          parentApi,
+          controlGroupJson: tabs.find(({ id }) => id === runtimeState.selectedTabId)
+            ?.controlGroupJson,
+          uuid,
+        });
+      }
 
       const { cleanup: cleanupFetch, cancelRequests: _cancelRequests } = initializeFetch({
         api: {

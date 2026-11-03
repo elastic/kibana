@@ -132,6 +132,28 @@ describe('addControlsFromSavedSession', () => {
       expect(addedPanels).toEqual(['nonExistentVar']);
     });
 
+    it('should not add controls whose variable has a control that is not published yet', async () => {
+      const container = {
+        ...mockContainer,
+        removePanel: jest.fn(),
+        replacePanel: jest.fn(),
+        children$: new BehaviorSubject({
+          dashboardControl: {
+            type: ESQL_CONTROL,
+            uuid: 'dashboardControl',
+            serializeState: () => ({ variable_name: 'nonExistentVar' }),
+            applySerializedState: jest.fn(),
+            anyStateChange$: new BehaviorSubject(undefined),
+            latestState$: new BehaviorSubject({}),
+          },
+        }),
+      };
+
+      await addControlsFromSavedSession(container, controlGroupJson);
+
+      expect(container.addNewPanel).not.toHaveBeenCalled();
+    });
+
     it('should normalize legacy esqlControl panels through parseControlGroupJson', async () => {
       await addControlsFromSavedSession(
         mockContainer,

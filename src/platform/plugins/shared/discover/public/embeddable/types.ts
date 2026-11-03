@@ -51,6 +51,12 @@ export type { SearchEmbeddablePanelApiState };
  */
 export type SearchEmbeddableInputState = SearchEmbeddablePanelApiState & {
   nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
+  /**
+   * Set when Discover adds a library session to a dashboard it wasn't opened from. Once the
+   * dashboard's panels have loaded, the session's ES|QL controls for variables the dashboard
+   * doesn't have yet are added. Never serialized.
+   */
+  addMissingSessionControls?: boolean;
 };
 
 export type SearchEmbeddablePublicState = Pick<
