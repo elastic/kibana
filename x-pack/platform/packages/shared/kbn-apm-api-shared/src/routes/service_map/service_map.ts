@@ -5,10 +5,11 @@
  * 2.0.
  */
 import { z, lazySchema } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import type { ServiceMapResponse } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { rangeSchema } from '../../default_api_types';
+import { rangeSchema, serviceTransactionDataSourceSchema } from '../../default_api_types';
 
 export type ServiceMapRouteResponse = ServiceMapResponse;
 
@@ -31,7 +32,10 @@ export const serviceMapRoute = defineRoute<ServiceMapRouteResponse>()({
               return z.NEVER;
             }
           }),
+          // When not provided, the server picks the source. Only read when service map grouping is enabled.
+          useDurationSummary: BooleanFromString,
         })
+        .merge(serviceTransactionDataSourceSchema)
         .partial()
         .merge(environmentSchema)
         .merge(rangeSchema),
