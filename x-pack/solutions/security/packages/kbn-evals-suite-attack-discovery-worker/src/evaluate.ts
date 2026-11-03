@@ -9,7 +9,7 @@ import { evaluate as base } from '@kbn/evals';
 import { parseCohort } from './cohort_routing';
 import { COHORT_ENV, REFERENCE_MODEL_ENV } from './constants';
 import { runPreflight, type PreflightResult } from './preflight';
-import { AttackDiscoveryWorkerClient } from './worker_client';
+import { AttackDiscoveryWorkerClient, usingClient } from './worker_client';
 
 // Extends the base evaluate fixture with the stack preflight (cohort routing, eval space) and
 // the runner client. `{}` is the repo-wide convention for an empty test-fixture bag in
@@ -42,8 +42,7 @@ export const evaluate = base.extend<
     async ({ fetch, log, adWorkerPreflight }, use) => {
       void adWorkerPreflight;
       const client = new AttackDiscoveryWorkerClient(fetch, log);
-      await use(client);
-      await client.cancelPending();
+      await usingClient(client, () => use(client));
     },
     { scope: 'worker' },
   ],

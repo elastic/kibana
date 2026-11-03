@@ -276,11 +276,11 @@ const setEntityExtraction = async ({
 };
 
 /**
- * One-time world setup: the eval space with AlertZero and the Attack Discovery workflows
- * enabled, the alerts index, anonymization fields, and Entity Store extraction stopped so it
- * cannot rewrite the seeded alerts mid-run. The returned function restores extraction.
+ * Non-destructive world setup: the eval space with AlertZero and the Attack Discovery
+ * workflows enabled, the alerts index, anonymization fields and an installed Entity Store.
+ * Returns the Entity Store's status before this run, for `pauseEntityExtraction`.
  */
-export const ensureWorkerWorld = async ({
+export const prepareWorkerSpace = async ({
   request,
   esClient,
   log,
@@ -290,7 +290,7 @@ export const ensureWorkerWorld = async ({
   esClient: Client;
   log: ToolingLog;
   spaceId: string;
-}): Promise<() => Promise<void>> => {
+}): Promise<{ entityStoreStatus: string | undefined }> => {
   await ensureSpace({ request, log, spaceId });
   await ensureSettingsEnabled({
     request,
@@ -299,19 +299,25 @@ export const ensureWorkerWorld = async ({
   });
   await ensureAlertsIndex({ request, esClient, log, spaceId });
   await ensureAnonymizationFields({ request, esClient, spaceId });
+  return { entityStoreStatus: await waitForEntityStoreInstalled({ request, spaceId }) };
+};
 
-  const initial = await waitForEntityStoreInstalled({ request, spaceId });
-  if (initial === 'running') {
-    await setEntityExtraction({ request, spaceId, action: 'stop' });
-  }
-  return async () => {
-    if (initial !== 'running') return;
-    try {
-      await setEntityExtraction({ request, spaceId, action: 'start' });
-    } catch (error) {
-      log.warning(`[ad-worker] could not restart Entity Store extraction: ${errorMessage(error)}`);
-    }
-  };
+/**
+ * Stops Entity Store extraction so it cannot rewrite the seeded alerts mid-run. The returned
+ * function restarts it, and throws if it cannot, so a stack left paused is never reported clean.
+ */
+export const pauseEntityExtraction = async ({
+  request,
+  spaceId,
+  entityStoreStatus: initial,
+}: {
+  request: KbnRequest;
+  spaceId: string;
+  entityStoreStatus: string | undefined;
+}): Promise<() => Promise<void>> => {
+  if (initial !== 'running') return async () => undefined;
+  await setEntityExtraction({ request, spaceId, action: 'stop' });
+  return () => setEntityExtraction({ request, spaceId, action: 'start' });
 };
 
 export interface SeededScenario {

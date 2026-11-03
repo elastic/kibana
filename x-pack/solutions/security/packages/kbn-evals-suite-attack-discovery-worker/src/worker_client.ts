@@ -152,3 +152,15 @@ export const stepsOf = (
   execution: WorkflowExecutionDto,
   stepId: string
 ): WorkflowStepExecutionDto[] => execution.stepExecutions.filter((step) => step.stepId === stepId);
+
+/** Hands the client to `use`, and cancels whatever is still pending whether `use` ends or throws. */
+export const usingClient = async (
+  client: Pick<AttackDiscoveryWorkerClient, 'cancelPending'>,
+  use: () => Promise<void>
+): Promise<void> => {
+  try {
+    await use();
+  } finally {
+    await client.cancelPending();
+  }
+};

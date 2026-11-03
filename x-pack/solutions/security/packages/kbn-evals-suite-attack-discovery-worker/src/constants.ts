@@ -6,6 +6,7 @@
  */
 
 import {
+  ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
@@ -19,6 +20,8 @@ export {
 /** The runner is a global workflow; it runs in a space through the space-prefixed API path. */
 export const RUNNER_WORKFLOW_ID = ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID;
 export const REVIEW_WORKFLOW_ID = ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID;
+/** The review's analysis child: its `analyze` step is where the review stage calls the model. */
+export const FP_TP_WORKFLOW_ID = ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID;
 
 /** A dedicated space keeps the runner's per-space concurrency key and the seeded alerts apart. */
 export const EVAL_SPACE_ID = 'ad-worker-eval';
@@ -70,6 +73,8 @@ export const REVIEW_REQUIRED_STEP_IDS: readonly string[] = [
   'resolve_analysis',
   'escalation_gate',
 ];
+
+export const FP_TP_REQUIRED_STEP_IDS: readonly string[] = ['analyze'];
 
 /** Lookback handed to the runner; seeded alert timestamps are placed inside it. */
 export const SCHEDULE_INTERVAL = '30m';
