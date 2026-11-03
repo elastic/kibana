@@ -114,7 +114,7 @@ const buildFullAttributes = (): {
   settings: { syncAlerts: false },
   observables: [{ typeKey: 'url', value: 'http://x.com', description: '' }],
   customFields: [{ key: 'cf', type: 'text', value: 'x' }],
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   extended_fields: { riskScore_as_long: '42' },
 });
 
