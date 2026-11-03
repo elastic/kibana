@@ -101,6 +101,15 @@ interface SelfFetchInit extends RequestInit {
   dispatcher?: Dispatcher;
 }
 
+/** The parts of a self call that do not depend on its credential, validated and built once. */
+interface PreparedSelfRequest {
+  readonly method: string;
+  readonly url: URL;
+  readonly body: BodyInit | null | undefined;
+  /** Whether the body was serialized to JSON, so a call without a content type gets that one. */
+  readonly isJsonBody: boolean;
+}
+
 export interface InternalHttpSelfService extends HttpSelfService {
   close(): Promise<void>;
 }
@@ -136,9 +145,10 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     this.validateRequestContext(options.target);
 
     const fetchOptions = { ...options, path };
-    let request = this.createRequest(path, options);
+    const prepared = this.prepareRequest(path, options);
+    let request: Request | undefined;
     let response: Response | undefined;
-    this.logAttempt(request.method, false, options.target);
+    this.logAttempt(prepared.method, false, options.target);
     const cleanup: Array<() => void> = [];
 
     try {
@@ -161,18 +171,12 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
       };
 
       const refresher = this.params.getCredentialRefresher?.();
-      if (refresher) {
-        const refreshedAuthHeaders = await this.resolveRefreshedAuthHeaders(
-          refresher,
-          path,
-          timeoutMs,
-          signal,
-          cleanup
-        );
-        // Built again even when nothing was replaced: the request's own credential may have been
-        // replaced or released while the refresher ran, and the call must carry what it holds now.
-        request = this.createRequest(path, options, refreshedAuthHeaders);
-      }
+      const refreshedAuthHeaders = refresher
+        ? await this.resolveRefreshedAuthHeaders(refresher, path, timeoutMs, signal, cleanup)
+        : undefined;
+      // Built only once the refresher is done, even when it replaced nothing: the request's own
+      // credential may have been replaced while it ran, and the call must carry what it holds now.
+      request = this.createRequest(prepared, options, refreshedAuthHeaders);
 
       let followed = await dispatch(request);
       request = followed.request;
@@ -189,7 +193,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
         if (retryAuthHeaders) {
           // Nothing else reads this body, and undici holds the connection until it is drained.
           discardResponseBody(response);
-          request = this.createRequest(path, options, retryAuthHeaders);
+          request = this.createRequest(prepared, options, retryAuthHeaders);
           response = undefined;
           this.logAttempt(request.method, true, options.target);
           followed = await dispatch(request);
@@ -220,14 +224,17 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
 
       return body;
     } catch (error) {
+      // A call that failed before it was built, such as one its credential refresher rejected, is
+      // described by the request it would have sent.
+      const failedRequest = request ?? this.createRequest(prepared, options);
       const selfError = isHttpSelfFetchError(error)
         ? error
         : createHttpSelfFetchError(
             `Kibana self HTTP call failed: ${describeSelfCall(
-              request,
+              failedRequest,
               response
             )}: ${describeErrorCause(error)}`,
-            request,
+            failedRequest,
             response,
             undefined,
             error
@@ -323,14 +330,12 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     }
   }
 
-  private createRequest<TRequestBody>(
+  private prepareRequest<TRequestBody>(
     path: string,
-    options: HttpSelfFetchOptions<TRequestBody>,
-    overrideAuthHeaders?: AuthHeaders
-  ): Request {
+    options: HttpSelfFetchOptions<TRequestBody>
+  ): PreparedSelfRequest {
     const method = options.method ?? 'GET';
     const url = this.createUrl(path, options);
-    const headers = this.createHeaders(options, overrideAuthHeaders);
     if (options.body !== undefined && options.rawBody !== undefined) {
       throw new Error('Invalid self HTTP options, body and rawBody are mutually exclusive.');
     }
@@ -341,8 +346,22 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     ) {
       throw new Error('Invalid self HTTP rawBody, only buffered body types are supported.');
     }
-    const body =
-      options.rawBody !== undefined ? options.rawBody : serializeBody(headers, options.body);
+    if (options.rawBody !== undefined) {
+      return { method, url, body: options.rawBody, isJsonBody: false };
+    }
+    return { method, url, ...serializeBody(options.body) };
+  }
+
+  private createRequest<TRequestBody>(
+    prepared: PreparedSelfRequest,
+    options: HttpSelfFetchOptions<TRequestBody>,
+    overrideAuthHeaders?: AuthHeaders
+  ): Request {
+    const { method, url, body, isJsonBody } = prepared;
+    const headers = this.createHeaders(options, overrideAuthHeaders);
+    if (isJsonBody && !headers.has('content-type')) {
+      headers.set('content-type', 'application/json');
+    }
 
     return new Request(url, {
       method,
@@ -996,26 +1015,21 @@ const isBufferedRawBody = (body: unknown): boolean =>
   ArrayBuffer.isView(body);
 
 const serializeBody = <TRequestBody>(
-  headers: Headers,
   body: HttpSelfFetchOptions<TRequestBody>['body']
-): BodyInit | null | undefined => {
+): Pick<PreparedSelfRequest, 'body' | 'isJsonBody'> => {
   if (body === undefined) {
-    return undefined;
+    return { body: undefined, isJsonBody: false };
   }
 
   if (body === null) {
-    return null;
+    return { body: null, isJsonBody: false };
   }
 
   if (typeof body === 'string') {
-    return body;
+    return { body, isJsonBody: false };
   }
 
-  if (!headers.has('content-type')) {
-    headers.set('content-type', 'application/json');
-  }
-
-  return JSON.stringify(body);
+  return { body: JSON.stringify(body), isJsonBody: true };
 };
 
 const parseResponseBody = async (response: Response): Promise<unknown> => {

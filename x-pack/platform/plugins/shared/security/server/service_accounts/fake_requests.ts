@@ -23,6 +23,15 @@ import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 export const SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS = 10_000;
 
 /**
+ * Before a Kibana self call, a token younger than this share of its lifetime is reused even when it
+ * expires before the call's timeout. A timeout as long as a token lives (`kibana.request` and UIAM
+ * both use five minutes) would otherwise re-mint once every
+ * {@link SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS}. The handler still gets at least the rest of the
+ * lifetime, four minutes of a UIAM token.
+ */
+export const SERVICE_ACCOUNT_TOKEN_SELF_CALL_REUSE_SHARE = 0.2;
+
+/**
  * After a transient mint failure, further mint attempts are suppressed
  * for this long so a hot caller loop cannot hammer UIAM with doomed exchange requests.
  */
@@ -364,14 +373,16 @@ export class ServiceAccountFakeRequests {
    * Refreshes a token before it is handed to a caller that cannot renew it, aiming to cover
    * `validForMs` without promising validity beyond the token's own lifetime.
    *
-   * A token minted within {@link SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS} is reused. An older token
-   * is reused only when its reported expiry covers the call, and is replaced when its expiry is
-   * unknown.
+   * A token is reused while it is younger than {@link SERVICE_ACCOUNT_TOKEN_SELF_CALL_REUSE_SHARE}
+   * of its lifetime, and never for less than {@link SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS}. An older
+   * token is reused only when its reported expiry covers the call. A token of unknown lifetime only
+   * gets the shorter window, since there is no lifetime to take a share of.
    *
    * A token that is reused is returned without any other check, even when the request can no
    * longer mint: an issued token keeps its upstream expiry. Otherwise, throws
-   * {@link ServiceAccountCredentialRefusedError} when the request will never get a replacement,
-   * and whatever {@link ensureFreshToken} throws when a replacement failed for now.
+   * {@link ServiceAccountCredentialRefusedError} when the request will never get a replacement or
+   * was released while one was minted, and whatever {@link ensureFreshToken} throws when a
+   * replacement failed for now.
    */
   async refreshTokenBeforeUse(request: KibanaRequest, validForMs: number): Promise<string> {
     const entry = this.registry.get(request);
@@ -380,22 +391,37 @@ export class ServiceAccountFakeRequests {
     }
 
     const now = Date.now();
+    const reuseWindowMs =
+      entry.expiresAt === undefined
+        ? SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS
+        : Math.max(
+            SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS,
+            (entry.expiresAt - entry.mintedAt) * SERVICE_ACCOUNT_TOKEN_SELF_CALL_REUSE_SHARE
+          );
     if (
-      now - entry.mintedAt <= SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS ||
+      now - entry.mintedAt <= reuseWindowMs ||
       (entry.expiresAt !== undefined && entry.expiresAt - now >= validForMs)
     ) {
       return entry.token;
     }
 
+    let token: string;
     try {
       // The reuse window has elapsed, and the token's lifetime is insufficient or unknown.
-      return await this.ensureFreshToken(request, 0);
+      token = await this.ensureFreshToken(request, 0);
     } catch (err) {
-      if (this.registry.get(request) === entry && entry.nonRetryableError) {
+      if (this.registry.get(request) !== entry || entry.nonRetryableError) {
         throw new ServiceAccountCredentialRefusedError();
       }
       throw err;
     }
+
+    // A release strips the credential the call was started with. Sending the call anyway would
+    // run it with no credential at all, so it fails instead.
+    if (this.registry.get(request) !== entry) {
+      throw new ServiceAccountCredentialRefusedError();
+    }
+    return token;
   }
 
   /**

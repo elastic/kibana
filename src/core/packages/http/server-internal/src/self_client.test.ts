@@ -1652,7 +1652,7 @@ describe('InternalHttpSelfScopedClient', () => {
       expect(sentRequest(0).headers.get('authorization')).toBe('Bearer essu_after');
     });
 
-    it('sends no credential when the request was released while the refresher ran', async () => {
+    it('sends no credential when the refresher leaves the request without one', async () => {
       mockFetchResponses(okResponse());
       const request = createFakeRequest({ authorization: 'Bearer essu_released' });
       const { self } = createClient({
@@ -1681,6 +1681,35 @@ describe('InternalHttpSelfScopedClient', () => {
       expect(sentRequest(0).headers.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(
         'attestation-for-essu_refreshed'
       );
+    });
+
+    it('builds the outbound request once, after the refresher', async () => {
+      mockFetchResponses(okResponse());
+      const getAttestation = jest.fn(attestationGetter);
+      const { self } = createClient({
+        credentialRefresher: notHandling(),
+        getUiamAttestationGetter: () => getAttestation,
+      });
+
+      await self
+        .asScoped(createFakeRequest({ authorization: 'Bearer essu_token' }))
+        .fetch('/api/status', { method: 'POST', body: { name: 'value' } });
+
+      expect(getAttestation).toHaveBeenCalledTimes(1);
+      expect(sentRequest(0).headers.get('content-type')).toBe('application/json');
+      await expect(sentRequest(0).text()).resolves.toBe('{"name":"value"}');
+    });
+
+    it('rejects invalid options before consulting the refresher', async () => {
+      const credentialRefresher = notHandling();
+      const { self } = createClient({ credentialRefresher });
+
+      await expect(
+        self
+          .asScoped(createFakeRequest({ authorization: 'Bearer essu_token' }))
+          .fetch('/api/status', { method: 'POST', body: {}, rawBody: Buffer.from('raw') })
+      ).rejects.toThrow('Invalid self HTTP options, body and rawBody are mutually exclusive.');
+      expect(credentialRefresher).not.toHaveBeenCalled();
     });
 
     it('ignores headers the refresher may not set', async () => {

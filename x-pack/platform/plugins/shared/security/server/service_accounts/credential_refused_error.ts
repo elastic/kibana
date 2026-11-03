@@ -7,7 +7,8 @@
 
 /**
  * Thrown when a service account bound request needs a new credential and will never get one: its
- * workload binding is gone or was replaced, its account was revoked, or its lease expired.
+ * workload binding is gone or was replaced, its account was revoked, its lease expired, or it was
+ * released while the new credential was minted.
  *
  * The message is fixed and there is no cause. Callers surface this error to whoever started the
  * work, and an upstream refusal can carry credentials.
