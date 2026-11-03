@@ -367,6 +367,7 @@ export interface DocLinks {
     readonly trustedDevices: string;
     readonly elasticAiFeatures: string;
     readonly eventFilters: string;
+    readonly kubernetesDashboard: string;
     readonly eventMerging: string;
     readonly blocklist: string;
     readonly endpointArtifacts: string;
