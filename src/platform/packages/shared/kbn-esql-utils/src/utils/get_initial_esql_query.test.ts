@@ -357,9 +357,7 @@ describe('getInitialESQLQuery', () => {
 
     expect(
       getInitialESQLQuery(dataView, { language: 'kuery', query: 'transaction.type: request' })
-    ).toBe(
-      'FROM traces-apm*,metrics-apm* | WHERE KQL("""transaction.type: request""")'
-    );
+    ).toBe('FROM traces-apm*,metrics-apm* | WHERE KQL("""transaction.type: request""")');
   });
 
   it('should still use TS command in TSDB mode when filters translate to an empty expression', () => {
