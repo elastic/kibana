@@ -32,6 +32,7 @@ import { KibanaSavedObjectType } from '../../../../../../../common/types/models'
 import { appendReturnParams } from '../../components/return_params';
 
 import {
+  isAssetOnlyIntegrationPackage,
   isPackagePrerelease,
   splitPkgKey,
   packageToPackagePolicyInputs,
@@ -117,6 +118,10 @@ export interface DetailParams {
   panel?: DetailViewPanelName;
 }
 const CUSTOM_INTEGRATION_SOURCES = ['custom', 'upload'];
+// Packages that would otherwise get "Install assets" but keep "Add integration" because of a custom UI
+// registered by another plugin (cribl: Security's package-policy-replace-define-step extension).
+// Temporary: remove once the packages are re-typed and behavior is inferred from `type`.
+const INSTALL_ASSETS_CTA_EXCLUDED_PACKAGES = ['cribl'];
 const Divider = styled.div`
   width: 0;
   height: 100%;
@@ -661,6 +666,16 @@ export function Detail() {
     [getPath, history]
   );
 
+  // Temporary: integration packages with nothing to configure on an agent only install assets
+  const isAssetOnlyPackage = useMemo(
+    () =>
+      packageInfo
+        ? !INSTALL_ASSETS_CTA_EXCLUDED_PACKAGES.includes(packageInfo.name) &&
+          isAssetOnlyIntegrationPackage(packageInfo)
+        : false,
+    [packageInfo]
+  );
+
   const headerRightContent = useMemo(
     () =>
       packageInfo ? (
@@ -708,10 +723,20 @@ export function Detail() {
                     },
                   ]
                 : []),
-              ...(packageInfo.type === 'content'
+              ...(packageInfo.type === 'content' || isAssetOnlyPackage
                 ? !isInstalled
-                  ? [{ isDivider: true }, { content: <InstallButton {...packageInfo} /> }]
-                  : [] // if content package is already installed, don't show install button in header
+                  ? [
+                      { isDivider: true },
+                      {
+                        content: (
+                          <InstallButton
+                            {...packageInfo}
+                            variant={isAssetOnlyPackage ? 'assets' : 'package'}
+                          />
+                        ),
+                      },
+                    ]
+                  : [] // if the package is already installed, don't show install button in header
                 : [
                     { isDivider: true },
                     {
@@ -773,6 +798,7 @@ export function Detail() {
       versionOptions,
       updateAvailable,
       isInstalled,
+      isAssetOnlyPackage,
       isCustomPackage,
       handleEditIntegrationClick,
       addIntegrationDisabledReason,

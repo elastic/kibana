@@ -57,7 +57,7 @@ export const ConfirmPackageInstall = (props: ConfirmPackageInstallProps) => {
           <FormattedMessage
             id="xpack.fleet.integrations.settings.confirmInstallModal.installCalloutTitle"
             defaultMessage="This action will install {numOfAssets} assets"
-            values={{ numOfAssets }}
+            values={{ numOfAssets: numOfAssets.toLocaleString() }}
           />
         }
       />

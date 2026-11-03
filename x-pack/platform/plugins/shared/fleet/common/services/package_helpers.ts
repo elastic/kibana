@@ -137,6 +137,10 @@ type PackageClassificationFields = Partial<
   Pick<PackageInfo | PackageListItem, 'name' | 'type' | 'data_streams' | 'policy_templates'>
 >;
 
+// `assets` is only available on the package info, not on the catalog list items
+type AssetOnlyClassificationFields = PackageClassificationFields &
+  Partial<Pick<PackageInfo, 'assets'>>;
+
 /**
  * Return true if a package declares at least one data stream or policy template.
  * Integration packages without either (documentation-only, or assets-only) have nothing to configure.
@@ -163,4 +167,28 @@ export function shouldAddIntegrationFromCatalog(pkg: PackageClassificationFields
     return true;
   }
   return hasDataStreamsOrPolicyTemplates(pkg);
+}
+
+/**
+ * Return true if the package ships at least one Kibana or Elasticsearch asset that can be installed.
+ * Knowledge base assets are ignored: they are built from the docs folder, which every package has.
+ */
+export function hasInstallableAssets(pkg: Pick<AssetOnlyClassificationFields, 'assets'>): boolean {
+  return Object.values(pkg.assets ?? {}).some((assetsByType) =>
+    Object.entries(assetsByType ?? {}).some(
+      ([assetType, assets]) => assetType !== 'knowledge_base' && (assets?.length ?? 0) > 0
+    )
+  );
+}
+
+/**
+ * Return true if the Integration Details page should offer "Install assets" instead of "Add integration":
+ * integration packages that have nothing to configure on an agent (no data streams and no policy templates,
+ * or on the ADD_INTEGRATION_EXCLUDED_PACKAGES list) but ship installable assets.
+ * Temporary: remove once packages are re-typed and behavior is inferred from `type`.
+ */
+export function isAssetOnlyIntegrationPackage(pkg: AssetOnlyClassificationFields): boolean {
+  return (
+    pkg.type === 'integration' && !shouldAddIntegrationFromCatalog(pkg) && hasInstallableAssets(pkg)
+  );
 }

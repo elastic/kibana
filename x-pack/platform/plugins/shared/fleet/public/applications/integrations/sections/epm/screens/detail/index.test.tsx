@@ -582,6 +582,109 @@ describe('When on integration detail', () => {
     });
   });
 
+  describe('and the package has nothing to configure on an agent', () => {
+    const renderAssetOnlyDetail = async ({
+      name = 'corelight',
+      status = 'not_installed',
+      dataStreams = [],
+    }: {
+      name?: string;
+      status?: 'installed' | 'not_installed';
+      dataStreams?: Array<{ name: string }>;
+    } = {}) => {
+      const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
+      mockedApi.responseProvider.epmGetInfo.mockReturnValue({
+        ...baseResponse,
+        item: {
+          ...baseResponse.item,
+          name,
+          title: name,
+          // narrowed so the spread keeps matching the not_installed variant of the package info type
+          status: status as 'not_installed',
+          policy_templates: [],
+          data_streams: dataStreams as any,
+        },
+      });
+
+      await render();
+      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+    };
+
+    it(
+      'should show "Install assets" instead of "Add integration" for an integration with assets only',
+      async () => {
+        await renderAssetOnlyDetail();
+
+        const installButton = await renderResult.findByTestId('installAssetsButton');
+        expect(installButton).toHaveTextContent('Install assets');
+        expect(renderResult.queryByTestId('addIntegrationPolicyButton')).toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should keep the README as the landing tab',
+      async () => {
+        await renderAssetOnlyDetail();
+
+        await renderResult.findByTestId('installAssetsButton');
+        expect(renderResult.getByTestId('tab-overview')).toHaveAttribute('aria-selected', 'true');
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should show "Install assets" for packages with data streams but no inputs, like awsfirehose',
+      async () => {
+        await renderAssetOnlyDetail({ name: 'awsfirehose', dataStreams: [{ name: 'logs' }] });
+
+        expect(await renderResult.findByTestId('installAssetsButton')).toHaveTextContent(
+          'Install assets'
+        );
+        expect(renderResult.queryByTestId('addIntegrationPolicyButton')).toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should not show any header button once the package is installed',
+      async () => {
+        await renderAssetOnlyDetail({ status: 'installed' });
+
+        await renderResult.findByTestId('tab-overview');
+        expect(renderResult.queryByTestId('installAssetsButton')).toBeNull();
+        expect(renderResult.queryByTestId('addIntegrationPolicyButton')).toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should keep "Add integration" for an integration with data streams',
+      async () => {
+        await renderAssetOnlyDetail({ name: 'okta', dataStreams: [{ name: 'system' }] });
+
+        expect(await renderResult.findByTestId('addIntegrationPolicyButton')).toBeInTheDocument();
+        expect(renderResult.queryByTestId('installAssetsButton')).toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should keep "Add integration" for cribl, which has a custom UI',
+      async () => {
+        await renderAssetOnlyDetail({ name: 'cribl' });
+
+        expect(await renderResult.findByTestId('addIntegrationPolicyButton')).toBeInTheDocument();
+        expect(renderResult.queryByTestId('installAssetsButton')).toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+  });
+
   describe('and the AWS onboarding flow is enabled', () => {
     const renderAwsDetail = async () => {
       const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');

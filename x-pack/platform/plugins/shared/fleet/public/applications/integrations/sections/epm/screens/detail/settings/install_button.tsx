@@ -23,6 +23,8 @@ import { getNumTransformAssets } from '../../../../../../../components/transform
 import { ConfirmPackageInstall } from './confirm_package_install';
 
 type InstallationButtonProps = Pick<PackageInfo, 'name' | 'title' | 'version' | 'assets'> & {
+  /** `assets` labels the button "Install assets" instead of "Install {title}" */
+  variant?: 'package' | 'assets';
   disabled?: boolean;
   dryRunData?: UpgradePackagePolicyDryRunResponse | null;
   isUpgradingPackagePolicies?: boolean;
@@ -31,7 +33,7 @@ type InstallationButtonProps = Pick<PackageInfo, 'name' | 'title' | 'version' | 
   setIsUpgradingPackagePolicies?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 export function InstallButton(props: InstallationButtonProps) {
-  const { name, title, version, assets } = props;
+  const { name, title, version, assets, variant = 'package' } = props;
 
   const authz = useAuthz();
   const canInstallPackages = authz.integrations.installPackages;
@@ -87,7 +89,19 @@ export function InstallButton(props: InstallationButtonProps) {
         onClick={toggleInstallModal}
         data-test-subj="installAssetsButton"
       >
-        {isInstalling ? (
+        {variant === 'assets' ? (
+          isInstalling ? (
+            <FormattedMessage
+              id="xpack.fleet.integrations.installPackage.installingAssetsButtonLabel"
+              defaultMessage="Installing assets"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.fleet.integrations.installPackage.installAssetsButtonLabel"
+              defaultMessage="Install assets"
+            />
+          )
+        ) : isInstalling ? (
           <FormattedMessage
             id="xpack.fleet.integrations.installPackage.installingPackageButtonLabel"
             defaultMessage="Installing {title}"
