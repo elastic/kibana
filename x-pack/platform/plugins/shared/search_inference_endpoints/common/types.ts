@@ -27,7 +27,53 @@ export const APIRoutes = {
   GET_INFERENCE_CONNECTORS: INFERENCE_CONNECTORS_INTERNAL_API_PATH,
   // Single path shared by GET, PUT, and DELETE region policy operations
   REGION_POLICY: '/internal/search_inference_endpoints/region_policy',
+  TEST_INFERENCE_ENDPOINT: '/internal/search_inference_endpoints/endpoints/{id}/_test',
+  TEST_FEATURE: '/internal/search_inference_endpoints/features/{featureId}/_test',
+  TEST_CONNECTOR: '/internal/search_inference_endpoints/connectors/{connectorId}/_test',
 } as const;
+
+export type TestEndpointFailureCause =
+  | 'auth'
+  | 'quota'
+  | 'timeout'
+  | 'not_found'
+  | 'bad_request'
+  | 'no_endpoint'
+  | 'provider_error'
+  | 'unknown';
+
+export const TESTABLE_TASK_TYPES = [
+  'chat_completion',
+  'completion',
+  'text_embedding',
+  'embedding',
+  'sparse_embedding',
+  'rerank',
+] as const;
+
+export type TestableTaskType = (typeof TESTABLE_TASK_TYPES)[number];
+
+export type TestEndpointResult =
+  | { type: 'text'; content: string }
+  | { type: 'embedding'; dimensions: number; preview: number[] }
+  | {
+      type: 'sparse_embedding';
+      tokenCount: number;
+      topTokens: Array<{ token: string; weight: number }>;
+    }
+  | { type: 'rerank'; ranking: Array<{ index: number; text: string; score: number }> };
+
+export interface TestEndpointResponse {
+  ok: boolean;
+  latencyMs: number;
+  result?: TestEndpointResult;
+  raw?: unknown;
+  error?: {
+    cause: TestEndpointFailureCause;
+    reason: string;
+    statusCode?: number;
+  };
+}
 
 export interface InferenceConnectorsResponse {
   connectors: InferenceConnector[];
