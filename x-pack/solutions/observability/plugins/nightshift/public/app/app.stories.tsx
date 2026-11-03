@@ -17,7 +17,7 @@ import {
   type NightshiftStreamFeaturesScenario,
 } from '../__storybook__/provider';
 import { NightshiftApp } from './app';
-import { NightshiftAppHeader } from './app_header';
+import { NightshiftAppHeader } from '../components/app_header';
 
 const noop = () => undefined;
 

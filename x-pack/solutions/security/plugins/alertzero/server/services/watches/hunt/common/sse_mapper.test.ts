@@ -452,7 +452,7 @@ describe('buildSseData', () => {
     expect(secondEntry.data.corroborated_technique_id).toBe('T1552.001');
   });
 
-  it('returns a single report-scoped entry when Tier 2 produced no behaviors', async () => {
+  it('returns a single report-scoped entry when Behavior Hunt produced no behaviors', async () => {
     const { huntForThreat } = jest.requireMock('../tier1/hunt_for_threat');
     const { huntBehavior } = jest.requireMock('../tier2/hunt_behavior');
     huntForThreat.mockResolvedValue(HIT_TIER1_RESULT);
@@ -484,7 +484,7 @@ describe('buildSseData', () => {
     expect(huntResultOf(entries[0]).tier2?.status).toBe('no_behaviors_found');
   });
 
-  it('emits a Tier 2-only hit with tier2 hit_sources and Tier 2 entities', async () => {
+  it('emits a Behavior Hunt-only hit with tier2 hit_sources and Behavior Hunt entities', async () => {
     const { huntForThreat } = jest.requireMock('../tier1/hunt_for_threat');
     const { huntBehavior } = jest.requireMock('../tier2/hunt_behavior');
     huntForThreat.mockResolvedValue(CLEAN_TIER1_RESULT);
@@ -663,7 +663,7 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
     ]);
   });
 
-  it('falls back to one report-scoped entry when Tier 1 hit and no technique did', async () => {
+  it('falls back to one report-scoped entry when IOC Hunt hit and no technique did', async () => {
     // `HIT_TIER1_RESULT`'s hits carry no `matched.technique_id`, so they are shared
     // context for the report rather than corroboration of either proposal.
     const result = await run(HIT_TIER1_RESULT, [
@@ -692,7 +692,7 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
       'T1552.001',
     ]);
     expect(entries[0].data.evidence_against).toEqual([
-      'Tier 2 executed 2 proposed technique(s) with no required-index rows: T1078.004, T1552.001.',
+      'Behavior Hunt executed 2 proposed technique(s) with no required-index rows: T1078.004, T1552.001.',
     ]);
     // Neither proposed technique was corroborated, so this report-scoped entry must not
     // claim either one by name -- packaging relies on this to avoid crediting a technique
@@ -703,7 +703,7 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
     );
   });
 
-  it('does not let a Tier 1 hit attributed to another technique corroborate this one', async () => {
+  it('does not let an IOC Hunt hit attributed to another technique corroborate this one', async () => {
     const result = await run(
       {
         ...HIT_TIER1_RESULT,
@@ -739,7 +739,7 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
     expect(entries[0].attachment_id).toEqual(idFor());
   });
 
-  it('publishes a technique entry for a technique a Tier 1 hit was attributed to', async () => {
+  it('publishes a technique entry for a technique an IOC Hunt hit was attributed to', async () => {
     const result = await run(
       {
         ...HIT_TIER1_RESULT,
@@ -778,7 +778,7 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
     // sentence says whose count it is, that it is a match count rather than a
     // confirmed one, and how much of it this entry carries.
     expect(entries[0].data.evidence_for).toContain(
-      'Tier 1 matched 1 event(s) for this report in the hunt window, at least one in a required index; 1 are referenced here (see hunt_result.tier1.per_index for the required/optional split).'
+      'IOC Hunt matched 1 event(s) for this report in the hunt window, at least one in a required index; 1 are referenced here (see hunt_result.tier1.per_index for the required/optional split).'
     );
     expect(entries[0].data.corroborated_technique_id).toBe('T1552.001');
   });
@@ -959,7 +959,7 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     ).toThrow(/time_range/);
   });
 
-  it('keeps Tier 1 per_index order when the list overflows the schema cap', () => {
+  it('keeps IOC Hunt per_index order when the list overflows the schema cap', () => {
     // Tier 1 aggregates up to 500 `_index` buckets; the schema accepts 20. The mapper
     // no longer reorders confirming-first: it keeps Tier 1's order and truncates.
     const perIndex = Array.from({ length: 25 }, (_, i) => ({
@@ -1122,7 +1122,7 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     const [entry] = buildSseData(result, 'tr-1', { spaceId: 'default' });
 
     expect(entry.data.evidence_against).toEqual([
-      'Tier 2 executed 1 proposed technique(s) with no required-index rows: T1078.004.',
+      'Behavior Hunt executed 1 proposed technique(s) with no required-index rows: T1078.004.',
     ]);
     // The reason survives in the structured payload, so the distinction is recoverable
     // rather than asserted in prose the schema cannot check.
@@ -1134,7 +1134,7 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     });
   });
 
-  it('shares the event cap between the tiers instead of letting Tier 1 fill it', () => {
+  it('shares the event cap between the tiers instead of letting IOC Hunt fill it', () => {
     // Tier 1 returns up to the coordinator's `size: 100`, and `events` caps at 50, so
     // appending Tier 2 after Tier 1 drops every ref to the behavior that confirmed
     // the technique — the SSE keeps the report's sample and loses its own evidence.
@@ -1177,11 +1177,11 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     // The Tier 1 count quoted to the reader is the refs the entry carries, not the
     // ones it was offered.
     expect(entry.data.evidence_for).toContain(
-      'Tier 1 matched 50 event(s) for this report in the hunt window, at least one in a required index; 49 are referenced here (see hunt_result.tier1.per_index for the required/optional split).'
+      'IOC Hunt matched 50 event(s) for this report in the hunt window, at least one in a required index; 49 are referenced here (see hunt_result.tier1.per_index for the required/optional split).'
     );
   });
 
-  it('shares the entity cap between the tiers instead of letting Tier 1 fill it', () => {
+  it('shares the entity cap between the tiers instead of letting IOC Hunt fill it', () => {
     // 50 Tier 1 affected hosts are within the default `maxAssets`, and `entities` caps
     // at 50, so the technique's own host and user are the ones that fall off.
     const hosts = Array.from({ length: 50 }, (_, i) => ({
@@ -1260,5 +1260,155 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     expect(byId.get('evt-garbage')).toBeUndefined();
     expect(byId.get('evt-datemath')).toBeUndefined();
     expect(entry.data.timeline).toHaveLength(2);
+  });
+
+  it('keeps a remote event ref and drops a remote alert ref, which no local exit ramp can open', () => {
+    const remoteBacking = 'infosec_zocalo:.ds-logs-aws.cloudtrail-default-2026.10.26-000001';
+    const remoteAlerts = 'infosec_zocalo:.alerts-security.alerts-default';
+    const result = tier1Result({
+      hits: [
+        { id: 'evt-remote', index: remoteBacking, timestamp: '2026-07-30T13:05:00.000Z' },
+        { id: 'alert-remote', index: remoteAlerts, timestamp: '2026-07-30T13:06:00.000Z' },
+      ],
+      counts: { total_hits: 2, returned_hits: 2, affected_hosts: 0, affected_users: 0 },
+      per_index: [
+        { index: remoteBacking, hit_count: 1, required: true },
+        { index: remoteAlerts, hit_count: 1, required: true },
+      ],
+    });
+
+    expect(schemaIssues(result)).toEqual([]);
+    const [entry] = buildSseData(result, 'tr-1', { spaceId: 'default' });
+    expect(entry.data.events).toEqual([
+      expect.objectContaining({ event_id: 'evt-remote', source_index: remoteBacking }),
+    ]);
+    // Not filed as an event either: the remote alert gets no ref at all.
+    expect(entry.data.alerts ?? []).toEqual([]);
+    // The hit still counts where the hunt reports it.
+    expect(huntResultOf(entry).tier1.per_index.map((row) => row.index)).toContain(remoteAlerts);
+  });
+
+  it('keeps the Tier 1 verdict of a technique entry whose only Tier 1 hit is a remote alert', () => {
+    const remoteAlerts = 'infosec_zocalo:.alerts-security.alerts-default';
+    const result = withBehaviors(
+      tier1Result({
+        hits: [
+          {
+            id: 'alert-remote',
+            index: remoteAlerts,
+            timestamp: '2026-07-30T13:06:00.000Z',
+            matched: { field: 'file.hash.md5', technique_id: 'T1552.001' },
+          },
+        ],
+        counts: { total_hits: 1, returned_hits: 1, affected_hosts: 0, affected_users: 0 },
+        per_index: [{ index: remoteAlerts, hit_count: 1, required: true }],
+      }),
+      [
+        behaviorFixture({
+          technique_id: 'T1552.001',
+          execution: { executed: true, row_count: 0, hit: false },
+        }),
+      ]
+    );
+
+    const entry = buildSseData(result, 'tr-1', { spaceId: 'default' }).find(
+      (candidate) => candidate.data.corroborated_technique_id === 'T1552.001'
+    );
+    if (!entry) throw new Error('expected a technique entry for T1552.001');
+    expect(entry.data.alerts ?? []).toEqual([]);
+    expect(huntResultOf(entry).has_confirmed_hit).toBe(true);
+    expect(huntResultOf(entry).hit_sources).toEqual(['tier1']);
+    expect(significantSecurityEventAttachmentDataSchema.safeParse(entry.data).success).toBe(true);
+  });
+
+  it('drops a remote alert ref from Tier 2 hits too', () => {
+    const remoteAlerts = 'infosec_zocalo:.alerts-security.alerts-default';
+    const result = withBehaviors(tier1Result({}), [
+      behaviorFixture({
+        hits: [
+          { id: 't2-remote-alert', index: remoteAlerts },
+          { id: 't2-local-alert', index: '.alerts-security.alerts-default' },
+        ],
+      }),
+    ]);
+
+    expect(schemaIssues(result)).toEqual([]);
+    const alertIds = buildSseData(result, 'tr-1', { spaceId: 'default' }).flatMap((entry) =>
+      (entry.data.alerts ?? []).map((alert) => alert.alert_id)
+    );
+    expect(alertIds).toContain('t2-local-alert');
+    expect(alertIds).not.toContain('t2-remote-alert');
+  });
+});
+
+describe('buildSseData host entity origins', () => {
+  const withHosts = (hosts: HuntCoordinatorCoreResult['tier1']['affected_assets']['hosts']) =>
+    tier1Result({
+      affected_assets: { hosts, users: [], services: [] },
+      counts: { total_hits: 1, returned_hits: 1, affected_hosts: hosts.length, affected_users: 0 },
+    });
+
+  const hostEntities = (result: HuntCoordinatorCoreResult) => {
+    const [entry] = buildSseData(result, 'tr-1', { spaceId: 'default' });
+    return entry.data.entities.filter((entity) => entity.field === 'host.name');
+  };
+
+  it('carries the Tier 1 origin onto each host entity, and parses', () => {
+    const result = withHosts([
+      { name: 'web-1', hit_count: 1, local: true, remote_clusters: [] },
+      { name: 'ubuntu', hit_count: 1, local: false, remote_clusters: ['cluster_b'] },
+    ]);
+
+    expect(schemaIssues(result)).toEqual([]);
+    expect(hostEntities(result)).toEqual([
+      { field: 'host.name', value: 'web-1', local: true, remote_clusters: [] },
+      { field: 'host.name', value: 'ubuntu', local: false, remote_clusters: ['cluster_b'] },
+    ]);
+  });
+
+  it('leaves a host entity without origin when Tier 1 could not tell', () => {
+    expect(hostEntities(withHosts([{ name: 'web-1', hit_count: 1 }]))).toEqual([
+      { field: 'host.name', value: 'web-1' },
+    ]);
+  });
+
+  it('carries the Tier 2 origin onto a host only a behavior named', () => {
+    const result = withBehaviors(withHosts([]), [
+      behaviorFixture({
+        affected_hosts: ['ubuntu'],
+        affected_host_origins: [{ name: 'ubuntu', local: false, remote_clusters: ['cluster_b'] }],
+      }),
+    ]);
+
+    expect(schemaIssues(result)).toEqual([]);
+    expect(hostEntities(result)).toEqual([
+      { field: 'host.name', value: 'ubuntu', local: false, remote_clusters: ['cluster_b'] },
+    ]);
+  });
+
+  it('merges the origins of a host both tiers named instead of keeping only the Tier 1 copy', () => {
+    const result = withBehaviors(
+      withHosts([{ name: 'web-1', hit_count: 1, local: false, remote_clusters: ['cluster_b'] }]),
+      [
+        behaviorFixture({
+          affected_hosts: ['web-1'],
+          affected_host_origins: [{ name: 'web-1', local: true, remote_clusters: [] }],
+        }),
+      ]
+    );
+
+    expect(hostEntities(result)).toEqual([
+      { field: 'host.name', value: 'web-1', local: true, remote_clusters: ['cluster_b'] },
+    ]);
+  });
+
+  it('leaves a remote host unknown when another tier named it without an origin', () => {
+    // The unknown sighting could have been local, so "remote only" is no longer proven.
+    const result = withBehaviors(
+      withHosts([{ name: 'ubuntu', hit_count: 1, local: false, remote_clusters: ['cluster_b'] }]),
+      [behaviorFixture({ affected_hosts: ['ubuntu'] })]
+    );
+
+    expect(hostEntities(result)).toEqual([{ field: 'host.name', value: 'ubuntu' }]);
   });
 });

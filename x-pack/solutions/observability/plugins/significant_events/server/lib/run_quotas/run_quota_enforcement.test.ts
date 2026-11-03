@@ -7,7 +7,7 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RunQuotaGroup } from '../../../common/run_quotas';
-import { consumeRunQuota } from './consume';
+import { consumeRunQuota, releaseRunQuota } from './consume';
 import {
   getRunQuotaLedgerId,
   patchRunQuotaSettings,
@@ -218,6 +218,46 @@ describe('run quota admission behavior', () => {
     ).resolves.toEqual({ allowed: false });
 
     await expect(repository.count('2026-08-31', 'investigation')).resolves.toBe(1);
+  });
+
+  it('enforces the investigation limit while the global enabled flag is off', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-31T12:00:00.000Z'));
+    const repository = createRepository();
+    await patchRunQuotaSettings(repository.client, {
+      enabled: false,
+      limits: { investigation: 1 },
+    });
+
+    await expect(
+      consumeRunQuota({ internalRepository: repository.client, group: 'investigation' })
+    ).resolves.toEqual({ allowed: true });
+    await expect(
+      consumeRunQuota({ internalRepository: repository.client, group: 'investigation' })
+    ).resolves.toEqual({ allowed: false });
+  });
+
+  it('gives back a released investigation slot without going below zero', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-31T12:00:00.000Z'));
+    const repository = createRepository();
+    await patchRunQuotaSettings(repository.client, {
+      enabled: true,
+      limits: { investigation: 1 },
+    });
+    await consumeRunQuota({ internalRepository: repository.client, group: 'investigation' });
+
+    const release = () =>
+      releaseRunQuota({
+        internalRepository: repository.client,
+        group: 'investigation',
+        date: '2026-08-31',
+      });
+    await release();
+    await release();
+
+    await expect(repository.count('2026-08-31', 'investigation')).resolves.toBe(0);
+    await expect(
+      consumeRunQuota({ internalRepository: repository.client, group: 'investigation' })
+    ).resolves.toEqual({ allowed: true });
   });
 
   it('never over-grants concurrent attempts competing for the final slot', async () => {
