@@ -66,24 +66,3 @@ export interface TinesStoryExport {
   agents: TinesAgent[];
   links?: TinesLink[];
 }
-
-export interface ParsedTinesAgent extends TinesAgent {
-  /** Original index in the Tines export `agents` array. */
-  index: number;
-  /** Slugified name suitable for Elastic Workflow step names. */
-  stepName: string;
-  /** Source agent indices that link into this agent. */
-  incomingLinks: number[];
-  /** Receiver agent indices this agent links to. */
-  outgoingLinks: number[];
-}
-
-export interface ParsedTinesStory {
-  name: string;
-  description: string;
-  guid?: string;
-  tags: string[];
-  agents: ParsedTinesAgent[];
-  links: TinesLink[];
-  hasWebhookEntry: boolean;
-}
