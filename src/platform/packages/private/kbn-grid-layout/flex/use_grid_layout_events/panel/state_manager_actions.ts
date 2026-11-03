@@ -23,7 +23,7 @@ export const startAction = (
   e: UserInteractionEvent,
   type: ActivePanelEvent['type'],
   gridLayoutStateManager: FlexLayoutStateManager,
-  sectionId: string,
+  sectionId: string | undefined,
   panelId: string
 ) => {
   const panelRef = gridLayoutStateManager.panelRefs.current[panelId];

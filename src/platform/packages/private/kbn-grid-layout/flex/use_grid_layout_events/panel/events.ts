@@ -48,7 +48,6 @@ export const useGridLayoutPanelEvents = ({
 
   const onStart = useCallback(
     (ev: UserInteractionEvent) => {
-      if (!sectionId) return;
       startAction(ev, interactionType, gridLayoutStateManager, sectionId, panelId);
     },
     [gridLayoutStateManager, interactionType, sectionId, panelId]

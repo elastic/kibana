@@ -68,64 +68,61 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
       .pipe(skip(1))
       .subscribe(([activePanel, currentPanel]) => {
         if (!currentPanel) return;
-        // const ref = gridLayoutStateManager.panelRefs.current[currentPanel?.id];
-        // const isPanelActive = activePanel && activePanel.id === currentPanel?.id;
-        // if (!ref) return;
+        const ref = gridLayoutStateManager.panelRefs.current[currentPanel?.id];
+        const isPanelActive = activePanel && activePanel.id === currentPanel?.id;
+        if (!ref) return;
 
-        // if (isPanelActive) {
-        //   // allow click events through before triggering active status
-        //   ref.classList.add('kbnGridPanel--active');
+        if (isPanelActive) {
+          // allow click events through before triggering active status
+          ref.classList.add('kbnGridPanel--active');
 
-        //   // if the current panel is active, give it fixed positioning depending on the interaction event
-        //   const { position: draggingPosition } = activePanel;
-        //   const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
+          // if the current panel is active, give it fixed positioning depending on the interaction event
+          const { position: draggingPosition } = activePanel;
+          const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
 
-        //   ref.style.zIndex = `${euiTheme.levels.modal}`;
-        //   if (activePanel.type === 'resize') {
-        //     // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
-        //     ref.style.width = `${Math.max(
-        //       draggingPosition.right - draggingPosition.left,
-        //       runtimeSettings.columnPixelWidth
-        //     )}px`;
-        //     ref.style.height = `${Math.max(
-        //       draggingPosition.bottom - draggingPosition.top,
-        //       runtimeSettings.rowHeight
-        //     )}px`;
+          ref.style.zIndex = `${euiTheme.levels.modal}`;
+          if (activePanel.type === 'resize') {
+            // // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
+            ref.style.width = `${Math.max(
+              draggingPosition.right - draggingPosition.left,
+              runtimeSettings.columnPixelWidth
+            )}px`;
+            // ref.style.height = `${Math.max(
+            //   draggingPosition.bottom - draggingPosition.top,
+            //   runtimeSettings.rowHeight
+            // )}px`;
+            // // undo any "lock to grid" styles **except** for the top left corner, which stays locked
+            // ref.style.gridColumnStart = `${currentPanel.column + 1}`;
+            // ref.style.gridRowStart = `${`gridRow-${currentPanel.sectionId}`} ${
+            //   currentPanel.row + 1
+            // }`;
+            // ref.style.gridColumnEnd = `auto`;
+            // ref.style.gridRowEnd = `auto`;
+          } else {
+            // if the current panel is being dragged, render it with a fixed position + size
+            ref.style.position = 'fixed';
 
-        //     // undo any "lock to grid" styles **except** for the top left corner, which stays locked
-        //     ref.style.gridColumnStart = `${currentPanel.column + 1}`;
-        //     ref.style.gridRowStart = `${`gridRow-${currentPanel.sectionId}`} ${
-        //       currentPanel.row + 1
-        //     }`;
-        //     ref.style.gridColumnEnd = `auto`;
-        //     ref.style.gridRowEnd = `auto`;
-        //   } else {
-        //     // if the current panel is being dragged, render it with a fixed position + size
-        //     ref.style.position = 'fixed';
-
-        //     ref.style.left = `${draggingPosition.left}px`;
-        //     ref.style.top = `${draggingPosition.top}px`;
-        //     ref.style.width = `${draggingPosition.right - draggingPosition.left}px`;
-        //     ref.style.height = `${draggingPosition.bottom - draggingPosition.top}px`;
-        //   }
-        // } else {
-        //   ref.classList.remove('kbnGridPanel--active');
-        //   ref.style.zIndex = `auto`;
-
-        //   // if the panel is not being dragged and/or resized, undo any fixed position styles
-        //   ref.style.position = '';
-        //   ref.style.left = ``;
-        //   ref.style.top = ``;
-        //   ref.style.width = ``;
-        //   // setting the height is necessary for mobile mode
-        //   ref.style.height = `calc(1px * (${currentPanel.height} * (var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) - var(--kbnGridGutterSize)))`;
-
-        //   // and render the panel locked to the grid
-        //   ref.style.gridColumnStart = `${currentPanel.column + 1}`;
-        //   ref.style.gridColumnEnd = `${currentPanel.column + 1 + currentPanel.width}`;
-        //   ref.style.gridRowStart = `${`gridRow-${currentPanel.sectionId}`} ${currentPanel.row + 1}`;
-        //   ref.style.gridRowEnd = `span ${currentPanel.height}`;
-        // }
+            ref.style.left = `${draggingPosition.left}px`;
+            ref.style.top = `${draggingPosition.top}px`;
+            ref.style.width = `${draggingPosition.right - draggingPosition.left}px`;
+            ref.style.height = `${draggingPosition.bottom - draggingPosition.top}px`;
+          }
+        } else {
+          ref.classList.remove('kbnGridPanel--active');
+          // ref.style.zIndex = `auto`;
+          // // if the panel is not being dragged and/or resized, undo any fixed position styles
+          // ref.style.position = '';
+          // ref.style.left = ``;
+          // ref.style.top = ``;
+          // ref.style.width = ``;
+          // // setting the height is necessary for mobile mode
+          // ref.style.height = `calc(1px * (${currentPanel.height} * (var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) - var(--kbnGridGutterSize)))`;
+          // // and render the panel locked to the grid
+          // ref.style.gridColumnStart = `${currentPanel.column + 1}`;
+          // ref.style.gridColumnEnd = `${currentPanel.column + 1 + currentPanel.width}`;
+          // ref.style.gridRowStart = `${`gridRow-${currentPanel.sectionId}`} ${currentPanel.row + 1}`;
+          // ref.style.gridRowEnd = `span ${currentPanel.height}`;
+        }
       });
 
     return () => {
