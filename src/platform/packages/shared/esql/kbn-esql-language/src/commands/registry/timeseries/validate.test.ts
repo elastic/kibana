@@ -6,11 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { Parser } from '@elastic/esql';
 import type { ICommandCallbacks } from '../types';
 import { mockContext } from '../../../__tests__/commands/context_fixtures';
 import { validate } from './validate';
 import { expectErrors } from '../../../__tests__/commands/validation';
 import { CPS_METADATA_FIELDS, METADATA_FIELDS } from '../options/metadata';
+import { getNamedSubqueries } from '../../definitions/utils/named_subqueries';
 
 const tsExpectErrors = (
   query: string,
@@ -137,6 +139,16 @@ describe('TS Validation', () => {
           tsExpectErrors('TS index METADATA _project.custom_tag', [], mockContext, callbacks);
         });
       });
+    });
+  });
+
+  test('errors on LET references', () => {
+    const query = 'LET a = (FROM index); TS a, index';
+    const namedSubqueries = getNamedSubqueries(Parser.parse(query).root.header);
+
+    tsExpectErrors(query, ['Subqueries are not supported in TS'], {
+      ...mockContext,
+      namedSubqueries,
     });
   });
 });

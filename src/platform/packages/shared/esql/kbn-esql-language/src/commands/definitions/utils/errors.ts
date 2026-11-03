@@ -80,6 +80,21 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           values: { name: out.name },
         }),
       };
+    case 'namedSubqueryForwardReference':
+      return {
+        message: i18n.translate('esqlLanguage.esql.validation.namedSubqueryForwardReference', {
+          defaultMessage:
+            'Forward reference in LET bindings: "{name}" cannot be referenced before its declaration',
+          values: { name: out.name },
+        }),
+      };
+    case 'namedSubqueryNotSupportedInCommand':
+      return {
+        message: i18n.translate('esqlLanguage.esql.validation.namedSubqueryNotSupportedInCommand', {
+          defaultMessage: 'Subqueries are not supported in {command}',
+          values: { command: out.command },
+        }),
+      };
     case 'unknownCastingType':
       return {
         message: i18n.translate('esqlLanguage.esql.validation.unknownCastingType', {
@@ -719,6 +734,12 @@ export const errors = {
       errors.byId('unknownDataSource', source.location, { name: source.name }),
       'getSources'
     ),
+
+  namedSubqueryForwardReference: (source: ESQLSource): ESQLMessage =>
+    errors.byId('namedSubqueryForwardReference', source.location, { name: source.name }),
+
+  namedSubqueryNotSupportedInCommand: (source: ESQLSource, command: string): ESQLMessage =>
+    errors.byId('namedSubqueryNotSupportedInCommand', source.location, { command }),
 
   unknownPolicy: (policyName: string, location: ESQLLocation): ESQLMessage =>
     tagSemanticError(errors.byId('unknownPolicy', location, { name: policyName }), 'getPolicies'),

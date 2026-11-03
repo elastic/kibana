@@ -11,6 +11,7 @@ import type { ESQLSource } from '@elastic/esql/types';
 import type { ICommandContext } from '../../../registry/types';
 import { cleanIndex, removeSourceNameQuotes, sourceExists } from '../sources';
 import { errors } from '../errors';
+import { findNamedSubqueryForSource } from '../named_subqueries';
 import type { ESQLMessage } from '../../types';
 
 function hasWildcard(name: string) {
@@ -33,9 +34,32 @@ export function isDotPrefixedSource(sourceName: string): boolean {
   });
 }
 
+/** Returns the errors of a source referencing a LET binding, or undefined when it references none. */
+export function validateNamedSubqueryReference(
+  source: ESQLSource,
+  context?: ICommandContext,
+  notSupportedIn?: string
+): ESQLMessage[] | undefined {
+  if (findNamedSubqueryForSource(source, context?.forwardNamedSubqueries ?? [])) {
+    return [errors.namedSubqueryForwardReference(source)];
+  }
+
+  if (!findNamedSubqueryForSource(source, context?.namedSubqueries ?? [])) {
+    return undefined;
+  }
+
+  if (notSupportedIn) {
+    return [errors.namedSubqueryNotSupportedInCommand(source, notSupportedIn)];
+  }
+
+  return [];
+}
+
 export interface ValidateSourcesOptions {
   /** When true, use "Unknown data source" error (e.g. for FROM). When false, use "Unknown index" (e.g. for TS). */
   useGenericDataSourceError?: boolean;
+  /** Keyword of a command that cannot read LET bindings (e.g. TS): referencing one is an error. */
+  namedSubqueriesNotSupportedIn?: string;
 }
 
 export function validateSources(
@@ -54,6 +78,17 @@ export function validateSources(
   for (const source of sources) {
     if (source.incomplete) {
       return messages;
+    }
+
+    const namedSubqueryErrors = validateNamedSubqueryReference(
+      source,
+      context,
+      options?.namedSubqueriesNotSupportedIn
+    );
+
+    if (namedSubqueryErrors) {
+      messages.push(...namedSubqueryErrors);
+      continue;
     }
 
     if (source.sourceType === 'index') {
