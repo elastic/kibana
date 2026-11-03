@@ -7,6 +7,7 @@
 
 import {
   createHttpServiceAccountsApi,
+  ensureNightshiftServiceAccount,
   ensureNightshiftServiceAccounts,
   NightshiftServiceAccountSetupError,
   type ListedServiceAccount,
@@ -237,5 +238,27 @@ describe('createHttpServiceAccountsApi', () => {
       body: JSON.stringify({ name: 'nightshift_agent', description: 'd', roles: ['r'] }),
     });
     expect(api.isConflict({ status: 409 })).toBe(true);
+  });
+});
+
+describe('ensureNightshiftServiceAccount', () => {
+  it('creates the detection account alone, so a deployment without the other roles can set it up', async () => {
+    const { api } = createApi({ roles: ['_nightshift_detection'] });
+
+    await expect(
+      ensureNightshiftServiceAccount(api, { kind: 'detection', isServerless: true })
+    ).resolves.toBe('uiam-1');
+    expect(api.createServiceAccount).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'nightshift_detection', roles: ['_nightshift_detection'] })
+    );
+  });
+
+  it('keeps the detection role out of the investigations setup', async () => {
+    const { api } = createApi({ roles: ['_nightshift_agent', '_nightshift_automations'] });
+
+    await expect(ensureNightshiftServiceAccounts(api, { isServerless: true })).resolves.toEqual({
+      agent: 'uiam-1',
+      automations: 'uiam-2',
+    });
   });
 });
