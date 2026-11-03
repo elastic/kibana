@@ -22,6 +22,10 @@ export const downscaleCanvas = (
   const target = createCanvas();
   target.width = Math.max(1, Math.round(canvas.width * ratio));
   target.height = Math.max(1, Math.round(canvas.height * ratio));
-  target.getContext('2d')?.drawImage(canvas, 0, 0, target.width, target.height);
+  const context = target.getContext('2d');
+  if (!context) {
+    throw new Error('Canvas 2D context unavailable');
+  }
+  context.drawImage(canvas, 0, 0, target.width, target.height);
   return target;
 };

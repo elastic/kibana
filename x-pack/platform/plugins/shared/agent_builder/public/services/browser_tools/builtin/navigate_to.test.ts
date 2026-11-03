@@ -16,6 +16,7 @@ const setup = () => {
   ]);
   const application = deps.application as any;
   application.navigateToApp = jest.fn().mockResolvedValue(undefined);
+  application.navigateToUrl = jest.fn();
   application.getUrlForApp = jest.fn(
     (id: string, { path }: { path?: string }) => `/app/${id}${path ?? ''}`
   );
@@ -42,7 +43,7 @@ describe('navigate_to', () => {
   it('never uses navigateToUrl', async () => {
     const { application, tool } = setup();
     await tool.handler({ app_id: 'discover' }, callContext());
-    expect(application.navigateToUrl).toBeUndefined();
+    expect(application.navigateToUrl).not.toHaveBeenCalled();
   });
 
   it('does nothing when the signal is already aborted', async () => {
@@ -60,5 +61,12 @@ describe('navigate_to', () => {
     const result = await tool.handler({ app_id: 'discover', path: '#/x' }, callContext());
     expect(application.navigateToApp).toHaveBeenCalledWith('discover', { path: '#/x' });
     expect(result).toEqual({ content: { url: '/app/discover#/x' } });
+  });
+
+  it('navigates without a path', async () => {
+    const { application, tool } = setup();
+    const result = await tool.handler({ app_id: 'discover' }, callContext());
+    expect(application.navigateToApp).toHaveBeenCalledWith('discover', { path: undefined });
+    expect(result).toEqual({ content: { url: '/app/discover' } });
   });
 });

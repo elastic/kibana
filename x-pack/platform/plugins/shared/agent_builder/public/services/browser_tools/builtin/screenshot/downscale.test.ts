@@ -39,4 +39,17 @@ describe('downscaleCanvas', () => {
     const result = downscaleCanvas(fakeCanvas(1000, 2000).canvas, 1000, () => target.canvas);
     expect([result.width, result.height]).toEqual([500, 1000]);
   });
+
+  it('rounds to integer dimensions for non-exact ratios', () => {
+    const target = fakeCanvas(0, 0);
+    const result = downscaleCanvas(fakeCanvas(2000, 1333).canvas, 1568, () => target.canvas);
+    expect([result.width, result.height]).toEqual([1568, 1045]);
+  });
+
+  it('throws when no 2d context is available', () => {
+    const target = { width: 0, height: 0, getContext: () => null } as unknown as HTMLCanvasElement;
+    expect(() => downscaleCanvas(fakeCanvas(2000, 1000).canvas, 1000, () => target)).toThrow(
+      'Canvas 2D context unavailable'
+    );
+  });
 });
