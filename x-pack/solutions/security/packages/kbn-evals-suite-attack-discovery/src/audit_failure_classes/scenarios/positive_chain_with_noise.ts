@@ -152,6 +152,7 @@ export const positiveChainWithNoiseScenario: AuditScenario = {
     'Finance workstations are standard-image Windows laptops; engineering uses several AWS accounts behind a shared egress NAT gateway.',
   gold: {
     alertGroups,
+    // Pairs the chain with each noise group only; noise-to-noise joins are scored by shared-ci-egress.
     forbiddenCoCitation: SHARED_CI_EGRESS_GROUPS.map((group) => ['clickfix-chain', group] as const),
     expectedDiscoveries: 'atLeastOne',
     requiredGroup: 'clickfix-chain',

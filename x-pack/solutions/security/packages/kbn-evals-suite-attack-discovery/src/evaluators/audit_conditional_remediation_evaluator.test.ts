@@ -112,6 +112,28 @@ describe('findUnconditionalContainment', () => {
     expect(findUnconditionalContainment(text)).toEqual([]);
   });
 
+  describe('past-tense narrative before a coordinated verb', () => {
+    it.each([
+      'The attacker signed in and reset the MFA device.',
+      'The actor logged in, deleted the trail and shut down the logging agent.',
+      'The script created a new user and then reset its password.',
+    ])('does not flag narrative: %s', (text) => {
+      expect(findUnconditionalContainment(text)).toEqual([]);
+    });
+
+    it.each([
+      'Review the logs and reset the password.',
+      'Disable the user and reset the MFA device.',
+      'Isolate the host, then shut down the logging agent.',
+      'Check the key and rotate it.',
+      'Review the affected hosts and isolate them.',
+      'Review the logs created by the user and reset the password.',
+      'The analyst reviewed the alert; next, check the owner and reset the password.',
+    ])('still flags advice: %s', (text) => {
+      expect(findUnconditionalContainment(text).length).toBeGreaterThan(0);
+    });
+  });
+
   describe('follow-up cues ("if not", "if they did not")', () => {
     it.each([
       'The deploy-bot account is compromised. If it is not already disabled, disable it now.',

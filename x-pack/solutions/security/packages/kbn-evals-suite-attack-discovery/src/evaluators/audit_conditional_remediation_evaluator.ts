@@ -91,6 +91,23 @@ const COORDINATED = new RegExp(
   'i'
 );
 const NARRATIVE_BEFORE_COORDINATOR = /\b(?:to|attempt\w*|tr(?:y|ies|ied|ying))\s+(?:\w+\s+){0,5}$/i;
+/**
+ * Narrative, not advice: the clause before the coordinator either opens with a past-tense verb
+ * ("deleted the trail and shut down the agent") or has an actor subject and a past-tense verb within
+ * two words ("The attacker signed in and reset the MFA device"). A past-tense word elsewhere does not
+ * count, so "Review the affected hosts and isolate them" and "Review the logs created by the user and
+ * reset the password" stay flagged. Advice participles ("is recommended") are not past tense here.
+ * Cost: a narrative clause with no actor subject and no leading verb ("Then logged in and reset the
+ * device") is still flagged.
+ */
+const PAST_VERB =
+  '(?!(?:recommended|advised|required|suggested|requested|encouraged|urged|needed|expected|supposed|instructed|asked|ordered)\\b)(?:\\w{2,}ed|ran|made|took|got|gave|sent|began|went|stole|wrote|did|was|were)';
+const ACTOR =
+  '(?:(?:the|this|that)\\s+(?:threat\\s+)?(?:attacker|adversary|actor|intruder|user|account|process|malware|script|binary|session)|they|he|she|it)';
+const PAST_TENSE_BEFORE_COORDINATOR = new RegExp(
+  `^\\W*${PAST_VERB}\\b|\\b${ACTOR}\\s+(?:\\w+\\s+){0,2}?${PAST_VERB}\\b`,
+  'i'
+);
 
 /** A gerund subject under a directive word: "Revoking the key should be prioritized." */
 const GERUND_SUBJECT = new RegExp(
@@ -265,7 +282,11 @@ const isInstructionClause = (clause: string): boolean => {
   const coordinated = COORDINATED.exec(clause);
   if (coordinated === null) return false;
   const before = clause.slice(0, coordinated.index);
-  return !NEGATION.test(before) && !NARRATIVE_BEFORE_COORDINATOR.test(before);
+  return (
+    !NEGATION.test(before) &&
+    !NARRATIVE_BEFORE_COORDINATOR.test(before) &&
+    !PAST_TENSE_BEFORE_COORDINATOR.test(before)
+  );
 };
 
 /**

@@ -216,6 +216,9 @@ dataset-backed spec above and is **opt-in**: `playwright.config.ts` ignores the 
 | No negative control | `benign-batch` (36 vendor-signed, SYSTEM-context alerts, nothing to find) |
 | Positive control under noise | `positive-chain-with-noise` (a four-alert `clickfix-chain` next to shared-egress noise) |
 
+The positive control forbids only chain-to-noise joins; noise-to-noise joins are scored by
+`shared-ci-egress`.
+
 Each scenario declares its gold as data in the registry (`alertGroups`, `forbiddenCoCitation`,
 `expectedDiscoveries`, `requiredGroup` / `requiredAnyOf`, `confirmedGroups`, `metaAlertGroups`, and
 optional per-variant `variantOverrides` of the recall target), so the evaluators stay generic. Alert
@@ -330,6 +333,12 @@ examples; read the row count beside each mean.
     policy. If they did not change it, revoke the key." are not flagged.
   - One question covers every follow-up cue in a chain: "Ask the owner whether they created the key.
     If not, revoke it. If they did, disable the user anyway." is not flagged.
+  - Past-tense narrative is skipped only when the clause before the and/then/or opens with a past-tense
+    verb or has an actor subject (the attacker, actor, user, account, process, malware, script, they,
+    he, she, it) and a past-tense verb within two words: "The attacker signed in and reset the MFA
+    device." is not flagged. A narrative clause with neither ("Then logged in and reset the device") is
+    still flagged, and so is advice that merely mentions a past event ("Review the logs created by the
+    user and reset the password.").
   - "Determine that ..." counts as a question: "Determine that the instance exists. If it does,
     terminate it." is not flagged.
 - `EntityCoOccurrence` reads `{{ field value }}` tokens and, when a discovery has none, falls back to
