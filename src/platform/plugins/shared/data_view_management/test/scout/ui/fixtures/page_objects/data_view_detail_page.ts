@@ -308,6 +308,11 @@ export class DataViewDetailPage {
     await this.formatSelect.selectOption(format);
   }
 
+  /** Turns on the "Set custom label" row of the field editor. */
+  async enableCustomLabel(): Promise<void> {
+    await this.toggleFlyoutRow('customLabelRow');
+  }
+
   async setStringTransform(transform: string): Promise<void> {
     await this.page.testSubj.locator('stringEditorTransform').selectOption(transform);
   }

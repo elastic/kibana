@@ -171,6 +171,7 @@ export const matchDatasetsDeterministic = ({
 };
 
 export interface ModelDatasetMatch {
+  status: 'matched';
   /** Datasets that cleared the threshold, in option-list order. */
   matches: DiscoveredDataset[];
   /** Lowest confidence among the accepted matches. */
@@ -178,6 +179,19 @@ export interface ModelDatasetMatch {
   /** Every accepted match with its own confidence, for logging. */
   scored: Array<{ dataset: string; confidence: number }>;
 }
+
+/**
+ * `empty` means the model answered and nothing usable came back (or there was
+ * nothing to choose from); `failed` means no answer was obtained, so the caller
+ * must not read it as "no datasets match".
+ */
+export type MatchDatasetsWithModelResult =
+  | ModelDatasetMatch
+  | { status: 'empty' }
+  | { status: 'failed'; message?: string };
+
+/** Keeps the failure detail short enough for a narrative; the full text stays in the warn log. */
+const MAX_FAILURE_MESSAGE_CHARS = 200;
 
 const datasetMatchSchema = lazySchema(() =>
   z.object({
@@ -245,8 +259,9 @@ const buildPrompt = (datasets: DiscoveredDataset[], report: HuntScopeReportConte
  * same answer. Returned names are checked against the real option list (exact
  * match on `dataset`) so a hallucinated name never reaches the hunt, and every
  * item below `HUNT_DATASET_MATCH_MIN_CONFIDENCE` is dropped on its own.
- * Returns undefined, never throws, when there is nothing to choose from, the
- * call fails, or nothing real clears the threshold.
+ * Never throws. Returns `failed` when the call errors or the response is
+ * unusable, and `empty` when there is nothing to choose from or nothing real
+ * clears the threshold.
  */
 export const matchDatasetsWithModel = async ({
   model,
@@ -261,8 +276,8 @@ export const matchDatasetsWithModel = async ({
   datasets: DiscoveredDataset[];
   report: HuntScopeReportContext;
   logger?: Logger;
-}): Promise<ModelDatasetMatch | undefined> => {
-  if (datasets.length === 0) return undefined;
+}): Promise<MatchDatasetsWithModelResult> => {
+  if (datasets.length === 0) return { status: 'empty' };
 
   const ranked = rankOptionsForModel(datasets, report);
   const options =
@@ -273,7 +288,7 @@ export const matchDatasetsWithModel = async ({
     );
   }
 
-  let output: DatasetMatchOutput;
+  let output: DatasetMatchOutput | undefined;
   try {
     output = await invokeHuntStructured({
       model,
@@ -313,10 +328,14 @@ export const matchDatasetsWithModel = async ({
       },
     });
   } catch (err) {
-    logger?.warn(
-      `Hunt dataset model matching failed: ${err instanceof Error ? err.message : String(err)}`
-    );
-    return undefined;
+    const message = err instanceof Error ? err.message : String(err);
+    logger?.warn(`Hunt dataset model matching failed: ${message}`);
+    return { status: 'failed', message: message.slice(0, MAX_FAILURE_MESSAGE_CHARS) };
+  }
+
+  if (!output || !Array.isArray(output.datasets)) {
+    logger?.warn('Hunt dataset model matching returned no usable structured output');
+    return { status: 'failed', message: 'dataset match returned no usable structured output' };
   }
 
   const optionNames = new Set(options.map((dataset) => dataset.dataset));
@@ -352,7 +371,7 @@ export const matchDatasetsWithModel = async ({
     if (hallucinated === 0 && belowThreshold === 0) {
       logger?.debug('Hunt dataset model matching returned no datasets');
     }
-    return undefined;
+    return { status: 'empty' };
   }
 
   const scored = matches.flatMap((dataset) => {
@@ -363,5 +382,5 @@ export const matchDatasetsWithModel = async ({
   });
   const confidence = Math.min(...scored.map((item) => item.confidence));
 
-  return { matches, confidence, scored };
+  return { status: 'matched', matches, confidence, scored };
 };

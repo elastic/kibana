@@ -258,11 +258,11 @@ overrides:
   '@babel/plugin-transform-typescript': 7.24.7
   '@bufbuild/protobuf': 2.5.2
   '@elastic/elasticsearch@9>@elastic/transport': 9.4.0
-  '@elastic/esql-definitions': 4.34.0
-  '@elastic/esql-grammar': 4.34.0
-  '@elastic/esql-promql-grammar': 4.34.0
-  '@elastic/esql-types': 4.34.0
-  '@elastic/pretty-printer': 4.34.0
+  '@elastic/esql-definitions': 4.36.0
+  '@elastic/esql-grammar': 4.36.0
+  '@elastic/esql-promql-grammar': 4.36.0
+  '@elastic/esql-types': 4.36.0
+  '@elastic/pretty-printer': 4.36.0
   '@emnapi/core': 1.11.1
   '@emnapi/runtime': 1.11.1
   '@paulirish/trace_engine>legacy-javascript': 0.0.3
@@ -398,11 +398,11 @@ importers:
         specifier: 8.8.1
         version: 8.8.1
       '@elastic/esql':
-        specifier: 4.34.0
-        version: 4.34.0
+        specifier: 4.36.0
+        version: 4.36.0
       '@elastic/esql-definitions':
-        specifier: 4.34.0
-        version: 4.34.0
+        specifier: 4.36.0
+        version: 4.36.0
       '@elastic/eui':
         specifier: 123.3.0
         version: 123.3.0(@elastic/datemath@5.0.3(moment@2.31.0))(@elastic/eui-theme-borealis@8.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)
@@ -428,8 +428,8 @@ importers:
         specifier: 2.0.2
         version: 2.0.2
       '@elastic/monaco-esql':
-        specifier: 4.34.0
-        version: 4.34.0(monaco-editor@0.56.0)
+        specifier: 4.35.0
+        version: 4.35.0(monaco-editor@0.56.0)
       '@elastic/node-crypto':
         specifier: 1.2.3
         version: 1.2.3
@@ -500,8 +500,8 @@ importers:
         specifier: 0.24.1
         version: 0.24.1
       '@grpc/grpc-js':
-        specifier: 1.14.5
-        version: 1.14.5
+        specifier: 1.14.6
+        version: 1.14.6
       '@hapi/accept':
         specifier: 6.0.3
         version: 6.0.3
@@ -3889,6 +3889,9 @@ importers:
       '@kbn/tour-queue':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-tour-queue
+      '@kbn/trace-latency-map':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-trace-latency-map
       '@kbn/traced-es-client':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-traced-es-client
@@ -4613,8 +4616,8 @@ importers:
         specifier: 29.7.0
         version: 29.7.0
       joi:
-        specifier: 18.2.9
-        version: 18.2.9
+        specifier: 18.3.1
+        version: 18.3.1
       joi-to-json:
         specifier: 5.0.0
         version: 5.0.0
@@ -4724,8 +4727,8 @@ importers:
         specifier: 2.7.0
         version: 2.7.0
       node-forge:
-        specifier: 1.4.0
-        version: 1.4.0
+        specifier: 1.4.2
+        version: 1.4.2
       nodemailer:
         specifier: 10.0.16
         version: 10.0.16
@@ -6078,8 +6081,8 @@ importers:
         specifier: 0.6.2
         version: 0.6.2(react-refresh@0.18.0)(type-fest@4.41.0)(webpack-hot-middleware@2.26.1)(webpack@5.96.1)
       '@redocly/cli':
-        specifier: 2.53.3
-        version: 2.53.3
+        specifier: 2.64.1
+        version: 2.64.1
       '@rsdoctor/rspack-plugin':
         specifier: 1.6.1
         version: 1.6.1(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@rspack/core@2.1.8(@swc/helpers@0.5.19))(supports-color@10.2.2)(webpack@5.96.1)
@@ -8384,6 +8387,8 @@ importers:
   src/platform/packages/shared/kbn-tooling-log: {}
 
   src/platform/packages/shared/kbn-tour-queue: {}
+
+  src/platform/packages/shared/kbn-trace-latency-map: {}
 
   src/platform/packages/shared/kbn-traced-es-client: {}
 
@@ -11155,29 +11160,29 @@ packages:
       eslint: ^8.57.0 || ^9.0.0
       typescript: 6.0.3
 
-  '@elastic/esql-ast@4.34.0':
-    resolution: {integrity: sha512-5CWvJBnPq9LTUr/jnQSVs0eER8jCxqzSZKd75VoN4ytEdf4IdG1FQUOgOOTID2SMC3AagtzeXMHoQ1Q/KmEgUw==}
+  '@elastic/esql-ast@4.36.0':
+    resolution: {integrity: sha512-DF6gfruk8imGPjQXkhPGZ8weJ67BEIXC90iajhQqGrP9bb0U31RgSUyC27oN6lYPrN5XHWS/6So+47snPOyhfQ==}
 
-  '@elastic/esql-definitions@4.34.0':
-    resolution: {integrity: sha512-RZ8Ry2kmlukoG2YLpI+8jwGjp99mqZ/MLOdEklKyjRZIK3BQfnHfjs8yyp0ed+HeSPnTCLI3cLK3IRsBXk0A6Q==}
+  '@elastic/esql-definitions@4.36.0':
+    resolution: {integrity: sha512-Yfm/nHY4ru7LdGP0uidKLdqGUFc7DBSbRK4TZ1n2lUVOv3l2tqeC+gE58axMsHpqbWdIprwyMA8dnMACMbfOcw==}
 
-  '@elastic/esql-grammar@4.34.0':
-    resolution: {integrity: sha512-FnjYFc8E8aVKl86wWyIpJJNCCRgelHQxCDkqnPYQ9b67+8U927qfwf20JSmT7g7VRAg+5qfl6j2w5LamvGrhDQ==}
+  '@elastic/esql-grammar@4.36.0':
+    resolution: {integrity: sha512-EB7rHhxl6K1av3xTc5xsRmK3xpdBWwxQWIFOMHhsruXjDA6rdD+vZq0Kvby2e0A+tVssSqYU09ZGBILPX+o56g==}
 
-  '@elastic/esql-parser@4.34.0':
-    resolution: {integrity: sha512-3aTu8Jr9jl2XlmypI2afiSxIrwsAn7oY5XEX+LeHRy6nSRS8G66BwHlXxKvNMk/b0pcf3+nEPV7p2fxPRCY+RQ==}
+  '@elastic/esql-parser@4.36.0':
+    resolution: {integrity: sha512-nedlmMnBaB99X+BmpLo6Od7BnWHCN1scHeYzBeeem2MFOJj/hWxdEE0geO8DHf6oCS2NXZlDJGiJUMaTITlsSA==}
 
-  '@elastic/esql-promql-grammar@4.34.0':
-    resolution: {integrity: sha512-vcwmgXqaa0smTvvm1/s9zkdJrLCSVOUy7Ugbm6kDgD3EdM7bhHA3H6ORjbVTBK08YZ/yUIRHoWizTE/689ck7A==}
+  '@elastic/esql-promql-grammar@4.36.0':
+    resolution: {integrity: sha512-VFx0EPvV4a1kNtqdepJrA5S5dMroSkiCrp2xeTWq+dQ016hocwDaJvV8ChkRL1LRYAp/Z6ysbhJFhZ6D/hZ+gw==}
 
-  '@elastic/esql-traversal@4.34.0':
-    resolution: {integrity: sha512-qeLNX6OYKc0kfbcvRuG604htkdDno66WcTVDuPyNS+aGTlHWEVgz5+/+0tOJnpnQUOx5LpJC+fp3sEu8SprF/A==}
+  '@elastic/esql-traversal@4.36.0':
+    resolution: {integrity: sha512-wEjbq53jpEfnPk+I27ixqlAFBAteFtNYLjdQoMxlFMTZEynxLlgU2Uv/8+ePYHDtS7yFtTPyPo+zf0+Yvyb15w==}
 
-  '@elastic/esql-types@4.34.0':
-    resolution: {integrity: sha512-5CZZLD09eYkTUjf3GvpALaaMT13Q5tM2SfBlX+j2hmCGy/KEIYM8ah50FsBS55IlKQ3fX+V1qU+Q5+1EOovozg==}
+  '@elastic/esql-types@4.36.0':
+    resolution: {integrity: sha512-QxU/F/X3cukG9bDArKK9avv5q6H9L7bOF1uP0MxyUhKC4m8AGuRhY3DY75MIPbyhvdnW2dKn5L3hbJgxgUspyA==}
 
-  '@elastic/esql@4.34.0':
-    resolution: {integrity: sha512-F4x+V5mSVs2yx0+5ukm0120hdu9VyR/wyc4RDuKDdFjq7VQeyXbnb0Wz67Kd3QBkkAggh5qkvQ0nR8rHd06rXQ==}
+  '@elastic/esql@4.36.0':
+    resolution: {integrity: sha512-dv65a2IEA1RhL2nSF3kx/ZUBndXDXwe4XsYJregM0JgUim0/EglnefxhO1z68amOK7nsDDljINzlLMZ1m25Sdw==}
 
   '@elastic/eui-illustrations@1.1.0':
     resolution: {integrity: sha512-xqOf5dcFmB0WylGy7w2aTJfHMIOjGxW1xops2WkxsfWEpqSFz4r0y4QCpGW+zEhRBVemWcB/lr3S+GoFqm+AFQ==}
@@ -11249,8 +11254,8 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  '@elastic/monaco-esql@4.34.0':
-    resolution: {integrity: sha512-5fI1zfp4IPeROP6CGpb/FtdBDeKNRRY9oAjYZZIMTKTi/eLAYGDOAfCLvoZOY0ganWRWiPn0QaxcaS7APND68A==}
+  '@elastic/monaco-esql@4.35.0':
+    resolution: {integrity: sha512-glwGeIao5jaN94wke96pwJh2QSLvcmLRNfzD9OWaw16e4FLX9Pb8diMnx2K/LNP/w52/9Yn9k+o3bf3atQK8/Q==}
     peerDependencies:
       monaco-editor: '>=0.30.0'
 
@@ -11269,8 +11274,8 @@ packages:
     resolution: {integrity: sha512-/WCA7YiM855/QVxJIcNSiqw4/U5t0TFmPktbelcpT4e1NEosHRS7soQ7k7YMV21MlS2cnFcmvTq9fob59gs/Qw==}
     engines: {node: ^18.19.0 || >=20.6.0}
 
-  '@elastic/pretty-printer@4.34.0':
-    resolution: {integrity: sha512-QEvQ+nagGZMv8bQ6J29cbKv7upJtqZVHlu2CyQH8ZUU8rlTjWPv5lAHwGNxaqh8y3XRWsHjUORwiggYULnsvgQ==}
+  '@elastic/pretty-printer@4.36.0':
+    resolution: {integrity: sha512-cUxLIKNAi6SVbYcHaj2d6yVCVDY8NsIgtnY1EWuYnFHO2n+3+B5WDkibciqkK+XeGzSVwbzT22yFPs3AKSoqBw==}
 
   '@elastic/prismjs-esql@4.28.0':
     resolution: {integrity: sha512-nl0x5VIZu1/duqOpcAYofBJBuqzuBJL3szSIytHtiNCDl4xgndnV5FR5D37r8OZmGY4M1nOYhKk2rZ/Iwl7XPA==}
@@ -11734,8 +11739,8 @@ packages:
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
 
-  '@grpc/grpc-js@1.14.5':
-    resolution: {integrity: sha512-7VZM+SVdEcUUqSQeNI3zM8Qs/BhQKZndPo2h5VkYkAM8Iz0wJIa8mKV5ekQGqG8UUsnkQ0NMxIxwkIHYvj0qOw==}
+  '@grpc/grpc-js@1.14.6':
+    resolution: {integrity: sha512-SgC/B3/VZ8lTyOZ4Cwk6f1skWhmkNAaVfiX90qd5u1rRXGKk1//8FTUEN9GvOUq7rfWIqAYkA3CoyumYVpOS6g==}
     engines: {node: '>=12.10.0'}
 
   '@grpc/proto-loader@0.8.1':
@@ -11778,8 +11783,8 @@ packages:
   '@hapi/catbox@12.1.1':
     resolution: {integrity: sha512-hDqYB1J+R0HtZg4iPH3LEnldoaBsar6bYp0EonBmNQ9t5CO+1CqgCul2ZtFveW1ReA5SQuze9GPSU7/aecERhw==}
 
-  '@hapi/content@6.0.2':
-    resolution: {integrity: sha512-OKyCOTjNR1hftwSjk9ueyAQTw8AwapvzBrPIWMGn39vhR5PmqLdYFmLc35bsSBye7gSMnlkXfc679bUdMIcRyQ==}
+  '@hapi/content@6.0.3':
+    resolution: {integrity: sha512-ksXemMNZAwPq/mu1a9TZ7LDUSgMR9sexBgpalF3nrP6SM42ARlnBZs58IS5Ay+o4o7y6tFNXL+rMJkQ5ghvCSw==}
 
   '@hapi/cookie@12.0.1':
     resolution: {integrity: sha512-TpykARUIgTBvgbsgtYe5CrM/7XBGms2/22JD3N6dzct6bG1vcOC6pH1JWIos1O5zvQnyDSJ2pnaFk+DToHkAng==}
@@ -11897,11 +11902,11 @@ packages:
   '@hey-api/types@0.1.2':
     resolution: {integrity: sha512-uNNtiVAWL7XNrV/tFXx7GLY9lwaaDazx1173cGW3+UEaw4RUPsHEmiB4DSpcjNxMIcrctfz2sGKLnVx5PBG2RA==}
 
-  '@hono/node-server@1.19.17':
-    resolution: {integrity: sha512-dSneS5qhiauZWGDCeK4o695Xd9nUNjviSZCMQrj10eetr8Uln1ucn6bbphOM6UynAMMtNIzZNSpL9vnASJwrPQ==}
-    engines: {node: '>=18.14.1'}
+  '@hono/node-server@2.1.5':
+    resolution: {integrity: sha512-MgP/I06GdvsilDspMk/qmRzpk8LOUStP6jFAbSRi40W09DhoyUn+Mj7eyKICPqeYKybOjVFLVIAQzvu1bfIa7Q==}
+    engines: {node: '>=20'}
     peerDependencies:
-      hono: ^4
+      hono: ^4 || ^5.0.0-0
 
   '@humanwhocodes/config-array@0.11.14':
     resolution: {integrity: sha512-3T8LkOmg45BV5FICb15QQMsyUSWrQ8AygVfC7ZG32zOalnqrilm018ZVCw0eapXux8FtA33q8PSRSstjee3jSg==}
@@ -13937,8 +13942,8 @@ packages:
       yauzl:
         optional: true
 
-  '@redocly/cli@2.53.3':
-    resolution: {integrity: sha512-hzNAWzHCOZ05vwRx0ehTxNeJaxxizjGV505eKtfs9MR/8ieD/8lYhAK4GF5FaqRRwOEpLO0PvzQwBSKYXmxhRA==}
+  '@redocly/cli@2.64.1':
+    resolution: {integrity: sha512-SkCnNexidfvHmkOCqRZ29oaHh1nVbpnQEF5Qweu8M2cUfVEh1/jSAvd5+LX+D/uNbPnhL6v03AamXHeeB2AwsQ==}
     engines: {node: '>=22.12.0 || >=20.19.0 <21.0.0', npm: '>=10'}
     hasBin: true
 
@@ -14268,6 +14273,7 @@ packages:
   '@smithy/core@3.36.2':
     resolution: {integrity: sha512-oRw0rB9QSUiCZfEs23G5F4Af+b2rQt1lItIICWu5IejFNd+uPM8SWqiKLMpQ6bX1Q7slsLbjuoE2niErFtkVPQ==}
     engines: {node: '>=18.0.0'}
+    deprecated: Deprecated due to a bug in custom logger data redaction. See https://github.com/aws/aws-sdk-js-v3/issues/8393.
 
   '@smithy/credential-provider-imds@4.5.2':
     resolution: {integrity: sha512-A9uSdn72ozbRUSit0eib0TW7nXuNPlaeM0zcGkJ+nE6tFcSDbnmtwoxbTCFBukVQcszDAyvsd7+rTduPTXpygg==}
@@ -17634,8 +17640,8 @@ packages:
     resolution: {integrity: sha512-FqUYQ+8o158GyGTrMFJms9qh3CqTKvAqgqsTnkLI8sKu0028orqBhxNMFkFen0zGyg6epACD32pjVk58ngIErQ==}
     engines: {node: '>=0.10'}
 
-  decode-uri-component@0.5.0:
-    resolution: {integrity: sha512-1BiQVoK8C9gUbQU6NzAtO/tkz2qOFpEObMWpcFvhx4fYnj4Oc5yzaJN/LD36ihkVUdXyh5ZekzX+yM+ty/SrPg==}
+  decode-uri-component@0.5.1:
+    resolution: {integrity: sha512-vWHQkXgg2cE3BB4rR0c+PYw9BCQzLoNIRMI7AunIkZst74tw/vpPp7VLoYtsR/cy1f55g3XDWUslfeCZjiZJyA==}
     engines: {node: '>=14.16'}
 
   decompress-response@6.0.0:
@@ -18573,8 +18579,8 @@ packages:
   fast-string-width@3.0.2:
     resolution: {integrity: sha512-gX8LrtNEI5hq8DVUfRQMbr5lpaS4nMIWV+7XEbXk2b8kiQIizgnlr12B4dA3ZEx3308ze0O4Q1R+cHts8kyUJg==}
 
-  fast-uri@3.1.8:
-    resolution: {integrity: sha512-GZMtZUTNRpOVIECoXwLNZS5xUGE+mVNbTB8h/7Rwh2TFWcBQiPzTgyZi05BF9UMZKkLJv8XBRJTlU7zg8+ZfMg==}
+  fast-uri@3.1.9:
+    resolution: {integrity: sha512-hS/0Wt3Ya043oKXs0sIxrMpKQITXhMLIrVAKKXi4gozGC9v7YRWVnXIZzjNPTO02M9BdxLCWqK1yRXgNziVyJQ==}
 
   fast-wrap-ansi@0.2.2:
     resolution: {integrity: sha512-7F2Fl+TjRSenLqlU3UjSH0iyqopqoZIu7eZVpEirP2g1GtWa2G/ecEmBdgz31+Mxr+ELclgg6sokpSFIQiZ02Q==}
@@ -19340,6 +19346,7 @@ packages:
   http-call@5.3.0:
     resolution: {integrity: sha512-ahwimsC23ICE4kPl9xTBjKB4inbRaeLyZeRunC/1Jy/Z6X8tv22MEAjK+KBOMSVLaqXPTTmd8638waVIKLGx2w==}
     engines: {node: '>=8.0.0'}
+    deprecated: Renamed to @heroku/http-call — please install @heroku/http-call instead.
 
   http-errors@2.0.1:
     resolution: {integrity: sha512-4FbRdAX+bSdmo4AUFuS0WNiPz8NgFt+r8ThgNWmlrjQjt1Q7ZR9+zTlce2859x4KSXrwIsaeTqDoKQmtP8pLmQ==}
@@ -20166,8 +20173,8 @@ packages:
   joi@17.13.8:
     resolution: {integrity: sha512-iPKOGmiRw1jxf/JOPwxmCcUQAOdF359mdzYiP2DJ+TMX0YK2zjK3D+zYOaGjpumWxOFF/l2xVWjRVK5bGSLdEw==}
 
-  joi@18.2.9:
-    resolution: {integrity: sha512-2mD929bUVKUhOLQQEVhlf6EZ0Mlo0DeRb5MO7cViR9AXLtBauuccEtB1py9Ocxpo/P7ucnh442iY/iOwrh3IQw==}
+  joi@18.3.1:
+    resolution: {integrity: sha512-mV9M4Llh4va3NT90p7KBtQhoZqjs8xLX7EWYE4y/GG3yLF6REbIBEHSUb0UX1JXRht2w5tiLSsvmpYc5akiqIw==}
     engines: {node: '>= 20'}
 
   jose@6.2.12:
@@ -21471,8 +21478,8 @@ packages:
       encoding:
         optional: true
 
-  node-forge@1.4.0:
-    resolution: {integrity: sha512-LarFH0+6VfriEhqMMcLX2F7SwSXeWwnEAJEsYm5QKWchiVYVvJyV9v7UDvUv+w5HO23ZpQTXDv/GxdDdMyOuoQ==}
+  node-forge@1.4.2:
+    resolution: {integrity: sha512-rRtAR5XLJ8gCKd9du4qrKAsgCG1ObGP4gLeNJMa4vYSeq4bmBMOJk5IHkrviBV0q7uoAJlVd8HEQYQSVUb4FGQ==}
     engines: {node: '>= 6.13.0'}
 
   node-gyp-build-optional-packages@5.2.2:
@@ -27242,56 +27249,56 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@elastic/esql-ast@4.34.0':
+  '@elastic/esql-ast@4.36.0':
     dependencies:
-      '@elastic/esql-definitions': 4.34.0
-      '@elastic/esql-grammar': 4.34.0
-      '@elastic/esql-promql-grammar': 4.34.0
-      '@elastic/esql-types': 4.34.0
+      '@elastic/esql-definitions': 4.36.0
+      '@elastic/esql-grammar': 4.36.0
+      '@elastic/esql-promql-grammar': 4.36.0
+      '@elastic/esql-types': 4.36.0
       tslib: 2.8.1
 
-  '@elastic/esql-definitions@4.34.0': {}
+  '@elastic/esql-definitions@4.36.0': {}
 
-  '@elastic/esql-grammar@4.34.0':
+  '@elastic/esql-grammar@4.36.0':
     dependencies:
       antlr4: 4.13.2
       tslib: 2.8.1
 
-  '@elastic/esql-parser@4.34.0':
+  '@elastic/esql-parser@4.36.0':
     dependencies:
-      '@elastic/esql-ast': 4.34.0
-      '@elastic/esql-definitions': 4.34.0
-      '@elastic/esql-grammar': 4.34.0
-      '@elastic/esql-promql-grammar': 4.34.0
-      '@elastic/esql-traversal': 4.34.0
-      '@elastic/esql-types': 4.34.0
+      '@elastic/esql-ast': 4.36.0
+      '@elastic/esql-definitions': 4.36.0
+      '@elastic/esql-grammar': 4.36.0
+      '@elastic/esql-promql-grammar': 4.36.0
+      '@elastic/esql-traversal': 4.36.0
+      '@elastic/esql-types': 4.36.0
       antlr4: 4.13.2
       tslib: 2.8.1
 
-  '@elastic/esql-promql-grammar@4.34.0':
+  '@elastic/esql-promql-grammar@4.36.0':
     dependencies:
       antlr4: 4.13.2
       tslib: 2.8.1
 
-  '@elastic/esql-traversal@4.34.0':
+  '@elastic/esql-traversal@4.36.0':
     dependencies:
-      '@elastic/esql-ast': 4.34.0
-      '@elastic/esql-types': 4.34.0
+      '@elastic/esql-ast': 4.36.0
+      '@elastic/esql-types': 4.36.0
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
 
-  '@elastic/esql-types@4.34.0': {}
+  '@elastic/esql-types@4.36.0': {}
 
-  '@elastic/esql@4.34.0':
+  '@elastic/esql@4.36.0':
     dependencies:
-      '@elastic/esql-ast': 4.34.0
-      '@elastic/esql-definitions': 4.34.0
-      '@elastic/esql-grammar': 4.34.0
-      '@elastic/esql-parser': 4.34.0
-      '@elastic/esql-promql-grammar': 4.34.0
-      '@elastic/esql-traversal': 4.34.0
-      '@elastic/esql-types': 4.34.0
-      '@elastic/pretty-printer': 4.34.0
+      '@elastic/esql-ast': 4.36.0
+      '@elastic/esql-definitions': 4.36.0
+      '@elastic/esql-grammar': 4.36.0
+      '@elastic/esql-parser': 4.36.0
+      '@elastic/esql-promql-grammar': 4.36.0
+      '@elastic/esql-traversal': 4.36.0
+      '@elastic/esql-types': 4.36.0
+      '@elastic/pretty-printer': 4.36.0
       antlr4: 4.13.2
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
@@ -27408,9 +27415,9 @@ snapshots:
 
   '@elastic/micro-jq@2.0.2': {}
 
-  '@elastic/monaco-esql@4.34.0(monaco-editor@0.56.0)':
+  '@elastic/monaco-esql@4.35.0(monaco-editor@0.56.0)':
     dependencies:
-      '@elastic/esql-definitions': 4.34.0
+      '@elastic/esql-definitions': 4.36.0
       monaco-editor: 0.56.0
 
   '@elastic/node-crypto@1.2.3': {}
@@ -27491,14 +27498,14 @@ snapshots:
       - encoding
       - supports-color
 
-  '@elastic/pretty-printer@4.34.0':
+  '@elastic/pretty-printer@4.36.0':
     dependencies:
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
 
   '@elastic/prismjs-esql@4.28.0':
     dependencies:
-      '@elastic/esql-definitions': 4.34.0
+      '@elastic/esql-definitions': 4.36.0
 
   '@elastic/react-search-ui-views@1.24.2(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)':
     dependencies:
@@ -28038,7 +28045,7 @@ snapshots:
     dependencies:
       graphql: 16.14.2
 
-  '@grpc/grpc-js@1.14.5':
+  '@grpc/grpc-js@1.14.6':
     dependencies:
       '@grpc/proto-loader': 0.8.1
       '@js-sdsl/ordered-map': 4.4.2
@@ -28099,7 +28106,7 @@ snapshots:
       '@hapi/podium': 5.0.2
       '@hapi/validate': 2.0.1
 
-  '@hapi/content@6.0.2':
+  '@hapi/content@6.0.3':
     dependencies:
       '@hapi/boom': 10.0.1
 
@@ -28187,7 +28194,7 @@ snapshots:
     dependencies:
       '@hapi/b64': 6.0.1
       '@hapi/boom': 10.0.1
-      '@hapi/content': 6.0.2
+      '@hapi/content': 6.0.3
       '@hapi/hoek': 11.0.7
       '@hapi/nigel': 5.0.1
 
@@ -28223,7 +28230,7 @@ snapshots:
     dependencies:
       '@hapi/boom': 10.0.1
       '@hapi/bourne': 3.0.0
-      '@hapi/content': 6.0.2
+      '@hapi/content': 6.0.3
       '@hapi/file': 3.0.0
       '@hapi/hoek': 11.0.7
       '@hapi/pez': 6.1.1
@@ -28303,7 +28310,7 @@ snapshots:
 
   '@hey-api/types@0.1.2': {}
 
-  '@hono/node-server@1.19.17(hono@4.13.13)':
+  '@hono/node-server@2.1.5(hono@4.13.13)':
     dependencies:
       hono: 4.13.13
 
@@ -29079,7 +29086,7 @@ snapshots:
 
   '@modelcontextprotocol/sdk@1.32.1(@cfworker/json-schema@4.1.1)(supports-color@10.2.2)(zod@4.6.5)':
     dependencies:
-      '@hono/node-server': 1.19.17(hono@4.13.13)
+      '@hono/node-server': 2.1.5(hono@4.13.13)
       ajv: 8.20.0
       ajv-formats: 3.0.1(ajv@8.20.0)
       content-type: 1.0.5
@@ -29895,7 +29902,7 @@ snapshots:
 
   '@opentelemetry/otlp-grpc-exporter-base@0.223.0(@opentelemetry/api@1.9.1)':
     dependencies:
-      '@grpc/grpc-js': 1.14.5
+      '@grpc/grpc-js': 1.14.6
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/core': 2.12.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/otlp-exporter-base': 0.223.0(@opentelemetry/api@1.9.1)
@@ -30433,7 +30440,7 @@ snapshots:
       proxy-agent: 8.0.2(supports-color@10.2.2)
       yauzl: 3.4.0
 
-  '@redocly/cli@2.53.3': {}
+  '@redocly/cli@2.64.1': {}
 
   '@redux-saga/core@1.3.0':
     dependencies:
@@ -32670,7 +32677,7 @@ snapshots:
   ajv@8.20.0:
     dependencies:
       fast-deep-equal: 3.1.3
-      fast-uri: 3.1.8
+      fast-uri: 3.1.9
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
 
@@ -34578,7 +34585,7 @@ snapshots:
 
   decode-uri-component@0.2.2: {}
 
-  decode-uri-component@0.5.0: {}
+  decode-uri-component@0.5.1: {}
 
   decompress-response@6.0.0:
     dependencies:
@@ -35843,7 +35850,7 @@ snapshots:
     dependencies:
       fast-string-truncated-width: 3.0.3
 
-  fast-uri@3.1.8: {}
+  fast-uri@3.1.9: {}
 
   fast-wrap-ansi@0.2.2:
     dependencies:
@@ -37896,7 +37903,7 @@ snapshots:
       '@sideway/formula': 3.0.1
       '@sideway/pinpoint': 2.0.0
 
-  joi@18.2.9:
+  joi@18.3.1:
     dependencies:
       '@hapi/address': 5.1.1
       '@hapi/formula': 3.0.2
@@ -39508,7 +39515,7 @@ snapshots:
     dependencies:
       whatwg-url: 5.0.0
 
-  node-forge@1.4.0: {}
+  node-forge@1.4.2: {}
 
   node-gyp-build-optional-packages@5.2.2:
     dependencies:
@@ -39526,7 +39533,7 @@ snapshots:
       es6-promise: 4.2.8
       lodash: 4.18.1
       long: 5.3.2
-      node-forge: 1.4.0
+      node-forge: 1.4.2
       pako: 2.2.0
       process: 0.11.10
       uuid: 11.1.1
@@ -40605,7 +40612,7 @@ snapshots:
 
   query-string@9.5.1:
     dependencies:
-      decode-uri-component: 0.5.0
+      decode-uri-component: 0.5.1
       filter-obj: 5.1.0
       split-on-first: 3.0.0
 

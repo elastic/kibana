@@ -21,7 +21,7 @@ What gets pushed, from the Elasticsearch planner:
 4. **`SORT` + `LIMIT`** is pushed when it sorts indexed fields right on the index, with a limit of
    at most 10,000. Then Lucene stops at the limit instead of sorting every entity.
 5. **`COUNT`** with no `BY` is pushed.
-6. **KQL can't run after `STATS` or `LOOKUP JOIN`**, so a search must run on the entity index.
+6. **`KQL` and `QSTR` can't run after `STATS` or `LOOKUP JOIN`**, so a search must run on the entity index. (`MATCH` can run on a computed column after them, but it is not KQL.)
 
 A query that breaks these rules still returns the right rows, just by reading every entity.
 
@@ -54,6 +54,13 @@ A query that breaks these rules still returns the right rows, just by reading ev
 - **Filters over a group's values become id lists** (`applyResolvedEntityFilterOverrides`): the
   groups whose values pass the filters differently from their main entity are listed once, and
   added to or removed from the filter by id. Every other query keeps a plain, pushed filter.
+- **The search is judged on resolved rows too** (`GROUP_FIELDS` in `kql_to_esql.ts`,
+  `useSearchBarExpression`): KQL only sees the main entity's own values, but a resolved row shows
+  some fields rolled up from its group (criticality, sources, watchlists, risk). A KQL search
+  that names only those fields is translated to ES|QL and run through the same overrides as the
+  filters (`fetchResolvedEntityOverrides`): once on the main entity alone and once on the group. Any
+  other search (free text, other fields, a wildcard on a multi-value field, filter pills) keeps
+  matching the main entity's own values, and a toast says so.
 - **Alerts and anomalies are found by entity id** (`euid_pipeline.ts`): stamped alerts carry
   `kibana.alert.entity.id`; for the others the id is built from their user, host and service
   fields, behind a cheap pushed prefilter that keeps the exact check on few docs.
