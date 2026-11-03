@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { callContext, createDeps, mockLayout } from './test_helpers';
+import { callContext, createDeps, mockLayout } from './test_helpers.mock';
 import { createFillFormTool } from './fill_form';
 import { createGetPageSnapshotTool } from './get_page_snapshot';
 
@@ -90,5 +90,59 @@ describe('fill_form', () => {
         callContext()
       )
     ).rejects.toThrow('No field could be filled');
+  });
+
+  it('is not fooled by a React-style value tracker: uses the prototype setter', async () => {
+    document.body.innerHTML = '<input aria-label="Name" /><div role="button">x</div>';
+    const input = document.querySelector('input')!;
+    let tracked = 'old';
+    // React's inputValueTracking shadows the prototype setter on the instance
+    Object.defineProperty(input, 'value', {
+      configurable: true,
+      get: () => tracked,
+      set: (v: string) => {
+        tracked = v;
+      },
+    });
+    const deps = createDeps();
+    const [ref] = await snapshotRefs(deps);
+    const seen: Array<{ value: string; tracked: string }> = [];
+    input.addEventListener('input', (e) => {
+      seen.push({
+        value: Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.get!.call(
+          e.target
+        ),
+        tracked,
+      });
+    });
+
+    await createFillFormTool(deps).handler({ fields: [{ ref, value: 'Ada' }] }, callContext());
+
+    expect(seen).toEqual([{ value: 'Ada', tracked: 'old' }]);
+  });
+
+  it('refuses to uncheck a radio but unchecks a checkbox', async () => {
+    document.body.innerHTML = `
+      <input type="radio" aria-label="R" checked />
+      <input type="checkbox" aria-label="C" checked />`;
+    const deps = createDeps();
+    const [radio, checkbox] = await snapshotRefs(deps);
+    const events = jest.fn();
+    document.querySelectorAll('input').forEach((i) => i.addEventListener('change', events));
+    const result = (await createFillFormTool(deps).handler(
+      {
+        fields: [
+          { ref: radio, value: 'false' },
+          { ref: checkbox, value: 'false' },
+        ],
+      },
+      callContext()
+    )) as FillResult;
+    expect(result.content.fields.map((f) => f.status)).toEqual(['not_fillable', 'filled']);
+    expect((document.querySelector('input[type=radio]') as HTMLInputElement).checked).toBe(true);
+    expect((document.querySelector('input[type=checkbox]') as HTMLInputElement).checked).toBe(
+      false
+    );
+    expect(events).toHaveBeenCalledTimes(1);
   });
 });

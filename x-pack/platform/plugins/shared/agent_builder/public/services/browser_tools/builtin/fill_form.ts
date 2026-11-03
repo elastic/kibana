@@ -7,6 +7,7 @@
 
 import type { BrowserToolDefinition } from '@kbn/agent-builder-browser';
 import { builtinBrowserToolIds, fillFormSchema } from '@kbn/agent-builder-common';
+import { flushUpdates } from './flush_updates';
 import { getBuiltinDescription } from './get_description';
 import { setNativeValue } from './set_native_value';
 import { takeSnapshot } from './snapshot/take_snapshot';
@@ -42,7 +43,7 @@ export const createFillFormTool = (
     if (results.every((r) => r.status !== 'filled')) {
       throw new Error('No field could be filled');
     }
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await flushUpdates();
     return { content: { fields: results, snapshot: await takeSnapshot(deps) } };
   },
 });

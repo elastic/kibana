@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { callContext, createDeps, mockLayout } from './test_helpers';
+import { AppStatus } from '@kbn/core/public';
+import { callContext, createDeps, mockLayout } from './test_helpers.mock';
 import { createGetPageSnapshotTool } from './get_page_snapshot';
 
 describe('get_page_snapshot', () => {
@@ -21,7 +22,7 @@ describe('get_page_snapshot', () => {
       { id: 'b', title: 'Zeta' },
       { id: 'a', title: 'Alpha' },
       { id: 'hidden', title: 'Hidden', visibleIn: [] },
-      { id: 'off', title: 'Off', status: 1 },
+      { id: 'off', title: 'Off', status: AppStatus.inaccessible },
     ]);
     const result = await createGetPageSnapshotTool(deps).handler({}, callContext());
     const content = (result as { content: string }).content;

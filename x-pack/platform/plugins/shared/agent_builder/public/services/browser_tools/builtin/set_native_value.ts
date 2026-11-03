@@ -23,7 +23,12 @@ const notify = (el: Element) => {
 export const setNativeValue = (el: Element, value: string): boolean => {
   if (el instanceof HTMLInputElement) {
     if (el.type === 'checkbox' || el.type === 'radio') {
-      callSetter(HTMLInputElement.prototype, 'checked', el, TRUTHY.includes(value));
+      const checked = TRUTHY.includes(value);
+      // a radio cannot be unchecked directly; refuse rather than dispatch misleading events
+      if (el.type === 'radio' && !checked) {
+        return false;
+      }
+      callSetter(HTMLInputElement.prototype, 'checked', el, checked);
     } else {
       callSetter(HTMLInputElement.prototype, 'value', el, value);
     }

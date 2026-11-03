@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { callContext, createDeps, mockLayout } from './test_helpers';
+import { callContext, createDeps, mockLayout } from './test_helpers.mock';
 import { createClickElementTool } from './click_element';
 import { createGetPageSnapshotTool } from './get_page_snapshot';
 
@@ -56,6 +56,22 @@ describe('click_element', () => {
     await expect(
       createClickElementTool(deps).handler({ ref }, callContext(controller.signal))
     ).rejects.toThrow('aborted');
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('reports disabled elements without clicking them', async () => {
+    document.body.innerHTML = '<button disabled>Save</button>';
+    const deps = createDeps();
+    const snap = (await createGetPageSnapshotTool(deps).handler({}, callContext())) as {
+      content: string;
+    };
+    const ref = /s\d+e\d+/.exec(snap.content)![0];
+    const onClick = jest.fn();
+    document.querySelector('button')!.addEventListener('click', onClick);
+    const result = (await createClickElementTool(deps).handler({ ref }, callContext())) as {
+      content: { disabled?: boolean };
+    };
+    expect(result.content.disabled).toBe(true);
     expect(onClick).not.toHaveBeenCalled();
   });
 });

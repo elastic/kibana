@@ -7,6 +7,7 @@
 
 import type { BrowserToolDefinition } from '@kbn/agent-builder-browser';
 import { builtinBrowserToolIds, clickElementSchema } from '@kbn/agent-builder-common';
+import { flushUpdates } from './flush_updates';
 import { getBuiltinDescription } from './get_description';
 import { accessibleName } from './snapshot/accessible_name';
 import { takeSnapshot } from './snapshot/take_snapshot';
@@ -27,10 +28,12 @@ export const createClickElementTool = (
       throw new Error('aborted');
     }
     const clicked = accessibleName(element);
+    if ((element as HTMLButtonElement).disabled === true) {
+      return { content: { clicked, snapshot: await takeSnapshot(deps), disabled: true } };
+    }
     element.scrollIntoView?.({ block: 'center' });
     (element as HTMLElement).click();
-    // let synchronous React updates flush before snapshotting
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await flushUpdates();
     return { content: { clicked, snapshot: await takeSnapshot(deps) } };
   },
 });
