@@ -158185,8 +158185,9 @@ components:
       properties:
         acknowledge_breaking_changes:
           default: false
-          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The force flag does not bypass this check.
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
           type: boolean
+          x-state: Generally available
         allow_outdated_version:
           default: false
           description: When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.
@@ -158483,8 +158484,9 @@ components:
       properties:
         acknowledge_breaking_changes:
           default: false
-          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The force flag does not bypass this check.
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
           type: boolean
+          x-state: Experimental
         policyIds:
           description: IDs of the managed integrations to upgrade to their installed package version.
           items:
@@ -158501,8 +158503,9 @@ components:
       properties:
         acknowledge_breaking_changes:
           default: false
-          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The force flag does not bypass this check.
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
           type: boolean
+          x-state: Generally available
         force:
           default: false
           type: boolean
@@ -164719,8 +164722,9 @@ components:
       properties:
         acknowledge_breaking_changes:
           default: false
-          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The force flag does not bypass this check.
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
           type: boolean
+          x-state: Generally available
         allow_outdated_version:
           default: false
           description: When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.
@@ -184907,8 +184911,9 @@ components:
       properties:
         acknowledge_breaking_changes:
           default: false
-          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The force flag does not bypass this check.
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
           type: boolean
+          x-state: Generally available
         packagePolicyIds:
           items:
             minLength: 0
