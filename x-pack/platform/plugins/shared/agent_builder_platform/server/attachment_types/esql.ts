@@ -122,9 +122,9 @@ export const createEsqlAttachmentType = ({
                 language: 'esql',
                 text: clampText(query, SURFACE_LIMITS.codeText),
               },
+              ...(await toDiscoverLink(query)),
             ]
           : []),
-        ...(hasText(query) ? await toDiscoverLink(query) : []),
       ],
     }),
     getAgentDescription: () => {
