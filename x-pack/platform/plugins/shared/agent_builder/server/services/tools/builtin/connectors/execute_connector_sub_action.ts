@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { asAgentBuilderExecutionSource } from '@kbn/actions-plugin/server';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { AuthorizationStatus, isAuthorizationMethod } from '@kbn/agent-builder-common/agents';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -267,6 +268,7 @@ export const createExecuteConnectorSubActionTool = ({
           subAction,
           subActionParams: params ?? {},
         },
+        source: asAgentBuilderExecutionSource({ toolId: context.callContext.toolId }),
       });
     } catch (error) {
       return {

@@ -67,11 +67,11 @@ const createInvestigationConfig = (
         '--feature_flags.overrides.nightshift.enabled=true',
         '--xpack.nightshift_investigations.cortex.enabled=false',
         '--xpack.nightshift_investigations.memory.enabled=false',
+        '--xpack.nightshift_investigations.findings_recorder.enabled=false',
         `--config=${sandboxKibanaConfig}`,
         ...(telemetryConfig ? [`--config=${telemetryConfig}`] : []),
         '--uiSettings.overrides.workflows:ui:enabled=true',
         '--uiSettings.overrides.workflows:aiAgent:enabled=true',
-        '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
         // The tracing config set already lifts the content redaction settings.
         '--uiSettings.overrides.agentBuilder:tracing:enabled=true',
         '--uiSettings.overrides.agentBuilder:tracing:includeUserData=true',

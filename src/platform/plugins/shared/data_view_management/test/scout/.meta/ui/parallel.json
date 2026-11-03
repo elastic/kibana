@@ -1,5 +1,5 @@
 {
-  "sha1": "724ab54cf62d321e59e7e80733b18e5e98aebdc5",
+  "sha1": "370b34ec4e9840a321976f6914f92f47e14d2ebc",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -412,8 +412,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_on_alias.spec.ts",
-        "line": 104,
-        "column": 44
+        "line": 113,
+        "column": 4
       }
     },
     {
@@ -432,8 +432,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_on_alias.spec.ts",
-        "line": 124,
-        "column": 3
+        "line": 131,
+        "column": 27
       }
     },
     {

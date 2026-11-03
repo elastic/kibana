@@ -81,7 +81,7 @@ describe('useTileQueryInputs', () => {
     expect(data).toBe(INDEX);
     expect(isLoading).toBe(false);
     expect(entityFilterClauses).toEqual([
-      `| WHERE ((${W1}) AND NOT entity.id IN ("host:out")) OR entity.id IN ("host:in")`,
+      `| WHERE (((${W1}) AND NOT entity.id IN ("host:out")) OR entity.id IN ("host:in"))`,
     ]);
   });
 

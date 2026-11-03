@@ -160,6 +160,7 @@ describe('CasesWorkflowRunService', () => {
       undefined as never
     );
     casesClient.attachments.getAllDocumentsAttachedToCase.mockResolvedValue([]);
+    clientArgs.services.alertsService.confirmAlertIndices.mockResolvedValue([]);
     management.getWorkflow.mockResolvedValue({
       id: 'workflow-1',
       name: 'Investigate case',
@@ -794,6 +795,57 @@ describe('CasesWorkflowRunService', () => {
       })
     ).rejects.toThrow('All selected alerts must belong to the case.');
     expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
+  });
+
+  describe('when an alert is attached under the alerts alias', () => {
+    const alertsAlias = '.alerts-security.alerts-default';
+    const backingIndex = '.internal.alerts-security.alerts-default-000001';
+
+    beforeEach(() => {
+      setCaseAlerts({ type: 'alert', alertId: 'alert-1', index: alertsAlias });
+      // The alias reaches the alert in its backing index only.
+      clientArgs.services.alertsService.confirmAlertIndices.mockImplementation(async ({ claims }) =>
+        claims.filter(({ index }) => index === backingIndex)
+      );
+    });
+
+    it('runs on the alert selected under its backing index', async () => {
+      await expect(
+        run({
+          caseIds: ['case-1'],
+          inputs: { event: { alertIds: [{ _id: 'alert-1', _index: backingIndex }] } },
+          origin: alertOrigin('alert-1'),
+        })
+      ).resolves.toEqual({ workflowExecutionId: 'execution-1', activityStatus: 'succeeded' });
+
+      expect(clientArgs.services.alertsService.confirmAlertIndices).toHaveBeenCalledWith({
+        claims: [{ id: 'alert-1', index: backingIndex, attachedIndex: alertsAlias }],
+      });
+      expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not confirm an alert selected under the index the case stores', async () => {
+      await expect(
+        run({
+          caseIds: ['case-1'],
+          inputs: { event: { alertIds: [{ _id: 'alert-1', _index: alertsAlias }] } },
+          origin: alertOrigin('alert-1'),
+        })
+      ).resolves.toEqual({ workflowExecutionId: 'execution-1', activityStatus: 'succeeded' });
+
+      expect(clientArgs.services.alertsService.confirmAlertIndices).not.toHaveBeenCalled();
+    });
+
+    it('rejects an index the alias does not reach the alert in', async () => {
+      await expect(
+        run({
+          caseIds: ['case-1'],
+          inputs: { event: { alertIds: [{ _id: 'alert-1', _index: '.alerts-spoofed' }] } },
+          origin: alertOrigin('alert-1'),
+        })
+      ).rejects.toThrow('All selected alerts must belong to the case.');
+      expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
+    });
   });
 
   it('rejects an alert origin without selected alerts with a specific validation error', async () => {

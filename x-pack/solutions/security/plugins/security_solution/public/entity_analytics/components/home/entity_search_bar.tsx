@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { EuiButtonGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { css } from '@emotion/react';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { TIME_RANGE_OPTIONS } from './entities_grid';
@@ -44,28 +43,35 @@ interface Props {
   onTimeRangeChange: (timeRange: TimeRange) => void;
 }
 
-export const EntitySearchBar: React.FC<Props> = ({ dataView, timeRange, onTimeRangeChange }) => (
-  <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
-    <EuiFlexItem>
-      <SiemSearchBar dataView={dataView} id={InputsModelId.global} hideDatePicker />
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-      css={css`
-        align-self: flex-start;
-        margin-top: 8px;
-      `}
-    >
-      <EuiButtonGroup
-        legend={TIME_RANGE_LEGEND}
-        options={TIME_RANGE_OPTIONS.map((v) => ({
-          id: v,
-          label: TIME_RANGE_BUTTON_LABELS[v],
-        }))}
-        idSelected={timeRange}
-        onChange={(id) => onTimeRangeChange(id as TimeRange)}
-        buttonSize="compressed"
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+export const EntitySearchBar: React.FC<Props> = ({ dataView, timeRange, onTimeRangeChange }) => {
+  // The search bar renders the ranges between the query input and the Refresh button. Its props
+  // are compared by reference, so the function only changes with the range.
+  const renderTimeRange = useCallback(
+    () => (
+      <EuiFlexItem grow={false}>
+        <EuiButtonGroup
+          legend={TIME_RANGE_LEGEND}
+          options={TIME_RANGE_OPTIONS.map((v) => ({
+            id: v,
+            label: TIME_RANGE_BUTTON_LABELS[v],
+            'data-test-subj': `eaTimeRange-${v}`,
+          }))}
+          idSelected={timeRange}
+          onChange={(id) => onTimeRangeChange(id as TimeRange)}
+          buttonSize="compressed"
+        />
+      </EuiFlexItem>
+    ),
+    [timeRange, onTimeRangeChange]
+  );
+
+  return (
+    <SiemSearchBar
+      dataView={dataView}
+      id={InputsModelId.global}
+      displayStyle="inPage"
+      hideDatePicker
+      renderQueryInputAppend={renderTimeRange}
+    />
+  );
+};
