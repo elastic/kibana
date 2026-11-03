@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '../hooks/use_kibana';
@@ -15,14 +16,16 @@ jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 
 const STORAGE_KEY = 'nightshift.onboarding.introBannerDismissed:/s/sre';
 
-const setup = () => {
+const setup = (search = '') => {
   (useKibana as jest.Mock).mockReturnValue({
     services: { http: { basePath: { get: () => '/s/sre' } } },
   });
   return render(
-    <I18nProvider>
-      <OnboardingIntroBanner />
-    </I18nProvider>
+    <MemoryRouter initialEntries={[`/${search}`]}>
+      <I18nProvider>
+        <OnboardingIntroBanner />
+      </I18nProvider>
+    </MemoryRouter>
   );
 };
 
@@ -33,10 +36,10 @@ describe('OnboardingIntroBanner', () => {
     setup();
 
     expect(screen.getByTestId('nightshiftOnboardingIntroBanner')).toHaveTextContent(
-      'Elastic nightshift is an SRE coworker'
+      'Elastic nightshift AI SRE is a co-worker that is always there for you'
     );
     expect(screen.getByTestId('nightshiftOnboardingIntroBanner')).toHaveTextContent(
-      'Once you add data, it will start analyzing.'
+      'It helps you detect, investigate and resolve problems faster.'
     );
     expect(screen.queryByTestId('nightshiftOnboardingExploreLiveExample')).not.toBeInTheDocument();
   });
@@ -52,5 +55,11 @@ describe('OnboardingIntroBanner', () => {
     unmount();
     setup();
     expect(screen.queryByTestId('nightshiftOnboardingIntroBanner')).not.toBeInTheDocument();
+  });
+
+  it('comes back when onboarding is forced with ?onboarding=1', () => {
+    window.localStorage.setItem(STORAGE_KEY, 'true');
+    setup('?onboarding=1');
+    expect(screen.getByTestId('nightshiftOnboardingIntroBanner')).toBeInTheDocument();
   });
 });

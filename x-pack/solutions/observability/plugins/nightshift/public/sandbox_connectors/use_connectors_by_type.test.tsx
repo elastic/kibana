@@ -110,4 +110,29 @@ describe('useConnectorsByType', () => {
     await waitFor(() => expect(result.current.error).not.toBeNull());
     expect(result.current.typesError).toBeNull();
   });
+
+  it('still lists connector types when the investigation agent is not installed yet', async () => {
+    const { agents } = mockKibanaServices({ types: [actionType('.http'), actionType('.github')] });
+    agents.get.mockRejectedValue(httpError(404));
+
+    const { result } = renderHook(() => useConnectorsByType(), { wrapper: createHookWrapper() });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.error).toBeNull();
+    expect(result.current.groups).toHaveLength(2);
+    expect(result.current.groups.every(({ assignedCount }) => assignedCount === 0)).toBe(true);
+  });
+
+  it('still lists connector types when the investigation agent exists but is unavailable', async () => {
+    const { agents } = mockKibanaServices({ types: [actionType('.http')] });
+    agents.get.mockRejectedValue(
+      Object.assign(httpError(400), { message: 'Agent nightshift.investigation is not available' })
+    );
+
+    const { result } = renderHook(() => useConnectorsByType(), { wrapper: createHookWrapper() });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.error).toBeNull();
+    expect(result.current.groups).toHaveLength(1);
+  });
 });

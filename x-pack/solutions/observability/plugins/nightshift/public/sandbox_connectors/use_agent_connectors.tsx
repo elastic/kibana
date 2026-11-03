@@ -10,10 +10,18 @@ import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { AgentWithPermissions } from '@kbn/agent-builder-browser';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '@kbn/nightshift-investigations-plugin/common';
-import { isHttpClientError } from '../common/http_error';
+import { getHttpErrorStatus, isHttpClientError, isHttpNotFoundError } from '../common/http_error';
 import { useKibana } from '../hooks/use_kibana';
 
 export const INVESTIGATION_AGENT_QUERY_KEY = ['nightshift.investigationAgent'] as const;
+
+/** Agent Builder 404s missing agents and 400s when the profile exists but is unavailable. */
+const isMissingInvestigationAgent = (error: unknown): boolean => {
+  if (isHttpNotFoundError(error)) return true;
+  if (getHttpErrorStatus(error) !== 400) return false;
+  const message = error instanceof Error ? error.message : String(error);
+  return message.includes('is not available');
+};
 
 export const noAgentPermissionReason = i18n.translate(
   'xpack.nightshift.agentConnectors.noPermission',
@@ -44,17 +52,28 @@ export function useAgentConnectors(): {
   const queryClient = useQueryClient();
 
   // The agent exists once Nightshift is enabled in the space, the first onboarding step.
-  const agent = useQuery<AgentWithPermissions, Error>({
+  // Before that (or after disable), Agent Builder 404s — treat as "no agent yet", not a load failure.
+  const agent = useQuery<AgentWithPermissions | null, Error>({
     queryKey: INVESTIGATION_AGENT_QUERY_KEY,
     enabled: agents != null,
-    queryFn: () => {
+    queryFn: async () => {
       if (!agents) throw new Error('Agent Builder is unavailable');
-      return agents.get(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
+      try {
+        return await agents.get(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
+      } catch (error) {
+        if (isMissingInvestigationAgent(error)) {
+          return null;
+        }
+        throw error;
+      }
     },
     retry: (failureCount, err) => !isHttpClientError(err) && failureCount < 3,
   });
 
-  const assignedIds = useMemo(() => agent.data?.configuration.connector_ids ?? [], [agent.data]);
+  const assignedIds = useMemo(
+    () => agent.data?.configuration.connector_ids ?? [],
+    [agent.data]
+  );
   const { actions } = application.capabilities;
   const canEditAgent =
     (agent.data?.permissions?.update_agent ?? false) &&

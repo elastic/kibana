@@ -52,7 +52,8 @@ export function useConnectorsByType(): {
   return {
     groups,
     isLoading: types.isLoading || connectors.isLoading || agent.isLoading,
-    error: types.error ?? connectors.error ?? agent.error,
+    // A missing investigation agent is not a connectors failure — show the cards with none assigned.
+    error: types.error ?? connectors.error ?? null,
     typesError: types.error,
     refetch: () => {
       if (types.error) void types.refetch();

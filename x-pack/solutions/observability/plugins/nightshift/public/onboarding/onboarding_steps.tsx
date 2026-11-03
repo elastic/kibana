@@ -10,13 +10,18 @@ import React from 'react';
 import { EuiIcon, EuiLink, EuiPanel, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export type OnboardingStepId = 'enable' | 'connect' | 'investigate' | 'automate';
+export type OnboardingStepId =
+  | 'enable'
+  | 'connect'
+  | 'sources'
+  | 'investigate'
+  | 'automate';
 
 export type OnboardingStepStatus = 'complete' | 'current' | 'disabled';
 
 export interface OnboardingStepState {
   status: OnboardingStepStatus;
-  /** Makes the step title a link to that step. */
+  /** Optional click handler for the step title. */
   onClick?: () => void;
   /** Short line under the step title. */
   hint?: string;
@@ -29,6 +34,9 @@ const STEP_TITLES: Record<OnboardingStepId, string> = {
   connect: i18n.translate('xpack.nightshift.onboarding.steps.connect', {
     defaultMessage: 'Add data',
   }),
+  sources: i18n.translate('xpack.nightshift.onboarding.steps.sources', {
+    defaultMessage: 'Connect other sources',
+  }),
   investigate: i18n.translate('xpack.nightshift.onboarding.steps.investigate', {
     defaultMessage: 'Try first investigation',
   }),
@@ -37,7 +45,13 @@ const STEP_TITLES: Record<OnboardingStepId, string> = {
   }),
 };
 
-const STEP_IDS: OnboardingStepId[] = ['enable', 'connect', 'investigate', 'automate'];
+const STEP_IDS: OnboardingStepId[] = [
+  'enable',
+  'connect',
+  'sources',
+  'investigate',
+  'automate',
+];
 
 /** The "Get started" card: a vertical stepper, then the current step's action. */
 export function OnboardingStepsCard({
