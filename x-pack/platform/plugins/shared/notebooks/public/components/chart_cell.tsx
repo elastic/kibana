@@ -166,6 +166,7 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
     const { EditPanel, attributes: initial } = editor;
     return (
       <NotebookFlyout
+        type="push"
         ownFocus
         paddingSize="m"
         hideCloseButton
