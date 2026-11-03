@@ -573,13 +573,18 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('adds lens visualization in new comment', async () => {
+        // The case is shared, so earlier comments may already hold a chart
+        const chartSelector =
+          '[data-test-subj="comment-comment-comment"] [data-test-subj="xyVisChart"]';
+        const chartsBefore = (await find.allByCssSelector(chartSelector)).length;
+
         await cases.singleCase.addVisualizationToNewComment(LENS_BASIC_XY_VIS_TITLE);
 
         await header.waitUntilLoadingHasFinished();
 
-        const newComment = await find.byCssSelector('[data-test-subj="comment-comment-comment"]');
-
-        await newComment.findByCssSelector('[data-test-subj="xyVisChart"]');
+        await retry.try(async () => {
+          expect((await find.allByCssSelector(chartSelector)).length).to.be(chartsBefore + 1);
+        });
       });
     });
 
