@@ -88,10 +88,14 @@ const getChangedParams = (previous: ParamMap, next: ParamMap): string[] =>
 const isMemoHit = (runtime: CellRuntime, memoKey: string, forced: boolean): boolean =>
   !forced && runtime.output !== undefined && runtime.memoKey === memoKey;
 
-const getOptions = ({ columns, rows }: Datatable): string[] => {
-  const [first] = columns;
-  if (!first) return [];
-  const values = rows.map((row) => row[first.id]);
+/** Distinct non-null values of `columnName`, or of the first column when no name is given. */
+const getOptions = ({ columns, rows }: Datatable, columnName?: string): string[] => {
+  const column =
+    columnName === undefined
+      ? columns[0]
+      : columns.find(({ id, name }) => id === columnName || name === columnName);
+  if (!column) return [];
+  const values = rows.map((row) => row[column.id]);
   return [...new Set(values.filter((value) => value !== null && value !== undefined).map(String))];
 };
 
@@ -362,14 +366,28 @@ export class NotebookScheduler {
       return;
     }
 
-    if (input.optionsSource === 'static') {
-      const options = [...new Set(input.staticOptions ?? [])];
-      const memoKey = objectHash({ options, params });
-      if (isMemoHit(runtime, memoKey, forced)) {
-        this.setStatus(id, 'done');
+    if (input.optionsSource === 'cell') {
+      const { optionsCell = null, optionsColumn = null } = input;
+      const source = optionsCell === null ? undefined : this.runtime(optionsCell).output;
+      const table = source?.kind === 'table' ? source.table : undefined;
+      const hasColumn = table?.columns.some(
+        ({ id: columnId, name }) => columnId === optionsColumn || name === optionsColumn
+      );
+      if (table && optionsColumn !== null && !hasColumn) {
+        const sourceName = optionsCell === null ? '' : this.cells[optionsCell]?.name ?? '';
+        this.publish(id, {
+          status: 'error',
+          error: `Column "${optionsColumn}" is not in the results of "${sourceName}"`,
+        });
         return;
       }
-      this.publish(id, { status: 'done', output: { kind: 'input', params, options }, memoKey });
+      const options = table && optionsColumn !== null ? getOptions(table, optionsColumn) : [];
+      this.publishOptions(id, params, options, forced);
+      return;
+    }
+
+    if (input.optionsSource === 'static') {
+      this.publishOptions(id, params, [...new Set(input.staticOptions ?? [])], forced);
       return;
     }
 
@@ -402,6 +420,16 @@ export class NotebookScheduler {
       lastRunAt: this.now().getTime(),
       durationMs,
     });
+  }
+
+  /** Publishes dropdown options that need no query of their own. */
+  private publishOptions(id: string, params: ParamMap, options: string[], forced: boolean): void {
+    const memoKey = objectHash({ options, params });
+    if (isMemoHit(this.runtime(id), memoKey, forced)) {
+      this.setStatus(id, 'done');
+      return;
+    }
+    this.publish(id, { status: 'done', output: { kind: 'input', params, options }, memoKey });
   }
 
   /** Runs a query, rejecting as soon as the evaluation is aborted so a superseded run never settles it. */

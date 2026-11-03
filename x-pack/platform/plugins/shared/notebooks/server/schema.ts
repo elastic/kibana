@@ -45,13 +45,17 @@ const inputSchema = schema.discriminatedUnion('kind', [
   }),
   schema.object({
     kind: schema.literal('dropdown'),
-    optionsSource: schema.maybe(schema.oneOf([schema.literal('query'), schema.literal('static')])),
+    optionsSource: schema.maybe(
+      schema.oneOf([schema.literal('query'), schema.literal('static'), schema.literal('cell')])
+    ),
     optionsQuery: querySchema,
     staticOptions: schema.maybe(
       schema.arrayOf(schema.string({ maxLength: MAX_VALUE_LENGTH }), {
         maxSize: MAX_STATIC_OPTIONS,
       })
     ),
+    optionsCell: schema.maybe(schema.nullable(idSchema)),
+    optionsColumn: schema.maybe(schema.nullable(schema.string({ maxLength: MAX_NAME_LENGTH }))),
     defaultValue: schema.nullable(schema.string({ maxLength: MAX_VALUE_LENGTH })),
   }),
   schema.object({

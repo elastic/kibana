@@ -70,6 +70,32 @@ describe('buildGraph', () => {
     expect(graph.errors.size).toBe(0);
   });
 
+  it('links a column-fed dropdown to its options cell, and flags a cycle through it', () => {
+    const columnDropdown = (optionsCell: string | null) =>
+      input('os', {
+        kind: 'dropdown',
+        optionsSource: 'cell',
+        optionsQuery: 'FROM logs | WHERE @timestamp >= ?_tstart',
+        optionsCell,
+        optionsColumn: 'os',
+        defaultValue: null,
+      });
+
+    const linked = graphOf([esql('hosts', 'FROM hosts'), columnDropdown('hosts')]);
+    expect(linked.parents.get('os')).toEqual(['hosts']);
+    expect(linked.errors.size).toBe(0);
+
+    const cyclic = graphOf([
+      esql('hosts', 'FROM hosts | WHERE os == ?os'),
+      columnDropdown('hosts'),
+    ]);
+    expect(cyclic.errors.get('os')).toMatch(/Circular reference/);
+
+    expect(graphOf([columnDropdown('gone')]).errors.get('os')).toBe(
+      'The options cell no longer exists'
+    );
+  });
+
   it('sorts cells topologically even when the notebook lists consumers first', () => {
     const graph = graphOf([
       chart('c', 'q'),

@@ -16,8 +16,8 @@ export interface TimeRangeValue {
   to: string;
 }
 
-/** Where a dropdown's options come from; absent means `query`. */
-export type DropdownOptionsSource = 'query' | 'static';
+/** Where a dropdown's options come from: its own query, a typed list, or a column of an ES|QL cell. Absent means `query`. */
+export type DropdownOptionsSource = 'query' | 'static' | 'cell';
 
 export type InputDefinition =
   | { kind: 'time'; defaultValue: TimeRangeValue; pinned?: boolean }
@@ -26,6 +26,10 @@ export type InputDefinition =
       optionsSource?: DropdownOptionsSource;
       optionsQuery: string;
       staticOptions?: string[];
+      /** Id of the ES|QL cell whose results feed the options when `optionsSource` is `cell`. */
+      optionsCell?: string | null;
+      /** Column of `optionsCell` whose distinct values become the options. */
+      optionsColumn?: string | null;
       defaultValue: string | null;
     }
   | {

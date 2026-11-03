@@ -128,6 +128,20 @@ export const buildGraph = (
       parents.set(cell.id, source?.type === 'esql' ? [source.id] : []);
       return;
     }
+    if (
+      cell.type === 'input' &&
+      cell.input.kind === 'dropdown' &&
+      cell.input.optionsSource === 'cell'
+    ) {
+      const { optionsCell = null } = cell.input;
+      const source = optionsCell === null ? undefined : cells[optionsCell];
+      if (optionsCell !== null && !source) addError(cell.id, 'The options cell no longer exists');
+      if (source && source.type !== 'esql') {
+        addError(cell.id, `Options cell "${source.name}" is not an ES|QL cell`);
+      }
+      parents.set(cell.id, source?.type === 'esql' ? [source.id] : []);
+      return;
+    }
     const params = getCellParamNames(cell);
     const unknown = params.filter((param) => !exposers.has(param));
     if (unknown.length > 0) {

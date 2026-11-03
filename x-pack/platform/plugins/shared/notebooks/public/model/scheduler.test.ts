@@ -802,6 +802,47 @@ describe('NotebookScheduler', () => {
       expect(env.fake.callsFor(optionsQuery)).toHaveLength(1);
     });
 
+    it("takes dropdown options from a column of another cell's results", async () => {
+      const hostsQuery = 'FROM logs | STATS c = COUNT() BY host, os';
+      const env = track(
+        setup([
+          esql('hosts', hostsQuery),
+          input('os', {
+            kind: 'dropdown',
+            optionsSource: 'cell',
+            optionsQuery: '',
+            optionsCell: 'hosts',
+            optionsColumn: 'os',
+            defaultValue: null,
+          }),
+        ])
+      );
+      env.fake.setRows(hostsQuery, [
+        { host: 'a', os: 'win', c: 1 },
+        { host: 'b', os: 'mac', c: 2 },
+        { host: 'c', os: 'win', c: 3 },
+      ]);
+      await env.open();
+
+      expect(env.fake.calls).toHaveLength(1);
+      expect(env.output('os')).toEqual({
+        kind: 'input',
+        params: { os: null },
+        options: ['win', 'mac'],
+      });
+
+      env.store.updateCell('os', (cell) =>
+        cell.type === 'input' && cell.input.kind === 'dropdown'
+          ? { ...cell, input: { ...cell.input, optionsColumn: 'missing' } }
+          : cell
+      );
+      await env.scheduler.whenIdle();
+      expect(env.runtime('os')).toEqual({
+        status: 'error',
+        error: 'Column "missing" is not in the results of "hosts"',
+      });
+    });
+
     it('loads dropdown options from the first column of its options query', async () => {
       const optionsQuery = 'FROM logs | WHERE @timestamp >= ?_tstart | STATS c = COUNT() BY os';
       const env = track(setup([pinnedTime('time'), dropdown('os', optionsQuery, 'win')]));

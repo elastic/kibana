@@ -46,6 +46,19 @@ const everyVariant = toNotebook([
     },
   },
   {
+    id: 'host',
+    name: 'host',
+    type: 'input',
+    input: {
+      kind: 'dropdown',
+      optionsSource: 'cell',
+      optionsQuery: '',
+      optionsCell: 'visits',
+      optionsColumn: 'c',
+      defaultValue: null,
+    },
+  },
+  {
     id: 'bytes',
     name: 'bytes',
     type: 'input',

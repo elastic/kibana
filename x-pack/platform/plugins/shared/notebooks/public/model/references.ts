@@ -38,7 +38,8 @@ export const getExposedParamNames = ({ name, input }: InputCellDefinition): stri
 export const getCellParamNames = (cell: CellDefinition): string[] => {
   if (cell.type === 'esql') return getQueryParamNames(cell.query);
   if (cell.type === 'input' && cell.input.kind === 'dropdown') {
-    return cell.input.optionsSource === 'static' ? [] : getQueryParamNames(cell.input.optionsQuery);
+    const { optionsSource = 'query', optionsQuery } = cell.input;
+    return optionsSource === 'query' ? getQueryParamNames(optionsQuery) : [];
   }
   return [];
 };
