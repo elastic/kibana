@@ -8,7 +8,14 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { createEsClient } from './es_client';
 import { EsProxyPlugin } from './plugin';
+
+jest.mock('./es_client', () => ({
+  createEsClient: jest.fn(jest.requireActual('./es_client').createEsClient),
+}));
+
+const createEsClientMock = jest.mocked(createEsClient);
 
 const setup = () => {
   const coreSetup = coreMock.createSetup();
@@ -74,5 +81,25 @@ describe('WHEN using the browser Elasticsearch proxy client', () => {
     await expect(contract.stream({ method: 'GET', path: '' })).rejects.toThrow(
       'No response received'
     );
+  });
+
+  it('SHOULD return the same client from every getClient call', async () => {
+    const { contract } = setup();
+
+    const [first, second] = await Promise.all([contract.getClient(), contract.getClient()]);
+
+    expect(first).toBe(second);
+  });
+
+  it('SHOULD load the client again WHEN an earlier load failed', async () => {
+    const { contract } = setup();
+    createEsClientMock.mockImplementationOnce(() => {
+      throw new Error('Loading chunk failed');
+    });
+
+    await expect(contract.getClient()).rejects.toThrow('Loading chunk failed');
+    const client = await contract.getClient();
+
+    expect(client.search).toEqual(expect.any(Function));
   });
 });

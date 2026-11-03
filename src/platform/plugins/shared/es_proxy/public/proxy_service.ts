@@ -39,7 +39,11 @@ export const proxyService = (http: HttpSetup): EsProxyPluginSetup => {
       return response;
     },
     getClient: () => {
-      client ??= loadClient();
+      // A failed load is not cached, so a later call can retry, for example after a chunk load error.
+      client ??= loadClient().catch((error) => {
+        client = undefined;
+        throw error;
+      });
       return client;
     },
   };
