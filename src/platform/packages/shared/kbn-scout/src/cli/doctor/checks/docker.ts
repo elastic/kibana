@@ -110,7 +110,7 @@ const dockerDaemonCheck: DoctorCheck = {
         fix,
         hint: fix
           ? 'restarts Docker Desktop and stops its containers'
-          : `Give Docker ${recommended} if this machine allows it (Docker Desktop settings → Resources)`,
+          : 'raise them in Docker Desktop settings → Resources',
       }
     );
   },
@@ -132,7 +132,6 @@ export const dockerChecks: DoctorCheck[] = [
       ]);
       if (!output) {
         return warn(`${ES_SERVERLESS_DEFAULT_IMAGE} is not pulled yet`, {
-          hint: 'If the pull fails, log in at https://docker-auth.elastic.co/github_auth',
           fix: { command: `docker pull ${ES_SERVERLESS_DEFAULT_IMAGE}` },
         });
       }
@@ -160,7 +159,7 @@ export const dockerChecks: DoctorCheck[] = [
       const scoutServerPids = running.length ? await getScoutServerPids() : [];
       if (scoutServerPids.length) {
         return pass(
-          `Serverless containers belong to the running Scout servers (PID ${scoutServerPids.join(
+          `Serverless containers belong to running Scout servers (PID ${scoutServerPids.join(
             ', '
           )})`
         );

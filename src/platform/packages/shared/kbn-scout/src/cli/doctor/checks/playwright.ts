@@ -79,7 +79,7 @@ export const playwrightChecks: DoctorCheck[] = [
       const revisions = [...new Set(oldDirs.map((oldDir) => oldDir.revision))];
 
       return warn(`Old Chromium revisions ${revisions.join(', ')} use ${formatBytes(size)}`, {
-        hint: 'Other branches may still need them',
+        hint: 'other branches may need them',
         fix: {
           command: `rm -rf ${tildify(cacheDir)}/${braces([
             ...new Set(oldDirs.map(({ dir }) => dir.replace(/-\d+$/, ''))),

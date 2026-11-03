@@ -97,24 +97,22 @@ const checkUsers = (file: string, users: Users, expected: string[], copyFix?: Fi
 
   const message = `${file} has no users for ${
     missing.length === 1 ? quoteRoles(missing) : `${missing.length} roles`
-  }, tests that log in with ${missing.length === 1 ? 'it' : 'them'} will fail`;
+  }`;
   const remedy = {
     ...(missing.length > 1 ? { details: quoteRoles(missing) } : {}),
-    ...(copyFix
-      ? { fix: copyFix, hint: `copy them only if they are ${getEnvironment()} users` }
-      : {}),
+    ...(copyFix ? { fix: copyFix, hint: `only if they are ${getEnvironment()} users` } : {}),
   };
   return missing.includes('admin') ? fail(message, remedy) : warn(message, remedy);
 };
 
 const checkCustomRoleUser = (file: string, users: Users, remedy: Fix | string): CheckResult =>
   getDefinedRoles(users).includes(CUSTOM_ROLE)
-    ? pass(`${file} has a user for custom role tests ("${CUSTOM_ROLE}")`)
+    ? pass(`${file} has a custom role user ("${CUSTOM_ROLE}")`)
     : warn(
-        `${file} has no user for custom role tests ("${CUSTOM_ROLE}"), they will fail`,
+        `${file} has no custom role user ("${CUSTOM_ROLE}")`,
         typeof remedy === 'string'
           ? { hint: remedy }
-          : { fix: remedy, hint: `copy them only if they are ${getEnvironment()} users` }
+          : { fix: remedy, hint: `only if they are ${getEnvironment()} users` }
       );
 
 /** For the QAF create command, which assigns the custom role to this user */
@@ -172,13 +170,11 @@ const environmentCheck: DoctorCheck = {
     const env = getEnvironment();
     if (!QAF_ENVIRONMENTS.includes(env)) {
       return fail(`QAF doesn't support EC_ENV=${env}`, {
-        hint: `use one of ${QAF_ENVIRONMENTS.join(', ')}`,
+        hint: `use ${QAF_ENVIRONMENTS.join(', ')}`,
       });
     }
     return pass(
-      `Elastic Cloud environment ${env} (${
-        process.env.EC_ENV ? 'EC_ENV' : 'default, set EC_ENV to change'
-      })`
+      `Elastic Cloud environment ${env} (${process.env.EC_ENV ? 'from EC_ENV' : 'EC_ENV not set'})`
     );
   },
 };
@@ -208,7 +204,7 @@ const qafCustomRoleCheck: DoctorCheck = {
       `${tildify(CLOUD_SECRETS_FILE)} (${getEnvironment()})`,
       await readCloudUsers(),
       (await getCopyFtrUsersFix([CUSTOM_ROLE])) ??
-        `add it under role_credentials.${getEnvironment()}, QAF assigns the custom role to it when it creates the project`
+        `add it under role_credentials.${getEnvironment()}, QAF assigns the role when creating a project`
     ),
 };
 
@@ -218,7 +214,7 @@ const apiKeyCheck: DoctorCheck = {
   run: async () => {
     if (!Fs.existsSync(CLOUD_SECRETS_FILE)) {
       return fail(`${tildify(CLOUD_SECRETS_FILE)} does not exist`, {
-        hint: 'QAF reads the Elastic Cloud API key and Cloud users from it',
+        hint: 'QAF reads the API key and Cloud users from it',
       });
     }
 
@@ -227,13 +223,10 @@ const apiKeyCheck: DoctorCheck = {
     const keyName = keySet ? `${keySet}_${getEnvironment()}` : getEnvironment();
     const secrets = await readJson<CloudSecrets>(CLOUD_SECRETS_FILE);
     return secrets?.api_key?.[keyName]
-      ? pass(`Elastic Cloud API key (${keyName}) is set in ${tildify(CLOUD_SECRETS_FILE)}`)
-      : fail(
-          `No Elastic Cloud API key under api_key.${keyName} in ${tildify(CLOUD_SECRETS_FILE)}`,
-          {
-            hint: 'QAF needs it to create projects and deployments',
-          }
-        );
+      ? pass(`${tildify(CLOUD_SECRETS_FILE)} has API key "${keyName}"`)
+      : fail(`${tildify(CLOUD_SECRETS_FILE)} has no API key "${keyName}"`, {
+          hint: 'QAF needs it to create projects and deployments',
+        });
   },
 };
 
@@ -287,7 +280,7 @@ const scoutUsersCheck = (arch: DoctorArch, configCheck: DoctorCheck): DoctorChec
     const users = await readJson<Users>(usersFile);
     if (!users) {
       return fail(`${displayPath(usersFile)} does not exist`, {
-        hint: `${configFile} reads Cloud users from it`,
+        hint: `set as cloudUsersFilePath in ${configFile}`,
       });
     }
 
@@ -305,7 +298,7 @@ const scoutKibanaCheck = (arch: DoctorArch, configCheck: DoctorCheck): DoctorChe
       await readJson(Path.resolve(REPO_ROOT, SCOUT_CLOUD_CONFIGS[arch]))
     );
     const { host } = new URL(hosts.kibana);
-    const remedy = { hint: 'the project or deployment may be deleted, create a new one' };
+    const remedy = { hint: 'the project or deployment may be deleted' };
     try {
       const response = await fetch(new URL('/api/status', hosts.kibana), {
         headers: {
@@ -316,7 +309,7 @@ const scoutKibanaCheck = (arch: DoctorArch, configCheck: DoctorCheck): DoctorChe
         signal: AbortSignal.timeout(KIBANA_TIMEOUT_MS),
       });
       if (response.status === 401) {
-        return fail(`Kibana at ${host} rejects the credentials in auth`);
+        return fail(`Kibana at ${host} rejects the auth credentials`);
       }
       if (!response.ok) {
         return fail(`Kibana at ${host} responds with ${response.status}`, remedy);
@@ -343,11 +336,9 @@ const scoutCustomRoleCheck = (arch: DoctorArch, configCheck: DoctorCheck): Docto
     );
     if (arch === 'stateful') {
       return customSamlProviderName
-        ? pass(
-            `${configFile} logs in custom roles through SAML provider "${customSamlProviderName}"`
-          )
-        : warn(`${configFile} has no customSamlProviderName, custom role tests will fail`, {
-            hint: 'create the deployment with qaf elastic-cloud deployments create --add-custom-saml-realm and set "customSamlProviderName": "qaf"',
+        ? pass(`${configFile} logs in custom roles via SAML provider "${customSamlProviderName}"`)
+        : warn(`${configFile} has no customSamlProviderName for custom roles`, {
+            hint: 'create the deployment with --add-custom-saml-realm, then set "customSamlProviderName": "qaf"',
           });
     }
 
@@ -355,7 +346,7 @@ const scoutCustomRoleCheck = (arch: DoctorArch, configCheck: DoctorCheck): Docto
     return checkCustomRoleUser(
       displayPath(usersFile),
       (await readJson<Users>(usersFile)) ?? {},
-      'create the custom role in the project and assign it to the user'
+      'add a user with the custom role in the project'
     );
   },
 });
@@ -365,7 +356,7 @@ const qafRunFileCheck = (file: string, arch?: DoctorArch): DoctorCheck => ({
   arch,
   run: async () =>
     warn(`QAF won't run while ${file} exists`, {
-      hint: 'direct Scout runs use it, remove it to run with QAF',
+      hint: 'used by direct Scout runs',
       fix: { command: `rm -f ${file}`, destructive: true },
     }),
 });

@@ -36,7 +36,6 @@ export const esSnapshotChecks: DoctorCheck[] = [
       const stats = await Fs.promises.stat(path).catch(() => undefined);
       if (!stats) {
         return warn(`Elasticsearch ${version}-SNAPSHOT is not cached`, {
-          hint: 'start-server also downloads it on the first run (~600 MB)',
           fix: { command: 'node scripts/es snapshot --download-only' },
         });
       }
@@ -70,7 +69,7 @@ export const esSnapshotChecks: DoctorCheck[] = [
       return warn(
         `Snapshots for ${versions.join(', ')} use ${formatBytes(sizes.reduce((a, b) => a + b, 0))}`,
         {
-          hint: 'Other branches may still need them',
+          hint: 'other branches may need them',
           fix: {
             command: `rm -f .es/cache/elasticsearch-${braces(versions)}-SNAPSHOT-*`,
             destructive: true,

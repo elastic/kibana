@@ -31,7 +31,7 @@ export const environmentChecks: DoctorCheck[] = [
         });
       }
       if (lockfile && lockfile.mtimeMs > installed.mtimeMs) {
-        return warn('Kibana bootstrap is out of date, pnpm-lock.yaml changed after it', {
+        return warn('Kibana bootstrap is out of date, pnpm-lock.yaml changed', {
           fix: { command: 'node scripts/kbn bootstrap' },
         });
       }
@@ -44,7 +44,7 @@ export const environmentChecks: DoctorCheck[] = [
       const { bavail, bsize } = await Fs.promises.statfs(REPO_ROOT);
       const free = bavail * bsize;
       return free < MIN_FREE_DISK_SPACE
-        ? warn(`Only ${formatBytes(free)} free disk space, ES and browsers need more`)
+        ? warn(`Only ${formatBytes(free)} free disk space, 20 GB recommended`)
         : pass(`${formatBytes(free)} free disk space`);
     },
   },

@@ -74,7 +74,7 @@ const portCheck = (name: string, port: number): DoctorCheck => ({
       return fail(
         `${name} port ${port} is used by Scout servers (PID ${scoutServerPids.join(', ')})`,
         {
-          hint: 'stops the running Scout servers, say no to keep using them',
+          hint: 'stops the running Scout servers',
           fix: await stopScoutServersFix(scoutServerPids),
         }
       );
