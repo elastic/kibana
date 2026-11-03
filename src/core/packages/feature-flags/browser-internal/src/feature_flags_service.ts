@@ -177,7 +177,14 @@ export class FeatureFlagsService {
         startWith([flagName]) // only to emit on the first call
       );
 
-    await this.waitForProviderInitialization();
+    try {
+      await this.waitForProviderInitialization();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Feature flags provider failed to initialize. Evaluations use fallbacks until it recovers: ${message}`
+      );
+    }
 
     const getBooleanValue = (flagName: string, fallbackValue: boolean) =>
       this.evaluateFlag(this.featureFlagsClient.getBooleanValue, flagName, fallbackValue);

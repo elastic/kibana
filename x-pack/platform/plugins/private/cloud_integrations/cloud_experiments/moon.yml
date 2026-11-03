@@ -29,6 +29,7 @@ dependsOn:
   - '@kbn/core-feature-flags-browser'
   - '@kbn/core-feature-flags-server'
   - '@kbn/config'
+  - '@kbn/core-http-common'
 tags:
   - plugin
   - prod

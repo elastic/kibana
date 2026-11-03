@@ -101,6 +101,24 @@ describe('FeatureFlagsService Browser', () => {
       await expect(isSettledPromise(startPromise)).resolves.toBe(true);
     });
 
+    test('continues startup when the provider fails to initialize', async () => {
+      const coreContext = coreContextMock.create();
+      const service = new FeatureFlagsService(coreContext);
+      const { setProvider } = service.setup(createSetupDeps());
+      const spy = jest
+        .spyOn(OpenFeature, 'setProviderAndWait')
+        .mockRejectedValueOnce(new Error('provider down'));
+      setProvider({} as Provider);
+
+      await expect(service.start()).resolves.toEqual(expect.any(Object));
+      expect(coreContext.logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('provider down')
+      );
+
+      spy.mockRestore();
+      await service.stop();
+    });
+
     test('do not hold for too long during initialization', async () => {
       const { setProvider } = featureFlagsService.setup(createSetupDeps());
       const spy = jest.spyOn(OpenFeature, 'setProviderAndWait').mockImplementationOnce(async () => {

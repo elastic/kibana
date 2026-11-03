@@ -10,9 +10,8 @@ import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { LaunchDarklyClientProvider } from '@openfeature/launchdarkly-client-provider';
-import { type LDLogLevel, basicLogger } from '@launchdarkly/js-client-sdk';
 import { initializeMetadata, MetadataService } from '../common/metadata_service';
+import { createKibanaOfrepProvider } from './kibana_ofrep_provider';
 
 interface CloudExperimentsPluginSetupDeps {
   cloud: CloudSetup;
@@ -22,13 +21,9 @@ interface CloudExperimentsPluginStartDeps {
   dataViews: DataViewsPublicPluginStart;
 }
 
-interface LaunchDarklyClientConfig {
-  client_id: string;
-  client_log_level: LDLogLevel;
-}
-
 /**
- * Browser-side implementation of the Cloud Experiments plugin
+ * Browser-side implementation of the Cloud Experiments plugin.
+ * Flag evaluation goes through Kibana. LaunchDarkly stays on the server.
  */
 export class CloudExperimentsPlugin
   implements Plugin<void, void, CloudExperimentsPluginSetupDeps, CloudExperimentsPluginStartDeps>
@@ -40,7 +35,6 @@ export class CloudExperimentsPlugin
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     const config = initializerContext.config.get<{
-      launch_darkly?: LaunchDarklyClientConfig;
       metadata_refresh_interval: string;
     }>();
 
@@ -48,19 +42,10 @@ export class CloudExperimentsPlugin
       { metadata_refresh_interval: duration(config.metadata_refresh_interval) },
       this.logger.get('metadata')
     );
-
-    const ldConfig = config.launch_darkly;
-    if (!ldConfig?.client_id && !initializerContext.env.mode.dev) {
-      // If the plugin is enabled, and it's in prod mode, launch_darkly must exist
-      // (config-schema should enforce it, but just in case).
-      throw new Error(
-        'xpack.cloud_integrations.experiments.launch_darkly configuration should exist'
-      );
-    }
   }
 
   /**
-   * Sets up the A/B testing client only if cloud is enabled
+   * Sets up the feature-flag provider when the plugin is enabled.
    * @param core {@link CoreSetup}
    * @param deps {@link CloudExperimentsPluginSetupDeps}
    */
@@ -73,11 +58,14 @@ export class CloudExperimentsPlugin
       logger: this.logger,
     });
 
-    const initialFeatureFlags = core.featureFlags.getInitialFeatureFlags();
-    const launchDarklyOpenFeatureProvider = this.createOpenFeatureProvider(initialFeatureFlags);
-    if (launchDarklyOpenFeatureProvider) {
-      core.featureFlags.setProvider(launchDarklyOpenFeatureProvider);
-    }
+    core.featureFlags.setProvider(
+      createKibanaOfrepProvider({
+        basePath: core.http.basePath,
+        kibanaVersion: this.initializerContext.env.packageInfo.version,
+        initialFlags: core.featureFlags.getInitialFeatureFlags(),
+        logger: this.logger,
+      })
+    );
   }
 
   /**
@@ -96,36 +84,5 @@ export class CloudExperimentsPlugin
    */
   public stop() {
     this.metadataService.stop();
-  }
-
-  /**
-   * Sets up the OpenFeature LaunchDarkly provider
-   * @internal
-   */
-  private createOpenFeatureProvider(initialFeatureFlags: Record<string, unknown>) {
-    const { launch_darkly: ldConfig } = this.initializerContext.config.get<{
-      launch_darkly?: LaunchDarklyClientConfig;
-    }>();
-
-    if (!ldConfig) return;
-
-    const bootstrap = Object.keys(initialFeatureFlags).length > 0 ? initialFeatureFlags : undefined;
-
-    return new LaunchDarklyClientProvider(ldConfig.client_id, {
-      // logger: this.logger.get('launch-darkly'),
-      // Using basicLogger for now because we can't limit the level for now if we're using core's logger.
-      logger: basicLogger({ level: ldConfig.client_log_level }),
-      streaming: true, // Necessary to react to flag changes
-      applicationInfo: {
-        id: 'kibana-browser',
-        version:
-          this.initializerContext.env.packageInfo.buildFlavor === 'serverless'
-            ? this.initializerContext.env.packageInfo.buildSha
-            : this.initializerContext.env.packageInfo.version,
-      },
-      bootstrap,
-      // Remove the query params from the URL
-      eventUrlTransformer: (url) => url.split('?')[0],
-    });
   }
 }

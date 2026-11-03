@@ -9,7 +9,7 @@ import { duration } from 'moment';
 import { coreMock } from '@kbn/core/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { LaunchDarklyClientProviderMocked } from './plugin.test.mocks';
+import { OFREPWebProviderMocked } from './plugin.test.mocks';
 import { CloudExperimentsPlugin } from './plugin';
 import { MetadataService } from '../common/metadata_service';
 
@@ -35,25 +35,24 @@ describe('Cloud Experiments public plugin', () => {
       expect(plugin).toHaveProperty('metadataService', expect.any(MetadataService));
     });
 
-    test('fails if launch_darkly is not provided in the config and it is a non-dev environment', () => {
+    test('does not require a LaunchDarkly client id in production', () => {
       const initializerContext = coreMock.createPluginInitializerContext();
       initializerContext.env.mode = {
         name: 'production',
         dev: false,
-        prod: true, // ensure it's true
+        prod: true,
       };
-      expect(() => new CloudExperimentsPlugin(initializerContext)).toThrow(
-        'xpack.cloud_integrations.experiments.launch_darkly configuration should exist'
-      );
+      expect(() => new CloudExperimentsPlugin(initializerContext)).not.toThrow();
     });
   });
+
+  const createCoreSetup = (basePath = '') => coreMock.createSetup({ basePath });
 
   describe('setup', () => {
     let plugin: CloudExperimentsPlugin;
 
     beforeEach(() => {
       const initializerContext = coreMock.createPluginInitializerContext({
-        launch_darkly: { client_id: '1234' },
         metadata_refresh_interval: duration(1, 'h'),
       });
       plugin = new CloudExperimentsPlugin(initializerContext);
@@ -65,36 +64,43 @@ describe('Cloud Experiments public plugin', () => {
 
     test('returns no contract', () => {
       expect(
-        plugin.setup(coreMock.createSetup(), {
+        plugin.setup(createCoreSetup(), {
           cloud: cloudMock.createSetup(),
         })
       ).toBeUndefined();
     });
 
-    test('leverages the injected initial feature flags when creating the new client', () => {
-      const coreSetup = coreMock.createSetup();
+    test('points the OFREP provider at Kibana and seeds it with the injected flags', () => {
+      const coreSetup = createCoreSetup('/kbn');
       coreSetup.featureFlags.getInitialFeatureFlags.mockReturnValue({
         'my-initial-flag': true,
       });
       plugin.setup(coreSetup, { cloud: cloudMock.createSetup() });
-      expect(LaunchDarklyClientProviderMocked).toHaveBeenCalledWith(
-        '1234',
-        expect.objectContaining({
-          bootstrap: { 'my-initial-flag': true },
-        })
-      );
-    });
 
-    test('use undefined bootstrap when creating the new client and no provided initial feature flags', () => {
-      const coreSetup = coreMock.createSetup();
-      coreSetup.featureFlags.getInitialFeatureFlags.mockReturnValue({});
-      plugin.setup(coreSetup, { cloud: cloudMock.createSetup() });
-      expect(LaunchDarklyClientProviderMocked).toHaveBeenCalledWith(
-        '1234',
+      expect(OFREPWebProviderMocked).toHaveBeenCalledWith(
         expect.objectContaining({
-          bootstrap: undefined,
+          baseUrl: `${window.location.origin}/kbn/internal/feature-flags/`,
+          pollInterval: 30_000,
+          changeDetection: 'polling',
+          cacheMode: 'network-first',
+          headers: expect.arrayContaining([
+            ['kbn-version', 'version'],
+            ['kbn-xsrf', 'kibana'],
+            ['x-elastic-internal-origin', 'Kibana'],
+          ]),
         })
       );
+      expect(coreSetup.featureFlags.setProvider).toHaveBeenCalledWith(
+        expect.objectContaining({ metadata: { name: 'Kibana OFREP provider' } })
+      );
+      expect(
+        coreSetup.featureFlags.setProvider.mock.calls[0][0].resolveBooleanEvaluation(
+          'my-initial-flag',
+          false,
+          {},
+          { error() {}, warn() {}, info() {}, debug() {} }
+        )
+      ).toEqual({ value: true, reason: 'CACHED' });
     });
   });
 
@@ -103,7 +109,7 @@ describe('Cloud Experiments public plugin', () => {
 
     beforeEach(() => {
       const initializerContext = coreMock.createPluginInitializerContext({
-        launch_darkly: { client_id: '1234' },
+        metadata_refresh_interval: duration(1, 'h'),
       });
       plugin = new CloudExperimentsPlugin(initializerContext);
     });
@@ -113,7 +119,7 @@ describe('Cloud Experiments public plugin', () => {
     });
 
     test('returns the contract', () => {
-      plugin.setup(coreMock.createSetup(), { cloud: cloudMock.createSetup() });
+      plugin.setup(createCoreSetup(), { cloud: cloudMock.createSetup() });
       const startContract = plugin.start(coreMock.createStart(), {
         dataViews: dataViewPluginMocks.createStartContract(),
       });
@@ -121,7 +127,7 @@ describe('Cloud Experiments public plugin', () => {
     });
 
     test('updates the context with `has_data`', async () => {
-      const coreSetup = coreMock.createSetup();
+      const coreSetup = createCoreSetup();
       plugin.setup(coreSetup, {
         cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
       });
@@ -147,12 +153,10 @@ describe('Cloud Experiments public plugin', () => {
 
     beforeEach(() => {
       const initializerContext = coreMock.createPluginInitializerContext({
-        launch_darkly: { client_id: '1234' },
-        flag_overrides: { my_flag: '1234' },
         metadata_refresh_interval: duration(1, 'h'),
       });
       plugin = new CloudExperimentsPlugin(initializerContext);
-      plugin.setup(coreMock.createSetup(), {
+      plugin.setup(createCoreSetup(), {
         cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
       });
       plugin.start(coreMock.createStart(), {

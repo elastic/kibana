@@ -40,12 +40,14 @@ import {
 } from 'rxjs';
 import { get } from 'lodash';
 import type { InitialFeatureFlagsGetter } from '@kbn/core-feature-flags-server/src/contracts';
+import type { IRouter } from '@kbn/core-http-server';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import { schema } from '@kbn/config-schema';
 import { createOpenFeatureLogger } from './create_open_feature_logger';
 import { setProviderWithRetries } from './set_provider_with_retries';
 import { type FeatureFlagsConfig, featureFlagsConfig } from './feature_flags_config';
 import { incrementCounter } from './increment_counter';
+import { registerOfrepRoutes } from './ofrep_routes';
 
 /**
  * Core-internal contract for the setup lifecycle step.
@@ -132,7 +134,7 @@ export class FeatureFlagsService {
         this.overrides$.next(getFlattenedObject(overrides));
       });
 
-    this.registerCounterRoute(http);
+    this.registerRoutes(http);
 
     return {
       getOverrides: () => this.overrides$.value,
@@ -300,8 +302,14 @@ export class FeatureFlagsService {
     this.contextChanged$.next();
   }
 
-  private registerCounterRoute(http: InternalHttpServiceSetup): void {
-    http.createRouter('').post(
+  private registerRoutes(http: InternalHttpServiceSetup): void {
+    const router = http.createRouter('');
+    this.registerCounterRoute(router);
+    registerOfrepRoutes(router, () => this.initialFeatureFlagsGetter(), this.logger);
+  }
+
+  private registerCounterRoute(router: IRouter): void {
+    router.post(
       {
         path: '/internal/feature-flags/{flagName}/counter',
         validate: {
