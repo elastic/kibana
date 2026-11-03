@@ -1,9 +1,6 @@
 {
   "type": "shared-common",
   "id": "@kbn/item-buffer",
-  "owner": [
-    "@elastic/appex-sharedux"
-  ],
   "group": "platform",
   "visibility": "private"
 }
