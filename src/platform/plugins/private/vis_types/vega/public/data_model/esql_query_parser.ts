@@ -12,8 +12,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { getTime } from '@kbn/data-plugin/public';
 import { buildEsQuery } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import { getESQLTimeField, getNamedParams } from '@kbn/esql-utils';
-import type { GeoPrecisions } from '@kbn/geo-precision';
+import { getESQLTimeField, getNamedParams, type GeoPrecisionParams } from '@kbn/esql-utils';
 import { getHttp } from '../services';
 import type { TimeCache } from './time_cache';
 import type { SearchAPI } from './search_api';
@@ -86,7 +85,7 @@ export class EsqlQueryParser {
   readonly _filters: Bool;
   readonly _onWarning: (...args: string[]) => void;
   readonly _esqlVariables?: ESQLControlVariable[];
-  readonly _geoPrecisions?: GeoPrecisions;
+  readonly _geoPrecision?: GeoPrecisionParams;
   approximationApplied: boolean | undefined = undefined;
 
   constructor(
@@ -95,14 +94,14 @@ export class EsqlQueryParser {
     filters: Bool,
     onWarning: (...args: string[]) => void,
     esqlVariables?: ESQLControlVariable[],
-    geoPrecisions?: GeoPrecisions
+    geoPrecision?: GeoPrecisionParams
   ) {
     this._timeCache = timeCache;
     this._searchAPI = searchAPI;
     this._filters = filters;
     this._onWarning = onWarning;
     this._esqlVariables = esqlVariables;
-    this._geoPrecisions = geoPrecisions;
+    this._geoPrecision = geoPrecision;
   }
 
   /**
@@ -246,7 +245,7 @@ export class EsqlQueryParser {
    */
   private _injectNamedParams(query: string, url: InternalEsqlUrlObject): InjectedParams {
     const params: Record<string, unknown>[] = [
-      ...getNamedParams(query, this._getTimeRange(), this._esqlVariables, this._geoPrecisions),
+      ...getNamedParams(query, this._getTimeRange(), this._esqlVariables, this._geoPrecision),
     ];
     const boundKeys = new Set(params.flatMap((param) => Object.keys(param)));
 

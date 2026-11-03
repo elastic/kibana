@@ -17,9 +17,8 @@ import {
   getESQLQueryColumnsRaw,
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
-  getGeoPrecisionParams,
   getProjectRoutingFromEsqlQuery,
-  getStartEndParams,
+  getNamedParams,
   hasAggregatingCommand,
   hasGeohashPrecisionParam,
   hasGeohexPrecisionParam,
@@ -270,14 +269,10 @@ export class ESQLSource
       }
     }
 
-    const namedParams = [
-      ...getStartEndParams(this._descriptor.esql, timeRange),
-      ...getGeoPrecisionParams(this._descriptor.esql, {
-        geotile: this.getGeotilePrecision(requestMeta.zoom),
-        geohex: this.getGeohexPrecision(requestMeta.zoom),
-        geohash: this.getGeohashPrecision(requestMeta.zoom),
-      }),
-    ];
+    const namedParams = getNamedParams(this._descriptor.esql, timeRange, undefined, {
+      zoom: requestMeta.zoom,
+      resolution: this._getResolution(),
+    });
     if (namedParams.length) {
       params.params = namedParams;
     }
@@ -394,30 +389,6 @@ export class ESQLSource
     );
   }
 
-  /**
-   * Geotile precision bound to `?_geotile_precision`, calculated from the map zoom and
-   * the source's grid resolution (same calculation as the geo grid source).
-   */
-  getGeotilePrecision(zoom: number): number {
-    return getGeotilePrecision(zoom, this._getResolution());
-  }
-
-  /**
-   * Geohex (H3) resolution bound to `?_geohex_precision`, calculated from the map zoom and
-   * the source's grid resolution (same calculation as hex layers rendered with vector tiles).
-   */
-  getGeohexPrecision(zoom: number): number {
-    return getGeohexPrecision(zoom, this._getResolution());
-  }
-
-  /**
-   * Geohash precision bound to `?_geohash_precision`, calculated from the map zoom and
-   * the source's grid resolution so geohash cells have a similar size to geotile cells.
-   */
-  getGeohashPrecision(zoom: number): number {
-    return getGeohashPrecision(zoom, this._getResolution());
-  }
-
   private _getResolution() {
     return this._descriptor.resolution ?? DEFAULT_GRID_RESOLUTION;
   }
@@ -425,13 +396,13 @@ export class ESQLSource
   getSyncMeta(dataFilters?: DataFilters): ESQLSourceSyncMeta {
     return {
       ...(dataFilters && hasGeotilePrecisionParam(this._descriptor.esql)
-        ? { geotilePrecision: this.getGeotilePrecision(dataFilters.zoom) }
+        ? { geotilePrecision: getGeotilePrecision(dataFilters.zoom, this._getResolution()) }
         : {}),
       ...(dataFilters && hasGeohexPrecisionParam(this._descriptor.esql)
-        ? { geohexPrecision: this.getGeohexPrecision(dataFilters.zoom) }
+        ? { geohexPrecision: getGeohexPrecision(dataFilters.zoom, this._getResolution()) }
         : {}),
       ...(dataFilters && hasGeohashPrecisionParam(this._descriptor.esql)
-        ? { geohashPrecision: this.getGeohashPrecision(dataFilters.zoom) }
+        ? { geohashPrecision: getGeohashPrecision(dataFilters.zoom, this._getResolution()) }
         : {}),
       dateField: this._descriptor.dateField,
       esql: this._descriptor.esql,

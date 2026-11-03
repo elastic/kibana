@@ -21,7 +21,6 @@ import { compile, version as vegaLiteVersion } from 'vega-lite';
 
 import type { CoreTheme } from '@kbn/core/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import { getGeoPrecisionsForZoom } from './geo_precisions';
 import { EsQueryParser } from './es_query_parser';
 import { EsqlQueryParser } from './esql_query_parser';
 import { Utils, getDefaultAreaGradientFill, getVegaThemeColors } from './utils';
@@ -651,9 +650,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
           onWarn,
           this.esqlVariables,
           // Map zoom is only known for `type: map` specs
-          this.useMap
-            ? getGeoPrecisionsForZoom(this.mapZoom ?? this.mapConfig?.zoom ?? 0)
-            : undefined
+          this.useMap ? { zoom: this.mapZoom ?? this.mapConfig?.zoom ?? 0 } : undefined
         ),
         emsfile: new EmsFileParser(serviceSettings),
         url: new UrlParser(onWarn),

@@ -90,9 +90,9 @@ export {
   hasGeotilePrecisionParam,
   hasGeohexPrecisionParam,
   hasGeohashPrecisionParam,
-  getGeoPrecisionParams,
   getNamedParams,
   getEsqlSearchParams,
+  type GeoPrecisionParams,
 } from './utils/run_query';
 export {
   isESQLColumnSortable,

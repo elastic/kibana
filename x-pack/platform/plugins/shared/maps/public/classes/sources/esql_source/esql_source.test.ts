@@ -29,15 +29,14 @@ jest.mock('../../../kibana_services', () => ({
   getIndexPatternService: () => ({}),
 }));
 
-const mockGetGeoPrecisionParams = jest.fn().mockReturnValue([]);
+const mockGetNamedParams = jest.fn().mockReturnValue([]);
 
 jest.mock('@kbn/esql-utils', () => ({
   getESQLQueryColumnsRaw: () => mockGetESQLQueryColumnsRaw(),
   getLimitFromESQLQuery: (...args: any[]) => mockGetLimitFromESQLQuery(...args),
-  getStartEndParams: () => [],
+  getNamedParams: (...args: any[]) => mockGetNamedParams(...args),
   hasStartEndParams: () => false,
   hasAggregatingCommand: (query: string) => /\|\s*stats\b/i.test(query),
-  getGeoPrecisionParams: (...args: any[]) => mockGetGeoPrecisionParams(...args),
   hasGeohexPrecisionParam: (query: string) => query.includes('?_geohex_precision'),
   hasGeohashPrecisionParam: (query: string) => query.includes('?_geohash_precision'),
   hasGeotilePrecisionParam: (query: string) => query.includes('?_geotile_precision'),
@@ -166,7 +165,7 @@ describe('getGeoJsonWithMeta', () => {
   beforeEach(() => {
     mockSearch.mockReset();
     mockGetLimitFromESQLQuery.mockReturnValue(10000);
-    mockGetGeoPrecisionParams.mockReset().mockReturnValue([]);
+    mockGetNamedParams.mockReset().mockReturnValue([]);
   });
 
   test('should return features and resultsCount from ES|QL response', async () => {
@@ -224,7 +223,7 @@ describe('getGeoJsonWithMeta', () => {
   });
 
   test('should bind ?_geotile_precision to a precision derived from the map zoom', async () => {
-    mockGetGeoPrecisionParams.mockReturnValue([{ _geotile_precision: 9 }]);
+    mockGetNamedParams.mockReturnValue([{ _geotile_precision: 9 }]);
     mockSearch.mockReturnValue(of({ rawResponse: makeEsqlResponse(1), requestParams: {} }));
 
     await createSource().getGeoJsonWithMeta(
@@ -235,10 +234,9 @@ describe('getGeoJsonWithMeta', () => {
       makeInspectorAdapters() as any
     );
 
-    expect(mockGetGeoPrecisionParams).toHaveBeenCalledWith(ESQL, {
-      geotile: 8,
-      geohex: 4,
-      geohash: 3,
+    expect(mockGetNamedParams).toHaveBeenCalledWith(ESQL, expect.anything(), undefined, {
+      zoom: 4.5,
+      resolution: GRID_RESOLUTION.FINE,
     });
     expect(mockSearch.mock.calls[0][0].params.params).toEqual([{ _geotile_precision: 9 }]);
   });
@@ -278,7 +276,7 @@ describe('getGeotilePrecision', () => {
     });
 
   test('should default to fine resolution', () => {
-    expect(createSource().getGeotilePrecision(4.5)).toBe(8);
+    expect(createSource().getSyncMeta({ zoom: 4.5 } as any).geotilePrecision).toBe(8);
   });
 
   test.each([
@@ -288,7 +286,6 @@ describe('getGeotilePrecision', () => {
     [GRID_RESOLUTION.SUPER_FINE, 13],
   ])('should use source resolution %s', (resolution, expected) => {
     const source = createSource(resolution);
-    expect(source.getGeotilePrecision(4.5)).toBe(expected);
     expect(source.getSyncMeta({ zoom: 4.5 } as any).geotilePrecision).toBe(expected);
   });
 });
@@ -299,7 +296,7 @@ describe('getGeohexPrecision', () => {
     new ESQLSource({ esql, geoField: 'geo.coordinates', resolution });
 
   test('should default to fine resolution', () => {
-    expect(createSource(GEOHEX_ESQL).getGeohexPrecision(4.5)).toBe(4);
+    expect(createSource(GEOHEX_ESQL).getSyncMeta({ zoom: 4.5 } as any).geohexPrecision).toBe(4);
   });
 
   test.each([
@@ -309,7 +306,6 @@ describe('getGeohexPrecision', () => {
     [GRID_RESOLUTION.SUPER_FINE, 6], // geotile level 13
   ])('should use source resolution %s', (resolution, expected) => {
     const source = createSource(GEOHEX_ESQL, resolution);
-    expect(source.getGeohexPrecision(4.5)).toBe(expected);
     expect(source.getSyncMeta({ zoom: 4.5 } as any).geohexPrecision).toBe(expected);
   });
 
@@ -329,7 +325,7 @@ describe('getGeohashPrecision', () => {
     new ESQLSource({ esql, geoField: 'geo.coordinates', resolution });
 
   test('should default to fine resolution', () => {
-    expect(createSource(GEOHASH_ESQL).getGeohashPrecision(4.5)).toBe(3);
+    expect(createSource(GEOHASH_ESQL).getSyncMeta({ zoom: 4.5 } as any).geohashPrecision).toBe(3);
   });
 
   test.each([
@@ -339,7 +335,6 @@ describe('getGeohashPrecision', () => {
     [GRID_RESOLUTION.SUPER_FINE, 5],
   ])('should use source resolution %s', (resolution, expected) => {
     const source = createSource(GEOHASH_ESQL, resolution);
-    expect(source.getGeohashPrecision(4.5)).toBe(expected);
     expect(source.getSyncMeta({ zoom: 4.5 } as any).geohashPrecision).toBe(expected);
   });
 

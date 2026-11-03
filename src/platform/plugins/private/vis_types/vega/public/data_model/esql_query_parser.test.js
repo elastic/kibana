@@ -618,13 +618,13 @@ describe('EsqlQueryParser.populateData', () => {
 describe('EsqlQueryParser._injectNamedParams', () => {
   test('should inject geo precision parameters used by the query', () => {
     const { parser } = createParser();
-    parser._geoPrecisions = { geotile: 7, geohex: 4, geohash: 5 };
+    parser._geoPrecision = { zoom: 4.5 };
 
     const query =
       'FROM logs | STATS c = COUNT(*) BY t = ST_GEOTILE(location, ?_geotile_precision), h = ST_GEOHEX(location, ?_geohex_precision)';
     const result = parser._injectNamedParams(query, { query });
 
-    expect(result.params).toEqual([{ _geotile_precision: 7 }, { _geohex_precision: 4 }]);
+    expect(result.params).toEqual([{ _geotile_precision: 8 }, { _geohex_precision: 4 }]);
   });
 
   test('should not inject geo precision parameters without a map zoom', () => {
