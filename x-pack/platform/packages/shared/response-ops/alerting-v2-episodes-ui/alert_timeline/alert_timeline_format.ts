@@ -39,19 +39,21 @@ export interface SegmentSpanFlags {
 
 /**
  * Classify a rendered segment's right edge so the tooltip can avoid presenting a
- * clipped window edge as a real end time. The open tail's `x1Ms` is set to
- * `windowEndMs`, so right-edge equality is a reliable "ongoing" signal. (The left edge
- * needs no such treatment: the segment's `trueStartMs` is the real start,
+ * clipped window edge as a real end time. Episode timelines provide the explicit
+ * lifecycle state; callers without it retain the right-edge heuristic. (The left
+ * edge needs no such treatment: the segment's `trueStartMs` is the real start,
  * resolved by the untimed starts query independent of the display window.)
  */
 export const describeSegmentSpan = ({
   x1Ms,
   status,
   windowEndMs,
+  isOngoing,
 }: {
   x1Ms: number;
   status: AlertEpisodeStatus;
   windowEndMs: number;
+  isOngoing?: boolean;
 }): SegmentSpanFlags => ({
-  isOngoing: x1Ms >= windowEndMs && status !== ALERT_EPISODE_STATUS.INACTIVE,
+  isOngoing: isOngoing ?? (x1Ms >= windowEndMs && status !== ALERT_EPISODE_STATUS.INACTIVE),
 });

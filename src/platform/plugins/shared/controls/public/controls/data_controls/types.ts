@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataControlState } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { TextContextTypeConvert } from '@kbn/field-formats-plugin/common';
@@ -16,7 +17,7 @@ import type {
   HasEditCapabilities,
   PublishesBlockingError,
   PublishesDataLoading,
-  PublishesDataViews,
+  PublishesDataSources,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
@@ -34,7 +35,7 @@ export interface PublishesField {
 export type DataControlApi = StateManager<Omit<DataControlState, 'title'>>['api'] &
   Partial<HasCustomPrepend> &
   HasEditCapabilities &
-  PublishesDataViews &
+  PublishesDataSources<DataView> &
   PublishesBlockingError &
   PublishesField &
   PublishesDataLoading &

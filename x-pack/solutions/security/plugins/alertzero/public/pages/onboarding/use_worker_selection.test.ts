@@ -10,6 +10,7 @@ import {
   SYSTEM_SECURITY_WORKER_CATALOG,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  type WorkerBlockingReason,
 } from '@kbn/alertzero-common';
 import { useWorkers } from '../../hooks/use_workers_api';
 import { useWorkerSelection } from './use_worker_selection';
@@ -18,9 +19,18 @@ jest.mock('../../hooks/use_workers_api');
 
 const mockUseWorkers = useWorkers as jest.Mock;
 
-const respondWith = (ids: string[]) =>
+const respondWith = (
+  ids: string[],
+  {
+    blockingReasons = [],
+    canModifyWorkers,
+  }: { blockingReasons?: WorkerBlockingReason[]; canModifyWorkers?: boolean } = {}
+) =>
   mockUseWorkers.mockReturnValue({
-    data: { workers: ids.map((id) => ({ id, enabled: true, settings: {} })) },
+    data: {
+      workers: ids.map((id) => ({ id, enabled: true, settings: {}, blockingReasons })),
+      canModifyWorkers,
+    },
   });
 
 const ALL_IDS = SYSTEM_SECURITY_WORKER_CATALOG.map(({ id }) => id);
@@ -59,6 +69,29 @@ describe('useWorkerSelection', () => {
     const { result } = renderHook(() => useWorkerSelection());
     expect(result.current.workers).toEqual([]);
     expect(result.current.enabledCount).toBe(0);
+  });
+
+  it('reports a missing model when the Workers are blocked by no_model', () => {
+    respondWith(ALL_IDS, { blockingReasons: ['no_model'] });
+    const { result } = renderHook(() => useWorkerSelection());
+    expect(result.current.isModelMissing).toBe(true);
+  });
+
+  it('does not report a missing model when nothing blocks the Workers', () => {
+    const { result } = renderHook(() => useWorkerSelection());
+    expect(result.current.isModelMissing).toBe(false);
+  });
+
+  it('does not report a missing model to a user who cannot change Workers', () => {
+    respondWith(ALL_IDS, { blockingReasons: ['no_model'], canModifyWorkers: false });
+    const { result } = renderHook(() => useWorkerSelection());
+    expect(result.current.isModelMissing).toBe(false);
+  });
+
+  it('does not report a missing model while the server response is not available', () => {
+    mockUseWorkers.mockReturnValue({ data: undefined });
+    const { result } = renderHook(() => useWorkerSelection());
+    expect(result.current.isModelMissing).toBe(false);
   });
 
   it('toggles a worker off and back on', () => {

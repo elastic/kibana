@@ -38,7 +38,6 @@ describe('event_investigation_attach tool', () => {
     const logger = loggingSystemMock.createLogger();
     const tool = createEventInvestigationAttachTool({
       getScopedClients: jest.fn().mockResolvedValue({
-        getEventClient: jest.fn().mockResolvedValue({}),
         getEventSearchClient: jest.fn().mockResolvedValue({}),
         getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
         licensing: {},

@@ -30,6 +30,12 @@ export const groupedActorMockData = {
       count: 4,
       label: 'Mixed Entities',
       tag: 'Actor',
+      riskScore: { min: 55.0, max: 92.0 },
+      assetCriticality: [
+        { level: 'high_impact', count: 2 },
+        { level: 'medium_impact', count: 1 },
+        { level: 'low_impact', count: 1 },
+      ],
       documentsData: [
         {
           id: 'user-entity-1',
@@ -37,6 +43,7 @@ export const groupedActorMockData = {
           entity: {
             availableInEntityStore: false,
             engine_type: 'user',
+            sources: ['okta'],
             sourceFields: { 'user.email': 'user1@example.com' },
           },
         },
@@ -46,6 +53,7 @@ export const groupedActorMockData = {
           entity: {
             availableInEntityStore: false,
             engine_type: 'service',
+            sources: ['endpoint'],
             sourceFields: { 'service.name': 'auth-service' },
           },
         },
@@ -54,6 +62,7 @@ export const groupedActorMockData = {
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
             availableInEntityStore: false,
+            sources: ['cloud_asset_inventory'],
             sourceFields: { 'host.id': 'host-abc', 'host.name': 'web-server-1' },
           },
         },
@@ -62,6 +71,7 @@ export const groupedActorMockData = {
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
             availableInEntityStore: false,
+            sources: ['active_directory'],
             sourceFields: { 'entity.id': 'entity-entity-1' },
           },
         },
@@ -74,6 +84,8 @@ export const groupedActorMockData = {
       icon: 'question',
       label: 'Target Role',
       tag: 'Role',
+      riskScore: { min: 74.5, max: 74.5 },
+      assetCriticality: [{ level: 'low_impact', count: 1 }],
       documentsData: [
         {
           id: 'target-role',
@@ -82,6 +94,7 @@ export const groupedActorMockData = {
             name: 'Target Role',
             type: 'role',
             availableInEntityStore: true,
+            sources: ['cloud_asset_inventory'],
             sourceFields: { 'entity.id': 'target-role' },
           },
         },

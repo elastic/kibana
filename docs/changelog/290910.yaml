@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/290910
-issues:
-- https://github.com/elastic/security-team/issues/19352
-type: bug-fix
-products:
-- product: cloud-serverless
-- product: kibana
-title: "Restore resume actions and nested run links in the workflow execution flyout"

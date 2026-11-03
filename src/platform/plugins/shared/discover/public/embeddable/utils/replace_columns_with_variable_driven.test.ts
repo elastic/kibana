@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import { replaceColumnsWithVariableDriven } from './replace_columns_with_variable_driven';
 
 describe('replaceColumnsWithVariableDriven', () => {
-  const mockColumnsMeta: Record<string, DatatableColumnMeta> = {
-    timestamp: { type: 'date' },
-    message: { type: 'string' },
-    host: { type: 'string' },
-    variableColumn: { type: 'string' },
-  };
+  const mockResultDataSource = createMockEsqlSource([
+    { name: 'timestamp', type: 'date', source: 'index' },
+    { name: 'message', type: 'string', source: 'index' },
+    { name: 'host', type: 'string', source: 'index' },
+    { name: 'variableColumn', type: 'string', source: 'index' },
+  ]);
 
   const mockEsqlVariables: ESQLControlVariable[] = [
     { key: 'field', value: 'variableColumn', type: ESQLVariableType.FIELDS },
@@ -30,7 +30,7 @@ describe('replaceColumnsWithVariableDriven', () => {
 
       const result = replaceColumnsWithVariableDriven(
         savedSearchColumns,
-        mockColumnsMeta,
+        mockResultDataSource,
         mockEsqlVariables,
         false
       );
@@ -39,8 +39,8 @@ describe('replaceColumnsWithVariableDriven', () => {
     });
   });
 
-  describe('when columnsMeta is not provided', () => {
-    it('should return original columns when columnsMeta is undefined', () => {
+  describe('when the result source is not provided', () => {
+    it('should return original columns when the result source is undefined', () => {
       const savedSearchColumns = ['timestamp', 'message'];
 
       const result = replaceColumnsWithVariableDriven(
@@ -56,16 +56,16 @@ describe('replaceColumnsWithVariableDriven', () => {
 
   describe('when no variable-driven columns exist', () => {
     it('should return original columns when no columns match ESQL variables', () => {
-      const columnsMetaWithoutVariables: Record<string, DatatableColumnMeta> = {
-        timestamp: { type: 'date' },
-        message: { type: 'string' },
-        host: { type: 'string' },
-      };
+      const resultDataSourceWithoutVariables = createMockEsqlSource([
+        { name: 'timestamp', type: 'date', source: 'index' },
+        { name: 'message', type: 'string', source: 'index' },
+        { name: 'host', type: 'string', source: 'index' },
+      ]);
       const savedSearchColumns = ['timestamp', 'message'];
 
       const result = replaceColumnsWithVariableDriven(
         savedSearchColumns,
-        columnsMetaWithoutVariables,
+        resultDataSourceWithoutVariables,
         mockEsqlVariables,
         true
       );
@@ -78,7 +78,7 @@ describe('replaceColumnsWithVariableDriven', () => {
 
       const result = replaceColumnsWithVariableDriven(
         savedSearchColumns,
-        mockColumnsMeta,
+        mockResultDataSource,
         undefined,
         true
       );
@@ -93,7 +93,7 @@ describe('replaceColumnsWithVariableDriven', () => {
 
       const result = replaceColumnsWithVariableDriven(
         savedSearchColumns,
-        mockColumnsMeta,
+        mockResultDataSource,
         mockEsqlVariables,
         true
       );
@@ -101,12 +101,12 @@ describe('replaceColumnsWithVariableDriven', () => {
       expect(result).toEqual(['timestamp', 'variableColumn', 'message']);
     });
 
-    it('should keep existing columns that are present in columnsMeta', () => {
+    it('should keep existing columns that are present in the result source', () => {
       const savedSearchColumns = ['timestamp', 'message', 'host'];
 
       const result = replaceColumnsWithVariableDriven(
         savedSearchColumns,
-        mockColumnsMeta,
+        mockResultDataSource,
         mockEsqlVariables,
         true
       );
@@ -119,7 +119,7 @@ describe('replaceColumnsWithVariableDriven', () => {
 
       const result = replaceColumnsWithVariableDriven(
         savedSearchColumns,
-        mockColumnsMeta,
+        mockResultDataSource,
         mockEsqlVariables,
         true
       );

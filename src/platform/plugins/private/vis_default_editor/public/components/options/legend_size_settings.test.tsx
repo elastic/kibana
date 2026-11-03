@@ -20,7 +20,6 @@ describe('legend size settings', () => {
         legendSize={undefined}
         onLegendSizeChange={() => {}}
         isVerticalLegend={false}
-        showAutoOption={true}
       />
     );
 
@@ -35,7 +34,6 @@ describe('legend size settings', () => {
         legendSize={CURRENT_SIZE}
         onLegendSizeChange={() => {}}
         isVerticalLegend={true}
-        showAutoOption={true}
       />
     );
 
@@ -50,35 +48,17 @@ describe('legend size settings', () => {
         legendSize={LegendSize.SMALL}
         onLegendSizeChange={onSizeChange}
         isVerticalLegend={true}
-        showAutoOption={true}
       />
     );
 
     const onChange = instance.find(EuiSuperSelect).props().onChange;
 
     onChange?.(LegendSize.EXTRA_LARGE);
+    onChange?.(LegendSize.AUTO);
     onChange?.(DEFAULT_LEGEND_SIZE);
 
     expect(onSizeChange).toHaveBeenNthCalledWith(1, LegendSize.EXTRA_LARGE);
-    expect(onSizeChange).toHaveBeenNthCalledWith(2, undefined);
-  });
-
-  it('hides "auto" option if visualization not using it', () => {
-    const getOptions = (showAutoOption: boolean) =>
-      shallow(
-        <LegendSizeSettings
-          legendSize={LegendSize.LARGE}
-          onLegendSizeChange={() => {}}
-          isVerticalLegend={true}
-          showAutoOption={showAutoOption}
-        />
-      )
-        .find(EuiSuperSelect)
-        .props().options;
-
-    const autoOption = expect.objectContaining({ value: LegendSize.AUTO });
-
-    expect(getOptions(true)).toContainEqual(autoOption);
-    expect(getOptions(false)).not.toContainEqual(autoOption);
+    expect(onSizeChange).toHaveBeenNthCalledWith(2, LegendSize.AUTO);
+    expect(onSizeChange).toHaveBeenNthCalledWith(3, undefined);
   });
 });

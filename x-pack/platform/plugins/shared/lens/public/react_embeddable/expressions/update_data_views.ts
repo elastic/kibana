@@ -6,15 +6,70 @@
  */
 
 import { uniqBy } from 'lodash';
-import type { LensRuntimeState } from '@kbn/lens-common';
+import type { HttpStart } from '@kbn/core/public';
+import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
+import {
+  getProjectRoutingFromEsqlQuery,
+  getSourceCommandQueryFromESQLQuery,
+} from '@kbn/esql-utils';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { LensRuntimeState, TextBasedPersistedState } from '@kbn/lens-common';
 import { getIndexPatternsObjects } from '../../utils';
 import type { LensEmbeddableStartServices } from '../types';
+
+type DataViewsService = LensEmbeddableStartServices['dataViews'];
+
+interface EsqlContext {
+  layers: TextBasedPersistedState['layers'] | undefined;
+  http: HttpStart;
+  projectRouting?: string;
+}
+
+/**
+ * The DataView of an ES|QL layer is the one registered for its dataset, so the panel publishes the
+ * same DataView, with the filterable fields of the FROM target, as the rest of the ES|QL code, and
+ * the filters created from it match the DataViews of the panel.
+ * A layer that was not saved with the dataset id (e.g. created as code) has no persisted time
+ * field to rely on, so it is resolved like the click path does, in parallel with the schema.
+ */
+const getEsqlDataView = async (
+  spec: DataViewSpec,
+  esqlQuery: string,
+  timeField: string | undefined,
+  dataViews: DataViewsService,
+  { http, projectRouting }: EsqlContext
+) => {
+  const query = getSourceCommandQueryFromESQLQuery(esqlQuery) || esqlQuery;
+  const routing = getProjectRoutingFromEsqlQuery(esqlQuery) ?? projectRouting;
+  const persistedTimeField = timeField ?? spec.timeFieldName;
+  const { datasetId } = await EsqlSource.resolveDataset({
+    query,
+    projectRouting: routing,
+    timeFieldName: persistedTimeField,
+  });
+
+  const source = await EsqlSource.create({
+    query,
+    http,
+    projectRouting: routing,
+    timeFieldName: persistedTimeField,
+    resolveTimeField: persistedTimeField === undefined && datasetId !== spec.id,
+  });
+  return registerEsqlSourceInDataViewsCache(dataViews, source);
+};
 
 export async function getUsedDataViews(
   references: LensRuntimeState['attributes']['references'],
   adHocDataViewsSpecs: LensRuntimeState['attributes']['state']['adHocDataViews'],
-  dataViews: LensEmbeddableStartServices['dataViews']
+  dataViews: DataViewsService,
+  esql?: EsqlContext
 ) {
+  const esqlLayersByIndex = new Map(
+    Object.values(esql?.layers ?? {}).flatMap(({ index, query, timeField }) =>
+      index && query && 'esql' in query ? [[index, { query: query.esql, timeField }] as const] : []
+    )
+  );
+
   const [{ indexPatterns }, ...adHocDataViews] = await Promise.all([
     getIndexPatternsObjects(
       // get index pattern only references
@@ -22,7 +77,12 @@ export async function getUsedDataViews(
       dataViews
     ),
 
-    ...Object.values(adHocDataViewsSpecs ?? {}).map((spec) => dataViews.create(spec)),
+    ...Object.values(adHocDataViewsSpecs ?? {}).map((spec) => {
+      const esqlLayer = spec.id ? esqlLayersByIndex.get(spec.id) : undefined;
+      return esql && esqlLayer
+        ? getEsqlDataView(spec, esqlLayer.query, esqlLayer.timeField, dataViews, esql)
+        : dataViews.create(spec);
+    }),
   ]);
 
   return uniqBy(indexPatterns.concat(adHocDataViews), 'id');

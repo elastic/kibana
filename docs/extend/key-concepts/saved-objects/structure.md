@@ -20,7 +20,7 @@ Model versions are structured objects (not plain migration functions). They desc
 A model version is defined by:
 
 * **changes** — The list of changes applied in this version (mapping additions, backfills, data removal, etc.).
-* **schemas** — Optional but recommended: `create` (validation on create/bulkCreate) and `forwardCompatibility` (used when reading documents from a newer version than the current Kibana instance, to strip unknown fields).
+* **schemas** — Optional but recommended: `create` (validation on create/bulkCreate), `forwardCompatibility` (used when reading documents from a newer version than the current Kibana instance, to strip unknown fields), and optionally `update` (validation on update/bulkUpdate).
 
 *Base example:*
 
@@ -28,7 +28,8 @@ A model version is defined by:
 const myType: SavedObjectsType = {
   name: 'test',
   modelVersions: {
-    1: {
+    1: modelVersion1,
+    2: {
       changes: [
         {
           type: 'mappings_addition',
@@ -38,7 +39,7 @@ const myType: SavedObjectsType = {
         },
         {
           type: 'data_backfill',
-          transform: someBackfillFunction,
+          backfillFn: someBackfillFunction,
         },
       ],
       schemas: {
@@ -58,7 +59,7 @@ Having multiple changes of the same type for a given version is supported by des
 *Valid definition with multiple changes of the same type:*
 
 ```ts
-const version1: SavedObjectsModelVersion = {
+const version2: SavedObjectsFullModelVersion = {
   changes: [
     {
       type: 'mappings_addition',
@@ -73,6 +74,10 @@ const version1: SavedObjectsModelVersion = {
       },
     },
   ],
+  schemas: {
+    forwardCompatibility: fcSchema,
+    create: createSchema,
+  },
 };
 ```
 
@@ -132,7 +137,7 @@ Populates fields (indexed or not) added in the same version.
 ```ts
 let change: SavedObjectsModelDataBackfillChange = {
   type: 'data_backfill',
-  transform: (document) => {
+  backfillFn: (document) => {
     return { attributes: { someAddedField: 'defaultValue' } };
   },
 };
@@ -212,3 +217,23 @@ Starting with {{kib}} 9.3.0, all new model versions must include a `forwardCompa
 Replaces the old `SavedObjectType.schemas` definition. It is a `@kbn/config-schema` object-type schema used to validate document attributes during `create` and `bulkCreate` operations. New model versions must include both `create` and `forwardCompatibility`; see [Validate](validate.md#saved-object-type-validation-rules).
 
 For implementation examples, see [Update: Use-case examples](update.md#use-case-examples).
+
+#### update [_update]
+
+Optional. A `@kbn/config-schema` object type schema used to validate document attributes during `update` and `bulkUpdate` operations. Only the latest model version's `update` schema is used; when it is absent, updates are not validated. Once a model version defines `update`, all later model versions must define it too (enforced by the saved objects CI check). Once an `update` schema has shipped, it is held to the same snapshot diff as `create`: removing it, removing a field, changing a field type, or adding a required field fails the check.
+
+The schema is applied to the full document that is about to be indexed: the stored document is fetched, migrated to the latest model version, and merged with the provided attributes before validation. Because existing documents may contain fields that are not part of the current `create` schema, reuse the `create` schema while ignoring unknown fields:
+
+```ts
+schemas: {
+  create: createSchema,
+  forwardCompatibility: createSchema.extends({}, { unknowns: 'ignore' }),
+  update: createSchema.extends({}, { unknowns: 'ignore' }),
+},
+```
+
+Known fields are still validated (types, required keys, constraints); unknown fields are left untouched.
+
+:::{note}
+When `update` is called with `mergeAttributes: false`, only the provided attributes are indexed, so they are what gets validated. Types that use full attribute replacement need an `update` schema that accepts the attributes callers send, including any required fields.
+:::

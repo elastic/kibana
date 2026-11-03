@@ -7,7 +7,14 @@
 
 import { z } from '@kbn/zod/v4';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
-import { CommentAttachmentPayloadSchema } from '../../../common/types/domain_zod/attachment/comment/v2';
+import {
+  MAX_ATTACHMENT_ID_LENGTH,
+  MAX_ATTACHMENT_JSON_LENGTH,
+  MAX_ATTACHMENT_TYPE_LENGTH,
+  MAX_IDS_PER_ATTACHMENT,
+  MAX_OWNER_LENGTH,
+} from '../../../common/constants';
+import { CommentAttachmentPayloadSchema } from '../../../common/types/domain/attachment/comment/v2';
 import { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
 import { validateUnifiedAttachments } from './validators';
 
@@ -89,6 +96,111 @@ describe('validateUnifiedAttachments', () => {
     });
   });
 
+  describe('type-agnostic bounds', () => {
+    const referenceType = 'test.reference';
+    const registry = () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register({
+        id: referenceType,
+        schema: z.object({}).loose(),
+      });
+      return unifiedAttachmentTypeRegistry;
+    };
+    const referencePayload = { type: referenceType, owner: 'cases', attachmentId: 'id-1' };
+
+    it('accepts a payload within bounds even if the registered schema is unbounded', () => {
+      expect(() =>
+        validateUnifiedAttachments({
+          query: {
+            ...referencePayload,
+            attachmentId: Array.from({ length: MAX_IDS_PER_ATTACHMENT }, (_, i) => `id-${i}`),
+          },
+          unifiedAttachmentTypeRegistry: registry(),
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects a type over the max length before the registry check', () => {
+      const type = 'a'.repeat(MAX_ATTACHMENT_TYPE_LENGTH + 1);
+
+      expect(() =>
+        validateUnifiedAttachments({
+          query: { ...referencePayload, type },
+          unifiedAttachmentTypeRegistry: registry(),
+        })
+      ).toThrow(/^Invalid attachment payload: type:/);
+    });
+
+    it('does not echo an oversized type or owner in the error', () => {
+      const type = 'a'.repeat(MAX_ATTACHMENT_TYPE_LENGTH + 1);
+      const owner = 'b'.repeat(MAX_OWNER_LENGTH + 1);
+
+      expect(() =>
+        validateUnifiedAttachments({
+          query: { ...referencePayload, type, owner },
+          unifiedAttachmentTypeRegistry: registry(),
+        })
+      ).toThrow(expect.objectContaining({ message: expect.not.stringMatching(/aaaa|bbbb/) }));
+    });
+
+    it('rejects an owner over the max length', () => {
+      expect(() =>
+        validateUnifiedAttachments({
+          query: { ...referencePayload, owner: 'a'.repeat(MAX_OWNER_LENGTH + 1) },
+          unifiedAttachmentTypeRegistry: registry(),
+        })
+      ).toThrow(/owner:/);
+    });
+
+    it('rejects data over the max serialized length', () => {
+      expect(() =>
+        validateUnifiedAttachments({
+          query: {
+            ...referencePayload,
+            data: {
+              a: 'a'.repeat(MAX_ATTACHMENT_JSON_LENGTH / 2),
+              b: 'b'.repeat(MAX_ATTACHMENT_JSON_LENGTH / 2),
+            },
+          },
+          unifiedAttachmentTypeRegistry: registry(),
+        })
+      ).toThrow(/data: The data field is too large/);
+    });
+
+    it('rejects metadata over the max serialized length', () => {
+      expect(() =>
+        validateUnifiedAttachments({
+          query: {
+            ...referencePayload,
+            metadata: { index: 'a'.repeat(MAX_ATTACHMENT_JSON_LENGTH) },
+          },
+          unifiedAttachmentTypeRegistry: registry(),
+        })
+      ).toThrow(/metadata: The metadata field is too large/);
+    });
+
+    it('rejects an attachmentId over the max length', () => {
+      expect(() =>
+        validateUnifiedAttachments({
+          query: { ...referencePayload, attachmentId: 'a'.repeat(MAX_ATTACHMENT_ID_LENGTH + 1) },
+          unifiedAttachmentTypeRegistry: registry(),
+        })
+      ).toThrow(/attachmentId:/);
+    });
+
+    it('rejects an attachmentId array over the max size', () => {
+      expect(() =>
+        validateUnifiedAttachments({
+          query: {
+            ...referencePayload,
+            attachmentId: Array.from({ length: MAX_IDS_PER_ATTACHMENT + 1 }, (_, i) => `id-${i}`),
+          },
+          unifiedAttachmentTypeRegistry: registry(),
+        })
+      ).toThrow(/attachmentId:/);
+    });
+  });
+
   it('applies the registered schema regardless of the registered id', () => {
     // Whatever schema is registered for an id is what gets enforced.
     const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
@@ -103,5 +215,50 @@ describe('validateUnifiedAttachments', () => {
         unifiedAttachmentTypeRegistry,
       })
     ).toThrow(/Invalid attachment payload for type 'comment'/);
+  });
+
+  describe('owner consistency', () => {
+    const securityEventType = 'security.event';
+    const registryWithEvent = () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register({
+        id: securityEventType,
+        schema: z.object({ type: z.literal(securityEventType), owner: z.string() }).loose(),
+      });
+      return unifiedAttachmentTypeRegistry;
+    };
+
+    it('rejects a solution-scoped type under another solution owner', () => {
+      expect(() =>
+        validateUnifiedAttachments({
+          query: { type: securityEventType, owner: 'observability', attachmentId: 'event-1' },
+          unifiedAttachmentTypeRegistry: registryWithEvent(),
+        })
+      ).toThrow(/cannot be attached to a case with owner observability/);
+    });
+
+    it('accepts a solution-scoped type under its own owner', () => {
+      expect(() =>
+        validateUnifiedAttachments({
+          query: { type: securityEventType, owner: 'securitySolution', attachmentId: 'event-1' },
+          unifiedAttachmentTypeRegistry: registryWithEvent(),
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects before running the schema', () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register({
+        id: securityEventType,
+        schema: z.object({ never: z.literal('matches') }),
+      });
+
+      expect(() =>
+        validateUnifiedAttachments({
+          query: { type: securityEventType, owner: 'cases', attachmentId: 'event-1' },
+          unifiedAttachmentTypeRegistry,
+        })
+      ).toThrow(/cannot be attached to a case with owner cases/);
+    });
   });
 });

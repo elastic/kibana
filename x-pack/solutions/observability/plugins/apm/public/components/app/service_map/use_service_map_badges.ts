@@ -68,6 +68,9 @@ export function useServiceMapBadges({
         return;
       }
       return callApmApi('POST /internal/apm/service-map/service_badges', {
+        // Active-alert badges must not use the APM client LRU cache: when end < now
+        // (absolute picker / post-Refresh), cached snapshots diverge across surfaces.
+        isCachable: false,
         params: {
           query: {
             start,

@@ -6,20 +6,46 @@
  */
 
 import React from 'react';
-import { EuiProgress, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiProgress,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getDailyUsageTone } from '../../utils/daily_usage';
+import { triggerLabels } from '../../flyouts/form/triggers/translations';
+import { listLabels } from '../translations';
 
-export const AutomationUsageCell = ({ used, limit }: { used?: number; limit?: number }) => {
+export const AutomationUsageCell = ({
+  used,
+  limit,
+  isRateLimited,
+}: {
+  used?: number;
+  limit?: number;
+  isRateLimited: boolean;
+}) => {
   const { euiTheme } = useEuiTheme();
-  if (limit === undefined || used === undefined) return <>—</>;
+  if (used === undefined) return <>—</>;
 
-  const color = used >= limit ? 'danger' : 'success';
+  const isLimitReached = limit !== undefined && used >= limit;
+  const isLimitHigh = limit !== undefined && getDailyUsageTone(used, limit) !== 'healthy';
+  const limitColor = euiTheme.colors.vis.euiColorVisWarning0;
   return (
     <div css={{ width: '100%' }}>
       <EuiToolTip
         display="block"
         content={
-          used >= limit
+          limit === undefined
+            ? i18n.translate('xpack.nightshift.automations.usageCellNoLimitTooltip', {
+                defaultMessage: 'No daily limit. {used} runs today.',
+                values: { used },
+              })
+            : isLimitReached
             ? i18n.translate('xpack.nightshift.automations.usageCellLimitReachedTooltip', {
                 defaultMessage: 'Daily limit reached · no more runs until midnight (UTC)',
               })
@@ -30,21 +56,45 @@ export const AutomationUsageCell = ({ used, limit }: { used?: number; limit?: nu
         }
       >
         <div data-test-subj="automationUsage" tabIndex={0}>
-          <EuiProgress
-            label={
+          <EuiFlexGroup
+            justifyContent="flexEnd"
+            alignItems="center"
+            gutterSize="xs"
+            responsive={false}
+            css={{ marginBlockEnd: euiTheme.size.xs }}
+          >
+            {isRateLimited && (
+              <EuiFlexItem grow={false}>
+                <EuiIcon
+                  type="hourglass"
+                  size="s"
+                  color={limitColor}
+                  aria-label={listLabels.limitReached}
+                  data-test-subj="automationLimitReached"
+                />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
               <EuiText
                 size="xs"
-                color={color === 'danger' ? 'danger' : undefined}
-                css={{ marginBlockEnd: euiTheme.size.xs }}
+                color={isLimitHigh ? euiTheme.colors.textWarning : undefined}
+                css={{
+                  fontWeight: euiTheme.font.weight.semiBold,
+                  fontVariantNumeric: 'tabular-nums',
+                }}
               >
-                {used} / {limit}
+                {used} / {limit ?? triggerLabels.noLimit}
               </EuiText>
-            }
-            value={Math.min(used, limit)}
-            max={limit}
-            size="s"
-            color={color}
-          />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {limit !== undefined && (
+            <EuiProgress
+              value={Math.min(used, limit)}
+              max={limit}
+              size="s"
+              color={isLimitHigh ? limitColor : 'success'}
+            />
+          )}
         </div>
       </EuiToolTip>
     </div>

@@ -18,6 +18,7 @@ import type { CoreStart, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import {
@@ -41,6 +42,12 @@ export interface RunAutomationResult {
   enabledForRun?: boolean;
   /** Why the run did not start. */
   reason?: string;
+  /** Execution status, present when the call waited for the run. */
+  status?: ExecutionStatus;
+  /** Wall-clock run time, present when the call waited and the run finished. */
+  durationMs?: number;
+  /** Why the run failed, present when the call waited and the run failed. */
+  errorMessage?: string;
 }
 
 export interface SaveAutomationResult {
@@ -515,6 +522,7 @@ const persistWorkflow = async ({
 /**
  * Starts a saved automation, enabling its definition first when it is disabled. Never throws: the
  * workflow is already saved and attached by this point, and a failed run must not undo that.
+ * With `completionTimeoutSec` it waits up to that long and reports the status and duration.
  */
 export const runSavedAutomation = async ({
   workflowId,
@@ -523,6 +531,8 @@ export const runSavedAutomation = async ({
   workflowsManagement,
   getSecurityStart,
   logger,
+  inputs = {},
+  completionTimeoutSec,
 }: {
   workflowId: string;
   spaceId: string;
@@ -530,6 +540,8 @@ export const runSavedAutomation = async ({
   workflowsManagement: WorkflowsManagementApi;
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
   logger: Logger;
+  inputs?: Record<string, unknown>;
+  completionTimeoutSec?: number;
 }): Promise<RunAutomationResult> => {
   try {
     const security = await getSecurityStart();
@@ -578,24 +590,48 @@ export const runSavedAutomation = async ({
       }
     }
 
+    const waitForCompletion = completionTimeoutSec !== undefined;
     const result = await executeWorkflow({
       workflowId,
-      workflowParams: {},
+      workflowParams: inputs,
       request,
       spaceId,
       workflowApi: workflowsManagement,
-      // A full-corpus run costs a model call per document, so return the execution id to poll
-      // rather than holding the turn open until it finishes.
-      waitForCompletion: false,
+      // A full-corpus run costs a model call per item, if any, so return the execution id to poll
+      // rather than holding the turn open until it finishes. Only a bounded run waits.
+      waitForCompletion,
+      ...(waitForCompletion && { completionTimeoutSec }),
     });
 
     if (!result.success) {
       return { started: false, reason: result.error, ...(enabledForRun && { enabledForRun }) };
     }
 
+    const { execution } = result;
+    if (!waitForCompletion) {
+      return {
+        started: true,
+        executionId: execution.execution_id,
+        ...(enabledForRun && { enabledForRun }),
+      };
+    }
+
+    const { status, started_at: startedAt, finished_at: finishedAt } = execution;
+    // Only a completed run measured anything; a cancelled or timed-out one stopped part-way.
+    const durationMs =
+      status === ExecutionStatus.COMPLETED && finishedAt
+        ? Date.parse(finishedAt) - Date.parse(startedAt)
+        : undefined;
+    const endedEarly = status !== ExecutionStatus.COMPLETED && isTerminalStatus(status);
+
     return {
       started: true,
-      executionId: result.execution.execution_id,
+      executionId: execution.execution_id,
+      status,
+      ...(durationMs !== undefined && { durationMs }),
+      ...(endedEarly && {
+        errorMessage: execution.error_message ?? `The run ended with status '${status}'.`,
+      }),
       ...(enabledForRun && { enabledForRun }),
     };
   } catch (error) {

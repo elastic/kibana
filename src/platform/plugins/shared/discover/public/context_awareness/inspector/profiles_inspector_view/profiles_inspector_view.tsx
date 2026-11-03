@@ -9,6 +9,8 @@
 
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { DataSourceProfileSection } from './data_source_profile_section';
 import { RootProfileSection } from './root_profile_section';
 import { DocumentProfilesSection } from './document_profiles_section';
@@ -22,6 +24,16 @@ export function ProfilesInspectorView({ contextsAdapter }: { contextsAdapter: Co
       data-test-subj="profilesInspectorView"
       css={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.s }}
     >
+      <KbnInfoCallout
+        data-test-subj="profilesInspectorViewCallout"
+        title={i18n.translate('discover.inspector.profilesInspectorView.calloutTitle', {
+          defaultMessage: 'About Discover profiles',
+        })}
+        text={i18n.translate('discover.inspector.profilesInspectorView.calloutDescription', {
+          defaultMessage:
+            'Discover profiles customize the Discover experience, such as the available columns, row indicators, and document actions, based on your data. This view shows which profiles are currently active and can help you troubleshoot unexpected behavior.',
+        })}
+      />
       <RootProfileSection rootContext={contextsAdapter.getRootContext()} />
       <DataSourceProfileSection dataSourceContext={contextsAdapter.getDataSourceContext()} />
       <DocumentProfilesSection

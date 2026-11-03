@@ -14,7 +14,6 @@ import { InitialTabStateService } from '../plugin_imports/initial_tab_state_serv
 import { DataSourceService } from '@kbn/data-source';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { searchSessionsManagementMock } from '@kbn/search-sessions-management-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public';
@@ -31,6 +30,7 @@ import {
   CONTEXT_STEP_SETTING,
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
+  ENABLE_SOLUTION_PROFILES_IN_CLASSIC_SETTING,
   MAX_DOC_FIELDS_DISPLAYED,
   SAMPLE_SIZE_SETTING,
   SAMPLE_ROWS_PER_PAGE_SETTING,
@@ -128,25 +128,6 @@ export function createDiscoverServicesMock(): DiscoverServices {
     return createSearchSourceWithDeps(fields);
   });
 
-  const expressionsPlugin = expressionsPluginMock.createStartContract();
-
-  expressionsPlugin.run = jest.fn(() =>
-    of({
-      partial: false,
-      result: {
-        rows: [],
-      },
-    })
-  ) as unknown as typeof expressionsPlugin.run;
-
-  expressionsPlugin.execute = jest.fn(() => ({
-    getData: jest.fn(() =>
-      of({
-        result: { type: 'datatable', rows: [], columns: [] },
-      })
-    ),
-  })) as unknown as typeof expressionsPlugin.execute;
-
   const corePluginMock = coreMock.createStart();
 
   const uiSettingsMock: Partial<typeof corePluginMock.uiSettings> = {
@@ -175,6 +156,8 @@ export function createDiscoverServicesMock(): DiscoverServices {
       } else if (key === HIDE_ANNOUNCEMENTS) {
         return false;
       } else if (key === SEARCH_ON_PAGE_LOAD_SETTING) {
+        return true;
+      } else if (key === ENABLE_SOLUTION_PROFILES_IN_CLASSIC_SETTING) {
         return true;
       }
     }),
@@ -302,7 +285,6 @@ export function createDiscoverServicesMock(): DiscoverServices {
     notifications: {
       toasts: notificationServiceMock.createStartContract().toasts,
     },
-    expressions: expressionsPlugin,
     savedObjectsTagging: {
       ui: {
         getTagIdsFromReferences: jest.fn().mockResolvedValue([]),

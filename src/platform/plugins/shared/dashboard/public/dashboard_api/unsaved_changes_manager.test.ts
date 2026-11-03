@@ -10,6 +10,8 @@
 import { BehaviorSubject, Subject, skip } from 'rxjs';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
+import { initializeChangeSourceTracker } from './change_source_tracker';
+import type { DashboardChangeSource } from '../../common/change_sources';
 import { DEFAULT_DASHBOARD_STATE } from '../../common/default_dashboard_state';
 import type { initializeLayoutManager } from './layout_manager';
 import type { DashboardChildren } from './layout_manager/types';
@@ -110,6 +112,7 @@ describe('unsavedChangesManager', () => {
           approximationManager: approximationManagerMock,
           setState: setStateMock,
           onSave$: onSave$.asObservable(),
+          changeSourceTracker: initializeChangeSourceTracker(),
         });
 
         unsavedChangesManager.api.hasUnsavedChanges$
@@ -137,6 +140,7 @@ describe('unsavedChangesManager', () => {
           approximationManager: approximationManagerMock,
           setState: setStateMock,
           onSave$: onSave$.asObservable(),
+          changeSourceTracker: initializeChangeSourceTracker(),
         });
 
         setBackupStateMock.mockImplementation((id, backupState) => {
@@ -193,6 +197,7 @@ describe('unsavedChangesManager', () => {
         approximationManager: approximationManagerMock,
         setState: setStateMock,
         onSave$: onSave$.asObservable(),
+        changeSourceTracker: initializeChangeSourceTracker(),
       });
 
       unsavedChangesManager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasChanges) => {
@@ -229,6 +234,7 @@ describe('unsavedChangesManager', () => {
         approximationManager: approximationManagerMock,
         setState: setStateMock,
         onSave$: onSave$.asObservable(),
+        changeSourceTracker: initializeChangeSourceTracker(),
       });
 
       unsavedChangesManager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasChanges) => {
@@ -263,6 +269,7 @@ describe('unsavedChangesManager', () => {
         approximationManager: customApproximationManagerMock,
         setState: setStateMock,
         onSave$: onSave$.asObservable(),
+        changeSourceTracker: initializeChangeSourceTracker(),
       });
 
       unsavedChangesManager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasChanges) => {
@@ -271,6 +278,123 @@ describe('unsavedChangesManager', () => {
       });
 
       approximationChanges$.next({ esql_approximation: true });
+    });
+  });
+
+  describe('change sources', () => {
+    const grid = { x: 0, y: 0, w: 12, h: 8 };
+    const agentPanel: DashboardPanel = { type: 'testType', grid, config: { title: 'Agent panel' } };
+    const userPanel: DashboardPanel = { type: 'testType', grid, config: { title: 'User panel' } };
+
+    const createManager = ({
+      storeUnsavedChanges = false,
+      initialChangeSources,
+      setState = setStateMock,
+    }: {
+      storeUnsavedChanges?: boolean;
+      initialChangeSources?: DashboardChangeSource[];
+      setState?: (state: DashboardState) => Promise<void>;
+    } = {}) => {
+      const changeSourceTracker = initializeChangeSourceTracker(initialChangeSources);
+      const manager = initializeUnsavedChangesManager({
+        viewMode$,
+        storeUnsavedChanges,
+        lastSavedState: DEFAULT_DASHBOARD_STATE,
+        layoutManager: layoutManagerMock,
+        savedObjectId$,
+        settingsManager: settingsManagerMock,
+        unifiedSearchManager: unifiedSearchManagerMock,
+        projectRoutingManager: projectRoutingManagerMock,
+        approximationManager: approximationManagerMock,
+        setState,
+        onSave$: onSave$.asObservable(),
+        changeSourceTracker,
+      });
+      return { ...manager, changeSourceTracker };
+    };
+
+    const emitLayoutChanges = (changes: { panels?: DashboardState['panels'] }) => {
+      layoutUnsavedChanges$.next(changes);
+      jest.advanceTimersByTime(100);
+    };
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('drops unsaved sources on reset to the last saved state', async () => {
+      const { api, changeSourceTracker } = createManager({ initialChangeSources: ['agent'] });
+
+      await api.asyncResetToLastSavedState();
+
+      expect(changeSourceTracker.getUnsavedSources()).toEqual([]);
+    });
+
+    it('keeps sources added while a reset is being applied', async () => {
+      let finishReset = () => {};
+      const { api, changeSourceTracker } = createManager({
+        setState: () => new Promise((resolve) => (finishReset = resolve)),
+      });
+
+      const reset = api.asyncResetToLastSavedState();
+      changeSourceTracker.recordChange(['agent']);
+      finishReset();
+      await reset;
+
+      expect(changeSourceTracker.getUnsavedSources()).toEqual(['agent']);
+    });
+
+    it('backs up the sources of unsaved changes', () => {
+      const { changeSourceTracker } = createManager({ storeUnsavedChanges: true });
+
+      changeSourceTracker.recordChange(['agent']);
+      emitLayoutChanges({ panels: [agentPanel] });
+
+      expect(setBackupStateMock).toHaveBeenLastCalledWith('dashboard1234', {
+        viewMode: 'edit',
+        panels: [agentPanel],
+        changedBy: ['agent'],
+      });
+    });
+
+    it('backs up only the sources of changes made since the last save', () => {
+      const { changeSourceTracker } = createManager({
+        storeUnsavedChanges: true,
+        initialChangeSources: ['agent'],
+      });
+      changeSourceTracker.markSaved(changeSourceTracker.getLatestChanges());
+
+      emitLayoutChanges({ panels: [agentPanel, userPanel] });
+      expect(setBackupStateMock).toHaveBeenLastCalledWith('dashboard1234', {
+        viewMode: 'edit',
+        panels: [agentPanel, userPanel],
+      });
+
+      changeSourceTracker.recordChange(['agent']);
+      emitLayoutChanges({ panels: [agentPanel] });
+      expect(setBackupStateMock).toHaveBeenLastCalledWith('dashboard1234', {
+        viewMode: 'edit',
+        panels: [agentPanel],
+        changedBy: ['agent'],
+      });
+    });
+
+    it('backs up sources only alongside dashboard edits', () => {
+      createManager({ storeUnsavedChanges: true, initialChangeSources: ['agent'] });
+
+      emitLayoutChanges({});
+      expect(setBackupStateMock).toHaveBeenLastCalledWith('dashboard1234', { viewMode: 'edit' });
+
+      emitLayoutChanges({ panels: [agentPanel] });
+      expect(setBackupStateMock).toHaveBeenLastCalledWith('dashboard1234', {
+        viewMode: 'edit',
+        panels: [agentPanel],
+        changedBy: ['agent'],
+      });
     });
   });
 
@@ -288,6 +412,7 @@ describe('unsavedChangesManager', () => {
         approximationManager: approximationManagerMock,
         setState: setStateMock,
         onSave$: onSave$.asObservable(),
+        changeSourceTracker: initializeChangeSourceTracker(),
       });
       const saveEvent = {
         previousDashboardId: 'dashboard-a',

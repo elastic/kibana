@@ -11,6 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { waitFor, renderHook } from '@testing-library/react';
 import { DataViewSource } from '@kbn/data-source';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { dataViewMock } from '../../../__mocks__/data_view';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { unifiedHistogramServicesMock } from '../../../__mocks__/services';
@@ -41,15 +42,19 @@ describe('useEditVisualization', () => {
         dataSource: new DataViewSource(dataViewWithTimefieldMock),
         relativeTimeRange,
         lensAttributes,
+        lensEditorOptions: { originatingApp: 'discover' },
       })
     );
     await waitFor(() => expect(hook.result.current).toBeDefined());
     hook.result.current!();
-    expect(navigateToPrefilledEditor).toHaveBeenCalledWith({
-      id: '',
-      time_range: relativeTimeRange,
-      attributes: lensAttributes,
-    });
+    expect(navigateToPrefilledEditor).toHaveBeenCalledWith(
+      {
+        id: '',
+        time_range: relativeTimeRange,
+        attributes: lensAttributes,
+      },
+      { originatingApp: 'discover' }
+    );
   });
 
   it('should return undefined if the data source has no ID', async () => {
@@ -86,10 +91,9 @@ describe('useEditVisualization', () => {
     const hook = renderHook(() =>
       useEditVisualization({
         services: unifiedHistogramServicesMock,
-        dataSource: new DataViewSource(dataViewWithTimefieldMock),
+        dataSource: createMockEsqlSource(),
         relativeTimeRange: { from: 'now-15m', to: 'now' },
         lensAttributes: {} as unknown as TypedLensByValueInput['attributes'],
-        isPlainRecord: true,
       })
     );
     await waitFor(() => expect(hook.result.current).toBeUndefined());

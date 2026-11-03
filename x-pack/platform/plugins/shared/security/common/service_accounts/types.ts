@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { ServiceAccountWorkloadBinder } from '@kbn/core-security-common';
+import type {
+  ServiceAccountBoundWorkload,
+  ServiceAccountWorkloadBinder,
+} from '@kbn/core-security-common';
 
 /**
  * The principal that created an account.
@@ -50,6 +53,11 @@ export interface ServiceAccountDirectoryEntry {
    * own, and absent on Elasticsearch until Elasticsearch stores one too.
    */
   createdBy?: ServiceAccountDirectoryCreator;
+  /**
+   * How many workloads are bound to the account, across every space. Only the list reports it,
+   * and it's absent when the count failed. The count isn't verified, so it's for display only.
+   */
+  workloadCount?: number;
   // No creation time. UIAM reports no timestamp of any kind, and the only one Elasticsearch could
   // offer is on the credential Kibana stored, which dates Kibana's record rather than the
   // account. It arrives with the same followup that brings the Elasticsearch creator.
@@ -62,22 +70,6 @@ export interface ServiceAccountDirectoryEntry {
 export interface ListServiceAccountsResponse {
   serviceAccounts: ServiceAccountDirectoryEntry[];
   nextPage?: string;
-}
-
-/**
- * A workload bound to a service account, as the management routes report it. The workload type is
- * scoped to the plugin that registered it, so `pluginId` and `workloadType` name the type
- * together.
- */
-export interface ServiceAccountBoundWorkload {
-  pluginId: string;
-  workloadType: string;
-  workloadId: string;
-  /**
-   * What to call the workload in the UI. The workload id for now, until a workload type can
-   * resolve its bindings to a title of its own.
-   */
-  displayName: string;
 }
 
 /** Every workload bound to one service account, across spaces. */

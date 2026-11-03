@@ -6,6 +6,7 @@
  */
 
 import type {
+  ConnectorModelUsageStats,
   ConversationRound,
   ConversationRoundStep,
   PreExecutionWorkflowStep,
@@ -17,7 +18,7 @@ import {
   ZERO_MODEL_USAGE,
 } from '@kbn/agent-builder-common';
 import type { AskUserQuestionAnswer } from '@kbn/agent-builder-common/agents/prompts';
-import { mergeRounds, applyResumeResolution } from './merge_rounds';
+import { mergeRounds, mergeModelUsage, applyResumeResolution } from './merge_rounds';
 
 const usage = (llm_calls: number, input: number, output: number): RoundModelUsageStats => ({
   connector_id: 'connector-1',
@@ -117,6 +118,158 @@ describe('mergeRounds — last call input tokens', () => {
       mergeRounds(previous, baseRound({ model_usage: usage(1, 9, 5) })).model_usage
         .last_call_input_tokens
     ).toBe(5);
+  });
+});
+
+describe('mergeModelUsage — per-connector breakdown', () => {
+  const connectorUsage = (
+    connector_id: string,
+    llm_calls: number,
+    input_tokens: number,
+    output_tokens: number,
+    extra: Partial<ConnectorModelUsageStats> = {}
+  ): ConnectorModelUsageStats => ({
+    connector_id,
+    llm_calls,
+    input_tokens,
+    output_tokens,
+    ...extra,
+  });
+
+  const withConnectors = (
+    connectors: ConnectorModelUsageStats[],
+    extra: Partial<RoundModelUsageStats> = {}
+  ): RoundModelUsageStats => ({
+    connector_id: connectors[0].connector_id,
+    llm_calls: connectors.reduce((total, c) => total + c.llm_calls, 0),
+    input_tokens: connectors.reduce((total, c) => total + c.input_tokens, 0),
+    output_tokens: connectors.reduce((total, c) => total + c.output_tokens, 0),
+    connectors,
+    ...extra,
+  });
+
+  it('merges the entries by connector id: the first side first, then the entries only in the second', () => {
+    const a = withConnectors([
+      connectorUsage('main', 2, 100, 10),
+      connectorUsage('fast', 1, 10, 1),
+    ]);
+    const b = withConnectors([connectorUsage('other', 1, 20, 2), connectorUsage('main', 1, 50, 5)]);
+
+    const merged = mergeModelUsage(a, b);
+
+    expect(merged.connectors).toEqual([
+      connectorUsage('main', 3, 150, 15),
+      connectorUsage('fast', 1, 10, 1),
+      connectorUsage('other', 1, 20, 2),
+    ]);
+    expect(merged).toMatchObject({ llm_calls: 5, input_tokens: 180, output_tokens: 18 });
+  });
+
+  it('sums the cached tokens when either side reports them, and keeps the first model', () => {
+    const a = withConnectors([
+      connectorUsage('main', 1, 100, 10, { cached_input_tokens: 60, model: 'opus' }),
+      connectorUsage('fast', 1, 10, 1),
+      connectorUsage('other', 1, 10, 1),
+    ]);
+    const b = withConnectors([
+      connectorUsage('main', 1, 100, 10, { cached_input_tokens: 40, model: 'opus-later' }),
+      connectorUsage('fast', 1, 10, 1, { cached_input_tokens: 5, model: 'haiku' }),
+      connectorUsage('other', 1, 10, 1),
+    ]);
+
+    const merged = mergeModelUsage(a, b);
+
+    expect(merged.connectors).toEqual([
+      connectorUsage('main', 2, 200, 20, { cached_input_tokens: 100, model: 'opus' }),
+      connectorUsage('fast', 2, 20, 2, { cached_input_tokens: 5, model: 'haiku' }),
+      connectorUsage('other', 2, 20, 2),
+    ]);
+  });
+
+  it('sums the reasoning tokens of each connector when either side reports them', () => {
+    const a = withConnectors([
+      connectorUsage('main', 1, 100, 20, { reasoning_tokens: 10 }),
+      connectorUsage('fast', 1, 10, 2),
+      connectorUsage('other', 1, 10, 2),
+    ]);
+    const b = withConnectors([
+      connectorUsage('main', 1, 100, 20, { reasoning_tokens: 5 }),
+      connectorUsage('fast', 1, 10, 2, { reasoning_tokens: 3 }),
+      connectorUsage('other', 1, 10, 2),
+    ]);
+
+    const merged = mergeModelUsage(a, b);
+
+    expect(merged.connectors?.map((connector) => connector.reasoning_tokens)).toEqual([
+      15,
+      3,
+      undefined,
+    ]);
+    // a connector that never reported them has no field, not a zero
+    expect(merged.connectors?.[2]).not.toHaveProperty('reasoning_tokens');
+  });
+
+  it('sums the top-level reasoning tokens when either side reports them', () => {
+    const connectors = [connectorUsage('main', 1, 100, 20)];
+    const reported = (reasoningTokens?: number) =>
+      withConnectors(
+        connectors,
+        reasoningTokens === undefined ? {} : { reasoning_tokens: reasoningTokens }
+      );
+
+    expect(mergeModelUsage(reported(10), reported(5)).reasoning_tokens).toBe(15);
+    expect(mergeModelUsage(reported(10), reported()).reasoning_tokens).toBe(10);
+    expect(mergeModelUsage(reported(), reported(5)).reasoning_tokens).toBe(5);
+    expect(mergeModelUsage(reported(0), reported()).reasoning_tokens).toBe(0);
+    expect(mergeModelUsage(reported(), reported())).not.toHaveProperty('reasoning_tokens');
+  });
+
+  it('keeps the reasoning tokens of the merged usage when the breakdown is dropped', () => {
+    const withBreakdown = withConnectors([connectorUsage('main', 1, 100, 20)], {
+      reasoning_tokens: 10,
+    });
+    const legacy = { ...usage(1, 5, 5), reasoning_tokens: 4 };
+
+    const merged = mergeModelUsage(legacy, withBreakdown);
+
+    expect(merged).not.toHaveProperty('connectors');
+    expect(merged.reasoning_tokens).toBe(14);
+  });
+
+  it('drops the breakdown when a side made calls but has none (persisted before it existed)', () => {
+    const withBreakdown = withConnectors([connectorUsage('main', 1, 100, 10)]);
+    const legacy = usage(1, 5, 5);
+
+    expect(mergeModelUsage(legacy, withBreakdown)).not.toHaveProperty('connectors');
+    expect(mergeModelUsage(withBreakdown, legacy)).not.toHaveProperty('connectors');
+    expect(mergeModelUsage(legacy, legacy)).not.toHaveProperty('connectors');
+    expect(mergeModelUsage(legacy, withBreakdown)).toMatchObject({
+      llm_calls: 2,
+      input_tokens: 105,
+      output_tokens: 15,
+    });
+  });
+
+  it('keeps the breakdown of the other side when a side made no call', () => {
+    const withBreakdown = withConnectors([connectorUsage('main', 1, 100, 10)]);
+    const noCall = { ...usage(0, 0, 0), llm_calls: 0 };
+
+    expect(mergeModelUsage(noCall, withBreakdown).connectors).toEqual(withBreakdown.connectors);
+    expect(mergeModelUsage(withBreakdown, noCall).connectors).toEqual(withBreakdown.connectors);
+  });
+
+  it('has no breakdown when neither side made a call', () => {
+    expect(mergeModelUsage(usage(0, 0, 0), usage(0, 0, 0))).not.toHaveProperty('connectors');
+  });
+
+  it('does not mutate its inputs', () => {
+    const a = withConnectors([connectorUsage('main', 1, 100, 10)]);
+    const b = withConnectors([connectorUsage('main', 1, 50, 5)]);
+
+    mergeModelUsage(a, b);
+
+    expect(a.connectors).toEqual([connectorUsage('main', 1, 100, 10)]);
+    expect(b.connectors).toEqual([connectorUsage('main', 1, 50, 5)]);
   });
 });
 

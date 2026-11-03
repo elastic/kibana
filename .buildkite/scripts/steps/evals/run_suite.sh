@@ -48,6 +48,10 @@ if [[ -z "${EVAL_SCOUT_DOMAIN:-}" && "${EVAL_SCOUT_ARCH:-stateful}" == "$_suite_
   EVAL_SCOUT_DOMAIN="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.scoutDomain // empty' 2>/dev/null || true)"
 fi
 unset _suite_scout_arch
+# Resolve the Scout serverConfigSet: explicit override, else the suite's own (the on-demand pipeline
+# doesn't forward it, and the default evals_tracing stack disables suite plugins), else evals_tracing.
+source .buildkite/scripts/steps/evals/resolve_server_config_set.sh
+EVAL_SERVER_CONFIG_SET="$(resolve_server_config_set "${EVAL_SUITE_INFO}")"
 
 cleanup() {
   if [[ -n "${SCOUT_PID:-}" ]]; then
@@ -448,7 +452,7 @@ EOF
           KBN_EVALS: "1"
           EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
           EVAL_SUITE_IDS: "${EVAL_SUITE_ID}"
-          GITHUB_PR_NUMBER: "${EVAL_PR_NUMBER:-}"
+          EVAL_PR_NUMBER: "${EVAL_PR_NUMBER:-}"
           FRESH_BASELINE_PR_EXPERIMENT_ID: "${FRESH_BASELINE_PR_EXPERIMENT_ID}"
         depends_on:
 EOF
@@ -496,15 +500,26 @@ df -h .
 du -sh .es node_modules "${KIBANA_BUILD_LOCATION:-}" 2>/dev/null || true
 
 # A suite's `scoutHook` reads the evals config on stdin and prints `{ env }`, exported for Scout and
-# Playwright so the suite's server config set can read it.
+# Playwright so the suite's server config set can read it. A suite with a `vaultSecret` gets its own
+# secret instead of the general config, so its credentials rotate without touching other suites.
 EVAL_SUITE_SCOUT_HOOK="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.scoutHook // empty' 2>/dev/null || true)"
+EVAL_SUITE_VAULT_SECRET="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.vaultSecret // empty' 2>/dev/null || true)"
 if [[ -n "$EVAL_SUITE_SCOUT_HOOK" ]]; then
-  if [[ -n "${KBN_EVALS_CONFIG_B64:-}" ]]; then
+  if [[ -n "$EVAL_SUITE_VAULT_SECRET" ]]; then
+    if [[ ! "$EVAL_SUITE_VAULT_SECRET" =~ ^[a-z0-9][a-z0-9_-]*$ ]]; then
+      echo "Invalid vaultSecret \"$EVAL_SUITE_VAULT_SECRET\" in evals.suites.json" >&2
+      exit 1
+    fi
+    _scout_hook_config="$(retry 5 5 vault kv get -field=config "kv/ci-shared/kbn-evals/$EVAL_SUITE_VAULT_SECRET" | base64 -d)"
+  elif [[ -n "${KBN_EVALS_CONFIG_B64:-}" ]]; then
     _scout_hook_config="$(printf '%s' "$KBN_EVALS_CONFIG_B64" | base64 -d)"
   else
     _scout_hook_config='{}'
   fi
   _scout_hook_output="$(printf '%s' "$_scout_hook_config" | bash "$EVAL_SUITE_SCOUT_HOOK")"
+  # The native evals CLI invokes this hook again; give it the same suite-owned input.
+  KBN_EVALS_SCOUT_HOOK_CONFIG_B64="$(printf '%s' "$_scout_hook_config" | base64)"
+  export KBN_EVALS_SCOUT_HOOK_CONFIG_B64
   # Piped, not `<<<`: older bash backs here-strings with a temp file, and this holds the private key.
   while IFS= read -r _scout_hook_name; do
     [[ -z "$_scout_hook_name" ]] && continue
@@ -530,11 +545,7 @@ es_curl() {
 
 # Start Scout server in background (run Kibana from the distributable)
 SCOUT_SERVER_ARGS=(start-server --location local --arch "$SCOUT_ARCH" --domain "$SCOUT_DOMAIN" --kibanaInstallDir "${KIBANA_BUILD_LOCATION:?}")
-if [[ -n "${EVAL_SERVER_CONFIG_SET:-}" ]]; then
-  SCOUT_SERVER_ARGS+=(--serverConfigSet "$EVAL_SERVER_CONFIG_SET")
-else
-  SCOUT_SERVER_ARGS+=(--serverConfigSet evals_tracing)
-fi
+SCOUT_SERVER_ARGS+=(--serverConfigSet "$EVAL_SERVER_CONFIG_SET")
 
 node scripts/scout "${SCOUT_SERVER_ARGS[@]}" &
 SCOUT_PID=$!

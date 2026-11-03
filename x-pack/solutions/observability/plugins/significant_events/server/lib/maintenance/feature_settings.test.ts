@@ -12,35 +12,21 @@ import {
   SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
-import { LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
 import { shouldRestoreSettingsBackedWorkflow } from './feature_settings';
 
 describe('shouldRestoreSettingsBackedWorkflow', () => {
-  it('restores continuous onboarding only when the setting was previously enabled', () => {
+  it('always restores a recorded continuous onboarding document, ignoring the legacy flag', () => {
+    const workflow = {
+      id: `${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-space-a`,
+      spaceId: asSpaceId('space-a'),
+    };
     expect(
-      shouldRestoreSettingsBackedWorkflow(
-        {
-          id: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-          spaceId: asSpaceId('default'),
-        },
-        { continuousOnboardingWasEnabled: true, scheduledDiscoveryEnabledSpaceIds: [] }
-      )
+      shouldRestoreSettingsBackedWorkflow(workflow, {
+        continuousOnboardingWasEnabled: false,
+        scheduledDiscoveryEnabledSpaceIds: [],
+      })
     ).toBe(true);
-    expect(
-      shouldRestoreSettingsBackedWorkflow(
-        {
-          id: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-          spaceId: asSpaceId('default'),
-        },
-        { continuousOnboardingWasEnabled: false, scheduledDiscoveryEnabledSpaceIds: [] }
-      )
-    ).toBe(false);
-    expect(
-      shouldRestoreSettingsBackedWorkflow(
-        { id: LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID, spaceId: asSpaceId('default') },
-        { continuousOnboardingWasEnabled: true, scheduledDiscoveryEnabledSpaceIds: [] }
-      )
-    ).toBe(true);
+    expect(shouldRestoreSettingsBackedWorkflow(workflow, undefined)).toBe(true);
   });
 
   it('restores scheduled discovery only for spaces that were previously enabled', () => {
@@ -84,15 +70,6 @@ describe('shouldRestoreSettingsBackedWorkflow', () => {
   });
 
   it('does not restore settings-backed workflows when pausedSettings is missing', () => {
-    expect(
-      shouldRestoreSettingsBackedWorkflow(
-        {
-          id: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-          spaceId: asSpaceId('default'),
-        },
-        undefined
-      )
-    ).toBe(false);
     expect(
       shouldRestoreSettingsBackedWorkflow(
         {

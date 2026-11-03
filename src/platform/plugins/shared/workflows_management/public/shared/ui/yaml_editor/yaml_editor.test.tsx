@@ -75,9 +75,7 @@ jest.mock('./yaml_language_service', () => {
 
 // Mock the CodeEditor component
 jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
   return {
-    ...original,
     CodeEditor: (props: CodeEditorProps) => {
       // Use React from the outer scope
       const { useEffect } = jest.requireActual('react');

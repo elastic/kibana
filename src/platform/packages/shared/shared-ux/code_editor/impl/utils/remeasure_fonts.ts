@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { apm } from '@elastic/apm-rum';
 import { monaco } from '@kbn/monaco';
 
 /**
@@ -20,10 +21,9 @@ export const remeasureFonts = () => {
         monaco.editor.remeasureFonts();
       })
       .catch((e) => {
-        // eslint-disable-next-line no-console
-        console.warn('Failed to remeasureFonts in <CodeEditor/>');
-        // eslint-disable-next-line no-console
-        console.warn(e);
+        apm.captureError(e instanceof Error ? e : new Error(String(e)), {
+          labels: { source: 'remeasure_fonts' },
+        });
       });
   }
 };

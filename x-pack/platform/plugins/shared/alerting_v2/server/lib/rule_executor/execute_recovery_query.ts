@@ -11,6 +11,7 @@ import { isEsqlUserError } from '../errors/esql_user_error';
 import { toQueryResponseSizeExceededError } from '../errors/query_response_size_exceeded_error';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import type { RuleExecutionInput } from './types';
+import { RULE_EXECUTION_REASONS, tagFailureReason } from './execution_outcome';
 import { buildQueryRecoveryAlertEvents, resolveAlertEventType } from './build_alert_events';
 import { getQueryPayload } from './get_query_payload';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
@@ -80,8 +81,13 @@ export const executeRecoveryQuery = async ({
       type: resolveAlertEventType(rule),
     });
   } catch (error) {
+    tagFailureReason(error, RULE_EXECUTION_REASONS.RECOVERY_QUERY_FAILED);
+
     if (isMaximumResponseSizeExceededError(error)) {
-      const sizeError = toQueryResponseSizeExceededError(error, 'recovery', maxResponseSize);
+      const sizeError = tagFailureReason(
+        toQueryResponseSizeExceededError(error, 'recovery', maxResponseSize),
+        RULE_EXECUTION_REASONS.RECOVERY_QUERY_FAILED
+      );
       logger.warn({
         message: `Recovery query: ${sizeError.message}`,
         code: ALERTING_LOG_CODES.RULE_EXECUTION_QUERY_RESPONSE_SIZE_EXCEEDED,

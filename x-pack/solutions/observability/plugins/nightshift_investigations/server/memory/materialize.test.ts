@@ -22,7 +22,7 @@ const page = (id: string, title: string): MemoryPage => ({
   title,
   content: `${title} body`,
   tags: ['memory'],
-  status: 'established',
+  archived: false,
   categories: [],
   references: [],
   created_at: '2026-01-01T00:00:00.000Z',

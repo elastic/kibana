@@ -225,6 +225,42 @@ describe('AD2 scenario registry (dense profile)', () => {
     }
   });
 
+  it('does not let a message token separate target from noise', () => {
+    const dense = buildAd2SeedPlan({ profile: 'dense', baseTime: fixedBaseTime });
+    const backgroundMessages = denseStepsBySide(dense, true).map((step) => step.message);
+    const targetMessages = denseStepsBySide(dense, false).map((step) => step.message);
+
+    expect(backgroundMessages.length).toBeGreaterThan(0);
+    expect(targetMessages.length).toBeGreaterThan(0);
+
+    // A marker the seeded messages never intend to carry — the historical
+    // example is a `Background test alert:` prefix copied verbatim into every
+    // noise message — turns `message LIKE '%<marker>%'` into the answer key
+    // without reading anything else on the alert. The invariant: no token may
+    // be near-universal on the noise side AND near-absent on the signal side,
+    // which is exactly what a prefix or tag-word discriminator looks like.
+    const tokensPerMessage = (messages: string[]): string[][] =>
+      messages.map((message) => (message.toLowerCase().match(/[a-z]+/g) ?? []) as string[]);
+
+    const noiseTokenized = tokensPerMessage(backgroundMessages);
+    const signalTokenized = tokensPerMessage(targetMessages);
+    const noiseTokens = new Set(noiseTokenized.flat());
+
+    // A token only counts as a marker candidate when it is near-universal on
+    // the noise side; anything rarer cannot back a discriminator.
+    const markerCandidates = [...noiseTokens].filter(
+      (token) =>
+        noiseTokenized.filter((tokens) => tokens.includes(token)).length / noiseTokenized.length >=
+        0.9
+    );
+
+    for (const token of markerCandidates) {
+      const signalShare =
+        signalTokenized.filter((tokens) => tokens.includes(token)).length / signalTokenized.length;
+      expect(signalShare).toBeGreaterThanOrEqual(0.1);
+    }
+  });
+
   it('does not let raw-event backing separate target from noise', () => {
     // The former leak: every clean chain has `raw: true` and every background
     // template had `raw: false`, so `NOT EXISTS(ancestor raw event)` alone

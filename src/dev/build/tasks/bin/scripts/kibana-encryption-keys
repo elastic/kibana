@@ -14,7 +14,7 @@ while [ -h "$SCRIPT" ] ; do
 done
 
 DIR="$(dirname "${SCRIPT}")/.."
-CONFIG_DIR=${KBN_PATH_CONF:-"$DIR/config"}
+. "$DIR/bin/kibana_env"
 {{#darwin}}
 NODE="${DIR}/node/default/bin/node"
 {{/darwin}}
@@ -25,10 +25,6 @@ test -x "$NODE"
 if [ ! -x "$NODE" ]; then
   echo "unable to find usable node.js executable."
   exit 1
-fi
-
-if [ -f "${CONFIG_DIR}/node.options" ]; then
-  KBN_NODE_OPTS="$(grep -v ^# < ${CONFIG_DIR}/node.options | xargs)"
 fi
 
 NODE_OPTIONS="$KBN_NODE_OPTS $NODE_OPTIONS" NODE_ENV=production "${NODE}" "${DIR}/node_modules/@kbn/cli/encryption_keys/dist" "$@"

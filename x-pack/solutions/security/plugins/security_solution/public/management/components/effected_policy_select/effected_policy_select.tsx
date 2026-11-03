@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIconTip,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -71,6 +72,8 @@ export interface EffectedPolicySelection {
 export interface EffectedPolicySelectProps {
   item: ExceptionListItemSchema | CreateExceptionListItemSchema;
   description?: string;
+  /** When set, an info icon next to the section title shows this text in a tooltip */
+  assignmentInfoTooltip?: string;
   onChange: (updatedItem: ExceptionListItemSchema | CreateExceptionListItemSchema) => void;
   disabled?: boolean;
   'data-test-subj'?: string;
@@ -80,7 +83,14 @@ export interface EffectedPolicySelectProps {
  * Policy Selection component used on Endpoint Artifact forms for setting Global/Per-Policy assignment.
  */
 export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
-  ({ item, description, onChange, disabled = false, 'data-test-subj': dataTestSubj }) => {
+  ({
+    item,
+    description,
+    assignmentInfoTooltip,
+    onChange,
+    disabled = false,
+    'data-test-subj': dataTestSubj,
+  }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const canManageGlobalArtifacts =
@@ -193,14 +203,27 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
 
     return (
       <EffectivePolicyFormContainer data-test-subj={getTestId()}>
-        <EuiText size="xs">
-          <h3>
-            <FormattedMessage
-              id="xpack.securitySolution.effectedPolicySelect.assignmentSectionTitle"
-              defaultMessage="Assignment"
-            />
-          </h3>
-        </EuiText>
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <h3>
+                <FormattedMessage
+                  id="xpack.securitySolution.effectedPolicySelect.assignmentSectionTitle"
+                  defaultMessage="Assignment"
+                />
+              </h3>
+            </EuiText>
+          </EuiFlexItem>
+          {assignmentInfoTooltip && (
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                type="info"
+                content={assignmentInfoTooltip}
+                iconProps={{ 'data-test-subj': getTestId('assignmentInfoTooltip') }}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
         <EuiSpacer size="xs" />
         <EuiFlexGroup>
           <EuiFlexItem grow={2}>

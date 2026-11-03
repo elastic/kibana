@@ -21,6 +21,7 @@ import {
 
 describe('workflow service account execution', () => {
   const execution = (accountId?: string) => ({
+    id: 'parent-execution',
     workflowId: 'workflow',
     spaceId: 'space',
     workflowDefinition: {
@@ -73,6 +74,7 @@ describe('workflow service account execution', () => {
         workloadId: 'workflow',
         spaceId: 'space',
         expectedServiceAccountId: 'account-a',
+        executionId: 'parent-execution',
       },
       expect.any(Function)
     );

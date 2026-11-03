@@ -20,6 +20,16 @@ describe('mergeVersionSuffixedPolicyBuckets', () => {
     ]);
   });
 
+  it('merges the sentinel policy bucket into its base policy', () => {
+    expect(
+      mergeVersionSuffixedPolicyBuckets([
+        { id: 'policy-1', name: 'policy-1', size: 1 },
+        { id: 'policy-1#9.4', name: 'policy-1#9.4', size: 2 },
+        { id: 'policy-1#sentinel', name: 'policy-1#sentinel', size: 3 },
+      ])
+    ).toEqual([{ id: 'policy-1', name: 'policy-1', size: 6 }]);
+  });
+
   it('does not merge a distinct policy whose id contains a non-version "#" suffix', () => {
     expect(
       mergeVersionSuffixedPolicyBuckets([

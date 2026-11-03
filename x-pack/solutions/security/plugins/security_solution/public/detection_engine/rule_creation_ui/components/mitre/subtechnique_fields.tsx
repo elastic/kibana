@@ -39,6 +39,7 @@ interface AddSubtechniqueProps {
   isDisabled: boolean;
   onFieldChange: (threats: Threats) => void;
   subtechniques: MitreSubtechniqueSummary[];
+  labelPrefix: string;
 }
 
 export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
@@ -49,6 +50,7 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
   techniqueIndex,
   onFieldChange,
   subtechniques,
+  labelPrefix,
 }): JSX.Element => {
   const isMitreAttackUpdatesUIEnabled = useIsExperimentalFeatureEnabled(
     'mitreAttackUpdatesUIEnabled'
@@ -151,7 +153,9 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
 
   const getSubtechniqueRenamedFromName = useCallback(
     (subtechnique: ThreatSubtechnique) => {
-      if (!isMitreAttackUpdatesUIEnabled) return undefined;
+      if (!isMitreAttackUpdatesUIEnabled) {
+        return undefined;
+      }
       const matchedOption = findCurrentSubtechniqueOption(subtechnique);
       return matchedOption && matchedOption.name !== subtechnique.name
         ? subtechnique.name
@@ -160,17 +164,29 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
     [findCurrentSubtechniqueOption, isMitreAttackUpdatesUIEnabled]
   );
 
+  const parentTechniqueId = technique[techniqueIndex]?.id;
+  // Filter subtechniques belonging to the parent technique. The managed source returns
+  // entities name-ordered, so the filtered subset is already in the correct display order.
+  const baseSubtechniqueOptions = useMemo(
+    () =>
+      subtechniques
+        .filter((t) => t.technique_id === parentTechniqueId)
+        .map((option) => ({
+          inputDisplay: <>{getMitreEntityDisplayName(option)}</>,
+          value: option.id,
+          disabled: isDisabled,
+        })),
+    [subtechniques, parentTechniqueId, isDisabled]
+  );
+
   const getSelectSubtechnique = useCallback(
     (index: number, disabled: boolean, subtechnique: ThreatSubtechnique) => {
-      // Filter subtechniques belonging to the parent technique. The managed source returns
-      // entities name-ordered, so the filtered subset is already in the correct display order.
-      const options = subtechniques.filter((t) => t.technique_id === technique[techniqueIndex]?.id);
       const isUnsupported = isUnsupportedSubtechnique(subtechnique);
 
       return (
         <>
           <EuiSuperSelect
-            id="mitreAttackSubtechnique"
+            id={`mitreAttackSubtechnique-${threatIndex}-${techniqueIndex}-${index}`}
             options={[
               ...(subtechnique.name === 'none'
                 ? [
@@ -189,13 +205,9 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
                     }),
                   ]
                 : []),
-              ...options.map((option) => ({
-                inputDisplay: <>{getMitreEntityDisplayName(option)}</>,
-                value: option.id,
-                disabled,
-              })),
+              ...baseSubtechniqueOptions,
             ]}
-            prepend={`${field.label} ${i18n.SUBTECHNIQUE}`}
+            prepend={`${labelPrefix} ${i18n.SUBTECHNIQUE}`}
             aria-label=""
             onChange={updateSubtechnique.bind(null, index)}
             fullWidth={true}
@@ -209,12 +221,12 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
       );
     },
     [
-      subtechniques,
+      baseSubtechniqueOptions,
       isUnsupportedSubtechnique,
-      field.label,
+      labelPrefix,
       updateSubtechnique,
-      technique,
       techniqueIndex,
+      threatIndex,
     ]
   );
 
@@ -237,12 +249,12 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
                 isInvalid={subtechniqueUnsupported}
                 error={
                   subtechniqueUnsupported
-                    ? i18n.UNSUPPORTED_MITRE_ID_ERROR(subtechnique.id)
+                    ? i18n.UNSUPPORTED_MITRE_ID_ERROR(subtechnique.id, labelPrefix)
                     : undefined
                 }
                 helpText={
                   subtechniqueRenamedFrom
-                    ? i18n.RENAMED_FROM_HINT(subtechniqueRenamedFrom)
+                    ? i18n.RENAMED_FROM_HINT(subtechniqueRenamedFrom, labelPrefix)
                     : undefined
                 }
               >

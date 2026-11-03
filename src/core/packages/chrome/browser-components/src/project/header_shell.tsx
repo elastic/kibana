@@ -31,6 +31,7 @@ export interface ChromeHeaderShellProps {
   logo?: ReactNode;
   switcher?: ReactNode;
   projectPicker?: ReactNode;
+  subscriptionBadge?: ReactNode;
   search?: ReactNode;
   help?: ReactNode;
   actions?: ReactNode;
@@ -76,6 +77,13 @@ const useChromeHeaderStyles = () => {
       margin-inline-start: ${euiTheme.size.xs};
     `;
 
+    const subscriptionBadgeSlot = css`
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      margin-inline: ${euiTheme.size.s};
+    `;
+
     const separator = css`
       width: 1px;
       height: 24px;
@@ -88,6 +96,7 @@ const useChromeHeaderStyles = () => {
       leftGroup,
       switcherSlot,
       projectPickerSlot,
+      subscriptionBadgeSlot,
       spacer,
       separator,
     };
@@ -95,7 +104,7 @@ const useChromeHeaderStyles = () => {
 };
 
 export const ChromeHeaderShell = React.memo<ChromeHeaderShellProps>(
-  ({ logo, switcher, projectPicker, search, help, actions, userMenu }) => {
+  ({ logo, switcher, projectPicker, subscriptionBadge, search, help, actions, userMenu }) => {
     const sideNavWidth = useSideNavWidth();
     const styles = useChromeHeaderStyles();
     const logoWidth = sideNavWidth <= COLLAPSED_WIDTH ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
@@ -123,6 +132,17 @@ export const ChromeHeaderShell = React.memo<ChromeHeaderShellProps>(
           >
             {projectPicker}
           </div>
+        )}
+        {subscriptionBadge && (
+          <>
+            {projectPicker && <div css={styles.separator} />}
+            <div
+              css={styles.subscriptionBadgeSlot}
+              data-test-subj={CHROME_HEADER_TEST_SUBJECTS.subscriptionBadge}
+            >
+              {subscriptionBadge}
+            </div>
+          </>
         )}
         <div css={styles.spacer} />
         <HeaderRightGroup search={search} help={help} actions={actions} userMenu={userMenu} />

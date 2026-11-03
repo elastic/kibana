@@ -17,10 +17,12 @@ export interface TimelineLinkProps {
   savedObjectId: string;
   timelineId: string;
   title: string;
+  /** Renders the deletion event; test subjects get a `-deleted` suffix so they stay unique. */
+  isDeleted?: boolean;
 }
 
 export const TimelineLink: React.FC<TimelineLinkProps> = memo(
-  ({ savedObjectId, timelineId, title }) => {
+  ({ savedObjectId, timelineId, title, isDeleted = false }) => {
     const { addError } = useAppToasts();
     const interactionsUpsellingMessage = useUpsellingMessage('investigation_guide_interactions');
     const {
@@ -45,16 +47,18 @@ export const TimelineLink: React.FC<TimelineLinkProps> = memo(
       handleTimelineClick(timelineId, onError);
     }, [handleTimelineClick, isDisabled, onError, timelineId]);
 
+    const testSubjSuffix = isDeleted ? '-deleted' : '';
+
     return (
       <UserActionTitle
-        label={i18n.ADDED_TIMELINE_LABEL}
+        label={isDeleted ? i18n.REMOVED_TIMELINE_LABEL : i18n.ADDED_TIMELINE_LABEL}
         link={{
           targetId: timelineId,
           label: title,
-          dataTestSubj: `timeline-attachment-link-${timelineId}`,
+          dataTestSubj: `timeline-attachment-link-${timelineId}${testSubjSuffix}`,
           onClick,
         }}
-        dataTestSubj={`timeline-user-action-${savedObjectId}`}
+        dataTestSubj={`timeline-user-action-${savedObjectId}${testSubjSuffix}`}
       />
     );
   }

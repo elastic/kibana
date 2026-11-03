@@ -9,6 +9,7 @@
 
 export * from './constants';
 export * from './errors';
+export * from './render_retry';
 export * from './schema_utils';
 
 export { CancellationToken } from './cancellation_token';

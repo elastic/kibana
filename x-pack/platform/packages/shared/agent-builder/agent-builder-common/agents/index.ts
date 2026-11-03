@@ -10,8 +10,11 @@ export {
   chatAgentTypeId,
   agentBuilderDefaultAgentId,
   agentBuilderDefaultAiIndexId,
+  kiRetrievalSkillId,
   type AgentDefinition,
+  type AgentApprovals,
   type AgentConfiguration,
+  type AgentConfigurationInput,
   type AgentConfigurationOverrides,
   type RuntimeAgentConfigurationOverrides,
 } from './definition';
@@ -32,6 +35,7 @@ export {
   type AgentAccessControlEntry,
   type AgentAccessControlPrincipalType,
 } from './access_control';
+export { agentApprovalsEqual, normalizeAgentApprovals } from './approvals';
 export { agentIdRegexp, agentIdMaxLength, validateAgentId } from './agent_ids';
 export { SELF_AGENT_ID } from './constants';
 export { AgentExecutionErrorCode } from './execution_errors';
@@ -50,6 +54,7 @@ export type {
   InteractivityConfigInput,
 } from './interactivity';
 export {
+  applyAgentApprovals,
   createNonInteractiveConfig,
   isApiAutoApproved,
   normalizeInteractive,

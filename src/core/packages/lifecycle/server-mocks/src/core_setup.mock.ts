@@ -36,6 +36,7 @@ import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 import { pricingServiceMock } from '@kbn/core-pricing-server-mocks';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
 import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
+import { pubSubServiceMock } from '@kbn/core-pubsub-server-mocks';
 import { userStorageServiceMock } from '@kbn/core-user-storage-server-mocks';
 import { lazyObject } from '@kbn/lazy-object';
 
@@ -97,6 +98,7 @@ export function createCoreSetupMock({
     pricing: pricingServiceMock.createSetupContract(),
     injection: injectionServiceMock.createSetupContract(),
     dataStreams: dataStreamServiceMock.createSetupContract(),
+    pubsub: pubSubServiceMock.createSetupContract(),
     userStorage: userStorageServiceMock.createSetupContract(),
     getStartServices: jest
       .fn<Promise<[ReturnType<typeof createCoreStartMock>, object, any]>, []>()

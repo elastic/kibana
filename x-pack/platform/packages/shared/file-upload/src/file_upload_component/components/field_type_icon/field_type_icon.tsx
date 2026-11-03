@@ -20,7 +20,7 @@ interface FieldTypeIconProps {
 export const FieldTypeIcon: FC<FieldTypeIconProps> = ({ tooltipEnabled = false, type }) => {
   const label =
     getFieldTypeName(type) ??
-    i18n.translate('xpack.dataVisualizer.fieldTypeIcon.fieldTypeTooltip', {
+    i18n.translate('xpack.fileUpload.fieldTypeIcon.fieldTypeTooltip', {
       defaultMessage: '{type} type',
       values: { type },
     });

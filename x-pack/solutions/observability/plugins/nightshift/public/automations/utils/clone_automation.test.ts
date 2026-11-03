@@ -15,7 +15,7 @@ const buildAutomation = (overrides: Partial<Automation>): Automation => ({
   isEnabled: true,
   trigger: { rows: [{ kind: 'alert' }] },
   execution: {},
-  completion: {},
+  completions: [],
   runtime: {},
   createdAt: '2026-10-01T00:00:00.000Z',
   updatedAt: '2026-10-01T00:00:00.000Z',
@@ -29,22 +29,67 @@ describe('toCloneRequestBody', () => {
       name: 'Triage',
       tags: ['oncall'],
       description: 'Triage alerts',
-      trigger: { rows: [{ kind: 'schedule', cronExpression: '0 7 * * 1', timezone: 'CET' }] },
+      trigger: {
+        rows: [
+          {
+            kind: 'schedule',
+            schedulePreset: 'weekly',
+            time: '07:00',
+            daysOfWeek: [1],
+            timezone: 'Europe/Berlin',
+          },
+        ],
+      },
       execution: { promptTemplate: 'Find the cause', reasoningMode: 'investigate' },
-      completion: { action: 'post_to_slack', targetMode: 'self', destination: '@me' },
+      completions: [
+        {
+          action: 'post_to_slack',
+          targetMode: 'channel',
+          destination: '#oncall',
+          connectorId: 'saved-slack',
+        },
+      ],
+
       runtime: { dailyDispatchLimit: 5 },
     });
 
-    expect(toCloneRequestBody(automation)).toEqual({
+    expect(toCloneRequestBody(automation, [])).toEqual({
       name: 'Triage (copy)',
       tags: ['oncall'],
       description: 'Triage alerts',
       isEnabled: false,
       automationType: 'custom',
-      trigger: { rows: [{ kind: 'schedule', cronExpression: '0 7 * * 1', timezone: 'CET' }] },
+      trigger: {
+        rows: [
+          {
+            kind: 'schedule',
+            schedulePreset: 'weekly',
+            time: '07:00',
+            daysOfWeek: [1],
+            timezone: 'Europe/Berlin',
+          },
+        ],
+      },
       execution: { promptTemplate: 'Find the cause', reasoningMode: 'investigate' },
-      completion: { action: 'post_to_slack', targetMode: 'self', destination: '@me' },
+      completions: [
+        {
+          action: 'post_to_slack',
+          targetMode: 'channel',
+          destination: '#oncall',
+          connectorId: 'saved-slack',
+        },
+      ],
+
       runtime: { dailyDispatchLimit: 5 },
     });
+  });
+
+  it('numbers the copy when the name is already taken', () => {
+    const automation = buildAutomation({ name: 'Triage' });
+
+    expect(toCloneRequestBody(automation, ['Triage (copy)']).name).toBe('Triage (copy 2)');
+    expect(toCloneRequestBody(automation, ['Triage (copy)', 'Triage (copy 2)']).name).toBe(
+      'Triage (copy 3)'
+    );
   });
 });

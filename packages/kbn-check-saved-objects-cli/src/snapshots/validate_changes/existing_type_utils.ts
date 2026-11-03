@@ -84,6 +84,7 @@ export function validateNoStructuralModelVersionChanges(
       delete comparable.schemas.create;
       // @ts-ignore we're simulating an older version of the type without the new properties
       comparable.schemas.forwardCompatibility = Boolean(comparable.schemas.forwardCompatibility);
+      delete comparable.schemas?.update;
       if (!equal(summaryBefore, comparable)) {
         structuralMutations.push(versionLabel);
       }
@@ -101,7 +102,6 @@ export function validateNoStructuralModelVersionChanges(
       typeName: name,
       message: `Some modelVersions have been structurally updated for SO type '${name}' after they were defined: ${structuralMutations}.`,
       fixHint: `Existing model versions are immutable. Revert the change and add a new model version to capture the update instead.`,
-      docsAnchor: '#defining-model-versions',
     });
   }
 
@@ -133,7 +133,8 @@ function schemasChanged(before: ModelVersionSummary, after: ModelVersionSummary)
     !schemasEqual(
       before.schemas.forwardCompatibility as SchemasValue,
       after.schemas.forwardCompatibility as SchemasValue
-    )
+    ) ||
+    !schemasEqual(before.schemas.update ?? false, after.schemas.update ?? false)
   );
 }
 
@@ -203,7 +204,6 @@ function reportSchemaChanges(
         )} of SO type '${name}', ` +
         `but the baseline snapshot uses the legacy hash format — detailed diff is not possible.`,
       fixHint: `Re-generate the baseline snapshot to enable schema change validation.`,
-      docsAnchor: '#defining-model-versions',
     });
   }
 
@@ -216,7 +216,6 @@ function reportSchemaChanges(
         '\n  - '
       )}`,
       fixHint: `Revert the breaking schema change and introduce it as a new model version instead.`,
-      docsAnchor: '#defining-model-versions',
     });
   }
 
@@ -248,11 +247,15 @@ function canDiffSchemas(before: ModelVersionSummary, after: ModelVersionSummary)
   const aCreate = after.schemas.create as SchemasValue;
   const bFwd = before.schemas.forwardCompatibility as SchemasValue;
   const aFwd = after.schemas.forwardCompatibility as SchemasValue;
+  const bUpdate: SchemasValue = before.schemas.update ?? false;
+  const aUpdate: SchemasValue = after.schemas.update ?? false;
   return (
     (bCreate === false || isObject(bCreate)) &&
     (aCreate === false || isObject(aCreate)) &&
     (bFwd === false || isObject(bFwd)) &&
-    (aFwd === false || isObject(aFwd))
+    (aFwd === false || isObject(aFwd)) &&
+    (bUpdate === false || isObject(bUpdate)) &&
+    (aUpdate === false || isObject(aUpdate))
   );
 }
 
@@ -275,9 +278,14 @@ function diffModelVersionSchemas(
     after.schemas.forwardCompatibility as false | Record<string, unknown>,
     'forwardCompatibility'
   );
+  const updateDiff = diffSchemas(
+    before.schemas.update ?? false,
+    after.schemas.update ?? false,
+    'update'
+  );
   return {
-    breaking: [...createDiff.breaking, ...fwdDiff.breaking],
-    warnings: [...createDiff.warnings, ...fwdDiff.warnings],
+    breaking: [...createDiff.breaking, ...fwdDiff.breaking, ...updateDiff.breaking],
+    warnings: [...createDiff.warnings, ...fwdDiff.warnings, ...updateDiff.warnings],
   };
 }
 
@@ -299,7 +307,7 @@ function diffModelVersionSchemas(
 function diffSchemas(
   before: false | Record<string, unknown>,
   after: false | Record<string, unknown>,
-  schemaType: 'create' | 'forwardCompatibility'
+  schemaType: 'create' | 'forwardCompatibility' | 'update'
 ): SchemaDiffResult {
   if (before === false) {
     // Schema absent in the baseline: either still absent (false/false = no change) or newly added
@@ -472,7 +480,6 @@ export function validateNewMappingsInModelVersion(
         newModelVersion.version
       }': ${undeclaredFields.join(', ')}.`,
       fixHint: `Add the missing fields to the 'mappings_addition' change in model version '${newModelVersion.version}'.`,
-      docsAnchor: '#defining-model-versions',
     });
   }
 }
@@ -514,7 +521,6 @@ export function validateIgnoreAboveExistingType(
         ', '
       )}.`,
       fixHint: `Add 'ignore_above: 1024' (or another appropriate limit) to each affected field to prevent Elasticsearch from silently dropping strings that exceed the limit.`,
-      docsAnchor: '#defining-model-versions',
     });
   }
 }
@@ -573,7 +579,6 @@ export function validateNameTitleFieldTypesExistingType(
         .map(({ description }) => description)
         .join(', ')}.`,
       fixHint: `Change the field mapping type to 'text'. If the field already exists in production, this requires a reindex.`,
-      docsAnchor: '#defining-model-versions',
     });
   }
 }

@@ -15,3 +15,15 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { ProposalsPluginSetup, ProposalsPluginStart } from './types';
+
+// The errors a caller of the service has to recognise: `get` and `getLatestRevision` throw
+// `ProposalNotFoundError` for an id nothing is under, `create` throws
+// `ProposalAlreadyExistsError` for a caller-chosen id that is taken, and `getLatestRevisions`
+// throws `ProposalLookupTruncatedError` rather than return a partial answer. They carry no
+// dependencies, so exporting them does not defeat the lazy import above.
+export {
+  ProposalAlreadyExistsError,
+  ProposalConflictError,
+  ProposalLookupTruncatedError,
+  ProposalNotFoundError,
+} from './services/errors';

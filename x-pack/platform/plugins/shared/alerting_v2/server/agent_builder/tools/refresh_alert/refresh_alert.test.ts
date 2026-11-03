@@ -245,7 +245,7 @@ describe('refreshAlertTool', () => {
         'Failed to refresh episode',
         expect.objectContaining({
           labels: {
-            episode_id: 'ep-1',
+            alert_id: 'ep-1',
             space_id: 'default',
             code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_REFRESH_FAILED,
           },

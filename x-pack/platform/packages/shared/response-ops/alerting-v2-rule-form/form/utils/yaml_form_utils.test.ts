@@ -532,6 +532,33 @@ describe('yaml_form_utils', () => {
       expect(result.error).toBe(`Signal rules cannot set ${field}.`);
     });
 
+    it('rejects a signal rule that sets metadata.routing_tags', () => {
+      const yaml = stringify({
+        kind: 'signal',
+        metadata: { name: 'Signal rule', routing_tags: ['sre'] },
+        query: { base: 'FROM logs-*' },
+      });
+
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.values).toBeNull();
+      expect(result.error).toBe('Signal rules cannot set metadata.routing_tags.');
+    });
+
+    it('reads metadata.routing_tags into the form values', () => {
+      const yaml = stringify({
+        kind: 'alert',
+        metadata: { name: 'Routed rule', tags: ['prod'], routing_tags: ['sre'] },
+        query: { base: 'FROM logs-*' },
+      });
+
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.error).toBeNull();
+      expect(result.values?.metadata.routingTags).toEqual(['sre']);
+      expect(result.values?.metadata.tags).toEqual(['prod']);
+    });
+
     it('ignores invalid artifacts entries', () => {
       const yaml = stringify({
         metadata: { name: 'Rule with mixed artifacts' },
@@ -878,6 +905,23 @@ describe('yaml_form_utils', () => {
   });
 
   describe('round-trip stability', () => {
+    it('parse(serialize(values)) preserves routing tags', () => {
+      const original: FormValues = {
+        kind: 'alert',
+        metadata: { name: 'Routed rule', enabled: true, routingTags: ['sre', 'payments'] },
+        timeField: '@timestamp',
+        schedule: { every: '5m', lookback: '1m' },
+        query: { base: 'FROM logs-*', breach: { segment: '' } },
+        stateTransitionAlertDelayMode: 'immediate',
+        stateTransitionRecoveryDelayMode: 'immediate',
+      };
+
+      const result = parseYamlToFormValues(serializeFormToYaml(original));
+
+      expect(result.error).toBeNull();
+      expect(result.values?.metadata.routingTags).toEqual(['sre', 'payments']);
+    });
+
     it('parse(serialize(values)) preserves the same FormValues structure', () => {
       const original: FormValues = {
         kind: 'alert',

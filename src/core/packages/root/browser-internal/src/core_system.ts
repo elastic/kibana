@@ -483,6 +483,7 @@ export class CoreSystem {
           http,
           docLinks,
           customBranding,
+          notifications,
         },
         coreUiTargetDomElement
       );

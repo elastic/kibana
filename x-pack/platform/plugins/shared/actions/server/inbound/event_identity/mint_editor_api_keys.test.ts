@@ -188,4 +188,106 @@ describe('mintConnectorEventIdentity', () => {
     ).rejects.toThrow('Cloud API keys are only supported in serverless environments');
     expect(securityService.authc.apiKeys.cloneAsInternalUser).not.toHaveBeenCalled();
   });
+
+  describe('UIAM service account principals', () => {
+    const serviceAccountRequest = httpServerMock.createKibanaRequest({
+      headers: { authorization: 'Bearer essu_service_account_token' },
+    });
+
+    const createServiceAccountSecurityService = () => {
+      const securityService = createSecurityService({ withUiam: true });
+      securityService.authc.getCurrentUser.mockReturnValue({
+        authentication_type: 'token',
+      } as never);
+      securityService.authc.getPrincipal.mockReturnValue({
+        type: 'service_account',
+        serviceAccountId: 'sa-id',
+        variant: 'uiam',
+      });
+      return securityService;
+    };
+
+    test('grants only a UIAM API key', async () => {
+      const securityService = createServiceAccountSecurityService();
+      securityService.authc.apiKeys.uiam!.grant.mockResolvedValue({
+        id: 'uiam-id',
+        name: `uiam-${name}`,
+        api_key: 'essu_granted',
+      });
+
+      const identity = await mintConnectorEventIdentity({
+        request: serviceAccountRequest,
+        securityService,
+        logger,
+        connectorId,
+      });
+
+      expect(securityService.authc.apiKeys.uiam!.grant).toHaveBeenCalledWith(
+        serviceAccountRequest,
+        { name: `uiam-${name}` }
+      );
+      expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+      expect(identity).toEqual({
+        uiamApiKey: encodeApiKey('uiam-id', 'essu_granted'),
+        uiamApiKeyExternal: false,
+      });
+    });
+
+    test('rethrows the UIAM grant error instead of falling back to an ES API key', async () => {
+      const securityService = createServiceAccountSecurityService();
+      const refusal = new Error('Unable to grant an API key for service account [sa-id]');
+      securityService.authc.apiKeys.uiam!.grant.mockRejectedValue(refusal);
+
+      await expect(
+        mintConnectorEventIdentity({
+          request: serviceAccountRequest,
+          securityService,
+          logger,
+          connectorId,
+        })
+      ).rejects.toBe(refusal);
+      expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    test('throws when the UIAM grant returns no key', async () => {
+      const securityService = createServiceAccountSecurityService();
+      securityService.authc.apiKeys.uiam!.grant.mockResolvedValue(null);
+
+      await expect(
+        mintConnectorEventIdentity({
+          request: serviceAccountRequest,
+          securityService,
+          logger,
+          connectorId,
+        })
+      ).rejects.toThrow(`Failed to create UIAM API key for connector event identity "${name}"`);
+      expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    test('keeps the ES grant for an Elasticsearch service account', async () => {
+      const securityService = createServiceAccountSecurityService();
+      securityService.authc.getPrincipal.mockReturnValue({
+        type: 'service_account',
+        serviceAccountId: 'elastic/sa',
+        variant: 'stack',
+      });
+      securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValue({
+        id: 'es-id',
+        name,
+        api_key: 'es-secret',
+      });
+
+      const identity = await mintConnectorEventIdentity({
+        request: httpServerMock.createKibanaRequest({
+          headers: { authorization: 'Bearer es-token' },
+        }),
+        securityService,
+        logger,
+        connectorId,
+      });
+
+      expect(securityService.authc.apiKeys.uiam!.grant).not.toHaveBeenCalled();
+      expect(identity).toEqual({ apiKey: encodeApiKey('es-id', 'es-secret') });
+    });
+  });
 });

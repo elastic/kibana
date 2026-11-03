@@ -31,9 +31,9 @@ export const ActionPoliciesArtifactsSubsection: React.FC<
   ActionPoliciesArtifactsSubsectionProps
 > = ({ rule, flyoutSession = 'start', showTitle = true }) => {
   const { actionPolicyLocators } = useAlertingLocators();
-  const ruleTags = rule.metadata.tags ?? [];
+  const routingTags = rule.metadata.routing_tags ?? [];
   const { items, evaluatedCount, isMatchTruncated, isLoading, isError } =
-    useLinkedActionPolicies(ruleTags);
+    useLinkedActionPolicies(routingTags);
   const [isListExpanded, setIsListExpanded] = useState(false);
   // Connector icons are only rendered for rows on screen. Hidden matches stay
   // out of mgetWorkflows until the operator expands the list.
@@ -78,7 +78,7 @@ export const ActionPoliciesArtifactsSubsection: React.FC<
           isError={isError}
           isExpanded={isListExpanded}
           onExpand={handleExpandList}
-          ruleTags={ruleTags}
+          routingTags={routingTags}
           connectorTypesByPolicy={connectorTypesByPolicy}
           onOpen={setPolicyToViewId}
         />

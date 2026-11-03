@@ -44,6 +44,7 @@ import {
   defaultValuePlaceholderConstant,
 } from '../../../../../registry/complete_items';
 import { parametersFromHintsResolvers } from '../../parameters_from_hints';
+import { getTimeSeriesAggregateFieldTypes } from '../../../time_series_aggregate_args';
 
 // functionDefinition is guaranteed by in_function.ts early return
 type FunctionParamContext = NonNullable<ExpressionContext['options']['functionParameterContext']>;
@@ -239,7 +240,14 @@ async function buildFieldAndFunctionSuggestions(
     );
 
     await builder.addFields({
-      types: config.acceptedTypes,
+      types: [
+        ...config.acceptedTypes,
+        ...getTimeSeriesAggregateFieldTypes(
+          config.acceptedTypes,
+          ctx.context?.isTimeseriesSource === true,
+          functionParamContext.functionDefinition?.type
+        ),
+      ] as FunctionParameterType[],
       ignoredColumns,
       addComma: config.shouldAddComma,
       canBeMultiValue,

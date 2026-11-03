@@ -14,6 +14,8 @@ Pick **one** control for the card's action and make everything else inert:
 2. **No interactive content inside the card.** Keep `href`/`onClick` on `EuiCard` — a clickable card with only text/image content is explicitly valid and not reported.
 3. **Selecting and acting are genuinely two different actions** (e.g. a checkbox-style select plus a separate "Details" action). Use `EuiCard`'s `selectable` prop for the select action and keep the second action as a real control in `footer`. This is EUI's own supported pairing and is not reported, but it's only safe when the footer control stops click propagation — the rule cannot verify that statically, so confirm it by reading the control's handler before relying on this pattern.
 
+4. **A badge (status, beta, deprecated) with a tooltip.** Use `EuiCard`'s `betaBadgeProps` (`label`, `tooltipContent`, `color`) instead of placing an `EuiBetaBadge`/`EuiIconTip` in `title`/`description`. This is the pattern EUI documents for badging a clickable card: the card wires the badge into the title control's `aria-describedby`, and the tooltip stays reachable by keyboard. Put any extra explanatory text in the same `tooltipContent` rather than adding an `EuiIconTip` next to it. The rule does not analyse `betaBadgeProps`, so it is never reported.
+
 ## Examples
 
 ```tsx
@@ -36,6 +38,14 @@ const footer = (
   selectable={{ onClick: onSelect }}
   footer={<EuiButtonEmpty onClick={onDetails}>Details</EuiButtonEmpty>}
 />;
+
+// RIGHT — badge with a tooltip on a clickable card: use betaBadgeProps
+<EuiCard
+  title={title}
+  description={description}
+  onClick={onClick}
+  betaBadgeProps={{ label: deprecatedLabel, color: 'warning', tooltipContent: deprecatedTooltip }}
+/>;
 ```
 
 ## Common mistakes
@@ -43,6 +53,13 @@ const footer = (
 ```tsx
 // WRONG — card has href, footer has its own unwired button: invalid nesting
 <EuiCard title={title} href={href} footer={<EuiButton fill>{label}</EuiButton>} />;
+
+// WRONG — tooltip badge hand-placed in the content of a clickable card
+<EuiCard
+  title={title}
+  onClick={onClick}
+  description={<EuiBetaBadge label={deprecatedLabel} tooltipContent={deprecatedTooltip} />}
+/>;
 
 // WRONG — same bug, hidden from the lint rule because href arrives via the spread
 const footer = <EuiButton fill>{label}</EuiButton>;

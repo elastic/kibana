@@ -42,4 +42,22 @@ describe('MoreActions', () => {
       screen.getByTestId(ADD_TO_BLOCK_LIST_TEST_ID).querySelector('[data-euiicon-type="stopSlash"]')
     ).toBeInTheDocument();
   });
+
+  it('disables the add-to-case menu item for an indicator missing its name', async () => {
+    const indicator: Indicator = generateMockFileIndicator();
+    const fields = { ...indicator.fields };
+    delete fields['threat.indicator.name'];
+    const indicatorMissingName: Indicator = { _id: indicator._id, fields };
+
+    render(
+      <TestProvidersComponent>
+        <MoreActions indicator={indicatorMissingName} />
+      </TestProvidersComponent>
+    );
+
+    fireEvent.click(screen.getByTestId(MORE_ACTIONS_TEST_ID));
+    await screen.findByTestId('alertsTableActionsMenu');
+
+    expect(screen.getByTestId(ADD_TO_CASE_TEST_ID)).toBeDisabled();
+  });
 });

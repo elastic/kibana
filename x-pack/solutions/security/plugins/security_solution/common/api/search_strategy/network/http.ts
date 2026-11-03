@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { NetworkQueries } from '../model/factory_query_type';
 
 import { requestOptionsPaginatedSchema } from '../model/request_paginated_options';
 import { sort } from '../model/sort';
 import { timerange } from '../model/timerange';
 
-export const networkHttpSchema = requestOptionsPaginatedSchema.extend({
-  ip: z.ipv4().or(z.ipv6()).optional(),
-  defaultIndex: z.array(z.string()).min(1).optional(),
-  timerange,
-  sort,
-  factoryQueryType: z.literal(NetworkQueries.http),
-});
+export const networkHttpSchema = lazySchema(() =>
+  requestOptionsPaginatedSchema.extend({
+    ip: z.ipv4().or(z.ipv6()).optional(),
+    defaultIndex: z.array(z.string()).min(1).optional(),
+    timerange,
+    sort,
+    factoryQueryType: z.literal(NetworkQueries.http),
+  })
+);
 
 export type NetworkHttpRequestOptionsInput = z.input<typeof networkHttpSchema>;
 
