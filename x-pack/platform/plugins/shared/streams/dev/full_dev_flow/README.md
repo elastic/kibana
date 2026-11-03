@@ -75,8 +75,11 @@ Docker Desktop must be running. Collector pods reach ES via `host.docker.interna
 - Always pass `--context kind-streams` to `tilt up` and `tilt down`. If Docker
   Desktop's own Kubernetes is on, every Docker restart switches the current kube
   context to `docker-desktop`.
-- Use a recent kind. Old kind releases create a Kubernetes version that
-  cert-manager rejects (see Troubleshooting).
+- Use kind v0.27.0 or newer (`kind version`) if you create the cluster from
+  `streams-config-distributor`. Older releases default to a Kubernetes version
+  that cert-manager rejects (see Troubleshooting). `make kind` in
+  `streams-controller` runs its own pinned kind, so your installed version does
+  not matter there.
 
 ## 1. Create the kind cluster
 
@@ -320,7 +323,7 @@ make kind-delete    # from either repo
 | `es serverless` bind error on 8081 | Another process holds 8081, which local serverless ES needs. Stop it. |
 | ES red, logs show `failed to recover from translog` / `EOFException` | ES data was corrupted when the container was killed (often out of memory). Restart ES with `--clean`, then run `reset` followed by `seed` to discard cached credentials and mint new keys. |
 | Tilt: `containerd image snapshotter is disabled` | Tilt is pointed at Docker Desktop's Kubernetes. Start both Tilts with `--context kind-streams`. Do not change the containerd setting. |
-| cert-manager: `selectableFields: field not declared in schema` | kind is too old. Upgrade kind, then `make kind-delete && make kind`. |
+| cert-manager: `selectableFields: field not declared in schema` | kind is older than v0.27.0. Upgrade kind (or create the cluster from `streams-controller`), then `make kind-delete && make kind`. |
 | kind API server TLS handshake timeouts, `streamunit-watch` dies | Docker Desktop is out of memory. Raise it to 16 GB. |
 | Map: "Unable to get streams-configuration" | You logged in with a role that cannot read the Map saved objects. Log in as `elastic_serverless`. |
 | Map: add-source form lists no source types | `xpack.cloud.managed_otlp.url` is missing. Run `setup`, add the printed `xpack.cloud.managed_otlp.url to config/kibana.dev.yml`, and restart Kibana. |
