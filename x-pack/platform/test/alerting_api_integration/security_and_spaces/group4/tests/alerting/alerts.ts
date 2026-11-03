@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { expect as expectExpect } from 'expect';
-import { omit, padStart } from 'lodash';
+import { mapValues, omit, padStart } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
@@ -26,6 +26,26 @@ import {
   TaskManagerUtils,
   getEventLog,
 } from '../../../../common/lib';
+
+interface SummarizedAlertHit {
+  kibana: { alert: { instance: { id: string } } };
+}
+
+type SummarizedAlertsMessage =
+  | SummarizedAlertHit[]
+  | Record<string, { count: number; data: SummarizedAlertHit[] }>;
+
+const sortByInstanceId = (hits: SummarizedAlertHit[]): SummarizedAlertHit[] =>
+  [...hits].sort((a, b) => a.kibana.alert.instance.id.localeCompare(b.kibana.alert.instance.id));
+
+// The summarized alerts searches run without a `sort`, so Elasticsearch does not promise a hit order.
+const parseSummarizedAlertsMessage = (message: string) => {
+  const parsed: SummarizedAlertsMessage = JSON.parse(message);
+
+  return Array.isArray(parsed)
+    ? sortByInstanceId(parsed)
+    : mapValues(parsed, (chunk) => ({ ...chunk, data: sortByInstanceId(chunk.data) }));
+};
 
 export default function alertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -1490,7 +1510,7 @@ instanceStateValue: true
               expectExpect(
                 // Summary action is executed on first rule run then skipped 4 times (throttle is 5s and schedule.interval is 1s)
                 // @ts-expect-error _source: unknown
-                JSON.parse(searchResult.body.hits.hits[0]._source.params.message)
+                parseSummarizedAlertsMessage(searchResult.body.hits.hits[0]._source.params.message)
               ).toEqual(
                 expectExpect.objectContaining({
                   new: {
@@ -1603,7 +1623,7 @@ instanceStateValue: true
               expectExpect(
                 // @ts-expect-error _source: unknown
                 //  Summary action is executed on the fifth rule run. The new alerts in the first execution become ongoing
-                JSON.parse(searchResult.body.hits.hits[1]._source.params.message)
+                parseSummarizedAlertsMessage(searchResult.body.hits.hits[1]._source.params.message)
               ).toEqual(
                 expectExpect.objectContaining({
                   new: { count: 0, data: [] },
@@ -1770,7 +1790,7 @@ instanceStateValue: true
               expect(searchResult.body.hits.total.value).to.be.greaterThan(0);
               expectExpect(
                 // @ts-expect-error _source: unknown
-                JSON.parse(searchResult.body.hits.hits[0]._source.params.message)
+                parseSummarizedAlertsMessage(searchResult.body.hits.hits[0]._source.params.message)
               ).toEqual([
                 expectExpect.objectContaining({
                   _id: expectExpect.any(String),
