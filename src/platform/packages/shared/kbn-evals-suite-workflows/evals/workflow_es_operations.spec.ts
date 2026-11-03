@@ -52,7 +52,6 @@ import {
   createBulkOperationsShapeEvaluator,
   createEfficiencyEvaluator,
   createToolTrajectoryEvaluator,
-  createLatencyEvaluator,
   skipInfraErrors,
   skipNegativeCases,
   extractResultYaml,
@@ -77,11 +76,9 @@ const evaluate = base.extend<
           {
             datasets: [dataset],
             task: async ({ input }) => {
-              const startMs = Date.now();
               const response = await chatClient.converse({
                 messages: [{ message: input.instruction }],
               });
-              const latencyMs = Date.now() - startMs;
 
               const taskOutput = {
                 messages: response.messages,
@@ -100,7 +97,7 @@ const evaluate = base.extend<
               return {
                 ...taskOutput,
                 resultYaml,
-                latencyMs,
+                traceId: response.traceId,
               };
             },
           },
@@ -112,7 +109,7 @@ const evaluate = base.extend<
             skip(createBulkOperationsShapeEvaluator()),
             skip(createEfficiencyEvaluator()),
             skip(createToolTrajectoryEvaluator()),
-            skip(createLatencyEvaluator()),
+            skip(evaluators.traceBasedEvaluators.latency),
             skipInfraErrors(createCriteriaEvaluator({ evaluators })),
           ])
         );

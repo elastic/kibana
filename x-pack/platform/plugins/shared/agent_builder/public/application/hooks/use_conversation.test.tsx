@@ -15,7 +15,6 @@ import {
   ConversationAccessControlRole,
   ConversationRoundStatus,
 } from '@kbn/agent-builder-common';
-import { NEVER } from 'rxjs';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useStreamingContext, useStreamRecord } from '../context/streaming/streaming_context';
 import { ConversationStreamService } from '../../services/events/conversation_stream_service';
@@ -45,11 +44,7 @@ jest.mock('./use_last_agent_id', () => ({
   useLastAgentId: () => ({ agentId: undefined }),
 }));
 
-const stubConversationStreamService = new ConversationStreamService({
-  getChatEvents$: () => NEVER,
-  getStreamEnded$: () => NEVER,
-  getStreamStarted$: () => NEVER,
-});
+const stubConversationStreamService = new ConversationStreamService();
 
 const mockUseConversationId = jest.mocked(useConversationId);
 const mockUseStreamingContext = jest.mocked(useStreamingContext);

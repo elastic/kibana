@@ -9,6 +9,7 @@ import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import type { Logger } from '@kbn/core/server';
 import { isTemplateRequiredConnector, MessageRole } from '@kbn/inference-common';
 import type { InferenceClient } from '@kbn/inference-common';
+import { throwIfModelRefusal } from '@kbn/langchain/server';
 
 /** EIS template id. The file is `prompt-templates/attack-discovery/1.yaml` in eis-gateway. */
 export const ATTACK_DISCOVERY_TEMPLATE_ID = '.attack-discovery';
@@ -167,6 +168,8 @@ export const createAttackDiscoveryTemplateCompletion = ({
       ...(timeout !== undefined ? { timeout } : {}),
       ...(telemetryMetadata != null ? { metadata: { connectorTelemetry: telemetryMetadata } } : {}),
     });
+    throwIfModelRefusal({ connectorId, content: response.content, refusal: response.refusal });
+
     return response.content ?? '';
   };
 };
