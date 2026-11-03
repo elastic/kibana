@@ -157,4 +157,4 @@ export const OTEL_COLLECTOR_INPUT_TYPE = 'otelcol';
 export const OBLT_DEFAULT_CATEGORIES: readonly string[] = ['opentelemetry', 'observability'];
 
 export const ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION =
-  'When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The force flag does not bypass this check.';
+  'When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.';
