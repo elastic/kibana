@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
+import type { EpisodeActionsDeps } from '@kbn/alerting-v2-episodes-ui/actions';
 import { createObservabilityAlertingV2Host } from '@kbn/deeplinks-observability';
 import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
 import { EpisodesHistogram } from '@kbn/alerting-v2-episodes-ui/components/episodes_histogram';
@@ -19,8 +20,10 @@ import type { EpisodesKpisServices } from '@kbn/alerting-v2-episodes-ui/componen
 import { EpisodesTable } from '@kbn/alerting-v2-episodes-ui/components/episodes_table';
 import type { EpisodesTableServices } from '@kbn/alerting-v2-episodes-ui/components/episodes_table';
 import { useAlertingEpisodesDataView } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view';
+import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
 import { useDatePickerContext } from '../../../../../hooks/use_date_picker_context';
 import { useKibana as useObservabilityKibana } from '../../../../../utils/kibana_react';
+import { createObservabilityEpisodeActions } from '../../../../../episode_actions/create_observability_episode_actions';
 
 const OVERVIEW_FILTER_STATE: EpisodesFilterState = {};
 
@@ -34,13 +37,25 @@ type EmbeddedAlertsServices = EpisodesHistogramServices &
 function UniversalAlertsSectionContent({
   timeRange,
   onTimeRangeChange,
+  lastUpdated,
 }: {
   timeRange: TimeRange;
   onTimeRangeChange: (next: TimeRange) => void;
+  lastUpdated: number;
 }) {
   const services = useKibana<EmbeddedAlertsServices>().services;
   const dataView = useAlertingEpisodesDataView({ services });
   const [breakdownField, setBreakdownField] = useState<string | undefined>();
+
+  const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
+  const refreshedAt = useRef(lastUpdated);
+  useEffect(() => {
+    if (refreshedAt.current === lastUpdated) {
+      return;
+    }
+    refreshedAt.current = lastUpdated;
+    invalidateEpisodeQueries();
+  }, [lastUpdated, invalidateEpisodeQueries]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -77,7 +92,7 @@ function UniversalAlertsSectionContent({
 }
 
 export function UniversalAlertsSection({ alertingVTwo }: { alertingVTwo: AlertingV2PublicStart }) {
-  const { relativeStart, relativeEnd, updateTimeRange } = useDatePickerContext();
+  const { relativeStart, relativeEnd, updateTimeRange, lastUpdated } = useDatePickerContext();
   const coreStart = useObservabilityKibana().services;
 
   const hostApp = useMemo(
@@ -95,11 +110,27 @@ export function UniversalAlertsSection({ alertingVTwo }: { alertingVTwo: Alertin
     [updateTimeRange]
   );
 
+  const { cases, triggersActionsUi } = coreStart;
+  const { getAlertFormatter } = triggersActionsUi;
+
+  const createActions = useCallback(
+    (deps: EpisodeActionsDeps) =>
+      createObservabilityEpisodeActions(
+        { cases: cases && { service: cases, kibanaServices: coreStart }, getAlertFormatter },
+        deps
+      ),
+    [cases, getAlertFormatter, coreStart]
+  );
+
   const { AlertsProvider } = alertingVTwo;
 
   return (
-    <AlertsProvider coreStart={coreStart} hostApp={hostApp}>
-      <UniversalAlertsSectionContent timeRange={timeRange} onTimeRangeChange={onTimeRangeChange} />
+    <AlertsProvider coreStart={coreStart} hostApp={hostApp} createActions={createActions}>
+      <UniversalAlertsSectionContent
+        timeRange={timeRange}
+        onTimeRangeChange={onTimeRangeChange}
+        lastUpdated={lastUpdated}
+      />
     </AlertsProvider>
   );
 }

@@ -33,7 +33,6 @@ interface Props {
   initialIsOpen?: boolean;
   appLink?: AppLink;
   showExperimentalBadge?: boolean;
-  /** Set to false when the content brings its own panels, to avoid nesting rounded borders. */
   hasInnerPanel?: boolean;
 }
 

@@ -41,27 +41,45 @@ jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view', 
   useAlertingEpisodesDataView: () => ({ timeFieldName: '@timestamp' }),
 }));
 
+const invalidateEpisodeQueries = jest.fn();
+
+jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries', () => ({
+  useInvalidateEpisodeQueries: () => invalidateEpisodeQueries,
+}));
+
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({ services: { storage: {}, http: {} } }),
 }));
 
 const updateTimeRange = jest.fn();
 
+const providerProps = jest.fn();
+
 const alertingVTwo = {
-  AlertsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  AlertsProvider: ({ children, ...rest }: { children: React.ReactNode }) => {
+    providerProps(rest);
+    return <>{children}</>;
+  },
   createAlertingV2HostApp: jest.fn(() => ({})),
 } as unknown as AlertingV2PublicStart;
+
+const mockDatePicker = (lastUpdated: number) =>
+  jest.spyOn(datePickerHook, 'useDatePickerContext').mockReturnValue({
+    relativeStart: 'now-15m',
+    relativeEnd: 'now',
+    updateTimeRange,
+    lastUpdated,
+  } as unknown as ReturnType<typeof datePickerHook.useDatePickerContext>);
 
 describe('UniversalAlertsSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(datePickerHook, 'useDatePickerContext').mockReturnValue({
-      relativeStart: 'now-15m',
-      relativeEnd: 'now',
-      updateTimeRange,
-    } as unknown as ReturnType<typeof datePickerHook.useDatePickerContext>);
+    mockDatePicker(1);
     jest.spyOn(kibanaHook, 'useKibana').mockReturnValue({
-      services: {},
+      services: {
+        cases: { helpers: { canUseCases: jest.fn() } },
+        triggersActionsUi: { getAlertFormatter: jest.fn() },
+      },
     } as unknown as ReturnType<typeof kibanaHook.useKibana>);
   });
 
@@ -122,6 +140,52 @@ describe('UniversalAlertsSection', () => {
     expect(props.actions).toBeUndefined();
     expect(props.onRuleNameClick).toBeUndefined();
     expect(props.getRuleDetailsHref).toBeUndefined();
+  });
+
+  it("gives the provider Observability's row actions, matching the Alerts page", () => {
+    render(<UniversalAlertsSection alertingVTwo={alertingVTwo} />);
+
+    const { createActions } = providerProps.mock.calls[0][0];
+    const actions = createActions({
+      rendering: {},
+      http: { basePath: { prepend: (p: string) => p } },
+      notifications: { toasts: {} },
+    });
+
+    expect(actions.map((action: { id: string }) => action.id)).toEqual([
+      'OBSERVABILITY_ALERTING_INVESTIGATE_EPISODE',
+      'VIEW_V1_ALERT_IN_APP',
+      'ALERTING_V2_ADD_EPISODE_TO_CASE',
+    ]);
+  });
+
+  it('drops Add to case when the cases plugin is unavailable', () => {
+    jest.spyOn(kibanaHook, 'useKibana').mockReturnValue({
+      services: { triggersActionsUi: { getAlertFormatter: jest.fn() } },
+    } as unknown as ReturnType<typeof kibanaHook.useKibana>);
+    render(<UniversalAlertsSection alertingVTwo={alertingVTwo} />);
+
+    const { createActions } = providerProps.mock.calls[0][0];
+    const actions = createActions({
+      rendering: {},
+      http: { basePath: { prepend: (p: string) => p } },
+      notifications: { toasts: {} },
+    });
+
+    expect(actions.map((action: { id: string }) => action.id)).not.toContain(
+      'ALERTING_V2_ADD_EPISODE_TO_CASE'
+    );
+  });
+
+  it('refetches when the Overview is refreshed without the range changing', () => {
+    const { rerender } = render(<UniversalAlertsSection alertingVTwo={alertingVTwo} />);
+
+    expect(invalidateEpisodeQueries).not.toHaveBeenCalled();
+
+    mockDatePicker(2);
+    rerender(<UniversalAlertsSection alertingVTwo={alertingVTwo} />);
+
+    expect(invalidateEpisodeQueries).toHaveBeenCalled();
   });
 
   it('keeps the histogram breakdown selector working', () => {
