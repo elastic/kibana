@@ -11,7 +11,11 @@ import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { PROJECT_DEFAULT_ROLES } from '../../../common/constants';
+import {
+  SERVERLESS_ROLES_ROOT_PATH,
+  STATEFUL_ROLES_ROOT_PATH,
+  readRolesFromResource,
+} from '@kbn/es';
 import { ScoutTestConfigSchema } from '../../../types/test_config.schema';
 import type { CheckResult, DoctorArch, DoctorCheck, Fix } from '../types';
 import { DOCTOR_ARCHS, fail, pass, warn } from '../types';
@@ -21,9 +25,28 @@ import { tildify } from '../utils';
 const CLOUD_SECRETS_FILE = Path.join(Os.homedir(), '.elastic/cloud.json');
 const getEnvironment = () => process.env.EC_ENV ?? 'qa';
 
-const ROLES_BY_ARCH: Record<DoctorArch, string[]> = {
-  stateful: ['editor', 'viewer'],
-  serverless: ['viewer', ...new Set(PROJECT_DEFAULT_ROLES.values())],
+// Used for test setup, tests don't log in with it
+const SKIPPED_ROLES = ['system_indices_superuser'];
+
+const readRoles = (rolesFile: string) =>
+  readRolesFromResource(rolesFile).filter((role) => !SKIPPED_ROLES.includes(role));
+
+/** Roles tests can log in with, from the roles.yml files of all project types when none is given */
+const getRoles = (arch: DoctorArch, projectType?: string): string[] => {
+  if (arch === 'stateful') {
+    return readRoles(Path.join(STATEFUL_ROLES_ROOT_PATH, 'roles.yml'));
+  }
+
+  const rolesFiles = projectType
+    ? [Path.join(projectType, 'roles.yml')]
+    : Fs.readdirSync(SERVERLESS_ROLES_ROOT_PATH, { recursive: true, encoding: 'utf8' }).filter(
+        (file) => Path.basename(file) === 'roles.yml'
+      );
+  return [
+    ...new Set(
+      rolesFiles.flatMap((file) => readRoles(Path.join(SERVERLESS_ROLES_ROOT_PATH, file)))
+    ),
+  ];
 };
 
 // Direct Scout runs read these; QAF writes them for a run and refuses to run when they exist
@@ -70,7 +93,7 @@ const checkUsers = (
   const inFile = file ? ` in ${file}` : '';
   const remedy = copyFix
     ? { fix: copyFix, hint: `copy them only if they are ${getEnvironment()} users` }
-    : { hint: `tests that log in as ${missing.join(' or ')} will fail` };
+    : { hint: 'tests that log in with these roles will fail' };
   if (!missing.length) {
     return pass(`${label} are defined${inFile}: ${quoteRoles(roles)}`);
   }
@@ -142,13 +165,16 @@ const cloudRolesCheck = (arch: DoctorArch): DoctorCheck => ({
   title: 'Cloud users',
   arch,
   dependsOn: cloudUsersCheck,
-  run: async () =>
-    checkUsers(
+  run: async () => {
+    // admin is checked for both architectures at once
+    const roles = getRoles(arch).filter((role) => role !== 'admin');
+    return checkUsers(
       { label: 'Cloud users' },
       await readCloudUsers(),
-      ROLES_BY_ARCH[arch],
-      await getCopyFtrUsersFix(ROLES_BY_ARCH[arch])
-    ),
+      roles,
+      await getCopyFtrUsersFix(roles)
+    );
+  },
 });
 
 const apiKeyCheck: DoctorCheck = {
@@ -218,15 +244,10 @@ const scoutUsersCheck = (arch: DoctorArch, configCheck: DoctorCheck): DoctorChec
       });
     }
 
-    const projectRole = config?.projectType && PROJECT_DEFAULT_ROLES.get(config.projectType);
-    const expected =
-      arch === 'stateful'
-        ? ['admin', ...ROLES_BY_ARCH.stateful]
-        : ['admin', 'viewer', ...(projectRole ? [projectRole] : [])];
     return checkUsers(
       { label: 'Scout Cloud users', file: displayPath(usersFile) },
       users,
-      expected
+      getRoles(arch, config?.projectType)
     );
   },
 });
