@@ -1212,9 +1212,7 @@ describe('a scoped retrieval whose rows carry no identity is attributed', () => 
     const steps = [recordedEsqlStep({ query: scopedQuery, rows: 0, includeIdColumn: false })];
     const workflow = workflowFor(steps);
 
-    expect(hasScopedAgentAlertRetrievalWithoutIdentity(steps, AD2_SCENARIO_SEED_LABEL)).toBe(
-      false
-    );
+    expect(hasScopedAgentAlertRetrievalWithoutIdentity(steps, AD2_SCENARIO_SEED_LABEL)).toBe(false);
     expect(workflow.retrievedAlertCount).toBe(0);
     expect(workflow.retrievedAlertCountSource).toBe('none');
     expect(workflow.retrievalEvidence.agentEsqlRowCounts).toEqual([0]);
