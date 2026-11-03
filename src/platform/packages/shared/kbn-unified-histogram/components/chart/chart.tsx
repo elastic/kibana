@@ -47,6 +47,7 @@ import { useTotalHits } from './hooks/use_total_hits';
 import { useChartStyles } from './hooks/use_chart_styles';
 import { ChartConfigPanel } from './chart_config_panel';
 import { useEditVisualization } from './hooks/use_edit_visualization';
+import { useSuggestAdJobs } from './hooks/use_suggest_ad_jobs';
 import type { LensVisService } from '../../services/lens_vis_service';
 import { removeTablesFromLensAttributes } from '../../utils/lens_vis_from_table';
 import { useLensProps } from './hooks/use_lens_props';
@@ -81,6 +82,10 @@ export interface UnifiedHistogramChartProps {
   lensActionsOptions?: UnifiedHistogramLensActionsOptions;
   onApiAvailable?: EmbeddableComponentProps['onApiAvailable'];
 }
+
+const suggestAdJobsLabel = i18n.translate('unifiedHistogram.suggestAdJobsButtonLabel', {
+  defaultMessage: 'Suggest anomaly jobs',
+});
 
 const RequestStatusError: typeof RequestStatus.ERROR = 2;
 const HistogramMemoized = memo(Histogram);
@@ -255,6 +260,8 @@ export function UnifiedHistogramChart({
     lensEditorOptions: lensActionsOptions?.navigation,
   });
 
+  const onSuggestAdJobs = useSuggestAdJobs({ services, dataSource });
+
   const toolbarToggleActions = useMemo(() => renderToggleActions(), [renderToggleActions]);
 
   const toolbarSelectors = useMemo(
@@ -342,6 +349,16 @@ export function UnifiedHistogramChart({
       iconType: 'addToDashboard',
       'data-test-subj': 'unifiedHistogramSaveVisualization',
       onClick: () => setIsSaveModalVisible(true),
+    });
+  }
+
+  if (onSuggestAdJobs) {
+    actions.push({
+      label: suggestAdJobsLabel,
+      toolTipContent: suggestAdJobsLabel,
+      iconType: 'machineLearningApp',
+      'data-test-subj': 'unifiedHistogramSuggestAdJobs',
+      onClick: onSuggestAdJobs,
     });
   }
 
