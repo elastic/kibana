@@ -15,17 +15,11 @@ import type {
   ServiceAccountWorkloadRef,
 } from '@kbn/core-security-server';
 import {
+  SERVICE_ACCOUNT_ID_MAX_LENGTH,
   SERVICE_ACCOUNT_WORKLOAD_BINDING_CHANGES_MAX,
   SERVICE_ACCOUNT_WORKLOAD_ID_MAX_LENGTH,
 } from '@kbn/core-security-server';
 import type { WorkloadTypeRegistry } from '../workload_type_registry';
-
-/**
- * Upper bound on the service account ID a binding names. Bindings are looked up by account to
- * answer "what would break if this account went away?", and an ID longer than the index keeps
- * would make its bindings invisible to that lookup.
- */
-const SERVICE_ACCOUNT_ID_MAX_LENGTH = 1024;
 
 export interface PluginScopedServiceAccountsOptions {
   pluginId: string;

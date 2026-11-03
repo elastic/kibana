@@ -20,7 +20,7 @@ import {
   getWorkloadBindingId,
   SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
 } from './binding_saved_object';
-import { getDetailedErrorMessage } from '../../errors';
+import { getDetailedErrorMessage, toErrorStatusCode } from '../../errors';
 
 /** Pages of this size are walked when listing every workload bound to a service account. */
 const FIND_PAGE_SIZE = 100;
@@ -59,9 +59,7 @@ const toBoom = (error: { message: string; statusCode: number }): Boom.Boom => {
   }
 
   const { message, statusCode } = error;
-  return new Boom.Boom(message, {
-    statusCode: Number.isInteger(statusCode) && statusCode >= 400 ? statusCode : 500,
-  });
+  return new Boom.Boom(message, { statusCode: toErrorStatusCode(statusCode) });
 };
 
 /**

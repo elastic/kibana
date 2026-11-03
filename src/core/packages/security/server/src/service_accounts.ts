@@ -110,7 +110,7 @@ export interface CoreServiceAccountsService {
    * the existing binding for the workload.
    *
    * Rejects when the workload type was not registered by the calling plugin, or when
-   * `serviceAccountId` is empty or longer than 1024 characters.
+   * `serviceAccountId` is empty or longer than {@link SERVICE_ACCOUNT_ID_MAX_LENGTH}.
    */
   bindWorkload(
     request: KibanaRequest,
@@ -142,6 +142,7 @@ export interface CoreServiceAccountsService {
    * authenticated, there are more than {@link SERVICE_ACCOUNT_WORKLOAD_BINDING_CHANGES_MAX}
    * changes, a change names a workload type the calling plugin did not register, a malformed
    * workload ID, or a bind names no service account, or two changes name the same workload.
+   * Two changes to one workload always come down to the last of them, so send only that one.
    *
    * Every change applies in the space of the request, as with the single-workload methods. A flow
    * that copies workloads into another space has to make the call from a request in that space.

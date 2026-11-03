@@ -33,7 +33,7 @@ import type { WorkloadBindingStore, WorkloadBindingWriteOutcome } from './worklo
 import type { AuthenticatedUser, SecurityLicense } from '../../../common';
 import type { ServiceAccountAuditEventParams } from '../../audit';
 import { ServiceAccountAuditAction, serviceAccountAuditEvent } from '../../audit';
-import { getDetailedErrorMessage, getErrorStatusCode } from '../../errors';
+import { getDetailedErrorMessage, getErrorStatusCode, toErrorStatusCode } from '../../errors';
 import { clusterPrivilegeRefusal, hasClusterPrivilege } from '../cluster_privilege';
 import type { ServiceAccountMintInterceptor } from '../fake_requests';
 import { isTerminalMintFailure } from '../fake_requests';
@@ -50,18 +50,6 @@ const CANARY_BYTE_LENGTH = 32;
  * get, since only a verified binding may name an account in the audit log.
  */
 const PREVIOUS_BINDING_READ_CONCURRENCY = 10;
-
-/** What each operation is called in the messages that refuse it. */
-const CHANGE_ACTIONS = {
-  bind: 'bind a service account to a workload',
-  unbind: 'unbind a service account from a workload',
-} as const satisfies Record<ServiceAccountWorkloadBindingChange['op'], string>;
-
-/** The audit action each operation is recorded under. */
-const CHANGE_AUDIT_ACTIONS = {
-  bind: ServiceAccountAuditAction.WORKLOAD_BIND,
-  unbind: ServiceAccountAuditAction.WORKLOAD_UNBIND,
-} as const satisfies Record<ServiceAccountWorkloadBindingChange['op'], ServiceAccountAuditAction>;
 
 /**
  * The outcome of one change, as {@link ServiceAccountWorkloadBindings.applyChanges} reports it.
@@ -82,15 +70,6 @@ type PreviousBinding = { ok: true; serviceAccountId?: string } | { ok: false; er
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(getDetailedErrorMessage(error));
-
-/** An error status code, or 500 for anything that is not one. */
-const toErrorStatusCode = (statusCode: unknown): number =>
-  typeof statusCode === 'number' &&
-  Number.isInteger(statusCode) &&
-  statusCode >= 400 &&
-  statusCode < 600
-    ? statusCode
-    : 500;
 
 /**
  * Why a change failed, as the bulk update reports it. A client error keeps its message, as the
@@ -536,27 +515,25 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     changes: readonly ServiceAccountWorkloadBindingChange[],
     audits: readonly BindingAudit[]
   ): ChangeOutcome[] {
-    const refusals = new Map<ServiceAccountWorkloadBindingChange['op'], Boom.Boom>();
-    const refusalFor = (op: ServiceAccountWorkloadBindingChange['op']): Boom.Boom => {
-      let error = refusals.get(op);
-      if (!error) {
-        error = clusterPrivilegeRefusal({
-          logger: this.logger,
-          privilege: 'manage_security',
-          action: CHANGE_ACTIONS[op],
-        });
-        refusals.set(op, error);
-      }
-      return error;
-    };
+    // Each made on first use, so a refusal is logged once per operation.
+    let bindRefusal: Boom.Boom | undefined;
+    let unbindRefusal: Boom.Boom | undefined;
+    const refuse = (action: string): Boom.Boom =>
+      clusterPrivilegeRefusal({ logger: this.logger, privilege: 'manage_security', action });
 
-    return changes.map((change, index) => {
-      const error = refusalFor(change.op);
-      audits[index].refused(
-        CHANGE_AUDIT_ACTIONS[change.op],
-        change.op === 'bind' ? change.serviceAccountId : undefined
-      )(error);
-      return { op: change.op, ok: false, error };
+    return changes.map((change, index): ChangeOutcome => {
+      if (change.op === 'bind') {
+        bindRefusal ??= refuse('bind a service account to a workload');
+        audits[index].refused(
+          ServiceAccountAuditAction.WORKLOAD_BIND,
+          change.serviceAccountId
+        )(bindRefusal);
+        return { op: 'bind', ok: false, error: bindRefusal };
+      }
+
+      unbindRefusal ??= refuse('unbind a service account from a workload');
+      audits[index].refused(ServiceAccountAuditAction.WORKLOAD_UNBIND)(unbindRefusal);
+      return { op: 'unbind', ok: false, error: unbindRefusal };
     });
   }
 

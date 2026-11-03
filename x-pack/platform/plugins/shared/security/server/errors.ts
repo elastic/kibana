@@ -41,6 +41,19 @@ export function getErrorStatusCode(error: any): number {
 }
 
 /**
+ * The status code a value carries, when it is an HTTP error status, else `500`. For building a
+ * Boom error from a status that may be missing or malformed, which Boom itself refuses.
+ */
+export function toErrorStatusCode(statusCode: unknown): number {
+  return typeof statusCode === 'number' &&
+    Number.isInteger(statusCode) &&
+    statusCode >= 400 &&
+    statusCode < 600
+    ? statusCode
+    : 500;
+}
+
+/**
  * Extracts detailed error message from Boom and Elasticsearch "native" errors. It's supposed to be
  * only logged on the server side and never returned to the client as it may contain sensitive
  * information.

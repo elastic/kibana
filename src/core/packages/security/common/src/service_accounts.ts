@@ -8,6 +8,15 @@
  */
 
 /**
+ * Upper bound on a service account ID. Bindings are looked up by the account they name, to answer
+ * "what would break if this account went away?", and an ID longer than the index keeps would make
+ * its bindings invisible to that lookup.
+ *
+ * @public
+ */
+export const SERVICE_ACCOUNT_ID_MAX_LENGTH = 1024;
+
+/**
  * Parameters for creating a service account.
  *
  * @public
