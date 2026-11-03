@@ -20,13 +20,10 @@ import { PLUGIN_ID } from '../../../common';
 import { WorkflowsPageName } from '../../deep_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
+import { WORKFLOWS_EXPERIMENTAL_BADGE_LABEL } from '../../shared/translations/experimental_badge_label';
 
 const libraryPageTitle = i18n.translate('workflows.libraryPage.pageTitle', {
   defaultMessage: 'Template library',
-});
-
-const experimentalBadgeLabel = i18n.translate('workflows.libraryPage.experimentalBadge', {
-  defaultMessage: 'Experimental',
 });
 
 const contributeLinkLabel = i18n.translate('workflows.libraryPage.contributeLink', {
@@ -56,7 +53,7 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
   const headerBadges = useMemo<AppHeaderBadge[]>(
     () => [
       {
-        label: experimentalBadgeLabel,
+        label: WORKFLOWS_EXPERIMENTAL_BADGE_LABEL,
         color: 'hollow',
         'data-test-subj': 'workflowLibraryExperimentalBadge',
       },
