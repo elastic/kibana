@@ -11,7 +11,7 @@ import type { GridLayoutStateManager } from '../types';
 
 export const isLayoutInteractive = (gridLayoutStateManager: GridLayoutStateManager) => {
   return (
-    gridLayoutStateManager.expandedPanelId$.value === undefined &&
+    gridLayoutStateManager.expandedPanelId$?.value === undefined &&
     gridLayoutStateManager.accessMode$.getValue() === 'EDIT'
   );
 };

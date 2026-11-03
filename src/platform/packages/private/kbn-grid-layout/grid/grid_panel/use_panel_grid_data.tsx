@@ -14,7 +14,6 @@ import type { OrderedLayout } from '../types';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { isGridDataEqual } from '../utils/equality_checks';
 import type { GridPanelData } from './types';
-import { FlexGridLayoutData } from '@kbn/grid-layout/flex_grid/types';
 
 export const useGridPanelState = ({
   panelId,
@@ -60,11 +59,12 @@ export const useGridPanelState = ({
 };
 
 const getPanelState = (
-  layout: OrderedLayout | FlexGridLayoutData,
+  layout: OrderedLayout,
   panelId: string
 ): (GridPanelData & { sectionId: string }) | undefined => {
+  console.log({ layout });
   for (const section of Object.values(layout)) {
-    const panel = 'panels' in section ? section.panels[panelId] : section[panelId];
+    const panel = section.panels[panelId];
     if (panel) {
       return { ...panel, sectionId: section.id };
     }

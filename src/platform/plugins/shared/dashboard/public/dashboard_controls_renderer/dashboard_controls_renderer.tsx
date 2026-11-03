@@ -9,7 +9,7 @@
 
 import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/as-code-dashboard-schema';
 import type { ControlsLayout } from '@kbn/controls-renderer';
-import { FlexGridLayout } from '@kbn/grid-layout';
+import { FlexGridLayout, GridLayout } from '@kbn/grid-layout';
 import type { PublishesDataLoading } from '@kbn/presentation-publishing';
 import {
   apiPublishesDataLoading,
@@ -31,9 +31,9 @@ export const DashboardPinnedPanelsRenderer = () => {
   const [topOffset, setTopOffset] = useState(DEFAULT_DASHBOARD_DRAG_TOP_OFFSET);
 
   const [flexLayout] = useBatchedPublishingSubjects(dashboardInternalApi.pinnedLayout$);
-
+  console.log({ flexLayout });
   return (
-    <FlexGridLayout
+    <GridLayout
       layout={flexLayout}
       gridSettings={{
         gutterSize: 0,
@@ -43,15 +43,7 @@ export const DashboardPinnedPanelsRenderer = () => {
       }}
       // useCustomDragHandle={true}
       renderPanelContents={() => {
-        return (
-          <div
-            css={css`
-              height: 100px;
-            `}
-          >
-            here
-          </div>
-        );
+        return <div>here</div>;
       }}
       onLayoutChange={() => {}}
       accessMode={'EDIT'}

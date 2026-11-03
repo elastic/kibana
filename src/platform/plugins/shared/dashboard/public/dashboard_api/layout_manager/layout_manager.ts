@@ -39,7 +39,6 @@ import type {
 } from '@kbn/embeddable-plugin/public';
 import { PanelNotFoundError, PlacementStrategy } from '@kbn/embeddable-plugin/public';
 import type { GridLayoutData, GridPanelData, GridSectionData } from '@kbn/grid-layout';
-import type { FlexGridLayoutData, FlexGridLayoutPanel } from '@kbn/grid-layout/flex_grid/types';
 import { i18n } from '@kbn/i18n';
 import type { PanelPackage, SerializedTitles } from '@kbn/presentation-publishing';
 import {
@@ -752,7 +751,7 @@ function getClonedPanelTitle(panelTitles: string[], rawTitle: string) {
 }
 
 const transformPinnedPanelsToGridLayout = (layout: DashboardLayout) => {
-  const newLayout: FlexGridLayoutData = {};
+  const newLayout: GridLayoutData = {};
   Object.keys(layout.pinnedPanels).forEach((panelId) => {
     const panel = layout.pinnedPanels[panelId];
     const basePanel = {
@@ -761,9 +760,10 @@ const transformPinnedPanelsToGridLayout = (layout: DashboardLayout) => {
       width: panel.width === 'large' ? 12 : panel.width === 'medium' ? 6 : 3,
       height: 1,
       resizeOptions: { maxHeight: 1, minHeight: 1 },
-    } as FlexGridLayoutPanel;
+    } as unknown as GridLayoutData;
     newLayout[panelId] = {
       ...basePanel,
+      type: 'panel',
     };
   });
   return newLayout;

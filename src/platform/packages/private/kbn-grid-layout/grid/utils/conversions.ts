@@ -48,6 +48,7 @@ export const getGridLayout = (layout: OrderedLayout): GridLayoutData => {
 
 export const getOrderedLayout = (layout: GridLayoutData): OrderedLayout => {
   const widgets = cloneDeep(getLayoutInOrder(layout));
+  console.log({ widgets });
   const orderedLayout: OrderedLayout = {};
   let order = 0;
   let mainRow = 0;
@@ -93,6 +94,6 @@ export const getOrderedLayout = (layout: GridLayoutData): OrderedLayout => {
     }
     order++;
   }
-
+  console.log({ orderedLayout });
   return orderedLayout;
 };

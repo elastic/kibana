@@ -67,7 +67,7 @@ export const GridLayout = ({
     accessMode,
   });
   const [elementsInOrder, setElementsInOrder] = useState<GridLayoutElementsInOrder>([]);
-
+  console.log({ layout, elementsInOrder });
   /**
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
    */
