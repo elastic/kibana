@@ -8,7 +8,13 @@
  */
 
 import type { Phase } from './types';
-import { ONGOING_REPORT_AFTER_MS, REPORT_BURST, REPORT_REFILL_MS } from './constants';
+import {
+  ONGOING_FAST_REPEAT_MS,
+  ONGOING_FAST_REPEAT_UNTIL_MS,
+  ONGOING_REPORT_AFTER_MS,
+  REPORT_BURST,
+  REPORT_REFILL_MS,
+} from './constants';
 
 export interface DetectedBlock {
   phase: Phase;
@@ -37,8 +43,6 @@ interface OngoingBlock {
   phase: Phase;
   /** When the next ongoing report is due. */
   nextReportAt: number;
-  /** Whether an ongoing report was written: the end report then needs no token. */
-  reported: boolean;
 }
 
 /** Clock-injected state machine detecting blocks from a stale heartbeat (milliseconds). */
@@ -47,11 +51,6 @@ export class BlockDetector {
   private reportTokens = REPORT_BURST;
   private lastRefillAt?: number;
   private suppressedBlocks = 0;
-
-  /** Start of the ongoing block, if any, so the worker can share it with the main thread. */
-  public get ongoingStartedAt(): number | undefined {
-    return this.ongoing?.startedAt;
-  }
 
   /**
    * Returns the block that ended, or a report on the ongoing block when one is due, given the
@@ -71,7 +70,6 @@ export class BlockDetector {
         startedAt: lastHeartbeat,
         phase,
         nextReportAt: lastHeartbeat + Math.max(thresholdMs, ONGOING_REPORT_AFTER_MS),
-        reported: false,
       };
       // Due right away when the threshold is the longer of the two.
       return this.pollOngoing(now, this.ongoing);
@@ -80,8 +78,7 @@ export class BlockDetector {
       return this.pollOngoing(now, ongoing);
     }
     this.ongoing = undefined;
-    // A block already reported while ongoing is only completed here, not reported again.
-    const report = ongoing.reported || this.takeReportToken(now);
+    const report = this.takeReportToken(now);
     const suppressedBlocks = report ? this.suppressedBlocks : 0;
     this.suppressedBlocks = report ? 0 : this.suppressedBlocks + 1;
     return {
@@ -96,30 +93,28 @@ export class BlockDetector {
   }
 
   /**
-   * An ongoing report is due once the block has lasted the ongoing mark, then every refill
-   * interval. A suppressed one tries again as soon as a token refills, so a block that outlives
-   * the process waits at most one refill for its log line.
+   * An ongoing report is due once the block has lasted the ongoing mark, then every fast repeat
+   * interval early in the block, then every refill interval. It doesn't take or check a report
+   * token, so warnings on earlier short blocks can't suppress it. Only one block is ongoing at a
+   * time, so this schedule bounds the ongoing reports.
    */
   private pollOngoing(now: number, ongoing: OngoingBlock): DetectedBlock | undefined {
     if (now < ongoing.nextReportAt) {
       return;
     }
-    const report = this.takeReportToken(now);
-    ongoing.nextReportAt = report ? now + REPORT_REFILL_MS : this.lastRefillAt! + REPORT_REFILL_MS;
-    // A suppressed ongoing report isn't a suppressed block: the block is still counted and may
-    // still be reported when it ends.
-    const suppressedBlocks = report ? this.suppressedBlocks : 0;
-    if (report) {
-      ongoing.reported = true;
-      this.suppressedBlocks = 0;
-    }
+    const fastRepeatAt = now + ONGOING_FAST_REPEAT_MS;
+    ongoing.nextReportAt =
+      fastRepeatAt - ongoing.startedAt <= ONGOING_FAST_REPEAT_UNTIL_MS
+        ? fastRepeatAt
+        : now + REPORT_REFILL_MS;
     return {
       phase: ongoing.phase,
       startedAt: ongoing.startedAt,
       endedAt: now,
       blockedMs: now - ongoing.startedAt,
-      report,
-      suppressedBlocks,
+      report: true,
+      // Left to the block's end report, which reports or counts the suppressed blocks as before.
+      suppressedBlocks: 0,
       ongoing: true,
     };
   }

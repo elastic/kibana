@@ -19,7 +19,7 @@ interface PhaseStats {
   suppressed: number;
 }
 
-/** The parts of a stdout log line these tests read: the worker's, or the main thread's fallback. */
+/** The parts of a worker log line these tests read. */
 interface WorkerLogLine {
   message: string;
   log: { level: string; logger: string };
@@ -29,12 +29,7 @@ interface WorkerLogLine {
       blockedMs?: number;
       startedAt?: string;
       ongoing?: boolean;
-      stats?: {
-        starting: PhaseStats;
-        running: PhaseStats;
-        heapUsed: number;
-        ongoing?: { phase: string; blockedMs: number };
-      };
+      stats?: { starting: PhaseStats; running: PhaseStats; heapUsed: number };
     };
     worker?: { name: string; thread_id: number };
   };
@@ -243,18 +238,19 @@ describe('event loop watchdog in a child process', () => {
   }, 120_000);
 
   describe('a block that lasts longer than the ongoing mark', () => {
-    it('is reported while it lasts, before the process is killed', async () => {
-      const ongoingWarning = (line: WorkerLogLine) =>
-        line.log.level === 'WARN' && blockOf(line)?.ongoing === true;
-      const ongoingStats = (line: WorkerLogLine) =>
-        blockOf(line)?.stats?.ongoing?.phase === 'running';
-      const result = await runHarness('hang', {
-        timeoutMs: 30_000,
-        killWhen: (lines) => lines.some(ongoingWarning) && lines.some(ongoingStats),
+    it('is reported while it lasts, after short blocks used up the warning burst', async () => {
+      const ongoingWarnings = (lines: WorkerLogLine[]) =>
+        lines.filter((line) => line.log.level === 'WARN' && blockOf(line)?.ongoing === true);
+      const result = await runHarness('permanent_block', {
+        timeoutMs: 60_000,
+        killWhen: (lines) => ongoingWarnings(lines).length >= 2,
       });
       expect(result.signal).toBe('SIGKILL');
-      const [ongoing] = blockLogLines(result);
-      expect(ongoing).toMatchObject({
+      // The 5 short blocks took the whole burst.
+      const ended = endedBlockLogLines(result);
+      expect(ended).toHaveLength(5);
+      const [first, repeat] = ongoingWarnings(result.workerLogLines);
+      expect(first).toMatchObject({
         message: expect.stringMatching(/^Event loop blocked for ~\d+ms so far$/),
         log: { level: 'WARN', logger: 'metrics.event_loop_watchdog' },
         kibana: {
@@ -267,12 +263,18 @@ describe('event loop watchdog in a child process', () => {
           worker: { name: 'event-loop-watchdog', thread_id: expect.any(Number) },
         },
       });
-      expect(blockOf(ongoing)?.blockedMs).toBeGreaterThanOrEqual(1000);
-      expect(endedBlockLogLines(result)).toEqual([]);
-      const stats = statsOf(result).find((line) => line.ongoing);
-      expect(stats?.ongoing).toEqual({ phase: 'running', blockedMs: expect.any(Number) });
-      expect(stats?.running.blocks).toBe(0);
-    }, 60_000);
+      const firstBlockedMs = blockOf(first)?.blockedMs ?? 0;
+      // Early enough to be written before a liveness probe kills a blocked Kibana.
+      expect(firstBlockedMs).toBeGreaterThanOrEqual(1_000);
+      expect(firstBlockedMs).toBeLessThan(10_000);
+      // A repeat of the same block, seconds later rather than on the next poll.
+      const { startedAt } = blockOf(first) ?? {};
+      expect(blockOf(repeat)).toMatchObject({ ongoing: true, startedAt });
+      expect((blockOf(repeat)?.blockedMs ?? 0) - firstBlockedMs).toBeGreaterThanOrEqual(3_000);
+      // The block never ended, so its log lines came from the worker while the main thread was
+      // still blocked.
+      expect(ended.map(blockOf)).not.toContainEqual(expect.objectContaining({ startedAt }));
+    }, 90_000);
 
     it('is reported again when it ends, with the same start', async () => {
       const result = await runHarness('long_block');
@@ -286,47 +288,6 @@ describe('event loop watchdog in a child process', () => {
       expect(ended?.blockedMs).toBeGreaterThanOrEqual(3000);
       expect(ended?.startedAt).toBe(ongoing?.startedAt);
       expect(statsOf(result).reduce((total, stats) => total + stats.running.blocks, 0)).toBe(1);
-    }, 60_000);
-  });
-
-  describe('a block the worker cannot report', () => {
-    const singleEndedBlock = (result: HarnessResult, reason: string) => {
-      const [ended, ...rest] = endedBlockLogLines(result);
-      expect(rest).toEqual([]);
-      expect(ended).toMatchObject({
-        message: expect.stringMatching(`^Event loop blocked for ~\\d+ms; ${reason}$`),
-        log: { level: 'WARN', logger: 'metrics.event_loop_watchdog' },
-        kibana: { event_loop_watchdog: { phase: 'running', suppressedBlocks: 0 } },
-      });
-      // Written by the main thread, so no worker marker.
-      expect(ended.kibana?.worker).toBeUndefined();
-      expect(blockOf(ended)?.blockedMs).toBeGreaterThanOrEqual(3000);
-    };
-
-    it('is reported by the main thread when the worker crashes during it', async () => {
-      const result = await runHarness('worker_crash_during_block');
-      expectCleanExit(result);
-      // The worker died before its ongoing report, so the main thread's log line is the only one.
-      expect(blockLogLines(result)).toHaveLength(1);
-      singleEndedBlock(result, 'the watchdog worker exited during the block');
-      expect(result.mainLogLines).toContainEqual({
-        level: 'warn',
-        message: expect.stringMatching(
-          /^Worker event-loop-watchdog exited unexpectedly \(error, code 1\): crashing_entry: worker crashes on purpose; restart 1(\/\d+)? in \d+ms$/
-        ),
-      });
-    }, 60_000);
-
-    it('is reported by the main thread when the watchdog stops right after it', async () => {
-      const result = await runHarness('stop_after_block');
-      expectCleanExit(result);
-      singleEndedBlock(result, 'the watchdog stopped before its worker reported it');
-    }, 60_000);
-
-    it('is reported by the main thread when the process exits right after it', async () => {
-      const result = await runHarness('exit_after_block');
-      expectCleanExit(result);
-      singleEndedBlock(result, 'the process exited before the watchdog worker reported it');
     }, 60_000);
   });
 });

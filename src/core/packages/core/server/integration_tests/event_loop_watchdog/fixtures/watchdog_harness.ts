@@ -81,8 +81,8 @@ const create = (workerEntry?: string) =>
 const LONG_BLOCK_MS = 3_000;
 
 /** Starts the watchdog, marks running and waits a moment, so the next block is a running one. */
-const startRunning = async (workerEntry?: string) => {
-  const watchdog = create(workerEntry);
+const startRunning = async () => {
+  const watchdog = create();
   watchdog.start();
   await waitForLogLine('ready', 30_000);
   watchdog.markRunning();
@@ -124,9 +124,14 @@ const scenarios: Record<string, () => Promise<void>> = {
     await waitForLogLine('(oom,', 60_000);
     await watchdog.stop();
   },
-  // A block that never ends: the test kills the process once the block is reported as ongoing.
-  hang: async () => {
+  // 5 short blocks use up the warning burst, then a block that never ends: the test kills the
+  // process once the block is reported as ongoing and repeated.
+  permanent_block: async () => {
     await startRunning();
+    for (let i = 0; i < 5; i++) {
+      blockFor(500);
+      await sleep(BLOCK_GAP_MS);
+    }
     for (;;) {
       // blocks the main thread until the process is killed
     }
@@ -137,26 +142,6 @@ const scenarios: Record<string, () => Promise<void>> = {
     blockFor(LONG_BLOCK_MS);
     await sleep(STATS_INTERVAL_MS * 2);
     await watchdog.stop();
-  },
-  // The worker crashes 0.3 s after it detects the block, so the main thread reports the block.
-  worker_crash_during_block: async () => {
-    const watchdog = await startRunning(Path.resolve(__dirname, 'crashing_entry.ts'));
-    blockFor(LONG_BLOCK_MS);
-    // Lets the worker's exit, and the restart log line, reach the main thread.
-    await sleep(BLOCK_GAP_MS);
-    await watchdog.stop();
-  },
-  // The watchdog stops on the same tick the block ends, before its worker can see the end.
-  stop_after_block: async () => {
-    const watchdog = await startRunning();
-    blockFor(LONG_BLOCK_MS);
-    await watchdog.stop();
-  },
-  // The process exits on the same tick the block ends, without stopping the watchdog.
-  exit_after_block: async () => {
-    await startRunning();
-    blockFor(LONG_BLOCK_MS);
-    process.exit(0);
   },
 };
 

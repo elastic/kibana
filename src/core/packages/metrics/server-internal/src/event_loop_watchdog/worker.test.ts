@@ -146,50 +146,6 @@ describe('runWatchdogWorker', () => {
     expect(statsMeta().starting.blocks).toBe(1);
   });
 
-  it('shares the ongoing block with the main thread until it reports the end', () => {
-    start();
-    const heartbeatUs = nowUs;
-    const epochMs = Date.now();
-    beat();
-    stall(100);
-    expect(shared[Slot.blockStartedAt]).toBe(0n);
-    stall(200);
-    expect(shared[Slot.blockStartedAt]).toBe(BigInt(heartbeatUs));
-    expect(shared[Slot.blockStartedAtEpochMs]).toBe(BigInt(epochMs));
-    resume();
-    expect(shared[Slot.blockStartedAt]).toBe(0n);
-    expect(logger.warn).toHaveBeenCalledTimes(1);
-  });
-
-  it('does not report a block end the main thread already claimed', () => {
-    start();
-    beat();
-    stall(300);
-    // The main thread claims the block, as it does on stop or exit.
-    setSlot(Slot.blockStartedAt, 0);
-    resume();
-    expect(logger.warn).not.toHaveBeenCalled();
-    jest.advanceTimersByTime(STATS_INTERVAL_MS);
-    expect(statsMeta().starting.blocks).toBe(0);
-  });
-
-  it('names the ongoing block in the stats log line', () => {
-    start();
-    beat();
-    stall(STATS_INTERVAL_MS);
-    expect(logger.info).toHaveBeenCalledTimes(1);
-    expect(logger.info.mock.calls[0][0]).toMatch(
-      /^Event loop watchdog stats for the last \d+s: 0 blocks while starting, 0 blocks while running; a starting block is ongoing for ~\d+ms$/
-    );
-    const { ongoing } = statsMeta();
-    expect(ongoing).toEqual({ phase: 'starting', blockedMs: expect.any(Number) });
-    expect(ongoing!.blockedMs).toBeGreaterThanOrEqual(STATS_INTERVAL_MS - 25);
-    resume();
-    jest.advanceTimersByTime(STATS_INTERVAL_MS);
-    expect(statsMeta(1).ongoing).toBeUndefined();
-    expect(logger.info.mock.calls[1][0]).toMatch(/1 block while starting, 0 blocks while running$/);
-  });
-
   it('does not log heartbeat gaps below the threshold', () => {
     start();
     block(150);
@@ -266,8 +222,6 @@ describe('runWatchdogWorker', () => {
     start({ thresholdsMs: { starting: 300, running: 200 } });
     block(400);
     nowUs += STATS_INTERVAL_MS * 1000;
-    // Keeps the heartbeat current across the jump, so no block is ongoing at stats time.
-    beat();
     jest.advanceTimersByTime(STATS_INTERVAL_MS);
     expect(logger.info).toHaveBeenCalledTimes(1);
     expect(logger.info.mock.calls[0][0]).toMatch(

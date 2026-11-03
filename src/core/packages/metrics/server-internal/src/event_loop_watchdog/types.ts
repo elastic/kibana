@@ -35,12 +35,6 @@ export interface BlockLogMeta extends LogMeta {
   };
 }
 
-/** A block still ongoing when a stats log line is written; it is counted once it ends. */
-export interface OngoingBlockStats {
-  phase: Phase;
-  blockedMs: number;
-}
-
 export interface StatsLogMeta extends LogMeta {
   kibana: {
     event_loop_watchdog: {
@@ -49,7 +43,6 @@ export interface StatsLogMeta extends LogMeta {
         heapUsed: number;
         /** Worker log lines lost since the last stats log line that was written. */
         droppedLogLines: number;
-        ongoing?: OngoingBlockStats;
       };
     };
   };
