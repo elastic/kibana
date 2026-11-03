@@ -29,7 +29,7 @@ export interface OnboardingStepState {
 
 const STEP_TITLES: Record<OnboardingStepId, string> = {
   enable: i18n.translate('xpack.nightshift.onboarding.steps.enable', {
-    defaultMessage: 'Enable Elastic nightshift AI SRE',
+    defaultMessage: 'Enable Elastic nightshift',
   }),
   connect: i18n.translate('xpack.nightshift.onboarding.steps.connect', {
     defaultMessage: 'Add data',
