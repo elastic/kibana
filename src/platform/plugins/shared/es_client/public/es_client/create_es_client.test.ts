@@ -11,20 +11,33 @@ import API from '@elastic/elasticsearch/lib/api/index';
 import { coreMock } from '@kbn/core/public/mocks';
 import { EsClientPlugin } from '../plugin';
 
+const ELASTICSEARCH_WARNING = '299 Elasticsearch-9.0.0 "this request accesses system indices"';
+
 const setup = async () => {
   const coreSetup = coreMock.createSetup();
-  const contract = new EsClientPlugin().setup(coreSetup);
-  const client = await contract.getClient();
-  return { client, contract, fetch: coreSetup.http.fetch };
+  const { fetch } = coreSetup.http;
+  fetch.mockResolvedValue({ response: new Response(), body: {} });
+  const client = await new EsClientPlugin().setup(coreSetup).getClient();
+  return { client, fetch };
 };
 
-const fetchError = (status: number, body?: object) =>
-  Object.assign(new Error('Request failed'), {
+const okResponse = (body: unknown, headers?: HeadersInit) => ({
+  response: new Response(null, { status: 200, headers }),
+  body,
+});
+
+const fetchError = (status: number, body?: object) => {
+  const response = new Response(body === undefined ? null : JSON.stringify(body), {
+    status,
+    headers: { 'content-type': 'application/json' },
+  });
+  return Object.assign(new Error('Request failed'), {
     name: 'HttpFetchError',
     request: {},
-    response: { status },
+    response,
     body,
   });
+};
 
 describe('WHEN using the elasticsearch-js client through the proxy', () => {
   it('SHOULD expose every elasticsearch-js API', async () => {
@@ -37,15 +50,9 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
     expect(apiNames.filter((name) => !(name in client))).toEqual([]);
   });
 
-  it('SHOULD reuse one client instance', async () => {
-    const { client, contract } = await setup();
-
-    expect(await contract.getClient()).toBe(client);
-  });
-
   it('SHOULD send searches as POST requests with a JSON body', async () => {
     const { client, fetch } = await setup();
-    fetch.mockResolvedValue({ hits: { hits: [] } });
+    fetch.mockResolvedValue(okResponse({ hits: { hits: [] } }));
 
     const response = await client.search({ index: 'my-index', query: { match_all: {} } });
 
@@ -56,6 +63,8 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
         method: 'POST',
         body: '{"query":{"match_all":{}}}',
         version: '1',
+        asResponse: true,
+        rawResponse: false,
       })
     );
   });
@@ -93,10 +102,114 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
     );
   });
 
+  it('SHOULD send raw requests through transport.request', async () => {
+    const { client, fetch } = await setup();
+    fetch.mockResolvedValue(okResponse({ acknowledged: true }));
+
+    const response = await client.transport.request({
+      method: 'POST',
+      path: '/my-index/_forcemerge',
+      querystring: { max_num_segments: 1 },
+    });
+
+    expect(response).toEqual({ acknowledged: true });
+    expect(fetch).toHaveBeenCalledWith(
+      '/internal/es_client/my-index/_forcemerge',
+      expect.objectContaining({ method: 'POST', query: { max_num_segments: 1 } })
+    );
+  });
+
+  describe('WHEN the meta option is set', () => {
+    it('SHOULD resolve with the status, headers, warnings and request', async () => {
+      const { client, fetch } = await setup();
+      fetch.mockResolvedValue(
+        okResponse({ count: 3 }, { warning: `${ELASTICSEARCH_WARNING}, 199 agent "other"` })
+      );
+
+      const result = await client.count({ index: 'my-index', q: 'a b' }, { meta: true });
+
+      expect(result).toEqual({
+        body: { count: 3 },
+        statusCode: 200,
+        headers: { warning: `${ELASTICSEARCH_WARNING}, 199 agent "other"` },
+        warnings: [ELASTICSEARCH_WARNING],
+        meta: {
+          aborted: false,
+          request: {
+            id: null,
+            options: { meta: true },
+            params: {
+              method: 'GET',
+              path: '/my-index/_count',
+              querystring: 'q=a%20b',
+              headers: {},
+              body: undefined,
+            },
+          },
+        },
+      });
+    });
+
+    it('SHOULD resolve with null warnings WHEN there is no warning header', async () => {
+      const { client, fetch } = await setup();
+      fetch.mockResolvedValue(okResponse({ count: 3 }));
+
+      const { warnings } = await client.count({}, { meta: true });
+
+      expect(warnings).toBeNull();
+    });
+  });
+
+  describe('WHEN the asStream option is set', () => {
+    it('SHOULD resolve with the unread response body', async () => {
+      const { client, fetch } = await setup();
+      const response = new Response('data: {}\n\n');
+      fetch.mockResolvedValue({ response });
+
+      const stream = await client.transport.request(
+        { method: 'POST', path: '/_inference/completion/my-endpoint/_stream' },
+        { asStream: true }
+      );
+
+      expect(stream).toBe(response.body);
+      expect(fetch).toHaveBeenCalledWith(
+        '/internal/es_client/_inference/completion/my-endpoint/_stream',
+        expect.objectContaining({ asResponse: true, rawResponse: true })
+      );
+    });
+
+    it('SHOULD resolve with the stream in the result WHEN meta is also set', async () => {
+      const { client, fetch } = await setup();
+      const response = new Response('data: {}\n\n', { status: 200 });
+      fetch.mockResolvedValue({ response });
+
+      const result = await client.transport.request(
+        { method: 'POST', path: '/_inference/completion/my-endpoint/_stream' },
+        { asStream: true, meta: true }
+      );
+
+      expect(result.statusCode).toBe(200);
+      expect(result.body).toBe(response.body);
+    });
+
+    it('SHOULD resolve with the read error body WHEN the status is ignored', async () => {
+      const { client, fetch } = await setup();
+      const error = fetchError(400, { error: { type: 'parse_exception' }, status: 400 });
+      fetch.mockRejectedValue(Object.assign(error, { body: null }));
+
+      const response = await client.transport.request(
+        { method: 'POST', path: '/_inference/completion/my-endpoint/_stream' },
+        { asStream: true, ignore: [400] }
+      );
+
+      expect(response).toEqual({ error: { type: 'parse_exception' }, status: 400 });
+    });
+  });
+
   describe('WHEN calling an exists API', () => {
     it('SHOULD resolve true for an existing resource', async () => {
       const { client, fetch } = await setup();
-      fetch.mockResolvedValue('');
+      fetch.mockResolvedValue(okResponse(''));
 
       expect(await client.indices.exists({ index: 'my-index' })).toBe(true);
       expect(fetch).toHaveBeenCalledWith(
@@ -111,23 +224,45 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
 
       expect(await client.indices.exists({ index: 'missing' })).toBe(false);
     });
+
+    it('SHOULD resolve with a false body and the status WHEN meta is set', async () => {
+      const { client, fetch } = await setup();
+      fetch.mockRejectedValue(fetchError(404));
+
+      const result = await client.indices.exists({ index: 'missing' }, { meta: true });
+
+      expect(result).toMatchObject({ body: false, statusCode: 404 });
+    });
   });
 
-  it('SHOULD reject with the fetch error WHEN Elasticsearch answers with an error', async () => {
-    const { client, fetch } = await setup();
-    const error = fetchError(403, { error: { type: 'security_exception' } });
-    fetch.mockRejectedValue(error);
+  describe('WHEN Elasticsearch answers with an error', () => {
+    it('SHOULD reject with the fetch error', async () => {
+      const { client, fetch } = await setup();
+      const error = fetchError(403, { error: { type: 'security_exception' } });
+      fetch.mockRejectedValue(error);
 
-    await expect(client.search({ index: 'secret' })).rejects.toBe(error);
-  });
+      await expect(client.search({ index: 'secret' })).rejects.toBe(error);
+    });
 
-  it('SHOULD resolve with the error body WHEN the status is ignored', async () => {
-    const { client, fetch } = await setup();
-    fetch.mockRejectedValue(fetchError(404, { found: false }));
+    it('SHOULD resolve with the error body WHEN the status is ignored', async () => {
+      const { client, fetch } = await setup();
+      fetch.mockRejectedValue(fetchError(404, { found: false }));
 
-    const response = await client.get({ index: 'my-index', id: '1' }, { ignore: [404] });
+      const response = await client.get({ index: 'my-index', id: '1' }, { ignore: [404] });
 
-    expect(response).toEqual({ found: false });
+      expect(response).toEqual({ found: false });
+    });
+
+    it('SHOULD reject with the fetch error WHEN the request is aborted', async () => {
+      const { client, fetch } = await setup();
+      const error = Object.assign(new Error('The user aborted a request.'), {
+        name: 'AbortError',
+        request: {},
+      });
+      fetch.mockRejectedValue(error);
+
+      await expect(client.search({ index: 'my-index' })).rejects.toBe(error);
+    });
   });
 
   it('SHOULD send bulk operations as ndjson', async () => {
@@ -148,6 +283,15 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
         headers: { 'Content-Type': 'application/x-ndjson' },
       })
     );
+  });
+
+  it('SHOULD resolve bulk calls with the result WHEN meta is set', async () => {
+    const { client, fetch } = await setup();
+    fetch.mockResolvedValue(okResponse({ errors: false, items: [], took: 1 }));
+
+    const result = await client.bulk({ operations: [{ delete: { _id: '1' } }] }, { meta: true });
+
+    expect(result).toMatchObject({ statusCode: 200, body: { errors: false } });
   });
 
   it('SHOULD send multi-search bodies as ndjson', async () => {
@@ -179,14 +323,6 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
         signal,
         headers: { 'Content-Type': 'application/vnd.elasticsearch+json' },
       })
-    );
-  });
-
-  it('SHOULD reject the meta option, which needs the full transport', async () => {
-    const { client } = await setup();
-
-    await expect(client.search({ index: 'my-index' }, { meta: true })).rejects.toThrow(
-      'does not support the `meta` or `asStream` options'
     );
   });
 });

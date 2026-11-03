@@ -7,23 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TransportRequestOptions, TransportRequestParams } from '@elastic/elasticsearch';
-import type { HttpFetchQuery } from '@kbn/core-http-browser';
+import type {
+  TransportRequestOptions,
+  TransportRequestOptionsWithMeta,
+  TransportRequestParams,
+} from '@elastic/elasticsearch';
+import type { HttpFetchQuery, HttpResponse } from '@kbn/core-http-browser';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { EsClientRequestParams, HttpMethod } from '../../common/types';
+import type { EsClientResult, EsClientTransport, TransportRequestOptionsAsStream } from './types';
 
-export type ProxyRequest = <T>(params: EsClientRequestParams) => Promise<T>;
-
-export interface ProxyTransport {
-  request: (params: TransportRequestParams, options?: TransportRequestOptions) => Promise<unknown>;
-}
+/** Sends a request through the proxy. `rawResponse` leaves the response body unread. */
+export type ProxyFetch = (
+  params: EsClientRequestParams,
+  rawResponse: boolean
+) => Promise<HttpResponse>;
 
 type Querystring = TransportRequestParams['querystring'];
 type RequestHeaders = TransportRequestOptions['headers'];
+type RequestMeta = EsClientResult['meta']['request'];
 
 const HTTP_METHODS: ReadonlySet<string> = new Set(['GET', 'HEAD', 'PUT', 'POST', 'DELETE']);
 const NDJSON_CONTENT_TYPE = 'application/x-ndjson';
 const NOT_FOUND = 404;
+// Splits a `Warning` header on commas outside quoted warning text, as elasticsearch-js does.
+const WARNING_SEPARATOR = /(?!\B"[^"]*),(?![^"]*"\B)/;
+const ELASTICSEARCH_WARNING = /^\d\d\d Elasticsearch-/;
 
 const isHttpMethod = (method: string): method is HttpMethod => HTTP_METHODS.has(method);
 
@@ -60,6 +69,11 @@ const toQuery = (...querystrings: Querystring[]): HttpFetchQuery => {
   }
   return query;
 };
+
+const toQuerystring = (query: HttpFetchQuery): string =>
+  Object.entries(query)
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
+    .join('&');
 
 const isSerializable = (value: object): boolean =>
   !ArrayBuffer.isView(value) && !('pipe' in value) && !('getReader' in value);
@@ -99,45 +113,121 @@ const toHeaders = (headers: RequestHeaders, isNdjson: boolean): Record<string, s
   return result;
 };
 
-const getStatus = (error: unknown): number | undefined =>
-  isHttpFetchError(error) ? error.response?.status : undefined;
+const toResponseHeaders = (response: Response): Record<string, string> => {
+  const headers: Record<string, string> = {};
+  response.headers.forEach((value, name) => {
+    headers[name] = value;
+  });
+  return headers;
+};
+
+const toWarnings = (response: Response): string[] | null => {
+  const warning = response.headers.get('warning');
+  if (warning == null) {
+    return null;
+  }
+  return warning.split(WARNING_SEPARATOR).filter((entry) => ELASTICSEARCH_WARNING.test(entry));
+};
+
+const toResult = <TBody>(
+  response: Response,
+  body: TBody,
+  request: RequestMeta
+): EsClientResult<TBody> => ({
+  body,
+  statusCode: response.status,
+  headers: toResponseHeaders(response),
+  warnings: toWarnings(response),
+  meta: { request, aborted: false },
+});
+
+/** Reads the body of an ignored error response that was fetched without being read. */
+const readBody = async (response: Response): Promise<unknown> => {
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    return text;
+  }
+};
 
 /**
- * Creates an elasticsearch-js compatible transport that sends requests through the proxy. Responses
- * resolve with the parsed body and failed requests reject with Kibana's `HttpFetchError`.
+ * Creates an elasticsearch-js compatible transport that sends requests through the proxy. Failed
+ * requests reject with Kibana's `HttpFetchError`.
  */
-export const createProxyTransport = (proxyRequest: ProxyRequest): ProxyTransport => ({
-  request: async (params, options = {}) => {
+export const createProxyTransport = (proxyFetch: ProxyFetch): EsClientTransport => {
+  function request(
+    params: TransportRequestParams,
+    options: TransportRequestOptionsAsStream & TransportRequestOptionsWithMeta
+  ): Promise<EsClientResult<ReadableStream<Uint8Array> | null>>;
+  function request(
+    params: TransportRequestParams,
+    options: TransportRequestOptionsAsStream
+  ): Promise<ReadableStream<Uint8Array> | null>;
+  function request<TResponse = unknown>(
+    params: TransportRequestParams,
+    options: TransportRequestOptionsWithMeta
+  ): Promise<EsClientResult<TResponse>>;
+  function request<TResponse = unknown>(
+    params: TransportRequestParams,
+    options?: TransportRequestOptions
+  ): Promise<TResponse>;
+  async function request(
+    params: TransportRequestParams,
+    options: TransportRequestOptions = {}
+  ): Promise<unknown> {
     const { method, path } = params;
-    if (options.meta || options.asStream) {
-      throw new Error(
-        'The Elasticsearch proxy client does not support the `meta` or `asStream` options.'
-      );
-    }
     if (!isHttpMethod(method)) {
       throw new Error(`The Elasticsearch proxy does not support the ${method} method.`);
     }
 
+    const asStream = options.asStream === true;
     const body = toBody(params);
-    try {
-      const response = await proxyRequest({
+    const query = toQuery(params.querystring, options.querystring);
+    const headers = toHeaders(options.headers, params.bulkBody != null);
+    const requestMeta: RequestMeta = {
+      params: {
         method,
-        path: toPathSegments(path),
-        query: toQuery(params.querystring, options.querystring),
-        body,
-        headers: toHeaders(options.headers, params.bulkBody != null),
-        signal: options.signal,
-      });
-      return method === 'HEAD' ? true : response;
+        path,
+        querystring: toQuerystring(query),
+        headers,
+        body: typeof body === 'object' ? JSON.stringify(body) : body,
+      },
+      options,
+      id: null,
+    };
+    const respond = (result: EsClientResult): unknown => (options.meta ? result : result.body);
+
+    let httpResponse: HttpResponse;
+    try {
+      httpResponse = await proxyFetch(
+        { method, path: toPathSegments(path), query, body, headers, signal: options.signal },
+        asStream
+      );
     } catch (error) {
-      const status = getStatus(error);
-      if (method === 'HEAD' && status === NOT_FOUND) {
-        return false;
+      if (!isHttpFetchError(error) || !error.response) {
+        throw error;
       }
-      if (status !== undefined && options.ignore?.includes(status) && isHttpFetchError(error)) {
-        return error.body;
+      const { response } = error;
+      if (method === 'HEAD' && response.status === NOT_FOUND) {
+        return respond(toResult(response, false, requestMeta));
       }
-      throw error;
+      if (!options.ignore?.includes(response.status)) {
+        throw error;
+      }
+      const errorBody = asStream ? await readBody(response) : error.body;
+      return respond(toResult(response, errorBody, requestMeta));
     }
-  },
-});
+
+    const { response } = httpResponse;
+    if (!response) {
+      throw new Error(`No response received for ${method} ${path}`);
+    }
+    if (method === 'HEAD') {
+      return respond(toResult(response, true, requestMeta));
+    }
+    return respond(toResult(response, asStream ? response.body : httpResponse.body, requestMeta));
+  }
+
+  return { request };
+};

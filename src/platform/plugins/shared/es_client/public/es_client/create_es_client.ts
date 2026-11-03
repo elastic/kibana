@@ -9,7 +9,6 @@
 
 // Mirrors `@elastic/elasticsearch/lib/api/index.js` without `bulk`, whose module loads the Node-only
 // transport. Imported per module so the browser bundle never loads the elasticsearch-js `Client`.
-import type { Transport } from '@elastic/elasticsearch';
 import AsyncSearchApi from '@elastic/elasticsearch/lib/api/api/async_search';
 import AutoscalingApi from '@elastic/elasticsearch/lib/api/api/autoscaling';
 import CatApi from '@elastic/elasticsearch/lib/api/api/cat';
@@ -101,22 +100,21 @@ import termvectorsApi from '@elastic/elasticsearch/lib/api/api/termvectors';
 import updateApi from '@elastic/elasticsearch/lib/api/api/update';
 import updateByQueryApi from '@elastic/elasticsearch/lib/api/api/update_by_query';
 import updateByQueryRethrottleApi from '@elastic/elasticsearch/lib/api/api/update_by_query_rethrottle';
-import { createBulk } from './bulk';
-import type { ProxyRequest, ProxyTransport } from './proxy_transport';
+import { bulkApi } from './bulk';
+import type { ProxyFetch } from './proxy_transport';
 import { createProxyTransport } from './proxy_transport';
 import type { EsClient } from './types';
 
 /**
  * Creates an elasticsearch-js API client whose requests go through the Elasticsearch proxy.
  */
-export const createEsClient = (proxyRequest: ProxyRequest): EsClient => {
-  const proxyTransport: ProxyTransport = createProxyTransport(proxyRequest);
+export const createEsClient = (proxyFetch: ProxyFetch): EsClient => {
   // The generated API modules only call `transport.request`, which the proxy transport implements.
-  const transport = proxyTransport as unknown as Transport;
+  const transport = createProxyTransport(proxyFetch) as EsClient['transport'];
 
   return {
     transport,
-    bulk: createBulk(proxyTransport),
+    bulk: bulkApi,
     asyncSearch: new AsyncSearchApi(transport),
     autoscaling: new AutoscalingApi(transport),
     cat: new CatApi(transport),

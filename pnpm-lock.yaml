@@ -2092,15 +2092,15 @@ importers:
       '@kbn/error-boundary-example-plugin':
         specifier: workspace:*
         version: link:examples/error_boundary
+      '@kbn/es-client-plugin':
+        specifier: workspace:*
+        version: link:src/platform/plugins/shared/es_client
       '@kbn/es-errors':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-es-errors
       '@kbn/es-mappings':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-es-mappings
-      '@kbn/es-client-plugin':
-        specifier: workspace:*
-        version: link:src/platform/plugins/shared/es_client
       '@kbn/es-query':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-es-query

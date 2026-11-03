@@ -8,18 +8,10 @@
  */
 
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
-import type { EsClientRequestParams } from '../common/types';
 import type { EsClient } from './es_client/types';
 import { proxyService } from './proxy_service';
 
 export interface EsClientPluginSetup {
-  /** Sends a request and resolves with the parsed response body. */
-  request: <T>(params: EsClientRequestParams) => Promise<T>;
-  /**
-   * Sends a request and resolves with the unread `Response`, for streamed or binary output such as
-   * server-sent events or `_query?format=arrow`.
-   */
-  stream: (params: EsClientRequestParams) => Promise<Readonly<Response>>;
   /**
    * Resolves with an elasticsearch-js API client that sends every call through the proxy. The
    * client code is loaded on first use.

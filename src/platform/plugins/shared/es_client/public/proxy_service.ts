@@ -8,8 +8,8 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import type { EsClientRequestParams } from '../common/types';
 import type { EsClient } from './es_client/types';
+import type { ProxyFetch } from './es_client/proxy_transport';
 import type { EsClientPluginSetup } from './plugin';
 import { proxyArgsToEsArgs } from './proxy_args_to_es_args';
 
@@ -17,27 +17,17 @@ import { proxyArgsToEsArgs } from './proxy_args_to_es_args';
  * Creates the browser client that sends requests through the Elasticsearch proxy.
  */
 export const proxyService = (http: HttpSetup): EsClientPluginSetup => {
-  const request = <T>(params: EsClientRequestParams) => http.fetch<T>(...proxyArgsToEsArgs(params));
+  const proxyFetch: ProxyFetch = (params, rawResponse) => {
+    const [path, options] = proxyArgsToEsArgs(params);
+    return http.fetch(path, { ...options, asResponse: true, rawResponse });
+  };
   const loadClient = async (): Promise<EsClient> => {
     const { createEsClient } = await import('./es_client');
-    return createEsClient(request);
+    return createEsClient(proxyFetch);
   };
   let client: Promise<EsClient> | undefined;
 
   return {
-    request,
-    stream: async (params) => {
-      const [path, options] = proxyArgsToEsArgs(params);
-      const { response } = await http.fetch(path, {
-        ...options,
-        asResponse: true,
-        rawResponse: true,
-      });
-      if (!response) {
-        throw new Error(`No response received for ${params.method} ${path}`);
-      }
-      return response;
-    },
     getClient: () => {
       // A failed load is not cached, so a later call can retry, for example after a chunk load error.
       client ??= loadClient().catch((error) => {

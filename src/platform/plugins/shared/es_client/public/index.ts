@@ -12,5 +12,4 @@ import { EsClientPlugin } from './plugin';
 export const plugin = () => new EsClientPlugin();
 
 export type { EsClientPluginSetup, EsClientPluginStart } from './plugin';
-export type { EsClientRequestParams, HttpMethod } from '../common/types';
-export type { EsClient } from './es_client/types';
+export type { EsClient, EsClientResult, EsClientTransport } from './es_client/types';

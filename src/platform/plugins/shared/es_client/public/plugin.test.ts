@@ -23,63 +23,23 @@ const setup = () => {
   return { contract, fetch: coreSetup.http.fetch };
 };
 
-describe('WHEN using the browser Elasticsearch proxy client', () => {
-  it('SHOULD send custom headers such as an ndjson content type', async () => {
-    const { contract, fetch } = setup();
-    const body = '{"index":{}}\n{"message":"hello"}\n';
+describe('WHEN using the browser Elasticsearch client plugin', () => {
+  it('SHOULD only expose getClient', () => {
+    const { contract } = setup();
 
-    await contract.request({
-      method: 'POST',
-      path: 'my-index/_bulk',
-      body,
-      headers: { 'Content-Type': 'application/x-ndjson' },
-    });
-
-    expect(fetch).toHaveBeenCalledWith(
-      '/internal/es_client/my-index/_bulk',
-      expect.objectContaining({
-        method: 'POST',
-        body,
-        headers: { 'Content-Type': 'application/x-ndjson' },
-        version: '1',
-      })
-    );
+    expect(Object.keys(contract)).toEqual(['getClient']);
   });
 
-  it('SHOULD serialize object bodies as JSON', async () => {
+  it('SHOULD send client requests to the proxy route as full responses', async () => {
     const { contract, fetch } = setup();
+    fetch.mockResolvedValue({ response: new Response(), body: { count: 1 } });
+    const client = await contract.getClient();
 
-    await contract.request({ method: 'POST', path: '/my-index/_search', body: { size: 0 } });
+    await client.count({ index: 'my-index' });
 
     expect(fetch).toHaveBeenCalledWith(
-      '/internal/es_client/my-index/_search',
-      expect.objectContaining({ body: '{"size":0}' })
-    );
-  });
-
-  it('SHOULD resolve stream requests with the unread response', async () => {
-    const { contract, fetch } = setup();
-    const response = new Response('data: {}\n\n');
-    fetch.mockResolvedValue({ response });
-
-    const result = await contract.stream({
-      method: 'POST',
-      path: '_inference/completion/x/_stream',
-    });
-
-    expect(result).toBe(response);
-    expect(fetch).toHaveBeenCalledWith(
-      '/internal/es_client/_inference/completion/x/_stream',
-      expect.objectContaining({ asResponse: true, rawResponse: true })
-    );
-  });
-
-  it('SHOULD reject stream requests WHEN no response is received', async () => {
-    const { contract, fetch } = setup();
-    fetch.mockResolvedValue({});
-
-    await expect(contract.stream({ method: 'GET', path: '' })).rejects.toThrow(
-      'No response received'
+      '/internal/es_client/my-index/_count',
+      expect.objectContaining({ version: '1', asResponse: true, rawResponse: false })
     );
   });
 

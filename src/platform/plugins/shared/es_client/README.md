@@ -35,47 +35,34 @@ This means **any authenticated Kibana user can call any Elasticsearch API their 
 
 ## Browser usage
 
-```ts
-const { request } = plugins.esClient;
-const result = await request<SearchResponse>({
-  method: 'POST',
-  path: 'my-index/_search',
-  body: { query: { match_all: {} } },
-});
-
-// ndjson bodies need an explicit content type
-await request({
-  method: 'POST',
-  path: 'my-index/_bulk',
-  body: '{"index":{}}\n{"message":"hello"}\n',
-  headers: { 'Content-Type': 'application/x-ndjson' },
-});
-
-// stream() resolves with the unread Response, for server-sent events or binary formats
-const response = await plugins.esClient.stream({
-  method: 'POST',
-  path: '_query',
-  query: { format: 'arrow' },
-  body: { query: 'FROM my-index | LIMIT 10' },
-});
-const reader = response.body?.getReader();
-```
-
-### elasticsearch-js client
-
-`getClient()` resolves with the [elasticsearch-js](https://github.com/elastic/elasticsearch-js) API surface, sending every call through the proxy. The client code is loaded on first use and the same instance is returned afterwards.
+The plugin contract has one method, `getClient()`. It resolves with the [elasticsearch-js](https://github.com/elastic/elasticsearch-js) API surface, sending every call through the proxy, so browser code calls Elasticsearch the same way server code uses core's Elasticsearch client. The client code is loaded on first use and the same instance is returned afterwards.
 
 ```ts
 const client = await plugins.esClient.getClient();
 const { hits } = await client.search({ index: 'my-index', query: { match_all: {} } });
 const exists = await client.indices.exists({ index: 'my-index' });
 await client.bulk({ index: 'my-index', operations: [{ index: {} }, { message: 'hello' }] });
+
+// Status, headers and warnings
+const { body, statusCode, warnings } = await client.count({ index: 'my-index' }, { meta: true });
+
+// Raw requests
+await client.transport.request({ method: 'POST', path: '/my-index/_forcemerge' });
+
+// Streamed or binary responses resolve with the unread body
+const stream = await client.transport.request(
+  { method: 'POST', path: '/_query', querystring: { format: 'arrow' }, body: { query: 'FROM my-index' } },
+  { asStream: true }
+);
+const reader = stream?.getReader();
 ```
 
 It is built from the client's generated API modules, not its `Client` class, which depends on Node. Compared with the Node client:
 
 - Errors reject with Kibana's `HttpFetchError` (status on `error.response.status`, Elasticsearch body on `error.body`) instead of `ResponseError`. `exists`-style APIs resolve `false` for `404`, and the `ignore` option resolves with the error body.
-- Supported request options are `headers`, `signal`, `querystring` and `ignore`. `meta` and `asStream` throw; use `stream()` for streamed or binary responses.
+- With `meta: true`, calls resolve with `EsClientResult`: the `body`, `statusCode`, `headers`, `warnings` and `meta.request` / `meta.aborted` of the Node client's `TransportResult`. Connection details, attempts and the request context are not available in the browser.
+- With `asStream: true`, calls resolve with the response body as a `ReadableStream`, or with an `EsClientResult` holding it when `meta: true` is also set.
+- Supported request options are `headers`, `signal`, `querystring`, `ignore`, `meta` and `asStream`.
 - `helpers`, `child()`, `close()` and diagnostics are not available, and `transport` only implements `request`.
 - `bulk` is reimplemented in this plugin because the generated module loads the Node transport.
 

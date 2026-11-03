@@ -27,7 +27,7 @@ const toEsFetchError = ({ statusCode, message }: ResponseError) =>
   Object.assign(new Error(String(message)), {
     name: 'HttpFetchError',
     request: {},
-    response: { status: statusCode, statusText: 'Error' },
+    response: new Response(null, { status: statusCode, statusText: 'Error' }),
     body: { error: { type: 'exception', reason: String(message) }, status: statusCode },
   });
 
@@ -73,11 +73,11 @@ const registerHttpRequestMockHelpers = (
   httpSetup.put.mockImplementation((path) =>
     mockMethodImplementation('PUT', path as unknown as string)
   );
-  httpSetup.fetch.mockImplementation(((path: string, options?: HttpFetchOptions) =>
-    mockMethodImplementation(
-      (options?.method ?? 'GET') as HttpMethod,
-      path
-    )) as unknown as typeof httpSetup.fetch);
+  httpSetup.fetch.mockImplementation((async (path: string, options?: HttpFetchOptions) => {
+    const body = await mockMethodImplementation((options?.method ?? 'GET') as HttpMethod, path);
+    // es_client requests ask for the full response.
+    return options?.asResponse ? { response: new Response(), body } : body;
+  }) as unknown as typeof httpSetup.fetch);
 
   const defuse = (promise: Promise<unknown>) => {
     promise.catch(() => {});
