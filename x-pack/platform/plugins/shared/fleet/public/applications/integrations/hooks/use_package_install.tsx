@@ -22,7 +22,7 @@ import type { FleetStartServices } from '../../../plugin';
 import { sendInstallPackage, sendRemovePackage, useLink } from '../../../hooks';
 
 import { InstallStatus } from '../../../types';
-import { isVerificationError } from '../services';
+import { isVerificationError, isBreakingChangesNotAcknowledgedError } from '../services';
 
 import type { InstalledPackageUIPackageListItem } from '../sections/epm/screens/installed_integrations/types';
 
@@ -43,6 +43,7 @@ type InstallPackageProps = Pick<PackageInfo, 'name' | 'version' | 'title'> & {
   isReinstall?: boolean;
   isUpgrade?: boolean;
   force?: boolean;
+  acknowledgeBreakingChanges?: boolean;
 };
 type SetPackageInstallStatusProps = Pick<PackageInfo, 'name'> & PackageInstallItem;
 
@@ -90,7 +91,15 @@ function usePackageInstall({ startServices }: { startServices: StartServices }) 
 
   const installPackage = useCallback(
     async (props: InstallPackageProps) => {
-      const { name, version, title, isReinstall = false, isUpgrade = false, force = false } = props;
+      const {
+        name,
+        version,
+        title,
+        isReinstall = false,
+        isUpgrade = false,
+        force = false,
+        acknowledgeBreakingChanges = false,
+      } = props;
       const prevStatus = getPackageInstallStatus(name);
       const newStatus = {
         ...prevStatus,
@@ -100,7 +109,9 @@ function usePackageInstall({ startServices }: { startServices: StartServices }) 
       setPackageInstallStatus(newStatus);
 
       try {
-        const res = await sendInstallPackage(name, version, isReinstall || force);
+        const res = await sendInstallPackage(name, version, isReinstall || force, {
+          acknowledgeBreakingChanges,
+        });
         if (res.error) {
           throw res.error;
         }
@@ -177,15 +188,26 @@ function usePackageInstall({ startServices }: { startServices: StartServices }) 
           setPackageInstallStatus({ name, status: InstallStatus.notInstalled, version });
         }
 
+        // The breaking changes are listed in the error details of the toast.
+        const toastMessage = isBreakingChangesNotAcknowledgedError(error)
+          ? i18n.translate(
+              'xpack.fleet.integrations.packageInstallBreakingChangesErrorDescription',
+              {
+                defaultMessage:
+                  'This upgrade includes breaking changes that were not acknowledged. Review them and confirm the upgrade.',
+              }
+            )
+          : i18n.translate('xpack.fleet.integrations.packageInstallErrorDescription', {
+              defaultMessage:
+                'Something went wrong while trying to install this package. Please try again later.',
+            });
+
         notifications.toasts.addError(error, {
           title: i18n.translate('xpack.fleet.integrations.packageInstallErrorTitle', {
             defaultMessage: 'Failed to install {title} package',
             values: { title },
           }),
-          toastMessage: i18n.translate('xpack.fleet.integrations.packageInstallErrorDescription', {
-            defaultMessage:
-              'Something went wrong while trying to install this package. Please try again later.',
-          }),
+          toastMessage,
         });
         return false;
       }
