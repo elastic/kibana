@@ -622,11 +622,18 @@ describe('createSourceChangeListener', () => {
   const setup = () => {
     const enqueueReconciliation = jest.fn(async () => {});
     const ensurePeriodicReconciliation = jest.fn(async () => {});
+    const syncContinuousOnboarding = jest.fn(async () => {});
     const listener = createSourceChangeListener({
       enqueueReconciliation,
       ensurePeriodicReconciliation,
+      syncContinuousOnboarding,
     });
-    return { listener, enqueueReconciliation, ensurePeriodicReconciliation };
+    return {
+      listener,
+      enqueueReconciliation,
+      ensurePeriodicReconciliation,
+      syncContinuousOnboarding,
+    };
   };
 
   it.each<SourceChangeEvent>([
@@ -640,15 +647,22 @@ describe('createSourceChangeListener', () => {
       request,
     },
   ])('queues a $type change in its request space', async (event) => {
-    const { listener, enqueueReconciliation, ensurePeriodicReconciliation } = setup();
+    const {
+      listener,
+      enqueueReconciliation,
+      ensurePeriodicReconciliation,
+      syncContinuousOnboarding,
+    } = setup();
     const otherRequest = { spaceId: 'other' } as KibanaRequest;
-    await listener({ ...event, request: otherRequest });
+    const eventInOtherSpace = { ...event, request: otherRequest };
+    await listener(eventInOtherSpace);
     expect(enqueueReconciliation).toHaveBeenCalledWith({
       sourceId: source.id,
       sourceSlug: source.slug,
       request: otherRequest,
     });
     expect(ensurePeriodicReconciliation).toHaveBeenCalledWith(otherRequest);
+    expect(syncContinuousOnboarding).toHaveBeenCalledWith(eventInOtherSpace);
   });
 
   it('retains queued cleanup when periodic recovery setup fails', async () => {
@@ -669,8 +683,30 @@ describe('createSourceChangeListener', () => {
     expect(ensurePeriodicReconciliation).toHaveBeenCalledWith(request);
   });
 
+  it('keeps reconciliation tasks when continuous onboarding sync fails', async () => {
+    const {
+      listener,
+      enqueueReconciliation,
+      ensurePeriodicReconciliation,
+      syncContinuousOnboarding,
+    } = setup();
+    syncContinuousOnboarding.mockRejectedValue(new Error('settings unavailable'));
+
+    await expect(listener({ type: 'created', source, request })).rejects.toThrow(
+      'settings unavailable'
+    );
+
+    expect(enqueueReconciliation).toHaveBeenCalledTimes(1);
+    expect(ensurePeriodicReconciliation).toHaveBeenCalledWith(request);
+  });
+
   it('ignores title changes that preserve the query and enabled flag', async () => {
-    const { listener, enqueueReconciliation, ensurePeriodicReconciliation } = setup();
+    const {
+      listener,
+      enqueueReconciliation,
+      ensurePeriodicReconciliation,
+      syncContinuousOnboarding,
+    } = setup();
     await listener({
       type: 'updated',
       source: { ...source, title: 'Renamed' },
@@ -679,6 +715,7 @@ describe('createSourceChangeListener', () => {
     });
     expect(enqueueReconciliation).not.toHaveBeenCalled();
     expect(ensurePeriodicReconciliation).not.toHaveBeenCalled();
+    expect(syncContinuousOnboarding).not.toHaveBeenCalled();
   });
 });
 
@@ -778,5 +815,24 @@ describe('durable source revision reconciliation', () => {
     scheduleSourceOnboarding.mockResolvedValue(false);
     await reconcile();
     expect(state.onboardingScheduled).toBe(false);
+  });
+
+  it('starts no run for a source created disabled, and exactly one when it is first enabled', async () => {
+    const { reconcile, source, state, scheduleSourceOnboarding } = setup();
+    state.revision = undefined;
+    state.onboardingScheduled = false;
+    source.enabled = false;
+
+    await reconcile();
+    expect(scheduleSourceOnboarding).not.toHaveBeenCalled();
+    expect(state).toMatchObject({ revision: 'revision-2', onboardingScheduled: false });
+
+    source.enabled = true;
+    await reconcile();
+    expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
+    expect(state.onboardingScheduled).toBe(true);
+
+    await reconcile();
+    expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
   });
 });

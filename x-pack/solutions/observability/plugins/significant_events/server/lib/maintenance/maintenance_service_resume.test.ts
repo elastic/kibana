@@ -83,6 +83,42 @@ describe('SignificantEventsMaintenanceService', () => {
       );
     });
 
+    it('does not restore continuous onboarding after its restore record is cleared', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, soClient, spaceUiSettingsClient } = makeService({
+        management: api,
+        continuousOnboardingEnabled: true,
+      });
+
+      await service.pause({ request: REQUEST });
+      await service.clearContinuousOnboardingRestore({ request: REQUEST });
+
+      const clearWrite = soClient.create.mock.calls.at(-1)?.[1] as {
+        disabledWorkflows: Array<{ id: string }>;
+      };
+      expect(
+        clearWrite.disabledWorkflows.some(({ id }) =>
+          id.startsWith(SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID)
+        )
+      ).toBe(false);
+
+      updateWorkflow.mockClear();
+      spaceUiSettingsClient.set.mockClear();
+      await service.resume({ request: REQUEST });
+
+      expect(spaceUiSettingsClient.set).not.toHaveBeenCalledWith(
+        OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
+        true
+      );
+      expect(
+        updateWorkflow.mock.calls.some(
+          ([id, update]) =>
+            id.startsWith(SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID) &&
+            update.enabled === true
+        )
+      ).toBe(false);
+    });
+
     it('does not re-enable settings-backed workflows that were off before pause', async () => {
       // Continuous onboarding is off, so its space document is not installed.
       const { api, updateWorkflow } = makeManagementApi({

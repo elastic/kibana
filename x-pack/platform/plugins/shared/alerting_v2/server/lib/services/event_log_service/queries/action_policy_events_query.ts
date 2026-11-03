@@ -26,7 +26,7 @@ import {
  * `kibana.saved_objects` array — or, for rules only, in the top-level
  * `kibana.alerting_v2.dispatcher.rule_ids` spillover field that the
  * dispatcher writes when a single event exceeds the nested ref cap (see
- * `store_execution_history_step.ts:157`).
+ * `emitPolicySummary` in `lib/dispatcher/steps/utils/execution_history.ts`).
  */
 export interface BuildActionPolicyEventsQueryParams {
   spaceId: string;
@@ -85,7 +85,7 @@ export const buildFindActionPolicyEventsQuery = (
  * stays the only call site — adding another query should go through this
  * helper as well.
  *
- * The query reads documents emitted by `store_execution_history_step.ts`:
+ * The query reads documents emitted by `lib/dispatcher/steps/utils/execution_history.ts`:
  *
  *  - `event.provider` is always `alerting_v2`.
  *  - `event.action` is one of `dispatched` / `throttled` / `dispatch_failed`.

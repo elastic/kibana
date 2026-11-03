@@ -51,6 +51,7 @@ export function useServiceErrorsFromLogs({
   rangeFrom,
   rangeTo,
   maxRows,
+  showToastOnError,
 }: {
   serviceName: string;
   environment: string;
@@ -58,6 +59,8 @@ export function useServiceErrorsFromLogs({
   rangeFrom: string;
   rangeTo: string;
   maxRows?: number;
+  /** Hosts that render their own error state (e.g. the request flyout) opt out of the toast. */
+  showToastOnError?: boolean;
 }) {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -72,7 +75,7 @@ export function useServiceErrorsFromLogs({
       });
     },
     [serviceName, start, end, environment, kuery, maxRows],
-    { operationId: FETCHER_OPERATION_IDS.FETCH_SERVICE_ERRORS_FROM_LOGS }
+    { operationId: FETCHER_OPERATION_IDS.FETCH_SERVICE_ERRORS_FROM_LOGS, showToastOnError }
   );
 
   const rows = useMemo<ErrorFromLogsRow[]>(

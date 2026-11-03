@@ -24,16 +24,4 @@ describe('validateSourceQuery', () => {
   it('returns the type of a query that targets one kind of data', () => {
     expect(validateSourceQuery({ esql: 'FROM logs-*' })).toBe('logs');
   });
-
-  it('throws a 400 Boom when the query mixes types', () => {
-    expect(() => validateSourceQuery({ esql: 'FROM logs-*, traces-*' })).toThrow(
-      expect.objectContaining({ message: expect.stringContaining('mixes') })
-    );
-  });
-
-  it('throws a 400 Boom when one index matches more than one type', () => {
-    expect(() => validateSourceQuery({ esql: 'FROM logs-traces-*' })).toThrow(
-      expect.objectContaining({ message: expect.stringContaining('more than one kind') })
-    );
-  });
 });

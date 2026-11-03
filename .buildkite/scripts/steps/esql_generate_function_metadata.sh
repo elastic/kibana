@@ -49,7 +49,7 @@ main () {
 
   report_main_step "Bootstrapping Kibana"
 
-  pnpm kbn bootstrap --force-install --no-frozen-lockfile --no-prebuilt
+  pnpm kbn bootstrap --force-install --no-frozen-lockfile
 
   cd "$KIBANA_DIR/$SCRIPTS_PACKAGE_DIR"
 
