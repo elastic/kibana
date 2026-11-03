@@ -8,7 +8,7 @@
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { isUiamCredential } from '@kbn/core-security-server';
-import { decodeStoredApiKey } from '@kbn/task-manager-plugin/server';
+import { getInvalidationTargets, queueInvalidationTargets } from '@kbn/response-ops-api-keys';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '..';
 
 export const bulkMarkApiKeysForInvalidation = async (
@@ -31,37 +31,9 @@ export const bulkMarkApiKeysForInvalidation = async (
       return true;
     });
 
-    if (decodableApiKeys.length === 0) {
-      return;
-    }
-
-    const apiKeysToInvalidate = decodableApiKeys.map((key) => {
-      // A UIAM key is queued under its own id, so the in-use guard has to match it against the
-      // `uiamApiKeyId` attribute that pending jobs record it in, not against `apiKeyId`.
-      const { id: apiKeyId, secret } = decodeStoredApiKey(key);
-      const uiamApiKey = secret && isUiamCredential(secret) ? secret : undefined;
-
-      return {
-        attributes: {
-          apiKeyId,
-          createdAt: new Date().toISOString(),
-          ...(uiamApiKey ? { uiamApiKey } : {}),
-        },
-        type: API_KEY_PENDING_INVALIDATION_TYPE,
-      };
-    });
-
-    try {
-      await savedObjectsClient.bulkCreate(apiKeysToInvalidate);
-    } catch (e) {
-      logger.error(
-        `Failed to bulk mark list of API keys [${apiKeysToInvalidate
-          .map(({ attributes }) => `"${attributes.apiKeyId}"`)
-          .join(', ')}] for invalidation: ${e.message}`,
-        {
-          error: { stack_trace: e.stack },
-        }
-      );
-    }
+    await queueInvalidationTargets(
+      decodableApiKeys.flatMap((apiKey) => getInvalidationTargets({ apiKey })),
+      { type: API_KEY_PENDING_INVALIDATION_TYPE, savedObjectsClient, logger }
+    );
   });
 };

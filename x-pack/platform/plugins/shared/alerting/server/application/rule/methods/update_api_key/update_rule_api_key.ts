@@ -12,12 +12,12 @@ import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { RawRule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
-import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { createNewAPIKeySet, updateMeta } from '../../../../rules_client/lib';
 import { API_KEY_ATTRIBUTES_TO_STRIP } from '../../../../rules_client/common';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { invalidateKeys } from '../common_utils/invalidate_keys';
 import { logRuleChanges } from '../common_utils/log_rule_changes';
 import type { UpdateApiKeyParams } from './types';
 import { updateApiKeyParamsSchema } from './schemas';
@@ -161,45 +161,20 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
       },
     });
   } catch (e) {
-    const { apiKey, apiKeyCreatedByUser, uiamApiKey } = updateAttributes;
-
-    const apiKeysToInvalidate = [];
-    if (apiKey && !apiKeyCreatedByUser) {
-      apiKeysToInvalidate.push(apiKey);
-    }
-    if (uiamApiKey && !apiKeyCreatedByUser) {
-      apiKeysToInvalidate.push(uiamApiKey);
-    }
-
-    if (apiKeysToInvalidate.length > 0) {
-      // Avoid unused API key
-      await bulkMarkApiKeysForInvalidation(
-        {
-          apiKeys: apiKeysToInvalidate,
-        },
-        context.logger,
-        context.unsecuredSavedObjectsClient
-      );
-    }
+    // Avoid unused API key
+    await invalidateKeys([updateAttributes], context);
 
     throw e;
   }
 
-  const oldApiKeysToInvalidate = [];
-  if (oldApiKeyToInvalidate && !oldApiKeyCreatedByUser) {
-    oldApiKeysToInvalidate.push(oldApiKeyToInvalidate);
-  }
-  if (oldUiamApiKeyToInvalidate && !oldApiKeyCreatedByUser) {
-    oldApiKeysToInvalidate.push(oldUiamApiKeyToInvalidate);
-  }
-
-  if (oldApiKeysToInvalidate.length > 0) {
-    await bulkMarkApiKeysForInvalidation(
+  await invalidateKeys(
+    [
       {
-        apiKeys: oldApiKeysToInvalidate,
+        apiKey: oldApiKeyToInvalidate,
+        uiamApiKey: oldUiamApiKeyToInvalidate,
+        apiKeyCreatedByUser: oldApiKeyCreatedByUser,
       },
-      context.logger,
-      context.unsecuredSavedObjectsClient
-    );
-  }
+    ],
+    context
+  );
 }

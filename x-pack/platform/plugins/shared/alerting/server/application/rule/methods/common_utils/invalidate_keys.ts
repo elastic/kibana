@@ -9,9 +9,9 @@ import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_a
 import type { RulesClientContext } from '../../../../rules_client/types';
 
 export interface ApiKeyEntry {
-  apiKey: string | null;
-  uiamApiKey: string | null;
-  apiKeyCreatedByUser: boolean | null;
+  apiKey?: string | null;
+  uiamApiKey?: string | null;
+  apiKeyCreatedByUser?: boolean | null;
 }
 
 export const invalidateKeys = async (
