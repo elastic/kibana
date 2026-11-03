@@ -22,7 +22,6 @@ import { createAttachmentPublicClient } from './services/attachments';
 import type { AgentBuilderConfig } from './config';
 import { registerTracingExporter } from './tracing/register_tracing';
 import { ServiceManager } from './services';
-import { getKibanaUrl } from './utils/get_kibana_url';
 import type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
@@ -73,7 +72,7 @@ export class AgentBuilderPlugin
   private readonly env: PluginInitializerContext['env'];
   private serviceManager: ServiceManager;
   private cloudSetup?: CloudSetup;
-  private getKibanaBaseUrl?: () => string;
+  private getKibanaBaseUrl?: () => string | undefined;
   private usageCounter?: UsageCounter;
   private trackingService?: TrackingService;
   private analyticsService?: AnalyticsService;
@@ -96,7 +95,9 @@ export class AgentBuilderPlugin
   ): AgentBuilderPluginSetup {
     this.home = setupDeps.home;
     this.cloudSetup = setupDeps.cloud;
-    this.getKibanaBaseUrl = () => getKibanaUrl(coreSetup, setupDeps.cloud);
+    // Unlike `getKibanaUrl`, no fallback to the server address, which Slack users cannot reach.
+    this.getKibanaBaseUrl = () =>
+      coreSetup.http.basePath.publicBaseUrl ?? setupDeps.cloud?.kibanaUrl;
 
     setupDeps.files.registerFileKind({
       id: CHAT_ATTACHMENT_IMAGES_FILE_KIND,
