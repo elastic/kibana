@@ -1,0 +1,496 @@
+{
+  "components": {
+    "schemas": {
+      "Ack": {
+        "type": "object"
+      },
+      "SilenceMetadata": {
+        "properties": {
+          "folder_uid": {
+            "type": "string"
+          },
+          "rule_title": {
+            "type": "string"
+          },
+          "rule_uid": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "alertStatus": {
+        "properties": {
+          "inhibitedBy": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "silencedBy": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "state": {
+            "enum": [
+              "[unprocessed active suppressed]"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "inhibitedBy",
+          "silencedBy",
+          "state"
+        ],
+        "type": "object"
+      },
+      "gettableAlert": {
+        "properties": {
+          "annotations": {
+            "$ref": "#/components/schemas/labelSet"
+          },
+          "endsAt": {
+            "type": "string"
+          },
+          "fingerprint": {
+            "type": "string"
+          },
+          "generatorURL": {
+            "type": "string"
+          },
+          "labels": {
+            "$ref": "#/components/schemas/labelSet"
+          },
+          "receivers": {
+            "items": {
+              "$ref": "#/components/schemas/receiver"
+            },
+            "type": "array"
+          },
+          "startsAt": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/alertStatus"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "labels",
+          "annotations",
+          "endsAt",
+          "fingerprint",
+          "receivers",
+          "startsAt",
+          "status",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "gettableAlerts": {
+        "items": {
+          "$ref": "#/components/schemas/gettableAlert",
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "gettableGrafanaSilence": {
+        "properties": {
+          "accessControl": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "type": "object"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "endsAt": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "matchers": {
+            "$ref": "#/components/schemas/matchers"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/SilenceMetadata"
+          },
+          "startsAt": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/silenceStatus"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "comment",
+          "createdBy",
+          "endsAt",
+          "matchers",
+          "startsAt",
+          "id",
+          "status",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "gettableGrafanaSilences": {
+        "items": {
+          "$ref": "#/components/schemas/gettableGrafanaSilence"
+        },
+        "type": "array"
+      },
+      "labelSet": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "type": "object"
+      },
+      "matcher": {
+        "properties": {
+          "isEqual": {
+            "type": "boolean"
+          },
+          "isRegex": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "isRegex",
+          "name",
+          "value"
+        ],
+        "type": "object"
+      },
+      "matchers": {
+        "items": {
+          "$ref": "#/components/schemas/matcher"
+        },
+        "type": "array"
+      },
+      "postSilencesOKBody": {
+        "properties": {
+          "silenceID": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "postableSilence": {
+        "properties": {
+          "comment": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "endsAt": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "matchers": {
+            "$ref": "#/components/schemas/matchers"
+          },
+          "startsAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "comment",
+          "createdBy",
+          "endsAt",
+          "matchers",
+          "startsAt"
+        ],
+        "type": "object"
+      },
+      "receiver": {
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "silenceStatus": {
+        "properties": {
+          "state": {
+            "enum": [
+              "[expired active pending]"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "state"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Grafana Alerting API."
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/alertmanager/grafana/api/v2/alerts": {
+      "get": {
+        "operationId": "RouteGetGrafanaAMAlerts",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "active",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "silenced",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "inhibited",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "filter",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "receiver",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/gettableAlerts"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alertmanager/grafana/api/v2/silence/{SilenceId}": {
+      "delete": {
+        "operationId": "RouteDeleteGrafanaSilence",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "SilenceId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ack"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "RouteGetGrafanaSilence",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "SilenceId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/gettableGrafanaSilence"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alertmanager/grafana/api/v2/silences": {
+      "get": {
+        "operationId": "RouteGetGrafanaSilences",
+        "parameters": [
+          {
+            "explode": false,
+            "in": "query",
+            "name": "filter",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleMetadata",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "accesscontrol",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/gettableGrafanaSilences"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "RouteCreateGrafanaSilence",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/postableSilence"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/postSilencesOKBody"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "/api"
+    }
+  ]
+}

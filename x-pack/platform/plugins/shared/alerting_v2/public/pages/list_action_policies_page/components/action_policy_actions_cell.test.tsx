@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyActionsCell } from './action_policy_actions_cell';
@@ -77,6 +77,22 @@ describe('ActionPolicyActionsCell', () => {
 
       expect(screen.queryByTestId('actionPolicyViewDetailsButton')).not.toBeInTheDocument();
       expect(screen.queryByLabelText('Edit this action policy')).not.toBeInTheDocument();
+    });
+
+    it('renders a menu that only offers to send a test notification', () => {
+      renderCell(false);
+
+      expect(screen.queryByLabelText('Edit this action policy')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByLabelText('More actions'));
+      expect(screen.getByTestId('sendTestNotificationActionPolicy-policy-1')).toBeInTheDocument();
+      expect(screen.queryByTestId('viewDetailsActionPolicy-policy-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('cloneActionPolicy-policy-1')).not.toBeInTheDocument();
+    });
+
+    it('renders no menu when the license is not valid', () => {
+      mockIsLicenseValid = false;
+      renderCell(false);
+
       expect(screen.queryByLabelText('More actions')).not.toBeInTheDocument();
     });
   });
