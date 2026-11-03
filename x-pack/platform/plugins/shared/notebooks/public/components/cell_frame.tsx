@@ -241,7 +241,7 @@ export const CellFrame = ({
             top: 0;
             left: 100%;
             padding-left: ${euiTheme.size.s};
-            opacity: ${isRunMenuOpen ? 1 : 0};
+            opacity: ${isRunMenuOpen || cell.runMode === 'manual' ? 1 : 0};
             transition: opacity ${euiTheme.animation.fast};
           `}
         >
