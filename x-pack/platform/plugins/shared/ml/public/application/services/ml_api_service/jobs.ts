@@ -32,6 +32,7 @@ import type {
   BulkUpdateProjectRoutingResponse,
   ResetJobsResponse,
 } from '@kbn/ml-common-types/job_service';
+import type { SuggestJobsResponse } from '../../../../common/types/job_suggestions';
 import type { ExistingJobsAndGroups } from '../job_service';
 import type { JobAction } from '../../../../common/constants/job_actions';
 import { useMlKibana } from '../../contexts/kibana';
@@ -412,6 +413,26 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     const body = JSON.stringify({ datafeedId, job, datafeed });
     return httpService.http<unknown[]>({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/datafeed_preview`,
+      method: 'POST',
+      body,
+      version: '1',
+    });
+  },
+
+  suggestJobs({
+    index,
+    start,
+    end,
+    maxSuggestions,
+  }: {
+    index: string;
+    start?: number;
+    end?: number;
+    maxSuggestions?: number;
+  }) {
+    const body = JSON.stringify({ index, start, end, maxSuggestions });
+    return httpService.http<SuggestJobsResponse>({
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/suggest_jobs`,
       method: 'POST',
       body,
       version: '1',

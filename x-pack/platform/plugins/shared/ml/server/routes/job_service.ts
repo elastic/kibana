@@ -10,7 +10,8 @@ import { schema } from '@kbn/config-schema';
 import { categorizationExamplesProvider } from '@kbn/ml-category-validator';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
-import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import { type CompatibleModule, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization } from '../types';
 import {
@@ -30,16 +31,31 @@ import {
   deleteJobsSchema,
   stopDatafeedsSchema,
   bulkUpdateProjectRoutingSchema,
+  suggestJobsSchema,
 } from './schemas/job_service_schema';
 
 import { jobForCloningSchema, jobIdSchema } from './schemas/anomaly_detectors_schema';
 
 import { jobServiceProvider } from '../models/job_service';
+import { suggestJobs } from '../models/job_service/job_suggestions';
+import { dataRecognizerFactory } from '../models/data_recognizer';
+
+// Suggesting jobs makes several model calls, which takes longer than the default socket timeout.
+const SUGGEST_JOBS_SOCKET_TIMEOUT_MS = 10 * 60 * 1000;
+
+export interface JobServiceRoutesDeps {
+  /** Resolves to undefined when the Agent Builder plugin is not available. */
+  getAgentBuilder: () => Promise<AgentBuilderPluginStart | undefined>;
+  compatibleModuleType: CompatibleModule | null;
+}
 
 /**
  * Routes for job service
  */
-export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
+export function jobServiceRoutes(
+  { router, routeGuard, mlLicense }: RouteInitialization,
+  { getAgentBuilder, compatibleModuleType }: JobServiceRoutesDeps
+) {
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/force_start_datafeeds`,
@@ -1141,6 +1157,100 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
             return response.ok({
               body,
             });
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
+        }
+      )
+    );
+
+  router.versioned
+    .post({
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/suggest_jobs`,
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
+      },
+      options: {
+        timeout: { idleSocket: SUGGEST_JOBS_SOCKET_TIMEOUT_MS },
+      },
+      summary: 'Suggest anomaly detection jobs',
+      description:
+        'Analyses the data in an index and uses an AI model to suggest anomaly detection jobs which suit it. Each suggestion has a plain language title and description, and a validated job and datafeed configuration. Requires an Enterprise license and an AI connector.',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: { body: suggestJobsSchema },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(
+        async ({
+          client,
+          mlClient,
+          request,
+          response,
+          context,
+          mlSavedObjectService,
+          getDataViewsService,
+          serverless,
+        }) => {
+          try {
+            const license = mlLicense.getLicenseInfo().license;
+            if (license?.status !== 'active' || !license.hasAtLeast('enterprise')) {
+              return response.forbidden({
+                body: {
+                  message: 'Suggesting anomaly detection jobs requires an Enterprise license.',
+                },
+              });
+            }
+
+            const agentBuilder = await getAgentBuilder();
+            if (agentBuilder === undefined) {
+              return response.customError({
+                statusCode: 501,
+                body: { message: 'AI features are not available.' },
+              });
+            }
+
+            let model;
+            try {
+              model = await agentBuilder.runtime.createModelProvider({ request }).getDefaultModel();
+            } catch (e) {
+              return response.badRequest({ body: { message: 'No AI connector available.' } });
+            }
+
+            const { index, start, end, maxSuggestions } = request.body;
+            const suggestions = await suggestJobs(
+              {
+                client,
+                mlClient,
+                model,
+                isSecurityDisabled: mlLicense.isSecurityEnabled() === false,
+                findRecognizerMatches: async (indexPattern) => {
+                  const soClient = (await context.core).savedObjects.client;
+                  const dataViewsService = await getDataViewsService();
+                  const recognizer = dataRecognizerFactory(
+                    client,
+                    mlClient,
+                    soClient,
+                    dataViewsService,
+                    mlSavedObjectService,
+                    request,
+                    compatibleModuleType,
+                    serverless
+                  );
+                  const matches = await recognizer.findMatches(indexPattern);
+                  return matches.map(({ id, title, description }) => ({ id, title, description }));
+                },
+              },
+              { index, start, end, maxSuggestions }
+            );
+
+            return response.ok({ body: { suggestions } });
           } catch (e) {
             return response.customError(wrapError(e));
           }

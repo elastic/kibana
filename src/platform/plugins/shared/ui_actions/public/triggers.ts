@@ -40,6 +40,7 @@ import {
   IN_APP_EMBEDDABLE_EDIT_TRIGGER,
   CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,
   UPDATE_AD_JOBS_PROJECT_ROUTING_TRIGGER,
+  SUGGEST_AD_JOBS_TRIGGER,
   SWIM_LANE_SELECTION_TRIGGER,
   EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER,
   SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER,
@@ -308,6 +309,15 @@ export const triggers: { [key: string]: Trigger } = {
           'Update project routing for anomaly detection jobs to use cross-project search.',
       }
     ),
+  },
+  [SUGGEST_AD_JOBS_TRIGGER]: {
+    id: SUGGEST_AD_JOBS_TRIGGER,
+    title: i18n.translate('uiActions.triggers.ml.actions.suggestADJobs.title', {
+      defaultMessage: 'Suggest anomaly detection jobs',
+    }),
+    description: i18n.translate('uiActions.triggers.ml.actions.suggestADJobs.description', {
+      defaultMessage: 'Suggest anomaly detection jobs which suit the data in an index.',
+    }),
   },
   [SWIM_LANE_SELECTION_TRIGGER]: {
     id: SWIM_LANE_SELECTION_TRIGGER,

@@ -31,3 +31,29 @@ export interface UpdateADJobsProjectRoutingContext {
 }
 
 export const UPDATE_AD_JOBS_PROJECT_ROUTING_ACTION = 'updateADJobsProjectRoutingAction';
+
+/**
+ * Context for the suggest anomaly detection jobs action.
+ */
+export interface SuggestADJobsContext {
+  /**
+   * The index name or index pattern to suggest jobs for.
+   */
+  indexPattern: string;
+  /**
+   * Used to open the job wizards on the data view. When neither this nor `savedSearchId` is
+   * provided, a data view matching `indexPattern` is looked up.
+   */
+  dataViewId?: string;
+  /**
+   * Used to open the job wizards on a saved Discover session.
+   */
+  savedSearchId?: string;
+  projectRouting?: string;
+  /**
+   * Invoked after the flyout is closed.
+   */
+  onClose?: () => void;
+}
+
+export const SUGGEST_AD_JOBS_ACTION = 'suggestADJobsAction';

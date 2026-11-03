@@ -14,6 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { SUGGEST_AD_JOBS_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   useMlKibana,
   useMlManagementLocator,
@@ -30,15 +31,18 @@ import {
   useMlLink,
 } from '../../../../contexts/kibana/use_create_url';
 import { MlAppHeader, useAnomalyDetectionJobsBack } from '../../../../components/ml_app_header';
+import { useSuggestJobsAvailable } from './use_suggest_jobs_available';
 
 export const Page: FC = () => {
   const {
     services: {
       chrome: { recentlyAccessed },
       share,
+      uiActions,
       notifications: { toasts },
     },
   } = useMlKibana();
+  const isSuggestJobsAvailable = useSuggestJobsAvailable();
   const onSelectDifferentIndex = useCreateAndNavigateToMlLink(
     ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX
   );
@@ -147,6 +151,15 @@ export const Page: FC = () => {
       recentlyAccessed
     );
     navigateToPath(`/${ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER}${getJobTypeUrlParams()}`);
+  };
+
+  const openSuggestJobsFlyout = () => {
+    void uiActions.executeTriggerActions(SUGGEST_AD_JOBS_TRIGGER, {
+      indexPattern: selectedDataView.getIndexPattern(),
+      dataViewId: selectedSavedSearch ? undefined : selectedDataView.id,
+      savedSearchId: selectedSavedSearch?.id,
+      projectRouting,
+    });
   };
 
   const jobTypes = [
@@ -306,6 +319,43 @@ export const Page: FC = () => {
 
         <EuiSpacer size="xxl" />
       </div>
+
+      {isSuggestJobsAvailable && (
+        <>
+          <EuiTitle size="s">
+            <h2>
+              <FormattedMessage
+                id="xpack.ml.newJob.wizard.jobType.suggestJobsTitle"
+                defaultMessage="Get suggestions"
+              />
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+
+          <EuiFlexGrid gutterSize="l" columns={4}>
+            <EuiFlexItem>
+              <LinkCard
+                data-test-subj="mlJobTypeLinkSuggestJobs"
+                onClick={openSuggestJobsFlyout}
+                icon={<EuiIcon size="xl" type="sparkles" aria-hidden={true} />}
+                title={i18n.translate('xpack.ml.newJob.wizard.jobType.suggestJobsCardTitle', {
+                  defaultMessage: 'Suggest jobs',
+                })}
+                description={i18n.translate(
+                  'xpack.ml.newJob.wizard.jobType.suggestJobsCardDescription',
+                  {
+                    defaultMessage:
+                      'Analyze your data and get anomaly detection jobs which suit it.',
+                  }
+                )}
+                isDisabled={!isTimeBasedIndex}
+              />
+            </EuiFlexItem>
+          </EuiFlexGrid>
+
+          <EuiSpacer size="xxl" />
+        </>
+      )}
 
       <EuiTitle size="s">
         <h2>

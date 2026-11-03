@@ -8,7 +8,9 @@
 export {
   CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_ACTION,
   UPDATE_AD_JOBS_PROJECT_ROUTING_ACTION,
+  SUGGEST_AD_JOBS_ACTION,
   type CreateCategorizationADJobContext,
+  type SuggestADJobsContext,
   type UpdateADJobsProjectRoutingContext,
 } from './src/ml/ui_actions';
 

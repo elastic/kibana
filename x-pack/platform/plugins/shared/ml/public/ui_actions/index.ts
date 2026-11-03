@@ -14,6 +14,7 @@ import {
   ON_OPEN_PANEL_MENU,
   PANEL_BADGE_TRIGGER,
   SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER,
+  SUGGEST_AD_JOBS_TRIGGER,
   SWIM_LANE_SELECTION_TRIGGER,
   UPDATE_AD_JOBS_PROJECT_ROUTING_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
@@ -128,6 +129,10 @@ export function registerMlUiActions(
       return updateADJobsProjectRouting(core.getStartServices);
     }
   );
+  uiActions.addTriggerActionAsync(SUGGEST_AD_JOBS_TRIGGER, 'suggest-ad-jobs-action', async () => {
+    const { createSuggestADJobsAction } = await import('./async_module');
+    return createSuggestADJobsAction(core.getStartServices);
+  });
   uiActions.addTriggerActionAsync(
     PANEL_BADGE_TRIGGER,
     'anomaly-swimlane-severity-badge',

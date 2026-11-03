@@ -207,3 +207,31 @@ export const bulkUpdateProjectRoutingSchema = schema.object({
     })
   ),
 });
+
+export const suggestJobsSchema = schema.object({
+  index: schema.string({
+    maxLength: 1000,
+    minLength: 1,
+    meta: { description: 'The index name or index pattern to suggest anomaly detection jobs for.' },
+  }),
+  start: schema.maybe(
+    schema.number({
+      meta: {
+        description:
+          'Start of the analysed time range, in epoch ms. Defaults to 30 days before end.',
+      },
+    })
+  ),
+  end: schema.maybe(
+    schema.number({
+      meta: { description: 'End of the analysed time range, in epoch ms. Defaults to now.' },
+    })
+  ),
+  maxSuggestions: schema.maybe(
+    schema.number({
+      min: 1,
+      max: 10,
+      meta: { description: 'The maximum number of suggestions to return. Defaults to 5.' },
+    })
+  ),
+});
