@@ -87,6 +87,7 @@ import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import {
   registerAttachmentUiDefinitions,
+  registerEntityAnalyticsAiBriefResultAttachment,
   registerAiRuleCreationHandler,
   registerAttackDiscoveryAttachment,
   registerAttackDiscoveryVerdictAttachment,
@@ -390,6 +391,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }
 
       registerAttachmentUiDefinitions({ attachments: plugins.agentBuilder.attachments });
+      registerEntityAnalyticsAiBriefResultAttachment({
+        attachments: plugins.agentBuilder.attachments,
+        application: core.application,
+        agentBuilder: plugins.agentBuilder,
+        chrome: core.chrome,
+        experimentalFeatures: this.experimentalFeatures,
+        searchSession: plugins.data.search.session,
+        uiSettings: core.uiSettings,
+      });
       registerSiemMigrationRuleItemsAttachment(plugins.agentBuilder.attachments);
       this.registerFlyoutGroupedAttachments(core, plugins);
       registerAttackDiscoveryAttachment({

@@ -99,10 +99,6 @@ export interface GenerateBriefParams {
 }
 
 export interface GenerateBriefResult {
-  /** The brief as the HTML of an inline visualization. */
-  html: string;
-  /** The card's height in pixels. */
-  height: number;
   viewModel: BriefViewModel;
   /** The `security.entity` table of the priorities, as its render tag. */
   entityTableTag?: string;

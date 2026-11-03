@@ -403,6 +403,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'security.entity',
   'security.entity_analytics_dashboard',
   'security.entity_analytics_ai_brief',
+  'security.entity_analytics_ai_brief_result',
   'security.entity_graph',
   'security.entity_risk_score_history',
   'security.exception',

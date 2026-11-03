@@ -19,6 +19,7 @@ import { SecurityAgentBuilderAttachments } from '../../../../../common/constants
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import type { BriefDraft } from '../../../../../server/agent_builder/tools/entity_analytics/brief/prompts';
 import { getBriefToolId } from '../../../../../server/agent_builder/tools/entity_analytics/brief/prompts';
+import { BriefViewModel } from '../../../../../common/entity_analytics/ai_brief/result';
 
 /** The inference plugin's structured-output tool, which the brief's model call forces. */
 const SUBMIT_BRIEF_TOOL_NAME = 'structuredOutput';
@@ -191,16 +192,17 @@ export const getBriefResult = ({ steps }: ConverseResponseBody): BriefToolResult
   return result.data;
 };
 
-/** The HTML of the conversation's `visualization` attachment, which is where the brief is posted. */
-export const getBriefTemplate = ({ attachments = [] }: Conversation): string => {
-  const attachment = attachments.find(({ type }) => type === 'visualization');
+/** The captured brief data stored on the conversation's result attachment. */
+export const getBriefViewModel = ({ attachments = [] }: Conversation) => {
+  const attachment = attachments.find(
+    ({ type }) => type === SecurityAgentBuilderAttachments.entityAnalyticsAiBriefResult
+  );
   const version = attachment?.versions.find(
     ({ version: number }) => number === attachment.current_version
   );
-  const template = (version?.data as { visualization?: { template?: unknown } } | undefined)
-    ?.visualization?.template;
-  if (typeof template !== 'string') {
-    throw new Error(`No brief visualization in the conversation: ${JSON.stringify(attachments)}`);
+  const result = BriefViewModel.safeParse(version?.data);
+  if (!result.success) {
+    throw new Error(`No valid brief result in the conversation: ${JSON.stringify(attachments)}`);
   }
-  return template;
+  return result.data;
 };

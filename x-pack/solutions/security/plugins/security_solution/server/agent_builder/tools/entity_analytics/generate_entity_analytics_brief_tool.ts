@@ -16,6 +16,7 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { isInferenceError } from '@kbn/inference-common';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { ExperimentalFeatures } from '../../../../common';
+import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import type { EntityAnalyticsScope } from '../../../../common/entity_analytics/ai_brief/scope';
 import { WatchlistConfigClient } from '../../../lib/entity_analytics/watchlists/management/watchlist_config';
 import { RiskScoreDataClient } from '../../../lib/entity_analytics/risk_score/risk_score_data_client';
@@ -113,7 +114,7 @@ export const createGenerateBriefTool = ({
         return { results: [access.result] };
       }
       const { inferenceClient } = await modelProvider.getDefaultModel();
-      const { html, height, viewModel, entityTableTag, priorityCount } = await generateBrief({
+      const { viewModel, entityTableTag, priorityCount } = await generateBrief({
         scope,
         spaceId,
         esClient: esClient.asCurrentUser,
@@ -139,13 +140,10 @@ export const createGenerateBriefTool = ({
       });
       telemetryTracker.recordResultCount(priorityCount);
       const attachment = await attachments.add({
-        type: 'visualization',
-        data: {
-          renderer: 'custom_content',
-          query: BRIEF_TITLE,
-          visualization: { template: html, height, title: BRIEF_TITLE },
-        },
+        type: SecurityAgentBuilderAttachments.entityAnalyticsAiBriefResult,
+        data: viewModel,
         description: BRIEF_TITLE,
+        readonly: true,
       });
       const { summary, priorities, recommendation } = viewModel;
       return {
