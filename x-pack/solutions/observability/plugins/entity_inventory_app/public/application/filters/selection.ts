@@ -33,7 +33,7 @@ export const normalizeSelection = ({
   )
     ? selection.type
     : undefined;
-  const { attributeNames } = getFilterControls({
+  const { attributes } = getFilterControls({
     types,
     pageCategory,
     selectedCategory: category,
@@ -44,7 +44,9 @@ export const normalizeSelection = ({
     category: pageCategory ? undefined : category,
     type,
     attributes: Object.fromEntries(
-      Object.entries(selection.attributes).filter(([name]) => attributeNames.includes(name))
+      Object.entries(selection.attributes).filter(([name]) =>
+        attributes.some((attribute) => attribute.name === name)
+      )
     ),
   };
 };

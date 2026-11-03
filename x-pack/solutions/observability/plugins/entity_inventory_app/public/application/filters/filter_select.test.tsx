@@ -12,12 +12,14 @@ import { FilterSelect } from './filter_select';
 
 const TEST_SUBJ = 'testFilter';
 
+const toOptions = (names: string[]) => names.map((name) => ({ name, label: name }));
+
 const renderFilterSelect = (props: Partial<React.ComponentProps<typeof FilterSelect>> = {}) => {
   const onChange = jest.fn();
   render(
     <FilterSelect
       label="Cloud provider"
-      options={['aws', 'azure', 'gcp']}
+      options={toOptions(['aws', 'azure', 'gcp'])}
       selected={[]}
       onChange={onChange}
       data-test-subj={TEST_SUBJ}
@@ -43,7 +45,7 @@ describe('FilterSelect', () => {
       renderFilterSelect({
         ...singleSelectProps,
         selected: ['aws'],
-        getOptionLabel: (option) => option.toUpperCase(),
+        options: [{ name: 'aws', label: 'AWS' }],
       });
 
       expect(screen.getByTestId(TEST_SUBJ)).toHaveTextContent('AWS');
@@ -164,7 +166,11 @@ describe('FilterSelect', () => {
 
   describe('invalid options', () => {
     it('does not list an invalid option that is no longer selected', async () => {
-      renderFilterSelect({ options: ['aws'], invalidOptions: ['azure'], selected: [] });
+      renderFilterSelect({
+        options: toOptions(['aws']),
+        invalidOptions: ['azure'],
+        selected: [],
+      });
 
       await openList();
 
@@ -173,7 +179,7 @@ describe('FilterSelect', () => {
 
     it('lists them before the other options and lets the user remove them', async () => {
       const { onChange } = renderFilterSelect({
-        options: ['aws'],
+        options: toOptions(['aws']),
         invalidOptions: ['azure'],
         selected: ['azure'],
       });

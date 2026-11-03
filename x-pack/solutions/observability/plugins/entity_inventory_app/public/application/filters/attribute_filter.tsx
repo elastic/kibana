@@ -41,7 +41,7 @@ export function AttributeFilter({
   return (
     <FilterSelect
       label={label}
-      options={values}
+      options={values.map((value) => ({ name: value, label: value }))}
       invalidOptions={invalidSelections}
       selected={selected}
       onChange={onChange}

@@ -6,7 +6,7 @@
  */
 
 import { typesFixture as types } from './__fixtures__/types';
-import { getAttributeLabel, getTypeLabel } from './labels';
+import { getAttributeLabel } from './labels';
 
 describe('getAttributeLabel', () => {
   it('returns the first label found for the attribute', () => {
@@ -23,12 +23,5 @@ describe('getAttributeLabel', () => {
 
   it('falls back to the attribute name', () => {
     expect(getAttributeLabel(types, 'os.type')).toBe('os.type');
-  });
-});
-
-describe('getTypeLabel', () => {
-  it('returns the name of the type, or the type when it is unknown', () => {
-    expect(getTypeLabel(types, 'k8s.pod')).toBe('Pod');
-    expect(getTypeLabel(types, 'unknown')).toBe('unknown');
   });
 });

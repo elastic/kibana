@@ -17,7 +17,6 @@ import { FilterSelect } from './filter_select';
 import { getFilterControls, getTypesInScope } from './get_filter_controls';
 import { normalizeSelection } from './selection';
 import type { FilterControlsSelection } from './selection';
-import { getAttributeLabel, getCategoryLabel, getTypeLabel } from './labels';
 import {
   ALL_CATEGORIES_LABEL,
   ALL_TYPES_LABEL,
@@ -27,7 +26,7 @@ import {
 } from './translations';
 
 interface EntityInventoryFilterControlsProps {
-  types: EntityInventoryTypeDefinition[];
+  typeDefinitions: EntityInventoryTypeDefinition[];
   isLoading?: boolean;
   error?: Error;
   pageCategory?: string;
@@ -37,7 +36,7 @@ interface EntityInventoryFilterControlsProps {
 }
 
 export function EntityInventoryFilterControls({
-  types,
+  typeDefinitions,
   isLoading = false,
   error,
   pageCategory,
@@ -46,14 +45,13 @@ export function EntityInventoryFilterControls({
   onSelectionChange,
 }: EntityInventoryFilterControlsProps) {
   const params = {
-    types,
+    types: typeDefinitions,
     pageCategory,
     selectedCategory: selection.category,
     selectedType: selection.type,
   };
-  const { categoryOptions, typeOptions, attributeNames } = getFilterControls(params);
-  const definitionsInScope = getTypesInScope(params);
-  const typeIdsInScope = definitionsInScope.map(({ type }) => type);
+  const { categories, types, attributes } = getFilterControls(params);
+  const typeIds = getTypesInScope(params).map(({ type }) => type);
 
   if (error) {
     return <EuiCallOut announceOnMount size="s" color="danger" title={TYPES_ERROR_MESSAGE} />;
@@ -61,7 +59,11 @@ export function EntityInventoryFilterControls({
 
   const updateSelection = (changes: Partial<FilterControlsSelection>) =>
     onSelectionChange(
-      normalizeSelection({ types, pageCategory, selection: { ...selection, ...changes } })
+      normalizeSelection({
+        types: typeDefinitions,
+        pageCategory,
+        selection: { ...selection, ...changes },
+      })
     );
 
   const updateAttribute = (attribute: string, values: string[]) => {
@@ -78,46 +80,44 @@ export function EntityInventoryFilterControls({
       wrap
       data-test-subj="entityInventoryFilterControls"
     >
-      {categoryOptions && (
+      {categories.length > 0 && (
         <EuiFlexItem grow={false}>
           <FilterSelect
             label={CATEGORY_FILTER_LABEL}
             allLabel={ALL_CATEGORIES_LABEL}
-            options={categoryOptions}
+            options={categories}
             selected={selection.category ? [selection.category] : []}
             onChange={([category]) => updateSelection({ category })}
             singleSelection
             isLoading={isLoading}
-            getOptionLabel={getCategoryLabel}
             data-test-subj="entityInventoryCategoryFilter"
           />
         </EuiFlexItem>
       )}
-      {typeOptions && (
+      {types.length > 0 && (
         <EuiFlexItem grow={false}>
           <FilterSelect
             label={TYPE_FILTER_LABEL}
             allLabel={ALL_TYPES_LABEL}
-            options={typeOptions}
+            options={types}
             selected={selection.type ? [selection.type] : []}
             onChange={([type]) => updateSelection({ type })}
             singleSelection
             isLoading={isLoading}
-            getOptionLabel={(type) => getTypeLabel(types, type)}
             data-test-subj="entityInventoryTypeFilter"
           />
         </EuiFlexItem>
       )}
-      {attributeNames.map((attribute) => (
-        <EuiFlexItem key={attribute} grow={false}>
+      {attributes.map(({ name, label }) => (
+        <EuiFlexItem key={name} grow={false}>
           <AttributeFilter
-            attribute={attribute}
-            label={getAttributeLabel(definitionsInScope, attribute)}
-            types={typeIdsInScope}
-            filters={omit(selection.attributes, attribute)}
+            attribute={name}
+            label={label}
+            types={typeIds}
+            filters={omit(selection.attributes, name)}
             timeRange={timeRange}
-            selected={selection.attributes[attribute] ?? []}
-            onChange={(values) => updateAttribute(attribute, values)}
+            selected={selection.attributes[name] ?? []}
+            onChange={(values) => updateAttribute(name, values)}
           />
         </EuiFlexItem>
       ))}

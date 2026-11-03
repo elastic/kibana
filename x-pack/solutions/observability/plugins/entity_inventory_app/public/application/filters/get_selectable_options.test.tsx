@@ -7,14 +7,15 @@
 
 import { ALL_OPTION_KEY, getSelectableOptions } from './get_selectable_options';
 
+const toOptions = (names: string[]) => names.map((name) => ({ name, label: name.toUpperCase() }));
+
 const getOptions = (params: Partial<Parameters<typeof getSelectableOptions>[0]> = {}) =>
   getSelectableOptions({
-    options: ['aws', 'azure'],
+    options: toOptions(['aws', 'azure']),
     invalidOptions: [],
     selected: [],
     isLoading: false,
     hasError: false,
-    getOptionLabel: (option) => option.toUpperCase(),
     ...params,
   });
 
@@ -42,16 +43,18 @@ describe('getSelectableOptions', () => {
 
   it('lists the invalid options that are selected before the others', () => {
     expect(
-      summary(getOptions({ options: ['aws'], invalidOptions: ['gcp'], selected: ['gcp'] }))
+      summary(
+        getOptions({ options: toOptions(['aws']), invalidOptions: ['gcp'], selected: ['gcp'] })
+      )
     ).toEqual([
-      { key: 'gcp', label: 'GCP', checked: 'on' },
+      { key: 'gcp', label: 'gcp', checked: 'on' },
       { key: 'aws', label: 'AWS', checked: undefined },
     ]);
   });
 
   it('does not list an invalid option that is no longer selected', () => {
     expect(
-      summary(getOptions({ options: ['aws'], invalidOptions: ['gcp'], selected: [] }))
+      summary(getOptions({ options: toOptions(['aws']), invalidOptions: ['gcp'], selected: [] }))
     ).toEqual([{ key: 'aws', label: 'AWS', checked: undefined }]);
   });
 
@@ -69,7 +72,7 @@ describe('getSelectableOptions', () => {
 
   it('does not repeat an option', () => {
     const keys = getOptions({
-      options: ['aws', 'gcp'],
+      options: toOptions(['aws', 'gcp']),
       invalidOptions: ['gcp'],
       selected: ['aws', 'gcp'],
       hasError: true,

@@ -17,7 +17,7 @@ export const EntityInventoryPageFilterControls = () => {
 
   return (
     <EntityInventoryFilterControls
-      types={types}
+      typeDefinitions={types}
       isLoading={isLoading}
       error={error}
       pageCategory={entityCategory === 'all' ? undefined : entityCategory}

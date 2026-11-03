@@ -9,18 +9,18 @@ import React from 'react';
 import { uniqBy } from 'lodash';
 import { EuiIcon } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui';
+import type { FilterOption } from './get_filter_controls';
 import { INVALID_OPTION_TOOLTIP } from './translations';
 
 export const ALL_OPTION_KEY = '__all__';
 
 interface GetSelectableOptionsParams {
-  options: string[];
+  options: FilterOption[];
   invalidOptions: string[];
   selected: string[];
   allLabel?: string;
   isLoading: boolean;
   hasError: boolean;
-  getOptionLabel: (option: string) => string;
 }
 
 export const getSelectableOptions = ({
@@ -30,8 +30,10 @@ export const getSelectableOptions = ({
   allLabel,
   isLoading,
   hasError,
-  getOptionLabel,
 }: GetSelectableOptionsParams): EuiSelectableOption[] => {
+  const getOptionLabel = (name: string) =>
+    options.find((option) => option.name === name)?.label ?? name;
+
   const allOptions = allLabel
     ? [
         {
@@ -54,10 +56,10 @@ export const getSelectableOptions = ({
       }),
     }));
 
-  const validOptions = options.map((option) => ({
-    key: option,
-    label: getOptionLabel(option),
-    checked: selected.includes(option) ? ('on' as const) : undefined,
+  const validOptions = options.map(({ name, label }) => ({
+    key: name,
+    label,
+    checked: selected.includes(name) ? ('on' as const) : undefined,
   }));
 
   return uniqBy([...allOptions, ...selectedOptions, ...validOptions], 'key');

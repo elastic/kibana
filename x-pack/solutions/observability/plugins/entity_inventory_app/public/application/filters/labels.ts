@@ -17,6 +17,3 @@ export const getAttributeLabel = (
   types
     .flatMap(({ attributes }) => attributes)
     .find(({ name, label }) => name === attribute && label)?.label ?? attribute;
-
-export const getTypeLabel = (types: EntityInventoryTypeDefinition[], type: string): string =>
-  types.find((definition) => definition.type === type)?.name ?? type;

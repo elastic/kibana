@@ -25,7 +25,7 @@ const renderControls = (
   const onSelectionChange = jest.fn();
   render(
     <EntityInventoryFilterControls
-      types={types}
+      typeDefinitions={types}
       timeRange={{ from: 'now-15m', to: 'now' }}
       selection={{ attributes: {} }}
       onSelectionChange={onSelectionChange}
@@ -129,7 +129,7 @@ describe('EntityInventoryFilterControls', () => {
   });
 
   it('shows an error instead of the filters when the types could not be loaded', () => {
-    renderControls({ types: [], error: new Error('failed') });
+    renderControls({ typeDefinitions: [], error: new Error('failed') });
 
     expect(screen.getByText('The filters could not be loaded')).toBeInTheDocument();
     expect(screen.queryByTestId(CATEGORY_FILTER)).not.toBeInTheDocument();

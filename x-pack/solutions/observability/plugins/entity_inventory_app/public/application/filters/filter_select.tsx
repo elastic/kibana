@@ -16,20 +16,20 @@ import {
   EuiSelectableMessage,
 } from '@elastic/eui';
 import type { EuiSelectableProps } from '@elastic/eui';
+import type { FilterOption } from './get_filter_controls';
 import { ALL_OPTION_KEY, getSelectableOptions } from './get_selectable_options';
 import { EMPTY_MESSAGE, SEARCH_PLACEHOLDER } from './translations';
 
 interface FilterSelectProps {
   label: string;
   allLabel?: string;
-  options: string[];
+  options: FilterOption[];
   invalidOptions?: string[];
   selected: string[];
   onChange: (selected: string[]) => void;
   singleSelection?: boolean;
   isLoading?: boolean;
   errorMessage?: string;
-  getOptionLabel?: (option: string) => string;
   'data-test-subj': string;
 }
 
@@ -43,7 +43,6 @@ export function FilterSelect({
   singleSelection = false,
   isLoading = false,
   errorMessage,
-  getOptionLabel = (option) => option,
   'data-test-subj': dataTestSubj,
 }: FilterSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -57,7 +56,6 @@ export function FilterSelect({
     allLabel,
     isLoading,
     hasError,
-    getOptionLabel,
   });
 
   const getNextSelection = (key: string, isChecked: boolean): string[] => {
@@ -86,9 +84,8 @@ export function FilterSelect({
     }
   };
 
-  const buttonLabel = singleSelection
-    ? (selected[0] && getOptionLabel(selected[0])) || allLabel || label
-    : label;
+  const selectedLabel = options.find(({ name }) => name === selected[0])?.label ?? selected[0];
+  const buttonLabel = singleSelection ? selectedLabel || allLabel || label : label;
 
   return (
     <EuiFilterGroup>
