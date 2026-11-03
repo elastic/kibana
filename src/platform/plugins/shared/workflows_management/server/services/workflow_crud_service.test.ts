@@ -195,18 +195,15 @@ describe('WorkflowCrudService', () => {
 
       await expect(
         service.getWorkflow('wf-1', 'default', { includeDeleted: true })
-      ).rejects.toThrow('Could not determine workflow access from an incomplete search.');
+      ).rejects.toThrow('Could not read workflow wf-1 from an incomplete search.');
       expect(client.search).toHaveBeenCalledWith(
         expect.objectContaining({ allow_partial_search_results: false })
       );
     });
 
     it('returns WorkflowDetailDto for existing workflow', async () => {
-      const source = makeSource();
       const { deps, client } = makeDeps();
-      client.search.mockResolvedValue({
-        hits: { hits: [{ _id: 'wf-1', _source: source }] },
-      });
+      client.search.mockResolvedValue({ hits: { hits: [occSearchHit('wf-1')] } });
 
       const service = new WorkflowCrudService(deps);
       const result = await service.getWorkflow('wf-1', 'default');
@@ -4493,6 +4490,19 @@ describe('managed orphan cleanup without a request', () => {
       await expect(
         service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN)
       ).resolves.toBeNull();
+      expect(client.index).not.toHaveBeenCalled();
+    });
+
+    it('fails instead of resolving to null when the guarded read is incomplete', async () => {
+      const { client, service } = setup();
+      client.search.mockResolvedValue({ timed_out: true, hits: { hits: [] } });
+
+      await expect(
+        service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN)
+      ).rejects.toThrow('incomplete search');
+      expect(client.search).toHaveBeenCalledWith(
+        expect.objectContaining({ allow_partial_search_results: false })
+      );
       expect(client.index).not.toHaveBeenCalled();
     });
 

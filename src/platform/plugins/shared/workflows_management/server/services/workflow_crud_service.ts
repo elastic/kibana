@@ -192,23 +192,8 @@ export class WorkflowCrudService {
     spaceId: string,
     options?: { includeDeleted?: boolean; includeGlobal?: boolean }
   ): Promise<WorkflowProperties | null> {
-    const { must, must_not } = buildWorkflowFilters({
-      ids: [id],
-      space: { id: spaceId, includeGlobal: options?.includeGlobal },
-      deleted: options?.includeDeleted ? 'all' : 'not_deleted',
-    });
-    const searchResponse = await this.deps.workflowStorage.getClient().search({
-      query: { bool: { must, must_not } },
-      size: 1,
-      track_total_hits: false,
-      allow_partial_search_results: false,
-    });
-    if (searchResponse.timed_out) {
-      throw new Error('Could not determine workflow access from an incomplete search.');
-    }
-
-    const hit = searchResponse.hits.hits[0];
-    return (hit?._source as WorkflowProperties | undefined) ?? null;
+    const versioned = await this.getWorkflowDocumentWithVersion(id, spaceId, options);
+    return versioned?.source ?? null;
   }
 
   async getWorkflowDocumentWithVersion(
@@ -226,7 +211,12 @@ export class WorkflowCrudService {
       seq_no_primary_term: true,
       size: 1,
       track_total_hits: false,
+      allow_partial_search_results: false,
     });
+    // An incomplete search with no hit would otherwise read as a missing workflow.
+    if (searchResponse.timed_out) {
+      throw new Error(`Could not read workflow ${id} from an incomplete search.`);
+    }
 
     const hit = searchResponse.hits.hits[0];
     if (!hit?._source || hit._seq_no == null || hit._primary_term == null) {
