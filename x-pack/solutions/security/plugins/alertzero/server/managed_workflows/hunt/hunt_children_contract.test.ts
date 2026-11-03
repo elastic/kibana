@@ -26,6 +26,7 @@ import {
   SYSTEM_SECURITY_HUNT_PROPOSAL_GATE_ID,
   WRITE_HUNT_EVIDENCE_URL,
 } from '@kbn/alertzero-common';
+import { MAX_HUNT_TECHNIQUE_IDS } from '../../../common/hunt_technique_limit';
 
 interface NestedStep {
   name: string;
@@ -248,12 +249,27 @@ describe('system-security-hunt-execute', () => {
   // step calling its own route -- see write_hunt_evidence.test.ts for the `deriveLastHuntStatus` /
   // script-shape coverage this test used to provide at the YAML level when it was still an
   // `elasticsearch.update` step.
-  it('only stamps the hunt-once gate once the coordinator confirms success', () => {
+  it('records the run once the coordinator has a result, whether or not it completed successfully', () => {
     const step = stepNamed(workflow, 'write_evidence');
-    expect(step.if).toBe(
-      '${{ steps.read_hunt_result.output.data.result.completed_successfully == true }}'
-    );
+    // A confirmed hit on a retryable run must still be written; the route decides what to stamp.
+    expect(step.if).toBe("${{ steps.read_hunt_result.output.data.state == 'completed' }}");
     expect(step.with?.path).toBe(`/s/{{ workflow.spaceId }}${WRITE_HUNT_EVIDENCE_URL}`);
+  });
+
+  it('sends the techniques the coordinator searched so the route can record them', () => {
+    const body = stepNamed(workflow, 'write_evidence').with?.body as Record<string, string>;
+
+    expect(body.searchedTechniqueIds).toBe(
+      '${{ steps.read_hunt_result.output.data.result.searched_technique_ids | compact }}'
+    );
+  });
+
+  it("sends the coordinator's retryable reasons, so the route can tell an outage from a failure that repeats", () => {
+    const body = stepNamed(workflow, 'write_evidence').with?.body as Record<string, string>;
+
+    expect(body.retryableReasons).toBe(
+      '${{ steps.read_hunt_result.output.data.result.retryable_reasons }}'
+    );
   });
 
   it('writes the coordinator narrative as the hunt results message', () => {
@@ -262,6 +278,22 @@ describe('system-security-hunt-execute', () => {
       string
     >;
     expect(inputs.message).toEqual(expect.stringContaining('coordinator.narrative'));
+  });
+
+  it('declares the coverage gaps a retired run hands to packaging', () => {
+    const emitted = stepNamed(workflow, 'emit_result').with as Record<string, unknown>;
+    expect(Object.keys(emitted)).toContain('coverage_gaps');
+    expect(outputNames(workflow)).toContain('coverage_gaps');
+    expect(
+      (workflow.outputs as { properties?: Record<string, { type?: string }> }).properties
+        ?.coverage_gaps?.type
+    ).toBe('array');
+  });
+
+  it('bounds the gap list at the technique cap the packaging step accepts', () => {
+    const { result_coverage_gaps: expression } = stepNamed(workflow, 'resolve_result_status')
+      .with as Record<string, string>;
+    expect(expression).toContain(`slice: 0, ${MAX_HUNT_TECHNIQUE_IDS}`);
   });
 
   it('exposes the headline, hit, and sse_count the Worker conclusion quotes', () => {

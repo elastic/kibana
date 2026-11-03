@@ -81,7 +81,7 @@ describe('TemplateMetadataPreview', () => {
       },
     });
 
-    expect(screen.getByText('Sync alerts')).toBeInTheDocument();
+    expect(screen.getByText('Sync detections')).toBeInTheDocument();
     expect(screen.getByText('On')).toBeInTheDocument();
   });
 
@@ -96,7 +96,7 @@ describe('TemplateMetadataPreview', () => {
       },
     });
 
-    expect(screen.queryByText('Sync alerts')).not.toBeInTheDocument();
+    expect(screen.queryByText('Sync detections')).not.toBeInTheDocument();
   });
 
   it('renders extract observables setting when provided', () => {
@@ -115,7 +115,7 @@ describe('TemplateMetadataPreview', () => {
   it('does not render settings rows when settings are not provided', () => {
     renderComponent();
 
-    expect(screen.queryByText('Sync alerts')).not.toBeInTheDocument();
+    expect(screen.queryByText('Sync detections')).not.toBeInTheDocument();
     expect(screen.queryByText('Extract observables')).not.toBeInTheDocument();
   });
 

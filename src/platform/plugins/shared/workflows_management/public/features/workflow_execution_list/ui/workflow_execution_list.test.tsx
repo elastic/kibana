@@ -82,8 +82,6 @@ describe('WorkflowExecutionList', () => {
     overrides: Partial<WorkflowExecutionListProps> = {},
     services: StartServicesMock = createStartServicesMock()
   ) => {
-    services.userProfile.bulkGet.mockResolvedValue([]);
-
     return render(<WorkflowExecutionList {...defaultProps} {...overrides} />, {
       wrapper: getTestProvider({ services }),
     });
@@ -176,6 +174,38 @@ describe('WorkflowExecutionList', () => {
         'data-executed-by-label',
         'user1'
       );
+    });
+
+    it('shows the executor name resolved by the server without a client profile lookup', () => {
+      const services = createStartServicesMock();
+      const [first, second] = mockExecutions.results;
+
+      renderComponent(
+        {
+          showExecutor: true,
+          executions: {
+            ...mockExecutions,
+            results: [
+              {
+                ...first,
+                executedByProfile: {
+                  uid: 'user1',
+                  enabled: true,
+                  user: { username: 'jdoe', full_name: 'Jane Doe' },
+                  data: {},
+                },
+              },
+              second,
+            ],
+          },
+        },
+        services
+      );
+
+      expect(
+        within(screen.getAllByTestId('workflowExecutionListItem')[0]).getByText('Jane Doe')
+      ).toBeInTheDocument();
+      expect(services.userProfile.bulkGet).not.toHaveBeenCalled();
     });
 
     it('hides unresolved profile UIDs on Serverless', () => {

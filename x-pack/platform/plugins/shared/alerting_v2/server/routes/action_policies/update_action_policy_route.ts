@@ -98,8 +98,8 @@ export class UpdateActionPolicyRoute extends BaseAlertingRoute {
 
   protected async execute() {
     const updated = await this.actionPolicyClient.updateActionPolicy({
+      id: this.request.params.id,
       data: this.request.body,
-      options: { id: this.request.params.id },
     });
 
     return this.ctx.response.ok({ body: updated });

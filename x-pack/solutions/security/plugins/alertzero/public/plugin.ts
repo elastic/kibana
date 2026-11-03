@@ -18,6 +18,7 @@ import type { Logger } from '@kbn/logging';
 import { i18n } from '@kbn/i18n';
 import {
   BehaviorSubject,
+  ReplaySubject,
   Subject,
   combineLatest,
   filter,
@@ -36,6 +37,7 @@ import {
 import React from 'react';
 import { getSubscriptionAvailability, type SubscriptionAvailability } from '../common/availability';
 import { getAlertZeroDeepLinks } from './deep_links';
+import { isSpaceSupported$ } from './is_space_supported';
 import { registerAlertZeroAttachmentTypesUI } from './agent_builder/attachment_types';
 import { registerAlertZeroPublicStepDefinitions } from './step_types';
 import type {
@@ -65,7 +67,9 @@ export class AlertZeroPublicPlugin
   private readonly isServerless: boolean;
   private readonly serverlessTierAvailable$ = new BehaviorSubject(false);
   private readonly availability$ = new BehaviorSubject<SubscriptionAvailability>('loading');
+  private readonly spaceSupported$ = new ReplaySubject<boolean>(1);
   private availabilitySubscription?: Subscription;
+  private spaceSupportedSubscription?: Subscription;
   private attachmentRegistration?: Subscription;
   private readonly startContract: AlertZeroPublicStart = {
     setServerlessTierAvailable: (available) => this.serverlessTierAvailable$.next(available),
@@ -105,7 +109,7 @@ export class AlertZeroPublicPlugin
       // `deepLinks` for us, which is what removes the AlertZero nodes from the Security
       // navigation tree — those trees hold no check of their own.
       status: AppStatus.inaccessible,
-      visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
+      visibleIn: ['projectSideNav', 'globalSearch'],
       order: 101,
       // Initial deep links without capability filtering — capabilities are not available at
       // setup. `start()` emits an update via appUpdater$ once capabilities are known.
@@ -128,6 +132,7 @@ export class AlertZeroPublicPlugin
           startDeps,
           params,
           availability$: this.availability$,
+          spaceSupported$: this.spaceSupported$,
           isServerless: this.isServerless,
         });
       },
@@ -158,23 +163,40 @@ export class AlertZeroPublicPlugin
 
     const canRead = core.application.capabilities[ALERTZERO_FEATURE_ID]?.show === true;
     const settingEnabled$ = core.uiSettings.get$<boolean>(ALERTZERO_ENABLED_SETTING_ID, false);
-    this.statusSubscription = combineLatest([settingEnabled$, this.availability$]).subscribe(
-      ([settingEnabled, availability]) => {
-        const showNavigation = settingEnabled && canRead && availability === 'available';
-        this.appUpdater$.next(() => ({
-          status: settingEnabled ? AppStatus.accessible : AppStatus.inaccessible,
-          visibleIn: showNavigation ? ['classicSideNav', 'projectSideNav', 'globalSearch'] : [],
-          deepLinks: showNavigation ? getAlertZeroDeepLinks(core.application.capabilities) : [],
-        }));
-      }
-    );
+    this.spaceSupportedSubscription = isSpaceSupported$({
+      isServerless: this.isServerless,
+      spaces: startDeps.spaces,
+    }).subscribe(this.spaceSupported$);
+    // An unsupported space keeps the app accessible, whatever the setting is, so a direct URL
+    // shows an explanation instead of core's generic "Application unavailable" page. Navigation
+    // and deep links stay hidden.
+    this.statusSubscription = combineLatest([
+      settingEnabled$,
+      this.availability$,
+      this.spaceSupported$,
+    ]).subscribe(([settingEnabled, availability, spaceSupported]) => {
+      const showNavigation =
+        settingEnabled && spaceSupported && canRead && availability === 'available';
+      this.appUpdater$.next(() => ({
+        status: settingEnabled || !spaceSupported ? AppStatus.accessible : AppStatus.inaccessible,
+        visibleIn: showNavigation ? ['projectSideNav', 'globalSearch'] : [],
+        deepLinks: showNavigation ? getAlertZeroDeepLinks(core.application.capabilities) : [],
+      }));
+    });
 
     const { agentBuilder } = startDeps;
     if (!agentBuilder || !startDeps.agenticInvestigations || !startDeps.proposals) {
       return this.startContract;
     }
-    const canAccess$ = combineLatest([settingEnabled$, this.availability$]).pipe(
-      map(([enabled, availability]) => enabled && canRead && availability === 'available')
+    const canAccess$ = combineLatest([
+      settingEnabled$,
+      this.availability$,
+      this.spaceSupported$,
+    ]).pipe(
+      map(
+        ([enabled, availability, spaceSupported]) =>
+          enabled && spaceSupported && canRead && availability === 'available'
+      )
     );
 
     // Space id comes from the base path so registration starts synchronously.
@@ -197,6 +219,7 @@ export class AlertZeroPublicPlugin
             AccessBoundary,
             {
               availability$: this.availability$,
+              spaceSupported$: this.spaceSupported$,
               serviceAccountsEnabled: core.security.serviceAccounts.isEnabled(),
             },
             children
@@ -225,6 +248,7 @@ export class AlertZeroPublicPlugin
 
   public stop() {
     this.availabilitySubscription?.unsubscribe();
+    this.spaceSupportedSubscription?.unsubscribe();
     this.attachmentRegistration?.unsubscribe();
     this.statusSubscription?.unsubscribe();
   }

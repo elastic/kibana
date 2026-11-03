@@ -6,7 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getMitreFrameworkById, THREAT_FRAMEWORK_NAME } from '@kbn/security-mitre-attack-common';
+import {
+  getMitreFrameworkById,
+  THREAT_FRAMEWORK_DISPLAY_NAME,
+} from '@kbn/security-mitre-attack-common';
 
 export const COVERAGE_OVERVIEW_DASHBOARD_TITLE = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.pageTitle',
@@ -272,7 +275,7 @@ export const INVALID_MITRE_ID_BADGE_TOOLTIP = (id: string) =>
   i18n.translate(
     'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesModal.invalidMitreIdBadgeTooltip',
     {
-      values: { id, framework: THREAT_FRAMEWORK_NAME[getMitreFrameworkById(id)] },
+      values: { id, framework: THREAT_FRAMEWORK_DISPLAY_NAME[getMitreFrameworkById(id)] },
       defaultMessage: 'Open {framework} reference for {id}',
     }
   );
