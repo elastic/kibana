@@ -34,6 +34,18 @@ const everyVariant = toNotebook([
     input: { kind: 'dropdown', optionsQuery: 'FROM logs | STATS BY geo.src', defaultValue: null },
   },
   {
+    id: 'os',
+    name: 'os',
+    type: 'input',
+    input: {
+      kind: 'dropdown',
+      optionsSource: 'static',
+      optionsQuery: '',
+      staticOptions: ['win', 'mac'],
+      defaultValue: 'win',
+    },
+  },
+  {
     id: 'bytes',
     name: 'bytes',
     type: 'input',

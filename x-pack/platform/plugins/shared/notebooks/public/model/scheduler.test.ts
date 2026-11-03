@@ -770,6 +770,38 @@ describe('NotebookScheduler', () => {
       ]);
     });
 
+    it('offers static dropdown options without running its query', async () => {
+      const optionsQuery = 'FROM logs | WHERE @timestamp >= ?_tstart | STATS BY os';
+      const env = track(
+        setup([
+          pinnedTime('time'),
+          input('os', {
+            kind: 'dropdown',
+            optionsSource: 'static',
+            optionsQuery,
+            staticOptions: ['win', 'mac', 'win'],
+            defaultValue: 'mac',
+          }),
+        ])
+      );
+      await env.open();
+
+      expect(env.fake.callsFor(optionsQuery)).toHaveLength(0);
+      expect(env.runtime('os')).toEqual({
+        status: 'done',
+        output: { kind: 'input', params: { os: 'mac' }, options: ['win', 'mac'] },
+        memoKey: expect.any(String),
+      });
+
+      env.store.updateCell('os', (cell) =>
+        cell.type === 'input' && cell.input.kind === 'dropdown'
+          ? { ...cell, input: { ...cell.input, optionsSource: 'query' } }
+          : cell
+      );
+      await env.scheduler.whenIdle();
+      expect(env.fake.callsFor(optionsQuery)).toHaveLength(1);
+    });
+
     it('loads dropdown options from the first column of its options query', async () => {
       const optionsQuery = 'FROM logs | WHERE @timestamp >= ?_tstart | STATS c = COUNT() BY os';
       const env = track(setup([pinnedTime('time'), dropdown('os', optionsQuery, 'win')]));

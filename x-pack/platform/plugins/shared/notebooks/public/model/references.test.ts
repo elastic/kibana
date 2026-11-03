@@ -101,6 +101,20 @@ describe('getCellParamNames', () => {
     ).toEqual(['_tstart']);
   });
 
+  it('ignores the options query of a static dropdown', () => {
+    expect(
+      getCellParamNames(
+        input('os', {
+          kind: 'dropdown',
+          optionsSource: 'static',
+          optionsQuery: 'FROM logs | WHERE @timestamp >= ?_tstart | STATS BY os',
+          staticOptions: ['win'],
+          defaultValue: null,
+        })
+      )
+    ).toEqual([]);
+  });
+
   it('returns nothing for charts, markdown, time and range inputs', () => {
     const cells: CellDefinition[] = [
       { id: 'c', name: 'c', type: 'chart', runMode: 'auto', sourceCell: 'q', lensAttributes: null },

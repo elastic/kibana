@@ -16,9 +16,18 @@ export interface TimeRangeValue {
   to: string;
 }
 
+/** Where a dropdown's options come from; absent means `query`. */
+export type DropdownOptionsSource = 'query' | 'static';
+
 export type InputDefinition =
   | { kind: 'time'; defaultValue: TimeRangeValue; pinned?: boolean }
-  | { kind: 'dropdown'; optionsQuery: string; defaultValue: string | null }
+  | {
+      kind: 'dropdown';
+      optionsSource?: DropdownOptionsSource;
+      optionsQuery: string;
+      staticOptions?: string[];
+      defaultValue: string | null;
+    }
   | {
       kind: 'range';
       min: number;

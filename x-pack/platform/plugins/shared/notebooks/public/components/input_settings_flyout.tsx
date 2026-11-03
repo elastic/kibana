@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiComboBox,
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,15 +18,19 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
   EuiTextArea,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { InputDefinition } from '../../common/types';
+import type { DropdownOptionsSource, InputDefinition } from '../../common/types';
 
 type ConfigurableInput = Extract<InputDefinition, { kind: 'dropdown' | 'range' }>;
+type DropdownInput = Extract<InputDefinition, { kind: 'dropdown' }>;
 type RangeInput = Extract<InputDefinition, { kind: 'range' }>;
 
 const RANGE_FIELD_LABELS = {
@@ -48,34 +53,101 @@ const getRangeError = ({ min, max, step }: RangeInput): string | undefined => {
   return undefined;
 };
 
+const OPTIONS_SOURCE_TABS: ReadonlyArray<{ id: DropdownOptionsSource; label: string }> = [
+  {
+    id: 'query',
+    label: i18n.translate('xpack.notebook.inputSettings.sourceQuery', {
+      defaultMessage: 'ES|QL query',
+    }),
+  },
+  {
+    id: 'static',
+    label: i18n.translate('xpack.notebook.inputSettings.sourceStatic', {
+      defaultMessage: 'Static values',
+    }),
+  },
+];
+
 const DropdownFields = ({
   draft,
   onChange,
 }: {
-  draft: Extract<InputDefinition, { kind: 'dropdown' }>;
+  draft: DropdownInput;
   onChange: (draft: ConfigurableInput) => void;
-}) => (
-  <EuiFormRow
-    fullWidth
-    label={i18n.translate('xpack.notebook.inputSettings.optionsQuery', {
-      defaultMessage: 'Options query (first column)',
-    })}
-    helpText={i18n.translate('xpack.notebook.inputSettings.optionsQueryHelp', {
-      defaultMessage: 'ES|QL; may reference ?_tstart and ?_tend.',
-    })}
-  >
-    <EuiTextArea
-      fullWidth
-      rows={8}
-      value={draft.optionsQuery}
-      onChange={(event) => onChange({ ...draft, optionsQuery: event.target.value })}
-      css={css`
-        font-family: monospace;
-      `}
-      data-test-subj="notebookInputSettingsOptionsQuery"
-    />
-  </EuiFormRow>
-);
+}) => {
+  const source = draft.optionsSource ?? 'query';
+  const staticOptions = draft.staticOptions ?? [];
+  const addStaticOption = (value: string) => {
+    const option = value.trim();
+    if (option && !staticOptions.includes(option)) {
+      onChange({ ...draft, staticOptions: [...staticOptions, option] });
+    }
+  };
+
+  return (
+    <>
+      <EuiTabs size="s">
+        {OPTIONS_SOURCE_TABS.map(({ id, label }) => (
+          <EuiTab
+            key={id}
+            isSelected={source === id}
+            onClick={() => onChange({ ...draft, optionsSource: id })}
+            data-test-subj={`notebookInputSettingsSource-${id}`}
+          >
+            {label}
+          </EuiTab>
+        ))}
+      </EuiTabs>
+      <EuiSpacer size="m" />
+      {source === 'query' ? (
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate('xpack.notebook.inputSettings.optionsQuery', {
+            defaultMessage: 'Options query (first column)',
+          })}
+          helpText={i18n.translate('xpack.notebook.inputSettings.optionsQueryHelp', {
+            defaultMessage: 'ES|QL; may reference ?_tstart and ?_tend.',
+          })}
+        >
+          <EuiTextArea
+            fullWidth
+            rows={8}
+            value={draft.optionsQuery}
+            onChange={(event) => onChange({ ...draft, optionsQuery: event.target.value })}
+            css={css`
+              font-family: monospace;
+            `}
+            data-test-subj="notebookInputSettingsOptionsQuery"
+          />
+        </EuiFormRow>
+      ) : (
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate('xpack.notebook.inputSettings.staticOptions', {
+            defaultMessage: 'Options',
+          })}
+          helpText={i18n.translate('xpack.notebook.inputSettings.staticOptionsHelp', {
+            defaultMessage: 'Type a value and press Enter to add it.',
+          })}
+        >
+          <EuiComboBox
+            fullWidth
+            noSuggestions
+            selectedOptions={staticOptions.map((option) => ({ label: option }))}
+            onCreateOption={addStaticOption}
+            onChange={(selected) =>
+              onChange({ ...draft, staticOptions: selected.map(({ label }) => label) })
+            }
+            aria-label={i18n.translate('xpack.notebook.inputSettings.staticOptions', {
+              defaultMessage: 'Options',
+            })}
+            data-test-subj="notebookInputSettingsStaticOptions"
+          />
+        </EuiFormRow>
+      )}
+    </>
+  );
+};
 
 const RangeFields = ({
   draft,

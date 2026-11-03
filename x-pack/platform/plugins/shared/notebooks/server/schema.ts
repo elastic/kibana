@@ -16,6 +16,7 @@ export const MAX_LENS_ATTRIBUTES_LENGTH = 200_000;
 const MAX_ID_LENGTH = 256;
 const MAX_NAME_LENGTH = 256;
 const MAX_VALUE_LENGTH = 1024;
+const MAX_STATIC_OPTIONS = 1000;
 
 const idSchema = schema.string({ minLength: 1, maxLength: MAX_ID_LENGTH });
 const runModeSchema = schema.oneOf([schema.literal('auto'), schema.literal('manual')]);
@@ -44,7 +45,13 @@ const inputSchema = schema.discriminatedUnion('kind', [
   }),
   schema.object({
     kind: schema.literal('dropdown'),
+    optionsSource: schema.maybe(schema.oneOf([schema.literal('query'), schema.literal('static')])),
     optionsQuery: querySchema,
+    staticOptions: schema.maybe(
+      schema.arrayOf(schema.string({ maxLength: MAX_VALUE_LENGTH }), {
+        maxSize: MAX_STATIC_OPTIONS,
+      })
+    ),
     defaultValue: schema.nullable(schema.string({ maxLength: MAX_VALUE_LENGTH })),
   }),
   schema.object({

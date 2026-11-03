@@ -362,6 +362,17 @@ export class NotebookScheduler {
       return;
     }
 
+    if (input.optionsSource === 'static') {
+      const options = [...new Set(input.staticOptions ?? [])];
+      const memoKey = objectHash({ options, params });
+      if (isMemoHit(runtime, memoKey, forced)) {
+        this.setStatus(id, 'done');
+        return;
+      }
+      this.publish(id, { status: 'done', output: { kind: 'input', params, options }, memoKey });
+      return;
+    }
+
     const { optionsQuery } = input;
     const queryParams = buildQueryParams(optionsQuery, this.parentOutputs(id));
     const memoKey = objectHash({ optionsQuery, params: queryParams });
