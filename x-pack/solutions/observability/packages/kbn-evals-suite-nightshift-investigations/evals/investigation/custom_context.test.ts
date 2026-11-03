@@ -9,6 +9,7 @@ import {
   CUSTOMER0_CUSTOM_CONTEXT,
   RETROSPECTIVE_GUARDRAIL_CONTEXT,
   getDatasetCustomContext,
+  getReadableIndicesContext,
 } from './custom_context';
 
 describe('getDatasetCustomContext', () => {
@@ -34,5 +35,19 @@ describe('getDatasetCustomContext', () => {
       []
     );
     expect(getDatasetCustomContext({ name: 'ns-investigation-golden-2610' })).toEqual([]);
+  });
+});
+
+describe('getReadableIndicesContext', () => {
+  it('turns the configured readable indices into a custom context snippet', () => {
+    expect(
+      getReadableIndicesContext({
+        NIGHTSHIFT_SANDBOX_READABLE_INDICES: ' Read logs-orcabench.otel-*. ',
+      })
+    ).toEqual(['Read logs-orcabench.otel-*.']);
+  });
+
+  it('adds nothing when no readable indices are configured', () => {
+    expect(getReadableIndicesContext({})).toEqual([]);
   });
 });

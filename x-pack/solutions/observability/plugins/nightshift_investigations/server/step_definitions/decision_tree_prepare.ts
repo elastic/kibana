@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreStart, Logger } from '@kbn/core/server';
 import { usesDecisionTrees } from '../agents/agent_policy';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
@@ -19,16 +19,11 @@ import { toolCallsSchema, toolResultsSchema } from './tool_calls_schema';
 const MAX_INPUT_CHARS = 100_000;
 
 export const decisionTreePrepareStepDefinition = ({
-  getTelemetryConnectorId,
   getSavedObjects,
   getUiSettings,
   logger,
   isEnabled,
 }: {
-  getTelemetryConnectorId: (
-    request: KibanaRequest,
-    conversationId?: string
-  ) => string | undefined | Promise<string | undefined>;
   getSavedObjects?: () => CoreStart['savedObjects'] | undefined;
   getUiSettings?: () => CoreStart['uiSettings'] | undefined;
   logger: Logger;
@@ -42,7 +37,6 @@ export const decisionTreePrepareStepDefinition = ({
       'Builds the closing reinforcement message for a completed investigation round: the decision ' +
       'trees available to edit, the learnings already on file, and the turn script.',
     inputSchema: z.object({
-      conversation_id: z.string().max(512).optional(),
       response: z
         .string()
         .max(MAX_INPUT_CHARS)
@@ -105,10 +99,6 @@ export const decisionTreePrepareStepDefinition = ({
         return skippedOutput;
       }
 
-      const telemetryConnectorId = await getTelemetryConnectorId(
-        context.contextManager.getFakeRequest(),
-        context.input.conversation_id
-      );
       const workflowContext = context.contextManager.getContext();
       const { spaceId } = workflowContext.workflow;
       const executionId = workflowContext.execution?.id;
@@ -126,7 +116,7 @@ export const decisionTreePrepareStepDefinition = ({
         async (span) => {
           const res = await prepareReinforcementTurn({
             response,
-            connectorNames: telemetryConnectorId ? [telemetryConnectorId] : [],
+            connectorNames: [],
             esClient: context.contextManager.getScopedEsClient(),
             logger,
             spaceId,

@@ -10,12 +10,7 @@ import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { AgentConnector, ActionsClient } from './agent_connectors';
 import { listAgentConnectors } from './agent_connectors';
 import type { SandboxCallContext } from './tool_utils';
-import {
-  CONNECTOR_DOCS,
-  CONNECTOR_DOCS_ROOT,
-  CONNECTOR_MANIFEST_PATH,
-  ELASTIC_MANIFEST_PATH,
-} from './connector_docs';
+import { CONNECTOR_DOCS, CONNECTOR_DOCS_ROOT, CONNECTOR_MANIFEST_PATH } from './connector_docs';
 
 const renderConnectorSection = (connector: AgentConnector): string =>
   `## ${connector.name} (connector-id: ${connector.id}, type: ${connector.actionTypeId})`;
@@ -29,7 +24,6 @@ const renderGuidesSection = (): string[] => [
   'API recipes and how to authenticate through a connector, or without credentials where the',
   'service allows it. Read one when you need that service.',
   '',
-  `- Elasticsearch: \`${ELASTIC_MANIFEST_PATH}\``,
   ...CONNECTOR_DOCS.map(({ service, path }) => `- ${service}: \`${path}\``),
 ];
 

@@ -56,7 +56,7 @@ it('loads the alert and builds the investigation context server-side', async () 
   );
 });
 
-it('loads every alert id and preserves the selected telemetry target', async () => {
+it('loads every alert id and stores the first as the subject', async () => {
   const find = jest.fn().mockResolvedValue({
     hits: { hits: [{ _source: alert }, { _source: { ...alert, 'kibana.alert.uuid': 'alert-2' } }] },
   });
@@ -69,18 +69,12 @@ it('loads every alert id and preserves the selected telemetry target', async () 
     getInvestigationsClient,
     getAlertsClient: jest.fn().mockResolvedValue(alertsClient),
     getEpisodeLookup,
-    params: {
-      body: {
-        subject: { type: 'alert', ids: ['alert-1', 'alert-2', 'alert-1'] },
-        telemetry_target: 'orca',
-      },
-    },
+    params: { body: { subject: { type: 'alert', ids: ['alert-1', 'alert-2', 'alert-1'] } } },
   } as never);
   expect(find).toHaveBeenCalledTimes(1);
   expect(start).toHaveBeenCalledWith(
     expect.objectContaining({
       subject: { type: 'alert', id: 'alert-1', summary: undefined },
-      telemetry_target: 'orca',
       context: {
         alerts: [
           expect.objectContaining({ id: 'alert-1' }),
@@ -269,38 +263,3 @@ it('returns bad request for runtime notification validation failures', async () 
     } as never)
   ).rejects.toMatchObject({ output: { statusCode: 400 } });
 });
-
-it.each(['c0', 'orca', 'none'])(
-  'accepts the telemetry target %s independently of the model',
-  async (target) => {
-    const body = schema.parse({
-      subject: { type: 'manual' },
-      message: 'Investigate',
-      connector_id: 'model',
-      telemetry_target: target,
-    });
-    await handler({
-      request: {},
-      getInvestigationsClient,
-      getAlertsClient,
-      params: { body },
-    } as never);
-    expect(start).toHaveBeenCalledWith(
-      expect.objectContaining({ connector_id: 'model', telemetry_target: target }),
-      { entryPoint: 'start_api' }
-    );
-  }
-);
-
-it.each(['', 'UPPERCASE', 'a'.repeat(65), '../orca'])(
-  'rejects malformed telemetry target names',
-  (target) => {
-    expect(
-      schema.safeParse({
-        subject: { type: 'manual' },
-        message: 'Investigate',
-        telemetry_target: target,
-      }).success
-    ).toBe(false);
-  }
-);
