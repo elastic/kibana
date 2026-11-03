@@ -23,7 +23,7 @@ export interface AnnotationTooltipProps {
   annotation: Annotation | CreateAnnotationParams;
 }
 
-function AnnotationTooltip({ annotation }: AnnotationTooltipProps) {
+export function AnnotationTooltip({ annotation }: AnnotationTooltipProps) {
   const listItems = [
     {
       title: i18n.translate('xpack.observability.annotationTooltip.title', {
@@ -85,6 +85,3 @@ function AnnotationTooltip({ annotation }: AnnotationTooltipProps) {
     </EuiPanel>
   );
 }
-
-// eslint-disable-next-line import/no-default-export
-export default AnnotationTooltip;
