@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { KibanaRequest } from '@kbn/core/server';
-import { brandSpaceId } from '@kbn/core-spaces-common';
 import type {
   BulkScheduleWorkflowResult,
   WorkflowDetailDto,
@@ -19,7 +16,7 @@ import type {
   WorkflowsServerPluginSetup,
   WorkflowsManagementClient,
 } from '@kbn/workflows-management-plugin/server';
-import { getUiamApiKeySecret } from '@kbn/response-ops-api-keys';
+import { toFakeRequest } from '@kbn/response-ops-api-keys';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { inject, injectable } from 'inversify';
 import { isError, uniqBy } from 'lodash';
@@ -287,11 +284,12 @@ export class DispatchStep implements DispatcherStep {
       return;
     }
 
-    // One batch per (API key, space): the request's space scopes the scheduled workflow runs.
+    // One batch per (API key, space): workflows are looked up and scheduled as the key's owner,
+    // and the request's space scopes the scheduled workflow runs.
     const batches: DispatchBatch[] = [...groupsByApiKey].flatMap(([apiKey, keyGroups]) =>
       [...Map.groupBy(keyGroups, ({ spaceId }) => spaceId)].map(([spaceId, batchGroups]) => ({
         groups: batchGroups,
-        request: this.craftFakeRequest(apiKey, spaceId),
+        request: toFakeRequest({ uiamApiKey: apiKey }, { spaceId, prefer: 'uiam' }).request,
         workflowsBySpace: new Map(),
         failedSpaces: new Map(),
       }))
@@ -618,23 +616,5 @@ export class DispatchStep implements DispatcherStep {
       reason,
       message,
     };
-  }
-
-  /**
-   * Workflows are looked up and scheduled as the policy's API key owner, so a policy only reaches
-   * the workflows its owner may access. The request is scoped to the policy's space so the
-   * scheduled workflow runs, and resolves its connectors, in that space.
-   */
-  private craftFakeRequest(apiKey: string, spaceId: string): KibanaRequest {
-    const requestHeaders: Headers = {
-      authorization: `ApiKey ${getUiamApiKeySecret(apiKey)}`,
-    };
-
-    const fakeRawRequest: FakeRawRequest = {
-      headers: requestHeaders,
-      spaceId: brandSpaceId(spaceId),
-    };
-
-    return kibanaRequestFactory(fakeRawRequest);
   }
 }
