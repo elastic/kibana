@@ -12,7 +12,9 @@ import { test } from '../fixtures';
 const SEED_MESSAGE = 'Hello, this is the seed message';
 const SEED_RESPONSE = 'This is the seed response';
 const QUESTION = 'Take your time answering this one';
-const ANSWER = 'Here is the answer after the reload';
+const REPLAYED_TEXT = 'Here is the answer before the reload.';
+const LIVE_TEXT = ' This text arrived after the reload.';
+const ANSWER = `${REPLAYED_TEXT}${LIVE_TEXT}`;
 const TEST_TIMEOUT_MS = 180_000;
 const RUN_TIMEOUT_MS = 60_000;
 
@@ -24,7 +26,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    test('a reload mid-run shows the running turn, lets the user stop it, and settles when it ends', async ({
+    test('a reload mid-run replays text, shows Stop, continues streaming, and settles when it ends', async ({
       page,
       pageObjects,
       llmProxy,
@@ -44,13 +46,17 @@ test.describe(
       const answer = llmProxy.intercept({
         name: 'held-answer',
         when: (body) => JSON.stringify(body.messages).includes(QUESTION),
-        responseMock: ANSWER,
+      });
+      const responseMessage = page.locator('[data-test-subj="agentBuilderResponseMessage"]', {
+        hasText: REPLAYED_TEXT,
       });
 
-      await test.step('send a message and wait for the run to reach the LLM', async () => {
+      await test.step('send a message and stream partial text', async () => {
         await pageObjects.agentBuilder.typeMessage(QUESTION);
         await pageObjects.agentBuilder.sendMessage();
-        await answer.waitForIntercept();
+        const simulator = await answer.waitForIntercept();
+        await simulator.writeChunk(REPLAYED_TEXT);
+        await expect(responseMessage).toHaveText(REPLAYED_TEXT, { timeout: RUN_TIMEOUT_MS });
       });
 
       await test.step('reload and re-attach', async () => {
@@ -59,19 +65,25 @@ test.describe(
         await expect(
           page.testSubj.locator('agentBuilderConversationInputCancelButton')
         ).toBeVisible({ timeout: RUN_TIMEOUT_MS });
+        await expect(responseMessage).toHaveText(REPLAYED_TEXT, { timeout: RUN_TIMEOUT_MS });
+      });
+
+      await test.step('receive live text before the run completes', async () => {
+        const simulator = await answer.waitForIntercept();
+        await simulator.writeChunk(LIVE_TEXT);
+        await expect(responseMessage).toHaveText(ANSWER, { timeout: RUN_TIMEOUT_MS });
       });
 
       await test.step('the run finishes and the turn settles', async () => {
-        await answer.completeAfterIntercept();
-        await expect(
-          page.locator('[data-test-subj="agentBuilderResponseMessage"]', { hasText: ANSWER })
-        ).toContainText(ANSWER, { timeout: RUN_TIMEOUT_MS });
+        const simulator = await answer.waitForIntercept();
+        await simulator.complete();
         await expect(
           page.testSubj.locator('agentBuilderConversationInputCancelButton')
         ).toBeHidden();
         await expect(
           page.testSubj.locator('agentBuilderConversationInputSubmitButton')
         ).toBeVisible();
+        await expect(responseMessage).toContainText(ANSWER, { timeout: RUN_TIMEOUT_MS });
       });
     });
   }
