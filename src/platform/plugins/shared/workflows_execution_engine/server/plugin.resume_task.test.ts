@@ -705,6 +705,7 @@ describe('workflow:resume task runner event fields', () => {
         taskManagerMock.createRunContext({
           taskInstance: {
             ...taskManagerMock.createTask(),
+            attempts: 1,
             state,
             params: { workflowRunId, spaceId: 'default' },
           },
@@ -762,7 +763,7 @@ describe('workflow:resume task runner event fields', () => {
 
       expect(result).toEqual({
         runAt: expect.any(Date),
-        state: { workflowMintRetries: 2, kept: true },
+        state: { workflowMintRetries: 2, workflowMintDeferredAttempts: 0, kept: true },
       });
       const delayMs = (result?.runAt?.getTime() ?? 0) - 60_000;
       expect(delayMs).toBeGreaterThanOrEqual(before);
@@ -784,9 +785,50 @@ describe('workflow:resume task runner event fields', () => {
       );
 
       await expect(runner.run()).resolves.toEqual(
-        expect.objectContaining({ state: { workflowMintRetries: 1 } })
+        expect.objectContaining({
+          state: { workflowMintRetries: 1, workflowMintDeferredAttempts: 0 },
+        })
       );
       expect(mockFinalizeWorkflowIdentityFailure).not.toHaveBeenCalled();
+    });
+
+    it('still recovers an interrupted run after a deferred retry resets the attempts', async () => {
+      mockGetWorkflowExecutionById.mockResolvedValue({ ...execution, status: 'running' });
+      const claim = (
+        attempts: number,
+        state: Record<string, unknown>,
+        withScopedRequest: jest.Mock
+      ) =>
+        taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
+          taskManagerMock.createRunContext({
+            taskInstance: {
+              ...taskManagerMock.createTask(),
+              id: getWorkflowImmediateResumeTaskId(workflowRunId),
+              attempts,
+              state,
+              params: { workflowRunId, spaceId: 'default' },
+            },
+            fakeRequest: undefined,
+            runAs: { withScopedRequest },
+          })
+        ).run();
+
+      const deferred = await claim(
+        2,
+        {},
+        jest.fn().mockRejectedValue(new Error('connect ECONNREFUSED'))
+      );
+      expect(deferred?.state).toEqual({ workflowMintRetries: 1, workflowMintDeferredAttempts: 1 });
+
+      await claim(
+        1,
+        deferred?.state ?? {},
+        jest.fn((fn: (request: KibanaRequest) => Promise<unknown>) => fn({} as KibanaRequest))
+      );
+
+      expect(mockResolveInterruptedWorkflowResumeTask).toHaveBeenCalledWith(
+        expect.objectContaining({ workflowRunId, taskAttempts: 2 })
+      );
     });
 
     it('fails the execution when a transient failure outlasts the retries', async () => {

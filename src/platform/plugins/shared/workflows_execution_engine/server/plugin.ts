@@ -309,6 +309,9 @@ export class WorkflowsExecutionEnginePlugin
               taskRunner = createTaskRunner(context);
               return taskRunner.run();
             }
+            // Claims that failed before a deferral, whose attempts Task Manager reset to 0 when it
+            // rescheduled. The runner needs them to tell an interrupted run from one in progress.
+            const deferredAttempts = Number(taskInstance.state?.workflowMintDeferredAttempts ?? 0);
             let minted = false;
             try {
               return await this.runAsExecutionId.run(execution.id, () =>
@@ -320,7 +323,14 @@ export class WorkflowsExecutionEnginePlugin
                       execution.id,
                       executionRunAs,
                       async () => {
-                        taskRunner = createTaskRunner({ ...context, fakeRequest: request });
+                        taskRunner = createTaskRunner({
+                          ...context,
+                          fakeRequest: request,
+                          taskInstance: {
+                            ...taskInstance,
+                            attempts: taskInstance.attempts + deferredAttempts,
+                          },
+                        });
                         return taskRunner.run();
                       }
                     );
@@ -341,7 +351,12 @@ export class WorkflowsExecutionEnginePlugin
                 );
                 return {
                   runAt: new Date(Date.now() + WORKFLOW_MINT_RETRY_DELAY_MS * 2 ** mintRetries),
-                  state: { ...taskInstance.state, workflowMintRetries: mintRetries + 1 },
+                  state: {
+                    ...taskInstance.state,
+                    workflowMintRetries: mintRetries + 1,
+                    workflowMintDeferredAttempts:
+                      deferredAttempts + Math.max(0, taskInstance.attempts - 1),
+                  },
                 };
               }
               // Without a request the runner can't start, so fail the execution here rather than
