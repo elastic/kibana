@@ -47,6 +47,11 @@ const LITERAL_KEYWORDS = new Set([
   'x-ms-pageable',
   // Path parameters whose values span segments, which the mock matches.
   'x-ms-skip-url-encoding',
+  // Routing that converted Smithy models carry, which the mock reads: a server variable that is
+  // also a path parameter (S3's virtual-hosted buckets), and fixed query parameters requests may
+  // leave out (S3's `x-id`).
+  'x-path-parameter',
+  'x-optional-fixed-query',
 ]);
 
 // Objects whose keys are names (properties, status codes, media types, ...), not keywords.
