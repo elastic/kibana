@@ -13,7 +13,7 @@ import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { PROJECT_DEFAULT_ROLES } from '../../../common/constants';
 import { ScoutTestConfigSchema } from '../../../types/test_config.schema';
-import type { CheckResult, DoctorArch, DoctorCheck } from '../types';
+import type { CheckResult, DoctorArch, DoctorCheck, Fix } from '../types';
 import { DOCTOR_ARCHS, fail, pass, warn } from '../types';
 import { tildify } from '../utils';
 
@@ -32,6 +32,8 @@ const SCOUT_CLOUD_CONFIGS: Record<DoctorArch, string> = {
   serverless: '.scout/servers/cloud_mki.json',
 };
 const SCOUT_ROLE_USERS_FILE = '.scout/role_users.json';
+// FTR Cloud runs read users from here, in the same format
+const FTR_ROLE_USERS_FILE = '.ftr/role_users.json';
 
 type Users = Record<string, { email?: string; password?: string } | undefined>;
 
@@ -50,36 +52,83 @@ const existsInRepo = (file: string) => Fs.existsSync(Path.resolve(REPO_ROOT, fil
 const displayPath = (path: string) =>
   path.startsWith(REPO_ROOT) ? Path.relative(REPO_ROOT, path) : tildify(path);
 
-const checkUsers = (source: string, users: Users, expected: string[]): CheckResult => {
-  const defined = Object.keys(users).filter((role) => users[role]?.email && users[role]?.password);
-  if (expected.includes('admin') && !defined.includes('admin')) {
-    return fail(`${source} have no admin`);
-  }
+const getDefinedRoles = (users: Users) =>
+  Object.keys(users).filter((role) => users[role]?.email && users[role]?.password);
 
+const checkUsers = (
+  source: string,
+  users: Users,
+  expected: string[],
+  copyFix?: Fix
+): CheckResult => {
+  const defined = getDefinedRoles(users);
   const missing = [...new Set(expected)].filter((role) => !defined.includes(role));
+  const remedy = copyFix
+    ? { fix: copyFix, hint: `copy them only if they are ${getEnvironment()} users` }
+    : { hint: `tests that log in as ${missing.join(' or ')} will fail` };
+  if (missing.includes('admin')) {
+    return fail(`${source} have no admin`, remedy);
+  }
   return missing.length
-    ? warn(`${source} have no ${missing.join(', ')}`, {
-        hint: `tests that log in as ${missing.join(' or ')} will fail`,
-      })
+    ? warn(`${source} have no ${missing.join(', ')}`, remedy)
     : pass(`${source} have ${[...new Set(expected)].join(', ')}`);
 };
 
 const readCloudUsers = async () =>
   (await readJson<CloudSecrets>(CLOUD_SECRETS_FILE))?.role_credentials?.[getEnvironment()] ?? {};
 
+/** Copies users from the FTR users file when it has some of the expected roles QAF is missing */
+const getCopyFtrUsersFix = async (expected: string[]): Promise<Fix | undefined> => {
+  const ftrUsers = await readJson<Users>(Path.resolve(REPO_ROOT, FTR_ROLE_USERS_FILE));
+  const cloudRoles = getDefinedRoles(await readCloudUsers());
+  // copy every role QAF is missing, so all checks suggest the same command
+  const roles = getDefinedRoles(ftrUsers ?? {}).filter((role) => !cloudRoles.includes(role));
+  if (!ftrUsers || !roles.some((role) => expected.includes(role))) {
+    return undefined;
+  }
+
+  const env = getEnvironment();
+  return {
+    command: `copy ${roles.join(
+      ', '
+    )} from ${FTR_ROLE_USERS_FILE} to role_credentials.${env} in ${tildify(CLOUD_SECRETS_FILE)}`,
+    destructive: true,
+    run: async () => {
+      const secrets = (await readJson<CloudSecrets>(CLOUD_SECRETS_FILE)) ?? {};
+      const copied = Object.fromEntries(roles.map((role) => [role, ftrUsers[role]]));
+      const updated: CloudSecrets = {
+        ...secrets,
+        role_credentials: {
+          ...secrets.role_credentials,
+          [env]: { ...secrets.role_credentials?.[env], ...copied },
+        },
+      };
+      await Fs.promises.mkdir(Path.dirname(CLOUD_SECRETS_FILE), { recursive: true });
+      await Fs.promises.writeFile(CLOUD_SECRETS_FILE, `${JSON.stringify(updated, null, 2)}\n`, {
+        mode: 0o600,
+      });
+    },
+  };
+};
+
 const cloudUsersCheck: DoctorCheck = {
   title: 'Cloud users',
   run: async () => {
     const env = getEnvironment();
+    const copyFix = await getCopyFtrUsersFix(['admin']);
     if (!Fs.existsSync(CLOUD_SECRETS_FILE)) {
-      return fail(`${tildify(CLOUD_SECRETS_FILE)} does not exist`, {
-        hint: `add Cloud users under role_credentials.${env}`,
-      });
+      return fail(
+        `${tildify(CLOUD_SECRETS_FILE)} does not exist`,
+        copyFix
+          ? { fix: copyFix, hint: `copy them only if they are ${env} users` }
+          : { hint: `add Cloud users under role_credentials.${env}` }
+      );
     }
     return checkUsers(
       `Cloud users in ${tildify(CLOUD_SECRETS_FILE)} (${env})`,
       await readCloudUsers(),
-      ['admin']
+      ['admin'],
+      copyFix
     );
   },
 };
@@ -88,7 +137,13 @@ const cloudRolesCheck = (arch: DoctorArch): DoctorCheck => ({
   title: 'Cloud users',
   arch,
   dependsOn: cloudUsersCheck,
-  run: async () => checkUsers('Cloud users', await readCloudUsers(), ROLES_BY_ARCH[arch]),
+  run: async () =>
+    checkUsers(
+      'Cloud users',
+      await readCloudUsers(),
+      ROLES_BY_ARCH[arch],
+      await getCopyFtrUsersFix(ROLES_BY_ARCH[arch])
+    ),
 });
 
 const apiKeyCheck: DoctorCheck = {

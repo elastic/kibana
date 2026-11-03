@@ -61,13 +61,18 @@ const ICONS: Record<CheckResult['status'], string> = {
   warn: chalk.yellow('⚠'),
   fail: chalk.red('✖'),
 };
+const MESSAGE_COLORS: Record<CheckResult['status'], (text: string) => string> = {
+  pass: chalk.dim,
+  warn: chalk.yellow,
+  fail: (text) => text,
+};
 const PREFIX_WIDTH = '[serverless] '.length;
 
 const formatResult = ({ status, message, fix, hint }: CheckResult, prefix?: string) => {
   const indent = prefix ? ' '.repeat(PREFIX_WIDTH) : '';
-  const line = `   ${ICONS[status]} ${prefix ? chalk.dim(prefix.padEnd(PREFIX_WIDTH)) : ''}${
-    status === 'pass' ? chalk.dim(message) : message
-  }`;
+  const line = `   ${ICONS[status]} ${
+    prefix ? chalk.dim(prefix.padEnd(PREFIX_WIDTH)) : ''
+  }${MESSAGE_COLORS[status](message)}`;
   const remedy = fix ? chalk.cyan(fix.command) : hint && chalk.dim(hint);
   return remedy ? `${line}\n     ${indent}${remedy}` : line;
 };
