@@ -47,7 +47,7 @@ export const validate = (
     }
   }
   const sources = command.args.filter((arg) => isSource(arg)) as ESQLSource[];
-  messages.push(...validateSources(sources, context));
+  messages.push(...validateSources(sources, context, { namedSubqueriesNotSupportedIn: 'TS' }));
 
   return messages;
 };

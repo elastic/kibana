@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isBinaryExpression, isIdentifier, isSource, isSubQuery } from '@elastic/esql';
+import { isBinaryExpression, isIdentifier, isSource, isSubQuery, Walker } from '@elastic/esql';
 import { uniqBy } from 'lodash';
 import type {
   ESQLAstCommand,
+  ESQLAstAllCommands,
   ESQLAstHeaderCommand,
   ESQLAstLetHeaderCommand,
   ESQLAstQueryExpression,
+  ESQLCommand,
   ESQLIdentifier,
   ESQLSource,
 } from '@elastic/esql/types';
@@ -74,6 +76,33 @@ export const resolveNamedSubquerySources = (
   namedSubqueries: readonly NamedSubquery[]
 ): ESQLSource[] => uniqBy(collectIndexSources(sourceCommand, namedSubqueries, new Set()), 'name');
 
+/** Returns the named subqueries referenced by the commands, directly or through other named subqueries. */
+export const getUsedNamedSubqueries = (
+  commands: ESQLAstAllCommands[],
+  namedSubqueries: readonly NamedSubquery[]
+): ReadonlySet<NamedSubquery> => {
+  const usedNamedSubqueries = new Set(getReferencedNamedSubqueries(commands, namedSubqueries));
+
+  for (let index = namedSubqueries.length - 1; index >= 0; index--) {
+    const namedSubquery = namedSubqueries[index];
+
+    if (!usedNamedSubqueries.has(namedSubquery)) {
+      continue;
+    }
+
+    const dependencies = getReferencedNamedSubqueries(
+      namedSubquery.query.commands,
+      getNamedSubqueriesAvailableTo(namedSubqueries, namedSubquery)
+    );
+
+    for (const dependency of dependencies) {
+      usedNamedSubqueries.add(dependency);
+    }
+  }
+
+  return usedNamedSubqueries;
+};
+
 const toNamedSubquery = (command: ESQLAstLetHeaderCommand): NamedSubquery | undefined => {
   const [binding] = command.args;
 
@@ -123,3 +152,17 @@ const collectIndexSources = (
       visitedBindings
     );
   });
+
+const getReferencedNamedSubqueries = (
+  commands: ESQLAstAllCommands[],
+  namedSubqueries: readonly NamedSubquery[]
+) => {
+  const fromCommands = Walker.matchAll(commands, {
+    type: 'command',
+    // Only FROM can read a LET; TS and JOIN targets must not mark it as used.
+    name: 'from',
+  }) as Array<ESQLCommand<'from'>>;
+  const sources = fromCommands.flatMap(({ args }) => args.filter(isSource));
+
+  return sources.flatMap((source) => findNamedSubqueryForSource(source, namedSubqueries) ?? []);
+};

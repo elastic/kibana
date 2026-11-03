@@ -17,6 +17,11 @@ import type {
   ESQLSingleAstItem,
 } from '@elastic/esql/types';
 import { inOperators } from '../../commands/definitions/all_operators';
+import type { NamedSubquery } from '../../commands/definitions/utils/named_subqueries';
+import {
+  getNamedSubqueries,
+  getUsedNamedSubqueries,
+} from '../../commands/definitions/utils/named_subqueries';
 import { expandEvals } from '../shared/expand_evals';
 
 const COMMANDS_WITH_SUBQUERIES = new Set(['from', 'where', 'eval', 'stats', 'inline stats']);
@@ -24,6 +29,48 @@ const COMMANDS_WITH_SUBQUERIES = new Set(['from', 'where', 'eval', 'stats', 'inl
 export interface InSubqueryReference {
   left: ESQLSingleAstItem;
   query: ESQLAstQueryExpression;
+}
+
+/** A pipeline of the query to validate: a LET body or the main query. */
+export interface PipelineToValidate {
+  commands: ESQLCommand[];
+  /** SET commands and the LET bindings the pipeline can reference. */
+  header: ESQLAstHeaderCommand[];
+  namedSubqueries: readonly NamedSubquery[];
+  /** LET bindings declared from the pipeline's own binding onward. */
+  forwardNamedSubqueries: readonly NamedSubquery[];
+  /** Elasticsearch analyzes only the main query and the LET bodies it uses. */
+  analyzed: boolean;
+}
+
+/**
+ * Returns the LET bodies, in declaration order, followed by the main query.
+ */
+export function getPipelinesToValidate(
+  headerCommands: ESQLAstHeaderCommand[],
+  rootCommands: ESQLCommand[]
+): PipelineToValidate[] {
+  const namedSubqueries = getNamedSubqueries(headerCommands);
+  const usedNamedSubqueries = getUsedNamedSubqueries(rootCommands, namedSubqueries);
+
+  const bodies = namedSubqueries.map((namedSubquery, index) => ({
+    commands: namedSubquery.query.commands,
+    header: headerCommands.slice(0, headerCommands.indexOf(namedSubquery.command)),
+    namedSubqueries: namedSubqueries.slice(0, index),
+    forwardNamedSubqueries: namedSubqueries.slice(index),
+    analyzed: usedNamedSubqueries.has(namedSubquery),
+  }));
+
+  return [
+    ...bodies,
+    {
+      commands: rootCommands,
+      header: headerCommands,
+      namedSubqueries,
+      forwardNamedSubqueries: [],
+      analyzed: true,
+    },
+  ];
 }
 
 /**

@@ -11,6 +11,7 @@ import type { EditorError } from '@elastic/esql/types';
 import type { ESQLColumnData } from '../../commands/registry/types';
 import type { ESQLPolicy } from '../../commands/registry/types';
 import type { ESQLMessage } from '../../commands';
+import type { NamedSubquery } from '../../commands/definitions/utils/named_subqueries';
 
 export interface ReferenceMaps {
   sources: Set<string>;
@@ -21,6 +22,8 @@ export interface ReferenceMaps {
   timeSeriesSources?: IndexAutocompleteItem[];
   views?: EsqlView[];
   datasets?: EsqlDataset[];
+  namedSubqueries?: readonly NamedSubquery[];
+  forwardNamedSubqueries?: readonly NamedSubquery[];
 }
 
 export interface ValidationResult {
