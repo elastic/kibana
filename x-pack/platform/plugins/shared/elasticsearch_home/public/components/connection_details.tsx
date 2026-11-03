@@ -25,24 +25,22 @@ export const ConnectionDetails = () => {
   const { url, isLoading } = useElasticsearchUrl();
   const getTelemetryId = useTelemetryId();
 
-  if (!isLoading && !url) {
-    return null;
-  }
-
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-      <EuiFlexItem grow={false} css={endpointUrlItem}>
-        <EndpointUrl
-          url={url}
-          isLoading={isLoading}
-          copyAriaLabel={i18n.translate(
-            'xpack.elasticsearchHome.home.connectionDetails.copyUrlAriaLabel',
-            { defaultMessage: 'Copy Elasticsearch URL' }
-          )}
-          copyTestSubj="elasticsearchHomeCopyEndpointUrl"
-          copyTelemetryId={getTelemetryId('copyEndpointUrl')}
-        />
-      </EuiFlexItem>
+      {(isLoading || url) && (
+        <EuiFlexItem grow={false} css={endpointUrlItem}>
+          <EndpointUrl
+            url={url}
+            isLoading={isLoading}
+            copyAriaLabel={i18n.translate(
+              'xpack.elasticsearchHome.home.connectionDetails.copyUrlAriaLabel',
+              { defaultMessage: 'Copy Elasticsearch URL' }
+            )}
+            copyTestSubj="elasticsearchHomeCopyEndpointUrl"
+            copyTelemetryId={getTelemetryId('copyEndpointUrl')}
+          />
+        </EuiFlexItem>
+      )}
       <EuiShowFor sizes={['xl']}>
         <EuiFlexItem grow={false}>
           <EuiButton

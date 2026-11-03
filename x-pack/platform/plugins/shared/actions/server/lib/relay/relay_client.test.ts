@@ -534,6 +534,33 @@ describe('RelayClient', () => {
     });
   });
 
+  describe('readThread', () => {
+    it('GETs the thread path with the encoded ts', async () => {
+      requestMock.mockResolvedValue({
+        status: 200,
+        data: { channel: { id: 'C123', name: 'alerts' }, messages: [] },
+      } as never);
+
+      await expect(
+        createClient().readThread({
+          tenantKey: 'team-A',
+          channelId: 'C123',
+          threadTs: '1700000000.000100',
+          oldest: '1700000001',
+        })
+      ).resolves.toEqual({
+        channel: { id: 'C123', name: 'alerts' },
+        messages: [],
+        truncated: false,
+      });
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://relay.test/v1/slack/tenants/team-A/channels/C123/threads/1700000000.000100?oldest=1700000001',
+        })
+      );
+    });
+  });
+
   describe('bind', () => {
     it('PUTs to the per-channel bind endpoint', async () => {
       requestMock.mockResolvedValue({ status: 200, data: { status: 'bound' } } as never);
