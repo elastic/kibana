@@ -155,6 +155,8 @@ describe('audit failure class registry', () => {
         /two distinct groups/,
       ],
       ['an unknown confirmed group', { confirmedGroups: ['nope'] }, /unknown group/],
+      ['an unknown meta-alert group', { metaAlertGroups: ['nope'] }, /unknown group/],
+      ['an unknown base requiredGroup', { requiredGroup: 'nope' }, /unknown group/],
       [
         'a variant override naming an unknown group',
         { variantOverrides: { baseline: { requiredGroup: 'nope' } } },
@@ -172,6 +174,16 @@ describe('audit failure class registry', () => {
       ],
     ])('throws for %s', (_name, gold, message) => {
       expect(() => validateGold(withGold(gold))).toThrow(message);
+    });
+
+    it('throws for an empty group', () => {
+      const gold = { alertGroups: { ...base.gold.alertGroups, 'empty-group': [] } };
+      expect(() => validateGold(withGold(gold))).toThrow(/group "empty-group" is empty/);
+    });
+
+    it('throws for a duplicated alert id in the alerts', () => {
+      const duplicated = { ...base, alerts: [...base.alerts, base.alerts[0]] };
+      expect(() => validateGold(duplicated)).toThrow(/alert ids are not unique/);
     });
 
     it('is applied when the dataset is built', () => {

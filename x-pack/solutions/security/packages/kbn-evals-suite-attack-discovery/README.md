@@ -301,17 +301,24 @@ examples; read the row count beside each mean.
 - `ConditionalRemediation` is regex based. A containment verb (including gerunds) counts anywhere in
   a clause: at its start ("Revoke the key"), after a lead-in ("To contain it, isolate the host";
   "Next steps: revoke the key"), after a directive ("should rotate", "steps include revoking",
-  "should include isolating"), in a passive directive ("the key should be revoked"), in a nominal
-  one ("Revocation of the key is recommended"), or joined with and/then/or. Negation, whether and
+  "should include isolating"), in a passive directive ("the key should be revoked", "keys should immediately be
+  revoked"), in a nominal one ("Revocation of the key is recommended"), after "so", "therefore",
+  "thus" or "hence", or joined with and/then/or. Negation, whether and
   if before a mid-clause frame cancel it. A condition is if/once/unless/pending (or "only
   after/when") followed within about four words by confirm*/verif*/validat*, or followed by a
   judgement ("if it is confirmed malicious", "if deemed suspicious", "if the activity is
   unauthorized"), or "should ... prove/be confirmed". Bare when/after/until are never conditions,
   because they mostly sit in noun phrases or timings ("keys created after the compromise"), so
   "Disable the account after the logins are confirmed malicious" is flagged. A descriptive adjective
-  alone ("the suspicious key creation") is not a condition. "If so", "if it was not" and "if they did
-  not create it" count only after a sentence that tells the reader to verify, check, confirm, ask or
-  contact, and never when "already" or "yet" follows ("if it is not already disabled"). Waiting for
+  alone ("the suspicious key creation") is not a condition. A follow-up cue (a chain "if they are, …; if not, …" inherits the question) counts only when the whole clause is
+  elliptical ("if so", "if not", "if it was", "if they do", "if they did not create it") and the
+  previous sentence is an instruction to verify, check, confirm, ask or contact followed by
+  whether/if/that ("Ask the owner whether they created the key. If they did not, revoke it."). A
+  cue with its own subject or predicate ("if the host is still online", "if the owner did not"), one after a sentence with
+  no such question ("Check the key age. If they do, rotate every key."), and one with "already" or
+  "yet" ("if it is not already disabled") never count. "If they did not create it" is also honoured
+  after a verify/confirm/validate sentence, because it restates the verified event; so "Contact the
+  owner. If they did not create it, revoke it." is flagged, a known false positive. Waiting for
   the investigation itself ("until the investigation is complete") is not a condition. A conditional
   split across sentences ("Verify first. Then revoke.") is flagged, past forms ("the key was
   revoked") are never flagged, and a verb with no directive frame ("the team can disable it") is not

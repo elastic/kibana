@@ -57,7 +57,7 @@ const GERUNDS = [
 const ANY_FORM = `${BASE_VERBS}|${GERUNDS}`;
 
 const FILLER =
-  '(?:(?:immediately|urgently|promptly|also|then|next|first|finally|and|please|now|ideally|additionally|quickly|temporarily|manually|proactively|ultimately|afterwards?)\\s*,?\\s+)*';
+  '(?:(?:immediately|urgently|promptly|also|then|next|first|finally|and|please|now|ideally|additionally|quickly|temporarily|manually|proactively|ultimately|afterwards?|so|therefore|thus|hence)\\s*,?\\s+)*';
 
 /** The verb opens the clause, as in "Revoke the key" or "Immediately isolate the host". */
 const IMPERATIVE_AT_START = new RegExp(
@@ -137,13 +137,13 @@ const PAST_PARTICIPLES = [
 
 /** "The key should be revoked immediately", "must be rotated". */
 const PASSIVE_DIRECTIVE = new RegExp(
-  `\\b(?:should|must|needs? to|has to|ought to)\\s+be\\s+${FILLER}(?:${PAST_PARTICIPLES})\\b`,
+  `\\b(?:should|must|needs? to|has to|ought to)\\s+${FILLER}be\\s+${FILLER}(?:${PAST_PARTICIPLES})\\b`,
   'i'
 );
 
 /** "Revocation of the access key is recommended." */
 const NOMINAL_DIRECTIVE =
-  /\b(?:revocation|rotation|isolation|termination|quarantine|suspension|deactivation|disabling|blocking)\s+of\b[^.]*?\b(?:is|are)\s+(?:strongly\s+)?(?:recommended|advised|required)\b/i;
+  /\b(?:revocation|rotation|isolation|termination|quarantine|suspension|deactivation|disabling|blocking|removal|deletion|reset|reimaging|containment|lockout|wiping)\s+of\b[^.]*?\b(?:is|are)\s+(?:strongly\s+)?(?:recommended|advised|required)\b/i;
 
 /** Negation before the verb in the same clause turns advice into a caution. */
 const NEGATION = /\b(?:not|never|avoid|without|nor|no need)\b|n't\b/i;
@@ -191,15 +191,29 @@ const SHOULD_PROVE_CUE = new RegExp(
   'i'
 );
 /**
- * "if so", "if it is", "if it was not", "if they did not create it" point back at the previous
- * sentence, which must be an instruction to verify something. "If not already done" and "if it is
- * not isolated yet" ask about the state of the action itself, so they never count.
+ * A follow-up cue is elliptical: the whole clause is "if so", "if not", "if it was", "if they do",
+ * or "if they did not <verb> it". Anything with a fresh subject or predicate ("if the owner has
+ * left", "if the host is still online") is a new claim, not a pointer back, and never counts.
+ * "If it is not already disabled" is elliptical but asks about the action itself, so "already" or
+ * "yet" anywhere in the clause disqualifies it.
  */
-const ANAPHORIC_CUE =
-  /\b(?:if|once)\s+(?:so|yes|not|that is the case|(?:it|they|he|she|this|that|the \w+(?: \w+)?)\s+(?:is|are|was|were|did|does|do|has|have|had)(?:\s+not|n't)?)\b/i;
-const ALREADY_DONE = /\b(?:already|yet)\b/i;
-const VERIFICATION_INSTRUCTION =
-  /\b(?:verify|confirm|check|determine|validate|ask|contact|investigate|assess)\b/i;
+const ELLIPTICAL_CUE =
+  /^(?:if|once)\s+(?:so|not|yes|that is the case|(?:it|they|he|she|this|that)\s+(?:is|are|was|were|did|does|do|has|have|had)(?:\s+not|n't)?|(?:they|he|she)\s+did(?:\s+not|n't)\s+\w+\s+(?:it|them|this))\s*$/i;
+const NOT_YET_DONE = /\b(?:already|yet)\b/i;
+/**
+ * The previous sentence must raise a question the cue answers: a verification verb followed by
+ * whether/if/that ("Ask the owner whether they created it", "Verify that the login was expected").
+ */
+const VERIFICATION_QUESTION =
+  /\b(?:verify|confirm|check|determine|validate|ask|contact|investigate|assess)\b[^.]*\b(?:whether|if|that)\b/i;
+/**
+ * "if they did not create it" restates the event the previous clause told the reader to verify, so
+ * "verify the key creation" is enough there. A bare "if they do" or "if it was" has nothing to
+ * restate and still needs the whether/if/that question. "Contact the owner. If they did not create
+ * it, revoke it." has no verify verb and is flagged.
+ */
+const VERIFIED_EVENT = /\b(?:verify|confirm|validate)\b/i;
+const RESTATES_EVENT = /\bdid(?:\s+not|n't)\s+\w+\s+(?:it|them|this)$/i;
 /** A trailing condition ("..., unless the owner confirms") also governs the clauses before it. */
 const STARTS_WITH_CUE = /^(?:only\s+)?(?:if|unless|once|pending|should)\b/i;
 
@@ -225,14 +239,11 @@ const splitClauses = (sentence: string): string[] =>
     .map((clause) => clause.trim())
     .filter((clause) => clause.length > 0);
 
-const isAnaphoricCue = (clause: string, previousSentence: string): boolean => {
-  const match = ANAPHORIC_CUE.exec(clause);
-  return (
-    match !== null &&
-    VERIFICATION_INSTRUCTION.test(previousSentence) &&
-    !ALREADY_DONE.test(clause.slice(match.index + match[0].length))
-  );
-};
+const isAnaphoricCue = (clause: string, previousSentence: string): boolean =>
+  ELLIPTICAL_CUE.test(clause) &&
+  !NOT_YET_DONE.test(clause) &&
+  (VERIFICATION_QUESTION.test(previousSentence) ||
+    (RESTATES_EVENT.test(clause) && VERIFIED_EVENT.test(previousSentence)));
 
 const isCue = (clause: string, previousSentence: string): boolean =>
   VERIFICATION_CUE.test(clause) ||
@@ -289,7 +300,7 @@ export const findUnconditionalContainment = (markdown: string): string[] => {
         if (!governedByHeader && hasUnconditionalInstruction(sentence, previousSentence)) {
           flagged.push(sentence);
         }
-        previousSentence = sentence;
+        if (!ELLIPTICAL_CUE.test(splitClauses(sentence)[0] ?? '')) previousSentence = sentence;
       }
       const endsWithColon = line.trim().endsWith(':');
       if (

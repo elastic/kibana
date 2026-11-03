@@ -119,6 +119,19 @@ describe('findUnconditionalContainment', () => {
       'This is malicious. If it is not isolated yet, isolate the host.',
       'The login was malicious. If not, reset the password.',
       'Verify the login first. If it is not already blocked, block the IP.',
+      // a fresh subject or predicate is a new claim, not a pointer back
+      'Check the logs. If the user is active, disable the account.',
+      'Verify the alert. If the host is still online, isolate it.',
+      'Investigate the beacon. If the host is still online, isolate it.',
+      'Contact the owner. If the owner has left, disable the account.',
+      'Verify the logging configuration. If the trail is still stopped, terminate the session and rotate keys.',
+      // only pronoun subjects are elliptical; a noun subject is a new claim
+      'Ask the owner whether they created the key. If the owner did not, revoke it.',
+      // the previous sentence raises no whether/if/that question
+      'Check the key age. If they do, rotate every key.',
+      'Check CloudTrail for further activity. If it was, revoke the key anyway.',
+      // documented limit: no verify verb to restate
+      'Contact the owner. If they did not create it, revoke it.',
     ])('flags an action the cue does not govern: %s', (text) => {
       expect(findUnconditionalContainment(text).length).toBeGreaterThan(0);
     });
@@ -126,8 +139,10 @@ describe('findUnconditionalContainment', () => {
     it.each([
       'Contact the owner to verify the key creation; if they did not create it, disable the user.',
       'Verify with the owner that the login was legitimate. If it was not, reset the password.',
-      'Ask the owner whether they created the key. If the owner did not, disable the user.',
+      'Ask the owner whether they created the key. If they did not, revoke it.',
+      'Check whether the key was created by the owner. If it was not, disable the user.',
       'Investigate whether the host is compromised; if so, isolate it.',
+      'Determine whether the traffic is expected. If they are, leave it; if not, block the IP.',
     ])('honours a cue that follows a verification instruction: %s', (text) => {
       expect(findUnconditionalContainment(text)).toEqual([]);
     });
@@ -155,12 +170,35 @@ describe('findUnconditionalContainment', () => {
     });
   });
 
+  describe('consequence connectives before the verb', () => {
+    it.each([
+      'The account is compromised, so disable it.',
+      'If deploy-bot is still active, it was compromised, so disable it.',
+      'The key leaked, therefore rotate it.',
+      'The host is beaconing, thus isolate it.',
+    ])('flags: %s', (text) => {
+      expect(findUnconditionalContainment(text).length).toBeGreaterThan(0);
+    });
+
+    it('still passes a connective inside a conditional', () => {
+      expect(findUnconditionalContainment('If confirmed malicious, so disable it.')).toEqual([]);
+    });
+  });
+
   describe('passive and nominal directives', () => {
     it.each([
       'The prod access key should be revoked immediately.',
       'Access keys for deploy-bot should be rotated and the user disabled.',
       'Revocation of the access key is recommended.',
       'Containment should include isolating the host.',
+    ])('flags: %s', (text) => {
+      expect(findUnconditionalContainment(text).length).toBeGreaterThan(0);
+    });
+
+    it.each([
+      'Keys should immediately be revoked.',
+      'Removal of the persistence mechanism is required.',
+      'Deletion of the new user is recommended.',
     ])('flags: %s', (text) => {
       expect(findUnconditionalContainment(text).length).toBeGreaterThan(0);
     });
