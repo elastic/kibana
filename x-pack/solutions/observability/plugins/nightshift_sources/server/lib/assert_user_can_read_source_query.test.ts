@@ -7,6 +7,7 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { assertUserCanReadSourceQuery } from './assert_user_can_read_source_query';
+import { createEsResponseError } from './es_errors.mock';
 
 const setup = (index: Record<string, { read: boolean }>) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -84,6 +85,21 @@ describe('assertUserCanReadSourceQuery', () => {
     ).rejects.toMatchObject({ output: { statusCode: 403 } });
 
     expect(esClient.security.hasPrivileges).not.toHaveBeenCalled();
+  });
+
+  it('keeps the status of an Elasticsearch error without echoing its reason', async () => {
+    const esClient = setup({});
+    esClient.security.hasPrivileges.mockRejectedValue(
+      createEsResponseError(429, 'es_rejected_execution_exception', 'queue at node-7 is full')
+    );
+
+    const error = await assertUserCanReadSourceQuery({
+      esClient,
+      esql: 'FROM logs-nginx-*',
+    }).catch((caught: unknown) => caught);
+
+    expect(error).toMatchObject({ output: { statusCode: 429 } });
+    expect(error).toHaveProperty('message', 'Could not check read access to the source data');
   });
 
   it('answers 503 when the privilege check itself fails', async () => {

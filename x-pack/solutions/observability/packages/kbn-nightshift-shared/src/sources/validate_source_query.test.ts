@@ -155,6 +155,7 @@ describe('source type', () => {
     expectType('FROM remote:metrics-logstash.node-*', 'metrics');
     expectType('TS remote:my-tsdb-*', 'metrics');
     expectType('FROM logs-*, -remote:*', 'logs');
+    expectType('FROM "logs-*,-remote:*"', 'logs');
     expectType('FROM logs-*, cluster:-traces-*', 'logs');
     expectType('FROM logs-foo.metrics-*', 'logs');
     // The `+01:00` form only parses quoted.
@@ -288,6 +289,13 @@ describe('getSourceReadTargets', () => {
 
   it('has no target for a name that is only a selector', () => {
     expect(getSourceReadTargets('FROM "::data"')).toEqual({ indexPatterns: [], hasRemote: false });
+  });
+
+  it('treats an exclusion in a quoted list like the unquoted one', () => {
+    expect(getSourceReadTargets('FROM "logs-*,-remote:*"')).toEqual({
+      indexPatterns: ['logs-*'],
+      hasRemote: false,
+    });
   });
 
   it('does not let a cluster prefix in one part of a quoted list hide the others', () => {

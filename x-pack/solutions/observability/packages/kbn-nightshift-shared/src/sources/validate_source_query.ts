@@ -124,7 +124,10 @@ const isExcludedIndex = (name: ISourceName): boolean => {
   const pattern = indexPatternOf(name);
   return (
     (pattern !== undefined && pattern.startsWith('-')) ||
-    (name.prefix !== undefined && name.prefix.startsWith('-'))
+    (name.prefix !== undefined && name.prefix.startsWith('-')) ||
+    // A part split from a quoted list has no parsed prefix, so `-remote:*` shows its exclusion
+    // only in the text, before the cluster prefix is stripped.
+    (name.raw?.replace(BACKTICK_QUOTES, '$1').startsWith('-') ?? false)
   );
 };
 

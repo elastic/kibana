@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { forbidden, serverUnavailable } from '@hapi/boom';
+import { Boom, forbidden, isBoom } from '@hapi/boom';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import { getSourceReadTargets, type ISourceReadTargets } from '@kbn/nightshift-shared';
@@ -15,6 +15,18 @@ const UNPARSEABLE_QUERY = 'This query could not be analyzed, so its data access 
 const NO_INDEX_TARGET =
   'This query has no FROM or TS index target, so its data access cannot be checked.';
 const PRIVILEGE_CHECK_FAILED = 'Could not check read access to the source data';
+
+/**
+ * Keeps the status Elasticsearch answered with, mapped like every other ES error here (a 401
+ * becomes a 500, so it cannot pass for an expired Kibana session). The message is fixed: an ES
+ * reason or a transport failure can carry backend detail the caller should not see.
+ */
+const toPrivilegeCheckError = (error: unknown): Boom => {
+  const mapped = isResponseError(error) ? toBoom(error) : undefined;
+  return new Boom(PRIVILEGE_CHECK_FAILED, {
+    statusCode: isBoom(mapped) ? mapped.output.statusCode : 503,
+  });
+};
 
 /**
  * Refuses a query over data the current user cannot read.
@@ -58,10 +70,7 @@ export const assertUserCanReadSourceQuery = async ({
       index: [{ names: targets.indexPatterns, privileges: ['read'] }],
     });
   } catch (error) {
-    // A transport failure can carry the internal host in its message, so it is not echoed.
-    throw isResponseError(error)
-      ? toBoom(error, PRIVILEGE_CHECK_FAILED)
-      : serverUnavailable(PRIVILEGE_CHECK_FAILED);
+    throw toPrivilegeCheckError(error);
   }
 
   if (!response.has_all_requested) {
