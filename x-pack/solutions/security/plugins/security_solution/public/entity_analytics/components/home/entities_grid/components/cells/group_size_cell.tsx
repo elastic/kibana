@@ -17,6 +17,7 @@ const cellTruncateCss = css`
   text-overflow: ellipsis;
   min-width: 0;
   flex: 1;
+  text-align: end;
 `;
 
 const cellContainerCss = css`
