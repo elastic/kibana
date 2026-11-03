@@ -7,12 +7,18 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-/** Blank-landing hero: media placeholder next to the Nightshift pitch. */
+/** Vidyard intro video — same player Kibana CSP already allows (`play.vidyard.com`). */
+const INTRO_VIDEO_SRC = '//play.vidyard.com/EU8nJMgSQEZUpkv6Eg9Wck';
+
+/** Blank-landing hero: intro video next to the Nightshift pitch. */
 export function OnboardingIntroBanner(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
+  const videoTitle = i18n.translate('xpack.nightshift.onboarding.introMediaAriaLabel', {
+    defaultMessage: 'Nightshift introduction video',
+  });
 
   return (
     <div
@@ -37,38 +43,31 @@ export function OnboardingIntroBanner(): React.ReactElement {
       <EuiFlexGroup gutterSize="none" responsive alignItems="stretch">
         <EuiFlexItem grow={false}>
           <div
-            role="img"
-            aria-label={i18n.translate('xpack.nightshift.onboarding.introMediaAriaLabel', {
-              defaultMessage: 'Nightshift introduction video',
-            })}
             css={css`
-              align-items: center;
-              background: linear-gradient(
-                135deg,
-                ${euiTheme.colors.backgroundLightPrimary},
-                ${euiTheme.colors.backgroundLightAssistance}
-              );
-              display: flex;
+              /* Match the previous media slot (284×160 ≈ Vidyard 488×275). */
+              aspect-ratio: 488 / 275;
+              background: ${euiTheme.colors.backgroundLightPrimary};
               height: 160px;
-              justify-content: center;
-              width: 284px;
               max-width: 100%;
+              overflow: hidden;
+              width: 284px;
+
+              iframe {
+                border: 0;
+                display: block;
+                height: 100%;
+                width: 100%;
+              }
             `}
           >
-            <div
-              css={css`
-                align-items: center;
-                background: ${euiTheme.colors.backgroundBasePlain};
-                border-radius: 50%;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-                display: flex;
-                height: 48px;
-                justify-content: center;
-                width: 48px;
-              `}
-            >
-              <EuiIcon type="play" size="l" color="primary" aria-hidden={true} />
-            </div>
+            <iframe
+              allow="autoplay"
+              allowFullScreen={true}
+              referrerPolicy="no-referrer"
+              sandbox="allow-scripts allow-same-origin"
+              src={INTRO_VIDEO_SRC}
+              title={videoTitle}
+            />
           </div>
         </EuiFlexItem>
         <EuiFlexItem
