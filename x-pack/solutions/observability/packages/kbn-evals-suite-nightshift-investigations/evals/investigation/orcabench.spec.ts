@@ -6,9 +6,10 @@
  */
 
 import { registerInvestigationEvaluation } from './register_evaluation';
-import { loadOrcaDataset, resolveOrcaRun } from './orca_dataset';
+import { loadOrcaDataset, resolveOrcaRun, resolveOrcaTelemetryVariant } from './orca_dataset';
 
 const run = resolveOrcaRun();
+const telemetryVariant = resolveOrcaTelemetryVariant();
 const { release, slice } = run;
 
 registerInvestigationEvaluation({
@@ -21,6 +22,7 @@ registerInvestigationEvaluation({
     dataset_release: release.name,
     dataset_sha256: release.sha256,
     source_release: 'data-0418/2026-10-01',
+    telemetry_variant: telemetryVariant,
     ...(slice ? { dataset_slice: `${slice.index}/${slice.count}` } : {}),
   },
 });

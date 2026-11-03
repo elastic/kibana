@@ -244,7 +244,34 @@ export const hasOrcaTelemetryQuery = (rounds: Array<Pick<ConversationRound, 'ste
         )
     );
 
-/** Checks the immutable historical data with the configured read key before starting paid tasks. */
+/**
+ * What the ORCA read key can see. `no-flags` is the flag ablation: a key whose document-level
+ * security hides flagd, every `feature_flag` field, flag-evaluation spans and log lines naming a flag.
+ */
+export type OrcaTelemetryVariant = 'full' | 'no-flags';
+
+/** Documents each signal holds from 16:22 to 16:50 UTC on 2026-04-19, per variant. */
+const ORCA_PREFLIGHT_COUNTS: Readonly<Record<OrcaTelemetryVariant, Record<string, number>>> = {
+  full: { logs: 14268, traces: 11864, metrics: 117594 },
+  'no-flags': { logs: 13182, traces: 11136, metrics: 115056 },
+};
+
+/** The variant from `NIGHTSHIFT_ORCA_TELEMETRY_VARIANT`, `full` by default. */
+export const resolveOrcaTelemetryVariant = (
+  env: Record<string, string | undefined> = process.env
+): OrcaTelemetryVariant => {
+  const value = env.NIGHTSHIFT_ORCA_TELEMETRY_VARIANT?.trim() || 'full';
+  assert(
+    value === 'full' || value === 'no-flags',
+    `NIGHTSHIFT_ORCA_TELEMETRY_VARIANT=${value} is not one of full, no-flags`
+  );
+  return value;
+};
+
+/**
+ * Checks the immutable historical data with the configured read key before starting paid tasks. The
+ * counts also prove which variant the key sees, so an ablation cannot run on full telemetry.
+ */
 export const assertOrcaSource = async (
   request: typeof globalThis.fetch = globalThis.fetch,
   env: NodeJS.ProcessEnv = process.env
@@ -255,26 +282,25 @@ export const assertOrcaSource = async (
     url && apiKey && env.NIGHTSHIFT_ORCA_TELEMETRY,
     'ORCA requires its configured telemetry source'
   );
+  const variant = resolveOrcaTelemetryVariant(env);
   await Promise.all(
-    Object.entries({ logs: 14268, traces: 11864, metrics: 117594 }).map(
-      async ([signal, expected]) => {
-        const response = await request(`${url.replace(/\/$/, '')}/_query`, {
-          method: 'POST',
-          headers: { Authorization: `ApiKey ${apiKey}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            query: `FROM ${signal}-orcabench.otel-* | WHERE @timestamp >= "2026-04-19T16:22:00Z" AND @timestamp < "2026-04-19T16:50:00Z" | STATS documents = COUNT(*)`,
-          }),
-          signal: AbortSignal.timeout(30_000),
-        });
-        assert(response.ok, `ORCA ${signal} preflight returned HTTP ${response.status}`);
-        const result = z
-          .object({ values: z.array(z.array(z.number())), is_partial: z.boolean().optional() })
-          .parse(await response.json());
-        assert(
-          !result.is_partial && result.values.length === 1 && result.values[0][0] === expected,
-          `ORCA ${signal} preflight differs from the pinned snapshot`
-        );
-      }
-    )
+    Object.entries(ORCA_PREFLIGHT_COUNTS[variant]).map(async ([signal, expected]) => {
+      const response = await request(`${url.replace(/\/$/, '')}/_query`, {
+        method: 'POST',
+        headers: { Authorization: `ApiKey ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: `FROM ${signal}-orcabench.otel-* | WHERE @timestamp >= "2026-04-19T16:22:00Z" AND @timestamp < "2026-04-19T16:50:00Z" | STATS documents = COUNT(*)`,
+        }),
+        signal: AbortSignal.timeout(30_000),
+      });
+      assert(response.ok, `ORCA ${signal} preflight returned HTTP ${response.status}`);
+      const result = z
+        .object({ values: z.array(z.array(z.number())), is_partial: z.boolean().optional() })
+        .parse(await response.json());
+      assert(
+        !result.is_partial && result.values.length === 1 && result.values[0][0] === expected,
+        `ORCA ${signal} preflight differs from the pinned ${variant} snapshot`
+      );
+    })
   );
 };

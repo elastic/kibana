@@ -15,6 +15,7 @@ import {
   ORCA_PUBLIC_RELEASE,
   ORCA_RELEASE,
   resolveOrcaRun,
+  resolveOrcaTelemetryVariant,
   sliceOrcaDataset,
   validateOrcaDataset,
 } from './orca_dataset';
@@ -229,4 +230,36 @@ describe('ORCA source preflight', () => {
       await expect(assertOrcaSource(request, env)).rejects.toThrow('ORCA');
     }
   );
+
+  const answering = (...counts: number[]) => {
+    const request = jest.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>();
+    counts.forEach((count) =>
+      request.mockResolvedValueOnce(new Response(JSON.stringify({ values: [[count]] })))
+    );
+    return request;
+  };
+  it('accepts a flag-ablation key only when the run asks for that variant', async () => {
+    const noFlags = { ...env, NIGHTSHIFT_ORCA_TELEMETRY_VARIANT: 'no-flags' };
+    await expect(
+      assertOrcaSource(answering(13182, 11136, 115056), noFlags)
+    ).resolves.toBeUndefined();
+    await expect(assertOrcaSource(answering(13182, 11136, 115056), env)).rejects.toThrow(
+      'pinned full snapshot'
+    );
+    await expect(assertOrcaSource(answering(14268, 11864, 117594), noFlags)).rejects.toThrow(
+      'pinned no-flags snapshot'
+    );
+  });
+});
+
+describe('ORCA telemetry variant', () => {
+  it('runs on full telemetry unless the flag ablation is named', () => {
+    expect(resolveOrcaTelemetryVariant({})).toBe('full');
+    expect(resolveOrcaTelemetryVariant({ NIGHTSHIFT_ORCA_TELEMETRY_VARIANT: 'no-flags' })).toBe(
+      'no-flags'
+    );
+    expect(() =>
+      resolveOrcaTelemetryVariant({ NIGHTSHIFT_ORCA_TELEMETRY_VARIANT: 'none' })
+    ).toThrow(/NIGHTSHIFT_ORCA_TELEMETRY_VARIANT/);
+  });
 });
