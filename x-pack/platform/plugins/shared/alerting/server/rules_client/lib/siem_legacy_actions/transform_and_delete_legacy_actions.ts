@@ -85,6 +85,10 @@ const ruleHasAllSidecarActions = (
   return sidecarActions.every(ruleContainsSidecarAction);
 };
 
+const ruleHasOnlyActionsWithFrequency = (rule: SavedObject<RawRule>): boolean =>
+  rule.attributes.actions.length > 0 &&
+  rule.attributes.actions.every(({ frequency }) => frequency !== undefined);
+
 type LegacySidecar = SavedObject<LegacyIRuleActionsAttributes>;
 
 const toRuleReferences = (ruleIds: string[]) =>
@@ -263,14 +267,21 @@ export const findAndTransformLegacyActions: FindAndTransformLegacyActions = asyn
         throw new Error('Failed to find rule reference on legacy action Saved Object');
       }
 
+      const rule = rules.find((r) => r.id === ruleId);
       if (!hasThrottledActions(savedObject.attributes)) {
+        if (rule != null && ruleHasOnlyActionsWithFrequency(rule)) {
+          // A previous migration already applied the legacy notify setting to the actions and saved the rule,
+          // but could not delete the sidecar. Applying the rule level default again would overwrite the
+          // frequencies saved since then.
+          alreadyMigratedSidecarIds.push(savedObject.id);
+          return;
+        }
         // There are no actions to copy: the actions that run are the ones already on the rule.
         // The rule is still part of the result, with nothing to add, because its legacy notify
         // setting still has to be applied to those actions.
         transformedActionsByRuleId[ruleId] = { transformedActions: [], transformedReferences: [] };
         return;
       }
-      const rule = rules.find((r) => r.id === ruleId);
       if (rule != null && ruleHasAllSidecarActions(rule, savedObject)) {
         alreadyMigratedSidecarIds.push(savedObject.id);
         return;

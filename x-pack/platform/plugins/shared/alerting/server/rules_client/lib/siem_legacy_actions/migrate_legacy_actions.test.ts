@@ -256,6 +256,33 @@ describe('bulkMigrateLegacyActions', () => {
     }
   );
 
+  it.each(['rule', 'no_actions'])(
+    'discards a "%s" sidecar left behind by a migration without overwriting the saved frequencies',
+    async (ruleThrottle) => {
+      mockLegacyObjects({ sidecars: [buildSidecar(ruleThrottle)] });
+      const savedFrequency = {
+        summary: false,
+        notifyWhen: 'onActionGroupChange',
+        throttle: null,
+      } as const;
+      const rule = buildRule([{ ...existingAction, frequency: savedFrequency }]);
+      rule.attributes.notifyWhen = null;
+      rule.attributes.throttle = null;
+
+      const migratedIds = await bulkMigrateLegacyActions({
+        context,
+        rules: [rule],
+        skipActionsValidation: true,
+      });
+
+      expect(migratedIds).toEqual([]);
+      expect(rule.attributes.actions).toEqual([{ ...existingAction, frequency: savedFrequency }]);
+      expect(savedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { type: legacyRuleActionsSavedObjectType, id: SIDECAR_ID },
+      ]);
+    }
+  );
+
   it('defers the cleanup of a "no_actions" sidecar until the rule is saved', async () => {
     mockLegacyObjects({ sidecars: [buildSidecar('no_actions')] });
     const rule = buildRule();
