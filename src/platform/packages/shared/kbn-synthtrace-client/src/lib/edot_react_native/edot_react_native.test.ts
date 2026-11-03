@@ -370,12 +370,12 @@ describe('edotReactNative', () => {
         .httpRequest({
           method: 'GET',
           url: 'https://api.example.com/',
-          errorType: 'URLError',
+          errorType: 'NSURLError',
           ...ids,
         })
         .serialize() as EdotReactNativeSpanDocument[];
       expect(iosSpan.status.code).toBe('Error');
-      expect(iosSpan.attributes['error.type']).toBe('URLError');
+      expect(iosSpan.attributes['error.type']).toBe('NSURLError');
     });
 
     it('falls back to the status class for iOS status codes without a text of their own', () => {

@@ -150,9 +150,11 @@ const TRANSPORT_ERRORS: Readonly<Record<MobilePlatform, readonly TransportError[
     { type: 'java.net.SocketTimeoutException', message: 'timeout' },
     { type: 'java.net.UnknownHostException', message: 'Unable to resolve host' },
   ],
+  // EDOT iOS writes the runtime class of the error, which URLSession creates as Foundation's
+  // NSURLError; Swift only bridges it to the URLError struct when the error is cast
   ios: [
-    { type: 'URLError', message: 'The request timed out.' },
-    { type: 'URLError', message: 'The Internet connection appears to be offline.' },
+    { type: 'NSURLError', message: 'The request timed out.' },
+    { type: 'NSURLError', message: 'The Internet connection appears to be offline.' },
   ],
 };
 

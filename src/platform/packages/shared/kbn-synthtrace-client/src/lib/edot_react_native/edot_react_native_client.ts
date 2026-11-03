@@ -46,7 +46,7 @@ export interface HttpRequestOptions {
   url: string;
   /** Omitted for a request that got no response. */
   statusCode?: number;
-  /** The exception class on Android, the Swift error type on iOS. */
+  /** The exception class on Android, the runtime class of the error on iOS (e.g. `NSURLError`). */
   errorType?: string;
   requestBodySize?: number;
   responseBodySize?: number;
