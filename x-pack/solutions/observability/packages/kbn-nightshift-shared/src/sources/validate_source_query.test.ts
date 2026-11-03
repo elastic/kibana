@@ -162,6 +162,7 @@ describe('source type', () => {
     expectTypeError('FROM *:*', 'Index "*:*" is an unscoped wildcard');
     expectTypeError('FROM "remote:*"', 'unscoped wildcard');
     expectTypeError('FROM `*`', 'unscoped wildcard');
+    expectTypeError('FROM "logs-a,*"', 'Index "*" is an unscoped wildcard');
   });
 
   it('rejects indices of more than one type', () => {
@@ -246,6 +247,20 @@ describe('getSourceReadTargets', () => {
 
   it('still reports a remote date-math target', () => {
     expect(getSourceReadTargets('FROM remote:<logs-{now/d}>')).toMatchObject({ hasRemote: true });
+  });
+
+  it('reads each index of a quoted comma list on its own', () => {
+    // ES|QL reads `"a,b"` as two indices, so `has_privileges` must be asked about each one.
+    expect(
+      getSourceReadTargets('FROM "logs-team-a,logs-team-b-*,other:logs-*,-logs-team-a-old"')
+    ).toEqual({ indexPatterns: ['logs-team-a', 'logs-team-b-*'], hasRemote: true });
+  });
+
+  it('does not let a cluster prefix in one part of a quoted list hide the others', () => {
+    expect(getSourceReadTargets('FROM "secret-*,other:logs-*"')).toEqual({
+      indexPatterns: ['secret-*'],
+      hasRemote: true,
+    });
   });
 
   it('throws on a query that does not parse', () => {

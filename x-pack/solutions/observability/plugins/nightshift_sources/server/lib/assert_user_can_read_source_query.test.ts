@@ -44,17 +44,39 @@ describe('assertUserCanReadSourceQuery', () => {
     });
   });
 
-  it('refuses a remote target without asking Elasticsearch', async () => {
+  it('accepts a remote-only query without asking Elasticsearch, since remote access cannot be assessed', async () => {
     const esClient = setup({});
 
     await expect(
       assertUserCanReadSourceQuery({ esClient, esql: 'FROM other:logs-nginx-*' })
+    ).resolves.toBeUndefined();
+
+    expect(esClient.security.hasPrivileges).not.toHaveBeenCalled();
+  });
+
+  it('checks only the local patterns of a query that also reads a remote cluster', async () => {
+    const esClient = setup({ 'logs-a': { read: false } });
+
+    await expect(
+      assertUserCanReadSourceQuery({ esClient, esql: 'FROM logs-a, other:logs-*' })
+    ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+    expect(esClient.security.hasPrivileges).toHaveBeenCalledWith({
+      index: [{ names: ['logs-a'], privileges: ['read'] }],
+    });
+  });
+
+  it('refuses a query with no index target without asking Elasticsearch', async () => {
+    const esClient = setup({});
+
+    await expect(
+      assertUserCanReadSourceQuery({ esClient, esql: 'FROM -logs-*' })
     ).rejects.toMatchObject({ output: { statusCode: 403 } });
 
     expect(esClient.security.hasPrivileges).not.toHaveBeenCalled();
   });
 
-  it('refuses a query it cannot analyze without asking Elasticsearch', async () => {
+  it('refuses a query that does not parse when called without structural validation first', async () => {
     const esClient = setup({});
 
     await expect(

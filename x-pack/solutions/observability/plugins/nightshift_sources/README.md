@@ -19,7 +19,7 @@ gated by the Nightshift feature privileges: reads need `read_nightshift`, writes
 | --- | --- | --- | --- |
 | `GET` | `/internal/nightshift/sources?page&per_page&search&enabled` | read | Paginated catalog, sorted by title. Does not fetch views. `search` matches titles that contain every word, in any order, ignoring case; the last word may be a partial word. `ids` narrows the list to those sources; `search`, `enabled` and paging apply to them. |
 | `POST` | `/internal/nightshift/sources` | manage | Validates the query, derives `type`, writes the saved object, creates the view. Takes `enabled` (default `true`) to create the source switched off |
-| `POST` | `/internal/nightshift/sources/_validate` | manage | Runs the create checks on `{ esql }` without writing; answers `{ valid: true, type, index_exists }` or `{ valid: false, error }` for a query that fails validation. A query the user cannot read is a 403 and a failed privilege check a 503, as on create |
+| `POST` | `/internal/nightshift/sources/_validate` | manage | Runs the create checks on `{ esql }` without writing; answers `{ valid: true, type, index_exists }` or `{ valid: false, error }` for a structurally invalid query (a 400 on create). A query the user cannot read is a 403 and a failed privilege check a 503, as on create |
 | `GET` | `/internal/nightshift/sources/{sourceId}` | read | Source plus view health, including a `FROM <view> \| LIMIT 0` probe for `unresolvable` |
 | `PUT` | `/internal/nightshift/sources/{sourceId}` | manage | Full replace of `title`, `description`, `tags`, `esql`; always re-puts the view. Does not take `enabled` |
 | `DELETE` | `/internal/nightshift/sources/{sourceId}` | manage | Deletes the view (404 ignored), then the saved object. The engine knowledge of the source is cleaned up asynchronously; a failed cleanup is logged and retried by the sync sweep, which does not run while maintenance is paused |
@@ -93,11 +93,17 @@ that the calling user has `read` on every local index pattern in `FROM` or `TS`.
 source's data with their own credentials, so this is the only place the author's access is
 checked. Running the query as the user is not enough: a wildcard that spans a readable and an
 unreadable index succeeds and shows only the readable one, while the privilege check refuses it.
-The refusal is a 403 that names the patterns. A query with no index target and any remote
-cluster target (`FROM remote:logs-*`) are refused too, since a local privilege check cannot
-cover them. A query that does not parse never gets here: structural validation answers 400
-first. If Elasticsearch cannot answer the privilege check the
-response is a 503. `_enable`, `_disable` and edits that keep the stored query run no check.
+
+- A refusal is a 403 that names the patterns.
+- A quoted list (`FROM "logs-a,logs-b-*"`) is checked one index at a time, as ES|QL reads it.
+- Remote cluster targets (`FROM remote:logs-*`) are skipped, because `has_privileges` cannot
+  assess them. A query that reads only remote clusters passes, and a mixed query is checked on
+  its local patterns.
+- A query with no index target, or one that does not parse, is refused with a 403. Structural
+  validation answers 400 first, so a parse failure never gets here through the routes.
+- If Elasticsearch cannot answer the privilege check the response is a 503, or the status
+  Elasticsearch returned.
+- `_enable`, `_disable` and edits that keep the stored query run no check.
 
 Wildcards, several sources and date math are fine. An unscoped `*` is not. Create always runs
 `<esql> | LIMIT 0` as the calling user. Update does too when the normalized query changes. A
@@ -183,6 +189,12 @@ in `config/serverless.oblt.yml` and back on for Observability Complete in
   user's effective DLS/FLS on Serverless (`GET _security/user/_privileges` is unavailable there).
 - The check runs when the query is saved. If the author later loses access, the source keeps
   running with the engine's credentials.
+- Remote cluster access is not checked. The `| LIMIT 0` probe runs as the user, so a concrete
+  remote index they cannot read fails there, but a remote wildcard that spans readable and
+  unreadable indices passes, as a local one would without the privilege check.
+- With cross-project search on, `has_privileges` answers for the origin project only, while the
+  probe and the engines read across linked projects. An unqualified `logs-*` is checked locally
+  and read everywhere.
 - `PUT`, `_enable` and `_disable` pass the saved-object `version` they just read, so a concurrent
   write 409s. That OCC covers the saved object, not the view write that follows: two overlapping
   `PUT`s can land query B on the catalog and query A on the view. `GET` reports `view_drift`; a

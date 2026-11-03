@@ -7,9 +7,14 @@
 
 import { forbidden, serverUnavailable } from '@hapi/boom';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { isResponseError } from '@kbn/es-errors';
 import { getSourceReadTargets, type ISourceReadTargets } from '@kbn/nightshift-shared';
+import { toBoom } from './es_errors';
 
-const CANNOT_CHECK = 'Cannot save a source over this query: its data access cannot be checked.';
+const UNPARSEABLE_QUERY = 'This query could not be parsed, so its data access cannot be checked.';
+const NO_INDEX_TARGET =
+  'This query has no FROM or TS index target, so its data access cannot be checked.';
+const PRIVILEGE_CHECK_FAILED = 'Could not check read access to the source data';
 
 /**
  * Refuses a query over data the current user cannot read.
@@ -19,9 +24,11 @@ const CANNOT_CHECK = 'Cannot save a source over this query: its data access cann
  * readable and an unreadable index succeeds and shows only the readable one. Asking Elasticsearch
  * for `read` on the patterns themselves covers wildcards and indices that do not exist yet.
  *
- * Fails closed: a query that cannot be analyzed, a remote target (which a local privilege check
- * cannot cover) and a query with no index target are all refused. Document and field level
- * security is not visible to this check.
+ * Remote cluster targets (`cluster:index`) are skipped: `has_privileges` only covers local
+ * indices, so their access cannot be assessed and is assumed. A query that targets only remote
+ * clusters therefore passes. Fails closed on everything else: a query that cannot be analyzed and
+ * a query with no index target are refused. Document and field level security is not visible to
+ * this check.
  */
 export const assertUserCanReadSourceQuery = async ({
   esClient,
@@ -34,15 +41,15 @@ export const assertUserCanReadSourceQuery = async ({
   try {
     targets = getSourceReadTargets(esql);
   } catch {
-    throw forbidden(CANNOT_CHECK);
-  }
-  if (targets.hasRemote) {
-    throw forbidden(
-      'Cannot save a source over a remote cluster index: its data access cannot be checked.'
-    );
+    // Defensive: structural validation answers 400 first, so this is only reachable when the
+    // function is called on its own. Keeps it fail-closed there.
+    throw forbidden(UNPARSEABLE_QUERY);
   }
   if (targets.indexPatterns.length === 0) {
-    throw forbidden(CANNOT_CHECK);
+    if (targets.hasRemote) {
+      return;
+    }
+    throw forbidden(NO_INDEX_TARGET);
   }
 
   let response: Awaited<ReturnType<ElasticsearchClient['security']['hasPrivileges']>>;
@@ -51,21 +58,20 @@ export const assertUserCanReadSourceQuery = async ({
       index: [{ names: targets.indexPatterns, privileges: ['read'] }],
     });
   } catch (error) {
-    throw serverUnavailable(
-      `Could not check read access to the source data: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
+    // A transport failure can carry the internal host in its message, so it is not echoed.
+    throw isResponseError(error)
+      ? toBoom(error, PRIVILEGE_CHECK_FAILED)
+      : serverUnavailable(PRIVILEGE_CHECK_FAILED);
   }
 
   if (!response.has_all_requested) {
-    const unreadable = targets.indexPatterns.filter(
-      (pattern) => response.index?.[pattern]?.read !== true
-    );
+    const unreadable = targets.indexPatterns
+      .filter((pattern) => response.index?.[pattern]?.read !== true)
+      .map((pattern) => `\`${pattern}\``);
     throw forbidden(
       `You need read access to the data this source reads. Missing access to: ${unreadable.join(
         ', '
-      )}.`
+      )}`
     );
   }
 };
