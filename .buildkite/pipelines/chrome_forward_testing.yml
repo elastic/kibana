@@ -26,6 +26,7 @@ steps:
     agents:
       machineType: n2-standard-8
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     key: build
     timeout_in_minutes: 60
     retry:
@@ -85,6 +86,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -99,6 +101,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -113,6 +116,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -127,6 +131,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -141,6 +146,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -155,6 +161,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -169,6 +176,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -183,6 +191,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -199,6 +208,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -213,6 +223,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -227,6 +238,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -241,6 +253,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -255,6 +268,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -269,6 +283,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -283,6 +298,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -297,6 +313,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -311,6 +328,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -325,6 +343,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -339,6 +358,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -353,6 +373,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -367,6 +388,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -381,6 +403,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -395,6 +418,7 @@ steps:
     agents:
       machineType: n2-highmem-4
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -409,6 +433,7 @@ steps:
     agents:
       machineType: n2-highmem-4
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
