@@ -16,10 +16,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_GRID_RESOLUTION } from '@kbn/geo-precision';
 import type { OnSourceChangeArgs } from '../source';
 import { ForceRefreshCheckbox } from '../../../components/force_refresh_checkbox';
 import { hasGeoPrecisionParam } from './esql_utils';
-import { GRID_RESOLUTION } from '../../../../common/constants';
+import type { GRID_RESOLUTION } from '../../../../common/constants';
 import { ESQLEditor } from './esql_editor';
 import { GeoPrecisionResolutionEditor } from './geo_precision_resolution_editor';
 import { NarrowByMapBounds, NarrowByTime } from './narrow_by_field';
@@ -165,7 +166,7 @@ export function UpdateSourceEditor(props: Props) {
 
           {hasGeoPrecisionParam(props.sourceDescriptor.esql) && (
             <GeoPrecisionResolutionEditor
-              resolution={props.sourceDescriptor.resolution ?? GRID_RESOLUTION.MOST_FINE}
+              resolution={props.sourceDescriptor.resolution ?? DEFAULT_GRID_RESOLUTION}
               onChange={(resolution: GRID_RESOLUTION) => {
                 props.onChange({ propName: 'resolution', value: resolution });
               }}

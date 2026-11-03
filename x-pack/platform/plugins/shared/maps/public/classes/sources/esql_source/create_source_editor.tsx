@@ -9,10 +9,12 @@ import React, { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import { DEFAULT_GRID_RESOLUTION } from '@kbn/geo-precision';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiFormRow, EuiPanel, EuiSkeletonText, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
-import { ES_GEO_FIELD_TYPE, GRID_RESOLUTION } from '../../../../common/constants';
+import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
+import type { GRID_RESOLUTION } from '../../../../common/constants';
 import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
 import { getHttp, getIndexPatternService } from '../../../kibana_services';
 import { ESQLEditor } from './esql_editor';
@@ -34,7 +36,7 @@ export function CreateSourceEditor(props: Props) {
   const [geoFields, setGeoFields] = useState<string[]>([]);
   const [narrowByGlobalSearch, setNarrowByGlobalSearch] = useState(true);
   const [narrowByGlobalTime, setNarrowByGlobalTime] = useState(true);
-  const [resolution, setResolution] = useState<GRID_RESOLUTION>(GRID_RESOLUTION.MOST_FINE);
+  const [resolution, setResolution] = useState<GRID_RESOLUTION>(DEFAULT_GRID_RESOLUTION);
   const [narrowByMapBounds, setNarrowByMapBounds] = useState(true);
 
   useEffect(() => {

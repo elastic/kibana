@@ -235,9 +235,9 @@ describe('getGeoJsonWithMeta', () => {
     );
 
     expect(mockGetGeoPrecisionParams).toHaveBeenCalledWith(ESQL, {
-      geotile: 9,
+      geotile: 8,
       geohex: 4,
-      geohash: 4,
+      geohash: 3,
     });
     expect(mockSearch.mock.calls[0][0].params.params).toEqual([{ _geotile_precision: 9 }]);
   });
@@ -257,9 +257,9 @@ describe('getSyncMeta', () => {
 
   test('should include geotilePrecision derived from zoom when the query uses ?_geotile_precision', () => {
     const source = createSource(GEOTILE_ESQL);
-    expect(source.getSyncMeta({ zoom: 4.2 } as any).geotilePrecision).toBe(9);
-    expect(source.getSyncMeta({ zoom: 4.9 } as any).geotilePrecision).toBe(9);
-    expect(source.getSyncMeta({ zoom: 5.1 } as any).geotilePrecision).toBe(10);
+    expect(source.getSyncMeta({ zoom: 4.2 } as any).geotilePrecision).toBe(8);
+    expect(source.getSyncMeta({ zoom: 4.9 } as any).geotilePrecision).toBe(8);
+    expect(source.getSyncMeta({ zoom: 5.1 } as any).geotilePrecision).toBe(9);
   });
 
   test('should not include geotilePrecision when the query does not use ?_geotile_precision', () => {
@@ -276,8 +276,8 @@ describe('getGeotilePrecision', () => {
       resolution,
     });
 
-  test('should default to most fine resolution', () => {
-    expect(createSource().getGeotilePrecision(4.5)).toBe(9);
+  test('should default to fine resolution', () => {
+    expect(createSource().getGeotilePrecision(4.5)).toBe(8);
   });
 
   test.each([
@@ -297,7 +297,7 @@ describe('getGeohexPrecision', () => {
   const createSource = (esql: string, resolution?: GRID_RESOLUTION) =>
     new ESQLSource({ esql, geoField: 'geo.coordinates', resolution });
 
-  test('should default to most fine resolution', () => {
+  test('should default to fine resolution', () => {
     expect(createSource(GEOHEX_ESQL).getGeohexPrecision(4.5)).toBe(4);
   });
 
@@ -327,8 +327,8 @@ describe('getGeohashPrecision', () => {
   const createSource = (esql: string, resolution?: GRID_RESOLUTION) =>
     new ESQLSource({ esql, geoField: 'geo.coordinates', resolution });
 
-  test('should default to most fine resolution', () => {
-    expect(createSource(GEOHASH_ESQL).getGeohashPrecision(4.5)).toBe(4);
+  test('should default to fine resolution', () => {
+    expect(createSource(GEOHASH_ESQL).getGeohashPrecision(4.5)).toBe(3);
   });
 
   test.each([

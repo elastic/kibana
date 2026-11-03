@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
+import { DEFAULT_GRID_RESOLUTION } from '@kbn/geo-precision';
 import { SortDirection } from '@kbn/data-plugin/common/search';
 import { SCALING_TYPES, SOURCE_TYPES } from '../../../../../common';
 import { GRID_RESOLUTION } from '../../../../../common/constants';
@@ -90,39 +91,41 @@ export const ESSearchSourceSchema = BaseESSourceSchema.extend({
     'Vector tile or vector feature source returning points, lines, and polygons from Elasticsearch documents.',
 });
 
-export const ESQLSourceSchema = z
-  .object({
-    applyForceRefresh: applyForceRefreshSchema,
-    dateField: z.string().optional().meta({
-      description: `Date field used to narrow ES|QL requests by global time range. Required when 'narrowByGlobalTime' is true.`,
-    }),
-    esql: z.string().meta({
-      description: 'ES|QL statement returning at least one geo_point or geo_shape column.',
-    }),
-    geoField: z.string().optional().meta({
-      description: `Geo field used to narrow ES|QL requests by visible map area and spatial filters drawn on map. Required when 'narrowByMapBounds' is true.`,
-    }),
-    id: z.string().meta({ description: 'uuid.' }),
-    narrowByMapBounds: z.boolean().optional().meta({
-      description: `When true, results narrowed by visible map area.`,
-    }),
-    narrowByGlobalSearch,
-    narrowByGlobalTime,
-    resolution: z
-      .union([
-        z.literal(GRID_RESOLUTION.COARSE),
-        z.literal(GRID_RESOLUTION.FINE),
-        z.literal(GRID_RESOLUTION.MOST_FINE),
-        z.literal(GRID_RESOLUTION.SUPER_FINE),
-      ])
-      .optional()
-      .meta({
-        description: `Grid resolution used to calculate the values of the '?_geotile_precision', '?_geohex_precision' and '?_geohash_precision' ES|QL parameters from the map zoom level. Ignored when the ES|QL statement uses none of them. Defaults to '${GRID_RESOLUTION.MOST_FINE}'.`,
+export const ESQLSourceSchema = lazySchema(() =>
+  z
+    .object({
+      applyForceRefresh: applyForceRefreshSchema,
+      dateField: z.string().optional().meta({
+        description: `Date field used to narrow ES|QL requests by global time range. Required when 'narrowByGlobalTime' is true.`,
       }),
-    type: z.literal(SOURCE_TYPES.ESQL),
-  })
-  .strict()
-  .meta({
-    description:
-      'Vector feature source returning points, lines, and polygons from Elasticsearch ES|QL request. One feature is returned per response row. Feature geometry is provided from first geo_point or geo_shape column.',
-  });
+      esql: z.string().meta({
+        description: 'ES|QL statement returning at least one geo_point or geo_shape column.',
+      }),
+      geoField: z.string().optional().meta({
+        description: `Geo field used to narrow ES|QL requests by visible map area and spatial filters drawn on map. Required when 'narrowByMapBounds' is true.`,
+      }),
+      id: z.string().meta({ description: 'uuid.' }),
+      narrowByMapBounds: z.boolean().optional().meta({
+        description: `When true, results narrowed by visible map area.`,
+      }),
+      narrowByGlobalSearch,
+      narrowByGlobalTime,
+      resolution: z
+        .union([
+          z.literal(GRID_RESOLUTION.COARSE),
+          z.literal(GRID_RESOLUTION.FINE),
+          z.literal(GRID_RESOLUTION.MOST_FINE),
+          z.literal(GRID_RESOLUTION.SUPER_FINE),
+        ])
+        .optional()
+        .meta({
+          description: `Grid resolution used to calculate the values of the '?_geotile_precision', '?_geohex_precision' and '?_geohash_precision' ES|QL parameters from the map zoom level. Ignored when the ES|QL statement uses none of them. Defaults to '${DEFAULT_GRID_RESOLUTION}'.`,
+        }),
+      type: z.literal(SOURCE_TYPES.ESQL),
+    })
+    .strict()
+    .meta({
+      description:
+        'Vector feature source returning points, lines, and polygons from Elasticsearch ES|QL request. One feature is returned per response row. Feature geometry is provided from first geo_point or geo_shape column.',
+    })
+);

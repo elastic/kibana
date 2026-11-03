@@ -18,7 +18,7 @@ export interface GeoPrecisions {
   geohash?: number;
 }
 
-export const DEFAULT_GRID_RESOLUTION: GRID_RESOLUTION = GRID_RESOLUTION.MOST_FINE;
+export const DEFAULT_GRID_RESOLUTION: GRID_RESOLUTION = GRID_RESOLUTION.FINE;
 
 const MAX_GEOTILE_LEVEL = 29;
 

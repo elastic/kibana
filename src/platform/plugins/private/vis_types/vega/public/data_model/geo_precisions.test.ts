@@ -10,8 +10,8 @@
 import { getGeoPrecisionsForZoom } from './geo_precisions';
 
 describe('getGeoPrecisionsForZoom', () => {
-  test('returns the MOST_FINE precisions', () => {
-    expect(getGeoPrecisionsForZoom(4.5)).toEqual({ geotile: 9, geohex: 4, geohash: 4 });
+  test('returns the FINE precisions', () => {
+    expect(getGeoPrecisionsForZoom(4.5)).toEqual({ geotile: 8, geohex: 4, geohash: 3 });
   });
 
   test('caps at the maximum precisions', () => {

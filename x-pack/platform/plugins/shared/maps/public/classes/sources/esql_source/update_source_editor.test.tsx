@@ -181,7 +181,7 @@ describe('UpdateSourceEditor', () => {
       expect(slider).toHaveValue('2');
     });
 
-    test('should default resolution to most fine', async () => {
+    test('should default resolution to fine', async () => {
       const sourceDescriptor = ESQLSource.createDescriptor({ esql: GEOTILE_ESQL });
       render(
         <UpdateSourceEditor
@@ -191,7 +191,7 @@ describe('UpdateSourceEditor', () => {
         />
       );
       const slider = await screen.findByRole('slider', { name: 'Resolution' });
-      expect(slider).toHaveValue('3');
+      expect(slider).toHaveValue('2');
     });
 
     test('should call onChange with resolution', async () => {
