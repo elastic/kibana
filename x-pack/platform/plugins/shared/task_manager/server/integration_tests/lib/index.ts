@@ -13,6 +13,8 @@ export {
   listIndices,
   waitForStableIndices,
   startPodProcess,
+  startModelSimulator,
+  MODEL_REPLY,
   ENCRYPTION_KEY,
 } from './task_pod';
 export type { PodProcess } from './task_pod';

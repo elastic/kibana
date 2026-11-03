@@ -11,7 +11,8 @@ import { mkdtempSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { spawn, type ChildProcess } from 'child_process';
-import { request } from 'http';
+import { createServer, request } from 'http';
+import type { AddressInfo } from 'net';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { esTestConfig } from '@kbn/test';
 import type { TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
@@ -122,4 +123,52 @@ export const startPodProcess = async ({
       if (pod.pid) process.kill(-pod.pid, 'SIGTERM');
     },
   };
+};
+
+export const MODEL_REPLY = 'Hello from the simulator';
+
+/** An OpenAI chat completions endpoint that answers every request with `MODEL_REPLY`. */
+export const startModelSimulator = async () => {
+  const requests: string[] = [];
+  const server = createServer((req, res) => {
+    let body = '';
+    req.on('data', (chunk) => (body += chunk));
+    req.on('end', () => {
+      requests.push(body);
+      const parsed = body ? JSON.parse(body) : {};
+      const base = { id: 'chatcmpl-sim', created: 1, model: 'sim' };
+      const usage = { prompt_tokens: 3, completion_tokens: 5, total_tokens: 8 };
+      if (parsed.stream) {
+        res.writeHead(200, { 'content-type': 'text/event-stream' });
+        const chunk = (delta: object, finish: string | null, extra: object = {}) =>
+          `data: ${JSON.stringify({
+            ...base,
+            object: 'chat.completion.chunk',
+            choices: [{ index: 0, delta, finish_reason: finish }],
+            ...extra,
+          })}\n\n`;
+        res.write(chunk({ role: 'assistant', content: MODEL_REPLY }, null));
+        res.write(chunk({}, 'stop', { usage }));
+        res.end('data: [DONE]\n\n');
+      } else {
+        res.writeHead(200, { 'content-type': 'application/json' });
+        res.end(
+          JSON.stringify({
+            ...base,
+            object: 'chat.completion',
+            choices: [
+              {
+                index: 0,
+                message: { role: 'assistant', content: MODEL_REPLY },
+                finish_reason: 'stop',
+              },
+            ],
+            usage,
+          })
+        );
+      }
+    });
+  });
+  await new Promise<void>((resolve) => server.listen(0, resolve));
+  return { server, requests, url: `http://localhost:${(server.address() as AddressInfo).port}` };
 };

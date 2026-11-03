@@ -11,8 +11,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import { createServer, type Server } from 'http';
-import type { AddressInfo } from 'net';
+import type { Server } from 'http';
 import {
   type TestElasticsearchUtils,
   type TestKibanaUtils,
@@ -22,6 +21,8 @@ import {
   ENCRYPTION_KEY,
   http,
   listIndices,
+  MODEL_REPLY as REPLY,
+  startModelSimulator,
   setupTestServers,
   startPodProcess,
   waitForStableIndices,
@@ -34,52 +35,9 @@ const { AgentBuilderPlugin } = jest.requireActual('@kbn/agent-builder-plugin/ser
 
 const KIBANA_PORT = 5696;
 const POD_PORT = 3594;
-const REPLY = 'Hello from the simulator';
 
 const taskManagerStartSpy = jest.spyOn(TaskManagerPlugin.prototype, 'start');
 const agentBuilderStartSpy = jest.spyOn(AgentBuilderPlugin.prototype, 'start');
-
-/** An OpenAI chat completions endpoint that answers every request with `REPLY`. */
-const startModelSimulator = async () => {
-  const requests: string[] = [];
-  const server = createServer((req, res) => {
-    let body = '';
-    req.on('data', (chunk) => (body += chunk));
-    req.on('end', () => {
-      requests.push(body);
-      const parsed = body ? JSON.parse(body) : {};
-      const base = { id: 'chatcmpl-sim', created: 1, model: 'sim' };
-      const usage = { prompt_tokens: 3, completion_tokens: 5, total_tokens: 8 };
-      if (parsed.stream) {
-        res.writeHead(200, { 'content-type': 'text/event-stream' });
-        const chunk = (delta: object, finish: string | null, extra: object = {}) =>
-          `data: ${JSON.stringify({
-            ...base,
-            object: 'chat.completion.chunk',
-            choices: [{ index: 0, delta, finish_reason: finish }],
-            ...extra,
-          })}\n\n`;
-        res.write(chunk({ role: 'assistant', content: REPLY }, null));
-        res.write(chunk({}, 'stop', { usage }));
-        res.end('data: [DONE]\n\n');
-      } else {
-        res.writeHead(200, { 'content-type': 'application/json' });
-        res.end(
-          JSON.stringify({
-            ...base,
-            object: 'chat.completion',
-            choices: [
-              { index: 0, message: { role: 'assistant', content: REPLY }, finish_reason: 'stop' },
-            ],
-            usage,
-          })
-        );
-      }
-    });
-  });
-  await new Promise<void>((resolve) => server.listen(0, resolve));
-  return { server, requests, url: `http://localhost:${(server.address() as AddressInfo).port}` };
-};
 
 /**
  * Runs an agent in a task pod, against the same ES as a Kibana that routes `agent-builder:run-agent`

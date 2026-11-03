@@ -19,6 +19,7 @@ import {
   ENCRYPTION_KEY,
   http,
   listIndices,
+  startModelSimulator,
   retry,
   setupTestServers,
   startPodProcess,
@@ -56,6 +57,11 @@ steps:
     type: console
     with:
       message: and again
+  - name: ask
+    type: ai.prompt
+    connector-id: parity-llm
+    with:
+      prompt: say hello
 `;
 
 /**
@@ -67,6 +73,7 @@ describe('task pod parity (workflows family)', () => {
   let kibanaServer: TestKibanaUtils;
   let taskManager: TaskManagerStartContract;
   let pod: PodProcess;
+  let simulator: Awaited<ReturnType<typeof startModelSimulator>>;
   let indicesBeforePod: string[];
   const auth = `Basic ${Buffer.from('elastic:changeme').toString('base64')}`;
   const kibana = (path: string, method = 'GET', body?: unknown) =>
@@ -77,11 +84,21 @@ describe('task pod parity (workflows family)', () => {
     });
 
   beforeAll(async () => {
+    simulator = await startModelSimulator();
+    const preconfigured = {
+      'parity-llm': {
+        name: 'parity llm',
+        actionTypeId: '.gen-ai',
+        config: { apiProvider: 'OpenAI', apiUrl: `${simulator.url}/v1/chat/completions` },
+        secrets: { apiKey: 'sim' },
+      },
+    };
     const podUrl = `http://localhost:${POD_PORT}`;
     const setup = await setupTestServers({
       server: { port: KIBANA_PORT },
       xpack: {
         encryptedSavedObjects: { encryptionKey: ENCRYPTION_KEY },
+        actions: { preconfigured },
         task_manager: { pods: [{ url: podUrl, task_types: WORKFLOW_TASK_TYPES }] },
       },
     });
@@ -93,14 +110,13 @@ describe('task pod parity (workflows family)', () => {
     pod = await startPodProcess({
       family: 'workflows',
       port: POD_PORT,
-      podConfig: {
-        // The pod serves only the workflow task types; Kibana keeps the rest.
-      },
+      podConfig: { 'xpack.actions.preconfigured': preconfigured },
     });
   });
 
   afterAll(async () => {
     pod?.stop();
+    simulator?.server.close();
     await kibanaServer?.stop();
     await esServer?.stop();
   });
@@ -153,6 +169,8 @@ describe('task pod parity (workflows family)', () => {
       { times: 30, intervalMs: 1000 }
     );
     // Task Manager sent the run to the pod; Kibana's engine never ran it.
+    // The AI step reached the model from the pod.
+    expect(simulator.requests.length).toBeGreaterThan(0);
     expect(kibanaRunWorkflow).not.toHaveBeenCalled();
   });
 
