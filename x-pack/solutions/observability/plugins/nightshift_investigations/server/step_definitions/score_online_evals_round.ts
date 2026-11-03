@@ -36,7 +36,7 @@ const inputSchema = lazySchema(() =>
     graded_report: z
       .enum(['first_round', 'pre_recovery', 'current'])
       .describe(
-        "Which report the judges grade: `first_round` is the investigation's first round, `current` the round being scored."
+        "Which report the judges grade: `first_round` is the investigation's first round, `current` the round being scored. `pre_recovery`, the report just before an alert recovery, isn't supported yet."
       ),
     evaluator_set: z
       .string()
