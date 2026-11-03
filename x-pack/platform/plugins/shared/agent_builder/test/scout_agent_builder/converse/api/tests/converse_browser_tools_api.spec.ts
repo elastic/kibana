@@ -44,6 +44,8 @@ const EXECUTION_MODES: ExecutionMode[] = ['local', 'task_manager'];
 const TEST_PREFIX = 'browser-tools-test';
 const CLIENT_ID = 'test-client';
 const FINAL_ANSWER = 'The tool answered';
+// cases that wait for a browser tool call to expire
+const EXPIRY_TEST_TIMEOUT_MS = 120_000;
 
 const echoTool = (timeoutMs: number) => ({
   id: 'echo_tool',
@@ -278,6 +280,7 @@ apiTest.describe('Agent Builder — browser tools', { tag: [...tags.stateful.cla
             expect(call.params).toStrictEqual({ text: 'ping' });
             expect(call.client_id).toBe(CLIENT_ID);
             expect(new Date(call.expires_at).getTime()).toBeGreaterThan(Date.now());
+            expect(Date.parse(call.issued_at)).toBeLessThan(Date.parse(call.expires_at));
 
             const res = await postBrowserToolResult(apiClient, adminCredentials.apiKeyHeader, {
               executionId,
@@ -315,7 +318,7 @@ apiTest.describe('Agent Builder — browser tools', { tag: [...tags.stateful.cla
     );
 
     apiTest(`times out when nobody answers [${mode}]`, async ({ apiClient }) => {
-      apiTest.setTimeout(120_000);
+      apiTest.setTimeout(EXPIRY_TEST_TIMEOUT_MS);
       setupAgentCallToolThenAnswer({
         proxy: llmProxy,
         toolName: 'echo_tool',
@@ -349,6 +352,70 @@ apiTest.describe('Agent Builder — browser tools', { tag: [...tags.stateful.cla
       expect(String((step.results[0].data as { message: string }).message)).toContain(
         'did not answer'
       );
+    });
+
+    apiTest(`rejects a result posted after the call expired [${mode}]`, async ({ apiClient }) => {
+      apiTest.setTimeout(EXPIRY_TEST_TIMEOUT_MS);
+      setupAgentCallToolThenAnswer({
+        proxy: llmProxy,
+        toolName: 'echo_tool',
+        toolArg: { text: 'ping' },
+        response: FINAL_ANSWER,
+      });
+
+      const executionId = randomUUID();
+      const events = await streamConverse({
+        url: converseUrl,
+        headers: adminCredentials.apiKeyHeader,
+        body: converseBody(executionId, 1_000),
+      });
+      conversationIds.push(conversationIdOf(events));
+      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+      const calls = events.map(browserToolCallData).filter(Boolean) as BrowserToolCallEventData[];
+      expect(calls).toHaveLength(1);
+
+      const res = await postBrowserToolResult(apiClient, adminCredentials.apiKeyHeader, {
+        executionId,
+        toolCallId: calls[0].tool_call_id,
+        body: { client_id: CLIENT_ID, result: { status: 'ok', content: 'too late' } },
+      });
+      expect(res).toHaveStatusCode(409);
+    });
+
+    apiTest(`rejects a duplicate result [${mode}]`, async ({ apiClient }) => {
+      setupAgentCallToolThenAnswer({
+        proxy: llmProxy,
+        toolName: 'echo_tool',
+        toolArg: { text: 'ping' },
+        response: FINAL_ANSWER,
+      });
+
+      const executionId = randomUUID();
+      const statuses: number[] = [];
+      const events = await streamConverse({
+        url: converseUrl,
+        headers: adminCredentials.apiKeyHeader,
+        body: converseBody(executionId, 10_000),
+        onEvent: async (event) => {
+          const call = browserToolCallData(event);
+          if (!call) {
+            return;
+          }
+          for (let i = 0; i < 2; i++) {
+            const res = await postBrowserToolResult(apiClient, adminCredentials.apiKeyHeader, {
+              executionId,
+              toolCallId: call.tool_call_id,
+              body: { client_id: CLIENT_ID, result: { status: 'ok', content: 'pong' } },
+            });
+            statuses.push(res.statusCode);
+          }
+        },
+      });
+      conversationIds.push(conversationIdOf(events));
+      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+      expect(statuses).toStrictEqual([204, 409]);
     });
 
     apiTest(`two browser tool calls in one turn [${mode}]`, async ({ apiClient }) => {

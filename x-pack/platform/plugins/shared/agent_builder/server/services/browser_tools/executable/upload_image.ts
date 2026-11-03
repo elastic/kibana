@@ -78,7 +78,7 @@ export const createUploadBrowserToolImage = ({
         attachment_id: attachmentId,
         mime_type: mimeType,
         name,
-        description: `Screenshot taken by ${toolId}.`,
+        description: image.description ?? `Screenshot taken by ${toolId}.`,
       },
     };
   };

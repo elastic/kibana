@@ -92,7 +92,8 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   // Create a QueryClient per instance to ensure cache isolation between multiple embeddable conversations
   const queryClient = useMemo(() => new QueryClient(), []);
   const conversationStreamService = useMemo(() => new ConversationStreamService(), []);
-  const clientId = useMemo(() => uuidv4(), []);
+  // useState, not useMemo: React may discard memoised values, and the id must stay stable.
+  const [clientId] = useState(() => uuidv4());
   const browserToolIds = useMemo(
     () =>
       selectBrowserToolIds({

@@ -235,6 +235,40 @@ describe('converse_helpers browser tools', () => {
     expect(executeAgentMock).not.toHaveBeenCalled();
   });
 
+  it('rejects an id listed twice in browser_tools.tool_ids with a bad request error', async () => {
+    await expect(
+      executeAgent({
+        payload: {
+          input: 'hello',
+          browser_tools: {
+            client_id: 'client-1',
+            tool_ids: ['get_page_snapshot', 'get_page_snapshot'],
+          },
+        },
+        request,
+        executionService,
+      })
+    ).rejects.toThrow('Duplicate browser tool id "get_page_snapshot"');
+    expect(executeAgentMock).not.toHaveBeenCalled();
+  });
+
+  it('rejects a legacy browser_api_tools id colliding with a browser_tools id', async () => {
+    await expect(
+      executeAgent({
+        payload: {
+          input: 'hello',
+          browser_tools: { client_id: 'client-1', tool_ids: ['get_page_snapshot'] },
+          browser_api_tools: [
+            { id: 'get_page_snapshot', description: 'legacy', schema: { type: 'object' } },
+          ],
+        },
+        request,
+        executionService,
+      })
+    ).rejects.toThrow('Duplicate browser tool id "get_page_snapshot"');
+    expect(executeAgentMock).not.toHaveBeenCalled();
+  });
+
   it('merges legacy browser_api_tools into browserTools.tools', async () => {
     await executeAgent({
       payload: {

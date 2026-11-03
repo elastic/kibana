@@ -214,7 +214,7 @@ export const createToolManagerMock = (): ToolManagerMock => {
     setEventEmitter: jest.fn(),
     setMaxToolResultTokens: jest.fn(),
     addTools: jest.fn(),
-    list: jest.fn(),
+    list: jest.fn().mockReturnValue([]),
     recordToolUse: jest.fn(),
     getToolIdMapping: jest.fn(),
     getToolMeta: jest.fn(),

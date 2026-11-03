@@ -137,6 +137,7 @@ describe('subscribeToChatEvents', () => {
         tool_id: 'my_tool',
         params: { a: 1 },
         client_id: 'client-1',
+        issued_at: '2026-01-01T00:00:00.000Z',
         expires_at: '2026-01-01T00:01:00.000Z',
       },
     } as BrowserToolCallEvent;

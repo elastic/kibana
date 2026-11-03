@@ -33,7 +33,7 @@ describe('Event utilities', () => {
   });
 
   describe('emitBrowserToolCall', () => {
-    it('emitBrowserToolCall forwards a browser_tool_call event with client_id and expires_at', () => {
+    it('emitBrowserToolCall forwards a browser_tool_call event with client_id, issued_at and expires_at', () => {
       const mockEventHandler = jest.fn();
       const emitter = createToolEventEmitter({
         eventHandler: mockEventHandler,
@@ -43,6 +43,7 @@ describe('Event utilities', () => {
       emitter.emitBrowserToolCall({
         params: { foo: 'bar' },
         clientId: 'client-1',
+        issuedAt: '2025-12-31T23:59:30.000Z',
         expiresAt: '2026-01-01T00:00:00.000Z',
       });
 
@@ -51,6 +52,7 @@ describe('Event utilities', () => {
         data: {
           params: { foo: 'bar' },
           client_id: 'client-1',
+          issued_at: '2025-12-31T23:59:30.000Z',
           expires_at: '2026-01-01T00:00:00.000Z',
         },
       });

@@ -96,6 +96,8 @@ export interface BrowserToolCallEventData {
   tool_id: string;
   params: Record<string, unknown>;
   client_id?: string;
+  /** ISO server time at which the call was emitted, used by the client to correct clock skew. */
+  issued_at: string;
   /** ISO timestamp after which the call is considered expired. */
   expires_at: string;
 }

@@ -82,7 +82,7 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       schema: schema.boolean(),
       value: false,
       experimental: true,
-      requiresPageReload: false,
+      requiresPageReload: true,
       readonly: false,
     },
     [AGENT_BUILDER_API_DISCOVERY_SETTING_ID]: {

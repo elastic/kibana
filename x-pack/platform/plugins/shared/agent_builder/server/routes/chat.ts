@@ -21,6 +21,7 @@ import {
   createInternalError,
   ConversationAccessControlMode,
   ConversationOriginType,
+  MAX_BROWSER_TOOL_TIMEOUT_MS,
 } from '@kbn/agent-builder-common';
 import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
 import type {
@@ -244,6 +245,7 @@ export const conversePayloadSchema = schema.object({
         timeout_ms: schema.maybe(
           schema.number({
             min: 1000,
+            max: MAX_BROWSER_TOOL_TIMEOUT_MS,
             meta: {
               description: 'How long the agent waits for the browser to answer a call, in ms.',
             },

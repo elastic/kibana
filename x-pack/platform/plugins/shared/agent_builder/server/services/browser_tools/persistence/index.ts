@@ -10,5 +10,6 @@ export type {
   BrowserToolCallClient,
   BrowserToolCallDocument,
   AnswerOutcome,
+  SetStatusOutcome,
 } from './browser_tool_call_client';
 export { browserToolCallIndexName } from './browser_tool_call_storage';

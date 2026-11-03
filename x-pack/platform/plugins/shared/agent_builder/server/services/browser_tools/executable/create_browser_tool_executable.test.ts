@@ -8,6 +8,7 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   BrowserToolCallStatus,
+  MAX_BROWSER_TOOL_TIMEOUT_MS,
   ToolOrigin,
   ToolResultType,
   ToolType,
@@ -64,7 +65,7 @@ describe('createBrowserToolExecutable', () => {
 
     browserTools = createBrowserToolsServiceMock();
     (browserTools.callClient.create as jest.Mock).mockResolvedValue(undefined);
-    (browserTools.callClient.setStatus as jest.Mock).mockResolvedValue(undefined);
+    (browserTools.callClient.setStatus as jest.Mock).mockResolvedValue('applied');
     logger = loggerMock.create();
 
     handlerContext = createToolHandlerContextMock();
@@ -87,9 +88,9 @@ describe('createBrowserToolExecutable', () => {
     jest.useRealTimers();
   });
 
-  const createExecutable = () =>
+  const createExecutable = (toolDescriptor: BrowserToolDescriptor = descriptor) =>
     createBrowserToolExecutable({
-      descriptor,
+      descriptor: toolDescriptor,
       clientId: 'client-1',
       executionId: 'exec-1',
       spaceId: 'default',
@@ -116,7 +117,7 @@ describe('createBrowserToolExecutable', () => {
     expect(schema.safeParse({}).success).toBe(false);
   });
 
-  it('creates a pending document, emits browser_tool_call with client_id and expires_at, and returns the normalised result', async () => {
+  it('creates a pending document, emits browser_tool_call with client_id, issued_at and expires_at, and returns the normalised result', async () => {
     const expiresAt = new Date(NOW.getTime() + 5_000).toISOString();
     let answered = false;
     (browserTools.callClient.get as jest.Mock).mockImplementation(async () =>
@@ -146,6 +147,7 @@ describe('createBrowserToolExecutable', () => {
     expect(handlerContext.events.emitBrowserToolCall).toHaveBeenCalledWith({
       params: { selector: '#main' },
       clientId: 'client-1',
+      issuedAt: NOW.toISOString(),
       expiresAt,
     });
     expect(output).toBeUndefined();
@@ -228,6 +230,92 @@ describe('createBrowserToolExecutable', () => {
       'call-1',
       BrowserToolCallStatus.expired
     );
+  });
+
+  it('clamps the descriptor timeout to the maximum', async () => {
+    (browserTools.callClient.get as jest.Mock).mockResolvedValue(
+      record(BrowserToolCallStatus.answered, { status: 'ok' })
+    );
+
+    const promise = createExecutable({ ...descriptor, timeout_ms: 3_600_000 }).execute({
+      toolParams: { selector: '#main' },
+    });
+    await jest.advanceTimersByTimeAsync(0);
+    await promise;
+
+    const expiresAt = new Date(NOW.getTime() + MAX_BROWSER_TOOL_TIMEOUT_MS).toISOString();
+    expect(browserTools.callClient.create).toHaveBeenCalledWith(
+      expect.objectContaining({ expiresAt })
+    );
+    expect(handlerContext.events.emitBrowserToolCall).toHaveBeenCalledWith(
+      expect.objectContaining({ expiresAt })
+    );
+  });
+
+  it('uses an answer that landed after the last read when expiring the call is skipped', async () => {
+    (browserTools.callClient.get as jest.Mock).mockResolvedValue(
+      record(BrowserToolCallStatus.pending)
+    );
+    (browserTools.callClient.setStatus as jest.Mock).mockImplementation(
+      async (_executionId: string, _toolCallId: string, status: BrowserToolCallStatus) => {
+        if (status === BrowserToolCallStatus.expired) {
+          // the browser answered between the waiter's last read and the expire write
+          (browserTools.callClient.get as jest.Mock).mockResolvedValue(
+            record(BrowserToolCallStatus.answered, { status: 'ok', content: 'late answer' })
+          );
+          return 'skipped';
+        }
+        return 'applied';
+      }
+    );
+
+    let output: RunToolReturn | undefined;
+    createExecutable()
+      .execute({ toolParams: { selector: '#main' } })
+      .then((value) => {
+        output = value;
+      });
+
+    await jest.advanceTimersByTimeAsync(5_200);
+
+    expect(output).toEqual({
+      results: [
+        expect.objectContaining({
+          type: ToolResultType.other,
+          data: { content: 'late answer' },
+        }),
+      ],
+    });
+    expect(browserTools.callClient.setStatus).toHaveBeenCalledWith(
+      'exec-1',
+      'call-1',
+      BrowserToolCallStatus.consumed
+    );
+  });
+
+  it('returns the timeout error when expiring is skipped but the call is not answered', async () => {
+    (browserTools.callClient.get as jest.Mock).mockResolvedValue(
+      record(BrowserToolCallStatus.consumed)
+    );
+    (browserTools.callClient.setStatus as jest.Mock).mockResolvedValue('skipped');
+
+    let output: RunToolReturn | undefined;
+    createExecutable()
+      .execute({ toolParams: { selector: '#main' } })
+      .then((value) => {
+        output = value;
+      });
+
+    await jest.advanceTimersByTimeAsync(5_200);
+
+    expect(output).toEqual({
+      results: [
+        expect.objectContaining({
+          type: ToolResultType.error,
+          data: { message: 'Browser did not answer within 5 s' },
+        }),
+      ],
+    });
   });
 
   it('marks the call expired and returns an error result when the execution is aborted', async () => {

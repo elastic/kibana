@@ -23,6 +23,7 @@ const createEvent = (
     tool_call_id: 'call-1',
     tool_id: 'my_tool',
     params: {},
+    issued_at: new Date(START).toISOString(),
     expires_at: new Date(START + 60_000).toISOString(),
     ...overrides,
   },
@@ -264,5 +265,149 @@ describe('BrowserToolDispatcher', () => {
       ['exec-2', 'b'],
       ['exec-1', 'c'],
     ]);
+  });
+
+  describe('clock skew', () => {
+    const TWO_MINUTES = 2 * 60_000;
+    // server-side window: 30 s from issue
+    const skewedEvent = (overrides: Partial<BrowserToolCallEvent['data']> = {}) =>
+      createEvent({
+        issued_at: new Date(START).toISOString(),
+        expires_at: new Date(START + 30_000).toISOString(),
+        ...overrides,
+      });
+
+    it('executes a fresh call when the browser clock is ahead of the server', async () => {
+      jest.setSystemTime(START + TWO_MINUTES);
+      const handler = jest.fn(() => ({ content: 'ran' }));
+      register(handler);
+
+      dispatcher.dispatch(skewedEvent(), context);
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(posted.map((p) => p.result)).toEqual([{ status: 'ok', content: 'ran' }]);
+    });
+
+    it('does not run a call whose server-side window has passed when the browser clock is behind', async () => {
+      jest.setSystemTime(START - TWO_MINUTES);
+      const started: string[] = [];
+      register((_params, { toolCallId }) => {
+        started.push(toolCallId);
+        // the first call blocks the queue until its own deadline
+        return new Promise<void>(() => {});
+      });
+
+      dispatcher.dispatch(
+        skewedEvent({
+          tool_call_id: 'blocker',
+          expires_at: new Date(START + 60_000).toISOString(),
+        }),
+        context
+      );
+      dispatcher.dispatch(skewedEvent({ tool_call_id: 'queued' }), context);
+
+      // 60 s after receipt: the queued call's 30 s window has elapsed, though its raw
+      // expires_at is still 90 s ahead on the (late) browser clock
+      await jest.advanceTimersByTimeAsync(60_000);
+
+      expect(started).toEqual(['blocker']);
+      expect(posted.map((p) => [p.toolCallId, p.result])).toEqual([
+        ['blocker', { status: 'error', message: expect.stringContaining('expired') }],
+        ['queued', { status: 'error', message: 'expired before execution' }],
+      ]);
+    });
+
+    it('falls back to the raw expires_at when issued_at is missing', async () => {
+      jest.setSystemTime(START + TWO_MINUTES);
+      const handler = jest.fn();
+      register(handler);
+
+      dispatcher.dispatch(skewedEvent({ issued_at: undefined as unknown as string }), context);
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(handler).not.toHaveBeenCalled();
+      expect(posted.map((p) => p.result)).toEqual([
+        { status: 'error', message: 'expired before execution' },
+      ]);
+    });
+
+    it('treats an unparseable expires_at as expired', async () => {
+      const handler = jest.fn();
+      register(handler);
+
+      dispatcher.dispatch(skewedEvent({ expires_at: 'not-a-date' }), context);
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(handler).not.toHaveBeenCalled();
+      expect(posted.map((p) => p.result)).toEqual([
+        { status: 'error', message: 'expired before execution' },
+      ]);
+    });
+  });
+
+  describe('posting results', () => {
+    let consoleError: jest.SpyInstance;
+
+    beforeEach(() => {
+      register(() => ({ content: 'done' }));
+      consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      consoleError.mockRestore();
+    });
+
+    it('retries a 5xx after 500 ms then 1500 ms', async () => {
+      postBrowserToolResult
+        .mockRejectedValueOnce({ response: { status: 503 } })
+        .mockRejectedValueOnce({ body: { statusCode: 500 } });
+
+      dispatcher.dispatch(createEvent(), context);
+      await jest.advanceTimersByTimeAsync(0);
+      expect(postBrowserToolResult).toHaveBeenCalledTimes(1);
+
+      await jest.advanceTimersByTimeAsync(499);
+      expect(postBrowserToolResult).toHaveBeenCalledTimes(1);
+      await jest.advanceTimersByTimeAsync(1);
+      expect(postBrowserToolResult).toHaveBeenCalledTimes(2);
+
+      await jest.advanceTimersByTimeAsync(1_499);
+      expect(postBrowserToolResult).toHaveBeenCalledTimes(2);
+      await jest.advanceTimersByTimeAsync(1);
+      expect(postBrowserToolResult).toHaveBeenCalledTimes(3);
+      expect(posted.map((p) => p.result)).toEqual([{ status: 'ok', content: 'done' }]);
+      expect(consoleError).not.toHaveBeenCalled();
+    });
+
+    it('gives up after two retries on network errors', async () => {
+      postBrowserToolResult.mockRejectedValue(new TypeError('Failed to fetch'));
+
+      dispatcher.dispatch(createEvent(), context);
+      await jest.advanceTimersByTimeAsync(5_000);
+
+      expect(postBrowserToolResult).toHaveBeenCalledTimes(3);
+      expect(consoleError).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not retry other 4xx errors', async () => {
+      postBrowserToolResult.mockRejectedValue({ response: { status: 403 } });
+
+      dispatcher.dispatch(createEvent(), context);
+      await jest.advanceTimersByTimeAsync(5_000);
+
+      expect(postBrowserToolResult).toHaveBeenCalledTimes(1);
+      expect(consoleError).toHaveBeenCalledTimes(1);
+    });
+
+    it("treats a 'final' answer (404/409) as done", async () => {
+      postBrowserToolResult.mockResolvedValue('final');
+
+      dispatcher.dispatch(createEvent(), context);
+      await jest.advanceTimersByTimeAsync(5_000);
+
+      expect(postBrowserToolResult).toHaveBeenCalledTimes(1);
+      expect(consoleError).not.toHaveBeenCalled();
+    });
   });
 });

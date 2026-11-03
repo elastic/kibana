@@ -149,7 +149,10 @@ describe('BrowserToolCallClient', () => {
   });
 
   it('setStatus runs a conditional scripted update with retry on conflict', async () => {
-    await client.setStatus('exec-1', 'call-1', BrowserToolCallStatus.consumed);
+    esClient.update.mockResolvedValue({ result: 'updated' } as any);
+    await expect(
+      client.setStatus('exec-1', 'call-1', BrowserToolCallStatus.consumed)
+    ).resolves.toBe('applied');
     expect(esClient.update).toHaveBeenCalledWith({
       index: browserToolCallIndexName,
       id: 'exec-1:call-1',
@@ -160,6 +163,13 @@ describe('BrowserToolCallClient', () => {
         params: { status: 'consumed' },
       }),
     });
+  });
+
+  it("setStatus returns 'skipped' when the update result is 'noop'", async () => {
+    esClient.update.mockResolvedValue({ result: 'noop' } as any);
+    await expect(client.setStatus('exec-1', 'call-1', BrowserToolCallStatus.expired)).resolves.toBe(
+      'skipped'
+    );
   });
 
   it('deleteOlderThan issues delete_by_query with a created_at range', async () => {

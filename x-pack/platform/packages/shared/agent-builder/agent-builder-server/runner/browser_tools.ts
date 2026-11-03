@@ -30,6 +30,8 @@ export interface BrowserToolCallRecord {
 
 export type BrowserToolCallAnswerOutcome = 'accepted' | 'not_found' | 'rejected';
 
+export type BrowserToolCallSetStatusOutcome = 'applied' | 'skipped';
+
 /**
  * Persistence client for browser tool calls, as exposed to the agent loop.
  */
@@ -56,12 +58,15 @@ export interface BrowserToolCallClientContract {
     now?: Date;
   }): Promise<BrowserToolCallAnswerOutcome>;
 
-  /** Mark a call as consumed or expired. */
+  /**
+   * Mark a call as consumed or expired. Resolves to `skipped` when the transition did not
+   * apply (e.g. expiring a call that was answered in the meantime).
+   */
   setStatus(
     executionId: string,
     toolCallId: string,
     status: BrowserToolCallStatus.consumed | BrowserToolCallStatus.expired
-  ): Promise<void>;
+  ): Promise<BrowserToolCallSetStatusOutcome>;
 }
 
 /**

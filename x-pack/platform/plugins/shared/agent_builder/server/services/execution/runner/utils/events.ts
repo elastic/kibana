@@ -75,12 +75,13 @@ export const createToolEventEmitter = ({
       };
       eventHandler(event);
     },
-    emitBrowserToolCall: ({ params, clientId, expiresAt }) => {
+    emitBrowserToolCall: ({ params, clientId, issuedAt, expiresAt }) => {
       const event: InternalBrowserToolCallEvent = {
         type: ChatEventType.browserToolCall,
         data: {
           params,
           ...(clientId ? { client_id: clientId } : {}),
+          issued_at: issuedAt,
           expires_at: expiresAt,
         },
       };

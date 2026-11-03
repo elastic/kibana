@@ -89,6 +89,7 @@ export const createBrowserToolCallEvent = (data: {
   toolId: string;
   params: Record<string, unknown>;
   clientId?: string;
+  issuedAt: string;
   expiresAt: string;
 }): BrowserToolCallEvent => {
   return {
@@ -98,6 +99,7 @@ export const createBrowserToolCallEvent = (data: {
       tool_id: data.toolId,
       params: data.params,
       client_id: data.clientId,
+      issued_at: data.issuedAt,
       expires_at: data.expiresAt,
     },
   };

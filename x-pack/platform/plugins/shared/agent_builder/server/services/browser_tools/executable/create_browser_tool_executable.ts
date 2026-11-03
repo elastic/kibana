@@ -11,12 +11,13 @@ import type { Logger } from '@kbn/logging';
 import {
   BrowserToolCallStatus,
   DEFAULT_BROWSER_TOOL_TIMEOUT_MS,
+  MAX_BROWSER_TOOL_TIMEOUT_MS,
   ToolOrigin,
   ToolType,
 } from '@kbn/agent-builder-common';
-import type { BrowserToolDescriptor } from '@kbn/agent-builder-common';
+import type { BrowserToolDescriptor, BrowserToolResultPayload } from '@kbn/agent-builder-common';
 import { createErrorResult } from '@kbn/agent-builder-server';
-import type { ScopedRunner, ToolHandlerFn } from '@kbn/agent-builder-server';
+import type { ScopedRunner, ToolHandlerContext, ToolHandlerFn } from '@kbn/agent-builder-server';
 import type { BrowserToolsRunContext } from '@kbn/agent-builder-server/runner';
 import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
 import { waitForBrowserToolResult } from './wait_for_result';
@@ -46,17 +47,17 @@ export const createBrowserToolExecutable = ({
   logger: Logger;
 }): ExecutableToolWithOrigin => {
   const toolId = descriptor.id;
-  const timeoutMs = descriptor.timeout_ms ?? DEFAULT_BROWSER_TOOL_TIMEOUT_MS;
+  const timeoutMs = Math.min(
+    descriptor.timeout_ms ?? DEFAULT_BROWSER_TOOL_TIMEOUT_MS,
+    MAX_BROWSER_TOOL_TIMEOUT_MS
+  );
   const { callClient } = browserTools;
 
   const getSchema = () =>
     (fromJSONSchema(descriptor.schema as Record<string, unknown>) ??
       z.object({})) as z.ZodObject<any>;
 
-  const markCall = (
-    toolCallId: string,
-    status: BrowserToolCallStatus.consumed | BrowserToolCallStatus.expired
-  ) => {
+  const markCall = (toolCallId: string, status: BrowserToolCallStatus.consumed) => {
     callClient.setStatus(executionId, toolCallId, status).catch((error) => {
       logger.warn(
         `Failed to mark browser tool call [${toolCallId}] of execution [${executionId}] as ${status}: ${errorMessage(
@@ -66,10 +67,58 @@ export const createBrowserToolExecutable = ({
     });
   };
 
+  const consumeAnswer = async (
+    toolCallId: string,
+    result: BrowserToolResultPayload,
+    ctx: ToolHandlerContext
+  ) => {
+    markCall(toolCallId, BrowserToolCallStatus.consumed);
+    return {
+      results: await normalizeBrowserToolResult({
+        result,
+        uploadImage: (image) =>
+          browserTools.uploadImage({
+            image,
+            request: ctx.request,
+            attachments: ctx.attachments,
+            toolId,
+          }),
+      }),
+    };
+  };
+
+  /**
+   * Expires the call. When the transition is skipped, the browser answered between the
+   * waiter's last read and this write: re-read once and return that answer if there is one.
+   */
+  const expireCall = async (toolCallId: string): Promise<BrowserToolResultPayload | undefined> => {
+    try {
+      const outcome = await callClient.setStatus(
+        executionId,
+        toolCallId,
+        BrowserToolCallStatus.expired
+      );
+      if (outcome === 'skipped') {
+        const call = await callClient.get(executionId, toolCallId);
+        if (call?.status === BrowserToolCallStatus.answered) {
+          return call.result ?? { status: 'error', message: 'Browser answered without a result' };
+        }
+      }
+    } catch (error) {
+      logger.warn(
+        `Failed to mark browser tool call [${toolCallId}] of execution [${executionId}] as ${
+          BrowserToolCallStatus.expired
+        }: ${errorMessage(error)}`
+      );
+    }
+    return undefined;
+  };
+
   const handler: ToolHandlerFn = async (params, ctx) => {
     const { toolCallId } = ctx.callContext;
     try {
-      const expiresAt = new Date(Date.now() + timeoutMs);
+      const issuedAt = new Date();
+      const expiresAt = new Date(issuedAt.getTime() + timeoutMs);
 
       await callClient.create({
         executionId,
@@ -83,6 +132,7 @@ export const createBrowserToolExecutable = ({
       ctx.events.emitBrowserToolCall({
         params,
         clientId,
+        issuedAt: issuedAt.toISOString(),
         expiresAt: expiresAt.toISOString(),
       });
 
@@ -97,31 +147,23 @@ export const createBrowserToolExecutable = ({
 
       switch (outcome.type) {
         case 'answered':
-          markCall(toolCallId, BrowserToolCallStatus.consumed);
-          return {
-            results: await normalizeBrowserToolResult({
-              result: outcome.result,
-              uploadImage: (image) =>
-                browserTools.uploadImage({
-                  image,
-                  request: ctx.request,
-                  attachments: ctx.attachments,
-                  toolId,
-                }),
-            }),
-          };
+          return await consumeAnswer(toolCallId, outcome.result, ctx);
         case 'timeout':
-          markCall(toolCallId, BrowserToolCallStatus.expired);
+        case 'aborted': {
+          const lateAnswer = await expireCall(toolCallId);
+          if (lateAnswer) {
+            return await consumeAnswer(toolCallId, lateAnswer, ctx);
+          }
           return {
             results: [
-              createErrorResult(`Browser did not answer within ${Math.round(timeoutMs / 1000)} s`),
+              createErrorResult(
+                outcome.type === 'timeout'
+                  ? `Browser did not answer within ${Math.round(timeoutMs / 1000)} s`
+                  : 'Execution aborted while waiting for the browser'
+              ),
             ],
           };
-        case 'aborted':
-          markCall(toolCallId, BrowserToolCallStatus.expired);
-          return {
-            results: [createErrorResult('Execution aborted while waiting for the browser')],
-          };
+        }
       }
     } catch (error) {
       logger.warn(`Browser tool [${toolId}] call [${toolCallId}] failed: ${errorMessage(error)}`);

@@ -134,7 +134,12 @@ describe('toolToLangchain', () => {
   });
 
   it('stamps browser tool call events with the tool id and call id', async () => {
-    const data = { params: { a: 1 }, client_id: 'c1', expires_at: '2026-01-01T00:00:00.000Z' };
+    const data = {
+      params: { a: 1 },
+      client_id: 'c1',
+      issued_at: '2025-12-31T23:59:30.000Z',
+      expires_at: '2026-01-01T00:00:00.000Z',
+    };
     const tool = createTool('toolA', {
       execute: jest.fn().mockImplementation(async ({ onEvent }) => {
         onEvent({ type: ChatEventType.browserToolCall, data });

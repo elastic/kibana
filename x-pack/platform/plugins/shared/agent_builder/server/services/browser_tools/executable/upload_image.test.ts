@@ -90,7 +90,7 @@ describe('createUploadBrowserToolImage', () => {
         attachment_id: 'attachment-1',
         mime_type: 'image/png',
         name: 'page.png',
-        description: `Screenshot taken by ${TOOL_ID}.`,
+        description: 'the discover page',
       },
     });
     expect(JSON.stringify(result)).not.toContain(PNG_BASE64);
@@ -104,6 +104,12 @@ describe('createUploadBrowserToolImage', () => {
       expect.objectContaining({ name: `${TOOL_ID}_screenshot.jpg` })
     );
     expect(result.data.name).toBe(`${TOOL_ID}_screenshot.jpg`);
+  });
+
+  it('uses a default description derived from the tool id when the image has none', async () => {
+    const result = await upload({ mime_type: 'image/png', base64: PNG_BASE64 });
+
+    expect(result.data.description).toBe(`Screenshot taken by ${TOOL_ID}.`);
   });
 
   it('strips a data URL prefix before decoding', async () => {

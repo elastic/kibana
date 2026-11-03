@@ -89,4 +89,5 @@ export type {
   BrowserToolCallClientContract,
   BrowserToolCallRecord,
   BrowserToolCallAnswerOutcome,
+  BrowserToolCallSetStatusOutcome,
 } from './browser_tools';

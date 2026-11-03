@@ -130,6 +130,13 @@ export const getConverseHelpers = ({
         timeout_ms: timeoutMs,
       })),
     ];
+    const seenIds = new Set<string>();
+    for (const { id } of tools) {
+      if (seenIds.has(id)) {
+        throw createBadRequestError(`Duplicate browser tool id "${id}"`);
+      }
+      seenIds.add(id);
+    }
     return tools.length > 0 ? { clientId: browserToolsRequest?.client_id, tools } : undefined;
   };
 

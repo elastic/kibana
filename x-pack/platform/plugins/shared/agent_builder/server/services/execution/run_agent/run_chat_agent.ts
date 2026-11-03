@@ -329,22 +329,23 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     });
 
     // First add static tools
-    await Promise.all([
-      toolManager.addTools({
-        type: ToolManagerToolType.executable,
-        tools: staticTools,
-        logger,
+    await toolManager.addTools({
+      type: ToolManagerToolType.executable,
+      tools: staticTools,
+      logger,
+    });
+
+    // Then the browser tools, which must not shadow a static tool of the same name
+    await toolManager.addTools({
+      type: ToolManagerToolType.executable,
+      tools: createBrowserTools({
+        browserTools,
+        context,
+        executionId: executionId ?? runId,
+        existingToolNames: new Set(toolManager.list().map(({ name }) => name)),
       }),
-      toolManager.addTools({
-        type: ToolManagerToolType.executable,
-        tools: createBrowserTools({
-          browserTools,
-          context,
-          executionId: executionId ?? runId,
-        }),
-        logger,
-      }),
-    ]);
+      logger,
+    });
 
     const conversationId = conversation?.id;
     const updateConversationMetadata =
@@ -789,16 +790,27 @@ const createBrowserTools = ({
   browserTools,
   context,
   executionId,
+  existingToolNames,
 }: {
   browserTools: RunChatAgentParams['browserTools'];
   context: AgentHandlerContext;
   executionId: string;
+  existingToolNames: Set<string>;
 }): ExecutableToolWithOrigin[] => {
   if (!browserTools || !context.interactivity.enabled) {
     return [];
   }
   return browserTools.tools
     .filter(({ id }) => context.experimentalFeatures.browserTools || !isBuiltinBrowserToolId(id))
+    .filter(({ id }) => {
+      if (existingToolNames.has(id)) {
+        context.logger.warn(
+          `Skipping browser tool [${id}]: a tool with the same name is already registered`
+        );
+        return false;
+      }
+      return true;
+    })
     .map((descriptor) =>
       createBrowserToolExecutable({
         descriptor,

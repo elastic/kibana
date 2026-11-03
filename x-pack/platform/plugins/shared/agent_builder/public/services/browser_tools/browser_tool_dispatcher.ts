@@ -38,9 +38,37 @@ interface CompletedCall {
 const COMPLETED_TTL_MS = 10 * 60 * 1000;
 const COMPLETED_MAX_ENTRIES = 200;
 const CANCELLED_MESSAGE = 'cancelled: the conversation stream was aborted';
+/** Delays before each retry of a failed result post. */
+const POST_RETRY_DELAYS_MS = [500, 1500];
 
 const getErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
+
+const getHttpStatus = (error: unknown): number | undefined => {
+  const err = error as
+    | { response?: { status?: number }; body?: { statusCode?: number } }
+    | undefined;
+  return err?.response?.status ?? err?.body?.statusCode;
+};
+
+/** Network errors (no status) and server errors are worth retrying; other statuses are final. */
+const isRetryablePostError = (error: unknown): boolean => {
+  const status = getHttpStatus(error);
+  return status === undefined || status >= 500;
+};
+
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Converts the server-time `expires_at` to a deadline on the browser clock: the offset between
+ * the browser clock at receipt and the server's `issued_at` absorbs clock skew (and transit time).
+ * An unparseable `expires_at` yields NaN, which callers treat as expired.
+ */
+const getClientDeadline = (event: BrowserToolCallEvent, receivedAt: number): number => {
+  const issuedAt = Date.parse(event.data.issued_at);
+  const offset = Number.isNaN(issuedAt) ? 0 : receivedAt - issuedAt;
+  return Date.parse(event.data.expires_at) + offset;
+};
 
 const toResultPayload = (value: void | BrowserToolHandlerReturn): BrowserToolResultPayload => {
   if (!value) {
@@ -102,7 +130,8 @@ export class BrowserToolDispatcher {
     }
 
     this.inFlight.add(key);
-    void this.execute(event, context)
+    const deadline = getClientDeadline(event, this.now());
+    void this.execute(event, context, deadline)
       .then((result) => {
         this.storeCompleted(key, result);
         return this.post(event, context, result);
@@ -118,12 +147,13 @@ export class BrowserToolDispatcher {
 
   private async execute(
     event: BrowserToolCallEvent,
-    context: DispatchContext
+    context: DispatchContext,
+    deadline: number
   ): Promise<BrowserToolResultPayload> {
-    const { tool_id: toolId, params, expires_at: expiresAt } = event.data;
-    const deadline = Date.parse(expiresAt);
+    const { tool_id: toolId, params } = event.data;
 
-    if (deadline <= this.now()) {
+    // negated so that a NaN deadline counts as expired
+    if (!(deadline > this.now())) {
       return { status: 'error', message: 'expired before execution' };
     }
 
@@ -152,7 +182,7 @@ export class BrowserToolDispatcher {
   ): Promise<BrowserToolResultPayload> {
     // the call may have waited in the queue past its deadline
     const remainingMs = deadline - this.now();
-    if (remainingMs <= 0) {
+    if (!(remainingMs > 0)) {
       return { status: 'error', message: 'expired before execution' };
     }
     if (context.streamSignal.aborted) {
@@ -207,16 +237,28 @@ export class BrowserToolDispatcher {
     context: DispatchContext,
     result: BrowserToolResultPayload
   ): Promise<void> {
-    try {
-      await this.chatService.postBrowserToolResult({
-        executionId: context.executionId,
-        toolCallId: event.data.tool_call_id,
-        clientId: context.clientId,
-        result,
-      });
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(`Failed to post result of browser tool call ${event.data.tool_call_id}`, error);
+    for (let attempt = 0; ; attempt++) {
+      try {
+        // 404 and 409 resolve as 'final': nothing to retry
+        await this.chatService.postBrowserToolResult({
+          executionId: context.executionId,
+          toolCallId: event.data.tool_call_id,
+          clientId: context.clientId,
+          result,
+        });
+        return;
+      } catch (error) {
+        if (attempt < POST_RETRY_DELAYS_MS.length && isRetryablePostError(error)) {
+          await sleep(POST_RETRY_DELAYS_MS[attempt]);
+          continue;
+        }
+        // eslint-disable-next-line no-console
+        console.error(
+          `Failed to post result of browser tool call ${event.data.tool_call_id}`,
+          error
+        );
+        return;
+      }
     }
   }
 

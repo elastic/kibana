@@ -212,25 +212,28 @@ describe('runDefaultAgentMode browser tools', () => {
     expect(registeredBrowserTools(context).map((tool) => tool.id)).toEqual([consumerDescriptor.id]);
   });
 
-  it('runs a stored execution with legacy browserApiTools params', async () => {
+  it('skips a browser tool whose name is already taken by a static tool', async () => {
     const context = setup();
+    context.toolManager.list.mockReturnValue([{ name: consumerDescriptor.id } as any]);
 
-    // params of an execution stored before `browserTools` existed: the legacy field is not read
-    // by the run (the execution runner maps it to `browserTools`)
-    await expect(
-      runDefaultAgentMode(
-        {
-          nextInput: { message: 'hello' },
-          agentConfiguration: { tools: [] } as any,
-          executionId: 'exec-1',
-          browserApiTools: [consumerDescriptor],
-        } as any,
-        context
-      )
-    ).resolves.toBeDefined();
+    await runDefaultAgentMode(
+      {
+        nextInput: { message: 'hello' },
+        agentConfiguration: { tools: [] } as any,
+        executionId: 'exec-1',
+        browserTools: { clientId: 'client-1', tools: [builtinDescriptor, consumerDescriptor] },
+      },
+      context
+    );
 
-    expect(registeredBrowserTools(context)).toEqual([]);
+    expect(registeredBrowserTools(context).map((tool) => tool.id)).toEqual([builtinDescriptor.id]);
+    expect(context.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(`Skipping browser tool [${consumerDescriptor.id}]`)
+    );
   });
+
+  // Stored executions with legacy `browserApiTools` params are mapped to `browserTools` by the
+  // execution runner: see execution_runner.test.ts.
 });
 
 describe('runDefaultAgentMode', () => {
@@ -292,7 +295,7 @@ describe('runDefaultAgentMode', () => {
 
     expect(context.toolManager.addTools).toHaveBeenCalledTimes(3);
 
-    // Static tools are added first (executable tools + browser tools)
+    // Static tools are added first, then browser tools
     expect(context.toolManager.addTools).toHaveBeenNthCalledWith(1, {
       type: ToolManagerToolType.executable,
       tools: staticTools,

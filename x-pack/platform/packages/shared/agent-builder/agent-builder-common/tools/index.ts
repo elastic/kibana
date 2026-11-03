@@ -102,6 +102,7 @@ export {
 export { type BrowserApiToolMetadata } from './browser_tool_metadata';
 export {
   DEFAULT_BROWSER_TOOL_TIMEOUT_MS,
+  MAX_BROWSER_TOOL_TIMEOUT_MS,
   BrowserToolCallStatus,
   type BrowserToolDescriptor,
   type BrowserToolsRequest,

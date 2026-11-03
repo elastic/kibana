@@ -11,6 +11,9 @@ import type { JSONSchema } from 'zod/v4/core/json-schema';
 
 export const DEFAULT_BROWSER_TOOL_TIMEOUT_MS = 30_000;
 
+/** Upper bound for a browser tool timeout, well below the call documents cleanup age. */
+export const MAX_BROWSER_TOOL_TIMEOUT_MS = 300_000;
+
 /** Serializable description of a tool whose handler runs in the browser. */
 export interface BrowserToolDescriptor {
   id: string;

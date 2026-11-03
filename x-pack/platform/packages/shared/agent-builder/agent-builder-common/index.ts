@@ -87,6 +87,7 @@ export {
   type IndexSearchToolDefinitionWithSchema,
   type BrowserApiToolMetadata,
   DEFAULT_BROWSER_TOOL_TIMEOUT_MS,
+  MAX_BROWSER_TOOL_TIMEOUT_MS,
   BrowserToolCallStatus,
   type BrowserToolDescriptor,
   type BrowserToolsRequest,

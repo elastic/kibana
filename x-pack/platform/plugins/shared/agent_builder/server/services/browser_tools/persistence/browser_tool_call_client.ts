@@ -31,6 +31,12 @@ export type BrowserToolCallDocument = BrowserToolCallProperties;
  */
 export type AnswerOutcome = 'accepted' | 'not_found' | 'rejected';
 
+/**
+ * - `applied`: the status transition happened.
+ * - `skipped`: the call was not in a state allowing it (the scripted update was a noop).
+ */
+export type SetStatusOutcome = 'applied' | 'skipped';
+
 export interface BrowserToolCallClient {
   /** Create a pending call document. Fails if it already exists. */
   create(params: {
@@ -59,7 +65,7 @@ export interface BrowserToolCallClient {
     executionId: string,
     toolCallId: string,
     status: BrowserToolCallStatus.consumed | BrowserToolCallStatus.expired
-  ): Promise<void>;
+  ): Promise<SetStatusOutcome>;
 
   /** Delete call documents created more than `hours` ago. Returns the number deleted. */
   deleteOlderThan(age: { hours: number }): Promise<number>;
@@ -196,13 +202,14 @@ class BrowserToolCallClientImpl implements BrowserToolCallClient {
     executionId: string,
     toolCallId: string,
     status: BrowserToolCallStatus.consumed | BrowserToolCallStatus.expired
-  ): Promise<void> {
-    await this.esClient.update({
+  ): Promise<SetStatusOutcome> {
+    const response = await this.esClient.update({
       index: browserToolCallIndexName,
       id: browserToolCallDocId(executionId, toolCallId),
       retry_on_conflict: UPDATE_RETRY_ON_CONFLICT,
       script: { lang: 'painless', source: SET_STATUS_SCRIPT, params: { status } },
     });
+    return response.result === 'noop' ? 'skipped' : 'applied';
   }
 
   async deleteOlderThan({ hours }: { hours: number }): Promise<number> {

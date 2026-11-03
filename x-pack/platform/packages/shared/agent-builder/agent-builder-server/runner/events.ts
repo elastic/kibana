@@ -102,6 +102,8 @@ export interface ToolEventEmitter {
   emitBrowserToolCall(data: {
     params: Record<string, unknown>;
     clientId?: string;
+    /** ISO server time at emit. */
+    issuedAt: string;
     expiresAt: string;
   }): void;
 }
