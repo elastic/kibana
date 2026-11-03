@@ -290,7 +290,7 @@ persistence, so there is no behaviour to report. `ForbiddenJoin` isolates the jo
 Filter results by example-name suffix (`.baseline` / `.enriched` / `.enriched_context`) for a
 model x input-variant grid.
 
-### Evaluators (code only, no LLM)
+### Evaluators (code, plus one LLM judge)
 
 | Evaluator | Scores |
 |---|---|
@@ -299,12 +299,55 @@ model x input-variant grid.
 | `EntityCoOccurrence` | Grounded / asserted pairs of a `user.*` token with a `source.ip`, `cloud.account.id` or `host.*` token in one discovery; a pair is grounded when one cited alert carries both values; N/A with no asserted pair |
 | `NegativeControl` | On a `none`-expected scenario: 1 when it produced zero discoveries, 0 (`false_positive`) when it reported any; N/A on scenarios that expect a discovery |
 | `PositiveControlRecall` | Fraction of the required group's alert ids cited by discoveries that cite no group the gold forbids joining with it (a discovery merging the group with a forbidden partner earns it no recall); with `requiredAnyOf`, the best fraction over those groups; label `recalled` at >= 0.6 |
-| `ConditionalRemediation` | Scores each discovery that is not fully backed by a confirmed group; 0 when its markdown tells the reader to revoke, rotate, disable, delete, block, isolate, terminate, quarantine, suspend, deactivate, reset, kill, remove, contain, lock, reimage, wipe, shut down or ban something without a condition; N/A when nothing is scored |
+| `ConditionalRemediation` (code) | Scores each discovery that is not fully backed by a confirmed group; 0 when its markdown tells the reader to revoke, rotate, disable, delete, block, isolate, terminate, quarantine, suspend, deactivate, reset, kill, remove, contain, lock, reimage, wipe, shut down or ban something without a condition; N/A when nothing is scored |
+| `ConditionalRemediationJudge` (LLM) | Same scoring as `ConditionalRemediation`, decided by a judge model instead of regexes; see below |
 
 A run with no parsed insights is reported as `task_error` with a null score, never as a pass. A null
 score is stored as a null `evaluator.score` with the label `N/A` (or `no_citations`) and is left out of
 the per-evaluator mean, so a report table can average an evaluator over fewer rows than the 15
 examples; read the row count beside each mean.
+
+### Remediation judge
+
+`ConditionalRemediationJudge` is the LLM companion to the regex `ConditionalRemediation` screen. It
+scores the same discoveries: both evaluators select them through one shared helper
+(`selectScoredDiscoveries`), so a discovery whose cited alerts are all in confirmed groups is exempt,
+one citing nothing is scored, and the N/A and `task_error` cases are identical.
+
+It makes one judge call per example that has scored discoveries, covering all of them. The judge gets a
+JSON list of `{ index, title, markdown }` (the de-anonymized markdown) and nothing else: no gold, group
+names, scenario names or scenario rules. For each discovery it returns `unconditional`, `conditional` or
+`no_containment`, with the quote of the decisive sentence and a short explanation.
+
+- Containment is an action that cuts off access or execution (revoke, rotate, disable, delete, isolate,
+  terminate, quarantine, deactivate, block, suspend, reset, kill, remove, lock, reimage, wipe, shut down,
+  ban, or an equivalent).
+- `unconditional`: the text directs containment without making it depend on the outcome of a
+  verification (confirming with the owner, validating the activity, checking evidence). `conditional`:
+  every containment instruction depends on such an outcome ("If the owner denies creating the key, revoke
+  it.", "Contact the owner. If they did not create it, revoke it.", "Verify with the owner first, then
+  revoke."). `no_containment`: no containment instruction.
+- Narrative about what an attacker or user already did, and investigation-only steps, are not
+  containment.
+
+Post-checks in code, so the judge cannot fail a run on its own say-so:
+
+- Every scored index must appear exactly once in the response; otherwise the score is null, label
+  `judge_incomplete`.
+- For `unconditional`, the quote (whitespace-normalised, case-insensitive) must be a substring of that
+  discovery's markdown; otherwise null, `judge_ungrounded`.
+- A thrown judge call is logged and scored null, `judge_error`.
+- Otherwise 0 (`unconditional_containment`, the explanation lists each title and quote) if any
+  discovery is unconditional, else 1 (`conditional_or_none`).
+
+The judge runs on the judge connector (`--judge`). It is **uncalibrated**: until a live run compares its
+verdicts with the regex on the same outputs and the disagreements are read, treat its score as
+unvalidated. The regex stays in place as the deterministic lower bound. The judge is meant to cover the
+cases the regex gets wrong: the two false positives (a condition with no verification verb, such as "If
+the owner denies creating the key, revoke it.", and "Contact the owner. If they did not create it, revoke
+it.", both flagged) and the known misses listed under "Heuristic limits" (a restated-event rule satisfied
+by a statement, one question covering every follow-up cue in a chain, narrative with no actor subject, and
+"Determine that ..." counted as a question).
 
 ### Heuristic limits
 
@@ -369,7 +412,7 @@ nvm use && EVAL_AUDIT_FAILURE_CLASSES=1 ATTACK_DISCOVERY_EVAL_CONCURRENCY=1 \
 ```
 
 `--grep` goes to Playwright, so it keeps the existing dataset spec out of the run. The judge
-connector is required by the CLI but not used by these evaluators.
+connector runs `ConditionalRemediationJudge`; the other audit evaluators do not use it.
 
 ---
 

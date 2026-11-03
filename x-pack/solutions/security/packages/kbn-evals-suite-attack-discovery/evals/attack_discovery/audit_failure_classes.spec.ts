@@ -12,6 +12,7 @@ import { resolveConcurrency } from '../../src/evaluate_dataset';
 import { buildAuditExamples } from '../../src/audit_failure_classes/registry';
 import { createAttackDiscoveryBasicEvaluator } from '../../src/evaluators/attack_discovery_basic_evaluator';
 import { createAuditConditionalRemediationEvaluator } from '../../src/evaluators/audit_conditional_remediation_evaluator';
+import { createAuditConditionalRemediationJudgeEvaluator } from '../../src/evaluators/audit_conditional_remediation_judge_evaluator';
 import { createAuditEntityCoOccurrenceEvaluator } from '../../src/evaluators/audit_entity_co_occurrence_evaluator';
 import { createAuditForbiddenJoinEvaluator } from '../../src/evaluators/audit_forbidden_join_evaluator';
 import { createAuditMetaAlertAsEvidenceEvaluator } from '../../src/evaluators/audit_meta_alert_as_evidence_evaluator';
@@ -23,7 +24,8 @@ import type { AttackDiscoveryDatasetExample } from '../../src/types';
 /**
  * Synthetic bundledAlerts scenarios, each run as a baseline, an enriched and an enriched_context input variant.
  * Failure classes: invented entity joins, threshold/meta alerts treated as evidence,
- * unconditional containment advice, and no negative control. Scoring is deterministic code only;
+ * unconditional containment advice, and no negative control. Scoring is deterministic code, plus
+ * one LLM judge (`ConditionalRemediationJudge`) beside the regex `ConditionalRemediation` screen;
  * the LLM rubric is deliberately not attached. Gold and the anonymization replacements are
  * looked up from the registry by `metadata.scenarioId`; the evaluators map tokens in the model
  * output back to original values before comparing.
@@ -33,9 +35,20 @@ import type { AttackDiscoveryDatasetExample } from '../../src/types';
 evaluate.describe('Attack Discovery audit failure classes', { tag: tags.stateful.classic }, () => {
   evaluate(
     'bundled alerts by scenario and input variant',
-    async ({ executorClient, inferenceClient, attackDiscoveryClient, evaluators, log }) => {
+    async ({
+      executorClient,
+      inferenceClient,
+      attackDiscoveryClient,
+      evaluators,
+      evaluationConnector,
+      log,
+    }) => {
       const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
         evaluators.traceBasedEvaluators;
+
+      const judgeInferenceClient = inferenceClient.bindTo({
+        connectorId: evaluationConnector.id,
+      });
 
       await executorClient.runExperiment(
         {
@@ -63,6 +76,10 @@ evaluate.describe('Attack Discovery audit failure classes', { tag: tags.stateful
           createAuditNegativeControlEvaluator(),
           createAuditPositiveControlRecallEvaluator(),
           createAuditConditionalRemediationEvaluator(),
+          createAuditConditionalRemediationJudgeEvaluator({
+            inferenceClient: judgeInferenceClient,
+            log,
+          }),
           toolCalls as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
           latency as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
           inputTokens as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
