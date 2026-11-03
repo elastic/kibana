@@ -802,45 +802,51 @@ describe('Package policy service', () => {
       );
     });
 
-    it('should keep agent version conditions on bumpRevision when the package has none', async () => {
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      const soClient = createSavedObjectClientMock();
+    it.each([
+      { when: 'the package has none', overwrite: false, expected: true },
+      { when: 'the package has none but the create overwrites', overwrite: true, expected: false },
+    ])(
+      'should set agentVersionConditionsUnchanged to $expected on bumpRevision when $when',
+      async ({ overwrite, expected }) => {
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const soClient = createSavedObjectClientMock();
 
-      soClient.create.mockResolvedValueOnce({
-        id: 'test-package-policy',
-        attributes: {},
-        references: [],
-        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-      });
+        soClient.create.mockResolvedValueOnce({
+          id: 'test-package-policy',
+          attributes: {},
+          references: [],
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
 
-      mockAgentPolicyGet();
+        mockAgentPolicyGet();
 
-      await packagePolicyService.create(
-        soClient,
-        esClient,
-        {
-          name: 'Test Package Policy',
-          namespace: 'test',
-          enabled: true,
-          policy_id: 'test',
-          policy_ids: ['test'],
-          inputs: [],
-          package: {
-            name: 'endpoint',
-            title: 'Elastic Endpoint',
-            version: '0.9.0',
+        await packagePolicyService.create(
+          soClient,
+          esClient,
+          {
+            name: 'Test Package Policy',
+            namespace: 'test',
+            enabled: true,
+            policy_id: 'test',
+            policy_ids: ['test'],
+            inputs: [],
+            package: {
+              name: 'endpoint',
+              title: 'Elastic Endpoint',
+              version: '0.9.0',
+            },
           },
-        },
-        { id: 'test-package-policy', skipUniqueNameVerification: true }
-      );
+          { id: 'test-package-policy', skipUniqueNameVerification: true, overwrite }
+        );
 
-      expect(agentPolicyService.bumpRevision).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
-        'test',
-        expect.objectContaining({ agentVersionConditionsUnchanged: true })
-      );
-    });
+        expect(agentPolicyService.bumpRevision).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          'test',
+          expect.objectContaining({ agentVersionConditionsUnchanged: expected })
+        );
+      }
+    );
 
     it('should store package_agent_version_condition on saved object when package manifest has agent version condition', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;

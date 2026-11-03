@@ -872,7 +872,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         enrichedPackagePolicy.policy_ids,
         {
           user: options?.user,
-          agentVersionConditionsUnchanged: addsNoAgentVersionConditions(pkgInfo, assetsMap),
+          // An overwrite replaces a policy whose conditions may be removed.
+          agentVersionConditionsUnchanged:
+            !options?.overwrite && addsNoAgentVersionConditions(pkgInfo, assetsMap),
         }
       );
     }
@@ -1243,7 +1245,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
 
-    let agentVersionConditionsUnchanged = true;
+    // An overwrite replaces policies whose conditions may be removed.
+    let agentVersionConditionsUnchanged = !options?.overwrite;
     for (const newSo of newSos) {
       const pkgInfo = packageInfos.get(
         `${newSo.attributes.package?.name}-${newSo.attributes.package?.version}`
