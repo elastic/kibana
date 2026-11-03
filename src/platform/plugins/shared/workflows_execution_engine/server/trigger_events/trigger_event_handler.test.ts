@@ -470,6 +470,7 @@ describe('TriggerEventHandler', () => {
       now: new Date(),
       maxEventChainDepth: 10,
       getConcurrencyGroupKey: () => null,
+      getRunName: () => undefined,
     });
     mockGetEventChainContext.mockReturnValue(undefined);
     mockGetEmitterWorkflowExecutionIdFromRequest.mockReturnValue(childExecution.id);
