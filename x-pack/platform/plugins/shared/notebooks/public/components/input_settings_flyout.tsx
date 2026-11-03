@@ -106,6 +106,7 @@ interface QueryRun {
 const QueryOptionsFields = ({
   cellId,
   savedQuery,
+  onQueryStaleChange,
   draft,
   onChange,
 }: FieldsProps<DropdownInput> & DynamicOptionsProps) => {
@@ -122,6 +123,12 @@ const QueryOptionsFields = ({
     columns: output?.kind === 'input' ? output.columns ?? [] : [],
   };
   const isQueryChanged = draft.optionsQuery !== lastRun.query;
+  const isQueryStale = isQueryChanged && draft.optionsQuery.trim() !== '';
+
+  useEffect(() => {
+    onQueryStaleChange(isQueryStale);
+  }, [onQueryStaleChange, isQueryStale]);
+  useEffect(() => () => onQueryStaleChange(false), [onQueryStaleChange]);
 
   const run = async () => {
     const { optionsQuery } = draft;
@@ -193,6 +200,13 @@ const QueryOptionsFields = ({
       <ColumnSelect
         columns={lastRun.columns}
         isDisabled={isQueryChanged}
+        helpText={
+          isQueryStale
+            ? i18n.translate('xpack.notebook.inputSettings.queryStale', {
+                defaultMessage: 'The query changed. Run it to choose a column.',
+              })
+            : undefined
+        }
         draft={draft}
         onChange={onChange}
       />
@@ -235,9 +249,14 @@ const StaticOptionsFields = ({ draft, onChange }: FieldsProps<DropdownInput>) =>
 const ColumnSelect = ({
   columns,
   isDisabled = false,
+  helpText,
   draft,
   onChange,
-}: FieldsProps<DropdownInput> & { columns: readonly string[]; isDisabled?: boolean }) => {
+}: FieldsProps<DropdownInput> & {
+  columns: readonly string[];
+  isDisabled?: boolean;
+  helpText?: string;
+}) => {
   const { optionsColumn = null } = draft;
   const choices =
     optionsColumn && !columns.includes(optionsColumn) ? [optionsColumn, ...columns] : columns;
@@ -248,6 +267,7 @@ const ColumnSelect = ({
       label={i18n.translate('xpack.notebook.inputSettings.optionsColumn', {
         defaultMessage: 'Column',
       })}
+      helpText={helpText}
     >
       <EuiSelect
         fullWidth
@@ -277,11 +297,14 @@ interface DynamicOptionsProps {
   cellId: string;
   /** The applied options query, which the cell's latest results come from. */
   savedQuery: string;
+  /** Reports whether the draft options query has changed since it last ran. */
+  onQueryStaleChange: (isStale: boolean) => void;
 }
 
 const DynamicOptionsFields = ({
   cellId,
   savedQuery,
+  onQueryStaleChange,
   draft,
   onChange,
 }: FieldsProps<DropdownInput> & DynamicOptionsProps) => {
@@ -331,6 +354,7 @@ const DynamicOptionsFields = ({
         <QueryOptionsFields
           cellId={cellId}
           savedQuery={savedQuery}
+          onQueryStaleChange={onQueryStaleChange}
           draft={draft}
           onChange={onChange}
         />
@@ -346,6 +370,7 @@ const DynamicOptionsFields = ({
 const DropdownFields = ({
   cellId,
   savedQuery,
+  onQueryStaleChange,
   draft,
   onChange,
 }: FieldsProps<DropdownInput> & DynamicOptionsProps) => {
@@ -371,6 +396,7 @@ const DropdownFields = ({
         <DynamicOptionsFields
           cellId={cellId}
           savedQuery={savedQuery}
+          onQueryStaleChange={onQueryStaleChange}
           draft={draft}
           onChange={onChange}
         />
@@ -424,6 +450,7 @@ export const InputSettingsFlyout = ({
 }) => {
   const titleId = useGeneratedHtmlId({ prefix: 'notebookInputSettings' });
   const [draft, setDraft] = useState<ConfigurableInput>(input);
+  const [isQueryStale, setIsQueryStale] = useState(false);
 
   return (
     <NotebookFlyout
@@ -447,6 +474,7 @@ export const InputSettingsFlyout = ({
           <DropdownFields
             cellId={cellId}
             savedQuery={input.kind === 'dropdown' ? input.optionsQuery : ''}
+            onQueryStaleChange={setIsQueryStale}
             draft={draft}
             onChange={setDraft}
           />
@@ -466,7 +494,7 @@ export const InputSettingsFlyout = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              isDisabled={!isComplete(draft)}
+              isDisabled={!isComplete(draft) || isQueryStale}
               onClick={() => {
                 onApply(draft);
                 onClose();
