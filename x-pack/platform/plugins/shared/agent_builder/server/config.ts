@@ -49,7 +49,7 @@ export const configSchema = schema.object({
       schema.object({
         apiKey: schema.string({ minLength: 1, maxLength: 512 }),
         model: schema.string({ defaultValue: 'typesafe/jev-1.13', minLength: 1, maxLength: 256 }),
-        url: schema.uri({ scheme: ['https'], defaultValue: 'https://openrouter.ai/api/v1' }),
+        url: schema.uri({ scheme: ['https'], defaultValue: 'https://openrouter.ai/api' }),
       })
     ),
   }),
