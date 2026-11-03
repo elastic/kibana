@@ -418,9 +418,8 @@ export function createEventsWriteTool({
     tags: ['streams', 'significant-events'],
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
-      const { request } = context;
+      const { request, spaceId } = context;
       let storedItems: EventsWriteInput[] | undefined;
-      let spaceId = UNKNOWN_TELEMETRY_VALUE;
       try {
         const {
           getEventSearchClient,
@@ -428,11 +427,9 @@ export function createEventsWriteTool({
           getKnowledgeIndicatorClient,
           licensing,
           sourcesClient,
-          space,
         } = await getScopedClients({
           request,
         });
-        spaceId = space;
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
         const catalog = await loadSourceCatalog(sourcesClient);

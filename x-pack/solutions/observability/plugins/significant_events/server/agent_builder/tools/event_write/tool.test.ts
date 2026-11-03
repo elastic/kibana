@@ -75,7 +75,6 @@ const createTool = (
     getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
     sourcesClient: mockSourcesClient(['logs.test', 'logs.batch', 'logs.web']),
     licensing: {},
-    space: 'tool-space',
   });
   return createEventsWriteTool({
     getScopedClients: getScopedClients as unknown as GetScopedClients,
@@ -812,7 +811,7 @@ describe('events_write tool', () => {
           { ...input, event_id: 'event-2' },
         ],
       },
-      createMockToolContext()
+      { ...createMockToolContext(), spaceId: 'tool-space' }
     );
 
     expect(telemetry.trackAgentToolEventsWrite).toHaveBeenNthCalledWith(
@@ -836,7 +835,7 @@ describe('events_write tool', () => {
     expect(second).not.toHaveProperty('workflow_execution_id');
   });
 
-  it('reports an unknown space when scoping fails', async () => {
+  it('still reports the request space when scoping fails', async () => {
     const telemetry = { trackAgentToolEventsWrite: jest.fn() };
     const getScopedClients = jest.fn().mockRejectedValue(new Error('no clients'));
     const failingTool = createEventsWriteTool({
@@ -846,13 +845,17 @@ describe('events_write tool', () => {
       telemetry: telemetry as never,
     });
 
-    await invokeHandler(failingTool as never, { items: [input] }, createMockToolContext());
+    await invokeHandler(
+      failingTool as never,
+      { items: [input] },
+      { ...createMockToolContext(), spaceId: 'tool-space' }
+    );
 
     expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledWith(
       expect.objectContaining({
         alert_source: 'elastic.significant_events',
         fingerprint: 'event-1',
-        space_id: 'unknown',
+        space_id: 'tool-space',
         success: false,
         error_message: 'no clients',
       })

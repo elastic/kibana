@@ -22,7 +22,7 @@ import type { GetScopedClients } from '../../../routes/types';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
-import { alertIdentity, UNKNOWN_TELEMETRY_VALUE } from '../alert_identity_telemetry';
+import { alertIdentity } from '../alert_identity_telemetry';
 import { updateEventStatusToolHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID =
@@ -76,11 +76,9 @@ export function createEventStatusUpdateTool({
     tags: ['streams', 'significant-events'],
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
-      const { request } = context;
-      let spaceId = UNKNOWN_TELEMETRY_VALUE;
+      const { request, spaceId } = context;
       try {
-        const { getEventSearchClient, licensing, space } = await getScopedClients({ request });
-        spaceId = space;
+        const { getEventSearchClient, licensing } = await getScopedClients({ request });
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
 
