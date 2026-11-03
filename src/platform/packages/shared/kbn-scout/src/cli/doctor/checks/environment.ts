@@ -36,9 +36,7 @@ export const environmentChecks: DoctorCheck[] = [
           fix: { command: 'node scripts/kbn bootstrap' },
         });
       }
-      return pass(
-        `Kibana bootstrapped ${formatAge(installed.mtime)}, pnpm-lock.yaml unchanged since`
-      );
+      return pass(`Kibana bootstrapped ${formatAge(installed.mtime)}`);
     },
   },
   {

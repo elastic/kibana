@@ -40,7 +40,8 @@ export interface DoctorCheck {
   arch?: DoctorArch;
   /** Hidden unless this check passes or warns, e.g. image checks need Docker running */
   dependsOn?: DoctorCheck;
-  run: () => Promise<CheckResult>;
+  /** Returns undefined to hide the check, e.g. when there is nothing to report */
+  run: () => Promise<CheckResult | undefined>;
 }
 
 type Remedy = Pick<CheckResult, 'details' | 'hint' | 'fix'>;

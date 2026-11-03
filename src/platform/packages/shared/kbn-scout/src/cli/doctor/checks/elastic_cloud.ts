@@ -217,18 +217,22 @@ const qafCustomRoleCheck: DoctorCheck = {
     ),
 };
 
-const qafRunFilesCheck: DoctorCheck = {
-  title: 'Files that block QAF runs',
+const qafLeftoversCheck: DoctorCheck = {
+  title: 'Scout Cloud configs that block QAF',
   run: async () => {
     const files = [SCOUT_ROLE_USERS_FILE, ...Object.values(SCOUT_CLOUD_CONFIGS)].filter((file) =>
       Fs.existsSync(inRepo(file))
     );
-    return files.length
-      ? warn(`QAF won't run while ${files.join(', ')} ${files.length > 1 ? 'exist' : 'exists'}`, {
-          hint: 'used by direct Scout runs',
-          fix: { command: `rm -f ${files.join(' ')}`, destructive: true },
-        })
-      : pass('No files that block QAF runs');
+    if (!files.length) {
+      return undefined;
+    }
+    return warn(
+      `QAF won't run while ${files.join(', ')} ${files.length > 1 ? 'exist' : 'exists'}`,
+      {
+        hint: 'left by a direct Scout run or an interrupted QAF run',
+        fix: { command: `rm -f ${files.join(' ')}`, destructive: true },
+      }
+    );
   },
 };
 
@@ -237,7 +241,7 @@ export const getQafCloudChecks = (): DoctorCheck[] => [
   apiKeyCheck,
   ...DOCTOR_ARCHS.map(cloudUsersCheck),
   qafCustomRoleCheck,
-  qafRunFilesCheck,
+  qafLeftoversCheck,
 ];
 
 // only called by checks that depend on scoutConfigCheck, so the file is valid
