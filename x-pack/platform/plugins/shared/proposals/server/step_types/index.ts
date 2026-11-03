@@ -25,7 +25,7 @@ export const registerStepDefinitions = ({
   resolveWorkerUser,
   privileges,
 }: {
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+  workflowsExtensions: Pick<WorkflowsExtensionsServerPluginSetup, 'registerStepDefinition'>;
   getProposalsService: () => ProposalsService;
   resolveUser: ResolveProposalUser;
   resolveWorkerUser: ResolveWorkerUser;

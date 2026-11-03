@@ -15,7 +15,7 @@ import type { ExperimentalFeatures } from '../../../../common';
 import { IdentifierType } from '../../../../common/api/entity_analytics/common/common.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import type { ProductFeaturesService } from '../../../lib/product_features_service';
-import { securityTool } from '../constants';
+import { SECURITY_GET_ENTITY_GRAPH_TOOL_ID } from '../tool_ids';
 import { buildRenderAttachmentTag } from './attachment_utils';
 import { getEntityAnalyticsToolAvailability } from './entity_analytics_availability';
 import { requireResolvedEntity } from './entity_resolution';
@@ -44,7 +44,7 @@ const schema = lazySchema(() =>
 
 const DEFAULT_ENTITY_GRAPH_TIME_RANGE = { from: 'now-30d', to: 'now' } as const;
 
-export const SECURITY_GET_ENTITY_GRAPH_TOOL_ID = securityTool('get_entity_graph');
+export { SECURITY_GET_ENTITY_GRAPH_TOOL_ID };
 
 export const getEntityGraphTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,

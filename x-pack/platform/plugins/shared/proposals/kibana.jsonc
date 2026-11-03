@@ -12,6 +12,9 @@
     "server": true,
     "requiredPlugins": ["agentBuilder", "features", "workflowsExtensions", "workflowsManagement"],
     "requiredBundles": ["kibanaReact"],
-    "optionalPlugins": ["security", "spaces"]
+    "optionalPlugins": ["security", "spaces"],
+    "tasks": {
+      "requiredPlugins": ["agentBuilder", "workflowsExtensions", "security", "workflowsManagement"]
+    }
   }
 }

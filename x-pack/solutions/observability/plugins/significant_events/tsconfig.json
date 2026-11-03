@@ -18,6 +18,8 @@
     "@kbn/nightshift-shared",
     "@kbn/nightshift-sources-plugin",
     "@kbn/core",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-plugins-server",
     "@kbn/core-pricing-common",
     "@kbn/significant-events-schema",
     "@kbn/agent-builder-common",

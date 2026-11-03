@@ -7,7 +7,7 @@
 
 import type { RootTransactionByTraceIdResponse } from '@kbn/apm-api-shared';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import {
   AT_TIMESTAMP,

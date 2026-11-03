@@ -10,12 +10,14 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { getWorkflowExecutionStatusTool } from './get_workflow_execution_status';
 
-jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
-  ...jest.requireActual('@kbn/agent-builder-tools-base/workflows'),
+jest.mock('@kbn/agent-builder-tools-base/workflows/get_execution_state', () => ({
+  ...jest.requireActual('@kbn/agent-builder-tools-base/workflows/get_execution_state'),
   getExecutionState: jest.fn(),
 }));
 
-const { getExecutionState } = jest.requireMock('@kbn/agent-builder-tools-base/workflows');
+const { getExecutionState } = jest.requireMock(
+  '@kbn/agent-builder-tools-base/workflows/get_execution_state'
+);
 
 const createWorkflowsManagement = () => ({
   management: {

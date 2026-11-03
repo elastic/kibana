@@ -9,8 +9,8 @@ import moment from 'moment';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
 import type {
-  ObservabilityAgentBuilderCoreSetup,
-  ObservabilityAgentBuilderPluginSetupDependencies,
+  ObservabilityAgentBuilderStartServices,
+  ObservabilityAgentBuilderToolPlugins,
 } from '../../types';
 import { getObservabilityDataSources } from '../../utils/get_observability_data_sources';
 import { parseDatemath } from '../../utils/time';
@@ -31,8 +31,8 @@ export async function getToolHandler({
   maxTraces,
   maxDocsPerTrace,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
-  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  core: ObservabilityAgentBuilderStartServices;
+  plugins: ObservabilityAgentBuilderToolPlugins;
   logger: Logger;
   esClient: IScopedClusterClient;
   start: string;

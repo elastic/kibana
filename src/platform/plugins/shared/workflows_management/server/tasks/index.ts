@@ -7,20 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { of } from 'rxjs';
+import type { ActionsTasksStart } from '@kbn/actions-plugin/server/tasks';
 import { schema } from '@kbn/config-schema';
 import type {
+  CoreTasksSetup,
   CoreTasksStart,
-  KibanaRequest,
   PluginConfigDescriptor,
   PluginInitializerContext,
   TasksPlugin,
 } from '@kbn/core/server';
+import { ServiceStatusLevels } from '@kbn/core-status-common';
 import type { LicensingTasksStart } from '@kbn/licensing-plugin/server/tasks';
+import type { SecurityTasksStart } from '@kbn/security-plugin/server/tasks';
+import type { SpacesTasksStart } from '@kbn/spaces-plugin/server/tasks';
+import type { TaskManagerTasksStart } from '@kbn/task-manager-plugin/server/tasks';
 import type { WorkflowsExecutionEngineTasksStart } from '@kbn/workflows-execution-engine/server/tasks';
-import { getWorkflowsByIdsForRequests } from '../api/lib/get_workflows_by_ids_for_requests';
-import { getWorkflowsByIds } from '../services/get_workflows_by_ids';
-import { WorkflowAccessControlService } from '../services/workflow_access_control';
-import { createStorage } from '../storage/workflow_storage';
+import type { WorkflowsExtensionsTasksStart } from '@kbn/workflows-extensions/server/tasks';
+import { workflowsManagementBridge } from './bridge';
+import { createWorkflowsManagement } from '../api/create_workflows_management';
+import type { WorkflowsServerPluginSetup } from '../types';
 
 const configSchema = schema.object(
   { available: schema.boolean({ defaultValue: true }) },
@@ -32,7 +38,26 @@ export const config: PluginConfigDescriptor<WorkflowsManagementTasksConfig> = {
   schema: configSchema,
 };
 
-/** What a request needs from a workflows call: who scheduled it, as a request. */
+interface TasksStartDeps {
+  taskManager: TaskManagerTasksStart;
+  actions: ActionsTasksStart;
+  licensing: LicensingTasksStart;
+  spaces: SpacesTasksStart;
+  security?: SecurityTasksStart;
+  workflowsExecutionEngine: WorkflowsExecutionEngineTasksStart;
+  workflowsExtensions: WorkflowsExtensionsTasksStart;
+}
+
+/**
+ * The Workflows Management API for task runtimes: the very `WorkflowsManagementApi` that Kibana
+ * serves (reads, CRUD, executions, validation, scheduling), built over the tasks contracts of its
+ * dependencies. In Kibana the plugin owns it and this hands out that instance (see `bridge.ts`).
+ * In a task pod the service is read-only against Elasticsearch: it uses the workflow index and the
+ * change history data stream that Kibana installed and never creates or changes them. Routes, UI,
+ * managed workflow installs and the inbox belong to Kibana.
+ */
+export type WorkflowsManagementTasksSetup = WorkflowsServerPluginSetup;
+
 export interface BulkScheduleItem {
   workflow: { id: string } & Record<string, unknown>;
   spaceId: string;
@@ -41,110 +66,52 @@ export interface BulkScheduleItem {
   metadata?: Record<string, unknown>;
 }
 
-interface TasksStartDeps {
-  licensing: LicensingTasksStart;
-  workflowsExecutionEngine: WorkflowsExecutionEngineTasksStart;
-}
-
-/**
- * The part of Workflows Management a task uses: looking up workflows by id for a request and bulk
- * scheduling them. Everything else (the management API, UI, CRUD) is not available.
- */
-export interface WorkflowsManagementTasksSetup {
-  management: {
-    getWorkflowsByIdsForRequests: (lookups: never) => Promise<unknown>;
-    getClient: (request: KibanaRequest) => {
-      bulkScheduleWorkflow: (items: BulkScheduleItem[]) => Promise<unknown[]>;
-    };
-  };
-}
-
 class WorkflowsManagementTasksPlugin
   implements TasksPlugin<WorkflowsManagementTasksSetup, void, {}, TasksStartDeps>
 {
-  private started?: {
-    core: CoreTasksStart;
-    engine: WorkflowsExecutionEngineTasksStart;
-    licensing: LicensingTasksStart;
+  private readonly startDeps: {
+    promise: Promise<[CoreTasksStart, TasksStartDeps, unknown]>;
+    resolve: (value: [CoreTasksStart, TasksStartDeps, unknown]) => void;
   };
+  private readonly setupDeps: Record<string, unknown> = {};
+  private bridged = false;
 
-  constructor(private readonly context: PluginInitializerContext<WorkflowsManagementTasksConfig>) {}
-
-  setup(): WorkflowsManagementTasksSetup {
-    const getStarted = () => {
-      if (!this.started) throw new Error('Workflows management is not started');
-      return this.started;
-    };
-    const logger = this.context.logger.get();
-    return {
-      management: {
-        getWorkflowsByIdsForRequests: (lookups) => {
-          const { core } = getStarted();
-          const esClient = core.elasticsearch.client.asInternalUser;
-          const workflowStorage = createStorage({ logger, esClient });
-          const accessControl = new WorkflowAccessControlService(
-            core as never,
-            {} as never,
-            undefined
-          );
-          return getWorkflowsByIdsForRequests(
-            {
-              getWorkflowsByIds: (ids, spaceId) => getWorkflowsByIds(workflowStorage, ids, spaceId),
-              getAccessControl: async () => accessControl,
-            },
-            lookups
-          );
-        },
-        getClient: (request) => ({
-          bulkScheduleWorkflow: (items) => {
-            const { engine } = getStarted();
-            // Same mapping as the management API's `bulkScheduleWorkflow` (workflows that delegate
-            // their identity to a parent can't be run standalone).
-            const results: unknown[] = new Array(items.length);
-            const forwarded: number[] = [];
-            const engineItems = items.flatMap((item, index) => {
-              if (
-                (item.workflow as { requiresDelegatedIdentity?: boolean }).requiresDelegatedIdentity
-              ) {
-                results[index] = {
-                  status: 'error',
-                  error: {
-                    message: `Workflow '${item.workflow.id}' delegates its execution identity to a parent workflow and cannot be run standalone.`,
-                  },
-                };
-                return [];
-              }
-              forwarded.push(index);
-              const { event, ...manualInputs } = item.inputs;
-              return [
-                {
-                  workflow: item.workflow,
-                  context: {
-                    event,
-                    spaceId: item.spaceId,
-                    inputs: manualInputs,
-                    triggeredBy: item.triggeredBy,
-                    ...(item.metadata ? { metadata: item.metadata } : {}),
-                  },
-                },
-              ];
-            });
-            return engine
-              .bulkScheduleWorkflow(engineItems as never, request)
-              .then((engineResults) => {
-                forwarded.forEach((itemIndex, resultIndex) => {
-                  results[itemIndex] = (engineResults as unknown[])[resultIndex];
-                });
-                return results;
-              });
-          },
-        }),
-      },
-    };
+  constructor(private readonly context: PluginInitializerContext<WorkflowsManagementTasksConfig>) {
+    let resolve!: (value: [CoreTasksStart, TasksStartDeps, unknown]) => void;
+    const promise = new Promise<[CoreTasksStart, TasksStartDeps, unknown]>((r) => {
+      resolve = r;
+    });
+    promise.catch(() => undefined);
+    this.startDeps = { promise, resolve };
   }
 
-  start(core: CoreTasksStart, { licensing, workflowsExecutionEngine }: TasksStartDeps) {
-    this.started = { core, engine: workflowsExecutionEngine, licensing };
+  setup(_core: CoreTasksSetup): WorkflowsManagementTasksSetup {
+    const real = workflowsManagementBridge.getSetup();
+    if (real) {
+      this.bridged = true;
+      return real;
+    }
+
+    const { api } = createWorkflowsManagement({
+      core: {
+        getStartServices: () => this.startDeps.promise,
+        // A pod has Elasticsearch by definition (it is how it runs).
+        status: { core$: of({ elasticsearch: { level: ServiceStatusLevels.available } }) },
+      } as never,
+      plugins: this.setupDeps as never,
+      logger: this.context.logger.get(),
+      kibanaVersion: this.context.env.packageInfo.version,
+      available: this.context.config.get().available,
+      options: { readOnly: true },
+    });
+    return { management: api };
+  }
+
+  start(core: CoreTasksStart, deps: TasksStartDeps) {
+    if (this.bridged) return;
+    // Setup dependencies the service reads at call time.
+    this.setupDeps.spaces = deps.spaces;
+    this.startDeps.resolve([core, deps, undefined]);
   }
 }
 

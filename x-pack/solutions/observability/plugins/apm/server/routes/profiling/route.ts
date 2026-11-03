@@ -6,7 +6,7 @@
  */
 
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import {
   routeDefinitions,
   type ServicesFlamegraphResponse,

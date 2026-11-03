@@ -6,14 +6,14 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { apiPrivileges } from '@kbn/context-engine-plugin/common/features';
+import type { ToolsSecurityStart } from '../start_types';
 
 export const hasContextEngineReadPrivilege = async ({
   security,
   request,
 }: {
-  security: SecurityPluginStart | undefined;
+  security: ToolsSecurityStart | undefined;
   request: KibanaRequest;
 }): Promise<boolean> => {
   if (!security) {

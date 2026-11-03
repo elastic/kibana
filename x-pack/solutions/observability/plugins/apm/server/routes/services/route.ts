@@ -38,7 +38,7 @@ import {
   UnknownMLCapabilitiesError,
 } from '@kbn/ml-plugin/server';
 import type { Annotation } from '@kbn/observability-plugin/common/annotations';
-import { apmMaxNumberOfServices } from '@kbn/observability-plugin/common';
+import { apmMaxNumberOfServices } from '@kbn/observability-plugin/common/ui_settings_keys';
 import type { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { mergeWith, uniq } from 'lodash';

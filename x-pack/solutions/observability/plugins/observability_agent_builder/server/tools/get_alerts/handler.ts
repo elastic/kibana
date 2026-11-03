@@ -12,8 +12,8 @@ import {
   ALERT_STATUS_ACTIVE,
   AlertConsumers,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
-import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common/rule_type_ids';
+import type { ObservabilityAgentBuilderStartServices } from '../../types';
 import { getTotalHits } from '../../utils/get_total_hits';
 import { kqlFilter as buildKqlFilter } from '../../utils/dsl_filters';
 import { defaultFields } from './tool';
@@ -27,7 +27,7 @@ export async function getToolHandler({
   includeRecovered,
   fields,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
+  core: ObservabilityAgentBuilderStartServices;
   request: KibanaRequest;
   start: string;
   end: string;

@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { maxSuggestions } from '@kbn/observability-plugin/common';
+import { maxSuggestions } from '@kbn/observability-plugin/common/ui_settings_keys';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   routeDefinitions,

@@ -16,15 +16,15 @@ import {
   MAX_TITLE_LENGTH,
   significantEventTypeSchema,
 } from '@kbn/significant-events-schema';
+import { QUERY_GENERATION_EXCLUDED_FEATURE_TYPES } from '@kbn/nightshift-ai/src/significant_events/queries/tools/features_tool';
 import {
   createQueryValidationContext,
-  QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
   validateKIQueries,
   type ValidatedKIQuery,
-} from '@kbn/nightshift-ai';
+} from '@kbn/nightshift-ai/src/significant_events/queries/validate_ki_queries';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID } from '../../../../../common/constants';
-import type { GetScopedClients } from '../../../../routes/types';
+import type { GetAgentBuilderScopedClients } from '../../../../scoped_clients';
 import { assertCanReadSignificantEvents } from '../../../../routes/utils/assert_can_manage_significant_events';
 import type { SignificantEventsServer } from '../../../../types';
 import { getRequestAbortSignal } from '../../../../routes/utils/get_request_abort_signal';
@@ -118,7 +118,7 @@ export const createValidateQueriesTool = ({
   server,
   logger,
 }: {
-  getScopedClients: GetScopedClients;
+  getScopedClients: GetAgentBuilderScopedClients;
   server: Pick<SignificantEventsServer, 'security'>;
   logger: Logger;
 }): BuiltinSkillBoundedTool<typeof validateQueriesSchema> => {

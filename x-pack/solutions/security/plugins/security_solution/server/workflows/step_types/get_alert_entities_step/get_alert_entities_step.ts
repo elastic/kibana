@@ -10,7 +10,6 @@ import {
   getAlertEntitiesInputSchema,
   getAlertEntitiesStepCommonDefinition,
 } from '../../../../common/workflows/step_types/get_alert_entities_step/get_alert_entities_step_common';
-import { getAlertEntities } from './get_alert_entities';
 import { resolveSpaceId } from './resolve_space_id';
 
 export const getAlertEntitiesStepDefinition = createServerStepDefinition({
@@ -25,6 +24,10 @@ export const getAlertEntitiesStepDefinition = createServerStepDefinition({
     }
 
     try {
+      // Loaded when the step runs: it needs the entity store's EUID helpers, which pull in a large
+      // dependency tree (@kbn/streamlang and the UI library it imports) that a task pod would
+      // otherwise carry for every run.
+      const { getAlertEntities } = await import('./get_alert_entities');
       const output = await getAlertEntities({
         abortSignal: context.abortSignal,
         alertIds: parsed.data.alert_ids,

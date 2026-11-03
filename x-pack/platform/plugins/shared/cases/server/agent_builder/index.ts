@@ -49,9 +49,14 @@ export function registerCasesAgentBuilderTools(
     attachmentsEnabled,
     templatesEnabled,
   }: { analyticsV2Enabled: boolean; attachmentsEnabled: boolean; templatesEnabled: boolean },
-  logger: Logger
+  logger: Logger,
+  /**
+   * Replaces the space-based availability check, for a runtime that decides it differently (a
+   * task pod has no Cases client, so it marks the tools and skills unavailable).
+   */
+  availabilityOverride?: ReturnType<typeof createCasesToolAvailability>
 ): void {
-  const availability = createCasesToolAvailability(coreSetup, logger);
+  const availability = availabilityOverride ?? createCasesToolAvailability(coreSetup, logger);
   agentBuilder.tools.register({
     ...searchCasesTool(coreSetup, getCasesClient),
     availability,

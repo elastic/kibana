@@ -6,7 +6,7 @@
  */
 import { merge } from 'lodash';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import type { ServiceInstanceMetadataDetailsResponse } from '@kbn/apm-api-shared';
 import {

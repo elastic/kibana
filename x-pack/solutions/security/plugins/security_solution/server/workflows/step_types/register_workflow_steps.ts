@@ -28,12 +28,13 @@ import { patchRuleStepDefinition } from './patch_rule_step/patch_rule_step';
 import { getAlertEntitiesStepDefinition } from './get_alert_entities_step';
 import { matchAttackFingerprintsStepDefinition } from './match_attack_fingerprints';
 
+/** What registering steps needs: Kibana's setup contract and the tasks entry's one both fit. */
+type StepRegistry = Pick<WorkflowsExtensionsServerPluginSetup, 'registerStepDefinition'>;
+
 /**
  * Registers all security workflow steps with the workflowsExtensions plugin.
  */
-export const registerWorkflowSteps = (
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup
-): void => {
+export const registerWorkflowSteps = (workflowsExtensions: StepRegistry): void => {
   workflowsExtensions.registerStepDefinition(renderAlertNarrativeStepDefinition);
   workflowsExtensions.registerStepDefinition(buildAlertEntityGraphStepDefinition);
   workflowsExtensions.registerStepDefinition(setAlertStatusStepDefinition);

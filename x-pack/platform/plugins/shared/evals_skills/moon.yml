@@ -17,6 +17,8 @@ project:
   owner: '@elastic/nightshift-context-and-research-team'
   sourceRoot: x-pack/platform/plugins/shared/evals_skills
 dependsOn:
+  - '@kbn/security-plugin'
+  - '@kbn/agent-builder-plugin'
   - '@kbn/core'
   - '@kbn/logging'
   - '@kbn/agent-builder-server'

@@ -6,7 +6,8 @@
  */
 
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import Boom from '@hapi/boom';
 import {
   EntityStoreGlobalState,

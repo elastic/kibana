@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/server';
+import type { CoreTasksStart } from '@kbn/core/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
@@ -14,7 +14,14 @@ import { omitNullKiAttributes } from '../../common/step_types/ki';
 import { isContextEngineEnabledInSpace } from '../utils/is_context_engine_enabled_in_space';
 import type { VerifyKi } from './verify_ki';
 
-export const createVerifyKiStepDefinition = (coreSetup: CoreSetup, verifyKi: VerifyKi) =>
+export const createVerifyKiStepDefinition = (
+  coreSetup: {
+    getStartServices: () => Promise<
+      [Pick<CoreTasksStart, 'savedObjects' | 'uiSettings'>, unknown, unknown]
+    >;
+  },
+  verifyKi: VerifyKi
+) =>
   createServerStepDefinition({
     ...VerifyKiStepCommonDefinition,
     handler: async (context) => {

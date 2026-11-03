@@ -11,7 +11,7 @@ import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/t
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { AgentBuilderConnectorFeatureId } from '@kbn/actions-plugin/common';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { ActionsTasksStart } from '@kbn/actions-plugin/server/tasks';
 import {
   CONNECTOR_SETUP_ATTACHMENT_TYPE,
   type ConnectorSetupAttachmentData,
@@ -54,7 +54,7 @@ export type ProposeConnectorInput = z.infer<typeof proposeConnectorSchema>;
 export const createProposeConnectorTool = ({
   getActionsStart,
 }: {
-  getActionsStart: () => Promise<ActionsPluginStart>;
+  getActionsStart: () => Promise<ActionsTasksStart>;
 }): BuiltinSkillBoundedTool<typeof proposeConnectorSchema> => ({
   id: 'propose_connector',
   type: ToolType.builtin,

@@ -7,12 +7,12 @@
 
 import type { CoreStart, Logger } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { NightshiftModelBlockedError } from '@kbn/significant-events-schema';
+import { NightshiftModelBlockedError } from '@kbn/significant-events-schema/src/nightshift_model_blocked_error';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { z } from '@kbn/zod/v4';
-import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
-import { MAX_KEYWORD_LENGTH } from '../../common';
+import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai/src/resolve_nightshift_model_for_request';
+import { MAX_KEYWORD_LENGTH } from '../../common/constants';
 
 export const resolveModelStepDefinition = ({
   getInference,

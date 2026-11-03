@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type {
-  ObservabilityAgentBuilderPluginSetupDependencies,
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
+  ObservabilityAgentBuilderStartServices,
+  ObservabilityAgentBuilderToolPlugins,
 } from '../../types';
 import { parseDatemath } from '../../utils/time';
 import { buildApmResources } from '../../utils/build_apm_resources';
@@ -59,11 +58,8 @@ export async function getToolHandler({
   latencyType = 'avg',
   sortBy = 'latency',
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
-  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  core: ObservabilityAgentBuilderStartServices;
+  plugins: ObservabilityAgentBuilderToolPlugins;
   request: KibanaRequest;
   logger: Logger;
   start: string;

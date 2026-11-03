@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core/server';
 import { uiSettings } from '../common/ui_settings';
 import { registerServices } from './services/register_services';
+import { logsDataAccessBridge } from './tasks/bridge';
 import type { LogsDataAccessPluginStartDeps, LogsDataAccessPluginSetupDeps } from './types';
 
 export type LogsDataAccessPluginSetup = ReturnType<LogsDataAccessPlugin['setup']>;
@@ -35,6 +36,7 @@ export class LogsDataAccessPlugin
   }
   public setup(core: CoreSetup, plugins: LogsDataAccessPluginSetupDeps) {
     core.uiSettings.register(uiSettings);
+    logsDataAccessBridge.setSetup(true);
   }
 
   public start(core: CoreStart, plugins: LogsDataAccessPluginStartDeps) {
@@ -46,8 +48,8 @@ export class LogsDataAccessPlugin
       },
     });
 
-    return {
-      services,
-    };
+    const start = { services };
+    logsDataAccessBridge.setStart(start);
+    return start;
   }
 }

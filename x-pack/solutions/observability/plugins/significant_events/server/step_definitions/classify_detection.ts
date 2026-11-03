@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { NeedsAgentReason, SignalVerdict, SkipReason } from '@kbn/significant-events-schema';
+import type {
+  NeedsAgentReason,
+  SignalVerdict,
+  SkipReason,
+} from '@kbn/significant-events-schema/src/significant_events';
 import type { ProbeOutcome } from '../lib/significant_events/rules/run_probe';
 
 export type DetectionClassification =

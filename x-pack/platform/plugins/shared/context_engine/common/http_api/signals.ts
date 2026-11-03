@@ -49,7 +49,7 @@ export interface EsqlToolCallSignal extends SignalEnvelope {
     query?: string;
     // `columns` is optional because the paginated list read strips it from `_source`
     // (`SIGNAL_SOURCE_EXCLUDES` in server/signals/read.ts) — only `row_count` is needed there.
-    // The write path (server/tasks/transform.ts) still populates a concrete array.
+    // The write path (server/signal_generator/transform.ts) still populates a concrete array.
     returned: { columns?: string[]; row_count: number };
     error?: string;
     duration_ms: number;

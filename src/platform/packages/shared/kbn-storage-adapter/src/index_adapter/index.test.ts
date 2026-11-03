@@ -691,3 +691,42 @@ describe('StorageIndexAdapter - esql method', () => {
     expect(esqlQuery).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('StorageIndexAdapter - readOnly', () => {
+  let esClient: jest.Mocked<ElasticsearchClient>;
+  let loggerMock: jest.Mocked<Logger>;
+
+  beforeEach(() => {
+    esClient = createMockEsClient();
+    loggerMock = createLoggerMock();
+  });
+
+  it('reads and writes the existing index without installing anything', async () => {
+    const client = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
+      readOnly: true,
+    }).getClient();
+
+    await client.search({ track_total_hits: false, size: 1, query: { match_all: {} } });
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.search).toHaveBeenCalled();
+    expect(esClient.index).toHaveBeenCalled();
+    expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+    expect(esClient.indices.create).not.toHaveBeenCalled();
+    expect(esClient.indices.putMapping).not.toHaveBeenCalled();
+  });
+
+  it('fails clearly, creating nothing, when the index does not exist', async () => {
+    (esClient.indices.getAlias as jest.Mock).mockResolvedValue({});
+    const client = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
+      readOnly: true,
+    }).getClient();
+
+    await expect(client.index({ id: 'doc1', document: { foo: 'bar' } })).rejects.toThrow(
+      /read-only/
+    );
+    expect(esClient.index).not.toHaveBeenCalled();
+    expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+    expect(esClient.indices.create).not.toHaveBeenCalled();
+  });
+});

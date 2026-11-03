@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsClient } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { StreamsPluginStartDependencies } from '../../../types';

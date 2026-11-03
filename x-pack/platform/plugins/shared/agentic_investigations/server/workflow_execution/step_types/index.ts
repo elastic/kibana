@@ -15,7 +15,7 @@ export const registerWorkflowExecutionStepDefinitions = ({
   workflowsExtensions,
   getConversationClient,
 }: {
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+  workflowsExtensions: Pick<WorkflowsExtensionsServerPluginSetup, 'registerStepDefinition'>;
   getConversationClient: (request: KibanaRequest) => Promise<ConversationPublicClient>;
 }): void => {
   workflowsExtensions.registerStepDefinition(

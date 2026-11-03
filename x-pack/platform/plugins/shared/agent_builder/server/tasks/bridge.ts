@@ -14,5 +14,5 @@ import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '../types'
  */
 export const agentBuilderBridge = createTasksKibanaBridge<
   AgentBuilderPluginSetup,
-  Pick<AgentBuilderPluginStart, 'agents' | 'tools'>
+  Pick<AgentBuilderPluginStart, 'agents' | 'tools' | 'conversations' | 'attachments'>
 >();

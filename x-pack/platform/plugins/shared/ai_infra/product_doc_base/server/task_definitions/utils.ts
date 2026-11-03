@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/logging';
-import {
-  TaskStatus,
-  type ConcreteTaskInstance,
-  type TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { TaskStatus, type ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import {
   INSTALL_LOCK_RETRY_DELAY_MS,

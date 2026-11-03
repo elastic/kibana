@@ -12,7 +12,7 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
 import dedent from 'dedent';
-import type { GetScopedClients } from '../../../routes/types';
+import type { GetAgentBuilderScopedClients } from '../../types';
 import {
   buildPolicyUsage,
   normalizeIlmPhases,
@@ -61,7 +61,7 @@ export const createListIlmPoliciesTool = ({
   getScopedClients,
   isServerless,
 }: {
-  getScopedClients: GetScopedClients;
+  getScopedClients: GetAgentBuilderScopedClients;
   isServerless: boolean;
 }): BuiltinToolDefinition<typeof listIlmPoliciesSchema> => ({
   id: LIST_ILM_POLICIES,

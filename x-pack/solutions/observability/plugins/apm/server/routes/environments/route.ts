@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { maxSuggestions } from '@kbn/observability-plugin/common';
+import { maxSuggestions } from '@kbn/observability-plugin/common/ui_settings_keys';
 import { routeDefinitions, type EnvironmentsResponse } from '@kbn/apm-api-shared';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { getEnvironments } from './get_environments';

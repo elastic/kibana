@@ -29,7 +29,7 @@ const distPerms = (rec: Record) => (rec.type === 'file' ? 0o644 : 0o755);
 /**
  * exclude files from packages by their whole name
  */
-function excludeFileByName(name: string) {
+export function excludeFileByName(name: string) {
   return (
     name === 'package.json' ||
     name === 'tsconfig.json' ||
@@ -43,7 +43,7 @@ function excludeFileByName(name: string) {
  * exclude files from packages by their "tags" or basename without the extension
  * (We split the filename on "." and check every segment except for the last one
  */
-function excludeFileByTags(tags: readonly string[]) {
+export function excludeFileByTags(tags: readonly string[]) {
   return tags.some(
     (t) =>
       t === 'mock' ||
@@ -63,7 +63,7 @@ function excludeFileByTags(tags: readonly string[]) {
 /**
  * exclude directories from packages by their relative path (relative to the package root)
  */
-function excludeDirsByRel(rel: string) {
+export function excludeDirsByRel(rel: string) {
   return rel === 'scripts';
 }
 
@@ -71,7 +71,7 @@ function excludeDirsByRel(rel: string) {
  * exclude directories from packages by their names, any directory in the package with
  * these names will be excluded
  */
-function excludeDirsByName(name: string) {
+export function excludeDirsByName(name: string) {
   return (
     name === '.agents' ||
     name === '.claude' ||

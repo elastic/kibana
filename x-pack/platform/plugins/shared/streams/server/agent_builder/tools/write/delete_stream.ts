@@ -11,7 +11,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import dedent from 'dedent';
-import type { GetScopedClients } from '../../../routes/types';
+import type { GetAgentBuilderScopedClients } from '../../types';
 import { STREAMS_DELETE_STREAM_TOOL_ID } from '../tool_ids';
 import { classifyError } from '../../utils/error_utils';
 import { getConfirmationMessage } from './confirmation_helpers';
@@ -31,7 +31,7 @@ export const createDeleteStreamTool = ({
   getScopedClients,
   writeQueue,
 }: {
-  getScopedClients: GetScopedClients;
+  getScopedClients: GetAgentBuilderScopedClients;
   writeQueue: StreamsWriteQueue;
 }): BuiltinToolDefinition<typeof deleteStreamSchema> => ({
   id: STREAMS_DELETE_STREAM_TOOL_ID,

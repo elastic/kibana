@@ -13,13 +13,15 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import {
   EPISODE_EVENTS_FIELDS,
-  EVENTS_SERIES_ID_EVAL,
   addEpisodeSummaryStats,
-  asTypedEsqlQuery,
   buildEpisodesDataRequest,
-  rowsFromEsql,
   type EpisodeEventsEsqlRow,
-} from '@kbn/alerting-v2-common-queries';
+} from '@kbn/alerting-v2-common-queries/episodes/episode_query';
+import { EVENTS_SERIES_ID_EVAL } from '@kbn/alerting-v2-common-queries/episodes/series_id_eval';
+import {
+  asTypedEsqlQuery,
+  rowsFromEsql,
+} from '@kbn/alerting-v2-common-queries/episodes/typed_esql_query';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import {

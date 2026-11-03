@@ -6,11 +6,11 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { getSampleDocumentsEsql } from '@kbn/ai-tools';
+import { getSampleDocumentsEsql } from '@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents';
 import type { AnalysisTarget } from '../../../shared/analysis_target';
 import { logSamplesGenerator } from './log_samples';
 
-jest.mock('@kbn/ai-tools', () => ({
+jest.mock('@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents', () => ({
   getSampleDocumentsEsql: jest.fn(),
 }));
 

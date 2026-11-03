@@ -8,15 +8,11 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import {
-  getToolResultId,
-  createErrorResult,
-  getAgentConnectorDetail,
-  resolveAllowedConnectorIds,
-} from '@kbn/agent-builder-server';
+import { getAgentConnectorDetail, resolveAllowedConnectorIds } from '@kbn/agent-builder-server';
+import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { getConnectorSpec } from '@kbn/connector-specs';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { ActionsTasksStart } from '@kbn/actions-plugin/server/tasks';
 
 const getConnectorSubActionsSchema = z.object({
   connector_id: z
@@ -48,7 +44,7 @@ const notAssignedMessage = (connectorId: string): string =>
 export const createGetConnectorSubActionsTool = ({
   getActionsStart,
 }: {
-  getActionsStart: () => Promise<ActionsPluginStart>;
+  getActionsStart: () => Promise<ActionsTasksStart>;
 }): BuiltinSkillBoundedTool<typeof getConnectorSubActionsSchema> => ({
   id: 'get_connector_sub_actions',
   type: ToolType.builtin,

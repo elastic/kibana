@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentBuilderPluginSetup, AiIndexResolver } from '@kbn/agent-builder-server';
 import { registerContextEngineAgentBuilderIntegration } from './register_agent_builder_integration';
@@ -19,10 +18,6 @@ import {
   CONTEXT_ENGINE_SIGNALS_SKILL_ID,
 } from '../common/agent_builder_skills';
 import { SELF_AGENT_ID } from '@kbn/agent-builder-common';
-import type {
-  ContextEngineAgentBuilderPluginStart,
-  ContextEngineAgentBuilderStartDependencies,
-} from './types';
 
 jest.mock('./agent_builder/tools', () => ({
   registerAgentBuilderTools: jest.fn(),
@@ -57,19 +52,14 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     const getAiIndexDataReadService = jest.fn().mockReturnValue({ list });
     const asCurrentUser = {};
     const asScoped = jest.fn().mockReturnValue({ asCurrentUser });
-    const coreSetup = {
-      getStartServices: jest.fn().mockResolvedValue([
-        { elasticsearch: { client: { asScoped } } },
-        {
-          contextEngine: { getAiIndexDataReadService },
-          security,
-        },
-        {},
-      ]),
-    } as unknown as CoreSetup<
-      ContextEngineAgentBuilderStartDependencies,
-      ContextEngineAgentBuilderPluginStart
-    >;
+    const getStartServices = jest.fn().mockResolvedValue([
+      { elasticsearch: { client: { asScoped } } },
+      {
+        contextEngine: { getAiIndexDataReadService },
+        security,
+      },
+      {},
+    ]);
 
     let resolver: AiIndexResolver | undefined;
     const register = jest.fn();
@@ -84,9 +74,9 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     } as unknown as AgentBuilderPluginSetup;
 
     registerContextEngineAgentBuilderIntegration({
-      coreSetup,
+      getStartServices,
       agentBuilder,
-      workflowsManagement: {} as any,
+      getWorkflowsManagement: () => ({} as any),
     });
 
     if (!resolver) {

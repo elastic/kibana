@@ -43,7 +43,7 @@ export const agentType = {
   },
 } as const satisfies AgentTypeDefinition;
 
-export const registerAgentType = (agentBuilder: AgentBuilderPluginSetup): void => {
+export const registerAgentType = (agentBuilder: Pick<AgentBuilderPluginSetup, 'agents'>): void => {
   agentBuilder.agents.registerType(agentType);
 };
 

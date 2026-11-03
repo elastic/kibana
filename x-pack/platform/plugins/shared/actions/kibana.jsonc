@@ -38,7 +38,8 @@
         "licensing",
         "taskManager",
         "encryptedSavedObjects",
-        "eventLog"
+        "eventLog",
+        "security"
       ],
       "optionalPlugins": [
         "spaces"

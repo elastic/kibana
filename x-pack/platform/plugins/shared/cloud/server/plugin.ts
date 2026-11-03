@@ -19,13 +19,10 @@ import type { CloudConfigType } from './config';
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { registerCloudUsageCollector } from './collectors';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
-import { getIsEce } from '../common/get_is_ece';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
 import type { DecodedCloudId } from '../common/decode_cloud_id';
 import { decodeCloudId } from '../common/decode_cloud_id';
-import { parseOnboardingSolution } from '../common/parse_onboarding_default_solution';
-import { getFullCloudUrl, withTargetOrganization } from '../common/utils';
-import { readInstanceSizeMb } from './env';
+import { createCloudSetup, createCloudStart } from './cloud_contracts';
 import { defineRoutes } from './routes';
 import type { CloudRequestHandlerContext } from './routes/types';
 import { cloudOnboardingQuerySchema } from './routes/onboarding_query_schema';
@@ -237,14 +234,10 @@ export interface CloudStart {
 export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
   private readonly config: CloudConfigType;
   private readonly logger: Logger;
-  private readonly trialEndDate: Date | undefined;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.config = this.context.config.get<CloudConfigType>();
     this.logger = this.context.logger.get();
-    this.trialEndDate = this.config.trial_end_date
-      ? new Date(this.config.trial_end_date)
-      : undefined;
   }
 
   public setup(core: CoreSetup, { usageCollection }: PluginsSetup): CloudSetup {
@@ -254,12 +247,6 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     const projectType = this.config.serverless?.project_type;
     const productTier = this.config.serverless?.product_tier;
     const orchestratorTarget = this.config.serverless?.orchestrator_target;
-    const isServerlessEnabled = !!projectId;
-    const isEce = getIsEce({
-      isCloudEnabled,
-      isServerlessEnabled,
-      isSaasContainer: this.config.isSaasContainer,
-    });
     const deploymentId = parseDeploymentIdFromDeploymentUrl(this.config.deployment_url);
 
     registerCloudDeploymentMetadataAnalyticsContext(core.analytics, this.config);
@@ -356,87 +343,16 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     });
 
     setupSavedObjects(core.savedObjects, this.logger);
-    return {
-      ...this.getCloudUrls(),
-      cloudId: this.config.id,
-      csp: this.config.csp,
-      region: this.config.region,
-      organizationId,
-      instanceSizeMb: readInstanceSizeMb(),
-      deploymentId,
-      elasticsearchClusterId: decodedId?.elasticsearchClusterId,
+    return createCloudSetup({
+      config: this.config,
+      logger: this.logger,
+      decodedId,
       elasticsearchUrl,
-      kibanaUrl: decodedId?.kibanaUrl,
-      cloudHost: decodedId?.host,
-      cloudDefaultPort: decodedId?.defaultPort,
-      isCloudEnabled,
-      isEce,
-      trialEndDate: this.trialEndDate,
-      isElasticStaffOwned: this.config.is_elastic_staff_owned,
-      apm: {
-        url: this.config.apm?.url,
-        secretToken: this.config.apm?.secret_token,
-      },
-      managedOtlp: {
-        url: this.config.managed_otlp?.url,
-      },
-      onboarding: {
-        defaultSolution: parseOnboardingSolution(this.config.onboarding?.default_solution),
-      },
-      isServerlessEnabled,
-      serverless: {
-        projectId,
-        projectName: this.config.serverless?.project_name,
-        projectType,
-        orchestratorTarget,
-        // Hi fellow developer! Please, refrain from using `productTier` from this contract.
-        // It is exposed for informational purposes (telemetry and feature flags). Do not use it for feature-gating.
-        // Use `core.pricing` when checking if a feature is available for the current product tier.
-        productTier,
-        organizationInTrial: this.config.serverless?.in_trial,
-      },
-      isInTrial: this.isInTrial.bind(this),
-      trialDaysLeft: this.trialDaysLeft.bind(this),
-    };
+      deploymentId,
+    });
   }
 
   public start(): CloudStart {
-    return {
-      ...this.getCloudUrls(),
-      isCloudEnabled: getIsCloudEnabled(this.config.id),
-      isInTrial: this.isInTrial.bind(this),
-      trialDaysLeft: this.trialDaysLeft.bind(this),
-    };
-  }
-
-  private getCloudUrls() {
-    const { base_url: baseUrl, organization_id: organizationId } = this.config;
-    const projectsUrl = withTargetOrganization(
-      getFullCloudUrl(baseUrl, this.config.projects_url),
-      organizationId
-    );
-    return {
-      baseUrl,
-      projectsUrl,
-    };
-  }
-
-  private trialDaysLeft(): number | undefined {
-    if (this.trialEndDate !== undefined && this.config.trial_end_date) {
-      const endDateMs = this.trialEndDate.getTime();
-      if (!Number.isNaN(endDateMs)) {
-        const diff = endDateMs - Date.now();
-        return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
-      } else {
-        this.logger.error('cloud.trial_end_date config value could not be parsed.');
-      }
-    }
-    return undefined;
-  }
-
-  private isInTrial(): boolean {
-    if (this.config.serverless?.in_trial) return true;
-    const daysLeft = this.trialDaysLeft();
-    return daysLeft !== undefined && daysLeft > 0;
+    return createCloudStart({ config: this.config, logger: this.logger });
   }
 }

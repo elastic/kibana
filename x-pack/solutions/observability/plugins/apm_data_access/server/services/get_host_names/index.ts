@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { rangeQuery } from '@kbn/observability-utils-common/es/queries/range_query';
 import { HOST_NAME } from '@kbn/apm-types/es_fields';
 import { castArray } from 'lodash';
-import { type DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { getBucketSize, type TimeRangeMetadata } from '../../../common';
 import { getPreferredBucketSizeAndDataSource } from '../../../common/utils/get_preferred_bucket_size_and_data_source';
 import { ApmDocumentType } from '../../../common/document_type';

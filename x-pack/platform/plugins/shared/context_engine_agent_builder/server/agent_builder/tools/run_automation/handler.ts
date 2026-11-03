@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { CoreStart, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ExecutionStatus, isTerminalStatus, type WorkflowDetailDto } from '@kbn/workflows';
 import { CREATE_KI_STEP_ID } from '@kbn/context-engine-plugin/common/step_types/create_ki';
+import type { ToolsCoreStart, ToolsSecurityStart } from '../../../start_types';
 import { runSavedAutomation, type RunAutomationResult } from '../save_automation/handler';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
 
@@ -112,8 +112,8 @@ export const runAutomationHandler = async ({
   request: KibanaRequest;
   spaceId: string;
   logger: Logger;
-  getCoreStart: () => Promise<CoreStart>;
-  getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+  getCoreStart: () => Promise<ToolsCoreStart>;
+  getSecurityStart: () => Promise<ToolsSecurityStart | undefined>;
   getWorkflowsManagement: () => WorkflowsManagementApi;
 }): Promise<RunAutomationHandlerResult> => {
   await assertContextEngineWriteAccess({ request, spaceId, getCoreStart, getSecurityStart });

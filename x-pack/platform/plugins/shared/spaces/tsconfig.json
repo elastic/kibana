@@ -44,6 +44,7 @@
     "@kbn/core-saved-objects-utils-server",
     "@kbn/utils",
     "@kbn/shared-ux-page-kibana-template",
+    "@kbn/core-plugins-server",
     "@kbn/core-saved-objects-common",
     "@kbn/shared-ux-router",
     "@kbn/core-custom-branding-browser-mocks",

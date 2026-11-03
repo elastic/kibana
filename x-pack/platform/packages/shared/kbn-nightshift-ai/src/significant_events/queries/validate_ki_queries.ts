@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getMappingConflicts } from '@kbn/ai-tools';
+import { getMappingConflicts } from '@kbn/ai-tools/src/utils/get_mapping_conflicts';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { Feature, QueryFeature, QueryType } from '@kbn/significant-events-schema';

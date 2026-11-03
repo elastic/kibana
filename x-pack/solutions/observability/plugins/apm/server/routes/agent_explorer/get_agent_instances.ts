@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import type { AgentExplorerAgentInstancesResponse } from '@kbn/apm-api-shared';
 import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';

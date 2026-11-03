@@ -17,15 +17,16 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { ProductDocInstallClient } from '../doc_install_status';
 import { DocumentationManager } from './doc_manager';
 
-jest.mock('../../tasks');
+jest.mock('../../task_definitions');
+jest.mock('../../task_definitions/install_all');
+import { getInstallAllTaskStatus } from '../../task_definitions/install_all';
 import {
   scheduleInstallAllTask,
   scheduleUninstallAllTask,
   scheduleEnsureUpToDateTask,
   scheduleEnsureSecurityLabsUpToDateTask,
-  getInstallAllTaskStatus,
   waitUntilTaskCompleted,
-} from '../../tasks';
+} from '../../task_definitions';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { PRODUCT_DOC_INSTALL_LOCK_ID } from '../install_lock';
 

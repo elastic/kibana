@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { getRollupIntervalForTimeRange } from '@kbn/apm-data-access-plugin/server/utils';
 import type { TraceMetrics } from '@kbn/observability-agent-builder-plugin/server/data_registry/data_registry_types';
 import type { APMConfig } from '../..';
@@ -26,8 +26,12 @@ import { getSeverity, isNoAnomalyScore } from '../../../common/anomaly_detection
 import { ApmDocumentType } from '../../../common/document_type';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getExitSpanChangePoints, getServiceChangePoints } from './get_change_points';
-import { buildApmToolResources } from '../utils/build_apm_tool_resources';
-import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
+import {
+  buildApmToolResources,
+  type ApmToolCore,
+  type ApmToolPlugins,
+} from '../utils/build_apm_tool_resources';
+import type { APMPluginSetupDependencies } from '../../types';
 import { getTransaction } from '../../routes/transactions/get_transaction';
 import { getTransactionByName } from '../../routes/transactions/get_transaction_by_name';
 
@@ -37,8 +41,8 @@ export function registerDataProviders({
   config,
   logger,
 }: {
-  core: CoreSetup<APMPluginStartDependencies>;
-  plugins: APMPluginSetupDependencies;
+  core: ApmToolCore;
+  plugins: ApmToolPlugins & Pick<APMPluginSetupDependencies, 'observabilityAgentBuilder'>;
   config: APMConfig;
   logger: Logger;
 }) {

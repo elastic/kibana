@@ -24,7 +24,7 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import { hasWorkflowExecutePrivilege } from '@kbn/agent-builder-tools-base/workflows';
+import { hasWorkflowExecutePrivilege } from '@kbn/agent-builder-tools-base/workflows/check_privileges';
 import { confirmToolCall, hashDefinition } from './utils/confirm_tool_call';
 import { formatCodeBlock } from './utils/code_block';
 import { findUnsafeSteps, resolveYamlAliases, type UnsafeStep } from './utils/step_risk';

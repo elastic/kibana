@@ -18,7 +18,7 @@ import {
 } from '../../../common/workflows/triggers';
 
 export const registerSecurityWorkflowTriggers = (
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup
+  workflowsExtensions: Pick<WorkflowsExtensionsServerPluginSetup, 'registerTriggerDefinition'>
 ): void => {
   workflowsExtensions.registerTriggerDefinition(alertStatusChangedTriggerDef);
   workflowsExtensions.registerTriggerDefinition(alertTagsChangedTriggerDef);

@@ -7,7 +7,7 @@
 
 import { existsQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { EventOutcome } from '../../../common/event_outcome';
 import type { ServiceMapService, ServiceMapSpan } from '../../../common/service_map/types';

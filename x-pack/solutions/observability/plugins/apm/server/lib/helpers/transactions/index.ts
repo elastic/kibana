@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { getHasTransactionsEvents } from '@kbn/apm-data-access-plugin/server/utils';
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';

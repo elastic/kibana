@@ -7,7 +7,7 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
-import { significantEventsAgentPrompt } from '@kbn/nightshift-ai';
+import { significantEventsAgentPrompt } from '@kbn/nightshift-ai/src/significant_events/queries/prompt';
 import { SCS_AGENT_BUILDER_TOOL_IDS } from '../../../lib/semantic_code_search_grounding/semantic_code_search_tools';
 import { KI_QUERY_GENERATION_SKILL_ID } from '../../skills/ki_query_generation';
 import { KI_QUERY_GENERATION_AGENT_ID } from '../../../../common/constants';

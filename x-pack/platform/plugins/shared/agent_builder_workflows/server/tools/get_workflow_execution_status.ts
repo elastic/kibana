@@ -11,10 +11,8 @@ import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
-import {
-  getExecutionState,
-  hasWorkflowExecutionReadPrivilege,
-} from '@kbn/agent-builder-tools-base/workflows';
+import { getExecutionState } from '@kbn/agent-builder-tools-base/workflows/get_execution_state';
+import { hasWorkflowExecutionReadPrivilege } from '@kbn/agent-builder-tools-base/workflows/check_privileges';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 
 const getWorkflowExecutionStatusSchema = z.object({

@@ -15,6 +15,7 @@
     // must be loaded for the routes to be accessible — the serverless configs keep both in sync.
     "requiredPlugins": [],
     "optionalPlugins": ["features"],
-    "requiredBundles": []
+    "requiredBundles": [],
+    "tasks": { "requiredPlugins": [] }
   }
 }

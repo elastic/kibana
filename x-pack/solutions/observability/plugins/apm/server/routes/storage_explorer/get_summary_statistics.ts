@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
   getDurationFieldForTransactions,

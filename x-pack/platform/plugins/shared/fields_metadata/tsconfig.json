@@ -13,6 +13,7 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/core-plugins-server",
     "@kbn/io-ts-utils",
     "@kbn/logging",
     "@kbn/core-http-request-handler-context-server",

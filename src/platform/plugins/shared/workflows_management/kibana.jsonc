@@ -10,7 +10,17 @@
     "configPath": ["workflowsManagement"],
     "browser": true,
     "server": true,
-    "tasks": { "requiredPlugins": ["workflowsExecutionEngine", "licensing"] },
+    "tasks": {
+      "requiredPlugins": [
+        "workflowsExecutionEngine",
+        "workflowsExtensions",
+        "licensing",
+        "taskManager",
+        "actions",
+        "spaces"
+      ],
+      "optionalPlugins": ["security"]
+    },
     "requiredBundles": ["kibanaReact", "kibanaUtils", "data"],
     "requiredPlugins": [
       "navigation",

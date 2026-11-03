@@ -33,8 +33,8 @@ import {
   THROUGHPUT_TOP_VALUES_PER_FIELD,
 } from '@kbn/apm-types';
 import type {
-  ObservabilityAgentBuilderCoreSetup,
-  ObservabilityAgentBuilderPluginSetupDependencies,
+  ObservabilityAgentBuilderStartServices,
+  ObservabilityAgentBuilderToolPlugins,
 } from '../../types';
 import { getObservabilityDataSources } from '../../utils/get_observability_data_sources';
 import { kqlFilter, timeRangeFilter } from '../../utils/dsl_filters';
@@ -195,8 +195,8 @@ export async function getToolHandler({
   fieldCandidates,
   limit,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
-  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  core: ObservabilityAgentBuilderStartServices;
+  plugins: ObservabilityAgentBuilderToolPlugins;
   logger: Logger;
   esClient: IScopedClusterClient;
   start: string;

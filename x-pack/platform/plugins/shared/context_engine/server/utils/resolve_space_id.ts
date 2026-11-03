@@ -6,11 +6,18 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 export const DEFAULT_SPACE_ID = 'default';
 
+/**
+ * The part of the Spaces contract that resolves a request's space; Kibana's and a task runtime's
+ * (whose requests carry the space id) both provide it.
+ */
+export interface SpaceIdResolver {
+  spacesService: { getSpaceId: (request: KibanaRequest & { spaceId?: string }) => string };
+}
+
 export const resolveSpaceId = (
-  spaces: SpacesPluginStart | undefined,
+  spaces: SpaceIdResolver | undefined,
   request: KibanaRequest
 ): string => spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;

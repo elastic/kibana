@@ -13,8 +13,8 @@ import type {
   AttachmentTypeDefinition,
 } from '@kbn/agent-builder-server/attachments';
 import { getTacticMetadata } from '@kbn/elastic-assistant-common';
-import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
+import type { AdhocAttackDiscoveryDataClient } from '../../../types';
 
 import { ATTACK_DISCOVERY_ATTACHMENT_TYPE } from '../../../../common/constants';
 import { transformSearchResponseToAlerts } from '../../../routes/post/validate/helpers/transform_search_response_to_alerts';
@@ -136,7 +136,7 @@ export const createAttackDiscoveryAttachmentType = ({
   esClient,
   logger,
 }: {
-  adhocAttackDiscoveryDataClient: IRuleDataClient;
+  adhocAttackDiscoveryDataClient: AdhocAttackDiscoveryDataClient;
   esClient: IClusterClient;
   logger: Logger;
 }): AttachmentTypeDefinition => ({

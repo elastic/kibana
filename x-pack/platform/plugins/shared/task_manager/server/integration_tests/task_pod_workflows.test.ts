@@ -62,6 +62,11 @@ steps:
     connector-id: parity-llm
     with:
       prompt: say hello
+  - name: agent
+    type: ai.agent
+    connector-id: parity-llm
+    with:
+      message: say hello as an agent
 `;
 
 /**
@@ -110,6 +115,8 @@ describe('task pod parity (workflows family)', () => {
     pod = await startPodProcess({
       family: 'workflows',
       port: POD_PORT,
+      // Agent Builder's steps write to a restricted system index, which only the system user may.
+      esUser: { username: 'kibana_system', password: 'changeme' },
       podConfig: { 'xpack.actions.preconfigured': preconfigured },
     });
   });
@@ -165,6 +172,7 @@ describe('task pod parity (workflows family)', () => {
           size: 10,
         });
         expect((steps.hits.total as { value: number }).value).toBeGreaterThanOrEqual(2);
+        // The agent step is Agent Builder's own: it must be in the pod for the run to complete.
       },
       { times: 30, intervalMs: 1000 }
     );
@@ -177,7 +185,11 @@ describe('task pod parity (workflows family)', () => {
   it('did not create any index or data stream', async () => {
     const created = (await listIndices(kibanaServer)).filter((i) => !indicesBeforePod.includes(i));
     const notThePods = (i: string) =>
-      i.startsWith('.ds-') || i.startsWith('.security-profile') || i.startsWith('.ai-index');
+      i.startsWith('.ds-') ||
+      i.startsWith('.security-profile') ||
+      i.startsWith('.ai-index') ||
+      // Agent Builder creates its storage on first use, in Kibana too.
+      i.startsWith('.chat-');
     expect(created.filter((i) => !notThePods(i))).toEqual([]);
   });
 });

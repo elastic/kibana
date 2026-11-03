@@ -6,18 +6,23 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import {
-  type SavedObjectsServiceStart,
-  type KibanaRequest,
-  type IScopedClusterClient,
-  SavedObjectsClient,
+import type {
+  SavedObjectsServiceStart,
+  KibanaRequest,
+  IScopedClusterClient,
 } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
 import { ML_JOB_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
 import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../common/constants/trained_models';
 import type { TrainedModelJob, MLSavedObjectService } from './service';
 
+type SavedObjectsStartForClients = Pick<
+  SavedObjectsServiceStart,
+  'getScopedClient' | 'createInternalRepository'
+>;
+
 export function savedObjectClientsFactory(
-  getSavedObjectsStart: () => SavedObjectsServiceStart | null
+  getSavedObjectsStart: () => SavedObjectsStartForClients | null
 ) {
   return {
     // create a saved object client scoped to the current request

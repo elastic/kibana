@@ -111,7 +111,7 @@ describe('task pod parity (connectors family)', () => {
     await esServer?.stop();
   });
 
-  it('serves connector task types Kibana registered, and none that need privileges', async () => {
+  it('serves the connector task types Kibana registered, privileged ones included', async () => {
     const health = (await http(`${pod.url}/health`)).json() as { taskTypes: string[] };
     const kibanaTypes = taskManager.getRegisteredTypes().filter((t) => t.startsWith('actions:.'));
     expect(health.taskTypes.length).toBeGreaterThan(20);
@@ -119,9 +119,10 @@ describe('task pod parity (connectors family)', () => {
     expect(health.taskTypes).toEqual(
       expect.arrayContaining(['actions:.webhook', 'actions:.server-log'])
     );
-    // Sub-feature connector types need Kibana privileges, which a pod cannot check.
+    // Connector types that need Kibana privileges run in the pod too: it checks them through the
+    // security tasks entry, like Kibana does.
     expect(kibanaTypes).toContain('actions:.sentinelone');
-    expect(health.taskTypes).not.toContain('actions:.sentinelone');
+    expect(health.taskTypes).toContain('actions:.sentinelone');
     // Cleanup and telemetry tasks stay in Kibana.
     expect(health.taskTypes.filter((t) => !t.startsWith('actions:.'))).toEqual([]);
   });

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
+import type {
+  SignificantEvent,
+  SignificantEventStatus,
+} from '@kbn/significant-events-schema/src/significant_events';
 import {
   EVENT_CREATED_TRIGGER_ID,
   EVENT_STATUS_CHANGED_TRIGGER_ID,

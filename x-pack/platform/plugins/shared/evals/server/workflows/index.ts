@@ -16,7 +16,7 @@ export { createEvalsServerSteps } from './steps';
  * Registers all evals workflow steps with the Workflows engine.
  */
 export const registerEvalsWorkflowSteps = (
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
+  workflowsExtensions: Pick<WorkflowsExtensionsServerPluginSetup, 'registerStepDefinition'>,
   deps: EvalStepDeps
 ): void => {
   for (const step of createEvalsServerSteps(deps)) {

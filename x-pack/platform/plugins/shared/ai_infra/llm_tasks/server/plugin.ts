@@ -7,7 +7,6 @@
 
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { ResourceTypes, type ResourceType } from '@kbn/product-doc-common';
 import type { LlmTasksConfig } from './config';
 import type {
   LlmTasksPluginSetup,
@@ -15,7 +14,7 @@ import type {
   PluginSetupDependencies,
   PluginStartDependencies,
 } from './types';
-import { retrieveDocumentation } from './tasks';
+import { createLlmTasksStart } from './create_llm_tasks_start';
 
 export class LlmTasksPlugin
   implements
@@ -40,34 +39,6 @@ export class LlmTasksPlugin
 
   start(core: CoreStart, startDependencies: PluginStartDependencies): LlmTasksPluginStart {
     const { inference, productDocBase } = startDependencies;
-    return {
-      retrieveDocumentationAvailable: async (options: {
-        inferenceId: string;
-        resourceType?: ResourceType;
-      }) => {
-        try {
-          const resourceType = options.resourceType ?? ResourceTypes.productDoc;
-          if (resourceType === ResourceTypes.securityLabs) {
-            const status = await startDependencies.productDocBase.management.getSecurityLabsStatus({
-              inferenceId: options.inferenceId,
-            });
-            return status.status === 'installed';
-          }
-          const docBaseStatus = await startDependencies.productDocBase.management.getStatus({
-            inferenceId: options.inferenceId,
-          });
-          return docBaseStatus.status === 'installed';
-        } catch {
-          return false;
-        }
-      },
-      retrieveDocumentation: (options) => {
-        return retrieveDocumentation({
-          outputAPI: inference.getClient({ request: options.request }).output,
-          searchDocAPI: productDocBase.search,
-          logger: this.logger.get('tasks.retrieve-documentation'),
-        })(options);
-      },
-    };
+    return createLlmTasksStart({ inference, productDocBase, logger: this.logger });
   }
 }

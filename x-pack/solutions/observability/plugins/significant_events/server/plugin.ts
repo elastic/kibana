@@ -18,7 +18,6 @@ import type {
 import { SavedObjectsClient } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import {
   catchError,
   combineLatest,
@@ -32,16 +31,10 @@ import {
   timer,
 } from 'rxjs';
 import type { Subscription } from 'rxjs';
-import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { SIGNIFICANT_EVENTS_SOURCE_RECONCILIATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
-import {
-  createSourceKnowledgeStateClient,
-  sourceKnowledgeStateSavedObjectType,
-  SOURCE_KNOWLEDGE_STATE_TYPE,
-  SOURCE_WRITE_LEASE_WAIT_MS,
-} from './lib/knowledge_indicators/source_knowledge_state';
+import { sourceKnowledgeStateSavedObjectType } from './lib/knowledge_indicators/source_knowledge_state';
 import {
   getRelayAppConnectionSavedObjectType,
   RELAY_APP_CONNECTION_SO_TYPE,
@@ -67,10 +60,6 @@ import {
   type ManagedWorkflowsInstaller,
 } from './lib/workflows/setup/managed_workflows_installer';
 import { registerFeatureFlags } from './feature_flags';
-import { getSignificantEventsTuningConfig } from './lib/significant_events/helpers/get_significant_events_tuning_config';
-
-import { createSignificantEventsAlertingContextResolver } from './lib/significant_events/alerting/significant_events_alerting_context';
-import type { SignificantEventsAlertingContext } from './lib/significant_events/alerting/significant_events_alerting_context';
 
 import { EbtTelemetryService } from './lib/telemetry/ebt';
 import { significantEventsRouteRepository } from './routes';
@@ -86,21 +75,18 @@ import type {
   SignificantEventsServer,
 } from './types';
 import {
-  type KnowledgeIndicatorClient,
   KnowledgeIndicatorService,
   knowledgeIndicatorsDataStream,
 } from './lib/knowledge_indicators';
-import {
-  createSignificantEventsClients,
-  createSignificantEventsServices,
-} from './lib/significant_events/significant_events_clients';
+import { createSignificantEventsServices } from './lib/significant_events/significant_events_clients';
 import { detectionsDataStream } from './lib/significant_events/detections';
 import { deleteLegacyEventsDataStream } from './lib/significant_events/events';
 import { registerStreamsAgentBuilder } from './agent_builder/register';
+import { createAgentBuilderScopedClients } from './scoped_clients';
+import { significantEventsBridge } from './tasks/bridge';
 import { registerSignificantEventsSkills } from './agent_builder/skills/register_skills';
 import { registerAgentBuilderSmlTypes } from './agent_builder/sml/register_sml_types';
-import { classifyDetectionsStepDefinition } from './step_definitions/classify_detections';
-import { resolveModelStepDefinition } from './step_definitions/resolve_model';
+import { registerSignificantEventsWorkflowExtensions } from './task_runtime';
 import {
   createContinuousOnboardingWorkflowService,
   type ContinuousOnboardingWorkflowService,
@@ -116,8 +102,6 @@ import {
 } from './lib/workflows/significant_events_scheduled_workflows';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 import { removeLegacyDefaultSpaceWorkflows } from './lib/workflows/setup/remove_legacy_default_space_workflows';
-import { registerSignificantEventsWorkflowTriggers } from './workflows/triggers/register_triggers';
-import { createTriggerEmitter } from './workflows/triggers/emit';
 import {
   installDiscoveryAgents,
   registerSignificantEventsDiscoveryAgentTypes,
@@ -133,7 +117,6 @@ import {
 import { createSignificantEventsAvailability } from './agent_builder/tools/significant_events_availability';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
-import { getRequestAbortSignal } from './routes/utils/get_request_abort_signal';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 import { WorkflowExecutionService } from './lib/workflows/workflow_execution_service';
 import { createSourceChangeListener } from './routes/internal/knowledge_indicators/reconcile_source_catalog';
@@ -142,7 +125,6 @@ import { syncContinuousOnboarding } from './lib/continuous_onboarding/sync_conti
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
 const SLACK_CONNECTOR_RECONCILE_INTERVAL_MS = 60_000;
-const RULE_CREATION_APP = 'nightshift';
 
 export class SignificantEventsPlugin
   implements
@@ -221,128 +203,21 @@ export class SignificantEventsPlugin
       const [coreStart, pluginsStart] = await core.getStartServices();
       const cpsEnabled = plugins.cps?.getCpsEnabled() ?? false;
 
-      const scopedSoClient = coreStart.savedObjects.getScopedClient(request);
-      const uiSettingsClient = coreStart.uiSettings.asScopedToClient(scopedSoClient);
-      const globalUiSettingsClient = coreStart.uiSettings.globalAsScopedToClient(scopedSoClient);
-
-      // `scopedClusterClient`: origin-only. Used for everything the plugin owns (its hidden
-      // data streams), which only ever exists in the origin project.
-      // `streamDataEsClient`: always routed across every CPS-linked project, regardless of the
-      // active space's project routing expression. Knowledge indicators are stored per space,
-      // but they model all data available to a source, so extraction must always read across
-      // every linked project.
-      //
-      // Detection matches that all-projects scope when CPS is enabled via `withAllProjectsRouting`.
-      const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
-      const streamDataEsClient = coreStart.elasticsearch.client.asScoped(request, {
-        projectRouting: 'expression',
-        value: PROJECT_ROUTING_ALL,
-      }).asCurrentUser;
-      const soClient = scopedSoClient;
-      const inferenceClient = pluginsStart.inference.getClient({ request });
-      const licensing = pluginsStart.licensing;
+      const base = await createAgentBuilderScopedClients({
+        request,
+        coreStart,
+        pluginsStart,
+        cpsEnabled,
+        significantEventsServices,
+        knowledgeIndicatorService,
+        logger: this.logger,
+      });
+      const { uiSettingsClient } = base;
       const fieldsMetadataClient = await pluginsStart.fieldsMetadata.getClient(request);
 
-      const [tuningConfig, sourcesClient] = await Promise.all([
-        getSignificantEventsTuningConfig(globalUiSettingsClient, this.logger),
-        pluginsStart.nightshiftSources.getSourcesClient({ request }),
-      ]);
-
-      // Core always populates `request.spaceId` (default space when the URL has no prefix), so
-      // no fallback is needed. Knowledge indicators and their rules are scoped to this space.
-      const space = request.spaceId;
-
-      let alertEventsClientPromise: Promise<AlertEventsClientApi> | undefined;
-      const getAlertEventsClient = (): Promise<AlertEventsClientApi> => {
-        alertEventsClientPromise ??=
-          pluginsStart.alertingVTwo.getAlertEventsClientWithRequest(request);
-        return alertEventsClientPromise;
-      };
-
-      const significantEventsClients = createSignificantEventsClients({
-        services: significantEventsServices,
-        dataStreams: coreStart.dataStreams,
-        esClient: scopedClusterClient.asCurrentUser,
-        internalEsClient: scopedClusterClient.asInternalUser,
-        logger: this.logger,
-        space,
-        getAlertEventsClient,
-        triggerEmitter: createTriggerEmitter({
-          workflowsExtensions: pluginsStart.workflowsExtensions,
-          request,
-          logger: this.logger,
-        }),
-      });
-
-      const getAlertingV2RulesClient = async () =>
-        pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, space, {
-          app: RULE_CREATION_APP,
-        });
-
-      const resolveSignificantEventsAlertingContext =
-        createSignificantEventsAlertingContextResolver({
-          getAlertingV2RulesClient,
-          cpsEnabled,
-        });
-
-      const sourceKnowledgeState = createSourceKnowledgeStateClient({
-        repository: coreStart.savedObjects.createInternalRepository([SOURCE_KNOWLEDGE_STATE_TYPE]),
-        space,
-        sourcesClient,
-      });
-      const createKnowledgeIndicatorClient = (
-        context: SignificantEventsAlertingContext,
-        source?: NightshiftSource
-      ) =>
-        knowledgeIndicatorService.getClient({
-          esClient: scopedClusterClient.asInternalUser,
-          soClient,
-          space,
-          context,
-          config: tuningConfig,
-          withSourceWrite: (sourceId, run, options) => {
-            const shouldWaitForLease = options?.waitForLease !== false;
-            return sourceKnowledgeState.write({
-              sourceId,
-              allowDisabled: options?.allowDisabled,
-              waitForLeaseMs: shouldWaitForLease ? SOURCE_WRITE_LEASE_WAIT_MS : undefined,
-              signal: shouldWaitForLease ? getRequestAbortSignal(request) : undefined,
-              expectedRevision:
-                typeof request.headers['x-nightshift-source-revision'] === 'string' &&
-                request.headers['x-nightshift-source-revision']
-                  ? request.headers['x-nightshift-source-revision']
-                  : source?.esql_updated_at,
-              run,
-            });
-          },
-        });
-
-      let kiClientPromise: ReturnType<typeof createKnowledgeIndicatorClient> | undefined;
-      const getKnowledgeIndicatorClient = async (
-        source?: NightshiftSource
-      ): Promise<KnowledgeIndicatorClient> => {
-        if (source) {
-          return createKnowledgeIndicatorClient(
-            await resolveSignificantEventsAlertingContext(),
-            source
-          );
-        }
-        kiClientPromise ??= (async () =>
-          createKnowledgeIndicatorClient(await resolveSignificantEventsAlertingContext()))();
-        return kiClientPromise;
-      };
-
-      const license = await licensing.getLicense();
-      const isSecurityEnabled = license.getFeature('security').isEnabled;
-
       return {
-        scopedClusterClient,
-        streamDataEsClient,
-        soClient,
-        space,
-        getSignificantEventsAlertingContext: resolveSignificantEventsAlertingContext,
-        getKnowledgeIndicatorClient,
-        sourceKnowledgeState,
+        ...base,
+        fieldsMetadataClient,
         scheduleSourceOnboarding: async (
           source: NightshiftSource,
           { ignoreContinuousSetting = false }: IScheduleSourceOnboardingOptions = {}
@@ -379,16 +254,6 @@ export class SignificantEventsPlugin
           });
           return true;
         },
-        getAlertEventsClient,
-        ...significantEventsClients,
-        inferenceClient,
-        fieldsMetadataClient,
-        sourcesClient,
-        licensing,
-        uiSettingsClient,
-        globalUiSettingsClient,
-        isSecurityEnabled,
-        tuningConfig,
       };
     };
 
@@ -462,20 +327,15 @@ export class SignificantEventsPlugin
     plugins.workflowsExtensions?.registerManagedWorkflowOwner(
       SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER
     );
-    plugins.workflowsExtensions?.registerStepDefinition(
-      resolveModelStepDefinition({
+    if (plugins.workflowsExtensions) {
+      registerSignificantEventsWorkflowExtensions({
+        workflowsExtensions: plugins.workflowsExtensions,
         getInference: () => this.server?.inference,
         getSavedObjects: () => this.server?.core?.savedObjects,
         getUiSettings: () => this.server?.core?.uiSettings,
-        logger: this.logger.get('resolve_model'),
-      })
-    );
-    plugins.workflowsExtensions?.registerStepDefinition(
-      classifyDetectionsStepDefinition({ logger: this.logger.get('classify_detections') })
-    );
-
-    // Custom event-driven triggers users can subscribe to from their own workflows.
-    registerSignificantEventsWorkflowTriggers(plugins.workflowsExtensions);
+        logger: this.logger,
+      });
+    }
 
     if (plugins.workflowsManagement && plugins.workflowsExtensions) {
       const { management: managementApi } = plugins.workflowsManagement;
@@ -621,6 +481,9 @@ export class SignificantEventsPlugin
       logger: this.logger,
       runDevModeChecks: this.isDev,
     });
+
+    // A tasks entry that boots in this process (Kibana) leaves the registrations above to this entry.
+    significantEventsBridge.setSetup(true);
   }
 
   public start(core: CoreStart, plugins: SignificantEventsPluginStartDependencies): void {

@@ -28,6 +28,7 @@ export interface CoreTasksSetup<TPluginsStart extends object = object, TStart = 
     CoreSetup['savedObjects'],
     'registerType' | 'setEncryptionExtension' | 'getDefaultIndex'
   >;
+  uiSettings: Pick<CoreSetup['uiSettings'], 'register' | 'registerGlobal'>;
   getStartServices(): Promise<[CoreTasksStart, TPluginsStart, TStart]>;
 }
 

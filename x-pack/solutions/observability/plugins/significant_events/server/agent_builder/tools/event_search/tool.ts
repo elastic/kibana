@@ -15,7 +15,7 @@ import dedent from 'dedent';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { significantEventSchema } from '@kbn/significant-events-schema';
 import type { SignificantEventsServer } from '../../../types';
-import type { GetScopedClients } from '../../../routes/types';
+import type { GetAgentBuilderScopedClients } from '../../../scoped_clients';
 import { assertCanReadSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
@@ -218,7 +218,7 @@ export function createSearchEventsTool({
   logger,
   telemetry,
 }: {
-  getScopedClients: GetScopedClients;
+  getScopedClients: GetAgentBuilderScopedClients;
   server: SignificantEventsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;

@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
-import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared/src/feature_flags';
 
 /**
  * Caches the latest `nightshift.enabled` value so callers that cannot await (sync factories, tool

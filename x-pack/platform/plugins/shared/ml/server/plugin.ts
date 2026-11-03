@@ -38,6 +38,7 @@ import {
   type CompatibleModule,
 } from '../common/constants/app';
 import { initMlServerLog } from './lib/log';
+import { mlBridge } from './tasks/bridge';
 import { annotationRoutes } from './routes/annotations';
 import { calendars } from './routes/calendars';
 import { dataFeedRoutes } from './routes/datafeeds';
@@ -334,6 +335,7 @@ export class MlServerPlugin
           compatibleModuleType: this.compatibleModuleType,
         },
       });
+      mlBridge.setSetup(true);
     }
 
     return { ...sharedServicesProviders };

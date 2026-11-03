@@ -9,7 +9,6 @@ import { esManifest } from '@elastic/schemas/es/tools/manifest.js';
 import { kibanaManifest } from '@elastic/schemas/kibana/tools/manifest.js';
 import type { ApiTarget, AutoApprovedApi, InteractivityConfig } from '@kbn/agent-builder-common';
 import { isApiAutoApproved } from '@kbn/agent-builder-common';
-import { getConnectorSpec } from '@kbn/connector-specs';
 import { LineCounter, parseDocument, stringify, visit } from 'yaml';
 import { buildWorkflowLookup, type StepInfo } from '@kbn/workflows-yaml';
 
@@ -104,6 +103,11 @@ const fromRegistry = (
  * classifies each action as `read` / `write` / `destroy`; an omitted scope fails closed.
  */
 const fromConnectorSpec = (stepType: string): StepRisk | undefined => {
+  // Loaded on first use, synchronously: the package holds every connector spec, which a runtime that
+  // never classifies a connector step (a task pod) should not load.
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const connectorSpecs = require('@kbn/connector-specs') as typeof import('@kbn/connector-specs');
+  const { getConnectorSpec } = connectorSpecs;
   const [connectorType, ...action] = stepType.split('.');
   const scope = getConnectorSpec(`.${connectorType}`)?.actions?.[action.join('.')]?.scope;
   return scope && { safe: scope === 'read', destructive: scope === 'destroy' };

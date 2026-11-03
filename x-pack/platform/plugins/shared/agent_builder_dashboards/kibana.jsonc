@@ -19,6 +19,7 @@
       "share",
       "uiActions",
       "unifiedSearch"
-    ]
+    ],
+    "tasks": { "requiredPlugins": ["agentBuilder"] }
   }
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { Sort, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import type { TransactionTraceSamplesResponse } from '@kbn/apm-api-shared';

@@ -9,7 +9,7 @@ import { ToolResultType } from '@kbn/agent-builder-common';
 import { isToolHandlerStandardReturn } from '@kbn/agent-builder-server';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
-import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
+import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools/search';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
 import {
@@ -19,7 +19,7 @@ import {
 } from '../__mocks__/test_helpers';
 import { alertsTool, SECURITY_ALERTS_TOOL_ID } from './alerts_tool';
 
-jest.mock('@kbn/agent-builder-genai-utils/tools', () => ({
+jest.mock('@kbn/agent-builder-genai-utils/tools/search', () => ({
   runSearchTool: jest.fn(),
 }));
 

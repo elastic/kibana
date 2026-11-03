@@ -6,7 +6,7 @@
  */
 
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import { termQuery, termsQuery } from '@kbn/es-query';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {

@@ -17,6 +17,7 @@ project:
   owner: '@elastic/security-solution'
   sourceRoot: x-pack/platform/plugins/shared/agentic_investigations
 dependsOn:
+  - '@kbn/security-plugin'
   - '@kbn/dev-cli-runner'
   - '@kbn/tooling-log'
   - '@kbn/core'

@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
-import { NIGHTSHIFT_ONLINE_EVALS_INCLUDE_EXPLANATIONS_FLAG } from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_ONLINE_EVALS_INCLUDE_EXPLANATIONS_FLAG } from '@kbn/nightshift-shared/src/feature_flags';
 
 /**
  * Follows the `nightshift.onlineEvals.includeExplanations` flag, so turning it on or off applies to

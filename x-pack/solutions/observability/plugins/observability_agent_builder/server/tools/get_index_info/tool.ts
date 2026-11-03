@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import dedent from 'dedent';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
@@ -19,9 +19,8 @@ import {
   MAX_SHORT_STRING_LENGTH,
 } from '../../utils/schema_limits';
 import type {
-  ObservabilityAgentBuilderPluginSetupDependencies,
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
+  ObservabilityAgentBuilderStartServices,
+  ObservabilityAgentBuilderToolPlugins,
 } from '../../types';
 import { getIndexPatternsHandler } from './get_index_overview_handler';
 import { listFieldsHandler } from './get_index_fields_handler';
@@ -70,11 +69,8 @@ export function createGetIndexInfoTool({
   plugins,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
-  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  core: ObservabilityAgentBuilderStartServices;
+  plugins: ObservabilityAgentBuilderToolPlugins;
   logger: Logger;
 }): StaticToolRegistration<typeof getIndexInfoSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof getIndexInfoSchema> = {

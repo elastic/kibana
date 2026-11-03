@@ -11,12 +11,10 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { Logger } from '@kbn/core/server';
 import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
-import {
-  QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
-  toFeatureForLlmContext,
-} from '@kbn/nightshift-ai';
+import { QUERY_GENERATION_EXCLUDED_FEATURE_TYPES } from '@kbn/nightshift-ai/src/significant_events/queries/tools/features_tool';
+import { toFeatureForLlmContext } from '@kbn/nightshift-ai/src/significant_events/features/tool';
 import { z, lazySchema } from '@kbn/zod/v4';
-import type { GetScopedClients } from '../../../../routes/types';
+import type { GetAgentBuilderScopedClients } from '../../../../scoped_clients';
 import {
   loadSourceCatalog,
   resolveSourcesBySlugOrId,
@@ -60,7 +58,7 @@ export const createGetFeaturesTool = ({
   server,
   logger,
 }: {
-  getScopedClients: GetScopedClients;
+  getScopedClients: GetAgentBuilderScopedClients;
   server: Pick<SignificantEventsServer, 'security'>;
   logger: Logger;
 }): BuiltinSkillBoundedTool<typeof getFeaturesSchema> => {

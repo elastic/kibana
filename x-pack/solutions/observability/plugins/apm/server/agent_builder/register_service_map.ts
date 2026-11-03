@@ -8,8 +8,7 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { createServiceMapSkill } from './skills/service_map';
 import { createInvestigateServiceMapSkill } from './skills/investigate_service_map';
-import { createServiceMapAttachmentType } from './attachments/service_map';
-import { createServiceMapContextAttachmentType } from './attachments/service_map_context';
+import { registerServiceMapAttachments } from './register_service_map_attachments';
 
 export const registerServiceMapAgentBuilder = ({
   agentBuilder,
@@ -18,12 +17,5 @@ export const registerServiceMapAgentBuilder = ({
 }) => {
   agentBuilder.skills.register(createServiceMapSkill());
   agentBuilder.skills.register(createInvestigateServiceMapSkill());
-  agentBuilder.attachments.registerType(
-    createServiceMapAttachmentType() as Parameters<typeof agentBuilder.attachments.registerType>[0]
-  );
-  agentBuilder.attachments.registerType(
-    createServiceMapContextAttachmentType() as Parameters<
-      typeof agentBuilder.attachments.registerType
-    >[0]
-  );
+  registerServiceMapAttachments({ agentBuilder });
 };

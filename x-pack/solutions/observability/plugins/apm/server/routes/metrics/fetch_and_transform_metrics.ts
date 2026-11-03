@@ -9,7 +9,7 @@ import type { Unionize } from 'utility-types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { AggregationOptionsByType } from '@kbn/es-types';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import type { FetchAndTransformMetrics } from '@kbn/apm-api-shared';
 import type {
   APMEventClient,

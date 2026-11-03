@@ -25,6 +25,10 @@
       "unifiedDocViewer",
       "charts"
     ],
+    "tasks": {
+      "requiredPlugins": ["agentBuilder", "workflowsExtensions", "security"],
+      "optionalPlugins": ["proposals", "spaces"]
+    },
     "extraPublicDirs": ["common"]
   }
 }

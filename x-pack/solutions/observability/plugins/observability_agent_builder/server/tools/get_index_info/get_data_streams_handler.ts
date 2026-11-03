@@ -6,7 +6,7 @@
  */
 
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { listSearchSources } from '@kbn/agent-builder-genai-utils';
+import { listSearchSources } from '@kbn/agent-builder-genai-utils/tools/steps/list_search_sources';
 import { sortBy } from 'lodash';
 import type { ObservabilityDataSources } from '../../utils/get_observability_data_sources';
 

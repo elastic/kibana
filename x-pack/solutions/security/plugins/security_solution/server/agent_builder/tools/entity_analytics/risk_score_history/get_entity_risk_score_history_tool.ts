@@ -21,7 +21,7 @@ import type { ExperimentalFeatures } from '../../../../../common';
 import { IdentifierType } from '../../../../../common/api/entity_analytics/common/common.gen';
 import { RiskScoreDataClient } from '../../../../lib/entity_analytics/risk_score/risk_score_data_client';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
-import { securityTool } from '../../constants';
+import { SECURITY_GET_ENTITY_RISK_SCORE_HISTORY_TOOL_ID } from '../../tool_ids';
 import { buildRenderAttachmentTag } from '../attachment_utils';
 import { getEntityAnalyticsToolAvailability } from '../entity_analytics_availability';
 import { requireResolvedEntity } from '../entity_resolution';
@@ -89,9 +89,7 @@ const schema = lazySchema(() =>
   })
 );
 
-export const SECURITY_GET_ENTITY_RISK_SCORE_HISTORY_TOOL_ID = securityTool(
-  'get_entity_risk_score_history'
-);
+export { SECURITY_GET_ENTITY_RISK_SCORE_HISTORY_TOOL_ID };
 
 const getRiskScoreHistoryToolAvailability = async ({
   core,

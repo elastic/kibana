@@ -22,7 +22,7 @@ export type {
   RetrieveDocumentationParams,
   RetrieveDocumentationResult,
   RetrieveDocumentationResultDoc,
-} from './tasks';
+} from './task_impls';
 
 export const plugin: PluginInitializer<
   LlmTasksPluginSetup,

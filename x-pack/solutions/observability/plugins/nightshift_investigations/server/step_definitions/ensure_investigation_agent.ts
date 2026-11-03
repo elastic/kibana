@@ -11,16 +11,32 @@ import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
-import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
-import { installInvestigationAgent } from '../lib/install_investigation_agent';
-import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../agents/decision_tree_reinforcement';
-import { installDecisionTreeReinforcementAgent } from '../lib/install_decision_tree_reinforcement_agent';
+import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common/constants';
+import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../agents/decision_tree_reinforcement/constants';
 
-/** Which agent a workflow wants installed. */
-const AGENT_INSTALLERS = {
-  [NIGHTSHIFT_INVESTIGATION_AGENT_ID]: installInvestigationAgent,
-  [NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID]: installDecisionTreeReinforcementAgent,
-} as const;
+/**
+ * Which agent a workflow wants installed. The installers pull in the agent definitions, so they
+ * load when a step runs rather than with the step definition (a task pod registers it too).
+ */
+const installAgent = async (
+  agentId:
+    | typeof NIGHTSHIFT_INVESTIGATION_AGENT_ID
+    | typeof NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
+  options: {
+    agentBuilder: AgentBuilderPluginStart;
+    spaceId: string;
+    availability: AgentAvailabilityConfig;
+  }
+) => {
+  if (agentId === NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID) {
+    const { installDecisionTreeReinforcementAgent } = await import(
+      '../lib/install_decision_tree_reinforcement_agent'
+    );
+    return installDecisionTreeReinforcementAgent(options);
+  }
+  const { installInvestigationAgent } = await import('../lib/install_investigation_agent');
+  return installInvestigationAgent(options);
+};
 
 /**
  * `agents.ensure` guarantees the agent document exists, not that it is searchable, and the
@@ -67,7 +83,7 @@ export const ensureInvestigationAgentStepDefinition = ({
       // reaches zod, so a schema-level default would leave `agent_id` undefined at runtime.
       const agentId = context.input.agent_id ?? NIGHTSHIFT_INVESTIGATION_AGENT_ID;
 
-      await AGENT_INSTALLERS[agentId]({
+      await installAgent(agentId, {
         agentBuilder,
         spaceId,
         availability: getAgentAvailability(),

@@ -23,6 +23,7 @@
     "@kbn/observability-utils-common",
     "@kbn/observability-utils-server",
     "@kbn/apm-sources-access-plugin",
+    "@kbn/core-plugins-server",
     "@kbn/metrics-data-access-plugin",
     "@kbn/safer-lodash-set",
     "@kbn/genai-common"

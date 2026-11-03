@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
-import { NIGHTSHIFT_ONLINE_EVALS_PAUSED_FLAG } from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_ONLINE_EVALS_PAUSED_FLAG } from '@kbn/nightshift-shared/src/feature_flags';
 
 /**
  * Follows the `nightshift.onlineEvals.paused` kill switch, so flipping it applies to the next run

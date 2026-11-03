@@ -17,7 +17,7 @@ import { createHuntCoordinatorResultAttachmentType } from './hunt_coordinator_re
  * `AGENT_BUILDER_BUILTIN_ATTACHMENTS` and registering an id absent from that allow-list
  * throws at boot.
  */
-export const registerAttachments = (agentBuilder: AgentBuilderPluginSetup) => {
+export const registerAttachments = (agentBuilder: Pick<AgentBuilderPluginSetup, 'attachments'>) => {
   agentBuilder.attachments.registerType(createThreatAttachmentType());
   agentBuilder.attachments.registerType(createSignificantSecurityEventAttachmentType());
   agentBuilder.attachments.registerType(createHuntCoordinatorResultAttachmentType());

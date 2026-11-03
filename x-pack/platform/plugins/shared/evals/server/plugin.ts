@@ -39,6 +39,7 @@ import { EvaluationScoreService } from './storage/scores/evaluation_score_servic
 import { evaluationsDataStreamDefinition } from './storage/scores/scores_index_template';
 import { OnlineScoreService } from './storage/scores/online_score_service';
 import { onlineScoresDataStreamDefinition } from './storage/scores/online_scores_index_template';
+import { createListEvaluators, createListModelConnectors } from './runtime';
 import { createTaskProviderRegistry } from './task_providers/registry';
 import type { TaskProviderRegistry } from './task_providers/types';
 import { registerEvalsWorkflowSteps } from './workflows';
@@ -321,26 +322,8 @@ export class EvalsPlugin
     return {
       datasetService: this.datasetService,
       evaluationScoreService: this.evaluationScoreService,
-      listEvaluators: async ({ spaceId }) => {
-        const definitions = await evaluatorRegistry.asScoped({ spaceId }).list();
-
-        return definitions.map((def) => ({
-          name: def.name,
-          version: def.version,
-          kind: def.kind,
-          origin: def.origin,
-          description: def.description,
-          needsJudgeConnector: def.kind === 'llm',
-        }));
-      },
-      listModelConnectors: async (request) => {
-        const connectors = await plugins.inference.getConnectorList(request);
-        return connectors.map((connector) => ({
-          id: connector.connectorId,
-          name: connector.name,
-          type: connector.type,
-        }));
-      },
+      listEvaluators: createListEvaluators(evaluatorRegistry),
+      listModelConnectors: createListModelConnectors(plugins.inference),
       onlineScoreService: this.onlineScoreService,
     };
   }

@@ -17,13 +17,13 @@ import {
   toLifecycleDetection,
 } from '../../../common/significant_event_detection_attachment';
 import { lifecycleDetectionAttachmentSchema } from '../../../common/significant_event_detection_attachment_schema';
-import type { GetScopedClients } from '../../routes/types';
+import type { GetAgentBuilderScopedClients } from '../../scoped_clients';
 import { canReadSignificantEvents } from '../../routes/utils/assert_can_manage_significant_events';
 import type { SignificantEventsServer } from '../../types';
 
 interface CreateSignificantEventDetectionAttachmentTypeOptions {
   logger: Logger;
-  getScopedClients: GetScopedClients;
+  getScopedClients: GetAgentBuilderScopedClients;
   server: Pick<SignificantEventsServer, 'security'>;
 }
 

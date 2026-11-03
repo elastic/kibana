@@ -11,7 +11,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { createErrorResult } from '@kbn/agent-builder-server';
-import { MLCATEGORY } from '@kbn/ml-anomaly-utils';
+import { MLCATEGORY } from '@kbn/ml-anomaly-utils/field_types';
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import { VALIDATION_STATUS } from '@kbn/ml-validators';
 import type { MlLicense } from '../../../common/license';

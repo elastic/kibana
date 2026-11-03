@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { CoreSetup, IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type {
-  ObservabilityAgentBuilderPluginSetupDependencies,
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
+  ObservabilityAgentBuilderStartServices,
+  ObservabilityAgentBuilderToolPlugins,
 } from '../../types';
 import { getObservabilityDataSources } from '../../utils/get_observability_data_sources';
 import { getDataStreamsHandler, type DataStreamInfo } from './get_data_streams_handler';
@@ -36,11 +35,8 @@ export async function getIndexPatternsHandler({
   esClient,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
-  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  core: ObservabilityAgentBuilderStartServices;
+  plugins: ObservabilityAgentBuilderToolPlugins;
   esClient: IScopedClusterClient;
   logger: Logger;
 }): Promise<IndexPatternsResult> {

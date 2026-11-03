@@ -7,7 +7,7 @@
 
 import type { AggregationOptionsByType } from '@kbn/es-types';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import {
   METRIC_PROCESS_CPU_PERCENT,
   METRIC_OTEL_SYSTEM_CPU_UTILIZATION,

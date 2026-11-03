@@ -8,7 +8,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { IdentifierType } from '../../../common/api/entity_analytics/common/common.gen';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
-import { SECURITY_GET_ENTITY_GRAPH_TOOL_ID } from '../tools';
+import { SECURITY_GET_ENTITY_GRAPH_TOOL_ID } from '../tools/tool_ids';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
 const entityGraphAttachmentDataSchema = lazySchema(() =>

@@ -7,7 +7,6 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
-import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
@@ -125,6 +124,9 @@ export const alertsTool = (
           isCount ?? false
         }, timeWindowHours: ${timeWindowHours ?? 'default'}`
       );
+      // Loaded when the tool runs: the search graph pulls in the ES|QL language and LangChain, which a
+      // task pod should not carry until an agent calls the tool.
+      const { runSearchTool } = await import('@kbn/agent-builder-genai-utils/tools/search');
       const results = await runSearchTool({
         nlQuery: enhancedQuery,
         index: searchIndex,

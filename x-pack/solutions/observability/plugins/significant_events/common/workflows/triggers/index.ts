@@ -11,7 +11,7 @@ import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import {
   SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS,
   severitySchema,
-} from '@kbn/significant-events-schema';
+} from '@kbn/significant-events-schema/src/significant_events';
 
 // Trigger ids: kebab-case namespace, camelCase event.
 export const EVENT_CREATED_TRIGGER_ID = 'significant-events.eventCreated' as const;

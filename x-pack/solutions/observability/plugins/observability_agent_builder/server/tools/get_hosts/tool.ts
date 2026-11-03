@@ -18,7 +18,7 @@ import type { Logger } from '@kbn/core/server';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import { MAX_KQL_FILTER_LENGTH } from '../../utils/schema_limits';
-import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
+import type { ObservabilityAgentBuilderStartServices } from '../../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import { getToolHandler } from './handler';
 
@@ -55,7 +55,7 @@ export function createGetHostsTool({
   logger,
   dataRegistry,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
+  core: ObservabilityAgentBuilderStartServices;
   logger: Logger;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
 }): StaticToolRegistration<typeof getHostsSchema> {

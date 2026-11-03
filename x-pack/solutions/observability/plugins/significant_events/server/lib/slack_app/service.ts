@@ -12,7 +12,7 @@ import type {
   SavedObject,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { isAgentNotFoundError, isAgentUnavailableError } from '@kbn/agent-builder-common';
 import type { AgentRegistry } from '@kbn/agent-builder-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';

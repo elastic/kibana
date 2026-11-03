@@ -11,8 +11,8 @@ import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-b
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
-  ObservabilityAgentBuilderCoreSetup,
-  ObservabilityAgentBuilderPluginSetupDependencies,
+  ObservabilityAgentBuilderStartServices,
+  ObservabilityAgentBuilderToolPlugins,
 } from '../../types';
 import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
 import { MAX_KQL_FILTER_LENGTH, MAX_SHORT_STRING_LENGTH } from '../../utils/schema_limits';
@@ -53,8 +53,8 @@ export function createGetTraceMetricsTool({
   plugins,
   logger,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
-  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  core: ObservabilityAgentBuilderStartServices;
+  plugins: ObservabilityAgentBuilderToolPlugins;
   logger: Logger;
 }): StaticToolRegistration<typeof getTraceMetricsSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof getTraceMetricsSchema> = {

@@ -22,10 +22,10 @@ jest.mock('./services/search');
 jest.mock('./services/doc_install_status');
 jest.mock('./services/doc_manager');
 jest.mock('./routes');
-jest.mock('./tasks');
+jest.mock('./task_definitions');
 import { registerRoutes } from './routes';
 import { PackageInstaller } from './services/package_installer';
-import { registerTaskDefinitions, scheduleEnsureUpToDateTask } from './tasks';
+import { registerTaskDefinitions, scheduleEnsureUpToDateTask } from './task_definitions';
 import { DocumentationManager } from './services/doc_manager';
 
 const PackageInstallMock = PackageInstaller as jest.Mock;

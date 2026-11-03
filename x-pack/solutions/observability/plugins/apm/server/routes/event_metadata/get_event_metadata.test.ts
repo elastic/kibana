@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import { getEventMetadata } from './get_event_metadata';
 import { getFieldFromSource } from './get_field_from_source';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';

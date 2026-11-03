@@ -8,8 +8,8 @@
 import { lazySchema, z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
-import { MAX_KEYWORD_LENGTH } from '../../common';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema/src/significant_events/constants';
+import { MAX_KEYWORD_LENGTH } from '../../common/constants';
 import { INVESTIGATION_FAILED_TRIGGER_ID } from '../../common/workflows/triggers';
 import type { GetTriggerEmitter } from '../types';
 import { sendInvestigationNotifications } from '../lib/notifications/send_investigation_notifications';

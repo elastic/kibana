@@ -6,7 +6,7 @@
  */
 
 import { context as otelContext, propagation } from '@opentelemetry/api';
-import { EVALUATOR_NAME_BAGGAGE_KEY } from '@kbn/inference-tracing';
+import { EVALUATOR_NAME_BAGGAGE_KEY } from '@kbn/inference-tracing/src/baggage';
 
 /**
  * Executes `fn` within a context tagged with the running evaluator's name, so any spans

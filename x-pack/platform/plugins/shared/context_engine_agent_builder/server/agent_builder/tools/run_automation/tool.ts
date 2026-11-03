@@ -11,14 +11,13 @@ import {
   hasWorkflowExecutePrivilege,
   hasWorkflowReadPrivilege,
   hasWorkflowUpdatePrivilege,
-} from '@kbn/agent-builder-tools-base/workflows';
+} from '@kbn/agent-builder-tools-base/workflows/check_privileges';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { CoreStart } from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import { MAX_AI_INDEX_AUTOMATION_LENGTH } from '@kbn/context-engine-plugin/common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { ToolsCoreStart, ToolsSecurityStart } from '../../../start_types';
 import { CONTEXT_ENGINE_RUN_AUTOMATION_TOOL_ID } from '../../../../common/agent_builder_tools';
 import { aiIndexToolsAvailability } from '../ai_index_tools_availability';
 import { getRunAutomationErrorMessage, runAutomationHandler } from './handler';
@@ -54,8 +53,8 @@ export const createRunAutomationTool = ({
   getSecurityStart,
   getWorkflowsManagement,
 }: {
-  getCoreStart: () => Promise<CoreStart>;
-  getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+  getCoreStart: () => Promise<ToolsCoreStart>;
+  getSecurityStart: () => Promise<ToolsSecurityStart | undefined>;
   getWorkflowsManagement: () => WorkflowsManagementApi;
 }): BuiltinToolDefinition<typeof runAutomationSchema> => ({
   id: CONTEXT_ENGINE_RUN_AUTOMATION_TOOL_ID,

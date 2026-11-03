@@ -7,7 +7,7 @@
 
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ToolType } from '@kbn/agent-builder-common';
-import { hasWorkflowReadPrivilege } from '@kbn/agent-builder-tools-base/workflows';
+import { hasWorkflowReadPrivilege } from '@kbn/agent-builder-tools-base/workflows/check_privileges';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';

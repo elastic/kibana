@@ -9,7 +9,7 @@ import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/serve
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ToolsStart } from '@kbn/agent-builder-server';
 import type { AnalysisTarget } from '@kbn/nightshift-ai';
-import { getSigEventsLogPatternsEsql } from '@kbn/ai-tools';
+import { getSigEventsLogPatternsEsql } from '@kbn/ai-tools/src/tools/log_patterns/get_log_patterns';
 import { createCodeAnalysisProvider, type CodeAnalysisOutcome } from './compute_code_analysis';
 import {
   SCS_LIST_REPOS_TOOL_ID,
@@ -17,7 +17,7 @@ import {
   SCS_SEMANTIC_SEARCH_TOOL_ID,
 } from './semantic_code_search_tools';
 
-jest.mock('@kbn/ai-tools', () => ({
+jest.mock('@kbn/ai-tools/src/tools/log_patterns/get_log_patterns', () => ({
   getSigEventsLogPatternsEsql: jest.fn(),
 }));
 

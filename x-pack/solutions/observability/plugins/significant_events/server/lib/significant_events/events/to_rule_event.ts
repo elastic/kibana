@@ -9,7 +9,7 @@ import type { CreateAlertEventData } from '@kbn/alerting-v2-schemas';
 import {
   SIGNIFICANT_EVENTS_ALERT_SOURCE,
   type SignificantEvent,
-} from '@kbn/significant-events-schema';
+} from '@kbn/significant-events-schema/src/significant_events';
 
 /**
  * Maps a SignificantEvent to the CreateAlertEventData payload accepted by

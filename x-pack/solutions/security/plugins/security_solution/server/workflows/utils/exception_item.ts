@@ -23,7 +23,7 @@ import type {
   ExceptionItemOutcome,
   ExceptionItemOutput,
 } from '@kbn/securitysolution-exceptions-common/workflows';
-import { CREATE_RULE_EXCEPTIONS_URL } from '../../../common/api/detection_engine/rule_exceptions';
+import { CREATE_RULE_EXCEPTIONS_URL } from '../../../common/api/detection_engine/rule_exceptions/urls';
 import { DETECTION_ENGINE_RULES_URL } from '../../../common/constants';
 import { RuleExceptionList } from '../../../common/api/detection_engine/model/rule_schema';
 import {

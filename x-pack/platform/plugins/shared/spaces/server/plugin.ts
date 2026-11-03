@@ -30,6 +30,7 @@ import type { SpacesClientRepositoryFactory, SpacesClientWrapper } from './space
 import { SpacesClientService } from './spaces_client';
 import type { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
 import { SpacesService } from './spaces_service';
+import { spacesBridge } from './tasks/bridge';
 import type {
   SpacesPluginSetupDeps,
   SpacesPluginStartDeps,
@@ -131,6 +132,7 @@ export class SpacesPlugin
     const spacesClientSetup = this.spacesClientService.setup({ config$: this.config$ });
 
     const spacesServiceSetup = this.spacesService.setup();
+    spacesBridge.setSetup(true);
 
     const getSpacesService = () => {
       if (!this.spacesServiceStart) {
@@ -253,6 +255,9 @@ export class SpacesPlugin
 
     this.spacesServiceStart = this.spacesService.start({
       spacesClientService: spacesClientStart,
+    });
+    spacesBridge.setStart({
+      getActiveSpace: (request) => this.spacesServiceStart!.getActiveSpace(request as never),
     });
 
     return {

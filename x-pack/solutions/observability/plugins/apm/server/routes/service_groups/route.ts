@@ -8,7 +8,7 @@
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import Boom from '@hapi/boom';
 import datemath from '@kbn/datemath';
-import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
+import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common/ui_settings_keys';
 import {
   routeDefinitions,
   type ServiceGroupsResponse,

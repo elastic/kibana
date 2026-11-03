@@ -10,6 +10,7 @@
     "id": "cloud",
     "browser": true,
     "server": true,
+    "tasks": {},
     "configPath": [
       "xpack",
       "cloud"

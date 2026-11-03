@@ -70,6 +70,7 @@ import { AlertStatusChangedWorkflowSubscriber } from './lib/workflow_extensions/
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
+import { alertingBridge } from './tasks/bridge';
 import { ruleQueryInspectorRoute } from './routes/rule/apis/rule_query_inspector/rule_query_inspector_route';
 import type { RulesClientCreateOptions } from './rules_client_factory';
 import {
@@ -787,6 +788,7 @@ export class AlertingPlugin {
     };
 
     this.getRulesClientWithRequest = getRulesClientWithRequest;
+    alertingBridge.setStart({ getRulesClientWithRequest, getRulesClientWithRequestInSpace });
 
     const getAlertingAuthorizationWithRequest = async (request: KibanaRequest) => {
       return alertingAuthorizationClientFactory!.create(request);

@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core-lifecycle-server';
-import type { StaticToolRegistration } from '@kbn/agent-builder-server';
+import type { AgentBuilderPluginSetup, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { productDocumentationTool } from './product_documentation';
 import { integrationKnowledgeTool } from './integration_knowledge';
-import type {
-  AgentBuilderPlatformPluginStart,
-  PluginSetupDependencies,
-  PluginStartDependencies,
-} from '../types';
+import type { PlatformCoreSetup } from '../start_types';
 import { getDocumentByIdTool } from './get_document_by_id';
 import { getIndexMappingsTool } from './get_index_mapping';
 import { listIndicesTool } from './list_indices';
@@ -24,21 +19,22 @@ import { searchTool } from './search';
 
 export const registerTools = ({
   coreSetup,
-  setupDeps,
+  agentBuilder,
+  organizationId,
   isServerless,
 }: {
-  coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>;
-  setupDeps: PluginSetupDependencies;
+  coreSetup: PlatformCoreSetup;
+  agentBuilder: AgentBuilderPluginSetup;
+  /** The cloud organization, where there is a cloud deployment (not in a task pod). */
+  organizationId?: string;
   isServerless: boolean;
 }) => {
-  const { agentBuilder, cloud } = setupDeps;
-
   const tools: Array<StaticToolRegistration<any>> = [
     searchTool({ coreSetup, topSnippetsDefaults: agentBuilder.topSnippets, isServerless }),
     getDocumentByIdTool(),
     executeEsqlTool({ isServerless }),
     generateEsqlTool({
-      organizationId: cloud?.organizationId,
+      organizationId,
       isServerless,
     }),
     getIndexMappingsTool({ isServerless }),

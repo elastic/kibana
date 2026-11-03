@@ -12,7 +12,7 @@ import {
   EVENT_NAME,
   PROCESSOR_EVENT,
 } from '@kbn/apm-types/es_fields';
-import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
+import type { ObservabilityAgentBuilderStartServices } from '../../types';
 import { getLogsIndices } from '../../utils/get_logs_indices';
 import { timeRangeFilter, kqlFilter } from '../../utils/dsl_filters';
 import { getCategorizedLogs, getSamplingProbability } from './get_categorized_logs';
@@ -28,7 +28,7 @@ export async function getLogExceptionGroups({
   logger,
   fields,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
+  core: ObservabilityAgentBuilderStartServices;
   esClient: IScopedClusterClient;
   index: string | undefined;
   startMs: number;

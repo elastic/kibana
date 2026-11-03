@@ -13,7 +13,7 @@ import {
   trace,
   type Span,
 } from '@opentelemetry/api';
-import { withInferenceContext } from '@kbn/inference-tracing';
+import { withInferenceContext } from '@kbn/inference-tracing/src/with_inference_context';
 
 /** OpenTelemetry's sentinel for "no valid trace" (a non-recording / no-op span). */
 const INVALID_TRACE_ID = '00000000000000000000000000000000';

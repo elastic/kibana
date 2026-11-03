@@ -6,7 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema/src/significant_events/constants';
 import type { Logger } from '@kbn/core/server';
 import type { InvestigationNotificationDestination } from '../../../common';
 import { prepareNotificationDelivery } from './notification_delivery';
@@ -21,8 +21,8 @@ import type {
   NotificationOutcome,
   NotificationRouting,
   NotificationDestination,
-} from './notification_routing';
-import { repliesUnderCallerMessage } from './notification_routing';
+} from './notification_routing_schema';
+import { repliesUnderCallerMessage } from './notification_routing_schema';
 
 export interface DeliverInvestigationNotificationsResult {
   sent: number;

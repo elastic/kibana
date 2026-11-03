@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  uiSettingsGlobalType,
-  uiSettingsType,
-} from '@kbn/core-ui-settings-server-internal/src/saved_objects';
+import { randomUUID } from 'crypto';
+import { schema } from '@kbn/config-schema';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getPackages } from '@kbn/repo-packages';
 import type { PluginPackage } from '@kbn/repo-packages';
@@ -21,28 +19,22 @@ import type {
   PluginsServiceTasksSetupDeps,
   PluginsServiceTasksStartDeps,
 } from '@kbn/core-plugins-server-internal/plugins_system';
+import { createPluginInitializerContext } from '@kbn/core-plugins-server-internal/src/plugin_context';
 import { PluginType } from '@kbn/core-base-common';
+import type { FakeRequestEnricher } from '@kbn/core-security-server';
 import type { TaskManagerTasksDefinitions } from '../../tasks';
 import { PodLogger } from './logger';
 import { createDataStreams } from './core/data_streams';
-import { createElasticsearchCore } from './core/elasticsearch';
-import { PodSavedObjects } from './core/saved_objects';
-import { POD_KIBANA_VERSION } from './version';
+import { createPodCoreContext } from './core/core_context';
+import { createElasticsearchCore } from './core/es_cluster';
+import { PodSavedObjects } from './core/pod_saved_objects';
 import {
-  createAnalytics,
-  createFeatureFlagsStart,
-  createHttpStart,
-  createSecurityStart,
-  createUiSettings,
-  createUserProfileStart,
-} from './core/small_services';
-
-const PACKAGE_INFO = {
-  version: POD_KIBANA_VERSION,
-  buildFlavor: 'traditional',
-  branch: 'main',
-  dist: true,
-};
+  PodCoreServices,
+  registerCoreConfigSchemas,
+  withPodFeatureFlagOverrides,
+} from './core/core_services';
+import { createServerInfo } from './core/server_info';
+import { POD_KIBANA_VERSION } from './version';
 
 /** A task type's definition as registered through `registerTaskDefinitions`. */
 export type CapturedTaskDefinition = TaskManagerTasksDefinitions extends Map<string, infer D>
@@ -51,25 +43,24 @@ export type CapturedTaskDefinition = TaskManagerTasksDefinitions extends Map<str
 
 export interface BootedPod {
   taskDefinitions: TaskManagerTasksDefinitions;
+  /** Binds a run's user to its fake request: Core's `acquireFakeRequestEnricher`. */
+  enrichFakeRequest: FakeRequestEnricher;
   stop: () => Promise<void>;
 }
-
-const readConfigPath = (config: Record<string, unknown>, path: string | string[]) =>
-  [path]
-    .flat()
-    .reduce<unknown>(
-      (value, key) => (value && typeof value === 'object' ? (value as never)[key] : undefined),
-      config
-    );
 
 /**
  * Boots a family of plugins' `server/tasks` entries the way Kibana boots them: Core's own
  * `PluginsSystem` over the plugins' manifests, so dependency order, `setup` then `start`, DI modules
  * and `stop` are Core's, and every plugin only gets the contracts its `tasks` block declares.
+ *
+ * Core services are Core's own classes (`ConfigService`, `ClusterClient`, `AnalyticsService`,
+ * `FeatureFlagsService`, `UiSettingsService`, `SecurityService`, `UserProfileService`, `BasePath`,
+ * the saved objects building blocks), wired for a process with no HTTP server. The stand-ins that
+ * remain, and why, are listed in `README.md` ("What is real in a pod").
  */
 export const bootTasksPlugins = async ({
   pluginIds,
-  config = {},
+  config: podConfig = {},
 }: {
   pluginIds: string[];
   config?: Record<string, unknown>;
@@ -95,90 +86,91 @@ export const bootTasksPlugins = async ({
     }
   }
 
+  const config = withPodFeatureFlagOverrides(podConfig);
   const logLevel = (process.env.LOG_LEVEL as never) ?? 'info';
   const rootLogger = new PodLogger('plugins', logLevel);
-  const coreContext = {
-    logger: { get: (...parts: string[]) => rootLogger.get(...parts) },
-    env: { mode: { dev: false } },
-  };
-  const system = new PluginsSystem(coreContext as never, PluginType.tasks);
+  const coreContext = createPodCoreContext({ config, logger: rootLogger });
+  const { configService } = coreContext;
+  registerCoreConfigSchemas(coreContext);
+  const system = new PluginsSystem(coreContext, PluginType.tasks);
 
+  const configPaths = new Set<string>();
+  const instanceInfo = { uuid: randomUUID(), airgapped: false };
+  const nodeInfo = { roles: { backgroundTasks: true, ui: false, migrator: false } };
   for (const id of pluginIds) {
     const pkg = packages.get(id)!;
     const opaqueId = Symbol(id);
-    const configHolder: { value?: unknown } = {};
-    const initializerContext = {
-      opaqueId,
-      logger: { get: (...parts: string[]) => rootLogger.get(id, ...parts) },
-      config: { get: () => configHolder.value },
-      env: { packageInfo: PACKAGE_INFO },
-      node: { roles: { backgroundTasks: true, ui: false, migrator: false } },
-    };
     const manifest = pluginManifestFromPluginPackage(POD_KIBANA_VERSION, pkg.manifest);
+    const initializerContext = createPluginInitializerContext({
+      coreContext,
+      opaqueId,
+      manifest,
+      instanceInfo,
+      nodeInfo,
+    });
     const wrapper = new PluginWrapper({
       path: pkg.directory,
       manifest,
       opaqueId,
-      initializerContext: initializerContext as never,
+      initializerContext,
     }).createTasksWrapper();
 
-    // The tasks entry's own `config` export validates its slice of the pod's config file.
+    // The tasks entry's own `config` export validates its slice of the pod's config file, through
+    // Core's `ConfigService` like a server entry's. A plugin without one reads its slice unvalidated.
     const descriptor = await wrapper.getConfigDescriptor();
-    const raw = readConfigPath(config, manifest.configPath) ?? {};
-    configHolder.value = descriptor
-      ? (descriptor.schema as never as { validate: Function }).validate(raw)
-      : raw;
+    const path = [manifest.configPath].flat().join('.');
+    if (!configPaths.has(path)) {
+      configPaths.add(path);
+      configService.setSchema(manifest.configPath, (descriptor?.schema as never) ?? schema.any());
+      if (descriptor?.deprecations) {
+        configService.addDeprecationProvider(manifest.configPath, descriptor.deprecations);
+      }
+    }
     system.addPlugin(wrapper);
   }
+  await configService.validate({ logDeprecations: false });
 
   const { CoreInjectionService } = await import('@kbn/core-di-server-internal');
   const injection = new CoreInjectionService();
   const injectionSetup = injection.setup();
   const injectionStart = injection.start();
 
-  const elasticsearch = createElasticsearchCore();
+  const elasticsearch = createElasticsearchCore(coreContext, config);
   const savedObjects = new PodSavedObjects();
-  const uiSettings = createUiSettings(rootLogger.get('uiSettings') as never);
-  const analytics = createAnalytics();
-  const http = createHttpStart(config);
-  const dataStreams = createDataStreams(
-    elasticsearch.internalClient as never,
-    rootLogger.get('dataStreams') as never
-  );
+  const core = new PodCoreServices(coreContext, config);
+  const dataStreams = createDataStreams(elasticsearch.internalClient as never);
+  const coreSetup = await core.setup({
+    savedObjects: savedObjects.setup as never,
+    internalClient: elasticsearch.internalClient,
+  });
 
   const setupDeps = {
-    analytics: analytics.setup,
+    analytics: coreSetup.analytics,
     dataStreams: dataStreams.setup,
-    http: { basePath: http.basePath },
+    http: { basePath: core.basePath },
     injection: injectionSetup,
     savedObjects: savedObjects.setup,
+    uiSettings: coreSetup.uiSettings,
   } as unknown as PluginsServiceTasksSetupDeps;
-  // The saved objects that hold users' UI settings, per space and global.
-  savedObjects.setup.registerType(uiSettingsType);
-  savedObjects.setup.registerType(uiSettingsGlobalType);
   const contracts = await system.setupPlugins(setupDeps);
 
   if (savedObjects.hasTypes) await savedObjects.load();
 
-  const security = createSecurityStart(elasticsearch.internalClient);
+  const coreStart = await core.start();
   const startDeps = {
-    analytics: analytics.start,
+    analytics: coreStart.analytics,
     dataStreams: dataStreams.start,
     elasticsearch: elasticsearch.start,
-    featureFlags: createFeatureFlagsStart(),
-    http: { basePath: http.basePath, getServerInfo: http.getServerInfo },
+    featureFlags: coreStart.featureFlags,
+    http: { basePath: core.basePath, getServerInfo: createServerInfo(config) },
     injection: injectionStart,
     savedObjects: savedObjects.start(
-      elasticsearch.internalClient,
+      elasticsearch.internalClient as never,
       rootLogger.get('savedObjects') as never
     ),
-    security: {
-      authc: security.authc,
-      audit: security.audit,
-      serviceAccounts: { asScopedToPlugin: () => security.serviceAccounts },
-    },
-    uiSettings: uiSettings.start,
-    userProfile: createUserProfileStart(elasticsearch.internalClient),
+    security: coreStart.security,
+    uiSettings: coreStart.uiSettings,
+    userProfile: coreStart.userProfile,
   } as unknown as PluginsServiceTasksStartDeps;
   await system.startPlugins(startDeps);
 
@@ -189,6 +181,11 @@ export const bootTasksPlugins = async ({
 
   return {
     taskDefinitions: taskManager.getRegisteredTaskDefinitions(),
-    stop: () => system.stopPlugins(),
+    enrichFakeRequest: coreSetup.enrichFakeRequest,
+    stop: async () => {
+      await system.stopPlugins();
+      await core.stop();
+      await elasticsearch.stop();
+    },
   };
 };

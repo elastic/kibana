@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
+import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows/execute_workflow';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
@@ -16,13 +16,9 @@ import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 type ToolCallSource = ToolHandlerContext['callContext']['callSource'];
 import { executeWorkflowTool } from './execute_workflow';
 
-jest.mock('@kbn/agent-builder-tools-base/workflows', () => {
-  const actual = jest.requireActual('@kbn/agent-builder-tools-base/workflows');
-  return {
-    ...actual,
-    executeWorkflow: jest.fn(),
-  };
-});
+jest.mock('@kbn/agent-builder-tools-base/workflows/execute_workflow', () => ({
+  executeWorkflow: jest.fn(),
+}));
 
 const executeWorkflowMock = executeWorkflow as jest.MockedFunction<typeof executeWorkflow>;
 

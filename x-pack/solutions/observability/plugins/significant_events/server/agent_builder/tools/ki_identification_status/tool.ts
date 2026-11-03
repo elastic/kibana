@@ -21,7 +21,7 @@ import {
   toSourceRef,
 } from '../../utils/resolve_source_slugs';
 import { getKiIdentificationStatusToolHandler } from './handler';
-import type { GetScopedClients } from '../../../routes/types';
+import type { GetAgentBuilderScopedClients } from '../../../scoped_clients';
 
 export const SIGNIFICANT_EVENTS_KI_IDENTIFICATION_STATUS_TOOL_ID =
   'platform.sig_events.ki_identification_status';
@@ -39,7 +39,7 @@ export const createKiIdentificationStatusTool = ({
 }: {
   server: Pick<SignificantEventsServer, 'security'>;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
-  getScopedClients: GetScopedClients;
+  getScopedClients: GetAgentBuilderScopedClients;
 }): BuiltinSkillBoundedTool<typeof onboardingStatusSchema> => ({
   id: SIGNIFICANT_EVENTS_KI_IDENTIFICATION_STATUS_TOOL_ID,
   type: ToolType.builtin,

@@ -7,10 +7,8 @@
 
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { hasWorkflowReadPrivilege } from '@kbn/agent-builder-tools-base/workflows';
+import { hasWorkflowReadPrivilege } from '@kbn/agent-builder-tools-base/workflows/check_privileges';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { CoreStart } from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import {
@@ -20,6 +18,7 @@ import {
 import { validateAiIndexId } from '@kbn/context-engine-plugin/common/validation';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
+import type { ToolsCoreStart, ToolsSecurityStart } from '../../../start_types';
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../../../common/agent_builder_tools';
 import { aiIndexToolsAvailability } from '../ai_index_tools_availability';
 import type { SaveAutomationParams, SavedWorkflowSummary } from './handler';
@@ -133,8 +132,8 @@ export const createSaveAutomationTool = ({
   getWorkflowsManagement,
 }: {
   getAiIndexService: () => Promise<AiIndexService>;
-  getCoreStart: () => Promise<CoreStart>;
-  getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+  getCoreStart: () => Promise<ToolsCoreStart>;
+  getSecurityStart: () => Promise<ToolsSecurityStart | undefined>;
   getWorkflowsManagement: () => WorkflowsManagementApi;
 }): BuiltinToolDefinition<typeof saveAutomationSchema> => ({
   id: CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,

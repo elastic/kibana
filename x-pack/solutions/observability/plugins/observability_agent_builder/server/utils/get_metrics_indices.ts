@@ -6,11 +6,10 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { SavedObjectsClient } from '@kbn/core/server';
 
 import type {
-  ObservabilityAgentBuilderCoreSetup,
-  ObservabilityAgentBuilderPluginSetupDependencies,
+  ObservabilityAgentBuilderStartServices,
+  ObservabilityAgentBuilderToolPlugins,
 } from '../types';
 
 export async function getMetricsIndices({
@@ -18,14 +17,12 @@ export async function getMetricsIndices({
   plugins,
   logger,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
-  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  core: ObservabilityAgentBuilderStartServices;
+  plugins: ObservabilityAgentBuilderToolPlugins;
   logger: Logger;
 }): Promise<string[]> {
   const [coreStart] = await core.getStartServices();
-  const savedObjectsClient = new SavedObjectsClient(
-    coreStart.savedObjects.createInternalRepository()
-  );
+  const savedObjectsClient = coreStart.savedObjects.getUnsafeInternalClient();
 
   try {
     const { metricsDataAccess } = plugins;

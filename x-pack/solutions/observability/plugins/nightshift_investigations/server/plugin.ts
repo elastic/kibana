@@ -52,28 +52,11 @@ import {
   isInvestigationInfrastructureAvailable,
   isInvestigationRunAvailable,
 } from './is_investigation_available';
-import { ensureInvestigationAgentStepDefinition } from './step_definitions/ensure_investigation_agent';
 import { notificationRoutingAttachment } from './lib/notifications/notification_routing';
 import type { StoredNotificationRouting } from './lib/notifications/notification_routing';
 import { NotificationRoutingClient } from './lib/notifications/notification_routing_client';
-import { sendNotificationsStepDefinition } from './step_definitions/send_notifications';
-import { handleInvestigationFailureStepDefinition } from './step_definitions/handle_investigation_failure';
-import { renderSlackMessageStepDefinition } from './step_definitions/render_slack_message';
-import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
-import { followUpRecoveredAlertStepDefinition } from './step_definitions/follow_up_recovered_alert';
-import { classifyOnlineEvalsRoundStepDefinition } from './step_definitions/classify_online_evals_round';
 import { createIsOnlineEvalsPaused } from './online_evals/is_online_evals_paused';
 import { referenceFreeJudges } from './online_evals/judges';
-import { obtainSandboxStepDefinition } from './step_definitions/obtain_sandbox';
-import { composeHydrateNotificationsStepDefinition } from './step_definitions/compose_hydrate_notifications';
-import { resolveModelStepDefinition } from './step_definitions/resolve_model';
-import { cortexHydrateStepDefinition } from './step_definitions/cortex_hydrate';
-import { memoryMaterializeToSandboxStepDefinition } from './step_definitions/memory_materialize_to_sandbox';
-import { cortexOptimizeStepDefinition } from './step_definitions/cortex_optimize';
-import { decisionTreeHydrateStepDefinition } from './step_definitions/decision_tree_hydrate';
-import { decisionTreePrepareStepDefinition } from './step_definitions/decision_tree_prepare';
-import { decisionTreeReinforceStepDefinition } from './step_definitions/decision_tree_reinforce';
-import { memoryOptimizeStepDefinition } from './step_definitions/memory_optimize';
 import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
 import { registerMemoryAiIndex } from './memory/register_memory';
 import { registerCortexTelemetryEvents } from './telemetry';
@@ -83,6 +66,8 @@ import { createKnowledgePurgeClient } from './purge/purge_client';
 import { registerDecisionTreeAiIndex } from './decision_trees/register_decision_trees';
 import { setupNightshiftTelemetry } from './telemetry';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
+import { nightshiftInvestigationsBridge } from './tasks/bridge';
+import { registerNightshiftStepDefinitions } from './workflows/register_step_definitions';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import type { NightshiftAgentTypeOptions } from './agents/investigation';
 import {
@@ -465,143 +450,36 @@ export class NightshiftInvestigationsPlugin
 
     if (plugins.workflowsManagement) {
       if (plugins.workflowsExtensions) {
-        plugins.workflowsExtensions.registerStepDefinition(
-          triggerInvestigationStepDefinition(
-            this.getInvestigationsClient,
-            this.getAutomationsSoClient,
-            this.getAlertsClient,
-            this.getEpisodeLookup,
-            () => this.actionsStart,
-            settingsLocator
-          )
-        );
-        plugins.workflowsExtensions.registerStepDefinition(
-          followUpRecoveredAlertStepDefinition(this.getInvestigationsClient)
-        );
-        plugins.workflowsExtensions.registerStepDefinition(
-          classifyOnlineEvalsRoundStepDefinition({
-            getAgentBuilder: () => this.agentBuilder,
-            isEvalsAvailable: () => this.evals !== undefined,
-            isPaused: createIsOnlineEvalsPaused(core.getStartServices),
-          })
-        );
-        // `agentBuilder` is only available from `start()`, so the step resolves it lazily.
-        plugins.workflowsExtensions.registerStepDefinition(
-          ensureInvestigationAgentStepDefinition({
-            getAgentBuilder: () => this.agentBuilder,
-            getAgentAvailability: () => this.getInvestigationAvailability(),
-          })
-        );
-        plugins.workflowsExtensions.registerStepDefinition(
-          resolveModelStepDefinition({
-            getInference: () => this.inference,
-            getSavedObjects: () => this.savedObjects,
-            getUiSettings: () => this.uiSettings,
-            logger: this.logger.get('resolve_model'),
-          })
-        );
-        plugins.workflowsExtensions.registerStepDefinition(
-          sendNotificationsStepDefinition({
-            investigationLocator,
-            getInvestigationsClient: this.getInvestigationsClient,
-            getActions: () => this.actionsStart,
-            getRoutingClient: this.getNotificationRoutingClient,
-          })
-        );
-        plugins.workflowsExtensions.registerStepDefinition(
-          handleInvestigationFailureStepDefinition({
-            investigationLocator,
-            getInvestigationsClient: this.getInvestigationsClient,
-            getActions: () => this.actionsStart,
-            getRoutingClient: this.getNotificationRoutingClient,
-            getTriggerEmitter,
-          })
-        );
-        plugins.workflowsExtensions.registerStepDefinition(
-          renderSlackMessageStepDefinition({
-            investigationLocator,
-            getInvestigationsClient: this.getInvestigationsClient,
-          })
-        );
-        // Registered even when disabled: the combined workflow no-ops a writer branch instead
-        // of failing on an unknown step type, and obtain runs first to hand both writers a sandbox.
-        plugins.workflowsExtensions.registerStepDefinition(
-          obtainSandboxStepDefinition({
-            getSandboxStart: getGatedSandboxStart,
-            logger: this.logger.get('sandbox'),
-          })
-        );
-        plugins.workflowsExtensions.registerStepDefinition(
-          cortexHydrateStepDefinition({
-            getSandboxStart: getGatedSandboxStart,
-            analytics: core.analytics,
-            logger: this.logger.get('cortex'),
-            isEnabled: () => this.cortexEnabled,
-          })
-        );
-        plugins.workflowsExtensions.registerStepDefinition(
-          memoryMaterializeToSandboxStepDefinition({
-            getSandboxStart: getGatedSandboxStart,
-            logger: this.logger.get('memory'),
-            isEnabled: () => this.memoryEnabled,
-            telemetry,
-          })
-        );
-        plugins.workflowsExtensions.registerStepDefinition(
-          composeHydrateNotificationsStepDefinition()
-        );
-        // Registered unconditionally: the combined materialize workflow installs with Cortex
-        // or Memory, so a trees-off install would otherwise reference an unknown step type.
-        // The handler no-ops on the flag instead, matching cortex/memory above.
-        plugins.workflowsExtensions.registerStepDefinition(
-          decisionTreeHydrateStepDefinition({
-            getSandboxStart: getGatedSandboxStart,
-            logger: this.logger.get('decision_trees'),
-            isEnabled: () => this.decisionTreesEnabled,
-          })
-        );
-        plugins.workflowsExtensions.registerStepDefinition(
-          cortexOptimizeStepDefinition({
-            getAgentBuilder: () => this.agentBuilder,
-            getInference: () => this.inference,
-            getSavedObjects: () => this.savedObjects,
-            getUiSettings: () => this.uiSettings,
-            analytics: core.analytics,
-            logger: this.logger.get('cortex'),
-            isEnabled: () => this.cortexEnabled,
-          })
-        );
-        plugins.workflowsExtensions.registerStepDefinition(
-          memoryOptimizeStepDefinition({
-            getAgentBuilder: () => this.agentBuilder,
-            getInference: () => this.inference,
-            getSavedObjects: () => this.savedObjects,
-            getUiSettings: () => this.uiSettings,
-            logger: this.logger.get('memory'),
-            isEnabled: () => this.memoryEnabled,
-            telemetry,
-          })
-        );
-        // Registered unconditionally for the same reason as the tree hydrate above: the
-        // combined optimize workflow installs with Cortex or Memory and now runs the
-        // reinforcement phase too. The handler no-ops on the flag.
-        plugins.workflowsExtensions.registerStepDefinition(
-          decisionTreePrepareStepDefinition({
-            getTelemetryConnectorId: async (request, conversationId) =>
-              conversationId
-                ? (await this.getInvestigationsClient(request).getTelemetryTarget(conversationId))
-                    .connectorId
-                : this.ctx.config.get().sandbox?.telemetry_connector_id,
-            logger: this.logger.get('decision_trees'),
-            isEnabled: () => this.decisionTreesEnabled,
-          })
-        );
-        plugins.workflowsExtensions.registerStepDefinition(
-          decisionTreeReinforceStepDefinition({
-            getAgentBuilder: () => this.agentBuilder,
-            isEnabled: () => this.decisionTreesEnabled,
-          })
-        );
+        registerNightshiftStepDefinitions(plugins.workflowsExtensions, {
+          logger: this.logger,
+          analytics: core.analytics,
+          telemetry,
+          investigationLocator,
+          settingsLocator,
+          getInvestigationsClient: this.getInvestigationsClient,
+          getAutomationsSoClient: this.getAutomationsSoClient,
+          getAlertsClient: this.getAlertsClient,
+          getEpisodeLookup: this.getEpisodeLookup,
+          getActions: () => this.actionsStart,
+          getRoutingClient: this.getNotificationRoutingClient,
+          getTriggerEmitter,
+          getAgentBuilder: () => this.agentBuilder,
+          getAgentAvailability: () => this.getInvestigationAvailability(),
+          getInference: () => this.inference,
+          getSavedObjects: () => this.savedObjects,
+          getUiSettings: () => this.uiSettings,
+          getSandboxStart: getGatedSandboxStart,
+          getTelemetryConnectorId: async (request, conversationId) =>
+            conversationId
+              ? (await this.getInvestigationsClient(request).getTelemetryTarget(conversationId))
+                  .connectorId
+              : this.ctx.config.get().sandbox?.telemetry_connector_id,
+          isEvalsAvailable: () => this.evals !== undefined,
+          isOnlineEvalsPaused: createIsOnlineEvalsPaused(core.getStartServices),
+          isCortexEnabled: () => this.cortexEnabled,
+          isMemoryEnabled: () => this.memoryEnabled,
+          isDecisionTreesEnabled: () => this.decisionTreesEnabled,
+        });
       }
 
       registerRoutes({
@@ -683,6 +561,9 @@ export class NightshiftInvestigationsPlugin
         'workflowsManagement is not available — nightshift investigations routes will not be registered'
       );
     }
+
+    // The tasks entry registers the same steps and triggers for task pods: it has nothing to add here.
+    nightshiftInvestigationsBridge.setSetup(true);
 
     return {
       registerInvestigationQuota: (callback) => {

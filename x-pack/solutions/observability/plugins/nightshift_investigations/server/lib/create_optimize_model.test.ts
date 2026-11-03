@@ -6,15 +6,15 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
+import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai/src/resolve_nightshift_model_for_request';
 import {
   NightshiftModelBlockedError,
   NightshiftModelNotFoundError,
 } from '@kbn/significant-events-schema';
 import { createOptimizeModel } from './create_optimize_model';
 
-jest.mock('@kbn/nightshift-ai', () => ({
-  ...jest.requireActual('@kbn/nightshift-ai'),
+jest.mock('@kbn/nightshift-ai/src/resolve_nightshift_model_for_request', () => ({
+  ...jest.requireActual('@kbn/nightshift-ai/src/resolve_nightshift_model_for_request'),
   resolveNightshiftModelForRequest: jest.fn(),
 }));
 

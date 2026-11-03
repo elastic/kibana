@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BaselineObservation } from '@kbn/significant-events-schema';
+import type { BaselineObservation } from '@kbn/significant-events-schema/src/significant_events';
 import { canCompileMatchMetric } from './can_compile_match_metric';
 import type { StoredQueryRunner } from './run_probe';
 

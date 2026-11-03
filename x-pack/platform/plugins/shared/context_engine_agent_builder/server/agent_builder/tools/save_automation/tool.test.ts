@@ -14,11 +14,13 @@ import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachmen
 import { createSaveAutomationTool, normalizeSaveAutomationParams } from './tool';
 import { aiIndexToolsAvailability } from '../ai_index_tools_availability';
 
-jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
+jest.mock('@kbn/agent-builder-tools-base/workflows/check_privileges', () => ({
   hasWorkflowReadPrivilege: jest.fn().mockResolvedValue(true),
 }));
 
-const { hasWorkflowReadPrivilege } = jest.requireMock('@kbn/agent-builder-tools-base/workflows');
+const { hasWorkflowReadPrivilege } = jest.requireMock(
+  '@kbn/agent-builder-tools-base/workflows/check_privileges'
+);
 
 describe('save_automation tool', () => {
   const getWorkflowMock = jest.fn();

@@ -8,7 +8,8 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { isComputedFeature, isFeatureWithFilter } from '@kbn/significant-events-schema';
-import { compactInferenceDocuments, type InferenceDocument } from '@kbn/nightshift-ai';
+import type { InferenceDocument } from '@kbn/nightshift-ai';
+import { compactInferenceDocuments } from '@kbn/nightshift-ai/src/significant_events/features/compact_inference_documents';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 import { fetchSampleDocuments } from './fetch_sample_documents';
 

@@ -11,18 +11,18 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { ResourceTypes, resolveDefaultInferenceIdFromInferenceGet } from '@kbn/product-doc-common';
-import type { InstallationStatus, ProductInstallState } from '../../../common/install_status';
+import type { ProductInstallState } from '../../../common/install_status';
 import type { ProductDocInstallClient } from '../doc_install_status';
 import {
-  getInstallAllTaskStatus,
   INSTALL_TASK_WAIT_TIMEOUT_MS,
   scheduleInstallAllTask,
   scheduleUninstallAllTask,
   scheduleEnsureUpToDateTask,
   scheduleEnsureSecurityLabsUpToDateTask,
   waitUntilTaskCompleted,
-} from '../../tasks';
+} from '../../task_definitions';
 import { checkLicense } from './check_license';
+import { getDocumentationStatus } from './get_status';
 import type {
   DocumentationManagerAPI,
   DocGetStatusResponse,
@@ -350,21 +350,11 @@ export class DocumentationManager implements DocumentationManagerAPI {
    * @param inferenceId - The inference ID to get the status for. If not provided, the default ELSER inference ID will be used.
    */
   async getStatus({ inferenceId }: { inferenceId: string }): Promise<DocGetStatusResponse> {
-    const taskStatus = await getInstallAllTaskStatus({
+    return getDocumentationStatus({
       taskManager: this.taskManager,
+      docInstallClient: this.docInstallClient,
       inferenceId,
     });
-    if (taskStatus === 'pending') {
-      return { status: 'installing' };
-    }
-
-    const installStatus = await this.docInstallClient.getInstallationStatus({ inferenceId });
-    // A failed install task may have failed before writing any product status
-    const overallStatus =
-      taskStatus === 'failed'
-        ? 'error'
-        : getOverallStatus(Object.values(installStatus).map((v) => v.status));
-    return { status: overallStatus, installStatus };
   }
 
   async getStatuses({
@@ -578,19 +568,3 @@ export class DocumentationManager implements DocumentationManagerAPI {
     }
   }
 }
-
-const getOverallStatus = (statuses: InstallationStatus[]): InstallationStatus => {
-  const statusOrder: InstallationStatus[] = [
-    'error',
-    'installing',
-    'uninstalling',
-    'uninstalled',
-    'installed',
-  ];
-  for (const status of statusOrder) {
-    if (statuses.includes(status)) {
-      return status;
-    }
-  }
-  return 'installed';
-};

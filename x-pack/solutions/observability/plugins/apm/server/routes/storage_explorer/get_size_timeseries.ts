@@ -6,7 +6,7 @@
  */
 
 import { rangeQuery, kqlQuery, termQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import type { SizeTimeseriesResponse } from '@kbn/apm-api-shared';
 import { TIER, SERVICE_NAME, INDEX } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';

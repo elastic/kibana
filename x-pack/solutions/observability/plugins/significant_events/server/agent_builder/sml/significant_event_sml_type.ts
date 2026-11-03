@@ -13,10 +13,10 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { SIGNIFICANT_EVENT_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '../../../common';
 import { RuleEventsClient } from '../../lib/significant_events/events/rule_events_client';
-import type { GetScopedClients } from '../../routes/types';
+import type { GetAgentBuilderScopedClients } from '../../scoped_clients';
 
 interface CreateSignificantEventSmlTypeOptions {
-  getScopedClients: GetScopedClients;
+  getScopedClients: GetAgentBuilderScopedClients;
   isAvailable: () => Promise<boolean>;
 }
 

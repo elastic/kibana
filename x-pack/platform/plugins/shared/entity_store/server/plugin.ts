@@ -37,7 +37,7 @@ import { CustomResolutionRuleType } from './domain/resolution/rules';
 import { registerEntityMaintainerTask } from './tasks/entity_maintainers';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 import { getMaintainerStatus } from './domain/entity_maintainers';
-import { CRUDClient } from './domain/crud';
+import { createCRUDClientFactory } from './domain/crud/create_crud_client';
 import { EntityMetadataClient } from './domain/entity_metadata';
 import { RelationshipsClient } from './domain/relationships';
 import { ResolutionClient } from './domain/resolution';
@@ -45,7 +45,6 @@ import { ResolutionRulesClient } from './domain/resolution/rules';
 import { registerTelemetry, createReportEvent } from './telemetry/events';
 import { registerEntityStoreUsageCollector } from './telemetry/usage_collector';
 import { automatedResolutionMaintainerConfig } from './domain/resolution/rules/maintainers/automated_resolution';
-import { createWorkflowTriggerEmitter } from './workflow/create_workflow_trigger_emitter';
 import {
   subscribeToDualProcessFlag,
   subscribeToLegacySecurityAssetsMigrationFlag,
@@ -112,7 +111,15 @@ export class EntityStorePlugin
 
     registerTasks(plugins.taskManager, this.logger, core, this.isServerless);
     registerTriggers(plugins.workflowsExtensions);
-    registerSteps(plugins.workflowsExtensions, core);
+    const startServices = core.getStartServices();
+    registerSteps(plugins.workflowsExtensions, {
+      getCreateCRUDClient: () =>
+        startServices.then(([, , startContract]) => startContract.createCRUDClient),
+      getWorkflowsExtensions: () =>
+        startServices.then(([, pluginsStart]) => pluginsStart.workflowsExtensions),
+      getLicensing: () => startServices.then(([, pluginsStart]) => pluginsStart.licensing),
+      getSecurity: () => startServices.then(([, pluginsStart]) => pluginsStart.security),
+    });
     this.logger.debug('Registering routes');
     registerRoutes(router);
 
@@ -195,16 +202,7 @@ export class EntityStorePlugin
 
     const { logger, entityDefinitionRegistry } = this;
     return {
-      createCRUDClient: (esClient, namespace, getWorkflowsClient) => {
-        const emitWorkflowTriggerEvent = getWorkflowsClient
-          ? createWorkflowTriggerEmitter({
-              getWorkflowsClient,
-              logger,
-              context: `namespace "${namespace}"`,
-            })
-          : undefined;
-        return new CRUDClient({ logger, esClient, namespace, emitWorkflowTriggerEvent });
-      },
+      createCRUDClient: createCRUDClientFactory(logger),
       createEntityMetadataClient: (esClient, namespace) =>
         new EntityMetadataClient({ logger, esClient, namespace }),
       createRelationshipsClient: (esClient, namespace) =>

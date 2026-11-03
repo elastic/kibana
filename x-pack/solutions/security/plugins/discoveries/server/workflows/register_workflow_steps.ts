@@ -7,12 +7,11 @@
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
-import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { CoreStart } from '@kbn/core/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { isWorkflowsEnabled } from '@kbn/discoveries/impl/lib/helpers/is_workflows_enabled';
-import type { DiscoveriesPluginStartDeps } from '../types';
+import type { AdhocAttackDiscoveryDataClient, DiscoveriesPluginStartDeps } from '../types';
 import { getDefaultAlertRetrievalStepDefinition } from './steps/default_alert_retrieval_step';
 import { getDefaultValidationStepDefinition } from './steps/default_validation_step';
 import { getGenerateStepDefinition } from './steps/generate_step';
@@ -34,6 +33,9 @@ type GetStartServices = () => Promise<{
   pluginsStart: DiscoveriesPluginStartDeps;
 }>;
 
+/** The part of the workflows extensions setup contract that steps are registered through. */
+type StepRegistry = Pick<WorkflowsExtensionsServerPluginSetup, 'registerStepDefinition'>;
+
 const tryRegisterStep = ({
   getStartServices,
   logger,
@@ -43,7 +45,7 @@ const tryRegisterStep = ({
   getStartServices: GetStartServices;
   logger: Logger;
   stepDefinition: { id: string };
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+  workflowsExtensions: StepRegistry;
 }): StepRegistrationOutcome => {
   try {
     // Register a flag-gated loader instead of the definition directly. The
@@ -77,7 +79,7 @@ const tryRegisterStep = ({
 };
 
 export const registerWorkflowSteps = (
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
+  workflowsExtensions: StepRegistry,
   {
     adhocAttackDiscoveryDataClient,
     analytics,
@@ -90,7 +92,7 @@ export const registerWorkflowSteps = (
     logger,
     workflowsManagementApi,
   }: {
-    adhocAttackDiscoveryDataClient: IRuleDataClient;
+    adhocAttackDiscoveryDataClient: AdhocAttackDiscoveryDataClient;
     analytics?: AnalyticsServiceSetup;
     connectorTimeout: number;
     getEventLogIndex: () => Promise<string>;

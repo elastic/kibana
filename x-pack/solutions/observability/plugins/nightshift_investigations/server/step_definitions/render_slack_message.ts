@@ -8,11 +8,11 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
-import { MAX_KEYWORD_LENGTH } from '../../common';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema/src/significant_events/constants';
+import { MAX_KEYWORD_LENGTH } from '../../common/constants';
 import type { InvestigationLocator } from '../../common/locators';
 import type { GetInvestigationsClient } from '../routes/types';
-import { notificationPhaseSchema } from '../lib/notifications/notification_routing';
+import { notificationPhaseSchema } from '../lib/notifications/notification_routing_schema';
 import { renderInvestigationSlackMessage } from '../lib/notifications/format_investigation_slack_message';
 
 const inputSchema = z.object({

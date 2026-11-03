@@ -24,7 +24,8 @@ import {
   NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
   NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
 } from '@kbn/nightshift-shared';
-import { EMPTY_TOKENS, buildKIQueryGenerationUserMessage } from '@kbn/nightshift-ai';
+import { EMPTY_TOKENS } from '@kbn/nightshift-ai/src/shared/tokens/sum_tokens';
+import { buildKIQueryGenerationUserMessage } from '@kbn/nightshift-ai/src/significant_events/queries/build_ki_query_generation_user_message';
 import type { ExistingQuerySummary } from '@kbn/nightshift-ai';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { KI_QUERY_GENERATION_AGENT_ID } from '../../agent_builder/agents/ki_query_generation';

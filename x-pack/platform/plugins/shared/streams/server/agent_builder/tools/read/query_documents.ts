@@ -13,7 +13,7 @@ import { getFlattenedObject } from '@kbn/std';
 import { Streams } from '@kbn/streams-schema';
 import type { SearchRequest, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import dedent from 'dedent';
-import type { GetScopedClients } from '../../../routes/types';
+import type { GetAgentBuilderScopedClients } from '../../types';
 import { FAILURE_STORE_SELECTOR } from '../../../../common/constants';
 import {
   STREAMS_QUERY_DOCUMENTS_TOOL_ID as QUERY_DOCUMENTS,
@@ -79,7 +79,7 @@ const containsDisallowedKeys = (obj: unknown): string | null => {
 export const createQueryDocumentsTool = ({
   getScopedClients,
 }: {
-  getScopedClients: GetScopedClients;
+  getScopedClients: GetAgentBuilderScopedClients;
 }): BuiltinToolDefinition<typeof queryDocumentsSchema> => ({
   id: QUERY_DOCUMENTS,
   type: ToolType.builtin,

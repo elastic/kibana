@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import type { PluginSetupDependencies } from '../types';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { investigationTemplate } from './investigation';
 import { escalationTemplate } from './escalation';
 
 const BUILTIN_TEMPLATES = [investigationTemplate, escalationTemplate];
 
 export const registerConversationTemplates = ({
-  setupDeps,
+  agentBuilder,
 }: {
-  setupDeps: PluginSetupDependencies;
+  agentBuilder: AgentBuilderPluginSetup;
 }): void => {
-  const { agentBuilder } = setupDeps;
   for (const template of BUILTIN_TEMPLATES) {
     agentBuilder.conversationTemplates.register(template);
   }

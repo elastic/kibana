@@ -10,7 +10,7 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { SignificantEventsServer } from '../../types';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { SignificantEventsMaintenanceService } from '../../lib/maintenance/maintenance_service';
-import type { GetScopedClients } from '../../routes/types';
+import type { GetAgentBuilderScopedClients } from '../../scoped_clients';
 import { createFeatureSimilaritySearchTool } from './feature_similarity_search/tool';
 import { createFeatureKnowledgeIndicatorTool } from './create_feature_knowledge_indicator/tool';
 import { createQueryKnowledgeIndicatorTool } from './create_query_knowledge_indicator/tool';
@@ -50,7 +50,7 @@ export function registerAgentBuilderTools({
   maintenanceService,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
-  getScopedClients: GetScopedClients;
+  getScopedClients: GetAgentBuilderScopedClients;
   server: SignificantEventsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;

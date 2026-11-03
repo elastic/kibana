@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import type {
-  PluginInitializerContext,
-  CoreSetup,
-  Plugin,
-  SavedObjectsClientContract,
-  Logger,
-} from '@kbn/core/server';
+import type { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import type { APMSourcesAccessConfig } from '../common/config_schema';
 
-import {
-  apmIndicesSavedObjectDefinition,
-  getApmIndicesSavedObject,
-} from './saved_objects/apm_indices';
+import { apmIndicesSavedObjectDefinition } from './saved_objects/apm_indices';
+import { createApmSourcesServices, createGetApmIndices } from './runtime';
+import { apmSourcesAccessBridge } from './tasks/bridge';
 import { apmSourcesSettingsRouteRepository } from './routes';
 
 /**
@@ -39,12 +32,10 @@ export class ApmSourcesAccessPlugin
   constructor(initContext: PluginInitializerContext) {
     this.config = initContext.config.get<APMSourcesAccessConfig>();
     this.logger = initContext.logger.get();
+    this.getApmIndices = createGetApmIndices(this.config);
   }
 
-  getApmIndices = async (savedObjectsClient: SavedObjectsClientContract) => {
-    const apmIndicesFromSavedObject = await getApmIndicesSavedObject(savedObjectsClient);
-    return { ...this.config.indices, ...apmIndicesFromSavedObject };
-  };
+  getApmIndices: ReturnType<typeof createGetApmIndices>;
 
   /**
    * Registers the saved object definition and ui settings
@@ -54,10 +45,8 @@ export class ApmSourcesAccessPlugin
     // register saved object
     core.savedObjects.registerType(apmIndicesSavedObjectDefinition);
 
-    const services = {
-      apmIndicesFromConfigFile: this.config.indices,
-      getApmIndices: this.getApmIndices,
-    };
+    const services = createApmSourcesServices(this.config);
+    apmSourcesAccessBridge.setSetup(services);
 
     registerRoutes({
       core,
@@ -75,9 +64,9 @@ export class ApmSourcesAccessPlugin
    * Initialises the user value for APM Sources UI settings.
    */
   public start() {
-    return {
-      getApmIndices: this.getApmIndices,
-    };
+    const start = { getApmIndices: this.getApmIndices };
+    apmSourcesAccessBridge.setStart(start);
+    return start;
   }
 
   public stop() {}

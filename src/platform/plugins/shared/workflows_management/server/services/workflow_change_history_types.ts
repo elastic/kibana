@@ -25,6 +25,8 @@ export interface WorkflowChangeHistoryServiceInitializeParams {
   elasticsearchClient: ElasticsearchClient;
   authService: CoreAuthenticationService;
   userProfileService: UserProfileServiceStart;
+  /** Use the data stream Kibana created; never install it (task pods). */
+  useExistingDataStream?: boolean;
 }
 
 export interface IWorkflowChangeHistoryService {

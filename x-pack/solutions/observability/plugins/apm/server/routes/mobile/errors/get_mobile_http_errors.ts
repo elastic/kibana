@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import type { MobileHttpErrorsTimeseries } from '@kbn/apm-api-shared';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';

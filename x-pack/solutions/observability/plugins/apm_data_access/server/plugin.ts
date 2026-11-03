@@ -18,7 +18,8 @@ import type {
   ApmDataAccessPluginStart,
   ApmDataAccessServerSetupDependencies,
 } from './types';
-import { getServices } from './services/get_services';
+import { createApmDataAccessSetup } from './runtime';
+import { apmDataAccessBridge } from './tasks/bridge';
 
 export class ApmDataAccessPlugin
   implements Plugin<ApmDataAccessPluginSetup, ApmDataAccessPluginStart>
@@ -37,13 +38,9 @@ export class ApmDataAccessPlugin
     this.config = plugins.apmSourcesAccess.apmIndicesFromConfigFile;
 
     // expose
-    return {
-      // TODO: Deprecate and replace with apmSourcesAccess
-      apmIndicesFromConfigFile: this.config,
-      // TODO: Deprecate and replace with apmSourcesAccess
-      getApmIndices: plugins.apmSourcesAccess.getApmIndices,
-      getServices,
-    };
+    const setup = createApmDataAccessSetup(plugins.apmSourcesAccess);
+    apmDataAccessBridge.setSetup(setup);
+    return setup;
   }
 
   public start(_core: CoreStart): ApmDataAccessPluginStart {

@@ -7,11 +7,8 @@
 
 import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import {
-  getAgentFromRunContext,
-  type BuiltinToolDefinition,
-  type StaticToolRegistration,
-} from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
+import { getAgentFromRunContext } from '@kbn/agent-builder-server/runner/run_context_utils';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
@@ -26,7 +23,7 @@ import { nightshiftSourceSlugsField } from '@kbn/nightshift-shared';
 import { z, lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
-import type { GetScopedClients } from '../../../routes/types';
+import type { GetAgentBuilderScopedClients } from '../../../scoped_clients';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
@@ -356,7 +353,7 @@ export function createEventsWriteTool({
   logger,
   telemetry,
 }: {
-  getScopedClients: GetScopedClients;
+  getScopedClients: GetAgentBuilderScopedClients;
   server: SignificantEventsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;

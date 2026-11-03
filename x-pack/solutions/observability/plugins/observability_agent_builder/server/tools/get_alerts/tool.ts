@@ -10,7 +10,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
-import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
+import type { ObservabilityAgentBuilderStartServices } from '../../types';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import { MAX_KQL_FILTER_LENGTH, MAX_SHORT_STRING_LENGTH } from '../../utils/schema_limits';
@@ -77,7 +77,7 @@ export function createGetAlertsTool({
   core,
   logger,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
+  core: ObservabilityAgentBuilderStartServices;
   logger: Logger;
 }): StaticToolRegistration<typeof getAlertsSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof getAlertsSchema> = {

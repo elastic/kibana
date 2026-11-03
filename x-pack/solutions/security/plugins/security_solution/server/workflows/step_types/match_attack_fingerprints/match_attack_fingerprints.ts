@@ -14,7 +14,6 @@ import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { MAX_ALERT_IDS } from '../../../../common/workflows/step_types/common/constants';
 import { DEFAULT_MAX_ENTITIES } from '../../../../common/workflows/step_types/get_alert_entities_step/get_alert_entities_step_common';
-import { getAlertEntities } from '../get_alert_entities_step/get_alert_entities';
 import type { AttackSignals, Disposition, InvestigationMeta, StoredFingerprint } from './cluster';
 import { FingerprintIndexUnscopedError } from './fingerprint_index_unscoped_error';
 import {
@@ -246,6 +245,10 @@ const enrichAttack = async (
   if (alertIds.length === 0) {
     return attack;
   }
+  // Loaded when the step runs: it needs the entity store's EUID helpers, which pull in a large
+  // dependency tree (@kbn/streamlang and the UI library it imports) that a task pod would otherwise
+  // carry for every run.
+  const { getAlertEntities } = await import('../get_alert_entities_step/get_alert_entities');
   const [entities, span, entityPairs] = await Promise.all([
     getAlertEntities({
       abortSignal,

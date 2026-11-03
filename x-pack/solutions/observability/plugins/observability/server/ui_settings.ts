@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { UiSettingsParams } from '@kbn/core/types';
 import { i18n } from '@kbn/i18n';
-import { observabilityFeatureId, ProgressiveLoadingQuality } from '../common';
+import { ProgressiveLoadingQuality } from '../common/progressive_loading';
 import {
   enableComparisonByDefault,
   enableInspectEsQueries,
@@ -37,6 +37,9 @@ import {
   enableDiagnosticMode,
   apmMaxNumberOfServices,
 } from '../common/ui_settings_keys';
+
+// Same as `observabilityFeatureId` of the common barrel, which pulls in UI code a task pod must not load.
+const observabilityFeatureId = 'observability';
 
 /**
  * uiSettings definitions for Observability.

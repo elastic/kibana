@@ -19,7 +19,7 @@ import {
   type EventLifecycleResponse,
 } from '@kbn/significant-events-schema';
 import { notFound, serverUnavailable } from '@hapi/boom';
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
@@ -58,35 +58,38 @@ import type { RouteHandlerScopedClients } from '../../types';
 const toArray = <T extends string>(val: T | T[] | undefined): T[] | undefined =>
   val === undefined ? undefined : Array.isArray(val) ? val : [val];
 
-const investigationStateSchema = z.enum(SIGNIFICANT_EVENT_INVESTIGATION_STATES);
+// A function, so the schema is built on first use (inside the lazy schemas below).
+const investigationStateSchema = () => z.enum(SIGNIFICANT_EVENT_INVESTIGATION_STATES);
 
 /** Filters shared by the list and facet reads, so their counts always describe the same set. */
-const eventsFilterQuerySchema = z.object({
-  from: isoDateTime().optional(),
-  to: isoDateTime().optional(),
-  status: z
-    .union([
-      significantEventStatusSchema,
-      z.array(significantEventStatusSchema).max(SIGNIFICANT_EVENT_STATUS_OPTIONS.length),
-    ])
-    .optional(),
-  source_id: sourceIdsQuerySchema(MAX_SOURCE_IDS_PER_REQUEST).describe(
-    'Source ids to filter events by. One id or a repeated list.'
-  ),
-  search: z.string().max(MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH).optional(),
-  severity: z.union([severitySchema, z.array(severitySchema).max(4)]).optional(),
-  // Same cap as the agent `event_search` tool; the UI lets users select any number of services.
-  topology_feature_id: z
-    .union([z.string().max(255), z.array(z.string().max(255)).max(100)])
-    .optional(),
-  unassigned_entities: BooleanFromString.optional(),
-  investigation_state: z
-    .union([
-      investigationStateSchema,
-      z.array(investigationStateSchema).max(SIGNIFICANT_EVENT_INVESTIGATION_STATES.length),
-    ])
-    .optional(),
-});
+const eventsFilterQuerySchema = lazySchema(() =>
+  z.object({
+    from: isoDateTime().optional(),
+    to: isoDateTime().optional(),
+    status: z
+      .union([
+        significantEventStatusSchema,
+        z.array(significantEventStatusSchema).max(SIGNIFICANT_EVENT_STATUS_OPTIONS.length),
+      ])
+      .optional(),
+    source_id: sourceIdsQuerySchema(MAX_SOURCE_IDS_PER_REQUEST).describe(
+      'Source ids to filter events by. One id or a repeated list.'
+    ),
+    search: z.string().max(MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH).optional(),
+    severity: z.union([severitySchema, z.array(severitySchema).max(4)]).optional(),
+    // Same cap as the agent `event_search` tool; the UI lets users select any number of services.
+    topology_feature_id: z
+      .union([z.string().max(255), z.array(z.string().max(255)).max(100)])
+      .optional(),
+    unassigned_entities: BooleanFromString.optional(),
+    investigation_state: z
+      .union([
+        investigationStateSchema(),
+        z.array(investigationStateSchema()).max(SIGNIFICANT_EVENT_INVESTIGATION_STATES.length),
+      ])
+      .optional(),
+  })
+);
 
 const toEventsFilterOptions = async (
   {
@@ -260,21 +263,23 @@ const eventsLifecycleRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    path: z.object({
-      id: z.string().max(255),
-    }),
-    query: z
-      .object({
-        include_skipped: z
-          .enum(['true', 'false'])
-          .optional()
-          .describe(
-            'Also list the detections the classifier closed without the agent, with why. Off by default.'
-          ),
-      })
-      .optional(),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        id: z.string().max(255),
+      }),
+      query: z
+        .object({
+          include_skipped: z
+            .enum(['true', 'false'])
+            .optional()
+            .describe(
+              'Also list the detections the classifier closed without the agent, with why. Off by default.'
+            ),
+        })
+        .optional(),
+    })
+  ),
   handler: async ({
     params,
     request,

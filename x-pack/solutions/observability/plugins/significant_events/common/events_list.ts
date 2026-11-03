@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { Severity, SignificantEventStatus } from '@kbn/significant-events-schema';
+import type {
+  Severity,
+  SignificantEventStatus,
+} from '@kbn/significant-events-schema/src/significant_events';
 
 /**
  * Investigation progress derived from an event's `investigations` entries: none recorded,

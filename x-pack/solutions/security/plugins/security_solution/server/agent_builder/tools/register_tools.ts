@@ -10,13 +10,11 @@ import type { Logger } from '@kbn/logging';
 import type { PageProfilingOptions } from '../../lib/entity_analytics/risk_score/maintainer/instrumentation/page_timing_types';
 import type { ExperimentalFeatures } from '../../../common';
 import { securityLabsSearchTool } from './security_labs_search_tool';
-import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
-import { buildRedirectUrlTool } from './build_redirect_url_tool';
+import { registerPodTools } from './register_pod_tools';
 import {
   addEntitiesToWatchlistTool,
   createWatchlistTool,
   deleteWatchlistTool,
-  entityRiskScoreTool,
   getEntityTool,
   getEntityGraphTool,
   getEntityRiskScoreHistoryTool,
@@ -39,11 +37,7 @@ import {
   listResolutionRulesTool,
   setResolutionRulesTool,
 } from './entity_analytics';
-import { alertsTool } from './alerts_tool';
 import { createDetectionRuleTool } from './create_detection_rule_tool';
-import { pciComplianceTool } from './pci_compliance_tool';
-import { pciScopeDiscoveryTool } from './pci_scope_discovery_tool';
-import { pciFieldMapperTool } from './pci_field_mapper_tool';
 import { registerSiemReadinessTools } from './siem_readiness';
 import { registerSiemMigrationTools } from './siem_migrations';
 import { runRulePreviewTool } from './run_rule_preview_tool';
@@ -75,12 +69,9 @@ export const registerTools = (
   profiling: PageProfilingOptions,
   hasEncryptionKey: boolean = false
 ) => {
-  agentBuilder.tools.register(entityRiskScoreTool(core, logger));
-  agentBuilder.tools.register(attackDiscoverySearchTool(core, logger));
+  registerPodTools({ agentBuilder, core, logger, experimentalFeatures });
   agentBuilder.tools.register(securityLabsSearchTool(core));
   agentBuilder.tools.register(createDetectionRuleTool(core, logger, experimentalFeatures));
-  agentBuilder.tools.register(alertsTool(core, logger));
-  agentBuilder.tools.register(buildRedirectUrlTool(core, experimentalFeatures));
   agentBuilder.tools.register(getEntityTool(core, logger, ml, experimentalFeatures));
   agentBuilder.tools.register(
     getEntityGraphTool(core, logger, experimentalFeatures, productFeaturesService)
@@ -128,12 +119,6 @@ export const registerTools = (
       generateLeadsTool(core, logger, experimentalFeatures, rulePreviewDeps.getStartServices, ml)
     );
     agentBuilder.tools.register(dismissLeadTool(core, logger, experimentalFeatures));
-  }
-
-  if (experimentalFeatures.pciComplianceAgentBuilder) {
-    agentBuilder.tools.register(pciScopeDiscoveryTool(core, logger));
-    agentBuilder.tools.register(pciComplianceTool(core, logger));
-    agentBuilder.tools.register(pciFieldMapperTool(core, logger));
   }
 
   if (SIEM_READINESS_AGENT_BUILDER_ENABLED) {

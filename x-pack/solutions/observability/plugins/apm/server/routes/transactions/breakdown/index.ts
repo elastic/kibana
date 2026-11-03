@@ -7,7 +7,7 @@
 
 import { orderBy, last, clamp, round } from 'lodash';
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import type { TransactionBreakdownResponse } from '@kbn/apm-api-shared';
 import { asPercent } from '../../../../common/utils/formatters';
 import {

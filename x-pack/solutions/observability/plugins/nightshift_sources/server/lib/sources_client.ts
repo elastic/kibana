@@ -11,8 +11,9 @@ import type {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core/server';
-import { hasSameEsql } from '@kbn/streams-schema';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { hasSameEsql } from '@kbn/streams-schema/src/helpers/esql_helpers';
 import {
   createSourceRequestSchema,
   getNightshiftSourceViewName,

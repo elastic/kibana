@@ -10,7 +10,7 @@
 import type { Observable } from 'rxjs';
 import { filter, firstValueFrom, fromEvent, map, of, race, take, timer } from 'rxjs';
 import type { CoreStatus, Logger } from '@kbn/core/server';
-import { ServiceStatusLevels } from '@kbn/core/server';
+import { ServiceStatusLevels } from '@kbn/core-status-common';
 
 export const DEFAULT_MANAGED_INSTALL_PING_RETRY_INTERVAL_MS = 500;
 

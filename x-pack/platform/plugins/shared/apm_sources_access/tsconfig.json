@@ -10,5 +10,8 @@
     "@kbn/core",
     "@kbn/i18n",
     "@kbn/server-route-repository",
+    "@kbn/core-plugins-server",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-api-server",
   ]
 }

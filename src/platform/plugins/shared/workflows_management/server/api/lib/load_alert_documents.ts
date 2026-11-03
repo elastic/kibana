@@ -9,7 +9,7 @@
 
 import { get } from 'lodash';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
-import { expandFlattenedAlert } from '@kbn/alerting-plugin/server/alerts_client/lib';
+import { expandFlattenedAlert } from '@kbn/alerting-plugin/server/alerts_client/lib/format_alert';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALERT_RULE_TYPE_ID, ALERT_UUID } from '@kbn/rule-data-utils';

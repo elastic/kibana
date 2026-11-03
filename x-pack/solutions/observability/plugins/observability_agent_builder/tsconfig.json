@@ -57,6 +57,7 @@
     "@kbn/react-query",
     "@kbn/sse-utils",
     "@kbn/cloud-plugin",
+    "@kbn/core-plugins-server",
   ],
   "exclude": ["target/**/*"]
 }

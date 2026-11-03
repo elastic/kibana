@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { maxSuggestions } from '@kbn/observability-plugin/common';
+import { maxSuggestions } from '@kbn/observability-plugin/common/ui_settings_keys';
 import { routeDefinitions, type SuggestionsResponse } from '@kbn/apm-api-shared';
 import { getSuggestionsWithTermsEnum } from './get_suggestions_with_terms_enum';
 import { getSuggestionsWithTermsAggregation } from './get_suggestions_with_terms_aggregation';

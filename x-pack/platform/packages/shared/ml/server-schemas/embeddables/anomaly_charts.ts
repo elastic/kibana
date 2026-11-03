@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
+import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,

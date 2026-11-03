@@ -15,7 +15,7 @@ import {
 } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
-import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
+import type { ObservabilityAgentBuilderStartServices } from '../../types';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import {
@@ -84,7 +84,7 @@ export function createGetLogsTool({
   core,
   logger,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
+  core: ObservabilityAgentBuilderStartServices;
   logger: Logger;
 }): StaticToolRegistration<typeof getLogsSchema, GetLogsHandlerResult> {
   const toolDefinition: BuiltinToolDefinition<typeof getLogsSchema, GetLogsHandlerResult> = {

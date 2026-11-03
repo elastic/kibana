@@ -7,7 +7,7 @@
 
 import pRetry from 'p-retry';
 import { errors as esErrors } from '@elastic/elasticsearch';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 export type RetryOnConflictOptions = pRetry.Options;
 

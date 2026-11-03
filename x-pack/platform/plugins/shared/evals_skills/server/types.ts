@@ -16,10 +16,16 @@ export interface EvalsSkillsSetupDependencies {
   evals: EvalsPluginSetup;
 }
 
+/** The part of Security the skills' privilege checks need, which a task pod's Security has too. */
+export interface EvalsSkillsSecurity {
+  authz: Pick<SecurityPluginStart['authz'], 'actions' | 'checkPrivilegesWithRequest'>;
+}
+
+/** What the skills use at run time, which the `server` entry and a task pod both provide. */
 export interface EvalsSkillsStartDependencies {
-  agentBuilder: AgentBuilderPluginStart;
-  evals: EvalsPluginStart;
-  security?: SecurityPluginStart;
+  agentBuilder: { agents: Pick<AgentBuilderPluginStart['agents'], 'getRegistry'> };
+  evals: Pick<EvalsPluginStart, 'datasetService' | 'listEvaluators' | 'listModelConnectors'>;
+  security?: EvalsSkillsSecurity;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

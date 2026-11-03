@@ -6,7 +6,7 @@
  */
 
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
-import { getToolResultId } from '@kbn/agent-builder-server';
+import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { z } from '@kbn/zod/v4';
 

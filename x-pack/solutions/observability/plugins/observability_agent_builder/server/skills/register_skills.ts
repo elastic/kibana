@@ -6,14 +6,14 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { ObservabilityAgentBuilderPluginSetupDependencies } from '../types';
+import type { ObservabilityAgentBuilderToolPlugins } from '../types';
 import { createInvestigationSkill } from './investigation';
 
 export const registerSkills = ({
   plugins,
   logger,
 }: {
-  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  plugins: ObservabilityAgentBuilderToolPlugins;
   logger: Logger;
 }) => {
   plugins.agentBuilder.skills.register(createInvestigationSkill());

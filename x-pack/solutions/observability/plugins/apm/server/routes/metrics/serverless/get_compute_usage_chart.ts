@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import type { GenericMetricsChart } from '@kbn/apm-api-shared';
 import type { APMConfig } from '../../..';

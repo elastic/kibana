@@ -6,6 +6,8 @@
   "include": ["../../../../../typings/**/*", "server/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/security-plugin",
+    "@kbn/agent-builder-plugin",
     "@kbn/core",
     "@kbn/logging",
     "@kbn/agent-builder-server",

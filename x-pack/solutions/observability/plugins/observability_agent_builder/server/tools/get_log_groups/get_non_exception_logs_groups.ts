@@ -11,7 +11,7 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import { ERROR_EXC_TYPE } from '@kbn/apm-types/es_fields';
-import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
+import type { ObservabilityAgentBuilderStartServices } from '../../types';
 import { getLogsIndices } from '../../utils/get_logs_indices';
 import { timeRangeFilter, kqlFilter } from '../../utils/dsl_filters';
 import { warningAndAboveLogFilter } from '../../utils/warning_and_above_log_filter';
@@ -28,7 +28,7 @@ export async function getNonExceptionLogGroups({
   fields,
   size,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
+  core: ObservabilityAgentBuilderStartServices;
   logger: Logger;
   esClient: IScopedClusterClient;
   index?: string;

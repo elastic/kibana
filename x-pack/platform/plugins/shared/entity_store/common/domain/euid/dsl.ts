@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import { conditionToQueryDsl } from '@kbn/streamlang';
+import { conditionToQueryDsl } from '@kbn/streamlang/src/conditions/condition_to_query_dsl';
 import type { EntityDefinitionWithoutId, FieldEvaluation } from '../definitions/entity_schema';
 import {
   getPostStatsFieldOverrides,

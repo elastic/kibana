@@ -8,7 +8,7 @@
  */
 
 import type { EditorError } from '@elastic/esql/types';
-import { validateQuery } from '@kbn/esql-language';
+import type { validateQuery } from '@kbn/esql-language';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { WorkflowValidationRuleId } from '@kbn/workflows';
 import {
@@ -150,7 +150,9 @@ export async function validateEsqlQuery(
 
   let result: Awaited<ReturnType<typeof validateQuery>>;
   try {
-    result = await validateQuery(maskedQuery, trackedCallbacks, options);
+    // Loaded on first use: the ES|QL language package is large and most workflows have no ES|QL.
+    const { validateQuery: validate } = await import('@kbn/esql-language');
+    result = await validate(maskedQuery, trackedCallbacks, options);
   } catch {
     return { kind: 'failed' };
   }
@@ -177,7 +179,8 @@ async function validateGrammarWithPlaceholders(
 
   let result: Awaited<ReturnType<typeof validateQuery>>;
   try {
-    result = await validateQuery(query);
+    const { validateQuery: validate } = await import('@kbn/esql-language');
+    result = await validate(query);
   } catch {
     return { kind: 'failed' };
   }

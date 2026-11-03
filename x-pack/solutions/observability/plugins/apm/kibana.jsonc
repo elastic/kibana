@@ -77,6 +77,15 @@
       "observabilityAgentBuilder",
       "unifiedDocViewer",
       "presentationUtil"
-    ]
+    ],
+    "tasks": {
+      "requiredPlugins": [
+        "agentBuilder",
+        "observabilityAgentBuilder",
+        "apmDataAccess",
+        "licensing",
+        "ruleRegistry"
+      ]
+    }
   }
 }

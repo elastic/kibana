@@ -12,7 +12,7 @@ import type { Logger } from '@kbn/core/server';
 import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { SignificantEventsServer } from '../../../types';
-import type { GetScopedClients } from '../../../routes/types';
+import type { GetAgentBuilderScopedClients } from '../../../scoped_clients';
 import { assertCanReadSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import {
@@ -50,7 +50,7 @@ export const createFeatureSimilaritySearchTool = ({
   server,
   logger,
 }: {
-  getScopedClients: GetScopedClients;
+  getScopedClients: GetAgentBuilderScopedClients;
   server: SignificantEventsServer;
   logger: Logger;
 }): StaticToolRegistration<typeof featureSimilaritySearchSchema> => {

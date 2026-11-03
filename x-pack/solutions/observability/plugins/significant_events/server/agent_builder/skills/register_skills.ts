@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { SignificantEventsMaintenanceService } from '../../lib/maintenance/maintenance_service';
 import type { SignificantEventsKIsOnboardingClient } from '../../lib/workflows/onboarding_workflow_client';
-import type { GetScopedClients } from '../../routes/types';
+import type { GetAgentBuilderScopedClients } from '../../scoped_clients';
 import type { SignificantEventsServer } from '../../types';
 import { createKIQueryGenerationSkill } from './ki_query_generation';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
@@ -27,7 +27,7 @@ interface RegisterSignificantEventsSkillsOptions {
   telemetry: EbtTelemetryClient;
   streamsKIsOnboardingClient?: SignificantEventsKIsOnboardingClient;
   maintenanceService?: SignificantEventsMaintenanceService;
-  getScopedClients: GetScopedClients;
+  getScopedClients: GetAgentBuilderScopedClients;
   server: Pick<SignificantEventsServer, 'security'>;
   logger: Logger;
   isAvailable: () => Promise<boolean>;
@@ -40,6 +40,46 @@ interface RegisterSignificantEventsSkillsOptions {
    */
   availability: AvailabilityConfig;
 }
+
+/**
+ * The core skills, one list for Kibana (registered at start, gated by the availability flag) and
+ * for a task pod (registered at setup). The KI identification skill starts workflows through the
+ * workflows management API, so it is only there where a runtime provides that client.
+ */
+export const createSignificantEventsCoreSkills = ({
+  telemetry,
+  streamsKIsOnboardingClient,
+  maintenanceService,
+  getScopedClients,
+  server,
+  logger,
+}: Pick<
+  RegisterSignificantEventsSkillsOptions,
+  | 'telemetry'
+  | 'streamsKIsOnboardingClient'
+  | 'maintenanceService'
+  | 'getScopedClients'
+  | 'server'
+  | 'logger'
+>): SignificantEventsSkill[] => [
+  knowledgeIndicatorsManagementSkill,
+  nightshiftSourcesManagementSkill,
+  createKIQueryGenerationSkill({ getScopedClients, server, logger }),
+  significantEventsKIGroundingSkill,
+  significantEventsManagementSkill,
+  featureIdentificationSkill,
+  ...(streamsKIsOnboardingClient && maintenanceService
+    ? [
+        createKiIdentificationManagementSkill({
+          server,
+          telemetry,
+          streamsKIsOnboardingClient,
+          maintenanceService,
+          getScopedClients,
+        }),
+      ]
+    : []),
+];
 
 /**
  * Registers the significant events agent-builder skills at start, gated by the
@@ -70,25 +110,15 @@ export const registerSignificantEventsSkills = async ({
 }: RegisterSignificantEventsSkillsOptions): Promise<{ ensureRegistered: () => Promise<void> }> => {
   const registeredSkillIds = new Set<string>();
 
-  const getCoreSkills = (): SignificantEventsSkill[] => [
-    knowledgeIndicatorsManagementSkill,
-    nightshiftSourcesManagementSkill,
-    createKIQueryGenerationSkill({ getScopedClients, server, logger }),
-    significantEventsKIGroundingSkill,
-    significantEventsManagementSkill,
-    featureIdentificationSkill,
-    ...(streamsKIsOnboardingClient && maintenanceService
-      ? [
-          createKiIdentificationManagementSkill({
-            server,
-            telemetry,
-            streamsKIsOnboardingClient,
-            maintenanceService,
-            getScopedClients,
-          }),
-        ]
-      : []),
-  ];
+  const getCoreSkills = (): SignificantEventsSkill[] =>
+    createSignificantEventsCoreSkills({
+      telemetry,
+      streamsKIsOnboardingClient,
+      maintenanceService,
+      getScopedClients,
+      server,
+      logger,
+    });
 
   // Registers only the skills not registered yet. Already-registered skills are skipped (a second
   // register() call throws), so this is safe to call repeatedly and after a partial failure.

@@ -13,13 +13,13 @@ import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-c
 import type { Logger } from '@kbn/core/server';
 import { featureSchema, type Feature } from '@kbn/significant-events-schema';
 import { decodeFeatureAttachmentOrigin, KI_FEATURE_ATTACHMENT_TYPE } from '../../../common';
-import type { GetScopedClients } from '../../routes/types';
+import type { GetAgentBuilderScopedClients } from '../../scoped_clients';
 import { canReadSignificantEvents } from '../../routes/utils/assert_can_manage_significant_events';
 import type { SignificantEventsServer } from '../../types';
 
 interface CreateSignificantEventFeatureAttachmentTypeOptions {
   logger: Logger;
-  getScopedClients: GetScopedClients;
+  getScopedClients: GetAgentBuilderScopedClients;
   server: Pick<SignificantEventsServer, 'security'>;
 }
 

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import { PROCESSOR_EVENT, SPAN_DESTINATION_SERVICE_RESOURCE } from './es_fields/apm';
 import { environmentQuery } from './utils/environment_query';
 

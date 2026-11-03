@@ -6,7 +6,7 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { ActionsTasksStart } from '@kbn/actions-plugin/server/tasks';
 import type { Logger } from '@kbn/logging';
 import { agentBuilderTracesSkill } from './agent_builder_traces/agent_builder_traces_skill';
 import { graphCreationSkill } from './graph_creation_skill';
@@ -22,7 +22,7 @@ import { loadElasticSkills } from './elastic_skills';
 
 export const registerSkills = (
   agentBuilder: AgentBuilderPluginSetup,
-  getActionsStart: () => Promise<ActionsPluginStart>,
+  getActionsStart: () => Promise<ActionsTasksStart>,
   logger: Logger
 ) => {
   agentBuilder.skills.register(graphCreationSkill);

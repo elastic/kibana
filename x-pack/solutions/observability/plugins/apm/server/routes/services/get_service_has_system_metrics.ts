@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import {
   METRIC_CGROUP_MEMORY_USAGE_BYTES,

@@ -19,10 +19,13 @@ import { startPodServer } from './server';
  */
 export const startPod = async ({
   pluginIds,
+  taskTypes,
   defaultPort,
   baseConfig = {},
 }: {
   pluginIds: string[];
+  /** Globs of the task types the pod serves: the family's. Other plugins' types stay with Kibana. */
+  taskTypes?: string[];
   defaultPort: number;
   /** Config underneath `POD_CONFIG`, such as the keystore's settings. */
   baseConfig?: Record<string, unknown>;
@@ -41,11 +44,16 @@ export const startPod = async ({
   const config = process.env.POD_CONFIG
     ? (parse(readFileSync(process.env.POD_CONFIG, 'utf8')) as Record<string, unknown>) ?? {}
     : {};
-  const { taskDefinitions } = await bootTasksPlugins({
+  const { taskDefinitions, enrichFakeRequest } = await bootTasksPlugins({
     pluginIds,
     config: merge({}, baseConfig, nestDottedKeys(config)),
   });
-  return startPodServer({ taskDefinitions, port: Number(process.env.PORT ?? defaultPort) });
+  return startPodServer({
+    taskDefinitions,
+    taskTypes,
+    enrichFakeRequest,
+    port: Number(process.env.PORT ?? defaultPort),
+  });
 };
 
 /** Accepts both `xpack.alerting_v2.x: 1` and nested yml, like kibana.yml does. */

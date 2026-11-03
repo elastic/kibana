@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { appendToESQLQuery } from '@kbn/esql-utils';
 import { isResponseError } from '@kbn/es-errors';
 import { ESQL_VALID_RUNTIME_VERIFIER_ID } from '../../../common/ki_verification';
 import { formatEsError } from '../../utils/format_es_error';
@@ -24,8 +23,11 @@ export const ESQL_EXECUTION_ROW_LIMIT = 1;
 
 const MAX_QUERY_ATTEMPTS = 3;
 
-const boundQuery = (query: string): string =>
-  appendToESQLQuery(query, `| LIMIT ${ESQL_EXECUTION_ROW_LIMIT}`);
+// Loaded on first use: the ES|QL packages are large and most runtimes never execute a verifier.
+const boundQuery = async (query: string): Promise<string> => {
+  const { appendToESQLQuery } = await import('@kbn/esql-utils');
+  return appendToESQLQuery(query, `| LIMIT ${ESQL_EXECUTION_ROW_LIMIT}`);
+};
 
 /** Creates a verifier that executes ES|QL queries against Elasticsearch. */
 export const createEsqlValidRuntimeVerifier = (retryDelayMs = 200): KiVerifier => ({
@@ -50,10 +52,11 @@ export const createEsqlValidRuntimeVerifier = (retryDelayMs = 200): KiVerifier =
 
       const { source, query } = queryRef;
       try {
+        const boundedQuery = await boundQuery(query);
         const { is_partial: isPartial } = await withRetry(
           () =>
             esClient.esql.query(
-              { query: boundQuery(query), allow_partial_results: false },
+              { query: boundedQuery, allow_partial_results: false },
               { signal: abortSignal }
             ),
           { maxAttempts: MAX_QUERY_ATTEMPTS, delayMs: retryDelayMs, signal: abortSignal }

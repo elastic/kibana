@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { validateQuery } from '@kbn/esql-language';
 import type { ESQLMessage } from '@kbn/esql-language';
 import type { EditorError } from '@elastic/esql/types';
 import { ESQL_VALID_SYNTAX_VERIFIER_ID } from '../../../common/ki_verification';
@@ -45,6 +44,8 @@ export const createEsqlValidSyntaxVerifier = (): KiVerifier => ({
       }
 
       const { source, query } = queryRef;
+      // Loaded on first use: the ES|QL language package is large and most runtimes never validate.
+      const { validateQuery } = await import('@kbn/esql-language');
       const { errors } = await validateQuery(query);
       if (errors.length > 0) {
         failures.push(

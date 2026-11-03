@@ -11,7 +11,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { z, lazySchema } from '@kbn/zod/v4';
-import { SECURITY_ALERTS_TOOL_ID } from '../../tools';
+import { SECURITY_ALERTS_TOOL_ID } from '../../tools/alerts_tool';
 import {
   DEFAULT_ALERTS_INDEX,
   SecurityAgentBuilderAttachments,

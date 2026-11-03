@@ -11,8 +11,8 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type {
-  ObservabilityAgentBuilderCoreSetup,
-  ObservabilityAgentBuilderPluginSetupDependencies,
+  ObservabilityAgentBuilderStartServices,
+  ObservabilityAgentBuilderToolPlugins,
 } from '../../types';
 import { kqlToInfluencerQuery } from './kql_to_influencer_query';
 
@@ -34,8 +34,8 @@ export async function getToolHandler({
   rangeStart,
   rangeEnd,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
-  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  core: ObservabilityAgentBuilderStartServices;
+  plugins: ObservabilityAgentBuilderToolPlugins;
   mlClient: Ml;
   request: KibanaRequest;
   logger: Logger;

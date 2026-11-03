@@ -50,6 +50,7 @@
       "kibanaUtils",
       "savedObjectsFinder"
     ],
+    "tasks": { "requiredPlugins": ["workflowsExtensions"], "optionalPlugins": ["agentBuilder"] },
     "extraPublicDirs": ["common"]
   }
 }

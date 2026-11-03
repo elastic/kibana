@@ -12,11 +12,11 @@ import type { AttachmentPublicClient, ConversationPublicClient } from '@kbn/agen
 import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
 import { MAX_INVESTIGATION_NOTIFICATIONS } from '../../../common';
 import type { InvestigationNotificationDestination } from '../../../common';
+import { notificationRoutingAttachment } from './notification_routing';
 import {
-  notificationRoutingAttachment,
   notificationRoutingSchema,
   repliesUnderCallerMessage,
-} from './notification_routing';
+} from './notification_routing_schema';
 import type {
   NotificationAttempt,
   NotificationDestination,
@@ -24,7 +24,7 @@ import type {
   NotificationPhase,
   NotificationRouting,
   StoredNotificationRouting,
-} from './notification_routing';
+} from './notification_routing_schema';
 
 const canonicalize = (value: JsonValue): JsonValue => {
   if (Array.isArray(value)) {

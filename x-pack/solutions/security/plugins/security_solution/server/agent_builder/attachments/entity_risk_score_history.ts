@@ -8,7 +8,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { IdentifierType } from '../../../common/api/entity_analytics/common/common.gen';
-import { SECURITY_GET_ENTITY_RISK_SCORE_HISTORY_TOOL_ID } from '../tools';
+import { SECURITY_GET_ENTITY_RISK_SCORE_HISTORY_TOOL_ID } from '../tools/tool_ids';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
 const scoreTypeSchema = lazySchema(() => z.enum(['base', 'resolution']));

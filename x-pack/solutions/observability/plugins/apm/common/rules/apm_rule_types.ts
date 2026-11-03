@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { ValuesType } from 'utility-types';
 import type { AsDuration, AsPercent, TimeUnitChar } from '@kbn/observability-plugin/common';
 import type { ActionGroup } from '@kbn/alerting-plugin/common';
-import { formatDurationFromTimeUnitChar } from '@kbn/observability-plugin/common';
+import { formatDurationFromTimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import { ApmRuleType } from '@kbn/rule-data-utils';

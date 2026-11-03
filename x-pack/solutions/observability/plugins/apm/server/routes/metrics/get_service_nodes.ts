@@ -6,7 +6,7 @@
  */
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import type { ServiceNodesResponse } from '@kbn/apm-api-shared';
 import {
   METRIC_JAVA_HEAP_MEMORY_USED,

@@ -21,7 +21,13 @@ import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
 } from '@kbn/search-inference-endpoints/server';
+import type { CloudTasksSetup } from '@kbn/cloud-plugin/server/tasks';
 import type { SpacesTasksStart } from '@kbn/spaces-plugin/server/tasks';
+import type {
+  WorkflowsExtensionsTasksSetup,
+  WorkflowsExtensionsTasksStart,
+} from '@kbn/workflows-extensions/server/tasks';
+import type { WorkflowsManagementTasksSetup } from '@kbn/workflows-management-plugin/server/tasks';
 import type {
   TaskManagerTasksSetup,
   TaskManagerTasksStart,
@@ -29,24 +35,34 @@ import type {
 import type { AgentBuilderConfig } from '../config';
 import { configSchema } from '../config';
 import { registerInferenceFeatures } from '../inference_features';
+import { registerUISettings } from '../ui_settings';
 import { registerBuiltinSetup } from '../setup_builtins';
 import { createSetupContract } from '../setup_contract';
 import { ServiceManager } from '../services/create_services';
 import { registerTaskDefinitions } from '../services/execution/task/task_definitions';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '../types';
 import { getDeploymentInfo } from '../utils/deployment_info';
+import { createAttachmentPublicClient } from '../services/attachments/attachment_public_client';
+import { createConversationPublicClient } from '../services/conversation/conversation_public_client';
+import { registerAgentBuilderWorkflowSteps } from '../workflows/register_steps';
 import { agentBuilderBridge } from './bridge';
 import { toNoopContract } from './noop_contract';
 
 export const config: PluginConfigDescriptor<AgentBuilderConfig> = { schema: configSchema };
 
-export type AgentBuilderTasksStart = Pick<AgentBuilderPluginStart, 'agents' | 'tools'>;
+export type AgentBuilderTasksStart = Pick<
+  AgentBuilderPluginStart,
+  'agents' | 'tools' | 'conversations' | 'attachments'
+>;
 
 interface TasksSetupDeps {
   taskManager: TaskManagerTasksSetup;
   actions: unknown;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginSetup;
-  workflowsManagement?: unknown;
+  workflowsManagement?: WorkflowsManagementTasksSetup;
+  workflowsExtensions: WorkflowsExtensionsTasksSetup;
+  /** The deployment, from the pod's `xpack.cloud` config when it has one. */
+  cloud?: CloudTasksSetup;
 }
 
 interface TasksStartDeps {
@@ -57,11 +73,12 @@ interface TasksStartDeps {
   isomer: IsomerPluginStart;
   licensing: LicensingTasksStart;
   spaces?: SpacesTasksStart;
+  workflowsExtensions: WorkflowsExtensionsTasksStart;
 }
 
 /**
  * The agent execution path of Agent Builder for task runtimes: the services it builds in Kibana (the
- * same \`ServiceManager\`), the \`agent-builder:run-agent\` task and what contributing plugins register.
+ * same `ServiceManager`), the `agent-builder:run-agent` task and what contributing plugins register.
  * In Kibana the plugin owns all of it and this entry hands out its contracts (see \`bridge.ts\`).
  * Runs bound to a service account stay in Kibana, and an agent that calls Kibana APIs fails with a
  * clear message, because a task pod has no route back to Kibana.
@@ -75,6 +92,7 @@ class AgentBuilderTasksPlugin
   private readonly env: PluginInitializerContext['env'];
   private readonly serviceManager: ServiceManager;
   private readonly conversationUpdatedOptIns: ConversationUpdatedOptIn[] = [];
+  private cloud?: CloudTasksSetup;
 
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
@@ -87,18 +105,29 @@ class AgentBuilderTasksPlugin
     const real = agentBuilderBridge.getSetup();
     if (real) return toNoopContract(real);
 
+    this.cloud = deps.cloud;
+
+    // The defaults of the settings the tools read (for example whether to include frozen indices).
+    registerUISettings({ uiSettings: core.uiSettings as never });
     registerInferenceFeatures({ searchInferenceEndpoints: deps.searchInferenceEndpoints as never });
     const serviceSetups = this.serviceManager.setupServices({
       logger: this.logger.get('services'),
-      workflowsManagement: deps.workflowsManagement as never,
+      workflowsManagement: deps.workflowsManagement,
       trackingService: undefined,
-      cloud: undefined,
+      cloud: deps.cloud,
       usageApi: undefined,
       actions: deps.actions as never,
     });
 
     registerBuiltinSetup({
       serviceSetups,
+      getStartServices: core.getStartServices as never,
+    });
+
+    // The workflows engine runs in a pod too, so the steps Agent Builder contributes must be there.
+    registerAgentBuilderWorkflowSteps({
+      workflowsExtensions: deps.workflowsExtensions,
+      serviceManager: this.serviceManager,
       getStartServices: core.getStartServices as never,
     });
 
@@ -143,7 +172,7 @@ class AgentBuilderTasksPlugin
       searchInferenceEndpoints: deps.searchInferenceEndpoints,
       licensing: deps.licensing as never,
       deploymentInfo: getDeploymentInfo({
-        cloud: undefined,
+        cloud: this.cloud,
         packageInfo: this.env.packageInfo,
         airgapped: this.env.airgapped,
       }),
@@ -161,6 +190,24 @@ class AgentBuilderTasksPlugin
       tools: {
         getRegistry: ({ request }) => services.tools.getRegistry({ request }),
         execute: runner.runTool.bind(runner),
+      },
+      conversations: {
+        getScopedClient: async ({ request }) => {
+          const client = await services.conversations.getScopedClient({ request });
+          const agentRegistry = await services.agents.getRegistry({ request });
+          return createConversationPublicClient({ client, agentRegistry, source: 'server_api' });
+        },
+      },
+      attachments: {
+        getScopedClient: async ({ request }) =>
+          createAttachmentPublicClient({
+            request,
+            conversationsService: services.conversations,
+            attachmentsService: services.attachments,
+            coreStart: core as never,
+            spaces: deps.spaces as never,
+            source: 'server_api',
+          }),
       },
     };
   }

@@ -8,7 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ToolsStart } from '@kbn/agent-builder-server';
 import type { ComputedFeatureProvider } from '@kbn/nightshift-ai';
-import { getSigEventsLogPatternsEsql } from '@kbn/ai-tools';
+import { getSigEventsLogPatternsEsql } from '@kbn/ai-tools/src/tools/log_patterns/get_log_patterns';
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import { formatToolResults, type BridgedToolResponse } from '../agent_builder/format_tool_results';
 import {

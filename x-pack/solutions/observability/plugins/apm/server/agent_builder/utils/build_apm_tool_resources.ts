@@ -32,14 +32,23 @@ export interface ApmToolResources {
   soClient: SavedObjectsClientContract;
 }
 
+/** What the tool resources use of Core's setup: a way to reach the start services. */
+export type ApmToolCore = Pick<CoreSetup<APMPluginStartDependencies>, 'getStartServices'>;
+
+/** The setup contracts of other plugins the tool resources use. */
+export type ApmToolPlugins = Pick<
+  APMPluginSetupDependencies,
+  'apmDataAccess' | 'ml' | 'ruleRegistry' | 'slo'
+>;
+
 export async function buildApmToolResources({
   core,
   plugins,
   request,
   esClient,
 }: {
-  core: CoreSetup<APMPluginStartDependencies>;
-  plugins: APMPluginSetupDependencies;
+  core: ApmToolCore;
+  plugins: ApmToolPlugins;
   request: KibanaRequest;
   esClient?: IScopedClusterClient;
 }): Promise<ApmToolResources> {
@@ -84,7 +93,7 @@ export async function buildApmToolResources({
   const apmEventClientPromise = getApmEventClient({
     context: contextAdapter,
     core: {
-      setup: core,
+      setup: core as unknown as CoreSetup,
       start: () => core.getStartServices().then(([cs]) => cs),
     },
     request,
@@ -106,11 +115,19 @@ export async function buildApmToolResources({
     request,
   }).catch(() => undefined);
 
-  const apmAlertsClientPromise = getApmAlertsClient({
-    context: contextAdapter,
-    plugins: pluginsAdapter,
-    request,
-  });
+  // Created on first use: a provider that does not read alerts must not fail where alerts cannot
+  // be read (no alert indices, or a task pod, which has no alerts client).
+  let alertsClientPromise: ReturnType<typeof getApmAlertsClient> | undefined;
+  const apmAlertsClient: ApmAlertsClient = {
+    search: (async (searchParams: Parameters<ApmAlertsClient['search']>[0]) => {
+      alertsClientPromise ??= getApmAlertsClient({
+        context: contextAdapter,
+        plugins: pluginsAdapter,
+        request,
+      });
+      return (await alertsClientPromise).search(searchParams);
+    }) as ApmAlertsClient['search'],
+  };
 
   // SLO client degrades gracefully to undefined when the SLO plugin is absent.
   const sloClientPromise = getApmSloClient({
@@ -118,10 +135,9 @@ export async function buildApmToolResources({
     request,
   }).catch(() => undefined);
 
-  const [apmEventClient, mlClient, apmAlertsClient, sloClient] = await Promise.all([
+  const [apmEventClient, mlClient, sloClient] = await Promise.all([
     apmEventClientPromise,
     mlClientPromise,
-    apmAlertsClientPromise,
     sloClientPromise,
   ]);
 

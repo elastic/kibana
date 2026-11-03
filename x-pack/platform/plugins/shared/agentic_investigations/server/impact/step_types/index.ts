@@ -23,7 +23,7 @@ export const registerImpactStepDefinitions = ({
   getAttachmentClient,
   getConversationClient,
 }: {
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+  workflowsExtensions: Pick<WorkflowsExtensionsServerPluginSetup, 'registerStepDefinition'>;
   getImpactService: () => ImpactService;
   resolveUser: ResolveUser;
   privileges: InvestigationsPrivilegesChecker;

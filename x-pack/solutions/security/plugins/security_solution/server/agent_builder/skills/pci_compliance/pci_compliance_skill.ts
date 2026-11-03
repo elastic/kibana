@@ -7,11 +7,9 @@
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import {
-  PCI_COMPLIANCE_TOOL_ID,
-  PCI_FIELD_MAPPER_TOOL_ID,
-  PCI_SCOPE_DISCOVERY_TOOL_ID,
-} from '../../tools';
+import { PCI_COMPLIANCE_TOOL_ID } from '../../tools/pci_compliance_tool';
+import { PCI_FIELD_MAPPER_TOOL_ID } from '../../tools/pci_field_mapper_tool';
+import { PCI_SCOPE_DISCOVERY_TOOL_ID } from '../../tools/pci_scope_discovery_tool';
 
 /**
  * Registry-scoped tool IDs advertised by this skill.

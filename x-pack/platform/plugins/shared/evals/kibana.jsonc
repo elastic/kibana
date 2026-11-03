@@ -23,6 +23,7 @@
       "workflowsExtensions",
       "workflowsManagement"
     ],
-    "requiredBundles": ["kibanaReact", "data", "spaces", "workflowsExtensions"]
+    "requiredBundles": ["kibanaReact", "data", "spaces", "workflowsExtensions"],
+    "tasks": { "requiredPlugins": ["inference"], "optionalPlugins": ["workflowsExtensions"] }
   }
 }

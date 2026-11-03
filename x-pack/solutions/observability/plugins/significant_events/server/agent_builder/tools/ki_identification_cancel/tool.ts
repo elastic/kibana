@@ -21,7 +21,7 @@ import {
   toSourceRef,
 } from '../../utils/resolve_source_slugs';
 import { cancelKiIdentificationToolHandler } from './handler';
-import type { GetScopedClients } from '../../../routes/types';
+import type { GetAgentBuilderScopedClients } from '../../../scoped_clients';
 
 export const SIGNIFICANT_EVENTS_KI_IDENTIFICATION_CANCEL_TOOL_ID =
   'platform.sig_events.ki_identification_cancel';
@@ -39,7 +39,7 @@ export const createKiIdentificationCancelTool = ({
 }: {
   server: Pick<SignificantEventsServer, 'security'>;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
-  getScopedClients: GetScopedClients;
+  getScopedClients: GetAgentBuilderScopedClients;
 }): BuiltinSkillBoundedTool<typeof cancelSchema> => ({
   id: SIGNIFICANT_EVENTS_KI_IDENTIFICATION_CANCEL_TOOL_ID,
   type: ToolType.builtin,

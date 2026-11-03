@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type { WorkflowsExtensionsTasksSetup } from '@kbn/workflows-extensions/server/tasks';
 import type { FeedbackAnalysisStepDependencies, KiStepDependencies } from './helpers';
 import type { VerifyKi } from './verify_ki';
 import { getCreateKiStepDefinition } from './create_ki';
@@ -21,7 +21,7 @@ export const registerStepDefinitions = ({
   verifyKi,
   ...deps
 }: KiStepDependencies & {
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+  workflowsExtensions: Pick<WorkflowsExtensionsTasksSetup, 'registerStepDefinition'>;
   feedbackAnalysis: FeedbackAnalysisStepDependencies;
   verifyKi: VerifyKi;
 }): void => {

@@ -17,6 +17,7 @@ import type {
 } from '@kbn/encrypted-saved-objects-plugin/server/tasks';
 import type { EventLogTasksSetup } from '@kbn/event-log-plugin/server/tasks';
 import type { LicensingTasksSetup, LicensingTasksStart } from '@kbn/licensing-plugin/server/tasks';
+import type { SecurityTasksStart } from '@kbn/security-plugin/server/tasks';
 import type { SpacesTasksStart } from '@kbn/spaces-plugin/server/tasks';
 import type {
   TaskManagerTasksSetup,
@@ -46,6 +47,7 @@ interface TasksStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsTasksStart;
   licensing: LicensingTasksStart;
   spaces?: SpacesTasksStart;
+  security: SecurityTasksStart;
 }
 
 /**
@@ -82,7 +84,8 @@ class ActionsTasksPlugin
       licensing: plugins.licensing,
       eventLog: plugins.eventLog,
       getSystemIdentity: () => undefined,
-      canRunPrivilegedActionTypes: false,
+      // A pod checks privileges through the security tasks entry, like Kibana does.
+      canRunPrivilegedActionTypes: true,
     });
     return this.runtime.setup;
   }
@@ -99,7 +102,7 @@ class ActionsTasksPlugin
       taskManager: plugins.taskManager as never,
       // It only reads the space of a request and converts space ids.
       spaces: plugins.spaces as never,
-      getAuthorization: () => undefined,
+      getAuthorization: () => plugins.security.authz as never,
     }).contract;
   }
 

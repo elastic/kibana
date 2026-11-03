@@ -9,6 +9,10 @@
     "browser": true,
     "server": true,
     "requiredPlugins": ["agentBuilder", "contextEngine", "workflowsManagement", "security"],
-    "optionalPlugins": ["spaces", "searchInferenceEndpoints"]
+    "optionalPlugins": ["spaces", "searchInferenceEndpoints"],
+    "tasks": {
+      "requiredPlugins": ["agentBuilder", "contextEngine", "security", "workflowsManagement"],
+      "optionalPlugins": ["searchInferenceEndpoints"]
+    }
   }
 }

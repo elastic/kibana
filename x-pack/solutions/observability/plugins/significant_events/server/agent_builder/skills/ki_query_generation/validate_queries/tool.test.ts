@@ -11,7 +11,7 @@ import {
   createQueryValidationContext,
   validateKIQueries,
   type ValidatedKIQuery,
-} from '@kbn/nightshift-ai';
+} from '@kbn/nightshift-ai/src/significant_events/queries/validate_ki_queries';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../../routes/types';
 import {
   createMockToolContext,
@@ -21,8 +21,8 @@ import {
 } from '../../../utils/test_helpers';
 import { createValidateQueriesTool } from './tool';
 
-jest.mock('@kbn/nightshift-ai', () => ({
-  ...jest.requireActual('@kbn/nightshift-ai'),
+jest.mock('@kbn/nightshift-ai/src/significant_events/queries/validate_ki_queries', () => ({
+  ...jest.requireActual('@kbn/nightshift-ai/src/significant_events/queries/validate_ki_queries'),
   createQueryValidationContext: jest.fn(),
   validateKIQueries: jest.fn(),
 }));

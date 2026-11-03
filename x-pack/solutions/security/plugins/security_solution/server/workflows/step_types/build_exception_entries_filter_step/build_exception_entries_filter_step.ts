@@ -9,19 +9,25 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { estypes } from '@elastic/elasticsearch';
 import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  buildExistsClause,
-  buildMatchAnyClause,
-  buildMatchClause,
-  buildMatchWildcardClause,
-} from '@kbn/lists-plugin/server/services/exception_lists';
+type ClauseBuilders = Pick<
+  typeof import('@kbn/lists-plugin/server/services/exception_lists'),
+  'buildExistsClause' | 'buildMatchAnyClause' | 'buildMatchClause' | 'buildMatchWildcardClause'
+>;
 import { buildExceptionEntriesFilterStepCommonDefinition } from '../../../../common/workflows/step_types/build_exception_entries_filter_step/build_exception_entries_filter_step_common';
 import { toApiEntries } from '../../utils/exception_item';
 
 // Dispatches each API entry to the same clause builder the detection engine's own
 // exception evaluation uses, so the backtested filter matches exactly what the
 // created exception would suppress.
-const buildClause = (entry: EntriesArray[number]): estypes.QueryDslQueryContainer => {
+const buildClause = (
+  {
+    buildExistsClause,
+    buildMatchAnyClause,
+    buildMatchClause,
+    buildMatchWildcardClause,
+  }: ClauseBuilders,
+  entry: EntriesArray[number]
+): estypes.QueryDslQueryContainer => {
   switch (entry.type) {
     case 'match':
       return buildMatchClause(entry);
@@ -54,7 +60,10 @@ export const buildExceptionEntriesFilterStepDefinition = createServerStepDefinit
     }
     const { entries, existing_filters: existingFilters } = parsed.data;
 
-    const clauses = toApiEntries(entries).map(buildClause);
+    // Loaded when the step runs: the lists plugin's exception services pull in a large dependency
+    // tree that a task pod should not carry for every run.
+    const builders = await import('@kbn/lists-plugin/server/services/exception_lists');
+    const clauses = toApiEntries(entries).map((entry) => buildClause(builders, entry));
 
     // bool.filter ANDs its clauses, matching how one exception item's entries all must
     // match for the exception to apply; the outer must_not excludes alerts that would

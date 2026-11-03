@@ -10,6 +10,10 @@
     "id": "securitySolution",
     "browser": true,
     "server": true,
+    "tasks": {
+      "requiredPlugins": ["workflowsExtensions"],
+      "optionalPlugins": ["agentBuilder"]
+    },
     "configPath": [
       "xpack",
       "securitySolution"

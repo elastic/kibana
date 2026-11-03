@@ -11,7 +11,7 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { CoreStart, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { MAX_KEYWORD_LENGTH } from '../../common';
+import { MAX_KEYWORD_LENGTH } from '../../common/constants';
 import { usesKnowledge } from '../agents/agent_policy';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { investigationRoundInputsSchema, withToolResults } from '../investigation_round';

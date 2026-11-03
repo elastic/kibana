@@ -31,8 +31,8 @@ import {
   VALUE_OTEL_JVM_MEMORY_TYPE_NON_HEAP,
 } from '@kbn/apm-types';
 import type {
-  ObservabilityAgentBuilderCoreSetup,
-  ObservabilityAgentBuilderPluginSetupDependencies,
+  ObservabilityAgentBuilderStartServices,
+  ObservabilityAgentBuilderToolPlugins,
 } from '../../types';
 import { buildApmResources } from '../../utils/build_apm_resources';
 import { parseDatemath } from '../../utils/time';
@@ -71,8 +71,8 @@ export async function getToolHandler({
   limit = 20,
   kqlFilter,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
-  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  core: ObservabilityAgentBuilderStartServices;
+  plugins: ObservabilityAgentBuilderToolPlugins;
   request: KibanaRequest;
   logger: Logger;
   serviceName?: string;

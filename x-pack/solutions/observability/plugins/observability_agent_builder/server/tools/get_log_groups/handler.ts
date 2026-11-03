@@ -28,8 +28,8 @@ import {
   ERROR_STACK_TRACE,
 } from '@kbn/apm-types';
 import type {
-  ObservabilityAgentBuilderCoreSetup,
-  ObservabilityAgentBuilderPluginSetupDependencies,
+  ObservabilityAgentBuilderStartServices,
+  ObservabilityAgentBuilderToolPlugins,
 } from '../../types';
 import { parseDatemath } from '../../utils/time';
 import { buildApmResources } from '../../utils/build_apm_resources';
@@ -52,8 +52,8 @@ export async function getToolHandler({
   includeFirstSeen,
   size,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
-  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  core: ObservabilityAgentBuilderStartServices;
+  plugins: ObservabilityAgentBuilderToolPlugins;
   request: KibanaRequest;
   logger: Logger;
   esClient: IScopedClusterClient;

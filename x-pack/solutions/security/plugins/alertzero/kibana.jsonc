@@ -12,6 +12,10 @@
     "configPath": ["xpack", "alertzero"],
     "requiredPlugins": ["licensing", "features", "workflowsExtensions", "workflowsManagement", "taskManager"],
     "optionalPlugins": ["security", "agentBuilder", "agenticInvestigations", "proposals", "cloud", "inference", "searchInferenceEndpoints", "spaces", "share", "fleet", "mitreAttack", "contextEngine", "telemetry"],
-    "requiredBundles": ["kibanaReact"]
+    "requiredBundles": ["kibanaReact"],
+    "tasks": {
+      "requiredPlugins": ["workflowsExtensions", "workflowsManagement", "taskManager"],
+      "optionalPlugins": ["security", "agentBuilder", "searchInferenceEndpoints", "spaces"]
+    }
   }
 }

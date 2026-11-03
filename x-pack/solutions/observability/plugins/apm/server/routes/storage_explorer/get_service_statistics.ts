@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import type { StorageExplorerServiceStatisticsResponse } from '@kbn/apm-api-shared';
 import type { ApmPluginRequestHandlerContext } from '../typings';
 import {

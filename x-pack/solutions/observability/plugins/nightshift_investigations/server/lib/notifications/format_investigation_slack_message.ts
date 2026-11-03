@@ -7,7 +7,7 @@
 
 import type { JsonObject } from '@kbn/utility-types';
 import type { Severity } from '@kbn/significant-events-schema';
-import type { NotificationPhase } from './notification_routing';
+import type { NotificationPhase } from './notification_routing_schema';
 import type { NotifiableInvestigation } from './notification_delivery';
 
 /** Slack truncates long messages; a channel post is a pointer, the detail lives in Kibana. */

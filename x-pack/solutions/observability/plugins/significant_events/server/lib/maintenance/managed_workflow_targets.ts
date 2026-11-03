@@ -21,7 +21,7 @@ import {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
-import { LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
+import { LEGACY_DEFAULT_SPACE_WORKFLOW_IDS } from './legacy_workflow_ids';
 
 /**
  * Global-scope workflows installed by `install_workflows` (always-on core set).
@@ -72,10 +72,7 @@ export const GLOBAL_MAINTENANCE_WORKFLOW_IDS = [
  * TODO: remove with the legacy default-space cleanup.
  * https://github.com/elastic/kibana/issues/294271
  */
-export const LEGACY_DEFAULT_SPACE_WORKFLOW_IDS: readonly string[] = [
-  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-  LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
-];
+export { LEGACY_DEFAULT_SPACE_WORKFLOW_IDS };
 
 /**
  * Every workflow id that installers may create. Used by the drift test so a

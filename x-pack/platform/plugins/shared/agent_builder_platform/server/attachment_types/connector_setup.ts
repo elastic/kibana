@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { AgentsStart } from '@kbn/agent-builder-server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { ActionsTasksStart } from '@kbn/actions-plugin/server/tasks';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { getConnectorSpec } from '@kbn/connector-specs';
 import {
@@ -19,7 +19,7 @@ import { isChatCallableConnectorType } from '../skills/connector_authoring/utils
 
 interface ConnectorSetupAttachmentTypeDeps {
   getAgentsStart: () => Promise<AgentsStart>;
-  getActionsStart: () => Promise<ActionsPluginStart>;
+  getActionsStart: () => Promise<ActionsTasksStart>;
   logger: Logger;
 }
 

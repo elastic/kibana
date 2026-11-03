@@ -13,6 +13,7 @@ import type {
 } from '@kbn/core/server';
 import type { MetricsDataPluginStartDeps } from './types';
 import { MetricsDataClient } from './client';
+import { metricsDataAccessBridge } from './tasks/bridge';
 import { metricsDataSourceSavedObjectType } from './saved_objects/metrics_data_source';
 import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapter';
 import { initMetricExplorerRoute } from './routes/metrics_explorer';
@@ -41,9 +42,9 @@ export class MetricsDataPlugin
     core.savedObjects.registerType(metricsDataSourceSavedObjectType);
 
     this.metricsClient = new MetricsDataClient();
-    return {
-      client: this.metricsClient,
-    };
+    const setup = { client: this.metricsClient };
+    metricsDataAccessBridge.setSetup(setup);
+    return setup;
   }
 
   public start() {

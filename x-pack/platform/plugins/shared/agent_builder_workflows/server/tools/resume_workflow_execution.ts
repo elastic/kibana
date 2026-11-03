@@ -13,11 +13,11 @@ import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolHandlerContext } from '@kbn/agent-builder-server';
 import { i18n } from '@kbn/i18n';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+import { getExecutionState } from '@kbn/agent-builder-tools-base/workflows/get_execution_state';
 import {
-  getExecutionState,
   hasWorkflowExecutePrivilege,
   hasWorkflowExecutionReadPrivilege,
-} from '@kbn/agent-builder-tools-base/workflows';
+} from '@kbn/agent-builder-tools-base/workflows/check_privileges';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import { confirmToolCall } from './utils/confirm_tool_call';
 import { formatCodeBlock } from './utils/code_block';

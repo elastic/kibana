@@ -6,7 +6,7 @@
  */
 
 import { getBuckets } from './get_buckets';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 
 describe('get buckets', () => {
   let clientSpy: jest.Mock;

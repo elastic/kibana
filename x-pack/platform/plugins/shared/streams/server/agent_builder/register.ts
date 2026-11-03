@@ -8,14 +8,14 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { StreamsPluginStartDependencies, StreamsServer } from '../types';
-import type { GetScopedClients } from '../routes/types';
+import type { GetAgentBuilderScopedClients } from './types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
 
 import { registerAgentBuilderTools } from './tools/register_tools';
 import { registerAgentBuilderSkills } from './skills/register_skills';
 import { createStreamsToolAvailability } from './utils/get_streams_tool_availability';
 
-export const registerStreamsAgentBuilder = async ({
+export const registerStreamsAgentBuilder = ({
   agentBuilder,
   getScopedClients,
   server,
@@ -24,12 +24,12 @@ export const registerStreamsAgentBuilder = async ({
   core,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
-  getScopedClients: GetScopedClients;
-  server: StreamsServer;
+  getScopedClients: GetAgentBuilderScopedClients;
+  server: Pick<StreamsServer, 'isServerless'>;
   logger: Logger;
-  telemetry: EbtTelemetryClient;
+  telemetry?: EbtTelemetryClient;
   core: CoreSetup<StreamsPluginStartDependencies>;
-}): Promise<void> => {
+}): void => {
   const availability = createStreamsToolAvailability(core, logger);
 
   registerAgentBuilderTools({

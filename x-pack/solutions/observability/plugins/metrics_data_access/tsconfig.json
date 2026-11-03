@@ -8,6 +8,8 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-plugins-server",
     "@kbn/io-ts-utils",
     "@kbn/i18n",
     "@kbn/share-plugin",

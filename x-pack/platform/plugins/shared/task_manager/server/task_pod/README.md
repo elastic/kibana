@@ -153,5 +153,31 @@ creates no indices. `task_pod.test.ts` covers the wire format.
 ## Known gaps
 
 No authentication between Kibana and the pod. Tasks that run `runAs` a service account, and
-`http.selfClient` calls, are not available in pods. The host still uses hand-built Core stand-ins
-(`host/core/`), over the real saved objects repository and type registry.
+`http.selfClient` calls, are not available in pods.
+
+## What is real in a pod
+
+The host (`host/boot_tasks_plugins.ts`) runs Core's `PluginsSystem` and gives it Core's own
+services, wired for a process with no HTTP server, no routes and no migrations. A stand-in is kept
+only where the real class cannot run in a pod. Fresh-process costs below are `task_pod_entry_cost
+--baseline` (noisy by a few MB on a busy machine).
+
+| Core service | In a pod | Why |
+| --- | --- | --- |
+| `Env`, `ConfigService` | **Real** (`core/core_context.ts`) over the merged `POD_CONFIG` object. Plugin tasks entries validate their `config` export through it, like a server entry. `packageInfo.version` is `POD_KIBANA_VERSION` and `dist` is `true`. | |
+| Plugin initializer context | **Real** (`createPluginInitializerContext`) | |
+| Elasticsearch client | **Real** `ClusterClient` + `AgentManager` + `ElasticsearchConfig` (`core/es_cluster.ts`), over `ES_URL`, `ES_USERNAME`/`ES_PASSWORD` or `ES_API_KEY` and the optional `elasticsearch.*` section of `POD_CONFIG`. Scoped clients read the fake request's `authorization` header. | `ElasticsearchService` itself is not used: its setup needs the HTTP, execution context and security services, and it polls nodes, clock skew and cluster info for the life of the process and blocks start on a version check that needs cluster privileges an API key-only pod lacks. With `ES_API_KEY` the key is a custom header, so a scoped client of a request with no `authorization` runs as the pod. |
+| Analytics | **Real** `AnalyticsService` | |
+| Feature flags | **Real** `FeatureFlagsService`. `workflows.kibanaRequest.coreSelfClientEnabled` is forced on through `feature_flags.overrides`, which `POD_CONFIG` may extend. No provider is set, so other flags return their fallback. | Its counter route goes to a no-op router. |
+| UI settings | **Real** `UiSettingsService` (core defaults, plugin registrations, validation, `UiSettingsClient`s over the pod's saved objects) | Its routes go to a no-op router (`createNoopRouter`). |
+| Security | **Real** `SecurityService` with a pod delegate (what the security plugin provides in Kibana): the user a run's fake request was enriched with, `areAPIKeysEnabled`, `cloneAsInternalUser`; everything else is Core's default (audit off, no UIAM). Service accounts fail with `TaskPodUnsupportedError`. `acquireFakeRequestEnricher` is what the server uses to bind a run's user. | The security plugin does not run in a pod. |
+| User profile | **Real** `UserProfileService` with a pod delegate (`getCurrentProfileId`: the enriched user, else the profile of the request's API key) | Same. |
+| Base path | **Real** `BasePath` | |
+| Saved objects | Core's building blocks (`SavedObjectTypeRegistry`, `KibanaMigrator.prepareMigrations`, `SavedObjectsRepository`, `SavedObjectsClientProvider`, `SavedObjectsClient`, the encryption extension from ESO) in `core/pod_saved_objects.ts`; the active space comes from a pod spaces extension. | `SavedObjectsService` needs the HTTP, deprecations, core usage data and ES-status services and costs about 44 MB more in a fresh process (the pod loads only the pieces it uses). It is started like Core's with `migrations.skip`: documents are migrated on read, the index is never touched. Like Kibana with the security plugin, request-scoped clients use the internal repository. Hidden types of plugins outside the family are dropped from `includedHiddenTypes`. |
+| Data streams | Stand-in (`core/data_streams.ts`) over `DataStreamClient.fromDefinition` | `DataStreamsService.start` runs `DataStreamClient.initialize` for every stream, which installs and updates index templates and mappings and, in `initializeClient`, creates the stream. A pod never installs anything; Elasticsearch creates a missing stream on the first write through the template Kibana installed. |
+| HTTP (`getServerInfo`) | Stand-in (`core/server_info.ts`): the `server.host`/`server.port` settings | `HttpService` starts a hapi server and routes and costs about 30 MB in a fresh process. A pod listens only for Task Manager on `PORT`. |
+| Logging | Stand-in (`PodLogger`): JSON lines on stderr, `LOG_LEVEL` | `LoggingSystem` costs about 48 MB in a fresh process (appenders, layouts, rolling files) against a 59 MB budget for the whole host. |
+| Dependency injection | **Real** `CoreInjectionService` | |
+
+`host/core/*.test.ts` cover the wiring; `task_pod_parity` and the family parity tests cover it
+against a real Elasticsearch.

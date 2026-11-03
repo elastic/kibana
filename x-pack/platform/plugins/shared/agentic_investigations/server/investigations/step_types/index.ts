@@ -17,7 +17,7 @@ export const registerInvestigationStepDefinitions = ({
   getInvestigationStatusService,
   getConversationClient,
 }: {
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+  workflowsExtensions: Pick<WorkflowsExtensionsServerPluginSetup, 'registerStepDefinition'>;
   getInvestigationStatusService: () => InvestigationStatusService;
   getConversationClient: (request: KibanaRequest) => Promise<ConversationPublicClient>;
 }) => {

@@ -8,8 +8,8 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { uniq } from 'lodash';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import type {
-  ObservabilityAgentBuilderCoreSetup,
-  ObservabilityAgentBuilderPluginSetupDependencies,
+  ObservabilityAgentBuilderStartServices,
+  ObservabilityAgentBuilderToolPlugins,
 } from '../../types';
 import { parseDatemath } from '../../utils/time';
 import { buildApmResources } from '../../utils/build_apm_resources';
@@ -24,8 +24,8 @@ import { expandMessagingConnections } from './expand_messaging_connections';
 
 interface TopologyResources {
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
-  core: ObservabilityAgentBuilderCoreSetup;
-  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  core: ObservabilityAgentBuilderStartServices;
+  plugins: ObservabilityAgentBuilderToolPlugins;
   request: KibanaRequest;
   logger: Logger;
 }
@@ -346,8 +346,8 @@ export async function getServiceTopology({
   start,
   end,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
-  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  core: ObservabilityAgentBuilderStartServices;
+  plugins: ObservabilityAgentBuilderToolPlugins;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   request: KibanaRequest;
   logger: Logger;

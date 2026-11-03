@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getSampleDocumentsEsql } from '@kbn/ai-tools';
+import { getSampleDocumentsEsql } from '@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents';
 import { esql } from '@elastic/esql';
 import { ERROR_LOGS_FEATURE_TYPE } from '@kbn/significant-events-schema';
 import { compact } from 'lodash';

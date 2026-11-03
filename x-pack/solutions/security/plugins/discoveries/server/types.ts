@@ -21,7 +21,12 @@ import type { AttackDiscoveryExecutorOptions } from '@kbn/attack-discovery-sched
 import type { CustomRequestHandlerContext } from '@kbn/core/server';
 import type { IEventLogService } from '@kbn/event-log-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import type {
+  IRuleDataClient,
+  IRuleDataReader,
+  IRuleDataWriter,
+  RuleRegistryPluginSetupContract,
+} from '@kbn/rule-registry-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -30,6 +35,16 @@ import type {
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+
+/**
+ * What the Attack Discovery steps and attachment use of the ad-hoc alerts data client: Kibana passes
+ * rule registry's, a task pod its own over the same index.
+ */
+export interface AdhocAttackDiscoveryDataClient {
+  indexNameWithNamespace: IRuleDataClient['indexNameWithNamespace'];
+  getReader: (options?: { namespace?: string }) => Pick<IRuleDataReader, 'search'>;
+  getWriter: (options?: { namespace?: string }) => Promise<IRuleDataWriter>;
+}
 
 export type AttackDiscoveryWorkflowExecutorFactory = (
   options: AttackDiscoveryExecutorOptions

@@ -17,6 +17,7 @@
       "dataViews",
     ],
     "optionalPlugins": [],
-    "requiredBundles": []
+    "requiredBundles": [],
+    "tasks": {}
   }
 }

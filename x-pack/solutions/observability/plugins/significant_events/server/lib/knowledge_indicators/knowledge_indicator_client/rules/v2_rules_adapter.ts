@@ -6,7 +6,8 @@
  */
 
 import { isBoom } from '@hapi/boom';
-import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server/lib/errors/error_codes';
 import pLimit from 'p-limit';
 import { uniq } from 'lodash';
 import { deleteRules } from '../../../significant_events/rules/bulk_rule_operations';

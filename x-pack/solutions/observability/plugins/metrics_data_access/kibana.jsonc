@@ -12,6 +12,7 @@
     "configPath": ["xpack", "metrics_data_access"],
     "requiredPlugins": ["data", "observabilityShared"],
     "requiredBundles": ["kibanaReact"],
+    "tasks": {},
     "extraPublicDirs": ["common"]
   }
 }

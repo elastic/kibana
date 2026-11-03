@@ -5,37 +5,41 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { hasContextEngineReadPrivilege } from './agent_builder/has_context_engine_read_privilege';
 import { registerAgentBuilderTools } from './agent_builder/tools';
 import { registerAttachmentTypes } from './attachment_types';
 import { registerContextEngineAgent } from './agent/context_engine_agent';
-import type {
-  ContextEngineAgentBuilderPluginStart,
-  ContextEngineAgentBuilderStartDependencies,
-} from './types';
+import type { ToolsContextEngineStart, ToolsCoreStart, ToolsSecurityStart } from './start_types';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 
+/**
+ * Registers the Context Engine attachment, agent, AI index resolver and tools. The one runtime behind
+ * Kibana's `server` entry and the task pod's `server/tasks` entry, which pass the same dependencies
+ * typed against what both provide.
+ */
 export const registerContextEngineAgentBuilderIntegration = ({
-  coreSetup,
+  getStartServices,
   agentBuilder,
-  workflowsManagement,
+  getWorkflowsManagement,
 }: {
-  coreSetup: CoreSetup<
-    ContextEngineAgentBuilderStartDependencies,
-    ContextEngineAgentBuilderPluginStart
+  getStartServices: () => Promise<
+    [
+      ToolsCoreStart,
+      { contextEngine: ToolsContextEngineStart; security: ToolsSecurityStart },
+      unknown
+    ]
   >;
   agentBuilder: AgentBuilderPluginSetup;
-  workflowsManagement: WorkflowsManagementApi;
+  getWorkflowsManagement: () => WorkflowsManagementApi;
 }): void => {
   registerAttachmentTypes(agentBuilder);
   registerContextEngineAgent(agentBuilder);
 
   agentBuilder.agents.registerAiIndexResolver(async ({ ids, request }) => {
-    const [coreStart, startDeps] = await coreSetup.getStartServices();
+    const [coreStart, startDeps] = await getStartServices();
     const { contextEngine, security } = startDeps;
 
     if (!(await hasContextEngineReadPrivilege({ security, request }))) {
@@ -60,16 +64,16 @@ export const registerContextEngineAgentBuilderIntegration = ({
   registerAgentBuilderTools({
     agentBuilder,
     getCoreStart: async () => {
-      const [coreStart] = await coreSetup.getStartServices();
+      const [coreStart] = await getStartServices();
       return coreStart;
     },
     getSecurityStart: async () => {
-      const [, startDeps] = await coreSetup.getStartServices();
+      const [, startDeps] = await getStartServices();
       return startDeps.security;
     },
-    getWorkflowsManagement: () => workflowsManagement,
+    getWorkflowsManagement,
     getContextEngineStart: async () => {
-      const [, startDeps] = await coreSetup.getStartServices();
+      const [, startDeps] = await getStartServices();
       return startDeps.contextEngine;
     },
   });

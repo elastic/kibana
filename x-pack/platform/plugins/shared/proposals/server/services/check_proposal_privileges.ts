@@ -10,6 +10,11 @@ import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { PROPOSALS_API_PRIVILEGE_MANAGE, PROPOSALS_API_PRIVILEGE_READ } from '../constants';
 import { ProposalForbiddenError } from './errors';
 
+/** The part of Security a privilege check needs, which a task pod's Security has too. */
+export interface ProposalsSecurity {
+  authz: Pick<SecurityPluginStart['authz'], 'actions' | 'checkPrivilegesDynamicallyWithRequest'>;
+}
+
 /**
  * The same privileges the routes require, checked against a principal that did
  * not arrive through a route — a workflow execution. The feature declares them
@@ -17,7 +22,7 @@ import { ProposalForbiddenError } from './errors';
  * before `checkPrivileges` will recognise it.
  */
 export interface ProposalPrivilegesDeps {
-  getSecurity: () => Promise<SecurityPluginStart | undefined>;
+  getSecurity: () => Promise<ProposalsSecurity | undefined>;
   logger: Logger;
 }
 

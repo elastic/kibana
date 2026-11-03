@@ -9,6 +9,7 @@
     "id": "llmTasks",
     "server": true,
     "browser": false,
+    "tasks": { "requiredPlugins": ["inference", "productDocBase"], "optionalPlugins": [] },
     "configPath": ["xpack", "llmTasks"],
     "requiredPlugins": ["inference", "productDocBase"],
     "requiredBundles": [],

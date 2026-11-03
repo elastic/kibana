@@ -7,7 +7,7 @@
 
 import type { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/types';
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import type { MobileCrashGroupMainStatisticsResponse } from '@kbn/apm-api-shared';
 import { asMutableArray } from '../../../../../common/utils/as_mutable_array';

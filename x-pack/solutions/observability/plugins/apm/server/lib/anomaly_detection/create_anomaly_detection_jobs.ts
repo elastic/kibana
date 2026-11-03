@@ -10,7 +10,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { snakeCase } from 'lodash';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import type { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
 import { ML_ERRORS } from '../../../common/anomaly_detection';

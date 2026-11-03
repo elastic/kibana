@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { searchKnowledgeIndicators } from '@kbn/nightshift-ai';
+import { searchKnowledgeIndicators } from '@kbn/nightshift-ai/src/significant_events/knowledge_indicators/search';
 import type {
   KnowledgeIndicator,
   KnowledgeIndicatorFeature,

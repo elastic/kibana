@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { createErrorResult } from '@kbn/agent-builder-server';
+import { createErrorResult } from '@kbn/agent-builder-server/tools/utils';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import { ToolType } from '@kbn/agent-builder-common';

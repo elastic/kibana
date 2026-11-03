@@ -70,3 +70,21 @@ export type ObservabilityAgentBuilderCoreSetup = CoreSetup<
   ObservabilityAgentBuilderPluginStartDependencies,
   ObservabilityAgentBuilderPluginStart
 >;
+
+/**
+ * What tools, attachments and their helpers need of Core's setup: a way to reach the start services.
+ * A task pod has no setup contract to give, only that.
+ */
+export type ObservabilityAgentBuilderStartServices = Pick<
+  ObservabilityAgentBuilderCoreSetup,
+  'getStartServices'
+>;
+
+/**
+ * What tools, attachments and skills use of the setup contracts of other plugins. A task pod fills
+ * the same shape from the tasks contracts of those plugins.
+ */
+export type ObservabilityAgentBuilderToolPlugins = Pick<
+  ObservabilityAgentBuilderPluginSetupDependencies,
+  'agentBuilder' | 'apmDataAccess' | 'metricsDataAccess' | 'ml'
+>;

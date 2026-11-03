@@ -31,5 +31,9 @@
     ],
     "requiredBundles": [],
     "extraPublicDirs": ["common"],
+    "tasks": {
+      "requiredPlugins": [],
+      "optionalPlugins": ["agentBuilder", "inference", "workflowsExtensions"],
+    },
   },
 }

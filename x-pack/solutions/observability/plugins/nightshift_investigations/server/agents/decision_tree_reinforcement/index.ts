@@ -20,8 +20,7 @@ import {
   DECISION_TREE_SUBMIT_TOOL_ID,
 } from '../../tools/decision_tree';
 
-export const NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID =
-  'significant-events.decision-tree-reinforcement';
+export { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from './constants';
 export const NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_TYPE_ID =
   'platform.sig_events.decision-tree-reinforcement-type';
 

@@ -6,7 +6,7 @@
  */
 
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { getToolResultId } from '@kbn/agent-builder-server';
+import { getToolResultId } from '@kbn/agent-builder-server/tools/utils';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server';
 
 export const otherResult = (data: Record<string, unknown>): ToolHandlerStandardReturn => ({

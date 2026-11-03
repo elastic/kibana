@@ -58,17 +58,20 @@ export class WorkflowChangeHistoryService implements IWorkflowChangeHistoryServi
     elasticsearchClient,
     authService,
     userProfileService,
+    useExistingDataStream,
   }: WorkflowChangeHistoryServiceInitializeParams): Promise<void> {
     this.logger.debug('Initializing workflow change history');
     this.authService = authService;
 
-    return this.client.initialize(elasticsearchClient, { userProfileService }).catch((cause) => {
-      const error = new Error(
-        `Unable to initialize workflow change history for [${WORKFLOW_CHANGE_HISTORY_MODULE}, ${WORKFLOW_CHANGE_HISTORY_DATASET}]`,
-        { cause }
-      );
-      this.logger.error(error);
-    });
+    return this.client
+      .initialize(elasticsearchClient, { userProfileService, useExistingDataStream })
+      .catch((cause) => {
+        const error = new Error(
+          `Unable to initialize workflow change history for [${WORKFLOW_CHANGE_HISTORY_MODULE}, ${WORKFLOW_CHANGE_HISTORY_DATASET}]`,
+          { cause }
+        );
+        this.logger.error(error);
+      });
   }
 
   asScoped(request: KibanaRequest): IScopedWorkflowChangeHistoryService {

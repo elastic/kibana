@@ -25,6 +25,7 @@ import { SavedObjectProviderRegistry } from '../saved_object_provider_registry';
 export interface EventLogTasksSetup {
   registerProviderActions: EventLogService['registerProviderActions'];
   getLogger: EventLogService['getLogger'];
+  getIndexPattern: EventLogService['getIndexPattern'];
 }
 
 class EventLogTasksPlugin implements TasksPlugin<EventLogTasksSetup> {

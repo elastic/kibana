@@ -18,6 +18,7 @@
     ],
     "requiredBundles": ["kibanaReact"],
     "optionalPlugins": ["security"],
+    "tasks": { "requiredPlugins": ["agentBuilder", "workflowsManagement"], "optionalPlugins": ["security"] },
     "extraPublicDirs": []
   }
 }

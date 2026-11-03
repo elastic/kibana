@@ -12,7 +12,7 @@ import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigatio
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { resolveNightshiftModel } from '@kbn/nightshift-ai';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
-import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared/src/feature_flags';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';

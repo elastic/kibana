@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { validateQuery } from '@kbn/esql-language';
 import type { AiIndexSource } from '../../common/http_api/ai_indices';
 import { previewQuery } from '../ki_verification/verifiers/esql_attribute';
 import { formatValidationError } from '../ki_verification/verifiers/esql_valid_syntax';
@@ -16,6 +15,8 @@ const validateSingleEsqlSource = async (query: string): Promise<string | undefin
     return 'ES|QL source value cannot be empty';
   }
 
+  // Loaded on first use: the ES|QL language package is large and most runtimes never validate.
+  const { validateQuery } = await import('@kbn/esql-language');
   const { errors } = await validateQuery(query);
   if (errors.length > 0) {
     return `ES|QL source '${previewQuery(query)}' is invalid: ${errors

@@ -9,12 +9,6 @@ import { memoize, once } from 'lodash';
 import type { FieldValue, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { getAnySourceCommandFromESQLQuery, hasStartEndParams } from '@kbn/esql-utils';
-import {
-  executeEsql,
-  buildTimeRangeParams,
-  interpolateEsqlQuery,
-} from '@kbn/agent-builder-genai-utils/tools/utils/esql';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -33,7 +27,12 @@ import {
  */
 const MAX_FILTER_LENGTH = 100_000;
 
-const getTimeRangeNotAppliedWarning = (query: string): string => {
+// Loaded on first use: the ES|QL packages are large and most runs never execute a query.
+const loadEsqlUtils = () => import('@kbn/esql-utils');
+const loadEsqlExecution = () => import('@kbn/agent-builder-genai-utils/tools/utils/esql');
+
+const getTimeRangeNotAppliedWarning = async (query: string): Promise<string> => {
+  const { getAnySourceCommandFromESQLQuery } = await loadEsqlUtils();
   const example =
     getAnySourceCommandFromESQLQuery(query) === 'PROMQL'
       ? 'PROMQL index=<target> start=?_tstart end=?_tend <name>=(<expression>). Do not add a WHERE clause on @timestamp after PROMQL: its output has no @timestamp column.'
@@ -160,6 +159,8 @@ ${isServerless ? '' : dataTiersSection}## API documentation
         limit = 100,
         filter: esqlFilter,
       } = toolParams;
+      const { hasStartEndParams } = await loadEsqlUtils();
+      const { executeEsql, buildTimeRangeParams, interpolateEsqlQuery } = await loadEsqlExecution();
       const usesTimeRangeParams = hasStartEndParams(esqlQuery);
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
       const timeRangeParams = usesTimeRangeParams ? buildTimeRangeParams(timeRange) ?? [] : [];
@@ -213,7 +214,7 @@ ${isServerless ? '' : dataTiersSection}## API documentation
                 {
                   type: ToolResultType.other as const,
                   data: {
-                    warning: getTimeRangeNotAppliedWarning(esqlQuery),
+                    warning: await getTimeRangeNotAppliedWarning(esqlQuery),
                   },
                 },
               ]

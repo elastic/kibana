@@ -1,0 +1,87 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { z, lazySchema } from '@kbn/zod/v4';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema/src/significant_events/constants';
+import { investigationNotificationDestinationSchema } from '../../../common/schemas';
+
+// The schema and helpers of the routing attachment, apart from its storage definition so workflow
+// steps (which a task pod registers) load neither the storage adapter nor the attachment helpers.
+
+export const NOTIFICATION_ROUTING_ATTACHMENT_TYPE = 'nightshift.notification_routing';
+export const notificationPhaseSchema = lazySchema(() => z.enum(['started', 'completed', 'failed']));
+const identifier = lazySchema(() => z.string().min(1).max(500));
+const messageId = lazySchema(() => z.string().min(1).max(100));
+const timestamp = lazySchema(() => z.string().min(1).max(64));
+
+export const notificationAttemptSchema = lazySchema(() =>
+  z.strictObject({
+    execution_id: identifier,
+    destination_id: identifier,
+    phase: notificationPhaseSchema,
+    attempt_id: z.string().min(1).max(100),
+    status: z.enum(['sent', 'failed', 'unconfirmed']),
+    attempted_at: timestamp,
+    creates_root: z.boolean(),
+    message_ts: messageId.optional(),
+    external_conversation_id: identifier.optional(),
+    sent_at: timestamp.optional(),
+    error: z.string().max(MAX_TEXT_LENGTH).optional(),
+  })
+);
+
+export const notificationRoutingSchema = lazySchema(() =>
+  z.strictObject({
+    id: identifier,
+    spaceId: identifier,
+    conversationId: identifier,
+    investigationId: identifier,
+    destinations: z.array(
+      investigationNotificationDestinationSchema
+        .omit({ automation_id: true, automation_name: true })
+        .extend({
+          id: identifier,
+          automations: z.array(
+            z.strictObject({
+              id: z.string().max(500).optional(),
+              name: z.string().max(500).optional(),
+            })
+          ),
+          thread: z.strictObject({ channel: identifier, thread_ts: messageId }).optional(),
+        })
+    ),
+    executions: z.array(
+      z.strictObject({
+        id: identifier,
+        workflow_id: identifier,
+        destination_ids: z.array(identifier),
+        terminal_phase: z.enum(['completed', 'failed']).optional(),
+      })
+    ),
+    attempts: z.array(notificationAttemptSchema),
+  })
+);
+
+export type NotificationPhase = z.infer<typeof notificationPhaseSchema>;
+export type NotificationAttempt = z.infer<typeof notificationAttemptSchema>;
+export type NotificationOutcome = Pick<
+  NotificationAttempt,
+  'status' | 'message_ts' | 'external_conversation_id' | 'sent_at' | 'error'
+> & {
+  channel?: string;
+};
+export type NotificationRouting = z.infer<typeof notificationRoutingSchema>;
+export type StoredNotificationRouting = Omit<NotificationRouting, 'id'>;
+export type NotificationDestination = NotificationRouting['destinations'][number];
+
+/**
+ * Whether the destination replies under a message the caller named, such as the Slack message that
+ * triggered an automation, rather than under a thread it starts itself. That thread belongs to the
+ * run started for the message, and the run keeps a single message in it.
+ */
+export const repliesUnderCallerMessage = ({ params }: Pick<NotificationDestination, 'params'>) =>
+  typeof params.thread_ts === 'string' && params.thread_ts.length > 0;

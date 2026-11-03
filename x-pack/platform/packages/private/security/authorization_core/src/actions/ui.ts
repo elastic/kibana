@@ -8,7 +8,7 @@
 import { isString } from 'lodash';
 
 import type { Capabilities as UICapabilities } from '@kbn/core/server';
-import { uiCapabilitiesRegex } from '@kbn/features-plugin/server';
+import { uiCapabilitiesRegex } from '@kbn/features-plugin/server/feature_schema';
 import type { UIActions as UIActionsType } from '@kbn/security-plugin-types-server';
 
 export class UIActions implements UIActionsType {

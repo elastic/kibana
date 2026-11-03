@@ -19,6 +19,10 @@
     ],
     "requiredBundles": [],
     "optionalPlugins": ["cases", "cloud", "esql", "llmTasks"],
+    "tasks": {
+      "requiredPlugins": ["agentBuilder", "actions"],
+      "optionalPlugins": ["llmTasks", "cloud"]
+    },
     "extraPublicDirs": []
   }
 }

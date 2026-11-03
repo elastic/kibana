@@ -17,13 +17,13 @@ import {
   type SignificantEvent,
 } from '@kbn/significant-events-schema';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '../../../common';
-import type { GetScopedClients } from '../../routes/types';
+import type { GetAgentBuilderScopedClients } from '../../scoped_clients';
 import { canReadSignificantEvents } from '../../routes/utils/assert_can_manage_significant_events';
 import type { SignificantEventsServer } from '../../types';
 
 interface CreateSignificantEventAttachmentTypeOptions {
   logger: Logger;
-  getScopedClients: GetScopedClients;
+  getScopedClients: GetAgentBuilderScopedClients;
   server: Pick<SignificantEventsServer, 'security'>;
 }
 

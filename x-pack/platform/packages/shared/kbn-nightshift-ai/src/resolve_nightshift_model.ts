@@ -6,12 +6,13 @@
  */
 
 import { isInferenceRequestError } from '@kbn/inference-common';
+// Leaf imports: the package root pulls in streamlang, which a task pod must not load.
 import {
   NIGHTSHIFT_DEFAULT_MODELS,
-  NightshiftModelBlockedError,
-  NightshiftModelNotFoundError,
   type NightshiftModelStep,
-} from '@kbn/significant-events-schema';
+} from '@kbn/significant-events-schema/src/nightshift_models';
+import { NightshiftModelBlockedError } from '@kbn/significant-events-schema/src/nightshift_model_blocked_error';
+import { NightshiftModelNotFoundError } from '@kbn/significant-events-schema/src/nightshift_model_not_found_error';
 
 export interface NightshiftModelRestriction {
   defaultOnly: boolean;

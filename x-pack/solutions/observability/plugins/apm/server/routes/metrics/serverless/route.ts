@@ -8,7 +8,7 @@
 import {
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
-} from '@kbn/observability-plugin/common';
+} from '@kbn/observability-plugin/common/ui_settings_keys';
 import {
   routeDefinitions,
   type ServerlessMetricsChartsResponse,

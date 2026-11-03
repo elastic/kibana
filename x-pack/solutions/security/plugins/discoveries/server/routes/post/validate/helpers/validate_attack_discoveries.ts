@@ -6,7 +6,6 @@
  */
 
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { PostValidateRequestBody, PostValidateResponse } from '@kbn/discoveries-schemas';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import {
@@ -17,6 +16,7 @@ import { isEmpty } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes } from '@elastic/elasticsearch';
+import type { AdhocAttackDiscoveryDataClient } from '../../../../types';
 import {
   getCreatedDocumentIds,
   getVersionConflictDocumentIds,
@@ -47,7 +47,7 @@ export const validateAttackDiscoveries = async ({
   spaceId,
   validateRequestBody,
 }: {
-  adhocAttackDiscoveryDataClient: IRuleDataClient;
+  adhocAttackDiscoveryDataClient: AdhocAttackDiscoveryDataClient;
   authenticatedUser: AuthenticatedUser;
   esClient: ElasticsearchClient;
   /**

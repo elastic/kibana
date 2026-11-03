@@ -34,6 +34,7 @@
       "cps",
       "workflowsExtensions"
     ],
+    "tasks": { "requiredPlugins": [], "optionalPlugins": ["workflowsExtensions"] },
     "extraPublicDirs": ["common", "common/parse_duration"]
   }
 }

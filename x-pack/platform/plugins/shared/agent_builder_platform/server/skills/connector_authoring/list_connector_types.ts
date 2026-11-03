@@ -13,7 +13,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { AgentBuilderConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { ActionType } from '@kbn/actions-plugin/common';
 import { getConnectorSpec } from '@kbn/connector-specs';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { ActionsTasksStart } from '@kbn/actions-plugin/server/tasks';
 import {
   getConnectorTypeDisplayName,
   isConnectorTypeAvailable,
@@ -82,7 +82,7 @@ export type ListConnectorTypesInput = z.infer<typeof listConnectorTypesSchema>;
 export const createListConnectorTypesTool = ({
   getActionsStart,
 }: {
-  getActionsStart: () => Promise<ActionsPluginStart>;
+  getActionsStart: () => Promise<ActionsTasksStart>;
 }): BuiltinSkillBoundedTool<typeof listConnectorTypesSchema> => ({
   id: 'list_connector_types',
   type: ToolType.builtin,

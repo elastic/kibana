@@ -7,11 +7,11 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
+jest.mock('@kbn/agent-builder-genai-utils/tools/utils/esql/execute_esql', () => ({
   executeEsql: jest.fn(),
 }));
 
-import { executeEsql } from '@kbn/agent-builder-genai-utils';
+import { executeEsql } from '@kbn/agent-builder-genai-utils/tools/utils/esql/execute_esql';
 import { evaluateRequirement, runWithConcurrency } from './pci_compliance_evaluator';
 
 const mockExecuteEsql = executeEsql as jest.MockedFunction<typeof executeEsql>;

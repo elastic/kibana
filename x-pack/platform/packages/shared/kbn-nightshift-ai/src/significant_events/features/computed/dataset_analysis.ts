@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { describeDataset, formatDocumentAnalysis, getMappingConflicts } from '@kbn/ai-tools';
+import { describeDataset } from '@kbn/ai-tools/src/tools/describe_dataset';
+import { formatDocumentAnalysis } from '@kbn/ai-tools/src/tools/describe_dataset/format_document_analysis';
+import { getMappingConflicts } from '@kbn/ai-tools/src/utils/get_mapping_conflicts';
 import { DATASET_ANALYSIS_FEATURE_TYPE } from '@kbn/significant-events-schema';
 import type { ComputedFeatureGenerator } from './types';
 

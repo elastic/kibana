@@ -6,7 +6,7 @@
  */
 import { keyBy } from 'lodash';
 import { rangeQuery, kqlQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import type { MobileErrorGroupPeriodsResponse } from '@kbn/apm-api-shared';
 import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
 import type { Coordinate } from '../../../../typings/timeseries';

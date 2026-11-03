@@ -6,7 +6,7 @@
  */
 
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { PROCESSOR_EVENT, SERVICE_NAME, TRACE_ID } from '../../../common/es_fields/apm';
 

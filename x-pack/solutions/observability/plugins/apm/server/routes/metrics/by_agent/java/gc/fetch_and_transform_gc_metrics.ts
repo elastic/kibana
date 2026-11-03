@@ -7,7 +7,7 @@
 
 import { sum, round } from 'lodash';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import { isFiniteNumber } from '../../../../../../common/utils/is_finite_number';
 import { getMetricsDateHistogramParams } from '../../../../../lib/helpers/metrics';
 import type { ChartBase } from '../../../types';

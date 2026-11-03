@@ -7,7 +7,7 @@
 
 import { uniq } from 'lodash';
 import { termQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,

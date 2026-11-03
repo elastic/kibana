@@ -6,19 +6,10 @@
  */
 
 import type { ContainerModuleLoadOptions } from 'inversify';
-import { OnSetup, PluginSetup, PluginStart, Start } from '@kbn/core-di';
-import type { ServiceToken } from '@kbn/core-di';
-import { CoreSetup, CoreStart } from '@kbn/core-di-server';
-import type { KibanaRequest } from '@kbn/core/server';
-import { resolveRequestScoped } from '../agent_builder/resolve_request_scoped';
-import { PrivilegeChecker } from '../lib/services/privilege_checker/privilege_checker';
-import type {
-  AlertingServerSetupDependencies,
-  AlertingServerStartDependencies,
-  AlertingServerStart,
-} from '../types';
+import { OnSetup, PluginSetup, PluginStart } from '@kbn/core-di';
+import { CoreSetup } from '@kbn/core-di-server';
+import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
-import { registerCreateAlertEventStep } from '../lib/workflow_extensions/register_create_alert_event_step';
 import { registerAlertingV2ManagedWorkflowOwner } from '../lib/workflow_extensions/managed_workflows';
 import { registerAlertingV2UsageCollector } from '../lib/usage/usage_collector';
 import { registerAlertingAdvancedSettings } from '../settings/advanced_settings';
@@ -49,22 +40,6 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       PluginSetup<AlertingServerSetupDependencies['workflowsExtensions']>('workflowsExtensions')
     );
     registerAlertingV2ManagedWorkflowOwner(workflowsExtensionsSetup);
-
-    const getAlertEventsClient = (request: KibanaRequest) =>
-      container
-        .get(Start as ServiceToken<AlertingServerStart>)
-        .getAlertEventsClientWithRequest(request);
-    const checkAlertWritePrivilege = (request: KibanaRequest) =>
-      resolveRequestScoped(
-        container.get(CoreStart('injection')),
-        request,
-        PrivilegeChecker
-      ).canWrite('alerts');
-    registerCreateAlertEventStep(
-      workflowsExtensionsSetup,
-      getAlertEventsClient,
-      checkAlertWritePrivilege
-    );
 
     // Usage collection is optional. The telemetry task that feeds this collector
     // is registered unconditionally via the `TaskDefinition` registry in

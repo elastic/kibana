@@ -157,6 +157,15 @@ export interface SearchWorkflowExecutionsParams {
   searchAfter?: estypes.FieldValue[];
 }
 
+export interface WorkflowsServiceOptions {
+  /**
+   * Never create or change anything in Elasticsearch (workflow index, template, mappings, change
+   * history data stream): use what Kibana installed, and fail clearly when it is missing. Task pods
+   * set this; they never install.
+   */
+  readOnly?: boolean;
+}
+
 export class WorkflowsService {
   // The following attributes require `ensureInitialized` to be called before use
   private coreStart!: CoreStart;
@@ -187,7 +196,8 @@ export class WorkflowsService {
     public readonly core: CoreSetup<WorkflowsServerPluginStartDeps>,
     public readonly plugins: WorkflowsServerPluginSetupDeps,
     private readonly logger: Logger,
-    public readonly kibanaVersion: string
+    public readonly kibanaVersion: string,
+    private readonly options: WorkflowsServiceOptions = {}
   ) {
     this.changeHistoryService = new WorkflowChangeHistoryService(logger, kibanaVersion);
     this.initPromise = this.initialize(core);
@@ -233,6 +243,7 @@ export class WorkflowsService {
         elasticsearchClient: coreStart.elasticsearch.client.asInternalUser,
         authService: coreStart.security.authc,
         userProfileService: coreStart.userProfile,
+        useExistingDataStream: this.options.readOnly,
       });
       return;
     }
@@ -250,6 +261,7 @@ export class WorkflowsService {
     this.workflowStorage = createStorage({
       logger: this.logger,
       esClient: this.esClient,
+      readOnly: this.options.readOnly,
     });
 
     this.workflowsExecutionEngine = pluginsStart.workflowsExecutionEngine;

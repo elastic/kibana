@@ -9,6 +9,7 @@
     "id": "productDocBase",
     "server": true,
     "browser": true,
+    "tasks": { "requiredPlugins": ["taskManager"], "optionalPlugins": [] },
     "configPath": ["xpack", "productDocBase"],
     "requiredPlugins": ["licensing", "taskManager"],
     "requiredBundles": [],

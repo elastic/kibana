@@ -65,6 +65,9 @@
     ],
     "extraPublicDirs": [
       "common"
-    ]
+    ],
+    "tasks": {
+      "requiredPlugins": ["agentBuilder"]
+    }
   }
 }

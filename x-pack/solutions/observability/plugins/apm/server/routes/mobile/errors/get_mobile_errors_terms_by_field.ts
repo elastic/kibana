@@ -6,7 +6,7 @@
  */
 
 import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import type { MobileErrorTermsByFieldResponse } from '@kbn/apm-api-shared';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';

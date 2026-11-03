@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { getSigEventsLogPatternsEsql } from '@kbn/ai-tools';
+import { getSigEventsLogPatternsEsql } from '@kbn/ai-tools/src/tools/log_patterns/get_log_patterns';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import type { AnalysisTarget } from '../../../shared/analysis_target';
 import { logPatternsGenerator, selectLogPatternsForLlm } from './log_patterns';
 
-jest.mock('@kbn/ai-tools', () => ({
+jest.mock('@kbn/ai-tools/src/tools/log_patterns/get_log_patterns', () => ({
   getSigEventsLogPatternsEsql: jest.fn(),
 }));
 

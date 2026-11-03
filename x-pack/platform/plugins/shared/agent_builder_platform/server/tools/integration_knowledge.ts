@@ -10,8 +10,7 @@ import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common';
-import type { CoreSetup } from '@kbn/core/server';
-import type { AgentBuilderPlatformPluginStart, PluginStartDependencies } from '../types';
+import type { PlatformCoreSetup } from '../start_types';
 
 const INTEGRATION_KNOWLEDGE_INDEX = '.integration_knowledge';
 const INTEGRATIONS_BASE_PATH = '/app/integrations/detail';
@@ -71,7 +70,7 @@ function extractRelevantContent(
 }
 
 export const integrationKnowledgeTool = (
-  coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>
+  coreSetup: PlatformCoreSetup
 ): BuiltinToolDefinition<typeof integrationKnowledgeSchema> => {
   const baseTool: BuiltinToolDefinition<typeof integrationKnowledgeSchema> = {
     id: platformCoreTools.integrationKnowledge,

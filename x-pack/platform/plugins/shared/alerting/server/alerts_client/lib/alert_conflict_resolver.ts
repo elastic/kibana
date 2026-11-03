@@ -24,7 +24,7 @@ import {
 } from '@kbn/rule-data-utils';
 
 import { zip, get } from 'lodash';
-import { sanitizeBulkErrorResponse } from '../..';
+import { sanitizeBulkErrorResponse } from './sanitize_bulk_response';
 
 // these fields are the one's we'll refresh from the fresh mget'd docs
 const REFRESH_FIELDS_ALWAYS = [ALERT_WORKFLOW_STATUS, ALERT_WORKFLOW_TAGS, ALERT_CASE_IDS];

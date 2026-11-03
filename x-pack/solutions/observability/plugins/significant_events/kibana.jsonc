@@ -34,6 +34,18 @@
       "workflowsManagement",
     ],
     "requiredBundles": [],
+    "tasks": {
+      "requiredPlugins": [
+        "agentBuilder",
+        "alertingVTwo",
+        "inference",
+        "licensing",
+        "nightshiftSources",
+        "security",
+        "workflowsExtensions",
+      ],
+      "optionalPlugins": ["workflowsManagement"],
+    },
     "extraPublicDirs": ["common"],
   },
 }

@@ -22,7 +22,7 @@ import type {
 } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
 import dedent from 'dedent';
-import type { GetScopedClients } from '../../../routes/types';
+import type { GetAgentBuilderScopedClients } from '../../types';
 import type { StreamsClient } from '../../../lib/streams/client';
 import type { AttachmentClient } from '../../../lib/streams/attachments/attachment_client';
 import { patchIngestAndUpsert } from '../../../lib/streams/helpers/ingest_upsert';
@@ -135,7 +135,7 @@ export const createUpdateStreamTool = ({
   getScopedClients,
   writeQueue,
 }: {
-  getScopedClients: GetScopedClients;
+  getScopedClients: GetAgentBuilderScopedClients;
   writeQueue: StreamsWriteQueue;
 }): BuiltinToolDefinition<typeof updateStreamSchema> => ({
   id: UPDATE_STREAM,

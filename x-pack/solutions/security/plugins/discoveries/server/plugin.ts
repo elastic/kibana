@@ -19,7 +19,7 @@ import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
-import type { IRuleDataClient, IndexOptions } from '@kbn/rule-registry-plugin/server';
+import type { IndexOptions } from '@kbn/rule-registry-plugin/server';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID } from '@kbn/elastic-assistant-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -36,15 +36,13 @@ import {
 } from '@kbn/discoveries/impl/lib/telemetry/event_based_telemetry';
 import { reportMisconfiguration } from '@kbn/discoveries/impl/lib/telemetry/report_misconfiguration';
 import { isWorkflowsEnabled } from '@kbn/discoveries/impl/lib/helpers/is_workflows_enabled';
-import { DEFAULT_CONNECTOR_TIMEOUT_MS } from '.';
+import { DEFAULT_CONNECTOR_TIMEOUT_MS } from './config';
 import { preCreateDefaultAdhocAttackDiscoveryIndex } from './lib/attack_discovery/pre_create_default_adhoc_index';
 import { logStartupHealthCheck } from './lib/startup_health_check';
 import { workflowExecutor } from './lib/schedules/workflow_executor';
 import { registerRoutes } from './routes';
-import { createAttackDiscoveryAttachmentType } from './agent_builder/attachments/attack_discovery';
-import { createAttackDiscoveryVerdictAttachmentType } from './agent_builder/attachments/attack_discovery_verdict';
-import { createDiagnosticReportAttachmentType } from './agent_builder/attachments/diagnostic_report';
-import { registerSkills } from './agent_builder/skills/register_skills';
+import { discoveriesBridge } from './tasks/bridge';
+import { registerDiscoveriesAgentBuilderContributions } from './agent_builder/register_agent_builder_contributions';
 import type {
   DiscoveriesPluginSetup,
   DiscoveriesPluginSetupDeps,
@@ -125,7 +123,6 @@ export class DiscoveriesPlugin
   private analytics?: AnalyticsServiceSetup;
   private readonly config: DiscoveriesConfig;
   private readonly logger: Logger;
-  private adhocAttackDiscoveryDataClient?: IRuleDataClient;
   private workflowsExtensionsStart?: WorkflowsExtensionsServerPluginStart;
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
   private workflowStepRegistrationResult: StepRegistrationResult = {
@@ -189,12 +186,12 @@ export class DiscoveriesPlugin
       ],
     };
 
-    this.adhocAttackDiscoveryDataClient =
+    const adhocAttackDiscoveryDataClient =
       plugins.ruleRegistry.ruleDataService.initializeIndex(ruleDataServiceOptions);
 
     preCreateDefaultAdhocAttackDiscoveryIndex({
       core,
-      dataClient: this.adhocAttackDiscoveryDataClient,
+      dataClient: adhocAttackDiscoveryDataClient,
       frameworkAlerts: plugins.alerting.frameworkAlerts,
       logger: this.logger,
     });
@@ -228,7 +225,7 @@ export class DiscoveriesPlugin
     }
 
     this.workflowStepRegistrationResult = registerWorkflowSteps(plugins.workflowsExtensions, {
-      adhocAttackDiscoveryDataClient: this.adhocAttackDiscoveryDataClient,
+      adhocAttackDiscoveryDataClient,
       analytics: core.analytics,
       connectorTimeout: this.config.connectorTimeout ?? DEFAULT_CONNECTOR_TIMEOUT_MS,
       getEventLogIndex,
@@ -262,65 +259,16 @@ export class DiscoveriesPlugin
     // and skills are read lazily at request time, so registering here (rather
     // than synchronously in setup) is safe. This mirrors the Streams plugin.
     if (plugins.agentBuilder) {
-      const agentBuilder = plugins.agentBuilder;
-      const logger = this.logger;
-      const workflowsManagementApi = this.workflowsManagementApi;
-      const adhocAttackDiscoveryDataClient = this.adhocAttackDiscoveryDataClient;
-
-      void getStartServices()
-        .then(async ({ coreStart }) => {
-          // Registered regardless of the flag: Security Solution's "Add to chat" attaches
-          // discoveries as this type, so it must not depend on the workflows kill switch.
-          // The data client is assigned unconditionally in `setup()` above; the guard
-          // narrows the optional field rather than describing a reachable state.
-          if (adhocAttackDiscoveryDataClient != null) {
-            agentBuilder.attachments.registerType(
-              createAttackDiscoveryAttachmentType({
-                adhocAttackDiscoveryDataClient,
-                esClient: coreStart.elasticsearch.client,
-                logger,
-              })
-            );
-          }
-
-          if (!(await isWorkflowsEnabled(coreStart.featureFlags))) {
-            logger.debug(
-              () =>
-                'discoveries: Attack Discovery workflows disabled; skipping agent builder registration'
-            );
-            return;
-          }
-
-          agentBuilder.attachments.registerType(createDiagnosticReportAttachmentType());
-
-          // By value, so unlike the discovery itself it needs no data client to
-          // resolve against.
-          agentBuilder.attachments.registerType(createAttackDiscoveryVerdictAttachmentType());
-
-          await registerSkills(agentBuilder, logger, {
-            getEventLogIndex,
-            getStartServices,
-            runAttackDiscoveryToolDeps: {
-              analytics: core.analytics,
-              getEventLogIndex,
-              getEventLogger,
-              getStartServices,
-              logger,
-              workflowsManagementApi,
-            },
-            workflowExecutionLookup:
-              workflowsManagementApi != null
-                ? {
-                    getWorkflowExecution: (executionId, spaceId, options) =>
-                      workflowsManagementApi.getWorkflowExecution(executionId, spaceId, options),
-                  }
-                : undefined,
-            workflowFetcher: workflowsManagementApi,
-          });
-        })
-        .catch((error) => {
-          logger.error(`discoveries: Error registering skills: ${error}`);
-        });
+      registerDiscoveriesAgentBuilderContributions({
+        adhocAttackDiscoveryDataClient,
+        agentBuilder: plugins.agentBuilder,
+        analytics: core.analytics,
+        getEventLogIndex,
+        getEventLogger,
+        getStartServices,
+        logger: this.logger,
+        workflowsManagementApi: this.workflowsManagementApi,
+      });
     } else {
       this.logger.debug(
         'discoveries: agentBuilder plugin not available, skipping skill registration'
@@ -402,6 +350,10 @@ export class DiscoveriesPlugin
     } else {
       this.logger.warn('elastic_assistant not available, skipping workflow executor registration');
     }
+
+    // The tasks entry registers the same steps and agent builder contributions for task pods: it has
+    // nothing left to do where Kibana also boots it.
+    discoveriesBridge.setSetup(true);
 
     return {};
   }

@@ -34,9 +34,9 @@ export class ContextEngineAgentBuilderPlugin
     setupDeps: ContextEngineAgentBuilderSetupDependencies
   ): ContextEngineAgentBuilderPluginSetup {
     registerContextEngineAgentBuilderIntegration({
-      coreSetup,
+      getStartServices: coreSetup.getStartServices,
       agentBuilder: setupDeps.agentBuilder,
-      workflowsManagement: setupDeps.workflowsManagement.management,
+      getWorkflowsManagement: () => setupDeps.workflowsManagement.management,
     });
 
     if (setupDeps.searchInferenceEndpoints) {

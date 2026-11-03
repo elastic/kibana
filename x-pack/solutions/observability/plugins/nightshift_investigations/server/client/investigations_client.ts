@@ -39,6 +39,7 @@ import {
 } from '@kbn/agentic-investigations-plugin/common';
 import { assertNever } from '@kbn/std';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
+import { ALERT_RECOVERED_FOLLOW_UP } from './follow_up';
 import { installAssistantAgent } from '../lib/install_assistant_agent';
 import { telemetryTargetNameSchema } from '../../common/telemetry_targets';
 import { resolveTelemetryTarget, type TelemetryTarget } from '../telemetry_targets';
@@ -110,9 +111,6 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
 function asString(v: unknown): string | undefined {
   return typeof v === 'string' ? v || undefined : undefined;
 }
-
-/** `inputs.context.follow_up` of the investigation runs `followUpRecoveredAlert` starts. */
-export const ALERT_RECOVERED_FOLLOW_UP = 'alert_recovered';
 
 const isAlertRecoveredFollowUp = (inputs: Record<string, unknown> | undefined): boolean => {
   const context = inputs?.context;

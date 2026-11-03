@@ -17,7 +17,7 @@ jest.mock('../span_links/get_linked_children');
 import { getUnifiedTraceErrors } from './get_unified_trace_errors';
 import { getSpanLinksCountById } from '../span_links/get_linked_children';
 import { getTraceItemIcon } from './get_unified_trace_items';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import {
   AGENT_NAME,
   AT_TIMESTAMP,

@@ -7,7 +7,6 @@
 
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { getDocumentById } from '@kbn/agent-builder-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -32,6 +31,8 @@ export const getDocumentByIdTool = (): BuiltinToolDefinition<typeof getDocumentB
     },
     schema: getDocumentByIdSchema,
     handler: async ({ id, index }, { esClient }) => {
+      // Loaded on first use: the package is large and most runs never call this tool.
+      const { getDocumentById } = await import('@kbn/agent-builder-genai-utils');
       const result = await getDocumentById({ id, index, esClient: esClient.asCurrentUser });
 
       if (result.found) {

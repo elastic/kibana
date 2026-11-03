@@ -24,6 +24,16 @@
     ],
     "optionalPlugins": ["ml", "spaces", "cloud"],
     "requiredBundles": ["kibanaReact", "kibanaUtils"],
-    "extraPublicDirs": []
+    "extraPublicDirs": [],
+    "tasks": {
+      "requiredPlugins": [
+        "agentBuilder",
+        "apmDataAccess",
+        "metricsDataAccess",
+        "logsDataAccess",
+        "licensing",
+        "ruleRegistry"
+      ]
+    }
   }
 }

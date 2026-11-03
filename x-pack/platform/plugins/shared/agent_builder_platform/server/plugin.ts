@@ -14,11 +14,7 @@ import type {
   AgentBuilderPlatformPluginSetup,
   AgentBuilderPlatformPluginStart,
 } from './types';
-import { registerTools } from './tools';
-import { registerAttachmentTypes } from './attachment_types';
-import { registerConversationEventTypes } from './conversation_events';
-import { registerConversationTemplates } from './conversation_templates';
-import { registerSkills } from './skills';
+import { registerAgentBuilderPlatform } from './register_agent_builder';
 import { createConnectorSmlType } from './sml_types/connector';
 import { createConnectorLifecycleHandler } from './connector_lifecycle/connector_lifecycle_handler';
 import { setAgentBuilderDashboard } from './dashboard/install_dashboard';
@@ -44,23 +40,25 @@ export class AgentBuilderPlatformPlugin
     coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>,
     setupDeps: PluginSetupDependencies
   ): AgentBuilderPlatformPluginSetup {
-    registerTools({
+    registerAgentBuilderPlatform({
+      agentBuilder: setupDeps.agentBuilder,
       coreSetup,
-      setupDeps,
+      organizationId: setupDeps.cloud?.organizationId,
       isServerless: this.isServerless,
-    });
-    registerAttachmentTypes({
-      coreSetup,
-      setupDeps,
       logger: this.logger,
+      getFilesPlugin: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.files;
+      },
+      getAgentsStart: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.agentBuilder.agents;
+      },
+      getActionsStart: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.actions;
+      },
     });
-    registerConversationTemplates({ setupDeps });
-    registerConversationEventTypes({ setupDeps });
-    const getActionsStart = async () => {
-      const [, startDeps] = await coreSetup.getStartServices();
-      return startDeps.actions;
-    };
-    registerSkills(setupDeps.agentBuilder, getActionsStart, this.logger);
 
     const connectorSmlType = createConnectorSmlType({
       getActionSavedObjectsClient: async (request) => {

@@ -12,7 +12,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import dedent from 'dedent';
 import { OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID } from '../../common/constants';
-import type { ObservabilityAgentBuilderCoreSetup } from '../types';
+import type { ObservabilityAgentBuilderStartServices } from '../types';
 import { MAX_SHORT_STRING_LENGTH } from '../utils/schema_limits';
 import { observabilityAttachmentDataSchema } from './observability_attachment_data_schema';
 
@@ -28,7 +28,7 @@ export function createAlertAttachmentType({
   core,
   logger,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
+  core: ObservabilityAgentBuilderStartServices;
   logger: Logger;
 }): AttachmentTypeDefinition<typeof OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID, AlertAttachmentData> {
   return {

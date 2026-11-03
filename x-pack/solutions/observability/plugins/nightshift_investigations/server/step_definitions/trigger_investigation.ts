@@ -11,7 +11,7 @@ import {
   MAX_ID_LENGTH,
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
-} from '@kbn/significant-events-schema';
+} from '@kbn/significant-events-schema/src/significant_events/constants';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { serverUnavailable } from '@hapi/boom';
@@ -34,7 +34,6 @@ import type {
   GetEpisodeLookup,
   GetInvestigationsClient,
 } from '../routes/types';
-import { fetchInvestigationAlertSnapshots } from '../lib/alert_snapshot';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../saved_objects/automation_saved_object';
 import type { NightshiftAutomationAttributes } from '../lib/automations/types';
 import { createAutomationBudget } from '../lib/automations/automation_budget';
@@ -153,6 +152,8 @@ const resolveAlerts = async ({
   if (!alertsClient) {
     throw serverUnavailable('Alert lookup is unavailable');
   }
+  // Loaded on use: it builds ES|QL queries, which a task pod that only registers the step skips.
+  const { fetchInvestigationAlertSnapshots } = await import('../lib/alert_snapshot');
   return fetchInvestigationAlertSnapshots({
     alertsClient,
     alertIds: [subjectId],

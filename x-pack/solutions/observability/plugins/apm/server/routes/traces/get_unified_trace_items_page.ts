@@ -7,7 +7,7 @@
 
 import type { Sort, SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   AT_TIMESTAMP,

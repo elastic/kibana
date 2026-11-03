@@ -8,9 +8,9 @@
 import { isIndexPattern } from '@kbn/context-engine-plugin/common/ai_index_dest';
 import type { AiIndexHttpItem } from '@kbn/context-engine-plugin/common/http_api/ai_indices';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
-import type { CoreStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import type { ToolsCoreStart } from '../../start_types';
 
 export const getWritableMemoryAiIndex = async ({
   aiIndexId,
@@ -23,7 +23,7 @@ export const getWritableMemoryAiIndex = async ({
   spaceId: string;
   request: KibanaRequest;
   getAiIndexService: () => Promise<AiIndexService>;
-  getCoreStart: () => Promise<CoreStart>;
+  getCoreStart: () => Promise<ToolsCoreStart>;
 }): Promise<AiIndexHttpItem> => {
   const coreStart = await getCoreStart();
   const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);

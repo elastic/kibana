@@ -6,16 +6,19 @@
  */
 import { DataStreamClient, type AnyDataStreamDefinition } from '@kbn/data-streams';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { Logger } from '@kbn/logging';
 
 /**
- * Core's data streams service, without installing anything: Kibana creates the data streams, and a
- * pod only reads and writes them. Clients are created with `lazyCreation`, so a stream that does
- * not exist yet is not created by the pod until something writes to it.
+ * `DataStreamsService` is not used: its `start` initializes every registered stream through
+ * `DataStreamClient.initialize`, which installs and updates index templates, applies mapping
+ * changes and, for `initializeClient`, creates the data stream. A pod never installs anything:
+ * Kibana does, in its own `start`. Clients are built with `DataStreamClient.fromDefinition`, the
+ * runtime path Core documents for code that runs after setup: no calls to Elasticsearch until the
+ * first read or write, and a stream that does not exist yet is auto-created by Elasticsearch on the
+ * first write, through the template Kibana installed.
  */
-export const createDataStreams = (client: ElasticsearchClient, logger: Logger) => {
+export const createDataStreams = (client: ElasticsearchClient) => {
   const definitions = new Map<string, AnyDataStreamDefinition>();
-  const clients = new Map<string, Promise<unknown>>();
+  const clients = new Map<string, unknown>();
 
   return {
     setup: {
@@ -27,23 +30,20 @@ export const createDataStreams = (client: ElasticsearchClient, logger: Logger) =
       },
     },
     start: {
-      initializeClient: (name: string) => {
+      initializeClient: async (name: string) => {
         const definition = definitions.get(name);
         if (!definition) {
           throw new Error(`Data stream ${name} is not registered.`);
         }
-        let initialized = clients.get(name);
-        if (!initialized) {
-          initialized = DataStreamClient.initialize({
+        let dataStreamClient = clients.get(name);
+        if (!dataStreamClient) {
+          dataStreamClient = DataStreamClient.fromDefinition({
             dataStream: definition,
             elasticsearchClient: client,
-            logger,
-            lazyCreation: true,
-            devMode: false,
           });
-          clients.set(name, initialized);
+          clients.set(name, dataStreamClient);
         }
-        return initialized;
+        return dataStreamClient;
       },
     },
   };

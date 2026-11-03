@@ -7,12 +7,11 @@
 
 import { memoize, once } from 'lodash';
 import { z } from '@kbn/zod/v4';
-import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { TopSnippetsConfig } from '@kbn/agent-builder-genai-utils/tools';
-import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { PlatformCoreSetup } from '../start_types';
 import { resolveTimeRange } from './screen_context_utils';
 import {
   createIncludeFrozenSchema,
@@ -59,12 +58,12 @@ export const searchTool = ({
   topSnippetsDefaults,
   isServerless = false,
 }: {
-  coreSetup: CoreSetup;
+  coreSetup: PlatformCoreSetup;
   topSnippetsDefaults: TopSnippetsConfig;
   isServerless?: boolean;
 }): DynamicSchemaBuiltinToolDefinition<SearchSchema> => {
   // Cache the start services promise so it is resolved at most once.
-  let startServicesPromise: ReturnType<CoreSetup['getStartServices']> | undefined;
+  let startServicesPromise: ReturnType<PlatformCoreSetup['getStartServices']> | undefined;
   const getStartServices = () => {
     if (!startServicesPromise) {
       startServicesPromise = coreSetup.getStartServices();
@@ -132,6 +131,8 @@ Note:
         );
       }
 
+      // Loaded on first use: the package is large and most runs never call this tool.
+      const { runSearchTool } = await import('@kbn/agent-builder-genai-utils/tools');
       const results = await runSearchTool({
         nlQuery,
         index,

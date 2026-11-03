@@ -22,11 +22,11 @@ import {
   SEVERITY_OPTIONS,
   type SignificantEvent,
   type SignificantEventResponse,
-  type EventDeactivation,
   type Severity,
   type SignalVerdict,
   type SignificantEventStatus,
-} from '@kbn/significant-events-schema';
+} from '@kbn/significant-events-schema/src/significant_events';
+import type { EventDeactivation } from '@kbn/significant-events-schema';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import {
   MAX_DEDUP_SCAN_LIMIT,

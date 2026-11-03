@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type { WorkflowsExtensionsTasksSetup } from '@kbn/workflows-extensions/server/tasks';
 import { significantEventsTriggerCommonDefinitions } from '../../../common/workflows/triggers';
 
 export const registerSignificantEventsWorkflowTriggers = (
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup | undefined
+  workflowsExtensions: Pick<WorkflowsExtensionsTasksSetup, 'registerTriggerDefinition'> | undefined
 ): void => {
   if (!workflowsExtensions) {
     return;

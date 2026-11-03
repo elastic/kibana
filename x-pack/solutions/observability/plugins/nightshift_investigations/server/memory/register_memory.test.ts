@@ -16,8 +16,8 @@ import { createMemoryStore, loadRoundSteps, runMemoryOptimize } from './register
 import { optimizeMemory } from './optimize';
 
 // Mirrors the resolver's precedence; the resolver itself is covered in @kbn/nightshift-ai.
-jest.mock('@kbn/nightshift-ai', () => ({
-  ...jest.requireActual('@kbn/nightshift-ai'),
+jest.mock('@kbn/nightshift-ai/src/resolve_nightshift_model_for_request', () => ({
+  ...jest.requireActual('@kbn/nightshift-ai/src/resolve_nightshift_model_for_request'),
   resolveNightshiftModelForRequest: jest.fn(
     async ({
       requestedId,

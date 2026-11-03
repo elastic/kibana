@@ -14,7 +14,7 @@ import { Streams } from '@kbn/streams-schema';
 import { getFlattenedObject } from '@kbn/std';
 import dateMath from '@kbn/datemath';
 import dedent from 'dedent';
-import type { GetScopedClients } from '../../../routes/types';
+import type { GetAgentBuilderScopedClients } from '../../types';
 import { FAILURE_STORE_SELECTOR } from '../../../../common/constants';
 import {
   STREAMS_DIAGNOSE_STREAM_TOOL_ID as DIAGNOSE_STREAM,
@@ -53,7 +53,7 @@ export const createDiagnoseStreamTool = ({
   isServerless,
   logger,
 }: {
-  getScopedClients: GetScopedClients;
+  getScopedClients: GetAgentBuilderScopedClients;
   isServerless: boolean;
   logger: Logger;
 }): BuiltinToolDefinition<typeof diagnoseStreamSchema> => ({

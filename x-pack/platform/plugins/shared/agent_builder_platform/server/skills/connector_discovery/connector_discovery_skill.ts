@@ -7,7 +7,7 @@
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools } from '@kbn/agent-builder-common';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { ActionsTasksStart } from '@kbn/actions-plugin/server/tasks';
 import { createListConnectorsTool } from './list_connectors_tool';
 import { createGetConnectorSubActionsTool } from './get_connector_sub_actions_tool';
 
@@ -27,7 +27,7 @@ const CONNECTOR_DISCOVERY_CONTENT = [
 ].join('\n');
 
 interface ConnectorDiscoverySkillDeps {
-  getActionsStart: () => Promise<ActionsPluginStart>;
+  getActionsStart: () => Promise<ActionsTasksStart>;
 }
 
 /**

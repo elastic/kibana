@@ -31,7 +31,6 @@ import {
   getAllConnectorsWithDynamic,
   getWorkflowZodSchemaFromConnectors,
 } from '../../common/schema';
-import { getAvailableConnectors } from '../api/lib/workflow_connectors';
 
 /**
  * How many ES|QL steps one validation checks. Each check runs the ES|QL
@@ -87,6 +86,8 @@ export class WorkflowValidationService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<GetAvailableConnectorsResponse> {
+    // Loaded on first use: it pulls in every connector spec.
+    const { getAvailableConnectors } = await import('../api/lib/workflow_connectors');
     return getAvailableConnectors({
       getActionsClient: this.deps.getActionsClient,
       getActionsClientWithRequest: this.deps.getActionsClientWithRequest,

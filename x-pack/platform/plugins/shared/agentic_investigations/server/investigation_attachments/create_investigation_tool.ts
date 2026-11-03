@@ -14,7 +14,7 @@ import type {
   ToolHandlerContext,
   ToolHandlerStandardReturn,
 } from '@kbn/agent-builder-server';
-import { createErrorResult } from '@kbn/agent-builder-server';
+import { createErrorResult } from '@kbn/agent-builder-server/tools/utils';
 
 /**
  * Conversation the tool runs in: that of the innermost agent on the run stack, whose run owns

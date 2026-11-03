@@ -8,8 +8,8 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import type {
-  ObservabilityAgentBuilderCoreSetup,
-  ObservabilityAgentBuilderPluginSetupDependencies,
+  ObservabilityAgentBuilderStartServices,
+  ObservabilityAgentBuilderToolPlugins,
 } from '../../types';
 import type { TopologyDirection, ServiceTopologyResponse } from './types';
 import { getServiceTopology } from './get_service_topology';
@@ -26,8 +26,8 @@ export function getToolHandler({
   start,
   end,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
-  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  core: ObservabilityAgentBuilderStartServices;
+  plugins: ObservabilityAgentBuilderToolPlugins;
   request: KibanaRequest;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   logger: Logger;

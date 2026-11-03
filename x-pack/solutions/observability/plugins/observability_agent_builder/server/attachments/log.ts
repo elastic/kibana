@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { ObservabilityAgentBuilderCoreSetup } from '../types';
+import type { ObservabilityAgentBuilderStartServices } from '../types';
 import { OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID } from '../../common';
 import { getLogDocumentById } from '../routes/ai_insights/get_log_document_by_id';
 import { MAX_INDEX_PATTERN_LENGTH, MAX_SHORT_STRING_LENGTH } from '../utils/schema_limits';
@@ -30,7 +30,7 @@ export function createLogAttachmentType({
   core,
   logger,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
+  core: ObservabilityAgentBuilderStartServices;
   logger: Logger;
 }): AttachmentTypeDefinition<typeof OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID, LogAttachmentData> {
   return {

@@ -10,6 +10,7 @@
     "taskManager",
     "spaces",
     "licensing",
+    "security",
     "eventLog",
     "encryptedSavedObjects"
   ]

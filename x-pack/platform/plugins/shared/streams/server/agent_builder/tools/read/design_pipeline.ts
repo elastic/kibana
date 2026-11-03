@@ -11,7 +11,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import dedent from 'dedent';
 import type { FlattenRecord } from '@kbn/streams-schema';
-import type { GetScopedClients } from '../../../routes/types';
+import type { GetAgentBuilderScopedClients } from '../../types';
 import { simulateProcessing } from '../../../routes/internal/streams/processing/simulation_handler';
 import { STREAMS_DESIGN_PIPELINE_TOOL_ID as DESIGN_PIPELINE } from '../tool_ids';
 import { classifyError } from '../../utils/error_utils';
@@ -54,7 +54,7 @@ const designPipelineSchema = z.object({
 export const createDesignPipelineTool = ({
   getScopedClients,
 }: {
-  getScopedClients: GetScopedClients;
+  getScopedClients: GetAgentBuilderScopedClients;
 }): BuiltinToolDefinition<typeof designPipelineSchema> => ({
   id: DESIGN_PIPELINE,
   type: ToolType.builtin,

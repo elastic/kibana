@@ -15,7 +15,7 @@ import {
   baselineObservationSchema,
   detectionSkipSchema,
   type DetectionSkip,
-} from '@kbn/significant-events-schema';
+} from '@kbn/significant-events-schema/src/significant_events';
 import { lazySchema, z } from '@kbn/zod/v4';
 import dateMath from '@kbn/datemath';
 import { getSourceColumnIndex, toEsqlRequest } from '../streams/esql';

@@ -25,5 +25,6 @@
     "@kbn/use-tracked-promise",
     "@kbn/core-application-browser",
     "@kbn/i18n-react",
+    "@kbn/core-plugins-server",
   ]
 }

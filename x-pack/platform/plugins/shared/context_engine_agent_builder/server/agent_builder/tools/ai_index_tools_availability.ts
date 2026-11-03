@@ -6,11 +6,11 @@
  */
 
 import type { ToolAvailabilityConfig } from '@kbn/agent-builder-server';
-import type { CoreStart } from '@kbn/core/server';
 import {
   CONTEXT_ENGINE_ENABLED_SETTING_ID,
   CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
+import type { ToolsCoreStart } from '../../start_types';
 
 // Only reads a setting, so caching per space is safe. Privileges are checked in each handler.
 export const aiIndexToolsAvailability: ToolAvailabilityConfig = {
@@ -27,7 +27,7 @@ export const aiIndexToolsAvailability: ToolAvailabilityConfig = {
 };
 
 export const createMemoryToolsAvailability = (
-  getCoreStart: () => Promise<CoreStart>
+  getCoreStart: () => Promise<ToolsCoreStart>
 ): ToolAvailabilityConfig => ({
   cacheMode: 'none',
   handler: async ({ request, uiSettings }) => {

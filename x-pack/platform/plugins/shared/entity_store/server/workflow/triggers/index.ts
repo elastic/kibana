@@ -11,7 +11,9 @@ import {
   entityRiskScoreChangedTriggerDefinition,
 } from '../../../common/workflow/triggers';
 
-export const registerTriggers = (workflowsExtensions: WorkflowsExtensionsServerPluginSetup) => {
+export const registerTriggers = (
+  workflowsExtensions: Pick<WorkflowsExtensionsServerPluginSetup, 'registerTriggerDefinition'>
+) => {
   workflowsExtensions.registerTriggerDefinition(entityAssetCriticalityUpdatedTriggerDefinition);
   workflowsExtensions.registerTriggerDefinition(entityRiskScoreChangedTriggerDefinition);
 };

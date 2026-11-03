@@ -8,6 +8,7 @@
   "plugin": {
     "id": "fieldsMetadata",
     "server": true,
+    "tasks": {},
     "browser": true,
     "configPath": ["xpack", "fields_metadata"],
     "requiredPlugins": [],

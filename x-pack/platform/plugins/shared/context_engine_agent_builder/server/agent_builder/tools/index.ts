@@ -6,10 +6,12 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { CoreStart } from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { ContextEnginePluginStart } from '@kbn/context-engine-plugin/server';
+import type {
+  ToolsContextEngineStart,
+  ToolsCoreStart,
+  ToolsSecurityStart,
+} from '../../start_types';
 import { createSaveAutomationTool } from './save_automation/tool';
 import { createInstallAutomationTemplateTool } from './install_automation_template/tool';
 import { createRunAutomationTool } from './run_automation/tool';
@@ -29,9 +31,9 @@ export const registerAgentBuilderTools = ({
   getWorkflowsManagement,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
-  getContextEngineStart: () => Promise<ContextEnginePluginStart>;
-  getCoreStart: () => Promise<CoreStart>;
-  getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+  getContextEngineStart: () => Promise<ToolsContextEngineStart>;
+  getCoreStart: () => Promise<ToolsCoreStart>;
+  getSecurityStart: () => Promise<ToolsSecurityStart | undefined>;
   getWorkflowsManagement: () => WorkflowsManagementApi;
 }): void => {
   agentBuilder.tools.register(

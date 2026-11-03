@@ -24,7 +24,9 @@ const FAMILIES = {
   connectors: {
     owner: 'actions',
     dependsOn: ['actions'],
-    pattern: /\b(?:registerType|registerSubActionConnectorType)\(/,
+    // `registerType` alone is also how rule types register, so it must be called on `actions`.
+    pattern:
+      /\bregisterSubActionConnectorType\(|\b(?:actions|actionsSetup|actionsPlugin)\??\.registerType\(/,
   },
   workflows: {
     owner: 'workflowsExecutionEngine',
@@ -37,6 +39,17 @@ const FAMILIES = {
     pattern:
       /\b(?:tools|skills|attachments|agents|hooks|conversationEvents|renderers)\.(?:register|registerType|registerCycleHook)\(|\bregisterTool\(|\bregisterAttachmentType\(|\bregisterSkill\(/,
   },
+};
+
+// Contributors that are deliberately not in a pod, and why. A pod that does not serve a connector
+// type answers 404 and Task Manager runs the task in Kibana, so a missing system connector is safe.
+const NOT_IN_POD = {
+  connectors: {
+    cases: 'system connector that needs a cases client (Lens, Files, Rule Registry)',
+    observabilityAIAssistantApp: 'system connector that needs the whole AI assistant service',
+    workflowsManagement: 'system connector that needs the workflows management API',
+  },
+  agent_builder: {},
 };
 
 const args = process.argv.slice(2);
@@ -63,7 +76,10 @@ const walk = (dir, out = []) => {
 
 const readJsonc = (file) => JSON.parse(fs.readFileSync(file, 'utf8').replace(/^\s*\/\/.*$/gm, ''));
 
-const plugins = getPackages(REPO_ROOT).filter((p) => p.manifest.type === 'plugin');
+// Test fixture plugins register into the registries but never run in a pod.
+const plugins = getPackages(REPO_ROOT).filter(
+  (p) => p.manifest.type === 'plugin' && !/\/(test|examples)\//.test(p.directory)
+);
 const byId = new Map(plugins.map((p) => [p.manifest.plugin.id, p]));
 let missingTotal = 0;
 
@@ -98,6 +114,11 @@ for (const [name, family] of Object.entries(FAMILIES)) {
       Boolean(p.manifest.plugin.tasks) &&
       fs.existsSync(path.join(p.directory, 'server/tasks/index.ts'));
     const inFamily = listed.has(id);
+    const skipReason = NOT_IN_POD[name] && NOT_IN_POD[name][id];
+    if (skipReason) {
+      console.log(`  - ${id.padEnd(32)} not in the pod: ${skipReason}`);
+      continue;
+    }
     let status = 'no tasks entry';
     if (hasEntry) status = inFamily ? 'ok' : 'has tasks entry, not in family';
     if (status !== 'ok') missingTotal++;

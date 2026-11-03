@@ -88,6 +88,7 @@
     "@kbn/server-http-tools",
     "@kbn/task-manager-plugin",
     "@kbn/core-logging-server-mocks",
-    "@kbn/data-plugin"
+    "@kbn/data-plugin",
+    "@kbn/core-saved-objects-api-server-internal"
   ]
 }

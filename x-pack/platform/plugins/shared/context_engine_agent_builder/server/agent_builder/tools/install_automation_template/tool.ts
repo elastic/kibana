@@ -8,12 +8,11 @@
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { CoreStart } from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { z, lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
+import type { ToolsCoreStart, ToolsSecurityStart } from '../../../start_types';
 import { CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID } from '../../../../common/agent_builder_tools';
 import { getSaveAutomationErrorMessage } from '../save_automation/handler';
 import { installAutomationTemplateHandler, type InstallAutomationTemplateParams } from './handler';
@@ -362,8 +361,8 @@ export const createInstallAutomationTemplateTool = ({
   getWorkflowsManagement,
 }: {
   getAiIndexService: () => Promise<AiIndexService>;
-  getCoreStart: () => Promise<CoreStart>;
-  getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+  getCoreStart: () => Promise<ToolsCoreStart>;
+  getSecurityStart: () => Promise<ToolsSecurityStart | undefined>;
   getWorkflowsManagement: () => WorkflowsManagementApi;
 }): BuiltinToolDefinition<typeof installAutomationTemplateSchema> => ({
   id: CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID,

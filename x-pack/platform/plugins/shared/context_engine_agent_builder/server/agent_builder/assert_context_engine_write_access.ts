@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { apiPrivileges } from '@kbn/context-engine-plugin/common/features';
 import { isContextEngineEnabledInSpace } from '@kbn/context-engine-plugin/server/utils/is_context_engine_enabled_in_space';
+import type { ToolsCoreStart, ToolsSecurityStart } from '../start_types';
 
 export const assertContextEngineWriteAccess = async ({
   request,
@@ -19,8 +18,8 @@ export const assertContextEngineWriteAccess = async ({
 }: {
   request: KibanaRequest;
   spaceId: string;
-  getCoreStart: () => Promise<CoreStart>;
-  getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+  getCoreStart: () => Promise<ToolsCoreStart>;
+  getSecurityStart: () => Promise<ToolsSecurityStart | undefined>;
 }): Promise<void> => {
   const coreStart = await getCoreStart();
   const security = await getSecurityStart();

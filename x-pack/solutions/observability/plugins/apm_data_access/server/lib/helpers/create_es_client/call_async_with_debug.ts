@@ -6,8 +6,9 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { RequestStatus } from '@kbn/inspector-plugin/common';
-import { getInspectResponse, type InspectResponse } from '@kbn/observability-shared-plugin/common';
+import { RequestStatus } from '@kbn/inspector-plugin/common/adapters/request/types';
+import type { InspectResponse } from '@kbn/observability-shared-plugin/common';
+import { getInspectResponse } from '@kbn/observability-shared-plugin/common/utils/get_inspect_response';
 import type { WrappedElasticsearchClientError } from '@kbn/observability-utils-server/es/unwrap_es_response';
 
 export async function callAsyncWithDebug<T>({

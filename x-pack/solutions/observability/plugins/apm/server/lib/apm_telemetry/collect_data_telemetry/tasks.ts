@@ -6,7 +6,7 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 import { getKqlFieldNamesFromExpression } from '@kbn/es-query';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import { createHash } from 'crypto';
 import { flatten, merge, pickBy, sortBy, sum, uniq, without } from 'lodash';
 import type { SavedObjectsClient } from '@kbn/core/server';

@@ -7,7 +7,7 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
-import type { GetScopedClients } from '../../routes/types';
+import type { GetAgentBuilderScopedClients } from '../../scoped_clients';
 import type { SignificantEventsServer } from '../../types';
 import { createSignificantEventAttachmentType } from './significant_event_attachment_type';
 import { createSignificantEventFeatureAttachmentType } from './feature_attachment_type';
@@ -20,7 +20,7 @@ export const registerAgentBuilderAttachments = ({
   logger,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
-  getScopedClients: GetScopedClients;
+  getScopedClients: GetAgentBuilderScopedClients;
   server: Pick<SignificantEventsServer, 'security'>;
   logger: Logger;
 }): void => {

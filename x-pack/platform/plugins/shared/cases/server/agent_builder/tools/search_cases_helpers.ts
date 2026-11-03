@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createErrorResult } from '@kbn/agent-builder-server';
+import { createErrorResult } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { CoreStart } from '@kbn/core/server';
 import { addSpaceIdToPath } from '@kbn/core-spaces-common';
@@ -13,7 +13,7 @@ import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Case, RelatedCase } from '../../../common/types/domain';
 import { GENERAL_CASES_OWNER, OWNER_INFO } from '../../../common/constants';
-import { getCaseViewPath } from '../../common/utils';
+import { getCaseViewPath } from '../../common/case_view_path';
 import { isValidOwner } from '../../../common/utils/owner';
 
 export interface CoreServices {

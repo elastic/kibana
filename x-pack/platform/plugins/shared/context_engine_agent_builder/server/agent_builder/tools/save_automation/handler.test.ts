@@ -28,11 +28,13 @@ jest.mock('../../assert_context_engine_write_access', () => ({
   assertContextEngineWriteAccess: jest.fn().mockResolvedValue(undefined),
 }));
 
-jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
+jest.mock('@kbn/agent-builder-tools-base/workflows/check_privileges', () => ({
   hasWorkflowReadPrivilege: jest.fn().mockResolvedValue(true),
   hasWorkflowCreatePrivilege: jest.fn().mockResolvedValue(true),
   hasWorkflowUpdatePrivilege: jest.fn().mockResolvedValue(true),
   hasWorkflowExecutePrivilege: jest.fn().mockResolvedValue(true),
+}));
+jest.mock('@kbn/agent-builder-tools-base/workflows/execute_workflow', () => ({
   executeWorkflow: jest.fn(),
 }));
 
@@ -41,8 +43,10 @@ const {
   hasWorkflowCreatePrivilege,
   hasWorkflowUpdatePrivilege,
   hasWorkflowExecutePrivilege,
-  executeWorkflow,
-} = jest.requireMock('@kbn/agent-builder-tools-base/workflows');
+} = jest.requireMock('@kbn/agent-builder-tools-base/workflows/check_privileges');
+const { executeWorkflow } = jest.requireMock(
+  '@kbn/agent-builder-tools-base/workflows/execute_workflow'
+);
 
 const WORKFLOW_ATTACHMENT_ID = 'workflow-attachment-1';
 const WORKFLOW_YAML = 'name: pilot\nsteps: []';

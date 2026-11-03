@@ -21,7 +21,15 @@ import {
   SCHEDULED_MAINTENANCE_WORKFLOW_IDS,
 } from './managed_workflow_targets';
 
+import { CONTINUOUS_ONBOARDING_WORKFLOW_ID_LITERAL } from './legacy_workflow_ids';
+
 describe('managed_workflow_targets registry', () => {
+  it('keeps the light copy of the continuous onboarding workflow id in sync', () => {
+    expect(CONTINUOUS_ONBOARDING_WORKFLOW_ID_LITERAL).toBe(
+      SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID
+    );
+  });
+
   it('includes every installable workflow id in the maintenance sweep lists', () => {
     const maintenanceIds = new Set<string>([
       ...GLOBAL_MAINTENANCE_WORKFLOW_IDS,

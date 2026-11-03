@@ -49,7 +49,7 @@ export const registerStepDefinitions = ({
   grouping,
   logger,
 }: {
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+  workflowsExtensions: Pick<WorkflowsExtensionsServerPluginSetup, 'registerStepDefinition'>;
   getActionsService: () => ActionsService;
   getConversations: () => AgentBuilderPluginStart['conversations'];
   resolveChatModel: SummarizeInvestigationStepDependencies['resolveChatModel'];
@@ -114,7 +114,7 @@ export const registerAlertZeroStepDefinitions = ({
   workflowsExtensions,
   ...deps
 }: ReportWorkerOutcomeStepDeps & {
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+  workflowsExtensions: Pick<WorkflowsExtensionsServerPluginSetup, 'registerStepDefinition'>;
 }): void => {
   workflowsExtensions.registerStepDefinition(getReportWorkerOutcomeStepDefinition(deps));
 };

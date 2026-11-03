@@ -10,12 +10,10 @@ import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachm
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
-import {
-  SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
-  SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
-  SECURITY_LABS_SEARCH_TOOL_ID,
-  SECURITY_ALERTS_TOOL_ID,
-} from '../tools';
+import { SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from '../tools/entity_analytics/entity_risk_score_tool';
+import { SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID } from '../tools/attack_discovery_search_tool';
+import { SECURITY_LABS_SEARCH_TOOL_ID } from '../tools/tool_ids';
+import { SECURITY_ALERTS_TOOL_ID } from '../tools/alerts_tool';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
 export const alertAttachmentDataSchema = lazySchema(() =>

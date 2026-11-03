@@ -7,7 +7,7 @@
 
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { FeatureUpsert, IterationResult } from '@kbn/significant-events-schema';
-import { EMPTY_TOKENS, sumTokens } from '@kbn/nightshift-ai';
+import { EMPTY_TOKENS, sumTokens } from '@kbn/nightshift-ai/src/shared/tokens/sum_tokens';
 
 export const MS_PER_DAY = 24 * 60 * 60 * 1000;
 

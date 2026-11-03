@@ -66,8 +66,10 @@
         "searchInferenceEndpoints",
         "isomer",
         "licensing",
-        "spaces"
-      ]
+        "spaces",
+        "workflowsExtensions"
+      ],
+      "optionalPlugins": ["workflowsManagement", "cloud"]
     }
   }
 }

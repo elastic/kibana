@@ -13,7 +13,7 @@ import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
-import { hasWorkflowExecutionReadPrivilege } from '@kbn/agent-builder-tools-base/workflows';
+import { hasWorkflowExecutionReadPrivilege } from '@kbn/agent-builder-tools-base/workflows/check_privileges';
 
 const executionStatusSchema = z.enum(ExecutionStatusValues as [string, ...string[]]);
 

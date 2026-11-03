@@ -9,7 +9,7 @@ import { randomUUID } from 'node:crypto';
 import pLimit from 'p-limit';
 import { setTimeout as sleep } from 'timers/promises';
 import type { SavedObjectsClientContract, SavedObjectsType } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { schema } from '@kbn/config-schema';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import {

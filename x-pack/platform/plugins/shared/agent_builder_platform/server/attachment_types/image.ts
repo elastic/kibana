@@ -13,11 +13,12 @@ import {
   imageAttachmentDataSchema,
 } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import {
-  FileNotFoundError,
-  type FileServiceStart,
-  type FilesStart,
-} from '@kbn/files-plugin/server';
+import type { FileServiceStart, FilesStart } from '@kbn/files-plugin/server';
+
+// Loaded on first use: the Files plugin's server entry pulls in the whole server, which a runtime
+// that never reads an image attachment (a task pod) should not load.
+const loadFileNotFoundError = async () =>
+  (await import('@kbn/files-plugin/server')).FileNotFoundError;
 
 const streamToBuffer = (stream: Readable): Promise<Buffer> =>
   new Promise((resolve, reject) => {
@@ -33,6 +34,7 @@ const streamToBuffer = (stream: Readable): Promise<Buffer> =>
 const getImageFile = async (fileService: FileServiceStart, fileId: string) => {
   const file = await fileService.getById({ id: fileId });
   if (file.data.fileKind !== CHAT_ATTACHMENT_IMAGES_FILE_KIND) {
+    const FileNotFoundError = await loadFileNotFoundError();
     throw new FileNotFoundError('image file not found');
   }
   return file;
@@ -57,7 +59,7 @@ export const createImageAttachmentType = ({
       try {
         await getImageFile(fileService, parse.data.file_id);
       } catch (e) {
-        if (e instanceof FileNotFoundError) {
+        if (e instanceof (await loadFileNotFoundError())) {
           return { valid: false, error: 'image file not found' };
         }
         throw e;

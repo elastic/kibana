@@ -6,11 +6,11 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { EVALS_API_PRIVILEGES } from '@kbn/evals-plugin/common';
+import type { EvalsSkillsSecurity } from '../../types';
 
 interface EvalsPrivilegeCheck {
-  security: SecurityPluginStart | undefined;
+  security: EvalsSkillsSecurity | undefined;
   request: KibanaRequest;
   spaceId: string;
 }

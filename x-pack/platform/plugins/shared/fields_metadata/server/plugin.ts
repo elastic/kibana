@@ -17,6 +17,7 @@ import type {
 import { initFieldsMetadataServer } from './fields_metadata_server';
 import { FieldsMetadataService } from './services/fields_metadata';
 import type { FieldsMetadataBackendLibs } from './lib/shared_types';
+import { fieldsMetadataBridge } from './tasks/bridge';
 
 export class FieldsMetadataPlugin
   implements
@@ -50,16 +51,19 @@ export class FieldsMetadataPlugin
     // Register server side APIs
     initFieldsMetadataServer(this.libs);
 
-    return {
+    const setupContract = {
       registerIntegrationFieldsExtractor: fieldsMetadata.registerIntegrationFieldsExtractor,
       registerIntegrationListExtractor: fieldsMetadata.registerIntegrationListExtractor,
       registerStreamsFieldsExtractor: fieldsMetadata.registerStreamsFieldsExtractor,
     };
+    fieldsMetadataBridge.setSetup(setupContract);
+    return setupContract;
   }
 
   public start(core: CoreStart, _plugins: FieldsMetadataServerPluginStartDeps) {
     const fieldsMetadata = this.fieldsMetadataService.start(core);
 
+    fieldsMetadataBridge.setStart(fieldsMetadata);
     return { getClient: fieldsMetadata.getClient };
   }
 }

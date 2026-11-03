@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { executeEsql } from '@kbn/agent-builder-genai-utils';
+import { executeEsql } from '@kbn/agent-builder-genai-utils/tools/utils/esql/execute_esql';
 import {
   type ComplianceConfidence,
   type ComplianceStatus,

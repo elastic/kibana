@@ -12,6 +12,7 @@
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
+    "@kbn/security-plugin",
     "@kbn/dev-cli-runner",
     "@kbn/tooling-log",
     "@kbn/core",

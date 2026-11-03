@@ -116,14 +116,18 @@ export type WorkflowStorage = StorageIndexAdapter<WorkflowStorageSettings, Workf
 export const createStorage = ({
   logger,
   esClient,
+  readOnly,
 }: {
   logger: Logger;
   esClient: ElasticsearchClient;
+  /** Never create or change the index, template or mappings (task pods; Kibana installs them). */
+  readOnly?: boolean;
 }): WorkflowStorage => {
   // @ts-expect-error type mismatch for tags type
   return new StorageIndexAdapter<WorkflowStorageSettings, WorkflowProperties>(
     esClient,
     logger,
-    storageSettings
+    storageSettings,
+    { readOnly }
   );
 };

@@ -9,8 +9,11 @@ import type { Logger } from '@kbn/logging';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { TaskProviderRegistry } from '../task_providers/types';
 
+/** What the steps use of inference, which a task pod's inference has too. */
+export type EvalsStepInference = Pick<InferenceServerStart, 'getClient' | 'getConnectorById'>;
+
 export interface EvalStepDeps {
   logger: Logger;
   taskProviderRegistry: TaskProviderRegistry;
-  getInferenceStart: () => Promise<InferenceServerStart>;
+  getInferenceStart: () => Promise<EvalsStepInference>;
 }

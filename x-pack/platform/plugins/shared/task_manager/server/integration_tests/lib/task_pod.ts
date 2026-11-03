@@ -97,7 +97,13 @@ export const startPodProcess = async ({
     })
   );
   const { hostname, port: esPort } = new URL(esTestConfig.getUrl());
-  const pod: ChildProcess = spawn(process.execPath, ['scripts/task_pod.js', '--family', family], {
+  // TASK_POD_BIN points at a built distribution's `bin/kibana-task-pod`, to run the same checks
+  // against the distributable (transpiled, unbundled) instead of the source tree.
+  const builtBin = process.env.TASK_POD_BIN;
+  const [command, args] = builtBin
+    ? [builtBin, ['--family', family]]
+    : [process.execPath, ['scripts/task_pod.js', '--family', family]];
+  const pod: ChildProcess = spawn(command, args, {
     cwd: REPO_ROOT,
     env: {
       ...process.env,
@@ -111,12 +117,33 @@ export const startPodProcess = async ({
     // The launcher re-executes itself; a group lets us stop both processes.
     detached: true,
   });
+  const startedAt = Date.now();
   await retry(
     async () => {
       expect((await http(`${url}/health`)).status).toBe(200);
     },
     { times: 240, intervalMs: 500 }
   );
+  if (process.env.TASK_POD_METRICS) {
+    // Startup is spawn to the first healthy answer (500 ms polling); memory is the resident set of
+    // the process listening on the port after it has been idle for a few seconds.
+    const startupMs = Date.now() - startedAt;
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+    const { execSync } = await import('child_process');
+    let rssMb = -1;
+    try {
+      const pid = execSync(`lsof -ti tcp:${port} -sTCP:LISTEN`).toString().trim().split('\n')[0];
+      rssMb = Math.round(Number(execSync(`ps -o rss= -p ${pid}`).toString().trim()) / 1024);
+    } catch (e) {
+      // leave -1
+    }
+    // eslint-disable-next-line no-console
+    console.log(
+      `POD_METRICS mode=${
+        builtBin ? 'built' : 'dev'
+      } family=${family} startupMs=${startupMs} idleRssMb=${rssMb}`
+    );
+  }
   return {
     url,
     stop: () => {

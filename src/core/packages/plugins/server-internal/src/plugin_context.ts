@@ -490,6 +490,10 @@ export function createPluginTasksSetupContext<TPlugin, TPluginDependencies>({
       setEncryptionExtension: deps.savedObjects.setEncryptionExtension,
       getDefaultIndex: deps.savedObjects.getDefaultIndex,
     },
+    uiSettings: {
+      register: deps.uiSettings.register,
+      registerGlobal: deps.uiSettings.registerGlobal,
+    },
     getStartServices: () =>
       plugin.startDependencies as unknown as ReturnType<CoreTasksSetup['getStartServices']>,
   };

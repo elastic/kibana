@@ -90,10 +90,15 @@ export const formatPrivileges = (
   };
 };
 
+/** The part of Security a privilege check needs, which a task pod's Security has too. */
+export interface EntityStoreSecurity {
+  authz: Pick<SecurityPluginStart['authz'], 'actions' | 'checkPrivilegesDynamicallyWithRequest'>;
+}
+
 interface CheckAndFormatPrivilegesOpts {
   indexPatterns: string[];
   request: KibanaRequest;
-  security: SecurityPluginStart;
+  security: EntityStoreSecurity;
   privilegesToCheck: CheckPrivilegesPayload;
 }
 
@@ -118,7 +123,7 @@ export async function checkAndFormatPrivileges({
 
 export interface CheckEntityStoreIndexPrivilegesOpts {
   request: KibanaRequest;
-  security: SecurityPluginStart;
+  security: EntityStoreSecurity;
   spaceId: string;
   /**
    * Also checks read access to the metadata alias/index pattern, e.g. for the

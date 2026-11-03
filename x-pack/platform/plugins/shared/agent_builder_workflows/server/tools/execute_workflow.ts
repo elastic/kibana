@@ -16,10 +16,9 @@ import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { workflowIdSchema } from '@kbn/workflows-management-plugin/common/lib/workflow_id_schema';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import {
-  executeWorkflow,
   hasWorkflowExecutePrivilege,
   hasWorkflowReadPrivilege,
-} from '@kbn/agent-builder-tools-base/workflows';
+} from '@kbn/agent-builder-tools-base/workflows/check_privileges';
 import { stringify } from 'yaml';
 import { confirmToolCall, hashDefinition } from './utils/confirm_tool_call';
 import { formatCodeBlock } from './utils/code_block';
@@ -327,6 +326,10 @@ If set to false, or if the workflow does not complete within the timeout, the to
         return confirmation;
       }
 
+      // Loaded on first use: it brings in tracing, which a runtime that never executes a workflow skips.
+      const { executeWorkflow } = await import(
+        '@kbn/agent-builder-tools-base/workflows/execute_workflow'
+      );
       const result = resolvedYaml
         ? await executeWorkflow({
             yaml: resolvedYaml,

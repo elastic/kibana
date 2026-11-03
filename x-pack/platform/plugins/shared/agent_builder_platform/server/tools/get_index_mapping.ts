@@ -10,7 +10,6 @@ import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { MappingField } from '@kbn/agent-builder-genai-utils';
 import { otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
-import { getIndexFields } from '@kbn/agent-builder-genai-utils';
 import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import {
   createIncludeFrozenSchema,
@@ -137,6 +136,8 @@ export const getIndexMappingsTool = ({
       // getIndexFields transparently handles the local-vs-CCS split:
       //  - local indices use _mapping API (full mapping tree in rawMapping)
       //  - CCS indices use batched _field_caps API (flat field list)
+      // Loaded on first use: the package is large and most runs never call this tool.
+      const { getIndexFields } = await import('@kbn/agent-builder-genai-utils');
       const indexFields = await getIndexFields({
         indices,
         includeViews: true,

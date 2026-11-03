@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import { rangeQuery, termQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import {
   ELASTIC_PROFILER_STACK_TRACE_IDS,

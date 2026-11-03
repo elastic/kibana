@@ -14,7 +14,7 @@ import {
   type BaselineObservation,
   type NeedsAgentReason,
   type SkipMarker,
-} from '@kbn/significant-events-schema';
+} from '@kbn/significant-events-schema/src/significant_events';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { lazySchema, z } from '@kbn/zod/v4';

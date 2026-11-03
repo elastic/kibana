@@ -10,7 +10,7 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { investigationNotificationDestinationSchema } from '../../../common';
 import type { InvestigationNotificationDestination, Severity } from '../../../common';
 import { InvalidNotificationDestinationError } from '../../client/errors';
-import type { NotificationPhase, NotificationOutcome } from './notification_routing';
+import type { NotificationPhase, NotificationOutcome } from './notification_routing_schema';
 import { slackNotificationHandler } from './slack_notification';
 
 /** What a lifecycle message says about an investigation. */

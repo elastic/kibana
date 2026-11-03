@@ -11,7 +11,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
-import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
+import type { ObservabilityAgentBuilderStartServices } from '../../types';
 import { timeRangeSchemaRequired, indexDescription } from '../../utils/tool_schemas';
 import {
   MAX_INDEX_PATTERN_LENGTH,
@@ -50,7 +50,7 @@ export function createRunLogRateAnalysisTool({
   core,
   logger,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
+  core: ObservabilityAgentBuilderStartServices;
   logger: Logger;
 }): StaticToolRegistration<typeof logRateAnalysisSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof logRateAnalysisSchema> = {

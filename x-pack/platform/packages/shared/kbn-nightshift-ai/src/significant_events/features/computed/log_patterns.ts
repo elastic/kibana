@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { getSigEventsLogPatternsEsql, type LogPatternEsqlEntry } from '@kbn/ai-tools';
+import {
+  getSigEventsLogPatternsEsql,
+  type LogPatternEsqlEntry,
+} from '@kbn/ai-tools/src/tools/log_patterns/get_log_patterns';
 import { LOG_PATTERNS_FEATURE_TYPE } from '@kbn/significant-events-schema';
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import type { ComputedFeatureGenerator } from './types';

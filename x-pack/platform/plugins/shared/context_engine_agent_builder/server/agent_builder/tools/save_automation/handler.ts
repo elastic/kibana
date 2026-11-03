@@ -7,20 +7,19 @@
 
 import { ATTACHMENT_REF_ACTOR, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import {
-  executeWorkflow,
   hasWorkflowCreatePrivilege,
   hasWorkflowExecutePrivilege,
   hasWorkflowReadPrivilege,
   hasWorkflowUpdatePrivilege,
-} from '@kbn/agent-builder-tools-base/workflows';
+} from '@kbn/agent-builder-tools-base/workflows/check_privileges';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import type { CoreStart, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
+import type { ToolsCoreStart, ToolsSecurityStart } from '../../../start_types';
 import {
   AI_INDEX_ATTACHMENT_TYPE,
   WORKFLOW_YAML_ATTACHMENT_TYPE,
@@ -287,7 +286,7 @@ const assertWorkflowReadAccess = async ({
   workflowId: string;
   spaceId: string;
   request: KibanaRequest;
-  getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+  getSecurityStart: () => Promise<ToolsSecurityStart | undefined>;
   workflowsManagement: WorkflowsManagementApi;
 }): Promise<void> => {
   const security = await getSecurityStart();
@@ -311,7 +310,7 @@ const assertWorkflowCreateAccess = async ({
 }: {
   spaceId: string;
   request: KibanaRequest;
-  getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+  getSecurityStart: () => Promise<ToolsSecurityStart | undefined>;
 }): Promise<void> => {
   const security = await getSecurityStart();
   const canCreate = await hasWorkflowCreatePrivilege({ security, request, spaceId });
@@ -331,7 +330,7 @@ const assertWorkflowUpdateAccess = async ({
   workflowId: string;
   spaceId: string;
   request: KibanaRequest;
-  getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+  getSecurityStart: () => Promise<ToolsSecurityStart | undefined>;
 }): Promise<void> => {
   const security = await getSecurityStart();
   const canUpdate = await hasWorkflowUpdatePrivilege({ security, request, spaceId });
@@ -487,7 +486,7 @@ const persistWorkflow = async ({
   workflowsManagement: WorkflowsManagementApi;
   spaceId: string;
   request: KibanaRequest;
-  getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+  getSecurityStart: () => Promise<ToolsSecurityStart | undefined>;
 }): Promise<{ workflowId: string; newlyCreated: boolean }> => {
   if (existingWorkflowId !== undefined) {
     await assertWorkflowUpdateAccess({
@@ -538,7 +537,7 @@ export const runSavedAutomation = async ({
   spaceId: string;
   request: KibanaRequest;
   workflowsManagement: WorkflowsManagementApi;
-  getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+  getSecurityStart: () => Promise<ToolsSecurityStart | undefined>;
   logger: Logger;
   inputs?: Record<string, unknown>;
   completionTimeoutSec?: number;
@@ -591,6 +590,10 @@ export const runSavedAutomation = async ({
     }
 
     const waitForCompletion = completionTimeoutSec !== undefined;
+    // Loaded on first use: it brings in tracing, which a runtime that never executes a workflow skips.
+    const { executeWorkflow } = await import(
+      '@kbn/agent-builder-tools-base/workflows/execute_workflow'
+    );
     const result = await executeWorkflow({
       workflowId,
       workflowParams: inputs,
@@ -660,8 +663,8 @@ export const saveAutomationHandler = async ({
   attachments: AttachmentStateManager;
   logger: Logger;
   getAiIndexService: () => Promise<AiIndexService>;
-  getCoreStart: () => Promise<CoreStart>;
-  getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+  getCoreStart: () => Promise<ToolsCoreStart>;
+  getSecurityStart: () => Promise<ToolsSecurityStart | undefined>;
   getWorkflowsManagement: () => WorkflowsManagementApi;
 }): Promise<SaveAutomationResult> => {
   await assertContextEngineWriteAccess({ request, spaceId, getCoreStart, getSecurityStart });

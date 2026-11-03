@@ -7,7 +7,7 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { termQuery } from '@kbn/observability-plugin/server';
-import { TRANSACTION_NAME } from '@kbn/observability-shared-plugin/common';
+import { TRANSACTION_NAME } from '@kbn/observability-shared-plugin/common/field_names/elasticsearch';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { TRANSACTION_DURATION_HISTOGRAM, TRANSACTION_TYPE } from '../../../../common/es_fields/apm';
 import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';

@@ -24,6 +24,7 @@
     "extraPublicDirs": [
       "common",
       "common/entity_summary"
-    ]
+    ],
+    "tasks": { "requiredPlugins": ["workflowsExtensions", "licensing", "security"] }
   }
 }

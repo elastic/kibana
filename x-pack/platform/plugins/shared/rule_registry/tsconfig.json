@@ -13,6 +13,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/core-plugins-server",
     "@kbn/data-plugin",
     "@kbn/alerting-plugin",
     "@kbn/security-plugin",

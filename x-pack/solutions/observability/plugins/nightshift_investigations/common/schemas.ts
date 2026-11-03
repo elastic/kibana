@@ -7,7 +7,7 @@
 
 import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import type { JsonValue } from '@kbn/utility-types';
-import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema/src/significant_events/constants';
 import { INVESTIGATION_SUBJECT_TYPES } from './workflows/triggers';
 
 /**
@@ -198,6 +198,7 @@ export const v2AlertSnapshotSchema = lazySchema(() =>
   })
 );
 
+// eslint-disable-next-line @kbn/eslint/require_lazy_zod_schema
 export const investigationAlertSnapshotSchema = z.discriminatedUnion('alert_version', [
   alertSnapshotSchema.extend({ alert_version: z.literal('v1').optional() }),
   v2AlertSnapshotSchema,
@@ -211,6 +212,7 @@ export const investigationAlertSnapshotSchema = z.discriminatedUnion('alert_vers
  * believing the attach happened. If a single investigation ever needs several triggers, that is a
  * deliberate change to the subject shape, not an extra key smuggled through the context.
  */
+// eslint-disable-next-line @kbn/eslint/require_lazy_zod_schema
 export const alertInvestigationContextSchema = z
   .object({
     alerts: z.array(investigationAlertSnapshotSchema).min(1).max(MAX_ALERTS_PER_INVESTIGATION),

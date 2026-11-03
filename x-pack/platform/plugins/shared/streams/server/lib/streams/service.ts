@@ -17,7 +17,9 @@ export class StreamsService {
   constructor(
     private readonly coreSetup: CoreSetup<StreamsPluginStartDependencies>,
     private readonly logger: Logger,
-    private readonly isDev: boolean
+    private readonly isDev: boolean,
+    /** Given by a task pod, which has no Elasticsearch capabilities service. */
+    private readonly isServerlessOverride?: boolean
   ) {}
 
   async getClient({
@@ -37,7 +39,8 @@ export class StreamsService {
 
     const logger = this.logger;
 
-    const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
+    const isServerless =
+      this.isServerlessOverride ?? coreStart.elasticsearch.getCapabilities().serverless;
     const isWiredStreamViewsEnabled = await uiSettingsClient.get<boolean>(
       OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS
     );

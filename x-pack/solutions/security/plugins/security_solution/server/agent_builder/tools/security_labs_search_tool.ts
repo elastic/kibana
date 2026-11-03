@@ -17,7 +17,7 @@ import {
 } from '@kbn/product-doc-common';
 import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
-import { securityTool } from './constants';
+import { SECURITY_LABS_SEARCH_TOOL_ID } from './tool_ids';
 
 const securityLabsSearchSchema = lazySchema(() =>
   z.object({
@@ -29,7 +29,7 @@ const securityLabsSearchSchema = lazySchema(() =>
   })
 );
 
-export const SECURITY_LABS_SEARCH_TOOL_ID = securityTool('security_labs_search');
+export { SECURITY_LABS_SEARCH_TOOL_ID };
 
 // Path to GenAI Settings within the management app
 const GENAI_SETTINGS_APP_PATH = '/app/management/ai/genAiSettings';

@@ -9,9 +9,11 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { runAutomationHandler } from './handler';
 
-jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
+jest.mock('@kbn/agent-builder-tools-base/workflows/check_privileges', () => ({
   hasWorkflowExecutePrivilege: jest.fn().mockResolvedValue(true),
   hasWorkflowUpdatePrivilege: jest.fn().mockResolvedValue(true),
+}));
+jest.mock('@kbn/agent-builder-tools-base/workflows/execute_workflow', () => ({
   executeWorkflow: jest.fn(),
 }));
 
@@ -19,8 +21,12 @@ jest.mock('../../assert_context_engine_write_access', () => ({
   assertContextEngineWriteAccess: jest.fn().mockResolvedValue(undefined),
 }));
 
-const { hasWorkflowExecutePrivilege, hasWorkflowUpdatePrivilege, executeWorkflow } =
-  jest.requireMock('@kbn/agent-builder-tools-base/workflows');
+const { hasWorkflowExecutePrivilege, hasWorkflowUpdatePrivilege } = jest.requireMock(
+  '@kbn/agent-builder-tools-base/workflows/check_privileges'
+);
+const { executeWorkflow } = jest.requireMock(
+  '@kbn/agent-builder-tools-base/workflows/execute_workflow'
+);
 
 const { assertContextEngineWriteAccess } = jest.requireMock(
   '../../assert_context_engine_write_access'

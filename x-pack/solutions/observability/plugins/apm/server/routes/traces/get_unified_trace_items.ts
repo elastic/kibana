@@ -8,7 +8,7 @@
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { EventOutcome, StatusCode, Transaction } from '@kbn/apm-types';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import {
   AGENT_NAME,
   AT_TIMESTAMP,

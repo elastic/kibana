@@ -11,12 +11,10 @@ import type {
   SavedObjectsFindResponse,
   SavedObject,
   SavedObjectReference,
-  IBasePath,
 } from '@kbn/core/server';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import { flatMap, uniqWith, xorWith } from 'lodash';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
-import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { LensEmbeddableStateWithType } from '@kbn/lens-plugin/server/embeddable/types';
 import type {
   ActionsAttachmentPayload,
@@ -41,16 +39,12 @@ import {
 } from '../../common/types/domain';
 import { isValidOwner } from '../../common/utils/owner';
 import {
-  CASE_VIEW_COMMENT_PATH,
-  CASE_VIEW_PATH,
-  CASE_VIEW_TAB_PATH,
   FILE_ATTACHMENT_TYPE,
   GENERAL_CASES_OWNER,
   OWNER_INFO,
   PERSISTABLE_ATTACHMENT_TYPES,
   UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP,
 } from '../../common/constants';
-import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
 import type { AlertInfo, FileAttachmentRequest } from './types';
 
 import type { UpdateAlertStatusRequest } from '../client/alerts/types';
@@ -662,43 +656,7 @@ export const getApplicationRoute = (
   return appRoute.startsWith('/') ? appRoute : `/${appRoute}`;
 };
 
-export const getCaseViewPath = (params: {
-  publicBaseUrl: NonNullable<IBasePath['publicBaseUrl']>;
-  spaceId: string;
-  caseId: string;
-  owner: string;
-  commentId?: string;
-  tabId?: CASE_VIEW_PAGE_TABS;
-}): string => {
-  const normalizePath = (path: string): string => path.replaceAll('//', '/');
-  const removeEndingSlash = (path: string): string =>
-    path.endsWith('/') ? path.slice(0, -1) : path;
-
-  const { publicBaseUrl, caseId, owner, commentId, tabId, spaceId } = params;
-
-  const publicBaseUrlWithoutEndingSlash = removeEndingSlash(publicBaseUrl);
-  const publicBaseUrlWithSpace = addSpaceIdToPath(publicBaseUrlWithoutEndingSlash, spaceId);
-  const ownerInfo = isValidOwner(owner) ? OWNER_INFO[owner] : OWNER_INFO[GENERAL_CASES_OWNER];
-  const basePath = `${publicBaseUrlWithSpace}${ownerInfo.appBasePath}${ownerInfo.casesBasePath}`;
-
-  if (commentId) {
-    const commentPath = normalizePath(
-      CASE_VIEW_COMMENT_PATH.replace(':detailName', caseId).replace(':commentId', commentId)
-    );
-
-    return `${basePath}${commentPath}`;
-  }
-
-  if (tabId) {
-    const tabPath = normalizePath(
-      CASE_VIEW_TAB_PATH.replace(':detailName', caseId).replace(':tabId', tabId)
-    );
-
-    return `${basePath}${tabPath}`;
-  }
-
-  return `${basePath}${normalizePath(CASE_VIEW_PATH.replace(':detailName', caseId))}`;
-};
+export { getCaseViewPath } from './case_view_path';
 
 export const countUserAttachments = (
   attachments: Array<SavedObject<AttachmentAttributes>>

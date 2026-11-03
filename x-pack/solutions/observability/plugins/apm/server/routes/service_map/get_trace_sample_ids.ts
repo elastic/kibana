@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { sortBy, take, uniq } from 'lodash';
 import { existsQuery, kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import type { BoolQuery } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
@@ -22,7 +22,7 @@ import {
   TRACE_ID,
   TRANSACTION_NAME,
 } from '../../../common/es_fields/apm';
-import { SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map';
+import { SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map/constants';
 import { environmentQuery } from '../../../common/utils/environment_query';
 
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';

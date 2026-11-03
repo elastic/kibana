@@ -13,9 +13,7 @@ import type {
   EvalsSkillsPluginSetup,
   EvalsSkillsPluginStart,
 } from './types';
-import { createEvalDatasetManagementSkill } from './skills/eval_dataset_management/skill';
-import { createEvalExperimentsSkill } from './skills/eval_experiments/skill';
-import type { EvalExperimentsToolDeps } from './skills/eval_experiments/tools/deps';
+import { registerEvalsSkills } from './register_skills';
 
 /**
  * "Glue" plugin that registers evals-domain Agent Builder skills. It depends on
@@ -53,20 +51,13 @@ export class EvalsSkillsPlugin
     const getStartDependencies = () =>
       coreSetup.getStartServices().then(([, startDependencies]) => startDependencies);
 
-    const toolDeps: EvalExperimentsToolDeps = {
+    registerEvalsSkills({
+      agentBuilder,
       workflowsApi: workflowsManagement.management,
       serverBasePath: coreSetup.http.basePath.serverBasePath,
       logger: this.logger,
       getStartDependencies,
-    };
-
-    agentBuilder.skills.register(createEvalExperimentsSkill(toolDeps));
-    agentBuilder.skills.register(
-      createEvalDatasetManagementSkill({
-        logger: this.logger,
-        getStartDependencies,
-      })
-    );
+    });
     this.logger.debug('Registered evals Agent Builder skill(s).');
 
     return {};

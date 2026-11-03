@@ -8,7 +8,6 @@
 import { memoize, once } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { indexExplorer } from '@kbn/agent-builder-genai-utils';
 import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
@@ -80,6 +79,8 @@ Tool result: [{ type: "index", name: '.alerts' }]
         `Index explorer tool called with query: ${nlQuery}, indexPattern: ${indexPattern}, limit: ${limit}`
       );
       const model = await modelProvider.getDefaultModel();
+      // Loaded on first use: the package is large and most runs never call this tool.
+      const { indexExplorer } = await import('@kbn/agent-builder-genai-utils');
       const response = await indexExplorer({
         nlQuery,
         indexPattern,

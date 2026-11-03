@@ -13,7 +13,7 @@ import type {
   RunContextStackEntry,
   ToolHandlerContext,
 } from '@kbn/agent-builder-server';
-import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
+import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server/tools/utils';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { CREATE_PROPOSAL_WORKFLOW_ID } from '@kbn/workflows/managed';
 import {

@@ -33,6 +33,7 @@ import { AlertsClientFactory } from './alert_data_client/alerts_client_factory';
 import type { AlertsClient } from './alert_data_client/alerts_client';
 import type { RacApiRequestHandlerContext, RacRequestHandlerContext } from './types';
 import { defineRoutes } from './routes';
+import { ruleRegistryBridge } from './tasks/bridge';
 import { ruleRegistrySearchStrategyProvider, RULE_SEARCH_STRATEGY_NAME } from './search_strategy';
 
 export interface RuleRegistryPluginSetupDependencies {
@@ -179,6 +180,8 @@ export class RuleRegistryPlugin
     const getRacClientWithRequest = async (request: KibanaRequest) => {
       return alertsClientFactory.create(request);
     };
+
+    ruleRegistryBridge.setStart({ getRacClientWithRequest });
 
     return {
       getRacClientWithRequest,

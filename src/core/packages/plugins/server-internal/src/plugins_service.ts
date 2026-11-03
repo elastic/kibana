@@ -86,6 +86,7 @@ export interface PluginsServiceTasksSetupDeps {
     PluginsServiceSetupDeps['savedObjects'],
     'registerType' | 'setEncryptionExtension' | 'getDefaultIndex'
   >;
+  uiSettings: Pick<PluginsServiceSetupDeps['uiSettings'], 'register' | 'registerGlobal'>;
 }
 
 /**

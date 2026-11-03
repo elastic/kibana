@@ -21,7 +21,6 @@ import { getMlClient } from '../lib/ml_client';
 import { MlAuditLogger } from '../lib/ml_client/ml_audit_logger';
 import { mlSavedObjectServiceFactory } from '../saved_objects/service';
 import type { DataRecognizer } from '../models/data_recognizer/data_recognizer';
-import { dataRecognizerFactory } from '../models/data_recognizer/data_recognizer';
 import { getDataViewsServiceFactory } from '../lib/data_views_utils';
 
 export interface MlClientFactoryDeps {
@@ -143,6 +142,9 @@ export function createDataRecognizerFactory(
       return null;
     }
 
+    // Loaded on first use: it pulls in the models of every ML service, which a task pod (it has no
+    // data views, so never gets here) does not need to load.
+    const { dataRecognizerFactory } = await import('../models/data_recognizer/data_recognizer');
     return dataRecognizerFactory(
       esClient,
       mlClient,

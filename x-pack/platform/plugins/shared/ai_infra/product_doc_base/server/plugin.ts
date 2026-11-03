@@ -29,7 +29,8 @@ import { ProductDocInstallClient } from './services/doc_install_status';
 import { DocumentationManager } from './services/doc_manager';
 import { SearchService } from './services/search';
 import { registerRoutes } from './routes';
-import { registerTaskDefinitions } from './tasks';
+import { productDocBaseBridge } from './tasks/bridge';
+import { registerTaskDefinitions } from './task_definitions';
 import { waitForInstallLock, type InstallLockManager } from './services/install_lock';
 
 // Sentinels that mean no default AI connector/model is configured. Either can
@@ -68,6 +69,7 @@ export class ProductDocBasePlugin
     };
 
     coreSetup.savedObjects.registerType(productDocInstallStatusSavedObjectType);
+    productDocBaseBridge.setSetup(true);
 
     this.lockManager = new LockManagerService(coreSetup, this.logger);
     registerTaskDefinitions({
@@ -150,7 +152,7 @@ export class ProductDocBasePlugin
     ).catch((err: Error) => {
       this.logger.error(`Unexpected error in product documentation startup tasks: ${err.message}`);
     });
-    return {
+    const contract = {
       management: {
         install: documentationManager.install.bind(documentationManager),
         update: documentationManager.update.bind(documentationManager),
@@ -168,6 +170,8 @@ export class ProductDocBasePlugin
       },
       search: searchService.search.bind(searchService),
     };
+    productDocBaseBridge.setStart(contract);
+    return contract;
   }
 
   private async runStartupTasks(

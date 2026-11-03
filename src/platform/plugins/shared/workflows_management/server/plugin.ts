@@ -15,10 +15,11 @@ import type {
 } from '@kbn/core/server';
 
 import { registerHitlLifecycleAuditor } from '@kbn/workflows-execution-engine/server';
+import { createWorkflowsManagement } from './api/create_workflows_management';
 import { defineRoutes } from './api/routes';
-import { WorkflowManagementAuditLog } from './api/routes/utils/workflow_audit_logging';
-import { WorkflowsManagementApi } from './api/workflows_management_api';
-import { WorkflowsService } from './api/workflows_management_service';
+import type { WorkflowManagementAuditLog } from './api/routes/utils/workflow_audit_logging';
+import type { WorkflowsManagementApi } from './api/workflows_management_api';
+import type { WorkflowsService } from './api/workflows_management_service';
 import { AvailabilityUpdater } from './availability';
 import {
   createManagedWorkflowsSystemApiProvider,
@@ -32,6 +33,7 @@ import {
 import { ExecutionDataViewsBootstrap } from './execution_data_views_bootstrap';
 import { WorkflowsManagementFeatureConfig } from './features';
 import { createWorkflowsInboxProvider } from './inbox/workflows_inbox_provider';
+import { workflowsManagementBridge } from './tasks/bridge';
 import { registerConnectorEventTriggers } from './triggers/register_connector_event_triggers';
 import type {
   WorkflowsRequestHandlerContext,
@@ -80,11 +82,16 @@ export class WorkflowsPlugin
 
     this.logger.debug('Workflows Management: Creating workflows service');
 
-    const workflowsService = new WorkflowsService(core, plugins, this.logger, this.kibanaVersion);
+    const { workflowsService, api, audit } = createWorkflowsManagement({
+      core,
+      plugins,
+      logger: this.logger,
+      kibanaVersion: this.kibanaVersion,
+      available: this.config.available,
+    });
     this.workflowsService = workflowsService;
-
-    const api = new WorkflowsManagementApi(workflowsService, this.config.available, this.logger);
     this.api = api;
+    this.audit = audit;
 
     if (plugins.actions) {
       plugins.actions.registerType(getWorkflowsConnectorType(api));
@@ -112,10 +119,6 @@ export class WorkflowsPlugin
     const spaces = plugins.spaces.spacesService;
 
     const router = core.http.createRouter<WorkflowsRequestHandlerContext>();
-    const audit = new WorkflowManagementAuditLog({ service: workflowsService });
-    this.audit = audit;
-    api.setAuditLog(audit);
-
     defineRoutes({
       router,
       config: this.config,
@@ -156,6 +159,8 @@ export class WorkflowsPlugin
         createWorkflowsInboxProvider({ api, logger: this.logger })
       );
     }
+
+    workflowsManagementBridge.setSetup({ management: api });
 
     return {
       management: api,

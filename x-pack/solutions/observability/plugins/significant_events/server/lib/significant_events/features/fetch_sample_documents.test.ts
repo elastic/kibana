@@ -11,14 +11,14 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/logging';
 import type { FeatureWithFilter } from '@kbn/significant-events-schema';
-import { getSampleDocumentsEsql } from '@kbn/ai-tools';
-import { getDiverseSampleDocuments } from '@kbn/nightshift-ai';
+import { getSampleDocumentsEsql } from '@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents';
+import { getDiverseSampleDocuments } from '@kbn/nightshift-ai/src/shared/sampling/get_diverse_sample_documents';
 import { fetchSampleDocuments } from './fetch_sample_documents';
 
-jest.mock('@kbn/ai-tools', () => ({
+jest.mock('@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents', () => ({
   getSampleDocumentsEsql: jest.fn(),
 }));
-jest.mock('@kbn/nightshift-ai', () => ({
+jest.mock('@kbn/nightshift-ai/src/shared/sampling/get_diverse_sample_documents', () => ({
   getDiverseSampleDocuments: jest.fn(),
 }));
 

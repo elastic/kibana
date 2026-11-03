@@ -10,7 +10,7 @@ import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import {
   BulkEditActionSummary,
   NormalizedRuleError,
-} from '../../../common/api/detection_engine/rule_management';
+} from '../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route.gen';
 import type { BulkRuleSummaryOutput } from '../../../common/workflows/step_types/common/bulk_action_schemas';
 import { toApiExecutionError } from './to_api_execution_error';
 

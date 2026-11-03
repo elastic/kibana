@@ -24,7 +24,7 @@ export const resolveConnectorModel = async ({
   logger,
 }: {
   connectorId: string;
-  inference: InferenceServerStart;
+  inference: Pick<InferenceServerStart, 'getConnectorById'>;
   request: KibanaRequest;
   logger: Pick<Logger, 'debug'>;
 }): Promise<Model | undefined> => {

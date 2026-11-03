@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { validateQuery } from '@kbn/esql-language';
 import { z as z4 } from '@kbn/zod/v4';
 import type { EsqlAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType, esqlAttachmentDataSchema } from '@kbn/agent-builder-common/attachments';
@@ -34,6 +33,8 @@ export const createEsqlAttachmentType = (): AttachmentTypeDefinition<
         };
       }
 
+      // Loaded on first use: the ES|QL language package is large and most runs never validate.
+      const { validateQuery } = await import('@kbn/esql-language');
       const validationResult = await validateQuery(parseResult.data.query);
       if (validationResult.errors.length > 0) {
         const message = `Query validation returned errors: \n${validationResult.errors

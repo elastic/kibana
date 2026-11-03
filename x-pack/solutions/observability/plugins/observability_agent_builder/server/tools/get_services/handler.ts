@@ -13,8 +13,8 @@ import { kqlQuery } from '@kbn/observability-utils-server/es/queries/kql_query';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import type { ServicesItemsItem } from '../../data_registry/data_registry_types';
 import type {
-  ObservabilityAgentBuilderCoreSetup,
-  ObservabilityAgentBuilderPluginSetupDependencies,
+  ObservabilityAgentBuilderStartServices,
+  ObservabilityAgentBuilderToolPlugins,
 } from '../../types';
 import { getLogsIndices } from '../../utils/get_logs_indices';
 import { getMetricsIndices } from '../../utils/get_metrics_indices';
@@ -133,8 +133,8 @@ export async function getToolHandler({
   anomalySeverities,
   kqlFilter,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
-  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  core: ObservabilityAgentBuilderStartServices;
+  plugins: ObservabilityAgentBuilderToolPlugins;
   request: KibanaRequest;
   esClient: IScopedClusterClient;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;

@@ -7,8 +7,8 @@
 
 import type { EsqlQueryRequest, FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
-import type { ProbeStatus } from '@kbn/significant-events-schema';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema/src/significant_events';
+import type { ProbeStatus } from '@kbn/significant-events-schema/src/significant_events';
 import { canCompileMatchMetric } from './can_compile_match_metric';
 
 export interface ProbeWindow {

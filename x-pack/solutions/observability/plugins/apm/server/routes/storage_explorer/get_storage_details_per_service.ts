@@ -6,7 +6,7 @@
  */
 
 import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import { PROCESSOR_EVENT, SERVICE_NAME, TIER, INDEX } from '../../../common/es_fields/apm';
 import {
   IndexLifecyclePhaseSelectOption,

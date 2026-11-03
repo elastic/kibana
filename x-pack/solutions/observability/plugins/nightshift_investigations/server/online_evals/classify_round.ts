@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_RECOVERED_FOLLOW_UP } from '../client/investigations_client';
+import { ALERT_RECOVERED_FOLLOW_UP } from '../client/follow_up';
 
 export type OnlineEvalsRoundKind = 'initial' | 'follow_up' | 'alert_recovery';
 

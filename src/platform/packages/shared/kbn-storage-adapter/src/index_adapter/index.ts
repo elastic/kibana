@@ -150,6 +150,12 @@ export interface StorageIndexAdapterOptions<TApplicationType> {
    *    the `illegal_argument_exception` on the first write and retries.
    */
   isServerless?: boolean;
+  /**
+   * When true, the adapter never creates or changes anything in Elasticsearch (index template,
+   * write index, mappings). Reads and writes use what exists; a write to an index that does not
+   * exist fails with a clear error. Used by task pods, where Kibana owns the installation.
+   */
+  readOnly?: boolean;
 }
 
 /**
@@ -396,6 +402,15 @@ export class StorageIndexAdapter<
    * - the index has the right version (if not, update it)
    */
   private async validateComponentsBeforeWriting<T>(cb: () => Promise<T>): Promise<T> {
+    if (this.options.readOnly) {
+      const writeIndex = await this.getCurrentWriteIndexName();
+      if (!writeIndex) {
+        throw new Error(
+          `Index "${this.storage.name}" does not exist and this client is read-only (it cannot create indices); Kibana creates it.`
+        );
+      }
+      return await cb();
+    }
     const expectedSchemaVersion = getSchemaVersion(this.storage);
     await this.createOrUpdateIndexTemplate();
 
@@ -416,6 +431,9 @@ export class StorageIndexAdapter<
   }
 
   private async ensureMappingsBeforeReading<T>(cb: () => Promise<T>): Promise<T> {
+    if (this.options.readOnly) {
+      return cb();
+    }
     if (!this.updateMappingsPromise) {
       this.updateMappingsPromise = this.updateMappingsIfNeeded().catch((error) => {
         this.updateMappingsPromise = undefined;

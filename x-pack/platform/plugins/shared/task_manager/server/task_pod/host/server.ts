@@ -8,11 +8,11 @@
 import { createServer } from 'node:http';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { FakeRequestEnricher } from '@kbn/core-security-server';
 import { serializeTaskRunError } from '../../task_running/errors';
 import type { PodRunRequest, PodRunResponse } from '../wire';
 import { MAX_TIMER_MS, reviveTaskInstance, serializeRunResult } from '../wire';
 import type { CapturedTaskDefinition } from './boot_tasks_plugins';
-import { enrichPodFakeRequest } from './core/small_services';
 import { POD_KIBANA_VERSION } from './version';
 import { PodLogger } from './logger';
 
@@ -71,6 +71,7 @@ export const startPodServer = ({
     .map((t) => t.trim())
     .filter(Boolean),
   kibanaVersion = POD_KIBANA_VERSION,
+  enrichFakeRequest = () => undefined,
 }: {
   taskDefinitions: Map<string, CapturedTaskDefinition>;
   port: number;
@@ -79,6 +80,8 @@ export const startPodServer = ({
   /** Globs of task types this pod serves (a plugin's other types stay with Kibana). Default: all. */
   taskTypes?: string[];
   kibanaVersion?: string;
+  /** Binds a run's user to its fake request (Core's fake request enricher, from the security service). */
+  enrichFakeRequest?: FakeRequestEnricher;
 }) => {
   const inFlight = new Map<string, InFlight>();
   let draining = false;
@@ -122,16 +125,16 @@ export const startPodServer = ({
             userProfileId: body.userProfileId,
             userName: body.userName,
             uiamApiKeyExternal: body.uiamApiKeyExternal,
-            enrichFakeRequest: enrichPodFakeRequest,
+            enrichFakeRequest,
           })
         : undefined;
     const enrichRequest =
       body.userProfileId || body.userName
         ? (request: KibanaRequest) =>
-            enrichPodFakeRequest(request, {
+            enrichFakeRequest(request, {
               profileId: body.userProfileId,
               username: body.userName,
-            })
+            } as never)
         : undefined;
 
     const task = definition.createTaskRunner({

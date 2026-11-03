@@ -10,14 +10,14 @@ import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { CONTEXT_ENGINE_RUN_AUTOMATION_TOOL_ID } from '../../../../common/agent_builder_tools';
 import { createRunAutomationTool } from './tool';
 
-jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
+jest.mock('@kbn/agent-builder-tools-base/workflows/check_privileges', () => ({
   hasWorkflowReadPrivilege: jest.fn().mockResolvedValue(true),
   hasWorkflowExecutePrivilege: jest.fn().mockResolvedValue(true),
   hasWorkflowUpdatePrivilege: jest.fn().mockResolvedValue(true),
 }));
 
 const { hasWorkflowReadPrivilege, hasWorkflowExecutePrivilege, hasWorkflowUpdatePrivilege } =
-  jest.requireMock('@kbn/agent-builder-tools-base/workflows');
+  jest.requireMock('@kbn/agent-builder-tools-base/workflows/check_privileges');
 
 describe('run_automation tool', () => {
   const getWorkflowMock = jest.fn();

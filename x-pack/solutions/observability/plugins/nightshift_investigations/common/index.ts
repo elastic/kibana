@@ -131,13 +131,11 @@ export interface StartInvestigationResponse {
   investigation_id: string;
 }
 
-export const NIGHTSHIFT_INVESTIGATION_AGENT_ID = 'nightshift.investigation';
-
-/** Answers one telemetry question from the sandbox without running an investigation. */
-export const NIGHTSHIFT_ASSISTANT_AGENT_ID = 'nightshift.assistant';
-
-/** Bound for investigation ids, concurrency keys, and other keyword-sized strings. */
-export const MAX_KEYWORD_LENGTH = 500;
+export {
+  NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+  NIGHTSHIFT_ASSISTANT_AGENT_ID,
+  MAX_KEYWORD_LENGTH,
+} from './constants';
 
 export const DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID = 'manual';
 

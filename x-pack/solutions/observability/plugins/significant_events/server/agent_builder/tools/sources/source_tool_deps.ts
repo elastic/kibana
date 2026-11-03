@@ -7,12 +7,12 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
-import type { GetScopedClients } from '../../../routes/types';
+import type { GetAgentBuilderScopedClients } from '../../../scoped_clients';
 import type { SignificantEventsServer } from '../../../types';
 
 /** The dependencies every source tool takes. */
 export interface SourceToolDeps {
-  getScopedClients: GetScopedClients;
+  getScopedClients: GetAgentBuilderScopedClients;
   server: SignificantEventsServer;
   logger: Logger;
 }

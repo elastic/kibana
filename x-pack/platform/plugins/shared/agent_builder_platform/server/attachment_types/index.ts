@@ -6,7 +6,8 @@
  */
 
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import type { CoreSetup } from '@kbn/core-lifecycle-server';
+import type { AgentBuilderPluginSetup, AgentsStart } from '@kbn/agent-builder-server';
+import type { ActionsTasksStart } from '@kbn/actions-plugin/server/tasks';
 import type { Logger } from '@kbn/logging';
 import type { FilesStart } from '@kbn/files-plugin/server';
 import { createTextAttachmentType } from './text';
@@ -17,38 +18,20 @@ import { createConnectorAttachmentType } from './connector';
 import { createConnectorSetupAttachmentType } from './connector_setup';
 import { createSkillAttachmentType } from './skill';
 import { createImageAttachmentType } from './image';
-import type {
-  AgentBuilderPlatformPluginStart,
-  PluginSetupDependencies,
-  PluginStartDependencies,
-} from '../types';
 
 export const registerAttachmentTypes = ({
-  coreSetup,
-  setupDeps,
+  agentBuilder,
+  getFilesPlugin,
+  getAgentsStart,
+  getActionsStart,
   logger,
 }: {
-  coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>;
-  setupDeps: PluginSetupDependencies;
+  agentBuilder: AgentBuilderPluginSetup;
+  getFilesPlugin: () => Promise<FilesStart>;
+  getAgentsStart: () => Promise<AgentsStart>;
+  getActionsStart: () => Promise<ActionsTasksStart>;
   logger: Logger;
 }) => {
-  const { agentBuilder } = setupDeps;
-
-  const getFilesPlugin = async (): Promise<FilesStart> => {
-    const [, startDeps] = await coreSetup.getStartServices();
-    return startDeps.files;
-  };
-
-  const getAgentsStart = async () => {
-    const [, startDeps] = await coreSetup.getStartServices();
-    return startDeps.agentBuilder.agents;
-  };
-
-  const getActionsStart = async () => {
-    const [, startDeps] = await coreSetup.getStartServices();
-    return startDeps.actions;
-  };
-
   const attachmentTypes: AttachmentTypeDefinition<any, any>[] = [
     createTextAttachmentType(),
     createScreenContextAttachmentType(),

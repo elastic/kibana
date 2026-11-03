@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 
-// plugin config
-export const config: PluginConfigDescriptor = {
-  schema: schema.never(),
-};
+export { config } from './config';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { ApmDataAccessPlugin } = await import('./plugin');

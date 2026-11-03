@@ -8,12 +8,9 @@
 import { memoize, once } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import {
-  generateEsql,
-  GenerateEsqlNoDataError,
-  setDefaultEsqlCacheKey,
-} from '@kbn/agent-builder-genai-utils';
-import { toHashedId, type DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { generateEsql } from '@kbn/agent-builder-genai-utils';
+import { type DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { toHashedId } from '@kbn/agent-builder-server';
 import type { ToolHandlerResult } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { resolveTimeRange } from './screen_context_utils';
@@ -23,9 +20,13 @@ import {
   getIncludeFrozenParam,
 } from './include_frozen_schema';
 
+// Loaded on first use: the package pulls in the inference stack, which most runs never reach.
+const loadGenaiUtils = () => import('@kbn/agent-builder-genai-utils');
+
 const callGenerateEsql = async (params: Parameters<typeof generateEsql>[0]) => {
+  const { generateEsql: generate, GenerateEsqlNoDataError } = await loadGenaiUtils();
   try {
-    return { response: await generateEsql(params), noDataError: undefined };
+    return { response: await generate(params), noDataError: undefined };
   } catch (err) {
     if (err instanceof GenerateEsqlNoDataError) {
       return { response: undefined, noDataError: err };
@@ -97,7 +98,10 @@ export const generateEsqlTool = ({
   isServerless?: boolean;
 } = {}): DynamicSchemaBuiltinToolDefinition<NlToEsqlToolSchema> => {
   if (organizationId) {
-    setDefaultEsqlCacheKey(toHashedId(organizationId));
+    const cacheKey = toHashedId(organizationId);
+    loadGenaiUtils()
+      .then(({ setDefaultEsqlCacheKey }) => setDefaultEsqlCacheKey(cacheKey))
+      .catch(() => undefined);
   }
   return {
     id: platformCoreTools.generateEsql,

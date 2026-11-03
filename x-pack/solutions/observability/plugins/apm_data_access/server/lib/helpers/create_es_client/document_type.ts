@@ -8,7 +8,8 @@
 import { ProcessorEvent } from '@kbn/apm-types-shared';
 import { termQuery } from '@kbn/observability-utils-common/es/queries/term_query';
 import { METRICSET_INTERVAL, METRICSET_NAME } from '@kbn/apm-types/es_fields';
-import { DATASTREAM_DATASET, type DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { DATASTREAM_DATASET } from '@kbn/metrics-data-access-plugin/common/constants';
 import type { estypes } from '@elastic/elasticsearch';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';

@@ -7,7 +7,7 @@
 
 import type { UnifiedSpanDocument } from '@kbn/apm-types';
 import { existsQuery, rangeQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { SPAN_ID, TRACE_ID, PROCESSOR_EVENT, PARENT_ID } from '../../../common/es_fields/apm';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';

@@ -12,8 +12,8 @@ import { createErrorAttachmentType } from './error';
 import { createAlertAttachmentType } from './alert';
 import { createLogAttachmentType } from './log';
 import type {
-  ObservabilityAgentBuilderCoreSetup,
-  ObservabilityAgentBuilderPluginSetupDependencies,
+  ObservabilityAgentBuilderStartServices,
+  ObservabilityAgentBuilderToolPlugins,
 } from '../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
 import { createServiceAttachmentType } from './service';
@@ -28,8 +28,8 @@ export async function registerAttachments({
   logger,
   dataRegistry,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
-  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  core: ObservabilityAgentBuilderStartServices;
+  plugins: ObservabilityAgentBuilderToolPlugins;
   logger: Logger;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
 }) {

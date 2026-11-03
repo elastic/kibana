@@ -9,7 +9,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { contextEngineMemoryTools } from '@kbn/agent-builder-common/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { getAgentFromRunContext } from '@kbn/agent-builder-server';
+import { getAgentFromRunContext } from '@kbn/agent-builder-server/runner/run_context_utils';
 import { randomUUID } from 'crypto';
 import { aiIndexIdFieldSchema } from '@kbn/context-engine-plugin/common/ai_index_schemas';
 import { MAX_KI_CONTENT_LENGTH } from '@kbn/context-engine-plugin/common/constants';
@@ -30,10 +30,9 @@ import {
   type KiWriter,
   type StoredKi,
 } from '@kbn/context-engine-plugin/server/ai_indices/ki_revision';
-import type { CoreStart } from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { isoDateTime, z } from '@kbn/zod/v4';
 import dedent from 'dedent';
+import type { ToolsCoreStart, ToolsSecurityStart } from '../../../start_types';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
 import { createMemoryToolsAvailability } from '../ai_index_tools_availability';
 import { getWritableMemoryAiIndex } from '../get_writable_memory_ai_index';
@@ -104,8 +103,8 @@ export const createRememberTool = ({
   getCurrentDate = () => new Date(),
 }: {
   getAiIndexService: () => Promise<AiIndexService>;
-  getCoreStart: () => Promise<CoreStart>;
-  getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+  getCoreStart: () => Promise<ToolsCoreStart>;
+  getSecurityStart: () => Promise<ToolsSecurityStart | undefined>;
   generateId?: () => string;
   generateSessionId?: () => string;
   getCurrentDate?: () => Date;

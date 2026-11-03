@@ -12,9 +12,8 @@ import type {
   PluginInitializerContext,
   Logger,
 } from '@kbn/core/server';
-import { registerTools } from './tools/register_tools';
-import { registerAttachments } from './attachments/register_attachments';
-import { registerSkills } from './skills/register_skills';
+import { registerObservabilityAgentBuilder } from './register_agent_builder';
+import { observabilityAgentBuilderBridge } from './tasks/bridge';
 import type {
   ObservabilityAgentBuilderPluginSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
@@ -52,25 +51,13 @@ export class ObservabilityAgentBuilderPlugin
     >,
     plugins: ObservabilityAgentBuilderPluginSetupDependencies
   ): ObservabilityAgentBuilderPluginSetup {
-    registerSkills({ plugins, logger: this.logger });
-
-    registerTools({
+    registerObservabilityAgentBuilder({
       core,
       plugins,
       dataRegistry: this.dataRegistry,
       logger: this.logger,
-    }).catch((error) => {
-      this.logger.error(`Error registering observability tools: ${error}`);
     });
-
-    registerAttachments({
-      core,
-      plugins,
-      logger: this.logger,
-      dataRegistry: this.dataRegistry,
-    }).catch((error) => {
-      this.logger.error(`Error registering observability attachments: ${error}`);
-    });
+    observabilityAgentBuilderBridge.setSetup(true);
 
     registerServerRoutes({ core, plugins, logger: this.logger, dataRegistry: this.dataRegistry });
 

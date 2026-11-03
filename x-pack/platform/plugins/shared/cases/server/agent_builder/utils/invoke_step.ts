@@ -6,7 +6,7 @@
  */
 
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
-import { getAgentFromRunContext } from '@kbn/agent-builder-server';
+import { getAgentFromRunContext } from '@kbn/agent-builder-server/runner';
 import type {
   ServerHandlerStepDefinition,
   StepHandlerContext,

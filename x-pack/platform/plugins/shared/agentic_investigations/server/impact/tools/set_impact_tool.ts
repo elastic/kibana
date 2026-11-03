@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
-import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
+import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server/tools/utils';
 import { investigationEvidenceSchema, MAX_EVIDENCE_TEXT_LENGTH } from '../../../common/evidence';
 import {
   MAX_ENTITY_ID_LENGTH,

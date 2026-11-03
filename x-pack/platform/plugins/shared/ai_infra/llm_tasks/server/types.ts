@@ -8,7 +8,7 @@
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import type { ResourceType } from '@kbn/product-doc-common';
-import type { RetrieveDocumentationAPI } from './tasks/retrieve_documentation';
+import type { RetrieveDocumentationAPI } from './task_impls/retrieve_documentation';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 

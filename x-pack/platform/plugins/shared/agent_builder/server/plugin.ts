@@ -36,7 +36,7 @@ import { createStorage as createAgentStorage } from './services/agents/persisted
 import { registerRoutes } from './routes';
 import { agentBuilderSpaceSettingsType } from './saved_objects';
 import { registerUISettings } from './ui_settings';
-import { getRunAgentStepDefinition, rerankStepDefinition } from './step_types';
+import { registerAgentBuilderWorkflowSteps } from './workflows/register_steps';
 import type { AgentBuilderHandlerContext } from './request_handler_context';
 import { registerAgentBuilderHandlerContext } from './request_handler_context';
 import { createAgentBuilderUsageCounter } from './telemetry/usage_counters';
@@ -52,7 +52,6 @@ import { createSmlTools } from './services/tools/builtin/sml';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
 import { createConversationEventBus } from './workflows/triggers/conversation_event_bus';
-import { registerAttachmentWorkflowSteps, registerConversationWorkflowSteps } from './workflows';
 import { registerConversationWorkflowEventBridge } from './workflows/triggers/event_bridge';
 import { apiPrivileges } from '../common/features';
 import { runToolIdBackfill } from './backfills/tool_id_backfill';
@@ -198,51 +197,10 @@ export class AgentBuilderPlugin
       register: this.config.deductive?.register ?? false,
     });
 
-    setupDeps.workflowsExtensions.registerStepDefinition(
-      getRunAgentStepDefinition(this.serviceManager)
-    );
-    setupDeps.workflowsExtensions.registerStepDefinition(rerankStepDefinition);
-
-    registerConversationWorkflowSteps(setupDeps.workflowsExtensions, {
-      getConversationClient: async (request) => {
-        const services = this.serviceManager.internalStart;
-        if (!services) {
-          throw new Error('Conversation service not available — plugin has not started');
-        }
-        return services.conversations.getScopedClient({ request });
-      },
-      getAgentRegistry: async (request) => {
-        const services = this.serviceManager.internalStart;
-        if (!services) {
-          throw new Error('Agents service not available — plugin has not started');
-        }
-        return services.agents.getRegistry({ request });
-      },
-      getExecutionService: () => {
-        const services = this.serviceManager.internalStart;
-        if (!services) {
-          throw new Error('Execution service not available — plugin has not started');
-        }
-        return services.execution;
-      },
-    });
-
-    registerAttachmentWorkflowSteps(setupDeps.workflowsExtensions, {
-      getAttachmentClient: async (request) => {
-        const services = this.serviceManager.internalStart;
-        if (!services) {
-          throw new Error('Attachment client not available — plugin has not started');
-        }
-        const [coreStart, startDeps] = await coreSetup.getStartServices();
-        return createAttachmentPublicClient({
-          request,
-          conversationsService: services.conversations,
-          attachmentsService: services.attachments,
-          coreStart,
-          spaces: startDeps.spaces,
-          source: 'workflow',
-        });
-      },
+    registerAgentBuilderWorkflowSteps({
+      workflowsExtensions: setupDeps.workflowsExtensions,
+      serviceManager: this.serviceManager,
+      getStartServices: coreSetup.getStartServices as never,
     });
 
     registerAgentBuilderHandlerContext({ coreSetup });

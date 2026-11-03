@@ -7,7 +7,7 @@
 
 import semverCompare from 'semver/functions/compare';
 import semverValid from 'semver/functions/valid';
-import { MAX_EVALUATOR_VERSION_LENGTH } from '@kbn/evals-common';
+import { MAX_EVALUATOR_VERSION_LENGTH } from '@kbn/evals-common/constants';
 import {
   assertValidEvaluatorName,
   type EvaluatorDefinitionClient,

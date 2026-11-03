@@ -7,10 +7,10 @@
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
-import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { CoreStart } from '@kbn/core/server';
 
 import { createTracedLogger } from '@kbn/discoveries/impl/lib/create_traced_logger';
+import type { AdhocAttackDiscoveryDataClient } from '../../../types';
 import type { DiscoveriesPluginStartDeps } from '../../../types';
 import { asNonEmpty } from '../../../lib/non_empty_string';
 import { resolveConnectorDetails } from '../../helpers/resolve_connector_details';
@@ -23,7 +23,7 @@ export const getPersistDiscoveriesStepDefinition = ({
   getStartServices,
   logger,
 }: {
-  adhocAttackDiscoveryDataClient: IRuleDataClient;
+  adhocAttackDiscoveryDataClient: AdhocAttackDiscoveryDataClient;
   getStartServices: () => Promise<{
     coreStart: CoreStart;
     pluginsStart: DiscoveriesPluginStartDeps;

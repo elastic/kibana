@@ -6,13 +6,17 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { describeDataset, formatDocumentAnalysis, getMappingConflicts } from '@kbn/ai-tools';
+import { describeDataset } from '@kbn/ai-tools/src/tools/describe_dataset';
+import { formatDocumentAnalysis } from '@kbn/ai-tools/src/tools/describe_dataset/format_document_analysis';
+import { getMappingConflicts } from '@kbn/ai-tools/src/utils/get_mapping_conflicts';
 import type { AnalysisTarget } from '../../../shared/analysis_target';
 import { datasetAnalysisGenerator } from './dataset_analysis';
 
-jest.mock('@kbn/ai-tools', () => ({
-  describeDataset: jest.fn(),
+jest.mock('@kbn/ai-tools/src/tools/describe_dataset', () => ({ describeDataset: jest.fn() }));
+jest.mock('@kbn/ai-tools/src/tools/describe_dataset/format_document_analysis', () => ({
   formatDocumentAnalysis: jest.fn(),
+}));
+jest.mock('@kbn/ai-tools/src/utils/get_mapping_conflicts', () => ({
   getMappingConflicts: jest.fn(),
 }));
 

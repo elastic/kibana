@@ -43,6 +43,10 @@
     "requiredBundles": [],
     "extraPublicDirs": [
       "common"
-    ]
+    ],
+    "tasks": {
+      "requiredPlugins": ["agentBuilder", "licensing", "alerting", "fieldsMetadata"],
+      "optionalPlugins": ["spaces"]
+    }
   }
 }

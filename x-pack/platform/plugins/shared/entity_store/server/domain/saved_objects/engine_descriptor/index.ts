@@ -9,7 +9,8 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { EntityType } from '../../../../common/domain/definitions/entity_schema';
 import type { EngineDescriptor } from './constants';
 import { EngineLogExtractionState, VersionState } from './constants';

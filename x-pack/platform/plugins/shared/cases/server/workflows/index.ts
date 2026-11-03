@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { CasesServerSetupDependencies } from '../types';
+import type { WorkflowsExtensionsTasksSetup } from '@kbn/workflows-extensions/server/tasks';
 import type { CasesClient } from '../client';
 import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 
@@ -15,7 +15,7 @@ import { createCaseFromTemplateStepDefinition } from './steps/create_case_from_t
 import { setExtendedFieldsStepDefinition } from './steps/set_extended_fields';
 
 export function registerCaseWorkflowSteps(
-  workflowsExtensions: CasesServerSetupDependencies['workflowsExtensions'],
+  workflowsExtensions: Pick<WorkflowsExtensionsTasksSetup, 'registerStepDefinition'> | undefined,
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>,
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry,
   isCasesAttachmentsEnabled: boolean,

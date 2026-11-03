@@ -11,6 +11,7 @@
     "configPath": ["xpack", "apm_data_access"],
     "requiredPlugins": ["data", "apmSourcesAccess"],
     "optionalPlugins": ["security"],
-    "requiredBundles": []
+    "requiredBundles": [],
+    "tasks": { "requiredPlugins": ["apmSourcesAccess"] }
   }
 }

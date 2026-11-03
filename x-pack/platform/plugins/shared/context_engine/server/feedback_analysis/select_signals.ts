@@ -12,7 +12,7 @@ import { MAX_GROUP_SIGNAL_IDS } from '../../common/constants';
 import type { AiIndexSignalTimeRange, AiIndexSource } from '../../common/http_api/ai_indices';
 import type { Signal, SignalTag } from '../../common/http_api/signals';
 import { buildSignalsIndexName } from '../../common/http_api/signals';
-import { parseFromClause } from '../tasks/transform';
+import { parseFromClause } from '../signal_generator/transform';
 import type { SignalPatternCandidate } from './group_signals';
 import { resolveSignalWindow } from './window';
 

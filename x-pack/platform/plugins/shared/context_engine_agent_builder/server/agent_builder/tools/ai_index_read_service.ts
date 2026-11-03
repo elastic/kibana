@@ -7,17 +7,16 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { ContextEnginePluginStart } from '@kbn/context-engine-plugin/server';
+import type { ToolsContextEngineStart, ToolsSecurityStart } from '../../start_types';
 import { hasContextEngineReadPrivilege } from '../has_context_engine_read_privilege';
 
 export type AiIndexDataReadServiceApi = ReturnType<
-  ContextEnginePluginStart['getAiIndexDataReadService']
+  ToolsContextEngineStart['getAiIndexDataReadService']
 >;
 
 export interface AiIndexToolDeps {
-  getContextEngineStart: () => Promise<ContextEnginePluginStart>;
-  getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+  getContextEngineStart: () => Promise<ToolsContextEngineStart>;
+  getSecurityStart: () => Promise<ToolsSecurityStart | undefined>;
 }
 
 export const CONTEXT_ENGINE_READ_DENIED_MESSAGE =

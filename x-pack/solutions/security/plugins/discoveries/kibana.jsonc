@@ -31,7 +31,11 @@
       "spaces",
       "workflowsManagement"
     ],
-    "requiredBundles": []
+    "requiredBundles": [],
+    "tasks": {
+      "requiredPlugins": ["actions", "eventLog", "security", "workflowsExtensions"],
+      "optionalPlugins": ["agentBuilder", "inference", "searchInferenceEndpoints", "spaces", "workflowsManagement"]
+    }
   }
 }
 

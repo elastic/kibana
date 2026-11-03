@@ -5,81 +5,15 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
 import { types } from '@kbn/storage-adapter';
-import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { defineInvestigationAttachment } from '@kbn/agentic-investigations-plugin/server';
-import { investigationNotificationDestinationSchema } from '../../../common';
+import {
+  NOTIFICATION_ROUTING_ATTACHMENT_TYPE,
+  notificationRoutingSchema,
+  type StoredNotificationRouting,
+} from './notification_routing_schema';
 
-export const NOTIFICATION_ROUTING_ATTACHMENT_TYPE = 'nightshift.notification_routing';
-export const notificationPhaseSchema = z.enum(['started', 'completed', 'failed']);
-const identifier = z.string().min(1).max(500);
-const messageId = z.string().min(1).max(100);
-const timestamp = z.string().min(1).max(64);
-
-export const notificationAttemptSchema = z.strictObject({
-  execution_id: identifier,
-  destination_id: identifier,
-  phase: notificationPhaseSchema,
-  attempt_id: z.string().min(1).max(100),
-  status: z.enum(['sent', 'failed', 'unconfirmed']),
-  attempted_at: timestamp,
-  creates_root: z.boolean(),
-  message_ts: messageId.optional(),
-  external_conversation_id: identifier.optional(),
-  sent_at: timestamp.optional(),
-  error: z.string().max(MAX_TEXT_LENGTH).optional(),
-});
-
-export const notificationRoutingSchema = z.strictObject({
-  id: identifier,
-  spaceId: identifier,
-  conversationId: identifier,
-  investigationId: identifier,
-  destinations: z.array(
-    investigationNotificationDestinationSchema
-      .omit({ automation_id: true, automation_name: true })
-      .extend({
-        id: identifier,
-        automations: z.array(
-          z.strictObject({
-            id: z.string().max(500).optional(),
-            name: z.string().max(500).optional(),
-          })
-        ),
-        thread: z.strictObject({ channel: identifier, thread_ts: messageId }).optional(),
-      })
-  ),
-  executions: z.array(
-    z.strictObject({
-      id: identifier,
-      workflow_id: identifier,
-      destination_ids: z.array(identifier),
-      terminal_phase: z.enum(['completed', 'failed']).optional(),
-    })
-  ),
-  attempts: z.array(notificationAttemptSchema),
-});
-
-export type NotificationPhase = z.infer<typeof notificationPhaseSchema>;
-export type NotificationAttempt = z.infer<typeof notificationAttemptSchema>;
-export type NotificationOutcome = Pick<
-  NotificationAttempt,
-  'status' | 'message_ts' | 'external_conversation_id' | 'sent_at' | 'error'
-> & {
-  channel?: string;
-};
-export type NotificationRouting = z.infer<typeof notificationRoutingSchema>;
-export type StoredNotificationRouting = Omit<NotificationRouting, 'id'>;
-export type NotificationDestination = NotificationRouting['destinations'][number];
-
-/**
- * Whether the destination replies under a message the caller named, such as the Slack message that
- * triggered an automation, rather than under a thread it starts itself. That thread belongs to the
- * run started for the message, and the run keeps a single message in it.
- */
-export const repliesUnderCallerMessage = ({ params }: Pick<NotificationDestination, 'params'>) =>
-  typeof params.thread_ts === 'string' && params.thread_ts.length > 0;
+export * from './notification_routing_schema';
 
 const notificationRoutingStorageSettings = {
   name: '.kibana-nightshift-notification-routing',

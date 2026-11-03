@@ -24,12 +24,13 @@ program
   .requiredOption('--family <name>', 'The task pod family to run, e.g. alerting_v2')
   .option('--port <port>', 'Port to serve /run, /cancel and /health on', '3500')
   .action(async ({ family, port }: { family: string; port: string }) => {
-    const { plugins } = loadFamily(family);
+    const { plugins, taskTypes } = loadFamily(family);
     process.env.PORT ??= port;
     // Secrets such as preconfigured connectors' live in the keystore, which Kibana reads the same way.
     const { readKeystore } = await import('../keystore/lib/read_keystore');
     await startPod({
       pluginIds: plugins,
+      taskTypes,
       defaultPort: Number(port),
       baseConfig: await readKeystore(),
     });

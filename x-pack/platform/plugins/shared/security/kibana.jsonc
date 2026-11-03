@@ -11,7 +11,7 @@
     "id": "security",
     "browser": true,
     "server": true,
-    "tasks": {},
+    "tasks": { "optionalPlugins": ["spaces"] },
     "configPath": [
       "xpack",
       "security"

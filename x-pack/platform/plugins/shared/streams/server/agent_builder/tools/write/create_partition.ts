@@ -13,7 +13,7 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { Streams } from '@kbn/streams-schema';
 import { isNeverCondition } from '@kbn/streamlang';
 import dedent from 'dedent';
-import type { GetScopedClients } from '../../../routes/types';
+import type { GetAgentBuilderScopedClients } from '../../types';
 import { STREAMS_CREATE_PARTITION_TOOL_ID } from '../tool_ids';
 import { classifyError } from '../../utils/error_utils';
 import { validateConditionJson } from '../../utils/format_validation_errors';
@@ -47,7 +47,7 @@ export const createCreatePartitionTool = ({
   getScopedClients,
   writeQueue,
 }: {
-  getScopedClients: GetScopedClients;
+  getScopedClients: GetAgentBuilderScopedClients;
   writeQueue: StreamsWriteQueue;
 }): BuiltinToolDefinition<typeof createPartitionSchema> => ({
   id: STREAMS_CREATE_PARTITION_TOOL_ID,

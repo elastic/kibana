@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type { WorkflowsExtensionsTasksSetup } from '@kbn/workflows-extensions/server/tasks';
 import { alertStatusChangedV1TriggerDefinition } from '../../../common/workflows/triggers';
 
 export function registerTriggerDefinitions(
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup
+  workflowsExtensions: Pick<WorkflowsExtensionsTasksSetup, 'registerTriggerDefinition'>
 ): void {
   workflowsExtensions.registerTriggerDefinition(alertStatusChangedV1TriggerDefinition);
 }

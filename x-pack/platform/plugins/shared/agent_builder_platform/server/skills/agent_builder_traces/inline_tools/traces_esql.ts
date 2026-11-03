@@ -8,12 +8,8 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { generateEsql } from '@kbn/agent-builder-genai-utils';
-import {
-  createErrorResult,
-  getToolResultId,
-  type ToolHandlerResult,
-} from '@kbn/agent-builder-server';
+import { type ToolHandlerResult } from '@kbn/agent-builder-server';
+import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { buildAgentBuilderTracesIndexPattern } from '@kbn/agent-builder-plugin/common/traces';
 
@@ -68,6 +64,8 @@ export const createTracesEsqlTool = (): BuiltinSkillBoundedTool<typeof tracesEsq
 
     try {
       const model = await modelProvider.getDefaultModel();
+      // Loaded on first use: the package pulls in the inference stack, which most runs never reach.
+      const { generateEsql } = await import('@kbn/agent-builder-genai-utils');
       const esqlResponse = await generateEsql({
         model,
         logger,

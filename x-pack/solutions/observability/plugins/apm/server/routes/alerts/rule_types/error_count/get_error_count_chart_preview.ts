@@ -6,7 +6,7 @@
  */
 
 import { getParsedFilterQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import type { AlertParams, PreviewChartResponse } from '@kbn/apm-api-shared';
 import { ERROR_GROUP_ID, PROCESSOR_EVENT, SERVICE_NAME } from '../../../../../common/es_fields/apm';

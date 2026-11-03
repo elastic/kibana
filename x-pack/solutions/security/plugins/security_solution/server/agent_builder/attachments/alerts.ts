@@ -12,11 +12,9 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { ALERTS_BATCH_MAX_SIZE, SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { getAlertsIndex } from '../../../common/entity_analytics/utils';
-import {
-  SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
-  SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
-  SECURITY_LABS_SEARCH_TOOL_ID,
-} from '../tools';
+import { SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from '../tools/entity_analytics/entity_risk_score_tool';
+import { SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID } from '../tools/attack_discovery_search_tool';
+import { SECURITY_LABS_SEARCH_TOOL_ID } from '../tools/tool_ids';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { getAlertsById } from '../tools/get_alerts_by_id';
 import { getAlertsByTags } from '../tools/get_alerts_by_tags';

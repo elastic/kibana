@@ -67,6 +67,10 @@
       "alerting",
       "presentationUtil"
     ],
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": ["common"],
+    "tasks": {
+      "requiredPlugins": ["agentBuilder", "licensing", "security"],
+      "optionalPlugins": ["spaces"]
+    }
   }
 }

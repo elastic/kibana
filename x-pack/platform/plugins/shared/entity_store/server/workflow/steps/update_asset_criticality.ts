@@ -6,14 +6,14 @@
  */
 
 import { truncate } from 'lodash';
-import {
-  createServerStepDefinition,
-  type WorkflowsExtensionsServerPluginStart,
-} from '@kbn/workflows-extensions/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import { checkEntityStoreIndexPrivileges } from '../../routes/apis/utils/check_and_format_privileges';
+import {
+  checkEntityStoreIndexPrivileges,
+  type EntityStoreSecurity,
+} from '../../routes/apis/utils/check_and_format_privileges';
 import { ENTITY_ANALYTICS_KIBANA_FEATURE_PRIVILEGES } from '../../routes/constants';
 import {
   MAX_WORKFLOW_MESSAGE_LENGTH,
@@ -21,15 +21,22 @@ import {
 } from '../../../common/workflow/steps/update_asset_criticality';
 import type { EntityStoreStartContract } from '../../types';
 
+/** The part of Workflows Extensions the step uses: the client that emits trigger events. */
+export interface StepWorkflowsExtensions {
+  getClient: (request: KibanaRequest) => Promise<{
+    emitEvent: (triggerId: string, payload: Record<string, unknown>) => Promise<void>;
+  }>;
+}
+
 // Leaves room for the base message (which includes the caller-controlled `entity_id`) so the
 // combined message still fits within `MAX_WORKFLOW_MESSAGE_LENGTH` after truncation below.
 const MAX_RECALC_ERROR_MESSAGE_LENGTH = 200;
 
 export const getUpdateAssetCriticalityStepDefinition = (
   getCreateCRUDClient: () => Promise<EntityStoreStartContract['createCRUDClient']>,
-  getWorkflowsExtensionsStart: () => Promise<WorkflowsExtensionsServerPluginStart | undefined>,
-  getLicensingStart: () => Promise<LicensingPluginStart>,
-  getSecurityStart: () => Promise<SecurityPluginStart>
+  getWorkflowsExtensionsStart: () => Promise<StepWorkflowsExtensions | undefined>,
+  getLicensingStart: () => Promise<Pick<LicensingPluginStart, 'getLicense'>>,
+  getSecurityStart: () => Promise<EntityStoreSecurity>
 ) =>
   createServerStepDefinition({
     ...updateAssetCriticalityStepCommonDefinition,

@@ -6,7 +6,7 @@
  */
 
 import type { AgentBuilderSmlPluginSetup } from '@kbn/agent-builder-sml-plugin/server';
-import type { GetScopedClients } from '../../routes/types';
+import type { GetAgentBuilderScopedClients } from '../../scoped_clients';
 import { createSignificantEventSmlType } from './significant_event_sml_type';
 
 export const registerAgentBuilderSmlTypes = ({
@@ -15,7 +15,7 @@ export const registerAgentBuilderSmlTypes = ({
   isAvailable,
 }: {
   agentBuilderSml?: AgentBuilderSmlPluginSetup;
-  getScopedClients: GetScopedClients;
+  getScopedClients: GetAgentBuilderScopedClients;
   isAvailable: () => Promise<boolean>;
 }): void => {
   agentBuilderSml?.registerType(

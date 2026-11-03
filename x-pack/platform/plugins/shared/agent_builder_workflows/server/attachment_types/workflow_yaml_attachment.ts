@@ -20,7 +20,7 @@ import {
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import { hasWorkflowReadPrivilege } from '@kbn/agent-builder-tools-base/workflows';
+import { hasWorkflowReadPrivilege } from '@kbn/agent-builder-tools-base/workflows/check_privileges';
 import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import deepEqual from 'fast-deep-equal';
 import { workflowTools } from '../../common/constants';

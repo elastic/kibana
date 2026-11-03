@@ -18,7 +18,7 @@ import type {
 import dateMath from '@kbn/datemath';
 import dedent from 'dedent';
 import { isIlmLifecycle } from '@kbn/streams-schema';
-import type { GetScopedClients } from '../../../routes/types';
+import type { GetAgentBuilderScopedClients } from '../../types';
 import {
   getUnmappedFields,
   UNMAPPED_SAMPLE_SIZE,
@@ -80,7 +80,7 @@ export const createInspectStreamsTool = ({
   getScopedClients,
   isServerless,
 }: {
-  getScopedClients: GetScopedClients;
+  getScopedClients: GetAgentBuilderScopedClients;
   isServerless: boolean;
 }): BuiltinToolDefinition<typeof inspectStreamsSchema> => ({
   id: INSPECT_STREAMS,

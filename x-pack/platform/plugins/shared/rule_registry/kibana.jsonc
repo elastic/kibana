@@ -11,6 +11,7 @@
     "id": "ruleRegistry",
     "browser": false,
     "server": true,
+    "tasks": {},
     "configPath": [
       "xpack",
       "ruleRegistry"

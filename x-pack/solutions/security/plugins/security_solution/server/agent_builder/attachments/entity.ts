@@ -7,7 +7,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
-import { SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from '../tools';
+import { SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from '../tools/entity_analytics/entity_risk_score_tool';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
 /**

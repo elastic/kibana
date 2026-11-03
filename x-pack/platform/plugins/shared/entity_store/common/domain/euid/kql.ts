@@ -6,16 +6,15 @@
  */
 
 import { escapeQuotes } from '@kbn/es-query';
-import type { FilterCondition, RangeCondition, Condition } from '@kbn/streamlang';
+import type { FilterCondition, RangeCondition, Condition } from '@kbn/streamlang/types/conditions';
 import {
-  getFilterOperator,
-  getFilterValue,
   isFilterCondition,
   isAndCondition,
   isOrCondition,
   isNotCondition,
   isAlwaysCondition,
-} from '@kbn/streamlang';
+} from '@kbn/streamlang/types/conditions';
+import { getFilterOperator, getFilterValue } from '@kbn/streamlang/src/conditions/helpers';
 import type { EntityDefinitionWithoutId, FieldEvaluation } from '../definitions/entity_schema';
 import {
   getPostStatsFieldOverrides,

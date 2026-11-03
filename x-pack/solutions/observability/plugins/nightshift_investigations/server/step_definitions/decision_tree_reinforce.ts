@@ -10,7 +10,7 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import { MAX_KEYWORD_LENGTH } from '../../common';
+import { MAX_KEYWORD_LENGTH } from '../../common/constants';
 import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../agents/decision_tree_reinforcement';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import {

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
+jest.mock('@kbn/agent-builder-genai-utils/tools/utils/esql/execute_esql', () => ({
   executeEsql: jest.fn(),
 }));
 
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
-import { executeEsql } from '@kbn/agent-builder-genai-utils';
+import { executeEsql } from '@kbn/agent-builder-genai-utils/tools/utils/esql/execute_esql';
 import { createToolHandlerContext, createToolTestMocks } from '../__mocks__/test_helpers';
 import { PCI_COMPLIANCE_TOOL_ID, pciComplianceTool } from './pci_compliance_tool';
 

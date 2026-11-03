@@ -13,12 +13,14 @@ import { AgentExecutionMode, platformCoreTools } from '@kbn/agent-builder-common
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import { resumeWorkflowExecutionTool } from './resume_workflow_execution';
 
-jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
-  ...jest.requireActual('@kbn/agent-builder-tools-base/workflows'),
+jest.mock('@kbn/agent-builder-tools-base/workflows/get_execution_state', () => ({
+  ...jest.requireActual('@kbn/agent-builder-tools-base/workflows/get_execution_state'),
   getExecutionState: jest.fn(),
 }));
 
-const { getExecutionState } = jest.requireMock('@kbn/agent-builder-tools-base/workflows');
+const { getExecutionState } = jest.requireMock(
+  '@kbn/agent-builder-tools-base/workflows/get_execution_state'
+);
 
 describe('resumeWorkflowExecutionTool', () => {
   const createWorkflowsManagement = () => ({

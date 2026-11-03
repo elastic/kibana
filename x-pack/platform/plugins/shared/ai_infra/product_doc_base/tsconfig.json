@@ -24,6 +24,7 @@
     "@kbn/logging-mocks",
     "@kbn/licensing-plugin",
     "@kbn/task-manager-plugin",
+    "@kbn/core-plugins-server",
     "@kbn/inference-common",
     "@kbn/core-security-server",
     "@kbn/ml-is-populated-object",

@@ -344,43 +344,45 @@ const bulkDeleteQueriesRoute = createServerRoute({
 
 const getDiscoveryQueriesRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_queries',
-  params: z.object({
-    query: requestParamsSchema.extend({
-      page: z.coerce.number().int().min(1).optional().describe('Page number (1-based)'),
-      perPage: z.coerce
-        .number()
-        .int()
-        .min(1)
-        .max(1000)
-        .optional()
-        .describe('Number of items per page'),
-      status: queryStatusSchema,
-      queryIds: z
-        .union([
-          z
-            .string()
-            .max(MAX_ID_LENGTH)
-            .transform((id) => [id]),
-          z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_DISCOVERY_QUERY_IDS),
-        ])
-        .optional()
-        .describe('Only return queries with these ids'),
-      entityIds: z
-        .union([
-          z
-            .string()
-            .min(1)
-            .max(MAX_ID_LENGTH)
-            .transform((id) => [id]),
-          z.array(z.string().min(1).max(MAX_ID_LENGTH)).max(MAX_DISCOVERY_QUERY_IDS),
-        ])
-        .optional()
-        .describe('Only return queries linked to these entity slugs'),
-      unassignedEntities: BooleanFromString.optional().describe(
-        'Also return queries linked to no live entity'
-      ),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      query: requestParamsSchema.extend({
+        page: z.coerce.number().int().min(1).optional().describe('Page number (1-based)'),
+        perPage: z.coerce
+          .number()
+          .int()
+          .min(1)
+          .max(1000)
+          .optional()
+          .describe('Number of items per page'),
+        status: queryStatusSchema,
+        queryIds: z
+          .union([
+            z
+              .string()
+              .max(MAX_ID_LENGTH)
+              .transform((id) => [id]),
+            z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_DISCOVERY_QUERY_IDS),
+          ])
+          .optional()
+          .describe('Only return queries with these ids'),
+        entityIds: z
+          .union([
+            z
+              .string()
+              .min(1)
+              .max(MAX_ID_LENGTH)
+              .transform((id) => [id]),
+            z.array(z.string().min(1).max(MAX_ID_LENGTH)).max(MAX_DISCOVERY_QUERY_IDS),
+          ])
+          .optional()
+          .describe('Only return queries linked to these entity slugs'),
+        unassignedEntities: BooleanFromString.optional().describe(
+          'Also return queries linked to no live entity'
+        ),
+      }),
+    })
+  ),
   options: {
     access: 'internal',
     summary: 'Read paginated significant-event queries for the discovery table',

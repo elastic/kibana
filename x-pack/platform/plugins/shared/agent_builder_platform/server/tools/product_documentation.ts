@@ -10,14 +10,13 @@ import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common';
-import type { CoreSetup } from '@kbn/core/server';
 import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import {
   resolveDefaultInferenceIdFromInferenceGet,
   resolveInstalledProductDocInferenceId,
 } from '@kbn/product-doc-common';
-import type { AgentBuilderPlatformPluginStart, PluginStartDependencies } from '../types';
+import type { PlatformCoreSetup } from '../start_types';
 
 const productDocumentationSchema = z.object({
   query: z
@@ -40,13 +39,9 @@ const productDocumentationSchema = z.object({
 const GENAI_SETTINGS_APP_PATH = '/app/management/ai/genAiSettings';
 
 export const productDocumentationTool = (
-  coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>
+  coreSetup: PlatformCoreSetup
 ): BuiltinToolDefinition<typeof productDocumentationSchema> => {
-  let startServicesPromise:
-    | ReturnType<
-        CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>['getStartServices']
-      >
-    | undefined;
+  let startServicesPromise: ReturnType<PlatformCoreSetup['getStartServices']> | undefined;
   const getStartServices = () => {
     if (!startServicesPromise) {
       startServicesPromise = coreSetup.getStartServices();

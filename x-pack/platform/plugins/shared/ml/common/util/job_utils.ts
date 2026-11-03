@@ -19,12 +19,10 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { FilterStateStore } from '@kbn/es-query';
 import { isDefined } from '@kbn/ml-is-defined';
-import {
-  type MlEntityField,
-  ES_AGGREGATION,
-  ML_JOB_AGGREGATION,
-  MLCATEGORY,
-} from '@kbn/ml-anomaly-utils';
+import type { MlEntityField } from '@kbn/ml-anomaly-utils';
+// Leaf imports: the package index loads EUI (through its severity colors), too heavy for a task pod.
+import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
+import { MLCATEGORY } from '@kbn/ml-anomaly-utils/field_types';
 import { maxLengthValidator, ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '@kbn/ml-validators';
 import { parseInterval } from '@kbn/ml-parse-interval';
 

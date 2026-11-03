@@ -6,7 +6,8 @@
  */
 
 import { MAX_BULK_ITEMS, type BulkResponse } from '@kbn/alerting-v2-schemas';
-import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server/lib/errors/error_codes';
 
 export interface BulkRuleResult {
   affectedCount: number;

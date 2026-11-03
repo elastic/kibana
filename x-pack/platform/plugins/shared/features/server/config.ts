@@ -6,7 +6,7 @@
  */
 
 import { offeringBasedSchema, schema, type TypeOf } from '@kbn/config-schema';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
 const privilegeOverrideSchema = schema.maybe(
   schema.object({

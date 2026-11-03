@@ -6,21 +6,32 @@
  */
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
-import type { EntityStoreCoreSetup } from '../../types';
-import { getUpdateAssetCriticalityStepDefinition } from './update_asset_criticality';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { EntityStoreSecurity } from '../../routes/apis/utils/check_and_format_privileges';
+import type { EntityStoreStartContract } from '../../types';
+import {
+  getUpdateAssetCriticalityStepDefinition,
+  type StepWorkflowsExtensions,
+} from './update_asset_criticality';
+
+/** What the steps need once started, from the `server` entry and the task pod entry alike. */
+export interface StepStartServices {
+  getCreateCRUDClient: () => Promise<EntityStoreStartContract['createCRUDClient']>;
+  getWorkflowsExtensions: () => Promise<StepWorkflowsExtensions | undefined>;
+  getLicensing: () => Promise<Pick<LicensingPluginStart, 'getLicense'>>;
+  getSecurity: () => Promise<EntityStoreSecurity>;
+}
 
 export const registerSteps = (
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
-  core: EntityStoreCoreSetup
+  workflowsExtensions: Pick<WorkflowsExtensionsServerPluginSetup, 'registerStepDefinition'>,
+  { getCreateCRUDClient, getWorkflowsExtensions, getLicensing, getSecurity }: StepStartServices
 ): void => {
-  const startServices = core.getStartServices();
-
   workflowsExtensions.registerStepDefinition(
     getUpdateAssetCriticalityStepDefinition(
-      () => startServices.then(([, , startContract]) => startContract.createCRUDClient),
-      () => startServices.then(([, pluginsStart]) => pluginsStart.workflowsExtensions),
-      () => startServices.then(([, pluginsStart]) => pluginsStart.licensing),
-      () => startServices.then(([, pluginsStart]) => pluginsStart.security)
+      getCreateCRUDClient,
+      getWorkflowsExtensions,
+      getLicensing,
+      getSecurity
     )
   );
 };

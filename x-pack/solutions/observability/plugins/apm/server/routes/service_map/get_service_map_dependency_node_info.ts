@@ -13,7 +13,7 @@ import {
 } from '@kbn/apm-data-access-plugin/server/utils';
 import type { NodeStats } from '@kbn/apm-types';
 import { LatencyAggregationType } from '@kbn/apm-types';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { calculateThroughputWithInterval } from '../../lib/helpers/calculate_throughput';
 import { ApmDocumentType } from '../../../common/document_type';

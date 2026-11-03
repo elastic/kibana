@@ -10,7 +10,7 @@ import {
   NEEDS_AGENT_REASONS,
   PROBE_STATUSES,
   baselineObservationSchema,
-} from '@kbn/significant-events-schema';
+} from '@kbn/significant-events-schema/src/significant_events';
 import { lazySchema, z } from '@kbn/zod/v4';
 
 /** Why a detection reached the agent, with the events its rule is already a member of. */

@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type {
@@ -20,10 +20,8 @@ import {
 } from '../../../common/maintenance/state_machine';
 import type { SignificantEventsServer } from '../../types';
 import type { PausedFeatureSettings } from './feature_settings';
-import {
-  LEGACY_DEFAULT_SPACE_WORKFLOW_IDS,
-  type MaintenanceWorkflowTarget,
-} from './managed_workflow_targets';
+import { LEGACY_DEFAULT_SPACE_WORKFLOW_IDS } from './legacy_workflow_ids';
+import type { MaintenanceWorkflowTarget } from './managed_workflow_targets';
 import {
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,

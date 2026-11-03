@@ -14,7 +14,6 @@ import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
-import { createGetRiskScores } from '../../../lib/entity_analytics/risk_score/get_risk_score';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { getRiskIndex } from '../../../../common/search_strategy/security_solution/risk_score/common';
@@ -210,6 +209,11 @@ export const entityRiskScoreTool = (
         }
 
         // Handle specific entity queries
+        // Loaded when the tool runs: it builds on the search strategy modules, which pull in the ECS
+        // field maps that a task pod should not carry until an agent asks for one entity.
+        const { createGetRiskScores } = await import(
+          '../../../lib/entity_analytics/risk_score/get_risk_score'
+        );
         const getRiskScore = createGetRiskScores({
           logger,
           esClient: esClient.asCurrentUser,

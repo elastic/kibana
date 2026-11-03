@@ -13,7 +13,7 @@ import {
   type ConnectionTransactionsResponse,
   type ConnectionFailedCallsResponse,
 } from '@kbn/apm-api-shared';
-import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
+import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common/ui_settings_keys';
 import type { BoolQuery } from '@kbn/es-query';
 import Boom from '@hapi/boom';
 import { isActivePlatinumLicense } from '../../../common/license_check';

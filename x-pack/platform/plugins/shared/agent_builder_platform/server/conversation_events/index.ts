@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import type { PluginSetupDependencies } from '../types';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 
 import { textNoteEventType } from './text_note';
 
 export const registerConversationEventTypes = ({
-  setupDeps,
+  agentBuilder,
 }: {
-  setupDeps: PluginSetupDependencies;
+  agentBuilder: AgentBuilderPluginSetup;
 }) => {
-  const {
-    agentBuilder: { conversationEvents },
-  } = setupDeps;
+  const { conversationEvents } = agentBuilder;
 
   conversationEvents.register(textNoteEventType);
 };

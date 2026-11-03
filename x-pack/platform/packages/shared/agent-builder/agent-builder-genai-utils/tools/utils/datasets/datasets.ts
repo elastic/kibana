@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { MappingField } from '../mappings';
-import { executeEsql } from '../esql';
+import { executeEsql } from '../esql/execute_esql';
 
 /**
  * An external ES|QL dataset, registered via the `_query/dataset` API. Datasets are only

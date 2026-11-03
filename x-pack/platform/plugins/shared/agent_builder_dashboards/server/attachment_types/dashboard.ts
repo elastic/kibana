@@ -11,13 +11,9 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import deepEqual from 'fast-deep-equal';
-import {
-  DASHBOARD_ATTACHMENT_TYPE,
-  attachmentDataToDashboardState,
-  dashboardAttachmentDataSchema,
-  dashboardStateToAttachmentData,
-  type DashboardAttachmentData,
-} from '@kbn/agent-builder-dashboards-common';
+import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common/constants';
+import { dashboardAttachmentDataSchema } from '@kbn/agent-builder-dashboards-common/types';
+import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type { Logger } from '@kbn/core/server';
 
@@ -26,9 +22,14 @@ interface CreateDashboardAttachmentTypeOptions {
   getDashboardClient: () => Promise<DashboardPluginStart['client']>;
 }
 
-const normalizeDashboardAttachmentData = (
+// The converters build Lens panels, which is most of this plugin's weight, and only resolving an
+// attachment from its dashboard needs them: they load on first use.
+const loadConverters = () => import('@kbn/agent-builder-dashboards-common/converters');
+
+const normalizeDashboardAttachmentData = async (
   data: DashboardAttachmentData
-): DashboardAttachmentData => {
+): Promise<DashboardAttachmentData> => {
+  const { attachmentDataToDashboardState, dashboardStateToAttachmentData } = await loadConverters();
   return dashboardStateToAttachmentData(attachmentDataToDashboardState(data));
 };
 
@@ -73,6 +74,7 @@ export const createDashboardAttachmentType = ({
           return undefined;
         }
 
+        const { dashboardStateToAttachmentData } = await loadConverters();
         return dashboardStateToAttachmentData(dashboard.data);
       } catch (error) {
         logger.warn(`Failed to resolve dashboard attachment for origin "${origin}": ${error}`);
@@ -101,13 +103,14 @@ export const createDashboardAttachmentType = ({
             );
             return false;
           }
-          const resolvedDashboardData = normalizeDashboardAttachmentData(
+          const { dashboardStateToAttachmentData } = await loadConverters();
+          const resolvedDashboardData = await normalizeDashboardAttachmentData(
             dashboardStateToAttachmentData(dashboard.data)
           );
           // Compare canonicalized attachment data so Lens panel shape differences do not cause false staleness.
           return !deepEqual(
             resolvedDashboardData,
-            normalizeDashboardAttachmentData(latestVersion.data)
+            await normalizeDashboardAttachmentData(latestVersion.data)
           );
         }
         return false;

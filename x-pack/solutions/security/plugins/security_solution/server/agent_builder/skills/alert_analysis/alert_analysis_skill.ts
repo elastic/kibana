@@ -8,11 +8,9 @@
 import { ToolType } from '@kbn/agent-builder-common/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import {
-  SECURITY_ALERTS_TOOL_ID,
-  SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
-  SECURITY_LABS_SEARCH_TOOL_ID,
-} from '../../tools';
+import { SECURITY_ALERTS_TOOL_ID } from '../../tools/alerts_tool';
+import { SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from '../../tools/entity_analytics/entity_risk_score_tool';
+import { SECURITY_LABS_SEARCH_TOOL_ID } from '../../tools/tool_ids';
 import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { relatedAlertsInlineToolSchema } from '../../../../common/api/alert_analysis/related_alerts';
 import {

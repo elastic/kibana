@@ -7,11 +7,11 @@
 
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import type { CoreStart, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
+import type { ToolsCoreStart, ToolsSecurityStart } from '../../../start_types';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
 import {
   parseWorkflowNameFromYaml,
@@ -187,8 +187,8 @@ export const installAutomationTemplateHandler = async ({
   attachments: AttachmentStateManager;
   logger: Logger;
   getAiIndexService: () => Promise<AiIndexService>;
-  getCoreStart: () => Promise<CoreStart>;
-  getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+  getCoreStart: () => Promise<ToolsCoreStart>;
+  getSecurityStart: () => Promise<ToolsSecurityStart | undefined>;
   getWorkflowsManagement: () => WorkflowsManagementApi;
 }): Promise<InstallAutomationTemplateResult> => {
   await assertContextEngineWriteAccess({ request, spaceId, getCoreStart, getSecurityStart });

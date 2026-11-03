@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { parseInterval } from '@kbn/data-plugin/common';
+import { parseInterval } from '@kbn/data-plugin/common/search/aggs/utils/date_interval_utils/parse_interval';
 import { orderBy, last } from 'lodash';
 import type { ApmDataSourceWithSummary } from '../data_source';
 import { ApmDocumentType } from '../document_type';

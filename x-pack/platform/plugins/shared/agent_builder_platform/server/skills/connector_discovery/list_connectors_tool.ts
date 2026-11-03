@@ -8,14 +8,10 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import {
-  getToolResultId,
-  createErrorResult,
-  listAgentConnectors,
-  resolveAllowedConnectorIds,
-} from '@kbn/agent-builder-server';
+import { listAgentConnectors, resolveAllowedConnectorIds } from '@kbn/agent-builder-server';
+import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { ActionsTasksStart } from '@kbn/actions-plugin/server/tasks';
 
 const listConnectorsSchema = lazySchema(() =>
   z.object({
@@ -34,7 +30,7 @@ export type ListConnectorsInput = z.infer<typeof listConnectorsSchema>;
 export const createListConnectorsTool = ({
   getActionsStart,
 }: {
-  getActionsStart: () => Promise<ActionsPluginStart>;
+  getActionsStart: () => Promise<ActionsTasksStart>;
 }): BuiltinSkillBoundedTool<typeof listConnectorsSchema> => ({
   id: 'list_connectors',
   type: ToolType.builtin,
