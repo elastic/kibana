@@ -8,6 +8,8 @@
   "taskTypes": ["agent-builder:run-agent"],
   "plugins": [
     "agentBuilder",
+    "customContent",
+    "elasticsearchHome",
     "inference",
     "searchInferenceEndpoints",
     "isomer",

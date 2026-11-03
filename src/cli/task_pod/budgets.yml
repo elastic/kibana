@@ -18,3 +18,5 @@
 ./x-pack/platform/plugins/shared/search_inference_endpoints/server/tasks: 20
 ./x-pack/platform/plugins/shared/inference/server/tasks: 98
 ./x-pack/platform/plugins/shared/agent_builder/server/tasks: 200
+./x-pack/platform/plugins/shared/custom_content/server/tasks: 290
+./x-pack/platform/plugins/shared/elasticsearch_home/server/tasks: 12

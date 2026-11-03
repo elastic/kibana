@@ -29,12 +29,14 @@ import type {
 import type { AgentBuilderConfig } from '../config';
 import { configSchema } from '../config';
 import { registerInferenceFeatures } from '../inference_features';
+import { registerBuiltinSetup } from '../setup_builtins';
 import { createSetupContract } from '../setup_contract';
 import { ServiceManager } from '../services/create_services';
 import { registerTaskDefinitions } from '../services/execution/task/task_definitions';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '../types';
 import { getDeploymentInfo } from '../utils/deployment_info';
 import { agentBuilderBridge } from './bridge';
+import { toNoopContract } from './noop_contract';
 
 export const config: PluginConfigDescriptor<AgentBuilderConfig> = { schema: configSchema };
 
@@ -83,7 +85,7 @@ class AgentBuilderTasksPlugin
 
   setup(core: CoreTasksSetup, deps: TasksSetupDeps): AgentBuilderPluginSetup {
     const real = agentBuilderBridge.getSetup();
-    if (real) return real;
+    if (real) return toNoopContract(real);
 
     registerInferenceFeatures({ searchInferenceEndpoints: deps.searchInferenceEndpoints as never });
     const serviceSetups = this.serviceManager.setupServices({
@@ -93,6 +95,11 @@ class AgentBuilderTasksPlugin
       cloud: undefined,
       usageApi: undefined,
       actions: deps.actions as never,
+    });
+
+    registerBuiltinSetup({
+      serviceSetups,
+      getStartServices: core.getStartServices as never,
     });
 
     registerTaskDefinitions({

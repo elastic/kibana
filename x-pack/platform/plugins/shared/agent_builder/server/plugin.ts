@@ -46,12 +46,9 @@ import { AnalyticsService } from './telemetry';
 import { registerSampleData } from './register_sample_data';
 import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
 import { registerAfterExecutionWorkflowsHook } from './hooks/agent_workflows/register_after_execution_workflows_hook';
-import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
-import { createRelevantSkillsCycleHook } from './services/execution/run_agent/cycle_hooks/relevant_skills_hook';
 import { registerTaskDefinitions } from './services/execution';
 import { createModelProviderFactory } from './services/execution/runner/model_provider';
 import { createSmlTools } from './services/tools/builtin/sml';
-import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
 import { createConversationEventBus } from './workflows/triggers/conversation_event_bus';
@@ -63,6 +60,7 @@ import { RecommendedEndpointsPoller } from './recommended_endpoints_poller';
 import { registerDeductiveAgent } from './services/execution/run_agent/deductive/register_deductive_agent';
 import { getDeploymentInfo } from './utils/deployment_info';
 import { createSetupContract } from './setup_contract';
+import { registerBuiltinSetup } from './setup_builtins';
 import { agentBuilderBridge } from './tasks/bridge';
 
 export class AgentBuilderPlugin
@@ -142,12 +140,6 @@ export class AgentBuilderPlugin
       usageApi: setupDeps.usageApi,
       actions: setupDeps.actions,
     });
-
-    serviceSetups.hooks.registerCycleHook(
-      createRelevantSkillsCycleHook({
-        getUiSettings: async () => (await coreSetup.getStartServices())[0].uiSettings,
-      })
-    );
 
     registerTaskDefinitions({
       taskManager: setupDeps.taskManager,
@@ -286,11 +278,6 @@ export class AgentBuilderPlugin
       getInternalServices,
     });
 
-    registerSkillToolsLoaderHook(serviceSetups, {
-      analyticsService: this.analyticsService,
-      trackingService: this.trackingService,
-    });
-
     const smlTools = createSmlTools({
       getAgentBuilderSml: () => {
         if (!this.startDeps) {
@@ -303,18 +290,11 @@ export class AgentBuilderPlugin
       serviceSetups.tools.register(tool);
     });
 
-    const connectorTools = createConnectorTools({
-      getActions: async () => {
-        const [, startDeps] = await coreSetup.getStartServices();
-        return startDeps.actions;
-      },
-      getInference: async () => {
-        const [, startDeps] = await coreSetup.getStartServices();
-        return startDeps.inference;
-      },
-    });
-    connectorTools.forEach((tool) => {
-      serviceSetups.tools.register(tool);
+    registerBuiltinSetup({
+      serviceSetups,
+      getStartServices: coreSetup.getStartServices,
+      analyticsService: this.analyticsService,
+      trackingService: this.trackingService,
     });
 
     const setupContract = createSetupContract({

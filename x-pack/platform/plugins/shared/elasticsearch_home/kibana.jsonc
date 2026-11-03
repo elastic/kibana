@@ -22,6 +22,7 @@
     "optionalPlugins": [
       "agentBuilder",
       "cloud"
-    ]
+    ],
+    "tasks": { "requiredPlugins": ["agentBuilder"] }
   }
 }

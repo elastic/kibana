@@ -74,8 +74,15 @@ class WorkflowsExtensionsTasksPlugin
   }
 
   setup(): WorkflowsExtensionsTasksSetup {
-    const real = workflowsExtensionsBridge.getSetup();
-    if (real) return real;
+    // In Kibana the plugins' server entries registered their steps and triggers already; registering
+    // them again from their tasks entries would throw.
+    if (workflowsExtensionsBridge.getSetup()) {
+      return {
+        registerStepDefinition: () => undefined,
+        registerTriggerDefinition: () => undefined,
+        registerManagedWorkflowOwner: () => undefined,
+      };
+    }
 
     registerInternalStepDefinitions(this.stepRegistry);
     registerInternalTriggerDefinitions(this.triggerRegistry);
