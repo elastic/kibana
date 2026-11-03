@@ -99,13 +99,17 @@ export interface EmbeddableConversationProps {
   greetingMessage?: string;
 
   /**
+   * @deprecated Register `BrowserToolDefinition`s in the browser tool registry instead.
+   * These inline tools are sent as `browser_api_tools` and executed by the sending client
+   * without a server-side registry entry.
+   *
    * Browser API tools that the agent can use to interact with the page.
    * Tools are executed browser-side when the LLM requests them.
    *
    * Example:
    * ```typescript
    * browserApiTools: [{
-   *   id: 'dashboard.config.update_title',
+   *   id: 'dashboard_update_title',
    *   description: 'Update the dashboard title',
    *   schema: z.object({
    *     title: z.string().describe('The new title')

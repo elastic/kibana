@@ -253,7 +253,7 @@ export const conversePayloadSchema = schema.object({
       {
         meta: {
           description:
-            'Optional browser API tools to be registered as LLM tools with browser.* namespace. These tools execute on the client side.',
+            'Deprecated: inline browser tool definitions executed by the sending client. Prefer browser_tools.',
         },
       }
     )

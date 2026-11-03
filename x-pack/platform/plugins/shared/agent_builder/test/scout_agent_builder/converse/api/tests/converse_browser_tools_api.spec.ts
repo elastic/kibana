@@ -257,7 +257,7 @@ for (const mode of EXECUTION_MODES) {
         } as ChatRequestBodyPayload);
 
       apiTest(
-        'LLM calls a legacy browser tool, the client posts a result, and the final answer contains it',
+        'LLM calls a legacy browser tool, the client posts a result, and the result reaches the LLM and is persisted',
         async ({ apiClient }) => {
           setupAgentCallToolThenAnswer({
             proxy: llmProxy,

@@ -1591,6 +1591,34 @@ agentBuilder.skills.register({
 });
 ```
 
+## Browser-side tools
+
+Browser-side tools are tools the LLM can call but whose handler runs in the user's browser (reading the page, clicking, navigating...). The feature is experimental and gated by the `agentBuilder:browserTools` advanced setting.
+
+### Contract
+
+- `BrowserToolDefinition` (`@kbn/agent-builder-browser`): `id` (must match `^[a-zA-Z0-9_-]+$`, no dots), `description`, a zod `schema`, optional `timeoutMs`, and a `handler(params, context)` returning `void` or `{ content?, images? }`. `context.signal` is aborted on timeout or cancellation.
+- `BrowserToolDescriptor` (`@kbn/agent-builder-common`): the serializable form (`id`, `description`, JSON `schema`, `timeout_ms`) that the server knows about. `toBrowserToolDescriptor` converts a definition into a descriptor.
+
+### Registries
+
+- Browser: `BrowserToolRegistry` (`public/services/browser_tools`) holds the definitions with their handlers. The `BrowserToolDispatcher` runs the handler when the server asks for a call and posts the result back.
+- Server: `BrowserToolDescriptorRegistry` (`server/services/browser_tools`) holds the descriptors only, seeded with the built-in ones.
+- The chat surface sends `browser_tools: { client_id, tool_ids }` to `POST /api/agent_builder/converse` (or `/converse/async`). The server resolves the ids against its registry, rejects unknown ids, and exposes each as an LLM tool.
+
+### Round trip and result route
+
+When the LLM calls a browser tool, the server persists a pending call and waits. The client executes the handler and posts the outcome to the internal route
+`POST /internal/agent_builder/executions/{executionId}/browser_tool_results/{toolCallId}` with `{ status: 'ok', content?, images? }` or `{ status: 'error', message }`. Images are uploaded as attachments server-side. Calls that are not answered within the timeout expire, and a cleanup task removes stale call documents.
+
+### Built-in tools
+
+Registered on both sides: `get_page_snapshot`, `take_screenshot`, `click_element`, `fill_form` and `navigate_to`. Descriptors live in `agent-builder-common/tools/browser_tools/builtin.ts`, handlers in `public/services/browser_tools/builtin/`. Take a snapshot first: `click_element` and `fill_form` use the `ref` ids it returns.
+
+### Legacy `browser_api_tools`
+
+The older `browserApiTools` embeddable conversation prop (sent as `browser_api_tools` in the converse payload) is deprecated. Those tools are inline definitions with no server registry and are executed by the sending client. Prefer registered `BrowserToolDefinition`s and `browser_tools`.
+
 ## Semantic Metadata Layer (SML) — Developer Guide
 
 ### 1. What is SML?
