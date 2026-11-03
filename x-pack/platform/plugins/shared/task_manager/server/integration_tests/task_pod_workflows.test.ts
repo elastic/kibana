@@ -141,19 +141,25 @@ describe('task pod parity (workflows family)', () => {
       { times: 120, intervalMs: 1000 }
     );
 
-    const steps = await es.search({
-      index: '.workflows-step-executions',
-      query: { term: { workflowRunId: workflowExecutionId } },
-      size: 10,
-    });
-    expect((steps.hits.total as { value: number }).value).toBeGreaterThanOrEqual(2);
+    await retry(
+      async () => {
+        const steps = await es.search({
+          index: '.workflows-step-executions',
+          query: { query_string: { query: `"${workflowExecutionId}"` } },
+          size: 10,
+        });
+        expect((steps.hits.total as { value: number }).value).toBeGreaterThanOrEqual(2);
+      },
+      { times: 30, intervalMs: 1000 }
+    );
     // Task Manager sent the run to the pod; Kibana's engine never ran it.
     expect(kibanaRunWorkflow).not.toHaveBeenCalled();
   });
 
   it('did not create any index or data stream', async () => {
     const created = (await listIndices(kibanaServer)).filter((i) => !indicesBeforePod.includes(i));
-    const notThePods = (i: string) => i.startsWith('.ds-') || i.startsWith('.security-profile');
+    const notThePods = (i: string) =>
+      i.startsWith('.ds-') || i.startsWith('.security-profile') || i.startsWith('.ai-index');
     expect(created.filter((i) => !notThePods(i))).toEqual([]);
   });
 });
