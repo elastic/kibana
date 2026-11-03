@@ -1,5 +1,5 @@
 {
-  "sha1": "baba7b601b49b25ff2f296cbd27a815ec2721610",
+  "sha1": "2faa523979876e06c431084e9e42a49120a23da0",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -51,7 +51,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/data_quality/doc_counts_failed.spec.ts",
-        "line": 25,
+        "line": 26,
         "column": 34
       }
     },
@@ -71,7 +71,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/data_quality/doc_counts_ingestion_failure_store.spec.ts",
-        "line": 28,
+        "line": 29,
         "column": 36
       }
     },
@@ -91,7 +91,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/data_quality/doc_counts.spec.ts",
-        "line": 78,
+        "line": 85,
         "column": 20
       }
     },
@@ -111,7 +111,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/data_quality/doc_counts.spec.ts",
-        "line": 91,
+        "line": 98,
         "column": 15
       }
     },
@@ -131,7 +131,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/data_quality/doc_counts.spec.ts",
-        "line": 100,
+        "line": 107,
         "column": 13
       }
     },
@@ -151,7 +151,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/data_quality/doc_counts.spec.ts",
-        "line": 117,
+        "line": 124,
         "column": 25
       }
     },
@@ -171,8 +171,68 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/data_quality/doc_counts.spec.ts",
-        "line": 134,
+        "line": 141,
         "column": 11
+      }
+    },
+    {
+      "id": "8c04f5ffe1062e7-f22ed612f9e94d3",
+      "title": "Doc counts - total and ingestion returns total document counts for the posted streams only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/data_quality/doc_counts.spec.ts",
+        "line": 156,
+        "column": 65
+      }
+    },
+    {
+      "id": "8c04f5ffe1062e7-ad9ce2b9d49ce69",
+      "title": "Doc counts - total and ingestion returns range-scoped ingestion counts for the posted streams only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/data_quality/doc_counts.spec.ts",
+        "line": 190,
+        "column": 23
+      }
+    },
+    {
+      "id": "8c04f5ffe1062e7-1938c94cdc1f89a",
+      "title": "Doc counts - total and ingestion rejects a posted request without stream names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/data_quality/doc_counts.spec.ts",
+        "line": 212,
+        "column": 95
       }
     },
     {
