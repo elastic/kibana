@@ -72,21 +72,17 @@ describe('IntroBannerVideo', () => {
   it('closes the expanded player from the close button without leaving focus on the document body', () => {
     renderVideo();
 
-    const playButton = screen.getByTestId('nightshiftOnboardingIntroVideoPlay');
+    const preview = screen.getByTestId('nightshiftOnboardingIntroVideoPreview');
     act(() => {
-      playButton.focus();
+      preview.focus();
     });
-    fireEvent.click(playButton);
+    fireEvent.keyDown(preview, { key: 'Enter' });
     expect(screen.getByTestId('nightshiftOnboardingIntroVideoExpanded')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('nightshiftOnboardingIntroVideoClose'));
     expect(screen.queryByTestId('nightshiftOnboardingIntroVideoExpanded')).toBeNull();
-    // Without the pre-open blur, EuiModal can restore focus to the launch control
-    // (play button or preview root) instead of dumping it on <body>.
-    expect(document.body).not.toHaveFocus();
-    expect(
-      screen.getByTestId('nightshiftOnboardingIntroVideoPreview').contains(document.activeElement)
-    ).toBe(true);
+    // Without the pre-open blur, EuiModal restores focus to the preview instead of <body>.
+    expect(preview).toHaveFocus();
   });
 
   it('skips the muted preview iframe when the user prefers reduced motion', () => {

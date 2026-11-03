@@ -9,6 +9,7 @@ import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButtonIcon,
+  EuiIcon,
   EuiModal,
   EuiModalBody,
   EuiToolTip,
@@ -47,10 +48,6 @@ const previewAriaLabel = i18n.translate('xpack.nightshift.onboarding.introVideoP
   defaultMessage: 'Nightshift introduction video. Click to open video player.',
 });
 
-const playButtonAriaLabel = i18n.translate('xpack.nightshift.onboarding.introVideoPlayAriaLabel', {
-  defaultMessage: 'Open Nightshift introduction video',
-});
-
 const closeButtonAriaLabel = i18n.translate(
   'xpack.nightshift.onboarding.introVideoCloseAriaLabel',
   {
@@ -69,7 +66,6 @@ const iframeTitle = i18n.translate('xpack.nightshift.onboarding.introVideoIframe
 export function IntroBannerVideo(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const mediaRootRef = useRef<HTMLDivElement>(null);
-  const playButtonRef = useRef<HTMLButtonElement>(null);
   const modalTitleId = useGeneratedHtmlId({ prefix: 'nightshiftIntroVideoTitle' });
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPreviewHighlighted, setIsPreviewHighlighted] = useState(false);
@@ -106,11 +102,6 @@ export function IntroBannerVideo(): React.ReactElement {
 
   const handleMediaClick = (event: React.MouseEvent<HTMLDivElement>) => {
     event.preventDefault();
-    openExpanded();
-  };
-
-  const handlePlayClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation();
     openExpanded();
   };
 
@@ -188,17 +179,27 @@ export function IntroBannerVideo(): React.ReactElement {
     }
   `;
 
-  const playButtonStyles = css`
-    ${glassIconButtonStyles};
+  const playBadgeStyles = css`
     position: absolute;
     z-index: ${euiTheme.levels.content};
     top: 50%;
     left: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 48px;
+    block-size: 48px;
+    border-radius: 50%;
+    background: ${transparentize(euiTheme.colors.plainDark, 0.75)};
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: ${euiTheme.colors.textGhost};
     transform: translate(-50%, -50%);
     opacity: ${isPreviewHighlighted ? 1 : 0};
-    transition: opacity 160ms ease, background 160ms ease;
+    transition: opacity 160ms ease;
+    pointer-events: none;
 
-    .euiButtonIcon__icon {
+    svg {
       transform: translateX(1px);
     }
   `;
@@ -287,20 +288,13 @@ export function IntroBannerVideo(): React.ReactElement {
           />
         ) : null}
         <div css={dimStyles} aria-hidden={true} />
-        <EuiToolTip content={playButtonAriaLabel} disableScreenReaderOutput>
-          <EuiButtonIcon
-            buttonRef={playButtonRef}
-            css={playButtonStyles}
-            type="button"
-            display="empty"
-            color="text"
-            size="m"
-            iconType="play"
-            aria-label={playButtonAriaLabel}
-            data-test-subj="nightshiftOnboardingIntroVideoPlay"
-            onClick={handlePlayClick}
-          />
-        </EuiToolTip>
+        <div
+          css={playBadgeStyles}
+          aria-hidden={true}
+          data-test-subj="nightshiftOnboardingIntroVideoPlay"
+        >
+          <EuiIcon type="play" size="m" aria-hidden={true} />
+        </div>
       </div>
 
       {isExpanded ? (
