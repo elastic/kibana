@@ -968,7 +968,7 @@ describe('classifyDetectionsStepDefinition', () => {
       .filter((request) => request.query.includes('INLINE STATS created_at'));
     const lookback = '@timestamp >= TO_DATETIME(?lookbackIso)';
     expect(members.indexOf(lookback)).toBeGreaterThan(-1);
-    expect(members.indexOf(lookback)).toBeLessThan(members.indexOf('INLINE STATS created_at'));
+    expect(members.indexOf('INLINE STATS created_at')).toBeLessThan(members.indexOf(lookback));
     expect(members).not.toContain('?fromIso');
     expect(params).toContainEqual({ lookbackIso: new Date(NOW - 30 * 24 * HOUR_MS).toISOString() });
   });

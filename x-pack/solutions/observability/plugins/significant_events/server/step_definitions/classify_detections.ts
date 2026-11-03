@@ -894,8 +894,8 @@ export const classifyDetectionsStepDefinition = ({ logger }: { logger: Logger })
         probeSpanBuckets: probeSpanInBuckets({ probeWindowMinutes: windowMinutes, bucketMinutes }),
         reviewFreshMs: reviewFreshMinutes * MINUTE_MS,
         probeConcurrency,
-        // A live event stays a member however long ago it was last written: `series_too_old` and
-        // the review memory decide whether its verdict still stands.
+        // A live event stays a member while it has a version inside the lookback: `series_too_old`
+        // and the review memory decide whether its verdict still stands.
         findLiveMemberships: (ruleUuids) =>
           ruleEventsClient.findLiveMemberships({
             ruleUuids,
