@@ -170,6 +170,7 @@ export const InputCell = ({ cell }: { cell: InputCellDefinition }) => {
     >
       {isEditing && configurable && (
         <InputSettingsFlyout
+          cellId={cell.id}
           name={cell.name}
           input={configurable}
           onApply={(next) =>

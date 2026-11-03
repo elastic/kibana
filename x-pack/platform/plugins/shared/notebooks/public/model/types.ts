@@ -26,7 +26,13 @@ export type InputValue =
 
 export type CellOutput =
   | { kind: 'table'; table: Datatable; truncated: boolean }
-  | { kind: 'input'; params: ParamMap; options?: string[] };
+  | {
+      kind: 'input';
+      params: ParamMap;
+      options?: string[];
+      /** Result columns of a dropdown's own options query, for picking the options column. */
+      columns?: string[];
+    };
 
 export interface CellRuntime {
   status: CellStatus;

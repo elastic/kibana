@@ -28,7 +28,7 @@ export type InputDefinition =
       staticOptions?: string[];
       /** Id of the ES|QL cell whose results feed the options when `optionsSource` is `cell`. */
       optionsCell?: string | null;
-      /** Column of `optionsCell` whose distinct values become the options. */
+      /** Column (of `optionsCell`, or of the options query) whose distinct values become the options; null means the first. */
       optionsColumn?: string | null;
       defaultValue: string | null;
     }

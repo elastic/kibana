@@ -871,6 +871,29 @@ describe('NotebookScheduler', () => {
         kind: 'input',
         params: { os: 'mac' },
         options: ['win', 'mac', '7'],
+        columns: ['os', 'c'],
+      });
+    });
+
+    it('takes dropdown options from a chosen column of its options query', async () => {
+      const optionsQuery = 'FROM logs | STATS c = COUNT() BY host, os';
+      const withColumn = (optionsColumn: string) =>
+        input('os', { kind: 'dropdown', optionsQuery, optionsColumn, defaultValue: null });
+      const env = track(setup([withColumn('os')]));
+      env.fake.setRows(optionsQuery, [
+        { host: 'a', os: 'win', c: 1 },
+        { host: 'b', os: 'mac', c: 2 },
+      ]);
+      await env.open();
+
+      expect(env.output('os')).toMatchObject({ options: ['win', 'mac'] });
+
+      env.store.updateCell('os', () => withColumn('missing'));
+      await env.scheduler.whenIdle();
+      expect(env.runtime('os')).toMatchObject({
+        status: 'error',
+        error: 'Column "missing" is not in the results of the options query',
+        output: { columns: ['host', 'os', 'c'] },
       });
     });
 

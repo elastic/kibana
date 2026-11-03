@@ -88,13 +88,16 @@ const getChangedParams = (previous: ParamMap, next: ParamMap): string[] =>
 const isMemoHit = (runtime: CellRuntime, memoKey: string, forced: boolean): boolean =>
   !forced && runtime.output !== undefined && runtime.memoKey === memoKey;
 
-/** Distinct non-null values of `columnName`, or of the first column when no name is given. */
-const getOptions = ({ columns, rows }: Datatable, columnName?: string): string[] => {
-  const column =
-    columnName === undefined
-      ? columns[0]
-      : columns.find(({ id, name }) => id === columnName || name === columnName);
+const findColumn = ({ columns }: Datatable, columnName: string | null) =>
+  columnName === null
+    ? columns[0]
+    : columns.find(({ id, name }) => id === columnName || name === columnName);
+
+/** Distinct non-null values of `columnName`, or of the first column when it is null. */
+const getOptions = (table: Datatable, columnName: string | null): string[] => {
+  const column = findColumn(table, columnName);
   if (!column) return [];
+  const { rows } = table;
   const values = rows.map((row) => row[column.id]);
   return [...new Set(values.filter((value) => value !== null && value !== undefined).map(String))];
 };
@@ -370,10 +373,7 @@ export class NotebookScheduler {
       const { optionsCell = null, optionsColumn = null } = input;
       const source = optionsCell === null ? undefined : this.runtime(optionsCell).output;
       const table = source?.kind === 'table' ? source.table : undefined;
-      const hasColumn = table?.columns.some(
-        ({ id: columnId, name }) => columnId === optionsColumn || name === optionsColumn
-      );
-      if (table && optionsColumn !== null && !hasColumn) {
+      if (table && optionsColumn !== null && !findColumn(table, optionsColumn)) {
         const sourceName = optionsCell === null ? '' : this.cells[optionsCell]?.name ?? '';
         this.publish(id, {
           status: 'error',
@@ -381,7 +381,7 @@ export class NotebookScheduler {
         });
         return;
       }
-      const options = table && optionsColumn !== null ? getOptions(table, optionsColumn) : [];
+      const options = table ? getOptions(table, optionsColumn) : [];
       this.publishOptions(id, params, options, forced);
       return;
     }
@@ -391,9 +391,9 @@ export class NotebookScheduler {
       return;
     }
 
-    const { optionsQuery } = input;
+    const { optionsQuery, optionsColumn = null } = input;
     const queryParams = buildQueryParams(optionsQuery, this.parentOutputs(id));
-    const memoKey = objectHash({ optionsQuery, params: queryParams });
+    const memoKey = objectHash({ optionsQuery, optionsColumn, params: queryParams });
     const previous = runtime.output?.kind === 'input' ? runtime.output : undefined;
     if (previous && isMemoHit(runtime, memoKey, forced)) {
       const output =
@@ -413,9 +413,18 @@ export class NotebookScheduler {
       signal,
     });
     if (signal.aborted) return;
+    const columns = table.columns.map(({ name }) => name);
+    if (optionsColumn !== null && !findColumn(table, optionsColumn)) {
+      this.publish(id, {
+        status: 'error',
+        output: { kind: 'input', params, options: [], columns },
+        error: `Column "${optionsColumn}" is not in the results of the options query`,
+      });
+      return;
+    }
     this.publish(id, {
       status: 'done',
-      output: { kind: 'input', params, options: getOptions(table) },
+      output: { kind: 'input', params, options: getOptions(table, optionsColumn), columns },
       memoKey,
       lastRunAt: this.now().getTime(),
       durationMs,
