@@ -19,21 +19,19 @@ import {
   EuiHighlight,
   EuiInMemoryTable,
   EuiLink,
-  EuiPageHeader,
+  EuiPageSection,
   EuiSpacer,
   EuiTextColor,
   EuiToolTip,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { useAbortableAsync } from '@kbn/react-hooks';
-import { createRepositoryClient } from '@kbn/server-route-repository-client';
-import type { DefaultClientOptions } from '@kbn/server-route-repository-client';
-import { getDateISORange } from '@kbn/timerange';
 import { APPLICATION_SOURCE } from '../../../common/application_source';
 import type {
   ApplicationSource,
@@ -43,17 +41,18 @@ import type {
 import type { CoreWebVital, VitalRating } from '../../../common/core_web_vitals';
 import { CORE_WEB_VITAL, getVitalRating } from '../../../common/core_web_vitals';
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../../../common/feature';
-import type { DigitalExperienceServerRouteRepository } from '../../../server';
 import { ApplicationsSummaryPanel } from './components/applications_summary_panel';
 import { ColumnSelector } from './components/column_selector';
-import { EnvironmentFilter } from './components/environment_filter';
 import { PageLoadsChart } from './components/page_loads_chart';
 import { SourceFilter } from './components/source_filter';
+import { EnvironmentFilter } from '../../components/environment_filter';
+import { LoadErrorPrompt } from '../../components/load_error_prompt';
 import { TimeRangePicker } from '../../components/time_range_picker';
 import {
   APPLICATIONS_LIST_EBT_ELEMENTS,
   DIGITAL_EXPERIENCE_EBT_ACTIONS,
 } from '../../ebt_constants';
+import { useApiClient } from '../../hooks/use_api_client';
 import { useDigitalExperienceRouter } from '../../hooks/use_digital_experience_router';
 import { useEnvironment } from '../../hooks/use_environment';
 import { useListQuery } from '../../hooks/use_list_query';
@@ -67,6 +66,8 @@ import { APPLICATIONS_LABEL, SOURCE_LABELS } from '../../labels';
 import type { ApplicationRow } from './utils/filter_applications';
 import { applicationsMatching, filterApplications } from './utils/filter_applications';
 import { pageLoadsOfSources, summarizeApplications } from './utils/summarize_applications';
+import { formatDurationMs } from '../../utils/format_duration';
+import { toTimeRangeQuery } from '../../utils/time_range_query';
 import {
   applicationColumnPreset,
   metricColumnPreset,
@@ -85,24 +86,12 @@ const RATING_COLORS: Record<VitalRating, 'success' | 'warning' | 'danger'> = {
   poor: 'danger',
 };
 
-const formatSeconds = (milliseconds: number) =>
-  i18n.translate('xpack.digitalExperience.applications.seconds', {
-    defaultMessage: '{value} s',
-    values: { value: (milliseconds / 1000).toFixed(2) },
-  });
-
-const formatMilliseconds = (milliseconds: number) =>
-  i18n.translate('xpack.digitalExperience.applications.milliseconds', {
-    defaultMessage: '{value} ms',
-    values: { value: Math.round(milliseconds) },
-  });
-
 const VITAL_FORMATTERS: Record<CoreWebVital, (value: number) => string> = {
-  lcp: formatSeconds,
-  inp: formatMilliseconds,
+  lcp: formatDurationMs,
+  inp: formatDurationMs,
   cls: (value) => value.toFixed(3),
-  fcp: formatSeconds,
-  ttfb: formatMilliseconds,
+  fcp: formatDurationMs,
+  ttfb: formatDurationMs,
 };
 
 /** In display order. */
@@ -384,35 +373,9 @@ const UnavailableSourcesCallOut = ({ sources }: { sources: ApplicationSource[] }
   />
 );
 
-const LoadErrorPrompt = ({ error, onRetry }: { error: Error; onRetry: () => void }) => (
-  <EuiEmptyPrompt
-    data-test-subj="digitalExperienceApplicationsError"
-    iconType="warning"
-    color="danger"
-    title={
-      <h2>
-        {i18n.translate('xpack.digitalExperience.applications.fetchError', {
-          defaultMessage: 'Could not load the applications',
-        })}
-      </h2>
-    }
-    body={<p>{error.message}</p>}
-    actions={
-      <EuiButton
-        data-test-subj="digitalExperienceApplicationsRetry"
-        {...getEbtProps({
-          action: DIGITAL_EXPERIENCE_EBT_ACTIONS.RETRY_LOAD,
-          element: APPLICATIONS_LIST_EBT_ELEMENTS.RETRY,
-        })}
-        onClick={onRetry}
-      >
-        {i18n.translate('xpack.digitalExperience.applications.retry', {
-          defaultMessage: 'Try again',
-        })}
-      </EuiButton>
-    }
-  />
-);
+const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.applications.fetchError', {
+  defaultMessage: 'Could not load the applications',
+});
 
 const SORT_BY_PAGE_LOADS = { sort: { field: 'pageLoads.count', direction: 'desc' } } as const;
 
@@ -452,7 +415,7 @@ const HIDDEN_COLUMNS_STORAGE_KEY = 'xpack.digitalExperience.applications.hiddenC
 const NO_PAGE_LOADS: PageLoadsOverTime = { otel: [], classic: [] };
 
 export function ApplicationsListPage() {
-  const { application, http, ux } = useKibanaServices();
+  const { application, ux } = useKibanaServices();
   const router = useDigitalExperienceRouter();
   const { timeRange, setTimeRange } = useTimeRange();
   const formatters = useFormatters();
@@ -462,13 +425,7 @@ export function ApplicationsListPage() {
   const [search, setSearch] = useState('');
   const searchTerm = search.trim();
 
-  const apiClient = useMemo(
-    () =>
-      createRepositoryClient<DigitalExperienceServerRouteRepository, DefaultClientOptions>({
-        http,
-      }),
-    [http]
-  );
+  const apiClient = useApiClient();
 
   const {
     value: response,
@@ -476,18 +433,11 @@ export function ApplicationsListPage() {
     error,
     refresh,
   } = useAbortableAsync(
-    async ({ signal }) => {
-      const { startDate, endDate } = getDateISORange({
-        from: timeRange.rangeFrom,
-        to: timeRange.rangeTo,
-      });
-      return apiClient.fetch('GET /internal/digital_experience/applications', {
+    async ({ signal }) =>
+      apiClient.fetch('GET /internal/digital_experience/applications', {
         signal,
-        params: {
-          query: { start: startDate, end: endDate, ...(environment ? { environment } : {}) },
-        },
-      });
-    },
+        params: { query: toTimeRangeQuery(timeRange, environment) },
+      }),
     [apiClient, timeRange, environment],
     { unsetValueOnError: true }
   );
@@ -540,7 +490,16 @@ export function ApplicationsListPage() {
       return LOADING_MESSAGE;
     }
     if (error) {
-      return <LoadErrorPrompt error={error} onRetry={refresh} />;
+      return (
+        <LoadErrorPrompt
+          data-test-subj="digitalExperienceApplicationsError"
+          retryDataTestSubj="digitalExperienceApplicationsRetry"
+          retryEbtElement={APPLICATIONS_LIST_EBT_ELEMENTS.RETRY}
+          title={FETCH_ERROR_TITLE}
+          error={error}
+          onRetry={refresh}
+        />
+      );
     }
     if (response?.applications.length) {
       return NO_MATCHES_MESSAGE;
@@ -698,80 +657,78 @@ export function ApplicationsListPage() {
 
   return (
     <>
-      <EuiPageHeader
-        pageTitle={APPLICATIONS_LABEL}
-        bottomBorder
-        rightSideItems={[<TimeRangePicker key="timeRange" onRefresh={refresh} />]}
-      />
-      <EuiSpacer size="m" />
-      {unavailableSources.length > 0 && (
-        <>
-          <UnavailableSourcesCallOut sources={unavailableSources} />
-          <EuiSpacer size="m" />
-        </>
-      )}
-      <ApplicationsSummaryPanel summary={summary} isLoading={isLoading} />
-      <EuiSpacer size="m" />
-      <PageLoadsChart
-        points={pageLoadsOverTime}
-        isLoading={isLoading}
-        onTimeRangeSelect={({ start, end }) =>
-          setTimeRange({
-            rangeFrom: new Date(start).toISOString(),
-            rangeTo: new Date(end).toISOString(),
-          })
-        }
-      />
-      <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiFilterGroup>
-            <EnvironmentFilter
-              environments={response?.environments ?? []}
-              selected={environment}
-              onChange={setEnvironment}
-              isLoading={isLoading}
+      <AppHeader title={APPLICATIONS_LABEL} />
+      <EuiPageSection paddingSize="m" restrictWidth={false}>
+        <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <TimeRangePicker onRefresh={refresh} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        {unavailableSources.length > 0 && (
+          <>
+            <UnavailableSourcesCallOut sources={unavailableSources} />
+            <EuiSpacer size="m" />
+          </>
+        )}
+        <ApplicationsSummaryPanel summary={summary} isLoading={isLoading} />
+        <EuiSpacer size="m" />
+        <PageLoadsChart
+          points={pageLoadsOverTime}
+          isLoading={isLoading}
+          onTimeRangeSelect={setTimeRange}
+        />
+        <EuiSpacer size="m" />
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiFilterGroup>
+              <EnvironmentFilter
+                environments={response?.environments ?? []}
+                selected={environment}
+                onChange={setEnvironment}
+                isLoading={isLoading}
+              />
+              {canFilterBySource && (
+                <SourceFilter selected={sourceFilter} onChange={setSourceFilter} />
+              )}
+            </EuiFilterGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFieldSearch
+              fullWidth
+              data-test-subj="digitalExperienceApplicationsSearch"
+              placeholder={SEARCH_PLACEHOLDER}
+              aria-label={SEARCH_PLACEHOLDER}
+              value={search}
+              onChange={({ target: { value } }) => setSearch(value)}
+              isClearable
             />
-            {canFilterBySource && (
-              <SourceFilter selected={sourceFilter} onChange={setSourceFilter} />
-            )}
-          </EuiFilterGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFieldSearch
-            fullWidth
-            data-test-subj="digitalExperienceApplicationsSearch"
-            placeholder={SEARCH_PLACEHOLDER}
-            aria-label={SEARCH_PLACEHOLDER}
-            value={search}
-            onChange={({ target: { value } }) => setSearch(value)}
-            isClearable
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ColumnSelector
-            columns={OPTIONAL_COLUMNS}
-            visibleColumns={visibleColumns}
-            onChange={setVisibleColumns}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiInMemoryTable<ApplicationRow>
-        data-test-subj="digitalExperienceApplicationsTable"
-        tableCaption={APPLICATIONS_LABEL}
-        items={items}
-        itemId={getRowId}
-        columns={columns}
-        // Many columns: they keep their width and the table scrolls sideways instead of squeezing.
-        tableLayout="auto"
-        scrollableInline
-        stickyScrollbar
-        pagination={true}
-        sorting={SORT_BY_PAGE_LOADS}
-        loading={isLoading}
-        noItemsMessage={getNoItemsMessage()}
-      />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ColumnSelector
+              columns={OPTIONAL_COLUMNS}
+              visibleColumns={visibleColumns}
+              onChange={setVisibleColumns}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <EuiInMemoryTable<ApplicationRow>
+          data-test-subj="digitalExperienceApplicationsTable"
+          tableCaption={APPLICATIONS_LABEL}
+          items={items}
+          itemId={getRowId}
+          columns={columns}
+          // Many columns: they keep their width and the table scrolls sideways instead of squeezing.
+          tableLayout="auto"
+          scrollableInline
+          stickyScrollbar
+          pagination={true}
+          sorting={SORT_BY_PAGE_LOADS}
+          loading={isLoading}
+          noItemsMessage={getNoItemsMessage()}
+        />
+      </EuiPageSection>
     </>
   );
 }

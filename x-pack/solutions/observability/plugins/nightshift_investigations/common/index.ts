@@ -8,6 +8,8 @@
 import type { Severity } from '@kbn/significant-events-schema';
 import type { InvestigationTriggerType } from './workflows/triggers';
 
+export { telemetryTargetNameSchema } from './telemetry_targets';
+
 export type { Severity } from '@kbn/significant-events-schema';
 
 export { MAX_RULE_NAMES, MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from './automation_limits';
@@ -75,6 +77,7 @@ export interface StartInvestigationRequest {
   source_ids?: string[];
   /** Optional chat model connector or inference endpoint id for this run. */
   connector_id?: string;
+  telemetry_target?: string;
   context?: InvestigationContext | AlertInvestigationContext;
   /** Destinations receiving investigation lifecycle messages. */
   notificationDestinations?: InvestigationNotificationDestination[];
@@ -255,33 +258,13 @@ export {
   type InvestigationCompletedTriggerPayload,
   type InvestigationFailedTriggerPayload,
 } from './workflows/triggers';
-export {
-  getNightshiftRoleName,
-  getNightshiftServiceAccountName,
-  NIGHTSHIFT_SERVICE_ACCOUNT_KINDS,
-  type EnableInvestigatorServiceAccountBody,
-  type InvestigatorServiceAccountStatus,
-  type NightshiftBoundWorkflowStatus,
-  type NightshiftServiceAccountIds,
-  type NightshiftServiceAccountInfo,
-  type NightshiftServiceAccountKind,
+export type {
+  EnableInvestigatorServiceAccountBody,
+  InvestigatorServiceAccountStatus,
+  NightshiftBoundWorkflowStatus,
+  NightshiftServiceAccountInfo,
+  NightshiftUnboundAutomation,
 } from './service_account';
-export {
-  createHttpServiceAccountsApi,
-  ensureNightshiftServiceAccounts,
-  getSecurityRoleUrl,
-  NightshiftServiceAccountSetupError,
-  SECURITY_ROLE_API_VERSION,
-  SECURITY_SERVICE_ACCOUNT_URL,
-  type ListedServiceAccount,
-  type ListedServiceAccountsPage,
-  type NightshiftServiceAccountsApi,
-  type NightshiftServiceAccountSetupErrorCode,
-} from './ensure_service_accounts';
-export {
-  ensureNightshiftServiceAccountRoles,
-  NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES,
-} from './service_account_roles';
 
 export {
   KNOWLEDGE_PURGE_CONFIRMATION,

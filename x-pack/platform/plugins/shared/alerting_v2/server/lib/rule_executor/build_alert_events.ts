@@ -40,6 +40,13 @@ export const resolveAlertEventType = (rule: Pick<RuleResponse, 'kind'>): AlertEv
   }
 };
 
+/**
+ * `source` of every alert event the rule executor writes. The
+ * `alerting.alertStatusChanged` trigger reports it as `event.source`, so the
+ * two must not drift apart.
+ */
+export const RULE_EXECUTION_SOURCE = 'internal';
+
 const SEVERITY_COLUMN = 'severity';
 const SUPPORTED_SEVERITIES = new Set<AlertEventSeverity>(
   Object.values(alertEventSeverity) as AlertEventSeverity[]
@@ -139,7 +146,7 @@ export function createAlertEventsBatchBuilder({
   maxGroupsPerExecution,
   activeGroupHashes = new Set<string>(),
 }: BuildAlertEventsBaseOpts): AlertEventsBatchBuilder {
-  const source = 'internal';
+  const source = RULE_EXECUTION_SOURCE;
   const groupingFields = ruleAttributes.grouping?.fields ?? [];
   const hasGroupingFields = groupingFields.length > 0;
   const groupHashes = new Set<string>();
@@ -236,7 +243,7 @@ export function buildRecoveryAlertEvents({
         group_hash,
         data: {},
         status: 'recovered',
-        source: 'internal',
+        source: RULE_EXECUTION_SOURCE,
         type,
         space_id: spaceId,
       })
@@ -272,7 +279,7 @@ export function buildContinuedBreachAlertEvents({
     group_hash: groupHash,
     data: {},
     status: 'breached' as const,
-    source: 'internal',
+    source: RULE_EXECUTION_SOURCE,
     type,
     space_id: spaceId,
   }));
@@ -306,7 +313,7 @@ export function buildNoDataAlertEvents({
     group_hash: groupHash,
     data: {},
     status: 'no_data' as const,
-    source: 'internal',
+    source: RULE_EXECUTION_SOURCE,
     type,
     space_id: spaceId,
   }));
@@ -391,7 +398,7 @@ export function buildQueryRecoveryAlertEvents({
       group_hash: groupHash,
       data,
       status: 'recovered',
-      source: 'internal',
+      source: RULE_EXECUTION_SOURCE,
       type,
       space_id: spaceId,
     })

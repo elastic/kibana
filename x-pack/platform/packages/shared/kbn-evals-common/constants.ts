@@ -96,5 +96,6 @@ export const MAX_DATASET_NAME_LENGTH = 256 as const;
 export const MAX_DATASET_DESCRIPTION_LENGTH = 2048 as const;
 
 export const MAX_EVALUATOR_NAME_LENGTH = 128 as const;
+export const MAX_EVALUATOR_VERSION_LENGTH = 64 as const;
 
 export const MAX_DATASET_TAG_FACETS = 100 as const;

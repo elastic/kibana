@@ -9,14 +9,18 @@ import type {
   ActionPolicyChangedEbtData,
   ActionPolicyEbtEventType,
 } from './action_policy_ebt_schema';
+import type {
+  ActionPolicyTestSentEbtData,
+  ActionPolicyTestSentEbtEventType,
+} from './action_policy_test_ebt_event';
 import type { AlertActionAppliedEbtData, AlertActionEbtEventType } from './alert_action_ebt_schema';
 import type { RuleChangedEbtData, RuleEbtEventType } from './rule_ebt_schema';
 
 /**
  * Maps every EBT event type the plugin registers to the data it is reported with.
  * Rule-lifecycle events share {@link RuleChangedEbtData}, action policy change events share
- * {@link ActionPolicyChangedEbtData}, and alert-action events share
- * {@link AlertActionAppliedEbtData}.
+ * {@link ActionPolicyChangedEbtData}, alert-action events share {@link AlertActionAppliedEbtData},
+ * and test notification sends report {@link ActionPolicyTestSentEbtData}.
  */
 export type AlertingEbtEventMap = {
   [TEventType in RuleEbtEventType]: RuleChangedEbtData;
@@ -24,6 +28,8 @@ export type AlertingEbtEventMap = {
   [TEventType in ActionPolicyEbtEventType]: ActionPolicyChangedEbtData;
 } & {
   [TEventType in AlertActionEbtEventType]: AlertActionAppliedEbtData;
+} & {
+  [TEventType in ActionPolicyTestSentEbtEventType]: ActionPolicyTestSentEbtData;
 };
 
 export type AlertingEbtEventType = keyof AlertingEbtEventMap;
