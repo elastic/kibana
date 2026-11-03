@@ -78,15 +78,10 @@ describe('FeatureFlagsService Browser', () => {
 
       expect(OFREPWebProvider).toHaveBeenCalledWith(
         expect.objectContaining({
-          baseUrl: `${window.location.origin}/kbn/internal/feature-flags/`,
-          pollInterval: 30_000,
+          baseUrl: `${window.location.origin}/kbn/internal/feature-flags`,
+          pollInterval: 10_000,
           changeDetection: 'polling',
-          cacheMode: 'network-first',
-          headers: expect.arrayContaining([
-            ['kbn-version', 'version'],
-            ['kbn-xsrf', 'kibana'],
-            ['x-elastic-internal-origin', 'Kibana'],
-          ]),
+          fetchImplementation: expect.any(Function),
         })
       );
       const provider = jest.mocked(OpenFeature.setProviderAndWait).mock

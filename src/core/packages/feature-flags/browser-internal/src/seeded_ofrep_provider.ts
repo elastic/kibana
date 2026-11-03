@@ -75,7 +75,8 @@ const readFlagValue = (entry: CachedEvaluation | undefined): unknown => {
 };
 
 export interface SeededOfrepWebProviderOptions {
-  ofrep: OFREPWebProviderOptions;
+  /** Connection options. `cacheMode` is fixed by this provider. */
+  ofrep: Omit<OFREPWebProviderOptions, 'cacheMode'>;
   /** Values Kibana injected from the server evaluation, served until the first bulk response. */
   initialFlags: Record<string, unknown>;
   logger?: Pick<Logger, 'warn'>;
@@ -122,9 +123,14 @@ export class SeededOfrepWebProvider implements Provider {
     this.initialFlags = options.initialFlags;
     this.published = { ...options.initialFlags };
     this.logger = options.logger;
+    // The web provider otherwise resolves initialize() from its persisted cache.
+    const ofrepOptions: OFREPWebProviderOptions = {
+      ...options.ofrep,
+      cacheMode: 'network-first',
+    };
     this.inner = options.createProvider
-      ? options.createProvider(options.ofrep)
-      : new OFREPWebProvider(options.ofrep);
+      ? options.createProvider(ofrepOptions)
+      : new OFREPWebProvider(ofrepOptions);
     this.forwardEvents();
   }
 

@@ -66,6 +66,22 @@ describe('SeededOfrepWebProvider', () => {
     };
   };
 
+  test('asks the OFREP provider for a network evaluation before any persisted cache', () => {
+    const createProvider = jest.fn(() => createDelegate().delegate);
+    new SeededOfrepWebProvider({
+      ofrep,
+      initialFlags: { 'my.flag': true },
+      createProvider,
+    });
+
+    expect(createProvider).toHaveBeenCalledWith(
+      expect.objectContaining({
+        baseUrl: 'http://kibana/internal/feature-flags/',
+        cacheMode: 'network-first',
+      })
+    );
+  });
+
   test('serves injected flags until the OFREP provider responds', async () => {
     const { delegate, resolveInit } = createDelegate();
     const provider = new SeededOfrepWebProvider({

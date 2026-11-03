@@ -119,7 +119,7 @@ export class FeatureFlagsService {
    * The core service's constructor
    * @param core {@link CoreContext}
    */
-  constructor(private readonly core: CoreContext) {
+  constructor(core: CoreContext) {
     this.logger = core.logger.get('feature-flags-service');
     this.featureFlagsClient = OpenFeature.getClient();
     OpenFeature.setLogger(this.logger.get('open-feature'));
@@ -216,8 +216,7 @@ export class FeatureFlagsService {
   ): void {
     const transaction = apm.startTransaction('set-provider', 'feature-flags');
     const provider = createKibanaOfrepProvider({
-      basePath: http.basePath,
-      kibanaVersion: this.core.env.packageInfo.version,
+      http,
       initialFlags: seedFlags(injectedMetadata),
       logger: this.logger,
     });
@@ -280,7 +279,8 @@ export class FeatureFlagsService {
     fallbackValue: T
   ): T {
     // Bind the evaluation or the client will lose its internal context.
-    // Overrides are already part of the server snapshot this provider reads.
+    // Overrides are already part of the server snapshot this provider reads
+    // and are taken into account in the `initialFlags` property when bootstrapping the client.
     const value = evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
     apm.addLabels({ [`flag_${flagName.replaceAll('.', '_')}`]: value });
 
