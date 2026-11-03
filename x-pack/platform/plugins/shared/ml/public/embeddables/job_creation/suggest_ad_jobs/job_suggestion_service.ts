@@ -22,6 +22,7 @@ export const DEFAULT_SUGGESTION_TIME_RANGE: SuggestionTimeRange = { from: 'now-3
 
 export type SuggestionsState =
   | { status: 'loading' }
+  /** The request was stopped before the suggestions arrived. */
   | { status: 'cancelled' }
   | { status: 'error'; error: ErrorType }
   | {
@@ -37,14 +38,13 @@ type Timefilter = Pick<TimefilterContract, 'calculateBounds'>;
 
 /**
  * Asks for suggested jobs, and keeps the state of the latest request.
- * The answer to a request which has been superseded is ignored.
+ * A request which is replaced or cancelled is aborted, and its answer is ignored.
  */
 export class JobSuggestionService {
   private readonly stateSubject = new BehaviorSubject<SuggestionsState>({ status: 'loading' });
-  private latestRequest = 0;
-  /** Cancels the request which is being waited for. */
-  private abortController?: AbortController;
   private lastParams?: { indexPattern: string; timeRange: SuggestionTimeRange };
+  /** Aborts the request which is being waited for, and tells it apart from earlier ones. */
+  private abortController?: AbortController;
 
   /** The state of the latest request, which is loading until the first request is made. */
   public readonly state$: Observable<SuggestionsState> = this.stateSubject.asObservable();
@@ -60,18 +60,11 @@ export class JobSuggestionService {
    * The returned promise settles once the state has been updated, and never rejects.
    */
   public async suggest(indexPattern: string, timeRange: SuggestionTimeRange): Promise<void> {
-    // A request which is waited for is replaced, and so is no longer needed.
-    this.abortController?.abort();
-    this.abortController = undefined;
-
-    const requestId = ++this.latestRequest;
-    const isCurrent = () => requestId === this.latestRequest;
+    this.abortInFlight();
     this.lastParams = { indexPattern, timeRange };
 
-    const { min, max } = this.timefilter.calculateBounds(timeRange);
-    const start = min?.valueOf();
-    const end = max?.valueOf();
-    if (start === undefined || end === undefined || start >= end) {
+    const bounds = this.getBounds(timeRange);
+    if (bounds === undefined) {
       this.stateSubject.next({
         status: 'error',
         error: i18n.translate('xpack.ml.suggestADJobsFlyout.invalidTimeRangeError', {
@@ -81,23 +74,24 @@ export class JobSuggestionService {
       return;
     }
 
-    const abortController = new AbortController();
-    this.abortController = abortController;
+    const controller = new AbortController();
+    this.abortController = controller;
     this.stateSubject.next({ status: 'loading' });
+
+    const settle = (state: SuggestionsState) => {
+      if (this.abortController !== controller) return;
+      this.abortController = undefined;
+      this.stateSubject.next(state);
+    };
+
     try {
       const { suggestions } = await this.jobsApi.suggestJobs(
-        { index: indexPattern, start, end },
-        abortController.signal
+        { index: indexPattern, ...bounds },
+        controller.signal
       );
-      if (isCurrent()) {
-        this.abortController = undefined;
-        this.stateSubject.next({ status: 'loaded', suggestions, timeRange, ranAt: Date.now() });
-      }
+      settle({ status: 'loaded', suggestions, timeRange, ranAt: Date.now() });
     } catch (error) {
-      if (isCurrent()) {
-        this.abortController = undefined;
-        this.stateSubject.next({ status: 'error', error });
-      }
+      settle({ status: 'error', error });
     }
   }
 
@@ -107,16 +101,26 @@ export class JobSuggestionService {
    */
   public cancel(): void {
     if (this.abortController === undefined) return;
-    this.latestRequest++;
-    this.abortController.abort();
-    this.abortController = undefined;
+    this.abortInFlight();
     this.stateSubject.next({ status: 'cancelled' });
   }
 
   /** Asks again, for what was last asked for. Does nothing before the first request. */
   public async reload(): Promise<void> {
     if (this.lastParams === undefined) return;
-    const { indexPattern, timeRange } = this.lastParams;
-    await this.suggest(indexPattern, timeRange);
+    await this.suggest(this.lastParams.indexPattern, this.lastParams.timeRange);
+  }
+
+  private abortInFlight(): void {
+    this.abortController?.abort();
+    this.abortController = undefined;
+  }
+
+  /** The time range as times, or nothing when it is not a valid range. */
+  private getBounds(timeRange: SuggestionTimeRange): { start: number; end: number } | undefined {
+    const { min, max } = this.timefilter.calculateBounds(timeRange);
+    const start = min?.valueOf();
+    const end = max?.valueOf();
+    return start !== undefined && end !== undefined && start < end ? { start, end } : undefined;
   }
 }
