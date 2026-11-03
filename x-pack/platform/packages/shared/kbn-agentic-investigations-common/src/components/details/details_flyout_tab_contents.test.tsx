@@ -51,11 +51,13 @@ const renderTab = ({
   investigationOverrides,
   proposedActionsContent,
   proposedActionsCount,
+  isRunning,
 }: {
   attachments?: VersionedAttachment[];
   investigationOverrides?: Partial<Investigation>;
   proposedActionsContent?: React.ReactNode;
   proposedActionsCount?: React.ReactNode;
+  isRunning?: boolean;
 } = {}) =>
   render(
     <OverviewTab
@@ -64,6 +66,7 @@ const renderTab = ({
       groupedAttachments={groupedAttachments}
       proposedActionsContent={proposedActionsContent}
       proposedActionsCount={proposedActionsCount}
+      isRunning={isRunning}
     />
   );
 
@@ -247,5 +250,20 @@ describe('OverviewTab', () => {
     renderTab({ attachments: [], investigationOverrides: { summary: undefined } });
 
     expect(screen.queryByText("What's happened")).not.toBeInTheDocument();
+  });
+
+  it('ends in a loading skeleton while the investigation is running', () => {
+    renderTab({ isRunning: true });
+
+    expect(screen.getByTestId('investigationOverviewLoadingSection')).toBeInTheDocument();
+    expect(
+      screen.getByText('Still investigating. This flyout will update with new findings.')
+    ).toBeInTheDocument();
+  });
+
+  it('renders no loading skeleton once nothing works on the investigation', () => {
+    renderTab({ isRunning: false });
+
+    expect(screen.queryByTestId('investigationOverviewLoadingSection')).not.toBeInTheDocument();
   });
 });

@@ -11,6 +11,6 @@
     "configPath": ["xpack", "digital_experience"],
     "requiredPlugins": ["features", "observabilityShared", "data", "unifiedSearch"],
     "optionalPlugins": ["ux", "apmDataAccess", "taskManager"],
-    "requiredBundles": ["kibanaReact", "fieldFormats"]
+    "requiredBundles": ["kibanaReact", "fieldFormats", "observability"]
   }
 }

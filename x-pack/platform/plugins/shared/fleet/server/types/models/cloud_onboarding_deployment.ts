@@ -35,6 +35,14 @@ const StatusSchema = schema.oneOf(
 
 const DataFormatSchema = schema.oneOf([schema.literal('ecs'), schema.literal('otel')]);
 
+const EcfServiceConfigSchema = schema.object({
+  serviceId: schema.string({ minLength: 1, maxLength: 128 }),
+  bucketArns: schema.arrayOf(schema.string({ minLength: 1, maxLength: 2048 }), { maxSize: 1000 }),
+  logGroupArns: schema.arrayOf(schema.string({ minLength: 1, maxLength: 2048 }), {
+    maxSize: 1000,
+  }),
+});
+
 const EcfStackSchema = schema.object({
   family: schema.oneOf([
     schema.literal('unified'),
@@ -51,6 +59,8 @@ const EcfStackSchema = schema.object({
   serviceIds: schema.maybe(
     schema.arrayOf(schema.string({ minLength: 1, maxLength: 128 }), { maxSize: 1000 })
   ),
+  /** Stack-relevant settings per service when the stack was last launched or updated. Used for settings drift detection on session resume. */
+  serviceConfigs: schema.maybe(schema.arrayOf(EcfServiceConfigSchema, { maxSize: 1000 })),
 });
 
 const SharedFields = {
@@ -125,6 +135,16 @@ const PersistedInstanceSchema = schema.object({
 
 export const CloudOnboardingDeploymentSchemaV5 = CloudOnboardingDeploymentSchemaV4.extends({
   instances: schema.maybe(schema.arrayOf(PersistedInstanceSchema, { maxSize: 1000 })),
+});
+
+// ── V6: packageNames + serviceNames + updatedBy ──────────────────────────────
+// packageNames (and provider) are mapped as keyword so deployments can be listed per package.
+export const CloudOnboardingDeploymentSchemaV6 = CloudOnboardingDeploymentSchemaV5.extends({
+  packageNames: schema.maybe(schema.arrayOf(schema.string({ maxLength: 255 }), { maxSize: 100 })),
+  serviceNames: schema.maybe(
+    schema.recordOf(schema.string({ maxLength: 256 }), schema.string({ maxLength: 256 }))
+  ),
+  updatedBy: schema.maybe(schema.string({ maxLength: 1024 })),
 });
 
 // ── V1 ───────────────────────────────────────────────────────────────────────
