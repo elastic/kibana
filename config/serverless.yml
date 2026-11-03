@@ -323,3 +323,7 @@ xpack.genAiSettings:
   showAiBreadcrumb: false
   showSpacesIntegration: false
   showAiAssistantsVisibilitySetting: false
+
+# TEMPORARY (QA only, do not merge): enable service accounts for the Service Accounts E2E QA round.
+# `xpack.task_manager.grant_uiam_api_keys` is already enabled for QA projects via serverless-gitops.
+xpack.security.serviceAccounts.enabled: true
