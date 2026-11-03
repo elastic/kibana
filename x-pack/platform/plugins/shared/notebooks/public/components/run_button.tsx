@@ -56,7 +56,7 @@ export const RunButton = ({
     <EuiSplitButton size="s" color={runMode === 'auto' ? 'primary' : 'text'}>
       <EuiSplitButton.ActionPrimary
         isIconOnly
-        iconType="play"
+        iconType={runMode === 'auto' ? 'refresh' : 'play'}
         aria-label={RUN_LABEL}
         onClick={onRun}
         tooltipProps={{ title, content: description }}
