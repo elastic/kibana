@@ -533,6 +533,31 @@ describe('ProcessorEditor', () => {
       ).toBeNull();
     });
 
+    it('lists a diagnostic on a config entry the form has no field for', async () => {
+      const message = 'unknown parameter legacy_option';
+      renderEditor({
+        step: {
+          ...savedStep,
+          processor: {
+            ...savedStep.processor,
+            config: [...savedStep.processor.config, { name: 'legacy_option', value: true }],
+          },
+        },
+        fetchCheck: jest.fn().mockResolvedValue({
+          valid: false,
+          diagnostics: [
+            { severity: 'error', code: 'E029_UNKNOWN_CONFIG', message, path: '/config/1' },
+          ],
+        }),
+      });
+      commitPath('other');
+      await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
+
+      const callout = await screen.findByTestId('streamsProcessingFlyoutEditorDiagnostics');
+      expect(within(callout).getByText(message)).toBeTruthy();
+      expect(within(callout).queryByText(/highlighted field/)).toBeNull();
+    });
+
     it('commits unchecked when the configuration service cannot be reached', async () => {
       const { onCommit } = renderEditor({
         fetchCheck: jest.fn().mockRejectedValue(httpError(502, 'Bad Gateway')),

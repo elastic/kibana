@@ -178,17 +178,25 @@ describe('createComponentCatalogueService', () => {
     await service.get();
     time.advance(60_000);
 
-    // Once the copy is stale the freshness window no longer applies: every call tries again.
     await expect(service.get()).resolves.toEqual({
       catalogue: first,
       etag: '"etag-1"',
       stale: true,
     });
-    await expect(service.get()).resolves.toMatchObject({ stale: true });
     expect(logger.warn).toHaveBeenCalledTimes(1);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('distributor unreachable'));
+
+    // The stale copy is served without asking again until the next window, so an unresponsive
+    // distributor does not cost a request timeout per call.
+    await expect(service.get()).resolves.toMatchObject({ stale: true });
+    expect(fetchComponentCatalogue).toHaveBeenCalledTimes(2);
+
+    time.advance(60_000);
+    await expect(service.get()).resolves.toMatchObject({ stale: true });
+    expect(logger.warn).toHaveBeenCalledTimes(1);
     expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('distributor unreachable'));
 
+    time.advance(60_000);
     await expect(service.get()).resolves.toMatchObject({ stale: false });
     expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('succeeded again'));
     expect(fetchComponentCatalogue).toHaveBeenCalledTimes(4);

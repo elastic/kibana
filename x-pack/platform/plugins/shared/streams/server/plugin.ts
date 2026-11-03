@@ -322,6 +322,11 @@ export class StreamsPlugin
       logger: this.logger.get('component-catalogue'),
     });
 
+    if (this.config.canvas.enabled && !this.config.distributor.url) {
+      this.logger.warn(
+        'xpack.streams.distributor.url is not configured; unit publish and validation and the component catalogue are unavailable.'
+      );
+    }
     this.republishUnitsEnabled = this.config.canvas.enabled && Boolean(this.config.distributor.url);
     registerRepublishUnitsTask({
       taskManager: plugins.taskManager,

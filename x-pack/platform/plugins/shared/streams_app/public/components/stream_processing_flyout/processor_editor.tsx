@@ -201,7 +201,11 @@ export function ProcessorEditor({
         return;
       case 'invalid': {
         // Diagnostics that point at a field show on it; editing the field clears them again.
-        const { errors, unmatched } = toFieldErrors(result.diagnostics, processor.config);
+        const { errors, unmatched } = toFieldErrors(
+          result.diagnostics,
+          processor.config,
+          new Set(definition?.fields.map(({ name }) => name))
+        );
         form.addErrors(errors);
         setOutcome({ kind: 'rejected', unmatched, highlightedCount: Object.keys(errors).length });
         return;

@@ -202,9 +202,6 @@ export const createConfigDistributorClient = ({
   const baseUrl = config.url?.replace(/\/$/, '');
 
   if (!baseUrl) {
-    logger.warn(
-      'xpack.streams.distributor.url is not configured; unit publish and validation and the component catalogue are unavailable.'
-    );
     const distributorNotConfigured = (operation: string): never => {
       const message = `streams-config-distributor URL is not configured; skipping ${operation}.`;
       logger.debug(message);

@@ -23,25 +23,32 @@ export interface DiagnosticFieldErrors {
 /**
  * Places configuration service diagnostics on the form fields they point at. `config` is the
  * entries that were submitted, so `/config/<index>` resolves to the entry's name, which is the
- * form pointer; anything inside `value` keeps its relative pointer. Per-telemetry overrides are
- * not editable in the form, so their diagnostics stay unmatched.
+ * form pointer; anything inside `value` keeps its relative pointer. Per-telemetry overrides and
+ * entries the definition has no field for (kept from hand-written YAML) have no control to show
+ * a diagnostic on, so theirs stay unmatched.
  */
 export const toFieldErrors = (
   diagnostics: readonly StreamsUnit.Diagnostic[],
-  config: readonly ConfigEntry[]
+  config: readonly ConfigEntry[],
+  /** Names of the fields the form renders. */
+  fieldNames: ReadonlySet<string>
 ): DiagnosticFieldErrors => {
   const errors: FieldErrors = {};
   const unmatched: StreamsUnit.Diagnostic[] = [];
   for (const diagnostic of diagnostics) {
     const match = diagnostic.path ? CONFIG_ENTRY_POINTER.exec(diagnostic.path) : null;
     const entry = match ? config[Number(match[1])] : undefined;
-    const pointer = entry ? `${joinPointer('', entry.name)}${match?.[2] ?? ''}` : undefined;
     if (
-      pointer === undefined ||
-      entry?.telemetry !== undefined ||
-      diagnostic.severity !== 'error' ||
-      errors[pointer] !== undefined
+      !entry ||
+      entry.telemetry !== undefined ||
+      !fieldNames.has(entry.name) ||
+      diagnostic.severity !== 'error'
     ) {
+      unmatched.push(diagnostic);
+      continue;
+    }
+    const pointer = `${joinPointer('', entry.name)}${match?.[2] ?? ''}`;
+    if (errors[pointer] !== undefined) {
       unmatched.push(diagnostic);
       continue;
     }

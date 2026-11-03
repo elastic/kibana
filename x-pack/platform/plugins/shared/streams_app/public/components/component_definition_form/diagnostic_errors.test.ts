@@ -19,7 +19,9 @@ const config = [
   { name: 'fields', value: [{ action: 'nope' }] },
   { name: 'a/b', value: 'x' },
   { name: 'fields', value: [], telemetry: ['metrics' as const] },
+  { name: 'legacy_option', value: true },
 ];
+const fieldNames = new Set(['fields', 'a/b']);
 
 describe('toFieldErrors', () => {
   it('maps config entry pointers to form pointers', () => {
@@ -30,7 +32,8 @@ describe('toFieldErrors', () => {
           error('too few', '/config/0'),
           error('escaped', '/config/1/value'),
         ],
-        config
+        config,
+        fieldNames
       )
     ).toEqual({
       errors: { '/fields/0/action': 'bad action', '/fields': 'too few', '/a~1b': 'escaped' },
@@ -45,14 +48,18 @@ describe('toFieldErrors', () => {
       error('entry name', '/config/0/name'),
       error('out of range', '/config/9'),
       error('scoped override', '/config/2/value'),
+      error('unknown entry', '/config/3'),
       { ...error('a warning', '/config/0'), severity: 'warning' as const },
     ];
-    expect(toFieldErrors(diagnostics, config)).toEqual({ errors: {}, unmatched: diagnostics });
+    expect(toFieldErrors(diagnostics, config, fieldNames)).toEqual({
+      errors: {},
+      unmatched: diagnostics,
+    });
   });
 
   it('keeps the first error per field and lists the rest', () => {
     const [first, second] = [error('first', '/config/0'), error('second', '/config/0')];
-    expect(toFieldErrors([first, second], config)).toEqual({
+    expect(toFieldErrors([first, second], config, fieldNames)).toEqual({
       errors: { '/fields': 'first' },
       unmatched: [second],
     });

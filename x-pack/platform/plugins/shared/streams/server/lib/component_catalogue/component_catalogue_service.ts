@@ -26,7 +26,7 @@ export interface CachedComponentCatalogue {
 }
 
 export interface ComponentCatalogueService {
-  /** The current catalogue, revalidated with the distributor once its freshness window passed. */
+  /** The current catalogue, fresh or stale, revalidated with the distributor once a window passed. */
   get: () => Promise<CachedComponentCatalogue>;
   /** Validates one component against its catalogue definition. */
   validate: ValidateComponent;
@@ -51,6 +51,7 @@ export const createComponentCatalogueService = ({
   now?: () => number;
 }): ComponentCatalogueService => {
   let cached: CachedComponentCatalogue | undefined;
+  // When the distributor was last asked, whether or not it answered.
   let revalidatedAt: number | undefined;
   let inFlight: Promise<CachedComponentCatalogue> | undefined;
   // One warning per run of failures, so an outage is one line and not one per flyout open.
@@ -70,11 +71,10 @@ export const createComponentCatalogueService = ({
     );
   };
 
+  // A stale copy is fresh in the same sense: the distributor is retried once per window, so an
+  // outage costs one failed request a minute, not a request timeout on every flyout open.
   const isFresh = (): boolean =>
-    cached !== undefined &&
-    !cached.stale &&
-    revalidatedAt !== undefined &&
-    now() - revalidatedAt < freshForMs;
+    cached !== undefined && revalidatedAt !== undefined && now() - revalidatedAt < freshForMs;
 
   const revalidate = async (): Promise<CachedComponentCatalogue> => {
     try {
@@ -111,6 +111,7 @@ export const createComponentCatalogueService = ({
         logger.warn(message);
       }
       cached = { ...cached, stale: true };
+      revalidatedAt = now();
       return cached;
     }
   };

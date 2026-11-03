@@ -61,7 +61,7 @@ const okFetch = () =>
   });
 
 describe('createConfigDistributorClient', () => {
-  it('warns once and does not call the distributor when the URL is not configured', async () => {
+  it('answers 503 quietly without calling the distributor when the URL is not configured', async () => {
     const fetchImpl = jest.fn();
     const logger = loggerMock.create();
     const { publish, validate } = createConfigDistributorClient({
@@ -78,7 +78,8 @@ describe('createConfigDistributorClient', () => {
     });
 
     expect(fetchImpl).not.toHaveBeenCalled();
-    expect(logger.warn).toHaveBeenCalledTimes(1);
+    // The plugin decides whether a missing URL is worth a warning; the client stays quiet.
+    expect(logger.warn).not.toHaveBeenCalled();
     expect(logger.error).not.toHaveBeenCalled();
   });
 
