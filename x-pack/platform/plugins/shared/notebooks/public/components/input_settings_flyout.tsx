@@ -71,26 +71,31 @@ const isComplete = (draft: ConfigurableInput): boolean => {
   return Boolean(draft.optionsCell && draft.optionsColumn);
 };
 
-const OPTIONS_SOURCE_TABS: ReadonlyArray<{ id: DropdownOptionsSource; label: string }> = [
+type OptionsTab = 'dynamic' | 'static';
+
+const OPTIONS_TABS: ReadonlyArray<{ id: OptionsTab; label: string }> = [
   {
-    id: 'query',
-    label: i18n.translate('xpack.notebook.inputSettings.sourceQuery', {
-      defaultMessage: 'ES|QL query',
+    id: 'dynamic',
+    label: i18n.translate('xpack.notebook.inputSettings.tabDynamic', {
+      defaultMessage: 'Dynamic',
     }),
   },
   {
     id: 'static',
-    label: i18n.translate('xpack.notebook.inputSettings.sourceStatic', {
-      defaultMessage: 'Static values',
-    }),
-  },
-  {
-    id: 'cell',
-    label: i18n.translate('xpack.notebook.inputSettings.sourceCell', {
-      defaultMessage: 'Cell column',
+    label: i18n.translate('xpack.notebook.inputSettings.tabStatic', {
+      defaultMessage: 'Static',
     }),
   },
 ];
+
+/** Select value for the custom options query; cell ids are UUIDs, so it cannot collide. */
+const CUSTOM_QUERY = 'customQuery';
+
+/** The source a tab switches to, returning to the dynamic source the draft last used. */
+const getTabSource = (tab: OptionsTab, { optionsCell }: DropdownInput): DropdownOptionsSource => {
+  if (tab === 'static') return 'static';
+  return optionsCell ? 'cell' : 'query';
+};
 
 const QueryOptionsFields = ({ draft, onChange }: FieldsProps<DropdownInput>) => (
   <EuiFormRow
@@ -191,65 +196,90 @@ const ColumnSelect = ({
   );
 };
 
-const CellOptionsFields = ({ draft, onChange }: FieldsProps<DropdownInput>) => {
+const DynamicOptionsFields = ({ draft, onChange }: FieldsProps<DropdownInput>) => {
   const { store } = useNotebook();
   const cells = useStateFromPublishingSubject(store.cells$);
   const esqlCells = Object.values(cells).filter(({ type }) => type === 'esql');
+  const isCell = draft.optionsSource === 'cell';
   const { optionsCell = null } = draft;
-  const source = optionsCell === null ? undefined : cells[optionsCell];
+  const source = isCell && optionsCell !== null ? cells[optionsCell] : undefined;
 
   return (
     <>
       <EuiFormRow
         fullWidth
-        label={i18n.translate('xpack.notebook.inputSettings.optionsCell', {
-          defaultMessage: 'ES|QL cell',
+        label={i18n.translate('xpack.notebook.inputSettings.optionsSource', {
+          defaultMessage: 'Source',
         })}
       >
         <EuiSelect
           fullWidth
-          hasNoInitialSelection={!optionsCell}
-          value={optionsCell ?? ''}
-          options={esqlCells.map(({ id, name }) => ({ value: id, text: name }))}
-          onChange={(event) =>
-            onChange({ ...draft, optionsCell: event.target.value, optionsColumn: null })
+          value={isCell ? optionsCell ?? '' : CUSTOM_QUERY}
+          options={[
+            {
+              value: CUSTOM_QUERY,
+              text: i18n.translate('xpack.notebook.inputSettings.customQuery', {
+                defaultMessage: 'Custom ES|QL query',
+              }),
+            },
+            ...esqlCells.map(({ id, name }) => ({ value: id, text: name })),
+          ]}
+          onChange={({ target: { value } }) =>
+            onChange(
+              value === CUSTOM_QUERY
+                ? { ...draft, optionsSource: 'query', optionsCell: null, optionsColumn: null }
+                : {
+                    ...draft,
+                    optionsSource: 'cell',
+                    optionsCell: value,
+                    optionsColumn: value === optionsCell ? draft.optionsColumn : null,
+                  }
+            )
           }
-          data-test-subj="notebookInputSettingsOptionsCell"
+          data-test-subj="notebookInputSettingsOptionsSource"
         />
       </EuiFormRow>
-      {source && (
-        <ColumnSelect
-          key={source.id}
-          cellId={source.id}
-          cellName={source.name}
-          draft={draft}
-          onChange={onChange}
-        />
+      {isCell ? (
+        source && (
+          <ColumnSelect
+            key={source.id}
+            cellId={source.id}
+            cellName={source.name}
+            draft={draft}
+            onChange={onChange}
+          />
+        )
+      ) : (
+        <QueryOptionsFields draft={draft} onChange={onChange} />
       )}
     </>
   );
 };
 
 const DropdownFields = ({ draft, onChange }: FieldsProps<DropdownInput>) => {
-  const source = draft.optionsSource ?? 'query';
+  const tab: OptionsTab = draft.optionsSource === 'static' ? 'static' : 'dynamic';
   return (
     <>
       <EuiTabs size="s">
-        {OPTIONS_SOURCE_TABS.map(({ id, label }) => (
+        {OPTIONS_TABS.map(({ id, label }) => (
           <EuiTab
             key={id}
-            isSelected={source === id}
-            onClick={() => onChange({ ...draft, optionsSource: id })}
-            data-test-subj={`notebookInputSettingsSource-${id}`}
+            isSelected={tab === id}
+            onClick={() =>
+              id !== tab && onChange({ ...draft, optionsSource: getTabSource(id, draft) })
+            }
+            data-test-subj={`notebookInputSettingsTab-${id}`}
           >
             {label}
           </EuiTab>
         ))}
       </EuiTabs>
       <EuiSpacer size="m" />
-      {source === 'query' && <QueryOptionsFields draft={draft} onChange={onChange} />}
-      {source === 'static' && <StaticOptionsFields draft={draft} onChange={onChange} />}
-      {source === 'cell' && <CellOptionsFields draft={draft} onChange={onChange} />}
+      {tab === 'dynamic' ? (
+        <DynamicOptionsFields draft={draft} onChange={onChange} />
+      ) : (
+        <StaticOptionsFields draft={draft} onChange={onChange} />
+      )}
     </>
   );
 };
