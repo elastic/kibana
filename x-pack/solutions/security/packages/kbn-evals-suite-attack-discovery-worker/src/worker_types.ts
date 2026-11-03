@@ -95,6 +95,10 @@ export interface WorkerArtifacts {
   /** Set when the wait for the runner ran out before it ended. */
   runnerTimedOutAfterMs?: number;
   seededAlertCount: number;
+  /** The scenario's own ids of the alerts seeded into the space. */
+  seededAlertIds: string[];
+  /** The scenario's own ids of every open alert in the space once seeded (the readable set). */
+  openAlertIds: string[];
   alertsAnalyzed?: number;
   attacksGenerated?: number;
   reviewsRequested?: number;
@@ -104,6 +108,8 @@ export interface WorkerArtifacts {
   /** Attacks `match_fingerprints` handed back for review; undefined when it did not run. */
   fingerprintReviewCount?: number;
   fingerprintAttachCount?: number;
+  /** Reviews the matcher handed back that already point at an existing Investigation. */
+  fingerprintMatchedCount?: number;
   fingerprintMatchFailed: boolean;
   dispatchedReviewExecutionIds: string[];
   reviews: ReviewArtifact[];

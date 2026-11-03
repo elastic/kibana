@@ -313,8 +313,11 @@ export const createEvaluateDataset =
             });
           } finally {
             // Parked reviews are done being read; cancel them so they do not outlive the row.
-            await client.cancelPending();
-            await cleanupSeed({ esClient, log, seeded });
+            try {
+              await client.cancelPending();
+            } finally {
+              await cleanupSeed({ esClient, seeded });
+            }
           }
         },
       },

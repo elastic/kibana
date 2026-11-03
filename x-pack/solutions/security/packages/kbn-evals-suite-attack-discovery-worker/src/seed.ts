@@ -27,6 +27,7 @@ import {
   UI_SETTINGS_ROUTE,
   alertsIndexForSpace,
   anonymizationFieldsIndexForSpace,
+  attackDiscoveryIndexForSpace,
 } from './constants';
 import { errorMessage, sleep, spacePath } from './kibana_api';
 import { kbnErrorMessage, type KbnRequest } from './kbn_request';
@@ -326,6 +327,11 @@ export interface SeededScenario {
   /** Seeded `_id` to the scenario's own alert id, so evaluators compare against gold ids. */
   goldIdBySeededId: ReadonlyMap<string, string>;
   alertCount: number;
+  /**
+   * Ids (mapped back to the scenario's own) of every open alert in the space right after seeding.
+   * The generation step reports only how many alerts it read, so this is the id set it can read.
+   */
+  openAlertIds: string[];
 }
 
 const toIso = (ms: number): string => new Date(ms).toISOString();
@@ -442,6 +448,7 @@ export const seedScenario = async ({
   spaceId: string;
   now?: number;
 }): Promise<SeededScenario> => {
+  await assertCleanSpace({ esClient, spaceId });
   const runMarker = newRunMarker(scenario.id);
   const timestamps = rescaleTimestamps({ alerts: scenario.alerts, now });
   const goldIdBySeededId = new Map<string, string>();
@@ -464,45 +471,112 @@ export const seedScenario = async ({
     const failed = response.items.find((item) => item.index?.error)?.index?.error;
     throw new Error(`Seeding "${scenario.id}" failed: ${JSON.stringify(failed)}`);
   }
+  const open = await esClient.search({
+    index: alertsIndexForSpace(spaceId),
+    query: { term: { 'kibana.alert.workflow_status': 'open' } },
+    _source: false,
+    size: 10_000,
+  });
+  const openAlertIds = open.hits.hits.map(
+    ({ _id }) => goldIdBySeededId.get(String(_id)) ?? String(_id)
+  );
   log.info(
     `[ad-worker] seeded ${scenario.alerts.length} alerts for "${scenario.id}" (${runMarker})`
   );
-  return { runMarker, spaceId, goldIdBySeededId, alertCount: scenario.alerts.length };
+  return {
+    runMarker,
+    spaceId,
+    goldIdBySeededId,
+    alertCount: scenario.alerts.length,
+    openAlertIds,
+  };
 };
 
 /**
- * Removes a seed's alerts, and the space's fingerprints so the next row cannot match an attack
- * from this one.
+ * Fails when the space already holds open alerts or attack fingerprints. A row only measures its
+ * own seed if nothing else is in the space: a leftover alert would be analyzed with it, and a
+ * leftover fingerprint would make an attack match instead of being reviewed.
+ */
+export const assertCleanSpace = async ({
+  esClient,
+  spaceId,
+}: {
+  esClient: Client;
+  spaceId: string;
+}): Promise<void> => {
+  const [alerts, fingerprints] = await Promise.all([
+    esClient.count({
+      index: alertsIndexForSpace(spaceId),
+      query: { term: { 'kibana.alert.workflow_status': 'open' } },
+      ignore_unavailable: true,
+    }),
+    esClient.count({
+      index: ATTACK_FINGERPRINT_INDEX,
+      query: { match: { 'attributes.space_id': spaceId } },
+      ignore_unavailable: true,
+    }),
+  ]);
+  if (alerts.count > 0 || fingerprints.count > 0) {
+    throw new Error(
+      `Space "${spaceId}" is not clean before the row: ${alerts.count} open alerts and ${fingerprints.count} attack fingerprints are left over from an earlier run.`
+    );
+  }
+};
+
+/**
+ * Removes a seed's alerts, the space's fingerprints so the next row cannot match an attack from
+ * this one, and the space's persisted discoveries. Every delete is attempted; any that fails
+ * is thrown, because a space left dirty would poison the next row.
  */
 export const cleanupSeed = async ({
   esClient,
-  log,
   seeded,
 }: {
   esClient: Client;
-  log: ToolingLog;
   seeded: SeededScenario;
 }): Promise<void> => {
   const { spaceId, runMarker } = seeded;
-  await esClient
-    .deleteByQuery({
-      index: alertsIndexForSpace(spaceId),
-      query: { prefix: { tags: runMarker } },
-      conflicts: 'proceed',
-      refresh: true,
-    })
-    .catch((error) =>
-      log.warning(`[ad-worker] could not delete seeded alerts: ${errorMessage(error)}`)
-    );
-  await esClient
-    .deleteByQuery({
-      index: ATTACK_FINGERPRINT_INDEX,
-      query: { match: { 'attributes.space_id': spaceId } },
-      conflicts: 'proceed',
-      refresh: true,
-      ignore_unavailable: true,
-    })
-    .catch((error) =>
-      log.warning(`[ad-worker] could not delete fingerprints: ${errorMessage(error)}`)
-    );
+  const deletions: Array<{ what: string; run: () => Promise<unknown> }> = [
+    {
+      what: 'seeded alerts',
+      run: () =>
+        esClient.deleteByQuery({
+          index: alertsIndexForSpace(spaceId),
+          query: { prefix: { tags: runMarker } },
+          conflicts: 'proceed',
+          refresh: true,
+        }),
+    },
+    {
+      what: 'fingerprints',
+      run: () =>
+        esClient.deleteByQuery({
+          index: ATTACK_FINGERPRINT_INDEX,
+          query: { match: { 'attributes.space_id': spaceId } },
+          conflicts: 'proceed',
+          refresh: true,
+          ignore_unavailable: true,
+        }),
+    },
+    {
+      what: 'persisted discoveries',
+      run: () =>
+        esClient.deleteByQuery({
+          index: attackDiscoveryIndexForSpace(spaceId),
+          query: { match_all: {} },
+          conflicts: 'proceed',
+          refresh: true,
+          ignore_unavailable: true,
+        }),
+    },
+  ];
+  const results = await Promise.allSettled(deletions.map(({ run }) => run()));
+  const failures = results.flatMap((result, index) =>
+    result.status === 'rejected'
+      ? [new Error(`could not delete ${deletions[index].what}: ${errorMessage(result.reason)}`)]
+      : []
+  );
+  if (failures.length > 0) {
+    throw new AggregateError(failures, `Cleanup of space "${spaceId}" failed`);
+  }
 };

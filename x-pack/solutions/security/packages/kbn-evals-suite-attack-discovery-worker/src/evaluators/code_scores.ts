@@ -118,14 +118,33 @@ export const scoreReviewsSettled: CodeScorer = (_expected, artifacts) =>
     'no review ran'
   );
 
-/** Every seeded alert was in the window the generation step read. */
+/**
+ * Exactly the seeded alerts were read. The generation step reports a count, not ids, so the
+ * check has three parts: the space held exactly the seeded ids when the row started, the step
+ * analyzed exactly that many, and no attack cites an alert outside the seeded set.
+ */
 export const scoreAlertsRetrieved: CodeScorer = (_expected, artifacts) => {
   if (artifacts.alertsAnalyzed === undefined) {
     return missing('the generation step reported no alert count');
   }
-  return artifacts.alertsAnalyzed >= artifacts.seededAlertCount
-    ? pass(`${artifacts.alertsAnalyzed} alerts analyzed, ${artifacts.seededAlertCount} seeded`)
-    : fail(`${artifacts.alertsAnalyzed} alerts analyzed, ${artifacts.seededAlertCount} seeded`);
+  const seeded = new Set(artifacts.seededAlertIds);
+  const open = new Set(artifacts.openAlertIds);
+  const absent = [...seeded].filter((id) => !open.has(id));
+  const extra = [...open].filter((id) => !seeded.has(id));
+  if (absent.length > 0 || extra.length > 0) {
+    return fail(
+      `the space's open alerts differ from the seeded set (${absent.length} seeded alerts not open, ${extra.length} unexpected open alerts)`
+    );
+  }
+  if (artifacts.alertsAnalyzed !== seeded.size) {
+    return fail(`${artifacts.alertsAnalyzed} alerts analyzed, ${seeded.size} seeded`);
+  }
+  const foreign = artifacts.insights
+    .flatMap(({ alertIds }) => alertIds)
+    .filter((id) => !seeded.has(id));
+  return foreign.length > 0
+    ? fail(`${foreign.length} alert ids cited by attacks were never seeded`)
+    : pass(`${artifacts.alertsAnalyzed} alerts analyzed, ${seeded.size} seeded`);
 };
 
 /**
@@ -142,7 +161,8 @@ export const scoreDiscoveriesPersisted: CodeScorer = (expected, artifacts) => {
 };
 
 /**
- * Fingerprint matching ran, and every attack it handed back was dispatched for review. A match
+ * Fingerprint matching ran, none of the attacks matched an existing fingerprint, and every attack
+ * it handed back was dispatched for review (zero of zero is not a pass). A match
  * step that failed closed hides the matcher, so it fails here even though reviews still run.
  */
 export const scoreFingerprintsDispatched: CodeScorer = (_expected, artifacts) => {
@@ -154,6 +174,19 @@ export const scoreFingerprintsDispatched: CodeScorer = (_expected, artifacts) =>
   }
   if (artifacts.fingerprintReviewCount === undefined) {
     return missing('match_fingerprints produced no output');
+  }
+  if ((artifacts.fingerprintMatchedCount ?? 0) > 0) {
+    return fail(
+      `${artifacts.fingerprintMatchedCount} attacks matched an existing fingerprint in a space that started empty`
+    );
+  }
+  if (
+    artifacts.fingerprintReviewCount === 0 &&
+    artifacts.dispatchedReviewExecutionIds.length === 0
+  ) {
+    return fail(
+      `${artifacts.persistedAttackIds.length} attacks were persisted but none was dispatched for review`
+    );
   }
   return artifacts.dispatchedReviewExecutionIds.length === artifacts.fingerprintReviewCount
     ? pass(
@@ -241,7 +274,21 @@ export const scoreParkedAtGate: CodeScorer = (_expected, artifacts) =>
     'no review reached a verdict that escalates'
   );
 
-/** Both worker outcome events fired, and their outcome agrees with what the run produced. */
+const numberField = (
+  record: Record<string, unknown> | undefined,
+  key: string
+): number | undefined => {
+  const value = record?.[key];
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  return typeof value === 'string' && value.trim() !== '' && Number.isFinite(Number(value))
+    ? Number(value)
+    : undefined;
+};
+
+/**
+ * Both worker outcome events fired, and their outcome and counts agree with what the run
+ * produced (persisted and dispatched attacks).
+ */
 export const scoreOutcomeReported: CodeScorer = (_expected, artifacts) => {
   const run = artifacts.outcomes.find(({ stepId }) => stepId === 'report_run_completed');
   const worker = artifacts.outcomes.find(({ stepId }) => stepId === 'report_worker_run_completed');
@@ -262,6 +309,18 @@ export const scoreOutcomeReported: CodeScorer = (_expected, artifacts) => {
     return missing('an outcome event carried no run_outcome');
   }
   const produced = artifacts.persistedAttackIds.length > 0;
+  const persisted = artifacts.persistedAttackIds.length;
+  const dispatched = artifacts.dispatchedReviewExecutionIds.length;
+  const reportedPersisted = numberField(run.input, 'attacks_persisted');
+  if (reportedPersisted === undefined) {
+    return missing('the run event carried no attacks_persisted count');
+  }
+  if (reportedPersisted !== persisted) {
+    return fail(`run event reported ${reportedPersisted} persisted attacks, ${persisted} found`);
+  }
+  if (dispatched > reportedPersisted) {
+    return fail(`${dispatched} reviews dispatched for ${reportedPersisted} persisted attacks`);
+  }
   const claimedEmpty = [run.runOutcome, worker.runOutcome].filter((outcome) =>
     EMPTY_RUN_OUTCOMES.includes(outcome)
   );

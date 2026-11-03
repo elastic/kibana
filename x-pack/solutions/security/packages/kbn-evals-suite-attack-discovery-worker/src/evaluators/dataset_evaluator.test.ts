@@ -47,7 +47,14 @@ const rowFor = (scenarioId: string): WorkerExample => {
   return row;
 };
 
-const outcome = (stepId: string) => ({ stepId, status: 'completed', runOutcome: 'completed' });
+const outcome = (stepId: string, attacksPersisted = 0) => ({
+  stepId,
+  status: 'completed',
+  runOutcome: 'completed',
+  input: { attacks_persisted: attacksPersisted },
+});
+
+const SEEDED_IDS = ['a1', 'a2', 'a3'];
 
 /** A benign row where the Worker found nothing: every applicable CODE check passes. */
 const quietArtifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifacts => ({
@@ -55,6 +62,8 @@ const quietArtifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifac
   runnerStatus: 'completed',
   runnerStepCount: 4,
   seededAlertCount: 3,
+  seededAlertIds: SEEDED_IDS,
+  openAlertIds: SEEDED_IDS,
   alertsAnalyzed: 3,
   insights: [],
   persistedAttackIds: [],
@@ -66,15 +75,22 @@ const quietArtifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifac
 });
 
 /** The attack row where the review parked a true positive at the analyst gate. */
-const attackArtifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifacts =>
-  quietArtifacts({
+const attackArtifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifacts => {
+  const chainIds = [
+    ...(AUDIT_SCENARIOS.find(({ id }) => id === 'positive-chain-with-noise')?.gold.alertGroups[
+      'clickfix-chain'
+    ] ?? []),
+  ];
+  return quietArtifacts({
+    seededAlertCount: chainIds.length,
+    seededAlertIds: chainIds,
+    openAlertIds: chainIds,
+    alertsAnalyzed: chainIds.length,
+    outcomes: [outcome('report_run_completed', 1), outcome('report_worker_run_completed', 1)],
     insights: [
       {
         id: 'attack-1',
-        alertIds: [
-          ...(AUDIT_SCENARIOS.find(({ id }) => id === 'positive-chain-with-noise')?.gold
-            .alertGroups['clickfix-chain'] ?? []),
-        ],
+        alertIds: chainIds,
         title: 'ClickFix chain',
         summaryMarkdown: 'summary',
         detailsMarkdown: 'details',
@@ -96,6 +112,7 @@ const attackArtifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifa
     ],
     ...overrides,
   });
+};
 
 const stubExecutor = (): EvalsExecutorClient =>
   ({
@@ -170,6 +187,7 @@ describe('createEvaluateDataset', () => {
       spaceId: 'space',
       goldIdBySeededId: new Map(),
       alertCount: 3,
+      openAlertIds: SEEDED_IDS,
     });
   });
 
@@ -243,6 +261,13 @@ describe('createEvaluateDataset', () => {
     collect.mockRejectedValue(new Error('collect failed'));
     await expect(evaluateRow('benign-batch')).rejects.toThrow(/collect failed/);
     expect(client.cancelPending).toHaveBeenCalled();
+    expect(cleanup).toHaveBeenCalledTimes(1);
+  });
+
+  it('still removes the seed when cancelling pending executions throws', async () => {
+    collect.mockResolvedValue(quietArtifacts());
+    (client.cancelPending as jest.Mock).mockRejectedValueOnce(new Error('cancel failed'));
+    await expect(evaluateRow('benign-batch')).rejects.toThrow(/cancel failed/);
     expect(cleanup).toHaveBeenCalledTimes(1);
   });
 });

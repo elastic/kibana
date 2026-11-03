@@ -328,6 +328,8 @@ export const collectWorkerArtifacts = async ({
     runnerStepCount: run.stepExecutions.length,
     ...(runTimedOutAfterMs !== undefined ? { runnerTimedOutAfterMs: runTimedOutAfterMs } : {}),
     seededAlertCount: seeded.alertCount,
+    seededAlertIds: [...seeded.goldIdBySeededId.values()],
+    openAlertIds: seeded.openAlertIds,
     alertsAnalyzed: asNumber(generation?.alerts_analyzed) ?? asNumber(emit?.alerts_analyzed),
     attacksGenerated:
       asNumber(generation?.discoveries_generated) ?? asNumber(emit?.attacks_generated),
@@ -339,6 +341,11 @@ export const collectWorkerArtifacts = async ({
       : undefined,
     fingerprintAttachCount: Array.isArray(matchOutput?.attachments)
       ? matchOutput.attachments.length
+      : undefined,
+    fingerprintMatchedCount: Array.isArray(matchOutput?.reviews)
+      ? matchOutput.reviews.filter(
+          (item) => asString(asRecord(item)?.related_investigation_id) !== undefined
+        ).length
       : undefined,
     fingerprintMatchFailed: matchFailed,
     dispatchedReviewExecutionIds: dispatches.map(({ executionId }) => executionId),
