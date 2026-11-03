@@ -6,7 +6,7 @@
  */
 
 import type { SavedObject } from '@kbn/core-saved-objects-server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CaseAttributes, Observable } from '../../../common/types/domain';
 import { CaseAttributesSchema } from '../../../common/types/domain';
 import type { ConnectorPersisted } from './connectors';
@@ -86,12 +86,9 @@ export type CaseTransformedAttributesWithAttachmentStats = CaseAttributes & {
 
 export const CaseTransformedAttributesSchema = CaseAttributesSchema;
 
-export const ExtractObservablesSourceSchema = z.enum([
-  'explicit',
-  'template',
-  'space_default',
-  'rule',
-]);
+export const ExtractObservablesSourceSchema = lazySchema(() =>
+  z.enum(['explicit', 'template', 'space_default', 'rule'])
+);
 
 export type ExtractObservablesSource = z.infer<typeof ExtractObservablesSourceSchema>;
 
@@ -101,7 +98,7 @@ export type ExtractObservablesSource = z.infer<typeof ExtractObservablesSourceSc
  * Read schemas keep dropping this key, so it never reaches an API response.
  */
 export const CaseCreateAttributesSchema = CaseAttributesSchema.extend({
-  extract_observables_source: ExtractObservablesSourceSchema.optional(),
+  extract_observables_source: lazySchema(() => ExtractObservablesSourceSchema.optional()),
 });
 
 export type CaseCreateAttributes = CaseTransformedAttributes & {
