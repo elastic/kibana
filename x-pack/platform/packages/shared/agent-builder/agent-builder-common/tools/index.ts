@@ -99,7 +99,23 @@ export {
   isFileReferenceResult,
 } from './tool_result';
 export { type BrowserApiToolMetadata } from './browser_tool_metadata';
-export * from './browser_tools';
+export {
+  DEFAULT_BROWSER_TOOL_TIMEOUT_MS,
+  BrowserToolCallStatus,
+  type BrowserToolDescriptor,
+  type BrowserToolsRequest,
+  type BrowserToolImagePayload,
+  type BrowserToolResultPayload,
+  zodToBrowserToolSchema,
+  builtinBrowserToolIds,
+  builtinBrowserToolDescriptors,
+  isBuiltinBrowserToolId,
+  getPageSnapshotSchema,
+  takeScreenshotSchema,
+  clickElementSchema,
+  fillFormSchema,
+  navigateToSchema,
+} from './browser_tools';
 export {
   visualizationElement,
   dashboardElement,
