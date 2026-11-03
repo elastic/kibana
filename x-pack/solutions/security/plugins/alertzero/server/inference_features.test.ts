@@ -132,7 +132,7 @@ describe('registerAlertZeroInferenceFeatures', () => {
       featureName: 'Frontier models',
       featureDescription:
         'Complex, single-pass work where output quality matters most, such as generating attack discoveries or drafting a detection rule. Choose your most capable model.',
-      recommendedEndpoints: [GPT_6_SOL, GPT_5_6_SOL, OPUS_5],
+      recommendedEndpoints: [GPT_5_6_SOL, GPT_6_SOL, OPUS_5],
     });
   });
 
@@ -168,8 +168,14 @@ describe('registerAlertZeroInferenceFeatures', () => {
       register,
       ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID
     );
+    const { recommendedEndpoints: balancedEndpoints } = registeredTier(
+      register,
+      ALERTZERO_BALANCED_INFERENCE_FEATURE_ID
+    );
     expect(recommendedEndpoints).not.toContain(SONNET_5);
-    expect(recommendedEndpoints).not.toContain(SONNET_5_5);
+    for (const endpoint of balancedEndpoints) {
+      expect(recommendedEndpoints).not.toContain(endpoint);
+    }
   });
 
   it('registers the prompt-template row with no recommended model', () => {
