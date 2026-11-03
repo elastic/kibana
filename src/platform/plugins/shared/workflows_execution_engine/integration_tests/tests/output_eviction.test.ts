@@ -756,7 +756,7 @@ steps:
       minPayloadSize: new ByteSizeValue(1),
     };
     await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
-    await workflowRunFixture.resumeWorkflowAtScheduledTime();
+    await workflowRunFixture.driveToTerminal();
   });
 
   it('completes the workflow after resume', () => {
