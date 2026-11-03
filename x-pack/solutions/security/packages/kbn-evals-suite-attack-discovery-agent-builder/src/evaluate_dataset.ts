@@ -1240,19 +1240,37 @@ const isValidationFinished = (validation: unknown): boolean => {
   return validationRunTerminal.get(runId) === true;
 };
 
+/**
+ * Why `tracking.validation` can never become non-null for this execution, when
+ * the AD tool result already says so:
+ * - `execution_failed`: a failed run never reaches validation, which runs after
+ *   generation in the same pipeline.
+ * - `zero_alerts`: the product short-circuits a run that retrieved no alerts
+ *   (`handleNoAlerts`) — it reports `completed` with `alerts_context_count: 0`
+ *   and never starts the generation or validation workflows.
+ * `pending` is deliberately not covered: a pending run may still reach validation.
+ */
+export type ValidationUnreachableReason = 'execution_failed' | 'zero_alerts';
+
+export const getValidationUnreachableReason = (
+  adToolResult?: Pick<AdToolResult, 'status' | 'alertsContextCount'>
+): ValidationUnreachableReason | undefined => {
+  if (adToolResult?.status === 'error') return 'execution_failed';
+  if (adToolResult?.status === 'completed' && adToolResult.alertsContextCount === 0) {
+    return 'zero_alerts';
+  }
+  return undefined;
+};
+
 export const waitForValidationPhase = async ({
   fetch,
   executionId,
-  executionFailed = false,
+  validationUnreachableReason,
 }: {
   fetch: HttpHandler;
   executionId: string;
-  /**
-   * The AD tool reported a terminal failure for this execution (`adToolResult.status`).
-   * Validation runs after generation in the same pipeline, so a failed run never
-   * reaches it and `tracking.validation` stays null — there is nothing to wait for.
-   */
-  executionFailed?: boolean;
+  /** There is nothing to wait for: see {@link ValidationUnreachableReason}. */
+  validationUnreachableReason?: ValidationUnreachableReason;
 }): Promise<ExecutionTrackingResponse> => {
   const deadline = Date.now() + WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS;
   let lastError: unknown;
@@ -1317,13 +1335,17 @@ export const waitForValidationPhase = async ({
         }
       }
     }
-    // The execution terminally failed before the validation phase, so
-    // `tracking.validation` can never become non-null. Return the snapshot we
-    // have rather than poll for the rest of the budget on a predicate that can
-    // no longer be satisfied — a wedged run must not stall the suite.
-    if (executionFailed && tracking?.validation == null) {
+    // `tracking.validation` can never become non-null, so return the snapshot
+    // we have rather than poll for the rest of the budget on a predicate that
+    // can no longer be satisfied — a wedged run must not stall the suite.
+    if (validationUnreachableReason && tracking?.validation == null) {
       if (lastTracking) {
         return lastTracking;
+      }
+      // A correct zero-alert run has no generation workflow to read, so a
+      // tracking read that is not indexed yet is not worth failing it over.
+      if (validationUnreachableReason === 'zero_alerts') {
+        return { generation: null, validation: null };
       }
       throw new Error(
         `Attack Discovery execution ${executionId} failed before reaching the validation phase`,
@@ -1371,7 +1393,7 @@ const inspectWorkflow = async ({
   const tracking = await waitForValidationPhase({
     fetch,
     executionId,
-    executionFailed: adToolResult?.status === 'error',
+    validationUnreachableReason: getValidationUnreachableReason(adToolResult),
   });
   const workflowId = tracking.generation?.workflow_id;
   const pipeline = workflowId
