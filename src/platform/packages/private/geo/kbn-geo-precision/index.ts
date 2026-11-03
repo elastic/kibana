@@ -15,5 +15,4 @@ export {
   getGeotilePrecision,
   getGeohexPrecision,
   getGeohashPrecision,
-  type GeoPrecisions,
 } from './src/geo_precision';

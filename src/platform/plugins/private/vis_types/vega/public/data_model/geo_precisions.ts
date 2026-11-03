@@ -11,8 +11,16 @@ import {
   getGeohashPrecision,
   getGeohexPrecision,
   getGeotilePrecision,
-  type GeoPrecisions,
 } from '@kbn/geo-precision';
+
+interface GeoPrecisions {
+  /** Value for `?_geotile_precision` */
+  geotile?: number;
+  /** Value for `?_geohex_precision` */
+  geohex?: number;
+  /** Value for `?_geohash_precision` */
+  geohash?: number;
+}
 
 /** Values for all geo precision params for a map zoom. A Vega spec can use any of them. */
 export function getGeoPrecisionsForZoom(zoom: number): Required<GeoPrecisions> {

@@ -9,15 +9,6 @@
 
 import { GRID_RESOLUTION } from './grid_resolution';
 
-export interface GeoPrecisions {
-  /** Value for `?_geotile_precision` */
-  geotile?: number;
-  /** Value for `?_geohex_precision` */
-  geohex?: number;
-  /** Value for `?_geohash_precision` */
-  geohash?: number;
-}
-
 export const DEFAULT_GRID_RESOLUTION: GRID_RESOLUTION = GRID_RESOLUTION.FINE;
 
 const MAX_GEOTILE_LEVEL = 29;
