@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiResizableContainer,
   EuiSpacer,
@@ -75,8 +76,11 @@ import {
   APP_UI_ID,
   DEFAULT_INDEX_KEY,
   DEFAULT_INDICATOR_SOURCE_PATH,
-  DEFAULT_THREAT_INDEX_KEY,
 } from '../../../../../common/constants';
+import {
+  useCuratedIndicatorAlias,
+  useDefaultThreatIndices,
+} from '../../../../common/hooks/use_curated_indicator_alias';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import { RulePreview } from '../../components/rule_preview';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
@@ -132,7 +136,7 @@ const CreateRulePageComponent: React.FC<{}> = () => {
     ruleStepsOrder[ruleStepsOrder.indexOf(step) + 1];
 
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
-  const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
+  const { threatIndices: threatIndicesConfig } = useDefaultThreatIndices();
   const defineStepDefault = useMemo(
     () => ({
       ...stepDefineDefaultValue,
@@ -1022,6 +1026,16 @@ const CreateRulePageComponent: React.FC<{}> = () => {
   );
 };
 
-export const CreateRulePage = React.memo(CreateRulePageComponent);
+/**
+ * The form seeds its default threat index once at mount, so hold it back until the
+ * curated indicator alias lookup settles; otherwise the alias would arrive too late
+ * to be part of the default.
+ */
+const CreateRulePageContainer: React.FC<{}> = () => {
+  const { isLoading } = useCuratedIndicatorAlias();
+  return isLoading ? <EuiLoadingSpinner size="xl" /> : <CreateRulePageComponent />;
+};
+
+export const CreateRulePage = React.memo(CreateRulePageContainer);
 
 const MemoEuiAccordion = memo(EuiAccordion);
