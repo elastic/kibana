@@ -11,6 +11,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { cpsPluginMock } from '@kbn/cps/public/mocks';
 import type { FormValues } from '../../form/types';
 import { useResolveTimeField } from './use_resolve_time_field';
 import { useComposeDiscoverTimeField } from './use_compose_discover_time_field';
@@ -18,7 +19,7 @@ import { useComposeDiscoverTimeField } from './use_compose_discover_time_field';
 const mockHttp = httpServiceMock.createStartContract();
 const mockData = dataPluginMock.createStartContract();
 const mockDataViews = dataViewPluginMocks.createStartContract();
-const mockCps = { cpsManager: { getDefaultProjectRouting: () => '_alias:*' } };
+const mockCps = cpsPluginMock.createStartContract();
 
 jest.mock('../../form/contexts/rule_form_context', () => ({
   useRuleFormServices: () => ({

@@ -67,6 +67,7 @@ export const ComposeDiscoverChart: React.FC<ComposeDiscoverChartProps> = ({
         const adHocDataView = await getESQLAdHocDataview({
           dataViewsService: dataViews,
           query,
+          projectRouting: getRuleProjectRouting(query, cps),
         });
         if (cancelled) return;
 
@@ -112,7 +113,7 @@ export const ComposeDiscoverChart: React.FC<ComposeDiscoverChartProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [query, timeField, columns, lens, dataViews]);
+  }, [query, timeField, columns, lens, dataViews, cps]);
 
   if (isLoading && !lensAttributes) {
     return (

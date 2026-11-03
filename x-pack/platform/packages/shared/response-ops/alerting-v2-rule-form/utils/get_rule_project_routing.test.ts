@@ -5,19 +5,12 @@
  * 2.0.
  */
 
-import type { CPSPluginStart } from '@kbn/cps/public';
+import { cpsPluginMock } from '@kbn/cps/public/mocks';
 import { getRuleProjectRouting } from './get_rule_project_routing';
 
-const mockGetDefaultProjectRouting = jest.fn();
-const mockCps = {
-  cpsManager: { getDefaultProjectRouting: mockGetDefaultProjectRouting },
-} as unknown as CPSPluginStart;
+const mockCps = cpsPluginMock.createStartContract();
 
 describe('getRuleProjectRouting', () => {
-  beforeEach(() => {
-    mockGetDefaultProjectRouting.mockReturnValue('_alias:*');
-  });
-
   it('returns the space default routing when the query does not set one', () => {
     expect(getRuleProjectRouting('FROM logs-*', mockCps)).toBe('_alias:*');
   });

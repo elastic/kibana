@@ -107,6 +107,10 @@ export const useQueryExecution = ({
   const executionQuery = activeExecution?.query ?? null;
   const executionTimeRange = activeExecution?.timeRange ?? null;
   const executionTimeField = activeExecution?.timeField ?? null;
+  // Resolved on every render since the CPS space default loads asynchronously
+  const executionProjectRouting = executionQuery
+    ? getRuleProjectRouting(executionQuery, cps)
+    : undefined;
 
   const canExecute = Boolean(executionQuery?.trim() && executionTimeField?.trim());
 
@@ -122,11 +126,17 @@ export const useQueryExecution = ({
       search: data.search.search,
       dropNullColumns: true,
       timeRange: executionTimeRange,
-      projectRouting: getRuleProjectRouting(executionQuery, cps),
+      projectRouting: executionProjectRouting,
     });
 
     return result.response;
-  }, [executionQuery, executionTimeRange, executionTimeField, data.search.search, cps]);
+  }, [
+    executionQuery,
+    executionTimeRange,
+    executionTimeField,
+    executionProjectRouting,
+    data.search.search,
+  ]);
 
   const {
     data: response,
@@ -134,7 +144,13 @@ export const useQueryExecution = ({
     isError,
     error,
   } = useQuery({
-    queryKey: ['composeDiscoverQuery', executionQuery, executionTimeRange, executionTimeField],
+    queryKey: [
+      'composeDiscoverQuery',
+      executionQuery,
+      executionTimeRange,
+      executionTimeField,
+      executionProjectRouting,
+    ],
     queryFn: fetchResults,
     enabled: canExecute,
     keepPreviousData: true,
@@ -162,7 +178,13 @@ export const useQueryExecution = ({
     const fieldChanged = exec?.timeField !== tf;
     if (exec && trimmed === exec.query && !rangeChanged && !fieldChanged) {
       queryClient.invalidateQueries({
-        queryKey: ['composeDiscoverQuery', exec.query, exec.timeRange, exec.timeField],
+        queryKey: [
+          'composeDiscoverQuery',
+          exec.query,
+          exec.timeRange,
+          exec.timeField,
+          getRuleProjectRouting(exec.query, cps),
+        ],
         exact: true,
       });
     } else {
@@ -171,7 +193,7 @@ export const useQueryExecution = ({
         [activeTab]: { query: trimmed, timeRange: { ...tr }, timeField: tf },
       }));
     }
-  }, [queryClient]);
+  }, [queryClient, cps]);
 
   const columns: QueryColumn[] = useMemo(
     () =>

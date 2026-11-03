@@ -14,6 +14,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import { cpsPluginMock } from '@kbn/cps/public/mocks';
 import { EsqlQueryExpression, getTimeFilter } from './esql_query_expression';
 import type { EsQueryRuleParams } from '../types';
 import { SearchType } from '../types';
@@ -69,12 +70,13 @@ jest.mock('@kbn/esql-utils', () => {
 });
 
 const mockHttp = httpServiceMock.createStartContract();
-const mockGetDefaultProjectRouting = jest.fn();
+const mockCps = cpsPluginMock.createStartContract();
+const mockGetDefaultProjectRouting = jest.mocked(mockCps.cpsManager!.getDefaultProjectRouting);
 const mockServices = {
   http: mockHttp,
   isServerless: false,
   uiSettings: { get: jest.fn() },
-  cps: { cpsManager: { getDefaultProjectRouting: mockGetDefaultProjectRouting } },
+  cps: mockCps,
 };
 jest.mock('../util', () => ({
   ...jest.requireActual('../util'),

@@ -10,6 +10,7 @@ import { suggest } from '@kbn/esql-language';
 import { getEsqlColumns } from '@kbn/esql-utils';
 import { ESQL_LANG_ID, monaco } from '@kbn/code-editor';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import { cpsPluginMock } from '@kbn/cps/public/mocks';
 import { useSplitQueryCompletion } from './use_split_query_completion';
 
 const mockDispose = jest.fn();
@@ -147,9 +148,7 @@ describe('useSplitQueryCompletion', () => {
 
   it('runs the column lookup with the rule project routing', async () => {
     jest.mocked(getEsqlColumns).mockResolvedValue([]);
-    const mockCps = {
-      cpsManager: { getDefaultProjectRouting: () => '_alias:*' },
-    } as unknown as CPSPluginStart;
+    const mockCps = cpsPluginMock.createStartContract();
     const { provider } = mountProvider(baseQuery, mockCps);
 
     await getCompletionItems(provider);
