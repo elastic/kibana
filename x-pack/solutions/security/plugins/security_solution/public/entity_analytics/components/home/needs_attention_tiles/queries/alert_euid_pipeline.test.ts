@@ -14,7 +14,7 @@ describe('buildAlertEuidPipeline', () => {
     const query = pipelineText();
     expect(query).toContain('| FORK (');
     expect(query).toContain('WHERE `kibana.alert.entity.id` IS NOT NULL');
-    expect(query).toContain('| EVAL _ea_entity_id = `kibana.alert.entity.id`');
+    expect(query).toContain('| EVAL _ea_entity_id = `kibana.alert.entity.id`::KEYWORD');
     expect(query).toContain('WHERE `kibana.alert.entity.id` IS NULL');
     expect(query).not.toContain('COALESCE(`kibana.alert.entity.id`');
   });
