@@ -55,26 +55,28 @@ const displayPath = (path: string) =>
 const getDefinedRoles = (users: Users) =>
   Object.keys(users).filter((role) => users[role]?.email && users[role]?.password);
 
+const quoteRoles = (roles: string[]) => roles.map((role) => `"${role}"`).join(', ');
+
+/** Checks users by role, e.g. "Cloud users" in ~/.elastic/cloud.json (qa) */
 const checkUsers = (
-  source: string,
+  { label, file }: { label: string; file?: string },
   users: Users,
   expected: string[],
   copyFix?: Fix
 ): CheckResult => {
+  const roles = [...new Set(expected)];
   const defined = getDefinedRoles(users);
-  const missing = [...new Set(expected)].filter((role) => !defined.includes(role));
+  const missing = roles.filter((role) => !defined.includes(role));
+  const inFile = file ? ` in ${file}` : '';
   const remedy = copyFix
     ? { fix: copyFix, hint: `copy them only if they are ${getEnvironment()} users` }
     : { hint: `tests that log in as ${missing.join(' or ')} will fail` };
-  const missingMessage = `Missing ${source} for roles: ${missing
-    .map((role) => `"${role}"`)
-    .join(', ')}`;
-  if (missing.includes('admin')) {
-    return fail(missingMessage, remedy);
+  if (!missing.length) {
+    return pass(`${label} are defined${inFile}: ${quoteRoles(roles)}`);
   }
-  return missing.length
-    ? warn(missingMessage, remedy)
-    : pass(`${source} have ${[...new Set(expected)].join(', ')}`);
+
+  const message = `Missing ${label}${inFile} for roles: ${quoteRoles(missing)}`;
+  return missing.includes('admin') ? fail(message, remedy) : warn(message, remedy);
 };
 
 const readCloudUsers = async () =>
@@ -128,7 +130,7 @@ const cloudUsersCheck: DoctorCheck = {
       );
     }
     return checkUsers(
-      `Cloud users in ${tildify(CLOUD_SECRETS_FILE)} (${env})`,
+      { label: 'Cloud users', file: `${tildify(CLOUD_SECRETS_FILE)} (${env})` },
       await readCloudUsers(),
       ['admin'],
       copyFix
@@ -142,7 +144,7 @@ const cloudRolesCheck = (arch: DoctorArch): DoctorCheck => ({
   dependsOn: cloudUsersCheck,
   run: async () =>
     checkUsers(
-      'Cloud users',
+      { label: 'Cloud users' },
       await readCloudUsers(),
       ROLES_BY_ARCH[arch],
       await getCopyFtrUsersFix(ROLES_BY_ARCH[arch])
@@ -221,7 +223,11 @@ const scoutUsersCheck = (arch: DoctorArch, configCheck: DoctorCheck): DoctorChec
       arch === 'stateful'
         ? ['admin', ...ROLES_BY_ARCH.stateful]
         : ['admin', 'viewer', ...(projectRole ? [projectRole] : [])];
-    return checkUsers(`Scout Cloud users in ${displayPath(usersFile)}`, users, expected);
+    return checkUsers(
+      { label: 'Scout Cloud users', file: displayPath(usersFile) },
+      users,
+      expected
+    );
   },
 });
 
