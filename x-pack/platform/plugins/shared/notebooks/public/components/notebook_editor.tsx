@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { Fragment, useCallback, useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiPageTemplate } from '@elastic/eui';
+import React, { Fragment, Suspense, useCallback, useEffect, useState } from 'react';
+import { EuiFlexGroup, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import useLatest from 'react-use/lib/useLatest';
 import { BehaviorSubject } from 'rxjs';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
@@ -22,7 +22,13 @@ import { EsqlCell } from './esql_cell';
 import { InputCell } from './input_cell';
 import { MarkdownCell } from './markdown_cell';
 import { NotebookContext, useNotebook, type NotebookContextValue } from './notebook_context';
-import { NotebookHeader } from './notebook_header';
+import { NotebookHeader, type NotebookView } from './notebook_header';
+import { getCellElementId } from './cell_display';
+
+const LazyDependencyGraph = React.lazy(async () => {
+  const { DependencyGraph } = await import('./dependency_graph');
+  return { default: DependencyGraph };
+});
 
 const CellView = ({ cell }: { cell: CellDefinition }) => {
   switch (cell.type) {
@@ -74,11 +80,26 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
     return { store, scheduler, openFlyouts$: new BehaviorSubject(0) };
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [view, setView] = useState<NotebookView>('notebook');
+  const [focusedCell, setFocusedCell] = useState<string>();
 
   useEffect(() => {
     notebook.scheduler.start();
     return () => notebook.scheduler.stop();
   }, [notebook]);
+
+  useEffect(() => {
+    if (view !== 'notebook' || !focusedCell) return;
+    document
+      .getElementById(getCellElementId(focusedCell))
+      ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setFocusedCell(undefined);
+  }, [view, focusedCell]);
+
+  const selectCell = useCallback((cellId: string) => {
+    setFocusedCell(cellId);
+    setView('notebook');
+  }, []);
 
   const latestOnSave = useLatest(onSave);
   const save = useCallback(async () => {
@@ -95,10 +116,21 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
     <NotebookContext.Provider value={notebook}>
       <EuiPageTemplate restrictWidth={1200} paddingSize="m">
         <EuiPageTemplate.Section paddingSize="m" grow={false}>
-          <NotebookHeader onSave={onSave ? save : undefined} isSaving={isSaving} />
+          <NotebookHeader
+            onSave={onSave ? save : undefined}
+            isSaving={isSaving}
+            view={view}
+            onViewChange={setView}
+          />
         </EuiPageTemplate.Section>
         <EuiPageTemplate.Section paddingSize="m">
-          <CellList />
+          {view === 'graph' ? (
+            <Suspense fallback={<EuiLoadingSpinner />}>
+              <LazyDependencyGraph onSelectCell={selectCell} />
+            </Suspense>
+          ) : (
+            <CellList />
+          )}
         </EuiPageTemplate.Section>
       </EuiPageTemplate>
     </NotebookContext.Provider>

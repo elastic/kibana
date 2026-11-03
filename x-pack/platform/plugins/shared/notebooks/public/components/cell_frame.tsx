@@ -19,64 +19,19 @@ import {
   EuiSpacer,
   EuiToolTip,
   useEuiTheme,
-  type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import type { CellDefinition, CellType } from '../../common/types';
+import type { CellDefinition } from '../../common/types';
 import { CELL_NAME_PATTERN } from '../model/references';
-import { duplicateCell, type NewCellKind } from '../model/cell_factory';
-import type { CellRuntime, CellStatus } from '../model/types';
+import { duplicateCell } from '../model/cell_factory';
+import type { CellRuntime } from '../model/types';
+import { TYPE_ICONS, getCellElementId, getStatusBorderColor, getTypeLabel } from './cell_display';
 import { CellFooter } from './cell_footer';
 import { RunButton } from './run_button';
 import { useNotebook } from './notebook_context';
-
-const TYPE_ICONS: Record<CellType, string> = {
-  esql: 'database',
-  chart: 'visBarVertical',
-  markdown: 'text',
-  input: 'controls',
-};
-
-const TYPE_LABELS: Record<NewCellKind, string> = {
-  esql: i18n.translate('xpack.notebook.cell.type.esql', { defaultMessage: 'ES|QL query' }),
-  chart: i18n.translate('xpack.notebook.cell.type.chart', { defaultMessage: 'Chart' }),
-  markdown: i18n.translate('xpack.notebook.cell.type.markdown', { defaultMessage: 'Markdown' }),
-  'input:time': i18n.translate('xpack.notebook.cell.type.time', {
-    defaultMessage: 'Time range input',
-  }),
-  'input:dropdown': i18n.translate('xpack.notebook.cell.type.dropdown', {
-    defaultMessage: 'Dropdown input',
-  }),
-  'input:range': i18n.translate('xpack.notebook.cell.type.range', {
-    defaultMessage: 'Range input',
-  }),
-};
-
-const getTypeLabel = (cell: CellDefinition): string => {
-  const kind: NewCellKind = cell.type === 'input' ? `input:${cell.input.kind}` : cell.type;
-  return TYPE_LABELS[kind];
-};
-
-const getBorderColor = (
-  status: CellStatus | undefined,
-  { colors, border }: UseEuiTheme['euiTheme']
-): string => {
-  switch (status) {
-    case 'stale':
-      return colors.borderStrongWarning;
-    case 'running':
-      return colors.borderStrongPrimary;
-    case 'error':
-      return colors.borderStrongDanger;
-    case 'blocked':
-      return colors.borderStrongNeutral;
-    default:
-      return border.color;
-  }
-};
 
 const RUN_GUTTER_CLASS = 'notebookCellRunGutter';
 
@@ -104,7 +59,7 @@ export const CellFrame = ({
   const { store, openFlyouts$ } = useNotebook();
   const isFlyoutOpen = useStateFromPublishingSubject(openFlyouts$) > 0;
   const { euiTheme } = useEuiTheme();
-  const borderColor = getBorderColor(runtime?.status, euiTheme);
+  const borderColor = getStatusBorderColor(runtime?.status, euiTheme);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isRunMenuOpen, setIsRunMenuOpen] = useState(false);
   const closeMenu = () => setIsMenuOpen(false);
@@ -161,6 +116,7 @@ export const CellFrame = ({
 
   return (
     <div
+      id={getCellElementId(cell.id)}
       css={css`
         position: relative;
         &:hover > .${RUN_GUTTER_CLASS}, &:focus-within > .${RUN_GUTTER_CLASS} {
