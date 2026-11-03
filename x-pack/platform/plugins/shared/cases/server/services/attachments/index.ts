@@ -91,24 +91,6 @@ import {
 const PERSISTABLE_ATTACHMENT_TYPES_ARRAY = Array.from(PERSISTABLE_ATTACHMENT_TYPES);
 
 /**
- * Ensures legacy alert attachments include a rule name. Unified alerts are not checked: their
- * `metadata.rule` is optional (cross-tenant or rule-less alerts), and no create path requires it.
- */
-function assertAlertAttachmentHasRuleName(attributes: Record<string, unknown>): void {
-  const type = attributes?.type;
-  if (type !== AttachmentType.alert && type !== 'alert') {
-    return;
-  }
-
-  const rule = attributes.rule as { name?: unknown } | null | undefined;
-  if (rule == null || rule.name == null) {
-    throw Boom.badRequest(
-      'Invalid attributes: expected attributes.rule.name for alert attachments'
-    );
-  }
-}
-
-/**
  * Unified attachment shape fields that must NOT appear on the legacy
  * `cases-comments` SO. When a unified-shape payload (e.g.
  * `{ type: 'security.endpoint', attachmentId, metadata }`) is written to the
@@ -655,7 +637,6 @@ export class AttachmentService {
       const decodedAttributes = decodeOrThrowZod(AttachmentPatchAttributesSchemaV2)(
         updatedAttributes
       ) as AttachmentPatchAttributesV2;
-      assertAlertAttachmentHasRuleName(decodedAttributes as Record<string, unknown>);
       const transformer = getAttachmentTypeTransformers(
         getAttachmentTypeFromAttributes(decodedAttributes),
         decodedAttributes.owner ?? ''
@@ -726,7 +707,6 @@ export class AttachmentService {
         res
       );
 
-      assertAlertAttachmentHasRuleName(transformedAttachment.attributes as Record<string, unknown>);
       const validatedAttributes = decodeOrThrowZod(AttachmentPartialAttributesSchema)(
         transformedAttachment.attributes
       );
@@ -794,7 +774,6 @@ export class AttachmentService {
             },
           });
         } else {
-          assertAlertAttachmentHasRuleName(decodedAttributes as Record<string, unknown>);
           // Skip when `requestWithoutType` is set: the patch carries no `type`
           // to resolve, and only the typed path can introduce a unified-only type.
           if (!requestWithoutType) {
@@ -950,9 +929,6 @@ export class AttachmentService {
           attachment
         );
 
-        assertAlertAttachmentHasRuleName(
-          transformedAttachment.attributes as Record<string, unknown>
-        );
         const validatedAttributes = decodeOrThrowZod(AttachmentPartialAttributesSchema)(
           transformedAttachment.attributes
         );
