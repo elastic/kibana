@@ -18,13 +18,17 @@ describe('evals_alertzero_endpoint_analysis config set', () => {
     '--xpack.proposals.enabled=true',
     '--xpack.security.serviceAccounts.enabled=true',
     '--uiSettings.overrides.contextEngine:enabled=true',
-    '--uiSettings.overrides.workflows:aiAgent:enabled=true',
-    '--uiSettings.overrides.securitySolution:enableAlertZero=true',
+    '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
     '--xpack.spaces.defaultSolution=security',
     `--xpack.securitySolution.enableExperimental=${JSON.stringify([
       'endpointForensicAnalysisSkill',
     ])}`,
   ])('enables %s', (arg) => {
     expect(args).toContain(arg);
+  });
+
+  // The per-space AlertZero gate is set by the suite, so an override must not pin it in every space.
+  it('does not override the per-space AlertZero setting', () => {
+    expect(args.some((arg) => arg.includes('securitySolution:enableAlertZero'))).toBe(false);
   });
 });

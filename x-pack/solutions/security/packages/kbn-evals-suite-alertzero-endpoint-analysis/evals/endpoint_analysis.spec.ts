@@ -17,6 +17,7 @@ import {
 import {
   AlertZeroRuntime,
   deleteDataStreamQuietly,
+  enableAlertZeroInDefaultSpace,
   ensureSecuritySolutionSpace,
   ignore404,
   installWorkerAndPinConnector,
@@ -36,12 +37,13 @@ import {
 import { analysisWorkflowId, gateWorkflowId, workerWorkflowId } from '../src/contracts';
 
 evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.classic }, () => {
-  let restoreSolutionSpace: (() => Promise<unknown>) | undefined;
+  const restoreSpace: Array<() => Promise<unknown>> = [];
   evaluate.beforeAll(async ({ fetch }) => {
-    restoreSolutionSpace = await ensureSecuritySolutionSpace(fetch);
+    restoreSpace.push(await ensureSecuritySolutionSpace(fetch));
+    restoreSpace.push(await enableAlertZeroInDefaultSpace(fetch));
   });
   evaluate.afterAll(async () => {
-    await restoreSolutionSpace?.();
+    await runAllCleanups(restoreSpace.reverse());
   });
 
   evaluate('L1 endpoint forensic skill routing', async ({ esClient, agentBuilderClient }) => {

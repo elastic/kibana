@@ -7,10 +7,14 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
-import { ALERTZERO_BALANCED_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
+import {
+  ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
+  ALERTZERO_ENABLED_SETTING_ID,
+} from '@kbn/alertzero-common';
 import {
   AlertZeroRuntime,
   assertNoCompetingPendingKis,
+  enableAlertZeroInDefaultSpace,
   ensureSecuritySolutionSpace,
   installWorkerAndPinConnector,
   pinAgenticConnector,
@@ -965,5 +969,47 @@ describe('ensureSecuritySolutionSpace', () => {
     const restore = await ensureSecuritySolutionSpace(fetch);
     await restore();
     expect(solutionPuts(fetch)).toEqual([]);
+  });
+});
+
+describe('enableAlertZeroInDefaultSpace', () => {
+  const settingsRoute = '/internal/kibana/settings';
+  const settingWrites = (fetch: FetchMock) =>
+    fetch.mock.calls
+      .filter(([path, options]) => path === settingsRoute && options?.method === 'POST')
+      .map(
+        ([, options]) =>
+          JSON.parse((options as { body: string }).body).changes[ALERTZERO_ENABLED_SETTING_ID]
+      );
+  const withUserValue = (userValue?: unknown) =>
+    createFetch((path, options) =>
+      path === settingsRoute && !options?.method
+        ? {
+            settings:
+              userValue === undefined ? {} : { [ALERTZERO_ENABLED_SETTING_ID]: { userValue } },
+          }
+        : {}
+    );
+
+  it('enables AlertZero and clears the user value on restore when it was unset', async () => {
+    const fetch = withUserValue();
+    const restore = await enableAlertZeroInDefaultSpace(fetch);
+    expect(settingWrites(fetch)).toEqual([true]);
+    await restore();
+    expect(settingWrites(fetch)).toEqual([true, null]);
+  });
+
+  it('restores an explicit false', async () => {
+    const fetch = withUserValue(false);
+    const restore = await enableAlertZeroInDefaultSpace(fetch);
+    await restore();
+    expect(settingWrites(fetch)).toEqual([true, false]);
+  });
+
+  it('leaves an already enabled space untouched', async () => {
+    const fetch = withUserValue(true);
+    const restore = await enableAlertZeroInDefaultSpace(fetch);
+    await restore();
+    expect(settingWrites(fetch)).toEqual([]);
   });
 });

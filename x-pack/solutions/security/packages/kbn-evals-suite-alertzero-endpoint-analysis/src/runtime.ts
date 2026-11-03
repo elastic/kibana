@@ -19,6 +19,7 @@ import {
 } from '@kbn/proposals-common';
 import {
   ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
+  ALERTZERO_ENABLED_SETTING_ID,
   ALERTZERO_WORKERS_URL,
   ALERTZERO_WORKER_URL_TEMPLATE,
   API_VERSIONS,
@@ -950,6 +951,33 @@ export const ensureSecuritySolutionSpace = async (
     });
   await setSolution('security');
   return () => setSolution(solution);
+};
+
+const UI_SETTINGS_URL = '/internal/kibana/settings';
+
+/**
+ * AlertZero routes also 404 while the per-space `securitySolution:enableAlertZero` setting is
+ * off. Turns it on in the default space and returns a function restoring the previous user
+ * value (`null` clears it back to the registered default).
+ */
+export const enableAlertZeroInDefaultSpace = async (
+  fetch: HttpHandler
+): Promise<() => Promise<unknown>> => {
+  const headers = { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': INTERNAL_API_ACCESS };
+  const { settings } = await fetch<{ settings: Record<string, { userValue?: unknown }> }>(
+    UI_SETTINGS_URL,
+    { headers }
+  );
+  const previous = settings[ALERTZERO_ENABLED_SETTING_ID]?.userValue ?? null;
+  if (previous === true) return async () => undefined;
+  const setEnabled = (value: unknown) =>
+    fetch(UI_SETTINGS_URL, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ changes: { [ALERTZERO_ENABLED_SETTING_ID]: value } }),
+    });
+  await setEnabled(true);
+  return () => setEnabled(previous);
 };
 
 /**

@@ -17,8 +17,7 @@ import { serviceAccountsServerArgs } from '../../service_accounts/shared';
  * (`agenticInvestigations`, `proposals`; both default off and cascade-disable alertzero when
  * missing). Managed workflows install only when service accounts are enabled. The Context
  * Engine routes the suite uses to build its AI index fixture 404 unless `contextEngine:enabled`
- * is on, and the analysis `ai.agent` step needs the Workflows agent settings and Agent Builder
- * experimental features.
+ * is on, and the analysis `ai.agent` step needs Agent Builder experimental features.
  *
  * Usage:
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet evals_alertzero_endpoint_analysis
@@ -34,16 +33,11 @@ export const servers: ScoutServerConfig = {
       '--xpack.agenticInvestigations.enabled=true',
       '--xpack.proposals.enabled=true',
       '--uiSettings.overrides.contextEngine:enabled=true',
-      '--uiSettings.overrides.workflows:ui:enabled=true',
-      '--uiSettings.overrides.workflows:aiAgent:enabled=true',
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
-      // `withAlertZeroEnabled` gates every AlertZero route on the per-space
-      // `securitySolution:enableAlertZero` advanced setting and 404s while it is off, so the
-      // proposals API the L4 eval drives is unreachable without this override.
-      '--uiSettings.overrides.securitySolution:enableAlertZero=true',
-      // AlertZero is also gated to Security solution spaces, and a stateful default space is
+      // AlertZero routes are gated to Security solution spaces, and a stateful default space is
       // Classic. This only applies when Kibana creates the default space, so the suite still
-      // switches an existing one at runtime (`ensureSecuritySolutionSpace`).
+      // switches an existing one at runtime (`ensureSecuritySolutionSpace`). The per-space
+      // `securitySolution:enableAlertZero` setting is turned on by the suite itself.
       '--xpack.spaces.defaultSolution=security',
       // The endpoint-forensic skill (and its discover_telemetry tool) only registers under
       // this experimental flag; without it the L1 routing eval cannot find the tool at all.
