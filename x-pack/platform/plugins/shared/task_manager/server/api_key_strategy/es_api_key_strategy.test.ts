@@ -164,6 +164,14 @@ describe('EsApiKeyStrategy', () => {
     test('creates invalidation SOs for ES keys', async () => {
       const logger = loggingSystemMock.createLogger();
       const soClient = savedObjectsClientMock.create();
+      soClient.bulkCreate.mockImplementation(async (objects) => ({
+        saved_objects: objects.map(({ type, attributes }, index) => ({
+          id: `${index}`,
+          type,
+          attributes,
+          references: [],
+        })),
+      }));
 
       await strategy.markForInvalidation(
         [{ apiKeyId: 'key-1' }, { apiKeyId: 'key-2' }],
@@ -200,7 +208,8 @@ describe('EsApiKeyStrategy', () => {
       await strategy.markForInvalidation([{ apiKeyId: 'key-1' }], logger, soClient);
 
       expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to bulk mark 1 API keys for invalidation')
+        'Failed to bulk mark list of API keys ["key-1"] for invalidation: SO error',
+        expect.anything()
       );
     });
   });

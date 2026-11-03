@@ -82,6 +82,15 @@ const mockExecutionContextStart = executionContextServiceMock.createSetupContrac
 beforeEach(() => {
   jest.resetAllMocks();
 
+  invalidationSoClientMock.bulkCreate.mockImplementation(async (objects) => ({
+    saved_objects: objects.map(({ type, attributes }, index) => ({
+      id: `${index}`,
+      type,
+      attributes,
+      references: [],
+    })),
+  }));
+
   mockGetValidatedTaskInstanceFromReading = jest
     .spyOn(TaskValidator.prototype, 'getValidatedTaskInstanceFromReading')
     .mockImplementation((task) => task);

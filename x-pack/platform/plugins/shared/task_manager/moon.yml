@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/licensing-plugin'
   - '@kbn/rrule'
   - '@kbn/response-ops-scheduling-types'
+  - '@kbn/response-ops-api-keys'
   - '@kbn/logging-mocks'
   - '@kbn/core-spaces-common'
   - '@kbn/licensing-types'

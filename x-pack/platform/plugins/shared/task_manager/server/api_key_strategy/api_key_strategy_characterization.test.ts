@@ -1571,6 +1571,14 @@ describe('API key strategy characterization', () => {
       const strategyLogger = loggingSystemMock.createLogger();
       const logger = loggingSystemMock.createLogger();
       const soClient = savedObjectsClientMock.create();
+      soClient.bulkCreate.mockImplementation(async (objects) => ({
+        saved_objects: objects.map(({ type, attributes }, index) => ({
+          id: `${index}`,
+          type,
+          attributes,
+          references: [],
+        })),
+      }));
       const strategy = createStrategy(kind, security, strategyLogger);
 
       await expect(
@@ -1660,7 +1668,12 @@ describe('API key strategy characterization', () => {
         ).resolves.toBeUndefined();
 
         expect(collectLogs(logger)).toStrictEqual({
-          error: [['Failed to bulk mark 2 API keys for invalidation: SO error']],
+          error: [
+            [
+              'Failed to bulk mark list of API keys ["a", "b"] for invalidation: SO error',
+              { error: { stack_trace: expect.any(String) } },
+            ],
+          ],
         });
         expect(collectLogs(strategyLogger)).toStrictEqual({});
       }

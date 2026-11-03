@@ -888,6 +888,14 @@ describe('EsAndUiamApiKeyStrategy', () => {
       const { strategy } = createStrategy();
       const logger = loggingSystemMock.createLogger();
       const soClient = savedObjectsClientMock.create();
+      soClient.bulkCreate.mockImplementation(async (objects) => ({
+        saved_objects: objects.map(({ type, attributes }, index) => ({
+          id: `${index}`,
+          type,
+          attributes,
+          references: [],
+        })),
+      }));
 
       await strategy.markForInvalidation(
         [{ apiKeyId: 'es-key-id' }, { apiKeyId: 'uiam-key-id', uiamApiKey: 'essu_uiam-key' }],
