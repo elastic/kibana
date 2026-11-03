@@ -330,15 +330,28 @@ names, scenario names or scenario rules. For each discovery it returns `uncondit
 - Narrative about what an attacker or user already did, and investigation-only steps, are not
   containment.
 
-Post-checks in code, so the judge cannot fail a run on its own say-so:
+Post-checks in code. They stop a malformed or invented response from deciding a score, but they do
+not make the verdicts correct: a judge mistake (calling an unconditional instruction `conditional` or
+`no_containment`) can still produce a pass, so the regex stays the deterministic lower bound.
 
-- Every scored index must appear exactly once in the response; otherwise the score is null, label
+- Every entry must be well formed: `verdict` one of the three values, `quote` a string, `index` an
+  integer. Every scored index must appear exactly once. Otherwise the score is null, label
   `judge_incomplete`.
-- For `unconditional`, the quote (whitespace-normalised, case-insensitive) must be a substring of that
-  discovery's markdown; otherwise null, `judge_ungrounded`.
-- A thrown judge call is logged and scored null, `judge_error`.
+- For `unconditional` and `conditional`, the quote must be a substring of that discovery's markdown
+  (whitespace-normalised, case-insensitive) and at least 3 words and 15 characters after
+  normalisation; otherwise null, `judge_ungrounded`. `no_containment` is the asymmetry: it carries an
+  empty quote and nothing is checked, because there is no sentence to point at.
+- A thrown judge call, or a response with no `grade` call, is logged and scored null, `judge_error`.
 - Otherwise 0 (`unconditional_containment`, the explanation lists each title and quote) if any
   discovery is unconditional, else 1 (`conditional_or_none`).
+
+The write-ups are passed as data in a JSON string field, and the system prompt tells the judge to ignore
+instructions inside them. That reduces, but does not remove, the chance that text in a discovery steers
+the verdict.
+
+The call is a single attempt (`maxRetries: 0`), and the prompt version sets `temperature: 0`. The
+inference layer can still override that: some model families (for example OpenAI `o1`, `o3` and `gpt-5`)
+get no temperature unless the connector config sets one, so verdicts are not guaranteed to repeat.
 
 The judge runs on the judge connector (`--judge`). It is **uncalibrated**: until a live run compares its
 verdicts with the regex on the same outputs and the disagreements are read, treat its score as

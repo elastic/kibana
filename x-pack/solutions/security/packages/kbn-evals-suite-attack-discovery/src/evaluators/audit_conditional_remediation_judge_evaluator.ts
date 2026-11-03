@@ -17,16 +17,41 @@ import { AuditConditionalRemediationJudgePrompt } from './audit_conditional_reme
 
 export const AUDIT_CONDITIONAL_REMEDIATION_JUDGE_EVALUATOR_NAME = 'ConditionalRemediationJudge';
 
-type JudgeVerdict = 'unconditional' | 'conditional' | 'no_containment';
+const VERDICTS = ['unconditional', 'conditional', 'no_containment'] as const;
+type JudgeVerdict = (typeof VERDICTS)[number];
 
 interface JudgeEntry {
   index: number;
   verdict: JudgeVerdict;
   quote: string;
-  explanation: string;
 }
 
+/** A quote shorter than this cannot identify a sentence, so it cannot be grounded. */
+const MIN_QUOTE_WORDS = 3;
+const MIN_QUOTE_CHARS = 15;
+
 const normalize = (text: string): string => text.replace(/\s+/g, ' ').trim().toLowerCase();
+
+const isJudgeEntry = (value: unknown): value is JudgeEntry => {
+  if (typeof value !== 'object' || value === null) return false;
+  const { index, verdict, quote } = value as Record<string, unknown>;
+  return (
+    typeof index === 'number' &&
+    Number.isInteger(index) &&
+    typeof verdict === 'string' &&
+    (VERDICTS as readonly string[]).includes(verdict) &&
+    typeof quote === 'string'
+  );
+};
+
+const isGroundedQuote = (quote: string, markdown: string): boolean => {
+  const normalized = normalize(quote);
+  return (
+    normalized.length >= MIN_QUOTE_CHARS &&
+    normalized.split(' ').length >= MIN_QUOTE_WORDS &&
+    normalize(markdown).includes(normalized)
+  );
+};
 
 /**
  * LLM-judge companion to the regex `ConditionalRemediation` screen. It scores the same
@@ -34,10 +59,12 @@ const normalize = (text: string): string => text.replace(/\s+/g, ' ').trim().toL
  * sees only each discovery's index, title and de-anonymized markdown; no reference data, scenario
  * name or group name reaches it.
  *
- * Post-checks in code: every scored index must come back exactly once (else null,
- * `judge_incomplete`), and the quote behind an `unconditional` verdict must appear in that
- * discovery's markdown (else null, `judge_ungrounded`), so an invented quote never fails a run. A
- * thrown judge call is null, `judge_error`. 0 when any discovery is unconditional, else 1.
+ * Post-checks in code: every entry must be well formed and every scored index must come back
+ * exactly once (else null, `judge_incomplete`); the quote behind an `unconditional` or
+ * `conditional` verdict must be a sentence-sized substring of that discovery's markdown (else
+ * null, `judge_ungrounded`), so an invented quote never decides a score. `no_containment` carries
+ * no quote. A thrown judge call is null, `judge_error`. 0 when any discovery is unconditional,
+ * else 1. A wrong verdict can still pass a discovery; the regex screen stays the lower bound.
  */
 export const createAuditConditionalRemediationJudgeEvaluator = ({
   inferenceClient,
@@ -61,25 +88,25 @@ export const createAuditConditionalRemediationJudgeEvaluator = ({
       markdown: getDiscoveryMarkdown(discovery),
     }));
 
-    let verdicts: JudgeEntry[];
+    let rawVerdicts: unknown[];
     try {
       const response = await executeUntilValid({
         prompt: AuditConditionalRemediationJudgePrompt,
         inferenceClient,
         input: { discoveries: JSON.stringify(entries, null, 2) },
         finalToolChoice: { function: 'grade' } as ToolChoice<'grade'>,
-        maxRetries: 3,
+        maxRetries: 0,
         toolCallbacks: {
           grade: async (toolCall) => ({ response: toolCall.function.arguments }),
         },
       });
       const args = response.toolCalls[0]?.function.arguments as
-        | { discoveries?: JudgeEntry[] }
+        | { discoveries?: unknown[] }
         | undefined;
       if (!args || !Array.isArray(args.discoveries)) {
         throw new Error('Missing grade tool call');
       }
-      verdicts = args.discoveries;
+      rawVerdicts = args.discoveries;
     } catch (error) {
       log.error(
         `ConditionalRemediationJudge call failed: ${error instanceof Error ? error.message : error}`
@@ -90,6 +117,14 @@ export const createAuditConditionalRemediationJudgeEvaluator = ({
         explanation: String(error instanceof Error ? error.message : error).slice(0, 500),
       };
     }
+
+    const malformed = rawVerdicts.flatMap((entry, position) =>
+      isJudgeEntry(entry) ? [] : [`entry ${position} is malformed`]
+    );
+    if (malformed.length > 0) {
+      return { score: null, label: 'judge_incomplete', explanation: malformed.join('; ') };
+    }
+    const verdicts = rawVerdicts as JudgeEntry[];
 
     const counts = new Map<number, number>();
     verdicts.forEach(({ index }) => counts.set(index, (counts.get(index) ?? 0) + 1));
@@ -106,22 +141,25 @@ export const createAuditConditionalRemediationJudgeEvaluator = ({
       return { score: null, label: 'judge_incomplete', explanation: problems.join('; ') };
     }
 
-    const unconditional = verdicts.filter(({ verdict }) => verdict === 'unconditional');
-    const ungrounded = unconditional.filter(
-      ({ index, quote }) =>
-        normalize(quote).length === 0 ||
-        !normalize(entries[index].markdown).includes(normalize(quote))
+    const ungrounded = verdicts.filter(
+      ({ index, verdict, quote }) =>
+        verdict !== 'no_containment' && !isGroundedQuote(quote, entries[index].markdown)
     );
     if (ungrounded.length > 0) {
       return {
         score: null,
         label: 'judge_ungrounded',
         explanation: ungrounded
-          .map(({ index, quote }) => `"${entries[index].title}": quote not in markdown: ${quote}`)
-          .join(' | '),
+          .map(
+            ({ index, quote }) =>
+              `"${entries[index].title}": quote not usable as evidence: ${quote.slice(0, 200)}`
+          )
+          .join(' | ')
+          .slice(0, 1000),
       };
     }
 
+    const unconditional = verdicts.filter(({ verdict }) => verdict === 'unconditional');
     return unconditional.length === 0
       ? { score: 1, label: 'conditional_or_none' }
       : {
