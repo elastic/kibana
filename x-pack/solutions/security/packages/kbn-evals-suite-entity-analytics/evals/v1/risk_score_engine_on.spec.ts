@@ -17,6 +17,7 @@ import {
 import { deleteAllRules } from '@kbn/detections-response-ftr-services/rules';
 import { dataGeneratorFactory } from '@kbn/test-suites-security-solution-apis/test_suites/detections_response/utils';
 import { deleteAllAlerts, createAlertsIndex } from '@kbn/detections-response-ftr-services/alerts';
+import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/common';
 import { evaluate } from '../../src/evaluate';
 
 evaluate.describe(
@@ -25,7 +26,7 @@ evaluate.describe(
   () => {
     const userId = uuidv4();
 
-    evaluate.beforeAll(async ({ log, esArchiverLoad, esClient: es, quickApiClient, supertest }) => {
+    evaluate.beforeAll(async ({ log, esArchiverLoad, esClient: es, supertest }) => {
       await createAlertsIndex(supertest, log);
       await esArchiverLoad(
         'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
@@ -45,7 +46,13 @@ evaluate.describe(
         alerts: 10,
         riskScore: Math.floor(Math.random() * 100),
       });
-      await quickApiClient.initRiskEngine();
+      await supertest
+        .post(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT)
+        .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2')
+        .set('x-elastic-internal-origin', 'Kibana')
+        .send({})
+        .expect(200);
       await waitForRiskScoresToBePresent({ es, log, scoreCount: 20 });
     });
 
