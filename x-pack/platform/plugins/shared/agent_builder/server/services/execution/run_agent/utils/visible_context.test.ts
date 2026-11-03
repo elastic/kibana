@@ -891,6 +891,7 @@ describe('prompt-cache stability through persistence and reload', () => {
         conversation: received,
         conversationClient: store.client,
         roundCompletedEvents$: of(roundComplete),
+        releaseExecutionId: 'exec-1',
       })
     );
     const later = await renderNextTurn(store.read());
@@ -1028,6 +1029,7 @@ describe('prompt-cache stability through persistence and reload', () => {
         roundCompletedEvents$: of(roundComplete),
         input: resumeInput,
         author,
+        releaseExecutionId: 'exec-1',
       })
     );
     const reloaded = store.read();

@@ -97,6 +97,7 @@ const createMockMessageEditor = (): {
       focus: jest.fn(),
       getContent: jest.fn(() => ''),
       setContent: jest.fn(),
+      insertText: jest.fn(),
       isEmpty: false,
       getPlaceholderNames: jest.fn(() => []),
       removePlaceholderByName: jest.fn(),

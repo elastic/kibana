@@ -34,34 +34,37 @@ describe('AutonomyLevelControl (Sep 14 radios)', () => {
     expect(onChange).toHaveBeenLastCalledWith('manual');
   });
 
-  it('renders consequence-forward card copy (Incidents fact with actor pills)', () => {
+  it('renders consequence-forward card copy as sentences that start with an actor pill', () => {
     render(<AutonomyLevelControl workerId={AD_WORKER_ID} current="manual" onChange={onChange} />);
     const group = screen.getByTestId('alertZeroAutonomyLevelControl');
-    expect(within(group).getAllByText('Incidents').length).toBeGreaterThan(0);
+    expect(within(group).getAllByText('Worker').length).toBeGreaterThan(0);
     expect(within(group).getAllByText('You').length).toBeGreaterThan(0);
+    expect(
+      within(group).getAllByText(/opens an investigation for each attack/).length
+    ).toBeGreaterThan(0);
   });
 
-  it('lays each fact out as a label/value row on one grid, not label above value', () => {
-    render(<AutonomyLevelControl workerId={AD_WORKER_ID} current="manual" onChange={onChange} />);
+  it('stacks rows as sentences, with no summary line or row labels', () => {
+    const { container } = render(
+      <AutonomyLevelControl workerId={AD_WORKER_ID} current="manual" onChange={onChange} />
+    );
     const [fact] = screen.getAllByTestId('alertZeroAutonomyCardFact');
 
-    // `display: contents` drops the per-fact wrapper from layout so its `dt`/`dd` become columns of
-    // the shared grid — that is what keeps every value on the same left edge across rows. The label
-    // column is `max-content` so a short label keeps its value beside it rather than past a fixed
-    // column, while the grid still aligns the rows with each other.
-    expect(fact).toHaveStyleRule('display', 'contents');
-    expect(fact.parentElement).toHaveStyleRule('display', 'grid');
-    expect(fact.parentElement).toHaveStyleRule(
-      'grid-template-columns',
-      expect.stringMatching(/^max-content minmax\(0, ?1fr\)$/) as unknown as string
-    );
+    // Each row starts with who acts, so the card needs neither a summary line nor a label column.
+    expect(screen.queryByTestId('alertZeroAutonomyCardWho')).not.toBeInTheDocument();
+    expect(container.querySelectorAll('dt')).toHaveLength(0);
+    expect(fact.tagName).toBe('LI');
+    expect(fact.parentElement).toHaveStyleRule('display', 'flex');
+    expect(fact.parentElement).toHaveStyleRule('flex-direction', 'column');
   });
 
   it('shows the supervised warning callout at the highest level', () => {
     render(
       <AutonomyLevelControl workerId={TRIAGE_WORKER_ID} current="supervised" onChange={onChange} />
     );
-    expect(screen.getByTestId('alertZeroAutonomyWarn')).toBeInTheDocument();
+    expect(screen.getByTestId('alertZeroAutonomyWarn')).toHaveTextContent(
+      'At this autonomy level, Alert Triage closes false positives without your approval.'
+    );
   });
 
   it('hides the warning below the highest level', () => {
@@ -129,9 +132,10 @@ describe('AutonomyLevelControl (Sep 14 radios)', () => {
         />
       );
 
-      expect(screen.getByTestId('alertZeroAutonomyCardWho')).toBeInTheDocument();
       expect(screen.getAllByTestId('alertZeroAutonomyCardFact').length).toBeGreaterThan(0);
-      expect(screen.getAllByText('Closures').length).toBeGreaterThan(0);
+      expect(
+        screen.getAllByText(/approve or decline each proposed closure/).length
+      ).toBeGreaterThan(0);
     });
 
     it('presents the fixed level as the same card an offered level gets', () => {
@@ -150,7 +154,7 @@ describe('AutonomyLevelControl (Sep 14 radios)', () => {
         within(screen.getByTestId('alertZeroAutonomyCard-manual')).getByRole('radio')
       ).toBeChecked();
       expect(screen.getByTestId('alertZeroAutonomyFixedLevel')).toHaveTextContent('Manual');
-      expect(screen.getByTestId('alertZeroAutonomyCardWho')).toBeInTheDocument();
+      expect(screen.getAllByTestId('alertZeroAutonomyCardFact').length).toBeGreaterThan(0);
     });
 
     // React routes a radio's `onChange` off its click event, so an already-checked radio still

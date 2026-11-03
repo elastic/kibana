@@ -47,8 +47,8 @@ export interface ServiceAccountsTableProps {
   onViewWorkloads?: (serviceAccount: ServiceAccountTableItem) => void;
 }
 
-const unavailableValue = (tabIndex?: number) => (
-  <EuiText color="subdued" size="s" tabIndex={tabIndex}>
+const unavailableValue = (tabIndex?: number, dataTestSubj?: string) => (
+  <EuiText color="subdued" size="s" tabIndex={tabIndex} data-test-subj={dataTestSubj}>
     &mdash;
   </EuiText>
 );
@@ -222,7 +222,7 @@ export const ServiceAccountsTable = ({
                   { defaultMessage: 'Unable to count the workloads bound to this account.' }
                 )}
               >
-                {unavailableValue(0)}
+                {unavailableValue(0, 'serviceAccountWorkloadCountUnavailable')}
               </EuiToolTip>
             );
           }

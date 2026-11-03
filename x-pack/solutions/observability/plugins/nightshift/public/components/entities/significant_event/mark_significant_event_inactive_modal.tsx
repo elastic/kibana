@@ -27,7 +27,7 @@ import {
   NIGHTSHIFT_EBT_DETAILS,
   NIGHTSHIFT_EBT_ELEMENTS,
 } from '../../../common/ebt_constants';
-import { useCloseSignificantEvent } from '../../../hooks/use_close_significant_event';
+import { useCloseSignificantEvent } from '../../../data/significant_events/use_close_significant_event';
 
 const MODAL_TITLE = i18n.translate('xpack.nightshift.markSignificantEventInactiveModal.title', {
   defaultMessage: 'Mark significant event inactive',

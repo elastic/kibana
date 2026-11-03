@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import {
-  NIGHTSHIFT_DEFAULT_MODELS,
   SignificantEventsWorkflowStatus,
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
@@ -77,40 +76,6 @@ const AwaitingRunProbe = () => {
     </>
   );
 };
-
-const ContextProbe = () => {
-  const { onboardingConfig, featuresConnectors, queriesConnectors } = useKiGeneration();
-
-  return (
-    <>
-      <div data-test-subj="features-connector">{onboardingConfig.connectors.features}</div>
-      <div data-test-subj="queries-connector">{onboardingConfig.connectors.queries}</div>
-      <div data-test-subj="features-loading">{String(featuresConnectors.loading)}</div>
-      <div data-test-subj="queries-loading">{String(queriesConnectors.loading)}</div>
-    </>
-  );
-};
-
-describe('KiGenerationProvider model defaults', () => {
-  it('uses the static Nightshift defaults without a loading state', async () => {
-    render(
-      <KiGenerationProvider>
-        <ContextProbe />
-      </KiGenerationProvider>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByTestId('features-connector')).toHaveTextContent(
-        NIGHTSHIFT_DEFAULT_MODELS.kiExtraction
-      );
-      expect(screen.getByTestId('queries-connector')).toHaveTextContent(
-        NIGHTSHIFT_DEFAULT_MODELS.kiQueryGeneration
-      );
-    });
-    expect(screen.getByTestId('features-loading')).toHaveTextContent('false');
-    expect(screen.getByTestId('queries-loading')).toHaveTextContent('false');
-  });
-});
 
 describe('KiGenerationProvider status polling', () => {
   beforeEach(() => {

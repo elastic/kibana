@@ -157,9 +157,15 @@ describe('RunLimitsSection', () => {
     expect(screen.getByTestId('nightshiftRunLimitCount-detection')).toHaveTextContent(
       '14 counted scheduled admissions today'
     );
-    expect(screen.queryByTestId(/^nightshiftRunLimitInput-/)).not.toBeInTheDocument();
+    expect(screen.getAllByTestId(/^nightshiftRunLimitInput-/)).toHaveLength(1);
+    expect(screen.getByTestId('nightshiftRunLimitInput-investigation')).toHaveValue(30);
     for (const group of ALL_GROUPS) {
-      expect(screen.getByTestId(`nightshiftRunLimitEnabledSwitch-${group}`)).not.toBeChecked();
+      const switchElement = screen.getByTestId(`nightshiftRunLimitEnabledSwitch-${group}`);
+      if (group === 'investigation') {
+        expect(switchElement).toBeChecked();
+      } else {
+        expect(switchElement).not.toBeChecked();
+      }
     }
   });
 
@@ -237,10 +243,10 @@ describe('RunLimitsSection', () => {
     const discoveryCallout = screen.getByTestId('nightshiftRunQuotaReached-detection');
     const extractionCallout = screen.getByTestId('nightshiftRunQuotaReached-ki_extraction');
     expect(discoveryCallout).toHaveTextContent(
-      'Discovery reached daily run limit for this deployment'
+      'Discovery reached daily run limit of 100 for this deployment'
     );
     expect(extractionCallout).toHaveTextContent(
-      'Knowledge indicators extraction reached daily run limit for this deployment'
+      'Knowledge indicators extraction reached daily run limit of 20 for this deployment'
     );
     expect(
       discoveryCallout.compareDocumentPosition(
@@ -379,7 +385,9 @@ describe('RunLimitsSection', () => {
     );
 
     const callout = screen.getByTestId('nightshiftRunLimitsBanner');
-    expect(callout).toHaveTextContent('Automations reached a daily run limit for this deployment.');
+    expect(callout).toHaveTextContent(
+      'Automations reached a daily run limit of 100 for this deployment'
+    );
     expect(callout).toHaveTextContent(
       'Further triggers will be skipped until the limit resets at midnight (UTC). Already started investigations will continue. You can still trigger investigations manually'
     );
