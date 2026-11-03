@@ -16,6 +16,8 @@ import {
 } from '.';
 import { getManagedWorkflowDefinition, managedWorkflowDefinitions } from '../..';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
+import { convertToWorkflowGraph } from '../../../graph';
+import type { WorkflowYaml } from '../../../spec/schema';
 
 interface ParsedStep {
   name: string;
@@ -25,6 +27,7 @@ interface ParsedStep {
   foreach?: string;
   if?: string;
   mode?: string;
+  'on-failure'?: { continue?: boolean };
   status?: string;
   steps?: ParsedStep[];
   timeout?: string;
@@ -149,11 +152,33 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       expect(query()).toMatch(/\| KEEP _id$/);
     });
 
-    // The cap drops everything past LIMIT, so the kept rows have to be the newest.
-    // Descending order also makes the first batch that newest slice.
-    it('sorts newest first so the cap keeps the most recent alerts', () => {
-      expect(query().indexOf('| SORT @timestamp DESC')).toBeGreaterThan(-1);
-      expect(query().indexOf('| SORT @timestamp DESC')).toBeLessThan(query().indexOf('| LIMIT'));
+    // The LIMIT cuts whatever sorts last, so the pre-LIMIT order decides which
+    // alerts a capped run keeps: the highest-risk, newest must survive.
+    it('sorts riskiest first, newest first among equals, before the LIMIT', () => {
+      const riskSort = query().indexOf(
+        '| SORT kibana.alert.risk_score DESC NULLS LAST, @timestamp DESC'
+      );
+
+      expect(riskSort).toBeGreaterThan(-1);
+      expect(riskSort).toBeLessThan(query().indexOf('| LIMIT'));
+    });
+
+    // ES|QL sorts a null as the largest value, so a bare `DESC` would put every
+    // unscored alert ahead of the scored ones.
+    it('puts NULLS LAST directly after the risk_score direction', () => {
+      expect(query()).toMatch(/\| SORT kibana\.alert\.risk_score DESC NULLS LAST, /);
+    });
+
+    // Risk only picks which alerts are kept. Batches are slices of the kept list,
+    // so it has to be back in time order (newest first) after the cut.
+    it('restores newest-first order after the LIMIT, so batches are contiguous time slices', () => {
+      const limit = query().indexOf('| LIMIT');
+      const timeSort = query().indexOf('| SORT @timestamp DESC\n');
+
+      expect(limit).toBeGreaterThan(-1);
+      expect(timeSort).toBeGreaterThan(limit);
+      expect(timeSort).toBeLessThan(query().indexOf('| KEEP _id'));
+      expect(query().match(/\| SORT /g)).toHaveLength(2);
     });
 
     it('retrieves only open and acknowledged alerts', () => {
@@ -206,34 +231,107 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       expect(query()).toContain('METADATA _id');
     });
 
-    it('derives the LIMIT from the alert cap and the 100-branch ceiling', () => {
-      expect(query()).toContain(
+    it('derives the LIMIT from the resolved alert cap', () => {
+      expect(query()).toContain('| LIMIT {{ steps.resolve_alert_limit.output.alert_limit }}');
+    });
+
+    it('derives the cap from max_alerts and the 100-branch ceiling', () => {
+      const template = String(step('resolve_alert_limit').with?.alert_limit);
+
+      expect(template).toContain(
         '{%- assign branch_ceiling = inputs.batch_size | times: 100 | at_most: 10000 -%}'
       );
-      expect(query()).toContain(
+      expect(template).toContain(
         '{%- assign alert_limit = inputs.max_alerts | default: 10000 | at_most: branch_ceiling -%}'
       );
-      expect(query()).toContain('| LIMIT {{ alert_limit }}');
     });
 
     it('renders the prorated cap, and never more branches than the batch size allows', async () => {
       const engine = createWorkflowLiquidEngine({ strictFilters: true });
-      const limitOf = async (maxAlerts: number | undefined, batchSize: number) => {
-        const rendered = await engine.parseAndRender(query(), {
-          inputs: {
-            batch_size: batchSize,
-            lookback: '24h',
-            ...(maxAlerts === undefined ? {} : { max_alerts: maxAlerts }),
-          },
-          workflow: { spaceId: 'default' },
-        });
-        return Number(/\| LIMIT (\d+)/.exec(rendered)?.[1]);
-      };
+      const limitOf = async (maxAlerts: number | undefined, batchSize: number) =>
+        Number(
+          await engine.parseAndRender(String(step('resolve_alert_limit').with?.alert_limit), {
+            inputs: {
+              batch_size: batchSize,
+              ...(maxAlerts === undefined ? {} : { max_alerts: maxAlerts }),
+            },
+          })
+        );
 
       expect(await limitOf(undefined, 100)).toBe(10000);
       expect(await limitOf(416, 100)).toBe(416);
       expect(await limitOf(100, 100)).toBe(100);
       expect(await limitOf(10000, 50)).toBe(5000);
+    });
+
+    describe('eligible count', () => {
+      const count = () => step('count_eligible_alerts');
+      const countQuery = () => String(count().with?.query);
+      const whereClauses = (text: string) =>
+        text
+          .split('|')
+          .map((clause) => clause.trim())
+          .filter((clause) => clause.startsWith('WHERE'));
+
+      // A count over a different window or population would report alerts that
+      // were never eligible as over the cap.
+      it('counts with the same WHERE pipes as the retrieval', () => {
+        expect(whereClauses(countQuery())).toEqual(whereClauses(query()));
+        expect(countQuery()).toContain('STATS eligible = COUNT(*)');
+      });
+
+      it('excludes the same already-reviewed tags as the retrieval', () => {
+        expect(count().with?.filter).toEqual(retrieve().with?.filter);
+      });
+
+      it('does not sort or limit, so it counts every eligible alert', () => {
+        expect(countQuery()).not.toMatch(/\| (SORT|LIMIT)/);
+      });
+
+      // A report must not fail the run: the batches' discoveries come after it.
+      it('continues on failure', () => {
+        expect(count()['on-failure']).toEqual({ continue: true });
+      });
+
+      it('runs after the retrieval it follows and before the fan-out', () => {
+        const names = parsed.steps?.map(({ name }) => name) ?? [];
+
+        expect(names.indexOf('count_eligible_alerts')).toBeGreaterThan(
+          names.indexOf('retrieve_alert_ids')
+        );
+        expect(names.indexOf('count_eligible_alerts')).toBeLessThan(
+          names.indexOf('generate_batches')
+        );
+      });
+
+      describe('capped-run condition', () => {
+        const engine = createWorkflowLiquidEngine({ strictFilters: true });
+
+        const isCapped = async (rows: number, limit: number) =>
+          (
+            await engine.parseAndRender(String(step('resolve_cap').with?.capped), {
+              steps: {
+                resolve_alert_limit: { output: { alert_limit: String(limit) } },
+                retrieve_alert_ids: {
+                  output: { values: Array.from({ length: rows }, (_, i) => [`alert-${i}`]) },
+                },
+              },
+            })
+          ).trim();
+
+        it('gates the count on the cap having been hit', () => {
+          expect(count().if).toBe("${{ steps.resolve_cap.output.capped == 'true' }}");
+        });
+
+        it('is capped when exactly alert_limit rows came back', async () => {
+          expect(await isCapped(500, 500)).toBe('true');
+        });
+
+        it('is not capped when fewer rows came back', async () => {
+          expect(await isCapped(499, 500)).toBe('false');
+          expect(await isCapped(0, 500)).toBe('false');
+        });
+      });
     });
 
     it('gives the child 12h so a slow scan can return to the runner', () => {
@@ -355,6 +453,7 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
         expect(getInList(query, 'kibana.alert.uuid')).toEqual(getQueryIds(query));
       });
 
+      // The retrieval is newest first, so this is the order the model sees.
       it('sorts each batch by @timestamp before limiting it', async () => {
         const query = await renderQuery(getContext(5, 2), 0);
 
@@ -475,6 +574,8 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
     it('emits the aggregate contract the parent reads', () => {
       expect(Object.keys(step('emit_result').with ?? {}).sort()).toEqual([
         'alerts_analyzed',
+        'alerts_eligible',
+        'alerts_over_cap',
         'attack_discoveries',
         'batch_errors',
         'batches_failed',
@@ -506,6 +607,137 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       expect(step('emit_result').with?.discoveries_generated).toBe(
         '${{ steps.aggregate.output.discoveries_generated | plus: 0 }}'
       );
+    });
+
+    describe('count_eligible_alerts', () => {
+      const countStep = step('count_eligible_alerts');
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+
+      // The step-level `if` becomes an `if_<step>` node wrapping the step, and
+      // `on-failure: continue` wraps that in an `enterContinue_<step>` node.
+      it('builds an if node and a continue wrapper in the execution graph', () => {
+        const graph = convertToWorkflowGraph(
+          parse(ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW.yaml) as WorkflowYaml
+        );
+
+        expect(graph.hasNode('enterContinue_count_eligible_alerts')).toBe(true);
+        expect(graph.hasNode('enterCondition_if_count_eligible_alerts')).toBe(true);
+      });
+
+      it.each([
+        ['true', true],
+        ['false', false],
+      ])('evaluates its condition with capped=%s to %s', (capped, expected) => {
+        expect(
+          engine.evalValueSync(String(countStep.if).replace(/^\$\{\{|\}\}$/g, ''), {
+            steps: { resolve_cap: { output: { capped } } },
+          })
+        ).toBe(expected);
+      });
+    });
+
+    describe('alerts_over_cap', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+
+      interface Scenario {
+        // Rows `retrieve_alert_ids` returned; `limit` is the cap.
+        retrieved: number;
+        limit: number;
+        // `undefined` models a skipped count step: no output at all.
+        eligible?: number;
+        // The engine stores a failed step as `output: null` (`step_io_service.ts`).
+        countFailed?: boolean;
+      }
+
+      const context = ({ retrieved, limit, eligible, countFailed }: Scenario) => ({
+        steps: {
+          resolve_alert_limit: { output: { alert_limit: String(limit) } },
+          resolve_cap: { output: { capped: retrieved >= limit ? 'true' : 'false' } },
+          retrieve_alert_ids: {
+            output: { values: Array.from({ length: retrieved }, (_, i) => [`alert-${i}`]) },
+          },
+          count_eligible_alerts: countFailed
+            ? { output: null, error: { message: 'x' } }
+            : { output: eligible === undefined ? undefined : { values: [[eligible]] } },
+        },
+      });
+
+      const render = async (field: string, scenario: Scenario) =>
+        (
+          await engine.parseAndRender(String(step('aggregate').with?.[field]), context(scenario))
+        ).trim();
+
+      // Liquid evaluates the emit expressions against the rendered strings.
+      const emit = (field: string, rendered: string) =>
+        engine.evalValueSync(
+          String(step('emit_result').with?.[field]).replace(/^\$\{\{|\}\}$/g, ''),
+          {
+            steps: { aggregate: { output: { [field]: rendered } } },
+          }
+        );
+
+      it('reports the eligible alerts the cap left out of the run', async () => {
+        expect(
+          await render('alerts_over_cap', { eligible: 1300, limit: 500, retrieved: 500 })
+        ).toBe('800');
+      });
+
+      it('reports zero when the cap was hit by exactly the eligible alerts', async () => {
+        expect(await render('alerts_over_cap', { eligible: 500, limit: 500, retrieved: 500 })).toBe(
+          '0'
+        );
+      });
+
+      it('never goes negative when alerts close between the count and the retrieval', async () => {
+        expect(await render('alerts_over_cap', { eligible: 490, limit: 500, retrieved: 500 })).toBe(
+          '0'
+        );
+      });
+
+      it('reports zero without a count when fewer alerts than the cap came back', async () => {
+        expect(await render('alerts_over_cap', { limit: 500, retrieved: 120 })).toBe('0');
+      });
+
+      // Unknown is not zero: a capped run whose count failed must not look complete.
+      it('reports null, not zero, when a capped run has no count', async () => {
+        const rendered = await render('alerts_over_cap', { limit: 500, retrieved: 500 });
+
+        expect(rendered).toBe('null');
+        expect(emit('alerts_over_cap', rendered)).toBeNull();
+      });
+
+      it('reports null, not zero, when the count step failed on a capped run', async () => {
+        const scenario = { countFailed: true, limit: 500, retrieved: 500 };
+
+        const overCap = await render('alerts_over_cap', scenario);
+        const eligible = await render('alerts_eligible', scenario);
+
+        expect(overCap).toBe('null');
+        expect(eligible).toBe('null');
+        expect(emit('alerts_over_cap', overCap)).toBeNull();
+        expect(emit('alerts_eligible', eligible)).toBeNull();
+      });
+
+      it('emits a counted over-cap value as a number', async () => {
+        expect(emit('alerts_over_cap', '800')).toBe(800);
+      });
+
+      it('reports the eligible total from the count on a capped run', async () => {
+        expect(
+          await render('alerts_eligible', { eligible: 1300, limit: 500, retrieved: 500 })
+        ).toBe('1300');
+      });
+
+      it('reports the retrieved rows as the eligible total on an uncapped run', async () => {
+        expect(await render('alerts_eligible', { limit: 500, retrieved: 120 })).toBe('120');
+      });
+
+      it('reports the eligible total as null, not zero, when a capped run has no count', async () => {
+        const rendered = await render('alerts_eligible', { limit: 500, retrieved: 500 });
+
+        expect(rendered).toBe('null');
+        expect(emit('alerts_eligible', rendered)).toBeNull();
+      });
     });
 
     // A legacy array-typed output is validated as an array of scalars

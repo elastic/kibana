@@ -654,6 +654,36 @@ describe('Attack Discovery worker chain', () => {
       expect(stepIn(workerSteps, 'log_empty_run')?.if).toContain('attack_count == 0');
     });
 
+    describe('alerts_over_cap', () => {
+      const renderOverCap = (template: unknown, overCap: unknown) =>
+        createWorkflowLiquidEngine().parseAndRenderSync(String(template), {
+          steps: {
+            run_generation: { output: overCap === undefined ? {} : { alerts_over_cap: overCap } },
+          },
+        });
+
+      it('reports the child count on emit', () => {
+        expect(renderOverCap(stepIn(workerSteps, 'emit_result')?.with?.alerts_over_cap, 800)).toBe(
+          '800'
+        );
+      });
+
+      // The child emits null when a capped run's count failed. Zero would make a
+      // partial run look complete.
+      it.each([undefined, null])('reports an unknown count (%s) as unknown, not 0', (overCap) => {
+        expect(
+          renderOverCap(stepIn(workerSteps, 'emit_result')?.with?.alerts_over_cap, overCap)
+        ).toBe('unknown');
+      });
+
+      it('names the over-cap count in the empty-run log, with unknown handled', () => {
+        const message = stepIn(workerSteps, 'log_empty_run')?.with?.message;
+
+        expect(renderOverCap(message, 800)).toContain('over the cap: 800');
+        expect(renderOverCap(message, null)).toContain('over the cap: unknown');
+      });
+    });
+
     it('requests a review for every persisted attack', () => {
       expect(stepIn(workerSteps, 'emit_result')?.with?.reviews_requested).toContain(
         'steps.resolve_fanout.output.attack_count'
@@ -2559,7 +2589,7 @@ describe('Attack Discovery worker chain', () => {
       expect(steps.filter((step) => step.type === 'workflow.output')).toHaveLength(1);
     });
 
-    it.each(['alerts_analyzed', 'attacks_generated', 'reviews_requested'])(
+    it.each(['alerts_analyzed', 'alerts_over_cap', 'attacks_generated', 'reviews_requested'])(
       'reports %s so a caller can tell an empty run from a failed one',
       (name) => {
         expect((worker.outputs ?? []).map((output) => output.name)).toContain(name);
@@ -2568,7 +2598,7 @@ describe('Attack Discovery worker chain', () => {
 
     // The editor type-checks `workflow.output` `with:` source text, so a
     // `type: number` field cannot be filled with `"${{ ... }}"`.
-    it.each(['alerts_analyzed', 'attacks_generated', 'reviews_requested'])(
+    it.each(['alerts_analyzed', 'alerts_over_cap', 'attacks_generated', 'reviews_requested'])(
       'declares %s as a string so the templated emit passes editor type checks',
       (name) => {
         expect((worker.outputs ?? []).find((output) => output.name === name)?.type).toBe('string');
@@ -2578,7 +2608,7 @@ describe('Attack Discovery worker chain', () => {
     // `${{ }}` keeps the Liquid value's type. Runtime output validation then
     // rejects a number against `type: string`. `{{ }}` stringifies so the
     // emitted value matches the declared schema.
-    it.each(['alerts_analyzed', 'attacks_generated', 'reviews_requested'])(
+    it.each(['alerts_analyzed', 'alerts_over_cap', 'attacks_generated', 'reviews_requested'])(
       'stringifies %s in emit_result so runtime matches the string output schema',
       (name) => {
         expect(stepIn(workerSteps, 'emit_result')?.with?.[name]).toEqual(
@@ -3848,12 +3878,12 @@ describe('Attack Discovery worker chain', () => {
 
     describe('managed versions', () => {
       // Fixed `yaml` definitions roll out through the hash; the bump is the signal.
-      it('bumps the runner to version 22 so a failed read does not retarget the fingerprint', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(22);
+      it('bumps the runner to version 23 so it reports alerts_over_cap', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(23);
       });
 
-      it('bumps batched generation to version 13 so the worker passes generation_source', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW.version).toBe(13);
+      it('bumps batched generation to version 14 so retrieval is risk-first', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW.version).toBe(14);
       });
 
       it('continues when fingerprint matching fails', () => {

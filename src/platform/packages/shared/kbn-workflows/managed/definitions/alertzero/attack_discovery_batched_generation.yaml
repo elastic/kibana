@@ -2,10 +2,17 @@ version: "1"
 name: Attack Discovery Batched Generation
 description: |
   Runs Attack Discovery over the whole open alert population for a lookback
-  window instead of a single truncated slice: retrieve once sorted by
-  @timestamp, slice into fixed-size batches, run the pipeline per batch in
-  parallel, and aggregate. A batch that fails is reported in `batch_errors`
-  rather than failing the run.
+  window instead of a single truncated slice: retrieve once, slice into
+  fixed-size batches (contiguous time slices, newest first), run the pipeline
+  per batch in parallel, and aggregate. A batch that fails is reported in
+  `batch_errors` rather than failing the run.
+
+  A run analyses at most `max_alerts` alerts (the worker prorates it to its
+  schedule interval, and it never exceeds `batch_size * 100`). When more alerts
+  qualify, the cap keeps the highest-risk ones (unscored alerts last, newest
+  first among equal risk) and the rest is reported as `alerts_over_cap` rather
+  than silently dropped. Risk only chooses which alerts are kept; the kept
+  alerts are still batched by time.
 
   Each batch runs the full pipeline, so every batch persists its own
   discoveries. Persistence is idempotent (de-duplication keys on the attack
@@ -15,13 +22,16 @@ description: |
   opt-in gate is the AD Worker, which ships disabled.
 
   Emits to the caller: attack_discoveries (the persisted alert documents),
-  batch_errors,
-  batches_total, batches_succeeded, batches_failed, discoveries_generated (what
-  the model produced, before de-duplication). A declared outputs block is
-  deliberately omitted: a legacy array-typed output is validated as an array of
-  scalars (items anyOf string/number/boolean), which would reject arrays of
-  discovery objects at runtime, and workflow.execute types a child's output as
-  unknown regardless.
+  batch_errors, batches_total, batches_succeeded, batches_failed,
+  discoveries_generated (what the model produced, before de-duplication),
+  alerts_eligible (every alert that matched the filters) and alerts_over_cap
+  (eligible alerts beyond the cap, so never handed to a batch; alerts in a failed
+  batch are in `batch_errors` instead). The two counts are `null` when the run
+  hit the cap and the count query failed: unknown is not zero. A declared
+  outputs block is deliberately omitted: a legacy array-typed output is
+  validated as an array of scalars (items anyOf string/number/boolean), which
+  would reject arrays of discovery objects at runtime, and workflow.execute
+  types a child's output as unknown regardless.
 enabled: true
 tags:
   - watch
@@ -74,6 +84,17 @@ triggers:
           type: integer
 
 steps:
+  # The alert cap: the prorated `max_alerts`, never more than one page of
+  # branches (`batch_size * 100`, itself capped at 10000). One place, because the
+  # retrieval's `LIMIT` and the cap-hit check below must agree on it.
+  - name: resolve_alert_limit
+    type: data.set
+    with:
+      alert_limit: |-
+        {%- assign branch_ceiling = inputs.batch_size | times: 100 | at_most: 10000 -%}
+        {%- assign alert_limit = inputs.max_alerts | default: 10000 | at_most: branch_ceiling -%}
+        {{ alert_limit }}
+
   # Ids only. Each batch's `security.attack-discovery.run` retrieves and anonymizes
   # its own slice with an ES|QL query over those ids, so the replacements its
   # markdown uses are the ones that batch persists. Anonymizing here instead would
@@ -102,24 +123,65 @@ steps:
       # false, for an alert with no closing reason. Kept as its own `| WHERE`
       # pipe (pipes are ANDed) so the `OR` cannot widen the clauses above it.
       #
-      # `LIMIT` is the prorated alert cap, and never more than one page of
-      # branches (`batch_size * 100`, itself capped at 10000). Newest first:
-      # an ascending sort would spend that cap on the oldest alerts and let
-      # newer ones age out of the lookback without being analyzed. The list
-      # stays time-ordered, so each batch is still a contiguous slice and the
-      # first batch is the newest. Each batch re-sorts its own slice ascending
-      # before the model sees it.
+      # Two sorts, on purpose. The first, before `LIMIT`, decides WHICH alerts a
+      # capped run keeps: highest risk first, newest first among equals, so the
+      # cap drops the lowest-risk, oldest alerts. ES|QL sorts a null as the
+      # largest value, so under `DESC` an unscored alert would come first;
+      # `NULLS LAST` states the intent explicitly. The second, after `LIMIT`,
+      # restores newest-first order, so the kept alerts are batched as contiguous
+      # time slices and the first batch is the newest. Risk does not order batches.
       query: |-
-        {%- assign branch_ceiling = inputs.batch_size | times: 100 | at_most: 10000 -%}
-        {%- assign alert_limit = inputs.max_alerts | default: 10000 | at_most: branch_ceiling -%}
         FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
           | WHERE @timestamp >= NOW() - {{ inputs.lookback }} - 1m
           | WHERE kibana.alert.workflow_status IN ("open", "acknowledged")
           | WHERE kibana.alert.building_block_type IS NULL
           | WHERE kibana.alert.workflow_reason IS NULL OR kibana.alert.workflow_reason != "false_positive"
+          | SORT kibana.alert.risk_score DESC NULLS LAST, @timestamp DESC
+          | LIMIT {{ steps.resolve_alert_limit.output.alert_limit }}
           | SORT @timestamp DESC
-          | LIMIT {{ alert_limit }}
           | KEEP _id
+
+  # Whether the cap was hit: fewer rows than the limit means every eligible alert
+  # was retrieved. A string because the `if` below cannot compare after a filter chain.
+  - name: resolve_cap
+    type: data.set
+    with:
+      capped: |-
+        {%- assign retrieved = steps.retrieve_alert_ids.output.values | size -%}
+        {%- assign alert_limit = steps.resolve_alert_limit.output.alert_limit | plus: 0 -%}
+        {%- if retrieved >= alert_limit -%}true{%- else -%}false{%- endif -%}
+
+  # How many alerts qualify, so a capped run can say how many the cap left out.
+  # Runs only when the cap was hit: below it, the retrieval already returned every
+  # eligible alert, so nothing was left out. The same window, tag filter and
+  # `| WHERE` pipes as `retrieve_alert_ids`: a count over a wider population would
+  # report alerts that were never eligible as over the cap. Keep the two in step.
+  #
+  # `continue` because this count is a report, not a precondition: a failure here
+  # must not discard the discoveries the batches would produce. The aggregate then
+  # reports the counts as unknown (`null`), never 0. `NOW()` is evaluated per
+  # query, so the windows can differ by a few seconds; the aggregate clamps at 0.
+  - name: count_eligible_alerts
+    type: elasticsearch.esql.query
+    if: "${{ steps.resolve_cap.output.capped == 'true' }}"
+    timeout: "5m"
+    on-failure:
+      continue: true
+    with:
+      filter:
+        bool:
+          must_not:
+            - terms:
+                kibana.alert.workflow_tags:
+                  - az:ad_correlated
+                  - az:ad_fp_chain
+      query: |-
+        FROM .alerts-security.alerts-{{ workflow.spaceId }}
+          | WHERE @timestamp >= NOW() - {{ inputs.lookback }} - 1m
+          | WHERE kibana.alert.workflow_status IN ("open", "acknowledged")
+          | WHERE kibana.alert.building_block_type IS NULL
+          | WHERE kibana.alert.workflow_reason IS NULL OR kibana.alert.workflow_reason != "false_positive"
+          | STATS eligible = COUNT(*)
 
   # `mode: settled` is what turns a failed batch into a gap instead of a failed
   # run. Concurrency is the per-run rate-limit exposure against the connector as
@@ -173,8 +235,8 @@ steps:
           # alert's `kibana.alert.uuid` equals its `_id`, so filtering that keyword on
           # the same ids is pushed down; `_id IN` then keeps the match exact.
           #
-          # Sorted because each batch used to be a slice of the `@timestamp`-sorted
-          # retrieval, so its alerts reached the model in time order.
+          # Sorted ascending within the batch: the retrieval is newest first, and
+          # each batch's alerts reach the model oldest first.
           alert_retrieval_mode: esql
           esql_query: |-
             {%- assign ids = steps.retrieve_alert_ids.output.values | slice: foreach.item, inputs.batch_size | map: 'first' | join: '", "' -%}
@@ -277,6 +339,41 @@ steps:
         {%- assign generated = generated | plus: batch_count -%}
         {%- endfor -%}
         {{ generated }}
+      # `retrieve_alert_ids` holds at most `alert_limit` rows. Below that every
+      # eligible alert was retrieved, so the count step was skipped: eligible is
+      # the row count and nothing is over the cap. At the cap the count step
+      # decides; when it failed the counts are `null` (the string `null`, parsed
+      # back on emit), never 0. `blank` rather than `nil` because a missing step
+      # output renders as an empty string and `== nil` does not match it; a real
+      # count of 0 is not blank. Clamped because alerts can be closed between the
+      # two queries.
+      alerts_eligible: |-
+        {%- assign retrieved = steps.retrieve_alert_ids.output.values | size -%}
+        {%- if steps.resolve_cap.output.capped != 'true' -%}
+        {{ retrieved }}
+        {%- else -%}
+        {%- assign eligible = steps.count_eligible_alerts.output.values | first | first -%}
+        {%- if eligible == blank -%}
+        null
+        {%- else -%}
+        {%- if eligible < retrieved -%}{%- assign eligible = retrieved -%}{%- endif -%}
+        {{ eligible }}
+        {%- endif -%}
+        {%- endif -%}
+      alerts_over_cap: |-
+        {%- assign retrieved = steps.retrieve_alert_ids.output.values | size -%}
+        {%- if steps.resolve_cap.output.capped != 'true' -%}
+        0
+        {%- else -%}
+        {%- assign eligible = steps.count_eligible_alerts.output.values | first | first -%}
+        {%- if eligible == blank -%}
+        null
+        {%- else -%}
+        {%- assign over_cap = eligible | minus: retrieved -%}
+        {%- if over_cap < 0 -%}{%- assign over_cap = 0 -%}{%- endif -%}
+        {{ over_cap }}
+        {%- endif -%}
+        {%- endif -%}
       # Empty list used when `fetch_discoveries` is skipped. The template
       # language has no empty-list literal.
       no_discoveries: []
@@ -307,7 +404,9 @@ steps:
           kibana.alert.rule.execution.uuid:
             "${{ steps.generate_batches.output.results | map: 'output' | map: 'execution_uuid' | compact }}"
 
-  # `| plus: 0` coerces the counted strings above back to numbers.
+  # `| plus: 0` coerces the counted strings above back to numbers. The two
+  # nullable counts at the end use `json_parse` instead, so an unknown count
+  # stays null rather than becoming 0.
   - name: emit_result
     type: workflow.output
     status: completed
@@ -325,3 +424,7 @@ steps:
       # expression `fetch_discoveries` queries by, so the two cannot drift.
       execution_uuids: "${{ steps.generate_batches.output.results | map: 'output' | map: 'execution_uuid' | compact }}"
       alerts_analyzed: "${{ steps.aggregate.output.alerts_analyzed | plus: 0 }}"
+      # `json_parse` turns the counted string back into a number, or the string
+      # `null` into null (count unknown). `plus: 0` would turn it into 0.
+      alerts_eligible: "${{ steps.aggregate.output.alerts_eligible | json_parse }}"
+      alerts_over_cap: "${{ steps.aggregate.output.alerts_over_cap | json_parse }}"

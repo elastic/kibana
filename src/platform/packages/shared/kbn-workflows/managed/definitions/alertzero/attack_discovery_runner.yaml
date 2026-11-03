@@ -118,6 +118,11 @@ outputs:
   # its own execution and in the journal it writes to its Investigation.
   - name: alerts_analyzed
     type: string
+  # Eligible alerts beyond the batched generation's alert cap (the lowest risk,
+  # then the oldest), so a capped run is visibly partial instead of looking complete.
+  # `unknown` when the run hit the cap and the count failed; never 0 in that case.
+  - name: alerts_over_cap
+    type: string
   - name: schedule_interval
     type: string
   # The Attack Discovery generation ids, not this workflow's execution id. Each
@@ -207,6 +212,7 @@ steps:
       message: >-
         Attack Discovery generation produced no attacks
         (alerts analyzed: {{ steps.run_generation.output.alerts_analyzed }},
+        eligible alerts over the cap: {{ steps.run_generation.output.alerts_over_cap | default: 'unknown' }},
         batches: {{ steps.run_generation.output.batches_succeeded }}/{{
         steps.run_generation.output.batches_total }} succeeded, {{
         steps.run_generation.output.batches_failed }} failed). Skipping the
@@ -486,5 +492,6 @@ steps:
       # elastic/kibana#290732; keep them apart.
       reviews_requested: "{{ steps.resolve_fanout.output.attack_count }}"
       alerts_analyzed: "{{ steps.run_generation.output.alerts_analyzed | default: 0 }}"
+      alerts_over_cap: "{{ steps.run_generation.output.alerts_over_cap | default: 'unknown' }}"
       schedule_interval: "{{ inputs.schedule_interval }}"
       execution_uuids: "{{ steps.run_generation.output.execution_uuids | join: ',' }}"
