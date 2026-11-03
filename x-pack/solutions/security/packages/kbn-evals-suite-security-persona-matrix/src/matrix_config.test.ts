@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { parseMatrixConfig } from '@kbn/security-evals-matrix';
 import config from '../persona_matrix.config.json';
+import productionConfig from '../persona_matrix.production.config.json';
 import suitesMetadata from '../../../../../../.buildkite/pipelines/evals/evals.suites.json';
 
 /**
@@ -29,6 +31,28 @@ describe('persona_matrix.config.json scoring policy', () => {
 
     expect(notes.some((note) => note.includes('NOT comparable'))).toBe(true);
     expect(notes.some((note) => note.includes('verdict'))).toBe(true);
+  });
+});
+
+/**
+ * Importing the JSON proves nothing about whether `matrix --config` / `rejudge --config`
+ * accept it: the loader rejects, for example, `requireEisJudge` / `useVerdictLadder` on a suite
+ * whose columns declare no `examplePrefixes`. Both shipped configs go through the real loader.
+ */
+describe.each([
+  ['persona_matrix.config.json', config],
+  ['persona_matrix.production.config.json', productionConfig],
+])('%s through the matrix config loader', (_name, raw) => {
+  it('passes parseMatrixConfig', () => {
+    expect(() => parseMatrixConfig(raw)).not.toThrow();
+  });
+
+  it('declares examplePrefixes for every column so the scoring policy applies per document', () => {
+    const missing = raw.columns
+      .filter((column) => !('examplePrefixes' in column) || !column.examplePrefixes?.length)
+      .map((column) => column.id);
+
+    expect(missing).toEqual([]);
   });
 });
 

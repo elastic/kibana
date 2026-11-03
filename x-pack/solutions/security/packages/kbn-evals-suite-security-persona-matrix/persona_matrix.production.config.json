@@ -278,6 +278,9 @@
       "suites": [
         "attack-discovery-agent-builder"
       ],
+      "examplePrefixes": [
+        "0"
+      ],
       "evaluators": [
         "AttackDiscoveryBasic",
         "Rubric",
@@ -297,6 +300,10 @@
       "group": "Automatic Migrations",
       "suites": [
         "security-automatic-migrations"
+      ],
+      "examplePrefixes": [
+        "qradar",
+        "splunk"
       ],
       "evaluators": [
         "Translation Result",
@@ -323,6 +330,13 @@
       "group": "Automatic Migrations",
       "suites": [
         "security-automatic-migrations"
+      ],
+      "examplePrefixes": [
+        "access-center-data",
+        "ess-executive-summary-data",
+        "microsoft365-data",
+        "threat-artifacts-data",
+        "dashboard-example-2"
       ],
       "evaluators": [
         "Translation Completeness",
