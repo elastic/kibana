@@ -1927,6 +1927,183 @@ steps:
       );
     });
 
+    it('should unschedule existing tasks when an overwrite removes the scheduled trigger', async () => {
+      const mockTaskScheduler = {
+        scheduleWorkflowTask: jest.fn(),
+        updateWorkflowTasks: jest.fn(),
+        unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
+      };
+      service.setTaskScheduler(mockTaskScheduler as any);
+
+      mockEsClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ index: { _id: 'my-custom-id', status: 200 } }],
+        took: 10,
+      } as any);
+
+      const workflows = [
+        {
+          id: 'my-custom-id',
+          yaml: `
+name: manual workflow
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Hello"
+`,
+        },
+      ];
+
+      await service.bulkCreateWorkflows(workflows, 'default', mockRequest, { overwrite: true });
+
+      expect(mockTaskScheduler.unscheduleWorkflowTasks).toHaveBeenCalledWith('my-custom-id');
+      expect(mockTaskScheduler.updateWorkflowTasks).not.toHaveBeenCalled();
+      expect(mockTaskScheduler.scheduleWorkflowTask).not.toHaveBeenCalled();
+    });
+
+    it('should unschedule existing tasks when an overwrite disables a scheduled workflow', async () => {
+      const mockTaskScheduler = {
+        scheduleWorkflowTask: jest.fn(),
+        updateWorkflowTasks: jest.fn(),
+        unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
+      };
+      service.setTaskScheduler(mockTaskScheduler as any);
+
+      mockEsClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ index: { _id: 'my-custom-id', status: 200 } }],
+        took: 10,
+      } as any);
+
+      const workflows = [
+        {
+          id: 'my-custom-id',
+          yaml: `
+name: disabled scheduled workflow
+enabled: false
+triggers:
+  - type: 'scheduled'
+    with:
+      every: '5m'
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Hello"
+`,
+        },
+      ];
+
+      await service.bulkCreateWorkflows(workflows, 'default', mockRequest, { overwrite: true });
+
+      expect(mockTaskScheduler.unscheduleWorkflowTasks).toHaveBeenCalledWith('my-custom-id');
+      expect(mockTaskScheduler.updateWorkflowTasks).not.toHaveBeenCalled();
+      expect(mockTaskScheduler.scheduleWorkflowTask).not.toHaveBeenCalled();
+    });
+
+    it('should update scheduled tasks with the caller request when an overwrite keeps the scheduled trigger', async () => {
+      const mockTaskScheduler = {
+        scheduleWorkflowTask: jest.fn(),
+        updateWorkflowTasks: jest.fn().mockResolvedValue(undefined),
+        unscheduleWorkflowTasks: jest.fn(),
+      };
+      service.setTaskScheduler(mockTaskScheduler as any);
+
+      mockEsClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ index: { _id: 'my-custom-id', status: 200 } }],
+        took: 10,
+      } as any);
+      // The scheduler sync re-reads the saved workflow before updating its tasks
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _id: 'my-custom-id',
+              _source: {
+                ...mockWorkflowDocument._source,
+                name: 'scheduled workflow',
+                triggerTypes: ['scheduled'],
+                definition: {
+                  name: 'scheduled workflow',
+                  enabled: true,
+                  triggers: [{ type: 'scheduled', with: { every: '5m' } }],
+                  steps: [],
+                },
+              },
+            },
+          ],
+        },
+      } as any);
+
+      const workflows = [
+        {
+          id: 'my-custom-id',
+          yaml: `
+name: scheduled workflow
+triggers:
+  - type: 'scheduled'
+    with:
+      every: '5m'
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Hello"
+`,
+        },
+      ];
+
+      await service.bulkCreateWorkflows(workflows, 'default', mockRequest, { overwrite: true });
+
+      expect(mockTaskScheduler.updateWorkflowTasks).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'my-custom-id' }),
+        'default',
+        mockRequest
+      );
+      expect(mockTaskScheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
+      expect(mockTaskScheduler.scheduleWorkflowTask).not.toHaveBeenCalled();
+    });
+
+    it('should warn without failing the overwrite when the task scheduler is unavailable', async () => {
+      mockEsClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ index: { _id: 'my-custom-id', status: 200 } }],
+        took: 10,
+      } as any);
+
+      const workflows = [
+        {
+          id: 'my-custom-id',
+          yaml: `
+name: scheduled workflow
+triggers:
+  - type: 'scheduled'
+    with:
+      every: '5m'
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Hello"
+`,
+        },
+      ];
+
+      const result = await service.bulkCreateWorkflows(workflows, 'default', mockRequest, {
+        overwrite: true,
+      });
+
+      expect(result.created).toHaveLength(1);
+      expect(result.failed).toHaveLength(0);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Skipping scheduler sync for workflow my-custom-id in space default: task scheduler is unavailable'
+      );
+    });
+
     it('should use index operation when overwrite is true', async () => {
       mockEsClient.bulk.mockResolvedValue({
         errors: false,
