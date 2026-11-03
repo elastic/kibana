@@ -7,6 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export type DoctorArch = 'stateful' | 'serverless';
+export type DoctorLocation = 'cloud' | 'local';
+
+export const DOCTOR_ARCHS: DoctorArch[] = ['stateful', 'serverless'];
+export const DOCTOR_LOCATIONS: DoctorLocation[] = ['cloud', 'local'];
+
 export type CheckStatus = 'pass' | 'warn' | 'fail';
 
 export interface Fix {
@@ -28,14 +34,11 @@ export interface CheckResult {
 
 export interface DoctorCheck {
   title: string;
+  /** Architecture the check matters for, both when not set */
+  arch?: DoctorArch;
+  /** Hidden unless this check passes or warns, e.g. image checks need Docker running */
+  dependsOn?: DoctorCheck;
   run: () => Promise<CheckResult>;
-}
-
-export interface DoctorCheckGroup {
-  title: string;
-  checks: DoctorCheck[];
-  /** Stop at the first failed check, e.g. when the rest need Docker running */
-  stopOnFailure?: boolean;
 }
 
 type Remedy = Pick<CheckResult, 'hint' | 'fix'>;

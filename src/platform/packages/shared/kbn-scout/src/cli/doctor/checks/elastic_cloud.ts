@@ -13,9 +13,8 @@ import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { PROJECT_DEFAULT_ROLES } from '../../../common/constants';
 import { ScoutTestConfigSchema } from '../../../types/test_config.schema';
-import type { CheckResult, DoctorCheck, DoctorCheckGroup } from '../types';
-import { fail, pass, warn } from '../types';
-import type { DoctorArch } from '../run_doctor';
+import type { CheckResult, DoctorArch, DoctorCheck } from '../types';
+import { DOCTOR_ARCHS, fail, pass, warn } from '../types';
 import { tildify } from '../utils';
 
 // QAF reads Cloud credentials from this file, and EC_ENV picks the environment (qa by default)
@@ -23,8 +22,8 @@ const CLOUD_SECRETS_FILE = Path.join(Os.homedir(), '.elastic/cloud.json');
 const getEnvironment = () => process.env.EC_ENV ?? 'qa';
 
 const ROLES_BY_ARCH: Record<DoctorArch, string[]> = {
-  stateful: ['admin', 'editor', 'viewer'],
-  serverless: ['admin', 'viewer', ...new Set(PROJECT_DEFAULT_ROLES.values())],
+  stateful: ['editor', 'viewer'],
+  serverless: ['viewer', ...new Set(PROJECT_DEFAULT_ROLES.values())],
 };
 
 // Direct Scout runs read these; QAF writes them for a run and refuses to run when they exist
@@ -46,42 +45,50 @@ const readJson = async <T>(path: string): Promise<T | undefined> => {
   return content === undefined ? undefined : JSON.parse(content);
 };
 
+const existsInRepo = (file: string) => Fs.existsSync(Path.resolve(REPO_ROOT, file));
+
 const displayPath = (path: string) =>
   path.startsWith(REPO_ROOT) ? Path.relative(REPO_ROOT, path) : tildify(path);
 
-const archsOf = (arch?: DoctorArch): DoctorArch[] => (arch ? [arch] : ['stateful', 'serverless']);
-
 const checkUsers = (source: string, users: Users, expected: string[]): CheckResult => {
   const defined = Object.keys(users).filter((role) => users[role]?.email && users[role]?.password);
-  if (!defined.includes('admin')) {
-    return fail(`No admin user in ${source}`);
+  if (expected.includes('admin') && !defined.includes('admin')) {
+    return fail(`${source} have no admin`);
   }
 
   const missing = [...new Set(expected)].filter((role) => !defined.includes(role));
   return missing.length
-    ? warn(`${source}: ${defined.join(', ')}, missing ${missing.join(', ')}`, {
+    ? warn(`${source} have no ${missing.join(', ')}`, {
         hint: `tests that log in as ${missing.join(' or ')} will fail`,
       })
-    : pass(`${source}: ${defined.join(', ')}`);
+    : pass(`${source} have ${[...new Set(expected)].join(', ')}`);
 };
 
-const qafUsersCheck = (arch?: DoctorArch): DoctorCheck => ({
-  title: 'QAF Cloud users',
+const readCloudUsers = async () =>
+  (await readJson<CloudSecrets>(CLOUD_SECRETS_FILE))?.role_credentials?.[getEnvironment()] ?? {};
+
+const cloudUsersCheck: DoctorCheck = {
+  title: 'Cloud users',
   run: async () => {
     const env = getEnvironment();
-    const secrets = await readJson<CloudSecrets>(CLOUD_SECRETS_FILE);
-    if (!secrets) {
+    if (!Fs.existsSync(CLOUD_SECRETS_FILE)) {
       return fail(`${tildify(CLOUD_SECRETS_FILE)} does not exist`, {
         hint: `add Cloud users under role_credentials.${env}`,
       });
     }
-
     return checkUsers(
-      `QAF Cloud users (role_credentials.${env})`,
-      secrets.role_credentials?.[env] ?? {},
-      archsOf(arch).flatMap((target) => ROLES_BY_ARCH[target])
+      `Cloud users in ${tildify(CLOUD_SECRETS_FILE)} (${env})`,
+      await readCloudUsers(),
+      ['admin']
     );
   },
+};
+
+const cloudRolesCheck = (arch: DoctorArch): DoctorCheck => ({
+  title: 'Cloud users',
+  arch,
+  dependsOn: cloudUsersCheck,
+  run: async () => checkUsers('Cloud users', await readCloudUsers(), ROLES_BY_ARCH[arch]),
 });
 
 const apiKeyCheck: DoctorCheck = {
@@ -100,6 +107,7 @@ const apiKeyCheck: DoctorCheck = {
 /** Validates a direct Scout run config with the schema Scout uses when it loads it */
 const scoutConfigCheck = (arch: DoctorArch): DoctorCheck => ({
   title: SCOUT_CLOUD_CONFIGS[arch],
+  arch,
   run: async () => {
     const configFile = SCOUT_CLOUD_CONFIGS[arch];
     let raw: unknown;
@@ -132,18 +140,17 @@ const scoutConfigCheck = (arch: DoctorArch): DoctorCheck => ({
 });
 
 /** Checks the users file a direct Scout run reads, as set by cloudUsersFilePath */
-const scoutUsersCheck = (arch: DoctorArch): DoctorCheck => ({
+const scoutUsersCheck = (arch: DoctorArch, configCheck: DoctorCheck): DoctorCheck => ({
   title: `Scout Cloud users for ${SCOUT_CLOUD_CONFIGS[arch]}`,
+  arch,
+  dependsOn: configCheck,
   run: async () => {
     const configFile = SCOUT_CLOUD_CONFIGS[arch];
-    const config = await readJson<{ cloudUsersFilePath?: string; projectType?: string }>(
+    const config = await readJson<{ cloudUsersFilePath: string; projectType?: string }>(
       Path.resolve(REPO_ROOT, configFile)
     );
-    if (!config?.cloudUsersFilePath) {
-      return fail(`${configFile} has no cloudUsersFilePath`);
-    }
     // Scout resolves it against the working directory, which is the repo root
-    const usersFile = Path.resolve(REPO_ROOT, config.cloudUsersFilePath);
+    const usersFile = Path.resolve(REPO_ROOT, config?.cloudUsersFilePath ?? '');
     const users = await readJson<Users>(usersFile);
     if (!users) {
       return fail(`${displayPath(usersFile)} does not exist`, {
@@ -151,54 +158,49 @@ const scoutUsersCheck = (arch: DoctorArch): DoctorCheck => ({
       });
     }
 
-    const projectRole = config.projectType && PROJECT_DEFAULT_ROLES.get(config.projectType);
+    const projectRole = config?.projectType && PROJECT_DEFAULT_ROLES.get(config.projectType);
     const expected =
       arch === 'stateful'
-        ? ROLES_BY_ARCH.stateful
+        ? ['admin', ...ROLES_BY_ARCH.stateful]
         : ['admin', 'viewer', ...(projectRole ? [projectRole] : [])];
-    return checkUsers(`Scout Cloud users (${displayPath(usersFile)})`, users, expected);
+    return checkUsers(`Scout Cloud users in ${displayPath(usersFile)}`, users, expected);
   },
 });
 
-const qafRunFilesCheck = (arch?: DoctorArch): DoctorCheck => ({
+const qafRunFileCheck = (file: string, arch?: DoctorArch): DoctorCheck => ({
   title: 'Files that block QAF runs',
-  run: async () => {
-    const existing = [
-      SCOUT_ROLE_USERS_FILE,
-      ...archsOf(arch).map((target) => SCOUT_CLOUD_CONFIGS[target]),
-    ].filter((file) => Fs.existsSync(Path.resolve(REPO_ROOT, file)));
-    return existing.length
-      ? warn(
-          `QAF won't run while ${existing.join(', ')} ${existing.length > 1 ? 'exist' : 'exists'}`,
-          {
-            hint: 'direct Scout runs use them, remove them to run with QAF',
-            fix: { command: `rm -f ${existing.join(' ')}`, destructive: true },
-          }
-        )
-      : pass('No files that block QAF runs');
-  },
+  arch,
+  run: async () =>
+    warn(`QAF won't run while ${file} exists`, {
+      hint: 'direct Scout runs use it, remove it to run with QAF',
+      fix: { command: `rm -f ${file}`, destructive: true },
+    }),
 });
 
-const readConfigSync = (arch: DoctorArch): { cloudUsersFilePath?: unknown } | undefined => {
-  try {
-    return JSON.parse(Fs.readFileSync(Path.resolve(REPO_ROOT, SCOUT_CLOUD_CONFIGS[arch]), 'utf8'));
-  } catch {
-    return undefined;
-  }
+const getQafRunFileChecks = (): DoctorCheck[] => {
+  const checks = [
+    ...(existsInRepo(SCOUT_ROLE_USERS_FILE) ? [qafRunFileCheck(SCOUT_ROLE_USERS_FILE)] : []),
+    ...DOCTOR_ARCHS.filter((arch) => existsInRepo(SCOUT_CLOUD_CONFIGS[arch])).map((arch) =>
+      qafRunFileCheck(SCOUT_CLOUD_CONFIGS[arch], arch)
+    ),
+  ];
+  return checks.length
+    ? checks
+    : [
+        {
+          title: 'Files that block QAF runs',
+          run: async () => pass('No files that block QAF runs'),
+        },
+      ];
 };
 
-export const getElasticCloudChecks = (arch?: DoctorArch): DoctorCheckGroup => ({
-  title: 'Elastic Cloud',
-  checks: [
-    qafUsersCheck(arch),
-    apiKeyCheck,
-    ...archsOf(arch)
-      .filter((target) => Fs.existsSync(Path.resolve(REPO_ROOT, SCOUT_CLOUD_CONFIGS[target])))
-      .flatMap((target) => [
-        scoutConfigCheck(target),
-        // a config without cloudUsersFilePath is already reported as invalid
-        ...(readConfigSync(target)?.cloudUsersFilePath ? [scoutUsersCheck(target)] : []),
-      ]),
-    qafRunFilesCheck(arch),
-  ],
-});
+export const getElasticCloudChecks = (): DoctorCheck[] => [
+  apiKeyCheck,
+  cloudUsersCheck,
+  ...DOCTOR_ARCHS.map(cloudRolesCheck),
+  ...DOCTOR_ARCHS.filter((arch) => existsInRepo(SCOUT_CLOUD_CONFIGS[arch])).flatMap((arch) => {
+    const configCheck = scoutConfigCheck(arch);
+    return [configCheck, scoutUsersCheck(arch, configCheck)];
+  }),
+  ...getQafRunFileChecks(),
+];

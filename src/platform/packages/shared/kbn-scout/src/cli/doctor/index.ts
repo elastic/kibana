@@ -11,22 +11,22 @@ import type { Command } from '@kbn/dev-cli-runner';
 import { runDoctor } from './run_doctor';
 
 /**
- * Check that the local setup can run Scout tests
+ * Check that the setup can run Scout tests on Elastic Cloud and locally
  */
 export const doctorCmd: Command<void> = {
   name: 'doctor',
-  description: 'Check that your setup is ready to run Scout tests locally or on Elastic Cloud',
+  description: 'Check that your setup is ready to run Scout tests on Elastic Cloud and locally',
   flags: {
     string: ['location', 'arch'],
     boolean: ['fix'],
     help: `
-    --location          Where tests run (one of: local, cloud) [default: local]
-    --arch              Server architecture to check (one of: stateful, serverless) [default: both]
+    --location          Only check where tests run (one of: cloud, local) [default: both]
+    --arch              Only check one server architecture (one of: stateful, serverless) [default: both]
     --fix               Run the commands that fix failed checks and warnings, asking first for destructive ones
     `,
   },
   run: async ({ flagsReader, log }) => {
-    const location = flagsReader.enum('location', ['local', 'cloud']) ?? 'local';
+    const location = flagsReader.enum('location', ['cloud', 'local']);
     const arch = flagsReader.enum('arch', ['stateful', 'serverless']);
     if (!(await runDoctor(log, { location, arch, fix: flagsReader.boolean('fix') }))) {
       process.exitCode = 1;

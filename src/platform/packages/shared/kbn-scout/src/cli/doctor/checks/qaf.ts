@@ -7,39 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DoctorCheckGroup } from '../types';
+import type { DoctorCheck } from '../types';
 import { fail, pass } from '../types';
 import { tryExec } from '../utils';
 
-export const qafChecks: DoctorCheckGroup = {
-  title: 'QAF',
-  checks: [
-    {
-      title: 'QAF installation',
-      run: async () => {
-        // qaf doctor exits with 0 even when checks fail, so read its ✓/✗ lines
-        const output = await tryExec('qaf', ['doctor']);
-        if (output === undefined) {
-          return fail('QAF is not installed', {
-            fix: { command: 'uv tool install --python 3.11 git+https://github.com/elastic/qaf' },
-          });
-        }
-
-        const version = output.match(/QAF:\s*(\S+)/)?.[1] ?? 'unknown version';
-        const failed = output.split('\n').flatMap((line) => {
-          const title = line.match(/^✗\s+(.+)/)?.[1];
-          return title ? [title] : [];
+export const qafChecks: DoctorCheck[] = [
+  {
+    title: 'QAF installation',
+    run: async () => {
+      // qaf doctor exits with 0 even when checks fail, so read its ✓/✗ lines
+      const output = await tryExec('qaf', ['doctor']);
+      if (output === undefined) {
+        return fail('QAF is not installed', {
+          fix: { command: 'uv tool install --python 3.11 git+https://github.com/elastic/qaf' },
         });
-        if (!failed.length) {
-          return pass(`QAF ${version} · qaf doctor passed`);
-        }
+      }
 
-        return fail(`QAF ${version} · qaf doctor failed: ${failed.join(', ')}`, {
-          ...(output.includes('Treatment:')
-            ? { fix: { command: 'qaf doctor --treat' } }
-            : { hint: 'run qaf doctor for details' }),
-        });
-      },
+      const version = output.match(/QAF:\s*(\S+)/)?.[1] ?? 'unknown version';
+      const failed = output.split('\n').flatMap((line) => {
+        const title = line.match(/^✗\s+(.+)/)?.[1];
+        return title ? [title] : [];
+      });
+      if (!failed.length) {
+        return pass(`QAF ${version} · qaf doctor passed`);
+      }
+
+      return fail(`QAF ${version} · qaf doctor failed: ${failed.join(', ')}`, {
+        ...(output.includes('Treatment:')
+          ? { fix: { command: 'qaf doctor --treat' } }
+          : { hint: 'run qaf doctor for details' }),
+      });
     },
-  ],
-};
+  },
+];

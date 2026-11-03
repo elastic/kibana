@@ -13,7 +13,7 @@ import Path from 'path';
 import chalk from 'chalk';
 import execa from 'execa';
 import { ES_SERVERLESS_DEFAULT_IMAGE, SERVERLESS_NODES, getUiamContainers } from '@kbn/es';
-import type { DoctorCheckGroup, Fix } from '../types';
+import type { DoctorCheck, Fix } from '../types';
 import { fail, pass, warn } from '../types';
 import { formatAge, formatBytes, getScoutServerPids, tildify, tryExec } from '../utils';
 
@@ -87,86 +87,89 @@ const resizeDockerDesktopFix = (cpus: number, memoryBytes: number): Fix | undefi
   };
 };
 
-export const dockerChecks: DoctorCheckGroup = {
-  title: 'Docker',
-  stopOnFailure: true,
-  checks: [
-    {
-      title: 'Docker daemon',
-      run: async () => {
-        const output = await tryExec('docker', ['info', '--format', '{{json .}}']);
-        if (!output) {
-          return fail('Docker is not running', { fix: startDockerFix() });
-        }
+const dockerDaemonCheck: DoctorCheck = {
+  title: 'Docker daemon',
+  arch: 'serverless',
+  run: async () => {
+    const output = await tryExec('docker', ['info', '--format', '{{json .}}']);
+    if (!output) {
+      return fail('Docker is not running', { fix: startDockerFix() });
+    }
 
-        const { ServerVersion, MemTotal, NCPU } = JSON.parse(output);
-        const details = `Docker ${ServerVersion} · ${NCPU} CPUs · ${formatBytes(MemTotal)} memory`;
-        if (NCPU >= RECOMMENDED_CPUS && MemTotal >= RECOMMENDED_MEMORY) {
-          return pass(details);
-        }
+    const { ServerVersion, MemTotal, NCPU } = JSON.parse(output);
+    const details = `Docker ${ServerVersion} · ${NCPU} CPUs · ${formatBytes(MemTotal)} memory`;
+    if (NCPU >= RECOMMENDED_CPUS && MemTotal >= RECOMMENDED_MEMORY) {
+      return pass(details);
+    }
 
-        const recommended = `${RECOMMENDED_CPUS} CPUs and ${RECOMMENDED_MEMORY_GB} GB RAM`;
-        const fix = resizeDockerDesktopFix(NCPU, MemTotal);
-        return warn(
-          `${details}, ${chalk.yellow(`multi-project serverless tests need ${recommended}`)}`,
-          {
-            fix,
-            hint: fix
-              ? 'restarts Docker Desktop and stops its containers'
-              : `Give Docker ${recommended} if this machine allows it (Docker Desktop settings → Resources)`,
-          }
-        );
-      },
-    },
-    {
-      title: 'Elasticsearch serverless image',
-      run: async () => {
-        const output = await tryExec('docker', [
-          'image',
-          'inspect',
-          ES_SERVERLESS_DEFAULT_IMAGE,
-          '--format',
-          '{{json .}}',
-        ]);
-        if (!output) {
-          return warn(`${ES_SERVERLESS_DEFAULT_IMAGE} is not pulled yet`, {
-            hint: 'If the pull fails, log in at https://docker-auth.elastic.co/github_auth',
-            fix: { command: `docker pull ${ES_SERVERLESS_DEFAULT_IMAGE}` },
-          });
-        }
-
-        const { Created, Size, Id } = JSON.parse(output);
-        return pass(
-          `${ES_SERVERLESS_DEFAULT_IMAGE} built ${formatAge(new Date(Created))} · ${formatBytes(
-            Size
-          )} · ${Id.slice(7, 19)}`
-        );
-      },
-    },
-    {
-      title: 'Leftover serverless containers',
-      run: async () => {
-        const names = [...SERVERLESS_NODES, ...getUiamContainers({ includeOAuth: true })].map(
-          ({ name }) => name
-        );
-        const running = ((await tryExec('docker', ['ps', '--format', '{{.Names}}'])) ?? '')
-          .split('\n')
-          .filter((name) => names.includes(name));
-
-        const scoutServerPids = running.length ? await getScoutServerPids() : [];
-        if (scoutServerPids.length) {
-          return pass(
-            `Serverless containers belong to the running Scout servers (PID ${scoutServerPids.join(
-              ', '
-            )})`
-          );
-        }
-        return running.length
-          ? warn(`Serverless containers are still running: ${running.join(', ')}`, {
-              fix: { command: `docker kill ${running.join(' ')}`, destructive: true },
-            })
-          : pass('No serverless containers running');
-      },
-    },
-  ],
+    const recommended = `${RECOMMENDED_CPUS} CPUs and ${RECOMMENDED_MEMORY_GB} GB RAM`;
+    const fix = resizeDockerDesktopFix(NCPU, MemTotal);
+    return warn(
+      `${details}, ${chalk.yellow(`multi-project serverless tests need ${recommended}`)}`,
+      {
+        fix,
+        hint: fix
+          ? 'restarts Docker Desktop and stops its containers'
+          : `Give Docker ${recommended} if this machine allows it (Docker Desktop settings → Resources)`,
+      }
+    );
+  },
 };
+
+export const dockerChecks: DoctorCheck[] = [
+  dockerDaemonCheck,
+  {
+    title: 'Elasticsearch serverless image',
+    arch: 'serverless',
+    dependsOn: dockerDaemonCheck,
+    run: async () => {
+      const output = await tryExec('docker', [
+        'image',
+        'inspect',
+        ES_SERVERLESS_DEFAULT_IMAGE,
+        '--format',
+        '{{json .}}',
+      ]);
+      if (!output) {
+        return warn(`${ES_SERVERLESS_DEFAULT_IMAGE} is not pulled yet`, {
+          hint: 'If the pull fails, log in at https://docker-auth.elastic.co/github_auth',
+          fix: { command: `docker pull ${ES_SERVERLESS_DEFAULT_IMAGE}` },
+        });
+      }
+
+      const { Created, Size, Id } = JSON.parse(output);
+      return pass(
+        `${ES_SERVERLESS_DEFAULT_IMAGE} built ${formatAge(new Date(Created))} · ${formatBytes(
+          Size
+        )} · ${Id.slice(7, 19)}`
+      );
+    },
+  },
+  {
+    title: 'Leftover serverless containers',
+    arch: 'serverless',
+    dependsOn: dockerDaemonCheck,
+    run: async () => {
+      const names = [...SERVERLESS_NODES, ...getUiamContainers({ includeOAuth: true })].map(
+        ({ name }) => name
+      );
+      const running = ((await tryExec('docker', ['ps', '--format', '{{.Names}}'])) ?? '')
+        .split('\n')
+        .filter((name) => names.includes(name));
+
+      const scoutServerPids = running.length ? await getScoutServerPids() : [];
+      if (scoutServerPids.length) {
+        return pass(
+          `Serverless containers belong to the running Scout servers (PID ${scoutServerPids.join(
+            ', '
+          )})`
+        );
+      }
+      return running.length
+        ? warn(`Serverless containers are still running: ${running.join(', ')}`, {
+            fix: { command: `docker kill ${running.join(' ')}`, destructive: true },
+          })
+        : pass('No serverless containers running');
+    },
+  },
+];

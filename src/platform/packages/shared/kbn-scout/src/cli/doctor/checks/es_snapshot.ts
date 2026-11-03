@@ -11,7 +11,7 @@ import Fs from 'fs';
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getSnapshotCacheFilename } from '@kbn/es';
-import type { DoctorCheckGroup } from '../types';
+import type { DoctorCheck } from '../types';
 import { pass, warn } from '../types';
 import { braces, formatAge, formatBytes, removePaths } from '../utils';
 
@@ -25,67 +25,64 @@ const readCacheDir = async () =>
     (file) => file.startsWith('elasticsearch-') && !file.endsWith('.meta')
   );
 
-export const esSnapshotChecks: DoctorCheckGroup = {
-  title: 'Elasticsearch snapshot',
-  checks: [
-    {
-      title: 'Cached snapshot',
-      run: async () => {
-        const version = await getKibanaVersion();
-        const filename = getSnapshotCacheFilename(version);
-        const path = Path.join(CACHE_DIR, filename);
-        const stats = await Fs.promises.stat(path).catch(() => undefined);
-        if (!stats) {
-          return warn(`Elasticsearch ${version}-SNAPSHOT is not cached`, {
-            hint: 'start-server also downloads it on the first run (~600 MB)',
-            fix: { command: 'node scripts/es snapshot --download-only' },
-          });
-        }
+export const esSnapshotChecks: DoctorCheck[] = [
+  {
+    title: 'Cached snapshot',
+    arch: 'stateful',
+    run: async () => {
+      const version = await getKibanaVersion();
+      const filename = getSnapshotCacheFilename(version);
+      const path = Path.join(CACHE_DIR, filename);
+      const stats = await Fs.promises.stat(path).catch(() => undefined);
+      if (!stats) {
+        return warn(`Elasticsearch ${version}-SNAPSHOT is not cached`, {
+          hint: 'start-server also downloads it on the first run (~600 MB)',
+          fix: { command: 'node scripts/es snapshot --download-only' },
+        });
+      }
 
-        // kbn-es stores the download time next to the archive
-        const meta = await Fs.promises.readFile(`${path}.meta`, 'utf8').catch(() => undefined);
-        const downloadedAt = meta ? new Date(JSON.parse(meta).ts) : stats.mtime;
-        return pass(
-          `${filename.replace(/\.(tar\.gz|zip)$/, '')} downloaded ${formatAge(
-            downloadedAt
-          )} · ${formatBytes(stats.size)}`
-        );
-      },
+      // kbn-es stores the download time next to the archive
+      const meta = await Fs.promises.readFile(`${path}.meta`, 'utf8').catch(() => undefined);
+      const downloadedAt = meta ? new Date(JSON.parse(meta).ts) : stats.mtime;
+      return pass(
+        `${filename.replace(/\.(tar\.gz|zip)$/, '')} downloaded ${formatAge(
+          downloadedAt
+        )} · ${formatBytes(stats.size)}`
+      );
     },
-    {
-      title: 'Other cached snapshots',
-      run: async () => {
-        const current = getSnapshotCacheFilename(await getKibanaVersion());
-        const others = (await readCacheDir()).filter((file) => file !== current);
-        if (!others.length) {
-          return pass('No snapshots for other versions in cache');
-        }
+  },
+  {
+    title: 'Other cached snapshots',
+    arch: 'stateful',
+    run: async () => {
+      const current = getSnapshotCacheFilename(await getKibanaVersion());
+      const others = (await readCacheDir()).filter((file) => file !== current);
+      if (!others.length) {
+        return pass('No snapshots for other versions in cache');
+      }
 
-        const sizes = await Promise.all(
-          others.map(async (file) => (await Fs.promises.stat(Path.join(CACHE_DIR, file))).size)
-        );
-        const versions = others.map(
-          (file) => file.match(/^elasticsearch-(.+?)-SNAPSHOT/)?.[1] ?? file
-        );
-        return warn(
-          `Snapshots for ${versions.join(', ')} use ${formatBytes(
-            sizes.reduce((a, b) => a + b, 0)
-          )}`,
-          {
-            hint: 'Other branches may still need them',
-            fix: {
-              command: `rm -f .es/cache/elasticsearch-${braces(versions)}-SNAPSHOT-*`,
-              destructive: true,
-              run: () =>
-                removePaths(
-                  others
-                    .flatMap((file) => [file, `${file}.meta`])
-                    .map((file) => Path.join(CACHE_DIR, file))
-                ),
-            },
-          }
-        );
-      },
+      const sizes = await Promise.all(
+        others.map(async (file) => (await Fs.promises.stat(Path.join(CACHE_DIR, file))).size)
+      );
+      const versions = others.map(
+        (file) => file.match(/^elasticsearch-(.+?)-SNAPSHOT/)?.[1] ?? file
+      );
+      return warn(
+        `Snapshots for ${versions.join(', ')} use ${formatBytes(sizes.reduce((a, b) => a + b, 0))}`,
+        {
+          hint: 'Other branches may still need them',
+          fix: {
+            command: `rm -f .es/cache/elasticsearch-${braces(versions)}-SNAPSHOT-*`,
+            destructive: true,
+            run: () =>
+              removePaths(
+                others
+                  .flatMap((file) => [file, `${file}.meta`])
+                  .map((file) => Path.join(CACHE_DIR, file))
+              ),
+          },
+        }
+      );
     },
-  ],
-};
+  },
+];

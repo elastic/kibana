@@ -9,7 +9,7 @@
 
 import Net from 'net';
 import execa from 'execa';
-import type { DoctorCheck, DoctorCheckGroup, Fix } from '../types';
+import type { DoctorCheck, Fix } from '../types';
 import { fail, pass } from '../types';
 import { defaultConfig } from '../../../servers/configs/config_sets/default/stateful/base.config';
 import { getScoutServerPids, tryExec } from '../utils';
@@ -72,9 +72,7 @@ const portCheck = (name: string, port: number): DoctorCheck => ({
     const usedBy = owner ? ` by ${owner.command} (PID ${owner.pid})` : '';
     if (scoutServerPids.length) {
       return fail(
-        `${name} port ${port} is used${usedBy}, Scout servers are already running (PID ${scoutServerPids.join(
-          ', '
-        )})`,
+        `${name} port ${port} is used by Scout servers (PID ${scoutServerPids.join(', ')})`,
         {
           hint: 'stops the running Scout servers, say no to keep using them',
           fix: await stopScoutServersFix(scoutServerPids),
@@ -92,10 +90,7 @@ const portCheck = (name: string, port: number): DoctorCheck => ({
   },
 });
 
-export const localServerChecks: DoctorCheckGroup = {
-  title: 'Local servers',
-  checks: [
-    portCheck('Kibana', Number(defaultConfig.servers.kibana.port)),
-    portCheck('Elasticsearch', Number(defaultConfig.servers.elasticsearch.port)),
-  ],
-};
+export const localServerChecks: DoctorCheck[] = [
+  portCheck('Kibana', Number(defaultConfig.servers.kibana.port)),
+  portCheck('Elasticsearch', Number(defaultConfig.servers.elasticsearch.port)),
+];
