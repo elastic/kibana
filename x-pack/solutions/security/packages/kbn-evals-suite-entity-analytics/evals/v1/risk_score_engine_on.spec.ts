@@ -22,10 +22,10 @@ evaluate.describe(
       await installEntityStoreV2AndWait({ supertest, log });
       await bulkIndexEntities({
         esClient,
-        entities: Array.from({ length: 10 }, (_, index) => ({
+        entities: Array.from({ length: 15 }, (_, index) => ({
           euid: `user:user-${index}`,
-          riskScoreNorm: 95 - index * 8,
-          riskLevel: index < 2 ? 'Critical' : index < 5 ? 'High' : 'Low',
+          riskScoreNorm: 95 - index * 5,
+          riskLevel: index < 3 ? 'Critical' : index < 8 ? 'High' : 'Low',
         })),
       });
       const day = 24 * 60 * 60 * 1000;
@@ -41,9 +41,10 @@ evaluate.describe(
     });
 
     evaluate.afterAll(async ({ esClient, log, supertest }) => {
-      await esClient.indices
-        .delete({ index: 'risk-score.risk-score-default' })
-        .catch(() => undefined);
+      await esClient.indices.deleteDataStream(
+        { name: 'risk-score.risk-score-default' },
+        { ignore: [404] }
+      );
       await deleteEntityEngines({ supertest, log });
     });
 

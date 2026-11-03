@@ -129,7 +129,7 @@ export async function indexRiskScoreHistory({
   if (points.length === 0) return;
 
   const operations = points.flatMap((point) => [
-    { index: { _index: `risk-score.risk-score-${namespace}` } },
+    { create: { _index: `risk-score.risk-score-${namespace}` } },
     {
       '@timestamp': point.timestamp,
       [entityType]: {
@@ -144,7 +144,14 @@ export async function indexRiskScoreHistory({
     },
   ]);
 
-  await esClient.bulk({ refresh: true, operations });
+  const response = await esClient.bulk({ refresh: true, operations });
+  if (response.errors) {
+    const failures = response.items.flatMap((item) => {
+      const error = item.create?.error;
+      return error ? [error.reason ?? error.type] : [];
+    });
+    throw new Error(`Failed to seed risk score history: ${failures.join('; ')}`);
+  }
 }
 
 export async function deleteWatchlistsByName({
@@ -298,13 +305,14 @@ export async function deleteEntityEngines({
   supertest: SuperTest.Agent;
   log: ScoutLogger;
 }): Promise<void> {
-  try {
-    await supertest
-      .post('/api/security/entity_store/uninstall')
-      .set(MUTATING_HEADERS)
-      .send({ delete_data: true });
-  } catch (err) {
-    log.warning(`deleteEntityEngines failed during teardown: ${(err as Error).message}`);
+  const res = await supertest
+    .post('/api/security/entity_store/uninstall')
+    .set(MUTATING_HEADERS)
+    .send({});
+  if (res.status !== 200) {
+    log.warning(
+      `deleteEntityEngines failed during teardown: ${res.status} ${JSON.stringify(res.body)}`
+    );
   }
 }
 
