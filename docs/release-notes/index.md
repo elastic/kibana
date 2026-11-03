@@ -137,7 +137,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Rename the built-in Agent Builder dashboards skill from `dashboard-management` to `dashboards`, so you select it with `/dashboards` in chat. Custom agents that list `dashboard-management` no longer load the skill, and the built-in skill overrides a custom skill with the ID `dashboards` [#294574]({{kib-pull}}294574).
 * Filter the results of the dashboards and links list API endpoints by tag name. Use the `tag_names` and `excluded_tag_names` parameters [#278874]({{kib-pull}}278874).
 * Add an API to manage Links panels that you save to the library [#268783]({{kib-pull}}268783).
-* Add a badge to visualization, Discover session, Vega, and custom content panels when {{esql}} approximation is applied to the results [#288709]({{kib-pull}}288709).
+* Add a badge to visualization, Discover session, Vega, and custom content panels when **Fast mode** ({{esql}} approximation) is applied to the results [#288709]({{kib-pull}}288709).
 * Add multiple layers, including annotation and reference line layers, to XY charts that use {{esql}} queries [#285350]({{kib-pull}}285350).
 * Add a gradient fill option to area charts. New area charts use the gradient fill by default, and existing charts keep the solid fill [#277546]({{kib-pull}}277546), [#297161]({{kib-pull}}297161).
 * Add a **Progress bar** cell display option to tables [#272407]({{kib-pull}}272407).
@@ -178,7 +178,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Raise the limit for a string in a request body from `10000` to `100000` characters when you copy a request as a curl command in Console [#287526]({{kib-pull}}287526).
 
 **Discover**:
-* Add the Discover sessions API. Use `/api/discover_sessions` to create, read, update, and delete Discover sessions, including {{esql}} and data view tabs, metrics tabs, and table settings [#297958]({{kib-pull}}297958).
+* Add the Discover sessions API, which is generally available. Use `/api/discover_sessions` to create, read, update, and delete Discover sessions, including {{esql}} and data view tabs, metrics tabs, and table settings [#297958]({{kib-pull}}297958).
 * Make {{esql}} the default query mode when you open Discover [#297980]({{kib-pull}}297980).
 * Add a **JSON** view mode to the Discover results table [#289802]({{kib-pull}}289802).
 * Add the `discover:defaultEsqlQuery` advanced setting to override the default {{esql}} query [#281319]({{kib-pull}}281319).
@@ -186,11 +186,11 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Show a more prominent **Search** button in {{esql}} mode when the query differs from the query that produced the displayed results [#296621]({{kib-pull}}296621).
 * Show recommended query cards on the {{esql}} empty state page [#294685]({{kib-pull}}294685).
 * Show a new Discover tab as an empty page until you run a query [#289032]({{kib-pull}}289032).
-* Keep {{esql}} approximation turned on for a Discover session tab when you save and reopen the session [#282776]({{kib-pull}}282776).
-* Show an indicator in Discover when approximation is applied to an {{esql}} query [#291464]({{kib-pull}}291464).
+* Keep **Fast mode** ({{esql}} approximation) turned on for a Discover session tab when you save and reopen the session [#282776]({{kib-pull}}282776).
+* Show an indicator in Discover when **Fast mode** is applied to a query [#291464]({{kib-pull}}291464).
 * Replace the **Documents**, **Patterns**, and **Field statistics** tabs with a **View as** dropdown in the Discover toolbar [#282141]({{kib-pull}}282141).
 * Add a **Find similar values** button to the Discover table that analyzes the pattern of a single document, and add it to the Discover summary column in Observability [#249110]({{kib-pull}}249110), [#297525]({{kib-pull}}297525).
-* Make the Discover table **Summary** column optional [#283538]({{kib-pull}}283538).
+* Add a switch to show the **Summary** column together with the selected columns in the Discover table [#283538]({{kib-pull}}283538).
 * Reorder the selected fields from the sidebar, with mouse or keyboard [#296098]({{kib-pull}}296098).
 * Add a button to the field list that deselects all selected fields [#292355]({{kib-pull}}292355).
 * Highlight matches in Discover results when you use the {{esql}} `HIGHLIGHT` command, instead of showing the raw `<em>` tags as plain text [#290050]({{kib-pull}}290050).
@@ -203,7 +203,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Show up to 10,000 matching indices, up from 100, when you create a data view [#285899]({{kib-pull}}285899).
 * Add the data views API in `/api/data_views/v2`, which follows REST conventions [#298114]({{kib-pull}}298114).
 * Show a warning in the data view editor when the configured time field doesn't exist, and stop showing an empty time field column in Discover [#297060]({{kib-pull}}297060).
-* Create an {{esql}} view from the {{esql}} editor in Discover and in dashboards. Find the option in the editor menu and in the query history [#294468]({{kib-pull}}294468).
 * Show the time range selector, turned off, in Discover and Dashboards when a KQL or Lucene query has no time field configured [#286858]({{kib-pull}}286858).
 * Stop rounding relative time ranges, such as **Last 15 minutes**, by default in the time range selector. You can turn rounding on again in the time range selector settings [#280105]({{kib-pull}}280105).
 * Increase the default value of the `search:timeout` advanced setting from 10 minutes to 20 minutes [#297511]({{kib-pull}}297511).
@@ -232,6 +231,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * [{{esql}} Data Federation](elasticsearch://reference/query-languages/esql/esql-data-federation.md) (technical preview) is now [enabled by default](elasticsearch://reference/query-languages/esql/esql-data-federation.md#enable-the-feature) in {{es}} and {{kib}}. The management UI adds a wizard for creating datasets, federated identity authentication for Amazon S3 data sources on {{ech}}, and data source privileges in the role editor.
 * Redesign the {{esql}} editor. The time range selector moves next to the editor, the field where you filter with KQL or describe a query in natural language stays visible at the top in Discover, that field no longer shows the sources dropdown in KQL mode, and a **Stop** button appears while AI generates a query [#267922]({{kib-pull}}267922).
 * Add {{esql}} views to the data source browser in the {{esql}} editor, with a filter that shows only views [#292608]({{kib-pull}}292608).
+* Create an {{esql}} view from the {{esql}} editor in Discover and in dashboards. Find the option in the editor menu and in the query history [#294468]({{kib-pull}}294468).
 * Expand the {{esql}} editor to fit a long query when you paste one or when AI inserts one [#279712]({{kib-pull}}279712).
 
 **{{kib}} platform**:
