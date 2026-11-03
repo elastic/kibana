@@ -23,7 +23,7 @@ import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
 import { type Filter, type ProjectRouting, buildExistsFilter } from '@kbn/es-query';
-import { getGeohexPrecision, getGeotilePrecision } from '@kbn/geo-precision';
+import { getGeohexPrecision, getGeotilePrecision, GRID_RESOLUTION } from '@kbn/geo-precision';
 import { makeESBbox } from '../../../../common/elasticsearch_util';
 import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -32,7 +32,6 @@ import {
   ES_GEO_FIELD_TYPE,
   GEOCENTROID_AGG_NAME,
   GEOTILE_GRID_AGG_NAME,
-  GRID_RESOLUTION,
   MVT_GETGRIDTILE_API_PATH,
   RENDER_AS,
   SOURCE_TYPES,

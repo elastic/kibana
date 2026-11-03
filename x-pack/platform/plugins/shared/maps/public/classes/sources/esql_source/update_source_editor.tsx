@@ -17,10 +17,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_GRID_RESOLUTION } from '@kbn/geo-precision';
+import type { GRID_RESOLUTION } from '@kbn/geo-precision';
 import type { OnSourceChangeArgs } from '../source';
 import { ForceRefreshCheckbox } from '../../../components/force_refresh_checkbox';
 import { hasGeoPrecisionParam } from './esql_utils';
-import type { GRID_RESOLUTION } from '../../../../common/constants';
 import { ESQLEditor } from './esql_editor';
 import { GeoPrecisionResolutionEditor } from './geo_precision_resolution_editor';
 import { NarrowByMapBounds, NarrowByTime } from './narrow_by_field';

@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFormRow, EuiRange } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { GRID_RESOLUTION } from '../../../../common/constants';
+import { GRID_RESOLUTION } from '@kbn/geo-precision';
 
 const RESOLUTIONS = [
   GRID_RESOLUTION.COARSE,

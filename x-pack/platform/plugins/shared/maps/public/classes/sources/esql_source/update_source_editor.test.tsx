@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UpdateSourceEditor } from './update_source_editor';
-import { GRID_RESOLUTION } from '../../../../common/constants';
+import { GRID_RESOLUTION } from '@kbn/geo-precision';
 import { ESQLSource } from './esql_source';
 
 const mockGetDataViewFields = jest.fn().mockResolvedValue({

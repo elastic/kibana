@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import type { FeatureCollection } from 'geojson';
-import { GRID_RESOLUTION } from '@kbn/geo-precision';
 
 export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
@@ -172,8 +171,6 @@ export enum RENDER_AS {
   GRID = 'grid',
   HEX = 'hex',
 }
-
-export { GRID_RESOLUTION };
 
 export const GEOTILE_GRID_AGG_NAME = 'gridSplit';
 export const GEOCENTROID_AGG_NAME = 'gridCentroid';

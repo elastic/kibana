@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { GEOHEX_LEVEL_DELTAS, GEOTILE_LEVEL_DELTAS } from '@kbn/geo-precision';
-import type { GRID_RESOLUTION } from '../../../../common/constants';
+import type { GRID_RESOLUTION } from '@kbn/geo-precision';
 import { RENDER_AS } from '../../../../common/constants';
 
 export function getGeoGridPrecisionResolutionDelta(

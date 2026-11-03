@@ -14,13 +14,8 @@ import {
   getSearchService,
 } from '../../../kibana_services';
 import { ESGeoGridSource } from './es_geo_grid_source';
-import {
-  APP_ID,
-  ES_GEO_FIELD_TYPE,
-  GRID_RESOLUTION,
-  RENDER_AS,
-  SOURCE_TYPES,
-} from '../../../../common/constants';
+import { GRID_RESOLUTION } from '@kbn/geo-precision';
+import { APP_ID, ES_GEO_FIELD_TYPE, RENDER_AS, SOURCE_TYPES } from '../../../../common/constants';
 import type { SearchSource } from '@kbn/data-plugin/public';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 

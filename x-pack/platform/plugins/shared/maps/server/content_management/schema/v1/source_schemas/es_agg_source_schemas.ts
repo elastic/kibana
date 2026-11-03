@@ -7,13 +7,9 @@
 
 import { z } from '@kbn/zod';
 
+import { GRID_RESOLUTION } from '@kbn/geo-precision';
 import { SOURCE_TYPES } from '../../../../../common';
-import {
-  AGG_TYPE,
-  GRID_RESOLUTION,
-  MASK_OPERATOR,
-  RENDER_AS,
-} from '../../../../../common/constants';
+import { AGG_TYPE, MASK_OPERATOR, RENDER_AS } from '../../../../../common/constants';
 import { BaseESSourceSchema } from './es_source_schemas';
 
 const aggMaskSchema = z

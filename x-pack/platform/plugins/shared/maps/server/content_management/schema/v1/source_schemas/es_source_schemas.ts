@@ -6,10 +6,9 @@
  */
 
 import { z, lazySchema } from '@kbn/zod';
-import { DEFAULT_GRID_RESOLUTION } from '@kbn/geo-precision';
+import { DEFAULT_GRID_RESOLUTION, GRID_RESOLUTION } from '@kbn/geo-precision';
 import { SortDirection } from '@kbn/data-plugin/common/search';
 import { SCALING_TYPES, SOURCE_TYPES } from '../../../../../common';
-import { GRID_RESOLUTION } from '../../../../../common/constants';
 
 const applyForceRefreshSchema = z.boolean().default(true).optional().meta({
   description: `When true, results are re-fetched when page's automatic refresh fires or user clicks 'Refresh'.`,

@@ -6,7 +6,8 @@
  */
 
 import { of } from 'rxjs';
-import { GRID_RESOLUTION, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import { GRID_RESOLUTION } from '@kbn/geo-precision';
+import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { ESQLSource } from './esql_source';
 import type { DataRequest } from '../../util/data_request';
 

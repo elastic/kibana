@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { GRID_RESOLUTION, RENDER_AS } from '../../../../common/constants';
+import { GRID_RESOLUTION } from '@kbn/geo-precision';
+import { RENDER_AS } from '../../../../common/constants';
 import { getGeoGridPrecisionResolutionDelta } from './get_geo_grid_precision';
 
 describe('getGeoGridPrecisionResolutionDelta', () => {
