@@ -17,12 +17,12 @@ import {
   CONNECTOR_MANIFEST_PATH,
   ELASTIC_MANIFEST_PATH,
 } from './connector_docs';
-import { writeElasticManifest } from './elastic_manifest';
+import { renderElasticManifest, writeElasticManifest } from './elastic_manifest';
 
 /**
- * Tracks per-conversation workspace state (connector IDs) and writes the connector manifest (and,
- * when configured, the Elasticsearch telemetry manifest) to the sandbox whenever the session is
- * reset or the allowed connector list changes.
+ * Tracks per-conversation workspace state (connector IDs) and writes the connector manifest and
+ * the Elasticsearch guide (naming the configured telemetry connector when the agent may use it)
+ * to the sandbox whenever the session is reset or the allowed connector list changes.
  *
  * Create one instance per plugin lifecycle and share it across all sandbox tools.
  */
@@ -35,7 +35,7 @@ export const createSandboxWorkspaceManager = ({
   logger,
 }: {
   getDeps: () => { actions?: ActionsPluginStart };
-  /** When set, `/workspace/.connector-docs/elastic.md` is (re-)seeded alongside the connector manifest. */
+  /** When set and usable by the agent, `/workspace/.connector-docs/elastic.md` names this connector. */
   telemetryConnectorId?: string;
   telemetryReadableIndices?: string;
   telemetryTargets?: TelemetryTarget[];
@@ -69,8 +69,8 @@ export const createSandboxWorkspaceManager = ({
       // Agents without a bound target (the assistant, custom agents) can use several telemetry
       // connectors; infer guidance for an unambiguous source, else fall back to the legacy
       // `telemetry_connector_id`, the same default an investigation without a named target uses.
-      // With several named targets and no legacy default, `elastic.md` stays unseeded and the
-      // agent picks one from `connectors.md`.
+      // With several named targets and no legacy default, `elastic.md` names none and the agent
+      // picks one from `connectors.md`.
       const inferredTarget =
         new Set(allowedTargets.map(({ connectorId }) => connectorId)).size === 1
           ? allowedTargets[0]
@@ -131,12 +131,13 @@ export const createSandboxWorkspaceManager = ({
 
       if (!canUseTelemetry) {
         lastWorkspaceKeys.delete(session);
-        // Clear previously seeded hints on revocation; a failed clear must block file access.
+        // The generic guide replaces previously seeded telemetry hints; a failed write must block
+        // file access.
         await session.mkdirs([CONNECTOR_DOCS_ROOT]);
         const [result] = await session.writeFiles([
           {
             path: ELASTIC_MANIFEST_PATH,
-            content: Buffer.from('No telemetry connector is available.\n'),
+            content: Buffer.from(renderElasticManifest()),
           },
         ]);
         if (!result?.success) throw new Error('Failed to clear sandbox telemetry guidance');
