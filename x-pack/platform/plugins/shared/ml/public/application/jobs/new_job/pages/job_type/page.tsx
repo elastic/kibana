@@ -234,6 +234,24 @@ export const Page: FC = () => {
       }),
       id: 'mlJobTypeLinkrareJob',
     },
+    ...(isSuggestJobsAvailable
+      ? [
+          {
+            onClick: openSuggestJobsFlyout,
+            iconType: 'sparkles',
+            title: i18n.translate('xpack.ml.newJob.wizard.jobType.suggestJobsCardTitle', {
+              defaultMessage: 'Suggest jobs',
+            }),
+            description: i18n.translate(
+              'xpack.ml.newJob.wizard.jobType.suggestJobsCardDescription',
+              {
+                defaultMessage: 'Analyze your data and get anomaly detection jobs which suit it.',
+              }
+            ),
+            id: 'mlJobTypeLinkSuggestJobs',
+          },
+        ]
+      : []),
   ];
 
   if (hasGeoFields) {
@@ -319,43 +337,6 @@ export const Page: FC = () => {
 
         <EuiSpacer size="xxl" />
       </div>
-
-      {isSuggestJobsAvailable && (
-        <>
-          <EuiTitle size="s">
-            <h2>
-              <FormattedMessage
-                id="xpack.ml.newJob.wizard.jobType.suggestJobsTitle"
-                defaultMessage="Get suggestions"
-              />
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="m" />
-
-          <EuiFlexGrid gutterSize="l" columns={4}>
-            <EuiFlexItem>
-              <LinkCard
-                data-test-subj="mlJobTypeLinkSuggestJobs"
-                onClick={openSuggestJobsFlyout}
-                icon={<EuiIcon size="xl" type="sparkles" aria-hidden={true} />}
-                title={i18n.translate('xpack.ml.newJob.wizard.jobType.suggestJobsCardTitle', {
-                  defaultMessage: 'Suggest jobs',
-                })}
-                description={i18n.translate(
-                  'xpack.ml.newJob.wizard.jobType.suggestJobsCardDescription',
-                  {
-                    defaultMessage:
-                      'Analyze your data and get anomaly detection jobs which suit it.',
-                  }
-                )}
-                isDisabled={!isTimeBasedIndex}
-              />
-            </EuiFlexItem>
-          </EuiFlexGrid>
-
-          <EuiSpacer size="xxl" />
-        </>
-      )}
 
       <EuiTitle size="s">
         <h2>
