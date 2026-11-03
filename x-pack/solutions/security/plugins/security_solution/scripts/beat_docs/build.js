@@ -21,7 +21,13 @@ const tar = require('tar');
 const zlib = require('zlib');
 
 const OUTPUT_DIRECTORY = resolve('scripts', 'beat_docs');
-const OUTPUT_SERVER_DIRECTORY = resolve('../timelines', 'server', 'utils', 'beat_schema');
+const OUTPUT_SERVER_DIRECTORY = resolve(
+  'server',
+  'lib',
+  'timelines_server',
+  'utils',
+  'beat_schema'
+);
 const BEATS_VERSION = '8.0.0-rc1';
 
 const beats = [

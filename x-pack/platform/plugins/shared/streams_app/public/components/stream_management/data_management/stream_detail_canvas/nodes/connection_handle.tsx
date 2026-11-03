@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import type { Position } from '@xyflow/react';
-import { Handle } from '@xyflow/react';
+import { Handle, useNodeId } from '@xyflow/react';
 import { i18n } from '@kbn/i18n';
 
 export const CONNECTION_HANDLE_CLASS = 'streamsConnectionHandle';
@@ -16,48 +16,60 @@ export const NODE_HANDLE_CLASS = 'streamsNodeHandle';
 
 const ConnectionTargetsContext = createContext<ReadonlySet<string> | null>(null);
 
-/** Destination ids that can accept the line currently being dragged. */
+/** Node ids that can accept the line currently being dragged. */
 export const ConnectionTargetsProvider = ConnectionTargetsContext.Provider;
 
 interface ConnectionHandleProps {
+  /** Distinguishes several handles of the same type on one node. */
+  id?: string;
   type: 'source' | 'target';
   position: Position;
   /** Configured unit nodes can start or receive a pipeline connection. */
   isConnectable: boolean;
-  /** Destination id, used to highlight handles that can receive the dragged line. */
-  destinationId?: string;
+  /**
+   * Whether a new line can be dragged out of a source handle. Defaults to
+   * `isConnectable`. Turn off when the node already has its one outgoing line,
+   * which stays movable.
+   */
+  isConnectableStart?: boolean;
   /** Overrides the label of a handle that starts lines. */
   connectAriaLabel?: string;
 }
 
 export function ConnectionHandle({
+  id,
   type,
   position,
   isConnectable,
-  destinationId,
+  isConnectableStart = isConnectable,
   connectAriaLabel,
 }: ConnectionHandleProps) {
+  const nodeId = useNodeId();
   const connectionTargets = useContext(ConnectionTargetsContext);
-  const canStart = type === 'source' && isConnectable;
+  const canStart = type === 'source' && isConnectable && isConnectableStart;
+  const canTarget = type === 'target' && isConnectable;
   const highlighted =
-    type === 'target' &&
-    destinationId !== undefined &&
-    connectionTargets?.has(destinationId) === true;
-  const className = [
-    isConnectable ? NODE_HANDLE_CLASS : undefined,
-    isConnectable ? CONNECTION_HANDLE_CLASS : undefined,
-    highlighted ? 'streamsConnectionTarget' : undefined,
-  ]
-    .filter((name) => name !== undefined)
-    .join(' ');
+    type === 'target' && nodeId !== null && connectionTargets?.has(nodeId) === true;
+  const className = useMemo(
+    () =>
+      [
+        isConnectable && isConnectableStart ? NODE_HANDLE_CLASS : undefined,
+        canTarget || canStart ? CONNECTION_HANDLE_CLASS : undefined,
+        highlighted ? 'streamsConnectionTarget' : undefined,
+      ]
+        .filter((name) => name !== undefined)
+        .join(' '),
+    [isConnectable, isConnectableStart, canTarget, canStart, highlighted]
+  );
 
   return (
     <Handle
+      id={id}
       type={type}
       position={position}
       isConnectable={isConnectable}
       isConnectableStart={canStart}
-      isConnectableEnd={type === 'target' && isConnectable}
+      isConnectableEnd={canTarget}
       className={className || undefined}
       aria-label={
         type === 'source'
