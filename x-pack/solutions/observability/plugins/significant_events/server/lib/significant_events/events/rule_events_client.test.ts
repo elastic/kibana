@@ -1208,9 +1208,11 @@ describe('RuleEventsClient', () => {
       ...overrides,
     });
     const makeWriter = () =>
-      ({ createAlertEvent: jest.fn().mockResolvedValue(undefined) } as jest.Mocked<
-        Pick<AlertEventsClientApi, 'createAlertEvent'>
-      >);
+      ({
+        createAlertEvent: jest
+          .fn()
+          .mockResolvedValue({ group_hash: 'hash-1', alert_id: 'alert-1' }),
+      } as jest.Mocked<Pick<AlertEventsClientApi, 'createAlertEvent'>>);
     const clientWith = ({
       head,
       writer,
@@ -1225,13 +1227,14 @@ describe('RuleEventsClient', () => {
         { getAlertEventsClient: async () => writer as AlertEventsClientApi, emitTrigger }
       );
 
-    it('createEvent writes the version without reading the head, and notifies its creation', async () => {
+    it('createEvent writes without reading the head, returns its series identity, and notifies its creation', async () => {
       const writer = makeWriter();
       const emitTrigger = jest.fn();
       const client = clientWith({ writer, emitTrigger });
 
-      await client.createEvent({ event: version() });
+      const result = await client.createEvent({ event: version() });
 
+      expect(result).toEqual({ groupHash: 'hash-1', alertId: 'alert-1' });
       expect(writer.createAlertEvent).toHaveBeenCalledWith(
         expect.objectContaining({ fingerprint: 'agent-event-1' })
       );

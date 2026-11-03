@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SignificantEventsServer } from '../../../types';
 import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
 import type { GetScopedClients } from '../../../routes/types';
@@ -88,5 +89,90 @@ describe('event_status_update tool', () => {
     expect(assertCanManageSignificantEvents).toHaveBeenCalledWith(
       expect.objectContaining({ request: expect.anything() })
     );
+  });
+
+  describe('alert identity telemetry', () => {
+    const run = async (trackAgentToolEventStatusUpdate = jest.fn()) => {
+      const getScopedClients = jest.fn().mockResolvedValue({
+        getEventSearchClient: jest.fn().mockReturnValue({}),
+        licensing: {},
+      });
+      const tool = createEventStatusUpdateTool({
+        getScopedClients: getScopedClients as unknown as GetScopedClients,
+        server: {} as SignificantEventsServer,
+        logger: loggingSystemMock.createLogger(),
+        telemetry: { trackAgentToolEventStatusUpdate } as never,
+      });
+      const context = createMockToolContext();
+      context.request = httpServerMock.createKibanaRequest({ spaceId: 'space-a' });
+      const result = await invokeHandler(
+        tool as never,
+        { event_id: 'event-1', status: 'inactive' },
+        context
+      );
+      return { result, payload: trackAgentToolEventStatusUpdate.mock.calls[0]?.[0] };
+    };
+
+    const identity = {
+      alert_source: 'elastic.significant_events',
+      fingerprint: 'event-1',
+      space_id: 'space-a',
+    };
+
+    beforeEach(() => {
+      (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+      (assertCanManageSignificantEvents as jest.Mock).mockResolvedValue(undefined);
+    });
+
+    it('reports the updated event identity', async () => {
+      (updateEventStatusToolHandler as jest.Mock).mockResolvedValue({
+        event_id: 'event-1',
+        updated: 1,
+        ignored: 0,
+        status: 'inactive',
+      });
+
+      const { payload } = await run();
+
+      expect(payload).toEqual({
+        ...identity,
+        success: true,
+        event_id: 'event-1',
+        status: 'inactive',
+      });
+    });
+
+    it('keeps the caller-named event as fingerprint when the update fails', async () => {
+      (updateEventStatusToolHandler as jest.Mock).mockRejectedValue(new Error('index unavailable'));
+
+      const { payload } = await run();
+
+      expect(payload).toEqual({
+        ...identity,
+        success: false,
+        event_id: 'event-1',
+        status: 'inactive',
+        error_message: 'index unavailable',
+      });
+    });
+
+    it('keeps the update result when telemetry throws', async () => {
+      (updateEventStatusToolHandler as jest.Mock).mockResolvedValue({
+        event_id: 'event-1',
+        updated: 1,
+        ignored: 0,
+        status: 'inactive',
+      });
+
+      const { result } = await run(
+        jest.fn().mockImplementation(() => {
+          throw new Error('telemetry unavailable');
+        })
+      );
+
+      expect(result).toEqual(
+        expect.objectContaining({ results: [expect.objectContaining({ type: 'other' })] })
+      );
+    });
   });
 });
