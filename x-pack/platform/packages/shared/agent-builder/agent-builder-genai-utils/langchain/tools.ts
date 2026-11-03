@@ -232,6 +232,16 @@ const getToolEventConverter = ({ toolId, toolCallId }: { toolId: string; toolCal
         },
       };
     }
+    if (toolEvent.type === ChatEventType.browserToolCall) {
+      return {
+        type: ChatEventType.browserToolCall,
+        data: {
+          ...toolEvent.data,
+          tool_id: toolId,
+          tool_call_id: toolCallId,
+        },
+      };
+    }
 
     // @ts-expect-error all possible subtypes are handled
     throw new Error(`Invalid tool call type ${toolEvent.type}`);

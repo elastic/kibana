@@ -456,6 +456,7 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
     events: {
       reportProgress: jest.fn(),
       sendUiEvent: jest.fn(),
+      emitBrowserToolCall: jest.fn(),
     },
     logger: loggerMock.create(),
     prompts: createToolPromptManagerMock(),

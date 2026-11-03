@@ -32,6 +32,31 @@ describe('Event utilities', () => {
     });
   });
 
+  describe('emitBrowserToolCall', () => {
+    it('emitBrowserToolCall forwards a browser_tool_call event with client_id and expires_at', () => {
+      const mockEventHandler = jest.fn();
+      const emitter = createToolEventEmitter({
+        eventHandler: mockEventHandler,
+        context: { runId: 'test-run-id', stack: [] },
+      });
+
+      emitter.emitBrowserToolCall({
+        params: { foo: 'bar' },
+        clientId: 'client-1',
+        expiresAt: '2026-01-01T00:00:00.000Z',
+      });
+
+      expect(mockEventHandler).toHaveBeenCalledWith({
+        type: ChatEventType.browserToolCall,
+        data: {
+          params: { foo: 'bar' },
+          client_id: 'client-1',
+          expires_at: '2026-01-01T00:00:00.000Z',
+        },
+      });
+    });
+  });
+
   describe('createAgentEventEmitter', () => {
     it('should emit events directly to the event handler when provided', () => {
       const mockEventHandler = jest.fn();

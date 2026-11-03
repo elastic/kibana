@@ -258,6 +258,18 @@ describe('runTool', () => {
     );
   });
 
+  it('tool handler context exposes the runner abort signal', async () => {
+    const abortSignal = new AbortController().signal;
+    const manager = new RunnerManager({ ...runnerDeps, abortSignal });
+
+    await runTool({
+      toolExecutionParams: { toolId: 'test-tool', toolParams: { foo: 'bar' } },
+      parentManager: manager,
+    });
+
+    expect(toolHandler.mock.lastCall![1].abortSignal).toBe(abortSignal);
+  });
+
   it('records attachment changes made by the tool handler under its tool call id', async () => {
     const attachmentStateManager = createAttachmentStateManager([], {
       getTypeDefinition: () =>
