@@ -215,8 +215,7 @@ export function NightshiftOnboarding({
     },
     investigate: {
       status: step === 'investigate' ? 'current' : latestInvestigation ? 'complete' : 'disabled',
-      onClick:
-        isConnected && step !== 'investigate' ? () => setStepOverride('investigate') : undefined,
+      onClick: step === 'automate' ? () => setStepOverride('investigate') : undefined,
       hint:
         step === 'investigate' && execution?.status === 'running'
           ? i18n.translate('xpack.nightshift.onboarding.steps.analyzingHint', {
@@ -226,10 +225,6 @@ export function NightshiftOnboarding({
     },
     automate: {
       status: step === 'automate' ? 'current' : 'disabled',
-      onClick:
-        latestInvestigation && isConnected && step !== 'automate'
-          ? () => setStepOverride(undefined)
-          : undefined,
     },
   };
 
@@ -361,7 +356,7 @@ export function NightshiftOnboarding({
     >
       <NightshiftHeader title={HERO_TITLES[step]} isGreetingInline greetingName={greetingName} />
       <EuiSpacer size="l" />
-      {(step === 'enable' || (step === 'connect' && !isConnected)) && (
+      {(step === 'enable' || step === 'connect') && (
         <>
           <OnboardingIntroBanner />
           <EuiSpacer size="xl" />

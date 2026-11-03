@@ -23,7 +23,7 @@ import { IntroBannerVideo } from './intro_banner_video';
 
 const EXPLORE_LIVE_EXAMPLE_HREF: string | undefined = undefined;
 
-const MEDIA_WIDTH_PX = 425;
+const MEDIA_WIDTH_PX = 368;
 const MEDIA_HEIGHT_PX = 239;
 const COPY_PADDING_INLINE_PX = 32;
 
@@ -78,7 +78,8 @@ export function OnboardingIntroBanner(): React.ReactElement | null {
         <EuiTitle size="xs">
           <h2>
             {i18n.translate('xpack.nightshift.onboarding.introTitle', {
-              defaultMessage: 'Elastic nightshift is an SRE coworker that is always there for you',
+              defaultMessage:
+                'Elastic nightshift AI SRE is a co-worker that is always there for you',
             })}
           </h2>
         </EuiTitle>
@@ -86,13 +87,12 @@ export function OnboardingIntroBanner(): React.ReactElement | null {
           size="s"
           color="subdued"
           css={css`
-            margin-top: ${euiTheme.size.s};
+            margin-top: ${euiTheme.size.xs};
           `}
         >
           <p>
             {i18n.translate('xpack.nightshift.onboarding.introDescription', {
-              defaultMessage:
-                'Elastic nightshift helps you detect, investigate and resolve problems faster. Once you add data, it will start analyzing.',
+              defaultMessage: 'It helps you detect, investigate and resolve problems faster.',
             })}
           </p>
         </EuiText>

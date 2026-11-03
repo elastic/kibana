@@ -25,6 +25,9 @@ export const NIGHTSHIFT_PROMO_VIDEO_ID = 'EU8nJMgSQEZUpkv6Eg9Wck';
 
 const VIDYARD_PLAYER_ORIGIN = 'https://play.vidyard.com';
 
+/** The expanded 16:9 player fills up to this share of the viewport width and height. */
+const EXPANDED_MAX_VIEWPORT_PERCENT = 90;
+
 function buildVidyardPlayerUrl(query: Record<string, string>): string {
   const params = new URLSearchParams(query);
   return `${VIDYARD_PLAYER_ORIGIN}/${NIGHTSHIFT_PROMO_VIDEO_ID}.html?${params.toString()}`;
@@ -201,6 +204,8 @@ export function IntroBannerVideo(): React.ReactElement {
   `;
 
   const modalStyles = css`
+    max-block-size: ${EXPANDED_MAX_VIEWPORT_PERCENT}vh;
+
     .euiModalHeader {
       display: none;
     }
@@ -222,7 +227,7 @@ export function IntroBannerVideo(): React.ReactElement {
 
   const expandedPanelStyles = css`
     position: relative;
-    width: min(960px, 100%);
+    width: min(${EXPANDED_MAX_VIEWPORT_PERCENT}vw, ${(EXPANDED_MAX_VIEWPORT_PERCENT * 16) / 9}vh);
     aspect-ratio: 16 / 9;
     background: ${euiTheme.colors.plainDark};
     overflow: hidden;
@@ -302,7 +307,7 @@ export function IntroBannerVideo(): React.ReactElement {
         <EuiModal
           aria-labelledby={modalTitleId}
           css={modalStyles}
-          maxWidth={960}
+          maxWidth={false}
           onClose={closeExpanded}
           outsideClickCloses
           data-test-subj="nightshiftOnboardingIntroVideoExpanded"
