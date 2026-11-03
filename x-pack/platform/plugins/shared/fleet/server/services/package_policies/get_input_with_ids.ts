@@ -95,10 +95,7 @@ function validateNoTraversalInIdOverrides(packagePolicy: NewPackagePolicy): void
   const overrideInputs = packagePolicy.overrides?.inputs;
   if (overrideInputs) {
     for (const override of Object.values(overrideInputs)) {
-      const overrideId = (override as { id?: unknown })?.id;
-      if (typeof overrideId === 'string') {
-        validateNoPathTraversalId(overrideId);
-      }
+      validateNoPathTraversalId((override as { id?: unknown })?.id);
     }
   }
 }

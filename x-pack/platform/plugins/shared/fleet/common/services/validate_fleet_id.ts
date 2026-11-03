@@ -48,9 +48,17 @@ const PATH_TRAVERSAL_ID_ERROR =
  * package policy input and stream ids, which may legitimately contain `/` and
  * so cannot use `validateFleetSavedObjectId`. Only call on create/update
  * paths so pre-existing stored ids continue to function.
+ *
+ * Accepts `unknown` because some id sources (e.g. `input.config.id.value`) are
+ * schema-typed as `any`. A missing value (`undefined`/`null`) is treated as
+ * "no id set"; any other non-string is rejected as an invalid id rather than
+ * crashing the string check.
  */
-export const validateNoPathTraversalId = (value: string | undefined): void => {
-  if (value === undefined) return;
+export const validateNoPathTraversalId = (value: unknown): void => {
+  if (value === undefined || value === null) return;
+  if (typeof value !== 'string') {
+    throw new FleetError(PATH_TRAVERSAL_ID_ERROR);
+  }
   if (isPathTraversalId(value)) {
     throw new FleetError(PATH_TRAVERSAL_ID_ERROR);
   }

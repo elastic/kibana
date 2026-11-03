@@ -170,6 +170,10 @@ describe('isPathTraversalId / validateNoPathTraversalId', () => {
       expect(() => validateNoPathTraversalId(undefined)).not.toThrow();
     });
 
+    it('does not throw for null (treated as no id set)', () => {
+      expect(() => validateNoPathTraversalId(null)).not.toThrow();
+    });
+
     it.each(safeIds)('does not throw for safe id %p', (id) => {
       expect(() => validateNoPathTraversalId(id)).not.toThrow();
     });
@@ -177,6 +181,15 @@ describe('isPathTraversalId / validateNoPathTraversalId', () => {
     it.each(traversalIds)('throws for traversal id %p', (id) => {
       expect(() => validateNoPathTraversalId(id)).toThrow('path traversal');
     });
+
+    // Some id sources are schema-typed as `any`; a non-string (other than
+    // null/undefined) must be rejected, not crash the string check.
+    it.each([42, true, {}, [], { value: 'x' }])(
+      'throws for non-string value %p instead of crashing',
+      (value) => {
+        expect(() => validateNoPathTraversalId(value)).toThrow('path traversal');
+      }
+    );
   });
 
   describe('validateNoPathTraversalIdSchema', () => {

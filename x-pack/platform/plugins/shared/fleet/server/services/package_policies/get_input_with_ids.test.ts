@@ -356,5 +356,17 @@ describe('getInputsWithIds', () => {
       policy.inputs[0].config = { id: { value: 'cloudbeat/cis_k8s-safe' } };
       expect(() => getInputsWithIds(policy, 'policy123')).not.toThrow();
     });
+
+    it('rejects a non-string config.id override without crashing (no 500)', () => {
+      const policy = policyWithInputId('safe-input-id') as any;
+      policy.inputs[0].config = { id: { value: 42 } };
+      expect(() => getInputsWithIds(policy, 'policy123')).toThrow('path traversal');
+    });
+
+    it('ignores a null config.id override value', () => {
+      const policy = policyWithInputId('safe-input-id') as any;
+      policy.inputs[0].config = { id: { value: null } };
+      expect(() => getInputsWithIds(policy, 'policy123')).not.toThrow();
+    });
   });
 });
