@@ -64,6 +64,7 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
       key={dashboardFileName}
       getCreationOptions={() => getCreationOptions(dashboardProps, notifications)}
       onApiAvailable={setDashboard}
+      onApiCleanup={() => setDashboard(undefined)}
     />
   );
 }
