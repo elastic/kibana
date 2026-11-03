@@ -264,6 +264,14 @@ describe('system-security-hunt-execute', () => {
     );
   });
 
+  it("sends the coordinator's retryable reasons, so the route can tell an outage from a failure that repeats", () => {
+    const body = stepNamed(workflow, 'write_evidence').with?.body as Record<string, string>;
+
+    expect(body.retryableReasons).toBe(
+      '${{ steps.read_hunt_result.output.data.result.retryable_reasons }}'
+    );
+  });
+
   it('writes the coordinator narrative as the hunt results message', () => {
     const inputs = stepNamed(workflow, 'write_hunt_results_message').with?.inputs as Record<
       string,
