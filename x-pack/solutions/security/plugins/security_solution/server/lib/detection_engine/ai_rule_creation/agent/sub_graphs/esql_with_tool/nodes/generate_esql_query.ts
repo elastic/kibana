@@ -66,6 +66,7 @@ Optimize for Elastic Security: Suggest additional filters, aggregations, or enha
       const toolEvents: ToolEventEmitter = events || {
         reportProgress: () => {},
         sendUiEvent: () => {},
+        emitBrowserToolCall: () => {},
       };
 
       // Generate ES|QL query using agent_builder tool

@@ -54,6 +54,7 @@ describe('createRuleNameAndDescriptionNode', () => {
   const mockEvents = {
     reportProgress: jest.fn(),
     sendUiEvent: jest.fn(),
+    emitBrowserToolCall: jest.fn(),
   };
   const mockModel = { invoke: mockModelInvoke } as unknown as InferenceChatModel;
 

@@ -88,6 +88,7 @@ describe('createDetectionRuleTool', () => {
   const mockEvents = {
     reportProgress: jest.fn(),
     sendUiEvent: jest.fn(),
+    emitBrowserToolCall: jest.fn(),
   };
   const mockExperimentalFeatures = { aiRuleCreationEnabled: true } as ExperimentalFeatures;
   const tool = createDetectionRuleTool(

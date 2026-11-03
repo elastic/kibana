@@ -32,7 +32,7 @@ const createMlMock = () => ({
 
 const createContext = (
   mlMock = createMlMock(),
-  events = { reportProgress: jest.fn(), sendUiEvent: jest.fn() }
+  events = { reportProgress: jest.fn(), sendUiEvent: jest.fn(), emitBrowserToolCall: jest.fn() }
 ) =>
   ({
     esClient: { asCurrentUser: { ml: mlMock } },
@@ -163,7 +163,11 @@ describe('adManageJobStateTool', () => {
 
     it('operation=await_batch_completion returns completed when the datafeed has stopped', async () => {
       const ml = createMlMock();
-      const events = { reportProgress: jest.fn(), sendUiEvent: jest.fn() };
+      const events = {
+        reportProgress: jest.fn(),
+        sendUiEvent: jest.fn(),
+        emitBrowserToolCall: jest.fn(),
+      };
       const result = await createToolWithMlClient(ml).handler(
         {
           operation: 'await_batch_completion',

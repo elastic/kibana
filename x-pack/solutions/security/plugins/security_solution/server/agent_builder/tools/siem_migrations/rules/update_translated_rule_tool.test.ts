@@ -93,7 +93,7 @@ describe('updateTranslatedRuleTool', () => {
     it('should return { ok: true } and emit the tool UI event', async () => {
       const sendUiEvent = jest.fn();
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-        events: { reportProgress: jest.fn(), sendUiEvent },
+        events: { reportProgress: jest.fn(), sendUiEvent, emitBrowserToolCall: jest.fn() },
       });
 
       const result = (await tool.handler(validInput, context)) as ToolHandlerStandardReturn;
@@ -112,7 +112,7 @@ describe('updateTranslatedRuleTool', () => {
     mockCheckPrivileges.mockResolvedValueOnce({ hasAllRequested: false });
     const sendUiEvent = jest.fn();
     const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-      events: { reportProgress: jest.fn(), sendUiEvent },
+      events: { reportProgress: jest.fn(), sendUiEvent, emitBrowserToolCall: jest.fn() },
     });
 
     const result = (await tool.handler(validInput, context)) as ToolHandlerStandardReturn;
@@ -130,7 +130,7 @@ describe('updateTranslatedRuleTool', () => {
     });
     const sendUiEvent = jest.fn();
     const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-      events: { reportProgress: jest.fn(), sendUiEvent },
+      events: { reportProgress: jest.fn(), sendUiEvent, emitBrowserToolCall: jest.fn() },
     });
 
     const result = (await tool.handler(validInput, context)) as ToolHandlerStandardReturn;
@@ -150,7 +150,7 @@ describe('updateTranslatedRuleTool', () => {
 
     const sendUiEvent = jest.fn();
     const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-      events: { reportProgress: jest.fn(), sendUiEvent },
+      events: { reportProgress: jest.fn(), sendUiEvent, emitBrowserToolCall: jest.fn() },
     });
 
     const result = (await tool.handler(validInput, context)) as ToolHandlerStandardReturn;
@@ -165,7 +165,7 @@ describe('updateTranslatedRuleTool', () => {
 
     const sendUiEvent = jest.fn();
     const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-      events: { reportProgress: jest.fn(), sendUiEvent },
+      events: { reportProgress: jest.fn(), sendUiEvent, emitBrowserToolCall: jest.fn() },
     });
     const { esql_query: _, ...inputWithoutMutation } = validInput;
 
@@ -178,7 +178,7 @@ describe('updateTranslatedRuleTool', () => {
   it('should reject esql_query without integration_ids without PATCHing', async () => {
     mockFetch.mockResolvedValueOnce(makeGetResponse(mockCurrentRule));
     const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-      events: { reportProgress: jest.fn(), sendUiEvent: jest.fn() },
+      events: { reportProgress: jest.fn(), sendUiEvent: jest.fn(), emitBrowserToolCall: jest.fn() },
     });
     const { integration_ids: _, ...inputWithoutIntegrations } = validInput;
 
@@ -206,7 +206,7 @@ describe('updateTranslatedRuleTool', () => {
       mockFetch.mockResolvedValueOnce(makeGetResponse(installedRule));
       const sendUiEvent = jest.fn();
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-        events: { reportProgress: jest.fn(), sendUiEvent },
+        events: { reportProgress: jest.fn(), sendUiEvent, emitBrowserToolCall: jest.fn() },
       });
 
       const result = (await tool.handler(validInput, context)) as ToolHandlerStandardReturn;
@@ -224,7 +224,7 @@ describe('updateTranslatedRuleTool', () => {
       mockFetch.mockResolvedValueOnce(makeGetResponse(installedRule));
       const sendUiEvent = jest.fn();
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-        events: { reportProgress: jest.fn(), sendUiEvent },
+        events: { reportProgress: jest.fn(), sendUiEvent, emitBrowserToolCall: jest.fn() },
       });
 
       const prebuiltInput = {
@@ -248,7 +248,11 @@ describe('updateTranslatedRuleTool', () => {
   describe('prebuilt rule update', () => {
     const makeContext = () =>
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-        events: { reportProgress: jest.fn(), sendUiEvent: jest.fn() },
+        events: {
+          reportProgress: jest.fn(),
+          sendUiEvent: jest.fn(),
+          emitBrowserToolCall: jest.fn(),
+        },
       });
 
     it('should PATCH only prebuilt_rule_id', async () => {
@@ -300,7 +304,11 @@ describe('updateTranslatedRuleTool', () => {
       mockFetch.mockResolvedValueOnce(makePatchResponse());
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-        events: { reportProgress: jest.fn(), sendUiEvent: jest.fn() },
+        events: {
+          reportProgress: jest.fn(),
+          sendUiEvent: jest.fn(),
+          emitBrowserToolCall: jest.fn(),
+        },
       });
 
       await tool.handler(validInput, context);
