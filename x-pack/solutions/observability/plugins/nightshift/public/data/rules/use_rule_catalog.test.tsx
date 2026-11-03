@@ -83,6 +83,27 @@ describe('useRuleCatalog', () => {
     );
   });
 
+  it('gives universal rules without tags an empty tag list', async () => {
+    get.mockResolvedValue({
+      items: [
+        { metadata: { name: 'Null tags', tags: null } },
+        { metadata: { name: 'Missing tags' } },
+      ],
+      total: 2,
+    });
+
+    const { result } = renderCatalog();
+
+    await waitFor(() =>
+      expect(result.current.data).toEqual([
+        { name: 'CPU', tags: ['infra'] },
+        { name: 'Disk', tags: [] },
+        { name: 'Null tags', tags: [] },
+        { name: 'Missing tags', tags: [] },
+      ])
+    );
+  });
+
   it('reads every page of universal rules', async () => {
     const page = (prefix: string) =>
       Array.from({ length: 100 }, (_, index) => ({

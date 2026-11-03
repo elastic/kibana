@@ -26,7 +26,7 @@ interface FindRulesResponse {
 }
 
 interface FindV2RulesResponse {
-  items: Array<{ metadata: CatalogRule }>;
+  items: Array<{ metadata: { name: string; tags?: string[] | null } }>;
   total: number;
 }
 
@@ -70,7 +70,9 @@ const findV2Rules = async (
   const rules: CatalogRule[] = [];
   for (let page = 1; rules.length < MAX_RULES; page++) {
     const response = await findV2RulesPage(http, signal, page);
-    rules.push(...response.items.map(({ metadata: { name, tags } }) => ({ name, tags })));
+    rules.push(
+      ...response.items.map(({ metadata: { name, tags } }) => ({ name, tags: tags ?? [] }))
+    );
     if (rules.length >= response.total || response.items.length < V2_PAGE_SIZE) break;
   }
   return rules;
