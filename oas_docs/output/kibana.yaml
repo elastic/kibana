@@ -136033,6 +136033,11 @@ components:
     Kibana_HTTP_APIs_bulk_install_packages_from_registry_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         force:
           default: false
           type: boolean
@@ -136318,6 +136323,11 @@ components:
     Kibana_HTTP_APIs_bulk_upgrade_managed_integrations_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Experimental; added in 9.5.0
         policyIds:
           description: IDs of the managed integrations to upgrade to their installed package version.
           items:
@@ -136332,6 +136342,11 @@ components:
     Kibana_HTTP_APIs_bulk_upgrade_packages_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         force:
           default: false
           type: boolean
@@ -145432,6 +145447,11 @@ components:
     Kibana_HTTP_APIs_install_package_from_registry_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         force:
           default: false
           type: boolean
@@ -168038,6 +168058,11 @@ components:
     Kibana_HTTP_APIs_upgrade_package_policies_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         packagePolicyIds:
           items:
             type: string
