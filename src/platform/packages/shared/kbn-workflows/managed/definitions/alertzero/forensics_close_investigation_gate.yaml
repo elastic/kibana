@@ -1,0 +1,328 @@
+version: "1"
+name: Forensics close investigation gate
+description: >
+  Asks the analyst whether to close an Investigation once Endpoint analysis is
+  done with it: after every containment Proposal on it has been decided, or
+  right away when the analysis proposed nothing. Raises one "Close
+  Investigation" Proposal, always gated, and journals the decision. Approving
+  closes the Investigation, the attack and its alerts; dismissing changes
+  nothing. Never closes anything itself.
+enabled: true
+tags:
+  - security
+  - forensics
+settings:
+  # This run waits (WAITING_FOR_CHILD) while the analyst decides, and that wait
+  # counts against the wall-clock workflow timeout. 176h covers the bridge's
+  # 168h ceiling (72h decision + 72h for a re-parked clone + margin), the same as
+  # every other human-gated AlertZero parent.
+  timeout: '176h'
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        investigationConversationId:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: Investigation the question is asked on, and that approval closes.
+        attackDiscoveryId:
+          type: string
+          minLength: 1
+          maxLength: 512
+          description: Attack Discovery alert the Investigation was opened for; approval closes it and its alerts.
+        closeReason:
+          type: string
+          enum:
+            - false_positive
+            - benign
+            - resolved
+            - duplicate
+            - other
+          description: Investigation close reason the analysis decided on.
+        attackReason:
+          type: string
+          enum:
+            - false_positive
+            - true_positive
+            - benign_positive
+            - duplicate
+            - other
+          description: Reason written on the attack and its alerts on approval.
+        assessment:
+          type: string
+          maxLength: 500
+          description: Short assessment from the analysis, quoted on the card and in the journal.
+        attackAlertCount:
+          type: integer
+          minimum: 0
+          description: How many detection alerts the attack lists, so the card can say how many an approval reaches at most.
+        caveat:
+          type: string
+          maxLength: 2000
+          description: >
+            Markdown the analyst should read before deciding, such as containment that
+            never reached the approval queue. Shown first on the card. Optional: a
+            containment gate that settled normally has nothing to add.
+      required:
+        - investigationConversationId
+        - attackDiscoveryId
+        - closeReason
+        - attackReason
+      additionalProperties: false
+outputs:
+  - name: asked
+    type: boolean
+  - name: proposalStatus
+    type: string
+  - name: decision
+    type: string
+  - name: expired
+    type: boolean
+consts:
+  close_investigation_action: system-alertzero-action-close-attack-discovery-investigation
+steps:
+  # Re-checks for pending proposals before asking. A containment gate dispatches
+  # this child when it thinks nothing is pending, and the no-actions path in the
+  # run checks nothing at all. A Close card next to an undecided containment card
+  # would be wrong, and the action would refuse anyway. `size: 1` is enough:
+  # `total` is the server's own count.
+  - name: check_pending
+    type: kibana.request
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/proposals"
+      headers:
+        elastic-api-version: "1"
+      query:
+        conversationId: "{{ inputs.investigationConversationId }}"
+        status: pending
+        size: 1
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 1s
+      continue: true
+
+  # `default: 1` fails closed: a failed read looks like "something pending", never
+  # "nothing pending", so nothing is asked.
+  - name: resolve_pending
+    type: data.set
+    with:
+      pending_count: "${{ steps.check_pending.output.total | default: 1 }}"
+
+  # Builds the proposal card. Approve and Dismiss are the card's own buttons, so
+  # the comment says what each does here.
+  #   - `false_positive` close reason: the card says the analysis found no real
+  #     incident. Any other reason quotes the assessment.
+  #   - "Up to N alerts": an alert that another open attack also owns is left
+  #     acknowledged.
+  #   - The Investigation's close reason is not named on the card: the status
+  #     route records none yet (see the action).
+  #
+  # `action_input` deliberately names no host, process or identity. The dedup step
+  # then keys the proposal to the Investigation and action, so only one Close
+  # question is open per Investigation. A dismissed one is asked again only after
+  # something else on the Investigation settles.
+  - name: build_proposal
+    type: data.set
+    with:
+      action_input:
+        investigation_id: "{{ inputs.investigationConversationId }}"
+        attack_discovery_id: "{{ inputs.attackDiscoveryId }}"
+        close_reason: "{{ inputs.closeReason }}"
+        attack_reason: "{{ inputs.attackReason }}"
+        summary: "{{ inputs.assessment | default: '' }}"
+      # A caveat comes first: whatever went wrong before this question changes what
+      # Approve means, so it is read before the close itself.
+      comment: |-
+        {%- if inputs.caveat != blank -%}
+        **Before you close:** {{ inputs.caveat }}
+
+        {% endif -%}
+        {%- assign alerts = 'its detection alerts' -%}
+        {%- if inputs.attackAlertCount > 0 %}{% assign alerts = 'up to ' | append: inputs.attackAlertCount | append: ' detection alert(s)' %}{% endif -%}
+        {%- if inputs.closeReason == 'false_positive' -%}
+        Endpoint analysis found **no real incident**
+        {%- if inputs.assessment != blank %}: {{ inputs.assessment }}{% else %}.{% endif %}
+
+        **Approve** closes this Investigation, the attack and {{ alerts }} as **false positive**. An alert that another open attack also owns is left acknowledged.
+        {%- else -%}
+        Endpoint analysis is done with this Investigation.
+        {%- if inputs.assessment != blank %} Its assessment: {{ inputs.assessment }}{% endif %}
+
+        **Approve** closes this Investigation, and closes the attack and {{ alerts }} as `{{ inputs.attackReason }}`. An alert that another open attack also owns is left acknowledged.
+        {%- endif %}
+
+        **Dismiss** keeps everything open.
+
+  # Same dedup step the run uses for containment. With one candidate and no
+  # target, it returns:
+  #   - the proposal and its id, if no live Close Proposal exists on this
+  #     Investigation;
+  #   - nothing (`alreadyOpenCount`), if one does;
+  #   - the next generation's id, if the last one settled.
+  # Fails closed: if existing Proposals can't be read, nothing is created
+  # (`check_failed`).
+  - name: resolve_close_proposal
+    type: alertzero.resolveProposals
+    if: "${{ steps.resolve_pending.output.pending_count == 0 }}"
+    with:
+      investigationConversationId: "{{ inputs.investigationConversationId }}"
+      proposals:
+        - actionWorkflowId: "{{ consts.close_investigation_action }}"
+          actionInput: "${{ steps.build_proposal.output.action_input }}"
+          title: Close Investigation
+          comment: "{{ steps.build_proposal.output.comment }}"
+    on-failure:
+      continue: true
+
+  # `0`/`false` when the step above was skipped or created nothing, so nothing
+  # below asks.
+  - name: resolve_close_counts
+    type: data.set
+    with:
+      minted: "${{ steps.resolve_close_proposal.output.proposals | size }}"
+      already_open: "${{ steps.resolve_close_proposal.output.alreadyOpenCount | default: 0 }}"
+      check_failed: >-
+        ${{ steps.resolve_close_proposal.output.mintSuppression == 'check_failed'
+          or (steps.resolve_close_proposal.error != nil and steps.resolve_close_proposal.error != empty) }}
+
+  # Created through the bridge so the Proposal is stamped origin: alertzero. All
+  # inputs come from the dedup step, under the id it resolved. If two of these
+  # children race on one Investigation, only one create succeeds; the loser fails
+  # and `continue` moves it on silently. `autoApprove` is false because the
+  # analyst always decides the close question, in every autonomy mode.
+  - name: create_and_gate_proposal
+    type: workflow.execute
+    if: "${{ steps.resolve_close_counts.output.minted > 0 }}"
+    with:
+      workflow-id: system-create-alertzero-proposal
+      run-as-mode: inherit
+      inputs:
+        conversationId: "{{ inputs.investigationConversationId }}"
+        proposalId: "{{ steps.resolve_close_proposal.output.proposals[0].proposalId }}"
+        title: "{{ steps.resolve_close_proposal.output.proposals[0].title }}"
+        comment: "{{ steps.resolve_close_proposal.output.proposals[0].comment }}"
+        actionWorkflowId: "{{ steps.resolve_close_proposal.output.proposals[0].actionWorkflowId }}"
+        actionInput: "${{ steps.resolve_close_proposal.output.proposals[0].actionInput }}"
+        autoApprove: false
+    on-failure:
+      continue: true
+
+  # Nothing was asked because a proposal is still pending, or the read failed
+  # (counted as pending above). The note covers both.
+  - name: journal_not_asked
+    type: workflow.execute
+    if: "${{ steps.resolve_pending.output.pending_count != 0 }}"
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        conversation_id: "{{ inputs.investigationConversationId }}"
+        message: >-
+          Could not confirm that every proposal on this Investigation has been decided,
+          so the question whether to close it was not raised. The Investigation stays open
+          until an analyst closes it.
+    on-failure:
+      continue: true
+
+  # Mirrors `journal_proposals_lost` in the run: says the check failed and leaves
+  # the Investigation to the analyst. It includes no error message because later
+  # agent rounds read the journal as user input.
+  - name: journal_check_failed
+    type: workflow.execute
+    if: "${{ steps.resolve_close_counts.output.check_failed == true }}"
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        conversation_id: "{{ inputs.investigationConversationId }}"
+        message: >-
+          Could not check whether a Close Investigation proposal already exists, so none
+          was raised. The Investigation stays open until an analyst closes it.
+    on-failure:
+      continue: true
+
+  # Reads who decided and why, which the bridge's output doesn't carry. Uses the
+  # bridge's `proposalId`; after a failed action that is the clone the analyst
+  # last decided on. Skipped when the wrap didn't settle: a lost race has no
+  # decision of its own.
+  - name: read_proposal_decision
+    type: kibana.request
+    if: "${{ steps.create_and_gate_proposal.output.status != blank }}"
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/proposals/{{ steps.create_and_gate_proposal.output.proposalId }}"
+      headers:
+        elastic-api-version: "1"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 1s
+      continue: true
+
+  # `decision` is what the analyst concluded; `status` is how far the Proposal
+  # got (as in attack_discovery_review.yaml). Approval counts only once the action
+  # `succeeded`. A dismissal counts whatever the status.
+  - name: resolve_decision
+    type: data.set
+    with:
+      approved: >-
+        ${{ steps.create_and_gate_proposal.output.decision == 'approved'
+          and steps.create_and_gate_proposal.output.status == 'succeeded' }}
+      dismissed: "${{ steps.create_and_gate_proposal.output.decision == 'dismissed' }}"
+      expired: "${{ steps.create_and_gate_proposal.output.status == 'expired' }}"
+
+  # Reported here, not in the action: the report step verifies that every ancestor
+  # is an AlertZero-managed execution, and the action's chain passes through the
+  # platform's proposal workflow. `succeeded` means the action's status-route close
+  # returned; an Investigation someone closed meanwhile is counted too.
+  - name: report_investigation_closed
+    type: alertzero.reportWorkerOutcome
+    if: "${{ steps.resolve_decision.output.approved == true }}"
+    on-failure:
+      continue: true
+    with:
+      event: worker_investigation_closed
+      investigation_id: "{{ inputs.investigationConversationId }}"
+      close_reason: "{{ inputs.closeReason }}"
+
+  # The action already journaled what it closed. This note says what was decided
+  # and by whom. Best-effort.
+  - name: journal_outcome
+    type: workflow.execute
+    if: "${{ steps.create_and_gate_proposal.output.status != blank }}"
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        conversation_id: "{{ inputs.investigationConversationId }}"
+        message: >-
+          {%- assign who = steps.read_proposal_decision.output.decidedBy.username | default: 'An analyst' -%}
+          {%- if steps.resolve_decision.output.approved == true and inputs.closeReason == 'false_positive' -%}
+          {{ who }} approved closing this Investigation, the attack and its alerts as a false positive. Endpoint analysis found no real incident
+          {%- if inputs.assessment != blank %}: {{ inputs.assessment }}{% else %}.{% endif %}
+          {%- elsif steps.resolve_decision.output.approved == true -%}
+          {{ who }} approved closing this Investigation. Endpoint analysis assessed it as `{{ inputs.closeReason }}`
+          {%- if inputs.assessment != blank %}: {{ inputs.assessment }}{% else %}.{% endif %}
+          {%- elsif steps.resolve_decision.output.dismissed == true -%}
+          {{ who }} chose to keep this Investigation open ({{ steps.read_proposal_decision.output.dismissReason | default: 'no reason given' }})
+          {%- if steps.read_proposal_decision.output.rationale != blank %}: {{ steps.read_proposal_decision.output.rationale }}{% else %}.{% endif %}
+          Nothing was changed. The question is asked again after the next proposal on this Investigation is decided.
+          {%- elsif steps.resolve_decision.output.expired == true -%}
+          The Close Investigation proposal expired with no decision. The Investigation stays open.
+          {%- else -%}
+          The Close Investigation proposal ended as `{{ steps.create_and_gate_proposal.output.status }}`. The Investigation stays open.
+          {%- endif -%}
+    on-failure:
+      continue: true
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      asked: "${{ steps.create_and_gate_proposal.output.status != blank }}"
+      proposalStatus: "{{ steps.create_and_gate_proposal.output.status }}"
+      decision: "{{ steps.create_and_gate_proposal.output.decision }}"
+      expired: "${{ steps.resolve_decision.output.expired == true }}"

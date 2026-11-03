@@ -1,5 +1,5 @@
 {
-  "sha1": "e84d544fb67d7de16cabae3848a8971728dbab1c",
+  "sha1": "7eb4eea8af34b4f1dfc6d4ad0f0ea9ddb17c6b71",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -33,7 +33,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/add_to_dashboard.spec.ts",
-        "line": 15,
+        "line": 14,
         "column": 11
       }
     },
@@ -53,7 +53,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/add_to_dashboard.spec.ts",
-        "line": 24,
+        "line": 23,
         "column": 17
       }
     },
@@ -162,6 +162,45 @@
       }
     },
     {
+      "id": "7705009e05970cb-f2cdf356be66c2a",
+      "title": "Maps - documents source - docvalue_fields should only fetch geo_point field and time field and nothing else when source does not have data driven styling",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/docvalue_fields.spec.ts",
+        "line": 56,
+        "column": 56
+      }
+    },
+    {
+      "id": "7705009e05970cb-ab6564e109b8aff",
+      "title": "Maps - documents source - docvalue_fields should only fetch geo_point field and data driven styling fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/docvalue_fields.spec.ts",
+        "line": 72,
+        "column": 17
+      }
+    },
+    {
+      "id": "7705009e05970cb-ff11ec786715872",
+      "title": "Maps - documents source - docvalue_fields should format date fields as epoch_millis when data driven styling is applied to a date field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/docvalue_fields.spec.ts",
+        "line": 85,
+        "column": 15
+      }
+    },
+    {
       "id": "7bb1c014d258d13-a4b331b9efb2c28",
       "title": "Maps - embed in dashboard should render map embeddables",
       "expectedStatus": "passed",
@@ -261,7 +300,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/es_geo_grid_source.spec.ts",
-        "line": 76,
+        "line": 77,
         "column": 11
       }
     },
@@ -274,7 +313,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/es_geo_grid_source.spec.ts",
-        "line": 103,
+        "line": 104,
         "column": 18
       }
     },
@@ -287,7 +326,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/es_geo_grid_source.spec.ts",
-        "line": 127,
+        "line": 128,
         "column": 15
       }
     },
@@ -347,7 +386,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/full_screen_mode.spec.ts",
         "line": 18,
-        "column": 43
+        "column": 41
       }
     },
     {
@@ -439,6 +478,71 @@
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/mapbox_styles.spec.ts",
         "line": 22,
         "column": 8
+      }
+    },
+    {
+      "id": "8b2ad00fab0b9bf-2e2cdcad1a4dab7",
+      "title": "Maps - security feature controls global maps all privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/maps_security.spec.ts",
+        "line": 43,
+        "column": 33
+      }
+    },
+    {
+      "id": "8b2ad00fab0b9bf-bc572582da8adb9",
+      "title": "Maps - security feature controls global maps read-only privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/maps_security.spec.ts",
+        "line": 72,
+        "column": 5
+      }
+    },
+    {
+      "id": "8b2ad00fab0b9bf-7d48a06f16c07c3",
+      "title": "Maps - security feature controls no maps privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/maps_security.spec.ts",
+        "line": 88,
+        "column": 13
+      }
+    },
+    {
+      "id": "ec5ff3e707d71e9-951ad9a0b55ca6a",
+      "title": "Maps - spaces feature controls space with no features disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/maps_spaces.spec.ts",
+        "line": 32,
+        "column": 55
+      }
+    },
+    {
+      "id": "ec5ff3e707d71e9-66b8fffc03982b6",
+      "title": "Maps - spaces feature controls space with Maps disabled returns a 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/maps_spaces.spec.ts",
+        "line": 60,
+        "column": 49
       }
     },
     {
@@ -686,6 +790,71 @@
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/save_and_return.spec.ts",
         "line": 99,
         "column": 13
+      }
+    },
+    {
+      "id": "2901e50a7f667c0-1bdc834bbe85684",
+      "title": "Maps - documents source - search hits should re-fetch documents with refresh timer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/search_hits.spec.ts",
+        "line": 70,
+        "column": 10
+      }
+    },
+    {
+      "id": "2901e50a7f667c0-c6aa87eeb38f581",
+      "title": "Maps - documents source - search hits query bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/search_hits.spec.ts",
+        "line": 82,
+        "column": 19
+      }
+    },
+    {
+      "id": "2901e50a7f667c0-fb7b4d673a3f52a",
+      "title": "Maps - documents source - search hits layer query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/search_hits.spec.ts",
+        "line": 117,
+        "column": 15
+      }
+    },
+    {
+      "id": "2901e50a7f667c0-45a48e4cba9c376",
+      "title": "Maps - documents source - search hits filter by extent - should handle geo_point filtering with extents that cross antimeridian",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/search_hits.spec.ts",
+        "line": 141,
+        "column": 20
+      }
+    },
+    {
+      "id": "2901e50a7f667c0-965ebd750d43a73",
+      "title": "Maps - documents source - search hits filter by extent - should handle geo_shape filtering with extents that cross antimeridian",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/search_hits.spec.ts",
+        "line": 144,
+        "column": 26
       }
     },
     {
