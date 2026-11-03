@@ -159,6 +159,12 @@ export class NotebookScheduler {
     return this.propagate(timeInputs, new Set());
   }
 
+  /** Runs an unsaved query against the current input values without publishing any results. */
+  previewQuery(query: string, signal: AbortSignal): Promise<RunQueryResult> {
+    const outputs = Object.keys(this.cells).map((id) => this.runtime(id).output);
+    return this.run({ query, params: buildQueryParams(query, outputs), signal });
+  }
+
   async whenIdle(): Promise<void> {
     while (this.tasks.size > 0) {
       await Promise.all(this.tasks.values());

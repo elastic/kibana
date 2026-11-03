@@ -754,6 +754,24 @@ describe('NotebookScheduler', () => {
     });
   });
 
+  describe('query preview', () => {
+    it('runs an unsaved query with current input values without publishing', async () => {
+      const env = track(setup([pinnedTime('time'), range('bytes', [1, 9])]));
+      await env.open();
+      const emissions = [env.countEmissions('time'), env.countEmissions('bytes')];
+      const query = 'FROM logs | WHERE bytes >= ?bytes_min AND @timestamp >= ?_tstart';
+
+      const { table } = await env.scheduler.previewQuery(query, new AbortController().signal);
+
+      expect(env.fake.callsFor(query).map(({ params }) => params)).toEqual([
+        { bytes_min: 1, _tstart: '2026-10-29T11:45:00.000Z' },
+      ]);
+      expect(table.rows).toHaveLength(1);
+      expect(emissions.map(({ count }) => count)).toEqual([0, 0]);
+      emissions.forEach(({ unsubscribe }) => unsubscribe());
+    });
+  });
+
   describe('params and inputs', () => {
     it('binds null for an empty dropdown and range, and values once set', async () => {
       const query =

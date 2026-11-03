@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -27,6 +27,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { DropdownOptionsSource, InputDefinition } from '../../common/types';
 import { LazyEsqlEditor } from './lazy_esql_editor';
 import { useNotebook } from './notebook_context';
@@ -96,29 +97,108 @@ const getTabSource = (tab: OptionsTab, { optionsCell }: DropdownInput): Dropdown
   return optionsCell ? 'cell' : 'query';
 };
 
-const QueryOptionsFields = ({ draft, onChange }: FieldsProps<DropdownInput>) => (
-  <EuiFormRow
-    fullWidth
-    label={i18n.translate('xpack.notebook.inputSettings.optionsQuery', {
-      defaultMessage: 'Options query',
-    })}
-  >
-    <Suspense fallback={<EuiLoadingSpinner />}>
-      <LazyEsqlEditor
-        query={{ esql: draft.optionsQuery }}
-        onTextLangQueryChange={({ esql }) => onChange({ ...draft, optionsQuery: esql })}
-        onTextLangQuerySubmit={async () => {}}
-        editorIsInline
-        hideRunQueryButton
-        hideQueryHistory
-        hideQuickSearch
-        disableAutoFocus
-        expandToFitQueryOnMount
-        dataTestSubj="notebookInputSettingsOptionsQuery"
+interface QueryRun {
+  query: string;
+  columns: readonly string[];
+}
+
+/** The custom options query, with a Run action that previews the draft query's columns. */
+const QueryOptionsFields = ({
+  cellId,
+  savedQuery,
+  draft,
+  onChange,
+}: FieldsProps<DropdownInput> & DynamicOptionsProps) => {
+  const { store, scheduler } = useNotebook();
+  const { output } = useStateFromPublishingSubject(store.getRuntime$(cellId));
+  const [preview, setPreview] = useState<QueryRun>();
+  const [error, setError] = useState<string>();
+  const [isRunning, setIsRunning] = useState(false);
+  const controller = useRef<AbortController>();
+  useEffect(() => () => controller.current?.abort(), []);
+
+  const lastRun: QueryRun = preview ?? {
+    query: savedQuery,
+    columns: output?.kind === 'input' ? output.columns ?? [] : [],
+  };
+  const isQueryChanged = draft.optionsQuery !== lastRun.query;
+
+  const run = async () => {
+    const { optionsQuery } = draft;
+    controller.current?.abort();
+    const current = new AbortController();
+    controller.current = current;
+    setIsRunning(true);
+    try {
+      const { table } = await scheduler.previewQuery(optionsQuery, current.signal);
+      if (current.signal.aborted) return;
+      setPreview({ query: optionsQuery, columns: table.columns.map(({ name }) => name) });
+      setError(undefined);
+    } catch (runError) {
+      if (current.signal.aborted) return;
+      setPreview({ query: optionsQuery, columns: [] });
+      setError(runError instanceof Error ? runError.message : String(runError));
+    } finally {
+      if (!current.signal.aborted) setIsRunning(false);
+    }
+  };
+
+  return (
+    <>
+      <EuiFormRow
+        fullWidth
+        label={i18n.translate('xpack.notebook.inputSettings.optionsQuery', {
+          defaultMessage: 'Options query',
+        })}
+        labelAppend={
+          <EuiButtonEmpty
+            size="xs"
+            iconType="play"
+            isLoading={isRunning}
+            isDisabled={!draft.optionsQuery.trim()}
+            onClick={run}
+            data-test-subj="notebookInputSettingsRunQuery"
+          >
+            {i18n.translate('xpack.notebook.inputSettings.runQuery', { defaultMessage: 'Run' })}
+          </EuiButtonEmpty>
+        }
+      >
+        <Suspense fallback={<EuiLoadingSpinner />}>
+          <LazyEsqlEditor
+            query={{ esql: draft.optionsQuery }}
+            onTextLangQueryChange={({ esql }) => onChange({ ...draft, optionsQuery: esql })}
+            onTextLangQuerySubmit={run}
+            isLoading={isRunning}
+            editorIsInline
+            hideRunQueryButton
+            hideQueryHistory
+            hideQuickSearch
+            disableAutoFocus
+            expandToFitQueryOnMount
+            dataTestSubj="notebookInputSettingsOptionsQuery"
+          />
+        </Suspense>
+      </EuiFormRow>
+      {error && !isQueryChanged && (
+        <>
+          <KbnDangerCallout
+            announceOnMount
+            size="s"
+            title={error}
+            data-test-subj="notebookInputSettingsQueryError"
+          />
+          <EuiSpacer size="s" />
+        </>
+      )}
+      <ColumnSelect
+        columns={lastRun.columns}
+        isDisabled={isQueryChanged}
+        draft={draft}
+        onChange={onChange}
       />
-    </Suspense>
-  </EuiFormRow>
-);
+    </>
+  );
+};
 
 const StaticOptionsFields = ({ draft, onChange }: FieldsProps<DropdownInput>) => {
   const staticOptions = draft.staticOptions ?? [];
@@ -154,9 +234,10 @@ const StaticOptionsFields = ({ draft, onChange }: FieldsProps<DropdownInput>) =>
 
 const ColumnSelect = ({
   columns,
+  isDisabled = false,
   draft,
   onChange,
-}: FieldsProps<DropdownInput> & { columns: readonly string[] }) => {
+}: FieldsProps<DropdownInput> & { columns: readonly string[]; isDisabled?: boolean }) => {
   const { optionsColumn = null } = draft;
   const choices =
     optionsColumn && !columns.includes(optionsColumn) ? [optionsColumn, ...columns] : columns;
@@ -170,7 +251,7 @@ const ColumnSelect = ({
     >
       <EuiSelect
         fullWidth
-        disabled={choices.length === 0}
+        disabled={isDisabled || choices.length === 0}
         hasNoInitialSelection={choices.length === 0}
         value={optionsColumn ?? choices[0] ?? ''}
         options={choices.map((choice) => ({ value: choice, text: choice }))}
@@ -192,21 +273,18 @@ const CellColumnSelect = ({
   return <ColumnSelect {...props} columns={columns} />;
 };
 
-/** Columns from the dropdown's own last options query run. */
-const QueryColumnSelect = ({
-  cellId,
-  ...props
-}: FieldsProps<DropdownInput> & { cellId: string }) => {
-  const { store } = useNotebook();
-  const { output } = useStateFromPublishingSubject(store.getRuntime$(cellId));
-  return <ColumnSelect {...props} columns={output?.kind === 'input' ? output.columns ?? [] : []} />;
-};
+interface DynamicOptionsProps {
+  cellId: string;
+  /** The applied options query, which the cell's latest results come from. */
+  savedQuery: string;
+}
 
 const DynamicOptionsFields = ({
   cellId,
+  savedQuery,
   draft,
   onChange,
-}: FieldsProps<DropdownInput> & { cellId: string }) => {
+}: FieldsProps<DropdownInput> & DynamicOptionsProps) => {
   const { store } = useNotebook();
   const cells = useStateFromPublishingSubject(store.cells$);
   const esqlCells = Object.values(cells).filter(({ type }) => type === 'esql');
@@ -249,21 +327,28 @@ const DynamicOptionsFields = ({
           data-test-subj="notebookInputSettingsOptionsSource"
         />
       </EuiFormRow>
-      {!isCell && <QueryOptionsFields draft={draft} onChange={onChange} />}
-      {source ? (
-        <CellColumnSelect key={source.id} cellId={source.id} draft={draft} onChange={onChange} />
-      ) : (
-        <QueryColumnSelect cellId={cellId} draft={draft} onChange={onChange} />
+      {!isCell && (
+        <QueryOptionsFields
+          cellId={cellId}
+          savedQuery={savedQuery}
+          draft={draft}
+          onChange={onChange}
+        />
       )}
+      {source && (
+        <CellColumnSelect key={source.id} cellId={source.id} draft={draft} onChange={onChange} />
+      )}
+      {isCell && !source && <ColumnSelect columns={[]} draft={draft} onChange={onChange} />}
     </>
   );
 };
 
 const DropdownFields = ({
   cellId,
+  savedQuery,
   draft,
   onChange,
-}: FieldsProps<DropdownInput> & { cellId: string }) => {
+}: FieldsProps<DropdownInput> & DynamicOptionsProps) => {
   const tab: OptionsTab = draft.optionsSource === 'static' ? 'static' : 'dynamic';
   return (
     <>
@@ -283,7 +368,12 @@ const DropdownFields = ({
       </EuiTabs>
       <EuiSpacer size="m" />
       {tab === 'dynamic' ? (
-        <DynamicOptionsFields cellId={cellId} draft={draft} onChange={onChange} />
+        <DynamicOptionsFields
+          cellId={cellId}
+          savedQuery={savedQuery}
+          draft={draft}
+          onChange={onChange}
+        />
       ) : (
         <StaticOptionsFields draft={draft} onChange={onChange} />
       )}
@@ -354,7 +444,12 @@ export const InputSettingsFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {draft.kind === 'dropdown' ? (
-          <DropdownFields cellId={cellId} draft={draft} onChange={setDraft} />
+          <DropdownFields
+            cellId={cellId}
+            savedQuery={input.kind === 'dropdown' ? input.optionsQuery : ''}
+            draft={draft}
+            onChange={setDraft}
+          />
         ) : (
           <RangeFields draft={draft} onChange={setDraft} />
         )}
