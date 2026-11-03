@@ -121,8 +121,8 @@ function setSections({
 }) {
   const sectionTotal = (id: InvestigationSectionState['id']) =>
     sections.find((section) => section.id === id)?.total ?? 0;
-  // Mirrors the hook: the severity counts cover running investigations too, so they plus the
-  // unrated section count every matching investigation exactly once.
+  // Mirrors the hook: the severity counts leave out running investigations, so they plus the
+  // unrated and in-progress sections count every matching investigation exactly once.
   const severityCounts = {
     critical: sectionTotal('critical'),
     high: sectionTotal('high'),
@@ -143,7 +143,8 @@ function setSections({
       severityCounts.high +
       severityCounts.medium +
       severityCounts.low +
-      sectionTotal('not-rated'),
+      sectionTotal('not-rated') +
+      sectionTotal('in-progress'),
     loadedCount: sections.reduce((sum, section) => sum + section.investigations.length, 0),
     refetchAll,
   });
@@ -554,12 +555,9 @@ describe('NightshiftApp', () => {
   });
 
   it('reports a search by length and result count, never by term', async () => {
-    // The running investigation is also listed in its severity section, so the section totals
-    // add up to two while only one investigation matches.
     setSections({
       sections: defaultSections({
         'in-progress': { investigations: [investigation], total: 1 },
-        critical: { investigations: [investigation], total: 1 },
       }),
       hasActiveInvestigations: true,
     });

@@ -53,10 +53,8 @@ export interface InvestigationSectionsResult {
   isFetching: boolean;
   totalCount: number;
   /**
-   * Investigations matching the current filters, each counted once. `totalCount` sums the
-   * sections, and a running investigation also appears in its severity section, so it is not a
-   * distinct count. The severity counts come from one query over all investigations, so adding
-   * the unrated section's total gives every match exactly once.
+   * Investigations matching the current filters, each counted once: the finished ones per
+   * severity, the finished ones without a severity, and the running ones.
    */
   matchedCount: number;
   loadedCount: number;
@@ -111,14 +109,15 @@ export const useInvestigationSections = ({
   const low = useFetchInvestigations({ ...tierSection('low'), query });
   const notRated = useFetchInvestigations({ inProgress: false, severities: ['none'], query });
 
-  // The shared counts cannot leave out running investigations, so the tiles include them.
+  // Running investigations are listed in the in-progress section only, so the tiles leave them out
+  // to match the severity sections they scroll to.
   const severityCountsQuery = useQuery({
     queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, 'severityCounts', query],
     enabled: agenticInvestigations != null,
     queryFn: ({ signal }) =>
       http.get<InvestigationSeverityCounts>(SHARED_INVESTIGATIONS_SEVERITY_COUNTS_URL, {
         version: SHARED_INVESTIGATIONS_API_VERSION,
-        query: query ? { query } : {},
+        query: { in_progress: false, ...(query ? { query } : {}) },
         signal,
       }),
     keepPreviousData: true,
@@ -219,7 +218,8 @@ export const useInvestigationSections = ({
       severityCounts.high +
       severityCounts.medium +
       severityCounts.low +
-      notRated.total,
+      notRated.total +
+      inProgress.total,
     loadedCount: sections.reduce((sum, section) => sum + section.investigations.length, 0),
     refetchAll,
   };

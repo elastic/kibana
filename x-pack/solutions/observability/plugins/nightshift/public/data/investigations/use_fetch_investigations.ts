@@ -24,17 +24,17 @@ export const NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY = ['nightshift.investigations']
 
 const INVESTIGATIONS_PAGE_SIZE = 10;
 
-/**
- * The shared list API cannot filter on `in_progress`, so the in-progress section reads this many
- * of the newest open investigations and keeps the running ones.
- */
-const IN_PROGRESS_CANDIDATES = 20;
+/** The in-progress section is a single page: it reads this many of the newest running ones. */
+const IN_PROGRESS_PAGE_SIZE = 20;
 
 /** How long a section's pages stay fresh, which bounds how often a refocus can refetch it. */
 const SECTION_STALE_TIME_MS = 30_000;
 
 export interface FetchInvestigationsParams {
-  /** True: only investigations an agent is working on; false: the rest. */
+  /**
+   * True: only investigations an agent is working on; false: only the finished ones, so a running
+   * investigation shows in the in-progress section alone until its final severity is known.
+   */
   inProgress: boolean;
   severities?: InvestigationSeverityFilterValue[];
   query?: string;
@@ -112,8 +112,9 @@ export const useFetchInvestigations = ({
         query: {
           sort_field: 'created_at',
           sort_order: 'desc',
+          in_progress: inProgress,
           ...(inProgress
-            ? { page: 1, per_page: IN_PROGRESS_CANDIDATES, status: 'open' }
+            ? { page: 1, per_page: IN_PROGRESS_PAGE_SIZE }
             : {
                 page: typeof pageParam === 'number' ? pageParam : 1,
                 per_page: INVESTIGATIONS_PAGE_SIZE,
@@ -134,14 +135,10 @@ export const useFetchInvestigations = ({
     retry: (failureCount, err) => !isHttpClientError(err) && failureCount < 3,
   });
 
-  // The other sections keep running investigations: dropping them from a page could empty the
-  // section and hide the finished ones on later pages.
-  const investigations = useMemo(() => {
-    const loaded = flattenInvestigationPages(data?.pages ?? []);
-    return inProgress ? loaded.filter(({ in_progress: isRunning }) => isRunning) : loaded;
-  }, [data?.pages, inProgress]);
+  const investigations = useMemo(() => flattenInvestigationPages(data?.pages ?? []), [data?.pages]);
 
   const listedTotal = data?.pages[data.pages.length - 1]?.pagination.total ?? 0;
+  // The in-progress section never pages, so its count is what it shows.
   const total = inProgress ? investigations.length : listedTotal;
 
   const handleFetchNextPage = useCallback(() => {
