@@ -93,9 +93,6 @@ export const javascriptRules: DummyRuleMap = {
   //     'groups': [['external', 'builtin'], 'internal', ['parent', 'sibling', 'index']]
   //   }
   // ],
-
-  // 'mocha/handle-done-callback': 'error',
-  // 'mocha/no-exclusive-tests': 'error',
   'no-caller': 'error',
   'no-cond-assign': 'error',
   'no-const-assign': 'error',
@@ -108,7 +105,6 @@ export const javascriptRules: DummyRuleMap = {
   // 'no-new': 'error',
   'no-new-wrappers': 'error',
   // 'no-path-concat': 'error',
-  // 'no-restricted-imports': [2, RESTRICTED_MODULES],
   // 'no-restricted-modules': [2, RESTRICTED_MODULES],
   // 'no-restricted-syntax': [
   //   'error',
@@ -122,8 +118,6 @@ export const javascriptRules: DummyRuleMap = {
   // 'no-undef': 'error',
   // 'no-undef-init': 'error',
   'no-underscore-dangle': 'off',
-  // 'no-unsanitized/method': 'error',
-  // 'no-unsanitized/property': 'error',
   'no-unused-labels': 'error',
   'no-with': 'error',
 
@@ -154,6 +148,8 @@ export const javascriptOverrides: OxlintOverride[] = [
       'no-redeclare': 'error',
       'no-restricted-globals': ['error', ...RESTRICTED_GLOBALS],
       'no-sequences': 'error',
+      'no-unsanitized/method': 'error',
+      'no-unsanitized/property': 'error',
       'no-use-before-define': ['error', 'nofunc'],
       'no-var': 'error',
       'one-var': ['error', 'never'],

@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
+import {
+  AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+  AS_CODE_ESQL_DATA_SOURCE_TYPE,
+} from '@kbn/as-code-data-views-schema';
 import type { DiscoverSessionApiTab, DiscoverSessionApiData } from '@kbn/as-code-discover-schema';
 import { DataGridDensity, DiscoverTabType } from '@kbn/discover-session-constants';
+import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { NEW_TAB_ID } from '../../common/constants';
 import type { DiscoverSessionEmbeddableByValueState } from '../../common';
 import {
@@ -19,6 +23,7 @@ import {
   getDiscoverSessionLocatorParams,
   getDiscoverSessionSeedTimeRange,
   isDiscoverSessionByValueState,
+  toSearchEmbeddableByValueState,
 } from './discover_session_inline_state';
 
 const esqlTab: DiscoverSessionApiTab = {
@@ -67,9 +72,54 @@ describe('discover session inline state', () => {
     });
   });
 
+  it('projects only the first Classic tab without session-only fields', () => {
+    const classicTab: DiscoverSessionApiTab = {
+      ...esqlTab,
+      data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'logs-data-view' },
+      filters: [],
+      view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+      sample_size: 500,
+    };
+    const result = toSearchEmbeddableByValueState(
+      createSession({ title: 'Classic logs', tabs: [classicTab, { ...esqlTab, id: 'tab-2' }] })
+    );
+
+    expect(result).toEqual({
+      title: 'Classic logs',
+      time_range: esqlTab.time_range,
+      tabs: [
+        {
+          data_source: classicTab.data_source,
+          type: DiscoverTabType.Default,
+          column_order: esqlTab.column_order,
+          sort: esqlTab.sort,
+          filters: [],
+          view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+          sample_size: 500,
+        },
+      ],
+    });
+  });
+
   describe('buildDiscoverSessionEmbeddableInput', () => {
     it('adds overlay document viewer display options and the local time range', () => {
-      const data = createSession({ title: 'Nginx errors', tabs: [esqlTab] });
+      const data = createSession({
+        title: 'Nginx errors',
+        tabs: [
+          {
+            ...esqlTab,
+            type: DiscoverTabType.Metrics,
+            dimensions: ['service.name'],
+            search_term: 'cpu',
+            counter_aggregation: 'sum',
+            gauge_aggregation: 'avg',
+            histogram_percentile: 'p95',
+            histogram_visualization: 'lnsHeatmap',
+            grid_sort_field: 'recency',
+            grid_sort_direction: 'desc',
+          },
+        ],
+      });
       const originalTab = { ...data.tabs[0] };
       const result = buildDiscoverSessionEmbeddableInput(data, { from: 'now-15m', to: 'now' });
 
@@ -79,6 +129,9 @@ describe('discover session inline state', () => {
           density: DataGridDensity.COMPACT,
           row_height: 1,
           header_row_height: 1,
+          histogram_visualization: 'lnsHeatmap',
+          grid_sort_field: 'recency',
+          grid_sort_direction: 'desc',
         })
       );
       expect(result.nonPersistedDisplayOptions).toEqual({

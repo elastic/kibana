@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
+import { decode } from '@kbn/rison';
 import { AlertsDetailsTable } from './alerts_findings_details_table';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
@@ -20,6 +21,10 @@ import {
   ENTITY_ANALYTICS_ALERTS_FROM,
   ENTITY_ANALYTICS_DEFAULT_TIMERANGE_TO,
 } from '../../../entity_analytics/components/home/constants';
+import { getEntityAnalyticsNewHomeScopeId } from '../../../entity_analytics/common/scope_time_ranges';
+import { useNavigateToAlertsPageWithFilters } from '../../../common/hooks/use_navigate_to_alerts_page_with_filters';
+
+const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
 jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({
   uiMetricService: { trackUiMetric: jest.fn() },
@@ -140,6 +145,90 @@ describe('AlertsDetailsTable', () => {
     expect(onShowAlert).toHaveBeenCalledWith('alert-1', 'index-1', 'Rule');
   });
 
+  describe('loading state', () => {
+    const defaultQueryAlertsImplementation = (useQueryAlerts as jest.Mock).getMockImplementation();
+
+    const mockQueryAlerts = (result: {
+      loading: boolean;
+      data: unknown;
+      refetch: jest.Mock | null;
+    }) =>
+      (useQueryAlerts as jest.Mock).mockReturnValue({
+        ...result,
+        setQuery: jest.fn(),
+        response: '',
+        request: '',
+      });
+
+    const isTableLoading = () => document.querySelector('.euiBasicTable-loading') !== null;
+
+    afterEach(() => {
+      (useQueryAlerts as jest.Mock).mockImplementation(defaultQueryAlertsImplementation);
+      (useUiSetting as jest.Mock).mockReturnValue(false);
+      (useEntityStoreEuidApi as jest.Mock).mockReturnValue({ euid: null });
+      (useEntityFromStore as jest.Mock).mockReturnValue({ entityRecord: null, isLoading: false });
+    });
+
+    it('shows a loading state instead of the empty message before the request starts', () => {
+      mockQueryAlerts({ loading: false, data: null, refetch: null });
+
+      const { getByText, queryByText } = renderTable(jest.fn());
+
+      expect(isTableLoading()).toBe(true);
+      expect(getByText('Loading alerts…')).toBeInTheDocument();
+      expect(queryByText('No items found')).not.toBeInTheDocument();
+    });
+
+    it('shows a loading state while the request is in flight', () => {
+      mockQueryAlerts({ loading: true, data: null, refetch: null });
+
+      const { queryByText } = renderTable(jest.fn());
+
+      expect(isTableLoading()).toBe(true);
+      expect(queryByText('No items found')).not.toBeInTheDocument();
+    });
+
+    it('shows a loading state while the entity store lookup is pending', () => {
+      mockEntityStoreEnabled();
+      (useEntityFromStore as jest.Mock).mockReturnValue({ entityRecord: null, isLoading: true });
+      mockQueryAlerts({ loading: false, data: null, refetch: null });
+
+      const { queryByText } = render(
+        <TestProviders>
+          <AlertsDetailsTable
+            field={EntityIdentifierFields.hostName}
+            value="my-host"
+            entityId="host:target"
+            entityType="host"
+            onShowAlert={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      expect(isTableLoading()).toBe(true);
+      expect(queryByText('No items found')).not.toBeInTheDocument();
+    });
+
+    it('shows the empty message once the request finishes with no alerts', () => {
+      mockQueryAlerts({ loading: false, data: { hits: { hits: [] } }, refetch: jest.fn() });
+
+      const { getByText, queryByText } = renderTable(jest.fn());
+
+      expect(isTableLoading()).toBe(false);
+      expect(getByText('No items found')).toBeInTheDocument();
+      expect(queryByText('Loading alerts…')).not.toBeInTheDocument();
+    });
+
+    it('stops loading when the request fails', () => {
+      mockQueryAlerts({ loading: false, data: null, refetch: jest.fn() });
+
+      const { getByText } = renderTable(jest.fn());
+
+      expect(isTableLoading()).toBe(false);
+      expect(getByText('No items found')).toBeInTheDocument();
+    });
+  });
+
   describe('time range', () => {
     const renderWithScopeId = (scopeId?: string) =>
       render(
@@ -178,6 +267,43 @@ describe('AlertsDetailsTable', () => {
       expect(useNonClosedAlerts).toHaveBeenCalledWith(
         expect.objectContaining({ from: '2022-01-01', to: '2023-01-01' })
       );
+    });
+
+    describe('alerts page link', () => {
+      const getLinkTimerange = (scopeId?: string) => {
+        const { getByTestId } = renderWithScopeId(scopeId);
+        fireEvent.click(getByTestId('securitySolutionFlyoutInsightsAlertsCount'));
+        const openAlertsPageWithFilters = (useNavigateToAlertsPageWithFilters as jest.Mock)();
+        expect(openAlertsPageWithFilters).toHaveBeenCalledTimes(1);
+        const [, openInNewTab, timerange] = openAlertsPageWithFilters.mock.calls[0];
+        expect(openInNewTab).toBe(true);
+        return decode(timerange);
+      };
+
+      it('passes the global time range as an absolute range', () => {
+        expect(getLinkTimerange()).toEqual({
+          global: { timerange: { kind: 'absolute', from: '2022-01-01', to: '2023-01-01' } },
+        });
+      });
+
+      it.each([
+        [ENTITY_ANALYTICS_TABLE_ID, ENTITY_ANALYTICS_ALERTS_FROM],
+        [getEntityAnalyticsNewHomeScopeId('24h'), 'now-24h'],
+        [getEntityAnalyticsNewHomeScopeId('7d'), 'now-7d'],
+        [getEntityAnalyticsNewHomeScopeId('30d'), 'now-30d'],
+      ])('passes the %s scope time range as a relative range', (scopeId, fromStr) => {
+        expect(getLinkTimerange(scopeId)).toEqual({
+          global: {
+            timerange: {
+              kind: 'relative',
+              fromStr,
+              toStr: ENTITY_ANALYTICS_DEFAULT_TIMERANGE_TO,
+              from: expect.stringMatching(ISO_DATE_REGEX),
+              to: expect.stringMatching(ISO_DATE_REGEX),
+            },
+          },
+        });
+      });
     });
   });
 

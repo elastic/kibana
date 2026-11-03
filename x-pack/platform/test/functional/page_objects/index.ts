@@ -15,7 +15,6 @@ import { CanvasPageProvider } from './canvas_page';
 import { LensPageProvider } from './lens_page';
 import { GisPageObject } from './gis_page';
 import { ReportingPageObject } from './reporting_page';
-import { UpgradeAssistantFlyoutObject } from './upgrade_assistant_page';
 import { UserProfilePageProvider } from './user_profile_page';
 import { SearchSessionsPageProvider } from './search_sessions_management_page';
 import { GraphPageObject } from './graph_page';
@@ -29,11 +28,6 @@ import { ShareSavedObjectsToSpacePageProvider } from './share_saved_objects_to_s
 import { StatusPageObject } from './status_page';
 import { GeoFileUploadPageObject } from './geo_file_upload';
 import { LogstashPageObject } from './logstash_page';
-import { IndexLifecycleManagementPageProvider } from './index_lifecycle_management_page';
-import { RollupPageObject } from './rollup_page';
-import { RemoteClustersPageProvider } from './remote_clusters_page';
-import { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
-
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
 export const pageObjects = {
@@ -49,7 +43,6 @@ export const pageObjects = {
   maps: GisPageObject,
   reporting: ReportingPageObject,
   searchSessionsManagement: SearchSessionsPageProvider,
-  upgradeAssistant: UpgradeAssistantFlyoutObject,
   userProfiles: UserProfilePageProvider,
   maintenanceWindows: MaintenanceWindowsPageProvider,
   banners: BannersPageObject,
@@ -60,9 +53,5 @@ export const pageObjects = {
   shareSavedObjectsToSpace: ShareSavedObjectsToSpacePageProvider,
   statusPage: StatusPageObject,
   geoFileUpload: GeoFileUploadPageObject,
-  indexLifecycleManagement: IndexLifecycleManagementPageProvider,
   logstash: LogstashPageObject,
-  rollup: RollupPageObject,
-  remoteClusters: RemoteClustersPageProvider,
-  crossClusterReplication: CrossClusterReplicationPageProvider,
 };

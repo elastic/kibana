@@ -5,33 +5,46 @@
  * 2.0.
  */
 
-import { SpecsClient } from '../../../../specs_client';
+import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { getRegisteredSpec } from '../../../../specs_client/lib/get_registered_spec';
-import type { GetConnectorSpecParams } from './types';
+import { serializeSpecDetail } from '../../../../specs_client/lib/serialize_spec_detail';
+import type { GetConnectorSpecParams, GetConnectorSpecResult } from './types';
 
 export async function getConnectorSpecAsJsonSchema({
   context,
   id,
   configurationUtilities,
-}: GetConnectorSpecParams) {
-  const client = new SpecsClient({
-    actionTypeRegistry: context.actionTypeRegistry,
-    configurationUtilities,
-    authorization: context.authorization,
-    auditLogger: context.auditLogger,
-  });
-  const detail = await client.get({ id });
-  const { spec } = getRegisteredSpec(context.actionTypeRegistry, id);
+}: GetConnectorSpecParams): Promise<GetConnectorSpecResult> {
+  try {
+    await context.authorization.ensureAuthorized({ operation: 'get' });
+  } catch (error) {
+    context.auditLogger?.log(
+      connectorAuditEvent({
+        action: ConnectorAuditAction.GET,
+        error,
+      })
+    );
+    throw error;
+  }
+
+  const registered = getRegisteredSpec(context.actionTypeRegistry, id);
+  const detail = serializeSpecDetail(registered, configurationUtilities);
 
   return {
-    metadata: spec.metadata,
+    metadata: registered.spec.metadata,
     schema: detail.formSchema,
     isTestable: detail.isTestable,
-    actions: detail.actions.map(({ name, isTool, description, scope }) => ({
+    authTypeIds: detail.authTypeIds,
+    hasInboundEvents: detail.hasInboundEvents,
+    isInboundOnly: detail.isInboundOnly,
+    isEarsExperimental: detail.isEarsExperimental,
+    ...(detail.skill !== undefined ? { skill: detail.skill } : {}),
+    actions: detail.actions.map(({ name, isTool, description, scope, inputSchema }) => ({
       name,
       isTool,
       ...(description !== undefined ? { description } : {}),
-      ...(scope !== undefined ? { scope } : {}),
+      scope,
+      inputSchema,
     })),
   };
 }

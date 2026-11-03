@@ -307,6 +307,7 @@ export { useGetEnrollmentAPIKeysQuery } from './hooks/use_request/enrollment_api
 // /internal/ URL path. Do NOT change to internal.v1 ('1') — it returns 400 Unsupported version.
 // See: fleet/server/routes/agent_policy/index.ts ~line 308.
 export { sendCreateAgentPolicyWithPackagePolicies } from './hooks/use_request/agent_policy';
+export { sendGetPackagePolicies } from './hooks/use_request/package_policy';
 
 // Package policy creation — used by the existing-agent-policy path in ingest_hub
 export { sendCreatePackagePolicyForRq as sendCreatePackagePolicy } from './hooks/use_request/package_policy';

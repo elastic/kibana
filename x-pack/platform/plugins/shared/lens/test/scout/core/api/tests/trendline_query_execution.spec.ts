@@ -91,10 +91,17 @@ apiTest.describe(
         const columnNames = response.body.rawResponse.columns.map(
           ({ name }: { name: string }) => name
         );
-        expect(columnNames).toStrictEqual([
-          ...queryCase.expectedMetricFields,
-          queryCase.expectedTimeField,
-        ]);
+        expect(columnNames).toStrictEqual(
+          queryCase.expectedResultColumns ?? [
+            ...queryCase.expectedMetricFields,
+            queryCase.expectedTimeField,
+          ]
+        );
+        expect(generated.timeField).toBe(queryCase.expectedTimeField);
+        const timeColumn = response.body.rawResponse.columns.find(
+          ({ name }: { name: string }) => name === generated.timeField
+        );
+        expect(timeColumn).toMatchObject({ type: 'date' });
         expect(response.body.rawResponse.values.length).toBeGreaterThan(0);
       });
     }

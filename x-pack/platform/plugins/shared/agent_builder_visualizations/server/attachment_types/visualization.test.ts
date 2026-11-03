@@ -50,11 +50,22 @@ describe('createVisualizationAttachmentType resolve()', () => {
     expect(resolveMock).toHaveBeenCalledWith('lens', 'viz-1');
     expect(result).toEqual({
       renderer: 'lens',
-      query: 'viz-1',
+      query: 'My Visualization',
       visualization: { type: 'xy', layers: [] },
       chart_type: 'xy',
       esql: 'FROM logs',
     });
+  });
+
+  it('falls back to the saved object id as the query when the visualization has no title', async () => {
+    resolveMock.mockResolvedValue({
+      saved_object: { attributes: {}, references: [] },
+      outcome: 'exactMatch',
+    });
+
+    const result = await createVisualizationAttachmentType().resolve!('viz-1', createContext());
+
+    expect(result?.query).toBe('viz-1');
   });
 
   it('omits chart_type when the Lens API type is outside the supported vocabulary', async () => {
