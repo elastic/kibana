@@ -65,6 +65,17 @@ export interface BrowserToolCallClient {
   deleteOlderThan(age: { hours: number }): Promise<number>;
 }
 
+// Only pending calls can expire, and only answered calls can be consumed.
+const SET_STATUS_SCRIPT = `
+  if (params.status == 'expired' && ctx._source.status != 'pending') {
+    ctx.op = 'noop';
+  } else if (params.status == 'consumed' && ctx._source.status != 'answered') {
+    ctx.op = 'noop';
+  } else {
+    ctx._source.status = params.status;
+  }
+`;
+
 // `expires_at` is a date string: it must be parsed, comparing strings is not safe.
 const ANSWER_SCRIPT = `
   if (
@@ -90,7 +101,8 @@ export const createBrowserToolCallClient = ({
   return new BrowserToolCallClientImpl({ storage, esClient });
 };
 
-const isNotFound = (err: any): boolean => err?.meta?.statusCode === 404;
+const isNotFound = (err: unknown): boolean =>
+  (err as { meta?: { statusCode?: number } } | undefined)?.meta?.statusCode === 404;
 
 class BrowserToolCallClientImpl implements BrowserToolCallClient {
   private readonly storage: BrowserToolCallStorage;
@@ -123,7 +135,8 @@ class BrowserToolCallClientImpl implements BrowserToolCallClient {
       tool_id: toolId,
       status: BrowserToolCallStatus.pending,
       created_at: new Date().toISOString(),
-      expires_at: expiresAt,
+      // Normalised so the answer script can always parse it (a bare date would make it throw).
+      expires_at: new Date(expiresAt).toISOString(),
     };
 
     // Reads by id are real-time GETs, so there is no need to wait for a refresh.
@@ -162,6 +175,8 @@ class BrowserToolCallClientImpl implements BrowserToolCallClient {
         index: browserToolCallIndexName,
         id: browserToolCallDocId(executionId, toolCallId),
         refresh: false,
+        // On a concurrent answer the script re-runs, sees `answered` and noops (-> rejected).
+        retry_on_conflict: UPDATE_RETRY_ON_CONFLICT,
         script: {
           lang: 'painless',
           source: ANSWER_SCRIPT,
@@ -186,7 +201,7 @@ class BrowserToolCallClientImpl implements BrowserToolCallClient {
       index: browserToolCallIndexName,
       id: browserToolCallDocId(executionId, toolCallId),
       retry_on_conflict: UPDATE_RETRY_ON_CONFLICT,
-      doc: { status },
+      script: { lang: 'painless', source: SET_STATUS_SCRIPT, params: { status } },
     });
   }
 
@@ -195,6 +210,7 @@ class BrowserToolCallClientImpl implements BrowserToolCallClient {
       index: browserToolCallIndexName,
       query: { range: { created_at: { lt: `now-${hours}h` } } },
       conflicts: 'proceed',
+      ignore_unavailable: true,
       refresh: false,
     });
     return response.deleted ?? 0;

@@ -63,6 +63,19 @@ describe('BrowserToolCallClient', () => {
     );
   });
 
+  it('create stores a normalised expires_at when given a date without offset', async () => {
+    await client.create({
+      executionId: 'exec-1',
+      toolCallId: 'call-1',
+      spaceId: 'default',
+      toolId: 'my_tool',
+      expiresAt: '2026-01-01T00:00:00',
+    });
+    const [{ document }] = mockStorageClient.index.mock.calls[0];
+    expect(document.expires_at).toBe(new Date('2026-01-01T00:00:00').toISOString());
+    expect(document.expires_at).toMatch(/Z$/);
+  });
+
   it('get returns undefined on 404', async () => {
     esClient.get.mockRejectedValue(notFound());
     await expect(client.get('exec-1', 'call-1')).resolves.toBeUndefined();
@@ -102,6 +115,17 @@ describe('BrowserToolCallClient', () => {
     );
   });
 
+  it('answer retries on conflict and sends a null client_id when none is given', async () => {
+    esClient.update.mockResolvedValue({ result: 'updated' } as any);
+    await client.answer({ executionId: 'exec-1', toolCallId: 'call-1', result: { status: 'ok' } });
+    expect(esClient.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        retry_on_conflict: 3,
+        script: expect.objectContaining({ params: expect.objectContaining({ client_id: null }) }),
+      })
+    );
+  });
+
   it("answer returns 'rejected' when the update result is 'noop'", async () => {
     esClient.update.mockResolvedValue({ result: 'noop' } as any);
     await expect(
@@ -124,13 +148,17 @@ describe('BrowserToolCallClient', () => {
     ).resolves.toBe('not_found');
   });
 
-  it('setStatus updates the status with retry on conflict', async () => {
+  it('setStatus runs a conditional scripted update with retry on conflict', async () => {
     await client.setStatus('exec-1', 'call-1', BrowserToolCallStatus.consumed);
     expect(esClient.update).toHaveBeenCalledWith({
       index: browserToolCallIndexName,
       id: 'exec-1:call-1',
       retry_on_conflict: 3,
-      doc: { status: 'consumed' },
+      script: expect.objectContaining({
+        lang: 'painless',
+        source: expect.stringContaining("ctx.op = 'noop'"),
+        params: { status: 'consumed' },
+      }),
     });
   });
 
@@ -142,6 +170,7 @@ describe('BrowserToolCallClient', () => {
       index: browserToolCallIndexName,
       query: { range: { created_at: { lt: 'now-24h' } } },
       conflicts: 'proceed',
+      ignore_unavailable: true,
       refresh: false,
     });
   });
