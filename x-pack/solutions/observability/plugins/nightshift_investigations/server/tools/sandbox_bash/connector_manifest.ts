@@ -17,8 +17,14 @@ import {
   ELASTIC_MANIFEST_PATH,
 } from './connector_docs';
 
-const renderConnectorSection = (connector: AgentConnector): string =>
-  `## ${connector.name} (connector-id: ${connector.id}, type: ${connector.actionTypeId})`;
+const ELASTICSEARCH_CONNECTOR_TYPE = '.elasticsearch';
+
+const renderConnectorSection = (connector: AgentConnector): string[] => [
+  `## ${connector.name} (connector-id: ${connector.id}, type: ${connector.actionTypeId})`,
+  ...(connector.actionTypeId === ELASTICSEARCH_CONNECTOR_TYPE
+    ? ['', `Elasticsearch cluster. Query guide: ${ELASTIC_MANIFEST_PATH}`]
+    : []),
+];
 
 const renderGuidesSection = (): string[] => [
   '',
@@ -72,7 +78,7 @@ export const writeConnectorManifest = async ({
     sections.push('', '---', '', '*(No connectors are assigned to this agent.)*');
   } else {
     for (const connector of connectors) {
-      sections.push('', '---', '', renderConnectorSection(connector));
+      sections.push('', '---', '', ...renderConnectorSection(connector));
     }
   }
 

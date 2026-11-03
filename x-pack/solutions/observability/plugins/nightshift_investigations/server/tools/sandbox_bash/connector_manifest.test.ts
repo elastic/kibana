@@ -158,6 +158,26 @@ describe('writeConnectorManifest', () => {
       expect(content).toContain('## My GitHub (connector-id: connector-1, type: .github)');
     });
 
+    it('points Elasticsearch connectors at the Elasticsearch guide', async () => {
+      const { content } = await renderManifest({
+        connectors: [createRawConnector({ name: 'Telemetry', actionTypeId: '.elasticsearch' })],
+      });
+
+      expect(content).toContain(
+        '## Telemetry (connector-id: connector-1, type: .elasticsearch)\n\n' +
+          'Elasticsearch cluster. Query guide: /workspace/.connector-docs/elastic.md\n'
+      );
+    });
+
+    it.each(['.http', '.github'])('does not mark %s connectors as Elasticsearch', async (type) => {
+      const { content } = await renderManifest({
+        connectors: [createRawConnector({ actionTypeId: type })],
+      });
+
+      expect(content).toContain(`## My GitHub (connector-id: connector-1, type: ${type})\n\n---`);
+      expect(content).not.toContain('Elasticsearch cluster.');
+    });
+
     it('renders every allow-listed connector', async () => {
       const { content } = await renderManifest({
         allowedConnectorIds: ['connector-1', 'connector-2'],
