@@ -172,7 +172,7 @@ describe('runResolutionScoringStep', () => {
     beforeEach(() => {
       jest
         .mocked(calculateResolutionEntityScores)
-        .mockReturnValue(scorePages([[riskScoreServiceMock.createRiskScore()]]));
+        .mockReturnValue(scorePages([[createRiskScore()]]));
     });
 
     it('leaves the entity store refresh to its default unless asked otherwise', async () => {
