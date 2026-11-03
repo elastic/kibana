@@ -28,6 +28,7 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 import { FormProvider, useForm } from 'react-hook-form';
 import type { CreateConnectorTypeRequest } from '@kbn/actions-plugin/common';
 import { useCreateConnectorType } from '../../../hooks/use_create_connector_type';
+import { AiAssistantPanel } from './ai_assistant_panel';
 import { BuildConnectorForm } from './build_connector_form';
 import { YamlImportPanel } from './yaml_import_panel';
 import { buildConnectorFormResolver } from './form_resolver';
@@ -45,6 +46,7 @@ const BuildConnectorFlyoutComponent: React.FC<BuildConnectorFlyoutProps> = ({
 }) => {
   const titleId = useGeneratedHtmlId({ prefix: 'buildConnectorFlyoutTitle' });
   const yamlAccordionId = useGeneratedHtmlId({ prefix: 'buildConnectorFlyoutYaml' });
+  const aiAccordionId = useGeneratedHtmlId({ prefix: 'buildConnectorFlyoutAi' });
   const methods = useForm<BuildConnectorFormData>({
     mode: 'onTouched',
     defaultValues: getEmptyFormData(),
@@ -67,7 +69,7 @@ const BuildConnectorFlyoutComponent: React.FC<BuildConnectorFlyoutProps> = ({
     Boolean(message)
   );
 
-  const onApplyYaml = useCallback(
+  const onApplyDefinition = useCallback(
     (connectorType: Partial<CreateConnectorTypeRequest>) => {
       reset(requestToFormData(connectorType));
       // Surface what the schema would reject right away, so the imported definition can be fixed in place.
@@ -117,7 +119,21 @@ const BuildConnectorFlyoutComponent: React.FC<BuildConnectorFlyoutProps> = ({
           paddingSize="s"
         >
           <div data-test-subj="build-connector-flyout-yaml-panel">
-            <YamlImportPanel onApply={onApplyYaml} isDisabled={isSaving} />
+            <YamlImportPanel onApply={onApplyDefinition} isDisabled={isSaving} />
+          </div>
+        </EuiAccordion>
+        <EuiSpacer size="s" />
+        <EuiAccordion
+          id={aiAccordionId}
+          buttonContent={i18n.translate(
+            'xpack.triggersActionsUI.sections.buildConnectorFlyout.aiAccordionLabel',
+            { defaultMessage: 'Generate with AI' }
+          )}
+          buttonProps={{ 'data-test-subj': 'build-connector-flyout-ai-toggle' }}
+          paddingSize="s"
+        >
+          <div data-test-subj="build-connector-flyout-ai-panel">
+            <AiAssistantPanel onApply={onApplyDefinition} isDisabled={isSaving} />
           </div>
         </EuiAccordion>
         <EuiSpacer size="m" />

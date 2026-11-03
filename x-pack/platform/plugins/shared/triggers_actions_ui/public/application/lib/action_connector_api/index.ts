@@ -10,6 +10,7 @@ export { loadAllActions } from './connectors';
 export { fetchConnectorAuthStatus as loadConnectorAuthStatus } from '@kbn/alerts-ui-shared/src/common/apis/fetch_connector_auth_status';
 export { createActionConnector } from './create';
 export { createConnectorType } from './create_connector_type';
+export { generateConnectorType } from './generate_connector_type';
 export { deleteActions } from './delete';
 export { executeAction } from './execute';
 export { updateActionConnector } from './update';

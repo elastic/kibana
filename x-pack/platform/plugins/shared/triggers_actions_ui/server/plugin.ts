@@ -18,8 +18,11 @@ import type {
   ActionsApiRequestHandlerContext,
 } from '@kbn/actions-plugin/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { getService, register as registerDataService } from './data';
-import { createHealthRoute, createConfigRoute } from './routes';
+import type { ConnectorBuilderInferenceEndpoints } from './register_inference_feature';
+import { registerConnectorBuilderInferenceFeature } from './register_inference_feature';
+import { createHealthRoute, createConfigRoute, createGenerateConnectorTypeRoute } from './routes';
 
 type TriggersActionsUiRequestHandlerContext = CustomRequestHandlerContext<{
   actions: ActionsApiRequestHandlerContext;
@@ -35,10 +38,12 @@ interface PluginsSetup {
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
   alerting: AlertingServerSetup;
   actions: ActionsPluginSetup;
+  searchInferenceEndpoints?: ConnectorBuilderInferenceEndpoints;
 }
 
 interface TriggersActionsPluginStart {
   alerting: AlertingServerStart;
+  inference?: InferenceServerStart;
 }
 
 export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> {
@@ -56,6 +61,7 @@ export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> 
   ): void {
     const router = core.http.createRouter();
     const typedRouter = core.http.createRouter<TriggersActionsUiRequestHandlerContext>();
+    registerConnectorBuilderInferenceFeature(plugins.searchInferenceEndpoints, this.logger);
     registerDataService({
       logger: this.logger,
       data: this.data,
@@ -79,6 +85,14 @@ export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> 
         const [, pluginStart] = await core.getStartServices();
         return pluginStart.alerting.getRulesClientWithRequest(request);
       },
+    });
+
+    createGenerateConnectorTypeRoute({
+      logger: this.logger,
+      router,
+      baseRoute: BASE_TRIGGERS_ACTIONS_UI_API_PATH,
+      getActionsConfigurationUtilities: () => plugins.actions.getActionsConfigurationUtilities(),
+      getInference: async () => (await core.getStartServices())[1].inference,
     });
   }
 

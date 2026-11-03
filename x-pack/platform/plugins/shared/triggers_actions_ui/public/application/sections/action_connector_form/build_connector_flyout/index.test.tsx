@@ -17,6 +17,7 @@ jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../lib/action_connector_api', () => ({
   ...(jest.requireActual('../../../lib/action_connector_api') as object),
   createConnectorType: jest.fn(),
+  generateConnectorType: jest.fn(),
 }));
 const mockCodeEditor = jest.fn();
 jest.mock('@kbn/code-editor', () => ({
@@ -26,7 +27,9 @@ jest.mock('@kbn/code-editor', () => ({
     return <MockedCodeEditor {...props} />;
   },
 }));
-const { createConnectorType } = jest.requireMock('../../../lib/action_connector_api');
+const { createConnectorType, generateConnectorType } = jest.requireMock(
+  '../../../lib/action_connector_api'
+);
 
 const yamlDefinition = `
 id: .acme
@@ -544,6 +547,187 @@ describe('BuildConnectorFlyout', () => {
         expect(bodyEditor(0)).toHaveValue('{\n  "a": 1,\n  "b": {\n    "c": true\n  }\n}')
       );
       expect(screen.queryByText('Must be valid JSON.')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('AI assistant', () => {
+    const generatedConnectorType = {
+      id: 'acme',
+      displayName: 'Acme',
+      description: 'Talks to Acme',
+      auth: { type: 'api_key_header' as const, headerName: 'X-Api-Key' },
+      config: [{ name: 'baseUrl', type: 'string' as const, required: true }],
+      actions: {
+        ping: {
+          description: 'Ping',
+          scope: 'read' as const,
+          input: [],
+          request: { method: 'GET' as const, url: '{{config.baseUrl}}/ping' },
+        },
+      },
+    };
+
+    const openAiPanel = async () => {
+      await userEvent.click(await screen.findByTestId('build-connector-flyout-ai-toggle'));
+    };
+
+    it('renders the toggle and the URL field', async () => {
+      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+
+      expect(await screen.findByTestId('build-connector-flyout-ai-toggle')).toBeInTheDocument();
+      await openAiPanel();
+      expect(screen.getByTestId('build-connector-flyout-ai-url')).toBeInTheDocument();
+      expect(screen.getByText('Fills the form without saving.')).toBeInTheDocument();
+    });
+
+    it('disables Generate for an empty or non-http URL', async () => {
+      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      await openAiPanel();
+
+      const generateButton = screen.getByTestId('build-connector-flyout-ai-generate-btn');
+      expect(generateButton).toBeDisabled();
+
+      await userEvent.type(screen.getByTestId('build-connector-flyout-ai-url'), 'not-a-url');
+      expect(generateButton).toBeDisabled();
+
+      await userEvent.clear(screen.getByTestId('build-connector-flyout-ai-url'));
+      await userEvent.type(
+        screen.getByTestId('build-connector-flyout-ai-url'),
+        'ftp://example.com/docs'
+      );
+      expect(generateButton).toBeDisabled();
+      expect(generateConnectorType).not.toHaveBeenCalled();
+    });
+
+    it('fills the form from a generated draft and does not save it', async () => {
+      generateConnectorType.mockResolvedValue({ connectorType: generatedConnectorType });
+      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      await openAiPanel();
+
+      await userEvent.type(
+        screen.getByTestId('build-connector-flyout-ai-url'),
+        'https://docs.example.com/api'
+      );
+      await userEvent.click(screen.getByTestId('build-connector-flyout-ai-generate-btn'));
+
+      await waitFor(() =>
+        expect(screen.getByTestId('buildConnectorNameInput')).toHaveValue('Acme')
+      );
+      expect(screen.getByTestId('buildConnectorIdInput')).toHaveValue('acme');
+      expect(screen.getByTestId('buildConnectorAuthTypeSelect')).toHaveValue('api_key_header');
+      expect(screen.getByTestId('buildConnectorAuthHeaderNameInput')).toHaveValue('X-Api-Key');
+      expect(screen.getByTestId('buildConnectorAction-0-name')).toHaveValue('ping');
+      expect(screen.getByTestId('buildConnectorAction-0-url')).toHaveValue(
+        '{{config.baseUrl}}/ping'
+      );
+      expect(screen.getByTestId('build-connector-flyout-ai-success')).toHaveTextContent(
+        'Review the draft before saving.'
+      );
+      expect(createConnectorType).not.toHaveBeenCalled();
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it('shows the callout and guidance for a typed API error', async () => {
+      generateConnectorType.mockRejectedValue({
+        body: {
+          message: 'That host is not allowed.',
+          attributes: { reason: 'blocked_destination' },
+        },
+      });
+      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      await openAiPanel();
+
+      await userEvent.type(
+        screen.getByTestId('build-connector-flyout-ai-url'),
+        'https://docs.example.com/api'
+      );
+      await userEvent.click(screen.getByTestId('build-connector-flyout-ai-generate-btn'));
+
+      const callout = await screen.findByTestId('build-connector-flyout-ai-error');
+      expect(callout).toHaveTextContent('That host is not allowed.');
+      expect(callout).toHaveTextContent('Use a public https documentation URL.');
+      expect(createConnectorType).not.toHaveBeenCalled();
+    });
+
+    it('shows Feature Settings guidance when no model is configured', async () => {
+      generateConnectorType.mockRejectedValue({
+        body: {
+          message: 'No AI model is available.',
+          attributes: { reason: 'no_model' },
+        },
+      });
+      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      await openAiPanel();
+
+      await userEvent.type(
+        screen.getByTestId('build-connector-flyout-ai-url'),
+        'https://docs.example.com/api'
+      );
+      await userEvent.click(screen.getByTestId('build-connector-flyout-ai-generate-btn'));
+
+      expect(await screen.findByTestId('build-connector-flyout-ai-error')).toHaveTextContent(
+        'Set a default AI connector, or pick a model for Connector builder in Feature Settings.'
+      );
+    });
+
+    it('shows try another page guidance when the model output is invalid', async () => {
+      generateConnectorType.mockRejectedValue({
+        body: {
+          message: 'The model did not return a valid connector type.',
+          attributes: { reason: 'invalid_output' },
+        },
+      });
+      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      await openAiPanel();
+
+      await userEvent.type(
+        screen.getByTestId('build-connector-flyout-ai-url'),
+        'https://docs.example.com/api'
+      );
+      await userEvent.click(screen.getByTestId('build-connector-flyout-ai-generate-btn'));
+
+      expect(await screen.findByTestId('build-connector-flyout-ai-error')).toHaveTextContent(
+        'Try again or another page, then edit the form by hand.'
+      );
+    });
+
+    it('submits the generated draft when Save is clicked', async () => {
+      generateConnectorType.mockResolvedValue({ connectorType: generatedConnectorType });
+      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      await openAiPanel();
+
+      await userEvent.type(
+        screen.getByTestId('build-connector-flyout-ai-url'),
+        'https://docs.example.com/api'
+      );
+      await userEvent.click(screen.getByTestId('build-connector-flyout-ai-generate-btn'));
+      await waitFor(() =>
+        expect(screen.getByTestId('buildConnectorNameInput')).toHaveValue('Acme')
+      );
+
+      await userEvent.click(screen.getByTestId('build-connector-flyout-save-btn'));
+
+      await waitFor(() =>
+        expect(createConnectorType).toHaveBeenCalledWith(
+          expect.objectContaining({
+            connectorType: {
+              id: 'acme',
+              displayName: 'Acme',
+              description: 'Talks to Acme',
+              auth: { type: 'api_key_header', headerName: 'X-Api-Key' },
+              config: [{ name: 'baseUrl', type: 'string', required: true }],
+              actions: {
+                ping: {
+                  description: 'Ping',
+                  scope: 'read',
+                  input: [],
+                  request: { method: 'GET', url: '{{config.baseUrl}}/ping' },
+                },
+              },
+            },
+          })
+        )
+      );
     });
   });
 

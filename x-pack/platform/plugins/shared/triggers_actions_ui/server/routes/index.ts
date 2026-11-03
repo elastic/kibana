@@ -6,3 +6,4 @@
  */
 export { createHealthRoute } from './health';
 export { createConfigRoute } from './config';
+export { createGenerateConnectorTypeRoute } from './generate_connector_type';
