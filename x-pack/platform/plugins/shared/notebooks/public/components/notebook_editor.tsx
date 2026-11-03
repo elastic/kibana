@@ -8,6 +8,7 @@
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiPageTemplate } from '@elastic/eui';
 import useLatest from 'react-use/lib/useLatest';
+import { BehaviorSubject } from 'rxjs';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { CellDefinition, NotebookAttributes } from '../../common/types';
 import { isPinnedTimeCell } from '../model/cell_factory';
@@ -70,7 +71,7 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
     const scheduler = new NotebookScheduler(store, {
       runQuery: createRunQuery(plugins.data.search),
     });
-    return { store, scheduler };
+    return { store, scheduler, openFlyouts$: new BehaviorSubject(0) };
   });
   const [isSaving, setIsSaving] = useState(false);
 

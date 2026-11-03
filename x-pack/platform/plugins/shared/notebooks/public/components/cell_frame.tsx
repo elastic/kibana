@@ -24,6 +24,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { CellDefinition, CellType } from '../../common/types';
 import { CELL_NAME_PATTERN } from '../model/references';
 import { duplicateCell, type NewCellKind } from '../model/cell_factory';
@@ -100,7 +101,8 @@ export const CellFrame = ({
   outputs,
   children,
 }: PropsWithChildren<CellFrameProps>) => {
-  const { store } = useNotebook();
+  const { store, openFlyouts$ } = useNotebook();
+  const isFlyoutOpen = useStateFromPublishingSubject(openFlyouts$) > 0;
   const { euiTheme } = useEuiTheme();
   const borderColor = getBorderColor(runtime?.status, euiTheme);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -233,7 +235,7 @@ export const CellFrame = ({
         {children}
         <CellFooter outputs={outputs} runtime={runtime} />
       </EuiPanel>
-      {onRun && 'runMode' in cell && (
+      {onRun && 'runMode' in cell && !isFlyoutOpen && (
         <div
           className={RUN_GUTTER_CLASS}
           css={css`

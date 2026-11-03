@@ -6,12 +6,15 @@
  */
 
 import { createContext, useContext } from 'react';
+import type { BehaviorSubject } from 'rxjs';
 import type { NotebookStore } from '../model/notebook_store';
 import type { NotebookScheduler } from '../model/scheduler';
 
 export interface NotebookContextValue {
   store: NotebookStore;
   scheduler: NotebookScheduler;
+  /** Number of notebook flyouts currently open. */
+  openFlyouts$: BehaviorSubject<number>;
 }
 
 export const NotebookContext = createContext<NotebookContextValue | null>(null);
