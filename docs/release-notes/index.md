@@ -203,7 +203,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Show up to 10,000 matching indices, up from 100, when you create a data view [#285899]({{kib-pull}}285899).
 * Add the data views API in `/api/data_views/v2`, which follows REST conventions [#298114]({{kib-pull}}298114).
 * Show a warning in the data view editor when the configured time field doesn't exist, and stop showing an empty time field column in Discover [#297060]({{kib-pull}}297060).
-* Show the time range selector, turned off, in Discover and Dashboards when a KQL or Lucene query has no time field configured [#286858]({{kib-pull}}286858).
+* Show a disabled time range selector in Discover when the data view has no time field, and on Dashboards when no panel has one [#286858]({{kib-pull}}286858).
 * Stop rounding relative time ranges, such as **Last 15 minutes**, by default in the time range selector. You can turn rounding on again in the time range selector settings [#280105]({{kib-pull}}280105).
 * Increase the default value of the `search:timeout` advanced setting from 10 minutes to 20 minutes [#297511]({{kib-pull}}297511).
 * Show more time buckets in the Discover histogram for {{esql}} queries [#292319]({{kib-pull}}292319).
