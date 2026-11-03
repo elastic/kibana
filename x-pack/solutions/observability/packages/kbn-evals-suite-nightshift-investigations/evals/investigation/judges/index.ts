@@ -603,11 +603,38 @@ const reportHasFindings = (
 ): report is InvestigationTaskReport =>
   Boolean(report?.conclusion || report?.summary || report?.hypotheses?.length);
 
-const quietWindowText = (metadata: InvestigationExample['metadata']): string => {
+/**
+ * Why ORCA cannot score a run, or undefined when it can. A run that crashed, timed out, or ended
+ * without recording anything has no answer, and reading it as an empty one would pass a control.
+ * ORCA leaves such trials out; `execution_success` still counts them.
+ */
+const orcaUnscoredReason = ({
+  execution_error: executionError,
+  structured_report: report,
+}: InvestigationTaskOutput): string | undefined => {
+  if (!executionError) return undefined;
+  if (executionError === NO_CONCLUSION_ERROR && reportHasFindings(report)) return undefined;
+  return executionError;
+};
+
+const unscored = (reason: string) => ({
+  score: null,
+  label: 'unscored',
+  explanation: `The run did not finish, so ORCA does not score it: ${reason}`,
+});
+
+/**
+ * The quiet window as ORCA shows it to its control judge: each defined bound moved ten minutes
+ * inward, and a missing bound rendered as `null` (open-ended). Undefined without a quiet window.
+ */
+const orcaQuietWindowBounds = (
+  metadata: InvestigationExample['metadata']
+): { start: string; end: string } | undefined => {
   const window = metadata.quiet_window;
-  if (window === undefined || window === null) return '';
-  const text = JSON.stringify(shrinkQuietWindow(window));
-  return text.length > 4_000 ? text.slice(0, 4_000) : text;
+  if (window === null || typeof window !== 'object' || Array.isArray(window)) return undefined;
+  const { start, end } = shrinkQuietWindow(window) as { start?: unknown; end?: unknown };
+  const bound = (value: unknown) => (typeof value === 'string' && value ? value : 'null');
+  return { start: bound(start), end: bound(end) };
 };
 
 const extractReference = (expected: InvestigationExample['output']): string => {
@@ -662,6 +689,8 @@ export const createOrcaEvaluators = (deps: JudgeDeps): InvestigationEvaluator[] 
             explanation: 'RCA accuracy applies to an incident with a non-empty plausible flag set.',
           };
         }
+        const unscoredReason = orcaUnscoredReason(output);
+        if (unscoredReason) return unscored(unscoredReason);
         const report = output.structured_report;
         if (!reportHasFindings(report)) {
           return {
@@ -703,6 +732,8 @@ export const createOrcaEvaluators = (deps: JudgeDeps): InvestigationEvaluator[] 
             explanation: 'Hallucination needs the example plausible flag set.',
           };
         }
+        const unscoredReason = orcaUnscoredReason(output);
+        if (unscoredReason) return unscored(unscoredReason);
         const report = output.structured_report;
         if (!reportHasFindings(report)) {
           return { score: 0, label: 'pass', explanation: 'The report names no cause.' };
@@ -731,7 +762,7 @@ export const createOrcaEvaluators = (deps: JudgeDeps): InvestigationEvaluator[] 
       kind: 'LLM',
       direction: 'maximize',
       getModel: getModelFactory(deps.evaluationConnector),
-      evaluate: async ({ output, expected, metadata }) => {
+      evaluate: async ({ output, metadata }) => {
         if (!isOrcaControl(metadata)) {
           return {
             score: null,
@@ -739,39 +770,39 @@ export const createOrcaEvaluators = (deps: JudgeDeps): InvestigationEvaluator[] 
             explanation: 'Control applies to a no-incident task.',
           };
         }
+        const unscoredReason = orcaUnscoredReason(output);
+        if (unscoredReason) return unscored(unscoredReason);
         if (!reportHasFindings(output.structured_report)) {
           return { score: 1, label: 'pass', explanation: 'An empty control report passes.' };
         }
-        const answer = composeAnswerText(output.structured_report);
-        const quietWindow = quietWindowText(metadata);
-        const reference = extractReference(expected);
-        if (!quietWindow && !reference) {
+        const quietWindow = orcaQuietWindowBounds(metadata);
+        const { current_time: currentTime } = metadata;
+        if (!quietWindow || typeof currentTime !== 'string') {
           return {
             score: null,
             label: 'n/a',
-            explanation: 'Control needs a quiet window or a reference answer.',
+            explanation: 'Control needs the task quiet window and current time.',
           };
         }
         const result = await invokeJudge<{
-          incident_inside_quiet_window: unknown;
+          claims_incident_in_quiet_window: unknown;
           reasoning: string;
         }>(deps, ORCA_CONTROL_EVALUATOR, OrcaControlJudgePrompt, {
-          quietWindow,
-          reference,
-          answer,
+          currentTime,
+          quietWindowStart: quietWindow.start,
+          quietWindowEnd: quietWindow.end,
+          answer: composeAnswerText(output.structured_report),
         });
-        if (typeof result.incident_inside_quiet_window !== 'boolean') {
+        const claims = result.claims_incident_in_quiet_window;
+        if (typeof claims !== 'boolean') {
           throw new Error('ORCA control judge returned no window decision');
         }
-        const score = scoreOrcaControl({
-          emptyReport: false,
-          incidentInsideQuietWindow: result.incident_inside_quiet_window,
-        });
+        const score = scoreOrcaControl({ emptyReport: false, incidentInsideQuietWindow: claims });
         return {
           score,
           label: score === 1 ? 'pass' : 'fail',
           explanation: result.reasoning,
-          metadata: { incident_inside_quiet_window: result.incident_inside_quiet_window },
+          metadata: { claims_incident_in_quiet_window: claims },
         };
       },
     },

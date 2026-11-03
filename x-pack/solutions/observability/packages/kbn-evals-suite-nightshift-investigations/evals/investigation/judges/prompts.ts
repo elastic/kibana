@@ -686,49 +686,71 @@ export const OrcaFlagsJudgePrompt = createPrompt({
   } as const)
   .get();
 
-const ORCA_CONTROL_SYSTEM = `You judge a no-incident control report.
+/**
+ * ORCA's control judge (`JUDGE_PROMPT_CONTROL` in the public Harbor tasks' `check_prediction.py`),
+ * verbatim except that it answers through the `score` tool instead of a bare JSON object.
+ */
+const ORCA_CONTROL_USER = `You are an expert SRE judging whether an AI-generated incident RCA report makes a false-positive claim about an incident at the queried time.
 
-## Quiet window
-{{{quietWindow}}}
+The task is a **control task**: the user queried the system at \`current_time\` during a verified quiet period in which no problem-pattern feature flag is active. The agent's snapshot includes telemetry from before \`current_time\`, so it may legitimately describe past, resolved incidents. Past incidents are **not** false positives — only claims placing an incident inside the quiet window are.
 
-## Reference
-{{{reference}}}
+## Queried time
 
-The quiet window is the time range in which no incident occurred. Call the \`score\` tool with incident_inside_quiet_window true only when the report places an incident strictly inside that window. A report that names no incident, or places one outside the window, is false.`;
+\`current_time = {{{currentTime}}}\`
 
-const ORCA_CONTROL_USER = `## Report
+## Quiet window (no flag active inside)
+
+- \`quiet_window_start = {{{quietWindowStart}}}\` (inclusive lower bound; "null" means open-ended, i.e. no neighboring incident before \`current_time\`)
+- \`quiet_window_end   = {{{quietWindowEnd}}}\` (exclusive upper bound; "null" means open-ended, i.e. no neighboring incident after \`current_time\`)
+
+## SRE Agent's Incident RCA Report
+
 {{{answer}}}
+
+## Evaluation
+
+Answer the single boolean question \`claims_incident_in_quiet_window\`:
+
+- **true** iff the report places **any** incident — its start, ongoing period, or any reported timestamp of active impact — at a time **strictly inside** \`(quiet_window_start, quiet_window_end)\`. Examples that count as true:
+  - Claiming the incident is currently ongoing at \`current_time\`.
+  - Reporting a timeline entry with a UTC timestamp inside the quiet window.
+  - Stating that the incident started or is still active at any time inside the window.
+- **false** otherwise. In particular, the following are NOT false positives:
+  - Describing a past, resolved incident whose start, end, and timeline entries all fall at or before \`quiet_window_start\`.
+  - Describing a future incident whose entries all fall at or after \`quiet_window_end\`.
+  - Saying "no incident occurred at \`current_time\`" while describing past context.
+  - **Timeline entries that merely document when the user reported the issue** (e.g. "02:04 UTC — Incident reported by user", "22:00 ET — issue reported"). These describe the moment the complaint arrived, not active system impact. Ignore such entries when applying the rule above; only entries that describe the system actively failing or degraded count.
+
+Treat the bounds as half-open: a reported time exactly equal to \`quiet_window_start\` or exactly equal to \`quiet_window_end\` is **outside** the quiet window (no false positive). An open-ended bound (null) is equivalent to \`-inf\` / \`+inf\` respectively.
+
+In \`reasoning\`, briefly state the verdict; if \`claims_incident_in_quiet_window\` is true, quote or paraphrase the specific offending claim from the report.
 
 Call the \`score\` tool.`;
 
 export const OrcaControlJudgePrompt = createPrompt({
   name: 'nightshift_orca_control_judge',
-  description: 'Decides whether a control report places an incident inside the quiet window.',
+  description: "ORCA's control judge: whether a report places an incident inside the quiet window.",
   input: lazySchema(() =>
     z.object({
-      quietWindow: z.string().max(4_000),
-      reference: z.string(),
+      currentTime: z.string().max(100),
+      quietWindowStart: z.string().max(100),
+      quietWindowEnd: z.string().max(100),
       answer: z.string(),
     })
   ),
 })
   .version({
-    system: { mustache: { template: ORCA_CONTROL_SYSTEM } },
     template: { mustache: { template: ORCA_CONTROL_USER } },
     tools: {
       score: {
-        description: 'Return whether the report places an incident inside the quiet window.',
+        description: 'Return whether the report claims an incident inside the quiet window.',
         schema: {
           type: 'object',
           properties: {
-            incident_inside_quiet_window: {
-              type: 'boolean',
-              description:
-                'True only when the report places an incident strictly inside the quiet window.',
-            },
-            reasoning: { type: 'string', description: 'One sentence.' },
+            claims_incident_in_quiet_window: { type: 'boolean' },
+            reasoning: { type: 'string' },
           },
-          required: ['incident_inside_quiet_window', 'reasoning'],
+          required: ['claims_incident_in_quiet_window', 'reasoning'],
         },
       },
     },
