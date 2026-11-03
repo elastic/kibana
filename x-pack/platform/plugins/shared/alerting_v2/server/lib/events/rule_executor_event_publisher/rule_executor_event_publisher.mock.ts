@@ -24,7 +24,7 @@ export function createRuleExecutorEventPublisher(): {
   const request = httpServerMock.createKibanaRequest();
 
   return {
-    publisher: new RuleExecutorEventPublisher(eventBus, request),
+    publisher: new RuleExecutorEventPublisher(eventBus, request, 'user'),
     eventBus,
     request,
   };

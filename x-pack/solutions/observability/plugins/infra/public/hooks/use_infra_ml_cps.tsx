@@ -73,7 +73,7 @@ const useIsOnMlCpsPage = (): boolean => {
 const useIsCpsPlatformGateEnabled = (): boolean => {
   const { services } = useKibanaContextForPlugin();
 
-  const isCpsFeatureFlagEnabled = services.featureFlags.getBooleanValue(
+  const isCpsFeatureFlagEnabled = services.featureFlags.useBooleanValue(
     OBSERVABILITY_INFRA_CPS_ENABLED_FEATURE_FLAG,
     OBSERVABILITY_INFRA_CPS_ENABLED_DEFAULT
   );

@@ -11,9 +11,11 @@ import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
-import { getExecutionState } from '@kbn/agent-builder-tools-base/workflows';
+import {
+  getExecutionState,
+  hasWorkflowExecutionReadPrivilege,
+} from '@kbn/agent-builder-tools-base/workflows';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
-import { hasWorkflowExecutionReadPrivilege } from './utils/check_execution_read_privilege';
 
 const getWorkflowExecutionStatusSchema = z.object({
   executionId: z
@@ -51,7 +53,7 @@ export const getWorkflowExecutionStatusTool = ({
     handler: async ({ executionId }, { spaceId, request }) => {
       try {
         const authorized = await hasWorkflowExecutionReadPrivilege({
-          getSecurity,
+          security: getSecurity(),
           request,
           spaceId,
         });
@@ -65,6 +67,7 @@ export const getWorkflowExecutionStatusTool = ({
           executionId,
           spaceId,
           workflowApi,
+          request,
         });
 
         if (execution) {

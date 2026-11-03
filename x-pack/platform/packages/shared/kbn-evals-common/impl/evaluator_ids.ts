@@ -16,3 +16,14 @@ import { EVALUATOR_UUID_NAMESPACE } from '../constants';
  */
 export const getEvaluatorDefinitionId = (spaceId: string, name: string, version: string): string =>
   uuidv5(JSON.stringify([spaceId, name, version]), EVALUATOR_UUID_NAMESPACE);
+
+/**
+ * The id of the version written on top of `parentVersion`, so concurrent edits of one version
+ * compete for a single id and only one of them can become its successor.
+ */
+export const getEvaluatorSuccessorId = (
+  spaceId: string,
+  name: string,
+  parentVersion: string
+): string =>
+  uuidv5(JSON.stringify([spaceId, name, parentVersion, 'successor']), EVALUATOR_UUID_NAMESPACE);

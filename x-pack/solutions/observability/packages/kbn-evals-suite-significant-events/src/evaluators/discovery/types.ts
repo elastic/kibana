@@ -39,7 +39,7 @@ export interface DiscoveryEvaluationExample {
      * the grouping check derives its expected groups from these events' `signals[].metadata.rule_uuid`s.
      */
     expected_significant_events?: Array<Partial<SignificantEvent>>;
-    /** Human-readable summary of expected status outcomes for status-correctness grading. */
+    /** Human-readable summary of the expected outcome, for orientation; no evaluator grades it. */
     expected_ground_truth?: string;
     /** Expected confirmed rule UUIDs keyed by event ID for confirmation-alignment grading. */
     expected_confirmed_rule_uuids?: Record<string, string[]>;

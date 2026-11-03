@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 export const EMPTY_VALUE = '—';
 export const LAST_EPISODE_TIMESTAMP_ESQL_VARIABLE = 'lastEpisodeTimestamp';
 export const RELATED_ALERT_EPISODES_PAGE_SIZE = 5;
-/** Max episodes returned per list page (ESQL LIMIT) and max unique rules resolved in one batch. */
+/** Max episodes returned per list page (ESQL LIMIT). */
 export const ALERT_EPISODES_LIST_PAGE_SIZE = 1000;
 /** Source id used when settling the native v2 ES|QL episode fetches. */
 export const ALERTING_V2_EPISODE_SOURCE_ID = 'v2';
@@ -24,26 +24,28 @@ export const QUERY_STALE_TIME = 30_000;
 export const HISTOGRAM_BREAKDOWN_COLUMNS: DatatableColumn[] = [
   {
     id: 'episode.status',
-    name: i18n.translate('xpack.alertingV2.episodesUi.breakdownByStatus', {
+    name: i18n.translate('xpack.alertingV2EpisodesUi.episodesUi.breakdownByStatus', {
       defaultMessage: 'Status',
     }),
     meta: { type: 'string' },
   },
   {
     id: 'rule.id',
-    name: i18n.translate('xpack.alertingV2.episodesUi.breakdownByRule', { defaultMessage: 'Rule' }),
+    name: i18n.translate('xpack.alertingV2EpisodesUi.episodesUi.breakdownByRule', {
+      defaultMessage: 'Rule',
+    }),
     meta: { type: 'string' },
   },
   {
     id: 'last_ack_action',
-    name: i18n.translate('xpack.alertingV2.episodesUi.breakdownByAcknowledged', {
+    name: i18n.translate('xpack.alertingV2EpisodesUi.episodesUi.breakdownByAcknowledged', {
       defaultMessage: 'Acknowledged',
     }),
     meta: { type: 'string' },
   },
   {
     id: 'last_assignee_uid',
-    name: i18n.translate('xpack.alertingV2.episodesUi.breakdownByAssignee', {
+    name: i18n.translate('xpack.alertingV2EpisodesUi.episodesUi.breakdownByAssignee', {
       defaultMessage: 'Assignee',
     }),
     meta: { type: 'string' },

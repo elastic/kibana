@@ -26,6 +26,12 @@ export interface GenerateQueryAction {
   success: boolean;
   query?: string;
   response: string;
+  /**
+   * Set when the model refused to answer (the provider ended the response with a content
+   * filter) instead of writing a query. The same prompt will be refused again, so this ends
+   * generation rather than spending the retries on it.
+   */
+  refusal?: string;
 }
 
 export interface AutocorrectQueryAction {

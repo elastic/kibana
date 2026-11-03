@@ -9,16 +9,16 @@
 
 import { renderHook } from '@testing-library/react';
 import { LineCounter, parseDocument } from 'yaml';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import { resolveWorkflowEventsModeFromOn } from '@kbn/workflows-execution-engine/server';
 import { useWorkflowEventsOnDecorations } from './use_workflow_events_on_decorations';
 
-jest.mock('@kbn/monaco', () => {
-  const actualMonaco = jest.requireActual('@kbn/monaco');
+jest.mock('@kbn/code-editor', () => {
+  const actualCodeEditor = jest.requireActual('@kbn/code-editor');
   return {
-    ...actualMonaco,
+    ...actualCodeEditor,
     monaco: {
-      ...actualMonaco.monaco,
+      ...actualCodeEditor.monaco,
       Range: jest.fn((startLine: number, startCol: number, endLine: number, endCol: number) => ({
         startLineNumber: startLine,
         startColumn: startCol,

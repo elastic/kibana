@@ -197,19 +197,22 @@ describe('@elastic/schemas registries', () => {
   });
 
   describe('toDescribedSchema', () => {
-    it('leaves no cross-file reference in the described schema for any elasticsearch API', async () => {
-      const problems: string[] = [];
+    it.each<ApiTarget>(['elasticsearch', 'kibana'])(
+      'leaves no cross-file reference in the described schema for any %s API',
+      async (target) => {
+        const problems: string[] = [];
 
-      for (const { id, input } of await loadApiInputs('elasticsearch')) {
-        const { schema } = await toDescribedSchema('elasticsearch', input);
-        const unresolved = crossFileRefs(schema);
-        if (unresolved.length > 0) {
-          problems.push(`${id}: ${unresolved.join(', ')}`);
+        for (const { id, input } of await loadApiInputs(target)) {
+          const { schema } = await toDescribedSchema(target, input);
+          const unresolved = crossFileRefs(schema);
+          if (unresolved.length > 0) {
+            problems.push(`${id}: ${unresolved.join(', ')}`);
+          }
         }
-      }
 
-      expect(problems).toEqual([]);
-    });
+        expect(problems).toEqual([]);
+      }
+    );
 
     it('keeps the description a parameter hangs off its own reference', async () => {
       // Every `$ref` parameter on this API documents itself, so dropping the keys that sit
@@ -319,43 +322,46 @@ describe('@elastic/schemas registries', () => {
   });
 
   describe('toDescribedDefinition', () => {
-    it('describes every type stubbed by an elasticsearch API without leaking a cross-file reference', async () => {
-      const stubbedBy = new Map<string, ApiInput>();
+    it.each<ApiTarget>(['elasticsearch', 'kibana'])(
+      'describes every type the %s APIs stub without leaking a cross-file reference',
+      async (target) => {
+        const stubbedBy = new Map<string, ApiInput>();
 
-      for (const api of await loadApiInputs('elasticsearch')) {
-        const { expandableTypes } = await toDescribedSchema('elasticsearch', api.input);
-        for (const type of expandableTypes) {
-          if (!stubbedBy.has(type)) {
-            stubbedBy.set(type, api);
+        for (const api of await loadApiInputs(target)) {
+          const { expandableTypes } = await toDescribedSchema(target, api.input);
+          for (const type of expandableTypes) {
+            if (!stubbedBy.has(type)) {
+              stubbedBy.set(type, api);
+            }
           }
         }
+
+        const problems: string[] = [];
+
+        for (const [type, api] of stubbedBy) {
+          const described = await toDescribedDefinition(target, api.input, type);
+          if (!described) {
+            problems.push(`${type}: not found in the closure of "${api.id}"`);
+            continue;
+          }
+
+          const unresolved = crossFileRefs(described.schema);
+          if (unresolved.length > 0) {
+            problems.push(`${type}: unresolved ${unresolved.join(', ')}`);
+          }
+          if (containsKey(described.schema, 'x-found-in')) {
+            problems.push(`${type}: kept a routing annotation`);
+          }
+
+          const chars = JSON.stringify(described.schema).length;
+          if (chars > MAX_DESCRIBED_CHARS) {
+            problems.push(`${type}: ${chars}`);
+          }
+        }
+
+        expect(problems).toEqual([]);
       }
-
-      const problems: string[] = [];
-
-      for (const [type, api] of stubbedBy) {
-        const described = await toDescribedDefinition('elasticsearch', api.input, type);
-        if (!described) {
-          problems.push(`${type}: not found in the closure of "${api.id}"`);
-          continue;
-        }
-
-        const unresolved = crossFileRefs(described.schema);
-        if (unresolved.length > 0) {
-          problems.push(`${type}: unresolved ${unresolved.join(', ')}`);
-        }
-        if (containsKey(described.schema, 'x-found-in')) {
-          problems.push(`${type}: kept a routing annotation`);
-        }
-
-        const chars = JSON.stringify(described.schema).length;
-        if (chars > MAX_DESCRIBED_CHARS) {
-          problems.push(`${type}: ${chars}`);
-        }
-      }
-
-      expect(problems).toEqual([]);
-    });
+    );
 
     it('spells out the query types the search API only stubbed', async () => {
       const { elasticsearch } = await getRegistries();

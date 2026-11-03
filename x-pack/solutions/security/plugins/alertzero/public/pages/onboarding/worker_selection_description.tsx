@@ -1,0 +1,49 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { EuiLink, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ONBOARDING_READ_MORE_URL } from './constants';
+import * as i18n from './translations';
+
+interface Props {
+  isSaving: boolean;
+  onWatchSettingsClick: () => void;
+}
+
+export const WorkerSelectionDescription: React.FC<Props> = ({ isSaving, onWatchSettingsClick }) => (
+  <EuiText>
+    <p>
+      <FormattedMessage
+        id="xpack.alertzero.onboarding.subtitle"
+        defaultMessage="Each Worker belongs to a Watch, a team of Workers with one area of expertise. To start using AlertZero, enable the settings your Workers need, then select {enableAndRun}. You can change any of this later in {watchSettingsLink}."
+        values={{
+          enableAndRun: <strong>{i18n.ENABLE_AND_RUN}</strong>,
+          watchSettingsLink: (
+            <EuiLink
+              onClick={onWatchSettingsClick}
+              disabled={isSaving}
+              data-test-subj="alertZeroOnboardingWatchSettingsLink"
+            >
+              {i18n.WATCH_SETTINGS}
+            </EuiLink>
+          ),
+        }}
+      />
+      <br />
+      <EuiLink
+        href={ONBOARDING_READ_MORE_URL}
+        target="_blank"
+        external
+        data-test-subj="alertZeroOnboardingReadMoreLink"
+      >
+        {i18n.READ_MORE}
+      </EuiLink>
+    </p>
+  </EuiText>
+);

@@ -142,6 +142,10 @@ export const processImageFile = async ({
         data: { file_id: fileEntry.id, name, mime_type: file.type },
       } as ConversationAttachment,
     ]);
+    reportEvent(AGENT_BUILDER_EVENT_TYPES.ImageUploadSucceeded, {
+      mime_type: file.type,
+      file_size: file.size,
+    });
     return true;
   } catch (err: unknown) {
     if (abortSignal?.aborted) return true;

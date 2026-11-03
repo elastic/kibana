@@ -24,6 +24,7 @@ const RSPACK_ONLY_EXTERNALS = [
   'node:crypto',
   'mongodb',
   'mongodb-connection-string-url',
+  'mssql',
   'mysql2',
   'mysql2/promise',
 ];

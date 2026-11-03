@@ -23,17 +23,20 @@ const scoutHookOutputSchema = z.strictObject({
 export const runScoutHook = (
   repoRoot: string,
   hookPath: string,
-  config: object
+  config: object,
+  { env = process.env }: { env?: NodeJS.ProcessEnv } = {}
 ): Record<string, string> => {
   const result = spawnSync('bash', [Path.resolve(repoRoot, hookPath)], {
     cwd: repoRoot,
+    env,
     input: JSON.stringify(config),
     encoding: 'utf8',
     stdio: ['pipe', 'pipe', 'inherit'],
     timeout: HOOK_TIMEOUT_MS,
   });
 
-  if (result.error) {
+  // A hook may exit before draining stdin; the EPIPE that leaves behind is not the hook's failure.
+  if (result.error && (result.error as NodeJS.ErrnoException).code !== 'EPIPE') {
     throw new Error(`scoutHook ${hookPath} failed to run: ${result.error.message}`);
   }
   if (result.status !== 0) {

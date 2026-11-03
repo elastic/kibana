@@ -10,6 +10,7 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
 import { EMPTY_SEVERITY_COUNT, RiskSeverity } from '../../../../common/search_strategy';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
@@ -45,19 +46,30 @@ interface EntityStoreRiskKpiQueryResult {
   severityCount: SeverityCount;
 }
 
+interface UseEntityStoreRiskScoreKpiProps extends UseRiskScoreKpiProps {
+  /**
+   * Execution context for the risk-engine-status request only; defaults to `executionContext`.
+   * The status query key includes the context name and id, so callers on the same page that
+   * pass the same value here share one status request while keeping distinct KPI contexts.
+   */
+  statusExecutionContext?: KibanaExecutionContext;
+}
+
 export const useEntityStoreRiskScoreKpi = ({
   filterQuery,
   skip,
   riskEntity,
   timerange,
-}: UseRiskScoreKpiProps) => {
+  executionContext,
+  statusExecutionContext,
+}: UseEntityStoreRiskScoreKpiProps) => {
   const { addError } = useAppToasts();
   const { fetchEntitiesListV2 } = useEntityAnalyticsRoutes();
   const {
     data: riskEngineStatus,
     isFetching: isStatusLoading,
     refetch: refetchEngineStatus,
-  } = useRiskEngineStatus();
+  } = useRiskEngineStatus({}, { executionContext: statusExecutionContext ?? executionContext });
   const { isPlatinumOrTrialLicense } = useMlCapabilities();
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const isAuthorized = isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
@@ -139,6 +151,7 @@ export const useEntityStoreRiskScoreKpi = ({
             sortField,
             sortOrder: 'asc',
           },
+          context: executionContext,
         });
 
         total = res.total;

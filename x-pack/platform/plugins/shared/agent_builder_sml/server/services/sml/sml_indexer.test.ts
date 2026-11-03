@@ -35,6 +35,7 @@ const createMockEsClient = (): jest.Mocked<ElasticsearchClient> =>
     bulk: bulkMock,
     deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
     count: jest.fn().mockResolvedValue({ count: 0 }),
+    indices: { refresh: jest.fn().mockResolvedValue({ _shards: { failed: 0 } }) },
     get: jest.fn().mockResolvedValue({ found: false }),
   } as unknown as jest.Mocked<ElasticsearchClient>);
 
@@ -642,6 +643,115 @@ describe('createSmlIndexer', () => {
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(logger.warn).not.toHaveBeenCalled();
     });
+
+    it('strict deletion removes every ingestion method and waits for refresh', async () => {
+      const esClient = createMockEsClient();
+      const indexer = createSmlIndexer({
+        registry: createMockRegistry(),
+        logger: createMockLogger(),
+      });
+      await indexer.deleteAttachment({
+        ...createIndexerParams({ esClient }),
+        ingestionMethod: 'all',
+        strict: true,
+      });
+      expect(esClient.deleteByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({ refresh: true, conflicts: 'proceed' })
+      );
+      expect(JSON.stringify(esClient.deleteByQuery.mock.calls[0][0])).not.toContain(
+        'ingestion_method'
+      );
+    });
+
+    it('strict deletion surfaces Elasticsearch errors', async () => {
+      const esClient = createMockEsClient();
+      esClient.deleteByQuery.mockRejectedValue(new Error('delete failed'));
+      const indexer = createSmlIndexer({
+        registry: createMockRegistry(),
+        logger: createMockLogger(),
+      });
+      await expect(
+        indexer.deleteAttachment({ ...createIndexerParams({ esClient }), strict: true })
+      ).rejects.toThrow('delete failed');
+    });
+
+    it.each([
+      { timed_out: true },
+      { failures: [{ cause: { type: 'error' }, id: 'entry', index: 'sml', status: 500 }] },
+    ])('strict deletion rejects incomplete results: %j', async (failure) => {
+      const esClient = createMockEsClient();
+      esClient.deleteByQuery.mockResolvedValue({
+        took: 0,
+        timed_out: false,
+        total: 1,
+        deleted: 0,
+        batches: 1,
+        version_conflicts: 0,
+        noops: 0,
+        retries: { bulk: 0, search: 0 },
+        throttled_millis: 0,
+        requests_per_second: -1,
+        throttled_until_millis: 0,
+        failures: [],
+        ...failure,
+      });
+      const indexer = createSmlIndexer({
+        registry: createMockRegistry(),
+        logger: createMockLogger(),
+      });
+      await expect(
+        indexer.deleteAttachment({ ...createIndexerParams({ esClient }), strict: true })
+      ).rejects.toThrow('SML deletion was incomplete');
+    });
+
+    it.each([
+      { count: 0, failedShards: 0, succeeds: true },
+      { count: 1, failedShards: 0, succeeds: false },
+      { count: 0, failedShards: 1, succeeds: false },
+    ])(
+      'verifies strict deletion after a version conflict: %j',
+      async ({ count, failedShards, succeeds }) => {
+        const esClient = createMockEsClient();
+        esClient.deleteByQuery.mockResolvedValue({
+          took: 1,
+          timed_out: false,
+          total: 1,
+          deleted: 0,
+          batches: 1,
+          version_conflicts: 1,
+          noops: 0,
+          retries: { bulk: 0, search: 0 },
+          throttled_millis: 0,
+          requests_per_second: -1,
+          throttled_until_millis: 0,
+          failures: [],
+        });
+        esClient.count.mockResolvedValue({
+          count,
+          _shards: { total: 1, successful: 1 - failedShards, failed: failedShards },
+        });
+        const indexer = createSmlIndexer({
+          registry: createMockRegistry(),
+          logger: createMockLogger(),
+        });
+        const deletion = indexer.deleteAttachment({
+          ...createIndexerParams({ esClient }),
+          strict: true,
+          ingestionMethod: 'all',
+        });
+        if (succeeds) {
+          await expect(deletion).resolves.toBeUndefined();
+        } else {
+          await expect(deletion).rejects.toThrow('SML deletion was incomplete');
+        }
+        expect(esClient.count).toHaveBeenCalledWith(
+          expect.objectContaining({ query: esClient.deleteByQuery.mock.calls[0][0]?.query })
+        );
+        expect(esClient.indices.refresh).toHaveBeenCalledWith(
+          expect.objectContaining({ index: smlIndexName })
+        );
+      }
+    );
 
     it('deleteEntry warns on non-404 errors', async () => {
       const error500 = Object.assign(new Error('internal error'), { statusCode: 500 });

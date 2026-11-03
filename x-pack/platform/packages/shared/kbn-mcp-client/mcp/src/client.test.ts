@@ -7,6 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 import { McpClient } from './client';
+import { McpNotConnectedError } from './mcp_not_connected_error';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import {
   StreamableHTTPClientTransport,
@@ -368,6 +369,51 @@ describe('McpClient', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Error connecting to MCP server test-client, 1.0.0: [object Object]'
       );
+    });
+  });
+
+  describe('transport close', () => {
+    it('reports not connected after the SDK client closes and fails operations with McpNotConnectedError', async () => {
+      const client = new McpClient(mockLogger, clientDetails);
+      await client.connect();
+      expect(client.isConnected()).toBe(true);
+
+      (mockClient as unknown as { onclose?: () => void }).onclose?.();
+
+      expect(client.isConnected()).toBe(false);
+      await expect(client.listTools()).rejects.toBeInstanceOf(McpNotConnectedError);
+      await expect(client.callTool({ name: 'tool', arguments: {} })).rejects.toBeInstanceOf(
+        McpNotConnectedError
+      );
+    });
+
+    it('does not call close on disconnect after the SDK client already closed', async () => {
+      const client = new McpClient(mockLogger, clientDetails);
+      await client.connect();
+
+      (mockClient as unknown as { onclose?: () => void }).onclose?.();
+      await client.disconnect();
+
+      expect(mockClient.close).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getServerCapabilities', () => {
+    it('returns undefined before connect', () => {
+      const client = new McpClient(mockLogger, clientDetails);
+      mockClient.getServerCapabilities.mockReturnValue({ tools: {} });
+
+      expect(client.getServerCapabilities()).toBeUndefined();
+    });
+
+    it('returns the SDK value after connect', async () => {
+      const client = new McpClient(mockLogger, clientDetails);
+      mockClient.connect.mockResolvedValue(undefined);
+      mockClient.getServerCapabilities.mockReturnValue({ tools: {} });
+
+      await client.connect();
+
+      expect(client.getServerCapabilities()).toEqual({ tools: {} });
     });
   });
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_KQL_LENGTH } from './constants';
 import { ruleEventFieldsQuerySchema } from './rule_event_fields_schema';
 
 describe('ruleEventFieldsQuerySchema', () => {
@@ -22,8 +23,16 @@ describe('ruleEventFieldsQuerySchema', () => {
     expect(() => ruleEventFieldsQuerySchema.parse({ matcher: '' })).toThrow();
   });
 
-  it('rejects a matcher longer than 2048 characters', () => {
-    expect(() => ruleEventFieldsQuerySchema.parse({ matcher: 'a'.repeat(2049) })).toThrow();
+  it('accepts a matcher as long as the one a policy can store', () => {
+    expect(() =>
+      ruleEventFieldsQuerySchema.parse({ matcher: 'a'.repeat(MAX_KQL_LENGTH) })
+    ).not.toThrow();
+  });
+
+  it('rejects a matcher longer than the policy matcher bound', () => {
+    expect(() =>
+      ruleEventFieldsQuerySchema.parse({ matcher: 'a'.repeat(MAX_KQL_LENGTH + 1) })
+    ).toThrow();
   });
 
   it('rejects unknown keys', () => {

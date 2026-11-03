@@ -6,16 +6,35 @@
  */
 
 export { ApprovalModal, type ApprovalModalProps } from './src/approval_modal';
+export { ApprovalContent, type ApprovalContentProps } from './src/approval_content';
+export { ApprovalActorTime, type ApprovalActorTimeProps } from './src/approval_actor_time';
 export {
-  ApprovalContent,
-  type ApprovalContentProps,
-  type ApprovalAction,
-  type AlwaysAllowOption,
-} from './src/approval_content';
-export { getProposalTone, isProposalExpired } from './src/proposal_helpers';
-export { toActionImpactItems } from './src/to_action_impact_items';
-export type { ApprovalProposal } from './src/types';
+  getApprovalOutcomeBadge,
+  type ApprovalOutcomeBadge,
+  type ApprovalOutcomeStatus,
+  type ApprovalPhase,
+} from './src/approval_outcome';
 export {
-  type ActionImpactContent,
-  type ActionImpactSectionProps,
-} from './src/action_impact_section';
+  ProposedActionStatusBadge,
+  type ProposedActionStatusBadgeProps,
+} from './src/needs_review_badge';
+export { ProposalCaption, type ProposalCaptionProps } from './src/proposal_caption';
+export {
+  getProposalCaption,
+  getProposalDecision,
+  getProposalTone,
+  isProposalExpired,
+} from './src/proposal_helpers';
+export type {
+  ApprovalProposal,
+  ApprovalAction,
+  ApprovalDecision,
+  AlwaysAllowOption,
+  DeclineParams,
+} from './src/types';
+export {
+  DISMISS_REASON_LABELS,
+  DISMISS_REASON_OPTIONS,
+  formatDismissReason,
+} from './src/dismiss_reason';
+export { DeclineReasonForm, type DeclineReasonFormProps } from './src/decline_reason_form';

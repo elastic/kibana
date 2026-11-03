@@ -40,6 +40,7 @@ export async function getServicesItems({
   rollupInterval,
   useDurationSummary,
   searchQuery,
+  maxNumServices = MAX_NUMBER_OF_SERVICES,
 }: {
   environment: string;
   kuery: string;
@@ -56,19 +57,14 @@ export async function getServicesItems({
   rollupInterval: RollupInterval;
   useDurationSummary: boolean;
   searchQuery?: string;
+  maxNumServices?: number;
 }): Promise<ServicesItemsResponse> {
   return withApmSpan('get_services_items', async () => {
+    // Shared by transaction stats, anomalies, and alerts.
     const commonParams = {
       environment,
-      kuery,
-      maxNumServices: MAX_NUMBER_OF_SERVICES,
       start,
       end,
-      serviceGroup,
-      randomSampler,
-      documentType,
-      rollupInterval,
-      useDurationSummary,
       searchQuery,
     };
 
@@ -76,22 +72,38 @@ export async function getServicesItems({
       await Promise.all([
         getServiceTransactionStats({
           ...commonParams,
+          kuery,
           apmEventClient,
+          maxNumServices,
+          serviceGroup,
+          randomSampler,
+          documentType,
+          rollupInterval,
+          useDurationSummary,
         }),
-        getServiceAnomalyScores({ ...commonParams, mlClient }).catch((err) => {
+        getServiceAnomalyScores({
+          ...commonParams,
+          mlClient,
+        }).catch((err) => {
           logger.debug(err);
           return [];
         }),
-        getServicesAlerts({ ...commonParams, apmAlertsClient }).catch((err) => {
+        getServicesAlerts({
+          ...commonParams,
+          apmAlertsClient,
+          maxNumServices,
+          serviceGroup,
+        }).catch((err) => {
           logger.debug(err);
           return [];
         }),
       ]);
 
     const sloStats = await getServicesSloStats({
-      ...commonParams,
-      serviceNames: serviceStats.map(({ serviceName }) => serviceName),
       sloClient,
+      environment,
+      maxNumServices,
+      serviceNames: serviceStats.map(({ serviceName }) => serviceName),
     }).catch((err) => {
       logger.debug(err);
       return [];

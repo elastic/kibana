@@ -10,41 +10,43 @@ import { expect } from '@playwright/test';
 import type { RuleManagementExample } from './types';
 import {
   assertLatestHostCpuAlert,
-  assertQueriedFormat,
+  assertQueriedStyle,
   hostCpuCreateTurn,
-  isComposedQuery,
-  isStandaloneQuery,
   MANAGE_RULE_SKILL_OUTPUT,
   PERSIST_VIA_ATTACHMENT_CRITERION,
   requireRuleVersions,
-  type QueryFormat,
+  type QueryStyle,
 } from './rule_example_helpers';
 
+const CUSTOM_THRESHOLD_REQUEST =
+  'Treat a host as recovered only when its average system.cpu.total.norm.pct ' +
+  'falls below 0.5 — not as soon as it drops back under 0.9.';
+
 const RECOVERY_REQUESTS = {
-  query:
-    'Treat a host as recovered only when its average system.cpu.total.norm.pct ' +
-    'falls below 0.5 — not as soon as it drops back under 0.9.',
-  none: 'Do not recover these alerts automatically. Leave them active even after CPU is back to normal.',
+  condition: CUSTOM_THRESHOLD_REQUEST,
+  query: CUSTOM_THRESHOLD_REQUEST,
+  manual:
+    'Do not recover these alerts automatically. Leave them active even after CPU is back to normal.',
   no_breach: 'Recover automatically once CPU is no longer above 0.9.',
 } as const;
 
 export type RecoveryExampleStrategy = keyof typeof RECOVERY_REQUESTS;
 
+const usesCustomRecoveryQuery = (strategy: RecoveryExampleStrategy): boolean =>
+  strategy === 'condition' || strategy === 'query';
+
 const assertCustomRecoveryQuery = (
   versions: RuleAttachmentData[],
   hostMetricsIndex: string,
-  format: QueryFormat
+  _strategy: RecoveryExampleStrategy
 ) => {
   const customRecovery = versions.find(
-    (version) => version.recovery_strategy === 'query' && version.query
+    (version) =>
+      (version.recovery?.strategy === 'condition' || version.recovery?.strategy === 'query') &&
+      version.query
   );
   expect(customRecovery).toBeDefined();
-  if (format === 'composed') {
-    expect(isComposedQuery(customRecovery!.query)).toBe(true);
-  } else {
-    expect(isStandaloneQuery(customRecovery!.query)).toBe(true);
-  }
-  const recoveryEsql = getRecoverEsqlQuery(customRecovery!.query!, 'query');
+  const recoveryEsql = getRecoverEsqlQuery(customRecovery!.query!, customRecovery!.recovery);
   expect(recoveryEsql).toBeDefined();
   expect(recoveryEsql).toContain(hostMetricsIndex);
   expect(recoveryEsql).toContain('system.cpu.total.norm.pct');
@@ -53,38 +55,51 @@ const assertCustomRecoveryQuery = (
 
 export const recoveryExample = ({
   hostMetricsIndex,
-  format,
+  style,
   strategy,
 }: {
   hostMetricsIndex: string;
-  format: QueryFormat;
+  style: QueryStyle;
   strategy: RecoveryExampleStrategy;
 }): RuleManagementExample => ({
   input: {
-    turns: [hostCpuCreateTurn({ index: hostMetricsIndex, format }), RECOVERY_REQUESTS[strategy]],
+    turns: [hostCpuCreateTurn({ index: hostMetricsIndex, style }), RECOVERY_REQUESTS[strategy]],
   },
   output: {
     criteria: [
-      format === 'composed'
-        ? 'The first-turn set_query uses `query.format: composed` (shared `base` + `breach.segment`), not standalone.'
-        : 'The first-turn set_query uses `query.format: standalone` (full independent ES|QL queries), not composed.',
-      ...(strategy === 'query'
+      style === 'segmented'
+        ? 'The first-turn set_query uses a shared `query.base` plus a `query.breach.segment`.'
+        : 'The first-turn set_query uses a single complete `query.base` with no `query.breach` segment.',
+      ...(strategy === 'condition'
         ? [
-            'The second-turn set_query includes a `query.recovery` ES|QL block whose threshold is average `system.cpu.total.norm.pct` below 0.5 (not merely dropping back under 0.9).',
+            'The second-turn operations include a `set_recovery` with `strategy: condition` and a `segment` appended to the shared base whose threshold is average `system.cpu.total.norm.pct` below 0.5 (not merely dropping back under 0.9).',
           ]
         : []),
-      'The recovery change is applied with manage_rule against the existing attachment (not a new rule), and the final manage_rule call ends with a validate operation.',
+      ...(strategy === 'query'
+        ? [
+            'The second-turn operations include a `set_recovery` with `strategy: query` and a full ES|QL `query` whose threshold is average `system.cpu.total.norm.pct` below 0.5 (not merely dropping back under 0.9).',
+          ]
+        : []),
+      ...(strategy !== 'no_breach'
+        ? [
+            'The recovery change is applied with manage_rule against the existing attachment (not a new rule), and the final manage_rule call ends with a validate operation.',
+          ]
+        : [
+            'The assistant confirms that the requested recovery behavior (no_breach) is already the default, OR re-applies it with a manage_rule call ending with validate.',
+          ]),
       PERSIST_VIA_ATTACHMENT_CRITERION,
     ],
     ...MANAGE_RULE_SKILL_OUTPUT,
     expectAttachmentData: (attachments) => {
       const versions = requireRuleVersions(attachments);
-      assertQueriedFormat(versions, format);
+      assertQueriedStyle(versions, style);
       const latest = assertLatestHostCpuAlert(attachments, hostMetricsIndex);
       expect(latest.grouping?.fields).toEqual(expect.arrayContaining(['host.name']));
-      expect(latest.recovery_strategy).toEqual(strategy);
-      if (strategy === 'query') {
-        assertCustomRecoveryQuery(versions, hostMetricsIndex, format);
+      if (usesCustomRecoveryQuery(strategy)) {
+        expect(['condition', 'query']).toContain(latest.recovery?.strategy);
+        assertCustomRecoveryQuery(versions, hostMetricsIndex, strategy);
+      } else {
+        expect(latest.recovery?.strategy).toEqual(strategy);
       }
     },
   },

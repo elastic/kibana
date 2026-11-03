@@ -16,13 +16,15 @@ import type { RuleChangeHistoryApi } from '../../../../services/rule_change_hist
 
 const toChangeHistoryItem = (item: RuleChangeHistoryListItem): ChangeHistoryListItem => ({
   id: item.id,
-  timestamp: item.timestamp,
+  timestamp: item.created_at,
   actor: { name: item.actor.name, profileId: item.actor.profile_id },
   action: item.action,
   changes: item.changes,
   comment: item.comment,
   tags: item.tags,
-  metadata: item.metadata,
+  // `metadata.version` is the convention the change-history UI package reads for
+  // the restore label and its version-distance telemetry.
+  metadata: item.version !== undefined ? { version: item.version } : undefined,
   isCurrent: item.is_current,
 });
 
@@ -45,9 +47,8 @@ export const createRuleChangeHistoryAdapter = (
 
     return { items: items.map(toChangeHistoryItem), total };
   },
-  getChange: async ({ objectId, changeId, signal }): Promise<ChangeHistoryDetail> => {
+  getChange: async ({ changeId, signal }): Promise<ChangeHistoryDetail> => {
     const { snapshot, reason, ...item } = await api.getRuleChangeEvent({
-      id: objectId,
       eventId: changeId,
       signal,
     });

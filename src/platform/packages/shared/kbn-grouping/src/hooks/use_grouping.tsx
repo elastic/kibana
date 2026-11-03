@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { FieldSpec } from '@kbn/data-views-types';
 import React, { useCallback, useMemo, useReducer } from 'react';
 import type { UiCounterMetricType } from '@kbn/analytics';
 import { groupsReducerWithStorage, initialState as reducerInitialGroupings } from './state/reducer';

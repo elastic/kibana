@@ -1,0 +1,128 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type {
+  IndicesIndexSettings,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+
+export interface EnsureIndexDeps {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}
+
+/**
+ * Idempotently creates an analytics index if it doesn't already exist, or
+ * applies an additive mapping sync when it does. Safe to call from multiple
+ * Kibana nodes concurrently — the create loser hits an `already_exists`
+ * exception and short-circuits; the putMapping is idempotent for
+ * already-present fields.
+ *
+ * Settings applied to every analytics index (callers add their own, e.g.
+ * `index.mode: lookup` for `.cases`):
+ *   - `index.hidden: true` — not surfaced by default in `_cat/indices`
+ *     and excluded from queries that don't opt in. Default visibility is
+ *     restricted to administrators querying directly via Console.
+ *   - `auto_expand_replicas: '0-1'` — 0 replicas on single-node clusters
+ *     (dev/CI), 1 replica on multi-node clusters. Without this, ES
+ *     defaults to `number_of_replicas: 1`, so the index costs 2 shards
+ *     (1 primary + 1 replica) even on a single-node cluster. Dev and CI
+ *     environments that already have many indices hit the default
+ *     `cluster.max_shards_per_node` limit (1000) and the bootstrap
+ *     fails with `validation_exception` before the feature can start.
+ *     `auto_expand_replicas` avoids this with no production trade-off:
+ *     on multi-node clusters the replica is added automatically for HA,
+ *     and `LOOKUP JOIN` is unaffected because it operates on the primary
+ *     shard — replicas are transparent read copies.
+ *
+ * Failure policy: throws on unexpected errors so callers can decide how
+ * to handle them. Plugin start wraps in `Promise.allSettled` and leaves
+ * the failed surface's writer a no-op (so Kibana starts even when ES is
+ * temporarily over the shard limit); the `/reset` route lets errors
+ * propagate to its own error handler and returns 500 so administrators
+ * get an actionable response rather than a silent 202 followed by a
+ * writer flood. The one exception is `resource_already_exists_exception`,
+ * which is swallowed here — two Kibana nodes racing on bootstrap both
+ * want the index to exist, so the loser's "already exists" error is a
+ * success.
+ */
+export const ensureIndex = async ({
+  esClient,
+  logger,
+  index,
+  mappings,
+  settings,
+}: EnsureIndexDeps & {
+  index: string;
+  mappings: MappingTypeMapping;
+  settings?: IndicesIndexSettings;
+}): Promise<void> => {
+  try {
+    const exists = await esClient.indices.exists({ index });
+    if (exists) {
+      // `indices.create` only runs on first bootstrap, so fields later added to
+      // the mapping never reach an already-created index. The analytics indices
+      // are `dynamic: 'strict'`, so a doc carrying an unmapped field is rejected
+      // with `mapper_parsing_exception` (silently swallowed by the writer).
+      // Apply an additive, idempotent mapping sync so new fields exist before
+      // any writer emits them.
+      await esClient.indices.putMapping({
+        index,
+        properties: mappings.properties,
+        dynamic_templates: mappings.dynamic_templates,
+      });
+      logger.debug(`${index} already exists; applied additive mapping sync`);
+      return;
+    }
+
+    await esClient.indices.create({
+      index,
+      settings: {
+        'index.hidden': true,
+        'index.auto_expand_replicas': '0-1',
+        ...settings,
+      },
+      mappings,
+    });
+
+    logger.info(`bootstrapped ${index}`);
+  } catch (err) {
+    // Two Kibana nodes starting in parallel can both pass the `exists`
+    // check and race on `create`. The loser gets
+    // `resource_already_exists_exception` — the index exists, which is
+    // exactly what was needed, so swallow and return.
+    const errType = err?.body?.error?.type ?? err?.meta?.body?.error?.type;
+    if (errType === 'resource_already_exists_exception') {
+      logger.debug(`${index} already exists (concurrent bootstrap)`);
+      return;
+    }
+
+    // Surface shard-limit failures with an actionable message. ES returns
+    // `validation_exception` when `cluster.max_shards_per_node` (default
+    // 1000) is reached. We already minimise our footprint with
+    // `auto_expand_replicas: '0-1'` (1 shard on single-node clusters), but
+    // a busy dev/CI environment may still be at the limit. The fix is a
+    // one-liner in Kibana Dev Tools:
+    //
+    //   PUT _cluster/settings
+    //   { "persistent": { "cluster.max_shards_per_node": 1500 } }
+    if (errType === 'validation_exception') {
+      const reason: string =
+        err?.body?.error?.reason ?? err?.meta?.body?.error?.reason ?? err?.message ?? '';
+      if (reason.includes('shards')) {
+        throw new Error(
+          `Bootstrap of ${index} failed: cluster may be at the shard limit. ` +
+            `Increase cluster.max_shards_per_node. ` +
+            `Original error: ${reason}`
+        );
+      }
+    }
+
+    throw err;
+  }
+};

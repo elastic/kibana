@@ -6,7 +6,7 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { TestProviders } from '../../../../../../common/mock';
+import { createReactQueryWrapper } from '../../../../../../common/mock/create_react_query_wrapper';
 import { useWatchlistsTableData } from './use_watchlists_table_data';
 
 const mockFetchWatchlists = jest.fn();
@@ -53,7 +53,7 @@ describe('useWatchlistsTableData', () => {
 
   it('includes manual assignments in the source label without requesting sources for empty lists', async () => {
     const { result } = renderHook(() => useWatchlistsTableData('default', 0, true), {
-      wrapper: TestProviders,
+      wrapper: createReactQueryWrapper(),
     });
 
     await waitFor(() => {
@@ -76,11 +76,42 @@ describe('useWatchlistsTableData', () => {
     );
   });
 
+  it('passes the watchlists execution context to the list and entity-source requests', async () => {
+    renderHook(() => useWatchlistsTableData('default', 0, true), {
+      wrapper: createReactQueryWrapper(),
+    });
+
+    await waitFor(() => expect(mockListWatchlistEntitySources).toHaveBeenCalledTimes(1));
+
+    expect(mockFetchWatchlists).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:watchlists',
+            id: 'watchlists_management_table_list',
+          },
+        },
+      })
+    );
+    expect(mockListWatchlistEntitySources).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:watchlists',
+            id: 'watchlists_entity_sources_list',
+          },
+        },
+      })
+    );
+  });
+
   it('preserves the manual source label when fetching entity sources fails', async () => {
     mockListWatchlistEntitySources.mockRejectedValue(new Error('Request failed'));
 
     const { result } = renderHook(() => useWatchlistsTableData('default', 0, true), {
-      wrapper: TestProviders,
+      wrapper: createReactQueryWrapper(),
     });
 
     await waitFor(() => {

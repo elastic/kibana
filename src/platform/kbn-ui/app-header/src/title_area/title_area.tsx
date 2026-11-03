@@ -26,8 +26,9 @@ export interface TitleAreaProps {
    */
   placeholder?: ReactNode;
   /**
-   * Compact headers use a larger no-back title offset so the title clears a rounded
-   * workspace corner. Does not apply when a back button is present.
+   * Compact headers apply a no-back title offset so the title clears a rounded
+   * workspace corner. Does not apply for standard spacing or when a back button
+   * is present.
    */
   compact?: boolean;
 }
@@ -39,6 +40,7 @@ export const TitleArea = React.memo<TitleAreaProps>(
     const hasBack = backTargets.length > 0;
     const showTitle = !!title && (isEditableTitle(title) || title.length > 0);
     const showPlaceholder = !showTitle && placeholder != null;
+    const applyNoBackOffset = !hasBack && !!compact;
 
     const styles = useMemo(() => {
       const wrapper = css`
@@ -50,11 +52,14 @@ export const TitleArea = React.memo<TitleAreaProps>(
         max-width: 100%;
       `;
 
-      // Same inset `Title` applies when there is no back button, so a lone placeholder
+      // Same inset `Title` applies for compact no-back headers, so a lone placeholder
       // lines up with where the title text sits.
-      const placeholderOffset = css`
-        padding-inline-start: ${getNoBackTitleOffset(euiTheme, compact)};
-      `;
+      const noBackOffset = getNoBackTitleOffset(euiTheme, compact);
+      const placeholderOffset = noBackOffset
+        ? css`
+            padding-inline-start: ${noBackOffset};
+          `
+        : undefined;
 
       return { wrapper, placeholderOffset };
     }, [compact, euiTheme]);
@@ -67,10 +72,10 @@ export const TitleArea = React.memo<TitleAreaProps>(
       <div css={styles.wrapper}>
         {hasBack && <BackButton targets={backTargets} />}
         {showTitle && title && (
-          <Title title={title} titleOffset={!hasBack} size={size} compact={compact} />
+          <Title title={title} titleOffset={applyNoBackOffset} size={size} compact={compact} />
         )}
         {showPlaceholder && (
-          <div css={!hasBack ? styles.placeholderOffset : undefined}>{placeholder}</div>
+          <div css={applyNoBackOffset ? styles.placeholderOffset : undefined}>{placeholder}</div>
         )}
       </div>
     );

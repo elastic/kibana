@@ -9,6 +9,7 @@ import Path from 'path';
 import Fs from 'fs/promises';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { documentWithInferenceFields, inferenceFieldSearchOptions } from '../inference_fields';
 
 const fileSizeLimit = 500_000;
 
@@ -28,8 +29,7 @@ export const createOpenAPIChunkFiles = async ({
   const searchRes = await client.search({
     index,
     size: 10000,
-    // includes inference field meta info in source
-    fields: ['_inference_fields'],
+    ...inferenceFieldSearchOptions,
     query: {
       match_all: {},
     },
@@ -54,7 +54,7 @@ export const createOpenAPIChunkFiles = async ({
 
   for (let i = 0; i < searchRes.hits.hits.length; i++) {
     const hit = searchRes.hits.hits[i];
-    chunkContent += JSON.stringify(hit._source) + '\n';
+    chunkContent += JSON.stringify(documentWithInferenceFields(hit)) + '\n';
     chunkDocCount++;
     if (
       Buffer.byteLength(chunkContent, 'utf8') > fileSizeLimit ||

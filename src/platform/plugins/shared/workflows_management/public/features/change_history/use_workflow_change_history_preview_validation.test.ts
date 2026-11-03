@@ -64,6 +64,7 @@ const stableConnectorsData = { connectorTypes: {} };
 const createValidationContextRef = (): MutableRefObject<WorkflowYamlValidationContext> => ({
   current: {
     registry: emptyRegistry,
+    isManaged: false,
     connectorTypes: { status: 'ready', value: {} },
     connectorsManagementUrl: 'http://test/connectors',
     workflows: { workflows: {}, totalWorkflows: 0 },

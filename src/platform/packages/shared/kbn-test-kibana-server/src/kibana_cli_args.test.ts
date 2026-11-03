@@ -49,6 +49,17 @@ describe('parseRawFlags()', () => {
       ]
     `);
   });
+
+  it('keeps every --config in order so Kibana merges all of the files', () => {
+    expect(parseRawFlags(['--config=tracing.yml', '--foo=bar', '--config=sandbox.yml']))
+      .toMatchInlineSnapshot(`
+      Array [
+        "--config=tracing.yml",
+        "--config=sandbox.yml",
+        "--foo=bar",
+      ]
+    `);
+  });
 });
 
 describe('getArgValue()', () => {

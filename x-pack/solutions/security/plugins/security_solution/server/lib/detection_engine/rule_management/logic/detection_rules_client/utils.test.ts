@@ -258,6 +258,54 @@ describe('utils', () => {
 
       expect(hasOnlyReadAuthEditableChanges(ruleUpdate, existingRule)).toBe(true);
     });
+
+    it('should return true when required_fields are only reordered', () => {
+      const existingRule = {
+        ...getRulesSchemaMock(),
+        required_fields: [
+          { name: 'host.name', type: 'keyword', ecs: true },
+          { name: 'user.name', type: 'keyword', ecs: true },
+        ],
+      };
+      const ruleUpdate = {
+        ...getRulesSchemaMock(),
+        required_fields: [
+          { name: 'user.name', type: 'keyword', ecs: true },
+          { name: 'host.name', type: 'keyword', ecs: true },
+        ],
+      };
+
+      expect(hasOnlyReadAuthEditableChanges(ruleUpdate, existingRule)).toBe(true);
+    });
+
+    it('should return true when required_fields only have duplicates', () => {
+      const existingRule = {
+        ...getRulesSchemaMock(),
+        required_fields: [{ name: 'host.name', type: 'keyword', ecs: true }],
+      };
+      const ruleUpdate = {
+        ...getRulesSchemaMock(),
+        required_fields: [
+          { name: 'host.name', type: 'keyword', ecs: true },
+          { name: 'host.name', type: 'keyword', ecs: true },
+        ],
+      };
+
+      expect(hasOnlyReadAuthEditableChanges(ruleUpdate, existingRule)).toBe(true);
+    });
+
+    it('should return false when required_fields set changed', () => {
+      const existingRule = {
+        ...getRulesSchemaMock(),
+        required_fields: [{ name: 'host.name', type: 'keyword', ecs: true }],
+      };
+      const ruleUpdate = {
+        ...getRulesSchemaMock(),
+        required_fields: [{ name: 'user.name', type: 'keyword', ecs: true }],
+      };
+
+      expect(hasOnlyReadAuthEditableChanges(ruleUpdate, existingRule)).toBe(false);
+    });
   });
 
   describe('extractChangedUpdatableFields', () => {

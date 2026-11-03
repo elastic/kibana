@@ -11,26 +11,30 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { RuleConditions } from '../rule_conditions';
 import { RuleSummaryAboutCard } from './rule_summary_about_card';
-import type { RuleSummarySectionProps } from '../types';
+import { useRuleSummary } from './rule_summary_context';
 
-export const RuleSummaryAboutSection: React.FC<RuleSummarySectionProps> = ({ rule }) => (
-  <FlyoutAccordion
-    title={i18n.translate('xpack.alertingV2.ruleSummary.about', {
-      defaultMessage: 'About',
-    })}
-    hasBorder={false}
-    initialIsOpen
-    data-test-subj="ruleSummaryAbout"
-  >
-    <RuleSummaryAboutCard rule={rule} />
-    <EuiSpacer size="m" />
-    <FlyoutSubsection
-      title={i18n.translate('xpack.alertingV2.ruleDetails.conditions', {
-        defaultMessage: 'Rule conditions',
+export const RuleSummaryAboutSection: React.FC = () => {
+  const rule = useRuleSummary();
+
+  return (
+    <FlyoutAccordion
+      title={i18n.translate('xpack.alertingV2.ruleSummary.about', {
+        defaultMessage: 'About',
       })}
-      hasBorder
+      hasBorder={false}
+      initialIsOpen
+      data-test-subj="ruleSummaryAbout"
     >
-      <RuleConditions rule={rule} variant="summary" />
-    </FlyoutSubsection>
-  </FlyoutAccordion>
-);
+      <RuleSummaryAboutCard rule={rule} />
+      <EuiSpacer size="m" />
+      <FlyoutSubsection
+        title={i18n.translate('xpack.alertingV2.ruleDetails.conditions', {
+          defaultMessage: 'Rule conditions',
+        })}
+        hasBorder
+      >
+        <RuleConditions rule={rule} variant="summary" />
+      </FlyoutSubsection>
+    </FlyoutAccordion>
+  );
+};

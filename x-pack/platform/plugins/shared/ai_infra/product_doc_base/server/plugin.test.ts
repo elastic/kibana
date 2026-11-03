@@ -12,6 +12,7 @@ import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { productDocInstallStatusSavedObjectTypeName } from '../common/consts';
 import { LockManagerService } from '@kbn/lock-manager';
 import { ProductDocBasePlugin } from './plugin';
+import type { ProductDocBaseConfig } from './config';
 import type { ProductDocBaseSetupDependencies, ProductDocBaseStartDependencies } from './types';
 import { PRODUCT_DOC_INSTALL_LOCK_ID } from './services/install_lock';
 
@@ -32,6 +33,12 @@ const DocumentationManagerMock = DocumentationManager as jest.Mock;
 const LockManagerServiceMock = LockManagerService as jest.Mock;
 
 const callOrderOf = (fn: jest.Mock): number => fn.mock.invocationCallOrder[0];
+
+// The initializer mock returns the object passed in and does not apply schema defaults.
+const createInitContext = (autoInstallEnabled = true) =>
+  coreMock.createPluginInitializerContext({
+    autoInstallEnabled,
+  } as ProductDocBaseConfig);
 
 const mockEisAvailable = (coreStart: ReturnType<typeof coreMock.createStart>) => {
   coreStart.elasticsearch.client.asInternalUser.inference.get = jest.fn().mockResolvedValue({
@@ -66,7 +73,7 @@ describe('ProductDocBasePlugin', () => {
   let pluginStartDeps: ProductDocBaseStartDependencies;
 
   beforeEach(() => {
-    initContext = coreMock.createPluginInitializerContext();
+    initContext = createInitContext();
     plugin = new ProductDocBasePlugin(initContext);
     pluginSetupDeps = {
       taskManager: taskManagerMock.createSetup(),
@@ -181,6 +188,21 @@ describe('ProductDocBasePlugin', () => {
       );
     });
 
+    it('skips startup install tasks when auto-install is disabled', async () => {
+      const coreStart = coreMock.createStart();
+      mockEisAvailable(coreStart);
+      const disabledPlugin = new ProductDocBasePlugin(createInitContext(false));
+      disabledPlugin.setup(coreMock.createSetup(), pluginSetupDeps);
+      disabledPlugin.start(coreStart, pluginStartDeps);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(PackageInstallMock().purgeArtifactsFolder).toHaveBeenCalledTimes(1);
+      expect(DocumentationManagerMock().ensureDefaultProductDocumentation).not.toHaveBeenCalled();
+      expect(DocumentationManagerMock().updateAll).not.toHaveBeenCalled();
+      expect(DocumentationManagerMock().ensureDefaultSecurityLabs).not.toHaveBeenCalled();
+      expect(DocumentationManagerMock().updateSecurityLabsAll).not.toHaveBeenCalled();
+    });
+
     it('skips startup tasks when EIS is not available', async () => {
       const coreStart = coreMock.createStart();
       mockEisUnavailable(coreStart);
@@ -236,7 +258,7 @@ describe('ProductDocBasePlugin', () => {
       let serverlessContext: ReturnType<typeof coreMock.createPluginInitializerContext>;
 
       beforeEach(() => {
-        serverlessContext = coreMock.createPluginInitializerContext();
+        serverlessContext = createInitContext();
         (serverlessContext.env.packageInfo as Record<string, unknown>).buildFlavor = 'serverless';
         serverlessPlugin = new ProductDocBasePlugin(serverlessContext);
       });

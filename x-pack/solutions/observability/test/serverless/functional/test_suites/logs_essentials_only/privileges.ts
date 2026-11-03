@@ -56,7 +56,7 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
         'Discover\nAll\nRead\nNone',
         'Dashboard\nAll\nRead\nNone',
         'Logs\nAll\nRead\nNone',
-        'Observability Alerts\nAll\nRead\nNone',
+        'Classic Observability Alerts\nAll\nRead\nNone',
       ]);
     });
 

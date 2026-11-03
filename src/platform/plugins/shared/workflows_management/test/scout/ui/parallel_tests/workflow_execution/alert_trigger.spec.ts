@@ -108,8 +108,7 @@ const fireAlertsAndStopRule = async ({
 
 // Alert trigger tests run on Security and Observability (and ESS), but NOT on Elasticsearch/Search.
 // Security uses the detection engine API; Observability uses the generic alerting API.
-// Failing: See https://github.com/elastic/kibana/issues/252959
-test.describe.skip(
+test.describe(
   'Workflow execution - Alert triggers',
   {
     tag: [
@@ -242,7 +241,7 @@ test.describe.skip(
 
         // Only 1 iteration per execution (single-alert mode)
         const logEachAlertButton = await pageObjects.workflowExecution.getStep(
-          'foreach_log_each_alert > 0 > log_each_alert'
+          'foreach_log_each_alert > Iteration #0 > log_each_alert'
         );
         await logEachAlertButton.click();
 
@@ -272,7 +271,7 @@ test.describe.skip(
       const iterationOutputs: string[] = [];
       for (let i = 0; i < mockAlerts.length; i++) {
         const logEachAlertButton = await pageObjects.workflowExecution.getStep(
-          `foreach_log_each_alert > ${i} > log_each_alert`
+          `foreach_log_each_alert > Iteration #${i} > log_each_alert`
         );
         await logEachAlertButton.click();
 

@@ -15,8 +15,8 @@ import React from 'react';
 import type { UserProfile, UserProfileUserInfo } from '@kbn/core-user-profile-common';
 
 import type { UserProfileAvatarData } from './types';
+import { getUserAvatarColor } from './user_avatar_color';
 import {
-  getUserAvatarColor,
   getUserAvatarInitials,
   getUserDisplayLabel,
   USER_AVATAR_MAX_INITIALS,

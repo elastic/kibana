@@ -22,6 +22,7 @@ const createMockWorkflowsService = (
     hasAtLeast?: boolean;
     emitEvent?: jest.Mock;
     getManagedWorkflowStatus?: jest.Mock;
+    disableManagedWorkflow?: jest.Mock;
     getInstalledManagedWorkflowState?: jest.Mock;
     listInstalledManagedWorkflowStates?: jest.Mock;
   } = {}
@@ -55,6 +56,9 @@ const createMockWorkflowsService = (
       },
     }),
     getManagedWorkflowStatus,
+    installManagedWorkflow: jest.fn().mockResolvedValue(undefined),
+    uninstallManagedWorkflow: jest.fn().mockResolvedValue(undefined),
+    disableManagedWorkflow: overrides.disableManagedWorkflow ?? jest.fn().mockResolvedValue(true),
     getInstalledManagedWorkflowState:
       overrides.getInstalledManagedWorkflowState ?? jest.fn().mockResolvedValue(null),
     listInstalledManagedWorkflowStates:
@@ -96,6 +100,33 @@ describe('createWorkflowsClientProvider', () => {
     const client = await provider(mockRequest);
 
     expect(client.isWorkflowsAvailable).toBe(false);
+  });
+
+  it('preserves the request for managed installation and removal', async () => {
+    const service = createMockWorkflowsService();
+    const provider = createWorkflowsClientProvider(
+      service,
+      { available: true } as WorkflowsManagementConfig,
+      logger
+    );
+    const client = await provider(mockRequest);
+    const options = { spaceId: 'default', values: { recipient: 'World' } };
+    await client.managedWorkflows.install('testPlugin', EXAMPLE_MANAGED_WORKFLOW_ID, options);
+    expect(service.installManagedWorkflow).toHaveBeenCalledWith(
+      EXAMPLE_MANAGED_WORKFLOW_ID,
+      options,
+      'testPlugin',
+      mockRequest
+    );
+    await client.managedWorkflows.uninstall('testPlugin', EXAMPLE_MANAGED_WORKFLOW_ID, {
+      spaceId: 'default',
+    });
+    expect(service.uninstallManagedWorkflow).toHaveBeenCalledWith(
+      EXAMPLE_MANAGED_WORKFLOW_ID,
+      { spaceId: 'default' },
+      'testPlugin',
+      mockRequest
+    );
   });
 
   it('should delegate emitEvent to the execution engine when available', async () => {
@@ -197,6 +228,41 @@ describe('createManagedWorkflowsSystemApiProvider', () => {
       client.getWorkflowStatus(EXAMPLE_MANAGED_WORKFLOW_ID, { spaceId: 'default' })
     ).rejects.toThrow('Workflows is not available in this environment');
     expect(getManagedWorkflowStatus).not.toHaveBeenCalled();
+  });
+
+  it('should delegate requestless managed workflow disable as the owner plugin when available', async () => {
+    const disableManagedWorkflow = jest.fn().mockResolvedValue(true);
+    const service = createMockWorkflowsService({ disableManagedWorkflow });
+    const config = { available: true } as WorkflowsManagementConfig;
+    const provider = createManagedWorkflowsSystemApiProvider(service, config, logger);
+
+    const client = await provider('testPlugin');
+
+    await expect(client.disable(EXAMPLE_MANAGED_WORKFLOW_ID, { spaceId: 'default' })).resolves.toBe(
+      true
+    );
+    expect(disableManagedWorkflow).toHaveBeenCalledWith(
+      EXAMPLE_MANAGED_WORKFLOW_ID,
+      { spaceId: 'default' },
+      'testPlugin'
+    );
+  });
+
+  it('should skip requestless managed workflow disable when unavailable', async () => {
+    const disableManagedWorkflow = jest.fn();
+    const service = createMockWorkflowsService({ hasAtLeast: false, disableManagedWorkflow });
+    const config = { available: true } as WorkflowsManagementConfig;
+    const provider = createManagedWorkflowsSystemApiProvider(service, config, logger);
+
+    const client = await provider('testPlugin');
+
+    await expect(client.disable(EXAMPLE_MANAGED_WORKFLOW_ID, { spaceId: 'default' })).resolves.toBe(
+      false
+    );
+    expect(disableManagedWorkflow).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Workflows is not available in this environment. Managed disable ignored.'
+    );
   });
 
   it('should delegate owner-scoped managed workflow state reads when available', async () => {

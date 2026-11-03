@@ -24,6 +24,7 @@ const FORBIDDEN_HEADERS = [
   'set-cookie',
   'x-elastic-app-auth',
   'es-client-authentication',
+  'x-client-authentication',
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 ];
 const REDACTED_HEADER_TEXT = '[REDACTED]';

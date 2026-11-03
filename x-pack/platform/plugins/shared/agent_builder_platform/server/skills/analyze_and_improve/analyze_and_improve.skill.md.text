@@ -41,8 +41,8 @@ are in, not of the analysis, and you find out from the tools you were given and 
 attachment or system prompt says:
 
 - **When the run says to apply**, load `ai-index-automations` and author the change through the
-  save path the run gives you. How to sequence that with the user — what to ask, when to show a
-  diff, when to save — comes from the run, not from here.
+  save path you were given. How to sequence that with the user — what to ask, when to show a
+  diff, when to save — comes from the agent's instructions, not from here.
 - **When nothing grants you that**, and always when the run is unattended, the proposal *is* the
   deliverable. Describe the change precisely enough to act on and stop there.
 
@@ -101,6 +101,14 @@ A **KI** is a structured fact stored in a searchable AI index or datastream (bac
 `ai-index-ds-*` for timeseries KIs, `ai-index-idx-*` otherwise). Workflows write KIs through the
 `context-engine` steps using the AI index id — never by indexing into the backing store directly.
 
+Agents retrieve through `platform.context_engine.query_ai_indices`, which returns only current,
+active, unexpired KIs: on a data stream the newest revision per `id`, never one whose
+`governance.lifecycle.status` is `deleted` or whose `expires_at` has passed, and with
+`governance` dropped. Those are the KIs an agent can retrieve. A top-level `WHERE` command on
+`governance.lifecycle.status` or `expires_at` switches off that one filter, and naming
+any `governance.*` field keeps it in the result, so diagnosis can read tombstones, expired KIs and
+provenance through the same tool.
+
 Each KI does two things:
 
 1. **Orients** — describes a class of information: its purpose, when to use it, what it does and
@@ -131,10 +139,10 @@ Access patterns live in the KI's `content`, and any ES|QL among them is mirrored
 
 ```
 Access patterns:
-  Q: Status of a specific support case
-  ESQL: FROM raw-cases-all | WHERE case_number == ?case_number | KEEP status, priority | LIMIT 1
-  params: case_number (keyword, e.g. "02115676")
-  returns: status, priority for one case
+  Q: Status of a specific order
+  ESQL: FROM orders | WHERE order_id == ?order_id | KEEP status, updated_at | LIMIT 1
+  params: order_id (keyword, e.g. "A-20481")
+  returns: status, updated_at for one order
 ```
 
 **Connector — `execute_connector_sub_action` call:**
@@ -164,7 +172,7 @@ documents that triggered it, and the full-text `field : "value"` match operator.
    A few high-leverage KIs beat many thin ones.
 
 2. **Precompute the path, not the value.** Cache stable things — themes, when-to-use, joins, query
-   templates. Materialize a literal answer only for **immutable** facts, such as a resolved case's
+   templates. Materialize a literal answer only for **immutable** facts, such as a closed incident's
    root cause. Never materialize volatile facts (status, priority, counts, dates): they rot and
    produce confidently wrong answers. Immutability sets the durability tier — immutable-fact KIs
    omit `expires_at`; anything that can drift gets a TTL and is refreshed on re-run.
@@ -198,9 +206,10 @@ Choosing the strategy is this skill's job, and a strategy is three answers, stat
 
 The `strategy_catalog` reference attached to this skill has the six named strategies (Index/Table
 Metadata, Bottom-Up, Selective / Outlier, Atomic Facts, Cumulative / Wiki-style, Detection /
-Feature) as worked examples of those three answers, with their `type` values, the quick guide and
-the default: unsure means Index/Table Metadata, which is cheap, fast and always useful. When the
-findings fit an example, name it. When they do not — a case corpus with a root-cause structure, a
+Feature) as worked examples of those three answers, with their `type` values and the signals in the
+data that call for each. Choose from those signals, not from a default: a strategy the data does not
+call for spends the KI budget on indicators nobody retrieves. When the findings fit an example,
+name it. When they do not — an incident corpus with a root-cause structure, a
 unit grounded from three indices — write the three answers from the findings rather than picking
 the nearest name and inheriting a shape that does not fit. State the strategy in the proposal as
 the three answers even when it has a name, because the person reading it has not read the catalog.
@@ -247,7 +256,7 @@ is a hallucination wearing a number.
 
 **Evidence discipline.** Two to five short, specific evidence lines quoting real observed values —
 `service.name=checkout`, `error.type=timeout (312 of 1,204)`,
-`customer_flight_activity.Loyalty Number: 0 of 31,901 populated`. When derived from specific
+`inventory.supplier_id: 0 of 31,901 populated`. When derived from specific
 documents, record the minimal covering set of source ids: enough to trace every claim, no more.
 
 ## Ground the proposal in the data before writing it
@@ -271,9 +280,10 @@ results as evidence lines:
    the document `_id`, reached with `METADATA _id`) or drop the claim. A key populated on one side
    only is a one-way lookup, and the proposal says which way.
 3. **One unit count for a per-unit strategy.** When one KI is about a unit rather than the whole
-   index, count the units the Unit section quotes and the Cost estimate multiplies:
-   `FROM <index> | STATS units = COUNT_DISTINCT(<unit_key>)`. Units, not rows: 62,884 sales rows
-   can be 2,517 products.
+   index, count the units the Unit section quotes and the Cost estimate multiplies, with the
+   agreed corpus filter applied so the count is of units the automation will actually process:
+   `FROM <index> <corpus filter> | STATS units = COUNT_DISTINCT(<unit_key>)`. Units, not rows:
+   62,884 sales rows can be 2,517 products.
 
 That is the whole budget: a row sample and a row count per source, a populated count per side of
 each claimed join, and one unit count for a per-unit strategy. Do not profile the index
@@ -289,8 +299,10 @@ proposals for the same index read the same way:
 
 - **Suggested automation** — the strategy by name where a catalog strategy fits (or "custom" with
   the unit named), the template it starts from, and whether it is new or replaces an automation,
-  naming which.
-- **Unit** — what one KI is about, and how many units the corpus holds (a count you ran).
+  naming which. Then the runner-up: the next-best strategy and the evidence line that decided
+  against it, so the reader can see the choice was made rather than defaulted.
+- **Unit** — what one KI is about, and how many units the filtered corpus holds (a count you ran
+  with the corpus filter applied).
 - **Carries** — what one KI carries: the orientation and the access patterns, and the grounded
   figures that separate it from its siblings.
 - **Found and refreshed** — the discovery query, the corpus filter, and whether a unit is
@@ -299,11 +311,12 @@ proposals for the same index read the same way:
   for an existing index the counted findings with their denominators and windows. Every claim the
   proposal makes about the data points at a line here; a proposal with an empty Evidence section
   is not ready.
-- **Cost** — required. The corpus size, how many units one run writes, how many model calls that
-  is (one per unit for the profile templates, one per document for the document template), and,
-  once a pilot has run, the pilot's duration and the projected duration of a full run from it, as
+- **Cost** — required. The corpus size, how many units one run writes (the unit count, or the
+  automation's own KI cap when that is lower), how many model calls that is (one per unit for the
+  profile templates, one per document for the document template, one per source for index metadata), and, once a pilot has run, the pilot's duration and the projected duration of a full run from it, as
   `ai-index-automations` lays out. Before the pilot, say the time is not yet measured rather than
-  guessing.
+  guessing. For a template install, the pilot is a `run_automation` call with `pilotSize`;
+  `ai-index-automations` says when a template install gets a pilot and how big it is.
 - **Example questions** — optional. Include it only when you are sure: a question belongs here
   only if an access pattern the KI will carry answers it, and every field that pattern filters or
   aggregates on was non-null in the sampled rows or had a probe count above zero. Do not run extra
@@ -386,12 +399,13 @@ Before proposing a change to something, read it.
   target each is queried through, `platform.context_engine.describe_ai_index` gives one index's
   fields and example queries, and
   `platform.context_engine.query_ai_indices` samples them with the space filter applied
-  server-side; never read an AI index with `platform.core.execute_esql`. On a data-stream
-  destination one KI can be several revisions, so read the newest per `id` as `ki_shapes`
-  describes. Aggregating by `type` and `tags` tells you what the
+  server-side; never read an AI index with `platform.core.execute_esql`. It already reads the
+  newest revision per `id` and hides deleted and expired KIs, as `ki_shapes` describes, so what it
+  returns is what an agent can retrieve. Aggregating by `type` and `tags` tells you what the
   index actually holds, which is what determines whether an `empty_retrieval` means "missing
   content" or "content that exists under a name the agent did not guess". This is the step signals
-  cannot substitute for.
+  cannot substitute for. `governance.provenance.created_by.uri` on a KI names the automation that
+  wrote it; `KEEP` it to see it, since the tool drops `governance` otherwise.
 - **Sources, and the filter on them.** A coverage gap on data that is not in any source is a source
   problem, and a different fix from anything about generation. `ai-index-sources` covers how to
   tell those apart — an `esql` source is a query you can run, so run it with and without its filter
@@ -462,8 +476,8 @@ stays in `attributes.error_text`.
   calls when trace details are available. Determine whether the agent composed the query or followed
   an access pattern from a previously retrieved KI. If the KI contains the malformed query, inspect
   its producing workflow and propose correcting the generation step — and note that a query in
-  `attributes.esql` passed `verifyKi`, which only parses, so a query can be syntactically valid and
-  still fail on unknown fields at execution time.
+  `attributes.esql` passed the verifiers, which parse it and run it, so a failure since then points
+  at the data changing under it: a renamed field, a dropped index, a mapping change.
 - **Repeated `coverage_gap` on the same raw index, especially with `fell_back_to_raw`.** Agents
   keep reaching for data no indicator covers, and the raw queries tell you what an automation
   should be producing. Check the corpus filter first — the data may be excluded rather than
@@ -544,8 +558,8 @@ against data you cannot see.
 index nobody has built cannot have been queried, and a probe that comes back empty only costs a
 turn. The analysis is of the data itself: what it contains (`platform.core.get_index_mapping`,
 then the sampling queries, join probes and unit count from "Ground the proposal in the data"), what questions
-it could answer, and which strategy fits, stated as the three answers. Start at Index/Table
-Metadata, and say that the proposal rests on the shape of the data rather than on observed
+it could answer, and which strategy fits, stated as the three answers. Choose the strategy from the
+signals in `strategy_catalog`, and say that the proposal rests on the shape of the data rather than on observed
 retrieval — with the Evidence section carrying the counts that shape was read from.
 Load `ai-index-sources` after the strategy, to write the source query and the filter the strategy
 calls for — not before, because the filter depends on the unit.
@@ -553,7 +567,3 @@ calls for — not before, because the filter depends on the unit.
 **No signals, on an index that exists.** Not evidence of health: an index nobody queries and an
 index that works perfectly look the same from here. Say which you can and cannot rule out rather
 than reporting the index as fine.
-
-**A corpus larger than 10,000 documents.** ES|QL caps at 10,000 rows per query, so an automation
-over a larger corpus needs pagination it will not get by default. Note the cap rather than
-proposing something that silently truncates; `ai-index-automations` has the shapes that handle it.

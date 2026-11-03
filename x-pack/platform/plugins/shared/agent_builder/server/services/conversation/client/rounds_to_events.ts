@@ -9,6 +9,7 @@ import type {
   Conversation,
   ConversationRound,
   ConversationRoundAuthor,
+  ConversationRoundOrigin,
   ConversationRoundStep,
   EventActor,
   ExecutionInterruption,
@@ -16,8 +17,10 @@ import type {
   ExecutionOutcome,
   ExecutionPartialRunSummary,
   ExecutionRunSummary,
+  UserIdAndName,
   RoundInput,
   TimelineEvent,
+  UserPrincipalType,
 } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
@@ -30,6 +33,7 @@ import {
   parseExecutionId,
   resumeExecutionId,
   roundStepEventId,
+  roundUserMessageEventId,
 } from '@kbn/agent-builder-common';
 import type { PromptResponse } from '@kbn/agent-builder-common/agents/prompts';
 
@@ -66,15 +70,31 @@ type RoundStart = Pick<ConversationRound, 'id' | 'input' | 'started_at' | 'autho
 
 type ConversationForRoundEvents = Pick<Conversation, 'agent_id' | 'user'>;
 
+/**
+ * Builds a `user_message` event. The caller owns the id: round-derived when a round will run,
+ * a plain uuid for a message appended on its own, which `isRoundDerivedEventId` must not match.
+ */
 export const userMessageEvent = (
-  round: RoundStart,
+  {
+    id,
+    createdAt,
+    input,
+    author,
+    origin,
+  }: {
+    id: string;
+    createdAt: string;
+    input: RoundInput;
+    author?: ConversationRoundAuthor;
+    origin?: ConversationRoundOrigin;
+  },
   conversation: ConversationForRoundEvents
 ): TimelineEvent => ({
-  id: `${round.id}${ROUND_DERIVED_EVENT_ID_SUFFIXES.userMessage}`,
+  id,
   type: TimelineEventType.userMessage,
-  created_at: round.started_at,
-  actor: userMessageActor(conversation, round),
-  data: round.input,
+  created_at: createdAt,
+  actor: userMessageActor(conversation, { author, origin }),
+  data: input,
 });
 
 export const executionStartedEvent = (
@@ -97,7 +117,16 @@ export const roundStartEvents = (
   round: RoundStart,
   conversation: ConversationForRoundEvents
 ): TimelineEvent[] => [
-  userMessageEvent(round, conversation),
+  userMessageEvent(
+    {
+      id: roundUserMessageEventId(round.id),
+      createdAt: round.started_at,
+      input: round.input,
+      author: round.author,
+      origin: round.origin,
+    },
+    conversation
+  ),
   executionStartedEvent(round, conversation),
 ];
 
@@ -166,10 +195,6 @@ export const roundToEvents = (
   ];
 };
 
-/**
- * Converts a rounds-based conversation into a timeline, on read. Maps each round with
- * {@link roundToEvents}, in round order.
- */
 export const roundsToEvents = (conversation: Conversation): TimelineEvent[] =>
   conversation.rounds.flatMap((round) => roundToEvents(round, conversation));
 
@@ -184,6 +209,9 @@ const executionRunSummary = (round: ConversationRound): ExecutionRunSummary => (
     : {}),
 });
 
+const principalType = (type: UserPrincipalType | undefined) =>
+  type === 'service_account' ? { principal_type: type } : {};
+
 /** Actor for a round's `user_message`: the round author (external or user), else the owner. */
 export const userMessageActor = (
   conversation: Pick<Conversation, 'user'> | undefined,
@@ -195,6 +223,7 @@ export const userMessageActor = (
       id: round.author.id,
       ...(round.author.username ? { username: round.author.username } : {}),
       ...(round.author.full_name ? { full_name: round.author.full_name } : {}),
+      ...(round.origin ? {} : principalType(round.author.type)),
       ...(round.origin ? { origin: round.origin } : {}),
     };
   }
@@ -204,6 +233,7 @@ export const userMessageActor = (
       type: round.origin ? EventActorType.external : EventActorType.user,
       id: conversation.user.id ?? conversation.user.username,
       ...(conversation.user.username ? { username: conversation.user.username } : {}),
+      ...(round.origin ? {} : principalType(conversation.user.type)),
       ...(round.origin ? { origin: round.origin } : {}),
     };
   }
@@ -214,6 +244,17 @@ export const userMessageActor = (
     ...(round.origin ? { origin: round.origin } : {}),
   };
 };
+
+/**
+ * Actor for events a principal writes directly, outside a round: custom events the current user
+ * appends, and the activity events of the writes it makes.
+ */
+export const currentUserActor = (user: UserIdAndName): EventActor => ({
+  type: EventActorType.user,
+  id: user.id ?? user.username,
+  ...(user.username ? { username: user.username } : {}),
+  ...principalType(user.type),
+});
 
 /** Actor for a run's lifecycle events. */
 export const agentActor = (conversation: Pick<Conversation, 'agent_id'>): EventActor => ({

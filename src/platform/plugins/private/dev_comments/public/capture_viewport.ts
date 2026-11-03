@@ -7,17 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IGNORE_SELECTOR, getEffectiveBackgroundColor } from '@kbn/dev-comments';
+import {
+  COMMENTS_BUTTON_SELECTOR,
+  IGNORE_SELECTOR,
+  getEffectiveBackgroundColor,
+} from '@kbn/dev-comments';
 
 /** Elements this far (in px) beyond the viewport are still rendered, so that shadows and edges are not cut short. */
 const OFFSCREEN_MARGIN = 100;
 
-/**
- * Whether a node can be left out of the capture: an element whose box lies
- * entirely outside the viewport. Boxless elements (portal containers,
- * `display: contents`) are kept, their descendants may well be on screen.
- * Skipping the rest is what keeps long pages affordable to capture.
- */
+/** Whether an element's box lies entirely outside the viewport; boxless ones (portal containers) are kept, their descendants may be on screen. */
 const isOffScreen = (node: Node, viewportWidth: number, viewportHeight: number): boolean => {
   if (!(node instanceof Element)) {
     return false;
@@ -45,14 +44,10 @@ const isTextField = (element: Element): element is HTMLTextAreaElement | HTMLInp
   (element instanceof HTMLInputElement && TEXT_INPUT_TYPES.has(element.type));
 
 /**
- * Clones start unscrolled. Once the content of a scrolled container is in
- * place, it is shifted by the scroll offset and the container clips it, as on
- * screen: elements with a transform, which leaves their own positioning alone,
- * and text of the container's own in a positioned wrapper, as a transform does
- * nothing to inline content. Inline styles set here survive the copy of
- * computed styles. A text field has no content to shift yet; it is marked, and
- * the styles a field has by default and a box does not are made explicit, for
- * the box that stands in for it once its value is there.
+ * Clones start unscrolled: once a scrolled container's content is in place, it
+ * is shifted by the scroll offset (elements by a transform, the container's own
+ * text in a positioned wrapper) and clipped. A text field, whose value is not
+ * there yet, is marked for `drawScrolledFields`, with the styles a box lacks made explicit.
  */
 export const preserveScroll = (original: Node, clone: Node, after: boolean) => {
   if (!after || !(original instanceof Element) || !(clone instanceof HTMLElement)) {
@@ -88,12 +83,7 @@ export const preserveScroll = (original: Node, clone: Node, after: boolean) => {
   }
 };
 
-/**
- * Text fields scroll their value on their own, and their clones show it from
- * the start. With the value and the field's styles on the clone, a scrolled
- * field (marked by `preserveScroll`) is replaced by a box with the same styles
- * that clips the value, shifted by the scroll offset.
- */
+/** Replaces each scrolled field's clone (marked by `preserveScroll`) with a box of the same styles, clipping its value shifted by the scroll offset. */
 export const drawScrolledFields = (root: Element) => {
   for (const field of Array.from(root.querySelectorAll<HTMLElement>(`[${FIELD_SCROLL_ATTR}]`))) {
     const [scrollLeft, scrollTop] = (field.getAttribute(FIELD_SCROLL_ATTR) ?? '0,0')
@@ -112,26 +102,34 @@ export const drawScrolledFields = (root: Element) => {
 };
 
 /**
- * What is on screen right now, at the viewport's size in CSS pixels, without
- * the layer's own UI (marked with `IGNORE_ATTR`). The rest, developer toolbar
- * included, is kept: the screenshot shows the page as the author saw it.
+ * Whether the node is the layer's own UI and should be left out of a screenshot.
+ * The toolbar comments button is ignored so it cannot be commented on, but it
+ * sits among the host's buttons and a hole there looks wrong: it is kept.
  */
+export const isOmittedFromCapture = (node: Node): boolean => {
+  if (!(node instanceof Element) || !node.matches(IGNORE_SELECTOR)) {
+    return false;
+  }
+  return (
+    !node.matches(COMMENTS_BUTTON_SELECTOR) &&
+    node.closest(COMMENTS_BUTTON_SELECTOR) === null &&
+    node.querySelector(COMMENTS_BUTTON_SELECTOR) === null
+  );
+};
+
+/** What is on screen, at the viewport's size in CSS pixels, without the layer's own UI (marked with `IGNORE_ATTR`). */
 export const captureViewport = async (): Promise<HTMLCanvasElement> => {
   const { default: domtoimage } = await import('dom-to-image-more');
   const { innerWidth: width, innerHeight: height, scrollX, scrollY } = window;
   return domtoimage.toCanvas(document.body, {
     width,
     height,
-    // The page's scroll position is reproduced by shifting the body's content
-    // with margins: unlike a transform, they leave `position: fixed` chrome
-    // (header, flyouts, modals) where it is on screen.
+    // The scroll position, by margins: unlike a transform, they leave fixed chrome (header, flyouts) where it is.
     style: { marginTop: `${-scrollY}px`, marginLeft: `${-scrollX}px` },
-    // `body` is transparent in Kibana (the color is on `html`), so captures keep the app's color mode.
+    // `body` is transparent in Kibana (the color is on `html`).
     bgcolor: getEffectiveBackgroundColor(document.body),
-    // A filtered node is left out with its whole subtree, so matching the roots is enough.
-    filter: (node) =>
-      !(node instanceof Element && node.matches(IGNORE_SELECTOR)) &&
-      !isOffScreen(node, width, height),
+    // A filtered node is left out with its whole subtree.
+    filter: (node) => !isOmittedFromCapture(node) && !isOffScreen(node, width, height),
     adjustClonedNode: preserveScroll,
     onclone: drawScrolledFields,
   });

@@ -1,0 +1,53 @@
+{
+  "sha1": "6f45b383cfdcc432af9204da5b5e996c7f192451",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "a3b0af1c54e2374-f4a16e8a10b2aa9",
+      "title": "Data Usage main page opens from the management card",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_usage/test/scout_data_usage_autoops/ui/tests/main.spec.ts",
+        "line": 49,
+        "column": 43
+      }
+    },
+    {
+      "id": "a3b0af1c54e2374-3095cdaebc112c3",
+      "title": "Data Usage main page renders the charts with a legend per data stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_usage/test/scout_data_usage_autoops/ui/tests/main.spec.ts",
+        "line": 56,
+        "column": 10
+      }
+    },
+    {
+      "id": "a3b0af1c54e2374-655beec330693ca",
+      "title": "Data Usage main page links a data stream to Index Management from the legend",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_usage/test/scout_data_usage_autoops/ui/tests/main.spec.ts",
+        "line": 63,
+        "column": 89
+      }
+    }
+  ]
+}

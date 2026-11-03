@@ -19,7 +19,9 @@ export interface PutConnectorFilteringArgs {
 export type PutConnectorFilteringResponse = FilteringRules;
 
 export const putConnectorFiltering = async ({ connectorId }: PutConnectorFilteringArgs) => {
-  const route = `/internal/enterprise_search/connectors/${connectorId}/filtering`;
+  const route = `/internal/enterprise_search/connectors/${encodeURIComponent(
+    connectorId
+  )}/filtering`;
 
   return await HttpLogic.values.http.put(route);
 };

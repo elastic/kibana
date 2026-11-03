@@ -44,7 +44,13 @@ export const AlertEpisodeGroupingSection = ({
   services,
   compressed,
 }: AlertEpisodeGroupingSectionProps) => {
-  const { data: episode, isLoading, isError } = useFetchEpisodeQuery({ episodeId, services });
+  const {
+    data: episode,
+    isLoading,
+    isError,
+    isDataLoading,
+    isDataError,
+  } = useFetchEpisodeQuery({ episodeId, services });
 
   const ruleId = episode?.['rule.id'];
   const { ruleState } = useFetchRule({ id: ruleId, http: services.http });
@@ -59,7 +65,7 @@ export const AlertEpisodeGroupingSection = ({
     http: services.http,
   });
 
-  if (isLoading || isRuleLoading(ruleState)) {
+  if (isLoading || isDataLoading || isRuleLoading(ruleState)) {
     return (
       <EuiPanel hasBorder paddingSize="m" data-test-subj="alertingV2EpisodeGroupingSectionLoading">
         <EuiSkeletonRectangle width="100%" height={20} />
@@ -67,7 +73,7 @@ export const AlertEpisodeGroupingSection = ({
     );
   }
 
-  if (isError) {
+  if (isError || isDataError) {
     return (
       <EuiText size="s" color="danger" data-test-subj="alertingV2EpisodeGroupingSectionError">
         {i18n.METADATA_LIST_GROUPING_ERROR}

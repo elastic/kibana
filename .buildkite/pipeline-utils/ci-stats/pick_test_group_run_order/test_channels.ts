@@ -11,9 +11,8 @@
  * NOTE: This is a local mirror of the channel vocabulary defined in
  * src/platform/packages/private/kbn-scout-info/src/test_channels.ts.
  *
- * Pipeline-gen runs with KBN_BOOTSTRAP_NO_PREBUILT=true and deliberately
- * imports zero @kbn/* runtime packages, so we cannot import @kbn/scout-info
- * directly. Keep the channel list and semantics in sync with that module.
+ * Pipeline-gen deliberately imports zero @kbn/* runtime packages, so we cannot
+ * import @kbn/scout-info directly. Keep the channel list and semantics in sync with that module.
  */
 const COMPLETE_CHANNEL_LIST = [
   'ci-on-commit',

@@ -6,7 +6,8 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import { withTimeout } from '@kbn/std';
 import type { Replacements, ConversationResponse } from '@kbn/elastic-assistant-common';
 import {
   ELASTIC_AI_ASSISTANT_CHAT_COMPLETE_URL,
@@ -200,13 +201,8 @@ export const chatCompleteRoute = (
             }));
           }
 
-          const timeout = new Promise((_, reject) => {
-            setTimeout(() => {
-              reject(
-                new Error('Request timed out, increase xpack.elasticAssistant.responseTimeout')
-              );
-            }, config?.responseTimeout as number);
-          }) as unknown as IKibanaResponse;
+          const responseTimeoutMs = config?.responseTimeout as number;
+          const responseDeadline = Date.now() + responseTimeoutMs;
 
           // Do not persist conversation messages if `persist = false`
           const conversationId = request.body.persist
@@ -270,8 +266,8 @@ export const chatCompleteRoute = (
             }
           };
 
-          return await Promise.race([
-            langChainExecute({
+          const outcome = await withTimeout({
+            promise: langChainExecute({
               abortSignal,
               isStream: request.body.isStream ?? false,
               actionsClient,
@@ -296,8 +292,12 @@ export const chatCompleteRoute = (
               systemPrompt,
               ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
             }),
-            timeout,
-          ]);
+            timeoutMs: Math.max(0, responseDeadline - Date.now()),
+          });
+          if (outcome.timedout) {
+            throw new Error('Request timed out, increase xpack.elasticAssistant.responseTimeout');
+          }
+          return outcome.value;
         } catch (err) {
           const error = transformError(err as Error);
           const kbDataClient =

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { errorResponseSchema, suggestUserProfilesResponseSchema } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { Request } from '@kbn/core-di-server';
@@ -20,24 +20,50 @@ import { ALERTING_V2_INTERNAL_SUGGESTIONS_USER_PROFILES_API_PATH } from '../cons
 
 const ROUTE_AUTH_PRIVILEGES = [ALERTING_V2_API_PRIVILEGES.alerts.read] as const;
 
-const suggestUserProfilesBodySchema = z
-  .object({
-    name: z
-      .string()
-      .max(256)
-      .optional()
-      .describe('Name fragment to search by. Omit or leave empty to list profiles unfiltered.'),
-    size: z
-      .number()
-      .int()
-      .min(0)
-      .max(100)
-      .optional()
-      .describe('Maximum number of profiles to return. Defaults to 10'),
-  })
-  .strict();
+const suggestUserProfilesBodySchema = lazySchema(() =>
+  z
+    .object({
+      name: z
+        .string()
+        .max(256)
+        .optional()
+        .describe('Name fragment to search by. Omit or leave empty to list profiles unfiltered.'),
+      size: z
+        .number()
+        .int()
+        .min(0)
+        .max(100)
+        .optional()
+        .describe('Maximum number of profiles to return. Defaults to 10'),
+    })
+    .strict()
+);
 
 type SuggestUserProfilesBody = z.infer<typeof suggestUserProfilesBodySchema>;
+
+/**
+ * Maps security user profiles to the alerting v2 suggestion response: picks the
+ * safe user fields and, when present, the avatar — renaming the security
+ * service's `imageUrl` to the API contract's `image_url`.
+ */
+export const toSuggestUserProfilesResponse = (
+  profiles: UserProfile[]
+): z.infer<typeof suggestUserProfilesResponseSchema> =>
+  profiles.map(({ uid, user, data }) => ({
+    uid,
+    user: {
+      username: user.username,
+      full_name: user.full_name,
+      email: user.email,
+    },
+    ...(data?.avatar && {
+      avatar: {
+        initials: data.avatar.initials,
+        color: data.avatar.color,
+        image_url: data.avatar.imageUrl,
+      },
+    }),
+  }));
 
 /**
  *
@@ -110,24 +136,6 @@ export class SuggestUserProfilesRoute extends BaseAlertingRoute {
       dataPath: 'avatar',
     });
 
-    const body = profiles.map(({ uid, user, data }) => {
-      return {
-        uid,
-        user: {
-          username: user.username,
-          full_name: user.full_name,
-          email: user.email,
-        },
-        ...(data?.avatar && {
-          avatar: {
-            initials: data.avatar.initials,
-            color: data.avatar.color,
-            image_url: data.avatar.imageUrl,
-          },
-        }),
-      };
-    });
-
-    return this.ctx.response.ok({ body });
+    return this.ctx.response.ok({ body: toSuggestUserProfilesResponse(profiles) });
   }
 }

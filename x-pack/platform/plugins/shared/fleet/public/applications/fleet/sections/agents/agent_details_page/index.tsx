@@ -367,7 +367,7 @@ const AgentDetailsPageContent: React.FunctionComponent<{
         <Route
           path={FLEET_ROUTING_PATHS.agent_details_diagnostics}
           render={() => {
-            return <AgentDiagnosticsTab agent={agent} />;
+            return <AgentDiagnosticsTab agent={agent} agentPolicy={agentPolicy} />;
           }}
         />
       )}

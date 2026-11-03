@@ -8,8 +8,7 @@
 import expect from '@kbn/expect';
 
 import { OBSERVABLE_TYPE_IPV4 } from '@kbn/cases-plugin/common/constants';
-import { AttachmentType } from '@kbn/cases-plugin/common';
-import { getPostCaseRequest } from '../../../../common/lib/mock';
+import { buildUnifiedAlertReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   createCase,
   deleteAllCaseItems,
@@ -79,13 +78,11 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: theCase.id,
           params: [
-            {
-              type: AttachmentType.alert,
+            buildUnifiedAlertReq('securitySolutionFixture', {
               alertId: 'ext-alert-1',
               index: alertIndex,
               rule: { id: 'rule-1', name: 'Rule 1' },
-              owner: 'securitySolutionFixture',
-            },
+            }),
           ],
           expectedHttpCode: 200,
         });
@@ -116,13 +113,11 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: theCase.id,
           params: [
-            {
-              type: AttachmentType.alert,
+            buildUnifiedAlertReq('securitySolutionFixture', {
               alertId: 'ext-alert-2',
               index: alertIndex,
               rule: { id: 'rule-1', name: 'Rule 1' },
-              owner: 'securitySolutionFixture',
-            },
+            }),
           ],
           expectedHttpCode: 200,
         });
@@ -132,13 +127,11 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: theCase.id,
           params: [
-            {
-              type: AttachmentType.alert,
+            buildUnifiedAlertReq('securitySolutionFixture', {
               alertId: 'ext-alert-2',
               index: alertIndex,
               rule: { id: 'rule-1', name: 'Rule 1' },
-              owner: 'securitySolutionFixture',
-            },
+            }),
           ],
           expectedHttpCode: 200,
         });
@@ -161,13 +154,11 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: theCase.id,
           params: [
-            {
-              type: AttachmentType.alert,
+            buildUnifiedAlertReq('securitySolutionFixture', {
               alertId: 'ext-alert-no-ecs',
               index: alertIndex,
               rule: { id: 'rule-1', name: 'Rule 1' },
-              owner: 'securitySolutionFixture',
-            },
+            }),
           ],
           expectedHttpCode: 200,
         });
@@ -187,20 +178,16 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: theCase.id,
           params: [
-            {
-              type: AttachmentType.alert,
+            buildUnifiedAlertReq('securitySolutionFixture', {
               alertId: 'ext-alert-1',
               index: alertIndex,
               rule: { id: 'rule-1', name: 'Rule 1' },
-              owner: 'securitySolutionFixture',
-            },
-            {
-              type: AttachmentType.alert,
+            }),
+            buildUnifiedAlertReq('securitySolutionFixture', {
               alertId: 'ext-alert-2',
               index: alertIndex,
               rule: { id: 'rule-2', name: 'Rule 2' },
-              owner: 'securitySolutionFixture',
-            },
+            }),
           ],
           expectedHttpCode: 200,
         });
@@ -224,13 +211,11 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: theCase.id,
           params: [
-            {
-              type: AttachmentType.alert,
+            buildUnifiedAlertReq('securitySolutionFixture', {
               alertId: 'ext-alert-1',
               index: alertIndex,
               rule: { id: 'rule-1', name: 'Rule 1' },
-              owner: 'securitySolutionFixture',
-            },
+            }),
           ],
           expectedHttpCode: 200,
         });

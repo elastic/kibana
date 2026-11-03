@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import type { Location } from 'history';
 
 export const getIsLegacyFromQueryParams = (location: Location): boolean => {
-  const { legacy } = parse(location.search.substring(1));
+  const { legacy } = queryString.parse(location.search.substring(1));
 
   if (!Boolean(legacy) || typeof legacy !== 'string') {
     return false;

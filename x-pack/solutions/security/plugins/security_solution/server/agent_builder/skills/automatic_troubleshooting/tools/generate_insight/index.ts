@@ -7,28 +7,39 @@
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
+import { NotFoundError } from '../../../../../endpoint/errors';
 import { GENERATE_INSIGHT_TOOL_ID } from '../..';
 import { createGenerateInsightGraph } from './graph';
 
-const generateInsightSchema = z.object({
-  problemDescription: z
-    .string()
-    .min(1)
-    .describe('A brief description of the original problem being diagnosed.'),
-  remediation: z.string().min(1).describe('A detailed guide for how to remediate the problem.'),
-  endpointIds: z.array(z.string()).min(1).describe('Related endpoint IDs'),
-  data: z
-    .array(z.object({}).catchall(z.unknown()))
-    .min(1)
-    .describe('Relevant raw unedited documents.'),
-});
+const generateInsightSchema = lazySchema(() =>
+  z.object({
+    problemDescription: z
+      .string()
+      .min(1)
+      .describe('A brief description of the original problem being diagnosed.'),
+    remediation: z.string().min(1).describe('A detailed guide for how to remediate the problem.'),
+    endpointIds: z
+      .array(z.string())
+      .min(1)
+      .describe(
+        'Elastic Agent IDs (`agent.id`) of the affected endpoints, taken from `.fleet-agents*` or endpoint metadata documents. Host names, policy IDs, and artifact IDs are not accepted.'
+      ),
+    data: z
+      .array(z.object({}).catchall(z.unknown()))
+      .min(1)
+      .describe('Relevant raw unedited documents.'),
+  })
+);
 
 const getErrorMessage = (error: unknown): string => {
   return error instanceof Error ? error.message : String(error);
 };
+
+const INVALID_ENDPOINT_IDS_GUIDANCE =
+  'endpointIds must be Elastic Agent IDs (`agent.id`) of endpoints in the current space; host names, policy IDs, and artifact IDs are not accepted. Do not call this tool again with guessed IDs. If no specific endpoint is involved, answer without persisting findings.';
 
 const errorResult = (message: string) => ({
   results: [
@@ -49,12 +60,12 @@ export const generateInsightTool = (
     type: ToolType.builtin,
     description: `Generate and store structured Automatic Troubleshooting insights.
 
-This tool MUST ALWAYS be called.
+This tool MUST be called when the findings concern one or more specific endpoints. Do not call it when no specific endpoint is involved. If it rejects the endpoint IDs, do not call it again with guessed IDs; after any other error, retry it at most once.
 
 This tool creates structured insights for persisting the results of the troubleshooting session.
 
 **When to use:**
-- When a conclusion has been reached`,
+- When a conclusion has been reached about specific endpoints`,
     schema: generateInsightSchema,
     handler: async (
       { problemDescription, remediation, endpointIds, data },
@@ -64,7 +75,17 @@ This tool creates structured insights for persisting the results of the troubles
         await endpointAppContextService
           .getInternalFleetServices(spaceId)
           .ensureInCurrentSpace({ agentIds: endpointIds });
+      } catch (error) {
+        const errorMessage = getErrorMessage(error);
+        logger.error(`Error in ${GENERATE_INSIGHT_TOOL_ID} tool: ${errorMessage}`);
+        return errorResult(
+          error instanceof NotFoundError
+            ? `Error: ${errorMessage}. ${INVALID_ENDPOINT_IDS_GUIDANCE}`
+            : `Error: ${errorMessage}`
+        );
+      }
 
+      try {
         const model = await modelProvider.getDefaultModel();
         const ccsEnabled = await endpointAppContextService.isCcsEnabled();
         const graph = createGenerateInsightGraph({

@@ -6,6 +6,12 @@
  */
 
 import pMap from 'p-map';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  SECURITY_EVENT_ATTACHMENT_TYPE,
+  SECURITY_SOLUTION_OWNER,
+  buildAlertCaseAttachment,
+} from '../../common';
 import { logger } from './logger';
 import type { GenerateCasesParams, KbnContext } from './types';
 import { casesBasePath, chunk, formatRequestError, rng, runWithRetry } from './utils';
@@ -209,20 +215,20 @@ export async function generateCases(
   const createdCaseRefs: CreatedCaseRef[] = [];
 
   // Precompute per-case offsets so concurrent pMap tasks don't race on shared cursors.
-  // Each case gets a stable position within its owner-bucket and within the non-observability
+  // Each case gets a stable position within its owner-bucket and within the security
   // bucket, so alert/event attachments are distributed across the indexed pools instead of
   // every concurrent task starting from the same cursor.
   const ownerSeq = new Map<string, number>();
-  let nonObsSeq = 0;
+  let securitySeq = 0;
   const offsets = cases.map((oneCase) => {
     const ownerIdx = ownerSeq.get(oneCase.owner) ?? 0;
     ownerSeq.set(oneCase.owner, ownerIdx + 1);
-    if (oneCase.owner === 'observability') {
-      return { ownerIdx, nonObsIdx: -1 };
+    if (oneCase.owner !== SECURITY_SOLUTION_OWNER) {
+      return { ownerIdx, securityIdx: -1 };
     }
-    const nonObsIdx = nonObsSeq;
-    nonObsSeq += 1;
-    return { ownerIdx, nonObsIdx };
+    const securityIdx = securitySeq;
+    securitySeq += 1;
+    return { ownerIdx, securityIdx };
   });
 
   let completed = 0;
@@ -231,7 +237,7 @@ export async function generateCases(
   await pMap(
     cases,
     async (newCase, index) => {
-      const { ownerIdx, nonObsIdx } = offsets[index];
+      const { ownerIdx, securityIdx } = offsets[index];
       try {
         const { data: created } = await runWithRetry(
           () =>
@@ -255,9 +261,9 @@ export async function generateCases(
         const pending: PendingAttachment[] = [];
 
         for (let i = 0; i < commentsPerCase; i++) {
-          const comment = `Auto generated comment ${i + 1}`;
+          const content = `Auto generated comment ${i + 1}`;
           pending.push({
-            body: { type: 'user', comment, owner: newCase.owner },
+            body: { type: COMMENT_ATTACHMENT_TYPE, data: { content }, owner: newCase.owner },
           });
         }
 
@@ -273,24 +279,25 @@ export async function generateCases(
           const rule = { id: alert.ruleId, name: alert.ruleName };
           pending.push({
             body: {
-              type: 'alert',
-              alertId: alert.alertId,
-              index: alert.index,
-              rule,
+              ...buildAlertCaseAttachment(newCase.owner, {
+                alertId: alert.alertId,
+                index: alert.index,
+                rule,
+              }),
               owner: newCase.owner,
             },
           });
         }
 
-        if (newCase.owner !== 'observability' && nonObsIdx >= 0 && events.length > 0) {
-          const eventBase = nonObsIdx * eventsPerCase;
+        if (securityIdx >= 0 && events.length > 0) {
+          const eventBase = securityIdx * eventsPerCase;
           for (let i = 0; i < eventsPerCase; i++) {
             const event = events[(eventBase + i) % events.length];
             pending.push({
               body: {
-                type: 'event',
-                eventId: event.eventId,
-                index: event.index,
+                type: SECURITY_EVENT_ATTACHMENT_TYPE,
+                attachmentId: event.eventId,
+                metadata: { index: event.index },
                 owner: newCase.owner,
               },
             });

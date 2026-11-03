@@ -7,23 +7,26 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiPanel, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { Handle, Position, type NodeProps } from '@xyflow/react';
+import { EuiBadge, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import { Position, type NodeProps } from '@xyflow/react';
+import { ConnectionHandle } from './connection_handle';
 import type { DestinationNode as DestinationNodeType } from '../types';
 import { DESTINATION_NODE_WIDTH } from '../canvas_constants';
+import { DestinationNodeStats } from './destination_node_stats';
+import { DESTINATION_TYPES_WITH_STATS } from './destination_stats_status';
 import { getNodeCardStyles } from './node_card_styles';
-
-const processingLabel = i18n.translate('xpack.streams.canvas.destinationNode.processingLabel', {
-  defaultMessage: 'Processing',
-});
+import { DESTINATION_SIGNAL_LABELS } from '../../../../streams_layout/destinations/destination_type_config';
 
 export function DestinationNode({ data, selected, dragging }: NodeProps<DestinationNodeType>) {
   const { euiTheme } = useEuiTheme();
 
   return (
     <>
-      <Handle type="target" position={Position.Left} isConnectable={false} />
+      <ConnectionHandle
+        type="target"
+        position={Position.Left}
+        isConnectable={Boolean(data.destinationId)}
+      />
       <EuiPanel
         // `nokey` stops React Flow from arming a marquee when a Shift+drag starts
         // on the card, so Shift+click multi-select stays stable.
@@ -32,7 +35,11 @@ export function DestinationNode({ data, selected, dragging }: NodeProps<Destinat
         hasBorder
         paddingSize="m"
         data-test-subj="streamsCanvasDestinationNode"
-        css={getNodeCardStyles(euiTheme, { width: DESTINATION_NODE_WIDTH, selected, dragging })}
+        css={getNodeCardStyles(euiTheme, {
+          width: DESTINATION_NODE_WIDTH,
+          selected,
+          dragging,
+        })}
       >
         <div
           css={css`
@@ -41,32 +48,58 @@ export function DestinationNode({ data, selected, dragging }: NodeProps<Destinat
             gap: ${euiTheme.size.s};
           `}
         >
-          <EuiText
-            size="xs"
+          <div
             css={css`
               flex: 1 1 auto;
               min-width: 0;
               overflow-wrap: anywhere;
             `}
           >
-            <strong>{data.title}</strong>
-          </EuiText>
-          {data.hasProcessing && (
-            <EuiToolTip content={processingLabel} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="processor"
-                size="xs"
-                color="text"
-                aria-label={processingLabel}
-                data-test-subj="streamsCanvasProcessingButton"
-                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                  event.stopPropagation();
-                  data.onProcessingClick?.(data.streamName);
-                }}
-              />
-            </EuiToolTip>
-          )}
+            <div
+              css={css`
+                display: flex;
+                align-items: center;
+                gap: ${euiTheme.size.xs};
+                flex-wrap: wrap;
+              `}
+            >
+              <EuiText size="m">
+                <strong>{data.title}</strong>
+              </EuiText>
+              {data.signals?.map((signal) => (
+                <EuiBadge
+                  key={signal}
+                  color="hollow"
+                  data-test-subj="streamsCanvasDestinationSignalBadge"
+                >
+                  {DESTINATION_SIGNAL_LABELS[signal]}
+                </EuiBadge>
+              ))}
+            </div>
+            {data.subtitle && (
+              <EuiText
+                size="s"
+                color="subdued"
+                title={data.subtitle}
+                data-test-subj="streamsCanvasDestinationSubtitle"
+                css={css`
+                  display: -webkit-box;
+                  -webkit-line-clamp: 2;
+                  -webkit-box-orient: vertical;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                `}
+              >
+                {data.subtitle}
+              </EuiText>
+            )}
+          </div>
         </div>
+        {data.destinationId &&
+          data.destinationType &&
+          DESTINATION_TYPES_WITH_STATS.includes(data.destinationType) && (
+            <DestinationNodeStats destinationId={data.destinationId} indexCount={data.indexCount} />
+          )}
       </EuiPanel>
     </>
   );

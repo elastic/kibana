@@ -73,8 +73,13 @@ export interface BuildPolicyBodyOpts {
   storedServiceVars: Record<string, ServiceVars>;
   globalRegion: string;
   namespace: string;
+  /** The global namespace, which every instance without a namespace of its own deploys into. */
+  globalNamespace?: string;
   authenticateAndDeployStep: AuthenticateAndDeployStepState;
   servicesMap: Map<string, AwsServiceMatrixEntry>;
+  /** When set, use this cloud_connector on the policy instead of preserving the existing one.
+   *  Pass null to explicitly clear the connector (e.g. when switching to static keys). */
+  overrideCloudConnector?: string | null;
 }
 
 /** Build surviving members list and package name from surviving instance IDs. Returns null if no valid members. */
@@ -85,8 +90,9 @@ export function resolveSurvivingMembers(
 ): Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }> | null {
   const instanceById = new Map(instances.map((i) => [i.instanceId, i]));
   const rawMembers = survivingInstanceIds.map((id) => {
-    // Fall back to a synthetic base instance (instanceId === serviceId) when session-storage
-    // instances are absent — e.g. the user skipped Step 2 or sessions don't overlap.
+    // Defensive: fall back to a synthetic base instance (instanceId === serviceId) when an id is not
+    // in `instances`. Callers pass the reconciled list, which lacks removed instances whose policy
+    // is still deployed, so cleanup can still resolve them.
     const inst = instanceById.get(id) ?? {
       instanceId: id,
       serviceId: id,

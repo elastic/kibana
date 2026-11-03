@@ -10,6 +10,7 @@ import type {
   DiagnosticsContext,
   WorkflowExecutionsTracking,
 } from '@kbn/discoveries/impl/attack_discovery/persistence/event_logging';
+import { ATTACK_DISCOVERY_EVENT_SERVICE_ACCOUNT_TAG } from '@kbn/discoveries/impl/attack_discovery/persistence/event_logging';
 
 import { getWorkflowExecutionsTracking } from '.';
 
@@ -23,6 +24,16 @@ const eventLogIndex = '.kibana-event-log-test';
 const executionId = 'test-execution-uuid-123';
 const spaceId = 'default';
 const username = 'test-user';
+
+const ownerFilter = {
+  bool: {
+    minimum_should_match: 1,
+    should: [
+      { term: { 'user.name': username } },
+      { term: { tags: ATTACK_DISCOVERY_EVENT_SERVICE_ACCOUNT_TAG } },
+    ],
+  },
+};
 
 const validTracking: WorkflowExecutionsTracking = {
   alertRetrieval: [
@@ -172,7 +183,7 @@ describe('getWorkflowExecutionsTracking', () => {
               { term: { 'event.provider': 'securitySolution.attackDiscovery' } },
               { term: { 'kibana.alert.rule.execution.uuid': executionId } },
               { term: { 'kibana.space_ids': spaceId } },
-              { term: { 'user.name': username } },
+              ownerFilter,
             ]),
           }),
         }),
@@ -180,7 +191,7 @@ describe('getWorkflowExecutionsTracking', () => {
     );
   });
 
-  it('scopes the query to the requesting principal via user.name (object-level authz)', async () => {
+  it("scopes the query to the requesting principal's events, plus events written by a service account (object-level authz)", async () => {
     mockSearch.mockResolvedValue({
       hits: {
         hits: [],
@@ -200,7 +211,7 @@ describe('getWorkflowExecutionsTracking', () => {
       expect.objectContaining({
         query: expect.objectContaining({
           bool: expect.objectContaining({
-            filter: expect.arrayContaining([{ term: { 'user.name': username } }]),
+            filter: expect.arrayContaining([ownerFilter]),
           }),
         }),
       })

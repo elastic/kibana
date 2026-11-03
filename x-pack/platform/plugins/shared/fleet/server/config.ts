@@ -31,7 +31,7 @@ const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled
 const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
 
 const REGISTRY_SPEC_MIN_VERSION = '2.3';
-const REGISTRY_SPEC_MAX_VERSION = '3.6';
+const REGISTRY_SPEC_MAX_VERSION = '3.7';
 
 export const DEFAULT_PRODUCT_VERSIONS_TIMEOUT_MS = 60 * 1000;
 
@@ -498,6 +498,7 @@ export const config: PluginConfigDescriptor = {
       versionSpecificPolicyAssignment: schema.maybe(
         schema.object({
           taskInterval: schema.maybe(schema.string()),
+          orphanSweepIntervalMs: schema.maybe(schema.number({ min: 0 })),
         })
       ),
       unenrollInactiveAgents: schema.maybe(

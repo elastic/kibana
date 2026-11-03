@@ -9,7 +9,11 @@ applies_to:
 
 # Google Cloud Monitoring connector [google-cloud-monitoring-action-type]
 
-The Google Cloud Monitoring connector wraps the [Cloud Monitoring API v3](https://cloud.google.com/monitoring/api/ref_v3/rest) so that AI agents and workflows can locate the alerting policy behind a firing alert, silence or reactivate it, suppress alerts for a maintenance window, and enrich the alert with metric, Uptime check, and Service Level Objective (SLO) data. Cloud Monitoring has no incidents REST resource, so this connector drives alert suppression through the policy's `enabled` flag and through Snoozes rather than an acknowledge-incident call.
+The Google Cloud Monitoring connector wraps the [Cloud Monitoring API v3](https://cloud.google.com/monitoring/api/ref_v3/rest) so that AI agents can locate the alerting policy behind a firing alert, silence or reactivate it, suppress alerts for a maintenance window, and enrich the alert with metric, Uptime check, and Service Level Objective (SLO) data. Cloud Monitoring has no incidents REST resource, so this connector drives alert suppression through the policy's `enabled` flag and through Snoozes rather than an acknowledge-incident call.
+
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+::::
 
 ## Create connectors in {{kib}} [define-google-cloud-monitoring-ui]
 
@@ -98,7 +102,7 @@ List services
 List Service Level Objectives
 :   List the SLOs defined for a service, to read error-budget status while triaging an incident.
     - `serviceId` (required): From *List services*.
-    - `filter`, `view` (`DEFAULT` or `EXPLICIT`), `pageSize`, `pageToken`, `projectId` (optional).
+    - `filter`, `view` (`FULL` or `EXPLICIT`), `pageSize`, `pageToken`, `projectId` (optional).
 
 :::::{tip}
 To triage a firing alert: *List alert policies* (optionally filtering by `displayName`) to find the policy, then *Get alert policy* for its full conditions and notification channels. Use the same filter from the fired condition with *List time series* to see the metric values that triggered it. Prefer *Create snooze* over *Set alert policy enabled* whenever the suppression is meant to end on its own.

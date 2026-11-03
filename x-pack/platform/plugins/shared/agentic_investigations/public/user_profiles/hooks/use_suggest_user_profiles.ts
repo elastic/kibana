@@ -12,7 +12,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
-import { ESCALATIONS_SUGGEST_USERS_URL } from '../../../common/escalations/constants';
+import { SUGGEST_USER_PROFILES_URL } from '../../../common/constants';
 import { userProfileQueryKeys } from '../query_keys';
 
 const DEFAULT_SIZE = 10;
@@ -28,7 +28,7 @@ const SUGGEST_ERROR_TITLE = i18n.translate(
  * popover (queue) and the collaborator picker (create-escalation modal).
  *
  * Uses `core.userProfile.suggest` against the plugin-owned route
- * (`ESCALATIONS_SUGGEST_USERS_URL`), which requires only `ESCALATIONS_API_PRIVILEGE_MANAGE`.
+ * (`SUGGEST_USER_PROFILES_URL`), which requires escalation or investigation manage privilege.
  * This avoids the Agent Builder read-privilege dependency.
  *
  * Pass `enabled: false` to suppress the request when the caller lacks the privilege
@@ -51,7 +51,7 @@ export const useSuggestUserProfiles = (
     queryFn: async () => {
       if (!services.userProfile) return [];
       return services.userProfile.suggest<UserProfileWithAvatar['data']>(
-        ESCALATIONS_SUGGEST_USERS_URL,
+        SUGGEST_USER_PROFILES_URL,
         { name: debouncedTerm, size, dataPath: 'avatar' }
       ) as Promise<UserProfileWithAvatar[]>;
     },
