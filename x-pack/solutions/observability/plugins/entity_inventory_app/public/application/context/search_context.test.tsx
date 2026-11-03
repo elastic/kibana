@@ -63,7 +63,7 @@ describe('EntityInventorySearchProvider', () => {
     });
   });
 
-  it('resets the filter selection when the entity category changes', () => {
+  it('resets the filter selection every time the entity category changes', () => {
     const core = coreMock.createStart();
     const { result, rerender } = renderHook(() => useEntityInventorySearch(), {
       wrapper: ({ children }: { children?: React.ReactNode }) => (
@@ -81,6 +81,11 @@ describe('EntityInventorySearchProvider', () => {
     expect(result.current.filterSelection).toEqual({ attributes: { 'os.type': ['linux'] } });
 
     category = 'hosts';
+    rerender();
+
+    expect(result.current.filterSelection).toEqual({ attributes: {} });
+
+    category = 'kubernetes';
     rerender();
 
     expect(result.current.filterSelection).toEqual({ attributes: {} });

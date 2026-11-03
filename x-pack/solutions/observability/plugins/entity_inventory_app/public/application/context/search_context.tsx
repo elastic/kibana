@@ -56,10 +56,10 @@ export const EntityInventorySearchProvider = ({
     entityCategory,
     selection: DEFAULT_FILTER_SELECTION,
   });
-  const filterSelection =
-    selectionState.entityCategory === entityCategory
-      ? selectionState.selection
-      : DEFAULT_FILTER_SELECTION;
+  if (selectionState.entityCategory !== entityCategory) {
+    setSelectionState({ entityCategory, selection: DEFAULT_FILTER_SELECTION });
+  }
+  const filterSelection = selectionState.selection;
   const setFilterSelection = useCallback(
     (selection: FilterControlsSelection) => setSelectionState({ entityCategory, selection }),
     [entityCategory]
