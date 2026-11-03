@@ -65,6 +65,8 @@ const createInvestigationConfig = (
         '--xpack.agenticInvestigations.enabled=true',
         '--xpack.proposals.enabled=true',
         '--feature_flags.overrides.nightshift.enabled=true',
+        // The suite judges investigations offline; online evals would run its judges again on every one.
+        '--feature_flags.overrides.nightshift.onlineEvals.paused=true',
         '--xpack.nightshift_investigations.cortex.enabled=false',
         '--xpack.nightshift_investigations.memory.enabled=false',
         '--xpack.nightshift_investigations.findings_recorder.enabled=false',
