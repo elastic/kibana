@@ -43,7 +43,7 @@ interface Step {
  * Both accounts raise the same three alerts, with the same rule names, severities, messages,
  * region and source IP, and no account name. Everything in the baseline render is identical
  * between them except the timestamps. What separates the principals sits in the enriched
- * variant only: `user.id` and `cloud.account.id` (different principals), and
+ * variants only: `user.id` and `cloud.account.id` (different principals), and
  * `user_agent.original` (Terraform in the sandbox, a Python script in production).
  */
 const STEPS: readonly Step[] = [
@@ -116,15 +116,17 @@ const { alerts, alertGroups } = defineAlerts(SCENARIO_ID, drafts);
 
 /**
  * `deploy-bot` exists in two accounts and raises the same StopLogging, CreateAccessKey and bulk
- * S3 alerts in both, minutes apart. In the sandbox that is a Terraform pipeline doing its job;
- * in production it is a script chaining defense evasion, persistence and exfiltration, which is
- * the confirmed activity.
+ * S3 alerts in both, minutes apart. In the sandbox that is a Terraform pipeline; in production it
+ * is a Python script that chains defense evasion, persistence and exfiltration.
  *
- * The baseline render cannot tell them apart (see `NON_IDENTIFYING_BASELINE_FIELDS`), so a
- * baseline `ForbiddenJoin` failure measures what a model does with indistinguishable principals,
- * and the `enriched` variant measures whether the extra identity fields let it separate them.
- * The gold is the same for both variants: no discovery may cite both groups, and the production
- * chain must be recovered.
+ * The baseline render cannot tell the accounts apart (see `NON_IDENTIFYING_BASELINE_FIELDS`), so
+ * a model that behaves correctly reports at most one three-alert story and cannot know which
+ * account it belongs to. Baseline recall therefore accepts either group (`requiredAnyOf`); what
+ * baseline measures is whether the model joins the two groups anyway (`ForbiddenJoin`). In both
+ * enriched variants `user.id`, `cloud.account.id` and `user_agent.original` separate the groups,
+ * and the production chain is the one that must be recovered. No group is a confirmed
+ * compromise: StopLogging, CreateAccessKey and a bulk GetObject from a script call for
+ * investigation, not for unconditional containment, so `confirmedGroups` is empty.
  */
 export const sameDisplayNameCrossAccountScenario: AuditScenario = {
   id: SCENARIO_ID,
@@ -132,11 +134,16 @@ export const sameDisplayNameCrossAccountScenario: AuditScenario = {
     'The same user.name (deploy-bot) raises identical alerts in two AWS accounts; one account is a routine pipeline and the other a chain of defense evasion, persistence and exfiltration.',
   provenance: 'authored',
   alerts,
+  operatorContext:
+    'The organisation runs separate prod and sandbox AWS accounts; service users with the same name exist in both.',
   gold: {
     alertGroups,
     forbiddenCoCitation: [['sandbox-deploy-bot', 'prod-deploy-bot']],
     expectedDiscoveries: 'atLeastOne',
     requiredGroup: 'prod-deploy-bot',
-    confirmedGroups: ['prod-deploy-bot'],
+    variantOverrides: {
+      baseline: { requiredAnyOf: ['prod-deploy-bot', 'sandbox-deploy-bot'] },
+    },
+    confirmedGroups: [],
   },
 };

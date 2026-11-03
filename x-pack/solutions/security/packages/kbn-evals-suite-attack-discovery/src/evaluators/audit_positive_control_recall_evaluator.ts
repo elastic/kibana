@@ -14,7 +14,11 @@ export const AUDIT_POSITIVE_CONTROL_RECALL_EVALUATOR_NAME = 'PositiveControlReca
 /** Recall at or above this counts as having found the chain. */
 export const POSITIVE_CONTROL_RECALL_THRESHOLD = 0.6;
 
-/** Fraction of the required group's alert ids cited by any discovery. */
+/**
+ * Fraction of the required group's alert ids cited by any discovery. When the gold sets
+ * `requiredAnyOf` (input that cannot tell the groups apart), the score is the best recall over
+ * those groups.
+ */
 export const createAuditPositiveControlRecallEvaluator = (
   resolveReference?: AuditReferenceResolver
 ): Evaluator<AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput> => ({
@@ -26,19 +30,30 @@ export const createAuditPositiveControlRecallEvaluator = (
     if ('result' in resolved) return resolved.result;
 
     const { gold, discoveries } = resolved;
-    const required = gold.requiredGroup ? gold.alertGroups[gold.requiredGroup] ?? [] : [];
-    if (required.length === 0) {
+    const candidates = gold.requiredGroup ? [gold.requiredGroup] : gold.requiredAnyOf ?? [];
+    if (candidates.length === 0) {
       return notApplicable('Scenario declares no required group.');
     }
 
     const cited = new Set(discoveries.flatMap(({ alertIds }) => alertIds));
-    const found = required.filter((id) => cited.has(id)).length;
-    const recall = found / required.length;
+    const results = candidates.map((group) => {
+      const required = gold.alertGroups[group] ?? [];
+      const found = required.filter((id) => cited.has(id)).length;
+      return {
+        group,
+        found,
+        total: required.length,
+        recall: required.length ? found / required.length : 0,
+      };
+    });
+    const best = results.reduce((top, next) => (next.recall > top.recall ? next : top));
 
     return {
-      score: recall,
-      label: recall >= POSITIVE_CONTROL_RECALL_THRESHOLD ? 'recalled' : 'missed',
-      explanation: `${found}/${required.length} alerts of "${gold.requiredGroup}" cited`,
+      score: best.recall,
+      label: best.recall >= POSITIVE_CONTROL_RECALL_THRESHOLD ? 'recalled' : 'missed',
+      explanation: `${best.found}/${best.total} alerts of "${best.group}" cited${
+        candidates.length > 1 ? ` (best of ${candidates.join(', ')})` : ''
+      }`,
     };
   },
 });

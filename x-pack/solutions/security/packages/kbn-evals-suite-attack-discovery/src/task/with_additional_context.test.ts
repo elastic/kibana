@@ -12,8 +12,12 @@ describe('withAdditionalContext', () => {
     expect(withAdditionalContext('PROMPT')).toBe('PROMPT');
   });
 
-  it('returns the prompt unchanged for blank context', () => {
-    expect(withAdditionalContext('PROMPT', '  \n')).toBe('PROMPT');
+  it('returns the prompt unchanged for empty context', () => {
+    expect(withAdditionalContext('PROMPT', '')).toBe('PROMPT');
+  });
+
+  it('appends whitespace-only context, as the product does', () => {
+    expect(withAdditionalContext('PROMPT', '  \n')).toBe('PROMPT\n\nAdditional context:\n  \n');
   });
 
   it('appends the context in the product format', () => {

@@ -177,6 +177,8 @@ export const benignBatchScenario: AuditScenario = {
     'Negative control: a batch of 36 alerts from vendor-signed enterprise tooling running from known paths, with no attack.',
   provenance: 'authored',
   alerts,
+  operatorContext:
+    'Endpoint management, patching and remote-support agents are deployed on all managed servers in this environment.',
   gold: {
     alertGroups,
     forbiddenCoCitation: [],

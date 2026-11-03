@@ -142,15 +142,23 @@ const SCENARIO_ID = 'shared-ci-egress';
 const { alerts, alertGroups } = defineAlerts(SCENARIO_ID, buildSharedCiEgressDrafts());
 
 /**
- * Three unrelated principals in three accounts share one egress NAT address. The shared IP is
- * the only thing linking them, and it links nothing: no discovery should span two of them.
+ * Isolates one failure: a shared source address treated as a link between principals.
+ *
+ * Three unrelated principals in three accounts raise low-severity alerts from one egress NAT
+ * address. The principals are already separable in the baseline render by `user.name` and
+ * `cloud.account.name`, so a model that joins them is joining on the shared `source.ip` against
+ * the evidence in front of it. The enriched variants add the shared-NAT signal (the same
+ * `source.as.*` on every alert, from the documentation ranges), `user.id` and
+ * `user_agent.original`; they do not make the principals any more separable than baseline did.
+ * No discovery should span two of them.
  */
 export const sharedCiEgressScenario: AuditScenario = {
   id: SCENARIO_ID,
   description:
-    'Unrelated principals in different AWS accounts share one egress NAT IP; a shared source.ip is not a link.',
+    'Unrelated principals, already separable by user.name and account, share one egress NAT IP; a shared source.ip is not a link.',
   provenance: 'authored',
   alerts,
+  operatorContext: 'CI runners in the build VPC egress through a shared NAT gateway.',
   gold: {
     alertGroups,
     forbiddenCoCitation: [

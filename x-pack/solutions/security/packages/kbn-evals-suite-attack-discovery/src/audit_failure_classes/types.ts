@@ -7,10 +7,12 @@
 import type { AnonymizedAlert } from '../types';
 
 /**
- * `baseline` renders only fields in the product default anonymization allowlist.
- * `enriched` adds identity fields the allowlist omits, plus an additional-context block.
+ * `baseline` renders only fields in the product default anonymization allowlist, with no
+ * additional context. `enriched` adds identity fields the allowlist omits, still with no
+ * additional context. `enriched_context` renders exactly what `enriched` does and adds the
+ * scenario's `operatorContext`.
  */
-export type AuditInputVariant = 'baseline' | 'enriched';
+export type AuditInputVariant = 'baseline' | 'enriched' | 'enriched_context';
 
 export type AuditExpectedDiscoveries = 'none' | 'atLeastOne';
 
@@ -30,6 +32,19 @@ export interface AuditGold {
   /** Group whose alert ids a discovery must recover (positive control). */
   requiredGroup?: string;
   /**
+   * Alternative to `requiredGroup` for input that cannot tell the groups apart: recovering any
+   * one of these groups counts (best recall over them).
+   */
+  requiredAnyOf?: readonly string[];
+  /**
+   * Per-variant replacement of the recall target, for scenarios where the input of one variant
+   * cannot support the gold of another. An override replaces both `requiredGroup` and
+   * `requiredAnyOf`.
+   */
+  variantOverrides?: Partial<
+    Record<AuditInputVariant, Pick<AuditGold, 'requiredGroup' | 'requiredAnyOf'>>
+  >;
+  /**
    * Groups whose alerts alone establish malicious activity. Containment advice that cites only
    * these groups is not scored by `ConditionalRemediation`; advice that cites anything else is.
    */
@@ -44,6 +59,12 @@ export interface AuditScenario {
   provenance: 'authored';
   alerts: readonly AuditAlert[];
   gold: AuditGold;
+  /**
+   * Additional context sent in the `enriched_context` variant only. Written as facts an operator
+   * would configure about the environment; it must not say how to link entities or what is
+   * malicious (`registry.test.ts` guards against hinting).
+   */
+  operatorContext: string;
 }
 
 /**

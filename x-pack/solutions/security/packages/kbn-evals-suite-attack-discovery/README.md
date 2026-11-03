@@ -204,7 +204,7 @@ nvm use && ATTACK_DISCOVERY_DATASET_JSONL_PATH=data/eval_dataset_attack_discover
 ## Audit failure classes (synthetic scenarios)
 
 `evals/attack_discovery/audit_failure_classes.spec.ts` runs authored `bundledAlerts` scenarios that
-reproduce four failure classes seen when auditing Attack Discovery output. It is independent of the
+reproduce five failure classes seen when auditing Attack Discovery output. It is independent of the
 dataset-backed spec above and is **opt-in**: `playwright.config.ts` ignores the spec unless
 `EVAL_AUDIT_FAILURE_CLASSES=1`, so the default and weekly runs only execute `attack_discovery.spec.ts`.
 
@@ -212,14 +212,18 @@ dataset-backed spec above and is **opt-in**: `playwright.config.ts` ignores the 
 |---|---|
 | Invented entity joins | `shared-ci-egress`, `same-display-name-cross-account` |
 | Threshold / meta alerts treated as evidence | `threshold-meta-alerts` |
-| Unconditional containment advice | `same-display-name-cross-account` (unconfirmed) |
+| Unconditional containment advice | `same-display-name-cross-account` (no group is a confirmed compromise, in any variant) |
 | No negative control | `benign-batch` (36 vendor-signed, SYSTEM-context alerts, nothing to find) |
 | Positive control under noise | `positive-chain-with-noise` (a four-alert `clickfix-chain` next to shared-egress noise) |
 
 Each scenario declares its gold as data in the registry (`alertGroups`, `forbiddenCoCitation`,
-`expectedDiscoveries`, `requiredGroup`, `confirmedGroups`, `metaAlertGroups`), so the evaluators stay
-generic. Alert ids are opaque hashes so an id never reveals its group. The registry validates that
-gold only references groups and alert ids that exist.
+`expectedDiscoveries`, `requiredGroup` / `requiredAnyOf`, `confirmedGroups`, `metaAlertGroups`, and
+optional per-variant `variantOverrides` of the recall target), so the evaluators stay generic. Alert
+ids are opaque hashes so an id never reveals its group. `validateGold(scenario)` in the registry runs
+inside `buildAuditExamples`, so a malformed scenario throws when the dataset is built: alert ids are
+unique, the groups partition the alerts, every group the gold names exists, a forbidden pair is two
+distinct groups, and in every variant a recall target is declared exactly when discoveries are
+expected.
 
 Gold is **not** stored in example metadata. Metadata carries `Title`, `scenarioId`, `inputVariant` and
 `provenance`; evaluators look the gold up from the registry by `scenarioId`. Example ids are
@@ -236,30 +240,49 @@ so evaluators compare real values.
 
 ### Input variants
 
-Every scenario runs twice, recorded as `metadata.inputVariant` and in the example name:
+Every scenario runs three times, recorded as `metadata.inputVariant` and in the example name
+(`<scenario>.<variant>`, 15 examples in total):
 
 - `baseline`: only fields in the product default allowlist, no additional context.
 - `enriched`: the baseline fields plus `cloud.account.id`, `user.id` (IAM ARN),
-  `source.as.organization.name`, `source.as.number`, `user_agent.original`, and an additional-context
-  block saying the egress NAT is shared and that `user.name` is not unique across accounts.
+  `source.as.organization.name`, `source.as.number`, `user_agent.original` and `cloud.provider`.
+  No additional context.
+- `enriched_context`: the same rendering as `enriched`, plus the scenario's `operatorContext` as
+  additional context. It is written as a fact an operator would configure about the environment
+  ("CI runners in the build VPC egress through a shared NAT gateway."), never as a rule for linking
+  entities or a statement of what is malicious. `registry.test.ts` rejects a context containing
+  `user.id`, `source.ip`, "link", "same entity", "malicious" or "do not".
 
-In `same-display-name-cross-account` the two accounts raise identical alerts; the baseline differs
-only in `_id` and `@timestamp` (`NON_IDENTIFYING_BASELINE_FIELDS`), so a model cannot tell the
-accounts apart from baseline input and must not join them. Only the enriched variant carries
-separators (`user.id`, `cloud.account.id`, `user_agent.original`).
+`enriched` vs `baseline` measures the extra fields; `enriched_context` vs `enriched` measures the
+context alone.
 
-Filter results by example-name suffix (`.baseline` / `.enriched`) for a model x input-variant grid.
+**`same-display-name-cross-account`.** The two accounts raise identical alerts; the baseline differs
+only in `_id` and `@timestamp` (`NON_IDENTIFYING_BASELINE_FIELDS`). A model that behaves correctly
+reports at most one three-alert story there and cannot know which account it belongs to, so baseline
+recall is any-of (`requiredAnyOf`: either group counts, best recall) and what baseline measures is
+`ForbiddenJoin`. The enriched variants carry the separators (`user.id`, `cloud.account.id`,
+`user_agent.original`) and require the production group. No group is a confirmed compromise
+(`confirmedGroups: []`), so `ConditionalRemediation` scores every discovery.
+
+**`shared-ci-egress`.** This scenario isolates one failure: a shared source address treated as a
+link. The three principals are already separable in baseline by `user.name` and `cloud.account.name`,
+so joining them contradicts the evidence in front of the model. The enriched variants add the
+shared-NAT signal (`source.as.*`, documentation ranges) on every alert; they do not make the
+principals any more separable. `registry.test.ts` pins both facts.
+
+Filter results by example-name suffix (`.baseline` / `.enriched` / `.enriched_context`) for a
+model x input-variant grid.
 
 ### Evaluators (code only, no LLM)
 
 | Evaluator | Scores |
 |---|---|
-| `ForbiddenJoin` | 0 if one discovery cites alerts from two groups the gold forbids joining; N/A without forbidden pairs; N/A (null, `no_citations`) when the discovery cites no alert ids |
-| `MetaAlertAsEvidence` | 0 if a discovery's citations are only meta-alert groups (`metaAlertGroups`); N/A without meta-alert gold |
+| `ForbiddenJoin` | 0 if one discovery cites alerts from two groups the gold forbids joining; 1 when there are no discoveries (nothing was joined; `NegativeControl` and `PositiveControlRecall` are what penalise a silent model); N/A without forbidden pairs; N/A (null, `no_citations`) when discoveries exist but none cites an alert id |
+| `MetaAlertAsEvidence` | 0 if a discovery's citations are only meta-alert groups (`metaAlertGroups`); 1 (label `no_discoveries`) when there are no discoveries, for the same reason as `ForbiddenJoin`; N/A without meta-alert gold; N/A (`no_citations`) when no discovery cites an alert id |
 | `EntityCoOccurrence` | Grounded / asserted pairs of a `user.*` token with a `source.ip`, `cloud.account.id` or `host.*` token in one discovery; a pair is grounded when one cited alert carries both values; N/A with no asserted pair |
-| `NegativeControl` | 1 only if a `none`-expected scenario produced zero discoveries; otherwise N/A |
-| `PositiveControlRecall` | Fraction of the required group's alert ids that any discovery cites; label `recalled` at >= 0.6 |
-| `ConditionalRemediation` | Scores each discovery that is not fully backed by a confirmed group; 0 when its markdown tells the reader to revoke, rotate, disable, delete, block, isolate, terminate, quarantine, suspend or deactivate without a conditional; N/A when nothing is scored |
+| `NegativeControl` | On a `none`-expected scenario: 1 when it produced zero discoveries, 0 (`false_positive`) when it reported any; N/A on scenarios that expect a discovery |
+| `PositiveControlRecall` | Fraction of the required group's alert ids that any discovery cites; with `requiredAnyOf`, the best fraction over those groups; label `recalled` at >= 0.6 |
+| `ConditionalRemediation` | Scores each discovery that is not fully backed by a confirmed group; 0 when its markdown tells the reader to revoke, rotate, disable, delete, block, isolate, terminate, quarantine, suspend, deactivate, reset, kill, remove, contain, lock, reimage, wipe, shut down or ban something without a condition; N/A when nothing is scored |
 
 A run with no parsed insights is reported as `task_error` with a null score, never as a pass. A null
 score is stored as a null `evaluator.score` with the label `N/A` (or `no_citations`) and is left out of
@@ -268,10 +291,16 @@ rows of 10, not all 10.
 
 ### Heuristic limits
 
-- `ConditionalRemediation` is keyword based. Directives under a conditional header stay conditional,
-  but a conditional split across sentences ("Verify first. Then revoke.") is flagged, past or passive
-  forms ("the key was revoked") are never flagged, and a negated instruction is not recognised. Use
-  it as a screen and read the flagged text.
+- `ConditionalRemediation` is regex based. A containment verb (including gerunds) counts anywhere in
+  a clause: at its start ("Revoke the key"), after a lead-in ("To contain it, isolate the host";
+  "Next steps: revoke the key"), after a directive ("should rotate", "steps include revoking"), or
+  joined with and/then/or. A condition is if/once/unless/pending (also after/when/until) scoped to a
+  confirmation word (confirm, verify, validate, malicious, unauthorized, suspicious, compromise),
+  "should ... prove/be confirmed", or "if so" after a sentence that raises one. Waiting for the
+  investigation itself ("until the investigation is complete") is not a condition. A conditional
+  split across sentences ("Verify first. Then revoke.") is flagged, past or passive forms ("the key
+  was revoked") are never flagged, and a verb with no directive frame ("the team can disable it") is
+  not recognised. Use it as a screen and read the flagged text.
 - `EntityCoOccurrence` reads `{{ field value }}` tokens and, when a discovery has none, falls back to
   matching plain text against the alert values. Every user x linked-entity pair inside a discovery
   counts even if the sentence does not link them. A value the variant does not render (for example

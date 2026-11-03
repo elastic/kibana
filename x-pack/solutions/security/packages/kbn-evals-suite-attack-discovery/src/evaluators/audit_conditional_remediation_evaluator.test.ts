@@ -67,6 +67,51 @@ describe('findUnconditionalContainment', () => {
     expect(findUnconditionalContainment(text)).toEqual([]);
   });
 
+  it.each([
+    // verb not at the start of the sentence
+    'To contain the activity, revoke the access keys for deploy-bot.',
+    'Given the severity, isolate WS-FIN-214 from the network.',
+    'For deploy-bot, rotate all access keys.',
+    'Immediate containment: isolate the host and block the C2 IP.',
+    'Next steps: Revoke the key.',
+    'Recommended next steps include revoking the access key and disabling the user.',
+    // widened verbs
+    'Reset the password for j.meyer.',
+    'Kill the process and remove svc_helper.exe.',
+    'Contain the host.',
+    'Reimage the workstation.',
+    'Wipe the laptop.',
+    'Lock the account.',
+    'Shut down the server.',
+    'Ban the IP address.',
+    // until/after/when + investigation is not a confirmation condition
+    'Disable the account until the investigation is complete.',
+    'Revoke the key after the incident is investigated.',
+    'Isolate the host when possible to stop investigation interference.',
+    // previously flagged, still flagged
+    'The SOC should immediately isolate the host.',
+    'Recommended Actions:\n- Revoke the key',
+    'Revoke the key, then confirm with the owner.',
+  ])('flags unconditional advice anywhere in the sentence: %s', (text) => {
+    expect(findUnconditionalContainment(text).length).toBeGreaterThan(0);
+  });
+
+  it.each([
+    'If confirmed unauthorized:\n- Revoke the key',
+    'Once confirmed, revoke the key.',
+    'If deemed suspicious, isolate the host.',
+    'Should the activity prove malicious, disable the account.',
+    // realistic negatives: investigation advice and hedged containment
+    'Verify with the account owner whether the key creation was expected before revoking it.',
+    'Investigate whether the host is compromised; if so, isolate it.',
+    'Verify with the owner that the login was legitimate. If it was not, reset the password.',
+    'Check CloudTrail for other actions by the principal and review the key age.',
+    'The attacker attempted to disable logging and delete the trail.',
+    'Do not block the IP until the owner confirms the traffic is unauthorized.',
+  ])('does not flag investigation advice or conditioned containment: %s', (text) => {
+    expect(findUnconditionalContainment(text)).toEqual([]);
+  });
+
   it('does not flag a verb that only appears inside an entity token', () => {
     expect(
       findUnconditionalContainment('Seen {{ rule.name Block Public Access Disabled }}')

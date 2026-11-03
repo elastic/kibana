@@ -182,12 +182,3 @@ export const ENRICHED_FIELDS: readonly string[] = [
   'user_agent.original',
   'cloud.provider',
 ];
-
-/**
- * Additional context shipped with the `enriched` variant, appended to the prompt the way the
- * product appends user-supplied additional context.
- */
-export const ENRICHED_ADDITIONAL_CONTEXT = [
-  'The CI egress NAT (203.0.113.50) is shared by many unrelated pipelines and people, so a shared source.ip does not link principals.',
-  'user.name is not unique across AWS accounts: the same display name can be different principals in different accounts. Identify a principal by user.id (the IAM ARN), and an account by cloud.account.id.',
-].join('\n');

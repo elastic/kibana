@@ -66,4 +66,27 @@ describe('PositiveControlRecall evaluator', () => {
     const result = await run([['c1']], makeGold({ alertGroups: { chain: ['c1'] } }));
     expect(result).toMatchObject({ score: null, label: 'N/A' });
   });
+
+  describe('requiredAnyOf', () => {
+    const anyOf = makeGold({
+      alertGroups: { prod: ['p1', 'p2', 'p3'], sandbox: ['s1', 's2', 's3'] },
+      requiredAnyOf: ['prod', 'sandbox'],
+    });
+
+    it('scores 1 when either group is fully recalled', async () => {
+      expect(await run([['s1', 's2', 's3']], anyOf)).toMatchObject({ score: 1, label: 'recalled' });
+      expect(await run([['p1', 'p2', 'p3']], anyOf)).toMatchObject({ score: 1, label: 'recalled' });
+    });
+
+    it('takes the best recall over the groups, not the sum', async () => {
+      const result = await run([['p1', 's1', 's2']], anyOf);
+      expect(result).toMatchObject({ label: 'recalled' });
+      expect(result).toMatchObject({ score: 2 / 3 });
+      expect((result as { explanation?: string }).explanation).toContain('best of prod, sandbox');
+    });
+
+    it('scores 0 when neither group is cited', async () => {
+      expect(await run([[]], anyOf)).toMatchObject({ score: 0, label: 'missed' });
+    });
+  });
 });

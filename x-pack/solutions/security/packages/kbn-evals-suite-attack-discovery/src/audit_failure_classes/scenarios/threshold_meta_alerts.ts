@@ -146,6 +146,8 @@ export const thresholdMetaAlertsScenario: AuditScenario = {
     'Threshold/aggregate alerts count other alerts and carry no behaviour; alongside benign low-severity alerts they are not an attack chain.',
   provenance: 'authored',
   alerts,
+  operatorContext:
+    'Threshold rules are enabled in this deployment and count alerts per user and per host.',
   gold: {
     alertGroups,
     forbiddenCoCitation: [],

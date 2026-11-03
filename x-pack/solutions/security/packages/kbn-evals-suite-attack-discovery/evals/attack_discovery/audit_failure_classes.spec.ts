@@ -21,7 +21,7 @@ import { runAttackDiscovery } from '../../src/task/run_attack_discovery';
 import type { AttackDiscoveryDatasetExample } from '../../src/types';
 
 /**
- * Synthetic bundledAlerts scenarios, each run as a baseline and an enriched input variant.
+ * Synthetic bundledAlerts scenarios, each run as a baseline, an enriched and an enriched_context input variant.
  * Failure classes: invented entity joins, threshold/meta alerts treated as evidence,
  * unconditional containment advice, and no negative control. Scoring is deterministic code only;
  * the LLM rubric is deliberately not attached. Gold and the anonymization replacements are
@@ -43,7 +43,7 @@ evaluate.describe('Attack Discovery audit failure classes', { tag: tags.stateful
             {
               name: 'Attack Discovery audit failure classes',
               description:
-                'Authored bundledAlerts scenarios (scenario x baseline/enriched input) with declared gold for invented joins, meta-alert evidence, unconditional containment and a negative control.',
+                'Authored bundledAlerts scenarios (scenario x baseline/enriched/enriched_context input) with declared gold for invented joins, meta-alert evidence, unconditional containment and a negative control.',
               examples: buildAuditExamples(),
             },
           ],

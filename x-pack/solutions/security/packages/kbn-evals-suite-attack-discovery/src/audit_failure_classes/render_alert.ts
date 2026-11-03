@@ -19,7 +19,7 @@ const ENRICHED_FIELD_SET: ReadonlySet<string> = new Set([...DEFAULT_ALLOWLIST, .
 const REPLACEMENT_FIELDS: ReadonlySet<string> = new Set(DEFAULT_ALLOW_REPLACEMENT);
 
 export const getVariantFields = (variant: AuditInputVariant): ReadonlySet<string> =>
-  variant === 'enriched' ? ENRICHED_FIELD_SET : BASELINE_FIELDS;
+  variant === 'baseline' ? BASELINE_FIELDS : ENRICHED_FIELD_SET;
 
 /**
  * The product default anonymization fields for a variant: every sent field is allowed, and the

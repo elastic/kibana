@@ -10,6 +10,6 @@
  * (`invoke_graph_with_alerts`): `${prompt}\n\nAdditional context:\n${context}`.
  */
 export const withAdditionalContext = (prompt: string, additionalContext?: string): string =>
-  additionalContext && additionalContext.trim().length > 0
+  additionalContext != null && additionalContext.length > 0
     ? `${prompt}\n\nAdditional context:\n${additionalContext}`
     : prompt;

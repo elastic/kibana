@@ -47,7 +47,7 @@ const STAGES: readonly ChainStage[] = [
       'process.pid': 4812,
       'process.executable': POWERSHELL,
       'process.command_line':
-        "powershell.exe -WInDo Min $RdLU='aZmEwGEtHPckKyBXPxMRi.neTwOrkicsGf';$OnRa=($RdLU.Substring(17,12))",
+        "powershell.exe -WInDo Min $a1='QkJCQkJCQkJCQkJCQmNkbi5leGFtcGxl';$b2=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($a1)).Substring(13)",
       'process.parent.name': 'explorer.exe',
     },
     network: { 'destination.ip': '192.0.2.44' },
@@ -139,10 +139,8 @@ const { alerts, alertGroups } = defineAlerts(SCENARIO_ID, [...chainDrafts, ...no
  * noise. A model that is merely quiet scores well on the other scenarios; this one only scores
  * when it still finds the chain without joining the noise to it.
  *
- * The `enriched` additional context is shared by every scenario. Here it is relevant to the
- * noise: its egress-NAT line explains the cloud alerts' shared `source.ip`, and its
- * account-identity line applies to those cloud alerts. It says nothing about the chain, which
- * is the same in both variants; the context is a distractor for the chain itself.
+ * The `enriched_context` operator context states environment facts only; it says nothing about
+ * the chain, which is the same in every variant.
  */
 export const positiveChainWithNoiseScenario: AuditScenario = {
   id: SCENARIO_ID,
@@ -150,6 +148,8 @@ export const positiveChainWithNoiseScenario: AuditScenario = {
     'Positive control: a ClickFix-style endpoint chain mixed with unrelated shared-egress cloud alerts.',
   provenance: 'authored',
   alerts,
+  operatorContext:
+    'Finance workstations are standard-image Windows laptops; engineering uses several AWS accounts behind a shared egress NAT gateway.',
   gold: {
     alertGroups,
     forbiddenCoCitation: SHARED_CI_EGRESS_GROUPS.map((group) => ['clickfix-chain', group] as const),
