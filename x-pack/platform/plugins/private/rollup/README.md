@@ -1,7 +1,5 @@
 # Rollup
 
-Set `xpack.rollup.enabled: false` in `kibana.yml` to disable the plugin, including its UI and Kibana APIs. The plugin is enabled by default in stateful Kibana and disabled by `config/serverless.yml` in serverless.
-
 The deprecated Rollup Jobs UI is off by default. Enable it with `xpack.rollup.ui.enabled` in Stack Management > Advanced Settings and refresh the page. The `kibana.yml` setting of the same name sets its default value.
 
 ## Summary

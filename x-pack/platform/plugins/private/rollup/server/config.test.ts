@@ -8,14 +8,6 @@
 import { config } from './config';
 
 describe('rollup config', () => {
-  it.each([false, true])('accepts enabled: false with serverless: %s', (serverless) => {
-    expect(config.schema.validate({ enabled: false }, { serverless }).enabled).toBe(false);
-  });
-
-  it('is enabled by default', () => {
-    expect(config.schema.validate({}, { serverless: false }).enabled).toBe(true);
-  });
-
   it('has the Rollup UI disabled by default', () => {
     expect(config.schema.validate({}, { serverless: false }).ui.enabled).toBe(false);
   });
