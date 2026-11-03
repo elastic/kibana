@@ -151,8 +151,6 @@ const StaticOptionsFields = ({ draft, onChange }: FieldsProps<DropdownInput>) =>
   );
 };
 
-const FIRST_COLUMN = '';
-
 const ColumnSelect = ({
   columns,
   emptyHelp,
@@ -179,19 +177,11 @@ const ColumnSelect = ({
     >
       <EuiSelect
         fullWidth
-        value={optionsColumn ?? FIRST_COLUMN}
-        options={[
-          {
-            value: FIRST_COLUMN,
-            text: i18n.translate('xpack.notebook.inputSettings.firstColumn', {
-              defaultMessage: 'First column',
-            }),
-          },
-          ...choices.map((choice) => ({ value: choice, text: choice })),
-        ]}
-        onChange={({ target: { value } }) =>
-          onChange({ ...draft, optionsColumn: value === FIRST_COLUMN ? null : value })
-        }
+        disabled={choices.length === 0}
+        hasNoInitialSelection={choices.length === 0}
+        value={optionsColumn ?? choices[0] ?? ''}
+        options={choices.map((choice) => ({ value: choice, text: choice }))}
+        onChange={({ target: { value } }) => onChange({ ...draft, optionsColumn: value })}
         data-test-subj="notebookInputSettingsOptionsColumn"
       />
     </EuiFormRow>
