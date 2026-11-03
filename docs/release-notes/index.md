@@ -53,6 +53,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add the built-in anomaly detection skills, which help agents query anomaly results with {{esql}}, troubleshoot anomaly detection jobs, and manage jobs [#270306]({{kib-pull}}270306).
 * Add guidance for anomaly charts, the anomaly swim lane, and the single metric viewer to the anomaly detection skills [#284519]({{kib-pull}}284519).
 * Add a guided anomaly detection job creation flow to Agent Builder chat [#286656]({{kib-pull}}286656).
+* Update the PagerDuty MCP connector to support the consolidated `browse_*` and `manage_*` tools that PagerDuty now provides [#295823]({{kib-pull}}295823).
 
 **Alerting and cases**:
 * Make Kibana Universal Alerting generally available and turn it on by default. Universal Alerting is the {{esql}}-based alerting system. You can detect conditions in your data with {{esql}} rules, track them as alerts, and route notifications with action policies. Kibana Classic Alerting stays available next to it. Universal Alerting relies on Workflows [#296546]({{kib-pull}}296546), [#297284]({{kib-pull}}297284).
@@ -280,7 +281,6 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix Agent Builder dropping arguments before it runs an MCP tool whose input schema allows extra arguments (`additionalProperties`). Tools with dynamic arguments, such as Backstage catalog queries, ran with empty or incomplete arguments [#287815]({{kib-pull}}287815).
 * Stop the Agent Builder MCP server from listing tools whose results only work in the {{kib}} UI: `create_visualization`, `search_cases`, `manage_cases`, `manage_attachments`, and `observables`. External MCP clients can't use their results [#291274]({{kib-pull}}291274).
 * Fix the import button staying unavailable, with no explanation, when you bulk import MCP tools that have no description [#300886]({{kib-pull}}300886).
-* Update the PagerDuty MCP connector to support the consolidated `browse_*` and `manage_*` tools that PagerDuty now provides [#295823]({{kib-pull}}295823).
 * Stop Agent Builder from offering Cases tools and skills in Serverless project types and {{es}} solution spaces where Cases isn't available. Agents there no longer hit authorization errors when they try to use them [#291268]({{kib-pull}}291268), [#287633]({{kib-pull}}287633).
 * Fix the **Tool Success Rate** panel in the Agent Builder overview dashboard showing 0.0% as soon as one tool call fails. The rate was rounded down to a whole number [#282026]({{kib-pull}}282026).
 * Fix attaching an image in the Agent Builder chat failing with a 403 error unless you're a superuser [#299455]({{kib-pull}}299455).
