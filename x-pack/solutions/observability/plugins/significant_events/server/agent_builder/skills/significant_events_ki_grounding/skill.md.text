@@ -266,7 +266,7 @@ One sample per rule proves whether its failure is happening now. Apply `<query_r
 
   | Stage | Sent when |
   |---|---|
-  | `spread` (tier 0) | every rule except an aggregate KI, on the KI's own `{failure}`; an `off_topic` rule sends a second one after its final sample (Definitions) |
+  | `spread` (tier 0) | every rule except an aggregate KI, on the KI's own `{failure}`, as the Profile step's `spread` query in its variant, over that step's `time_range` (the last 1h to now, not the sample's); it is the rule's only `spread`, never sent again after the sample, except the `off_topic` rule's second one (Definitions) |
   | sample (tier 1) | after `spread`: `LIMIT 1` when the rule is not small and has a text field, else `LIMIT 3`; an aggregate KI keeps `LIMIT 2`; an authored KI limit of 3 or fewer rows stays instead of ours |
   | re-sample | once, `LIMIT 3` (a new query, not a re-run), when a single-row sample does not show the rule's failure (healthy, or `off_topic`) or lacks a usable text-field column; never for an empty or errored sample, an authored limit of 3 or less, or an authored projection without the text field |
   | `dimensions` (tier 2) | the rule is not small (an `off_topic` rule too, after its own `spread`) and has 2 or more candidates |
@@ -324,7 +324,8 @@ queries a rule gets and when; this step says what each measures and how to read 
 variant that matches whether `{scope}` isolates the operation. It does when `{predicate}` holds a
 field condition besides the failure condition (a service, job or target); when `{predicate}` is the
 failure condition alone it does not. Decide this once per rule, before its `spread`, and send only that
-variant. A `spread`, `trend` or `baseline` figure
+variant. The `spread` is the Confirm step's tier 0 query: it is sent there once, and its result is the
+rule's profile `spread`; do not send it again. A `spread`, `trend` or `baseline` figure
 whose query returned no rows or failed is stated as not measured; a figure that does not apply to the
 shape that ran (no share without an isolating scope, no `factor` without `lines`) is left out, not
 unmeasured.
