@@ -21,6 +21,7 @@ import {
   DEFAULT_STREAM_IDLE_TIMEOUT_MS,
 } from '@kbn/inference-common';
 import { getRetryFilter } from '../../../../common/utils/error_retry_filter';
+import { retryHoldingTokenCountEvents } from '../../utils/hold_token_count_events';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
 import type { InferenceEndpointExecutor } from '../../utils/inference_endpoint_executor';
 import type { OpenAIChatCompletionChunkDelta } from '../openai/types';
@@ -755,6 +756,35 @@ describe('inferenceEndpointAdapter', () => {
       } finally {
         jest.useRealTimers();
       }
+    });
+
+    it('recovers through the retry wrapper when the stream stalls after emitting chunks', async () => {
+      const stalled = new Readable({ read: () => {} });
+      stalled.push(
+        `data: ${JSON.stringify(createOpenAIChunk({ delta: { content: 'partial' } }))}\n\n`
+      );
+      const healthy = observableIntoEventSourceStream(
+        of(createOpenAIChunk({ delta: { content: 'full answer' } })),
+        logger
+      );
+      executorMock.invoke.mockResolvedValueOnce(stalled).mockResolvedValueOnce(healthy);
+
+      const events = await lastValueFrom(
+        inferenceEndpointAdapter
+          .chatComplete({
+            ...defaultArgs,
+            messages: [{ role: MessageRole.User, content: 'question' }],
+            idleTimeoutMs: 20,
+          })
+          .pipe(retryHoldingTokenCountEvents({ maxRetry: 1, initialDelay: 1 }), toArray())
+      );
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(2);
+      // chunks of the stalled attempt are already out; the retry streams the full answer after them
+      expect(events.filter(isChatCompletionChunkEvent).map((event) => event.content)).toEqual([
+        'partial',
+        'full answer',
+      ]);
     });
 
     it('guards template requests with the same first-byte and idle timeouts', async () => {
