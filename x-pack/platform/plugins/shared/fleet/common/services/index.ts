@@ -199,3 +199,15 @@ export {
   buildPolicyBaseIdWithFallbackKuery,
   buildPolicyBaseIdsWithFallbackKuery,
 } from './version_specific_policies_utils';
+
+export {
+  parseYamlChangelog,
+  formatChangelog,
+  getBreakingChanges,
+  getBreakingChangesInRange,
+  ChangeType,
+  type Changelog,
+  type ChangelogEntry,
+  type BreakingChangesLog,
+  type YamlParseFn,
+} from './changelog_utils';
