@@ -52,9 +52,9 @@ describe('assertCleanSpace', () => {
 
 describe('cleanupSeed', () => {
   it('deletes alerts, fingerprints and persisted discoveries', async () => {
-    const deleteByQuery = jest.fn(async () => ({}));
+    const deleteByQuery = jest.fn(async (_args: { index: string }) => ({}));
     await cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded });
-    const indices = deleteByQuery.mock.calls.map(([args]) => (args as { index: string }).index);
+    const indices = deleteByQuery.mock.calls.map(([{ index }]) => index);
     expect(indices).toContain(attackDiscoveryIndexForSpace('space-a'));
     expect(indices).toHaveLength(3);
   });

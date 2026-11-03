@@ -140,7 +140,7 @@ export const assertNoLeftoverRouting = ({
   features: readonly InferenceFeatureSetting[];
   models: readonly string[];
 }): void => {
-  const alertZeroFeatures = [
+  const alertZeroFeatures: readonly string[] = [
     ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
     ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
   ];
