@@ -35,6 +35,13 @@ describe('anonymizeCell steps', () => {
     expect(JSON.stringify(c.steps)).not.toContain('claude-4.6-sonnet');
   });
 
+  it('does not corrupt text or steps when the cell has no model id', () => {
+    const steps = [{ type: 'tool_call', note: 'plain' }];
+    const c = anonymizeCell(cell({ modelId: '', steps }), new Map());
+    expect(c.question).toBe('Take a look at this alert.');
+    expect(c.steps).toEqual(steps);
+  });
+
   it('leaves a trajectory without steps alone', () => {
     expect(anonymizeCell(cell(), new Map()).steps).toEqual([]);
   });

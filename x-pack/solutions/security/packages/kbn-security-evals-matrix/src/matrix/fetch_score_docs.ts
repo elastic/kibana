@@ -145,6 +145,7 @@ export const fetchScoreDocs = async ({
           joinField,
           modelIds: models,
           suiteIds,
+          asOf,
         });
 
   if (effectiveExecutionIds.length === 0) {
@@ -235,6 +236,7 @@ async function resolveLatestExecutions({
   joinField = DEFAULT_JOIN_FIELD,
   modelIds,
   suiteIds,
+  asOf,
 }: {
   esUrl: string;
   apiKey: string;
@@ -242,6 +244,7 @@ async function resolveLatestExecutions({
   joinField?: string;
   modelIds?: string[];
   suiteIds?: string[];
+  asOf?: number;
 }): Promise<string[]> {
   const indexUrl = `${esUrl.replace(/\/$/, '')}/${SCORES_INDEX}/_search`;
   const chosen = new Set<string>();
@@ -252,6 +255,9 @@ async function resolveLatestExecutions({
   }
   if (modelIds?.length) {
     filter.push({ terms: { 'task.model.id': modelIds } });
+  }
+  if (asOf) {
+    filter.push({ range: { '@timestamp': { lt: new Date(asOf).toISOString() } } });
   }
 
   for (const exampleId of exampleIds) {

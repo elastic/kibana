@@ -193,6 +193,23 @@ describe('fetchScoreDocs', () => {
     });
   });
 
+  it('applies the as-of cutoff when resolving the newest execution per model', async () => {
+    // Without the cutoff here, a run newer than asOf is chosen and then filtered
+    // out of the document fetch, so the older in-window run is never read.
+    await fetchScoreDocs({
+      esUrl,
+      apiKey,
+      exampleIds: ['a'],
+      modelIds: ['m1'],
+      asOf: Date.parse('2026-09-01T00:00:00.000Z'),
+    });
+
+    expect(body(0).aggs.by_model).toBeDefined();
+    expect(body(0).query.bool.filter).toContainEqual({
+      range: { '@timestamp': { lt: '2026-09-01T00:00:00.000Z' } },
+    });
+  });
+
   it('surfaces a failed query instead of returning an empty result', async () => {
     fetchMock.mockResolvedValue({ ok: false, status: 403, text: async () => 'forbidden' });
 

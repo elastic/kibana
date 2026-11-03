@@ -71,7 +71,8 @@ function alias(index: number): string {
 function scrub(text: string, modelId: string): string {
   // The exact id first: it is the longest, most specific token, and removing it
   // before the generic patterns avoids leaving fragments like "-4.6-" behind.
-  let out = text.split(modelId).join(REDACTED);
+  // An empty id would split between every character.
+  let out = modelId ? text.split(modelId).join(REDACTED) : text;
   for (const pattern of IDENTITY_PATTERNS) {
     out = out.replace(pattern, REDACTED);
   }
