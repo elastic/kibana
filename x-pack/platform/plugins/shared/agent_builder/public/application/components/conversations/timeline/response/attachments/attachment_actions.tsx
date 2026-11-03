@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import { flushSync } from 'react-dom';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -57,14 +58,14 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
 
   const makeClickHandler = useCallback(
     (button: ActionButton) => async () => {
-      const result = button.handler();
-      if (result instanceof Promise) {
-        setLoadingLabel(button.label);
-        try {
+      flushSync(() => setLoadingLabel(button.label));
+      try {
+        const result = button.handler();
+        if (result instanceof Promise) {
           await result;
-        } finally {
-          setLoadingLabel(null);
         }
+      } finally {
+        setLoadingLabel(null);
       }
     },
     []
