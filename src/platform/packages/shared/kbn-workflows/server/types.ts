@@ -129,6 +129,15 @@ export interface RegisteredManagedWorkflowsLifecycleApi {
     options: ManagedWorkflowOperationOptions
   ) => Promise<void>;
   /**
+   * Switch off this plugin's managed workflow without a request, including one bound to a
+   * service account. Resolves `false` when nothing was switched off (missing, not managed,
+   * already off, or Workflows unavailable); throws when the caller does not own the workflow.
+   */
+  disable: <TId extends ManagedWorkflowId>(
+    id: TId,
+    options: ManagedWorkflowOperationOptions
+  ) => Promise<boolean>;
+  /**
    * Signal that the plugin has finished installing all its static managed workflows.
    * Triggers per-plugin reconciliation: removes persisted static workflows that were
    * not installed during the startup window (between owner registration and this call).

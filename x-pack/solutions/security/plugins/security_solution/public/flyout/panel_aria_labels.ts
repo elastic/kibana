@@ -119,11 +119,6 @@ export const MISCONFIGURATION_FINDINGS_PREVIEW_PANEL_ARIA_LABEL = i18n.translate
   { defaultMessage: 'Misconfiguration preview' }
 );
 
-export const EASE_PANEL_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.flyout.panelAriaLabel.ease',
-  { defaultMessage: 'Alert summary' }
-);
-
 export const ATTACK_DETAILS_RIGHT_PANEL_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.flyout.panelAriaLabel.attackDetailsRight',
   { defaultMessage: 'Attack discovery details' }
