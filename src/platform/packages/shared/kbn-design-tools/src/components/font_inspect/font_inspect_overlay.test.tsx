@@ -61,9 +61,7 @@ describe('FontInspectOverlay', () => {
 
     jest.spyOn(window, 'getComputedStyle').mockImplementation((el, pseudoElt) => {
       const override = computedStylesByElement.get(el);
-      return override
-        ? (override as CSSStyleDeclaration)
-        : originalGetComputedStyle(el, pseudoElt);
+      return override ? (override as CSSStyleDeclaration) : originalGetComputedStyle(el, pseudoElt);
     });
 
     // handlePointerMove throttles via requestAnimationFrame; run it

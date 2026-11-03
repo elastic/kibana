@@ -68,8 +68,6 @@ describe('useDesignTokenSections', () => {
 
     const { result } = renderHook(() => useDesignTokenSections(element));
 
-    expect(result.current.rows.find((row) => row.label === 'Letter spacing')?.cssValue).toBe(
-      '1px'
-    );
+    expect(result.current.rows.find((row) => row.label === 'Letter spacing')?.cssValue).toBe('1px');
   });
 });
