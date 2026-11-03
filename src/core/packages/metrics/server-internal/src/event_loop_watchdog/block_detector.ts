@@ -8,17 +8,21 @@
  */
 
 import type { Phase } from './types';
-import { REPORT_BURST, REPORT_REFILL_MS } from './constants';
+import { ONGOING_REPORT_AFTER_MS, REPORT_BURST, REPORT_REFILL_MS } from './constants';
 
 export interface DetectedBlock {
   phase: Phase;
   startedAt: number;
+  /** For an ongoing block: the time of this report. */
   endedAt: number;
+  /** For an ongoing block: how long it has lasted so far. */
   blockedMs: number;
   /** False when the warning is suppressed by the rate limit. */
   report: boolean;
   /** Blocks whose warnings were suppressed since the last reported one. */
   suppressedBlocks: number;
+  /** True for a report on a block that hasn't ended yet. */
+  ongoing: boolean;
 }
 
 export interface PollContext {
@@ -28,14 +32,31 @@ export interface PollContext {
   phase: Phase;
 }
 
+interface OngoingBlock {
+  startedAt: number;
+  phase: Phase;
+  /** When the next ongoing report is due. */
+  nextReportAt: number;
+  /** Whether an ongoing report was written: the end report then needs no token. */
+  reported: boolean;
+}
+
 /** Clock-injected state machine detecting blocks from a stale heartbeat (milliseconds). */
 export class BlockDetector {
-  private ongoing?: { startedAt: number; phase: Phase };
+  private ongoing?: OngoingBlock;
   private reportTokens = REPORT_BURST;
   private lastRefillAt?: number;
   private suppressedBlocks = 0;
 
-  /** Returns the block that ended, if any, given the main thread's last heartbeat. */
+  /** Start of the ongoing block, if any, so the worker can share it with the main thread. */
+  public get ongoingStartedAt(): number | undefined {
+    return this.ongoing?.startedAt;
+  }
+
+  /**
+   * Returns the block that ended, or a report on the ongoing block when one is due, given the
+   * main thread's last heartbeat.
+   */
   public poll(
     now: number,
     lastHeartbeat: number,
@@ -43,16 +64,24 @@ export class BlockDetector {
   ): DetectedBlock | undefined {
     const { ongoing } = this;
     if (ongoing === undefined) {
-      if (now - lastHeartbeat >= thresholdMs) {
-        this.ongoing = { startedAt: lastHeartbeat, phase };
+      if (now - lastHeartbeat < thresholdMs) {
+        return;
       }
-      return;
+      this.ongoing = {
+        startedAt: lastHeartbeat,
+        phase,
+        nextReportAt: lastHeartbeat + Math.max(thresholdMs, ONGOING_REPORT_AFTER_MS),
+        reported: false,
+      };
+      // Due right away when the threshold is the longer of the two.
+      return this.pollOngoing(now, this.ongoing);
     }
     if (lastHeartbeat <= ongoing.startedAt) {
-      return;
+      return this.pollOngoing(now, ongoing);
     }
     this.ongoing = undefined;
-    const report = this.takeReportToken(now);
+    // A block already reported while ongoing is only completed here, not reported again.
+    const report = ongoing.reported || this.takeReportToken(now);
     const suppressedBlocks = report ? this.suppressedBlocks : 0;
     this.suppressedBlocks = report ? 0 : this.suppressedBlocks + 1;
     return {
@@ -62,6 +91,36 @@ export class BlockDetector {
       blockedMs: lastHeartbeat - ongoing.startedAt,
       report,
       suppressedBlocks,
+      ongoing: false,
+    };
+  }
+
+  /**
+   * An ongoing report is due once the block has lasted the ongoing mark, then every refill
+   * interval. A suppressed one tries again as soon as a token refills, so a block that outlives
+   * the process waits at most one refill for its log line.
+   */
+  private pollOngoing(now: number, ongoing: OngoingBlock): DetectedBlock | undefined {
+    if (now < ongoing.nextReportAt) {
+      return;
+    }
+    const report = this.takeReportToken(now);
+    ongoing.nextReportAt = report ? now + REPORT_REFILL_MS : this.lastRefillAt! + REPORT_REFILL_MS;
+    // A suppressed ongoing report isn't a suppressed block: the block is still counted and may
+    // still be reported when it ends.
+    const suppressedBlocks = report ? this.suppressedBlocks : 0;
+    if (report) {
+      ongoing.reported = true;
+      this.suppressedBlocks = 0;
+    }
+    return {
+      phase: ongoing.phase,
+      startedAt: ongoing.startedAt,
+      endedAt: now,
+      blockedMs: now - ongoing.startedAt,
+      report,
+      suppressedBlocks,
+      ongoing: true,
     };
   }
 

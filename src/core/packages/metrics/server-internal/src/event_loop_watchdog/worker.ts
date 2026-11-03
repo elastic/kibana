@@ -18,8 +18,8 @@ import type { WorkerLogger } from '@kbn/core-threads-server-internal';
 import { createWorkerLogger } from '@kbn/core-threads-server-internal';
 import { BlockDetector, type DetectedBlock } from './block_detector';
 import { BlockStats } from './block_stats';
-import type { BlockLogMeta, Phase, StatsLogMeta, WatchdogWorkerData } from './types';
-import { POLL_INTERVAL_MS, Slot, WATCHDOG_WORKER_NAME, monotonicUs } from './constants';
+import type { BlockLogMeta, OngoingBlockStats, StatsLogMeta, WatchdogWorkerData } from './types';
+import { POLL_INTERVAL_MS, Slot, WATCHDOG_WORKER_NAME, monotonicUs, phaseOf } from './constants';
 
 export interface WatchdogWorkerDeps {
   logger: WorkerLogger;
@@ -44,62 +44,110 @@ export const runWatchdogWorker = (
   const detector = new BlockDetector();
   const stats = new BlockStats(thresholdsMs, toMs(nowUs()));
   let reportedDroppedLogLines = logger.getDroppedLogLineCount();
+  /** The ongoing block as shared with the main thread, so it can report the block if this worker can't. */
+  let sharedBlock: { heartbeatUs: bigint; startedAt: string } | undefined;
 
-  /** Phase of a heartbeat: running once the main thread has marked it. */
-  const phaseAt = (heartbeatUs: number): Phase => {
-    const runningSince = Number(Atomics.load(shared, Slot.runningSince));
-    return runningSince > 0 && heartbeatUs >= runningSince ? 'running' : 'starting';
-  };
+  const phaseAt = (heartbeatUs: number) =>
+    phaseOf(heartbeatUs, Number(Atomics.load(shared, Slot.runningSince)));
 
-  const onBlock = (block: DetectedBlock, nowMs: number) => {
-    stats.record(block);
-    if (!block.report) {
-      return;
-    }
-    const { blockedMs, startedAt, phase, suppressedBlocks } = block;
+  const logBlock = (block: DetectedBlock, startedAt: string) => {
+    const { blockedMs, phase, suppressedBlocks, ongoing } = block;
     logger.warn<BlockLogMeta>(
-      `Event loop blocked for ~${blockedMs}ms${
+      `Event loop blocked for ~${blockedMs}ms${ongoing ? ' so far' : ''}${
         suppressedBlocks ? `; ${blocks(suppressedBlocks)} before it not reported` : ''
       }`,
       {
         tags: ['event-loop-watchdog'],
         kibana: {
-          event_loop_watchdog: {
-            blockedMs,
-            // Measured back from now, so a wall-clock step can't shift it.
-            startedAt: new Date(Date.now() - (nowMs - startedAt)).toISOString(),
-            phase,
-            suppressedBlocks,
-          },
+          event_loop_watchdog: { blockedMs, startedAt, phase, suppressedBlocks, ongoing },
         },
       }
     );
+  };
+
+  /**
+   * Shares a block the detector just found with the main thread: the epoch slot first, so it is
+   * in place once the start slot is. `startedAt` is fixed here, measured back from now, so every
+   * log line of this block carries the same value. The trade-off: a wall-clock change during the
+   * block no longer moves `startedAt` on the end log line, which is measured in monotonic time.
+   */
+  const shareBlock = (heartbeatUs: bigint, startedAtMs: number, nowMs: number) => {
+    const startedAtEpochMs = Date.now() - (nowMs - startedAtMs);
+    sharedBlock = { heartbeatUs, startedAt: new Date(startedAtEpochMs).toISOString() };
+    Atomics.store(shared, Slot.blockStartedAtEpochMs, BigInt(startedAtEpochMs));
+    Atomics.store(shared, Slot.blockStartedAt, heartbeatUs);
+  };
+
+  /** Claims the block's end; false when the main thread already reported it. */
+  const claimBlockEnd = (): boolean => {
+    if (!sharedBlock) {
+      return false;
+    }
+    const { heartbeatUs } = sharedBlock;
+    sharedBlock = undefined;
+    return Atomics.compareExchange(shared, Slot.blockStartedAt, heartbeatUs, 0n) === heartbeatUs;
+  };
+
+  const onBlock = (block: DetectedBlock) => {
+    if (block.ongoing) {
+      if (block.report && sharedBlock) {
+        logBlock(block, sharedBlock.startedAt);
+      }
+      return;
+    }
+    const startedAt = sharedBlock?.startedAt;
+    if (!claimBlockEnd() || startedAt === undefined) {
+      return;
+    }
+    stats.record(block);
+    if (block.report) {
+      logBlock(block, startedAt);
+    }
   };
 
   const poll = () => {
     // Clock first: if the worker pauses between the two reads, a heartbeat stamped meanwhile is
     // newer than now, instead of looking stale and reading as a block.
     const nowMs = toMs(nowUs());
-    const heartbeatUs = Number(Atomics.load(shared, Slot.heartbeat));
+    const heartbeat = Atomics.load(shared, Slot.heartbeat);
+    const heartbeatUs = Number(heartbeat);
     // The threshold and the phase tag come from the same read.
     const phase = phaseAt(heartbeatUs);
     const block = detector.poll(nowMs, toMs(heartbeatUs), {
       thresholdMs: thresholdsMs[phase],
       phase,
     });
-    if (block) {
-      onBlock(block, nowMs);
+    const { ongoingStartedAt } = detector;
+    if (ongoingStartedAt !== undefined && !sharedBlock) {
+      shareBlock(heartbeat, ongoingStartedAt, nowMs);
     }
+    if (block) {
+      onBlock(block);
+    }
+  };
+
+  const ongoingStats = (now: number): OngoingBlockStats | undefined => {
+    const { ongoingStartedAt } = detector;
+    if (ongoingStartedAt === undefined || !sharedBlock) {
+      return;
+    }
+    return {
+      phase: phaseAt(Number(sharedBlock.heartbeatUs)),
+      blockedMs: now - ongoingStartedAt,
+    };
   };
 
   const writeStats = () => {
     const now = toMs(nowUs());
     const droppedBefore = logger.getDroppedLogLineCount();
     const snapshot = stats.snapshot(now);
+    const ongoing = ongoingStats(now);
     logger.info<StatsLogMeta>(
       `Event loop watchdog stats for the last ${Math.round(snapshot.periodMs / 1000)}s: ${blocks(
         snapshot.starting.blocks
-      )} while starting, ${blocks(snapshot.running.blocks)} while running`,
+      )} while starting, ${blocks(snapshot.running.blocks)} while running${
+        ongoing ? `; a ${ongoing.phase} block is ongoing for ~${ongoing.blockedMs}ms` : ''
+      }`,
       {
         tags: ['event-loop-watchdog'],
         kibana: {
@@ -108,6 +156,7 @@ export const runWatchdogWorker = (
               ...snapshot,
               heapUsed: heapUsed(),
               droppedLogLines: droppedBefore - reportedDroppedLogLines,
+              ...(ongoing ? { ongoing } : {}),
             },
           },
         },

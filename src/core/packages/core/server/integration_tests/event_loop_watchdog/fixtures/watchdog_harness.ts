@@ -77,6 +77,19 @@ const create = (workerEntry?: string) =>
     workerEntry,
   });
 
+/** Long enough to be reported while ongoing (after 1 s) well before it ends. */
+const LONG_BLOCK_MS = 3_000;
+
+/** Starts the watchdog, marks running and waits a moment, so the next block is a running one. */
+const startRunning = async (workerEntry?: string) => {
+  const watchdog = create(workerEntry);
+  watchdog.start();
+  await waitForLogLine('ready', 30_000);
+  watchdog.markRunning();
+  await sleep(BLOCK_GAP_MS);
+  return watchdog;
+};
+
 const scenarios: Record<string, () => Promise<void>> = {
   // 1 block while starting, then 7 while running: 5 warnings, 3 suppressed. Blocks are well over
   // the 200ms threshold, so a briefly stalled worker still has time to poll inside each one, and
@@ -109,6 +122,40 @@ const scenarios: Record<string, () => Promise<void>> = {
     watchdog.start();
     await waitForLogLine('(oom,', 60_000);
     await watchdog.stop();
+  },
+  // A block that never ends: the test kills the process once the block is reported as ongoing.
+  hang: async () => {
+    await startRunning();
+    for (;;) {
+      // blocks the main thread until the process is killed
+    }
+  },
+  // A block long enough to be reported while ongoing, and then again when it ends.
+  long_block: async () => {
+    const watchdog = await startRunning();
+    blockFor(LONG_BLOCK_MS);
+    await sleep(STATS_INTERVAL_MS * 2);
+    await watchdog.stop();
+  },
+  // The worker crashes 0.3 s after it detects the block, so the main thread reports the block.
+  worker_crash_during_block: async () => {
+    const watchdog = await startRunning(Path.resolve(__dirname, 'crashing_entry.ts'));
+    blockFor(LONG_BLOCK_MS);
+    // Lets the worker's exit, and the restart log line, reach the main thread.
+    await sleep(BLOCK_GAP_MS);
+    await watchdog.stop();
+  },
+  // The watchdog stops on the same tick the block ends, before its worker can see the end.
+  stop_after_block: async () => {
+    const watchdog = await startRunning();
+    blockFor(LONG_BLOCK_MS);
+    await watchdog.stop();
+  },
+  // The process exits on the same tick the block ends, without stopping the watchdog.
+  exit_after_block: async () => {
+    await startRunning();
+    blockFor(LONG_BLOCK_MS);
+    process.exit(0);
   },
 };
 

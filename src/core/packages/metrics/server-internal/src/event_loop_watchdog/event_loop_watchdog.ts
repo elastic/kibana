@@ -7,17 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ManagedWorker, WorkerLoggingConfig } from '@kbn/core-threads-server-internal';
-import { createManagedWorker } from '@kbn/core-threads-server-internal';
+import type {
+  ManagedWorker,
+  WorkerLogger,
+  WorkerLoggingConfig,
+} from '@kbn/core-threads-server-internal';
+import { createManagedWorker, createWorkerLogger } from '@kbn/core-threads-server-internal';
 import type { Logger } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
-import type { Phase, WatchdogWorkerData } from './types';
+import type { BlockLogMeta, Phase, WatchdogWorkerData } from './types';
 import {
   HEARTBEAT_INTERVAL_MS,
   SLOT_COUNT,
   Slot,
   WATCHDOG_WORKER_NAME,
   monotonicUs,
+  phaseOf,
 } from './constants';
 
 // The worker used 20-24 MB of heap over 10 minutes in dev, with the require hook loaded.
@@ -40,6 +45,10 @@ export class EventLoopWatchdog {
   private stopping?: Promise<void>;
   private shared?: BigInt64Array;
   private runningSinceUs = 0;
+  /** Writes to stdout synchronously, like the worker, so a log line survives a process exit handler. */
+  private blockLogger?: WorkerLogger;
+  private readonly onProcessExit = () =>
+    this.reportUnfinishedBlock('the process exited before the watchdog worker reported it');
 
   constructor(private readonly params: EventLoopWatchdogParams) {}
 
@@ -60,6 +69,7 @@ export class EventLoopWatchdog {
     Atomics.store(shared, Slot.heartbeat, BigInt(monotonicUs()));
     Atomics.store(shared, Slot.runningSince, BigInt(this.runningSinceUs));
     this.shared = shared;
+    this.blockLogger = createWorkerLogger(logging, WATCHDOG_WORKER_NAME);
     this.heartbeatTimer = setInterval(
       () => Atomics.store(shared, Slot.heartbeat, BigInt(monotonicUs())),
       HEARTBEAT_INTERVAL_MS
@@ -82,9 +92,13 @@ export class EventLoopWatchdog {
       },
       logger,
       unref: true,
+      // Runs on the main thread, so the block the worker died in is over by the time it runs.
+      onExit: () => this.reportUnfinishedBlock('the watchdog worker exited during the block'),
       onExhausted: () => this.clearHeartbeat(),
     });
     this.worker.start();
+    // Only synchronous work runs on `exit`: `process.exit()` and a crash skip Kibana's shutdown.
+    process.once('exit', this.onProcessExit);
     logger.info(
       `Event loop watchdog started (block threshold ${thresholdsMs.running}ms, ${thresholdsMs.starting}ms while starting)`
     );
@@ -136,8 +150,13 @@ export class EventLoopWatchdog {
     if (!worker) {
       return Promise.resolve();
     }
+    // Before the worker is terminated and the buffer dropped: a block that ended in the last few
+    // ms may not have been reported yet.
+    this.reportUnfinishedBlock('the watchdog stopped before its worker reported it');
+    process.off('exit', this.onProcessExit);
     this.worker = undefined;
     this.shared = undefined;
+    this.blockLogger = undefined;
     this.clearHeartbeat();
     this.stopping = worker
       .stop()
@@ -151,5 +170,39 @@ export class EventLoopWatchdog {
   private clearHeartbeat(): void {
     clearInterval(this.heartbeatTimer);
     this.heartbeatTimer = undefined;
+  }
+
+  /**
+   * Reports a block the worker can no longer report: the worker shares the start of an ongoing
+   * block, and whoever claims that slot first reports the block's end. This runs on the main
+   * thread, so the block is over when it runs; its length is measured to now.
+   */
+  private reportUnfinishedBlock(reason: string): void {
+    const { shared, blockLogger } = this;
+    if (!shared || !blockLogger) {
+      return;
+    }
+    const startedAtUs = Atomics.load(shared, Slot.blockStartedAt);
+    if (startedAtUs === 0n) {
+      return;
+    }
+    // The epoch slot is written before the start slot, so it is in place by now.
+    const startedAtEpochMs = Number(Atomics.load(shared, Slot.blockStartedAtEpochMs));
+    if (Atomics.compareExchange(shared, Slot.blockStartedAt, startedAtUs, 0n) !== startedAtUs) {
+      return;
+    }
+    const blockedMs = Math.floor((monotonicUs() - Number(startedAtUs)) / 1000);
+    blockLogger.warn<BlockLogMeta>(`Event loop blocked for ~${blockedMs}ms; ${reason}`, {
+      tags: ['event-loop-watchdog'],
+      kibana: {
+        event_loop_watchdog: {
+          blockedMs,
+          startedAt: new Date(startedAtEpochMs).toISOString(),
+          phase: phaseOf(Number(startedAtUs), this.runningSinceUs),
+          suppressedBlocks: 0,
+          ongoing: false,
+        },
+      },
+    });
   }
 }

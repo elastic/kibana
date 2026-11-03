@@ -29,8 +29,16 @@ export interface BlockLogMeta extends LogMeta {
       startedAt: string;
       phase: Phase;
       suppressedBlocks: number;
+      /** True when the block was still ongoing at log time; `blockedMs` is its length so far. */
+      ongoing: boolean;
     };
   };
+}
+
+/** A block still ongoing when a stats log line is written; it is counted once it ends. */
+export interface OngoingBlockStats {
+  phase: Phase;
+  blockedMs: number;
 }
 
 export interface StatsLogMeta extends LogMeta {
@@ -41,6 +49,7 @@ export interface StatsLogMeta extends LogMeta {
         heapUsed: number;
         /** Worker log lines lost since the last stats log line that was written. */
         droppedLogLines: number;
+        ongoing?: OngoingBlockStats;
       };
     };
   };
