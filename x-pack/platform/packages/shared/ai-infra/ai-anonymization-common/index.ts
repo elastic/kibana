@@ -15,6 +15,13 @@ export type {
 } from './src/types';
 export { NER_MODEL_ID, aiAnonymizationSettings } from './src/constants';
 export { DEFAULT_BUILTIN_REGEX_RULES } from './src/default_builtin_regex_rules';
+export { isShippedBuiltInRule } from './src/is_shipped_builtin_rule';
+export {
+  PUBLIC_HOSTS,
+  PUBLIC_SERVICE_DOMAINS,
+  refineBuiltInMatch,
+} from './src/builtin_match_filters';
+export type { MatchSpan } from './src/builtin_match_filters';
 export { refreshBuiltInAnonymizationRules } from './src/refresh_builtin_rules';
 export { isAnonymizationMaskingEnabled } from './src/is_masking_enabled';
 export { parseLegacyAnonymizationRules, parseLegacyOnFailureMode } from './src/legacy_settings';

@@ -23,7 +23,6 @@ export {
   createAggregators,
   createMonitoringStatsStream,
 } from './monitoring_stats_stream';
-
 export interface CreateMonitoringStatsOpts {
   taskStore: TaskStore;
   elasticsearchAndSOAvailability$: Observable<boolean>;

@@ -11,16 +11,15 @@ import { omit } from 'lodash';
 import { type Filter, isOfAggregateQueryType } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { DataViewField, getAbsoluteTimeRange } from '@kbn/data-plugin/common';
-import { hasTransformationalCommand, isESQLColumnGroupable } from '@kbn/esql-utils';
-import { fieldSupportsBreakdown } from '@kbn/field-utils';
-import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
+import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
+import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { getOrRegisterEsqlDataView } from '@kbn/data-source';
 import type {
   UnifiedHistogramFetchParams,
   UnifiedHistogramFetchParamsExternal,
   UnifiedHistogramServices,
 } from '../types';
+import { resolveBreakdownField } from './resolve_breakdown_field';
 
 const EMPTY_FILTERS: Filter[] = [];
 const EMPTY_ESQL_VARIABLES: ESQLControlVariable[] = [];
@@ -114,21 +113,7 @@ function getProcessedBreakdownField({
     return undefined;
   }
 
-  // only keep a breakdown field the chart can actually use, so the selector label stays in sync
-  if (dataSource.kind === 'esql') {
-    const breakdownColumn = columns?.find((column) => column.name === breakdownField);
-    const field =
-      breakdownColumn && isESQLColumnGroupable(breakdownColumn)
-        ? new DataViewField(convertDatatableColumnToDataViewFieldSpec(breakdownColumn))
-        : undefined;
-    return {
-      field,
-    };
-  }
-
-  const dataView = dataSource.kind === 'index-pattern' ? dataSource.getDataView() : undefined;
-  const field = breakdownField ? dataView?.getFieldByName(breakdownField) : undefined;
   return {
-    field: field && fieldSupportsBreakdown(field) ? field : undefined,
+    field: resolveBreakdownField({ breakdownField, dataSource, columns }),
   };
 }

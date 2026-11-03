@@ -192,22 +192,16 @@ test.describe(
         await expect(pageObjects.serviceFlyoutPage.flyout).toBeHidden();
       });
 
-      await test.step('click on a service map edge and verify popover contents', async () => {
-        await pageObjects.serviceMapPage.openEdgePopover(SERVICE_MAP_TEST_POSTGRESQL_EDGE);
+      await test.step('click on a service map edge and verify the request flyout', async () => {
+        await pageObjects.serviceMapPage.openEdgeFlyout(SERVICE_MAP_TEST_POSTGRESQL_EDGE);
 
-        await expect(pageObjects.serviceMapPage.serviceMapPopoverContent).toBeVisible({
-          timeout: EXTENDED_TIMEOUT,
-        });
-        await expect(pageObjects.serviceMapPage.serviceMapPopoverTitle).toHaveText(
-          `${SERVICE_MAP_TEST_SERVICE} → ${SERVICE_MAP_TEST_POSTGRESQL_DEPENDENCY}`
-        );
-        await expect(pageObjects.serviceMapPage.serviceMapEdgeExploreTracesButton).toBeVisible();
-        await expect(pageObjects.serviceMapPage.serviceMapEdgeExploreTracesButton).toHaveText(
-          'Explore traces'
+        await expect(pageObjects.serviceMapPage.requestFlyoutTitle).toHaveText(
+          `${SERVICE_MAP_TEST_SERVICE} → ${SERVICE_MAP_TEST_POSTGRESQL_DEPENDENCY}`,
+          { timeout: EXTENDED_TIMEOUT }
         );
 
         await page.keyboard.press('Escape');
-        await expect(pageObjects.serviceMapPage.serviceMapPopoverTitle).toBeHidden();
+        await expect(pageObjects.serviceMapPage.requestFlyout).toBeHidden();
       });
 
       await test.step('maximize the Service map panel', async () => {

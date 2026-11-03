@@ -7,12 +7,6 @@
 
 import type { PricingProductFeature } from '@kbn/core-pricing-common';
 
-/**
- * Base route of the Significant Events application. Used by the UI plugin's
- * `appRoute` registration and by server tools that return Kibana deep links.
- */
-export const SIGNIFICANT_EVENTS_APP_ROUTE = '/app/significant_events';
-
 /** Nightshift Sources page, where server tools link to KI identification progress. */
 export const NIGHTSHIFT_SOURCES_APP_PATH = '/app/nightshift/sources';
 

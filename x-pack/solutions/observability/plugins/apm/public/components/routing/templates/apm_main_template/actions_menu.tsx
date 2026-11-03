@@ -7,7 +7,7 @@
 
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-constants';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo, useState } from 'react';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';

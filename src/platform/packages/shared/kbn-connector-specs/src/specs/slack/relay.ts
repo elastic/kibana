@@ -8,8 +8,11 @@
  */
 
 import { RELAY_AUTH_ID } from '../../auth_types/relay';
-import type { ActionContext, RelayActionClient } from '../../connector_spec';
+import type { ActionContext } from '../../connector_spec';
+import type { RelayActionClient } from '../../relay_action_client';
 import type {
+  SlackGetConversationHistoryInput,
+  SlackGetConversationRepliesInput,
   SlackListChannelsInput,
   SlackResolveChannelIdInput,
   SlackSendMessageInput,
@@ -94,12 +97,18 @@ function toUserFacingError(error: unknown, channel?: string): unknown {
   }
 }
 
-/** Posts through the Relay, returning the timestamp as `ts` so callers can thread on it as usual. */
+/** Posts through the Relay, returning the timestamp as `ts` and `timestamp` so callers can thread on either. */
 export async function relaySendMessage(
   connection: SlackRelayConnection,
   ctx: ActionContext,
   input: SlackSendMessageInput
-): Promise<{ ok: true; channel: string; ts: string; externalConversationId?: string }> {
+): Promise<{
+  ok: true;
+  channel: string;
+  ts: string;
+  timestamp: string;
+  externalConversationId?: string;
+}> {
   if (input.unfurlLinks !== undefined || input.unfurlMedia !== undefined) {
     ctx.log.debug(
       'Slack sendMessage: unfurl options are not supported through the Elastic Slack app and were ignored'
@@ -130,6 +139,7 @@ export async function relaySendMessage(
       ok: true,
       channel: resolvedChannel,
       ts: ref,
+      timestamp: ref,
       ...(externalConversationId ? { externalConversationId } : {}),
     };
   } catch (error) {
@@ -289,6 +299,236 @@ export async function relayResolveChannelId(
   };
 }
 
+const SLACK_CONVERSATION_ID = /^[CGD][A-Z0-9]+$/;
+
+// A Slack ts or whole epoch seconds:
+// https://docs.slack.dev/reference/methods/conversations.history#arguments
+const SLACK_WINDOW_BOUND = /^\d{1,12}(\.\d{1,6})?$/;
+
+const SLACK_MESSAGE_TS = /^\d{1,12}\.\d{1,6}$/;
+
+const RELAY_MAX_READ_LIMIT = 200;
+
+/** The Relay's own default, made explicit so later pages keep the same floor. */
+const RELAY_DEFAULT_HISTORY_WINDOW_SECONDS = 2 * 60 * 60;
+
+/**
+ * A read that failed for one channel. Returned, not thrown: Agent Builder hints every thrown 403
+ * as bad credentials and every 429 as "do not move on".
+ */
+type RelayReadOutcome =
+  | { ok: false; reason: 'not_readable'; channel: string }
+  | { ok: false; reason: 'throttled'; retry_after_seconds?: number };
+
+interface ReadWindow {
+  oldest?: string;
+  latest?: string;
+}
+
+const getRelayErrorDetails = (error: unknown) => {
+  const { statusCode, reason, retryAfterSeconds } = (error ?? {}) as {
+    statusCode?: unknown;
+    reason?: unknown;
+    retryAfterSeconds?: unknown;
+  };
+  return {
+    statusCode: typeof statusCode === 'number' ? statusCode : undefined,
+    reason: typeof reason === 'string' ? reason : undefined,
+    retryAfterSeconds: typeof retryAfterSeconds === 'number' ? retryAfterSeconds : undefined,
+  };
+};
+
+const toReadOutcome = (error: unknown, channel: string): RelayReadOutcome | undefined => {
+  const { statusCode, reason, retryAfterSeconds } = getRelayErrorDetails(error);
+  if (statusCode === 403 && reason === 'not_readable') {
+    return { ok: false, reason: 'not_readable', channel };
+  }
+  if (statusCode === 429) {
+    return {
+      ok: false,
+      reason: 'throttled',
+      ...(retryAfterSeconds !== undefined ? { retry_after_seconds: retryAfterSeconds } : {}),
+    };
+  }
+  return undefined;
+};
+
+const toReadError = (error: unknown): unknown =>
+  getRelayErrorDetails(error).statusCode === 400
+    ? new Error(
+        'The Elastic Slack app rejected the read window. oldest and latest take Slack timestamps, and a window is at most 7 days.'
+      )
+    : toUserFacingError(error);
+
+/** `oldest:latest`, either side empty when open. */
+const encodeReadCursor = ({ oldest, latest }: ReadWindow): string =>
+  `${oldest ?? ''}:${latest ?? ''}`;
+
+const decodeReadCursor = (cursor: string): ReadWindow => {
+  const bounds = cursor.split(':');
+  if (bounds.length !== 2 || bounds.some((bound) => bound && !SLACK_WINDOW_BOUND.test(bound))) {
+    throw new Error(
+      'Invalid cursor. Pass the nextCursor from the previous response unchanged, or omit it.'
+    );
+  }
+  const [oldest, latest] = bounds;
+  return { ...(oldest ? { oldest } : {}), ...(latest ? { latest } : {}) };
+};
+
+type RelayReadPage = Awaited<ReturnType<RelayActionClient['readMessages']>>;
+
+const prepareRead = (
+  ctx: ActionContext,
+  action: string,
+  input: { channel: string; oldest?: string; latest?: string; inclusive?: boolean; raw?: boolean }
+): string => {
+  if (input.inclusive !== undefined || input.raw) {
+    ctx.log.debug(
+      `Slack ${action}: inclusive and raw are not supported through the Elastic Slack app and were ignored`
+    );
+  }
+  if ([input.oldest, input.latest].some((bound) => bound && !SLACK_WINDOW_BOUND.test(bound))) {
+    throw new Error('oldest and latest take Slack timestamps, e.g. "1700000000.000100".');
+  }
+  const channelId = input.channel.trim();
+  if (!SLACK_CONVERSATION_ID.test(channelId)) {
+    throw new Error(
+      `"${channelId}" is not a channel ID. Pass the channel ID (C...) from listChannels.`
+    );
+  }
+  return channelId;
+};
+
+const readPage = async (
+  ctx: ActionContext,
+  action: string,
+  channelId: string,
+  read: () => Promise<RelayReadPage>
+): Promise<RelayReadPage | RelayReadOutcome> => {
+  ctx.log.debug(`Slack ${action} request through relay: channel=${channelId}`);
+  try {
+    return await read();
+  } catch (error) {
+    const outcome = toReadOutcome(error, channelId);
+    if (outcome) {
+      return outcome;
+    }
+    ctx.log.error(`Slack ${action} through relay failed: ${(error as Error).message}`);
+    throw toReadError(error);
+  }
+};
+
+const toReadResult = (page: RelayReadPage, nextCursor: string | undefined) => ({
+  ok: true as const,
+  channel: page.channel.id,
+  channelName: page.channel.name,
+  messages: page.messages.map(({ ts, threadTs, replyCount, author, text }) => ({
+    ts,
+    user: author.id,
+    username: author.name,
+    is_bot: author.isBot,
+    text,
+    thread_ts: threadTs,
+    reply_count: replyCount,
+  })),
+  nextCursor,
+  hasMore: nextCursor !== undefined,
+});
+
+/**
+ * Reads a connected public channel through the Relay, newest first. The Relay has no cursor, so
+ * `nextCursor` encodes the next window: the same floor, ending just before the oldest message
+ * returned.
+ *
+ * `inclusive` and `raw` are ignored, and messages carry text only: no blocks, attachments or files.
+ */
+export async function relayGetConversationHistory(
+  connection: SlackRelayConnection,
+  ctx: ActionContext,
+  input: SlackGetConversationHistoryInput
+) {
+  const channelId = prepareRead(ctx, 'getConversationHistory', input);
+
+  const window = input.cursor
+    ? decodeReadCursor(input.cursor)
+    : {
+        oldest:
+          input.oldest ??
+          String(
+            Math.max(
+              0,
+              Math.floor(Number(input.latest ?? Date.now() / 1000)) -
+                RELAY_DEFAULT_HISTORY_WINDOW_SECONDS
+            )
+          ),
+        ...(input.latest ? { latest: input.latest } : {}),
+      };
+
+  const page = await readPage(ctx, 'getConversationHistory', channelId, () =>
+    connection.client.readMessages({
+      tenantKey: connection.tenantKey,
+      channelId,
+      ...window,
+      limit: Math.min(input.limit, RELAY_MAX_READ_LIMIT),
+    })
+  );
+  if ('ok' in page) {
+    return page;
+  }
+
+  const last = page.messages.at(-1);
+  return toReadResult(
+    page,
+    page.truncated && last ? encodeReadCursor({ ...window, latest: last.ts }) : undefined
+  );
+}
+
+/**
+ * Reads one thread of a connected public channel through the Relay, oldest first with the parent
+ * message included. `nextCursor` encodes the next window, starting just after the newest message
+ * returned.
+ *
+ * `inclusive` and `raw` are ignored, and messages carry text only: no blocks, attachments or files.
+ */
+export async function relayGetConversationReplies(
+  connection: SlackRelayConnection,
+  ctx: ActionContext,
+  input: SlackGetConversationRepliesInput
+) {
+  if (!SLACK_MESSAGE_TS.test(input.ts)) {
+    throw new Error('ts takes the parent message timestamp, e.g. "1700000000.000100".');
+  }
+  const channelId = prepareRead(ctx, 'getConversationReplies', input);
+
+  const window = input.cursor
+    ? decodeReadCursor(input.cursor)
+    : {
+        ...(input.oldest ? { oldest: input.oldest } : {}),
+        ...(input.latest ? { latest: input.latest } : {}),
+      };
+
+  const page = await readPage(ctx, 'getConversationReplies', channelId, () =>
+    connection.client.readThread({
+      tenantKey: connection.tenantKey,
+      channelId,
+      threadTs: input.ts,
+      ...window,
+      limit: Math.min(input.limit, RELAY_MAX_READ_LIMIT),
+    })
+  );
+  if ('ok' in page) {
+    return page;
+  }
+
+  const last = page.messages.at(-1);
+  // Only a reply newer than the floor moves the window; anything else would loop.
+  const nextCursor =
+    page.truncated && last && last.ts !== input.ts && last.ts !== window.oldest
+      ? encodeReadCursor({ ...window, oldest: last.ts })
+      : undefined;
+  return { ...toReadResult(page, nextCursor), ts: input.ts };
+}
+
 /**
  * Replaces `auth.test`, which needs a token this connector does not have. Reading one binding proves
  * the Relay accepts our identity and the workspace is still installed — the two ways this connector
@@ -324,5 +564,7 @@ export const slackRelay = {
     updateMessage: relayUpdateMessage,
     listChannels: relayListChannels,
     resolveChannelId: relayResolveChannelId,
+    getConversationHistory: relayGetConversationHistory,
+    getConversationReplies: relayGetConversationReplies,
   },
 };

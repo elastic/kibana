@@ -9,6 +9,7 @@ import type { IDataStreamClient } from '@kbn/core-data-streams-server';
 import { esql } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ChangePointType } from '@kbn/significant-events-schema';
 import {
   type CommonSearchOptions,
   type PaginatedSearchOptions,
@@ -17,6 +18,7 @@ import {
 } from '../query_utils';
 import {
   andWhere,
+  escapeEsqlLikePattern,
   runLatestSourceEsqlQuery,
   runPaginatedLatestSourceEsqlQuery,
   runFindByIdEsqlQuery,
@@ -44,11 +46,15 @@ type RawDetection = Omit<Detection, 'processed'>;
 export interface DetectionsSearchOptions extends CommonSearchOptions {
   rule_uuid?: string[];
   rule_name?: string;
+  search?: string;
+  change_point_type?: ChangePointType[];
 }
 
 export interface DetectionsPaginatedSearchOptions extends PaginatedSearchOptions {
   rule_uuid?: string[];
   rule_name?: string;
+  search?: string;
+  change_point_type?: ChangePointType[];
 }
 
 const PROCESSED_MARKER_CHUNK_SIZE = 250;
@@ -92,6 +98,19 @@ export class DetectionClient {
 
     if (options.rule_name) {
       where = andWhere(where, esql.exp`${esql.col('rule_name')} == ${esql.str(options.rule_name)}`);
+    }
+
+    if (options.search) {
+      const pattern = esql.str(`*${escapeEsqlLikePattern(options.search)}*`);
+      where = andWhere(where, esql.exp`TO_LOWER(${esql.col('rule_name')}) LIKE ${pattern}`);
+    }
+
+    const changePointTypeLiterals = options.change_point_type?.map((type) => esql.str(type));
+    if (changePointTypeLiterals?.length) {
+      where = andWhere(
+        where,
+        esql.exp`${esql.col('change_point_type')} IN (${changePointTypeLiterals})`
+      );
     }
 
     return where;

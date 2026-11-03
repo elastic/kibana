@@ -6,9 +6,12 @@
  */
 
 import { expectParseError, expectParseSuccess } from '@kbn/zod-helpers/v4';
+import { MAX_CONNECTION_RESOURCES } from './connection_params';
 import { serviceMapRoute } from './service_map';
 import { serviceMapDependencyNodeRoute } from './dependency_node';
 import { serviceMapServiceBadgesRoute } from './service_badges';
+import { serviceMapConnectionFailedCallsRoute } from './connection_failed_calls';
+import { serviceMapConnectionTransactionsRoute } from './connection_transactions';
 
 describe('serviceMapRoute params', () => {
   it('accepts a query with no optional fields', () => {
@@ -93,6 +96,169 @@ describe('serviceMapDependencyNodeRoute params', () => {
     expectParseError(
       serviceMapDependencyNodeRoute.params!.safeParse({
         query: { environment: 'production', start: '2021-01-01', end: '2021-01-02' },
+      })
+    );
+  });
+
+  it.each(['avg', 'p95', 'p99'])(
+    'accepts the %s latency aggregation type',
+    (latencyAggregationType) => {
+      expectParseSuccess(
+        serviceMapDependencyNodeRoute.params!.safeParse({
+          query: {
+            dependencies: 'postgresql',
+            latencyAggregationType,
+            environment: 'production',
+            start: '2021-01-01',
+            end: '2021-01-02',
+          },
+        })
+      );
+    }
+  );
+
+  it('rejects an unknown latency aggregation type', () => {
+    expectParseError(
+      serviceMapDependencyNodeRoute.params!.safeParse({
+        query: {
+          dependencies: 'postgresql',
+          latencyAggregationType: 'p50',
+          environment: 'production',
+          start: '2021-01-01',
+          end: '2021-01-02',
+        },
+      })
+    );
+  });
+});
+
+const connectionQuery = {
+  sourceServiceName: 'opbeans-java',
+  environment: 'production',
+  start: '2021-01-01',
+  end: '2021-01-02',
+};
+
+describe('serviceMapConnectionTransactionsRoute params', () => {
+  it('turns a single dependency into an array', () => {
+    const result = serviceMapConnectionTransactionsRoute.params!.safeParse({
+      query: { ...connectionQuery, dependencies: 'redis' },
+    });
+
+    expectParseSuccess(result);
+    if (result.success) {
+      expect(result.data.query.dependencies).toEqual(['redis']);
+    }
+  });
+
+  it('keeps an array of dependencies', () => {
+    const result = serviceMapConnectionTransactionsRoute.params!.safeParse({
+      query: { ...connectionQuery, dependencies: ['redis', 'postgresql'] },
+    });
+
+    expectParseSuccess(result);
+    if (result.success) {
+      expect(result.data.query.dependencies).toEqual(['redis', 'postgresql']);
+    }
+  });
+
+  it('accepts a target service without dependencies and defaults them to an empty list', () => {
+    const result = serviceMapConnectionTransactionsRoute.params!.safeParse({
+      query: { ...connectionQuery, targetServiceName: 'opbeans-node' },
+    });
+
+    expectParseSuccess(result);
+    if (result.success) {
+      expect(result.data.query.dependencies).toEqual([]);
+    }
+  });
+
+  it('rejects a query with neither dependencies nor a target service', () => {
+    expectParseError(
+      serviceMapConnectionTransactionsRoute.params!.safeParse({ query: connectionQuery })
+    );
+  });
+
+  it('rejects a missing sourceServiceName', () => {
+    expectParseError(
+      serviceMapConnectionTransactionsRoute.params!.safeParse({
+        query: {
+          environment: 'production',
+          start: '2021-01-01',
+          end: '2021-01-02',
+          dependencies: 'redis',
+        },
+      })
+    );
+  });
+});
+
+describe('serviceMapConnectionFailedCallsRoute params', () => {
+  it('turns a single dependency into an array', () => {
+    const result = serviceMapConnectionFailedCallsRoute.params!.safeParse({
+      query: { ...connectionQuery, dependencies: 'redis' },
+    });
+
+    expectParseSuccess(result);
+    if (result.success) {
+      expect(result.data.query.dependencies).toEqual(['redis']);
+    }
+  });
+
+  it('accepts dependencies with a target service', () => {
+    expectParseSuccess(
+      serviceMapConnectionFailedCallsRoute.params!.safeParse({
+        query: {
+          ...connectionQuery,
+          dependencies: ['opbeans-node'],
+          targetServiceName: 'opbeans-node',
+        },
+      })
+    );
+  });
+
+  it('rejects a missing dependencies field', () => {
+    expectParseError(
+      serviceMapConnectionFailedCallsRoute.params!.safeParse({
+        query: { ...connectionQuery, targetServiceName: 'opbeans-node' },
+      })
+    );
+  });
+
+  it('rejects an empty list of dependencies', () => {
+    expectParseError(
+      serviceMapConnectionFailedCallsRoute.params!.safeParse({
+        query: { ...connectionQuery, dependencies: [] },
+      })
+    );
+  });
+
+  it('accepts as many dependencies as a connection can have', () => {
+    expectParseSuccess(
+      serviceMapConnectionFailedCallsRoute.params!.safeParse({
+        query: {
+          ...connectionQuery,
+          dependencies: Array.from({ length: MAX_CONNECTION_RESOURCES }, (_, i) => `api-${i}`),
+        },
+      })
+    );
+  });
+
+  it('rejects more dependencies than a connection can have', () => {
+    expectParseError(
+      serviceMapConnectionFailedCallsRoute.params!.safeParse({
+        query: {
+          ...connectionQuery,
+          dependencies: Array.from({ length: MAX_CONNECTION_RESOURCES + 1 }, (_, i) => `api-${i}`),
+        },
+      })
+    );
+  });
+
+  it('rejects a dependency that is too long', () => {
+    expectParseError(
+      serviceMapConnectionFailedCallsRoute.params!.safeParse({
+        query: { ...connectionQuery, dependencies: 'a'.repeat(513) },
       })
     );
   });

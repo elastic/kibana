@@ -185,10 +185,18 @@ describe('canary report', () => {
   it('returns no seeded evidence', () => {
     expect(doc).not.toHaveProperty('evidence');
   });
+
+  it('stamps content.published_at to match generator historic reports', () => {
+    expect(doc.content.published_at).toBe('2026-01-01T00:00:00.000Z');
+  });
 });
 
 describe('IOC dump report', () => {
   const doc = buildIocDumpReportDoc('2026-01-01T00:00:00.000Z');
+
+  it('stamps content.published_at to match generator historic reports', () => {
+    expect(doc.content.published_at).toBe('2026-01-01T00:00:00.000Z');
+  });
 
   it('returns the per-hunt IOC bound the coordinator enforces', () => {
     const source = readRepoFile(

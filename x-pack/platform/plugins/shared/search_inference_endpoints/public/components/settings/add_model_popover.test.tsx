@@ -268,6 +268,30 @@ describe('AddModelPopover', () => {
     expect(screen.getByText('My Connector (ep-b)')).toBeInTheDocument();
   });
 
+  it('excludes connectors that are denied by region policy', () => {
+    mockUseConnectors.mockReturnValue({
+      data: [
+        createConnector({ connectorId: 'ep-allowed', name: 'Allowed Model' }),
+        createConnector({
+          connectorId: 'ep-denied',
+          name: 'Denied Model',
+          metadata: { denied_by_region_policy: true },
+        }),
+      ],
+    });
+
+    render(
+      <Wrapper>
+        <AddModelPopover existingEndpointIds={[]} onAdd={onAdd} />
+      </Wrapper>
+    );
+
+    fireEvent.click(screen.getByTestId('add-model-button'));
+
+    expect(screen.getByTestId('add-model-option-ep-allowed')).toBeInTheDocument();
+    expect(screen.queryByTestId('add-model-option-ep-denied')).not.toBeInTheDocument();
+  });
+
   it('handles empty connectors gracefully', () => {
     mockUseConnectors.mockReturnValue({ data: [] });
 

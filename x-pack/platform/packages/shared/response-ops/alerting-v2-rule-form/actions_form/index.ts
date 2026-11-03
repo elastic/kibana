@@ -11,14 +11,13 @@ export {
   InvalidInlineWorkflowError,
 } from './helpers/build_inline_workflow_yaml';
 export {
-  DISPATCH_PAYLOAD_VARIABLES,
   INLINE_ACTION_STEP_DEFINITIONS,
   getDefaultInlineActionStepDefinition,
   getInlineActionStepDefinition,
 } from './registry';
 export type { InlineActionStepDefinition, PayloadVariable } from './registry';
 export { InlineWorkflowEditor } from './components/inline_workflow_editor';
-export { isActionValid } from './types';
+export { isActionValid } from './helpers/validate_inline_action';
 export type {
   ActionDraft,
   ActionFormValue,
