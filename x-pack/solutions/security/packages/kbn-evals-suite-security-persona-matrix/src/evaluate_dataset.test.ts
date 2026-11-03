@@ -300,6 +300,22 @@ describe('createPersonaMatrixFinalAnswerPresentEvaluator', () => {
     expect(result.score).toBe(1);
   });
 
+  it('scores 0 when the only message is the last-assistant-step fallback', async () => {
+    const result = await evaluate({
+      messages: [{ message: 'Let me check that rule.' }],
+      messageSource: 'last_assistant_step',
+    });
+    expect(result.score).toBe(0);
+  });
+
+  it('scores 1 for a real closing message even when messageSource is "response"', async () => {
+    const result = await evaluate({
+      messages: [{ message: 'Done.' }],
+      messageSource: 'response',
+    });
+    expect(result.score).toBe(1);
+  });
+
   // Regression: 62% of detection-rule-edit runs in the 2026-08-21 sweep ended
   // on a tool call with no user-facing closing text.
   it('scores 0 when every message is empty', async () => {

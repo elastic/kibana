@@ -34,6 +34,7 @@ describe('selectJury', () => {
 
   it('resolves a jury by adapter name', () => {
     expect(selectJury('attack-discovery')?.name).toBe('attack-discovery');
+    expect(selectJury('persona-matrix')?.name).toBe('persona-matrix');
   });
 
   it('returns undefined for an unregistered suite rather than defaulting', () => {

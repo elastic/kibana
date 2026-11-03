@@ -35,6 +35,7 @@ const IDENTITY_PATTERNS: RegExp[] = [
   /\bllama\b/gi,
   /\bqwen[\w.-]*\b/gi,
   /\bglm[\w.-]*\b/gi,
+  /\bdeepseek[\w.-]*\b/gi,
   /\bgrok\b/gi,
 ];
 

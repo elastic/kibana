@@ -270,7 +270,9 @@ export function selectJury(suiteId: string | undefined): JuryAdapter | undefined
   if (!suiteId) {
     return undefined;
   }
-  return JURY_ADAPTERS.find((jury) => jury.suiteIds.includes(suiteId));
+  // The dataset-derived adapter name ('persona-matrix') is accepted too, so a
+  // rejudge without --suite resolves the same jury as the explicit suite id.
+  return JURY_ADAPTERS.find((jury) => jury.suiteIds.includes(suiteId) || jury.name === suiteId);
 }
 
 /**

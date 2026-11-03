@@ -42,6 +42,14 @@ describe('anonymizeCell steps', () => {
     expect(c.steps).toEqual(steps);
   });
 
+  it('scrubs deepseek self-identification', () => {
+    const c = anonymizeCell(
+      cell({ agentResponse: 'As DeepSeek-V4, I think so.' }),
+      new Map([['anthropic-claude-4.6-sonnet', 'A']])
+    );
+    expect(c.agentResponse.toLowerCase()).not.toContain('deepseek');
+  });
+
   it('leaves a trajectory without steps alone', () => {
     expect(anonymizeCell(cell(), new Map()).steps).toEqual([]);
   });

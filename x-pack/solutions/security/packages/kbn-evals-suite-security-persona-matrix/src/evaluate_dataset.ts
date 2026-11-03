@@ -167,7 +167,9 @@ export const createPersonaMatrixFinalAnswerPresentEvaluator = (): Evaluator => (
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async ({ output }) => {
-    const taskOutput = output as { messages?: Array<{ message?: unknown }> } | undefined;
+    const taskOutput = output as
+      | { messages?: Array<{ message?: unknown }>; messageSource?: string }
+      | undefined;
     if (!taskOutput) {
       return {
         score: null,
@@ -175,9 +177,13 @@ export const createPersonaMatrixFinalAnswerPresentEvaluator = (): Evaluator => (
         explanation: 'No task output — skipping FinalAnswerPresent.',
       };
     }
-    const hasMessage = (taskOutput.messages ?? []).some(
-      (msg) => typeof msg?.message === 'string' && msg.message.trim().length > 0
-    );
+    // A 'last_assistant_step' message is chat_client's fallback to interior
+    // narration for runs that ended on a tool call; it is not a closing answer.
+    const hasMessage =
+      taskOutput.messageSource !== 'last_assistant_step' &&
+      (taskOutput.messages ?? []).some(
+        (msg) => typeof msg?.message === 'string' && msg.message.trim().length > 0
+      );
     if (hasMessage) {
       return { score: 1, explanation: 'Final user-facing message present.' };
     }
