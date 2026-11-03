@@ -445,7 +445,7 @@ Good (spread, isolating scope):
 Good (spread, no isolating scope; use only when {scope} does not isolate the operation):
   FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {failure} | STATS affected = COUNT(*)
 Good (dimensions, isolating scope):
-  FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | STATS rows = COUNT(*) WHERE {failure}, `f_{field1}` = COUNT_DISTINCT(`{field1}`) WHERE {failure}, `a_{field1}` = COUNT_DISTINCT(`{field1}`), `present_{field1}` = COUNT(*) WHERE {failure} AND `{field1}` IS NOT NULL, `f_{field2}` = COUNT_DISTINCT(`{field2}`) WHERE {failure}, `a_{field2}` = COUNT_DISTINCT(`{field2}`), `present_{field2}` = COUNT(*) WHERE {failure} AND `{field2}` IS NOT NULL
+  FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | STATS rows = COUNT(*) WHERE {failure}, `f_{field1}` = COUNT_DISTINCT(`{field1}`) WHERE {failure}, `a_{field1}` = COUNT_DISTINCT(`{field1}`), `present_{field1}` = COUNT(*) WHERE ({failure}) AND `{field1}` IS NOT NULL, `f_{field2}` = COUNT_DISTINCT(`{field2}`) WHERE {failure}, `a_{field2}` = COUNT_DISTINCT(`{field2}`), `present_{field2}` = COUNT(*) WHERE ({failure}) AND `{field2}` IS NOT NULL
 Good (dimensions, no isolating scope; use only when {scope} does not isolate the operation):
   FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {failure} | STATS rows = COUNT(*), `f_{field1}` = COUNT_DISTINCT(`{field1}`), `present_{field1}` = COUNT(*) WHERE `{field1}` IS NOT NULL, `f_{field2}` = COUNT_DISTINCT(`{field2}`), `present_{field2}` = COUNT(*) WHERE `{field2}` IS NOT NULL
 Good (trend, buckets):
