@@ -121,3 +121,21 @@ export const useArchiveCortexPage = () =>
       defaultMessage: 'Could not archive Cortex page',
     })
   );
+
+/** Restores an archived page as tentative; agents can corroborate it again from there. */
+export const useRestoreCortexPage = () =>
+  useCortexMutation(
+    (client, page: CortexPageInput & CortexPageVersion) =>
+      client.fetch('PUT /internal/nightshift/cortex/pages', {
+        signal: null,
+        params: {
+          body: {
+            ...page,
+            status: 'tentative',
+          },
+        },
+      }),
+    i18n.translate('xpack.nightshift.knowledge.cortex.restoreErrorTitle', {
+      defaultMessage: 'Could not restore Cortex page',
+    })
+  );
