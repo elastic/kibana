@@ -1195,3 +1195,219 @@ describe('round 8 review findings: trace policy filtering', () => {
     });
   });
 });
+
+describe('queryMatrixTraces trace hydration', () => {
+  const span = (
+    name: string,
+    spanId: string,
+    parentId: string | undefined,
+    startOffsetMs: number,
+    durationMs: number,
+    attributes: Record<string, unknown> = {}
+  ) => ({
+    span_id: spanId,
+    trace_id: 'trace-1',
+    parent_span_id: parentId,
+    name,
+    kind: 'Internal',
+    status: 'Ok',
+    start_time: new Date(Date.parse('2026-09-05T19:30:58.391Z') + startOffsetMs).toISOString(),
+    duration_ms: durationMs,
+    attributes,
+  });
+
+  // Shape of a real persisted trace: root agent span (parent outside the set), a nested
+  // agent span, chat spans with usage attributes and execute_tool spans listed out of order.
+  const traceResponse = {
+    trace_id: 'trace-1',
+    total_spans: 8,
+    duration_ms: 16340.4,
+    spans: [
+      span('execute_tool security.security_labs_search', 's6', 's3', 6776, 313, {
+        'gen_ai.tool.name': 'security.security_labs_search',
+      }),
+      span('invoke_agent Elastic AI Agent', 's1', 'outside-the-trace', 0, 16340.4),
+      span('chat anthropic-claude-4.5-haiku', 's2', 's3', 1500, 1096, {
+        'gen_ai.usage.input_tokens': 1000,
+        'gen_ai.usage.output_tokens': 50,
+      }),
+      span('invoke_agent Elastic AI Agent', 's3', 's1', 544, 14237),
+      span('execute_tool load_skill', 's4', 's3', 4117, 94, { 'gen_ai.tool.name': 'load_skill' }),
+      span('chat anthropic-claude-4.5-haiku', 's5', 's3', 7106, 7645, {
+        'gen_ai.usage.input_tokens': '2345',
+        'gen_ai.usage.output_tokens': 400,
+      }),
+      span('select_relevant_skills', 's7', 's3', 926, 1695),
+      span('execute_tool attachments.read', 's8', 's3', 4116, 2, {
+        'gen_ai.tool.name': 'attachments.read',
+      }),
+    ],
+  };
+
+  const scoredDoc = (
+    taskOverrides: Record<string, unknown>,
+    repetition = 0
+  ): EvaluationScoreDocument =>
+    ({
+      example: { id: 'example-1', input: { question: 'Triage this alert' } },
+      evaluator: { name: 'Correctness', score: 1 },
+      metadata: { execution_id: 'exec-a' },
+      task: { model: { id: 'model-x' }, repetition_index: repetition, ...taskOverrides },
+    } as unknown as EvaluationScoreDocument);
+
+  const clientWith = (docs: EvaluationScoreDocument[], getTrace?: jest.Mock) => ({
+    getExperimentScores: jest.fn(
+      async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
+    ),
+    getExampleScores: jest.fn(async () => docs),
+    ...(getTrace ? { getTrace } : {}),
+  });
+
+  const aggregated = [
+    {
+      modelId: 'model-x',
+      suites: [{ suiteId: 'suite-1', experimentId: 'exec-a', datasets: [], evaluators: [] }],
+    },
+  ];
+
+  const makeLog = () => ({ debug: jest.fn(), info: jest.fn(), warning: jest.fn() });
+
+  it('hydrates tool steps, tokens and latency for a doc with a trace id but no task.output', async () => {
+    const getTrace = jest.fn(async () => traceResponse);
+    const log = makeLog();
+
+    const traces = await queryMatrixTraces(
+      clientWith([scoredDoc({ trace_id: 'trace-1' })], getTrace) as never,
+      log as never,
+      aggregated as never
+    );
+
+    const entry = traces['model-x:direct:suite-1:example-1'];
+    expect(entry.toolTrail).toEqual([
+      'attachments.read',
+      'load_skill',
+      'security.security_labs_search',
+    ]);
+    expect(entry.stepCount).toBe(3);
+    expect(entry.toolCount).toBe(3);
+    expect(entry.inputTokens).toBe(3345);
+    expect(entry.outputTokens).toBe(450);
+    expect(entry.latencyMs).toBeCloseTo(16340.4);
+    expect(entry.answer).toBeUndefined();
+    expect(entry.repTrails).toEqual([
+      ['attachments.read', 'load_skill', 'security.security_labs_search'],
+    ]);
+    expect(traces['model-x:suite-1']).toBeDefined();
+    expect(log.warning).not.toHaveBeenCalled();
+    expect(log.info).toHaveBeenCalledWith(expect.stringContaining('Hydrated 1/1 traces'));
+  });
+
+  it('fetches each trace id once even when several docs share it', async () => {
+    const getTrace = jest.fn(async () => traceResponse);
+    const docs = [scoredDoc({ trace_id: 'trace-1' }), scoredDoc({ trace_id: 'trace-1' })];
+
+    await queryMatrixTraces(
+      clientWith(docs, getTrace) as never,
+      makeLog() as never,
+      aggregated as never
+    );
+
+    expect(getTrace).toHaveBeenCalledTimes(1);
+  });
+
+  it('negative control: without a trace id the trace stays unavailable', async () => {
+    const getTrace = jest.fn(async () => traceResponse);
+    const log = makeLog();
+
+    const traces = await queryMatrixTraces(
+      clientWith([scoredDoc({})], getTrace) as never,
+      log as never,
+      aggregated as never
+    );
+
+    expect(getTrace).not.toHaveBeenCalled();
+    expect(traces['model-x:direct:suite-1:example-1'].stepCount).toBe(0);
+    expect(traces['model-x:suite-1']).toBeUndefined();
+    expect(log.warning).toHaveBeenCalledWith(
+      expect.stringContaining('No complete score documents found')
+    );
+  });
+
+  it('does not treat a null-scored doc with a trace id as complete', async () => {
+    const getTrace = jest.fn(async () => traceResponse);
+    const nullScored = {
+      ...scoredDoc({ trace_id: 'trace-1' }),
+      evaluator: { name: 'Correctness', score: null },
+    } as unknown as EvaluationScoreDocument;
+    const log = makeLog();
+
+    await queryMatrixTraces(
+      clientWith([nullScored], getTrace) as never,
+      log as never,
+      aggregated as never
+    );
+
+    expect(getTrace).not.toHaveBeenCalled();
+    expect(log.warning).toHaveBeenCalledWith(
+      expect.stringContaining('No complete score documents found')
+    );
+  });
+
+  it('keeps stored task.output authoritative and skips the trace fetch', async () => {
+    const getTrace = jest.fn(async () => traceResponse);
+    const withOutput = scoredDoc({
+      trace_id: 'trace-1',
+      output: {
+        steps: [{ type: 'tool_call', tool_id: 'stored.tool' }],
+        messages: [{ message: 'x'.repeat(60) }],
+      },
+    });
+
+    const traces = await queryMatrixTraces(
+      clientWith([withOutput], getTrace) as never,
+      makeLog() as never,
+      aggregated as never
+    );
+
+    expect(getTrace).not.toHaveBeenCalled();
+    const entry = traces['model-x:direct:suite-1:example-1'];
+    expect(entry.toolTrail).toEqual(['stored.tool']);
+    expect(entry.answer).toHaveLength(60);
+    expect(entry.latencyMs).toBeUndefined();
+  });
+
+  it('retries a failed trace fetch once and degrades to an empty trail after two failures', async () => {
+    jest.useFakeTimers();
+    try {
+      const getTrace = jest
+        .fn()
+        .mockRejectedValueOnce(new Error('503'))
+        .mockResolvedValueOnce(traceResponse);
+      const flaky = queryMatrixTraces(
+        clientWith([scoredDoc({ trace_id: 'trace-1' })], getTrace) as never,
+        makeLog() as never,
+        aggregated as never
+      );
+      await jest.advanceTimersByTimeAsync(1000);
+      const traces = await flaky;
+      expect(getTrace).toHaveBeenCalledTimes(2);
+      expect(traces['model-x:direct:suite-1:example-1'].toolCount).toBe(3);
+
+      const failing = jest.fn().mockRejectedValue(new Error('down'));
+      const log = makeLog();
+      const degraded = queryMatrixTraces(
+        clientWith([scoredDoc({ trace_id: 'trace-1' })], failing) as never,
+        log as never,
+        aggregated as never
+      );
+      await jest.advanceTimersByTimeAsync(1000);
+      const degradedTraces = await degraded;
+      expect(failing).toHaveBeenCalledTimes(2);
+      expect(degradedTraces['model-x:direct:suite-1:example-1'].stepCount).toBe(0);
+      expect(log.info).toHaveBeenCalledWith(expect.stringContaining('Hydrated 0/1 traces'));
+      expect(log.info).toHaveBeenCalledWith(expect.stringContaining('(1 failed)'));
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+});

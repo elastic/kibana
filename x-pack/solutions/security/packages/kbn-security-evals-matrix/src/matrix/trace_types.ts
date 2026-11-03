@@ -39,6 +39,12 @@ export interface MatrixTraceEntry {
   stepCount?: number;
   /** Number of tool calls (cached for summary table). */
   toolCount?: number;
+  /** Input tokens summed over the model calls of the shown run (hydrated from the trace). */
+  inputTokens?: number;
+  /** Output tokens summed over the model calls of the shown run (hydrated from the trace). */
+  outputTokens?: number;
+  /** Wall-clock duration of the shown run in ms (root span of the trace). */
+  latencyMs?: number;
   /** Per-evaluator mean score for this example over its repetitions. */
   scores?: Record<string, number>;
   /** Number of repetitions aggregated into this entry's scores. */

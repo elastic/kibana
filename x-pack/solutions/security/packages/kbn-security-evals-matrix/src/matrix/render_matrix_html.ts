@@ -415,6 +415,19 @@ const renderSummaryTable = (matrix: Matrix): string => {
 };
 
 /** Worst-case spread across repetitions as a `±` badge; empty for single-rep cells. */
+const compactCount = (n: number): string =>
+  n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}k` : String(Math.round(n));
+
+/** `12.3k in / 450 out tokens`; empty unless the trace carried usage. */
+const tokensLabel = (trace?: { inputTokens?: number; outputTokens?: number }): string => {
+  const { inputTokens, outputTokens } = trace ?? {};
+  if (inputTokens === undefined && outputTokens === undefined) return '';
+  return `${compactCount(inputTokens ?? 0)} in / ${compactCount(outputTokens ?? 0)} out tokens`;
+};
+
+const formatLatency = (ms: number): string =>
+  ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${Math.round(ms)}ms`;
+
 const spreadLabel = (trace?: { spread?: Record<string, number> }): string => {
   const values = Object.values(trace?.spread ?? {});
   if (values.length === 0) {
@@ -540,6 +553,8 @@ const renderModelCard = (
                 spreadLabel(trace),
                 trace?.stepCount ? `${trace.stepCount} steps` : '',
                 trace?.toolCount ? `${trace.toolCount} tools` : '',
+                tokensLabel(trace),
+                trace?.latencyMs !== undefined ? formatLatency(trace.latencyMs) : '',
               ].filter(Boolean);
 
               let body = '';

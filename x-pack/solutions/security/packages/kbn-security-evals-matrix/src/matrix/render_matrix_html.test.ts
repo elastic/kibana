@@ -165,6 +165,35 @@ describe('renderMatrixHtml', () => {
     expect(html).toContain('🔍 Step trace');
   });
 
+  it('renders step, tool, token and latency counts in the trace card meta line', () => {
+    const traces: MatrixTraceData = {
+      'test-model:alert': {
+        question: 'What is this alert?',
+        toolTrail: ['security.security_labs_search'],
+        steps: [{ type: 'tool', toolId: 'security.security_labs_search' }],
+        stepCount: 1,
+        toolCount: 1,
+        inputTokens: 12345,
+        outputTokens: 678,
+        latencyMs: 16340.4,
+      },
+    };
+
+    const html = renderMatrixHtml(mockMatrix, mockConfig, {}, traces);
+    expect(html).toContain('12k in / 678 out tokens');
+    expect(html).toContain('16.3s');
+    expect(html).toContain('security.security_labs_search');
+  });
+
+  it('omits the token and latency parts when the trace carries none', () => {
+    const traces: MatrixTraceData = {
+      'test-model:alert': { question: 'q', stepCount: 0, toolCount: 0 },
+    };
+
+    const html = renderMatrixHtml(mockMatrix, mockConfig, {}, traces);
+    expect(html).not.toContain('out tokens');
+  });
+
   describe('untrusted model output in answers', () => {
     const renderAnswer = (answer: string) =>
       renderMatrixHtml(

@@ -10,6 +10,8 @@ import type { EvaluationScoreDocument } from '@kbn/evals-common';
 import type { MatrixEvalsClient } from './matrix_evals_client';
 import type { AggregatedModelScores } from './query_matrix_scores';
 import type { MatrixTraceData, MatrixTraceEntry, TraceStep } from './trace_types';
+import type { TraceSummary } from './summarize_trace_spans';
+import { summarizeTraceSpans } from './summarize_trace_spans';
 import { directTraceKey, traceKey } from './trace_types';
 import type { PathContract } from './trajectory_agreement';
 import { answersFromDocs, pathContractFromDocs, trailsFromDocs } from './trajectory_agreement';
@@ -66,7 +68,12 @@ const mapWithConcurrency = async <T, R>(
   return results;
 };
 
-const extractTraceFromScore = (score: EvaluationScoreDocument): MatrixTraceEntry => {
+const extractTraceFromScore = (
+  score: EvaluationScoreDocument,
+  summaries: TraceSummaries = new Map()
+): MatrixTraceEntry => {
+  const traceId = score.task?.trace_id;
+  const summary = traceId ? summaries.get(traceId) : undefined;
   const question = (score.example?.input as { question?: string } | null)?.question;
   const taskOutput = score.task?.output as
     | {
@@ -124,14 +131,53 @@ const extractTraceFromScore = (score: EvaluationScoreDocument): MatrixTraceEntry
     steps: steps.length > 0 ? steps : undefined,
     stepCount: steps.length,
     toolCount: toolTrail.length,
+    ...(summary?.inputTokens !== undefined ? { inputTokens: summary.inputTokens } : {}),
+    ...(summary?.outputTokens !== undefined ? { outputTokens: summary.outputTokens } : {}),
+    ...(summary?.latencyMs !== undefined ? { latencyMs: summary.latencyMs } : {}),
   };
 };
 
-/** Aborted runs can write partial docs with a null score or output; those are incomplete. */
+/**
+ * Aborted runs can write partial docs with a null score or output; those are incomplete.
+ * Current evals runs no longer persist `task.output`; a scored doc with a `task.trace_id`
+ * is complete because its steps are hydrated from the trace route.
+ */
 const isCompleteScore = (score: EvaluationScoreDocument): boolean => {
   if (score.evaluator?.score == null) return false;
-  return score.task?.output != null;
+  return score.task?.output != null || Boolean(score.task?.trace_id);
 };
+
+const TRACE_FETCH_CONCURRENCY = 8;
+
+/** True when a doc has no stored output but points at a trace we can fetch. */
+const needsTraceHydration = (score: EvaluationScoreDocument): boolean =>
+  score.evaluator?.score != null && score.task?.output == null && Boolean(score.task?.trace_id);
+
+type TraceSummaries = ReadonlyMap<string, TraceSummary | null>;
+
+/**
+ * Gives docs without a stored `task.output` a synthetic one carrying the hydrated tool
+ * steps so trail extraction (trace cards, reliability repTrails) works unchanged.
+ * Stored output always wins; answers stay empty because the trace holds no final message.
+ */
+const withHydratedOutput = (
+  scores: EvaluationScoreDocument[],
+  summaries: TraceSummaries
+): EvaluationScoreDocument[] =>
+  scores.map((score) => {
+    const traceId = score.task?.trace_id;
+    const summary = traceId && score.task?.output == null ? summaries.get(traceId) : undefined;
+    if (!summary || !score.task) return score;
+    return {
+      ...score,
+      task: {
+        ...score.task,
+        output: {
+          steps: summary.toolIds.map((toolId) => ({ type: 'tool_call', tool_id: toolId })),
+        },
+      },
+    };
+  });
 
 /** Per-evaluator mean score across one example's score documents. */
 export const exampleScoresByEvaluator = (
@@ -264,9 +310,10 @@ const processExampleBatch = (
    * a strict-policy suite reports cross-family judge agreement and prompt-card scores
    * derived from documents the matrix itself rejected.
    */
-  scoringPolicy?: ScoringPolicy
+  scoringPolicy?: ScoringPolicy,
+  summaries: TraceSummaries = new Map()
 ): boolean => {
-  const relevant = scores
+  const relevant = withHydratedOutput(scores, summaries)
     .filter((score) => score.task?.model?.id === modelId)
     .filter((score) => score.metadata?.execution_id === executionId)
     .sort((a, b) => {
@@ -302,7 +349,7 @@ const processExampleBatch = (
     }
   }
 
-  const entry = extractTraceFromScore(relevant[0]);
+  const entry = extractTraceFromScore(relevant[0], summaries);
   entry.scores = exampleScoresByEvaluator(admitted);
   const spread = exampleSpreadByEvaluator(admitted);
   if (Object.keys(spread).length > 0) {
@@ -353,7 +400,7 @@ const processExampleBatch = (
   if (!complete) {
     const firstComplete = relevant.find(isCompleteScore);
     if (firstComplete) {
-      const fallbackEntry = extractTraceFromScore(firstComplete);
+      const fallbackEntry = extractTraceFromScore(firstComplete, summaries);
       fallbackEntry.scores = exampleScoresByEvaluator(admitted.filter(isCompleteScore));
       const fid = firstComplete.example?.id;
       if (fid) {
@@ -652,6 +699,58 @@ export const queryMatrixTraces = async (
     );
   }
 
+  // Current evals runs persist `task.trace_id` but no `task.output`; hydrate tool trails,
+  // tokens and latency from the trace route. Stored output (incl. --trace-cache) wins.
+  const traceIds = new Set<string>();
+  for (const ref of runRefs) {
+    for (const exampleId of ref.exampleIds) {
+      for (const score of exampleScores.get(cacheKey(ref, exampleId)) ?? []) {
+        const traceId = score.task?.trace_id;
+        if (
+          traceId &&
+          needsTraceHydration(score) &&
+          score.task?.model?.id === ref.modelId &&
+          score.metadata?.execution_id === ref.executionId
+        ) {
+          traceIds.add(traceId);
+        }
+      }
+    }
+  }
+
+  const summaries = new Map<string, TraceSummary | null>();
+  if (traceIds.size > 0) {
+    const fetchTrace = async (traceId: string): Promise<void> => {
+      // One retry for transient 502/503s, as for example scores.
+      const attempt = async (retriesLeft: number): Promise<TraceSummary> => {
+        try {
+          return summarizeTraceSpans(await evalsClient.getTrace(traceId));
+        } catch (error) {
+          if (retriesLeft === 0) throw error;
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          return attempt(retriesLeft - 1);
+        }
+      };
+      try {
+        summaries.set(traceId, await attempt(1));
+      } catch (error) {
+        log.debug(
+          `Trace ${traceId} could not be fetched: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        summaries.set(traceId, null);
+      }
+    };
+    await mapWithConcurrency([...traceIds], TRACE_FETCH_CONCURRENCY, fetchTrace);
+    const failed = [...summaries.values()].filter((summary) => summary === null).length;
+    log.info(
+      `Hydrated ${summaries.size - failed}/${
+        summaries.size
+      } traces from the evals trace route (${failed} failed)`
+    );
+  }
+
   // Derived from the synthetic `prefix:*` dataset ids so trace bucketing matches score bucketing.
   const examplePrefixes = new Set<string>();
   for (const modelScores of aggregated) {
@@ -679,7 +778,8 @@ export const queryMatrixTraces = async (
         traces,
         examplePrefixes,
         judgeVerdictsOut,
-        scoringBySuite?.[ref.suiteId] ?? globalScoring
+        scoringBySuite?.[ref.suiteId] ?? globalScoring,
+        summaries
       );
       if (!ok) missing.push(exampleId);
     }
