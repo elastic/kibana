@@ -446,7 +446,7 @@
   ],
   "tokenCost": {},
   "provenance": {
-    "fixtureFingerprint": "sha256:cf9c1d22 (env_seeds.ts + persona_matrix_tools_seed.ts, persona-matrix-env-truth worktree)",
+    "fixtureFingerprint": "sha256:cf9c1d22 (historical: fixture set that produced the recorded scores; its env seeding has since been replaced by chrysalis_seed.ts, tools by persona_matrix_tools_seed.ts)",
     "methodologyNotes": [
       "ExpectedToolCalled is all-or-nothing over the FULL declared expectedTools set since 2026-08-21 (previously only expectedTools[0] was checked). Categories whose skill contract changed (e.g. threat-hunting requiring generate_esql before execute_esql) score lower than in pre-fix matrices for identical traces.",
       "FinalAnswerPresent evaluator added 2026-08-22: scores 0 when a run ends on a tool call with no user-facing final message (observed in 62% of detection-rule-edit runs). Folded into every cell mean.",
