@@ -330,7 +330,6 @@ describe('nightshift-investigations scout hook', () => {
           NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: 'https://remote.example.com',
           NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: 'remote-key',
           NIGHTSHIFT_SANDBOX_READABLE_INDICES: 'remote:logs-*',
-          NIGHTSHIFT_SANDBOX_LOCAL_INDICES: '',
           NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: Path.join(__dirname, 'kibana.telemetry.yml'),
         },
       });
@@ -349,7 +348,6 @@ describe('nightshift-investigations scout hook', () => {
         expect(xpack.nightshift_investigations.sandbox).toEqual({
           telemetry_connector_id: 'nightshift-evals-telemetry',
           telemetry_readable_indices: 'remote:logs-*',
-          telemetry_local_indices: '',
         });
       } finally {
         process.env = originalEnv;

@@ -120,10 +120,9 @@ if [[ -z "$telemetry_url$telemetry_key" ]]; then
   telemetry_key="${NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY:-}"
 fi
 readable_indices="$(resolve NIGHTSHIFT_SANDBOX_READABLE_INDICES '.nightshift.telemetry.readableIndices')"
-local_indices="$(resolve NIGHTSHIFT_SANDBOX_LOCAL_INDICES '.nightshift.telemetry.localIndices')"
 
 telemetry_config=''
-if [[ -n "$telemetry_url$telemetry_key$readable_indices$local_indices" ]]; then
+if [[ -n "$telemetry_url$telemetry_key$readable_indices" ]]; then
   if [[ -z "$telemetry_url" || -z "$telemetry_key" ]]; then
     echo "nightshift-investigations scout hook: remote telemetry requires both URL and API key" \
       "from one source (nightshift.telemetry or NIGHTSHIFT_SANDBOX_*)" >&2
@@ -202,8 +201,7 @@ if [[ "$named_targets" != '{}' || -n "$default_telemetry_target" && -n "$api_key
         } + (if $ENV.HOOK_DEFAULT_TARGET != "" then {default_telemetry_target: $ENV.HOOK_DEFAULT_TARGET} else {} end)
         + (if $ENV.HOOK_HAS_LEGACY != "" then {
           telemetry_connector_id: "nightshift-evals-telemetry",
-          telemetry_readable_indices: "${NIGHTSHIFT_SANDBOX_READABLE_INDICES}",
-          telemetry_local_indices: "${NIGHTSHIFT_SANDBOX_LOCAL_INDICES}"
+          telemetry_readable_indices: "${NIGHTSHIFT_SANDBOX_READABLE_INDICES}"
         } else {} end))
       }')"
   config_hash="$(printf '%s' "$generated_config" | shasum -a 256)"
@@ -255,7 +253,6 @@ HOOK_HOST="$host" \
   HOOK_TELEMETRY_URL="$telemetry_url" \
   HOOK_TELEMETRY_KEY="$telemetry_key" \
   HOOK_READABLE_INDICES="$readable_indices" \
-  HOOK_LOCAL_INDICES="$local_indices" \
   HOOK_TELEMETRY_CONFIG="$telemetry_config" \
   HOOK_NAMED_TARGETS="$named_targets" \
   HOOK_DEFAULT_TARGET="$default_telemetry_target" \
@@ -276,8 +273,7 @@ HOOK_HOST="$host" \
     } + (if $ENV.HOOK_TELEMETRY_URL != "" then {
       NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: $ENV.HOOK_TELEMETRY_URL,
       NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: $ENV.HOOK_TELEMETRY_KEY,
-      NIGHTSHIFT_SANDBOX_READABLE_INDICES: $ENV.HOOK_READABLE_INDICES,
-      NIGHTSHIFT_SANDBOX_LOCAL_INDICES: $ENV.HOOK_LOCAL_INDICES
+      NIGHTSHIFT_SANDBOX_READABLE_INDICES: $ENV.HOOK_READABLE_INDICES
     } else {} end) + (if $ENV.HOOK_NAMED_TARGETS != "{}" then
       ($ENV.HOOK_NAMED_TARGETS | fromjson | to_entries | sort_by(.key) | to_entries |
         map(.key as $index | .value.value as $target | [

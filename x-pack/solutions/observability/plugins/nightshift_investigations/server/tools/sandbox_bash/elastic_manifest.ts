@@ -33,45 +33,18 @@ const DEFAULT_REMOTE_GUIDANCE = [
   'with the workflow below rather than assuming names.',
 ].join('\n');
 
-/**
- * Operator text says where to look, never what the data contains. Local indices (stored in the
- * queried cluster, no remote prefix) and remote clusters (`remote:index`) get separate sections
- * when both are configured, so a question naming a data stream is not answered from a same-named
- * remote one.
- */
-const renderDataSources = ({
-  readableIndices,
-  localIndices,
-}: {
-  readableIndices?: string;
-  localIndices?: string;
-}): string[] => {
-  const remote = readableIndices?.trim() || DEFAULT_REMOTE_GUIDANCE;
-  const local = localIndices?.trim();
-  return [
-    ...(local
-      ? [
-          '## Local indices',
-          '',
-          'Stored in the queried cluster itself: query them without a remote prefix. A data stream',
-          'named without a remote refers to the local one; a remote can hold a stream with the same',
-          'name and different data.',
-          '',
-          local,
-          '',
-        ]
-      : []),
-    '## Remote clusters',
-    '',
-    remote,
-    '',
-  ];
-};
+/** Operator text says where to look, never what the data contains. */
+const renderRemoteClusters = (readableIndices?: string): string[] => [
+  '## Remote clusters',
+  '',
+  readableIndices?.trim() || DEFAULT_REMOTE_GUIDANCE,
+  '',
+];
 
 /** How to query cluster telemetry from the sandbox. Names env vars; never embeds secrets. */
 export const renderElasticManifest = (
   credentials: ElasticCredentials,
-  { readableIndices, localIndices }: { readableIndices?: string; localIndices?: string } = {}
+  { readableIndices }: { readableIndices?: string } = {}
 ): string => {
   const { urlVar, authVar, authDescription, authHeader, parameterName, parameter } =
     describeCredentials(credentials);
@@ -89,7 +62,7 @@ export const renderElasticManifest = (
     'Reference those variables directly and never hard-code their values. A command that omits',
     `\`${parameterName}\` gets no credentials and cannot reach Elasticsearch.`,
     '',
-    ...renderDataSources({ readableIndices, localIndices }),
+    ...renderRemoteClusters(readableIndices),
     '## Workflow',
     '',
     'This document says where and how to look, not what the data contains. Every name, number or',
@@ -166,13 +139,11 @@ export const writeElasticManifest = async ({
   session,
   credentials,
   readableIndices,
-  localIndices,
   logger,
 }: {
   session: SandboxSession;
   credentials: ElasticCredentials;
   readableIndices?: string;
-  localIndices?: string;
   logger: Logger;
 }): Promise<void> => {
   logger.debug(`Writing Elasticsearch manifest`);
@@ -180,10 +151,7 @@ export const writeElasticManifest = async ({
   const [result] = await session.writeFiles([
     {
       path: ELASTIC_MANIFEST_PATH,
-      content: Buffer.from(
-        renderElasticManifest(credentials, { readableIndices, localIndices }),
-        'utf8'
-      ),
+      content: Buffer.from(renderElasticManifest(credentials, { readableIndices }), 'utf8'),
     },
   ]);
   if (!result?.success) throw new Error('Failed to write sandbox telemetry guidance');

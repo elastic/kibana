@@ -12,7 +12,6 @@ import { telemetryTargetNameSchema } from '../common/telemetry_targets';
 export interface TelemetryTarget {
   connectorId?: string;
   readableIndices?: string;
-  localIndices?: string;
 }
 
 export const resolveTelemetryTarget = (
@@ -24,7 +23,6 @@ export const resolveTelemetryTarget = (
     return {
       connectorId: sandbox?.telemetry_connector_id,
       readableIndices: sandbox?.telemetry_readable_indices,
-      localIndices: sandbox?.telemetry_local_indices,
     };
   }
   if (target === 'none') return {};
@@ -35,11 +33,7 @@ export const resolveTelemetryTarget = (
     ? sandbox?.telemetry_targets[target]
     : undefined;
   if (!configured) throw badRequest(`Unknown telemetry target: ${target}`);
-  return {
-    connectorId: configured.connector_id,
-    readableIndices: configured.readable_indices,
-    localIndices: configured.local_indices,
-  };
+  return { connectorId: configured.connector_id, readableIndices: configured.readable_indices };
 };
 
 export const getTelemetryTargets = (
@@ -50,15 +44,11 @@ export const getTelemetryTargets = (
         {
           connectorId: sandbox.telemetry_connector_id,
           readableIndices: sandbox.telemetry_readable_indices,
-          localIndices: sandbox.telemetry_local_indices,
         },
       ]
     : []),
-  ...Object.values(sandbox?.telemetry_targets ?? {}).map(
-    ({ connector_id, readable_indices, local_indices }) => ({
-      connectorId: connector_id,
-      readableIndices: readable_indices,
-      localIndices: local_indices,
-    })
-  ),
+  ...Object.values(sandbox?.telemetry_targets ?? {}).map(({ connector_id, readable_indices }) => ({
+    connectorId: connector_id,
+    readableIndices: readable_indices,
+  })),
 ];

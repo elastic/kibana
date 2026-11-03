@@ -28,7 +28,7 @@ describe('renderElasticManifest', () => {
     expect(content).toContain('cross-cluster search (CCS)');
     expect(content).toContain('`<remote>:<index>`');
     expect(content).toContain('`GET /_remote/info`');
-    expect(content).not.toContain('## Local indices');
+    expect(content).not.toContain('Local indices');
     expect(content).not.toContain('`logs-*`, `metrics-*`, `traces-*`');
     expect(content).not.toContain('logging-');
   });
@@ -40,20 +40,6 @@ describe('renderElasticManifest', () => {
 
     expect(content).toContain('Read `logging-region:logs-service-*`');
     expect(content).not.toContain('cross-cluster search (CCS)');
-  });
-
-  it('renders local indices before remote clusters when local guidance is set', () => {
-    const content = renderElasticManifest(connector('remote-telemetry'), {
-      readableIndices: 'Read `logging-region:logs-*`.',
-      localIndices: '- `traces-apm.rum-default`: browser traces',
-    });
-
-    expect(content).toContain('## Local indices');
-    expect(content.indexOf('## Local indices')).toBeLessThan(content.indexOf('## Remote clusters'));
-    expect(content).toContain('- `traces-apm.rum-default`: browser traces');
-    expect(content.indexOf('Read `logging-region:logs-*`.')).toBeGreaterThan(
-      content.indexOf('## Remote clusters')
-    );
   });
 
   it('tells the agent to verify every reported figure with a query', () => {

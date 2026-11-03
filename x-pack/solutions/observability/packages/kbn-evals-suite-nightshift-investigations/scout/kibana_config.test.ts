@@ -30,7 +30,6 @@ it('resolves credentials from the environment and preserves other preconfigured 
     NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: 'https://telemetry.example.com',
     NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: 'remote-key',
     NIGHTSHIFT_SANDBOX_READABLE_INDICES: 'remote:logs-*',
-    NIGHTSHIFT_SANDBOX_LOCAL_INDICES: 'local-streams',
   };
   try {
     const config = getConfigFromFiles([
@@ -64,7 +63,6 @@ it('resolves credentials from the environment and preserves other preconfigured 
     expect(config.xpack.nightshift_investigations.sandbox).toEqual({
       telemetry_connector_id: 'nightshift-evals-telemetry',
       telemetry_readable_indices: 'remote:logs-*',
-      telemetry_local_indices: 'local-streams',
     });
     expect(
       schema

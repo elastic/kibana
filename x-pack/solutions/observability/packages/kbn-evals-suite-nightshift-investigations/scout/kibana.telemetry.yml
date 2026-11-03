@@ -14,4 +14,3 @@ xpack.actions.preconfigured.nightshift-evals-telemetry:
 xpack.nightshift_investigations.sandbox:
   telemetry_connector_id: nightshift-evals-telemetry
   telemetry_readable_indices: ${NIGHTSHIFT_SANDBOX_READABLE_INDICES}
-  telemetry_local_indices: ${NIGHTSHIFT_SANDBOX_LOCAL_INDICES}

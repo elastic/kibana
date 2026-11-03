@@ -30,7 +30,6 @@ export const createSandboxWorkspaceManager = ({
   getDeps,
   telemetryConnectorId,
   telemetryReadableIndices,
-  telemetryLocalIndices,
   telemetryTargets,
   getTelemetryTarget,
   logger,
@@ -39,7 +38,6 @@ export const createSandboxWorkspaceManager = ({
   /** When set, `/workspace/.connector-docs/elastic.md` is (re-)seeded alongside the connector manifest. */
   telemetryConnectorId?: string;
   telemetryReadableIndices?: string;
-  telemetryLocalIndices?: string;
   telemetryTargets?: TelemetryTarget[];
   getTelemetryTarget?: (callContext: SandboxCallContext) => Promise<TelemetryTarget | undefined>;
   logger: Logger;
@@ -47,11 +45,7 @@ export const createSandboxWorkspaceManager = ({
   const lastWorkspaceKeys = new Map<SandboxSession, string>();
 
   const configuredTargets = telemetryTargets ?? [
-    {
-      connectorId: telemetryConnectorId,
-      readableIndices: telemetryReadableIndices,
-      localIndices: telemetryLocalIndices,
-    },
+    { connectorId: telemetryConnectorId, readableIndices: telemetryReadableIndices },
   ];
   const telemetryConnectorIds = new Set(configuredTargets.map(({ connectorId }) => connectorId));
   const callTargets = new WeakMap<SandboxCallContext, Promise<TelemetryTarget | undefined>>();
@@ -83,11 +77,7 @@ export const createSandboxWorkspaceManager = ({
           : undefined;
       const defaultTarget =
         telemetryConnectorId && callContext.allowedConnectorIds.includes(telemetryConnectorId)
-          ? {
-              connectorId: telemetryConnectorId,
-              readableIndices: telemetryReadableIndices,
-              localIndices: telemetryLocalIndices,
-            }
+          ? { connectorId: telemetryConnectorId, readableIndices: telemetryReadableIndices }
           : undefined;
       return boundTarget ?? inferredTarget ?? defaultTarget;
     })();
@@ -110,7 +100,6 @@ export const createSandboxWorkspaceManager = ({
       const selected = await prepareCallContext(callContext);
       const selectedConnectorId = selected?.connectorId;
       const selectedReadableIndices = selected?.readableIndices;
-      const selectedLocalIndices = selected?.localIndices;
       const getActionsClient = actions
         ? (req: KibanaRequest) => actions.getActionsClientWithRequest(req)
         : undefined;
@@ -125,7 +114,6 @@ export const createSandboxWorkspaceManager = ({
         canUseTelemetry,
         selectedConnectorId,
         selectedReadableIndices,
-        selectedLocalIndices,
       });
       const lastKey = lastWorkspaceKeys.get(session);
       if (!session.isReset && lastKey === currentKey) {
@@ -166,7 +154,6 @@ export const createSandboxWorkspaceManager = ({
             session,
             credentials: { kind: 'connector', connectorId: selectedConnectorId },
             readableIndices: selectedReadableIndices,
-            localIndices: selectedLocalIndices,
             logger,
           });
         }
