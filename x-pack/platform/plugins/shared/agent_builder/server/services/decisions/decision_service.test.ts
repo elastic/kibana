@@ -18,7 +18,13 @@ const questions: Record<string, DecisionQuestion> = {
 
 const input = 'secret conversation text';
 
-const setup = ({ inferenceId }: { inferenceId?: string } = {}) => {
+const setup = ({
+  inferenceId,
+  openRouter,
+}: {
+  inferenceId?: string;
+  openRouter?: { apiKey: string; model: string; url: string };
+} = {}) => {
   const logger = loggingSystemMock.createLogger();
   const elasticsearch = elasticsearchServiceMock.createStart();
   const scopedClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -31,7 +37,7 @@ const setup = ({ inferenceId }: { inferenceId?: string } = {}) => {
   const service = createDecisionService({
     logger,
     elasticsearch,
-    config: { inferenceId, triggerThreshold: 0.5, timeoutMs: 2000 },
+    config: { inferenceId, openRouter, triggerThreshold: 0.5, timeoutMs: 2000 },
   });
 
   return { service, logger, transportRequest, scopedClient, request };
@@ -71,7 +77,7 @@ describe('createDecisionService', () => {
     const result = await service.decide({ request, input, questions });
 
     expect(transportRequest.mock.calls[0][0]).toEqual(
-      expect.objectContaining({ method: 'GET', path: '/_inference/decision' })
+      expect.objectContaining({ method: 'GET', path: '/_inference/decision/_all' })
     );
     expect(transportRequest.mock.calls[1][0]).toEqual(
       expect.objectContaining({ method: 'POST', path: '/_inference/decision/.jev-1.13-decision' })
@@ -210,6 +216,33 @@ describe('createDecisionService', () => {
     await pending;
 
     expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('asks OpenRouter instead of Elasticsearch when openRouter is configured', async () => {
+    const { service, transportRequest, request } = setup({
+      openRouter: {
+        apiKey: 'test-key',
+        model: 'typesafe/jev-1.13',
+        url: 'https://openrouter.test',
+      },
+    });
+    const fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ answers: { should_respond: { type: 'noul', noul: 0.2 } } }), {
+        status: 200,
+      })
+    );
+
+    const result = await service.decide({ request, input, questions });
+
+    expect(result).toEqual({
+      status: 'decided',
+      inferenceId: 'openrouter:typesafe/jev-1.13',
+      answers: { should_respond: { type: 'predicate', probability: 0.2 } },
+    });
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(transportRequest).not.toHaveBeenCalled();
+
+    fetchSpy.mockRestore();
   });
 
   it('does not log the input text', async () => {

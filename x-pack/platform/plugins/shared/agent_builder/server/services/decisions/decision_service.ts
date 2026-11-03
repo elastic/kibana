@@ -10,6 +10,7 @@ import type { DecideParams, DecideResult, DecisionsStart } from '@kbn/agent-buil
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
 import type { AgentBuilderConfig } from '../../config';
 import { parseDecisionResponse } from './parse_decision_response';
+import { decideWithOpenRouter } from './openrouter_decide';
 
 interface DecisionEndpointsResponse {
   endpoints?: Array<{ inference_id: string }>;
@@ -33,7 +34,7 @@ const resolveInferenceId = async ({
   }
 
   const { endpoints = [] } = await esClient.transport.request<DecisionEndpointsResponse>(
-    { method: 'GET', path: '/_inference/decision' },
+    { method: 'GET', path: '/_inference/decision/_all' },
     { signal }
   );
 
@@ -106,6 +107,24 @@ export const createDecisionService = ({
     const startedAt = Date.now();
 
     const run = async (): Promise<DecideResult> => {
+      if (config.openRouter) {
+        const answers = await decideWithOpenRouter({
+          config: config.openRouter,
+          input,
+          questions,
+          signal: controller.signal,
+        });
+
+        logger.debug(
+          () =>
+            `Decision from OpenRouter [${config.openRouter?.model}] in ${
+              Date.now() - startedAt
+            }ms: ${JSON.stringify(answers)}`
+        );
+
+        return { status: 'decided', answers, inferenceId: `openrouter:${config.openRouter.model}` };
+      }
+
       const esClient = elasticsearch.client.asScoped(request).asCurrentUser;
 
       const inferenceId = await resolveInferenceId({

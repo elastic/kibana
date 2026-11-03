@@ -41,6 +41,17 @@ export const configSchema = schema.object({
     inferenceId: schema.maybe(schema.string({ minLength: 1, maxLength: 512 })),
     triggerThreshold: schema.number({ defaultValue: 0.5, min: 0, max: 1 }),
     timeoutMs: schema.number({ defaultValue: 2000, min: 100, max: 30000 }),
+    /**
+     * Temporary dev path: ask OpenRouter's Decisions API directly instead of Elasticsearch, until
+     * decision models are served by EIS. To be removed once they are.
+     */
+    openRouter: schema.maybe(
+      schema.object({
+        apiKey: schema.string({ minLength: 1, maxLength: 512 }),
+        model: schema.string({ defaultValue: 'typesafe/jev-1.13', minLength: 1, maxLength: 256 }),
+        url: schema.uri({ scheme: ['https'], defaultValue: 'https://openrouter.ai/api/v1' }),
+      })
+    ),
   }),
   /**
    * Internal-only Deductive AI integration. `register` gates whether the built-in
