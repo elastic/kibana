@@ -334,6 +334,72 @@ describe('createSandboxWorkspaceManager', () => {
       expect(mockWriteElasticManifest).not.toHaveBeenCalled();
     });
 
+    it('lists every telemetry target for the assistant and seeds no single source without a legacy default', async () => {
+      const named = createSandboxWorkspaceManager({
+        getDeps: () => ({ actions }),
+        telemetryTargets: [{ connectorId: 'c0' }, { connectorId: 'orca' }],
+        // As in the plugin: only the investigator has a conversation-bound target.
+        getTelemetryTarget: async () => undefined,
+        logger,
+      });
+      const callContext = {
+        ...createCallContext(['c0', 'orca', 'github']),
+        agentId: 'nightshift.assistant',
+      };
+      const session = createSessionMock(false);
+
+      await named.ensureWorkspaceReady({ session, callContext });
+
+      expect(callContext.allowedConnectorIds).toEqual(['c0', 'orca', 'github']);
+      expect(mockWriteConnectorManifest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          callContext: expect.objectContaining({ allowedConnectorIds: ['c0', 'orca', 'github'] }),
+        })
+      );
+      expect(mockWriteElasticManifest).not.toHaveBeenCalled();
+      expect(session.writeFiles).toHaveBeenCalledWith([
+        {
+          path: '/workspace/.connector-docs/elastic.md',
+          content: Buffer.from('No telemetry connector is available.\n'),
+        },
+      ]);
+    });
+
+    it('seeds the legacy telemetry connector for the assistant alongside named targets', async () => {
+      const baseConnector = actions.inMemoryConnectors[0];
+      actions.inMemoryConnectors = ['legacy', 'c0', 'orca'].map((id) => ({
+        ...baseConnector,
+        id,
+      }));
+      const named = createSandboxWorkspaceManager({
+        getDeps: () => ({ actions }),
+        telemetryConnectorId: 'legacy',
+        telemetryReadableIndices: 'legacy:logs-*',
+        telemetryTargets: [
+          { connectorId: 'legacy', readableIndices: 'legacy:logs-*' },
+          { connectorId: 'c0', readableIndices: 'c0:logs-*' },
+          { connectorId: 'orca', readableIndices: 'orca:logs-*' },
+        ],
+        getTelemetryTarget: async () => undefined,
+        logger,
+      });
+      const callContext = {
+        ...createCallContext(['legacy', 'c0', 'orca']),
+        agentId: 'nightshift.assistant',
+      };
+
+      await named.ensureWorkspaceReady({ session: createSessionMock(false), callContext });
+
+      // The assistant keeps every telemetry connector; only the guidance defaults to legacy.
+      expect(callContext.allowedConnectorIds).toEqual(['legacy', 'c0', 'orca']);
+      expect(mockWriteElasticManifest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          credentials: { kind: 'connector', connectorId: 'legacy' },
+          readableIndices: 'legacy:logs-*',
+        })
+      );
+    });
+
     it('scopes concurrent investigations that share the single agent to their conversation target', async () => {
       const baseConnector = actions.inMemoryConnectors[0];
       actions.inMemoryConnectors = ['c0', 'orca'].map((id) => ({ ...baseConnector, id }));
