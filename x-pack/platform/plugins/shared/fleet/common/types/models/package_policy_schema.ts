@@ -856,6 +856,7 @@ export const PackagePolicySchema = schema.object(
           meta: {
             description:
               'ID of the cloud onboarding instance that manages this package policy. Set by Fleet, read-only.',
+            availability: { since: '9.7.0', stability: 'experimental' },
           },
         })
       )
@@ -975,7 +976,8 @@ export const OnboardingDeploymentIdQuerySchema = schema.maybe(
     maxLength: 256,
     meta: {
       description:
-        'ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it.',
+        'ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.',
+      availability: { since: '9.7.0', stability: 'experimental' },
     },
   })
 );

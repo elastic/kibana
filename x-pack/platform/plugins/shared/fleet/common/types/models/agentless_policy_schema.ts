@@ -117,6 +117,7 @@ export const AgentlessPolicySchema = schema.object(
         meta: {
           description:
             'ID of the cloud onboarding instance that manages this managed integration. Set by Fleet, read-only.',
+          availability: { since: '9.7.0', stability: 'experimental' },
         },
       })
     ),

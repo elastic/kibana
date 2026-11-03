@@ -111,6 +111,7 @@ describe('managed integrations handlers: policies managed by a cloud onboarding 
 
     expect(agentlessService.bulkUpgradeAgentlessPolicies).toHaveBeenCalledWith(
       ['managed', 'other'],
+      expect.anything(),
       expect.anything()
     );
   });

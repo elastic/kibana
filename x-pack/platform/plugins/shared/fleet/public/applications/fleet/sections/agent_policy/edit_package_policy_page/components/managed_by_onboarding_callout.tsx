@@ -34,7 +34,7 @@ export const ManagedByOnboardingCallout: React.FunctionComponent<{
         onboardingInstanceUrl ? (
           <FormattedMessage
             id="xpack.fleet.editPackagePolicy.managedByOnboardingDescription"
-            defaultMessage="It was created by an AWS onboarding instance and can only be changed or deleted from there."
+            defaultMessage="You can only change or delete this integration policy from the AWS onboarding instance that manages it."
           />
         ) : (
           ONBOARDING_DISABLED_MANAGED_POLICY_MESSAGE

@@ -19,7 +19,7 @@ export const ONBOARDING_DISABLED_MANAGED_POLICY_MESSAGE = i18n.translate(
   'xpack.fleet.onboardingOverride.onboardingDisabledManagedPolicyMessage',
   {
     defaultMessage:
-      'This integration policy is managed by AWS onboarding, which is turned off. It can only be changed once AWS onboarding is turned on again.',
+      "AWS onboarding is turned off, so you can't edit or delete this integration policy. You can edit it again when AWS onboarding is turned back on.",
   }
 );
 

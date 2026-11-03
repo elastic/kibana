@@ -405,7 +405,7 @@ describe('edit package policy page', () => {
     await waitFor(() => {
       expect(
         renderResult.getByTestId('editPackagePolicyManagedByOnboardingCallout')
-      ).toHaveTextContent('which is turned off');
+      ).toHaveTextContent('AWS onboarding is turned off');
     });
     expect(
       renderResult.queryByTestId('editPackagePolicyManageInOnboardingButton')
