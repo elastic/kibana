@@ -76,27 +76,9 @@ const getEdgeDisplayLabel = (edge: GraphEdge): string => {
   return edge.label ? `${relation} (${edge.label})` : relation;
 };
 
-/** A note that `count` more items aren't shown, or nothing when all are. */
-const toMoreNote = (count: number): SurfaceNode[] =>
-  count > 0
-    ? [
-        {
-          type: 'context',
-          items: [
-            {
-              text: i18n.translate('xpack.agentBuilderPlatform.attachments.graph.surface.more', {
-                defaultMessage: '{count, plural, one {# more not shown} other {# more not shown}}',
-                values: { count },
-              }),
-            },
-          ],
-        },
-      ]
-    : [];
-
 /**
  * The graph as a table of its relationships, by node label, followed by the nodes that have none.
- * Long graphs show their first rows and count the rest.
+ * Long graphs show their first rows, and the table counts the rest.
  */
 const toGraphSurfaceComposition = ({
   title,
@@ -144,8 +126,8 @@ const toGraphSurfaceComposition = ({
                 : []),
               toCell(target),
             ]),
+            ...(edges.length > shownEdges.length ? { totalRows: edges.length } : {}),
           },
-          ...toMoreNote(edges.length - shownEdges.length),
         ]
       : [];
 
@@ -172,8 +154,8 @@ const toGraphSurfaceComposition = ({
               },
             ],
             rows: shownNodes.map(({ id }) => [toCell(id)]),
+            ...(unconnected.length > shownNodes.length ? { totalRows: unconnected.length } : {}),
           },
-          ...toMoreNote(unconnected.length - shownNodes.length),
         ]
       : [];
 

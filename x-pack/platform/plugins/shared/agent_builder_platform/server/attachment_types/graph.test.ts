@@ -80,17 +80,19 @@ describe('graph attachment type', () => {
 
       const composition = await toComposition({ nodes, edges });
 
-      expect(composition?.body.map(({ type }) => type)).toEqual([
-        'table',
-        'context',
-        'table',
-        'context',
+      expect(composition?.body).toEqual([
+        expect.objectContaining({ type: 'table', totalRows: 119 }),
+        expect.objectContaining({ type: 'table', totalRows: 1880 }),
       ]);
-      expect(JSON.stringify(composition?.body[1])).toContain('69 more not shown');
+      expect(
+        composition?.body.map((bodyNode) => bodyNode.type === 'table' && bodyNode.rows.length)
+      ).toEqual([50, 50]);
 
-      const { valid, errors } = await renderSurface(composition);
+      const { valid, errors, slack } = await renderSurface(composition);
       expect(errors).toEqual([]);
       expect(valid).toBe(true);
+      expect(slack).toMatch(/Showing \d+ of 119 rows/);
+      expect(slack).toMatch(/Showing \d+ of 1,880 rows/);
     });
   });
 });
