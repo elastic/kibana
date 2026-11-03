@@ -39,19 +39,18 @@ const CAPABILITIES_WITHOUT_CURRENT_COUNTERPART: string[] = [ALERTS_UI_UPDATE_DEP
 const GLOBAL_ARTIFACT_CAPABILITY = 'writeGlobalArtifacts';
 
 /**
- * The reverse direction has two sanctioned widenings, both of which exist to preserve what a
- * deprecated privilege already reached. Each is deliberately narrow: a capability is tolerated
- * only on the exact versions and privileges the mapping targets.
+ * The reverse direction has sanctioned widenings, all of which preserve reach a deprecated
+ * privilege already had. Each is deliberately narrow: a capability is tolerated only on the exact
+ * versions and privileges its mapping targets, and the ESS-only ones stay strict on serverless so
+ * a genuine widening there is still caught.
  *
- * Global artifact management. Before `siemV3` gave it a sub-feature of its own, each artifact
- * privilege carried the capability directly (`v1_features` and `v2_features`
- * `product_feature_config.ts`), and on ESS `addGlobalArtifactManagementToMinimalAll` extends the
- * same reach to `minimal_all`.
+ * Global artifact management, on both deployments. Before `siemV3` gave it a sub-feature of its
+ * own, each artifact privilege carried the capability directly — see `v1_features` and
+ * `v2_features` `product_feature_config.ts`.
  */
 const GLOBAL_ARTIFACT_FEATURE_IDS: string[] = [SECURITY_FEATURE_ID_V1, SECURITY_FEATURE_ID_V2];
 const GLOBAL_ARTIFACT_PRIVILEGES: string[] = [
   'all',
-  'minimal_all',
   'blocklist_all',
   'endpoint_exceptions_all',
   'event_filters_all',
@@ -60,37 +59,51 @@ const GLOBAL_ARTIFACT_PRIVILEGES: string[] = [
 ];
 
 /**
- * Endpoint exceptions. ESS never shipped an Endpoint Exceptions sub-feature privilege before
- * `siemV4`; the capability lived in the top-level `read` and `all` and their `minimal_` variants.
- * `security_solution_ess` `product_features_extensions.ts` maps those privileges onto the current
- * sub-feature so the reach survives, leaving the deprecated side without a `ui:` counterpart of
- * its own. Serverless has the sub-feature, so these entries never match there.
+ * On ESS only, `addGlobalArtifactManagementToMinimalAll` extends that same reach to `minimal_all`.
  */
-const ENDPOINT_EXCEPTION_FEATURE_IDS: string[] = [
+const ESS_GLOBAL_ARTIFACT_PRIVILEGES: string[] = ['minimal_all'];
+
+/**
+ * Endpoint exceptions, on ESS only. ESS never shipped an Endpoint Exceptions sub-feature privilege
+ * before `siemV4`; the capability lived in the top-level `read` and `all` and their `minimal_`
+ * variants. `security_solution_ess` `product_features_extensions.ts` maps those privileges onto
+ * the current sub-feature so the reach survives, leaving the deprecated side without a `ui:`
+ * counterpart of its own. Serverless has the sub-feature and applies no such mapping.
+ */
+const ESS_ENDPOINT_EXCEPTION_FEATURE_IDS: string[] = [
   SECURITY_FEATURE_ID_V1,
   SECURITY_FEATURE_ID_V2,
   SECURITY_FEATURE_ID_V3,
 ];
-const ENDPOINT_EXCEPTION_PRIVILEGES: Record<string, string[]> = {
+const ESS_ENDPOINT_EXCEPTION_PRIVILEGES: Record<string, string[]> = {
   showEndpointExceptions: ['all', 'read', 'minimal_all', 'minimal_read'],
   crudEndpointExceptions: ['all', 'minimal_all'],
 };
 
 const isSanctionedWidening = (
+  isServerless: boolean,
   featureId: string,
   privilegeId: string,
   capability: string
 ): boolean => {
   if (capability === GLOBAL_ARTIFACT_CAPABILITY) {
+    if (!GLOBAL_ARTIFACT_FEATURE_IDS.includes(featureId)) {
+      return false;
+    }
+
     return (
-      GLOBAL_ARTIFACT_FEATURE_IDS.includes(featureId) &&
-      GLOBAL_ARTIFACT_PRIVILEGES.includes(privilegeId)
+      GLOBAL_ARTIFACT_PRIVILEGES.includes(privilegeId) ||
+      (!isServerless && ESS_GLOBAL_ARTIFACT_PRIVILEGES.includes(privilegeId))
     );
   }
 
+  if (isServerless) {
+    return false;
+  }
+
   return (
-    ENDPOINT_EXCEPTION_FEATURE_IDS.includes(featureId) &&
-    (ENDPOINT_EXCEPTION_PRIVILEGES[capability] ?? []).includes(privilegeId)
+    ESS_ENDPOINT_EXCEPTION_FEATURE_IDS.includes(featureId) &&
+    (ESS_ENDPOINT_EXCEPTION_PRIVILEGES[capability] ?? []).includes(privilegeId)
   );
 };
 
@@ -103,6 +116,7 @@ const capabilitiesWithPrefix = (actions: string[], prefix: string): string[] =>
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const isServerless: boolean = getService('config').get('serverless');
 
   describe('@ess @serverless @skipInServerlessMKI deprecated `siem` versions map onto current `ui:` actions', () => {
     let features: FeaturePrivileges;
@@ -148,7 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
           for (const capability of current) {
             if (
               deprecated.includes(capability) ||
-              isSanctionedWidening(featureId, privilegeId, capability)
+              isSanctionedWidening(isServerless, featureId, privilegeId, capability)
             ) {
               continue;
             }
