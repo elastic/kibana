@@ -24,6 +24,8 @@ import { orcaJudgeConnector } from './orca_judge';
 import { efficiencyEvaluators } from './efficiency_evaluators';
 import { INVESTIGATION_TIMEOUT_MS, runInvestigation } from './task';
 import { assertSuccessfulSandboxCommand } from './trace_evidence';
+import { createAdminSessionRequest } from './admin_session_request';
+import type { AdminSessionRequestOptions } from './admin_session_request';
 import type { InvestigationExample, InvestigationTaskOutput } from './types';
 import { assertOrcaSource, hasOrcaTelemetryQuery } from './orca_dataset';
 import {
@@ -69,6 +71,8 @@ export const registerInvestigationEvaluation = ({
         log,
         inferenceClient,
         evaluationConnector,
+        kbnUrl,
+        samlAuth,
       }) => {
         if (orca) {
           expect(repetitions, 'ORCA runs each incident once').toBe(1);
@@ -102,17 +106,25 @@ export const registerInvestigationEvaluation = ({
         // set up first. The eval user holds manage_security; setup is idempotent. On stateful,
         // Elasticsearch has no predefined roles for the account, so the eval creates them first.
         await ensureNightshiftServiceAccountRoles(esClient, { isServerless: config.serverless });
-        // Like the app's setup step: find or create the accounts by name, then bind the space to
-        // the ids the backend assigned (generated ones on Serverless).
-        const serviceAccountIds = await ensureNightshiftServiceAccounts(
-          createHttpServiceAccountsApi({
-            request: (path, { method, query, body, version }) =>
-              fetch(path, {
+        // UIAM rejects the native superuser behind `fetch` on Serverless, so setup there runs as
+        // the admin's SAML session, as the plugin's Scout API tests do.
+        const setupRequest = config.serverless
+          ? createAdminSessionRequest(
+              kbnUrl.get('/'),
+              (await samlAuth.asInteractiveUser('admin')).cookieHeader
+            )
+          : <T>(path: string, { method, query, body, version }: AdminSessionRequestOptions) =>
+              fetch<T>(path, {
                 method,
                 ...(query ? { query } : {}),
                 ...(body ? { body } : {}),
                 ...(version ? { version } : {}),
-              }),
+              });
+        // Like the app's setup step: find or create the accounts by name, then bind the space to
+        // the ids the backend assigned (generated ones on Serverless).
+        const serviceAccountIds = await ensureNightshiftServiceAccounts(
+          createHttpServiceAccountsApi({
+            request: setupRequest,
             getStatus: (error) => (error as { status?: number }).status,
           }),
           { isServerless: config.serverless }
@@ -120,7 +132,7 @@ export const registerInvestigationEvaluation = ({
         await expect
           .poll(
             async () =>
-              fetch<{ installed: boolean; bound: boolean }>(
+              setupRequest<{ installed: boolean; bound: boolean }>(
                 '/internal/nightshift/investigations/service_account/_enable',
                 { method: 'POST', body: JSON.stringify({ serviceAccountIds }) }
               ).then(
