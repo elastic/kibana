@@ -48,7 +48,7 @@ export async function getApmTraceError(params: {
 
   // Error documents can be OTel-native or partial/legacy APM docs that do not always populate
   // every required field. Skipping a malformed hit keeps the whole request from failing with a
-  // 500 (see https://github.com/elastic/observability-error-backlog/issues/1363).
+  // 500.
   const accessor = createApmEventFieldsAccessor({ logger, operation: 'get_apm_trace_error' });
 
   return compactMap(response.hits.hits, (hit): Error | undefined => {

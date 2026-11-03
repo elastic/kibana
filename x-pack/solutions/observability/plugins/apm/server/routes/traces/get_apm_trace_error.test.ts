@@ -63,8 +63,8 @@ describe('getApmTraceError', () => {
   });
 
   // A single OTel/partial error document missing a required field (e.g. `error.id`) used to make
-  // the whole mapping throw, turning the trace request into a 500 (issue #1363). The route now
-  // skips the malformed hit and returns the valid ones instead.
+  // the whole mapping throw, turning the trace request into a 500. The malformed hit is now
+  // skipped and the valid ones returned.
   it('skips malformed hits instead of failing the whole request', async () => {
     const validHit = {
       _id: 'error-1',

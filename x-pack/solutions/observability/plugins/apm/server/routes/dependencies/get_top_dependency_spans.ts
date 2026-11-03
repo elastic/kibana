@@ -65,9 +65,10 @@ export async function getTopDependencySpans({
     SERVICE_NAME,
     AGENT_NAME,
     SPAN_DURATION,
-    EVENT_OUTCOME,
     AT_TIMESTAMP,
   ] as const);
+  // `event.outcome` is not guaranteed on OTel spans, so it is requested but not required.
+  const topDedsFields = asMutableArray([...topDedsRequiredFields, EVENT_OUTCOME] as const);
 
   const spanHits = (
     await apmEventClient.search('get_top_dependency_spans', {
@@ -99,13 +100,12 @@ export async function getTopDependencySpans({
           ],
         },
       },
-      fields: topDedsRequiredFields,
+      fields: topDedsFields,
     })
   ).hits.hits;
 
   // Span documents can be OTel-native or partial/legacy APM docs that do not always populate
-  // every required field (e.g. `event.outcome`). Skipping a malformed hit keeps the whole request
-  // from failing with a 500 (see https://github.com/elastic/observability-error-backlog/issues/1363).
+  // every required field. Skipping a malformed hit keeps the whole request from failing with a 500.
   const spansAccessor = createApmEventFieldsAccessor({
     logger,
     operation: 'get_top_dependency_spans',

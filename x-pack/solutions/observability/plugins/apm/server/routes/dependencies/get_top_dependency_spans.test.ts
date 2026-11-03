@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { getTopDependencySpans } from './get_top_dependency_spans';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -50,9 +51,8 @@ describe('getTopDependencySpans', () => {
     kuery: '',
   };
 
-  // A single OTel/partial span missing a required field (e.g. `event.outcome`) used to make the
-  // whole mapping throw, turning the request into a 500 (issue #1363). The route now skips the
-  // malformed hit and returns the valid ones instead.
+  // A single OTel/partial span missing a required field used to make the whole mapping throw,
+  // turning the request into a 500. The malformed hit is now skipped and the valid ones returned.
   it('skips malformed span hits instead of failing the whole request', async () => {
     const malformedSpanHit = {
       _id: 'span-2',
@@ -63,8 +63,7 @@ describe('getTopDependencySpans', () => {
         'span.name': ['SELECT'],
         'service.name': ['my-service'],
         'agent.name': ['otlp'],
-        'span.duration.us': [2000],
-        // `event.outcome` is missing on this OTel-native document.
+        // `span.duration.us` is missing on this OTel-native document.
         '@timestamp': ['2023-01-01T00:00:00.000Z'],
       },
     };
@@ -81,6 +80,18 @@ describe('getTopDependencySpans', () => {
     expect(spans).toHaveLength(1);
     expect(spans[0].spanId).toBe('span-1');
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('span-2'));
+  });
+
+  it('keeps spans without `event.outcome` and reports an unknown outcome', async () => {
+    const fields = omit(validSpanHit().fields, 'event.outcome');
+    const apmEventClient = createApmEventClientMock([{ _id: 'span-4', _index: 'x', fields }]);
+    const logger = loggingSystemMock.createLogger();
+
+    const spans = await getTopDependencySpans({ apmEventClient, logger, ...baseParams });
+
+    expect(spans).toHaveLength(1);
+    expect(spans[0].outcome).toBe('unknown');
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('returns all spans when they are all well-formed', async () => {
