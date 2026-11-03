@@ -159,166 +159,103 @@ const finalTurnToolMessages = (llmProxy: LlmProxy): string[] => {
     );
 };
 
-for (const mode of EXECUTION_MODES) {
-  apiTest.describe(
-    `Agent Builder — browser tool round trips [${mode}]`,
-    { tag: [...tags.stateful.classic] },
-    () => {
-      const testRunId = randomUUID();
-      const roleName = `${TEST_PREFIX}-role-${testRunId}`;
-      const otherUser = {
-        username: `${TEST_PREFIX}-other-${testRunId}`,
-        password: 'other-password',
-      };
-      const otherUserHeaders = {
-        Authorization: `Basic ${Buffer.from(`${otherUser.username}:${otherUser.password}`).toString(
-          'base64'
-        )}`,
-      };
+apiTest.describe('Agent Builder — browser tools', { tag: [...tags.stateful.classic] }, () => {
+  const testRunId = randomUUID();
+  const roleName = `${TEST_PREFIX}-role-${testRunId}`;
+  const otherUser = {
+    username: `${TEST_PREFIX}-other-${testRunId}`,
+    password: 'other-password',
+  };
+  const otherUserHeaders = {
+    Authorization: `Basic ${Buffer.from(`${otherUser.username}:${otherUser.password}`).toString(
+      'base64'
+    )}`,
+  };
 
-      let adminCredentials: RoleApiCredentials;
-      let llmProxy: LlmProxy;
-      let connectorId: string;
-      let converseUrl: string;
-      const conversationIds: string[] = [];
+  let adminCredentials: RoleApiCredentials;
+  let llmProxy: LlmProxy;
+  let connectorId: string;
+  let converseUrl: string;
+  const conversationIds: string[] = [];
 
-      apiTest.beforeAll(async ({ requestAuth, log, kbnClient, kbnUrl, esClient }) => {
-        adminCredentials = await requestAuth.getApiKeyForAdmin();
-        llmProxy = await createLlmProxy(log);
-        ({ id: connectorId } = await createGenAiConnectorForProxy(kbnClient, llmProxy));
+  apiTest.beforeAll(async ({ requestAuth, log, kbnClient, kbnUrl, esClient }) => {
+    adminCredentials = await requestAuth.getApiKeyForAdmin();
+    llmProxy = await createLlmProxy(log);
+    ({ id: connectorId } = await createGenAiConnectorForProxy(kbnClient, llmProxy));
 
-        const url = new URL(kbnUrl.get(CHAT_CONVERSE_ASYNC));
-        url.username = '';
-        url.password = '';
-        converseUrl = url.href;
+    const url = new URL(kbnUrl.get(CHAT_CONVERSE_ASYNC));
+    url.username = '';
+    url.password = '';
+    converseUrl = url.href;
 
-        await kbnClient.request({
-          method: 'PUT',
-          path: `/api/security/role/${encodeURIComponent(roleName)}`,
-          headers: { 'elastic-api-version': ELASTIC_API_VERSION },
-          body: {
-            elasticsearch: { cluster: ['monitor_inference'], indices: [], run_as: [] },
-            kibana: [
-              {
-                base: [],
-                feature: { agentBuilder: ['minimal_read', 'manage_agents'], actions: ['read'] },
-                spaces: ['*'],
-              },
-            ],
+    await kbnClient.request({
+      method: 'PUT',
+      path: `/api/security/role/${encodeURIComponent(roleName)}`,
+      headers: { 'elastic-api-version': ELASTIC_API_VERSION },
+      body: {
+        elasticsearch: { cluster: ['monitor_inference'], indices: [], run_as: [] },
+        kibana: [
+          {
+            base: [],
+            feature: { agentBuilder: ['minimal_read', 'manage_agents'], actions: ['read'] },
+            spaces: ['*'],
           },
-        });
-        await esClient.security.putUser({
-          username: otherUser.username,
-          password: otherUser.password,
-          roles: [roleName],
-        });
-      });
+        ],
+      },
+    });
+    await esClient.security.putUser({
+      username: otherUser.username,
+      password: otherUser.password,
+      roles: [roleName],
+    });
+  });
 
-      apiTest.afterAll(async ({ asAdmin, kbnClient, esClient }) => {
-        for (const id of conversationIds) {
-          await asAdmin.delete(`${API_AGENT_BUILDER}/conversations/${encodeURIComponent(id)}`);
-        }
-        await esClient.deleteByQuery({
-          index: CHAT_CONVERSATIONS_INDEX,
-          query: { term: { user_name: otherUser.username } },
-          wait_for_completion: true,
-          refresh: true,
-          conflicts: 'proceed',
-          ignore_unavailable: true,
-        });
-        llmProxy.close();
-        await deleteConnectorById(kbnClient, connectorId);
-        await esClient.security.deleteUser({ username: otherUser.username }, { ignore: [404] });
-        await kbnClient.request({
-          method: 'DELETE',
-          path: `/api/security/role/${encodeURIComponent(roleName)}`,
-          headers: { 'elastic-api-version': ELASTIC_API_VERSION },
-          ignoreErrors: [404],
-        });
-      });
+  apiTest.beforeEach(() => {
+    llmProxy.clear();
+  });
 
-      apiTest.beforeEach(() => {
-        llmProxy.clear();
-      });
+  apiTest.afterAll(async ({ asAdmin, kbnClient, esClient }) => {
+    for (const id of conversationIds) {
+      await asAdmin.delete(`${API_AGENT_BUILDER}/conversations/${encodeURIComponent(id)}`);
+    }
+    await esClient.deleteByQuery({
+      index: CHAT_CONVERSATIONS_INDEX,
+      query: { term: { user_name: otherUser.username } },
+      wait_for_completion: true,
+      refresh: true,
+      conflicts: 'proceed',
+      ignore_unavailable: true,
+    });
+    llmProxy.close();
+    await deleteConnectorById(kbnClient, connectorId);
+    await esClient.security.deleteUser({ username: otherUser.username }, { ignore: [404] });
+    await kbnClient.request({
+      method: 'DELETE',
+      path: `/api/security/role/${encodeURIComponent(roleName)}`,
+      headers: { 'elastic-api-version': ELASTIC_API_VERSION },
+      ignoreErrors: [404],
+    });
+  });
 
-      const converseBody = (
-        executionId: string,
-        timeoutMs: number,
-        extra: Partial<ChatRequestBodyPayload> = {}
-      ): ChatRequestBodyPayload =>
-        ({
-          input: 'Use the echo tool',
-          connector_id: connectorId,
-          execution_id: executionId,
-          _execution_mode: mode,
-          browser_api_tools: [echoTool(timeoutMs)],
-          browser_tools: { client_id: CLIENT_ID, tool_ids: [] },
-          ...extra,
-        } as ChatRequestBodyPayload);
+  for (const mode of EXECUTION_MODES) {
+    const converseBody = (
+      executionId: string,
+      timeoutMs: number,
+      extra: Partial<ChatRequestBodyPayload> = {}
+    ): ChatRequestBodyPayload =>
+      ({
+        input: 'Use the echo tool',
+        connector_id: connectorId,
+        execution_id: executionId,
+        _execution_mode: mode,
+        browser_api_tools: [echoTool(timeoutMs)],
+        browser_tools: { client_id: CLIENT_ID, tool_ids: [] },
+        ...extra,
+      } as ChatRequestBodyPayload);
 
-      apiTest(
-        'LLM calls a legacy browser tool, the client posts a result, and the result reaches the LLM and is persisted',
-        async ({ apiClient }) => {
-          setupAgentCallToolThenAnswer({
-            proxy: llmProxy,
-            toolName: 'echo_tool',
-            toolArg: { text: 'ping' },
-            response: FINAL_ANSWER,
-          });
-
-          const executionId = randomUUID();
-          const answered: string[] = [];
-          const events = await streamConverse({
-            url: converseUrl,
-            headers: adminCredentials.apiKeyHeader,
-            body: converseBody(executionId, 10_000),
-            onEvent: async (event) => {
-              const call = browserToolCallData(event);
-              if (!call) {
-                return;
-              }
-              expect(call.tool_id).toBe('echo_tool');
-              expect(call.params).toStrictEqual({ text: 'ping' });
-              expect(call.client_id).toBe(CLIENT_ID);
-              expect(new Date(call.expires_at).getTime()).toBeGreaterThan(Date.now());
-
-              const res = await postBrowserToolResult(apiClient, adminCredentials.apiKeyHeader, {
-                executionId,
-                toolCallId: call.tool_call_id,
-                body: { client_id: CLIENT_ID, result: { status: 'ok', content: 'pong' } },
-              });
-              expect(res).toHaveStatusCode(204);
-              answered.push(call.tool_call_id);
-            },
-          });
-          const conversationId = conversationIdOf(events);
-          conversationIds.push(conversationId);
-          await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-
-          expect(answered).toHaveLength(1);
-          expect(finalTurnToolMessages(llmProxy).some((content) => content.includes('pong'))).toBe(
-            true
-          );
-
-          const conversation = await getConversation(
-            apiClient,
-            adminCredentials.apiKeyHeader,
-            conversationId
-          );
-          expect(conversation.rounds).toHaveLength(1);
-          const [round] = conversation.rounds;
-          expect(round.response.message).toBe(FINAL_ANSWER);
-          const [step] = toolCallSteps(round.steps);
-          expect(step.tool_id).toBe('echo_tool');
-          expect(step.tool_call_id).toBe(answered[0]);
-          expect(step.results).toHaveLength(1);
-          expect(step.results[0].type).toBe(ToolResultType.other);
-          expect(step.results[0].data).toStrictEqual({ content: 'pong' });
-        }
-      );
-
-      apiTest('times out when nobody answers', async ({ apiClient }) => {
-        apiTest.setTimeout(120_000);
+    apiTest(
+      `LLM calls a legacy browser tool, the client posts a result, and the result reaches the LLM and is persisted [${mode}]`,
+      async ({ apiClient }) => {
         setupAgentCallToolThenAnswer({
           proxy: llmProxy,
           toolName: 'echo_tool',
@@ -327,45 +264,7 @@ for (const mode of EXECUTION_MODES) {
         });
 
         const executionId = randomUUID();
-        const events = await streamConverse({
-          url: converseUrl,
-          headers: adminCredentials.apiKeyHeader,
-          body: converseBody(executionId, 1_000),
-        });
-        const conversationId = conversationIdOf(events);
-        conversationIds.push(conversationId);
-        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-
-        expect(events.filter((event) => browserToolCallData(event))).toHaveLength(1);
-
-        const conversation = await getConversation(
-          apiClient,
-          adminCredentials.apiKeyHeader,
-          conversationId
-        );
-        const [round] = conversation.rounds;
-        expect(round.response.message).toBe(FINAL_ANSWER);
-        const [step] = toolCallSteps(round.steps);
-        expect(step.tool_id).toBe('echo_tool');
-        expect(step.results).toHaveLength(1);
-        expect(step.results[0].type).toBe(ToolResultType.error);
-        expect(String((step.results[0].data as { message: string }).message)).toContain(
-          'did not answer'
-        );
-      });
-
-      apiTest('two browser tool calls in one turn', async ({ apiClient }) => {
-        await setupAgentParallelToolCallsThenAnswer({
-          proxy: llmProxy,
-          response: FINAL_ANSWER,
-          toolCalls: [
-            { name: 'echo_tool', args: { text: 'one' } },
-            { name: 'echo_tool', args: { text: 'two' } },
-          ],
-        });
-
-        const executionId = randomUUID();
-        const answeredTexts: string[] = [];
+        const answered: string[] = [];
         const events = await streamConverse({
           url: converseUrl,
           headers: adminCredentials.apiKeyHeader,
@@ -375,115 +274,206 @@ for (const mode of EXECUTION_MODES) {
             if (!call) {
               return;
             }
-            const text = String(call.params.text);
+            expect(call.tool_id).toBe('echo_tool');
+            expect(call.params).toStrictEqual({ text: 'ping' });
+            expect(call.client_id).toBe(CLIENT_ID);
+            expect(new Date(call.expires_at).getTime()).toBeGreaterThan(Date.now());
+
             const res = await postBrowserToolResult(apiClient, adminCredentials.apiKeyHeader, {
               executionId,
               toolCallId: call.tool_call_id,
-              body: { client_id: CLIENT_ID, result: { status: 'ok', content: `pong-${text}` } },
+              body: { client_id: CLIENT_ID, result: { status: 'ok', content: 'pong' } },
             });
             expect(res).toHaveStatusCode(204);
-            answeredTexts.push(text);
+            answered.push(call.tool_call_id);
           },
         });
         const conversationId = conversationIdOf(events);
         conversationIds.push(conversationId);
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-        expect([...answeredTexts].sort()).toStrictEqual(['one', 'two']);
-        const toolMessages = finalTurnToolMessages(llmProxy);
-        expect(toolMessages.some((content) => content.includes('pong-one'))).toBe(true);
-        expect(toolMessages.some((content) => content.includes('pong-two'))).toBe(true);
+        expect(answered).toHaveLength(1);
+        expect(finalTurnToolMessages(llmProxy).some((content) => content.includes('pong'))).toBe(
+          true
+        );
 
         const conversation = await getConversation(
           apiClient,
           adminCredentials.apiKeyHeader,
           conversationId
         );
-        const steps = toolCallSteps(conversation.rounds[0].steps);
-        expect(steps).toHaveLength(2);
-        expect(
-          steps
-            .map((step) => {
-              expect(step.tool_id).toBe('echo_tool');
-              expect(step.results[0].type).toBe(ToolResultType.other);
-              return (step.results[0].data as { content: string }).content;
-            })
-            .sort()
-        ).toStrictEqual(['pong-one', 'pong-two']);
-      });
-
-      apiTest('a second user cannot answer', async ({ apiClient }) => {
-        setupAgentCallToolThenAnswer({
-          proxy: llmProxy,
-          toolName: 'echo_tool',
-          toolArg: { text: 'ping' },
-          response: FINAL_ANSWER,
-        });
-
-        const executionId = randomUUID();
-        let answered = false;
-        const events = await streamConverse({
-          url: converseUrl,
-          headers: adminCredentials.apiKeyHeader,
-          // A public conversation: the other user can read it, but still cannot answer for the owner.
-          body: converseBody(executionId, 10_000, {
-            access_control: { access_mode: ConversationAccessControlMode.Public },
-          }),
-          onEvent: async (event) => {
-            const call = browserToolCallData(event);
-            if (!call) {
-              return;
-            }
-            const body = {
-              client_id: CLIENT_ID,
-              result: { status: 'ok' as const, content: 'pong' },
-            };
-
-            const asOther = await postBrowserToolResult(apiClient, otherUserHeaders, {
-              executionId,
-              toolCallId: call.tool_call_id,
-              body,
-            });
-            expect(asOther).toHaveStatusCode(403);
-
-            const asOwner = await postBrowserToolResult(apiClient, adminCredentials.apiKeyHeader, {
-              executionId,
-              toolCallId: call.tool_call_id,
-              body,
-            });
-            expect(asOwner).toHaveStatusCode(204);
-            answered = true;
-          },
-        });
-        const conversationId = conversationIdOf(events);
-        conversationIds.push(conversationId);
-        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-
-        expect(answered).toBe(true);
-        const conversation = await getConversation(apiClient, otherUserHeaders, conversationId);
-        const [step] = toolCallSteps(conversation.rounds[0].steps);
+        expect(conversation.rounds).toHaveLength(1);
+        const [round] = conversation.rounds;
+        expect(round.response.message).toBe(FINAL_ANSWER);
+        const [step] = toolCallSteps(round.steps);
+        expect(step.tool_id).toBe('echo_tool');
+        expect(step.tool_call_id).toBe(answered[0]);
+        expect(step.results).toHaveLength(1);
         expect(step.results[0].type).toBe(ToolResultType.other);
         expect(step.results[0].data).toStrictEqual({ content: 'pong' });
-      });
-    }
-  );
-}
+      }
+    );
 
-apiTest.describe(
-  'Agent Builder — browser tool converse validation',
-  { tag: [...tags.stateful.classic] },
-  () => {
-    apiTest('builtin ids are rejected when unknown', async ({ asAdmin }) => {
-      const res = await asAdmin.post(CHAT_CONVERSE_ASYNC, {
-        body: {
-          input: 'Hello',
-          browser_tools: { client_id: 'c', tool_ids: ['nope'] },
-          _execution_mode: 'local',
-        },
-        responseType: 'json',
+    apiTest(`times out when nobody answers [${mode}]`, async ({ apiClient }) => {
+      apiTest.setTimeout(120_000);
+      setupAgentCallToolThenAnswer({
+        proxy: llmProxy,
+        toolName: 'echo_tool',
+        toolArg: { text: 'ping' },
+        response: FINAL_ANSWER,
       });
-      expect(res).toHaveStatusCode(400);
-      expect(JSON.stringify(res.body)).toContain('nope');
+
+      const executionId = randomUUID();
+      const events = await streamConverse({
+        url: converseUrl,
+        headers: adminCredentials.apiKeyHeader,
+        body: converseBody(executionId, 1_000),
+      });
+      const conversationId = conversationIdOf(events);
+      conversationIds.push(conversationId);
+      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+      expect(events.filter((event) => browserToolCallData(event))).toHaveLength(1);
+
+      const conversation = await getConversation(
+        apiClient,
+        adminCredentials.apiKeyHeader,
+        conversationId
+      );
+      const [round] = conversation.rounds;
+      expect(round.response.message).toBe(FINAL_ANSWER);
+      const [step] = toolCallSteps(round.steps);
+      expect(step.tool_id).toBe('echo_tool');
+      expect(step.results).toHaveLength(1);
+      expect(step.results[0].type).toBe(ToolResultType.error);
+      expect(String((step.results[0].data as { message: string }).message)).toContain(
+        'did not answer'
+      );
+    });
+
+    apiTest(`two browser tool calls in one turn [${mode}]`, async ({ apiClient }) => {
+      await setupAgentParallelToolCallsThenAnswer({
+        proxy: llmProxy,
+        response: FINAL_ANSWER,
+        toolCalls: [
+          { name: 'echo_tool', args: { text: 'one' } },
+          { name: 'echo_tool', args: { text: 'two' } },
+        ],
+      });
+
+      const executionId = randomUUID();
+      const answeredTexts: string[] = [];
+      const events = await streamConverse({
+        url: converseUrl,
+        headers: adminCredentials.apiKeyHeader,
+        body: converseBody(executionId, 10_000),
+        onEvent: async (event) => {
+          const call = browserToolCallData(event);
+          if (!call) {
+            return;
+          }
+          const text = String(call.params.text);
+          const res = await postBrowserToolResult(apiClient, adminCredentials.apiKeyHeader, {
+            executionId,
+            toolCallId: call.tool_call_id,
+            body: { client_id: CLIENT_ID, result: { status: 'ok', content: `pong-${text}` } },
+          });
+          expect(res).toHaveStatusCode(204);
+          answeredTexts.push(text);
+        },
+      });
+      const conversationId = conversationIdOf(events);
+      conversationIds.push(conversationId);
+      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+      expect([...answeredTexts].sort()).toStrictEqual(['one', 'two']);
+      const toolMessages = finalTurnToolMessages(llmProxy);
+      expect(toolMessages.some((content) => content.includes('pong-one'))).toBe(true);
+      expect(toolMessages.some((content) => content.includes('pong-two'))).toBe(true);
+
+      const conversation = await getConversation(
+        apiClient,
+        adminCredentials.apiKeyHeader,
+        conversationId
+      );
+      const steps = toolCallSteps(conversation.rounds[0].steps);
+      expect(steps).toHaveLength(2);
+      expect(
+        steps
+          .map((step) => {
+            expect(step.tool_id).toBe('echo_tool');
+            expect(step.results[0].type).toBe(ToolResultType.other);
+            return (step.results[0].data as { content: string }).content;
+          })
+          .sort()
+      ).toStrictEqual(['pong-one', 'pong-two']);
+    });
+
+    apiTest(`a second user cannot answer [${mode}]`, async ({ apiClient }) => {
+      setupAgentCallToolThenAnswer({
+        proxy: llmProxy,
+        toolName: 'echo_tool',
+        toolArg: { text: 'ping' },
+        response: FINAL_ANSWER,
+      });
+
+      const executionId = randomUUID();
+      let answered = false;
+      const events = await streamConverse({
+        url: converseUrl,
+        headers: adminCredentials.apiKeyHeader,
+        // A public conversation: the other user can read it, but still cannot answer for the owner.
+        body: converseBody(executionId, 10_000, {
+          access_control: { access_mode: ConversationAccessControlMode.Public },
+        }),
+        onEvent: async (event) => {
+          const call = browserToolCallData(event);
+          if (!call) {
+            return;
+          }
+          const body = {
+            client_id: CLIENT_ID,
+            result: { status: 'ok' as const, content: 'pong' },
+          };
+
+          const asOther = await postBrowserToolResult(apiClient, otherUserHeaders, {
+            executionId,
+            toolCallId: call.tool_call_id,
+            body,
+          });
+          expect(asOther).toHaveStatusCode(403);
+
+          const asOwner = await postBrowserToolResult(apiClient, adminCredentials.apiKeyHeader, {
+            executionId,
+            toolCallId: call.tool_call_id,
+            body,
+          });
+          expect(asOwner).toHaveStatusCode(204);
+          answered = true;
+        },
+      });
+      const conversationId = conversationIdOf(events);
+      conversationIds.push(conversationId);
+      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+      expect(answered).toBe(true);
+      const conversation = await getConversation(apiClient, otherUserHeaders, conversationId);
+      const [step] = toolCallSteps(conversation.rounds[0].steps);
+      expect(step.results[0].type).toBe(ToolResultType.other);
+      expect(step.results[0].data).toStrictEqual({ content: 'pong' });
     });
   }
-);
+
+  apiTest('builtin ids are rejected when unknown', async ({ asAdmin }) => {
+    const res = await asAdmin.post(CHAT_CONVERSE_ASYNC, {
+      body: {
+        input: 'Hello',
+        browser_tools: { client_id: 'c', tool_ids: ['nope'] },
+        _execution_mode: 'local',
+      },
+      responseType: 'json',
+    });
+    expect(res).toHaveStatusCode(400);
+    expect(JSON.stringify(res.body)).toContain('nope');
+  });
+});

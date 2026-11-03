@@ -23,9 +23,9 @@ describe('fill_form', () => {
     return snap.content.match(/s\d+e\d+/g)!;
   };
 
-  type FillResult = {
+  interface FillResult {
     content: { fields: Array<{ ref: string; status: string }>; snapshot: string };
-  };
+  }
 
   it('updates controlled inputs, checkboxes and selects through native setters', async () => {
     document.body.innerHTML = `

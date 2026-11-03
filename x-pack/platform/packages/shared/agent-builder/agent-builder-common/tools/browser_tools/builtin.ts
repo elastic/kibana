@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { BrowserToolDescriptor } from './types';
 import { zodToBrowserToolSchema } from './schema';
 
@@ -17,20 +17,26 @@ export const builtinBrowserToolIds = {
   navigateTo: 'navigate_to',
 } as const;
 
-export const getPageSnapshotSchema = z.object({});
-export const takeScreenshotSchema = z.object({});
-export const clickElementSchema = z.object({
-  ref: z.string().describe('Element reference from get_page_snapshot, e.g. "s3e7"'),
-});
-export const fillFormSchema = z.object({
-  fields: z.array(z.object({ ref: z.string(), value: z.string() })).min(1),
-});
-export const navigateToSchema = z.object({
-  app_id: z
-    .string()
-    .describe('Kibana app id, as listed in the "apps" section of get_page_snapshot'),
-  path: z.string().optional(),
-});
+export const getPageSnapshotSchema = lazySchema(() => z.object({}));
+export const takeScreenshotSchema = lazySchema(() => z.object({}));
+export const clickElementSchema = lazySchema(() =>
+  z.object({
+    ref: z.string().describe('Element reference from get_page_snapshot, e.g. "s3e7"'),
+  })
+);
+export const fillFormSchema = lazySchema(() =>
+  z.object({
+    fields: z.array(z.object({ ref: z.string(), value: z.string() })).min(1),
+  })
+);
+export const navigateToSchema = lazySchema(() =>
+  z.object({
+    app_id: z
+      .string()
+      .describe('Kibana app id, as listed in the "apps" section of get_page_snapshot'),
+    path: z.string().optional(),
+  })
+);
 
 export const builtinBrowserToolDescriptors: BrowserToolDescriptor[] = [
   {

@@ -12,7 +12,10 @@ import { builtinBrowserToolIds, navigateToSchema } from '@kbn/agent-builder-comm
 import { getBuiltinDescription } from './get_description';
 import type { BuiltinToolDeps } from './types';
 
-type NavigateToParams = { app_id: string; path?: string };
+interface NavigateToParams {
+  app_id: string;
+  path?: string;
+}
 
 export const createNavigateToTool = ({
   application,

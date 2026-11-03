@@ -12,6 +12,7 @@ const visibleRect = { width: 10, height: 10, top: 0, left: 0, right: 10, bottom:
 
 const render = (html: string): HTMLElement => {
   const root = document.createElement('div');
+  // eslint-disable-next-line no-unsanitized/property -- static test fixture markup
   root.innerHTML = html;
   document.body.appendChild(root);
   return root;

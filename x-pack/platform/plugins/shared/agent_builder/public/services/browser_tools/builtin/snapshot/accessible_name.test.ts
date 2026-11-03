@@ -9,6 +9,7 @@ import { accessibleName } from './accessible_name';
 
 const render = (html: string): HTMLElement => {
   const root = document.createElement('div');
+  // eslint-disable-next-line no-unsanitized/property -- static test fixture markup
   root.innerHTML = html;
   document.body.appendChild(root);
   return root;
