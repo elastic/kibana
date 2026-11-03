@@ -13,6 +13,8 @@ import {
   ONGOING_FAST_REPEAT_MS,
   ONGOING_FAST_REPEAT_UNTIL_MS,
   ONGOING_REPORT_AFTER_MS,
+  ONGOING_REPORT_BURST,
+  ONGOING_REPORT_REFILL_MS,
   POLL_INTERVAL_MS,
   REPORT_BURST,
   REPORT_REFILL_MS,
@@ -25,6 +27,8 @@ const starting: PollContext = { thresholdMs: 200, phase: 'starting' };
 const SHORT_BLOCK_MS = 300;
 /** Time the main thread runs between two short blocks. */
 const GAP_MS = 1_000;
+/** A block past the ongoing mark that ends before the first fast repeat. */
+const LONG_BLOCK_MS = 1_100;
 
 /**
  * Drives a detector along a timeline the way the worker does, so a test reads as what the main
@@ -73,6 +77,16 @@ const createTimeline = () => {
       timeline.runFor(GAP_MS);
       timeline.blockedFor(SHORT_BLOCK_MS, context);
       return timeline.resume(context);
+    },
+    /**
+     * A block past the ongoing mark that ends before its first fast repeat, after `gapMs`; returns
+     * what the worker's polls reported, the end included.
+     */
+    longBlock: (gapMs = GAP_MS) => {
+      timeline.runFor(gapMs);
+      const reports = timeline.pollBlockedUntil(now + LONG_BLOCK_MS);
+      const end = timeline.resume();
+      return end ? [...reports, end] : reports;
     },
     /** Uses up the burst with reported short blocks; returns when the refill clock started. */
     drainBurst: () => {
@@ -211,7 +225,7 @@ describe('BlockDetector', () => {
       expect(t.shortBlock()).toMatchObject({ report: false });
     });
 
-    it('takes no token for ongoing reports, and one for the end of the block', () => {
+    it('takes no end-of-block token for ongoing reports, and one for the end of the block', () => {
       const t = createTimeline();
       // More ongoing reports than the burst holds.
       expect(t.pollBlockedUntil(3 * REPORT_REFILL_MS).length).toBeGreaterThan(REPORT_BURST);
@@ -243,6 +257,65 @@ describe('BlockDetector', () => {
       expect(t.resume()).toMatchObject({ report: false, ongoing: false, reportedOngoing: true });
       t.runUntil(firstReportAt + REPORT_REFILL_MS);
       expect(t.shortBlock()).toMatchObject({ report: true, suppressedBlocks: 0 });
+    });
+  });
+
+  describe('ongoing rate limit', () => {
+    const ongoingReports = (reports: DetectedBlock[]) => reports.filter(({ ongoing }) => ongoing);
+
+    it('bounds ongoing reports across back-to-back long blocks', () => {
+      const t = createTimeline();
+      const durationMs = 10 * ONGOING_REPORT_REFILL_MS;
+      const reports: DetectedBlock[] = [];
+      while (t.now() < durationMs) {
+        reports.push(...t.longBlock(200));
+      }
+      // A first report on each of the burst's blocks, then one per refill interval.
+      expect(ongoingReports(reports).length).toBeLessThanOrEqual(
+        ONGOING_REPORT_BURST + durationMs / ONGOING_REPORT_REFILL_MS
+      );
+      // Many more blocks than that went past the ongoing mark.
+      expect(reports.filter(({ ongoing }) => !ongoing).length).toBeGreaterThan(400);
+    });
+
+    it('takes no ongoing token for short blocks', () => {
+      const t = createTimeline();
+      for (let i = 0; i < 2 * ONGOING_REPORT_BURST; i++) {
+        t.shortBlock();
+      }
+      expect(ongoingReports(t.longBlock())).toHaveLength(1);
+    });
+
+    it('reports a block from its first fast repeat when the ongoing burst is used up', () => {
+      const t = createTimeline();
+      for (let i = 0; i < ONGOING_REPORT_BURST; i++) {
+        expect(ongoingReports(t.longBlock())).toHaveLength(1);
+      }
+      t.runFor(GAP_MS);
+      const reports = t.pollBlockedUntil(3 * REPORT_REFILL_MS + t.now());
+      // No ongoing token for the 1 s mark; the repeats need none.
+      expect(reports.map(({ blockedMs }) => blockedMs)).toEqual([
+        ONGOING_REPORT_AFTER_MS + ONGOING_FAST_REPEAT_MS,
+        7_000,
+        10_000,
+        13_000,
+        73_000,
+        133_000,
+      ]);
+      expect(reports.every(({ ongoing, report }) => ongoing && report)).toBe(true);
+    });
+
+    it('counts a block as suppressed when its first ongoing report and its end are both denied', () => {
+      const t = createTimeline();
+      // Uses up both bursts: each long block takes an ongoing token and an end token.
+      for (let i = 0; i < Math.max(ONGOING_REPORT_BURST, REPORT_BURST); i++) {
+        t.longBlock();
+      }
+      expect(t.longBlock()).toEqual([
+        expect.objectContaining({ report: false, ongoing: false, reportedOngoing: false }),
+      ]);
+      t.runFor(REPORT_REFILL_MS);
+      expect(t.shortBlock()).toMatchObject({ report: true, suppressedBlocks: 1 });
     });
   });
 });

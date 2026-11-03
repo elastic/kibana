@@ -17,6 +17,7 @@ import { writeSync } from 'node:fs';
 import Path from 'node:path';
 import type { Logger } from '@kbn/logging';
 import { EventLoopWatchdog } from '@kbn/core-metrics-server-internal';
+import { REPORT_BURST } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/constants';
 
 // The last argument: `node -e <code> <scenario>` puts it at argv[1].
 const scenario = process.argv[process.argv.length - 1];
@@ -124,11 +125,11 @@ const scenarios: Record<string, () => Promise<void>> = {
     await waitForLogLine('(oom,', 60_000);
     await watchdog.stop();
   },
-  // 5 short blocks use up the warning burst, then a block that never ends: the test kills the
-  // process once the block is reported as ongoing and repeated.
+  // Short blocks use up the warning burst, with one more whose warning is suppressed, then a block
+  // that never ends: the test kills the process once the block is reported as ongoing and repeated.
   permanent_block: async () => {
     await startRunning();
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < REPORT_BURST + 1; i++) {
       blockFor(500);
       await sleep(BLOCK_GAP_MS);
     }

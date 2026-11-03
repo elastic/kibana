@@ -10,6 +10,7 @@
 import { spawn } from 'node:child_process';
 import Path from 'node:path';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { REPORT_BURST } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/constants';
 
 const HARNESS = Path.resolve(__dirname, 'fixtures', 'watchdog_harness.ts');
 
@@ -246,9 +247,10 @@ describe('event loop watchdog in a child process', () => {
         killWhen: (lines) => ongoingWarnings(lines).length >= 2,
       });
       expect(result.signal).toBe('SIGKILL');
-      // The 5 short blocks took the whole burst.
+      // The short blocks took the whole burst; the warning on the last one was suppressed.
       const ended = endedBlockLogLines(result);
-      expect(ended).toHaveLength(5);
+      expect(ended).toHaveLength(REPORT_BURST);
+      expect(statsOf(result).some(({ running }) => running.suppressed >= 1)).toBe(true);
       const [first, repeat] = ongoingWarnings(result.workerLogLines);
       expect(first).toMatchObject({
         message: expect.stringMatching(/^Event loop blocked for ~\d+ms so far$/),
@@ -271,6 +273,8 @@ describe('event loop watchdog in a child process', () => {
       const { startedAt } = blockOf(first) ?? {};
       expect(blockOf(repeat)).toMatchObject({ ongoing: true, startedAt });
       expect((blockOf(repeat)?.blockedMs ?? 0) - firstBlockedMs).toBeGreaterThanOrEqual(3_000);
+      // Still inside the roughly 10 s a liveness probe gives a blocked Kibana.
+      expect(blockOf(repeat)?.blockedMs ?? 0).toBeLessThan(10_000);
       // The block never ended, so its log lines came from the worker while the main thread was
       // still blocked.
       expect(ended.map(blockOf)).not.toContainEqual(expect.objectContaining({ startedAt }));

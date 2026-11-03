@@ -97,6 +97,7 @@ describe('runWatchdogWorker', () => {
     start();
     const blockStartedAt = new Date(Date.now()).toISOString();
     block(300);
+    expect(logger.warn).toHaveBeenCalledTimes(1);
     expect(logger.warn).toHaveBeenCalledWith('Event loop blocked for ~300ms', {
       tags: ['event-loop-watchdog'],
       kibana: {
@@ -133,6 +134,8 @@ describe('runWatchdogWorker', () => {
         },
       }
     );
+    // A wall-clock step during the block doesn't move its start on the end warning.
+    jest.setSystemTime(Date.now() + 5_000);
     stall(500);
     resume();
     expect(logger.warn).toHaveBeenCalledTimes(2);
