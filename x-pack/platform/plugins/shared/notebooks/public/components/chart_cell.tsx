@@ -34,11 +34,15 @@ import {
 import { useNotebookServices } from '../services';
 import { CellFrame } from './cell_frame';
 import { useNotebook } from './notebook_context';
+import { NotebookFlyout } from './notebook_flyout';
 
 const SOURCE_LABEL = i18n.translate('xpack.notebook.chartCell.source', {
   defaultMessage: 'Source',
 });
 const TYPE_LABEL = i18n.translate('xpack.notebook.chartCell.type', { defaultMessage: 'Type' });
+const EDIT_CHART_LABEL = i18n.translate('xpack.notebook.chartCell.editFlyout', {
+  defaultMessage: 'Edit chart',
+});
 
 const CHART_TYPE_LABELS: Record<NotebookChartType, string> = {
   [ChartType.Bar]: i18n.translate('xpack.notebook.chartCell.type.bar', { defaultMessage: 'Bar' }),
@@ -161,23 +165,32 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
     if (!editor) return null;
     const { EditPanel, attributes: initial } = editor;
     return (
-      <EditPanel
-        attributes={initial}
-        updatePanelState={(datasourceState, visualizationState, visualizationId) =>
-          setPreview(
-            applyEditorState(initial, datasourceState, visualizationState, visualizationId)
-          )
-        }
-        onApply={(applied) => {
-          setAttributes(stripTables(applied));
-          closeEditor();
-        }}
-        onCancel={closeEditor}
-        closeFlyout={closeEditor}
-        wrapInFlyout
-        hideTextBasedEditor
-        displayFlyoutHeader
-      />
+      <NotebookFlyout
+        type="push"
+        ownFocus
+        paddingSize="m"
+        hideCloseButton
+        onClose={closeEditor}
+        aria-label={EDIT_CHART_LABEL}
+        data-test-subj="notebookChartEditFlyout"
+      >
+        <EditPanel
+          attributes={initial}
+          updatePanelState={(datasourceState, visualizationState, visualizationId) =>
+            setPreview(
+              applyEditorState(initial, datasourceState, visualizationState, visualizationId)
+            )
+          }
+          onApply={(applied) => {
+            setAttributes(stripTables(applied));
+            closeEditor();
+          }}
+          onCancel={closeEditor}
+          closeFlyout={closeEditor}
+          hideTextBasedEditor
+          displayFlyoutHeader
+        />
+      </NotebookFlyout>
     );
   }, [editor, setAttributes, closeEditor]);
 

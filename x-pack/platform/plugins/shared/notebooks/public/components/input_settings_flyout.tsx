@@ -13,7 +13,6 @@ import {
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
@@ -31,6 +30,7 @@ import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { DropdownOptionsSource, InputDefinition } from '../../common/types';
 import { LazyEsqlEditor } from './lazy_esql_editor';
 import { useNotebook } from './notebook_context';
+import { NotebookFlyout } from './notebook_flyout';
 
 type ConfigurableInput = Extract<InputDefinition, { kind: 'dropdown' | 'range' }>;
 type DropdownInput = Extract<InputDefinition, { kind: 'dropdown' }>;
@@ -336,9 +336,8 @@ export const InputSettingsFlyout = ({
   const [draft, setDraft] = useState<ConfigurableInput>(input);
 
   return (
-    <EuiFlyout
+    <NotebookFlyout
       ownFocus
-      size="s"
       onClose={onClose}
       aria-labelledby={titleId}
       data-test-subj="notebookInputSettingsFlyout"
@@ -384,6 +383,6 @@ export const InputSettingsFlyout = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
-    </EuiFlyout>
+    </NotebookFlyout>
   );
 };

@@ -7,7 +7,6 @@
 
 import React from 'react';
 import {
-  EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiFormRow,
@@ -22,6 +21,7 @@ import { KbnWarningCallout } from '@kbn/ui-callout';
 import { findPinnedTimeCell } from '../model/cell_factory';
 import { getCellParamNames } from '../model/references';
 import { useNotebook } from './notebook_context';
+import { NotebookFlyout } from './notebook_flyout';
 
 const GLOBAL_TIME_PARAMS = new Set(['_tstart', '_tend']);
 
@@ -35,9 +35,8 @@ export const NotebookSettingsFlyout = ({ onClose }: { onClose: () => void }) => 
   ).length;
 
   return (
-    <EuiFlyout
+    <NotebookFlyout
       ownFocus
-      size="s"
       onClose={onClose}
       aria-labelledby={titleId}
       data-test-subj="notebookSettingsFlyout"
@@ -83,6 +82,6 @@ export const NotebookSettingsFlyout = ({ onClose }: { onClose: () => void }) => 
           </>
         )}
       </EuiFlyoutBody>
-    </EuiFlyout>
+    </NotebookFlyout>
   );
 };
