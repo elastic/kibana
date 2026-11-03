@@ -85,6 +85,13 @@
         "filters.group",
         "filters.spatial"
       ]
+    },
+    {
+      "file": "several_tags.json",
+      "source": "Kibana OAS example createDashboard (title and markdown panel, content shortened) + tags: two plain tags, Fleet's Kibana-managed tag ID (x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/tag_assets.ts, `fleet-managed-${spaceId}`), and one the user cannot read",
+      "covers": [
+        "envelope.tags"
+      ]
     }
   ],
   "variants": {
@@ -149,6 +156,9 @@
     ],
     "filters.spatial": [
       "root_filters.json"
+    ],
+    "envelope.tags": [
+      "several_tags.json"
     ]
   }
 }

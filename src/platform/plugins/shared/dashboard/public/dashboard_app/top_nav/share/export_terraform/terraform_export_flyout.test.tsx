@@ -37,8 +37,8 @@ const conversion: DashboardTerraformResponseBody = {
   resource_name: 'web_logs',
   body: { title: 'Web logs', description: 'Costs $${var.env}' },
   resources: [],
-  links: [],
   tag_resource: { type: 'elasticstack_kibana_tag', min_kibana_version: '9.5.0' },
+  literal_tags: [],
   dropped_fields: [],
   skipped_panels: [],
   partial_panels: [],
@@ -440,9 +440,14 @@ describe('TerraformExportFlyout', () => {
         tags: [
           '${elasticstack_kibana_tag.production.tag_id}',
           '${elasticstack_kibana_tag.team_a.tag_id}',
+          'managed-tag',
           'unreadable-tag',
         ],
       },
+      literal_tags: [
+        { id: 'managed-tag', reason: 'managed', name: 'Security' },
+        { id: 'unreadable-tag', reason: 'unreadable' },
+      ],
       resources: [
         {
           type: tagType,
@@ -459,19 +464,16 @@ describe('TerraformExportFlyout', () => {
           body: { name: 'Team $${a}', color: '#000000', description: '' },
         },
       ],
-      links: [
-        { path: ['tags', 0], resource_type: tagType, resource_name: 'production' },
-        { path: ['tags', 1], resource_type: tagType, resource_name: 'team_a' },
-      ],
     };
     const relatedItems = {
       related_items: [
         { type: 'tag', type_label: 'Tag', id: 'tag-1' },
         { type: 'tag', type_label: 'Tag', id: 'tag-${2}' },
+        { type: 'tag', type_label: 'Tag', id: 'managed-tag' },
         { type: 'tag', type_label: 'Tag', id: 'unreadable-tag' },
         { type: 'lens', type_label: 'Visualization', id: 'v1' },
       ],
-      related_items_count: 4,
+      related_items_count: 5,
     };
 
     it('writes the tags of a new copy as tag resources pinning no ID, which the dashboard references', async () => {
@@ -497,6 +499,7 @@ describe('TerraformExportFlyout', () => {
       expect(main.resource.elasticstack_kibana_dashboard.web_logs.tags).toEqual([
         '${elasticstack_kibana_tag.production.tag_id}',
         '${elasticstack_kibana_tag.team_a.tag_id}',
+        'managed-tag',
         'unreadable-tag',
       ]);
       expect(await showFile('README.md')).toContain(
@@ -507,19 +510,59 @@ describe('TerraformExportFlyout', () => {
       expect(entries).toEqual(await shownFiles('web_logs'));
     });
 
-    it('keeps the literal tag IDs of an adopted dashboard and writes no tags file', async () => {
+    it('adopts the tags of a saved dashboard: pins their IDs and space and imports each', async () => {
+      mockGetActiveSpace.mockResolvedValue({ id: 'marketing' });
       respondWith(async () => tagged);
       renderFlyout('Web logs', { dashboardId: 'abc-123' });
 
       await screen.findByRole('list', { name: 'Module files' });
-      expect(fileNames()).not.toContain('tags.tf.json');
+      expect(fileNames()).toEqual([
+        'versions.tf.json',
+        'main.tf.json',
+        'tags.tf.json',
+        'imports.tf.json',
+        'README.md',
+      ]);
+      expect(JSON.parse(await showFile('tags.tf.json'))).toEqual({
+        resource: {
+          elasticstack_kibana_tag: {
+            production: {
+              space_id: 'marketing',
+              tag_id: 'tag-1',
+              name: 'Production',
+              color: '#772299',
+              description: 'Owned by $${team}',
+            },
+            team_a: {
+              space_id: 'marketing',
+              tag_id: 'tag-$${2}',
+              name: 'Team $${a}',
+              color: '#000000',
+              description: '',
+            },
+          },
+        },
+      });
       const main = JSON.parse(await showFile('main.tf.json'));
       expect(main.resource.elasticstack_kibana_dashboard.web_logs.tags).toEqual([
-        'tag-1',
-        'tag-$${2}',
+        '${elasticstack_kibana_tag.production.tag_id}',
+        '${elasticstack_kibana_tag.team_a.tag_id}',
+        'managed-tag',
         'unreadable-tag',
       ]);
-      expect(await showFile('README.md')).not.toContain('tags.tf.json');
+      expect(JSON.parse(await showFile('imports.tf.json'))).toEqual({
+        import: [
+          { to: 'elasticstack_kibana_dashboard.web_logs', id: 'marketing/abc-123' },
+          { to: 'elasticstack_kibana_tag.production', id: 'marketing/tag-1' },
+          { to: 'elasticstack_kibana_tag.team_a', id: 'marketing/tag-$${2}' },
+        ],
+      });
+      const readme = await showFile('README.md');
+      expect(readme).toContain('3 to import, 0 to add, 0 to change, 0 to destroy');
+      expect(readme).toContain("`tags.tf.json` adopts the dashboard's tags (2)");
+
+      const { entries } = await downloadZip();
+      expect(entries).toEqual(await shownFiles('web_logs'));
     });
 
     it('names the tags a new copy creates, warns about existing names, and notes the target Kibana version', async () => {
@@ -529,20 +572,25 @@ describe('TerraformExportFlyout', () => {
       await userEvent.click(modeButton('New copy'));
 
       expect(await screen.findByText('Review this export')).toBeInTheDocument();
-      expect(screen.getByText('1 problem and 2 notes.')).toBeInTheDocument();
+      expect(screen.getByText('3 problems and 2 notes.')).toBeInTheDocument();
       expect(await problemDetails()).toEqual([
+        'Tag “Security” stays the literal ID managed-tag: Kibana manages it, so Terraform cannot.',
+        'Tag unreadable-tag stays a literal ID: you cannot read it, or it does not exist.',
         'A new copy creates 2 tags. Kibana refuses a tag whose name already exists, so apply fails if the target already has a tag with one of these names:ProductionTeam ${a}',
         'The tags file needs Kibana 9.5.0 or later where Terraform applies it.',
-        'The dashboard refers to 2 objects that are not exported. They must exist where Terraform runs.Tag: 1Visualization: 1',
+        'The dashboard refers to 1 object that is not exported. They must exist where Terraform runs.Visualization: 1',
       ]);
     });
 
-    it('lists the tags as objects not exported when adopting', async () => {
+    it('names the tags that stay literal IDs and notes the target Kibana version when adopting', async () => {
       respondWith(async () => tagged, relatedItems);
       renderFlyout('Web logs', { dashboardId: 'abc-123' });
 
       expect(await problemDetails()).toEqual([
-        'The dashboard refers to 4 objects that are not exported. They must exist where Terraform runs.Tag: 3Visualization: 1',
+        'Tag “Security” stays the literal ID managed-tag: Kibana manages it, so Terraform cannot.',
+        'Tag unreadable-tag stays a literal ID: you cannot read it, or it does not exist.',
+        'The tags file needs Kibana 9.5.0 or later where Terraform applies it.',
+        'The dashboard refers to 1 object that is not exported. They must exist where Terraform runs.Visualization: 1',
       ]);
     });
   });

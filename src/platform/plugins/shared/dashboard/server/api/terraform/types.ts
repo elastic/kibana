@@ -14,8 +14,12 @@ import type {
   LinkedResource,
   PanelSummary,
   SkippedPanel,
-  TerraformPath,
 } from '@kbn/as-code-dashboard-terraform';
+
+/** A tag the dashboard keeps as its literal ID: Kibana manages it, or the user cannot read it (or it is missing). */
+export type LiteralTag =
+  | { id: string; reason: 'managed'; name: string }
+  | { id: string; reason: 'unreadable' };
 
 /** The response body of the route converting a dashboard to Terraform. */
 export interface DashboardTerraformResponseBody {
@@ -25,12 +29,12 @@ export interface DashboardTerraformResponseBody {
   resource_name: string;
   /** The resource body, in Terraform JSON syntax: user text escaped, references to `resources` not. */
   body: JsonObject;
-  /** Resources written for the objects the dashboard refers to (its readable tags); they pin no ID. */
+  /** Resources written for the objects the dashboard refers to (its readable, unmanaged tags); they pin no ID. */
   resources: LinkedResource[];
-  /** Where `body` refers to one of `resources` instead of holding the object's ID. */
-  links: Array<{ path: TerraformPath; resource_type: string; resource_name: string }>;
   /** The tag resource type, and the oldest Kibana Terraform can apply it to. */
   tag_resource: { type: string; min_kibana_version: string };
+  /** The dashboard's tags that stay literal IDs, with no resource. */
+  literal_tags: LiteralTag[];
   /** API paths of the fields the resource has no attribute for. */
   dropped_fields: string[];
   /** Panels left out of `body` because they could not be converted. */

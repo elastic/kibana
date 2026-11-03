@@ -11,6 +11,7 @@ import supertest from 'supertest';
 import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import type { RequestHandlerContext } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { registerTerraformRoute, MAX_TERRAFORM_REQUEST_BYTES } from './register_terraform_route';
 
@@ -72,11 +73,15 @@ describe('POST /internal/dashboards/_terraform', () => {
     expect(result.body.body).toEqual({ title: 'Logs' });
   });
 
-  it('reads the tags the dashboard references with the user’s client and writes a resource for each readable one', async () => {
+  // Tag tests convert with the real converter, so the dashboard's `tags` produce references.
+  const convertForReal = async () => {
     const { createDashboardConverter: createActual, loadDashboardOas: loadActual } =
       jest.requireActual('@kbn/as-code-dashboard-terraform');
-    const actualConvert = createActual(await loadActual());
-    mockConvert.mockImplementationOnce(actualConvert);
+    mockConvert.mockImplementationOnce(createActual(await loadActual()));
+  };
+
+  it('reads the tags the dashboard references with the user’s client and writes a resource for each readable one', async () => {
+    await convertForReal();
     const bulkGet = handlerContext.savedObjects.client.bulkGet as jest.Mock;
     bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -113,13 +118,74 @@ describe('POST /internal/dashboards/_terraform', () => {
         body: { name: 'Production', color: '#772299', description: 'Owned by $${team}' },
       },
     ]);
-    expect(result.body.links).toEqual([
-      { path: ['tags', 0], resource_type: 'elasticstack_kibana_tag', resource_name: 'production' },
-    ]);
     expect(result.body.tag_resource).toEqual({
       type: 'elasticstack_kibana_tag',
       min_kibana_version: '9.5.0',
     });
+  });
+
+  it('keeps managed and unreadable tags as literal IDs and names them', async () => {
+    await convertForReal();
+    (handlerContext.savedObjects.client.bulkGet as jest.Mock).mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: 'tag-1',
+          type: 'tag',
+          attributes: { name: 'Production', color: '#772299', description: '' },
+          references: [],
+        },
+        {
+          id: 'managed-tag',
+          type: 'tag',
+          managed: true,
+          attributes: { name: 'Security', color: '#000000', description: '' },
+          references: [],
+        },
+        { id: 'tag-2', type: 'tag', error: { statusCode: 403, error: 'Forbidden', message: '' } },
+        { id: 'tag-3', type: 'tag', error: { statusCode: 404, error: 'Not Found', message: '' } },
+      ],
+    });
+
+    const result = await post({
+      dashboard: {
+        title: 'Web logs',
+        panels: [],
+        tags: ['tag-1', 'managed-tag', 'tag-2', 'tag-3'],
+      },
+    });
+
+    expect(result.status).toBe(200);
+    expect(result.body.body.tags).toEqual([
+      '${elasticstack_kibana_tag.production.tag_id}',
+      'managed-tag',
+      'tag-2',
+      'tag-3',
+    ]);
+    expect(result.body.resources.map(({ id }: { id: string }) => id)).toEqual(['tag-1']);
+    expect(result.body.literal_tags).toEqual([
+      { id: 'managed-tag', reason: 'managed', name: 'Security' },
+      { id: 'tag-2', reason: 'unreadable' },
+      { id: 'tag-3', reason: 'unreadable' },
+    ]);
+  });
+
+  it('keeps every tag a literal ID when the user may not read tags at all', async () => {
+    await convertForReal();
+    (handlerContext.savedObjects.client.bulkGet as jest.Mock).mockRejectedValueOnce(
+      SavedObjectsErrorHelpers.decorateForbiddenError(new Error('Unable to bulk_get tag'))
+    );
+
+    const result = await post({
+      dashboard: { title: 'Web logs', panels: [], tags: ['tag-1', 'tag-2'] },
+    });
+
+    expect(result.status).toBe(200);
+    expect(result.body.body.tags).toEqual(['tag-1', 'tag-2']);
+    expect(result.body.resources).toEqual([]);
+    expect(result.body.literal_tags).toEqual([
+      { id: 'tag-1', reason: 'unreadable' },
+      { id: 'tag-2', reason: 'unreadable' },
+    ]);
   });
 
   it.each([

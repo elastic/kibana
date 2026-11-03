@@ -35,13 +35,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { downloadFileAs } from '@kbn/share-plugin/public';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { ExportMode, ModuleFile } from './module_files';
-import {
-  MAIN_FILE,
-  buildModuleFiles,
-  buildModuleZip,
-  exportedTags,
-  toZipFilename,
-} from './module_files';
+import { MAIN_FILE, buildModuleFiles, buildModuleZip, toZipFilename } from './module_files';
 import { listProblems, ProblemsCallout } from './problems_callout';
 import { useTerraformExport } from './use_terraform_export';
 
@@ -171,7 +165,7 @@ export const TerraformExportFlyout = ({
             sanitized: exportState.sanitized,
             isDirty,
             isSaved: canAdopt,
-            exportedTags: exportedTags(exportState.conversion, mode),
+            mode,
           })
         : [],
     [canAdopt, exportState, isDirty, mode]

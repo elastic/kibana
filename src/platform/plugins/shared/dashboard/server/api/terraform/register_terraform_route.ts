@@ -25,7 +25,7 @@ import {
   DASHBOARD_INTERNAL_API_PATH,
   DASHBOARD_TERRAFORM_EXPORT_FLAG,
 } from '../../../common/constants';
-import type { DashboardTerraformResponseBody } from './types';
+import type { DashboardTerraformResponseBody, LiteralTag } from './types';
 
 // Loaded on first use, not at startup; only a successful load is kept, so a failed one is retried.
 let converter: Promise<DashboardConverter> | undefined;
@@ -59,28 +59,47 @@ const describeDashboard = ({ panels, pinned_panels: pinnedPanels }: JsonObject):
     ', '
   )}]`;
 
-// With the user's own privileges, in the space the request is for; a tag the user cannot read is left out and stays
-// a literal ID in the dashboard.
+interface ReadTags {
+  /** The tags a resource is written for. */
+  tags: ReferencedObject[];
+  /** The tags that stay literal IDs in the dashboard. */
+  literalTags: LiteralTag[];
+}
+
+// Reads with the user's client (`read` on `tag`, as the get-tag route needs); unreadable, missing and Kibana-managed tags stay literal IDs.
 const readTags = async (
   client: SavedObjectsClientContract,
   ids: string[],
   resourceType: string
-): Promise<ReferencedObject[]> => {
-  if (!ids.length) return [];
+): Promise<ReadTags> => {
+  if (!ids.length) return { tags: [], literalTags: [] };
+  const unreadable = (id: string): LiteralTag => ({ id, reason: 'unreadable' });
   try {
-    const { saved_objects: tags } = await client.bulkGet<TagAttributes>(
+    const { saved_objects: savedObjects } = await client.bulkGet<TagAttributes>(
       ids.map((id) => ({ type: 'tag', id }))
     );
-    return tags.flatMap((tag) => {
-      if (isSavedObjectErrorResult(tag)) return [];
+    const result: ReadTags = { tags: [], literalTags: [] };
+    for (const tag of savedObjects) {
+      if (isSavedObjectErrorResult(tag)) {
+        result.literalTags.push(unreadable(tag.id));
+        continue;
+      }
       const {
         id,
+        managed,
         attributes: { name, color, description },
       } = tag;
-      return [{ resourceType, id, attributes: { name, color, description } }];
-    });
+      if (managed) {
+        result.literalTags.push({ id, reason: 'managed', name });
+        continue;
+      }
+      result.tags.push({ resourceType, id, attributes: { name, color, description } });
+    }
+    return result;
   } catch (e) {
-    if (SavedObjectsErrorHelpers.isForbiddenError(e)) return [];
+    if (SavedObjectsErrorHelpers.isForbiddenError(e)) {
+      return { tags: [], literalTags: ids.map(unreadable) };
+    }
     throw e;
   }
 };
@@ -138,22 +157,22 @@ export function registerTerraformRoute(
                 .map(({ id }) => id)
             ),
           ];
-          const tags = await readTags(savedObjects.client, tagIds, TAG_RESOURCE.type);
-          const { body, resources, links } = linkReferences(conversion, tags);
+          const { tags, literalTags } = await readTags(
+            savedObjects.client,
+            tagIds,
+            TAG_RESOURCE.type
+          );
+          const { body, resources } = linkReferences(conversion, tags);
           const responseBody: DashboardTerraformResponseBody = {
             resource_type: DASHBOARD_RESOURCE_TYPE,
             resource_name: toResourceName(req.body.dashboard.title ?? '', 'dashboard'),
             body,
             resources,
-            links: links.map(({ path, resourceType, resourceName }) => ({
-              path,
-              resource_type: resourceType,
-              resource_name: resourceName,
-            })),
             tag_resource: {
               type: TAG_RESOURCE.type,
               min_kibana_version: TAG_RESOURCE.minKibanaVersion,
             },
+            literal_tags: literalTags,
             dropped_fields: droppedFields,
             skipped_panels: skippedPanels,
             partial_panels: partialPanels.map(({ droppedFields: dropped, ...panel }) => ({

@@ -397,7 +397,7 @@ export interface ReferencedObject {
   attributes: JsonObject;
 }
 
-/** A resource written for a referenced object; it pins no ID, so applying creates a new object. */
+/** A resource written for a referenced object; it pins no ID, so applying it as written creates a new object. */
 export interface LinkedResource {
   type: string;
   /** Unique among the resources of its type in the module. */
@@ -409,17 +409,9 @@ export interface LinkedResource {
   body: JsonObject;
 }
 
-/** A body location that now holds a reference to a linked resource instead of a literal ID. */
-export interface Link {
-  path: TerraformPath;
-  resourceType: string;
-  resourceName: string;
-}
-
 export interface LinkedConversion {
   body: JsonObject;
   resources: LinkedResource[];
-  links: Link[];
 }
 
 const setAt = (value: JsonValue, [step, ...rest]: TerraformPath, leaf: JsonValue): JsonValue => {
@@ -439,7 +431,6 @@ export const linkReferences = (
   objects: readonly ReferencedObject[]
 ): LinkedConversion => {
   const resources: LinkedResource[] = [];
-  const links: Link[] = [];
   const taken = new Set<string>();
   const uniqueName = (type: string, base: string): string => {
     let name = base;
@@ -466,7 +457,6 @@ export const linkReferences = (
       resources.push(resource);
     }
     linked = setAt(linked, path, `\${${resourceType}.${resource.name}.${idAttribute}}`);
-    links.push({ path, resourceType, resourceName: resource.name });
   }
-  return { body: expectObject(linked, 'body'), resources, links };
+  return { body: expectObject(linked, 'body'), resources };
 };

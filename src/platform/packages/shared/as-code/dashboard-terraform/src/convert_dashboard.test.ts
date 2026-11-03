@@ -263,7 +263,7 @@ describe('createDashboardConverter', () => {
 
     it('points the tags at new tag resources that pin no ID; references are not escaped, tag text is', () => {
       const conversion = convert({ title: 'Costs ${env}', tags: ['tag-1', 'tag-2'] });
-      const { body, resources, links } = linkReferences(conversion, [
+      const { body, resources } = linkReferences(conversion, [
         tag('tag-1', 'Production', { description: 'Owned by ${team}' }),
         tag('tag-2', '100%{ok}', { color: '#000000' }),
       ]);
@@ -289,10 +289,6 @@ describe('createDashboardConverter', () => {
           body: { name: '100%%{ok}', color: '#000000', description: '' },
         },
       ]);
-      expect(links).toEqual([
-        { path: ['tags', 0], resourceType: 'elasticstack_kibana_tag', resourceName: 'production' },
-        { path: ['tags', 1], resourceType: 'elasticstack_kibana_tag', resourceName: '_100_ok' },
-      ]);
     });
 
     it('gives tags whose names make the same resource name distinct names', () => {
@@ -312,6 +308,26 @@ describe('createDashboardConverter', () => {
 
       expect(body.tags).toEqual(['${elasticstack_kibana_tag.production.tag_id}', 'missing-$${x}']);
       expect(resources.map(({ id }) => id)).toEqual(['tag-1']);
+    });
+
+    it('links the readable tags of a dashboard with several, leaving the managed and unreadable ones literal', () => {
+      // The route gives only the tags the user can read and Kibana does not manage.
+      const conversion = convert(fixture('several_tags'));
+      const { body, resources } = linkReferences(conversion, [
+        tag('tag-production', 'Production'),
+        tag('tag-team-a', 'Team A'),
+      ]);
+
+      expect(body.tags).toEqual([
+        '${elasticstack_kibana_tag.production.tag_id}',
+        '${elasticstack_kibana_tag.team_a.tag_id}',
+        'fleet-managed-default',
+        'tag-unreadable',
+      ]);
+      expect(resources.map(({ id, name }) => [id, name])).toEqual([
+        ['tag-production', 'production'],
+        ['tag-team-a', 'team_a'],
+      ]);
     });
   });
 

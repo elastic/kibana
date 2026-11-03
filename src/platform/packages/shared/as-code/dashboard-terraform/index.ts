@@ -20,7 +20,6 @@ export type {
   JsonObject,
   JsonStringPanel,
   JsonValue,
-  Link,
   LinkedConversion,
   LinkedResource,
   PanelSummary,
@@ -28,7 +27,6 @@ export type {
   Reference,
   ReferencedObject,
   SkippedPanel,
-  TerraformPath,
 } from './src/convert_dashboard';
 export { loadDashboardOas } from './src/dashboard_oas';
 export { DASHBOARD_RESOURCE_TYPE, TAG_RESOURCE, TERRAFORM_PROVIDER } from './src/provider';

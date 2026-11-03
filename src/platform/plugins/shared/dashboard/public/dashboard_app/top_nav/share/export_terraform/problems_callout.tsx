@@ -22,8 +22,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import type { AsCodeRelatedItem } from '@kbn/as-code-shared-schemas';
-import type { LinkedResource, PanelSummary } from '@kbn/as-code-dashboard-terraform';
+import type { PanelSummary } from '@kbn/as-code-dashboard-terraform';
 import type { DashboardTerraformResponseBody } from '../../../../../server';
+import type { ExportMode } from './module_files';
+import { exportedTags } from './module_files';
 import type { SanitizeDetails } from './use_terraform_export';
 
 export interface ProblemsInput {
@@ -31,8 +33,7 @@ export interface ProblemsInput {
   sanitized: SanitizeDetails;
   isDirty: boolean;
   isSaved: boolean;
-  /** The tag resources the module writes for the chosen mode. */
-  exportedTags: readonly LinkedResource[];
+  mode: ExportMode;
 }
 
 type Severity = 'danger' | 'warning' | 'info';
@@ -86,7 +87,7 @@ export const listProblems = ({
   sanitized,
   isDirty,
   isSaved,
-  exportedTags,
+  mode,
 }: ProblemsInput): Problem[] => {
   const {
     skipped_panels: skippedPanels,
@@ -94,17 +95,19 @@ export const listProblems = ({
     json_panels: jsonPanels,
     dropped_fields: droppedFields,
     tag_resource: tagResource,
+    literal_tags: literalTags,
   } = conversion;
   const { warnings = [] } = sanitized;
-  // Exported tags are not among the objects the module only refers to.
-  const exportedTagIds = new Set(exportedTags.map(({ id }) => id));
+  const tags = exportedTags(conversion);
+  // Exported tags and the tags named below are not counted among the objects the module only refers to.
+  const namedTagIds = new Set([...tags, ...literalTags].map(({ id }) => id));
   const allRelatedItems = sanitized.related_items ?? [];
   const relatedItems = allRelatedItems.filter(
-    ({ type, id }) => type !== 'tag' || !exportedTagIds.has(id)
+    ({ type, id }) => type !== 'tag' || !namedTagIds.has(id)
   );
-  const exportedTagCount = allRelatedItems.length - relatedItems.length;
+  const namedTagCount = allRelatedItems.length - relatedItems.length;
   const relatedItemsCount =
-    (sanitized.related_items_count ?? allRelatedItems.length) - exportedTagCount;
+    (sanitized.related_items_count ?? allRelatedItems.length) - namedTagCount;
   const droppedInPanels = new Set(partialPanels.flatMap((panel) => panel.dropped_fields));
 
   // The sanitize step leaves out panels the Dashboards API has no schema for, before conversion.
@@ -184,7 +187,23 @@ export const listProblems = ({
         />
       ),
     })),
-    ...(exportedTags.length
+    ...literalTags.map((tag) => ({
+      key: `literal-tag:${tag.id}`,
+      severity: 'warning' as const,
+      content:
+        tag.reason === 'managed'
+          ? i18n.translate('dashboard.exportTerraform.problems.managedTagDescription', {
+              defaultMessage:
+                'Tag “{name}” stays the literal ID {id}: Kibana manages it, so Terraform cannot.',
+              values: { name: tag.name, id: tag.id },
+            })
+          : i18n.translate('dashboard.exportTerraform.problems.unreadableTagDescription', {
+              defaultMessage:
+                'Tag {id} stays a literal ID: you cannot read it, or it does not exist.',
+              values: { id: tag.id },
+            }),
+    })),
+    ...(mode.kind === 'copy' && tags.length
       ? [
           {
             key: 'created-tags',
@@ -194,16 +213,20 @@ export const listProblems = ({
                 {i18n.translate('dashboard.exportTerraform.problems.createdTagsDescription', {
                   defaultMessage:
                     'A new copy creates {count, plural, one {# tag} other {# tags}}. Kibana refuses a tag whose name already exists, so apply fails if the target already has a tag with one of these names:',
-                  values: { count: exportedTags.length },
+                  values: { count: tags.length },
                 })}
                 <ul>
-                  {exportedTags.map(({ name, label }) => (
+                  {tags.map(({ name, label }) => (
                     <li key={name}>{label}</li>
                   ))}
                 </ul>
               </>
             ),
           },
+        ]
+      : []),
+    ...(tags.length
+      ? [
           {
             key: 'tags-target-version',
             severity: 'info' as const,

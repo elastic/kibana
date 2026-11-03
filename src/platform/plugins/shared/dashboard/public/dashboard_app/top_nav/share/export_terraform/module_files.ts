@@ -8,12 +8,7 @@
  */
 
 import JSZip from 'jszip';
-import type {
-  JsonObject,
-  JsonValue,
-  LinkedResource,
-  TerraformPath,
-} from '@kbn/as-code-dashboard-terraform';
+import type { JsonObject, LinkedResource } from '@kbn/as-code-dashboard-terraform';
 import type { DashboardTerraformResponseBody } from '../../../../../server';
 
 export interface ModuleFile {
@@ -46,45 +41,26 @@ const json = (value: object) => `${JSON.stringify(value, null, 2)}\n`;
 const escapeTemplate = (text: string): string =>
   text.replace(/\$\{/g, () => '$${').replace(/%\{/g, () => '%%{');
 
-/** The tag resources the module writes: a new copy creates the dashboard's readable tags; adopting writes none yet. */
-export const exportedTags = (
-  { resources, tag_resource: tagResource }: DashboardTerraformResponseBody,
-  mode: ExportMode
-): LinkedResource[] =>
-  mode.kind === 'copy' ? resources.filter(({ type }) => type === tagResource.type) : [];
+/** The tag resources the module writes: the dashboard's tags that are readable and not managed by Kibana. */
+export const exportedTags = ({
+  resources,
+  tag_resource: tagResource,
+}: DashboardTerraformResponseBody): LinkedResource[] =>
+  resources.filter(({ type }) => type === tagResource.type);
 
-// The same as the package's (which the browser cannot import): a path the route reported always exists.
-const setAt = (value: JsonValue, [step, ...rest]: TerraformPath, leaf: JsonValue): JsonValue => {
-  if (step === undefined) return leaf;
-  if (Array.isArray(value) && typeof step === 'number') {
-    return value.map((item, i) => (i === step ? setAt(item, rest, leaf) : item));
-  }
-  if (value && typeof value === 'object' && !Array.isArray(value) && typeof step === 'string') {
-    return { ...value, [step]: setAt(value[step], rest, leaf) };
-  }
-  throw new Error(`No value at ${JSON.stringify([step, ...rest])}`);
-};
-
-// The route links the body to every resource it wrote; a reference to a resource this mode does not write goes back
-// to the object's literal ID, escaped like the rest of the body.
-const dashboardBody = (
-  { body, links, resources }: DashboardTerraformResponseBody,
-  written: readonly LinkedResource[]
-): JsonObject =>
-  links.reduce<JsonObject>((linked, { path, resource_type: type, resource_name: name }) => {
-    const isWritten = written.some((r) => r.type === type && r.name === name);
-    const resource = resources.find((r) => r.type === type && r.name === name);
-    if (isWritten || !resource) return linked;
-    return setAt(linked, path, escapeTemplate(resource.id)) as JsonObject;
-  }, body);
+// Adopting pins each tag's ID and space, as it does the dashboard's; a new copy pins nothing.
+const tagResourceBody = ({ id, body }: LinkedResource, mode: ExportMode): JsonObject =>
+  mode.kind === 'adopt' ? { space_id: mode.spaceId, tag_id: escapeTemplate(id), ...body } : body;
 
 const firstPlan = (mode: ExportMode, tagCount: number) =>
   mode.kind === 'adopt'
-    ? `This module adopts the existing dashboard \`${mode.dashboardId}\` in space \`${mode.spaceId}\`:
+    ? `This module adopts the existing dashboard \`${mode.dashboardId}\` in space \`${
+        mode.spaceId
+      }\`:
 Terraform manages it in place from now on. \`${IMPORTS_FILE}\` imports it, so the first plan should
 show
 
-    Plan: 1 to import, 0 to add, 0 to change, 0 to destroy.
+    Plan: ${1 + tagCount} to import, 0 to add, 0 to change, 0 to destroy.
 
 A change in that plan means the export differs from the saved dashboard, for example because it
 includes unsaved changes; review it before you apply. You can delete \`${IMPORTS_FILE}\` after the
@@ -94,16 +70,24 @@ should show
 
     Plan: ${1 + tagCount} to add, 0 to change, 0 to destroy.`;
 
-const tagsSection = (count: number, minKibanaVersion: string): string =>
-  count
-    ? `
+const tagsSection = (mode: ExportMode, count: number, minKibanaVersion: string): string => {
+  if (!count) return '';
+  if (mode.kind === 'adopt') {
+    return `
+\`${TAGS_FILE}\` adopts the dashboard's tags (${count}) the same way, and \`${IMPORTS_FILE}\` imports
+each; the dashboard refers to them. The tags file requires the Kibana Terraform applies to to be
+${minKibanaVersion} or later. If it is older, delete \`${TAGS_FILE}\`, remove the tag imports from
+\`${IMPORTS_FILE}\`, and set the dashboard's \`tags\` in \`${MAIN_FILE}\` to the tags' IDs.
+`;
+  }
+  return `
 \`${TAGS_FILE}\` creates the dashboard's tags (${count}) as new tags, and the dashboard refers to them.
 The tags file requires the Kibana Terraform applies to to be ${minKibanaVersion} or later, and Kibana
 refuses a tag whose name already exists. If the target is older, or already has tags with these names,
 delete \`${TAGS_FILE}\` and set the dashboard's \`tags\` in \`${MAIN_FILE}\` to the IDs of existing tags.
 The tags are created in the dashboard's space; if you set a \`space_id\` on the dashboard, set the same on each tag.
-`
-    : '';
+`;
+};
 
 const readme = (
   { source, version }: DashboardTerraformResponseBody['provider'],
@@ -113,7 +97,7 @@ const readme = (
 ) => `# Dashboard exported from Kibana
 
 ${firstPlan(mode, tagCount)}
-${tagsSection(tagCount, minKibanaVersion)}
+${tagsSection(mode, tagCount, minKibanaVersion)}
 It was generated for the ${source} provider; \`versions.tf.json\` requires version
 ${version} or later. This export is a technical preview.
 
@@ -138,9 +122,9 @@ export const buildModuleFiles = (
     resource_type: resourceType,
     resource_name: resourceName,
     tag_resource: tagResource,
+    body,
   } = conversion;
-  const tags = exportedTags(conversion, mode);
-  const body = dashboardBody(conversion, tags);
+  const tags = exportedTags(conversion);
   return [
     {
       name: 'versions.tf.json',
@@ -180,7 +164,7 @@ export const buildModuleFiles = (
             content: json({
               resource: {
                 [tagResource.type]: Object.fromEntries(
-                  tags.map(({ name, body: tagBody }) => [name, tagBody])
+                  tags.map((tag) => [tag.name, tagResourceBody(tag, mode)])
                 ),
               },
             }),
@@ -198,6 +182,10 @@ export const buildModuleFiles = (
                   to: `${resourceType}.${resourceName}`,
                   id: escapeTemplate(`${mode.spaceId}/${mode.dashboardId}`),
                 },
+                ...tags.map(({ name, id }) => ({
+                  to: `${tagResource.type}.${name}`,
+                  id: escapeTemplate(`${mode.spaceId}/${id}`),
+                })),
               ],
             }),
           },
