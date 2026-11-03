@@ -59,10 +59,10 @@ const getTypeLabel = (cell: CellDefinition): string => {
   return TYPE_LABELS[kind];
 };
 
-const getStatusBorderColor = (
-  status: CellStatus,
-  { colors }: UseEuiTheme['euiTheme']
-): string | undefined => {
+const getBorderColor = (
+  status: CellStatus | undefined,
+  { colors, border }: UseEuiTheme['euiTheme']
+): string => {
   switch (status) {
     case 'stale':
       return colors.borderStrongWarning;
@@ -73,7 +73,7 @@ const getStatusBorderColor = (
     case 'blocked':
       return colors.borderStrongNeutral;
     default:
-      return undefined;
+      return border.color;
   }
 };
 
@@ -102,7 +102,7 @@ export const CellFrame = ({
 }: PropsWithChildren<CellFrameProps>) => {
   const { store } = useNotebook();
   const { euiTheme } = useEuiTheme();
-  const statusBorderColor = runtime && getStatusBorderColor(runtime.status, euiTheme);
+  const borderColor = getBorderColor(runtime?.status, euiTheme);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isRunMenuOpen, setIsRunMenuOpen] = useState(false);
   const closeMenu = () => setIsMenuOpen(false);
@@ -167,9 +167,12 @@ export const CellFrame = ({
       `}
     >
       <EuiPanel
-        hasBorder
+        hasBorder={false}
+        hasShadow={false}
         paddingSize="s"
-        css={statusBorderColor && { borderColor: statusBorderColor }}
+        css={css`
+          box-shadow: inset 0 0 0 ${euiTheme.border.width.thin} ${borderColor};
+        `}
         data-test-subj={`notebookCell-${cell.name}`}
       >
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
