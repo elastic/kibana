@@ -77,10 +77,10 @@ const TARGETS: Record<DoctorTarget, { title: string; location: DoctorLocation; r
 
 const getSections = (): DoctorSection[] => [
   { checks: [...environmentChecks, ...playwrightChecks] },
+  { target: 'local', checks: [...localServerChecks, ...esSnapshotChecks, ...dockerChecks] },
   { target: 'qaf', checks: [...qafChecks, ...getQafCloudChecks()] },
   // only when the config files for running Scout against Cloud without QAF exist
   { target: 'scout', checks: getScoutCloudChecks() },
-  { target: 'local', checks: [...localServerChecks, ...esSnapshotChecks, ...dockerChecks] },
 ];
 
 const ICONS: Record<CheckResult['status'], string> = {

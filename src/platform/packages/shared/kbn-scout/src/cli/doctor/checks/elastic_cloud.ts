@@ -24,6 +24,8 @@ import { tildify } from '../utils';
 // QAF reads Cloud credentials from this file, and EC_ENV picks the environment (qa by default)
 const CLOUD_SECRETS_FILE = Path.join(Os.homedir(), '.elastic/cloud.json');
 const getEnvironment = () => process.env.EC_ENV ?? 'qa';
+const QAF_ENVIRONMENTS = ['qa', 'staging', 'production'];
+const KIBANA_TIMEOUT_MS = 10_000;
 
 // Used for test setup, tests don't log in with it
 const SKIPPED_ROLES = ['system_indices_superuser'];
@@ -140,35 +142,29 @@ const getCopyFtrUsersFix = async (expected: string[]): Promise<Fix | undefined> 
   };
 };
 
-const cloudUsersCheck: DoctorCheck = {
-  title: 'Cloud users',
+const environmentCheck: DoctorCheck = {
+  title: 'Elastic Cloud environment',
   run: async () => {
     const env = getEnvironment();
-    const copyFix = await getCopyFtrUsersFix(['admin']);
-    if (!Fs.existsSync(CLOUD_SECRETS_FILE)) {
-      return fail(
-        `${tildify(CLOUD_SECRETS_FILE)} does not exist`,
-        copyFix
-          ? { fix: copyFix, hint: `copy them only if they are ${env} users` }
-          : { hint: `add Cloud users under role_credentials.${env}` }
-      );
+    if (!QAF_ENVIRONMENTS.includes(env)) {
+      return fail(`QAF doesn't support EC_ENV=${env}`, {
+        hint: `use one of ${QAF_ENVIRONMENTS.join(', ')}`,
+      });
     }
-    return checkUsers(
-      `${tildify(CLOUD_SECRETS_FILE)} (${env})`,
-      await readCloudUsers(),
-      ['admin'],
-      copyFix
+    return pass(
+      `Elastic Cloud environment ${env} (${
+        process.env.EC_ENV ? 'EC_ENV' : 'default, set EC_ENV to change'
+      })`
     );
   },
 };
 
-const cloudRolesCheck = (arch: DoctorArch): DoctorCheck => ({
+const cloudUsersCheck = (arch: DoctorArch): DoctorCheck => ({
   title: 'Cloud users',
   arch,
-  dependsOn: cloudUsersCheck,
+  dependsOn: environmentCheck,
   run: async () => {
-    // admin is checked for both architectures at once
-    const roles = getRoles(arch).filter((role) => role !== 'admin');
+    const roles = getRoles(arch);
     return checkUsers(
       `${tildify(CLOUD_SECRETS_FILE)} (${getEnvironment()})`,
       await readCloudUsers(),
@@ -180,14 +176,26 @@ const cloudRolesCheck = (arch: DoctorArch): DoctorCheck => ({
 
 const apiKeyCheck: DoctorCheck = {
   title: 'Elastic Cloud API key',
+  dependsOn: environmentCheck,
   run: async () => {
-    const env = getEnvironment();
+    if (!Fs.existsSync(CLOUD_SECRETS_FILE)) {
+      return fail(`${tildify(CLOUD_SECRETS_FILE)} does not exist`, {
+        hint: 'QAF reads the Elastic Cloud API key and Cloud users from it',
+      });
+    }
+
+    // the same key name as QAF uses, e.g. api_key.qa or api_key.<EC_API_KEY_SET>_qa
+    const keySet = process.env.EC_API_KEY_SET;
+    const keyName = keySet ? `${keySet}_${getEnvironment()}` : getEnvironment();
     const secrets = await readJson<CloudSecrets>(CLOUD_SECRETS_FILE);
-    return secrets?.api_key?.[env]
-      ? pass(`Elastic Cloud API key (${env}) is set in ${tildify(CLOUD_SECRETS_FILE)}`)
-      : fail(`No Elastic Cloud API key under api_key.${env} in ${tildify(CLOUD_SECRETS_FILE)}`, {
-          hint: 'QAF needs it to create projects and deployments',
-        });
+    return secrets?.api_key?.[keyName]
+      ? pass(`Elastic Cloud API key (${keyName}) is set in ${tildify(CLOUD_SECRETS_FILE)}`)
+      : fail(
+          `No Elastic Cloud API key under api_key.${keyName} in ${tildify(CLOUD_SECRETS_FILE)}`,
+          {
+            hint: 'QAF needs it to create projects and deployments',
+          }
+        );
   },
 };
 
@@ -249,6 +257,43 @@ const scoutUsersCheck = (arch: DoctorArch, configCheck: DoctorCheck): DoctorChec
   },
 });
 
+/** Projects and deployments get deleted, while the config pointing to them stays */
+const scoutKibanaCheck = (arch: DoctorArch, configCheck: DoctorCheck): DoctorCheck => ({
+  title: `Kibana in ${SCOUT_CLOUD_CONFIGS[arch]}`,
+  arch,
+  dependsOn: configCheck,
+  run: async () => {
+    const { hosts, auth } = ScoutTestConfigSchema.parse(
+      await readJson(Path.resolve(REPO_ROOT, SCOUT_CLOUD_CONFIGS[arch]))
+    );
+    const { host } = new URL(hosts.kibana);
+    const remedy = { hint: 'the project or deployment may be deleted, create a new one' };
+    try {
+      const response = await fetch(new URL('/api/status', hosts.kibana), {
+        headers: {
+          Authorization: `Basic ${Buffer.from(`${auth.username}:${auth.password}`).toString(
+            'base64'
+          )}`,
+        },
+        signal: AbortSignal.timeout(KIBANA_TIMEOUT_MS),
+      });
+      if (response.status === 401) {
+        return fail(`Kibana at ${host} rejects the credentials in auth`);
+      }
+      if (!response.ok) {
+        return fail(`Kibana at ${host} responds with ${response.status}`, remedy);
+      }
+      const { version } = await response.json();
+      return pass(`Kibana ${version?.number ?? ''} at ${host} is up`.replace('  ', ' '));
+    } catch (error) {
+      return fail(
+        `Kibana at ${host} is not reachable: ${error.cause?.code ?? error.message}`,
+        remedy
+      );
+    }
+  },
+});
+
 const qafRunFileCheck = (file: string, arch?: DoctorArch): DoctorCheck => ({
   title: 'Files that block QAF runs',
   arch,
@@ -277,9 +322,9 @@ const getQafRunFileChecks = (): DoctorCheck[] => {
 };
 
 export const getQafCloudChecks = (): DoctorCheck[] => [
+  environmentCheck,
   apiKeyCheck,
-  cloudUsersCheck,
-  ...DOCTOR_ARCHS.map(cloudRolesCheck),
+  ...DOCTOR_ARCHS.map(cloudUsersCheck),
   ...getQafRunFileChecks(),
 ];
 
@@ -287,5 +332,5 @@ export const getQafCloudChecks = (): DoctorCheck[] => [
 export const getScoutCloudChecks = (): DoctorCheck[] =>
   DOCTOR_ARCHS.filter((arch) => existsInRepo(SCOUT_CLOUD_CONFIGS[arch])).flatMap((arch) => {
     const configCheck = scoutConfigCheck(arch);
-    return [configCheck, scoutUsersCheck(arch, configCheck)];
+    return [configCheck, scoutKibanaCheck(arch, configCheck), scoutUsersCheck(arch, configCheck)];
   });
