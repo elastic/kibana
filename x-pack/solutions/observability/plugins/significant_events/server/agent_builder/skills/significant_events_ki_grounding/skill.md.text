@@ -256,7 +256,7 @@ One sample per rule proves whether its failure is happening now. Apply `<query_r
     `QSTR()` and multi-field conditions give none. It is decided from `{failure}` alone and picks the
     single-row sample; examples also need it usable: the sample result has a column of that
     name holding a string with a space.
-  - `off_topic` rule: its sample row's verdict is `off_topic` (`<verdicts>`). The isolating condition
+  - `off_topic` rule: its final sample's verdict is `off_topic` (`<verdicts>`). The isolating condition
     built from that row's observed error replaces `{failure}` in its second `spread` and its profile
     queries.
 - **One table decides every stage.** Tiers: 0 `spread`; 1 the sample; 2 `dimensions`, examples,
@@ -266,8 +266,8 @@ One sample per rule proves whether its failure is happening now. Apply `<query_r
 
   | Stage | Sent when |
   |---|---|
-  | `spread` (tier 0) | every rule except an aggregate KI, on the KI's own `{failure}`; an `off_topic` rule sends a second one after its sample (Definitions) |
-  | sample (tier 1) | after `spread`: `LIMIT 1` when the rule is not small and has a text field, else `LIMIT 3`; an aggregate KI keeps `LIMIT 2`; an authored KI limit at or below the one we would set stays instead of ours |
+  | `spread` (tier 0) | every rule except an aggregate KI, on the KI's own `{failure}`; an `off_topic` rule sends a second one after its final sample (Definitions) |
+  | sample (tier 1) | after `spread`: `LIMIT 1` when the rule is not small and has a text field, else `LIMIT 3`; an aggregate KI keeps `LIMIT 2`; an authored KI limit of 3 or fewer rows stays instead of ours |
   | re-sample | once, `LIMIT 3` (a new query, not a re-run), when a single-row sample does not show the rule's failure (healthy, or `off_topic`) or lacks a usable text-field column; never for an empty or errored sample, an authored limit of 3 or less, or an authored projection without the text field |
   | `dimensions` (tier 2) | the rule is not small (an `off_topic` rule too, after its own `spread`) and has 2 or more candidates |
   | examples (tier 2) | the rule is not small, not `off_topic`, and has a usable text field |
@@ -284,8 +284,9 @@ One sample per rule proves whether its failure is happening now. Apply `<query_r
     rule 2's sample and rule 3's `spread`). Each response starts with `queue: R{n} = {rule_uuid}
     {stage}, ...`; write the fields of each `dimensions` and `breakdown` after its name (`r1
     dimensions(a, b)`), each in the `candidates:` line.
-  - Exceptions: a re-sample takes the next sample slot, shifting later rules' samples by one response;
-    an `off_topic` rule's second `spread` goes in the next response and its tier 2 in the one after; an
+  - Exceptions: a re-sample takes the next sample slot, shifting later rules' samples by one response.
+    An `off_topic` rule's re-sample is its final confirmation; only when that re-sample is still
+    `off_topic` does its second `spread` go in the next response and its tier 2 in the one after. An
     aggregate KI is sampled in order with no `spread` before it; a small rule's `trend` and `baseline`
     follow its sample; a `dimensions` resend goes in the next response, after any re-sample, and that
     rule's `breakdown` waits for it.
@@ -297,8 +298,9 @@ One sample per rule proves whether its failure is happening now. Apply `<query_r
 - **Row-level queries** keep the authored KI shape: never add a `KEEP` projection or choose a text
   field in the sample query, and leave any authored projection unchanged. Otherwise append
   `| SORT @timestamp DESC | LIMIT 1` or `| LIMIT 3` as the table says, so the sample returns the most
-  recent matching logs, which is the current state the severity rests on. A stricter existing KI
-  limit stays.
+  recent matching logs, which is the current state the severity rests on. An authored limit of 3 or
+  fewer rows stays; when it has no preceding `SORT @timestamp DESC`, insert that sort immediately
+  before the limit.
 - **Aggregation queries** (`STATS`/`BY`) keep the aggregation and add `| LIMIT 2`; add no projection.
 - **Executed vs stored.** The ordering and limit are executed only. `evidence.esql_query` is stored
   as `<output_format>` specifies.
@@ -427,7 +429,7 @@ Reading `baseline`:
   service, dependency or target) and is at most 32
   characters of letters, digits and `._:-`; name anything else by its field and what it
   distinguishes. `dimensions` and `breakdown` take field names only from the `candidates:` line; the
-  the examples query takes the text field only from `{failure}` (Confirm step). Never group by an
+  examples query takes the text field only from `{failure}` (Confirm step). Never group by an
   expression over message text or by a high-cardinality field (IDs, URLs, timestamps).
 - **No isolating scope (`spread`, `dimensions`):** no `total` or `a_{field}`, and `{failure}` in a
   `WHERE` before the `STATS` (the `spread` example below shows it; `dimensions` follows it).
@@ -554,9 +556,10 @@ Each entry:
      where P is N/M × 100 rounded to one decimal place (for example `0.1%`, `37.5%`, `100.0%`), so
      downstream fields can copy P. Give the dimensions the failing rows carry, by their values (Reading `dimensions`)
      and, from the examples, how many failure messages differ (Reading examples). Services: when `{scope}` pins the service, say the rule is
-     scoped to it (never "the number of services is not measured"); when the service field is informative
-     in `dimensions`, the number of services reached is its `f` of `a`, stated next to their values; otherwise the services the sample names
-     are a lower bound and their number is not measured.
+     scoped to it (never "the number of services is not measured"); when `dimensions` measured the
+     service field, state the services it measured with its `f` and, in an isolating scope, its `a`,
+     including when the field is uniform; otherwise the services the sample names are a lower bound
+     and their number is not measured.
 
      A `spread`, `trend` or `baseline` figure that was not measured is stated as not measured; a
      figure that does not apply to the shape that ran is left out.
