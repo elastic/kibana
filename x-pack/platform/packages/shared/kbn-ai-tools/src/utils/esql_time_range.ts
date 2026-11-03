@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { esql, type ComposerQueryTagHole } from '@elastic/esql';
+import { esql } from '@elastic/esql';
+import type { ESQLAstExpression } from '@elastic/esql/types';
 
 const TIME_FIELD = '@timestamp';
 
@@ -19,7 +20,7 @@ const TIME_FIELD = '@timestamp';
  * to the coordinator first. An inline predicate is pushed to Lucene together
  * with the view's own `WHERE`.
  */
-export function esqlTimeRange(start: number, end: number): ComposerQueryTagHole {
+export function esqlTimeRange(start: number, end: number): ESQLAstExpression {
   const timeField = esql.col(TIME_FIELD);
   const rangeStart = esql.str(new Date(start).toISOString());
   const rangeEnd = esql.str(new Date(end).toISOString());
