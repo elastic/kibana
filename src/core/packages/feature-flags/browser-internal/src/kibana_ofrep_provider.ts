@@ -67,9 +67,11 @@ async function kibanaFetch(
     const result = await http.fetch(path, {
       method: request.method,
       body: await requestBody(request),
-      headers: Object.fromEntries(request.headers.entries()),
+      headers: forwardedHeaders(request),
       signal: request.signal,
       ...(Object.keys(query).length > 0 ? { query } : {}),
+      // A background poll must not count as user activity, or an open tab never idles out.
+      asSystemRequest: true,
       asResponse: true,
       rawResponse: true,
     });
@@ -84,6 +86,16 @@ async function kibanaFetch(
     }
     throw error;
   }
+}
+
+/**
+ * Kibana's HTTP client sets `Content-Type` itself. Forwarding the request's lowercase
+ * `content-type` as well makes the browser send both, and Kibana rejects that MIME type.
+ */
+function forwardedHeaders(request: Request): Record<string, string> {
+  return Object.fromEntries(
+    [...request.headers.entries()].filter(([name]) => name.toLowerCase() !== 'content-type')
+  );
 }
 
 /** An empty body stays unset so requests without a payload do not send one. */

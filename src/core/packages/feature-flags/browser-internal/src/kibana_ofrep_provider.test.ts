@@ -60,12 +60,10 @@ describe('createKibanaOfrepProvider', () => {
       expect.objectContaining({
         method: 'POST',
         body: '{"context":{}}',
+        asSystemRequest: true,
         asResponse: true,
         rawResponse: true,
-        headers: expect.objectContaining({
-          'content-type': 'application/json; charset=utf-8',
-          'if-none-match': '"etag"',
-        }),
+        headers: { 'if-none-match': '"etag"' },
       })
     );
   });

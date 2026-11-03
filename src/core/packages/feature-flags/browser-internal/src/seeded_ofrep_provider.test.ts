@@ -10,6 +10,7 @@
 import {
   ClientProviderEvents,
   OpenFeatureEventEmitter,
+  ProviderFatalError,
   type EvaluationContext,
   type JsonValue,
   type ResolutionDetails,
@@ -27,11 +28,13 @@ describe('SeededOfrepWebProvider', () => {
     const delegate = {
       events,
       flagCache: {} as Record<string, { value?: unknown; errorCode?: string }>,
-      initialize: (_context?: EvaluationContext, _domain?: string) =>
-        new Promise<void>((resolve, reject) => {
-          resolveInit = resolve;
-          rejectInit = reject;
-        }),
+      initialize: jest.fn(
+        (_context?: EvaluationContext, _domain?: string) =>
+          new Promise<void>((resolve, reject) => {
+            resolveInit = resolve;
+            rejectInit = reject;
+          })
+      ),
       onContextChange: jest.fn(),
       onClose: jest.fn(),
       resolveBooleanEvaluation: jest.fn(
@@ -147,6 +150,71 @@ describe('SeededOfrepWebProvider', () => {
       reason: 'CACHED',
     });
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('network down'));
+    await provider.onClose();
+  });
+
+  test('serves the live evaluation after a failed activation recovers', async () => {
+    jest.useFakeTimers();
+    try {
+      const { delegate, rejectInit, resolveInit } = createDelegate();
+      const provider = new SeededOfrepWebProvider({
+        ofrep: { ...ofrep, pollInterval: 10_000 },
+        initialFlags: { 'my.flag': true },
+        createProvider: () => delegate,
+      });
+      const flagsChanged: string[][] = [];
+      provider.events.addHandler(ClientProviderEvents.ConfigurationChanged, (details) => {
+        flagsChanged.push((details?.flagsChanged ?? []) as string[]);
+      });
+
+      const starting = provider.initialize();
+      rejectInit(new Error('network down'));
+      await starting;
+      expect(delegate.initialize).toHaveBeenCalledTimes(1);
+
+      delegate.flagCache = { 'my.flag': { value: false } };
+      await jest.advanceTimersByTimeAsync(10_000);
+      resolveInit();
+      await Promise.resolve();
+
+      expect(flagsChanged).toEqual([['my.flag']]);
+      provider.resolveBooleanEvaluation('my.flag', true, {});
+      expect(delegate.resolveBooleanEvaluation).toHaveBeenCalledWith(
+        'my.flag',
+        true,
+        {},
+        undefined
+      );
+      await provider.onClose();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  test('does not retry an irrecoverable provider error', async () => {
+    jest.useFakeTimers();
+    try {
+      const { delegate, rejectInit } = createDelegate();
+      const provider = new SeededOfrepWebProvider({
+        ofrep: { ...ofrep, pollInterval: 10_000 },
+        initialFlags: { 'my.flag': true },
+        createProvider: () => delegate,
+      });
+
+      const starting = provider.initialize();
+      rejectInit(new ProviderFatalError('unauthorized'));
+      await starting;
+      await jest.advanceTimersByTimeAsync(10_000);
+
+      expect(delegate.initialize).toHaveBeenCalledTimes(1);
+      expect(provider.resolveBooleanEvaluation('my.flag', false, {})).toEqual({
+        value: true,
+        reason: 'CACHED',
+      });
+      await provider.onClose();
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   test('fails initialization when there is no injected flag and the fetch fails', async () => {
@@ -160,6 +228,7 @@ describe('SeededOfrepWebProvider', () => {
     const starting = provider.initialize();
     rejectInit(new Error('network down'));
     await expect(starting).rejects.toThrow('network down');
+    await provider.onClose();
   });
 
   test('forwards later context changes to the OFREP provider', async () => {

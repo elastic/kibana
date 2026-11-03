@@ -21,10 +21,14 @@ import {
   ClientProviderEvents,
   ErrorCode,
   OpenFeatureEventEmitter,
+  ProviderFatalError,
   StandardResolutionReasons,
 } from '@openfeature/web-sdk';
 
 type FlagValueType = 'boolean' | 'string' | 'number' | 'object';
+
+/** Delay before retrying a failed activation when the provider has no poll interval. */
+const DEFAULT_RETRY_DELAY_MS = 10_000;
 
 interface CachedEvaluation {
   value?: unknown;
@@ -116,13 +120,20 @@ export class SeededOfrepWebProvider implements Provider {
   private published: Record<string, unknown>;
   private context?: EvaluationContext;
   private domain?: string;
+  private readonly retryDelayMs: number;
   private delegating = false;
   private closed = false;
+  private reportedFailure = false;
+  private retryTimer: ReturnType<typeof setTimeout> | undefined;
 
   constructor(options: SeededOfrepWebProviderOptions) {
     this.initialFlags = options.initialFlags;
     this.published = { ...options.initialFlags };
     this.logger = options.logger;
+    this.retryDelayMs =
+      typeof options.ofrep.pollInterval === 'number' && options.ofrep.pollInterval > 0
+        ? options.ofrep.pollInterval
+        : DEFAULT_RETRY_DELAY_MS;
     // The web provider otherwise resolves initialize() from its persisted cache.
     const ofrepOptions: OFREPWebProviderOptions = {
       ...options.ofrep,
@@ -158,6 +169,7 @@ export class SeededOfrepWebProvider implements Provider {
 
   async onClose(): Promise<void> {
     this.closed = true;
+    this.clearRetry();
     await this.inner.onClose?.();
   }
 
@@ -223,18 +235,41 @@ export class SeededOfrepWebProvider implements Provider {
         this.publishDivergence();
       })
       .catch((error: unknown) => {
-        this.logger?.warn(
-          `OFREP provider failed to initialize: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-        this.events.emit(ClientProviderEvents.Error, {
-          message: error instanceof Error ? error.message : String(error),
-        });
+        const message = error instanceof Error ? error.message : String(error);
+        this.logger?.warn(`OFREP provider failed to initialize: ${message}`);
+        if (!this.reportedFailure) {
+          this.reportedFailure = true;
+          this.events.emit(ClientProviderEvents.Error, { message });
+        }
+        // The web provider only polls after a successful initialize, so a failed first request never recovers on its own.
+        if (!this.closed && !(error instanceof ProviderFatalError)) {
+          this.scheduleRetry();
+        }
         if (Object.keys(this.initialFlags).length === 0) {
           throw error;
         }
       });
+  }
+
+  /** Tries activation again after a transient failure. A fatal provider error is not retried. */
+  private scheduleRetry(): void {
+    if (this.retryTimer !== undefined || this.closed || this.delegating) {
+      return;
+    }
+    this.retryTimer = setTimeout(() => {
+      this.retryTimer = undefined;
+      if (this.closed || this.delegating) {
+        return;
+      }
+      void this.activate();
+    }, this.retryDelayMs);
+  }
+
+  private clearRetry(): void {
+    if (this.retryTimer !== undefined) {
+      clearTimeout(this.retryTimer);
+      this.retryTimer = undefined;
+    }
   }
 
   private forwardEvents(): void {
