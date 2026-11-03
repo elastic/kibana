@@ -43,6 +43,8 @@ export const NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES: Readonly<Record<string, 
           'feature_agentBuilder.invoke_bound_agents',
           'feature_actions.read',
           'feature_workflowsManagement.read',
+          'feature_alerting_v2_rules.read',
+          'feature_alerting_v2_alerts.read',
         ],
         resources: ['*'],
       },
@@ -53,13 +55,6 @@ export const NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES: Readonly<Record<string, 
     description:
       'Privileges for the service account of Nightshift automations. Assigned by Kibana; do not assign to users.',
     cluster: ['monitor_inference'],
-    indices: [
-      {
-        names: ['.rule-events'],
-        privileges: ['read', 'view_index_metadata'],
-        allow_restricted_indices: false,
-      },
-    ],
     applications: [
       {
         application: 'kibana-.kibana',
@@ -67,6 +62,7 @@ export const NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES: Readonly<Record<string, 
           'feature_agenticInvestigations.minimal_read',
           'feature_agenticInvestigations.investigations_all',
           'feature_alerting_v2_rules.read',
+          'feature_alerting_v2_alerts.read',
           'feature_agentBuilder.minimal_all',
           // Running an agent bound to a service account needs this sub-feature privilege;
           // `minimal_all` does not include it. See kibana#300175.
