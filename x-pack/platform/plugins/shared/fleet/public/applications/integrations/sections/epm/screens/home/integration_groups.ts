@@ -28,7 +28,7 @@ export const INTEGRATION_GROUPS: Record<string, IntegrationGroup> = {
     }),
     description: i18n.translate('xpack.fleet.integrationGroups.nginx.description', {
       defaultMessage:
-        'Collect logs and metrics from Nginx web servers using Elastic Agent. Choose from ECS-based, OTel-based, or Nginx Ingress Controller collection.',
+        'Collect logs and metrics from Nginx web servers using Elastic Agent. Choose from ECS-based or OTel-based collection.',
     }),
     icons: [],
   },

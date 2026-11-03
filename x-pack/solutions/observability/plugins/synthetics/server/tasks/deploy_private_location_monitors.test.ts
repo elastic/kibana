@@ -366,6 +366,59 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
         expect.stringContaining('Failed to create policies during sync')
       );
     });
+
+    it('logs failed updates with the policy, monitor and error, without failing the sync', async () => {
+      const editMonitors = jest.fn().mockResolvedValue({
+        failedUpdates: [
+          {
+            packagePolicy: { id: 'p1' },
+            config: { id: 'm1-0' },
+            error: new Error('policy update rejected'),
+          },
+        ],
+        failedCreates: [],
+      });
+      const { deployer } = buildDeployer({ pages: [['m1'], ['m2']], editMonitors });
+
+      await syncForMws(deployer, ['mw-1']);
+
+      expect(editMonitors).toHaveBeenCalledTimes(2);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining(
+          '"policyId":"p1","monitorId":"m1-0","error":"policy update rejected"'
+        )
+      );
+    });
+  });
+
+  describe('syncAllPackagePolicies failed updates', () => {
+    it('logs them without reporting them as failed creates', async () => {
+      const editMonitors = jest.fn().mockResolvedValue({
+        failedUpdates: [
+          { packagePolicy: { id: 'p1' }, error: new Error('policy update rejected') },
+        ],
+        failedCreates: [],
+      });
+      const { deployer } = buildDeployer({ pages: [], editMonitors });
+
+      jest.spyOn(deployer, 'getAllMonitorConfigs').mockResolvedValue({
+        configsBySpaces: { space1: [{ id: 'm1' }] },
+        monitorSpaceIds: new Set(['space1']),
+        paramsBySpace: {},
+        maintenanceWindows: [],
+      } as any);
+
+      await expect(
+        deployer.syncAllPackagePolicies({
+          allPrivateLocations: privateLocations,
+          soClient: mockSoClient as any,
+          encryptedSavedObjects: mockEncryptedSo,
+        })
+      ).resolves.toEqual({ failedCreatesBySpace: [] });
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to update 1 policies during sync for space space1')
+      );
+    });
   });
 });
 

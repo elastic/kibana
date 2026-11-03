@@ -113,25 +113,25 @@ export const ErrorInsightsPanel = ({
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="m" wrap>
         {hasEmergingTerms && (
-          <EuiFlexItem grow={3} style={{ minWidth: 320 }}>
+          <EuiFlexItem grow={3} style={{ minWidth: 'min(320px, 100%)' }}>
             <EmergingTermsCard terms={insights.emergingTerms} onFilter={filterByQuery} />
           </EuiFlexItem>
         )}
-        <EuiFlexItem grow={2} style={{ minWidth: 280 }}>
+        <EuiFlexItem grow={2} style={{ minWidth: 'min(280px, 100%)' }}>
           <FailingDomainsCard domains={insights.failingDomains} onFilter={filterByQuery} />
         </EuiFlexItem>
-        <EuiFlexItem grow={1} style={{ minWidth: 180 }}>
+        <EuiFlexItem grow={1} style={{ minWidth: 'min(180px, 100%)' }}>
           <MonitorTypeCard
             types={insights.monitorTypeStats}
             onFilter={toggleMonitorType}
             selected={selectedMonitorTypes}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
+        <EuiFlexItem grow={1} style={{ minWidth: 'min(200px, 100%)' }}>
           <TagBreakdownCard tags={insights.tagStats} onFilter={toggleTag} selected={selectedTags} />
         </EuiFlexItem>
         {hasStatusCodes && (
-          <EuiFlexItem grow={1} style={{ minWidth: 180 }}>
+          <EuiFlexItem grow={1} style={{ minWidth: 'min(180px, 100%)' }}>
             <StatusCodesCard
               codes={insights.statusCodes}
               onFilter={toggleStatusCode}
@@ -342,8 +342,12 @@ const FailingDomainsCard = ({
             margin-bottom: 6px;
           `}
         >
-          <EuiFlexItem>
-            <EuiToolTip content={FILTER_BY_DOMAIN_HINT}>
+          <EuiFlexItem
+            css={css`
+              min-width: 0;
+            `}
+          >
+            <EuiToolTip content={FILTER_BY_DOMAIN_HINT} display="block">
               <EuiLink
                 data-test-subj="syntheticsFailingDomainsCardLink"
                 onClick={() => onFilter(d.domain)}
@@ -419,8 +423,15 @@ const TagBreakdownCard = ({
             ? 'warning'
             : 'hollow';
           return (
-            <EuiFlexItem key={t.tag} grow={false}>
+            <EuiFlexItem
+              key={t.tag}
+              grow={false}
+              css={css`
+                min-width: 0;
+              `}
+            >
               <EuiToolTip
+                display="block"
                 content={`${t.downChecks} errors / ${t.totalChecks} checks (${pct}%) — ${
                   isSelected ? CLICK_TO_REMOVE_FILTER : CLICK_TO_FILTER
                 }`}

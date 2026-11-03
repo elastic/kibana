@@ -52,7 +52,12 @@ import {
 } from '../components/iac_key_check';
 import { LaunchCloudFormationButton } from '../components/launch_cloud_formation_button';
 import { StackArnField } from '../components/stack_arn_field';
-import { getCloudConnectorNameError, isStackArnInvalid } from '../utils';
+import {
+  INVALID_ROLE_ARN_MESSAGE,
+  getCloudConnectorNameError,
+  isRoleArnInvalid,
+  isStackArnInvalid,
+} from '../utils';
 import { TABS } from '../constants';
 
 export interface AwsIdentityFederationSetupProps {
@@ -166,6 +171,8 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   // Validate what Create will post: a pasted ARN often carries surrounding whitespace.
   const trimmedStackArn = stackArn.trim();
   const stackArnInvalid = isStackArnInvalid(stackArn);
+  const trimmedRoleArn = roleArn.trim();
+  const roleArnFormatInvalid = isRoleArnInvalid(roleArn);
 
   // Two ways to a new identity. Launch creates a record the stack reports to, and the server
   // creates the identity from that report; while the form waits, the ARN fields are locked and
@@ -385,7 +392,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
       cloudProvider: 'aws',
       accountType,
       vars: {
-        role_arn: { value: roleArn, type: 'text' },
+        role_arn: { value: trimmedRoleArn, type: 'text' },
       },
       ...(hasPendingIacConfirm(iacConfirm) ? iacConfirm : {}),
       ...(trimmedStackArn && !stackArnInvalid ? { iac_deployment_id: trimmedStackArn } : {}),
@@ -396,13 +403,14 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     createConnector,
     connectorName,
     accountType,
-    roleArn,
+    trimmedRoleArn,
     iacConfirm,
     trimmedStackArn,
     stackArnInvalid,
   ]);
 
-  const roleArnInvalid = hasInvalidRequiredVars && !roleArn;
+  const roleArnRequiredInvalid = hasInvalidRequiredVars && !trimmedRoleArn;
+  const roleArnInvalid = roleArnRequiredInvalid || roleArnFormatInvalid;
   // When the stack can report back, the record it reports to must already carry the name, so
   // Launch needs one. Without the callback the name is only needed at Create.
   const isLaunchMissingName = isCallbackAvailable && !!getCloudConnectorNameError(connectorName);
@@ -412,7 +420,8 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   const isCreateDisabled =
     isManualEntryLocked ||
     isGeneratingTemplate ||
-    !roleArn ||
+    !trimmedRoleArn ||
+    roleArnFormatInvalid ||
     !!getCloudConnectorNameError(connectorName) ||
     stackArnInvalid;
 
@@ -591,10 +600,12 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
               })}
               isInvalid={roleArnInvalid}
               error={
-                roleArnInvalid
+                roleArnRequiredInvalid
                   ? i18n.translate('xpack.fleet.awsIdentityFederationSetup.roleArnRequired', {
                       defaultMessage: 'Role ARN is required',
                     })
+                  : roleArnFormatInvalid
+                  ? INVALID_ROLE_ARN_MESSAGE
                   : undefined
               }
               fullWidth

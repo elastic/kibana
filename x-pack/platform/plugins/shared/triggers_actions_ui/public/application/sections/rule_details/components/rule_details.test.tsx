@@ -553,12 +553,21 @@ describe('rule_details', () => {
           interval: '1s',
         },
       });
-      renderRuleDetails(
-        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-      );
+      renderPage(rule);
 
       await waitFor(() => {
-        expect(useKibanaMock().services.notifications.toasts.addInfo).toHaveBeenCalled();
+        expect(useKibanaMock().services.notifications.toasts.addInfo).toHaveBeenCalledWith(
+          expect.objectContaining({
+            'data-test-subj': 'intervalConfigToast',
+            title: 'Configuration settings',
+            actionProps: {
+              primary: expect.objectContaining({
+                'data-test-subj': 'ruleIntervalToastEditButton',
+                children: 'Edit rule',
+              }),
+            },
+          })
+        );
       });
     });
 

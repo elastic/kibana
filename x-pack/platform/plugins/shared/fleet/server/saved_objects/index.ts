@@ -65,6 +65,8 @@ import {
   CloudOnboardingDeploymentSchemaV3,
   CloudOnboardingDeploymentSchemaV4,
   CloudOnboardingDeploymentSchemaV5,
+  CloudOnboardingDeploymentSchemaV6,
+  CloudOnboardingDeploymentSchemaV7,
   ProvisioningCallbackSchemaV1,
 } from '../types';
 
@@ -2162,6 +2164,8 @@ export const getSavedObjectTypes = (
         dynamic: false,
         properties: {
           connectorId: { type: 'keyword', ignore_above: 1024 },
+          provider: { type: 'keyword', ignore_above: 1024 },
+          packageNames: { type: 'keyword', ignore_above: 1024 },
         },
       },
       modelVersions: {
@@ -2212,8 +2216,7 @@ export const getSavedObjectTypes = (
           },
         },
         5: {
-          // pendingAgentlessPolicies: requests stored at Launch for the server to replay when the
-          // stack reports back. Not indexed, so no mappings_addition.
+          // Added instances. No mappings_addition — it is not indexed (dynamic: false).
           changes: [],
           schemas: {
             forwardCompatibility: CloudOnboardingDeploymentSchemaV5.extends(
@@ -2221,6 +2224,39 @@ export const getSavedObjectTypes = (
               { unknowns: 'ignore' }
             ),
             create: CloudOnboardingDeploymentSchemaV5,
+          },
+        },
+        6: {
+          // Added packageNames + serviceNames + updatedBy. packageNames and provider become queryable
+          // keywords so the list API can filter deployments per package. Existing documents have no
+          // packageNames and are treated as empty — no data_backfill.
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                provider: { type: 'keyword', ignore_above: 1024 },
+                packageNames: { type: 'keyword', ignore_above: 1024 },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV6.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV6,
+          },
+        },
+        7: {
+          // Added pendingAgentlessPolicies: requests stored at Launch for the server to replay
+          // when the stack reports back. Not indexed, so no mappings_addition.
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV7.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV7,
           },
         },
       },

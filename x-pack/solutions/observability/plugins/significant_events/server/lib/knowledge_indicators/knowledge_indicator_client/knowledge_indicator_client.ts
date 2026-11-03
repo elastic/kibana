@@ -80,7 +80,8 @@ export class KnowledgeIndicatorClient {
       deps.logger,
       config,
       revisionReader,
-      deps.space
+      deps.space,
+      deps.searchEmbeddingModelResolver
     );
     this.orchestrator = new QueryRuleOrchestrator(
       alertingContext.rulesClient,
