@@ -34,7 +34,7 @@ const ActionListEditorComponent: React.FC = () => {
       <EuiText size="xs" color="subdued">
         <FormattedMessage
           id="xpack.triggersActionsUI.sections.buildConnectorFlyout.actionsDescription"
-          defaultMessage="The HTTP requests this connector type can make. A rule picks one and provides its params."
+          defaultMessage="The HTTP requests this connector type can make. A rule picks one and provides its input values."
         />
       </EuiText>
       {fields.map((item, index) => (

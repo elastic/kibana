@@ -40,7 +40,7 @@ const EDITOR_OPTIONS: CodeEditorProps['options'] = {
 };
 
 /** Example shown while the editor is empty; mirrors the request body shape (config is a list, actions a map). */
-const YAML_EXAMPLE = `id: .my_service
+const YAML_EXAMPLE = `id: my_service
 displayName: My Service
 description: Sends notifications to My Service
 auth:
@@ -64,7 +64,7 @@ actions:
       headers:
         Content-Type: application/json
       body:
-        text: "{{params.message}}"`;
+        text: "{{input.message}}"`;
 
 const parseYaml = (yaml: string): ParsedYaml => {
   if (!yaml.trim()) {

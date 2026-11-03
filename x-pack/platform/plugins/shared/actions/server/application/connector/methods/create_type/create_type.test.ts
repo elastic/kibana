@@ -116,4 +116,129 @@ describe('createConnectorType', () => {
       expect.objectContaining({ url: 'https://example.test/items' })
     );
   });
+
+  it('preserves typed whole-value placeholders in JSON bodies and interpolates embedded values as strings', async () => {
+    const createTypeFromSpec = jest.fn(() => ({ id: '.dynamic_type' })) as never;
+    createConnectorType({
+      actionTypeRegistry: { has: jest.fn(() => false) } as unknown as ActionTypeRegistry,
+      createTypeFromSpec,
+      registerType: jest.fn(),
+      request: {
+        ...request,
+        actions: {
+          submit: {
+            ...request.actions.getItem,
+            input: [
+              { name: 'ids', type: 'array', items: 'number', required: true },
+              { name: 'enabled', type: 'boolean', required: true },
+              { name: 'count', type: 'number', required: true },
+            ],
+            request: {
+              method: 'POST',
+              url: 'https://example.test/items',
+              body: {
+                ids: '{{input.ids}}',
+                enabled: '{{input.enabled}}',
+                count: 'count={{input.count}}',
+              },
+            },
+          },
+        },
+      },
+    });
+    const spec = (createTypeFromSpec as jest.Mock).mock.calls[0][0] as ConnectorSpec;
+    const client = { request: jest.fn().mockResolvedValue({ data: {} }) };
+
+    await spec.actions.submit.handler({ config: {}, secrets: {}, client } as never, {
+      ids: [2, 5],
+      enabled: true,
+      count: 3,
+    });
+
+    expect(client.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: { ids: [2, 5], enabled: true, count: 'count=3' },
+      })
+    );
+  });
+
+  it('maps multiple auth choices, array config fields, and an HTTP connector test', async () => {
+    const createTypeFromSpec = jest.fn(() => ({ id: '.dynamic_type' })) as never;
+    createConnectorType({
+      actionTypeRegistry: { has: jest.fn(() => false) } as unknown as ActionTypeRegistry,
+      createTypeFromSpec,
+      registerType: jest.fn(),
+      request: {
+        ...request,
+        config: [{ name: 'hosts', type: 'array', items: 'string', required: true }],
+        auth: { types: ['basic', { type: 'api_key_header', defaults: { headerField: 'X-Key' } }] },
+        test: { description: 'Ping', request: { method: 'GET', url: 'https://example.test/ping' } },
+      },
+    });
+    const spec = (createTypeFromSpec as jest.Mock).mock.calls[0][0] as ConnectorSpec;
+    expect(spec.auth?.types).toEqual([
+      'basic',
+      { type: 'api_key_header', defaults: { headerField: 'X-Key' } },
+    ]);
+    const schema = spec.schema;
+    if (!schema) throw new Error('Expected connector config schema.');
+    expect(schema.safeParse({ hosts: ['a', 'b'] }).success).toBe(true);
+    expect(schema.safeParse({ hosts: Array.from({ length: 101 }, () => 'host') }).success).toBe(
+      false
+    );
+    const client = { request: jest.fn().mockResolvedValue({ data: { ok: true } }) };
+    await spec.test.handler({ config: {}, secrets: {}, client } as never);
+    expect(client.request).toHaveBeenCalledWith(
+      expect.objectContaining({ url: 'https://example.test/ping' })
+    );
+  });
+
+  it('maps legacy API key auth to ConnectorSpec defaults', () => {
+    const createTypeFromSpec = jest.fn(() => ({ id: '.dynamic_type' })) as never;
+    createConnectorType({
+      actionTypeRegistry: { has: jest.fn(() => false) } as unknown as ActionTypeRegistry,
+      createTypeFromSpec,
+      registerType: jest.fn(),
+      request: { ...request, auth: { type: 'api_key_header', headerName: 'X-API-Key' } },
+    });
+    const spec = (createTypeFromSpec as jest.Mock).mock.calls[0][0] as ConnectorSpec;
+    expect(spec.auth?.types).toEqual([
+      { type: 'api_key_header', defaults: { headerField: 'X-API-Key' } },
+    ]);
+  });
+
+  it('enforces URI, IPv4, and date-time config formats in the generated schema', () => {
+    const createTypeFromSpec = jest.fn(() => ({ id: '.dynamic_type' })) as never;
+    createConnectorType({
+      actionTypeRegistry: { has: jest.fn(() => false) } as unknown as ActionTypeRegistry,
+      createTypeFromSpec,
+      registerType: jest.fn(),
+      request: {
+        ...request,
+        config: [
+          { name: 'endpoint', type: 'string', format: 'uri', required: true },
+          { name: 'address', type: 'string', format: 'ipv4', required: true },
+          { name: 'createdAt', type: 'string', format: 'date-time', required: true },
+        ],
+      },
+    });
+    const spec = (createTypeFromSpec as jest.Mock).mock.calls[0][0] as ConnectorSpec;
+    const schema = spec.schema;
+    if (!schema) throw new Error('Expected connector config schema.');
+
+    expect(
+      schema.safeParse({
+        endpoint: 'https://example.test',
+        address: '192.0.2.1',
+        createdAt: '2026-11-03T12:00:00Z',
+      }).success
+    ).toBe(true);
+    expect(
+      schema.safeParse({
+        endpoint: 'not a URI',
+        address: '999.0.2.1',
+        createdAt: 'yesterday',
+      }).success
+    ).toBe(false);
+  });
 });

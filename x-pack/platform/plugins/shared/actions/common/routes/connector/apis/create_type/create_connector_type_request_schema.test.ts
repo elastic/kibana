@@ -36,6 +36,76 @@ describe('createConnectorTypeRequestSchema', () => {
     expect(result.config[0].required).toBe(true);
   });
 
+  it('accepts bounded array fields, supported string formats, multiple auth types, and a test request', () => {
+    const result = createConnectorTypeRequestSchema.safeParse({
+      ...validRequest,
+      config: [
+        { name: 'baseUrl', type: 'string', required: true, format: 'uri' },
+        { name: 'addresses', type: 'array', items: 'string', format: undefined },
+      ],
+      auth: { types: ['basic', { type: 'api_key_header', defaults: { headerField: 'X-Key' } }] },
+      test: {
+        description: 'Check credentials',
+        request: {
+          method: 'GET',
+          url: '{{config.baseUrl}}/ping',
+          headers: { 'X-Key': '{{secrets.apiKey}}' },
+        },
+      },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('requires an item type for arrays and rejects unsupported formats', () => {
+    expect(
+      createConnectorTypeRequestSchema.safeParse({
+        ...validRequest,
+        config: [{ name: 'values', type: 'array' }],
+      }).success
+    ).toBe(false);
+    expect(
+      createConnectorTypeRequestSchema.safeParse({
+        ...validRequest,
+        config: [{ name: 'date', type: 'string', format: 'password' }],
+      }).success
+    ).toBe(false);
+  });
+
+  it('rejects duplicate auth type IDs across string and object definitions', () => {
+    expect(
+      createConnectorTypeRequestSchema.safeParse({
+        ...validRequest,
+        auth: { types: ['basic', { type: 'basic' }] },
+      }).success
+    ).toBe(false);
+  });
+
+  it('validates test request references against config and auth, and rejects input references', () => {
+    const base = {
+      ...validRequest,
+      test: { request: { method: 'GET', url: '{{config.baseUrl}}/ping' } },
+    };
+    expect(createConnectorTypeRequestSchema.safeParse(base).success).toBe(true);
+    expect(
+      createConnectorTypeRequestSchema.safeParse({
+        ...base,
+        test: { request: { method: 'GET', url: 'https://example.test/{{input.orderId}}' } },
+      }).success
+    ).toBe(false);
+    expect(
+      createConnectorTypeRequestSchema.safeParse({
+        ...base,
+        test: {
+          request: {
+            method: 'GET',
+            url: 'https://example.test/ping',
+            headers: { Authorization: '{{secrets.password}}' },
+          },
+        },
+      }).success
+    ).toBe(false);
+  });
+
   it('does not accept a caller-supplied minimum license', () => {
     expect(
       createConnectorTypeRequestSchema.safeParse({
@@ -58,6 +128,9 @@ describe('createConnectorTypeRequestSchema', () => {
   it('requires the response id to include the dot prefix', () => {
     expect(createConnectorTypeResponseSchema.parse({ id: '.acme_orders' }).id).toBe('.acme_orders');
     expect(createConnectorTypeResponseSchema.safeParse({ id: 'acme_orders' }).success).toBe(false);
+    expect(createConnectorTypeResponseSchema.safeParse({ id: `.${'a'.repeat(127)}` }).success).toBe(
+      true
+    );
   });
 
   it('rejects unknown template roots and malformed template braces', () => {

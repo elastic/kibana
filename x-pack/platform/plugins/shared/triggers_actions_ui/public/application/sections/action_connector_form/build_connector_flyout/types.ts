@@ -7,7 +7,10 @@
 
 import type { CreateConnectorTypeRequest } from '@kbn/actions-plugin/common';
 
-export type ConnectorTypeAuthType = CreateConnectorTypeRequest['auth']['type'];
+export type ConnectorTypeAuthType = Extract<
+  CreateConnectorTypeRequest['auth'],
+  { type: string }
+>['type'];
 export type ConnectorTypeField = CreateConnectorTypeRequest['config'][number];
 export type ConnectorTypeAction = CreateConnectorTypeRequest['actions'][string];
 export type ConnectorTypeActionScope = ConnectorTypeAction['scope'];

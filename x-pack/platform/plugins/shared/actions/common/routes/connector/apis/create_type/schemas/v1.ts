@@ -37,14 +37,38 @@ export const identifierSchema = lazySchema(() =>
     .refine((name) => !RESERVED_IDENTIFIERS.has(name), 'This identifier is reserved.')
 );
 
+const scalarFieldTypeSchema = lazySchema(() => z.enum(['string', 'number', 'boolean']));
 export const fieldSchema = lazySchema(() =>
-  z.object({
-    name: identifierSchema,
-    type: z.enum(['string', 'number', 'boolean']),
-    required: z.boolean().default(false),
-    label: z.string().max(MAX_TEXT).optional(),
-    description: z.string().max(MAX_LONG_TEXT).optional(),
-  })
+  z
+    .object({
+      name: identifierSchema,
+      type: z.enum(['string', 'number', 'boolean', 'array']),
+      items: scalarFieldTypeSchema.optional(),
+      format: z.enum(['uri', 'ipv4', 'date-time']).optional(),
+      required: z.boolean().default(false),
+      label: z.string().max(MAX_TEXT).optional(),
+      description: z.string().max(MAX_LONG_TEXT).optional(),
+    })
+    .superRefine((field, context) => {
+      if (field.type === 'array' && !field.items)
+        context.addIssue({
+          code: 'custom',
+          path: ['items'],
+          message: 'Array fields require an item type.',
+        });
+      if (field.type !== 'array' && field.items)
+        context.addIssue({
+          code: 'custom',
+          path: ['items'],
+          message: 'Only array fields can define an item type.',
+        });
+      if (field.format && field.type !== 'string')
+        context.addIssue({
+          code: 'custom',
+          path: ['format'],
+          message: 'Formats apply only to string fields.',
+        });
+    })
 );
 
 const uniqueFieldNames = (fields: Array<{ name: string }>) =>
@@ -56,7 +80,7 @@ const fieldsSchema = lazySchema(() =>
   })
 );
 
-export const authSchema = lazySchema(() =>
+const singleAuthSchema = lazySchema(() =>
   z.discriminatedUnion('type', [
     z.object({ type: z.literal('none') }).strict(),
     z.object({ type: z.literal('basic') }).strict(),
@@ -71,6 +95,44 @@ export const authSchema = lazySchema(() =>
           .regex(/^[A-Za-z0-9-]+$/),
       })
       .strict(),
+  ])
+);
+const authTypeSchema = lazySchema(() =>
+  z.union([
+    z.enum(['none', 'basic', 'bearer']),
+    z.object({ type: z.enum(['basic', 'bearer']) }).strict(),
+    z
+      .object({
+        type: z.literal('api_key_header'),
+        defaults: z
+          .object({
+            headerField: z
+              .string()
+              .min(1)
+              .max(128)
+              .regex(/^[A-Za-z0-9-]+$/),
+          })
+          .strict(),
+      })
+      .strict(),
+  ])
+);
+export const authSchema = lazySchema(() =>
+  z.union([
+    singleAuthSchema,
+    z
+      .object({ types: z.array(authTypeSchema).min(1).max(16) })
+      .strict()
+      .superRefine(({ types }, context) => {
+        const typeIds = types.map((type) => (typeof type === 'string' ? type : type.type));
+        if (new Set(typeIds).size !== typeIds.length) {
+          context.addIssue({
+            code: 'custom',
+            path: ['types'],
+            message: 'Auth type IDs must be unique.',
+          });
+        }
+      }),
   ])
 );
 
@@ -199,6 +261,13 @@ export const createConnectorTypeRequestSchema = lazySchema(() =>
       description: z.string().max(MAX_LONG_TEXT),
       config: fieldsSchema,
       auth: authSchema,
+      test: z
+        .object({
+          description: z.string().max(MAX_LONG_TEXT).optional(),
+          request: requestTemplateSchema,
+        })
+        .strict()
+        .optional(),
       actions: z
         .record(identifierSchema, actionSchema)
         .refine((actions) => Object.keys(actions).length >= 1, {
@@ -211,14 +280,17 @@ export const createConnectorTypeRequestSchema = lazySchema(() =>
     .strict()
     .superRefine((request, context) => {
       const configNames = new Set(request.config.map(({ name }) => name));
-      const authSecrets =
-        request.auth.type === 'basic'
-          ? new Set(['username', 'password'])
-          : request.auth.type === 'bearer'
-          ? new Set(['token'])
-          : request.auth.type === 'api_key_header'
-          ? new Set(['apiKey'])
-          : new Set<string>();
+      const authTypes = 'types' in request.auth ? request.auth.types : [request.auth];
+      const authSecrets = new Set<string>();
+      for (const authType of authTypes) {
+        const type = typeof authType === 'string' ? authType : authType.type;
+        if (type === 'basic') {
+          authSecrets.add('username');
+          authSecrets.add('password');
+        }
+        if (type === 'bearer') authSecrets.add('token');
+        if (type === 'api_key_header') authSecrets.add('apiKey');
+      }
 
       for (const [actionName, action] of Object.entries(request.actions)) {
         const inputNames = new Set(action.input.map(({ name }) => name));
@@ -249,6 +321,30 @@ export const createConnectorTypeRequestSchema = lazySchema(() =>
           }
         }
       }
+
+      if (request.test) {
+        const values = [
+          request.test.request.url,
+          ...(request.test.request.path ? [request.test.request.path] : []),
+          ...Object.values(request.test.request.headers ?? {}),
+          ...stringValues(request.test.request.body),
+        ];
+        for (const value of values) {
+          for (const reference of templateReferences(value)) {
+            const [root, name] = reference.split('.');
+            const declared =
+              (root === 'config' && configNames.has(name)) ||
+              (root === 'secrets' && authSecrets.has(name));
+            if (!declared) {
+              context.addIssue({
+                code: 'custom',
+                path: ['test', 'request'],
+                message: `Template reference "${reference}" is not declared for this connector test.`,
+              });
+            }
+          }
+        }
+      }
     })
 );
 
@@ -258,7 +354,7 @@ export const createConnectorTypeResponseSchema = lazySchema(() =>
   z.object({
     id: z
       .string()
-      .max(CONNECTOR_TYPE_ID_MAX_LENGTH)
+      .max(CONNECTOR_TYPE_ID_MAX_LENGTH + 1)
       .regex(/^\.[a-z0-9_-]+$/),
   })
 );

@@ -78,7 +78,7 @@ const FORMAT_MESSAGES: Record<string, string> = {
   id: i18n.translate(
     'xpack.triggersActionsUI.sections.buildConnectorFlyout.error.invalidIdFormat',
     {
-      defaultMessage: 'Must start with "." and use only lowercase letters, numbers, "_" and "-".',
+      defaultMessage: 'Use only lowercase letters, numbers, "_" and "-".',
     }
   ),
   'auth.headerName': HEADER_NAME_FORMAT,
@@ -162,7 +162,11 @@ const toFormPath = (issue: z.ZodIssue, values: BuildConnectorFormData): string =
   return path ? root : 'root';
 };
 
-const toMessage = (issue: z.core.$ZodIssue, formPath: string, values: BuildConnectorFormData): string => {
+const toMessage = (
+  issue: z.core.$ZodIssue,
+  formPath: string,
+  values: BuildConnectorFormData
+): string => {
   const value = get(values, formPath);
   const messageKey = toMessageKey(formPath);
   if (REQUIRED_MESSAGES[messageKey] && (value === '' || value === undefined)) {

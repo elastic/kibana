@@ -67,10 +67,10 @@ const JsonBodyEditorComponent: React.FC<Props> = ({ actionIndex, testSubj }) => 
       helpText={i18n.translate(
         'xpack.triggersActionsUI.sections.buildConnectorFlyout.bodyFieldHelpText',
         {
-          defaultMessage: 'Optional. String values can reference {config}, {params} and {secrets}.',
+          defaultMessage: 'Optional. String values can reference {config}, {input} and {secrets}.',
           values: {
             config: '{{config.<name>}}',
-            params: '{{params.<name>}}',
+            input: '{{input.<name>}}',
             secrets: '{{secrets.<name>}}',
           },
         }

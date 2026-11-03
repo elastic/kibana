@@ -122,7 +122,7 @@ describe('BuildConnectorFlyout', () => {
 
     await userEvent.type(await screen.findByTestId('buildConnectorNameInput'), 'My Service');
     await waitFor(() =>
-      expect(screen.getByTestId('buildConnectorIdInput')).toHaveValue('.my-service')
+      expect(screen.getByTestId('buildConnectorIdInput')).toHaveValue('my-service')
     );
 
     await userEvent.clear(screen.getByTestId('buildConnectorIdInput'));
@@ -169,7 +169,7 @@ describe('BuildConnectorFlyout', () => {
       expect(
         await screen.findByTestId('buildConnectorAction-0-input-description')
       ).toHaveTextContent(
-        'Provided by a rule each time this action runs. Use as {{params.<name>}}.'
+        'Provided by a rule each time this action runs. Use as {{input.<name>}}.'
       );
       fireEvent.mouseOver(screen.getByTestId('buildConnectorAction-0-input-info'));
       expect(
@@ -275,7 +275,7 @@ describe('BuildConnectorFlyout', () => {
 
       await applyYaml(yamlDefinition);
 
-      expect(screen.getByTestId('buildConnectorIdInput')).toHaveValue('.acme');
+      expect(screen.getByTestId('buildConnectorIdInput')).toHaveValue('acme');
       expect(screen.getByTestId('buildConnectorDescriptionInput')).toHaveValue('Talks to Acme');
       expect(screen.getByTestId('buildConnectorAuthTypeSelect')).toHaveValue('api_key_header');
       expect(screen.getByTestId('buildConnectorAuthHeaderNameInput')).toHaveValue('X-Api-Key');
@@ -303,7 +303,7 @@ describe('BuildConnectorFlyout', () => {
         expect(createConnectorType).toHaveBeenCalledWith(
           expect.objectContaining({
             connectorType: {
-              id: '.acme',
+              id: 'acme',
               displayName: 'Acme',
               description: 'Talks to Acme',
               auth: { type: 'api_key_header', headerName: 'X-Api-Key' },
@@ -422,7 +422,7 @@ describe('BuildConnectorFlyout', () => {
   });
 
   describe('actions', () => {
-    it('submits an action built in the form with params, headers and a JSON body', async () => {
+    it('submits an action built in the form with input fields, headers and a JSON body', async () => {
       appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
 
       await userEvent.type(await screen.findByTestId('buildConnectorNameInput'), 'My Service');
@@ -443,14 +443,14 @@ describe('BuildConnectorFlyout', () => {
         screen.getByTestId('buildConnectorAction-0-headers-0-value'),
         'application/json'
       );
-      fireEvent.change(bodyEditor(0), { target: { value: '{"text": "{{params.message}}"}' } });
+      fireEvent.change(bodyEditor(0), { target: { value: '{"text": "{{input.message}}"}' } });
       await userEvent.click(screen.getByTestId('build-connector-flyout-save-btn'));
 
       await waitFor(() =>
         expect(createConnectorType).toHaveBeenCalledWith(
           expect.objectContaining({
             connectorType: expect.objectContaining({
-              id: '.my-service',
+              id: 'my-service',
               actions: {
                 notify: {
                   description: 'Send it',
@@ -460,7 +460,7 @@ describe('BuildConnectorFlyout', () => {
                     method: 'POST',
                     url: 'https://example.com/notify',
                     headers: { 'Content-Type': 'application/json' },
-                    body: { text: '{{params.message}}' },
+                    body: { text: '{{input.message}}' },
                   },
                 },
               },
@@ -554,9 +554,7 @@ describe('BuildConnectorFlyout', () => {
     await userEvent.tab();
 
     expect(
-      await screen.findByText(
-        'Must start with "." and use only lowercase letters, numbers, "_" and "-".'
-      )
+      await screen.findByText('Use only lowercase letters, numbers, "_" and "-".')
     ).toBeInTheDocument();
   });
 });

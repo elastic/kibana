@@ -61,15 +61,15 @@ const methodOptions: Array<{ value: ConnectorTypeHttpMethod; text: string }> = (
   ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const
 ).map((method) => ({ value: method, text: method }));
 
-/** Explains the `params` object; shown on the info icon of each action's field list. */
+/** Explains action input fields; shown on the info icon of each action's field list. */
 const PARAMS_TOOLTIP = (
   <p>
     <FormattedMessage
       id="xpack.triggersActionsUI.sections.buildConnectorFlyout.paramsTooltip"
-      defaultMessage="The {params} object. Its fields are provided by a rule each time this action runs, for example a message, and are available in this action's request as {example}. In YAML they are listed under {yamlKey}."
+      defaultMessage="The {input} object. Its fields are provided by a rule each time this action runs, for example a message, and are available in this action's request as {example}. In YAML they are listed under {yamlKey}."
       values={{
-        params: <code>params</code>,
-        example: <code>{'{{params.<name>}}'}</code>,
+        input: <code>input</code>,
+        example: <code>{'{{input.<name>}}'}</code>,
         yamlKey: <code>input</code>,
       }}
     />
@@ -80,7 +80,7 @@ const PARAMS_DESCRIPTION = (
   <FormattedMessage
     id="xpack.triggersActionsUI.sections.buildConnectorFlyout.paramsDescription"
     defaultMessage="Provided by a rule each time this action runs. Use as {example}."
-    values={{ example: <code>{'{{params.<name>}}'}</code> }}
+    values={{ example: <code>{'{{input.<name>}}'}</code> }}
   />
 );
 

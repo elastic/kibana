@@ -16,12 +16,19 @@ import type {
 } from './types';
 import { parseJsonObject } from './json_body';
 
-const CONNECTOR_TYPE_ID_PREFIX = '.';
-
-/** Derives a connector type ID from its display name, e.g. 'My Service' → '.my-service'. */
+/** Derives a connector type ID from its display name, e.g. 'My Service' → 'my-service'. */
 export const toConnectorTypeId = (displayName: string): string => {
   const slug = toSlugIdentifier(displayName.slice(0, CONNECTOR_TYPE_ID_MAX_LENGTH));
-  return slug ? `${CONNECTOR_TYPE_ID_PREFIX}${slug}`.slice(0, CONNECTOR_TYPE_ID_MAX_LENGTH) : '';
+  return slug.slice(0, CONNECTOR_TYPE_ID_MAX_LENGTH);
+};
+
+const normalizeConnectorTypeId = (id: string | undefined): string => {
+  if (!id) return '';
+  if (!id.startsWith('.')) return id;
+  const bareId = id.slice(1);
+  const isValidBareId =
+    bareId.length <= CONNECTOR_TYPE_ID_MAX_LENGTH && /^[a-z0-9_-]+$/.test(bareId);
+  return isValidBareId ? bareId : id;
 };
 
 export const createEmptyAction = (): ConnectorTypeActionForm => ({
@@ -127,13 +134,15 @@ const toFormAction = (
 export const requestToFormData = (
   request: Partial<CreateConnectorTypeRequest>
 ): BuildConnectorFormData => ({
-  id: request.id ?? '',
+  id: normalizeConnectorTypeId(request.id),
   displayName: request.displayName ?? '',
   description: request.description ?? '',
   auth:
-    request.auth?.type === 'api_key_header'
+    request.auth && 'type' in request.auth && request.auth.type === 'api_key_header'
       ? { type: 'api_key_header', headerName: request.auth.headerName }
-      : { type: request.auth?.type ?? 'none' },
+      : {
+          type: request.auth && 'type' in request.auth ? request.auth.type : ('none' as const),
+        },
   config: request.config ?? [],
   actions: Object.entries(request.actions ?? {}).map(([name, action]) =>
     toFormAction(name, action)
