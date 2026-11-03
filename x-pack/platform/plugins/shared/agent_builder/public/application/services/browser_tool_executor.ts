@@ -38,7 +38,14 @@ export class BrowserToolExecutor {
 
       try {
         const validatedParams = tool.schema.parse(call.params);
-        await tool.handler(validatedParams);
+        // Legacy one-way path: the call has no execution/agent info, handlers ignore the context.
+        await tool.handler(validatedParams, {
+          toolId: call.tool_id,
+          toolCallId: call.call_id,
+          executionId: '',
+          agentId: '',
+          signal: new AbortController().signal,
+        });
 
         if (this.toasts) {
           this.toasts.addSuccess({

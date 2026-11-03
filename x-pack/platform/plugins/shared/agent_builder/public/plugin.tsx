@@ -55,6 +55,7 @@ import { createPublicConversationEventsContract } from './services/conversation_
 import { createPublicToolContract } from './services/tools';
 import { createPublicAgentsContract } from './services/agents';
 import { createPublicEventsContract } from './services/events';
+import { BrowserToolRegistry } from './services/browser_tools';
 import { createPublicConversationsContract } from './services/conversations';
 import { registerWorkflowSteps } from './step_types';
 import type {
@@ -310,6 +311,7 @@ export class AgentBuilderPlugin
       usageCollection,
       accessChecker,
       eventsService,
+      browserToolsService: { registry: new BrowserToolRegistry() },
       isEarsEnabled: this.isEarsEnabled,
       isEarsExperimentalEnabled: this.isEarsExperimentalEnabled,
       isServerless: this.isServerless,
