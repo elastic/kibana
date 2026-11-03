@@ -13,11 +13,8 @@ export type HttpMethod = 'GET' | 'HEAD' | 'PUT' | 'POST' | 'DELETE';
 
 export interface EsClientRequestParams {
   method: HttpMethod;
-  /**
-   * Unencoded Elasticsearch path, e.g. `my-index/_search`; each `/`-separated segment is URI-encoded.
-   * Pass an array of segments when a segment itself contains `/`, e.g. `['my-index', '_doc', 'a/b']`.
-   */
-  path: string | readonly string[];
+  /** Unencoded Elasticsearch path segments, e.g. `['my-index', '_doc', 'a/b']`; each is URI-encoded. */
+  path: readonly string[];
   /** Objects are sent as JSON. Send ndjson as a string with `Content-Type: application/x-ndjson`. */
   body?: string | object;
   query?: HttpFetchQuery;

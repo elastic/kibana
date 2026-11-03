@@ -23,9 +23,7 @@ export const proxyArgsToEsArgs = ({
   headers,
   signal,
 }: EsClientRequestParams): [string, HttpFetchOptions] => [
-  buildPath(ES_CLIENT_ROUTE_PATH, {
-    path: typeof path === 'string' ? path.replace(/^\/+/, '') : path,
-  }),
+  buildPath(ES_CLIENT_ROUTE_PATH, { path }),
   {
     method,
     query,

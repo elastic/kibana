@@ -325,4 +325,159 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
       })
     );
   });
+
+  describe('WHEN sending bulk requests', () => {
+    it('SHOULD send a string body as is to the root bulk API', async () => {
+      const { client, fetch } = await setup();
+      const body = '{"delete":{"_index":"my-index","_id":"1"}}\n';
+
+      await client.bulk({ body });
+
+      expect(fetch).toHaveBeenCalledWith(
+        '/internal/es_client/_bulk',
+        expect.objectContaining({ body, query: {} })
+      );
+    });
+
+    it('SHOULD reject WHEN there are no operations', async () => {
+      const { client, fetch } = await setup();
+
+      await expect(client.bulk({ index: 'my-index' })).rejects.toThrow(
+        'Missing required parameter [operations]'
+      );
+      expect(fetch).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('WHEN sending raw requests through transport.request', () => {
+    it('SHOULD merge string and object query strings, skipping undefined values', async () => {
+      const { client, fetch } = await setup();
+
+      await client.transport.request(
+        { method: 'GET', path: '/_cat/indices', querystring: 'format=json&h=index' },
+        { querystring: { bytes: 'b', s: undefined } }
+      );
+
+      expect(fetch).toHaveBeenCalledWith(
+        '/internal/es_client/_cat/indices',
+        expect.objectContaining({ query: { format: 'json', h: 'index', bytes: 'b' } })
+      );
+    });
+
+    it('SHOULD join list headers and skip undefined headers', async () => {
+      const { client, fetch } = await setup();
+
+      await client.transport.request(
+        { method: 'GET', path: '/' },
+        { headers: { 'x-list': ['a', 'b'], 'x-skipped': undefined } }
+      );
+
+      expect(fetch).toHaveBeenCalledWith(
+        '/internal/es_client/',
+        expect.objectContaining({ headers: { 'x-list': 'a, b' } })
+      );
+    });
+
+    it('SHOULD keep an explicit content type for bulk bodies', async () => {
+      const { client, fetch } = await setup();
+
+      await client.transport.request(
+        { method: 'POST', path: '/_bulk', bulkBody: [{ delete: { _id: '1' } }] },
+        { headers: { 'Content-Type': 'application/vnd.elasticsearch+x-ndjson' } }
+      );
+
+      expect(fetch).toHaveBeenCalledWith(
+        '/internal/es_client/_bulk',
+        expect.objectContaining({
+          body: '{"delete":{"_id":"1"}}\n',
+          headers: { 'Content-Type': 'application/vnd.elasticsearch+x-ndjson' },
+        })
+      );
+    });
+
+    it('SHOULD send string bulk lines as is', async () => {
+      const { client, fetch } = await setup();
+
+      await client.bulk<string>({
+        operations: ['{"delete":{"_id":"1"}}', { delete: { _id: '2' } }],
+      });
+
+      expect(fetch).toHaveBeenCalledWith(
+        '/internal/es_client/_bulk',
+        expect.objectContaining({ body: '{"delete":{"_id":"1"}}\n{"delete":{"_id":"2"}}\n' })
+      );
+    });
+
+    it('SHOULD send a string body as is', async () => {
+      const { client, fetch } = await setup();
+
+      await client.transport.request({ method: 'POST', path: '/_sql', body: '{"query":"x"}' });
+
+      expect(fetch).toHaveBeenCalledWith(
+        '/internal/es_client/_sql',
+        expect.objectContaining({ body: '{"query":"x"}' })
+      );
+    });
+
+    it.each([
+      ['a buffer body', { body: Buffer.from([1]) }],
+      ['a stream body', { body: { pipe: () => undefined } }],
+      ['a web stream body', { body: { getReader: () => undefined } }],
+      ['a buffer bulk body', { bulkBody: Buffer.from([1]) }],
+    ])('SHOULD reject %s', async (_name, bodyParams) => {
+      const { client, fetch } = await setup();
+
+      await expect(
+        client.transport.request({ method: 'POST', path: '/_bulk', ...bodyParams })
+      ).rejects.toThrow('only sends string and JSON bodies');
+      expect(fetch).not.toHaveBeenCalled();
+    });
+
+    it('SHOULD reject methods the proxy does not support', async () => {
+      const { client, fetch } = await setup();
+
+      await expect(client.transport.request({ method: 'PATCH', path: '/' })).rejects.toThrow(
+        'does not support the PATCH method'
+      );
+      expect(fetch).not.toHaveBeenCalled();
+    });
+
+    it('SHOULD reject WHEN no response is received', async () => {
+      const { client, fetch } = await setup();
+      fetch.mockResolvedValue({ body: {} });
+
+      await expect(client.transport.request({ method: 'GET', path: '/' })).rejects.toThrow(
+        'No response received for GET /'
+      );
+    });
+
+    it('SHOULD resolve with the text of an ignored, unparsable streamed error body', async () => {
+      const { client, fetch } = await setup();
+      const response = new Response('Bad Gateway', { status: 502 });
+      fetch.mockRejectedValue(
+        Object.assign(new Error('Bad Gateway'), {
+          name: 'HttpFetchError',
+          request: {},
+          response,
+          body: null,
+        })
+      );
+
+      const body = await client.transport.request(
+        { method: 'GET', path: '/_stream' },
+        { asStream: true, ignore: [502] }
+      );
+
+      expect(body).toBe('Bad Gateway');
+    });
+
+    it('SHOULD resolve a HEAD request with a true body WHEN meta is set', async () => {
+      const { client, fetch } = await setup();
+      fetch.mockResolvedValue(okResponse(''));
+
+      const result = await client.indices.exists({ index: 'my-index' }, { meta: true });
+
+      expect(result).toMatchObject({ body: true, statusCode: 200 });
+    });
+  });
 });

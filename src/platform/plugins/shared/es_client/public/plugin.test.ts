@@ -9,6 +9,7 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { createEsClient } from './es_client';
+import { plugin } from '.';
 import { EsClientPlugin } from './plugin';
 
 jest.mock('./es_client', () => ({
@@ -24,10 +25,24 @@ const setup = () => {
 };
 
 describe('WHEN using the browser Elasticsearch client plugin', () => {
+  it('SHOULD create the plugin from the public entry point', () => {
+    expect(plugin()).toBeInstanceOf(EsClientPlugin);
+  });
+
   it('SHOULD only expose getClient', () => {
     const { contract } = setup();
 
     expect(Object.keys(contract)).toEqual(['getClient']);
+  });
+
+  it('SHOULD expose a working client from the start contract', async () => {
+    const coreStart = coreMock.createStart();
+    coreStart.http.fetch.mockResolvedValue({ response: new Response(), body: { count: 1 } });
+    const pluginInstance = new EsClientPlugin();
+    const client = await pluginInstance.start(coreStart).getClient();
+
+    expect(await client.count()).toEqual({ count: 1 });
+    expect(() => pluginInstance.stop()).not.toThrow();
   });
 
   it('SHOULD send client requests to the proxy route as full responses', async () => {

@@ -13,6 +13,7 @@ import { schema } from '@kbn/config-schema';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { CoreKibanaRequest, ensureRawRequest } from '@kbn/core-http-router-server-internal';
 import type { RequestFixtureOptions } from '@kbn/core-http-router-server-mocks';
 import { createProxyHandler, getEsPath } from './proxy_handler';
 import type { ProxyBody, ProxyParams } from './proxy_handler';
@@ -39,10 +40,14 @@ const setup = (requestOptions: RequestFixtureOptions<ProxyParams, unknown, Proxy
     ...requestOptions,
   });
 
-  const run = () =>
-    handler(coreMock.createCustomRequestHandlerContext({ core }), request, kibanaResponseFactory);
+  const run = (handledRequest = request) =>
+    handler(
+      coreMock.createCustomRequestHandlerContext({ core }),
+      handledRequest,
+      kibanaResponseFactory
+    );
 
-  return { run, transportRequest, esBody, log };
+  return { run, transportRequest, esBody, log, request };
 };
 
 describe('WHEN proxying a request to Elasticsearch', () => {
@@ -329,6 +334,83 @@ describe('WHEN proxying a request to Elasticsearch', () => {
     const response = await run();
 
     expect(response.status).toBe(499);
+  });
+
+  it('SHOULD rethrow unexpected errors', async () => {
+    const { run, transportRequest } = setup();
+    const error = new Error('unexpected');
+    transportRequest.mockRejectedValue(error);
+
+    await expect(run()).rejects.toBe(error);
+  });
+
+  it('SHOULD default to 500 and no headers WHEN an error response has neither', async () => {
+    const { run, transportRequest } = setup();
+    const error = new errors.ResponseError(
+      elasticsearchClientMock.createApiResponse({ body: 'failed' })
+    );
+    Object.assign(error.meta, { statusCode: undefined, headers: undefined });
+    transportRequest.mockRejectedValue(error);
+
+    const response = await run();
+
+    expect(response.status).toBe(500);
+    expect(response.options.headers).toEqual({});
+  });
+
+  it('SHOULD default to 200 and no headers WHEN the response has neither', async () => {
+    const { run, transportRequest } = setup();
+    transportRequest.mockResolvedValue({ body: Readable.from(['{}']) });
+
+    const response = await run();
+
+    expect(response.status).toBe(200);
+    expect(response.options.headers).toEqual({});
+  });
+
+  it('SHOULD forward the first accept header value', async () => {
+    const { run, transportRequest } = setup({ headers: { accept: 'text/csv' } });
+
+    await run();
+
+    expect(transportRequest.mock.calls[0][1]?.headers?.accept).toBe('text/csv');
+  });
+
+  it('SHOULD use the first value of a repeated request header', async () => {
+    const { run, transportRequest, request } = setup();
+    const rawRequest = ensureRawRequest(request);
+    Object.assign(rawRequest.headers, { 'content-type': ['text/plain', 'application/json'] });
+
+    await run(CoreKibanaRequest.from<ProxyParams, unknown, ProxyBody>(rawRequest));
+
+    expect(transportRequest.mock.calls[0][1]?.headers?.['content-type']).toBe('text/plain');
+  });
+
+  it('SHOULD default the content type to JSON', async () => {
+    const { run, transportRequest } = setup({ headers: {} });
+
+    await run();
+
+    expect(transportRequest.mock.calls[0][1]?.headers?.['content-type']).toBe('application/json');
+  });
+
+  it('SHOULD send x-forwarded headers WHEN the client address is known', async () => {
+    const { run, transportRequest, request } = setup();
+    Object.assign(ensureRawRequest(request), {
+      info: { remoteAddress: '10.0.0.1', remotePort: 51234, host: 'kibana:5601' },
+      server: { info: { protocol: 'https' } },
+    });
+
+    await run();
+
+    expect(transportRequest.mock.calls[0][1]?.headers).toEqual(
+      expect.objectContaining({
+        'x-forwarded-for': '10.0.0.1',
+        'x-forwarded-port': '51234',
+        'x-forwarded-proto': 'https',
+        'x-forwarded-host': 'kibana:5601',
+      })
+    );
   });
 });
 
