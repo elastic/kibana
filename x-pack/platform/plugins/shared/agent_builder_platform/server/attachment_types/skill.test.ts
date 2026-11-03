@@ -219,7 +219,7 @@ describe('skill toSurfaceComposition', () => {
     );
 
     expect(JSON.stringify(composition)).toContain(
-      'Showing the first 12000 of 20000 characters of SKILL.md.'
+      'Showing the first 11999 of 20000 characters of SKILL.md.'
     );
 
     const { valid, errors } = await renderSurface(composition);

@@ -141,7 +141,8 @@ const toSkillSurfaceComposition = (
     },
   ].filter((item): item is { label: string; value: string } => Boolean(item));
 
-  const isContentCut = content.length > SURFACE_LIMITS.codeText;
+  const shownContent = clampText(content, SURFACE_LIMITS.codeText);
+  const isContentCut = shownContent !== content;
 
   const body: SurfaceNode[] = [
     ...(hasText(description) ? [{ type: 'markdown' as const, text: description }] : []),
@@ -151,7 +152,7 @@ const toSkillSurfaceComposition = (
           {
             type: 'code' as const,
             language: 'markdown',
-            text: clampText(content, SURFACE_LIMITS.codeText),
+            text: shownContent,
           },
         ]
       : []),
@@ -165,7 +166,8 @@ const toSkillSurfaceComposition = (
                   'xpack.agentBuilderPlatform.attachments.skill.surface.contentCut',
                   {
                     defaultMessage: 'Showing the first {shown} of {total} characters of SKILL.md.',
-                    values: { shown: SURFACE_LIMITS.codeText, total: content.length },
+                    // Without the ellipsis `clampText` ends the cut content with.
+                    values: { shown: shownContent.length - 1, total: content.length },
                   }
                 ),
               },
