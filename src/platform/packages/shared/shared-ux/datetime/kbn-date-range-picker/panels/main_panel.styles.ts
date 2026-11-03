@@ -48,6 +48,11 @@ export const mainPanelStyles = (euiThemeContext: UseEuiTheme) => {
     flex-shrink: 0;
   `;
 
+  const fullDataCallout = css`
+    margin-inline: ${euiTheme.size.s};
+    margin-block-end: ${euiTheme.size.s};
+  `;
+
   return {
     root,
     presetsArea,
@@ -57,5 +62,6 @@ export const mainPanelStyles = (euiThemeContext: UseEuiTheme) => {
     roundedSuffix,
     bottomSection,
     documentationButtonWrapper,
+    fullDataCallout,
   };
 };

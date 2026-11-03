@@ -150,6 +150,8 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   prependBasePath: (path: string) => string;
   /** Whether the current user can access the Advanced Settings management page. */
   canAccessAdvancedSettings: boolean;
+  /** Resolves the time range covering all available data. Enables the "Use full time range of data" option. */
+  getFullDataRange?: (signal: AbortSignal) => Promise<TimeRangeBounds | null>;
 }
 
 const DateRangePickerContext = createContext<DateRangePickerInternalContextValue | null>(null);
@@ -198,6 +200,7 @@ export function DateRangePickerProvider({
   refreshEpoch,
   prependBasePath: prependBasePathProp,
   canAccessAdvancedSettings = false,
+  getFullDataRange,
 }: PropsWithChildren<DateRangePickerProps>) {
   const prependBasePath = useCallback(
     (path: string) => (prependBasePathProp ? prependBasePathProp(path) : path),
@@ -381,6 +384,7 @@ export function DateRangePickerProvider({
       hasAutoRefresh,
       prependBasePath,
       canAccessAdvancedSettings,
+      getFullDataRange,
     }),
     [
       text,
@@ -417,6 +421,7 @@ export function DateRangePickerProvider({
       hasAutoRefresh,
       prependBasePath,
       canAccessAdvancedSettings,
+      getFullDataRange,
     ]
   );
 

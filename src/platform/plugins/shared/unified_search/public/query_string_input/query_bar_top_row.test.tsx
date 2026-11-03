@@ -34,7 +34,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
-import type { Filter } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { unifiedSearchPluginMock } from '../mocks';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -1319,6 +1319,82 @@ describe('QueryBarTopRowTopRow', () => {
       await userEvent.click(screen.getByTestId('dateRangePickerAutoRefreshButton'));
 
       expect(onRefreshChange).toHaveBeenCalledWith({ isPaused: false, refreshInterval: 5000 });
+    });
+  });
+
+  describe('use full data', () => {
+    const renderAndUseFullData = async (query: Query | AggregateQuery) => {
+      const onSubmit = jest.fn();
+      const data = dataPluginMock.createStartContract();
+      (data.search.search as jest.Mock).mockReturnValue(
+        of({
+          rawResponse: {
+            aggregations: {
+              earliest: { value: Date.UTC(2024, 0, 1) },
+              latest: { value: Date.UTC(2024, 5, 30) },
+            },
+          },
+        })
+      );
+      render(
+        wrapQueryBarTopRowInContext(
+          {
+            query,
+            isDirty: false,
+            indexPatterns: [stubIndexPattern],
+            timeHistory: mockTimeHistory,
+            onSubmit,
+          },
+          { servicesOverride: { data } }
+        )
+      );
+
+      await userEvent.click(await screen.findByTestId('dateRangePickerControlButton'));
+      // The popover sets pointer-events: none while its open transition runs.
+      await userEvent.click(
+        within(screen.getByTestId('dateRangePickerUseFullDataItem')).getByRole('button'),
+        { pointerEventsCheck: 0 }
+      );
+      await waitFor(() =>
+        expect(onSubmit).toHaveBeenCalledWith(
+          expect.objectContaining({
+            dateRange: { from: '2024-01-01T00:00:00.000Z', to: '2024-06-30T00:00:00.000Z' },
+          }),
+          expect.anything()
+        )
+      );
+
+      return { search: data.search.search as jest.Mock };
+    };
+
+    it('queries the data view time range and applies it', async () => {
+      const { search } = await renderAndUseFullData(kqlQuery);
+
+      expect(search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ index: stubIndexPattern.getIndexPattern() }),
+        }),
+        { abortSignal: expect.any(AbortSignal) }
+      );
+    });
+
+    it('is available for ES|QL queries', async () => {
+      const { search } = await renderAndUseFullData(esqlQuery);
+
+      expect(search).toHaveBeenCalledWith(expect.anything(), {
+        abortSignal: expect.any(AbortSignal),
+      });
+    });
+
+    it('passes the project routing set in the ES|QL query', async () => {
+      const { search } = await renderAndUseFullData({
+        esql: 'SET project_routing = "_alias:_origin"; FROM test',
+      });
+
+      expect(search).toHaveBeenCalledWith(expect.anything(), {
+        abortSignal: expect.any(AbortSignal),
+        projectRouting: '_alias:_origin',
+      });
     });
   });
 });

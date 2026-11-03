@@ -1114,4 +1114,103 @@ describe('DateRangePickerControl', () => {
       expect(disabledOnRefresh).not.toHaveBeenCalled();
     });
   });
+
+  describe('use full data', () => {
+    const fullDataRange = {
+      start: '2024-01-01T00:00:00.000Z',
+      end: '2024-06-30T12:00:00.000Z',
+    };
+
+    it('is hidden when getFullDataRange is not provided', async () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
+
+      const input = openEditing();
+
+      expect(screen.queryByTestId('dateRangePickerUseFullDataItem')).not.toBeInTheDocument();
+      fireEvent.keyDown(input, { key: 'Escape' });
+      await waitForPopoverClose();
+    });
+
+    it('applies the resolved range', async () => {
+      const onChange = jest.fn();
+      const getFullDataRange = jest.fn().mockResolvedValue(fullDataRange);
+      renderWithEuiTheme(
+        <DateRangePicker
+          {...defaultProps}
+          onChange={onChange}
+          getFullDataRange={getFullDataRange}
+        />
+      );
+
+      openEditing();
+      fireEvent.click(
+        within(screen.getByTestId('dateRangePickerUseFullDataItem')).getByRole('button')
+      );
+
+      await waitFor(() =>
+        expect(onChange).toHaveBeenCalledWith(expect.objectContaining(fullDataRange))
+      );
+      expect(getFullDataRange).toHaveBeenCalledWith(expect.any(AbortSignal));
+      await waitForPopoverClose();
+    });
+
+    it('shows a message and keeps the dialog open when there is no data', async () => {
+      const onChange = jest.fn();
+      renderWithEuiTheme(
+        <DateRangePicker
+          {...defaultProps}
+          onChange={onChange}
+          getFullDataRange={() => Promise.resolve(null)}
+        />
+      );
+
+      const input = openEditing();
+      fireEvent.click(
+        within(screen.getByTestId('dateRangePickerUseFullDataItem')).getByRole('button')
+      );
+
+      expect(await screen.findByTestId('dateRangePickerFullDataNoData')).toBeInTheDocument();
+      expect(onChange).not.toHaveBeenCalled();
+      fireEvent.keyDown(input, { key: 'Escape' });
+      await waitForPopoverClose();
+    });
+
+    it('shows an error message when the request fails', async () => {
+      renderWithEuiTheme(
+        <DateRangePicker
+          {...defaultProps}
+          getFullDataRange={() => Promise.reject(new Error('boom'))}
+        />
+      );
+
+      const input = openEditing();
+      fireEvent.click(
+        within(screen.getByTestId('dateRangePickerUseFullDataItem')).getByRole('button')
+      );
+
+      expect(await screen.findByTestId('dateRangePickerFullDataError')).toBeInTheDocument();
+      fireEvent.keyDown(input, { key: 'Escape' });
+      await waitForPopoverClose();
+    });
+
+    it('aborts the request when the dialog closes', async () => {
+      let receivedSignal: AbortSignal | undefined;
+      const getFullDataRange = jest.fn((signal: AbortSignal) => {
+        receivedSignal = signal;
+        return new Promise<null>(() => {});
+      });
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} getFullDataRange={getFullDataRange} />);
+
+      const input = openEditing();
+      fireEvent.click(
+        within(screen.getByTestId('dateRangePickerUseFullDataItem')).getByRole('button')
+      );
+      expect(receivedSignal?.aborted).toBe(false);
+
+      fireEvent.keyDown(input, { key: 'Escape' });
+      await waitForPopoverClose();
+
+      expect(receivedSignal?.aborted).toBe(true);
+    });
+  });
 });

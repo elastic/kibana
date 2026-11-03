@@ -78,6 +78,9 @@ import {
   type AutoRefreshSettings,
 } from '@kbn/date-range-picker';
 import { useDateRangePickerPresets } from '@kbn/date-range-picker-presets';
+import { createGetFullDataRange } from '@kbn/date-range-picker-full-data';
+import { getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
+import { DataView } from '@kbn/data-views-plugin/public';
 import moment from 'moment';
 import { AddFilterPopover } from './add_filter_popover';
 import type { DataViewPickerProps } from '../dataview_picker';
@@ -512,6 +515,26 @@ export const QueryBarTopRow = React.memo(
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
     const shouldRenderESQLUi = Boolean(showQueryInput && isQueryLangSelected);
+
+    const fullDataRangeDataView = props.indexPatterns?.[0];
+    const esqlQueryText =
+      props.query && isOfAggregateQueryType(props.query) ? props.query.esql : undefined;
+    // An ES|QL `SET project_routing` overrides the global routing the search service applies.
+    const fullDataRangeProjectRouting = useMemo(
+      () => (esqlQueryText ? getProjectRoutingFromEsqlQuery(esqlQueryText) : undefined),
+      [esqlQueryText]
+    );
+    const getFullDataRange = useMemo(
+      () =>
+        fullDataRangeDataView instanceof DataView
+          ? createGetFullDataRange({
+              dataView: fullDataRangeDataView,
+              search: data.search.search,
+              projectRouting: fullDataRangeProjectRouting,
+            })
+          : undefined,
+      [fullDataRangeDataView, data.search.search, fullDataRangeProjectRouting]
+    );
     const isSubmitDisabled = Boolean(
       isDateRangeInvalid || props.isDisabled || props.disableSubmitAction
     );
@@ -1065,6 +1088,7 @@ export const QueryBarTopRow = React.memo(
               canAccessAdvancedSettings={
                 (application?.capabilities.advancedSettings?.save as boolean | undefined) ?? false
               }
+              getFullDataRange={getFullDataRange}
             />
           </>
         );

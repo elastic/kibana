@@ -18,8 +18,9 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
-import type { TimeRangeBoundsOption } from '../types';
+import type { TimeRangeBounds, TimeRangeBoundsOption } from '../types';
 import {
   PanelContainer,
   PanelBody,
@@ -42,6 +43,7 @@ import {
 import { inputControlTexts, mainPanelTexts } from '../translations';
 import { panelDividerStyles } from '../date_range_picker_panel_ui.styles';
 import { useTimeZoneDisplay } from '../hooks/use_time_zone_display';
+import { useFullDataRange } from '../hooks/use_full_data_range';
 
 const toTestSubj = (prefix: string, label: string) =>
   `${prefix}-${label.replace(/→/g, '-').replace(/["'&]/g, '').replace(/\s+/g, '_')}`;
@@ -151,31 +153,72 @@ const PresetsRecentTabs = () => {
 
 const SubPanelMenu = () => {
   const { navigateTo, panelDescriptors } = useDateRangePickerPanelNavigation();
+  const { getFullDataRange, applyRange } = useDateRangePickerContext();
   const euiThemeContext = useEuiTheme();
   const styles = mainPanelStyles(euiThemeContext);
 
+  const handleFullDataRangeResolved = useCallback(
+    (range: TimeRangeBounds) => applyRange(range),
+    [applyRange]
+  );
+  const { status: fullDataRangeStatus, requestFullDataRange } = useFullDataRange({
+    getFullDataRange,
+    onResolved: handleFullDataRangeResolved,
+  });
+
   return (
-    <ul css={styles.list}>
-      <PanelNavItem
-        onClick={() => navigateTo('calendar-panel')}
-        icon="calendar"
-        data-test-subj="dateRangePickerCalendarNavItem"
-      >
-        {mainPanelTexts.calendarPanelTitle}
-      </PanelNavItem>
-      <PanelNavItem
-        onClick={() => navigateTo('custom-time-range-panel')}
-        icon="controls"
-        data-test-subj="dateRangePickerCustomRangeNavItem"
-      >
-        {mainPanelTexts.customTimeRangePanelTitle}
-      </PanelNavItem>
-      {panelDescriptors.map(({ id, title, icon }) => (
-        <PanelNavItem key={id} onClick={() => navigateTo(id)} icon={icon}>
-          {title}
+    <>
+      <ul css={styles.list}>
+        <PanelNavItem
+          onClick={() => navigateTo('calendar-panel')}
+          icon="calendar"
+          data-test-subj="dateRangePickerCalendarNavItem"
+        >
+          {mainPanelTexts.calendarPanelTitle}
         </PanelNavItem>
-      ))}
-    </ul>
+        <PanelNavItem
+          onClick={() => navigateTo('custom-time-range-panel')}
+          icon="controls"
+          data-test-subj="dateRangePickerCustomRangeNavItem"
+        >
+          {mainPanelTexts.customTimeRangePanelTitle}
+        </PanelNavItem>
+        {panelDescriptors.map(({ id, title, icon }) => (
+          <PanelNavItem key={id} onClick={() => navigateTo(id)} icon={icon}>
+            {title}
+          </PanelNavItem>
+        ))}
+        {getFullDataRange && (
+          <PanelNavItem
+            onClick={requestFullDataRange}
+            icon="timeline"
+            isLoading={fullDataRangeStatus === 'loading'}
+            showChevron={false}
+            data-test-subj="dateRangePickerUseFullDataItem"
+          >
+            {mainPanelTexts.useFullDataLabel}
+          </PanelNavItem>
+        )}
+      </ul>
+      {fullDataRangeStatus === 'noData' && (
+        <KbnWarningCallout
+          announceOnMount
+          size="s"
+          title={mainPanelTexts.fullDataNoDataMessage}
+          css={styles.fullDataCallout}
+          data-test-subj="dateRangePickerFullDataNoData"
+        />
+      )}
+      {fullDataRangeStatus === 'error' && (
+        <KbnDangerCallout
+          announceOnMount
+          size="s"
+          title={mainPanelTexts.fullDataErrorMessage}
+          css={styles.fullDataCallout}
+          data-test-subj="dateRangePickerFullDataError"
+        />
+      )}
+    </>
   );
 };
 
