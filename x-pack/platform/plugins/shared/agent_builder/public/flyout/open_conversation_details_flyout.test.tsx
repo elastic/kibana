@@ -5,15 +5,23 @@
  * 2.0.
  */
 
+import type { EuiFlyoutMenuAction } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
 import type { ConversationsService } from '../services/conversations/conversations_service';
 import { ConversationTemplatesService } from '../services/conversation_templates';
 import { openConversationDetailsFlyout } from './open_conversation_details_flyout';
+import {
+  CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
+  CONVERSATION_DETAILS_FLYOUT_MAX_WIDTH,
+  CONVERSATION_DETAILS_FLYOUT_MIN_WIDTH,
+} from './conversation_details_flyout_width';
 
 describe('openConversationDetailsFlyout', () => {
   const setup = () => {
+    localStorage.clear();
     const core = coreMock.createStart();
+    const conversationTemplatesService = new ConversationTemplatesService();
     const close = jest.fn();
     let resolveClosed: () => void = () => {};
     const onClosed = new Promise<void>((resolve) => {
@@ -21,16 +29,29 @@ describe('openConversationDetailsFlyout', () => {
     });
     core.overlays.openSystemFlyout.mockReturnValue({ close, onClose: onClosed });
 
-    const open = (onClose?: () => void) =>
+    const open = ({
+      onClose,
+      trailingActions,
+    }: {
+      onClose?: () => void;
+      trailingActions?: EuiFlyoutMenuAction[];
+    } = {}) =>
       openConversationDetailsFlyout({
         core,
         conversationsService: { get: jest.fn() } as unknown as ConversationsService,
-        conversationTemplatesService: new ConversationTemplatesService(),
+        conversationTemplatesService,
         conversationId: 'conversation',
         onClose,
+        trailingActions,
       });
 
-    return { core, close, open, closeFlyout: () => resolveClosed() };
+    return {
+      core,
+      close,
+      open,
+      conversationTemplatesService,
+      closeFlyout: () => resolveClosed(),
+    };
   };
 
   it('opens a managed flyout in the conversation details history group', async () => {
@@ -49,11 +70,81 @@ describe('openConversationDetailsFlyout', () => {
     );
   });
 
+  it('renders the caller menu actions in the flyout menu bar', async () => {
+    const { core, open } = setup();
+    const copyLink: EuiFlyoutMenuAction = {
+      iconType: 'link',
+      'aria-label': 'Copy link',
+      onClick: jest.fn(),
+    };
+
+    await open({ trailingActions: [copyLink] });
+
+    expect(core.overlays.openSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ flyoutMenuProps: { trailingActions: [copyLink] } })
+    );
+  });
+
+  it('opens resizable at the default width, within the shared min/max bounds', async () => {
+    const { core, open } = setup();
+
+    await open();
+
+    const [[, options]] = core.overlays.openSystemFlyout.mock.calls;
+    expect(options).toEqual(
+      expect.objectContaining({
+        size: CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
+        defaultSize: CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
+        minWidth: CONVERSATION_DETAILS_FLYOUT_MIN_WIDTH,
+        maxWidth: CONVERSATION_DETAILS_FLYOUT_MAX_WIDTH,
+        resizable: true,
+      })
+    );
+  });
+
+  it('reopens at the width the user resized it to', async () => {
+    const { core, open } = setup();
+
+    await open();
+    const [[, firstOptions]] = core.overlays.openSystemFlyout.mock.calls;
+    firstOptions?.onResize?.(620);
+
+    await open();
+
+    const [, [, options]] = core.overlays.openSystemFlyout.mock.calls;
+    expect(options?.size).toBe(620);
+    // A reset still returns to the default, not to the remembered width.
+    expect(options?.defaultSize).toBe(CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH);
+  });
+
+  it('clamps a remembered width to the allowed range', async () => {
+    const { core, open } = setup();
+
+    await open();
+    const [[, firstOptions]] = core.overlays.openSystemFlyout.mock.calls;
+    firstOptions?.onResize?.(2000);
+
+    await open();
+
+    const [, [, options]] = core.overlays.openSystemFlyout.mock.calls;
+    expect(options?.size).toBe(CONVERSATION_DETAILS_FLYOUT_MAX_WIDTH);
+  });
+
+  it('renders no menu actions by default', async () => {
+    const { core, open } = setup();
+
+    await open();
+
+    const [[, options]] = core.overlays.openSystemFlyout.mock.calls;
+    expect(options?.flyoutMenuProps?.trailingActions).toBeUndefined();
+  });
+
   it('notifies the caller once the flyout closes', async () => {
     const { open, closeFlyout } = setup();
     const onClose = jest.fn();
 
-    await open(onClose);
+    await open({ onClose });
     await Promise.resolve();
 
     expect(onClose).not.toHaveBeenCalled();

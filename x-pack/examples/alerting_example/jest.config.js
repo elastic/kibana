@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/examples/alerting_example'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/examples/alerting_example',

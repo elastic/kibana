@@ -34,6 +34,7 @@ const agent = (overrides: Partial<AgentStat> = {}): AgentStat => ({
   platform: 'linux',
   tags: [],
   monitorsAssigned: null,
+  complete: false,
   ...overrides,
 });
 
@@ -42,19 +43,19 @@ const locationStats = (agents: AgentStat[]): LocationAgentStats => ({
   locationLabel: 'Local',
   agentPolicyId: 'policy-1',
   agentPolicyName: 'Synthetics policy',
-  isAgentSharding: true,
+  isShardingActive: true,
   agents,
 });
 
 describe('PolicyName', () => {
   const renderPolicyName = (
-    props: { isAgentSharding?: boolean; locationStats?: LocationAgentStats } = {}
+    props: { isShardingActive?: boolean; locationStats?: LocationAgentStats } = {}
   ) =>
     render(
       <PolicyName
         agentPolicyId="policy-1"
         locationStats={props.locationStats}
-        isAgentSharding={props.isAgentSharding}
+        isShardingActive={props.isShardingActive}
       />,
       {
         state: {
@@ -84,7 +85,7 @@ describe('PolicyName', () => {
 
   it('shows a Scalable badge with enrolled agent count for a sharded location', () => {
     const { getByTestId, queryByText, getByText } = renderPolicyName({
-      isAgentSharding: true,
+      isShardingActive: true,
       locationStats: locationStats([agent(), agent({ host: 'agent-b', agentId: 'agent-b-id' })]),
     });
 

@@ -48,7 +48,7 @@ module.exports = {
     fixable: 'code',
     schema: [],
   },
-  create: (context) => ({
+  createOnce: (context) => ({
     CallExpression(_) {
       const node = /** @type {CallExpression} */ (_);
 

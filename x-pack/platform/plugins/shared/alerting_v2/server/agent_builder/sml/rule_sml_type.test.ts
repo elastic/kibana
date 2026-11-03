@@ -43,7 +43,7 @@ const baseRuleResponse = {
   created_at: createdAt,
   updated_by: updatedBy,
   updated_at: updatedAt,
-  metadata: { ...baseRuleAttrs.metadata, version: baseRuleAttrs.metadata?.version ?? 1 },
+  metadata: baseRuleAttrs.metadata,
 };
 
 const buildToAttachmentContext = () => ({
@@ -295,6 +295,20 @@ describe('createRuleSmlType', () => {
       expect(getRule).toHaveBeenCalledWith({ id: 'rule-1' });
       expect(result?.type).toBe(RULE_ATTACHMENT_TYPE);
       expect(result?.data).toEqual(expect.objectContaining({ id: 'rule-1', kind: 'alert' }));
+    });
+
+    it('sets the attachment origin to the raw rule id instead of the SML origin URI', async () => {
+      getRule.mockResolvedValueOnce({
+        ...baseRuleResponse,
+        id: 'rule-1',
+      });
+
+      const result = await buildDefinition().toAttachment(
+        buildSmlDocument(),
+        buildToAttachmentContext()
+      );
+
+      expect(result?.origin).toBe('rule-1');
     });
 
     it('returns undefined when getRule throws', async () => {

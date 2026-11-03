@@ -22,7 +22,7 @@ const pipelineSlug = () =>
 
 const buildNumber = () =>
   z
-    .union([z.string(), z.number()])
+    .union([z.string().max(20), z.number()])
     .describe(
       'The build number — a sequential integer shown in the Buildkite UI and API (e.g. 42 or "42"), NOT the build\'s UUID "id" field.'
     );

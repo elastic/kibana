@@ -282,6 +282,84 @@ test('`init` fails if object returned from initializer does not define `setup` f
   );
 });
 
+test('`init` fails if object returned from initializer defines an `initialize` function', async () => {
+  const manifest = createPluginManifest();
+  const opaqueId = Symbol();
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-initializer-path',
+    manifest,
+    opaqueId,
+    initializerContext: createPluginInitializerContext({
+      coreContext,
+      opaqueId,
+      manifest,
+      instanceInfo,
+      nodeInfo,
+    }),
+  });
+
+  const mockPluginInstance = { setup: jest.fn(), initialize: jest.fn() };
+  mockPluginInitializer.mockResolvedValue(mockPluginInstance);
+
+  await expect(() => plugin.init()).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"Instance of plugin \\"some-plugin-id\\" defines an \\"initialize\\" function. \\"initialize\\" is reserved by core for plugin lifecycle hooks, rename the method."`
+  );
+});
+
+test('`init` fails if the plugin class defines an `initialize` method', async () => {
+  const manifest = createPluginManifest();
+  const opaqueId = Symbol();
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-initializer-path',
+    manifest,
+    opaqueId,
+    initializerContext: createPluginInitializerContext({
+      coreContext,
+      opaqueId,
+      manifest,
+      instanceInfo,
+      nodeInfo,
+    }),
+  });
+
+  class PluginWithInitializeMethod {
+    setup() {
+      return {};
+    }
+
+    initialize() {
+      return Promise.resolve();
+    }
+  }
+  mockPluginInitializer.mockResolvedValue(new PluginWithInitializeMethod());
+
+  await expect(() => plugin.init()).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"Instance of plugin \\"some-plugin-id\\" defines an \\"initialize\\" function. \\"initialize\\" is reserved by core for plugin lifecycle hooks, rename the method."`
+  );
+});
+
+test('`init` allows a preboot plugin to define an `initialize` function', async () => {
+  const manifest = createPluginManifest({ type: PluginType.preboot });
+  const opaqueId = Symbol();
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-initializer-path',
+    manifest,
+    opaqueId,
+    initializerContext: createPluginInitializerContext({
+      coreContext,
+      opaqueId,
+      manifest,
+      instanceInfo,
+      nodeInfo,
+    }),
+  });
+
+  const mockPluginInstance = { setup: jest.fn(), initialize: jest.fn() };
+  mockPluginInitializer.mockResolvedValue(mockPluginInstance);
+
+  await expect(plugin.init()).resolves.toBeUndefined();
+});
+
 test('`setup` initializes plugin and calls appropriate lifecycle hook', async () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();

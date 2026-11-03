@@ -8,7 +8,7 @@
  */
 
 import type { ParsedQuery } from 'query-string';
-import { stringify } from 'query-string';
+import queryString from 'query-string';
 import { format as formatUrl } from 'url';
 import { parseUrl, parseUrlHash } from './parse';
 import { url as urlUtils } from '..';
@@ -22,7 +22,7 @@ export function replaceUrlQuery(
   // however `@types/node` says that `url.query` has values of type `string | string[] | undefined`.
   // After investigating this, it seems that no matter what the values will be of type `string | string[]`
   const newQuery = queryReplacer(url.query || {});
-  const searchQueryString = stringify(urlUtils.encodeQuery(newQuery), {
+  const searchQueryString = queryString.stringify(urlUtils.encodeQuery(newQuery), {
     sort: false,
     encode: false,
   });
@@ -43,7 +43,7 @@ export function replaceUrlHashQuery(
   // however `@types/node` says that `url.query` has values of type `string | string[] | undefined`.
   // After investigating this, it seems that no matter what the values will be of type `string | string[]`
   const newQuery = queryReplacer(hash?.query || {});
-  const searchQueryString = stringify(urlUtils.encodeQuery(newQuery), {
+  const searchQueryString = queryString.stringify(urlUtils.encodeQuery(newQuery), {
     sort: false,
     encode: false,
   });

@@ -11,15 +11,15 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { dataPluginMock } from '../../mocks';
 import { setIndexPatterns, setSearchService } from '../../services';
-import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import { EsqlSource, getOrRegisterEsqlDataView } from '@kbn/data-source';
 
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLAdHocDataview: jest.fn(),
+jest.mock('@kbn/data-source', () => ({
+  ...jest.requireActual('@kbn/data-source'),
+  getOrRegisterEsqlDataView: jest.fn(),
 }));
 
-const mockGetESQLAdHocDataview = getESQLAdHocDataview as jest.MockedFunction<
-  typeof getESQLAdHocDataview
+const mockGetOrRegisterEsqlDataView = getOrRegisterEsqlDataView as jest.MockedFunction<
+  typeof getOrRegisterEsqlDataView
 >;
 
 import {
@@ -231,11 +231,17 @@ describe('createFiltersFromClickEvent', () => {
       });
 
       mockDataView.getFieldByName = mockFieldByName;
+      let createSourceSpy: jest.SpyInstance;
+
+      afterEach(() => {
+        createSourceSpy.mockRestore();
+      });
 
       beforeEach(() => {
         mockFieldByName.mockReset();
-        mockGetESQLAdHocDataview.mockReset();
-        mockGetESQLAdHocDataview.mockResolvedValue(mockDataView);
+        mockGetOrRegisterEsqlDataView.mockReset();
+        mockGetOrRegisterEsqlDataView.mockResolvedValue(mockDataView);
+        createSourceSpy = jest.spyOn(EsqlSource, 'create').mockResolvedValue({} as EsqlSource);
 
         table.columns[0] = {
           name: 'message',
@@ -336,15 +342,11 @@ describe('createFiltersFromClickEvent', () => {
 
       test('returns no filters when a computed column name matches sourceField and an index field with that name exists', async () => {
         table.columns[0].isComputedColumn = true;
-        mockFieldByName.mockReturnValue({
-          name: 'message',
-          filterable: true,
-        });
 
         const filter = await createFilterESQL(table, 0, 0);
 
-        expect(mockFieldByName).toHaveBeenCalledTimes(1);
-        expect(mockFieldByName).toHaveBeenCalledWith('message');
+        expect(mockGetOrRegisterEsqlDataView).not.toHaveBeenCalled();
+        expect(createSourceSpy).not.toHaveBeenCalled();
         expect(filter).toEqual([]);
       });
 
@@ -353,14 +355,11 @@ describe('createFiltersFromClickEvent', () => {
         // must not make an EVAL-computed column look like a genuine RENAME of the real field.
         table.columns[0].isComputedColumn = true;
         table.columns[0].name = 'My Custom Label';
-        mockFieldByName.mockReturnValue({
-          name: 'message',
-          filterable: true,
-        });
 
         const filter = await createFilterESQL(table, 0, 0);
 
-        expect(mockFieldByName).toHaveBeenCalledWith('message');
+        expect(mockGetOrRegisterEsqlDataView).not.toHaveBeenCalled();
+        expect(createSourceSpy).not.toHaveBeenCalled();
         expect(filter).toEqual([]);
       });
 
@@ -419,6 +418,59 @@ describe('createFiltersFromClickEvent', () => {
             }),
           })
         );
+      });
+
+      describe('ES|QL views and datasets', () => {
+        const useColumnOf = (indexPattern: string, sourceField: string, value: string) => {
+          table.columns[0] = {
+            name: sourceField,
+            id: '1-1',
+            meta: { type: 'string', sourceParams: { indexPattern, sourceField } },
+          };
+          table.rows[0]['1-1'] = value;
+        };
+
+        test('takes the DataView of the dataset from the ES|QL source, not from field caps', async () => {
+          useColumnOf('meow', 'geo.dest', 'US');
+          mockFieldByName.mockReturnValue({ name: 'geo.dest', filterable: true });
+
+          await createFilterESQL(table, 0, 0);
+
+          expect(createSourceSpy).toHaveBeenCalledWith(
+            expect.objectContaining({ query: 'FROM meow' })
+          );
+          expect(mockGetOrRegisterEsqlDataView).toHaveBeenCalledTimes(1);
+        });
+
+        test('creates a phrase filter for any output column of a view', async () => {
+          useColumnOf('meow', 'count', '10');
+          mockFieldByName.mockReturnValue({ name: 'count', filterable: true });
+
+          const filter = await createFilterESQL(table, 0, 0);
+
+          expect(filter).toEqual([
+            expect.objectContaining({ query: { match_phrase: { count: '10' } } }),
+          ]);
+        });
+
+        test('does not create a filter for a column the query computes on top of a view', async () => {
+          useColumnOf('meow', 'foo', 'USx');
+          table.columns[0].isComputedColumn = true;
+          mockFieldByName.mockReturnValue(undefined);
+
+          const filter = await createFilterESQL(table, 0, 0);
+
+          expect(filter).toEqual([]);
+        });
+
+        test('does not create a filter for a field the dataset does not have', async () => {
+          useColumnOf('meow', 'unknown', 'x');
+          mockFieldByName.mockReturnValue(undefined);
+
+          const filter = await createFilterESQL(table, 0, 0);
+
+          expect(filter).toEqual([]);
+        });
       });
     });
   });

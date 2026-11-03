@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/private/data_federation'],
   coverageDirectory:
@@ -15,4 +15,5 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/x-pack/platform/plugins/private/data_federation/{common,public,server}/**/*.{ts,tsx}',
   ],
+  testTimeout: 30_000,
 };

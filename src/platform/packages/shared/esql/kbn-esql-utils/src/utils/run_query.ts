@@ -85,6 +85,7 @@ export async function getESQLQueryColumnsRaw({
   timeRange,
   variables,
   includeColumnMetadata,
+  projectRouting,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
@@ -94,6 +95,7 @@ export async function getESQLQueryColumnsRaw({
   timeRange?: TimeRange;
   variables?: ESQLControlVariable[];
   includeColumnMetadata?: boolean;
+  projectRouting?: ProjectRouting;
 }): Promise<ESQLColumn[]> {
   try {
     const namedParams = getNamedParams(esqlQuery, timeRange, variables);
@@ -111,6 +113,7 @@ export async function getESQLQueryColumnsRaw({
         {
           abortSignal: signal,
           strategy: 'esql_async',
+          ...(projectRouting !== undefined ? { projectRouting } : {}),
         }
       )
     );
@@ -185,6 +188,36 @@ export async function getESQLQueryColumns({
   }
 }
 
+// The parameters getESQLResults sends to the ES|QL search. Exported so callers that display the
+// request (for example in Inspector) show exactly what is sent.
+export function getEsqlSearchParams({
+  esqlQuery,
+  filter,
+  dropNullColumns,
+  timeRange,
+  variables,
+  timezone,
+  includeColumnMetadata,
+}: {
+  esqlQuery: string;
+  filter?: unknown;
+  dropNullColumns?: boolean;
+  timeRange?: TimeRange;
+  variables?: ESQLControlVariable[];
+  timezone?: string;
+  includeColumnMetadata?: boolean;
+}) {
+  const namedParams = getNamedParams(esqlQuery, timeRange, variables);
+  return {
+    ...(filter ? { filter } : {}),
+    query: esqlQuery,
+    ...(dropNullColumns ? { dropNullColumns: true } : {}),
+    ...(namedParams.length ? { params: namedParams } : {}),
+    ...(timezone ? { time_zone: getTimeZoneFromSettings(timezone) } : {}),
+    ...(includeColumnMetadata ? { settings: { column_metadata: true } } : {}),
+  };
+}
+
 // Returns the table as being returned by the _query endpoint
 // Based on the search api from the data plugin
 export async function getESQLResults({
@@ -217,18 +250,18 @@ export async function getESQLResults({
   response: ESQLSearchResponse;
   params: ESQLSearchParams;
 }> {
-  const namedParams = getNamedParams(esqlQuery, timeRange, variables);
   const result = await lastValueFrom(
     search(
       {
-        params: {
-          ...(filter ? { filter } : {}),
-          query: esqlQuery,
-          ...(dropNullColumns ? { dropNullColumns: true } : {}),
-          ...(namedParams.length ? { params: namedParams } : {}),
-          ...(timezone ? { time_zone: getTimeZoneFromSettings(timezone) } : {}),
-          ...(includeColumnMetadata ? { settings: { column_metadata: true } } : {}),
-        },
+        params: getEsqlSearchParams({
+          esqlQuery,
+          filter,
+          dropNullColumns,
+          timeRange,
+          variables,
+          timezone,
+          includeColumnMetadata,
+        }),
       },
       {
         abortSignal: signal,

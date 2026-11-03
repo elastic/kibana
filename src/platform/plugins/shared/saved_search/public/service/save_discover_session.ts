@@ -55,7 +55,7 @@ const saveDiscoverSessionSavedObject = async (
         },
       });
 
-  return resp.item.id;
+  return { id: resp.item.id, version: resp.item.version };
 };
 
 export const saveDiscoverSession = async (
@@ -71,12 +71,12 @@ export const saveDiscoverSession = async (
     ? savedObjectsTagging.ui.updateTagsReferences(tabReferences, discoverSession.tags ?? [])
     : tabReferences;
 
-  const id = await saveDiscoverSessionSavedObject(
+  const { id, version } = await saveDiscoverSessionSavedObject(
     isNew ? undefined : discoverSession.id,
     attributes,
     references,
     contentManagement
   );
 
-  return { ...discoverSession, id, references, managed: false };
+  return { ...discoverSession, id, version, references, managed: false };
 };

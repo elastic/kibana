@@ -50,7 +50,7 @@ The `invoke` action does not use the service principal token. It authenticates w
 
 | Action | Description |
 |--------|-------------|
-| `invoke` | Invoke an HTTP-triggered function and return its status, headers, and body. Any status the function returns is reported in the `status` field rather than raised as an error; only an authentication failure or a transport error throws. Parameters: `resourceGroupName`, `functionAppName`, `functionName` (all three required), `method`, `route`, `body`, `query`, `functionKey`. |
+| `invoke` | Invoke an HTTP-triggered function and return its status, headers, and body. Resolves the app's hostname over the Azure management API first, which throws if the connector's credentials are rejected or the app is unknown. Once the function is reached, any status it returns is reported in the `status` field rather than raised as an error; only a transport failure throws. A 401 or 403 is reported too: it may be a missing or wrong function key, which the Functions host rejects before the function runs, or the function's own authorization decision. Parameters: `resourceGroupName`, `functionAppName`, `functionName` (all three required), `method`, `route`, `body`, `query`, `functionKey`. |
 | `listFunctionKeys` | Read the function-level keys of one function, as a name-to-key map. Parameters: `resourceGroupName`, `functionAppName`, `functionName` (all three required). |
 | `getFunctionApp` | Get a function app's configuration and running state. Parameters: `resourceGroupName`, `functionAppName` (both required). |
 | `restartFunctionApp` | Restart a function app. Parameters: `resourceGroupName`, `functionAppName` (both required), `softRestart`, `synchronous`. |

@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Url from 'url';
 import type { FtrProviderContext } from '../../services/types';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const config = getService('config');
 
   describe('kibana server with ssl', () => {
     it('redirects http requests at redirect port to https', async () => {
-      const host = process.env.TEST_KIBANA_HOST || 'localhost';
-      const port = process.env.TEST_KIBANA_PORT || '5620';
-      const url = `https://${host}:${port}/`;
+      const url = Url.format({
+        protocol: 'https',
+        hostname: config.get('servers.kibana.hostname'),
+        port: config.get('servers.kibana.port'),
+        pathname: '/',
+      });
 
       await supertest.get('/').expect('location', url).expect(302);
     });

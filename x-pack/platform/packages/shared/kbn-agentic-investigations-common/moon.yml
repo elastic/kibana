@@ -26,7 +26,7 @@ dependsOn:
   - '@kbn/ui-ai-components'
   - '@kbn/user-profile-components'
   - '@kbn/proposals-ui'
-  - '@kbn/proposals-common'
+  - '@kbn/core-http-browser'
   - '@kbn/ui-ai-components'
 tags:
   - shared-browser
@@ -40,6 +40,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

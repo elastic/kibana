@@ -18,12 +18,14 @@ const MAX_PAGE_LIMIT = 200;
  * path separators or filter syntax when interpolated into a request URL.
  */
 const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+const UUID_LENGTH = 36;
 
 /**
  * Protect IDs are opaque 24-character hex-ish strings (e.g. `66d025b301ebc903e80003ea`).
  * The spec does not publish a format, so bound the length and restrict to alphanumerics.
  */
 const PROTECT_ID_REGEX = /^[0-9a-zA-Z]{1,64}$/;
+const MAX_PROTECT_ID_LENGTH = 64;
 
 /**
  * The Network API's `filter` query parameter uses its own expression grammar (documented at
@@ -43,33 +45,42 @@ const FILTER_DESCRIPTION = [
   'differs per endpoint — start without a filter to see the returned fields, then filter on those.',
 ].join(' ');
 
-const SiteIdSchema = z
-  .string()
-  .regex(UUID_REGEX, 'Must be a UUID.')
-  .describe(
-    'The site UUID, returned by the listSites action. Most Network actions are site-scoped.'
-  );
+const SiteIdSchema = lazySchema(() =>
+  z
+    .string()
+    .max(UUID_LENGTH)
+    .regex(UUID_REGEX, 'Must be a UUID.')
+    .describe(
+      'The site UUID, returned by the listSites action. Most Network actions are site-scoped.'
+    )
+);
 
-const OffsetSchema = z
-  .number()
-  .int()
-  .min(0)
-  .optional()
-  .describe(
-    'Zero-based index of the first result to return. Defaults to 0. Use with `limit` to page through results using `totalCount` from the response.'
-  );
+const OffsetSchema = lazySchema(() =>
+  z
+    .number()
+    .int()
+    .min(0)
+    .optional()
+    .describe(
+      'Zero-based index of the first result to return. Defaults to 0. Use with `limit` to page through results using `totalCount` from the response.'
+    )
+);
 
-const LimitSchema = z
-  .number()
-  .int()
-  .min(1)
-  .max(MAX_PAGE_LIMIT)
-  .optional()
-  .describe(
-    `Maximum number of results to return (1–${MAX_PAGE_LIMIT}). Defaults to 25 on the server.`
-  );
+const LimitSchema = lazySchema(() =>
+  z
+    .number()
+    .int()
+    .min(1)
+    .max(MAX_PAGE_LIMIT)
+    .optional()
+    .describe(
+      `Maximum number of results to return (1–${MAX_PAGE_LIMIT}). Defaults to 25 on the server.`
+    )
+);
 
-const FilterSchema = z.string().max(MAX_FILTER_LENGTH).optional().describe(FILTER_DESCRIPTION);
+const FilterSchema = lazySchema(() =>
+  z.string().max(MAX_FILTER_LENGTH).optional().describe(FILTER_DESCRIPTION)
+);
 
 // ============================================================================
 // UniFi Network — reads
@@ -99,6 +110,7 @@ export const UnifiGetDeviceInputSchema = lazySchema(() =>
     siteId: SiteIdSchema,
     deviceId: z
       .string()
+      .max(UUID_LENGTH)
       .regex(UUID_REGEX, 'Must be a UUID.')
       .describe('The adopted device UUID, returned in the `id` field by listDevices.'),
   })
@@ -120,6 +132,7 @@ export const UnifiGetClientInputSchema = lazySchema(() =>
     siteId: SiteIdSchema,
     clientId: z
       .string()
+      .max(UUID_LENGTH)
       .regex(UUID_REGEX, 'Must be a UUID.')
       .describe('The connected client UUID, returned in the `id` field by listClients.'),
   })
@@ -154,6 +167,7 @@ export const UnifiRestartDeviceInputSchema = lazySchema(() =>
     siteId: SiteIdSchema,
     deviceId: z
       .string()
+      .max(UUID_LENGTH)
       .regex(UUID_REGEX, 'Must be a UUID.')
       .describe('The adopted device UUID to restart, returned by listDevices.'),
   })
@@ -165,6 +179,7 @@ export const UnifiPowerCyclePortInputSchema = lazySchema(() =>
     siteId: SiteIdSchema,
     deviceId: z
       .string()
+      .max(UUID_LENGTH)
       .regex(UUID_REGEX, 'Must be a UUID.')
       .describe(
         'The UUID of the switch whose port should be power-cycled, returned by listDevices.'
@@ -186,6 +201,7 @@ export const UnifiAuthorizeGuestAccessInputSchema = lazySchema(() =>
     siteId: SiteIdSchema,
     clientId: z
       .string()
+      .max(UUID_LENGTH)
       .regex(UUID_REGEX, 'Must be a UUID.')
       .describe('The UUID of the guest client to authorize, returned by listClients.'),
     timeLimitMinutes: z
@@ -229,6 +245,7 @@ export const UnifiUnauthorizeGuestAccessInputSchema = lazySchema(() =>
     siteId: SiteIdSchema,
     clientId: z
       .string()
+      .max(UUID_LENGTH)
       .regex(UUID_REGEX, 'Must be a UUID.')
       .describe(
         'The UUID of the guest client to unauthorize and disconnect, returned by listClients.'
@@ -264,20 +281,25 @@ export const PROTECT_DEVICE_TYPES = [
   'alarm-hubs',
 ] as const;
 
-const ProtectDeviceTypeSchema = z
-  .enum(PROTECT_DEVICE_TYPES)
-  .describe(
-    `The Protect device family to query. One of: ${PROTECT_DEVICE_TYPES.join(
-      ', '
-    )}. Use "cameras" for video devices, "sensors" for UniFi Protect sensors (door/motion/leak), "alarm-hubs" for keypads/hubs, and "link-stations" for AI LiteStation-class devices.`
-  );
+const ProtectDeviceTypeSchema = lazySchema(() =>
+  z
+    .enum(PROTECT_DEVICE_TYPES)
+    .describe(
+      `The Protect device family to query. One of: ${PROTECT_DEVICE_TYPES.join(
+        ', '
+      )}. Use "cameras" for video devices, "sensors" for UniFi Protect sensors (door/motion/leak), "alarm-hubs" for keypads/hubs, and "link-stations" for AI LiteStation-class devices.`
+    )
+);
 
-const ProtectDeviceIdSchema = z
-  .string()
-  .regex(PROTECT_ID_REGEX, 'Must be an alphanumeric Protect device ID.')
-  .describe(
-    'The Protect device ID, returned in the `id` field by listProtectDevices, e.g. "66d025b301ebc903e80003ea".'
-  );
+const ProtectDeviceIdSchema = lazySchema(() =>
+  z
+    .string()
+    .max(MAX_PROTECT_ID_LENGTH)
+    .regex(PROTECT_ID_REGEX, 'Must be an alphanumeric Protect device ID.')
+    .describe(
+      'The Protect device ID, returned in the `id` field by listProtectDevices, e.g. "66d025b301ebc903e80003ea".'
+    )
+);
 
 export const UnifiListProtectDevicesInputSchema = lazySchema(() =>
   z.object({
@@ -298,6 +320,7 @@ export const UnifiGetCameraSnapshotInputSchema = lazySchema(() =>
   z.object({
     cameraId: z
       .string()
+      .max(MAX_PROTECT_ID_LENGTH)
       .regex(PROTECT_ID_REGEX, 'Must be an alphanumeric Protect camera ID.')
       .describe('The camera ID, returned by listProtectDevices with deviceType "cameras".'),
     channel: z
@@ -320,10 +343,12 @@ export const UnifiMovePtzCameraInputSchema = lazySchema(() =>
   z.object({
     cameraId: z
       .string()
+      .max(MAX_PROTECT_ID_LENGTH)
       .regex(PROTECT_ID_REGEX, 'Must be an alphanumeric Protect camera ID.')
       .describe('The PTZ camera ID, returned by listProtectDevices with deviceType "cameras".'),
     slot: z
       .string()
+      .max(5)
       .regex(/^-?\d{1,4}$/, 'Must be an integer preset slot, e.g. "-1", "0" or "2".')
       .describe(
         'The preset slot to move to, as a string. "-1" is the home preset; "0" and above are user-configured presets. The camera\'s `activePatrolSlot` field shows the currently active slot.'

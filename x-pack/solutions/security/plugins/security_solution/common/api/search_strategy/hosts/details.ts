@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { HostsQueries } from '../model/factory_query_type';
 import { inspect } from '../model/inspect';
 import { pagination } from '../model/pagination';
@@ -13,16 +13,18 @@ import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { timerange } from '../model/timerange';
 import { sort } from './model/sort';
 
-export const hostDetailsSchema = requestBasicOptionsSchema.extend({
-  hostName: z.string(),
-  skip: z.boolean().optional(),
-  inspect,
-  pagination: pagination.optional(),
-  timerange,
-  sort,
-  factoryQueryType: z.literal(HostsQueries.details),
-  entityStoreV2: z.boolean().optional(),
-});
+export const hostDetailsSchema = lazySchema(() =>
+  requestBasicOptionsSchema.extend({
+    hostName: z.string(),
+    skip: z.boolean().optional(),
+    inspect,
+    pagination: pagination.optional(),
+    timerange,
+    sort,
+    factoryQueryType: z.literal(HostsQueries.details),
+    entityStoreV2: z.boolean().optional(),
+  })
+);
 
 export type HostDetailsRequestOptionsInput = z.input<typeof hostDetailsSchema>;
 

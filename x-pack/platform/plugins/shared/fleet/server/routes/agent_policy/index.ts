@@ -15,6 +15,8 @@ import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { AGENT_POLICY_API_ROUTES } from '../../constants';
 import {
   GetAgentPoliciesRequestSchema,
+  GetAgentPoliciesPackagePoliciesSummaryRequestSchema,
+  GetAgentPoliciesPackagePoliciesSummaryResponseSchema,
   GetOneAgentPolicyRequestSchema,
   CreateAgentPolicyRequestSchema,
   UpdateAgentPolicyRequestSchema,
@@ -64,6 +66,7 @@ import {
   getAutoUpgradeAgentsStatusHandler,
   createAgentAndPackagePoliciesHandler,
   RunAgentPolicyRevisionsCleanupTaskHandler,
+  getAgentPoliciesPackagePoliciesSummaryHandler,
 } from './handlers';
 
 export const registerRoutes = (
@@ -447,7 +450,10 @@ export const registerRoutes = (
       path: AGENT_POLICY_API_ROUTES.FULL_INFO_PATTERN,
       security: {
         authz: {
-          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ],
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+            FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
+          ],
         },
       },
       summary: `Get a full agent policy`,
@@ -487,7 +493,15 @@ export const registerRoutes = (
         authz: {
           requiredPrivileges: [
             {
-              anyRequired: [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ, FLEET_API_PRIVILEGES.SETUP],
+              anyRequired: [
+                {
+                  allOf: [
+                    FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+                    FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
+                  ],
+                },
+                FLEET_API_PRIVILEGES.SETUP,
+              ],
             },
           ],
         },
@@ -731,5 +745,40 @@ export const registerRoutes = (
         },
       },
       RunAgentPolicyRevisionsCleanupTaskHandler
+    );
+
+  router.versioned
+    .post({
+      path: AGENT_POLICY_API_ROUTES.PACKAGE_POLICIES_SUMMARY_PATTERN,
+      access: 'internal',
+      enableQueryVersion: true,
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ],
+        },
+      },
+      summary: `Get a summary of the package policies of agent policies`,
+      options: {
+        tags: ['oas-tag:Elastic Agent policies'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: GetAgentPoliciesPackagePoliciesSummaryRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => GetAgentPoliciesPackagePoliciesSummaryResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      getAgentPoliciesPackagePoliciesSummaryHandler
     );
 };

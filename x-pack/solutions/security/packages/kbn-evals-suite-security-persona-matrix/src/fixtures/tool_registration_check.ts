@@ -153,7 +153,7 @@ export async function assertPersonaMatrixToolsRegistered({
     throw new Error(
       `[persona-matrix] pre-flight tool-attachment check failed: tools registered but not attached ` +
         `to agent '${agentBuilderDefaultAgentId}': ${unattached.join(', ')}. ` +
-        `Call attachPersonaMatrixToolsToAgent after seeding.`
+        `Call seedPersonaMatrixTools, which attaches them, before running the suite.`
     );
   }
   log.info(`[persona-matrix] pre-flight: custom tools attached to '${agentBuilderDefaultAgentId}'`);

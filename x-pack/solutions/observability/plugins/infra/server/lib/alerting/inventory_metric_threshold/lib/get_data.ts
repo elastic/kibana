@@ -137,9 +137,9 @@ export const getData = async ({
   previousNodes?: Response;
   schema?: DataSchemaFormat;
 }): Promise<Response> => {
-  // Pod rules evaluate as ecs. additionalContext has to be parsed with that same
-  // schema, or host, orchestrator, labels, and tags are dropped from the alert.
-  const effectiveSchema = getInventoryRuleSchema(nodeType, schema);
+  // Resolved once here and passed down, so the search and the additionalContext parsing
+  // below cannot disagree — ECS context comes from `_source`, SemConv from `docvalue_fields`.
+  const effectiveSchema = getInventoryRuleSchema(schema);
 
   const handleResponse = (aggs: ResponseAggregations, previous: Response) => {
     const { nodes } = aggs;

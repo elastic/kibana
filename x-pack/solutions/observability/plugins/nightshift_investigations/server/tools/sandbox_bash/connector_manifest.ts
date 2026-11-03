@@ -10,9 +10,28 @@ import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { AgentConnector, ActionsClient } from './agent_connectors';
 import { listAgentConnectors } from './agent_connectors';
 import type { SandboxCallContext } from './tool_utils';
+import {
+  CONNECTOR_DOCS,
+  CONNECTOR_DOCS_ROOT,
+  CONNECTOR_MANIFEST_PATH,
+  ELASTIC_MANIFEST_PATH,
+} from './connector_docs';
 
 const renderConnectorSection = (connector: AgentConnector): string =>
   `## ${connector.name} (connector-id: ${connector.id}, type: ${connector.actionTypeId})`;
+
+const renderGuidesSection = (): string[] => [
+  '',
+  '---',
+  '',
+  '# Service guides',
+  '',
+  'API recipes and how to authenticate through a connector, or without credentials where the',
+  'service allows it. Read one when you need that service.',
+  '',
+  `- Elasticsearch: \`${ELASTIC_MANIFEST_PATH}\``,
+  ...CONNECTOR_DOCS.map(({ service, path }) => `- ${service}: \`${path}\``),
+];
 
 export const writeConnectorManifest = async ({
   session,
@@ -35,7 +54,7 @@ export const writeConnectorManifest = async ({
     '',
     '- `CONNECTOR_ID`, `CONNECTOR_TYPE`',
     '- `CONNECTOR_CONFIG_<KEY>` for each connector setting (e.g. `CONNECTOR_CONFIG_APIURL`)',
-    '- `CONNECTOR_SECRET_<KEY>` for each credential (e.g. `CONNECTOR_SECRET_TOKEN`, `CONNECTOR_SECRET_APIKEY`)',
+    '- `CONNECTOR_HEADER_<NAME>` for each normalized authentication header (e.g. `CONNECTOR_HEADER_AUTHORIZATION`)',
     '',
     'Keys are upper-cased with non-alphanumerics replaced by `_`. Discover the names available for a connector with:',
     '```bash',
@@ -43,7 +62,7 @@ export const writeConnectorManifest = async ({
     '```',
     'Then call the service directly, e.g.:',
     '```bash',
-    'curl -sS -H "Authorization: Bearer $CONNECTOR_SECRET_TOKEN" "$CONNECTOR_CONFIG_APIURL/..."',
+    'curl -sS -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" "$CONNECTOR_CONFIG_APIURL/..."',
     '```',
     'Never print, log, or write credential values to files; they are redacted from command output.',
     'Only the connectors listed below can be requested.',
@@ -57,11 +76,18 @@ export const writeConnectorManifest = async ({
     }
   }
 
+  sections.push(...renderGuidesSection());
+
   const content = sections.join('\n') + '\n';
 
   logger.debug(`Writing connector manifest (${connectors.length} connector(s))`);
 
+  await session.mkdirs([CONNECTOR_DOCS_ROOT]);
   await session.writeFiles([
-    { path: '/workspace/connectors.md', content: Buffer.from(content, 'utf8') },
+    { path: CONNECTOR_MANIFEST_PATH, content: Buffer.from(content, 'utf8') },
+    ...CONNECTOR_DOCS.map(({ path, content: doc }) => ({
+      path,
+      content: Buffer.from(doc, 'utf8'),
+    })),
   ]);
 };

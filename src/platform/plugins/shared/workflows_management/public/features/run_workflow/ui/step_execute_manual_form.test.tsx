@@ -13,7 +13,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { StepExecuteManualForm } from './step_execute_manual_form';
 
 jest.mock('@kbn/code-editor', () => {
+  const actual = jest.requireActual('@kbn/code-editor');
+
   return {
+    ...actual,
     CodeEditor: ({
       value,
       onChange,

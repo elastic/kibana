@@ -209,6 +209,9 @@ async function openFirstRowCollapsedActions(): Promise<void> {
 }
 
 describe('Authorization matrix', () => {
+  // The first EUI table render exceeds Jest's 5s default on a loaded CI worker.
+  jest.setTimeout(20_000);
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseWorkflows.mockReturnValue(workflowsQueryResult);

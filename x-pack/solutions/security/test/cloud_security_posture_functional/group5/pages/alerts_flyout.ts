@@ -226,11 +226,11 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       );
       // An alert is always coupled with an event, so we open the group preview panel instead of the alert panel
       await alertsPage.flyout.assertPreviewPanelIsOpen('group');
-      await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(3);
+      await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
 
       // assert the grouped items are rendered correctly
-      await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(3);
-      await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(3);
+      await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
+      await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(2);
       await expandedFlyoutGraph.assertGroupedItemActorAndTargetValues(
         2,
         'admin@example.com',
@@ -402,10 +402,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
           // Verify second entity node - Host target
           // get Node by sha256 hash of host:host-instance-1 and host:host-instance-2
-          await expandedFlyoutGraph.assertNodeEntityTag(
-            '081f21718bb4b854bda72b01719d0febe88b10520dede17fc2640260002ea339',
-            'Host'
-          );
           await expandedFlyoutGraph.assertNodeEntityDetails(
             '081f21718bb4b854bda72b01719d0febe88b10520dede17fc2640260002ea339',
             'GCP Compute Instance'

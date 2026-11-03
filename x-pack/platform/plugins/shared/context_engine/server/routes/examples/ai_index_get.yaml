@@ -10,6 +10,7 @@ responses:
               id: customer_support
               description: Knowledge about customer support cases.
               managed: false
+              memory_enabled: true
               dest:
                 type: data_stream
                 value: ai-index-ds-customer-support

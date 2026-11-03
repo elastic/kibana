@@ -28,7 +28,9 @@ const describeAiIndexSchema = z.object({
     .refine((value) => validateAiIndexId(value) === undefined, {
       message: 'Invalid AI index id.',
     })
-    .describe('AI Index id, as returned by the list AI Indices tool.'),
+    .describe(
+      'The AI-index registry ID, as shown in the agent AI INDICES configuration or returned by the list AI Indices tool. Do not use the backing Elasticsearch index or data stream name.'
+    ),
 });
 
 export const createDescribeAiIndexTool = (

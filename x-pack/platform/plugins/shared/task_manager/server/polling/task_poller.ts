@@ -10,7 +10,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { Subject } from 'rxjs';
+import { Subject, Subscription, of } from 'rxjs';
 
 import type { Option } from 'fp-ts/Option';
 import { none } from 'fp-ts/Option';
@@ -18,6 +18,7 @@ import type { Logger } from '@kbn/core/server';
 import { TaskErrorSource } from '../task_running';
 import type { Result } from '../lib/result_type';
 import { asOk, asErr } from '../lib/result_type';
+import { createThrottledClaimNudge } from '../claim_nudge/create_throttled_claim_nudge';
 
 type WorkFn<H> = () => Promise<H>;
 
@@ -25,6 +26,10 @@ interface Opts<H> {
   logger: Logger;
   initialPollInterval: number;
   pollInterval$: Observable<number>;
+  /** Requests an extra claim cycle, e.g. from `runSoon`. */
+  claimNudge$?: Observable<void>;
+  /** While true, claim nudges are ignored. */
+  backpressure$?: Observable<boolean>;
   getCapacity: () => number;
   work: WorkFn<H>;
 }
@@ -50,20 +55,67 @@ export function createTaskPoller<T, H>({
   logger,
   initialPollInterval,
   pollInterval$,
+  claimNudge$,
+  backpressure$,
   getCapacity,
   work,
 }: Opts<H>): TaskPoller<T, H> {
   const hasCapacity = () => getCapacity() > 0;
   let running: boolean = false;
+  let isCycleRunning: boolean = false;
+  let nudgePending = false;
+  let backpressureActive = false;
   let timeoutId: NodeJS.Timeout | null = null;
-  let hasSubscribed: boolean = false;
+  let subscribeTimeoutId: NodeJS.Timeout | null = null;
+  let subscriptions: Subscription | null = null;
   let pollInterval = initialPollInterval;
-  let pollIntervalDelay = 0;
+  let nextCycleAt = 0;
+  let lastCycleStart = 0;
   const subject = new Subject<Result<H, PollingError<T>>>();
+  const claimCycleStart$ = new Subject<void>();
+
+  function scheduleNextCycle() {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      timeoutId = null;
+    }
+    if (!running || isCycleRunning) {
+      return;
+    }
+    timeoutId = setTimeout(
+      runScheduledCycle,
+      nudgePending ? 0 : Math.max(nextCycleAt - Date.now(), 0)
+    );
+  }
+
+  function runScheduledCycle() {
+    void runCycle().catch((e) => {
+      subject.next(asPollingError(e, PollingErrorType.PollerError));
+    });
+  }
 
   async function runCycle() {
+    if (!running || isCycleRunning) {
+      return;
+    }
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
     timeoutId = null;
     const start = Date.now();
+    const cycleDue = start >= nextCycleAt;
+    // Backpressure may have started since the nudge was accepted.
+    if (!cycleDue && (!nudgePending || backpressureActive)) {
+      nudgePending = false;
+      scheduleNextCycle();
+      return;
+    }
+    nudgePending = false;
+    // Any cycle, nudged or regular, restarts the poll interval.
+    nextCycleAt = start + pollInterval;
+    lastCycleStart = start;
+    isCycleRunning = true;
+    claimCycleStart$.next();
     try {
       if (hasCapacity()) {
         const result = await work();
@@ -73,44 +125,84 @@ export function createTaskPoller<T, H>({
       }
     } catch (e) {
       subject.next(asPollingError<T>(e, PollingErrorType.WorkError));
+    } finally {
+      isCycleRunning = false;
     }
 
     if (running) {
-      // Set the next runCycle call
-      timeoutId = setTimeout(
-        () =>
-          runCycle().catch((e) => {
-            subject.next(asPollingError(e, PollingErrorType.PollerError));
-          }),
-        Math.max(pollInterval - (Date.now() - start) + (pollIntervalDelay % pollInterval), 0)
-      );
-      // Reset delay, it's designed to shuffle only once
-      pollIntervalDelay = 0;
+      scheduleNextCycle();
     } else {
       logger.info('Task poller finished running its last cycle');
     }
   }
 
-  function subscribe() {
-    if (hasSubscribed) {
+  function runCycleNow() {
+    if (!running) {
       return;
     }
-    pollInterval$.subscribe((interval) => {
-      if (!Number.isSafeInteger(interval) || interval < 0) {
-        // TODO: Investigate why we sometimes get null / NaN, causing the setTimeout logic to always schedule
-        // the next polling cycle to run immediately. If we don't see occurrences of this message by December 2024,
-        // we can remove the TODO and/or check because we now have a cap to how much we increase the poll interval.
-        logger.error(
-          new Error(
-            `Expected the new interval to be a number > 0, received: ${interval} but poller will keep using: ${pollInterval}`
-          )
-        );
-        return;
-      }
-      pollInterval = interval;
-      logger.debug(`Task poller now using interval of ${interval}ms`);
-    });
-    hasSubscribed = true;
+
+    nudgePending = true;
+    runScheduledCycle();
+  }
+
+  function subscribe() {
+    subscribeTimeoutId = null;
+    if (!running || subscriptions) {
+      return;
+    }
+    subscriptions = new Subscription();
+    subscriptions.add(
+      pollInterval$.subscribe((interval) => {
+        if (!Number.isSafeInteger(interval) || interval < 0) {
+          // TODO: Investigate why we sometimes get null / NaN, causing the setTimeout logic to always schedule
+          // the next polling cycle to run immediately. If we don't see occurrences of this message by December 2024,
+          // we can remove the TODO and/or check because we now have a cap to how much we increase the poll interval.
+          logger.error(
+            new Error(
+              `Expected the new interval to be a number > 0, received: ${interval} but poller will keep using: ${pollInterval}`
+            )
+          );
+          return;
+        }
+        if (pollInterval !== interval) {
+          pollInterval = interval;
+          // Reschedule the pending cycle for the new interval.
+          nextCycleAt = lastCycleStart + interval;
+          scheduleNextCycle();
+        }
+        logger.debug(`Task poller now using interval of ${interval}ms`);
+      })
+    );
+    if (backpressure$) {
+      subscriptions.add(
+        backpressure$.subscribe((active) => {
+          backpressureActive = active;
+          if (active) {
+            // The throttle cannot discard a nudge already queued behind an in-flight cycle.
+            nudgePending = false;
+            scheduleNextCycle();
+          }
+        })
+      );
+    }
+    if (claimNudge$) {
+      subscriptions.add(
+        createThrottledClaimNudge({
+          claimNudge$,
+          claimCycleStart$,
+          backpressure$: backpressure$ ?? of(false),
+          logger,
+        }).subscribe(() => {
+          // RxJS rethrows subscriber errors asynchronously, which would crash Kibana.
+          try {
+            logger.debug('Task poller received a claim nudge, running a claim cycle immediately');
+            runCycleNow();
+          } catch (err) {
+            logger.error(`Failed to run a claim cycle for a claim nudge: ${err}`);
+          }
+        })
+      );
+    }
   }
 
   return {
@@ -119,12 +211,11 @@ export function createTaskPoller<T, H>({
       if (!running) {
         logger.info('Starting the task poller');
         running = true;
-        runCycle().catch((e) => {
-          subject.next(asPollingError(e, PollingErrorType.PollerError));
-        });
+        nextCycleAt = Date.now();
+        runScheduledCycle();
         // We need to subscribe shortly after start. Otherwise, the observables start emiting events
         // too soon for the task run statistics module to capture.
-        setTimeout(() => subscribe(), 0);
+        subscribeTimeoutId = setTimeout(subscribe, 0);
       }
     },
     stop: () => {
@@ -134,6 +225,15 @@ export function createTaskPoller<T, H>({
         timeoutId = null;
       }
       running = false;
+      if (subscribeTimeoutId) {
+        clearTimeout(subscribeTimeoutId);
+        subscribeTimeoutId = null;
+      }
+      // Don't carry a nudge into the next `start()`.
+      nudgePending = false;
+      // Also clears the nudge throttle's timer.
+      subscriptions?.unsubscribe();
+      subscriptions = null;
     },
   };
 }

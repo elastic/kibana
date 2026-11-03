@@ -1,0 +1,698 @@
+{
+  "sha1": "5124dd4e15104dc82a7abc65c29080e9c35a7540",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "5b0b4e1c2a045d2-6e399a1b803f9d3",
+      "title": "Delete leftovers from an interrupted run",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "939eb6108dc6361-787b8495382f3d6",
+      "title": "Dataset quality alerting rule access hides the create rule button from a user who can only manage alerts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/alerting_rule_access.spec.ts",
+        "line": 26,
+        "column": 68
+      }
+    },
+    {
+      "id": "939eb6108dc6361-1c1011c3fe4da53",
+      "title": "Dataset quality alerting rule access shows the create rule button to a user who can manage rules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/alerting_rule_access.spec.ts",
+        "line": 29,
+        "column": 10
+      }
+    },
+    {
+      "id": "3243c7075e94144-92295eca75c15b9",
+      "title": "Dataset quality details - degraded field flyout opens and closes the flyout from the row expand button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/degraded_field_flyout.spec.ts",
+        "line": 39,
+        "column": 8
+      }
+    },
+    {
+      "id": "3243c7075e94144-ff15b9907aedd95",
+      "title": "Dataset quality details - degraded field flyout opens the flyout for the field named in the URL state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/degraded_field_flyout.spec.ts",
+        "line": 47,
+        "column": 15
+      }
+    },
+    {
+      "id": "3243c7075e94144-843877ebb253e09",
+      "title": "Dataset quality details - degraded field flyout opens Discover in ES|QL mode filtered on the expanded field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/degraded_field_flyout.spec.ts",
+        "line": 58,
+        "column": 10
+      }
+    },
+    {
+      "id": "86384b29572e72b-4a84c65c167ee5e",
+      "title": "Dataset quality details - character limit root cause lists past or current quality issues depending on the toggle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/degraded_field_rca_character_limit.spec.ts",
+        "line": 131,
+        "column": 24
+      }
+    },
+    {
+      "id": "86384b29572e72b-ad85957cf74eeba",
+      "title": "Dataset quality details - character limit root cause closes the flyout for an issue missing from the latest backing index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/degraded_field_rca_character_limit.spec.ts",
+        "line": 216,
+        "column": 11
+      }
+    },
+    {
+      "id": "86384b29572e72b-b5c18472567fe9f",
+      "title": "Dataset quality details - character limit root cause reports an exceeded field character limit as the root cause",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/degraded_field_rca_character_limit.spec.ts",
+        "line": 252,
+        "column": 11
+      }
+    },
+    {
+      "id": "86384b29572e72b-2a1badb776e2fdc",
+      "title": "Dataset quality details - character limit root cause offers the mitigations available for the view it is opened in",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/degraded_field_rca_character_limit.spec.ts",
+        "line": 269,
+        "column": 79
+      }
+    },
+    {
+      "id": "cdf5f077515f4cb-8b069c9588c1aa9",
+      "title": "Dataset quality details - malformed field root cause reports a type mismatch as the root cause",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/degraded_field_rca_malformed.spec.ts",
+        "line": 78,
+        "column": 30
+      }
+    },
+    {
+      "id": "cdf5f077515f4cb-edf22a0af7d1d14",
+      "title": "Dataset quality details - malformed field root cause offers manual mitigations for a data set of no integration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/degraded_field_rca_malformed.spec.ts",
+        "line": 87,
+        "column": 20
+      }
+    },
+    {
+      "id": "cdf5f077515f4cb-ea7c9ec6d525b04",
+      "title": "Dataset quality details - malformed field root cause offers stream mitigations for wired and classic streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/degraded_field_rca_malformed.spec.ts",
+        "line": 111,
+        "column": 13
+      }
+    },
+    {
+      "id": "8dd29bd41dc9d30-86aa1758c27d284",
+      "title": "Dataset quality details quality issues table shows the no-data state when the data set has no quality issues",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/details_degraded_fields.spec.ts",
+        "line": 67,
+        "column": 7
+      }
+    },
+    {
+      "id": "8dd29bd41dc9d30-9b41f3c3e0322c0",
+      "title": "Dataset quality details quality issues table lists every degraded field and keeps the last-occurrence sort in the URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/details_degraded_fields.spec.ts",
+        "line": 74,
+        "column": 7
+      }
+    },
+    {
+      "id": "8dd29bd41dc9d30-dbf7e8aaf7687d9",
+      "title": "Dataset quality details quality issues table filters the table by the selected issue type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/details_degraded_fields.spec.ts",
+        "line": 106,
+        "column": 23
+      }
+    },
+    {
+      "id": "8dd29bd41dc9d30-20c3912ea207355",
+      "title": "Dataset quality details quality issues table filters the table by the selected field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/details_degraded_fields.spec.ts",
+        "line": 156,
+        "column": 26
+      }
+    },
+    {
+      "id": "8dd29bd41dc9d30-0ecedd1ad28ff7b",
+      "title": "Dataset quality details quality issues table updates the document counts when new data is ingested and the page is refreshed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/details_degraded_fields.spec.ts",
+        "line": 191,
+        "column": 26
+      }
+    },
+    {
+      "id": "60aca77a1f371a5-cc571b085d70307",
+      "title": "Dataset quality details - Discover links opens the data set in Discover from the page header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/details_discover.spec.ts",
+        "line": 39,
+        "column": 48
+      }
+    },
+    {
+      "id": "60aca77a1f371a5-c86104c85ea0cdc",
+      "title": "Dataset quality details - Discover links opens the degraded documents in Discover in ES|QL mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/details_discover.spec.ts",
+        "line": 49,
+        "column": 7
+      }
+    },
+    {
+      "id": "4fd91868c48c1f7-7be195286521c12",
+      "title": "Dataset quality details navigation opens the details page for a data set from the list page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/details_navigation.spec.ts",
+        "line": 45,
+        "column": 78
+      }
+    },
+    {
+      "id": "4fd91868c48c1f7-47a60a524d8d60f",
+      "title": "Dataset quality details navigation shows an empty prompt when the data stream does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/details_navigation.spec.ts",
+        "line": 56,
+        "column": 11
+      }
+    },
+    {
+      "id": "4fd91868c48c1f7-a41d0189351eb6a",
+      "title": "Dataset quality details navigation reflects the breakdown field in the URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/details_navigation.spec.ts",
+        "line": 62,
+        "column": 13
+      }
+    },
+    {
+      "id": "4fd91868c48c1f7-fafbd8bfb094387",
+      "title": "Dataset quality details navigation renders the overview summary KPIs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/details_navigation.spec.ts",
+        "line": 80,
+        "column": 7
+      }
+    },
+    {
+      "id": "10913cde724a069-ca08fba6bf825de",
+      "title": "Dataset quality details size KPI renders a non-zero size for the data set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/details_size.spec.ts",
+        "line": 35,
+        "column": 30
+      }
+    },
+    {
+      "id": "61551fa793310de-f353ed970c4d3a5",
+      "title": "Dataset quality details failed docs reports the failed docs in the summary KPIs and as a single quality issue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/failed_docs.spec.ts",
+        "line": 76,
+        "column": 30
+      }
+    },
+    {
+      "id": "61551fa793310de-6f160c2ce687922",
+      "title": "Dataset quality details failed docs reflects the selected quality issue chart in the URL and opens the failure store in Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/failed_docs.spec.ts",
+        "line": 96,
+        "column": 17
+      }
+    },
+    {
+      "id": "61551fa793310de-8cc670af7f7617b",
+      "title": "Dataset quality details failed docs opens and closes the failed docs flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/failed_docs.spec.ts",
+        "line": 115,
+        "column": 10
+      }
+    },
+    {
+      "id": "61551fa793310de-0486950ef0a1111",
+      "title": "Dataset quality details failed docs opens Discover in ES|QL mode from the flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/failed_docs.spec.ts",
+        "line": 141,
+        "column": 15
+      }
+    },
+    {
+      "id": "cc8ffeacaffe7ed-0cbb7f607f7d564",
+      "title": "Dataset quality failure store - failed docs shows the failed docs count on the details page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/failure_store_failed_docs.spec.ts",
+        "line": 79,
+        "column": 25
+      }
+    },
+    {
+      "id": "cc8ffeacaffe7ed-d77dc84a37c923a",
+      "title": "Dataset quality failure store - failed docs renders the failed docs percentage in the table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/failure_store_failed_docs.spec.ts",
+        "line": 86,
+        "column": 13
+      }
+    },
+    {
+      "id": "21978b7cd3ad75a-bce266eb8d06379",
+      "title": "Dataset quality failure store hides the failed docs card from a user without failure store privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/failure_store.spec.ts",
+        "line": 117,
+        "column": 58
+      }
+    },
+    {
+      "id": "21978b7cd3ad75a-380a2fefe52bede",
+      "title": "Dataset quality failure store shows the \"No failure store\" card when the failure store is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/failure_store.spec.ts",
+        "line": 137,
+        "column": 7
+      }
+    },
+    {
+      "id": "21978b7cd3ad75a-16bbbc5c7888fc4",
+      "title": "Dataset quality failure store enables the failure store from the details page and disables it again",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/failure_store.spec.ts",
+        "line": 147,
+        "column": 13
+      }
+    },
+    {
+      "id": "21978b7cd3ad75a-df3f34b20f573fd",
+      "title": "Dataset quality failure store offers \"Set failure store\" from the table and removes the link once enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/failure_store.spec.ts",
+        "line": 185,
+        "column": 65
+      }
+    },
+    {
+      "id": "3a06697fa261542-132d33f2512d92d",
+      "title": "Dataset quality home shows the data sets table once data exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/home.spec.ts",
+        "line": 25,
+        "column": 5
+      }
+    },
+    {
+      "id": "e1e27a04579061b-504dc04dfb46eb5",
+      "title": "Dataset quality table filters on logs essentials does not render the data set type filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/logs_essentials_filters.spec.ts",
+        "line": 25,
+        "column": 59
+      }
+    },
+    {
+      "id": "b499fa77b8f8ac7-7f8b0b2b948434e",
+      "title": "Dataset quality privileges - no access shows the management landing when the user has no Data Quality privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/privileges_no_access.spec.ts",
+        "line": 29,
+        "column": 89
+      }
+    },
+    {
+      "id": "b499fa77b8f8ac7-1b9b011a04e3e79",
+      "title": "Dataset quality privileges - no access shows the no-privileges empty state when the user cannot monitor any data set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/privileges_no_access.spec.ts",
+        "line": 43,
+        "column": 7
+      }
+    },
+    {
+      "id": "a67299f5ed10846-e8ffd3bc58f5cc3",
+      "title": "Dataset quality summary panel reports every data set as healthy when only good data exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/summary.spec.ts",
+        "line": 30,
+        "column": 30
+      }
+    },
+    {
+      "id": "a67299f5ed10846-caa2c8039517e6e",
+      "title": "Dataset quality summary panel reflects poor, degraded and good data sets and the active count",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/summary.spec.ts",
+        "line": 51,
+        "column": 28
+      }
+    },
+    {
+      "id": "a67299f5ed10846-38a6116b8ebb894",
+      "title": "Dataset quality summary panel reports a non-zero estimated data size",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/summary.spec.ts",
+        "line": 100,
+        "column": 11
+      }
+    },
+    {
+      "id": "e93ea80ef1cdd04-78e404be8839473",
+      "title": "Delete the resources the parallel specs created",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
+      }
+    }
+  ]
+}

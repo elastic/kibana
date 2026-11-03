@@ -6,233 +6,347 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { resolveIndexScope, resolveHuntScope, parseTechnologyInput } from './resolve_index_scope';
-import { HUNT_ALERTS_INDEX_PATTERN_PREFIX } from '../../../../../common/constants';
-import type { HuntTechnology } from '@kbn/alertzero-common';
+import { loggerMock } from '@kbn/logging-mocks';
+import { resolveHuntScope } from './resolve_index_scope';
+import { MAX_SCOPE_TARGETS } from './scope_bounds';
 
-const present = { indices: [{ name: 'x', attributes: [] }], aliases: [], data_streams: [] };
-const absent = { indices: [], aliases: [], data_streams: [] };
+const SPACE_ID = 'default';
 
-const createMockEsClient = (presentPatterns: Set<string>): ElasticsearchClient =>
-  ({
-    indices: {
-      resolveIndex: jest
-        .fn()
-        .mockImplementation(({ name }: { name: string }) =>
-          Promise.resolve(presentPatterns.has(name) ? present : absent)
-        ),
-    },
-  } as unknown as ElasticsearchClient);
+/** The default data view, exclusion included. */
+const UNIVERSE = ['logs-*', 'filebeat-*', 'winlogbeat-*', '-*elastic-cloud-logs-*'];
 
-describe('resolveIndexScope', () => {
-  const SPACE_ID = 'default';
-  const alertsPattern = `${HUNT_ALERTS_INDEX_PATTERN_PREFIX}${SPACE_ID}`;
+const dataStream = (name: string) => ({
+  name,
+  backing_indices: [`.ds-${name}-2026.09.30-000001`],
+  timestamp_field: '@timestamp',
+});
 
-  describe.each<{
-    technology: HuntTechnology;
-    required: string[];
-    optional: string[];
-  }>([
-    { technology: 'aws_iam', required: ['logs-aws.*'], optional: ['logs-endpoint.events.*'] },
-    { technology: 'fortigate', required: ['logs-fortinet.*'], optional: [] },
-  ])('$technology', ({ technology, required, optional }) => {
-    it('is ok when every required and optional pattern (plus alerts) resolves', async () => {
-      const esClient = createMockEsClient(new Set([...required, ...optional, alertsPattern]));
-      const result = await resolveIndexScope({ esClient, technology, spaceId: SPACE_ID });
+const resolveResponse = ({
+  dataStreams = [],
+  indices = [],
+  aliases = [],
+}: {
+  dataStreams?: string[];
+  indices?: string[];
+  aliases?: string[];
+}) => ({
+  indices: indices.map((name) => ({ name, attributes: ['open'] })),
+  aliases: aliases.map((name) => ({ name, indices: [] })),
+  data_streams: dataStreams.map(dataStream),
+});
 
-      expect(result.status).toBe('ok');
-      expect(result.required).toEqual(required);
-      expect(result.optional).toEqual([...optional, alertsPattern]);
-      expect(result.missing).toEqual([]);
+const createEsClient = ({
+  resolved = resolveResponse({ dataStreams: ['logs-okta.system-default'] }),
+  fieldCaps = { indices: [], fields: {} },
+}: {
+  resolved?: ReturnType<typeof resolveResponse>;
+  fieldCaps?: { indices: string[]; fields: Record<string, unknown> };
+} = {}) => {
+  const resolveIndex = jest.fn().mockResolvedValue(resolved);
+  const fieldCapsFn = jest.fn().mockResolvedValue(fieldCaps);
+  const esClient = {
+    indices: { resolveIndex },
+    fieldCaps: fieldCapsFn,
+  } as unknown as ElasticsearchClient;
+  return { esClient, resolveIndex, fieldCapsFn };
+};
+
+describe('resolveHuntScope', () => {
+  it('resolves the universe from a mixed list of data streams, beats indices, and an exclusion', async () => {
+    const { esClient, resolveIndex } = createEsClient({
+      resolved: resolveResponse({
+        dataStreams: ['logs-okta.system-default', 'logs-aws.cloudtrail-default'],
+        indices: ['filebeat-8.15.0-2026.09.30', 'winlogbeat-2026.09.30'],
+      }),
     });
 
-    it('is blocked when a required pattern is absent, even if optional resolves', async () => {
-      const esClient = createMockEsClient(new Set([...optional, alertsPattern]));
-      const result = await resolveIndexScope({ esClient, technology, spaceId: SPACE_ID });
-
-      expect(result.status).toBe('blocked');
-      expect(result.missing).toEqual(expect.arrayContaining(required));
-    });
-
-    it('is degraded when required resolves but the alerts pattern is absent', async () => {
-      const esClient = createMockEsClient(new Set([...required, ...optional]));
-      const result = await resolveIndexScope({ esClient, technology, spaceId: SPACE_ID });
-
-      expect(result.status).toBe('degraded');
-      expect(result.missing).toEqual([alertsPattern]);
-    });
-  });
-
-  it('derives the alerts pattern from the passed spaceId, not a default', async () => {
-    const nonDefaultSpace = 'threat-hunting';
-    const esClient = createMockEsClient(
-      new Set([
-        'logs-aws.*',
-        'logs-endpoint.events.*',
-        `${HUNT_ALERTS_INDEX_PATTERN_PREFIX}${nonDefaultSpace}`,
-      ])
-    );
-    const result = await resolveIndexScope({
+    const scope = await resolveHuntScope({
       esClient,
-      technology: 'aws_iam',
-      spaceId: nonDefaultSpace,
+      spaceId: SPACE_ID,
+      indexPatterns: UNIVERSE,
     });
 
-    expect(result.status).toBe('ok');
-    expect(result.optional).toContain(`${HUNT_ALERTS_INDEX_PATTERN_PREFIX}${nonDefaultSpace}`);
-  });
-
-  it('resolves every pattern against open indices only, so hidden indices never satisfy a requirement', async () => {
-    const esClient = createMockEsClient(new Set(['logs-aws.*']));
-    await resolveIndexScope({ esClient, technology: 'aws_iam', spaceId: SPACE_ID });
-
-    expect(esClient.indices.resolveIndex).toHaveBeenCalledWith({
-      name: 'logs-aws.*',
-      expand_wildcards: 'open',
-      ignore_unavailable: true,
+    expect(scope.resolution).toBe('universe');
+    expect(scope.status).toBe('ok');
+    // Tier 1 searches the list as given, exclusion kept.
+    expect(scope.index_patterns).toEqual(UNIVERSE);
+    expect(scope.missing).toEqual([]);
+    expect(scope.discovered.map((dataset) => dataset.dataset)).toEqual([
+      'aws.cloudtrail',
+      'okta.system',
+    ]);
+    expect(resolveIndex).toHaveBeenCalledTimes(1);
+    expect(resolveIndex).toHaveBeenCalledWith({
+      name: UNIVERSE,
+      allow_no_indices: true,
+      expand_wildcards: ['open'],
     });
   });
 
-  it('treats a 404 on a concrete index name as absent instead of failing the resolution', async () => {
-    const esClient = createMockEsClient(new Set(['logs-aws.*', 'logs-endpoint.events.*']));
-    (esClient.indices.resolveIndex as jest.Mock).mockImplementation(({ name }: { name: string }) =>
-      name === alertsPattern
-        ? Promise.reject(Object.assign(new Error('index_not_found_exception'), { statusCode: 404 }))
-        : Promise.resolve(
-            name === 'logs-aws.*' || name === 'logs-endpoint.events.*' ? present : absent
-          )
-    );
-    const result = await resolveIndexScope({ esClient, technology: 'aws_iam', spaceId: SPACE_ID });
+  it('is blocked:empty_universe when nothing under any universe pattern is visible', async () => {
+    const { esClient, fieldCapsFn } = createEsClient({ resolved: resolveResponse({}) });
 
-    expect(result).toEqual(
-      expect.objectContaining({ status: 'degraded', missing: [alertsPattern] })
+    const scope = await resolveHuntScope({
+      esClient,
+      spaceId: SPACE_ID,
+      indexPatterns: UNIVERSE,
+    });
+
+    expect(scope).toEqual(
+      expect.objectContaining({
+        status: 'blocked',
+        resolution: 'blocked:empty_universe',
+        index_patterns: [],
+        discovered: [],
+        report_matches: [],
+        actionable_indices: [],
+        // Exclusions are not patterns the universe could have resolved.
+        missing: ['logs-*', 'filebeat-*', 'winlogbeat-*'],
+      })
     );
+    expect(fieldCapsFn).not.toHaveBeenCalled();
   });
 
-  it('treats a name that resolves only as an alias as present, since the alerts pattern is an alias over a hidden index', async () => {
-    const esClient = createMockEsClient(new Set(['logs-aws.*', 'logs-endpoint.events.*']));
-    (esClient.indices.resolveIndex as jest.Mock).mockImplementation(({ name }: { name: string }) =>
-      Promise.resolve(
-        name === alertsPattern
-          ? {
-              indices: [],
-              aliases: [{ name, indices: ['.internal.alerts-security.alerts-default-000001'] }],
-              data_streams: [],
-            }
-          : name === 'logs-aws.*' || name === 'logs-endpoint.events.*'
-          ? present
-          : absent
-      )
-    );
-    const result = await resolveIndexScope({ esClient, technology: 'aws_iam', spaceId: SPACE_ID });
+  it('is blocked:empty_universe without a call when the caller supplies no positive pattern', async () => {
+    const { esClient, resolveIndex } = createEsClient();
 
-    expect(result).toEqual(expect.objectContaining({ status: 'ok', missing: [] }));
+    const scope = await resolveHuntScope({
+      esClient,
+      spaceId: SPACE_ID,
+      indexPatterns: ['-*elastic-cloud-logs-*'],
+    });
+
+    expect(scope.resolution).toBe('blocked:empty_universe');
+    expect(resolveIndex).not.toHaveBeenCalled();
+  });
+
+  it('is blocked:discovery_failed and logs once when _resolve/index throws', async () => {
+    const logger = loggerMock.create();
+    const { esClient, resolveIndex } = createEsClient();
+    resolveIndex.mockRejectedValue(new Error('cluster unavailable'));
+
+    const scope = await resolveHuntScope({
+      esClient,
+      spaceId: SPACE_ID,
+      indexPatterns: UNIVERSE,
+      logger,
+    });
+
+    expect(scope.status).toBe('blocked');
+    expect(scope.resolution).toBe('blocked:discovery_failed');
+    expect(scope.index_patterns).toEqual([]);
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('cluster unavailable'));
+  });
+
+  it('lists the universe patterns that resolved nothing in missing, without degrading the scope', async () => {
+    const { esClient } = createEsClient({
+      resolved: resolveResponse({ dataStreams: ['logs-okta.system-default'] }),
+    });
+
+    const scope = await resolveHuntScope({
+      esClient,
+      spaceId: SPACE_ID,
+      indexPatterns: UNIVERSE,
+    });
+
+    expect(scope.missing).toEqual(['filebeat-*', 'winlogbeat-*']);
+    expect(scope.status).toBe('ok');
+  });
+
+  it('counts a pattern as resolved when only an alias or a backing index answers to it', async () => {
+    const { esClient } = createEsClient({
+      resolved: resolveResponse({ aliases: ['filebeat-alias'] }),
+    });
+
+    const scope = await resolveHuntScope({
+      esClient,
+      spaceId: SPACE_ID,
+      indexPatterns: ['filebeat-*', 'winlogbeat-*'],
+    });
+
+    expect(scope.resolution).toBe('universe');
+    expect(scope.missing).toEqual(['winlogbeat-*']);
+  });
+
+  it('never searches alerts: the universe is exactly what the caller supplied', async () => {
+    const { esClient } = createEsClient();
+
+    const scope = await resolveHuntScope({
+      esClient,
+      spaceId: SPACE_ID,
+      indexPatterns: UNIVERSE,
+    });
+
+    expect(scope.index_patterns.some((pattern) => pattern.includes('.alerts-'))).toBe(false);
+  });
+
+  describe('report matching', () => {
+    const resolved = resolveResponse({
+      dataStreams: [
+        'logs-aws.cloudtrail-default',
+        'logs-okta.system-default',
+        'logs-fortinet_fortigate.log-default',
+      ],
+    });
+
+    it('matches the vendor "Amazon" to the aws dataset', async () => {
+      const { esClient } = createEsClient({ resolved });
+      const scope = await resolveHuntScope({
+        esClient,
+        spaceId: SPACE_ID,
+        indexPatterns: UNIVERSE,
+        report: { vendor: 'Amazon' },
+      });
+
+      expect(scope.report_matches).toEqual(['logs-aws.cloudtrail-*']);
+    });
+
+    it('matches the product "FortiGate" to fortinet_fortigate.log', async () => {
+      const { esClient } = createEsClient({ resolved });
+      const scope = await resolveHuntScope({
+        esClient,
+        spaceId: SPACE_ID,
+        indexPatterns: UNIVERSE,
+        report: { vendor: 'Fortinet', product: 'FortiGate' },
+      });
+
+      expect(scope.report_matches).toEqual(['logs-fortinet_fortigate.log-*']);
+    });
+
+    it('leaves report_matches empty for a report that names no vendor or product', async () => {
+      const { esClient } = createEsClient({ resolved });
+      const scope = await resolveHuntScope({
+        esClient,
+        spaceId: SPACE_ID,
+        indexPatterns: UNIVERSE,
+        report: { text: 'an article with no vendor' },
+      });
+
+      expect(scope.report_matches).toEqual([]);
+      expect(scope.status).toBe('ok');
+    });
+
+    it('collapses a match list too long for the request path onto vendor wildcards and reads degraded', async () => {
+      const logger = loggerMock.create();
+      const dataStreams = Array.from(
+        { length: MAX_SCOPE_TARGETS + 1 },
+        (_, i) => `logs-acme.stream${i}-default`
+      );
+      const { esClient } = createEsClient({ resolved: resolveResponse({ dataStreams }) });
+
+      const scope = await resolveHuntScope({
+        esClient,
+        spaceId: SPACE_ID,
+        indexPatterns: UNIVERSE,
+        report: { vendor: 'Acme' },
+        logger,
+      });
+
+      expect(scope.report_matches).toEqual(['logs-acme.*', 'logs-acme-*']);
+      expect(scope.status).toBe('degraded');
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('vendor wildcard'));
+    });
+
+    it('never calls a model: the model matcher belongs to stage 2', async () => {
+      const { esClient } = createEsClient({ resolved });
+      const scope = await resolveHuntScope({
+        esClient,
+        spaceId: SPACE_ID,
+        indexPatterns: UNIVERSE,
+        report: { vendor: 'Zscaler', text: 'article about zscaler' },
+      });
+
+      expect(scope.resolution).toBe('universe');
+      expect(scope.report_matches).toEqual([]);
+    });
+  });
+
+  describe('actionable_indices', () => {
+    it('names the indices whose mapping carries a process identity, from the universe', async () => {
+      const { esClient, fieldCapsFn } = createEsClient({
+        resolved: resolveResponse({
+          dataStreams: ['logs-okta.system-default', 'logs-endpoint.events.process-default'],
+        }),
+        fieldCaps: {
+          indices: [
+            '.ds-logs-okta.system-default-2026.09.30-000001',
+            '.ds-logs-endpoint.events.process-default-2026.09.30-000001',
+          ],
+          fields: {
+            'process.entity_id': {
+              keyword: {
+                type: 'keyword',
+                indices: ['.ds-logs-endpoint.events.process-default-2026.09.30-000001'],
+              },
+            },
+          },
+        },
+      });
+
+      const scope = await resolveHuntScope({
+        esClient,
+        spaceId: SPACE_ID,
+        indexPatterns: UNIVERSE,
+      });
+
+      expect(scope.actionable_indices).toEqual(['logs-endpoint.events.process-default*']);
+      expect(fieldCapsFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: UNIVERSE,
+          fields: ['process.entity_id', 'process.pid'],
+        })
+      );
+    });
+
+    it('reads degraded, never blocked, when _field_caps fails', async () => {
+      const { esClient, fieldCapsFn } = createEsClient();
+      fieldCapsFn.mockRejectedValue(new Error('field caps unavailable'));
+
+      const scope = await resolveHuntScope({
+        esClient,
+        spaceId: SPACE_ID,
+        indexPatterns: UNIVERSE,
+      });
+
+      expect(scope.status).toBe('degraded');
+      expect(scope.resolution).toBe('universe');
+      expect(scope.actionable_indices).toEqual([]);
+      expect(scope.index_patterns).toEqual(UNIVERSE);
+    });
   });
 
   it('defaults the row limit to 25 and the window to a 30-day lookback', async () => {
-    const esClient = createMockEsClient(new Set());
+    const { esClient } = createEsClient();
     const before = Date.now();
-    const result = await resolveIndexScope({
+    const scope = await resolveHuntScope({
       esClient,
-      technology: 'fortigate',
       spaceId: SPACE_ID,
+      indexPatterns: UNIVERSE,
     });
     const after = Date.now();
 
-    expect(result.row_limit).toBe(25);
-    const fromMs = new Date(result.window.from).getTime();
-    const toMs = new Date(result.window.to).getTime();
+    expect(scope.row_limit).toBe(25);
+    const fromMs = new Date(scope.window.from).getTime();
+    const toMs = new Date(scope.window.to).getTime();
     expect(toMs).toBeGreaterThanOrEqual(before);
     expect(toMs).toBeLessThanOrEqual(after);
     expect(toMs - fromMs).toBeCloseTo(30 * 24 * 60 * 60 * 1000, -3);
   });
 
-  it('honors a caller-supplied window and row limit', async () => {
-    const esClient = createMockEsClient(new Set());
+  it('honors a caller-supplied window and row limit, blocked or not', async () => {
     const window = { from: '2026-01-01T00:00:00.000Z', to: '2026-01-02T00:00:00.000Z' };
-    const result = await resolveIndexScope({
+    const { esClient } = createEsClient({ resolved: resolveResponse({}) });
+
+    const scope = await resolveHuntScope({
       esClient,
-      technology: 'fortigate',
       spaceId: SPACE_ID,
+      indexPatterns: UNIVERSE,
       window,
       row_limit: 100,
     });
 
-    expect(result.window).toEqual(window);
-    expect(result.row_limit).toBe(100);
-  });
-});
-
-describe('resolveHuntScope', () => {
-  const SPACE_ID = 'default';
-  const alertsPattern = `${HUNT_ALERTS_INDEX_PATTERN_PREFIX}${SPACE_ID}`;
-
-  it('resolves only the named technology when one is given', async () => {
-    const esClient = createMockEsClient(new Set(['logs-aws.*', 'logs-fortinet.*', alertsPattern]));
-    const result = await resolveHuntScope({ esClient, spaceId: SPACE_ID, technology: 'fortigate' });
-
-    expect(result.technologies).toEqual(['fortigate']);
-  });
-
-  it('keeps only the technologies whose required indices exist when none is named', async () => {
-    const esClient = createMockEsClient(
-      new Set(['logs-aws.*', 'logs-endpoint.events.*', alertsPattern])
-    );
-    const result = await resolveHuntScope({ esClient, spaceId: SPACE_ID });
-
-    expect(result.technologies).toEqual(['aws_iam']);
-  });
-
-  it('merges the patterns of every present technology', async () => {
-    const esClient = createMockEsClient(
-      new Set(['logs-aws.*', 'logs-endpoint.events.*', 'logs-fortinet.*', alertsPattern])
-    );
-    const result = await resolveHuntScope({ esClient, spaceId: SPACE_ID });
-
-    expect(result.required).toEqual(['logs-aws.*', 'logs-fortinet.*']);
-  });
-
-  it('lists the alerts pattern once even though every technology checks it', async () => {
-    const esClient = createMockEsClient(
-      new Set(['logs-aws.*', 'logs-endpoint.events.*', 'logs-fortinet.*', alertsPattern])
-    );
-    const result = await resolveHuntScope({ esClient, spaceId: SPACE_ID });
-
-    expect(result.optional.filter((pattern) => pattern === alertsPattern)).toHaveLength(1);
-  });
-
-  it('is blocked with no technologies when no required index exists in the space', async () => {
-    const esClient = createMockEsClient(new Set([alertsPattern]));
-    const result = await resolveHuntScope({ esClient, spaceId: SPACE_ID });
-
-    expect(result).toEqual(expect.objectContaining({ status: 'blocked', technologies: [] }));
-  });
-
-  it('reports every checked required pattern as missing when blocked', async () => {
-    const esClient = createMockEsClient(new Set([alertsPattern]));
-    const result = await resolveHuntScope({ esClient, spaceId: SPACE_ID });
-
-    expect(result.missing).toEqual(expect.arrayContaining(['logs-aws.*', 'logs-fortinet.*']));
-  });
-
-  it('is degraded when any present technology is degraded', async () => {
-    const esClient = createMockEsClient(new Set(['logs-aws.*', 'logs-fortinet.*', alertsPattern]));
-    const result = await resolveHuntScope({ esClient, spaceId: SPACE_ID });
-
-    expect(result.status).toBe('degraded');
-  });
-});
-
-describe('parseTechnologyInput', () => {
-  it.each([undefined, null, ''])('treats %p as "resolve from the environment"', (value) => {
-    expect(parseTechnologyInput(value)).toEqual({});
-  });
-
-  it('accepts a known technology', () => {
-    expect(parseTechnologyInput('fortigate')).toEqual({ technology: 'fortigate' });
-  });
-
-  it('flags an unknown technology', () => {
-    expect(parseTechnologyInput('okta')).toEqual({ invalid: 'okta' });
+    expect(scope.window).toEqual(window);
+    expect(scope.row_limit).toBe(100);
   });
 });

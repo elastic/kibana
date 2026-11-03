@@ -48,6 +48,16 @@ export const isObservablesExtractionBlocked = (owner: string): boolean =>
   Object.hasOwn(OWNER_INFO, owner) && !OWNER_INFO[owner as Owner].features.observables.enabled;
 
 /**
+ * Returns true when a rule-level `extractObservables` override is meaningful for this owner. Only
+ * owners whose default is to auto-extract can have that default flipped per rule — an owner that
+ * defaults to off (e.g. Stack) never gets the per-rule override, same as an owner that blocks
+ * observables entirely (e.g. Observability). Unknown owners get no override.
+ */
+export const canOverrideExtractObservables = (owner: string): boolean =>
+  Object.hasOwn(OWNER_INFO, owner) &&
+  OWNER_INFO[owner as Owner].features.observables.autoExtractDefault;
+
+/**
  * Resolves the effective `extractObservables` value for a new case, applying the full precedence
  * chain when the caller omitted the field:
  *   blocked by owner → false

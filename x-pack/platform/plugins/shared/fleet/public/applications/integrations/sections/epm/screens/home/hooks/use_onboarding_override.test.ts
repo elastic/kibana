@@ -29,12 +29,13 @@ const ALL_HIDDEN_NAMES = [
   'aws',
   'aws_bedrock',
   'aws_bedrock_agentcore',
+  'aws_billing',
   'aws_cloudwatch_input_otel',
   'aws_logs',
   'aws_mq',
-  'awsfargate',
-  'awsfirehose',
   'aws_securityhub',
+  'amazon_security_lake',
+  'awsfargate',
   'aws_cloudtrail_otel',
   'aws_ec2_otel',
   'aws_ecs_otel',
@@ -119,6 +120,67 @@ describe('useOnboardingOverride', () => {
       expect(output[1]).toBe(nonAwsCard);
     });
 
+    it('indexes the hidden tiles on the onboarding tile and lists them as search members', () => {
+      const guardduty = {
+        ...makeCard('aws', 'epr:aws-guardduty'),
+        integration: 'guardduty',
+        title: 'Amazon GuardDuty',
+        description: 'Collect GuardDuty findings.',
+        categories: ['security', 'observability'],
+      };
+      const guarddutyOtel = {
+        ...makeCard('aws_vpcflow_otel', 'epr:aws_vpcflow_otel'),
+        title: 'Amazon GuardDuty',
+      };
+      const { result } = renderHook(() => useOnboardingOverride());
+      const [tile] = result.current.applyOnboardingOverride([guarddutyOtel, guardduty]);
+
+      expect(tile.searchableContent).toContain('guardduty');
+      expect(tile.searchableContent).toContain('Collect GuardDuty findings.');
+      expect(tile.searchMembers).toEqual([{ name: 'guardduty', title: 'Amazon GuardDuty' }]);
+      expect(tile.categories).toEqual(['aws', 'security', 'observability']);
+    });
+
+    it('sets the collection size to the number of services behind the tile', () => {
+      const guardduty = { ...makeCard('aws', 'epr:aws-guardduty'), title: 'Amazon GuardDuty' };
+      const cloudtrail = { ...makeCard('aws', 'epr:aws-cloudtrail'), title: 'AWS CloudTrail' };
+      const otel = { ...makeCard('aws_cloudtrail_otel'), title: 'AWS CloudTrail OpenTelemetry' };
+      const { result } = renderHook(() => useOnboardingOverride());
+      const [tile] = result.current.applyOnboardingOverride([guardduty, cloudtrail, otel]);
+
+      expect(tile.collectionSize).toBe(2);
+    });
+
+    it('does not set a collection size when no service is hidden behind the tile', () => {
+      const { result } = renderHook(() => useOnboardingOverride());
+      const [tile] = result.current.applyOnboardingOverride([makeCard('aws', 'epr:aws')]);
+
+      expect(tile.collectionSize).toBeUndefined();
+    });
+
+    it('leaves OpenTelemetry and content packages out of the search members', () => {
+      const real = { ...makeCard('aws', 'epr:aws-cloudtrail'), title: 'AWS CloudTrail' };
+      const otel = { ...makeCard('aws_cloudtrail_otel'), title: 'AWS CloudTrail OpenTelemetry' };
+      const content = {
+        ...makeCard('aws_waf_otel'),
+        title: 'AWS WAF OpenTelemetry Assets',
+        type: 'content',
+      };
+      const { result } = renderHook(() => useOnboardingOverride());
+      const [tile] = result.current.applyOnboardingOverride([otel, content, real]);
+
+      expect(tile.searchMembers).toEqual([{ name: 'aws', title: 'AWS CloudTrail' }]);
+      // Still searchable by their text.
+      expect(tile.searchableContent).toContain('AWS WAF OpenTelemetry Assets');
+    });
+
+    it('does not list the package-level epr:aws card as a search member', () => {
+      const { result } = renderHook(() => useOnboardingOverride());
+      const [tile] = result.current.applyOnboardingOverride([makeCard('aws', 'epr:aws')]);
+
+      expect(tile.searchMembers).toEqual([]);
+    });
+
     it('places onboarding tile first', () => {
       const cards = [makeCard('elastic_agent', 'epr:elastic_agent'), makeCard('aws')];
       const { result } = renderHook(() => useOnboardingOverride());
@@ -135,7 +197,7 @@ describe('useOnboardingOverride', () => {
       tile.onCardClick?.();
       expect(mockNavigateToApp).toHaveBeenCalledWith('onboarding', {
         path: '/aws',
-        state: { newSession: true },
+        state: { newSession: true, returnUrl: window.location.href },
       });
     });
 
@@ -150,7 +212,7 @@ describe('useOnboardingOverride', () => {
 
       expect(mockNavigateToApp).toHaveBeenCalledWith('onboarding', {
         path: '/aws',
-        state: { newSession: true },
+        state: { newSession: true, returnUrl: window.location.href },
       });
     });
 

@@ -11,13 +11,13 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { isNotFoundError } from '@kbn/es-errors';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { StreamDocsStat } from '../../../../common';
 import type { StreamsClient } from '../../../lib/streams/client';
 import {
   getAllBackingIndicesByStream,
   getDataStreamsMeteringStats,
+  getDataStreamsWithIndexNames,
   getLastBackingIndexByStream,
   processAsyncInChunks,
 } from './utils';
@@ -43,17 +43,12 @@ export async function getDocCountsForStreams(options: {
    * When omitted, doc counts are returned for all streams.
    */
   streamName?: string;
+  /** Limits the computation to these stream names; takes precedence over `streamName`. */
+  streamNames?: readonly string[];
 }): Promise<StreamDocsStat[]> {
-  const { isServerless, esClient, esClientAsSecondaryAuthUser, streamName } = options;
+  const { isServerless, esClient, esClientAsSecondaryAuthUser, streamName, streamNames } = options;
 
-  const { data_streams: streams } = streamName
-    ? await esClient.indices.getDataStream({ name: streamName }).catch((error) => {
-        if (isNotFoundError(error)) {
-          return { data_streams: [] };
-        }
-        throw error;
-      })
-    : await esClient.indices.getDataStream();
+  const streams = await getDataStreamsWithIndexNames({ esClient, streamName, streamNames });
   if (!streams.length) {
     return [];
   }
@@ -138,17 +133,12 @@ export async function getDegradedDocCountsForStreams(options: {
    * When omitted, degraded counts are returned for all streams.
    */
   streamName?: string;
+  /** Limits the computation to these stream names; takes precedence over `streamName`. */
+  streamNames?: readonly string[];
 }): Promise<StreamDocsStat[]> {
-  const { esClient, streamName } = options;
+  const { esClient, streamName, streamNames } = options;
 
-  const { data_streams: streams } = streamName
-    ? await esClient.indices.getDataStream({ name: streamName }).catch((error) => {
-        if (isNotFoundError(error)) {
-          return { data_streams: [] };
-        }
-        throw error;
-      })
-    : await esClient.indices.getDataStream();
+  const streams = await getDataStreamsWithIndexNames({ esClient, streamName, streamNames });
 
   if (!streams.length) {
     return [];
@@ -235,28 +225,23 @@ export async function getIngestionDocCountsForStreams(options: {
   start: number;
   end: number;
   streamName?: string;
+  /** Limits the computation to these stream names; takes precedence over `streamName`. */
+  streamNames?: readonly string[];
 }): Promise<StreamDocsStat[]> {
-  const { esClient, streamsClient, start, end, streamName } = options;
+  const { esClient, streamsClient, start, end, streamName, streamNames } = options;
 
-  const { data_streams: streams } = streamName
-    ? await esClient.indices.getDataStream({ name: streamName }).catch((error) => {
-        if (isNotFoundError(error)) {
-          return { data_streams: [] };
-        }
-        throw error;
-      })
-    : await esClient.indices.getDataStream();
+  const streams = await getDataStreamsWithIndexNames({ esClient, streamName, streamNames });
 
   if (!streams.length) {
     return [];
   }
 
-  const streamNames = streams.map((stream) => stream.name);
+  const resolvedStreamNames = streams.map((stream) => stream.name);
   const privilegeChunks = await processAsyncInChunks<
     string,
     Record<string, { read_failure_store: boolean }>
   >({
-    items: streamNames,
+    items: resolvedStreamNames,
     processChunk: (chunk) => streamsClient.getPrivilegesPerStream(chunk),
   });
   const readFailureStoreByStream: Record<string, { read_failure_store: boolean }> = Object.assign(
@@ -372,17 +357,12 @@ export async function getFailedDocCountsForStreams(options: {
    * When omitted, failed counts are returned for all streams.
    */
   streamName?: string;
+  /** Limits the computation to these stream names; takes precedence over `streamName`. */
+  streamNames?: readonly string[];
 }): Promise<StreamDocsStat[]> {
-  const { esClient, start, end, streamName } = options;
+  const { esClient, start, end, streamName, streamNames } = options;
 
-  const { data_streams: streams } = streamName
-    ? await esClient.indices.getDataStream({ name: streamName }).catch((error) => {
-        if (isNotFoundError(error)) {
-          return { data_streams: [] };
-        }
-        throw error;
-      })
-    : await esClient.indices.getDataStream();
+  const streams = await getDataStreamsWithIndexNames({ esClient, streamName, streamNames });
 
   if (!streams.length) {
     return [];

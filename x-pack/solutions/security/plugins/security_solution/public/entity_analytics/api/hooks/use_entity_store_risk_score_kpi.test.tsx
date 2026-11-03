@@ -77,6 +77,36 @@ describe('useEntityStoreRiskScoreKpi', () => {
     );
   });
 
+  it('uses statusExecutionContext for useRiskEngineStatus and executionContext for the KPI fetch', async () => {
+    const statusExecutionContext = {
+      child: {
+        type: 'security_solution',
+        name: 'entity_analytics:home_page',
+        id: 'host_risk_score_status',
+      },
+    };
+
+    renderHook(
+      () =>
+        useEntityStoreRiskScoreKpi({
+          riskEntity: EntityType.host,
+          executionContext,
+          statusExecutionContext,
+        }),
+      { wrapper: TestWrapper }
+    );
+
+    expect(mockUseRiskEngineStatus).toHaveBeenCalledWith(
+      {},
+      { executionContext: statusExecutionContext }
+    );
+    await waitFor(() =>
+      expect(mockFetchEntitiesListV2).toHaveBeenCalledWith(
+        expect.objectContaining({ context: executionContext })
+      )
+    );
+  });
+
   it('forwards executionContext to every paginated fetchEntitiesListV2 call', async () => {
     // Two non-empty pages (each 1 record) then an empty stop page.
     // The loop exits once fetched >= total (2 >= 2).

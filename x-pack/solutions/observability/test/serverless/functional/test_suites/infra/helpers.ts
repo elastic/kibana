@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { timerange, infra } from '@kbn/synthtrace-client';
+import { timerange, infra, type InfraDocument } from '@kbn/synthtrace-client';
 
 export function generateHostData({
   from,
@@ -49,13 +49,17 @@ export function generatePodsData({
     .fill(0)
     .map((_, idx) => infra.pod(`pod-${idx}`, `node-name-${idx}`));
 
-  return range
-    .interval('30s')
-    .rate(1)
-    .generator((timestamp) =>
-      pods.flatMap((pod, idx) => [
-        pod.metrics().timestamp(timestamp),
-        pod.container(`container-${idx}`).metrics().timestamp(timestamp),
-      ])
-    );
+  return (
+    range
+      .interval('30s')
+      .rate(1)
+      // Explicit type argument: the callback mixes pod and container documents, and inference would
+      // otherwise pick one of them as the element type.
+      .generator<InfraDocument>((timestamp) =>
+        pods.flatMap((pod, idx) => [
+          pod.metrics().timestamp(timestamp),
+          pod.container(`container-${idx}`).metrics().timestamp(timestamp),
+        ])
+      )
+  );
 }

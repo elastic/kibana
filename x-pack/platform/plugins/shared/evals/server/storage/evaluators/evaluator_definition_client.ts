@@ -8,6 +8,7 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { InternalIStorageClient, StorageIndexAdapter } from '@kbn/storage-adapter';
 import { isResponseError } from '@kbn/es-errors';
+import { isEqual } from 'lodash';
 import type { Logger } from '@kbn/logging';
 import semverCompare from 'semver/functions/compare';
 import semverInc from 'semver/functions/inc';
@@ -15,6 +16,8 @@ import {
   MAX_EVALUATOR_NAME_LENGTH,
   buildSpaceFilter,
   getEvaluatorDefinitionId,
+  getEvaluatorSuccessorId,
+  getJudgeScoreDirection,
 } from '@kbn/evals-common';
 import type {
   EvaluatorDefinitionDocument,
@@ -24,10 +27,83 @@ import { validateJudgeConfig } from '../../evaluators/user_defined/validate_conf
 import { EvaluatorAlreadyExistsError } from './evaluator_already_exists_error';
 import { BuiltInEvaluatorNameError } from './built_in_evaluator_name_error';
 import { EvaluatorNotFoundError } from './evaluator_not_found_error';
+import { EvaluatorVersionConflictError } from './evaluator_version_conflict_error';
 import { InvalidEvaluatorNameError } from './invalid_evaluator_name_error';
 import type { EvaluatorStorageProperties, evaluatorsStorageSettings } from './evaluators_storage';
 
 type EvaluatorStorageDocument = EvaluatorStorageProperties & { _id?: string };
+
+/**
+ * Compares two judge configs by meaning rather than representation, so a definition written
+ * through the API and one round-tripped through a form agree. `evidence` and
+ * `reference_data_keys` are sets the evaluator is given, so neither order nor an omitted
+ * empty list distinguishes them. Score order is left alone: it is the order a reader sees.
+ */
+const isSameJudge = (a: LlmJudgeConfig, b: LlmJudgeConfig): boolean => {
+  const normalize = (judge: LlmJudgeConfig) => ({
+    ...judge,
+    evidence: [...judge.evidence].sort(),
+    reference_data_keys: [...(judge.reference_data_keys ?? [])].sort(),
+    output: {
+      ...judge.output,
+      // Order is kept: it is the order a reader sees. A blank description is normalized,
+      // since the form omits one and the API accepts an empty string, and so is an absent
+      // direction, which a version written before scores declared one reads as `maximize`.
+      scores: judge.output.scores.map(({ description, ...score }) => ({
+        ...score,
+        direction: getJudgeScoreDirection(score),
+        ...(description?.trim() ? { description: description.trim() } : {}),
+      })),
+    },
+  });
+
+  return isEqual(normalize(a), normalize(b));
+};
+
+/**
+ * The part of a judge that decides whether two runs can be compared: which scores come back,
+ * on what scale, which way each one improves, and which inputs an example has to supply.
+ * Compared as sets, so reordering is a presentational change rather than a contract change.
+ */
+const comparabilityContract = (judge: LlmJudgeConfig) => ({
+  evidence: [...judge.evidence].sort(),
+  reference_data_keys: [...(judge.reference_data_keys ?? [])].sort(),
+  scores: [...judge.output.scores]
+    .map(({ name, type, labels, direction }) => ({
+      name,
+      type,
+      direction: getJudgeScoreDirection({ direction }),
+      labels: [...(labels ?? [])].map(({ value, score }) => `${value}=${score}`).sort(),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name)),
+});
+
+/**
+ * Derives the bump from what changed, so the level states a fact about the edit rather than a
+ * claim the author has to make honestly — a distinction that matters for a judge, where a
+ * one-word rubric change can move every score.
+ *
+ * - `major`: the scores, which way they improve, or the required inputs changed, so earlier
+ *   runs no longer line up.
+ * - `minor`: the judge's instructions changed, so scores may shift but still compare.
+ * - `patch`: only the catalog description changed, which the judge never sees.
+ *
+ * Returns `null` when the edit says nothing new, so no version is minted.
+ */
+const getVersionBump = (
+  current: { description: string; judge: LlmJudgeConfig },
+  next: { description: string; judge: LlmJudgeConfig }
+): 'major' | 'minor' | 'patch' | null => {
+  const judgeChanged = !isSameJudge(current.judge, next.judge);
+
+  if (!judgeChanged) {
+    return current.description === next.description ? null : 'patch';
+  }
+
+  return isEqual(comparabilityContract(current.judge), comparabilityContract(next.judge))
+    ? 'minor'
+    : 'major';
+};
 
 export type EvaluatorsStorageAdapter = StorageIndexAdapter<
   typeof evaluatorsStorageSettings,
@@ -46,6 +122,8 @@ export interface UpdateEvaluatorDefinitionInput {
   description?: string;
   judge?: LlmJudgeConfig;
   createdBy?: string;
+  /** The version the edit started from. When set, the update is refused once it is not the latest. */
+  baseVersion?: string;
 }
 
 export interface EvaluatorDefinitionDeleteResult {
@@ -54,7 +132,7 @@ export interface EvaluatorDefinitionDeleteResult {
 
 const INITIAL_VERSION = '1.0.0';
 
-/** Maximum writes attempted when concurrent updates take the same version. */
+/** Maximum writes attempted when concurrent updates edit the same version. */
 const UPDATE_MAX_ATTEMPTS = 5;
 
 const EVALUATOR_DEFINITIONS_PAGE_SIZE = 500;
@@ -117,8 +195,8 @@ interface LatestByNameAggregation {
  * Versions are immutable: an update writes a new document rather than replacing
  * the one it read, so a score naming `name@version` always resolves to the
  * definition that produced it. That also removes the read-modify-write datasets
- * need optimistic concurrency for — a derived id and `op_type: 'create'` are
- * enough to make two writers competing for one version resolve to one winner.
+ * need optimistic concurrency for — an id derived from the version an edit read,
+ * written with `op_type: 'create'`, lets only one edit of a version win.
  */
 export class EvaluatorDefinitionClient {
   private readonly storage: InternalIStorageClient<EvaluatorStorageDocument>;
@@ -197,11 +275,15 @@ export class EvaluatorDefinitionClient {
   /**
    * Writes the next version of a definition. The caller's fields are layered
    * over the latest version, so an update that only changes the description
-   * carries the judge config forward unchanged.
+   * carries the judge config forward unchanged. An update that changes nothing
+   * returns the current version instead of writing a duplicate of it.
+   *
+   * The version level is derived from the edit rather than chosen: see
+   * `getVersionBump`.
    */
   async update(
     name: string,
-    { description, judge, createdBy }: UpdateEvaluatorDefinitionInput
+    { description, judge, createdBy, baseVersion }: UpdateEvaluatorDefinitionInput
   ): Promise<EvaluatorDefinitionDocument> {
     if (this.isBuiltIn(name)) {
       throw new BuiltInEvaluatorNameError(name);
@@ -215,8 +297,24 @@ export class EvaluatorDefinitionClient {
       if (!current) {
         throw new EvaluatorNotFoundError(name);
       }
+      // Checked on every attempt, so an edit that loses a race is refused, not reapplied.
+      if (baseVersion && current.version !== baseVersion) {
+        throw new EvaluatorVersionConflictError(name, baseVersion, current.version);
+      }
 
-      const nextVersion = semverInc(current.version, 'minor');
+      const nextDescription = description ?? current.description;
+      const nextJudge = judge ?? current.judge;
+
+      const bump = getVersionBump(current, { description: nextDescription, judge: nextJudge });
+
+      // Saving without changing anything would otherwise mint a version identical to the one
+      // below it, inflating a history `listVersions` caps and making `name@version` ambiguous
+      // about which edit it represents.
+      if (!bump) {
+        return current;
+      }
+
+      const nextVersion = semverInc(current.version, bump);
       if (!nextVersion) {
         throw new Error(
           `Cannot derive the next version of evaluator "${name}" from "${current.version}"`
@@ -228,28 +326,41 @@ export class EvaluatorDefinitionClient {
         name,
         version: nextVersion,
         kind: 'llm',
-        description: description ?? current.description,
-        judge: judge ?? current.judge,
+        description: nextDescription,
+        judge: nextJudge,
         space_ids: [this.spaceId],
         created_at: timestamp,
         updated_at: timestamp,
         ...(createdBy ?? current.created_by ? { created_by: createdBy ?? current.created_by } : {}),
       };
 
-      const id = getEvaluatorDefinitionId(this.spaceId, name, nextVersion);
+      // Keyed by the version read, not `nextVersion`, so concurrent edits of it collide even
+      // when they derive different levels.
+      const id = getEvaluatorSuccessorId(this.spaceId, name, current.version);
 
       try {
         await this.storage.index({ id, op_type: 'create', document, refresh: true });
-        return toDefinition(id, document);
       } catch (error) {
         if (!isConflict(error)) {
           throw error;
         }
 
         this.logger.debug(
-          `Version ${nextVersion} of evaluator "${name}" was taken by a concurrent update; retrying (attempt ${attempt})`
+          `Version ${current.version} of evaluator "${name}" was superseded by a concurrent update; retrying (attempt ${attempt})`
         );
+        continue;
       }
+
+      // A node still keying versions by number (mid-upgrade) can land beside this write, so
+      // whoever ends up below the head reapplies onto it.
+      const latest = await this.getLatest(name);
+      if (latest?.version === nextVersion) {
+        return toDefinition(id, document);
+      }
+
+      this.logger.debug(
+        `Version ${nextVersion} of evaluator "${name}" was overtaken by ${latest?.version}; reapplying (attempt ${attempt})`
+      );
     }
 
     throw new Error(

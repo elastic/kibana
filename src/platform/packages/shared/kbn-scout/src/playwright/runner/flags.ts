@@ -11,13 +11,16 @@ import { createFlagError } from '@kbn/dev-cli-errors';
 import type { FlagOptions, FlagsReader } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import path from 'path';
-import type { ScoutTestTarget } from '@kbn/scout-info';
+import type { ScoutTargetAttribute, ScoutTestTarget } from '@kbn/scout-info';
+import { targetAttributes } from '@kbn/scout-info';
 import { validateAndProcessTestFiles } from '../../common/utils';
 import { SERVER_FLAG_OPTIONS, parseServerFlags } from '../../servers';
+import { resolveTargetAttributes } from '../../tests_discovery/tag_utils';
 import { validatePlaywrightConfig } from './config_validator';
 
 export interface RunTestsOptions {
   testTarget: ScoutTestTarget;
+  targetAttributes: ScoutTargetAttribute[];
   configPath: string;
   headed: boolean;
   repeatEach: number | undefined;
@@ -30,7 +33,13 @@ export interface RunTestsOptions {
 export const TEST_FLAG_OPTIONS: FlagOptions = {
   ...SERVER_FLAG_OPTIONS,
   boolean: [...(SERVER_FLAG_OPTIONS.boolean || []), 'headed'],
-  string: [...(SERVER_FLAG_OPTIONS.string || []), 'config', 'testFiles', 'repeatEach'],
+  string: [
+    ...(SERVER_FLAG_OPTIONS.string || []),
+    'config',
+    'testFiles',
+    'repeatEach',
+    'targetAttribute',
+  ],
   default: { ...SERVER_FLAG_OPTIONS.default, headed: false },
   help: `
     ${SERVER_FLAG_OPTIONS.help}
@@ -38,6 +47,10 @@ export const TEST_FLAG_OPTIONS: FlagOptions = {
     --testFiles         Comma-separated list of test file paths or test directory path (required if --config not provided)
     --headed            Run Playwright with browser head
     --repeatEach        Run each test N times for local flakiness validation (e.g. --repeatEach 5)
+    --targetAttribute   Attribute of the test target the tests run against, repeatable and/or
+                        comma-separated; defaults to SCOUT_TARGET_ATTRIBUTES. Tests carrying an
+                        unsatisfied '@limit/<selection-method>-<target-attr>' tag are skipped.
+                        Valid attributes: ${targetAttributes.all.join(', ')}
   `,
 };
 
@@ -63,6 +76,13 @@ export async function parseTestFlags(flags: FlagsReader) {
     throw createFlagError(`'--repeatEach' must be a positive integer, got '${repeatEach}'`);
   }
 
+  let runTargetAttributes: ScoutTargetAttribute[];
+  try {
+    runTargetAttributes = resolveTargetAttributes(flags.arrayOfStrings('targetAttribute'));
+  } catch (e) {
+    throw createFlagError(String(e));
+  }
+
   let scoutConfigPath: string;
   const testFiles: string[] = [];
 
@@ -83,6 +103,7 @@ export async function parseTestFlags(flags: FlagsReader) {
 
   return {
     ...serverOptions,
+    targetAttributes: runTargetAttributes,
     configPath: scoutConfigPath,
     headed,
     repeatEach,

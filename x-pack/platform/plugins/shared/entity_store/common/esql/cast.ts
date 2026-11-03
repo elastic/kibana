@@ -26,7 +26,7 @@ const fieldTypeMap: ReadonlyMap<string, string> = (() => {
     serviceEntityDefinition,
     genericEntityDefinition,
   ]) {
-    for (const field of def.fields) {
+    for (const field of def.extraction.fields) {
       if (field.mapping?.type && !map.has(field.source)) {
         map.set(field.source, field.mapping.type);
       }
@@ -79,6 +79,20 @@ export function castField(fieldName: string): string {
     return fieldName;
   }
   return castFieldByType(fieldName, fieldTypeMap.get(fieldName));
+}
+
+export interface CastFieldOptions {
+  /**
+   * Cast each field to its declared type. Turn off only for queries whose indices all map the field
+   * the same way: a cast hides the field from Lucene, so the filter runs row by row in ES|QL.
+   * @default true
+   */
+  castFields?: boolean;
+}
+
+/** `castField`, or the plain field name when `castFields` is false. */
+export function referenceField(fieldName: string, { castFields = true }: CastFieldOptions = {}) {
+  return castFields ? castField(fieldName) : fieldName;
 }
 
 /** Casts a field to its declared type — used by the STATS aggregation stage. */

@@ -7,7 +7,9 @@
 
 import {
   ConversationRoundStepType,
+  createInjectedContextStep,
   createReasoningStep,
+  createSubstitutionStep,
   createToolCallStep,
 } from '@kbn/agent-builder-common/chat/conversation';
 import type {
@@ -36,7 +38,7 @@ const transientReasoningStep = () =>
 
 const compactionStep = (): CompactionStep => ({
   type: ConversationRoundStepType.compaction,
-  summarized_round_count: 2,
+  summarized_cycle_count: 2,
   token_count_before: 4000,
   token_count_after: 1200,
 });
@@ -50,6 +52,14 @@ const backgroundAgentStep = (): BackgroundAgentCompleteStep => ({
 describe('groupSteps', () => {
   it('returns [] for an empty array', () => {
     expect(groupSteps([])).toEqual([]);
+  });
+
+  it('hides injected context steps without breaking the surrounding tool call group', () => {
+    const a = toolStep('a');
+    const b = toolStep('b');
+    const note = createInjectedContextStep({ hook_id: 'memory', text: 'remember' });
+
+    expect(groupSteps([note, a, note, b])).toEqual([{ kind: 'group', steps: [a, b] }]);
   });
 
   it('wraps a single tool call in a group', () => {
@@ -270,6 +280,31 @@ describe('groupSteps', () => {
       { kind: 'group', steps: [a] },
       { kind: 'step', step: r2, index: 4 },
     ]);
+  });
+
+  it('hides a SubstitutionStep without splitting the surrounding tool group', () => {
+    const substitution = createSubstitutionStep({
+      trigger: 'intra_round',
+      threshold_tokens: 1_000,
+      substituted_tool_calls: [{ round_id: 'round-1', tool_call_id: 'a' }],
+    });
+    const a = toolStep('a');
+    const b = toolStep('b');
+
+    const result = groupSteps([a, substitution, b]);
+
+    expect(result).toEqual([{ kind: 'group', steps: [a, b] }]);
+  });
+
+  it('hides a pre-execution workflow step without splitting tool groups', () => {
+    const a = toolStep('a');
+    const b = toolStep('b');
+    const workflowStep = {
+      type: ConversationRoundStepType.preExecutionWorkflow,
+      model_context: 'hidden context',
+    } as const;
+
+    expect(groupSteps([a, workflowStep, b])).toEqual([{ kind: 'group', steps: [a, b] }]);
   });
 
   it('flushes the tool buffer when an AskUserQuestionStep arrives and renders it as a step', () => {

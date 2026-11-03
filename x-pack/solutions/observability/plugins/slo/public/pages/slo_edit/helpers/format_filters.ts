@@ -5,15 +5,15 @@
  * 2.0.
  */
 import type { QuerySchema, FiltersSchema } from '@kbn/slo-schema';
-import { kqlQuerySchema, kqlWithFiltersSchema } from '@kbn/slo-schema';
+import { is, kqlQuerySchema, kqlWithFiltersSchema } from '@kbn/slo-schema';
 
 export const formatAllFilters = (
   globalFilters: QuerySchema = '',
   groupByCardinalityFilters: FiltersSchema
 ): QuerySchema => {
-  if (kqlQuerySchema.is(globalFilters)) {
+  if (is(kqlQuerySchema, globalFilters)) {
     return { kqlQuery: globalFilters, filters: groupByCardinalityFilters };
-  } else if (kqlWithFiltersSchema.is(globalFilters)) {
+  } else if (is(kqlWithFiltersSchema, globalFilters)) {
     return {
       kqlQuery: globalFilters.kqlQuery,
       filters: [...globalFilters.filters, ...groupByCardinalityFilters],

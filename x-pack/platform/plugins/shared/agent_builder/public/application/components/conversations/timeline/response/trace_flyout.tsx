@@ -25,6 +25,7 @@ import { createEsTraceFetcher, TraceWaterfall, useTraceSpans } from '@kbn/llm-tr
 import type { TraceSpan } from '@kbn/llm-trace-waterfall';
 import { downloadFileAs } from '@kbn/share-plugin/public';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useConversationFlyoutSessionProps } from '../../../../hooks/use_conversation_flyout_session_props';
 
 const labels = {
   title: i18n.translate('xpack.agentBuilder.response.traceFlyout.title', {
@@ -47,6 +48,7 @@ interface TraceFlyoutProps {
 export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, initialSpans, onClose }) => {
   const { services } = useKibana();
   const { data } = services.plugins;
+  const flyoutSessionProps = useConversationFlyoutSessionProps(labels.title);
   const fetchTrace = useMemo(() => createEsTraceFetcher(data.search.search), [data.search.search]);
 
   const isFromFile = Boolean(initialSpans);
@@ -92,6 +94,7 @@ export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, initialSpans,
           overflow: hidden;
         }
       `}
+      {...flyoutSessionProps}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>

@@ -19,6 +19,7 @@ export const AI_INDEX_KI_SUMMARY_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexI
 export const AI_INDEX_FEEDBACK_ANALYSIS_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/feedback_analysis`;
 export const AI_INDEX_KI_LIST_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/kis`;
 export const AI_INDEX_KI_BY_ID_PATH = `${AI_INDEX_KI_LIST_PATH}/{kiId}`;
+export const AI_INDEX_KI_RESTORE_PATH = `${AI_INDEX_KI_BY_ID_PATH}/_restore`;
 
 /** Default and maximum page size when listing Knowledge Indicators for an AI index. */
 export const DEFAULT_KI_PAGE_SIZE = 25;
@@ -27,6 +28,9 @@ export const MAX_KI_PAGE_SIZE = 100;
 export const KI_SUMMARY_PAGE_SIZE = 0;
 
 export const MAX_KI_TYPE_FILTER_LENGTH = 256;
+export const MAX_KI_SEARCH_QUERY_LENGTH = 256;
+/** Max length of a Knowledge Indicator `content` field (bytes). */
+export const MAX_KI_CONTENT_LENGTH = 65536;
 
 /** Read-only Signals routes (internal): a preaggregated grouped list and a per-group fetch. */
 export const SIGNAL_GROUPS_PATH = `${INTERNAL_API_PATH}/signals/groups`;
@@ -77,13 +81,11 @@ export const DEFAULT_AI_INDEX_TYPE: AiIndexType = 'index';
  */
 export const MAX_AI_INDICES = 100;
 
+export const MAX_AI_INDEX_ID_LENGTH = 256;
 export const MAX_AI_INDEX_FEEDBACK_AGENT_ID_LENGTH = 256;
 export const MAX_AI_INDEX_DESCRIPTION_LENGTH = 2048;
 export const MAX_AI_INDEX_DEST_VALUE_LENGTH = 1024;
 export const MAX_INDEX_NAME_BYTES = 255;
-export const KI_VIEW_NAME_PREFIX = 'v-ai-index-';
-// The view name `v-ai-index-<id>` must fit an index name.
-export const MAX_AI_INDEX_ID_LENGTH = MAX_INDEX_NAME_BYTES - KI_VIEW_NAME_PREFIX.length;
 export const MAX_AI_INDEX_AUTOMATION_LENGTH = 1024;
 export const MAX_AI_INDEX_SOURCE_VALUE_LENGTH = 10240;
 export const MAX_AI_INDEX_AUTOMATIONS = 100;

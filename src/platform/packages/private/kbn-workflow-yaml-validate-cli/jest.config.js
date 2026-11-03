@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/platform/packages/private/kbn-workflow-yaml-validate-cli'],
   // This is a Node CLI package (fetch/fs/crypto); run under Node, not jsdom.

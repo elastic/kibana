@@ -13,7 +13,6 @@ import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { RULES_RESOLUTION_BATCH_SIZE } from '../constants';
 
 jest.mock('react-use/lib/useAsync', () => ({
   __esModule: true,
@@ -86,7 +85,7 @@ describe('useAlertingRulesCache', () => {
       expect(mockHttp.get).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, {
         query: {
           filter: `id: "${ruleId}"`,
-          per_page: RULES_RESOLUTION_BATCH_SIZE,
+          per_page: 1,
           page: 1,
         },
       })
@@ -121,7 +120,7 @@ describe('useAlertingRulesCache', () => {
       items: [fetchedRule],
       total: 1,
       page: 1,
-      per_page: RULES_RESOLUTION_BATCH_SIZE,
+      per_page: 2,
     } as FindRulesResponse);
 
     const { result, rerender } = renderHook(
@@ -138,7 +137,7 @@ describe('useAlertingRulesCache', () => {
     expect(mockHttp.get).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, {
       query: {
         filter: `(id: "${presentRuleId}" OR id: "${missingRuleId}")`,
-        per_page: RULES_RESOLUTION_BATCH_SIZE,
+        per_page: 2,
         page: 1,
       },
     });

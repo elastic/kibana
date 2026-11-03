@@ -50,7 +50,6 @@ describe('data_source_flyout_initial_values', () => {
         name: 's3',
         description: '',
         settings: {
-          region: 'us-east-1',
           endpoint: 'https://s3.example',
           access_key: 'AKIA',
           secret_key: 'SECRET',
@@ -59,7 +58,6 @@ describe('data_source_flyout_initial_values', () => {
 
       const values = dataSourceToFlyoutFormValues(data);
       const settings = values.settings as S3DataSourceSettingsWithSecrets;
-      expect(settings.region).toBe('us-east-1');
       expect(settings.endpoint).toBe('https://s3.example');
       expect(settings.access_key).toBe('AKIA');
       expect(settings.secret_key).toBe('SECRET');

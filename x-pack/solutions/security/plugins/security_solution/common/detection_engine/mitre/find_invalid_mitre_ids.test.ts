@@ -7,8 +7,8 @@
 
 import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import { findInvalidMitreIds, buildValidMitreIdsFromBuckets } from './find_invalid_mitre_ids';
-import type { ValidMitreIdSets } from './find_invalid_mitre_ids';
-import { MITRE_ATTACK_FRAMEWORK } from './iterate_mitre_threat_entities';
+import type { ValidMitreIdSets, ValidMitreIdSetsByFramework } from './find_invalid_mitre_ids';
+import { MITRE_ATTACK_FRAMEWORK, MITRE_ATLAS_FRAMEWORK } from './iterate_mitre_threat_entities';
 
 const MITRE_FRAMEWORK = MITRE_ATTACK_FRAMEWORK;
 
@@ -17,12 +17,39 @@ const VALID_TACTIC_ID = 'TA0005'; // Defense Evasion
 const VALID_TECHNIQUE_ID = 'T1548'; // Abuse Elevation Control Mechanism
 const VALID_SUBTECHNIQUE_ID = 'T1548.002'; // Bypass User Account Control
 
-/** Small id-set fixture containing just the IDs used in the tests below. */
-const validIds: ValidMitreIdSets = {
+const VALID_ATLAS_TACTIC_ID = 'AML.TA0000';
+const VALID_ATLAS_TECHNIQUE_ID = 'AML.T0044';
+const VALID_ATLAS_SUBTECHNIQUE_ID = 'AML.T0024.002';
+
+/** Small id-set fixture containing just the ATT&CK IDs used in the tests below. */
+const enterpriseIds: ValidMitreIdSets = {
   tactic: new Set([VALID_TACTIC_ID]),
   technique: new Set([VALID_TECHNIQUE_ID]),
   subtechnique: new Set([VALID_SUBTECHNIQUE_ID]),
 };
+
+const atlasIds: ValidMitreIdSets = {
+  tactic: new Set([VALID_ATLAS_TACTIC_ID]),
+  technique: new Set([VALID_ATLAS_TECHNIQUE_ID]),
+  subtechnique: new Set([VALID_ATLAS_SUBTECHNIQUE_ID]),
+};
+
+const validIds: ValidMitreIdSetsByFramework = { enterprise: enterpriseIds };
+const validIdsAllFrameworks: ValidMitreIdSetsByFramework = {
+  enterprise: enterpriseIds,
+  atlas: atlasIds,
+};
+
+const makeAtlasThreat = (overrides?: Partial<Threats[number]>): Threats[number] => ({
+  framework: MITRE_ATLAS_FRAMEWORK,
+  tactic: {
+    id: VALID_ATLAS_TACTIC_ID,
+    name: 'ML Model Access',
+    reference: 'https://atlas.mitre.org/tactics/AML.TA0000/',
+  },
+  technique: [],
+  ...overrides,
+});
 
 const makeThreat = (overrides?: Partial<Threats[number]>): Threats[number] => ({
   framework: MITRE_FRAMEWORK,
@@ -163,7 +190,7 @@ describe('findInvalidMitreIds', () => {
     expect(findInvalidMitreIds(threats, validIds)).toEqual(['T1548.999', 'T9999']);
   });
 
-  it('skips non-MITRE ATT&CK framework entries', () => {
+  it('skips entries whose framework is not recognized', () => {
     const threats: Threats = [
       {
         framework: 'Some Other Framework',
@@ -234,5 +261,70 @@ describe('findInvalidMitreIds', () => {
       }),
     ];
     expect(findInvalidMitreIds(threats, validIds)).toEqual(['TA9999', 'T9999', 'T9999.001']);
+  });
+
+  describe('multiple frameworks', () => {
+    it('does not flag valid ATLAS ids when atlas sets are provided', () => {
+      const threats: Threats = [
+        makeAtlasThreat({
+          technique: [
+            {
+              id: VALID_ATLAS_TECHNIQUE_ID,
+              name: 'Full ML Model Access',
+              reference: 'https://atlas.mitre.org/techniques/AML.T0044/',
+              subtechnique: [
+                {
+                  id: VALID_ATLAS_SUBTECHNIQUE_ID,
+                  name: 'sub',
+                  reference: 'https://atlas.mitre.org/techniques/AML.T0024.002/',
+                },
+              ],
+            },
+          ],
+        }),
+      ];
+      expect(findInvalidMitreIds(threats, validIdsAllFrameworks)).toEqual([]);
+    });
+
+    it('flags an unknown ATLAS technique id when atlas sets are provided', () => {
+      const threats: Threats = [
+        makeAtlasThreat({
+          technique: [
+            {
+              id: 'AML.T9999',
+              name: 'Fake ATLAS Technique',
+              reference: 'https://atlas.mitre.org/techniques/AML.T9999/',
+            },
+          ],
+        }),
+      ];
+      expect(findInvalidMitreIds(threats, validIdsAllFrameworks)).toEqual(['AML.T9999']);
+    });
+
+    it('does not flag ATLAS ids when only enterprise sets are provided', () => {
+      const threats: Threats = [
+        makeAtlasThreat({
+          tactic: { id: 'AML.TA9999', name: 'Fake', reference: 'https://example.com' },
+          technique: [
+            { id: 'AML.T9999', name: 'Fake ATLAS Technique', reference: 'https://example.com' },
+          ],
+        }),
+      ];
+      expect(findInvalidMitreIds(threats, validIds)).toEqual([]);
+    });
+
+    it('still flags ATT&CK ids when only enterprise sets are provided alongside ATLAS entries', () => {
+      const threats: Threats = [
+        makeAtlasThreat({
+          technique: [
+            { id: 'AML.T9999', name: 'Fake ATLAS Technique', reference: 'https://example.com' },
+          ],
+        }),
+        makeThreat({
+          technique: [{ id: 'T9999', name: 'Fake Technique', reference: 'https://example.com' }],
+        }),
+      ];
+      expect(findInvalidMitreIds(threats, validIds)).toEqual(['T9999']);
+    });
   });
 });

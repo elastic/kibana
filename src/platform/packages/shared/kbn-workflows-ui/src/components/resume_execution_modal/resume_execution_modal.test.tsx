@@ -18,43 +18,39 @@ import { z } from '@kbn/zod/v4';
 import type { ResumeExecutionModalProps } from './resume_execution_modal';
 import { ResumeExecutionModal } from './resume_execution_modal';
 
-jest.mock('../../hooks/use_workflows_monaco_theme', () => ({
-  useWorkflowsMonacoTheme: jest.fn(),
-  WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
-}));
+jest.mock('@kbn/code-editor', () => {
+  const actual = jest.requireActual('@kbn/code-editor');
 
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: ({ value, onChange, dataTestSubj }: any) => (
-    <div data-test-subj={dataTestSubj}>
-      <span data-test-subj="editorValue">{value}</span>
-      <button
-        data-test-subj="editorChangeValid"
-        onClick={() => onChange('{"approved":true}')}
-        type="button"
-      >
-        {'valid change'}
-      </button>
-      <button
-        data-test-subj="editorChangeInvalid"
-        onClick={() => onChange('{bad json')}
-        type="button"
-      >
-        {'invalid change'}
-      </button>
-      <button
-        data-test-subj="editorChangeSyntaxOkSchemaFail"
-        onClick={() => onChange('{"wrongKey": true}')}
-        type="button"
-      >
-        {'valid json invalid schema'}
-      </button>
-    </div>
-  ),
-  monaco: {
-    languages: { json: { jsonDefaults: { setDiagnosticsOptions: jest.fn() } } },
-    editor: {},
-  },
-}));
+  return {
+    ...actual,
+    CodeEditor: ({ value, onChange, dataTestSubj }: any) => (
+      <div data-test-subj={dataTestSubj}>
+        <span data-test-subj="editorValue">{value}</span>
+        <button
+          data-test-subj="editorChangeValid"
+          onClick={() => onChange('{"approved":true}')}
+          type="button"
+        >
+          {'valid change'}
+        </button>
+        <button
+          data-test-subj="editorChangeInvalid"
+          onClick={() => onChange('{bad json')}
+          type="button"
+        >
+          {'invalid change'}
+        </button>
+        <button
+          data-test-subj="editorChangeSyntaxOkSchemaFail"
+          onClick={() => onChange('{"wrongKey": true}')}
+          type="button"
+        >
+          {'valid json invalid schema'}
+        </button>
+      </div>
+    ),
+  };
+});
 
 const renderWithProviders = (props: ResumeExecutionModalProps) => {
   return render(<ResumeExecutionModal {...props} />, { wrapper: I18nProvider });

@@ -8,15 +8,24 @@
 import Boom from '@hapi/boom';
 
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
-import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
-import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
+import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
+import { getAuthenticatedPrincipal } from '@kbn/core-security-common';
+import type { CreateServiceAccountServerParams, ServiceAccount } from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader, UIAM_ERROR_CODES } from '@kbn/core-security-server';
+import type {
+  AuditLogger,
+  AuditServiceSetup,
+  CheckPrivilegesWithRequest,
+} from '@kbn/security-plugin-types-server';
 import { z } from '@kbn/zod';
 
 import { buildAssumableBy } from './assumable_by';
 import { ensureClusterPrivilege } from './cluster_privilege';
 import { parseCreateServiceAccountParams } from './create_params';
+import { toDescriptionField } from './description_field';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from './fake_requests';
+import { getPlatformAssumerServiceAccountIds } from './platform_assumers';
 import { buildRoleAssignments, readApplicationRoles } from './role_assignments';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 import type {
@@ -27,6 +36,7 @@ import type {
 import { UIAM_SERVICE_ACCOUNT_ROLE_LIMITS } from './uiam_role_limits';
 import type { SecurityLicense } from '../../common';
 import type {
+  DeleteServiceAccountResponse,
   ListServiceAccountsResponse,
   ServiceAccountDirectoryCreator,
   ServiceAccountDirectoryEntry,
@@ -35,12 +45,12 @@ import {
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
   SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
-  serviceAccountIdSchema,
-  serviceAccountNameSchema,
 } from '../../common/service_accounts';
+import { ServiceAccountAuditAction, serviceAccountAuditEvent } from '../audit';
 import { getDetailedErrorMessage } from '../errors';
 import { securityTelemetry } from '../otel/instrumentation';
 import {
+  assertUiamCredential,
   getUiamAuthorizationHeaderFromRequest,
   isExternalApiKey,
   type UiamServiceAccount,
@@ -48,16 +58,6 @@ import {
   type UiamServiceAccountDetails,
   type UiamServicePublic,
 } from '../uiam';
-
-/**
- * The fields of UIAM's response that cross the contract boundary. The rest of the payload is
- * deliberately unvalidated: Kibana neither consumes nor reports it, so a shape change there is
- * not Kibana's to detect.
- */
-const serviceAccountSchema = z.object({
-  id: serviceAccountIdSchema,
-  name: serviceAccountNameSchema,
-});
 
 /**
  * UIAM identifies a user by the numeric id that is also their Kibana username on serverless, so
@@ -90,11 +90,12 @@ const toCreatedBy = (creator: UiamServiceAccountCreator): ServiceAccountDirector
  */
 const toDirectoryEntry = (
   cloudProjectContext: CloudProjectContext,
-  { id, name, role_assignments: roleAssignments, creator }: UiamServiceAccountDetails
+  { id, name, description, role_assignments: roleAssignments, creator }: UiamServiceAccountDetails
 ): ServiceAccountDirectoryEntry => ({
   id,
   name,
   roles: readApplicationRoles(cloudProjectContext, roleAssignments),
+  ...toDescriptionField(description),
   enabled: true,
   assumable: true,
   createdBy: toCreatedBy(creator),
@@ -126,16 +127,13 @@ const uiamErrorResponseSchema = z.object({
  * gets a 200 and is limited at runtime instead.
  */
 const CREATE_REFUSALS: Record<string, string> = {
-  // CREATE_SA_RESULTS_IN_NO_PRIVS
-  '0x138916':
+  [UIAM_ERROR_CODES.CREATE_SA_RESULTS_IN_NO_PRIVS]:
     'your credential grants no application roles in this organization. An account is limited to ' +
     "the privileges of both its own roles and its creator's, so it would have none",
-  // ALREADY_DOWNSCOPED
-  '0x91249F':
+  [UIAM_ERROR_CODES.ALREADY_DOWNSCOPED]:
     'the credential making this request is itself downscoped, and an account cannot be downscoped ' +
     'twice. Make the request from a user session',
-  // CREATE_SA_SERVICE_ACCOUNT_NOT_SUPPORTED
-  '0x97E147':
+  [UIAM_ERROR_CODES.SA_SERVICE_ACCOUNT_NOT_SUPPORTED]:
     'a service account cannot create service accounts. Make the request from a user session',
 };
 
@@ -145,6 +143,7 @@ export interface UiamServiceAccountsOptions {
   license: SecurityLicense;
   uiam: UiamServicePublic;
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
+  audit: AuditServiceSetup;
   cloudProjectContext: CloudProjectContext;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 }
@@ -154,6 +153,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
   private readonly license: SecurityLicense;
   private readonly uiam: UiamServicePublic;
   private readonly checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
+  private readonly audit: AuditServiceSetup;
   private readonly cloudProjectContext: CloudProjectContext;
   private readonly getCurrentUser: UiamServiceAccountsOptions['getCurrentUser'];
   private readonly fakeRequests: ServiceAccountFakeRequests;
@@ -164,6 +164,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     license,
     uiam,
     checkPrivilegesWithRequest,
+    audit,
     cloudProjectContext,
     getCurrentUser,
   }: UiamServiceAccountsOptions) {
@@ -171,10 +172,13 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     this.license = license;
     this.uiam = uiam;
     this.checkPrivilegesWithRequest = checkPrivilegesWithRequest;
+    this.audit = audit;
     this.cloudProjectContext = cloudProjectContext;
     this.getCurrentUser = getCurrentUser;
     this.fakeRequests = new ServiceAccountFakeRequests(
       logger,
+      // `boundAt` is not consulted: UIAM issues a new id on every create, so a binding can never
+      // name a later account than the one it was made for.
       async (serviceAccountId) => {
         const { token } = await this.exchangeToken(serviceAccountId);
         return token;
@@ -185,16 +189,19 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
 
   async create(
     request: KibanaRequest,
-    params: CreateServiceAccountParams
+    params: CreateServiceAccountServerParams
   ): Promise<ServiceAccount> {
+    const auditLogger = this.audit.asScoped(request);
     try {
-      const account = await this.createAccount(request, params);
+      const account = await this.createAccount(request, params, auditLogger);
       securityTelemetry.recordServiceAccountCreationAttempt({
         outcome: 'success',
         serviceAccountBackend: 'uiam',
       });
       return account;
     } catch (e) {
+      // An authorization refusal is the one failure audited. `createAccount` logs it, and the
+      // success event, where the validated parameters are in scope.
       securityTelemetry.recordServiceAccountCreationAttempt({
         outcome: 'failure',
         serviceAccountBackend: 'uiam',
@@ -203,9 +210,11 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     }
   }
 
+  /** `auditLogger` records the created account, or an authorization refusal. */
   private async createAccount(
     request: KibanaRequest,
-    params: CreateServiceAccountParams
+    params: CreateServiceAccountServerParams,
+    auditLogger: AuditLogger
   ): Promise<ServiceAccount> {
     if (!this.license.isEnabled()) {
       throw Boom.forbidden(
@@ -213,7 +222,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    const { name, roles } = parseCreateServiceAccountParams(
+    const { name, roles, description, platformAssumers } = parseCreateServiceAccountParams(
       params,
       UIAM_SERVICE_ACCOUNT_ROLE_LIMITS
     );
@@ -226,6 +235,15 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       logger: this.logger,
       privilege: 'manage_security',
       action: 'create a service account',
+      onRefused: (error) =>
+        auditLogger.log(
+          serviceAccountAuditEvent({
+            action: ServiceAccountAuditAction.CREATE,
+            serviceAccount: { name },
+            platformAssumers,
+            error,
+          })
+        ),
     });
 
     this.logger.debug('Attempting to create a service account');
@@ -237,8 +255,14 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
         {
           organization_id: this.cloudProjectContext.organizationId,
           name,
+          ...toDescriptionField(description),
+          project_type: this.cloudProjectContext.projectType,
+          project_id: this.cloudProjectContext.projectId,
           role_assignments: buildRoleAssignments(this.cloudProjectContext, roles),
-          assumable_by: buildAssumableBy(this.cloudProjectContext),
+          assumable_by: buildAssumableBy({
+            ...this.cloudProjectContext,
+            platformServiceAccountIds: getPlatformAssumerServiceAccountIds(platformAssumers ?? []),
+          }),
         },
         // External API keys must not carry client authentication (`null`); everything else is
         // vouched for with Kibana's own shared secret.
@@ -251,22 +275,25 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       throw getCreateRefusal(e) ?? e;
     }
 
-    // Validated outside the block above, so a refusal to report the account is not logged a
-    // second time as a failure to create it. By this point the account does exist.
-    const parsed = serviceAccountSchema.safeParse(result);
-    if (!parsed.success) {
-      // Returning an id or a name Kibana just rejected would be worse than failing, so name the
-      // account in the log: nothing else can find it now.
-      this.logger.error(
-        `UIAM reported the created service account [${name}] in an unrecognized shape. It may ` +
-          `need to be removed manually: ${parsed.error.message}`
-      );
-      throw Boom.badGateway('The service account was created but could not be reported back.');
-    }
+    // By this point the account exists, so the response is taken as typed rather than re-checked:
+    // refusing to report an account Kibana just created would leave the audit event, and the
+    // caller, describing a failure that did not happen. The roles are echoed from the request
+    // rather than read back. UIAM stores them as sent, and the directory reads the same roles out
+    // of its role assignments on list and get.
+    auditLogger.log(
+      serviceAccountAuditEvent({
+        action: ServiceAccountAuditAction.CREATE,
+        serviceAccount: { id: result.id, name: result.name },
+        platformAssumers,
+      })
+    );
 
-    // The roles are echoed from the request rather than read back. UIAM stores them as sent, and
-    // the directory reads the same roles out of its role assignments on list and get.
-    return { ...parsed.data, roles };
+    return {
+      id: result.id,
+      name: result.name,
+      roles,
+      ...toDescriptionField(result.description),
+    };
   }
 
   async list(
@@ -283,7 +310,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       request,
       checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
       logger: this.logger,
-      privilege: 'read_security',
+      privilege: 'manage_security',
       action: 'list service accounts',
     });
 
@@ -324,18 +351,78 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       request,
       checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
       logger: this.logger,
-      privilege: 'read_security',
+      privilege: 'manage_security',
       action: 'get a service account',
     });
 
     this.logger.debug(`Attempting to get service account ${id}`);
 
+    let account: UiamServiceAccountDetails;
     try {
-      return toDirectoryEntry(this.cloudProjectContext, await this.uiam.getServiceAccount(id));
+      account = await this.uiam.getServiceAccount(id);
     } catch (e) {
       this.logger.error(`Failed to get service account: ${getDetailedErrorMessage(e)}`);
-      throw e;
+      throw getNotFound(id, e) ?? e;
     }
+
+    // UIAM keeps a revoked account around for a while, but it is gone as far as Kibana is
+    // concerned: it cannot be exchanged, restored or listed.
+    if (account.revoked) {
+      this.logger.debug(`Service account [${id}] was found, but it was revoked`);
+      throw Boom.notFound(`Service account [${id}] was not found`);
+    }
+
+    return toDirectoryEntry(this.cloudProjectContext, account);
+  }
+
+  /**
+   * Revokes the account in UIAM. UIAM authorizes the revoke against Kibana's certificate and the
+   * account's `assumable_by` policy, not against the end user, so the user-level gates are all
+   * Kibana's. They match {@link create}: the `manage_security` privilege, a UIAM credential, and a
+   * caller that is not a service account. Create gets the last two from UIAM, which sees the
+   * caller's credential there.
+   *
+   * Repeating a revoke while UIAM still holds the record succeeds, so a retry is safe. Once UIAM
+   * drops the record, the same call answers 404.
+   */
+  async delete(request: KibanaRequest, id: string): Promise<DeleteServiceAccountResponse> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot delete a service account: security features are disabled in Elasticsearch'
+      );
+    }
+
+    await ensureClusterPrivilege({
+      request,
+      checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
+      logger: this.logger,
+      privilege: 'manage_security',
+      action: 'delete a service account',
+    });
+
+    assertUiamCredential(HTTPAuthorizationHeader.parseFromRequest(request));
+
+    const user = this.getCurrentUser(request);
+    if (!user) {
+      throw Boom.unauthorized('Cannot delete a service account: the request is not authenticated');
+    }
+    if (getAuthenticatedPrincipal(user).type === 'service_account') {
+      throw Boom.badRequest(
+        'Cannot delete a service account: a service account cannot delete service accounts. Make ' +
+          'the request from a user session'
+      );
+    }
+
+    this.logger.debug(`Attempting to delete service account [${id}]`);
+
+    try {
+      await this.uiam.revokeServiceAccount(id);
+    } catch (e) {
+      this.logger.error(`Failed to delete service account [${id}]: ${getDetailedErrorMessage(e)}`);
+      throw getNotFound(id, e) ?? e;
+    }
+
+    return { warnings: [] };
   }
 
   /**
@@ -366,7 +453,11 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
           retryDelay === null ? 'terminal' : 'retryable'
         } failure)`
       );
-      throw new ServiceAccountTokenExchangeError(cause, retryDelay !== null, retryDelay ?? 0);
+      throw new ServiceAccountTokenExchangeError(cause, {
+        retryable: retryDelay !== null,
+        retryAfterMs: retryDelay ?? 0,
+        statusCode: Boom.isBoom(cause) ? cause.output.statusCode : undefined,
+      });
     }
 
     const parsed = exchangeTokenResponseSchema.safeParse(result);
@@ -374,7 +465,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       this.logger.error(
         `Token exchange payload from UIAM failed validation for service account ${serviceAccountId}`
       );
-      throw new ServiceAccountTokenExchangeError(parsed.error, false);
+      throw new ServiceAccountTokenExchangeError(parsed.error, { retryable: false });
     }
 
     return parsed.data;
@@ -387,6 +478,11 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
 
   releaseFakeRequest(request: KibanaRequest): void {
     this.fakeRequests.release(request);
+  }
+
+  getFakeRequestPrincipal(request: KibanaRequest): AuthenticatedPrincipal | null {
+    const serviceAccountId = this.fakeRequests.getServiceAccountId(request);
+    return serviceAccountId ? { type: 'service_account', serviceAccountId, variant: 'uiam' } : null;
   }
 
   async reauthenticateFakeRequest(
@@ -408,10 +504,10 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
   }
 }
 
-const TERMINAL_EXCHANGE_CODES = new Set([
-  '0xEDF789', // ORGANIZATION_SERVICE_ACCOUNT_NOT_FOUND
-  '0x3B8626', // ORGANIZATION_SERVICE_ACCOUNT_REVOKED
-  '0x93B121', // AUTHZ_DENY
+const TERMINAL_EXCHANGE_CODES = new Set<string>([
+  UIAM_ERROR_CODES.ORGANIZATION_SERVICE_ACCOUNT_NOT_FOUND,
+  UIAM_ERROR_CODES.ORGANIZATION_SERVICE_ACCOUNT_REVOKED,
+  UIAM_ERROR_CODES.AUTHZ_DENY,
 ]);
 const RETRYABLE_EXCHANGE_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
 const RETRYABLE_TRANSPORT_CODES = new Set([
@@ -440,6 +536,21 @@ const getCreateRefusal = (error: unknown): Boom.Boom | null => {
   const parsed = uiamErrorResponseSchema.safeParse(error.output.payload);
   const reason = parsed.success ? CREATE_REFUSALS[parsed.data.error.code] : undefined;
   return reason ? Boom.badRequest(`Cannot create a service account: ${reason}`) : null;
+};
+
+/**
+ * Turns UIAM's answer for an account it does not know into a 404, or returns `null` for anything
+ * else. UIAM answers that with a 403, and the error code is what separates it from a real refusal.
+ */
+const getNotFound = (id: string, error: unknown): Boom.Boom | null => {
+  if (!Boom.isBoom(error)) {
+    return null;
+  }
+  const parsed = uiamErrorResponseSchema.safeParse(error.output.payload);
+  return parsed.success &&
+    parsed.data.error.code === UIAM_ERROR_CODES.ORGANIZATION_SERVICE_ACCOUNT_NOT_FOUND
+    ? Boom.notFound(`Service account [${id}] was not found`)
+    : null;
 };
 
 const getExchangeRetryDelay = (error: Error): number | null => {
