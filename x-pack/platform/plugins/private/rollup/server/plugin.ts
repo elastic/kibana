@@ -77,7 +77,7 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
         value: this.config.ui.enabled,
         description: i18n.translate('xpack.rollupJobs.enableUiDescription', {
           defaultMessage:
-            'Show Rollup Jobs in Stack Management. Refresh the page to apply changes.',
+            'Show Rollup Jobs in Stack Management. Applies to users with the required rollup privileges.',
         }),
         category: ['rollups'],
         schema: schema.boolean(),
