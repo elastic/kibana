@@ -272,6 +272,8 @@ describe('POST /internal/dashboards/_terraform', () => {
       id: string;
       type: string;
       error?: { statusCode: number; message: string };
+      managed?: boolean;
+      namespaces?: string[];
     }>;
     // Answers tags and data views from separate lists, as the route reads each type on its own.
     const mockBulkGet = (tags: SavedObjectsResponse, dataViews: SavedObjectsResponse | Error) =>
@@ -348,16 +350,62 @@ describe('POST /internal/dashboards/_terraform', () => {
       expect(result.body.literal_data_views).toEqual([{ id: 'adhoc-dv', reason: 'not_found' }]);
     });
 
-    it('returns a body for adopting that keeps every data view a literal ID and still links the tags', async () => {
+    it('keeps managed, unreadable and ad hoc data views as literal IDs beside a saved one, and names them', async () => {
       await convertForReal();
-      mockBulkGet([tag], [savedDataView('logs-dv', { title: 'logs-*' })]);
+      mockBulkGet(
+        [tag],
+        [
+          savedDataView('web-dv', { title: 'web-*', name: 'Web' }),
+          // Fleet installs its `logs-*` data view, with that ID, as a managed saved object.
+          { ...savedDataView('logs-*', { title: 'logs-*', name: 'logs-*' }), managed: true },
+          { id: 'hidden-dv', type: 'index-pattern', error: { statusCode: 403, message: '' } },
+          { id: 'adhoc-dv', type: 'index-pattern', error: { statusCode: 404, message: '' } },
+        ]
+      );
+
+      const result = await post({
+        dashboard: {
+          ...dashboard,
+          filters: [],
+          pinned_panels: ['web-dv', 'logs-*', 'hidden-dv', 'adhoc-dv'].map(control),
+        },
+      });
+
+      expect(result.status).toBe(200);
+      expect(controlDataViews(result.body.body)).toEqual([
+        '${elasticstack_kibana_data_view.web.data_view.id}',
+        'logs-*',
+        'hidden-dv',
+        'adhoc-dv',
+      ]);
+      expect(result.body.resources.map(({ id }: { id: string }) => id)).toEqual([
+        'tag-1',
+        'web-dv',
+      ]);
+      expect(result.body.literal_data_views).toEqual([
+        { id: 'logs-*', reason: 'managed', name: 'logs-*' },
+        { id: 'hidden-dv', reason: 'unreadable' },
+        { id: 'adhoc-dv', reason: 'not_found' },
+      ]);
+    });
+
+    it('returns the spaces each exported data view is currently shared to', async () => {
+      await convertForReal();
+      mockBulkGet(
+        [tag],
+        [
+          { ...savedDataView('logs-dv', { title: 'logs-*' }), namespaces: ['default', 'ops'] },
+          { ...savedDataView('metrics-dv', { title: 'metrics-*' }), namespaces: ['*'] },
+          { id: 'adhoc-dv', type: 'index-pattern', error: { statusCode: 404, message: '' } },
+        ]
+      );
 
       const result = await post({ dashboard });
 
-      const { adopt_body: adoptBody } = result.body;
-      expect(adoptBody.tags).toEqual(['${elasticstack_kibana_tag.production.tag_id}']);
-      expect(JSON.parse(adoptBody.filters[0].filter_json).data_view_id).toBe('logs-dv');
-      expect(controlDataViews(adoptBody)).toEqual(['logs-dv', 'metrics-dv', 'adhoc-dv']);
+      expect(result.body.data_views).toEqual([
+        expect.objectContaining({ id: 'logs-dv', namespaces: ['default', 'ops'] }),
+        expect.objectContaining({ id: 'metrics-dv', namespaces: ['*'] }),
+      ]);
     });
 
     it('keeps a data view literal everywhere when one of its uses cannot be linked, and says why', async () => {
@@ -424,6 +472,7 @@ describe('POST /internal/dashboards/_terraform', () => {
           id: 'logs-dv',
           index_pattern: 'logs-${env}-*',
           dropped_fields: ['allowHidden', 'fieldFormats.bytes.params.unsupported'],
+          namespaces: [],
         },
       ]);
     });

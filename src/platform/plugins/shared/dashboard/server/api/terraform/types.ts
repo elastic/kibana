@@ -27,17 +27,22 @@ export type LiteralTag =
 
 /**
  * A data view the dashboard keeps as its literal ID: it is not a saved data view in the space (missing or ad hoc),
- * the user cannot read it, or it is also used where the export cannot point at a resource.
+ * the user cannot read it, Kibana manages it, or it is also used where the export cannot point at a resource.
  */
 export type LiteralDataView =
   | { id: string; reason: 'not_found' | 'unreadable' }
-  | { id: string; reason: 'unlinkable'; name: string };
+  | { id: string; reason: 'managed' | 'unlinkable'; name: string };
 
-/** A data view a resource is written for: its index pattern, and the saved settings its resource cannot hold. */
+/**
+ * A data view a resource is written for: its index pattern, the saved settings its resource cannot hold, and the
+ * spaces it is shared to.
+ */
 export interface ExportedDataView {
   id: string;
   index_pattern: string;
   dropped_fields: string[];
+  /** The spaces the data view is currently shared to (`*` for every space), which adopting must keep. */
+  namespaces: string[];
 }
 
 /** The response body of the route converting a dashboard to Terraform. */
@@ -48,11 +53,9 @@ export interface DashboardTerraformResponseBody {
   resource_name: string;
   /** The resource body, in Terraform JSON syntax: user text escaped, references to `resources` not. */
   body: JsonObject;
-  /** `body` for adopting, with every data view a literal ID, until adopting writes data view resources. */
-  adopt_body: JsonObject;
   /**
    * Resources written for the objects the dashboard refers to (its readable, unmanaged tags, and its saved data
-   * views); they pin no ID.
+   * views); they pin no ID, which adopting adds in the browser.
    */
   resources: LinkedResource[];
   /** The tag resource type, and the oldest Kibana Terraform can apply it to. */
@@ -61,7 +64,7 @@ export interface DashboardTerraformResponseBody {
   literal_tags: LiteralTag[];
   /** The data view resource type. */
   data_view_resource: { type: string };
-  /** Each data view in `resources`: its index pattern (not escaped) and the settings its resource lacks. */
+  /** Each data view in `resources`: its index pattern (not escaped), the settings its resource lacks, its spaces. */
   data_views: ExportedDataView[];
   /** The dashboard's data views that stay literal IDs, with no resource. */
   literal_data_views: LiteralDataView[];

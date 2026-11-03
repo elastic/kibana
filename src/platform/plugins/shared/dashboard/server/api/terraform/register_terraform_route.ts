@@ -137,8 +137,9 @@ interface ReadDataViews {
 }
 
 // Reads with the user's client, in the dashboard's space, and leaves parsing the saved object to the data views
-// service. An ID that is not a saved data view there (missing or ad hoc) or that the user cannot read stays literal,
-// and so does one also used where no reference reaches.
+// service. An ID that is not a saved data view there (missing or ad hoc), that the user cannot read, or that Kibana
+// manages (Fleet and Security recreate theirs with the same ID) stays literal, and so does one also used where no
+// reference reaches.
 const readDataViews = async (
   client: SavedObjectsClientContract,
   ids: string[],
@@ -160,8 +161,12 @@ const readDataViews = async (
         result.literalDataViews.push({ id: dataView.id, reason });
         continue;
       }
-      const { id, attributes } = dataView;
+      const { id, attributes, managed, namespaces = [] } = dataView;
       const name = attributes.name || attributes.title;
+      if (managed) {
+        result.literalDataViews.push({ id, reason: 'managed', name });
+        continue;
+      }
       if (unlinkableIds.has(id)) {
         result.literalDataViews.push({ id, reason: 'unlinkable', name });
         continue;
@@ -176,6 +181,7 @@ const readDataViews = async (
         id,
         index_pattern: attributes.title,
         dropped_fields: droppedFields,
+        namespaces,
       });
     }
     return result;
@@ -268,12 +274,10 @@ export function registerTerraformRoute(
               ),
             ]);
           const { body, resources } = linkReferences(conversion, [...tags, ...dataViews]);
-          const { body: adoptBody } = linkReferences(conversion, tags);
           const responseBody: DashboardTerraformResponseBody = {
             resource_type: DASHBOARD_RESOURCE_TYPE,
             resource_name: toResourceName(req.body.dashboard.title ?? '', 'dashboard'),
             body,
-            adopt_body: adoptBody,
             resources,
             tag_resource: {
               type: TAG_RESOURCE.type,

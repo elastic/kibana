@@ -8,7 +8,7 @@
  */
 
 import JSZip from 'jszip';
-import type { JsonObject, LinkedResource } from '@kbn/as-code-dashboard-terraform';
+import type { JsonObject, JsonValue, LinkedResource } from '@kbn/as-code-dashboard-terraform';
 import type { DashboardTerraformResponseBody } from '../../../../../server';
 
 export interface ModuleFile {
@@ -35,6 +35,9 @@ export const toZipFilename = (title: string): string =>
       .slice(0, 180) || 'dashboard'
   }.zip`;
 
+const isJsonObject = (value: JsonValue | undefined): value is JsonObject =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
 const json = (value: object) => `${JSON.stringify(value, null, 2)}\n`;
 
 // Saved object IDs may be any string, and strings in Terraform JSON syntax are templates, so `${` and `%{`
@@ -49,29 +52,45 @@ export const exportedTags = ({
 }: DashboardTerraformResponseBody): LinkedResource[] =>
   resources.filter(({ type }) => type === tagResource.type);
 
-/**
- * The data view resources the module writes: the dashboard's saved data views, in a new copy only. Adopting keeps
- * them literal IDs until it can pin and import them.
- */
-export const exportedDataViews = (
-  { resources, data_view_resource: dataViewResource }: DashboardTerraformResponseBody,
-  mode: ExportMode
-): LinkedResource[] =>
-  mode.kind === 'copy' ? resources.filter(({ type }) => type === dataViewResource.type) : [];
+/** The data view resources the module writes: the dashboard's saved data views that are readable and not managed. */
+export const exportedDataViews = ({
+  resources,
+  data_view_resource: dataViewResource,
+}: DashboardTerraformResponseBody): LinkedResource[] =>
+  resources.filter(({ type }) => type === dataViewResource.type);
 
 // Adopting pins each tag's ID and space, as it does the dashboard's; a new copy pins nothing.
 const tagResourceBody = ({ id, body }: LinkedResource, mode: ExportMode): JsonObject =>
   mode.kind === 'adopt' ? { space_id: mode.spaceId, tag_id: escapeTemplate(id), ...body } : body;
 
-const firstPlan = (mode: ExportMode, tagCount: number, dataViewCount: number) =>
+// Adopting pins each data view's ID and space, and writes the spaces it is shared to: without them, the first apply
+// would remove a shared data view from every other space.
+const dataViewResourceBody = (
+  { id, body }: LinkedResource,
+  { data_views: details }: DashboardTerraformResponseBody,
+  mode: ExportMode
+): JsonObject => {
+  if (mode.kind === 'copy') return body;
+  const namespaces = details.find((dataView) => dataView.id === id)?.namespaces ?? [];
+  const dataView = isJsonObject(body.data_view) ? body.data_view : {};
+  return {
+    space_id: mode.spaceId,
+    ...body,
+    data_view: {
+      id: escapeTemplate(id),
+      ...(namespaces.length && { namespaces }),
+      ...dataView,
+    },
+  };
+};
+
+const firstPlan = (mode: ExportMode, resourceCount: number) =>
   mode.kind === 'adopt'
-    ? `This module adopts the existing dashboard \`${mode.dashboardId}\` in space \`${
-        mode.spaceId
-      }\`:
+    ? `This module adopts the existing dashboard \`${mode.dashboardId}\` in space \`${mode.spaceId}\`:
 Terraform manages it in place from now on. \`${IMPORTS_FILE}\` imports it, so the first plan should
 show
 
-    Plan: ${1 + tagCount} to import, 0 to add, 0 to change, 0 to destroy.
+    Plan: ${resourceCount} to import, 0 to add, 0 to change, 0 to destroy.
 
 A change in that plan means the export differs from the saved dashboard, for example because it
 includes unsaved changes; review it before you apply. You can delete \`${IMPORTS_FILE}\` after the
@@ -79,11 +98,18 @@ first apply.`
     : `This module creates a new copy of the dashboard; the original is not changed. The first plan
 should show
 
-    Plan: ${1 + tagCount + dataViewCount} to add, 0 to change, 0 to destroy.`;
+    Plan: ${resourceCount} to add, 0 to change, 0 to destroy.`;
 
-const dataViewsSection = (count: number, resourceType: string): string =>
-  count
-    ? `
+const dataViewsSection = (mode: ExportMode, count: number, resourceType: string): string => {
+  if (!count) return '';
+  if (mode.kind === 'adopt') {
+    return `
+\`${DATA_VIEWS_FILE}\` adopts the dashboard's data views (${count}) the same way, and \`${IMPORTS_FILE}\`
+imports each; the dashboard refers to them. Each data view keeps the spaces it is shared to now
+(\`namespaces\`); a space you remove from that list loses the data view at the next apply.
+`;
+  }
+  return `
 \`${DATA_VIEWS_FILE}\` creates the dashboard's data views (${count}) as new data views, and every place the
 dashboard uses one refers to it. The data views are created in the dashboard's space; if you set a
 \`space_id\` on the dashboard, set the same on each data view. Each data view's index pattern must match
@@ -94,8 +120,8 @@ the same Kibana creates a second one.
 To reuse data views that already exist in the target, delete \`${DATA_VIEWS_FILE}\` and replace each
 \`\${${resourceType}.<name>.data_view.id}\` reference in \`${MAIN_FILE}\` with the ID of an
 existing data view.
-`
-    : '';
+`;
+};
 
 const tagsSection = (mode: ExportMode, count: number, minKibanaVersion: string): string => {
   if (!count) return '';
@@ -125,8 +151,9 @@ const readme = (
   dataViewResourceType: string
 ) => `# Dashboard exported from Kibana
 
-${firstPlan(mode, tagCount, dataViewCount)}
+${firstPlan(mode, 1 + tagCount + dataViewCount)}
 ${tagsSection(mode, tagCount, minKibanaVersion)}${dataViewsSection(
+  mode,
   dataViewCount,
   dataViewResourceType
 )}
@@ -150,15 +177,15 @@ export const buildModuleFiles = (
   mode: ExportMode
 ): ModuleFile[] => {
   const {
+    body,
     provider,
     resource_type: resourceType,
     resource_name: resourceName,
     tag_resource: tagResource,
     data_view_resource: dataViewResource,
   } = conversion;
-  const body = mode.kind === 'adopt' ? conversion.adopt_body : conversion.body;
   const tags = exportedTags(conversion);
-  const dataViews = exportedDataViews(conversion, mode);
+  const dataViews = exportedDataViews(conversion);
   return [
     {
       name: 'versions.tf.json',
@@ -213,7 +240,10 @@ export const buildModuleFiles = (
             content: json({
               resource: {
                 [dataViewResource.type]: Object.fromEntries(
-                  dataViews.map(({ name, body: dataViewBody }) => [name, dataViewBody])
+                  dataViews.map((dataView) => [
+                    dataView.name,
+                    dataViewResourceBody(dataView, conversion, mode),
+                  ])
                 ),
               },
             }),
@@ -231,8 +261,8 @@ export const buildModuleFiles = (
                   to: `${resourceType}.${resourceName}`,
                   id: escapeTemplate(`${mode.spaceId}/${mode.dashboardId}`),
                 },
-                ...tags.map(({ name, id }) => ({
-                  to: `${tagResource.type}.${name}`,
+                ...[...tags, ...dataViews].map(({ type, name, id }) => ({
+                  to: `${type}.${name}`,
                   id: escapeTemplate(`${mode.spaceId}/${id}`),
                 })),
               ],

@@ -118,6 +118,12 @@ const literalDataViewDescription = (dataView: LiteralDataView): string => {
           'Data view {id} stays a literal ID: it is not found as a saved data view in this space.',
         values: { id },
       });
+    case 'managed':
+      return i18n.translate('dashboard.exportTerraform.problems.managedDataViewDescription', {
+        defaultMessage:
+          'Data view “{name}” stays the literal ID {id}: Kibana manages it and creates it with the same ID where it is needed.',
+        values: { name: dataView.name, id },
+      });
     case 'unreadable':
       return i18n.translate('dashboard.exportTerraform.problems.unreadableDataViewDescription', {
         defaultMessage: 'Data view {id} stays a literal ID: you cannot read it.',
@@ -147,15 +153,14 @@ export const listProblems = ({
     dropped_fields: droppedFields,
     tag_resource: tagResource,
     literal_tags: literalTags,
+    literal_data_views: literalDataViews,
     related_items: allRelatedItems,
   } = conversion;
   const { warnings = [] } = sanitized;
   const tags = exportedTags(conversion);
-  const dataViews = exportedDataViews(conversion, mode);
-  // Adopting keeps data views literal IDs, counted with the other objects the module only refers to.
-  const literalDataViews = mode.kind === 'copy' ? conversion.literal_data_views : [];
-  // The data views a new copy creates, with the index pattern and dropped settings of each.
-  const createdDataViews = dataViews.flatMap(({ id, label }) => {
+  const dataViews = exportedDataViews(conversion);
+  // The data views the module writes, with the index pattern and dropped settings of each.
+  const writtenDataViews = dataViews.flatMap(({ id, label }) => {
     const details = conversion.data_views.find((dataView) => dataView.id === id);
     return details ? [{ ...details, label }] : [];
   });
@@ -277,15 +282,17 @@ export const listProblems = ({
           },
         ]
       : []),
-    ...createdDataViews.map(({ id, label, index_pattern: indexPattern }) => ({
-      key: `created-data-view:${id}`,
-      severity: 'info' as const,
-      content: i18n.translate('dashboard.exportTerraform.problems.createdDataViewDescription', {
-        defaultMessage:
-          'A new copy creates data view “{name}” for the index pattern {indexPattern}. It must match indices where Terraform applies it, or the panels using it are empty.',
-        values: { name: label, indexPattern },
-      }),
-    })),
+    ...(mode.kind === 'copy' ? writtenDataViews : []).map(
+      ({ id, label, index_pattern: indexPattern }) => ({
+        key: `created-data-view:${id}`,
+        severity: 'info' as const,
+        content: i18n.translate('dashboard.exportTerraform.problems.createdDataViewDescription', {
+          defaultMessage:
+            'A new copy creates data view “{name}” for the index pattern {indexPattern}. It must match indices where Terraform applies it, or the panels using it are empty.',
+          values: { name: label, indexPattern },
+        }),
+      })
+    ),
     ...(tags.length
       ? [
           {
@@ -302,7 +309,7 @@ export const listProblems = ({
           },
         ]
       : []),
-    ...createdDataViews
+    ...writtenDataViews
       .filter(({ dropped_fields: dropped }) => dropped.length)
       .map(({ id, label, dropped_fields: dropped }) => ({
         key: `data-view-dropped:${id}`,

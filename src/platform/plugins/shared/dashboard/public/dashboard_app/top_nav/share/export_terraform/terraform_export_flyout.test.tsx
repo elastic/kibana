@@ -37,7 +37,6 @@ const conversion: DashboardTerraformResponseBody = {
   resource_type: 'elasticstack_kibana_dashboard',
   resource_name: 'web_logs',
   body,
-  adopt_body: body,
   resources: [],
   tag_resource: { type: 'elasticstack_kibana_tag', min_kibana_version: '9.5.0' },
   literal_tags: [],
@@ -450,7 +449,6 @@ describe('TerraformExportFlyout', () => {
     const tagged: DashboardTerraformResponseBody = {
       ...conversion,
       body: taggedBody,
-      adopt_body: taggedBody,
       literal_tags: [
         { id: 'managed-tag', reason: 'managed', name: 'Security' },
         { id: 'unreadable-tag', reason: 'unreadable' },
@@ -610,7 +608,6 @@ describe('TerraformExportFlyout', () => {
     const withDataViews: DashboardTerraformResponseBody = {
       ...conversion,
       body: { ...conversion.body, filters: [{ filter_json: filterJson(linked) }] },
-      adopt_body: { ...conversion.body, filters: [{ filter_json: filterJson('logs-dv') }] },
       resources: [
         {
           type: dataViewType,
@@ -620,8 +617,16 @@ describe('TerraformExportFlyout', () => {
           body: { data_view: { title: 'logs-*', name: 'Web logs' } },
         },
       ],
-      data_views: [{ id: 'logs-dv', index_pattern: 'logs-*', dropped_fields: [] }],
+      data_views: [
+        {
+          id: 'logs-dv',
+          index_pattern: 'logs-*',
+          dropped_fields: [],
+          namespaces: ['marketing', 'ops'],
+        },
+      ],
       literal_data_views: [
+        { id: 'fleet-logs-dv', reason: 'managed', name: 'logs-*' },
         { id: 'adhoc-dv', reason: 'not_found' },
         { id: 'hidden-dv', reason: 'unreadable' },
         { id: 'metrics-dv', reason: 'unlinkable', name: 'Metrics' },
@@ -631,6 +636,7 @@ describe('TerraformExportFlyout', () => {
       ...withDataViews,
       related_items: [
         { type: 'index-pattern', type_label: 'Data view', id: 'logs-dv' },
+        { type: 'index-pattern', type_label: 'Data view', id: 'fleet-logs-dv' },
         { type: 'index-pattern', type_label: 'Data view', id: 'hidden-dv' },
         { type: 'index-pattern', type_label: 'Data view', id: 'metrics-dv' },
         { type: 'lens', type_label: 'Visualization', id: 'v1' },
@@ -667,26 +673,72 @@ describe('TerraformExportFlyout', () => {
       expect(entries).toEqual(await shownFiles('web_logs'));
     });
 
-    it('leaves adopting as it was: data views stay literal IDs, with no data views file or import', async () => {
+    it('adopts the data views of a saved dashboard: pins their IDs and space, keeps the spaces they are shared to, and imports each', async () => {
       mockGetActiveSpace.mockResolvedValue({ id: 'marketing' });
-      respondWith(async () => withDataViews);
+      respondWith(async () => ({
+        ...withDataViews,
+        resources: [
+          ...withDataViews.resources,
+          {
+            type: dataViewType,
+            name: 'metrics',
+            id: 'metrics-${1}',
+            label: 'metrics-*',
+            body: { data_view: { title: 'metrics-*' } },
+          },
+        ],
+        data_views: [
+          ...withDataViews.data_views,
+          { id: 'metrics-${1}', index_pattern: 'metrics-*', dropped_fields: [], namespaces: ['*'] },
+        ],
+      }));
       renderFlyout('Web logs', { dashboardId: 'abc-123' });
 
       await screen.findByRole('list', { name: 'Module files' });
       expect(fileNames()).toEqual([
         'versions.tf.json',
         'main.tf.json',
+        'data_views.tf.json',
         'imports.tf.json',
         'README.md',
       ]);
+      expect(JSON.parse(await showFile('data_views.tf.json'))).toEqual({
+        resource: {
+          elasticstack_kibana_data_view: {
+            web_logs: {
+              space_id: 'marketing',
+              data_view: {
+                id: 'logs-dv',
+                namespaces: ['marketing', 'ops'],
+                title: 'logs-*',
+                name: 'Web logs',
+              },
+            },
+            metrics: {
+              space_id: 'marketing',
+              data_view: { id: 'metrics-$${1}', namespaces: ['*'], title: 'metrics-*' },
+            },
+          },
+        },
+      });
       const main = JSON.parse(await showFile('main.tf.json'));
       expect(main.resource.elasticstack_kibana_dashboard.web_logs.filters).toEqual([
-        { filter_json: filterJson('logs-dv') },
+        { filter_json: filterJson(linked) },
       ]);
       expect(JSON.parse(await showFile('imports.tf.json'))).toEqual({
-        import: [{ to: 'elasticstack_kibana_dashboard.web_logs', id: 'marketing/abc-123' }],
+        import: [
+          { to: 'elasticstack_kibana_dashboard.web_logs', id: 'marketing/abc-123' },
+          { to: 'elasticstack_kibana_data_view.web_logs', id: 'marketing/logs-dv' },
+          { to: 'elasticstack_kibana_data_view.metrics', id: 'marketing/metrics-$${1}' },
+        ],
       });
-      expect(await showFile('README.md')).toContain('1 to import, 0 to add');
+      const readme = await showFile('README.md');
+      expect(readme).toContain('3 to import, 0 to add, 0 to change, 0 to destroy');
+      expect(readme).toContain("`data_views.tf.json` adopts the dashboard's data views (2)");
+      expect(readme).not.toContain('Each copy creates new data views');
+
+      const { entries } = await downloadZip();
+      expect(entries).toEqual(await shownFiles('web_logs'));
     });
 
     it('names the data views a new copy keeps as literal IDs, and counts only the rest as not exported', async () => {
@@ -694,6 +746,7 @@ describe('TerraformExportFlyout', () => {
       renderFlyout();
 
       expect(await problemDetails()).toEqual([
+        'Data view “logs-*” stays the literal ID fleet-logs-dv: Kibana manages it and creates it with the same ID where it is needed.',
         'Data view adhoc-dv stays a literal ID: it is not found as a saved data view in this space.',
         'Data view hidden-dv stays a literal ID: you cannot read it.',
         'Data view “Metrics” stays the literal ID metrics-dv: the export cannot point every use of it at a data view resource.',
@@ -703,12 +756,16 @@ describe('TerraformExportFlyout', () => {
       ]);
     });
 
-    it('counts the data views of an adopted dashboard as objects it refers to, as before', async () => {
+    it('names the data views an adopted dashboard keeps as literal IDs, without the notes about copies', async () => {
       respondWith(async () => withRelatedItems);
       renderFlyout('Web logs', { dashboardId: 'abc-123' });
 
       expect(await problemDetails()).toEqual([
-        'The dashboard refers to 4 objects that are not exported. They must exist where Terraform runs.Data view: 3Visualization: 1',
+        'Data view “logs-*” stays the literal ID fleet-logs-dv: Kibana manages it and creates it with the same ID where it is needed.',
+        'Data view adhoc-dv stays a literal ID: it is not found as a saved data view in this space.',
+        'Data view hidden-dv stays a literal ID: you cannot read it.',
+        'Data view “Metrics” stays the literal ID metrics-dv: the export cannot point every use of it at a data view resource.',
+        'The dashboard refers to 1 object that is not exported. They must exist where Terraform runs.Visualization: 1',
       ]);
     });
 
@@ -730,8 +787,14 @@ describe('TerraformExportFlyout', () => {
             id: 'logs-dv',
             index_pattern: 'logs-*',
             dropped_fields: ['allowHidden', 'fieldFormats.took.params.showSuffix'],
+            namespaces: ['default'],
           },
-          { id: 'env-dv', index_pattern: 'metrics-${env}-*', dropped_fields: [] },
+          {
+            id: 'env-dv',
+            index_pattern: 'metrics-${env}-*',
+            dropped_fields: [],
+            namespaces: ['default'],
+          },
         ],
         literal_data_views: [],
       }));
@@ -746,16 +809,24 @@ describe('TerraformExportFlyout', () => {
       ]);
     });
 
-    it('says nothing about the index patterns or dropped settings of data views an adopted dashboard keeps literal', async () => {
+    it('lists the settings each adopted data view drops, without its index pattern', async () => {
       respondWith(async () => ({
         ...withDataViews,
-        data_views: [{ id: 'logs-dv', index_pattern: 'logs-*', dropped_fields: ['allowHidden'] }],
+        data_views: [
+          {
+            id: 'logs-dv',
+            index_pattern: 'logs-*',
+            dropped_fields: ['allowHidden'],
+            namespaces: ['default'],
+          },
+        ],
         literal_data_views: [],
       }));
       renderFlyout('Web logs', { dashboardId: 'abc-123' });
 
-      await screen.findByRole('list', { name: 'Module files' });
-      expect(screen.queryByText('Review this export')).not.toBeInTheDocument();
+      expect(await problemDetails()).toEqual([
+        'Data view “Web logs” is exported without settings the resource cannot hold. Dropped:allowHidden',
+      ]);
     });
 
     it('counts more than 100 objects the dashboard refers to with a total that agrees with the counts by kind', async () => {
