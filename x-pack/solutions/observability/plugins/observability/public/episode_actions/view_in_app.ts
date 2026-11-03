@@ -8,7 +8,8 @@
 import { castArray } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
-import { getAlertViewInAppUrl, type AlertFormatter } from '@kbn/alerts-ui-shared';
+import { getAlertViewInAppUrl } from '@kbn/alerts-ui-shared/src/common/utils/get_alert_view_in_app_url';
+import type { AlertFormatter } from '@kbn/alerts-ui-shared/src/common/types/alert_formatter_types';
 import { ALERT_GROUP, ALERT_GROUP_FIELD, ALERT_GROUP_VALUE } from '@kbn/rule-data-utils';
 import type { EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
