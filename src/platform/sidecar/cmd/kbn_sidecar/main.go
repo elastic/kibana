@@ -167,6 +167,7 @@ func newProxyHandler(proxy *httputil.ReverseProxy, config *BootstrapConfig) http
 	statusHandler := NewStatusHandler(nodeClient, proxy)
 
 	var esqlHandler *ESQLAsyncHandler
+	var eseHandler *ESEHandler
 	if config.Elasticsearch != nil {
 		esCfg := config.Elasticsearch
 		globalHeaders := http.Header{}
@@ -186,7 +187,8 @@ func newProxyHandler(proxy *httputil.ReverseProxy, config *BootstrapConfig) http
 			log.Fatalf("failed to create ES client: %v", err)
 		}
 		esqlHandler = NewESQLAsyncHandler(nodeClient, esClient, esCfg.RequestHeadersWhitelist, proxy)
-		log.Printf("ESQL handler enabled (ES hosts: %v)", esCfg.Hosts)
+		eseHandler = NewESEHandler(nodeClient, esClient, esCfg.RequestHeadersWhitelist, proxy)
+		log.Printf("Search handlers enabled (ES hosts: %v)", esCfg.Hosts)
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -205,6 +207,15 @@ func newProxyHandler(proxy *httputil.ReverseProxy, config *BootstrapConfig) http
 			id := strings.TrimPrefix(r.URL.Path, "/internal/search/esql_async/")
 			log.Printf("[route] %s %s → Go (esql_async delete)", r.Method, r.URL.Path)
 			esqlHandler.HandleDelete(w, r, id)
+		case eseHandler != nil && r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/internal/search/ese"):
+			id := strings.TrimPrefix(r.URL.Path, "/internal/search/ese")
+			id = strings.TrimPrefix(id, "/")
+			log.Printf("[route] %s %s → Go (ese)", r.Method, r.URL.Path)
+			eseHandler.HandleSearch(w, r, id)
+		case eseHandler != nil && r.Method == http.MethodDelete && strings.HasPrefix(r.URL.Path, "/internal/search/ese/"):
+			id := strings.TrimPrefix(r.URL.Path, "/internal/search/ese/")
+			log.Printf("[route] %s %s → Go (ese delete)", r.Method, r.URL.Path)
+			eseHandler.HandleDelete(w, r, id)
 		default:
 			log.Printf("[route] %s %s → Node", r.Method, r.URL.Path)
 			proxy.ServeHTTP(w, r)

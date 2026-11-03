@@ -299,20 +299,33 @@ func writeAsyncResponse(w http.ResponseWriter, esResp *http.Response, method, pa
 
 
 func relayESError(w http.ResponseWriter, esResp *http.Response, method, path string) {
-	var esError json.RawMessage
-	_ = json.NewDecoder(esResp.Body).Decode(&esError)
+	var esBody map[string]json.RawMessage
+	_ = json.NewDecoder(esResp.Body).Decode(&esBody)
 
 	attrs := map[string]interface{}{
 		"requestParams": requestParams{Method: method, Path: path},
 	}
-	if esError != nil {
-		attrs["error"] = esError
+	if errField, ok := esBody["error"]; ok {
+		attrs["error"] = errField
+	}
+	if respField, ok := esBody["response"]; ok {
+		attrs["rawResponse"] = respField
+	}
+
+	message := fmt.Sprintf("ES returned %d", esResp.StatusCode)
+	if reason, ok := esBody["error"]; ok {
+		var errObj struct {
+			Reason string `json:"reason"`
+		}
+		if json.Unmarshal(reason, &errObj) == nil && errObj.Reason != "" {
+			message = errObj.Reason
+		}
 	}
 
 	writeJSON(w, esResp.StatusCode, kibanaErrorResponse{
 		StatusCode: esResp.StatusCode,
 		Error:      http.StatusText(esResp.StatusCode),
-		Message:    fmt.Sprintf("ES returned %d", esResp.StatusCode),
+		Message:    message,
 		Attributes: attrs,
 	})
 }
