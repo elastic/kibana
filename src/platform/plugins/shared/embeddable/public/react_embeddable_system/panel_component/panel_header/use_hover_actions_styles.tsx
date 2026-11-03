@@ -7,10 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme, highContrastModeStyles, euiShadow } from '@elastic/eui';
+import { useEuiTheme, highContrastModeStyles, euiShadow, euiCanAnimate } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { useMemo } from 'react';
+
+// POC: same duration math as euiPopoverPanelStyles (slow + 100ms on the transform).
+const addMilliseconds = (duration: string | number | undefined, extraMs: number): string => {
+  if (typeof duration === 'number') return `${duration + extraMs}ms`;
+  const match = duration ? /^([\d.]+)(ms|s)$/.exec(duration.trim()) : null;
+  if (!match) return `${extraMs}ms`;
+  const value = Number(match[1]);
+  return match[2] === 'ms' ? `${value + extraMs}ms` : `${value + extraMs / 1000}s`;
+};
 
 export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) => {
   const euiThemeContext = useEuiTheme();
@@ -88,6 +97,9 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
   const containerStyles = useMemo(() => {
     const editModeOutline = `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseProminent}`;
     const viewModeOutline = `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`;
+    // POC: one speed token faster than EuiPopover (`slow`), transform still 100ms longer.
+    const popoverSpeed = euiTheme.animation.normal;
+    const popoverTransformSpeed = addMilliseconds(popoverSpeed, 100);
 
     return css`
       // the border style can be overwritten by parents who define --hoverActionsBorderStyle; otherwise, default to either
@@ -153,12 +165,16 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
         z-index: -1;
         opacity: 0;
         visibility: hidden;
+        /* POC: half the EuiPopover offset (size.s is 8px). */
+        transform: translateY(${euiTheme.size.xs});
 
-        // delay hiding hover actions to make grabbing the drag handle easier
-        transition: opacity ${euiTheme.animation.extraFast} ease-in,
-          z-index ${euiTheme.animation.extraFast} linear,
-          visibility ${euiTheme.animation.extraFast} linear;
-        transition-delay: ${euiTheme.animation.fast};
+        /* POC: EuiPopover panel — opacity and transform, bounce, both directions.
+           Transform runs 100ms longer than opacity. Visibility waits out the exit. */
+        ${euiCanAnimate} {
+          transition: opacity ${euiTheme.animation.bounce} ${popoverSpeed},
+            transform ${euiTheme.animation.bounce} ${popoverTransformSpeed},
+            visibility 0s linear ${popoverTransformSpeed}, z-index 0s linear ${popoverTransformSpeed};
+        }
       }
 
       &:hover .embPanel__hoverActions,
@@ -169,7 +185,12 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
         z-index: ${euiTheme.levels.menu};
         opacity: 1;
         visibility: visible;
-        transition: none; // apply transition delay on hover out only
+        transform: translateY(0);
+        ${euiCanAnimate} {
+          transition: opacity ${euiTheme.animation.bounce} ${popoverSpeed},
+            transform ${euiTheme.animation.bounce} ${popoverTransformSpeed}, visibility 0s linear 0s,
+            z-index 0s linear 0s;
+        }
         // when the panel is in fullscreen mode, increase the z-index of the hover actions to be above the sticky nav
         .kbnGridPanel--expanded & {
           z-index: ${euiTheme.levels.toast};
