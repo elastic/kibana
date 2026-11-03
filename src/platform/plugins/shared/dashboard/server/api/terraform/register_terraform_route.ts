@@ -10,7 +10,8 @@
 import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
-import type { DashboardConverter, JsonObject } from '@kbn/as-code-dashboard-terraform';
+import type { DashboardConverter, JsonObject, JsonValue } from '@kbn/as-code-dashboard-terraform';
+import { MAX_TITLE_LENGTH } from '@kbn/as-code-shared-schemas';
 import { logRequest } from '@kbn/as-code-utils';
 import {
   DASHBOARD_INTERNAL_API_PATH,
@@ -32,6 +33,24 @@ const getConverter = (): Promise<DashboardConverter> => {
   return converter;
 };
 
+/** The largest request body the route accepts, with headroom for the defaults sanitizing adds. */
+export const MAX_TERRAFORM_REQUEST_BYTES = 2 * 1024 * 1024;
+
+// Panel types point at the mapping that failed without logging the dashboard's own text.
+const panelTypes = (list: JsonValue | undefined): string[] =>
+  Array.isArray(list)
+    ? list.flatMap((panel) => {
+        if (!panel || typeof panel !== 'object' || Array.isArray(panel)) return ['?'];
+        if (typeof panel.type === 'string') return [panel.type];
+        return Array.isArray(panel.panels) ? ['section', ...panelTypes(panel.panels)] : ['?'];
+      })
+    : [];
+
+const describeDashboard = ({ panels, pinned_panels: pinnedPanels }: JsonObject): string =>
+  `panels [${panelTypes(panels).join(', ')}], pinned panels [${panelTypes(pinnedPanels).join(
+    ', '
+  )}]`;
+
 /** Registers the internal, flag-gated route behind Export → Terraform. */
 export function registerTerraformRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -48,13 +67,20 @@ export function registerTerraformRoute(
         },
       },
       access: 'internal',
+      options: { body: { maxBytes: MAX_TERRAFORM_REQUEST_BYTES } },
     })
     .addVersion(
       {
         version: '1',
         validate: {
           request: {
-            body: schema.object({ dashboard: schema.object({}, { unknowns: 'allow' }) }),
+            body: schema.object({
+              dashboard: schema.object(
+                // The title names the Terraform resource.
+                { title: schema.maybe(schema.string({ maxLength: MAX_TITLE_LENGTH })) },
+                { unknowns: 'allow' }
+              ),
+            }),
           },
         },
       },
@@ -65,11 +91,11 @@ export function registerTerraformRoute(
         }
         const { DashboardConversionError, DASHBOARD_RESOURCE_TYPE, TERRAFORM_PROVIDER } =
           await import('@kbn/as-code-dashboard-terraform');
+        const dashboard = req.body.dashboard as JsonObject;
         try {
           const convert = await getConverter();
-          const { body, droppedFields, skippedPanels, partialPanels, jsonPanels } = convert(
-            req.body.dashboard as JsonObject
-          );
+          const { body, droppedFields, skippedPanels, partialPanels, jsonPanels } =
+            convert(dashboard);
           const responseBody: DashboardTerraformResponseBody = {
             resource_type: DASHBOARD_RESOURCE_TYPE,
             body,
@@ -87,7 +113,14 @@ export function registerTerraformRoute(
           if (e instanceof DashboardConversionError) {
             return res.badRequest({ body: { message: e.message } });
           }
-          logRequest(logger, req, 'error', e.stack ?? e.message);
+          logRequest(
+            logger,
+            req,
+            'error',
+            `Terraform conversion failed for a dashboard with ${describeDashboard(dashboard)}: ${
+              e.stack ?? e.message
+            }`
+          );
           throw e;
         }
       }
