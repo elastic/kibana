@@ -5,14 +5,18 @@
  * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import {
   analysisUsageOf,
+  countIndexedAttacks,
   generationUsageOf,
   isParkedAtGate,
   isReviewSettled,
   toInsights,
 } from './collect';
+import { attackDiscoveryIndexForSpace } from './constants';
 
 const step = (
   stepId: string,
@@ -214,5 +218,62 @@ describe('toInsights', () => {
     );
     expect(insights[0].title).toBe('Plain');
     expect(insights[0].entitySummaryMarkdown).toBeUndefined();
+  });
+});
+
+describe('countIndexedAttacks', () => {
+  const log = { warning: jest.fn() } as unknown as ToolingLog;
+  const esCounting = (count: jest.Mock): Client => ({ count } as unknown as Client);
+
+  it('counts the space index by the run generation uuids, read separately from the runner', async () => {
+    const count = jest.fn(async () => ({ count: 2 }));
+    await expect(
+      countIndexedAttacks({
+        esClient: esCounting(count),
+        spaceId: 'space-a',
+        executionUuids: 'u1,u2',
+        log,
+      })
+    ).resolves.toBe(2);
+    expect(count).toHaveBeenCalledWith({
+      index: attackDiscoveryIndexForSpace('space-a'),
+      query: { terms: { 'kibana.alert.rule.execution.uuid': ['u1', 'u2'] } },
+    });
+  });
+
+  it('is zero without searching when the runner reported an empty uuid list', async () => {
+    const count = jest.fn();
+    await expect(
+      countIndexedAttacks({
+        esClient: esCounting(count),
+        spaceId: 's',
+        executionUuids: [],
+        log,
+      })
+    ).resolves.toBe(0);
+    expect(count).not.toHaveBeenCalled();
+  });
+
+  it('is undefined when the runner reported no uuid field', async () => {
+    await expect(
+      countIndexedAttacks({
+        esClient: esCounting(jest.fn()),
+        spaceId: 's',
+        executionUuids: undefined,
+        log,
+      })
+    ).resolves.toBeUndefined();
+  });
+
+  it('is undefined when the index cannot be read', async () => {
+    const count = jest.fn().mockRejectedValue(new Error('forbidden'));
+    await expect(
+      countIndexedAttacks({
+        esClient: esCounting(count),
+        spaceId: 's',
+        executionUuids: ['u1'],
+        log,
+      })
+    ).resolves.toBeUndefined();
   });
 });

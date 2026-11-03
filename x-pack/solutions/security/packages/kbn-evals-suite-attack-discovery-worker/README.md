@@ -20,7 +20,7 @@ workflows until they park, and scores what happened.
 | An Investigation was opened                       | code      |
 | FP/TP verdict matches the per-scenario gold       | code      |
 | TP and inconclusive verdicts park at an open analyst gate (escalated, gate step still open, no gate failure) | code |
-| The worker outcome was reported and its persisted count matches the index | code |
+| The worker outcome was reported and its persisted count matches a separate count of the attack discovery index (scoped to the run's generation uuids) | code |
 | Each stage ran on the endpoint the cohort planned (`StageModelResolved`) | code |
 | Discovery and verdict quality                     | LLM judge (reported, never gates) |
 

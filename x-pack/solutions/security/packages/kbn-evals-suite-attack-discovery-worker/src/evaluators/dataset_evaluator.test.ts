@@ -73,6 +73,7 @@ const quietArtifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifac
     discoveriesWithoutConnector: 0,
   },
   persistedAttackIds: [],
+  indexedAttackCount: 0,
   fingerprintMatchFailed: false,
   dispatchedReviewExecutionIds: [],
   reviews: [],
@@ -109,6 +110,7 @@ const attackArtifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifa
       discoveriesWithoutConnector: 0,
     },
     persistedAttackIds: ['attack-1'],
+    indexedAttackCount: 1,
     fingerprintReviewCount: 1,
     dispatchedReviewExecutionIds: ['review-1'],
     reviews: [

@@ -323,6 +323,7 @@ export const createEvaluateDataset =
             });
             return await collectWorkerArtifacts({
               client,
+              esClient,
               run,
               runTimedOutAfterMs: timedOutAfterMs,
               spaceId,

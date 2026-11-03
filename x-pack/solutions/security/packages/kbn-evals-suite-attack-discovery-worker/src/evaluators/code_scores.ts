@@ -288,7 +288,9 @@ const numberField = (
 
 /**
  * Both worker outcome events fired, and their outcome and counts agree with what the run
- * produced (persisted and dispatched attacks).
+ * produced: the runner's reported persisted count is checked against a separate count of the
+ * attack discovery index scoped to the run's generation uuids, not against the runner's own
+ * generation output (which the reported count is derived from).
  */
 export const scoreOutcomeReported: CodeScorer = (_expected, artifacts) => {
   const run = artifacts.outcomes.find(({ stepId }) => stepId === 'report_run_completed');
@@ -310,14 +312,19 @@ export const scoreOutcomeReported: CodeScorer = (_expected, artifacts) => {
     return missing('an outcome event carried no run_outcome');
   }
   const produced = artifacts.persistedAttackIds.length > 0;
-  const persisted = artifacts.persistedAttackIds.length;
   const dispatched = artifacts.dispatchedReviewExecutionIds.length;
   const reportedPersisted = numberField(run.input, 'attacks_persisted');
   if (reportedPersisted === undefined) {
     return missing('the run event carried no attacks_persisted count');
   }
-  if (reportedPersisted !== persisted) {
-    return fail(`run event reported ${reportedPersisted} persisted attacks, ${persisted} found`);
+  const { indexedAttackCount } = artifacts;
+  if (indexedAttackCount === undefined) {
+    return missing('the persisted attack count could not be read from the attack discovery index');
+  }
+  if (reportedPersisted !== indexedAttackCount) {
+    return fail(
+      `run event reported ${reportedPersisted} persisted attacks, ${indexedAttackCount} found in the index`
+    );
   }
   if (dispatched > reportedPersisted) {
     return fail(`${dispatched} reviews dispatched for ${reportedPersisted} persisted attacks`);

@@ -137,6 +137,12 @@ export interface WorkerArtifacts {
   insights: AttackDiscovery[];
   generationUsage: GenerationUsage;
   persistedAttackIds: string[];
+  /**
+   * Documents in the space's attack discovery index carrying this run's generation uuids,
+   * counted by a separate read; undefined when the index could not be read or the runner
+   * reported no generation uuids.
+   */
+  indexedAttackCount?: number;
   /** Attacks `match_fingerprints` handed back for review; undefined when it did not run. */
   fingerprintReviewCount?: number;
   fingerprintAttachCount?: number;

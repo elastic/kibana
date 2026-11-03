@@ -215,13 +215,21 @@ describe('scoreOutcomeReported', () => {
     event('report_worker_run_completed'),
   ];
 
-  it('fails when the reported persisted count disagrees with the persisted attacks', () => {
+  it('fails when the reported persisted count disagrees with the index count', () => {
     const result = scoreOutcomeReported(
       expected,
-      artifacts({ persistedAttackIds: ['x'], outcomes: outcomes(2) })
+      artifacts({ persistedAttackIds: ['x', 'y'], indexedAttackCount: 1, outcomes: outcomes(2) })
     );
     expect(result.score).toBe(0);
-    expect(result.explanation).toContain('reported 2 persisted attacks, 1 found');
+    expect(result.explanation).toContain('reported 2 persisted attacks, 1 found in the index');
+  });
+
+  it('is MISSING, not a pass, when the index count could not be read', () => {
+    const result = scoreOutcomeReported(
+      expected,
+      artifacts({ persistedAttackIds: ['x'], outcomes: outcomes(1) })
+    );
+    expect(result.label).toBe('MISSING');
   });
 
   it('fails when more reviews were dispatched than attacks persisted', () => {
@@ -229,6 +237,7 @@ describe('scoreOutcomeReported', () => {
       expected,
       artifacts({
         persistedAttackIds: ['x'],
+        indexedAttackCount: 1,
         dispatchedReviewExecutionIds: ['r1', 'r2'],
         outcomes: outcomes(1),
       })
@@ -248,6 +257,7 @@ describe('scoreOutcomeReported', () => {
         expected,
         artifacts({
           persistedAttackIds: ['x'],
+          indexedAttackCount: 1,
           dispatchedReviewExecutionIds: ['r1'],
           outcomes: outcomes(1),
         })

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { parseCohort } from '../src/cohort_routing';
+import { COHORT_ENV } from '../src/constants';
 import { evaluate, tags } from '../src/evaluate';
 import { assertWorkflowsInstalled } from '../src/preflight';
 
@@ -22,8 +24,18 @@ evaluate.describe('Attack Discovery Worker: install assert', { tag: tags.statefu
       // `adWorkerPreflight` has already prepared the space and routed the cohort. Assert the
       // workflows again, directly, so this test fails by name if any is missing or disabled.
       await assertWorkflowsInstalled(fetch);
-      if (adWorkerPreflight.routing.generationModel === '') {
+      const { routing } = adWorkerPreflight;
+      if (routing.generationModel === '') {
         throw new Error('Cohort routing resolved no generation model');
+      }
+      if (routing.reviewModel === '') {
+        throw new Error('Cohort routing resolved no review model');
+      }
+      const expectedCohort = parseCohort(process.env[COHORT_ENV]);
+      if (routing.cohort !== expectedCohort) {
+        throw new Error(
+          `Cohort routing planned "${routing.cohort}" but ${COHORT_ENV} asks for "${expectedCohort}"`
+        );
       }
     }
   );

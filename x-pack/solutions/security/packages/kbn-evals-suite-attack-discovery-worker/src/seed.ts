@@ -515,7 +515,7 @@ export const assertCleanSpace = async ({
     }),
     esClient.count({
       index: ATTACK_FINGERPRINT_INDEX,
-      query: { match: { 'attributes.space_id': spaceId } },
+      query: { term: { 'attributes.space_id': spaceId } },
       ignore_unavailable: true,
     }),
   ]);
@@ -555,7 +555,7 @@ export const cleanupSeed = async ({
       run: () =>
         esClient.deleteByQuery({
           index: ATTACK_FINGERPRINT_INDEX,
-          query: { match: { 'attributes.space_id': spaceId } },
+          query: { term: { 'attributes.space_id': spaceId } },
           conflicts: 'proceed',
           refresh: true,
           ignore_unavailable: true,

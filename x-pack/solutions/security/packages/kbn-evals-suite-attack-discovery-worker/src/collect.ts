@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import {
   replaceAnonymizedValuesWithOriginalValues,
@@ -24,8 +25,9 @@ import {
   REVIEW_DISPATCH_STEP_IDS,
   REVIEW_SETTLE_TIMEOUT_MS,
   RUN_GENERATION_STEP_ID,
+  attackDiscoveryIndexForSpace,
 } from './constants';
-import { apiVersion, httpStatus, spacePath } from './kibana_api';
+import { apiVersion, errorMessage, httpStatus, spacePath } from './kibana_api';
 import type { SeededScenario } from './seed';
 import { isTerminal, stepsOf, type AttackDiscoveryWorkerClient } from './worker_client';
 import type {
@@ -415,6 +417,46 @@ const outcomeEvents = (run: WorkflowExecutionDto): WorkerOutcomeEvent[] =>
     })
   );
 
+const EXECUTION_UUID_FIELD = 'kibana.alert.rule.execution.uuid';
+
+/**
+ * Counts the persisted discoveries that carry this run's generation uuids: the same scope the
+ * batched generation reads back, but a separate read from the runner's own output, so a count
+ * the runner reports can be checked against the index. A missing index is an honest zero;
+ * undefined means the count could not be read (or no uuids were reported to scope it).
+ */
+export const countIndexedAttacks = async ({
+  esClient,
+  spaceId,
+  executionUuids,
+  log,
+}: {
+  esClient: Client;
+  spaceId: string;
+  executionUuids: unknown;
+  log: ToolingLog;
+}): Promise<number | undefined> => {
+  const uuids =
+    typeof executionUuids === 'string'
+      ? executionUuids.split(',').filter((uuid) => uuid.trim() !== '')
+      : Array.isArray(executionUuids)
+      ? strings(executionUuids)
+      : undefined;
+  if (uuids === undefined) return undefined;
+  if (uuids.length === 0) return 0;
+  try {
+    const { count } = await esClient.count({
+      index: attackDiscoveryIndexForSpace(spaceId),
+      query: { terms: { [EXECUTION_UUID_FIELD]: uuids } },
+    });
+    return count;
+  } catch (error) {
+    if (asRecord(asRecord(error)?.meta)?.statusCode === 404) return 0;
+    log.warning(`[ad-worker] could not count persisted attacks: ${errorMessage(error)}`);
+    return undefined;
+  }
+};
+
 /**
  * Collects what one runner execution produced: the persisted discoveries, the fingerprint
  * match result, every review it dispatched (polled until it ends or parks at the analyst gate)
@@ -422,6 +464,7 @@ const outcomeEvents = (run: WorkflowExecutionDto): WorkerOutcomeEvent[] =>
  */
 export const collectWorkerArtifacts = async ({
   client,
+  esClient,
   run,
   runTimedOutAfterMs,
   spaceId,
@@ -430,6 +473,7 @@ export const collectWorkerArtifacts = async ({
   log,
 }: {
   client: AttackDiscoveryWorkerClient;
+  esClient: Client;
   run: WorkflowExecutionDto;
   runTimedOutAfterMs?: number;
   spaceId: string;
@@ -475,6 +519,12 @@ export const collectWorkerArtifacts = async ({
       });
     })
   );
+  const indexedAttackCount = await countIndexedAttacks({
+    esClient,
+    spaceId,
+    executionUuids: generation?.execution_uuids,
+    log,
+  });
   log.info(
     `[ad-worker] run ${run.id}: ${insights.length} discoveries, ${reviews.length} reviews dispatched`
   );
@@ -495,6 +545,7 @@ export const collectWorkerArtifacts = async ({
     insights,
     generationUsage: generationUsageOf(docs),
     persistedAttackIds: ids,
+    ...(indexedAttackCount !== undefined ? { indexedAttackCount } : {}),
     fingerprintReviewCount: Array.isArray(matchOutput?.reviews)
       ? matchOutput.reviews.length
       : undefined,

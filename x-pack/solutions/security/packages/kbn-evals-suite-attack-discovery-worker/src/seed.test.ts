@@ -58,6 +58,26 @@ describe('assertCleanSpace', () => {
   });
 });
 
+describe('fingerprint space scoping', () => {
+  it('counts fingerprints with an exact term on the space id', async () => {
+    const count = jest.fn(async (_args: { index: string; query?: unknown }) => ({ count: 0 }));
+    await assertCleanSpace({ esClient: esWith({ count }), spaceId: 'ad-worker-eval' });
+    const queries = count.mock.calls
+      .filter(([{ index }]) => index.startsWith('ai-index'))
+      .map(([{ query }]) => query);
+    expect(queries).toEqual([{ term: { 'attributes.space_id': 'ad-worker-eval' } }]);
+  });
+
+  it('deletes fingerprints with an exact term on the space id', async () => {
+    const deleteByQuery = jest.fn(async (_args: { index: string; query?: unknown }) => ({}));
+    await cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded });
+    const queries = deleteByQuery.mock.calls
+      .filter(([{ index }]) => index.startsWith('ai-index'))
+      .map(([{ query }]) => query);
+    expect(queries).toEqual([{ term: { 'attributes.space_id': 'space-a' } }]);
+  });
+});
+
 describe('cleanupSeed', () => {
   it('deletes alerts, fingerprints and persisted discoveries', async () => {
     const deleteByQuery = jest.fn(async (_args: { index: string }) => ({}));
