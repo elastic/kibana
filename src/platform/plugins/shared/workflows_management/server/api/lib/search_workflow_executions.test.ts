@@ -286,6 +286,34 @@ describe('searchWorkflowExecutions', () => {
       );
     });
 
+    it('rethrows result window errors unchanged so the route maps them to a sanitized 400', async () => {
+      const resultWindowError = new errors.ResponseError({
+        statusCode: 400,
+        body: {
+          error: {
+            type: 'search_phase_execution_exception',
+            reason:
+              'Result window is too large, from + size must be less than or equal to: [10000]',
+          },
+        },
+        headers: {},
+        meta: {} as any,
+        warnings: [],
+      });
+
+      mockWorkflowDataClient.search.mockRejectedValue(resultWindowError);
+
+      await expect(
+        searchWorkflowExecutions({
+          workflowExecutionsDataClient: mockWorkflowDataClient,
+          logger: mockLogger,
+          query: { term: { workflowId: 'workflow-1' } },
+          page: 101,
+          size: 100,
+        })
+      ).rejects.toBe(resultWindowError);
+    });
+
     it('should log error and throw for non-ResponseError exceptions', async () => {
       mockLogger.error.mockClear();
       const genericError = new Error('Network error');

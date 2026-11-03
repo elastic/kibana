@@ -20,6 +20,10 @@ import {
   GetCloudOnboardingDeploymentResponseSchema,
   GetCloudOnboardingDeploymentsByConnectorIdRequestSchema,
   GetCloudOnboardingDeploymentsByConnectorIdResponseSchema,
+  GetCloudOnboardingDeploymentsRequestSchema,
+  GetCloudOnboardingDeploymentsResponseSchema,
+  GetCloudOnboardingDeploymentCountsRequestSchema,
+  GetCloudOnboardingDeploymentCountsResponseSchema,
   UpdateCloudOnboardingDeploymentRequestSchema,
   UpdateCloudOnboardingDeploymentResponseSchema,
   DeleteCloudOnboardingDeploymentRequestSchema,
@@ -30,6 +34,8 @@ import {
   createCloudOnboardingDeploymentHandler,
   getCloudOnboardingDeploymentHandler,
   getCloudOnboardingDeploymentsByConnectorIdHandler,
+  getCloudOnboardingDeploymentsHandler,
+  getCloudOnboardingDeploymentCountsHandler,
   updateCloudOnboardingDeploymentHandler,
   deleteCloudOnboardingDeploymentHandler,
 } from './handlers';
@@ -83,6 +89,98 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       createCloudOnboardingDeploymentHandler
+    );
+
+  // GET /api/fleet/cloud_onboarding_deployments
+  router.versioned
+    .get({
+      path: CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES.LIST_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+                FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
+              ],
+            },
+          ],
+        },
+      },
+      summary: 'Get cloud onboarding deployment instances',
+      description:
+        'List cloud onboarding deployment instances, newest first. Optionally filter by package name or provider.',
+      options: {
+        tags: ['oas-tag:Fleet cloud onboarding deployments'],
+        availability: {
+          since: '9.7.0',
+          stability: 'experimental',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/get_cloud_onboarding_deployments.yaml'),
+        },
+        validate: {
+          request: GetCloudOnboardingDeploymentsRequestSchema,
+          response: {
+            200: {
+              body: () => GetCloudOnboardingDeploymentsResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
+            },
+          },
+        },
+      },
+      getCloudOnboardingDeploymentsHandler
+    );
+
+  // GET /internal/fleet/cloud_onboarding_deployments/counts
+  // Internal: only the Installed integrations Instances column needs it.
+  router.versioned
+    .get({
+      path: CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES.COUNTS_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+                FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
+              ],
+            },
+          ],
+        },
+      },
+      summary: 'Get cloud onboarding deployment instance counts',
+      description: 'Count the cloud onboarding deployment instances that cover each package.',
+      access: 'internal',
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: GetCloudOnboardingDeploymentCountsRequestSchema,
+          response: {
+            200: {
+              body: () => GetCloudOnboardingDeploymentCountsResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
+            },
+          },
+        },
+      },
+      getCloudOnboardingDeploymentCountsHandler
     );
 
   // GET /api/fleet/cloud_onboarding_deployments/{id}
