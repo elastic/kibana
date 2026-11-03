@@ -56,71 +56,20 @@ describe('ConversationDetailsFlyoutFooter', () => {
     expect(screen.queryByTestId('investigationFlyoutOpenChat')).not.toBeInTheDocument();
   });
 
-  it('opens the escalation modal via onOpenEscalation when the button is clicked', () => {
-    const onOpenEscalation = jest.fn(() => <div>Escalation modal</div>);
-
+  it('does not show Open an escalation in the footer (technical preview)', () => {
     renderWithKibanaRenderContext(
       <ConversationDetailsFlyoutFooter
         investigation={investigation}
         isOpenedFromChat={false}
         onOpenChat={jest.fn()}
-        onOpenEscalation={onOpenEscalation}
-      />
-    );
-
-    fireEvent.click(screen.getByRole('button', { name: openEscalationButtonName }));
-
-    expect(onOpenEscalation).toHaveBeenCalledTimes(1);
-    expect(onOpenEscalation).toHaveBeenCalledWith(
-      expect.objectContaining({ mode: 'create', investigation, onClose: expect.any(Function) })
-    );
-    expect(screen.getByText('Escalation modal')).toBeInTheDocument();
-  });
-
-  it('omits the escalation button when onOpenEscalation is not supplied', () => {
-    renderWithKibanaRenderContext(
-      <ConversationDetailsFlyoutFooter
-        investigation={investigation}
-        isOpenedFromChat={false}
-        onOpenChat={jest.fn()}
-        onCloseInvestigation={() => <div>Dismiss proposal</div>}
+        onOpenEscalation={jest.fn(() => <div>Escalation modal</div>)}
+        wrapEscalationButton={(button) => button}
       />
     );
 
     expect(
       screen.queryByRole('button', { name: openEscalationButtonName })
     ).not.toBeInTheDocument();
-  });
-
-  it('lets wrapEscalationButton hide the escalation button', () => {
-    renderWithKibanaRenderContext(
-      <ConversationDetailsFlyoutFooter
-        investigation={investigation}
-        isOpenedFromChat={false}
-        onOpenChat={jest.fn()}
-        onOpenEscalation={jest.fn(() => null)}
-        wrapEscalationButton={() => null}
-      />
-    );
-
-    expect(
-      screen.queryByRole('button', { name: openEscalationButtonName })
-    ).not.toBeInTheDocument();
-  });
-
-  it('renders the escalation button through wrapEscalationButton', () => {
-    renderWithKibanaRenderContext(
-      <ConversationDetailsFlyoutFooter
-        investigation={investigation}
-        isOpenedFromChat={false}
-        onOpenChat={jest.fn()}
-        onOpenEscalation={jest.fn(() => null)}
-        wrapEscalationButton={(button) => <div data-test-subj="escalationButtonGate">{button}</div>}
-      />
-    );
-
-    expect(screen.getByTestId('escalationButtonGate')).toContainElement(
-      screen.getByRole('button', { name: openEscalationButtonName })
-    );
+    expect(screen.getByTestId('investigationFlyoutOpenChat')).toBeInTheDocument();
   });
 });
