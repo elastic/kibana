@@ -70,21 +70,19 @@ describe('InspectHighlight', () => {
     expect(badge).toBeInTheDocument();
   });
 
-  it('should render the hint and make the box a drag source when onDragStart is provided', () => {
+  it('should make the box a drag source when onDragStart is provided', () => {
     const onDragStart = jest.fn();
 
     renderWithI18n(
       <InspectHighlight
         currentPosition={{ width: 50, height: 20, transform: 'translate(0px,0px)' }}
         path="CapybaraWrapper"
-        hint="Drag me"
         onDragStart={onDragStart}
       />
     );
 
     const highlight = screen.getByTestId('inspectHighlightBox');
     expect(highlight).toHaveAttribute('draggable', 'true');
-    expect(screen.getByText('Drag me')).toBeInTheDocument();
 
     fireEvent.dragStart(highlight);
 

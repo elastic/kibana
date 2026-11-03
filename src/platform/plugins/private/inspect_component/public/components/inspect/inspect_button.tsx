@@ -37,12 +37,12 @@ const TOOLTIP_CONTENT = i18n.translate('kbnInspectComponent.inspectButton.toolti
 });
 
 const GRAB_ARIA_LABEL = i18n.translate('kbnInspectComponent.grabButton.ariaLabel', {
-  defaultMessage: 'Grab component context for coding agents',
+  defaultMessage: 'Grab component',
 });
 
 const GRAB_TOOLTIP_CONTENT = i18n.translate('kbnInspectComponent.grabButton.tooltip', {
   values: { keyboardShortcut: isMac ? "⌘ ⇧ '" : "Ctrl Shift '" },
-  defaultMessage: 'Grab component context for coding agents {keyboardShortcut}',
+  defaultMessage: 'Grab component {keyboardShortcut}',
 });
 
 interface ModeConfig {
@@ -64,7 +64,7 @@ const MODE_CONFIG: Record<InspectMode, ModeConfig> = {
   grab: {
     ariaLabel: GRAB_ARIA_LABEL,
     tooltipContent: GRAB_TOOLTIP_CONTENT,
-    iconType: 'copy',
+    iconType: 'move',
     testSubj: 'grabComponentButton',
     isShortcut: isGrabKeyboardShortcut,
   },

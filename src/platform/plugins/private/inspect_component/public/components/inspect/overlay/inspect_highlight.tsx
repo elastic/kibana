@@ -16,8 +16,6 @@ import { css } from '@emotion/css';
 interface Props {
   currentPosition: CSSProperties;
   path: string | null;
-  /** Secondary line rendered below the path badge, e.g. usage hints. */
-  hint?: string;
   badgeColor?: EuiBadgeProps['color'];
   badgeIconType?: IconType;
   /** When provided, the highlight box becomes a native drag source. */
@@ -31,7 +29,6 @@ interface Props {
 export const InspectHighlight = ({
   currentPosition,
   path,
-  hint,
   badgeColor = 'primary',
   badgeIconType,
   onDragStart,
@@ -118,17 +115,13 @@ export const InspectHighlight = ({
         setBadgeOffsetY(highlightHeight);
       }
     }
-  }, [path, hint, rest.left, rest.top, rest.width, rest.height, currentPosition.position, isFixed]);
+  }, [path, rest.left, rest.top, rest.width, rest.height, currentPosition.position, isFixed]);
 
   const badgeCss = css({
     position: 'absolute',
     top: badgeOffsetY,
     left: badgeOffsetX,
     whiteSpace: 'nowrap',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-    gap: euiTheme.size.xxs,
   });
 
   return (
@@ -144,7 +137,6 @@ export const InspectHighlight = ({
           <EuiBadge color={badgeColor} iconType={badgeIconType}>
             {path}
           </EuiBadge>
-          {hint && <EuiBadge color="hollow">{hint}</EuiBadge>}
         </div>
       )}
     </div>

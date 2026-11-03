@@ -1962,6 +1962,7 @@
     "@kbn/product-doc-artifact-builder": "workspace:*",
     "@kbn/profiler": "workspace:*",
     "@kbn/pubsub-example-topic": "workspace:*",
+    "@kbn/react-fiber": "workspace:*",
     "@kbn/relocate": "workspace:*",
     "@kbn/repo-file-maps": "workspace:*",
     "@kbn/repo-linter": "workspace:*",

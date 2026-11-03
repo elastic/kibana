@@ -13,9 +13,9 @@ import type { CoreStart } from '@kbn/core/public';
 import { screen, createEvent, fireEvent, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { copyToClipboard } from '@elastic/eui';
+import { findFiberWithDebugSource, findSourceComponentName } from '@kbn/react-fiber';
 import { InspectOverlay } from './inspect_overlay';
 import { getElementFromPoint } from '../../../lib/dom/get_element_from_point';
-import { findSourceComponent } from '../../../lib/fiber/find_source_component';
 import { getInspectedElementData } from '../../../lib/get_inspected_element_data';
 import { isEscapeKey } from '../../../lib/keyboard_shortcut/keyboard_shortcut';
 import { mockBranch } from '../../../__mocks__/mocks';
@@ -25,12 +25,13 @@ jest.mock('@elastic/eui', () => ({
   copyToClipboard: jest.fn(() => true),
 }));
 
-jest.mock('../../../lib/dom/get_element_from_point', () => ({
-  getElementFromPoint: jest.fn(),
+jest.mock('@kbn/react-fiber', () => ({
+  findFiberWithDebugSource: jest.fn(),
+  findSourceComponentName: jest.fn(),
 }));
 
-jest.mock('../../../lib/fiber/find_source_component', () => ({
-  findSourceComponent: jest.fn(),
+jest.mock('../../../lib/dom/get_element_from_point', () => ({
+  getElementFromPoint: jest.fn(),
 }));
 
 jest.mock('../../../lib/get_inspected_element_data', () => ({
@@ -66,16 +67,17 @@ describe('InspectOverlay', () => {
     expect(overlay).toHaveStyle({ position: 'fixed' });
   });
 
-  it('should update highlight position on pointer move', () => {
+  it('should highlight the hovered element with its source component name on pointer move', () => {
     const fakeTarget = document.createElement('div');
     fakeTarget.getBoundingClientRect = jest.fn(
       () => ({ top: 10, left: 10, width: 100, height: 50 } as DOMRect)
     );
     (getElementFromPoint as jest.Mock).mockReturnValue(fakeTarget);
-    (findSourceComponent as jest.Mock).mockReturnValue({
-      path: 'fakePath',
-      sourceComponent: { type: 'FakeComponent', element: document.createElement('div') },
+    (findFiberWithDebugSource as jest.Mock).mockReturnValue({
+      element: fakeTarget,
+      fiber: { type: 'div', _debugSource: { fileName: 'a.tsx', lineNumber: 1, columnNumber: 1 } },
     });
+    (findSourceComponentName as jest.Mock).mockReturnValue('FakeComponent');
 
     renderWithI18n(
       <InspectOverlay
@@ -88,8 +90,8 @@ describe('InspectOverlay', () => {
 
     fireEvent.pointerMove(window, { clientX: 30, clientY: 20 });
 
-    const overlay = screen.getByTestId('inspectOverlayContainer');
-    expect(overlay).toBeInTheDocument();
+    expect(screen.getByText('FakeComponent')).toBeInTheDocument();
+    expect(screen.getByTestId('inspectHighlightBox')).toHaveStyle({ width: '100px' });
   });
 
   it('should open flyout when clicking on an element', async () => {
@@ -142,6 +144,19 @@ describe('InspectOverlay', () => {
       );
     });
 
+    it('should highlight the hovered element without a label', () => {
+      (findFiberWithDebugSource as jest.Mock).mockReturnValue({
+        element: fakeTarget,
+        fiber: { type: 'div', _debugSource: { fileName: 'a.tsx', lineNumber: 1, columnNumber: 1 } },
+      });
+      (findSourceComponentName as jest.Mock).mockReturnValue('FakeComponent');
+
+      fireEvent.pointerMove(window, { clientX: 30, clientY: 20 });
+
+      expect(screen.getByTestId('inspectHighlightBox')).toBeInTheDocument();
+      expect(screen.queryByTestId('inspectHighlightBadge')).not.toBeInTheDocument();
+    });
+
     it('should copy the element context on click, show feedback and stay in grab mode', async () => {
       fireEvent.click(document, { target: fakeTarget });
 
@@ -154,7 +169,7 @@ describe('InspectOverlay', () => {
       expect(setIsInspecting).not.toHaveBeenCalled();
     });
 
-    it('should carry the element context and use the element as drag image on drag start', () => {
+    it('should carry the element context on drag start without showing feedback', () => {
       const dataTransfer = { setData: jest.fn(), setDragImage: jest.fn(), effectAllowed: 'none' };
       const highlightBox = screen.getByTestId('inspectHighlightBox');
       // jsdom has no DragEvent, so pointer coordinates have to be defined on the plain event
@@ -167,6 +182,7 @@ describe('InspectOverlay', () => {
       expect(dataTransfer.setData).toHaveBeenCalledWith('text/plain', '<div>Save</div>');
       expect(dataTransfer.setDragImage).toHaveBeenCalledWith(fakeTarget, 15, 25);
       expect(copyToClipboard).toHaveBeenCalledWith('<div>Save</div>');
+      expect(screen.queryByTestId('inspectHighlightBadge')).not.toBeInTheDocument();
     });
   });
 

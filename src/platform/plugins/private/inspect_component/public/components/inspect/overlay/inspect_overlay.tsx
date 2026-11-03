@@ -21,18 +21,18 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { findFiberWithDebugSource, findSourceComponentName } from '@kbn/react-fiber';
+import type { ElementFiber } from '@kbn/react-fiber';
 import { isEscapeKey } from '../../../lib/keyboard_shortcut/keyboard_shortcut';
-import { findFirstFiberWithDebugSource } from '../../../lib/fiber/find_first_fiber_with_debug_source';
 import { handleEventPropagation } from '../../../lib/dom/handle_event_propagation';
 import { getInspectedElementData } from '../../../lib/get_inspected_element_data';
 import { getElementFromPoint } from '../../../lib/dom/get_element_from_point';
-import { findSourceComponent } from '../../../lib/fiber/find_source_component';
-import { buildGrabContext, getGrabLabel, getRepoRoot } from '../../../lib/grab/build_grab_context';
+import { buildGrabContext, getRepoRoot } from '../../../lib/grab/build_grab_context';
 import { fetchComponentData } from '../../../api/fetch_component_data';
 import { InspectFlyout, flyoutOptions } from '../flyout/inspect_flyout';
 import { InspectHighlight } from './inspect_highlight';
 import { GRAB_FEEDBACK_DURATION_MS, INSPECT_OVERLAY_ID } from '../../../lib/constants';
-import type { ReactFiberNode, SourceComponent } from '../../../lib/fiber/types';
+import type { SourceComponent } from '../../../lib/types';
 
 /**
  * 'inspect' opens a flyout with component details,
@@ -41,10 +41,6 @@ import type { ReactFiberNode, SourceComponent } from '../../../lib/fiber/types';
 export type InspectMode = 'inspect' | 'grab';
 
 type GrabStatus = 'idle' | 'copied' | 'failed';
-
-const GRAB_HINT = i18n.translate('kbnInspectComponent.grab.hint', {
-  defaultMessage: 'Drag into your agent · Click to copy · Esc to exit',
-});
 
 const GRAB_STATUS_LABELS: Record<Exclude<GrabStatus, 'idle'>, string> = {
   copied: i18n.translate('kbnInspectComponent.grab.copiedLabel', {
@@ -77,7 +73,7 @@ export const InspectOverlay = ({
   const { euiTheme } = useEuiTheme();
   const [highlightPosition, setHighlightPosition] = useState<CSSProperties>({});
   const [sourceComponent, setSourceComponent] = useState<SourceComponent | null>(null);
-  const [targetFiberNode, setTargetFiberNode] = useState<ReactFiberNode | null>(null);
+  const [target, setTarget] = useState<ElementFiber | null>(null);
   const [grabStatus, setGrabStatus] = useState<GrabStatus>('idle');
   const [repoRoot, setRepoRoot] = useState<string | null>(null);
   const repoRootRequest = useRef<Promise<void> | null>(null);
@@ -126,24 +122,26 @@ export const InspectOverlay = ({
 
   const handlePointerMove = useCallback(
     (event: PointerEvent) => {
-      const target = getElementFromPoint(event);
+      const hoveredElement = getElementFromPoint(event);
 
-      if (!target) {
+      if (!hoveredElement) {
         return;
       }
 
-      const { top, left, width, height } = target.getBoundingClientRect();
-      const fiberNode = findFirstFiberWithDebugSource(target);
+      const { top, left, width, height } = hoveredElement.getBoundingClientRect();
+      const elementFiber = findFiberWithDebugSource(hoveredElement);
 
-      if (!fiberNode) {
+      if (!elementFiber) {
         return;
       }
 
-      setTargetFiberNode(fiberNode);
+      setTarget(elementFiber);
 
-      const sourceComponentResult = findSourceComponent(fiberNode);
+      const sourceComponentName = findSourceComponentName(elementFiber.fiber);
 
-      setSourceComponent(sourceComponentResult);
+      setSourceComponent(
+        sourceComponentName ? { type: sourceComponentName, element: elementFiber.element } : null
+      );
 
       setHighlightPosition({
         width: `${width}px`,
@@ -151,46 +149,43 @@ export const InspectOverlay = ({
         transform: `translate(${left}px, ${top}px)`,
       });
 
-      const fileName = fiberNode._debugSource?.fileName;
-      if (isGrabMode && fileName) {
-        resolveRepoRoot(fileName);
+      if (isGrabMode) {
+        resolveRepoRoot(elementFiber.fiber._debugSource.fileName);
       }
     },
     [isGrabMode, resolveRepoRoot]
   );
 
-  const copyGrabContext = useCallback(
-    (context: string) => {
-      setGrabStatus(copyToClipboard(context) ? 'copied' : 'failed');
-    },
-    [setGrabStatus]
-  );
-
   /**
    * Makes the inspected element itself the drag image and carries its context as plain text,
    * so it can be dropped straight into an agent chat, a terminal or a message box.
+   * The clipboard copy stays silent here, the feedback badge is reserved for clicks.
    */
   const handleDragStart = useCallback(
     (event: DragEvent<HTMLDivElement>) => {
-      const target = getElementFromPoint(event.nativeEvent);
+      const draggedElement = getElementFromPoint(event.nativeEvent);
 
-      if (!target) {
+      if (!draggedElement) {
         event.preventDefault();
         return;
       }
 
-      const context = buildGrabContext({ element: target, targetFiberNode, repoRoot });
-      const { top, left } = target.getBoundingClientRect();
+      const context = buildGrabContext({
+        element: draggedElement,
+        fiber: target?.fiber ?? null,
+        repoRoot,
+      });
+      const { top, left } = draggedElement.getBoundingClientRect();
 
       event.dataTransfer.effectAllowed = 'copy';
       event.dataTransfer.setData('text/plain', context);
-      event.dataTransfer.setDragImage(target, event.clientX - left, event.clientY - top);
-      copyGrabContext(context);
+      event.dataTransfer.setDragImage(draggedElement, event.clientX - left, event.clientY - top);
+      copyToClipboard(context);
     },
-    [targetFiberNode, repoRoot, copyGrabContext]
+    [target, repoRoot]
   );
 
-  /** Resets the copied / failed feedback back to the hint after a short while. */
+  /** Resets the copied / failed feedback back to the component label after a short while. */
   useEffect(() => {
     if (grabStatus === 'idle') return;
 
@@ -201,21 +196,26 @@ export const InspectOverlay = ({
 
   const handleClickAtPositionOfInspectedElement = useCallback(
     async (event: MouseEvent) => {
-      const target = getElementFromPoint(event);
+      const clickedElement = getElementFromPoint(event);
 
-      if (!target) {
+      if (!clickedElement) {
         setIsInspecting(false);
         return;
       }
 
       if (isGrabMode) {
-        copyGrabContext(buildGrabContext({ element: target, targetFiberNode, repoRoot }));
+        const context = buildGrabContext({
+          element: clickedElement,
+          fiber: target?.fiber ?? null,
+          repoRoot,
+        });
+        setGrabStatus(copyToClipboard(context) ? 'copied' : 'failed');
         return;
       }
 
       const componentData = await getInspectedElementData({
         httpService: core.http,
-        targetFiberNode,
+        target,
         sourceComponent,
       });
 
@@ -226,7 +226,7 @@ export const InspectOverlay = ({
 
       const flyout = core.overlays.openFlyout(
         toMountPoint(
-          <InspectFlyout componentData={componentData} target={target} branch={branch} />,
+          <InspectFlyout componentData={componentData} target={clickedElement} branch={branch} />,
           core.rendering
         ),
         flyoutOptions
@@ -243,10 +243,9 @@ export const InspectOverlay = ({
       core,
       branch,
       isGrabMode,
-      copyGrabContext,
       repoRoot,
       sourceComponent,
-      targetFiberNode,
+      target,
       setIsInspecting,
       setFlyoutOverlayRef,
     ]
@@ -270,26 +269,22 @@ export const InspectOverlay = ({
     };
   }, [handleClickAtPositionOfInspectedElement]);
 
-  const highlightLabel =
-    isGrabMode && sourceComponent && targetFiberNode?._debugSource
-      ? getGrabLabel(sourceComponent.type, targetFiberNode._debugSource)
-      : sourceComponent?.type ?? null;
-
+  /** Grab mode shows a bare highlight, only the copy feedback is labelled. */
   const highlightProps = useMemo(() => {
     if (!isGrabMode) {
-      return { path: highlightLabel };
+      return { path: sourceComponent?.type ?? null };
     }
 
-    if (grabStatus !== 'idle') {
-      return {
-        path: GRAB_STATUS_LABELS[grabStatus],
-        badgeColor: grabStatus === 'copied' ? 'success' : 'danger',
-        badgeIconType: grabStatus === 'copied' ? 'check' : 'warning',
-      };
+    if (grabStatus === 'idle') {
+      return { path: null };
     }
 
-    return { path: highlightLabel, hint: GRAB_HINT };
-  }, [isGrabMode, grabStatus, highlightLabel]);
+    return {
+      path: GRAB_STATUS_LABELS[grabStatus],
+      badgeColor: grabStatus === 'copied' ? 'success' : 'danger',
+      badgeIconType: grabStatus === 'copied' ? 'check' : 'warning',
+    };
+  }, [isGrabMode, grabStatus, sourceComponent]);
 
   const overlayContent = useMemo(
     () => (
