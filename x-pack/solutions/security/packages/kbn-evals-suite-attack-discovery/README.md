@@ -351,7 +351,14 @@ the verdict.
 
 The call is a single attempt (`maxRetries: 0`), and the prompt version sets `temperature: 0`. The
 inference layer can still override that: some model families (for example OpenAI `o1`, `o3` and `gpt-5`)
-get no temperature unless the connector config sets one, so verdicts are not guaranteed to repeat.
+get no temperature unless the connector config sets one, and, on inference-endpoint connectors, Claude
+models outside a fixed allow-list (for example Opus 5 or Sonnet 5), or an endpoint with no model id; on
+that path the connector config cannot restore it. Verdicts are therefore not guaranteed to repeat.
+
+When the judge returns `conditional` or `no_containment` for a discovery that the regex screen flags,
+the explanation ends with `regex_disagrees: <n> (<titles>)` and the result carries
+`metadata.regexDisagreements`. The score and label are unchanged. It is a calibration aid: those are the
+discoveries to read when deciding which of the two is wrong.
 
 The judge runs on the judge connector (`--judge`). It is **uncalibrated**: until a live run compares its
 verdicts with the regex on the same outputs and the disagreements are read, treat its score as

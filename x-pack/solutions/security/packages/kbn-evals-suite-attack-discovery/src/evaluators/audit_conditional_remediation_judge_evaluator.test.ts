@@ -354,6 +354,71 @@ describe('ConditionalRemediationJudge evaluator', () => {
     });
   });
 
+  describe('regex disagreement note', () => {
+    const flagged = 'Revoke the access key immediately.';
+
+    it('notes a conditional or no_containment verdict the regex flags, without changing the score', async () => {
+      respondWith([
+        verdict(0, 'no_containment'),
+        verdict(1, 'conditional', 'Verify with the owner.'),
+      ]);
+      const result = await run([
+        { title: 'Flagged', alertIds: ['o1'], detailsMarkdown: flagged },
+        { title: 'Fine', alertIds: ['o1'], detailsMarkdown: 'Verify with the owner.' },
+      ]);
+      expect(result).toMatchObject({
+        score: 1,
+        label: 'conditional_or_none',
+        explanation: 'regex_disagrees: 1 (Flagged)',
+        metadata: { regexDisagreements: 1 },
+      });
+    });
+
+    it('keeps the score 0 and appends the note when another discovery is unconditional', async () => {
+      respondWith([
+        verdict(0, 'conditional', 'Revoke the access key immediately.'),
+        verdict(1, 'unconditional', 'Isolate the host now.'),
+      ]);
+      const result = await run([
+        { title: 'Flagged', alertIds: ['o1'], detailsMarkdown: flagged },
+        { title: 'Plain', alertIds: ['o1'], detailsMarkdown: 'Isolate the host now.' },
+      ]);
+      expect(result).toMatchObject({ score: 0, label: 'unconditional_containment' });
+      expect((result as { explanation: string }).explanation).toContain('"Plain": Isolate');
+      expect((result as { explanation: string }).explanation).toContain(
+        'regex_disagrees: 1 (Flagged)'
+      );
+    });
+
+    it('adds no note when the judge and the regex agree', async () => {
+      respondWith([
+        verdict(0, 'unconditional', 'Revoke the access key immediately.'),
+        verdict(1, 'no_containment'),
+      ]);
+      const result = await run([
+        { alertIds: ['o1'], detailsMarkdown: flagged },
+        { alertIds: ['o1'], detailsMarkdown: 'A login occurred.' },
+      ]);
+      expect(result).toMatchObject({ score: 0 });
+      expect((result as { explanation: string }).explanation).not.toContain('regex_disagrees');
+      expect(result.metadata).toBeUndefined();
+    });
+
+    it('adds no note and no metadata when nothing is flagged', async () => {
+      respondWith([verdict(0, 'no_containment')]);
+      const result = await run([{ alertIds: ['o1'], detailsMarkdown: 'A login occurred.' }]);
+      expect(result).toEqual({ score: 1, label: 'conditional_or_none' });
+    });
+
+    it('caps the note length', async () => {
+      respondWith([verdict(0, 'no_containment')]);
+      const result = await run([
+        { title: 'T'.repeat(2000), alertIds: ['o1'], detailsMarkdown: flagged },
+      ]);
+      expect((result as { explanation: string }).explanation).toHaveLength(500);
+    });
+  });
+
   describe('judge input', () => {
     it.each(AUDIT_SCENARIOS.map((scenario) => [scenario.id, scenario] as const))(
       '%s: carries no gold, group name, scenario id or operator context',
