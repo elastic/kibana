@@ -85,7 +85,12 @@ const getDefinedRoles = (users: Users) =>
 const quoteRoles = (roles: string[]) => roles.map((role) => `"${role}"`).join(', ');
 
 /** Checks that a users file has a user for every expected role */
-const checkUsers = (file: string, users: Users, expected: string[], copyFix?: Fix): CheckResult => {
+const checkUsers = (
+  file: string,
+  users: Users,
+  expected: string[],
+  remedy?: Fix | string
+): CheckResult => {
   const roles = [...new Set(expected)];
   const defined = getDefinedRoles(users);
   const missing = roles.filter((role) => !defined.includes(role));
@@ -98,11 +103,13 @@ const checkUsers = (file: string, users: Users, expected: string[], copyFix?: Fi
   const message = `${file} has no users for ${
     missing.length === 1 ? quoteRoles(missing) : `${missing.length} roles`
   }`;
-  const remedy = {
+  const result = {
     ...(missing.length > 1 ? { details: quoteRoles(missing) } : {}),
-    ...(copyFix ? { fix: copyFix, hint: `only if they are ${getEnvironment()} users` } : {}),
+    ...(typeof remedy === 'string'
+      ? { hint: remedy }
+      : remedy && { fix: remedy, hint: `only if they are ${getEnvironment()} users` }),
   };
-  return missing.includes('admin') ? fail(message, remedy) : warn(message, remedy);
+  return missing.includes('admin') ? fail(message, result) : warn(message, result);
 };
 
 const checkCustomRoleUser = (file: string, users: Users, remedy: Fix | string): CheckResult =>
@@ -189,7 +196,8 @@ const cloudUsersCheck = (arch: DoctorArch): DoctorCheck => ({
       `${tildify(CLOUD_SECRETS_FILE)} (${getEnvironment()})`,
       await readCloudUsers(),
       roles,
-      await getCopyFtrUsersFix(roles)
+      (await getCopyFtrUsersFix(roles)) ??
+        `add them under role_credentials.${getEnvironment()}, or to ${FTR_ROLE_USERS_FILE} to copy them with --fix`
     );
   },
 });
