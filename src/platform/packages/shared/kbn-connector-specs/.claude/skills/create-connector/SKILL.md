@@ -32,9 +32,10 @@ vendor's real API docs and verify — don't assume: update semantics (partial vs
 nested objects sent whole), the HTTP method and body shape of that exact route, how array query params
 are encoded, whether optional modifier params (`scope`, filters, flags) on `POST`/`PATCH` actions belong
 in the query string or the JSON body, the auth scope or cloud role (and the level it is granted at) each
-action needs, each identifier field's allowed format, the resource variants the vendor documents, and
-whether the service has regional/self-hosted domain variants. See "Research the Vendor API Before Writing
-Any Code" in
+action needs, each identifier field's allowed format, each input field's documented limits (length,
+item count, numeric range, size in bytes, and limits shared across fields), the resource variants the
+vendor documents, and whether the service has regional/self-hosted domain variants. See "Research the
+Vendor API Before Writing Any Code" in
 [reference/custom-connector-setup.md](reference/custom-connector-setup.md) for the full checklist. Bugs
 found late (during manual testing or review) that trace back to skipping this step are expensive to fix
 one action at a time — verifying up front is cheaper.
@@ -132,6 +133,16 @@ Every Zod parameter in input schemas MUST have a `.describe()` call that include
 
 See the ServiceNow, Slack, and GitHub connector specs for examples of strong description quality.
 
+### Input bounds
+
+Take every `.max()` and `.min()` from the vendor's documented limit for that field, never from a guess
+or a neighbouring connector. A bound below the vendor limit rejects valid input; one above it lets
+through input the vendor rejects. Declare each limit once as a named constant with the doc URL in a
+comment, use it in every action that takes the field, and state the same number in `.describe()` and
+on the docs page. When the vendor documents no limit, say so in the comment. See
+[Take every bound from the vendor](reference/connector-patterns.md#take-every-bound-from-the-vendor)
+for limits shared across fields, byte limits, Base64 inputs, and numeric lower bounds.
+
 ### The `skill` property
 
 Add a `skill` property to the ConnectorSpec — a markdown string providing higher-level LLM guidance:
@@ -194,8 +205,10 @@ them with unit tests up front — each one only if your connector has the thing 
   as well as an absolute one, because it reads as relative and resolves to a different origin. Without
   this case a regression that drops the origin guard still passes every test above, and the connector's
   credentials go to the host the link names
-- **if an input carries a size or byte bound** — an over-sized input rejected at the schema boundary,
-  including a **non-ASCII** case for a byte bound
+- **if an input carries a bound taken from the vendor** — the limit itself accepted and one past it
+  rejected, parsed through the action's `input` schema (a test that calls the handler directly skips
+  the schema). Add a **non-ASCII** case for a byte bound, and for a limit shared across fields, a case
+  where each field is within its cap but the total is over
 - **if a regex constrains a URL path** — every accept *and* reject case, table-driven
 - **if an action polls an operation URL from a response** (`Location`, `Azure-AsyncOperation`) — an
   off-origin URL, asserting no authenticated request is made; and a 403 during polling, asserting it is
@@ -224,7 +237,8 @@ They check that the docs page exists at the URL derived from the connector id, t
 availability `supportedFeatureIds` allows (and only that), that a page for a connector without workflow
 support does not describe workflow use, that the docs page avoids internal wording ("custom connector", "MCP-native",
 "connector spec"), that the navigation links resolve, that every tool action and input parameter has a
-description, and that every input string and array has a `.max()`. Do not re-check those by hand.
+description, and that every input string and array has a `.max()`. Do not re-check those by hand. The
+test only checks that a bound exists; whether it matches the vendor is for you to check below.
 
 Then, before treating the connector as done, re-read the whole diff once, end to end, specifically hunting for:
 
@@ -270,6 +284,15 @@ Then, before treating the connector as done, re-read the whole diff once, end to
   a resource into (draft, stopped) with no action to leave it
 - One regex helper shared by identifier fields whose vendor formats differ, or an identifier pattern that
   rejects the vendor's fully qualified form
+- A `.max()`/`.min()` with no vendor doc URL (or "documents no limit" note) above its constant, or a
+  round number where the vendor documents a different one
+- The same vendor field capped differently in two actions
+- A page number, offset, or count without `.int()` and a `.min()`
+- A required ID, title, query, or recipient list that accepts an empty value the vendor rejects; or a
+  `.min(1)` on an update field where an empty value clears it
+- Fields the vendor limits together (reviewers and team reviewers, To + Cc + Bcc) with no `.refine()`
+  on the total
+- A limit in `.describe()`, the `skill` text, or the docs page that differs from the schema
 - A size bound measured with `.length` on a serialized string where the message says "bytes"
 - A regex guarding a URL path that has only been tested for what it accepts, never for what it must reject
 - Handlers still typed with implicit `any` (missing the `input: XInput` annotation)
