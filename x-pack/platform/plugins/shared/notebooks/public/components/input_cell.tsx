@@ -17,7 +17,6 @@ import {
   EuiFormRow,
   EuiPopover,
   EuiSuperDatePicker,
-  EuiSwitch,
   EuiTextArea,
   EuiToolTip,
 } from '@elastic/eui';
@@ -221,40 +220,18 @@ const RangeControl = ({
   );
 };
 
-const TimeControl = ({
-  cell,
-  input,
-}: {
-  cell: InputCellDefinition;
-  input: Extract<InputDefinition, { kind: 'time' }>;
-}) => {
-  const { value, setValue, updateInput } = useInputCell(cell);
+const TimeControl = ({ cell }: { cell: InputCellDefinition }) => {
+  const { value, setValue } = useInputCell(cell);
   if (value?.kind !== 'time') return null;
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiSuperDatePicker
-          compressed
-          width="auto"
-          start={value.range.from}
-          end={value.range.to}
-          showUpdateButton={false}
-          onTimeChange={({ start, end }) =>
-            setValue({ kind: 'time', range: { from: start, to: end } })
-          }
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiSwitch
-          compressed
-          label={i18n.translate('xpack.notebook.inputCell.pin', {
-            defaultMessage: 'Pin to header (?_tstart / ?_tend)',
-          })}
-          checked={false}
-          onChange={() => updateInput({ ...input, pinned: true })}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiSuperDatePicker
+      compressed
+      width="auto"
+      start={value.range.from}
+      end={value.range.to}
+      showUpdateButton={false}
+      onTimeChange={({ start, end }) => setValue({ kind: 'time', range: { from: start, to: end } })}
+    />
   );
 };
 
@@ -268,7 +245,7 @@ export const InputCell = ({ cell }: { cell: InputCellDefinition }) => {
     <CellFrame cell={cell} runtime={runtime} outputs={outputs}>
       {input.kind === 'dropdown' && <DropdownControl cell={cell} input={input} />}
       {input.kind === 'range' && <RangeControl cell={cell} input={input} />}
-      {input.kind === 'time' && <TimeControl cell={cell} input={input} />}
+      {input.kind === 'time' && <TimeControl cell={cell} />}
     </CellFrame>
   );
 };

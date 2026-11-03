@@ -37,6 +37,11 @@ const CELL_KINDS: ReadonlyArray<{ kind: NewCellKind; icon: string; label: string
     label: i18n.translate('xpack.notebook.addCell.markdown', { defaultMessage: 'Markdown' }),
   },
   {
+    kind: 'input:time',
+    icon: 'calendar',
+    label: i18n.translate('xpack.notebook.addCell.time', { defaultMessage: 'Time range input' }),
+  },
+  {
     kind: 'input:dropdown',
     icon: 'list',
     label: i18n.translate('xpack.notebook.addCell.dropdown', { defaultMessage: 'Dropdown input' }),

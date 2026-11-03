@@ -44,7 +44,7 @@ const TYPE_LABELS: Record<NewCellKind, string> = {
   chart: i18n.translate('xpack.notebook.cell.type.chart', { defaultMessage: 'Chart' }),
   markdown: i18n.translate('xpack.notebook.cell.type.markdown', { defaultMessage: 'Markdown' }),
   'input:time': i18n.translate('xpack.notebook.cell.type.time', {
-    defaultMessage: 'Time input',
+    defaultMessage: 'Time range input',
   }),
   'input:dropdown': i18n.translate('xpack.notebook.cell.type.dropdown', {
     defaultMessage: 'Dropdown input',
