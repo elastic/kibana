@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import objectHash from 'object-hash';
 import { skip, type Subscription } from 'rxjs';
 import type { Datatable } from '@kbn/expressions-plugin/common';
@@ -63,11 +64,12 @@ const RUNTIME_FIELDS = [
 ] as const satisfies ReadonlyArray<keyof CellRuntime>;
 
 const isSameRuntime = (a: CellRuntime, b: CellRuntime): boolean =>
-  RUNTIME_FIELDS.every((field) => a[field] === b[field]);
+  RUNTIME_FIELDS.every((field) => a[field] === b[field]) && isEqual(a.staleParents, b.staleParents);
 
 const withoutStatusDetails = ({
   error: _error,
   staleReason: _staleReason,
+  staleParents: _staleParents,
   ...runtime
 }: CellRuntime): CellRuntime => runtime;
 
@@ -229,13 +231,15 @@ export class NotebookScheduler {
       });
       return;
     }
-    const parentStatuses = this.parents(id).map((parent) => this.runtime(parent).status);
+    const parents = this.parents(id);
+    const parentStatuses = parents.map((parent) => this.runtime(parent).status);
     if (parentStatuses.some((status) => status === 'error' || status === 'blocked')) {
       this.setStatus(id, 'blocked');
       return;
     }
-    if (parentStatuses.includes('stale')) {
-      this.markStale(id, 'upstream');
+    const staleParents = parents.filter((_parent, index) => parentStatuses[index] === 'stale');
+    if (staleParents.length > 0) {
+      this.markStale(id, 'upstream', staleParents);
       return;
     }
 
@@ -389,8 +393,13 @@ export class NotebookScheduler {
     this.publish(id, { ...withoutStatusDetails(this.runtime(id)), status });
   }
 
-  private markStale(id: string, staleReason: StaleReason): void {
-    this.publish(id, { ...withoutStatusDetails(this.runtime(id)), status: 'stale', staleReason });
+  private markStale(id: string, staleReason: StaleReason, staleParents?: readonly string[]): void {
+    this.publish(id, {
+      ...withoutStatusDetails(this.runtime(id)),
+      status: 'stale',
+      staleReason,
+      ...(staleParents && { staleParents }),
+    });
   }
 
   private publish(id: string, runtime: CellRuntime): void {

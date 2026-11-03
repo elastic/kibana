@@ -8,7 +8,9 @@
 import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { CellRuntime, CellStatus, StaleReason } from '../model/types';
+import { useNotebook } from './notebook_context';
 
 const STATUS_BADGES: Record<CellStatus, { color: string; label: string }> = {
   idle: {
@@ -41,7 +43,7 @@ const BLOCKED_TOOLTIP = i18n.translate('xpack.notebook.status.blockedTooltip', {
   defaultMessage: 'An upstream cell has an error, so this cell did not run.',
 });
 
-const STALE_TOOLTIPS: Record<StaleReason, string> = {
+const STALE_TOOLTIPS: Record<Exclude<StaleReason, 'upstream'>, string> = {
   edited: i18n.translate('xpack.notebook.status.staleEditedTooltip', {
     defaultMessage: 'The query was edited but not run. Run the cell to update its results.',
   }),
@@ -49,20 +51,33 @@ const STALE_TOOLTIPS: Record<StaleReason, string> = {
     defaultMessage:
       'This cell is in manual run mode and its results may be out of date. Run the cell to update them.',
   }),
-  upstream: i18n.translate('xpack.notebook.status.staleUpstreamTooltip', {
-    defaultMessage: 'An upstream cell is stale, so this cell is waiting for it to run.',
-  }),
 };
 
-const getTooltip = ({ status, error, staleReason }: CellRuntime): string | undefined => {
-  if (status === 'blocked') return BLOCKED_TOOLTIP;
-  if (status === 'stale' && staleReason) return STALE_TOOLTIPS[staleReason];
-  return error;
-};
+const getUpstreamTooltip = (names: readonly string[]): string =>
+  i18n.translate('xpack.notebook.status.staleUpstreamTooltip', {
+    defaultMessage:
+      'Depends on {count, plural, one {a stale cell} other {stale cells}}: {names}. Run {count, plural, one {it} other {them}} to update this cell.',
+    values: { count: names.length, names: names.join(', ') },
+  });
 
 export const CellStatusBadge = ({ runtime }: { runtime: CellRuntime }) => {
+  const { store } = useNotebook();
+  const cells = useStateFromPublishingSubject(store.cells$);
   const { color, label } = STATUS_BADGES[runtime.status];
-  const tooltip = getTooltip(runtime);
+
+  const getTooltip = (): string | undefined => {
+    const { status, error, staleReason, staleParents = [] } = runtime;
+    if (status === 'blocked') return BLOCKED_TOOLTIP;
+    if (status !== 'stale' || !staleReason) return error;
+    if (staleReason !== 'upstream') return STALE_TOOLTIPS[staleReason];
+    return getUpstreamTooltip(
+      staleParents.flatMap((parentId) => {
+        const parent = cells[parentId];
+        return parent ? [parent.name] : [];
+      })
+    );
+  };
+  const tooltip = getTooltip();
   const badge = (
     <EuiBadge color={color} data-test-subj={`notebookCellStatus-${runtime.status}`}>
       {label}

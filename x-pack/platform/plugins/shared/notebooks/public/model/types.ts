@@ -33,6 +33,8 @@ export interface CellRuntime {
   output?: CellOutput;
   error?: string;
   staleReason?: StaleReason;
+  /** Ids of the stale parents when `staleReason` is `upstream`. */
+  staleParents?: readonly string[];
   lastRunAt?: number;
   durationMs?: number;
   memoKey?: string;

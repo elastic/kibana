@@ -211,7 +211,11 @@ describe('NotebookScheduler', () => {
 
       expect(env.fake.calls).toHaveLength(0);
       expect(env.runtime('q')).toEqual({ status: 'stale', staleReason: 'manual' });
-      expect(env.runtime('c')).toEqual({ status: 'stale', staleReason: 'upstream' });
+      expect(env.runtime('c')).toEqual({
+        status: 'stale',
+        staleReason: 'upstream',
+        staleParents: ['q'],
+      });
     });
 
     it('leaves a blank query and its chart idle without running anything', async () => {
@@ -511,7 +515,11 @@ describe('NotebookScheduler', () => {
       await env.scheduler.whenIdle();
 
       expect(env.runtime('q')).toMatchObject({ status: 'stale', staleReason: 'edited' });
-      expect(env.runtime('c')).toMatchObject({ status: 'stale', staleReason: 'upstream' });
+      expect(env.runtime('c')).toMatchObject({
+        status: 'stale',
+        staleReason: 'upstream',
+        staleParents: ['q'],
+      });
       expect(env.output('q')).toBe(qOutput);
       expect(env.output('c')).toBe(qOutput);
 
@@ -523,6 +531,7 @@ describe('NotebookScheduler', () => {
       expect(env.runtime('c').status).toBe('done');
       expect(env.runtime('q').staleReason).toBeUndefined();
       expect(env.runtime('c').staleReason).toBeUndefined();
+      expect(env.runtime('c').staleParents).toBeUndefined();
     });
 
     it('returns an edited query to done without running when the edit is reverted', async () => {
@@ -571,7 +580,11 @@ describe('NotebookScheduler', () => {
       await env.scheduler.whenIdle();
 
       expect(env.runtime('q')).toMatchObject({ status: 'stale', staleReason: 'manual' });
-      expect(env.runtime('c')).toMatchObject({ status: 'stale', staleReason: 'upstream' });
+      expect(env.runtime('c')).toMatchObject({
+        status: 'stale',
+        staleReason: 'upstream',
+        staleParents: ['q'],
+      });
       expect(env.output('q')).toBe(qOutput);
       expect(env.output('c')).toBe(qOutput);
       expect(env.fake.callsFor(query)).toHaveLength(1);
