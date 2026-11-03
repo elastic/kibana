@@ -104,6 +104,12 @@ const MIN_DWELL_MS = 1_000;
 const WARM_LAUNCH_FACTOR = 0.25;
 const MAX_TAPS_PER_SCREEN = 2;
 const DEFAULT_FAILURE_STATUS_CODES = [500, 502, 503, 504] as const;
+// How long before a crash a span may have ended and still wait in the SDK's export queue, which a
+// crash loses
+const SPAN_EXPORT_DELAY_MS: Readonly<Record<MobilePlatform, number>> = {
+  android: 0,
+  ios: 0,
+};
 const FAULT_ADDRESS_RANGE = 2 ** 32;
 
 const COMMON_ERROR_LOGS: readonly string[] = [
@@ -170,7 +176,9 @@ const TRANSPORT_ERRORS: Readonly<Record<MobilePlatform, readonly TransportError[
  * - each screen view: the iOS view span, the opt-in manual screen span, the screen's requests,
  *   taps and the requests they fire, and error logs
  * - the crash: EDOT Android writes it right away, EDOT iOS on the next launch. When the session
- *   ends with an iOS crash, the user relaunches the app within the session to report it.
+ *   ends with an iOS crash, the user relaunches the app within the session to report it. Spans
+ *   that hadn't been exported yet are lost: the screen span and requests still running at the
+ *   crash.
  *
  * Planning and simulation draw from the same `random` source, so a seed reproduces a session.
  */
@@ -413,11 +421,52 @@ const describeCrash = ({ client, app, random }: SessionContext): CrashReport => 
   return { type: template.type, message, stacktrace };
 };
 
-/** Everything that happens on one screen view. */
-const viewScreen = (ctx: SessionContext, view: ScreenViewPlan): EdotReactNativeEvent[] => {
+/**
+ * What the SDK has exported of a visit when the app crashes. Spans that were still running, or
+ * had ended so recently that they still waited in the export queue, are lost with their span
+ * events, and nothing happens after the crash.
+ */
+const exportedBeforeCrash = (
+  { client }: SessionContext,
+  events: EdotReactNativeEvent[],
+  crashedAt: number
+): EdotReactNativeEvent[] => {
+  const exportedUntil = crashedAt - SPAN_EXPORT_DELAY_MS[client.platform];
+  const lostSpanIds = new Set<string>();
+  return events
+    .filter(({ fields }) => {
+      if (!('kind' in fields)) {
+        return true;
+      }
+      const { '@timestamp': time = 0, duration = 0, span_id: spanId } = fields;
+      if (time + duration / 1_000_000 < exportedUntil) {
+        return true;
+      }
+      lostSpanIds.add(spanId);
+      return false;
+    })
+    .filter(({ fields }) => {
+      if ('kind' in fields) {
+        return true;
+      }
+      const { '@timestamp': time = 0, span_id: spanId } = fields;
+      return time <= crashedAt && !(spanId !== undefined && lostSpanIds.has(spanId));
+    });
+};
+
+/**
+ * Everything that happens on one screen view. When the app crashes on it, requests run on past the
+ * crash, so that `exportedBeforeCrash` drops them instead of cutting them short.
+ */
+const viewScreen = (
+  ctx: SessionContext,
+  view: ScreenViewPlan,
+  crashedAt?: number
+): EdotReactNativeEvent[] => {
   const { client, app, health, manualSpans, random } = ctx;
   const { screen, start, appeared, end } = view;
   const events: EdotReactNativeEvent[] = [];
+  const latestRequestEnd = crashedAt === undefined ? end : Number.POSITIVE_INFINITY;
 
   // Drawn on both platforms, so that the platform doesn't change the rest of the draws
   const viewContext = newTraceContext(random);
@@ -429,9 +478,10 @@ const viewScreen = (ctx: SessionContext, view: ScreenViewPlan): EdotReactNativeE
         .duration(Math.max(appeared - start, 1))
     );
   }
-  // Drawn even without manual spans, so that the option doesn't change the rest of the session
+  // Drawn even without manual spans, so that the option doesn't change the rest of the session.
+  // A screen span only ends when the user leaves the screen, so a crash loses it.
   const screenSpanContext = newTraceContext(random);
-  if (manualSpans.screens) {
+  if (manualSpans.screens && crashedAt === undefined) {
     events.push(
       client
         .manualSpan({ name: screen.name, ...screenSpanContext })
@@ -443,7 +493,7 @@ const viewScreen = (ctx: SessionContext, view: ScreenViewPlan): EdotReactNativeE
   (screen.requests ?? []).forEach((request) => {
     // The SDKs never make an HTTP span a child of a view or JS span: requests are their own traces
     const time = Math.round(between(random, start, Math.max(appeared, start + 1)));
-    events.push(...sendRequest(ctx, request, time, end));
+    events.push(...sendRequest(ctx, request, time, latestRequestEnd));
   });
 
   const widgets = screen.widgets ?? [];
@@ -453,7 +503,7 @@ const viewScreen = (ctx: SessionContext, view: ScreenViewPlan): EdotReactNativeE
     const time = Math.round(between(random, appeared, end - 1));
     events.push(client.widgetClick({ id: widget.id, name: widget.name }).timestamp(time));
     if (widget.request) {
-      events.push(...sendRequest(ctx, widget.request, time + 5, end));
+      events.push(...sendRequest(ctx, widget.request, time + 5, latestRequestEnd));
     }
   }
 
@@ -512,15 +562,21 @@ const simulateVisit = (
     );
   }
 
-  events.push(...screenViews.flatMap((view) => viewScreen(ctx, view)));
+  const lastView = screenViews.length - 1;
+  events.push(
+    ...screenViews.flatMap((view, i) =>
+      viewScreen(ctx, view, i === lastView ? crashedAt : undefined)
+    )
+  );
 
   if (crashedAt !== undefined) {
     const crash = describeCrash(ctx);
+    const exported = exportedBeforeCrash(ctx, events, crashedAt);
     if (client.platform === 'ios') {
-      return { events, crash: { crashedAt, crash } };
+      return { events: exported, crash: { crashedAt, crash } };
     }
-    events.push(client.crash(crash).timestamp(crashedAt));
-    return { events };
+    exported.push(client.crash(crash).timestamp(crashedAt));
+    return { events: exported };
   }
 
   if (client.platform === 'ios') {

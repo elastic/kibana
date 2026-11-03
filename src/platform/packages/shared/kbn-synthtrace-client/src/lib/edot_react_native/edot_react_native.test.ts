@@ -709,6 +709,52 @@ describe('edotReactNative', () => {
       expect(crashes[0]['@timestamp']).toBe(Math.max(...docs.map(timeOf)));
     });
 
+    it('loses the spans the SDK had not exported yet when the app crashes', () => {
+      // Slow requests that all fail, so that some still run at the crash and have span events
+      const health = withHealth({
+        crashRate: 1,
+        httpFailureRate: 1,
+        httpLatency: { median: 3_000, sigma: 1 },
+      });
+      (['android', 'ios'] as const).forEach((platform) => {
+        const exportDelay = 0;
+        for (let i = 0; i < 20; i++) {
+          const docs = simulate({
+            platform,
+            seed: `lost-at-crash-${i}`,
+            health,
+            manualSpans: { screens: true },
+          });
+          const [crash] = logs(docs).filter(
+            ({ event_name: eventName }) => eventName === 'app.crash'
+          );
+          const crashedAt = Number(crash.observed_timestamp);
+          const spans = docs.filter(isSpan);
+          expect(spans.filter(({ kind }) => kind === 'Client').length).toBeGreaterThan(0);
+
+          // Neither the crashed screen's span nor its running requests end at the crash
+          spans
+            .filter((span) => timeOf(span) < crashedAt)
+            .forEach((span) => {
+              expect(timeOf(span) + (span.duration ?? 0) / 1_000_000).toBeLessThan(
+                crashedAt - exportDelay
+              );
+            });
+          // Nothing happens between the crash and the relaunch
+          expect(
+            docs.filter(
+              (doc) => doc !== crash && timeOf(doc) > crashedAt && timeOf(doc) < crashedAt + 60_000
+            )
+          ).toEqual([]);
+          // Span events are lost with their span
+          const spanIds = new Set(spans.map(({ span_id: spanId }) => spanId));
+          logs(docs)
+            .filter(({ span_id: spanId }) => spanId !== undefined)
+            .forEach(({ span_id: spanId }) => expect(spanIds.has(String(spanId))).toBe(true));
+        }
+      });
+    });
+
     it('writes an iOS crash on the next launch, observed when it happened', () => {
       const docs = simulate({ platform: 'ios', health: withHealth({ crashRate: 1 }) });
       const [crash] = logs(docs).filter(({ event_name: eventName }) => eventName === 'app.crash');
