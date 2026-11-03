@@ -109,7 +109,8 @@ TS metrics-a
 TS metrics-a METADATA _ignored
   | WHERE _ignored IS NULL
   | STATS count = COUNT(latency.exp, bucket) BY bucket = BUCKET(latency.exp, 10, 1, 250), TBUCKET(100)
-  | EVAL bucket = RANGE_MIN(bucket)`);
+  | EVAL bucket = RANGE_MIN(bucket)
+  | SORT bucket DESC`);
   });
 
   it('opens a positive span when min equals max', () => {
