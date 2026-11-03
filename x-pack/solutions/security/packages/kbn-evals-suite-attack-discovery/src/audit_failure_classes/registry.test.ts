@@ -305,6 +305,22 @@ describe('audit failure class registry', () => {
     });
   });
 
+  describe('rendering cache', () => {
+    const base = findScenario('same-display-name-cross-account');
+
+    it('does not reuse a rendering for another scenario object with the same id', () => {
+      const trimmed: AuditScenario = { ...base, alerts: base.alerts.slice(1) };
+      expect(getAuditRendering(trimmed, 'baseline').anonymizedAlerts).not.toEqual(
+        getAuditRendering(base, 'baseline').anonymizedAlerts
+      );
+    });
+
+    it('returns the identical rendering for the same scenario object', () => {
+      expect(getAuditRendering(base, 'enriched_context')).toBe(getAuditRendering(base, 'enriched'));
+      expect(getAuditRendering(base, 'baseline')).toBe(getAuditRendering(base, 'baseline'));
+    });
+  });
+
   it('has a negative control that expects no discoveries', () => {
     expect(AUDIT_SCENARIOS.some(({ gold }) => gold.expectedDiscoveries === 'none')).toBe(true);
   });

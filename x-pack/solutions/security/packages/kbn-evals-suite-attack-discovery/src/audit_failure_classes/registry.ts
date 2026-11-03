@@ -33,7 +33,9 @@ export const AUDIT_INPUT_VARIANTS: readonly AuditInputVariant[] = [
 export const getAuditExampleName = (scenarioId: string, variant: AuditInputVariant): string =>
   `${scenarioId}.${variant}`;
 
-const renderCache = new Map<string, RenderedAlerts>();
+type RenderVariant = 'baseline' | 'enriched';
+/** Keyed on the scenario object, so a scenario that reuses a registered id never gets a stale rendering. */
+const renderCache = new WeakMap<AuditScenario, Map<RenderVariant, RenderedAlerts>>();
 
 /**
  * Product-style anonymized alerts and the token replacements for one scenario and variant.
@@ -44,12 +46,17 @@ export const getAuditRendering = (
   scenario: AuditScenario,
   variant: AuditInputVariant
 ): RenderedAlerts => {
-  const renderVariant: AuditInputVariant = variant === 'baseline' ? 'baseline' : 'enriched';
-  const seed = getAnonymizationSeed(scenario.id, renderVariant);
-  const cached = renderCache.get(seed);
+  const renderVariant: RenderVariant = variant === 'baseline' ? 'baseline' : 'enriched';
+  const byVariant = renderCache.get(scenario) ?? new Map<RenderVariant, RenderedAlerts>();
+  renderCache.set(scenario, byVariant);
+  const cached = byVariant.get(renderVariant);
   if (cached) return cached;
-  const rendered = renderAlerts(scenario.alerts, renderVariant, seed);
-  renderCache.set(seed, rendered);
+  const rendered = renderAlerts(
+    scenario.alerts,
+    renderVariant,
+    getAnonymizationSeed(scenario.id, renderVariant)
+  );
+  byVariant.set(renderVariant, rendered);
   return rendered;
 };
 
