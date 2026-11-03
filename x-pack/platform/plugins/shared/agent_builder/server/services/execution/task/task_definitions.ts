@@ -12,6 +12,7 @@ import type { TaskHandler } from './task_handler';
 
 export const taskTypes = {
   runAgent: 'agent-builder:run-agent',
+  browserToolCallsCleanup: 'agent-builder:browser-tool-calls-cleanup',
 } as const;
 
 export interface RunAgentTaskParams {
