@@ -129,6 +129,15 @@ export const loadRoundSteps = async ({
   };
 };
 
+/** `runMemoryOptimize` left the round alone on purpose, which is not a failure. */
+export interface MemoryOptimizeSkipped {
+  skipped: 'conversation_unreadable';
+}
+
+export const isMemoryOptimizeSkipped = (
+  result: MemoryOptimizeSummary | MemoryOptimizeSkipped | undefined
+): result is MemoryOptimizeSkipped => result !== undefined && 'skipped' in result;
+
 export const runMemoryOptimize = async ({
   request,
   agentId,
@@ -171,7 +180,7 @@ export const runMemoryOptimize = async ({
   requestedConnectorId?: string;
   roundConnectorId?: string;
   interactionId: string;
-}): Promise<MemoryOptimizeSummary | undefined> => {
+}): Promise<MemoryOptimizeSummary | MemoryOptimizeSkipped | undefined> => {
   logger.debug(
     `Memory optimize wiring space=${spaceId} agent=${agentId} ` +
       `connector=${requestedConnectorId ?? '(none)'} round=${roundConnectorId ?? '(none)'} ` +
@@ -209,7 +218,7 @@ export const runMemoryOptimize = async ({
     logger.info(
       `Memory optimize skipped — conversation ${conversationId} is not readable by this caller`
     );
-    return undefined;
+    return { skipped: 'conversation_unreadable' };
   }
   const investigation =
     loaded.source === 'persisted_round'

@@ -256,6 +256,38 @@ describe('runMemoryOptimize', () => {
       })
     );
   });
+
+  it('skips a round in a conversation the caller cannot read, without writing anything', async () => {
+    const get = jest
+      .fn()
+      .mockRejectedValue(createConversationNotFoundError({ conversationId: 'private-1' }));
+    getAgentBuilder.mockReturnValue({
+      runtime: { createModelProvider },
+      conversations: { getScopedClient: jest.fn().mockResolvedValue({ get }) },
+    });
+
+    await expect(
+      runMemoryOptimize({
+        request,
+        agentId: 'nightshift.investigation',
+        userMessage: 'why?',
+        assistantMessage: 'redis',
+        toolCalls: [{ tool_id: 'nightshift_sandbox_bash', params: {}, results: [] }],
+        conversationId: 'private-1',
+        roundId: 'round-1',
+        recalledIds: [],
+        esClient: {} as never,
+        spaceId: 'default',
+        getAgentBuilder,
+        getInference,
+        getSavedObjects,
+        getUiSettings,
+        logger: loggerMock.create(),
+        interactionId: 'execution-1',
+      })
+    ).resolves.toEqual({ skipped: 'conversation_unreadable' });
+    expect(optimizeMemory).not.toHaveBeenCalled();
+  });
 });
 
 describe('loadRoundSteps', () => {
