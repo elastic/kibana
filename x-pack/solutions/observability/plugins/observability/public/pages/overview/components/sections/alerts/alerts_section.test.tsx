@@ -27,11 +27,13 @@ jest.mock('../section_container', () => ({
   SectionContainer: ({
     children,
     appLink,
+    hasInnerPanel,
   }: {
     children: React.ReactNode;
     appLink: { href: string };
+    hasInnerPanel?: boolean;
   }) => (
-    <div data-test-subj="sectionContainer">
+    <div data-test-subj="sectionContainer" data-has-inner-panel={String(hasInnerPanel)}>
       <a data-test-subj="sectionAppLink" href={appLink.href}>
         link
       </a>
@@ -119,6 +121,26 @@ describe('AlertsSection', () => {
     expect(href).toContain('timeFrom');
     expect(href).toContain('now-15m');
     expect(href).toContain('now');
+  });
+
+  it('drops the section panel when the universal section brings its own panels', () => {
+    setup({ universalEnabled: true });
+    render(<AlertsSection bucketSize={bucketSize} />);
+
+    expect(screen.getByTestSubject('sectionContainer')).toHaveAttribute(
+      'data-has-inner-panel',
+      'false'
+    );
+  });
+
+  it('keeps the section panel for the classic section, which has none of its own', () => {
+    setup({ universalEnabled: false });
+    render(<AlertsSection bucketSize={bucketSize} />);
+
+    expect(screen.getByTestSubject('sectionContainer')).toHaveAttribute(
+      'data-has-inner-panel',
+      'true'
+    );
   });
 
   it('renders nothing when the space has no alerting rules', () => {
