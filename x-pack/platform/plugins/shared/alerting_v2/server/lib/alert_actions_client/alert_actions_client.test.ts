@@ -701,6 +701,51 @@ describe('AlertActionsClient', () => {
       expect(emitEpisodeActionsSpy).not.toHaveBeenCalled();
     });
 
+    describe.each([
+      ['the synthetic rule event', 0],
+      ['the audit action row', 1],
+    ])('when %s is rejected inside an otherwise resolved bulk', (_label, failingIndex) => {
+      it('throws and emits no action event', async () => {
+        queryServiceEsClient.esql.query
+          .mockResolvedValueOnce(
+            getAlertEventESQLResponse([
+              { episode_id: 'episode-3', group_hash: 'group-1', episode_status: 'active' },
+            ])
+          )
+          .mockResolvedValueOnce(
+            getSeriesEventESQLResponse([{ episode_id: 'episode-3', group_hash: 'group-1' }])
+          );
+        storageServiceEsClient.bulk.mockReset();
+        storageServiceEsClient.bulk.mockResolvedValueOnce({
+          took: 1,
+          errors: true,
+          items: [0, 1].map((index) =>
+            index === failingIndex
+              ? {
+                  create: {
+                    _index: 'x',
+                    status: 403,
+                    error: { type: 'security_exception', reason: 'denied' },
+                  },
+                }
+              : { create: { _index: 'x', status: 201 } }
+          ),
+        });
+
+        await expect(
+          client.createEpisodeAction({
+            episodeId: 'episode-3',
+            action: { action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE, reason: 'resolved' },
+          })
+        ).rejects.toMatchObject({
+          output: { statusCode: 500 },
+          message: 'Failed to persist 1 of 2 alert action documents',
+        });
+
+        expect(emitEpisodeActionsSpy).not.toHaveBeenCalled();
+      });
+    });
+
     it('waits for both data streams to be ready before writing', async () => {
       queryServiceEsClient.esql.query
         .mockResolvedValueOnce(getAlertEventESQLResponse([{ episode_id: 'episode-3' }]))
@@ -1029,6 +1074,34 @@ describe('AlertActionsClient', () => {
       return operations.filter((_, index) => index % 2 === 1);
     };
 
+    it('keeps resolving when the bulk reports a per-document error (only single actions throw)', async () => {
+      queryServiceEsClient.esql.query
+        .mockResolvedValueOnce(
+          getAlertEventESQLResponse([{ episode_id: 'episode-1', group_hash: 'group-1' }])
+        )
+        .mockResolvedValueOnce(getAlertActionStateESQLResponse());
+      storageServiceEsClient.bulk.mockReset();
+      storageServiceEsClient.bulk.mockResolvedValueOnce({
+        took: 1,
+        errors: true,
+        items: [
+          {
+            create: {
+              _index: 'x',
+              status: 403,
+              error: { type: 'security_exception', reason: 'denied' },
+            },
+          },
+        ],
+      });
+
+      await expect(
+        client.createBulkEpisodeActions([
+          { alert_id: 'episode-1', action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
+        ])
+      ).resolves.toEqual({ affected_count: 1, errors: [] });
+    });
+
     it('persists non-lifecycle actions with one by-episode and one action-state lookup', async () => {
       const items: BulkCreateEpisodeAlertActionItemBody[] = [
         { alert_id: 'episode-1', action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
@@ -1272,6 +1345,87 @@ describe('AlertActionsClient', () => {
       expect(docs).toHaveLength(1);
       expect(docs[0]).toMatchObject({ alert_id: 'episode-2' });
       expect(emitEpisodeActionsSpy.mock.calls[0][1]).toHaveLength(1);
+    });
+  });
+
+  describe('when the client writes as the internal user (requireUserProfile)', () => {
+    beforeEach(() => {
+      ({
+        alertActionsClient: client,
+        queryServiceEsClient,
+        storageServiceEsClient,
+        userProfileService,
+        alertActionEventPublisher,
+      } = createAlertActionsClient({ requireUserProfile: true }));
+      emitEpisodeActionsSpy = jest.spyOn(alertActionEventPublisher, 'emitEpisodeActions');
+      storageServiceEsClient.bulk.mockResolvedValueOnce({ items: [], errors: false, took: 1 });
+    });
+
+    it('rejects with 403 and writes nothing when the request user has no profile uid', async () => {
+      userProfileService.getCurrentProfileId.mockResolvedValue(null as unknown as string);
+      queryServiceEsClient.esql.query
+        .mockResolvedValueOnce(getAlertEventESQLResponse([{ episode_id: 'episode-3' }]))
+        .mockResolvedValueOnce(getAlertActionStateESQLResponse());
+
+      await expect(
+        client.createEpisodeAction({
+          episodeId: 'episode-3',
+          action: { action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
+      expect(emitEpisodeActionsSpy).not.toHaveBeenCalled();
+    });
+
+    it('rejects a series action with 403 and writes nothing when the request user has no profile uid', async () => {
+      userProfileService.getCurrentProfileId.mockResolvedValue(null as unknown as string);
+      queryServiceEsClient.esql.query
+        .mockResolvedValueOnce(getSeriesEventESQLResponse([{ group_hash: GROUP_HASH }]))
+        .mockResolvedValueOnce(getSeriesActionStateESQLResponse());
+
+      await expect(
+        client.createSeriesAction({
+          seriesId: toSeriesId(),
+          action: {
+            action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+            snoozed_until: '2026-08-12T00:00:00.000Z',
+          },
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('rejects a bulk episode request with 403 and writes nothing when the request user has no profile uid', async () => {
+      userProfileService.getCurrentProfileId.mockResolvedValue(null as unknown as string);
+      queryServiceEsClient.esql.query
+        .mockResolvedValueOnce(
+          getAlertEventESQLResponse([{ episode_id: 'episode-1', group_hash: 'group-1' }])
+        )
+        .mockResolvedValueOnce(getAlertActionStateESQLResponse());
+
+      await expect(
+        client.createBulkEpisodeActions([
+          { alert_id: 'episode-1', action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
+        ])
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('records the request user as the actor', async () => {
+      queryServiceEsClient.esql.query
+        .mockResolvedValueOnce(getAlertEventESQLResponse([{ episode_id: 'episode-3' }]))
+        .mockResolvedValueOnce(getAlertActionStateESQLResponse());
+
+      await client.createEpisodeAction({
+        episodeId: 'episode-3',
+        action: { action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
+      });
+
+      const operations = storageServiceEsClient.bulk.mock.calls[0][0].operations ?? [];
+      expect(operations[1]).toMatchObject({ actor: { type: 'user', profile_uid: 'test-uid' } });
     });
   });
 });

@@ -51,6 +51,7 @@ export type {
   RulesClientApi,
   InternalRulesClientApi,
   ActionPolicyClientApi,
+  AlertActionsClientApi,
   AlertEventsClientApi,
 } from './types';
 export type { ArtifactTypeDefinition, ArtifactReferenceDescriptor } from './lib/artifact_types';

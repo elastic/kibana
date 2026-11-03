@@ -16,6 +16,12 @@ import { RulesClientOptionsToken } from '../lib/rules_client/tokens';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
 import { AlertEventsClient } from '../lib/alert_events_client';
+import { AlertActionsClient } from '../lib/alert_actions_client';
+import {
+  AlertActionsRequireUserProfileToken,
+  AlertActionsStorageToken,
+} from '../lib/alert_actions_client/tokens';
+import { StorageServiceInternalToken } from '../lib/services/storage_service/tokens';
 import { AlertStatusChangedOptIns } from '../lib/alert_status_changed';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
 import { InternalRulesClient } from '../lib/internal_rules_client';
@@ -25,6 +31,7 @@ import type {
   RulesClientApi,
   InternalRulesClientApi,
   ActionPolicyClientApi,
+  AlertActionsClientApi,
   AlertEventsClientApi,
 } from '../types';
 
@@ -93,6 +100,19 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
       },
       async getAlertEventsClientWithRequest(request: KibanaRequest): Promise<AlertEventsClientApi> {
         return buildScope(request).get(AlertEventsClient);
+      },
+      async getAlertActionsClientWithRequest(
+        request: KibanaRequest
+      ): Promise<AlertActionsClientApi> {
+        const scope = buildScope(request);
+        scope
+          .bind(AlertActionsStorageToken)
+          .toDynamicValue((context) => context.get(StorageServiceInternalToken))
+          .inRequestScope();
+        scope.bind(Global).toConstantValue(AlertActionsStorageToken);
+        scope.bind(AlertActionsRequireUserProfileToken).toConstantValue(true);
+        scope.bind(Global).toConstantValue(AlertActionsRequireUserProfileToken);
+        return scope.get(AlertActionsClient);
       },
     };
     return contract;
