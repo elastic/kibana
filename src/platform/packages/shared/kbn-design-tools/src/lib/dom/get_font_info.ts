@@ -28,6 +28,6 @@ export const getFontInfo = (element: HTMLElement): FontInfo => {
     fontSize: formatPxValue(computed.fontSize),
     fontWeight: computed.fontWeight,
     lineHeight: formatPxValue(computed.lineHeight),
-    letterSpacing: formatPxValue(computed.letterSpacing),
+    letterSpacing: computed.letterSpacing,
   };
 };

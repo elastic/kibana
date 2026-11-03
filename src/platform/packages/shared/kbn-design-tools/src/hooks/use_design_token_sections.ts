@@ -56,12 +56,12 @@ const mapToken = (
   return key ? `${prefix}.${key}` : undefined;
 };
 
-const shouldShowLetterSpacing = (rawLetterSpacing: string): boolean => {
-  if (rawLetterSpacing === 'normal') {
+const shouldShowLetterSpacing = (letterSpacing: string): boolean => {
+  if (letterSpacing === 'normal') {
     return false;
   }
-  const raw = parseFloat(rawLetterSpacing);
-  return Number.isFinite(raw) && raw !== 0;
+  const value = parseFloat(letterSpacing);
+  return Number.isFinite(value) && value !== 0;
 };
 
 /**
@@ -98,7 +98,7 @@ export const useDesignTokenSections = (element: HTMLElement): ElementStyleSummar
         cssValue: fontInfo.lineHeight,
       },
     ];
-    if (shouldShowLetterSpacing(computed.letterSpacing)) {
+    if (shouldShowLetterSpacing(fontInfo.letterSpacing)) {
       rows.push({
         label: i18n.translate('kbnDesignTools.fontInspect.card.letterSpacing', {
           defaultMessage: 'Letter spacing',

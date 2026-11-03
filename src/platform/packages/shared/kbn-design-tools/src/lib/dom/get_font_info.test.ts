@@ -48,7 +48,7 @@ describe('getFontInfo', () => {
     });
   });
 
-  it('should round fractional pixel values in size, line-height, and letter-spacing', () => {
+  it('should round fractional pixel values in size and line-height, but not letter-spacing', () => {
     mockComputedStyle({
       fontFamily: 'Arial',
       fontSize: '14.567px',
@@ -60,7 +60,7 @@ describe('getFontInfo', () => {
     expect(getFontInfo(element)).toMatchObject({
       fontSize: '15px',
       lineHeight: '20px',
-      letterSpacing: '0px',
+      letterSpacing: '0.4px',
     });
   });
 });
