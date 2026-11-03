@@ -1,5 +1,7 @@
 # Rollup
 
+Set `xpack.rollup.enabled: false` in `kibana.yml` to disable the plugin, including its UI and Kibana APIs. The plugin is enabled by default in stateful Kibana and disabled by `config/serverless.yml` in serverless.
+
 ## Summary
 
 Welcome to the Kibana rollup plugin! This plugin provides Kibana support for [Elasticsearch's rollup feature](https://www.elastic.co/guide/en/elasticsearch/reference/current/xpack-rollup.html). Please refer to the Elasticsearch documentation to understand rollup indices and how to create rollup jobs.
