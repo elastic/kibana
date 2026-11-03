@@ -200,6 +200,19 @@ describe('ORCA scores', () => {
     expect(prompt).toHaveBeenCalledTimes(2);
   });
 
+  it.each([
+    ['control', OrcaControlJudgePrompt],
+    ['flags', OrcaFlagsJudgePrompt],
+  ])('asks the %s judge for its reasoning before its decision', (_, prompt) => {
+    const [version] = prompt.versions;
+    const { properties, required } = version.tools?.score.schema as {
+      properties: Record<string, unknown>;
+      required: string[];
+    };
+    expect(Object.keys(properties)[0]).toBe('reasoning');
+    expect(required[0]).toBe('reasoning');
+  });
+
   it('accepts a report and reference longer than any fixed limit', () => {
     const long = 'x'.repeat(100_000);
     expect(() =>

@@ -665,7 +665,9 @@ export const OrcaFlagsJudgePrompt = createPrompt({
         description: 'Return the flags and causes the report names.',
         schema: {
           type: 'object',
+          // `reasoning` comes first so the lists follow from it, as in the control judge.
           properties: {
+            reasoning: { type: 'string', description: 'One sentence.' },
             named_flags: {
               type: 'array',
               items: { type: 'string' },
@@ -677,9 +679,8 @@ export const OrcaFlagsJudgePrompt = createPrompt({
               items: { type: 'string' },
               description: 'Every root cause the report asserts.',
             },
-            reasoning: { type: 'string', description: 'One sentence.' },
           },
-          required: ['named_flags', 'named_causes', 'reasoning'],
+          required: ['reasoning', 'named_flags', 'named_causes'],
         },
       },
     },
@@ -744,13 +745,19 @@ export const OrcaControlJudgePrompt = createPrompt({
     tools: {
       score: {
         description: 'Return whether the report claims an incident inside the quiet window.',
+        // `reasoning` comes first so the model compares the times before it commits to the
+        // decision. With the decision first, it sometimes reasoned its way to the opposite answer.
         schema: {
           type: 'object',
           properties: {
+            reasoning: {
+              type: 'string',
+              description:
+                'Compare each reported time of active impact with the window bounds, then state the verdict.',
+            },
             claims_incident_in_quiet_window: { type: 'boolean' },
-            reasoning: { type: 'string' },
           },
-          required: ['claims_incident_in_quiet_window', 'reasoning'],
+          required: ['reasoning', 'claims_incident_in_quiet_window'],
         },
       },
     },
