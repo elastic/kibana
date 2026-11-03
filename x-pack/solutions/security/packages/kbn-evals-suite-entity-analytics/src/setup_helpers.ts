@@ -113,6 +113,40 @@ export async function bulkIndexEntities({
   await esClient.bulk({ refresh: true, operations });
 }
 
+export async function indexRiskScoreHistory({
+  esClient,
+  entityType,
+  entityId,
+  points,
+  namespace = 'default',
+}: {
+  esClient: ElasticsearchClient;
+  entityType: 'user' | 'host';
+  entityId: string;
+  points: ReadonlyArray<{ timestamp: string; scoreNorm: number; level: EntityRiskLevels }>;
+  namespace?: string;
+}): Promise<void> {
+  if (points.length === 0) return;
+
+  const operations = points.flatMap((point) => [
+    { index: { _index: `risk-score.risk-score-${namespace}` } },
+    {
+      '@timestamp': point.timestamp,
+      [entityType]: {
+        risk: {
+          '@timestamp': point.timestamp,
+          id_field: 'entity.id',
+          id_value: entityId,
+          calculated_score_norm: point.scoreNorm,
+          calculated_level: point.level,
+        },
+      },
+    },
+  ]);
+
+  await esClient.bulk({ refresh: true, operations });
+}
+
 export async function deleteWatchlistsByName({
   supertest,
   names,

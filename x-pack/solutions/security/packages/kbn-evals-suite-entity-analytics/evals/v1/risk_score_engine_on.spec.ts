@@ -5,65 +5,46 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { tags } from '@kbn/scout-security';
-import {
-  buildDocument,
-  createAndSyncRuleAndAlertsFactory,
-  waitForRiskScoresToBePresent,
-  dataViewRouteHelpersFactory,
-  deleteAllRiskScores,
-} from '@kbn/test-suites-security-solution-apis/test_suites/entity_analytics/utils';
-import { deleteAllRules } from '@kbn/detections-response-ftr-services/rules';
-import { dataGeneratorFactory } from '@kbn/test-suites-security-solution-apis/test_suites/detections_response/utils';
-import { deleteAllAlerts, createAlertsIndex } from '@kbn/detections-response-ftr-services/alerts';
-import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/common';
 import { evaluate } from '../../src/evaluate';
+import {
+  bulkIndexEntities,
+  deleteEntityEngines,
+  indexRiskScoreHistory,
+  installEntityStoreV2AndWait,
+} from '../../src/setup_helpers';
 
 evaluate.describe(
   'SIEM Entity Analytics Skill - Risk Score Tests',
   { tag: tags.serverless.security.complete },
   () => {
-    const userId = uuidv4();
-
-    evaluate.beforeAll(async ({ log, esArchiverLoad, esClient: es, supertest }) => {
-      await createAlertsIndex(supertest, log);
-      await esArchiverLoad(
-        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
-      );
-      const dataView = dataViewRouteHelpersFactory(supertest);
-      await dataView.create('security-solution', 'ecs_compliant,auditbeat-*');
-
-      const { indexListOfDocuments } = dataGeneratorFactory({ es, index: 'ecs_compliant', log });
-      const userDocs = Array(20)
-        .fill({})
-        .map((_, index) => buildDocument({ user: { name: `user-${index}` } }, userId));
-      await indexListOfDocuments(userDocs);
-
-      const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
-      await createAndSyncRuleAndAlerts({
-        query: `id: ${userId}`,
-        alerts: 10,
-        riskScore: Math.floor(Math.random() * 100),
+    evaluate.beforeAll(async ({ log, esClient, supertest }) => {
+      await installEntityStoreV2AndWait({ supertest, log });
+      await bulkIndexEntities({
+        esClient,
+        entities: Array.from({ length: 10 }, (_, index) => ({
+          euid: `user:user-${index}`,
+          riskScoreNorm: 95 - index * 8,
+          riskLevel: index < 2 ? 'Critical' : index < 5 ? 'High' : 'Low',
+        })),
       });
-      await supertest
-        .post(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT)
-        .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '2')
-        .set('x-elastic-internal-origin', 'Kibana')
-        .send({})
-        .expect(200);
-      await waitForRiskScoresToBePresent({ es, log, scoreCount: 20 });
+      const day = 24 * 60 * 60 * 1000;
+      await indexRiskScoreHistory({
+        esClient,
+        entityType: 'user',
+        entityId: 'user:user-1',
+        points: [
+          { timestamp: new Date(Date.now() - 60 * day).toISOString(), scoreNorm: 40, level: 'Low' },
+          { timestamp: new Date(Date.now() - day).toISOString(), scoreNorm: 87, level: 'Critical' },
+        ],
+      });
     });
 
-    evaluate.afterAll(async ({ esClient, log, quickApiClient, supertest }) => {
-      await quickApiClient.cleanUpRiskEngine();
-      await deleteAllRiskScores(log, esClient);
-      await deleteAllAlerts(supertest, log, esClient);
-      await deleteAllRules(supertest, log);
-
-      const dataView = dataViewRouteHelpersFactory(supertest);
-      await dataView.delete('security-solution');
+    evaluate.afterAll(async ({ esClient, log, supertest }) => {
+      await esClient.indices
+        .delete({ index: 'risk-score.risk-score-default' })
+        .catch(() => undefined);
+      await deleteEntityEngines({ supertest, log });
     });
 
     evaluate('entity analytics risk score questions', async ({ evaluateDataset }) => {
@@ -85,17 +66,9 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.entity_analytics.risk_score',
-                    acceptableAlternativeToolIds: ['security.entity_analytics.asset_criticality'],
+                    id: 'security.search_entities',
                     criteria: [
-                      `The tool should return the following ESQL query:
-                      FROM risk-score.risk-score-latest-default
-                      | WHERE user.risk.calculated_score_norm IS NOT NULL
-                      | KEEP @timestamp, user.risk.calculated_score_norm, user.risk.calculated_level, user.risk.id_value, user.risk.id_field
-                      | SORT user.risk.calculated_score_norm DESC
-
-                      Don't fail the assertion if the query has limit.
-                      `,
+                      'The tool searches entities and orders them by risk score descending.',
                     ],
                   },
                 ],
@@ -115,15 +88,8 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.entity_analytics.risk_score',
-                    acceptableAlternativeToolIds: ['security.entity_analytics.asset_criticality'],
-                    criteria: [
-                      `The tool should return an ESQL query with the following structure:
-                      * FROM index: risk-score.risk-score-default
-                      * Filter by: @timestamp >= NOW() - 90 days
-                      * Filter by: user.name == "user-1"
-                      `,
-                    ],
+                    id: 'security.get_entity_risk_score_history',
+                    criteria: ['The tool requests risk score history for user-1.'],
                   },
                 ],
               },
@@ -142,15 +108,9 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.entity_analytics.risk_score',
-                    acceptableAlternativeToolIds: ['security.entity_analytics.asset_criticality'],
+                    id: 'security.search_entities',
                     criteria: [
-                      `The tool should return the following ESQL query:
-                      FROM risk-score.risk-score-latest-default
-                      | WHERE user.risk.calculated_score_norm IS NOT NULL
-                      | KEEP @timestamp, user.risk.calculated_score_norm, user.risk.calculated_level, user.risk.id_value, user.risk.id_field
-                      | SORT user.risk.calculated_score_norm DESC
-                      | LIMIT 15`,
+                      'The tool searches entities, orders them by risk score descending, and limits the result to 15.',
                     ],
                   },
                 ],
