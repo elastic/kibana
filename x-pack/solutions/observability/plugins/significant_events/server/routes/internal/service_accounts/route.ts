@@ -56,6 +56,7 @@ const enableServiceAccountRoute = createServerRoute({
       core: server.core,
       spaces: server.spaces,
       workflowsExtensions: server.workflowsExtensions,
+      workflowsManagement: server.workflowsManagement,
       isServerless: server.isServerless,
     }).enable({
       request,
@@ -92,6 +93,7 @@ const getServiceAccountStatusRoute = createServerRoute({
       core: server.core,
       spaces: server.spaces,
       workflowsExtensions: server.workflowsExtensions,
+      workflowsManagement: server.workflowsManagement,
       isServerless: server.isServerless,
     }).getStatus({ request, spaceId: await getSpaceId(request) });
   },
