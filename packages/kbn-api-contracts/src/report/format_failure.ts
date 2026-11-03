@@ -169,6 +169,7 @@ export function formatFailure(entries: ImpactReportEntry[]): string {
     ...HEADER,
     `Detected ${gating.length} breaking change(s) in stable/tech_preview APIs ` +
       `(${stable.length} stable, ${techPreview.length} tech_preview):`,
+    'Stable and Technical Preview changes block merge.',
     '',
     ...gating.flatMap(formatEntry),
     ...allowlistedSection,

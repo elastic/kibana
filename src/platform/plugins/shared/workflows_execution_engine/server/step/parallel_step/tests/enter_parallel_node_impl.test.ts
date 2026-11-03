@@ -30,6 +30,9 @@ describe('EnterParallelNodeImpl', () => {
   let factory: jest.Mocked<StepExecutionRuntimeFactory>;
   let nodesFactory: jest.Mocked<NodesFactory>;
   let workflowGraph: jest.Mocked<WorkflowGraph>;
+  let workflowExecutionState: {
+    getStepExecutionsByStepId: jest.Mock;
+  };
 
   // The state the parallel step "persists"; kept in a closure so the impl can
   // read it back across ticks like the real step state store.
@@ -147,7 +150,13 @@ describe('EnterParallelNodeImpl', () => {
       getDirectSuccessors: jest.fn((nodeId: string) =>
         nodeId === 'branchStep' ? [{ id: 'exitParallel_fanOut' }] : []
       ),
+      getWorkflowLevelTimeout: jest.fn(() => undefined),
+      getNode: jest.fn(() => undefined),
     } as unknown as jest.Mocked<WorkflowGraph>;
+
+    workflowExecutionState = {
+      getStepExecutionsByStepId: jest.fn(() => []),
+    };
 
     node = makeNode();
   });
@@ -160,7 +169,8 @@ describe('EnterParallelNodeImpl', () => {
       logger,
       factory,
       nodesFactory,
-      workflowGraph
+      workflowGraph,
+      workflowExecutionState
     );
 
   // Re-tick the node until it finishes the step or stops making progress, mimicking
@@ -738,6 +748,75 @@ describe('EnterParallelNodeImpl', () => {
       expect(output.status).toBe('failed');
       expect(output.results.every((r) => r.status === 'timed_out')).toBe(true);
       expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith('exitParallel_fanOut');
+    });
+
+    it('parks at the branch deadline when a wait runs longer than branch-timeout', async () => {
+      node = makeNode({
+        foreach: JSON.stringify(['a']),
+        mode: 'settled',
+        'branch-timeout': '3s',
+      });
+      const waitEndsAt = nowMs + 60_000;
+      factory.createStepExecutionRuntime.mockImplementation(
+        () =>
+          ({
+            abortController: new AbortController(),
+            contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+            stepExecutionId: 'exec_branch_0',
+            get stepExecution() {
+              return {
+                status: ExecutionStatus.WAITING,
+                state: { resumeAt: new Date(waitEndsAt).toISOString() },
+              };
+            },
+            getCurrentStepResult: () => ({ output: { branch: 0 }, error: undefined }),
+            timeoutStep: jest.fn(),
+          } as unknown as StepExecutionRuntime)
+      );
+
+      await build().run();
+
+      expect(stepRuntime.enterWaitUntil).toHaveBeenCalledWith(
+        new Date(nowMs + 3_000),
+        undefined,
+        true
+      );
+    });
+
+    it('parks at an enclosing idle deadline that is sooner than the wait', async () => {
+      node = makeNode({
+        foreach: JSON.stringify(['a']),
+        mode: 'settled',
+      });
+      const idleDeadline = nowMs + 2_000;
+      // The enclosing deadline comes from the workflow-level timeout: the
+      // workflow started at `nowMs` with a 2s budget.
+      workflowGraph.getWorkflowLevelTimeout.mockReturnValue('2s');
+      factory.createStepExecutionRuntime.mockImplementation(
+        () =>
+          ({
+            abortController: new AbortController(),
+            contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+            stepExecutionId: 'exec_branch_0',
+            workflowExecution: { startedAt: new Date(nowMs).toISOString() },
+            get stepExecution() {
+              return {
+                status: ExecutionStatus.WAITING,
+                state: { resumeAt: new Date(nowMs + 60_000).toISOString() },
+              };
+            },
+            getCurrentStepResult: () => ({ output: { branch: 0 }, error: undefined }),
+            timeoutStep: jest.fn(),
+          } as unknown as StepExecutionRuntime)
+      );
+
+      await build().run();
+
+      expect(stepRuntime.enterWaitUntil).toHaveBeenCalledWith(
+        new Date(idleDeadline),
+        undefined,
+        true
+      );
     });
 
     it('times out only the branch that exceeds the per-branch budget', async () => {

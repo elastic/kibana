@@ -24,7 +24,7 @@ import * as onboardingI18n from './translations';
 
 const PARTIAL_SUCCESS_WARNING = i18n.translate('xpack.alertzero.onboarding.partialSuccessWarning', {
   defaultMessage:
-    'Some settings were saved before the error. Check Watches to review the current status.',
+    'Some changes were saved before the error. Go to Watches to check which Workers are on.',
 });
 
 type WorkerEnabledMap = Record<string, boolean>;

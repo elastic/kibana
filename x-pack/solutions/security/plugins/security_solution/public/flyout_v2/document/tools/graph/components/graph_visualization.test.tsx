@@ -218,6 +218,66 @@ describe('GraphVisualization', () => {
     });
   });
 
+  describe('graph scope', () => {
+    it('gives each mounted graph its own scope derived from the consumer scope', async () => {
+      render(
+        <>
+          <GraphVisualization {...ENTITY_PROPS} />
+          <GraphVisualization {...ENTITY_PROPS} entityId="entity-2" />
+        </>
+      );
+
+      await waitFor(() => {
+        expect(GraphInvestigation).toHaveBeenCalledTimes(2);
+      });
+
+      const [first, second] = jest
+        .mocked(GraphInvestigation)
+        .mock.calls.map(([{ scopeId }]) => scopeId);
+      expect(first).toMatch(/^test-scope-graph/);
+      expect(second).toMatch(/^test-scope-graph/);
+      expect(first).not.toEqual(second);
+    });
+
+    it('uses graphScopeId as is when provided', async () => {
+      const { getNodeDocumentMode } = jest.requireMock('@kbn/cloud-security-posture-graph');
+      getNodeDocumentMode.mockReturnValueOnce('grouped-events');
+
+      render(<GraphVisualization {...EVENT_PROPS} graphScopeId="test-scope" />);
+
+      await waitFor(() => {
+        expect(GraphInvestigation).toHaveBeenCalledTimes(1);
+      });
+
+      const { onOpenEventPreview, scopeId } = jest.mocked(GraphInvestigation).mock.calls[0][0];
+      expect(scopeId).toBe('test-scope');
+
+      onOpenEventPreview?.({ documentsData: [{ id: 'doc-1', type: 'event' }] } as never);
+      expect(callbacks.onShowGrouped).toHaveBeenCalledWith(
+        expect.objectContaining({ scopeId: 'test-scope' })
+      );
+    });
+
+    it('keeps the same scope across re-renders', async () => {
+      const { rerender } = render(<GraphVisualization {...ENTITY_PROPS} />);
+
+      await waitFor(() => {
+        expect(GraphInvestigation).toHaveBeenCalledTimes(1);
+      });
+
+      rerender(<GraphVisualization {...ENTITY_PROPS} entityId="entity-2" />);
+
+      await waitFor(() => {
+        expect(GraphInvestigation).toHaveBeenCalledTimes(2);
+      });
+
+      const [first, second] = jest
+        .mocked(GraphInvestigation)
+        .mock.calls.map(([{ scopeId }]) => scopeId);
+      expect(second).toEqual(first);
+    });
+  });
+
   describe('showInvestigateInTimeline', () => {
     it('passes showInvestigateInTimeline as true when user has timeline read access', async () => {
       mockCapabilities.securitySolutionTimeline.read = true;
@@ -282,13 +342,37 @@ describe('GraphVisualization', () => {
         ],
       } as never);
 
+      const { scopeId: graphScopeId } = jest.mocked(GraphInvestigation).mock.calls[0][0];
       expect(callbacks.onShowGrouped).toHaveBeenCalledWith({
         docMode: 'grouped-events',
         documentIds: ['doc-1', 'doc-2'],
         dataViewId: 'experimental-data-view-pattern',
         entityItems: [],
+        scopeId: graphScopeId,
       });
       expect(mockToasts.addDanger).not.toHaveBeenCalled();
+    });
+
+    it('routes a grouped-entities node to onShowGrouped with the graph scope', async () => {
+      const { getNodeDocumentMode } = jest.requireMock('@kbn/cloud-security-posture-graph');
+      getNodeDocumentMode.mockReturnValueOnce('grouped-entities');
+
+      render(<GraphVisualization {...ENTITY_PROPS} />);
+
+      await waitFor(() => {
+        expect(GraphInvestigation).toHaveBeenCalledTimes(1);
+      });
+
+      const { onOpenEventPreview, scopeId: graphScopeId } =
+        jest.mocked(GraphInvestigation).mock.calls[0][0];
+      onOpenEventPreview?.({
+        icon: 'user',
+        documentsData: [{ id: 'entity-2', type: 'entity', entity: { name: 'Entity 2' } }],
+      } as never);
+
+      expect(callbacks.onShowGrouped).toHaveBeenCalledWith(
+        expect.objectContaining({ docMode: 'grouped-entities', scopeId: graphScopeId })
+      );
     });
 
     it('forwards onOpenNetworkPreview straight to GraphInvestigation', async () => {

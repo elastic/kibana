@@ -39,4 +39,43 @@ describe('isCredentialSensitiveChange', () => {
     const next = { ...base, futureField: 'x' } as HashiCorpVaultConfig;
     expect(isCredentialSensitiveChange(base, next)).toBe(true);
   });
+
+  describe('allowedMonitorHosts', () => {
+    const restricted = { ...base, allowedMonitorHosts: ['a.example.com', 'b.example.com'] };
+
+    it('allows narrowing the list', () => {
+      expect(
+        isCredentialSensitiveChange(restricted, { ...base, allowedMonitorHosts: ['a.example.com'] })
+      ).toBe(false);
+    });
+
+    it('allows resaving an unchanged list', () => {
+      expect(
+        isCredentialSensitiveChange(restricted, {
+          ...base,
+          allowedMonitorHosts: ['a.example.com', 'b.example.com'],
+        })
+      ).toBe(false);
+    });
+
+    it('flags allowing another host', () => {
+      expect(
+        isCredentialSensitiveChange(restricted, {
+          ...base,
+          allowedMonitorHosts: ['a.example.com', 'c.example.com'],
+        })
+      ).toBe(true);
+    });
+
+    it.each([
+      ['omitted', undefined],
+      ['empty', []],
+    ])('flags removing the restriction (%s)', (_name, allowedMonitorHosts) => {
+      expect(isCredentialSensitiveChange(restricted, { ...base, allowedMonitorHosts })).toBe(true);
+    });
+
+    it('allows adding a restriction to an unrestricted connection', () => {
+      expect(isCredentialSensitiveChange(base, restricted)).toBe(false);
+    });
+  });
 });
