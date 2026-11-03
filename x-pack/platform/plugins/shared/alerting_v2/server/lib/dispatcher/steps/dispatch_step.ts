@@ -8,7 +8,9 @@
 import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { KibanaRequest } from '@kbn/core/server';
+import { Logger as LoggerToken } from '@kbn/core-di';
 import { brandSpaceId } from '@kbn/core-spaces-common';
+import type { Logger as KibanaLogger } from '@kbn/logging';
 import type {
   BulkScheduleWorkflowResult,
   WorkflowDetailDto,
@@ -37,11 +39,12 @@ import { LicenseServiceToken } from '../../services/license_service/tokens';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
 import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
-import { DISPATCH_CHUNK_SIZE } from '../constants';
+import { DISPATCH_CHUNK_SIZE, DISPATCH_RETRY_MAX_RETRIES } from '../constants';
 import type {
   ActionGroup,
   ActionGroupId,
   ActionPolicyDestination,
+  DispatchDeferral,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
@@ -54,7 +57,9 @@ import { DISPATCH_FAILURE_REASONS, type DispatchFailureReason } from './constant
 import { WorkflowsManagementApiToken } from './dispatch_step_tokens';
 import { toNotifiedActions } from './utils/action_documents';
 import { CommitFailedError } from './utils/commit_failed_error';
+import { DispatchRetryService } from './utils/dispatch_retry_service';
 import { emitExecutionHistory } from './utils/execution_history';
+import { isTransientDispatchError } from './utils/is_transient_dispatch_error';
 import { SeriesLedger } from './utils/series_ledger';
 
 const ACTION_POLICY_TRIGGER = 'action_policy';
@@ -64,6 +69,13 @@ interface DispatchBatch {
   request: KibanaRequest;
   workflowsBySpace: Map<string, Map<string, WorkflowDetailDto>>;
   failedSpaces: Map<string, Error>;
+  deferredSpaces: Map<string, Error>;
+}
+
+interface WorkflowLookup {
+  ids: string[];
+  spaceId: string;
+  request: KibanaRequest;
 }
 
 interface PlannedSchedule {
@@ -76,9 +88,17 @@ interface PlannedSchedule {
 interface DispatchProgress {
   readonly executionsByGroup: Map<ActionGroupId, string[]>;
   readonly failures: DispatchFailure[];
+  readonly deferrals: DispatchDeferral[];
+  /** Set once an operation outlasted its retry budget: later operations of the tick are not retried. */
+  retriesExhausted: boolean;
 }
 
 const toError = (err: unknown): Error => (isError(err) ? err : new Error(String(err)));
+
+const isTransientRejection = (
+  result: PromiseSettledResult<WorkflowDetailDto[]>
+): result is PromiseRejectedResult =>
+  result.status === 'rejected' && isTransientDispatchError(toError(result.reason));
 
 const workflowDestinations = (group: ActionGroup): ActionPolicyDestination[] =>
   group.destinations.filter((destination) => destination.type === 'workflow');
@@ -132,7 +152,8 @@ export class DispatchStep implements DispatcherStep {
     private readonly workflowsManagement: WorkflowsServerPluginSetup['management'],
     @inject(LicenseServiceToken) private readonly licenseService: LicenseServiceContract,
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract,
-    @inject(EventLogServiceToken) private readonly eventLogService: EventLogServiceContract
+    @inject(EventLogServiceToken) private readonly eventLogService: EventLogServiceContract,
+    @inject(LoggerToken) private readonly kibanaLogger: KibanaLogger
   ) {}
 
   public async execute(
@@ -152,7 +173,12 @@ export class DispatchStep implements DispatcherStep {
       return { type: 'halt', reason: 'no_actions' };
     }
 
-    const progress: DispatchProgress = { executionsByGroup: new Map(), failures: [] };
+    const progress: DispatchProgress = {
+      executionsByGroup: new Map(),
+      failures: [],
+      deferrals: [],
+      retriesExhausted: false,
+    };
     const outcome = () => DispatchOutcome.of(progress);
 
     try {
@@ -192,9 +218,14 @@ export class DispatchStep implements DispatcherStep {
       });
     }
 
-    // Completing with groups never attempted would let the watermark advance past their alerts.
+    // Completing with groups never attempted or deferred would let the watermark advance past
+    // their alerts. A deferred group is dispatched again next tick; the outcome carries the
+    // deferrals so the stuck-watermark escape hatch can report them if it gives up.
     if (ledger.hasUnattemptedGroups()) {
-      return { type: 'halt', reason: 'aborted' };
+      if (input.signal.aborted || progress.deferrals.length === 0) {
+        return { type: 'halt', reason: 'aborted' };
+      }
+      return { type: 'halt', reason: 'dispatch_deferred', data: { outcome: outcome() } };
     }
 
     return { type: 'continue', data: { outcome: outcome() } };
@@ -246,7 +277,9 @@ export class DispatchStep implements DispatcherStep {
    * Schedules the workflows of `groups` and yields each group once, after its last schedule
    * attempt. Stops when the tick signal fires; groups not yielded by then were never attempted.
    * Groups that cannot be scheduled (license, API key, workflow lookup) are yielded with their
-   * failures too: a group never yielded holds back its series' records and halts the tick as aborted.
+   * failures too: a group never yielded holds back its series' records and halts the tick. Groups
+   * whose lookup or schedule failed with a transient error after retries are deferred: recorded in
+   * `progress.deferrals` and never yielded, so the next tick dispatches them again.
    */
   private async *dispatchGroups(
     groups: readonly ActionGroup[],
@@ -294,30 +327,60 @@ export class DispatchStep implements DispatcherStep {
         request: this.craftFakeRequest(apiKey, spaceId),
         workflowsBySpace: new Map(),
         failedSpaces: new Map(),
+        deferredSpaces: new Map(),
       }))
     );
-    await this.prefetchWorkflows(batches, logger);
-    for (const { groups: batchGroups, request, workflowsBySpace, failedSpaces } of batches) {
+    await this.prefetchWorkflows(batches, signal, progress, logger);
+    for (const batch of batches) {
       if (signal.aborted) return;
       const schedulesByGroup = Map.groupBy(
-        this.planSchedules(batchGroups, workflowsBySpace, failedSpaces, failures, logger),
+        this.planSchedules(batch, progress, logger),
         ({ group }) => group.id
       );
-      const unscheduledGroups = batchGroups.filter(({ id }) => !schedulesByGroup.has(id));
+      const deferredGroupIds = new Set(
+        progress.deferrals.map(({ actionGroupId }) => actionGroupId)
+      );
+      const unscheduledGroups = batch.groups.filter(
+        ({ id }) => !schedulesByGroup.has(id) && !deferredGroupIds.has(id)
+      );
       if (unscheduledGroups.length > 0) {
         yield unscheduledGroups;
       }
       for (const chunk of chunkByGroup(schedulesByGroup, DISPATCH_CHUNK_SIZE)) {
         if (signal.aborted) return;
-        await withDispatcherSpan('dispatch_chunk', () =>
-          this.dispatchChunk(chunk, this.workflowsManagement.getClient(request), progress, logger)
+        const concluded = await withDispatcherSpan('dispatch_chunk', () =>
+          this.dispatchChunk(
+            chunk,
+            this.workflowsManagement.getClient(batch.request),
+            signal,
+            progress,
+            logger
+          )
         );
-        yield uniqBy(
-          chunk.map(({ group }) => group),
-          ({ id }) => id
-        );
+        if (concluded) {
+          yield uniqBy(
+            chunk.map(({ group }) => group),
+            ({ id }) => id
+          );
+        }
       }
     }
+  }
+
+  /**
+   * Retries transient failures of one dispatch operation within the retry budget. Once an
+   * operation of the tick exhausted its retries, later operations get a single attempt: retrying
+   * them during the same outage would only delay the tick.
+   */
+  private createRetryService(
+    signal: AbortSignal,
+    { retriesExhausted }: DispatchProgress
+  ): DispatchRetryService {
+    return new DispatchRetryService(
+      this.kibanaLogger,
+      signal,
+      retriesExhausted ? 0 : DISPATCH_RETRY_MAX_RETRIES
+    );
   }
 
   private recordLicenseNotSupported(
@@ -358,14 +421,11 @@ export class DispatchStep implements DispatcherStep {
 
   private async prefetchWorkflows(
     batches: DispatchBatch[],
+    signal: AbortSignal,
+    progress: DispatchProgress,
     logger: LoggerServiceContract
   ): Promise<void> {
-    const lookups: Array<{
-      batch: DispatchBatch;
-      ids: string[];
-      spaceId: string;
-      request: KibanaRequest;
-    }> = [];
+    const lookups: Array<WorkflowLookup & { batch: DispatchBatch }> = [];
     for (const batch of batches) {
       const idsBySpace = new Map<string, Set<string>>();
       for (const group of batch.groups) {
@@ -377,13 +437,27 @@ export class DispatchStep implements DispatcherStep {
         lookups.push({ batch, ids: [...ids], spaceId, request: batch.request });
       }
     }
-    const results = await this.workflowsManagement.getWorkflowsByIdsForRequests(
-      lookups.map(({ ids, spaceId, request }) => ({ ids, spaceId, request }))
+    const results = await this.lookUpWorkflows(
+      lookups.map(({ ids, spaceId, request }) => ({ ids, spaceId, request })),
+      signal,
+      progress
     );
     results.forEach((result, index) => {
       const { batch, ids, spaceId } = lookups[index];
       if (result.status === 'rejected') {
         const error = toError(result.reason);
+        if (isTransientDispatchError(error)) {
+          batch.deferredSpaces.set(spaceId, error);
+          logger.warn({
+            error,
+            code: ALERTING_LOG_CODES.DISPATCH_TRANSIENT_FAILURE_DEFERRED,
+            message: () =>
+              `Failed to look up ${ids.length} workflow(s) in space ${spaceId} after retries; ` +
+              `their action groups are dispatched again next tick. ${error.message}`,
+            labels: { space_id: spaceId },
+          });
+          return;
+        }
         batch.failedSpaces.set(spaceId, error);
         logger.error({
           error,
@@ -402,16 +476,55 @@ export class DispatchStep implements DispatcherStep {
     });
   }
 
+  /**
+   * Looks up the workflows of every lookup, retrying while the call throws or a lookup is rejected
+   * with a transient error. After the last attempt, a transient error is reported as the rejection
+   * of the lookups it affected so that only their groups are deferred.
+   */
+  private async lookUpWorkflows(
+    requests: WorkflowLookup[],
+    signal: AbortSignal,
+    progress: DispatchProgress
+  ): Promise<Array<PromiseSettledResult<WorkflowDetailDto[]>>> {
+    let lastResults: Array<PromiseSettledResult<WorkflowDetailDto[]>> | undefined;
+    try {
+      return await this.createRetryService(signal, progress).retryWithBackoff(async () => {
+        lastResults = undefined;
+        const results = await this.workflowsManagement.getWorkflowsByIdsForRequests(requests);
+        const transientRejection = results.find(isTransientRejection);
+        if (transientRejection) {
+          lastResults = results;
+          throw toError(transientRejection.reason);
+        }
+        return results;
+      });
+    } catch (err) {
+      const error = toError(err);
+      if (!isTransientDispatchError(error)) {
+        throw error;
+      }
+      progress.retriesExhausted = true;
+      return (
+        lastResults ??
+        requests.map((): PromiseRejectedResult => ({ status: 'rejected', reason: error }))
+      );
+    }
+  }
+
   private planSchedules(
-    groups: ActionGroup[],
-    workflowsBySpace: Map<string, Map<string, WorkflowDetailDto>>,
-    failedSpaces: Map<string, Error>,
-    dispatchFailures: DispatchFailure[],
+    { groups, workflowsBySpace, failedSpaces, deferredSpaces }: DispatchBatch,
+    { failures: dispatchFailures, deferrals }: DispatchProgress,
     logger: LoggerServiceContract
   ): PlannedSchedule[] {
     const schedules: PlannedSchedule[] = [];
 
     for (const group of groups) {
+      const deferralError = deferredSpaces.get(group.spaceId);
+      if (deferralError) {
+        deferrals.push(...this.buildGroupDeferrals(group, deferralError.message));
+        continue;
+      }
+
       const prefetchError = failedSpaces.get(group.spaceId);
       if (prefetchError) {
         dispatchFailures.push(
@@ -523,22 +636,45 @@ export class DispatchStep implements DispatcherStep {
     };
   }
 
+  /**
+   * Schedules one chunk and returns whether its groups concluded. A chunk that still fails with a
+   * transient error after retries is deferred and returns false: its groups are not recorded.
+   */
   private async dispatchChunk(
     chunk: PlannedSchedule[],
     client: WorkflowsManagementClient,
+    signal: AbortSignal,
     progress: DispatchProgress,
     logger: LoggerServiceContract
-  ): Promise<void> {
+  ): Promise<boolean> {
     try {
-      const results = await client.bulkScheduleWorkflow(chunk.map(({ item }) => item));
+      const results = await this.createRetryService(signal, progress).retryWithBackoff(() =>
+        client.bulkScheduleWorkflow(chunk.map(({ item }) => item))
+      );
       for (let i = 0; i < chunk.length; i++) {
         this.applyScheduleResult(chunk[i], results[i], progress, logger);
       }
+      return true;
     } catch (err) {
       // Unlike a failed commit, a failed schedule leaves no workflow to record,
       // so later chunks still run.
       const error = toError(err);
       const groupCount = new Set(chunk.map(({ group }) => group.id)).size;
+      if (isTransientDispatchError(error)) {
+        progress.retriesExhausted = true;
+        logger.warn({
+          error,
+          code: ALERTING_LOG_CODES.DISPATCH_TRANSIENT_FAILURE_DEFERRED,
+          message: () =>
+            `Failed to schedule ${chunk.length} workflow(s) for ${groupCount} action group(s) ` +
+            `after retries; they are dispatched again next tick. ${error.message}`,
+          labels: { space_id: chunk[0].group.spaceId },
+        });
+        for (const { group, workflowId } of chunk) {
+          progress.deferrals.push(this.buildDeferral(group, workflowId, error.message));
+        }
+        return false;
+      }
       logger.error({
         error,
         code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_SCHEDULE_FAILED,
@@ -556,6 +692,7 @@ export class DispatchStep implements DispatcherStep {
           )
         );
       }
+      return true;
     }
   }
 
@@ -609,13 +746,22 @@ export class DispatchStep implements DispatcherStep {
     reason: DispatchFailureReason,
     message: string
   ): DispatchFailure {
+    return { ...this.buildDeferral(group, workflowId, message), reason };
+  }
+
+  private buildGroupDeferrals(group: ActionGroup, message: string): DispatchDeferral[] {
+    return workflowDestinations(group).map((destination) =>
+      this.buildDeferral(group, destination.id, message)
+    );
+  }
+
+  private buildDeferral(group: ActionGroup, workflowId: string, message: string): DispatchDeferral {
     return {
       policyId: group.policyId,
       spaceId: group.spaceId,
       actionGroupId: group.id,
       workflowId,
       alerts: group.alerts,
-      reason,
       message,
     };
   }

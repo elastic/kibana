@@ -91,6 +91,17 @@ describe('computeNextWatermark', () => {
     });
   });
 
+  describe('dispatch_deferred halt', () => {
+    it('does not advance the watermark', () => {
+      const result = computeNextWatermark({
+        input: BASE_INPUT,
+        result: makeResult({ completed: false, haltReason: 'dispatch_deferred' }),
+      });
+
+      expect(result.toISOString()).toBe('2026-01-22T07:30:00.000Z');
+    });
+  });
+
   describe('no_alerts halt', () => {
     it('advances to windowEnd', () => {
       const result = computeNextWatermark({

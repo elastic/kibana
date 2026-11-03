@@ -13,6 +13,8 @@ import { isError } from 'lodash';
 import { v4 as uuidV4 } from 'uuid';
 import type { PluginConfig } from '../../config';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
+import type { EventLogServiceContract } from '../services/event_log_service/event_log_service';
+import { EventLogServiceToken } from '../services/event_log_service/tokens';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -28,9 +30,12 @@ import {
   getTickDeadlineMs,
 } from './constants';
 import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
-import { AlertScan } from './state';
+import { AlertScan, RuleCatalog } from './state';
+import { DISPATCH_FAILURE_REASONS } from './steps/constants';
 import { toAction } from './steps/utils/action_documents';
+import { emitDispatchFailures } from './steps/utils/execution_history';
 import type {
+  DispatchDeferral,
   DispatcherExecutionParams,
   DispatcherExecutionResult,
   DispatcherPipelineInput,
@@ -86,7 +91,8 @@ export class DispatcherService implements DispatcherServiceContract {
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract,
     @inject(LoggerServiceToken) logger: LoggerServiceContract,
     @inject(PluginInitializer('config'))
-    pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
+    pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config'],
+    @inject(EventLogServiceToken) private readonly eventLogService: EventLogServiceContract
   ) {
     this.parentLogger = logger.forSubsystem('dispatcher');
     const { dispatcher } = pluginConfigAccessor.get<PluginConfig>();
@@ -144,6 +150,16 @@ export class DispatcherService implements DispatcherServiceContract {
       const isStuck = nextWatermark.getTime() === resolvedWatermark.getTime();
       const nextStuckTicks = isStuck ? stuckTicks + 1 : 0;
       const scan = pipelineResult.finalState.scan ?? AlertScan.empty();
+
+      if (pipelineResult.haltReason === 'dispatch_deferred') {
+        const deferralCount = pipelineResult.finalState.outcome?.deferrals.length ?? 0;
+        logger.warn({
+          code: ALERTING_LOG_CODES.DISPATCH_TRANSIENT_FAILURE_DEFERRED,
+          message: () =>
+            `${deferralCount} dispatch attempt(s) deferred by transient errors; holding watermark ` +
+            `(stuck ticks: ${nextStuckTicks}/${STUCK_TICK_LIMIT}).`,
+        });
+      }
 
       logger.debug({
         message: () => {
@@ -267,13 +283,14 @@ export class DispatcherService implements DispatcherServiceContract {
     const clampedEscapeTarget = new Date(
       Math.max(escapeTarget.getTime(), eventWatermark.getTime())
     );
+    const deferrals = pipelineResult.finalState.outcome?.deferrals ?? [];
 
     logger.error({
       code: ALERTING_LOG_CODES.DISPATCHER_WATERMARK_STUCK,
       message: () =>
         `watermark stuck for ${STUCK_TICK_LIMIT} consecutive ticks ` +
         `(lag: ${lagMs}ms, blocking alerts: ${blockingAlerts.length}, ` +
-        `truncated: ${truncated}). ` +
+        `deferred dispatches: ${deferrals.length}, truncated: ${truncated}). ` +
         `Force-recording as unmatched and advancing to ${clampedEscapeTarget.toISOString()}.`,
       error: new Error(`Watermark stuck at ${eventWatermark.toISOString()}`),
     });
@@ -304,11 +321,38 @@ export class DispatcherService implements DispatcherServiceContract {
       return { startedAt, nextWatermark: eventWatermark, nextStuckTicks: 0, pipelineResult };
     }
 
+    // The deferred groups' alerts were just force-recorded, so they are never dispatched again.
+    this.emitDroppedDeferrals({ input, pipelineResult, deferrals });
+
     return {
       startedAt,
       nextWatermark: clampedEscapeTarget,
       nextStuckTicks: 0,
       pipelineResult,
     };
+  }
+
+  private emitDroppedDeferrals({
+    input: { startedAt, executionUuid },
+    pipelineResult: { finalState },
+    deferrals,
+  }: {
+    input: DispatcherPipelineInput;
+    pipelineResult: DispatcherPipelineResult;
+    deferrals: readonly DispatchDeferral[];
+  }): void {
+    emitDispatchFailures({
+      eventLogService: this.eventLogService,
+      failures: deferrals.map((deferral) => ({
+        ...deferral,
+        reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
+        message:
+          `Transient error persisted for ${STUCK_TICK_LIMIT} ticks; notification dropped. ` +
+          deferral.message,
+      })),
+      rules: finalState.rules ?? RuleCatalog.empty(),
+      timestamp: startedAt.toISOString(),
+      executionUuid,
+    });
   }
 }

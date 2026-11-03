@@ -8,6 +8,7 @@
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import type {
@@ -20,6 +21,7 @@ import type {
   ActionPolicySavedObjectAttributes,
   RuleSavedObjectAttributes,
 } from '../../saved_objects';
+import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import type { ActionPolicySavedObjectServiceContract } from '../services/action_policy_saved_object_service/action_policy_saved_object_service';
 import { createActionPolicySavedObjectService } from '../services/action_policy_saved_object_service/action_policy_saved_object_service.mock';
 import type { EventLogServiceContract } from '../services/event_log_service/event_log_service';
@@ -63,7 +65,8 @@ import {
   createWorkflowDetailDto,
   MOCK_KIBANA_BASE_URL,
 } from './fixtures/test_utils';
-import { AlertScan } from './state';
+import { AlertScan, DispatchOutcome } from './state';
+import { DISPATCH_FAILURE_REASONS } from './steps/constants';
 import { ESQL_QUERY_ROW_LIMIT, getDispatchableAlertEventsQuery } from './queries';
 import {
   ApplyAlreadyNotifiedStep,
@@ -82,6 +85,7 @@ import {
 import type {
   Alert,
   AlreadyNotifiedRecord,
+  DispatchDeferral,
   DispatcherHaltReason,
   AlertSuppressionRow,
   SeriesSuppressionRow,
@@ -181,15 +185,27 @@ function buildDispatcherService(deps: {
       deps.workflowsManagement,
       deps.licenseService ?? createMockLicenseService(),
       deps.storageService,
-      deps.eventLogService
+      deps.eventLogService,
+      loggerMock.create()
     ),
   ]);
-  return new DispatcherService(
+  return createService(
     pipeline,
     deps.storageService,
-    deps.loggerService ?? createLoggerService().loggerService,
-    createDispatcherConfigAccessor()
+    deps.loggerService,
+    createDispatcherConfigAccessor(),
+    deps.eventLogService
   );
+}
+
+function createService(
+  pipeline: DispatcherPipelineContract,
+  storageService: StorageServiceContract,
+  loggerService: LoggerServiceContract = createLoggerService().loggerService,
+  config = createDispatcherConfigAccessor(),
+  eventLogService: EventLogServiceContract = createEventLogService().eventLogService
+): DispatcherService {
+  return new DispatcherService(pipeline, storageService, loggerService, config, eventLogService);
 }
 
 describe('DispatcherService', () => {
@@ -959,12 +975,7 @@ describe('DispatcherService', () => {
     it('generates a fresh UUID on every run', async () => {
       const { storageService: noopStorage } = createStorageService();
       const mockPipeline = buildMockPipeline();
-      const service = new DispatcherService(
-        mockPipeline,
-        noopStorage,
-        createLoggerService().loggerService,
-        createDispatcherConfigAccessor()
-      );
+      const service = createService(mockPipeline, noopStorage);
 
       await service.run({
         eventWatermark: new Date(),
@@ -993,12 +1004,7 @@ describe('DispatcherService', () => {
       const { loggerService, mockLogger } = createLoggerService();
       const { storageService: noopStorage } = createStorageService();
       const mockPipeline = buildMockPipeline();
-      const service = new DispatcherService(
-        mockPipeline,
-        noopStorage,
-        loggerService,
-        createDispatcherConfigAccessor()
-      );
+      const service = createService(mockPipeline, noopStorage, loggerService);
 
       await service.run({ taskId: 'task-1' });
 
@@ -1010,12 +1016,7 @@ describe('DispatcherService', () => {
       const { loggerService, mockLogger } = createLoggerService();
       const { storageService: noopStorage } = createStorageService();
       const mockPipeline = buildMockPipeline();
-      const service = new DispatcherService(
-        mockPipeline,
-        noopStorage,
-        loggerService,
-        createDispatcherConfigAccessor()
-      );
+      const service = createService(mockPipeline, noopStorage, loggerService);
 
       await service.run({
         eventWatermark: new Date(),
@@ -1030,12 +1031,7 @@ describe('DispatcherService', () => {
       const { loggerService, mockLogger } = createLoggerService();
       const { storageService: noopStorage } = createStorageService();
       const mockPipeline = buildMockPipeline();
-      const service = new DispatcherService(
-        mockPipeline,
-        noopStorage,
-        loggerService,
-        createDispatcherConfigAccessor()
-      );
+      const service = createService(mockPipeline, noopStorage, loggerService);
 
       await service.run({ eventWatermark: new Date('invalid'), taskId: 'task-1' });
 
@@ -1085,12 +1081,7 @@ describe('DispatcherService', () => {
       const { storageService: noopStorage } = createStorageService();
       const lastAlertTs = '2026-01-22T07:33:00.000Z';
       const mockPipeline = buildMockTruncatedPipeline(lastAlertTs);
-      const service = new DispatcherService(
-        mockPipeline,
-        noopStorage,
-        createLoggerService().loggerService,
-        createDispatcherConfigAccessor()
-      );
+      const service = createService(mockPipeline, noopStorage);
 
       const result = await service.run({
         eventWatermark: new Date('2026-01-22T07:30:00.000Z'),
@@ -1142,12 +1133,7 @@ describe('DispatcherService', () => {
     it('aborts the pipeline signal at the default 1m-timeout deadline and holds the watermark', async () => {
       const { storageService: noopStorage } = createStorageService();
       const mockPipeline = buildNeverResolvingPipeline();
-      const service = new DispatcherService(
-        mockPipeline,
-        noopStorage,
-        createLoggerService().loggerService,
-        createDispatcherConfigAccessor()
-      );
+      const service = createService(mockPipeline, noopStorage);
 
       const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
       const resultPromise = service.run({ eventWatermark, taskId: 'task-1' });
@@ -1168,10 +1154,10 @@ describe('DispatcherService', () => {
     it('derives the deadline from the configured dispatcher timeout', async () => {
       const { storageService: noopStorage } = createStorageService();
       const mockPipeline = buildNeverResolvingPipeline();
-      const service = new DispatcherService(
+      const service = createService(
         mockPipeline,
         noopStorage,
-        createLoggerService().loggerService,
+        undefined,
         createDispatcherConfigAccessor({ run: { timeout: '3m' } })
       );
 
@@ -1194,12 +1180,7 @@ describe('DispatcherService', () => {
       const { loggerService, mockLogger } = createLoggerService();
       const { storageService: noopStorage } = createStorageService();
       const mockPipeline = buildNeverResolvingPipeline();
-      const service = new DispatcherService(
-        mockPipeline,
-        noopStorage,
-        loggerService,
-        createDispatcherConfigAccessor()
-      );
+      const service = createService(mockPipeline, noopStorage, loggerService);
 
       const resultPromise = service.run({
         eventWatermark: new Date('2026-01-22T07:30:00.000Z'),
@@ -1220,12 +1201,7 @@ describe('DispatcherService', () => {
       const { loggerService, mockLogger } = createLoggerService();
       const { storageService: noopStorage } = createStorageService();
       const mockPipeline = buildNeverResolvingPipeline();
-      const service = new DispatcherService(
-        mockPipeline,
-        noopStorage,
-        loggerService,
-        createDispatcherConfigAccessor()
-      );
+      const service = createService(mockPipeline, noopStorage, loggerService);
 
       const tmController = new AbortController();
       const resultPromise = service.run({
@@ -1431,7 +1407,8 @@ describe('DispatcherService', () => {
     // concluded every group. `inline_stats_too_large` pins it too.
     function buildStuckPipeline(
       alerts: Alert[],
-      haltReason: DispatcherHaltReason = 'aborted'
+      haltReason: DispatcherHaltReason = 'aborted',
+      outcome?: DispatchOutcome
     ): jest.Mocked<DispatcherPipelineContract> {
       return {
         execute: jest
@@ -1453,6 +1430,7 @@ describe('DispatcherService', () => {
                   input,
                   scan: AlertScan.of({ alerts }),
                   // aborted → computeNextWatermark returns input.eventWatermark
+                  outcome,
                 },
               });
             }
@@ -1460,7 +1438,7 @@ describe('DispatcherService', () => {
       };
     }
 
-    it.each<DispatcherHaltReason>(['aborted', 'commit_failed'])(
+    it.each<DispatcherHaltReason>(['aborted', 'commit_failed', 'dispatch_deferred'])(
       'nextStuckTicks increments when the watermark does not advance (halt_reason: %s)',
       async (haltReason) => {
         const { storageService: noopStorage } = createStorageService();
@@ -1471,12 +1449,7 @@ describe('DispatcherService', () => {
           [createAlert({ alert_id: 'e1', last_event_timestamp: '2026-01-22T07:31:00.000Z' })],
           haltReason
         );
-        const service = new DispatcherService(
-          mockPipeline,
-          noopStorage,
-          createLoggerService().loggerService,
-          createDispatcherConfigAccessor()
-        );
+        const service = createService(mockPipeline, noopStorage);
 
         const result = await service.run({ eventWatermark, stuckTicks: 4, taskId: 'task-1' });
 
@@ -1513,12 +1486,7 @@ describe('DispatcherService', () => {
             }
           ),
       };
-      const service = new DispatcherService(
-        advancingPipeline,
-        noopStorage,
-        createLoggerService().loggerService,
-        createDispatcherConfigAccessor()
-      );
+      const service = createService(advancingPipeline, noopStorage);
 
       // Had 5 stuck ticks before, but this tick advances → reset
       const result = await service.run({ eventWatermark, stuckTicks: 5, taskId: 'task-1' });
@@ -1540,12 +1508,7 @@ describe('DispatcherService', () => {
       });
 
       const mockPipeline = buildStuckPipeline([blockingAlert]);
-      const service = new DispatcherService(
-        mockPipeline,
-        escapeStorage,
-        createLoggerService().loggerService,
-        createDispatcherConfigAccessor()
-      );
+      const service = createService(mockPipeline, escapeStorage);
 
       // Pass stuckTicks = STUCK_TICK_LIMIT - 1 so this tick pushes over the limit
       const result = await service.run({
@@ -1586,12 +1549,7 @@ describe('DispatcherService', () => {
       const mockPipeline = buildStuckPipeline([
         createAlert({ alert_id: 'e1', last_event_timestamp: '2026-01-22T07:31:00.000Z' }),
       ]);
-      const service = new DispatcherService(
-        mockPipeline,
-        escapeStorage,
-        loggerService,
-        createDispatcherConfigAccessor()
-      );
+      const service = createService(mockPipeline, escapeStorage, loggerService);
 
       await service.run({
         eventWatermark,
@@ -1607,6 +1565,136 @@ describe('DispatcherService', () => {
       );
     });
 
+    describe('deferred dispatches', () => {
+      const deferredAlert = createAlert({
+        alert_id: 'deferred-e1',
+        last_event_timestamp: '2026-01-22T07:31:00.000Z',
+        space_id: 'default',
+      });
+      const deferral: DispatchDeferral = {
+        policyId: 'p1',
+        spaceId: 'default',
+        actionGroupId: 'g1',
+        workflowId: 'wf-1',
+        alerts: [deferredAlert],
+        message: 'service unavailable',
+      };
+      const deferredOutcome = DispatchOutcome.of({
+        executionsByGroup: new Map(),
+        failures: [],
+        deferrals: [deferral, { ...deferral, workflowId: 'wf-2' }],
+      });
+      const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
+
+      it('logs the deferral and holds the watermark below the stuck limit', async () => {
+        const { loggerService, mockLogger } = createLoggerService();
+        const { storageService: noopStorage } = createStorageService();
+        const { eventLogService, mockEventLogger } = createEventLogService();
+        const service = createService(
+          buildStuckPipeline([deferredAlert], 'dispatch_deferred', deferredOutcome),
+          noopStorage,
+          loggerService,
+          undefined,
+          eventLogService
+        );
+
+        const result = await service.run({ eventWatermark, stuckTicks: 0, taskId: 'task-1' });
+
+        expect(result.nextWatermark.toISOString()).toBe(eventWatermark.toISOString());
+        expect(result.nextStuckTicks).toBe(1);
+        expect(mockEventLogger.logEvent).not.toHaveBeenCalled();
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.any(Function),
+          expect.objectContaining({
+            labels: expect.objectContaining({
+              code: ALERTING_LOG_CODES.DISPATCH_TRANSIENT_FAILURE_DEFERRED,
+            }),
+          })
+        );
+        const [[warnMessage]] = mockLogger.warn.mock.calls;
+        expect(typeof warnMessage === 'function' ? warnMessage() : warnMessage).toContain(
+          `2 dispatch attempt(s) deferred by transient errors; holding watermark (stuck ticks: 1/${STUCK_TICK_LIMIT})`
+        );
+      });
+
+      it('emits a dispatch_failed event per deferral when the escape hatch drops them', async () => {
+        const { storageService: escapeStorage, mockEsClient: escapeMockEsClient } =
+          createStorageService();
+        escapeMockEsClient.bulk.mockResolvedValue({ errors: false, took: 0, items: [] });
+        const { eventLogService, mockEventLogger } = createEventLogService();
+        const service = createService(
+          buildStuckPipeline([deferredAlert], 'dispatch_deferred', deferredOutcome),
+          escapeStorage,
+          undefined,
+          undefined,
+          eventLogService
+        );
+
+        await service.run({ eventWatermark, stuckTicks: STUCK_TICK_LIMIT - 1, taskId: 'task-1' });
+
+        const events = mockEventLogger.logEvent.mock.calls.map(([event]) => event);
+        expect(events).toHaveLength(2);
+        expect(events.map((event) => event?.event)).toEqual([
+          { action: 'dispatch_failed', outcome: 'failure' },
+          { action: 'dispatch_failed', outcome: 'failure' },
+        ]);
+        expect(events.map((event) => event?.kibana?.alerting_v2?.dispatcher)).toEqual([
+          expect.objectContaining({
+            failure_reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
+            action_group_ids: ['g1'],
+            workflow_ids: ['wf-1'],
+            alert_ids: ['deferred-e1'],
+          }),
+          expect.objectContaining({ workflow_ids: ['wf-2'] }),
+        ]);
+        expect(events[0]?.error?.message).toBe(
+          `Transient error persisted for ${STUCK_TICK_LIMIT} ticks; notification dropped. service unavailable`
+        );
+      });
+
+      it('emits no event when the escape hatch drops no deferral', async () => {
+        const { storageService: escapeStorage, mockEsClient: escapeMockEsClient } =
+          createStorageService();
+        escapeMockEsClient.bulk.mockResolvedValue({ errors: false, took: 0, items: [] });
+        const { eventLogService, mockEventLogger } = createEventLogService();
+        const service = createService(
+          buildStuckPipeline([deferredAlert]),
+          escapeStorage,
+          undefined,
+          undefined,
+          eventLogService
+        );
+
+        await service.run({ eventWatermark, stuckTicks: STUCK_TICK_LIMIT - 1, taskId: 'task-1' });
+
+        expect(escapeMockEsClient.bulk).toHaveBeenCalled();
+        expect(mockEventLogger.logEvent).not.toHaveBeenCalled();
+      });
+
+      it('emits no event when the escape hatch write fails', async () => {
+        const { storageService: escapeStorage, mockEsClient: escapeMockEsClient } =
+          createStorageService();
+        escapeMockEsClient.bulk.mockRejectedValue(new Error('es unavailable'));
+        const { eventLogService, mockEventLogger } = createEventLogService();
+        const service = createService(
+          buildStuckPipeline([deferredAlert], 'dispatch_deferred', deferredOutcome),
+          escapeStorage,
+          undefined,
+          undefined,
+          eventLogService
+        );
+
+        const result = await service.run({
+          eventWatermark,
+          stuckTicks: STUCK_TICK_LIMIT - 1,
+          taskId: 'task-1',
+        });
+
+        expect(result.nextWatermark.toISOString()).toBe(eventWatermark.toISOString());
+        expect(mockEventLogger.logEvent).not.toHaveBeenCalled();
+      });
+    });
+
     it.each<DispatcherHaltReason>(['aborted', 'inline_stats_too_large'])(
       'holds the watermark when the pre-fetch hatch fires within one max window (halt_reason: %s)',
       async (haltReason) => {
@@ -1617,12 +1705,7 @@ describe('DispatcherService', () => {
         const eventWatermark = new Date(Date.now() - 60_000);
 
         const mockPipeline = buildStuckPipeline([], haltReason);
-        const service = new DispatcherService(
-          mockPipeline,
-          escapeStorage,
-          loggerService,
-          createDispatcherConfigAccessor()
-        );
+        const service = createService(mockPipeline, escapeStorage, loggerService);
 
         const result = await service.run({
           eventWatermark,
@@ -1655,12 +1738,7 @@ describe('DispatcherService', () => {
         const eventWatermark = new Date(Date.now() - PRE_FETCH_STUCK_ADVANCE_LAG_MS - 60_000);
 
         const mockPipeline = buildStuckPipeline([], haltReason);
-        const service = new DispatcherService(
-          mockPipeline,
-          escapeStorage,
-          loggerService,
-          createDispatcherConfigAccessor()
-        );
+        const service = createService(mockPipeline, escapeStorage, loggerService);
 
         const result = await service.run({
           eventWatermark,

@@ -135,7 +135,30 @@ export function emitExecutionHistory({
     emitUnmatchedSummary({ eventLogService, timestamp, executionUuid, group });
   }
 
-  for (const failure of outcome.failures) {
+  emitDispatchFailures({
+    eventLogService,
+    failures: outcome.failures,
+    rules,
+    timestamp,
+    executionUuid,
+  });
+}
+
+/** Emits one `dispatch_failed` event-log entry per failed (group, destination) attempt. */
+export function emitDispatchFailures({
+  eventLogService,
+  failures,
+  rules,
+  timestamp,
+  executionUuid,
+}: {
+  eventLogService: EventLogServiceContract;
+  failures: readonly DispatchFailure[];
+  rules: RuleCatalog;
+  timestamp: string;
+  executionUuid: string;
+}): void {
+  for (const failure of failures) {
     emitDispatchFailure({ eventLogService, timestamp, executionUuid, failure, rules });
   }
 }

@@ -76,7 +76,7 @@ export class DispatcherPipeline implements DispatcherPipelineContract {
         return {
           completed: false,
           haltReason: output.reason,
-          finalState: pipelineState,
+          finalState: output.data ? { ...pipelineState, ...output.data } : pipelineState,
         };
       }
 

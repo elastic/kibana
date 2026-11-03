@@ -36,13 +36,16 @@ export const computeNextWatermark = ({
   if (
     haltReason === 'aborted' ||
     haltReason === 'commit_failed' ||
-    haltReason === 'inline_stats_too_large'
+    haltReason === 'inline_stats_too_large' ||
+    haltReason === 'dispatch_deferred'
   ) {
     // Pipeline stopped before every alert was recorded — do not advance.
     //   'aborted': TM signal or tick deadline stopped the pipeline in any step, or
     //     DispatchStep stopped with groups never attempted; their alerts have no record yet.
     //   'commit_failed': DispatchStep could not write alert action records and stopped
     //     scheduling; the unrecorded groups are dispatched again next tick.
+    //   'dispatch_deferred': DispatchStep left groups unrecorded after a transient error
+    //     outlasted the retry budget; they are dispatched again next tick.
     //   'inline_stats_too_large': ES rejected the INLINE STATS pre-fetch query (sub-plan
     //     too large); scan was refused, not executed. stuckTicks increments so the
     //     pre-fetch escape hatch can eventually force-advance. Do NOT fall through to the

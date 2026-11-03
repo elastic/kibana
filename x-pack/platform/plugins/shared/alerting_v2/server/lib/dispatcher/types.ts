@@ -190,6 +190,13 @@ export interface DispatchFailure {
   message: string;
 }
 
+/**
+ * An attempt to dispatch one action group to one workflow destination that failed with a
+ * transient error past the retry budget. The group is left unrecorded and dispatched again next
+ * tick; `message` carries the last error.
+ */
+export type DispatchDeferral = Omit<DispatchFailure, 'reason'>;
+
 export interface DispatcherPipelineInput {
   readonly startedAt: Date;
   readonly eventWatermark: Date;
@@ -226,11 +233,16 @@ export type DispatcherHaltReason =
   | 'no_actions'
   | 'aborted'
   | 'inline_stats_too_large'
-  | 'commit_failed';
+  | 'commit_failed'
+  | 'dispatch_deferred';
 
 export type DispatcherStepOutput =
   | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input'>> }
-  | { type: 'halt'; reason: DispatcherHaltReason };
+  | {
+      type: 'halt';
+      reason: DispatcherHaltReason;
+      data?: Partial<Omit<DispatcherPipelineState, 'input'>>;
+    };
 
 export interface DispatcherStep {
   readonly name: string;

@@ -68,6 +68,7 @@ The window caps **event** rows only. Action rows are not upper-bounded, so `last
 | `no_alerts` or `no_actions` halt                | `windowEnd`                                         |
 | `aborted` halt                                  | `eventWatermark` (no advance)                       |
 | `commit_failed` halt                            | `eventWatermark` (no advance)                       |
+| `dispatch_deferred` halt                        | `eventWatermark` (no advance)                       |
 | `inline_stats_too_large` halt                   | `eventWatermark` (no advance)                       |
 | Normal completion                               | `windowEnd`                                         |
 
@@ -106,7 +107,9 @@ By the end of a dispatcher run, every alert that reached the later pipeline stag
 
 `fire`, `suppress` and `unmatched` carry no `alert_id`, and the scan dedups them per series (`subject`, `group_hash`): one record hides every policy and every episode of its series. `DispatchStep` therefore writes them per series, through `SeriesLedger` (`steps/utils/series_ledger.ts`), only once every (dispatched group, alert) pair of that series has concluded. A group concludes when its chunk returns or when it fails before scheduling. Series with no group to dispatch are written in a first commit, before any scheduling. `notified` is keyed by (`action_group_id`, `alert_id`), so it is written right after each chunk; `ApplyAlreadyNotifiedStep` reads it back on later ticks.
 
-`notified` means the group concluded, not that a workflow ran: a group whose scheduling failed (license, API key, workflow lookup, schedule error) gets `notified` too, and its failure is reported as a `dispatch_failed` event. A failed attempt is therefore not retried, on an aborted tick as on a completed one, and it starts the group's throttle interval like a successful dispatch.
+`notified` means the group concluded, not that a workflow ran: a group whose scheduling failed permanently (license, API key, workflow not found or disabled, a non-transient lookup or schedule error) gets `notified` too, and its failure is reported as a `dispatch_failed` event. Such an attempt is therefore not retried, on an aborted tick as on a completed one, and it starts the group's throttle interval like a successful dispatch.
+
+A transient Elasticsearch error (`408`, `429`, `502`–`504`, connection and timeout errors) on the workflow lookup or on a whole `bulkScheduleWorkflow` call is retried within the tick (see [Delivery guarantees and limits](#delivery-guarantees-and-limits)). When it outlasts the retries, the affected groups are **deferred**: they get no `notified` record, their series hold back `fire`, `DISPATCH_TRANSIENT_FAILURE_DEFERRED` is logged, and the tick halts `dispatch_deferred` so the next tick dispatches them again.
 
 The full action taxonomy, including user-written actions such as `ack` and `snooze`, is documented in [`../../resources/README.md`](../../resources/README.md).
 
@@ -183,6 +186,7 @@ An empty matcher is a catch-all.
 | Stuck-tick limit            | `10` ticks (~50 s)             | `STUCK_TICK_LIMIT` — after this many stuck ticks the escape hatch fires                                                                                                                                                                 |
 | Pre-fetch force-advance lag | `15` minutes                   | `PRE_FETCH_STUCK_ADVANCE_LAG_MS` — if the hatch fires with no known alerts and lag exceeds this, skip the unread window                                                                                                                 |
 | Dispatch chunk size         | `250` items                    | `DISPATCH_CHUNK_SIZE` — max items per `bulkScheduleWorkflow` call. Workflows are prefetched with a single `getWorkflowsByIdsForRequests` call (one lookup per space and API key) and scheduled in chunks batched by policy API key. A group's items never span two chunks. Each chunk is followed by one `.alert-actions` commit, and the next chunk is scheduled only after it. The tick signal is checked between chunks. |
+| Dispatch retries            | `3` retries, `1 s`–`4 s` backoff, `8 s` budget | `DISPATCH_RETRY_MAX_RETRIES`, `DISPATCH_RETRY_BASE_DELAY_MS`, `DISPATCH_RETRY_MAX_BACKOFF_MS`, `DISPATCH_RETRY_BUDGET_MS` in [`constants.ts`](constants.ts) — full-jitter retries of a transient workflow lookup or schedule failure. A retry starts only if its maximum backoff still fits the budget, which stays below `TICK_DEADLINE_MARGIN_MS`. |
 | Matcher language            | KQL                            | `@kbn/eval-kql`                                                                                                                                                                                                                         |
 
 ### Mitigation levers
@@ -211,7 +215,7 @@ The dispatcher carries state forward through `DispatcherPipelineState` in `types
 | `groups`           | plain array        | `BuildGroupsStep`; narrowed by `ApplyAlreadyNotifiedStep`                           | Action groups to consider for delivery (transient — consumed by `ApplyThrottlingStep`).                                                                        |
 | `alreadyNotified`  | plain array        | `ApplyAlreadyNotifiedStep`                                                          | Groups narrowed to the alerts an earlier, aborted tick already handled; recorded as `fire`, never dispatched again.                                           |
 | `plan`             | `DispatchPlan`     | `ApplyThrottlingStep`                                                               | Delivery decision: `toDispatch` vs `throttled`, the `alreadyNotified` groups, plus the `unmatched` alerts that landed in no group.                            |
-| `outcome`          | `DispatchOutcome`  | `DispatchStep`                                                                      | What happened: workflow execution ids per group and failed (group, destination) attempts; `deliveredDestinationsFor()` filters totally-failed groups.           |
+| `outcome`          | `DispatchOutcome`  | `DispatchStep`                                                                      | What happened: workflow execution ids per group, failed (group, destination) attempts and attempts deferred by transient errors; `deliveredDestinationsFor()` filters totally-failed groups. |
 
 ## Execution steps
 
@@ -231,7 +235,7 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 | 10  | `BuildGroupsStep`            | Build `ActionGroup` objects based on policy grouping settings.                                   |
 | 11  | `ApplyAlreadyNotifiedStep`   | Move the alerts whose `notified` record (per group and alert) covers their current content out of their groups, into `alreadyNotified`. |
 | 12  | `ApplyThrottlingStep`        | Compare candidate groups with action history and split them into dispatch vs throttled.          |
-| 13  | `DispatchStep`               | Perform delivery side effects for eligible groups, commit the `.alert-actions` records each chunk made safe, and emit per-policy `dispatched` / `throttled` / `unmatched` / `dispatch_failed` event-log summaries once. Halts `commit_failed` when a commit cannot be written, and `aborted` while groups are left unattempted. |
+| 13  | `DispatchStep`               | Perform delivery side effects for eligible groups, commit the `.alert-actions` records each chunk made safe, and emit per-policy `dispatched` / `throttled` / `unmatched` / `dispatch_failed` event-log summaries once. Halts `commit_failed` when a commit cannot be written, `dispatch_deferred` when transient errors deferred groups, and `aborted` while groups are left unattempted. |
 
 ### Suppression queries
 
@@ -266,6 +270,7 @@ An aggregated group keeps the same id from tick to tick and gets one `notified` 
 | `no_actions`             | The run produced no stored outcomes after evaluation; watermark advances to `windowEnd`.                                                                         |
 | `aborted`                | The pipeline was stopped early by the TM signal or the soft deadline (`getTickDeadlineMs`), or `DispatchStep` stopped with groups left unattempted. The watermark does not advance; the records already committed keep the progress. |
 | `commit_failed`          | `DispatchStep` could not write a commit's `.alert-actions` records (the bulk request threw, or ES rejected every record) and stopped scheduling. Logged once as `DISPATCH_COMMIT_FAILED`. Watermark held; tick counts toward stuck-tick limit (see below). |
+| `dispatch_deferred`      | `DispatchStep` deferred groups whose workflow lookup or schedule kept failing with a transient error after retries. The deferrals travel in `outcome.deferrals`, and `DispatcherService` logs `DISPATCH_TRANSIENT_FAILURE_DEFERRED` at `warn` with the stuck-tick count. Watermark held; tick counts toward stuck-tick limit (see below). |
 | `inline_stats_too_large` | ES rejected the INLINE STATS pre-fetch query with `illegal_argument_exception: sub-plan execution results too large`. Watermark held; tick counts toward stuck-tick limit (see below). |
 
 ## Watermark contract
@@ -285,7 +290,7 @@ If the watermark does not advance for `STUCK_TICK_LIMIT` consecutive ticks (defa
 3. Advances `nextWatermark` to `input.windowEnd`.
 4. Resets the stuck-tick counter to 0.
 
-The blocking alerts are **not dispatched** — they are permanently marked as `unmatched`. This is the documented escape from a permanently un-recordable alert that would otherwise stall the dispatcher indefinitely.
+The blocking alerts are **not dispatched** — they are permanently marked as `unmatched`. This is the documented escape from a permanently un-recordable alert that would otherwise stall the dispatcher indefinitely. When the hatch fires on a `dispatch_deferred` tick, each deferred (group, destination) also gets a terminal `dispatch_failed` event (`schedule_error`, message `Transient error persisted for 10 ticks; notification dropped.`), so the dropped notification stays visible in the execution history.
 
 If no alerts were fetched (the pipeline was aborted before or during `FetchAlertsStep`, or the scan was rejected with `inline_stats_too_large`), there is nothing to mark. While watermark lag is within `PRE_FETCH_STUCK_ADVANCE_LAG_MS` (one max scan window), the hatch holds the watermark, logs `DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK`, and resets the counter so the scan can recover. Once lag exceeds that threshold, it logs `DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE` and advances to `windowEnd` anyway — unread events in that window are skipped so the dispatcher cannot stall forever. Both logs include the tick's `halt_reason`.
 
@@ -308,6 +313,8 @@ Alerts in the skipped window are **not dispatched** (accepted data loss). Once t
 - Delivery is effectively at-least-once. `DispatchStep` records each chunk right after it returns, so an abort leaves no scheduled chunk unrecorded; a crash, or a commit write that fails, re-delivers at most the chunk in flight. Records not yet searchable can still be delivered again (see `refresh: false` below). A failed commit write stops scheduling for the rest of the tick, which halts `commit_failed`. When the first commit (the series with no group to dispatch) fails, nothing is scheduled. A commit with only some records rejected logs `DISPATCH_COMMIT_DEGRADED` and scheduling continues.
 - An aborted tick keeps its progress: concluded series get their `fire` / `suppress` / `unmatched` records, so the next scan does not return them, and `ApplyAlreadyNotifiedStep` drops the (group, alert) pairs whose `notified` record covers their content.
 - Commits use `refresh: false`: records become searchable only after the next `.alert-actions` refresh, which depends on the deployment's refresh settings (`index.refresh_interval`, 1 s by default). Each tick re-reads the last `OVERLAP_WINDOW_MINUTES` (10) of events, so any record of the previous tick that is not searchable yet when the next tick queries can be delivered again, whether that tick completed or aborted. In practice this exposes the last commits of the previous tick.
+- Transient Elasticsearch errors on the workflow lookup and on whole `bulkScheduleWorkflow` calls are retried up to `DISPATCH_RETRY_MAX_RETRIES` (3) times within `DISPATCH_RETRY_BUDGET_MS` (8 s) per operation. Once one operation exhausts its retries, later operations of the tick get a single attempt, so an outage costs at most one budget per tick. Groups still failing are deferred to the next tick (halt `dispatch_deferred`). With ~5 s ticks and `STUCK_TICK_LIMIT` (10), an outage of about 1–2 minutes is absorbed; past that the escape hatch drops the deferred notifications and emits a `dispatch_failed` event per (group, destination). Per-item errors of a `bulkScheduleWorkflow` response are not retried.
+- A retried `bulkScheduleWorkflow` call can schedule some items twice: workflow execution ids are random, and the call is not idempotent.
 - Destination handlers should therefore be idempotent.
 - Workflow destinations are scheduled in `DISPATCH_CHUNK_SIZE` (250) batches via `bulkScheduleWorkflow`, not per-group `pLimit(3)`.
 - The alert query is capped at `xpack.alerting_v2.dispatcher.run.alerts.max` (default 10 000) rows per run. A truncated tick advances the watermark only to the last returned row's timestamp; the deferred tail is scanned next tick.

@@ -12,15 +12,22 @@ import { EsConcurrentModificationError } from './es_concurrent_modification_erro
 import { EsUnacknowledgedError } from './es_unacknowledged_error';
 
 /**
- * Retry service that retries transient Elasticsearch errors: connection/timeout
- * failures, retryable response status codes, unacknowledged cluster-state mutations,
- * and resources modified concurrently by another node.
+ * Whether an error is a transient Elasticsearch failure: connection/timeout failures,
+ * retryable response status codes, unacknowledged cluster-state mutations, and resources
+ * modified concurrently by another node.
+ */
+export const isTransientEsError = (error: Error): boolean => {
+  if (error instanceof EsUnacknowledgedError || error instanceof EsConcurrentModificationError) {
+    return true;
+  }
+  return error instanceof errors.ElasticsearchClientError && isRetryableEsClientError(error);
+};
+
+/**
+ * Retry service that retries transient Elasticsearch errors (see `isTransientEsError`).
  */
 export class EsTransientRetryService extends RetryService {
   protected isRetryableError(error: Error): boolean {
-    if (error instanceof EsUnacknowledgedError || error instanceof EsConcurrentModificationError) {
-      return true;
-    }
-    return error instanceof errors.ElasticsearchClientError && isRetryableEsClientError(error);
+    return isTransientEsError(error);
   }
 }

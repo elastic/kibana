@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { DiagnosticResult } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import type { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import type { BulkScheduleWorkflowResult } from '@kbn/workflows';
@@ -20,7 +22,11 @@ import {
   EMPTY_BULK_INDEX_RESULT,
 } from '../../services/storage_service/storage_service.mock';
 import { buildAlertDetailsUrl } from '../alert_details_url';
-import { DISPATCH_CHUNK_SIZE } from '../constants';
+import {
+  DISPATCH_CHUNK_SIZE,
+  DISPATCH_RETRY_BUDGET_MS,
+  DISPATCH_RETRY_MAX_RETRIES,
+} from '../constants';
 import {
   createActionGroup,
   createActionPolicy,
@@ -30,7 +36,8 @@ import {
   createWorkflowDetailDto,
   MOCK_KIBANA_BASE_URL,
 } from '../fixtures/test_utils';
-import type { DispatchFailure } from '../types';
+import { DispatchOutcome } from '../state';
+import type { DispatchDeferral, DispatchFailure, DispatcherPipelineState } from '../types';
 import { DISPATCH_FAILURE_REASONS } from './constants';
 import { DispatchStep } from './dispatch_step';
 
@@ -41,6 +48,9 @@ const getExpectedAlertUrl = (spaceId: string, alertId: string): string =>
 
 const getFailures = (result: Awaited<ReturnType<DispatchStep['execute']>>): DispatchFailure[] =>
   result.type === 'continue' ? [...(result.data?.outcome?.failures ?? [])] : [];
+
+const getDeferrals = (result: Awaited<ReturnType<DispatchStep['execute']>>): DispatchDeferral[] =>
+  result.type === 'halt' ? [...(result.data?.outcome?.deferrals ?? [])] : [];
 
 const getExecutionIds = (
   result: Awaited<ReturnType<DispatchStep['execute']>>,
@@ -95,7 +105,7 @@ describe('DispatchStep', () => {
   });
 
   const createStep = () =>
-    new DispatchStep(mockWfm, mockLicenseService, mockStorageService, eventLogService);
+    new DispatchStep(mockWfm, mockLicenseService, mockStorageService, eventLogService, mockLogger);
 
   const committedDocs = () =>
     mockStorageService.bulkIndexDocs.mock.calls.flatMap(([{ docs }]) => [...docs]);
@@ -1678,6 +1688,249 @@ describe('DispatchStep', () => {
         expect(
           mockEventLogger.logEvent.mock.calls[0][0]?.kibana?.alerting_v2?.dispatcher
         ).toMatchObject({ action_group_ids: ['g-no-key'] });
+      });
+    });
+
+    describe('transient failures', () => {
+      const transientError = () =>
+        new errors.ResponseError({ statusCode: 503 } as DiagnosticResult);
+      const notifiedGroupIds = () =>
+        committedDocs()
+          .filter(({ action_type: type }) => type === 'notified')
+          .map(({ action_group_id: groupId }) => groupId);
+      const execute = async (state: DispatcherPipelineState) => {
+        const execution = createStep().execute(state, loggerService);
+        await jest.advanceTimersByTimeAsync(10 * DISPATCH_RETRY_BUDGET_MS);
+        return execution;
+      };
+
+      beforeEach(() => {
+        jest.useFakeTimers();
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      it('retries a workflow lookup that throws a transient error', async () => {
+        mockWfm.getWorkflowsByIdsForRequests.mockRejectedValueOnce(transientError());
+
+        const result = await execute(
+          createDispatcherPipelineState({ dispatch: [groupFor(0)], policies })
+        );
+
+        expect(result.type).toBe('continue');
+        expect(mockWfm.getWorkflowsByIdsForRequests).toHaveBeenCalledTimes(2);
+        expect(notifiedGroupIds()).toEqual(['g0']);
+      });
+
+      it('retries a workflow lookup rejected with a transient error', async () => {
+        mockWfm.getWorkflowsByIdsForRequests.mockResolvedValueOnce([
+          { status: 'rejected', reason: transientError() },
+        ]);
+
+        const result = await execute(
+          createDispatcherPipelineState({ dispatch: [groupFor(0)], policies })
+        );
+
+        expect(result.type).toBe('continue');
+        expect(mockWfm.getWorkflowsByIdsForRequests).toHaveBeenCalledTimes(2);
+        expect(notifiedGroupIds()).toEqual(['g0']);
+      });
+
+      it('defers the groups of a workflow lookup that keeps failing', async () => {
+        const error = transientError();
+        mockWfm.getWorkflowsByIdsForRequests.mockRejectedValue(error);
+
+        const result = await execute(
+          createDispatcherPipelineState({ dispatch: [groupFor(0)], policies })
+        );
+
+        expect(result).toEqual({
+          type: 'halt',
+          reason: 'dispatch_deferred',
+          data: { outcome: expect.any(DispatchOutcome) },
+        });
+        expect(mockWfm.getWorkflowsByIdsForRequests).toHaveBeenCalledTimes(
+          DISPATCH_RETRY_MAX_RETRIES + 1
+        );
+        expect(mockWfm.bulkScheduleWorkflow).not.toHaveBeenCalled();
+        expect(notifiedGroupIds()).toEqual([]);
+        expect(getDeferrals(result)).toEqual([
+          expect.objectContaining({
+            actionGroupId: 'g0',
+            workflowId: 'workflow-1',
+            message: error.message,
+          }),
+        ]);
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.any(Function),
+          expect.objectContaining({
+            labels: {
+              code: ALERTING_LOG_CODES.DISPATCH_TRANSIENT_FAILURE_DEFERRED,
+              space_id: 'default',
+            },
+          })
+        );
+        expect(mockLogger.error).not.toHaveBeenCalled();
+        expect(
+          mockEventLogger.logEvent.mock.calls.map(([event]) => event?.event?.action)
+        ).not.toContain('dispatch_failed');
+      });
+
+      it('records notified for the concluded group and holds fire of a series it shares with a deferred group', async () => {
+        mockWfm.bulkScheduleWorkflow
+          .mockImplementationOnce(async (items) => items.map((_, i) => scheduled(`exec-${i}`)))
+          .mockRejectedValue(transientError());
+        const sharing = createActionGroup({ id: 'g-share', policyId: 'p1', alerts: [alertFor(0)] });
+
+        const result = await execute(
+          createDispatcherPipelineState({
+            dispatch: [...groupsFor(DISPATCH_CHUNK_SIZE), sharing],
+            dispatchable: [alertFor(0)],
+            policies,
+          })
+        );
+
+        expect(result).toMatchObject({ type: 'halt', reason: 'dispatch_deferred' });
+        expect(notifiedGroupIds()).toContain('g0');
+        expect(notifiedGroupIds()).not.toContain('g-share');
+        const firedSeries = committedDocs()
+          .filter(({ action_type: type }) => type === 'fire')
+          .map(({ group_hash: groupHash }) => groupHash);
+        expect(firedSeries).not.toContain('hash-0');
+      });
+
+      it('defers only the groups of the space whose lookup keeps failing', async () => {
+        mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
+          { status: 'rejected', reason: transientError() },
+          { status: 'fulfilled', value: [createWorkflowDetailDto()] },
+        ]);
+
+        const result = await execute(
+          createDispatcherPipelineState({
+            dispatch: [
+              createActionGroup({ id: 'g-a', policyId: 'p1', spaceId: 'space-a' }),
+              createActionGroup({ id: 'g-b', policyId: 'p1', spaceId: 'space-b' }),
+            ],
+            policies,
+          })
+        );
+
+        expect(result).toMatchObject({ type: 'halt', reason: 'dispatch_deferred' });
+        expect(notifiedGroupIds()).toEqual(['g-b']);
+        expect(getDeferrals(result).map(({ actionGroupId }) => actionGroupId)).toEqual(['g-a']);
+      });
+
+      it('concludes a group without workflow destinations in a space whose lookup keeps failing', async () => {
+        mockWfm.getWorkflowsByIdsForRequests.mockRejectedValue(transientError());
+
+        const result = await execute(
+          createDispatcherPipelineState({
+            dispatch: [
+              groupFor(0),
+              createActionGroup({
+                id: 'g-empty',
+                policyId: 'p1',
+                destinations: [],
+                alerts: [alertFor(1)],
+              }),
+            ],
+            policies,
+          })
+        );
+
+        expect(result).toMatchObject({ type: 'halt', reason: 'dispatch_deferred' });
+        expect(notifiedGroupIds()).toEqual(['g-empty']);
+        expect(getDeferrals(result).map(({ actionGroupId }) => actionGroupId)).toEqual(['g0']);
+      });
+
+      it('retries a schedule that throws a transient error', async () => {
+        mockWfm.bulkScheduleWorkflow.mockRejectedValueOnce(transientError());
+
+        const result = await execute(
+          createDispatcherPipelineState({ dispatch: [groupFor(0)], policies })
+        );
+
+        expect(result.type).toBe('continue');
+        expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(2);
+        expect(getExecutionIds(result, 'g0')).toEqual(['exec-0']);
+        expect(notifiedGroupIds()).toEqual(['g0']);
+      });
+
+      it('defers chunks whose schedule keeps failing and stops retrying for the rest of the tick', async () => {
+        mockWfm.bulkScheduleWorkflow.mockRejectedValue(transientError());
+
+        const result = await execute(
+          createDispatcherPipelineState({ dispatch: groupsFor(DISPATCH_CHUNK_SIZE + 1), policies })
+        );
+
+        expect(result).toMatchObject({ type: 'halt', reason: 'dispatch_deferred' });
+        expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(DISPATCH_RETRY_MAX_RETRIES + 2);
+        expect(notifiedGroupIds()).toEqual([]);
+        expect(getDeferrals(result)).toHaveLength(DISPATCH_CHUNK_SIZE + 1);
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.any(Function),
+          expect.objectContaining({
+            labels: {
+              code: ALERTING_LOG_CODES.DISPATCH_TRANSIENT_FAILURE_DEFERRED,
+              space_id: 'default',
+            },
+          })
+        );
+      });
+
+      it('records the groups of a concluded chunk and defers the rest', async () => {
+        mockWfm.bulkScheduleWorkflow
+          .mockImplementationOnce(async (items) => items.map((_, i) => scheduled(`exec-${i}`)))
+          .mockRejectedValue(transientError());
+
+        const result = await execute(
+          createDispatcherPipelineState({ dispatch: groupsFor(DISPATCH_CHUNK_SIZE + 1), policies })
+        );
+
+        expect(result).toMatchObject({ type: 'halt', reason: 'dispatch_deferred' });
+        expect(notifiedGroupIds()).toHaveLength(DISPATCH_CHUNK_SIZE);
+        expect(getDeferrals(result).map(({ actionGroupId }) => actionGroupId)).toEqual([
+          `g${DISPATCH_CHUNK_SIZE}`,
+        ]);
+      });
+
+      it('records a permanent schedule error without retrying', async () => {
+        mockWfm.bulkScheduleWorkflow.mockRejectedValue(new Error('bad request'));
+
+        const result = await execute(
+          createDispatcherPipelineState({ dispatch: [groupFor(0)], policies })
+        );
+
+        expect(result.type).toBe('continue');
+        expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
+        expect(getFailures(result)).toEqual([
+          expect.objectContaining({
+            actionGroupId: 'g0',
+            reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
+          }),
+        ]);
+        expect(notifiedGroupIds()).toEqual(['g0']);
+      });
+
+      it('halts aborted instead of deferred when the tick signal fired', async () => {
+        const controller = new AbortController();
+        mockWfm.bulkScheduleWorkflow.mockImplementation(async () => {
+          controller.abort();
+          throw transientError();
+        });
+
+        const result = await execute(
+          createDispatcherPipelineState({
+            dispatch: [groupFor(0)],
+            policies,
+            input: createDispatcherPipelineInput({ signal: controller.signal }),
+          })
+        );
+
+        expect(result).toEqual({ type: 'halt', reason: 'aborted' });
+        expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
       });
     });
 

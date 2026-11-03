@@ -84,6 +84,21 @@ export const getTickDeadlineMs = (timeout: string): number =>
 export const DISPATCH_CHUNK_SIZE = 250;
 
 /**
+ * Retries of a dispatch operation (workflow lookup, `bulkScheduleWorkflow`) that failed with a
+ * transient error, before its groups are deferred to the next tick.
+ */
+export const DISPATCH_RETRY_MAX_RETRIES = 3;
+export const DISPATCH_RETRY_BASE_DELAY_MS = 1_000;
+export const DISPATCH_RETRY_MAX_BACKOFF_MS = 4_000;
+
+/**
+ * Wall-clock budget of one dispatch operation and its retries. Must stay below
+ * TICK_DEADLINE_MARGIN_MS: the backoff does not yield to the tick signal, so a retry
+ * sequence that started before the soft deadline still has to end before the task timeout.
+ */
+export const DISPATCH_RETRY_BUDGET_MS = 8_000;
+
+/**
  * Task manager task type and singleton task id used to schedule dispatcher
  * ticks.
  *

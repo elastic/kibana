@@ -9,6 +9,7 @@ import type {
   ActionGroup,
   ActionGroupId,
   ActionPolicyDestination,
+  DispatchDeferral,
   DispatchFailure,
 } from '../types';
 
@@ -16,15 +17,17 @@ const NO_EXECUTIONS: readonly string[] = [];
 
 /**
  * What actually happened during dispatch (DispatchStep): workflow execution ids
- * per successfully scheduled group, plus every failed (group, destination) attempt.
+ * per successfully scheduled group, every failed (group, destination) attempt, and
+ * every (group, destination) deferred to the next tick by a transient error.
  */
 export class DispatchOutcome {
-  private static readonly EMPTY = new DispatchOutcome([], new Map());
+  private static readonly EMPTY = new DispatchOutcome([], [], new Map());
 
   private readonly failedWorkflowsByGroup: ReadonlyMap<ActionGroupId, ReadonlySet<string>>;
 
   private constructor(
     public readonly failures: readonly DispatchFailure[],
+    public readonly deferrals: readonly DispatchDeferral[],
     private readonly executionsByGroup: ReadonlyMap<ActionGroupId, readonly string[]>
   ) {
     this.failedWorkflowsByGroup = indexFailedWorkflows(failures);
@@ -33,11 +36,13 @@ export class DispatchOutcome {
   public static of({
     executionsByGroup,
     failures,
+    deferrals = [],
   }: {
     executionsByGroup: ReadonlyMap<ActionGroupId, readonly string[]>;
     failures: readonly DispatchFailure[];
+    deferrals?: readonly DispatchDeferral[];
   }): DispatchOutcome {
-    return new DispatchOutcome(failures, executionsByGroup);
+    return new DispatchOutcome(failures, deferrals, executionsByGroup);
   }
 
   public static empty(): DispatchOutcome {
