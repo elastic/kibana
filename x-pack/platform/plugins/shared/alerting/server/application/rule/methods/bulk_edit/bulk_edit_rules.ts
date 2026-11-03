@@ -63,7 +63,10 @@ import type {
   NormalizedAlertActionWithGeneratedValues,
   NormalizedAlertAction,
 } from '../../../../rules_client/types';
-import { bulkMigrateLegacyActions, deleteLegacyActionsForRules } from '../../../../rules_client/lib';
+import {
+  bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
+} from '../../../../rules_client/lib';
 import type {
   BulkEditFields,
   BulkEditOperation,
