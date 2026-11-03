@@ -32,3 +32,9 @@ export const ALERT_MATCH_KEYS: Readonly<Record<string, readonly MatchKey[]>> = {
 };
 
 export const getMatchKeys = (type: string): readonly MatchKey[] => ALERT_MATCH_KEYS[type] ?? [];
+
+/** The same keys read from alerting v2 events, where a group value is stored under the column's own name. */
+export const getV2MatchKeys = (type: string): readonly MatchKey[] =>
+  getMatchKeys(type).map((key) =>
+    key.map(({ entityColumn }) => ({ entityColumn, alertField: entityColumn }))
+  );

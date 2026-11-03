@@ -10,7 +10,8 @@ import type { IRouter } from '@kbn/core/server';
 import { getIdentityFields } from '@kbn/entity-store/common';
 import type { EntityStoreStartContract } from '@kbn/entity-store/server';
 import { createClassicAlertMatcher } from '../alerts/classic_matcher';
-import type { AlertMatchResult } from '../alerts/types';
+import { alertCountsFor, runMatchers, summarizeCoverage } from '../alerts/run_matchers';
+import { createV2AlertMatcher } from '../alerts/v2_matcher';
 import { InventoryDefinitionError } from '../inventory/generator';
 import { listEntities } from '../inventory/list_entities';
 
@@ -22,9 +23,6 @@ const PROOF_OF_CONCEPT_AUTHZ = {
   reason:
     'Proof of concept. Every query runs as the requesting user, so Elasticsearch privileges apply.',
 } as const;
-
-const countMatchedAlerts = ({ alertIdsByEntity }: AlertMatchResult): number =>
-  new Set([...alertIdsByEntity.values()].flatMap((alertIds) => [...alertIds])).size;
 
 /** Internal routes of the alerts-by-entity proof of concept. */
 export const registerPocRoutes = ({
@@ -67,14 +65,13 @@ export const registerPocRoutes = ({
         query: schema.object({
           type: schema.string({ minLength: 1, maxLength: 64 }),
           windowMinutes: schema.number({ min: 1, max: MAX_WINDOW_MINUTES, defaultValue: 60 }),
-          ruleTag: schema.maybe(schema.string({ minLength: 1, maxLength: 128 })),
           limit: schema.number({ min: 1, max: 1000, defaultValue: 100 }),
         }),
       },
       options: { access: 'internal' },
     },
     async (context, request, response) => {
-      const { type, windowMinutes, ruleTag, limit } = request.query;
+      const { type, windowMinutes, limit } = request.query;
       const definition = await (await getEntityStore())
         .getEntityDefinitionsClientForSpace(DEFAULT_SPACE_ID)
         .get(type);
@@ -92,27 +89,26 @@ export const registerPocRoutes = ({
 
       try {
         const entities = await listEntities({ esClient, definition, window, limit: 10000 });
-        const classic = await createClassicAlertMatcher({ esClient, ruleTag }).match({
-          type,
-          entities,
-        });
+        const outcomes = await runMatchers(
+          [
+            createClassicAlertMatcher({ esClient, spaceId: DEFAULT_SPACE_ID }),
+            createV2AlertMatcher({
+              esClient,
+              scope: { from: window.from, spaceId: DEFAULT_SPACE_ID },
+            }),
+          ],
+          { type, entities }
+        );
 
         return response.ok({
           body: {
             type,
             window,
             entityCount: entities.length,
-            coverage: {
-              classic: {
-                activeAlerts: classic.activeAlerts,
-                matchedAlerts: countMatchedAlerts(classic),
-              },
-            },
+            coverage: summarizeCoverage(outcomes),
             entities: entities.slice(0, limit).map((entity) => ({
               ...entity,
-              alerts: {
-                classic: classic.alertIdsByEntity.get(String(entity['entity.id']))?.size ?? 0,
-              },
+              alerts: alertCountsFor(outcomes, String(entity['entity.id'])),
             })),
           },
         });

@@ -15,14 +15,14 @@ import {
 import { getMatchKeys } from './match_keys';
 import type { EntityRow } from './types';
 
-const [uidKey, nameKey] = getMatchKeys('k8s.pod');
+const [, nameKey] = getMatchKeys('k8s.pod');
 
 /** The client types a cell as a scalar, though ES|QL returns an array for a multi-value cell. */
 const multiValue = (...values: string[]): string => values as never;
 
 describe('classic alert queries', () => {
   it('groups active alerts by the key fields over both classic alert index families', () => {
-    const { esql, params } = buildGroupQuery(nameKey);
+    const { esql, params } = buildGroupQuery(nameKey, 'default');
 
     expect(esql).toContain('SET unmapped_fields="nullify";');
     expect(esql).toContain(`FROM ${CLASSIC_ALERT_INDICES}`);
@@ -32,19 +32,19 @@ describe('classic alert queries', () => {
     expect(esql).toContain(
       'STATS alert_ids = VALUES(`kibana.alert.uuid`) BY `kibana.alert.grouping.k8s.pod.name`, `kibana.alert.grouping.k8s.namespace.name`'
     );
-    expect(params).toEqual([]);
+    expect(params).toEqual([{ spaceId: 'default' }]);
   });
 
-  it('filters on a rule tag through a named parameter when one is given', () => {
-    const { esql, params } = buildGroupQuery(uidKey, '6230-poc');
+  it('scopes the alerts to a space through a named parameter', () => {
+    const { esql, params } = buildGroupQuery(nameKey, 'team-a');
 
-    expect(esql).toContain('MV_CONTAINS(`kibana.alert.rule.tags`, ?ruleTag)');
-    expect(esql).not.toContain('6230-poc');
-    expect(params).toEqual([{ ruleTag: '6230-poc' }]);
+    expect(esql).toContain('MV_CONTAINS(`kibana.space_ids`, ?spaceId)');
+    expect(esql).not.toContain('team-a');
+    expect(params).toEqual([{ spaceId: 'team-a' }]);
   });
 
   it('counts the distinct active alerts for the total', () => {
-    expect(buildTotalQuery().esql).toContain(
+    expect(buildTotalQuery('default').esql).toContain(
       'STATS active_alerts = COUNT_DISTINCT(`kibana.alert.uuid`)'
     );
   });
@@ -86,7 +86,10 @@ describe('createClassicAlertMatcher', () => {
   };
 
   it('attributes alerts through every key of the type and reports the total', async () => {
-    const result = await createClassicAlertMatcher({ esClient: createClient() }).match({
+    const result = await createClassicAlertMatcher({
+      esClient: createClient(),
+      spaceId: 'default',
+    }).match({
       type: 'k8s.pod',
       entities,
     });
@@ -97,24 +100,24 @@ describe('createClassicAlertMatcher', () => {
     expect(result.alertIdsByEntity.get('k8s.pod:u2')).toEqual(new Set(['a2']));
   });
 
-  it('passes the rule tag to every query', async () => {
+  it('scopes every query to the space', async () => {
     const esClient = createClient();
 
-    await createClassicAlertMatcher({ esClient, ruleTag: '6230-poc' }).match({
+    await createClassicAlertMatcher({ esClient, spaceId: 'default' }).match({
       type: 'k8s.pod',
       entities,
     });
 
     expect(esClient.esql.query).toHaveBeenCalledTimes(3);
     esClient.esql.query.mock.calls.forEach(([request]) =>
-      expect(request.params).toEqual([{ ruleTag: '6230-poc' }])
+      expect(request.params).toEqual([{ spaceId: 'default' }])
     );
   });
 
   it('only counts the total for a type without keys', async () => {
     const esClient = createClient();
 
-    const result = await createClassicAlertMatcher({ esClient }).match({
+    const result = await createClassicAlertMatcher({ esClient, spaceId: 'default' }).match({
       type: 'not.a.type',
       entities,
     });

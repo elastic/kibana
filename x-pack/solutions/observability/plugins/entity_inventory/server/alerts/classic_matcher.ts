@@ -8,8 +8,9 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { GeneratedQuery } from '../inventory/generator';
 import { attributeAlertsToEntities } from './attribute_alerts';
+import { toAlertGroups } from './esql_rows';
 import { getMatchKeys } from './match_keys';
-import type { AlertGroup, AlertMatcher, EsqlValue, KeyedAlertGroups, MatchKey } from './types';
+import type { AlertGroup, AlertMatcher, KeyedAlertGroups, MatchKey } from './types';
 
 export const CLASSIC_ALERT_INDICES = '.alerts-stack.*,.alerts-observability.*';
 
@@ -19,12 +20,12 @@ const MAX_GROUPS = 10000;
 const ALERT_UUID = '`kibana.alert.uuid`';
 const quote = (field: string): string => `\`${field}\``;
 
-const activeFilters = (ruleTag?: string): string[] => [
+const ACTIVE_IN_SPACE_FILTERS = [
   '`kibana.alert.status` == "active"',
-  ...(ruleTag ? ['MV_CONTAINS(`kibana.alert.rule.tags`, ?ruleTag)'] : []),
+  'MV_CONTAINS(`kibana.space_ids`, ?spaceId)',
 ];
 
-const buildQuery = (filters: string[], stats: string, ruleTag?: string): GeneratedQuery => ({
+const buildQuery = (filters: string[], stats: string, spaceId: string): GeneratedQuery => ({
   esql: [
     'SET unmapped_fields="nullify";',
     `FROM ${CLASSIC_ALERT_INDICES}`,
@@ -32,51 +33,41 @@ const buildQuery = (filters: string[], stats: string, ruleTag?: string): Generat
     `| ${stats}`,
     `| LIMIT ${MAX_GROUPS}`,
   ].join('\n'),
-  params: ruleTag ? [{ ruleTag }] : [],
+  params: [{ spaceId }],
 });
 
 /** Active alerts grouped by the key's alert fields, with the ids of the alerts in each group. */
-export const buildGroupQuery = (key: MatchKey, ruleTag?: string): GeneratedQuery => {
+export const buildGroupQuery = (key: MatchKey, spaceId: string): GeneratedQuery => {
   const fields = key.map(({ alertField }) => quote(alertField));
   return buildQuery(
-    [...activeFilters(ruleTag), ...fields.map((field) => `${field} IS NOT NULL`)],
+    [...ACTIVE_IN_SPACE_FILTERS, ...fields.map((field) => `${field} IS NOT NULL`)],
     `STATS alert_ids = VALUES(${ALERT_UUID}) BY ${fields.join(', ')}`,
-    ruleTag
+    spaceId
   );
 };
 
-export const buildTotalQuery = (ruleTag?: string): GeneratedQuery =>
+export const buildTotalQuery = (spaceId: string): GeneratedQuery =>
   buildQuery(
-    activeFilters(ruleTag),
+    ACTIVE_IN_SPACE_FILTERS,
     `STATS active_alerts = COUNT_DISTINCT(${ALERT_UUID})`,
-    ruleTag
+    spaceId
   );
-
-const toList = (value: EsqlValue | undefined): string[] => {
-  if (value === null || value === undefined) {
-    return [];
-  }
-  return Array.isArray(value) ? value.map(String) : [String(value)];
-};
 
 const queryGroups = async (
   esClient: ElasticsearchClient,
   key: MatchKey,
-  ruleTag?: string
+  spaceId: string
 ): Promise<AlertGroup[]> => {
-  const { esql, params } = buildGroupQuery(key, ruleTag);
+  const { esql, params } = buildGroupQuery(key, spaceId);
   const { values } = await esClient.esql.query({ query: esql, params, format: 'json' });
-  return values.map(([alertIds, ...groupValues]) => ({
-    alertIds: toList(alertIds),
-    values: groupValues.map(String),
-  }));
+  return toAlertGroups(values);
 };
 
 const queryActiveAlerts = async (
   esClient: ElasticsearchClient,
-  ruleTag?: string
+  spaceId: string
 ): Promise<number> => {
-  const { esql, params } = buildTotalQuery(ruleTag);
+  const { esql, params } = buildTotalQuery(spaceId);
   const { values } = await esClient.esql.query({ query: esql, params, format: 'json' });
   return Number(values[0]?.[0] ?? 0);
 };
@@ -84,10 +75,10 @@ const queryActiveAlerts = async (
 /** Matches entities to the active alerts of the classic rules, through `kibana.alert.grouping`. */
 export const createClassicAlertMatcher = ({
   esClient,
-  ruleTag,
+  spaceId,
 }: {
   esClient: ElasticsearchClient;
-  ruleTag?: string;
+  spaceId: string;
 }): AlertMatcher => ({
   source: 'classic',
   match: async ({ type, entities }) => {
@@ -96,11 +87,11 @@ export const createClassicAlertMatcher = ({
         getMatchKeys(type).map(
           async (key): Promise<KeyedAlertGroups> => ({
             key,
-            groups: await queryGroups(esClient, key, ruleTag),
+            groups: await queryGroups(esClient, key, spaceId),
           })
         )
       ),
-      queryActiveAlerts(esClient, ruleTag),
+      queryActiveAlerts(esClient, spaceId),
     ]);
 
     return {
