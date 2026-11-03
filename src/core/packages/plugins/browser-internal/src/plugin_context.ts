@@ -12,7 +12,6 @@ import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { DiscoveredPlugin, PluginOpaqueId } from '@kbn/core-base-common';
 import type { CoreSetup, CoreStart } from '@kbn/core-lifecycle-browser';
 import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
-import { mountWithInitializingGate } from '@kbn/core-deferred-init-browser-internal';
 import type { PluginWrapper } from './plugin';
 import type { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
 import type { IRuntimePluginContractResolver } from './plugin_contract_resolver';
@@ -78,24 +77,7 @@ export function createPluginSetupContext<
   return {
     analytics: deps.analytics,
     application: {
-      register: (app) => {
-        if (!plugin.discoveredPlugin.hasInitialization) {
-          deps.application.register(plugin.opaqueId, app);
-          return;
-        }
-        deps.application.register(plugin.opaqueId, {
-          ...app,
-          mount: mountWithInitializingGate({
-            pluginId: plugin.name,
-            mount: app.mount,
-            status$: deps.deferredInit.getStatus$(plugin.name),
-            // A full reload guarantees a fresh attempt is observed (init state lives server-side
-            // and is polled from scratch), rather than relying on the in-place `refresh()` nudge.
-            onRetry: () => window.location.reload(),
-            getStartServices: () => plugin.startDependencies,
-          }),
-        });
-      },
+      register: (app) => deps.application.register(plugin.opaqueId, app),
       registerAppUpdater: (statusUpdater$) => deps.application.registerAppUpdater(statusUpdater$),
     },
     chrome: deps.chrome,

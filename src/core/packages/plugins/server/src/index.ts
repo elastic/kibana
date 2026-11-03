@@ -23,13 +23,4 @@ export type {
 
 export { SharedGlobalConfigKeys } from './shared_global_config';
 
-export type {
-  PluginInitialization,
-  PluginInitState,
-  PluginInitStatus,
-} from './plugin_initialization';
-
-export {
-  PluginInitializationError,
-  isPluginInitializationError,
-} from '@kbn/core-deferred-init-common';
+export type { PluginInitialization, PluginInitStatus } from './plugin_initialization';

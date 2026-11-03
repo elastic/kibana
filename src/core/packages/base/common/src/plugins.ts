@@ -89,10 +89,4 @@ export interface DiscoveredPlugin {
    * configured, etc.) Default is false.
    */
   readonly enabledOnAnonymousPages?: boolean;
-
-  /**
-   * Whether the plugin implements the server-side `initialize()` lifecycle hook.
-   * The browser gates the plugin's apps behind a loading screen until it has succeeded.
-   */
-  readonly hasInitialization?: boolean;
 }

@@ -54,7 +54,6 @@ const KNOWN_MANIFEST_FIELDS = (() => {
     owner: true,
     description: true,
     enabledOnAnonymousPages: true,
-    hasInitialization: true,
   };
 
   return new Set(Object.keys(manifestFields));
@@ -220,7 +219,6 @@ export async function parseManifest(
     owner: manifest.owner!,
     description: manifest.description,
     enabledOnAnonymousPages: manifest.enabledOnAnonymousPages,
-    hasInitialization: manifest.hasInitialization,
   };
 }
 

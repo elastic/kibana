@@ -7,393 +7,144 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, type Observable } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, type Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
-import { PluginInitializationError } from '@kbn/core-deferred-init-common';
-import type { PluginInitState, PluginInitStatus } from '@kbn/core-deferred-init-common';
-import {
-  DEFERRED_INIT_BACKOFF_BASE_MS,
-  DEFERRED_INIT_BACKOFF_FACTOR,
-  DEFERRED_INIT_BACKOFF_MAX_MS,
-  DEFERRED_INIT_MAX_BACKGROUND_ATTEMPTS,
-  DEFERRED_INIT_SLOW_ATTEMPT_WARNING_MS,
-} from './backoff';
+import type { PluginInitStatus } from '@kbn/core-plugins-server';
 
 /**
- * One attempt at a plugin's `initialize()`, bound by `PluginsSystem` to the plugin's start
- * context and injected dependency contracts.
+ * A plugin's `initialize()`, bound by `PluginsSystem` to the plugin's start context and
+ * dependency contracts.
  */
 export type PluginInitRunner = () => Promise<void>;
 
-/** The boot lifecycles during which the engine refuses to block on a plugin's initialization. */
-export type PluginLifecyclePhase = 'setup' | 'start';
-
-/** A scheduled background retry; `promise` settles once the retry has been kicked or cancelled. */
-interface DeferredInitCooldown {
-  readonly promise: Promise<void>;
-  readonly timer: NodeJS.Timeout;
-  readonly resolve: () => void;
-}
+/** An `initialize()` still running after this long logs a warning. It is not a timeout. */
+export const SLOW_INITIALIZE_WARNING_MS = 10_000;
 
 interface DeferredInitRecord {
   readonly status$: BehaviorSubject<PluginInitStatus>;
-  runner?: PluginInitRunner;
-  /** The running attempt. Never rejects: the settle handlers record the outcome instead. */
-  inFlight?: Promise<void>;
-  /** Consecutive failed attempts since the last success; reset to 0 on success. */
-  failedAttempts: number;
-  lastError?: Error;
-  cooldown?: DeferredInitCooldown;
-  emitting?: boolean;
-  pendingEmissions?: PluginInitStatus[];
+  /** The plugin's single `initialize()` run. Rejects when it fails. */
+  run?: Promise<void>;
 }
 
-// Leaves the `lastError` key out entirely when there is no error, so status consumers and JSON
-// bodies only ever see it while it is meaningful.
-const toStatus = (state: PluginInitState, attempts: number, lastError?: Error): PluginInitStatus =>
-  lastError ? { state, attempts, lastError } : { state, attempts };
-
 /**
- * Per-instance engine that tracks each plugin's `initialize()` status and runs attempts on
- * demand. Core alone decides when an attempt runs: {@link DeferredInitEngine.ensureInitialized}
- * kicks one without waiting (gated routes), {@link DeferredInitEngine.initialize} and
- * {@link DeferredInitEngine.waitUntilAvailable} kick one and await it (for the plugin itself and
- * for its dependents, respectively), and the cooldown timer re-kicks a `failed` plugin in the
- * background.
+ * Tracks each plugin's `initialize()` on this Kibana instance and runs it once every plugin has
+ * started, without holding boot.
  *
- * State is per Kibana instance and in memory only, exactly like the `/status` entry of any other
- * plugin: nothing is persisted and no cross-instance lock is involved, so every instance behind a
- * load balancer runs each plugin's `initialize()` itself. That is deliberate: `initialize()`
- * routinely has to establish instance-local preconditions (downloading a browser binary, warming
- * an in-process cache, populating module-scoped state) that a run on another instance cannot
- * satisfy. The cost is that `initialize()` may run once per instance rather than once per
- * deployment, so it must be safe to execute concurrently on several instances against the same
- * Elasticsearch cluster.
- *
- * Within one instance, concurrent triggers for the same plugin share one in-flight attempt
- * (`record.inFlight`), so a burst of requests produces exactly one attempt. A `failed` attempt is
- * retried after a jittered, exponentially backed-off cooldown (see {@link scheduleCooldown}),
- * which also keeps instances that fail against the same unhealthy cluster from retrying in
- * lockstep.
+ * A failed `initialize()` is emitted on {@link DeferredInitEngine.failure$}, which `Root` turns
+ * into a shutdown, the same outcome as a thrown `setup()` or `start()`.
  *
  * @internal
  */
 export class DeferredInitEngine {
   private readonly records = new Map<string, DeferredInitRecord>();
+  private readonly failures$ = new ReplaySubject<Error>(1);
   /**
-   * Set while `PluginsSystem` runs the plugins' `setup()` or `start()` loop. Awaiting a plugin's
-   * initialization there would hold boot until deliberately expensive work finished, so
-   * {@link initialize} and {@link waitUntilAvailable} reject while it is set.
+   * Set once every plugin's `start()` has returned. Until then {@link initialize} rejects, since
+   * waiting there would hold boot on deliberately expensive work.
    */
-  private activeLifecycle?: PluginLifecyclePhase;
+  private bootCompleted = false;
+
+  /** Emits the error of every `initialize()` that fails. The latest is replayed to late subscribers. */
+  public readonly failure$: Observable<Error> = this.failures$.asObservable();
 
   constructor(private readonly log: Logger) {}
 
-  /** Marks the given boot lifecycle as in progress until {@link endLifecycle} is called. */
-  public beginLifecycle(phase: PluginLifecyclePhase): void {
-    this.activeLifecycle = phase;
-  }
-
-  /** Clears the lifecycle set by {@link beginLifecycle} once its loop has finished or thrown. */
-  public endLifecycle(): void {
-    this.activeLifecycle = undefined;
-  }
-
-  /** Creates an `idle` record for a plugin that declares `initialize()`, so its status is readable before its runner is attached. */
-  public register(pluginId: string): void {
-    this.ensureRecord(pluginId);
-  }
-
-  /** Attaches the plugin's `initialize()` attempt to its record without running it. */
-  public setRunner(pluginId: string, runner: PluginInitRunner): void {
-    this.ensureRecord(pluginId).runner = runner;
-  }
-
-  /** Marks a plugin that has no `initialize()` as `available` once its `start()` has returned. */
-  public markAvailable(pluginId: string): void {
-    this.emit(this.ensureRecord(pluginId), toStatus('available', 0));
-  }
-
-  /** Current status of a plugin id (`idle` with no attempts if unknown); never creates a record or triggers anything. */
-  public getStatus(pluginId: string): PluginInitStatus {
-    return this.records.get(pluginId)?.status$.value ?? toStatus('idle', 0);
-  }
-
-  /** Status of a plugin id, replaying the current value; creates an `idle` record if needed and never triggers anything. */
+  /** Status of a plugin, replaying the current value. Never triggers anything. */
   public status$(pluginId: string): Observable<PluginInitStatus> {
     return this.ensureRecord(pluginId).status$.asObservable();
   }
 
-  /**
-   * Starts an attempt if the plugin is `idle`, or `failed` with its background retries exhausted,
-   * and returns the current state without waiting. This backs every gated request, so it is not
-   * subject to the lifecycle guard, and it deliberately leaves a `failed` plugin alone while a
-   * background retry is scheduled: re-kicking on every hit would flip the state to `initializing`
-   * before any caller observed the failure, defeating the backoff.
-   */
-  public ensureInitialized(pluginId: string): PluginInitState {
-    const record = this.records.get(pluginId);
-    if (!record) {
-      return 'idle';
-    }
-    const { state } = record.status$.value;
-    if (state === 'idle' || (state === 'failed' && !record.cooldown)) {
-      this.kick(pluginId, record);
-    }
-    return record.status$.value.state;
+  /** Current status of a plugin, `idle` when unknown. Never triggers anything. */
+  public getStatus(pluginId: string): PluginInitStatus {
+    return this.records.get(pluginId)?.status$.value ?? 'idle';
+  }
+
+  /** Marks a plugin that has no `initialize()` as `available` once its `start()` has returned. */
+  public markAvailable(pluginId: string): void {
+    this.ensureRecord(pluginId).status$.next('available');
   }
 
   /**
-   * Makes sure the plugin is initialized, on the plugin's own behalf: resolves once `available`,
-   * joins an in-flight attempt, and otherwise starts one immediately, cancelling any scheduled
-   * background retry. Rejects with a {@link PluginInitializationError} when the attempt fails,
-   * and with a plain error while a boot lifecycle is active.
+   * Marks boot as completed and runs each plugin's `initialize()` without waiting for it, in the
+   * given order.
+   */
+  public startInitialization(runners: ReadonlyMap<string, PluginInitRunner>): void {
+    this.bootCompleted = true;
+    for (const [pluginId, runner] of runners) {
+      this.run(pluginId, this.ensureRecord(pluginId), runner);
+    }
+  }
+
+  /**
+   * Resolves once the plugin is `available` and rejects when its `initialize()` fails. Rejects
+   * before boot has completed, and for a plugin that has not started on this instance.
    */
   public async initialize(pluginId: string): Promise<void> {
-    this.assertOutsideLifecycle(pluginId);
-    const record = this.ensureRecord(pluginId);
-    if (record.status$.value.state === 'available') {
-      return;
-    }
-    if (record.inFlight) {
-      await record.inFlight;
-    } else {
-      // `idle`, or `failed` with or without a pending cooldown: a plugin asking for itself does not
-      // wait out the backoff.
-      await this.runAttempt(pluginId, record);
-    }
-    this.assertAvailable(pluginId, record);
-  }
-
-  /**
-   * Waits until the plugin is `available`, on a dependent's behalf: joins an in-flight attempt,
-   * waits out a scheduled background retry rather than bypassing it, and otherwise starts an
-   * attempt. Observes exactly one attempt, so it rejects with a {@link PluginInitializationError}
-   * if that attempt fails; it also rejects with a plain error while a boot lifecycle is active.
-   */
-  public async waitUntilAvailable(pluginId: string): Promise<void> {
-    this.assertOutsideLifecycle(pluginId);
-    const record = this.ensureRecord(pluginId);
-    if (record.status$.value.state === 'available') {
-      return;
-    }
-    const { inFlight, cooldown } = record;
-    if (inFlight) {
-      await inFlight;
-    } else if (cooldown) {
-      // Wakes when the timer kicks the retry, or when a self `initialize()` cancels the cooldown
-      // and starts one; either way the attempt to join is in flight by then, unless it has already
-      // settled.
-      await cooldown.promise;
-      const kicked = record.inFlight;
-      if (kicked) {
-        await kicked;
-      }
-    } else {
-      await this.runAttempt(pluginId, record);
-    }
-    this.assertAvailable(pluginId, record);
-  }
-
-  private assertOutsideLifecycle(pluginId: string): void {
-    const phase = this.activeLifecycle;
-    if (phase) {
+    if (!this.bootCompleted) {
       throw new Error(
-        `Cannot wait for plugin "${pluginId}" to initialize during the plugin ${phase} lifecycle: ` +
+        `Cannot wait for plugin "${pluginId}" to initialize before every plugin has started: ` +
           `it would block boot. Call initialize() from a route handler, a task runner, or a ` +
           `function returned from start() that runs after boot.`
       );
     }
-  }
-
-  /** Kicks an attempt and awaits it; rejects as non-retriable when there is no runner to run. */
-  private async runAttempt(pluginId: string, record: DeferredInitRecord): Promise<void> {
-    this.kick(pluginId, record);
-    const { inFlight } = record;
-    if (!inFlight) {
-      throw new PluginInitializationError(pluginId, {
-        retriable: false,
-        status: record.status$.value.state,
-        message:
-          `Plugin "${pluginId}" cannot be initialized: it has not started on this Kibana ` +
-          `instance yet, or it is disabled or has no server side.`,
-      });
-    }
-    await inFlight;
-  }
-
-  private assertAvailable(pluginId: string, record: DeferredInitRecord): void {
-    const { state } = record.status$.value;
-    if (state !== 'available') {
-      throw new PluginInitializationError(pluginId, { cause: record.lastError, status: state });
-    }
-  }
-
-  private kick(pluginId: string, record: DeferredInitRecord): void {
-    if (record.inFlight) {
+    const record = this.records.get(pluginId);
+    if (record?.status$.value === 'available') {
       return;
     }
-    const { runner, failedAttempts, lastError } = record;
-    if (!runner) {
-      this.log.warn(
-        `Plugin "${pluginId}" was asked to initialize before its start() ran on this instance; ` +
-          `staying ${record.status$.value.state}.`
-      );
-      return;
+    if (!record?.run) {
+      throw new Error(`Plugin "${pluginId}" has not started on this Kibana instance.`);
     }
+    return record.run;
+  }
 
-    // A pending cooldown belongs to the failure this attempt supersedes. Stop its timer so it
-    // cannot start a second attempt, but wake its waiters only once `inFlight` exists so they
-    // join this attempt.
-    const cancelled = record.cooldown;
-    if (cancelled) {
-      clearTimeout(cancelled.timer);
-      record.cooldown = undefined;
-    }
-
+  private run(pluginId: string, record: DeferredInitRecord, runner: PluginInitRunner): void {
     const startedAt = performance.now();
     const slowTimer = setTimeout(() => {
       this.log.warn(
         `Plugin "${pluginId}" initialize() has been running for ` +
-          `${Math.round((performance.now() - startedAt) / 1000)}s and has not finished. ` +
-          `Its routes and apps stay unavailable until it does.`
+          `${Math.round((performance.now() - startedAt) / 1000)}s and has not finished.`
       );
-    }, DEFERRED_INIT_SLOW_ATTEMPT_WARNING_MS);
-    // Node-only API; guard for environments/tests where timers are mocked without `unref`.
+    }, SLOW_INITIALIZE_WARNING_MS);
+    // Node-only API; guard for environments where timers are mocked without `unref`.
     slowTimer.unref?.();
 
-    // Calling the runner inside the chain turns a synchronous throw into a failed attempt rather
-    // than an exception escaping a request or a timer callback.
-    record.inFlight = Promise.resolve()
-      .then(() => runner())
+    this.log.debug(`Plugin "${pluginId}": running initialize().`);
+    record.status$.next('initializing');
+
+    // Calling the runner inside the chain turns a synchronous throw into a failed run.
+    const run = Promise.resolve()
+      .then(runner)
+      .finally(() => clearTimeout(slowTimer))
       .then(
         () => {
-          clearTimeout(slowTimer);
-          this.onAttemptSucceeded(pluginId, record, performance.now() - startedAt);
+          this.log.info(
+            `Plugin "${pluginId}" initialized in ${Math.round(performance.now() - startedAt)}ms.`
+          );
+          record.status$.next('available');
         },
         (error: unknown) => {
-          clearTimeout(slowTimer);
-          this.onAttemptFailed(pluginId, record, error);
+          record.status$.next('failed');
+          throw new Error(`Plugin "${pluginId}" initialize() failed: ${toMessage(error)}`, {
+            cause: error,
+          });
         }
       );
-    cancelled?.resolve();
-
-    this.log.info(
-      failedAttempts === 0
-        ? `Plugin "${pluginId}": running initialize().`
-        : `Plugin "${pluginId}": retrying initialize() (${failedAttempts} failed attempt(s) so far).`
-    );
-    this.emit(record, toStatus('initializing', failedAttempts, lastError));
-  }
-
-  /**
-   * Emits through the record's subject, queueing emissions requested while one is in progress
-   * (a subscriber that re-kicks synchronously) so every subscriber sees them in order. While an
-   * emission is in progress the subject's value lags behind the queued transitions, so
-   * `getStatus()` and `ensureInitialized()` called from inside a subscriber report the state
-   * before them.
-   */
-  private emit(record: DeferredInitRecord, status: PluginInitStatus): void {
-    if (record.emitting) {
-      record.pendingEmissions = [...(record.pendingEmissions ?? []), status];
-      return;
-    }
-    record.emitting = true;
-    try {
-      record.status$.next(status);
-      while (record.pendingEmissions?.length) {
-        const [next, ...rest] = record.pendingEmissions;
-        record.pendingEmissions = rest;
-        record.status$.next(next);
-      }
-    } finally {
-      record.emitting = false;
-      record.pendingEmissions = undefined;
-    }
-  }
-
-  private onAttemptSucceeded(
-    pluginId: string,
-    record: DeferredInitRecord,
-    durationMs: number
-  ): void {
-    record.inFlight = undefined;
-    record.failedAttempts = 0;
-    record.lastError = undefined;
-    this.log.info(
-      `Plugin "${pluginId}" initialized in ${Math.round(
-        durationMs
-      )}ms; its routes and apps are now served.`
-    );
-    this.emit(record, toStatus('available', 0));
-  }
-
-  private onAttemptFailed(pluginId: string, record: DeferredInitRecord, error: unknown): void {
-    const lastError = error instanceof Error ? error : new Error(String(error));
-    record.inFlight = undefined;
-    record.failedAttempts += 1;
-    record.lastError = lastError;
-    const { failedAttempts } = record;
-    // Scheduled before emitting so a synchronous subscriber that reacts to `failed` already sees
-    // the cooldown and takes the right path.
-    const delayMs = this.scheduleCooldown(pluginId, record);
-    const nextStep =
-      delayMs === undefined
-        ? 'No more background retries; the next request or initialize() call will try again.'
-        : `Retrying in ${Math.round(delayMs / 1000)}s.`;
-    this.log.error(
-      `Plugin "${pluginId}" initialize() failed (attempt ${failedAttempts}): ${lastError.message}. ${nextStep}`
-    );
-    this.emit(record, toStatus('failed', failedAttempts, lastError));
-  }
-
-  /**
-   * Arms a jittered, exponentially backed-off timer that re-kicks the plugin if it is still
-   * `failed`, and returns the delay; returns `undefined` once
-   * {@link DEFERRED_INIT_MAX_BACKGROUND_ATTEMPTS} consecutive failures have accumulated, after
-   * which only on-demand kicks retry. Full jitter keeps instances that failed against the same
-   * unhealthy cluster from retrying in lockstep, mirroring Fleet's `backOff({ jitter: 'full' })`.
-   */
-  private scheduleCooldown(pluginId: string, record: DeferredInitRecord): number | undefined {
-    if (record.failedAttempts >= DEFERRED_INIT_MAX_BACKGROUND_ATTEMPTS) {
-      return undefined;
-    }
-    const upperBoundMs = Math.min(
-      DEFERRED_INIT_BACKOFF_BASE_MS * DEFERRED_INIT_BACKOFF_FACTOR ** (record.failedAttempts - 1),
-      DEFERRED_INIT_BACKOFF_MAX_MS
-    );
-    const delayMs = Math.random() * upperBoundMs;
-
-    const { promise, resolve } = Promise.withResolvers<void>();
-    const timer = setTimeout(() => {
-      // Only the live cooldown may act: kick() cancels and replaces the one it supersedes.
-      if (record.cooldown?.promise !== promise) {
-        return;
-      }
-      record.cooldown = undefined;
-      try {
-        if (record.status$.value.state === 'failed') {
-          this.kick(pluginId, record);
-        }
-      } finally {
-        resolve();
-      }
-    }, delayMs);
-    // Node-only API; guard for environments/tests where timers are mocked without `unref`.
-    timer.unref?.();
-    record.cooldown = { promise, timer, resolve };
-    return delayMs;
+    // Reporting the failure also handles the rejection, so a run nobody awaits is not an
+    // unhandled rejection. Callers of `initialize()` still get it.
+    run.catch((error: Error) => this.failures$.next(error));
+    record.run = run;
   }
 
   private ensureRecord(pluginId: string): DeferredInitRecord {
-    let record = this.records.get(pluginId);
-    if (!record) {
-      record = {
-        status$: new BehaviorSubject<PluginInitStatus>(toStatus('idle', 0)),
-        failedAttempts: 0,
-      };
-      this.records.set(pluginId, record);
+    const existing = this.records.get(pluginId);
+    if (existing) {
+      return existing;
     }
+    const record = { status$: new BehaviorSubject<PluginInitStatus>('idle') };
+    this.records.set(pluginId, record);
     return record;
   }
 }
+
+const toMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);

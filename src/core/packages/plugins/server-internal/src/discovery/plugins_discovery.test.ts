@@ -166,10 +166,10 @@ const packageMock = {
   },
 };
 
+const deferredInitEngine = new DeferredInitEngine(loggingSystemMock.create().get());
+
 const pluginDir = (...segments: string[]) => resolve(REPO_ROOT, 'plugins', ...segments);
 const manifestPath = (...pluginPath: string[]) => resolve(pluginDir(...pluginPath), 'kibana.json');
-
-const deferredInitEngine = new DeferredInitEngine(loggingSystemMock.create().get());
 
 describe('plugins discovery system', () => {
   let logger: ReturnType<typeof loggingSystemMock.create>;

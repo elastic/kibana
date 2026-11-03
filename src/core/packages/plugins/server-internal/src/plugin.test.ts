@@ -134,36 +134,6 @@ test('`constructor` correctly initializes plugin instance', () => {
   expect(plugin.runtimePluginDependencies).toEqual(['some-runtime-dep']);
 });
 
-describe('`hasInitialization`', () => {
-  function createPlugin(manifestProps: Partial<PluginManifest> = {}) {
-    const manifest = createPluginManifest(manifestProps);
-    const opaqueId = Symbol();
-    return new PluginWrapper({
-      path: 'some-plugin-path',
-      manifest,
-      opaqueId,
-      initializerContext: createPluginInitializerContext({
-        coreContext,
-        opaqueId,
-        manifest,
-        instanceInfo,
-        nodeInfo,
-        deferredInitEngine,
-      }),
-    });
-  }
-
-  test('reflects the manifest flag even before `init()` has run', () => {
-    const plugin = createPlugin({ hasInitialization: true });
-    expect(plugin.hasInitialization).toBe(true);
-  });
-
-  test('defaults to `false` when unset in the manifest', () => {
-    const plugin = createPlugin();
-    expect(plugin.hasInitialization).toBe(false);
-  });
-});
-
 describe('`constructor` correctly sets non-external source', () => {
   function createPlugin(path: string) {
     const manifest = createPluginManifest();
@@ -321,82 +291,93 @@ test('`init` fails if object returned from initializer does not define `setup` f
   );
 });
 
-test('`init` fails if object returned from initializer defines an `initialize` function', async () => {
-  const manifest = createPluginManifest();
-  const opaqueId = Symbol();
-  const plugin = new PluginWrapper({
-    path: 'plugin-with-initializer-path',
-    manifest,
-    opaqueId,
-    initializerContext: createPluginInitializerContext({
-      coreContext,
-      opaqueId,
+describe('initialize', () => {
+  const createPlugin = (manifestProps: Partial<PluginManifest> = {}) => {
+    const manifest = createPluginManifest(manifestProps);
+    const opaqueId = Symbol();
+    return new PluginWrapper({
+      path: 'plugin-with-initializer-path',
       manifest,
-      instanceInfo,
-      nodeInfo,
-    }),
-  });
-
-  const mockPluginInstance = { setup: jest.fn(), initialize: jest.fn() };
-  mockPluginInitializer.mockResolvedValue(mockPluginInstance);
-
-  await expect(() => plugin.init()).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Instance of plugin \\"some-plugin-id\\" defines an \\"initialize\\" function. \\"initialize\\" is reserved by core for plugin lifecycle hooks, rename the method."`
-  );
-});
-
-test('`init` fails if the plugin class defines an `initialize` method', async () => {
-  const manifest = createPluginManifest();
-  const opaqueId = Symbol();
-  const plugin = new PluginWrapper({
-    path: 'plugin-with-initializer-path',
-    manifest,
-    opaqueId,
-    initializerContext: createPluginInitializerContext({
-      coreContext,
       opaqueId,
-      manifest,
-      instanceInfo,
-      nodeInfo,
-    }),
-  });
+      initializerContext: createPluginInitializerContext({
+        coreContext,
+        opaqueId,
+        manifest,
+        instanceInfo,
+        nodeInfo,
+        deferredInitEngine,
+      }),
+    });
+  };
 
-  class PluginWithInitializeMethod {
-    setup() {
-      return {};
+  test('`hasInitialize` is true when the plugin class defines an `initialize` method', async () => {
+    const plugin = createPlugin();
+    class PluginWithInitializeMethod {
+      setup() {
+        return {};
+      }
+
+      start() {
+        return {};
+      }
+
+      initialize() {
+        return Promise.resolve();
+      }
     }
+    mockPluginInitializer.mockResolvedValue(new PluginWithInitializeMethod());
 
-    initialize() {
-      return Promise.resolve();
-    }
-  }
-  mockPluginInitializer.mockResolvedValue(new PluginWithInitializeMethod());
+    await plugin.init();
 
-  await expect(() => plugin.init()).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Instance of plugin \\"some-plugin-id\\" defines an \\"initialize\\" function. \\"initialize\\" is reserved by core for plugin lifecycle hooks, rename the method."`
-  );
-});
-
-test('`init` allows a preboot plugin to define an `initialize` function', async () => {
-  const manifest = createPluginManifest({ type: PluginType.preboot });
-  const opaqueId = Symbol();
-  const plugin = new PluginWrapper({
-    path: 'plugin-with-initializer-path',
-    manifest,
-    opaqueId,
-    initializerContext: createPluginInitializerContext({
-      coreContext,
-      opaqueId,
-      manifest,
-      instanceInfo,
-      nodeInfo,
-    }),
+    expect(plugin.hasInitialize).toBe(true);
   });
 
-  const mockPluginInstance = { setup: jest.fn(), initialize: jest.fn() };
-  mockPluginInitializer.mockResolvedValue(mockPluginInstance);
+  test('`hasInitialize` is false when the plugin does not define `initialize`', async () => {
+    const plugin = createPlugin();
+    mockPluginInitializer.mockResolvedValue({ setup: jest.fn(), start: jest.fn() });
 
-  await expect(plugin.init()).resolves.toBeUndefined();
+    await plugin.init();
+
+    expect(plugin.hasInitialize).toBe(false);
+  });
+
+  test('`hasInitialize` is false for a preboot plugin that defines `initialize`', async () => {
+    const plugin = createPlugin({ type: PluginType.preboot });
+    mockPluginInitializer.mockResolvedValue({ setup: jest.fn(), initialize: jest.fn() });
+
+    await plugin.init();
+
+    expect(plugin.hasInitialize).toBe(false);
+  });
+
+  test('`runInitialize` calls plugin.initialize with the start context and dependencies', async () => {
+    const plugin = createPlugin();
+    const context = { any: 'thing' } as any;
+    const deps = { otherDep: 'value' };
+    const mockPluginInstance = {
+      setup: jest.fn(),
+      start: jest.fn(),
+      initialize: jest.fn().mockResolvedValue(undefined),
+    };
+    mockPluginInitializer.mockResolvedValue(mockPluginInstance);
+
+    await plugin.init();
+    await plugin.runInitialize(context, deps);
+
+    expect(mockPluginInstance.initialize).toHaveBeenCalledTimes(1);
+    expect(mockPluginInstance.initialize).toHaveBeenCalledWith(context, deps);
+  });
+
+  test('`runInitialize` fails if the plugin does not define `initialize`', async () => {
+    const plugin = createPlugin();
+    mockPluginInitializer.mockResolvedValue({ setup: jest.fn(), start: jest.fn() });
+
+    await plugin.init();
+
+    await expect(plugin.runInitialize({} as any, {})).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Plugin \\"some-plugin-id\\" does not implement initialize()."`
+    );
+  });
 });
 
 test('`setup` initializes plugin and calls appropriate lifecycle hook', async () => {
@@ -723,107 +704,6 @@ test('`stop` calls `stop` defined by the plugin instance', async () => {
 
   await expect(plugin.stop()).resolves.toBeUndefined();
   expect(mockPluginInstance.stop).toHaveBeenCalledTimes(1);
-});
-
-describe('initialize()', () => {
-  const createPlugin = (manifestProps: Partial<PluginManifest> = {}) => {
-    const manifest = createPluginManifest(manifestProps);
-    const opaqueId = Symbol();
-    return new PluginWrapper({
-      path: 'plugin-with-initializer-path',
-      manifest,
-      opaqueId,
-      initializerContext: createPluginInitializerContext({
-        coreContext,
-        opaqueId,
-        manifest,
-        instanceInfo,
-        nodeInfo,
-        deferredInitEngine,
-      }),
-    });
-  };
-
-  test('`runInitialize` calls plugin.initialize with the start context and dependencies', async () => {
-    const plugin = createPlugin({ hasInitialization: true });
-    const context = { any: 'thing' } as any;
-    const deps = { otherDep: 'value' };
-    const mockPluginInstance = {
-      setup: jest.fn(),
-      start: jest.fn(),
-      initialize: jest.fn().mockResolvedValue(undefined),
-    };
-    mockPluginInitializer.mockResolvedValue(mockPluginInstance);
-
-    await plugin.init();
-    await plugin.runInitialize(context, deps);
-
-    expect(mockPluginInstance.initialize).toHaveBeenCalledTimes(1);
-    expect(mockPluginInstance.initialize).toHaveBeenCalledWith(context, deps);
-  });
-
-  test('`runInitialize` fails if the plugin does not implement initialize()', async () => {
-    const plugin = createPlugin();
-    mockPluginInitializer.mockResolvedValue({ setup: jest.fn(), start: jest.fn() });
-
-    await plugin.init();
-
-    await expect(plugin.runInitialize({} as any, {})).rejects.toThrow(
-      'Plugin "some-plugin-id" does not implement initialize().'
-    );
-  });
-
-  test('`init` fails if a preboot plugin sets `hasInitialization`', async () => {
-    const plugin = createPlugin({ type: PluginType.preboot, hasInitialization: true });
-    mockPluginInitializer.mockResolvedValue({ setup: jest.fn() });
-
-    await expect(plugin.init()).rejects.toThrow(
-      'Plugin "some-plugin-id" is a preboot plugin and cannot set "hasInitialization": initialize() runs after start(), which preboot plugins do not have.'
-    );
-  });
-
-  test('`init` fails if the manifest sets `hasInitialization` but the plugin does not implement initialize()', async () => {
-    const plugin = createPlugin({ hasInitialization: true });
-    mockPluginInitializer.mockResolvedValue({ setup: jest.fn(), start: jest.fn() });
-
-    await expect(plugin.init()).rejects.toThrow(
-      'Plugin "some-plugin-id" sets "hasInitialization: true" in its manifest but its plugin class does not implement initialize().'
-    );
-  });
-
-  test('`init` fails if the plugin implements initialize() but the manifest does not set `hasInitialization`', async () => {
-    const plugin = createPlugin();
-    mockPluginInitializer.mockResolvedValue({
-      setup: jest.fn(),
-      start: jest.fn(),
-      initialize: jest.fn(),
-    });
-
-    await expect(plugin.init()).rejects.toThrow(
-      'Plugin "some-plugin-id" has an initialize() method but its manifest does not set "hasInitialization: true". initialize() is a lifecycle hook reserved by core: set the flag if this method is meant to be it, otherwise rename the method.'
-    );
-  });
-
-  test('`stop` calls the instance stop and leaves `startDependencies` pending when start never ran', async () => {
-    const plugin = createPlugin({ hasInitialization: true });
-    const mockPluginInstance = {
-      setup: jest.fn(),
-      start: jest.fn(),
-      initialize: jest.fn(),
-      stop: jest.fn(),
-    };
-    mockPluginInitializer.mockResolvedValue(mockPluginInstance);
-    const onSettled = jest.fn();
-    plugin.startDependencies.then(onSettled, onSettled);
-
-    await plugin.init();
-    await plugin.setup({} as any, {} as any);
-    await expect(plugin.stop()).resolves.toBeUndefined();
-    await new Promise((resolve) => setImmediate(resolve));
-
-    expect(mockPluginInstance.stop).toHaveBeenCalledTimes(1);
-    expect(onSettled).not.toHaveBeenCalled();
-  });
 });
 
 test('`stop` cleans up the plugin container', async () => {

@@ -130,8 +130,8 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
     node: nodeServiceMock.createInternalPrebootContract(),
     initialization: {
       initialize: jest.fn().mockResolvedValue(undefined),
-      status$: new BehaviorSubject<PluginInitStatus>({ state: 'available', attempts: 0 }),
-      getStatus: jest.fn().mockReturnValue({ state: 'available', attempts: 0 }),
+      status$: new BehaviorSubject<PluginInitStatus>('available'),
+      getStatus: jest.fn().mockReturnValue('available'),
     },
   };
 

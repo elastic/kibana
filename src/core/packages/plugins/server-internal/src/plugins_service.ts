@@ -36,7 +36,7 @@ import type { PluginsConfigType } from './plugins_config';
 import { PluginsConfig } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 import { createBrowserConfig } from './create_browser_config';
-import { DeferredInitEngine, registerDeferredInitStatusRoute } from './deferred_init';
+import { DeferredInitEngine } from './deferred_init';
 
 /** @internal */
 export type DiscoveredPlugins = {
@@ -109,6 +109,14 @@ export class PluginsService
     );
   }
 
+  /**
+   * Emits the error of a plugin `initialize()` that failed. Core shuts Kibana down on it, the
+   * same outcome as a thrown `setup()` or `start()`.
+   */
+  public getInitializationFailure$(): Observable<Error> {
+    return this.deferredInitEngine.failure$;
+  }
+
   public async discover({
     environment,
     node,
@@ -131,7 +139,6 @@ export class PluginsService
       },
       deferredInitEngine: this.deferredInitEngine,
     });
-    this.standardPluginsSystem.setNodeRoles(node.roles);
 
     await this.handleDiscoveryErrors(error$);
     await this.handleDiscoveredPlugins(plugin$);
@@ -182,10 +189,6 @@ export class PluginsService
 
     const config = await firstValueFrom(this.config$);
 
-    // Always-available core endpoint the initializing UI polls for plugin initialization status.
-    // Registered on a core router so it is never gated while a plugin is initializing.
-    registerDeferredInitStatusRoute(deps.http.createRouter(''), this.deferredInitEngine);
-
     let contracts = new Map<PluginName, unknown>();
     if (config.initialize) {
       contracts = await this.standardPluginsSystem.setupPlugins(deps);
@@ -215,7 +218,6 @@ export class PluginsService
     await this.prebootPluginsSystem.stopPlugins();
     this.arePrebootPluginsStopped = true;
 
-    this.standardPluginsSystem.setInitializeOnBoot(config.initializeOnBoot);
     const contracts = await this.standardPluginsSystem.startPlugins(deps);
     return { contracts };
   }

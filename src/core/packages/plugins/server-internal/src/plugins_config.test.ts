@@ -11,14 +11,13 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import type { PluginsConfigType } from './plugins_config';
-import { config as pluginsConfigDescriptor, PluginsConfig } from './plugins_config';
+import { PluginsConfig } from './plugins_config';
 
 describe('PluginsConfig', () => {
   it('retrieves additionalPluginPaths from config.paths when in production mode', () => {
     const env = Env.createDefault(REPO_ROOT, getEnvOptions({ cliArgs: { dev: false } }));
     const rawConfig: PluginsConfigType = {
       initialize: true,
-      initializeOnBoot: true,
       paths: ['some-path', 'another-path'],
     };
     const config = new PluginsConfig(rawConfig, env);
@@ -29,7 +28,6 @@ describe('PluginsConfig', () => {
     const env = Env.createDefault(REPO_ROOT, getEnvOptions({ cliArgs: { dev: true } }));
     const rawConfig: PluginsConfigType = {
       initialize: true,
-      initializeOnBoot: true,
       paths: ['some-path', 'another-path'],
     };
     const config = new PluginsConfig(rawConfig, env);
@@ -40,7 +38,6 @@ describe('PluginsConfig', () => {
     const env = Env.createDefault(REPO_ROOT, getEnvOptions({ cliArgs: { dev: true } }));
     const rawConfig: PluginsConfigType = {
       initialize: true,
-      initializeOnBoot: true,
       paths: ['some-path', 'another-path'],
       forceEnableAllPlugins: true,
     };
@@ -52,25 +49,11 @@ describe('PluginsConfig', () => {
     const env = Env.createDefault(REPO_ROOT, getEnvOptions({ cliArgs: { dev: true } }));
     const rawConfig: PluginsConfigType = {
       initialize: true,
-      initializeOnBoot: true,
       paths: ['some-path', 'another-path'],
       forceEnableAllPlugins: true,
       allowlistPluginGroups: ['search'],
     };
     const config = new PluginsConfig(rawConfig, env);
     expect(config.allowlistPluginGroups).toEqual(['search']);
-  });
-
-  it('defaults initializeOnBoot to true', () => {
-    const env = Env.createDefault(REPO_ROOT, getEnvOptions());
-    const rawConfig = pluginsConfigDescriptor.schema.validate({});
-    expect(rawConfig.initializeOnBoot).toBe(true);
-    expect(new PluginsConfig(rawConfig, env).initializeOnBoot).toBe(true);
-  });
-
-  it('honors an explicit initializeOnBoot: false', () => {
-    const env = Env.createDefault(REPO_ROOT, getEnvOptions());
-    const rawConfig = pluginsConfigDescriptor.schema.validate({ initializeOnBoot: false });
-    expect(new PluginsConfig(rawConfig, env).initializeOnBoot).toBe(false);
   });
 });

@@ -4,9 +4,7 @@
     "outDir": "target/types",
     "types": [
       "jest",
-      "node",
-      "react",
-      "@kbn/ambient-ui-types"
+      "node"
     ]
   },
   "include": [
@@ -18,10 +16,7 @@
     "@kbn/core-theme-browser",
     "@kbn/core-mount-utils-browser",
     "@kbn/core-capabilities-common",
-    "@kbn/core-application-common",
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/test-jest-helpers"
+    "@kbn/core-application-common"
   ],
   "exclude": [
     "target/**/*",

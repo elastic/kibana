@@ -184,12 +184,6 @@ export const MANIFEST_V2: JSONSchema = {
               `,
               type: 'boolean',
             },
-            hasInitialization: {
-              description: desc`
-                Set to true when the plugin implements the server-side initialize() lifecycle hook.
-              `,
-              type: 'boolean',
-            },
             type: {
               description: desc`
                 Only used to distinguish "preboot" plugins from standard plugins.
