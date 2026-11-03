@@ -11,7 +11,6 @@ import Fs from 'fs';
 import Path from 'path';
 import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { ScoutTestTarget } from '@kbn/scout-info';
 import { testTargets } from '@kbn/scout-info';
 import { testableModules } from '@kbn/scout-reporting/src/registry';
 import { validateAndProcessTestFiles } from '../../common/utils';
@@ -22,14 +21,15 @@ export interface PickableConfig {
   module: string;
   group: string;
   configSet: string;
-  targets: ScoutTestTarget[];
+  /** Local test target tags, e.g. local-stateful-classic */
+  targets: string[];
 }
 
-const getLocalTargets = (tags: string[]): ScoutTestTarget[] => {
+const getLocalTargets = (tags: string[]): string[] => {
   const local = testTargets.local;
   const found = local.filter((target) => tags.includes(target.playwrightTag));
   // configs without a manifest yet, e.g. new ones, can run on any local target
-  return found.length ? found : local;
+  return (found.length ? found : local).map(({ tag }) => tag);
 };
 
 export const getConfigs = (): PickableConfig[] =>
@@ -78,7 +78,10 @@ const getMergeBase = async () => {
 export const getChangedSpecs = async (): Promise<Map<string, string[]>> => {
   const [changed, untracked] = await Promise.all([
     getMergeBase().then((base) => git(['diff', '--name-only', base, '--', '*.spec.ts'])),
-    git(['ls-files', '--others', '--exclude-standard', '--', '*.spec.ts']),
+    // `git status` finds untracked files faster than `git ls-files --others`
+    git(['status', '--porcelain', '--untracked-files=all', '--', '*.spec.ts']).then((lines) =>
+      lines.filter((line) => line.startsWith('??')).map((line) => line.slice(3))
+    ),
   ]);
 
   const byConfig = new Map<string, string[]>();

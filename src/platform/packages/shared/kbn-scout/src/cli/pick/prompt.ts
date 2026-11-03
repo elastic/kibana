@@ -15,6 +15,7 @@ export interface Choice<T> {
   label: string;
   value: T;
   hint?: string;
+  checked?: boolean;
 }
 
 interface PromptOptions<T> {
@@ -47,7 +48,9 @@ const prompt = <T>({ message, choices, multiple = false }: PromptOptions<T>): Pr
     let query = '';
     let cursor = 0;
     let renderedLines = 0;
-    const selected = new Set<Choice<T>>();
+    const selected = new Set(choices.filter(({ checked }) => checked));
+    // with preselected choices, unselecting all of them is a valid answer
+    const allowEmpty = selected.size > 0;
     const filtered = () => choices.filter((choice) => matches(choice, query));
 
     const clear = () => {
@@ -113,9 +116,13 @@ const prompt = <T>({ message, choices, multiple = false }: PromptOptions<T>): Pr
         stdout.write('\x1b[?25h');
         process.exit(130);
       } else if (key.name === 'return') {
-        const picked = multiple && selected.size ? choices.filter((c) => selected.has(c)) : [];
-        if (picked.length || current) {
-          finish(picked.length ? picked : [current]);
+        const picked = multiple ? choices.filter((choice) => selected.has(choice)) : [];
+        if (picked.length || (multiple && allowEmpty)) {
+          finish(picked);
+          return;
+        }
+        if (current) {
+          finish([current]);
           return;
         }
       } else if (key.name === 'up' && visible.length) {

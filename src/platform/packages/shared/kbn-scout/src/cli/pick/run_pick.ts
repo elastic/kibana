@@ -14,11 +14,12 @@ import { stripVTControlCharacters } from 'util';
 import chalk from 'chalk';
 import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { ScoutTestTarget } from '@kbn/scout-info';
+import { ScoutTestTarget } from '@kbn/scout-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { PickableConfig } from './configs';
 import { getChangedSpecs, getConfigs, getSpecs } from './configs';
-import { readPins, writePins } from './pins';
+import type { PinnedConfig } from './pins';
+import { readState, toPinned, updateState } from './pins';
 import type { RunningServers } from './servers';
 import { getRunningServers, stopServers } from './servers';
 import { multiSelect, select } from './prompt';
@@ -26,7 +27,7 @@ import { multiSelect, select } from './prompt';
 const LOG_FILE = '.scout/logs/scout_pick.log';
 
 interface Selection {
-  config: PickableConfig;
+  config: PinnedConfig;
   specs: string[];
   target: ScoutTestTarget;
   verbose: boolean;
@@ -77,27 +78,67 @@ const findConfigs = async (configs: PickableConfig[], multiple: boolean) => {
   return multiple ? multiSelect('Configs to pin', choices) : [await select('Config', choices)];
 };
 
-const pickTests = async (log: ToolingLog, configs: PickableConfig[]): Promise<Selection> => {
-  const byPath = new Map(configs.map((config) => [config.path, config]));
-  const getConfig = (path: string) => {
-    const config = byPath.get(path);
-    if (!config) {
-      throw new Error(`${path} is not a registered Scout config`);
-    }
-    return config;
-  };
-  // a new config is only registered once its manifest exists
-  const changed = new Map([...(await getChangedSpecs())].filter(([path]) => byPath.has(path)));
+const describeRun = ({ config, specs, target }: Omit<Selection, 'verbose'>) =>
+  `${config.label} · ${specs.length ? plural(specs.length, 'spec') : 'all specs'} · ${
+    target.arch
+  } · ${target.domain}`;
 
-  let pins = readPins()?.filter((path) => byPath.has(path));
+const pickSpecs = async (config: PinnedConfig) => {
+  const specs = getSpecs(config.path);
+  const whole = await select('Run', [
+    { label: 'Whole config', value: true, hint: plural(specs.length, 'spec') },
+    { label: 'Pick specs', value: false },
+  ]);
+  if (whole) {
+    return [];
+  }
+  const configDir = Path.dirname(config.path);
+  return multiSelect(
+    'Specs',
+    specs.map((spec) => ({ label: Path.relative(configDir, spec), value: spec }))
+  );
+};
+
+const pickTarget = async ({ targets }: PinnedConfig) => {
+  const choices = targets.map((tag) => {
+    const target = ScoutTestTarget.fromTag(tag);
+    return { label: `${target.arch} · ${target.domain}`, value: target };
+  });
+  return choices.length === 1 ? choices[0].value : select('Target', choices);
+};
+
+/** Picks what to run; Scout configs are only loaded when pinned ones are not enough */
+const pickTests = async (log: ToolingLog): Promise<Selection> => {
+  let configs: PickableConfig[] | undefined;
+  const loadConfigs = () => {
+    if (!configs) {
+      log.write(chalk.dim('Loading Scout configs…'));
+      configs = getConfigs();
+    }
+    return configs;
+  };
+
+  const state = readState();
+  let pins = state.pins;
   if (!pins) {
     log.write(chalk.dim("No pinned configs yet, let's find the ones you use\n"));
-    pins = (await findConfigs(configs, true)).map(({ path }) => path);
-    writePins(pins);
+    pins = (await findConfigs(loadConfigs(), true)).map(toPinned);
+    updateState({ pins });
   }
 
+  const changed = await getChangedSpecs();
   const changedSpecs = [...changed.values()].flat();
+  const { last } = state;
   const start = await select('What do you want to run?', [
+    ...(last
+      ? [
+          {
+            label: 'Run last',
+            value: 'last',
+            hint: describeRun({ ...last, target: ScoutTestTarget.fromTag(last.target) }),
+          },
+        ]
+      : []),
     ...(changed.size
       ? [
           {
@@ -107,67 +148,69 @@ const pickTests = async (log: ToolingLog, configs: PickableConfig[]): Promise<Se
           },
         ]
       : []),
-    ...pins.map((path) => ({ label: getConfig(path).label, value: path, hint: 'pinned' })),
+    ...pins.map(({ label, path }) => ({ label, value: path, hint: 'pinned' })),
     { label: 'Find another config', value: 'find' },
+    { label: 'Edit pins', value: 'edit' },
   ]);
 
-  let config: PickableConfig;
+  let config: PinnedConfig | undefined = pins.find(({ path }) => path === start);
   let specs: string[] | undefined;
-  if (start === 'changed') {
-    const paths = [...changed.keys()];
-    const path =
-      paths.length === 1
-        ? paths[0]
+  if (start === 'last' && last) {
+    return {
+      ...last,
+      target: ScoutTestTarget.fromTag(last.target),
+      verbose: state.verbose ?? false,
+    };
+  } else if (start === 'edit') {
+    const kept = await multiSelect(
+      'Pinned configs (space to unpin)',
+      pins.map((pin) => ({ label: pin.label, value: pin, checked: true }))
+    );
+    updateState({ pins: kept });
+    return pickTests(log);
+  } else if (start === 'changed') {
+    // changed configs may not be pinned, so their details come from all configs
+    const changedConfigs = loadConfigs().filter(({ path }) => changed.has(path));
+    config =
+      changedConfigs.length === 1
+        ? changedConfigs[0]
         : await select(
             'Config',
-            paths.map((value) => ({
-              label: getConfig(value).label,
+            changedConfigs.map((value) => ({
+              label: value.label,
               value,
-              hint: plural(changed.get(value)?.length ?? 0, 'spec'),
+              hint: plural(changed.get(value.path)?.length ?? 0, 'spec'),
             }))
           );
-    config = getConfig(path);
-    specs = changed.get(path);
+    specs = changed.get(config.path);
   } else if (start === 'find') {
-    [config] = await findConfigs(configs, false);
+    config = (await findConfigs(loadConfigs(), false))[0];
     const pin =
-      !pins.includes(config.path) &&
+      !pins.some(({ path }) => path === config?.path) &&
       (await select('Pin it for next time?', [
         { label: 'Yes', value: true },
         { label: 'No', value: false },
       ]));
     if (pin) {
-      writePins(unique([...pins, config.path]));
+      updateState({ pins: [...pins, toPinned(config)] });
     }
-  } else {
-    config = getConfig(start);
   }
 
-  if (!specs) {
-    const allSpecs = getSpecs(config.path);
-    const whole = await select('Run', [
-      { label: 'Whole config', value: true, hint: plural(allSpecs.length, 'spec') },
-      { label: 'Pick specs', value: false },
+  if (!config) {
+    throw new Error(`Unknown choice ${start}`);
+  }
+  config = toPinned(config);
+  specs ??= await pickSpecs(config);
+  const target = await pickTarget(config);
+
+  let verbose = state.verbose;
+  if (verbose === undefined) {
+    verbose = await select('Output', [
+      { label: 'Test results', value: false },
+      { label: 'Everything', value: true, hint: 'server and debug logs' },
     ]);
-    specs = whole
-      ? []
-      : await multiSelect(
-          'Specs',
-          allSpecs.map((spec) => ({ label: spec, value: spec }))
-        );
   }
-
-  const targets = config.targets.map((target) => ({
-    label: `${target.arch} · ${target.domain}`,
-    value: target,
-  }));
-  const target = targets.length === 1 ? targets[0].value : await select('Target', targets);
-
-  const verbose = await select('Output', [
-    { label: 'Test results', value: false },
-    { label: 'Everything', value: true, hint: 'server and debug logs' },
-  ]);
-
+  updateState({ last: { config, specs, target: target.tag }, verbose });
   return { config, specs, target, verbose };
 };
 
@@ -319,19 +362,27 @@ const runTests = async (log: ToolingLog, selection: Selection, mode: ServersMode
 };
 
 export const runPick = async (log: ToolingLog) => {
-  log.write(chalk.dim('Loading Scout configs…'));
-  const configs = getConfigs();
-
   for (;;) {
-    const selection = await pickTests(log, configs);
-    let next: 'again' | 'pick' | 'exit' = 'again';
-    while (next === 'again') {
+    const selection = await pickTests(log);
+    log.write(chalk.dim(describeRun(selection)));
+    let next: 'again' | 'toggle-output' | 'pick' | 'exit' = 'again';
+    while (next === 'again' || next === 'toggle-output') {
+      if (next === 'toggle-output') {
+        selection.verbose = !selection.verbose;
+        updateState({ verbose: selection.verbose });
+      }
       const mode = await prepareServers(log, selection);
       if (mode) {
         process.exitCode = await runTests(log, selection, mode);
       }
       next = await select('What next?', [
         { label: 'Run the same tests again', value: 'again' },
+        {
+          label: selection.verbose
+            ? 'Run again showing test results only'
+            : 'Run again showing all logs',
+          value: 'toggle-output',
+        },
         { label: 'Pick other tests', value: 'pick' },
         { label: 'Exit', value: 'exit' },
       ]);

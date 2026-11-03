@@ -10,13 +10,36 @@
 import Fs from 'fs';
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
+import type { PickableConfig } from './configs';
 
-const PINS_FILE = Path.resolve(REPO_ROOT, '.scout/pins.json');
+const STATE_FILE = Path.resolve(REPO_ROOT, '.scout/pins.json');
 
-export const readPins = (): string[] | undefined =>
-  Fs.existsSync(PINS_FILE) ? JSON.parse(Fs.readFileSync(PINS_FILE, 'utf8')).configs : undefined;
+/** What the picker needs to run a config without loading all Scout configs */
+export type PinnedConfig = Pick<PickableConfig, 'path' | 'label' | 'configSet' | 'targets'>;
 
-export const writePins = (configs: string[]) => {
-  Fs.mkdirSync(Path.dirname(PINS_FILE), { recursive: true });
-  Fs.writeFileSync(PINS_FILE, `${JSON.stringify({ configs }, null, 2)}\n`);
+export interface LastRun {
+  config: PinnedConfig;
+  specs: string[];
+  target: string;
+}
+
+export interface PickState {
+  pins?: PinnedConfig[];
+  last?: LastRun;
+  verbose?: boolean;
+}
+
+export const toPinned = ({ path, label, configSet, targets }: PinnedConfig): PinnedConfig => ({
+  path,
+  label,
+  configSet,
+  targets,
+});
+
+export const readState = (): PickState =>
+  Fs.existsSync(STATE_FILE) ? JSON.parse(Fs.readFileSync(STATE_FILE, 'utf8')) : {};
+
+export const updateState = (changes: PickState) => {
+  Fs.mkdirSync(Path.dirname(STATE_FILE), { recursive: true });
+  Fs.writeFileSync(STATE_FILE, `${JSON.stringify({ ...readState(), ...changes }, null, 2)}\n`);
 };
