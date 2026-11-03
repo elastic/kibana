@@ -2084,10 +2084,10 @@ groups:
         default: false
         applies_to:
           stack: preview 9.6+
-          ech: preview 9.6+
-          ece: preview 9.6+
-          eck: preview 9.6+
-          self: preview 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: "securitySolution:refreshIntervalDefaults"
