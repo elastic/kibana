@@ -89,5 +89,16 @@ export const RUNNER_TIMEOUT_MS = 40 * 60_000;
 export const REVIEW_SETTLE_TIMEOUT_MS = 20 * 60_000;
 export const POLL_INTERVAL_MS = 5_000;
 
+/** Per row, on top of the runner and review timeouts: seeding, cleanup and the judge calls. */
+export const ROW_OVERHEAD_MS = 10 * 60_000;
+
+/**
+ * Playwright runs every row inside one test, so its timeout has to cover each row hitting its own
+ * timeouts. Otherwise a slow model is killed mid-dataset with no scores, and the failure reads as a
+ * generic test timeout instead of the suite's labeled one.
+ */
+export const getPlaywrightTestTimeoutMs = (rowCount: number): number =>
+  rowCount * (RUNNER_TIMEOUT_MS + REVIEW_SETTLE_TIMEOUT_MS + ROW_OVERHEAD_MS);
+
 export const COHORT_ENV = 'AD_WORKER_EVAL_COHORT';
 export const REFERENCE_MODEL_ENV = 'AD_WORKER_EVAL_REFERENCE_MODEL';

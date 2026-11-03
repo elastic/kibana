@@ -6,6 +6,8 @@
  */
 
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
+import { WORKER_SCENARIOS } from './datasets/worker_rows';
+import { getPlaywrightTestTimeoutMs } from './src/constants';
 
 export default createPlaywrightEvalsConfig({
   testDir: `${__dirname}/evals`,
@@ -13,6 +15,6 @@ export default createPlaywrightEvalsConfig({
   // The runner's concurrency key is per space (`cancel-in-progress`, max 1), so a second
   // concurrent trigger in the eval space cancels the first. Rows run one at a time.
   workers: 1,
-  // One row is generation, fingerprint matching and a review per attack, each an LLM pass.
-  timeout: 60 * 60_000,
+  // One test runs every row, and a row may take up to its runner plus review timeouts.
+  timeout: getPlaywrightTestTimeoutMs(WORKER_SCENARIOS.length),
 });

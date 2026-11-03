@@ -97,8 +97,10 @@ AD_WORKER_EVAL_COHORT=review AD_WORKER_EVAL_REFERENCE_MODEL=<reference-id> \
 - The per-space `securitySolution:enableAlertZero` setting is set by the preflight spec.
 - Specs run with one Playwright worker: the runner's concurrency key is per space with
   cancel-in-progress.
-- Timeouts: runner 40 min, review settle 20 min, Playwright 60 min per test. Wall time per row is
-  dominated by one generation batch plus one review per unmatched attack (review concurrency 2).
+- Timeouts: runner 40 min, review settle 20 min, Playwright rows x (runner + review settle +
+  10 min overhead) per test (350 min for 5 rows), so the suite's own timeouts fire first. Wall time
+  per row is dominated by one generation batch plus one review per unmatched attack (review
+  concurrency 2).
 
 This suite has no entry in the weekly CI pipeline; it is cohort-driven and run on demand
 (`evals:security-attack-discovery-worker` label).
