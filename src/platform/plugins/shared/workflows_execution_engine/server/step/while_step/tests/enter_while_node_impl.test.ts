@@ -10,7 +10,6 @@
 import type { WhileStep } from '@kbn/workflows';
 import type { EnterWhileNode } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
-import type { StepIoService } from '../../../workflow_context_manager/step_io_service';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 import { EnterWhileNodeImpl } from '../enter_while_node_impl';
@@ -20,7 +19,6 @@ describe('EnterWhileNodeImpl', () => {
   let workflowExecutionRuntimeManager: WorkflowExecutionRuntimeManager;
   let stepExecutionRuntime: StepExecutionRuntime;
   let workflowLogger: IWorkflowEventLogger;
-  let stepIoService: StepIoService;
   let underTest: EnterWhileNodeImpl;
 
   beforeEach(() => {
@@ -49,17 +47,11 @@ describe('EnterWhileNodeImpl', () => {
     workflowLogger = {} as unknown as IWorkflowEventLogger;
     workflowLogger.logDebug = jest.fn();
 
-    stepIoService = {
-      pinLoopSource: jest.fn(),
-      unpinLoopScope: jest.fn(),
-    } as unknown as StepIoService;
-
     underTest = new EnterWhileNodeImpl(
       node,
       workflowExecutionRuntimeManager,
       stepExecutionRuntime,
-      workflowLogger,
-      stepIoService
+      workflowLogger
     );
   });
 
@@ -80,15 +72,6 @@ describe('EnterWhileNodeImpl', () => {
       expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({
         condition: 'steps.testStep.inner_step.output.status : "success"',
       });
-    });
-
-    it('should pin the condition source outputs for the loop scope', () => {
-      underTest.run();
-
-      expect(stepIoService.pinLoopSource).toHaveBeenCalledWith(
-        'testStep',
-        'steps.testStep.inner_step.output.status : "success"'
-      );
     });
 
     it('should initialize while state with iteration 0', () => {

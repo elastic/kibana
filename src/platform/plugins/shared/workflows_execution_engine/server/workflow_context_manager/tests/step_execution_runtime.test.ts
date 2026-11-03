@@ -30,15 +30,33 @@ function createPassthroughStepIoService(state: WorkflowExecutionState): StepIoSe
   const inputs = new Map<string, JsonValue>();
   const outputs = new Map<string, JsonValue | null>();
   const sizes = new Map<string, number>();
+  const write = (
+    id: string,
+    type: 'input' | 'output',
+    value: JsonValue | null,
+    sizeBytes?: number
+  ) => {
+    if (type === 'input') {
+      if (value != null) {
+        inputs.set(id, value);
+      }
+      return;
+    }
+    outputs.set(id, value);
+    if (sizeBytes !== undefined && Number.isFinite(sizeBytes) && sizeBytes >= 0) {
+      sizes.set(id, sizeBytes);
+    }
+  };
   return {
+    read: jest.fn((id: string, type: 'input' | 'output') =>
+      type === 'input' ? inputs.get(id) : outputs.get(id)
+    ),
+    write: jest.fn(write),
     setStepInput: (id: string, input: JsonValue) => {
       inputs.set(id, input);
     },
     setStepOutput: (id: string, output: JsonValue | null, sizeBytes?: number) => {
-      outputs.set(id, output);
-      if (sizeBytes !== undefined && Number.isFinite(sizeBytes) && sizeBytes >= 0) {
-        sizes.set(id, sizeBytes);
-      }
+      write(id, 'output', output, sizeBytes);
     },
     getStepInput: jest.fn((id: string) => inputs.get(id)),
     getStepOutput: jest.fn((id: string) => outputs.get(id)),
@@ -61,7 +79,7 @@ function createPassthroughStepIoService(state: WorkflowExecutionState): StepIoSe
     hasEvictedOutputs: jest.fn().mockReturnValue(false),
     pinOutputsForRead: jest.fn(),
     rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
-    prepareForRead: jest.fn().mockResolvedValue(undefined),
+    rehydrate: jest.fn().mockResolvedValue(undefined),
     releaseReadPins: jest.fn(),
     releaseTransientlyRehydratedOutputs: jest.fn(),
   } as unknown as StepIoService;
@@ -195,8 +213,8 @@ describe('StepExecutionRuntime', () => {
         error: { type: 'Error', message: 'Fake error' },
       } as Partial<EsWorkflowStepExecution>);
       // IO lives in the service now — seed it through the passthrough mock.
-      stepIoService.setStepInput(fakeStepExecutionId, {});
-      stepIoService.setStepOutput(fakeStepExecutionId, { success: true, data: {} });
+      stepIoService.write(fakeStepExecutionId, 'input', {});
+      stepIoService.write(fakeStepExecutionId, 'output', { success: true, data: {} });
 
       const stepResult = underTest.getCurrentStepResult();
       expect(workflowExecutionState.getStepExecution).toHaveBeenCalledWith(
@@ -885,35 +903,12 @@ describe('StepExecutionRuntime', () => {
   // output during the ES round trip, and it would be neither fetched nor
   // resident when the caller reads it.
   describe('rehydrateStepOutputs', () => {
-    it('pins the requested ids BEFORE awaiting rehydration', async () => {
-      const calls: string[] = [];
-      jest.spyOn(stepIoService, 'pinOutputsForRead').mockImplementation(() => {
-        calls.push('pin');
-      });
-      jest.spyOn(stepIoService, 'rehydrateOutputs').mockImplementation(async () => {
-        calls.push('rehydrate');
-      });
+    it('rehydrates the requested step execution ids', async () => {
+      const rehydrate = jest.spyOn(stepIoService, 'rehydrate').mockImplementation(async () => {});
 
       await underTest.rehydrateStepOutputs(['a', 'b']);
 
-      expect(calls).toEqual(['pin', 'rehydrate']);
-    });
-
-    it('pins the whole requested set, not just the evicted subset', async () => {
-      const pin = jest.spyOn(stepIoService, 'pinOutputsForRead').mockImplementation(() => {});
-      jest.spyOn(stepIoService, 'rehydrateOutputs').mockImplementation(async () => {});
-
-      await underTest.rehydrateStepOutputs(['a', 'b']);
-
-      expect(pin).toHaveBeenCalledWith(underTest.stepExecutionId, ['a', 'b']);
-    });
-
-    it('releases the pins under the same consumer id', () => {
-      const release = jest.spyOn(stepIoService, 'releaseReadPins').mockImplementation(() => {});
-
-      underTest.releaseReadOutputPins();
-
-      expect(release).toHaveBeenCalledWith(underTest.stepExecutionId);
+      expect(rehydrate).toHaveBeenCalledWith(['a', 'b'], ['a', 'b']);
     });
   });
 });

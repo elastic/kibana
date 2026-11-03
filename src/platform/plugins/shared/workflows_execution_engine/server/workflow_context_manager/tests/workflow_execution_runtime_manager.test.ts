@@ -124,7 +124,13 @@ describe('WorkflowExecutionRuntimeManager', () => {
       getLatestStepExecution: jest.fn(),
       getStepExecutionsByStepId: jest.fn(),
       getAllStepExecutions: jest.fn().mockReturnValue([]),
+      getDataSetStepExecutions: jest.fn().mockReturnValue([]),
+      getDataSetStepExecutionCount: jest.fn().mockReturnValue(0),
+      getStepIoVersion: jest.fn().mockReturnValue(0),
       upsertStep: jest.fn(),
+      load: jest.fn().mockResolvedValue(undefined),
+      flushWorkflowDoc: jest.fn().mockResolvedValue(undefined),
+      flushStepChanges: jest.fn().mockResolvedValue(undefined),
     } as unknown as WorkflowExecutionState;
 
     const topologicalOrder = ['node1', 'node2', 'node3'];
@@ -171,18 +177,10 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
     stepIoService = {
       getOutputSizeStats: jest.fn().mockReturnValue({ totalBytes: 0, stepCount: 0 }),
-      flush: jest.fn().mockResolvedValue(undefined),
-      flushStepChanges: jest.fn().mockResolvedValue(undefined),
-      load: jest.fn().mockResolvedValue(undefined),
-      evictStaleLoopOutputs: jest.fn(),
-      // Drives the eviction work that used to live in this class — tests that
-      // observe stale-loop eviction now spy on this method directly.
-      evictCompletedLoopsOnResume: jest.fn(),
     } as unknown as StepIoService;
 
     underTest = new WorkflowExecutionRuntimeManager({
       workflowExecution,
-      workflowExecutionGraph,
       workflowExecutionCursor,
       workflowLogger,
       workflowExecutionState,
@@ -200,7 +198,6 @@ describe('WorkflowExecutionRuntimeManager', () => {
       });
       underTest = new WorkflowExecutionRuntimeManager({
         workflowExecution,
-        workflowExecutionGraph,
         workflowExecutionCursor,
         workflowLogger,
         workflowExecutionState,
@@ -244,7 +241,6 @@ describe('WorkflowExecutionRuntimeManager', () => {
         });
         underTest = new WorkflowExecutionRuntimeManager({
           workflowExecution,
-          workflowExecutionGraph,
           workflowExecutionCursor,
           workflowLogger,
           workflowExecutionState,
@@ -506,7 +502,6 @@ describe('WorkflowExecutionRuntimeManager', () => {
       });
       underTest = new WorkflowExecutionRuntimeManager({
         workflowExecution,
-        workflowExecutionGraph,
         workflowExecutionCursor,
         workflowLogger,
         workflowExecutionState,
@@ -522,7 +517,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
     it('should load workflow execution state', async () => {
       await underTest.resume();
-      expect(stepIoService.load).toHaveBeenCalled();
+      expect(workflowExecutionState.load).toHaveBeenCalled();
     });
 
     it('should set current step to the node from execution', async () => {
@@ -539,32 +534,18 @@ describe('WorkflowExecutionRuntimeManager', () => {
       });
     });
 
-    describe('evictCompletedLoopOutputs (delegation)', () => {
-      // The actual eviction logic lives in StepIoService.evictCompletedLoopsOnResume
-      // and is exercised by step_io_service.test.ts. Here we only verify the
-      // runtime manager delegates correctly: load() must complete first, then
-      // the eviction call is made with the workflow graph.
-      it('delegates loop eviction to StepIoService.evictCompletedLoopsOnResume', async () => {
-        await underTest.resume();
-
-        expect(stepIoService.evictCompletedLoopsOnResume).toHaveBeenCalledWith(
-          workflowExecutionGraph
-        );
+    it('should load state before marking the execution as RUNNING', async () => {
+      const callOrder: string[] = [];
+      (workflowExecutionState.load as jest.Mock).mockImplementation(async () => {
+        callOrder.push('load');
+      });
+      (workflowExecutionState.updateWorkflowExecution as jest.Mock).mockImplementation(() => {
+        callOrder.push('update');
       });
 
-      it('delegates after load() so the service sees fully-loaded state', async () => {
-        const callOrder: string[] = [];
-        (stepIoService.load as jest.Mock).mockImplementation(async () => {
-          callOrder.push('load');
-        });
-        (stepIoService.evictCompletedLoopsOnResume as jest.Mock).mockImplementation(() => {
-          callOrder.push('evict');
-        });
+      await underTest.resume();
 
-        await underTest.resume();
-
-        expect(callOrder).toEqual(['load', 'evict']);
-      });
+      expect(callOrder).toEqual(['load', 'update']);
     });
   });
 
@@ -881,7 +862,6 @@ describe('WorkflowExecutionRuntimeManager', () => {
       });
       underTest = new WorkflowExecutionRuntimeManager({
         workflowExecution,
-        workflowExecutionGraph,
         workflowExecutionCursor,
         workflowLogger,
         workflowExecutionState,
@@ -1183,7 +1163,6 @@ describe('WorkflowExecutionRuntimeManager', () => {
           telemetryClient: new WorkflowExecutionTelemetryClient(analytics, loggerMock.create()),
           workflowExecution: childWorkflowExecution,
           workflowExecutionCursor,
-          workflowExecutionGraph,
           workflowExecutionState,
           workflowLogger,
         });
@@ -1253,7 +1232,6 @@ describe('WorkflowExecutionRuntimeManager', () => {
           telemetryClient: new WorkflowExecutionTelemetryClient(analytics, loggerMock.create()),
           workflowExecution: childWorkflowExecution,
           workflowExecutionCursor,
-          workflowExecutionGraph,
           workflowExecutionState,
           workflowLogger,
         });

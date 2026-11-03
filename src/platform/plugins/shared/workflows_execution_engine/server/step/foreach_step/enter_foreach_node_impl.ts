@@ -12,7 +12,6 @@ import type { ForeachStepState } from './types';
 import { ITERATION_STEP_TYPE, iterationStepIdFromIndex } from './utils';
 import { isTemplateExpression } from '../../utils';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
-import type { StepIoService } from '../../workflow_context_manager/step_io_service';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { NodeImplementation } from '../node_implementation';
@@ -22,8 +21,7 @@ export class EnterForeachNodeImpl implements NodeImplementation {
     private node: EnterForeachNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
     private stepExecutionRuntime: StepExecutionRuntime,
-    private workflowLogger: IWorkflowEventLogger,
-    private stepIoService: StepIoService
+    private workflowLogger: IWorkflowEventLogger
   ) {}
 
   public async run(): Promise<void> {
@@ -37,13 +35,6 @@ export class EnterForeachNodeImpl implements NodeImplementation {
   private async enterForeach(): Promise<void> {
     this.stepExecutionRuntime.startStep();
     const foreachConfig = this.node.configuration.foreach;
-    // Pin the loop's source outputs for the lifetime of the loop. Enter still
-    // evaluates the source expression once; older executions without
-    // `input.items` re-evaluate it in WorkflowContextManager.buildForeachContext.
-    // Without pinning, a concurrent flush can evict the source between an inner
-    // step's prepareForRead and that read, blanking the loop item. Unpinned in
-    // ExitForeachNodeImpl.
-    this.stepIoService.pinForeachSource(this.node.stepId, foreachConfig);
 
     const foreachInput = Array.isArray(foreachConfig)
       ? JSON.stringify(foreachConfig)
@@ -66,8 +57,6 @@ export class EnterForeachNodeImpl implements NodeImplementation {
     }
 
     if (evaluatedItems.length === 0) {
-      // No iterations will run — release the pin we just took.
-      this.stepIoService.unpinForeachScope(this.node.stepId);
       this.workflowLogger.logDebug(
         `Foreach step "${this.node.stepId}" has no items to iterate over. Skipping execution.`,
         {
