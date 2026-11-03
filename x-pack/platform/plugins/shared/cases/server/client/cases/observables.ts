@@ -7,6 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import Boom from '@hapi/boom';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { MAX_OBSERVABLES_PER_CASE } from '../../../common/constants';
 import type { Observable } from '../../../common/types/domain';
@@ -38,6 +39,9 @@ import {
   validateObservableValue,
 } from '../validators';
 import { processObservables } from './utils';
+import { getObservableSource, mirrorToObservablesIndex } from './observables_index_sync';
+import type { ObservablesSyncAttributes } from './observables_index_sync';
+import type { ObservableSource } from '../../services/observables';
 import { emitObservablesAddedEvent } from './trigger_utils';
 
 const ensureUpdateAuthorized = async (
@@ -55,6 +59,175 @@ const ensureUpdateAuthorized = async (
   });
 };
 
+const MAX_OBSERVABLES_WRITE_ATTEMPTS = 3;
+
+interface ObservablesWrite<TResult> {
+  observables: Observable[];
+  result: TResult;
+  /**
+   * Mirrors the change of this attempt to the observables index. What it returns is merged into the
+   * case update of the same attempt, so a failed mirror is recorded with the change it belongs to.
+   */
+  mirror: () => Promise<ObservablesSyncAttributes>;
+}
+
+interface ObservablesWriteArgs<TResult, TComputed extends ObservablesWrite<TResult> | undefined> {
+  caseId: string;
+  prefetchedCase?: CaseSavedObjectTransformed;
+  clientArgs: CasesClientArgs;
+  compute: (retrievedCase: CaseSavedObjectTransformed) => TComputed;
+}
+
+interface ObservablesWriteOutcome<TResult> {
+  retrievedCase: CaseSavedObjectTransformed;
+  patchedCase: Awaited<ReturnType<CasesClientArgs['services']['caseService']['patchCase']>>;
+  result: TResult;
+}
+
+/**
+ * Reads the case, lets `compute` derive the new observables list from it, mirrors the change to the
+ * observables index and writes the list with the case version. On a version conflict the case is
+ * re-read and `compute` and the mirror run again, so a concurrent writer's observables are never
+ * overwritten and the index write is redone for the change that is actually stored. The sync task
+ * relies on that redo: it can remove a mirrored document while this write is in flight, and the
+ * version conflict it causes brings the document back. `compute` returns undefined when there is
+ * nothing to write.
+ *
+ * An attempt that wrote to the index and then lost the race can leave documents that no later
+ * attempt keeps, for example observables that no longer fit under the cap, or its own copy of an
+ * observable another writer added with a different id. Every write after such an attempt flags the
+ * case so the sync task makes the index match the case again. So does a write whose case update
+ * fails after its index write.
+ *
+ * The case is not re-authorized on a re-read: authorization ran on the first read and the owner
+ * of a case cannot change.
+ */
+function writeObservablesWithRetry<TResult>(
+  args: ObservablesWriteArgs<TResult, ObservablesWrite<TResult>>
+): Promise<ObservablesWriteOutcome<TResult>>;
+function writeObservablesWithRetry<TResult>(
+  args: ObservablesWriteArgs<TResult, ObservablesWrite<TResult> | undefined>
+): Promise<ObservablesWriteOutcome<TResult> | undefined>;
+async function writeObservablesWithRetry<TResult>({
+  caseId,
+  prefetchedCase,
+  clientArgs,
+  compute,
+}: ObservablesWriteArgs<TResult, ObservablesWrite<TResult> | undefined>): Promise<
+  ObservablesWriteOutcome<TResult> | undefined
+> {
+  const { caseService } = clientArgs.services;
+  let indexTouchedByLostAttempt = false;
+
+  for (let attempt = 1; attempt <= MAX_OBSERVABLES_WRITE_ATTEMPTS; attempt++) {
+    const retrievedCase =
+      attempt === 1 && prefetchedCase
+        ? prefetchedCase
+        : await readCaseForAttempt({ clientArgs, caseId, indexTouchedByLostAttempt });
+
+    let write: ObservablesWrite<TResult> | undefined;
+    try {
+      write = compute(retrievedCase);
+    } catch (error) {
+      if (indexTouchedByLostAttempt) {
+        await flagCasePendingSync({ clientArgs, caseId });
+      }
+      throw error;
+    }
+
+    if (!write) {
+      if (indexTouchedByLostAttempt) {
+        await flagCasePendingSync({ clientArgs, caseId });
+      }
+      return;
+    }
+
+    const syncAttributes = await write.mirror();
+
+    try {
+      const patchedCase = await caseService.patchCase({
+        caseId: retrievedCase.id,
+        originalCase: retrievedCase,
+        version: retrievedCase.version,
+        updatedAttributes: {
+          observables: write.observables,
+          total_observables: write.observables.length,
+          ...syncAttributes,
+          ...(indexTouchedByLostAttempt ? { observables_sync_pending: true } : {}),
+        },
+      });
+
+      return { retrievedCase, patchedCase, result: write.result };
+    } catch (error) {
+      if (!SavedObjectsErrorHelpers.isConflictError(error as Error)) {
+        // A deleted case has nothing left to flag: the sync removes the documents of deleted cases.
+        if (!SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
+          await flagCasePendingSync({ clientArgs, caseId });
+        }
+        throw error;
+      }
+      indexTouchedByLostAttempt = true;
+    }
+  }
+
+  await flagCasePendingSync({ clientArgs, caseId });
+
+  throw Boom.conflict(
+    `The observables of case ${caseId} were modified concurrently ${MAX_OBSERVABLES_WRITE_ATTEMPTS} times in a row. Retry the request.`
+  );
+}
+
+/**
+ * Reads the case again for a retry. When an earlier attempt already wrote to the index and the read
+ * fails, the case is flagged before the error is rethrown, so the sync task repairs what that attempt
+ * left. A deleted case needs no flag: the sync removes the documents of deleted cases.
+ */
+const readCaseForAttempt = async ({
+  clientArgs,
+  caseId,
+  indexTouchedByLostAttempt,
+}: {
+  clientArgs: CasesClientArgs;
+  caseId: string;
+  indexTouchedByLostAttempt: boolean;
+}): Promise<CaseSavedObjectTransformed> => {
+  try {
+    return await clientArgs.services.caseService.getCase({ id: caseId });
+  } catch (error) {
+    if (indexTouchedByLostAttempt && !SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
+      await flagCasePendingSync({ clientArgs, caseId });
+    }
+    throw error;
+  }
+};
+
+/**
+ * Flags a case for the sync task after a write that may have left the observables index different
+ * from the case. Only the flag is written, without a version: writers only ever set the flag, and the
+ * sync task clears it with a versioned update once it has made the index match the case.
+ */
+const flagCasePendingSync = async ({
+  clientArgs,
+  caseId,
+}: {
+  clientArgs: CasesClientArgs;
+  caseId: string;
+}): Promise<void> => {
+  const {
+    services: { caseService },
+    logger,
+  } = clientArgs;
+
+  try {
+    await caseService.flagObservablesSyncPending({ caseId });
+  } catch (error) {
+    logger.error(
+      `[observables] Failed to flag case ${caseId} as pending sync after an observable write that did not complete. The observables index can differ from the case until the next full sync pass. Error: ${error}`,
+      { error: { stack_trace: error instanceof Error ? error.stack : undefined } }
+    );
+  }
+};
+
 /**
  * License-agnostic core that dedupes, caps, persists, and records a user action
  * for a set of observables on a case. Callers MUST enforce the Platinum license
@@ -66,64 +239,86 @@ const ensureUpdateAuthorized = async (
  *
  * @param prefetchedCase - Optional already-fetched SO to avoid an extra getCase
  *   round-trip. When provided, `caseId` is ignored for the initial fetch.
+ * @param source - How the observables reached the case. Defaults to the origin of the cases client.
  */
 export const applyObservablesToCase = async (
   caseId: string,
   observables: ObservablePost[],
   clientArgs: CasesClientArgs,
-  prefetchedCase?: CaseSavedObjectTransformed
+  prefetchedCase?: CaseSavedObjectTransformed,
+  source: ObservableSource = getObservableSource(clientArgs.clientSource)
 ) => {
   const {
-    services: { caseService, userActionService },
+    services: { userActionService, observablesService },
     user,
+    logger,
+    spaceId,
   } = clientArgs;
 
   if (observables.length === 0) {
     return;
   }
 
-  const retrievedCase = prefetchedCase ?? (await caseService.getCase({ id: caseId }));
+  const written = await writeObservablesWithRetry({
+    caseId,
+    prefetchedCase,
+    clientArgs,
+    compute: (retrievedCase) => {
+      const currentObservables = retrievedCase.attributes.observables ?? [];
+      // Build a key-set from existing observables so we never overwrite or collapse
+      // them — even when two stored rows share the same typeKey+value (reachable
+      // via SO import or data written before the dedupe path was added).
+      const existingKeys = new Set(
+        currentObservables.map(({ typeKey, value }) => `${typeKey}-${value}`)
+      );
 
-  const currentObservables = retrievedCase.attributes.observables ?? [];
-  // Build a key-set from existing observables so we never overwrite or collapse
-  // them — even when two stored rows share the same typeKey+value (reachable
-  // via SO import or data written before the dedupe path was added).
-  const existingKeys = new Set(
-    currentObservables.map(({ typeKey, value }) => `${typeKey}-${value}`)
-  );
+      // Dedupe incoming entries against existing ones and against each other.
+      // processObservables mints ids/timestamps for ObservablePost entries and
+      // skips repeats, so it is safe to call for every incoming entry.
+      const incomingMap = new Map<string, Observable>();
+      observables.forEach((observable) => {
+        if (existingKeys.has(`${observable.typeKey}-${observable.value}`)) {
+          return;
+        }
+        processObservables(incomingMap, observable);
+      });
 
-  // Dedupe incoming entries against existing ones and against each other.
-  // processObservables mints ids/timestamps for ObservablePost entries and
-  // skips repeats, so it is safe to call for every incoming entry.
-  const incomingMap = new Map<string, Observable>();
-  observables.forEach((observable) => {
-    if (existingKeys.has(`${observable.typeKey}-${observable.value}`)) {
-      return;
-    }
-    processObservables(incomingMap, observable);
+      // Respect the per-case cap: add as many new observables as fit.
+      const remainingCapacity = Math.max(0, MAX_OBSERVABLES_PER_CASE - currentObservables.length);
+      const newlyAddedObservables = Array.from(incomingMap.values()).slice(0, remainingCapacity);
+
+      // Nothing new was added — skip both the patch write and the user action to
+      // avoid a no-op SO write on every idempotent re-extraction (e.g. the same
+      // alert being attached multiple times).
+      if (newlyAddedObservables.length === 0) {
+        return;
+      }
+
+      return {
+        observables: [...currentObservables, ...newlyAddedObservables],
+        result: newlyAddedObservables,
+        mirror: () =>
+          mirrorToObservablesIndex({
+            caseId: retrievedCase.id,
+            logger,
+            write: () =>
+              observablesService.createObservables({
+                caseId: retrievedCase.id,
+                spaceId,
+                owner: retrievedCase.attributes.owner,
+                observables: newlyAddedObservables,
+                source,
+              }),
+          }),
+      };
+    },
   });
 
-  // Respect the per-case cap: add as many new observables as fit.
-  const remainingCapacity = Math.max(0, MAX_OBSERVABLES_PER_CASE - currentObservables.length);
-  const newlyAddedObservables = Array.from(incomingMap.values()).slice(0, remainingCapacity);
-
-  // Nothing new was added — skip both the patch write and the user action to
-  // avoid a no-op SO write on every idempotent re-extraction (e.g. the same
-  // alert being attached multiple times).
-  if (newlyAddedObservables.length === 0) {
+  if (!written) {
     return;
   }
 
-  const finalObservables = [...currentObservables, ...newlyAddedObservables];
-
-  const patchedCase = await caseService.patchCase({
-    caseId: retrievedCase.id,
-    originalCase: retrievedCase,
-    updatedAttributes: {
-      observables: finalObservables,
-      total_observables: finalObservables.length,
-    },
-  });
+  const { retrievedCase, patchedCase, result: newlyAddedObservables } = written;
 
   await userActionService.creator.createUserAction({
     userAction: {
@@ -236,9 +431,12 @@ export const updateObservable = async (
   casesClient: CasesClient
 ) => {
   const {
-    services: { caseService, licensingService, userActionService },
+    services: { caseService, licensingService, userActionService, observablesService },
     authorization,
     user,
+    logger,
+    spaceId,
+    clientSource,
   } = clientArgs;
 
   const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
@@ -256,46 +454,67 @@ export const updateObservable = async (
     const retrievedCase = await caseService.getCase({ id: caseId });
     await ensureUpdateAuthorized(authorization, retrievedCase);
 
-    const currentObservables = retrievedCase.attributes.observables ?? [];
+    const written = await writeObservablesWithRetry({
+      caseId,
+      prefetchedCase: retrievedCase,
+      clientArgs,
+      compute: (currentCase) => {
+        const currentObservables = currentCase.attributes.observables ?? [];
 
-    const observableIndex = currentObservables.findIndex(
-      (observable) => observable.id === observableId
-    );
+        const observableIndex = currentObservables.findIndex(
+          (observable) => observable.id === observableId
+        );
 
-    if (observableIndex === -1) {
-      throw Boom.notFound(`Failed to update observable: observable id ${observableId} not found`);
-    }
+        if (observableIndex === -1) {
+          throw Boom.notFound(
+            `Failed to update observable: observable id ${observableId} not found`
+          );
+        }
 
-    validateObservableValue(
-      currentObservables[observableIndex].typeKey,
-      paramArgs.observable.value
-    );
+        validateObservableValue(
+          currentObservables[observableIndex].typeKey,
+          paramArgs.observable.value
+        );
 
-    const updatedObservables = [...currentObservables];
-    updatedObservables[observableIndex] = {
-      ...updatedObservables[observableIndex],
-      ...paramArgs.observable,
-      updatedAt: new Date().toISOString(),
-    };
+        const updatedObservables = [...currentObservables];
+        updatedObservables[observableIndex] = {
+          ...updatedObservables[observableIndex],
+          ...paramArgs.observable,
+          updatedAt: new Date().toISOString(),
+        };
 
-    validateDuplicatedObservablesInRequest({
-      requestFields: updatedObservables,
-    });
+        validateDuplicatedObservablesInRequest({
+          requestFields: updatedObservables,
+        });
 
-    const updatedCase = await caseService.patchCase({
-      caseId: retrievedCase.id,
-      originalCase: retrievedCase,
-      updatedAttributes: {
-        observables: updatedObservables,
-        total_observables: updatedObservables.length,
+        return {
+          observables: updatedObservables,
+          result: undefined,
+          mirror: () =>
+            mirrorToObservablesIndex({
+              caseId: currentCase.id,
+              logger,
+              write: () =>
+                observablesService.updateObservable({
+                  caseId: currentCase.id,
+                  spaceId,
+                  owner: currentCase.attributes.owner,
+                  previous: currentObservables[observableIndex],
+                  next: updatedObservables[observableIndex],
+                  source: getObservableSource(clientSource),
+                }),
+            }),
+        };
       },
     });
+
+    const { retrievedCase: latestCase, patchedCase: updatedCase } = written;
 
     await userActionService.creator.createUserAction({
       userAction: {
         type: UserActionTypes.observables,
-        caseId: retrievedCase.id,
-        owner: retrievedCase.attributes.owner,
+        caseId: latestCase.id,
+        owner: latestCase.attributes.owner,
         user,
         payload: {
           observables: { count: 1, actionType: 'update' },
@@ -305,10 +524,10 @@ export const updateObservable = async (
 
     const res = flattenCaseSavedObject({
       savedObject: {
-        ...retrievedCase,
+        ...latestCase,
         ...updatedCase,
-        attributes: { ...retrievedCase.attributes, ...updatedCase?.attributes },
-        references: retrievedCase.references,
+        attributes: { ...latestCase.attributes, ...updatedCase?.attributes },
+        references: latestCase.references,
       },
     });
 
@@ -325,9 +544,11 @@ export const deleteObservable = async (
   casesClient: CasesClient
 ) => {
   const {
-    services: { caseService, licensingService, userActionService },
+    services: { caseService, licensingService, userActionService, observablesService },
     authorization,
     user,
+    logger,
+    spaceId,
   } = clientArgs;
 
   const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
@@ -344,28 +565,47 @@ export const deleteObservable = async (
     const retrievedCase = await caseService.getCase({ id: caseId });
     await ensureUpdateAuthorized(authorization, retrievedCase);
 
-    const updatedObservables = retrievedCase.attributes.observables.filter(
-      (observable) => observable.id !== observableId
-    );
+    const { retrievedCase: latestCase } = await writeObservablesWithRetry({
+      caseId,
+      prefetchedCase: retrievedCase,
+      clientArgs,
+      compute: (currentCase) => {
+        const updatedObservables = currentCase.attributes.observables.filter(
+          (observable) => observable.id !== observableId
+        );
 
-    // NOTE: same length of observables pre and post filter means that the observable id has not been found
-    if (updatedObservables.length === retrievedCase.attributes.observables.length) {
-      throw Boom.notFound(`Failed to delete observable: observable id ${observableId} not found`);
-    }
+        // NOTE: same length of observables pre and post filter means that the observable id has not been found
+        if (updatedObservables.length === currentCase.attributes.observables.length) {
+          throw Boom.notFound(
+            `Failed to delete observable: observable id ${observableId} not found`
+          );
+        }
 
-    await caseService.patchCase({
-      caseId: retrievedCase.id,
-      originalCase: retrievedCase,
-      updatedAttributes: {
-        observables: updatedObservables,
-        total_observables: updatedObservables.length,
+        return {
+          observables: updatedObservables,
+          result: undefined,
+          mirror: () =>
+            mirrorToObservablesIndex({
+              caseId: currentCase.id,
+              logger,
+              write: () =>
+                observablesService.deleteObservables({
+                  caseId: currentCase.id,
+                  spaceId,
+                  observables: currentCase.attributes.observables.filter(
+                    (observable) => observable.id === observableId
+                  ),
+                }),
+            }),
+        };
       },
     });
+
     await userActionService.creator.createUserAction({
       userAction: {
         type: UserActionTypes.observables,
-        caseId: retrievedCase.id,
-        owner: retrievedCase.attributes.owner,
+        caseId: latestCase.id,
+        owner: latestCase.attributes.owner,
         user,
         payload: {
           observables: { count: 1, actionType: 'delete' },
@@ -448,9 +688,11 @@ export const bulkDeleteObservables = async (
   clientArgs: CasesClientArgs
 ) => {
   const {
-    services: { caseService, licensingService, userActionService },
+    services: { caseService, licensingService, userActionService, observablesService },
     authorization,
     user,
+    logger,
+    spaceId,
   } = clientArgs;
 
   const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
@@ -468,39 +710,56 @@ export const bulkDeleteObservables = async (
   await ensureUpdateAuthorized(authorization, retrievedCase);
 
   const idsToDelete = new Set(paramArgs.observableIds);
-  const currentObservables = retrievedCase.attributes.observables ?? [];
-  const currentIdSet = new Set(currentObservables.map(({ id }) => id));
 
-  const missingIds = [...idsToDelete].filter((id) => !currentIdSet.has(id));
-  if (missingIds.length > 0) {
-    throw Boom.notFound(
-      `Failed to bulk delete observables: observable ids not found: ${missingIds.join(', ')}`
-    );
-  }
+  const {
+    retrievedCase: latestCase,
+    patchedCase: updatedCase,
+    result: removedCount,
+  } = await writeObservablesWithRetry({
+    caseId: paramArgs.caseId,
+    prefetchedCase: retrievedCase,
+    clientArgs,
+    compute: (currentCase) => {
+      const currentObservables = currentCase.attributes.observables ?? [];
+      const currentIdSet = new Set(currentObservables.map(({ id }) => id));
 
-  const removedObservables = currentObservables.filter((observable) =>
-    idsToDelete.has(observable.id)
-  );
-  const updatedObservables = currentObservables.filter(
-    (observable) => !idsToDelete.has(observable.id)
-  );
-  const removedCount = removedObservables.length;
+      const missingIds = [...idsToDelete].filter((id) => !currentIdSet.has(id));
+      if (missingIds.length > 0) {
+        throw Boom.notFound(
+          `Failed to bulk delete observables: observable ids not found: ${missingIds.join(', ')}`
+        );
+      }
 
-  const updatedCase = await caseService.patchCase({
-    caseId: retrievedCase.id,
-    originalCase: retrievedCase,
-    version: retrievedCase.version,
-    updatedAttributes: {
-      observables: updatedObservables,
-      total_observables: updatedObservables.length,
+      const removedObservables = currentObservables.filter((observable) =>
+        idsToDelete.has(observable.id)
+      );
+      const updatedObservables = currentObservables.filter(
+        (observable) => !idsToDelete.has(observable.id)
+      );
+
+      return {
+        observables: updatedObservables,
+        result: removedObservables.length,
+        mirror: () =>
+          mirrorToObservablesIndex({
+            caseId: currentCase.id,
+            logger,
+            write: () =>
+              observablesService.deleteObservables({
+                caseId: currentCase.id,
+                spaceId,
+                observables: removedObservables,
+              }),
+          }),
+      };
     },
   });
 
   await userActionService.creator.createUserAction({
     userAction: {
       type: UserActionTypes.observables,
-      caseId: retrievedCase.id,
-      owner: retrievedCase.attributes.owner,
+      caseId: latestCase.id,
+      owner: latestCase.attributes.owner,
       user,
       payload: {
         observables: { count: removedCount, actionType: 'delete' },
@@ -510,10 +769,10 @@ export const bulkDeleteObservables = async (
 
   const res = flattenCaseSavedObject({
     savedObject: {
-      ...retrievedCase,
+      ...latestCase,
       ...updatedCase,
-      attributes: { ...retrievedCase.attributes, ...updatedCase?.attributes },
-      references: retrievedCase.references,
+      attributes: { ...latestCase.attributes, ...updatedCase?.attributes },
+      references: latestCase.references,
     },
   });
 

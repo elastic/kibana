@@ -224,4 +224,30 @@ describe('caseSavedObjectType model version transformations', () => {
       expect(migrated.attributes).not.toHaveProperty('extract_observables_source');
     });
   });
+
+  describe('Model version 11 to 12', () => {
+    it('does not add observables_sync_pending to existing cases', () => {
+      const migrated = migrator.migrate({
+        document: createCaseSavedObjectResponse(),
+        fromVersion: 11,
+        toVersion: 12,
+      });
+      expect(migrated.attributes).not.toHaveProperty('observables_sync_pending');
+    });
+
+    it('keeps observables_sync_pending when a case already has it', () => {
+      const document = createCaseSavedObjectResponse();
+      const migrated = migrator.migrate({
+        document: {
+          ...document,
+          attributes: { ...document.attributes, observables_sync_pending: true },
+        },
+        fromVersion: 11,
+        toVersion: 12,
+      });
+      expect(migrated.attributes).toEqual(
+        expect.objectContaining({ observables_sync_pending: true })
+      );
+    });
+  });
 });

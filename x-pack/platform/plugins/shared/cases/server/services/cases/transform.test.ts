@@ -34,6 +34,17 @@ import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../../common/type
 
 describe('case transforms', () => {
   describe('transformUpdateResponseToExternalModel', () => {
+    it('does not return the server-owned observables_sync_pending field', () => {
+      expect(
+        transformUpdateResponseToExternalModel({
+          type: 'a',
+          id: '1',
+          attributes: { observables_sync_pending: true },
+          references: undefined,
+        }).attributes
+      ).not.toHaveProperty('observables_sync_pending');
+    });
+
     it('does not return the connector field if it is undefined', () => {
       expect(
         transformUpdateResponseToExternalModel({
@@ -273,6 +284,13 @@ describe('case transforms', () => {
   });
 
   describe('transformAttributesToESModel', () => {
+    it.each([true, false])('persists observables_sync_pending when it is %s', (pending) => {
+      expect(
+        transformAttributesToESModel({ observables: [], observables_sync_pending: pending })
+          .attributes
+      ).toEqual(expect.objectContaining({ observables_sync_pending: pending }));
+    });
+
     it('does not return the external_service field when it is undefined', () => {
       expect(
         transformAttributesToESModel({
@@ -324,7 +342,6 @@ describe('case transforms', () => {
               "username": "elastic",
             },
           },
-          "total_observables": 0,
         }
       `);
       expect(transformedAttributes.attributes.external_service).not.toHaveProperty('connector_id');
@@ -384,7 +401,6 @@ describe('case transforms', () => {
             "name": ".jira",
             "type": ".jira",
           },
-          "total_observables": 0,
         }
       `);
       expect(transformedAttributes.attributes.connector).not.toHaveProperty('id');
@@ -411,7 +427,6 @@ describe('case transforms', () => {
             "name": "none",
             "type": ".none",
           },
-          "total_observables": 0,
         }
       `);
       expect(transformedAttributes.attributes.connector).not.toHaveProperty('id');
@@ -473,7 +488,6 @@ describe('case transforms', () => {
       expect(transformAttributesToESModel({ total_alerts: 10 }).attributes).toMatchInlineSnapshot(`
         Object {
           "total_alerts": 10,
-          "total_observables": 0,
         }
       `);
     });
@@ -482,9 +496,46 @@ describe('case transforms', () => {
       expect(transformAttributesToESModel({ total_comments: 5 }).attributes).toMatchInlineSnapshot(`
         Object {
           "total_comments": 5,
-          "total_observables": 0,
         }
       `);
+    });
+
+    describe('total_observables', () => {
+      it('does not reset total_observables when the update does not touch observables', () => {
+        // An update such as a title or status change must leave the stored count alone.
+        expect(transformAttributesToESModel({ title: 'new title' }).attributes).not.toHaveProperty(
+          'total_observables'
+        );
+      });
+
+      it('derives total_observables from the observables of the update', () => {
+        const observables = ['1.1.1.1', '2.2.2.2', '3.3.3.3'].map((value, index) => ({
+          id: `id-${index}`,
+          typeKey: 'typeKey',
+          value,
+          description: null,
+          createdAt: '2024-12-05',
+          updatedAt: null,
+        }));
+
+        expect(transformAttributesToESModel({ observables }).attributes.total_observables).toBe(3);
+      });
+
+      it('sets total_observables to 0 when the update empties the observables', () => {
+        expect(transformAttributesToESModel({ observables: [] }).attributes.total_observables).toBe(
+          0
+        );
+      });
+
+      it('ignores a total_observables supplied by the caller', () => {
+        expect(
+          transformAttributesToESModel({ observables: [], total_observables: 42 }).attributes
+            .total_observables
+        ).toBe(0);
+        expect(
+          transformAttributesToESModel({ total_observables: 42 }).attributes
+        ).not.toHaveProperty('total_observables');
+      });
     });
   });
 
@@ -635,6 +686,16 @@ describe('case transforms', () => {
       expect(
         transformSavedObjectToExternalModel(CaseSOResponseWithoutCategory).attributes.category
       ).toBe('foobar');
+    });
+
+    it('does not return the server-owned observables_sync_pending field', () => {
+      const caseSO = createCaseSavedObjectResponse({
+        overrides: { observables_sync_pending: true },
+      });
+
+      expect(transformSavedObjectToExternalModel(caseSO).attributes).not.toHaveProperty(
+        'observables_sync_pending'
+      );
     });
 
     it('returns observables array when it is defined', () => {
@@ -923,6 +984,23 @@ describe('case transforms', () => {
       expect(result.assignees).toEqual([{ uid: 'user1' }]);
       expect(result.created_at).toBe('2020-01-01T00:00:00.000Z');
       expect(result.updated_at).toBe('2020-01-02T00:00:00.000Z');
+    });
+
+    it('does not return the server-owned observables_sync_pending field', () => {
+      const hit: estypes.SearchHit<{ references?: SavedObjectReference[] }> = {
+        _index: 'cases',
+        _id: 'case-1',
+        _score: 1.0,
+        _source: { references: [] },
+      };
+
+      const result = transformESModelToCase(
+        'case-1',
+        { ...basicESCaseFields, observables_sync_pending: true },
+        hit
+      );
+
+      expect(result).not.toHaveProperty('observables_sync_pending');
     });
 
     it('returns "0" as version when _seq_no and _primary_term are missing', () => {

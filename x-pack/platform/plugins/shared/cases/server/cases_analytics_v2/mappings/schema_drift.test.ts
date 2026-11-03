@@ -87,6 +87,9 @@ const buildFullAttributes = (): {
   total_comments: 5,
   total_events: 1,
   total_observables: 2,
+  // Server-owned bookkeeping for the observables index sync; not an analytics dimension, so
+  // `buildCaseDoc` intentionally does not emit it.
+  observables_sync_pending: true,
   time_to_acknowledge: 60000,
   time_to_investigate: 120000,
   time_to_resolve: 300000,
@@ -206,7 +209,11 @@ describe('case mapping covers every doc-builder field', () => {
  * exactly what this layer exists to prevent.
  */
 const OMITTED_FROM_ANALYTICS_V2_MIRROR: ReadonlyMap<string, string> = new Map([
-  // Empty. (`owner` is mirrored at `case.owner` in addition to its
+  [
+    'observables_sync_pending',
+    'server-owned flag marking that the observables index is behind the case; not an analytics dimension',
+  ],
+  // (`owner` is mirrored at `case.owner` in addition to its
   // top-level DLS copy, so it satisfies the Layer 2 mirror directly.)
   // The intentional divergences are all covered by an opaque
   // (`enabled: false`) or `dynamic: true` parent in v2 and caught by

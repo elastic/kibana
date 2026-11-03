@@ -1267,6 +1267,23 @@ export class CasesService {
     }
   }
 
+  /**
+   * Flags a case for the observables sync. Only the flag is written, without a version, references or
+   * an analytics copy, so it cannot undo a concurrent change to any other part of the case.
+   */
+  public async flagObservablesSyncPending({ caseId }: { caseId: string }): Promise<void> {
+    try {
+      await this.unsecuredSavedObjectsClient.update<CasePersistedAttributes>(
+        CASE_SAVED_OBJECT,
+        caseId,
+        { observables_sync_pending: true }
+      );
+    } catch (error) {
+      this.log.error(`Error on flagging case ${caseId} as pending observables sync: ${error}`);
+      throw error;
+    }
+  }
+
   public async patchCases({
     cases,
     refresh,

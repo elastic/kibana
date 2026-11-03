@@ -51,6 +51,7 @@ export function transformUpdateResponseToExternalModel(
     status,
     total_alerts,
     total_comments,
+    observables_sync_pending,
     customFields,
     settings,
     extended_fields,
@@ -127,6 +128,8 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
     status,
     incremental_id,
     settings,
+    // Derived from `observables` below, so a caller-supplied value is never persisted.
+    total_observables: _totalObservables,
     ...restAttributes
   } = caseAttributes;
   const { connector_id: pushConnectorId, ...restExternalService } = external_service ?? {};
@@ -162,7 +165,9 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
           extractObservables: settings.extractObservables ?? false,
         },
       }),
-      total_observables: restAttributes.observables?.length ?? 0,
+      ...(restAttributes.observables !== undefined && {
+        total_observables: restAttributes.observables.length,
+      }),
     },
     referenceHandler: buildReferenceHandler(connector?.id, pushConnectorId),
   };
@@ -184,8 +189,14 @@ export function transformESModelToCase(
 
   const externalService = transformESExternalService(caseData.external_service, references);
 
-  const { total_alerts, total_comments, total_events, extended_fields, ...caseAttributes } =
-    caseData;
+  const {
+    total_alerts,
+    total_comments,
+    total_events,
+    extended_fields,
+    observables_sync_pending,
+    ...caseAttributes
+  } = caseData;
 
   const severity = SEVERITY_ESMODEL_TO_EXTERNAL[caseAttributes.severity] ?? CaseSeverity.LOW;
   const status = STATUS_ESMODEL_TO_EXTERNAL[caseAttributes.status] ?? CaseStatuses.open;
@@ -268,6 +279,7 @@ export function transformSavedObjectToExternalModel(
   const {
     total_alerts,
     total_comments,
+    observables_sync_pending,
     extended_fields: persistedExtendedFields,
     ...caseSavedObjectAttributes
   } = caseSavedObject.attributes ??
