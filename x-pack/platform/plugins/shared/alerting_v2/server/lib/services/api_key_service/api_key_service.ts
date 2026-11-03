@@ -11,8 +11,9 @@ import { Logger as PluginLogger } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
-import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import {
+  ApiKeysClient,
+  encodeApiKey,
   getInvalidationTargets,
   queueInvalidationTargets,
   type QueueResult,
@@ -41,12 +42,13 @@ export interface ApiKeyServiceContract {
   markApiKeysForInvalidation(apiKeys: string[]): Promise<ApiKeyInvalidationResult[]>;
 }
 
-const encodeApiKey = (id?: string, key?: string): string | null => {
-  return id && key ? Buffer.from(`${id}:${key}`).toString('base64') : null;
-};
+const encodeGrantedApiKey = (id?: string, key?: string): string | null =>
+  id && key ? encodeApiKey(id, key) : null;
 
 @injectable()
 export class ApiKeyService implements ApiKeyServiceContract {
+  private readonly apiKeys: ApiKeysClient;
+
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
     @inject(CoreStart('security'))
@@ -54,7 +56,13 @@ export class ApiKeyService implements ApiKeyServiceContract {
     @inject(ApiKeyServiceSavedObjectsClientToken)
     private readonly invalidationSavedObjectsClient: SavedObjectsClientContract,
     @inject(PluginLogger) private readonly logger: Logger
-  ) {}
+  ) {
+    this.apiKeys = new ApiKeysClient({
+      security: securityService,
+      logger,
+      pluginTag: 'alerting_v2',
+    });
+  }
 
   public async create(name: string): Promise<ApiKeyAttributes> {
     const username = this.securityService.authc.getCurrentUser(this.request)?.username;
@@ -88,46 +96,39 @@ export class ApiKeyService implements ApiKeyServiceContract {
     );
   }
 
-  private decodeApiKey(key: string): { apiKeyId: string; apiKeyValue?: string } {
-    const [id, apiKey] = Buffer.from(key, 'base64').toString().split(':');
-    return { apiKeyId: id, apiKeyValue: apiKey };
-  }
-
   private isAuthenticationTypeAPIKey(): boolean {
     const user = this.securityService.authc.getCurrentUser(this.request);
     return user?.authentication_type === 'api_key';
   }
 
   private getAuthenticationAPIKeyAttributes(name: string, username: string): ApiKeyAttributes {
-    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(this.request);
-    if (!authorizationHeader?.credentials) {
+    const requestApiKey = this.apiKeys.fromRequest(this.request);
+    if (!requestApiKey) {
       throw new Error(
         `Failed to extract API key from authorization header for action policy: ${name}`
       );
     }
 
-    if (isUiamCredential(authorizationHeader)) {
-      throw Boom.badRequest(getActionPolicyCloudApiKeyNotSupportedMessage(name), {
-        code: ALERTING_ERROR_CODES.ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED,
-      });
-    }
-
-    const { apiKeyId, apiKeyValue } = this.decodeApiKey(authorizationHeader.credentials);
-
-    if (!apiKeyId || !apiKeyValue) {
+    if (requestApiKey.type === 'invalid') {
       throw new Error(
         `Failed to parse API key credentials from authorization header for action policy: ${name}`
       );
     }
 
-    if (isUiamCredential(apiKeyValue) && !this.shouldGrantUiam()) {
+    const { type, id, secret } = requestApiKey;
+    // A raw `essu_…` Cloud API key carries no id, so Kibana can't store it.
+    if (!id) {
+      throw Boom.badRequest(getActionPolicyCloudApiKeyNotSupportedMessage(name), {
+        code: ALERTING_ERROR_CODES.ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED,
+      });
+    }
+
+    if (type === 'uiam' && !this.shouldGrantUiam()) {
       throw new Error('UIAM API keys should only be used in serverless environments');
     }
 
-    const encoded = encodeApiKey(apiKeyId, apiKeyValue)!;
-
     return {
-      apiKey: encoded,
+      apiKey: encodeApiKey(id, secret),
       owner: username,
       createdByUser: true,
     };
@@ -144,7 +145,7 @@ export class ApiKeyService implements ApiKeyServiceContract {
       }
 
       return {
-        apiKey: encodeApiKey(uiamResult.id, uiamResult.api_key)!,
+        apiKey: encodeGrantedApiKey(uiamResult.id, uiamResult.api_key)!,
         owner: username,
         createdByUser: false,
       };
@@ -161,7 +162,7 @@ export class ApiKeyService implements ApiKeyServiceContract {
     }
 
     return {
-      apiKey: encodeApiKey(esResult.id, esResult.api_key)!,
+      apiKey: encodeGrantedApiKey(esResult.id, esResult.api_key)!,
       owner: username,
       createdByUser: false,
     };
