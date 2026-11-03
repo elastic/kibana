@@ -19,7 +19,7 @@ After:
 
 ![After: <what it looks like now>](./after-<area>-<width>.png)
 
-**Design change:** <yes or no>. <If yes: say exactly what changes visually, for example "the vertical dividers between metrics are removed and the spacing goes from 32px to 24px". Reviewers from design should look at this PR.>
+**Design change:** <yes or no>. <If yes: say exactly what changes visually, for example "the vertical dividers between metrics are removed, the spacing between metrics changes to the `xl` gutter, and the wrapped row starts 40px below the first (the rows touched before)". Quote only numbers you measured. Reviewers from design should look at this PR.>
 
 ## Testing
 
