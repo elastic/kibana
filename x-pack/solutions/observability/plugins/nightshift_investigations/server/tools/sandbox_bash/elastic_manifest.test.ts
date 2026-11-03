@@ -21,37 +21,79 @@ describe('renderElasticManifest', () => {
     expect(content).toContain('never hard-code their values');
   });
 
-  it('documents the readable indices and a query example', () => {
+  it('keeps CCS and remote cluster guidance on by default, without naming indices or remotes', () => {
     const content = renderElasticManifest(connector('elasticsearch-telemetry'));
 
-    expect(content).toContain('`logs-*`, `metrics-*`, `traces-*`');
-    expect(content).toContain('"$CONNECTOR_CONFIG_URL/_remote/info"');
-    expect(content).toContain('"$CONNECTOR_CONFIG_URL/_query?format=txt"');
+    expect(content).toContain('## Remote clusters');
+    expect(content).toContain('cross-cluster search (CCS)');
+    expect(content).toContain('`<remote>:<index>`');
+    expect(content).toContain('`GET /_remote/info`');
+    expect(content).not.toContain('## Local indices');
+    expect(content).not.toContain('`logs-*`, `metrics-*`, `traces-*`');
+    expect(content).not.toContain('logging-');
   });
 
-  it('uses operator-supplied remote index guidance and bounds telemetry queries', () => {
+  it('uses operator-supplied remote guidance in place of the default', () => {
     const content = renderElasticManifest(connector('remote-telemetry'), {
       readableIndices: 'Read `logging-region:logs-service-*`; no local telemetry is available.',
     });
 
     expect(content).toContain('Read `logging-region:logs-service-*`');
-    expect(content).not.toContain('FROM *:logs-*');
-    expect(content).toContain('--max-time 120');
-    expect(content).toContain('@timestamp');
-    expect(content).toContain('Name each remote explicitly');
-    expect(content).toContain('never use wildcard remote names');
-    expect(content).toContain("jq -n --arg q '<ES|QL>'");
-    expect(content).toContain('there is no `python`');
-    expect(content).toContain('`Unknown column [x]` means no index in the `FROM` pattern');
-    expect(content).toContain('include_unmapped=true');
+    expect(content).not.toContain('cross-cluster search (CCS)');
   });
 
-  it('steers remote queries to a specific data stream instead of logs-*', () => {
-    const content = renderElasticManifest(connector('remote-telemetry'));
+  it('renders local indices before remote clusters when local guidance is set', () => {
+    const content = renderElasticManifest(connector('remote-telemetry'), {
+      readableIndices: 'Read `logging-region:logs-*`.',
+      localIndices: '- `traces-apm.rum-default`: browser traces',
+    });
 
-    expect(content).toContain('/_resolve/index/<remote>:logs-*nginx*');
-    expect(content).toContain('FROM $1:logs-nginx.error-*');
-    expect(content).not.toContain('FROM $1:logs-* ');
+    expect(content).toContain('## Local indices');
+    expect(content.indexOf('## Local indices')).toBeLessThan(content.indexOf('## Remote clusters'));
+    expect(content).toContain('- `traces-apm.rum-default`: browser traces');
+    expect(content.indexOf('Read `logging-region:logs-*`.')).toBeGreaterThan(
+      content.indexOf('## Remote clusters')
+    );
+  });
+
+  it('tells the agent to verify every reported figure with a query', () => {
+    const content = renderElasticManifest(connector('elasticsearch-telemetry'));
+
+    expect(content).toContain('not what the data contains');
+    expect(content).toContain('must come from a query result in this session');
+  });
+
+  it('discovers data with index-level APIs and never recommends cluster-level listing', () => {
+    const content = renderElasticManifest(connector('elasticsearch-telemetry'));
+
+    expect(content).toContain('_resolve/index/');
+    expect(content).toContain('_field_caps');
+    expect(content).toContain('include_unmapped=true');
+    expect(content).toContain('`Unknown column [x]` means no index in the `FROM` pattern');
+    expect(content).not.toContain('_cat/indices');
+    expect(content).not.toContain('_resolve/cluster');
+  });
+
+  it('bounds queries and keeps the ES|QL guidance', () => {
+    const content = renderElasticManifest(connector('elasticsearch-telemetry'));
+
+    expect(content).toContain('--max-time 120');
+    expect(content).toContain('time range');
+    expect(content).toContain("jq -n --arg q '<ES|QL>'");
+    expect(content).toContain('there is no `python`');
+    expect(content).toContain('Never hide a failure');
+  });
+
+  it('puts the examples in their own section, last, with placeholders instead of real names', () => {
+    const content = renderElasticManifest(connector('elasticsearch-telemetry'));
+
+    expect(content).toContain('## Examples');
+    expect(content.indexOf('## Examples')).toBeGreaterThan(content.indexOf('## Query rules'));
+    expect(content.indexOf('```bash')).toBeGreaterThan(content.indexOf('## Examples'));
+    expect(content).toContain('"$CONNECTOR_CONFIG_URL/_query?format=txt"');
+    expect(content).toContain('FROM $1:<index>');
+    expect(content).not.toContain('logs-nginx');
+    expect(content).not.toContain('2026-');
   });
 });
 

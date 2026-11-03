@@ -318,6 +318,7 @@ export class NightshiftInvestigationsPlugin
           getDeps: () => ({ actions: this.actionsStart }),
           telemetryConnectorId,
           telemetryReadableIndices: config.sandbox?.telemetry_readable_indices,
+          telemetryLocalIndices: config.sandbox?.telemetry_local_indices,
           telemetryTargets: getTelemetryTargets(config.sandbox),
           getTelemetryTarget: async ({ agentId, conversationId, request }) => {
             if (agentId !== NIGHTSHIFT_INVESTIGATION_AGENT_ID) return undefined;

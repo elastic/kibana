@@ -21,6 +21,7 @@ const sandboxConfigSchema = schema.object({
     schema.object({
       connector_id: schema.string({ minLength: 1, maxLength: 500 }),
       readable_indices: schema.maybe(schema.string({ maxLength: 10_000 })),
+      local_indices: schema.maybe(schema.string({ maxLength: 10_000 })),
     }),
     { defaultValue: {} }
   ),
@@ -33,6 +34,9 @@ const sandboxConfigSchema = schema.object({
   telemetry_connector_id: schema.maybe(schema.string()),
   // Operator-supplied readable index patterns and remote names for the telemetry manifest.
   telemetry_readable_indices: schema.maybe(schema.string({ maxLength: 10_000 })),
+  // Operator-supplied guidance on the indices stored in the telemetry cluster itself, rendered in
+  // its own manifest section apart from the remote clusters above.
+  telemetry_local_indices: schema.maybe(schema.string({ maxLength: 10_000 })),
 });
 
 const cortexConfigSchema = schema.object({
