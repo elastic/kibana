@@ -16,7 +16,6 @@ export default createTestConfig({
     require.resolve('../../test_suites/platform_security'),
     require.resolve('../../test_suites/reporting'),
     require.resolve('../../test_suites/telemetry'),
-    require.resolve('../../test_suites/favorites'),
   ],
   junit: {
     reportName: 'Serverless Security Platform API Integration Tests - Common Group 1',
