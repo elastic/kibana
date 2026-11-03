@@ -13,6 +13,7 @@ import {
 } from '@kbn/core/server/mocks';
 import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
 import { createUpdateDetectionService } from './update_detection';
+import { createWatchlistSyncMarkersService } from '../sync_markers';
 import type { WatchlistDataSources } from '../../../../../../../common/api/entity_analytics';
 import type { EntityStoreEntityIdsByType, WatchlistsByEuid } from '../../../entities/service';
 import type { CorrelationMap } from '../../../entities/types';
@@ -29,19 +30,12 @@ const createMockCrudClient = (): jest.Mocked<CRUDClient> =>
 
 jest.mock('../../infra/entity_source_client');
 
-const {
-  WatchlistEntitySourceClient,
-  mockGetLastProcessedMarker,
-  mockUpdateLastProcessedMarker,
-  mockGetLastFullSyncMarker,
-  mockUpdateLastFullSyncMarker,
-} = jest.requireMock('../../infra/entity_source_client') as {
-  WatchlistEntitySourceClient: jest.Mock;
-  mockGetLastProcessedMarker: jest.Mock;
-  mockUpdateLastProcessedMarker: jest.Mock;
-  mockGetLastFullSyncMarker: jest.Mock;
-  mockUpdateLastFullSyncMarker: jest.Mock;
-};
+const { WatchlistEntitySourceClient, mockGetLastProcessedMarker, mockUpdateLastProcessedMarker } =
+  jest.requireMock('../../infra/entity_source_client') as {
+    WatchlistEntitySourceClient: jest.Mock;
+    mockGetLastProcessedMarker: jest.Mock;
+    mockUpdateLastProcessedMarker: jest.Mock;
+  };
 
 type CapturedSearchRequest = SearchRequest & {
   aggs?: {
@@ -228,7 +222,7 @@ describe('Watchlist update detection service', () => {
     });
   });
 
-  describe('integration source without descriptorClient', () => {
+  describe('integration source without syncMarkersService', () => {
     it('logs warning and returns empty array without calling search or bulk', async () => {
       const internalEsClient = elasticsearchServiceMock.createElasticsearchClient();
       const dataEsClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -255,7 +249,7 @@ describe('Watchlist update detection service', () => {
 
       expect(result).toEqual({ entities: [] });
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('descriptorClient not available')
+        expect.stringContaining('syncMarkersService not available')
       );
       expect(dataEsClient.search).not.toHaveBeenCalled();
       expect(internalEsClient.bulk).not.toHaveBeenCalled();
@@ -297,7 +291,7 @@ describe('Watchlist update detection service', () => {
         internalEsClient,
         dataEsClient,
         logger,
-        descriptorClient,
+        syncMarkersService: createWatchlistSyncMarkersService(descriptorClient, internalEsClient),
         crudClient: createMockCrudClient(),
         watchlist: watchlist5,
       });
@@ -368,7 +362,7 @@ describe('Watchlist update detection service', () => {
         internalEsClient,
         dataEsClient,
         logger,
-        descriptorClient,
+        syncMarkersService: createWatchlistSyncMarkersService(descriptorClient, internalEsClient),
         crudClient: createMockCrudClient(),
         watchlist: watchlist6,
       });
@@ -383,29 +377,14 @@ describe('Watchlist update detection service', () => {
       expect(mockUpdateLastProcessedMarker).toHaveBeenCalledWith(integrationSource, maxTimestamp);
     });
 
-    it('uses the full-sync window (started marker) instead of lastUpdateProcessed when a new full sync is detected', async () => {
+    it('uses the full-sync window it is given instead of lastUpdateProcessed when told a new full sync was detected', async () => {
       const staleProcessedMarker = '2024-01-01T00:00:00Z';
-      const startedMarker = '2024-02-01T00:00:00Z';
-      const sourceWithSyncMarkerIndex: WatchlistDataSources.MonitoringEntitySource = {
-        ...integrationSource,
-        integrations: { syncMarkerIndex: 'logs-entityanalytics_okta.entity-default' },
-      };
+      const fullSyncWindowStart = '2024-02-01T00:00:00Z';
       const descriptorClient = createDescriptorClient();
       mockGetLastProcessedMarker.mockResolvedValue(staleProcessedMarker);
-      mockGetLastFullSyncMarker.mockResolvedValue(undefined);
-      mockUpdateLastFullSyncMarker.mockResolvedValue(undefined);
-      mockUpdateLastProcessedMarker.mockResolvedValue(undefined);
 
       const internalEsClient = elasticsearchServiceMock.createElasticsearchClient();
       const dataEsClient = elasticsearchServiceMock.createElasticsearchClient();
-
-      internalEsClient.search
-        .mockResolvedValueOnce({
-          hits: { hits: [{ _id: 'm1', _source: { '@timestamp': '2024-03-01T00:00:00Z' } }] },
-        } as never)
-        .mockResolvedValueOnce({
-          hits: { hits: [{ _id: 'm2', _source: { '@timestamp': startedMarker } }] },
-        } as never);
 
       const searchCalls: CapturedSearchRequest[] = [];
       dataEsClient.search.mockImplementation((params?: SearchRequest) => {
@@ -428,22 +407,22 @@ describe('Watchlist update detection service', () => {
         internalEsClient,
         dataEsClient,
         logger,
-        descriptorClient,
+        syncMarkersService: createWatchlistSyncMarkersService(descriptorClient, internalEsClient),
         crudClient: createMockCrudClient(),
         watchlist: watchlist7,
       });
 
-      const result = await service.updateDetection(
-        sourceWithSyncMarkerIndex,
+      await service.updateDetection(
+        integrationSource,
         createEntityStoreEntityIdsByType({ user: ['user:jdoe'] }),
         undefined,
-        emptyWatchlistsByEuid
+        emptyWatchlistsByEuid,
+        { hasNewFullSync: true, syncMarker: fullSyncWindowStart }
       );
 
-      expect(result.hasNewFullSync).toBe(true);
       expect(mockGetLastProcessedMarker).not.toHaveBeenCalled();
       expect(searchCalls[0].query?.bool?.must).toContainEqual({
-        range: { '@timestamp': { gte: startedMarker, lte: 'now' } },
+        range: { '@timestamp': { gte: fullSyncWindowStart, lte: 'now' } },
       });
     });
 
@@ -455,13 +434,10 @@ describe('Watchlist update detection service', () => {
       };
       const descriptorClient = createDescriptorClient();
       mockGetLastProcessedMarker.mockResolvedValue(syncMarker);
-      mockGetLastFullSyncMarker.mockResolvedValue(undefined);
       mockUpdateLastProcessedMarker.mockResolvedValue(undefined);
 
       const targetIndex = '.watchlist-entities-default';
       const internalEsClient = elasticsearchServiceMock.createElasticsearchClient();
-      // No 'completed' marker found -> detectNewFullSync is false, falls back to lastUpdateProcessed.
-      internalEsClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
       internalEsClient.bulk.mockResolvedValue({ errors: false } as never);
 
       const dataEsClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -507,7 +483,7 @@ describe('Watchlist update detection service', () => {
         internalEsClient,
         dataEsClient,
         logger,
-        descriptorClient,
+        syncMarkersService: createWatchlistSyncMarkersService(descriptorClient, internalEsClient),
         crudClient: createMockCrudClient(),
         watchlist: watchlist8,
       });

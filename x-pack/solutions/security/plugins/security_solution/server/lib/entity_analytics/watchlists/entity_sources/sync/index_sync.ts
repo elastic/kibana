@@ -7,9 +7,12 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
+import type { WatchlistDataSources } from '../../../../../../common/api/entity_analytics';
 import type { WatchlistEntitySourceClient } from '../infra';
 import { createSourcesSyncService } from './sources_sync';
-import type { SyncSourceEntry } from './sources_sync';
+import type { SyncResult, SyncSourceEntry } from './sources_sync';
+import { createWatchlistSyncMarkersService } from './sync_markers';
+import type { FullSyncState } from './update_detection/update_detection';
 import { createUpdateDetectionService } from './update_detection/update_detection';
 import { createDeletionDetectionService } from './deletion_detection/deletion_detection';
 
@@ -30,12 +33,14 @@ export const createIndexSyncService = ({
   descriptorClient: WatchlistEntitySourceClient;
   watchlist: { name: string; id: string; index: string };
 }) => {
+  const syncMarkersService = createWatchlistSyncMarkersService(descriptorClient, internalEsClient);
+
   const updateDetectionService = createUpdateDetectionService({
     internalEsClient,
     dataEsClient,
     crudClient,
     logger,
-    descriptorClient,
+    syncMarkersService,
     watchlist,
   });
   const deletionDetectionService = createDeletionDetectionService({
@@ -46,8 +51,31 @@ export const createIndexSyncService = ({
   });
   const sourcesSyncService = createSourcesSyncService({ logger });
 
-  const plainIndexSync = async (sources: SyncSourceEntry[]) => {
-    await sourcesSyncService.syncBySourceIds({
+  /**
+   * Resolves whether a new full sync has completed for this source, and the window to use for
+   * it, exactly once per sync cycle.
+   */
+  const resolveFullSyncState = async (
+    source: WatchlistDataSources.MonitoringEntitySource
+  ): Promise<FullSyncState & { completedAt?: string }> => {
+    if (source.type !== 'entity_analytics_integration') {
+      return { hasNewFullSync: false };
+    }
+
+    const { hasNewFullSync, completedAt } = await syncMarkersService.detectNewFullSync(source);
+    if (!hasNewFullSync || !completedAt) {
+      return { hasNewFullSync: false };
+    }
+
+    const syncMarker = await syncMarkersService.getFullSyncWindowStart(source, completedAt);
+    return { hasNewFullSync: true, syncMarker, completedAt };
+  };
+
+  const plainIndexSync = async (
+    sources: SyncSourceEntry[],
+    fullSyncState?: FullSyncState
+  ): Promise<SyncResult[]> =>
+    sourcesSyncService.syncBySourceIds({
       sources,
       process: async (
         source,
@@ -56,16 +84,12 @@ export const createIndexSyncService = ({
         watchlistsByEuid,
         pageRange
       ) => {
-        // updateDetection returns hasNewFullSync alongside entities because the two are tied
-        // together: it's what decided whether `entities` was built from a full-sync window
-        // (a complete snapshot) or just the incremental cursor (a partial delta). We pass it
-        // on to deletionDetection so it knows which one it's getting — only a complete
-        // snapshot is safe to use for deciding what's missing (and should be deleted).
-        const { entities, hasNewFullSync } = await updateDetectionService.updateDetection(
+        const { entities } = await updateDetectionService.updateDetection(
           source,
           entityStoreEntityIdsByType,
           correlationMap,
-          watchlistsByEuid
+          watchlistsByEuid,
+          fullSyncState
         );
         const currentEuids = entities.map((e) => e.euid);
         await deletionDetectionService.deletionDetection(
@@ -73,11 +97,17 @@ export const createIndexSyncService = ({
           currentEuids,
           watchlistsByEuid,
           pageRange,
-          hasNewFullSync
+          fullSyncState?.hasNewFullSync
         );
       },
     });
+
+  const markFullSyncProcessed = async (
+    source: WatchlistDataSources.MonitoringEntitySource,
+    completedAt: string
+  ): Promise<void> => {
+    await syncMarkersService.markFullSyncProcessed(source, completedAt);
   };
 
-  return { plainIndexSync };
+  return { plainIndexSync, resolveFullSyncState, markFullSyncProcessed };
 };

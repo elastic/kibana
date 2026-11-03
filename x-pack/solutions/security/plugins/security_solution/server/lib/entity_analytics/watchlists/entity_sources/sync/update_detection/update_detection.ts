@@ -12,8 +12,7 @@ import type { EntityType } from '@kbn/entity-store/common';
 import type { WatchlistDataSources } from '../../../../../../../common/api/entity_analytics';
 import type { EntityStoreEntityIdsByType, WatchlistsByEuid } from '../../../entities/service';
 import type { WatchlistBulkEntity } from '../../types';
-import { createWatchlistSyncMarkersService } from '../sync_markers';
-import type { WatchlistEntitySourceClient } from '../../infra';
+import type { WatchlistSyncMarkersService } from '../sync_markers';
 import { isTimestampGreaterThan } from '../utils';
 import { buildEntitiesSearchBody, buildIndexSourceSearchBody } from './queries';
 import { applyBulkUpsert } from '../../bulk/upsert';
@@ -23,12 +22,23 @@ import type { CorrelationMap } from '../../../entities/types';
 
 export type UpdateDetectionService = ReturnType<typeof createUpdateDetectionService>;
 
+/**
+ * A full-sync decision resolved once per source for the whole sync cycle
+ */
+export interface FullSyncState {
+  hasNewFullSync: boolean;
+  syncMarker?: string;
+}
+
 type UpdateDetection = (
   source: WatchlistDataSources.MonitoringEntitySource,
   entityStoreEntityIdsByType: EntityStoreEntityIdsByType,
   correlationMap: CorrelationMap | undefined,
-  watchlistsByEuid: WatchlistsByEuid
-) => Promise<{ entities: WatchlistBulkEntity[]; hasNewFullSync?: boolean }>;
+  watchlistsByEuid: WatchlistsByEuid,
+  fullSyncState?: FullSyncState
+) => Promise<{
+  entities: WatchlistBulkEntity[];
+}>;
 
 interface MappedBucket {
   euid: string;
@@ -96,20 +106,16 @@ export const createUpdateDetectionService = ({
   dataEsClient,
   crudClient,
   logger,
-  descriptorClient,
+  syncMarkersService,
   watchlist,
 }: {
   internalEsClient: ElasticsearchClient; // for writes to watchlist indices
   dataEsClient: ElasticsearchClient; // for reads against the source data index
   crudClient: CRUDClient;
   logger: Logger;
-  descriptorClient?: WatchlistEntitySourceClient;
+  syncMarkersService?: WatchlistSyncMarkersService;
   watchlist: { name: string; id: string; index: string };
 }) => {
-  const syncMarkersService = descriptorClient
-    ? createWatchlistSyncMarkersService(descriptorClient, internalEsClient)
-    : undefined;
-
   const detectForIntegrationEntityType = async (
     source: WatchlistDataSources.MonitoringEntitySource,
     entityType: EntityType,
@@ -233,24 +239,24 @@ export const createUpdateDetectionService = ({
     source: WatchlistDataSources.MonitoringEntitySource,
     entityStoreEntityIdsByType: EntityStoreEntityIdsByType,
     correlationMap: CorrelationMap | undefined,
-    watchlistsByEuid: WatchlistsByEuid
+    watchlistsByEuid: WatchlistsByEuid,
+    fullSyncState?: FullSyncState
   ) => {
     const allEntities: WatchlistBulkEntity[] = [];
     let maxProcessedTimestamp: string | undefined;
-    let hasNewFullSync: boolean | undefined;
 
     if (source.type === 'entity_analytics_integration') {
       if (!syncMarkersService) {
         logger.warn(
-          `[WatchlistSync] Skipping integration source ${source.id}: descriptorClient not available`
+          `[WatchlistSync] Skipping integration source ${source.id}: syncMarkersService not available`
         );
         return { entities: allEntities };
       }
 
-      hasNewFullSync = await syncMarkersService.detectNewFullSync(source);
-      const syncMarker = hasNewFullSync
-        ? await syncMarkersService.getFullSyncWindowStart(source)
-        : await syncMarkersService.getLastProcessedMarker(source);
+      const syncMarker =
+        fullSyncState?.hasNewFullSync && fullSyncState.syncMarker
+          ? fullSyncState.syncMarker
+          : await syncMarkersService.getLastProcessedMarker(source);
 
       for (const entityType of ALL_ENTITY_TYPES) {
         const allowedEntityIds = getAllowedEntityIds(entityStoreEntityIdsByType, entityType);
@@ -298,7 +304,7 @@ export const createUpdateDetectionService = ({
     logger.info(
       `[WatchlistSync] Update detection: found ${allEntities.length} entities from source ${source.id}`
     );
-    return { entities: allEntities, hasNewFullSync };
+    return { entities: allEntities };
   };
 
   return { updateDetection };
