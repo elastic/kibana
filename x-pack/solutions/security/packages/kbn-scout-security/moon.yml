@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/solutions/security/packages/kbn-scout-security
 dependsOn:
   - '@kbn/scout'
+  - '@kbn/securitysolution-list-constants'
   - '@kbn/es'
   - '@kbn/test-subj-selector'
   - '@kbn/core-http-common'
