@@ -132,7 +132,10 @@ export class HttpService
     const config = await firstValueFrom(this.config$);
 
     if (config.sidecar.enabled) {
-      const sidecarBinPath = pathResolve(this.env.homeDir, 'src/platform/sidecar/kbn_sidecar');
+      const ext = process.platform === 'win32' ? '.exe' : '';
+      const sidecarBinPath = this.env.packageInfo.dist
+        ? pathResolve(this.env.homeDir, 'bin', `kbn_sidecar${ext}`)
+        : pathResolve(this.env.homeDir, 'src/platform/sidecar', `kbn_sidecar${ext}`);
       const esBootstrapConfig = await this.buildElasticsearchBootstrapConfig();
       this.sidecar = new SidecarProcess(
         config,

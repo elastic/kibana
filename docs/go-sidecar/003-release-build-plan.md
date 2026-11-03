@@ -1,6 +1,6 @@
 # Plan: Include Go sidecar in release build
 
-**Status:** Not started
+**Status:** Implemented
 
 ## Goal
 
