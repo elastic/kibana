@@ -14,3 +14,6 @@
 ./src/platform/plugins/shared/workflows_execution_engine/server/tasks: 104
 ./src/platform/plugins/shared/workflows_extensions/server/tasks: 36
 ./src/platform/plugins/shared/workflows_management/server/tasks: 57
+./x-pack/platform/plugins/shared/isomer/server/tasks: 16
+./x-pack/platform/plugins/shared/search_inference_endpoints/server/tasks: 20
+./x-pack/platform/plugins/shared/inference/server/tasks: 98

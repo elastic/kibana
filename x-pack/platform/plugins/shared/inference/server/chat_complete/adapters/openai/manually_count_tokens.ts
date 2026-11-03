@@ -5,12 +5,24 @@
  * 2.0.
  */
 
-import { encode } from 'gpt-tokenizer';
 import type { ChatCompletionChunkEvent } from '@kbn/inference-common';
 import type { OpenAIRequest } from './types';
 import { mergeChunks } from '../../utils';
 
 const ENCODE_OPTIONS = { allowedSpecial: 'all' as const };
+
+type Encode = typeof import('gpt-tokenizer').encode;
+
+// The tokenizer is large and only needed when a provider reports no token usage, so it loads on
+// first use.
+let encodeFn: Encode | undefined;
+const encode: Encode = (...args) => {
+  if (!encodeFn) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires, import/no-dynamic-require
+    encodeFn = require('gpt-tokenizer').encode as Encode;
+  }
+  return encodeFn(...args);
+};
 
 function contentToString(
   content: string | Array<{ type: string; text?: string; refusal?: string }> | null | undefined

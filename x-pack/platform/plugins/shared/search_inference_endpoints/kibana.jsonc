@@ -29,6 +29,7 @@
     "requiredBundles": [
       "kibanaReact",
       "esUiShared"
-    ]
+    ],
+    "tasks": { "requiredPlugins": ["inference"] }
   }
 }
