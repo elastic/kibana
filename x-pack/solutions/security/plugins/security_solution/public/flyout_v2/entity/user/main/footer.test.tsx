@@ -14,15 +14,6 @@ import {
   ADD_TO_EXISTING_CASE_TEST_ID,
 } from '../../../../../common/cases/attachments/entity/test_ids';
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
-import {
-  DEFAULT_FACELIFT_VERSION,
-  setActiveFaceliftVersion,
-} from '../../../../entity_analytics/components/home/facelift/active_version';
-
-// The facelift v.8 prototype collapses the two case actions into one "Add to case".
-beforeEach(() => setActiveFaceliftVersion('v1'));
-afterAll(() => setActiveFaceliftVersion(DEFAULT_FACELIFT_VERSION));
-
 jest.mock('@kbn/entity-store/public', () => ({
   useEntityStoreEuidApi: jest.fn(() => null),
 }));
@@ -108,10 +99,10 @@ const renderFooter = (
 describe('Footer – entity attachment actions', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('renders Add to new case and Add to existing case when all conditions are met', () => {
+  it('renders a single Add to case when all conditions are met', () => {
     renderFooter(true, true, ENTITY_STORE_RECORD);
 
-    expect(screen.getByTestId(ADD_TO_NEW_CASE_TEST_ID)).toBeInTheDocument();
+    expect(screen.queryByTestId(ADD_TO_NEW_CASE_TEST_ID)).not.toBeInTheDocument();
     expect(screen.getByTestId(ADD_TO_EXISTING_CASE_TEST_ID)).toBeInTheDocument();
   });
 

@@ -22,7 +22,7 @@ import type {
   EntitiesGroupingAggregation,
   TargetEntityMetadata,
 } from '../../entities_table/grouping/use_fetch_grouped_data';
-import { IDENTITY_BY_ID } from '../v2/data';
+import { IDENTITY_BY_ID } from '../mocks/data';
 import { ENTITY_STORE_FIELDS } from './entity_store_fields';
 import type { EntityRow, RawRecordRow } from './resolved_entities_data';
 import { getActiveTimeRange } from './active_time_range';

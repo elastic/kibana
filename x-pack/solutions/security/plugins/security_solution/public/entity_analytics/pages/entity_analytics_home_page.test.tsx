@@ -17,8 +17,6 @@ import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_
 import { useLeadGenerationPrivileges } from '../api/hooks/use_lead_generation_privileges';
 import { useHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads/use_hunting_leads';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
-import { setActiveFaceliftVersion } from '../components/home/facelift/active_version';
-
 jest.mock('../../common/components/links/link_props', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const mockReact = require('react');
@@ -254,7 +252,6 @@ const mockUseHuntingLeads = useHuntingLeads as jest.Mock;
 describe('EntityAnalyticsHomePage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    setActiveFaceliftVersion('v8');
 
     mockUseEntityStoreDataView.mockReturnValue({
       dataView: { id: 'test-entity-store', fields: [], matchedIndices: ['index-1'] },
@@ -394,26 +391,6 @@ describe('EntityAnalyticsHomePage', () => {
     expect(addIntegrations).toHaveAttribute(
       'href',
       expect.stringContaining('/app/integrations/browse/security/advanced_analytics_ueba')
-    );
-  });
-
-  it('renders the Create watchlist primary action and Management on v.5', () => {
-    setActiveFaceliftVersion('v5');
-
-    render(
-      <MemoryRouter>
-        <EntityAnalyticsHomePage />
-      </MemoryRouter>,
-      { wrapper: TestProviders }
-    );
-
-    const createWatchlistLink = screen.getByTestId('eaFaceliftCreateWatchlistButton');
-    expect(createWatchlistLink).toBeInTheDocument();
-    expect(createWatchlistLink).toHaveAttribute('href', expect.stringContaining('/watchlists'));
-    expect(screen.getByRole('link', { name: 'Management' })).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Settings' })).not.toBeInTheDocument();
-    expect(screen.getByTestId('eaFaceliftAppHeader')).not.toHaveAttribute(
-      'data-show-add-integrations'
     );
   });
 

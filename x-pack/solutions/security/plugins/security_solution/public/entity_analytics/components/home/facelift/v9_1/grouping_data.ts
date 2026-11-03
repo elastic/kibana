@@ -9,4 +9,4 @@
  * Shared grouping / ES-query mock helpers for facelift v.5 — see `./data.ts`.
  */
 
-export * from '../v2/grouping_data';
+export * from '../mocks/grouping_data';

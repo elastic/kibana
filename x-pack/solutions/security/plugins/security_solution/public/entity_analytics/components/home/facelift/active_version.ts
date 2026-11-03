@@ -6,105 +6,34 @@
  */
 
 /**
- * Active EA Facelift prototype version.
+ * The EA timeline prototype carries a single facelift snapshot, v.9.1 (`./v9_1`).
  *
- * Home UI lives in `./v1`–`./v9_1` as independent code snapshots. Flyout / table
- * mock bridges read this module so external hooks follow the selected version.
- * To ship a single final version later: keep that folder, delete the others,
- * drop the switcher, and point the thin root bridges at the survivor (or move
- * its files up one level and delete the bridges).
- *
- * Mock corpora are shared across v.2+ via re-exports from `./v2/data` (and
- * related mock modules) so entity fixtures stay single-sourced.
- *
- * The Kibana chrome header dropdown and the home page both read/write this
- * module; `subscribeActiveFaceliftVersion` keeps React state in sync.
- *
- * In v.6–v.8, metric charts can also be swapped via a Metrics version header
- * control without changing the rest of the page. Each of those prototypes owns
- * its own metrics state: v.6 reads `./active_metrics_version` (metrics v.1–v.7),
- * v.7 reads `./v7/active_metrics_version` (metrics v.7–v.8), v.8 reads
- * `./v8/active_metrics_version` (full vs simplified tracks, each with its own
- * v.1). v.9 has metrics v.6 only, with its own Simplified metrics switch
- * (`./v9/active_metrics_version`). v.9.1 is a copy of v.9 with metrics v.6
- * and no Simplified metrics switch; its settings menu adds Empty, Loading and
- * Error states entries instead. Prototype v.5 keeps a fixed metrics v.1
- * look with no control.
+ * Shared flyout / table code still gates facelift refinements on
+ * `isFaceliftV8OrLater` / `isFaceliftV9OrLater`; with one version left those
+ * checks are always true. The hook and setters are kept so those call sites
+ * did not have to change.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 
-export type FaceliftVersion = 'v1' | 'v2' | 'v3' | 'v4' | 'v5' | 'v6' | 'v7' | 'v8' | 'v9' | 'v9_1';
+export type FaceliftVersion = 'v9_1';
 
 export const DEFAULT_FACELIFT_VERSION: FaceliftVersion = 'v9_1';
 
-export const FACELIFT_VERSION_OPTIONS: Array<{ key: FaceliftVersion; label: string }> = [
-  { key: 'v9_1', label: 'v.9.1' },
-  { key: 'v9', label: 'v.9' },
-  { key: 'v8', label: 'v.8' },
-  { key: 'v7', label: 'v.7' },
-  { key: 'v6', label: 'v.6' },
-  { key: 'v5', label: 'v.5' },
-  { key: 'v4', label: 'v.4' },
-  { key: 'v3', label: 'v.3' },
-  { key: 'v2', label: 'v.2' },
-  { key: 'v1', label: 'v.1' },
-];
+export const getActiveFaceliftVersion = (): FaceliftVersion => DEFAULT_FACELIFT_VERSION;
 
-let activeFaceliftVersion: FaceliftVersion = DEFAULT_FACELIFT_VERSION;
+export const setActiveFaceliftVersion = (_version: FaceliftVersion): void => {};
 
-type FaceliftVersionListener = (version: FaceliftVersion) => void;
-const listeners = new Set<FaceliftVersionListener>();
-
-export const getActiveFaceliftVersion = (): FaceliftVersion => activeFaceliftVersion;
-
-export const setActiveFaceliftVersion = (version: FaceliftVersion): void => {
-  if (version === activeFaceliftVersion) {
-    return;
-  }
-  activeFaceliftVersion = version;
-  listeners.forEach((listener) => listener(version));
-};
-
-export const subscribeActiveFaceliftVersion = (listener: FaceliftVersionListener): (() => void) => {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
-};
-
-/** React binding for the chrome header + home page remount key. */
 export const useActiveFaceliftVersion = (): [
   FaceliftVersion,
   (version: FaceliftVersion) => void
 ] => {
-  const [version, setVersion] = useState(getActiveFaceliftVersion);
-
-  useEffect(() => subscribeActiveFaceliftVersion(setVersion), []);
-
-  const setFaceliftVersion = useCallback((next: FaceliftVersion) => {
-    setActiveFaceliftVersion(next);
-  }, []);
-
-  return [version, setFaceliftVersion];
+  const setFaceliftVersion = useCallback(setActiveFaceliftVersion, []);
+  return [DEFAULT_FACELIFT_VERSION, setFaceliftVersion];
 };
 
-/** v.2+ share the AppHeader chrome and in-page search layout. */
-export const isFaceliftAppHeaderVersion = (version: FaceliftVersion): boolean =>
-  version === 'v2' ||
-  version === 'v3' ||
-  version === 'v4' ||
-  version === 'v5' ||
-  version === 'v6' ||
-  version === 'v7' ||
-  version === 'v8' ||
-  version === 'v9' ||
-  version === 'v9_1';
+export const isFaceliftAppHeaderVersion = (_version: FaceliftVersion): boolean => true;
 
-/** v.8 and later share the flyout / header refinements gated in shared code. */
-export const isFaceliftV8OrLater = (version: FaceliftVersion): boolean =>
-  version === 'v8' || version === 'v9' || version === 'v9_1';
+export const isFaceliftV8OrLater = (_version: FaceliftVersion): boolean => true;
 
-/** v.9 and v.9.1 share the resolved-entity flyout behaviour gated in shared code. */
-export const isFaceliftV9OrLater = (version: FaceliftVersion): boolean =>
-  version === 'v9' || version === 'v9_1';
+export const isFaceliftV9OrLater = (_version: FaceliftVersion): boolean => true;

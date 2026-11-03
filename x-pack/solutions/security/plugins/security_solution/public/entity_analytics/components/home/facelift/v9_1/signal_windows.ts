@@ -8,7 +8,7 @@
 /**
  * Mocked recency of the events behind each overview metric and each table row.
  *
- * The shared corpus in `../v2/data` decides card membership from entity state
+ * The shared corpus in `../mocks/data` decides card membership from entity state
  * (`isNewToCritical`, risk delta, anomaly flags…), stores one figure per
  * entity for alerts/anomalies/cases, and carries no per-event timestamp — so
  * there is nothing real to compare a preset window against. This module
@@ -33,7 +33,7 @@
  * card keeps at least one member, so no tile collapses to its zero state.
  */
 
-import type { SignalCardId } from '../v2/data';
+import type { SignalCardId } from '../mocks/data';
 import type { FaceliftTimeRangeId } from './time_range';
 
 /** Share of a card's 30-day members whose signal landed inside each window. */

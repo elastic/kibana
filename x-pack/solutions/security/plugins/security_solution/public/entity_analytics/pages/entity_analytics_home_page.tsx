@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux-v7';
 import { useHistory, useLocation } from 'react-router-dom';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { css, Global } from '@emotion/react';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
@@ -16,93 +16,38 @@ import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { HeaderPage } from '../../common/components/header_page';
-import { SiemSearchBar } from '../../common/components/search_bar';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { inputsActions } from '../../common/store/inputs';
-import { FiltersGlobal } from '../../common/components/filters_global';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useLicense } from '../../common/hooks/use_license';
 import { PageLoader } from '../../common/components/page_loader';
 import { useSpaceId } from '../../common/hooks/use_space_id';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
-import {
-  isFaceliftAppHeaderVersion,
-  isFaceliftV8OrLater,
-  useActiveFaceliftVersion,
-  type FaceliftVersion,
-} from '../components/home/facelift/active_version';
-import { FaceliftHome, FaceliftPageDescription } from '../components/home/facelift/facelift_home';
-import { requestProductTourStart } from '../components/home/facelift/v9/product_tour';
-import { requestProductTourStart as requestProductTourStartV9_1 } from '../components/home/facelift/v9_1/product_tour';
+import { FaceliftHome } from '../components/home/facelift/facelift_home';
+import { requestProductTourStart } from '../components/home/facelift/v9_1/product_tour';
 
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { TabId } from './entity_analytics_management_page';
-import { OPEN_CREATE_WATCHLIST_STORAGE_KEY } from '../components/watchlists/watchlists_tab';
-import { useKibana, useNavigateTo } from '../../common/lib/kibana';
+import { useKibana } from '../../common/lib/kibana';
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
 import { EntityAnalyticsReadPrivilegesCallout } from '../components/entity_analytics_read_privileges_callout';
 import { useLeadGenerationPrivileges } from '../api/hooks/use_lead_generation_privileges';
 import { useAnomalyPrivileges } from '../api/hooks/use_anomaly_privileges';
 import { NoPrivileges } from '../../common/components/no_privileges';
-import { DEFAULT_FROM, DEFAULT_TO } from '../../../common/constants';
-import {
-  FACELIFT_V6_DEFAULT_FROM,
-  FACELIFT_V6_DEFAULT_TO,
-} from '../components/home/facelift/v6/time_range';
-import {
-  FACELIFT_V7_DEFAULT_FROM,
-  FACELIFT_V7_DEFAULT_TO,
-} from '../components/home/facelift/v7/time_range';
-import {
-  FACELIFT_V8_DEFAULT_FROM,
-  FACELIFT_V8_DEFAULT_TO,
-} from '../components/home/facelift/v8/time_range';
-import {
-  FACELIFT_V9_DEFAULT_FROM,
-  FACELIFT_V9_DEFAULT_TO,
-} from '../components/home/facelift/v9/time_range';
 import {
   FACELIFT_V9_1_DEFAULT_FROM,
   FACELIFT_V9_1_DEFAULT_TO,
 } from '../components/home/facelift/v9_1/time_range';
 
-/**
- * Prototypes that open on their own range instead of the app-wide “Today”.
- * Each snapshot exports its own constants so the version folders stay isolated.
- */
-const FACELIFT_DEFAULT_RANGES: Partial<Record<FaceliftVersion, { from: string; to: string }>> = {
-  v6: { from: FACELIFT_V6_DEFAULT_FROM, to: FACELIFT_V6_DEFAULT_TO },
-  v7: { from: FACELIFT_V7_DEFAULT_FROM, to: FACELIFT_V7_DEFAULT_TO },
-  v8: { from: FACELIFT_V8_DEFAULT_FROM, to: FACELIFT_V8_DEFAULT_TO },
-  v9: { from: FACELIFT_V9_DEFAULT_FROM, to: FACELIFT_V9_DEFAULT_TO },
-  v9_1: { from: FACELIFT_V9_1_DEFAULT_FROM, to: FACELIFT_V9_1_DEFAULT_TO },
-};
-
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.homePage.pageTitle', {
   defaultMessage: 'Entity analytics',
 });
 
-const MANAGEMENT_BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.homePage.managementButtonLabel',
-  { defaultMessage: 'Management' }
-);
-
 const SETTINGS_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.homePage.settingsButtonLabel',
   { defaultMessage: 'Settings' }
-);
-
-const SAVE_VIEW_BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.homePage.saveViewButtonLabel',
-  { defaultMessage: 'Save view' }
-);
-
-const CREATE_WATCHLIST_BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.homePage.createWatchlistButtonLabel',
-  { defaultMessage: 'Create watchlist' }
 );
 
 const ADD_INTEGRATIONS_BUTTON_LABEL = i18n.translate(
@@ -168,22 +113,16 @@ const EntityAnalyticsHomePageContent = () => {
   const { euiTheme } = useEuiTheme();
   const spaceId = useSpaceId();
   const { dataView, isLoading: dataViewLoading } = useEntityStoreDataView(spaceId);
-  const [faceliftVersion] = useActiveFaceliftVersion();
   const { chrome, http } = useKibana().services;
   const uebaIntegrationsHref = http.basePath.prepend(UEBA_INTEGRATIONS_PATH);
 
   /**
    * Native AppHeader overflow includes Feedback only when Chrome has a handler
-   * (the feedback plugin registers one after telemetry opt-in). Register one on
-   * v.8+ so the three-dots menu matches Workflows: Add integrations, Feedback,
+   * (the feedback plugin registers one after telemetry opt-in). Register one so
+   * the three-dots menu matches Workflows: Add integrations, Feedback,
    * Documentation.
    */
-  useEffect(() => {
-    if (!isFaceliftV8OrLater(faceliftVersion)) {
-      return;
-    }
-    return chrome.next.registerFeedbackHandler(() => undefined);
-  }, [chrome, faceliftVersion]);
+  useEffect(() => chrome.next.registerFeedbackHandler(() => undefined), [chrome]);
 
   // Only subscribe to `search` rather than the whole `location` object so this
   // component doesn't re-render (and re-create callbacks) on unrelated URL
@@ -191,9 +130,7 @@ const EntityAnalyticsHomePageContent = () => {
   const { search } = useLocation();
   const history = useHistory();
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
-  const { navigateTo } = useNavigateTo();
 
-  /** v.2+ AppHeader Management → Entity Risk Score tab. */
   const managementHref = useMemo(
     () =>
       getSecuritySolutionUrl({
@@ -202,25 +139,6 @@ const EntityAnalyticsHomePageContent = () => {
       }),
     [getSecuritySolutionUrl]
   );
-
-  /** v.1 header gear still deep-links to Watchlists settings. */
-  const watchlistsManagementHref = useMemo(
-    () =>
-      getSecuritySolutionUrl({
-        deepLinkId: SecurityPageName.entityAnalyticsManagement,
-        path: `/${TabId.Watchlists}`,
-      }),
-    [getSecuritySolutionUrl]
-  );
-
-  const openCreateWatchlist = useCallback(() => {
-    try {
-      sessionStorage.setItem(OPEN_CREATE_WATCHLIST_STORAGE_KEY, 'true');
-    } catch {
-      // Ignore quota / private-mode failures; navigation still lands on Watchlists.
-    }
-    navigateTo({ url: watchlistsManagementHref });
-  }, [navigateTo, watchlistsManagementHref]);
 
   const selectedWatchlistId = useMemo(() => {
     const params = new URLSearchParams(search);
@@ -247,101 +165,45 @@ const EntityAnalyticsHomePageContent = () => {
     [history]
   );
 
-  const faceliftAppMenu = useMemo<AppHeaderMenu>(() => {
-    // v.8+: Add integrations then Settings in the overflow menu so the native
-    // static items (Feedback, Documentation) render below a divider.
-    if (isFaceliftV8OrLater(faceliftVersion)) {
-      return {
-        items: [
-          {
-            id: 'addIntegrations',
-            label: ADD_INTEGRATIONS_BUTTON_LABEL,
-            iconType: 'indexOpen' as const,
-            href: uebaIntegrationsHref,
-            overflow: true,
-            testId: 'eaFaceliftAddIntegrationsButton',
-          },
-          {
-            id: 'entityAnalyticsSettings',
-            label: SETTINGS_BUTTON_LABEL,
-            iconType: 'gear' as const,
-            href: managementHref,
-            overflow: true,
-            testId: 'eaFaceliftSettingsButton',
-          },
-          // Last caller item, so it sits directly above the native Feedback item.
-          ...(faceliftVersion === 'v9' || faceliftVersion === 'v9_1'
-            ? [
-                {
-                  id: 'entityAnalyticsProductTour',
-                  label: PRODUCT_TOUR_BUTTON_LABEL,
-                  iconType: 'bulb' as const,
-                  run:
-                    faceliftVersion === 'v9_1'
-                      ? requestProductTourStartV9_1
-                      : requestProductTourStart,
-                  overflow: true,
-                  testId: 'eaFaceliftProductTourMenuItem',
-                },
-              ]
-            : []),
-        ],
-      };
-    }
-
-    const items = [
-      {
-        id: 'entityAnalyticsManagement',
-        label: MANAGEMENT_BUTTON_LABEL,
-        iconType: 'gear' as const,
-        href: managementHref,
-        testId: 'eaFaceliftManagementButton',
-      },
-    ];
-
-    // Save view is v.2 only; Create watchlist is the v.5–v.7 primary header action.
-    if (faceliftVersion === 'v2') {
-      return {
-        primaryActionItem: {
-          id: 'entityAnalyticsSaveView',
-          label: SAVE_VIEW_BUTTON_LABEL,
-          iconType: 'save',
-          // Prototype: no-op until save-view is wired.
-          run: () => undefined,
-          testId: 'eaFaceliftSaveViewButton',
+  // Add integrations then Settings in the overflow menu so the native static
+  // items (Feedback, Documentation) render below a divider.
+  const faceliftAppMenu = useMemo<AppHeaderMenu>(
+    () => ({
+      items: [
+        {
+          id: 'addIntegrations',
+          label: ADD_INTEGRATIONS_BUTTON_LABEL,
+          iconType: 'indexOpen' as const,
+          href: uebaIntegrationsHref,
+          overflow: true,
+          testId: 'eaFaceliftAddIntegrationsButton',
         },
-        items,
-      };
-    }
-
-    if (faceliftVersion === 'v5' || faceliftVersion === 'v6' || faceliftVersion === 'v7') {
-      return {
-        primaryActionItem: {
-          id: 'entityAnalyticsCreateWatchlist',
-          label: CREATE_WATCHLIST_BUTTON_LABEL,
-          iconType: 'plusCircle',
-          href: watchlistsManagementHref,
-          run: openCreateWatchlist,
-          testId: 'eaFaceliftCreateWatchlistButton',
+        {
+          id: 'entityAnalyticsSettings',
+          label: SETTINGS_BUTTON_LABEL,
+          iconType: 'gear' as const,
+          href: managementHref,
+          overflow: true,
+          testId: 'eaFaceliftSettingsButton',
         },
-        items,
-      };
-    }
+        // Last caller item, so it sits directly above the native Feedback item.
+        {
+          id: 'entityAnalyticsProductTour',
+          label: PRODUCT_TOUR_BUTTON_LABEL,
+          iconType: 'bulb' as const,
+          run: requestProductTourStart,
+          overflow: true,
+          testId: 'eaFaceliftProductTourMenuItem',
+        },
+      ],
+    }),
+    [managementHref, uebaIntegrationsHref]
+  );
 
-    return { items };
-  }, [
-    faceliftVersion,
-    managementHref,
-    openCreateWatchlist,
-    uebaIntegrationsHref,
-    watchlistsManagementHref,
-  ]);
-
-  // Design prototype: v.6+ open on “Last 30 days”; older versions keep “Today”.
+  // Design prototype: open on “Last 30 days” instead of the app-wide “Today”.
   useEffect(() => {
-    const range = FACELIFT_DEFAULT_RANGES[faceliftVersion];
-    const fromStr = range?.from ?? DEFAULT_FROM;
-    const toStr = range?.to ?? DEFAULT_TO;
+    const fromStr = FACELIFT_V9_1_DEFAULT_FROM;
+    const toStr = FACELIFT_V9_1_DEFAULT_TO;
     const from = dateMath.parse(fromStr)?.toISOString();
     const to = dateMath.parse(toStr, { roundUp: true })?.toISOString();
     if (!from || !to) {
@@ -356,7 +218,7 @@ const EntityAnalyticsHomePageContent = () => {
         to,
       })
     );
-  }, [dispatch, faceliftVersion]);
+  }, [dispatch]);
 
   // Design prototype: always render the facelift mock UI (do not gate on Entity Store).
 
@@ -366,91 +228,34 @@ const EntityAnalyticsHomePageContent = () => {
 
   return (
     <>
-      {isFaceliftAppHeaderVersion(faceliftVersion) ? (
-        <Global
-          styles={css`
-            /* AppHeader layout: let header go edge-to-edge; content owns its own inset. */
-            [data-test-subj='pageContainer'].securityPageWrapper {
-              padding-inline: 0 !important;
-            }
-            [data-test-subj='pageContainer'].securityPageWrapper
-              > [class*='euiPageSection__content'] {
-              padding-block: 0 !important;
-            }
-          `}
-        />
-      ) : null}
+      <Global
+        styles={css`
+          /* AppHeader layout: let header go edge-to-edge; content owns its own inset. */
+          [data-test-subj='pageContainer'].securityPageWrapper {
+            padding-inline: 0 !important;
+          }
+          [data-test-subj='pageContainer'].securityPageWrapper
+            > [class*='euiPageSection__content'] {
+            padding-block: 0 !important;
+          }
+        `}
+      />
 
-      {faceliftVersion === 'v1' ? (
-        <FiltersGlobal>
-          <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
-        </FiltersGlobal>
-      ) : null}
+      <AppHeader title={PAGE_TITLE} menu={faceliftAppMenu} docLink={ENTITY_ANALYTICS_DOC_LINK} />
 
-      {isFaceliftAppHeaderVersion(faceliftVersion) ? (
-        <AppHeader
-          title={PAGE_TITLE}
-          menu={faceliftAppMenu}
-          {...(isFaceliftV8OrLater(faceliftVersion) ? { docLink: ENTITY_ANALYTICS_DOC_LINK } : {})}
-        />
-      ) : (
-        <HeaderPage
-          title={PAGE_TITLE}
-          border
-          subtitle={<FaceliftPageDescription version={faceliftVersion} />}
-          rightSideItems={[
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={i18n.translate(
-                    'xpack.securitySolution.entityAnalytics.homePage.watchlistsSettingsButtonAriaLabel',
-                    { defaultMessage: 'Watchlists settings' }
-                  )}
-                  disableScreenReaderOutput
-                >
-                  <EuiButtonIcon
-                    display="base"
-                    iconType="gear"
-                    size="m"
-                    aria-label={i18n.translate(
-                      'xpack.securitySolution.entityAnalytics.homePage.watchlistsSettingsButtonAriaLabel',
-                      { defaultMessage: 'Watchlists settings' }
-                    )}
-                    href={watchlistsManagementHref}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            </EuiFlexGroup>,
-          ]}
-        />
-      )}
-
-      {isFaceliftAppHeaderVersion(faceliftVersion) ? (
-        <div
-          css={css`
-            padding-inline: ${euiTheme.size.base}; /* 16px */
-            padding-block-start: ${euiTheme.size.base}; /* 16px above KQL */
-          `}
-        >
-          <FaceliftHome
-            key={faceliftVersion}
-            version={faceliftVersion}
-            dataView={dataView}
-            dataViewLoading={dataViewLoading}
-            selectedWatchlistId={selectedWatchlistId}
-            onWatchlistChange={setSelectedWatchlist}
-          />
-        </div>
-      ) : (
+      <div
+        css={css`
+          padding-inline: ${euiTheme.size.base}; /* 16px */
+          padding-block-start: ${euiTheme.size.base}; /* 16px above KQL */
+        `}
+      >
         <FaceliftHome
-          key={faceliftVersion}
-          version={faceliftVersion}
           dataView={dataView}
           dataViewLoading={dataViewLoading}
           selectedWatchlistId={selectedWatchlistId}
           onWatchlistChange={setSelectedWatchlist}
         />
-      )}
+      </div>
     </>
   );
 };

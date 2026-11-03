@@ -24,7 +24,7 @@ import {
   ADD_TO_CASE_LABEL,
   ADD_TO_CASE_TEST_ID,
   useFaceliftAddToCase,
-} from '../../../../entity_analytics/components/home/facelift/v8/use_facelift_add_to_case';
+} from '../../../../entity_analytics/components/home/facelift/v9_1/use_facelift_add_to_case';
 import { useEntityCasePermissions } from './use_case_permission';
 
 /**

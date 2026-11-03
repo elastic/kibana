@@ -40,7 +40,6 @@ import {
 } from './translations';
 import { RESOLUTION_GROUP_TAB_CONTENT_TEST_ID } from './test_ids';
 import { RiskScoreCell } from '../home/entities_table/risk_score_cell';
-import { useActiveFaceliftVersion } from '../home/facelift/active_version';
 
 interface ResolutionGroupTabProps {
   entityId: string;
@@ -92,17 +91,8 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
   const resolutionRiskScore = hasGroup
     ? getResolutionRiskScore(group.target) ?? getEntityRiskScore(group.target)
     : undefined;
-  const [faceliftVersion] = useActiveFaceliftVersion();
-  /** v.3+ matches the flyout Resolution overview: raw records only, no primary row. */
-  const isFaceliftAliasesOnly =
-    faceliftVersion === 'v3' ||
-    faceliftVersion === 'v4' ||
-    faceliftVersion === 'v5' ||
-    faceliftVersion === 'v6' ||
-    faceliftVersion === 'v7' ||
-    faceliftVersion === 'v8' ||
-    faceliftVersion === 'v9' ||
-    faceliftVersion === 'v9_1';
+  /** Facelift matches the flyout Resolution overview: raw records only, no primary row. */
+  const isFaceliftAliasesOnly = true;
   const riskScoreLabel = isFaceliftAliasesOnly
     ? RESOLVED_ENTITY_RISK_SCORE_LABEL
     : GROUP_RISK_SCORE_LABEL;
