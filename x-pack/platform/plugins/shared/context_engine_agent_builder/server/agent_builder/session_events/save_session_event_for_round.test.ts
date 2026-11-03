@@ -6,11 +6,25 @@
  */
 
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { AfterExecutionHookContext } from '@kbn/agent-builder-server';
 import type { CoreStart } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { buildRound } from './build_round_transcript.test';
 import { saveSessionEventForRound } from './save_session_event_for_round';
+
+const buildRound = (overrides: Partial<ConversationRound> = {}): ConversationRound =>
+  ({
+    id: 'round-1',
+    status: ConversationRoundStatus.completed,
+    input: { message: 'What does the user prefer?' },
+    steps: [],
+    response: { message: 'Dark mode.' },
+    started_at: '2026-01-01T00:00:00.000Z',
+    time_to_first_token: 1,
+    time_to_last_token: 2,
+    model_usage: { connector_id: 'c-1', model: 'm', input_tokens: 0, output_tokens: 0 },
+    ...overrides,
+  } as ConversationRound);
 
 const buildContext = (
   overrides: Partial<AfterExecutionHookContext> = {}
@@ -49,10 +63,11 @@ describe('saveSessionEventForRound', () => {
     return { run, save, logger, contextEngine };
   };
 
-  it('saves the completed round as a session event scoped to the conversation, user, and agent', async () => {
+  it('saves the round verbatim as a session event scoped to the conversation, user, and agent', async () => {
     const { run, save } = setup();
+    const round = buildRound();
 
-    await run(buildContext());
+    await run(buildContext({ round }));
 
     expect(save).toHaveBeenCalledWith({
       session_id: 'conv-1',
@@ -60,8 +75,9 @@ describe('saveSessionEventForRound', () => {
       agent_id: 'elastic-ai-agent',
       round_id: 'round-1',
       space: 'default',
-      transcript: 'user: What does the user prefer?\nagent: Dark mode.',
+      transcript: JSON.stringify(round),
     });
+    expect(JSON.parse(save.mock.calls[0][0].transcript)).toEqual(round);
   });
 
   it('skips read-only runs, rounds without a conversation, and incomplete rounds', async () => {
@@ -83,12 +99,23 @@ describe('saveSessionEventForRound', () => {
     expect(save).not.toHaveBeenCalled();
   });
 
-  it('skips without an authenticated user', async () => {
+  it('prefers the round author over the request user', async () => {
     const { run, save } = setup({ user: null });
+
+    await run(
+      buildContext({ round: buildRound({ author: { id: 'u-123', username: 'slack-kathleen' } }) })
+    );
+
+    expect(save).toHaveBeenCalledWith(expect.objectContaining({ user_id: 'slack-kathleen' }));
+  });
+
+  it('skips with a warning without an author or an authenticated user', async () => {
+    const { run, save, logger } = setup({ user: null });
 
     await run(buildContext());
 
     expect(save).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('no author on the round'));
   });
 
   it('logs a warning and swallows save failures', async () => {
