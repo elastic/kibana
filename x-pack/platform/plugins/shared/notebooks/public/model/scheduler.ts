@@ -26,6 +26,7 @@ import type {
   RunQuery,
   RunQueryArgs,
   RunQueryResult,
+  StaleReason,
 } from './types';
 
 export interface SchedulerDeps {
@@ -55,6 +56,7 @@ const RUNTIME_FIELDS = [
   'status',
   'output',
   'error',
+  'staleReason',
   'lastRunAt',
   'durationMs',
   'memoKey',
@@ -63,7 +65,11 @@ const RUNTIME_FIELDS = [
 const isSameRuntime = (a: CellRuntime, b: CellRuntime): boolean =>
   RUNTIME_FIELDS.every((field) => a[field] === b[field]);
 
-const withoutError = ({ error: _error, ...runtime }: CellRuntime): CellRuntime => runtime;
+const withoutStatusDetails = ({
+  error: _error,
+  staleReason: _staleReason,
+  ...runtime
+}: CellRuntime): CellRuntime => runtime;
 
 const isMemoHit = (runtime: CellRuntime, memoKey: string, forced: boolean): boolean =>
   !forced && runtime.output !== undefined && runtime.memoKey === memoKey;
@@ -217,7 +223,7 @@ export class NotebookScheduler {
     const validationError = this.graph.errors.get(id);
     if (validationError) {
       this.publish(id, {
-        ...withoutError(this.runtime(id)),
+        ...withoutStatusDetails(this.runtime(id)),
         status: 'error',
         error: validationError,
       });
@@ -229,7 +235,7 @@ export class NotebookScheduler {
       return;
     }
     if (parentStatuses.includes('stale')) {
-      this.setStatus(id, 'stale');
+      this.markStale(id, 'upstream');
       return;
     }
 
@@ -253,7 +259,7 @@ export class NotebookScheduler {
       return;
     }
     if (this.editedCells.has(id)) {
-      this.setStatus(id, 'stale');
+      this.markStale(id, 'edited');
       return;
     }
     const params = buildQueryParams(query, this.parentOutputs(id));
@@ -263,7 +269,7 @@ export class NotebookScheduler {
       return;
     }
     if (runMode === 'manual' && !forced) {
-      this.setStatus(id, 'stale');
+      this.markStale(id, 'manual');
       return;
     }
     this.setStatus(id, 'running');
@@ -290,7 +296,7 @@ export class NotebookScheduler {
       return;
     }
     if (runMode === 'manual' && !forced) {
-      this.setStatus(id, 'stale');
+      this.markStale(id, 'manual');
       return;
     }
     this.publish(id, { status: 'done', output: sourceOutput, lastRunAt: this.now().getTime() });
@@ -323,7 +329,7 @@ export class NotebookScheduler {
     if (previous && isMemoHit(runtime, memoKey, forced)) {
       const output =
         objectHash(previous.params) === objectHash(params) ? previous : { ...previous, params };
-      this.publish(id, { ...withoutError(runtime), status: 'done', output });
+      this.publish(id, { ...withoutStatusDetails(runtime), status: 'done', output });
       return;
     }
 
@@ -380,7 +386,11 @@ export class NotebookScheduler {
   }
 
   private setStatus(id: string, status: CellStatus): void {
-    this.publish(id, { ...withoutError(this.runtime(id)), status });
+    this.publish(id, { ...withoutStatusDetails(this.runtime(id)), status });
+  }
+
+  private markStale(id: string, staleReason: StaleReason): void {
+    this.publish(id, { ...withoutStatusDetails(this.runtime(id)), status: 'stale', staleReason });
   }
 
   private publish(id: string, runtime: CellRuntime): void {

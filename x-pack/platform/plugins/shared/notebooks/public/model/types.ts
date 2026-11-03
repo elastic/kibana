@@ -10,6 +10,9 @@ import type { TimeRangeValue } from '../../common/types';
 
 export type CellStatus = 'idle' | 'stale' | 'running' | 'done' | 'error' | 'blocked';
 
+/** Why a cell is `stale`: an unrun edit, manual run mode, or a stale parent. */
+export type StaleReason = 'edited' | 'manual' | 'upstream';
+
 /** A value bound to a named ES|QL param; `null` marks an empty input and is sent as JSON null. */
 export type ParamValue = string | number | null;
 
@@ -29,6 +32,7 @@ export interface CellRuntime {
   status: CellStatus;
   output?: CellOutput;
   error?: string;
+  staleReason?: StaleReason;
   lastRunAt?: number;
   durationMs?: number;
   memoKey?: string;

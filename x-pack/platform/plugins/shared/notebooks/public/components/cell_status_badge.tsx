@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { CellRuntime, CellStatus } from '../model/types';
+import type { CellRuntime, CellStatus, StaleReason } from '../model/types';
 
 const STATUS_BADGES: Record<CellStatus, { color: string; label: string }> = {
   idle: {
@@ -41,9 +41,28 @@ const BLOCKED_TOOLTIP = i18n.translate('xpack.notebook.status.blockedTooltip', {
   defaultMessage: 'An upstream cell has an error, so this cell did not run.',
 });
 
+const STALE_TOOLTIPS: Record<StaleReason, string> = {
+  edited: i18n.translate('xpack.notebook.status.staleEditedTooltip', {
+    defaultMessage: 'The query was edited but not run. Run the cell to update its results.',
+  }),
+  manual: i18n.translate('xpack.notebook.status.staleManualTooltip', {
+    defaultMessage:
+      'This cell is in manual run mode and its results may be out of date. Run the cell to update them.',
+  }),
+  upstream: i18n.translate('xpack.notebook.status.staleUpstreamTooltip', {
+    defaultMessage: 'An upstream cell is stale, so this cell is waiting for it to run.',
+  }),
+};
+
+const getTooltip = ({ status, error, staleReason }: CellRuntime): string | undefined => {
+  if (status === 'blocked') return BLOCKED_TOOLTIP;
+  if (status === 'stale' && staleReason) return STALE_TOOLTIPS[staleReason];
+  return error;
+};
+
 export const CellStatusBadge = ({ runtime }: { runtime: CellRuntime }) => {
   const { color, label } = STATUS_BADGES[runtime.status];
-  const tooltip = runtime.status === 'blocked' ? BLOCKED_TOOLTIP : runtime.error;
+  const tooltip = getTooltip(runtime);
   const badge = (
     <EuiBadge color={color} data-test-subj={`notebookCellStatus-${runtime.status}`}>
       {label}

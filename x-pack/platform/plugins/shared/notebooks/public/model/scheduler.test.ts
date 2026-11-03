@@ -210,8 +210,8 @@ describe('NotebookScheduler', () => {
       await env.open();
 
       expect(env.fake.calls).toHaveLength(0);
-      expect(env.runtime('q')).toEqual({ status: 'stale' });
-      expect(env.runtime('c')).toEqual({ status: 'stale' });
+      expect(env.runtime('q')).toEqual({ status: 'stale', staleReason: 'manual' });
+      expect(env.runtime('c')).toEqual({ status: 'stale', staleReason: 'upstream' });
     });
 
     it('leaves a blank query and its chart idle without running anything', async () => {
@@ -510,8 +510,8 @@ describe('NotebookScheduler', () => {
       env.scheduler.markEdited('q', true);
       await env.scheduler.whenIdle();
 
-      expect(env.runtime('q').status).toBe('stale');
-      expect(env.runtime('c').status).toBe('stale');
+      expect(env.runtime('q')).toMatchObject({ status: 'stale', staleReason: 'edited' });
+      expect(env.runtime('c')).toMatchObject({ status: 'stale', staleReason: 'upstream' });
       expect(env.output('q')).toBe(qOutput);
       expect(env.output('c')).toBe(qOutput);
 
@@ -521,6 +521,8 @@ describe('NotebookScheduler', () => {
       expect(env.fake.calls.map(({ query }) => query)).toEqual(['FROM logs', 'FROM metrics']);
       expect(env.runtime('q').status).toBe('done');
       expect(env.runtime('c').status).toBe('done');
+      expect(env.runtime('q').staleReason).toBeUndefined();
+      expect(env.runtime('c').staleReason).toBeUndefined();
     });
 
     it('returns an edited query to done without running when the edit is reverted', async () => {
@@ -568,8 +570,8 @@ describe('NotebookScheduler', () => {
       env.store.setInputValue('os', { kind: 'dropdown', value: 'win 7' });
       await env.scheduler.whenIdle();
 
-      expect(env.runtime('q').status).toBe('stale');
-      expect(env.runtime('c').status).toBe('stale');
+      expect(env.runtime('q')).toMatchObject({ status: 'stale', staleReason: 'manual' });
+      expect(env.runtime('c')).toMatchObject({ status: 'stale', staleReason: 'upstream' });
       expect(env.output('q')).toBe(qOutput);
       expect(env.output('c')).toBe(qOutput);
       expect(env.fake.callsFor(query)).toHaveLength(1);
@@ -606,7 +608,7 @@ describe('NotebookScheduler', () => {
     it('keeps a manual chart stale until it is run', async () => {
       const env = track(setup([esql('q', 'FROM logs'), chart('c', 'q', { runMode: 'manual' })]));
       await env.open();
-      expect(env.runtime('c')).toEqual({ status: 'stale' });
+      expect(env.runtime('c')).toEqual({ status: 'stale', staleReason: 'manual' });
 
       await env.scheduler.runCell('c');
       expect(env.runtime('c').status).toBe('done');
