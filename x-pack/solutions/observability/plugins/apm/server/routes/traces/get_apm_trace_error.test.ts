@@ -19,7 +19,8 @@ function createErrorHit(fields: Record<string, unknown[]>, id = 'doc-id') {
     _id: id,
     _index: 'apm-error',
     _source: {},
-    fields,
+    // `_id` is read from `fields` by `requireFields`, not from the top-level hit
+    fields: { _id: [id], ...fields },
   };
 }
 
