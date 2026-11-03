@@ -93,7 +93,10 @@ for (const [name, family] of Object.entries(FAMILIES)) {
     a.manifest.plugin.id.localeCompare(b.manifest.plugin.id)
   )) {
     const id = p.manifest.plugin.id;
-    const hasEntry = fs.existsSync(path.join(p.directory, 'server/tasks/index.ts'));
+    // A tasks entry is declared in the manifest; a plugin's own `server/tasks` folder is not one.
+    const hasEntry =
+      Boolean(p.manifest.plugin.tasks) &&
+      fs.existsSync(path.join(p.directory, 'server/tasks/index.ts'));
     const inFamily = listed.has(id);
     let status = 'no tasks entry';
     if (hasEntry) status = inFamily ? 'ok' : 'has tasks entry, not in family';
