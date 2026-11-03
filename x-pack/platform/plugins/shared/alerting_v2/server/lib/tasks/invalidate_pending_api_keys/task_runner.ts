@@ -13,7 +13,7 @@ import type { Logger, PluginInitializerContext } from '@kbn/core/server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
-import { runInvalidate } from '@kbn/task-manager-plugin/server';
+import { runInvalidate, type ApiKeyInvalidationTaskState } from '@kbn/response-ops-api-keys';
 import { inject, injectable } from 'inversify';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import {
@@ -24,7 +24,6 @@ import { ApiKeyServiceSavedObjectsClientToken } from '../../services/api_key_ser
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
 import type { PluginConfig } from '../../../config';
 import type { AlertingServerStartDependencies } from '../../../types';
-import type { LatestTaskStateSchema } from './task_state';
 
 type TaskRunParams = Pick<RunContext, 'taskInstance' | 'signal'>;
 
@@ -49,7 +48,7 @@ export class ApiKeyInvalidationTaskRunner {
   }
 
   public async run({ taskInstance }: TaskRunParams): Promise<RunResult> {
-    const state = taskInstance.state as LatestTaskStateSchema;
+    const state = taskInstance.state as ApiKeyInvalidationTaskState;
     const interval = this.config.invalidateApiKeysTask.interval;
     const removalDelay = this.config.invalidateApiKeysTask.removalDelay;
     let totalInvalidated = 0;
@@ -61,6 +60,7 @@ export class ApiKeyInvalidationTaskRunner {
         invalidateUiamApiKeyFn: this.securityCore.authc.apiKeys.uiam?.invalidate,
         logger: this.coreLogger,
         missingApiKeyRetries,
+        pluginTag: 'alerting_v2',
         removalDelay,
         savedObjectsClient: this.savedObjectsClient,
         savedObjectType: API_KEY_PENDING_INVALIDATION_TYPE,
@@ -69,7 +69,7 @@ export class ApiKeyInvalidationTaskRunner {
       totalInvalidated = result.totalInvalidated;
       missingApiKeyRetries = result.missingApiKeyRetries;
 
-      const updatedState: LatestTaskStateSchema = {
+      const updatedState: ApiKeyInvalidationTaskState = {
         runs: (state.runs || 0) + 1,
         total_invalidated: totalInvalidated,
         missing_api_key_retries: missingApiKeyRetries,
@@ -85,7 +85,7 @@ export class ApiKeyInvalidationTaskRunner {
         code: ALERTING_LOG_CODES.TASKS_API_KEY_INVALIDATION_RUN_FAILED,
       });
 
-      const updatedState: LatestTaskStateSchema = {
+      const updatedState: ApiKeyInvalidationTaskState = {
         runs: (state.runs || 0) + 1,
         total_invalidated: totalInvalidated,
         missing_api_key_retries: missingApiKeyRetries,

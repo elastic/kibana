@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { emptyApiKeyInvalidationTaskState } from '@kbn/response-ops-api-keys';
 import type { AlertingServerStartDependencies } from '../../../types';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
-import { emptyState } from './task_state';
 import { INVALIDATE_API_KEYS_TASK_ID, INVALIDATE_API_KEYS_TASK_TYPE } from './task_definition';
 
 export async function scheduleApiKeyInvalidationTask({
@@ -25,7 +25,7 @@ export async function scheduleApiKeyInvalidationTask({
       id: INVALIDATE_API_KEYS_TASK_ID,
       taskType: INVALIDATE_API_KEYS_TASK_TYPE,
       schedule: { interval },
-      state: emptyState,
+      state: emptyApiKeyInvalidationTaskState,
       params: {},
     });
   } catch (error) {
