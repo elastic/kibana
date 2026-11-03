@@ -453,8 +453,7 @@ export const createSkillAttachmentDefinition = ({
             title: i18n.translate(
               'xpack.agentBuilderPlatform.attachments.skill.addToAgentErrorToast',
               {
-                defaultMessage:
-                  'Skill "{skillId}" created, but could not be added to this agent',
+                defaultMessage: 'Skill "{skillId}" created, but could not be added to this agent',
                 values: { skillId: response.id },
               }
             ),
