@@ -8,8 +8,8 @@
  */
 
 import INVESTIGATION_COMPLETED_YAML from './bound_investigation_completed.yaml';
+import { renderRunAs } from '../../render_bound_yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../types';
-import { renderRunAs } from '../nightshift_investigations/render_bound_yaml';
 
 export const NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW_ID =
   'system-nightshift-investigation-completed-bound';

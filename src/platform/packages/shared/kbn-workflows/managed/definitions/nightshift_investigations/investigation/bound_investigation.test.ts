@@ -15,7 +15,7 @@ import {
   NIGHTSHIFT_INVESTIGATIONS_TRIGGER_SOURCE,
 } from './bound_investigation';
 import { WorkflowSchema } from '../../../../spec/schema';
-import { SERVICE_ACCOUNT_ID_TOKEN } from '../render_bound_yaml';
+import { SERVICE_ACCOUNT_ID_TOKEN } from '../../../render_bound_yaml';
 
 describe('Nightshift bound investigation workflow', () => {
   const render = (serviceAccountId: string) =>

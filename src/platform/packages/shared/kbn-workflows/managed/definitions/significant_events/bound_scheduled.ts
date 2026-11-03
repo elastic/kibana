@@ -9,8 +9,8 @@
 
 import SCHEDULED_DETECTION_YAML from './bound_scheduled_detection.yaml';
 import SCHEDULED_REVIEW_YAML from './bound_scheduled_review.yaml';
+import { renderRunAs } from '../../render_bound_yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../types';
-import { renderRunAs } from '../nightshift_investigations/render_bound_yaml';
 
 export const NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID =
   'system-nightshift-scheduled-detection-bound';

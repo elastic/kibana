@@ -8,8 +8,8 @@
  */
 
 import BOUND_ONBOARDING_WORKFLOW_YAML from './bound_onboarding.yaml';
+import { renderRunAs } from '../../../render_bound_yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../../types';
-import { renderRunAs } from '../../nightshift_investigations/render_bound_yaml';
 
 export const NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID = 'system-sources-ki-onboarding-bound';
 

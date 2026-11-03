@@ -8,8 +8,8 @@
  */
 
 import CLEANUP_YAML from './bound_cleanup.yaml';
+import { renderRunAs } from '../../render_bound_yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../types';
-import { renderRunAs } from '../nightshift_investigations/render_bound_yaml';
 
 export const NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID = 'system-nightshift-cleanup-bound';
 
