@@ -65,7 +65,7 @@ const createDocuments = (): FixtureDocument[] => {
           alert: {
             rule: {
               name: 'AD2 encoded PowerShell fixture',
-              uuid: `${attackDiscoveryFixtureMarker}-rule`,
+              uuid: `${attackDiscoveryFixtureMarker}-powershell-rule`,
             },
             severity: 'high',
             reason: `Encoded PowerShell execution marker ${attackDiscoveryFixtureMarker}`,
@@ -91,7 +91,7 @@ const createDocuments = (): FixtureDocument[] => {
           alert: {
             rule: {
               name: 'AD2 LSASS access fixture',
-              uuid: `${attackDiscoveryFixtureMarker}-rule`,
+              uuid: `${attackDiscoveryFixtureMarker}-lsass-rule`,
             },
             severity: 'critical',
             reason: `LSASS access marker ${attackDiscoveryFixtureMarker}`,
