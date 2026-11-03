@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** A rate limit: a burst of tokens, then one more per refill interval (D14). */
+/** A rate limit: a burst of tokens, then one more per refill interval. */
 export class ReportTokens {
   private tokens: number;
   private lastRefillAt?: number;
