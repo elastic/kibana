@@ -7,7 +7,7 @@
 
 import type { EntityInventoryTypeDefinition } from '../../inventory_api_types';
 import { typesFixture as types } from './__fixtures__/types';
-import { getCategories, getFilterControls, normalizeSelection } from './get_filter_controls';
+import { getCategories, getFilterControls, getTypesInScope } from './get_filter_controls';
 
 describe('getCategories', () => {
   it('returns each category once, in order of appearance', () => {
@@ -21,36 +21,72 @@ describe('getCategories', () => {
   });
 });
 
+describe('getTypesInScope', () => {
+  it('is empty when nothing is selected', () => {
+    expect(getTypesInScope({ types })).toEqual([]);
+  });
+
+  it('is the types of the category', () => {
+    expect(
+      getTypesInScope({ types, selectedCategory: 'kubernetes' }).map(({ type }) => type)
+    ).toEqual(['k8s.deployment', 'k8s.pod']);
+  });
+
+  it('is the selected type', () => {
+    expect(
+      getTypesInScope({ types, selectedCategory: 'kubernetes', selectedType: 'k8s.pod' }).map(
+        ({ type }) => type
+      )
+    ).toEqual(['k8s.pod']);
+  });
+
+  it('is empty for a selected type when there is no category', () => {
+    expect(getTypesInScope({ types, selectedType: 'k8s.pod' })).toEqual([]);
+  });
+
+  it('ignores a selected type that is outside the category', () => {
+    expect(getTypesInScope({ types, selectedCategory: 'hosts', selectedType: 'k8s.pod' })).toEqual(
+      []
+    );
+    expect(getTypesInScope({ types, pageCategory: 'hosts', selectedType: 'k8s.pod' })).toEqual([]);
+  });
+});
+
 describe('getFilterControls', () => {
   describe('All resources', () => {
     it('shows only the Category filter at first', () => {
       expect(getFilterControls({ types })).toEqual({
-        categoryFilter: ['hosts', 'kubernetes'],
-        attributeFilters: [],
+        categoryOptions: ['hosts', 'kubernetes'],
+        attributeNames: [],
       });
     });
 
-    it('shows the filters shared by the types of the selected category, and the Type filter', () => {
+    it('shows the filters of any type of the selected category, most shared first, and the Type filter', () => {
       expect(getFilterControls({ types, selectedCategory: 'kubernetes' })).toEqual({
-        categoryFilter: ['hosts', 'kubernetes'],
-        typeFilter: ['k8s.deployment', 'k8s.pod'],
-        attributeFilters: ['k8s.cluster.name', 'k8s.namespace.name'],
+        categoryOptions: ['hosts', 'kubernetes'],
+        typeOptions: ['k8s.deployment', 'k8s.pod'],
+        attributeNames: [
+          'k8s.cluster.name',
+          'k8s.namespace.name',
+          'cloud.provider',
+          'k8s.pod.phase',
+        ],
       });
     });
 
     it('does not show the Type filter for a category with a single type', () => {
-      expect(getFilterControls({ types, selectedCategory: 'hosts' }).typeFilter).toBe(undefined);
+      expect(getFilterControls({ types, selectedCategory: 'hosts' }).typeOptions).toBeUndefined();
     });
 
     it('keeps the Type filter once a type is selected', () => {
       expect(
         getFilterControls({ types, selectedCategory: 'kubernetes', selectedType: 'k8s.pod' })
-          .typeFilter
+          .typeOptions
       ).toEqual(['k8s.deployment', 'k8s.pod']);
     });
 
     it('shows the filters of a category with a single type', () => {
-      expect(getFilterControls({ types, selectedCategory: 'hosts' }).attributeFilters).toEqual([
+      expect(getFilterControls({ types, selectedCategory: 'hosts' }).attributeNames).toEqual([
         'os.type',
         'cloud.provider',
       ]);
@@ -59,29 +95,34 @@ describe('getFilterControls', () => {
     it('shows the filters of the selected type', () => {
       expect(
         getFilterControls({ types, selectedCategory: 'kubernetes', selectedType: 'k8s.pod' })
-          .attributeFilters
+          .attributeNames
       ).toEqual(['k8s.cluster.name', 'k8s.namespace.name', 'k8s.pod.phase']);
     });
   });
 
   describe('a page for a category with several types', () => {
     it('does not show the Category filter', () => {
-      expect(getFilterControls({ types, pageCategory: 'kubernetes' }).categoryFilter).toBe(
-        undefined
-      );
+      expect(
+        getFilterControls({ types, pageCategory: 'kubernetes' }).categoryOptions
+      ).toBeUndefined();
     });
 
-    it('shows the filters shared by its types, and the Type filter', () => {
+    it('shows the filters of any of its types, and the Type filter', () => {
       const filters = getFilterControls({ types, pageCategory: 'kubernetes' });
 
-      expect(filters.attributeFilters).toEqual(['k8s.cluster.name', 'k8s.namespace.name']);
-      expect(filters.typeFilter).toEqual(['k8s.deployment', 'k8s.pod']);
+      expect(filters.attributeNames).toEqual([
+        'k8s.cluster.name',
+        'k8s.namespace.name',
+        'cloud.provider',
+        'k8s.pod.phase',
+      ]);
+      expect(filters.typeOptions).toEqual(['k8s.deployment', 'k8s.pod']);
     });
 
     it('shows the filters of the selected type', () => {
       expect(
         getFilterControls({ types, pageCategory: 'kubernetes', selectedType: 'k8s.deployment' })
-          .attributeFilters
+          .attributeNames
       ).toEqual(['k8s.cluster.name', 'k8s.namespace.name', 'cloud.provider']);
     });
   });
@@ -89,16 +130,14 @@ describe('getFilterControls', () => {
   describe('a page with a single type', () => {
     it('shows the filters of that type, and only the dimensions', () => {
       expect(getFilterControls({ types, pageCategory: 'hosts' })).toEqual({
-        categoryFilter: undefined,
-        attributeFilters: ['os.type', 'cloud.provider'],
+        categoryOptions: undefined,
+        attributeNames: ['os.type', 'cloud.provider'],
       });
     });
   });
 
   it('shows no attribute filter when the category has no type', () => {
-    expect(getFilterControls({ types, selectedCategory: 'databases' }).attributeFilters).toEqual(
-      []
-    );
+    expect(getFilterControls({ types, selectedCategory: 'databases' }).attributeNames).toEqual([]);
   });
 
   it('shows the dimensions of a type without a category when it is selected as a category', () => {
@@ -112,13 +151,13 @@ describe('getFilterControls', () => {
     ];
 
     expect(getFilterControls({ types: withService, selectedCategory: 'service' })).toEqual({
-      categoryFilter: ['hosts', 'kubernetes', 'service'],
-      typeFilter: undefined,
-      attributeFilters: ['service.environment'],
+      categoryOptions: ['hosts', 'kubernetes', 'service'],
+      typeOptions: undefined,
+      attributeNames: ['service.environment'],
     });
   });
 
-  it('shows no attribute filter when the types of a category share no dimension', () => {
+  it('shows the filters of every type even when the types share none', () => {
     const unrelated: EntityInventoryTypeDefinition[] = [
       {
         type: 'a',
@@ -135,77 +174,9 @@ describe('getFilterControls', () => {
     ];
 
     expect(getFilterControls({ types: unrelated, selectedCategory: 'group' })).toEqual({
-      categoryFilter: ['group'],
-      typeFilter: ['a', 'b'],
-      attributeFilters: [],
+      categoryOptions: ['group'],
+      typeOptions: ['a', 'b'],
+      attributeNames: ['a.name', 'b.name'],
     });
-  });
-});
-
-describe('normalizeSelection', () => {
-  it('clears the type when it does not belong to the category', () => {
-    expect(
-      normalizeSelection({
-        types,
-        selection: { category: 'hosts', type: 'k8s.pod', attributes: {} },
-      })
-    ).toEqual({ category: 'hosts', type: undefined, attributes: {} });
-  });
-
-  it('clears the type and the attributes when the category is cleared', () => {
-    expect(
-      normalizeSelection({
-        types,
-        selection: { type: 'k8s.pod', attributes: { 'k8s.pod.phase': ['running'] } },
-      })
-    ).toEqual({ category: undefined, type: undefined, attributes: {} });
-  });
-
-  it('keeps the attributes that are still shown and clears the rest when the type changes', () => {
-    expect(
-      normalizeSelection({
-        types,
-        selection: {
-          category: 'kubernetes',
-          type: 'k8s.deployment',
-          attributes: { 'k8s.cluster.name': ['prod-us'], 'k8s.pod.phase': ['running'] },
-        },
-      })
-    ).toEqual({
-      category: 'kubernetes',
-      type: 'k8s.deployment',
-      attributes: { 'k8s.cluster.name': ['prod-us'] },
-    });
-  });
-
-  it('keeps the attributes shared by the types of the category once the type is cleared', () => {
-    expect(
-      normalizeSelection({
-        types,
-        selection: {
-          category: 'kubernetes',
-          attributes: { 'k8s.namespace.name': ['checkout'], 'k8s.pod.phase': ['running'] },
-        },
-      }).attributes
-    ).toEqual({ 'k8s.namespace.name': ['checkout'] });
-  });
-
-  it('drops a category that does not exist', () => {
-    expect(
-      normalizeSelection({
-        types,
-        selection: { category: 'databases', attributes: {} },
-      }).category
-    ).toBe(undefined);
-  });
-
-  it('ignores the selected category on a page that is for a category', () => {
-    expect(
-      normalizeSelection({
-        types,
-        pageCategory: 'hosts',
-        selection: { category: 'kubernetes', type: 'host', attributes: { 'os.type': ['linux'] } },
-      })
-    ).toEqual({ category: undefined, type: 'host', attributes: { 'os.type': ['linux'] } });
   });
 });

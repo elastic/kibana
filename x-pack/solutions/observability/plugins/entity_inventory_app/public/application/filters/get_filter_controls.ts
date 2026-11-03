@@ -15,21 +15,15 @@ export interface FilterControlsParams {
 }
 
 export interface FilterControls {
-  categoryFilter?: string[];
-  typeFilter?: string[];
-  attributeFilters: string[];
-}
-
-export interface FilterControlsSelection {
-  category?: string;
-  type?: string;
-  attributes: Record<string, string[]>;
+  categoryOptions?: string[];
+  typeOptions?: string[];
+  attributeNames: string[];
 }
 
 const getCategoryOfType = ({ category, type }: EntityInventoryTypeDefinition): string =>
   category ?? type;
 
-const getTypesOfCategory = (
+export const getTypesOfCategory = (
   types: EntityInventoryTypeDefinition[],
   category?: string
 ): EntityInventoryTypeDefinition[] =>
@@ -42,9 +36,13 @@ export const getCategories = (types: EntityInventoryTypeDefinition[]): string[] 
 const getDimensionNames = ({ attributes }: EntityInventoryTypeDefinition): string[] =>
   attributes.filter(({ dimension }) => dimension).map(({ name }) => name);
 
-const getAttributeFilters = (typesInScope: EntityInventoryTypeDefinition[]): string[] => {
-  const [first, ...others] = typesInScope.map(getDimensionNames);
-  return first ? first.filter((name) => others.every((names) => names.includes(name))) : [];
+const getDimensionNamesInScope = (typesInScope: EntityInventoryTypeDefinition[]): string[] => {
+  const typeCountByName = new Map<string, number>();
+  typesInScope
+    .flatMap((type) => [...new Set(getDimensionNames(type))])
+    .forEach((name) => typeCountByName.set(name, (typeCountByName.get(name) ?? 0) + 1));
+
+  return [...typeCountByName.entries()].sort(([, a], [, b]) => b - a).map(([name]) => name);
 };
 
 export const getTypesInScope = ({
@@ -52,51 +50,21 @@ export const getTypesInScope = ({
   pageCategory,
   selectedCategory,
   selectedType,
-}: FilterControlsParams): EntityInventoryTypeDefinition[] =>
-  selectedType
-    ? types.filter(({ type }) => type === selectedType)
-    : getTypesOfCategory(types, pageCategory ?? selectedCategory);
+}: FilterControlsParams): EntityInventoryTypeDefinition[] => {
+  const typesOfCategory = getTypesOfCategory(types, pageCategory ?? selectedCategory);
+
+  return selectedType
+    ? typesOfCategory.filter(({ type }) => type === selectedType)
+    : typesOfCategory;
+};
 
 export const getFilterControls = (params: FilterControlsParams): FilterControls => {
   const { types, pageCategory, selectedCategory } = params;
   const typesOfCategory = getTypesOfCategory(types, pageCategory ?? selectedCategory);
 
   return {
-    categoryFilter: pageCategory ? undefined : getCategories(types),
-    typeFilter: typesOfCategory.length > 1 ? typesOfCategory.map(({ type }) => type) : undefined,
-    attributeFilters: getAttributeFilters(getTypesInScope(params)),
-  };
-};
-
-export const normalizeSelection = ({
-  types,
-  pageCategory,
-  selection,
-}: {
-  types: EntityInventoryTypeDefinition[];
-  pageCategory?: string;
-  selection: FilterControlsSelection;
-}): FilterControlsSelection => {
-  const category =
-    pageCategory ??
-    (selection.category && getCategories(types).includes(selection.category)
-      ? selection.category
-      : undefined);
-  const type = getTypesOfCategory(types, category).some(({ type: name }) => name === selection.type)
-    ? selection.type
-    : undefined;
-  const { attributeFilters } = getFilterControls({
-    types,
-    pageCategory,
-    selectedCategory: category,
-    selectedType: type,
-  });
-
-  return {
-    category: pageCategory ? undefined : category,
-    type,
-    attributes: Object.fromEntries(
-      Object.entries(selection.attributes).filter(([name]) => attributeFilters.includes(name))
-    ),
+    categoryOptions: pageCategory ? undefined : getCategories(types),
+    typeOptions: typesOfCategory.length > 1 ? typesOfCategory.map(({ type }) => type) : undefined,
+    attributeNames: getDimensionNamesInScope(getTypesInScope(params)),
   };
 };

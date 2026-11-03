@@ -65,6 +65,18 @@ describe('useAttributeValues', () => {
     expect(mockGetValues).toHaveBeenLastCalledWith(nextParams);
   });
 
+  it('does not load the values again for equal params', async () => {
+    mockGetValues.mockResolvedValue(response(['linux']));
+    const { result, rerender } = renderHook((hookParams) => useAttributeValues(hookParams), {
+      initialProps: params,
+    });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    rerender({ ...params, filters: {}, types: [...params.types] });
+
+    expect(mockGetValues).toHaveBeenCalledTimes(1);
+  });
+
   it('ignores a response that arrives after the params changed', async () => {
     let resolveFirst: (value: EntityInventoryAttributeValuesResponse) => void = () => {};
     mockGetValues
