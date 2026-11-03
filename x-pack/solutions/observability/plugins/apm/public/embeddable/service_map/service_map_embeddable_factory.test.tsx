@@ -264,6 +264,7 @@ describe('getServiceMapEmbeddableFactory', () => {
 
   it('passes panel kuery to rendered components (ignores dashboard query)', async () => {
     mockUseBatchedPublishingSubjects.mockReturnValue([
+      'view',
       'production',
       'service.name: api',
       'checkout',
@@ -305,6 +306,7 @@ describe('getServiceMapEmbeddableFactory', () => {
         serviceName: 'checkout',
         serviceGroupId: 'group-1',
         core: deps.coreStart,
+        viewMode: 'view',
       })
     );
   });

@@ -84,7 +84,7 @@ export const PrePromptWorkflowSection: React.FC = () => {
           <EuiTitle size="s">
             <h3 data-test-subj="agentBuilderSectionTitle">
               <FormattedMessage
-                id="genAiSettings.agentBuilder.title"
+                id="xpack.genAiSettings.agentBuilder.title"
                 defaultMessage="Agent Builder"
               />
             </h3>

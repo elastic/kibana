@@ -26,12 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
-  const { common, discover, header, timePicker } = getPageObjects([
-    'common',
-    'discover',
-    'header',
-    'timePicker',
-  ]);
+  const { discover, header, timePicker } = getPageObjects(['discover', 'header', 'timePicker']);
   const dataViews = getService('dataViews');
   const monacoEditor = getService('monacoEditor');
 
@@ -65,144 +60,65 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.unset('search:timeout');
     });
 
-    describe('bfetch enabled', () => {
-      /**
-       * Migration recommendation: MIXED. Keep one CCS smoke that Discover shows the callout,
-       * inspector "timed out" details, and still returns the full local 14,004 hits. Drop the
-       * toast title (handle_warnings.test.ts).
-       */
-      it('timeout on single shard shows warning and results with bfetch enabled', async () => {
-        await common.navigateToApp('discover');
-        await dataViews.createFromSearchBar({
-          name: 'ftr-remote:logstash-*,logstash-*',
-          hasTimeField: false,
-          adHoc: true,
-        });
+    /**
+     * Migration recommendation: MIXED. Keep one CCS smoke that Discover shows the callout,
+     * inspector "timed out" details, and still returns the full local 14,004 hits. Drop the
+     * toast title (handle_warnings.test.ts).
+     */
+    it('timeout on single shard shows warning and results', async () => {
+      await discover.navigateToApp({ queryMode: 'classic' });
+      await dataViews.createFromSearchBar({
+        name: 'ftr-remote:logstash-*,logstash-*',
+        hasTimeField: false,
+        adHoc: true,
+      });
 
-        // Add a stall time to the remote indices
-        await filterBar.addDslFilter(
-          `
-      {
-        "query": {
-          "error_query": {
-            "indices": [
-              {
-                "name": "*:*",
-                "error_type": "exception",
-                "message": "'Watch out!'",
-                "stall_time_seconds": 5
-              }
-            ]
-          }
+      // Add a stall time to the remote indices
+      await filterBar.addDslFilter(
+        `
+    {
+      "query": {
+        "error_query": {
+          "indices": [
+            {
+              "name": "*:*",
+              "error_type": "exception",
+              "message": "'Watch out!'",
+              "stall_time_seconds": 5
+            }
+          ]
         }
-      }`,
-          true
-        );
+      }
+    }`,
+        true
+      );
 
-        // Warning callout is shown
-        await testSubjects.exists('searchResponseWarningsCallout');
+      // Warning callout is shown
+      await testSubjects.existOrFail('searchResponseWarningsCallout');
 
-        // Timed out error notification is shown
-        const { title } = await toasts.getErrorByIndex(1, true);
-        expect(title).to.be('Timed out');
+      // Timed out error notification is shown
+      await testSubjects.existOrFail('searchTimeoutError');
 
-        // Dismiss the toast so it doesn't cover the callout's action button
-        await toasts.dismissAllWithChecks();
+      // Dismiss the toast so it doesn't cover the callout's action button
+      await toasts.dismissAllWithChecks();
 
-        // View cluster details shows timed out
-        await testSubjects.click('searchResponseWarningsViewDetails');
-        await testSubjects.click('viewDetailsContextMenu');
-        await testSubjects.click('inspectorRequestToggleClusterDetailsftr-remote');
-        // Wait for the accordion content to render before reading it
-        await retry.waitFor(
-          'cluster details callout to render',
-          async () =>
-            (await testSubjects.getVisibleText('inspectorRequestClustersDetails')).length > 0
-        );
-        const txt = await testSubjects.getVisibleText('inspectorRequestClustersDetails');
-        expect(txt).to.be(
-          'Request timed out before completion. Results may be incomplete or empty.'
-        );
+      // View cluster details shows timed out
+      await testSubjects.click('searchResponseWarningsViewDetails');
+      await testSubjects.click('viewDetailsContextMenu');
+      await testSubjects.click('inspectorRequestToggleClusterDetailsftr-remote');
+      // Wait for the accordion content to render before reading it
+      await retry.waitFor(
+        'cluster details callout to render',
+        async () =>
+          (await testSubjects.getVisibleText('inspectorRequestClustersDetails')).length > 0
+      );
+      const txt = await testSubjects.getVisibleText('inspectorRequestClustersDetails');
+      expect(txt).to.be('Request timed out before completion. Results may be incomplete or empty.');
 
-        // Ensure documents are still returned for the successful shards
-        await retry.try(async function tryingForTime() {
-          const hitCount = await discover.getHitCount();
-          expect(hitCount).to.be('14,004');
-        });
-      });
-    });
-
-    describe('bfetch disabled', () => {
-      before(async () => {
-        await kibanaServer.uiSettings.update({ 'bfetch:disable': true });
-      });
-
-      after(async () => {
-        await kibanaServer.uiSettings.unset('bfetch:disabled');
-      });
-
-      /**
-       * Migration recommendation: DELETE. Duplicate of the bfetch-enabled test. bfetch is a
-       * transport, not Discover CCS behavior.
-       */
-      it('timeout on single shard shows warning and results', async () => {
-        await common.navigateToApp('discover');
-        await dataViews.createFromSearchBar({
-          name: 'ftr-remote:logstash-*,logstash-*',
-          hasTimeField: false,
-          adHoc: true,
-        });
-
-        // Add a stall time to the remote indices
-        await filterBar.addDslFilter(
-          `
-      {
-        "query": {
-          "error_query": {
-            "indices": [
-              {
-                "name": "*:*",
-                "error_type": "exception",
-                "message": "'Watch out!'",
-                "stall_time_seconds": 5
-              }
-            ]
-          }
-        }
-      }`,
-          true
-        );
-
-        // Warning callout is shown
-        await testSubjects.exists('searchResponseWarningsCallout');
-
-        // Timed out error notification is shown
-        const { title } = await toasts.getErrorByIndex(1, true);
-        expect(title).to.be('Timed out');
-
-        // Dismiss the toast so it doesn't cover the callout's action button
-        await toasts.dismissAllWithChecks();
-
-        // View cluster details shows timed out
-        await testSubjects.click('searchResponseWarningsViewDetails');
-        await testSubjects.click('viewDetailsContextMenu');
-        await testSubjects.click('inspectorRequestToggleClusterDetailsftr-remote');
-        // Wait for the accordion content to render before reading it
-        await retry.waitFor(
-          'cluster details callout to render',
-          async () =>
-            (await testSubjects.getVisibleText('inspectorRequestClustersDetails')).length > 0
-        );
-        const txt = await testSubjects.getVisibleText('inspectorRequestClustersDetails');
-        expect(txt).to.be(
-          'Request timed out before completion. Results may be incomplete or empty.'
-        );
-
-        // Ensure documents are still returned for the successful shards
-        await retry.try(async function tryingForTime() {
-          const hitCount = await discover.getHitCount();
-          expect(hitCount).to.be('14,004');
-        });
+      // Ensure documents are still returned for the successful shards
+      await retry.try(async function tryingForTime() {
+        const hitCount = await discover.getHitCount();
+        expect(hitCount).to.be('14,004');
       });
     });
 
@@ -213,19 +129,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
        * count — it is the proof the local aggregation still completed.
        */
       it('should show warning and results', async () => {
-        await common.navigateToApp('discover');
-        await discover.selectTextBaseLang();
+        await discover.navigateToApp({ queryMode: 'esql' });
         await monacoEditor.setCodeEditorValue(`FROM logstash-*, ftr-remote:logstash-* METADATA _index
   | EVAL buckets = DATE_TRUNC(5 minute, @timestamp), delay = TO_STRING(CASE(STARTS_WITH(_index, "ftr-remote"), DELAY(10ms), false))
   | STATS count = COUNT(*) BY buckets, delay`);
         await timePicker.setDefaultAbsoluteRange();
         await header.waitUntilLoadingHasFinished();
         // Warning callout is shown
-        await testSubjects.exists('searchResponseWarningsCallout');
+        await testSubjects.existOrFail('searchResponseWarningsCallout');
 
         // Timed out error notification is shown
-        const { title } = await toasts.getErrorByIndex(1, true);
-        expect(title).to.contain('Timed out');
+        await testSubjects.existOrFail('searchTimeoutError');
 
         // Dismiss the toast so it doesn't cover the callout's action button
         await toasts.dismissAllWithChecks();

@@ -36,8 +36,6 @@ export function StepMapping() {
     schemaResolutionFormState
   ).invalid;
   const schemaResolutionIsValid = useWatch({ control, name: 'ui.schemaResolutionIsValid' });
-  const [shouldShowTimeseriesValidation, setShouldShowTimeseriesValidation] = useState(false);
-  const [shouldShowDefineSchemaValidation, setShouldShowDefineSchemaValidation] = useState(false);
   const [hasAttemptedValidation, setHasAttemptedValidation] = useState(false);
 
   const setMappings = useCallback(
@@ -64,14 +62,14 @@ export function StepMapping() {
   const isMappingStepValid = isTimestampFieldValid(field.value) && isSchemaDefined;
   const mappingStepErrors = useMemo(() => {
     const errors: Array<{ testSubj: string; message: string }> = [];
-    if (shouldShowDefineSchemaValidation && !isSchemaDefined) {
+    if (hasAttemptedValidation && !isSchemaDefined) {
       errors.push({
         testSubj: 'createDatasetWizardDefineSchemaRequiresField',
         message: createDatasetWizardStrings.defineSchemaRequiresFieldError,
       });
     }
     return errors;
-  }, [isSchemaDefined, shouldShowDefineSchemaValidation]);
+  }, [isSchemaDefined, hasAttemptedValidation]);
 
   const onTimeseriesToggle = useCallback(
     (checked: boolean) => {
@@ -178,8 +176,6 @@ export function StepMapping() {
       isValid: hasAttemptedValidation ? isMappingStepValid && !isSchemaResolutionInvalid : true,
       validate: async () => {
         setHasAttemptedValidation(true);
-        setShouldShowTimeseriesValidation(true);
-        setShouldShowDefineSchemaValidation(true);
         const isSchemaResolutionValid = await trigger('settings.schema_resolution');
         return isMappingStepValid && isSchemaResolutionValid;
       },
@@ -204,10 +200,10 @@ export function StepMapping() {
       <MappingHeader docLinks={docLinks} />
 
       <div data-test-subj="createDatasetWizardMappedFields">
-        <EuiSpacer size="m" />
+        <EuiSpacer size="xl" />
         <TimeseriesDataSection
           isEnabled={isTimeseriesEnabled}
-          shouldShowValidation={shouldShowTimeseriesValidation}
+          shouldShowValidation={hasAttemptedValidation}
           timestampField={splitFields.timestampField}
           onToggle={onTimeseriesToggle}
           onChangeTimestampField={updateTimestampField}

@@ -17,11 +17,13 @@ export const TriggerRow = ({
   onSelect,
   onRemove,
   children,
+  readOnly = false,
 }: {
   trigger: TriggerFormValues;
   onSelect: (kind: TriggerFormValues['kind']) => void;
   onRemove: () => void;
   children: React.ReactNode;
+  readOnly?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
   const rowCss = css`
@@ -41,36 +43,47 @@ export const TriggerRow = ({
   `;
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} css={rowCss}>
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="s"
+      responsive={false}
+      css={
+        readOnly ? { minBlockSize: euiTheme.size.xl, paddingBlockEnd: euiTheme.size.xs } : rowCss
+      }
+    >
       <EuiFlexItem>{children}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <TriggerPicker
-          current={trigger.kind}
-          onSelect={onSelect}
-          button={(toggle) => (
-            <EuiToolTip content={triggerLabels.changeTrigger} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="chevronSingleDown"
-                color="text"
-                aria-label={triggerLabels.changeTrigger}
-                onClick={toggle}
-                data-test-subj="automationChangeTrigger"
-              />
-            </EuiToolTip>
-          )}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} data-remove-trigger>
-        <EuiToolTip content={triggerLabels.removeTrigger} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="trash"
-            color="danger"
-            aria-label={triggerLabels.removeTrigger}
-            onClick={onRemove}
-            data-test-subj="automationRemoveTrigger"
+      {!readOnly && (
+        <EuiFlexItem grow={false}>
+          <TriggerPicker
+            current={trigger.kind}
+            onSelect={onSelect}
+            button={(toggle) => (
+              <EuiToolTip content={triggerLabels.changeTrigger} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="chevronSingleDown"
+                  color="text"
+                  aria-label={triggerLabels.changeTrigger}
+                  onClick={toggle}
+                  data-test-subj="automationChangeTrigger"
+                />
+              </EuiToolTip>
+            )}
           />
-        </EuiToolTip>
-      </EuiFlexItem>
+        </EuiFlexItem>
+      )}
+      {!readOnly && (
+        <EuiFlexItem grow={false} data-remove-trigger>
+          <EuiToolTip content={triggerLabels.removeTrigger} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="trash"
+              color="danger"
+              aria-label={triggerLabels.removeTrigger}
+              onClick={onRemove}
+              data-test-subj="automationRemoveTrigger"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

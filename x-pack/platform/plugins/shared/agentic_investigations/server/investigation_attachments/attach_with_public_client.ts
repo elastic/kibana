@@ -6,7 +6,6 @@
  */
 
 import {
-  createConversationNotFoundError,
   isAttachmentAlreadyExistsError,
   isAttachmentNotFoundError,
 } from '@kbn/agent-builder-common';
@@ -22,18 +21,16 @@ import { sameInvestigationAttachmentDocument } from './same_document';
 const MAX_STAMP_ATTEMPTS = 3;
 
 /**
- * Confirms the caller can write this conversation before any index write.
- * `update_access_control` is Agent Builder's owner-only permission, which the public attachment
- * client's writes need; a missing or unreadable conversation fails closed as not found.
+ * Confirms the caller can write this conversation before any index write. `conversations.get`
+ * already gates on `converse` access (owner, public conversation, or ACL member) and fails
+ * closed as not-found otherwise, so a successful read is sufficient proof of write access here;
+ * no separate check is needed.
  */
-const assertConversationOwner = async (
+const assertConversationWritable = async (
   conversations: ConversationPublicClient,
   conversationId: string
 ): Promise<void> => {
-  const conversation = await conversations.get(conversationId);
-  if (conversation.permissions.update_access_control !== true) {
-    throw createConversationNotFoundError({ conversationId });
-  }
+  await conversations.get(conversationId);
 };
 
 const putAttachment = async <TStored extends StoredInvestigationAttachment>(
@@ -137,7 +134,7 @@ export const attachWithPublicClient = async <TStored extends StoredInvestigation
   /** Creates the attachment hidden from the chat (pills, inline cards, timeline events). */
   hidden?: boolean;
 }): Promise<InvestigationAttachmentDocument<TStored>> => {
-  await assertConversationOwner(conversations, conversationId);
+  await assertConversationWritable(conversations, conversationId);
 
   const written = await write();
   try {

@@ -12,6 +12,7 @@ export * from './initialize_single_tab';
 export * from './tabs';
 export * from './open_discover_session';
 export * from './save_discover_session';
+export * from './rename_discover_session';
 export * from './reset_discover_session';
 export * from './tab_state';
 export * from './tab_state_data_view';

@@ -9,13 +9,13 @@ import { ExecutionError } from '@kbn/workflows/server';
 import { isConversationNotFoundError } from '@kbn/agent-builder-common';
 import {
   ImpactConflictError,
-  ImpactForbiddenError,
   ImpactInvalidRequestError,
   ImpactNotFoundError,
 } from '../services/errors';
+import { InvestigationsForbiddenError } from '../../investigations/services/investigations_forbidden_error';
 
 const ERROR_TYPES: ReadonlyArray<[new (...args: never[]) => Error, string]> = [
-  [ImpactForbiddenError, 'PermissionError'],
+  [InvestigationsForbiddenError, 'PermissionError'],
   [ImpactConflictError, 'ConflictError'],
   [ImpactNotFoundError, 'NotFoundError'],
   [ImpactInvalidRequestError, 'ValidationError'],

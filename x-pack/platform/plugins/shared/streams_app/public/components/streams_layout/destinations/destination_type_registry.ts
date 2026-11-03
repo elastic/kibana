@@ -33,7 +33,8 @@ export const DESTINATION_TYPE_DEFINITIONS: readonly DestinationTypeDefinition[] 
   },
   {
     storageKind: 'external_storage',
-    available: false,
+    unitType: 's3',
+    available: true,
     label: i18n.translate('xpack.streams.destinations.externalStorageLabel', {
       defaultMessage: 'External storage',
     }),

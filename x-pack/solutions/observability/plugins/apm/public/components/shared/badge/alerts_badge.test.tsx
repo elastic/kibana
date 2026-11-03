@@ -190,6 +190,31 @@ describe('AlertsBadge', () => {
       );
     });
 
+    it('forces rangeTo to now even when navigationProps pass a past absolute end', () => {
+      const getRedirectUrl = jest.fn().mockReturnValue('/app/apm/services/svc/alerts');
+      renderBadge({
+        count: 3,
+        serviceName: 'svc',
+        navigationProps: {
+          serviceName: 'svc',
+          agentName: 'java',
+          environment: 'production',
+          rangeFrom: '2026-01-01T00:00:00.000Z',
+          rangeTo: '2026-01-01T00:15:00.000Z',
+          locators: { get: jest.fn().mockReturnValue({ getRedirectUrl }) } as any,
+        },
+      });
+
+      expect(getRedirectUrl).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            rangeFrom: '2026-01-01T00:00:00.000Z',
+            rangeTo: 'now',
+          }),
+        })
+      );
+    });
+
     it('sets data-ebt-* attributes when ebt is provided alongside navigationProps', () => {
       const { navigationProps } = makeNavigationProps();
       renderBadge({

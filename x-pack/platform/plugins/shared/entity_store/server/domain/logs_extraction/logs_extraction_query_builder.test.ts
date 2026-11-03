@@ -51,22 +51,25 @@ describe('buildLogsExtractionEsqlQuery', () => {
       latestIndex: 'latest-index',
       entityDefinition: {
         ...base,
-        fields: [
-          ...base.fields,
-          {
-            source: 'test.api_only_field',
-            destination: 'test.api_only_field',
-            mapping: { type: 'keyword' },
-            retention: { operation: 'managed' },
-            allowAPIUpdate: true,
-          },
-          {
-            source: 'test.log_field',
-            destination: 'test.log_field',
-            mapping: { type: 'keyword' },
-            retention: { operation: 'prefer_newest_value' },
-          },
-        ],
+        extraction: {
+          ...base.extraction,
+          fields: [
+            ...base.extraction.fields,
+            {
+              source: 'test.api_only_field',
+              destination: 'test.api_only_field',
+              mapping: { type: 'keyword' },
+              retention: { operation: 'managed' },
+              allowAPIUpdate: true,
+            },
+            {
+              source: 'test.log_field',
+              destination: 'test.log_field',
+              mapping: { type: 'keyword' },
+              retention: { operation: 'prefer_newest_value' },
+            },
+          ],
+        },
       },
       docsLimit: 100,
       fromDateISO: '2022-01-01T00:00:00.000Z',
@@ -146,6 +149,27 @@ describe('buildLogsExtractionEsqlQuery', () => {
     });
   });
 
+  it.each(Object.values(EXTRACTION_MODE))(
+    '%s applies custom user exclusions while generating the extraction query',
+    async (extractionMode) => {
+      const query = buildLogsExtractionEsqlQuery({
+        indexPatterns: ['test-index-*'],
+        latestIndex: 'latest-index',
+        entityDefinition: getEntityDefinition('user', 'default', extractionMode, {
+          excludedUserNames: ['svc-deploy'],
+        }),
+        docsLimit: 10000,
+        fromDateISO: '2022-01-01T00:00:00.000Z',
+        toDateISO: '2022-01-01T23:59:59.999Z',
+        samplingRate: extractionMode === EXTRACTION_MODE.nonPriority ? 0.2 : undefined,
+      });
+
+      expect(query).toContain('"svc-deploy"');
+      expect(query).toContain('"root"');
+      await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+    }
+  );
+
   describe('sampling stage', () => {
     // Built with the non-priority definition since that is the only process the caller samples;
     // the builder itself is mode-agnostic and just renders the rate it is given.
@@ -192,12 +216,15 @@ describe('buildLogsExtractionEsqlQuery', () => {
       latestIndex: 'latest-index',
       entityDefinition: {
         ...base,
-        whenConditionTrueSetFieldsAfterStats: [
-          {
-            condition: { field: 'host.name', eq: 'server1' },
-            fields: { 'host.name': { source: 'host.id' } },
-          },
-        ],
+        extraction: {
+          ...base.extraction,
+          whenConditionTrueSetFieldsAfterStats: [
+            {
+              condition: { field: 'host.name', eq: 'server1' },
+              fields: { 'host.name': { source: 'host.id' } },
+            },
+          ],
+        },
       },
       docsLimit: 100,
       fromDateISO: '2022-01-01T00:00:00.000Z',

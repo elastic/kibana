@@ -62,28 +62,34 @@ export const test = baseTest.extend<GraphTestFixtures, GraphWorkerFixtures>({
   ],
 });
 
-export interface GraphListingParallelTestFixtures extends ScoutParallelTestFixtures {
+export interface GraphParallelTestFixtures extends ScoutParallelTestFixtures {
   pageObjects: PageObjects & {
+    graph: GraphPage;
     graphListing: GraphListingPage;
   };
 }
 
 export const spaceTest = spaceBaseTest.extend<
-  GraphListingParallelTestFixtures,
+  GraphParallelTestFixtures,
   ScoutParallelWorkerFixtures
 >({
   pageObjects: async (
     {
       pageObjects,
       page,
+      kbnUrl,
+      scoutSpace,
     }: {
-      pageObjects: GraphListingParallelTestFixtures['pageObjects'];
-      page: GraphListingParallelTestFixtures['page'];
+      pageObjects: GraphParallelTestFixtures['pageObjects'];
+      page: GraphParallelTestFixtures['page'];
+      kbnUrl: KibanaUrl;
+      scoutSpace: ScoutParallelWorkerFixtures['scoutSpace'];
     },
-    use: (pageObjects: GraphListingParallelTestFixtures['pageObjects']) => Promise<void>
+    use: (pageObjects: GraphParallelTestFixtures['pageObjects']) => Promise<void>
   ) => {
     await use({
       ...pageObjects,
+      graph: createLazyPageObject(GraphPage, page, kbnUrl, scoutSpace.id),
       graphListing: createLazyPageObject(GraphListingPage, page),
     });
   },

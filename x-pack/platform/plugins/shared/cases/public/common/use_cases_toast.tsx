@@ -10,7 +10,6 @@ import { useMemo } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isValidOwner } from '../../common/utils/owner';
 import type { CaseUI } from '../../common';
-import { AttachmentType } from '../../common/types/domain';
 import { useKibana, useToasts } from './lib/kibana';
 import { generateCaseViewPath } from './navigation';
 import type { CaseAttachmentsWithoutOwner, ServerError } from '../types';
@@ -24,15 +23,12 @@ import {
 } from './translations';
 import { OWNER_INFO } from '../../common/constants';
 import { useApplication } from './lib/kibana/use_application';
-import { hasLegacyAlertId, isAlertAttachmentType } from '../../common/utils/attachments';
+import { isAlertAttachmentType } from '../../common/utils/attachments';
 
 function getAlertsCount(attachments: CaseAttachmentsWithoutOwner): number {
   return attachments.reduce((alertsCount, attachment) => {
     if (!isAlertAttachmentType(attachment.type)) {
       return alertsCount;
-    }
-    if (hasLegacyAlertId(attachment)) {
-      return alertsCount + (Array.isArray(attachment.alertId) ? attachment.alertId.length : 1);
     }
     if ('attachmentId' in attachment) {
       return (
@@ -80,7 +76,7 @@ function getToastContent({
   let toastContent;
   if (attachments !== undefined) {
     for (const attachment of attachments) {
-      if (attachment.type === AttachmentType.alert || isAlertAttachmentType(attachment.type)) {
+      if (isAlertAttachmentType(attachment.type)) {
         if (theCase.settings.syncAlerts && theCase.settings.extractObservables) {
           toastContent = CASE_ALERT_SUCCESS_SYNC_AND_EXTRACT_TEXT;
         } else if (theCase.settings.syncAlerts) {

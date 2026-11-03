@@ -42,6 +42,12 @@ describe('EA_EXECUTION_CONTEXT_NAMES', () => {
     }
   );
 
+  it('ENTITY_DETAILS_FLYOUT resolves to the exact expected string', () => {
+    expect(EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT).toBe(
+      'entity_analytics:entity_details_flyout'
+    );
+  });
+
   it('ENTITY_RESOLUTION resolves to the exact expected string', () => {
     expect(EA_EXECUTION_CONTEXT_NAMES.ENTITY_RESOLUTION).toBe('entity_analytics:entity_resolution');
   });
@@ -66,6 +72,14 @@ describe('EA_EXECUTION_CONTEXT_NAMES', () => {
 
   it('HOME_PAGE resolves to the exact expected string', () => {
     expect(EA_EXECUTION_CONTEXT_NAMES.HOME_PAGE).toBe('entity_analytics:home_page');
+  });
+
+  it.each([
+    ['PRIVILEGED_USER_MONITORING', 'entity_analytics:privileged_user_monitoring'],
+    ['THREAT_HUNTING_LEADS', 'entity_analytics:threat_hunting_leads'],
+    ['WATCHLISTS', 'entity_analytics:watchlists'],
+  ] as const)('%s resolves to the exact expected string', (key, expected) => {
+    expect(EA_EXECUTION_CONTEXT_NAMES[key]).toBe(expected);
   });
 
   it('RISK_SCORE_MANAGEMENT resolves to the exact expected string', () => {

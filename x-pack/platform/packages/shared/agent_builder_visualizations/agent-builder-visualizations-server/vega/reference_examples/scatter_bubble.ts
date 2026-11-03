@@ -11,9 +11,8 @@ export const spec: Record<string, unknown> = {
   data: {
     url: {
       '%type%': 'esql',
-      '%timefield%': '@timestamp',
       query:
-        'FROM metrics-* | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS avg_latency = AVG(latency_ms), throughput = COUNT(*), error_count = SUM(is_error) BY host.name | SORT throughput DESC | LIMIT 100',
+        'FROM metrics-* | STATS avg_latency = AVG(latency_ms), throughput = COUNT(*), error_count = SUM(is_error) BY host.name | SORT throughput DESC | LIMIT 100',
     },
   },
   mark: { type: 'point', filled: true, opacity: 0.7 },

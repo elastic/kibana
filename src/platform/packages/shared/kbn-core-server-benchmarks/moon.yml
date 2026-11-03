@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/bench'
   - '@kbn/tooling-log'
+  - '@kbn/std'
 tags:
   - shared-server
   - package
@@ -30,6 +31,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

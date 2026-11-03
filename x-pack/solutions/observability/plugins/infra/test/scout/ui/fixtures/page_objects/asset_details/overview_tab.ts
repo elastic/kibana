@@ -5,14 +5,21 @@
  * 2.0.
  */
 
+import { expect } from '@kbn/scout-oblt/ui';
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
 import type { AssetDetailsPageTabName } from './asset_details_tab';
 import { AssetDetailsTab } from './asset_details_tab';
-import { KPI_METRICS } from '../../constants';
+import { EXTENDED_TIMEOUT, KPI_METRICS } from '../../constants';
+
+const EMBEDDABLE_PANEL_SELECTOR = '[data-test-subj="embeddablePanel"]';
+const PENDING_PANEL_SELECTOR = `${EMBEDDABLE_PANEL_SELECTOR}[data-render-complete="false"]`;
+
+export type OverviewTabMetricsSection = 'cpu' | 'memory' | 'network' | 'disk';
 
 export class OverviewTab extends AssetDetailsTab {
   public readonly tabName: AssetDetailsPageTabName = 'Overview';
   public readonly tab: Locator;
+  public readonly tabContent: Locator;
 
   public readonly kpiGrid: Locator;
   public readonly kpiCpuUsageChart: Locator;
@@ -65,9 +72,13 @@ export class OverviewTab extends AssetDetailsTab {
   public readonly metricsDiskUsageChart: Locator;
   public readonly metricsDiskIOChart: Locator;
 
+  private readonly metricsSectionsByMetric: Record<OverviewTabMetricsSection, Locator>;
+  private readonly metricsShowAllButtonsByMetric: Record<OverviewTabMetricsSection, Locator>;
+
   constructor(page: ScoutPage, kbnUrl: KibanaUrl, private readonly assetType: 'Host' | 'Docker') {
     super(page, kbnUrl);
     this.tab = this.page.getByTestId(`infraAssetDetails${this.tabName}Tab`);
+    this.tabContent = this.page.getByTestId(`infraAssetDetails${this.tabName}TabContent`);
 
     this.kpiGrid = this.page.getByTestId('infraAssetDetailsKPIGrid');
     this.kpiCpuUsageChart = this.kpiGrid.getByTestId('infraAssetDetailsKPIcpuUsage');
@@ -179,6 +190,48 @@ export class OverviewTab extends AssetDetailsTab {
     this.metricsDiskIOChart = this.metricsDiskSection.getByTestId(
       'infraAssetDetailsMetricChartdiskIOReadWrite'
     );
+
+    this.metricsSectionsByMetric = {
+      cpu: this.metricsCpuSection,
+      memory: this.metricsMemorySection,
+      network: this.metricsNetworkSection,
+      disk: this.metricsDiskSection,
+    };
+    this.metricsShowAllButtonsByMetric = {
+      cpu: this.metricsCpuShowAllButton,
+      memory: this.metricsMemoryShowAllButton,
+      network: this.metricsNetworkShowAllButton,
+      disk: this.metricsDiskShowAllButton,
+    };
+  }
+
+  /**
+   * Switches to the Metrics tab through a metrics section's `Show all` link.
+   * The link only reacts while it holds still: a chart's Lens embeddable is
+   * mounted once its panel intersects the viewport and the panel then grows
+   * past the height it reserved while loading, so scrolling the link into view
+   * is itself what starts the re-layout that can move it out from under the
+   * cursor mid-click. Other async sections above the metrics (metadata, alerts,
+   * services) are not waited on.
+   */
+  public async clickMetricsShowAllButton(metric: OverviewTabMetricsSection) {
+    const section = this.metricsSectionsByMetric[metric];
+
+    await section.scrollIntoViewIfNeeded();
+    await this.waitForChartsToRender(section);
+
+    await this.metricsShowAllButtonsByMetric[metric].click();
+  }
+
+  private async waitForChartsToRender(section: Locator) {
+    // A chart that hasn't mounted its embeddable yet renders a placeholder and
+    // no `embeddablePanel`, so charts further down the tab can't hold this up.
+    await expect(section.locator(EMBEDDABLE_PANEL_SELECTOR)).not.toHaveCount(0, {
+      timeout: EXTENDED_TIMEOUT,
+    });
+    await expect(this.tabContent.locator(PENDING_PANEL_SELECTOR)).toHaveCount(0, {
+      timeout: EXTENDED_TIMEOUT,
+    });
   }
 
   private getKPIValueSelector(kpiPanelTestId: string): string {

@@ -13,6 +13,7 @@ import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { isEnterStepTimeoutZone } from '@kbn/workflows/graph';
 import { ResumeTaskSchedulingError } from './resume_task_scheduling_error';
 import type { WorkflowExecutionLoopParams } from './types';
+import { DEFAULT_WORKFLOW_TIMEOUT } from '../default_workflow_settings';
 import { getResolvedStepTimeout } from '../step/timeout_zone_step/step_level/enter_step_timeout_zone_node_impl';
 import {
   getHitlIdleDeadlineMsForNode,
@@ -20,8 +21,12 @@ import {
 } from '../step/wait_for_input_step/hitl_timeout_helpers';
 import { abortableTimeout, parseDuration, TimeoutAbortedError } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
+import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
+import type { RuntimeGraphView } from '../workflow_context_manager/workflow_runtime_graph';
 
 const SHORT_DURATION_THRESHOLD = 1000 * 5; // 5 seconds
+/** Claimable floor when the idle deadline is already due. Matches the HITL scheduler. */
+const DUE_RESUME_FLOOR_MS = 500;
 
 type IdleTimeoutHitlStep =
   | StepExecutionRuntime
@@ -33,7 +38,10 @@ type IdleTimeoutHitlStep =
 
 /** Returns the earliest deadline across the waiting step and its enclosing timeout scopes. */
 export function getIdleTimeoutResumeDeadlineMs(
-  params: Pick<WorkflowExecutionLoopParams, 'workflowExecutionGraph' | 'workflowExecutionState'>,
+  params: {
+    workflowExecutionGraph: Pick<RuntimeGraphView, 'getWorkflowLevelTimeout' | 'getNode'>;
+    workflowExecutionState: Pick<WorkflowExecutionState, 'getStepExecutionsByStepId'>;
+  },
   workflowExecution: EsWorkflowExecution,
   scopeStackFrames: StackFrame[],
   hitlStep: IdleTimeoutHitlStep
@@ -94,7 +102,7 @@ async function scheduleWorkflowGlobalTimeoutResumeTask(
     return undefined;
   }
 
-  const resumeAtMs = Math.max(deadlineMs, new Date().getTime() + 500);
+  const resumeAtMs = Math.max(deadlineMs, new Date().getTime() + DUE_RESUME_FLOOR_MS);
 
   try {
     return await params.workflowTaskManager.scheduleWorkflowGlobalTimeoutResumeTask({
@@ -109,6 +117,37 @@ async function scheduleWorkflowGlobalTimeoutResumeTask(
       }`
     );
     return undefined;
+  }
+}
+
+/** Arms the parent's wake task when the graph has no timeout to schedule one */
+async function armSyncParentWakeTask(
+  params: WorkflowExecutionLoopParams,
+  workflowExecution: EsWorkflowExecution
+): Promise<void> {
+  const startedAtMs = workflowExecution.startedAt
+    ? new Date(workflowExecution.startedAt).getTime()
+    : Date.now();
+  const runAt = new Date(
+    Math.max(
+      startedAtMs + parseDuration(DEFAULT_WORKFLOW_TIMEOUT),
+      Date.now() + DUE_RESUME_FLOOR_MS
+    )
+  );
+
+  try {
+    await params.workflowTaskManager.ensureWakeTask({
+      executionId: workflowExecution.id,
+      spaceId: workflowExecution.spaceId || 'default',
+      fakeRequest: params.fakeRequest,
+      runAt,
+    });
+  } catch (error: unknown) {
+    params.workflowLogger.logWarn(
+      `Failed to arm sync parent wake task (execution=${workflowExecution.id}): ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
   }
 }
 
@@ -185,7 +224,7 @@ export function getWorkflowIdleTimeoutResumeAtAfterLoop(
     return undefined;
   }
 
-  return new Date(Math.max(deadlineMs, Date.now() + 500));
+  return new Date(Math.max(deadlineMs, Date.now() + DUE_RESUME_FLOOR_MS));
 }
 
 /**
@@ -197,6 +236,17 @@ export async function ensureWorkflowIdleTimeoutResumeAfterLoop(
 ): Promise<void> {
   const resumeAt = getWorkflowIdleTimeoutResumeAtAfterLoop(params);
   if (resumeAt === undefined) {
+    const workflowExecution = params.workflowRuntime.getWorkflowExecution();
+    if (workflowExecution.status !== ExecutionStatus.WAITING_FOR_CHILD) {
+      return;
+    }
+
+    await armSyncParentWakeTask(params, workflowExecution);
+    const node = params.workflowRuntime.getCurrentNode();
+    if (node?.stepId) {
+      const stepExecution = params.workflowExecutionState.getLatestStepExecution(node.stepId);
+      await wakeIfSyncChildAlreadyTerminal(params, stepExecution?.state?.executionId);
+    }
     return;
   }
 
@@ -238,8 +288,16 @@ export async function handleExecutionDelay(
       status: stepStatus,
     });
 
-    await scheduleWorkflowGlobalTimeoutResumeTask(params, workflowExecution, stepExecutionRuntime);
+    const scheduledResume = await scheduleWorkflowGlobalTimeoutResumeTask(
+      params,
+      workflowExecution,
+      stepExecutionRuntime
+    );
     if (stepStatus === ExecutionStatus.WAITING_FOR_CHILD) {
+      // Arm 1st when the timeout scheduler did not, so the handshake can wake it
+      if (!scheduledResume) {
+        await armSyncParentWakeTask(params, workflowExecution);
+      }
       await wakeIfSyncChildAlreadyTerminal(
         params,
         stepExecutionRuntime.stepExecution?.state?.executionId
@@ -291,10 +349,23 @@ export async function handleExecutionDelay(
   params.workflowExecutionState.updateWorkflowExecution({
     status: ExecutionStatus.WAITING,
   });
+  // Wake at the earlier of the wait end and the enclosing timeout. The step's
+  // stored resumeAt stays the real wait end, so this wake is a timeout check.
+  const deadlineMs = getIdleTimeoutResumeDeadlineMs(
+    params,
+    workflowExecution,
+    params.workflowExecutionCursor.currentStackFrames,
+    stepExecutionRuntime
+  );
+  const chosenMs =
+    deadlineMs === undefined ? resumeAt.getTime() : Math.min(resumeAt.getTime(), deadlineMs);
+  const scheduledResumeAt = new Date(
+    chosenMs <= now.getTime() ? now.getTime() + DUE_RESUME_FLOOR_MS : chosenMs
+  );
   try {
     await params.workflowTaskManager.scheduleResumeTask({
       workflowExecution: workflowExecution as EsWorkflowExecution,
-      resumeAt,
+      resumeAt: scheduledResumeAt,
       fakeRequest: params.fakeRequest,
     });
   } catch (error) {

@@ -9,7 +9,7 @@
 
 import omit from 'lodash/omit';
 import { v4 as generateUuid } from 'uuid';
-import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
   ExecutionStatus,
   pickManagedWorkflowFields,
@@ -25,6 +25,7 @@ import type { WorkflowExecutionForInputRendering } from '../workflow_context_man
 
 export interface BuildWorkflowExecutionDocumentParams {
   workflow: WorkflowExecutionEngineModel;
+  inheritedIdentity?: EsWorkflowExecution['effectiveIdentity'];
   spaceId: string;
   context: Record<string, unknown>;
   defaultTriggeredBy: string;
@@ -49,6 +50,7 @@ export const buildWorkflowExecutionDocument = (
 ): WorkflowExecutionForInputRendering => {
   const {
     workflow,
+    inheritedIdentity,
     spaceId,
     context,
     defaultTriggeredBy,
@@ -62,9 +64,15 @@ export const buildWorkflowExecutionDocument = (
   const executionContext = { spaceId, ...omit(context, 'spaceId') };
   const metadata = context.metadata as Record<string, unknown> | undefined;
   const eventPayload = context.event as Record<string, unknown> | undefined;
+  const hasEventChain =
+    eventPayload?.eventChainDepth !== undefined ||
+    eventPayload?.eventChainVisitedWorkflowIds !== undefined;
+  const chainSource = hasEventChain
+    ? eventPayload
+    : (context.parentEventChain as Record<string, unknown> | undefined);
   let rootEventChainDepth: number | undefined;
-  if (eventPayload) {
-    const rawDepth = eventPayload.eventChainDepth;
+  if (chainSource) {
+    const rawDepth = chainSource.eventChainDepth;
     if (typeof rawDepth === 'number' && !Number.isNaN(rawDepth) && rawDepth >= 0) {
       rootEventChainDepth = rawDepth;
     } else if (typeof rawDepth === 'string' && rawDepth.trim() !== '') {
@@ -75,7 +83,7 @@ export const buildWorkflowExecutionDocument = (
     }
   }
   const rootVisited = normalizeEventChainVisitedWorkflowIds(
-    eventPayload?.eventChainVisitedWorkflowIds,
+    chainSource?.eventChainVisitedWorkflowIds,
     maxEventChainDepth
   );
   const dispatchEventId =
@@ -94,7 +102,9 @@ export const buildWorkflowExecutionDocument = (
     status: missingIdentity ? ExecutionStatus.FAILED : ExecutionStatus.PENDING,
     createdAt: now.toISOString(),
     executedBy: authenticatedUser ?? UNKNOWN_EXECUTION_IDENTITY,
-    ...(workflow.definition?.settings?.run_as
+    ...(inheritedIdentity
+      ? { effectiveIdentity: inheritedIdentity }
+      : workflow.definition?.settings?.run_as
       ? {
           effectiveIdentity: {
             type: 'service_account' as const,

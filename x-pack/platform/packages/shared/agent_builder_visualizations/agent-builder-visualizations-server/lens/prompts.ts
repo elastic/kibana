@@ -98,7 +98,7 @@ export const createGenerateConfigPrompt = ({
         ? 'This is an appearance-only edit. Each layer keeps its existing data_source, column bindings, order, and displayed measures from the existing configuration.'
         : 'Bind only result columns from the resolved ES|QL query supplied with the request.'
     }
-3. For ES|QL column bindings use { column: '<esql column name>', ...other options }, and bind only columns produced by the layer's query.`,
+3. For ES|QL column bindings use { column: '<esql column name>', ...other options }, and bind only columns produced by the layer's query. A \`PROMQL\` query returns its time bucket as the \`step\` column and has no \`@timestamp\` column.`,
     getChartTypeConfigPromptContent(chartType),
     getColorConfigPromptContent(chartType, parsedExistingConfig),
     getExamplesPromptContent(

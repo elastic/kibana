@@ -208,7 +208,12 @@ export const Navigation = ({
                           );
 
                           return (
-                            <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
+                            <SideNav.SecondaryMenu.Section
+                              key={section.id}
+                              id={section.id}
+                              isPaginated={section.isPaginated}
+                              label={section.label}
+                            >
                               {section.items.map((subItem, subItemIndex) => {
                                 const isFirstSubItem =
                                   sectionIndex === firstNonEmptySectionIndex && subItemIndex === 0;
@@ -419,7 +424,12 @@ export const Navigation = ({
                             (s) => s.items.length > 0
                           );
                           return (
-                            <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
+                            <SideNav.SecondaryMenu.Section
+                              key={section.id}
+                              id={section.id}
+                              isPaginated={section.isPaginated}
+                              label={section.label}
+                            >
                               {section.items.map((subItem, subItemIndex) => {
                                 const isFirstSubItem =
                                   sectionIndex === firstNonEmptySectionIndex && subItemIndex === 0;
@@ -470,7 +480,12 @@ export const Navigation = ({
                 isNew={getIsNewSecondary(openerNode.id)}
               >
                 {openerNode.sections?.map((section, sectionIndex) => (
-                  <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
+                  <SideNav.SecondaryMenu.Section
+                    key={section.id}
+                    id={section.id}
+                    isPaginated={section.isPaginated}
+                    label={section.label}
+                  >
                     {section.items.map((subItem, subItemIndex) => {
                       const isFirstItem =
                         sectionIndex === firstNonEmptySectionIndex && subItemIndex === 0;

@@ -68,6 +68,12 @@ describe('AlertZeroPageHeader', () => {
     expect(heading()).toContain('Looking into your data...');
   });
 
+  it('should render the subtitle under the heading when given', () => {
+    setup({ eventCount: 0, subtitle: 'Some detail' });
+
+    expect(screen.getByTestId('alertZeroPageHeaderSubtitle')).toHaveTextContent('Some detail');
+  });
+
   describe('overrides', () => {
     it('should replace the time-of-day greeting with the greeting prop', () => {
       setup({ eventCount: 1, greeting: 'Hello there!' });

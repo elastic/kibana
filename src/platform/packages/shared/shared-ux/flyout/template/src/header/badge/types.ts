@@ -8,9 +8,13 @@
  */
 
 import type { ReactNode } from 'react';
+import type { DistributiveOmit } from '@elastic/eui';
 import type { FlyoutHeaderBadgeProps } from '../../types';
 
-/** Descriptor produced by resolving a `Header.Badge` part; the part's children become `label`. */
-export type HeaderBadgeDescriptor = Omit<FlyoutHeaderBadgeProps, 'children' | 'id'> & {
+/**
+ * Descriptor produced by resolving a `Header.Badge` part; the part's children become `label`.
+ * `DistributiveOmit` keeps the `EuiBadgeProps` union intact (a plain `Omit` would collapse it).
+ */
+export type HeaderBadgeDescriptor = DistributiveOmit<FlyoutHeaderBadgeProps, 'children' | 'id'> & {
   label: ReactNode;
 };

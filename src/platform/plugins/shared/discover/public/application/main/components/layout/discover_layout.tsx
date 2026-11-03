@@ -33,6 +33,7 @@ import {
 import type { UseColumnsProps } from '@kbn/unified-data-table';
 import { SOURCE_COLUMN, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { AddOtherFilterHandler } from '@kbn/unified-field-list';
 import { BehaviorSubject } from 'rxjs';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -170,6 +171,7 @@ export function DiscoverLayout() {
     onAddColumn,
     onRemoveColumn,
     onRemoveColumns,
+    onMoveColumn,
   } = useColumns({
     capabilities,
     defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
@@ -213,6 +215,18 @@ export function DiscoverLayout() {
     [onRemoveColumns, scopedEBTManager, fieldsMetadata]
   );
 
+  const onMoveSidebarColumn = useCallback(
+    (columnName: string, sidebarTargetIndex: number) => {
+      // the sidebar columns exclude `_source`, so map the target position back to the actual columns
+      const targetIndex = currentColumns.indexOf(sidebarColumns[sidebarTargetIndex]);
+      if (targetIndex === -1) {
+        return;
+      }
+      onMoveColumn(columnName, targetIndex);
+    },
+    [currentColumns, sidebarColumns, onMoveColumn]
+  );
+
   // The assistant is getting the state from the url correctly
   // expect from the index pattern where we have only the dataview id
   useEffect(() => {
@@ -227,6 +241,12 @@ export function DiscoverLayout() {
   const onAddFilter = useCallback<DocViewFilterFn>(
     (field, values, operation) => {
       dispatch(addFilter({ field, value: values, mode: operation }));
+    },
+    [addFilter, dispatch]
+  );
+  const onAddOtherFilter = useCallback<AddOtherFilterHandler>(
+    (field, terms, { negate }) => {
+      dispatch(addFilter({ field, value: terms, mode: negate ? '-' : '+', otherBucket: true }));
     },
     [addFilter, dispatch]
   );
@@ -440,9 +460,11 @@ export function DiscoverLayout() {
                 onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
                 onAddField={onAddColumnWithTracking}
                 onAddFilter={onAddFilter}
+                onAddOtherFilter={onAddOtherFilter}
                 onChangeDataView={onChangeDataView}
                 onDataViewCreated={onDataViewCreated}
                 onFieldEdited={onFieldEdited}
+                onMoveField={onMoveSidebarColumn}
                 onRemoveField={onRemoveColumnWithTracking}
                 onRemoveFields={onRemoveColumnsWithTracking}
                 selectedDataView={dataView}
@@ -548,6 +570,7 @@ const componentStyles = {
     width: 'auto',
     height: 'auto',
     alignSelf: 'center',
+    maxWidth: '100%',
     marginTop: 'auto',
     marginBottom: 'auto',
     flexGrow: 0,

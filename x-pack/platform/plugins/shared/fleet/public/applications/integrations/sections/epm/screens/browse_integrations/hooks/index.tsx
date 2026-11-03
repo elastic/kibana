@@ -11,6 +11,7 @@ import { searchIdField, useLocalSearch } from '../../../../../hooks';
 
 import { useAvailablePackages } from '../../home/hooks/use_available_packages';
 import type { IntegrationCardItem } from '../../home';
+import { withSearchMemberMatch } from '../../home/search_member_match';
 
 import { STATUS_DEPRECATED } from '../types';
 
@@ -197,8 +198,8 @@ export function useBrowseIntegrationHook({
     //      the singleton itself must still match the query.
     // Original ungrouped cards (id IS in searchResults) are kept unconditionally.
     if (searchTerm) {
-      // Split on whitespace and hyphens to match js-search's PrefixIndexStrategy tokenization,
-      // which treats "nginx-otel" as two tokens ["nginx", "otel"].
+      // Looser than useLocalSearch: splits "nginx-otel" into "nginx" and "otel" and matches each
+      // anywhere in the text, while useLocalSearch keeps it as one word and matches word starts.
       const tokens = searchTerm
         .trim()
         .toLowerCase()
@@ -337,6 +338,15 @@ export function useBrowseIntegrationHook({
     );
   }, [filteredAllCategories, effectiveCategories]);
 
+  // Tell the user which bundled service their search matched (e.g. AWS tile for "guardduty").
+  const filteredCardsWithMemberMatch = useMemo(
+    () =>
+      searchTerm
+        ? filteredCards.map((card) => withSearchMemberMatch(card, searchTerm))
+        : filteredCards,
+    [filteredCards, searchTerm]
+  );
+
   const onCategoryChange = useCallback(
     ({ id }: { id: string }) => {
       setUrlCategory({ category: id });
@@ -358,7 +368,7 @@ export function useBrowseIntegrationHook({
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
-    filteredCards,
+    filteredCards: filteredCardsWithMemberMatch,
     allCards,
     availableSubCategories,
     onCategoryChange,

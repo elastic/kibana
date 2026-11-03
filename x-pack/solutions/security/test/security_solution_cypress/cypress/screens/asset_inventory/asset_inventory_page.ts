@@ -7,7 +7,7 @@
 
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
-export const ALL_ASSETS_TITLE = getDataTestSubjectSelector('asset-inventory-test-subj-page-title');
+export const ALL_ASSETS_TITLE = getDataTestSubjectSelector('appHeaderTitle');
 export const FLYOUT_RIGHT_PANEL = getDataTestSubjectSelector('rightSection');
 export const FLYOUT_CARDS = getDataTestSubjectSelector('responsive-data-card');
 export const DATAGRID_COLUMN_SELECTOR = getDataTestSubjectSelector('dataGridColumnSelectorButton');

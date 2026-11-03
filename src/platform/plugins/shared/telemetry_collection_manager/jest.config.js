@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   testEnvironment: 'node',
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/platform/plugins/shared/telemetry_collection_manager'],

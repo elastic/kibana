@@ -11,18 +11,35 @@
  * Do not import this file from plugin public (browser) code synchronously — it pulls in @kbn/streamlang.
  * For browser bundles, load the same {@link euid} object via dynamic import (`euid_browser` / `loadEuidApi()`).
  *
+ * Every helper outside `experimental` takes an entity definition as its first argument, so it works
+ * for any definition, including those other plugins register in the entity definition registry. Use
+ * {@link getBuiltInEntityDefinition} to resolve one of the Entity Store's built-in definitions
+ * (`user`, `host`, `service`, `generic`) by type name.
+ *
  * @example
- * import { euid } from '@kbn/entity-store/common/euid_helpers';
- * euid.getEuidFromObject('host', doc);
- * euid.dsl.getEuidDocumentsContainsIdFilter('host');
+ * import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
+ * // One of the four built-ins, by name:
+ * euid.getEuidFromObject(getBuiltInEntityDefinition('host'), doc);
+ * // Any definition, for example one read from the registry on the server:
+ * const definition = await entityStore.getEntityDefinitionsClientForSpace(space).get('k8s.pod');
+ * if (!definition) {
+ *   return; // not registered in this Kibana
+ * }
+ * euid.getEuidFromObject(definition, doc);
+ * euid.esql.getEuidEvaluation(definition, 'entity.id');
  */
 
 import * as euidModule from './domain/euid';
+import { getBuiltInEntityDefinition } from './domain/definitions/registry';
+import type { EntityDefinitionWithoutId, EntityType } from './domain/definitions/entity_schema';
+
+export { getBuiltInEntityDefinition };
 
 export const euid = {
   /**
-   * Resolves the entity unique id (EUID) for one document using entity definitions (in-memory only).
-   * Input: entity type (e.g. `user`) and a document body like ES `_source` (nested or flattened).
+   * Resolves the entity unique id (EUID) for one document in JavaScript, with no Elasticsearch
+   * round trip (the Painless, ES|QL and DSL forms below produce query fragments instead).
+   * Input: an entity definition and a document body like ES `_source` (nested or flattened).
    * Output: EUID string such as `user:…` / `host:…`, or `undefined` when no id can be derived.
    * Applies the creation gate, so it answers whether a document may create an entity.
    */
@@ -43,13 +60,13 @@ export const euid = {
    */
   getEuidFromTimelineNonEcsData: euidModule.getEuidFromTimelineNonEcsData,
   /**
-   * Returns which source fields are read for EUID for an entity type (`requiresOneOf`, full `identitySourceFields` list).
+   * Returns which source fields are read for EUID for an entity definition (`requiresOneOf`, full `identitySourceFields` list).
    * Exposed so UIs and CRUD can request minimal `_source` or validate partial documents.
    */
   getEuidSourceFields: euidModule.getEuidSourceFields,
 
   /**
-   * Returns the namespace source fields for an entity type, split by match kind.
+   * Returns the namespace source fields for an entity definition, split by match kind.
    * `exactMatchFields` are matched with a term query (e.g. `event.module`).
    * `prefixMatchFields` are matched with a prefix query because the entity store splits on a
    * delimiter (e.g. `data_stream.dataset` → prefix `gcp` matches `gcp.audit`, `gcp.firewall`).
@@ -72,7 +89,7 @@ export const euid = {
   painless: {
     /**
      * Builds the Painless expression text that computes the same EUID as `getEuidFromObject` at search time.
-     * Input: entity type. Output: a Painless snippet string to embed in scripts or runtime fields.
+     * Input: an entity definition. Output: a Painless snippet string to embed in scripts or runtime fields.
      * Applies the creation gate, so it answers whether a document may create an entity.
      */
     getEuidEvaluation: euidModule.getEuidPainlessEvaluation,
@@ -86,7 +103,7 @@ export const euid = {
 
     /**
      * Elasticsearch `runtime_mappings` entry that exposes the EUID as a `keyword` runtime field (`entity_id`).
-     * Input: entity type. Output: mapping object suitable for the Search API `runtime_mappings` map.
+     * Input: an entity definition. Output: mapping object suitable for the Search API `runtime_mappings` map.
      */
     getEuidRuntimeMapping: euidModule.getEuidPainlessRuntimeMapping,
   },
@@ -96,26 +113,26 @@ export const euid = {
    */
   esql: {
     /**
-     * Broad predicate: documents allowed into the entity pipeline and that could carry an EUID for this type.
-     * Input: entity type only. Output: ESQL boolean fragment for `WHERE` (no leading `WHERE`).
+     * Broad predicate: documents allowed into the entity pipeline and that could carry an EUID for the definition's type.
+     * Input: an entity definition only. Output: ESQL boolean fragment for `WHERE` (no leading `WHERE`).
      */
     getEuidDocumentsContainsIdFilter: euidModule.getEuidEsqlDocumentsContainsIdFilter,
 
     /**
      * Full ESQL expression used in extraction to compute the typed EUID (e.g. inside `EVAL` / `STATS`).
-     * Input: entity type. Output: ESQL expression string (often a `CONCAT`/`CASE` around identity fields).
+     * Input: an entity definition. Output: ESQL expression string (often a `CONCAT`/`CASE` around identity fields).
      */
     getEuidEvaluation: euidModule.getEuidEsqlEvaluation,
 
     /**
      * ESQL predicate that locates documents matching one sample document's identity (mirrors per-doc DSL).
-     * Input: entity type and sample document; output: parenthesized boolean expression or `undefined` if not buildable.
+     * Input: an entity definition and sample document; output: parenthesized boolean expression or `undefined` if not buildable.
      */
     getEuidFilterBasedOnDocument: euidModule.getEuidEsqlFilterBasedOnDocument,
 
     /**
      * Returns the ESQL `EVAL` expressions for field evaluations (e.g. entity.namespace derivation).
-     * Input: entity type. Output: ESQL expression string for `EVAL`, or `undefined` if none defined.
+     * Input: an entity definition. Output: ESQL expression string for `EVAL`, or `undefined` if none defined.
      */
     getFieldEvaluations: euidModule.getFieldEvaluationsEsql,
   },
@@ -126,7 +143,7 @@ export const euid = {
   dsl: {
     /**
      * Query DSL that should match documents sharing the same identity fields as the given sample document.
-     * Input: entity type and one document; output: bool/term-style filter, or `undefined` if identity or pipeline gate fails.
+     * Input: an entity definition and one document; output: bool/term-style filter, or `undefined` if identity or pipeline gate fails.
      * Pass `{ excludeHigherRankedFields: false }` when looking up a stored entity by partial identity
      * (e.g. only `host.name`) — the default partition semantics would require higher-ranked fields
      * (e.g. `host.id`) to be absent and never match stored entities.
@@ -137,21 +154,21 @@ export const euid = {
      * Query DSL that matches raw source documents belonging to an already-resolved entity-store record.
      * Trusts the record's resolved evaluated fields (e.g. `entity.namespace`) and reverse-maps them to
      * raw source-field conditions, so IdP users resolve correctly even though the record does not retain
-     * `event.module` / `data_stream.dataset`. Input: entity type and one entity-store record; output:
+     * `event.module` / `data_stream.dataset`. Input: an entity definition and one entity-store record; output:
      * bool/term-style filter, or `undefined` if the record lacks enough identity.
      */
     getEuidFilterBasedOnEntityRecord: euidModule.getEuidDslFilterBasedOnEntityRecord,
 
     /**
-     * Broad DSL filter: documents that may participate in the entity pipeline and could have an EUID for this type.
-     * Input: entity type only. Output: query DSL equivalent to documentsFilter (and postAgg when defined).
+     * Broad DSL filter: documents that may participate in the entity pipeline and could have an EUID for the definition's type.
+     * Input: an entity definition only. Output: query DSL equivalent to documentsFilter (and postAgg when defined).
      */
     getEuidDocumentsContainsIdFilter: euidModule.getEuidDslDocumentsContainsIdFilter,
   },
   kql: {
     /**
      * KQL that should match documents sharing the same identity fields as the given sample document.
-     * Input: entity type and one document; output: KQL, or `undefined` if identity or pipeline gate fails.
+     * Input: an entity definition and one document; output: KQL, or `undefined` if identity or pipeline gate fails.
      */
     getEuidFilterBasedOnDocument: euidModule.getEuidKqlFilterBasedOnDocument,
   },
@@ -182,8 +199,9 @@ export type EntityStoreEuid = typeof euid;
 
 /**
  * EUID API surface passed through the entity_store plugin React context and `loadEuidApi()`.
- * Aligns with the {@link euid} object from this module.
+ * Aligns with the {@link euid} object and {@link getBuiltInEntityDefinition} from this module.
  */
 export interface EntityStoreEuidApi {
   euid: EntityStoreEuid;
+  getBuiltInEntityDefinition: (type: EntityType) => EntityDefinitionWithoutId;
 }

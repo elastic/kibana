@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, inlineRootJsonSchemaRef } from '@kbn/zod/v4';
 import type { ZodType } from '@kbn/zod/v4';
 
 interface FieldDescription {
@@ -27,7 +27,7 @@ export function describeZodSchema(schema: ZodType): FieldDescription[] {
   }
 
   try {
-    const jsonSchema = z.toJSONSchema(schema) as Record<string, unknown>;
+    const jsonSchema = inlineRootJsonSchemaRef(z.toJSONSchema(schema) as Record<string, unknown>);
     if (jsonSchema.type !== 'object' || !jsonSchema.properties) {
       return [];
     }

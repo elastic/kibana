@@ -77,7 +77,7 @@ export function LayerConfiguration({
   return (
     <div
       css={css`
-        padding: ${hasPadding ? euiTheme.size.s : 0};
+        padding: ${hasPadding ? `${euiTheme.size.s} ${euiTheme.size.base}` : 0};
       `}
     >
       <ConfigPanelWrapper {...configPanelWrapperProps} />

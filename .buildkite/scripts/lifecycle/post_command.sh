@@ -24,6 +24,7 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
     'target/kibana-fleet/**/*.png'
     'target/test-metrics/*'
     'target/test-suites-ci-plan.json'
+    'target/cypress-results/**/*.ndjson'
     'test/**/screenshots/diff/*.png'
     'test/**/screenshots/failure/*.png'
     'test/**/screenshots/session/*.png'

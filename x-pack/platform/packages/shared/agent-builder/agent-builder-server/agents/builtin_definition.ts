@@ -38,6 +38,11 @@ export type BuiltInAgentDefinition = Pick<
    * The type must be registered before the agent.
    */
   type?: string;
+  /**
+   * When true, the agent is hidden from UI listings (agent picker, management page) by default.
+   * An admin can opt in to see hidden agents via a toggle on the management page.
+   */
+  hidden?: boolean;
   configuration:
     | BuiltInAgentConfiguration
     | ((ctx: AgentConfigContext) => MaybePromise<BuiltInAgentConfiguration>);

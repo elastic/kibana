@@ -10,9 +10,9 @@ import type { ToolingLog } from '@kbn/tooling-log';
 
 const log = { info: jest.fn(), warning: jest.fn() } as unknown as ToolingLog;
 
-const loadEnriched = () => {
+const loadProfile = (profile: 'minimal' | 'parity') => {
   jest.resetModules();
-  process.env.SEED_PROFILE = 'enriched';
+  process.env.SEED_PROFILE = profile;
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   return require('./chrysalis_seed') as typeof import('./chrysalis_seed');
 };
@@ -20,45 +20,69 @@ const loadEnriched = () => {
 interface MockClient {
   bulk: jest.Mock;
   deleteByQuery: jest.Mock;
-  indices: {
-    exists: jest.Mock;
-    create: jest.Mock;
-    delete: jest.Mock;
-    createDataStream: jest.Mock;
-    deleteDataStream: jest.Mock;
-  };
 }
 
-const createClient = (existing: string[] = []): MockClient => ({
+const createClient = (): MockClient => ({
   bulk: jest.fn().mockResolvedValue({ errors: false, items: [] }),
   deleteByQuery: jest.fn().mockResolvedValue({}),
-  indices: {
-    exists: jest.fn(async ({ index }: { index: string }) => existing.includes(index)),
-    create: jest.fn().mockResolvedValue({}),
-    delete: jest.fn().mockResolvedValue({}),
-    createDataStream: jest.fn(async ({ name }: { name: string }) => {
-      if (existing.includes(name)) {
-        throw Object.assign(new Error('exists'), {
-          meta: { body: { error: { type: 'resource_already_exists_exception' } } },
-        });
-      }
-      return {};
-    }),
-    deleteDataStream: jest.fn().mockResolvedValue({}),
-  },
 });
 
 const asEs = (client: MockClient) => client as unknown as EsClient;
 
-describe('chrysalis_seed (enriched profile)', () => {
+describe('chrysalis_seed', () => {
   afterEach(() => {
     delete process.env.SEED_PROFILE;
     jest.clearAllMocks();
   });
 
-  describe('seedChrysalisAlerts', () => {
+  describe('seedProfile resolution', () => {
+    it('defaults to minimal when SEED_PROFILE is unset or empty', () => {
+      delete process.env.SEED_PROFILE;
+      let unset: typeof import('./chrysalis_seed');
+      jest.isolateModules(() => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        unset = require('./chrysalis_seed');
+      });
+      expect(unset!.seedProfile).toBe('minimal');
+
+      process.env.SEED_PROFILE = '';
+      let empty: typeof import('./chrysalis_seed');
+      jest.isolateModules(() => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        empty = require('./chrysalis_seed');
+      });
+      expect(empty!.seedProfile).toBe('minimal');
+    });
+
+    it('resolves explicit minimal and parity', () => {
+      expect(loadProfile('minimal').seedProfile).toBe('minimal');
+      expect(loadProfile('parity').seedProfile).toBe('parity');
+    });
+
+    it('throws for the removed enriched profile instead of silently falling back', () => {
+      process.env.SEED_PROFILE = 'enriched';
+      expect(() => {
+        jest.isolateModules(() => {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          require('./chrysalis_seed');
+        });
+      }).toThrow(/enriched.*minimal.*parity|Unknown SEED_PROFILE 'enriched'/s);
+    });
+
+    it('throws for any other unknown profile (case-sensitive)', () => {
+      process.env.SEED_PROFILE = 'Parity';
+      expect(() => {
+        jest.isolateModules(() => {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          require('./chrysalis_seed');
+        });
+      }).toThrow(/Unknown SEED_PROFILE 'Parity'/);
+    });
+  });
+
+  describe('seedChrysalisAlerts (minimal profile)', () => {
     it('rejects when the alert bulk reports item-level errors', async () => {
-      const { seedChrysalisAlerts } = loadEnriched();
+      const { seedChrysalisAlerts } = loadProfile('minimal');
       const client = createClient();
       client.bulk.mockResolvedValueOnce({
         errors: true,
@@ -70,81 +94,148 @@ describe('chrysalis_seed (enriched profile)', () => {
       );
     });
 
-    it('rejects when an enriched source bulk reports item-level errors', async () => {
-      const { seedChrysalisAlerts } = loadEnriched();
-      const client = createClient();
-      client.bulk
-        .mockResolvedValueOnce({ errors: false, items: [] }) // alerts
-        .mockResolvedValueOnce({
-          errors: true,
-          items: [
-            { create: { error: { type: 'version_conflict_engine_exception', reason: 'x' } } },
-          ],
-        });
-
-      await expect(seedChrysalisAlerts({ esClient: asEs(client), log })).rejects.toThrow(
-        /version_conflict_engine_exception/
-      );
-    });
-
-    it('rejects when creating an enriched source fails for a reason other than already-exists', async () => {
-      const { seedChrysalisAlerts } = loadEnriched();
-      const client = createClient();
-      client.indices.createDataStream.mockRejectedValueOnce(new Error('security_exception'));
-
-      await expect(seedChrysalisAlerts({ esClient: asEs(client), log })).rejects.toThrow(
-        /security_exception/
-      );
-    });
-
     it('resolves when every bulk succeeds', async () => {
-      const { seedChrysalisAlerts } = loadEnriched();
+      const { seedChrysalisAlerts } = loadProfile('minimal');
       const client = createClient();
 
       await expect(seedChrysalisAlerts({ esClient: asEs(client), log })).resolves.toBeUndefined();
     });
   });
 
-  describe('cleanupChrysalisAlerts', () => {
-    it('deletes resources this run created', async () => {
-      const { seedChrysalisAlerts, cleanupChrysalisAlerts, TELEMETRY_INDEX, ENTITY_RISK_INDEX } =
-        loadEnriched();
+  describe('seedChrysalisAlerts (parity profile) restamping', () => {
+    it('shifts nested first_seen by the same offset as @timestamp', async () => {
+      const { seedChrysalisAlerts } = loadProfile('parity');
+      const { PARITY_DOCS } =
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        require('./chrysalis_parity_docs') as typeof import('./chrysalis_parity_docs');
       const client = createClient();
 
       await seedChrysalisAlerts({ esClient: asEs(client), log });
-      await cleanupChrysalisAlerts({ esClient: asEs(client), log });
 
-      expect(client.indices.deleteDataStream).toHaveBeenCalledWith({ name: TELEMETRY_INDEX });
-      expect(client.indices.delete).toHaveBeenCalledWith({ index: ENTITY_RISK_INDEX });
+      // Find the bulk body for the threat-intel index and its source doc.
+      const tiIndex = 'logs-ti_chrysalis_sim-default';
+      const tiCall = client.bulk.mock.calls.find(
+        ([arg]) => (arg as { index: string }).index === tiIndex
+      );
+      expect(tiCall).toBeDefined();
+      const seededDocs = (tiCall?.[0] as { operations: unknown[] }).operations.filter(
+        (op) => typeof op === 'object' && op !== null && !('create' in (op as object))
+      ) as Array<Record<string, unknown>>;
+
+      const seeded = seededDocs.find(
+        (d) =>
+          (d.threat as { indicator?: { first_seen?: unknown } } | undefined)?.indicator
+            ?.first_seen !== undefined
+      );
+      expect(seeded).toBeDefined();
+
+      const seededIndicator = (seeded!.threat as { indicator: Record<string, unknown> }).indicator;
+      const srcDoc = PARITY_DOCS.find(
+        ({ index, doc }) =>
+          index === tiIndex &&
+          (doc.threat as { indicator?: Record<string, unknown> } | undefined)?.indicator
+            ?.description === seededIndicator.description
+      )!.doc;
+      const srcIndicator = (srcDoc.threat as { indicator: Record<string, unknown> }).indicator;
+      expect(srcIndicator.first_seen).toBeDefined();
+
+      const tsOffset =
+        Date.parse(seeded!['@timestamp'] as string) - Date.parse(srcDoc['@timestamp'] as string);
+      const firstSeenOffset =
+        Date.parse(seededIndicator.first_seen as string) -
+        Date.parse(srcIndicator.first_seen as string);
+      const lastSeenOffset =
+        Date.parse(seededIndicator.last_seen as string) -
+        Date.parse(srcIndicator.last_seen as string);
+
+      // Same doc → identical offset across @timestamp and the nested keys.
+      expect(firstSeenOffset).toBe(tsOffset);
+      expect(lastSeenOffset).toBe(tsOffset);
+
+      // Offset is a real shift to ~now (positive, large).
+      const now = Date.now();
+      expect(Date.parse(seeded!['@timestamp'] as string)).toBeGreaterThan(now - 10 * 60 * 1000);
     });
+  });
 
-    it('never deletes pre-existing resources; it removes only the seeded doc ids from them', async () => {
-      const {
-        seedChrysalisAlerts,
-        cleanupChrysalisAlerts,
-        TELEMETRY_INDEX,
-        ENTITY_RISK_INDEX,
-        SECURITY_LABS_INDEX,
-      } = loadEnriched();
-      const client = createClient([TELEMETRY_INDEX, ENTITY_RISK_INDEX, SECURITY_LABS_INDEX]);
+  describe('cleanupChrysalisAlerts is id-scoped', () => {
+    it('deletes only the seeded alert ids, never match_all', async () => {
+      const { seedChrysalisAlerts, cleanupChrysalisAlerts } = loadProfile('minimal');
+      const client = createClient();
 
       await seedChrysalisAlerts({ esClient: asEs(client), log });
+      // Minimal seeding assigns deterministic ids via the seed prefix.
+      const bulkOps = client.bulk.mock.calls[0][0] as { operations: unknown[] };
+      const createIds = bulkOps.operations
+        .filter((op) => typeof op === 'object' && op !== null && 'create' in (op as object))
+        .map((op) => (op as { create: { _id: string } }).create._id);
+      expect(createIds).toEqual([
+        'persona-matrix-seed-.internal.alerts-security.alerts-default-000001-0',
+        'persona-matrix-seed-.internal.alerts-security.alerts-default-000001-1',
+        'persona-matrix-seed-.internal.alerts-security.alerts-default-000001-2',
+      ]);
+
       await cleanupChrysalisAlerts({ esClient: asEs(client), log });
 
-      expect(client.indices.deleteDataStream).not.toHaveBeenCalled();
-      expect(client.indices.delete).not.toHaveBeenCalled();
-
-      const seededIds = client.bulk.mock.calls
-        .filter(([{ index }]) => index === TELEMETRY_INDEX)
-        .flatMap(([{ operations }]) => operations)
-        .filter((op: Record<string, unknown>) => 'create' in op)
-        .map((op: { create: { _id: string } }) => op.create._id);
-      expect(seededIds.length).toBeGreaterThan(0);
-
-      const scopedDelete = client.deleteByQuery.mock.calls.find(
-        ([arg]) => arg.index === TELEMETRY_INDEX
+      const deletes = client.deleteByQuery.mock.calls.filter(
+        ([arg]) =>
+          (arg as { index: string }).index === '.internal.alerts-security.alerts-default-000001'
       );
-      expect(scopedDelete?.[0].query).toEqual({ ids: { values: seededIds } });
+      expect(deletes).toHaveLength(1);
+      const query = (deletes[0][0] as { query: unknown }).query;
+      expect(query).not.toEqual({ match_all: {} });
+      const ids = (query as { ids: { values: string[] } }).ids.values;
+      // Default cleanup sweeps every id a seed call could have written; the
+      // three seeded ids must all be covered.
+      expect(ids).toEqual(
+        expect.arrayContaining([
+          'persona-matrix-seed-.internal.alerts-security.alerts-default-000001-0',
+          'persona-matrix-seed-.internal.alerts-security.alerts-default-000001-1',
+          'persona-matrix-seed-.internal.alerts-security.alerts-default-000001-2',
+        ])
+      );
+    });
+
+    it('cleans up every alert when seeding more than the default count and cleaning up with defaults', async () => {
+      const { seedChrysalisAlerts, cleanupChrysalisAlerts } = loadProfile('minimal');
+      const client = createClient();
+
+      await seedChrysalisAlerts({ esClient: asEs(client), log, count: 5 });
+      await cleanupChrysalisAlerts({ esClient: asEs(client), log });
+
+      const deletes = client.deleteByQuery.mock.calls.filter(
+        ([arg]) =>
+          (arg as { index: string }).index === '.internal.alerts-security.alerts-default-000001'
+      );
+      expect(deletes).toHaveLength(1);
+      const query = (deletes[0][0] as { query: { ids?: { values: string[] } } }).query;
+      const values = query.ids?.values ?? [];
+      // Default cleanup covers every id a seed call could have written, so all
+      // five seeded ids (<0..4>) must be swept — none left behind.
+      expect(values).toContain(
+        'persona-matrix-seed-.internal.alerts-security.alerts-default-000001-4'
+      );
+      expect(values).toContain(
+        'persona-matrix-seed-.internal.alerts-security.alerts-default-000001-0'
+      );
+    });
+  });
+
+  describe('alert count guard', () => {
+    it('rejects non-integer, zero, negative, and out-of-range counts on seed and cleanup', async () => {
+      const { seedChrysalisAlerts, cleanupChrysalisAlerts } = loadProfile('minimal');
+      const client = createClient();
+
+      for (const bad of [0, -1, 2.5, 51]) {
+        await expect(
+          seedChrysalisAlerts({ esClient: asEs(client), log, count: bad })
+        ).rejects.toThrow(/Invalid alert count/);
+        await expect(
+          cleanupChrysalisAlerts({ esClient: asEs(client), log, count: bad })
+        ).rejects.toThrow(/Invalid alert count/);
+      }
+      expect(client.bulk).not.toHaveBeenCalled();
+      expect(client.deleteByQuery).not.toHaveBeenCalled();
     });
   });
 });

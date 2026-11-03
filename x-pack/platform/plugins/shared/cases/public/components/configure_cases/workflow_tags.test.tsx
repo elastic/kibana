@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, within } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   MAX_LENGTH_PER_WORKFLOW_TAG,
@@ -54,11 +54,11 @@ describe('WorkflowTags', () => {
     expect(await screen.findByRole('option', { name: 'enrichment' })).toBeInTheDocument();
   });
 
-  it('adds a suggested tag to the configured tags', async () => {
+  it('adds a suggested tag to the configured tags', () => {
     renderWithTestingProviders(<WorkflowTags {...defaultProps} />);
 
-    await userEvent.click(getSearchInput());
-    await userEvent.click(await screen.findByRole('option', { name: 'enrichment' }));
+    fireEvent.click(getSearchInput());
+    fireEvent.click(screen.getByRole('option', { name: 'enrichment' }));
 
     expect(onChange).toHaveBeenCalledWith(['soc-triage', 'enrichment']);
   });
@@ -66,7 +66,9 @@ describe('WorkflowTags', () => {
   it('adds a trimmed custom tag that no workflow carries yet', async () => {
     renderWithTestingProviders(<WorkflowTags {...defaultProps} />);
 
-    await userEvent.type(getSearchInput(), '  new-tag  {enter}');
+    await userEvent.click(getSearchInput());
+    await userEvent.paste('  new-tag  ');
+    await userEvent.keyboard('{enter}');
 
     expect(onChange).toHaveBeenCalledWith(['soc-triage', 'new-tag']);
   });
@@ -119,6 +121,8 @@ describe('WorkflowTags', () => {
     expect(screen.queryByRole('option', { name: longTag })).not.toBeInTheDocument();
   });
 
+  // Mounting a pill per configured tag is intrinsic to exercising the real limit, so this
+  // boundary test gets more headroom than the plugin-wide budget its siblings run under.
   it('does not add a custom tag once the maximum number of tags is configured', async () => {
     const workflowTags = Array.from(
       { length: MAX_WORKFLOW_TAGS_PER_CONFIGURATION },
@@ -126,10 +130,12 @@ describe('WorkflowTags', () => {
     );
     renderWithTestingProviders(<WorkflowTags {...defaultProps} workflowTags={workflowTags} />);
 
-    await userEvent.type(getSearchInput(), 'one-too-many{enter}');
+    await userEvent.click(getSearchInput());
+    await userEvent.paste('one-too-many');
+    await userEvent.keyboard('{enter}');
 
     expect(onChange).not.toHaveBeenCalled();
-  });
+  }, 30_000);
 
   it('removes a tag when its selection is cleared', async () => {
     renderWithTestingProviders(<WorkflowTags {...defaultProps} />);

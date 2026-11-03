@@ -15,21 +15,65 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 import React, { useState, useEffect } from 'react';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
+import { useEnabledProfilingStatus } from '../../components/contexts/profiling_status/use_enabled_profiling_status';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { PrimaryProfilingSearchBar } from '../../components/profiling_app_page_template/primary_profiling_search_bar';
+import { UniversalProfilingSetupIncompleteCallout } from '../../components/universal_profiling_setup_incomplete_callout';
 import { AsyncStatus } from '../../hooks/use_async';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
+import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../hooks/use_time_range_async';
 import { DataBreakdown } from './data_breakdown';
 import { DistinctProbabilisticValuesWarning } from './distinct_probabilistic_values_warning';
 import { HostBreakdown } from './host_breakdown';
 import { IndexLifecyclePhaseSelect } from './index_lifecycle_phase_select';
+import { OtelNotSupportedCallout } from './otel_not_supported_callout';
 import { Summary } from './summary';
+import {
+  getStorageExplorerAvailability,
+  StorageExplorerAvailability,
+} from '../../utils/get_storage_explorer_availability';
 
 export function StorageExplorerView() {
+  const {
+    data: { universalProfiling },
+  } = useEnabledProfilingStatus();
+  const profilingRouter = useProfilingRouter();
+  const { query } = useProfilingParams('/storage-explorer');
+  const { rangeFrom, rangeTo, kuery, schema } = query;
+
+  const availability = getStorageExplorerAvailability(universalProfiling);
+  const hasEcsSchema = schema === ProfilingSchema.ECS;
+
+  // Direct links can still reach Storage explorer without Universal Profiling set up
+  useEffect(() => {
+    if (availability === StorageExplorerAvailability.NotSetUp) {
+      profilingRouter.replace('/add-data-instructions', {
+        path: {},
+        query: { schema: ProfilingSchema.ECS },
+      });
+    } else if (availability === StorageExplorerAvailability.NotAvailable) {
+      profilingRouter.replace('/', { path: {}, query: { rangeFrom, rangeTo, kuery } });
+    } else if (!hasEcsSchema) {
+      // Storage explorer only covers Universal Profiling, so it selects that schema for the links
+      // leaving it
+      profilingRouter.replace('/storage-explorer', {
+        path: {},
+        query: { ...query, schema: ProfilingSchema.ECS },
+      });
+    }
+  }, [availability, hasEcsSchema, profilingRouter, query, rangeFrom, rangeTo, kuery]);
+
+  return availability === StorageExplorerAvailability.Available && hasEcsSchema ? (
+    <StorageExplorerContent />
+  ) : null;
+}
+
+function StorageExplorerContent() {
   const { query } = useProfilingParams('/storage-explorer');
   const { rangeFrom, rangeTo, indexLifecyclePhase } = query;
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
@@ -101,6 +145,8 @@ export function StorageExplorerView() {
       showBetaBadge
     >
       <EuiFlexGroup direction="column">
+        <UniversalProfilingSetupIncompleteCallout />
+        <OtelNotSupportedCallout />
         <EuiFlexItem grow={false}>
           <EuiPanel hasShadow={false} color="subdued">
             <PrimaryProfilingSearchBar />

@@ -163,6 +163,12 @@ These rules apply to both new and existing types.
 
 **Fix:** Add `schemas.create` to the model version.
 
+### `model-version/missing-update-schema` [model-version-missing-update]
+
+**Problem:** A model version defines `schemas.update`, but a later model version does not. Updates are only validated against the latest model version's `update` schema, so a missing one silently turns update validation off.
+
+**Fix:** Add `schemas.update` to every model version after the first one that defines it.
+
 ### `model-version/mappings-not-in-schema` [model-version-mappings-not-in-schema]
 
 **Problem:** The type has mapping fields that are not present in the latest model version's `create` schema. All mapped fields must be covered by the schema.

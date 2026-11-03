@@ -13,8 +13,8 @@ import {
   MAX_IMPACT_ID_LENGTH,
 } from '../../../common/impact/constants';
 import type { AttachImpactRequest, Impact, ImpactEntity } from '../../../common/impact/impact';
+import { unionEntities } from '../../../common/impact/union_entities';
 import {
-  hashInvestigationAttachmentId,
   InvestigationAttachmentConflictError,
   type InvestigationAttachmentDocService,
   type WrittenInvestigationAttachment,
@@ -50,8 +50,64 @@ export interface SetImpactParams {
 export class ImpactService {
   private readonly documents: InvestigationAttachmentDocService<ImpactDocument>;
 
-  constructor(deps: ImpactServiceDeps) {
+  constructor(private readonly deps: ImpactServiceDeps) {
     this.documents = impactAttachment.createServiceFromStorage(deps.storage);
+  }
+
+  private mappingsReconciled?: Promise<void>;
+
+  /** Applies pending mapping changes, which ES|QL reads do not trigger. Once per process. */
+  reconcileMappings(): Promise<void> {
+    this.mappingsReconciled ??= this.deps.storage.reconcileMappings().catch((error) => {
+      this.mappingsReconciled = undefined;
+      throw error;
+    });
+    return this.mappingsReconciled;
+  }
+
+  /** Stored `type` and `name` per entity id; unknown ids are absent. */
+  async getEntityLabels(
+    entityIds: string[],
+    spaceId: string
+  ): Promise<Map<string, Pick<ImpactEntity, 'type' | 'name'>>> {
+    if (entityIds.length === 0) {
+      return new Map();
+    }
+    assertBoundedId(spaceId, 'spaceId');
+    const response = await this.deps.storage.search({
+      size: 0,
+      track_total_hits: false,
+      query: { bool: { filter: [{ term: { spaceId } }] } },
+      aggs: {
+        entities: {
+          nested: { path: 'entities' },
+          aggs: {
+            listed: {
+              filter: { terms: { 'entities.id': entityIds } },
+              aggs: {
+                by_id: {
+                  terms: { field: 'entities.id', size: entityIds.length },
+                  aggs: {
+                    type: { terms: { field: 'entities.type', size: 1 } },
+                    name: { terms: { field: 'entities.name', size: 1 } },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+    const buckets = response.aggregations?.entities.listed.by_id.buckets ?? [];
+    return new Map(
+      buckets.map(({ key, type, name }) => [
+        String(key),
+        {
+          ...(type.buckets[0] ? { type: String(type.buckets[0].key) } : {}),
+          ...(name.buckets[0] ? { name: String(name.buckets[0].key) } : {}),
+        },
+      ])
+    );
   }
 
   /** The generic store, for the Agent Builder attachment type's resolve and staleness checks. */
@@ -145,14 +201,15 @@ export class ImpactService {
     if (!existing) {
       throw new ImpactNotFoundError(conversationId);
     }
-    return existing;
+    return toImpact(existing);
   }
 
   /** Like {@link getByConversationId}, but undefined when the conversation has no impact. */
   async findByConversationId(conversationId: string, spaceId: string): Promise<Impact | undefined> {
     assertBoundedId(spaceId, 'spaceId');
     assertBoundedId(conversationId, 'conversationId');
-    return this.documents.get(impactDocumentId(spaceId, conversationId), spaceId);
+    const existing = await this.documents.get(impactDocumentId(spaceId, conversationId), spaceId);
+    return existing && toImpact(existing);
   }
 
   /**
@@ -191,7 +248,7 @@ export class ImpactService {
         byConversationId.set(impact.conversationId, impact);
       }
     }
-    return [...byConversationId.values()];
+    return [...byConversationId.values()].map(toImpact);
   }
 
   private async write(
@@ -202,7 +259,7 @@ export class ImpactService {
     try {
       return await this.documents.upsert({
         id: impactDocumentId(spaceId, conversationId),
-        mutate,
+        mutate: (existing) => withEntityIds(mutate(existing)),
       });
     } catch (error) {
       if (error instanceof InvestigationAttachmentConflictError) {
@@ -213,13 +270,9 @@ export class ImpactService {
   }
 }
 
-/**
- * One impact document per space and conversation. Joining the two keys can
- * exceed Elasticsearch's 512-byte `_id` limit, so the id is a hash of a
- * length-prefixed pair.
- */
+/** One impact document per space and conversation. */
 export const impactDocumentId = (spaceId: string, conversationId: string): string =>
-  hashInvestigationAttachmentId(spaceId, conversationId);
+  impactAttachment.documentId(spaceId, conversationId);
 
 const assertBoundedId = (value: string, field: string): void => {
   if (value.length < 1 || value.length > MAX_IMPACT_ID_LENGTH) {
@@ -239,36 +292,15 @@ const assertEntityCeiling = (entities: ImpactEntity[]): void => {
 
 const withoutId = ({ id: _id, ...document }: Impact): ImpactDocument => document;
 
-const definedEntity = (entity: ImpactEntity): ImpactEntity => {
-  const stored: ImpactEntity = { id: entity.id };
-  if (entity.name !== undefined) stored.name = entity.name;
-  if (entity.type !== undefined) stored.type = entity.type;
-  if (entity.featureId !== undefined) stored.featureId = entity.featureId;
-  if (entity.streamName !== undefined) stored.streamName = entity.streamName;
-  if (entity.evidence !== undefined) stored.evidence = entity.evidence;
-  return stored;
-};
+/** Drops the storage-only `entityIds`. */
+const toImpact = ({
+  entityIds: _entityIds,
+  ...impact
+}: Impact & { entityIds?: string[] }): Impact => impact;
 
-/** First write wins the id. A later write fills or replaces only the fields it actually sends. */
-const unionEntities = (entities: ImpactEntity[]): ImpactEntity[] => {
-  const byId = new Map<string, ImpactEntity>();
-  for (const entity of entities) {
-    const current = byId.get(entity.id);
-    if (!current) {
-      byId.set(entity.id, definedEntity(entity));
-      continue;
-    }
-    byId.set(
-      entity.id,
-      definedEntity({
-        id: current.id,
-        name: entity.name ?? current.name,
-        type: entity.type ?? current.type,
-        featureId: entity.featureId ?? current.featureId,
-        streamName: entity.streamName ?? current.streamName,
-        evidence: entity.evidence ?? current.evidence,
-      })
-    );
-  }
-  return [...byId.values()];
+/** Derives the flat `entityIds` from `entities`. */
+const withEntityIds = (document: ImpactDocument): ImpactDocument => {
+  const { entityIds: _stale, ...rest } = document;
+  const ids = (rest.entities ?? []).map(({ id }) => id);
+  return ids.length > 0 ? { ...rest, entityIds: ids } : rest;
 };

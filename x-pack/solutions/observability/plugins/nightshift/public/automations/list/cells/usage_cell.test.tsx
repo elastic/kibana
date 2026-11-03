@@ -11,20 +11,21 @@ import { AutomationUsageCell } from './usage_cell';
 
 describe('AutomationUsageCell', () => {
   it('shows used triggers out of the limit', () => {
-    render(<AutomationUsageCell used={3} limit={5} />);
+    render(<AutomationUsageCell used={3} limit={5} isRateLimited={false} />);
 
     expect(screen.getByTestId('automationUsage')).toHaveTextContent('3 / 5');
   });
 
   it('shows a dash when usage is unknown', () => {
-    render(<AutomationUsageCell limit={5} />);
+    render(<AutomationUsageCell limit={5} isRateLimited={false} />);
 
     expect(screen.getByText('—')).toBeInTheDocument();
   });
 
-  it('shows a dash without a limit', () => {
-    render(<AutomationUsageCell used={3} />);
+  it('shows no limit and no progress bar for an unlimited automation', () => {
+    render(<AutomationUsageCell used={3} isRateLimited={false} />);
 
-    expect(screen.getByText('—')).toBeInTheDocument();
+    expect(screen.getByTestId('automationUsage')).toHaveTextContent('3 / No limit');
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
   });
 });

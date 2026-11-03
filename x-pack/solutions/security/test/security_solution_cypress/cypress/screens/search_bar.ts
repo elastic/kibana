@@ -7,6 +7,10 @@
 
 export const GLOBAL_KQL_WRAPPER = '[data-test-subj="globalDatePicker"]';
 
+export const GLOBAL_SEARCH_BAR = '[data-test-subj="globalDatePicker"]';
+
+export const GLOBAL_SEARCH_BAR_QUERY_INPUT = `${GLOBAL_SEARCH_BAR} [data-test-subj="queryInput"]`;
+
 export const GLOBAL_SEARCH_BAR_ADD_FILTER =
   '[data-test-subj="globalDatePicker"] [data-test-subj="addFilter"]';
 

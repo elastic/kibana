@@ -98,12 +98,14 @@ const FlyoutTemplateResolved = ({
   const headerAttrs = headerItem?.attributes as FlyoutHeaderProps | undefined;
   const bodyAttrs = bodyItem?.attributes as FlyoutBodyProps | undefined;
   const menuTitle = headerAttrs?.title;
-  const menuTitleString = typeof menuTitle === 'string' ? menuTitle : undefined;
+  const menuTitleString =
+    headerAttrs?.titleText ?? (typeof menuTitle === 'string' ? menuTitle : undefined);
   const flyoutAriaLabelledBy =
     ariaLabelledBy ?? (!ariaLabel && headerItem ? flyoutTitleId : undefined);
   const flyoutAriaLabel = flyoutAriaLabelledBy ? undefined : ariaLabel ?? menuTitleString;
 
-  // Feed string titles to EUI's flyout menu for history/navigation.
+  // Feed the title text to EUI's flyout menu for history/navigation. Without it EUI falls back to a
+  // placeholder title, so a header whose title is a node needs `titleText` to be named there.
   const mergedMenuProps = {
     ...(menuTitleString !== undefined ? { title: menuTitleString } : {}),
     ...flyoutMenuProps,

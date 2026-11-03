@@ -16,6 +16,7 @@ import {
   UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP,
   UNIFIED_TO_LEGACY_MAP,
   OWNER_TO_PREFIX_MAP,
+  PREFIX_TO_OWNER_MAP,
   LEGACY_EVENT_TYPE,
   LEGACY_ALERT_TYPE,
   LEGACY_EXTERNAL_REFERENCE_TYPE,
@@ -167,6 +168,18 @@ export const toUnifiedAttachmentType = (type: string, owner: string): string => 
  * `<prefix>.<type>` (e.g. `security.alert`).
  */
 export const hasOwnerUnifiedPrefix = (owner: string): boolean => OWNER_TO_PREFIX_MAP[owner] != null;
+
+/**
+ * A type with a solution prefix (security, observability, stack) must match the owner.
+ * Types with no prefix (comment, lens) or another prefix (ml, aiops) are allowed for any owner.
+ */
+export const isTypeAllowedForOwner = (type: string, owner: string): boolean => {
+  const [prefix, ...rest] = type.split('.');
+  if (rest.length === 0 || !Object.hasOwn(PREFIX_TO_OWNER_MAP, prefix)) {
+    return true;
+  }
+  return OWNER_TO_PREFIX_MAP[owner] === prefix;
+};
 
 /**
  * True when the persistable-state subtype id (legacy `.lens` or unified `lens`) has a

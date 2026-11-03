@@ -14,7 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { visualize, lens, common } = getPageObjects(['visualize', 'lens', 'common']);
   const elasticChart = getService('elasticChart');
   const testSubjects = getService('testSubjects');
-  const comboBox = getService('comboBox');
   const find = getService('find');
   const retry = getService('retry');
   const es = getService('es');
@@ -181,15 +180,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'select[data-test-subj="indexPattern-terms-orderBy"] > option[value="custom"]'
           );
 
-          const fnTarget = await testSubjects.find('indexPattern-reference-function');
-          await comboBox.openOptionsList(fnTarget);
-          await comboBox.setElement(fnTarget, 'percentile');
-
-          const fieldTarget = await testSubjects.find(
-            'indexPattern-reference-field-selection-row>indexPattern-dimension-field'
-          );
-          await comboBox.openOptionsList(fieldTarget);
-          await comboBox.setElement(fieldTarget, 'bytes');
+          await lens.configureReference({ operation: 'percentile', field: 'bytes' });
 
           await retry.try(async () => {
             // Can not use testSubjects because data-test-subj is placed range input and number input

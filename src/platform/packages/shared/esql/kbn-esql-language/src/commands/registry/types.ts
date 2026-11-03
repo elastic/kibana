@@ -13,6 +13,7 @@ import type {
   ESQLControlVariable,
   ESQLSourceResult,
   ESQLFieldWithMetadata,
+  ESQLFullTextMatch,
   ESQLCallbacks,
   EsqlView,
   EsqlDataset,
@@ -142,6 +143,7 @@ export interface ESQLUserDefinedColumn {
   userDefined: true;
   location: ESQLLocation; // TODO should this be optional?
   isUnmappedField?: boolean;
+  fullTextMatch?: ESQLFullTextMatch;
 }
 
 export type ESQLColumnData = ESQLUserDefinedColumn | ESQLFieldWithMetadata;
@@ -344,6 +346,12 @@ export enum Location {
    * In the HIGHLIGHT command query expression (before ON)
    */
   HIGHLIGHT_QUERY = 'highlight_query',
+
+  /**
+   * In the HIGHLIGHT command `ON` field list. Only used to give that list its own suggestion
+   * ordering, which the sorting context keys per option.
+   */
+  HIGHLIGHT_ON = 'highlight_on',
 
   /**
    * In the DENSE_VECTOR command field list

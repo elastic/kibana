@@ -6,6 +6,7 @@
  */
 
 import type { ActionPolicyAttachmentData, CreateActionPolicyData } from '@kbn/alerting-v2-schemas';
+import { normalizeMatcher } from './normalize_matcher';
 
 /**
  * Maps partial action policy attachment data to the API request payload,
@@ -14,12 +15,15 @@ import type { ActionPolicyAttachmentData, CreateActionPolicyData } from '@kbn/al
  */
 export const attachmentDataToActionPolicyPayload = (
   data: Partial<ActionPolicyAttachmentData>
-): CreateActionPolicyData => ({
-  name: data.name ?? '',
-  description: data.description ?? '',
-  destinations: data.destinations ?? [],
-  ...(data.matcher !== undefined ? { matcher: data.matcher ?? undefined } : {}),
-  ...(data.group_by !== undefined ? { group_by: data.group_by ?? undefined } : {}),
-  ...(data.grouping_mode !== undefined ? { grouping_mode: data.grouping_mode ?? undefined } : {}),
-  ...(data.throttle !== undefined ? { throttle: data.throttle ?? undefined } : {}),
-});
+): CreateActionPolicyData => {
+  const matcher = normalizeMatcher(data.matcher);
+
+  return {
+    name: data.name ?? '',
+    destinations: data.destinations ?? [],
+    ...(data.description ? { description: data.description } : {}),
+    ...(matcher ? { matcher } : {}),
+    ...(data.grouping !== undefined ? { grouping: data.grouping } : {}),
+    ...(data.throttle !== undefined ? { throttle: data.throttle } : {}),
+  };
+};

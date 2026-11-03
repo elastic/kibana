@@ -66,12 +66,14 @@ const storageSettings = {
         },
       }),
       decidedAt: types.date({}),
+      decisionMode: types.keyword({}),
       dismissReason: types.keyword({}),
       rationale: types.text({}),
       executionError: types.text({}),
       previousExecutionError: types.text({}),
 
       workflowExecutionId: types.keyword({}),
+      gateReleasedAt: types.date({}),
 
       createdAt: types.date({}),
       createdBy: types.object({
@@ -93,7 +95,9 @@ export type ProposalsStorageSettings = typeof storageSettings;
  * ranks are a storage concern and are stripped before a proposal leaves the
  * service, so they never reach the API contract.
  */
-export type ProposalDocument = Omit<Proposal, 'id'> & ProposalSortRanks;
+export type ProposalDocument = Omit<Proposal, 'id'> &
+  Required<Pick<Proposal, 'rootProposalId' | 'revision'>> &
+  ProposalSortRanks;
 
 export type ProposalsStorageClient = IStorageClient<ProposalsStorageSettings, ProposalDocument>;
 

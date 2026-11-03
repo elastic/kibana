@@ -60,13 +60,18 @@ const createInvestigationConfig = (
         // Allow sixteen investigation workflows plus five background tasks.
         '--xpack.task_manager.capacity=21',
         '--xpack.nightshift_investigations.enabled=true',
+        // Investigations only run as the Nightshift agent service account.
+        '--xpack.security.serviceAccounts.enabled=true',
+        '--xpack.agenticInvestigations.enabled=true',
+        '--xpack.proposals.enabled=true',
         '--feature_flags.overrides.nightshift.enabled=true',
         '--xpack.nightshift_investigations.cortex.enabled=false',
+        '--xpack.nightshift_investigations.memory.enabled=false',
+        '--xpack.nightshift_investigations.findings_recorder.enabled=false',
         `--config=${sandboxKibanaConfig}`,
         ...(telemetryConfig ? [`--config=${telemetryConfig}`] : []),
         '--uiSettings.overrides.workflows:ui:enabled=true',
         '--uiSettings.overrides.workflows:aiAgent:enabled=true',
-        '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
         // The tracing config set already lifts the content redaction settings.
         '--uiSettings.overrides.agentBuilder:tracing:enabled=true',
         '--uiSettings.overrides.agentBuilder:tracing:includeUserData=true',

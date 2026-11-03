@@ -15,6 +15,7 @@ import type {
 import type { InMemoryConnector, RawAction } from '../types';
 import type { IngestInboundEventInput, IngestInboundEventResult } from './ingest';
 import { ingestInboundEvent } from './ingest';
+import type { InboundEventRateLimiter } from './inbound_event_rate_limiter';
 import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from './types';
 
 /**
@@ -33,6 +34,7 @@ interface InboundEventsClientInternalDeps {
   getElasticsearchClient: () => Promise<IClusterClient>;
   getKibanaRequestAccess: (request: KibanaRequest) => Promise<boolean>;
   inMemoryConnectors: InMemoryConnector[];
+  rateLimiter: InboundEventRateLimiter;
 }
 
 export interface InboundEventsClient {
@@ -60,6 +62,7 @@ export function buildInboundEventsClient(
         getElasticsearchClient: deps.getElasticsearchClient,
         getKibanaRequestAccess: deps.getKibanaRequestAccess,
         inMemoryConnectors: deps.inMemoryConnectors,
+        rateLimiter: deps.rateLimiter,
       }),
   };
 }

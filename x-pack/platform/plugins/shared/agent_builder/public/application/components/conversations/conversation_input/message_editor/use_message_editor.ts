@@ -9,17 +9,24 @@ import type { RefObject } from 'react';
 import { useRef, useMemo, useState, useCallback } from 'react';
 import type { CommandMatchResult, CommandBadgeData } from './command_menu';
 import { useCommandMenu, useCommandMenuPrefetch } from './command_menu';
-import { createCommandBadgeElement, deserializeInputSegments } from './command_badge';
+import {
+  CommandBadgeSerializationError,
+  createCommandBadgeElement,
+  deserializeInputSegments,
+} from './command_badge';
 import { serializeEditorContent } from './serialize';
 import {
   createImagePlaceholderElement,
   getPlaceholderNamesFromElement,
   removePlaceholderByName as removePlaceholderByNameFromDom,
 } from './image_placeholder';
+import { getTextBeforeCursor } from './command_menu/utils/get_text_before_cursor';
+import { isAtWordBoundary } from './command_menu/command_matcher';
 import {
   createCommandRange,
   createTextFragment,
   ensureCaretTargetBeforeFirstBadge,
+  insertNodeAtCursor,
   insertSpaceAfter,
   placeCursorAfter,
   placeCursorAtEnd,
@@ -44,10 +51,25 @@ export interface MessageEditorController {
   getContent: () => string;
   setContent: (text: string) => void;
   clear: () => void;
+  insertText: (text: string) => void;
   isEmpty: boolean;
   getPlaceholderNames: () => string[];
   removePlaceholderByName: (name: string) => void;
 }
+
+// The limit applies to what is sent, and image placeholders and command badges serialize to
+// markdown links longer than the text they display. Falls back to the displayed length for a
+// badge that cannot be serialized, which submit reports on its own.
+const getSerializedLength = (element: HTMLElement, displayedLength: number): number => {
+  try {
+    return serializeEditorContent(element).length;
+  } catch (error) {
+    if (error instanceof CommandBadgeSerializationError) {
+      return displayedLength;
+    }
+    throw error;
+  }
+};
 
 /**
  * Reactive bindings for the MessageEditor component.
@@ -159,13 +181,13 @@ const useMessageEditorInstance = ({
 const useMessageEditorController = ({
   ref,
   syncIsEmpty,
+  notifyInput,
   isEmpty,
-  setIsEmpty,
 }: {
   ref: RefObject<HTMLDivElement>;
   syncIsEmpty: () => void;
+  notifyInput: () => void;
   isEmpty: boolean;
-  setIsEmpty: (next: boolean) => void;
 }): MessageEditorController => {
   const controller = useMemo(
     () => ({
@@ -202,8 +224,24 @@ const useMessageEditorController = ({
       clear: () => {
         if (ref.current) {
           ref.current.innerHTML = '';
-          setIsEmpty(true);
+          syncIsEmpty();
         }
+      },
+      insertText: (text: string) => {
+        const editor = ref.current;
+        if (!editor) {
+          return;
+        }
+        // Checked before focus(), because focus() moves the caret to the start of the editor
+        const isCaretInside = editor.contains(window.getSelection()?.anchorNode ?? null);
+        editor.focus();
+        if (!isCaretInside) {
+          placeCursorAtEnd(editor);
+        }
+        const textBefore = getTextBeforeCursor(editor);
+        const needsSpace = !isAtWordBoundary(textBefore, textBefore.length);
+        insertNodeAtCursor(document.createTextNode(`${needsSpace ? ' ' : ''}${text}`));
+        notifyInput();
       },
       getPlaceholderNames: () => (ref.current ? getPlaceholderNamesFromElement(ref.current) : []),
       removePlaceholderByName: (name: string) => {
@@ -214,7 +252,7 @@ const useMessageEditorController = ({
       },
       isEmpty,
     }),
-    [ref, isEmpty, setIsEmpty, syncIsEmpty]
+    [ref, isEmpty, syncIsEmpty, notifyInput]
   );
   return controller;
 };
@@ -236,20 +274,24 @@ const useMessageEditorController = ({
  * <MessageEditor messageEditor={messageEditor} onSubmit={handleSubmit} />
  */
 export const useMessageEditor = (
-  options: { onEditorFocus?: () => void; onContentChange?: () => void } = {}
+  options: { onEditorFocus?: () => void; onContentChange?: () => void; maxLength?: number } = {}
 ): {
   messageEditor: MessageEditorInstance;
   controller: MessageEditorController;
+  overLimitCharacterCount: number;
 } => {
-  const { onEditorFocus, onContentChange } = options;
+  const { onEditorFocus, onContentChange, maxLength = Infinity } = options;
   const ref = useRef<HTMLDivElement>(null);
   const [isEmpty, setIsEmpty] = useState(true);
+  const [overLimitCharacterCount, setOverLimitCharacterCount] = useState(0);
 
   const syncIsEmpty = useCallback(() => {
     if (!ref?.current) {
       return;
     }
     const textContent = stripZeroWidthSpaces(ref.current.textContent ?? '');
+    const contentLength = getSerializedLength(ref.current, textContent.length);
+    setOverLimitCharacterCount(contentLength > maxLength ? contentLength : 0);
     const nextIsEmpty = !textContent || textContent.trim() === '';
     if (nextIsEmpty) {
       // If current text content is empty clear innerHTML
@@ -257,16 +299,20 @@ export const useMessageEditor = (
       ref.current.innerHTML = '';
     }
     setIsEmpty(nextIsEmpty);
-  }, []);
+  }, [maxLength]);
 
   const instance = useMessageEditorInstance({ ref, syncIsEmpty, onEditorFocus, onContentChange });
-  const controller = useMessageEditorController({ ref, syncIsEmpty, isEmpty, setIsEmpty });
+  const onChangeRef = useRef(instance.onChange);
+  onChangeRef.current = instance.onChange;
+  const notifyInput = useCallback(() => onChangeRef.current(), []);
+  const controller = useMessageEditorController({ ref, syncIsEmpty, notifyInput, isEmpty });
   const messageEditor = useMemo(
     () => ({
       messageEditor: instance,
       controller,
+      overLimitCharacterCount,
     }),
-    [instance, controller]
+    [instance, controller, overLimitCharacterCount]
   );
 
   return messageEditor;

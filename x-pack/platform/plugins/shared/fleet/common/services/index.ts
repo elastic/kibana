@@ -142,7 +142,14 @@ export {
   isAgentVersionLessThanFleetServer,
 } from './check_fleet_server_versions';
 
-export { removeSOAttributes, getSortConfig, checkTargetVersionsValidity } from './agent_utils';
+export { getIncompatibleIntegrations } from './agent_version_compatibility';
+export {
+  removeSOAttributes,
+  getSortConfig,
+  checkTargetVersionsValidity,
+  extractAgentIdsWithData,
+  filterIncomingDataWithData,
+} from './agent_utils';
 
 export { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from './cloud_connector_helpers';
 
@@ -178,9 +185,24 @@ export {
 
 export {
   hasVersionSuffix,
+  hasAgentVersionSuffix,
+  hasSentinelVersionSuffix,
+  getSentinelVersionPolicyId,
   removeVersionSuffixFromPolicyId,
   buildPolicyIdOrVariantsKuery,
   buildPolicyIdsOrVariantsKuery,
   buildPolicyBaseIdWithFallbackKuery,
   buildPolicyBaseIdsWithFallbackKuery,
 } from './version_specific_policies_utils';
+
+export {
+  parseYamlChangelog,
+  formatChangelog,
+  getBreakingChanges,
+  getBreakingChangesInRange,
+  ChangeType,
+  type Changelog,
+  type ChangelogEntry,
+  type BreakingChangesLog,
+  type YamlParseFn,
+} from './changelog_utils';

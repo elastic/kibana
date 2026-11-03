@@ -500,6 +500,70 @@ describe('When on integration detail', () => {
     });
   });
 
+  describe('and the package has non FIPS policy templates', () => {
+    const renderWithFips = async ({
+      isFipsEnabled,
+      fipsCompatible,
+    }: {
+      isFipsEnabled: boolean;
+      fipsCompatible: boolean;
+    }) => {
+      const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
+      mockedApi.responseProvider.epmGetInfo.mockReturnValue({
+        ...baseResponse,
+        item: {
+          ...baseResponse.item,
+          policy_templates: baseResponse.item.policy_templates?.map((template) => ({
+            ...template,
+            fips_compatible: fipsCompatible,
+          })),
+        },
+      });
+      mockedApi.responseProvider.fleetSetup.mockReturnValue({
+        isReady: true,
+        missing_requirements: [],
+        missing_optional_features: [],
+        is_fips_enabled: isFipsEnabled,
+      });
+      await render();
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+    };
+
+    it(
+      'should hide the Configs tab when FIPS is enabled and all policy templates are non FIPS',
+      async () => {
+        await renderWithFips({ isFipsEnabled: true, fipsCompatible: false });
+
+        await renderResult.findByTestId('tab-settings');
+        expect(renderResult.queryByTestId('tab-configs')).toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should show the Configs tab when FIPS is enabled and the policy templates are FIPS compatible',
+      async () => {
+        await renderWithFips({ isFipsEnabled: true, fipsCompatible: true });
+
+        expect(await renderResult.findByTestId('tab-configs')).not.toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should show the Configs tab when FIPS is not enabled even if the policy templates are non FIPS',
+      async () => {
+        await renderWithFips({ isFipsEnabled: false, fipsCompatible: false });
+
+        expect(await renderResult.findByTestId('tab-configs')).not.toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+  });
+
   describe('and the Add integration button is clicked', () => {
     beforeEach(async () => {
       await render();
@@ -565,7 +629,7 @@ describe('When on integration detail', () => {
 
         expect(testRenderer.startServices.application.navigateToApp).toHaveBeenCalledWith(
           'onboarding',
-          { path: '/aws', state: { newSession: true } }
+          { path: '/aws', state: { newSession: true, returnUrl: window.location.href } }
         );
       },
       TESTS_TIMEOUT
@@ -598,22 +662,28 @@ describe('When on integration detail', () => {
     beforeEach(async () => {
       testRenderer.mountHistory.push(policiesTabURLPath);
       await render();
-    });
+    }, TESTS_TIMEOUT);
 
-    it('should display policies list', () => {
-      const table = renderResult.getByTestId('integrationPolicyTable');
-      expect(table).not.toBeNull();
-    });
+    it(
+      'should display policies list',
+      async () => {
+        expect(await renderResult.findByTestId('integrationPolicyTable')).not.toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
 
-    it('should link to integration policy detail when an integration policy is clicked', async () => {
-      await mockedApi.waitForApi();
-      const firstPolicy = renderResult.getAllByTestId(
-        'integrationNameLink'
-      )[0] as HTMLAnchorElement;
-      expect(firstPolicy.href).toEqual(
-        'http://localhost/mock/app/integrations/edit-integration/e8a37031-2907-44f6-89d2-98bd493f60dc'
-      );
-    });
+    it(
+      'should link to integration policy detail when an integration policy is clicked',
+      async () => {
+        const [firstPolicy] = (await renderResult.findAllByTestId(
+          'integrationNameLink'
+        )) as HTMLAnchorElement[];
+        expect(firstPolicy.href).toEqual(
+          'http://localhost/mock/app/integrations/edit-integration/e8a37031-2907-44f6-89d2-98bd493f60dc'
+        );
+      },
+      TESTS_TIMEOUT
+    );
   });
 });
 
