@@ -25,6 +25,9 @@ import { esqlTimeRange } from '../../utils/esql_time_range';
 
 const SAMPLE_PROBABILITY_FACTOR = 3;
 const SAMPLE_LIMIT_FACTOR = 10;
+const ESQL_VIEW_PREFIX = '$.';
+
+const isEsqlView = (index: string) => index.startsWith(ESQL_VIEW_PREFIX);
 
 type WhereCondition = ESQLAstExpression & ComposerQueryTagHole;
 
@@ -53,11 +56,8 @@ interface GetSampleDocumentsEsqlParams {
    * `filter` parameter. ES applies these at the request layer (before the ES|QL
    * pipeline runs), so callers can pass raw fixture-style DSL (`term`, `terms`,
    * `match`, `match_phrase`, `exists`, `bool { should, minimum_should_match }`,
-   * ...) without translating to KQL.
-   *
-   * Avoid this when `index` is an ES|QL view (`$.<name>`): a request-level
-   * `filter` prevents `SAMPLE` / `LIMIT` / `STATS` pushdown into the view (see
-   * `esqlTimeRange`). Prefer `whereCondition`.
+   * ...) without translating to KQL. On ES|QL views a request-level `filter`
+   * blocks `SAMPLE` / `LIMIT` / `STATS` pushdown (see `esqlTimeRange`).
    */
   dslFilter?: QueryDslQueryContainer | QueryDslQueryContainer[];
   abortSignal: AbortSignal;
@@ -197,7 +197,10 @@ export async function getSampleDocumentsEsql({
     sampleProbability?: number;
     limit?: number;
   } = {}) => {
-    let query = esql.from(indices, ['_id', '_source']).where`${whereExpression}`;
+    // Outer METADATA on a view is null-injected as an Eval between FROM and WHERE,
+    // which makes QSTR/MATCH fail with "cannot be used after FROM".
+    const metadata = indices.some(isEsqlView) ? undefined : ['_id', '_source'];
+    let query = esql.from(indices, metadata).where`${whereExpression}`;
     if (sampleProbability !== undefined && sampleProbability < 1) {
       query = query.sample(sampleProbability);
     }

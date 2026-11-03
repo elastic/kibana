@@ -253,6 +253,27 @@ describe('getSampleDocumentsEsql', () => {
     );
   });
 
+  it('omits METADATA when any index is an ES|QL view', async () => {
+    const { esClient, query } = createEsClient();
+    query.mockResolvedValueOnce(
+      createResponse({ columns: [{ name: 'message', type: 'text' }], values: [['boom']] })
+    );
+
+    await getSampleDocumentsEsql({
+      esClient,
+      abortSignal: AbortSignal.timeout(30_000),
+      index: ['$.logs', 'logs-*'],
+      start: 100,
+      end: 200,
+      whereCondition: esql.exp`QSTR(${esql.str('log.level:error')})`,
+      size: 2,
+    });
+
+    expect(query.mock.calls[0][0].query).toBe(
+      `FROM $.logs, logs-* | WHERE ${TIME_RANGE} AND QSTR("log.level:error") | LIMIT 2`
+    );
+  });
+
   it('emits SET unmapped_fields = "NULLIFY" when unmappedFields is NULLIFY', async () => {
     const { esClient, query } = createEsClient();
     query.mockResolvedValueOnce(createResponse({ values: [] }));
