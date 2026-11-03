@@ -19,6 +19,7 @@
     "@kbn/core-http-router-server-internal",
     "@kbn/core-http-browser",
     "@kbn/core-http-router-server-mocks",
+    "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/scout"
   ]
 }

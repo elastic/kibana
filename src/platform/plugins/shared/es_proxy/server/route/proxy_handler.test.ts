@@ -12,6 +12,7 @@ import { errors } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { RequestFixtureOptions } from '@kbn/core-http-router-server-mocks';
 import { createProxyHandler, getEsPath } from './proxy_handler';
 import type { ProxyBody, ProxyParams } from './proxy_handler';
@@ -190,6 +191,51 @@ describe('WHEN proxying a request to Elasticsearch', () => {
       'content-type': 'application/json',
       warning: '299 deprecated',
     });
+  });
+
+  it('SHOULD forward async query and body length headers', async () => {
+    const { run, transportRequest } = setup({ method: 'post' });
+    transportRequest.mockResolvedValue({
+      statusCode: 200,
+      headers: {
+        'content-type': 'text/csv',
+        'content-length': '42',
+        'x-elasticsearch-async-id': 'FmNJRUZ1YWZCU3dHY1BIOUhaenVSRkEaaXF',
+        'x-elasticsearch-async-is-running': '?1',
+      },
+      body: Readable.from(['a,b\n1,2\n']),
+    });
+
+    const response = await run();
+
+    expect(response.options.headers).toEqual({
+      'content-type': 'text/csv',
+      'content-length': '42',
+      'x-elasticsearch-async-id': 'FmNJRUZ1YWZCU3dHY1BIOUhaenVSRkEaaXF',
+      'x-elasticsearch-async-is-running': '?1',
+    });
+  });
+
+  it('SHOULD drop body length and encoding WHEN the transport rebuilt the error body', async () => {
+    const { run, transportRequest } = setup();
+    transportRequest.mockRejectedValue(
+      new errors.ResponseError(
+        elasticsearchClientMock.createApiResponse({
+          statusCode: 401,
+          body: { error: { type: 'security_exception' } },
+          headers: {
+            'content-type': 'application/json',
+            'content-length': '512',
+            'content-encoding': 'gzip',
+          },
+        })
+      )
+    );
+
+    const response = await run();
+
+    expect(response.status).toBe(401);
+    expect(response.options.headers).toEqual({ 'content-type': 'application/json' });
   });
 
   it('SHOULD disable compression WHEN Elasticsearch returns server-sent events', async () => {

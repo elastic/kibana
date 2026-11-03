@@ -25,10 +25,13 @@ export type ProxyBody = Buffer | undefined;
 
 const FORWARDED_RESPONSE_HEADERS = [
   'content-type',
-  'content-encoding',
   'warning',
   'retry-after',
+  'x-elasticsearch-async-id',
+  'x-elasticsearch-async-is-running',
 ] as const;
+// Only valid while the body is passed through byte for byte.
+const BODY_FRAMING_HEADERS = ['content-encoding', 'content-length'] as const;
 const EVENT_STREAM_TYPE = 'text/event-stream';
 const RETRYABLE_METHODS: ReadonlySet<string> = new Set(['GET', 'HEAD']);
 // Kibana's transport accepts `{ retryOn401 }` here, but the client typings only declare a boolean.
@@ -89,14 +92,19 @@ export const getEsPath = (url: URL): string => {
 
 /**
  * Picks the Elasticsearch response headers returned to the client. `location` is relative to
- * Elasticsearch, so it is rewritten to point back through the proxy.
+ * Elasticsearch, so it is rewritten to point back through the proxy. Encoding and length are only
+ * kept when the original Elasticsearch body is returned unchanged.
  */
 export const getResponseHeaders = (
   esHeaders: IncomingHttpHeaders,
-  proxyBasePath: string
+  proxyBasePath: string,
+  { isOriginalBody }: { isOriginalBody: boolean }
 ): ResponseHeaders => {
   const headers: ResponseHeaders = {};
-  for (const name of FORWARDED_RESPONSE_HEADERS) {
+  const names = isOriginalBody
+    ? [...FORWARDED_RESPONSE_HEADERS, ...BODY_FRAMING_HEADERS]
+    : FORWARDED_RESPONSE_HEADERS;
+  for (const name of names) {
     const value = esHeaders[name];
     if (value) {
       headers[name] = value;
@@ -149,14 +157,19 @@ export const createProxyHandler =
       return response.custom({
         statusCode: esResponse.statusCode ?? 200,
         body: esResponse.body,
-        headers: getResponseHeaders(esResponse.headers ?? {}, proxyBasePath),
+        headers: getResponseHeaders(esResponse.headers ?? {}, proxyBasePath, {
+          isOriginalBody: true,
+        }),
       });
     } catch (error) {
       if (error instanceof errors.ResponseError) {
         return response.custom({
           statusCode: error.statusCode ?? 500,
           body: error.body,
-          headers: getResponseHeaders(error.headers ?? {}, proxyBasePath),
+          // The transport may have read and parsed the error body, so its original framing no longer applies.
+          headers: getResponseHeaders(error.headers ?? {}, proxyBasePath, {
+            isOriginalBody: false,
+          }),
         });
       }
       if (error instanceof errors.TimeoutError) {

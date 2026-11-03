@@ -2,7 +2,7 @@
 
 Generic Elasticsearch proxy exposed as the internal Kibana API `/internal/es_proxy/{path*}`.
 
-A request to `/internal/es_proxy/<es path>?<query>` is sent to `/<es path>?<query>` on Elasticsearch as the current user. The response status, body, `content-type`, `content-encoding`, `warning` and `retry-after` headers come back unchanged. A `location` header is rewritten to point back through the proxy.
+A request to `/internal/es_proxy/<es path>?<query>` is sent to `/<es path>?<query>` on Elasticsearch as the current user. The response status, body, `content-type`, `content-encoding`, `content-length`, `warning`, `retry-after`, `x-elasticsearch-async-id` and `x-elasticsearch-async-is-running` headers come back unchanged. The async headers carry the query id for async searches whose results are not JSON (for example `_query/async?format=csv`). A `location` header is rewritten to point back through the proxy.
 
 ```
 GET kbn:/internal/es_proxy
@@ -25,7 +25,7 @@ Requests use API version `1` (`elastic-api-version` header). Internal APIs carry
 - **Path encoding.** The Elasticsearch path is taken from the raw URL, so percent-encoded characters (for example `%2F` in a document id) are preserved.
 - **GET and HEAD have no body.** Kibana does not accept request bodies on GET or HEAD. Use POST for search-style APIs (`_search`, `_count`, `_msearch`, ...), which Elasticsearch accepts.
 - **Compressed bodies.** Request bodies are forwarded still compressed together with their `content-encoding`, so gzip-compressed requests (for example from Elasticsearch clients with compression enabled) work.
-- **Headers.** Only `content-type`, `content-encoding` (for requests with a body), `accept` and `x-forwarded-*` headers are sent to Elasticsearch. Cookies and other client headers are not forwarded; credentials come from the scoped Elasticsearch client.
+- **Headers.** Only `content-type`, `content-encoding` (for requests with a body), `accept` and `x-forwarded-*` headers are sent to Elasticsearch. Cookies and other client headers are not forwarded; credentials come from the scoped Elasticsearch client. Elasticsearch receives Kibana's request id as `x-opaque-id`; Kibana adopts a client's `x-opaque-id` as that id only when `server.requestId.allowFromAnyIp` or `server.requestId.ipAllowlist` permits it.
 
 ## Authorization
 

@@ -92,6 +92,24 @@ apiTest.describe('Elasticsearch proxy', { tag: tags.deploymentAgnostic }, () => 
     expect(response.body.error.type).toBe('index_not_found_exception');
   });
 
+  apiTest('returns async ES|QL ids in headers for non-JSON formats', async ({ apiClient }) => {
+    const response = await apiClient.post(`${PROXY_PATH}/_query/async?format=csv`, {
+      headers,
+      body: { query: `FROM ${TEST_INDEX} | LIMIT 1`, keep_on_completion: true },
+      responseType: 'text',
+    });
+    expect(response).toHaveStatusCode(200);
+    const asyncId = response.headers['x-elasticsearch-async-id'];
+    expect(asyncId).toMatch(/\S+/);
+    expect(response.headers['x-elasticsearch-async-is-running']).toBe('?0');
+
+    const deleteResponse = await apiClient.delete(`${PROXY_PATH}/_query/async/${asyncId}`, {
+      headers,
+      responseType: 'json',
+    });
+    expect(deleteResponse).toHaveStatusCode(200);
+  });
+
   apiTest('forwards DELETE requests', async ({ apiClient }) => {
     const response = await apiClient.delete(`${PROXY_PATH}/${TEST_INDEX}/_doc/1`, {
       headers,
