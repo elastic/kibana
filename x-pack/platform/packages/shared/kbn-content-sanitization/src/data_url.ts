@@ -12,6 +12,30 @@ const SVG_MIME_TYPE = 'image/svg+xml';
 // RFC 2397: data:[<mediatype>][;base64],<data>
 const DATA_URL_REGEX = /^data:([^,]*),([\s\S]*)$/i;
 
+const isC0ControlOrSpace = (char: string) => char.charCodeAt(0) <= 0x20;
+
+/**
+ * Mirrors the WHATWG URL preprocessing browsers apply before parsing: leading and trailing C0
+ * controls and spaces are trimmed, and ASCII tab and newline characters are removed everywhere.
+ */
+const normalizeUrl = (url: string): string => {
+  const chars = Array.from(url);
+  const start = chars.findIndex((char) => !isC0ControlOrSpace(char));
+  if (start === -1) {
+    return '';
+  }
+  const end =
+    chars.length -
+    chars
+      .slice()
+      .reverse()
+      .findIndex((char) => !isC0ControlOrSpace(char));
+  return chars
+    .slice(start, end)
+    .join('')
+    .replace(/[\t\n\r]/g, '');
+};
+
 /**
  * Sanitizes an SVG image carried in a `data:` URL (e.g. an avatar stored as a saved object or user
  * profile attribute). Browsers only render a data URL as SVG when its media type is `image/svg+xml`,
@@ -23,7 +47,7 @@ const DATA_URL_REGEX = /^data:([^,]*),([\s\S]*)$/i;
  * @throws if the SVG payload cannot be decoded or sanitized.
  */
 export function sanitizeImageDataUrl(dataUrl: string): string {
-  const match = DATA_URL_REGEX.exec(dataUrl);
+  const match = DATA_URL_REGEX.exec(normalizeUrl(dataUrl));
   if (!match) {
     return dataUrl;
   }
@@ -36,9 +60,12 @@ export function sanitizeImageDataUrl(dataUrl: string): string {
 
   let svgContent: Buffer;
   try {
-    svgContent = params.includes('base64')
-      ? Buffer.from(payload, 'base64')
-      : Buffer.from(decodeURIComponent(payload), 'utf8');
+    // The payload is percent-decoded first, so escaped base64 characters (such as `%3D`) decode
+    // the same way a browser decodes them.
+    svgContent = Buffer.from(
+      decodeURIComponent(payload),
+      params.includes('base64') ? 'base64' : 'utf8'
+    );
   } catch (error) {
     throw new Error(`Failed to decode SVG data URL: ${error.message}`);
   }

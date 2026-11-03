@@ -48,6 +48,39 @@ describe('sanitizeImageDataUrl', () => {
     expect(sanitized).not.toMatch(/onload|<script|alert/i);
   });
 
+  it.each([
+    ['a tab in the media type', (url: string) => url.replace('svg+xml', 'sv\tg+xml')],
+    ['a newline in the media type', (url: string) => url.replace('image/', 'image\n/')],
+    ['a tab in the base64 parameter', (url: string) => url.replace('base64', 'base\t64')],
+    ['leading whitespace', (url: string) => `\u0001 \t${url}`],
+    ['trailing whitespace', (url: string) => `${url} \n`],
+  ])('sanitizes an SVG data URL with %s', (_, mutate) => {
+    const sanitized = decodeSvgDataUrl(
+      sanitizeImageDataUrl(mutate(toBase64DataUrl(MALICIOUS_SVG)))
+    );
+
+    expect(sanitized).toContain('<rect width="10" height="10"></rect>');
+    expect(sanitized).not.toMatch(/onload|<script|alert|href|foreignObject|iframe/i);
+  });
+
+  it('percent-decodes a base64 payload before decoding it', () => {
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg"><rect width="1" height="1"/></svg>';
+    const base64 = Buffer.from(svg).toString('base64');
+    const escaped = base64.replace(/=+$/, (padding) => padding.replace(/=/g, '%3D'));
+    const clean = decodeSvgDataUrl(sanitizeImageDataUrl(`data:image/svg+xml;base64,${base64}`));
+
+    expect(escaped).not.toBe(base64);
+    expect(decodeSvgDataUrl(sanitizeImageDataUrl(`data:image/svg+xml;base64,${escaped}`))).toBe(
+      clean
+    );
+  });
+
+  it('returns a non-SVG data URL unchanged when it contains whitespace', () => {
+    const value = ' data:image/png;base64,iVBOR\tw0KGgo=';
+
+    expect(sanitizeImageDataUrl(value)).toBe(value);
+  });
+
   it('keeps a benign SVG renderable', () => {
     const svg =
       '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">' +
