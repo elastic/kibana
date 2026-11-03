@@ -175,28 +175,47 @@ for (const { name, label, role, canChangeSources } of ROLES) {
         });
       }
 
-      apiTest('closes a significant event', async ({ apiClient }) => {
-        await expect
-          .poll(async () => {
-            const response = await apiClient.get(`${EVENTS_ENDPOINT}?event_id=${eventId}`, {
-              headers,
-              responseType: 'json',
-            });
-            return {
-              statusCode: response.statusCode,
-              eventIds: (response.body.hits ?? []).map(
-                ({ event_id: id }: { event_id: string }) => id
-              ),
-            };
-          }, POLL_OPTIONS)
-          .toStrictEqual({ statusCode: 200, eventIds: [eventId] });
+      apiTest('closes and reopens a significant event', async ({ apiClient }) => {
+        // An operator's change is an Alerting v2 alert action, which writes `.alert-actions` and
+        // its synthetic `.rule-events` version: this role has no write privilege on either index.
+        const readEventStatuses = async () => {
+          const response = await apiClient.get(`${EVENTS_ENDPOINT}?event_id=${eventId}`, {
+            headers,
+            responseType: 'json',
+          });
+          return {
+            statusCode: response.statusCode,
+            statuses: (response.body.hits ?? []).map(
+              ({ event_id: id, status }: { event_id: string; status: string }) => ({ id, status })
+            ),
+          };
+        };
 
-        const response = await apiClient.post(`${EVENTS_ENDPOINT}/${eventId}/update`, {
+        await expect
+          .poll(readEventStatuses, POLL_OPTIONS)
+          .toStrictEqual({ statusCode: 200, statuses: [{ id: eventId, status: 'active' }] });
+
+        const closeResponse = await apiClient.post(`${EVENTS_ENDPOINT}/${eventId}/update`, {
           headers,
           body: { status: 'inactive', assessment_note: `Closed by ${name}` },
           responseType: 'json',
         });
-        expect(response).toHaveStatusCode(200);
+        expect(closeResponse).toHaveStatusCode(200);
+        expect(closeResponse.body).toStrictEqual({ updated: 1, ignored: 0, status: 'inactive' });
+        await expect
+          .poll(readEventStatuses, POLL_OPTIONS)
+          .toStrictEqual({ statusCode: 200, statuses: [{ id: eventId, status: 'inactive' }] });
+
+        const reopenResponse = await apiClient.post(`${EVENTS_ENDPOINT}/${eventId}/update`, {
+          headers,
+          body: { status: 'active', assessment_note: `Reopened by ${name}` },
+          responseType: 'json',
+        });
+        expect(reopenResponse).toHaveStatusCode(200);
+        expect(reopenResponse.body).toStrictEqual({ updated: 1, ignored: 0, status: 'active' });
+        await expect
+          .poll(readEventStatuses, POLL_OPTIONS)
+          .toStrictEqual({ statusCode: 200, statuses: [{ id: eventId, status: 'active' }] });
       });
 
       apiTest('writes and reads detections', async ({ apiClient }) => {
