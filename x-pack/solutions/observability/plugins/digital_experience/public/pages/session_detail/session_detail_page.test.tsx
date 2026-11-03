@@ -224,6 +224,46 @@ describe('SessionDetailPage', () => {
     expect(marker.parentElement).toHaveStyle({ left: '75%', transform: 'translateX(-75%)' });
   });
 
+  it('lists what happened on each page, without spans and logs', async () => {
+    mockFetch.mockResolvedValue(detail());
+    const scrollIntoView = jest.fn();
+    window.HTMLElement.prototype.scrollIntoView = scrollIntoView;
+    renderPage();
+
+    const visits = await screen.findAllByTestId('digitalExperiencePageVisit');
+    expect(visits).toHaveLength(2);
+    expect(visits[0]).toHaveTextContent('/');
+    expect(visits[0]).toHaveTextContent('50% of the session');
+    // Page views and clicks read by kind, not by their raw event names.
+    const click = within(visits[0]).getByTestId('digitalExperienceSessionEvent-click');
+    expect(click).toHaveTextContent('Click');
+    expect(click).toHaveTextContent('button#add');
+    expect(
+      within(visits[0]).getByTestId('digitalExperienceSessionEvent-page_view')
+    ).toHaveTextContent('Page view');
+    expect(visits[0]).not.toHaveTextContent('documentLoad');
+    expect(visits[0]).not.toHaveTextContent('GET /api/cart');
+    const error = within(visits[1]).getByTestId('digitalExperienceSessionEvent-error');
+    expect(error).toHaveTextContent('0:45');
+    expect(error).toHaveTextContent('TypeError');
+    expect(error).toHaveTextContent('cart is undefined');
+    expect(visits[1]).toHaveTextContent('1 error');
+    expect(within(visits[1]).getByTestId('digitalExperienceWebVital-cls')).toBeInTheDocument();
+    // A web vital event is a rated badge, like the visit's own vitals.
+    expect(
+      within(within(visits[1]).getByTestId('digitalExperienceSessionEvent-web_vital')).getByTestId(
+        'digitalExperienceWebVital-inp'
+      )
+    ).toHaveAttribute('data-rating', 'good');
+    expect(within(visits[1]).getByRole('region', { name: 'Events on /cart' })).toHaveAttribute(
+      'tabindex',
+      '0'
+    );
+
+    fireEvent.click(screen.getAllByTestId('digitalExperienceSessionWaterfallSegment')[1]);
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+  });
+
   it('says when the timeline is cut short', async () => {
     mockFetch.mockResolvedValue(detail({ timelineTruncated: true }));
     renderPage();
