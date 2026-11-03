@@ -280,6 +280,27 @@ describe('getServiceCallGraph', () => {
     ]);
   });
 
+  it('keeps a service whose name is an object property', async () => {
+    const search: SearchMock = jest
+      .fn()
+      .mockResolvedValueOnce(
+        callResponse([
+          bucket('constructor', 'cart', 3),
+          bucket('toString', 'cart', 2),
+          bucket('__proto__', 'cart', 1),
+        ])
+      );
+
+    const graph = await getServiceCallGraph(
+      makeOptions({ apmEventClient: { search } as unknown as APMEventClient })
+    );
+
+    expect(graph.constructor).toEqual([{ destination: 'cart', calls: 3 }]);
+    expect(graph.toString).toEqual([{ destination: 'cart', calls: 2 }]);
+    expect(graph.__proto__).toEqual([{ destination: 'cart', calls: 1 }]);
+    expect(Object.getPrototypeOf(graph)).toBeNull();
+  });
+
   it('rejects when the search fails, without trying a finer rollup', async () => {
     const search: SearchMock = jest.fn().mockRejectedValueOnce(new Error('search failed'));
 

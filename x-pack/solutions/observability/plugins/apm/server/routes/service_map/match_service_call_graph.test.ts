@@ -102,4 +102,68 @@ describe('matchCallGraphToServices', () => {
   it('drops a caller that is not a service on the map', () => {
     expect(match({ unknown: [{ destination: 'cart:8080', calls: 3 }] })).toEqual({});
   });
+
+  it("uses each caller's own sample when one resource names two services", () => {
+    const graph = matchCallGraphToServices({
+      callGraph: {
+        gateway: [{ destination: 'localhost:8080', calls: 4 }],
+        payment: [{ destination: 'localhost:8080', calls: 2 }],
+      },
+      spans: [
+        span('localhost:8080', 'cart', 'gateway'),
+        span('localhost:8080', 'orders', 'payment'),
+      ],
+      serviceNames: ['gateway', 'payment', 'cart'],
+    });
+
+    expect(graph).toEqual({
+      gateway: [{ service: 'cart', calls: 4 }],
+      payment: [{ service: 'orders', calls: 2 }],
+    });
+  });
+
+  it('does not give another caller a resource whose samples disagree', () => {
+    const graph = matchCallGraphToServices({
+      callGraph: {
+        gateway: [{ destination: 'localhost:8080', calls: 4 }],
+        payment: [{ destination: 'localhost:8080', calls: 2 }],
+        checkout: [{ destination: 'localhost:8080', calls: 9 }],
+      },
+      spans: [
+        span('localhost:8080', 'cart', 'gateway'),
+        span('localhost:8080', 'orders', 'payment'),
+      ],
+      serviceNames: ['gateway', 'payment', 'checkout', 'cart'],
+    });
+
+    expect(graph.gateway).toEqual([{ service: 'cart', calls: 4 }]);
+    expect(graph.payment).toEqual([{ service: 'orders', calls: 2 }]);
+    expect(graph.checkout).toBeUndefined();
+  });
+
+  it('reuses a resource when every sample names the same service', () => {
+    const graph = matchCallGraphToServices({
+      callGraph: {
+        gateway: [{ destination: 'localhost:8080', calls: 4 }],
+        checkout: [{ destination: 'localhost:8080', calls: 9 }],
+      },
+      spans: [span('localhost:8080', 'cart', 'gateway'), span('localhost:8080', 'cart', 'payment')],
+      serviceNames: ['gateway', 'payment', 'checkout', 'cart'],
+    });
+
+    expect(graph.checkout).toEqual([{ service: 'cart', calls: 9 }]);
+  });
+
+  it("drops the sample when one caller's samples disagree", () => {
+    const graph = matchCallGraphToServices({
+      callGraph: { gateway: [{ destination: 'localhost:8080', calls: 4 }] },
+      spans: [
+        span('localhost:8080', 'cart', 'gateway'),
+        span('localhost:8080', 'payment', 'gateway'),
+      ],
+      serviceNames: ['gateway', 'cart', 'payment'],
+    });
+
+    expect(graph).toEqual({});
+  });
 });

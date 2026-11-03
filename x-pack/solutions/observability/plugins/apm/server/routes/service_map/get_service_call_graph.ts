@@ -14,6 +14,7 @@ import {
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import type { IEnvOptions } from './get_service_map';
+import { recordByService } from './record_by_service';
 
 /** How far back the calls reach, ending when the map's own range ends. */
 export const SERVICE_CALL_GRAPH_WINDOW_MS = 24 * 60 * 60 * 1000;
@@ -75,7 +76,7 @@ export async function getServiceCallGraph({
       return graph;
     }
   }
-  return {};
+  return recordByService([]);
 }
 
 async function readServiceCalls({
@@ -85,7 +86,7 @@ async function readServiceCalls({
   serviceGroupKuery,
   rollupInterval,
 }: ServiceCallGraphOptions & { rollupInterval: RollupInterval }): Promise<ServiceCallGraph> {
-  const graph: ServiceCallGraph = {};
+  const graph = new Map<string, ServiceDestinationCall[]>();
   let after: Record<string, string | number | null> | undefined;
 
   for (let page = 0; page < MAX_PAGES; page++) {
@@ -129,14 +130,14 @@ async function readServiceCalls({
         continue;
       }
       const serviceName = String(service);
-      const list = graph[serviceName] ?? [];
+      const list = graph.get(serviceName) ?? [];
       if (list.length < MAX_DESTINATIONS_PER_SERVICE) {
         list.push({
           destination: String(destination),
           calls: bucket.calls?.value ?? bucket.doc_count,
         });
       }
-      graph[serviceName] = list;
+      graph.set(serviceName, list);
     }
 
     const buckets = calls?.buckets ?? [];
@@ -146,5 +147,5 @@ async function readServiceCalls({
     after = calls.after_key;
   }
 
-  return graph;
+  return recordByService(graph);
 }

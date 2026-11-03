@@ -7,6 +7,7 @@
 
 import type { ServiceMapSpan } from '../../../common/service_map/types';
 import type { ServiceCallGraph } from './get_service_call_graph';
+import { recordByService } from './record_by_service';
 
 export interface MatchedServiceCall {
   service: string;
@@ -22,9 +23,10 @@ type CallGraphSpan = Pick<
 >;
 
 /**
- * Turns each destination into a service on the map. The trace sample's edge wins, otherwise the
- * host name is used when that host is a service. Databases, external hosts, and a service calling
- * itself are dropped. Counts of destinations that resolve to the same service are added.
+ * Turns each destination into a service on the map. The caller's own sample wins. A shared
+ * resource is reused only when every sample names the same service, otherwise the host name is
+ * used when that host is a service. Databases, external hosts, and a service calling itself are
+ * dropped. Counts of destinations that resolve to the same service are added.
  */
 export function matchCallGraphToServices({
   callGraph,
@@ -36,7 +38,8 @@ export function matchCallGraphToServices({
   serviceNames: Iterable<string>;
 }): MatchedServiceCallGraph {
   const services = new Set(serviceNames);
-  const serviceOfDestination = new Map<string, string>();
+  const serviceByCaller = new Map<string, Map<string, string | undefined>>();
+  const servicesForResource = new Map<string, Set<string>>();
 
   for (const span of spans) {
     if (span.serviceName) {
@@ -47,38 +50,94 @@ export function matchCallGraphToServices({
       continue;
     }
     services.add(destinationService);
-    serviceOfDestination.set(span.spanDestinationServiceResource, destinationService);
+    rememberSample(
+      serviceByCaller,
+      servicesForResource,
+      span.serviceName,
+      span.spanDestinationServiceResource,
+      destinationService
+    );
   }
 
-  const matched: MatchedServiceCallGraph = {};
+  const matched = new Map<string, MatchedServiceCall[]>();
   for (const [source, destinations] of Object.entries(callGraph)) {
     if (!services.has(source)) {
       continue;
     }
     const totals = new Map<string, number>();
     for (const { destination, calls } of destinations) {
-      const target = serviceForDestination(destination, serviceOfDestination, services);
+      const target = serviceForDestination(
+        source,
+        destination,
+        serviceByCaller,
+        servicesForResource,
+        services
+      );
       if (!target || target === source) {
         continue;
       }
       totals.set(target, (totals.get(target) ?? 0) + calls);
     }
     if (totals.size > 0) {
-      matched[source] = [...totals].map(([service, calls]) => ({ service, calls }));
+      matched.set(
+        source,
+        [...totals].map(([service, calls]) => ({ service, calls }))
+      );
     }
   }
-  return matched;
+  return recordByService(matched);
+}
+
+/**
+ * Records one sample. For this caller, the resource maps to one service, or to nothing when
+ * this caller's samples disagree. Across callers, the resource keeps every service it was seen as.
+ */
+function rememberSample(
+  serviceByCaller: Map<string, Map<string, string | undefined>>,
+  servicesForResource: Map<string, Set<string>>,
+  caller: string,
+  resource: string,
+  destinationService: string
+) {
+  const byResource = serviceByCaller.get(caller) ?? new Map<string, string | undefined>();
+  if (!byResource.has(resource)) {
+    byResource.set(resource, destinationService);
+  } else if (byResource.get(resource) !== destinationService) {
+    byResource.set(resource, undefined);
+  }
+  serviceByCaller.set(caller, byResource);
+
+  const seen = servicesForResource.get(resource) ?? new Set<string>();
+  seen.add(destinationService);
+  servicesForResource.set(resource, seen);
 }
 
 function serviceForDestination(
+  source: string,
   destination: string,
-  serviceOfDestination: ReadonlyMap<string, string>,
+  serviceByCaller: ReadonlyMap<string, ReadonlyMap<string, string | undefined>>,
+  servicesForResource: ReadonlyMap<string, ReadonlySet<string>>,
   services: ReadonlySet<string>
 ): string | undefined {
-  const fromSample = serviceOfDestination.get(destination);
-  if (fromSample && services.has(fromSample)) {
-    return fromSample;
+  const callerSamples = serviceByCaller.get(source);
+  if (callerSamples?.has(destination)) {
+    const fromCaller = callerSamples.get(destination);
+    return fromCaller && services.has(fromCaller)
+      ? fromCaller
+      : serviceByHost(destination, services);
   }
+
+  const seen = servicesForResource.get(destination);
+  if (seen?.size === 1) {
+    const [only] = seen;
+    if (services.has(only)) {
+      return only;
+    }
+  }
+  return serviceByHost(destination, services);
+}
+
+function serviceByHost(destination: string, services: ReadonlySet<string>): string | undefined {
   const host = destinationHost(destination);
   return services.has(host) ? host : undefined;
 }
