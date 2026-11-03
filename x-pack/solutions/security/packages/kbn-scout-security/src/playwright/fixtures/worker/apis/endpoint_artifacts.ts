@@ -6,6 +6,7 @@
  */
 
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { EsClient, KbnClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import { INTERNAL_API_HEADERS, PUBLIC_API_HEADERS } from '../../../constants/api_headers';
@@ -19,7 +20,9 @@ const ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE =
 export interface CreateEndpointArtifactListInput {
   listId: string;
   type: string;
+  /** Defaults to the product name for a known endpoint artifact list, else `listId`. */
   name?: string;
+  description?: string;
 }
 
 export interface CreateEndpointArtifactItemInput {
@@ -111,8 +114,15 @@ export const getEndpointArtifactsApiService = ({
   };
 
   // Opening an artifact tab/list page also ensure-creates the list, so the
-  // POST may 409 — same as FTR ensureListExists.
-  const ensureList = async ({ listId, type, name }: CreateEndpointArtifactListInput) => {
+  // POST may 409 — same as FTR ensureListExists. The list outlives the test
+  // run, so a known endpoint artifact list gets the product's own metadata.
+  const ensureList = async ({
+    listId,
+    type,
+    name,
+    description,
+  }: CreateEndpointArtifactListInput) => {
+    const known = Object.values(ENDPOINT_ARTIFACT_LISTS).find((list) => list.id === listId);
     await kbnClient.request({
       method: 'POST',
       path: `${basePath}${EXCEPTION_LIST_URL}`,
@@ -120,8 +130,8 @@ export const getEndpointArtifactsApiService = ({
       ignoreErrors: [409],
       retries: 0,
       body: {
-        name: name ?? listId,
-        description: 'Scout endpoint artifact list',
+        name: name ?? known?.name ?? listId,
+        description: description ?? known?.description ?? 'Scout endpoint artifact list',
         list_id: listId,
         type,
         namespace_type: 'agnostic',
@@ -180,6 +190,11 @@ export const getEndpointArtifactsApiService = ({
     },
 
     findItemIds: async ({ listId, name }) => {
+      // The route splits `filter` on commas to pair one filter per `list_id`,
+      // so a comma in the name cannot be expressed in this query.
+      if (name.includes(',')) {
+        throw new Error(`findItemIds: item name must not contain a comma, got "${name}"`);
+      }
       return measurePerformanceAsync(log, 'security.endpointArtifacts.findItemIds', async () => {
         const { data } = await kbnClient.request<{
           data: Array<{ item_id: string; name: string }>;
@@ -191,7 +206,7 @@ export const getEndpointArtifactsApiService = ({
             namespace_type: 'agnostic',
             // `name` is a keyword, so the quoted KQL value is an exact term.
             // The comparison below is a guard for names with quotes or spaces.
-            filter: `exception-list-agnostic.attributes.name:"${name.replace(/"/g, '\\"')}"`,
+            filter: `exception-list-agnostic.attributes.name:"${name.replace(/["\\]/g, '\\$&')}"`,
             per_page: 100,
           },
           headers: PUBLIC_API_HEADERS,

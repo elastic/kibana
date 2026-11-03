@@ -13,7 +13,9 @@ export { getEndpointArtifactsApiService } from './src/playwright/fixtures/worker
 export type {
   CreateEndpointArtifactItemInput,
   CreateEndpointArtifactListInput,
+  CreatedEndpointArtifactItem,
   EndpointArtifactsApiService,
+  FindEndpointArtifactItemIdsInput,
 } from './src/playwright/fixtures/worker/apis/endpoint_artifacts';
 export {
   CUSTOM_QUERY_RULE,

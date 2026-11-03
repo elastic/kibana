@@ -16,8 +16,9 @@ export interface CreateTrackedEndpointArtifactItemInput {
   policyId?: string;
 }
 
-const uniqueSuffix = (): string =>
-  `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+// No comma: `findItemIds` cannot query a name that contains one.
+const newName = (base: string): string =>
+  `${base} ${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
 /**
  * Tracks the items one test creates on an agnostic endpoint artifact list so
@@ -36,7 +37,7 @@ export class EndpointArtifactItemTracker {
 
   /** A unique item name for `listId`, tracked so cleanup finds the item by name. */
   uniqueName(listId: string, base: string): string {
-    const name = `${base} ${uniqueSuffix()}`;
+    const name = newName(base);
     this.trackName(listId, name);
     return name;
   }
@@ -56,7 +57,7 @@ export class EndpointArtifactItemTracker {
     osTypes,
     policyId,
   }: CreateTrackedEndpointArtifactItemInput): Promise<string> {
-    const name = `${base} ${uniqueSuffix()}`;
+    const name = newName(base);
     const { itemId } = await this.endpointArtifacts.createItem({
       name,
       listId,
@@ -68,19 +69,35 @@ export class EndpointArtifactItemTracker {
     return name;
   }
 
+  /**
+   * Deletes every tracked item. One failed lookup or delete does not stop the
+   * others; the failures are rethrown together at the end.
+   */
   async cleanup(): Promise<void> {
+    const lookups = [...this.namesByList].flatMap(([listId, names]) =>
+      [...names].map((name) => this.endpointArtifacts.findItemIds({ listId, name }))
+    );
+    const found = await Promise.allSettled(lookups);
     const itemIds = new Set(this.itemIds);
-    for (const [listId, names] of this.namesByList) {
-      for (const name of names) {
-        for (const itemId of await this.endpointArtifacts.findItemIds({ listId, name })) {
-          itemIds.add(itemId);
-        }
+    for (const result of found) {
+      if (result.status === 'fulfilled') {
+        result.value.forEach((itemId) => itemIds.add(itemId));
       }
     }
-    for (const itemId of itemIds) {
-      await this.endpointArtifacts.deleteItem(itemId);
-    }
+    const deletions = await Promise.allSettled(
+      [...itemIds].map((itemId) => this.endpointArtifacts.deleteItem(itemId))
+    );
     this.itemIds.clear();
     this.namesByList.clear();
+
+    const failures = [...found, ...deletions].flatMap((result) =>
+      result.status === 'rejected' ? [result.reason] : []
+    );
+    if (failures.length > 0) {
+      throw new AggregateError(
+        failures,
+        `endpointArtifactItems cleanup: ${failures.length} failed`
+      );
+    }
   }
 }

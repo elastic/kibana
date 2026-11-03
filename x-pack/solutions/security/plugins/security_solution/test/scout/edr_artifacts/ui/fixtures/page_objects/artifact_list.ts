@@ -46,7 +46,9 @@ export class ArtifactListPage {
   /**
    * The card whose title is `name`. Use it on lists that other spec files
    * also write to (agnostic lists are not space-isolated), where `card()`
-   * can match items another worker created.
+   * can match items another worker created. The page shows the newest 10
+   * items, so this holds as long as fewer than 10 newer items land on the
+   * list between create and assert (two workers create one or two at once).
    */
   cardByName(pagePrefix: string, name: string): Locator {
     // `exact` so "<name> edited" does not match a card titled "<name>".

@@ -15,6 +15,7 @@
   ],
   "kbn_references": [
     "@kbn/scout",
+    "@kbn/securitysolution-list-constants",
     "@kbn/es",
     "@kbn/test-subj-selector",
     "@kbn/core-http-common",
