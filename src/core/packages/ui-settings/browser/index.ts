@@ -11,7 +11,6 @@ export type {
   PublicUiSettingsParams,
   UiSettingsMetadataState,
   UiSettingsRuntimeState,
-  UiSettingsState,
   IUiSettingsClient,
   IUiSettingsMetadataClient,
   SettingsStart,

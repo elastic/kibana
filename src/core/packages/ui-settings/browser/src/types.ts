@@ -19,10 +19,6 @@ export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
 /** @public */
 export type UiSettingsRuntimeState = Record<string, UiSettingsRuntimeEntry & UserProvidedValues>;
 
-/**
- * @deprecated Use {@link UiSettingsRuntimeState} instead.
- */
-export type UiSettingsState = Record<string, PublicUiSettingsParams & UserProvidedValues>;
 
 export interface ValueValidation {
   successfulValidation: boolean;

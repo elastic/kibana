@@ -42,7 +42,6 @@ export type {
   FeatureFlagsStart,
 } from '@kbn/core-feature-flags-browser';
 export type {
-  UiSettingsState,
   UiSettingsRuntimeState,
   UiSettingsMetadataState,
   IUiSettingsClient,
