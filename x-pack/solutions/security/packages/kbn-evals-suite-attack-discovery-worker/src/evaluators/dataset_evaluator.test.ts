@@ -66,6 +66,12 @@ const quietArtifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifac
   openAlertIds: SEEDED_IDS,
   alertsAnalyzed: 3,
   insights: [],
+  generationUsage: {
+    discoveryCount: 0,
+    connectorIds: [],
+    models: [],
+    discoveriesWithoutConnector: 0,
+  },
   persistedAttackIds: [],
   fingerprintMatchFailed: false,
   dispatchedReviewExecutionIds: [],
@@ -96,6 +102,12 @@ const attackArtifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifa
         detailsMarkdown: 'details',
       },
     ],
+    generationUsage: {
+      discoveryCount: 1,
+      connectorIds: ['model-under-test'],
+      models: [],
+      discoveriesWithoutConnector: 0,
+    },
     persistedAttackIds: ['attack-1'],
     fingerprintReviewCount: 1,
     dispatchedReviewExecutionIds: ['review-1'],
@@ -108,6 +120,7 @@ const attackArtifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifa
         verdict: 'true_positive',
         investigationOpened: true,
         steps: [],
+        analysis: { connectorIds: ['reference-model'], inputTokens: 1, outputTokens: 1 },
       },
     ],
     ...overrides,
@@ -247,6 +260,30 @@ describe('createEvaluateDataset', () => {
       })
     );
     await expect(evaluateRow('positive-chain-with-noise')).rejects.toThrow(/ParkedAtGate/);
+  });
+
+  it('turns the dataset red when generation ran on a model other than the planned one', async () => {
+    collect.mockResolvedValue(
+      attackArtifacts({
+        generationUsage: {
+          discoveryCount: 1,
+          connectorIds: ['silently-substituted'],
+          models: [],
+          discoveriesWithoutConnector: 0,
+        },
+      })
+    );
+    await expect(evaluateRow('positive-chain-with-noise')).rejects.toThrow(/StageModelResolved/);
+  });
+
+  it('turns the dataset red when the review model cannot be determined', async () => {
+    const artifacts = attackArtifacts();
+    collect.mockResolvedValue(
+      attackArtifacts({
+        reviews: [{ ...artifacts.reviews[0], analysis: undefined }],
+      })
+    );
+    await expect(evaluateRow('positive-chain-with-noise')).rejects.toThrow(/StageModelResolved/);
   });
 
   it('turns the dataset red when the verdict is missing rather than counting it as a pass', async () => {

@@ -58,6 +58,35 @@ export interface StepSnapshot {
   output?: unknown;
 }
 
+/**
+ * What the review's FP/TP analysis step actually ran on, read from the per-step usage of the
+ * analysis child execution (`stepUsage` entries for its `analyze` step).
+ */
+export interface ReviewAnalysisUsage {
+  childExecutionId?: string;
+  /** Distinct inference endpoint ids the `analyze` step reported; empty when none was known. */
+  connectorIds: string[];
+  inputTokens?: number;
+  outputTokens?: number;
+  cachedTokens?: number;
+  /** Why the model could not be determined; unset when `connectorIds` is trustworthy. */
+  unresolvedReason?: string;
+}
+
+/**
+ * What generation actually ran on, read from the `api_config` stored on each persisted
+ * discovery. Generation token usage is not reported by the runner, so none is carried.
+ */
+export interface GenerationUsage {
+  discoveryCount: number;
+  /** Distinct `api_config.connector_id` values across the persisted discoveries. */
+  connectorIds: string[];
+  /** Distinct `api_config.model` values, reported only. */
+  models: string[];
+  /** Persisted discoveries that carried no connector id. */
+  discoveriesWithoutConnector: number;
+}
+
 export interface ReviewArtifact {
   executionId: string;
   attackDiscoveryId?: string;
@@ -77,6 +106,8 @@ export interface ReviewArtifact {
   verdictSummary?: string;
   verdictRationale?: string;
   steps: StepSnapshot[];
+  /** Unset when the review never ran the analysis step. */
+  analysis?: ReviewAnalysisUsage;
 }
 
 export interface WorkerOutcomeEvent {
@@ -104,6 +135,7 @@ export interface WorkerArtifacts {
   reviewsRequested?: number;
   /** Discoveries read back from the persisted index, with alert ids mapped to gold ids. */
   insights: AttackDiscovery[];
+  generationUsage: GenerationUsage;
   persistedAttackIds: string[];
   /** Attacks `match_fingerprints` handed back for review; undefined when it did not run. */
   fingerprintReviewCount?: number;

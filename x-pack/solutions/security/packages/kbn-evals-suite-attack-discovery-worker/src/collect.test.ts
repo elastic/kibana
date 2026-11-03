@@ -6,7 +6,7 @@
  */
 
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
-import { isParkedAtGate, isReviewSettled } from './collect';
+import { analysisUsageOf, generationUsageOf, isParkedAtGate, isReviewSettled } from './collect';
 
 const step = (
   stepId: string,
@@ -71,5 +71,82 @@ describe('isReviewSettled', () => {
   it('does not settle on a waiting review with a completed analysis but no escalation', () => {
     const analysis = step('resolve_analysis', 'completed', { verdict: 'true_positive' });
     expect(isReviewSettled(review('waiting_for_input', [analysis]))).toBe(false);
+  });
+});
+
+describe('analysisUsageOf', () => {
+  const child = (stepUsage: unknown): WorkflowExecutionDto =>
+    ({ id: 'child-1', stepExecutions: [], stepUsage } as unknown as WorkflowExecutionDto);
+
+  it('reads the connector and tokens from the analyze step usage', () => {
+    expect(
+      analysisUsageOf(
+        'child-1',
+        child([
+          { stepId: 'other', connectorId: 'x', inputTokens: 9, outputTokens: 9, totalTokens: 18 },
+          {
+            stepId: 'analyze',
+            connectorId: 'review-model',
+            inputTokens: 100,
+            outputTokens: 20,
+            cachedTokens: 40,
+            totalTokens: 120,
+          },
+        ])
+      )
+    ).toEqual({
+      childExecutionId: 'child-1',
+      connectorIds: ['review-model'],
+      inputTokens: 100,
+      outputTokens: 20,
+      cachedTokens: 40,
+    });
+  });
+
+  it('is unresolved when the engine reported the connector as unknown', () => {
+    const usage = analysisUsageOf(
+      'child-1',
+      child([
+        {
+          stepId: 'analyze',
+          connectorId: 'unknown',
+          inputTokens: 1,
+          outputTokens: 1,
+          totalTokens: 2,
+        },
+      ])
+    );
+    expect(usage.connectorIds).toEqual([]);
+    expect(usage.unresolvedReason).toContain('no connector id');
+  });
+
+  it('is unresolved when the child reported no usage for analyze', () => {
+    expect(analysisUsageOf('child-1', child(undefined)).unresolvedReason).toContain('no usage');
+  });
+
+  it('is unresolved when the child execution id or execution is missing', () => {
+    expect(analysisUsageOf(undefined, undefined).unresolvedReason).toContain(
+      'no analysis execution id'
+    );
+    expect(analysisUsageOf('child-1', undefined, 'boom').unresolvedReason).toContain('boom');
+  });
+});
+
+describe('generationUsageOf', () => {
+  it('reads distinct connector ids and counts discoveries without one', () => {
+    expect(
+      generationUsageOf([
+        {
+          'kibana.alert.attack_discovery.api_config': { connector_id: 'gen', model: 'm' },
+        },
+        { 'kibana.alert.attack_discovery.api_config.connector_id': 'gen' },
+        {},
+      ])
+    ).toEqual({
+      discoveryCount: 3,
+      connectorIds: ['gen'],
+      models: ['m'],
+      discoveriesWithoutConnector: 1,
+    });
   });
 });

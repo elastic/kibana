@@ -10,6 +10,8 @@ import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import {
+  FP_TP_ANALYSIS_STEP_ID,
+  FP_TP_ANALYZE_STEP_ID,
   MATCH_FINGERPRINTS_STEP_ID,
   PUBLIC_API_VERSION,
   RESOLVE_FANOUT_STEP_ID,
@@ -23,6 +25,8 @@ import { apiVersion, httpStatus, spacePath } from './kibana_api';
 import type { SeededScenario } from './seed';
 import { isTerminal, stepsOf, type AttackDiscoveryWorkerClient } from './worker_client';
 import type {
+  GenerationUsage,
+  ReviewAnalysisUsage,
   ReviewArtifact,
   StepSnapshot,
   Verdict,
@@ -72,15 +76,22 @@ const outputOf = (
 const firstStep = (execution: WorkflowExecutionDto, stepId: string) =>
   stepsOf(execution, stepId)[0];
 
-/** Reads a dotted field from a document that stores it flat or nested. */
+/**
+ * Reads a dotted field from a document that stores it flat, nested, or a mix: at each level
+ * the longest flat key that prefixes the remaining path wins.
+ */
 export const readField = (doc: Record<string, unknown>, path: string): unknown => {
   if (path in doc) return doc[path];
-  let current: unknown = doc;
-  for (const key of path.split('.')) {
-    current = asRecord(current)?.[key];
-    if (current === undefined) return undefined;
+  const parts = path.split('.');
+  for (let length = parts.length - 1; length >= 1; length--) {
+    const head = parts.slice(0, length).join('.');
+    const child = asRecord(doc[head]);
+    if (child) {
+      const found = readField(child, parts.slice(length).join('.'));
+      if (found !== undefined) return found;
+    }
   }
-  return current;
+  return undefined;
 };
 
 const strings = (value: unknown): string[] =>
@@ -117,6 +128,84 @@ export const toInsights = (
     });
   }
   return { insights, ids };
+};
+
+const distinct = (values: readonly (string | undefined)[]): string[] => [
+  ...new Set(values.filter((value): value is string => value !== undefined)),
+];
+
+/**
+ * What generation ran on, from the `api_config` each persisted discovery carries (the runner
+ * stores the connector the generation call resolved to). The runner reports no generation
+ * token usage, so none is read.
+ */
+export const generationUsageOf = (docs: readonly Record<string, unknown>[]): GenerationUsage => {
+  const connectors = docs.map((doc) =>
+    asString(readField(doc, 'kibana.alert.attack_discovery.api_config.connector_id'))
+  );
+  return {
+    discoveryCount: docs.length,
+    connectorIds: distinct(connectors),
+    models: distinct(
+      docs.map((doc) => asString(readField(doc, 'kibana.alert.attack_discovery.api_config.model')))
+    ),
+    discoveriesWithoutConnector: connectors.filter((id) => id === undefined).length,
+  };
+};
+
+/** The id the engine reports for a step that did not resolve a connector. */
+const UNKNOWN_CONNECTOR = 'unknown';
+
+/**
+ * What a review's FP/TP analysis ran on: the per-step usage the analysis child execution
+ * recorded for its `analyze` step. Anything that stops the connector being read is reported
+ * as `unresolvedReason`, never guessed.
+ */
+export const analysisUsageOf = (
+  childExecutionId: string | undefined,
+  child: WorkflowExecutionDto | undefined,
+  fetchError?: string
+): ReviewAnalysisUsage => {
+  if (!childExecutionId) {
+    return { connectorIds: [], unresolvedReason: 'the review recorded no analysis execution id' };
+  }
+  if (!child) {
+    return {
+      childExecutionId,
+      connectorIds: [],
+      unresolvedReason: `analysis execution could not be read${
+        fetchError ? `: ${fetchError}` : ''
+      }`,
+    };
+  }
+  const entries = (child.stepUsage ?? []).filter(({ stepId }) => stepId === FP_TP_ANALYZE_STEP_ID);
+  if (entries.length === 0) {
+    return {
+      childExecutionId,
+      connectorIds: [],
+      unresolvedReason: `analysis execution reported no usage for step ${FP_TP_ANALYZE_STEP_ID}`,
+    };
+  }
+  const connectorIds = distinct(
+    entries.map(({ connectorId }) =>
+      connectorId && connectorId !== UNKNOWN_CONNECTOR ? connectorId : undefined
+    )
+  );
+  const sum = (pick: (entry: (typeof entries)[number]) => number | undefined): number =>
+    entries.reduce((total, entry) => total + (pick(entry) ?? 0), 0);
+  const hasUnknown = entries.some(
+    ({ connectorId }) => !connectorId || connectorId === UNKNOWN_CONNECTOR
+  );
+  return {
+    childExecutionId,
+    connectorIds,
+    inputTokens: sum(({ inputTokens }) => inputTokens),
+    outputTokens: sum(({ outputTokens }) => outputTokens),
+    cachedTokens: sum(({ cachedTokens }) => cachedTokens),
+    ...(hasUnknown
+      ? { unresolvedReason: `step ${FP_TP_ANALYZE_STEP_ID} usage carried no connector id` }
+      : {}),
+  };
 };
 
 const snapshot = (step: WorkflowStepExecutionDto): StepSnapshot => ({
@@ -201,13 +290,39 @@ export const isParkedAtGate = (review: WorkflowExecutionDto): boolean => {
 export const isReviewSettled = (review: WorkflowExecutionDto): boolean =>
   isTerminal(review.status) || isParkedAtGate(review);
 
+const readAnalysisUsage = async ({
+  client,
+  review,
+  spaceId,
+}: {
+  client: AttackDiscoveryWorkerClient;
+  review: WorkflowExecutionDto;
+  spaceId: string;
+}): Promise<ReviewAnalysisUsage | undefined> => {
+  const step = firstStep(review, FP_TP_ANALYSIS_STEP_ID);
+  if (!step) return undefined;
+  const childExecutionId = asString(asRecord(step.state)?.executionId);
+  if (!childExecutionId) return analysisUsageOf(undefined, undefined);
+  try {
+    return analysisUsageOf(childExecutionId, await client.getExecution(spaceId, childExecutionId));
+  } catch (error) {
+    return analysisUsageOf(
+      childExecutionId,
+      undefined,
+      error instanceof Error ? error.message : String(error)
+    );
+  }
+};
+
 const buildReviewArtifact = async ({
+  client,
   review,
   timedOutAfterMs,
   dispatch,
   fetch,
   spaceId,
 }: {
+  client: AttackDiscoveryWorkerClient;
   review: WorkflowExecutionDto;
   timedOutAfterMs?: number;
   dispatch: WorkflowStepExecutionDto | undefined;
@@ -228,6 +343,7 @@ const buildReviewArtifact = async ({
   );
   const attachmentData = asRecord(verdictAttachment?.versions?.slice(-1)[0]?.data);
   const opened = emit?.investigation_opened;
+  const analysisUsage = await readAnalysisUsage({ client, review, spaceId });
 
   return {
     executionId: review.id,
@@ -248,6 +364,7 @@ const buildReviewArtifact = async ({
     steps: review.stepExecutions
       .filter(({ stepId }) => REVIEW_SNAPSHOT_STEP_IDS.includes(stepId))
       .map(snapshot),
+    ...(analysisUsage ? { analysis: analysisUsage } : {}),
   };
 };
 
@@ -314,7 +431,14 @@ export const collectWorkerArtifacts = async ({
         maxWaitMs: REVIEW_SETTLE_TIMEOUT_MS,
         isDone: isReviewSettled,
       });
-      return buildReviewArtifact({ review, timedOutAfterMs, dispatch: step, fetch, spaceId });
+      return buildReviewArtifact({
+        client,
+        review,
+        timedOutAfterMs,
+        dispatch: step,
+        fetch,
+        spaceId,
+      });
     })
   );
   log.info(
@@ -335,6 +459,7 @@ export const collectWorkerArtifacts = async ({
       asNumber(generation?.discoveries_generated) ?? asNumber(emit?.attacks_generated),
     reviewsRequested: asNumber(fanout?.attack_count) ?? asNumber(emit?.reviews_requested),
     insights,
+    generationUsage: generationUsageOf(docs),
     persistedAttackIds: ids,
     fingerprintReviewCount: Array.isArray(matchOutput?.reviews)
       ? matchOutput.reviews.length

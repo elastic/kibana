@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CohortRouting } from '../cohort_routing';
 import type {
   ReviewArtifact,
   Stage,
@@ -328,6 +329,87 @@ export const scoreOutcomeReported: CodeScorer = (_expected, artifacts) => {
     ? fail(`attacks were persisted but the run reported ${claimedEmpty.join(', ')}`)
     : pass(`reported ${run.runOutcome} and ${worker.runOutcome}`);
 };
+
+type StageRouting = Pick<CohortRouting, 'generationModel' | 'reviewModel'>;
+
+const joined = (values: readonly string[]): string => (values.length > 0 ? values.join(', ') : '-');
+
+/**
+ * Per-stage model and token facts read from the run, for stamping on score metadata. Keys are
+ * absent when the value could not be read; generation tokens are never reported by the runner.
+ */
+export const stageUsageMetadata = (artifacts: WorkerArtifacts): Record<string, unknown> => {
+  const { generationUsage: generation, reviews } = artifacts;
+  const analyses = reviews.flatMap(({ analysis }) => (analysis ? [analysis] : []));
+  const sum = (pick: (usage: (typeof analyses)[number]) => number | undefined) =>
+    analyses.some((usage) => pick(usage) !== undefined)
+      ? analyses.reduce((total, usage) => total + (pick(usage) ?? 0), 0)
+      : undefined;
+  const entries: Array<[string, unknown]> = [
+    ['generation.resolved_model', joined(generation.connectorIds)],
+    ['generation.reported_model_names', joined(generation.models)],
+    ['generation.tokens_available', false],
+    ['review.resolved_model', joined(analyses.flatMap(({ connectorIds }) => connectorIds))],
+    ['review.input_tokens', sum(({ inputTokens }) => inputTokens)],
+    ['review.output_tokens', sum(({ outputTokens }) => outputTokens)],
+    ['review.cached_tokens', sum(({ cachedTokens }) => cachedTokens)],
+  ];
+  return Object.fromEntries(entries.filter(([, value]) => value !== undefined));
+};
+
+/**
+ * Each stage that produced output ran on the endpoint the cohort planned. Generation is read
+ * from the persisted discoveries' `api_config.connector_id`, the review from the connector id
+ * in the usage of the analysis child's `analyze` step. A stage whose model cannot be read fails:
+ * an unverifiable model is not the planned one. A stage with no output is N/A.
+ */
+export const scoreStageModelResolved =
+  ({ generationModel, reviewModel }: StageRouting): CodeScorer =>
+  (_expected, artifacts) => {
+    const problems: string[] = [];
+    const checked: string[] = [];
+    const metadata = stageUsageMetadata(artifacts);
+
+    const { generationUsage: generation } = artifacts;
+    if (generation.discoveryCount > 0) {
+      const { connectorIds } = generation;
+      if (connectorIds.length === 0 || generation.discoveriesWithoutConnector > 0) {
+        problems.push(
+          `generation model undeterminable: ${generation.discoveriesWithoutConnector} of ${generation.discoveryCount} persisted discoveries carry no api_config.connector_id`
+        );
+      } else if (connectorIds.some((id) => id !== generationModel)) {
+        problems.push(`generation ran on ${joined(connectorIds)}, planned ${generationModel}`);
+      } else {
+        checked.push(`generation ${generationModel}`);
+      }
+    }
+
+    artifacts.reviews.forEach((review) => {
+      const label = review.attackDiscoveryId ?? review.executionId;
+      const { analysis } = review;
+      if (!analysis) {
+        problems.push(`review ${label} model undeterminable: it ran no analysis step`);
+      } else if (analysis.unresolvedReason || analysis.connectorIds.length === 0) {
+        problems.push(
+          `review ${label} model undeterminable: ${
+            analysis.unresolvedReason ?? 'no connector id reported'
+          }`
+        );
+      } else if (analysis.connectorIds.some((id) => id !== reviewModel)) {
+        problems.push(
+          `review ${label} ran on ${joined(analysis.connectorIds)}, planned ${reviewModel}`
+        );
+      } else {
+        checked.push(`review ${label} ${reviewModel}`);
+      }
+    });
+
+    if (problems.length > 0) return { ...fail(problems.join('; ')), metadata };
+    if (checked.length === 0) {
+      return { ...notApplicable('no stage produced output to attribute a model to'), metadata };
+    }
+    return { ...pass(`resolved as planned: ${checked.join('; ')}`), metadata };
+  };
 
 /** Scorer and the stage it belongs to, so generation and review quality can be read apart. */
 export const CODE_SCORERS: ReadonlyArray<{ name: string; stage: Stage; scorer: CodeScorer }> = [

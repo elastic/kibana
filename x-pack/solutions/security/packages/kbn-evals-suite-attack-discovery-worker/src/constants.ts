@@ -74,7 +74,11 @@ export const REVIEW_REQUIRED_STEP_IDS: readonly string[] = [
   'escalation_gate',
 ];
 
-export const FP_TP_REQUIRED_STEP_IDS: readonly string[] = ['analyze'];
+/** The review step that runs the FP/TP analysis workflow, and that workflow's model step. */
+export const FP_TP_ANALYSIS_STEP_ID = 'run_fp_tp_analysis';
+export const FP_TP_ANALYZE_STEP_ID = 'analyze';
+
+export const FP_TP_REQUIRED_STEP_IDS: readonly string[] = [FP_TP_ANALYZE_STEP_ID];
 
 /** Lookback handed to the runner; seeded alert timestamps are placed inside it. */
 export const SCHEDULE_INTERVAL = '30m';

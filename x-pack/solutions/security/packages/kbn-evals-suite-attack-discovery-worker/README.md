@@ -11,18 +11,29 @@ workflows until they park, and scores what happened.
 
 | Step                                              | Gate type |
 | ------------------------------------------------- | --------- |
-| Alert ids were retrieved                          | code      |
+| The runner completed, ran steps, and did not time out | code  |
+| Exactly the seeded alerts were open and analyzed, none unseeded cited | code |
 | Discoveries were persisted (audit evaluators)     | code      |
 | Fingerprints were matched and dispatched          | code      |
+| Every review ended or parked within the wait      | code      |
 | Exactly one review per unmatched attack           | code      |
 | An Investigation was opened                       | code      |
 | FP/TP verdict matches the per-scenario gold       | code      |
-| TP and inconclusive verdicts park at the analyst gate | code  |
-| The worker outcome was reported                   | code      |
+| TP and inconclusive verdicts park at an open analyst gate (escalated, gate step still open, no gate failure) | code |
+| The worker outcome was reported and its persisted count matches the index | code |
+| Each stage ran on the endpoint the cohort planned (`StageModelResolved`) | code |
 | Discovery and verdict quality                     | LLM judge (reported, never gates) |
 
 Code scores gate through `assertCodeScoresPass`: a `null` score is never a pass, and `N/A` and
 `MISSING` are distinct outcomes.
+
+`StageModelResolved` reads what each stage actually ran on and fails on a mismatch or when it
+cannot be read. Generation is read from `api_config.connector_id` on the persisted discoveries;
+the review from the `connectorId` in the `analyze` step usage of the analysis execution. Both are
+compared with the planned endpoint id. The resolved model and the review token usage are stamped on
+the score metadata (`generation.resolved_model`, `review.resolved_model`, `review.input_tokens`,
+`review.output_tokens`, `review.cached_tokens`). Generation token usage is not reported by the
+runner, so it is marked unavailable (`generation.tokens_available: false`).
 
 Per-scenario gold:
 

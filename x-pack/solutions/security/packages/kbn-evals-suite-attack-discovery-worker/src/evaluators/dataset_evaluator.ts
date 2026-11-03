@@ -31,7 +31,12 @@ import { createAuditForbiddenJoinEvaluator } from './audit_forbidden_join_evalua
 import { createAuditMetaAlertAsEvidenceEvaluator } from './audit_meta_alert_as_evidence_evaluator';
 import { createAuditNegativeControlEvaluator } from './audit_negative_control_evaluator';
 import { createAuditPositiveControlRecallEvaluator } from './audit_positive_control_recall_evaluator';
-import { CODE_SCORERS } from './code_scores';
+import {
+  CODE_SCORERS,
+  scoreStageModelResolved,
+  stageUsageMetadata,
+  type CodeScorer,
+} from './code_scores';
 import {
   assertCodeScoresPass,
   createRunCollector,
@@ -71,16 +76,27 @@ const withRoutingMetadata = (
 });
 
 export const createCodeEvaluators = (routing: CohortRouting): WorkerEvaluator[] =>
-  CODE_SCORERS.map(({ name, stage, scorer }) =>
+  [
+    ...CODE_SCORERS,
+    {
+      name: 'StageModelResolved',
+      stage: 'pipeline' as const,
+      scorer: scoreStageModelResolved(routing),
+    },
+  ].map(({ name, stage, scorer }: { name: string; stage: Stage; scorer: CodeScorer }) =>
     withRoutingMetadata(
       {
         name,
         kind: 'CODE',
         direction: DIRECTION,
-        evaluate: async ({ output, expected }) =>
-          expected
-            ? scorer(expected, output)
-            : { score: null, label: 'MISSING', explanation: 'row has no expected block' },
+        evaluate: async ({ output, expected }) => {
+          if (!expected) {
+            return { score: null, label: 'MISSING', explanation: 'row has no expected block' };
+          }
+          const result = scorer(expected, output);
+          // Every code score doc carries the models and tokens each stage actually ran on.
+          return { ...result, metadata: { ...stageUsageMetadata(output), ...result.metadata } };
+        },
       },
       stage,
       routing

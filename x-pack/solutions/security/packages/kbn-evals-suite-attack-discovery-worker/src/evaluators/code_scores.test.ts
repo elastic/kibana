@@ -13,7 +13,33 @@ import {
   scoreParkedAtGate,
   scoreReviewsSettled,
   scoreRunnerCompleted,
+  scoreStageModelResolved,
+  stageUsageMetadata,
 } from './code_scores';
+
+const NO_GENERATION = {
+  discoveryCount: 0,
+  connectorIds: [],
+  models: [],
+  discoveriesWithoutConnector: 0,
+};
+
+const generated = (overrides: Partial<WorkerArtifacts['generationUsage']> = {}) => ({
+  discoveryCount: 2,
+  connectorIds: ['gen-model'],
+  models: ['gen-model-name'],
+  discoveriesWithoutConnector: 0,
+  ...overrides,
+});
+
+const analysed = (overrides: Partial<NonNullable<ReviewArtifact['analysis']>> = {}) => ({
+  childExecutionId: 'child-1',
+  connectorIds: ['review-model'],
+  inputTokens: 100,
+  outputTokens: 20,
+  cachedTokens: 10,
+  ...overrides,
+});
 
 const artifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifacts => ({
   runnerExecutionId: 'run-1',
@@ -23,6 +49,7 @@ const artifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifacts =>
   seededAlertIds: [],
   openAlertIds: [],
   insights: [],
+  generationUsage: NO_GENERATION,
   persistedAttackIds: [],
   fingerprintMatchFailed: false,
   dispatchedReviewExecutionIds: [],
@@ -226,5 +253,86 @@ describe('scoreOutcomeReported', () => {
         })
       ).score
     ).toBe(1);
+  });
+});
+
+describe('scoreStageModelResolved', () => {
+  const score = scoreStageModelResolved({
+    generationModel: 'gen-model',
+    reviewModel: 'review-model',
+  });
+  const withBoth = (a: Partial<WorkerArtifacts> = {}) =>
+    artifacts({
+      generationUsage: generated(),
+      reviews: [review({ analysis: analysed() })],
+      ...a,
+    });
+
+  it('passes when both stages resolved to the planned endpoints', () => {
+    expect(score(expected, withBoth()).score).toBe(1);
+  });
+
+  it('fails when generation resolved to a different endpoint than planned', () => {
+    const result = score(
+      expected,
+      withBoth({ generationUsage: generated({ connectorIds: ['other'] }) })
+    );
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('generation ran on other, planned gen-model');
+  });
+
+  it('fails when the review analysis resolved to a different endpoint than planned', () => {
+    const result = score(
+      expected,
+      withBoth({ reviews: [review({ analysis: analysed({ connectorIds: ['other'] }) })] })
+    );
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('ran on other, planned review-model');
+  });
+
+  it('fails, not passes, when the review model cannot be determined', () => {
+    const result = score(
+      expected,
+      withBoth({
+        reviews: [
+          review({
+            analysis: analysed({ connectorIds: [], unresolvedReason: 'no usage reported' }),
+          }),
+        ],
+      })
+    );
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('undeterminable');
+  });
+
+  it('fails when a review recorded no analysis at all', () => {
+    expect(score(expected, withBoth({ reviews: [review()] })).score).toBe(0);
+  });
+
+  it('fails when a persisted discovery carries no connector id', () => {
+    const result = score(
+      expected,
+      withBoth({ generationUsage: generated({ discoveriesWithoutConnector: 1 }) })
+    );
+    expect(result.score).toBe(0);
+  });
+
+  it('is N/A when no stage produced output', () => {
+    const result = score(expected, artifacts());
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('N/A');
+  });
+
+  it('stamps the resolved models and review tokens, and marks generation tokens unavailable', () => {
+    expect(score(expected, withBoth()).metadata).toEqual({
+      'generation.resolved_model': 'gen-model',
+      'generation.reported_model_names': 'gen-model-name',
+      'generation.tokens_available': false,
+      'review.resolved_model': 'review-model',
+      'review.input_tokens': 100,
+      'review.output_tokens': 20,
+      'review.cached_tokens': 10,
+    });
+    expect(stageUsageMetadata(artifacts())).not.toHaveProperty('review.input_tokens');
   });
 });
