@@ -16,7 +16,6 @@ import {
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
-import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { usePageReady } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
@@ -61,7 +60,7 @@ const INVESTIGATIONS_SEARCH_DEBOUNCE_MS = 300;
 
 export function NightshiftApp(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
-  const { analytics, application, nightshiftInvestigations, agenticInvestigations, agentBuilder } =
+  const { analytics, nightshiftInvestigations, agenticInvestigations, agentBuilder } =
     useKibana().services;
   const history = useHistory();
   const { search } = useLocation();
@@ -120,10 +119,6 @@ export function NightshiftApp(): React.ReactElement {
     () => getNightshiftInvestigationIdFromSearch(search),
     [search]
   );
-
-  const showAllEventsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
-    path: '/detections/events',
-  });
 
   const handleInvestigationClick = useCallback(
     (investigation: InvestigationSummary) => {
@@ -346,7 +341,6 @@ export function NightshiftApp(): React.ReactElement {
       <NightshiftHeader
         isLoading={isInitialLoading}
         hasActiveInvestigations={hasActiveInvestigations}
-        showAllEventsHref={showAllEventsHref}
       />
 
       <EuiSpacer size="l" />
