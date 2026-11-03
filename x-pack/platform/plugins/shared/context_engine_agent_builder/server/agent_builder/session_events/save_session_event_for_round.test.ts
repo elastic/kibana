@@ -10,7 +10,11 @@ import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { AfterExecutionHookContext } from '@kbn/agent-builder-server';
 import type { CoreStart } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { saveSessionEventForRound } from './save_session_event_for_round';
+import {
+  MAX_TRANSCRIPT_BYTES,
+  saveSessionEventForRound,
+  serializeRound,
+} from './save_session_event_for_round';
 
 const buildRound = (overrides: Partial<ConversationRound> = {}): ConversationRound =>
   ({
@@ -125,5 +129,22 @@ describe('saveSessionEventForRound', () => {
     await expect(run(buildContext())).resolves.toBeUndefined();
 
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('boom'));
+  });
+});
+
+describe('serializeRound', () => {
+  it('keeps a round under the cap intact', () => {
+    const round = buildRound();
+
+    expect(serializeRound(round)).toEqual({ transcript: JSON.stringify(round), cut: false });
+  });
+
+  it('cuts a round over the cap at the byte limit', () => {
+    const round = buildRound({ response: { message: 'x'.repeat(MAX_TRANSCRIPT_BYTES + 10) } });
+
+    const { transcript, cut } = serializeRound(round);
+
+    expect(cut).toBe(true);
+    expect(Buffer.byteLength(transcript, 'utf8')).toBe(MAX_TRANSCRIPT_BYTES);
   });
 });

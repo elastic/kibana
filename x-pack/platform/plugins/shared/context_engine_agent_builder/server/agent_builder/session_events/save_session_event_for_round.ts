@@ -6,11 +6,30 @@
  */
 
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { AfterExecutionHookContext } from '@kbn/agent-builder-server';
 import type { ContextEnginePluginStart } from '@kbn/context-engine-plugin/server';
 import { resolveSpaceId } from '@kbn/context-engine-plugin/server/utils/resolve_space_id';
 import type { CoreStart, Logger } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+
+/**
+ * `transcript` is an unindexed `text` field, so the only size limit is Elasticsearch's request body
+ * cap (`http.max_content_length`, 100 MB by default). The cap leaves headroom for the other fields.
+ */
+export const MAX_TRANSCRIPT_BYTES = 95 * 1024 * 1024;
+
+/** The round as JSON, cut at the byte cap; a cut transcript is no longer valid JSON. */
+export const serializeRound = (round: ConversationRound): { transcript: string; cut: boolean } => {
+  const json = JSON.stringify(round);
+  if (Buffer.byteLength(json, 'utf8') <= MAX_TRANSCRIPT_BYTES) {
+    return { transcript: json, cut: false };
+  }
+  return {
+    transcript: Buffer.from(json, 'utf8').subarray(0, MAX_TRANSCRIPT_BYTES).toString('utf8'),
+    cut: true,
+  };
+};
 
 export interface SaveSessionEventForRoundParams {
   context: AfterExecutionHookContext;
@@ -82,14 +101,20 @@ export const saveSessionEventForRound = async ({
     }
 
     const space = resolveSpaceId(await getSpaces(), request);
+    // The round as Agent Builder produced it: no rendering, so nothing is lost or invented.
+    const { transcript, cut } = serializeRound(round);
+    if (cut) {
+      logger.warn(
+        `Transcript of round [${round.id}] of conversation [${conversationId}] exceeds ${MAX_TRANSCRIPT_BYTES} bytes and was cut`
+      );
+    }
     const saved = await contextEngine.getSessionEventsService().save({
       session_id: conversationId,
       user_id: userId,
       agent_id: agentId,
       round_id: round.id,
       space,
-      // The round as Agent Builder produced it: no rendering, so nothing is lost or invented.
-      transcript: JSON.stringify(round),
+      transcript,
     });
     logger.debug(
       `Saved session event [${saved.id}] for round [${round.id}] of conversation [${conversationId}]`
