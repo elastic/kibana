@@ -349,7 +349,7 @@ export const runDoctor = async (
         )
       );
     if (target === 'qaf') {
-      log.write(chalk.dim(`   Next runs reuse ${QAF_NAME}: run only the run-config line`));
+      log.write(chalk.dim(`   Already created ${QAF_NAME}? Run only the second line`));
     }
   }
   log.write('');
