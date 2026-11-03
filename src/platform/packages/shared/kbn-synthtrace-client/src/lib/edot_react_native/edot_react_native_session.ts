@@ -111,7 +111,6 @@ const EXPORT_DELAY_MS: Readonly<Record<MobilePlatform, { spans: number; logs: nu
   android: { spans: 1_000, logs: 0 },
   ios: { spans: 5_000, logs: 5_000 },
 };
-const FAULT_ADDRESS_RANGE = 2 ** 32;
 
 const COMMON_ERROR_LOGS: readonly string[] = [
   'Failed to restore persisted state',
@@ -375,31 +374,14 @@ const sendRequest = (
   return events;
 };
 
-const stacktraceOf = (
-  { platform }: EdotReactNativeClient,
-  { type, message }: EdotReactNativeCrashTemplate,
-  random: () => number
-): string => {
-  if (platform === 'android') {
-    return [
-      `${type}: ${message}`,
-      '\tat com.facebook.react.modules.core.ExceptionsManagerModule.reportException(ExceptionsManagerModule.java:65)',
-      '\tat com.facebook.jni.NativeRunnable.run(Native Method)',
-      '\tat android.os.Handler.handleCallback(Handler.java:958)',
-      '\tat android.os.Looper.loop(Looper.java:294)',
-    ].join('\n');
-  }
-  const address = () => `0x${randomHex(random, 9)}`;
-  return [
-    `Exception Type:  ${type}`,
-    '',
-    'Thread 0 Crashed:',
-    `0   libsystem_kernel.dylib          ${address()} __pthread_kill + 8`,
-    `1   libsystem_pthread.dylib         ${address()} pthread_kill + 268`,
-    `2   hermes                          ${address()} hermes::vm::Runtime::raiseError + 112`,
-    `3   React                           ${address()} RCTFatal + 532`,
+const androidStacktraceOf = ({ type, message }: EdotReactNativeCrashTemplate): string =>
+  [
+    `${type}: ${message}`,
+    '\tat com.facebook.react.modules.core.ExceptionsManagerModule.reportException(ExceptionsManagerModule.java:65)',
+    '\tat com.facebook.jni.NativeRunnable.run(Native Method)',
+    '\tat android.os.Handler.handleCallback(Handler.java:958)',
+    '\tat android.os.Looper.loop(Looper.java:294)',
   ].join('\n');
-};
 
 interface CrashReport {
   type: string;
@@ -413,16 +395,24 @@ interface PendingCrash {
 }
 
 /** The crash a visit ends with, described as the platform's crash reporter does. */
-const describeCrash = ({ client, app, random }: SessionContext): CrashReport => {
+const describeCrash = ({ client, app, random }: SessionContext, crashedAt: number): CrashReport => {
   const templates = [...(app.crashes?.[client.platform] ?? []), ...COMMON_CRASHES[client.platform]];
   const template = pick(random, templates);
-  const stacktrace = stacktraceOf(client, template, random);
-  // PLCrashReporter writes the signal code and the faulting address in decimal
-  const message =
-    client.platform === 'ios'
-      ? `${template.message} at ${Math.floor(random() * FAULT_ADDRESS_RANGE)}`
-      : template.message;
-  return { type: template.type, message, stacktrace };
+  if (client.platform === 'android') {
+    return { ...template, stacktrace: androidStacktraceOf(template) };
+  }
+  const { address, excerpt } = client.crashReport({
+    signal: template.type,
+    code: template.message,
+    crashedAt,
+    random,
+  });
+  // EDOT iOS writes the signal code and its address in decimal
+  return {
+    type: template.type,
+    message: `${template.message} at ${address}`,
+    stacktrace: excerpt,
+  };
 };
 
 /**
@@ -580,7 +570,7 @@ const simulateVisit = (
   );
 
   if (crashedAt !== undefined) {
-    const crash = describeCrash(ctx);
+    const crash = describeCrash(ctx, crashedAt);
     const exported = exportedBeforeCrash(ctx, events, crashedAt);
     if (client.platform === 'ios') {
       return { events: exported, crash: { crashedAt, crash } };

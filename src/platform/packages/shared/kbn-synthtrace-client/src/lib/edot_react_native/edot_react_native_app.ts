@@ -61,6 +61,7 @@ export interface EdotReactNativeAppOptions {
  */
 export class EdotReactNativeApp {
   readonly serviceName: string;
+  private readonly appId: string;
   private readonly resourceAttributesByPlatform: Readonly<
     Record<MobilePlatform, Readonly<Record<string, unknown>>>
   >;
@@ -73,6 +74,7 @@ export class EdotReactNativeApp {
     buildNumber = 1,
   }: EdotReactNativeAppOptions) {
     this.serviceName = serviceName;
+    this.appId = appId;
     const service = { 'service.name': serviceName, 'service.version': serviceVersion };
     this.resourceAttributesByPlatform = {
       android: {
@@ -101,6 +103,6 @@ export class EdotReactNativeApp {
       ...profile.resourceAttributes,
     };
     const clientOptions = { ...options, slowdown: options.slowdown ?? profile.slowdown };
-    return new CLIENT_CLASSES[profile.platform](resourceAttributes, clientOptions);
+    return new CLIENT_CLASSES[profile.platform](resourceAttributes, clientOptions, this.appId);
   }
 }

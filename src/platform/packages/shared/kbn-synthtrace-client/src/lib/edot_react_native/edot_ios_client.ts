@@ -17,6 +17,7 @@ import {
   type HttpRequestOptions,
 } from './edot_react_native_client';
 import type { EdotReactNativeSpan } from './edot_react_native_span';
+import { iosCrashReport, type IosCrashReport } from './ios_crash_report';
 
 const HTTP_SCOPE: OtelScope = { name: 'NSURLSession', version: '1.0.0' };
 const CRASH_SCOPE: OtelScope = { name: 'PLCrashReporter', version: '0.0.3' };
@@ -143,6 +144,52 @@ export class EdotIosClient extends EdotReactNativeClientBase {
       },
       { eventName: 'app.crash', severityNumber: SEVERITY_FATAL }
     );
+  }
+
+  /**
+   * The PLCrashReporter report of a crash of this installation, as EDOT iOS cuts it down for
+   * `exception.stacktrace`, and the signal's address for `exception.message`.
+   */
+  crashReport({
+    signal,
+    code,
+    crashedAt,
+    random,
+  }: {
+    signal: string;
+    code: string;
+    crashedAt: number;
+    random: () => number;
+  }): IosCrashReport {
+    const {
+      'service.name': serviceName,
+      'service.version': serviceVersion,
+      'app.build_id': buildNumber,
+      'device.model.identifier': hardwareModel,
+      'os.version': fullOsVersion,
+      'os.description': osDescription,
+    } = this.resourceAttributes;
+    // `os.description` keeps the version as the OS reports it, e.g. `18.1` rather than `18.1.0`
+    const [, osVersion = String(fullOsVersion), osBuild = ''] =
+      /Version (\S+) \(Build (\S+)\)/.exec(String(osDescription)) ?? [];
+    return iosCrashReport({
+      signal,
+      code,
+      crashedAt,
+      // The bundle's executable, named after the app like Xcode's default product name
+      executable: String(serviceName)
+        .split(/[^a-z0-9]+/i)
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(''),
+      appId: this.appId,
+      serviceVersion: String(serviceVersion),
+      buildNumber: String(buildNumber),
+      hardwareModel: String(hardwareModel),
+      osVersion,
+      osBuild,
+      installationId: this.formatUuid(this.options.installationId),
+      random,
+    });
   }
 
   /** A screen appearing, from `viewWillAppear` to `viewDidAppear`, titled like its view controller. */

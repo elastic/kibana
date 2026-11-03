@@ -86,7 +86,9 @@ export abstract class EdotReactNativeClientBase {
 
   constructor(
     private readonly appResourceAttributes: Readonly<Record<string, unknown>>,
-    protected readonly options: EdotReactNativeClientOptions
+    protected readonly options: EdotReactNativeClientOptions,
+    /** Android application ID and iOS bundle ID, which the SDKs don't write as an attribute. */
+    protected readonly appId: string
   ) {}
 
   /** Whether the SDK adds the cellular details to every span, not only to HTTP spans. */

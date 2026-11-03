@@ -809,6 +809,55 @@ describe('edotReactNative', () => {
       crashTypes.forEach((type) => expect(type).toMatch(/^SIG[A-Z]+$/));
     });
 
+    it('writes an iOS crash report like EDOT iOS cuts down the PLCrashReporter one', () => {
+      const reports = Array.from({ length: 40 }, (_, i) =>
+        logs(
+          simulate({ platform: 'ios', seed: `report-${i}`, health: withHealth({ crashRate: 1 }) })
+        )
+          .filter(({ event_name: eventName }) => eventName === 'app.crash')
+          .map(({ attributes }) => ({
+            type: String(attributes?.['exception.type']),
+            message: String(attributes?.['exception.message']),
+            stacktrace: String(attributes?.['exception.stacktrace']),
+          }))
+      ).flat();
+      expect(new Set(reports.map(({ type }) => type))).toEqual(
+        new Set(['SIGABRT', 'SIGSEGV', 'SIGBUS'])
+      );
+
+      reports.forEach(({ type, message, stacktrace }) => {
+        expect(stacktrace.length).toBeLessThanOrEqual(7_500);
+        expect(stacktrace).toMatch(/^Incident Identifier: [0-9A-F-]{36}\n/);
+        expect(stacktrace).toContain('\nHardware Model:      iPhone16,1\n');
+        expect(stacktrace).toContain('\nIdentifier:      co.elastic.weather\n');
+        expect(stacktrace).toContain('\nVersion:         1.4.0 (42)\n');
+        expect(stacktrace).toContain('\nOS Version:      iPhone OS 18.1 (22B83)\n');
+        expect(stacktrace).toContain(`\nException Type:  ${type}\n`);
+        // The message has the address in decimal, the report in hex
+        const [, code, address] = /^(\S+) at (\d+)$/.exec(message) ?? [];
+        expect(stacktrace).toContain(
+          `\nException Codes: ${code} at 0x${Number(address).toString(16)}\n`
+        );
+        // Uncaught exceptions of RCTFatal abort the app
+        expect(stacktrace.includes('Last Exception Backtrace:')).toBe(type === 'SIGABRT');
+        expect(stacktrace).not.toContain('Thread State');
+
+        // Binary images are those the frames point into
+        const [threads, images] = stacktrace.split('\nBinary Images:\n');
+        const frameImages = new Set(
+          [...threads.matchAll(/^\d+ +(\S+) +0x[0-9a-f]{16} 0x[0-9a-f]+ \+ \d+$/gm)].map(
+            ([, image]) => image
+          )
+        );
+        const listedImages = images
+          .trim()
+          .split('\n')
+          .map((line) => line.trim().split(/\s+/)[3].replace(/^\+/, ''));
+        expect(new Set(listedImages)).toEqual(frameImages);
+        expect(listedImages).toContain('WeatherDemoReactNative');
+      });
+    });
+
     it('relaunches the app after an iOS crash without crashing again', () => {
       const dwell = 10_000;
       for (const seed of ['relaunch-a', 'relaunch-b', 'relaunch-c']) {
