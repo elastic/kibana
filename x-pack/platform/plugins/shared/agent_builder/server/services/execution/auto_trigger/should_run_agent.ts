@@ -55,6 +55,11 @@ const getDecisionInput = async ({
 
   // A prompt response resumes a run, and an empty message fails validation either way.
   if (!conversationId || nextInput.prompts || !hasMessage) {
+    logger.debug(
+      `auto trigger: skipping the decision (conversation id: ${Boolean(
+        conversationId
+      )}, prompt response: ${Boolean(nextInput.prompts)}, message: ${hasMessage})`
+    );
     return undefined;
   }
 
@@ -64,6 +69,7 @@ const getDecisionInput = async ({
       .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
 
     if (!isExperimental) {
+      logger.debug('auto trigger: skipping the decision, experimental features are off');
       return undefined;
     }
 
@@ -71,6 +77,9 @@ const getDecisionInput = async ({
     const conversation = await conversationClient.get(conversationId);
 
     if (!isSharedConversation(conversation.access_control)) {
+      logger.debug(
+        `auto trigger: skipping the decision, conversation [${conversationId}] is not shared`
+      );
       return undefined;
     }
 
@@ -114,7 +123,7 @@ export const shouldRunAgent = async ({
     return true;
   }
 
-  const { decisions, decisionConfig } = deps;
+  const { decisions, decisionConfig, logger } = deps;
 
   const result = await decisions.decide({
     request,
@@ -125,14 +134,26 @@ export const shouldRunAgent = async ({
   });
 
   if (result.status !== 'decided') {
+    logger.debug(`auto trigger: decision ${result.status}, running the agent`);
     return true;
   }
 
   const answer = result.answers[SHOULD_RESPOND_QUESTION];
 
   if (answer?.type !== 'predicate') {
+    logger.debug(
+      `auto trigger: no predicate answer from [${result.inferenceId}], running the agent`
+    );
     return true;
   }
 
-  return answer.probability >= decisionConfig.triggerThreshold;
+  const run = answer.probability >= decisionConfig.triggerThreshold;
+
+  logger.debug(
+    `auto trigger: [${result.inferenceId}] should_respond=${answer.probability} (threshold ${
+      decisionConfig.triggerThreshold
+    }), ${run ? 'running the agent' : 'not running the agent'}`
+  );
+
+  return run;
 };

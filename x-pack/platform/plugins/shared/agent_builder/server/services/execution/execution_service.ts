@@ -388,6 +388,14 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
    * agent should not respond. Callers that always run the agent use {@link executeAgent}.
    */
   async maybeExecuteAgent(args: ExecuteAgentParams): Promise<MaybeExecuteAgentResult> {
+    if (args.mode === AgentExecutionMode.conversation) {
+      this.logger.debug(
+        `Chat request for conversation [${
+          args.params.conversationId ?? 'new'
+        }] with trigger_mode [${args.params.triggerMode ?? ChatTriggerMode.Always}]`
+      );
+    }
+
     if ('triggerMode' in args.params && args.params.triggerMode === ChatTriggerMode.Never) {
       return this.handleNeverTriggerMode(args);
     }
