@@ -159,6 +159,6 @@ const BUILTIN_TOOL_IDS: readonly string[] = [
   'security.security_labs_search',
   'security.create_detection_rule',
   'security.get_entity',
-  'security.entity_risk_score',
+  'security.get_entity_risk_score_history',
   'security.search_entities',
 ];
