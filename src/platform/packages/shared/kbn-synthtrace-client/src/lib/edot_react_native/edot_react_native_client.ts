@@ -76,7 +76,6 @@ export interface SpanOptions {
   attributes: Record<string, unknown>;
   traceId?: string;
   spanId?: string;
-  parentSpanId?: string;
 }
 
 /** The builders both platforms share; `EdotAndroidClient` and `EdotIosClient` follow their SDK. */
@@ -206,13 +205,11 @@ export abstract class EdotReactNativeClientBase {
     attributes,
     traceId = generateLongId(),
     spanId = generateShortId(),
-    parentSpanId,
   }: SpanOptions): EdotReactNativeSpan {
     return new EdotSpan<EdotReactNativeSpanDocument>({
       _index: TRACES_INDEX,
       trace_id: traceId,
       span_id: spanId,
-      ...(parentSpanId ? { parent_span_id: parentSpanId } : {}),
       name,
       kind,
       status: { code: status },
