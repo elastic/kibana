@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { memoize } from 'lodash';
+import { memoize, once } from 'lodash';
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
@@ -19,40 +19,66 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { resolveTimeRange } from './screen_context_utils';
-import { createIncludeFrozenSchema, getIncludeFrozenByDefault } from './include_frozen_schema';
+import {
+  createIncludeFrozenSchema,
+  getIncludeFrozenByDefault,
+  getIncludeFrozenParam,
+} from './include_frozen_schema';
+
+const createExecuteEsqlToolSchemaShape = () => ({
+  query: z.string().describe('The ES|QL query to execute'),
+  params: z
+    .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
+    .optional()
+    .describe('(Optional) The parameter values to use for the query'),
+  time_range: z
+    .object({
+      from: z
+        .string()
+        .describe('Start of the time range, e.g. "now-24h" or "2026-01-01T00:00:00Z"'),
+      to: z.string().describe('End of the time range, e.g. "now" or "2026-01-31T23:59:59Z"'),
+    })
+    .optional()
+    .describe(
+      '(Optional) Time range for named parameters ?_tstart and ?_tend. Falls back to screen context or last 24 hours.'
+    ),
+  limit: z
+    .number()
+    .optional()
+    .default(100)
+    .describe('(Optional) Can be set to limit the number of results to return. Defaults to 100.'),
+});
 
 const createExecuteEsqlToolSchema = memoize((includeFrozenByDefault: boolean) =>
   z.object({
-    query: z.string().describe('The ES|QL query to execute'),
-    params: z
-      .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
-      .optional()
-      .describe('(Optional) The parameter values to use for the query'),
-    time_range: z
-      .object({
-        from: z
-          .string()
-          .describe('Start of the time range, e.g. "now-24h" or "2026-01-01T00:00:00Z"'),
-        to: z.string().describe('End of the time range, e.g. "now" or "2026-01-31T23:59:59Z"'),
-      })
-      .optional()
-      .describe(
-        '(Optional) Time range for named parameters ?_tstart and ?_tend. Falls back to screen context or last 24 hours.'
-      ),
-    limit: z
-      .number()
-      .optional()
-      .default(100)
-      .describe('(Optional) Can be set to limit the number of results to return. Defaults to 100.'),
+    ...createExecuteEsqlToolSchemaShape(),
     include_frozen: createIncludeFrozenSchema(includeFrozenByDefault),
   })
 );
 
-type ExecuteEsqlToolSchema = ReturnType<typeof createExecuteEsqlToolSchema>;
+const createServerlessExecuteEsqlToolSchema = once(() =>
+  z.object(createExecuteEsqlToolSchemaShape())
+);
+
+type ExecuteEsqlToolSchema =
+  | ReturnType<typeof createExecuteEsqlToolSchema>
+  | ReturnType<typeof createServerlessExecuteEsqlToolSchema>;
 
 const generateEsqlTool = sanitizeToolId(platformCoreTools.generateEsql);
 
-export const executeEsqlTool = (): DynamicSchemaBuiltinToolDefinition<ExecuteEsqlToolSchema> => {
+const dataTiersSection = `
+
+### Data tiers
+
+The \`include_frozen\` parameter controls whether indices on the frozen tier are queried; its description states the default.
+Querying the frozen tier requires recovering searchable snapshots from object storage and can take several minutes, so expect such queries to be slow or to time out.
+If results look incomplete for a time range that reaches far into the past and frozen tier data was excluded, tell the user that frozen tier data was not searched.`;
+
+export const executeEsqlTool = ({
+  isServerless = false,
+}: {
+  isServerless?: boolean;
+} = {}): DynamicSchemaBuiltinToolDefinition<ExecuteEsqlToolSchema> => {
   return {
     id: platformCoreTools.executeEsql,
     type: ToolType.builtin,
@@ -78,25 +104,20 @@ These are default guidelines. If your instructions or a skill you loaded tell yo
 
 The \`limit\` parameter can be used to limit the number of results to return. It defaults to 100.
 You should avoid using a higher limit value unless explicitly asked by the user or if you know for sure the length of the data will not be a problem.
-Note that this option can't be used to increase the number of results if the query already defines a \`LIMIT\` clause - the lowest limit will always prevail.
-
-### Data tiers
-
-The \`include_frozen\` parameter controls whether indices on the frozen tier are queried; its description states the default.
-Querying the frozen tier requires recovering searchable snapshots from object storage and can take several minutes, so expect such queries to be slow or to time out.
-If results look incomplete for a time range that reaches far into the past and frozen tier data was excluded, tell the user that frozen tier data was not searched.`,
+Note that this option can't be used to increase the number of results if the query already defines a \`LIMIT\` clause - the lowest limit will always prevail.${
+      isServerless ? '' : dataTiersSection
+    }`,
     getSchema: async (schemaContext) =>
-      createExecuteEsqlToolSchema(await getIncludeFrozenByDefault(schemaContext)),
-    handler: async (
-      {
+      isServerless
+        ? createServerlessExecuteEsqlToolSchema()
+        : createExecuteEsqlToolSchema(await getIncludeFrozenByDefault(schemaContext)),
+    handler: async (toolParams, { esClient, attachments }) => {
+      const {
         query: esqlQuery,
         params: esqlParams = {},
         time_range: explicitTimeRange,
         limit = 100,
-        include_frozen: includeFrozen,
-      },
-      { esClient, attachments }
-    ) => {
+      } = toolParams;
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
 
       const params: Array<Record<string, FieldValue>> = [
@@ -111,7 +132,7 @@ If results look incomplete for a time range that reaches far into the past and f
         params,
         esClient: esClient.asCurrentUser,
         limit,
-        includeFrozen,
+        includeFrozen: getIncludeFrozenParam(toolParams),
       });
 
       // need the interpolated query to return in the results / to display in the UI
