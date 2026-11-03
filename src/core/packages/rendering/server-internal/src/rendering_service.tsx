@@ -20,7 +20,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { UserStorageServiceStart } from '@kbn/core-user-storage-server';
-import type { UserSettings } from '@kbn/core-user-settings-server-internal';
+import type { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import {
   type DarkModeValue,
@@ -206,36 +206,20 @@ export class RenderingService {
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
 
-    // Grouping all async HTTP requests to run them concurrently for performance reasons.
-    // Anonymous pages skip user-scoped values and async default values (the latter typically
-    // call ES via `asCurrentUser`, which would 401 on an unauthenticated request).
-    const [
+    const {
       defaultSettings,
-      globalSettingsDefaultValues = {},
-      settingsUserValues = {},
-      globalSettingsUserValues = {},
-      { darkMode: userSettingDarkMode, locale: userSettingLocale } = {},
-      userStorageResult = { available: false, values: {} },
-    ] = await Promise.all(
-      isAnonymousPage
-        ? [uiSettings.client?.getRegistered() ?? {}, uiSettings.globalClient?.getRegistered() ?? {}]
-        : ([
-            withAsyncDefaultValues(request, uiSettings.client?.getRegistered()),
-            withAsyncDefaultValues(request, uiSettings.globalClient?.getRegistered()),
-            uiSettings.client?.getUserProvided(true),
-            uiSettings.globalClient?.getUserProvided(true),
-            userSettings?.getUserSettings(request),
-            // user storage
-            this.fetchUserStorage(request),
-          ] as [
-            ReturnType<typeof withAsyncDefaultValues>,
-            ReturnType<typeof withAsyncDefaultValues>,
-            Promise<Record<string, UserProvidedValues>>,
-            Promise<Record<string, UserProvidedValues>>,
-            Promise<UserSettings> | undefined,
-            Promise<{ available: boolean; values: Record<string, unknown> }>
-          ])
-    );
+      globalSettingsDefaultValues,
+      settingsUserValues,
+      globalSettingsUserValues,
+      userSettingDarkMode,
+      userSettingLocale,
+      userStorageResult,
+    } = await this.loadSettingsForRender({
+      request,
+      uiSettings,
+      userSettings,
+      isAnonymousPage,
+    });
 
     const settings = {
       defaults: toRuntimeDefaults(defaultSettings),
@@ -426,6 +410,70 @@ export class RenderingService {
     return {
       body: `<!DOCTYPE html>${renderToStaticMarkup(<Template metadata={metadata} />)}`,
       headers: cookieHeaders,
+    };
+  }
+
+  /**
+   * Loads the default and user-provided UI settings values needed to render the page, along
+   * with the user's dark mode/locale preferences and user storage values.
+   *
+   * Anonymous pages skip user-scoped values and async default values (the latter typically call
+   * ES via `asCurrentUser`, which would 401 on an unauthenticated request), so they only need the
+   * two synchronous `getRegistered()` calls. All other pages run every request concurrently for
+   * performance reasons.
+   */
+  private async loadSettingsForRender({
+    request,
+    uiSettings,
+    userSettings,
+    isAnonymousPage,
+  }: {
+    request: KibanaRequest;
+    uiSettings: { client: IUiSettingsClient; globalClient: IUiSettingsClient };
+    userSettings: InternalUserSettingsServiceSetup | undefined;
+    isAnonymousPage: boolean;
+  }) {
+    if (isAnonymousPage) {
+      const [defaultSettings, globalSettingsDefaultValues] = await Promise.all([
+        uiSettings.client?.getRegistered() ?? {},
+        uiSettings.globalClient?.getRegistered() ?? {},
+      ]);
+
+      return {
+        defaultSettings,
+        globalSettingsDefaultValues,
+        settingsUserValues: {} as Record<string, UserProvidedValues>,
+        globalSettingsUserValues: {} as Record<string, UserProvidedValues>,
+        userSettingDarkMode: undefined as DarkModeValue | undefined,
+        userSettingLocale: undefined as string | undefined,
+        userStorageResult: { available: false, values: {} },
+      };
+    }
+
+    const [
+      defaultSettings,
+      globalSettingsDefaultValues,
+      settingsUserValues = {},
+      globalSettingsUserValues = {},
+      { darkMode: userSettingDarkMode, locale: userSettingLocale } = {},
+      userStorageResult = { available: false, values: {} },
+    ] = await Promise.all([
+      withAsyncDefaultValues(request, uiSettings.client?.getRegistered()),
+      withAsyncDefaultValues(request, uiSettings.globalClient?.getRegistered()),
+      uiSettings.client?.getUserProvided(true),
+      uiSettings.globalClient?.getUserProvided(true),
+      userSettings?.getUserSettings(request),
+      this.fetchUserStorage(request),
+    ]);
+
+    return {
+      defaultSettings,
+      globalSettingsDefaultValues,
+      settingsUserValues,
+      globalSettingsUserValues,
+      userSettingDarkMode,
+      userSettingLocale,
+      userStorageResult,
     };
   }
 
