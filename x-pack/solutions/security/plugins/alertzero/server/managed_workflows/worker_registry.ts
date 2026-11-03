@@ -31,6 +31,7 @@ interface RegisteredWorkerInstallOptions {
   workflowId?: string;
   workflowIdSuffix?: string;
   values?: ManagedWorkflowTemplateValues;
+  expectedDocumentVersion?: number | null;
 }
 
 /**

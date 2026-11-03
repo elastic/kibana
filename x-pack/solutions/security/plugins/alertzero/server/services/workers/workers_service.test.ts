@@ -98,10 +98,18 @@ const createPersistentHarness = () => {
         spaceId: string;
         workflowIdSuffix?: string;
         values?: Record<string, unknown>;
+        expectedDocumentVersion?: number | null;
       }
     ) => {
       const idWithSuffix = documentId(id, options.workflowIdSuffix ?? options.spaceId);
       const existing = documents.get(idWithSuffix);
+      // Same contract as the managed workflows service: skip the write on a version mismatch.
+      if (
+        options.expectedDocumentVersion !== undefined &&
+        (existing == null || existing.version !== options.expectedDocumentVersion)
+      ) {
+        return;
+      }
       const values = options.values ?? existing?.values ?? null;
       const yaml = renderManagedWorkflowYaml(id, values);
       documents.set(idWithSuffix, {
@@ -522,6 +530,104 @@ describe('WorkersService', () => {
       const document = harness.documents.get(`${ATTACK_DISCOVERY}-${SPACE}`);
       expect(document?.invalid).toBe(false);
       expect(document?.yaml).not.toContain(COLLIDING_CONTEXT);
+    });
+
+    describe('when the previous settings cannot be put back', () => {
+      const setUpHuntWithInvalidSave = async () => {
+        const harness = createPersistentHarness();
+        const logger = loggingSystemMock.createLogger();
+        const threatIntelSupply = {
+          assertHardGate: jest.fn(async () => undefined),
+          ensureSupplyForSpace: jest.fn(async () => undefined),
+          teardownSupplyForSpace: jest.fn(async () => undefined),
+        };
+        const service = new WorkersService(
+          harness.management,
+          Promise.resolve(harness.managedWorkflows),
+          logger as Logger,
+          {},
+          async (_request, registration, options) => {
+            await harness.install(registration.id, options);
+          },
+          async () => [],
+          threatIntelSupply as unknown as ThreatIntelSupplyService
+        );
+        const first = await service.update(
+          HUNT,
+          { settings: { serviceAccountId: 'sa-1' }, settingsRevision: null },
+          SPACE,
+          request
+        );
+        if (first.outcome !== 'updated') throw new Error('Expected the first save to succeed');
+        // Every write from here on is stored invalid, so only a skipped or rejected restore can
+        // leave the workflow in a state the service must report as unrestored.
+        harness.failValidationWhen(() => true);
+        harness.install.mockClear();
+        harness.updateWorkflow.mockClear();
+        const save = () =>
+          service.update(
+            HUNT,
+            {
+              enabled: true,
+              settings: { autonomy: 'manual' },
+              settingsRevision: first.response.worker.settingsRevision,
+            },
+            SPACE,
+            request
+          );
+        return { harness, logger, threatIntelSupply, save };
+      };
+
+      it('reports failed, rolls back Hunt supply and logs when the restore write throws', async () => {
+        const { harness, logger, threatIntelSupply, save } = await setUpHuntWithInvalidSave();
+        const realInstall = harness.install.getMockImplementation();
+        harness.install.mockImplementationOnce(realInstall!);
+        harness.install.mockRejectedValueOnce(new Error('restore write failed'));
+
+        const result = await save();
+
+        expect(result).toEqual({ outcome: 'failed' });
+        expect(harness.install).toHaveBeenCalledTimes(2);
+        expect(threatIntelSupply.teardownSupplyForSpace).toHaveBeenCalledWith(SPACE, request);
+        expect(logger.error).toHaveBeenCalledWith(
+          expect.stringContaining('previous settings could not be restored: restore write failed')
+        );
+        expect(harness.updateWorkflow).not.toHaveBeenCalled();
+      });
+
+      it('reports failed when the restore returns but the workflow is still invalid', async () => {
+        // The restore runs the real install, which stores the document invalid again.
+        const { harness, threatIntelSupply, save } = await setUpHuntWithInvalidSave();
+
+        const result = await save();
+
+        expect(result).toEqual({ outcome: 'failed' });
+        expect(harness.documents.get(`${HUNT}-${SPACE}`)?.invalid).toBe(true);
+        expect(threatIntelSupply.teardownSupplyForSpace).toHaveBeenCalledWith(SPACE, request);
+      });
+
+      it('does not overwrite a save that landed after the invalid one', async () => {
+        const { harness, threatIntelSupply, save } = await setUpHuntWithInvalidSave();
+        const realInstall = harness.install.getMockImplementation()!;
+        harness.install.mockImplementationOnce(realInstall);
+        harness.install.mockImplementationOnce(async (id, options) => {
+          // A concurrent save bumps the version between the invalid write and the restore.
+          const document = harness.documents.get(`${HUNT}-${SPACE}`);
+          if (document) document.version += 1;
+          await realInstall(id, options);
+        });
+
+        const result = await save();
+
+        expect(result).toEqual({ outcome: 'failed' });
+        expect(harness.install).toHaveBeenCalledTimes(2);
+        expect(harness.install).toHaveBeenLastCalledWith(
+          HUNT,
+          expect.objectContaining({ expectedDocumentVersion: expect.any(Number) })
+        );
+        expect(harness.documents.get(`${HUNT}-${SPACE}`)?.invalid).toBe(true);
+        expect(threatIntelSupply.teardownSupplyForSpace).toHaveBeenCalledWith(SPACE, request);
+      });
     });
   });
 

@@ -112,6 +112,7 @@ export type InstallWorkerForRequest = (
     spaceId: string;
     workflowIdSuffix?: string;
     values?: ManagedWorkflowTemplateValues;
+    expectedDocumentVersion?: number | null;
   }
 ) => Promise<void>;
 
@@ -173,6 +174,7 @@ export class WorkersService {
       spaceId: string;
       workflowIdSuffix: string;
       values: ManagedWorkflowTemplateValues;
+      expectedDocumentVersion?: number | null;
     }
   ): Promise<void> {
     await this.installWorkerForRequest(request, registration, options);
@@ -452,12 +454,39 @@ export class WorkersService {
           this.logger.error(
             `Worker "${registration.id}" settings produced an invalid workflow; restoring the previous settings`
           );
+          // When nothing was installed before, this "restore" installs the defaults: a disabled,
+          // valid workflow, which is harmless, so it is accepted rather than uninstalled.
+          const restoreValues =
+            currentState?.templateValues ?? registration.settings.createDefaultValues();
+          let restored = false;
           try {
-            await this.persistWorker(request, registration, {
-              spaceId,
-              workflowIdSuffix: spaceId,
-              values: currentState?.templateValues ?? registration.settings.createDefaultValues(),
-            });
+            // Pinned to the invalid document's version so a save that landed after ours is not
+            // overwritten; install skips the write on a mismatch and the check below catches it.
+            const invalidState = await managedWorkflows.getInstalledWorkflowState(
+              status.workflowId,
+              spaceId
+            );
+            if (invalidState) {
+              await this.persistWorker(request, registration, {
+                spaceId,
+                workflowIdSuffix: spaceId,
+                values: restoreValues,
+                expectedDocumentVersion: invalidState.documentVersion,
+              });
+              const restoredStatus = await managedWorkflows.getWorkflowStatus(registration.id, {
+                spaceId,
+                workflowIdSuffix: spaceId,
+              });
+              const restoredState = await managedWorkflows.getInstalledWorkflowState(
+                status.workflowId,
+                spaceId
+              );
+              restored =
+                restoredStatus.installed &&
+                restoredStatus.status !== 'invalid' &&
+                restoredState != null &&
+                templateValuesEqual(restoredState.templateValues, restoreValues);
+            }
           } catch (err) {
             this.logger.error(
               `Worker "${registration.id}" previous settings could not be restored: ${
@@ -466,6 +495,12 @@ export class WorkersService {
             );
           }
           await rollbackHuntSupplyIfNeeded();
+          if (!restored) {
+            this.logger.error(
+              `Worker "${registration.id}" could not be confirmed restored after an invalid save`
+            );
+            return { outcome: 'failed' };
+          }
           return {
             outcome: 'invalid',
             message: 'the settings produce a workflow that fails validation',
