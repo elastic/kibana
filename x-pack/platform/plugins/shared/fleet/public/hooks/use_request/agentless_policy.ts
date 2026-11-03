@@ -84,12 +84,18 @@ export const sendDeleteAgentlessPolicy = (
   });
 };
 
-export const sendBulkUpgradeAgentlessPolicies = (policyIds: string[]) => {
+export const sendBulkUpgradeAgentlessPolicies = (
+  policyIds: string[],
+  options?: { acknowledgeBreakingChanges?: boolean }
+) => {
   return sendRequestForRq<BulkUpgradeAgentlessPoliciesResponse>({
     path: agentlessPolicyRouteService.getUpgradePath(),
     method: 'post',
     version: API_VERSIONS.public.v1,
-    body: JSON.stringify({ policyIds }),
+    body: JSON.stringify({
+      policyIds,
+      ...(options?.acknowledgeBreakingChanges ? { acknowledge_breaking_changes: true } : {}),
+    }),
   });
 };
 

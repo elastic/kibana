@@ -16,6 +16,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { createAppContextStartContractMock, createPackagePolicyServiceMock } from '../../mocks';
 import { assertSecretIdsReusable, deleteSecretsIfNotReferenced } from '../secrets';
 import { getInstallation, getPackageInfo } from '../epm/packages';
+import { getPackagePoliciesUpgradeBreakingChanges } from '../epm/packages/breaking_changes';
 import { appContextService, cloudConnectorService } from '..';
 import { agentPolicyService } from '../agent_policy';
 import { agentlessAgentService } from '../agents/agentless_agent';
@@ -23,6 +24,10 @@ import { agentlessAgentService } from '../agents/agentless_agent';
 import { AgentlessPoliciesServiceImpl } from './agentless_policies';
 
 jest.mock('../epm/packages/get');
+jest.mock('../epm/packages/breaking_changes', () => ({
+  ...jest.requireActual('../epm/packages/breaking_changes'),
+  getPackagePoliciesUpgradeBreakingChanges: jest.fn(),
+}));
 
 jest.mock('../agent_policy');
 jest.mock('../secrets', () => ({
@@ -1810,6 +1815,83 @@ describe('AgentlessPoliciesService', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       packagePolicyService = createPackagePolicyServiceMock();
+      jest.mocked(getPackagePoliciesUpgradeBreakingChanges).mockResolvedValue([]);
+    });
+
+    describe('breaking changes', () => {
+      const breakingChanges = [
+        {
+          version: '2.0.0',
+          changes: [
+            {
+              description: 'Removed the foo input.',
+              link: 'https://github.com/elastic/integrations/pull/1',
+              type: 'breaking-change' as any,
+            },
+          ],
+        },
+      ];
+
+      beforeEach(() => {
+        jest.mocked(getInstallation).mockResolvedValue({ version: '2.0.0' } as any);
+        packagePolicyService.getByIDs.mockResolvedValue([
+          buildAgentlessPackagePolicy({ id: 'a' }),
+          buildAgentlessPackagePolicy({ id: 'b' }),
+        ]);
+        packagePolicyService.bulkUpgrade.mockResolvedValue([{ id: 'b', name: 'B', success: true }]);
+      });
+
+      it('should report policies with unacknowledged breaking changes as per-policy failures and upgrade the others', async () => {
+        jest.mocked(getPackagePoliciesUpgradeBreakingChanges).mockResolvedValue([
+          {
+            packagePolicy: buildAgentlessPackagePolicy({ id: 'a', name: 'A' }),
+            toVersion: '2.0.0',
+            breakingChanges,
+          },
+        ]);
+
+        const result = await createService().bulkUpgradeAgentlessPolicies(['a', 'b']);
+
+        expect(packagePolicyService.bulkUpgrade).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          ['b'],
+          expect.objectContaining({})
+        );
+        expect(result).toEqual([
+          {
+            id: 'a',
+            name: 'A',
+            success: false,
+            statusCode: 400,
+            body: {
+              message: expect.stringContaining(
+                'Package policy a: Upgrading test_agentless from 1.0.0 to 2.0.0 includes breaking changes'
+              ),
+            },
+          },
+          { id: 'b', name: 'B', success: true },
+        ]);
+      });
+
+      it('should not check breaking changes when acknowledged', async () => {
+        packagePolicyService.bulkUpgrade.mockResolvedValue([
+          { id: 'a', name: 'A', success: true },
+          { id: 'b', name: 'B', success: true },
+        ]);
+
+        await createService().bulkUpgradeAgentlessPolicies(['a', 'b'], undefined, {
+          acknowledgeBreakingChanges: true,
+        });
+
+        expect(getPackagePoliciesUpgradeBreakingChanges).not.toHaveBeenCalled();
+        expect(packagePolicyService.bulkUpgrade).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          ['a', 'b'],
+          expect.objectContaining({})
+        );
+      });
     });
 
     it('should upgrade each agentless policy and let the engine schedule the deploy', async () => {
