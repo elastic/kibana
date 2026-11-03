@@ -21,6 +21,17 @@ describe('renderElasticManifest', () => {
     expect(content).toContain('never hard-code their values');
   });
 
+  it('without a telemetry connector, points to any Elasticsearch connector in connectors.md', () => {
+    const content = renderElasticManifest();
+
+    expect(content).toContain('/workspace/connectors.md');
+    expect(content).toContain('`.elasticsearch`');
+    expect(content).toContain('`.http`');
+    expect(content).not.toContain('connector_id: "');
+    expect(content).not.toContain('## Investigation telemetry');
+    expect(content).toContain('"$CONNECTOR_CONFIG_URL/_query?format=txt"');
+  });
+
   it('keeps CCS and remote cluster guidance on by default, without naming indices or remotes', () => {
     const content = renderElasticManifest(connector('elasticsearch-telemetry'));
 

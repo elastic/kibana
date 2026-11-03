@@ -27,9 +27,11 @@ import { isTemplateExpression, parseDuration } from '../../utils';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../workflow_context_manager/step_execution_runtime_factory';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowExecutionState } from '../../workflow_context_manager/workflow_execution_state';
 import type { RuntimeGraphView } from '../../workflow_context_manager/workflow_runtime_graph';
 import { WorkflowScopeStack } from '../../workflow_context_manager/workflow_scope_stack';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
+import { getIdleTimeoutResumeDeadlineMs } from '../../workflow_execution_loop/handle_execution_delay';
 import type { CancellableNode, NodeImplementation } from '../node_implementation';
 import { isCancellableNode } from '../node_implementation';
 import type { NodesFactory } from '../nodes_factory';
@@ -78,7 +80,8 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
     private workflowLogger: IWorkflowEventLogger,
     private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
     private nodesFactory: NodesFactory,
-    private workflowGraph: RuntimeGraphView
+    private workflowGraph: RuntimeGraphView,
+    private workflowExecutionState: Pick<WorkflowExecutionState, 'getStepExecutionsByStepId'>
   ) {}
 
   public async run(): Promise<void> {
@@ -515,11 +518,10 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
         // Pre-warm (rehydrate evicted outputs) — scope-independent, safe to run
         // concurrently with sibling branches.
         await branchRuntime.contextManager.ensureContextReady();
-        // Start the node with the branch's scope installed. The step's
-        // synchronous template rendering (getInput) reads the scope before the
-        // first await, so the scope only needs to be correct for this synchronous
-        // prefix; we restore it immediately so concurrent siblings are unaffected.
-        // The returned promise's awaited I/O does not read the global scope.
+        // Start the node with the branch's scope installed. The scope only needs
+        // to be correct for this synchronous prefix; we restore it immediately so
+        // concurrent siblings are unaffected. Template rendering (getInput) reads
+        // the branch runtime's own stack frames, so it may run after an await.
         const runPromise = this.withBranchScope(branchStackFrames, () =>
           Promise.resolve(branchImpl.run())
         );
@@ -594,9 +596,9 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
 
   /**
    * Installs `branchStackFrames` as the global workflow scope, runs `fn`, then
-   * restores the previous scope. `fn` MUST complete all scope-dependent reads
-   * synchronously (e.g. template rendering in a step's `getInput()`), because
-   * the scope is restored as soon as `fn` returns — before any awaited I/O.
+   * restores the previous scope. `fn` MUST complete all reads of the global
+   * scope synchronously, because the scope is restored as soon as `fn`
+   * returns — before any awaited I/O.
    *
    * The shared workflow scope is a single mutable slot, so two branches must
    * never have their scope installed at the same time. `Promise.all` advances
@@ -752,7 +754,30 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
 
   private computeResumeAt(state: ParallelStepState): Date {
     const now = Date.now();
+
+    // Timeout deadlines may only cap a park taken because every in-flight branch
+    // is parked in a durable wait. When any branch would advance on the next tick
+    // (e.g. queued behind the concurrency window with a free slot), the step must
+    // re-tick at the floor — parking until a far-off timeout would strand it.
+    if (this.hasRunnableBranch(state)) {
+      return new Date(now + RETICK_FLOOR_MS);
+    }
+
     let earliest: number | undefined;
+    const consider = (ts: number | undefined) => {
+      if (ts === undefined || Number.isNaN(ts)) {
+        return;
+      }
+      if (earliest === undefined || ts < earliest) {
+        earliest = ts;
+      }
+    };
+
+    const overallTimeoutMs = this.resolveTimeoutMs(this.node.configuration.timeout);
+    if (overallTimeoutMs !== undefined) {
+      consider(state.startedAt + overallTimeoutMs);
+    }
+    const branchTimeoutMs = this.resolveTimeoutMs(this.node.configuration['branch-timeout']);
 
     const inFlightBranches = state.branches.filter(
       (branch) => !TERMINAL_BRANCH_STATUSES.has(branch.status)
@@ -765,17 +790,70 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
       });
       const resumeAt = branchRuntime.stepExecution?.state?.resumeAt;
       if (typeof resumeAt === 'string') {
-        const ts = new Date(resumeAt).getTime();
-        if (!Number.isNaN(ts) && (earliest === undefined || ts < earliest)) {
-          earliest = ts;
-        }
+        consider(new Date(resumeAt).getTime());
       }
+      if (branchTimeoutMs !== undefined && branch.startedAt !== undefined) {
+        consider(branch.startedAt + branchTimeoutMs);
+      }
+      // Step timeout around a wait inside the branch, plus the workflow timeout.
+      consider(this.getEnclosingIdleDeadlineMs(branchRuntime, branchStackFrames));
     }
 
     if (earliest !== undefined && earliest > now) {
       return new Date(earliest);
     }
     return new Date(now + RETICK_FLOOR_MS);
+  }
+
+  /**
+   * Whether the next tick would advance at least one branch, mirroring the
+   * tick's scheduling gate: a started non-terminal branch that is not parked in
+   * a durable wait, or a pending branch that is not blocked by fail-fast and has
+   * a free concurrency slot.
+   */
+  private hasRunnableBranch(state: ParallelStepState): boolean {
+    const { max, countWaiting } = this.resolveConcurrency();
+    const failFast = this.resolveMode() === 'fail-fast';
+    const hasFailure = state.branches.some(
+      (b) => b.status === 'failed' || b.status === 'timed_out'
+    );
+    const slotsInUse = state.branches.filter((b) => {
+      if (TERMINAL_BRANCH_STATUSES.has(b.status)) return false;
+      if (b.status !== 'running') return false;
+      if (countWaiting) return true;
+      return !b.waiting;
+    }).length;
+    return state.branches.some((branch) => {
+      if (TERMINAL_BRANCH_STATUSES.has(branch.status)) {
+        return false;
+      }
+      if (branch.started) {
+        return !branch.waiting;
+      }
+      if (failFast && hasFailure) {
+        return false;
+      }
+      return slotsInUse < max;
+    });
+  }
+
+  /** Earliest idle deadline enclosing a branch: workflow timeout, step-timeout zones, and HITL. */
+  private getEnclosingIdleDeadlineMs(
+    branchRuntime: StepExecutionRuntime,
+    branchStackFrames: StackFrame[]
+  ): number | undefined {
+    const persistedStack = branchRuntime.stepExecution?.scopeStack;
+    const stackFrames =
+      persistedStack != null && persistedStack.length > 0 ? persistedStack : branchStackFrames;
+    return getIdleTimeoutResumeDeadlineMs(
+      {
+        workflowExecutionGraph: this.workflowGraph,
+        workflowExecutionState: this.workflowExecutionState,
+      },
+      branchRuntime.workflowExecution,
+      stackFrames,
+      branchRuntime
+    );
   }
 
   /**

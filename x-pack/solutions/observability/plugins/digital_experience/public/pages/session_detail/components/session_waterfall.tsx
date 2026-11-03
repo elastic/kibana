@@ -8,16 +8,13 @@
 import React from 'react';
 import type { CSSProperties } from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiToolTip,
-  euiPaletteColorBlind,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, euiPaletteColorBlind } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { SessionPageVisit } from '../../../../common/sessions';
+import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../ebt_constants';
 import { formatSessionDuration } from '../../../utils/format_session_duration';
 import type { SessionWaterfallLayout } from '../utils/session_timeline';
 import { formatOffset } from '../utils/session_timeline';
@@ -34,6 +31,52 @@ const anchorStyle = (position: CSSProperties): CSSProperties => ({
   ...position,
 });
 
+const componentStyles = {
+  bar: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      position: 'relative',
+      height: BAR_HEIGHT,
+      borderRadius: euiTheme.border.radius.medium,
+      background: euiTheme.colors.backgroundBaseSubdued,
+      overflow: 'hidden',
+    }),
+  // The tooltip anchors are positioned on the bar (`anchorStyle`), so tooltips point at them;
+  // segments and markers fill their anchor.
+  segment: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      display: 'block',
+      width: '100%',
+      height: '100%',
+      padding: 0,
+      border: 'none',
+      borderRight: `1px solid ${euiTheme.colors.emptyShade}`,
+      cursor: 'pointer',
+      '&:hover, &:focus-visible': { filter: 'brightness(1.15)' },
+    }),
+  // A hit area wider than the 2px line, so the marker can be hovered and focused for its tooltip.
+  marker: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      justifyContent: 'center',
+      '&::after': {
+        content: '""',
+        width: 2,
+        background: euiTheme.colors.danger,
+        boxShadow: `0 0 0 1px ${euiTheme.colors.emptyShade}`,
+      },
+    }),
+  swatch: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      display: 'inline-block',
+      width: euiTheme.size.s,
+      height: euiTheme.size.s,
+      borderRadius: euiTheme.border.radius.small,
+      marginRight: euiTheme.size.xs,
+    }),
+};
+
 /** A color per page, the same for each visit of the page, in order of first visit. */
 export const pageColors = (pageVisits: SessionPageVisit[]): Map<string, string> => {
   const palette = euiPaletteColorBlind({ rotations: 2 });
@@ -48,58 +91,24 @@ export const pageColors = (pageVisits: SessionPageVisit[]): Map<string, string> 
 
 /**
  * The session on one bar: a segment per page visit, as wide as the time spent on the page, and a
- * marker at each error.
+ * marker at each error. Selecting a segment shows that visit in the journey.
  */
 export function SessionWaterfall({
   layout,
   pageVisits,
   colors,
+  onSelectVisit,
 }: {
   layout: SessionWaterfallLayout;
   pageVisits: SessionPageVisit[];
   colors: Map<string, string>;
+  onSelectVisit: (index: number) => void;
 }) {
-  const { euiTheme } = useEuiTheme();
-
-  const barCss = css({
-    position: 'relative',
-    height: BAR_HEIGHT,
-    borderRadius: euiTheme.border.radius.medium,
-    background: euiTheme.colors.backgroundBaseSubdued,
-    overflow: 'hidden',
-  });
-  // The tooltip anchors are positioned on the bar (`anchorStyle`), so tooltips point at them;
-  // segments and markers fill their anchor.
-  const segmentCss = css({
-    display: 'block',
-    width: '100%',
-    height: '100%',
-    borderRight: `1px solid ${euiTheme.colors.emptyShade}`,
-  });
-  // A hit area wider than the 2px line, so the marker can be hovered and focused for its tooltip.
-  const markerCss = css({
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    justifyContent: 'center',
-    '&::after': {
-      content: '""',
-      width: 2,
-      background: euiTheme.colors.danger,
-      boxShadow: `0 0 0 1px ${euiTheme.colors.emptyShade}`,
-    },
-  });
-  const swatchCss = css({
-    display: 'inline-block',
-    width: euiTheme.size.s,
-    height: euiTheme.size.s,
-    borderRadius: euiTheme.border.radius.small,
-    marginRight: euiTheme.size.xs,
-  });
+  const styles = useMemoCss(componentStyles);
 
   return (
     <div data-test-subj="digitalExperienceSessionWaterfall">
-      <div css={barCss}>
+      <div css={styles.bar}>
         {layout.segments.map(({ index, page, offsetPercent, widthPercent }) => {
           const visit = pageVisits[index];
           const label = i18n.translate(
@@ -123,14 +132,17 @@ export function SessionWaterfall({
                 style: anchorStyle({ left: `${offsetPercent}%`, width: `${widthPercent}%` }),
               }}
             >
-              <span
+              <button
+                type="button"
                 data-test-subj="digitalExperienceSessionWaterfallSegment"
-                // Focusable, so keyboard users get the tooltip too.
-                tabIndex={0}
-                role="img"
+                {...getEbtProps({
+                  action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SELECT_PAGE_VISIT,
+                  element: SESSIONS_EBT_ELEMENTS.WATERFALL_PAGE,
+                })}
                 aria-label={label}
-                css={segmentCss}
+                css={styles.segment}
                 style={{ background: colors.get(page) }}
+                onClick={() => onSelectVisit(index)}
               />
             </EuiToolTip>
           );
@@ -160,7 +172,7 @@ export function SessionWaterfall({
                 tabIndex={0}
                 role="img"
                 aria-label={label}
-                css={markerCss}
+                css={styles.marker}
               />
             </EuiToolTip>
           );
@@ -182,7 +194,7 @@ export function SessionWaterfall({
         {[...colors].map(([page, color]) => (
           <EuiFlexItem grow={false} key={page}>
             <EuiText size="xs" color="subdued">
-              <span css={swatchCss} style={{ background: color }} aria-hidden={true} />
+              <span css={styles.swatch} style={{ background: color }} aria-hidden={true} />
               {page}
             </EuiText>
           </EuiFlexItem>
