@@ -269,6 +269,32 @@ selection alone does not restart Scout. `run` and `start --skip-server` use your
 whose Task Manager capacity you must configure yourself. Wait for any active eval to finish before
 restarting a shared local stack.
 
+## Daily stored datasets
+
+[`src/datasets/stored_datasets.ts`](src/datasets/stored_datasets.ts) lists the stored datasets the
+[daily pipeline](#ci) runs. Each entry names a dataset on the evaluations cluster, either exactly
+(`name`) or as the newest match of a pattern (`latest`), and the eval that scores it:
+
+| Id                  | Eval            | Dataset                                                    |
+| ------------------- | --------------- | ---------------------------------------------------------- |
+| `golden`            | investigation   | newest `ns-investigation-golden-MMDD`, at most 90 days old |
+| `connector-elastic` | connector-probe | `nightshift/ns-connector-elastic`                          |
+
+`latest` picks the most recently created dataset whose name matches, so a new cut runs from the
+next build without a code change, and the date in its name is never parsed. The run fails when
+nothing matches or the newest match is older than `maxAgeDays`. Scores stay attributed to the
+resolved name, so each cut is its own series in the dashboards.
+
+To add a dataset to the daily run, add an entry. Its eval's CI shard (`stored-investigations` or
+`stored-connector-probes`) runs every entry of that eval. Each id is also a `NIGHTSHIFT_DATASETS`
+selector, opt-in like `connector-probe`:
+
+```bash
+NIGHTSHIFT_DATASETS=golden \
+  node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 1 \
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-anthropic-claude-4-6-sonnet
+```
+
 ## Telemetry targets
 
 An investigation selects its telemetry source with `input.telemetry_target` on its eval example.
@@ -612,7 +638,7 @@ against.
 
 | Variable                         | Effect                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NIGHTSHIFT_DATASETS`            | Comma-separated dataset ids (whitespace trimmed). Smoke dataset ids such as `synthetic-smoke` select seeded evals; `trace-only` selects the file-driven investigations; they can be combined, e.g. `synthetic-smoke,trace-only`. Unset or `all` runs every eval when sandbox credentials are present, except that a stored `NIGHTSHIFT_DATASET_NAME` defaults to trace-only when selection is unset. Without them, unset runs only smoke with a warning, while an explicit `all` or `trace-only` fails before any test runs, even when Scout is reused. `connector-probe` selects the [connector probes](#connector-probes), which unset and `all` never include. `orcabench` selects the isolated ORCA dataset and cannot be combined with other ids; it requires an ORCA-configured Scout server. Unknown ids fail early. |
+| `NIGHTSHIFT_DATASETS`            | Comma-separated dataset ids (whitespace trimmed). Smoke dataset ids such as `synthetic-smoke` select seeded evals; `trace-only` selects the file-driven investigations; they can be combined, e.g. `synthetic-smoke,trace-only`. Unset or `all` runs every eval when sandbox credentials are present, except that a stored `NIGHTSHIFT_DATASET_NAME` defaults to trace-only when selection is unset. Without them, unset runs only smoke with a warning, while an explicit `all` or `trace-only` fails before any test runs, even when Scout is reused. `connector-probe` selects the [connector probes](#connector-probes), which unset and `all` never include; neither do the ids of the [daily stored datasets](#daily-stored-datasets). `orcabench` selects the isolated ORCA dataset and cannot be combined with other ids; it requires an ORCA-configured Scout server. Unknown ids fail early. |
 | `NIGHTSHIFT_PROBE_EXAMPLES_FILE` | Examples file for `connector-probe`; required when it is selected. See [connector probes](#connector-probes).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `NIGHTSHIFT_PROBE_TIME_BUDGET_S` | Seconds a probe may take before `within_time_budget` scores 0 (default 30).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `SELECTED_EVALUATORS`            | Standard `@kbn/evals` filter, by evaluator name (`documents_restored`, `timestamps_replayed`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
@@ -669,7 +695,7 @@ as `nightshift-investigations`.
 - **Where it runs:** a serverless observability Scout cluster; `run_suite.sh` reads `scoutArch` /
   `scoutDomain` from the suite entry.
 - **What runs:** a `customer0` shard with the smoke and trace-only evals, and an `orcabench`
-  shard with the ORCA benchmark. The suite's ci-prod secret,
+  shard with the ORCA benchmark (plus the opt-in stored shards in the daily run). The suite's ci-prod secret,
   `kv/ci-shared/kbn-evals/nightshift`, must hold the `sandbox` block;
   `.buildkite/scripts/steps/evals/run_suite.sh` reads it and runs the suite's `scoutHook` on it
   before starting Scout (failing the step if it cannot be read), and Buildkite agents must be able
@@ -680,7 +706,14 @@ as `nightshift-investigations`.
 - **Weekly:** a step in [`llm_evals.yml`](../../../../../.buildkite/pipelines/evals/llm_evals.yml)
   runs it against Sonnet 5.5, GPT 5.6 Sol and GPT 5.6 Terra, set by
   `weeklyEisModelGroups` in the suite entry.
-- **Failures** are posted to `#nightshift-alerts`, resolved from `slackChannel` in the suite entry.
+- **Daily:** [`daily_evals.yml`](../../../../../.buildkite/pipelines/evals/daily_evals.yml)
+  ([`kibana-evals-daily-llm-evals`](https://buildkite.com/elastic/kibana-evals-daily-llm-evals))
+  runs the `orcabench` shard and the opt-in `stored-investigations` and `stored-connector-probes`
+  shards against Sonnet 5.5 at 02:00 UTC on weekdays. The stored shards run the
+  [daily stored datasets](#daily-stored-datasets); only pipelines that name them in
+  `EVAL_SHARD_IDS` run them, so the weekly and PR runs are unchanged.
+- **Failures** are posted to `#nightshift-alerts`, resolved from `slackChannel` in the suite entry
+  (weekly) or `EVAL_SLACK_NOTIFICATION_CHANNEL` (daily).
 - **Scores** reach the golden cluster automatically, through `EVAL_KBN_URL` in CI.
 
 ## Validation

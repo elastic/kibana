@@ -13,5 +13,7 @@
 export { selectDatasets } from './select_datasets';
 export { resolveEvalSelection, INVESTIGATION_DATASET_ID } from './eval_selection';
 export type { EvalSelection } from './eval_selection';
+export { STORED_DATASETS, resolveStoredDatasetName, selectStoredDatasets } from './stored_datasets';
+export type { StoredDataset, StoredDatasetEval } from './stored_datasets';
 export { toEvaluationDataset } from './to_evaluation_dataset';
 export type { Dataset } from './types';

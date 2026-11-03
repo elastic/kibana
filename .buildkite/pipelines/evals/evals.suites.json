@@ -155,6 +155,16 @@
         {
           "id": "orcabench",
           "specFiles": ["evals/investigation/orcabench.spec.ts"]
+        },
+        {
+          "id": "stored-investigations",
+          "optIn": true,
+          "specFiles": ["evals/investigation/stored.spec.ts"]
+        },
+        {
+          "id": "stored-connector-probes",
+          "optIn": true,
+          "specFiles": ["evals/connector_probe/stored.spec.ts"]
         }
       ]
     },

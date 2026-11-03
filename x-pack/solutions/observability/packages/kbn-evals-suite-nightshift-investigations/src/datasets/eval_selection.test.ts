@@ -21,6 +21,7 @@ describe('resolveEvalSelection', () => {
         runSmoke: true,
         runInvestigations: true,
         runConnectorProbes: false,
+        storedDatasetIds: [],
         smokeDatasetsRequest: undefined,
         fellBackToSmoke: false,
       });
@@ -32,6 +33,7 @@ describe('resolveEvalSelection', () => {
         runSmoke: true,
         runInvestigations: false,
         runConnectorProbes: false,
+        storedDatasetIds: [],
         smokeDatasetsRequest: undefined,
         fellBackToSmoke: true,
       });
@@ -55,6 +57,7 @@ describe('resolveEvalSelection', () => {
       runSmoke: false,
       runInvestigations: true,
       runConnectorProbes: false,
+      storedDatasetIds: [],
       smokeDatasetsRequest: undefined,
       fellBackToSmoke: false,
     });
@@ -66,6 +69,7 @@ describe('resolveEvalSelection', () => {
       runSmoke: true,
       runInvestigations: false,
       runConnectorProbes: false,
+      storedDatasetIds: [],
       smokeDatasetsRequest: 'synthetic-smoke',
       fellBackToSmoke: false,
     });
@@ -79,6 +83,7 @@ describe('resolveEvalSelection', () => {
       runSmoke: true,
       runInvestigations: true,
       runConnectorProbes: false,
+      storedDatasetIds: [],
       smokeDatasetsRequest: 'synthetic-smoke',
       fellBackToSmoke: false,
     });
@@ -92,6 +97,7 @@ describe('resolveEvalSelection', () => {
       runSmoke: false,
       runInvestigations: false,
       runConnectorProbes: true,
+      storedDatasetIds: [],
       smokeDatasetsRequest: undefined,
       fellBackToSmoke: false,
     });
@@ -100,6 +106,7 @@ describe('resolveEvalSelection', () => {
   it('never selects the connector probes for all', () => {
     expect(resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: 'all' })).toMatchObject({
       runConnectorProbes: false,
+      storedDatasetIds: [],
     });
   });
 
@@ -149,6 +156,62 @@ describe('resolveEvalSelection', () => {
   });
 });
 
+describe('stored dataset selection', () => {
+  it.each([
+    ['stored-investigations', ['golden']],
+    ['stored-connector-probes', ['connector-elastic']],
+  ])('runs only the stored datasets of the %s shard', (shardId, storedDatasetIds) => {
+    expect(resolveEvalSelection({ ...WITH_SANDBOX, EVAL_SHARD_ID: shardId })).toEqual({
+      runOrca: false,
+      runSmoke: false,
+      runInvestigations: false,
+      runConnectorProbes: false,
+      storedDatasetIds,
+      smokeDatasetsRequest: undefined,
+      fellBackToSmoke: false,
+    });
+  });
+
+  it('lets other shards keep their NIGHTSHIFT_DATASETS selection', () => {
+    expect(resolveEvalSelection({ ...WITH_SANDBOX, EVAL_SHARD_ID: 'customer0' })).toMatchObject({
+      runSmoke: true,
+      runInvestigations: true,
+      storedDatasetIds: [],
+    });
+  });
+
+  it('rejects a stored shard without credentials', () => {
+    expect(() => resolveEvalSelection({ EVAL_SHARD_ID: 'stored-investigations' })).toThrow(
+      'The stored-investigations shard requires SANDBOX_API_KEY'
+    );
+  });
+
+  it('selects stored datasets by id locally, alongside smoke datasets', () => {
+    expect(
+      resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: 'synthetic-smoke,golden' })
+    ).toMatchObject({
+      runSmoke: true,
+      runInvestigations: false,
+      storedDatasetIds: ['golden'],
+      smokeDatasetsRequest: 'synthetic-smoke',
+    });
+  });
+
+  it('never selects stored datasets for unset or all', () => {
+    for (const value of [undefined, 'all']) {
+      expect(
+        resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: value }).storedDatasetIds
+      ).toEqual([]);
+    }
+  });
+
+  it('rejects a stored dataset id without credentials', () => {
+    expect(() => resolveEvalSelection({ NIGHTSHIFT_DATASETS: 'golden' })).toThrow(
+      'NIGHTSHIFT_DATASETS=golden selects golden, which runs investigation evals'
+    );
+  });
+});
+
 describe('ORCA selection', () => {
   const orcaEnv = { ...WITH_SANDBOX, NIGHTSHIFT_ORCA_TELEMETRY: '1' };
   it.each([{ EVAL_SHARD_ID: 'orcabench' }, { NIGHTSHIFT_DATASETS: 'orcabench' }])(
@@ -159,6 +222,7 @@ describe('ORCA selection', () => {
         runSmoke: false,
         runInvestigations: false,
         runConnectorProbes: false,
+        storedDatasetIds: [],
       });
     }
   );

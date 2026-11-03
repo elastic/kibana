@@ -40,14 +40,18 @@ export const registerInvestigationEvaluation = ({
   loadDataset = loadInvestigationDataset,
   trustUpstreamDataset = Boolean(process.env.NIGHTSHIFT_DATASET_NAME),
   orca = false,
+  // The bundled synthetic questions ask for a sandbox calculation; other datasets may not.
+  requireSandboxCommand = !process.env.NIGHTSHIFT_EXAMPLES_FILE &&
+    !process.env.NIGHTSHIFT_DATASET_NAME,
   metadata: experimentMetadata = {},
 }: {
   name: string;
   loadDataset?: (
-    client: Pick<EvalsClient, 'getDatasetByName'>
+    client: Pick<EvalsClient, 'getDatasetByName' | 'listDatasets'>
   ) => Promise<EvaluationDataset<InvestigationExample>>;
   trustUpstreamDataset?: boolean;
   orca?: boolean;
+  requireSandboxCommand?: boolean;
   metadata?: Record<string, string | number>;
 }): void => {
   evaluate.describe(`Nightshift investigations: ${name}`, { tag: suiteTags }, () => {
@@ -214,11 +218,7 @@ export const registerInvestigationEvaluation = ({
               if (orca && hasOrcaTelemetryQuery(conversation.rounds)) {
                 casesWithOrcaTelemetry.push(output.case_id);
               }
-              if (
-                !orca &&
-                !process.env.NIGHTSHIFT_EXAMPLES_FILE &&
-                !process.env.NIGHTSHIFT_DATASET_NAME
-              ) {
+              if (!orca && requireSandboxCommand) {
                 assertSuccessfulSandboxCommand(conversation.rounds);
               }
               expect(output.traceId).toMatch(/^[a-f0-9]{32}$/);

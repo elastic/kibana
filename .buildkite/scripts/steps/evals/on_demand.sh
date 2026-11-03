@@ -46,6 +46,7 @@ for raw_suite in "${requested_suites[@]}"; do
       EVAL_FANOUT: "1"
       EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
       EVAL_GREP: "${EVAL_GREP:-}"
+      EVAL_SHARD_IDS: "${EVAL_SHARD_IDS:-}"
       EVAL_REPETITIONS: "${EVAL_REPETITIONS:-}"
       EVAL_CONCURRENCY: "${EVAL_CONCURRENCY:-}"
       KIBANA_BUILD_ID: "${KIBANA_BUILD_ID:-}"

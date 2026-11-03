@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-const { buildFanoutMatrix, formatFanoutMatrix } = require('./get_fanout_matrix');
+const { buildFanoutMatrix, formatFanoutMatrix, parseShardIds } = require('./get_fanout_matrix');
 
 const CONNECTORS = {
   'eis-a': { provider: 'elastic', providerConfig: { model_id: 'a' } },
@@ -261,6 +261,66 @@ describe('buildFanoutMatrix - override / no-config parity', () => {
       grepOverride: false,
     });
     expect(rows.map((r) => r.connectorId)).toEqual(['eis-a', 'eis-b', 'eis-c']);
+  });
+});
+
+describe('buildFanoutMatrix - shard selection', () => {
+  const OPT_IN_SUITE = {
+    shards: [
+      { id: 's1', specFiles: [DISCOVERY] },
+      { id: 'daily', optIn: true, specFiles: [OTHER] },
+    ],
+  };
+  const select = (overrides) =>
+    buildFanoutMatrix({
+      connectors: CONNECTORS,
+      suiteInfo: OPT_IN_SUITE,
+      requestedModelGroups: ['eis/a'],
+      perSpec: false,
+      grepOverride: false,
+      ...overrides,
+    });
+
+  it('skips opt-in shards unless EVAL_SHARD_IDS names them', () => {
+    expect(select()).toEqual([{ connectorId: 'eis-a', shardId: 's1', specFiles: [DISCOVERY] }]);
+  });
+
+  it('runs only the requested shards, including opt-in ones', () => {
+    expect(select({ requestedShardIds: ['daily'] })).toEqual([
+      { connectorId: 'eis-a', shardId: 'daily', specFiles: [OTHER] },
+    ]);
+    expect(select({ requestedShardIds: ['s1', 'daily'] })).toEqual([
+      { connectorId: 'eis-a', shardId: 's1', specFiles: [DISCOVERY] },
+      { connectorId: 'eis-a', shardId: 'daily', specFiles: [OTHER] },
+    ]);
+  });
+
+  it('applies the selection to the weekly per-spec batches too', () => {
+    expect(
+      select({
+        suiteInfo: {
+          ...OPT_IN_SUITE,
+          specModelGroups: [{ files: [DISCOVERY], models: ['eis/a'] }],
+        },
+        perSpec: true,
+      })
+    ).toEqual([{ connectorId: 'eis-a', shardId: 's1', specFiles: [DISCOVERY] }]);
+  });
+
+  it('throws on an unknown shard id instead of running fewer shards', () => {
+    expect(() => select({ requestedShardIds: ['daily', 'missing'] })).toThrow(
+      'Unknown shard id(s) in EVAL_SHARD_IDS: missing. Available: s1,daily'
+    );
+    expect(() => select({ suiteInfo: {}, requestedShardIds: ['daily'] })).toThrow(
+      'Available: <none, the suite has no shards>'
+    );
+  });
+});
+
+describe('parseShardIds', () => {
+  it('trims, drops empty items and dedupes', () => {
+    expect(parseShardIds(' a, b,,a ')).toEqual(['a', 'b']);
+    expect(parseShardIds(undefined)).toEqual([]);
   });
 });
 
