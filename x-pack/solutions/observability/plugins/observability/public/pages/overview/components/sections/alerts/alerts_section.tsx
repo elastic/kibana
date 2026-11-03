@@ -62,6 +62,7 @@ export function AlertsSection({ bucketSize }: { bucketSize: BucketSize }) {
       data-test-subj="obltOverviewAlerts"
       appLink={{ href: appLinkHref, label: SECTION_APP_LINK_LABEL }}
       hasError={false}
+      hasInnerPanel={!showUniversal}
     >
       {showUniversal ? (
         <Suspense fallback={<EuiLoadingSpinner data-test-subj="obltOverviewAlertsLoading" />}>
