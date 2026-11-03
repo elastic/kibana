@@ -67,12 +67,15 @@ const source: NightshiftSource = {
   esql_updated_at: '2026-09-01T00:00:00.000Z',
 };
 
-const renderFlyout = (props: { source?: NightshiftSource } = {}) =>
-  render(
+const renderFlyout = (props: Omit<React.ComponentProps<typeof SourceFlyout>, 'onClose'> = {}) => {
+  const onClose = jest.fn();
+  const view = render(
     <QueryClientProvider client={new QueryClient()}>
-      <SourceFlyout {...props} onClose={jest.fn()} />
+      <SourceFlyout {...props} onClose={onClose} />
     </QueryClientProvider>
   );
+  return { ...view, onClose };
+};
 
 const typeQuery = (esql: string) =>
   fireEvent.change(screen.getByLabelText('Query editor'), { target: { value: esql } });
@@ -218,4 +221,48 @@ describe('SourceFlyout enabled switch', () => {
       expect(mockUpdateSource.mock.calls[0][0].body).not.toHaveProperty('enabled');
     }
   );
+});
+
+describe('SourceFlyout draft mode', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    mockFetch.mockReset();
+    mockCreateSource.mockReset();
+    mockUpdateSource.mockReset();
+    mockFetch.mockResolvedValue({ valid: true, type: 'logs', index_exists: true });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('returns validated values without creating a source', async () => {
+    const onSubmit = jest.fn();
+    const { onClose } = renderFlyout({
+      initialValues: {
+        title: 'Logs',
+        description: 'Application logs',
+        tags: ['logs'],
+        esql: 'FROM logs*',
+      },
+      onSubmit,
+    });
+
+    await waitOutDebounce();
+    await waitFor(() => expect(saveButton()).toBeEnabled());
+    fireEvent.click(saveButton());
+
+    await waitFor(() =>
+      expect(onSubmit).toHaveBeenCalledWith({
+        title: 'Logs',
+        description: 'Application logs',
+        tags: ['logs'],
+        esql: 'FROM logs*',
+        enabled: true,
+      })
+    );
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(mockCreateSource).not.toHaveBeenCalled();
+    expect(mockUpdateSource).not.toHaveBeenCalled();
+  });
 });
