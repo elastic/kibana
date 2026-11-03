@@ -68,7 +68,9 @@ const pushIndexed = (index: Map<string, TopologyNode[]>, key: string, node: Topo
   const normalized = normalizeFeatureSlug(key);
   const list = index.get(normalized);
   if (list) {
-    list.push(node);
+    if (!list.some(({ node_id: nodeId }) => nodeId === node.node_id)) {
+      list.push(node);
+    }
   } else {
     index.set(normalized, [node]);
   }
@@ -107,8 +109,12 @@ function buildNodes(features: Feature[]): NodeIndex {
       provenance: sortProvenance(sorted.map(toProvenance)),
     };
     bySlug.set(slug, node);
-    if (name) pushIndexed(byName, name, node);
-    if (technology) pushIndexed(byTechnology, technology, node);
+    for (const feature of sorted) {
+      const featureName = stringProperty(feature, 'name');
+      const featureTechnology = stringProperty(feature, 'technology');
+      if (featureName) pushIndexed(byName, featureName, node);
+      if (featureTechnology) pushIndexed(byTechnology, featureTechnology, node);
+    }
   }
 
   return { bySlug, byName, byTechnology };
@@ -127,11 +133,17 @@ function resolveEndpoint(ref: string, index: NodeIndex): ResolvedEndpoint {
   if (bySlug) return { nodeId: bySlug.node_id, resolution: 'slug' };
 
   const byName = index.byName.get(normalized);
-  if (byName?.length === 1) return { nodeId: byName[0].node_id, resolution: 'name' };
+  if (byName) {
+    return byName.length === 1
+      ? { nodeId: byName[0].node_id, resolution: 'name' }
+      : { nodeId: null, resolution: 'unresolved' };
+  }
 
   const byTechnology = index.byTechnology.get(normalized);
-  if (byTechnology?.length === 1) {
-    return { nodeId: byTechnology[0].node_id, resolution: 'technology' };
+  if (byTechnology) {
+    return byTechnology.length === 1
+      ? { nodeId: byTechnology[0].node_id, resolution: 'technology' }
+      : { nodeId: null, resolution: 'unresolved' };
   }
 
   return { nodeId: null, resolution: 'unresolved' };
@@ -179,7 +191,6 @@ function buildEdges(features: Feature[], index: NodeIndex): TopologyEdge[] {
   return edges;
 }
 
-/** Builds the topology from entity and dependency features; output is independent of input order. */
 export function buildTopologySnapshot({
   features,
   sourceIds,
@@ -209,7 +220,6 @@ export function buildTopologySnapshot({
   };
 }
 
-/** Returns node and edge slugs reachable from the seeds. */
 export function topologyNeighborhood({
   snapshot,
   seedIds,
@@ -230,6 +240,8 @@ export function topologyNeighborhood({
       if (edgesReached.has(edge.edge_id)) continue;
       const touches =
         frontier.has(edge.edge_id) ||
+        frontier.has(normalizeFeatureSlug(edge.source_ref)) ||
+        frontier.has(normalizeFeatureSlug(edge.target_ref)) ||
         (edge.source_node_id !== null && frontier.has(edge.source_node_id)) ||
         (edge.target_node_id !== null && frontier.has(edge.target_node_id));
       if (!touches) continue;

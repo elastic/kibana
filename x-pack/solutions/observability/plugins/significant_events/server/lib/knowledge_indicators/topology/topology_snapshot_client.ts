@@ -15,7 +15,6 @@ import {
   topologyNeighborhood,
 } from './build_topology_snapshot';
 
-/** Computes topology snapshots from source KIs. */
 export class TopologySnapshotClient {
   constructor(
     private readonly deps: {

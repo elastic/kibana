@@ -18,7 +18,7 @@ import {
 } from '../../utils/resolve_source_ids';
 
 const getTopologyRoute = createServerRoute({
-  endpoint: 'GET /internal/significant_events/topology',
+  endpoint: 'GET /internal/nightshift/topology',
   options: {
     access: 'internal',
     summary: 'Get the service topology',

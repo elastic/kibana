@@ -50,25 +50,43 @@ describe('buildTopologySnapshot', () => {
         entity('Checkout', {
           source_id: 'src-a',
           confidence: 60,
-          properties: { name: 'checkout' },
+          properties: { name: 'legacy-checkout', technology: 'express' },
         }),
         entity('checkout', {
           source_id: 'src-b',
           confidence: 90,
-          properties: { name: 'checkout', technology: 'java' },
+          properties: { name: 'checkout', technology: 'nodejs' },
         }),
+        entity('frontend'),
+        dependency('frontend-checkout-name', 'frontend', 'legacy-checkout'),
+        dependency('frontend-checkout-technology', 'frontend', 'express'),
         feature({ id: 'aws', type: 'infrastructure' }),
         feature({ id: 'log4j', type: 'technology' }),
       ],
       ['src-a', 'src-b']
     );
 
-    expect(snapshot.nodes).toHaveLength(1);
-    const [node] = snapshot.nodes;
+    expect(snapshot.nodes).toHaveLength(2);
+    const [node] = snapshot.nodes.filter(({ node_id: nodeId }) => nodeId === 'checkout');
     expect(node.node_id).toBe('checkout');
-    expect(node.technology).toBe('java');
+    expect(node.name).toBe('checkout');
+    expect(node.technology).toBe('nodejs');
     expect(node.provenance.map((p) => p.source_id)).toEqual(['src-b', 'src-a']);
-    expect(snapshot.node_count).toBe(1);
+    expect(snapshot.edges).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          edge_id: 'frontend-checkout-name',
+          target_node_id: 'checkout',
+          target_resolution: 'name',
+        }),
+        expect.objectContaining({
+          edge_id: 'frontend-checkout-technology',
+          target_node_id: 'checkout',
+          target_resolution: 'technology',
+        }),
+      ])
+    );
+    expect(snapshot.node_count).toBe(2);
     expect(snapshot.source_ids).toEqual(['src-a', 'src-b']);
   });
 
@@ -107,6 +125,20 @@ describe('buildTopologySnapshot', () => {
       'orders-db',
     ]);
     expect(topologySnapshotPropertiesSchema.safeParse(snapshot).success).toBe(true);
+  });
+
+  it('does not fall through to technology when a name match is ambiguous', () => {
+    const snapshot = build([
+      entity('cache-1', { properties: { name: 'redis', technology: 'ioredis' } }),
+      entity('cache-2', { properties: { name: 'redis', technology: 'keydb' } }),
+      entity('cache-3', { properties: { name: 'other-cache', technology: 'redis' } }),
+      dependency('checkout-cache', 'checkout', 'redis'),
+    ]);
+
+    expect(snapshot.edges[0]).toMatchObject({
+      target_node_id: null,
+      target_resolution: 'unresolved',
+    });
   });
 
   it('is deterministic regardless of input order', () => {
@@ -151,6 +183,7 @@ describe('topologyNeighborhood', () => {
       dependency('checkout-orders', 'checkout', 'orders-db', { source_id: 'src-b' }),
       dependency('billing-orders', 'billing', 'orders-db', { source_id: 'src-c' }),
       dependency('dangling', 'checkout', 'nowhere', { source_id: 'src-a' }),
+      dependency('external-orders', 'external-api', 'orders-db', { source_id: 'src-b' }),
     ],
     ['src-a', 'src-b', 'src-c']
   );
@@ -177,6 +210,14 @@ describe('topologyNeighborhood', () => {
   it('keeps unknown seeds so the caller still fetches them directly', () => {
     expect(topologyNeighborhood({ snapshot, seedIds: ['not-in-snapshot'] })).toEqual([
       'not-in-snapshot',
+    ]);
+  });
+
+  it('expands from an endpoint reference when its entity is absent', () => {
+    expect(topologyNeighborhood({ snapshot, seedIds: ['External-API'] })).toEqual([
+      'external-api',
+      'external-orders',
+      'orders-db',
     ]);
   });
 });

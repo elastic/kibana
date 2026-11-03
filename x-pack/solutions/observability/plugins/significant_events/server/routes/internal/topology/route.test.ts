@@ -12,12 +12,12 @@ jest.mock('../../utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
 }));
 
-const route = internalTopologyRoutes['GET /internal/significant_events/topology'];
+const route = internalTopologyRoutes['GET /internal/nightshift/topology'];
 
-const setup = (sourceIds?: string[]) => {
+const setup = (sourceIds: string[]) => {
   const get = jest.fn().mockResolvedValue({ nodes: [], edges: [] });
   const resources = {
-    params: { query: sourceIds ? { sourceIds } : undefined },
+    params: { query: { sourceIds } },
     request: {},
     server: {},
     getScopedClients: jest.fn().mockResolvedValue({
@@ -37,15 +37,7 @@ const setup = (sourceIds?: string[]) => {
   return { resources, get };
 };
 
-describe('GET /internal/significant_events/topology', () => {
-  it('builds from every readable source when none are requested', async () => {
-    const { resources, get } = setup();
-
-    await route.handler(resources as never);
-
-    expect(get).toHaveBeenCalledWith(['source-1', 'source-2']);
-  });
-
+describe('GET /internal/nightshift/topology', () => {
   it('builds from the readable subset of the requested sources', async () => {
     const { resources, get } = setup(['source-2', 'unreadable']);
 

@@ -63,7 +63,6 @@ export const topologyEdgeSchema = lazySchema(() =>
 
 export type TopologyEdge = z.infer<typeof topologyEdgeSchema>;
 
-/** Service topology computed from the entity and dependency KIs of `source_ids`. */
 export const topologySnapshotPropertiesSchema = lazySchema(() =>
   z.object({
     built_at: isoDateTime(),

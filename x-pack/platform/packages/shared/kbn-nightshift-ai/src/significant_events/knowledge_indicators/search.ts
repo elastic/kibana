@@ -309,7 +309,7 @@ export async function searchKnowledgeIndicators({
   getSourceIds(): Promise<string[]>;
   /** Slug of a source id, used to order results. Ids sort as is when it is omitted. */
   getSourceSlug?(sourceId: string): string | undefined;
-  /** Topology neighborhood of the seeds; `undefined` when unavailable, which falls back to in-memory expansion. */
+  /** Returns topology-expanded IDs, or `undefined` to use in-memory expansion. */
   resolveTopologySeeds(seedIds: string[], sourceIds: string[]): Promise<string[] | undefined>;
   getFeatures(
     sourceId: string,
@@ -369,7 +369,6 @@ export async function searchKnowledgeIndicators({
       })
     : [];
 
-  // Step 3: Fetch queries.
   const queries = normalized.includeQueries
     ? await fetchQueryIndicators(
         sourceIds,
@@ -384,7 +383,6 @@ export async function searchKnowledgeIndicators({
       )
     : [];
 
-  // Step 4: Filter defensively, sort deterministically, and paginate.
   const sorted = sortIndicators(
     filterIndicators([...features, ...queries], params, expandedFeatureIds),
     (sourceId) => getSourceSlug?.(sourceId) ?? sourceId
