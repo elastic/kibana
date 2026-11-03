@@ -153,6 +153,11 @@ describe('resolveRound', () => {
       roundKind: 'follow_up',
       roundId: 'r2',
     });
+    // The run's round is not saved yet, and the only saved round predates the run.
+    expect(resolveRound({ rounds: [R1] }, { runStartedAt: AFTER_R1 })).toMatchObject({
+      roundKind: 'follow_up',
+      roundId: 'r1',
+    });
     expect(resolveRound({ rounds: [] }, { runStartedAt: BEFORE_R1 })).toBeUndefined();
   });
 });

@@ -145,7 +145,7 @@ export const resolveRound = (
       : rounds.length === 1);
   const index = createdFirstRound ? 0 : rounds.length - 1;
   return {
-    roundKind: kindAt(index),
+    roundKind: recovery ? 'alert_recovery' : createdFirstRound ? 'initial' : 'follow_up',
     roundId: rounds[index].id,
     ...changeAt(rounds, attachments, index),
   };
