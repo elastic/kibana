@@ -6,9 +6,22 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import type { KibanaRequest, PluginInitializerContext, TasksPlugin } from '@kbn/core/server';
+import type {
+  KibanaRequest,
+  Logger,
+  PluginInitializerContext,
+  TasksPlugin,
+} from '@kbn/core/server';
+import type { WorkflowsClient } from '@kbn/workflows/server/types';
+import { workflowsExtensionsBridge } from './bridge';
+import { ServerStepRegistry } from '../step_registry';
+import { registerInternalStepDefinitions } from '../steps';
 import { TriggerRegistry } from '../trigger_registry';
+import { registerInternalTriggerDefinitions } from '../triggers';
+import type {
+  WorkflowsExtensionsServerPluginSetup,
+  WorkflowsExtensionsServerPluginStart,
+} from '../types';
 
 /**
  * What a workflows runtime provides to `getClient(request).emitEvent` and `isWorkflowsAvailable`.
@@ -20,48 +33,77 @@ export interface WorkflowsTriggerRuntime {
 }
 
 /**
- * Workflows extensions for task runtimes: the trigger registry tasks emit events against. Step, UI
- * and managed-workflow registration belongs to Kibana's `server` entry, so those are no-ops here.
+ * Workflows extensions for task runtimes: the step and trigger registries. Steps and triggers are
+ * registered by the tasks entries of the plugins that own them, as the plugins' `server` entries do in
+ * Kibana, where this is the plugin's own registry (see `bridge.ts`). UI and managed-workflow
+ * registration belong to Kibana, so those are no-ops here.
  */
-export interface WorkflowsExtensionsTasksSetup {
-  registerTriggerDefinition: TriggerRegistry['register'];
-  registerStepDefinition: (definition: unknown) => void;
-  registerManagedWorkflowOwner: (owner: unknown) => void;
-}
+export type WorkflowsExtensionsTasksSetup = Pick<
+  WorkflowsExtensionsServerPluginSetup,
+  'registerStepDefinition' | 'registerTriggerDefinition' | 'registerManagedWorkflowOwner'
+>;
 
-export interface WorkflowsExtensionsTasksStart {
-  getTriggerDefinition: TriggerRegistry['get'];
-  getClient: (request: KibanaRequest) => Promise<{
-    isWorkflowsAvailable: boolean;
-    emitEvent: (triggerId: string, payload: unknown) => Promise<void>;
-  }>;
-  /** Called once by the workflows runtime that answers `getClient`. */
+export type WorkflowsExtensionsTasksStart = Pick<
+  WorkflowsExtensionsServerPluginStart,
+  | 'getStepDefinition'
+  | 'hasStepDefinition'
+  | 'getAllStepDefinitions'
+  | 'getTriggerDefinition'
+  | 'getAllTriggerDefinitions'
+  | 'isReady'
+> & {
+  getClient: (
+    request: KibanaRequest
+  ) => Promise<Pick<WorkflowsClient, 'isWorkflowsAvailable' | 'emitEvent'>>;
+  /** Called once by the workflows runtime that answers `getClient`; a no-op where Kibana answers. */
   bindRuntime: (runtime: WorkflowsTriggerRuntime) => void;
-}
+};
 
 class WorkflowsExtensionsTasksPlugin
   implements TasksPlugin<WorkflowsExtensionsTasksSetup, WorkflowsExtensionsTasksStart>
 {
-  // Trigger definitions are registered at setup (by the tasks that emit them) and read at start.
+  private readonly logger: Logger;
+  private readonly stepRegistry: ServerStepRegistry;
+  // Definitions are registered at setup (by the tasks that use them) and read at start.
   private readonly triggerRegistry = new TriggerRegistry();
   private runtime?: WorkflowsTriggerRuntime;
 
+  constructor(context: PluginInitializerContext) {
+    this.logger = context.logger.get();
+    this.stepRegistry = new ServerStepRegistry(this.logger);
+  }
+
   setup(): WorkflowsExtensionsTasksSetup {
+    const real = workflowsExtensionsBridge.getSetup();
+    if (real) return real;
+
+    registerInternalStepDefinitions(this.stepRegistry);
+    registerInternalTriggerDefinitions(this.triggerRegistry);
     return {
+      registerStepDefinition: (definition) => this.stepRegistry.register(definition),
       registerTriggerDefinition: (definition) => this.triggerRegistry.register(definition),
-      registerStepDefinition: () => undefined,
       registerManagedWorkflowOwner: () => undefined,
     };
   }
 
   start(): WorkflowsExtensionsTasksStart {
+    const real = workflowsExtensionsBridge.getStart();
+    if (real) return { ...real, bindRuntime: () => undefined };
+
     this.triggerRegistry.freeze();
     const getRuntime = () => {
       if (!this.runtime) throw new Error('The workflows runtime is not started');
       return this.runtime;
     };
     return {
+      getStepDefinition: (id) => this.stepRegistry.get(id),
+      hasStepDefinition: (id) => this.stepRegistry.has(id),
+      getAllStepDefinitions: () => this.stepRegistry.getAll(),
       getTriggerDefinition: (id) => this.triggerRegistry.get(id),
+      getAllTriggerDefinitions: () => this.triggerRegistry.list(),
+      isReady: async () => {
+        await this.stepRegistry.whenReady();
+      },
       getClient: async (request) => ({
         isWorkflowsAvailable: await getRuntime().isWorkflowsAvailable(),
         emitEvent: (triggerId, payload) => getRuntime().emitEvent(request, triggerId, payload),
@@ -73,5 +115,5 @@ class WorkflowsExtensionsTasksPlugin
   }
 }
 
-export const plugin = async (_context: PluginInitializerContext) =>
-  new WorkflowsExtensionsTasksPlugin();
+export const plugin = async (context: PluginInitializerContext) =>
+  new WorkflowsExtensionsTasksPlugin(context);

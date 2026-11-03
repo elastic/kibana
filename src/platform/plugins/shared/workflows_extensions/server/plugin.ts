@@ -25,6 +25,7 @@ import { registerGetStepDefinitionsRoute } from './routes/get_step_definitions';
 import { registerGetTriggerDefinitionsRoute } from './routes/get_trigger_definitions';
 import { ServerStepRegistry } from './step_registry';
 import { registerInternalStepDefinitions } from './steps';
+import { workflowsExtensionsBridge } from './tasks/bridge';
 import { TriggerRegistry } from './trigger_registry';
 import { registerInternalTriggerDefinitions } from './triggers';
 import type {
@@ -80,7 +81,7 @@ export class WorkflowsExtensionsServerPlugin
     registerInternalStepDefinitions(this.stepRegistry);
     registerInternalTriggerDefinitions(this.triggerRegistry);
 
-    return {
+    const setupContract: WorkflowsExtensionsServerPluginSetup = {
       registerStepDefinition: (definition) => {
         this.stepRegistry.register(definition);
       },
@@ -106,6 +107,8 @@ export class WorkflowsExtensionsServerPlugin
         this.managedWorkflowPluginIds.add(pluginId);
       },
     };
+    workflowsExtensionsBridge.setSetup(setupContract);
+    return setupContract;
   }
 
   public start(
@@ -114,7 +117,7 @@ export class WorkflowsExtensionsServerPlugin
   ): WorkflowsExtensionsServerPluginStart {
     this.triggerRegistry.freeze();
 
-    return {
+    const startContract: WorkflowsExtensionsServerPluginStart = {
       getStepDefinition: (stepTypeId: string) => {
         return this.stepRegistry.get(stepTypeId);
       },
@@ -152,6 +155,8 @@ export class WorkflowsExtensionsServerPlugin
       },
       getManagedWorkflowPluginIds: () => Array.from(this.managedWorkflowPluginIds),
     };
+    workflowsExtensionsBridge.setStart(startContract);
+    return startContract;
   }
 
   public stop() {}

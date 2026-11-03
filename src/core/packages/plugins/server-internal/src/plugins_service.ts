@@ -79,6 +79,7 @@ export interface PluginsServiceTasksSetupDeps {
     PluginsServiceSetupDeps['analytics'],
     'optIn' | 'registerEventType' | 'reportEvent'
   >;
+  dataStreams: Pick<PluginsServiceSetupDeps['dataStreams'], 'registerDataStream'>;
   http: Pick<PluginsServiceSetupDeps['http'], 'basePath'>;
   injection: Pick<PluginsServiceSetupDeps['injection'], 'getContainer'>;
   savedObjects: Pick<
@@ -96,6 +97,7 @@ export interface PluginsServiceTasksStartDeps {
     PluginsServiceStartDeps['analytics'],
     'optIn' | 'reportEvent' | 'telemetryCounter$'
   >;
+  dataStreams: Pick<PluginsServiceStartDeps['dataStreams'], 'initializeClient'>;
   elasticsearch: Pick<PluginsServiceStartDeps['elasticsearch'], 'client' | 'createClient'>;
   featureFlags: PluginsServiceStartDeps['featureFlags'];
   http: Pick<PluginsServiceStartDeps['http'], 'basePath' | 'getServerInfo'>;

@@ -478,6 +478,9 @@ export function createPluginTasksSetupContext<TPlugin, TPluginDependencies>({
       registerEventType: deps.analytics.registerEventType,
       reportEvent: deps.analytics.reportEvent,
     },
+    dataStreams: {
+      registerDataStream: (dataStream) => deps.dataStreams.registerDataStream(dataStream),
+    },
     http: { basePath: deps.http.basePath },
     injection: {
       getContainer: () => deps.injection.getContainer(plugin.opaqueId),
@@ -513,6 +516,9 @@ export function createPluginTasksStartContext<TPlugin, TPluginDependencies>({
     elasticsearch: {
       client: deps.elasticsearch.client,
       createClient: deps.elasticsearch.createClient,
+    },
+    dataStreams: {
+      initializeClient: (dataStream) => deps.dataStreams.initializeClient(dataStream),
     },
     featureFlags: deps.featureFlags,
     http: { basePath: deps.http.basePath, getServerInfo: deps.http.getServerInfo },

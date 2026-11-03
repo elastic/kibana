@@ -7,146 +7,163 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ActionsTasksStart } from '@kbn/actions-plugin/server/tasks';
 import type {
+  CoreTasksSetup,
   CoreTasksStart,
-  KibanaRequest,
   Logger,
   PluginInitializerContext,
   TasksPlugin,
 } from '@kbn/core/server';
 import type { LicensingTasksStart } from '@kbn/licensing-plugin/server/tasks';
 import type { SpacesTasksStart } from '@kbn/spaces-plugin/server/tasks';
-import type { TaskManagerTasksStart } from '@kbn/task-manager-plugin/server/tasks';
-import { WorkflowRepository } from '@kbn/workflows';
+import type {
+  TaskManagerTasksSetup,
+  TaskManagerTasksStart,
+} from '@kbn/task-manager-plugin/server/tasks';
 import type { WorkflowsExtensionsTasksStart } from '@kbn/workflows-extensions/server/tasks';
-import { ConcurrencyManager } from '../concurrency/concurrency_manager';
+import { workflowsExecutionEngineBridge } from './bridge';
+import type { ConcurrencyManager } from '../concurrency/concurrency_manager';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { config as engineConfig } from '../config';
+import { createScopedRepositories, createWorkflowsEngineRuntime } from '../engine_runtime';
+import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
+import type { DataClientBundle } from '../repositories/data_access_layer';
 import { createDataClientBundle } from '../repositories/data_access_layer';
-import { StepExecutionRepository } from '../repositories/step_execution_repository';
-import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import {
-  createBulkScheduleWorkflow,
-  createScheduleWorkflow,
-  createSchedulingHelpers,
-} from '../scheduling';
-import type { SchedulingDeps } from '../scheduling';
-import { TriggerEventHandler } from '../trigger_events/trigger_event_handler';
-import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+import { initializeLogsRepositoryDataStream } from '../repositories/logs_repository/data_stream';
+import { checkConcurrencyIfNeeded, getConcurrencyGroupKey } from '../scheduling';
+import { registerWorkflowTaskDefinitions } from '../task_runners';
+import { initializeTriggerEventsDataStream } from '../trigger_events';
+import type {
+  InternalResumeWorkflowExecution,
+  WorkflowsExecutionEnginePluginStart,
+} from '../types';
 
 export const config = engineConfig;
+
+interface TasksSetupDeps {
+  taskManager: TaskManagerTasksSetup;
+}
 
 interface TasksStartDeps {
   taskManager: TaskManagerTasksStart;
   licensing: LicensingTasksStart;
   spaces: SpacesTasksStart;
   workflowsExtensions: WorkflowsExtensionsTasksStart;
+  actions: ActionsTasksStart;
 }
 
-export interface WorkflowsExecutionEngineTasksStart {
-  /** Matches an event against workflows in Elasticsearch and schedules the ones that trigger. */
-  emitEvent: (request: KibanaRequest, triggerId: string, payload: unknown) => Promise<void>;
-  /** Same scheduling as the engine's `bulkScheduleWorkflow`. */
-  bulkScheduleWorkflow: ReturnType<typeof createBulkScheduleWorkflow>;
-}
+/** The engine's own contract: the same scheduling, execution, cancellation and trigger events. */
+export type WorkflowsExecutionEngineTasksStart = WorkflowsExecutionEnginePluginStart;
 
 /**
- * The scheduling half of the execution engine for task runtimes: trigger events are matched against
- * workflows in Elasticsearch and scheduled (executions written, a `workflow:run` task created
- * through the runtime's Task Manager), and workflows are bulk scheduled. It is the same code Kibana
- * runs, built from its parts; only the storage `plain_index` is supported. Running workflows (the
- * `workflow:run` task) stays on the node that claims the task.
+ * The workflows engine for task runtimes: the `workflow:run`, `workflow:resume` and
+ * `workflow:scheduled` task types, and the engine they run on, built from the same parts the plugin
+ * uses (`task_runners`, `engine_runtime`). In Kibana the plugin owns both and a task runtime
+ * sees its contract through the bridge. Not supported in a task pod: steps that call Kibana over
+ * HTTP, and workflows that run as a service account.
  */
 class WorkflowsExecutionEngineTasksPlugin
-  implements TasksPlugin<void, Promise<WorkflowsExecutionEngineTasksStart>, {}, TasksStartDeps>
+  implements
+    TasksPlugin<void, Promise<WorkflowsExecutionEngineTasksStart>, TasksSetupDeps, TasksStartDeps>
 {
   private readonly logger: Logger;
   private readonly config: WorkflowsExecutionEngineConfig;
+  private dataClientBundle?: DataClientBundle;
+  private concurrencyManager?: ConcurrencyManager;
+  private internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
+
+  private getConcurrencyManager() {
+    if (!this.concurrencyManager) throw new Error('The workflows engine is not started');
+    return this.concurrencyManager;
+  }
 
   constructor(context: PluginInitializerContext<WorkflowsExecutionEngineConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
   }
 
-  setup() {}
+  setup(core: CoreTasksSetup, { taskManager }: TasksSetupDeps) {
+    if (workflowsExecutionEngineBridge.getSetup()) return;
+
+    const { logger, config: engineSettings } = { logger: this.logger, config: this.config };
+    WorkflowExecutionTelemetryClient.setup(core.analytics as never);
+    initializeLogsRepositoryDataStream(core.dataStreams as never);
+    initializeTriggerEventsDataStream(core.dataStreams as never);
+    const dataClientBundle = createDataClientBundle({
+      source: engineSettings.storage.source,
+      dataRetention: engineSettings.storage.dataRetention,
+      logger,
+    });
+    this.dataClientBundle = dataClientBundle;
+    void dataClientBundle.initSetup(core as never);
+
+    registerWorkflowTaskDefinitions({
+      logger,
+      config: engineSettings,
+      registerTaskDefinitions: taskManager.registerTaskDefinitions,
+      // The task runners read the same services from here as in Kibana.
+      getStartServices: core.getStartServices as never,
+      setupDependencies: { cloudSetup: undefined },
+      meteringService: undefined,
+      createScopedRepositories: () => createScopedRepositories(dataClientBundle),
+      getInternalResumeWorkflowExecution: () => this.internalResumeWorkflowExecution,
+      getConcurrencyGroupKey: (workflowExecution, workflowSettings, coreStart, dependencies) =>
+        getConcurrencyGroupKey(
+          { concurrencyManager: this.getConcurrencyManager(), logger },
+          workflowExecution,
+          workflowSettings,
+          coreStart,
+          dependencies
+        ),
+      checkConcurrencyIfNeeded: (workflowExecution) =>
+        checkConcurrencyIfNeeded(
+          { concurrencyManager: this.getConcurrencyManager(), logger },
+          workflowExecution
+        ),
+    });
+  }
 
   async start(
     core: CoreTasksStart,
-    { taskManager, licensing, spaces, workflowsExtensions }: TasksStartDeps
+    { taskManager, licensing, spaces, workflowsExtensions, actions }: TasksStartDeps
   ): Promise<WorkflowsExecutionEngineTasksStart> {
-    const { storage, eventDriven } = this.config;
-    if (storage.source !== 'plain_index') {
-      throw new Error(
-        `xpack.workflowsExecutionEngine.storage.source '${storage.source}' is not supported in a task runtime: use 'plain_index'`
-      );
-    }
-    const logger = this.logger;
-    const esClient = core.elasticsearch.client.asInternalUser;
+    const real = workflowsExecutionEngineBridge.getStart();
+    if (real) return real;
 
-    const dataClientBundle = createDataClientBundle({
-      source: storage.source,
-      dataRetention: storage.dataRetention,
-      logger,
-    });
-    await dataClientBundle.initSetup({} as never);
+    const dataClientBundle = this.dataClientBundle;
+    if (!dataClientBundle) throw new Error('The workflows engine tasks entry was not set up');
     await dataClientBundle.initStart(core as never);
-    const workflowExecutionRepository = new WorkflowExecutionRepository(
-      dataClientBundle.createWorkflowDataClient()
-    );
-    const stepExecutionRepository = new StepExecutionRepository(
-      dataClientBundle.createStepDataClient()
-    );
-    const workflowRepository = new WorkflowRepository({ esClient, logger });
-    const workflowTaskManager = new WorkflowTaskManager(taskManager as never);
 
-    const schedulingDeps: SchedulingDeps = {
+    // The engine runs workflows inline through its own contract, which exists once it is built.
+    const engine: { contract?: WorkflowsExecutionEnginePluginStart } = {};
+    const runtime = createWorkflowsEngineRuntime({
+      logger: this.logger,
+      config: this.config,
       coreStart: core as never,
-      licensing: licensing as never,
-      taskManager: taskManager as never,
-      cloudSetup: undefined,
-      config: { eventDriven },
-      logger,
-      workflowRepository,
-      workflowExecutionRepository,
-      stepExecutionRepository,
-      workflowTaskManager,
-      concurrencyManager: new ConcurrencyManager(workflowTaskManager, workflowExecutionRepository),
-      // Resuming a parent workflow is the engine's job, on the node that claims the task.
-      getInternalResumeWorkflowExecution: () => undefined,
-    };
-    const helpers = createSchedulingHelpers(schedulingDeps);
-    const scheduleWorkflow = createScheduleWorkflow(schedulingDeps, helpers);
-    const bulkScheduleWorkflow = createBulkScheduleWorkflow(schedulingDeps, helpers);
-
-    const triggerEventHandler = new TriggerEventHandler({
-      workflowExecutionRepository,
-      coreStart: core as never,
-      workflowRepository,
-      workflowsExtensions: {
-        getTriggerDefinition: workflowsExtensions.getTriggerDefinition,
-      } as never,
-      spaces: spaces.spacesService as never,
-      scheduleWorkflow,
-      logger,
-      config: eventDriven,
-      // Trigger events are logged to a data stream that only Kibana sets up.
-      triggerEventsClientPromise: Promise.resolve(undefined),
+      plugins: { licensing, taskManager, workflowsExtensions, actions, spaces } as never,
+      dataClientBundle,
+      setupDependencies: { cloudSetup: undefined },
+      getEngine: async () => {
+        if (!engine.contract) throw new Error('The workflows engine is not started');
+        return engine.contract;
+      },
     });
-
-    const emitEvent: WorkflowsExecutionEngineTasksStart['emitEvent'] = async (
-      request,
-      triggerId,
-      payload
-    ) => {
-      await triggerEventHandler.handleEvent({ triggerId, payload, request } as never);
-    };
+    engine.contract = runtime.contract;
+    this.concurrencyManager = runtime.concurrencyManager;
+    this.internalResumeWorkflowExecution = runtime.internalResumeWorkflowExecution;
 
     workflowsExtensions.bindRuntime({
       isWorkflowsAvailable: async () => (await licensing.getLicense()).hasAtLeast('enterprise'),
-      emitEvent,
+      emitEvent: (request, triggerId, payload) =>
+        runtime.contract.triggerEvents.emitEvent({ triggerId, payload, request } as never),
     });
 
-    return { emitEvent, bulkScheduleWorkflow };
+    return runtime.contract;
+  }
+
+  async stop() {
+    await this.dataClientBundle?.stop();
   }
 }
 

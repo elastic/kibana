@@ -21,6 +21,7 @@ import type { CoreStart } from './core_start';
  */
 export interface CoreTasksSetup<TPluginsStart extends object = object, TStart = unknown> {
   analytics: Pick<CoreSetup['analytics'], 'optIn' | 'registerEventType' | 'reportEvent'>;
+  dataStreams: Pick<CoreSetup['dataStreams'], 'registerDataStream'>;
   http: Pick<CoreSetup['http'], 'basePath'>;
   injection: Pick<CoreSetup['injection'], 'getContainer'>;
   savedObjects: Pick<
@@ -37,6 +38,7 @@ export interface CoreTasksSetup<TPluginsStart extends object = object, TStart = 
  */
 export interface CoreTasksStart {
   analytics: Pick<CoreStart['analytics'], 'optIn' | 'reportEvent' | 'telemetryCounter$'>;
+  dataStreams: Pick<CoreStart['dataStreams'], 'initializeClient'>;
   elasticsearch: Pick<CoreStart['elasticsearch'], 'client' | 'createClient'>;
   featureFlags: CoreStart['featureFlags'];
   http: Pick<CoreStart['http'], 'basePath' | 'getServerInfo'>;

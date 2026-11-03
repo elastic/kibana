@@ -8,6 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { of } from 'rxjs';
+import { TaskPodUnsupportedError } from '../errors';
 
 /**
  * Who a task's fake request acts for. Kibana resolves the originating user (name and profile) when
@@ -106,8 +107,21 @@ export const createSecurityStart = (client: Client) => ({
       cloneAsInternalUser: cloneAsInternalUser(client),
     },
   },
-  // Tasks that run as service accounts always run in Kibana.
-  serviceAccounts: { isEnabled: () => false },
+  // Service accounts need Kibana's bindings and the security plugin: a pod runs none of them. A
+  // task that would use one fails here with a clear message instead of a missing method.
+  serviceAccounts: {
+    isEnabled: () => false,
+    getWorkloadBinding: async () => undefined,
+    withScopedRequestForWorkload: () => {
+      throw new TaskPodUnsupportedError('service account execution');
+    },
+    bindWorkload: () => {
+      throw new TaskPodUnsupportedError('service account bindings');
+    },
+    unbindWorkload: () => {
+      throw new TaskPodUnsupportedError('service account bindings');
+    },
+  },
   audit: { asScoped: () => ({ log: () => undefined, enabled: false }) },
 });
 

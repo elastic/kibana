@@ -20,6 +20,7 @@ import type {
 import { PluginType } from '@kbn/core-base-common';
 import type { TaskManagerTasksDefinitions } from '../../tasks';
 import { PodLogger } from './logger';
+import { createDataStreams } from './core/data_streams';
 import { createElasticsearchCore } from './core/elasticsearch';
 import { PodSavedObjects } from './core/saved_objects';
 import { POD_KIBANA_VERSION } from './version';
@@ -136,9 +137,14 @@ export const bootTasksPlugins = async ({
   const uiSettings = createUiSettings();
   const analytics = createAnalytics();
   const http = createHttpStart(config);
+  const dataStreams = createDataStreams(
+    elasticsearch.internalClient as never,
+    rootLogger.get('dataStreams') as never
+  );
 
   const setupDeps = {
     analytics: analytics.setup,
+    dataStreams: dataStreams.setup,
     http: { basePath: http.basePath },
     injection: injectionSetup,
     savedObjects: savedObjects.setup,
@@ -150,6 +156,7 @@ export const bootTasksPlugins = async ({
   const security = createSecurityStart(elasticsearch.internalClient);
   const startDeps = {
     analytics: analytics.start,
+    dataStreams: dataStreams.start,
     elasticsearch: elasticsearch.start,
     featureFlags: createFeatureFlagsStart(),
     http: { basePath: http.basePath, getServerInfo: http.getServerInfo },

@@ -10,7 +10,9 @@
     "id": "workflowsExecutionEngine",
     "browser": false,
     "server": true,
-    "tasks": { "requiredPlugins": ["taskManager", "workflowsExtensions", "licensing", "spaces"] },
+    "tasks": {
+      "requiredPlugins": ["taskManager", "workflowsExtensions", "licensing", "spaces", "actions"]
+    },
     "requiredPlugins": [
       "taskManager",
       "actions",
