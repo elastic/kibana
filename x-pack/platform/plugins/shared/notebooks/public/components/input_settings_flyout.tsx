@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -18,18 +18,18 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
+  EuiLoadingSpinner,
   EuiSelect,
   EuiSpacer,
   EuiTab,
   EuiTabs,
-  EuiTextArea,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { DropdownOptionsSource, InputDefinition } from '../../common/types';
+import { LazyEsqlEditor } from './lazy_esql_editor';
 import { useNotebook } from './notebook_context';
 
 type ConfigurableInput = Extract<InputDefinition, { kind: 'dropdown' | 'range' }>;
@@ -103,16 +103,20 @@ const QueryOptionsFields = ({ draft, onChange }: FieldsProps<DropdownInput>) => 
       defaultMessage: 'Options query',
     })}
   >
-    <EuiTextArea
-      fullWidth
-      rows={8}
-      value={draft.optionsQuery}
-      onChange={(event) => onChange({ ...draft, optionsQuery: event.target.value })}
-      css={css`
-        font-family: monospace;
-      `}
-      data-test-subj="notebookInputSettingsOptionsQuery"
-    />
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <LazyEsqlEditor
+        query={{ esql: draft.optionsQuery }}
+        onTextLangQueryChange={({ esql }) => onChange({ ...draft, optionsQuery: esql })}
+        onTextLangQuerySubmit={async () => {}}
+        editorIsInline
+        hideRunQueryButton
+        hideQueryHistory
+        hideQuickSearch
+        disableAutoFocus
+        expandToFitQueryOnMount
+        dataTestSubj="notebookInputSettingsOptionsQuery"
+      />
+    </Suspense>
   </EuiFormRow>
 );
 

@@ -11,12 +11,8 @@ import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { EsqlCellDefinition } from '../../common/types';
 import { CellFrame } from './cell_frame';
 import { useNotebook } from './notebook_context';
+import { LazyEsqlEditor } from './lazy_esql_editor';
 import { ResultPreview } from './result_preview';
-
-const LazyEsqlEditor = React.lazy(async () => {
-  const { ESQLLangEditor } = await import('@kbn/esql/public');
-  return { default: ESQLLangEditor };
-});
 
 export const EsqlCell = ({ cell }: { cell: EsqlCellDefinition }) => {
   const { store, scheduler } = useNotebook();
