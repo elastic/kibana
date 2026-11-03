@@ -8,11 +8,7 @@
  */
 
 import { getElementFromPoint } from './get_element_from_point';
-import {
-  EDIT_OVERLAY_ID,
-  LAYOUT_OVERLAY_ID,
-  DEVELOPER_TOOLBAR_ID,
-} from '../constants';
+import { EDIT_OVERLAY_ID, LAYOUT_OVERLAY_ID, DEVELOPER_TOOLBAR_ID } from '../constants';
 
 describe('getElementFromPoint', () => {
   let originalElementsFromPoint: typeof document.elementsFromPoint;
