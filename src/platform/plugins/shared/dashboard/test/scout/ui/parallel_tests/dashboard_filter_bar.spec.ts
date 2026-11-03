@@ -53,7 +53,8 @@ spaceTest.describe('Dashboard filter bar', { tag: tags.deploymentAgnostic }, () 
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsPrivilegedUser();
+    // The privileged role can't read the animals-* index in serverless security projects
+    await browserAuth.loginAsAdmin();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
