@@ -122,7 +122,7 @@ describe('Bulk upgrade task', () => {
 
     it('should check breaking changes and pass the acknowledgement to installPackage', async () => {
       await _runBulkUpgradeTask({
-        signal: new AbortController().signal,
+        abortController: new AbortController(),
         logger: loggingSystemMock.createLogger(),
         taskParams: {
           type: 'bulk_upgrade',
@@ -146,7 +146,7 @@ describe('Bulk upgrade task', () => {
       } as any);
 
       const res = await _runBulkUpgradeTask({
-        signal: new AbortController().signal,
+        abortController: new AbortController(),
         logger: loggingSystemMock.createLogger(),
         taskParams: {
           type: 'bulk_upgrade',
