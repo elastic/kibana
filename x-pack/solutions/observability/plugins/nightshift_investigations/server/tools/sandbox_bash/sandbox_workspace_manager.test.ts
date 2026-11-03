@@ -531,6 +531,34 @@ describe('createSandboxWorkspaceManager', () => {
       );
     });
 
+    it('writes elastic manifest for a saved telemetry connector', async () => {
+      actions.inMemoryConnectors = [];
+      actionsClient.get.mockResolvedValue({
+        id: 'elasticsearch-telemetry',
+        name: 'Telemetry',
+        actionTypeId: '.elasticsearch',
+        config: {},
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+        isConnectorTypeDeprecated: false,
+      });
+      const session = createSessionMock(true);
+
+      await managerWithTelemetry.ensureWorkspaceReady({
+        session,
+        callContext: createCallContext(['elasticsearch-telemetry']),
+      });
+
+      expect(mockWriteElasticManifest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          credentials: { kind: 'connector', connectorId: 'elasticsearch-telemetry' },
+          session,
+        })
+      );
+      expect(session.writeFiles).not.toHaveBeenCalled();
+    });
+
     it('passes the configured readable indices to the telemetry manifest', async () => {
       const session = createSessionMock(false);
       const configuredManager = createSandboxWorkspaceManager({
