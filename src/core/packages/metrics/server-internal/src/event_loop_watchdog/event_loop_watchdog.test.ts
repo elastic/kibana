@@ -40,13 +40,11 @@ describe('EventLoopWatchdog', () => {
   let blockLogger: jest.Mocked<WorkerLogger>;
   let created: EventLoopWatchdog[];
 
-  const options = () => createWorker.mock.calls[0][0] as ManagedWorkerOptions<WatchdogWorkerData>;
-  const slots = (call = 0) =>
-    new BigInt64Array(
-      (
-        createWorker.mock.calls[call][0] as ManagedWorkerOptions<WatchdogWorkerData>
-      ).workerData!.shared
-    );
+  /** The watchdog always passes the optional callbacks and the worker data, so they're required here. */
+  type WatchdogWorkerOptions = Required<ManagedWorkerOptions<WatchdogWorkerData>>;
+  const optionsOf = (opts: unknown) => opts as WatchdogWorkerOptions;
+  const options = (call = 0) => optionsOf(createWorker.mock.calls[call][0]);
+  const slots = (call = 0) => new BigInt64Array(options(call).workerData.shared);
   const create = (overrides: Partial<ConstructorParameters<typeof EventLoopWatchdog>[0]> = {}) => {
     const watchdog = new EventLoopWatchdog({
       logger,
@@ -117,9 +115,7 @@ describe('EventLoopWatchdog', () => {
   it('stamps the heartbeat before the worker starts, then every interval', () => {
     let heartbeatAtCreate = 0n;
     createWorker.mockImplementation((opts) => {
-      heartbeatAtCreate = new BigInt64Array(
-        (opts as ManagedWorkerOptions<WatchdogWorkerData>).workerData!.shared
-      )[Slot.heartbeat];
+      heartbeatAtCreate = new BigInt64Array(optionsOf(opts).workerData.shared)[Slot.heartbeat];
       return worker;
     });
     create().start();
@@ -238,7 +234,7 @@ describe('EventLoopWatchdog', () => {
   it('stops the heartbeat when the worker runs out of restarts', () => {
     create().start();
     expect(jest.getTimerCount()).toBe(1);
-    options().onExhausted!();
+    options().onExhausted();
     expect(jest.getTimerCount()).toBe(0);
   });
 
@@ -251,7 +247,7 @@ describe('EventLoopWatchdog', () => {
       const startedAt = new Date(Date.now()).toISOString();
       shareBlock(startedAtUs);
       jest.advanceTimersByTime(3000);
-      options().onExit!({ reason: 'error', exitCode: 1 });
+      options().onExit({ reason: 'error', exitCode: 1 });
       expect(blockLogger.warn).toHaveBeenCalledTimes(1);
       expect(blockLogger.warn).toHaveBeenCalledWith(
         'Event loop blocked for ~3000ms; the watchdog worker exited during the block',
@@ -270,13 +266,13 @@ describe('EventLoopWatchdog', () => {
       );
       expect(slots()[Slot.blockStartedAt]).toBe(0n);
       // Claimed: a second exit reports nothing.
-      options().onExit!({ reason: 'error', exitCode: 1 });
+      options().onExit({ reason: 'error', exitCode: 1 });
       expect(blockLogger.warn).toHaveBeenCalledTimes(1);
     });
 
     it('is not reported when no block is ongoing', () => {
       create().start();
-      options().onExit!({ reason: 'exit', exitCode: 0 });
+      options().onExit({ reason: 'exit', exitCode: 0 });
       expect(blockLogger.warn).not.toHaveBeenCalled();
     });
 
@@ -289,7 +285,7 @@ describe('EventLoopWatchdog', () => {
       jest.advanceTimersByTime(HEARTBEAT_INTERVAL_MS);
       watchdog.markRunning();
       jest.advanceTimersByTime(1000);
-      options().onExit!({ reason: 'error', exitCode: 1 });
+      options().onExit({ reason: 'error', exitCode: 1 });
       expect(blockMeta()).toMatchObject({ kibana: { event_loop_watchdog: { phase: 'starting' } } });
     });
 
@@ -300,7 +296,7 @@ describe('EventLoopWatchdog', () => {
       jest.advanceTimersByTime(HEARTBEAT_INTERVAL_MS);
       shareBlock(Number(slots()[Slot.heartbeat]));
       jest.advanceTimersByTime(1000);
-      options().onExit!({ reason: 'error', exitCode: 1 });
+      options().onExit({ reason: 'error', exitCode: 1 });
       expect(blockMeta()).toMatchObject({ kibana: { event_loop_watchdog: { phase: 'running' } } });
     });
 

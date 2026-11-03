@@ -21,13 +21,11 @@ import {
   SLOT_COUNT,
   Slot,
   WATCHDOG_WORKER_NAME,
+  WORKER_MAX_OLD_GENERATION_SIZE_MB,
+  WORKER_MAX_YOUNG_GENERATION_SIZE_MB,
   monotonicUs,
   phaseOf,
 } from './constants';
-
-// The worker used 20-24 MB of heap over 10 minutes in dev, with the require hook loaded.
-const WORKER_MAX_OLD_GENERATION_SIZE_MB = 32;
-const WORKER_MAX_YOUNG_GENERATION_SIZE_MB = 16;
 
 export interface EventLoopWatchdogParams {
   logger: Logger;

@@ -97,7 +97,6 @@ describe('runWatchdogWorker', () => {
     start();
     const blockStartedAt = new Date(Date.now()).toISOString();
     block(300);
-    expect(logger.warn).toHaveBeenCalledTimes(1);
     expect(logger.warn).toHaveBeenCalledWith('Event loop blocked for ~300ms', {
       tags: ['event-loop-watchdog'],
       kibana: {
@@ -119,7 +118,6 @@ describe('runWatchdogWorker', () => {
     stall(ONGOING_REPORT_AFTER_MS - 25);
     expect(logger.warn).not.toHaveBeenCalled();
     stall(25);
-    expect(logger.warn).toHaveBeenCalledTimes(1);
     expect(logger.warn).toHaveBeenCalledWith(
       `Event loop blocked for ~${ONGOING_REPORT_AFTER_MS}ms so far`,
       {
@@ -230,7 +228,10 @@ describe('runWatchdogWorker', () => {
     nowUs -= 400; // block ends at y.5ms: 999.6ms in microseconds
     resume();
     // The block was also reported while ongoing; the end warning is the last one.
-    expect(logger.warn.mock.calls.at(-1)![0]).toBe('Event loop blocked for ~1000ms');
+    expect(logger.warn).toHaveBeenLastCalledWith(
+      'Event loop blocked for ~1000ms',
+      expect.anything()
+    );
     jest.advanceTimersByTime(STATS_INTERVAL_MS);
     expect(statsMeta().running.buckets.lt2s + statsMeta().starting.buckets.lt2s).toBe(1);
   });

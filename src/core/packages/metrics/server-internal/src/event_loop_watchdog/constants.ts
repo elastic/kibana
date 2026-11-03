@@ -11,6 +11,10 @@ import type { Phase } from './types';
 
 export const WATCHDOG_WORKER_NAME = 'event-loop-watchdog';
 
+// The worker used 20-24 MB of heap over 10 minutes in dev, with the require hook loaded.
+export const WORKER_MAX_OLD_GENERATION_SIZE_MB = 32;
+export const WORKER_MAX_YOUNG_GENERATION_SIZE_MB = 16;
+
 /** How often the main thread stamps its heartbeat. */
 export const HEARTBEAT_INTERVAL_MS = 50;
 /** How often the worker reads the heartbeat: half the heartbeat interval. */
