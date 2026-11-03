@@ -9,6 +9,8 @@ import type { TermsBucket } from './types';
 
 export const TERMS_SIZE = 100;
 
+export const EVENT_LOG_INDEX = '.kibana-event-log-*';
+
 export const bucketsToRecord = <K extends string = string>(
   buckets: TermsBucket[] = []
 ): Partial<Record<K, number>> => {

@@ -14,6 +14,7 @@ import {
   getDocCounts,
   getStreamCounts,
   lastHourRange,
+  postDocCounts,
 } from '../../lib/doc_counts';
 import { failingClassicUpsertRequest } from '../../lib/streams';
 
@@ -68,6 +69,15 @@ apiTest.describe('Doc counts - failed', { tag: tags.deploymentAgnostic }, () => 
         });
         expect(response).toHaveStatusCode(200);
         expect(findCount(response.body, STREAM)).toBe(1);
+      });
+
+      await apiTest.step('returns failed counts for the posted streams', async () => {
+        const response = await postDocCounts(apiClient, cookieHeader, 'failed', {
+          ...range,
+          streams: [STREAM, `${STREAM}-missing`],
+        });
+        expect(response).toHaveStatusCode(200);
+        expect(response.body).toStrictEqual([{ stream: STREAM, count: 1 }]);
       });
     }
   );

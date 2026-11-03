@@ -17,6 +17,7 @@ import {
   applyFilterlist,
   fieldNames,
   mergeByPriority,
+  toDateOnly,
 } from './health_diagnostic_utils';
 import {
   Action,
@@ -914,5 +915,23 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
       const next = intervalFromDate(new Date(dateFrom), interval);
       expect(next).toEqual(new Date(expected));
     });
+  });
+});
+
+describe('toDateOnly', () => {
+  it('keeps a bare date as is', () => {
+    expect(toDateOnly('2099-12-31')).toBe('2099-12-31');
+  });
+
+  it('drops the time of an ISO datetime', () => {
+    expect(toDateOnly('2099-12-31T23:59:59Z')).toBe('2099-12-31');
+  });
+
+  it('keeps the written date of a datetime with an offset', () => {
+    expect(toDateOnly('2099-12-31T00:30:00+01:00')).toBe('2099-12-31');
+  });
+
+  it('uses the UTC date of a Date instance', () => {
+    expect(toDateOnly(new Date('2099-12-31T23:59:59Z'))).toBe('2099-12-31');
   });
 });
