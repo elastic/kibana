@@ -191,6 +191,7 @@ describe('identifyInferredFeatures', () => {
       totalFilters: 0,
       filtersCapped: false,
       hasFilteredDocuments: false,
+      tuning: { maxExcludedFeaturesInPrompt: 10 },
     } as unknown as Parameters<typeof identifyInferredFeatures>[0]);
 
     expect(mockExecuteFeatureIdentificationAgent).toHaveBeenCalledWith(
