@@ -250,7 +250,7 @@ const waitForEntityStoreInstalled = async ({
   const deadline = Date.now() + ENTITY_STORE_READY_TIMEOUT_MS;
   while (Date.now() < deadline) {
     const status = await entityStoreStatus(request, spaceId);
-    if (status === 'running' || status === 'stopped') return initial;
+    if (status === 'running' || status === 'stopped') return status;
     await sleep(ENTITY_STORE_POLL_INTERVAL_MS);
   }
   throw new Error('Entity Store did not finish installing in time');
@@ -279,7 +279,9 @@ const setEntityExtraction = async ({
 /**
  * Non-destructive world setup: the eval space with AlertZero and the Attack Discovery
  * workflows enabled, the alerts index, anonymization fields and an installed Entity Store.
- * Returns the Entity Store's status before this run, for `pauseEntityExtraction`.
+ * An absent store is installed and left installed. Returns the Entity Store's status once it is
+ * installed (`running` or `stopped`), for `pauseEntityExtraction`: a store this run just installed
+ * starts extracting on its own, so the pre-install status would miss it.
  */
 export const prepareWorkerSpace = async ({
   request,
@@ -306,6 +308,7 @@ export const prepareWorkerSpace = async ({
 /**
  * Stops Entity Store extraction so it cannot rewrite the seeded alerts mid-run. The returned
  * function restarts it, and throws if it cannot, so a stack left paused is never reported clean.
+ * A store that was `stopped` is neither stopped nor restarted.
  */
 export const pauseEntityExtraction = async ({
   request,

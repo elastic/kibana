@@ -8,7 +8,15 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { attackDiscoveryIndexForSpace } from './constants';
-import { assertCleanSpace, cleanupSeed, seedScenario, type SeededScenario } from './seed';
+import type { KbnRequest } from './kbn_request';
+import {
+  assertCleanSpace,
+  cleanupSeed,
+  pauseEntityExtraction,
+  prepareWorkerSpace,
+  seedScenario,
+  type SeededScenario,
+} from './seed';
 import { AUDIT_SCENARIOS } from './audit_failure_classes/registry';
 
 const seeded: SeededScenario = {
@@ -106,5 +114,64 @@ describe('seedScenario', () => {
       spaceId: 's',
     });
     expect([...result.openAlertIds].sort()).toEqual(scenario.alerts.map(({ id }) => id).sort());
+  });
+});
+
+describe('Entity Store extraction pause', () => {
+  const log = { info: jest.fn() } as unknown as ToolingLog;
+  const esClient = { indices: { exists: jest.fn(async () => true) } } as unknown as Client;
+
+  /** Answers every setup call with success; the Entity Store status reads come from `statuses`. */
+  const stackWith = ({ statuses }: { statuses: Array<number | string> }) => {
+    const remaining = [...statuses];
+    const calls: string[] = [];
+    const request: KbnRequest = async ({ method, path }) => {
+      calls.push(`${method} ${path}`);
+      if (path.endsWith('/api/security/entity_store/status')) {
+        const next = remaining.length > 1 ? remaining.shift() : remaining[0];
+        return typeof next === 'number'
+          ? { statusCode: next, body: {} }
+          : { statusCode: 200, body: { status: next } };
+      }
+      return { statusCode: 200, body: {} };
+    };
+    return { request, calls };
+  };
+
+  const entityStoreCalls = (calls: string[]) =>
+    calls.filter((call) => call.includes('/api/security/entity_store/'));
+
+  it('reports a store this run installed as running, so extraction is paused and restarted', async () => {
+    const { request, calls } = stackWith({ statuses: [404, 'running'] });
+    const prepared = await prepareWorkerSpace({ request, esClient, log, spaceId: 'eval' });
+    expect(entityStoreCalls(calls)).toContain('POST /s/eval/api/security/entity_store/install');
+    expect(prepared).toEqual({ entityStoreStatus: 'running' });
+
+    const restore = await pauseEntityExtraction({ request, spaceId: 'eval', ...prepared });
+    expect(entityStoreCalls(calls)).toContain('PUT /s/eval/api/security/entity_store/stop');
+    await restore();
+    expect(entityStoreCalls(calls)).toContain('PUT /s/eval/api/security/entity_store/start');
+  });
+
+  it('leaves behavior unchanged for a store that was already running', async () => {
+    const { request, calls } = stackWith({ statuses: ['running'] });
+    const prepared = await prepareWorkerSpace({ request, esClient, log, spaceId: 'eval' });
+    expect(prepared).toEqual({ entityStoreStatus: 'running' });
+    expect(entityStoreCalls(calls)).not.toContain('POST /s/eval/api/security/entity_store/install');
+
+    const restore = await pauseEntityExtraction({ request, spaceId: 'eval', ...prepared });
+    expect(entityStoreCalls(calls)).toContain('PUT /s/eval/api/security/entity_store/stop');
+    await restore();
+    expect(entityStoreCalls(calls)).toContain('PUT /s/eval/api/security/entity_store/start');
+  });
+
+  it('neither stops nor restarts a store that was already stopped', async () => {
+    const { request, calls } = stackWith({ statuses: ['stopped'] });
+    const prepared = await prepareWorkerSpace({ request, esClient, log, spaceId: 'eval' });
+    expect(prepared).toEqual({ entityStoreStatus: 'stopped' });
+
+    const restore = await pauseEntityExtraction({ request, spaceId: 'eval', ...prepared });
+    await restore();
+    expect(entityStoreCalls(calls).filter((call) => call.startsWith('PUT'))).toEqual([]);
   });
 });
