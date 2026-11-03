@@ -451,20 +451,21 @@ export const createInvestigatorServiceAccountService = ({
     );
   };
 
-  /** Lets the investigation agent run as its callers again; a missing or unbound agent is done. */
+  /**
+   * Lets the investigation agent run as its callers again; an agent that is not installed is done.
+   *
+   * `has` and `setServiceAccount` resolve the agent without checking that it is runnable, unlike
+   * `get`: the agent reports itself unavailable while the space's entry point is disabled, and a
+   * space in that state is exactly one an admin removes the setup from. Unbinding an agent that is
+   * already unbound is a no-op.
+   */
   const unbindAgent = async (request: KibanaRequest, spaceId: string): Promise<void> => {
     const agentBuilder = getAgentBuilder?.();
     if (!agentBuilder) {
       throw Boom.serverUnavailable('Agent Builder is not available; cannot unbind the agent.');
     }
     const registry = await agentBuilder.agents.getRegistry({ request });
-    try {
-      const agent = await registry.get(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
-      if (!agent.service_account_id) return;
-    } catch (error) {
-      if (isAgentNotFoundError(error)) return;
-      throw error;
-    }
+    if (!(await registry.has(NIGHTSHIFT_INVESTIGATION_AGENT_ID))) return;
     await registry.setServiceAccount(NIGHTSHIFT_INVESTIGATION_AGENT_ID, null);
     logger.info(`Nightshift agent in space [${spaceId}] runs as its callers again`);
   };

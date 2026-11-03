@@ -121,10 +121,11 @@ const setup = ({
     id: agentId,
     ...(agentRunAs ? { service_account_id: agentRunAs } : {}),
   }));
+  const hasAgent = jest.fn().mockResolvedValue(true);
   const agentBuilder = {
     agents: {
       ensure: ensureAgent,
-      getRegistry: jest.fn().mockResolvedValue({ setServiceAccount, get: getAgent }),
+      getRegistry: jest.fn().mockResolvedValue({ setServiceAccount, get: getAgent, has: hasAgent }),
     },
   } as unknown as NonNullable<
     ReturnType<
@@ -148,6 +149,7 @@ const setup = ({
     setServiceAccount,
     ensureAgent,
     getAgent,
+    hasAgent,
     esClient,
     serviceAccounts,
     managedWorkflows,
@@ -376,19 +378,25 @@ describe('createInvestigatorServiceAccountService', () => {
     expect(managedWorkflows.uninstall).not.toHaveBeenCalled();
   });
 
-  it('leaves an agent that is unbound or not installed alone on disable', async () => {
-    const unbound = setup({ agentRunAs: null });
-    await unbound.service.disable(request, SPACE_ID);
-    expect(unbound.setServiceAccount).not.toHaveBeenCalled();
-    expect(unbound.managedWorkflows.uninstall).toHaveBeenCalledTimes(BOUND_WORKFLOW_IDS.length);
-
+  it('leaves an agent that is not installed alone on disable', async () => {
     const missing = setup();
-    missing.getAgent.mockRejectedValue(
-      createAgentNotFoundError({ agentId: 'nightshift.investigation' })
-    );
+    missing.hasAgent.mockResolvedValue(false);
+
     await missing.service.disable(request, SPACE_ID);
+
     expect(missing.setServiceAccount).not.toHaveBeenCalled();
     expect(missing.managedWorkflows.uninstall).toHaveBeenCalledTimes(BOUND_WORKFLOW_IDS.length);
+  });
+
+  // The agent reports itself unavailable while the space's entry point is disabled, and that is
+  // exactly a space an admin removes the setup from.
+  it('unbinds the agent on disable without checking that it is runnable', async () => {
+    const { service, getAgent, setServiceAccount } = setup();
+
+    await service.disable(request, SPACE_ID);
+
+    expect(getAgent).not.toHaveBeenCalled();
+    expect(setServiceAccount.mock.calls).toEqual([['nightshift.investigation', null]]);
   });
 
   it('uninstalls every bound workflow on disable, entry point first', async () => {

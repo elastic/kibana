@@ -74,6 +74,8 @@ jest.mock('../server/cortex/register_cortex', () => ({
 
 jest.mock('../server/memory/register_memory', () => ({
   hydrateMemoryWorkspace: jest.fn(),
+  isMemoryOptimizeSkipped: jest.requireActual('../server/memory/register_memory')
+    .isMemoryOptimizeSkipped,
   runMemoryOptimize: jest.fn(),
 }));
 
