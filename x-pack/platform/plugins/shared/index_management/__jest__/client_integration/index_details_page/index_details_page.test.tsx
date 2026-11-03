@@ -42,6 +42,7 @@ import {
   testUserStartPrivilegesResponse,
 } from './mocks';
 import { setupEnvironment, WithAppDependencies } from '../helpers/setup_environment';
+import { esProxyPath } from '../helpers/http_requests';
 import { renderIndexDetailsPage } from './index_details_page.helpers';
 
 jest.mock('@kbn/code-editor');
@@ -89,7 +90,7 @@ describe('<IndexDetailsPage />', () => {
       testUserStartPrivilegesResponse
     );
     httpRequestsMockHelpers.setLoadIndexDocCountResponse({
-      [testIndexName]: testIndexMock.documents,
+      [testIndexName]: testIndexMock.documents ?? 0,
     });
   });
 
@@ -201,7 +202,7 @@ describe('<IndexDetailsPage />', () => {
     it('renders an error callout when the mapping contains semantic text errors', async () => {
       httpRequestsMockHelpers.setLoadIndexMappingResponse(
         testIndexName,
-        testIndexMappingsWithSemanticText.mappings
+        testIndexMappingsWithSemanticText
       );
       await renderPage(undefined, {
         docLinks: { links: { ml: '', enterpriseSearch: '' } },
@@ -270,9 +271,9 @@ describe('<IndexDetailsPage />', () => {
       await renderPage();
       fireEvent.click(screen.getByTestId('indexDetailsTab-stats'));
       await waitFor(() => {
-        expect(httpSetup.get).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}/stats/${testIndexName}`,
-          requestOptions
+        expect(httpSetup.fetch).toHaveBeenCalledWith(
+          esProxyPath(`${testIndexName}/_stats`),
+          expect.objectContaining({ method: 'GET' })
         );
       });
     });
@@ -327,7 +328,7 @@ describe('<IndexDetailsPage />', () => {
         fireEvent.click(screen.getByTestId('indexDetailsTab-stats'));
         await screen.findByTestId('indexDetailsStatsError');
 
-        const getMock = jest.mocked(httpSetup.get);
+        const getMock = jest.mocked(httpSetup.fetch);
         const requestsBefore = getMock.mock.calls.length;
 
         fireEvent.click(screen.getByTestId('reloadIndexStatsButton'));
@@ -550,9 +551,9 @@ describe('<IndexDetailsPage />', () => {
       fireEvent.click(screen.getByTestId('indexDetailsTab-settings'));
       await screen.findByTestId('indexDetailsSettingsCodeBlock');
       await waitFor(() => {
-        expect(httpSetup.get).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}/settings/${testIndexName}`,
-          requestOptions
+        expect(httpSetup.fetch).toHaveBeenCalledWith(
+          esProxyPath(`${testIndexName}/_settings`),
+          expect.objectContaining({ method: 'GET' })
         );
       });
     });
@@ -591,7 +592,7 @@ describe('<IndexDetailsPage />', () => {
         fireEvent.click(screen.getByTestId('indexDetailsTab-settings'));
         await screen.findByTestId('indexDetailsSettingsError');
 
-        const getMock = jest.mocked(httpSetup.get);
+        const getMock = jest.mocked(httpSetup.fetch);
         const requestsBefore = getMock.mock.calls.length;
         fireEvent.click(screen.getByTestId('indexDetailsSettingsReloadButton'));
         await waitFor(() => {
@@ -630,7 +631,7 @@ describe('<IndexDetailsPage />', () => {
         fireEvent.click(screen.getByTestId('indexDetailsSettingsEditModeSwitch'));
         const editor = await screen.findByTestId('indexDetailsSettingsEditor');
 
-        const getMock = jest.mocked(httpSetup.get);
+        const getMock = jest.mocked(httpSetup.fetch);
         const requestsBefore = getMock.mock.calls.length;
 
         const updatedSettings = { ...testIndexEditableSettingsAll, 'index.priority': '2' };
@@ -668,7 +669,7 @@ describe('<IndexDetailsPage />', () => {
         fireEvent.click(screen.getByTestId('indexDetailsSettingsEditModeSwitch'));
         const editor = await screen.findByTestId('indexDetailsSettingsEditor');
 
-        const getMock = jest.mocked(httpSetup.get);
+        const getMock = jest.mocked(httpSetup.fetch);
         const requestsBefore = getMock.mock.calls.length;
 
         const updatedSettings = { ...testIndexEditableSettingsAll, 'index.priority': '2' };
@@ -683,9 +684,9 @@ describe('<IndexDetailsPage />', () => {
         await waitFor(() => {
           expect(getMock.mock.calls.length).toBeGreaterThan(requestsBefore);
         });
-        expect(httpSetup.get).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}/settings/${testIndexName}`,
-          requestOptions
+        expect(httpSetup.fetch).toHaveBeenCalledWith(
+          esProxyPath(`${testIndexName}/_settings`),
+          expect.objectContaining({ method: 'GET' })
         );
       });
 
@@ -748,9 +749,10 @@ describe('<IndexDetailsPage />', () => {
       fireEvent.click(closeButton);
 
       await waitFor(() => {
-        expect(httpSetup.post).toHaveBeenCalledWith(`${API_BASE_PATH}/indices/close`, {
-          body: JSON.stringify({ indices: [testIndexName] }),
-        });
+        expect(httpSetup.fetch).toHaveBeenCalledWith(
+          esProxyPath(`${testIndexName}/_close`),
+          expect.objectContaining({ method: 'POST' })
+        );
       });
       await waitFor(() => {
         expect(getMock.mock.calls.length).toBeGreaterThan(requestsBefore);
@@ -772,9 +774,10 @@ describe('<IndexDetailsPage />', () => {
       fireEvent.click(openButton);
 
       await waitFor(() => {
-        expect(httpSetup.post).toHaveBeenCalledWith(`${API_BASE_PATH}/indices/open`, {
-          body: JSON.stringify({ indices: [testIndexName] }),
-        });
+        expect(httpSetup.fetch).toHaveBeenCalledWith(
+          esProxyPath(`${testIndexName}/_open`),
+          expect.objectContaining({ method: 'POST' })
+        );
       });
       // After action, should have made at least one more GET to refresh data
       expect(getMock.mock.calls.length).toBeGreaterThan(requestsBefore);
@@ -794,9 +797,13 @@ describe('<IndexDetailsPage />', () => {
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
       await waitFor(() => {
-        expect(httpSetup.post).toHaveBeenCalledWith(`${API_BASE_PATH}/indices/forcemerge`, {
-          body: JSON.stringify({ indices: [testIndexName], maxNumSegments: '2' }),
-        });
+        expect(httpSetup.fetch).toHaveBeenCalledWith(
+          esProxyPath(`${testIndexName}/_forcemerge`),
+          expect.objectContaining({
+            method: 'POST',
+            query: expect.objectContaining({ max_num_segments: 2 }),
+          })
+        );
       });
       await waitFor(() => {
         expect(getMock.mock.calls.length).toBeGreaterThan(requestsBefore);
@@ -813,9 +820,10 @@ describe('<IndexDetailsPage />', () => {
       fireEvent.click(refreshButton);
 
       await waitFor(() => {
-        expect(httpSetup.post).toHaveBeenCalledWith(`${API_BASE_PATH}/indices/refresh`, {
-          body: JSON.stringify({ indices: [testIndexName] }),
-        });
+        expect(httpSetup.fetch).toHaveBeenCalledWith(
+          esProxyPath(`${testIndexName}/_refresh`),
+          expect.objectContaining({ method: 'GET' })
+        );
       });
       await waitFor(() => {
         expect(getMock.mock.calls.length).toBeGreaterThan(requestsBefore);
@@ -832,9 +840,10 @@ describe('<IndexDetailsPage />', () => {
       fireEvent.click(clearCacheButton);
 
       await waitFor(() => {
-        expect(httpSetup.post).toHaveBeenCalledWith(`${API_BASE_PATH}/indices/clear_cache`, {
-          body: JSON.stringify({ indices: [testIndexName] }),
-        });
+        expect(httpSetup.fetch).toHaveBeenCalledWith(
+          esProxyPath(`${testIndexName}/_cache/clear`),
+          expect.objectContaining({ method: 'POST' })
+        );
       });
       await waitFor(() => {
         expect(getMock.mock.calls.length).toBeGreaterThan(requestsBefore);
@@ -851,9 +860,10 @@ describe('<IndexDetailsPage />', () => {
       fireEvent.click(flushButton);
 
       await waitFor(() => {
-        expect(httpSetup.post).toHaveBeenCalledWith(`${API_BASE_PATH}/indices/flush`, {
-          body: JSON.stringify({ indices: [testIndexName] }),
-        });
+        expect(httpSetup.fetch).toHaveBeenCalledWith(
+          esProxyPath(`${testIndexName}/_flush`),
+          expect.objectContaining({ method: 'GET' })
+        );
       });
       await waitFor(() => {
         expect(getMock.mock.calls.length).toBeGreaterThan(requestsBefore);
@@ -871,9 +881,10 @@ describe('<IndexDetailsPage />', () => {
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
       await waitFor(() => {
-        expect(httpSetup.post).toHaveBeenCalledWith(`${API_BASE_PATH}/indices/delete`, {
-          body: JSON.stringify({ indices: [testIndexName] }),
-        });
+        expect(httpSetup.fetch).toHaveBeenCalledWith(
+          esProxyPath(testIndexName),
+          expect.objectContaining({ method: 'DELETE' })
+        );
       });
     });
   });
@@ -886,10 +897,7 @@ describe('<IndexDetailsPage />', () => {
         ...testIndexMock,
         name: percentSignName,
       });
-      httpRequestsMockHelpers.setLoadIndexSettingsResponse(
-        encodeURIComponent(percentSignName),
-        testIndexSettings
-      );
+      httpRequestsMockHelpers.setLoadIndexSettingsResponse(percentSignName, testIndexSettings);
       await renderPage(`/indices/index_details?indexName=${encodeURIComponent(percentSignName)}`);
 
       expect(httpSetup.get).toHaveBeenCalledWith(
@@ -909,9 +917,9 @@ describe('<IndexDetailsPage />', () => {
       await user.click(screen.getByTestId('indexDetailsTab-mappings'));
 
       await waitFor(() => {
-        expect(httpSetup.get).toHaveBeenCalledWith(
-          `${API_BASE_PATH}/mapping/${encodeURIComponent(percentSignName)}`,
-          requestOptions
+        expect(httpSetup.fetch).toHaveBeenCalledWith(
+          esProxyPath(`${percentSignName}/_mapping`),
+          expect.objectContaining({ method: 'GET' })
         );
       });
     });
@@ -921,18 +929,15 @@ describe('<IndexDetailsPage />', () => {
         ...testIndexMock,
         name: percentSignName,
       });
-      httpRequestsMockHelpers.setLoadIndexSettingsResponse(
-        encodeURIComponent(percentSignName),
-        testIndexSettings
-      );
+      httpRequestsMockHelpers.setLoadIndexSettingsResponse(percentSignName, testIndexSettings);
       await renderPage(`/indices/index_details?indexName=${encodeURIComponent(percentSignName)}`);
 
       fireEvent.click(screen.getByTestId('indexDetailsTab-settings'));
 
       await waitFor(() => {
-        expect(httpSetup.get).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}/settings/${encodeURIComponent(percentSignName)}`,
-          requestOptions
+        expect(httpSetup.fetch).toHaveBeenCalledWith(
+          esProxyPath(`${percentSignName}/_settings`),
+          expect.objectContaining({ method: 'GET' })
         );
       });
     });
@@ -942,10 +947,7 @@ describe('<IndexDetailsPage />', () => {
         ...testIndexMock,
         name: percentSignName,
       });
-      httpRequestsMockHelpers.setLoadIndexSettingsResponse(
-        encodeURIComponent(percentSignName),
-        testIndexSettings
-      );
+      httpRequestsMockHelpers.setLoadIndexSettingsResponse(percentSignName, testIndexSettings);
       await renderPage(`/indices/index_details?indexName=${encodeURIComponent(percentSignName)}`);
 
       fireEvent.click(screen.getByTestId('indexDetailsTab-settings'));
@@ -953,7 +955,7 @@ describe('<IndexDetailsPage />', () => {
       fireEvent.click(screen.getByTestId('indexDetailsSettingsEditModeSwitch'));
       const editor = await screen.findByTestId('indexDetailsSettingsEditor');
 
-      const getMock = jest.mocked(httpSetup.get);
+      const getMock = jest.mocked(httpSetup.fetch);
       const requestsBefore = getMock.mock.calls.length;
 
       const updatedSettings = { ...testIndexEditableSettingsAll, 'index.priority': '2' };
@@ -993,9 +995,9 @@ describe('<IndexDetailsPage />', () => {
       fireEvent.click(screen.getByTestId('indexDetailsTab-stats'));
 
       await waitFor(() => {
-        expect(httpSetup.get).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}/stats/${encodeURIComponent(percentSignName)}`,
-          requestOptions
+        expect(httpSetup.fetch).toHaveBeenCalledWith(
+          esProxyPath(`${percentSignName}/_stats`),
+          expect.objectContaining({ method: 'GET' })
         );
       });
     });
@@ -1294,9 +1296,9 @@ describe('<IndexDetailsPage />', () => {
 
       // Loads mappings
       await waitFor(() => {
-        expect(httpSetup.get).toHaveBeenCalledWith(
-          `${API_BASE_PATH}/mapping/${testIndexName}`,
-          requestOptions
+        expect(httpSetup.fetch).toHaveBeenCalledWith(
+          esProxyPath(`${testIndexName}/_mapping`),
+          expect.objectContaining({ method: 'GET' })
         );
       });
 
@@ -1519,9 +1521,13 @@ describe('<IndexDetailsPage />', () => {
         fireEvent.click(screen.getByTestId('indexDetailsMappingsSaveMappings'));
 
         await waitFor(() => {
-          expect(httpSetup.put).toHaveBeenCalledWith(`${API_BASE_PATH}/mapping/${testIndexName}`, {
-            body: '{"my_field":{"type":"boolean"}}',
-          });
+          expect(httpSetup.fetch).toHaveBeenCalledWith(
+            esProxyPath(`${testIndexName}/_mapping`),
+            expect.objectContaining({
+              method: 'PUT',
+              body: '{"properties":{"my_field":{"type":"boolean"}}}',
+            })
+          );
         });
 
         // Verify the post-save refetch is consumed: JSON view reads the loaded mapping payload
@@ -1703,14 +1709,20 @@ describe('<IndexDetailsPage />', () => {
         await user.click(screen.getByTestId('indexDetailsMappingsSaveMappings'));
 
         await waitFor(() => {
-          expect(httpSetup.put).toHaveBeenCalledWith(`${API_BASE_PATH}/mapping/${testIndexName}`, {
-            body: JSON.stringify({
-              semantic_text_name: {
-                type: 'semantic_text',
-                inference_id: defaultInferenceEndpoints.ELSER,
-              },
-            }),
-          });
+          expect(httpSetup.fetch).toHaveBeenCalledWith(
+            esProxyPath(`${testIndexName}/_mapping`),
+            expect.objectContaining({
+              method: 'PUT',
+              body: JSON.stringify({
+                properties: {
+                  semantic_text_name: {
+                    type: 'semantic_text',
+                    inference_id: defaultInferenceEndpoints.ELSER,
+                  },
+                },
+              }),
+            })
+          );
         });
 
         expect(screen.queryByTestId('indexDetailsSaveMappingsError')).not.toBeInTheDocument();
@@ -1741,7 +1753,7 @@ describe('<IndexDetailsPage />', () => {
 
         await screen.findByTestId('indexDetailsMappingsError');
 
-        const getMock = jest.mocked(httpSetup.get);
+        const getMock = jest.mocked(httpSetup.fetch);
         const requestsBefore = getMock.mock.calls.length;
         fireEvent.click(screen.getByTestId('indexDetailsMappingsReloadButton'));
 
@@ -1751,10 +1763,12 @@ describe('<IndexDetailsPage />', () => {
       });
 
       it('handles errors from json.stringify function', async () => {
-        const circularReference: Record<string, unknown> = { mappings: { properties: {} } };
-        (circularReference as { myself?: unknown }).myself = circularReference;
+        const circularMappings: Record<string, unknown> = { properties: {} };
+        circularMappings.myself = circularMappings;
 
-        httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, circularReference);
+        httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
+          mappings: circularMappings,
+        });
 
         await renderPage();
         await clickMappingsTab();

@@ -304,7 +304,7 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
   constructor(props: IndexTableProps) {
     super(props);
 
-    this.docCountApi = docCountApi(props.http);
+    this.docCountApi = docCountApi();
     this.state = {
       selectedIndicesMap: {},
       selectionAnnouncement: '',

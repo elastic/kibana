@@ -7,12 +7,19 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
-import type { IndicesStatsResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesStatsIndicesStats,
+  IndicesStatsResponse,
+  MappingProperty,
+  SearchHit,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ReindexService } from '@kbn/reindex-service-plugin/public';
+import type { EsProxyClient } from '@kbn/es-proxy-plugin/public';
 import {
   API_BASE_PATH,
+  DEFAULT_DOCUMENT_PAGE_SIZE,
   INTERNAL_API_BASE_PATH,
   UIM_UPDATE_SETTINGS,
   UIM_INDEX_CLEAR_CACHE,
@@ -46,7 +53,9 @@ import type {
   MappingsResponse,
 } from '../../../common';
 import type { SnapshotRepositoriesInfo } from '../../../common/types/snapshot_repositories';
+import { quoteEsqlIndexName } from '../../../common/lib';
 import { useRequest, sendRequest } from './use_request';
+import { esRequest, runForIndexChunks, sendEsRequest, useEsRequest } from './es_request';
 import { httpService } from './http';
 import type { UiMetricService } from './ui_metric';
 import type { FieldFromIndicesRequest } from '../../../common';
@@ -304,93 +313,76 @@ export async function reloadIndices(
   return response.data ? response.data : response;
 }
 
+const runIndexAction = (
+  indices: string[],
+  action: (client: EsProxyClient, index: string[]) => Promise<unknown>
+) => esRequest((client) => runForIndexChunks(indices, (index) => action(client, index)));
+
 export async function closeIndices(indices: string[]) {
-  const body = JSON.stringify({
-    indices,
-  });
-  const response = await httpService.httpClient.post(`${API_BASE_PATH}/indices/close`, { body });
+  await runIndexAction(indices, (client, index) =>
+    client.indices.close({ index, expand_wildcards: 'none' })
+  );
   // Only track successful requests.
   const eventName = indices.length > 1 ? UIM_INDEX_CLOSE_MANY : UIM_INDEX_CLOSE;
   uiMetricService.trackMetric(METRIC_TYPE.COUNT, eventName);
-  return response;
 }
 
 export async function deleteIndices(indices: string[]) {
-  const body = JSON.stringify({
-    indices,
-  });
-  const response = await httpService.httpClient.post(`${API_BASE_PATH}/indices/delete`, { body });
+  await runIndexAction(indices, (client, index) =>
+    client.indices.delete({ index, expand_wildcards: 'none' })
+  );
   // Only track successful requests.
   const eventName = indices.length > 1 ? UIM_INDEX_DELETE_MANY : UIM_INDEX_DELETE;
   uiMetricService.trackMetric(METRIC_TYPE.COUNT, eventName);
-  return response;
 }
 
 export async function openIndices(indices: string[]) {
-  const body = JSON.stringify({
-    indices,
-  });
-  const response = await httpService.httpClient.post(`${API_BASE_PATH}/indices/open`, { body });
+  await runIndexAction(indices, (client, index) =>
+    client.indices.open({ index, expand_wildcards: 'none' })
+  );
   // Only track successful requests.
   const eventName = indices.length > 1 ? UIM_INDEX_OPEN_MANY : UIM_INDEX_OPEN;
   uiMetricService.trackMetric(METRIC_TYPE.COUNT, eventName);
-  return response;
 }
 
 export async function refreshIndices(indices: string[]) {
-  const body = JSON.stringify({
-    indices,
-  });
-  const response = await httpService.httpClient.post(`${API_BASE_PATH}/indices/refresh`, { body });
+  await runIndexAction(indices, (client, index) =>
+    client.indices.refresh({ index, expand_wildcards: 'none' })
+  );
   // Only track successful requests.
   const eventName = indices.length > 1 ? UIM_INDEX_REFRESH_MANY : UIM_INDEX_REFRESH;
   uiMetricService.trackMetric(METRIC_TYPE.COUNT, eventName);
-  return response;
 }
 
 export async function flushIndices(indices: string[]) {
-  const body = JSON.stringify({
-    indices,
-  });
-  const response = await httpService.httpClient.post(`${API_BASE_PATH}/indices/flush`, { body });
+  await runIndexAction(indices, (client, index) =>
+    client.indices.flush({ index, expand_wildcards: 'none' })
+  );
   // Only track successful requests.
   const eventName = indices.length > 1 ? UIM_INDEX_FLUSH_MANY : UIM_INDEX_FLUSH;
   uiMetricService.trackMetric(METRIC_TYPE.COUNT, eventName);
-  return response;
 }
 
 export async function forcemergeIndices(indices: string[], maxNumSegments: string) {
-  const body = JSON.stringify({
-    indices,
-    maxNumSegments,
-  });
-  const response = await httpService.httpClient.post(`${API_BASE_PATH}/indices/forcemerge`, {
-    body,
-  });
+  await runIndexAction(indices, (client, index) =>
+    client.indices.forcemerge({
+      index,
+      expand_wildcards: 'none',
+      max_num_segments: maxNumSegments ? Number(maxNumSegments) : undefined,
+    })
+  );
   // Only track successful requests.
   const eventName = indices.length > 1 ? UIM_INDEX_FORCE_MERGE_MANY : UIM_INDEX_FORCE_MERGE;
   uiMetricService.trackMetric(METRIC_TYPE.COUNT, eventName);
-  return response;
 }
 
 export async function clearCacheIndices(indices: string[]) {
-  const body = JSON.stringify({
-    indices,
-  });
-  const response = await httpService.httpClient.post(`${API_BASE_PATH}/indices/clear_cache`, {
-    body,
-  });
+  await runIndexAction(indices, (client, index) =>
+    client.indices.clearCache({ index, expand_wildcards: 'none' })
+  );
   // Only track successful requests.
   const eventName = indices.length > 1 ? UIM_INDEX_CLEAR_CACHE_MANY : UIM_INDEX_CLEAR_CACHE;
   uiMetricService.trackMetric(METRIC_TYPE.COUNT, eventName);
-  return response;
-}
-
-export async function loadIndexSettings(indexName: string) {
-  const response = await httpService.httpClient.get(
-    `${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`
-  );
-  return response;
 }
 
 export async function loadSyntheticSourceStatus(): Promise<SyntheticSourceStatus> {
@@ -411,13 +403,6 @@ export async function updateIndexSettings(indexName: string, body: object) {
     uiMetricService.trackMetric(METRIC_TYPE.COUNT, UIM_UPDATE_SETTINGS);
   }
 
-  return response;
-}
-
-export async function loadIndexStats(indexName: string) {
-  const response = await httpService.httpClient.get(
-    `${API_BASE_PATH}/stats/${encodeURIComponent(indexName)}`
-  );
   return response;
 }
 
@@ -606,12 +591,41 @@ export function loadIndex(indexName: string) {
   });
 }
 
-export async function loadIndexDocCount(indexName: string) {
-  return sendRequest<Record<string, number>>({
-    path: `${INTERNAL_API_BASE_PATH}/index_doc_count`,
-    method: 'post',
-    body: { indexNames: [indexName] },
+const queryIndexDocCounts = async (
+  client: EsProxyClient,
+  indexNames: string[],
+  signal?: AbortSignal
+): Promise<Record<string, number>> => {
+  // ES|QL because the list of index names can be too long for query DSL
+  const result = await client.esql.query(
+    {
+      query: `FROM ${indexNames
+        .map(quoteEsqlIndexName)
+        .join(',')} METADATA _index | STATS count() BY _index`,
+      // return partial results instead of failing the whole request when some shards are unavailable
+      allow_partial_results: true,
+    },
+    { signal }
+  );
+
+  const indexNameColumn = result.columns.findIndex((col) => col.name === '_index');
+  const countColumn = result.columns.findIndex((col) => col.name === 'count()');
+  const counts: Record<string, number> = {};
+  (result.values || []).forEach((row) => {
+    counts[row[indexNameColumn] as string] = row[countColumn] as number;
   });
+  // indices without documents are absent from the results
+  indexNames.forEach((indexName) => {
+    counts[indexName] ??= 0;
+  });
+  return counts;
+};
+
+export const fetchIndexDocCounts = (indexNames: string[], signal?: AbortSignal) =>
+  esRequest((client) => queryIndexDocCounts(client, indexNames, signal));
+
+export async function loadIndexDocCount(indexName: string) {
+  return sendEsRequest((client) => queryIndexDocCounts(client, [indexName]));
 }
 
 export async function loadIndexVectorCount(indexName: string) {
@@ -622,50 +636,76 @@ export async function loadIndexVectorCount(indexName: string) {
 }
 
 export function useLoadIndexMappings(indexName: string) {
-  return useRequest<MappingsResponse>({
-    path: `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`,
-    method: 'get',
+  return useEsRequest<MappingsResponse>(indexName, async (client) => {
+    const response = await client.indices.getMapping({
+      index: indexName,
+      expand_wildcards: 'none',
+    });
+    return { mappings: response[indexName].mappings };
   });
 }
 
+export interface IndexStatistics {
+  _shards: IndicesStatsResponse['_shards'];
+  stats?: IndicesStatsIndicesStats;
+}
+
 export function loadIndexStatistics(indexName: string) {
-  return sendRequest<IndicesStatsResponse>({
-    path: `${API_BASE_PATH}/stats/${encodeURIComponent(indexName)}`,
-    method: 'get',
+  return sendEsRequest<IndexStatistics>(async (client) => {
+    const { _shards: shards, indices } = await client.indices.stats({
+      index: indexName,
+      expand_wildcards: 'none',
+    });
+    return { _shards: shards, stats: indices?.[indexName] };
   });
 }
 
 export function useLoadIndexSettings(indexName: string) {
-  return useRequest<IndexSettingsResponse>({
-    path: `${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`,
-    method: 'get',
+  return useEsRequest<IndexSettingsResponse>(indexName, async (client) => {
+    const response = await client.indices.getSettings({
+      index: indexName,
+      expand_wildcards: 'none',
+      flat_settings: false,
+      include_defaults: true,
+    });
+    // the response is keyed by the concrete index name
+    const [indexSettings] = Object.values(response);
+    return indexSettings as IndexSettingsResponse;
   });
 }
 
 export function createIndex(indexName: string, indexMode?: string) {
-  return sendRequest({
-    path: `${INTERNAL_API_BASE_PATH}/indices/create`,
-    method: 'put',
-    body: JSON.stringify({
-      indexName,
-      indexMode,
-    }),
-  });
+  return sendEsRequest((client) =>
+    client.indices.create({
+      index: indexName,
+      ...(indexMode ? { settings: { mode: indexMode } } : {}),
+    })
+  );
 }
 
 export function useLoadIndexDocumentsSample(indexName: string) {
-  return useRequest<{ results: SearchHit[] }>({
-    path: `${INTERNAL_API_BASE_PATH}/indices/${encodeURIComponent(indexName)}/sample`,
-    method: 'get',
+  return useEsRequest<{ results: SearchHit[] }>(indexName, async (client) => {
+    const response = await client.search({
+      index: indexName,
+      size: DEFAULT_DOCUMENT_PAGE_SIZE,
+      track_total_hits: false,
+      _source: {
+        includes: ['*', '_inference_fields'],
+      },
+      fields: ['*'],
+      sort: [{ _doc: { order: 'desc' } }],
+    });
+    return { results: response.hits.hits };
   });
 }
 
 export function updateIndexMappings(indexName: string, newFields: Fields) {
-  return sendRequest({
-    path: `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`,
-    method: 'put',
-    body: JSON.stringify({ ...newFields }),
-  });
+  return sendEsRequest((client) =>
+    client.indices.putMapping({
+      index: indexName,
+      properties: { ...newFields } as Record<string, MappingProperty>,
+    })
+  );
 }
 
 export function getInferenceEndpoints() {
@@ -701,8 +741,15 @@ export const getReindexStatus = (sourceIndexName: string) => {
 };
 
 export const useUserPrivileges = (indexName: string) => {
-  return useRequest<UserStartPrivilegesResponse>({
-    path: `${API_BASE_PATH}/start_privileges/${encodeURIComponent(indexName)}`,
-    method: 'get',
+  return useEsRequest<UserStartPrivilegesResponse>(indexName, async (client) => {
+    const response = await client.security.hasPrivileges({
+      index: [{ names: [indexName], privileges: ['manage', 'delete'] }],
+    });
+    return {
+      privileges: {
+        canManageIndex: response.index?.[indexName]?.manage ?? false,
+        canDeleteDocuments: response.index?.[indexName]?.delete ?? false,
+      },
+    };
   });
 };
