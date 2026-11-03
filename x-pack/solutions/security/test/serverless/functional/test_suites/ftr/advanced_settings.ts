@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
+import {
+  SECURITY_CONTEXT_ENGINE_PROJECT_SETTINGS,
+  SECURITY_PROJECT_SETTINGS,
+} from '@kbn/serverless-security-settings';
 import {
   AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
   AI_ANONYMIZATION_SETTINGS,
@@ -26,6 +29,7 @@ import {
   AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID,
   SECURITY_SOLUTION_EXCLUDED_GAP_REASONS_KEY,
   SECURITY_SOLUTION_SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING,
+  CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
 import {
   AI_CHAT_EXPERIENCE_TYPE,
@@ -36,7 +40,10 @@ import {
 } from '@kbn/management-settings-ids';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
-const GLOBAL_SETTINGS: string[] = [DATA_FEDERATION_ENABLED_SETTING_ID];
+const GLOBAL_SETTINGS: string[] = [
+  DATA_FEDERATION_ENABLED_SETTING_ID,
+  CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
+];
 const EDITOR_SETTINGS: string[] = [
   AI_ANONYMIZATION_SETTINGS,
   ML_ANOMALY_DETECTION_RESULTS_TIME_DEFAULTS_ID,
@@ -106,6 +113,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         }
         // readOnly settings wont appear on the advanced settings page
         if (READ_ONLY_SETTINGS.includes(settingId)) {
+          continue;
+        }
+        it('renders ' + settingId + ' edit field', async () => {
+          const fieldTestSubj = 'management-settings-editField-' + settingId;
+          await testSubjects.existOrFail(fieldTestSubj, { timeout: 5000 });
+        });
+      }
+
+      for (const settingId of SECURITY_CONTEXT_ENGINE_PROJECT_SETTINGS) {
+        if (GLOBAL_SETTINGS.includes(settingId)) {
           continue;
         }
         it('renders ' + settingId + ' edit field', async () => {

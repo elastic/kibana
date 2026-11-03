@@ -20,6 +20,7 @@ import type {
   EntityInventoryAppSetupDependencies,
   EntityInventoryAppStartDependencies,
 } from './types';
+import { ENTITY_INVENTORY_APP_NAME } from './application/constants';
 import { ENTITY_INVENTORY_PAGES, ENTITY_INVENTORY_TITLE } from './pages';
 
 export class EntityInventoryAppPlugin
@@ -38,7 +39,7 @@ export class EntityInventoryAppPlugin
     const visibleIn: AppDeepLinkLocations[] = ['globalSearch', 'projectSideNav'];
 
     core.application.register({
-      id: 'entityInventoryApp',
+      id: ENTITY_INVENTORY_APP_NAME,
       title: ENTITY_INVENTORY_TITLE,
       appRoute: '/app/entity-inventory',
       visibleIn: [],
@@ -69,7 +70,7 @@ export class EntityInventoryAppPlugin
           sortKey: 300,
           entries: ENTITY_INVENTORY_PAGES.map(({ title, path }) => ({
             label: title,
-            app: 'entityInventoryApp',
+            app: ENTITY_INVENTORY_APP_NAME,
             path,
           })),
         },
@@ -79,7 +80,7 @@ export class EntityInventoryAppPlugin
     const navTreeGroup: PanelOpenerChildDefinition = {
       title: ENTITY_INVENTORY_TITLE,
       children: ENTITY_INVENTORY_PAGES.map(({ deepLinkId, title, path }) => ({
-        link: `entityInventoryApp:${deepLinkId}` as const,
+        link: `${ENTITY_INVENTORY_APP_NAME}:${deepLinkId}` as const,
         title,
         getIsActive: ({
           pathNameSerialized,
