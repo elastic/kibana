@@ -14,6 +14,7 @@ import { createBrowserToolDescriptorRegistry } from './registry';
 import type { BrowserToolDescriptorRegistry } from './registry';
 import { createBrowserToolCallClient } from './persistence';
 import type { BrowserToolCallClient } from './persistence';
+import { createUploadBrowserToolImage } from './executable/upload_image';
 
 export interface BrowserToolsService extends BrowserToolsRunContext {
   registry: BrowserToolDescriptorRegistry;
@@ -23,6 +24,7 @@ export interface BrowserToolsService extends BrowserToolsRunContext {
 export const createBrowserToolsService = ({
   logger,
   elasticsearch,
+  files,
 }: {
   logger: Logger;
   elasticsearch: ElasticsearchServiceStart;
@@ -34,9 +36,6 @@ export const createBrowserToolsService = ({
       logger,
       esClient: elasticsearch.client.asInternalUser,
     }),
-    // implemented together with the image result handling
-    uploadImage: async () => {
-      throw new Error('uploadImage is not implemented yet');
-    },
+    uploadImage: createUploadBrowserToolImage({ files }),
   };
 };
