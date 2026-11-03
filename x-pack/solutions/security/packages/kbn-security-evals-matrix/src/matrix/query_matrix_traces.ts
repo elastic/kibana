@@ -302,6 +302,7 @@ const processExampleBatch = (
   suiteId: string,
   executionId: string,
   traces: MatrixTraceData,
+  summaries: TraceSummaries,
   examplePrefixes: ReadonlySet<string> = new Set(),
   judgeVerdictsOut?: JudgeVerdict[],
   /**
@@ -310,8 +311,7 @@ const processExampleBatch = (
    * a strict-policy suite reports cross-family judge agreement and prompt-card scores
    * derived from documents the matrix itself rejected.
    */
-  scoringPolicy?: ScoringPolicy,
-  summaries: TraceSummaries = new Map()
+  scoringPolicy?: ScoringPolicy
 ): boolean => {
   const relevant = withHydratedOutput(scores, summaries)
     .filter((score) => score.task?.model?.id === modelId)
@@ -531,6 +531,8 @@ export const queryMatrixTraces = async (
     /** Experiment route ID; can differ from executionId on sharded runs. */
     experimentId: string;
     exampleIds: Set<string>;
+    /** The enumeration docs: trace-id bearing, already filtered to this run server-side. */
+    enumerated: EvaluationScoreDocument[];
   }
   const runRefs: RunRef[] = [];
 
@@ -589,7 +591,7 @@ export const queryMatrixTraces = async (
         return null;
       }
 
-      return { suiteId, modelId, executionId, experimentId, exampleIds };
+      return { suiteId, modelId, executionId, experimentId, exampleIds, enumerated: stripped };
     }
   );
 
@@ -699,6 +701,25 @@ export const queryMatrixTraces = async (
     );
   }
 
+  // Example ids that are bare indices are shared by thousands of runs, so an example route that
+  // ignores execution filters can fill its 10k window with other runs' documents and return none
+  // of ours. The enumeration route filters correctly, so its documents stand in for the cell.
+  for (const ref of runRefs) {
+    for (const exampleId of ref.exampleIds) {
+      const key = cacheKey(ref, exampleId);
+      const hasOwnDocs = (exampleScores.get(key) ?? []).some(
+        (score) =>
+          score.task?.model?.id === ref.modelId && score.metadata?.execution_id === ref.executionId
+      );
+      if (!hasOwnDocs) {
+        exampleScores.set(
+          key,
+          ref.enumerated.filter((score) => score.example?.id === exampleId)
+        );
+      }
+    }
+  }
+
   // Current evals runs persist `task.trace_id` but no `task.output`; hydrate tool trails,
   // tokens and latency from the trace route. Stored output (incl. --trace-cache) wins.
   const traceIds = new Set<string>();
@@ -776,10 +797,10 @@ export const queryMatrixTraces = async (
         ref.suiteId,
         ref.executionId,
         traces,
+        summaries,
         examplePrefixes,
         judgeVerdictsOut,
-        scoringBySuite?.[ref.suiteId] ?? globalScoring,
-        summaries
+        scoringBySuite?.[ref.suiteId] ?? globalScoring
       );
       if (!ok) missing.push(exampleId);
     }

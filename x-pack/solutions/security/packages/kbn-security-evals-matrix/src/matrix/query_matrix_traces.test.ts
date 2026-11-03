@@ -1376,6 +1376,46 @@ describe('queryMatrixTraces trace hydration', () => {
     expect(entry.latencyMs).toBeUndefined();
   });
 
+  it('falls back to the enumeration docs when the example route returns only other runs (bare-index ids)', async () => {
+    const getTrace = jest.fn(async () => traceResponse);
+    const ownDoc = scoredDoc({ trace_id: 'trace-1' });
+    const otherRun = {
+      ...scoredDoc({ trace_id: 'other-trace' }),
+      metadata: { execution_id: 'exec-other' },
+    } as unknown as EvaluationScoreDocument;
+    const client = {
+      getExperimentScores: jest.fn(async () => [ownDoc]),
+      getExampleScores: jest.fn(async () => [otherRun, otherRun]),
+      getTrace,
+    };
+
+    const traces = await queryMatrixTraces(
+      client as never,
+      makeLog() as never,
+      aggregated as never
+    );
+
+    expect(getTrace).toHaveBeenCalledTimes(1);
+    expect(getTrace).toHaveBeenCalledWith('trace-1');
+    expect(traces['model-x:direct:suite-1:example-1'].stepCount).toBe(3);
+    expect(traces['model-x:suite-1']).toBeDefined();
+  });
+
+  it('negative control: keeps the example-route docs when they belong to the run', async () => {
+    const getTrace = jest.fn(async () => traceResponse);
+    const enumerationDoc = scoredDoc({ trace_id: 'enumeration-only-trace' });
+    const client = {
+      getExperimentScores: jest.fn(async () => [enumerationDoc]),
+      getExampleScores: jest.fn(async () => [scoredDoc({ trace_id: 'trace-1' })]),
+      getTrace,
+    };
+
+    await queryMatrixTraces(client as never, makeLog() as never, aggregated as never);
+
+    expect(getTrace).toHaveBeenCalledTimes(1);
+    expect(getTrace).toHaveBeenCalledWith('trace-1');
+  });
+
   it('retries a failed trace fetch once and degrades to an empty trail after two failures', async () => {
     jest.useFakeTimers();
     try {
