@@ -64,40 +64,49 @@ const MAX_OBSERVABLES_WRITE_ATTEMPTS = 3;
 interface ObservablesWrite<TResult> {
   observables: Observable[];
   result: TResult;
-  /**
-   * Mirrors the change of this attempt to the observables index. What it returns is merged into the
-   * case update of the same attempt, so a failed mirror is recorded with the change it belongs to.
-   */
-  mirror: () => Promise<ObservablesSyncAttributes>;
+  /** The observables whose index documents this change creates, rewrites or deletes. */
+  involved: Observable[];
+  /** Applies the change of this attempt to the observables index. */
+  writeToIndex: () => Promise<void>;
 }
 
 interface ObservablesWriteArgs<TResult, TComputed extends ObservablesWrite<TResult> | undefined> {
   caseId: string;
   prefetchedCase?: CaseSavedObjectTransformed;
   clientArgs: CasesClientArgs;
+  /** How a repair after a lost race records an observable the index is missing. */
+  source: ObservableSource;
   compute: (retrievedCase: CaseSavedObjectTransformed) => TComputed;
 }
 
+type PatchedCase = Awaited<ReturnType<CasesClientArgs['services']['caseService']['patchCase']>>;
+
 interface ObservablesWriteOutcome<TResult> {
   retrievedCase: CaseSavedObjectTransformed;
-  patchedCase: Awaited<ReturnType<CasesClientArgs['services']['caseService']['patchCase']>>;
+  patchedCase: PatchedCase;
   result: TResult;
 }
 
 /**
- * Reads the case, lets `compute` derive the new observables list from it, mirrors the change to the
+ * Reads the case, lets `compute` derive the new observables list from it, writes the change to the
  * observables index and writes the list with the case version. On a version conflict the case is
- * re-read and `compute` and the mirror run again, so a concurrent writer's observables are never
- * overwritten and the index write is redone for the change that is actually stored. The sync task
- * relies on that redo: it can remove a mirrored document while this write is in flight, and the
- * version conflict it causes brings the document back. `compute` returns undefined when there is
- * nothing to write.
+ * re-read and the attempt runs again, so a concurrent writer's observables are never overwritten. The
+ * sync task relies on the index write being redone: it can remove a document while this write is in
+ * flight, and the version conflict it causes brings the document back. `compute` returns undefined
+ * when there is nothing to write.
  *
- * An attempt that wrote to the index and then lost the race can leave documents that no later
- * attempt keeps, for example observables that no longer fit under the cap, or its own copy of an
- * observable another writer added with a different id. Every write after such an attempt flags the
- * case so the sync task makes the index match the case again. So does a write whose case update
- * fails after its index write.
+ * An attempt that wrote to the index and then lost the race can leave documents that no later attempt
+ * keeps, for example observables that no longer fit under the cap, or its own copy of an observable
+ * another writer added with a different id. So the next attempt makes the documents of every
+ * observable an attempt touched match what it stores, and its versioned case update fences that repair
+ * against other writers. It updates the case even with nothing left to store, for the fence. Documents
+ * of other observables are never touched, so a case written by a later release with a higher cap keeps
+ * the observables beyond its preview.
+ *
+ * Where reads come from decides what a failed index write does. While the case field is the source of
+ * truth, the failure is recorded with the case update and the sync task repairs the index. Once reads
+ * come from the index, the request fails before the case changes. Either way, a write whose case update
+ * fails after its index write, or that runs out of retries, flags the case for the sync task.
  *
  * The case is not re-authorized on a re-read: authorization ran on the first read and the owner
  * of a case cannot change.
@@ -112,62 +121,69 @@ async function writeObservablesWithRetry<TResult>({
   caseId,
   prefetchedCase,
   clientArgs,
+  source,
   compute,
 }: ObservablesWriteArgs<TResult, ObservablesWrite<TResult> | undefined>): Promise<
   ObservablesWriteOutcome<TResult> | undefined
 > {
-  const { caseService } = clientArgs.services;
-  let indexTouchedByLostAttempt = false;
+  // Decided once, so a request that started before the switch finishes the way it started.
+  const indexFirst = clientArgs.services.observablesStorageMode.isIndexFirst();
+  const involvedInLostAttempts: Observable[] = [];
 
   for (let attempt = 1; attempt <= MAX_OBSERVABLES_WRITE_ATTEMPTS; attempt++) {
+    const afterLostAttempt = involvedInLostAttempts.length > 0;
     const retrievedCase =
       attempt === 1 && prefetchedCase
         ? prefetchedCase
-        : await readCaseForAttempt({ clientArgs, caseId, indexTouchedByLostAttempt });
+        : await readCaseForAttempt({
+            clientArgs,
+            caseId,
+            indexTouchedByLostAttempt: afterLostAttempt,
+          });
 
     let write: ObservablesWrite<TResult> | undefined;
+    let rejection: { error: unknown } | undefined;
     try {
       write = compute(retrievedCase);
     } catch (error) {
-      if (indexTouchedByLostAttempt) {
-        await flagCasePendingSync({ clientArgs, caseId });
+      if (!afterLostAttempt) {
+        throw error;
       }
-      throw error;
+      rejection = { error };
     }
 
-    if (!write) {
-      if (indexTouchedByLostAttempt) {
-        await flagCasePendingSync({ clientArgs, caseId });
-      }
+    if (!write && !afterLostAttempt) {
       return;
     }
 
-    const syncAttributes = await write.mirror();
+    const observables = write?.observables ?? retrievedCase.attributes.observables ?? [];
+    const syncAttributes = await writeAttemptToIndex({
+      clientArgs,
+      indexFirst,
+      theCase: retrievedCase,
+      observables,
+      write,
+      involvedInLostAttempts,
+      source,
+    });
+    const patchedCase = await patchCaseForAttempt({
+      clientArgs,
+      theCase: retrievedCase,
+      observables,
+      syncAttributes,
+    });
 
-    try {
-      const patchedCase = await caseService.patchCase({
-        caseId: retrievedCase.id,
-        originalCase: retrievedCase,
-        version: retrievedCase.version,
-        updatedAttributes: {
-          observables: write.observables,
-          total_observables: write.observables.length,
-          ...syncAttributes,
-          ...(indexTouchedByLostAttempt ? { observables_sync_pending: true } : {}),
-        },
-      });
-
-      return { retrievedCase, patchedCase, result: write.result };
-    } catch (error) {
-      if (!SavedObjectsErrorHelpers.isConflictError(error as Error)) {
-        // A deleted case has nothing left to flag: the sync removes the documents of deleted cases.
-        if (!SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
-          await flagCasePendingSync({ clientArgs, caseId });
-        }
-        throw error;
+    if (patchedCase) {
+      if (rejection) {
+        throw rejection.error;
       }
-      indexTouchedByLostAttempt = true;
+      if (!write) {
+        return;
+      }
+      return { retrievedCase, patchedCase, result: write.result };
     }
+
+    involvedInLostAttempts.push(...(write?.involved ?? []));
   }
 
   await flagCasePendingSync({ clientArgs, caseId });
@@ -176,6 +192,104 @@ async function writeObservablesWithRetry<TResult>({
     `The observables of case ${caseId} were modified concurrently ${MAX_OBSERVABLES_WRITE_ATTEMPTS} times in a row. Retry the request.`
   );
 }
+
+/**
+ * Writes one attempt to the observables index. The first attempt applies its own change. An attempt
+ * after a lost one instead makes the documents of every observable an attempt touched match the
+ * observables it stores. Returns what the case update of the attempt records about the index write.
+ */
+const writeAttemptToIndex = async <TResult>({
+  clientArgs,
+  indexFirst,
+  theCase,
+  observables,
+  write,
+  involvedInLostAttempts,
+  source,
+}: {
+  clientArgs: CasesClientArgs;
+  indexFirst: boolean;
+  theCase: CaseSavedObjectTransformed;
+  observables: Observable[];
+  write?: ObservablesWrite<TResult>;
+  involvedInLostAttempts: Observable[];
+  source: ObservableSource;
+}): Promise<ObservablesSyncAttributes> => {
+  const {
+    services: { observablesService },
+    logger,
+    spaceId,
+  } = clientArgs;
+
+  const writeToIndex =
+    write && involvedInLostAttempts.length === 0
+      ? write.writeToIndex
+      : async () => {
+          await observablesService.syncObservables({
+            caseId: theCase.id,
+            spaceId,
+            owner: theCase.attributes.owner,
+            observables,
+            involved: [...involvedInLostAttempts, ...(write?.involved ?? [])],
+            source,
+          });
+        };
+
+  if (!indexFirst) {
+    return mirrorToObservablesIndex({ caseId: theCase.id, logger, write: writeToIndex });
+  }
+
+  try {
+    await writeToIndex();
+    return {};
+  } catch (error) {
+    logger.error(
+      `[observables] Failed to write the observables of case ${theCase.id} to the observables index; the change is rejected and the case is flagged for the sync. Error: ${error}`,
+      { error: { stack_trace: error instanceof Error ? error.stack : undefined } }
+    );
+    await flagCasePendingSync({ clientArgs, caseId: theCase.id });
+    throw error;
+  }
+};
+
+/**
+ * Writes the observables of one attempt to the case with the version it read. Returns undefined when
+ * another writer changed the case first. Any other failure flags the case, since the index was already
+ * written, and is rethrown.
+ */
+const patchCaseForAttempt = async ({
+  clientArgs,
+  theCase,
+  observables,
+  syncAttributes,
+}: {
+  clientArgs: CasesClientArgs;
+  theCase: CaseSavedObjectTransformed;
+  observables: Observable[];
+  syncAttributes: ObservablesSyncAttributes;
+}): Promise<PatchedCase | undefined> => {
+  try {
+    return await clientArgs.services.caseService.patchCase({
+      caseId: theCase.id,
+      originalCase: theCase,
+      version: theCase.version,
+      updatedAttributes: {
+        observables,
+        total_observables: observables.length,
+        ...syncAttributes,
+      },
+    });
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isConflictError(error as Error)) {
+      return undefined;
+    }
+    // A deleted case has nothing left to flag: the sync removes the documents of deleted cases.
+    if (!SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
+      await flagCasePendingSync({ clientArgs, caseId: theCase.id });
+    }
+    throw error;
+  }
+};
 
 /**
  * Reads the case again for a retry. When an earlier attempt already wrote to the index and the read
@@ -251,7 +365,6 @@ export const applyObservablesToCase = async (
   const {
     services: { userActionService, observablesService },
     user,
-    logger,
     spaceId,
   } = clientArgs;
 
@@ -263,6 +376,7 @@ export const applyObservablesToCase = async (
     caseId,
     prefetchedCase,
     clientArgs,
+    source,
     compute: (retrievedCase) => {
       const currentObservables = retrievedCase.attributes.observables ?? [];
       // Build a key-set from existing observables so we never overwrite or collapse
@@ -297,18 +411,14 @@ export const applyObservablesToCase = async (
       return {
         observables: [...currentObservables, ...newlyAddedObservables],
         result: newlyAddedObservables,
-        mirror: () =>
-          mirrorToObservablesIndex({
+        involved: newlyAddedObservables,
+        writeToIndex: () =>
+          observablesService.createObservables({
             caseId: retrievedCase.id,
-            logger,
-            write: () =>
-              observablesService.createObservables({
-                caseId: retrievedCase.id,
-                spaceId,
-                owner: retrievedCase.attributes.owner,
-                observables: newlyAddedObservables,
-                source,
-              }),
+            spaceId,
+            owner: retrievedCase.attributes.owner,
+            observables: newlyAddedObservables,
+            source,
           }),
       };
     },
@@ -434,7 +544,6 @@ export const updateObservable = async (
     services: { caseService, licensingService, userActionService, observablesService },
     authorization,
     user,
-    logger,
     spaceId,
     clientSource,
   } = clientArgs;
@@ -458,6 +567,7 @@ export const updateObservable = async (
       caseId,
       prefetchedCase: retrievedCase,
       clientArgs,
+      source: getObservableSource(clientSource),
       compute: (currentCase) => {
         const currentObservables = currentCase.attributes.observables ?? [];
 
@@ -490,20 +600,19 @@ export const updateObservable = async (
         return {
           observables: updatedObservables,
           result: undefined,
-          mirror: () =>
-            mirrorToObservablesIndex({
+          involved: [currentObservables[observableIndex], updatedObservables[observableIndex]],
+          // Synced against the stored list rather than rewritten blindly: another observable of the
+          // case can share the previous value, and its document must stay.
+          writeToIndex: async () => {
+            await observablesService.syncObservables({
               caseId: currentCase.id,
-              logger,
-              write: () =>
-                observablesService.updateObservable({
-                  caseId: currentCase.id,
-                  spaceId,
-                  owner: currentCase.attributes.owner,
-                  previous: currentObservables[observableIndex],
-                  next: updatedObservables[observableIndex],
-                  source: getObservableSource(clientSource),
-                }),
-            }),
+              spaceId,
+              owner: currentCase.attributes.owner,
+              observables: updatedObservables,
+              involved: [currentObservables[observableIndex], updatedObservables[observableIndex]],
+              source: getObservableSource(clientSource),
+            });
+          },
         };
       },
     });
@@ -547,7 +656,6 @@ export const deleteObservable = async (
     services: { caseService, licensingService, userActionService, observablesService },
     authorization,
     user,
-    logger,
     spaceId,
   } = clientArgs;
 
@@ -569,6 +677,7 @@ export const deleteObservable = async (
       caseId,
       prefetchedCase: retrievedCase,
       clientArgs,
+      source: getObservableSource(clientArgs.clientSource),
       compute: (currentCase) => {
         const updatedObservables = currentCase.attributes.observables.filter(
           (observable) => observable.id !== observableId
@@ -581,22 +690,26 @@ export const deleteObservable = async (
           );
         }
 
+        const removedObservables = currentCase.attributes.observables.filter(
+          (observable) => observable.id === observableId
+        );
+
         return {
           observables: updatedObservables,
           result: undefined,
-          mirror: () =>
-            mirrorToObservablesIndex({
+          involved: removedObservables,
+          // Another observable of the case can share the value of the removed one, and its document
+          // must stay, so the documents are synced against the stored list.
+          writeToIndex: async () => {
+            await observablesService.syncObservables({
               caseId: currentCase.id,
-              logger,
-              write: () =>
-                observablesService.deleteObservables({
-                  caseId: currentCase.id,
-                  spaceId,
-                  observables: currentCase.attributes.observables.filter(
-                    (observable) => observable.id === observableId
-                  ),
-                }),
-            }),
+              spaceId,
+              owner: currentCase.attributes.owner,
+              observables: updatedObservables,
+              involved: removedObservables,
+              source: getObservableSource(clientArgs.clientSource),
+            });
+          },
         };
       },
     });
@@ -691,7 +804,6 @@ export const bulkDeleteObservables = async (
     services: { caseService, licensingService, userActionService, observablesService },
     authorization,
     user,
-    logger,
     spaceId,
   } = clientArgs;
 
@@ -719,6 +831,7 @@ export const bulkDeleteObservables = async (
     caseId: paramArgs.caseId,
     prefetchedCase: retrievedCase,
     clientArgs,
+    source: getObservableSource(clientArgs.clientSource),
     compute: (currentCase) => {
       const currentObservables = currentCase.attributes.observables ?? [];
       const currentIdSet = new Set(currentObservables.map(({ id }) => id));
@@ -740,17 +853,19 @@ export const bulkDeleteObservables = async (
       return {
         observables: updatedObservables,
         result: removedObservables.length,
-        mirror: () =>
-          mirrorToObservablesIndex({
+        involved: removedObservables,
+        // Another observable of the case can share the value of a removed one, and its document must
+        // stay, so the documents are synced against the stored list.
+        writeToIndex: async () => {
+          await observablesService.syncObservables({
             caseId: currentCase.id,
-            logger,
-            write: () =>
-              observablesService.deleteObservables({
-                caseId: currentCase.id,
-                spaceId,
-                observables: removedObservables,
-              }),
-          }),
+            spaceId,
+            owner: currentCase.attributes.owner,
+            observables: updatedObservables,
+            involved: removedObservables,
+            source: getObservableSource(clientArgs.clientSource),
+          });
+        },
       };
     },
   });

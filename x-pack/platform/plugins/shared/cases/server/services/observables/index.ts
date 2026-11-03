@@ -64,9 +64,20 @@ interface SyncCaseArgs extends CaseScope {
   signal?: AbortSignal;
 }
 
+interface SyncObservablesArgs extends CaseScope {
+  owner: string;
+  /** Every observable the case holds. */
+  observables: Observable[];
+  /** The observables whose documents are made to match the case. No other document is touched. */
+  involved: Observable[];
+  source: ObservableSource;
+}
+
 interface DeleteCaseDocumentsArgs extends CaseScope {
   signal?: AbortSignal;
 }
+
+type BulkOperations = Parameters<ObservablesStorageClient['bulk']>[0]['operations'];
 
 interface FindObservablesArgs extends CaseScope {
   owner: string;
@@ -263,28 +274,13 @@ export class ObservablesService {
       signal,
     });
     const existing = await this.getDocuments({ caseId, spaceId, ids: expectedIds, signal });
-
-    let created = 0;
-    let updated = 0;
-    const operations: Parameters<ObservablesStorageClient['bulk']>[0]['operations'] = [];
-    expected.forEach((observable, id) => {
-      const current = existing.get(id);
-      if (!current) {
-        created++;
-        operations.push({
-          create: { _id: id, document: toDocument({ caseId, spaceId, owner, observable, source }) },
-        });
-        return;
-      }
-      if (!isDocumentInSync({ document: current, observable, owner })) {
-        updated++;
-        operations.push({
-          index: {
-            _id: id,
-            document: toDocument({ caseId, spaceId, owner, observable, source: current.source }),
-          },
-        });
-      }
+    const { operations, created, updated } = buildUpserts({
+      caseId,
+      spaceId,
+      owner,
+      expected,
+      existing,
+      source,
     });
 
     if (operations.length > 0) {
@@ -292,6 +288,90 @@ export class ObservablesService {
     }
 
     return { created, updated, deleted };
+  }
+
+  /**
+   * Makes the documents of the involved observables match the case: an involved observable the case
+   * holds is created or rewritten to match it, keeping the source it was added with, and one the case
+   * does not hold is deleted. Documents of every other observable are left alone, so a write that
+   * repairs its own changes never removes an observable it did not touch.
+   */
+  public async syncObservables({
+    caseId,
+    spaceId,
+    owner,
+    observables,
+    involved,
+    source,
+  }: SyncObservablesArgs): Promise<SyncCaseResult> {
+    const involvedIds = [
+      ...new Set(
+        involved.map((observable) =>
+          generateObservableDocumentId({ spaceId, caseId, ...observable })
+        )
+      ),
+    ];
+    if (involvedIds.length === 0) {
+      return { created: 0, updated: 0, deleted: 0 };
+    }
+
+    const held = new Map<string, Observable>();
+    observables.forEach((observable) => {
+      const id = generateObservableDocumentId({ spaceId, caseId, ...observable });
+      if (!held.has(id)) {
+        held.set(id, observable);
+      }
+    });
+
+    const existing = await this.getDocuments({ caseId, spaceId, ids: involvedIds });
+    const expected = new Map<string, Observable>();
+    const deletions: BulkOperations = [];
+    involvedIds.forEach((id) => {
+      const observable = held.get(id);
+      if (observable) {
+        expected.set(id, observable);
+      } else if (existing.has(id)) {
+        deletions.push({ delete: { _id: id } });
+      }
+    });
+
+    const { operations, created, updated } = buildUpserts({
+      caseId,
+      spaceId,
+      owner,
+      expected,
+      existing,
+      source,
+    });
+
+    if (operations.length > 0) {
+      await this.bulk({ caseId, operations, toleratedStatus: CONFLICT });
+    }
+    if (deletions.length > 0) {
+      await this.bulk({ caseId, operations: deletions, toleratedStatus: NOT_FOUND });
+    }
+
+    return { created, updated, deleted: deletions.length };
+  }
+
+  /** The number of documents the index holds for a case. */
+  public async countCaseDocuments({
+    caseId,
+    spaceId,
+    signal,
+  }: DeleteCaseDocumentsArgs): Promise<number> {
+    const response = await this.storageClient.search(
+      {
+        size: 0,
+        track_total_hits: true,
+        query: {
+          bool: { filter: [{ term: { case_id: caseId } }, { term: { space_id: spaceId } }] },
+        },
+      },
+      ...toTransportArgs(signal)
+    );
+    const { total } = response.hits;
+    return typeof total === 'number' ? total : total?.value ?? 0;
   }
 
   /**
@@ -524,6 +604,48 @@ export class ObservablesService {
 
 const toTransportArgs = (signal?: AbortSignal): [StorageTransportOptions] | [] =>
   signal ? [{ signal }] : [];
+
+/**
+ * The writes that make the existing documents match the expected observables: a create for each missing
+ * one, and a rewrite that keeps the original source for each one that differs.
+ */
+const buildUpserts = ({
+  caseId,
+  spaceId,
+  owner,
+  expected,
+  existing,
+  source,
+}: CaseScope & {
+  owner: string;
+  expected: Map<string, Observable>;
+  existing: Map<string, ObservableDocument>;
+  source: ObservableSource;
+}): { operations: BulkOperations; created: number; updated: number } => {
+  let created = 0;
+  let updated = 0;
+  const operations: BulkOperations = [];
+  expected.forEach((observable, id) => {
+    const current = existing.get(id);
+    if (!current) {
+      created++;
+      operations.push({
+        create: { _id: id, document: toDocument({ caseId, spaceId, owner, observable, source }) },
+      });
+      return;
+    }
+    if (!isDocumentInSync({ document: current, observable, owner })) {
+      updated++;
+      operations.push({
+        index: {
+          _id: id,
+          document: toDocument({ caseId, spaceId, owner, observable, source: current.source }),
+        },
+      });
+    }
+  });
+  return { operations, created, updated };
+};
 
 const isDocumentInSync = ({
   document,

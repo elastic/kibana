@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ISavedObjectsRepository, SavedObject } from '@kbn/core/server';
+import type { ISavedObjectsRepository, Logger, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasePersistedAttributes } from '../../common/types/case';
@@ -21,7 +21,8 @@ interface SyncedCounts {
 export type SyncCaseOutcome =
   | ({ status: 'synced' } & SyncedCounts)
   | ({ status: 'case_deleted' } & Pick<SyncedCounts, 'deleted'>)
-  | ({ status: 'pending' } & SyncedCounts);
+  | ({ status: 'pending' } & SyncedCounts)
+  | { status: 'skipped'; indexedDocuments: number };
 
 const isConflict = (error: unknown): boolean =>
   SavedObjectsErrorHelpers.isConflictError(error as Error);
@@ -41,22 +42,47 @@ const isNotFound = (error: unknown): boolean =>
  *
  * After `MAX_CASE_SYNC_ATTEMPTS` version conflicts the case is flagged pending with an unversioned
  * update. That is safe because writers only ever set the flag to true.
+ *
+ * With `maxIndexedDocuments`, a case whose index holds more documents than that is skipped and left
+ * unchanged. Such a case was written by a later release with a higher cap, so its case field holds
+ * only a preview of its observables, and syncing the index to it would delete the rest.
  */
 export const syncCaseObservables = async ({
   repo,
   observablesService,
   caseSO,
+  logger,
+  maxIndexedDocuments,
   signal,
 }: {
   repo: ISavedObjectsRepository;
-  observablesService: Pick<ObservablesService, 'syncCase' | 'deleteCaseDocuments'>;
+  observablesService: Pick<
+    ObservablesService,
+    'syncCase' | 'deleteCaseDocuments' | 'countCaseDocuments'
+  >;
   caseSO: SavedObject<CasePersistedAttributes>;
+  logger: Logger;
+  maxIndexedDocuments?: number;
   signal?: AbortSignal;
 }): Promise<SyncCaseOutcome> => {
   const { id } = caseSO;
   const spaceId = caseSO.namespaces?.[0] ?? 'default';
   const namespace = spaceId === 'default' ? undefined : spaceId;
   const totals: SyncedCounts = { created: 0, updated: 0, deleted: 0 };
+
+  if (maxIndexedDocuments !== undefined) {
+    const indexedDocuments = await observablesService.countCaseDocuments({
+      caseId: id,
+      spaceId,
+      signal,
+    });
+    if (indexedDocuments > maxIndexedDocuments) {
+      logger.warn(
+        `Skipped syncing the observables of case ${id} in space ${spaceId}: the observables index holds ${indexedDocuments} of them, more than the ${maxIndexedDocuments} this version of Kibana supports. A later version most likely wrote them; they are left unchanged.`
+      );
+      return { status: 'skipped', indexedDocuments };
+    }
+  }
 
   const handleCaseDeleted = async (): Promise<SyncCaseOutcome> => {
     const deleted = await observablesService.deleteCaseDocuments({ caseId: id, spaceId, signal });

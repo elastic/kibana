@@ -42,10 +42,16 @@ export const runCleanupPhase = async ({
   onOutcome,
   onOrphan,
   onFailure,
+  maxIndexedDocuments,
 }: {
   repo: ISavedObjectsRepository;
-  observablesService: Pick<ObservablesService, 'listCaseKeys' | 'syncCase' | 'deleteCaseDocuments'>;
+  observablesService: Pick<
+    ObservablesService,
+    'listCaseKeys' | 'syncCase' | 'deleteCaseDocuments' | 'countCaseDocuments'
+  >;
   logger: Logger;
+  /** Passed on to `syncCaseObservables`: cases with more documents in the index are left unchanged. */
+  maxIndexedDocuments?: number;
   signal: AbortSignal;
   after?: ObservablesCaseKey;
   caseBudget: number;
@@ -100,7 +106,16 @@ export const runCleanupPhase = async ({
           if ((caseSO.attributes.observables?.length ?? 0) > 0) {
             return;
           }
-          onOutcome(await syncCaseObservables({ repo, observablesService, caseSO, signal }));
+          onOutcome(
+            await syncCaseObservables({
+              repo,
+              observablesService,
+              caseSO,
+              logger,
+              maxIndexedDocuments,
+              signal,
+            })
+          );
         } catch (error) {
           logger.warn(
             `Failed to clean up the observables index for case ${key.caseId} in space ${

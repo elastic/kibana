@@ -7,7 +7,7 @@
 
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { Observable } from '../../../common/types/domain';
 import type { CasePersistedAttributes } from '../../common/types/case';
@@ -47,12 +47,14 @@ const buildCase = ({
 describe('syncCaseObservables', () => {
   let repo: ReturnType<typeof savedObjectsRepositoryMock.create>;
   let observablesService: ReturnType<typeof createObservablesServiceMock>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   const run = (caseSO = buildCase(), signal?: AbortSignal) =>
-    syncCaseObservables({ repo, observablesService, caseSO, signal });
+    syncCaseObservables({ repo, observablesService, caseSO, logger, signal });
 
   beforeEach(() => {
     repo = savedObjectsRepositoryMock.create();
+    logger = loggingSystemMock.createLogger();
     observablesService = createObservablesServiceMock();
     observablesService.syncCase.mockResolvedValue({ created: 1, updated: 0, deleted: 0 });
   });
@@ -194,6 +196,59 @@ describe('syncCaseObservables', () => {
 
     await expect(run()).rejects.toThrow('index down');
     expect(repo.update).not.toHaveBeenCalled();
+  });
+});
+
+describe('syncCaseObservables once the index is the source of truth', () => {
+  let repo: ReturnType<typeof savedObjectsRepositoryMock.create>;
+  let observablesService: ReturnType<typeof createObservablesServiceMock>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  const run = (caseSO = buildCase()) =>
+    syncCaseObservables({ repo, observablesService, caseSO, logger, maxIndexedDocuments: 50 });
+
+  beforeEach(() => {
+    repo = savedObjectsRepositoryMock.create();
+    logger = loggingSystemMock.createLogger();
+    observablesService = createObservablesServiceMock();
+  });
+
+  // Failure scenario: after a rollback from a release with a higher cap, a case holds 120 observables
+  // in the index but only a preview of 50 on the case. Syncing the index to the case would delete 70.
+  it('leaves a case alone when the index holds more documents than the cap', async () => {
+    observablesService.countCaseDocuments.mockResolvedValue(120);
+
+    const outcome = await run(buildCase({ namespace: 'space-1' }));
+
+    expect(outcome).toEqual({ status: 'skipped', indexedDocuments: 120 });
+    expect(observablesService.countCaseDocuments).toHaveBeenCalledWith({
+      caseId: 'case-1',
+      spaceId: 'space-1',
+      signal: undefined,
+    });
+    expect(observablesService.syncCase).not.toHaveBeenCalled();
+    expect(observablesService.deleteCaseDocuments).not.toHaveBeenCalled();
+    expect(repo.update).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Skipped syncing the observables of case case-1 in space space-1')
+    );
+  });
+
+  it('syncs a case whose index holds as many documents as the cap', async () => {
+    observablesService.countCaseDocuments.mockResolvedValue(50);
+
+    const outcome = await run();
+
+    expect(outcome.status).toBe('synced');
+    expect(observablesService.syncCase).toHaveBeenCalledTimes(1);
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('does not count the documents when no limit is given, as during a full pass', async () => {
+    await syncCaseObservables({ repo, observablesService, caseSO: buildCase(), logger });
+
+    expect(observablesService.countCaseDocuments).not.toHaveBeenCalled();
+    expect(observablesService.syncCase).toHaveBeenCalledTimes(1);
   });
 });
 

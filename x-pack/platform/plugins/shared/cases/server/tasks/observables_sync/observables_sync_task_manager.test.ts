@@ -10,7 +10,7 @@ import { coreMock, loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/co
 import type { RunContext, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_SAVED_OBJECT, MAX_OBSERVABLES_PER_CASE } from '../../../common/constants';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import type { ObservablesService } from '../../services/observables';
 import { createObservablesServiceMock } from '../../services/mocks';
@@ -344,6 +344,54 @@ describe('ObservablesSyncTaskManager', () => {
       });
       expect(result.state.passVersion).toBeUndefined();
       expect(result.runAt).toBeDefined();
+    });
+
+    // Failure scenario: after a rollback from a release with a higher cap, the case field of some cases
+    // is only a preview. Maintenance must not cut the index of those cases down to the preview.
+    it('limits the cases it syncs to those the index holds at most the cap for', async () => {
+      scanCasesMock.mockImplementationOnce(async ({ handleCase }) => {
+        await handleCase(buildCase('case-1'));
+        return { outcome: 'complete', scanned: 1 };
+      });
+
+      await runTask({ state: completed });
+
+      expect(runCleanupPhaseMock).toHaveBeenCalledWith(
+        expect.objectContaining({ maxIndexedDocuments: MAX_OBSERVABLES_PER_CASE })
+      );
+      expect(syncCaseObservablesMock).toHaveBeenCalledWith(
+        expect.objectContaining({ maxIndexedDocuments: MAX_OBSERVABLES_PER_CASE })
+      );
+    });
+
+    it('completes with a skipped case, which counts as neither synced nor failed', async () => {
+      syncCaseObservablesMock.mockResolvedValue({ status: 'skipped', indexedDocuments: 120 });
+      scanCasesMock.mockImplementationOnce(async ({ handleCase }) => {
+        await handleCase(buildCase('case-1'));
+        return { outcome: 'complete', scanned: 1 };
+      });
+
+      const result = await runTask({ state: completed });
+
+      expect(result).toEqual({ state: completed });
+    });
+  });
+
+  describe('during a full pass', () => {
+    it('syncs every case to its case field, whatever the index holds', async () => {
+      scanCasesMock.mockImplementationOnce(async ({ handleCase }) => {
+        await handleCase(buildCase('case-1'));
+        return { outcome: 'complete', scanned: 1 };
+      });
+
+      await runTask();
+
+      expect(runCleanupPhaseMock).toHaveBeenCalledWith(
+        expect.objectContaining({ maxIndexedDocuments: undefined })
+      );
+      expect(syncCaseObservablesMock).toHaveBeenCalledWith(
+        expect.objectContaining({ maxIndexedDocuments: undefined })
+      );
     });
   });
 

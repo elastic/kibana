@@ -130,6 +130,22 @@ describe('runCleanupPhase', () => {
     });
   });
 
+  // Failure scenario: after a rollback from a release with a higher cap, the index of a case holds more
+  // observables than this release allows. Its case field cannot be the full list, so it is left alone.
+  it('leaves an empty case alone when the index holds more documents than the limit', async () => {
+    observablesService.listCaseKeys.mockResolvedValueOnce({
+      cases: [{ caseId: 'case-1', spaceId: 'default' }],
+    });
+    repo.bulkGet.mockResolvedValue({ saved_objects: [foundCase('case-1', 'default', [])] });
+    observablesService.countCaseDocuments.mockResolvedValue(51);
+
+    await cleanup({ maxIndexedDocuments: 50 });
+
+    expect(observablesService.syncCase).not.toHaveBeenCalled();
+    expect(callbacks.onOutcome).toHaveBeenCalledWith({ status: 'skipped', indexedDocuments: 51 });
+    expect(callbacks.onFailure).not.toHaveBeenCalled();
+  });
+
   it('reports a case it could not process and keeps going', async () => {
     observablesService.listCaseKeys.mockResolvedValueOnce({
       cases: [

@@ -540,6 +540,239 @@ describe('ObservablesService', () => {
     });
   });
 
+  describe('syncObservables', () => {
+    const searchHits = (hits: Array<{ _id: string; _source?: unknown }>) =>
+      ({ hits: { hits } } as never);
+    const documentOf = (item: Observable, source: 'api' | 'migration' = 'api') => ({
+      case_id: caseId,
+      space_id: spaceId,
+      owner,
+      type_key: item.typeKey,
+      value: item.value,
+      ...(item.description ? { description: item.description } : {}),
+      legacy_id: item.id,
+      source,
+      created_at: item.createdAt,
+      updated_at: item.updatedAt ?? item.createdAt,
+    });
+    const other: Observable = { ...observable, id: 'legacy-2', value: '2.2.2.2' };
+    const otherId = generateObservableDocumentId({ spaceId, caseId, ...other });
+
+    it('deletes the document of an involved observable the case does not hold', async () => {
+      storageClient.search.mockResolvedValueOnce(
+        searchHits([{ _id: otherId, _source: documentOf(other) }])
+      );
+
+      const result = await service.syncObservables({
+        caseId,
+        spaceId,
+        owner,
+        observables: [observable],
+        involved: [other],
+        source: 'api',
+      });
+
+      expect(result).toEqual({ created: 0, updated: 0, deleted: 1 });
+      expect(storageClient.bulk).toHaveBeenCalledTimes(1);
+      expect(storageClient.bulk).toHaveBeenCalledWith({
+        operations: [{ delete: { _id: otherId } }],
+      });
+    });
+
+    // Failure scenario: another writer added the same observable with its own id and won the case
+    // update, so the document must carry the id the case holds or the list returns an unknown id.
+    it('rewrites the document of an involved observable to match the case, keeping its source', async () => {
+      storageClient.search.mockResolvedValueOnce(
+        searchHits([
+          {
+            _id: observableId,
+            _source: { ...documentOf(observable, 'migration'), legacy_id: 'id-of-the-loser' },
+          },
+        ])
+      );
+
+      const result = await service.syncObservables({
+        caseId,
+        spaceId,
+        owner,
+        observables: [observable],
+        involved: [observable],
+        source: 'api',
+      });
+
+      expect(result).toEqual({ created: 0, updated: 1, deleted: 0 });
+      expect(storageClient.bulk).toHaveBeenCalledWith({
+        operations: [
+          { index: { _id: observableId, document: documentOf(observable, 'migration') } },
+        ],
+      });
+    });
+
+    // Failure scenario: the case held two observables with the same type and value, so both shared
+    // one document, and one of them was deleted. The document must stay, with the id of the other.
+    it('keeps a shared document for the twin the case still holds, under the twin id', async () => {
+      const twin: Observable = { ...observable, id: 'legacy-twin' };
+      storageClient.search.mockResolvedValueOnce(
+        searchHits([{ _id: observableId, _source: documentOf(observable) }])
+      );
+
+      const result = await service.syncObservables({
+        caseId,
+        spaceId,
+        owner,
+        observables: [twin],
+        involved: [observable],
+        source: 'api',
+      });
+
+      expect(result).toEqual({ created: 0, updated: 1, deleted: 0 });
+      expect(storageClient.bulk).toHaveBeenCalledWith({
+        operations: [{ index: { _id: observableId, document: documentOf(twin) } }],
+      });
+    });
+
+    it('creates the missing document of an involved observable the case holds', async () => {
+      storageClient.search.mockResolvedValueOnce(searchHits([]));
+
+      const result = await service.syncObservables({
+        caseId,
+        spaceId,
+        owner,
+        observables: [observable],
+        involved: [observable],
+        source: 'api',
+      });
+
+      expect(result).toEqual({ created: 1, updated: 0, deleted: 0 });
+      expect(storageClient.bulk).toHaveBeenCalledWith({
+        operations: [{ create: { _id: observableId, document: documentOf(observable) } }],
+      });
+    });
+
+    it('only looks up and changes the involved observables, never the rest of the case', async () => {
+      storageClient.search.mockResolvedValueOnce(searchHits([]));
+
+      await service.syncObservables({
+        caseId,
+        spaceId,
+        owner,
+        observables: [observable, other],
+        involved: [other],
+        source: 'api',
+      });
+
+      expect(storageClient.search).toHaveBeenCalledTimes(1);
+      expect(storageClient.search.mock.calls[0][0]).toMatchObject({
+        query: {
+          bool: {
+            filter: [
+              { ids: { values: [otherId] } },
+              { term: { case_id: caseId } },
+              { term: { space_id: spaceId } },
+            ],
+          },
+        },
+      });
+      expect(storageClient.bulk).toHaveBeenCalledWith({
+        operations: [{ create: { _id: otherId, document: documentOf(other) } }],
+      });
+    });
+
+    it('writes nothing when the involved documents already match the case', async () => {
+      storageClient.search.mockResolvedValueOnce(
+        searchHits([{ _id: observableId, _source: documentOf(observable) }])
+      );
+
+      const result = await service.syncObservables({
+        caseId,
+        spaceId,
+        owner,
+        observables: [observable],
+        involved: [observable, observable],
+        source: 'api',
+      });
+
+      expect(result).toEqual({ created: 0, updated: 0, deleted: 0 });
+      expect(storageClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('does nothing when no observable is involved', async () => {
+      await service.syncObservables({
+        caseId,
+        spaceId,
+        owner,
+        observables: [observable],
+        involved: [],
+        source: 'api',
+      });
+
+      expect(storageClient.search).not.toHaveBeenCalled();
+      expect(storageClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('throws when a write fails, so the caller can flag the case', async () => {
+      storageClient.search.mockResolvedValueOnce(searchHits([]));
+      storageClient.bulk.mockResolvedValueOnce(bulkError(500) as never);
+
+      await expect(
+        service.syncObservables({
+          caseId,
+          spaceId,
+          owner,
+          observables: [observable],
+          involved: [observable],
+          source: 'api',
+        })
+      ).rejects.toThrow('Failed to write 1 observables to the observables index: boom');
+    });
+
+    it('tolerates a document that is already gone when deleting', async () => {
+      storageClient.search.mockResolvedValueOnce(
+        searchHits([{ _id: otherId, _source: documentOf(other) }])
+      );
+      storageClient.bulk.mockResolvedValueOnce({
+        errors: true,
+        items: [{ delete: { status: 404, error: { type: 'not_found', reason: 'gone' } } }],
+      } as never);
+
+      await expect(
+        service.syncObservables({
+          caseId,
+          spaceId,
+          owner,
+          observables: [],
+          involved: [other],
+          source: 'api',
+        })
+      ).resolves.toEqual({ created: 0, updated: 0, deleted: 1 });
+    });
+  });
+
+  describe('countCaseDocuments', () => {
+    it('counts the documents of the case in its space', async () => {
+      storageClient.search.mockResolvedValueOnce({
+        hits: { hits: [], total: { value: 7 } },
+      } as never);
+
+      await expect(service.countCaseDocuments({ caseId, spaceId })).resolves.toBe(7);
+      expect(storageClient.search).toHaveBeenCalledWith({
+        size: 0,
+        track_total_hits: true,
+        query: {
+          bool: { filter: [{ term: { case_id: caseId } }, { term: { space_id: spaceId } }] },
+        },
+      });
+    });
+
+    it('passes the abort signal on', async () => {
+      const signal = new AbortController().signal;
+      storageClient.search.mockResolvedValueOnce({ hits: { hits: [], total: 0 } } as never);
+
+      await expect(service.countCaseDocuments({ caseId, spaceId, signal })).resolves.toBe(0);
+      expect(storageClient.search).toHaveBeenCalledWith(expect.anything(), { signal });
+    });
+  });
+
   describe('deleteCaseDocuments', () => {
     it('deletes in rounds until no document of the case is left', async () => {
       storageClient.search
