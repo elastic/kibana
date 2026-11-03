@@ -11,6 +11,12 @@ export const SNAPSHOT_MAX_CHARS = 20_000;
 /** Maximum length of an element's accessible name in a snapshot. */
 export const NAME_MAX_CHARS = 80;
 
+/** Maximum length of a form control value in a snapshot. */
+export const VALUE_MAX_CHARS = 200;
+
+/** Maximum length of a text line in a snapshot. */
+export const TEXT_MAX_CHARS = 300;
+
 /** Number of snapshot generations whose refs stay resolvable. */
 export const KEPT_GENERATIONS = 3;
 

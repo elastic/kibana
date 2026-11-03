@@ -7,13 +7,15 @@
 
 import { NAME_MAX_CHARS } from './constants';
 
-/** Collapses whitespace, trims and caps a string at {@link NAME_MAX_CHARS}. */
-export const normalizeText = (text: string | null | undefined): string => {
-  const collapsed = (text ?? '').replace(/\s+/g, ' ').trim();
-  return collapsed.length > NAME_MAX_CHARS
-    ? `${collapsed.slice(0, NAME_MAX_CHARS - 1)}…`
-    : collapsed;
-};
+/** Caps a string at `maxChars`, ending it with `…` when cut. */
+export const capLength = (text: string, maxChars: number): string =>
+  text.length > maxChars ? `${text.slice(0, maxChars - 1)}…` : text;
+
+/** Collapses whitespace, trims and caps a string at `maxChars` (default {@link NAME_MAX_CHARS}). */
+export const normalizeText = (
+  text: string | null | undefined,
+  maxChars: number = NAME_MAX_CHARS
+): string => capLength((text ?? '').replace(/\s+/g, ' ').trim(), maxChars);
 
 const labelledByText = (el: Element): string => {
   const ids = el.getAttribute('aria-labelledby')?.split(/\s+/).filter(Boolean) ?? [];

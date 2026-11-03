@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { accessibleName, normalizeText } from './accessible_name';
-import { CHAT_SURFACE_SELECTOR, SNAPSHOT_MAX_CHARS } from './constants';
+import { accessibleName, capLength, normalizeText } from './accessible_name';
+import {
+  CHAT_SURFACE_SELECTOR,
+  SNAPSHOT_MAX_CHARS,
+  TEXT_MAX_CHARS,
+  VALUE_MAX_CHARS,
+} from './constants';
 import type { RefStore } from './ref_store';
 import { implicitRole, isInteractiveRole, isNameFromContentRole } from './roles';
 
@@ -17,6 +22,8 @@ export interface SnapshotApp {
 
 const TRUNCATION_NOTICE = '… (truncated)';
 const SKIPPED_TAGS = new Set(['script', 'style', 'template', 'noscript']);
+/** Form controls whose content is rendered through `value` (and option lines for selects), not by walking. */
+const LEAF_CONTROL_TAGS = new Set(['input', 'textarea', 'select']);
 const VALUELESS_INPUT_TYPES = new Set([
   'password',
   'checkbox',
@@ -63,15 +70,37 @@ const roleOf = (el: Element): string | undefined => {
   return implicitRole(el);
 };
 
-const valueOf = (el: Element): string | undefined => {
+const isSensitive = (el: Element): boolean => {
+  const autocomplete = el.getAttribute('autocomplete')?.toLowerCase() ?? '';
+  return autocomplete.startsWith('cc-') || autocomplete.includes('password');
+};
+
+const rawValueOf = (el: Element): string | undefined => {
   if (el instanceof HTMLInputElement) {
     return VALUELESS_INPUT_TYPES.has(el.type) ? undefined : el.value;
   }
-  if (el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement) {
+  if (el instanceof HTMLTextAreaElement) {
     return el.value;
+  }
+  if (el instanceof HTMLSelectElement) {
+    // The option labels are what the model sees and what fill_form takes.
+    return Array.from(el.selectedOptions)
+      .map((option) => normalizeText(option.text))
+      .join(', ');
   }
   return undefined;
 };
+
+const valueOf = (el: Element): string | undefined => {
+  const value = rawValueOf(el);
+  return value === undefined || isSensitive(el) ? undefined : capLength(value, VALUE_MAX_CHARS);
+};
+
+const optionLines = (select: HTMLSelectElement): string[] =>
+  Array.from(select.options).map(
+    (option) =>
+      `- option ${quote(normalizeText(option.text))}${option.selected ? ' [selected]' : ''}`
+  );
 
 const headingLevel = (el: Element, role: string): number | undefined => {
   if (role !== 'heading') {
@@ -134,11 +163,11 @@ const walkTree = (root: Element, refStore: RefStore): string[] => {
   const lines: string[] = [];
   const indent = (depth: number) => '  '.repeat(depth);
 
-  // `inNamedContent`: an ancestor already took its name from its text content, so text is not repeated.
+  // `inNamedContent`: an ancestor took its name from its text content, so that text is not repeated.
   const walkChildren = (parent: Element, depth: number, inNamedContent: boolean) => {
     for (const child of Array.from(parent.childNodes)) {
       if (child.nodeType === Node.TEXT_NODE) {
-        const text = normalizeText(child.textContent);
+        const text = normalizeText(child.textContent, TEXT_MAX_CHARS);
         if (text && !inNamedContent) {
           lines.push(`${indent(depth)}- text ${quote(text)}`);
         }
@@ -157,16 +186,20 @@ const walkTree = (root: Element, refStore: RefStore): string[] => {
     if (isSvg && !role) {
       return;
     }
-    const fromContent = role !== undefined && isNameFromContentRole(role);
-    const name = accessibleName(el, { fromContent });
+    const explicitName = accessibleName(el, { fromContent: false });
+    const contentName =
+      !explicitName && role !== undefined && isNameFromContentRole(role) ? accessibleName(el) : '';
+    const name = explicitName || contentName;
     if (!role && !name) {
       walkChildren(el, depth, inNamedContent);
       return;
     }
     const ref = role && isInteractiveRole(role) ? refStore.assign(generation, el) : undefined;
     lines.push(indent(depth) + formatNode(el, role ?? 'generic', name, ref));
-    if (!isSvg) {
-      walkChildren(el, depth + 1, inNamedContent || (fromContent && name !== ''));
+    if (el instanceof HTMLSelectElement) {
+      lines.push(...optionLines(el).map((line) => indent(depth + 1) + line));
+    } else if (!isSvg && !LEAF_CONTROL_TAGS.has(el.tagName.toLowerCase())) {
+      walkChildren(el, depth + 1, inNamedContent || contentName !== '');
     }
   };
 

@@ -64,9 +64,17 @@ describe('buildPageSnapshot', () => {
       <input type="password" aria-label="Secret" value="hunter2" />
       <input type="checkbox" aria-label="Pin" checked />
       <button aria-expanded="false" disabled>More</button>
-      <select aria-label="Size"><option value="a" selected>A</option></select>
+      <select aria-label="Size">
+        <option value="s">Small</option>
+        <option value="l" selected>Large</option>
+      </select>
       <input type="submit" value="Go" />
     `);
+    // Native options have no layout box in a real browser: the walker must not depend on it.
+    root.querySelectorAll('option').forEach((option) => {
+      option.getBoundingClientRect = () => ({ ...visibleRect, width: 0, height: 0 } as DOMRect);
+      (option as unknown as { checkVisibility: () => boolean }).checkVisibility = () => false;
+    });
     const refStore = new RefStore();
     const output = snapshot(root, refStore);
     expect(treeLines(output)).toEqual([
@@ -79,9 +87,10 @@ describe('buildPageSnapshot', () => {
       '- textbox "Secret" [ref=s1e4]',
       '- checkbox "Pin" [ref=s1e5] [checked]',
       '- button "More" [ref=s1e6] [collapsed] [disabled]',
-      '- combobox "Size" [ref=s1e7] value="a"',
-      '  - option "A" [ref=s1e8]',
-      '- button "Go" [ref=s1e9]',
+      '- combobox "Size" [ref=s1e7] value="Large"',
+      '  - option "Small"',
+      '  - option "Large" [selected]',
+      '- button "Go" [ref=s1e8]',
     ]);
   });
 
@@ -92,8 +101,12 @@ describe('buildPageSnapshot', () => {
       <button>${long}</button>
     `);
     const lines = treeLines(snapshot(root));
-    expect(lines[0]).toBe('- button "Close flyout" [ref=s1e1]');
-    expect(lines[1]).toBe(`- button "${'x'.repeat(79)}…" [ref=s1e2]`);
+    expect(lines).toEqual([
+      '- button "Close flyout" [ref=s1e1]',
+      // The name did not come from the content, so the content is still shown.
+      '  - text "X"',
+      `- button "${'x'.repeat(79)}…" [ref=s1e2]`,
+    ]);
   });
 
   it('flattens unnamed wrappers, names svgs from their title and does not repeat named text', () => {
@@ -109,6 +122,69 @@ describe('buildPageSnapshot', () => {
       '- button "Save Disk" [ref=s1e1]',
       '  - img "Disk"',
       '- tab "Overview" [ref=s1e2] [expanded] [selected]',
+    ]);
+  });
+
+  it('keeps the rest of the page when a form control holds a huge value', () => {
+    const root = render(`
+      <textarea aria-label="Query">${'q'.repeat(50_000)}</textarea>
+      <p>${'t'.repeat(1_000)}</p>
+      <button>Run</button>
+    `);
+    const lines = treeLines(snapshot(root));
+    expect(lines).toEqual([
+      `- textbox "Query" [ref=s1e1] value="${'q'.repeat(199)}…"`,
+      `- text "${'t'.repeat(299)}…"`,
+      '- button "Run" [ref=s1e2]',
+    ]);
+  });
+
+  it('does not name containers from their content, so their text stays readable', () => {
+    const long = 'word '.repeat(40).trim();
+    const root = render(`
+      <ul>
+        <li><p>${long}</p></li>
+        <li aria-label="Item"><span>details</span></li>
+      </ul>
+      <table><tr><td>42</td></tr></table>
+    `);
+    expect(treeLines(snapshot(root))).toEqual([
+      '- list',
+      `  - listitem`,
+      `    - text "${long}"`,
+      '  - listitem "Item"',
+      '    - text "details"',
+      '- table',
+      '  - row',
+      '    - cell',
+      '      - text "42"',
+    ]);
+  });
+
+  it('escapes quotes and newlines and prints unnamed nodes without a name', () => {
+    const root = render(`
+      <button aria-label='Say "hi"'></button>
+      <textarea aria-label="Notes">line 1
+line "2"</textarea>
+      <button></button>
+    `);
+    expect(treeLines(snapshot(root))).toEqual([
+      '- button "Say \\"hi\\"" [ref=s1e1]',
+      '- textbox "Notes" [ref=s1e2] value="line 1\\nline \\"2\\""',
+      '- button [ref=s1e3]',
+    ]);
+  });
+
+  it('omits the value of credit card and password-autocomplete inputs', () => {
+    const root = render(`
+      <input aria-label="Card" autocomplete="cc-number" value="4111111111111111" />
+      <input aria-label="Pass" autocomplete="current-password" value="secret" />
+      <input aria-label="City" autocomplete="address-level2" value="Paris" />
+    `);
+    expect(treeLines(snapshot(root))).toEqual([
+      '- textbox "Card" [ref=s1e1]',
+      '- textbox "Pass" [ref=s1e2]',
+      '- textbox "City" [ref=s1e3] value="Paris"',
     ]);
   });
 
