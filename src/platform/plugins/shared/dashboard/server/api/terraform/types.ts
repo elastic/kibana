@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AsCodeRelatedItem } from '@kbn/as-code-shared-schemas';
 import type {
   DASHBOARD_RESOURCE_TYPE,
   JsonObject,
@@ -32,6 +33,13 @@ export type LiteralDataView =
   | { id: string; reason: 'not_found' | 'unreadable' }
   | { id: string; reason: 'unlinkable'; name: string };
 
+/** A data view a resource is written for: its index pattern, and the saved settings its resource cannot hold. */
+export interface ExportedDataView {
+  id: string;
+  index_pattern: string;
+  dropped_fields: string[];
+}
+
 /** The response body of the route converting a dashboard to Terraform. */
 export interface DashboardTerraformResponseBody {
   /** The provider resource type `body` is for. */
@@ -53,8 +61,12 @@ export interface DashboardTerraformResponseBody {
   literal_tags: LiteralTag[];
   /** The data view resource type. */
   data_view_resource: { type: string };
+  /** Each data view in `resources`: its index pattern (not escaped) and the settings its resource lacks. */
+  data_views: ExportedDataView[];
   /** The dashboard's data views that stay literal IDs, with no resource. */
   literal_data_views: LiteralDataView[];
+  /** Every saved object the dashboard refers to, once each and not truncated. */
+  related_items: AsCodeRelatedItem[];
   /** API paths of the fields the resource has no attribute for. */
   dropped_fields: string[];
   /** Panels left out of `body` because they could not be converted. */

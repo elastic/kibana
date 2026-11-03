@@ -42,7 +42,9 @@ const conversion: DashboardTerraformResponseBody = {
   tag_resource: { type: 'elasticstack_kibana_tag', min_kibana_version: '9.5.0' },
   literal_tags: [],
   data_view_resource: { type: 'elasticstack_kibana_data_view' },
+  data_views: [],
   literal_data_views: [],
+  related_items: [],
   dropped_fields: [],
   skipped_panels: [],
   partial_panels: [],
@@ -269,6 +271,11 @@ describe('TerraformExportFlyout', () => {
           },
         ],
         json_panels: [{ path: 'panels[3]', type: 'vis', title: 'Old chart', reason: 'no variant' }],
+        related_items: [
+          { type: 'lens', type_label: 'Visualization', id: 'v1' },
+          { type: 'index-pattern', type_label: 'Data view', id: 'd1' },
+          { type: 'lens', type_label: 'Visualization', id: 'v2' },
+        ],
       }),
       {
         warnings: [
@@ -286,12 +293,6 @@ describe('TerraformExportFlyout', () => {
             panel_config: { title: 'Instructions' },
           },
         ],
-        related_items: [
-          { type: 'lens', type_label: 'Visualization', id: 'v1' },
-          { type: 'index-pattern', type_label: 'Data view', id: 'd1' },
-          { type: 'lens', type_label: 'Visualization', id: 'v2' },
-        ],
-        related_items_count: 3,
       }
     );
     renderFlyout('Web logs', { dashboardId: 'abc-123', isDirty: true });
@@ -471,7 +472,8 @@ describe('TerraformExportFlyout', () => {
         },
       ],
     };
-    const relatedItems = {
+    const taggedWithRelatedItems: DashboardTerraformResponseBody = {
+      ...tagged,
       related_items: [
         { type: 'tag', type_label: 'Tag', id: 'tag-1' },
         { type: 'tag', type_label: 'Tag', id: 'tag-${2}' },
@@ -479,7 +481,6 @@ describe('TerraformExportFlyout', () => {
         { type: 'tag', type_label: 'Tag', id: 'unreadable-tag' },
         { type: 'lens', type_label: 'Visualization', id: 'v1' },
       ],
-      related_items_count: 5,
     };
 
     it('writes the tags of a new copy as tag resources pinning no ID, which the dashboard references', async () => {
@@ -572,7 +573,7 @@ describe('TerraformExportFlyout', () => {
     });
 
     it('names the tags a new copy creates, warns about existing names, and notes the target Kibana version', async () => {
-      respondWith(async () => tagged, relatedItems);
+      respondWith(async () => taggedWithRelatedItems);
       renderFlyout('Web logs', { dashboardId: 'abc-123' });
       await screen.findByRole('list', { name: 'Module files' });
       await userEvent.click(modeButton('New copy'));
@@ -589,7 +590,7 @@ describe('TerraformExportFlyout', () => {
     });
 
     it('names the tags that stay literal IDs and notes the target Kibana version when adopting', async () => {
-      respondWith(async () => tagged, relatedItems);
+      respondWith(async () => taggedWithRelatedItems);
       renderFlyout('Web logs', { dashboardId: 'abc-123' });
 
       expect(await problemDetails()).toEqual([
@@ -619,20 +620,21 @@ describe('TerraformExportFlyout', () => {
           body: { data_view: { title: 'logs-*', name: 'Web logs' } },
         },
       ],
+      data_views: [{ id: 'logs-dv', index_pattern: 'logs-*', dropped_fields: [] }],
       literal_data_views: [
         { id: 'adhoc-dv', reason: 'not_found' },
         { id: 'hidden-dv', reason: 'unreadable' },
         { id: 'metrics-dv', reason: 'unlinkable', name: 'Metrics' },
       ],
     };
-    const relatedItems = {
+    const withRelatedItems: DashboardTerraformResponseBody = {
+      ...withDataViews,
       related_items: [
         { type: 'index-pattern', type_label: 'Data view', id: 'logs-dv' },
         { type: 'index-pattern', type_label: 'Data view', id: 'hidden-dv' },
         { type: 'index-pattern', type_label: 'Data view', id: 'metrics-dv' },
         { type: 'lens', type_label: 'Visualization', id: 'v1' },
       ],
-      related_items_count: 4,
     };
 
     it('writes the data views of a new copy as resources pinning no ID, which the dashboard references', async () => {
@@ -688,25 +690,115 @@ describe('TerraformExportFlyout', () => {
     });
 
     it('names the data views a new copy keeps as literal IDs, and counts only the rest as not exported', async () => {
-      respondWith(async () => withDataViews, relatedItems);
+      respondWith(async () => withRelatedItems);
       renderFlyout();
 
       expect(await problemDetails()).toEqual([
         'Data view adhoc-dv stays a literal ID: it is not found as a saved data view in this space.',
         'Data view hidden-dv stays a literal ID: you cannot read it.',
         'Data view “Metrics” stays the literal ID metrics-dv: the export cannot point every use of it at a data view resource.',
+        'A new copy creates data view “Web logs” for the index pattern logs-*. It must match indices where Terraform applies it, or the panels using it are empty.',
         'This export includes unsaved changes. This dashboard has never been saved, so it can only be exported as a new copy. Save it to adopt it.',
         'The dashboard refers to 1 object that is not exported. They must exist where Terraform runs.Visualization: 1',
       ]);
     });
 
     it('counts the data views of an adopted dashboard as objects it refers to, as before', async () => {
-      respondWith(async () => withDataViews, relatedItems);
+      respondWith(async () => withRelatedItems);
       renderFlyout('Web logs', { dashboardId: 'abc-123' });
 
       expect(await problemDetails()).toEqual([
         'The dashboard refers to 4 objects that are not exported. They must exist where Terraform runs.Data view: 3Visualization: 1',
       ]);
+    });
+
+    it('lists the settings each data view of a new copy drops, and shows each index pattern', async () => {
+      respondWith(async () => ({
+        ...withDataViews,
+        resources: [
+          ...withDataViews.resources,
+          {
+            type: dataViewType,
+            name: 'metrics_env',
+            id: 'env-dv',
+            label: 'metrics-${env}-*',
+            body: { data_view: { title: 'metrics-$${env}-*' } },
+          },
+        ],
+        data_views: [
+          {
+            id: 'logs-dv',
+            index_pattern: 'logs-*',
+            dropped_fields: ['allowHidden', 'fieldFormats.took.params.showSuffix'],
+          },
+          { id: 'env-dv', index_pattern: 'metrics-${env}-*', dropped_fields: [] },
+        ],
+        literal_data_views: [],
+      }));
+      renderFlyout();
+
+      expect(await screen.findByText('1 problem and 3 notes.')).toBeInTheDocument();
+      expect(await problemDetails()).toEqual([
+        'A new copy creates data view “Web logs” for the index pattern logs-*. It must match indices where Terraform applies it, or the panels using it are empty.',
+        'A new copy creates data view “metrics-${env}-*” for the index pattern metrics-${env}-*. It must match indices where Terraform applies it, or the panels using it are empty.',
+        'Data view “Web logs” is exported without settings the resource cannot hold. Dropped:allowHiddenfieldFormats.took.params.showSuffix',
+        'This export includes unsaved changes. This dashboard has never been saved, so it can only be exported as a new copy. Save it to adopt it.',
+      ]);
+    });
+
+    it('says nothing about the index patterns or dropped settings of data views an adopted dashboard keeps literal', async () => {
+      respondWith(async () => ({
+        ...withDataViews,
+        data_views: [{ id: 'logs-dv', index_pattern: 'logs-*', dropped_fields: ['allowHidden'] }],
+        literal_data_views: [],
+      }));
+      renderFlyout('Web logs', { dashboardId: 'abc-123' });
+
+      await screen.findByRole('list', { name: 'Module files' });
+      expect(screen.queryByText('Review this export')).not.toBeInTheDocument();
+    });
+
+    it('counts more than 100 objects the dashboard refers to with a total that agrees with the counts by kind', async () => {
+      const visualizations = Array.from({ length: 130 }, (_, i) => ({
+        type: 'lens',
+        type_label: 'Visualization',
+        id: `v${i}`,
+      }));
+      const dataViews = ['logs-dv', 'hidden-dv', ...Array.from({ length: 20 }, (_, i) => `dv${i}`)];
+      const relatedItems = [
+        ...visualizations,
+        ...dataViews.map((id) => ({ type: 'index-pattern', type_label: 'Data view', id })),
+      ];
+      respondWith(
+        async () => ({
+          ...withDataViews,
+          data_views: [],
+          literal_data_views: [{ id: 'hidden-dv', reason: 'unreadable' }],
+          related_items: relatedItems,
+        }),
+        // The sanitize step truncates its list at 100; the export does not count from it.
+        { related_items: relatedItems.slice(0, 100), related_items_count: relatedItems.length }
+      );
+      renderFlyout();
+
+      const details = await problemDetails();
+      expect(details[details.length - 1]).toBe(
+        'The dashboard refers to 150 objects that are not exported. They must exist where Terraform runs.Visualization: 130Data view: 20'
+      );
+    });
+
+    it('says in the README that each copy creates new data views, and how to reuse existing ones', async () => {
+      respondWith(async () => withDataViews);
+      renderFlyout();
+
+      await screen.findByRole('list', { name: 'Module files' });
+      const readme = await showFile('README.md');
+      expect(readme).toContain(
+        'Each copy creates new data views: copying a second dashboard that uses the same data view into\nthe same Kibana creates a second one.'
+      );
+      expect(readme).toContain(
+        'To reuse data views that already exist in the target, delete `data_views.tf.json` and replace each\n`${elasticstack_kibana_data_view.<name>.data_view.id}` reference in `main.tf.json` with the ID of an\nexisting data view.'
+      );
     });
   });
 });

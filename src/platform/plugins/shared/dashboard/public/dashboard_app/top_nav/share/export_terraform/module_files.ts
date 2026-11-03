@@ -81,12 +81,19 @@ should show
 
     Plan: ${1 + tagCount + dataViewCount} to add, 0 to change, 0 to destroy.`;
 
-const dataViewsSection = (count: number): string =>
+const dataViewsSection = (count: number, resourceType: string): string =>
   count
     ? `
 \`${DATA_VIEWS_FILE}\` creates the dashboard's data views (${count}) as new data views, and every place the
 dashboard uses one refers to it. The data views are created in the dashboard's space; if you set a
-\`space_id\` on the dashboard, set the same on each data view.
+\`space_id\` on the dashboard, set the same on each data view. Each data view's index pattern must match
+indices where Terraform applies it, or the panels using it are empty.
+
+Each copy creates new data views: copying a second dashboard that uses the same data view into
+the same Kibana creates a second one.
+To reuse data views that already exist in the target, delete \`${DATA_VIEWS_FILE}\` and replace each
+\`\${${resourceType}.<name>.data_view.id}\` reference in \`${MAIN_FILE}\` with the ID of an
+existing data view.
 `
     : '';
 
@@ -114,11 +121,15 @@ const readme = (
   mode: ExportMode,
   tagCount: number,
   dataViewCount: number,
-  minKibanaVersion: string
+  minKibanaVersion: string,
+  dataViewResourceType: string
 ) => `# Dashboard exported from Kibana
 
 ${firstPlan(mode, tagCount, dataViewCount)}
-${tagsSection(mode, tagCount, minKibanaVersion)}${dataViewsSection(dataViewCount)}
+${tagsSection(mode, tagCount, minKibanaVersion)}${dataViewsSection(
+  dataViewCount,
+  dataViewResourceType
+)}
 It was generated for the ${source} provider; \`versions.tf.json\` requires version
 ${version} or later. This export is a technical preview.
 
@@ -237,7 +248,8 @@ export const buildModuleFiles = (
         mode,
         tags.length,
         dataViews.length,
-        tagResource.min_kibana_version
+        tagResource.min_kibana_version,
+        dataViewResource.type
       ),
     },
   ];

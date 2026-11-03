@@ -36,7 +36,12 @@ published OpenAPI file. This package reads only that document.
   `references`) is reported in `unlinkableIds` and stays literal everywhere, so a dashboard is never half-linked. The
   route reads the tags and data views with the user's own saved objects client and gives `linkReferences` only those
   the user can read (and, for tags, that Kibana does not manage), so the rest stay literal IDs. A data view resource is
-  mapped by hand from the saved data view (`toDataViewResourceBody`), not from annotations. `TAG_RESOURCE` holds the
+  mapped by hand (`toDataViewResource`), not from annotations, from the `DataViewSpec` the data views service's
+  `savedObjectToSpec` returns, which the route calls so the saved object is parsed as Kibana parses it. The mapping
+  only renames onto the provider's `data_view` block: title, name, time field, source filters, field formats, runtime
+  fields, field attributes and allow-no-index. It returns the spec paths of the settings the block cannot hold (hidden-index access, rollup type, field format
+  parameters it does not type, runtime fields without a script or composite, custom descriptions, scripted fields),
+  which the flyout lists as dropped fields on that data view. `TAG_RESOURCE` holds the
   oldest target Kibana the tag resource supports, updated with the provider version.
 - At runtime the converter reads `src/dashboard_schemas.oas.json`, the dashboard schemas of the published OpenAPI
   file (the whole file is not shipped with Kibana). `TERRAFORM_PROVIDER` is the provider version the mapping was

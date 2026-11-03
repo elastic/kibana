@@ -13,6 +13,13 @@ import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type {
+  IDataViewsApiClient,
+  PersistenceAPI,
+  UiSettingsCommon,
+} from '@kbn/data-views-plugin/common';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { registerTerraformRoute, MAX_TERRAFORM_REQUEST_BYTES } from './register_terraform_route';
 
 const mockConvert = jest.fn();
@@ -24,6 +31,16 @@ jest.mock('@kbn/as-code-dashboard-terraform', () => {
     createDashboardConverter: () => mockConvert,
   };
 });
+
+// The route lists related items with the dashboard's own transforms; no panel type registers any here. It parses data
+// views with the real data views service, whose `savedObjectToSpec` uses none of its dependencies.
+const mockDataViewsServiceFactory = jest.fn();
+jest.mock('../../kibana_services', () => ({
+  embeddableService: { getTransforms: () => undefined },
+  dataViewsService: {
+    dataViewsServiceFactory: (...args: unknown[]) => mockDataViewsServiceFactory(...args),
+  },
+}));
 
 const PATH = '/internal/dashboards/_terraform';
 
@@ -46,6 +63,19 @@ describe('POST /internal/dashboards/_terraform', () => {
     ({ server, createRouter, handlerContext } = await setupServer());
     logger = loggingSystemMock.createLogger();
     flagEnabled = true;
+    mockDataViewsServiceFactory.mockResolvedValue(
+      new DataViewsService({
+        uiSettings: {} as UiSettingsCommon,
+        savedObjectsClient: {} as PersistenceAPI,
+        apiClient: {} as IDataViewsApiClient,
+        fieldFormats: fieldFormatsMock,
+        onNotification: () => {},
+        onError: () => {},
+        getCanSave: async () => false,
+        getCanSaveAdvancedSettings: async () => false,
+        scriptedFieldsEnabled: true,
+      })
+    );
     Object.assign(handlerContext, {
       featureFlags: { getBooleanValue: jest.fn(async () => flagEnabled) },
     });
@@ -352,6 +382,52 @@ describe('POST /internal/dashboards/_terraform', () => {
       ]);
     });
 
+    it('maps each data view’s settings, parsed by the data views service, onto its resource, with its index pattern and the settings it drops', async () => {
+      await convertForReal();
+      mockBulkGet(
+        [tag],
+        [
+          savedDataView('logs-dv', {
+            title: 'logs-${env}-*',
+            name: 'Web logs',
+            allowNoIndex: true,
+            allowHidden: true,
+            sourceFilters: JSON.stringify([{ value: 'secret.*' }]),
+            fieldFormatMap: JSON.stringify({
+              bytes: { id: 'bytes', params: { pattern: '0b', unsupported: 1 } },
+            }),
+            // Stored as a string by an old bug (#211109); the data views service repairs it.
+            fieldAttrs: JSON.stringify({ host: { count: '4' } }),
+          }),
+        ]
+      );
+
+      const result = await post({ dashboard: { ...dashboard, pinned_panels: [] } });
+
+      expect(result.body.resources[1].body).toEqual({
+        data_view: {
+          title: 'logs-$${env}-*',
+          name: 'Web logs',
+          allow_no_index: true,
+          source_filters: ['secret.*'],
+          field_formats: { bytes: { id: 'bytes', params: { pattern: '0b' } } },
+          field_attrs: { host: { count: 4 } },
+        },
+      });
+      expect(mockDataViewsServiceFactory).toHaveBeenCalledWith(
+        handlerContext.savedObjects.client,
+        expect.anything(),
+        expect.anything()
+      );
+      expect(result.body.data_views).toEqual([
+        {
+          id: 'logs-dv',
+          index_pattern: 'logs-${env}-*',
+          dropped_fields: ['allowHidden', 'fieldFormats.bytes.params.unsupported'],
+        },
+      ]);
+    });
+
     it('keeps every data view a literal ID when the user may not read data views at all', async () => {
       await convertForReal();
       mockBulkGet(
@@ -388,6 +464,44 @@ describe('POST /internal/dashboards/_terraform', () => {
     });
     const result = await post({ dashboard: { title, panels: [] } });
     expect(result.body.resource_name).toBe(name);
+  });
+
+  it('lists every saved object the dashboard refers to, beyond the 100 the sanitize step returns', async () => {
+    await convertForReal();
+    const tags = Array.from({ length: 120 }, (_, i) => `tag-${i}`);
+    (handlerContext.savedObjects.client.bulkGet as jest.Mock).mockImplementation(
+      async (objects: Array<{ type: string; id: string }>) => ({
+        saved_objects: objects.map(({ type, id }) => ({ id, type, error: { statusCode: 404 } })),
+      })
+    );
+
+    const result = await post({
+      dashboard: {
+        title: 'Logs',
+        panels: [],
+        tags,
+        filters: [
+          {
+            type: 'condition',
+            data_view_id: 'logs-dv',
+            condition: { field: 'host.name', operator: 'is', value: 'web-01' },
+          },
+        ],
+      },
+    });
+
+    expect(result.status).toBe(200);
+    expect(result.body.related_items).toHaveLength(121);
+    expect(result.body.related_items).toContainEqual({
+      type: 'tag',
+      type_label: 'tag',
+      id: 'tag-119',
+    });
+    expect(result.body.related_items).toContainEqual({
+      type: 'index-pattern',
+      type_label: 'index-pattern',
+      id: 'logs-dv',
+    });
   });
 
   it('reads no tags for a dashboard without any', async () => {

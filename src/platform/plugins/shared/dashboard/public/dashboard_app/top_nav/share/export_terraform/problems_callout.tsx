@@ -147,22 +147,25 @@ export const listProblems = ({
     dropped_fields: droppedFields,
     tag_resource: tagResource,
     literal_tags: literalTags,
+    related_items: allRelatedItems,
   } = conversion;
   const { warnings = [] } = sanitized;
   const tags = exportedTags(conversion);
   const dataViews = exportedDataViews(conversion, mode);
   // Adopting keeps data views literal IDs, counted with the other objects the module only refers to.
   const literalDataViews = mode.kind === 'copy' ? conversion.literal_data_views : [];
+  // The data views a new copy creates, with the index pattern and dropped settings of each.
+  const createdDataViews = dataViews.flatMap(({ id, label }) => {
+    const details = conversion.data_views.find((dataView) => dataView.id === id);
+    return details ? [{ ...details, label }] : [];
+  });
   // Exported tags and data views, and the ones named below, are not counted among the objects the module only
-  // refers to.
+  // refers to. The total and the counts by kind are taken from the same, untruncated list.
   const namedIds: Record<string, ReadonlySet<string>> = {
     tag: new Set([...tags, ...literalTags].map(({ id }) => id)),
     [DATA_VIEW_SAVED_OBJECT_TYPE]: new Set([...dataViews, ...literalDataViews].map(({ id }) => id)),
   };
-  const allRelatedItems = sanitized.related_items ?? [];
   const relatedItems = allRelatedItems.filter(({ type, id }) => !namedIds[type]?.has(id));
-  const namedCount = allRelatedItems.length - relatedItems.length;
-  const relatedItemsCount = (sanitized.related_items_count ?? allRelatedItems.length) - namedCount;
   const droppedInPanels = new Set(partialPanels.flatMap((panel) => panel.dropped_fields));
 
   // The sanitize step leaves out panels the Dashboards API has no schema for, before conversion.
@@ -274,6 +277,15 @@ export const listProblems = ({
           },
         ]
       : []),
+    ...createdDataViews.map(({ id, label, index_pattern: indexPattern }) => ({
+      key: `created-data-view:${id}`,
+      severity: 'info' as const,
+      content: i18n.translate('dashboard.exportTerraform.problems.createdDataViewDescription', {
+        defaultMessage:
+          'A new copy creates data view “{name}” for the index pattern {indexPattern}. It must match indices where Terraform applies it, or the panels using it are empty.',
+        values: { name: label, indexPattern },
+      }),
+    })),
     ...(tags.length
       ? [
           {
@@ -290,6 +302,28 @@ export const listProblems = ({
           },
         ]
       : []),
+    ...createdDataViews
+      .filter(({ dropped_fields: dropped }) => dropped.length)
+      .map(({ id, label, dropped_fields: dropped }) => ({
+        key: `data-view-dropped:${id}`,
+        severity: 'warning' as const,
+        content: (
+          <>
+            <FormattedMessage
+              id="dashboard.exportTerraform.problems.dataViewDroppedFieldsDescription"
+              defaultMessage="Data view “{name}” is exported without settings the resource cannot hold. Dropped:"
+              values={{ name: label }}
+            />
+            <ul>
+              {dropped.map((path) => (
+                <li key={path}>
+                  <EuiCode>{path}</EuiCode>
+                </li>
+              ))}
+            </ul>
+          </>
+        ),
+      })),
     ...otherWarnings,
     ...(isDirty || !isSaved
       ? [
@@ -308,7 +342,7 @@ export const listProblems = ({
           },
         ]
       : []),
-    ...(relatedItemsCount > 0
+    ...(relatedItems.length
       ? [
           {
             key: 'references',
@@ -318,7 +352,7 @@ export const listProblems = ({
                 {i18n.translate('dashboard.exportTerraform.problems.referencesDescription', {
                   defaultMessage:
                     'The dashboard refers to {count, plural, one {# object that is} other {# objects that are}} not exported. They must exist where Terraform runs.',
-                  values: { count: relatedItemsCount },
+                  values: { count: relatedItems.length },
                 })}
                 <ul>
                   {countByKind(relatedItems).map(([kind, count]) => (

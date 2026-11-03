@@ -15,6 +15,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { createEmbeddableStartMock } from '@kbn/embeddable-plugin/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { createIndexPatternsStartMock } from '@kbn/data-views-plugin/server/mocks';
 
 import { TransformPanelsInError } from './api/transforms/in/transform_panels_in_error';
 import { getChangeHistoryClient } from './change_history/change_history_service';
@@ -62,6 +63,7 @@ describe('dashboard server client writes', () => {
     spaces.spacesService.getSpaceId = jest.fn().mockReturnValue('my-space');
     return new DashboardPlugin(coreMock.createPluginInitializerContext()).start(coreStart, {
       embeddable,
+      dataViews: createIndexPatternsStartMock(),
       taskManager: taskManagerMock.createStart(),
       spaces,
     }).client;

@@ -21,6 +21,8 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/dev-cli-runner'
   - '@kbn/dev-cli-errors'
+  - '@kbn/data-views-types'
+  - '@kbn/utility-types'
 tags:
   - shared-server
   - package

@@ -15,6 +15,7 @@ import { DASHBOARD_INTERNAL_API_PATH } from '../../../common/constants';
 import { getSanitizeResponseBodySchema } from './schemas';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { sanitize } from './sanitize';
+import { getTypeDisplayName } from './related_items';
 
 /**
  * Register the sanitize dashboard route.
@@ -60,11 +61,11 @@ export function registerSanitizeRoute(
     },
     async (ctx, req, res) => {
       try {
-        const typeRegistry = (await ctx.core).savedObjects.typeRegistry;
+        const { typeRegistry } = (await ctx.core).savedObjects;
         const result = await sanitize(
           getCachedDashboardStateSchema(),
           req.body,
-          (type) => typeRegistry.getType(type)?.management?.displayName ?? type
+          getTypeDisplayName(typeRegistry)
         );
         return res.ok({ body: result });
       } catch (e) {

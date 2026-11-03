@@ -9,6 +9,7 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { createEmbeddableStartMock } from '@kbn/embeddable-plugin/server/mocks';
+import { createIndexPatternsStartMock } from '@kbn/data-views-plugin/server/mocks';
 import { savedObjectsTaggingMock } from '@kbn/saved-objects-tagging-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { setKibanaServices } from './kibana_services';
@@ -19,6 +20,7 @@ export const setStubKibanaServices = () => {
     core,
     {
       embeddable: createEmbeddableStartMock(),
+      dataViews: createIndexPatternsStartMock(),
       savedObjectsTagging: savedObjectsTaggingMock.createStartContract(),
       taskManager: taskManagerMock.createStart(),
     },

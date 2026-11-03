@@ -12,15 +12,21 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext, SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { AuthzDisabled } from '@kbn/core-security-server';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type {
   DashboardConverter,
+  DataViewResource,
   JsonObject,
   JsonValue,
   Reference,
   ReferencedObject,
 } from '@kbn/as-code-dashboard-terraform';
 import type { TagAttributes } from '@kbn/saved-objects-tagging-oss-plugin/common';
-import type { DataViewAttributes } from '@kbn/data-views-plugin/common';
+import type {
+  DataViewAttributes,
+  DataViewSpec,
+  DataViewsService,
+} from '@kbn/data-views-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { MAX_TITLE_LENGTH } from '@kbn/as-code-shared-schemas';
 import { logRequest } from '@kbn/as-code-utils';
@@ -28,7 +34,15 @@ import {
   DASHBOARD_INTERNAL_API_PATH,
   DASHBOARD_TERRAFORM_EXPORT_FLAG,
 } from '../../../common/constants';
-import type { DashboardTerraformResponseBody, LiteralDataView, LiteralTag } from './types';
+import { transformDashboardIn } from '../transforms';
+import { dataViewsService } from '../../kibana_services';
+import { getTypeDisplayName, toRelatedItems } from '../sanitize/related_items';
+import type {
+  DashboardTerraformResponseBody,
+  ExportedDataView,
+  LiteralDataView,
+  LiteralTag,
+} from './types';
 
 // Loaded on first use, not at startup; only a successful load is kept, so a failed one is retried.
 let converter: Promise<DashboardConverter> | undefined;
@@ -116,25 +130,30 @@ const readTags = async (
 interface ReadDataViews {
   /** The data views a resource is written for. */
   dataViews: ReferencedObject[];
+  /** The index pattern of each data view a resource is written for, and the settings its resource lacks. */
+  exportedDataViews: ExportedDataView[];
   /** The data views that stay literal IDs in the dashboard. */
   literalDataViews: LiteralDataView[];
 }
 
-// Reads with the user's client, in the dashboard's space. An ID that is not a saved data view there (missing or ad
-// hoc) or that the user cannot read stays literal, and so does one also used where no reference reaches.
+// Reads with the user's client, in the dashboard's space, and leaves parsing the saved object to the data views
+// service. An ID that is not a saved data view there (missing or ad hoc) or that the user cannot read stays literal,
+// and so does one also used where no reference reaches.
 const readDataViews = async (
   client: SavedObjectsClientContract,
   ids: string[],
   unlinkableIds: ReadonlySet<string>,
   resourceType: string,
-  toBody: (dataView: DataViewAttributes) => JsonObject
+  createService: () => Promise<Pick<DataViewsService, 'savedObjectToSpec'>>,
+  toResource: (spec: DataViewSpec & { title: string }) => DataViewResource
 ): Promise<ReadDataViews> => {
-  if (!ids.length) return { dataViews: [], literalDataViews: [] };
+  if (!ids.length) return { dataViews: [], exportedDataViews: [], literalDataViews: [] };
   try {
     const { saved_objects: savedObjects } = await client.bulkGet<DataViewAttributes>(
       ids.map((id) => ({ type: DATA_VIEW_SAVED_OBJECT_TYPE, id }))
     );
-    const result: ReadDataViews = { dataViews: [], literalDataViews: [] };
+    const result: ReadDataViews = { dataViews: [], exportedDataViews: [], literalDataViews: [] };
+    let service: Pick<DataViewsService, 'savedObjectToSpec'> | undefined;
     for (const dataView of savedObjects) {
       if (isSavedObjectErrorResult(dataView)) {
         const reason = dataView.error.statusCode === 404 ? 'not_found' : 'unreadable';
@@ -147,13 +166,24 @@ const readDataViews = async (
         result.literalDataViews.push({ id, reason: 'unlinkable', name });
         continue;
       }
-      result.dataViews.push({ resourceType, id, name, attributes: toBody(attributes) });
+      service ??= await createService();
+      const { body, droppedFields } = toResource({
+        ...service.savedObjectToSpec(dataView),
+        title: attributes.title,
+      });
+      result.dataViews.push({ resourceType, id, name, attributes: body });
+      result.exportedDataViews.push({
+        id,
+        index_pattern: attributes.title,
+        dropped_fields: droppedFields,
+      });
     }
     return result;
   } catch (e) {
     if (SavedObjectsErrorHelpers.isForbiddenError(e)) {
       return {
         dataViews: [],
+        exportedDataViews: [],
         literalDataViews: ids.map((id) => ({ id, reason: 'unreadable' })),
       };
     }
@@ -194,7 +224,7 @@ export function registerTerraformRoute(
         },
       },
       async (ctx, req, res) => {
-        const { featureFlags, savedObjects } = await ctx.core;
+        const { featureFlags, savedObjects, elasticsearch } = await ctx.core;
         if (!(await featureFlags.getBooleanValue(DASHBOARD_TERRAFORM_EXPORT_FLAG, false))) {
           return res.notFound();
         }
@@ -205,7 +235,7 @@ export function registerTerraformRoute(
           TAG_RESOURCE,
           TERRAFORM_PROVIDER,
           linkReferences,
-          toDataViewResourceBody,
+          toDataViewResource,
           toResourceName,
         } = await import('@kbn/as-code-dashboard-terraform');
         const dashboard = req.body.dashboard as JsonObject;
@@ -215,21 +245,28 @@ export function registerTerraformRoute(
           const { droppedFields, skippedPanels, partialPanels, jsonPanels, references } =
             conversion;
           const unlinkableIds = new Set(conversion.unlinkableIds);
-          const [{ tags, literalTags }, { dataViews, literalDataViews }] = await Promise.all([
-            readTags(
-              savedObjects.client,
-              idsOf(references, TAG_RESOURCE.type),
-              unlinkableIds,
-              TAG_RESOURCE.type
-            ),
-            readDataViews(
-              savedObjects.client,
-              idsOf(references, DATA_VIEW_RESOURCE_TYPE),
-              unlinkableIds,
-              DATA_VIEW_RESOURCE_TYPE,
-              toDataViewResourceBody
-            ),
-          ]);
+          const [{ tags, literalTags }, { dataViews, exportedDataViews, literalDataViews }] =
+            await Promise.all([
+              readTags(
+                savedObjects.client,
+                idsOf(references, TAG_RESOURCE.type),
+                unlinkableIds,
+                TAG_RESOURCE.type
+              ),
+              readDataViews(
+                savedObjects.client,
+                idsOf(references, DATA_VIEW_RESOURCE_TYPE),
+                unlinkableIds,
+                DATA_VIEW_RESOURCE_TYPE,
+                () =>
+                  dataViewsService.dataViewsServiceFactory(
+                    savedObjects.client,
+                    elasticsearch.client.asCurrentUser,
+                    req
+                  ),
+                toDataViewResource
+              ),
+            ]);
           const { body, resources } = linkReferences(conversion, [...tags, ...dataViews]);
           const { body: adoptBody } = linkReferences(conversion, tags);
           const responseBody: DashboardTerraformResponseBody = {
@@ -244,7 +281,13 @@ export function registerTerraformRoute(
             },
             literal_tags: literalTags,
             data_view_resource: { type: DATA_VIEW_RESOURCE_TYPE },
+            data_views: exportedDataViews,
             literal_data_views: literalDataViews,
+            // Not truncated like the sanitize step's list, so the total and the counts by kind agree.
+            related_items: toRelatedItems(
+              transformDashboardIn(dashboard as Partial<DashboardState>).references,
+              getTypeDisplayName(savedObjects.typeRegistry)
+            ),
             dropped_fields: droppedFields,
             skipped_panels: skippedPanels,
             partial_panels: partialPanels.map(({ droppedFields: dropped, ...panel }) => ({
