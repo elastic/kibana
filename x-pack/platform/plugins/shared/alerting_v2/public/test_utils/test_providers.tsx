@@ -15,6 +15,9 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { EpisodeDataSourceProvider } from '@kbn/alerting-v2-episodes-ui/context/episode_data_source_context';
+import { AlertHostProvider } from '@kbn/alerting-v2-episodes-ui/context/alert_host_context';
+import { CLASSIC_ALERTS_DATA_SOURCE } from '../alert_sources';
 import type { AlertsKibanaServices } from '../alerts_kibana_services';
 import {
   LocatorProvider,
@@ -123,17 +126,33 @@ export function ListPageTestProviders({
   queryClient = createTestQueryClient(),
   initialEntries,
   locators = createMockLocators(),
+  canWriteAlerts = true,
 }: PropsWithChildren<{
   queryClient?: QueryClient;
   initialEntries?: string[];
   locators?: AlertingV2Locators;
+  canWriteAlerts?: boolean;
 }>) {
   return (
     <LocatorProvider locators={locators}>
       <MockChromeContextProvider>
         <I18nProvider>
           <MemoryRouter initialEntries={initialEntries}>
-            <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+            <QueryClientProvider client={queryClient}>
+              <EpisodeDataSourceProvider dataSource={CLASSIC_ALERTS_DATA_SOURCE}>
+                <AlertHostProvider
+                  value={{
+                    getRuleDetailsHref: (ruleId: string) =>
+                      locators.rulesLocators.getRedirectUrl({ ruleId }),
+                    getEpisodeDetailsHref: (episodeId: string) =>
+                      locators.episodesLocators.getRedirectUrl({ episodeId }),
+                    canWriteAlerts,
+                  }}
+                >
+                  {children}
+                </AlertHostProvider>
+              </EpisodeDataSourceProvider>
+            </QueryClientProvider>
           </MemoryRouter>
         </I18nProvider>
       </MockChromeContextProvider>

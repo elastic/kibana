@@ -74,6 +74,7 @@ describe('ObservabilityAlertingPlugin', () => {
           RulesPage: () => null,
           RuleLibraryPage: () => null,
           EpisodesPage: () => null,
+          AlertsProvider: ({ children }: { children?: React.ReactNode }) => children ?? null,
           ActionPoliciesPage: () => null,
           ExecutionHistoryPage: () => null,
           CreateRuleOptionsFlyout: () => null,
