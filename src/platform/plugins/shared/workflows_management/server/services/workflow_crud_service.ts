@@ -1397,14 +1397,11 @@ export class WorkflowCrudService {
     await unscheduleWorkflowTasks([id], this.deps.getTaskScheduler());
   }
 
-  /**
-   * Disables a managed workflow without a request, even when it is bound to a service account.
-   * The write may only turn `enabled` off.
-   */
+  /** Disables a managed workflow without a request, refusing any write that changes more than `enabled`. */
   async disableManagedWorkflowWithoutRequest(
     id: string,
     spaceId: string,
-    orphan: ManagedWorkflowOrphan
+    expectedOwnership: ManagedWorkflowOrphan
   ): Promise<WorkflowProperties> {
     const { document } = await this.runOccWrite(id, async () => {
       const writer = this.getReadModifyWriteOccWriter(
@@ -1412,7 +1409,7 @@ export class WorkflowCrudService {
         undefined,
         { includeDeleted: true },
         undefined,
-        orphan
+        expectedOwnership
       );
       return writer.readModifyWrite({
         id,

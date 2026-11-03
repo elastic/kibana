@@ -645,7 +645,13 @@ Background work with no user behind it, such as pausing a feature when its flag 
 const disabled = await managed.disable(MY_WORKFLOW_ID, { spaceId: 'my-space' });
 ```
 
-`disable` accepts the same identity options as `getWorkflowStatus`. It resolves to `true` when this call turned the workflow off, and to `false` when the workflow is missing, not managed, or already off.
+`disable` accepts the same identity options as `getWorkflowStatus`. It resolves to `true` when this call turned the workflow off, and to `false` when the workflow is missing, not managed, or already off, or when Workflows is unavailable in this environment.
+
+It throws instead when:
+
+- the id is not a registered definition, or the definition belongs to another plugin;
+- the stored workflow is managed by another plugin or definition (`403`);
+- the workflow is deleted while the call is switching it off.
 
 It also works on a workflow bound to a service account (`settings.run_as`), which otherwise only a user with `manage_security` can change: switching it off removes the delegation instead of widening it. The write is refused unless the workflow is still managed by the calling plugin under the same definition, and unless the only change is the switch-off. Turning the workflow back on, or changing anything else about a bound workflow, still requires a user with `manage_security`.
 

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Boom from '@hapi/boom';
 import { createHash } from 'node:crypto';
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
@@ -1347,45 +1348,90 @@ describe('ManagedWorkflowsService', () => {
   });
 
   describe('disableManagedWorkflow', () => {
-    it('switches an enabled managed workflow off as its registered owner, and skips one already off', async () => {
-      const definition = createDefinition();
-      mockManagedWorkflowDefinitions = [definition];
+    it('switches an enabled managed workflow off as its registered owner and records it', async () => {
+      mockManagedWorkflowDefinitions = [createDefinition()];
       const { audit, crudService, service } = createService();
-      const managed = {
-        managed: true,
-        managedBy: 'storedOtherOwner',
-        originManagedWorkflowId: 'storedOtherDefinition',
-      };
       crudService.getWorkflowDocumentSource.mockResolvedValue(
-        createWorkflowSource({ ...managed, enabled: true })
+        createWorkflowSource({ enabled: true })
       );
 
       await expect(
-        service.disableManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId)
+        service.disableManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, PLUGIN_ID)
       ).resolves.toBe(true);
 
       expect(crudService.disableManagedWorkflowWithoutRequest).toHaveBeenCalledWith(
         WORKFLOW_ID,
         SPACE_ID,
-        {
-          managedBy: PLUGIN_ID,
-          definitionId: WORKFLOW_ID,
-        }
+        { managedBy: PLUGIN_ID, definitionId: WORKFLOW_ID }
       );
-      expect(audit.logWorkflowUpdated).toHaveBeenCalledWith(
-        undefined,
-        expect.objectContaining({ id: WORKFLOW_ID, reason: 'disable' })
+      expect(crudService.logWorkflowChangesAfterWrite).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: WorkflowChangeHistoryAction.workflowUpdate,
+          spaceId: SPACE_ID,
+          workflows: [
+            expect.objectContaining({
+              id: WORKFLOW_ID,
+              document: expect.objectContaining({ enabled: false }),
+            }),
+          ],
+        })
       );
+      expect(audit.logWorkflowUpdated).toHaveBeenCalledWith(undefined, {
+        id: WORKFLOW_ID,
+        managed: true,
+        originalWorkflowId: WORKFLOW_ID,
+        ownerPlugin: PLUGIN_ID,
+        spaceId: SPACE_ID,
+        reason: 'disable',
+      });
+    });
 
-      crudService.disableManagedWorkflowWithoutRequest.mockClear();
+    it.each([
+      ['missing', null],
+      ['not managed', createWorkflowSource({ managed: false })],
+      ['already off', createWorkflowSource({ enabled: false })],
+    ])('resolves to false without writing when the workflow is %s', async (_label, stored) => {
+      mockManagedWorkflowDefinitions = [createDefinition()];
+      const { audit, crudService, service } = createService();
+      crudService.getWorkflowDocumentSource.mockResolvedValue(stored);
+
+      await expect(
+        service.disableManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, PLUGIN_ID)
+      ).resolves.toBe(false);
+
+      expect(crudService.disableManagedWorkflowWithoutRequest).not.toHaveBeenCalled();
+      expect(crudService.logWorkflowChangesAfterWrite).not.toHaveBeenCalled();
+      expect(audit.logWorkflowUpdated).not.toHaveBeenCalled();
+    });
+
+    it('rejects a caller that did not register the definition before reading the workflow', async () => {
+      mockManagedWorkflowDefinitions = [createDefinition({ pluginId: 'otherPlugin' })];
+      const { crudService, service } = createService();
+
+      await expect(
+        service.disableManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, PLUGIN_ID)
+      ).rejects.toThrow(
+        `Managed workflow '${WORKFLOW_ID}' is owned by plugin 'otherPlugin' but was registered by '${PLUGIN_ID}'`
+      );
+      expect(crudService.getWorkflowDocumentSource).not.toHaveBeenCalled();
+    });
+
+    it('records nothing when the guarded write refuses a workflow owned by someone else', async () => {
+      mockManagedWorkflowDefinitions = [createDefinition()];
+      const { audit, crudService, service } = createService();
       crudService.getWorkflowDocumentSource.mockResolvedValue(
-        createWorkflowSource({ ...managed, enabled: false })
+        createWorkflowSource({ managedBy: 'otherPlugin' })
+      );
+      crudService.disableManagedWorkflowWithoutRequest.mockRejectedValue(
+        Boom.forbidden('The managed workflow may only be switched off')
       );
 
       await expect(
-        service.disableManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId)
-      ).resolves.toBe(false);
-      expect(crudService.disableManagedWorkflowWithoutRequest).not.toHaveBeenCalled();
+        service.disableManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, PLUGIN_ID)
+      ).rejects.toThrow('The managed workflow may only be switched off');
+
+      expect(crudService.logWorkflowChangesAfterWrite).not.toHaveBeenCalled();
+      expect(audit.logWorkflowUpdated).not.toHaveBeenCalled();
     });
   });
 

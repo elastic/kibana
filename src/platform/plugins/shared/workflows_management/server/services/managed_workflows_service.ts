@@ -407,10 +407,7 @@ export class ManagedWorkflowsService {
     });
   }
 
-  /**
-   * Switches an installed managed workflow off without a request, even when it is bound to a
-   * service account. Resolves to whether this call turned it off.
-   */
+  /** Switches an owned managed workflow off without a request and resolves to whether this call did. */
   public async disableManagedWorkflow(
     id: ManagedWorkflowId,
     options: ManagedWorkflowOperationOptions,
