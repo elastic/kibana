@@ -107,6 +107,8 @@ export type MigrationResult =
   | {
       status: 'patched';
       destIndex: string;
+      /** The alias pointing to `destIndex`, when `destIndex` is the concrete index. */
+      alias?: string;
       elapsedMs: number;
     }
   | {
