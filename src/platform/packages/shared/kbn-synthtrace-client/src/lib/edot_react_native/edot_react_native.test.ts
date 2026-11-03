@@ -642,7 +642,9 @@ describe('edotReactNative', () => {
         expect(httpSpans.length).toBeGreaterThan(0);
         httpSpans.forEach((span) => {
           expect(span.parent_span_id).toBeUndefined();
-          expect(spans.filter(({ trace_id: traceId }) => traceId === span.trace_id)).toHaveLength(1);
+          expect(spans.filter(({ trace_id: traceId }) => traceId === span.trace_id)).toHaveLength(
+            1
+          );
         });
       });
     });
@@ -717,6 +719,20 @@ describe('edotReactNative', () => {
         .filter(({ name }) => name === 'UIViewController - view appearing');
       expect(relaunchViews).toHaveLength(2);
       expect(relaunchViews[1]['@timestamp']).toBeGreaterThan(Number(crash.observed_timestamp));
+    });
+
+    it('reports iOS crashes as BSD signals, as PLCrashReporter does', () => {
+      const crashTypes = new Set(
+        Array.from({ length: 30 }, (_, i) =>
+          logs(
+            simulate({ platform: 'ios', seed: `signal-${i}`, health: withHealth({ crashRate: 1 }) })
+          )
+            .filter(({ event_name: eventName }) => eventName === 'app.crash')
+            .map(({ attributes }) => attributes?.['exception.type'])
+        ).flat()
+      );
+      expect(crashTypes.size).toBeGreaterThan(1);
+      crashTypes.forEach((type) => expect(type).toMatch(/^SIG[A-Z]+$/));
     });
 
     it('relaunches the app after an iOS crash without crashing again', () => {

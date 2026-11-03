@@ -124,11 +124,12 @@ const COMMON_CRASHES: Readonly<Record<MobilePlatform, readonly EdotReactNativeCr
     },
     { type: 'java.lang.IllegalStateException', message: 'Fragment not attached to an activity.' },
   ],
-  // EDOT iOS reports the signal and its code; the message is completed with an address
+  // EDOT iOS reports the BSD signal and its code, never a Mach exception such as EXC_BAD_ACCESS;
+  // the message is completed with an address
   ios: [
     { type: 'SIGABRT', message: '#0' },
     { type: 'SIGSEGV', message: 'SEGV_MAPERR' },
-    { type: 'EXC_BAD_ACCESS', message: 'KERN_INVALID_ADDRESS' },
+    { type: 'SIGBUS', message: 'BUS_ADRERR' },
   ],
 };
 
