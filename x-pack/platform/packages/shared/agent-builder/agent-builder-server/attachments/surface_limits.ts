@@ -23,9 +23,19 @@ export const SURFACE_LIMITS = {
   tableRows: 50,
 } as const;
 
-/** `value` cut to `max` characters, with an ellipsis when it's cut. */
-export const clampText = (value: string, max: number): string =>
-  value.length > max ? `${value.slice(0, max - 1).trimEnd()}…` : value;
+/**
+ * `value` cut to `max` characters, with an ellipsis when it's cut. Limits count UTF-16 code units,
+ * so the cut drops a lone high surrogate rather than split a character such as an emoji.
+ */
+export const clampText = (value: string, max: number): string => {
+  if (value.length <= max) {
+    return value;
+  }
+
+  const cut = value.slice(0, max - 1).replace(/[\uD800-\uDBFF]$/, '');
+
+  return `${cut.trimEnd()}…`;
+};
 
 /** `value` on one line, cut to `max` characters. */
 export const toLine = (value: string, max: number): string =>

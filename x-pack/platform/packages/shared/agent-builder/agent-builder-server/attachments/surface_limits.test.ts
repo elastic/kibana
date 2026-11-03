@@ -86,6 +86,11 @@ describe('clampText', () => {
   it('cuts a longer value to the limit, with an ellipsis', () => {
     expect(clampText('abcdef', 4)).toBe('abc…');
   });
+
+  it('does not split a character made of two code units', () => {
+    expect(clampText('ab😀cd', 4)).toBe('ab…');
+    expect(clampText('ab😀cd', 5)).toBe('ab😀…');
+  });
 });
 
 describe('toLine', () => {
