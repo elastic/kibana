@@ -905,9 +905,8 @@ describe('supplied alerts can never be read as retrieved', () => {
   // retrieval block (`extraction_strategy: 'provided'`,
   // `alerts_context_count: providedAlerts.length`). That branch is the reading
   // for a supplied-alerts run — no alert-retrieval workflow executes, so
-  // `alertRetrievalData` stays null. Taking it without this exclusion would score
-  // the 7 provided-mode dense reps 16-vs-95 — a 0 that says nothing about
-  // retrieval.
+  // `alertRetrievalData` stays null, and counting it would score the supplied
+  // set as a retrieval.
   it('reads a provided-mode reconstruction as supplied, and scores the agent retrieval', () => {
     const result = computeWorkflowAlertCounts({
       pipeline: {
@@ -1136,12 +1135,6 @@ describe('an unscoped retrieval scores 0 rather than going unscored', () => {
   });
 });
 
-// The identity a row carries is not always `_id`. A scoped retrieval that keeps
-// alert fields without asking for the document metadata returns the alert's own
-// `kibana.alert.uuid`, which names exactly one alert per row — the same
-// distinct-alert semantics as `_id`, and equally not a row count. A result
-// carrying NEITHER identity still contributes nothing (see the id-less tests
-// above); this is only about which columns can supply the identity.
 describe('an alert identity carried without the _id metadata', () => {
   it('counts the alert population from kibana.alert.uuid', () => {
     const steps = [
@@ -1169,12 +1162,6 @@ describe('an alert identity carried without the _id metadata', () => {
   });
 });
 
-// A scoped retrieval that came back with rows but no identity column retrieves
-// and still cannot be counted. Reporting that as `none` ("the agent did not
-// retrieve") contradicts the row counts recorded beside it: the recorded
-// golden runs kept alert fields with a `KEEP` list that omitted `METADATA _id`,
-// so a correct 2-of-2 retrieval read as a missing one and the run scored 0
-// against a population it had in hand.
 describe('a scoped retrieval whose rows carry no identity is attributed', () => {
   const scopedQuery = `FROM .alerts-security.alerts-default | WHERE tags == "${AD2_SCENARIO_SEED_LABEL}"`;
 
@@ -1203,8 +1190,6 @@ describe('a scoped retrieval whose rows carry no identity is attributed', () => 
 
     expect(workflow.retrievedAlertCount).toBe(0);
     expect(workflow.retrievedAlertCountSource).toBe('agent_esql_retrieval_unidentified');
-    // The rows stay on the record, so the 0 reads as "retrieved 2 rows and could
-    // not attribute them" instead of "retrieved nothing".
     expect(workflow.retrievalEvidence.agentEsqlRowCounts).toEqual([2]);
   });
 
@@ -1218,8 +1203,6 @@ describe('a scoped retrieval whose rows carry no identity is attributed', () => 
     expect(workflow.retrievalEvidence.agentEsqlRowCounts).toEqual([0]);
   });
 
-  // The other half of the fix, end to end: the same scoped retrieval WITH an
-  // identity is the fixture's population and is attributed as such.
   it('attributes a scoped retrieval that returned the expected population', () => {
     const steps = [
       recordedEsqlStep({
@@ -1234,10 +1217,6 @@ describe('a scoped retrieval whose rows carry no identity is attributed', () => 
     expect(workflow.retrievedAlertCountSource).toBe('agent_esql_retrieval');
   });
 
-  // Guard: the new source must not absorb the unscoped case. A run whose only
-  // retrieval carried no scope is still `unscoped_retrieval` — it retrieved,
-  // just not this fixture's population — and a run that retrieved nothing at
-  // all is still `none`.
   it('leaves an unscoped-only retrieval reporting unscoped_retrieval', () => {
     const workflow = workflowFor([
       recordedEsqlStep({ query: denseRetrievalQuery, rows: 97, includeIdColumn: false }),

@@ -31,19 +31,6 @@ const seededDocuments = async (): Promise<
     }));
 };
 
-/**
- * The golden-path fixture seeds the alerts its examples retrieve BY MARKER, so
- * every field a marker-scoped query can be written against has to be reachable
- * by the query the example's QUESTION implies — and that query is not the
- * fixture's choice. The AD default retrieval query matches the marker against
- * `kibana.alert.rule.name`, `message`, `kibana.alert.rule.description` and
- * `process.command_line`, and keeps `message` in its projection, so the
- * recorded golden runs wrote `WHERE message LIKE "*<marker>*"`. A fixture that
- * carries the marker only in `tags`/`workflow_tags`, `kibana.alert.reason` and
- * `kibana.alert.rule.uuid` is unreachable for that query: it returns 0 rows
- * against a population of 2, and the exact-population assertion fails a
- * retrieval that was correct.
- */
 describe('the golden fixture is retrievable by the query its question implies', () => {
   it('seeds the marker into the text field a marker search targets', async () => {
     const documents = await seededDocuments();
@@ -59,10 +46,6 @@ describe('the golden fixture is retrievable by the query its question implies', 
     const ids = documents.map(({ id }) => id);
     expect(new Set(ids).size).toBe(ids.length);
 
-    // `kibana.alert.uuid` is the alert's OWN identity, distinct from the rule
-    // identity (`kibana.alert.rule.uuid`, one value per fixture rule): a
-    // retrieval that keeps no `_id` metadata still returns this column, so the
-    // observed population stays countable by identity rather than by row count.
     for (const { id, source } of documents) {
       const alert = (source.kibana as { alert?: { uuid?: unknown } })?.alert;
       expect(alert?.uuid).toBe(id);
@@ -78,9 +61,6 @@ describe('the golden fixture seeds a chain that spans more than one rule', () =>
       return { name: rule.name, uuid: rule.uuid };
     });
 
-  // The skill requires an attack chain to span more than one rule. Alerts from
-  // two differently named rules that share one rule uuid read as a single rule
-  // by id, so each seeded alert carries its own rule identity.
   it('seeds each alert under its own rule uuid', async () => {
     const rules = await seededRules();
 

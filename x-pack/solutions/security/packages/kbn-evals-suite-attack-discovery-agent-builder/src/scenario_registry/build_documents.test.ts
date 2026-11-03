@@ -53,14 +53,6 @@ describe('AD2 scenario registry (clean profile)', () => {
   it('carries the run marker in message, the text field a marker search targets', () => {
     const plan = buildAd2SeedPlan({ profile: 'dense', baseTime: fixedBaseTime });
 
-    // The marker has to be reachable by the query the example's QUESTION
-    // implies, and that query is not the fixture's choice: the AD default
-    // retrieval query matches the marker against `kibana.alert.rule.name`,
-    // `message`, `kibana.alert.rule.description` and `process.command_line`,
-    // and the recorded live-retrieval runs wrote
-    // `WHERE message LIKE "*<marker>*"`. A document carrying the marker only in
-    // `tags` is unreachable for that query — 0 rows against a population of 95
-    // — so the exact-population assertion failed a correct retrieval.
     const marked = plan.alerts.filter((alert) =>
       String(alert.source.message).includes(plan.runMarker)
     );

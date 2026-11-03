@@ -52,26 +52,15 @@ interface FixtureDocument {
 }
 
 /**
- * The fixture's own alert documents.
+ * The marker is seeded into `message` because the AD default retrieval query
+ * matches it against `kibana.alert.rule.name`, `message`,
+ * `kibana.alert.rule.description` and `process.command_line` — not `tags` —
+ * so a correct `WHERE message LIKE "*<marker>*"` retrieval must find both alerts.
  *
- * Every field a retrieval can be scoped by has to be reachable by the query
- * the example's question implies, and that query is not the fixture's choice:
- * the AD default retrieval query matches the marker against
- * `kibana.alert.rule.name`, `message`, `kibana.alert.rule.description` and
- * `process.command_line`, and keeps `message` in its projection. A fixture that
- * carries the marker only in `tags`/`workflow_tags`, `kibana.alert.reason` and
- * `kibana.alert.rule.uuid` is therefore UNREACHABLE for
- * `WHERE message LIKE "*<marker>*"` — the shape four of the five recorded
- * golden families wrote — and returns 0 rows against a population of 2. The
- * marker is seeded into `message` (the text field a marker search targets) so
- * the retrieval the exact-population assertion asks for is one a correct query
- * can actually perform.
- *
- * `kibana.alert.uuid` is the alert's OWN identity, distinct from the rule
- * identity (`kibana.alert.rule.uuid`, one value per fixture rule):
- * a retrieval that keeps no `_id` metadata still returns this column, so the
- * observed population stays countable by identity rather than by row count
- * (`extractAgentAlertRetrievalPopulation`).
+ * `kibana.alert.uuid` is the alert's own identity: a retrieval that keeps no
+ * `_id` metadata still returns it, so the observed population stays countable
+ * by identity (`extractAgentAlertRetrievalPopulation`). Each alert also has its
+ * own rule uuid, because the skill requires a chain to span more than one rule.
  */
 const createDocuments = (now: number = Date.now()): FixtureDocument[] => [
   {
