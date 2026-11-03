@@ -29,7 +29,7 @@ import { useNotebook } from './notebook_context';
 import { NotebookSettingsFlyout } from './notebook_settings_flyout';
 
 const REFRESH_TOOLTIP = i18n.translate('xpack.notebook.header.refreshTooltip', {
-  defaultMessage: 'Run all time-dependent cells',
+  defaultMessage: 'Run all cells that use the global time range',
 });
 
 const PinnedTimePicker = ({ cell }: { cell: InputCellDefinition }) => {
@@ -47,7 +47,7 @@ const PinnedTimePicker = ({ cell }: { cell: InputCellDefinition }) => {
       onTimeChange={({ start, end }) =>
         store.setInputValue(cell.id, { kind: 'time', range: { from: start, to: end } })
       }
-      onRefresh={() => scheduler.refresh()}
+      onRefresh={() => scheduler.refresh([cell.id])}
       showUpdateButton="iconOnly"
       updateButtonProps={{ toolTipProps: { content: REFRESH_TOOLTIP } }}
       data-test-subj="notebookTimePicker"

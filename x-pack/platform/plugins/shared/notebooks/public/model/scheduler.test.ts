@@ -715,7 +715,7 @@ describe('NotebookScheduler', () => {
       await env.open();
 
       env.clock.now = new Date('2026-10-29T12:05:00.000Z');
-      await env.scheduler.refresh();
+      await env.scheduler.refresh(['time']);
 
       expect(env.fake.callsFor(timeQuery).map(({ params }) => params)).toEqual([
         { _tstart: '2026-10-29T11:45:00.000Z', _tend: '2026-10-29T12:00:00.000Z' },
@@ -745,6 +745,12 @@ describe('NotebookScheduler', () => {
         { period_start: '2026-10-29T11:05:00.000Z' },
       ]);
       expect(env.fake.callsFor(globalQuery)).toHaveLength(1);
+
+      env.clock.now = new Date('2026-10-29T12:10:00.000Z');
+      await env.scheduler.refresh(['time']);
+
+      expect(env.fake.callsFor(globalQuery)).toHaveLength(2);
+      expect(env.fake.callsFor(periodQuery)).toHaveLength(2);
     });
   });
 
