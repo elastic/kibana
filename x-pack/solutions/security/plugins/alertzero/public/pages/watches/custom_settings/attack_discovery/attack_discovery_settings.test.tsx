@@ -39,17 +39,23 @@ const attackDiscovery: Worker = {
 const renderSettings = (
   settings = attackDiscovery.settings,
   onExtrasChange = jest.fn(),
-  isDisabled?: boolean
+  isDisabled?: boolean,
+  onValidityChange?: (isValid: boolean) => void
 ) => {
-  render(
+  const element = (resetKey?: number) => (
     <AttackDiscoverySettings
       worker={attackDiscovery}
       settings={settings}
       isDisabled={isDisabled}
       onExtrasChange={onExtrasChange}
+      onValidityChange={onValidityChange}
+      resetKey={resetKey}
     />
   );
-  return onExtrasChange;
+  const { rerender } = render(element());
+  return Object.assign(onExtrasChange, {
+    discard: (resetKey: number) => rerender(element(resetKey)),
+  });
 };
 
 describe('AttackDiscoverySettings', () => {
@@ -95,6 +101,70 @@ describe('AttackDiscoverySettings', () => {
     fireEvent.change(screen.getByTestId('alertZeroAdditionalContext'), { target: { value } });
 
     expect(onExtrasChange).toHaveBeenLastCalledWith({});
+  });
+
+  it('keeps whitespace typed into the empty box instead of dropping it', () => {
+    renderSettings({ ...attackDiscovery.settings, extras: {} });
+
+    fireEvent.change(screen.getByTestId('alertZeroAdditionalContext'), { target: { value: ' ' } });
+
+    expect(screen.getByTestId('alertZeroAdditionalContext')).toHaveValue(' ');
+  });
+
+  it('keeps the surrounding spaces while typing a word after them', () => {
+    const onExtrasChange = renderSettings({ ...attackDiscovery.settings, extras: {} });
+    const box = screen.getByTestId('alertZeroAdditionalContext');
+
+    fireEvent.change(box, { target: { value: ' ' } });
+    fireEvent.change(box, { target: { value: ' a' } });
+
+    expect(box).toHaveValue(' a');
+    expect(onExtrasChange).toHaveBeenLastCalledWith({ additionalContext: ' a' });
+  });
+
+  describe('a value the workflow engine would evaluate', () => {
+    const EXPRESSION = '${{ kibanaUrl }}';
+
+    it('shows the error, does not publish the value, and reports the draft invalid', () => {
+      const onValidityChange = jest.fn();
+      const onExtrasChange = renderSettings(undefined, jest.fn(), undefined, onValidityChange);
+
+      fireEvent.change(screen.getByTestId('alertZeroAdditionalContext'), {
+        target: { value: EXPRESSION },
+      });
+
+      expect(screen.getByTestId('alertZeroAdditionalContextError')).toBeInTheDocument();
+      expect(screen.getByTestId('alertZeroAdditionalContext')).toHaveValue(EXPRESSION);
+      expect(onExtrasChange).not.toHaveBeenCalled();
+      expect(onValidityChange).toHaveBeenLastCalledWith(false);
+    });
+
+    it('clears the error and publishes once text surrounds the expression', () => {
+      const onValidityChange = jest.fn();
+      const onExtrasChange = renderSettings(undefined, jest.fn(), undefined, onValidityChange);
+      const box = screen.getByTestId('alertZeroAdditionalContext');
+
+      fireEvent.change(box, { target: { value: EXPRESSION } });
+      fireEvent.change(box, { target: { value: `Base ${EXPRESSION}` } });
+
+      expect(screen.queryByTestId('alertZeroAdditionalContextError')).not.toBeInTheDocument();
+      expect(onExtrasChange).toHaveBeenLastCalledWith({ additionalContext: `Base ${EXPRESSION}` });
+      expect(onValidityChange).toHaveBeenLastCalledWith(true);
+    });
+
+    it('drops the flagged value on Discard', () => {
+      const onValidityChange = jest.fn();
+      const onExtrasChange = renderSettings(undefined, jest.fn(), undefined, onValidityChange);
+
+      fireEvent.change(screen.getByTestId('alertZeroAdditionalContext'), {
+        target: { value: EXPRESSION },
+      });
+      onExtrasChange.discard(1);
+
+      expect(screen.getByTestId('alertZeroAdditionalContext')).toHaveValue(SAVED_CONTEXT);
+      expect(screen.queryByTestId('alertZeroAdditionalContextError')).not.toBeInTheDocument();
+      expect(onValidityChange).toHaveBeenLastCalledWith(true);
+    });
   });
 
   it('limits the text to the schema maximum', () => {

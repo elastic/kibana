@@ -371,7 +371,8 @@
                 "kind": "leaf",
                 "type": "string",
                 "minLength": 1,
-                "maxLength": 4000
+                "maxLength": 4000,
+                "pattern": "^(?!\\$\\{\\{[\\s\\S]*\\}\\}$)[\\s\\S]*\\S[\\s\\S]*$"
               }
             },
             "required": [],

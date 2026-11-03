@@ -1203,6 +1203,50 @@ describe('WatchDetailPage', () => {
     expect(mutateAsync).not.toHaveBeenCalled();
   });
 
+  it('blocks Save while the additional context is an expression and frees it on Discard', () => {
+    const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
+    const context = screen.getByTestId('alertZeroAdditionalContext');
+    const save = screen.getByTestId('alertZeroWatchSettingsSave');
+
+    fireEvent.change(context, { target: { value: 'Pay hosts are pay-*.' } });
+    expect(save).toBeEnabled();
+
+    fireEvent.change(context, { target: { value: '${{ kibanaUrl }}' } });
+
+    expect(screen.getByTestId('alertZeroAdditionalContextError')).toBeInTheDocument();
+    expect(save).toBeDisabled();
+    expect(screen.getByTestId('alertZeroWatchSettingsInvalid')).toBeInTheDocument();
+    fireEvent.click(save);
+    expect(mutateAsync).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId('alertZeroWatchSettingsDiscard'));
+
+    expect(screen.queryByTestId('alertZeroAdditionalContextError')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertZeroWatchSettingsInvalid')).not.toBeInTheDocument();
+  });
+
+  it('keeps Save blocked until both an invalid trigger amount and an invalid context are fixed', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
+    const attackDiscovery = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
+    );
+    const interval = within(attackDiscovery).getByTestId(
+      `alertZeroTriggerAmount-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
+    );
+    const context = within(attackDiscovery).getByTestId('alertZeroAdditionalContext');
+    const save = screen.getByTestId('alertZeroWatchSettingsSave');
+
+    fireEvent.change(interval, { target: { value: '1.9' } });
+    fireEvent.change(context, { target: { value: '${{ kibanaUrl }}' } });
+    expect(save).toBeDisabled();
+
+    fireEvent.change(context, { target: { value: 'ok ${{ kibanaUrl }}' } });
+    expect(save).toBeDisabled();
+
+    fireEvent.change(interval, { target: { value: '6' } });
+    expect(save).toBeEnabled();
+  });
+
   it('re-enables Save once the invalid trigger amount is corrected in place', async () => {
     const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
     const ruleTuning = screen.getByTestId(

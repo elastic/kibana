@@ -85,10 +85,15 @@ components:
       type: string
       minLength: 1
       maxLength: 4000
+      pattern: '^(?!\$\{\{[\s\S]*\}\}$)[\s\S]*\S[\s\S]*$'
       description: >-
         Free-text guidance appended to the Attack Discovery generation prompt on every scheduled
         run, such as environment details or what the analysts care about. Sent to the model as
-        written and not anonymized, so it must not hold sensitive identifiers.
+        written and not anonymized, so it must not hold sensitive identifiers. Must contain a
+        non-whitespace character and must not be a single template expression (a value that starts
+        with `${{` and ends with `}}`), because the workflow engine would evaluate it instead of
+        treating it as text. The text is stored in workflow consts and execution inputs, so users
+        who can read workflows or executions in the space can see it.
 
     AttackDiscoveryWorkerExtras:
       type: object

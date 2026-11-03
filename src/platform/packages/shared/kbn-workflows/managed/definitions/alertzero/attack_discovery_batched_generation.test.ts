@@ -298,31 +298,14 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       );
     });
 
-    // Evaluates the `with` value the way the execution engine does for a `${{ }}`
-    // string: strip the delimiters and evaluate the expression against the context.
+    // Structural pin only: the engine behaviour (a literal staying literal, an absent value staying
+    // undefined) is tested against the real templating engine in the alertzero plugin's
+    // `attack_discovery_additional_context.test.ts`. This package cannot import the engine.
     describe('additional context', () => {
-      const engine = createWorkflowLiquidEngine({ strictFilters: true, strictVariables: false });
-
-      const forwarded = (inputValues: Record<string, unknown>): unknown => {
-        const template = String(fanOut().steps?.[0].with?.additional_context);
-        const expression = template
-          .replace(/^\$\{\{/, '')
-          .replace(/\}\}$/, '')
-          .trim();
-        return engine.evalValueSync(expression, { inputs: inputValues });
-      };
-
       it('forwards the input to the run step so it reaches the generation prompt', () => {
         expect(fanOut().steps?.[0].with?.additional_context).toBe(
           '${{ inputs.additional_context }}'
         );
-        expect(forwarded({ additional_context: 'Prioritise the finance subnet.' })).toBe(
-          'Prioritise the finance subnet.'
-        );
-      });
-
-      it('leaves the value undefined, not an empty string, when the input is absent', () => {
-        expect(forwarded({ batch_size: 100 })).toBeUndefined();
       });
     });
 

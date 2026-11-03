@@ -17,7 +17,7 @@ export const ADDITIONAL_CONTEXT_HELP = i18n.translate(
   'xpack.alertzero.watches.settings.additionalContext.help',
   {
     defaultMessage:
-      'Guidance added to the Attack Discovery prompt on every scheduled run, such as environment details or what your analysts care about. Sent to the model as written and not anonymized, so leave out sensitive identifiers. Up to {max} characters.',
+      'Guidance added to the Attack Discovery prompt on every scheduled run, such as environment details or what your analysts care about. Sent to the model as written and not anonymized, so leave out sensitive identifiers. Stored in the workflow and shown in its executions, so anyone who can view them can read it. Up to {max} characters.',
     values: { max: ATTACK_DISCOVERY_ADDITIONAL_CONTEXT_MAX_LENGTH },
   }
 );
@@ -25,4 +25,13 @@ export const ADDITIONAL_CONTEXT_HELP = i18n.translate(
 export const ADDITIONAL_CONTEXT_ARIA_LABEL = i18n.translate(
   'xpack.alertzero.watches.settings.additionalContext.ariaLabel',
   { defaultMessage: 'Additional context for Attack Discovery' }
+);
+
+export const ADDITIONAL_CONTEXT_EXPRESSION_ERROR = i18n.translate(
+  'xpack.alertzero.watches.settings.additionalContext.expressionError',
+  {
+    defaultMessage:
+      'Additional context cannot be a single template expression such as {example}. Add text before or after it.',
+    values: { example: '${{ … }}' },
+  }
 );

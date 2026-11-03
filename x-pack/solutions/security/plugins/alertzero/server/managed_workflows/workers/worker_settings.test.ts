@@ -226,6 +226,33 @@ describe('createWorkerSettingsRegistration', () => {
         expect(expectInvalid(applyContext(''))).toMatch(/additionalContext/);
       });
 
+      it.each(['   ', '\n\t ', '  \n  '])('rejects the whitespace-only value %j', (value) => {
+        expect(expectInvalid(applyContext(value))).toMatch(/additionalContext/);
+      });
+
+      // The workflow engine evaluates a string that starts with `${{` and ends with `}}` (no trim)
+      // instead of passing it through, so such a value must never be stored.
+      it.each(['${{ kibanaUrl }}', '${{kibanaUrl}}', '${{ a }} and ${{ b }}', '${{}}', '${{\n}}'])(
+        'rejects the value %j that the engine would evaluate',
+        (value) => {
+          expect(expectInvalid(applyContext(value))).toMatch(/additionalContext/);
+        }
+      );
+
+      it.each([
+        'x ${{ kibanaUrl }}',
+        '${{ kibanaUrl }} y',
+        ' ${{ kibanaUrl }}',
+        '${{ kibanaUrl }} ',
+        '${{ kibanaUrl }}\n',
+        '${{ unterminated',
+        'Hosts use {{ braces }} and {% tags %}.',
+      ])('accepts the value %j, which the engine keeps as text', (value) => {
+        expect(applyContext(value)).toEqual({
+          values: expect.objectContaining({ extras: { additionalContext: value } }),
+        });
+      });
+
       it('rejects an unknown extras field', () => {
         expect(
           expectInvalid(

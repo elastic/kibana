@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiAccordion,
@@ -69,7 +69,7 @@ interface WorkerSettingsPanelProps {
   canWrite: boolean;
   onEnabledChange: (enabled: boolean) => void;
   onSettingsChange: (patch: WorkerSettingsWrite) => void;
-  /** Raised when this Worker's trigger control holds an amount that cannot be committed. */
+  /** Raised when one of this Worker's controls holds a value that cannot be committed. */
   onTriggerValidityChange?: (isValid: boolean) => void;
   /** Bumped by the page on Discard so controls holding a flagged draft clear it. */
   draftResetKey?: number;
@@ -133,6 +133,17 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       })
     : undefined;
   const CustomSettings = getWorkerCustomSettingsComponent(worker.id);
+  // The trigger control and the Worker's custom settings each flag their own unpublished value; the
+  // page tracks one flag per Worker, so it hears from both only while both are valid.
+  const [isTriggerValid, setIsTriggerValid] = useState(true);
+  const [isCustomSettingsValid, setIsCustomSettingsValid] = useState(true);
+  const isDraftValid = isTriggerValid && isCustomSettingsValid;
+  useEffect(() => {
+    onTriggerValidityChange?.(isDraftValid);
+  }, [isDraftValid, onTriggerValidityChange]);
+  const onTriggerValidityChangeRef = useRef(onTriggerValidityChange);
+  onTriggerValidityChangeRef.current = onTriggerValidityChange;
+  useEffect(() => () => onTriggerValidityChangeRef.current?.(true), []);
   const autonomyIntro = getAutonomyLevelCards(worker.id)?.intro;
 
   const accordionHeaderStyles = useMemo(
@@ -383,7 +394,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
             current={settings.scheduleInterval}
             isDisabled={controlsDisabled || isWorkerScheduleIntervalReadOnly(worker.id)}
             onChange={(scheduleInterval) => onSettingsChange({ scheduleInterval })}
-            onValidityChange={onTriggerValidityChange}
+            onValidityChange={setIsTriggerValid}
             resetKey={draftResetKey}
           />
         </SettingRow>
@@ -413,6 +424,8 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           settings={settings}
           isDisabled={controlsDisabled}
           onExtrasChange={(extras) => onSettingsChange({ extras })}
+          onValidityChange={setIsCustomSettingsValid}
+          resetKey={draftResetKey}
         />
       ) : null}
     </>

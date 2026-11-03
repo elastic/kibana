@@ -146,7 +146,10 @@ const renderAdditionalContext = (yaml: string, additionalContext: string | undef
   const scalar = JSON.stringify(additionalContext)
     .replaceAll('\u2028', '\\u2028')
     .replaceAll('\u2029', '\\u2029');
-  return yaml.replaceAll(ADDITIONAL_CONTEXT_LINE_PLACEHOLDER, () => `    additionalContext: ${scalar}\n`);
+  return yaml.replaceAll(
+    ADDITIONAL_CONTEXT_LINE_PLACEHOLDER,
+    () => `    additionalContext: ${scalar}\n`
+  );
 };
 
 export const renderAttackDiscoveryWorkerYaml = (
