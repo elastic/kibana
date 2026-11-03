@@ -2099,6 +2099,8 @@
       "@kbn/plugin-generator/*": ["./packages/kbn-plugin-generator/*"],
       "@kbn/plugin-helpers": ["./packages/kbn-plugin-helpers"],
       "@kbn/plugin-helpers/*": ["./packages/kbn-plugin-helpers/*"],
+      "@kbn/plugin-initialize-example-plugin": ["./examples/plugin_initialize_example"],
+      "@kbn/plugin-initialize-example-plugin/*": ["./examples/plugin_initialize_example/*"],
       "@kbn/portable-dashboards-example": ["./examples/portable_dashboards_example"],
       "@kbn/portable-dashboards-example/*": ["./examples/portable_dashboards_example/*"],
       "@kbn/preboot-example-plugin": ["./examples/preboot_example"],

@@ -29,6 +29,7 @@ examples/hello_world @elastic/kibana-core
 examples/locator_examples @elastic/appex-sharedux
 examples/locator_explorer @elastic/appex-sharedux
 examples/partial_results_example @elastic/kibana-discover
+examples/plugin_initialize_example @elastic/kibana-core
 examples/portable_dashboards_example @elastic/kibana-dashboards
 examples/preboot_example @elastic/kibana-security @elastic/kibana-core
 examples/pubsub_example @elastic/kibana-core
