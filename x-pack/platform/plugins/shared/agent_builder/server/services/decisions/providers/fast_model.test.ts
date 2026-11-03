@@ -69,12 +69,39 @@ describe('createFastModelDecisionProvider', () => {
     expect(JSON.stringify(invoke.mock.calls[0][0])).toContain('@agent can you help?');
   });
 
-  it('converts the structured output to decision answers', async () => {
+  it('asks for calibrated probabilities', async () => {
+    const { run, invoke } = setup({ output: { should_respond: { probability: 0.8 } } });
+
+    await run({ should_respond: questions.should_respond });
+
+    const [[system]] = invoke.mock.calls[0];
+
+    expect(JSON.stringify(system)).toContain('Use the whole range');
+  });
+
+  it('asks for a probability per option on choice and score questions', async () => {
+    const { run, withStructuredOutput } = setup({
+      output: {
+        pick: { probabilities: { a: 0.3, b: 0.7 } },
+      },
+    });
+
+    await run({ pick: questions.pick });
+
+    const [schema] = withStructuredOutput.mock.calls[0];
+
+    expect(
+      schema.parse({ pick: { probabilities: { a: 0.3, b: 0.7 } } }).pick.probabilities
+    ).toEqual({ a: 0.3, b: 0.7 });
+    expect(() => schema.parse({ pick: { choice: 'a', confidence: 1 } })).toThrow();
+  });
+
+  it('answers with the most likely option and its probability as the confidence', async () => {
     const { run } = setup({
       output: {
         should_respond: { probability: 0.8 },
-        pick: { choice: 'b', confidence: 0.6 },
-        severity: { level: 'high', confidence: 0.7 },
+        pick: { probabilities: { a: 0.3, b: 0.7 } },
+        severity: { probabilities: { low: 0.4, high: 0.6 } },
       },
     });
 
@@ -82,8 +109,13 @@ describe('createFastModelDecisionProvider', () => {
       inferenceId: 'fast_model:fast-connector',
       answers: {
         should_respond: { type: 'predicate', probability: 0.8 },
-        pick: { type: 'choice', choice: 'b', confidence: 0.6, probabilities: { b: 0.6 } },
-        severity: { type: 'score', score: 1, confidence: 0.7, probabilities: { high: 0.7 } },
+        pick: { type: 'choice', choice: 'b', confidence: 0.7, probabilities: { a: 0.3, b: 0.7 } },
+        severity: {
+          type: 'score',
+          score: 1,
+          confidence: 0.6,
+          probabilities: { low: 0.4, high: 0.6 },
+        },
       },
     });
   });
