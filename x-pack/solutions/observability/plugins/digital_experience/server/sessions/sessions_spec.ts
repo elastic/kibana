@@ -16,15 +16,19 @@ import { CORE_WEB_VITALS, type CoreWebVital } from '../../common/core_web_vitals
 import {
   BROWSER_SDK_LANGUAGE,
   EVENT_CLICK,
+  EVENT_DEAD_CLICK,
   EVENT_DOCUMENT_LOAD,
   EVENT_EXCEPTION,
   EVENT_NAVIGATION,
+  EVENT_RAGE_CLICK,
   EVENT_USER_ACTION_CLICK,
   EVENT_WEB_VITAL,
   OTEL_SPAN_NAME,
 } from '../../common/otel_data';
 import {
+  SESSIONS_CLICK_PATH_SIZE,
   SESSIONS_DEFAULT_FREQUENCY,
+  SESSIONS_ERROR_GROUPS_SIZE,
   SESSIONS_INDEX,
   SESSIONS_INDEX_PATTERN,
   SESSIONS_INDEX_TEMPLATE_NAME,
@@ -34,6 +38,7 @@ import {
   SESSIONS_MAX_PAGE_SEARCH_SIZE,
   SESSIONS_MANAGED_BY,
   SESSIONS_PIPELINE_NAME,
+  SESSIONS_SEQUENCE_TOKEN_LENGTH,
   SESSIONS_SOURCE_INDICES,
   SESSIONS_SYNC_DELAY,
   SESSIONS_VERSION,
@@ -41,7 +46,10 @@ import {
 } from '../../common/sessions';
 import { partitionFilters, type SessionsPartition } from './partitions';
 import {
+  SOURCE_CLICK_TARGET_FIELD,
+  SOURCE_ERROR_GROUP_FIELD,
   SOURCE_EVENT_OUTCOME_FIELD,
+  SOURCE_HAS_REPLAY_FIELD,
   SOURCE_SERVICE_NAME_FIELD,
   SOURCE_SESSION_ID_FIELD,
   SOURCE_URL_FIELD,
@@ -70,6 +78,11 @@ export const ERROR_FILTER = anyOf(eventNamed(EVENT_EXCEPTION), {
   term: { [SOURCE_EVENT_OUTCOME_FIELD]: 'failure' },
 });
 export const WEB_VITAL_FILTER = eventNamed(EVENT_WEB_VITAL);
+export const RAGE_CLICK_FILTER = eventNamed(EVENT_RAGE_CLICK);
+export const DEAD_CLICK_FILTER = eventNamed(EVENT_DEAD_CLICK);
+export const HAS_REPLAY_FILTER: QueryDslQueryContainer = {
+  term: { [SOURCE_HAS_REPLAY_FIELD]: true },
+};
 
 /**
  * Candidate source fields per summarized attribute, in priority order. The dest
@@ -108,6 +121,8 @@ export const SESSION_ATTRIBUTE_FIELDS = {
     'attributes.device.model.name',
     'resource.attributes.device.type',
   ],
+  breakpoint: ['attributes.browser.breakpoint'],
+  connection: ['attributes.network.connection.type'],
   countryIso: [
     'attributes.client.geo.country_iso_code',
     'resource.attributes.client.geo.country_iso_code',
@@ -127,7 +142,14 @@ const fieldsOf = (...attributes: SessionAttribute[]): readonly string[] =>
  */
 export const SESSION_ATTRIBUTE_GROUPS = {
   user_seen: fieldsOf('user'),
-  user_agent_seen: fieldsOf('browser', 'browserVersion', 'os', 'device'),
+  user_agent_seen: fieldsOf(
+    'browser',
+    'browserVersion',
+    'os',
+    'device',
+    'breakpoint',
+    'connection'
+  ),
   geo_seen: fieldsOf('countryIso', 'region', 'city'),
 } as const;
 
@@ -178,8 +200,34 @@ const webVitalAgg = (name: CoreWebVital) => ({
   },
   aggs: {
     p75: { percentiles: { field: SOURCE_WEB_VITAL_VALUE_FIELD, percents: [75] } },
+    samples: { value_count: { field: SOURCE_WEB_VITAL_VALUE_FIELD } },
   },
 });
+
+/**
+ * Click targets in click order. A size above 1 makes `top_metrics` fail on shards where the
+ * field is unmapped, so only events that carry it are considered.
+ */
+const clickTargets = {
+  filter: { bool: { filter: [CLICK_FILTER, { exists: { field: SOURCE_CLICK_TARGET_FIELD } }] } },
+  aggs: {
+    targets: {
+      top_metrics: {
+        metrics: { field: SOURCE_CLICK_TARGET_FIELD },
+        sort: { '@timestamp': 'asc' as const },
+        size: SESSIONS_CLICK_PATH_SIZE,
+      },
+    },
+  },
+};
+
+/** Most frequent exception types of a session's error events. */
+const errorGroups = {
+  filter: ERROR_FILTER,
+  aggs: {
+    groups: { terms: { field: SOURCE_ERROR_GROUP_FIELD, size: SESSIONS_ERROR_GROUPS_SIZE } },
+  },
+};
 
 export const sessionsIndexMappings = {
   dynamic: false,
@@ -195,6 +243,18 @@ export const sessionsIndexMappings = {
     error_count: { type: 'long' },
     bounced: { type: 'boolean' },
     has_error: { type: 'boolean' },
+    has_replay: { type: 'boolean' },
+    replay_event_count: { type: 'long' },
+    rage_click_count: { type: 'long' },
+    dead_click_count: { type: 'long' },
+    error_groups: { type: 'keyword' },
+    pages: { type: 'keyword' },
+    clicks: { type: 'keyword' },
+    click_path_key: { type: 'keyword' },
+    path_key: { type: 'keyword' },
+    page_sequence: { type: 'text', analyzer: 'whitespace' },
+    click_sequence: { type: 'text', analyzer: 'whitespace' },
+    event_sequence: { type: 'text', analyzer: 'whitespace' },
     entry_page: { type: 'keyword' },
     exit_page: { type: 'keyword' },
     journey: { type: 'keyword' },
@@ -206,8 +266,10 @@ export const sessionsIndexMappings = {
         browser_version: { type: 'keyword' },
         os: { type: 'keyword' },
         device: { type: 'keyword' },
+        breakpoint: { type: 'keyword' },
       },
     },
+    network: { properties: { connection_type: { type: 'keyword' } } },
     geo: {
       properties: {
         country_iso: { type: 'keyword' },
@@ -218,6 +280,11 @@ export const sessionsIndexMappings = {
     web_vitals: {
       properties: Object.fromEntries(
         CORE_WEB_VITALS.map((name) => [name, { type: 'double' as const }])
+      ),
+    },
+    web_vitals_samples: {
+      properties: Object.fromEntries(
+        CORE_WEB_VITALS.map((name) => [name, { type: 'long' as const }])
       ),
     },
   },
@@ -250,6 +317,8 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
           fields: SESSION_ATTRIBUTE_FIELDS,
           vitals: [...CORE_WEB_VITALS],
           journeySize: SESSIONS_JOURNEY_SIZE,
+          tokenLength: SESSIONS_SEQUENCE_TOKEN_LENGTH,
+          clickTarget: SOURCE_CLICK_TARGET_FIELD,
         },
         source: `
           long countOf(def v) {
@@ -274,8 +343,8 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
             }
             return null;
           }
-          def metricsOf(def agg) {
-            def latest = agg instanceof Map ? agg.latest : null;
+          def metricsOf(def agg, String key) {
+            def latest = agg instanceof Map ? agg[key] : null;
             if ((latest instanceof Map) == false) { return []; }
             def out = [];
             if (latest.top instanceof List) {
@@ -287,8 +356,36 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
             return out;
           }
           def firstMetrics(def agg) {
-            def all = metricsOf(agg);
+            def all = metricsOf(agg, 'latest');
             return all.isEmpty() ? null : all[0];
+          }
+          long samplesOf(def agg) {
+            def samples = agg instanceof Map ? agg.samples : null;
+            if (samples instanceof Map) { samples = samples.value; }
+            return samples instanceof Number ? ((Number) samples).longValue() : 0L;
+          }
+          // Lowercased, without a leading '#' or '/', spaces as '_'. Mirrored by
+          // normalizeSequenceToken in common/sessions.ts.
+          String tokenOf(def raw, int maxLength) {
+            String s = clean(raw);
+            if (s == null) { return ''; }
+            s = s.toLowerCase();
+            while (s.startsWith('#') || s.startsWith('/')) { s = s.substring(1); }
+            s = s.replace(' ', '_');
+            return s.length() > maxLength ? s.substring(0, maxLength) : s;
+          }
+          void addToken(def tokens, String token) {
+            if (token != '' && (tokens.isEmpty() || tokens[tokens.size() - 1] != token)) {
+              tokens.add(token);
+            }
+          }
+          String joinTokens(def tokens, String separator) {
+            StringBuilder out = new StringBuilder();
+            for (int i = 0; i < tokens.size(); i++) {
+              if (i > 0) { out.append(separator); }
+              out.append(tokens[i]);
+            }
+            return out.toString();
           }
           def p75Of(def agg) {
             def p75 = agg instanceof Map ? agg.p75 : null;
@@ -343,6 +440,21 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
           ctx.click_count = countOf(ctx.click_count);
           ctx.error_count = countOf(ctx.error_count);
           ctx.has_error = ctx.error_count > 0;
+          ctx.replay_event_count = countOf(ctx.replay_events);
+          ctx.has_replay = ctx.replay_event_count > 0;
+          ctx.rage_click_count = countOf(ctx.rage_clicks);
+          ctx.dead_click_count = countOf(ctx.dead_clicks);
+          def groupKeys = [];
+          def groups = ctx.error_groups instanceof Map ? ctx.error_groups.groups : null;
+          if (groups instanceof Map) {
+            def buckets = groups.buckets;
+            if (buckets instanceof List) {
+              for (bucket in buckets) { String key = clean(bucket.key); if (key != null) { groupKeys.add(key); } }
+            } else {
+              for (entry in groups.entrySet()) { String key = clean(entry.getKey()); if (key != null) { groupKeys.add(key); } }
+            }
+          }
+          ctx.error_groups = groupKeys;
           // A session without a captured page view isn't a bounce: there was no page to leave.
           ctx.bounced = ctx.page_view_count == 1;
 
@@ -366,6 +478,22 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
           ctx.entry_page = journey.isEmpty() ? exitPage : journey[0];
           ctx.exit_page = exitPage != null ? exitPage : (journey.isEmpty() ? null : journey[journey.size() - 1]);
 
+          def pageTokens = [];
+          for (page in journey) { addToken(pageTokens, tokenOf(page, params.tokenLength)); }
+          def clickTokens = [];
+          for (bag in metricsOf(ctx.click_targets, 'targets')) {
+            if (bag instanceof Map) { addToken(clickTokens, tokenOf(bag[params.clickTarget], params.tokenLength)); }
+          }
+          def eventTokens = [];
+          for (token in pageTokens) { eventTokens.add('p:' + token); }
+          for (token in clickTokens) { eventTokens.add('a:' + token); }
+          ctx.clicks = clickTokens;
+          ctx.page_sequence = joinTokens(pageTokens, ' ');
+          ctx.click_sequence = joinTokens(clickTokens, ' ');
+          ctx.event_sequence = joinTokens(eventTokens, ' ');
+          ctx.path_key = joinTokens(pageTokens, '>');
+          ctx.click_path_key = joinTokens(clickTokens, '>');
+
           def userBag = firstMetrics(ctx.user_seen);
           def userAgentBag = firstMetrics(ctx.user_agent_seen);
           def geoBag = firstMetrics(ctx.geo_seen);
@@ -374,8 +502,10 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
             'browser': firstOf(userAgentBag, fields.browser),
             'browser_version': firstOf(userAgentBag, fields.browserVersion),
             'os': firstOf(userAgentBag, fields.os),
-            'device': firstOf(userAgentBag, fields.device)
+            'device': firstOf(userAgentBag, fields.device),
+            'breakpoint': firstOf(userAgentBag, fields.breakpoint)
           ];
+          ctx.network = ['connection_type': firstOf(userAgentBag, fields.connection)];
           ctx.geo = [
             'country_iso': firstOf(geoBag, fields.countryIso),
             'region': firstOf(geoBag, fields.region),
@@ -383,17 +513,25 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
           ];
 
           def vitals = new HashMap();
+          def vitalSamples = new HashMap();
           for (name in params.vitals) {
             vitals[name] = p75Of(ctx[name]);
+            vitalSamples[name] = samplesOf(ctx[name]);
             ctx.remove(name);
           }
           ctx.web_vitals = vitals;
+          ctx.web_vitals_samples = vitalSamples;
 
           ctx.remove('pages');
+          ctx.pages = pageTokens;
           ctx.remove('exit');
           ctx.remove('user_seen');
           ctx.remove('user_agent_seen');
           ctx.remove('geo_seen');
+          ctx.remove('replay_events');
+          ctx.remove('rage_clicks');
+          ctx.remove('dead_clicks');
+          ctx.remove('click_targets');
         `,
       },
     },
@@ -410,6 +548,11 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
           'error_count',
           'pages',
           'exit',
+          'replay_events',
+          'rage_clicks',
+          'dead_clicks',
+          'error_groups',
+          'click_targets',
           ...Object.keys(SESSION_ATTRIBUTE_GROUPS),
           ...CORE_WEB_VITALS,
         ],
@@ -472,6 +615,12 @@ export const buildSessionsTransform = ({
       page_view_count: { filter: PAGE_VIEW_FILTER },
       click_count: { filter: CLICK_FILTER },
       error_count: { filter: ERROR_FILTER },
+      // Not named has_replay: the transform maps a pivot aggregation's name as a long.
+      replay_events: { filter: HAS_REPLAY_FILTER },
+      rage_clicks: { filter: RAGE_CLICK_FILTER },
+      dead_clicks: { filter: DEAD_CLICK_FILTER },
+      error_groups: errorGroups,
+      click_targets: clickTargets,
       pages: pageUrls(SESSIONS_JOURNEY_URL_CANDIDATES, { first: 'asc' }),
       exit: pageUrls(1, { last: 'desc' }),
       ...Object.fromEntries(

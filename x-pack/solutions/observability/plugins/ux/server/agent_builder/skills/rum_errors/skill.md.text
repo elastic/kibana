@@ -1,0 +1,5 @@
+## Who is facing errors
+
+1. `observability.ux.get_errors` — groups ranked by impact (count, sessions, identified users).
+2. `observability.ux.find_sessions` with `hasErrors=true` (and the same filters) for replay IDs.
+3. Lead with the top groups, then 3–6 session IDs. Do not dump stack traces unless asked.

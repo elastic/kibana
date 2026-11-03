@@ -78,6 +78,7 @@ export function PageViewsChart({ breakdown }: Props) {
     <ExploratoryViewEmbeddable
       customHeight={'300px'}
       attributes={allSeries}
+      dataTypesIndexPatterns={{ ux: dataViewTitle }}
       onBrushEnd={onBrushEnd}
       reportType="kpi-over-time"
       isSingleMetric={true}

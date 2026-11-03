@@ -7,8 +7,7 @@
 
 import type { ConfigProps, SeriesConfig } from '../../types';
 import { FieldLabels } from '../constants';
-import { buildPhraseFilter } from '../utils';
-import { PROCESSOR_EVENT, TRANSACTION_TYPE } from '../constants/elasticsearch_fieldnames';
+import { buildKueryFilter, RUM_PAGE_LOAD_KQL } from '../utils';
 
 export function getSingleMetricConfig({ dataView }: ConfigProps): SeriesConfig {
   return {
@@ -25,10 +24,7 @@ export function getSingleMetricConfig({ dataView }: ConfigProps): SeriesConfig {
     hasOperationType: true,
     definitionFields: ['service.name'],
     reportType: 'single-metric',
-    baseFilters: [
-      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', dataView),
-      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', dataView),
-    ],
+    baseFilters: [...buildKueryFilter(RUM_PAGE_LOAD_KQL, dataView)],
     metricOptions: [
       {
         id: 'page_views',

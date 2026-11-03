@@ -20,3 +20,9 @@ export const SOURCE_URL_FIELD = attributeField(URL_FULL);
 export const SOURCE_EVENT_OUTCOME_FIELD = attributeField(EVENT_OUTCOME);
 export const SOURCE_WEB_VITAL_NAME_FIELD = attributeField(WEB_VITAL_NAME);
 export const SOURCE_WEB_VITAL_VALUE_FIELD = attributeField(WEB_VITAL_VALUE);
+/** Stamped by EDOT Browser on every signal of a session that has a recording. */
+export const SOURCE_HAS_REPLAY_FIELD = attributeField('rum.has_replay');
+/** Exception type of an error event; groups a session's errors. */
+export const SOURCE_ERROR_GROUP_FIELD = attributeField('exception.type');
+/** CSS selector of a click target, `keyword` in the OTel templates, so `top_metrics` can read it. */
+export const SOURCE_CLICK_TARGET_FIELD = attributeField('browser.css_selector');

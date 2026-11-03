@@ -3,7 +3,65 @@
 exports[`serviceNameQuery fetches rum services 1`] = `
 Object {
   "aggs": Object {
+    "otelServices": Object {
+      "aggs": Object {
+        "attrPlatform": Object {
+          "terms": Object {
+            "field": "attributes.rum.platform",
+            "size": 5,
+          },
+        },
+        "osName": Object {
+          "terms": Object {
+            "field": "resource.attributes.os.name",
+            "size": 5,
+          },
+        },
+        "osType": Object {
+          "terms": Object {
+            "field": "resource.attributes.os.type",
+            "size": 5,
+          },
+        },
+        "rumPlatform": Object {
+          "terms": Object {
+            "field": "resource.attributes.rum.platform",
+            "size": 5,
+          },
+        },
+      },
+      "terms": Object {
+        "field": "resource.attributes.service.name",
+        "size": 1000,
+      },
+    },
     "services": Object {
+      "aggs": Object {
+        "attrPlatform": Object {
+          "terms": Object {
+            "field": "attributes.rum.platform",
+            "size": 5,
+          },
+        },
+        "osName": Object {
+          "terms": Object {
+            "field": "resource.attributes.os.name",
+            "size": 5,
+          },
+        },
+        "osType": Object {
+          "terms": Object {
+            "field": "resource.attributes.os.type",
+            "size": 5,
+          },
+        },
+        "rumPlatform": Object {
+          "terms": Object {
+            "field": "resource.attributes.rum.platform",
+            "size": 5,
+          },
+        },
+      },
       "terms": Object {
         "field": "service.name",
         "size": 1000,
@@ -23,20 +81,43 @@ Object {
           },
         },
         Object {
-          "term": Object {
-            "transaction.type": "page-load",
-          },
-        },
-        Object {
-          "terms": Object {
-            "processor.event": Array [
-              "transaction",
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "bool": Object {
+                        "filter": Array [
+                          Object {
+                            "term": Object {
+                              "transaction.type": "page-load",
+                            },
+                          },
+                          Object {
+                            "term": Object {
+                              "processor.event": "transaction",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "name": "documentLoad",
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "exists": Object {
+                  "field": "resource.attributes.session.id",
+                },
+              },
             ],
-          },
-        },
-        Object {
-          "exists": Object {
-            "field": "transaction.marks.navigationTiming.fetchStart",
           },
         },
       ],

@@ -39,12 +39,25 @@ export function useLongTaskMetricsQuery() {
 
     const pkey = Number(percentile).toFixed(1);
 
-    const { longTaskSum, longTaskCount, longTaskMax } = esQueryResponse.aggregations ?? {};
+    const { longTaskSum, longTaskCount, longTaskMax, otelLongTaskDuration, otelLongTaskCount } =
+      (esQueryResponse.aggregations ?? {}) as {
+        longTaskSum?: { values: Record<string, number | null> };
+        longTaskCount?: { values: Record<string, number | null> };
+        longTaskMax?: { values: Record<string, number | null> };
+        otelLongTaskDuration?: { values: Record<string, number | null> };
+        otelLongTaskCount?: { doc_count?: number };
+      };
+
+    const classicCount = longTaskCount?.values[pkey] ?? 0;
+    const classicSum = longTaskSum?.values[pkey] ?? 0;
+    const classicMax = longTaskMax?.values[pkey] ?? 0;
+    const otelDuration = otelLongTaskDuration?.values[pkey] ?? 0;
+    const otelCount = otelLongTaskCount?.doc_count ?? 0;
 
     return {
-      noOfLongTasks: longTaskCount?.values[pkey] ?? 0,
-      sumOfLongTasks: longTaskSum?.values[pkey] ?? 0,
-      longestLongTask: longTaskMax?.values[pkey] ?? 0,
+      noOfLongTasks: classicCount || otelCount,
+      sumOfLongTasks: classicSum || otelDuration * otelCount,
+      longestLongTask: classicMax || otelDuration,
     };
   }, [esQueryResponse, percentile]);
 

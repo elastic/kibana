@@ -5,81 +5,95 @@
  * 2.0.
  */
 
-import { EuiSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
+import { AgentIcon } from '@kbn/custom-icons';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
-import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
+import type { RumApplicationOption } from '../../../../../../common/rum_platform';
 import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
+import { mergeRumSearch } from '../../../../../utils/rum_search';
+import { uxAppPath, uxTabSuffix } from '../../../../../utils/ux_app_path';
+import { applicationsForFilter } from './applications_for_filter';
 
 interface Props {
-  serviceNames?: string[];
+  applications?: RumApplicationOption[];
   loading: boolean;
 }
 
-function ServiceNameFilter({ loading, serviceNames }: Props) {
+const androidLabel = i18n.translate('xpack.ux.localFilters.titles.androidAriaLabel', {
+  defaultMessage: 'Android',
+});
+
+function ApplicationOptionDisplay({ name, platform }: RumApplicationOption) {
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      {platform === 'android' ? (
+        <EuiFlexItem grow={false}>
+          <AgentIcon agentName="android/java" size="s" title={androidLabel} />
+        </EuiFlexItem>
+      ) : null}
+      <EuiFlexItem grow={false} className="eui-textTruncate">
+        {name}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
+
+function ServiceNameFilter({ loading, applications }: Props) {
   const history = useHistory();
   const {
     urlParams: { serviceName: selectedServiceName },
   } = useLegacyUrlParams();
 
-  const options = (serviceNames ?? []).map((type) => ({
-    text: type,
-    value: type,
+  const apps = useMemo(
+    () => applicationsForFilter(applications, selectedServiceName),
+    [applications, selectedServiceName]
+  );
+
+  const options = apps.map((application) => ({
+    value: application.name,
+    inputDisplay: <ApplicationOptionDisplay {...application} />,
+    dropdownDisplay: <ApplicationOptionDisplay {...application} />,
   }));
 
   const updateServiceName = useCallback(
-    (serviceN: string, replaceHistory?: boolean) => {
-      const newLocation = {
+    (serviceN: string) => {
+      const suffix = uxTabSuffix(history.location.pathname);
+      history.push({
         ...history.location,
-        search: fromQuery({
-          ...toQuery(history.location.search),
-          serviceName: serviceN,
-        }),
-      };
-      if (replaceHistory) {
-        history.replace(newLocation);
-      } else {
-        history.push(newLocation);
-      }
+        pathname: serviceN ? uxAppPath(serviceN, suffix) : '/',
+        search: mergeRumSearch(history.location.search, { serviceName: '' }),
+      });
     },
     [history]
   );
 
-  useEffect(() => {
-    if (serviceNames && serviceNames?.length > 0) {
-      // select first from the list
-      if (!selectedServiceName) {
-        updateServiceName(serviceNames[0], true);
-      }
-
-      // in case serviceName is cached from url and isn't present in current list
-      if (selectedServiceName && !serviceNames.includes(selectedServiceName)) {
-        updateServiceName(serviceNames[0], true);
-      }
-    }
-
-    if (selectedServiceName && serviceNames?.length === 0 && !loading) {
-      updateServiceName('');
-    }
-  }, [serviceNames, selectedServiceName, updateServiceName, loading]);
-
-  const webApplicationLabel = i18n.translate('xpack.ux.localFilters.titles.webApplication', {
-    defaultMessage: 'Web application',
+  const applicationLabel = i18n.translate('xpack.ux.localFilters.titles.applicationLabel', {
+    defaultMessage: 'Application',
   });
 
   return (
-    <EuiSelect
+    <EuiSuperSelect
       data-test-subj="uxServiceNameFilterSelect"
       fullWidth
-      prepend={webApplicationLabel}
-      aria-label={webApplicationLabel}
+      compressed
+      prepend={applicationLabel}
+      aria-label={applicationLabel}
       isLoading={loading}
       data-cy="serviceNameFilter"
       options={options}
-      value={selectedServiceName}
-      onChange={(event) => {
-        updateServiceName(event.target.value);
+      valueOfSelected={
+        selectedServiceName && apps.some((app) => app.name === selectedServiceName)
+          ? selectedServiceName
+          : undefined
+      }
+      placeholder={i18n.translate('xpack.ux.localFilters.titles.applicationPlaceholder', {
+        defaultMessage: 'Select application',
+      })}
+      disabled={options.length === 0}
+      onChange={(value) => {
+        updateServiceName(value);
       }}
     />
   );

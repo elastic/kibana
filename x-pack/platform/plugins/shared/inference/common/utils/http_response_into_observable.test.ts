@@ -18,6 +18,11 @@ function toSse(...events: Array<Record<string, any>>) {
   return events.map((event) => new TextEncoder().encode(`data: ${JSON.stringify(event)}\n\n`));
 }
 
+/** Matches `@kbn/sse-utils-server`: type lives in the SSE `event:` field, not in JSON. */
+function toNamedSse(eventType: string, data: Record<string, unknown>) {
+  return new TextEncoder().encode(`event: ${eventType}\ndata: ${JSON.stringify(data)}\n\n`);
+}
+
 describe('httpResponseIntoObservable', () => {
   it('parses SSE output', async () => {
     const events = [
@@ -64,5 +69,58 @@ describe('httpResponseIntoObservable', () => {
         }).pipe(httpResponseIntoObservable(), toArray())
       );
     }).rejects.toThrow(`Internal error`);
+  });
+
+  it('restores type from the SSE event field used by kbn-sse-utils-server', async () => {
+    const messages = await lastValueFrom(
+      of<StreamedHttpResponse>({
+        response: {
+          // @ts-expect-error
+          body: ReadableStream.from([
+            toNamedSse(ChatCompletionEventType.ChatCompletionChunk, {
+              content: 'Hello',
+              tool_calls: [],
+            }),
+            toNamedSse(ChatCompletionEventType.ChatCompletionMessage, {
+              content: 'Hello world',
+              toolCalls: [],
+            }),
+          ]),
+        },
+      }).pipe(httpResponseIntoObservable(), toArray())
+    );
+
+    expect(messages).toEqual([
+      {
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        content: 'Hello',
+        tool_calls: [],
+      },
+      {
+        type: ChatCompletionEventType.ChatCompletionMessage,
+        content: 'Hello world',
+        toolCalls: [],
+      },
+    ]);
+  });
+
+  it('throws errors serialized with the SSE event field', async () => {
+    await expect(async () => {
+      await lastValueFrom(
+        of<StreamedHttpResponse>({
+          response: {
+            // @ts-expect-error
+            body: ReadableStream.from([
+              toNamedSse(InferenceTaskEventType.error, {
+                error: {
+                  code: InferenceTaskErrorCode.internalError,
+                  message: 'Provider failed',
+                },
+              }),
+            ]),
+          },
+        }).pipe(httpResponseIntoObservable(), toArray())
+      );
+    }).rejects.toThrowError('Provider failed');
   });
 });

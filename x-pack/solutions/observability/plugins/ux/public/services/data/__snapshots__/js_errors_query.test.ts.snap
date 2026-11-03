@@ -20,8 +20,20 @@ Object {
             },
           },
           "filter": Object {
-            "term": Object {
-              "transaction.type": "page-load",
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "term": Object {
+                    "transaction.type": "page-load",
+                  },
+                },
+                Object {
+                  "term": Object {
+                    "event_name": "exception",
+                  },
+                },
+              ],
             },
           },
         },
@@ -31,6 +43,8 @@ Object {
               "error.exception.message",
               "error.exception.type",
               "error.grouping_key",
+              "attributes.exception.message",
+              "attributes.exception.type",
               "@timestamp",
             ],
             "size": 1,
@@ -44,6 +58,35 @@ Object {
       },
       "terms": Object {
         "field": "error.grouping_key",
+        "size": 500,
+      },
+    },
+    "otelErrors": Object {
+      "aggs": Object {
+        "bucket_truncate": Object {
+          "bucket_sort": Object {
+            "from": 0,
+            "size": 5,
+          },
+        },
+        "sample": Object {
+          "top_hits": Object {
+            "_source": Array [
+              "attributes.exception.message",
+              "attributes.exception.type",
+              "@timestamp",
+            ],
+            "size": 1,
+            "sort": Array [
+              Object {
+                "@timestamp": "desc",
+              },
+            ],
+          },
+        },
+      },
+      "terms": Object {
+        "field": "attributes.exception.type",
         "size": 500,
       },
     },
@@ -71,14 +114,30 @@ Object {
           },
         },
         Object {
-          "term": Object {
-            "agent.name": "rum-js",
-          },
-        },
-        Object {
-          "terms": Object {
-            "processor.event": Array [
-              "error",
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "bool": Object {
+                  "filter": Array [
+                    Object {
+                      "term": Object {
+                        "agent.name": "rum-js",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "processor.event": "error",
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "term": Object {
+                  "event_name": "exception",
+                },
+              },
             ],
           },
         },

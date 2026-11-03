@@ -5,34 +5,23 @@
  * 2.0.
  */
 import qs from 'query-string';
+import type { ReactElement } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { useKibanaServices } from './use_kibana_services';
 
-export interface TimePickerTimeDefaults {
-  from: string;
-  to: string;
-}
+export const UX_DEFAULT_RANGE_FROM = 'now-7d';
+export const UX_DEFAULT_RANGE_TO = 'now';
 
 export function useDateRangeRedirect() {
   const history = useHistory();
   const location = useLocation();
   const query = qs.parse(location.search);
 
-  const { data, uiSettings } = useKibanaServices();
-
-  const timePickerTimeDefaults = uiSettings.get<TimePickerTimeDefaults>(
-    UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
-  );
-
-  const timePickerSharedState = data.query.timefilter.timefilter.getTime();
-
   const isDateRangeSet = 'rangeFrom' in query && 'rangeTo' in query;
 
   const redirect = () => {
     const nextQuery = {
-      rangeFrom: timePickerSharedState.from ?? timePickerTimeDefaults.from,
-      rangeTo: timePickerSharedState.to ?? timePickerTimeDefaults.to,
+      rangeFrom: UX_DEFAULT_RANGE_FROM,
+      rangeTo: UX_DEFAULT_RANGE_TO,
       ...query,
     };
 
@@ -46,4 +35,14 @@ export function useDateRangeRedirect() {
     isDateRangeSet,
     redirect,
   };
+}
+
+/** Write last-7d onto the URL before the shared date picker inherits Kibana's 15m default. */
+export function UxDefaultDateRange({ children }: { children: ReactElement }) {
+  const { isDateRangeSet, redirect } = useDateRangeRedirect();
+  if (!isDateRangeSet) {
+    redirect();
+    return null;
+  }
+  return children;
 }

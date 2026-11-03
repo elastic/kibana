@@ -58,7 +58,7 @@ export const sampleAttribute = {
                 filter: {
                   language: 'kuery',
                   query:
-                    'transaction.type: page-load and processor.event: transaction and transaction.type : *',
+                    '((transaction.type: page-load and processor.event: transaction) or name: documentLoad) and transaction.type : *',
                 },
                 isBucketed: false,
                 label: 'test-series',
@@ -71,7 +71,7 @@ export const sampleAttribute = {
                     },
                   },
                   formula:
-                    "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
+                    "count(kql='((transaction.type: page-load and processor.event: transaction) or name: documentLoad) and transaction.type : *') / overall_sum(count(kql='((transaction.type: page-load and processor.event: transaction) or name: documentLoad) and transaction.type : *'))",
                   isFormulaBroken: false,
                 },
                 references: [],
@@ -153,7 +153,7 @@ export const sampleAttribute = {
     query: {
       language: 'kuery',
       query:
-        'transaction.type: page-load and processor.event: transaction and transaction.type : * and transaction.duration.us < 60000000',
+        '((transaction.type: page-load and processor.event: transaction) or name: documentLoad) and transaction.type : * and transaction.duration.us < 60000000',
     },
     visualization: {
       axisTitlesVisibilitySettings: {

@@ -38,12 +38,20 @@ export function useClientMetricsQuery() {
     if (!esQueryResponse?.aggregations) return {};
 
     const {
-      hasFetchStartField: { backEnd, totalPageLoadDuration },
-    } = esQueryResponse.aggregations;
+      hasFetchStartField: { backEnd, totalPageLoadDuration, otelPageLoadDuration },
+    } = esQueryResponse.aggregations as {
+      hasFetchStartField: {
+        backEnd: { values: Record<string, number | null> };
+        totalPageLoadDuration: { values: Record<string, number | null> };
+        otelPageLoadDuration?: { values: Record<string, number | null> };
+      };
+    };
 
     const pkey = percentile.toFixed(1);
 
-    const totalPageLoadDurationValue = totalPageLoadDuration.values[pkey] ?? 0;
+    const classicDuration = totalPageLoadDuration.values[pkey] ?? 0;
+    const otelDuration = otelPageLoadDuration?.values?.[pkey] ?? 0;
+    const totalPageLoadDurationValue = classicDuration || otelDuration;
     const totalPageLoadDurationValueMs = totalPageLoadDurationValue / 1000; // Microseconds to milliseconds
     const backendValue = backEnd.values[pkey] ?? 0;
 
@@ -51,7 +59,7 @@ export function useClientMetricsQuery() {
       pageViews: { value: esQueryResponse.hits.total.value ?? 0 },
       totalPageLoadDuration: { value: totalPageLoadDurationValueMs },
       backEnd: { value: backendValue },
-      frontEnd: { value: totalPageLoadDurationValueMs - backendValue },
+      frontEnd: { value: Math.max(totalPageLoadDurationValueMs - backendValue, 0) },
     };
   }, [esQueryResponse, percentile]);
 

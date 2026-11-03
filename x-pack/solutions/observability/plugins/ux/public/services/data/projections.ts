@@ -5,16 +5,15 @@
  * 2.0.
  */
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  AGENT_NAME,
-  PROCESSOR_EVENT,
-  TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
-import { TRANSACTION_PAGE_EXIT, TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 import type { SetupUX } from '../../../typings/ui_filters';
 import { getEsFilter } from './get_es_filter';
 import { rangeQuery } from './range_query';
+import {
+  rumErrorsFilter,
+  rumPageExitOrInpFilter,
+  rumPageLoadFilter,
+  rumUrlWildcardFilter,
+} from './rum_otel_filters';
 
 export function getRumPageLoadTransactionsProjection({
   setup,
@@ -34,28 +33,27 @@ export function getRumPageLoadTransactionsProjection({
   const bool = {
     filter: [
       ...rangeQuery(start, end),
-      { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
-      { terms: { [PROCESSOR_EVENT]: [ProcessorEvent.transaction] } },
+      rumPageLoadFilter(),
       ...(checkFetchStartFieldExists
         ? [
             {
-              // Adding this filter to cater for some inconsistent rum data
-              // not available on aggregated transactions
-              exists: {
-                field: 'transaction.marks.navigationTiming.fetchStart',
+              // Classic RUM sometimes lacks marks; OTel documentLoad has no fetchStart mark.
+              // Keep as optional soft filter via should so OTel docs still match.
+              bool: {
+                should: [
+                  {
+                    exists: {
+                      field: 'transaction.marks.navigationTiming.fetchStart',
+                    },
+                  },
+                  { term: { name: 'documentLoad' } },
+                ],
+                minimum_should_match: 1,
               },
             },
           ]
         : []),
-      ...(urlQuery
-        ? [
-            {
-              wildcard: {
-                'url.full': `*${urlQuery}*`,
-              },
-            },
-          ]
-        : []),
+      ...(urlQuery ? [rumUrlWildcardFilter(urlQuery)] : []),
       ...getEsFilter(uiFilters),
     ],
     must_not: [...getEsFilter(uiFilters, true)],
@@ -84,17 +82,8 @@ export function getRumPageExitTransactionsProjection({
   const bool = {
     filter: [
       ...rangeQuery(start, end),
-      { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_EXIT } },
-      { terms: { [PROCESSOR_EVENT]: [ProcessorEvent.transaction] } },
-      ...(urlQuery
-        ? [
-            {
-              wildcard: {
-                'url.full': `*${urlQuery}*`,
-              },
-            },
-          ]
-        : []),
+      rumPageExitOrInpFilter(),
+      ...(urlQuery ? [rumUrlWildcardFilter(urlQuery)] : []),
       ...getEsFilter(uiFilters),
     ],
     must_not: [...getEsFilter(uiFilters, true)],
@@ -132,22 +121,9 @@ export function getRumErrorsProjection({
       bool: {
         filter: [
           ...rangeQuery(start, end),
-          { term: { [AGENT_NAME]: 'rum-js' } },
-          {
-            terms: {
-              [PROCESSOR_EVENT]: [ProcessorEvent.error],
-            },
-          },
+          rumErrorsFilter(),
           ...getEsFilter(setup.uiFilters),
-          ...(urlQuery
-            ? [
-                {
-                  wildcard: {
-                    'url.full': `*${urlQuery}*`,
-                  },
-                },
-              ]
-            : []),
+          ...(urlQuery ? [rumUrlWildcardFilter(urlQuery)] : []),
         ],
         must_not: [...getEsFilter(setup.uiFilters, true)],
       },

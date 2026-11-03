@@ -9,13 +9,16 @@ import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
 import type { UXMetrics } from '@kbn/observability-shared-plugin/public/types';
 import { DEFAULT_RANKS, getRanksPercentages } from './core_web_vitals_query';
 import { INP_FIELD } from '../../../common/elasticsearch_fieldnames';
+import { OTEL_WEB_VITAL_VALUE } from '../../../common/otel_rum';
 import type { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
 import { mergeProjection } from '../../../common/utils/merge_projection';
 import { getRumPageExitTransactionsProjection } from './projections';
 
 interface InPAggregations {
   inp?: { values?: Record<string, number> };
+  otelInp?: { values?: Record<string, number> };
   inpRanks?: { values?: Array<{ value?: number }> };
+  otelInpRanks?: { values?: Array<{ value?: number }> };
 }
 
 export function transformINPResponse<T>(
@@ -24,16 +27,16 @@ export function transformINPResponse<T>(
 ): UXMetrics | undefined {
   if (!response) return response;
   const aggs = (response.aggregations ?? {}) as InPAggregations;
-  const { inp, inpRanks } = aggs;
+  const { inp, otelInp, inpRanks, otelInpRanks } = aggs;
 
   const pkey = percentile.toFixed(1);
+  const inpValue = inp?.values?.[pkey] ?? otelInp?.values?.[pkey];
+  const ranks = inp?.values?.[pkey] ? inpRanks?.values : otelInpRanks?.values;
 
   return {
     hasINP: (response.hits?.total?.value ?? 0) > 0,
-    inp: inp?.values?.[pkey],
-    inpRanks: inp?.values?.[pkey]
-      ? getRanksPercentages(inpRanks?.values) ?? DEFAULT_RANKS
-      : DEFAULT_RANKS,
+    inp: inpValue,
+    inpRanks: inpValue ? getRanksPercentages(ranks) ?? DEFAULT_RANKS : DEFAULT_RANKS,
   };
 }
 
@@ -68,10 +71,22 @@ export function inpQuery(
           percents: [percentile],
         },
       },
-
+      otelInp: {
+        percentiles: {
+          field: OTEL_WEB_VITAL_VALUE,
+          percents: [percentile],
+        },
+      },
       inpRanks: {
         percentile_ranks: {
           field: INP_FIELD,
+          values: [200, 500],
+          keyed: false,
+        },
+      },
+      otelInpRanks: {
+        percentile_ranks: {
+          field: OTEL_WEB_VITAL_VALUE,
           values: [200, 500],
           keyed: false,
         },

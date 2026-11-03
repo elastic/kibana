@@ -16,19 +16,17 @@ import {
   PERCENTILE,
   ReportTypes,
 } from '../constants';
-import { buildPhraseFilter } from '../utils';
+import { buildKueryFilter, RUM_PAGE_LOAD_KQL } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,
   CLS_FIELD,
   FCP_FIELD,
   FID_FIELD,
   LCP_FIELD,
-  PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TBT_FIELD,
   TRANSACTION_DURATION,
-  TRANSACTION_TYPE,
   USER_AGENT_DEVICE,
   USER_AGENT_NAME,
   USER_AGENT_OS,
@@ -82,10 +80,7 @@ export function getKPITrendsLensConfig({ dataView }: ConfigProps): SeriesConfig 
       PERCENTILE,
       LABEL_FIELDS_BREAKDOWN,
     ],
-    baseFilters: [
-      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', dataView),
-      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', dataView),
-    ],
+    baseFilters: [...buildKueryFilter(RUM_PAGE_LOAD_KQL, dataView)],
     labels: { ...FieldLabels, [SERVICE_NAME]: WEB_APPLICATION_LABEL },
     definitionFields: [SERVICE_NAME, SERVICE_ENVIRONMENT],
     metricOptions: [

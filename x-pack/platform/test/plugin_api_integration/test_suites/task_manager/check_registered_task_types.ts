@@ -284,6 +284,7 @@ export default function ({ getService }: FtrProviderContext) {
         'task_manager:mark_removed_tasks_as_unrecognized',
         'task_manager:snapshot_telemetry',
         'unusedUrlsCleanupTask',
+        'ux:rum-report-email',
         'workflow:resume',
         'workflow:run',
         'workflow:scheduled',

@@ -9,8 +9,8 @@ import React from 'react';
 import { EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
-const ColoredSpan = styled.div`
-  height: 16px;
+const ColoredSpan = styled.div<{ $barHeight: number }>`
+  height: ${(props) => props.$barHeight}px;
   width: 100%;
   cursor: pointer;
 `;
@@ -49,19 +49,21 @@ export function ColorPaletteFlexItem({
   percentage,
   tooltip,
   position,
+  barHeight = 16,
 }: {
   hexCode: string;
   position: number;
   inFocus: boolean;
   percentage: number;
   tooltip: string;
+  barHeight?: number;
 }) {
   const spanStyle = getSpanStyle(position, inFocus, hexCode, percentage);
 
   return (
     <EuiFlexItem key={hexCode} grow={false} style={{ width: percentage + '%' }}>
       <EuiToolTip content={tooltip}>
-        <ColoredSpan style={spanStyle} />
+        <ColoredSpan $barHeight={barHeight} style={spanStyle} />
       </EuiToolTip>
     </EuiFlexItem>
   );

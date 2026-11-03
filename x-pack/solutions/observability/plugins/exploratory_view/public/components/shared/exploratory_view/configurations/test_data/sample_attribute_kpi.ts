@@ -45,7 +45,8 @@ export const sampleAttributeKpi = {
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
-                  query: 'transaction.type: page-load and processor.event: transaction',
+                  query:
+                    '((transaction.type: page-load and processor.event: transaction) or name: documentLoad)',
                 },
                 isBucketed: false,
                 label: 'test-series',
@@ -62,7 +63,8 @@ export const sampleAttributeKpi = {
     filters: [],
     query: {
       language: 'kuery',
-      query: 'transaction.type: page-load and processor.event: transaction',
+      query:
+        '((transaction.type: page-load and processor.event: transaction) or name: documentLoad)',
     },
     visualization: {
       axisTitlesVisibilitySettings: {

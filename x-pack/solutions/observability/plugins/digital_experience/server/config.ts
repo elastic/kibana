@@ -24,7 +24,7 @@ export const validateFrequency = (value: string): string | undefined => {
 };
 
 const digitalExperienceConfig = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
+  enabled: schema.boolean({ defaultValue: true }),
   sessions: schema.object({
     /** How often the sessions transform checks for changed sessions. Longer is cheaper but staler. */
     frequency: schema.string({
