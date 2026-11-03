@@ -46,7 +46,7 @@ import type { SecurityStartMock } from '@kbn/core-security-server-mocks';
 import type { ActionsAuthorizationMock } from '@kbn/actions-plugin/server/authorization/actions_authorization.mock';
 import type { BackfillClient } from './backfill_client/backfill_client';
 import { asSpaceId } from '@kbn/core-spaces-common';
-import { bulkMarkApiKeysForInvalidation } from './invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { bulkMarkApiKeysForInvalidation } from './api_keys/invalidation/bulk_mark_api_keys_for_invalidation';
 import { ALERTING_CLONE_API_KEY_HEADER } from '../common';
 
 let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
@@ -71,7 +71,7 @@ let scopedChangeTrackingService: {
 
 jest.mock('./rules_client');
 jest.mock('./authorization/alerting_authorization');
-jest.mock('./invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation');
+jest.mock('./api_keys/invalidation/bulk_mark_api_keys_for_invalidation');
 
 describe('RulesClientFactory', () => {
   beforeEach(() => {

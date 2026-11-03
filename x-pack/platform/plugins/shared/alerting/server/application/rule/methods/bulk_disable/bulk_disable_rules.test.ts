@@ -38,7 +38,7 @@ import {
 } from '../../../../rules_client/lib';
 import { RecoveredActionGroup } from '../../../../../common';
 
-jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+jest.mock('../../../../api_keys/invalidation/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 

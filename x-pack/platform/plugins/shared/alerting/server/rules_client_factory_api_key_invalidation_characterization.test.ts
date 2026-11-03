@@ -29,13 +29,13 @@ import { backfillClientMock } from './backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 import type { SecurityStartMock } from '@kbn/core-security-server-mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
-import { bulkMarkApiKeysForInvalidation } from './invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { bulkMarkApiKeysForInvalidation } from './api_keys/invalidation/bulk_mark_api_keys_for_invalidation';
 import { UIAM_LOGS_INVALIDATE_TAGS } from './constants';
 import type { ConstructorOptions } from './rules_client';
 
 jest.mock('./rules_client');
 jest.mock('./authorization/alerting_authorization');
-jest.mock('./invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation');
+jest.mock('./api_keys/invalidation/bulk_mark_api_keys_for_invalidation');
 
 const encode = (value: string) => Buffer.from(value).toString('base64');
 const ES_KEY = encode('es-id:es-secret');

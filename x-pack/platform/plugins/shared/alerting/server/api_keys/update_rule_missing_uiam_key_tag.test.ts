@@ -12,9 +12,9 @@ import {
   MISSING_UIAM_API_KEY_TAG,
 } from '../application/rule/constants';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { mockedRawRuleSO } from './fixtures';
-import type { RuleData } from './rule_loader';
-import { ApiKeyType, type TaskRunnerContext } from './types';
+import { mockedRawRuleSO } from '../task_runner/fixtures';
+import type { RuleData } from '../task_runner/rule_loader';
+import { ApiKeyType, type TaskRunnerContext } from '../task_runner/types';
 import { updateRuleMissingUiamKeyTag } from './update_rule_missing_uiam_key_tag';
 
 const ruleId = 'rule-id-1';

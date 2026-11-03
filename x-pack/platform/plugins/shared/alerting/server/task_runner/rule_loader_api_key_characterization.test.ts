@@ -15,8 +15,8 @@ import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import type { RawRule, Rule } from '../types';
 import { mockedRawRuleSO } from './fixtures';
 import { getAlertFromRaw } from '../rules_client/lib/get_alert_from_raw';
-import { alertingUiamTelemetry } from '../otel/uiam_telemetry';
-import type { CredentialReason, CredentialType } from '../otel/uiam_telemetry';
+import { alertingUiamTelemetry } from '../api_keys/uiam_telemetry';
+import type { CredentialReason, CredentialType } from '../api_keys/uiam_telemetry';
 import { UIAM_LOGS_USAGE_TAGS } from '../constants';
 
 jest.mock('../rules_client/lib/get_alert_from_raw');

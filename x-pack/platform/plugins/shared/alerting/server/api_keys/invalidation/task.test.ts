@@ -11,9 +11,9 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { runInvalidate } from '@kbn/response-ops-api-keys';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server/constants/saved_objects';
-import type { AlertingConfig } from '../config';
-import type { AlertingPluginsStart } from '../plugin';
-import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../saved_objects';
+import type { AlertingConfig } from '../../config';
+import type { AlertingPluginsStart } from '../../plugin';
+import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { taskRunner } from './task';
 
 jest.mock('@kbn/response-ops-api-keys', () => ({

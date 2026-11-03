@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './tags';
+export * from '../api_keys/log_tags';

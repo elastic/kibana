@@ -6,7 +6,7 @@
  */
 
 import { resolveRuleAPIKey } from './resolve_rule_api_key';
-import type { RulesClientContext, CreateAPIKeyResult } from '../types';
+import type { RulesClientContext, CreateAPIKeyResult } from '../rules_client/types';
 
 const clonedKey: CreateAPIKeyResult = {
   apiKeysEnabled: true,

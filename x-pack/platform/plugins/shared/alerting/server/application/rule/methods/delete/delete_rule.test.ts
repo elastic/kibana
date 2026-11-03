@@ -10,13 +10,13 @@ import { deleteLegacyActionsForRules } from '../../../../rules_client/lib';
 import { getRulesClientMockParams } from '../../../../test_utils';
 import { getBeforeSetup } from '../../../../rules_client/tests/lib';
 import { RecoveredActionGroup } from '../../../../../common';
-import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { bulkMarkApiKeysForInvalidation } from '../../../../api_keys/invalidation/bulk_mark_api_keys_for_invalidation';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 
-jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+jest.mock('../../../../api_keys/invalidation/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 

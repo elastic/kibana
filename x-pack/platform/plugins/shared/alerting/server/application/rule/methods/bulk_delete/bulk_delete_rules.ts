@@ -18,7 +18,7 @@ import {
 } from '../../../../rules_client/common/construct_ignore_internal_rule_type_filters';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
-import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { bulkMarkApiKeysForInvalidation } from '../../../../api_keys/invalidation/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { tryToRemoveTasks } from '../../../../rules_client/common';
 import {

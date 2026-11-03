@@ -8,9 +8,9 @@
 import { SPACES_EXTENSION_ID } from '@kbn/core/server';
 import type { RawRule } from '../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { updateMissingUiamKeyTag } from '../rules_client/common/api_key_as_alert_attributes';
-import type { RuleData } from './rule_loader';
-import type { TaskRunnerContext } from './types';
+import { updateMissingUiamKeyTag } from './api_key_as_alert_attributes';
+import type { RuleData } from '../task_runner/rule_loader';
+import type { TaskRunnerContext } from '../task_runner/types';
 
 export const updateRuleMissingUiamKeyTag = async (
   context: TaskRunnerContext,

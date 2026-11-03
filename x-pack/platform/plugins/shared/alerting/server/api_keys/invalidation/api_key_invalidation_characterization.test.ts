@@ -6,8 +6,8 @@
  */
 
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { API_KEY_PENDING_INVALIDATION_TYPE } from '..';
-import { mockedDateString, setGlobalDate } from '../rules_client/tests/lib';
+import { API_KEY_PENDING_INVALIDATION_TYPE } from '../..';
+import { mockedDateString, setGlobalDate } from '../../rules_client/tests/lib';
 import { bulkMarkApiKeysForInvalidation } from './bulk_mark_api_keys_for_invalidation';
 
 const encode = (value: string) => Buffer.from(value).toString('base64');

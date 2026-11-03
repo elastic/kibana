@@ -9,7 +9,7 @@ import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { isUiamCredential } from '@kbn/core-security-server';
 import { getInvalidationTargets, queueInvalidationTargets } from '@kbn/response-ops-api-keys';
-import { API_KEY_PENDING_INVALIDATION_TYPE } from '..';
+import { API_KEY_PENDING_INVALIDATION_TYPE } from '../..';
 
 export const bulkMarkApiKeysForInvalidation = async (
   { apiKeys }: { apiKeys: string[] },

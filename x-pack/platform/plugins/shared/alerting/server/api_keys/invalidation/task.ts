@@ -18,10 +18,10 @@ import {
   runInvalidate,
   type ApiKeyInvalidationTaskState,
 } from '@kbn/response-ops-api-keys';
-import type { AlertingConfig } from '../config';
-import type { AlertingPluginsStart } from '../plugin';
-import { API_KEY_PENDING_INVALIDATION_TYPE } from '..';
-import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../saved_objects';
+import type { AlertingConfig } from '../../config';
+import type { AlertingPluginsStart } from '../../plugin';
+import { API_KEY_PENDING_INVALIDATION_TYPE } from '../..';
+import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 const TASK_TYPE = 'alerts_invalidate_api_keys';
 export const TASK_ID = `Alerts-${TASK_TYPE}`;

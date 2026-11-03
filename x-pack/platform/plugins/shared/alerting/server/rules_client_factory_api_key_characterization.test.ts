@@ -27,9 +27,9 @@ import type { RulesClientCreateOptions } from './rules_client_factory';
 import { RulesClientFactory } from './rules_client_factory';
 import { RulesClient } from './rules_client';
 import type { CreateAPIKeyResult, RulesClientContext } from './rules_client/types';
-import { createNewAPIKeySet } from './rules_client/lib/create_new_api_key_set';
-import { resolveRuleAPIKey } from './rules_client/common/resolve_rule_api_key';
-import type { RuleApiKeyOwnership } from './rules_client/common/resolve_rule_api_key';
+import { createNewAPIKeySet } from './api_keys/create_new_api_key_set';
+import { resolveRuleAPIKey } from './api_keys/resolve_rule_api_key';
+import type { RuleApiKeyOwnership } from './api_keys/resolve_rule_api_key';
 import { ApiKeyType } from './task_runner/types';
 import { ruleTypeRegistryMock } from './rule_type_registry.mock';
 import { alertingAuthorizationClientFactoryMock } from './alerting_authorization_client_factory.mock';
@@ -45,7 +45,7 @@ import { ALERTING_CLONE_API_KEY_HEADER } from '../common';
 
 jest.mock('./rules_client');
 jest.mock('./authorization/alerting_authorization');
-jest.mock('./invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation');
+jest.mock('./api_keys/invalidation/bulk_mark_api_keys_for_invalidation');
 
 const b64 = (value: string) => Buffer.from(value).toString('base64');
 

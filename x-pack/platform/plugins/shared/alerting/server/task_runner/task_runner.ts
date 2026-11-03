@@ -62,7 +62,7 @@ import { IN_MEMORY_METRICS } from '../monitoring';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { getDecryptedRule, validateRuleAndCreateFakeRequest } from './rule_loader';
-import { updateRuleMissingUiamKeyTag } from './update_rule_missing_uiam_key_tag';
+import { updateRuleMissingUiamKeyTag } from '../api_keys/update_rule_missing_uiam_key_tag';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { lastRunToRaw } from '../lib/last_run_status';

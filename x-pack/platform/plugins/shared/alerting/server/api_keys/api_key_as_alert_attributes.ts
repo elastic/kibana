@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { RawRule } from '../../types';
-import type { CreateAPIKeyResult } from '../types';
-import type { RuleDomain } from '../../application/rule/types';
+import type { RawRule } from '../types';
+import type { CreateAPIKeyResult } from '../rules_client/types';
+import type { RuleDomain } from '../application/rule/types';
 import {
   LEGACY_MISSING_UIAM_API_KEY_TAG,
   MISSING_UIAM_API_KEY_TAG,
-} from '../../application/rule/constants';
-import { ApiKeyType } from '../../task_runner/types';
+} from '../application/rule/constants';
+import { ApiKeyType } from '../task_runner/types';
 
 /**
  * Stale API key attributes to remove from a rule's stored attributes before spreading in a newly

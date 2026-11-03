@@ -31,7 +31,7 @@ import {
 } from '../../../types';
 import { API_KEY_GENERATE_CONCURRENCY } from '../constants';
 import type { BulkEditOperationResult } from './retry_if_bulk_edit_conflicts';
-import { bulkMarkApiKeysForInvalidation } from '../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { bulkMarkApiKeysForInvalidation } from '../../../api_keys/invalidation/bulk_mark_api_keys_for_invalidation';
 import type {
   ApiKeysMap,
   ParamsModifier,

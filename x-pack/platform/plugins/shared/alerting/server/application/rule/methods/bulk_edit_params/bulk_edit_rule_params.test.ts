@@ -10,7 +10,7 @@ import { RulesClient } from '../../../../rules_client/rules_client';
 import { RecoveredActionGroup } from '../../../../../common';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
-import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { bulkMarkApiKeysForInvalidation } from '../../../../api_keys/invalidation/bulk_mark_api_keys_for_invalidation';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { toKqlExpression } from '@kbn/es-query';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
@@ -21,7 +21,7 @@ jest.mock('uuid', () => {
   return { v4: () => `${uuid++}` };
 });
 
-jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+jest.mock('../../../../api_keys/invalidation/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 

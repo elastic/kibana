@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { API_KEY_PENDING_INVALIDATION_TYPE } from '..';
+import { API_KEY_PENDING_INVALIDATION_TYPE } from '../..';
 import { bulkMarkApiKeysForInvalidation } from './bulk_mark_api_keys_for_invalidation';
 
 describe('bulkMarkApiKeysForInvalidation', () => {

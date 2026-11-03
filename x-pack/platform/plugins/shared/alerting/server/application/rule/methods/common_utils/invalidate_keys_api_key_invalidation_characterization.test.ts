@@ -6,11 +6,11 @@
  */
 
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { bulkMarkApiKeysForInvalidation } from '../../../../api_keys/invalidation/bulk_mark_api_keys_for_invalidation';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { invalidateKeys, type ApiKeyEntry } from './invalidate_keys';
 
-jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+jest.mock('../../../../api_keys/invalidation/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 

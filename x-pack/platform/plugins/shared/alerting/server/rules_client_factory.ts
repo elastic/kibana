@@ -42,7 +42,7 @@ import {
 } from './saved_objects';
 import type { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 import { type IChangeTrackingService } from './rules_client/lib/change_tracking';
-import { bulkMarkApiKeysForInvalidation } from './invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { bulkMarkApiKeysForInvalidation } from './api_keys/invalidation/bulk_mark_api_keys_for_invalidation';
 
 const RULE_API_KEY_METADATA = { managed: true, kibana: { type: 'alerting_rule' } };
 

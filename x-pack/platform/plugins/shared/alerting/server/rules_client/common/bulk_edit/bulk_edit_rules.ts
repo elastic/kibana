@@ -19,7 +19,7 @@ import { checkAuthorizationAndGetTotal } from '../../lib/check_authorization_and
 import { getAuthorizationFilter } from '../../lib/get_authorization_filter';
 import { convertRuleIdsToKueryNode } from '../../../lib';
 import { retryIfBulkEditConflicts } from './retry_if_bulk_edit_conflicts';
-import { bulkMarkApiKeysForInvalidation } from '../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { bulkMarkApiKeysForInvalidation } from '../../../api_keys/invalidation/bulk_mark_api_keys_for_invalidation';
 import { ruleDomainSchema } from '../../../application/rule/schemas';
 import type { RuleDomain } from '../../../application/rule/types';
 import {

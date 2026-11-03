@@ -24,7 +24,7 @@ import {
   alertingUiamTelemetry,
   type CredentialReason,
   type CredentialType,
-} from '../otel/uiam_telemetry';
+} from '../api_keys/uiam_telemetry';
 
 export interface RuleData {
   rawRule: RawRule;

@@ -13,8 +13,8 @@ import {
 import {
   LEGACY_MISSING_UIAM_API_KEY_TAG,
   MISSING_UIAM_API_KEY_TAG,
-} from '../../application/rule/constants';
-import { ApiKeyType } from '../../task_runner/types';
+} from '../application/rule/constants';
+import { ApiKeyType } from '../task_runner/types';
 
 describe('apiKeyAsAlertAttributes', () => {
   test('return attributes', () => {

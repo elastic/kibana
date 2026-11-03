@@ -38,9 +38,9 @@ import {
 } from '../../../../rules_client/lib';
 import { alertsServiceMock } from '../../../../alerts_service/alerts_service.mock';
 import { RecoveredActionGroup } from '../../../../../common';
-import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { bulkMarkApiKeysForInvalidation } from '../../../../api_keys/invalidation/bulk_mark_api_keys_for_invalidation';
 
-jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+jest.mock('../../../../api_keys/invalidation/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 
