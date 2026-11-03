@@ -397,6 +397,22 @@ describe('buildSecurityApi', () => {
       );
     });
 
+    it('delegates bulkUpdateWorkloadBindings and returns its results', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const changes = [{ op: 'unbind' as const, ...WORKLOAD }];
+      const results = [{ ...WORKLOAD, op: 'unbind' as const, ok: true as const, removed: true }];
+      serviceAccounts!.workloads.bulkUpdateWorkloadBindings.mockResolvedValue(results);
+
+      await expect(
+        api.serviceAccounts.bulkUpdateWorkloadBindings('alerting', request, changes)
+      ).resolves.toBe(results);
+      expect(serviceAccounts!.workloads.bulkUpdateWorkloadBindings).toHaveBeenCalledWith(
+        'alerting',
+        request,
+        changes
+      );
+    });
+
     it('delegates getBinding and returns its result', async () => {
       const binding = { pluginId: 'alerting' } as never;
       serviceAccounts!.workloads.getBinding.mockResolvedValue(binding);
@@ -451,6 +467,15 @@ describe('buildSecurityApi', () => {
             'alerting',
             httpServerMock.createKibanaRequest(),
             WORKLOAD
+          ),
+      ],
+      [
+        'bulkUpdateWorkloadBindings',
+        () =>
+          api.serviceAccounts.bulkUpdateWorkloadBindings(
+            'alerting',
+            httpServerMock.createKibanaRequest(),
+            [{ op: 'unbind', ...WORKLOAD }]
           ),
       ],
       [
