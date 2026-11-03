@@ -128,6 +128,26 @@ describe('triggerInvestigationStepDefinition', () => {
     );
   });
 
+  it.each([
+    [
+      'slack',
+      {
+        subject_type: 'slack_thread',
+        message: 'Review',
+        slack_thread: { workspace: 'T1', channel: 'C1', thread_ts: '1.1' },
+      },
+    ],
+    ['automation', { subject_type: 'significant_event', subject_id: 'event-1' }],
+    ['automation', { subject_type: 'manual', message: 'Review errors.' }],
+  ])('starts with entry point %s for %j', async (entryPoint, input) => {
+    const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+    const { definition } = createDefinition(start);
+
+    await definition.handler(createContext(input));
+
+    expect(start).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ entryPoint }));
+  });
+
   it('starts without a title, which Agent Builder generates', async () => {
     const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
     const { definition } = createDefinition(start);

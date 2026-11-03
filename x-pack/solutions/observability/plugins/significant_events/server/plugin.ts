@@ -137,7 +137,6 @@ import { getRequestAbortSignal } from './routes/utils/get_request_abort_signal';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 import { WorkflowExecutionService } from './lib/workflows/workflow_execution_service';
 import { createSourceChangeListener } from './routes/internal/knowledge_indicators/reconcile_source_catalog';
-import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from './lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
 import { syncContinuousOnboarding } from './lib/continuous_onboarding/sync_continuous_onboarding';
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
@@ -428,10 +427,6 @@ export class SignificantEventsPlugin
       });
       registerSignificantEventsKIQueryGenerationAgentTypes({
         agentBuilder: plugins.agentBuilder,
-        isSemanticCodeSearchGroundingEnabled: async () =>
-          this.server?.core
-            ? isSignificantEventsSemanticCodeSearchGroundingEnabled(this.server.core.featureFlags)
-            : false,
       });
       void core
         .getStartServices()

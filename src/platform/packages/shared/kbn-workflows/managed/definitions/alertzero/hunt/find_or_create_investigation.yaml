@@ -136,13 +136,13 @@ steps:
           - **Source severity:** {{ report.severity }}
           {% endif -%}
           {% if report != nil -%}
-          - **Indicators for Tier 1 to search:** {{ report.iocCount }}
+          - **Indicators for IOC Hunt to search:** {{ report.iocCount }}
           - **ATT&CK techniques:** {% if report.techniques != nil and report.techniques != empty %}{% for technique in report.techniques %}`{{ technique }}`{% unless forloop.last %}, {% endunless %}{% endfor %}{% else %}none{% endif %}
           {% endif -%}
           {% if inputs.runId != nil and inputs.runId != empty -%}
           - **Hunt run:** `{{ inputs.runId }}`
           {% endif %}
-          This run searches the space's telemetry for those indicators and techniques (Tier 1), derives behavior hunts from the report text and executes them as ES|QL (Tier 2), and appends what it finds to this Investigation.
+          This run searches the space's telemetry for those indicators and techniques (IOC Hunt), derives behavior hunts from the report text and executes them as ES|QL (Behavior Hunt), and appends what it finds to this Investigation.
     on-failure:
       continue: true
 

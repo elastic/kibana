@@ -1208,6 +1208,34 @@ export const AUTO_REFRESH_POPOVER_ARIA_LABEL = i18n.translate(
   }
 );
 
+export const AUTO_REFRESH_BUTTON_ON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.autoRefreshButtonOn',
+  {
+    defaultMessage: 'On',
+  }
+);
+
+export const AUTO_REFRESH_BUTTON_OFF = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.autoRefreshButtonOff',
+  {
+    defaultMessage: 'Off',
+  }
+);
+
+export const AUTO_REFRESH_BUTTON_ON_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.autoRefreshButtonOnAriaLabel',
+  {
+    defaultMessage: 'Auto refresh: On',
+  }
+);
+
+export const AUTO_REFRESH_BUTTON_OFF_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.autoRefreshButtonOffAriaLabel',
+  {
+    defaultMessage: 'Auto refresh: Off',
+  }
+);
+
 export const CLEAR_RULES_TABLE_FILTERS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.clearRulesTableFilters',
   {
