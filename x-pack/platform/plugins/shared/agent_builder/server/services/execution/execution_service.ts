@@ -48,6 +48,7 @@ import type {
   AgentExecutionParams,
   ConversationExecutionParams,
   ExecuteAgentParams,
+  ExecuteConversationAgentParams,
   ExecuteAgentResult,
   MaybeExecuteAgentResult,
   FollowExecutionOptions,
@@ -120,6 +121,8 @@ const noop = () => {};
 class AgentExecutionServiceImpl implements AgentExecutionService {
   private readonly deps: AgentExecutionServiceDeps;
   private readonly logger: Logger;
+  /** `trigger_mode: 'auto'` decisions in flight, by the execution id they would start. */
+  private readonly pendingDecisions = new Map<string, AbortController>();
 
   constructor(deps: AgentExecutionServiceDeps) {
     this.deps = deps;
@@ -392,12 +395,43 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     if (
       args.mode === AgentExecutionMode.conversation &&
       args.params.triggerMode === ChatTriggerMode.Auto &&
-      !(await shouldRunAgent({ request: args.request, params: args.params, deps: this.deps }))
+      !(await this.decideToRun(args))
     ) {
       return this.handleNeverTriggerMode(args);
     }
 
     return this.executeAgent(args);
+  }
+
+  /**
+   * The `trigger_mode: 'auto'` decision. A stop (an abort of the execution id the run would get)
+   * or a client disconnect while it is in flight cancels it, so no run starts.
+   */
+  private async decideToRun(args: ExecuteConversationAgentParams): Promise<boolean> {
+    const { executionId, request, params } = args;
+    const controller = new AbortController();
+    const subscription = request.events.aborted$.subscribe(() => controller.abort());
+
+    if (executionId) {
+      this.pendingDecisions.set(executionId, controller);
+    }
+
+    try {
+      const run = await shouldRunAgent({
+        request,
+        params,
+        deps: this.deps,
+        abortSignal: controller.signal,
+      });
+
+      return run && !controller.signal.aborted;
+    } finally {
+      subscription.unsubscribe();
+
+      if (executionId) {
+        this.pendingDecisions.delete(executionId);
+      }
+    }
   }
 
   /**
@@ -464,6 +498,13 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     executionId: string,
     { reason = { source: 'api' }, waitForTerminal = true }: AbortExecutionOptions = {}
   ): Promise<AbortExecutionResult> {
+    const pendingDecision = this.pendingDecisions.get(executionId);
+
+    if (pendingDecision) {
+      pendingDecision.abort();
+      return { acknowledged: true, terminalPersisted: false };
+    }
+
     const executionClient = this.createExecutionClient();
     const execution = await executionClient.get(executionId);
 

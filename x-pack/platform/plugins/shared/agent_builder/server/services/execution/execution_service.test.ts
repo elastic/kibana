@@ -111,6 +111,12 @@ import { createAgentExecutionService } from './execution_service';
 import { CallbackDeliveryService } from './callback';
 import { ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS } from './constants';
 
+const waitForCondition = async (condition: () => boolean) => {
+  for (let attempt = 0; attempt < 50 && !condition(); attempt++) {
+    await new Promise((resolve) => setImmediate(resolve));
+  }
+};
+
 describe('AgentExecutionService', () => {
   const logger = loggerMock.create();
   const elasticsearch = elasticsearchServiceMock.createStart();
@@ -2576,6 +2582,84 @@ describe('AgentExecutionService', () => {
         const error = await send().catch((thrown) => thrown);
 
         expect(isConversationBusyError(error)).toBe(true);
+      });
+
+      it('Stop during the decision keeps the agent from running and saves the message', async () => {
+        let decide: (run: boolean) => void = () => {};
+        let decisionSignal: AbortSignal | undefined;
+
+        mockShouldRunAgent.mockImplementationOnce(
+          ({ abortSignal }: { abortSignal: AbortSignal }) =>
+            new Promise<boolean>((resolve) => {
+              decisionSignal = abortSignal;
+              decide = resolve;
+            })
+        );
+
+        const pending = service.maybeExecuteAgent({
+          mode: AgentExecutionMode.conversation,
+          request: httpServerMock.createKibanaRequest(),
+          useTaskManager: true,
+          executionId: 'exec-auto',
+          params: {
+            agentId: 'agent-1',
+            conversationId: 'conversation-1',
+            triggerMode: ChatTriggerMode.Auto,
+            nextInput: { message: '@agent help' },
+          },
+        });
+
+        await waitForCondition(() => decisionSignal !== undefined);
+
+        const abortResult = await service.abortExecution('exec-auto');
+
+        expect(abortResult).toEqual({ acknowledged: true, terminalPersisted: false });
+        expect(decisionSignal?.aborted).toBe(true);
+
+        decide(true);
+        const result = await pending;
+
+        expect(result.executionId).toBeUndefined();
+        expect(mockExecutionClient.create).not.toHaveBeenCalled();
+        expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+      });
+
+      it('a disconnect during the decision keeps the agent from running', async () => {
+        const aborted$ = new Subject<void>();
+        const request = httpServerMock.createKibanaRequest();
+        let decide: (run: boolean) => void = () => {};
+        let decisionSignal: AbortSignal | undefined;
+
+        Object.defineProperty(request, 'events', {
+          value: { aborted$, completed$: new Subject<void>() },
+        });
+        mockShouldRunAgent.mockImplementationOnce(
+          ({ abortSignal }: { abortSignal: AbortSignal }) =>
+            new Promise<boolean>((resolve) => {
+              decisionSignal = abortSignal;
+              decide = resolve;
+            })
+        );
+
+        const pending = service.maybeExecuteAgent({
+          mode: AgentExecutionMode.conversation,
+          request,
+          useTaskManager: true,
+          params: {
+            agentId: 'agent-1',
+            conversationId: 'conversation-1',
+            triggerMode: ChatTriggerMode.Auto,
+            nextInput: { message: '@agent help' },
+          },
+        });
+
+        await waitForCondition(() => decisionSignal !== undefined);
+        aborted$.next();
+        decide(true);
+        await pending;
+
+        expect(decisionSignal?.aborted).toBe(true);
+        expect(mockExecutionClient.create).not.toHaveBeenCalled();
       });
 
       it('with a "no" decision on a busy conversation still persists the message', async () => {

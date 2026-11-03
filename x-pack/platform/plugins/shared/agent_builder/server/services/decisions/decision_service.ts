@@ -59,8 +59,14 @@ const createDeadline = ({
       reject(error);
     };
 
-    timer = setTimeout(() => fail(new Error(`Decision timed out after ${timeoutMs}ms`)), timeoutMs);
     onAbort = () => fail(new Error('Decision aborted'));
+
+    if (signal?.aborted) {
+      onAbort();
+      return;
+    }
+
+    timer = setTimeout(() => fail(new Error(`Decision timed out after ${timeoutMs}ms`)), timeoutMs);
     signal?.addEventListener('abort', onAbort, { once: true });
   });
 
@@ -95,13 +101,13 @@ export const createDecisionService = ({
     timeoutMs = config.timeoutMs,
     abortSignal,
   }: DecideParams): Promise<DecideResult> => {
-    const esClient = elasticsearch.client.asScoped(request).asCurrentUser;
     const questionNames = Object.keys(questions);
     const controller = new AbortController();
-    const { deadline, clear } = createDeadline({ timeoutMs, signal: abortSignal, controller });
     const startedAt = Date.now();
 
     const run = async (): Promise<DecideResult> => {
+      const esClient = elasticsearch.client.asScoped(request).asCurrentUser;
+
       const inferenceId = await resolveInferenceId({
         esClient,
         configuredId: config.inferenceId,
@@ -139,14 +145,22 @@ export const createDecisionService = ({
       'decide',
       { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
       async () => {
+        const { deadline, clear } = createDeadline({ timeoutMs, signal: abortSignal, controller });
+
         try {
           return await Promise.race([run(), deadline]);
         } catch (error) {
-          logger.debug(
-            `Decision [${questionNames.join(', ')}] failed after ${Date.now() - startedAt}ms: ${
-              error.message
-            }`
-          );
+          const message = `Decision [${questionNames.join(', ')}] failed after ${
+            Date.now() - startedAt
+          }ms: ${error.message}`;
+
+          // A timeout or abort is expected under load; anything else may mean a misconfigured endpoint or a changed response shape.
+          if (controller.signal.aborted) {
+            logger.debug(message);
+          } else {
+            logger.warn(message);
+          }
+
           return { status: 'failed', error };
         } finally {
           clear();

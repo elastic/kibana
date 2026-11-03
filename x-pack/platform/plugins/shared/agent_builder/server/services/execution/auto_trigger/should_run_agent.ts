@@ -51,7 +51,10 @@ const getDecisionInput = async ({
   params: Pick<ConversationExecutionParams, 'conversationId' | 'nextInput'>;
   deps: ShouldRunAgentDeps;
 }): Promise<string | undefined> => {
-  if (!conversationId) {
+  const hasMessage = Boolean(nextInput.message?.trim() || nextInput.attachments?.length);
+
+  // A prompt response resumes a run, and an empty message fails validation either way.
+  if (!conversationId || nextInput.prompts || !hasMessage) {
     return undefined;
   }
 
@@ -98,10 +101,12 @@ export const shouldRunAgent = async ({
   request,
   params,
   deps,
+  abortSignal,
 }: {
   request: KibanaRequest;
   params: Pick<ConversationExecutionParams, 'conversationId' | 'nextInput'>;
   deps: ShouldRunAgentDeps;
+  abortSignal?: AbortSignal;
 }): Promise<boolean> => {
   const input = await getDecisionInput({ request, params, deps });
 
@@ -116,6 +121,7 @@ export const shouldRunAgent = async ({
     input,
     questions: shouldRespondQuestions,
     timeoutMs: decisionConfig.timeoutMs,
+    abortSignal,
   });
 
   if (result.status !== 'decided') {

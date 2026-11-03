@@ -7,7 +7,7 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { DecisionQuestion } from '@kbn/agent-builder-server';
+import type { DecideResult, DecisionQuestion } from '@kbn/agent-builder-server';
 import decisionResponse from './__fixtures__/decision_response.json';
 import decisionEndpoints from './__fixtures__/decision_endpoints.json';
 import { createDecisionService } from './decision_service';
@@ -142,6 +142,74 @@ describe('createDecisionService', () => {
       answers: { should_respond: { type: 'predicate', probability: 0.94 } },
     });
     expect(scopedClient.asInternalUser.transport.request).not.toHaveBeenCalled();
+  });
+
+  it('returns failed instead of throwing when the scoped client cannot be created', async () => {
+    const { request } = setup({ inferenceId: 'my-decision' });
+    const elasticsearch = elasticsearchServiceMock.createStart();
+    const error = new Error('no client');
+
+    elasticsearch.client.asScoped.mockImplementation(() => {
+      throw error;
+    });
+
+    const failing = createDecisionService({
+      logger: loggingSystemMock.createLogger(),
+      elasticsearch,
+      config: { inferenceId: 'my-decision', triggerThreshold: 0.5, timeoutMs: 2000 },
+    });
+
+    await expect(failing.decide({ request, input, questions })).resolves.toEqual({
+      status: 'failed',
+      error,
+    });
+  });
+
+  it('returns failed without waiting when the abort signal is already aborted', async () => {
+    jest.useFakeTimers();
+
+    const { service, transportRequest, request } = setup({ inferenceId: 'my-decision' });
+    const controller = new AbortController();
+
+    controller.abort();
+    transportRequest.mockReturnValue(new Promise(() => {}));
+
+    let result: DecideResult | undefined;
+
+    service
+      .decide({ request, input, questions, abortSignal: controller.signal })
+      .then((decided) => {
+        result = decided;
+      });
+
+    await jest.advanceTimersByTimeAsync(0);
+
+    expect(result?.status).toBe('failed');
+  });
+
+  it('logs a malformed response at warn', async () => {
+    const { service, transportRequest, request, logger } = setup({ inferenceId: 'my-decision' });
+
+    transportRequest.mockResolvedValue({ decision: { answers: {} } });
+
+    await service.decide({ request, input, questions });
+
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+  });
+
+  it('logs a timeout at debug only', async () => {
+    jest.useFakeTimers();
+
+    const { service, transportRequest, request, logger } = setup({ inferenceId: 'my-decision' });
+
+    transportRequest.mockReturnValue(new Promise(() => {}));
+
+    const pending = service.decide({ request, input, questions, timeoutMs: 50 });
+
+    await jest.advanceTimersByTimeAsync(50);
+    await pending;
+
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('does not log the input text', async () => {

@@ -13,7 +13,7 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import type { ConversationWithPermissions } from '@kbn/agent-builder-common';
+import type { ConversationWithPermissions, ConverseInput } from '@kbn/agent-builder-common';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
 import type { DecideResult } from '@kbn/agent-builder-server';
 import {
@@ -66,12 +66,21 @@ const setup = (
   agentService.getRegistry.mockResolvedValue(agentRegistry);
   agentRegistry.get.mockResolvedValue(createMockedInternalAgent({ id: 'agent-1' }));
 
-  const run = ({ withConversation = true }: { withConversation?: boolean } = {}) =>
+  const run = ({
+    withConversation = true,
+    nextInput = { message: '@agent can you help?' },
+    abortSignal,
+  }: {
+    withConversation?: boolean;
+    nextInput?: ConverseInput;
+    abortSignal?: AbortSignal;
+  } = {}) =>
     shouldRunAgent({
       request: httpServerMock.createKibanaRequest(),
+      abortSignal,
       params: {
         conversationId: withConversation ? 'conversation-1' : undefined,
-        nextInput: { message: '@agent can you help?' },
+        nextInput,
       },
       deps: {
         logger: loggerMock.create(),
@@ -126,6 +135,29 @@ describe('shouldRunAgent', () => {
 
     expect(await run()).toBe(true);
     expect(decide).not.toHaveBeenCalled();
+  });
+
+  it('runs without deciding for a prompt response', async () => {
+    const { run, decide } = setup({ decideResult: predicate(0) });
+
+    expect(await run({ nextInput: { prompts: { 'prompt-1': { allow: true } } } })).toBe(true);
+    expect(decide).not.toHaveBeenCalled();
+  });
+
+  it('runs without deciding for a message without text or attachments', async () => {
+    const { run, decide } = setup({ decideResult: predicate(0) });
+
+    expect(await run({ nextInput: { message: '   ' } })).toBe(true);
+    expect(decide).not.toHaveBeenCalled();
+  });
+
+  it('passes the abort signal to decide', async () => {
+    const { run, decide } = setup({ decideResult: predicate(0.9) });
+    const { signal } = new AbortController();
+
+    await run({ abortSignal: signal });
+
+    expect(decide).toHaveBeenCalledWith(expect.objectContaining({ abortSignal: signal }));
   });
 
   it('asks should_respond for a shared conversation', async () => {
