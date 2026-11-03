@@ -8,11 +8,29 @@
  */
 
 import type { ListrTask } from 'listr2';
+import { isEqual } from 'lodash';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { getKibanaMigratorTestKit } from '@kbn/migrator-test-kit';
 import { encryptionOverrides, type Task, type TaskContext } from '../types';
 import { getPreviousVersionType } from '../../migrations';
 import { checkDocuments } from './check_documents';
 import { getRollbackMigrationContext } from './rollback_context';
+import { getMigratorOptions } from '../algorithms';
+
+interface IndexState {
+  aliases: string[];
+  meta: object | undefined;
+}
+
+const getIndexState = async (
+  client: ElasticsearchClient,
+  kibanaIndex: string
+): Promise<IndexState> => {
+  const [{ aliases = {}, mappings = {} }] = Object.values(
+    await client.indices.get({ index: kibanaIndex })
+  );
+  return { aliases: Object.keys(aliases).sort(), meta: mappings._meta };
+};
 
 export const testRollback: Task = async (ctx, task) => {
   const { migrationTypes, migrationKibanaIndex, migrationAlgorithm } =
@@ -23,27 +41,46 @@ export const testRollback: Task = async (ctx, task) => {
     getPreviousVersionType({ type, previousMappings: baselineMappings! })
   );
 
-  const { runMigrations: performRollback, savedObjectsRepository } = await getKibanaMigratorTestKit(
-    {
-      types: previousVersionTypes,
-      kibanaIndex: migrationKibanaIndex,
-      settings: { migrations: { algorithm: migrationAlgorithm } },
-      encryptionExtensionFactory: ctx.encryptedSavedObjects
-        ? (typeRegistry) =>
-            ctx.encryptedSavedObjects!.__testCreateDangerousExtension(
-              typeRegistry,
-              encryptionOverrides
-            )
-        : undefined,
-    }
-  );
+  const {
+    runMigrations: performRollback,
+    savedObjectsRepository,
+    client,
+  } = await getKibanaMigratorTestKit({
+    types: previousVersionTypes,
+    kibanaIndex: migrationKibanaIndex,
+    ...getMigratorOptions(migrationAlgorithm, 'rollback'),
+    encryptionExtensionFactory: ctx.encryptedSavedObjects
+      ? (typeRegistry) =>
+          ctx.encryptedSavedObjects!.__testCreateDangerousExtension(
+            typeRegistry,
+            encryptionOverrides
+          )
+      : undefined,
+  });
 
+  let indexStateBeforeRollback: IndexState | undefined;
   const subtasks: ListrTask<TaskContext>[] = [
     {
       title: `Run rollback migration on updated types: '${migrationTypes
         .map(({ name }) => name)
         .join(', ')}'`,
-      task: async () => await performRollback(),
+      task: async () => {
+        indexStateBeforeRollback = await getIndexState(client, migrationKibanaIndex);
+        await performRollback();
+      },
+    },
+    {
+      title: `Ensure the rollback left the index's aliases and _meta untouched`,
+      task: async () => {
+        const after = await getIndexState(client, migrationKibanaIndex);
+        if (!isEqual(after, indexStateBeforeRollback)) {
+          throw new Error(
+            `The rollback updated the '${migrationKibanaIndex}' index. Before: ${JSON.stringify(
+              indexStateBeforeRollback
+            )}, after: ${JSON.stringify(after)}`
+          );
+        }
+      },
     },
     {
       title: `Ensure API-retrieved SOs match previous version fixtures`,
