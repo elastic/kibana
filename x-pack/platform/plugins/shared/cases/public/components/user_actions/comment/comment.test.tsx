@@ -36,6 +36,7 @@ import { AttachmentActionType } from '../../../client/attachment_framework/types
 import { UnifiedAttachmentTypeRegistry } from '../../../client/attachment_framework/unified_attachment_registry';
 import { getCommentAttachmentType } from '../../attachments/comment';
 import { getStackAlertAttachmentType } from '../../attachments/alert';
+import { toStringArray } from '../../../../common/utils/attachments';
 import {
   SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_ENDPOINT_ATTACHMENT_TYPE,
@@ -110,6 +111,138 @@ describe('createCommentUserActionBuilder', () => {
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
       expect(screen.getByText('edited comment')).toBeInTheDocument();
+    });
+
+    it('names the attachment type when editing an alert', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        ...getStackAlertAttachmentType(),
+        id: SECURITY_ALERT_ATTACHMENT_TYPE,
+      });
+
+      const userAction = getAlertUserAction({ action: UserActionActions.update });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        unifiedAttachmentTypeRegistry,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByText('edited 1 alert')).toBeInTheDocument();
+    });
+
+    it('counts the referenced ids when editing multiple alerts', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        ...getStackAlertAttachmentType(),
+        id: SECURITY_ALERT_ATTACHMENT_TYPE,
+      });
+
+      const userAction = getMultipleAlertsUserAction({ action: UserActionActions.update });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        unifiedAttachmentTypeRegistry,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByText('edited 2 alerts')).toBeInTheDocument();
+    });
+
+    it('counts a value attachment as 1 when editing it', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        id: 'lens',
+        getLabel: () => 'Visualizations',
+        getIcon: () => 'lensApp',
+        getCreationActivity: () => ({ event: 'added a visualization' }),
+        getCountLabel: ({ count }) => (count === 1 ? '1 visualization' : `${count} visualizations`),
+        schema: z.object({}),
+      });
+
+      const userAction = getPersistableStateUserAction({
+        action: UserActionActions.update,
+        payload: {
+          comment: {
+            type: 'lens',
+            data: { state: { test_foo: 'foo' } },
+            owner: 'securitySolution',
+          },
+        },
+      });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        unifiedAttachmentTypeRegistry,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByText('edited 1 visualization')).toBeInTheDocument();
+    });
+
+    it('falls back to the common label for a registered type without a count label', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        id: 'security.event',
+        getLabel: () => 'Event',
+        getIcon: () => 'bell',
+        getCreationActivity: () => ({ event: 'added an event' }),
+        schema: z.object({}),
+      });
+
+      const userAction = getEventUserAction({
+        action: UserActionActions.update,
+        payload: {
+          comment: {
+            type: 'security.event',
+            attachmentId: 'event-id-1',
+            metadata: { index: 'event-index-1' },
+            owner: 'securitySolution',
+          },
+        },
+      });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        unifiedAttachmentTypeRegistry,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByText('edited attachment')).toBeInTheDocument();
+    });
+
+    it('falls back to the common label for an unregistered type', async () => {
+      const userAction = getPersistableStateUserAction({
+        action: UserActionActions.update,
+        payload: {
+          comment: {
+            type: 'lens',
+            data: { state: { test_foo: 'foo' } },
+            owner: 'securitySolution',
+          },
+        },
+      });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByText('edited attachment')).toBeInTheDocument();
     });
   });
 
@@ -656,7 +789,8 @@ describe('createCommentUserActionBuilder', () => {
       await waitFor(() => {
         expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
           'alert-comment-id',
-          'Deleted one alert'
+          'Deleted one alert',
+          undefined
         );
       });
     });
@@ -709,6 +843,93 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByTestId('comment-action-show-table-1234')).toBeInTheDocument();
     });
 
+    describe('after some alerts are removed', () => {
+      const addedIds = ['alert-id-1', 'alert-id-2', 'alert-id-3', 'alert-id-4'];
+      const getAddedAlertsUserAction = (
+        attachmentId: string | string[] = addedIds,
+        ruleName = alertComment.rule.name
+      ) =>
+        getMultipleAlertsUserAction({
+          payload: {
+            comment: {
+              type: STACK_ALERT_ATTACHMENT_TYPE,
+              attachmentId,
+              metadata: {
+                index: toStringArray(attachmentId).map((id) => `index-${id}`),
+                rule: { ...alertComment.rule, name: ruleName },
+              },
+              owner: alertComment.owner,
+            },
+          },
+        });
+
+      const renderUserAction = (
+        userAction: ReturnType<typeof getMultipleAlertsUserAction>,
+        attachments: Array<ReturnType<typeof createUnifiedAlertAttachment>>
+      ) => {
+        const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+        unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+        unifiedAttachmentTypeRegistry.register(getStackAlertAttachmentType());
+
+        const builder = createCommentUserActionBuilder({
+          ...builderArgs,
+          unifiedAttachmentTypeRegistry,
+          attachments,
+          userAction,
+        });
+
+        renderWithTestingProviders(<EuiCommentList comments={builder.build()} />);
+      };
+
+      it('keeps the added alerts count', () => {
+        renderUserAction(getAddedAlertsUserAction(), [
+          createUnifiedAlertAttachment({ attachmentId: ['alert-id-4'], index: ['index-4'] }),
+        ]);
+
+        expect(screen.getByTestId('alerts-user-action-alert-comment-id')).toHaveTextContent(
+          'added 4 alerts from Awesome rule'
+        );
+        expect(screen.getByTestId('comment-action-show-table-1234')).toBeInTheDocument();
+      });
+
+      it('counts the remaining alerts in the delete toast', async () => {
+        renderUserAction(getAddedAlertsUserAction(), [
+          createUnifiedAlertAttachment({
+            attachmentId: ['alert-id-3', 'alert-id-4'],
+            index: ['index-3', 'index-4'],
+          }),
+        ]);
+
+        await deleteAttachment('trash', 'Delete');
+
+        await waitFor(() => {
+          expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
+            'alert-comment-id',
+            'Deleted 2 alerts',
+            undefined
+          );
+        });
+      });
+
+      it('keeps the added alerts count once every alert is removed', () => {
+        renderUserAction(getAddedAlertsUserAction(), []);
+
+        expect(screen.getByTestId('alerts-user-action-alert-comment-id')).toHaveTextContent(
+          'added 4 alerts from Awesome rule'
+        );
+      });
+
+      it('uses the live attachment when no alert is removed', () => {
+        renderUserAction(getAddedAlertsUserAction('alert-id-1', 'Old rule name'), [
+          createUnifiedAlertAttachment({ attachmentId: ['alert-id-1'], index: ['index-1'] }),
+        ]);
+
+        expect(screen.getByTestId('alerts-user-action-alert-comment-id')).toHaveTextContent(
+          'added an alert from Awesome rule'
+        );
+      });
+    });
+
     it('deletes multiple alerts correctly', async () => {
       const userAction = getAlertUserAction();
       const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
@@ -739,7 +960,8 @@ describe('createCommentUserActionBuilder', () => {
       await waitFor(() => {
         expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
           'alert-comment-id',
-          'Deleted 2 alerts'
+          'Deleted 2 alerts',
+          undefined
         );
       });
     });
@@ -1028,7 +1250,8 @@ describe('createCommentUserActionBuilder', () => {
         await waitFor(() => {
           expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
             'persistable-state-comment-id',
-            'Deleted attachment'
+            'Deleted attachment',
+            undefined
           );
         });
       });

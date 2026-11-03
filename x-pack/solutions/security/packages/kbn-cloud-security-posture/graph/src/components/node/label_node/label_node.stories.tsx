@@ -41,6 +41,8 @@ const meta: Meta<LabelNodeViewModel> = {
     ],
     countryCodes: ['us', 'ru', 'es', 'us', 'us'],
     toolbarItemsFn: storybookToolbarItems,
+    isOrigin: false,
+    isOriginAlert: false,
   },
   argTypes: {
     color: {
@@ -51,6 +53,14 @@ const meta: Meta<LabelNodeViewModel> = {
       control: {
         type: 'boolean',
       },
+    },
+    isOrigin: {
+      control: { type: 'boolean' },
+      description: 'Origin event — draws the starting point highlight ring',
+    },
+    isOriginAlert: {
+      control: { type: 'boolean' },
+      description: 'Origin alert — draws the starting point highlight ring',
     },
     toolbarItemsFn: { control: false },
   },
@@ -86,4 +96,24 @@ const Template: StoryFn<LabelNodeViewModel> = (args: LabelNodeViewModel) => (
 
 export const LabelNode: StoryObj<LabelNodeViewModel> = {
   render: Template,
+};
+
+/** Origin event node (1 event, 0 alerts) with the starting point highlight ring. */
+export const OriginHighlightEvent: StoryObj<LabelNodeViewModel> = {
+  render: Template,
+  args: {
+    isOrigin: true,
+    uniqueEventsCount: 1,
+    uniqueAlertsCount: 0,
+  },
+};
+
+/** Origin alert node (0 events, 1 alert) with the starting point highlight ring. */
+export const OriginHighlightAlert: StoryObj<LabelNodeViewModel> = {
+  render: Template,
+  args: {
+    isOriginAlert: true,
+    uniqueEventsCount: 0,
+    uniqueAlertsCount: 1,
+  },
 };

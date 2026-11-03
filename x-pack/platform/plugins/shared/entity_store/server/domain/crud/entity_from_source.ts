@@ -21,6 +21,7 @@ import { getBuiltInEntityDefinition } from '../../../common/domain/definitions/r
 import {
   isSingleFieldIdentity,
   type EntityDefinitionWithoutId,
+  type ExtractedEntityDefinitionWithoutId,
 } from '../../../common/domain/definitions/entity_schema';
 import { ENTITY_SOURCE_FIELD } from '../../../common/domain/definitions/common_fields';
 import type { EntityCreatedBy } from '../../../common/domain/definitions/common_fields';
@@ -62,8 +63,8 @@ export function buildEntityFromSource({
   set(built, 'entity.EngineMetadata.UntypedId', untypedId);
   set(built, 'entity.created_by', createdBy);
   // Match extraction's fallback so alert-only entities receive entity.type at creation.
-  if (definition.entityTypeFallback) {
-    set(built, ENTITY_TYPE_FIELD, definition.entityTypeFallback);
+  if (definition.extraction.entityTypeFallback) {
+    set(built, ENTITY_TYPE_FIELD, definition.extraction.entityTypeFallback);
   }
 
   const { name, confidence } = deriveEntityNameAndConfidence(definition, doc, built);
@@ -113,7 +114,7 @@ function getUntypedId(
 }
 
 function deriveEntitySource(
-  definition: EntityDefinitionWithoutId,
+  definition: ExtractedEntityDefinitionWithoutId,
   doc: unknown
 ): string[] | undefined {
   const fieldEvaluations = getFieldEvaluations(definition);
@@ -126,13 +127,13 @@ function deriveEntitySource(
 }
 
 function deriveEntityNameAndConfidence(
-  definition: EntityDefinitionWithoutId,
+  { extraction }: ExtractedEntityDefinitionWithoutId,
   doc: unknown,
   built: Record<string, unknown>
 ): { name?: string; confidence?: string } {
-  if (definition.whenConditionTrueSetFieldsAfterStats?.length) {
+  if (extraction.whenConditionTrueSetFieldsAfterStats?.length) {
     const workingDoc = merge({}, doc, built);
-    applyWhenConditionTrueSetFields(workingDoc, definition.whenConditionTrueSetFieldsAfterStats);
+    applyWhenConditionTrueSetFields(workingDoc, extraction.whenConditionTrueSetFieldsAfterStats);
     const name = getFieldValue(workingDoc, 'entity.name');
     const confidence = getFieldValue(workingDoc, 'entity.confidence');
     if (name !== undefined || confidence !== undefined) {
@@ -140,7 +141,7 @@ function deriveEntityNameAndConfidence(
     }
   }
 
-  const nameField = definition.fields.find((field) => field.destination === 'entity.name');
+  const nameField = extraction.fields.find((field) => field.destination === 'entity.name');
   const name = nameField ? getFieldValue(doc, nameField.source) : undefined;
   return { name };
 }

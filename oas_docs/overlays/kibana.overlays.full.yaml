@@ -1,0 +1,17 @@
+overlay: 1.0.0
+info:
+  title: Dashboards and Visualizations changes for the full (docs-builder) bundles
+  version: 0.0.1
+  # Applied only to kibana_full.yaml and kibana_full.serverless.yaml. docs-builder renders
+  # requestBody.examples itself, so the handwritten create and update code samples are dropped.
+  # Remove together with the bump-slim overlay when Bump.sh is decommissioned.
+  # See https://github.com/elastic/kibana/issues/266195
+actions:
+  - target: "$.paths['/api/dashboards']['post']['x-codeSamples']"
+    remove: true
+  - target: "$.paths['/api/dashboards/{id}']['put']['x-codeSamples']"
+    remove: true
+  - target: "$.paths['/api/visualizations']['post']['x-codeSamples']"
+    remove: true
+  - target: "$.paths['/api/visualizations/{id}']['put']['x-codeSamples']"
+    remove: true

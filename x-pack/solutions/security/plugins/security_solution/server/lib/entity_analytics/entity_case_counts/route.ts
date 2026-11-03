@@ -13,11 +13,8 @@ import { APP_ID } from '../../../../common/constants';
 import { API_VERSIONS } from '../../../../common/entity_analytics/constants';
 import { ENTITY_CASE_COUNTS_INTERNAL_URL } from '../../../../common/entity_analytics/entity_analytics/constants';
 import type { EntityAnalyticsRoutesDeps } from '../types';
-import {
-  CASE_ATTACHMENT_TYPE,
-  canReadSecurityCases,
-  fetchEntityCaseCounts,
-} from './fetch_entity_case_counts';
+import { fetchEntityCaseCounts, isCasesForbiddenError } from './fetch_entity_case_counts';
+import { fetchGroupMemberIds } from './fetch_group_member_ids';
 
 export const registerEntityCaseCountsRoute = ({
   router,
@@ -39,8 +36,12 @@ export const registerEntityCaseCountsRoute = ({
         validate: {
           request: {
             body: buildRouteValidationWithZod(
-              // An id is at most as long as an entity attachment's `attachmentId`.
-              z.object({ entity_ids: z.array(z.string().max(1000)).max(100) })
+              z.object({
+                // An id is at most as long as an entity attachment's `attachmentId`.
+                entity_ids: z.array(z.string().max(1000)).max(100),
+                // Counts the cases of the entities resolved to each entity with its own.
+                include_members: z.boolean().optional(),
+              })
             ),
           },
         },
@@ -48,26 +49,31 @@ export const registerEntityCaseCountsRoute = ({
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
         try {
-          const [coreStart, { security, cases }] = await getStartServices();
+          const [, { cases }] = await getStartServices();
           if (!cases) throw new Error('The cases plugin is not available');
-          if (!(await canReadSecurityCases(security, request))) {
+          const spaceId = (await context.securitySolution).getSpaceId();
+          const { entity_ids: entityIds, include_members: includeMembers } = request.body;
+          const memberIds = includeMembers
+            ? await fetchGroupMemberIds(
+                (
+                  await context.core
+                ).elasticsearch.client.asCurrentUser,
+                spaceId,
+                entityIds
+              )
+            : {};
+          const counts = await fetchEntityCaseCounts(
+            await cases.getCasesClientWithRequest(request),
+            entityIds,
+            memberIds
+          );
+          return response.ok({ body: Object.fromEntries(counts) });
+        } catch (err) {
+          if (isCasesForbiddenError(err)) {
             return response.forbidden({
               body: { message: 'User is not authorized to read Security cases.' },
             });
           }
-
-          const spaceId = (await context.securitySolution).getSpaceId();
-          const repository = coreStart.savedObjects.createInternalRepository([
-            CASE_ATTACHMENT_TYPE,
-          ]);
-          const counts = await fetchEntityCaseCounts(
-            repository,
-            await cases.getCasesClientWithRequest(request),
-            spaceId,
-            request.body.entity_ids
-          );
-          return response.ok({ body: Object.fromEntries(counts) });
-        } catch (err) {
           logger.error(`Failed to count cases of entities: ${err}`);
           const error = transformError(err);
           return siemResponse.error({ statusCode: error.statusCode, body: error.message });

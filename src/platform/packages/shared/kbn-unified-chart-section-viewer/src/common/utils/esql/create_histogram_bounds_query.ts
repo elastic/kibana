@@ -12,6 +12,7 @@ import { getMetricUniqueKey } from '../get_metric_unique_key';
 import type { HistogramBoundsQuery, ParsedMetricItem } from '../../../types';
 import { getHistogramFieldExpression } from './create_histogram_distribution_query';
 import { resolveSource } from './helpers';
+import { needsUnmappedFieldsNullify } from './needs_unmapped_fields_nullify';
 
 export const HISTOGRAM_BOUNDS_MIN_COLUMN = 'min_value';
 export const HISTOGRAM_BOUNDS_MAX_COLUMN = 'max_value';
@@ -20,10 +21,12 @@ export const HISTOGRAM_BOUNDS_MAX_COLUMN = 'max_value';
 export const createHistogramBoundsQuery = ({
   metricItem,
   whereStatements = [],
+  metadataFields = [],
   originalSource,
 }: {
   metricItem: ParsedMetricItem;
   whereStatements?: readonly string[];
+  metadataFields?: readonly string[];
   originalSource?: string;
 }): HistogramBoundsQuery | undefined => {
   const expression = getHistogramFieldExpression(metricItem);
@@ -32,16 +35,19 @@ export const createHistogramBoundsQuery = ({
   }
 
   const source = resolveSource(originalSource, metricItem.indexName);
-  const query = esql.ts(source);
-  // User applied filters may reference a field the metric stream lacks of, so NULLIFY prevents throwing exceptions
-  // TODO(https://github.com/elastic/kibana/issues/291132): add only when a WHERE references an unmapped field.
-  query.addSetCommand('unmapped_fields', 'NULLIFY');
+  const query = esql.ts([source], [...metadataFields]);
+  const trimmedWhere = whereStatements
+    .map((statement) => statement.trim())
+    .filter((statement) => statement.length > 0);
 
-  for (const statement of whereStatements) {
-    const trimmed = statement.trim();
-    if (trimmed.length > 0) {
-      query.pipe(`WHERE ${trimmed}`);
-    }
+  // `metrics_info` guarantees the metric field is mapped. NULLIFY is only needed
+  // when WHERE can name a column this stream may not map.
+  if (needsUnmappedFieldsNullify({ whereStatements: trimmedWhere })) {
+    query.addSetCommand('unmapped_fields', 'NULLIFY');
+  }
+
+  for (const statement of trimmedWhere) {
+    query.pipe(`WHERE ${statement}`);
   }
 
   query.pipe(

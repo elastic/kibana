@@ -12,6 +12,7 @@ import { datasourceSelector, requestDatasource } from './datasource';
 import { registerDatasourceListeners } from './datasource_listeners';
 import { fieldsSelector } from './fields';
 import { updateSettings } from './advanced_settings';
+import { createWorkspaceState, workspaceChanged, workspaceInitializedSelector } from './workspace';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 const waitForPromise = () => new Promise((r) => setTimeout(r));
@@ -47,6 +48,20 @@ describe('datasource listener', () => {
     const resultingState = env.store.getState();
     expect(env.mockedDeps.indexPatternProvider.get).toHaveBeenCalledWith('123');
     expect(fieldsSelector(resultingState)[0].name).toEqual('field1');
+  });
+
+  it('keeps a new workspace uninitialized after selecting a datasource', async () => {
+    env.mockedDeps.notifyReact.mockImplementation(() => {
+      const workspace = env.mockedDeps.getWorkspace();
+      if (workspace) {
+        env.store.dispatch(workspaceChanged(createWorkspaceState(workspace)));
+      }
+    });
+
+    dispatchRequest();
+    await waitForPromise();
+
+    expect(workspaceInitializedSelector(env.store.getState())).toBe(false);
   });
 
   it('should initialize workspace with the current advanced settings', async () => {

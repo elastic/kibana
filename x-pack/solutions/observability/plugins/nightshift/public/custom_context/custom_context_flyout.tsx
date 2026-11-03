@@ -37,7 +37,7 @@ import {
   MAX_CUSTOM_CONTEXT_SNIPPET_LENGTH,
   type CustomContextSnippet,
 } from '@kbn/nightshift-investigations-plugin/common';
-import { useFormatTimestamp } from '../common/format_timestamp';
+import { useFormatTimestamp } from '../hooks/use_format_timestamp';
 import { useFetchCustomContext } from './use_fetch_custom_context';
 import { useSaveCustomContext } from './use_save_custom_context';
 
@@ -67,6 +67,14 @@ const labels = {
     defaultMessage: 'Edited',
   }),
 };
+
+const DEFAULT_SNIPPET_PLACEHOLDER = i18n.translate(
+  'xpack.nightshift.customContext.snippetPlaceholder',
+  {
+    defaultMessage:
+      'For example: While debugging alerts, always rule out a release or config regression first.',
+  }
+);
 
 function SnippetEditor({
   initialText = '',
@@ -98,10 +106,7 @@ function SnippetEditor({
         aria-label={i18n.translate('xpack.nightshift.customContext.snippetAriaLabel', {
           defaultMessage: 'Snippet text',
         })}
-        placeholder={i18n.translate('xpack.nightshift.customContext.snippetPlaceholder', {
-          defaultMessage:
-            'For example: While debugging alerts, always rule out a release or config regression first.',
-        })}
+        placeholder={DEFAULT_SNIPPET_PLACEHOLDER}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
@@ -263,7 +268,8 @@ function SnippetItem({
   );
 }
 
-function CustomContextSnippets({
+/** Lists, adds, edits and deletes the space's custom context snippets. */
+export function CustomContextSnippets({
   snippets,
   version,
   canEdit,

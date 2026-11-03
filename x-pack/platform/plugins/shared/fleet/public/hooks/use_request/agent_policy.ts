@@ -26,6 +26,8 @@ import type {
   DeleteAgentPolicyRequest,
   DeleteAgentPolicyResponse,
   BulkGetAgentPoliciesResponse,
+  GetAgentPoliciesPackagePoliciesSummaryRequest,
+  GetAgentPoliciesPackagePoliciesSummaryResponse,
   GetAgentPolicyOutputsResponse,
   GetListAgentPolicyOutputsResponse,
   GetListAgentPolicyOutputsRequest,
@@ -57,6 +59,24 @@ export const useGetAgentPoliciesQuery = (
         // Make noAgentCount the default as it have a significant performance impact
         query: { ...(query ?? {}), noAgentCount: query?.noAgentCount === false ? false : true },
         version: API_VERSIONS.public.v1,
+      }),
+    enabled: options?.enabled,
+  });
+};
+
+export const useGetAgentPoliciesPackagePoliciesSummaryQuery = (
+  ids: GetAgentPoliciesPackagePoliciesSummaryRequest['body']['ids'],
+  options?: { enabled?: boolean }
+) => {
+  return useQuery<GetAgentPoliciesPackagePoliciesSummaryResponse, RequestError>({
+    // Prefixed with `agentPolicies` so that invalidating the agent policies refreshes the summaries
+    queryKey: ['agentPolicies', 'packagePoliciesSummary', ids],
+    queryFn: () =>
+      sendRequestForRq<GetAgentPoliciesPackagePoliciesSummaryResponse>({
+        path: agentPolicyRouteService.getPackagePoliciesSummaryPath(),
+        method: 'post',
+        body: JSON.stringify({ ids }),
+        version: API_VERSIONS.internal.v1,
       }),
     enabled: options?.enabled,
   });

@@ -9,16 +9,16 @@ import { i18n } from '@kbn/i18n';
 import type { RecommendedAction } from './investigation';
 
 export const CONVERSATION_QUEUE_LABELS: Record<RecommendedAction, string> = Object.freeze({
-  respond: i18n.translate('xpack.alertzero.conversationQueue.bucket.respond', {
+  respond: i18n.translate('xpack.agenticInvestigations.conversationQueue.bucket.respond', {
     defaultMessage: 'Respond',
   }),
-  investigate: i18n.translate('xpack.alertzero.conversationQueue.bucket.investigate', {
+  investigate: i18n.translate('xpack.agenticInvestigations.conversationQueue.bucket.investigate', {
     defaultMessage: 'Investigate',
   }),
-  configure: i18n.translate('xpack.alertzero.conversationQueue.bucket.configure', {
+  configure: i18n.translate('xpack.agenticInvestigations.conversationQueue.bucket.configure', {
     defaultMessage: 'Configure',
   }),
-  closed: i18n.translate('xpack.alertzero.conversationQueue.bucket.closed', {
+  closed: i18n.translate('xpack.agenticInvestigations.conversationQueue.bucket.closed', {
     defaultMessage: 'Closed Actions',
   }),
 });

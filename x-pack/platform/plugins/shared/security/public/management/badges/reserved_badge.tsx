@@ -25,7 +25,7 @@ interface Props {
 export const ReservedBadge = (props: Props) => {
   return (
     <OptionalToolTip tooltipContent={props.tooltipContent}>
-      <EuiBadge data-test-subj={props['data-test-subj']} color="primary">
+      <EuiBadge data-test-subj={props['data-test-subj']} color="hollow">
         {reservedBadgeLabel}
       </EuiBadge>
     </OptionalToolTip>

@@ -53,6 +53,7 @@ const defaultParams = () => ({
     .mockResolvedValue(undefined) as unknown as ESQLEditorProps['onTextLangQuerySubmit'],
   onQueryUpdate: jest.fn(),
   telemetryService: createMockTelemetryService(),
+  pendingReviewRef: { current: { accept: jest.fn(() => false), discard: jest.fn() } },
 });
 
 describe('useQueryActions', () => {
@@ -116,12 +117,40 @@ describe('useQueryActions', () => {
 
       // Should have cancelled, not submitted
       expect(params.onTextLangQuerySubmit).not.toHaveBeenCalled();
+      expect(params.pendingReviewRef.current.accept).not.toHaveBeenCalled();
       expect(result.current.isQueryLoading).toBe(false);
+    });
+
+    it('accepts a pending AI review instead of submitting when run manually', () => {
+      const params = defaultParams();
+      params.pendingReviewRef.current.accept.mockReturnValue(true);
+      const { result } = renderHook(() => useQueryActions(params));
+
+      act(() => {
+        result.current.onQuerySubmit(QuerySource.MANUAL);
+      });
+
+      expect(params.pendingReviewRef.current.accept).toHaveBeenCalledTimes(1);
+      expect(params.onTextLangQuerySubmit).not.toHaveBeenCalled();
+      expect(params.telemetryService.trackQuerySubmitted).not.toHaveBeenCalled();
+    });
+
+    it('does not consult the pending AI review for other query sources', () => {
+      const params = defaultParams();
+      params.pendingReviewRef.current.accept.mockReturnValue(true);
+      const { result } = renderHook(() => useQueryActions(params));
+
+      act(() => {
+        result.current.onQuerySubmit(QuerySource.HISTORY);
+      });
+
+      expect(params.pendingReviewRef.current.accept).not.toHaveBeenCalled();
+      expect(params.onTextLangQuerySubmit).toHaveBeenCalled();
     });
   });
 
   describe('onUpdateAndSubmitQuery', () => {
-    it('updates query then submits', () => {
+    it('discards a pending AI review, updates the query, then submits', () => {
       jest.useFakeTimers();
       const params = defaultParams();
       const { result } = renderHook(() => useQueryActions(params));
@@ -130,6 +159,7 @@ describe('useQueryActions', () => {
         result.current.onUpdateAndSubmitQuery('FROM new_index', QuerySource.HISTORY);
       });
 
+      expect(params.pendingReviewRef.current.discard).toHaveBeenCalledTimes(1);
       expect(params.onQueryUpdate).toHaveBeenCalledWith('FROM new_index');
       expect(params.telemetryService.trackQueryHistoryClicked).toHaveBeenCalledWith(false);
 

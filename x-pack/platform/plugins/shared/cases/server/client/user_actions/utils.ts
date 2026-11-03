@@ -142,7 +142,7 @@ const combineExtractors =
  * excluded, consistent with the rationale for the excluded types listed below.
  *
  * Must be defensive against undecoded payloads: `findWithSearch` calls `findAll` with
- * `decode: false`, so io-ts has not validated `payload.workflow` before this runs.
+ * `decode: false`, so zod has not validated `payload.workflow` before this runs.
  */
 const extractWorkflowContent: SearchableContentExtractor = (payload) => {
   const workflow = payload.workflow as Record<string, unknown> | undefined;
@@ -163,7 +163,8 @@ const extractWorkflowContent: SearchableContentExtractor = (payload) => {
  * Maps a user action type to the function that pulls its free-text-searchable
  * content out of the payload. Types not present here either carry no meaningful
  * free text or only reference IDs, so they're excluded from search:
- *   - `connector`, `pushed`, `settings`, `status`, `observables`, `template`: no free text
+ *   - `connector`, `pushed`, `settings`, `status`, `observables`, `template`,
+ *     `bulkAttachments`: no free text
  *   - `delete_case`: no payload
  * `workflow` is indexed but narrowly: only `workflow.name` and, for observable origins,
  * the rendered observable value (IDs are excluded — see `extractWorkflowContent`).

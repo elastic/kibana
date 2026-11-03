@@ -69,7 +69,7 @@ export class MitreAttackPlugin implements Plugin<MitreAttackServerSetup, MitreAt
 
     // Population does not block or throw from start()
     this.dataService.populate().catch((err: Error) => {
-      this.logger.error(`Unexpected error during MITRE ATT&CK data population: ${err.message}`);
+      this.logger.error(`Unexpected error during MITRE data population: ${err.message}`);
     });
 
     const mitreDataClient = createMitreAttackDataClient({

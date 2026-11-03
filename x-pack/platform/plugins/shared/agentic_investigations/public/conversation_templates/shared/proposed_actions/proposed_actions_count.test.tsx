@@ -41,46 +41,122 @@ describe('ProposedActionsCount', () => {
     render(<ProposedActionsCount conversationId="conv-1" />, { wrapper });
 
     expect(screen.getByTestId('investigationFlyoutProposedActionsCount')).toHaveTextContent(
-      '0 of 7 applied'
+      '0 of 7 actions closed'
     );
     expect(mockUseConversationProposals).toHaveBeenCalledWith('conv-1');
   });
 
-  it('counts approved proposals on the first page and follows data updates', () => {
-    mockUseConversationProposals.mockReturnValue(
-      withPages([{ total: 3, proposals: [{ decision: 'approved' }, {}, {}] }])
-    );
-    const { rerender } = render(<ProposedActionsCount conversationId="conv-1" />, { wrapper });
-    expect(screen.getByTestId('investigationFlyoutProposedActionsCount')).toHaveTextContent(
-      '1 of 3 applied'
-    );
-
-    mockUseConversationProposals.mockReturnValue(
-      withPages([{ total: 3, proposals: [{ decision: 'approved' }, { decision: 'approved' }, {}] }])
-    );
-    rerender(<ProposedActionsCount conversationId="conv-1" />);
-    expect(screen.getByTestId('investigationFlyoutProposedActionsCount')).toHaveTextContent(
-      '2 of 3 applied'
-    );
-  });
-
-  it('does not count declined or failed proposals as applied', () => {
+  it('counts closed proposals on the first page and follows data updates', () => {
     mockUseConversationProposals.mockReturnValue(
       withPages([
         {
-          total: 4,
+          total: 3,
           proposals: [
-            { decision: 'approved' },
-            { decision: 'dismissed' },
-            { decision: 'approved', status: 'failed' },
-            {},
+            { decision: 'approved', status: 'succeeded' },
+            { status: 'pending' },
+            { status: 'pending' },
+          ],
+        },
+      ])
+    );
+    const { rerender } = render(<ProposedActionsCount conversationId="conv-1" />, { wrapper });
+    expect(screen.getByTestId('investigationFlyoutProposedActionsCount')).toHaveTextContent(
+      '1 of 3 actions closed'
+    );
+
+    mockUseConversationProposals.mockReturnValue(
+      withPages([
+        {
+          total: 3,
+          proposals: [
+            { decision: 'approved', status: 'succeeded' },
+            { decision: 'dismissed', status: 'no_action' },
+            { status: 'pending' },
+          ],
+        },
+      ])
+    );
+    rerender(<ProposedActionsCount conversationId="conv-1" />);
+    expect(screen.getByTestId('investigationFlyoutProposedActionsCount')).toHaveTextContent(
+      '2 of 3 actions closed'
+    );
+  });
+
+  it('counts expired, dismissed and approved proposals as closed and not `executing` or `pending`', () => {
+    mockUseConversationProposals.mockReturnValue(
+      withPages([
+        {
+          total: 5,
+          proposals: [
+            { status: 'expired' },
+            { decision: 'dismissed', status: 'no_action' },
+            { decision: 'approved', status: 'succeeded' },
+            { decision: 'approved', status: 'executing' },
+            { decision: 'dismissed', status: 'pending' },
           ],
         },
       ])
     );
     render(<ProposedActionsCount conversationId="conv-1" />, { wrapper });
     expect(screen.getByTestId('investigationFlyoutProposedActionsCount')).toHaveTextContent(
-      '1 of 4 applied'
+      '3 of 5 actions closed'
+    );
+  });
+
+  it('does not count failed proposals, whether approved or dismissed', () => {
+    mockUseConversationProposals.mockReturnValue(
+      withPages([
+        {
+          total: 3,
+          proposals: [
+            { decision: 'approved', status: 'failed' },
+            { decision: 'dismissed', status: 'failed' },
+            { decision: 'approved', status: 'succeeded' },
+          ],
+        },
+      ])
+    );
+    render(<ProposedActionsCount conversationId="conv-1" />, { wrapper });
+    expect(screen.getByTestId('investigationFlyoutProposedActionsCount')).toHaveTextContent(
+      '1 of 3 actions closed'
+    );
+  });
+
+  it('does not count executing proposals, whether approved or dismissed', () => {
+    mockUseConversationProposals.mockReturnValue(
+      withPages([
+        {
+          total: 3,
+          proposals: [
+            { decision: 'approved', status: 'executing' },
+            { decision: 'dismissed', status: 'executing' },
+            { decision: 'approved', status: 'succeeded' },
+          ],
+        },
+      ])
+    );
+    render(<ProposedActionsCount conversationId="conv-1" />, { wrapper });
+    expect(screen.getByTestId('investigationFlyoutProposedActionsCount')).toHaveTextContent(
+      '1 of 3 actions closed'
+    );
+  });
+
+  it('does not count proposals that are still pending or executing', () => {
+    mockUseConversationProposals.mockReturnValue(
+      withPages([
+        {
+          total: 3,
+          proposals: [
+            { status: 'pending' },
+            { decision: 'approved', status: 'executing' },
+            { status: 'pending' },
+          ],
+        },
+      ])
+    );
+    render(<ProposedActionsCount conversationId="conv-1" />, { wrapper });
+    expect(screen.getByTestId('investigationFlyoutProposedActionsCount')).toHaveTextContent(
+      '0 of 3 actions closed'
     );
   });
 

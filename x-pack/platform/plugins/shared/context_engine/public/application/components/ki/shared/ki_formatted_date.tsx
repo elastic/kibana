@@ -39,7 +39,7 @@ export const KiFormattedDate = ({ value, className }: KiFormattedDateProps) => {
         />
       }
     >
-      <span tabIndex={0} className={className}>
+      <span className={className} tabIndex={-1}>
         <FormattedRelative value={date} />
       </span>
     </EuiToolTip>

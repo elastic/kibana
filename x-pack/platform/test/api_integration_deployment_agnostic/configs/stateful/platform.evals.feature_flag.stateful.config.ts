@@ -9,7 +9,7 @@ import { createStatefulFeatureFlagTestConfig } from '../../default_configs/featu
 
 export default createStatefulFeatureFlagTestConfig({
   testFiles: [require.resolve('./platform.evals.feature_flag.index.ts')],
-  kbnServerArgs: ['--xpack.evals.enabled=true'],
+  kbnServerArgs: ['--xpack.evals.enabled=true', '--xpack.evals.mode=full'],
   junit: {
     reportName: 'Platform Stateful - Evals API Integration Tests',
   },

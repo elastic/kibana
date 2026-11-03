@@ -74,6 +74,68 @@ describe('CRUDClient', () => {
     });
   });
 
+  describe('listEntities (cursor mode)', () => {
+    beforeEach(() => {
+      esClient.search.mockResolvedValue({ hits: { hits: [] } } as unknown as Awaited<
+        ReturnType<typeof esClient.search>
+      >);
+    });
+
+    it('sorts by @timestamp desc with a _shard_doc tiebreaker by default', async () => {
+      await client.listEntities({ size: 10 });
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ sort: [{ '@timestamp': 'desc' }, { _shard_doc: 'desc' }] })
+      );
+    });
+
+    it('uses the given sort in place of @timestamp and still appends the _shard_doc tiebreaker', async () => {
+      await client.listEntities({
+        size: 10,
+        sort: [{ 'entity.risk.calculated_score_norm': 'desc' }],
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: [{ 'entity.risk.calculated_score_norm': 'desc' }, { _shard_doc: 'desc' }],
+        })
+      );
+    });
+  });
+
+  describe('latestIndexName', () => {
+    it('resolves the index name once per client', async () => {
+      const first = await client.latestIndexName();
+      const requestsForFirst = esClient.indices.getAlias.mock.calls.length;
+      const second = await client.latestIndexName();
+
+      expect(second).toBe(first);
+      expect(requestsForFirst).toBeGreaterThan(0);
+      expect(esClient.indices.getAlias).toHaveBeenCalledTimes(requestsForFirst);
+    });
+  });
+
+  describe('bulkUpdateEntity refresh', () => {
+    const objects = [{ type: 'generic' as const, doc: { entity: { id: 'test-id' } } }];
+
+    beforeEach(() => {
+      esClient.indices.exists.mockResolvedValue(true);
+      esClient.bulk.mockResolvedValue({ errors: false, items: [] } as any);
+    });
+
+    it('waits for a refresh by default', async () => {
+      await client.bulkUpdateEntity({ objects, force: true });
+
+      expect(esClient.bulk).toHaveBeenCalledWith(expect.objectContaining({ refresh: 'wait_for' }));
+    });
+
+    it('forwards the refresh option', async () => {
+      await client.bulkUpdateEntity({ objects, force: true, refresh: false });
+
+      expect(esClient.bulk).toHaveBeenCalledWith(expect.objectContaining({ refresh: false }));
+    });
+  });
+
   describe('createEntitiesFromSource', () => {
     beforeEach(() => {
       esClient.indices.exists.mockResolvedValue(true);

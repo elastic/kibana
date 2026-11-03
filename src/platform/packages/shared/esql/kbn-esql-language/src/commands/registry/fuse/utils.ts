@@ -77,7 +77,7 @@ export function buildMissingMetadataMessage(
 ): ESQLMessage {
   return {
     location: command.location,
-    text: i18n.translate('kbn-esql-language.esql.validation.fuseMissingMetadata', {
+    text: i18n.translate('esqlLanguage.esql.validation.fuseMissingMetadata', {
       defaultMessage: `[FUSE] The FROM command is missing the {metadataField} METADATA field.`,
       values: { metadataField },
     }),

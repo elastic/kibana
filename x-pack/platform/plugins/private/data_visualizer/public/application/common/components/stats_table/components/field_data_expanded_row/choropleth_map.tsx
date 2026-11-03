@@ -160,7 +160,7 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
     >
       {mapsService && (
         <div className={'dvMap__wrapper'}>
-          <mapsService.PassiveMap passiveLayer={choroplethLayer} />
+          <mapsService.PassiveMap passiveLayer={choroplethLayer} viewMode="view" />
         </div>
       )}
 

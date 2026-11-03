@@ -180,6 +180,44 @@ describe('useHostDetails', () => {
     );
   });
 
+  it('ORs the EUID filters of the target and its alias records in the resolution-group view', () => {
+    mockUseUiSetting.mockReturnValue(true);
+    const getEuidFilterBasedOnEntityRecord = jest.fn(
+      (_type: string, record: { host: { id: string } }) => ({
+        term: { 'host.id': record.host.id },
+      })
+    );
+    mockUseEntityStoreEuidApi.mockReturnValue({
+      euid: { dsl: { getEuidFilterBasedOnEntityRecord } },
+      getBuiltInEntityDefinition,
+    });
+
+    const entityRecord = { entity: { id: 'host:host-1' }, host: { id: 'host-1' } };
+    const aliasRecords = [{ entity: { id: 'host:host-2' }, host: { id: 'host-2' } }];
+
+    renderHook(
+      () =>
+        useHostDetails({
+          ...defaultProps,
+          entityId: 'host:host-1',
+          entityRecord: entityRecord as never,
+          aliasRecords: aliasRecords as never,
+        }),
+      { wrapper: TestProviders }
+    );
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filterQuery: JSON.stringify({
+          bool: {
+            should: [{ term: { 'host.id': 'host-1' } }, { term: { 'host.id': 'host-2' } }],
+            minimum_should_match: 1,
+          },
+        }),
+      })
+    );
+  });
+
   it('falls back to host.name filter when the record-based EUID filter is undefined', () => {
     mockUseUiSetting.mockReturnValue(true);
     const getEuidFilterBasedOnEntityRecord = jest.fn().mockReturnValue(undefined);

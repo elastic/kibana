@@ -23,7 +23,7 @@ import * as i18n from './translations';
 interface RunCaseWorkflowModalProps
   extends Pick<
     RunWorkflowPanelProps,
-    'inputs' | 'sortWorkflow' | 'filterWorkflow' | 'onExecute' | 'onExecutionSettled'
+    'inputs' | 'sortWorkflow' | 'filterWorkflow' | 'onExecute' | 'onExecutionSettled' | 'telemetry'
   > {
   /** Required: the panel's success toast is suppressed, so the executor must raise its own. */
   runWorkflow: RunWorkflowExecutor;
@@ -47,6 +47,7 @@ export const RunCaseWorkflowModal: React.FC<RunCaseWorkflowModalProps> = ({
   onClose,
   onExecute,
   onExecutionSettled,
+  telemetry,
   focusButtonRef,
 }) => {
   const focusTrapProps = useFocusButtonTrap(focusButtonRef);
@@ -80,6 +81,7 @@ export const RunCaseWorkflowModal: React.FC<RunCaseWorkflowModalProps> = ({
         onExecute={onExecute}
         onExecutionSettled={onExecutionSettled}
         showSuccessToast={false}
+        telemetry={telemetry}
       />
     );
   };

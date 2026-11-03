@@ -1,5 +1,5 @@
 {
-  "sha1": "8cc878de34cf5adb6ca6f6ae8035c64568db6659",
+  "sha1": "59036009ee85aab73053ac5486133dbc98dc2f34",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -27,8 +27,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 345,
-        "column": 9
+        "line": 372,
+        "column": 15
       }
     },
     {
@@ -43,8 +43,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 358,
-        "column": 26
+        "line": 385,
+        "column": 18
       }
     },
     {
@@ -59,8 +59,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 374,
-        "column": 15
+        "line": 401,
+        "column": 23
       }
     },
     {
@@ -75,8 +75,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 397,
-        "column": 7
+        "line": 424,
+        "column": 25
       }
     },
     {
@@ -91,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 414,
-        "column": 15
+        "line": 447,
+        "column": 6
       }
     },
     {
@@ -107,8 +107,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 454,
+        "line": 483,
         "column": 19
+      }
+    },
+    {
+      "id": "c8588d2004a116a-fa691e94a328f4b",
+      "title": "Entity Store dual-process union equivalence flag on: a lowered maxLogsPerWindow engages sampling dynamically, without an override",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
+        "line": 514,
+        "column": 15
       }
     },
     {
@@ -283,7 +299,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 83,
+        "line": 84,
         "column": 38
       }
     },
@@ -299,7 +315,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 106,
+        "line": 107,
         "column": 12
       }
     },
@@ -315,7 +331,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 142,
+        "line": 143,
         "column": 14
       }
     },
@@ -331,7 +347,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 169,
+        "line": 170,
         "column": 15
       }
     },
@@ -347,7 +363,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 196,
+        "line": 197,
         "column": 11
       }
     },
@@ -363,8 +379,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 437,
+        "line": 438,
         "column": 20
+      }
+    },
+    {
+      "id": "8350afe5b00979d-9b7dcd27c283b33",
+      "title": "Entity Store Main logs extraction Should resolve CloudTrail actors to the inventory IAM role entity via user.entity.id (aws)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
+        "line": 587,
+        "column": 22
       }
     },
     {
@@ -379,8 +411,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 586,
-        "column": 22
+        "line": 639,
+        "column": 26
       }
     },
     {
@@ -395,8 +427,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 656,
-        "column": 9
+        "line": 713,
+        "column": 10
       }
     },
     {
@@ -411,8 +443,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 691,
-        "column": 14
+        "line": 740,
+        "column": 43
       }
     },
     {
@@ -427,8 +459,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 715,
-        "column": 44
+        "line": 773,
+        "column": 23
       }
     },
     {
@@ -443,8 +475,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 799,
-        "column": 22
+        "line": 854,
+        "column": 14
       }
     },
     {
@@ -459,8 +491,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 866,
-        "column": 52
+        "line": 924,
+        "column": 25
       }
     },
     {
@@ -475,8 +507,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 979,
-        "column": 23
+        "line": 1034,
+        "column": 17
       }
     },
     {
@@ -491,8 +523,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 1045,
-        "column": 16
+        "line": 1234,
+        "column": 24
       }
     },
     {
@@ -507,8 +539,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 1073,
-        "column": 10
+        "line": 1125,
+        "column": 66
       }
     },
     {
@@ -523,8 +555,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 1129,
-        "column": 13
+        "line": 1184,
+        "column": 7
       }
     },
     {
@@ -539,8 +571,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 1218,
-        "column": 14
+        "line": 1266,
+        "column": 9
       }
     },
     {
@@ -555,8 +587,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 1362,
-        "column": 15
+        "line": 1417,
+        "column": 22
       }
     },
     {

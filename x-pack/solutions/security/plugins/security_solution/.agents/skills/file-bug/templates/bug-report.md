@@ -1,7 +1,7 @@
 <!--
 Full field rules, including the four always-ask fields: ../references/drafting.md
 Omit empty optional headings. Never write _unknown_. Quote the exact error.
-Put the visible stamp after the last heading, not in this comment.
+Put the visible stamp after the last heading, not in this comment. `write` adds the hidden filed-via marker.
 Preconditions only when needed before step 1.
 -->
 

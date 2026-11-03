@@ -61,8 +61,6 @@ describe('createVisPanelResolver', () => {
     });
 
     const result = await resolveVisPanel({
-      operationType: 'add_panels',
-      identifier: 'show total requests',
       nlQuery: 'show total requests',
       index: 'logs-*',
       chartType: SupportedChartType.Metric,
@@ -100,8 +98,6 @@ describe('createVisPanelResolver', () => {
 
     await expect(
       resolveVisPanel({
-        operationType: 'add_panels',
-        identifier: 'show total requests',
         nlQuery: 'show total requests',
         index: 'logs-*',
       })
@@ -125,8 +121,6 @@ describe('createVisPanelResolver', () => {
     });
 
     await resolveVisPanel({
-      operationType: 'edit_panels',
-      identifier: 'panel-1',
       nlQuery: 'change the title',
       preserveESQL: true,
       applyChartRules: true,
@@ -160,8 +154,6 @@ describe('createVisPanelResolver', () => {
     const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
 
     const result = await resolveVisPanel({
-      operationType: 'add_panels',
-      identifier: 'a small multiples chart',
       nlQuery: 'a small multiples chart',
       index: 'logs-*',
       renderer: 'vega',
@@ -187,8 +179,6 @@ describe('createVisPanelResolver', () => {
     const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
 
     const result = await resolveVisPanel({
-      operationType: 'add_panels',
-      identifier: 'total requests',
       nlQuery: 'total requests',
       chartType: SupportedChartType.Metric,
     });
@@ -210,8 +200,6 @@ describe('createVisPanelResolver', () => {
     const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
 
     const result = await resolveVisPanel({
-      operationType: 'edit_panels',
-      identifier: 'panel-1',
       nlQuery: 'make it a line chart',
       preserveESQL: true,
       renderer: 'vega',
@@ -241,8 +229,6 @@ describe('createVisPanelResolver', () => {
     const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
 
     const result = await resolveVisPanel({
-      operationType: 'edit_panels',
-      identifier: 'panel-1',
       nlQuery: 'Enhance this panel',
       renderer: 'vega',
       applyChartRules: true,
@@ -257,7 +243,7 @@ describe('createVisPanelResolver', () => {
 
     expect(result).toMatchObject({
       type: 'failure',
-      failure: { error: 'Presentation enhancement is only supported for ES|QL Lens panels.' },
+      error: 'Presentation enhancement is only supported for ES|QL Lens panels.',
     });
     expect(mockedBuildVegaConfig).not.toHaveBeenCalled();
     expect(mockedBuildLensConfig).not.toHaveBeenCalled();

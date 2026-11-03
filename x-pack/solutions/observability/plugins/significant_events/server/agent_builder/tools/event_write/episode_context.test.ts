@@ -18,7 +18,7 @@ import type {
   SignificantEvent,
   SignalEntry,
 } from '@kbn/significant-events-schema';
-import { MAX_SIGNAL_DESCRIPTION_LENGTH } from '@kbn/significant-events-schema';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 
 const TS_EARLIER = '2024-01-01T00:00:00.000Z';
 const TS_SUBMITTED = '2024-01-02T00:00:00.000Z';
@@ -145,7 +145,7 @@ describe('mergeSignalsLatestPerRule', () => {
   it('normalizes a legacy carried-forward description before persistence', () => {
     const legacySignal = {
       ...makeSignal('rule-1'),
-      description: 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH + 1),
+      description: 'x'.repeat(MAX_TEXT_LENGTH + 1),
     };
     const result = mergeSignalsLatestPerRule(
       [{ '@timestamp': TS_EARLIER, signals: [legacySignal] }],
@@ -153,7 +153,7 @@ describe('mergeSignalsLatestPerRule', () => {
       TS_SUBMITTED
     );
 
-    expect(result[0].description).toHaveLength(MAX_SIGNAL_DESCRIPTION_LENGTH);
+    expect(result[0].description).toHaveLength(MAX_TEXT_LENGTH);
   });
 });
 

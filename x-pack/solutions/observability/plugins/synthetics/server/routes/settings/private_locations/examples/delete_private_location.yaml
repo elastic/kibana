@@ -3,3 +3,13 @@ responses:
     description: OK.
   400:
     description: The private location does not exist, or it is used by one or more monitors in any space.
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X DELETE "${KIBANA_URL}/api/synthetics/private_locations/location-id" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true"
+  - lang: Console
+    source: |
+      DELETE kbn://api/synthetics/private_locations/location-id

@@ -7,17 +7,17 @@
 
 import type { Logger } from '@kbn/logging';
 import { deepFreeze } from '@kbn/std';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import {
-  entitySchema,
+  entityDefinitionObjectSchema,
   EntityDefinitionManagedBy,
   type EntityDefinitionType,
-  type EntityDefinitionOfAnyType,
-  validateEntityDefinitionType,
+  type EntityDefinitionWithoutId,
 } from '../../../../common/domain/definitions/entity_schema';
+import { assertDynamicDefinitionRules } from '../../../../common/domain/definitions/dynamic';
 
-/** A definition as accepted by the registry: the built-in shape with a wider type name and a required `managedBy`. */
-export type RegistrableEntityDefinition = Omit<EntityDefinitionOfAnyType, 'managedBy'> & {
+/** A definition as accepted by the registry: any valid definition with a required `managedBy`. */
+export type RegistrableEntityDefinition = Omit<EntityDefinitionWithoutId, 'managedBy'> & {
   managedBy: EntityDefinitionManagedBy;
 };
 
@@ -32,14 +32,13 @@ export interface RegistrationRejection {
 }
 
 // Strict so unknown keys (notably a stale `id` from a full definition) are rejected, not kept.
-const registrableEntityDefinitionSchema = entitySchema
+// The base schema validates the type name, so a bad name fails here with the rule it broke.
+// Derived from the unrefined shape, so the whole-definition rules are applied again here.
+const registrableEntityDefinitionSchema = entityDefinitionObjectSchema
   .omit({ id: true })
-  .extend({
-    // Any string here; the name pattern is checked separately.
-    type: z.string(),
-    managedBy: EntityDefinitionManagedBy,
-  })
-  .strict();
+  .extend({ managedBy: EntityDefinitionManagedBy })
+  .strict()
+  .superRefine(assertDynamicDefinitionRules);
 
 const formatSchemaIssues = (error: z.ZodError): string =>
   error.issues
@@ -186,10 +185,6 @@ export class EntityDefinitionRegistry {
     const { type, managedBy } = parsed.data;
     if (managedBy.kind !== 'plugin') {
       return 'only plugin-managed definitions can be registered at setup';
-    }
-    const typeReason = validateEntityDefinitionType(type);
-    if (typeReason) {
-      return typeReason;
     }
     if (this.entries.has(type)) {
       return 'type name is already registered';

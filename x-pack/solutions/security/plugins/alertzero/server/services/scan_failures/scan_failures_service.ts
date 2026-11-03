@@ -11,6 +11,7 @@ import {
   SYSTEM_SECURITY_WORKER_IDS,
   type ScanFailuresResponse,
 } from '@kbn/alertzero-common';
+import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowExecutionListDto } from '@kbn/workflows';
 import { ALERTZERO_ACTION_WORKFLOW_IDS } from '@kbn/workflows/managed';
 import pMap from 'p-map';
@@ -23,7 +24,11 @@ const SCAN_FAILURE_ATTRIBUTION_CONCURRENCY = 8;
 const SCAN_FAILURE_MAX_PARENT_HOPS = 8;
 const WORKFLOW_STEP_TRIGGER = 'workflow-step';
 
-const EMPTY_SCAN_FAILURES: ScanFailuresResponse = { workers: [], unknown: false };
+const EMPTY_SCAN_FAILURES: ScanFailuresResponse = {
+  workers: [],
+  unknown: false,
+  lastFailedAt: null,
+};
 
 const CATALOG_WORKER_IDS = new Set<string>(SYSTEM_SECURITY_WORKER_IDS);
 const ACTION_WORKFLOW_IDS = new Set<string>(ALERTZERO_ACTION_WORKFLOW_IDS);
@@ -42,6 +47,12 @@ export interface FailedExecutionSearch {
     spaceId: string,
     request: KibanaRequest
   ): Promise<FailedExecutionPage>;
+
+  getLatestWorkflowExecution(
+    workflowId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<FailedExecutionPage['results'][number] | undefined>;
 
   getWorkflowExecution(
     workflowExecutionId: string,
@@ -125,34 +136,56 @@ export const attributeFailedExecution = async (
   return undefined;
 };
 
+const laterOf = (current: string | undefined, candidate: string): string =>
+  !current || Date.parse(candidate) > Date.parse(current) ? candidate : current;
+
 /** Folds failed executions onto distinct catalog Workers, in catalog order. */
 export const foldFailedExecutions = async (
   executions: FailedExecutionPage['results'],
-  loadExecution: LoadExecution
+  loadExecution: LoadExecution,
+  spaceId: string
 ): Promise<ScanFailuresResponse> => {
   const attributed = await pMap(
     executions,
     (execution) => attributeFailedExecution(execution, loadExecution),
     { concurrency: SCAN_FAILURE_ATTRIBUTION_CONCURRENCY }
   );
-  const workerIds = new Set<string>();
+  const latestByWorker = new Map<string, { lastFailedAt: string; workflowId: string }>();
+  let lastFailedAt: string | undefined;
 
-  for (const workerId of attributed) {
-    if (workerId) {
-      workerIds.add(workerId);
+  executions.forEach((execution, index) => {
+    const { finishedAt } = execution;
+    if (!finishedAt) {
+      return;
     }
-  }
+    lastFailedAt = laterOf(lastFailedAt, finishedAt);
+    const workerId = attributed[index];
+    if (!workerId) {
+      return;
+    }
+    const latest = latestByWorker.get(workerId);
+    if (latest && laterOf(latest.lastFailedAt, finishedAt) === latest.lastFailedAt) {
+      return;
+    }
+    // Link to the workflow that failed, which is a child when the Worker went on past it.
+    latestByWorker.set(workerId, {
+      lastFailedAt: finishedAt,
+      workflowId: execution.workflowId || `${workerId}-${spaceId}`,
+    });
+  });
 
-  const workers = SYSTEM_SECURITY_WORKER_CATALOG.filter((entry) => workerIds.has(entry.id)).map(
-    (entry) => ({ workerId: entry.id, watchId: entry.watchId })
-  );
+  const workers = SYSTEM_SECURITY_WORKER_CATALOG.flatMap((entry) => {
+    const latest = latestByWorker.get(entry.id);
+    return latest ? [{ workerId: entry.id, watchId: entry.watchId, ...latest }] : [];
+  });
 
-  return { workers, unknown: false };
+  return { workers, unknown: false, lastFailedAt: lastFailedAt ?? null };
 };
 
 export const collectScanFailures = async (
   searchPage: (page: number) => Promise<FailedExecutionPage>,
-  loadExecution: LoadExecution
+  loadExecution: LoadExecution,
+  spaceId: string
 ): Promise<ScanFailuresResponse> => {
   const executions: FailedExecutionPage['results'] = [];
   let incomplete = false;
@@ -176,7 +209,7 @@ export const collectScanFailures = async (
     }
   }
 
-  const folded = await foldFailedExecutions(executions, loadExecution);
+  const folded = await foldFailedExecutions(executions, loadExecution, spaceId);
   return incomplete ? { ...folded, unknown: true } : folded;
 };
 
@@ -218,14 +251,47 @@ export class ScanFailuresService {
             spaceId,
             request
           ),
-        loadExecution
+        loadExecution,
+        spaceId
       );
-      return lookupFailed ? { ...failures, unknown: true } : failures;
+      const stillFailing = await this.dropRecovered(failures, executions, request, spaceId);
+      return lookupFailed ? { ...stillFailing, unknown: true } : stillFailing;
     } catch (error) {
       this.logger.warn(
         `Scan failure query failed: ${error instanceof Error ? error.message : String(error)}`
       );
       return EMPTY_SCAN_FAILURES;
     }
+  }
+
+  /**
+   * A Worker recovered when the newest run of the workflow that failed completed. A failed or
+   * running newest run, or a lookup that throws, keeps the Worker listed.
+   */
+  private async dropRecovered(
+    failures: ScanFailuresResponse,
+    executions: FailedExecutionSearch,
+    request: KibanaRequest,
+    spaceId: string
+  ): Promise<ScanFailuresResponse> {
+    const recovered = await pMap(
+      failures.workers,
+      async ({ workflowId }) => {
+        try {
+          const latest = await executions.getLatestWorkflowExecution(workflowId, spaceId, request);
+          return latest?.status === ExecutionStatus.COMPLETED;
+        } catch (error) {
+          this.logger.warn(
+            `Latest execution lookup failed: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+          return false;
+        }
+      },
+      { concurrency: SCAN_FAILURE_ATTRIBUTION_CONCURRENCY }
+    );
+
+    return { ...failures, workers: failures.workers.filter((_, index) => !recovered[index]) };
   }
 }

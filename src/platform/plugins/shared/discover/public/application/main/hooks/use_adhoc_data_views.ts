@@ -11,20 +11,19 @@ import { useEffect } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../../../constants';
 import { useFiltersValidation } from './use_filters_validation';
-import { useIsEsqlMode } from './use_is_esql_mode';
 import { useCurrentDataSource } from '../state_management/redux';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 
 export const useAdHocDataViews = () => {
   const dataSource = useCurrentDataSource();
-  const isEsqlMode = useIsEsqlMode();
   const { filterManager, toastNotifications, trackUiMetric } = useDiscoverServices();
 
   useEffect(() => {
-    if (!dataSource.isPersisted()) {
+    // Only count ad hoc data views used in classic mode, since they are user-created
+    if (dataSource.kind === 'index-pattern' && !dataSource.isPersisted()) {
       trackUiMetric?.(METRIC_TYPE.COUNT, ADHOC_DATA_VIEW_RENDER_EVENT);
     }
-  }, [dataSource, isEsqlMode, trackUiMetric]);
+  }, [dataSource, trackUiMetric]);
 
   /**
    * Takes care of checking data view id references in filters

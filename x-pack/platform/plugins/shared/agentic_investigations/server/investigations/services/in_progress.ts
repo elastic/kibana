@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import pLimit from 'p-limit';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ConversationWithoutRoundsWithPermissions } from '@kbn/agent-builder-common';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import { isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-
-/** Workflow executions read at the same time. */
-const WORKFLOW_EXECUTION_READ_CONCURRENCY = 5;
 
 export type InProgressCandidate = Pick<ConversationWithoutRoundsWithPermissions, 'id' | 'metadata'>;
 
@@ -103,26 +99,22 @@ export class InProgressResolver {
     spaceId: string,
     executionIds: string[]
   ): Promise<Set<string>> {
-    const limit = pLimit(WORKFLOW_EXECUTION_READ_CONCURRENCY);
-    const running = await Promise.all(
-      [...new Set(executionIds)].map((id) =>
-        limit(async () => {
-          try {
-            const execution = await workflowsManagement.getWorkflowExecution(id, spaceId, {
-              request,
-              omitStepExecutions: true,
-            });
-            return execution && !isTerminalStatus(execution.status) ? id : undefined;
-          } catch (error) {
-            this.deps.logger.debug(
-              `Could not read workflow execution "${id}": ${errorMessage(error)}`
-            );
-            return undefined;
-          }
-        })
-      )
-    );
-    return new Set(running.filter((id): id is string => id !== undefined));
+    if (executionIds.length === 0) {
+      return new Set();
+    }
+    try {
+      const executions = await workflowsManagement.getWorkflowExecutionStatuses(
+        [...new Set(executionIds)],
+        spaceId,
+        { request }
+      );
+      return new Set(
+        executions.filter(({ status }) => !isTerminalStatus(status)).map(({ id }) => id)
+      );
+    } catch (error) {
+      this.deps.logger.debug(`Could not read workflow executions: ${errorMessage(error)}`);
+      return new Set();
+    }
   }
 }
 

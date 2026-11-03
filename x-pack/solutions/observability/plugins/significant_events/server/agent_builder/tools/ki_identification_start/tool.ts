@@ -16,14 +16,14 @@ import dedent from 'dedent';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
 import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
-import { SIGNIFICANT_EVENTS_APP_ROUTE } from '../../../../common/constants';
+import { NIGHTSHIFT_SOURCES_APP_PATH } from '../../../../common/constants';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import type { SignificantEventsServer } from '../../../types';
 import { classifyError } from '../../utils/error_utils';
 import {
   assertSourceEnabled,
   loadSourceCatalog,
-  resolveSourcesBySlug,
+  resolveSourcesBySlugOrId,
   toSourceRef,
 } from '../../utils/resolve_source_slugs';
 import { startKiIdentificationToolHandler } from './handler';
@@ -68,15 +68,15 @@ export const createKiIdentificationStartTool = ({
     Start Knowledge Indicator (KI) identification for a Nightshift source as a background task.
 
     This tool schedules the KI identification background task and returns immediately with a
-    Kibana path to the significant events knowledge indicators view where progress can be tracked.
+    Kibana path to the Nightshift Sources page, where each source's onboarding status shows progress.
 
     Use this tool to:
     - Kick off KI identification for an enabled source
     - Run feature identification and query generation steps in a background task
-    - Get a direct Kibana path to track background task progress in the significant events UI
+    - Get a direct Kibana path to track background task progress on the Nightshift Sources page
 
     Returns:
-    - On success: \`{ slug, title, view_name, kibanaPath: "${SIGNIFICANT_EVENTS_APP_ROUTE}/knowledge_indicators?source=<source id>" }\`
+    - On success: \`{ slug, title, view_name, kibanaPath: "${NIGHTSHIFT_SOURCES_APP_PATH}" }\`
     - On failure: an error result with \`message\`, \`slug\`, \`operation\`, and \`likely_cause\`
   `,
   schema: onboardingStartSchema,
@@ -86,7 +86,7 @@ export const createKiIdentificationStartTool = ({
       await assertCanManageSignificantEvents({ request, server });
       const scopedClients = await getScopedClients({ request });
       const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
-      const [source] = resolveSourcesBySlug(catalog, [slug]);
+      const [source] = resolveSourcesBySlugOrId(catalog, [slug]);
       assertSourceEnabled(source);
       sourceId = source.id;
 

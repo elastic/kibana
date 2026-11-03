@@ -76,4 +76,25 @@ describe('knowledge indicator snapshot replay', () => {
       'ctx._source.query.esql.replace(capturedView, params.source_view)'
     );
   });
+
+  it('stamps the source as the flat `source.id` key the readers use, not a nested object', async () => {
+    const reindex = jest.fn().mockResolvedValue({ total: 1, created: 1 });
+    const indices = {
+      delete: jest.fn().mockResolvedValue({}),
+      refresh: jest.fn().mockResolvedValue({}),
+    };
+    await replayKnowledgeIndicatorsSnapshot(
+      { reindex, indices } as unknown as Client,
+      new ToolingLog(),
+      'snapshot',
+      { bucket: 'bucket', basePathPrefix: 'prefix' },
+      { sourceId: 'source-uuid', spaceId: 'default', viewName: '$.nightshift.sources.default.eval' }
+    );
+
+    const { script } = reindex.mock.calls[0][0] as { script: { source: string } };
+    // A nested `source: { id }` object reads back as an undefined `source_id` in `_source`, which
+    // crashes the knowledge-indicator search sort as soon as it has two results to order.
+    expect(script.source).toContain("ctx._source['source.id'] = params.source_id");
+    expect(script.source).not.toMatch(/ctx\._source\.source\s*=/);
+  });
 });

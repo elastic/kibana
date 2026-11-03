@@ -18,7 +18,8 @@ export const NL_TEXTAREA_MAX_HEIGHT = 'calc(35vh - 100px)';
 export const visorStyles = (
   euiThemeContext: UseEuiTheme,
   isInline: boolean,
-  isVisible: boolean = true
+  isVisible: boolean = true,
+  hasOutline: boolean = false
 ) => {
   const { euiTheme } = euiThemeContext;
   const fontSize = euiFontSizeFromScale('xs', euiTheme);
@@ -29,6 +30,10 @@ export const visorStyles = (
     ${euiTheme.components.buttons.backgroundAssistanceHover} 83%
   )`;
 
+  // With an outline the row is inset from the shell border, so reserve room for the bottom inset.
+  const visibleHeight =
+    hasOutline && isInline ? `calc(${euiTheme.size.xl} + ${euiTheme.size.xs})` : euiTheme.size.xl;
+
   return {
     visorContainer: css`
       display: flex;
@@ -38,11 +43,16 @@ export const visorStyles = (
       width: 100%;
       position: relative;
       z-index: ${euiTheme.levels.menu};
+      ${hasOutline && isInline
+        ? `padding-inline: ${euiTheme.size.xs}; padding-block-end: ${
+            isVisible ? euiTheme.size.xs : '0'
+          }; box-sizing: border-box;`
+        : ''}
       ${isInline
         ? `
-          min-height: ${isVisible ? euiTheme.size.xl : '0'};
-          height: ${isVisible ? euiTheme.size.xl : '0'};
-          max-height: ${isVisible ? euiTheme.size.xl : '0'};
+          min-height: ${isVisible ? visibleHeight : '0'};
+          height: ${isVisible ? visibleHeight : '0'};
+          max-height: ${isVisible ? visibleHeight : '0'};
           opacity: ${isVisible ? 1 : 0};
           pointer-events: ${isVisible ? 'auto' : 'none'};
           overflow: ${isVisible ? 'visible' : 'hidden'};
@@ -87,7 +97,7 @@ export const visorStyles = (
       flex-shrink: 0;
       box-sizing: border-box;
       gap: ${euiTheme.size.xs};
-      margin-inline-start: ${euiTheme.size.xs};
+      margin-inline-start: ${hasOutline ? '0' : euiTheme.size.xs};
       block-size: ${euiTheme.size.xl};
       max-block-size: ${euiTheme.size.xl};
       padding: ${euiTheme.size.xs};

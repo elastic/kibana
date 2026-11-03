@@ -29,6 +29,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 
+import { ImportJsonErrorDetails } from './import_json_error_details';
 import { importJsonFlyoutStrings } from './import_json_strings';
 import { ImportJsonWarningsCallout } from './import_json_warnings_callout';
 import type { CreateFromJson, ImportJsonFlyoutServices, SanitizeImportJson } from './types';
@@ -86,7 +87,6 @@ export const ImportJsonFlyoutContent = <SanitizedState,>({
     title,
     closeFlyout,
     services,
-    serverValidationErrorTitle,
     sanitizeImportJson,
     createFromJson,
     onImportSuccess,
@@ -134,10 +134,16 @@ export const ImportJsonFlyoutContent = <SanitizedState,>({
           <>
             <KbnDangerCallout
               announceOnMount
-              title={serverError}
+              title={serverValidationErrorTitle}
               data-test-subj={`${dataTestSubjPrefix}ServerError`}
             >
               {serverValidationErrorText}
+              {serverError.details && (
+                <ImportJsonErrorDetails
+                  dataTestSubjPrefix={dataTestSubjPrefix}
+                  details={serverError.details}
+                />
+              )}
             </KbnDangerCallout>
             <EuiSpacer size="m" />
           </>
