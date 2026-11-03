@@ -71,6 +71,11 @@ const optionListControlStyles = {
         outline: `none !important`,
       },
     }),
+  // EUI's default placeholder color (textDisabled) fails WCAG 1.4.3 contrast
+  placeholderText: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      color: euiTheme.colors.textSubdued,
+    }),
   filterButtonText: css({
     flexGrow: 1,
     textAlign: 'left',
@@ -232,6 +237,7 @@ export const OptionsListControl = ({
       value={hasSelections || existsSelected ? selectionDisplayNode : ''}
       placeholder={displaySettings.placeholder ?? OptionsListStrings.control.getPlaceholder()}
       css={styles.filterButton}
+      textProps={{ css: styles.placeholderText }}
       onClick={() => setPopoverOpen(!isPopoverOpen)}
       aria-label={label}
       aria-expanded={isPopoverOpen}
