@@ -26,6 +26,17 @@ const fieldToZodSchema = (field: CreateConnectorTypeRequest['config'][number]) =
   });
 };
 
+const appendPath = (baseUrl: string, path: string): string => {
+  const url = new URL(baseUrl);
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+    throw new Error('A request URL with a path must use HTTP or HTTPS.');
+  }
+  if (url.search || url.hash || url.username || url.password) {
+    throw new Error('A request URL with a path cannot contain a query, fragment, or credentials.');
+  }
+  return `${url.origin}${url.pathname.replace(/\/+$/, '')}${path}`;
+};
+
 const toSpec = (request: CreateConnectorTypeRequest): ConnectorSpec => {
   const configShape = Object.fromEntries(
     request.config.map((field) => [field.name, fieldToZodSchema(field)])
@@ -47,7 +58,7 @@ const toSpec = (request: CreateConnectorTypeRequest): ConnectorSpec => {
             input: Record<string, unknown>
           ) => {
             const values = { config: ctx.config ?? {}, input, secrets: ctx.secrets ?? {} };
-            const render = (template: string) =>
+            const render = (template: string, encodePathValue = false) =>
               template.replace(
                 /{{\s*(config|input|secrets)\.([A-Za-z][A-Za-z0-9_]*)\s*}}/g,
                 (_match, source: keyof typeof values, key: string) => {
@@ -55,7 +66,7 @@ const toSpec = (request: CreateConnectorTypeRequest): ConnectorSpec => {
                   if (value === undefined || value === null) {
                     throw new Error(`Missing template value: ${source}.${key}`);
                   }
-                  return String(value);
+                  return encodePathValue ? encodeURIComponent(String(value)) : String(value);
                 }
               );
             const headers = Object.fromEntries(
@@ -76,7 +87,9 @@ const toSpec = (request: CreateConnectorTypeRequest): ConnectorSpec => {
             };
             const response = await ctx.client.request({
               method: action.request.method,
-              url: render(action.request.url),
+              url: action.request.path
+                ? appendPath(render(action.request.url), render(action.request.path, true))
+                : render(action.request.url),
               headers,
               ...(action.request.body ? { data: renderBody(action.request.body) } : {}),
             });

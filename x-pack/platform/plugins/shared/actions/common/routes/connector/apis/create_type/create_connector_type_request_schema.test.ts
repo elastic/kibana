@@ -113,6 +113,42 @@ describe('createConnectorTypeRequestSchema', () => {
     expect(createConnectorTypeRequestSchema.safeParse(wrongSecret).success).toBe(false);
   });
 
+  it('accepts a path with declared template fields', () => {
+    const result = createConnectorTypeRequestSchema.safeParse({
+      ...validRequest,
+      actions: {
+        getOrder: {
+          ...validRequest.actions.getOrder,
+          request: {
+            ...validRequest.actions.getOrder.request,
+            url: '{{config.baseUrl}}',
+            path: '/orders/{{input.orderId}}',
+          },
+        },
+      },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it.each([
+    '/orders/{{input.missing}}',
+    'orders',
+    '//other.example/orders',
+    '/orders?x=1',
+    '/orders#x',
+  ])('rejects an invalid path: %s', (path) => {
+    const result = createConnectorTypeRequestSchema.safeParse({
+      ...validRequest,
+      actions: {
+        getOrder: {
+          ...validRequest.actions.getOrder,
+          request: { ...validRequest.actions.getOrder.request, path },
+        },
+      },
+    });
+    expect(result.success).toBe(false);
+  });
+
   it('rejects duplicate field names and unbounded request bodies', () => {
     const duplicateFields = {
       ...validRequest,

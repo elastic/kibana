@@ -102,6 +102,14 @@ const templateSchema = (maxLength: number, allowSecret: boolean) =>
     });
 
 export const urlTemplateSchema = lazySchema(() => templateSchema(2048, false).min(1));
+export const pathTemplateSchema = lazySchema(() =>
+  templateSchema(2048, false)
+    .min(1)
+    .refine(
+      (path) => path.startsWith('/') && !path.startsWith('//') && !/[?#\\\u0000-\u001f]/.test(path),
+      'Path must start with one slash and cannot contain a query or fragment.'
+    )
+);
 export const headerNameSchema = lazySchema(() =>
   z
     .string()
@@ -152,6 +160,7 @@ export const requestTemplateSchema = lazySchema(() =>
     .object({
       method: httpMethodSchema,
       url: urlTemplateSchema,
+      path: pathTemplateSchema.optional(),
       headers: z
         .record(headerNameSchema, headerTemplateSchema)
         .refine((headers) => Object.keys(headers).length <= MAX_HEADERS, {
@@ -213,6 +222,7 @@ export const createConnectorTypeRequestSchema = lazySchema(() =>
         const inputNames = new Set(action.input.map(({ name }) => name));
         const values = [
           action.request.url,
+          ...(action.request.path ? [action.request.path] : []),
           ...Object.values(action.request.headers ?? {}),
           ...stringValues(action.request.body),
         ];

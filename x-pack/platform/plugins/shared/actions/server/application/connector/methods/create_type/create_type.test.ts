@@ -6,6 +6,7 @@
  */
 
 import type { ActionTypeRegistry } from '../../../../action_type_registry';
+import type { ConnectorSpec } from '@kbn/connector-specs';
 import { createConnectorType } from './create_type';
 
 const request = {
@@ -58,5 +59,61 @@ describe('createConnectorType', () => {
     ).toThrow('Connector type ".dynamic_type" is already registered.');
     expect(has).toHaveBeenCalledWith('.dynamic_type');
     expect(registerType).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['https://example.test', 'https://example.test/items/a%2Fb%3Fc'],
+    ['https://example.test/api/', 'https://example.test/api/items/a%2Fb%3Fc'],
+  ])('appends the action path to %s', async (baseUrl, expectedUrl) => {
+    const actionTypeRegistry = { has: jest.fn(() => false) } as unknown as ActionTypeRegistry;
+    const createTypeFromSpec = jest.fn(() => ({ id: '.dynamic_type' })) as never;
+    createConnectorType({
+      actionTypeRegistry,
+      createTypeFromSpec,
+      registerType: jest.fn(),
+      request: {
+        ...request,
+        actions: {
+          getItem: {
+            ...request.actions.getItem,
+            input: [{ name: 'itemId', type: 'string', required: true }],
+            request: {
+              method: 'GET',
+              url: '{{config.baseUrl}}',
+              path: '/items/{{input.itemId}}',
+            },
+          },
+        },
+      },
+    });
+    const spec = (createTypeFromSpec as jest.Mock).mock.calls[0][0] as ConnectorSpec;
+    const client = { request: jest.fn().mockResolvedValue({ data: { ok: true } }) };
+
+    await spec.actions.getItem.handler({ config: { baseUrl }, secrets: {}, client } as never, {
+      itemId: 'a/b?c',
+    });
+
+    expect(client.request).toHaveBeenCalledWith(
+      expect.objectContaining({ url: expectedUrl, method: 'GET' })
+    );
+  });
+
+  it('keeps a full URL template when no path is given', async () => {
+    const actionTypeRegistry = { has: jest.fn(() => false) } as unknown as ActionTypeRegistry;
+    const createTypeFromSpec = jest.fn(() => ({ id: '.dynamic_type' })) as never;
+    createConnectorType({
+      actionTypeRegistry,
+      createTypeFromSpec,
+      registerType: jest.fn(),
+      request,
+    });
+    const spec = (createTypeFromSpec as jest.Mock).mock.calls[0][0] as ConnectorSpec;
+    const client = { request: jest.fn().mockResolvedValue({ data: {} }) };
+
+    await spec.actions.getItem.handler({ config: {}, secrets: {}, client } as never, {});
+
+    expect(client.request).toHaveBeenCalledWith(
+      expect.objectContaining({ url: 'https://example.test/items' })
+    );
   });
 });
