@@ -11,6 +11,7 @@ import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { NightshiftInvestigationsClient } from '../client/investigations_client';
 import type { CortexPageStore } from '../cortex/page_store';
 import type {
@@ -48,6 +49,9 @@ export type GetAutomationsSoClient = (
 
 export type GetWorkflowsManagement = () => WorkflowsServerPluginSetup | undefined;
 
+/** Request-scoped, so connector writes run as the caller; undefined when Actions is unavailable. */
+export type GetActionsClient = (request: KibanaRequest) => Promise<ActionsClient | undefined>;
+
 export type GetCortexPageStore = (request: KibanaRequest) => CortexPageStore;
 
 export type GetDecisionTreeStore = (request: KibanaRequest) => DecisionTreeStore;
@@ -65,6 +69,7 @@ export interface NightshiftInvestigationsRouteHandlerResources
   getEpisodeLookup: GetEpisodeLookup;
   getAutomationsSoClient: GetAutomationsSoClient;
   getWorkflowsManagement: GetWorkflowsManagement;
+  getActionsClient: GetActionsClient;
   getCortexPageStore: GetCortexPageStore;
   isCortexEnabled: () => boolean;
   listSandboxConnectors: ListSandboxConnectors;

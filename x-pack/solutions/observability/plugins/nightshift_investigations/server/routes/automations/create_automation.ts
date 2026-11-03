@@ -12,7 +12,13 @@ import { createNightshiftInvestigationsServerRoute } from '../create_server_rout
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
 import { automationCompletionSchema, promptTemplateSchema } from '../../lib/automations/schemas';
 import { generateWorkflowYaml } from '../../lib/automations/generate_workflow_yaml';
+import { resolveClusterConnector } from '../../lib/automations/cluster_connector';
 import { validateScheduledAutomation } from '../../lib/automations/validate_scheduled_automation';
+import {
+  deleteInboundWebhook,
+  provisionInboundWebhook,
+  type ProvisionedInboundWebhook,
+} from '../../lib/automations/inbound_webhook_connector';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
 import { triggerRowSchema } from './trigger_row_schema';
 
@@ -62,6 +68,7 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
     params,
     getAutomationsSoClient,
     getWorkflowsManagement,
+    getActionsClient,
     getInvestigatorServiceAccountService,
     context,
   }) => {
@@ -97,10 +104,44 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
 
     validateScheduledAutomation(attributes);
 
-    const created = await soClient.create<NightshiftAutomationAttributes>(
-      NIGHTSHIFT_AUTOMATION_SO_TYPE,
-      attributes
-    );
+    // The workflow's trigger names the connector, so it has to exist before the document is built.
+    const actionsClient = await getActionsClient(request);
+    attributes.trigger = {
+      rows: await resolveClusterConnector(actionsClient, attributes.trigger.rows),
+    };
+    const webhookRows = attributes.trigger.rows.filter((row) => row.kind === 'webhook');
+    if (webhookRows.length > 1) {
+      throw badRequest('An automation can have only one webhook trigger');
+    }
+    let webhook: ProvisionedInboundWebhook | undefined;
+    if (webhookRows.length === 1) {
+      if (!actionsClient) {
+        throw serverUnavailable('Actions is not available');
+      }
+      webhook = await provisionInboundWebhook(actionsClient, attributes.name);
+      const { connectorId } = webhook;
+      attributes.trigger = {
+        rows: attributes.trigger.rows.map((row) =>
+          row.kind === 'webhook' ? { ...row, connectorId } : row
+        ),
+      };
+    }
+    const removeWebhook = async () => {
+      if (webhook && actionsClient) {
+        await deleteInboundWebhook(actionsClient, webhook.connectorId);
+      }
+    };
+
+    let created;
+    try {
+      created = await soClient.create<NightshiftAutomationAttributes>(
+        NIGHTSHIFT_AUTOMATION_SO_TYPE,
+        attributes
+      );
+    } catch (err) {
+      await removeWebhook();
+      throw err;
+    }
 
     let workflowId: string;
     try {
@@ -117,6 +158,7 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
       workflowId = workflow.id;
     } catch (err) {
       await soClient.delete(NIGHTSHIFT_AUTOMATION_SO_TYPE, created.id);
+      await removeWebhook();
       throw badRequest(`Failed to create backing workflow: ${err.message}`);
     }
 
@@ -134,9 +176,16 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
         // Best-effort cleanup; the SO will have no workflowId so the automation is inert.
       }
       await soClient.delete(NIGHTSHIFT_AUTOMATION_SO_TYPE, created.id);
+      await removeWebhook();
       throw badRequest(`Failed to link workflow to automation: ${err.message}`);
     }
 
-    return { id: created.id, ...attributes, workflowId };
+    // The token is returned only here: the platform keeps a hash, so it cannot be shown again.
+    return {
+      id: created.id,
+      ...attributes,
+      workflowId,
+      ...(webhook ? { webhook } : {}),
+    };
   },
 });

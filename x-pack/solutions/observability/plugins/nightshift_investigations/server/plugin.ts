@@ -537,6 +537,8 @@ export class NightshiftInvestigationsPlugin
           getEpisodeLookup: this.getEpisodeLookup,
           getAutomationsSoClient: this.getAutomationsSoClient,
           getWorkflowsManagement: () => this.workflowsManagement,
+          getActionsClient: async (request: KibanaRequest) =>
+            this.actionsStart?.getActionsClientWithRequest(request),
           isCortexEnabled: () => this.cortexEnabled,
           listSandboxConnectors,
           listSandboxConnectorTypes,

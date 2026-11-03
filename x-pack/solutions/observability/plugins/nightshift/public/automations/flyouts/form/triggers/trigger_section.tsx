@@ -16,6 +16,7 @@ import { DailyLimitField } from './daily_limit_field';
 import { AlertTriggerEditor } from './editors/alert_trigger_editor';
 import { EveryTriggerEditor } from './editors/every_trigger_editor';
 import { SlackTriggerEditor } from './editors/slack_trigger_editor';
+import { WebhookTriggerEditor } from './editors/webhook_trigger_editor';
 import { triggerLabels } from './translations';
 import { TriggerPicker } from './trigger_picker';
 import { TriggerRow } from './trigger_row';
@@ -105,6 +106,13 @@ export const AutomationTriggerSection = ({
                 readOnly={readOnly}
               />
             )}
+            {trigger.kind === 'webhook' && (
+              <WebhookTriggerEditor
+                trigger={trigger}
+                onChange={onTriggerChange}
+                readOnly={readOnly}
+              />
+            )}
           </TriggerRow>
         )}
         {trigger && (
@@ -113,6 +121,8 @@ export const AutomationTriggerSection = ({
             helpText={
               isSlackTrigger(trigger)
                 ? triggerLabels.slackDailyLimitHelp
+                : trigger.kind === 'webhook'
+                ? triggerLabels.webhookDailyLimitHelp
                 : triggerLabels.dailyLimitHelp
             }
             onChange={onDailyDispatchLimitChange}

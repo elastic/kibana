@@ -17,6 +17,13 @@ export const createRouteContext = () => ({
   resolve: jest.fn(),
 });
 
+/** The slice of the Actions client that provisions an automation's inbound webhook connector. */
+export const createActionsClient = () => ({
+  create: jest.fn().mockResolvedValue({ id: 'webhook-connector-1' }),
+  rotateInboundIngress: jest.fn().mockResolvedValue({ ingestToken: 'token-1' }),
+  delete: jest.fn().mockResolvedValue({}),
+});
+
 /** The service account service as the automation routes use it. */
 export const createServiceAccountService = () => ({
   resolveAutomationRunAs: jest.fn().mockResolvedValue('kibana/nightshift_automations'),

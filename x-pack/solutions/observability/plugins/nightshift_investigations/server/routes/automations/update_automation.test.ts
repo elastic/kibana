@@ -8,7 +8,11 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { parse } from 'yaml';
 import { updateAutomationRoute } from './update_automation';
-import { createRouteContext, createServiceAccountService } from './test_helpers';
+import {
+  createActionsClient,
+  createRouteContext,
+  createServiceAccountService,
+} from './test_helpers';
 
 const { handler, params } = updateAutomationRoute['PUT /internal/nightshift/automations/{id}'];
 
@@ -37,15 +41,18 @@ const call = (body: Record<string, unknown>) =>
     params: params.parse({ path: { id: 'automation-1' }, body }),
     getAutomationsSoClient,
     getWorkflowsManagement,
+    getActionsClient: async () => actionsClient,
     getInvestigatorServiceAccountService: () => serviceAccountService,
     context: createRouteContext(),
   } as never);
 
 let serviceAccountService = createServiceAccountService();
+let actionsClient = createActionsClient();
 
 beforeEach(() => {
   jest.clearAllMocks();
   serviceAccountService = createServiceAccountService();
+  actionsClient = createActionsClient();
   soClient.get.mockResolvedValue({ attributes: existing });
 });
 
@@ -358,4 +365,55 @@ it('refuses callers who cannot write a bound workflow before writing anything', 
   await expect(call({ isEnabled: false })).rejects.toThrow('manage_security');
   expect(updateWorkflow).not.toHaveBeenCalled();
   expect(soClient.update).not.toHaveBeenCalled();
+});
+
+describe('webhook trigger', () => {
+  const webhookRow = { kind: 'webhook' as const };
+  const withExistingConnector = () =>
+    soClient.get.mockResolvedValue({
+      attributes: {
+        ...existing,
+        trigger: { rows: [{ kind: 'webhook', connectorId: 'webhook-connector-1' }] },
+      },
+    });
+
+  it('provisions a connector when a webhook trigger is added and returns its token', async () => {
+    const result = await call({ trigger: { rows: [webhookRow] } });
+
+    expect(actionsClient.create).toHaveBeenCalledTimes(1);
+    expect(parse(updateWorkflow.mock.calls[0][1].yaml).triggers).toEqual([
+      { type: 'inboundWebhook.received', 'connector-id': 'webhook-connector-1' },
+    ]);
+    expect(result.webhook).toEqual({ connectorId: 'webhook-connector-1', ingestToken: 'token-1' });
+  });
+
+  it('keeps the existing connector, and returns no token, when other fields change', async () => {
+    withExistingConnector();
+
+    const result = await call({ name: 'Renamed', trigger: { rows: [webhookRow] } });
+
+    expect(actionsClient.create).not.toHaveBeenCalled();
+    expect(actionsClient.rotateInboundIngress).not.toHaveBeenCalled();
+    expect(result.trigger).toEqual({
+      rows: [{ kind: 'webhook', connectorId: 'webhook-connector-1' }],
+    });
+    expect(result).not.toHaveProperty('webhook');
+  });
+
+  it('deletes the connector when the webhook trigger is removed', async () => {
+    withExistingConnector();
+
+    await call({ trigger: { rows: [{ kind: 'alert' }] } });
+
+    expect(actionsClient.delete).toHaveBeenCalledWith({ id: 'webhook-connector-1' });
+  });
+
+  it('deletes a newly provisioned connector when the workflow cannot be updated', async () => {
+    updateWorkflow.mockRejectedValue(new Error('invalid yaml'));
+
+    await expect(call({ trigger: { rows: [webhookRow] } })).rejects.toThrow(
+      'Failed to update backing workflow'
+    );
+    expect(actionsClient.delete).toHaveBeenCalledWith({ id: 'webhook-connector-1' });
+  });
 });

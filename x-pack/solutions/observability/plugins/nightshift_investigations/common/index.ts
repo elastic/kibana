@@ -170,6 +170,7 @@ export {
 } from './locators';
 
 export {
+  EXTERNAL_ELASTICSEARCH_CONNECTOR_TYPE_ID,
   SANDBOX_CONNECTORS_API_PATH,
   SANDBOX_CONNECTOR_TYPES_API_PATH,
   type SandboxConnector,

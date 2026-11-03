@@ -32,6 +32,17 @@ const toTriggerRow = (
       ...(trigger.ruleTags.length ? { tags: trigger.ruleTags } : {}),
     };
   }
+  if (trigger.kind === 'webhook') {
+    // The webhook's own connector is the server's to provision and keep, so the row carries no id
+    // for it. The cluster connector is the user's choice, and only an alert-mode webhook has one.
+    return {
+      kind: 'webhook',
+      mode: trigger.mode,
+      ...(trigger.mode === 'alert' && trigger.clusterConnectorId
+        ? { clusterConnectorId: trigger.clusterConnectorId }
+        : {}),
+    };
+  }
   if (isSlackTrigger(trigger)) {
     const messageFilter = trigger.messageFilter.trim();
     return {

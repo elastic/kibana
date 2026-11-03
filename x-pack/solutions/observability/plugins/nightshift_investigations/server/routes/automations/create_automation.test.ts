@@ -8,7 +8,11 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { parse } from 'yaml';
 import { createAutomationRoute } from './create_automation';
-import { createRouteContext, createServiceAccountService } from './test_helpers';
+import {
+  createActionsClient,
+  createRouteContext,
+  createServiceAccountService,
+} from './test_helpers';
 
 const { handler, params } = createAutomationRoute['POST /internal/nightshift/automations'];
 
@@ -33,15 +37,18 @@ const call = (overrides: Record<string, unknown> = {}) =>
     params: params.parse({ body: { ...body, ...overrides } }),
     getAutomationsSoClient,
     getWorkflowsManagement,
+    getActionsClient: async () => actionsClient,
     getInvestigatorServiceAccountService: () => serviceAccountService,
     context: createRouteContext(),
   } as never);
 
 let serviceAccountService = createServiceAccountService();
+let actionsClient = createActionsClient();
 
 beforeEach(() => {
   jest.clearAllMocks();
   serviceAccountService = createServiceAccountService();
+  actionsClient = createActionsClient();
   soClient.create.mockResolvedValue({ id: 'automation-1' });
   createWorkflow.mockResolvedValue({ id: 'workflow-1' });
 });
@@ -101,6 +108,58 @@ it('removes the automation when the workflow cannot be created', async () => {
   expect(soClient.delete).toHaveBeenCalledWith('nightshift-automation', 'automation-1');
 });
 
+describe('webhook trigger', () => {
+  const webhookBody = { trigger: { rows: [{ kind: 'webhook' as const }] } };
+
+  it('provisions a connector, stores its id on the row and builds the workflow around it', async () => {
+    const result = await call(webhookBody);
+
+    expect(actionsClient.create).toHaveBeenCalledWith({
+      action: expect.objectContaining({ actionTypeId: '.inboundWebhook' }),
+    });
+    expect(actionsClient.rotateInboundIngress).toHaveBeenCalledWith({ id: 'webhook-connector-1' });
+    expect(soClient.create).toHaveBeenCalledWith(
+      'nightshift-automation',
+      expect.objectContaining({
+        trigger: { rows: [{ kind: 'webhook', connectorId: 'webhook-connector-1' }] },
+      })
+    );
+    const workflow = parse(createWorkflow.mock.calls[0][0].yaml);
+    expect(workflow.triggers).toEqual([
+      { type: 'inboundWebhook.received', 'connector-id': 'webhook-connector-1' },
+    ]);
+    expect(result.webhook).toEqual({ connectorId: 'webhook-connector-1', ingestToken: 'token-1' });
+  });
+
+  it('does not touch Actions for an automation without a webhook trigger', async () => {
+    const result = await call();
+
+    expect(actionsClient.create).not.toHaveBeenCalled();
+    expect(result).not.toHaveProperty('webhook');
+  });
+
+  it('deletes the connector when the workflow cannot be created', async () => {
+    createWorkflow.mockRejectedValue(new Error('invalid yaml'));
+
+    await expect(call(webhookBody)).rejects.toThrow('Failed to create backing workflow');
+    expect(actionsClient.delete).toHaveBeenCalledWith({ id: 'webhook-connector-1' });
+  });
+
+  it('deletes the connector when the automation cannot be saved', async () => {
+    soClient.create.mockRejectedValue(new Error('conflict'));
+
+    await expect(call(webhookBody)).rejects.toThrow('conflict');
+    expect(actionsClient.delete).toHaveBeenCalledWith({ id: 'webhook-connector-1' });
+  });
+
+  it('rejects more than one webhook trigger before provisioning anything', async () => {
+    await expect(
+      call({ trigger: { rows: [{ kind: 'webhook' }, { kind: 'webhook' }] } })
+    ).rejects.toThrow('only one webhook trigger');
+    expect(actionsClient.create).not.toHaveBeenCalled();
+  });
+});
+
 describe('request validation', () => {
   const slackRow = {
     kind: 'slack',
@@ -117,6 +176,21 @@ describe('request validation', () => {
 
   it('rejects Slack events other than message', () => {
     expect(() => parseRows([{ ...slackRow, event: 'mention' }])).toThrow();
+  });
+
+  it('accepts webhook rows in either mode, and drops a connector id a request tries to set', () => {
+    expect(parseRows([{ kind: 'webhook' }]).body.trigger.rows).toEqual([{ kind: 'webhook' }]);
+    expect(parseRows([{ kind: 'webhook', mode: 'alert' }]).body.trigger.rows).toEqual([
+      { kind: 'webhook', mode: 'alert' },
+    ]);
+    expect(
+      parseRows([{ kind: 'webhook', mode: 'generic', connectorId: 'someone-elses' }]).body.trigger
+        .rows
+    ).toEqual([{ kind: 'webhook', mode: 'generic' }]);
+  });
+
+  it('rejects a webhook mode that does not exist', () => {
+    expect(() => parseRows([{ kind: 'webhook', mode: 'mapped' }])).toThrow();
   });
 
   it('rejects a daily dispatch limit of zero and accepts an omitted one', () => {

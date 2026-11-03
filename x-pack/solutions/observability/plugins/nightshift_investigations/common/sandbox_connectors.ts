@@ -8,6 +8,9 @@
 import type { ActionType } from '@kbn/actions-types';
 import type { ConnectorResponse } from '@kbn/actions-plugin/common/routes/connector/response';
 
+/** The External Elasticsearch connector: how the agent reaches the data on another cluster. */
+export const EXTERNAL_ELASTICSEARCH_CONNECTOR_TYPE_ID = '.elasticsearch';
+
 export const SANDBOX_CONNECTORS_API_PATH = '/internal/nightshift/sandbox_connectors';
 export const SANDBOX_CONNECTOR_TYPES_API_PATH = '/internal/nightshift/sandbox_connector_types';
 

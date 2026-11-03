@@ -22,4 +22,16 @@ describe('getTriggerDisplay', () => {
       icon: 'logoSlack',
     });
   });
+
+  it('labels a webhook by the payload it takes', () => {
+    expect(getTriggerDisplay({ kind: 'webhook' })).toEqual({
+      label: 'Webhook request',
+      icon: 'link',
+    });
+    expect(getTriggerDisplay({ kind: 'webhook', mode: 'generic' }).label).toBe('Webhook request');
+    expect(getTriggerDisplay({ kind: 'webhook', mode: 'alert' })).toEqual({
+      label: 'Remote Elastic alert',
+      icon: 'logoElastic',
+    });
+  });
 });

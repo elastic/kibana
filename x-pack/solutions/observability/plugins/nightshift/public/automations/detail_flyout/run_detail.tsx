@@ -26,6 +26,13 @@ import { useKibana } from '../../hooks/use_kibana';
 import { SectionHeader } from '../flyouts/form/section_header';
 import { RunStatusIndicator, type Run } from './run_history';
 
+// A run's message is the whole prompt the investigation started with, and can hold a long value
+// with no spaces in it, such as a URL in a posted payload. The value column has to be allowed to
+// shrink and that kind of value has to break, or the column grows past the flyout and squeezes the
+// labels down to a letter wide.
+const DETAIL_COLUMN_WIDTHS: [string, string] = ['auto', 'minmax(0, 1fr)'];
+const DETAIL_VALUE_PROPS = { css: { overflowWrap: 'anywhere' } } as const;
+
 const getSkipReasonDescription = ({ skipReason, dailyLimit }: Run) => {
   if (skipReason === 'investigation_limit') {
     return i18n.translate('xpack.nightshift.automations.detail.investigationLimitReason', {
@@ -144,7 +151,8 @@ export const RunDetail = ({
             <EuiSpacer size="s" />
             <EuiDescriptionList
               type="column"
-              columnWidths={['auto', 1]}
+              columnWidths={DETAIL_COLUMN_WIDTHS}
+              descriptionProps={DETAIL_VALUE_PROPS}
               listItems={[
                 {
                   title: labels.triggered,
@@ -166,7 +174,8 @@ export const RunDetail = ({
             <EuiSpacer size="s" />
             <EuiDescriptionList
               type="column"
-              columnWidths={['auto', 1]}
+              columnWidths={DETAIL_COLUMN_WIDTHS}
+              descriptionProps={DETAIL_VALUE_PROPS}
               listItems={[
                 { title: labels.source, description: run.triggeredBy ?? '—' },
                 { title: labels.message, description: run.message ?? '—' },

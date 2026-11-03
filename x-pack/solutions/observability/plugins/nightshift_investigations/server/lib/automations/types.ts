@@ -11,6 +11,7 @@ export type AutomationType = 'custom' | 'managed';
 
 export type RuleNameMatchMode = 'substring' | 'regex';
 export type SlackTriggerEvent = 'message';
+export type WebhookTriggerMode = 'generic' | 'alert';
 export type OverlapPolicy = 'drop' | 'cancel_in_progress' | 'queue';
 export type ReasoningMode = 'investigate' | 'observe';
 export type CompletionAction = 'create_investigation' | 'post_to_slack' | 'silent';
@@ -32,6 +33,23 @@ export type NightshiftTriggerRow =
       users?: string[];
       bots?: string[];
       messageFilter?: string;
+    }
+  | {
+      kind: 'webhook';
+      /**
+       * `alert` expects the fixed alert payload (`id`, `name`, `status`, optional `start`) and runs
+       * the investigation on that alert. Anything else, or unset, takes any payload.
+       */
+      mode?: WebhookTriggerMode;
+      /** The `.inboundWebhook` connector provisioned for this automation; set by the server. */
+      connectorId?: string;
+      /**
+       * Alert mode only: the External Elasticsearch connector for the cluster the alerts come from.
+       * The investigation prompt names it so the agent queries that cluster.
+       */
+      clusterConnectorId?: string;
+      /** The connector's name when the automation was last saved; set by the server. */
+      clusterConnectorName?: string;
     };
 
 export interface NightshiftAutomationTrigger {

@@ -36,6 +36,9 @@ export const validationLabels = {
   triggerRequired: i18n.translate('xpack.nightshift.automations.flyout.triggerRequired', {
     defaultMessage: 'Select a trigger to save',
   }),
+  clusterRequired: i18n.translate('xpack.nightshift.automations.flyout.clusterRequired', {
+    defaultMessage: 'Choose the cluster the alerts come from before saving',
+  }),
   slackChannelsRequired: i18n.translate(
     'xpack.nightshift.automations.flyout.slackChannelsRequired',
     { defaultMessage: 'Select at least one channel.' }
@@ -58,6 +61,10 @@ export const isTriggerValid = (trigger?: TriggerFormValues): trigger is TriggerF
   if (trigger.kind === 'every') {
     return parsePresetSchedule(toPresetSchedule(trigger)).success;
   }
+  // A remote Elastic alert is investigated by querying its cluster, so it has to name one.
+  if (trigger.kind === 'webhook') {
+    return trigger.mode !== 'alert' || Boolean(trigger.clusterConnectorId);
+  }
   return true;
 };
 
@@ -71,6 +78,13 @@ export const getSaveBlocker = (values: AutomationFormValues): string | undefined
   }
   if (values.trigger && isSlackTrigger(values.trigger) && !values.trigger.channels.length) {
     return validationLabels.slackChannelsRequired;
+  }
+  if (
+    values.trigger.kind === 'webhook' &&
+    values.trigger.mode === 'alert' &&
+    !values.trigger.clusterConnectorId
+  ) {
+    return validationLabels.clusterRequired;
   }
   if (
     values.slackAction &&
