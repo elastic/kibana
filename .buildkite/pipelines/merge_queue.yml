@@ -157,6 +157,7 @@ steps:
       machineType: n4-standard-16
       diskType: hyperdisk-balanced
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,southamerica-east1-a,southamerica-east1-b,southamerica-east1-c
     key: linting
     env:
       CHECK_GATE: 'true'
@@ -175,6 +176,7 @@ steps:
       machineType: n4-standard-32
       diskType: hyperdisk-balanced
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,southamerica-east1-a,southamerica-east1-b,southamerica-east1-c
     key: linting_with_types
     env:
       CHECK_GATE: 'true'
