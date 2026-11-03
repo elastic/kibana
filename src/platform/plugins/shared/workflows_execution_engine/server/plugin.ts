@@ -92,6 +92,7 @@ import type {
   CancelAllActiveWorkflowExecutions,
   CancelWorkflowExecution,
   ExecuteWorkflow,
+  ExecuteWorkflowAsServiceAccount,
   ExecuteWorkflowStep,
   InternalResumeWorkflowExecution,
   ResumeWorkflowExecution,
@@ -297,9 +298,29 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '365d',
         // Retries allow `resolveInterruptedWorkflowRunTask` to fail-fast abandoned executions after interrupt.
         maxAttempts: WORKFLOW_RUN_TASK_MAX_ATTEMPTS,
-        createTaskRunner: ({ taskInstance, fakeRequest, signal, setCustomTaskRunEventFields }) => {
+        // Runs that have no caller identity, such as page submissions, run as the workflow's
+        // bound service account instead of a cloned API key.
+        runAs: {
+          workloadTypes: [WORKFLOW_SERVICE_ACCOUNT_TYPE],
+          withScopedRequest: async (params, fn) => {
+            const [coreStart] = await core.getStartServices();
+            return coreStart.security.serviceAccounts.withScopedRequestForWorkload(params, fn);
+          },
+        },
+        createTaskRunner: ({
+          taskInstance,
+          fakeRequest,
+          runAs,
+          signal,
+          setCustomTaskRunEventFields,
+        }) => {
           const { workflowRunId, spaceId } = taskInstance.params as StartWorkflowExecutionParams;
-          if (!fakeRequest) {
+          const withRunRequest = fakeRequest
+            ? <T>(fn: (request: KibanaRequest) => Promise<T>) => fn(fakeRequest)
+            : runAs
+            ? <T>(fn: (request: KibanaRequest) => Promise<T>) => runAs.withScopedRequest(fn)
+            : undefined;
+          if (!withRunRequest) {
             return this.createMissingIdentityTaskRunner({
               workflowRunId,
               spaceId,
@@ -383,20 +404,22 @@ export class WorkflowsExecutionEnginePlugin
               }
 
               try {
-                const runResult = await runWorkflow({
-                  workflowExecutionRepository,
-                  stepExecutionRepository,
-                  workflowRunId,
-                  spaceId,
-                  signal: taskAbortController.signal,
-                  config,
-                  logger,
-                  fakeRequest,
-                  dependencies,
-                  workflowsExecutionEngine,
-                  meteringService: this.meteringService,
-                  internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
-                });
+                const runResult = await withRunRequest((runRequest) =>
+                  runWorkflow({
+                    workflowExecutionRepository,
+                    stepExecutionRepository,
+                    workflowRunId,
+                    spaceId,
+                    signal: taskAbortController.signal,
+                    config,
+                    logger,
+                    fakeRequest: runRequest,
+                    dependencies,
+                    workflowsExecutionEngine,
+                    meteringService: this.meteringService,
+                    internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
+                  })
+                );
 
                 // Prefer cancelled when TM aborted the claim so a later stamp does not
                 // overwrite cancel's semantic outcome (shared last-write-wins buffer).
@@ -1531,6 +1554,72 @@ export class WorkflowsExecutionEnginePlugin
       };
     };
 
+    const executeWorkflowAsServiceAccount: ExecuteWorkflowAsServiceAccount = async (
+      workflow,
+      context
+    ) => {
+      await checkLicense(plugins.licensing);
+      const serviceAccountId = workflow.definition?.settings?.run_as;
+      if (!serviceAccountId) {
+        throw Boom.forbidden('This run requires a workflow bound to a service account.');
+      }
+      if (!coreStart.security.serviceAccounts.isEnabled()) {
+        throw Boom.forbidden('Service account execution is disabled.');
+      }
+      const runAs = {
+        workloadType: WORKFLOW_SERVICE_ACCOUNT_TYPE,
+        workloadId: workflow.id,
+        spaceId: (context.spaceId as string | undefined) || 'default',
+        expectedServiceAccountId: serviceAccountId,
+      };
+
+      // There is no caller: the service account creates the execution, and the task runs as it.
+      return coreStart.security.serviceAccounts.withScopedRequestForWorkload(
+        runAs,
+        async (request) => {
+          const { workflowExecution } = await createAndPersistWorkflowExecution(
+            workflow,
+            context,
+            'manual',
+            request,
+            { refresh: true }
+          );
+          if (workflowExecution.status === ExecutionStatus.FAILED) {
+            return { workflowExecutionId: workflowExecution.id };
+          }
+          const inputsValid = await validateWorkflowInputs(
+            workflowExecution,
+            workflowExecutionRepository,
+            this.logger,
+            coreStart,
+            dependencies
+          );
+          if (!inputsValid) {
+            return { workflowExecutionId: workflowExecution.id };
+          }
+          const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
+          if (!canProceed) {
+            await handleConcurrencyBlockedExecution({
+              workflowExecutionId: workflowExecution.id,
+              spaceId: workflowExecution.spaceId,
+              request,
+              workflowExecutionRepository,
+              stepExecutionRepository,
+              workflowTaskManager,
+              internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
+              logger: this.logger,
+            });
+            return { workflowExecutionId: workflowExecution.id };
+          }
+          await plugins.taskManager.schedule({
+            ...createTaskInstance(workflowExecution, ['workflows']),
+            runAs,
+          });
+          return { workflowExecutionId: workflowExecution.id };
+        }
+      );
+    };
+
     const scheduleWorkflow: ScheduleWorkflow = async (workflow, context, originalRequest) => {
       const request = getWorkflowOriginalRequest(originalRequest);
       await checkLicense(plugins.licensing);
@@ -2051,6 +2140,7 @@ export class WorkflowsExecutionEnginePlugin
     return {
       workflowEventLoggerService,
       executeWorkflow,
+      executeWorkflowAsServiceAccount,
       executeWorkflowStep,
       scheduleWorkflow,
       bulkScheduleWorkflow,

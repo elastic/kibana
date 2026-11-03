@@ -73,18 +73,12 @@ const configSchema = schema.object({
    */
   library: librarySchema,
   /**
-   * Workflow pages (proof of concept): hosted forms for the `page` trigger, keyed by
-   * the trigger's `page-id`. Both `enabled` and `runAsApiKey` are required before the
-   * unauthenticated routes are mounted.
+   * Workflow pages (proof of concept): hosted forms for the `page` trigger. The
+   * unauthenticated routes are mounted only while `enabled` is true. A page runs as
+   * its workflow's `settings.run_as` service account.
    */
   pages: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
-    /**
-     * Encoded Elasticsearch API key every page submission runs as. A page
-     * visitor has no Kibana identity and the execution engine requires one.
-     * Deployment-wide in this POC; the real feature stores a key per page.
-     */
-    runAsApiKey: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
   }),
 });
 
@@ -92,4 +86,6 @@ export type WorkflowsManagementConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<WorkflowsManagementConfig> = {
   schema: configSchema,
+  // Pages now run as the workflow's bound service account, so the POC key is ignored.
+  deprecations: ({ unused }) => [unused('pages.runAsApiKey', { level: 'warning' })],
 };
