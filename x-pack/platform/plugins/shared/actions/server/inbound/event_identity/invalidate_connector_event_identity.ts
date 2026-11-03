@@ -13,7 +13,7 @@ import { decodeApiKeyId, isUiamCredential } from '@kbn/core-security-server';
 
 import { connectorEventIdentityApiKeyName, type ConnectorEventIdentity } from './types';
 
-const UIAM_LOGS_INVALIDATE_TAGS = ['uiam', 'uiam-api-key-invalidate'];
+const UIAM_LOGS_INVALIDATE_TAGS = ['serverless', 'actions', 'uiam', 'uiam-api-key-invalidate'];
 
 export const invalidateConnectorEventIdentity = async ({
   identity,
@@ -57,7 +57,7 @@ export const invalidateConnectorEventIdentity = async ({
             }
           } catch (err) {
             logger.error(
-              `Failed to invalidate UIAM API key for connector event identity "${name}": ${
+              `Failed to synchronously invalidate UIAM API key for connector event identity "${name}": ${
                 err instanceof Error ? err.message : String(err)
               }`,
               {
@@ -70,7 +70,7 @@ export const invalidateConnectorEventIdentity = async ({
       );
     } else {
       logger.error(
-        `Failed to invalidate UIAM API key for connector event identity "${name}": stored credential is not a UIAM API key`,
+        `Failed to synchronously invalidate UIAM API key for connector event identity "${name}": stored credential is not a UIAM API key`,
         { tags: UIAM_LOGS_INVALIDATE_TAGS }
       );
     }
@@ -86,14 +86,14 @@ export const invalidateConnectorEventIdentity = async ({
             });
           if (result && result.error_count > 0) {
             logger.error(
-              `Failed to invalidate ES API key for connector event identity "${name}": ${result.error_details
+              `Failed to synchronously invalidate ES API key for connector event identity "${name}": ${result.error_details
                 ?.map((error) => error.reason)
                 .join(', ')}`
             );
           }
         } catch (err) {
           logger.error(
-            `Failed to invalidate ES API key for connector event identity "${name}": ${
+            `Failed to synchronously invalidate ES API key for connector event identity "${name}": ${
               err instanceof Error ? err.message : String(err)
             }`,
             { error: { stack_trace: err instanceof Error ? err.stack : undefined } }

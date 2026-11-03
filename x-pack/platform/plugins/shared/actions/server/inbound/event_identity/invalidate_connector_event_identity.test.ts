@@ -80,7 +80,7 @@ describe('invalidateConnectorEventIdentity', () => {
     ).resolves.toBeUndefined();
 
     expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to invalidate ES API key'),
+      expect.stringContaining('Failed to synchronously invalidate ES API key'),
       expect.any(Object)
     );
   });

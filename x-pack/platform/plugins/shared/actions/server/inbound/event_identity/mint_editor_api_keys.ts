@@ -17,9 +17,14 @@ import {
   type ConnectorEventIdentity,
 } from './types';
 
-const UIAM_LOGS_CREDENTIALS_TAGS = ['uiam', 'credentials'];
-const UIAM_LOGS_GRANT_TAGS = ['uiam', 'uiam-api-key-grant'];
-const UIAM_LOGS_INVALIDATE_TAGS = ['uiam', 'uiam-api-key-invalidate'];
+const UIAM_LOGS_CREDENTIALS_TAGS = [
+  'serverless',
+  'actions',
+  'uiam',
+  'uiam-api-key-invalid-credentials',
+];
+const UIAM_LOGS_GRANT_TAGS = ['serverless', 'actions', 'uiam', 'uiam-api-key-grant'];
+const UIAM_LOGS_INVALIDATE_TAGS = ['serverless', 'actions', 'uiam', 'uiam-api-key-invalidate'];
 
 const shouldGrantUiam = (securityService: SecurityServiceStart): boolean =>
   securityService.authc.apiKeys.uiam !== undefined;
