@@ -79,8 +79,7 @@ const AlertHostScope = ({
   const canWriteAlerts = userCapabilities.canWrite('alerts');
 
   const [openRule, setOpenRule] = useState<
-    | { ruleId: string; sourceRuleInfo?: { category?: string }; cachedRule?: CachedRule }
-    | undefined
+    { ruleId: string; sourceRuleInfo?: { category?: string }; cachedRule?: CachedRule } | undefined
   >();
   const [composeTarget, setComposeTarget] = useState<
     (ComposeTarget & { attempt: number }) | undefined
