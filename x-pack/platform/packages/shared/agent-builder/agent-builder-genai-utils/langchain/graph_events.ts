@@ -88,6 +88,8 @@ export const createBrowserToolCallEvent = (data: {
   toolCallId: string;
   toolId: string;
   params: Record<string, unknown>;
+  clientId?: string;
+  expiresAt: string;
 }): BrowserToolCallEvent => {
   return {
     type: ChatEventType.browserToolCall,
@@ -95,6 +97,8 @@ export const createBrowserToolCallEvent = (data: {
       tool_call_id: data.toolCallId,
       tool_id: data.toolId,
       params: data.params,
+      client_id: data.clientId,
+      expires_at: data.expiresAt,
     },
   };
 };

@@ -99,6 +99,7 @@ export {
   isFileReferenceResult,
 } from './tool_result';
 export { type BrowserApiToolMetadata } from './browser_tool_metadata';
+export * from './browser_tools';
 export {
   visualizationElement,
   dashboardElement,

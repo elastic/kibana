@@ -10,6 +10,8 @@
 import type { JSONSchema } from 'zod/v4/core/json-schema';
 
 /**
+ * @deprecated Use `BrowserToolDescriptor` instead.
+ *
  * Browser API tool metadata that can be transmitted between browser and server.
  *
  * This represents a browser-side tool definition in a serializable format.
@@ -37,4 +39,7 @@ export interface BrowserApiToolMetadata {
    * Generated from the tool's Zod schema.
    */
   schema: JSONSchema;
+
+  /** Optional timeout (ms) for the tool call. */
+  timeout_ms?: number;
 }

@@ -90,6 +90,7 @@ const stepUpdatesToEvents = (
             toolId: step.tool_id,
             toolCallId: step.tool_call_id,
             params: step.params,
+            expiresAt: new Date().toISOString(),
           })
         );
       } else if (kind === 'server') {

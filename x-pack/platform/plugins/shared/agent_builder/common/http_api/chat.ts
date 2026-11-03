@@ -13,7 +13,7 @@ import type {
   RuntimeAgentConfigurationOverrides,
 } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
+import type { BrowserApiToolMetadata, BrowserToolsRequest } from '@kbn/agent-builder-common';
 import type { PromptRequest, PromptResponse } from '@kbn/agent-builder-common/agents';
 import type { ChatCompletionReasoningEffort } from '@kbn/inference-common';
 import type { ChatTriggerMode } from '@kbn/agent-builder-common';
@@ -37,6 +37,8 @@ export interface ChatRequestBodyPayload {
   input?: string;
   prompts?: Record<string, PromptResponse>;
   browser_api_tools?: BrowserApiToolMetadata[];
+  /** Experimental. Browser-side tools the sending client can execute. */
+  browser_tools?: BrowserToolsRequest;
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
   action?: ConversationAction;
   project_routing?: string;
