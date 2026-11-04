@@ -36,7 +36,10 @@ export interface UseEditableSettingsResult {
   unsavedChanges: Record<string, UnsavedFieldChange>;
   handleFieldChange: OnFieldChangeFn;
   cleanUnsavedChanges: () => void;
-  /** Saves every unsaved change, and rejects with the combined messages if any update fails. */
+  /**
+   * Saves every unsaved change, and rejects with the combined messages if any update fails.
+   * Changes that saved are cleared; changes that failed stay unsaved so they can be retried.
+   */
   saveAll: () => Promise<SaveAllResult>;
   isSaving: boolean;
 }
@@ -110,28 +113,61 @@ export const useEditableSettings = ({
       (id) => fields[id]?.requiresPageReload === true
     );
 
-    // The client reports a failed update on this stream; `set` itself resolves.
+    // A request failure resolves `set` to false and puts the server's message on this stream.
+    // The stream is client-wide, so it only supplies messages; the return values decide what failed.
     const updateErrors: Error[] = [];
     const subscription = settingsClient
       .getUpdateErrors$()
       .subscribe((error) => updateErrors.push(error));
 
+    const changes = Object.entries(unsavedChanges);
+    let results: Array<PromiseSettledResult<boolean>>;
     setIsSaving(true);
     try {
-      await Promise.all(
-        Object.entries(unsavedChanges).map(([id, { unsavedValue }]) =>
-          settingsClient.set(id, unsavedValue)
-        )
+      // A readonly or overridden key makes `set` reject, which must not abandon the other keys.
+      results = await Promise.allSettled(
+        changes.map(([id, { unsavedValue }]) => settingsClient.set(id, unsavedValue))
       );
     } finally {
       subscription.unsubscribe();
       setIsSaving(false);
     }
 
-    setUnsavedChanges({});
+    const savedChanges = new Map<string, UnsavedFieldChange>();
+    const rejectionMessages: string[] = [];
+    const unconfirmedIds: string[] = [];
+    results.forEach((result, index) => {
+      const [id, change] = changes[index];
+      if (result.status === 'rejected') {
+        rejectionMessages.push(result.reason?.message ?? String(result.reason));
+      } else if (result.value === false) {
+        unconfirmedIds.push(id);
+      } else {
+        savedChanges.set(id, change);
+      }
+    });
 
-    if (updateErrors.length > 0) {
-      throw new Error(updateErrors.map(({ message }) => message).join('; '));
+    // Keeps failed changes for a retry, and any change the user made while the save was in flight.
+    setUnsavedChanges((current) => {
+      const remaining = { ...current };
+      savedChanges.forEach((change, id) => {
+        if (remaining[id] === change) {
+          delete remaining[id];
+        }
+      });
+      return remaining;
+    });
+
+    const failureMessages = [...rejectionMessages];
+    if (unconfirmedIds.length > 0) {
+      if (updateErrors.length > 0) {
+        failureMessages.push(...updateErrors.map(({ message }) => message));
+      } else {
+        failureMessages.push(...unconfirmedIds.map((id) => `Unable to save "${id}"`));
+      }
+    }
+    if (failureMessages.length > 0) {
+      throw new Error(failureMessages.join('; '));
     }
 
     return { requiresReload };

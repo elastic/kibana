@@ -216,6 +216,102 @@ describe('useEditableSettings', () => {
     expect(result.current.isSaving).toBe(false);
   });
 
+  it('keeps failed changes unsaved and clears the ones that saved', async () => {
+    const { result, settingsClient, updateErrors$ } = setup();
+    settingsClient.set.mockImplementation(async (key: string) => {
+      if (key === STRING_SETTING) {
+        updateErrors$.next(new Error('Bad request'));
+        return false;
+      }
+      return true;
+    });
+
+    act(() => {
+      result.current.handleFieldChange(STRING_SETTING, { type: 'string', unsavedValue: 'a' });
+      result.current.handleFieldChange(RELOAD_SETTING, { type: 'boolean', unsavedValue: true });
+    });
+
+    await act(async () => {
+      await expect(result.current.saveAll()).rejects.toThrow('Bad request');
+    });
+    expect(result.current.unsavedChanges).toEqual({
+      [STRING_SETTING]: { type: 'string', unsavedValue: 'a' },
+    });
+  });
+
+  it('saves the other changes when the client rejects one of them', async () => {
+    const { result, settingsClient } = setup();
+    settingsClient.set.mockImplementation(async (key: string) => {
+      if (key === STRING_SETTING) {
+        throw new Error(`Unable to update "${key}" because its value is overridden`);
+      }
+      return true;
+    });
+
+    act(() => {
+      result.current.handleFieldChange(STRING_SETTING, { type: 'string', unsavedValue: 'a' });
+      result.current.handleFieldChange(RELOAD_SETTING, { type: 'boolean', unsavedValue: true });
+    });
+
+    await act(async () => {
+      await expect(result.current.saveAll()).rejects.toThrow(
+        `Unable to update "${STRING_SETTING}" because its value is overridden`
+      );
+    });
+    expect(settingsClient.set).toHaveBeenCalledWith(RELOAD_SETTING, true);
+    expect(result.current.unsavedChanges).toEqual({
+      [STRING_SETTING]: { type: 'string', unsavedValue: 'a' },
+    });
+    expect(result.current.isSaving).toBe(false);
+  });
+
+  it('resolves when an unrelated update fails during the save', async () => {
+    const { result, settingsClient, updateErrors$ } = setup();
+    settingsClient.set.mockImplementation(async () => {
+      updateErrors$.next(new Error('Unable to save theme:darkMode'));
+      return true;
+    });
+
+    act(() => {
+      result.current.handleFieldChange(STRING_SETTING, { type: 'string', unsavedValue: 'a' });
+    });
+
+    await act(async () => {
+      await expect(result.current.saveAll()).resolves.toEqual({ requiresReload: false });
+    });
+    expect(result.current.unsavedChanges).toEqual({});
+  });
+
+  it('keeps a change made while the save was in flight', async () => {
+    const { result, settingsClient } = setup();
+    let resolveSet: (value: boolean) => void = () => {};
+    settingsClient.set.mockReturnValue(
+      new Promise<boolean>((resolve) => {
+        resolveSet = resolve;
+      })
+    );
+
+    act(() => {
+      result.current.handleFieldChange(STRING_SETTING, { type: 'string', unsavedValue: 'a' });
+    });
+
+    let savePromise: Promise<unknown> = Promise.resolve();
+    act(() => {
+      savePromise = result.current.saveAll();
+    });
+    act(() => {
+      result.current.handleFieldChange(STRING_SETTING, { type: 'string', unsavedValue: 'b' });
+    });
+
+    await act(async () => {
+      resolveSet(true);
+      await savePromise;
+    });
+    expect(result.current.unsavedChanges).toEqual({
+      [STRING_SETTING]: { type: 'string', unsavedValue: 'b' },
+    });
+  });
+
   it('unsubscribes from setting updates on unmount', () => {
     const { unmount, update$ } = setup();
 
