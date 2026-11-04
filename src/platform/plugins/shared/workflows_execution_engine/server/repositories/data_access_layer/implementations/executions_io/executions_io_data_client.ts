@@ -358,10 +358,10 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
     let response: estypes.MgetResponse<LegacyExecutionIoSource>;
     try {
       response = await this.deps.esClient.mget<LegacyExecutionIoSource>({
-        docs: lookups.map(({ executionId, index, sourceIncludes }) => ({
+        docs: lookups.map(({ executionId, index, sourceIncludes: legacyIncludes }) => ({
           _index: index,
           _id: executionId,
-          _source: { includes: sourceIncludes },
+          _source: { includes: legacyIncludes },
         })),
       });
     } catch (error) {

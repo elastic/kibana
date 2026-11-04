@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JsonObject } from '@kbn/utility-types';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import type { StepExecutionRepositoryMock } from './step_execution_repository.mock';
 import { executionIoId } from '../../server/repositories/data_access_layer/implementations/executions_io/execution_io_id';
@@ -154,8 +155,8 @@ function projectSource(
   ) {
     return document;
   }
-  const record = value as Record<string, unknown>;
-  const projected: Record<string, unknown> = {};
+  const record = value as JsonObject;
+  const projected: JsonObject = {};
   for (const field of valueFields) {
     if (field in record) {
       projected[field] = record[field];

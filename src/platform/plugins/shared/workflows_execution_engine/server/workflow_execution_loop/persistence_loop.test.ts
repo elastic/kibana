@@ -119,7 +119,7 @@ describe('persistenceLoop', () => {
   it('writes step metadata only after the IO flush settles', async () => {
     let resolveIo: () => void = () => {};
     const params = makeParams({ isExecuting: true });
-    params.stepIoService.flush.mockImplementation(
+    (params.stepIoService.flush as jest.Mock).mockImplementation(
       () =>
         new Promise<void>((resolve) => {
           resolveIo = resolve;
