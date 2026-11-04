@@ -153,6 +153,35 @@ describe('combineEmulators', () => {
     ]);
   });
 
+  it('leaves a response alone when a token request overlaps it', async () => {
+    let release = () => {};
+    const released = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const { fetch } = combineEmulators({
+      outlook: createEmulatorFetch({
+        specs: [graphSpec('/me/messages')],
+        respond: async () => {
+          await released;
+          return { statusCode: 204, headers: { 'content-type': 'application/json' } };
+        },
+      }),
+      one_drive: createEmulatorFetch({ specs: [graphSpec('/me/drive')] }),
+    });
+
+    const slow = fetch(`${GRAPH}/me`, bearer(emulatorCredential('outlook')));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const token = await fetch(TOKEN_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body: `grant_type=client_credentials&client_id=${emulatorCredential('outlook')}`,
+    });
+    release();
+
+    expect((await token.json()).access_token).toMatch(/^emulate-outlook\./);
+    expect((await slow).status).toBe(204);
+  });
+
   it('does not take a longer name for a shorter one', async () => {
     const { fetch, calls } = combineEmulators({
       sharepoint: createEmulatorFetch({ specs: [graphSpec('/sites')] }),

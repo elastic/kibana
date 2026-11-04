@@ -214,6 +214,7 @@ export const combineEmulators = (
   const combinedFetch: typeof fetch = async (input, init) => {
     const request = new Request(input, init);
     const url = new URL(request.url);
+    const description = `${request.method} ${url.origin}${url.pathname}`;
     const tagged = await findTagged(request.clone());
     const connector =
       tagged ??
@@ -221,7 +222,6 @@ export const combineEmulators = (
       (connectors.length === 1 ? connectors[0] : undefined);
 
     if (connector === undefined) {
-      const description = `${request.method} ${url.origin}${url.pathname}`;
       const call: ContractCall = {
         request: description,
         status: 404,
@@ -244,7 +244,10 @@ export const combineEmulators = (
     const emulator = emulators[connector];
     const recorded = emulator.calls.length;
     const response = await emulator.fetch(request);
-    const issuedToken = emulator.calls.slice(recorded).some(({ token }) => token);
+    // Other requests may have been recorded meanwhile, so only this URL's token calls count.
+    const issuedToken = emulator.calls
+      .slice(recorded)
+      .some(({ token, request: called }) => token && called === description);
     collect(connector);
     return tagged && issuedToken ? tagTokens(response, emulatorCredential(tagged)) : response;
   };
