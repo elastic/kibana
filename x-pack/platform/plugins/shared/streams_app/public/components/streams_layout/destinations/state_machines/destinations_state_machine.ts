@@ -14,7 +14,6 @@ import {
   enqueueActions,
   fromEventObservable,
   fromPromise,
-  not,
   sendTo,
   setup,
   stateIn,
@@ -42,9 +41,14 @@ import {
   getDestinationCreateSpec,
   getUnitDestinations,
   toDestinationViewModel,
+  toRemoteElasticsearchDestinationViewModel,
   toS3DestinationViewModel,
   withUnitDestinations,
 } from '../destination_models';
+import {
+  createRemoteElasticsearchUnitDestination,
+  remoteElasticsearchCredentialName,
+} from '../remote_elasticsearch_destination_models';
 import { createS3UnitDestination, s3CredentialNames } from '../s3_destination_models';
 import {
   createDestinationApiKeyServices,
@@ -146,6 +150,29 @@ export type DestinationsStateEvent =
   | { type: 'destinationDetail.show'; destinationId: string; viewerId: string }
   | { type: 'timefilter.changed'; timeRange: DestinationIndexStatsTimeRange }
   | { type: 'destinationDetail.hide'; destinationId: string; viewerId: string };
+
+/** Values for the unit PUT `secrets`. The created node references them by credential name. */
+const getCreateSecrets = (
+  formData: DestinationCreationFormData,
+  destinationId: string
+): StreamsUnit.Secrets | undefined => {
+  switch (formData.storageKind) {
+    case 'external_storage': {
+      const names = s3CredentialNames(destinationId);
+      return {
+        [names.accessKeyId]: formData.s3.accessKeyId.trim(),
+        [names.secretAccessKey]: formData.s3.secretAccessKey.trim(),
+      };
+    }
+    case 'remote_elasticsearch':
+      return {
+        [remoteElasticsearchCredentialName(destinationId)]:
+          formData.remoteElasticsearch.apiKey.trim(),
+      };
+    case 'local_elasticsearch':
+      return undefined;
+  }
+};
 
 const removeDestinationsFromContext = (
   context: Pick<DestinationsStateContext, 'unitDefinition' | 'selectedDestinationId'>,
@@ -388,6 +415,36 @@ export const destinationsStateMachine = setup({
         apiKeyError: undefined,
       };
     }),
+    stageCreatedRemoteElasticsearchDestination: assign(({ context }) => {
+      if (!context.creationContext) {
+        return {};
+      }
+      const { destinationName, description, remoteElasticsearch } =
+        context.creationContext.formData;
+      const name = destinationName.trim();
+      const id = createDestinationId({
+        name,
+        existingIds: collectUnitComponentIds(context.unitDefinition.unit),
+      });
+      const node = createRemoteElasticsearchUnitDestination({
+        id,
+        name,
+        description,
+        ...remoteElasticsearch,
+      });
+      return {
+        creationContext: {
+          ...context.creationContext,
+          createdDestination: toRemoteElasticsearchDestinationViewModel(node),
+        },
+        unitDefinition: withUnitDestinations(context.unitDefinition, [
+          ...getUnitDestinations(context.unitDefinition),
+          node,
+        ]),
+        persistenceError: undefined,
+        apiKeyError: undefined,
+      };
+    }),
     assignPendingDestination: assign(({ context }) => {
       if (!context.creationContext) {
         return {};
@@ -454,20 +511,12 @@ export const destinationsStateMachine = setup({
         if (!context.creationContext || !createdDestination) {
           throw new Error('Expected a created destination');
         }
-        const { storageKind, s3 } = context.creationContext.formData;
-        const names = s3CredentialNames(createdDestination.id);
         return {
           type: 'unit.changed',
           unitDefinition: context.unitDefinition,
           destinationIds: [createdDestination.id],
           intent: 'create',
-          secrets:
-            storageKind === 'external_storage'
-              ? {
-                  [names.accessKeyId]: s3.accessKeyId.trim(),
-                  [names.secretAccessKey]: s3.secretAccessKey.trim(),
-                }
-              : undefined,
+          secrets: getCreateSecrets(context.creationContext.formData, createdDestination.id),
         };
       }
     ),
@@ -535,6 +584,10 @@ export const destinationsStateMachine = setup({
                       accessKeyId: '',
                       secretAccessKey: '',
                     },
+                    remoteElasticsearch: {
+                      ...context.creationContext.formData.remoteElasticsearch,
+                      apiKey: '',
+                    },
                   },
                 }
               : undefined,
@@ -581,6 +634,10 @@ export const destinationsStateMachine = setup({
       event.type === 'unit.loaded' && context.hasReceivedUnit,
     isExternalStorage: ({ event }) =>
       event.type === 'destination.create' && event.formData.storageKind === 'external_storage',
+    isRemoteElasticsearch: ({ event }) =>
+      event.type === 'destination.create' && event.formData.storageKind === 'remote_elasticsearch',
+    isLocalElasticsearch: ({ event }) =>
+      event.type === 'destination.create' && event.formData.storageKind === 'local_elasticsearch',
     isDeletePersistenceFailure: ({ event }) =>
       event.type === 'unit.persistenceFailed' && event.intent === 'delete',
     unitSaveIsIdle: stateIn('#destinationsUnitSaveIdle'),
@@ -636,8 +693,17 @@ export const destinationsStateMachine = setup({
                 actions: ['storeCreationForm', 'stageCreatedS3Destination', 'notifyParentCreate'],
               },
               {
+                target: 'persisting',
+                guard: and(['isRemoteElasticsearch', 'canCreateDestination', 'unitSaveIsIdle']),
+                actions: [
+                  'storeCreationForm',
+                  'stageCreatedRemoteElasticsearchDestination',
+                  'notifyParentCreate',
+                ],
+              },
+              {
                 target: 'mintingApiKey',
-                guard: and(['canCreateDestination', 'unitSaveIsIdle', not('isExternalStorage')]),
+                guard: and(['isLocalElasticsearch', 'canCreateDestination', 'unitSaveIsIdle']),
                 actions: ['storeCreationForm', 'assignPendingDestination'],
               },
             ],

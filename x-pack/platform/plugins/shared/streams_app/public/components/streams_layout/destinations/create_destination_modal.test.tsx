@@ -34,6 +34,12 @@ const renderModal = () => {
   return { createDestination };
 };
 
+// Typing long values key by key times out on CI.
+const pasteInto = async (testSubject: string, value: string) => {
+  await userEvent.click(screen.getByTestId(testSubject));
+  await userEvent.paste(value);
+};
+
 describe('CreateDestinationModal', () => {
   it('only shows the errors of fields the user has left', async () => {
     renderModal();
@@ -67,5 +73,57 @@ describe('CreateDestinationModal', () => {
         expect.anything()
       )
     );
+  });
+
+  describe('remote Elasticsearch', () => {
+    const ENDPOINT_REQUIRED = 'Enter the endpoint of the remote cluster.';
+    const API_KEY_REQUIRED = 'Enter an API key.';
+
+    it('only shows connection errors after their input is left', async () => {
+      renderModal();
+      await userEvent.click(screen.getByTestId('streamsCreateDestinationRemoteElasticsearch'));
+
+      expect(screen.queryByText(ENDPOINT_REQUIRED)).not.toBeInTheDocument();
+
+      await userEvent.click(
+        screen.getByTestId('streamsCreateDestinationRemoteElasticsearchEndpoint')
+      );
+      await userEvent.tab();
+
+      expect(screen.getByText(ENDPOINT_REQUIRED)).toBeInTheDocument();
+      expect(screen.queryByText(API_KEY_REQUIRED)).not.toBeInTheDocument();
+    });
+
+    it('submits the remote form values', async () => {
+      const { createDestination } = renderModal();
+      await userEvent.click(screen.getByTestId('streamsCreateDestinationRemoteElasticsearch'));
+      await userEvent.click(screen.getByRole('radio', { name: 'Fixed index per signal' }));
+      await pasteInto('streamsCreateDestinationIndex', 'shared-idx');
+      await pasteInto(
+        'streamsCreateDestinationRemoteElasticsearchEndpoint',
+        'https://es.example.com:443'
+      );
+      await pasteInto('streamsCreateDestinationRemoteElasticsearchApiKey', 'remote-key');
+      await pasteInto('streamsCreateDestinationName', 'Central');
+      await userEvent.click(screen.getByTestId('streamsCreateDestinationSubmit'));
+
+      await waitFor(() =>
+        expect(createDestination).toHaveBeenCalledWith(
+          expect.objectContaining({
+            storageKind: 'remote_elasticsearch',
+            destinationName: 'Central',
+            remoteElasticsearch: expect.objectContaining({
+              auto: false,
+              logsIndex: 'shared-idx',
+              metricsIndex: 'shared-idx',
+              tracesIndex: 'shared-idx',
+              endpoint: 'https://es.example.com:443',
+              apiKey: 'remote-key',
+            }),
+          }),
+          expect.anything()
+        )
+      );
+    });
   });
 });
