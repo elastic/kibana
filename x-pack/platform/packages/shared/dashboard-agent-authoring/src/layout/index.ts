@@ -6,5 +6,7 @@
  */
 
 export { arrangeDashboardLayout } from './arrange_layout';
+export { startEarlyLayout } from './early_layout';
+export type { EarlyLayout } from './early_layout';
 export { buildLayoutPrompt, parseLayoutAnswer } from './layout_prompt';
 export type { ArrangeDashboardLayout, LayoutArrangement, LayoutRequest } from './types';

@@ -21,6 +21,7 @@ import { discardInvalidChanges, type DashboardValidator } from '../validate_dash
 import { applyPlan } from './apply';
 import { getChangedIds, type ChangedIds } from './changed_ids';
 import { planUpsert } from './plan';
+import { predictPlannedDashboard } from './predict';
 import { resolvePlan } from './resolve';
 import type { DashboardUpsert } from './schema';
 
@@ -33,6 +34,11 @@ interface ExecuteDashboardUpsertParams {
   resolveControlFieldCapabilities?: ResolveControlFieldCapabilities;
   resolveEsqlControlColumnType?: ResolveEsqlControlColumnType;
   validator?: DashboardValidator;
+  /**
+   * Called before panel content resolves with the dashboard the plan predicts, so the host can lay
+   * it out in parallel. Not called when a panel's kind or size is known only after resolution.
+   */
+  onPlanned?: (predictedDashboardData: DashboardAttachmentData) => void;
 }
 
 export interface DashboardUpsertResult extends ChangedIds {
@@ -66,12 +72,19 @@ export const executeDashboardUpsert = async ({
   resolveControlFieldCapabilities,
   resolveEsqlControlColumnType,
   validator,
+  onPlanned,
 }: ExecuteDashboardUpsertParams): Promise<DashboardUpsertResult> => {
   const originalDashboardData = structuredClone(
     dashboardData ?? { title: 'User Dashboard', description: undefined, panels: [] }
   );
   const original = indexDashboard(originalDashboardData);
   const plan = planUpsert({ original, upsert });
+  if (onPlanned) {
+    const predictedDashboardData = predictPlannedDashboard(originalDashboardData, plan);
+    if (predictedDashboardData) {
+      onPlanned(predictedDashboardData);
+    }
+  }
   const { panels, controls, failures } = await resolvePlan({
     panels: plan.panels,
     controls: plan.controls,
