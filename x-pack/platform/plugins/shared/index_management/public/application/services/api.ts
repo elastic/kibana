@@ -17,6 +17,7 @@ import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ReindexService } from '@kbn/reindex-service-plugin/public';
 import type { EsClient } from '@kbn/es-client-plugin/public';
+import { useQuery } from '@kbn/react-query';
 import {
   API_BASE_PATH,
   DEFAULT_DOCUMENT_PAGE_SIZE,
@@ -55,7 +56,7 @@ import type {
 import type { SnapshotRepositoriesInfo } from '../../../common/types/snapshot_repositories';
 import { quoteEsqlIndexName } from '../../../common/lib';
 import { useRequest, sendRequest } from './use_request';
-import { esRequest, runForIndexChunks, sendEsRequest, useEsRequest } from './es_request';
+import { esRequest, runForIndexChunks, sendEsRequest } from './es_request';
 import { httpService } from './http';
 import type { UiMetricService } from './ui_metric';
 import type { FieldFromIndicesRequest } from '../../../common';
@@ -636,12 +637,16 @@ export async function loadIndexVectorCount(indexName: string) {
 }
 
 export function useLoadIndexMappings(indexName: string) {
-  return useEsRequest<MappingsResponse>(indexName, async (client) => {
-    const response = await client.indices.getMapping({
-      index: indexName,
-      expand_wildcards: 'none',
-    });
-    return { mappings: response[indexName].mappings };
+  return useQuery<MappingsResponse, Error>({
+    queryKey: ['indexMappings', indexName],
+    queryFn: () =>
+      esRequest(async (client) => {
+        const response = await client.indices.getMapping({
+          index: indexName,
+          expand_wildcards: 'none',
+        });
+        return { mappings: response[indexName].mappings };
+      }),
   });
 }
 
@@ -661,16 +666,20 @@ export function loadIndexStatistics(indexName: string) {
 }
 
 export function useLoadIndexSettings(indexName: string) {
-  return useEsRequest<IndexSettingsResponse>(indexName, async (client) => {
-    const response = await client.indices.getSettings({
-      index: indexName,
-      expand_wildcards: 'none',
-      flat_settings: false,
-      include_defaults: true,
-    });
-    // the response is keyed by the concrete index name
-    const [indexSettings] = Object.values(response);
-    return indexSettings as IndexSettingsResponse;
+  return useQuery<IndexSettingsResponse, Error>({
+    queryKey: ['indexSettings', indexName],
+    queryFn: () =>
+      esRequest(async (client) => {
+        const response = await client.indices.getSettings({
+          index: indexName,
+          expand_wildcards: 'none',
+          flat_settings: false,
+          include_defaults: true,
+        });
+        // the response is keyed by the concrete index name
+        const [indexSettings] = Object.values(response);
+        return indexSettings as IndexSettingsResponse;
+      }),
   });
 }
 
@@ -684,18 +693,22 @@ export function createIndex(indexName: string, indexMode?: string) {
 }
 
 export function useLoadIndexDocumentsSample(indexName: string) {
-  return useEsRequest<{ results: SearchHit[] }>(indexName, async (client) => {
-    const response = await client.search({
-      index: indexName,
-      size: DEFAULT_DOCUMENT_PAGE_SIZE,
-      track_total_hits: false,
-      _source: {
-        includes: ['*', '_inference_fields'],
-      },
-      fields: ['*'],
-      sort: [{ _doc: { order: 'desc' } }],
-    });
-    return { results: response.hits.hits };
+  return useQuery<{ results: SearchHit[] }, Error>({
+    queryKey: ['indexDocumentsSample', indexName],
+    queryFn: () =>
+      esRequest(async (client) => {
+        const response = await client.search({
+          index: indexName,
+          size: DEFAULT_DOCUMENT_PAGE_SIZE,
+          track_total_hits: false,
+          _source: {
+            includes: ['*', '_inference_fields'],
+          },
+          fields: ['*'],
+          sort: [{ _doc: { order: 'desc' } }],
+        });
+        return { results: response.hits.hits };
+      }),
   });
 }
 
@@ -741,15 +754,19 @@ export const getReindexStatus = (sourceIndexName: string) => {
 };
 
 export const useUserPrivileges = (indexName: string) => {
-  return useEsRequest<UserStartPrivilegesResponse>(indexName, async (client) => {
-    const response = await client.security.hasPrivileges({
-      index: [{ names: [indexName], privileges: ['manage', 'delete'] }],
-    });
-    return {
-      privileges: {
-        canManageIndex: response.index?.[indexName]?.manage ?? false,
-        canDeleteDocuments: response.index?.[indexName]?.delete ?? false,
-      },
-    };
+  return useQuery<UserStartPrivilegesResponse, Error>({
+    queryKey: ['indexUserPrivileges', indexName],
+    queryFn: () =>
+      esRequest(async (client) => {
+        const response = await client.security.hasPrivileges({
+          index: [{ names: [indexName], privileges: ['manage', 'delete'] }],
+        });
+        return {
+          privileges: {
+            canManageIndex: response.index?.[indexName]?.manage ?? false,
+            canDeleteDocuments: response.index?.[indexName]?.delete ?? false,
+          },
+        };
+      }),
   });
 };

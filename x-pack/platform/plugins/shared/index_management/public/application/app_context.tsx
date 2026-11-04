@@ -104,7 +104,9 @@ export interface AppDependencies {
   };
 }
 
-const queryClient = new QueryClient({});
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false, refetchOnWindowFocus: false } },
+});
 
 export const AppContextProvider = ({
   children,

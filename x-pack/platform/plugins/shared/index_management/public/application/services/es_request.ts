@@ -5,17 +5,12 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
 import { chunk } from 'lodash';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { EsClient } from '@kbn/es-client-plugin/public';
 import { MAX_INDICES_PER_REQUEST } from '../../../common/constants';
-import type {
-  Error as EsUiError,
-  SendRequestResponse,
-  UseRequestResponse,
-} from '../../shared_imports';
+import type { Error as EsUiError, SendRequestResponse } from '../../shared_imports';
 import { esClientService } from './es_client';
 
 export type EsCall<T> = (client: EsClient) => Promise<T>;
@@ -107,49 +102,6 @@ export const sendEsRequest = async <T>(
     return { data: null, error: body };
   }
 };
-
-/**
- * `useRequest`-style hook for requests through the Elasticsearch proxy. The request is sent again
- * whenever `requestKey` changes.
- */
-export const useEsRequest = <T>(
-  requestKey: string,
-  call: EsCall<T>
-): UseRequestResponse<T, EsUiError> => {
-  const callRef = useRef(call);
-  callRef.current = call;
-  const requestIdRef = useRef(0);
-  const [isInitialRequest, setIsInitialRequest] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
-  const [data, setData] = useState<T | null>();
-  const [error, setError] = useState<EsUiError | null>(null);
-
-  const resendRequest = useCallback(async () => {
-    const requestId = ++requestIdRef.current;
-    setIsLoading(true);
-    const response = await sendEsRequest(callRef.current);
-    if (requestId !== requestIdRef.current) {
-      return;
-    }
-    setError(response.error);
-    if (!response.error) {
-      setData(response.data);
-    }
-    setIsLoading(false);
-    setIsInitialRequest(false);
-  }, []);
-
-  useEffect(() => {
-    const requestIds = requestIdRef;
-    resendRequest();
-    return () => {
-      requestIds.current++;
-    };
-  }, [requestKey, resendRequest]);
-
-  return { isInitialRequest, isLoading, data, error, resendRequest };
-};
-
 /**
  * Runs `run` for chunks of index names so request URLs stay under Elasticsearch's HTTP line limit.
  */
