@@ -164,6 +164,20 @@ columns: [
 
 ---
 
+### Bulk actions — `getBulkActions`
+
+**Changes:** Extra actions in the data grid's selection menu.
+
+**Use when:** An action needs the selected records, for example saving selected rows elsewhere.
+
+**Returns:** `DiscoverBulkAction[]` (`key`, `label`, `onClick({ selectedDocs })`, optional `isAvailable`, `getDisabledReason`)
+
+**Implementation examples:**
+
+- See [types.ts](./types.ts) for the `DiscoverBulkAction` interface definition
+
+---
+
 ### Additional cell actions — `getAdditionalCellActions`
 
 **Changes:** Extra actions in a cell's popover.

@@ -197,6 +197,29 @@ describe('ProfilesManager', () => {
     expect(mocks.dataSourceProfileProviderMock.resolve).toHaveBeenCalledTimes(2);
   });
 
+  it('should pass the profile state to the data source provider and resolve again when it changes', async () => {
+    const scopedProfilesManager = createScopedProfilesManager();
+    const profileState = { huntSession: { sessionId: 'a' } };
+
+    await scopedProfilesManager.resolveDataSourceProfile({ ...esqlProfileParams, profileState });
+    expect(mocks.dataSourceProfileProviderMock.resolve).toHaveBeenCalledTimes(1);
+    expect(mocks.dataSourceProfileProviderMock.resolve).toHaveBeenLastCalledWith(
+      expect.objectContaining({ profileState })
+    );
+
+    await scopedProfilesManager.resolveDataSourceProfile({
+      ...esqlProfileParams,
+      profileState: { huntSession: { sessionId: 'a' } },
+    });
+    expect(mocks.dataSourceProfileProviderMock.resolve).toHaveBeenCalledTimes(1);
+
+    await scopedProfilesManager.resolveDataSourceProfile({
+      ...esqlProfileParams,
+      profileState: { huntSession: { sessionId: 'b' } },
+    });
+    expect(mocks.dataSourceProfileProviderMock.resolve).toHaveBeenCalledTimes(2);
+  });
+
   it('should log an error and fall back to the default profile if root profile resolution fails', async () => {
     await mocks.profilesManagerMock.resolveRootProfile({ solutionNavId: 'solutionNavId' });
     const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({

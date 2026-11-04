@@ -401,6 +401,7 @@ export function getDataStateContainer({
                 dataSource: getCurrentTab().appState.dataSource,
                 dataView: currentDataView,
                 query: getCurrentTab().appState.query,
+                profileState: getCurrentTab().profileState,
               },
               resetFetchChart$
             );
