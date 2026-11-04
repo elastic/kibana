@@ -334,7 +334,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     return handleAgentDeploy();
   }, [handleAgentDeploy]);
 
-  useApplyDedicatedTemplates({
+  const applyDedicatedTemplates = useApplyDedicatedTemplates({
     enabled: !!serviceSettings.dedicatedNamespaceTemplates,
     isDeployDone: isAgentBased ? isAgentDone : isMiDone,
     groups: isAgentBased ? agentTargets : deployGroups,
@@ -656,6 +656,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       // Short-circuit if already deployed (e.g. user went Back then Next again) to avoid
       // creating duplicate package policies on the same agent policy.
       if (isAgentDone) {
+        await applyDedicatedTemplates();
         onContinue();
         return;
       }
@@ -664,6 +665,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         // Deploy failed — stay on step 3, error callout is already shown by the section.
         return;
       }
+      // The step unmounts on navigation, before the done state the hook reacts to is rendered.
+      await applyDedicatedTemplates();
       onContinue();
       return;
     }
@@ -679,6 +682,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     handleMixedEcfNext,
     handleMiNext,
     handleAgentDeployForNext,
+    applyDedicatedTemplates,
     handleDeploy,
     awsServicesMap,
     detectAndReviewStep.policyIdsByInstance,
