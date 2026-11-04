@@ -13,11 +13,10 @@ import type { Logger, RequestHandlerContext, SavedObjectsClientContract } from '
 import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { AuthzDisabled } from '@kbn/core-security-server';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import type { JsonObject, JsonValue } from '@kbn/utility-types';
 import type {
   DashboardConverter,
   DataViewResource,
-  JsonObject,
-  JsonValue,
   Reference,
   ReferencedObject,
 } from '@kbn/as-code-dashboard-terraform';

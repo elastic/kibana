@@ -8,7 +8,8 @@
  */
 
 import JSZip from 'jszip';
-import type { JsonObject, JsonValue, LinkedResource } from '@kbn/as-code-dashboard-terraform';
+import type { JsonObject, JsonValue } from '@kbn/utility-types';
+import type { LinkedResource } from '@kbn/as-code-dashboard-terraform';
 import type { DashboardTerraformResponseBody } from '../../../../../server';
 
 export interface ModuleFile {

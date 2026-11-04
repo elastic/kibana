@@ -12,7 +12,7 @@ import { join } from 'path';
 import { parse } from 'yaml';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { OasDocument } from './oas_model';
-import type { JsonObject, JsonValue } from './convert_dashboard';
+import type { JsonObject, JsonValue } from '@kbn/utility-types';
 import { createDashboardConverter, linkReferences } from './convert_dashboard';
 
 const publishedOas: OasDocument = parse(

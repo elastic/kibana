@@ -17,9 +17,7 @@ export {
 export type {
   DashboardConversion,
   DashboardConverter,
-  JsonObject,
   JsonStringPanel,
-  JsonValue,
   LinkedConversion,
   LinkedResource,
   PanelSummary,

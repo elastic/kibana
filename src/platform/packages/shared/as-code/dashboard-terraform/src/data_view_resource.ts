@@ -8,8 +8,7 @@
  */
 
 import type { DataViewSpec, RuntimeFieldSpec, FieldAttrSet } from '@kbn/data-views-types';
-import type { Serializable, SerializableRecord } from '@kbn/utility-types';
-import type { JsonObject } from './convert_dashboard';
+import type { JsonObject, Serializable, SerializableRecord } from '@kbn/utility-types';
 
 /** A data view resource's body, with the data view spec paths of the settings it cannot hold. */
 export interface DataViewResource {

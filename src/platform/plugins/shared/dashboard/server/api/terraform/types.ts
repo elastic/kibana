@@ -8,9 +8,9 @@
  */
 
 import type { AsCodeRelatedItem } from '@kbn/as-code-shared-schemas';
+import type { JsonObject } from '@kbn/utility-types';
 import type {
   DASHBOARD_RESOURCE_TYPE,
-  JsonObject,
   JsonStringPanel,
   LinkedResource,
   PanelSummary,

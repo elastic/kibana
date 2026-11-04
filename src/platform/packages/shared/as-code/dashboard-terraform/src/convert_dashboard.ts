@@ -7,14 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JsonObject, JsonValue } from '@kbn/utility-types';
 import type { KeyedNode, OasDocument, RefFinder, TNode, Variant } from './oas_model';
 import { compileDashboardRoot } from './oas_model';
 import { toResourceName } from './resource_name';
-
-export type JsonValue = string | number | boolean | null | JsonValue[] | JsonObject;
-export interface JsonObject {
-  [key: string]: JsonValue;
-}
 
 /** Identifies a panel a conversion reports on. */
 export interface PanelSummary {
