@@ -132,6 +132,9 @@ export {
   identifierSchema,
   headerNameSchema,
   CONNECTOR_TYPE_ID_MAX_LENGTH,
+  CONNECTOR_TYPE_ICON_MAX_BYTES,
+  CONNECTOR_TYPE_ICON_MAX_LENGTH,
+  CONNECTOR_TYPE_ICON_MIME_TYPES,
 } from './routes/connector/apis/create_type';
 export {
   OAuthAuthorizationStatus,

@@ -144,6 +144,7 @@ const toSpec = (request: CreateConnectorTypeRequest): ConnectorSpec => {
       id: request.id,
       displayName: request.displayName,
       description: request.description,
+      icon: request.icon,
       minimumLicense: 'enterprise',
       supportedFeatureIds: ['alerting', 'workflows'],
     },

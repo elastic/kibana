@@ -6,6 +6,8 @@
  */
 
 import {
+  CONNECTOR_TYPE_ICON_MAX_BYTES,
+  CONNECTOR_TYPE_ICON_MAX_LENGTH,
   createConnectorTypeRequestSchema,
   createConnectorTypeResponseSchema,
 } from './schemas/latest';
@@ -300,6 +302,54 @@ describe('createConnectorTypeRequestSchema', () => {
       },
     };
     expect(createConnectorTypeRequestSchema.safeParse(tooManyNodes).success).toBe(false);
+  });
+
+  describe('icon', () => {
+    it.each([
+      ['png', `data:image/png;base64,${Buffer.from('a small image').toString('base64')}`],
+      ['svg', `data:image/svg+xml;base64,${Buffer.from('<svg/>').toString('base64')}`],
+      ['jpeg', 'data:image/jpeg;base64,/9j/4AAQ'],
+      ['webp', 'data:image/webp;base64,UklGRg=='],
+      ['gif', 'data:image/gif;base64,R0lGODlh'],
+    ])('accepts a base64 %s data URI', (_type, icon) => {
+      expect(createConnectorTypeRequestSchema.safeParse({ ...validRequest, icon }).success).toBe(
+        true
+      );
+    });
+
+    it.each([
+      ['a remote URL, which the browser CSP would block', 'https://example.com/logo.png'],
+      ['a non-image data URI', 'data:text/html;base64,PHNjcmlwdD4='],
+      ['an unsupported image type', 'data:image/bmp;base64,Qk0='],
+      ['a data URI that is not base64', 'data:image/png,%89PNG'],
+      ['an empty payload', 'data:image/png;base64,'],
+      ['an EUI icon name', 'addDataApp'],
+    ])('rejects %s', (_label, icon) => {
+      expect(createConnectorTypeRequestSchema.safeParse({ ...validRequest, icon }).success).toBe(
+        false
+      );
+    });
+
+    it('accepts an image of the largest allowed size and rejects one byte more', () => {
+      const encode = (bytes: number) =>
+        `data:image/png;base64,${Buffer.alloc(bytes, 1).toString('base64')}`;
+      const largest = encode(CONNECTOR_TYPE_ICON_MAX_BYTES);
+
+      expect(largest.length).toBeLessThanOrEqual(CONNECTOR_TYPE_ICON_MAX_LENGTH);
+      expect(
+        createConnectorTypeRequestSchema.safeParse({ ...validRequest, icon: largest }).success
+      ).toBe(true);
+
+      const result = createConnectorTypeRequestSchema.safeParse({
+        ...validRequest,
+        icon: encode(CONNECTOR_TYPE_ICON_MAX_BYTES + 1),
+      });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0]).toMatchObject({
+        path: ['icon'],
+        message: 'Logo must be at most 64 KB.',
+      });
+    });
   });
 
   it('rejects unknown top-level fields', () => {

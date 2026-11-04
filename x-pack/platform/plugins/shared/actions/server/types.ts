@@ -257,6 +257,11 @@ export interface ActionTypeCoreFields<
    */
   description?: string;
   /**
+   * Logo of the connector type: an EUI icon name or a `data:` image URI.
+   * Populated for spec-backed connectors from the spec metadata.
+   */
+  icon?: string;
+  /**
    * When true, the connector type supports testing.
    */
   isTestable?: boolean;

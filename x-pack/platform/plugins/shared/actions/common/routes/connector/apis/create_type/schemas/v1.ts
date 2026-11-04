@@ -19,6 +19,46 @@ const RESERVED_IDENTIFIERS = new Set(['__proto__', 'constructor', 'prototype']);
 
 export const CONNECTOR_TYPE_ID_MAX_LENGTH = 127;
 
+/**
+ * Largest logo a connector type can carry. The connector specs bundle logos of at most ~34 KB, so
+ * this leaves headroom while keeping the type, and every list response that includes it, small.
+ */
+export const CONNECTOR_TYPE_ICON_MAX_BYTES = 64 * 1024;
+export const CONNECTOR_TYPE_ICON_MIME_TYPES = [
+  'image/png',
+  'image/jpeg',
+  'image/gif',
+  'image/webp',
+  'image/svg+xml',
+] as const;
+const ICON_DATA_URI_PREFIX_MAX_LENGTH = 'data:image/svg+xml;base64,'.length;
+/** Length of the base64 `data:` URI of a logo of the largest allowed size. */
+export const CONNECTOR_TYPE_ICON_MAX_LENGTH =
+  ICON_DATA_URI_PREFIX_MAX_LENGTH + 4 * Math.ceil(CONNECTOR_TYPE_ICON_MAX_BYTES / 3);
+
+const ICON_TOO_LARGE_MESSAGE = `Logo must be at most ${CONNECTOR_TYPE_ICON_MAX_BYTES / 1024} KB.`;
+
+/** Size of the image a base64 `data:` URI encodes. */
+const decodedIconBytes = (dataUri: string): number => {
+  const payload = dataUri.slice(dataUri.indexOf(',') + 1);
+  const padding = payload.endsWith('==') ? 2 : payload.endsWith('=') ? 1 : 0;
+  return Math.floor((payload.length * 3) / 4) - padding;
+};
+
+export const connectorTypeIconSchema = lazySchema(() =>
+  z
+    .string()
+    // Cheap bound first: it stops oversized input before the checks below read it.
+    .max(CONNECTOR_TYPE_ICON_MAX_LENGTH, { message: ICON_TOO_LARGE_MESSAGE })
+    .regex(
+      /^data:image\/(?:png|jpeg|gif|webp|svg\+xml);base64,[A-Za-z0-9+/]+={0,2}$/,
+      'Logo must be a base64 PNG, JPEG, GIF, WebP or SVG image.'
+    )
+    .refine((icon) => decodedIconBytes(icon) <= CONNECTOR_TYPE_ICON_MAX_BYTES, {
+      message: ICON_TOO_LARGE_MESSAGE,
+    })
+);
+
 export const connectorTypeIdSchema = lazySchema(() =>
   z
     .string()
@@ -285,6 +325,7 @@ export const createConnectorTypeRequestSchema = lazySchema(() =>
       id: connectorTypeIdSchema,
       displayName: z.string().min(1).max(MAX_TEXT),
       description: z.string().max(MAX_LONG_TEXT),
+      icon: connectorTypeIconSchema.optional(),
       config: fieldsSchema,
       auth: authSchema,
       test: z

@@ -309,6 +309,7 @@ export class ActionTypeRegistry {
         isDeprecated: !!actionType.isDeprecated,
         allowMultipleSystemActions: actionType.allowMultipleSystemActions,
         description: actionType.description,
+        icon: actionType.icon,
         isExperimental: actionType.isExperimental,
         isTestable: Boolean(actionType.isTestable),
       }));

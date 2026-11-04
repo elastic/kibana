@@ -6,6 +6,7 @@
  */
 
 import type { ActionTypeRegistry } from '../../../../action_type_registry';
+import type { CreateConnectorTypeRequest } from '../../../../../common/routes/connector/apis/create_type';
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import { z } from '@kbn/zod/v4';
 import { createConnectorType } from './create_type';
@@ -53,6 +54,22 @@ describe('createConnectorType', () => {
     expect(z.toJSONSchema(spec.schema)).toMatchObject({
       properties: { baseUrl: { default: 'https://api.abuseipdb.com' } },
     });
+  });
+
+  it('carries the logo on the spec metadata, and omits it when there is none', () => {
+    const icon = 'data:image/png;base64,iVBORw0KGgo=';
+    const create = (requestToCreate: CreateConnectorTypeRequest) => {
+      const createTypeFromSpec = jest.fn(() => ({ id: '.dynamic_type' })) as never;
+      createConnectorType({
+        actionTypeRegistry: { has: jest.fn(() => false) } as unknown as ActionTypeRegistry,
+        createTypeFromSpec,
+        registerType: jest.fn(),
+        request: requestToCreate,
+      });
+      return (createTypeFromSpec as jest.Mock).mock.calls[0][0] as ConnectorSpec;
+    };
+
+    expect(create({ ...request, icon }).metadata.icon).toBe(icon);
   });
 
   it('converts and registers the requested connector type', () => {

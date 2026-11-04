@@ -26,6 +26,7 @@ export const transformListTypesResponse = (
       isDeprecated,
       allowMultipleSystemActions,
       description,
+      icon,
       isExperimental,
       isTestable,
     }) => ({
@@ -42,6 +43,7 @@ export const transformListTypesResponse = (
       is_deprecated: isDeprecated,
       allow_multiple_system_actions: allowMultipleSystemActions,
       description,
+      icon,
       is_experimental: isExperimental,
       is_testable: Boolean(isTestable),
     })
