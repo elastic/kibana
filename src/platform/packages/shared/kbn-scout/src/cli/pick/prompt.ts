@@ -8,10 +8,12 @@
  */
 
 import Readline from 'readline';
+import { stripVTControlCharacters } from 'util';
 import chalk from 'chalk';
 import { createFailError } from '@kbn/dev-cli-errors';
 
 export interface Choice<T> {
+  /** May be colored, filtering uses the plain text */
   label: string;
   value: T;
   hint?: string;
@@ -32,16 +34,21 @@ export class GoBack extends Error {}
 let shownPrompts = 0;
 export const getShownPrompts = () => shownPrompts;
 
+const plain = stripVTControlCharacters;
+
 const matches = ({ label, hint }: Choice<unknown>, query: string) => {
-  const text = `${label} ${hint ?? ''}`.toLowerCase();
+  const text = plain(`${label} ${hint ?? ''}`).toLowerCase();
   return query
     .toLowerCase()
     .split(/\s+/)
     .every((word) => text.includes(word));
 };
 
-const truncate = (text: string, width: number) =>
-  text.length > width ? `${text.slice(0, Math.max(width - 1, 0))}…` : text;
+/** Colors are dropped when the text has to be cut */
+const truncate = (text: string, width: number) => {
+  const visible = plain(text);
+  return visible.length > width ? `${visible.slice(0, Math.max(width - 1, 0))}…` : text;
+};
 
 /** A list that filters as you type, resolving with one value or with the selected ones */
 const prompt = <T>({ message, choices, multiple = false }: PromptOptions<T>): Promise<T[]> => {
@@ -72,18 +79,25 @@ const prompt = <T>({ message, choices, multiple = false }: PromptOptions<T>): Pr
       const visible = filtered();
       cursor = Math.min(cursor, Math.max(visible.length - 1, 0));
       const start = Math.max(0, cursor - PAGE_SIZE + 1);
-      const width = (stdout.columns || 100) - 6;
+      const width = (stdout.columns || 100) - (multiple ? 8 : 6);
+      const page = visible.slice(start, start + PAGE_SIZE);
+      // hints line up in one column; labels are cut first, down to half of the width
+      const hintWidth = Math.max(0, ...page.map(({ hint }) => plain(hint ?? '').length));
+      const labelWidth = Math.min(
+        Math.max(0, ...page.map(({ label }) => plain(label).length)),
+        Math.max(width - hintWidth - 2, Math.floor(width / 2))
+      );
 
       const lines = [
         `${chalk.cyan('?')} ${chalk.bold(message)} ${query || chalk.dim('type to filter')}`,
-        ...visible.slice(start, start + PAGE_SIZE).map((choice, index) => {
+        ...page.map((choice, index) => {
           const isCurrent = start + index === cursor;
           const box = multiple ? `${selected.has(choice) ? chalk.green('◉') : '◯'} ` : '';
-          const label = truncate(choice.label, width - 2);
-          const hint = choice.hint ? truncate(choice.hint, width - label.length - 4) : '';
+          const label = truncate(choice.label, choice.hint ? labelWidth : width);
+          const hint = choice.hint ? truncate(choice.hint, width - labelWidth - 2) : '';
           return `${isCurrent ? chalk.cyan('❯') : ' '} ${box}${
             isCurrent ? chalk.cyan(label) : label
-          }${hint ? `  ${chalk.dim(hint)}` : ''}`;
+          }${hint ? `${' '.repeat(labelWidth - plain(label).length)}  ${chalk.dim(hint)}` : ''}`;
         }),
         ...(visible.length ? [] : [chalk.dim('  no matches')]),
         ...(visible.length > start + PAGE_SIZE
@@ -113,7 +127,7 @@ const prompt = <T>({ message, choices, multiple = false }: PromptOptions<T>): Pr
       const answer =
         picked.length > 3
           ? `${picked.length} selected`
-          : picked.map(({ label }) => label).join(', ');
+          : picked.map(({ label }) => plain(label)).join(', ');
       stdout.write(`${chalk.green('✔')} ${chalk.bold(message)} ${chalk.cyan(answer)}\n\x1b[?25h`);
       resolve(picked.map(({ value }) => value));
     };

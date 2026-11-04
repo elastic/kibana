@@ -51,6 +51,49 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 
 const unique = (values: string[]) => [...new Set(values)].sort();
 
+/** Dims the parts of a config path that all configs share */
+const highlightPath = (path: string) =>
+  path
+    .split('/')
+    .map((part) => {
+      if (part === 'test' || part === 'scout' || part === 'playwright.config.ts') {
+        return chalk.dim(part);
+      }
+      if (part === 'parallel.playwright.config.ts') {
+        return `${chalk.bold('parallel')}${chalk.dim('.playwright.config.ts')}`;
+      }
+      return chalk.bold(part);
+    })
+    .join(chalk.dim('/'));
+
+/** Config labels look like `module · path` */
+const formatLabel = (label: string, withModule = true) => {
+  const [module, path] = label.split(' · ');
+  if (!path) {
+    return label;
+  }
+  return withModule ? `${module} ${chalk.dim('·')} ${highlightPath(path)}` : highlightPath(path);
+};
+
+const describeServerSet = ({ configSet, targets }: PinnedConfig, running: RunningServers[]) => {
+  const servers =
+    configSet === 'default' ? 'default servers' : chalk.yellow(`custom servers: ${configSet}`);
+  const isRunning = running.some(
+    (server) =>
+      server.configSet === configSet &&
+      targets.some((tag) => {
+        const { arch, domain } = ScoutTestTarget.fromTag(tag);
+        return server.arch === arch && server.domain === domain;
+      })
+  );
+  return isRunning ? `${servers}  ${chalk.green('● running')}` : servers;
+};
+
+const byServerSet = (a: PickableConfig, b: PickableConfig) =>
+  Number(a.configSet !== 'default') - Number(b.configSet !== 'default') ||
+  a.configSet.localeCompare(b.configSet) ||
+  a.path.localeCompare(b.path);
+
 const yesNo = [
   { label: 'Yes', value: true },
   { label: 'No', value: false },
@@ -136,6 +179,7 @@ const pickTests = async (log: ToolingLog): Promise<Selection> => {
   let pins = state.pins ?? [];
   let pinning = !state.pins;
   let changed: ChangedTests | undefined;
+  let running: RunningServers[] = [];
 
   let group = '';
   let module = '';
@@ -173,9 +217,15 @@ const pickTests = async (log: ToolingLog): Promise<Selection> => {
       return 'config';
     },
     config: async () => {
+      running = await getRunningServers();
       const choices = loadConfigs()
         .filter((item) => item.group === group && item.module === module)
-        .map((item) => ({ label: item.label, value: item }));
+        .sort(byServerSet)
+        .map((item) => ({
+          label: formatLabel(item.label, false),
+          value: item,
+          hint: describeServerSet(item, running),
+        }));
       if (pinning) {
         const picked =
           choices.length === 1 ? [choices[0].value] : await multiSelect('Configs to pin', choices);
@@ -192,7 +242,7 @@ const pickTests = async (log: ToolingLog): Promise<Selection> => {
       return 'scope';
     },
     start: async () => {
-      changed ??= await getChangedTests();
+      [changed, running] = await Promise.all([changed ?? getChangedTests(), getRunningServers()]);
       const specCount = [...changed.specs.values()].flat().length;
       const helperCount = changed.helpers.length;
       const choice = await select('What do you want to run?', [
@@ -217,7 +267,11 @@ const pickTests = async (log: ToolingLog): Promise<Selection> => {
               },
             ]
           : []),
-        ...pins.map(({ label, path }) => ({ label, value: path, hint: 'pinned' })),
+        ...pins.map((pinned) => ({
+          label: formatLabel(pinned.label),
+          value: pinned.path,
+          hint: `pinned · ${describeServerSet(pinned, running)}`,
+        })),
         { label: 'Find another config', value: 'find' },
         { label: 'Edit pins', value: 'edit' },
       ]);
@@ -236,7 +290,7 @@ const pickTests = async (log: ToolingLog): Promise<Selection> => {
     edit: async () => {
       pins = await multiSelect(
         'Pinned configs (space to unpin)',
-        pins.map((item) => ({ label: item.label, value: item, checked: true }))
+        pins.map((item) => ({ label: formatLabel(item.label), value: item, checked: true }))
       );
       updateState({ pins });
       return 'start';
@@ -245,11 +299,13 @@ const pickTests = async (log: ToolingLog): Promise<Selection> => {
       // changed configs may not be pinned, so their details come from all configs
       const choices = groupChangedTests(changed ?? (await getChangedTests()), loadConfigs()).map(
         (entry) => ({
-          label: entry.config.label,
+          label: formatLabel(entry.config.label),
           value: entry,
-          hint: entry.helpers.length
-            ? `all specs, ${plural(entry.helpers.length, 'changed file')}`
-            : plural(entry.specs.length, 'spec'),
+          hint: `${
+            entry.helpers.length
+              ? `all specs, ${plural(entry.helpers.length, 'changed file')}`
+              : plural(entry.specs.length, 'spec')
+          } · ${describeServerSet(entry.config, running)}`,
         })
       );
       const picked = choices.length === 1 ? choices[0].value : await select('Config', choices);
