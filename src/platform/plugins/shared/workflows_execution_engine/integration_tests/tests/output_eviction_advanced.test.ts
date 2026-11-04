@@ -9,7 +9,7 @@
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import { ExecutionStatus } from '@kbn/workflows';
-import { executionIoId } from '../../server/repositories/data_access_layer/implementations/executions_io/execution_io_id';
+import { executionIoId } from '@kbn/workflows/server';
 import { FakeConnectors } from '../mocks/actions_plugin_mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
 

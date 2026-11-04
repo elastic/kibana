@@ -9,10 +9,9 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { executionIoId, type ExecutionIoType, parseExecutionIoId } from '@kbn/workflows/server';
 
 import { EXECUTION_IO_FALLBACK_INDEXES, WORKFLOWS_EXECUTIONS_IO_DATA_STREAM } from './constants';
-import { executionIoId, parseExecutionIoId } from './execution_io_id';
-import type { ExecutionIoType } from './execution_io_id';
 import type { EsExecutionIo } from './types';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../constants/execution_indexes';
 import type {

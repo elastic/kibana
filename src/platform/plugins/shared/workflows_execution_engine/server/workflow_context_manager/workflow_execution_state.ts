@@ -16,8 +16,8 @@ import type {
   WorkflowTokenUsage,
 } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
+import { executionIoId } from '@kbn/workflows/server';
 import { areParallelBranchesCompatible, getParallelBranchScopes } from './parallel_branch_scope';
-import { executionIoId } from '../repositories/data_access_layer/implementations/executions_io/execution_io_id';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { sumTokenUsage } from '../utils';

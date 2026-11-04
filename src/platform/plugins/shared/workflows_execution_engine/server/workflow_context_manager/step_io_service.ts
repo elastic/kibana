@@ -13,6 +13,7 @@ import type { EsWorkflowStepExecution, SerializedError, StackFrame } from '@kbn/
 import { ExecutionStatus } from '@kbn/workflows';
 import { extractPropertyPathsFromKql, scanForTemplateVariables } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import { executionIoId, parseExecutionIoId } from '@kbn/workflows/server';
 import {
   extractReferencedStepIds,
   extractReferencedStepIdsFromVariables,
@@ -23,10 +24,6 @@ import { EVICTION_EXEMPT_STEP_TYPES, LOOP_STEP_TYPES } from './step_io_pinned_ty
 import type { StepExecutionMetadata, StepIoStateAccessor } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { OutputSizeStats } from '../lib/telemetry/events/workflows_execution/types';
-import {
-  executionIoId,
-  parseExecutionIoId,
-} from '../repositories/data_access_layer/implementations/executions_io/execution_io_id';
 import type { ExecutionsIoClient } from '../repositories/data_access_layer/implementations/executions_io/executions_io_data_client';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { formatBytes, safeOutputSize } from '../step/errors';

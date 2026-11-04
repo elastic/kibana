@@ -1318,19 +1318,17 @@ describe('WorkflowExecutionQueryService', () => {
           hits: {
             hits: [
               {
+                _id: 'pred-1',
                 _source: {
-                  id: 'pred-1',
                   workflowRunId: 'run-1',
                   finishedAt: '2026-04-28T14:59:00.000Z',
-                  outputId: 'output:pred-1',
                 },
               },
               {
+                _id: 'pred-0',
                 _source: {
-                  id: 'pred-0',
                   workflowRunId: 'run-1',
                   finishedAt: '2026-04-28T14:00:00.000Z',
-                  outputId: 'output:pred-0',
                 },
               },
             ],
@@ -1367,7 +1365,7 @@ describe('WorkflowExecutionQueryService', () => {
         const reasoningArgs = mockEsClient.search.mock.calls[2][0] as any;
         expect(reasoningArgs).toMatchObject({
           index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-          _source: { includes: ['id', 'workflowRunId', 'finishedAt', 'outputId'] },
+          _source: { includes: ['workflowRunId', 'finishedAt'] },
           size: 1000,
           track_total_hits: false,
         });
@@ -1391,10 +1389,10 @@ describe('WorkflowExecutionQueryService', () => {
           hits: {
             hits: [
               {
+                _id: 'pred-1',
                 _source: {
                   workflowRunId: 'run-1',
                   finishedAt: '2026-04-28T15:30:00.000Z',
-                  outputId: 'output:pred-1',
                 },
               },
             ],
@@ -1414,10 +1412,10 @@ describe('WorkflowExecutionQueryService', () => {
           hits: {
             hits: [
               {
+                _id: 'pred-1',
                 _source: {
                   workflowRunId: 'run-1',
                   finishedAt: '2026-04-28T14:59:00.000Z',
-                  outputId: 'output:pred-1',
                 },
               },
             ],
@@ -1466,10 +1464,10 @@ describe('WorkflowExecutionQueryService', () => {
           hits: {
             hits: [
               {
+                _id: 'pred-1',
                 _source: {
                   workflowRunId: 'run-1',
                   finishedAt: '2026-04-28T14:59:00.000Z',
-                  outputId: 'output:pred-1',
                 },
               },
             ],

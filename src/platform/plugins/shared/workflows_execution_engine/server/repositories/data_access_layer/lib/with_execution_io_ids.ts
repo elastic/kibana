@@ -8,7 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { executionIoId } from '../implementations/executions_io/execution_io_id';
+import { executionIoId } from '@kbn/workflows/server';
 
 /** Stamps the IO document ids derived from the execution id. Stored values are not used. */
 export function withExecutionIoIds<T extends { id: string }>(document: T): T {

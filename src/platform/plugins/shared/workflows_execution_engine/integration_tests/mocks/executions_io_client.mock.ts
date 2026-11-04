@@ -9,8 +9,8 @@
 
 import type { JsonObject } from '@kbn/utility-types';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import { executionIoId } from '@kbn/workflows/server';
 import type { StepExecutionRepositoryMock } from './step_execution_repository.mock';
-import { executionIoId } from '../../server/repositories/data_access_layer/implementations/executions_io/execution_io_id';
 import type {
   ExecutionIoCreateDocument,
   ExecutionsIoBulkCreateRequest,

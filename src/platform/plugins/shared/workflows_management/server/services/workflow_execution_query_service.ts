@@ -15,6 +15,7 @@ import type {
   WorkflowExecutionDto,
   WorkflowExecutionListDto,
 } from '@kbn/workflows';
+import { executionIoId } from '@kbn/workflows/server';
 import type { ChildWorkflowExecutionItem } from '@kbn/workflows/types/v1';
 import type { LogSearchResult } from '@kbn/workflows-execution-engine/server';
 import { bulkUpdaterItem, getBulkUpdaterWriteResult } from '@kbn/workflows-execution-engine/server';
@@ -752,8 +753,8 @@ export class WorkflowExecutionQueryService {
           { workflowRunId: { order: 'asc' } },
           { finishedAt: { order: 'desc', missing: '_last' } },
         ],
-        // Metadata only. Reasoning is read from the predecessor's output document.
-        _source: { includes: ['id', 'workflowRunId', 'finishedAt', 'outputId'] },
+        // Metadata only. The output document id is output: plus the step _id.
+        _source: { includes: ['workflowRunId', 'finishedAt'] },
         size: PREDECESSOR_REASONING_MAX_HITS,
         track_total_hits: false,
       });
@@ -767,12 +768,15 @@ export class WorkflowExecutionQueryService {
     }
 
     const hits = response?.hits?.hits ?? [];
-    const completedByRun = new Map<string, Array<{ finishedAt?: string; outputId?: string }>>();
+    const completedByRun = new Map<string, Array<{ finishedAt?: string; outputId: string }>>();
     for (const hit of hits) {
       const source = hit._source;
-      if (source?.workflowRunId) {
+      if (source?.workflowRunId && hit._id) {
         const forRun = completedByRun.get(source.workflowRunId) ?? [];
-        forRun.push({ finishedAt: source.finishedAt, outputId: source.outputId });
+        forRun.push({
+          finishedAt: source.finishedAt,
+          outputId: executionIoId('output', hit._id),
+        });
         completedByRun.set(source.workflowRunId, forRun);
       }
     }
@@ -1160,7 +1164,7 @@ function omitEmbeddedStepPayloads(steps: EsWorkflowStepExecution[]): void {
  */
 function immediatePredecessorOutputId(
   step: EsWorkflowStepExecution,
-  completedByRun: ReadonlyMap<string, Array<{ finishedAt?: string; outputId?: string }>>
+  completedByRun: ReadonlyMap<string, Array<{ finishedAt?: string; outputId: string }>>
 ): string | undefined {
   const { id, workflowRunId, startedAt } = step;
   const candidates =
