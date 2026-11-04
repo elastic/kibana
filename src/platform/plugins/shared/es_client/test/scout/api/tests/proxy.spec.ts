@@ -38,6 +38,15 @@ apiTest.describe('Elasticsearch proxy', { tag: tags.deploymentAgnostic }, () => 
     });
   });
 
+  let retainedAsyncQueryId: string | undefined;
+
+  apiTest.afterEach(async ({ esClient }) => {
+    if (retainedAsyncQueryId) {
+      await esClient.esql.asyncQueryDelete({ id: retainedAsyncQueryId }, { ignore: [404] });
+      retainedAsyncQueryId = undefined;
+    }
+  });
+
   apiTest.afterAll(async ({ esClient }) => {
     await esClient.indices.delete({ index: TEST_INDEX, ignore_unavailable: true });
   });
@@ -116,8 +125,9 @@ apiTest.describe('Elasticsearch proxy', { tag: tags.deploymentAgnostic }, () => 
       body: { query: `FROM ${TEST_INDEX} | LIMIT 1`, keep_on_completion: true },
       responseType: 'text',
     });
-    expect(response).toHaveStatusCode(200);
     const asyncId = response.headers['x-elasticsearch-async-id'];
+    retainedAsyncQueryId = typeof asyncId === 'string' ? asyncId : undefined;
+    expect(response).toHaveStatusCode(200);
     expect(asyncId).toMatch(/\S+/);
     // `?1` WHEN the query outlasts the default wait_for_completion_timeout, for example under load
     expect(response.headers['x-elasticsearch-async-is-running']).toMatch(/^\?[01]$/);
@@ -127,6 +137,7 @@ apiTest.describe('Elasticsearch proxy', { tag: tags.deploymentAgnostic }, () => 
       responseType: 'json',
     });
     expect(deleteResponse).toHaveStatusCode(200);
+    retainedAsyncQueryId = undefined;
   });
 
   apiTest('forwards the query string', async ({ apiClient }) => {
