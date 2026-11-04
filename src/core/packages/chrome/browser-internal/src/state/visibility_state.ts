@@ -52,7 +52,8 @@ export const createVisibilityState = ({ application }: VisibilityStateDeps): Vis
       mergeMap((appId) =>
         application.applications$.pipe(
           map((applications) => {
-            return !!appId && applications.has(appId) && !!applications.get(appId)!.chromeless;
+            const app = appId ? applications.get(appId) : undefined;
+            return !!app && (!!app.chromeless || !!app.hideChrome);
           })
         )
       )

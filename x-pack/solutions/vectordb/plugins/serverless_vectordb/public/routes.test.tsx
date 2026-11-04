@@ -31,7 +31,7 @@ const renderRoutes = (initialEntry: string): MemoryHistory => {
   const history = createMemoryHistory({ initialEntries: [initialEntry] });
   render(
     <Router history={history}>
-      <AppRoutes />
+      <AppRoutes onOnboardingExit={jest.fn()} />
     </Router>
   );
   return history;
