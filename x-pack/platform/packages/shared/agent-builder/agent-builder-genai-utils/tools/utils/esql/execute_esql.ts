@@ -29,6 +29,20 @@ const buildTimeoutMessage = (timeoutMs: number | undefined): string => {
   );
 };
 
+/**
+ * Thrown by `executeEsql` when a query is given up on because of its `timeoutMs` deadline or the
+ * client's request timeout. Lets callers tell "too expensive to run" apart from other failures.
+ */
+export class EsqlExecutionTimeoutError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'EsqlExecutionTimeoutError';
+  }
+}
+
+export const isEsqlExecutionTimeoutError = (err: unknown): err is EsqlExecutionTimeoutError =>
+  err instanceof EsqlExecutionTimeoutError;
+
 const isTimeoutError = (err: unknown): boolean =>
   err instanceof Error && err.name === 'TimeoutError';
 
@@ -104,7 +118,9 @@ export const executeEsql = async ({
     if (timeoutSignal) {
       const deadlineHit = timeoutSignal.aborted && isRequestAbortedError(err);
       if (deadlineHit || isTimeoutError(err)) {
-        throw new Error(buildTimeoutMessage(deadlineHit ? timeoutMs : undefined));
+        throw new EsqlExecutionTimeoutError(
+          buildTimeoutMessage(deadlineHit ? timeoutMs : undefined)
+        );
       }
     }
     throw err;

@@ -23,6 +23,12 @@ import { loadDocumentation } from './documentation';
 import { createRequestDocumentationPromptNoResource } from './prompts';
 import { withPromqlKeyword } from './promql_keyword';
 
+/**
+ * Default wall-clock bound for executing a generated query. Matches Kibana's default
+ * `elasticsearch.requestTimeout`, minus the client retries that would otherwise multiply it.
+ */
+export const DEFAULT_EXECUTION_TIMEOUT_MS = 30_000;
+
 export class GenerateEsqlNoDataError extends Error {
   readonly code = 'NO_DATA' as const;
   constructor(message: string) {
@@ -110,6 +116,14 @@ export interface GenerateEsqlOptions {
    * */
   maxRetries?: number;
   /**
+   * How long, in milliseconds, a generated query may run before it is given up on. Applies to
+   * every execution of the generation loop (`execute` `'data'` or `'schema'`); client-side
+   * retries are disabled so this is a wall-clock bound. On timeout the model gets one chance to
+   * write a cheaper query before the call ends with a timeout error.
+   * Defaults to {@link DEFAULT_EXECUTION_TIMEOUT_MS} (30 seconds).
+   */
+  executionTimeoutMs?: number;
+  /**
    * Maximum row limit to use in generated ES|QL queries.
    */
   rowLimit?: number;
@@ -153,6 +167,7 @@ export const generateEsql = async ({
   additionalInstructions,
   additionalContext,
   maxRetries = 3,
+  executionTimeoutMs = DEFAULT_EXECUTION_TIMEOUT_MS,
   rowLimit,
   timeRange: inputTimeRange,
   esqlVariables,
@@ -273,6 +288,7 @@ export const generateEsql = async ({
             disableNamedParams,
             timeRange,
             esqlVariables,
+            executionTimeoutMs,
             // Empty when index is known — graph runs request_documentation in-graph with resource context.
             actions: precomputedDocAction ? [precomputedDocAction] : [],
           },
