@@ -31,7 +31,7 @@
  *      "Delete a rule"
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { CoreSetup, IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { AlertingServerStart } from '@kbn/alerting-v2-plugin/server';
@@ -61,9 +61,11 @@ const DETECTIONS_API_VERSION = '2023-10-31' as const;
 // Params schema (shared by PUT, PATCH, DELETE)
 // ---------------------------------------------------------------------------
 
-const ruleIdParamsSchema = z.object({
-  id: z.string().min(1).describe('The object id of the rule.'),
-});
+const ruleIdParamsSchema = lazySchema(() =>
+  z.object({
+    id: z.string().min(1).describe('The object id of the rule.'),
+  })
+);
 
 // ---------------------------------------------------------------------------
 // Route: POST /rules — create a rule

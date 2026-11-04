@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { detectionRuleCommonFields } from './detection_rule_common_fields';
 
 // ---------------------------------------------------------------------------
@@ -19,13 +19,15 @@ import { detectionRuleCommonFields } from './detection_rule_common_fields';
 // Ref: rule-data-model.md "security.detection.query"
 // ---------------------------------------------------------------------------
 
-export const customQueryBuilderFieldsSchema = z
-  .object({
-    ...detectionRuleCommonFields,
-    index: z.array(z.string().min(1).max(256)).min(1).max(32),
-    query: z.string().min(1).max(8192),
-    language: z.enum(['kuery', 'lucene']),
-  })
-  .strict();
+export const customQueryBuilderFieldsSchema = lazySchema(() =>
+  z
+    .object({
+      ...detectionRuleCommonFields,
+      index: z.array(z.string().min(1).max(256)).min(1).max(32),
+      query: z.string().min(1).max(8192),
+      language: z.enum(['kuery', 'lucene']),
+    })
+    .strict()
+);
 
 export type CustomQueryBuilderFields = z.infer<typeof customQueryBuilderFieldsSchema>;

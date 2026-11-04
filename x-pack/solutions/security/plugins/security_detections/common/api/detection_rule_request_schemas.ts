@@ -21,7 +21,7 @@
  *      rule-validation.md "No defaults, no transforms"
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_NAME_LENGTH,
   MAX_DESCRIPTION_LENGTH,
@@ -51,12 +51,14 @@ import { detectionRuleScheduleSchema } from './detection_rule_response_schema';
  * Base required fields on every create request (both types).
  * `type`, `index`, and `query` are in the per-type schemas instead.
  */
-const baseRequiredFieldsSchema = z.object({
-  name: z.string().min(1).max(MAX_NAME_LENGTH),
-  description: z.string().min(1).max(MAX_DESCRIPTION_LENGTH),
-  severity: detectionRuleCommonFields.severity,
-  risk_score: detectionRuleCommonFields.risk_score,
-});
+const baseRequiredFieldsSchema = lazySchema(() =>
+  z.object({
+    name: z.string().min(1).max(MAX_NAME_LENGTH),
+    description: z.string().min(1).max(MAX_DESCRIPTION_LENGTH),
+    severity: detectionRuleCommonFields.severity,
+    risk_score: detectionRuleCommonFields.risk_score,
+  })
+);
 
 /**
  * Base optional fields — genuinely optional, no default value.
@@ -65,16 +67,18 @@ const baseRequiredFieldsSchema = z.object({
  * `note` and `license` are imported from the schema package so bounds cannot
  * diverge from the stored model.
  */
-const baseOptionalFieldsSchema = z.object({
-  note: detectionRuleCommonFields.note,
-  license: detectionRuleCommonFields.license,
-  /**
-   * Client-assignable stable identifier at create time.  On UPDATE/PATCH it is
-   * optional but must match the stored value if provided (validation at the
-   * application layer, not the schema layer).
-   */
-  rule_id: z.string().min(1).max(MAX_SIGNATURE_ID_LENGTH).optional(),
-});
+const baseOptionalFieldsSchema = lazySchema(() =>
+  z.object({
+    note: detectionRuleCommonFields.note,
+    license: detectionRuleCommonFields.license,
+    /**
+     * Client-assignable stable identifier at create time.  On UPDATE/PATCH it is
+     * optional but must match the stored value if provided (validation at the
+     * application layer, not the schema layer).
+     */
+    rule_id: z.string().min(1).max(MAX_SIGNATURE_ID_LENGTH).optional(),
+  })
+);
 
 /**
  * Base defaultable fields — optional in create/update/patch; `applyRuleDefaults`
@@ -86,27 +90,29 @@ const baseOptionalFieldsSchema = z.object({
  *
  * Ref: rule-validation.md "No defaults, no transforms"
  */
-const baseDefaultableFieldsSchema = z.object({
-  version: z.number().int().min(1).optional(),
-  tags: z.array(z.string().min(1).max(MAX_TAG_LENGTH)).max(MAX_TAGS).optional(),
-  max_signals: detectionRuleCommonFields.max_signals,
-  setup: detectionRuleCommonFields.setup,
-  references: detectionRuleCommonFields.references,
-  false_positives: detectionRuleCommonFields.false_positives,
-  author: detectionRuleCommonFields.author,
-  threat: detectionRuleCommonFields.threat,
-  related_integrations: detectionRuleCommonFields.related_integrations,
-  required_fields: detectionRuleCommonFields.required_fields,
-  /**
-   * Schedule with optional lookback.  Default: { interval: '5m' }.
-   * No `from: now-6m` overlap — a deliberate departure from v1.
-   * A caller who wants v1's overlap sends `lookback: '6m'`.
-   *
-   * Ref: rule-domain-model.md "The request shapes" (defaults table)
-   */
-  schedule: detectionRuleScheduleSchema.optional(),
-  language: customQueryBuilderFieldsSchema.shape.language.optional(),
-});
+const baseDefaultableFieldsSchema = lazySchema(() =>
+  z.object({
+    version: z.number().int().min(1).optional(),
+    tags: z.array(z.string().min(1).max(MAX_TAG_LENGTH)).max(MAX_TAGS).optional(),
+    max_signals: detectionRuleCommonFields.max_signals,
+    setup: detectionRuleCommonFields.setup,
+    references: detectionRuleCommonFields.references,
+    false_positives: detectionRuleCommonFields.false_positives,
+    author: detectionRuleCommonFields.author,
+    threat: detectionRuleCommonFields.threat,
+    related_integrations: detectionRuleCommonFields.related_integrations,
+    required_fields: detectionRuleCommonFields.required_fields,
+    /**
+     * Schedule with optional lookback.  Default: { interval: '5m' }.
+     * No `from: now-6m` overlap — a deliberate departure from v1.
+     * A caller who wants v1's overlap sends `lookback: '6m'`.
+     *
+     * Ref: rule-domain-model.md "The request shapes" (defaults table)
+     */
+    schedule: detectionRuleScheduleSchema.optional(),
+    language: customQueryBuilderFieldsSchema.shape.language.optional(),
+  })
+);
 
 // ---------------------------------------------------------------------------
 // Per-type writable fields
@@ -120,11 +126,13 @@ const baseDefaultableFieldsSchema = z.object({
  * `baseDefaultableFieldsSchema` (shared across types) and is likewise imported
  * from the builder schema package there.
  */
-const customQueryWritableFieldsSchema = z.object({
-  type: z.literal('query'),
-  index: customQueryBuilderFieldsSchema.shape.index,
-  query: customQueryBuilderFieldsSchema.shape.query,
-});
+const customQueryWritableFieldsSchema = lazySchema(() =>
+  z.object({
+    type: z.literal('query'),
+    index: customQueryBuilderFieldsSchema.shape.index,
+    query: customQueryBuilderFieldsSchema.shape.query,
+  })
+);
 
 /**
  * Writable fields specific to the Threshold rule type.
@@ -132,13 +140,15 @@ const customQueryWritableFieldsSchema = z.object({
  * All type-specific field shapes are imported from the builder schema package.
  * `query` may be empty (match-all pre-filter).
  */
-const thresholdWritableFieldsSchema = z.object({
-  type: z.literal('threshold'),
-  index: thresholdBuilderFieldsSchema.shape.index,
-  /** Empty string is valid as a match-all pre-filter. */
-  query: thresholdBuilderFieldsSchema.shape.query,
-  threshold: thresholdBuilderFieldsSchema.shape.threshold,
-});
+const thresholdWritableFieldsSchema = lazySchema(() =>
+  z.object({
+    type: z.literal('threshold'),
+    index: thresholdBuilderFieldsSchema.shape.index,
+    /** Empty string is valid as a match-all pre-filter. */
+    query: thresholdBuilderFieldsSchema.shape.query,
+    threshold: thresholdBuilderFieldsSchema.shape.threshold,
+  })
+);
 
 // ---------------------------------------------------------------------------
 // Create schema (POST)
@@ -149,15 +159,19 @@ const thresholdWritableFieldsSchema = z.object({
 // Ref: rule-domain-model.md "The request shapes"
 // ---------------------------------------------------------------------------
 
-const customQueryCreateBaseSchema = baseRequiredFieldsSchema
-  .merge(baseOptionalFieldsSchema)
-  .merge(baseDefaultableFieldsSchema)
-  .merge(z.object({ enabled: z.boolean().optional() }));
+const customQueryCreateBaseSchema = lazySchema(() =>
+  baseRequiredFieldsSchema
+    .merge(baseOptionalFieldsSchema)
+    .merge(baseDefaultableFieldsSchema)
+    .merge(z.object({ enabled: z.boolean().optional() }))
+);
 
-const thresholdCreateBaseSchema = baseRequiredFieldsSchema
-  .merge(baseOptionalFieldsSchema)
-  .merge(baseDefaultableFieldsSchema)
-  .merge(z.object({ enabled: z.boolean().optional() }));
+const thresholdCreateBaseSchema = lazySchema(() =>
+  baseRequiredFieldsSchema
+    .merge(baseOptionalFieldsSchema)
+    .merge(baseDefaultableFieldsSchema)
+    .merge(z.object({ enabled: z.boolean().optional() }))
+);
 
 /**
  * Create schema for the Custom Query rule type.
@@ -167,9 +181,9 @@ const thresholdCreateBaseSchema = baseRequiredFieldsSchema
  * camelCase typo (e.g. `riskScore`) or a server-side field (`id`, `revision`,
  * `source`) surfaces as a 400 instead of being silently stripped.
  */
-export const customQueryCreateSchema = customQueryCreateBaseSchema
-  .merge(customQueryWritableFieldsSchema)
-  .strict();
+export const customQueryCreateSchema = lazySchema(() =>
+  customQueryCreateBaseSchema.merge(customQueryWritableFieldsSchema).strict()
+);
 export type CustomQueryCreateProps = z.infer<typeof customQueryCreateSchema>;
 
 /**
@@ -178,9 +192,9 @@ export type CustomQueryCreateProps = z.infer<typeof customQueryCreateSchema>;
  *
  * `.strict()` — same rationale as `customQueryCreateSchema`.
  */
-export const thresholdCreateSchema = thresholdCreateBaseSchema
-  .merge(thresholdWritableFieldsSchema)
-  .strict();
+export const thresholdCreateSchema = lazySchema(() =>
+  thresholdCreateBaseSchema.merge(thresholdWritableFieldsSchema).strict()
+);
 export type ThresholdCreateProps = z.infer<typeof thresholdCreateSchema>;
 
 /**
@@ -191,10 +205,9 @@ export type ThresholdCreateProps = z.infer<typeof thresholdCreateSchema>;
  *
  * Ref: rule-domain-model.md "The request shapes"
  */
-export const detectionRuleCreatePropsSchema = z.discriminatedUnion('type', [
-  customQueryCreateSchema,
-  thresholdCreateSchema,
-]);
+export const detectionRuleCreatePropsSchema = lazySchema(() =>
+  z.discriminatedUnion('type', [customQueryCreateSchema, thresholdCreateSchema])
+);
 export type DetectionRuleCreateProps = z.infer<typeof detectionRuleCreatePropsSchema>;
 
 // ---------------------------------------------------------------------------
@@ -207,13 +220,13 @@ export type DetectionRuleCreateProps = z.infer<typeof detectionRuleCreatePropsSc
 // Ref: rule-domain-model.md "The request shapes"
 // ---------------------------------------------------------------------------
 
-const customQueryUpdateBaseSchema = baseRequiredFieldsSchema
-  .merge(baseOptionalFieldsSchema)
-  .merge(baseDefaultableFieldsSchema);
+const customQueryUpdateBaseSchema = lazySchema(() =>
+  baseRequiredFieldsSchema.merge(baseOptionalFieldsSchema).merge(baseDefaultableFieldsSchema)
+);
 
-const thresholdUpdateBaseSchema = baseRequiredFieldsSchema
-  .merge(baseOptionalFieldsSchema)
-  .merge(baseDefaultableFieldsSchema);
+const thresholdUpdateBaseSchema = lazySchema(() =>
+  baseRequiredFieldsSchema.merge(baseOptionalFieldsSchema).merge(baseDefaultableFieldsSchema)
+);
 
 /**
  * `DetectionRuleUpdateProps` (PUT) — the create shape without `enabled`.
@@ -223,10 +236,12 @@ const thresholdUpdateBaseSchema = baseRequiredFieldsSchema
  *
  * Ref: rule-domain-model.md "The request shapes"
  */
-export const detectionRuleUpdatePropsSchema = z.discriminatedUnion('type', [
-  customQueryUpdateBaseSchema.merge(customQueryWritableFieldsSchema).strict(),
-  thresholdUpdateBaseSchema.merge(thresholdWritableFieldsSchema).strict(),
-]);
+export const detectionRuleUpdatePropsSchema = lazySchema(() =>
+  z.discriminatedUnion('type', [
+    customQueryUpdateBaseSchema.merge(customQueryWritableFieldsSchema).strict(),
+    thresholdUpdateBaseSchema.merge(thresholdWritableFieldsSchema).strict(),
+  ])
+);
 export type DetectionRuleUpdateProps = z.infer<typeof detectionRuleUpdatePropsSchema>;
 
 // ---------------------------------------------------------------------------
@@ -258,69 +273,71 @@ export type DetectionRuleUpdateProps = z.infer<typeof detectionRuleUpdatePropsSc
  *
  * Ref: rule-domain-model.md "The request shapes"
  */
-export const detectionRulePatchPropsSchema = z
-  .object({
-    // --- Required-in-create fields: optional in PATCH, not nullable ---
-    name: z.string().min(1).max(MAX_NAME_LENGTH).optional(),
-    description: z.string().min(1).max(MAX_DESCRIPTION_LENGTH).optional(),
-    severity: detectionRuleCommonFields.severity.optional(),
-    risk_score: detectionRuleCommonFields.risk_score.optional(),
-    /** rule_id is immutable; include for equality-check only. */
-    rule_id: z.string().min(1).max(MAX_SIGNATURE_ID_LENGTH).optional(),
+export const detectionRulePatchPropsSchema = lazySchema(() =>
+  z
+    .object({
+      // --- Required-in-create fields: optional in PATCH, not nullable ---
+      name: z.string().min(1).max(MAX_NAME_LENGTH).optional(),
+      description: z.string().min(1).max(MAX_DESCRIPTION_LENGTH).optional(),
+      severity: detectionRuleCommonFields.severity.optional(),
+      risk_score: detectionRuleCommonFields.risk_score.optional(),
+      /** rule_id is immutable; include for equality-check only. */
+      rule_id: z.string().min(1).max(MAX_SIGNATURE_ID_LENGTH).optional(),
 
-    // --- Type-specific fields: optional, not nullable ---
-    // `index` and `threshold` shapes imported from builder schemas so bounds
-    // cannot drift from the stored model.  `query` uses the threshold builder's
-    // (more permissive) shape to accommodate both types in the flat PATCH schema.
-    index: customQueryBuilderFieldsSchema.shape.index.optional(),
-    query: thresholdBuilderFieldsSchema.shape.query.optional(),
-    language: customQueryBuilderFieldsSchema.shape.language.optional(),
-    threshold: thresholdBuilderFieldsSchema.shape.threshold.optional(),
+      // --- Type-specific fields: optional, not nullable ---
+      // `index` and `threshold` shapes imported from builder schemas so bounds
+      // cannot drift from the stored model.  `query` uses the threshold builder's
+      // (more permissive) shape to accommodate both types in the flat PATCH schema.
+      index: customQueryBuilderFieldsSchema.shape.index.optional(),
+      query: thresholdBuilderFieldsSchema.shape.query.optional(),
+      language: customQueryBuilderFieldsSchema.shape.language.optional(),
+      threshold: thresholdBuilderFieldsSchema.shape.threshold.optional(),
 
-    // --- Content version: optional, not nullable (meaningless to null) ---
-    version: z.number().int().min(1).optional(),
+      // --- Content version: optional, not nullable (meaningless to null) ---
+      version: z.number().int().min(1).optional(),
 
-    // --- Optional-with-no-default: nullable so null clears the field ---
-    // Unwrap the package's .optional() wrapper before adding .nullable() so
-    // the result is T | null | undefined rather than T | undefined | undefined.
-    note: detectionRuleCommonFields.note.unwrap().nullable().optional(),
-    license: detectionRuleCommonFields.license.unwrap().nullable().optional(),
+      // --- Optional-with-no-default: nullable so null clears the field ---
+      // Unwrap the package's .optional() wrapper before adding .nullable() so
+      // the result is T | null | undefined rather than T | undefined | undefined.
+      note: detectionRuleCommonFields.note.unwrap().nullable().optional(),
+      license: detectionRuleCommonFields.license.unwrap().nullable().optional(),
 
-    // --- Defaultable scalars: optional but NOT nullable ---
-    // max_signals is a defaultable field (default 100).  Clearing it to null
-    // removes it from the stored container, which causes the compile step to
-    // emit no LIMIT and the rule to run under the deployment row cap while the
-    // read-back path papers over the absence with the default (100).  Callers
-    // who want to revert to 100 must send 100 explicitly.
-    // Ref: rule-domain-model.md "The request shapes" (three-group split) —
-    // only optional-with-no-default fields (note, license, rule_id,
-    // schedule.lookback, threshold.cardinality) are nullable in PATCH.
-    max_signals: detectionRuleCommonFields.max_signals.unwrap().optional(),
-    setup: detectionRuleCommonFields.setup.unwrap().nullable().optional(),
+      // --- Defaultable scalars: optional but NOT nullable ---
+      // max_signals is a defaultable field (default 100).  Clearing it to null
+      // removes it from the stored container, which causes the compile step to
+      // emit no LIMIT and the rule to run under the deployment row cap while the
+      // read-back path papers over the absence with the default (100).  Callers
+      // who want to revert to 100 must send 100 explicitly.
+      // Ref: rule-domain-model.md "The request shapes" (three-group split) —
+      // only optional-with-no-default fields (note, license, rule_id,
+      // schedule.lookback, threshold.cardinality) are nullable in PATCH.
+      max_signals: detectionRuleCommonFields.max_signals.unwrap().optional(),
+      setup: detectionRuleCommonFields.setup.unwrap().nullable().optional(),
 
-    // --- Defaultable arrays: nullable so null clears to [] ---
-    tags: z.array(z.string().min(1).max(MAX_TAG_LENGTH)).max(MAX_TAGS).nullable().optional(),
-    references: detectionRuleCommonFields.references.unwrap().nullable().optional(),
-    false_positives: detectionRuleCommonFields.false_positives.unwrap().nullable().optional(),
-    author: detectionRuleCommonFields.author.unwrap().nullable().optional(),
-    threat: detectionRuleCommonFields.threat.unwrap().nullable().optional(),
-    related_integrations: detectionRuleCommonFields.related_integrations
-      .unwrap()
-      .nullable()
-      .optional(),
-    required_fields: detectionRuleCommonFields.required_fields.unwrap().nullable().optional(),
+      // --- Defaultable arrays: nullable so null clears to [] ---
+      tags: z.array(z.string().min(1).max(MAX_TAG_LENGTH)).max(MAX_TAGS).nullable().optional(),
+      references: detectionRuleCommonFields.references.unwrap().nullable().optional(),
+      false_positives: detectionRuleCommonFields.false_positives.unwrap().nullable().optional(),
+      author: detectionRuleCommonFields.author.unwrap().nullable().optional(),
+      threat: detectionRuleCommonFields.threat.unwrap().nullable().optional(),
+      related_integrations: detectionRuleCommonFields.related_integrations
+        .unwrap()
+        .nullable()
+        .optional(),
+      required_fields: detectionRuleCommonFields.required_fields.unwrap().nullable().optional(),
 
-    // --- Schedule: the object itself is optional; lookback is nullable inside ---
-    // Shapes are composed from detectionRuleScheduleSchema so the min(1) bounds
-    // cannot drift from the create/update path.
-    schedule: z
-      .object({
-        interval: detectionRuleScheduleSchema.shape.interval.optional(),
-        lookback: detectionRuleScheduleSchema.shape.lookback.unwrap().nullable().optional(),
-      })
-      .strict()
-      .optional(),
-  })
-  .strict();
+      // --- Schedule: the object itself is optional; lookback is nullable inside ---
+      // Shapes are composed from detectionRuleScheduleSchema so the min(1) bounds
+      // cannot drift from the create/update path.
+      schedule: z
+        .object({
+          interval: detectionRuleScheduleSchema.shape.interval.optional(),
+          lookback: detectionRuleScheduleSchema.shape.lookback.unwrap().nullable().optional(),
+        })
+        .strict()
+        .optional(),
+    })
+    .strict()
+);
 
 export type DetectionRulePatchProps = z.infer<typeof detectionRulePatchPropsSchema>;
