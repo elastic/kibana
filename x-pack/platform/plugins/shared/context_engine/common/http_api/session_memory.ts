@@ -40,6 +40,7 @@ export type RememberSessionMemoryResponse = SessionMemory;
 
 /** Query of `GET /_context_engine/session_events/{session_id}`. */
 export interface SessionScopeQuery {
+  user_id?: string;
   space?: string;
   /** A single id; matches events whose `ai_index_ids` list contains it. */
   ai_index_ids?: string;
@@ -49,7 +50,6 @@ export interface SessionScopeQuery {
 /** Query of `GET /_context_engine/session_memory`. Every filter is optional; no inference runs. */
 export interface ListSessionMemoryQuery extends SessionScopeQuery {
   session_id?: string;
-  user_id?: string;
 }
 
 export interface ListSessionMemoryResponse {
@@ -113,4 +113,4 @@ export type RememberSessionMemoryRequestBody = Omit<RememberSessionMemoryBody, '
 export type SearchSessionMemoryRequestBody = Omit<SearchSessionMemoryBody, 'user_id' | 'space'>;
 export type ListSessionMemoryRequestQuery = Omit<ListSessionMemoryQuery, 'user_id' | 'space'>;
 export type SaveSessionEventRequestBody = Omit<SaveSessionEventBody, 'user_id' | 'space'>;
-export type ListSessionEventsRequestQuery = Omit<SessionScopeQuery, 'space'>;
+export type ListSessionEventsRequestQuery = Omit<SessionScopeQuery, 'user_id' | 'space'>;

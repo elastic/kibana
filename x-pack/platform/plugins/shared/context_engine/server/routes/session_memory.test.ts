@@ -206,7 +206,7 @@ describe('session memory routes', () => {
     expect(() => querySchema.validate({ space: 'other' })).toThrow(/space/);
   });
 
-  it('proxies save event and lists a session’s events in the caller’s space', async () => {
+  it('proxies save event and lists a session’s events scoped to the caller', async () => {
     const body = { ...scope, round_id: 'r-1', transcript: 'user: hi' };
     const saved = { ...body, ...callerScope, id: 'e-1' };
     transportRequest.mockResolvedValueOnce(saved);
@@ -226,7 +226,7 @@ describe('session memory routes', () => {
     expect(transportRequest).toHaveBeenNthCalledWith(2, {
       method: 'GET',
       path: '/_context_engine/session_events/s-1',
-      querystring: { size: 100, space: 'default' },
+      querystring: { size: 100, ...callerScope },
     });
     expect(response.ok).toHaveBeenCalledTimes(2);
   });

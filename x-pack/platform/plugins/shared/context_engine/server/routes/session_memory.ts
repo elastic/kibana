@@ -268,7 +268,8 @@ export const registerSessionMemoryRoutes = ({
       security: READ_SECURITY,
       access: 'internal',
       summary: 'List session events',
-      description: 'Returns the events stored for a session in the active space, newest first.',
+      description:
+        'Returns the current user’s events stored for a session in the active space, newest first.',
     })
     .addVersion(
       {
@@ -284,12 +285,11 @@ export const registerSessionMemoryRoutes = ({
           if (!scope) {
             return noCurrentUser(response);
           }
-          // The ES session events API filters by space but not by user.
           const esClient = (await ctx.core).elasticsearch.client.asInternalUser;
           const body = await esRequest<ListSessionEventsResponse>(esClient, {
             method: 'GET',
             path: `${ES_SESSION_EVENTS_PATH}/${encodeURIComponent(request.params.sessionId)}`,
-            querystring: { ...toListQuerystring(request.query), space: scope.space },
+            querystring: { ...toListQuerystring(request.query), ...scope },
           });
           return response.ok({ body });
         } catch (error) {
