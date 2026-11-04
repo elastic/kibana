@@ -20,9 +20,16 @@ import {
   updateStoredOverrides,
 } from './overrides_saved_object';
 
+export interface TrackedFeatureFlagEvaluation {
+  key: string;
+  value: FeatureFlagOverrideValue;
+}
+
 export interface FeatureFlagsOverridesResponse {
   runtimeOverrides: Record<string, FeatureFlagOverrideValue>;
   configOverrides: Record<string, unknown>;
+  /** Flags this node has evaluated. Keeps the helper usable when the provider snapshot is empty. */
+  evaluatedFlags: TrackedFeatureFlagEvaluation[];
 }
 
 export interface FeatureFlagsOverridesRouteDeps {

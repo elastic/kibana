@@ -26,9 +26,17 @@ function createHttp(): jest.Mocked<Pick<HttpSetup, 'get' | 'post' | 'put' | 'del
 
 function renderFlyout(
   http: ReturnType<typeof createHttp>,
-  refreshFlags = jest.fn().mockResolvedValue(undefined)
+  refreshFlags = jest.fn().mockResolvedValue(undefined),
+  getBrowserEvaluations: () => Array<{ key: string; value: unknown }> = () => []
 ) {
-  renderWithI18n(<FlagsFlyout http={http} refreshFlags={refreshFlags} onClose={jest.fn()} />);
+  renderWithI18n(
+    <FlagsFlyout
+      http={http}
+      refreshFlags={refreshFlags}
+      getBrowserEvaluations={getBrowserEvaluations}
+      onClose={jest.fn()}
+    />
+  );
   return { refreshFlags };
 }
 
@@ -54,6 +62,25 @@ describe('FlagsFlyout', () => {
     expect(screen.getByText('Runtime override')).toBeInTheDocument();
     expect(screen.getByText('Config override')).toBeInTheDocument();
     expect(screen.getByText('Provider')).toBeInTheDocument();
+  });
+
+  test('lists evaluated flags when the provider snapshot is empty', async () => {
+    const http = createHttp();
+    http.post.mockResolvedValue({ flags: [] });
+    http.get.mockResolvedValue({
+      runtimeOverrides: {},
+      configOverrides: {},
+      evaluatedFlags: [{ key: 'from.server', value: false }],
+    });
+
+    renderFlyout(http, jest.fn().mockResolvedValue(undefined), () => [
+      { key: 'from.browser', value: 'local' },
+    ]);
+
+    expect(await screen.findByText('from.server')).toBeInTheDocument();
+    expect(screen.getByText('from.browser')).toBeInTheDocument();
+    expect(screen.getAllByText('Fallback')).toHaveLength(2);
+    expect(screen.getByDisplayValue('local')).toBeInTheDocument();
   });
 
   test('saves a boolean, number, and string override', async () => {

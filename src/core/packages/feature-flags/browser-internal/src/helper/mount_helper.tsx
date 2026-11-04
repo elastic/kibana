@@ -23,6 +23,7 @@ export interface MountFeatureFlagsHelperDeps {
   overlays: Pick<OverlayStart, 'openFlyout'>;
   rendering: Pick<RenderingService, 'addContext'>;
   refreshFlags: () => Promise<void>;
+  getBrowserEvaluations: () => Array<{ key: string; value: unknown }>;
 }
 
 /** Mounts the corner button. The flyout itself is opened through the overlays service. */
@@ -39,6 +40,7 @@ export function mountFeatureFlagsHelper(deps: MountFeatureFlagsHelperDeps): {
         overlays={deps.overlays}
         rendering={deps.rendering}
         refreshFlags={deps.refreshFlags}
+        getBrowserEvaluations={deps.getBrowserEvaluations}
       />
     )
   );
@@ -55,6 +57,7 @@ function FeatureFlagsHelper({
   overlays,
   rendering,
   refreshFlags,
+  getBrowserEvaluations,
 }: MountFeatureFlagsHelperDeps) {
   const flyoutRef = useRef<OverlayRef | undefined>(undefined);
 
@@ -70,7 +73,12 @@ function FeatureFlagsHelper({
         const flyoutRoot = createRoot(element);
         flyoutRoot.render(
           rendering.addContext(
-            <FlagsFlyout http={http} refreshFlags={refreshFlags} onClose={() => flyout.close()} />
+            <FlagsFlyout
+              http={http}
+              refreshFlags={refreshFlags}
+              getBrowserEvaluations={getBrowserEvaluations}
+              onClose={() => flyout.close()}
+            />
           )
         );
         return () => flyoutRoot.unmount();

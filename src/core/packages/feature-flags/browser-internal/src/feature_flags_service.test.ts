@@ -594,6 +594,14 @@ describe('FeatureFlagsService Browser', () => {
 
       openFeatureAddHandlerSpy.mockRestore();
     });
+
+    test('records evaluations for the helper', async () => {
+      const flag$ = startContract.getBooleanValue$('my-flag', false);
+      flag$.subscribe(() => {});
+      await expect(firstValueFrom(flag$)).resolves.toEqual(false);
+
+      expect(featureFlagsService.getEvaluatedFlags()).toEqual([{ key: 'my-flag', value: false }]);
+    });
   });
 
   describe('helper registration', () => {
