@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { ENTITY_INVENTORY_EBT_ELEMENTS } from '../../ebt_constants';
 import type { EntityInventoryAttributeValuesParams } from '../../inventory_api_types';
 import { FilterSelect } from './filter_select';
 import { VALUES_ERROR_MESSAGE } from './translations';
@@ -47,6 +48,7 @@ export function AttributeFilter({
       onChange={onChange}
       isLoading={isLoading}
       errorMessage={error ? VALUES_ERROR_MESSAGE : undefined}
+      ebt={{ element: ENTITY_INVENTORY_EBT_ELEMENTS.FILTER_BAR, detail: attribute }}
       data-test-subj={`entityInventoryAttributeFilter-${attribute}`}
     />
   );

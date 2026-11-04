@@ -16,6 +16,9 @@ import {
   EuiSelectableMessage,
 } from '@elastic/eui';
 import type { EuiSelectableProps } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
+import type { EbtClickAttrsWithoutAction } from '@kbn/ebt-click';
+import { ENTITY_INVENTORY_EBT_ACTIONS } from '../../ebt_constants';
 import type { FilterOption } from './get_filter_controls';
 import { ALL_OPTION_KEY, getOptionLabel, getSelectableOptions } from './get_selectable_options';
 import { EMPTY_MESSAGE, SEARCH_PLACEHOLDER } from './translations';
@@ -33,6 +36,7 @@ interface FilterSelectProps {
   isLoading?: boolean;
   isDisabled?: boolean;
   errorMessage?: string;
+  ebt: EbtClickAttrsWithoutAction;
   'data-test-subj': string;
 }
 
@@ -47,6 +51,7 @@ export function FilterSelect({
   isLoading = false,
   isDisabled = false,
   errorMessage,
+  ebt,
   'data-test-subj': dataTestSubj,
 }: FilterSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -112,6 +117,7 @@ export function FilterSelect({
             numActiveFilters={isMultiSelect ? selected.length : undefined}
             onClick={() => setIsOpen((current) => !current)}
             data-test-subj={dataTestSubj}
+            {...getEbtProps({ action: ENTITY_INVENTORY_EBT_ACTIONS.OPEN_FILTER, ...ebt })}
           >
             {buttonLabel}
           </EuiFilterButton>

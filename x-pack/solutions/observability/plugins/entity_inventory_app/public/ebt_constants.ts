@@ -6,6 +6,17 @@
  */
 
 /** EBT click `element` values: where in the entity inventory the click happened. */
+export const ENTITY_INVENTORY_EBT_ACTIONS = {
+  OPEN_FILTER: 'openFilter',
+  CLEAR_FILTERS: 'clearFilters',
+};
+
 export const ENTITY_INVENTORY_EBT_ELEMENTS = {
   NO_DATA: 'entityInventoryNoData',
+  FILTER_BAR: 'filterBar',
+};
+
+export const ENTITY_INVENTORY_EBT_DETAILS = {
+  CATEGORY_FILTER: 'category',
+  TYPE_FILTER: 'type',
 };

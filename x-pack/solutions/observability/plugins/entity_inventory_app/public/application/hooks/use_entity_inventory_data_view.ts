@@ -41,20 +41,15 @@ export const useEntityInventoryDataView = (): { dataView: DataView | undefined }
   }, [types, entityCategory, filterSelection.category, filterSelection.type]);
 
   const { value: dataView } = useAbortableAsync(
-    async () => {
-      if (!indexPattern) {
-        return undefined;
-      }
-
-      const created = await dataViews.create({
-        id: `${DATA_VIEW_ID_PREFIX}${indexPattern}`,
-        title: indexPattern,
-        timeFieldName: '@timestamp',
-        allowNoIndex: true,
-      });
-
-      return created;
-    },
+    () =>
+      indexPattern
+        ? dataViews.create({
+            id: `${DATA_VIEW_ID_PREFIX}${indexPattern}`,
+            title: indexPattern,
+            timeFieldName: '@timestamp',
+            allowNoIndex: true,
+          })
+        : undefined,
     [dataViews, indexPattern],
     { unsetValueOnError: true }
   );

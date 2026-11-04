@@ -22,6 +22,7 @@ const renderFilterSelect = (props: Partial<React.ComponentProps<typeof FilterSel
       options={toOptions(['aws', 'azure', 'gcp'])}
       selected={[]}
       onChange={onChange}
+      ebt={{ element: 'testElement' }}
       data-test-subj={TEST_SUBJ}
       {...props}
     />

@@ -7,7 +7,15 @@
 
 import React from 'react';
 import { omit } from 'lodash';
-import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
+import type { EbtClickAttrsWithoutAction } from '@kbn/ebt-click';
+import { KbnDangerCallout } from '@kbn/ui-callout';
+import {
+  ENTITY_INVENTORY_EBT_ACTIONS,
+  ENTITY_INVENTORY_EBT_DETAILS,
+  ENTITY_INVENTORY_EBT_ELEMENTS,
+} from '../../ebt_constants';
 import type {
   EntityInventoryAttributeValuesParams,
   EntityInventoryTypeDefinition,
@@ -43,6 +51,7 @@ interface SingleSelectFilterProps {
   options: FilterOption[];
   value?: string;
   onChange: (value?: string) => void;
+  ebt: EbtClickAttrsWithoutAction;
   isLoading?: boolean;
   isDisabled?: boolean;
   'data-test-subj': string;
@@ -69,7 +78,7 @@ export function EntityInventoryFilterControls({
   onSelectionChange,
 }: EntityInventoryFilterControlsProps) {
   if (error) {
-    return <EuiCallOut announceOnMount size="s" color="danger" title={TYPES_ERROR_MESSAGE} />;
+    return <KbnDangerCallout announceOnMount size="s" title={TYPES_ERROR_MESSAGE} />;
   }
 
   const scope = {
@@ -116,6 +125,12 @@ export function EntityInventoryFilterControls({
             onChange={() => {}}
             isLoading
             isDisabled
+            ebt={{
+              element: ENTITY_INVENTORY_EBT_ELEMENTS.FILTER_BAR,
+              detail: pageCategory
+                ? ENTITY_INVENTORY_EBT_DETAILS.TYPE_FILTER
+                : ENTITY_INVENTORY_EBT_DETAILS.CATEGORY_FILTER,
+            }}
             data-test-subj="entityInventoryFilterControlsLoading"
           />
         </EuiFlexItem>
@@ -129,6 +144,10 @@ export function EntityInventoryFilterControls({
                 options={categories}
                 value={selection.category}
                 onChange={(category) => updateSelection({ category })}
+                ebt={{
+                  element: ENTITY_INVENTORY_EBT_ELEMENTS.FILTER_BAR,
+                  detail: ENTITY_INVENTORY_EBT_DETAILS.CATEGORY_FILTER,
+                }}
                 data-test-subj="entityInventoryCategoryFilter"
               />
             </EuiFlexItem>
@@ -141,6 +160,10 @@ export function EntityInventoryFilterControls({
                 options={types}
                 value={selection.type}
                 onChange={(type) => updateSelection({ type })}
+                ebt={{
+                  element: ENTITY_INVENTORY_EBT_ELEMENTS.FILTER_BAR,
+                  detail: ENTITY_INVENTORY_EBT_DETAILS.TYPE_FILTER,
+                }}
                 data-test-subj="entityInventoryTypeFilter"
               />
             </EuiFlexItem>
@@ -165,6 +188,10 @@ export function EntityInventoryFilterControls({
                 iconType="cross"
                 onClick={() => onSelectionChange(EMPTY_SELECTION)}
                 data-test-subj="entityInventoryClearFilters"
+                {...getEbtProps({
+                  action: ENTITY_INVENTORY_EBT_ACTIONS.CLEAR_FILTERS,
+                  element: ENTITY_INVENTORY_EBT_ELEMENTS.FILTER_BAR,
+                })}
               >
                 {CLEAR_FILTERS_LABEL}
               </EuiButtonEmpty>
