@@ -75,6 +75,7 @@ export function OutputField({
     <PackagePolicyOutputSelect
       fullWidth
       compressed
+      helpTextAsTooltip
       outputId={value}
       onChange={(outputId) => onChange(outputId ?? '')}
       allowedOutputs={allowedOutputs}

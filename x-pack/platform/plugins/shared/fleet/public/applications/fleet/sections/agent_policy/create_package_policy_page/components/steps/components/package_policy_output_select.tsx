@@ -26,6 +26,8 @@ export interface PackagePolicyOutputSelectProps {
   isDisabled?: boolean;
   fullWidth?: boolean;
   compressed?: boolean;
+  /** Show the help text in an info icon tooltip next to the label instead of under the field. */
+  helpTextAsTooltip?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -42,6 +44,7 @@ export function PackagePolicyOutputSelect({
   isDisabled = false,
   fullWidth = false,
   compressed = false,
+  helpTextAsTooltip = false,
   'data-test-subj': dataTestSubj = 'packagePolicyOutputInput',
 }: PackagePolicyOutputSelectProps) {
   // An unset output_id means "use the output of the parent agent policy". EuiSelect cannot
@@ -64,6 +67,13 @@ export function PackagePolicyOutputSelect({
     [inheritedOutputName]
   );
 
+  const helpText = (
+    <FormattedMessage
+      id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyOutputHelpLabel"
+      defaultMessage="Change the default output inherited from the parent agent policy. This setting changes where the integration's data is sent."
+    />
+  );
+
   return (
     <EuiFormRow
       fullWidth={fullWidth}
@@ -74,6 +84,17 @@ export function PackagePolicyOutputSelect({
             id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyOutputInputLabel"
             defaultMessage="Output"
           />
+          {helpTextAsTooltip && (
+            <>
+              {' '}
+              <EuiIconTip
+                type="info"
+                color="subdued"
+                content={helpText}
+                anchorProps={{ 'data-test-subj': `${dataTestSubj}-helpTooltip` }}
+              />
+            </>
+          )}
           {isDisabled && (
             <>
               {' '}
@@ -91,12 +112,7 @@ export function PackagePolicyOutputSelect({
           )}
         </>
       }
-      helpText={
-        <FormattedMessage
-          id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyOutputHelpLabel"
-          defaultMessage="Change the default output inherited from the parent agent policy. This setting changes where the integration's data is sent."
-        />
-      }
+      helpText={helpTextAsTooltip ? undefined : helpText}
     >
       <EuiSelect
         fullWidth={fullWidth}
