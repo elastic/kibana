@@ -89,7 +89,7 @@ const shouldRun = (
 };
 
 /**
- * Tells the handlers plugins registered at setup that an AI index was saved, and what changed.
+ * Tells the handlers registered at setup that an AI index was saved, and what changed.
  * A handler that fails is logged and does not stop the others: the save itself already happened.
  */
 export class AiIndexChangeNotifier {
@@ -100,7 +100,7 @@ export class AiIndexChangeNotifier {
 
   register(handler: AiIndexChangeHandler): void {
     if (this.frozen) {
-      throw new Error('registerAiIndexChangeHandler called after plugin setup');
+      throw new Error('AI index change handlers must be registered during plugin setup');
     }
     if (this.handlers.has(handler.id)) {
       throw new Error(`AI index change handler '${handler.id}' is already registered`);

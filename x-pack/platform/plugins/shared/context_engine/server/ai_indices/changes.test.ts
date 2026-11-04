@@ -199,7 +199,7 @@ describe('AiIndexChangeNotifier', () => {
     notifier.freeze();
 
     expect(() => notifier.register(handler())).toThrow(
-      'registerAiIndexChangeHandler called after plugin setup'
+      'AI index change handlers must be registered during plugin setup'
     );
   });
 });
