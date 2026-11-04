@@ -13,11 +13,13 @@ jest.mock('../../utils/assert_significant_events_access', () => ({
 }));
 
 const route = internalTopologyRoutes['GET /internal/nightshift/topology'];
+const featuresRoute = internalTopologyRoutes['GET /internal/nightshift/topology/features'];
 
-const setup = (sourceIds: string[]) => {
+const setup = (sourceIds: string[], featureUuids?: string[]) => {
   const get = jest.fn().mockResolvedValue({ nodes: [], edges: [] });
+  const getFeatures = jest.fn().mockResolvedValue({ hits: [] });
   const resources = {
-    params: { query: { sourceIds } },
+    params: { query: { sourceIds, featureUuids } },
     request: {},
     server: {},
     getScopedClients: jest.fn().mockResolvedValue({
@@ -32,9 +34,10 @@ const setup = (sourceIds: string[]) => {
         }),
       },
       getTopologySnapshotClient: jest.fn().mockResolvedValue({ get }),
+      getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
     }),
   };
-  return { resources, get };
+  return { resources, get, getFeatures };
 };
 
 describe('GET /internal/nightshift/topology', () => {
@@ -44,5 +47,18 @@ describe('GET /internal/nightshift/topology', () => {
     await route.handler(resources as never);
 
     expect(get).toHaveBeenCalledWith(['source-2']);
+  });
+});
+
+describe('GET /internal/nightshift/topology/features', () => {
+  it('looks up topology KIs by uuid within the readable sources', async () => {
+    const { resources, getFeatures } = setup(['source-1', 'unreadable'], ['uuid-1']);
+
+    await featuresRoute.handler(resources as never);
+
+    expect(getFeatures).toHaveBeenCalledWith(['source-1'], {
+      id: ['uuid-1'],
+      type: ['entity', 'dependency'],
+    });
   });
 });
