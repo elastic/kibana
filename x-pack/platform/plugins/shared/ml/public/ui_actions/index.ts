@@ -17,6 +17,7 @@ import {
   SUGGEST_AD_JOBS_TRIGGER,
   DISCOVER_AD_MANAGEMENT_TRIGGER,
   DISCOVER_AD_ANOMALIES_TRIGGER,
+  DISCOVER_AD_ANOMALY_TRIGGER,
   SWIM_LANE_SELECTION_TRIGGER,
   UPDATE_AD_JOBS_PROJECT_ROUTING_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
@@ -149,6 +150,14 @@ export function registerMlUiActions(
     async () => {
       const { createDiscoverADAnomaliesAction } = await import('./async_module');
       return createDiscoverADAnomaliesAction(core.getStartServices);
+    }
+  );
+  uiActions.addTriggerActionAsync(
+    DISCOVER_AD_ANOMALY_TRIGGER,
+    'discover-ad-anomaly-action',
+    async () => {
+      const { createDiscoverADAnomalyAction } = await import('./async_module');
+      return createDiscoverADAnomalyAction(core.getStartServices);
     }
   );
   uiActions.addTriggerActionAsync(

@@ -33,16 +33,19 @@ import {
   stopDatafeedsSchema,
   bulkUpdateProjectRoutingSchema,
   suggestJobsSchema,
+  summarizeAnomalySchema,
 } from './schemas/job_service_schema';
 
 import { jobForCloningSchema, jobIdSchema } from './schemas/anomaly_detectors_schema';
 
 import { jobServiceProvider } from '../models/job_service';
 import { suggestJobs } from '../models/job_service/job_suggestions';
+import { summarizeAnomaly } from '../models/job_service/anomaly_summary';
 import { dataRecognizerFactory } from '../models/data_recognizer';
 
 // Suggesting jobs makes several model calls, which takes longer than the default socket timeout.
 const SUGGEST_JOBS_SOCKET_TIMEOUT_MS = 10 * 60 * 1000;
+const SUMMARIZE_ANOMALY_SOCKET_TIMEOUT_MS = 2 * 60 * 1000;
 
 export interface JobServiceRoutesDeps {
   /** Resolves to undefined when the Agent Builder plugin is not available. */
@@ -1267,5 +1270,74 @@ export function jobServiceRoutes(
           }
         }
       )
+    );
+
+  router.versioned
+    .post({
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/summarize_anomaly`,
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
+      },
+      options: {
+        timeout: { idleSocket: SUMMARIZE_ANOMALY_SOCKET_TIMEOUT_MS },
+      },
+      summary: 'Summarize an anomaly',
+      description:
+        'Uses an AI model to write a very brief description of the anomalies a job found in a time range, from the job, its detectors, the influencers and the anomaly scores. Requires an Enterprise license and an AI connector.',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: { body: summarizeAnomalySchema },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+        // Aborted when the client cancels the request, so that the work stops.
+        const signal = getRequestAbortedSignal(request.events.aborted$);
+        try {
+          const license = mlLicense.getLicenseInfo().license;
+          if (license?.status !== 'active' || !license.hasAtLeast('enterprise')) {
+            return response.forbidden({
+              body: { message: 'Summarizing an anomaly requires an Enterprise license.' },
+            });
+          }
+
+          const agentBuilder = await getAgentBuilder();
+          if (agentBuilder === undefined) {
+            return response.customError({
+              statusCode: 501,
+              body: { message: 'AI features are not available.' },
+            });
+          }
+
+          let model;
+          try {
+            model = await agentBuilder.runtime.createModelProvider({ request }).getDefaultModel();
+          } catch (e) {
+            return response.badRequest({ body: { message: 'No AI connector available.' } });
+          }
+
+          const { jobId, start, end } = request.body;
+          const summary = await summarizeAnomaly(
+            { mlClient, model, signal },
+            { jobId, start, end }
+          );
+
+          return response.ok({ body: { summary } });
+        } catch (e) {
+          if (signal.aborted) {
+            // The client has gone, so this is not an error.
+            return response.customError({
+              statusCode: 499,
+              body: { message: 'The request was cancelled.' },
+            });
+          }
+          return response.customError(wrapError(e));
+        }
+      })
     );
 }

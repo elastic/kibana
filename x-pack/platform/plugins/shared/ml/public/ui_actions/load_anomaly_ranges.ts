@@ -69,6 +69,7 @@ export const loadAnomalyRanges = async ({
   return (overallBuckets ?? [])
     .filter(({ overall_score: score }) => score >= MIN_ANOMALY_SCORE)
     .map(({ timestamp, overall_score: score }) => ({
+      jobId: job.id,
       start: timestamp,
       end: timestamp + bucketSeconds * 1000,
       score,

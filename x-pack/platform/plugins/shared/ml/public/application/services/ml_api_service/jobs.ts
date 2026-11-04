@@ -443,6 +443,30 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
+  summarizeAnomaly(
+    {
+      jobId,
+      start,
+      end,
+    }: {
+      jobId: string;
+      /** Start of the time range of the anomaly, in epoch ms */
+      start: number;
+      /** End of the time range of the anomaly, in epoch ms */
+      end: number;
+    },
+    signal?: AbortSignal
+  ) {
+    const body = JSON.stringify({ jobId, start, end });
+    return httpService.http<{ summary: string }>({
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/summarize_anomaly`,
+      method: 'POST',
+      body,
+      version: '1',
+      signal,
+    });
+  },
+
   bulkCreateJobs(jobs: { job: Job; datafeed: Datafeed } | Array<{ job: Job; datafeed: Datafeed }>) {
     const body = JSON.stringify(jobs);
     return httpService.http<BulkCreateResults>({

@@ -235,3 +235,17 @@ export const suggestJobsSchema = schema.object({
     })
   ),
 });
+
+export const summarizeAnomalySchema = schema.object({
+  jobId: schema.string({
+    maxLength: 1000,
+    minLength: 1,
+    meta: { description: 'The anomaly detection job which found the anomaly.' },
+  }),
+  start: schema.number({
+    meta: { description: 'Start of the time range of the anomaly, in epoch ms.' },
+  }),
+  end: schema.number({
+    meta: { description: 'End of the time range of the anomaly, in epoch ms.' },
+  }),
+});

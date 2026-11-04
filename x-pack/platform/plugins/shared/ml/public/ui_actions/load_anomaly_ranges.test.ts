@@ -84,6 +84,8 @@ describe('loadAnomalyRanges', () => {
       { timestamp: 2 * HOUR_MS, overall_score: 1 },
     ]);
     const ranges = await loadAnomalyRanges({ mlApi, jobId: 'mine', timeRange });
-    expect(ranges).toEqual([{ start: HOUR_MS, end: HOUR_MS + 900 * 1000, score: 60 }]);
+    expect(ranges).toEqual([
+      { jobId: 'mine', start: HOUR_MS, end: HOUR_MS + 900 * 1000, score: 60 },
+    ]);
   });
 });

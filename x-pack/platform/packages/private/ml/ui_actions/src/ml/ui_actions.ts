@@ -83,6 +83,8 @@ export const DISCOVER_AD_MANAGEMENT_ACTION = 'discoverADManagementAction';
  * A time range in which anomaly detection jobs found anomalies.
  */
 export interface DiscoverADAnomalyRange {
+  /** The job which found the anomalies */
+  jobId: string;
   /** Start of the range, in epoch ms */
   start: number;
   /** End of the range, in epoch ms */
@@ -118,3 +120,31 @@ export interface DiscoverADAnomaliesContext {
 }
 
 export const DISCOVER_AD_ANOMALIES_ACTION = 'discoverADAnomaliesAction';
+
+/**
+ * Context for the action which shows the details of an anomaly found by a job.
+ */
+export interface DiscoverADAnomalyContext {
+  /**
+   * The job which found the anomaly.
+   */
+  jobId: string;
+  /**
+   * The time of the anomaly, in epoch ms.
+   */
+  timestamp: number;
+  /**
+   * The end of the time range of the anomaly, in epoch ms.
+   */
+  endTimestamp: number;
+  /**
+   * The anomaly score (0-100).
+   */
+  score: number;
+  /**
+   * Invoked after the flyout is closed.
+   */
+  onClose?: () => void;
+}
+
+export const DISCOVER_AD_ANOMALY_ACTION = 'discoverADAnomalyAction';

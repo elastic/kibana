@@ -120,6 +120,7 @@ import { SplitChart } from './split_chart';
 import {
   Annotations,
   getAnnotationsGroupedByInterval,
+  isFullyTransparent,
   isRangeAnnotation,
   OUTSIDE_RECT_ANNOTATION_WIDTH,
   OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION,
@@ -332,6 +333,11 @@ export function XYChart({
       return current === id ? undefined : current;
     });
   }, []);
+  // Clicking a visible range annotation can be handled, but the chart only shows a pointer cursor inside the plot area
+  const isClickableRangeAnnotationHovered = rangeAnnotations.some(
+    ({ id, color }) =>
+      id === hoveredRangeAnnotationId && color !== undefined && !isFullyTransparent(color)
+  );
 
   useEffect(() => {
     const legendShow = getShowLegendDefault();
@@ -851,6 +857,11 @@ export function XYChart({
       ? getAccessorByDimension(splitRowAccessor, splitTable?.columns)
       : undefined;
 
+  // TEMPORARY: the chart sets its cursor inline, so only !important overrides it, from outside its public API
+  const clickableRangeAnnotationStyle = css({
+    '.echChartPointerContainer': { cursor: 'pointer !important' },
+  });
+
   const chartContainerStyle = css({
     width: '100%',
     height: '100%',
@@ -876,7 +887,12 @@ export function XYChart({
   return (
     <>
       <GlobalXYChartStyles />
-      <div css={chartContainerStyle}>
+      <div
+        css={[
+          chartContainerStyle,
+          isClickableRangeAnnotationHovered && clickableRangeAnnotationStyle,
+        ]}
+      >
         {interactive && showLegend !== undefined && uiState && (
           <LegendToggle
             onClick={toggleLegend}

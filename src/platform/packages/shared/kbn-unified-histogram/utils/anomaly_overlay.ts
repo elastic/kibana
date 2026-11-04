@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
 export const ANOMALY_OVERLAY_LAYER_ID = 'unifiedHistogramAnomalyOverlay';
 
 /** A time range in which anomalies were detected, with the highest score found in it */
 export interface UnifiedHistogramAnomalyRange {
+  /** The job which found the anomalies */
+  jobId?: string;
   /** Start of the range, in epoch ms */
   start: number;
   /** End of the range, in epoch ms */
@@ -100,7 +103,12 @@ export const addAnomalyOverlayToAttributes = (
     id: `anomaly-${index}`,
     type: 'manual' as const,
     key: { type: 'range' as const, timestamp: toIso(start), endTimestamp: toIso(end) },
-    label: label ?? `${Math.round(score)}`,
+    label:
+      label ??
+      i18n.translate('unifiedHistogram.anomalyOverlay.maxScoreLabel', {
+        defaultMessage: 'Max anomaly score {score}',
+        values: { score: Math.round(score) },
+      }),
     color: toFadedColor(color),
     outside: true,
   }));

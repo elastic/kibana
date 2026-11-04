@@ -47,7 +47,7 @@ describe('discover anomalies action', () => {
     setSelectedJobId(INDEX_PATTERN, undefined);
     mockLoadAnomalyRanges.mockReset();
     mockLoadAnomalyRanges.mockImplementation(async ({ jobId }: { jobId: string }) => [
-      { start: 0, end: 10, score: jobId === 'a' ? 50 : 90 },
+      { jobId, start: 0, end: 10, score: jobId === 'a' ? 50 : 90 },
     ]);
   });
 
@@ -74,11 +74,15 @@ describe('discover anomalies action', () => {
     expect(mockLoadAnomalyRanges).toHaveBeenCalledWith(
       expect.objectContaining({ jobId: 'a', timeRange })
     );
-    expect(onAnomalyRanges).toHaveBeenLastCalledWith([{ start: 0, end: 10, score: 50 }]);
+    expect(onAnomalyRanges).toHaveBeenLastCalledWith([
+      { jobId: 'a', start: 0, end: 10, score: 50 },
+    ]);
 
     setSelectedJobId(INDEX_PATTERN, 'b');
     await flushPromises();
-    expect(onAnomalyRanges).toHaveBeenLastCalledWith([{ start: 0, end: 10, score: 90 }]);
+    expect(onAnomalyRanges).toHaveBeenLastCalledWith([
+      { jobId: 'b', start: 0, end: 10, score: 90 },
+    ]);
 
     setSelectedJobId(INDEX_PATTERN, undefined);
     await flushPromises();

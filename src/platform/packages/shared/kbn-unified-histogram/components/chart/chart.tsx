@@ -52,6 +52,7 @@ import type { LensVisService } from '../../services/lens_vis_service';
 import { removeTablesFromLensAttributes } from '../../utils/lens_vis_from_table';
 import { useLensProps } from './hooks/use_lens_props';
 import { useAnomalyRanges } from './hooks/use_anomaly_ranges';
+import { useAnomalyClick } from './hooks/use_anomaly_click';
 import { addAnomalyOverlayToAttributes } from '../../utils/anomaly_overlay';
 import { buildBucketInterval } from './utils/build_bucket_interval';
 import { ChartSectionTemplate } from './chart_section_template';
@@ -254,6 +255,8 @@ export function UnifiedHistogramChart({
     [baseLensPropsContext, anomalyOverlay]
   );
 
+  const onAnnotationClick = useAnomalyClick({ services, ranges: anomalyOverlay?.ranges });
+
   const { chartToolbarCss, histogramCss } = useChartStyles(chartVisible);
 
   const onSuggestionContextEdit = useCallback(
@@ -435,6 +438,7 @@ export function UnifiedHistogramChart({
                   abortController={abortController}
                   {...histogramProps}
                   {...lensPropsContext}
+                  onAnnotationClick={onAnnotationClick}
                   onApiAvailable={onApiAvailable}
                 />
               )}

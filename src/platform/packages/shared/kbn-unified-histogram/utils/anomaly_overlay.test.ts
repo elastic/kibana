@@ -91,7 +91,7 @@ describe('addAnomalyOverlayToAttributes', () => {
           timestamp: '2026-01-01T00:00:00.000Z',
           endTimestamp: '2026-01-01T01:00:00.000Z',
         },
-        color: 'rgba(254, 80, 80, 0.4)',
+        color: 'rgba(254, 80, 80, 0.6)',
         outside: true,
       }),
       expect.objectContaining({
@@ -100,7 +100,7 @@ describe('addAnomalyOverlayToAttributes', () => {
           timestamp: '2026-01-01T02:00:00.000Z',
           endTimestamp: '2026-01-01T03:00:00.000Z',
         },
-        color: 'rgba(253, 236, 37, 0.4)',
+        color: 'rgba(253, 236, 37, 0.6)',
         outside: true,
       }),
     ]);

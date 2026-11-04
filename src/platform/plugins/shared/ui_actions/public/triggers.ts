@@ -43,6 +43,7 @@ import {
   SUGGEST_AD_JOBS_TRIGGER,
   DISCOVER_AD_MANAGEMENT_TRIGGER,
   DISCOVER_AD_ANOMALIES_TRIGGER,
+  DISCOVER_AD_ANOMALY_TRIGGER,
   SWIM_LANE_SELECTION_TRIGGER,
   EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER,
   SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER,
@@ -329,6 +330,15 @@ export const triggers: { [key: string]: Trigger } = {
     description: i18n.translate('uiActions.triggers.ml.actions.discoverADAnomalies.description', {
       defaultMessage:
         'Provide the time ranges in which anomaly detection jobs found anomalies in an index, to overlay on the chart.',
+    }),
+  },
+  [DISCOVER_AD_ANOMALY_TRIGGER]: {
+    id: DISCOVER_AD_ANOMALY_TRIGGER,
+    title: i18n.translate('uiActions.triggers.ml.actions.discoverADAnomaly.title', {
+      defaultMessage: 'Show an anomaly from the Discover chart',
+    }),
+    description: i18n.translate('uiActions.triggers.ml.actions.discoverADAnomaly.description', {
+      defaultMessage: 'Show the details of an anomaly which was selected on the chart.',
     }),
   },
   [DISCOVER_AD_MANAGEMENT_TRIGGER]: {

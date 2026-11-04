@@ -280,7 +280,6 @@ RectAnnotation.displayName = 'RectAnnotation';
 export const Annotations = ({
   groupedLineAnnotations,
   rangeAnnotations,
-  isRangeAnnotationsHovered,
   onRangeAnnotationHoverChange,
   timeFormat,
   isHorizontal,
@@ -290,6 +289,8 @@ export const Annotations = ({
   isBarChart,
   outsideDimension,
 }: AnnotationsProps) => {
+  // TEMPORARY: always show the extended bands, ignoring the hover state
+  const isRangeAnnotationsHovered = true;
   const { colorMode } = useEuiTheme();
   const isDarkMode = colorMode === 'DARK';
 
@@ -297,7 +298,7 @@ export const Annotations = ({
   const rangeTooltips = useMemo(
     () =>
       Object.fromEntries(
-        rangeAnnotations.map(({ id, label, time, endTime, color }) => {
+        rangeAnnotations.map(({ id, label, time, color }) => {
           const resolvedColor = getResolvedAnnotationColor({ color, isDarkMode, isRange: true });
           // A transparent annotation is an area to hover, which has nothing to show
           const Tooltip: CustomAnnotationTooltip = isFullyTransparent(resolvedColor)
@@ -330,9 +331,7 @@ export const Annotations = ({
                         <EuiTitle size="xxxs">
                           <h6>{label}</h6>
                         </EuiTitle>
-                        <EuiFlexItem>{`${moment(time).format(timeFormat)} — ${moment(
-                          endTime
-                        ).format(timeFormat)}`}</EuiFlexItem>
+                        <EuiFlexItem>{moment(time).format(timeFormat)}</EuiFlexItem>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </div>
