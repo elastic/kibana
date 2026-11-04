@@ -46,11 +46,6 @@ type ConnectorAuthStatusError = string | undefined;
 
 const ConnectorsList = lazy(() => import('./actions_connectors_list'));
 
-const BUILD_CONNECTOR_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.connectors.home.buildConnector',
-  { defaultMessage: 'Build a connector' }
-);
-
 export interface MatchParams {
   section: Section;
 }
@@ -224,16 +219,10 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
               iconType: 'plusCircle',
               testId: 'createConnectorButton',
               run: () => setAddFlyoutVisibility(true),
-              splitButtonProps: {
-                secondaryButtonIconType: 'wrench',
-                secondaryButtonAriaLabel: BUILD_CONNECTOR_LABEL,
-                secondaryButtonTooltipContent: BUILD_CONNECTOR_LABEL,
-                run: () => history.push(routeToBuildConnector),
-              },
             }
           : undefined,
     }),
-    [canSave, history, isConnectorsSection]
+    [canSave, isConnectorsSection]
   );
 
   // Set breadcrumb and page title

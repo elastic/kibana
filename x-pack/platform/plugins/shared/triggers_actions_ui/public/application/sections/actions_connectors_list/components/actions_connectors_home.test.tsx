@@ -137,6 +137,7 @@ describe('ActionsConnectorsHome', () => {
     renderHome(connectorsTabProps());
 
     expect(await screen.findByTestId('createConnectorButton')).toBeEnabled();
+    expect(screen.queryByTestId('createConnectorButton-secondary-button')).not.toBeInTheDocument();
     await expectDocumentationInOverflow();
   });
 
@@ -193,19 +194,6 @@ describe('ActionsConnectorsHome', () => {
       name: 'Select a connector',
     });
     expect(selectConnectorFlyout).toBeInTheDocument();
-  });
-
-  it('navigates to the "Build a connector" page when the secondary "Create connector" button pressed', async () => {
-    const props = connectorsTabProps();
-    renderHome(props);
-
-    const buildConnectorButton = await screen.findByTestId(
-      'createConnectorButton-secondary-button'
-    );
-    expect(buildConnectorButton).toHaveAccessibleName('Build a connector');
-    await userEvent.click(buildConnectorButton);
-
-    expect(props.history.location.pathname).toBe('/connectors/build');
   });
 
   it('opens the builder with a draft handed off from chat', async () => {
