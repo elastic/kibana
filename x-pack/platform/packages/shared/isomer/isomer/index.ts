@@ -26,6 +26,7 @@ export type {
   ChartEvent,
   ChartSelectEvent,
   ColorValue,
+  DurationUnit,
   GridNode,
   Loss,
   MetricNode,

@@ -28,6 +28,9 @@ dependsOn:
   - '@kbn/data-plugin'
   - '@kbn/expressions-plugin'
   - '@kbn/esql-utils'
+  - '@kbn/field-formats-plugin'
+  - '@kbn/palettes'
+  - '@kbn/core-ui-settings-server-internal'
 tags:
   - plugin
   - prod

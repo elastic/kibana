@@ -23,6 +23,14 @@ Every `materialize` call runs one pipeline, as the requesting user:
 3. **Mapping and provenance.** The context's time range is resolved to absolute times once, before planning, so the queries and the provenance agree. The materializer maps the results. Chart nodes (`metric`, `xyChart`) and `unsupported` nodes get `source` provenance (Kibana version, materializer and its version, space, saved object type and ID, time range, capture time), and chart nodes get the pipeline's losses.
 4. **Validation.** Every result is validated the way the runtime validates a composition, against the Isomer input budget and the charts and components packs' primitives, nodes inside a `grid` included. A failing plan, query, mapping or validation returns `unsupported` with a reason, titled from the materializer's `describe` when it has one.
 
+### `MaterializeKit`
+
+`map` gets a kit built for the user and the context its plan ran in, so every materializer formats and colors as Kibana does:
+
+- **`toPortableFormat(format, type)`** maps a Kibana field format, as `Datatable` column meta carries it, to Isomer's `PortableFormat`: numeral patterns with `format:number:defaultLocale` and `alwaysShowSign` for `number`, `percent` and `bytes`; `duration` with its units and suffix options; `date` with its pattern and the context's time zone (then `dateFormat:tz`, with `Browser` formatting as UTC, as Kibana's server does); `text` for strings, booleans and IPs. It unwraps the aggs `terms` format (keeping its Other and missing labels) and Lens's `suffix` format. Formats without a portable form (currency, whole-number percentages, string transforms, URL, color, static lookup and others) come with Kibana's own text for each value instead.
+- **`toChartData(table, options)`** turns a `Datatable` into a chart's `data`, unreordered with raw values, so selections refer to the source rows. Each column's `source` is its `Datatable` column (`{ kind: 'kibana-datatable-column', column }`) and `data.source` is the table's meta, so a host can rebuild the table a selection refers to. Pre-rendered formats and bucket labels arrive as `display` strings, and anything that didn't carry over is a `losses` entry.
+- **`paletteColors(count, paletteId)`** returns a `@kbn/palettes` palette's colors for light and dark, falling back to Kibana's default palette.
+
 ### Instrumentation
 
 Sizes are measured as Isomer's input budget counts them (`measureInput` matches the SDK's `checkInputBudget`), and reported as event-based telemetry and debug logs (`plugins.isomer.instrumentation`):
