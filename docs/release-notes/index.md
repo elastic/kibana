@@ -50,6 +50,8 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Show skill names instead of skill IDs in the UI [#278065]({{kib-pull}}278065).
 * Make the `create_visualization` tool choose a time range from the earliest and latest values in your data, so charts for historical or sample data are no longer empty [#287090]({{kib-pull}}287090).
 * Update the `cases-analytics` skill in Agent Builder so agents can filter and group cases by template when they query the cases analytics indices [#291716]({{kib-pull}}291716).
+* Enable agents to find case templates by name, so you can ask an agent to create a case from a template without knowing its ID. If the name matches more than one template, the agent asks you which one to use [#287744]({{kib-pull}}287744).
+* Add an Agent Builder tool to attach saved dashboards, maps, Discover sessions, and Lens visualizations to a case [#279680]({{kib-pull}}279680).
 * Add the built-in anomaly detection skills, which help agents query anomaly results with {{esql}}, troubleshoot anomaly detection jobs, and manage jobs [#270306]({{kib-pull}}270306).
 * Add guidance for anomaly charts, the anomaly swim lane, and the single metric viewer to the anomaly detection skills [#284519]({{kib-pull}}284519).
 * Add a guided anomaly detection job creation flow to Agent Builder chat [#286656]({{kib-pull}}286656).
@@ -63,6 +65,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add an API to create, read, update, and delete case templates [#280144]({{kib-pull}}280144).
 * Add an API that lists the global fields and template fields you can set on a case, for a given owner and an optional template. The response includes the key to use in `extended_fields` [#279684]({{kib-pull}}279684).
 * Apply a case template's default values when you create a case through the API with a `template`. Values that you send in the request take precedence [#280143]({{kib-pull}}280143).
+* Enforce required global fields on API and workflow case creation when case templates are enabled, and accept `extended_fields` on the public and workflow case create and update APIs [#283350]({{kib-pull}}283350).
 * Warn you in the field library and the template editor when a required field has no default value. The field library also tells you, before you first save a field, that its name and type can't change afterward [#285453]({{kib-pull}}285453).
 * Improve the Cases UI. The cases list moves its filters to a second row, you can collapse and expand comments and attachments, the attributes panel stays in place and you can resize it as you scroll the activity, and template fields share one edit mode with a single **Save** [#282197]({{kib-pull}}282197).
 * Add limits to case templates: up to 200 templates per owner, 200 fields per template, and 30,000 characters per template definition. The field library editor also validates field definitions and default values before you save [#281650]({{kib-pull}}281650).
@@ -292,6 +295,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Stop the Agent Builder MCP server from listing tools whose results only work in the {{kib}} UI: `create_visualization`, `search_cases`, `manage_cases`, `manage_attachments`, and `observables`. External MCP clients can't use their results [#291274]({{kib-pull}}291274).
 * Fix the import button staying unavailable, with no explanation, when you bulk import MCP tools that have no description [#300886]({{kib-pull}}300886).
 * Stop Agent Builder from offering Cases tools and skills in Serverless project types and {{es}} solution spaces where Cases isn't available. Agents there no longer hit authorization errors when they try to use them [#291268]({{kib-pull}}291268), [#287633]({{kib-pull}}287633).
+* Fix agents being unable to update template fields on a case. The `cases-management` skill now describes how to set them [#287638]({{kib-pull}}287638).
 * Fix the **Tool Success Rate** panel in the Agent Builder overview dashboard showing 0.0% as soon as one tool call fails. The rate was rounded down to a whole number [#282026]({{kib-pull}}282026).
 * Fix attaching an image in the Agent Builder chat failing with a 403 error unless you're a superuser [#299455]({{kib-pull}}299455).
 * Fix chat completion requests that kept running after you cancelled them. Requests now also stop with a timeout error after 5 minutes [#285119]({{kib-pull}}285119).
@@ -327,17 +331,34 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix out-of-memory failures when Reporting generates wide PNG and PDF reports, by sizing the screenshot to the dashboard width instead of the browser window width [#289062]({{kib-pull}}289062).
 * Fix the **Auto-push case to connected external system** option missing from the Cases rule action when case templates are enabled [#292187]({{kib-pull}}292187).
 * Fix the **Read only** badge appearing on the case templates pages for users who have read access to Cases and the case templates management privilege [#291719]({{kib-pull}}291719).
+* Fix the **Create case** button in the **Add to case** selector being available to users who can't create cases [#292761]({{kib-pull}}292761).
 * Fix default values of global fields not being applied to cases that you create through the API or workflow steps. Those cases had empty global fields [#283185]({{kib-pull}}283185).
+* Fix a template `$ref` field silently dropping its local display and validation overrides [#283072]({{kib-pull}}283072).
+* Fix a template `$ref` global field ignoring its hide-on-value condition when the controlling field is in another section [#287308]({{kib-pull}}287308).
+* Fix required-on-close validation skipping global fields that a template includes by `$ref` [#287306]({{kib-pull}}287306).
+* Fix duplicate required-on-close validation errors when a template references a global field that is also required on close [#283922]({{kib-pull}}283922).
+* Fix **Sync alerts** and **Extract observables** not applying when you change a case template from the sidebar [#288636]({{kib-pull}}288636).
+* Fix cases created from a case template by a rule action not inheriting the template's external connector, **Sync alerts** and **Extract observables** settings, and assignees [#284854]({{kib-pull}}284854).
+* Fix creating a case from a workflow, a case template, or {{ml}} so **Sync alerts** is not turned on unless that solution enables it [#286670]({{kib-pull}}286670).
 * Fix the **All cases** list showing the wrong columns and values for custom and global fields. The column selector now lists legacy custom fields and global fields, hides markdown-only fields that were always empty, and shows user fields as avatars [#282129]({{kib-pull}}282129), [#282870]({{kib-pull}}282870).
 * Fix case activity showing a generated key or wrong values for custom and global fields. Activity now shows the field label when you update a legacy custom field, and the correct values for user picker, toggle, and checkbox fields [#282129]({{kib-pull}}282129), [#282870]({{kib-pull}}282870).
 * Fix the metrics bar on the redesigned cases list always showing unfiltered totals. The open, in progress, and closed counts and the average time to close now follow your search, filters, and date range [#280576]({{kib-pull}}280576).
+* Fix global field column selections not syncing between the Cases list and table views [#287327]({{kib-pull}}287327).
+* Fix field library toggle filters missing from **More filters** on the **All cases** page [#283645]({{kib-pull}}283645).
+* Fix the Cases list keeping the previous page after you change filters [#287945]({{kib-pull}}287945).
+* Fix Cases free-text search failing when a case's extended fields produced too many runtime-field values [#284475]({{kib-pull}}284475).
 * Fix duplicate case activity entries when you set or change a legacy custom field. Legacy custom fields now also stay in sync with their matching global fields when you update a case [#282813]({{kib-pull}}282813), [#282772]({{kib-pull}}282772).
+* Fix assigning users to a case creating duplicate activity entries [#284035]({{kib-pull}}284035).
+* Fix case Activity recording a row for every unchanged template or global field default when you create a case [#284310]({{kib-pull}}284310).
+* Fix matching fields missing from Cases Activity search results [#284940]({{kib-pull}}284940).
 * Fix the cases field library creating a second field with the same name as an existing one when legacy custom fields sync to it. Names that differ only in capitalization now count as the same name [#282060]({{kib-pull}}282060).
 * Prevent changing the name or type of a field in the cases field library after you create it. A change would orphan the values already stored on cases [#282770]({{kib-pull}}282770).
 * Fix templates losing a field when the template refers to the field with different capitalization than its stored name. Looking up and deleting fields now ignore capitalization [#282450]({{kib-pull}}282450).
 * Prevent deleting a field from the cases field library while an active template uses it. The error lists the templates that block the deletion [#280493]({{kib-pull}}280493).
 * Fix the case header showing the reporter's username instead of their email address when the reporter has no full name. The header now matches the names shown elsewhere in Cases [#282504]({{kib-pull}}282504).
 * Fix case attachment deletion behaving differently depending on how you delete. Deleting all attachments no longer reports success for attachments it didn't delete, and deleting a file attachment now also deletes the file [#297885]({{kib-pull}}297885).
+* Fix case attachment UI issues, including delete controls on saved-object attachments and the more-actions menu for read-only access [#285456]({{kib-pull}}285456).
+* Fix saved Lens visualizations missing from case attachments, and add helper text in the markdown editor for inline Timeline and Lens references [#286164]({{kib-pull}}286164).
 * Fix pushing a case to an external system repeating the alerts summary. The summary now reports only the alerts added or removed since the last push to that connector, and {{kib}} sends it only when alerts changed [#295571]({{kib-pull}}295571).
 * Fix checkbox group template fields accepting values that aren't a list, such as a comma-separated string. The cases API now returns a validation error instead of saving the value [#299407]({{kib-pull}}299407).
 
@@ -681,7 +702,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 % * Teach the workflow authoring skill about knowledge indicator steps [#287154]({{kib-pull}}287154).
 
 % Removed from 9.6.0: Team:Security Investigations owns these. They belong in the Security solution notes.
-% The other Cases and Anonymization entries from this block are listed in 9.6.0 or 9.5.5, or shipped in earlier 9.5 patch releases, following review on #300810.
+% The other Cases and Anonymization entries from this block are listed in 9.6.0, following review on #300810. Entries that first shipped in a 9.5 patch release are also listed in that release.
 % * Fix **Run workflow** on **Select all** alerts running the workflow on only the loaded page of about 100 alerts. It now runs on every matching alert, up to 500 [#292151]({{kib-pull}}292151). Team:Security Investigations, label release_note:bug.
 % * Fix **Associated users** and **Associated hosts** metrics not including entity attachments [#283036]({{kib-pull}}283036).
 
