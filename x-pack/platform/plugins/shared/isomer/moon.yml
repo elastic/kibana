@@ -40,6 +40,7 @@ dependsOn:
   - '@kbn/as-code-shared-transforms'
   - '@kbn/controls-constants'
   - '@kbn/controls-schemas'
+  - '@kbn/datemath'
 tags:
   - plugin
   - prod

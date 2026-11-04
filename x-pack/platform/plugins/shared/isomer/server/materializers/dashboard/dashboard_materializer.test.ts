@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import dateMath from '@kbn/datemath';
+import moment from 'moment-timezone';
 import type { IUiSettingsClient } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
@@ -26,6 +27,20 @@ import { createDashboardMaterializer } from './dashboard_materializer';
 import { logsDashboardRead, logsDroppedAppPanels } from './fixtures/logs_dashboard';
 
 const NOW = new Date('2025-01-15T12:00:00.000Z');
+const USER_TIME_ZONE = 'America/New_York';
+
+/** How Kibana's browser resolves a range, with moment's default zone set to `dateFormat:tz`. */
+const browserResolve = (from: string, to: string, timeZone: string) => {
+  moment.tz.setDefault(timeZone);
+  try {
+    return {
+      from: dateMath.parse(from, { forceNow: NOW })!.toISOString(),
+      to: dateMath.parse(to, { roundUp: true, forceNow: NOW })!.toISOString(),
+    };
+  } finally {
+    moment.tz.setDefault();
+  }
+};
 const LOGS_ID = 'edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b';
 const LOGS_DATA_VIEW = '90943e30-9a47-11e8-b64d-95841ca0b247';
 const KIBANA_URL = 'https://kibana.example.com/s/marketing';
@@ -134,7 +149,13 @@ const setup = ({ dashboardData = logsDashboardRead.data as DashboardData } = {})
           },
         } as unknown as DataViewsService),
       getUiSettings: () =>
-        ({ get: async () => ({ from: 'now-15m', to: 'now' }) } as unknown as IUiSettingsClient),
+        ({
+          get: async (key: string) =>
+            ({
+              'timepicker:timeDefaults': { from: 'now-15m', to: 'now' },
+              'dateFormat:tz': USER_TIME_ZONE,
+            }[key]),
+        } as unknown as IUiSettingsClient),
       getKibanaUrl: () => KIBANA_URL,
       now: () => NOW,
     })
@@ -260,11 +281,9 @@ describe('the dashboard materializer', () => {
 
     expect(lens.contexts).toHaveLength(8);
     for (const context of lens.contexts) {
-      // The dashboard's saved `now-7d/d` to `now`, with `/d` in the server's time zone.
-      expect(context.timeRange).toEqual({
-        from: moment(NOW).subtract(7, 'd').startOf('d').toISOString(),
-        to: NOW.toISOString(),
-      });
+      // The dashboard's saved `now-7d/d` to `now`, rounded in the user's `dateFormat:tz`.
+      expect(context.timeRange).toEqual(browserResolve('now-7d/d', 'now', USER_TIME_ZONE));
+      expect(context.timeRange?.from).toBe('2025-01-08T05:00:00.000Z');
       expect(context.query).toEqual({ query: '', language: 'kuery' });
       expect(context.filters).toEqual([
         {

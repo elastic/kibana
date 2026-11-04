@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import dateMath from '@kbn/datemath';
+import moment from 'moment-timezone';
 import type { Filter } from '@kbn/es-query';
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { DashboardConfig } from './config';
@@ -14,6 +15,22 @@ import { dashboardControls } from './controls';
 import { customTimeRange, dashboardContext, panelContext } from './panel_context';
 
 const now = new Date('2025-01-15T12:00:00.000Z');
+
+/**
+ * How Kibana's browser resolves a range: core sets moment's default zone to `dateFormat:tz`, and
+ * the time filter parses the start rounded down and the end rounded up.
+ */
+const browserResolve = (from: string, to: string, timeZone: string, at: Date = now) => {
+  moment.tz.setDefault(timeZone);
+  try {
+    return {
+      from: dateMath.parse(from, { forceNow: at })!.toISOString(),
+      to: dateMath.parse(to, { roundUp: true, forceNow: at })!.toISOString(),
+    };
+  } finally {
+    moment.tz.setDefault();
+  }
+};
 
 const controlFilter = (key: string, meta: Filter['meta'] = {}): Filter => ({
   meta: { key, ...meta },
@@ -35,14 +52,30 @@ describe('dashboardContext', () => {
       ],
     });
     const context = dashboardContext(dashboard, dashboardControls(dashboard), {}, now);
-    // `/d` rounds to the start of the day in the server's time zone, as Kibana's date math does.
-    expect(context.timeRange).toEqual({
-      from: moment(now).subtract(7, 'd').startOf('d').toISOString(),
-      to: '2025-01-15T12:00:00.000Z',
-    });
+    // Without a time zone in the context or `dateFormat:tz`, the range resolves as UTC.
+    expect(context.timeRange).toEqual(browserResolve('now-7d/d', 'now', 'UTC'));
     expect(context.query).toEqual({ query: 'response:200', language: 'kuery' });
     expect(context.savedFilters).toHaveLength(1);
     expect(context.savedFilters[0].meta.key).toBe('geo.src');
+  });
+
+  it("rounds the saved range in the user's `dateFormat:tz`, then the context's time zone", () => {
+    // 03:00 UTC on January 15 is still January 14 in New York.
+    const early = new Date('2025-01-15T03:00:00.000Z');
+    const saved = { time_range: { from: 'now-7d/d', to: 'now/d' } };
+    const inNewYork = config(saved, {
+      resolved: { controlFilters: [], unappliedControls: [], timeZone: 'America/New_York' },
+    });
+    expect(dashboardContext(inNewYork, [], {}, early).timeRange).toEqual(
+      browserResolve('now-7d/d', 'now/d', 'America/New_York', early)
+    );
+    expect(dashboardContext(inNewYork, [], {}, early).timeRange).toEqual({
+      from: '2025-01-07T05:00:00.000Z',
+      to: '2025-01-15T04:59:59.999Z',
+    });
+    expect(dashboardContext(inNewYork, [], { timeZone: 'Asia/Kolkata' }, early).timeRange).toEqual(
+      browserResolve('now-7d/d', 'now/d', 'Asia/Kolkata', early)
+    );
   });
 
   it("keeps the request's time range and query over the dashboard's", () => {

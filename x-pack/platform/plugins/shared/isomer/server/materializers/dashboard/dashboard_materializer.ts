@@ -88,11 +88,13 @@ export const createDashboardMaterializer = ({
       dataViews ??= getDataViews(scope);
       return (await dataViews).get(dataViewId).catch(() => undefined);
     };
-    const [{ controlFilters, unappliedControls }, timeDefaults] = await Promise.all([
+    const uiSettings = getUiSettings(scope);
+    const [{ controlFilters, unappliedControls }, timeDefaults, timeZone] = await Promise.all([
       resolveControlFilters(dashboardControls(config), { getDataView }),
       config.state.time_range
         ? undefined
-        : getUiSettings(scope).get<TimeRange | undefined>('timepicker:timeDefaults'),
+        : uiSettings.get<TimeRange | undefined>('timepicker:timeDefaults'),
+      uiSettings.get<string | undefined>('dateFormat:tz'),
     ]);
     return {
       ...config,
@@ -100,6 +102,7 @@ export const createDashboardMaterializer = ({
         controlFilters,
         unappliedControls,
         ...(timeDefaults ? { timeDefaults } : {}),
+        ...(timeZone ? { timeZone } : {}),
         ...(config.id
           ? {
               href: `${getKibanaUrl(scope.request)}/app/dashboards#/view/${encodeURIComponent(
