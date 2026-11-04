@@ -7,6 +7,7 @@
 
 import type {
   SecurityFieldSecurity,
+  SecurityIndicesPrivileges,
   SecurityUserIndicesPrivileges,
   TransformGetTransformStatsTransformStats,
   TransformGetTransformTransformSummary,
@@ -98,18 +99,74 @@ export const indexPatternCovers = (rolePattern: string, pattern: string): boolea
   return new RegExp(`^${regex}$`).test(pattern);
 };
 
-const grantsAllFields = (fieldSecurity: SecurityFieldSecurity[] | undefined): boolean =>
-  fieldSecurity === undefined ||
-  fieldSecurity.length === 0 ||
-  fieldSecurity.some(
-    ({ grant, except }) => asArray(grant).includes('*') && asArray(except).length === 0
-  );
+/** Index privileges as the user privileges API reports them, or as a role defines them. */
+type IndexPrivileges = SecurityUserIndicesPrivileges | SecurityIndicesPrivileges;
 
-const isUnrestrictedReadOf = (entry: SecurityUserIndicesPrivileges, pattern: string): boolean =>
+const grantsAllFields = (
+  fieldSecurity: SecurityFieldSecurity | SecurityFieldSecurity[] | undefined
+): boolean => {
+  const grants = asArray(fieldSecurity);
+  return (
+    grants.length === 0 ||
+    grants.some(({ grant, except }) => asArray(grant).includes('*') && asArray(except).length === 0)
+  );
+};
+
+const isUnrestrictedReadOf = (entry: IndexPrivileges, pattern: string): boolean =>
   entry.privileges.some((privilege) => READ_PRIVILEGES.has(privilege)) &&
   asArray(entry.query).length === 0 &&
   grantsAllFields(entry.field_security) &&
   asArray(entry.names).some((name) => indexPatternCovers(name, pattern));
+
+/**
+ * Index privileges of the user's roles, or `undefined` for an API key, whose own role descriptors
+ * no role holds. Uses the Query Role API, which unlike the Get Role API also returns predefined
+ * roles on Serverless. Reading roles needs `read_security`; without it, throws a
+ * `SessionsPrivilegesError`.
+ */
+const getRoleIndexPrivileges = async (
+  client: ElasticsearchClient
+): Promise<IndexPrivileges[] | undefined> => {
+  const { roles, authentication_type: authenticationType } = await client.security.authenticate();
+  if (authenticationType === 'api_key') {
+    return undefined;
+  }
+  if (roles.length === 0) {
+    return [];
+  }
+  try {
+    const { roles: descriptors } = await client.security.queryRole({
+      query: { terms: { name: roles } },
+      size: roles.length,
+    });
+    return descriptors.flatMap(({ indices }) => indices ?? []);
+  } catch (error) {
+    if (isResponseError(error) && error.statusCode === 403) {
+      throw new SessionsPrivilegesError(['cluster:read_security']);
+    }
+    throw error;
+  }
+};
+
+/** The user's index privileges, or `undefined` when Elasticsearch can't report them. */
+const getIndexPrivileges = async (
+  client: ElasticsearchClient
+): Promise<IndexPrivileges[] | undefined> => {
+  try {
+    const { indices } = await client.security.getUserPrivileges();
+    return indices;
+  } catch (error) {
+    // API keys with their own role descriptors: Elasticsearch answers 400 instead of privileges.
+    if (isResponseError(error) && error.statusCode === 400) {
+      return undefined;
+    }
+    // Serverless only lets operator users call it (410), so read the user's roles instead.
+    if (isResponseError(error) && error.statusCode === 410) {
+      return getRoleIndexPrivileges(client);
+    }
+    throw error;
+  }
+};
 
 /**
  * Source index patterns the user can't read in full. Elasticsearch merges the user's roles per
@@ -119,21 +176,16 @@ const isUnrestrictedReadOf = (entry: SecurityUserIndicesPrivileges, pattern: str
 export const getRestrictedSourceIndices = async (
   client: ElasticsearchClient
 ): Promise<{ indices: string[]; reason: 'filtered' | 'unverifiable' }> => {
-  try {
-    const { indices: entries } = await client.security.getUserPrivileges();
-    return {
-      indices: SESSIONS_SOURCE_INDICES.filter(
-        (pattern) => !entries.some((entry) => isUnrestrictedReadOf(entry, pattern))
-      ),
-      reason: 'filtered',
-    };
-  } catch (error) {
-    // API keys with their own role descriptors: Elasticsearch answers 400 instead of privileges.
-    if (isResponseError(error) && error.statusCode === 400) {
-      return { indices: [...SESSIONS_SOURCE_INDICES], reason: 'unverifiable' };
-    }
-    throw error;
+  const entries = await getIndexPrivileges(client);
+  if (entries === undefined) {
+    return { indices: [...SESSIONS_SOURCE_INDICES], reason: 'unverifiable' };
   }
+  return {
+    indices: SESSIONS_SOURCE_INDICES.filter(
+      (pattern) => !entries.some((entry) => isUnrestrictedReadOf(entry, pattern))
+    ),
+    reason: 'filtered',
+  };
 };
 
 const managedTransforms = async (

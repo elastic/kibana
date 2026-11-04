@@ -56,6 +56,10 @@ type IndexPrivilegesEntry = Awaited<
   ReturnType<Client['security']['getUserPrivileges']>
 >['indices'][number];
 
+type RoleIndices = NonNullable<
+  Awaited<ReturnType<Client['security']['queryRole']>>['roles'][number]['indices']
+>[number];
+
 const mockReadPrivileges = (client: Client, indices: Array<Partial<IndexPrivilegesEntry>>) =>
   client.security.getUserPrivileges.mockResolvedValue({
     applications: [],
@@ -486,6 +490,115 @@ describe('sessions setup', () => {
     it('rethrows other errors', async () => {
       client.security.getUserPrivileges.mockRejectedValue(esError(500));
       await expect(getRestrictedSourceIndices(client)).rejects.toThrow();
+    });
+
+    describe('on Serverless, where only operator users may read their privileges', () => {
+      const mockAuthenticated = (
+        roles: string[],
+        authenticationType: 'token' | 'realm' | 'api_key' = 'token'
+      ) =>
+        client.security.authenticate.mockResolvedValue({
+          username: 'uiam-user',
+          roles,
+          authentication_type: authenticationType,
+        } as unknown as Awaited<ReturnType<Client['security']['authenticate']>>);
+
+      const mockRoles = (roles: Array<{ name: string; indices: Array<Partial<RoleIndices>> }>) =>
+        client.security.queryRole.mockResolvedValue({
+          total: roles.length,
+          count: roles.length,
+          roles: roles.map(({ name, indices }) => ({
+            name,
+            cluster: [],
+            run_as: [],
+            indices: indices.map((entry) => ({
+              names: SOURCE_INDICES,
+              privileges: ['read', 'view_index_metadata'],
+              ...entry,
+            })),
+          })),
+        } as Awaited<ReturnType<Client['security']['queryRole']>>);
+
+      beforeEach(() => {
+        client.security.getUserPrivileges.mockRejectedValue(esError(410));
+      });
+
+      it('reads the user’s roles, including predefined ones, and accepts unrestricted read', async () => {
+        mockAuthenticated(['admin']);
+        mockRoles([{ name: 'admin', indices: [{ names: ['*'], privileges: ['all'] }] }]);
+
+        expect(await getRestrictedSourceIndices(client)).toEqual({
+          indices: [],
+          reason: 'filtered',
+        });
+        expect(client.security.queryRole).toHaveBeenCalledWith({
+          query: { terms: { name: ['admin'] } },
+          size: 1,
+        });
+      });
+
+      it('lists the patterns a role filters by document- or field-level security', async () => {
+        mockAuthenticated(['traces-dls', 'logs-fls']);
+        mockRoles([
+          {
+            name: 'traces-dls',
+            indices: [{ names: ['traces-*'], query: '{"term":{"service.name":"checkout-web"}}' }],
+          },
+          {
+            name: 'logs-fls',
+            indices: [{ names: ['logs-*'], field_security: { grant: ['@timestamp'] } }],
+          },
+        ]);
+
+        expect(await getRestrictedSourceIndices(client)).toEqual({
+          indices: SOURCE_INDICES,
+          reason: 'filtered',
+        });
+      });
+
+      it('lets an unrestricted role lift another role’s filter', async () => {
+        mockAuthenticated(['dls', 'reader']);
+        mockRoles([
+          { name: 'dls', indices: [{ query: '{"match_all":{}}' }] },
+          { name: 'reader', indices: [{}] },
+        ]);
+
+        expect((await getRestrictedSourceIndices(client)).indices).toEqual([]);
+      });
+
+      it('refuses a user without roles', async () => {
+        mockAuthenticated([], 'realm');
+
+        expect((await getRestrictedSourceIndices(client)).indices).toEqual(SOURCE_INDICES);
+        expect(client.security.queryRole).not.toHaveBeenCalled();
+      });
+
+      it('cannot verify an API key, which holds no roles', async () => {
+        mockAuthenticated([], 'api_key');
+
+        expect(await getRestrictedSourceIndices(client)).toEqual({
+          indices: SOURCE_INDICES,
+          reason: 'unverifiable',
+        });
+        expect(client.security.queryRole).not.toHaveBeenCalled();
+      });
+
+      it('asks for read_security when the user cannot read their roles', async () => {
+        mockAuthenticated(['custom']);
+        client.security.queryRole.mockRejectedValue(esError(403));
+
+        const error = await getRestrictedSourceIndices(client).catch((e) => e);
+
+        expect(error).toBeInstanceOf(SessionsPrivilegesError);
+        expect(error.missingPrivileges).toEqual(['cluster:read_security']);
+      });
+
+      it('rethrows other errors reading the roles', async () => {
+        mockAuthenticated(['custom']);
+        client.security.queryRole.mockRejectedValue(esError(500));
+
+        await expect(getRestrictedSourceIndices(client)).rejects.toThrow();
+      });
     });
   });
 
