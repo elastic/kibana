@@ -21,6 +21,7 @@ import {
   createUserActionServiceMock,
 } from '../../services/mocks';
 import { createCasesClientMockArgs } from '../mocks';
+import type { Observable } from '../../../common/types/domain';
 import {
   commentAttachmentType,
   stackAlertAttachmentType,
@@ -33,6 +34,47 @@ jest.mock('./extract_observables');
 const extractAndAddObservablesMock = extractAndAddObservables as jest.MockedFunction<
   typeof extractAndAddObservables
 >;
+
+/** Makes the observables summary aggregation return one stored observable for the case. */
+const mockStoredObservable = (
+  args: ReturnType<typeof createCasesClientMockArgs>,
+  caseId: string,
+  observable: Observable
+) => {
+  args.unsecuredSavedObjectsClient.find.mockResolvedValue({
+    saved_objects: [],
+    total: 0,
+    per_page: 0,
+    page: 1,
+    aggregations: {
+      refs: {
+        caseIds: {
+          buckets: [
+            {
+              key: caseId,
+              reverse: { doc_count: 1, preview: { hits: { hits: [{ _id: observable.id }] } } },
+            },
+          ],
+        },
+      },
+    },
+  });
+  args.savedObjectsSerializer.rawToSavedObject.mockReturnValue({
+    id: observable.id,
+    type: 'cases-attachments',
+    references: [],
+    attributes: {
+      type: 'observable',
+      owner: 'securitySolution',
+      data: {
+        typeKey: observable.typeKey,
+        value: observable.value,
+        description: observable.description,
+      },
+      created_at: observable.createdAt,
+    },
+  });
+};
 
 describe('addComment', () => {
   const caseId = 'test-case';
@@ -228,17 +270,13 @@ describe('addComment', () => {
         value: '1.2.3.4',
         description: null,
         createdAt: '2026-09-08T00:00:00.000Z',
-        updatedAt: '2026-09-08T00:00:00.000Z',
+        updatedAt: null,
       };
-      extractAndAddObservablesMock.mockResolvedValueOnce({
-        ...theCase,
-        version: 'patched-version',
-        attributes: { ...theCase.attributes, observables: [observable], total_observables: 1 },
-      });
+      mockStoredObservable(clientArgs, caseId, observable);
 
       const res = await addCommentAndGetCase({ comment: unifiedComment, caseId }, clientArgs);
 
-      expect(res.version).toBe('patched-version');
+      expect(extractAndAddObservablesMock).toHaveBeenCalledTimes(1);
       expect(res.observables).toEqual([observable]);
       expect(res.total_observables).toBe(1);
     });

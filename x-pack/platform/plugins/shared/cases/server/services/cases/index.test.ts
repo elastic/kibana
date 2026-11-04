@@ -17,6 +17,7 @@ import { omit, unset } from 'lodash';
 import type { CaseAttributes, ExternalService, CaseConnector } from '../../../common/types/domain';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_EXTENDED_FIELDS,
   CASE_EXTENDED_FIELDS_LABELS,
@@ -4000,6 +4001,27 @@ describe('CasesService', () => {
         expect(analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds).toHaveBeenCalledWith([
           'case-A',
         ]);
+      });
+
+      it('deletes in pages of 1,000 and waits for the refresh only on the last page', async () => {
+        unsecuredSavedObjectsClient.bulkDelete.mockImplementation(async (objects) => ({
+          statuses: objects.map(({ id, type }) => ({ id, type, success: true })),
+        }));
+        const entities = [
+          { type: CASE_SAVED_OBJECT, id: 'case-A' },
+          ...Array.from({ length: 2_500 }, (_, index) => ({
+            type: CASE_ATTACHMENT_SAVED_OBJECT,
+            id: `observable-${index}`,
+          })),
+        ];
+
+        const { svc, analyticsV2Writer } = makeServiceWithMockWriter();
+        await svc.bulkDeleteCaseEntities({ entities, options: { refresh: 'wait_for' } });
+
+        const calls = unsecuredSavedObjectsClient.bulkDelete.mock.calls;
+        expect(calls.map(([objects]) => objects.length)).toEqual([1_000, 1_000, 501]);
+        expect(calls.map(([, options]) => options?.refresh)).toEqual([false, false, 'wait_for']);
+        expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledWith(['case-A']);
       });
 
       it('skips analytics writes for non-case entity types', async () => {

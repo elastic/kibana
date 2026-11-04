@@ -17,9 +17,11 @@ import type {
   SavedObjectsFindOptions,
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
+  SavedObjectsBulkDeleteStatus,
 } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 
+import { chunk } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder, toElasticsearchQuery } from '@kbn/es-query';
@@ -52,6 +54,7 @@ import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
 import { STATUS_ESMODEL_TO_EXTERNAL } from '../../common/constants';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { buildFilter, combineFilters } from '../../client/utils';
+import { excludeObservablesFilter } from '../../client/attachments/type_filter';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import {
   transformSavedObjectToExternalModel,
@@ -187,6 +190,8 @@ const buildAttachmentSearchClause = (
   }
   return { match: { [field]: search } };
 };
+
+const BULK_DELETE_CASE_ENTITIES_PAGE_SIZE = 1_000;
 
 export class CasesService {
   private readonly log: Logger;
@@ -696,8 +701,19 @@ export class CasesService {
     options?: SavedObjectsBulkDeleteOptions;
   }) {
     try {
-      this.log.debug(() => `Attempting to bulk delete case entities ${JSON.stringify(entities)}`);
-      const bulkDeleteResult = await this.unsecuredSavedObjectsClient.bulkDelete(entities, options);
+      this.log.debug(() => `Attempting to bulk delete ${entities.length} case entities`);
+      // A case can hold up to 100,000 observables, so delete in pages. Only the last page waits
+      // for the refresh the caller asked for.
+      const pages = chunk(entities, BULK_DELETE_CASE_ENTITIES_PAGE_SIZE);
+      const bulkDeleteResult = { statuses: [] as SavedObjectsBulkDeleteStatus[] };
+      for (const [index, page] of pages.entries()) {
+        const isLastPage = index === pages.length - 1;
+        const { statuses } = await this.unsecuredSavedObjectsClient.bulkDelete(page, {
+          ...options,
+          ...(!isLastPage && { refresh: false }),
+        });
+        bulkDeleteResult.statuses.push(...statuses);
+      }
 
       // Cases-as-data v2: drop analytics docs ONLY for entities whose SO
       // delete actually succeeded. The bulkDelete response carries a
@@ -740,7 +756,7 @@ export class CasesService {
       // delete-by-`case.id` on the analytics index. No-op when empty.
       this.analyticsV2AttachmentsWriter.bulkDeleteAttachmentsByCaseIds(idsToDelete);
     } catch (error) {
-      this.log.error(`Error bulk deleting case entities ${JSON.stringify(entities)}: ${error}`);
+      this.log.error(`Error bulk deleting ${entities.length} case entities: ${error}`);
     }
   }
 
@@ -970,8 +986,8 @@ export class CasesService {
         options: {
           hasReferenceOperator: 'OR',
           hasReference: refs,
-          filter: options?.filter,
           ...options,
+          filter: combineFilters([options?.filter, excludeObservablesFilter()]),
         },
       });
     } catch (error) {

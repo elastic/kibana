@@ -1,0 +1,62 @@
+{
+  "10.1.0": [
+    {
+      "type": "comment",
+      "owner": "securitySolution",
+      "data": {
+        "content": "A user comment"
+      },
+      "created_at": "2026-11-01T00:00:00.000Z",
+      "created_by": {
+        "username": "elastic"
+      },
+      "pushed_at": null,
+      "updated_at": null
+    },
+    {
+      "type": "observable",
+      "owner": "securitySolution",
+      "data": {
+        "typeKey": "observable-type-ipv4",
+        "value": "10.0.0.1",
+        "description": "Auto extract observables"
+      },
+      "created_at": "2026-11-01T00:00:00.000Z",
+      "created_by": {
+        "username": "elastic"
+      },
+      "pushed_at": null,
+      "updated_at": null
+    }
+  ],
+  "10.2.0": [
+    {
+      "type": "comment",
+      "owner": "securitySolution",
+      "data": {
+        "content": "A user comment"
+      },
+      "created_at": "2026-11-01T00:00:00.000Z",
+      "created_by": {
+        "username": "elastic"
+      },
+      "pushed_at": null,
+      "updated_at": null
+    },
+    {
+      "type": "observable",
+      "owner": "securitySolution",
+      "data": {
+        "typeKey": "observable-type-ipv4",
+        "value": "10.0.0.1",
+        "description": "Auto extract observables"
+      },
+      "created_at": "2026-11-01T00:00:00.000Z",
+      "created_by": {
+        "username": "elastic"
+      },
+      "pushed_at": null,
+      "updated_at": null
+    }
+  ]
+}

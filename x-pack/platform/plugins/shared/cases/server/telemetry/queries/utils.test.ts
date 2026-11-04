@@ -12,7 +12,11 @@ import {
   OBSERVABLE_TYPE_IPV4,
   OBSERVABLE_TYPE_HOSTNAME,
 } from '../../../common/constants/observables';
-import type { CaseAggregationResult, FileAttachmentAggregationResults } from '../types';
+import type {
+  CaseAggregationResult,
+  FileAttachmentAggregationResults,
+  ObservablesTelemetryAggregationResult,
+} from '../types';
 import type { AttachmentsByTypeRaw } from './attachments_by_type';
 import {
   findValueInBuckets,
@@ -79,21 +83,26 @@ describe('utils', () => {
           ],
         },
       },
-      totalWithMaxObservables: {
-        doc_count: 3,
-        buckets: [
-          {
-            key: 3,
-            doc_count: 3,
-          },
-        ],
+      casesWithMaxObservables: {
+        byCase: {
+          buckets: [
+            { key: 'case-1', doc_count: 60 },
+            { key: 'case-2', doc_count: 50 },
+          ],
+        },
       },
+    };
+
+    const observablesAggsResult: ObservablesTelemetryAggregationResult = {
+      ...observables,
+      securitySolution: observables,
+      observability: observables,
+      cases: observables,
     };
 
     const caseSolutionValues = {
       counts,
       ...assignees,
-      ...observables,
     };
 
     const caseAggsResult: CaseAggregationResult = {
@@ -104,7 +113,6 @@ describe('utils', () => {
       securitySolution: { ...caseSolutionValues },
       observability: { ...caseSolutionValues },
       cases: { ...caseSolutionValues },
-      ...observables,
       syncAlerts: {
         buckets: [
           {
@@ -261,6 +269,23 @@ describe('utils', () => {
       });
       expect(res.total).toBe(5);
       expect(res.totalWithAlerts).toBe(20);
+    });
+
+    it('reads observables from the observable attachments aggregation', () => {
+      const res = getSolutionValues({
+        caseAggregations: caseAggsResult,
+        observablesAggregations: observablesAggsResult,
+        attachmentsByType,
+        filesAggregations: filesRes,
+        owner: 'securitySolution',
+      });
+
+      expect(res.observables).toEqual({
+        manual: { default: 0, custom: 0 },
+        auto: { default: 1, custom: 0 },
+        total: 1,
+      });
+      expect(res.totalWithMaxObservables).toBe(2);
     });
 
     it('uses the per-owner case total for the average (owner with a single case)', () => {
@@ -885,16 +910,21 @@ describe('utils', () => {
     });
 
     it('returns the correct total when no case has observables', () => {
-      expect(getTotalWithMaxObservables([])).toEqual(0);
+      expect(getTotalWithMaxObservables({ byCase: { buckets: [] } })).toEqual(0);
     });
 
-    it('returns the correct total when there are cases with max observables', () => {
+    it('counts the cases holding at least the preview size of observables', () => {
       expect(
-        getTotalWithMaxObservables([
-          { key: 50, doc_count: 20 },
-          { key: 49, doc_count: 15 },
-        ])
-      ).toEqual(20);
+        getTotalWithMaxObservables({
+          byCase: {
+            buckets: [
+              { key: 'case-1', doc_count: 100_000 },
+              { key: 'case-2', doc_count: 50 },
+              { key: 'case-3', doc_count: 49 },
+            ],
+          },
+        })
+      ).toEqual(2);
     });
   });
 });

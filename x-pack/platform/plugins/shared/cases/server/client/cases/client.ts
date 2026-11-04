@@ -28,6 +28,10 @@ import type {
   UpdateObservableRequest,
   BulkAddObservablesRequest,
   BulkDeleteObservablesRequest,
+  BulkCreateObservablesRequest,
+  BulkCreateObservablesResponse,
+  FindObservablesRequest,
+  FindObservablesResponse,
   CasesPatchResponse,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
@@ -64,8 +68,10 @@ import { similar } from './similar';
 import {
   addObservable,
   bulkAddObservables,
+  bulkCreateObservables,
   bulkDeleteObservables,
   deleteObservable,
+  findObservables,
   updateObservable,
 } from './observables';
 import type { GetApplicableFieldsParams } from './applicable_fields';
@@ -183,6 +189,18 @@ export interface CasesSubClient {
    */
   bulkDeleteObservables(params: BulkDeleteObservablesRequest): Promise<Case>;
   /**
+   * Adds up to 1,000 observables and reports how many were added, duplicated or over the cap
+   */
+  bulkCreateObservables(
+    params: BulkCreateObservablesRequest & { caseId: string }
+  ): Promise<BulkCreateObservablesResponse>;
+  /**
+   * Pages a case's observables with server-side sorting and filtering
+   */
+  findObservables(
+    params: FindObservablesRequest & { caseId: string }
+  ): Promise<FindObservablesResponse>;
+  /**
    * Returns the fully-formed `extended_fields` a caller may apply — the owner's global field-library
    * fields plus, when a template is in scope, that template's fields. Pass `caseId` to derive owner +
    * applied template from an existing case, or `owner` (+ optional `templateId`) for a prospective case.
@@ -214,6 +232,8 @@ const usageCounterByMethod = {
   deleteObservable: 'delete_observable',
   bulkAddObservables: 'bulk_add_observables',
   bulkDeleteObservables: 'bulk_delete_observables',
+  bulkCreateObservables: 'bulk_create_observables',
+  findObservables: null,
   getApplicableFields: null,
 } as const satisfies Record<keyof CasesSubClient, string | null>;
 
@@ -294,6 +314,14 @@ export const createCasesSubClient = (
       clientArgs,
       (params: BulkDeleteObservablesRequest) => bulkDeleteObservables(params, clientArgs)
     ),
+    bulkCreateObservables: withUsageCounter(
+      usageCounterByMethod.bulkCreateObservables,
+      clientArgs,
+      (params: BulkCreateObservablesRequest & { caseId: string }) =>
+        bulkCreateObservables(params, clientArgs, casesClient)
+    ),
+    findObservables: (params: FindObservablesRequest & { caseId: string }) =>
+      findObservables(params, clientArgs),
     getApplicableFields: (params: GetApplicableFieldsParams) =>
       getApplicableFields(params, clientArgs),
   };

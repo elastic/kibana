@@ -10,6 +10,7 @@ import type {
   AttachmentPersistedAttributes,
   UnifiedAttachmentAttributes,
 } from '../../common/types/attachments_v2';
+import { OBSERVABLE_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { ATTACHMENTS_INDEX_NAME } from '../constants';
 import { buildAttachmentDoc } from './attachments_doc_builder';
 import { withRetry } from './retry';
@@ -44,6 +45,13 @@ const RETRYABLE_BULK_ITEM_STATUSES = new Set<number>([408, 409, 429, 500, 502, 5
 export type AttachmentSource = SavedObject<
   AttachmentPersistedAttributes | UnifiedAttachmentAttributes
 >;
+
+/**
+ * Observables are not mirrored: a case can hold up to 100,000 of them, and analytics keeps its
+ * capped copy on the case doc instead.
+ */
+const isMirrored = (so: AttachmentSource): boolean =>
+  so.attributes?.type !== OBSERVABLE_ATTACHMENT_TYPE;
 
 interface CasesAttachmentsV2WriterDeps {
   esClient: ElasticsearchClient;
@@ -106,6 +114,7 @@ export class CasesAttachmentsV2Writer implements CasesAttachmentsV2WriterContrac
    * identity-keyed on the SO id and `index` overwrites by `_id`.
    */
   public upsertAttachment(so: AttachmentSource): void {
+    if (!isMirrored(so)) return;
     void this.fireAndForget(`attachment[id=${so.id}]`, () => this.doUpsertAttachment(so));
   }
 
@@ -126,9 +135,10 @@ export class CasesAttachmentsV2Writer implements CasesAttachmentsV2WriterContrac
    * factor at 1× regardless of batch size.
    */
   public bulkUpsertAttachments(sos: AttachmentSource[]): void {
-    if (sos.length === 0) return;
-    void this.fireAndForget(`bulk-upsert[count=${sos.length}]`, () =>
-      this.doBulkUpsertAttachments(sos)
+    const mirrored = sos.filter(isMirrored);
+    if (mirrored.length === 0) return;
+    void this.fireAndForget(`bulk-upsert[count=${mirrored.length}]`, () =>
+      this.doBulkUpsertAttachments(mirrored)
     );
   }
 
@@ -185,10 +195,11 @@ export class CasesAttachmentsV2Writer implements CasesAttachmentsV2WriterContrac
    * reconciliation and must not freeze every subsequent tick.
    */
   public async bulkUpsertAttachmentsAwait(sos: AttachmentSource[]): Promise<void> {
-    if (sos.length === 0) return;
+    const mirrored = sos.filter(isMirrored);
+    if (mirrored.length === 0) return;
     try {
       await withRetry({
-        op: () => this.doBulkUpsertAttachments(sos, { throwOnRetryableItemFailures: true }),
+        op: () => this.doBulkUpsertAttachments(mirrored, { throwOnRetryableItemFailures: true }),
         maxRetries: this.maxRetries,
         initialDelayMs: this.retryInitialDelayMs,
       });

@@ -82,12 +82,26 @@ export interface ObservablesAggregationResult {
   };
 }
 
-export interface TotalWithMaxObservablesAggregationResult {
-  buckets: Array<{
-    key: number;
-    doc_count: number;
-  }>;
+/** Cases (by id) that hold at least `MAX_OBSERVABLES_PER_CASE` observables. */
+export interface CasesWithMaxObservablesAggregationResult {
+  byCase: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+    }>;
+  };
 }
+
+interface ObservablesTelemetryAggregations {
+  observables: ObservablesAggregationResult;
+  casesWithMaxObservables: CasesWithMaxObservablesAggregationResult;
+}
+
+export type ObservablesTelemetryAggregationResult = Record<
+  Owner,
+  ObservablesTelemetryAggregations
+> &
+  ObservablesTelemetryAggregations;
 
 export interface FileAttachmentAggsResult {
   averageSize: {
@@ -132,8 +146,6 @@ export type CaseAggregationResult = Record<
     counts: Buckets;
     totalAssignees: ValueCount;
     assigneeFilters: AssigneesFilters;
-    observables: ObservablesAggregationResult;
-    totalWithMaxObservables: TotalWithMaxObservablesAggregationResult;
   }
 > & {
   assigneeFilters: AssigneesFilters;
@@ -141,13 +153,11 @@ export type CaseAggregationResult = Record<
   syncAlerts: Buckets;
   extractObservables: Buckets;
   extractObservablesSource: Buckets;
-  observables: ObservablesAggregationResult;
   status: Buckets;
   users: Cardinality;
   tags: Cardinality;
   totalAssignees: ValueCount;
   totalsByOwner: Buckets;
-  totalWithMaxObservables: TotalWithMaxObservablesAggregationResult;
 };
 
 export interface Assignees {

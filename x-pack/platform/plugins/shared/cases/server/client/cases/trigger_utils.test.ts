@@ -47,6 +47,20 @@ describe('emitObservablesAddedEvent', () => {
     expect(payload.observableIds.length).toBe(payload.observableTypeKeys.length);
   });
 
+  it('sends at most the first 50 observables, the trigger payload limit', () => {
+    const clientArgs = createCasesClientMockArgs();
+    const observables = Array.from({ length: 60 }, (_, index) =>
+      makeObservable({ id: `obs-${index}` })
+    );
+
+    emitObservablesAddedEvent(clientArgs, makeCase(), observables);
+
+    const [[, payload]] = (clientArgs.casesEventBus.emitObservablesAdded as jest.Mock).mock.calls;
+    expect(payload.observableIds).toHaveLength(50);
+    expect(payload.observableIds[49]).toBe('obs-49');
+    expect(payload.observableTypeKeys).toHaveLength(50);
+  });
+
   it('emits a single observable correctly', () => {
     const clientArgs = createCasesClientMockArgs();
     const theCase = makeCase();
