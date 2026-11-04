@@ -1,10 +1,20 @@
 # Multi-tenant Kibana M1 spike
 
-One Kibana dev server routes API requests to three local Elasticsearch clusters: `project-a`, `project-b`, and `project-c`. The `x-elastic-project-id` header picks the cluster, and [`tenants.yml`](tenants.yml) holds each project's credentials and saved objects encryption key. With no header, requests go to the home cluster (`elasticsearch.hosts`, which is `project-a`).
-
-The core change lives in `src/core/packages/elasticsearch/server-internal/src/`. `elasticsearch_service.ts` wires it in, and `multi_tenancy/` holds the logic: `tenants_file.ts` reads `tenants.yml`, and `tenant_clients.ts` manages the project clients and the unknown-project guard. It stays off unless `elasticsearch.multiTenancy.tenantsFile` is set. Beyond M1, `request.projectId`, request-aware internal saved objects repositories, and per-project encrypted saved objects build on it.
+One Kibana dev server routes API requests to three local Elasticsearch clusters, one per tenant: `project-a`, `project-b`, and `project-c`. The `x-elastic-tenant-id` header picks the tenant, and [`tenants.yml`](tenants.yml) holds each tenant's credentials and saved objects encryption key. With no header, requests go to the home cluster (`elasticsearch.hosts`, which is `project-a`).
 
 Run every command from the repo root. Remove this folder (`git rm -r mt_kibana`) before opening a PR.
+
+## Implementation
+
+Kibana stays a single process. Each request is tagged with its tenant when it arrives, and the code that talks to Elasticsearch uses that tag to pick the tenant's cluster.
+
+- **Tenants service** (`src/core/packages/tenants/`): reads `tenants.yml` at startup. It's the only code that creates a `TenantId`, and it stays off unless `tenants.file` is set.
+- **HTTP**: checks the `x-elastic-tenant-id` header against the tenants service, then sets `request.tenantId`. Unknown tenants get a 400.
+- **Elasticsearch**: `asScoped(request)` returns a client for the request's tenant, built from that tenant's credentials. Requests without a tenant use the home cluster.
+- **Saved objects**: repositories that use Kibana's internal user now take the request, so data views, spaces, and settings are stored in the tenant's cluster. Encrypted saved objects use the tenant's own key: core hands ESO a crypto for it, never the key itself.
+- **Security**: authentication and user profiles follow the request, so basic auth, API keys, and session login work for each tenant.
+
+[`FINDINGS.md`](FINDINGS.md) lists what still goes to the home cluster.
 
 ## Setup (once)
 
@@ -35,33 +45,33 @@ With all three clusters running, and nothing else on port 5601:
 mt_kibana/init_tenant.sh a && mt_kibana/init_tenant.sh b && mt_kibana/init_tenant.sh c
 ```
 
-Each run boots single-tenant Kibana against one cluster until "Kibana is now available", then stops it (about 30 seconds). This creates the `.kibana*` indices and registers Kibana's privileges. It also passes the project's encryption key from `tenants.yml` (`a`, `b`, or `c` repeated 32 times), so anything encrypted during init uses it. Logs go to `.es/mt/init-<a|b|c>.log`.
+Each run boots single-tenant Kibana against one cluster until "Kibana is now available", then stops it (about 30 seconds). This creates the `.kibana*` indices and registers Kibana's privileges. It also passes the tenant's encryption key from `tenants.yml` (`a`, `b`, or `c` repeated 32 times), so anything encrypted during init uses it. Logs go to `.es/mt/init-<a|b|c>.log`.
 
 ## 3. Run multi-tenant Kibana
 
 ```bash
 node scripts/kibana --dev --no-base-path --no-optimizer --elasticsearch.password=changeme-a \
-  --elasticsearch.multiTenancy.tenantsFile=$PWD/mt_kibana/tenants.yml
+  --tenants.file=$PWD/mt_kibana/tenants.yml
 ```
 
 Drop the last flag to get the single-tenant "red" baseline: `smoke.sh` then passes only for `project-a`, and `b` and `c` get a 401.
 
 ## 4. Check it
 
-`mt_kibana/smoke.sh` prints `PASS` for each project whose `/api/stats` `cluster_uuid` (internal-user path) and console proxy `cluster_name` (current-user path) come from that project's cluster. The console proxy is an internal API, so its calls send `x-elastic-internal-origin: kibana` like the browser does.
+`mt_kibana/smoke.sh` prints `PASS` for each tenant whose `/api/stats` `cluster_uuid` (internal-user path) and console proxy `cluster_name` (current-user path) come from that tenant's cluster. The console proxy is an internal API, so its calls send `x-elastic-internal-origin: kibana` like the browser does.
 
-`mt_kibana/so_check.sh` writes a data view, an advanced setting, and a space through `project-b`, then checks where each one is stored and who can see it. The setting check through `project-a` fails because advanced settings are cached per space for the whole process, not per project (see [`FINDINGS.md`](FINDINGS.md)).
+`mt_kibana/so_check.sh` writes a data view, an advanced setting, and a space through `project-b`, then checks where each one is stored and who can see it. The setting check through `project-a` fails because advanced settings are cached per space for the whole process, not per tenant (see [`FINDINGS.md`](FINDINGS.md)).
 
-`mt_kibana/eso_check.sh` creates `.index` and webhook connectors through `project-b` and `project-c` and runs them, including in parallel. It checks that each run reads its own project's connector, decrypts its secrets, and writes only to its own cluster. It also prints where the connector's event log entries landed.
+`mt_kibana/eso_check.sh` creates `.index` and webhook connectors through `project-b` and `project-c` and runs them, including in parallel. It checks that each run reads its own tenant's connector, decrypts its secrets, and writes only to its own cluster. It also prints where the connector's event log entries landed.
 
-Isolation check for the per-project keys: create a webhook connector with a secret through `project-b`. Then start single-tenant Kibana against cluster B with the default key: `node scripts/kibana --dev --no-base-path --no-optimizer --elasticsearch.hosts=http://localhost:9201 --elasticsearch.password=changeme-b`. Running the connector fails with `Failed to decrypt attribute "secrets"`.
+Isolation check for the per-tenant keys: create a webhook connector with a secret through `project-b`. Then start single-tenant Kibana against cluster B with the default key: `node scripts/kibana --dev --no-base-path --no-optimizer --elasticsearch.hosts=http://localhost:9201 --elasticsearch.password=changeme-b`. Running the connector fails with `Failed to decrypt attribute "secrets"`.
 Misrouting checks:
 
 ```bash
 # 401: cluster B rejects cluster A's password, so authentication really went to B
-curl -s -o /dev/null -w '%{http_code}\n' -u elastic:changeme-a -H 'x-elastic-project-id: project-b' localhost:5601/api/stats
-# 400: unknown project
-curl -s -o /dev/null -w '%{http_code}\n' -u elastic:changeme-a -H 'x-elastic-project-id: project-z' localhost:5601/api/stats
+curl -s -o /dev/null -w '%{http_code}\n' -u elastic:changeme-a -H 'x-elastic-tenant-id: project-b' localhost:5601/api/stats
+# 400: unknown tenant
+curl -s -o /dev/null -w '%{http_code}\n' -u elastic:changeme-a -H 'x-elastic-tenant-id: project-z' localhost:5601/api/stats
 # project-a: no header goes to the home cluster
 curl -s -u elastic:changeme-a -H 'kbn-xsrf: true' -H 'x-elastic-internal-origin: kibana' \
   -X POST 'localhost:5601/api/console/proxy?method=GET&path=/' | jq -r .cluster_name
@@ -71,8 +81,17 @@ API key created on cluster B (expect 200, then 401):
 
 ```bash
 key=$(curl -s -u elastic:changeme-b -H 'content-type: application/json' -X POST localhost:9201/_security/api_key -d '{"name":"mt-m1"}' | jq -r .encoded)
-curl -s -o /dev/null -w '%{http_code}\n' -H "authorization: ApiKey $key" -H 'x-elastic-project-id: project-b' localhost:5601/api/stats
-curl -s -o /dev/null -w '%{http_code}\n' -H "authorization: ApiKey $key" -H 'x-elastic-project-id: project-a' localhost:5601/api/stats
+curl -s -o /dev/null -w '%{http_code}\n' -H "authorization: ApiKey $key" -H 'x-elastic-tenant-id: project-b' localhost:5601/api/stats
+curl -s -o /dev/null -w '%{http_code}\n' -H "authorization: ApiKey $key" -H 'x-elastic-tenant-id: project-a' localhost:5601/api/stats
+```
+
+Session login through `project-b`, as the browser does it (expect 200, then `elastic`). In a browser, send the header with a header-injecting extension:
+
+```bash
+h=(-H 'x-elastic-tenant-id: project-b' -H 'kbn-xsrf: true' -H 'x-elastic-internal-origin: kibana' -H 'content-type: application/json')
+curl -s -c /tmp/mt-cookie -o /dev/null -w '%{http_code}\n' "${h[@]}" -X POST localhost:5601/internal/security/login \
+  -d '{"providerType":"basic","providerName":"basic","currentURL":"http://localhost:5601/login","params":{"username":"elastic","password":"changeme-b"}}'
+curl -s -b /tmp/mt-cookie "${h[@]}" localhost:5601/internal/security/me | jq -r .username
 ```
 
 Cross-talk under load. Expect exactly three lines, `100 project-a -> project-a` and so on:
@@ -80,7 +99,7 @@ Cross-talk under load. Expect exactly three lines, `100 project-a -> project-a` 
 ```bash
 seq 300 | xargs -P 12 -n 1 sh -c '
   p=$(printf abc | cut -c$(($1 % 3 + 1)))
-  got=$(curl -s -u elastic:changeme-$p -H "x-elastic-project-id: project-$p" -H "kbn-xsrf: true" \
+  got=$(curl -s -u elastic:changeme-$p -H "x-elastic-tenant-id: project-$p" -H "kbn-xsrf: true" \
     -H "x-elastic-internal-origin: kibana" -X POST "localhost:5601/api/console/proxy?method=GET&path=/" |
     jq -r .cluster_name)
   echo "project-$p -> $got"' _ | sort | uniq -c
