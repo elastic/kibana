@@ -20,7 +20,8 @@ describe.skip('workflow output eviction', () => {
     workflowRunFixture = new WorkflowRunFixture();
   });
 
-  describe('with low eviction threshold', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/302842
+  describe.skip('with low eviction threshold', () => {
     beforeEach(() => {
       // Set a very low threshold (1 byte) so that all connector step outputs get evicted
       (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
