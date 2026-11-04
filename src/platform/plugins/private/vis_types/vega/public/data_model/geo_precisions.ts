@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  getGeohashPrecision,
-  getGeohexPrecision,
-  getGeotilePrecision,
-} from '@kbn/geo-precision';
+import { getGeohashPrecision, getGeohexPrecision, getGeotilePrecision } from '@kbn/geo-precision';
 
 interface GeoPrecisions {
   /** Value for `?_geotile_precision` */

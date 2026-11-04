@@ -26,12 +26,14 @@ const narrowByGlobalTime = z
   .optional()
   .meta({ description: `When true, results narrowed by page's time range.` });
 
-export const gridResolutionSchema = z.union([
-  z.literal(GRID_RESOLUTION.COARSE),
-  z.literal(GRID_RESOLUTION.FINE),
-  z.literal(GRID_RESOLUTION.MOST_FINE),
-  z.literal(GRID_RESOLUTION.SUPER_FINE),
-]);
+export const gridResolutionSchema = lazySchema(() =>
+  z.union([
+    z.literal(GRID_RESOLUTION.COARSE),
+    z.literal(GRID_RESOLUTION.FINE),
+    z.literal(GRID_RESOLUTION.MOST_FINE),
+    z.literal(GRID_RESOLUTION.SUPER_FINE),
+  ])
+);
 
 // base schema for Elasticsearch DSL sources
 export const BaseESSourceSchema = z
