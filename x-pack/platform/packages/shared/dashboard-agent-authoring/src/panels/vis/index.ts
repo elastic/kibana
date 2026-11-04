@@ -143,6 +143,12 @@ export const lensPanelKind = defineRequestPanelKind({
   renderer: 'lens',
   embeddableType: LENS_EMBEDDABLE_TYPE,
   label: 'Lens',
+  selection: {
+    priority: 1,
+    whenToUse: 'metrics, time series, bar, line, pie, area, and data tables.',
+  },
+  canEdit: isEsqlLensPanel,
+  uneditableDescription: 'Lens panel that is not backed by ES|QL',
   contentSchema: lensPanelContentSchema,
 });
 
@@ -150,5 +156,10 @@ export const vegaPanelKind = defineRequestPanelKind({
   renderer: 'vega',
   embeddableType: VEGA_VIS_TYPE,
   label: 'Vega',
+  selection: {
+    priority: 2,
+    whenToUse:
+      'scatter/bubble plots, small multiples/faceting, layered or combination charts, or when the user asks for Vega.',
+  },
   contentSchema: vegaPanelContentSchema,
 });

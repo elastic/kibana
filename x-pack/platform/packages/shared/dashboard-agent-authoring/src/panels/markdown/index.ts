@@ -40,5 +40,6 @@ export const markdownPanelKind = defineConfigPanelKind({
   type: 'markdown',
   embeddableType: MARKDOWN_EMBEDDABLE_TYPE,
   label: 'markdown',
+  selection: { priority: 3, whenToUse: 'static text, links, or notes with no data.' },
   contentSchema: markdownPanelContentSchema,
 });

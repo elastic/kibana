@@ -28,7 +28,7 @@ import { SECTIONED_LOGS_DASHBOARD } from '../../../src/fixtures/sectioned_logs_d
 
 /** Slicing keys stored on every example so golden-cluster results can be split by behaviour. */
 export interface ExampleMetadata {
-  behaviour: 'creation' | 'routing' | 'enhance' | 'discover_results' | 'layout_edit';
+  behaviour: 'creation' | 'routing' | 'enhance' | 'discover_results' | 'layout_edit' | 'ml_panels';
   /** `logs_dissect` is the sample logs index read through a `DISSECT` query attached from Discover. */
   dataSource: 'logs' | 'logs_dissect';
   enhanceMode?: EnhanceMode;
@@ -170,6 +170,26 @@ export const layoutEditExample = ({
   output: {
     route: 'dashboard',
     layoutEdit,
+    goldenToolPath: ['load_skill', GENERATE_DASHBOARD_TOOL_ID],
+  },
+});
+
+/**
+ * Dashboard request for ML anomaly panels, whose config schemas are only in skill references.
+ * `panelConfigTypes` are the panel types the prompt asks for.
+ */
+export const mlPanelExample = ({
+  question,
+  panelConfigTypes,
+}: {
+  question: string;
+  panelConfigTypes: readonly string[];
+}): DashboardDatasetExample => ({
+  input: { question },
+  metadata: { behaviour: 'ml_panels', dataSource: 'logs' } satisfies ExampleMetadata,
+  output: {
+    route: 'dashboard',
+    panelConfigTypes,
     goldenToolPath: ['load_skill', GENERATE_DASHBOARD_TOOL_ID],
   },
 });

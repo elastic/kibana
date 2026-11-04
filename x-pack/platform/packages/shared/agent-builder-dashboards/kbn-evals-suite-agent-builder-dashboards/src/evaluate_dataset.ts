@@ -34,6 +34,7 @@ import {
   dashboardTitlesEvaluator,
 } from './evaluators/dashboard_rule_evaluators';
 import { dashboardRoutingEvaluator } from './evaluators/dashboard_routing';
+import { panelConfigReferenceEvaluator } from './evaluators/panel_config_reference';
 import { dashboardStructureEvaluator } from './evaluators/dashboard_structure';
 import { dashboardTimeRangeEvaluator } from './evaluators/dashboard_time_range';
 import {
@@ -239,6 +240,7 @@ export function createEvaluateDataset({
   // evaluators report counts and seconds, so a "low" value means nothing there.
   const qualityEvaluators = [
     dashboardRoutingEvaluator,
+    panelConfigReferenceEvaluator,
     positiveOnly(dashboardStructureEvaluator),
     positiveOnly(dashboardTimeRangeEvaluator),
     positiveOnly(dashboardLayoutRulesEvaluator),

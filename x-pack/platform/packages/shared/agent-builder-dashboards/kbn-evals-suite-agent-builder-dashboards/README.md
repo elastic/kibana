@@ -41,6 +41,7 @@ Chart presentation is checked on each panel's Lens Config API config, against th
   - each filter the prompt asks for by name (`requestedFilters`) has a stored control on one of its mapped substitutes, or a reply sentence that names it alongside a control or filter (the stored controls already show it was not added), so a requested filter the agent never tried still counts
   - the reply repeats no raw control error text
   - when more requested fields failed (each field counted once, however often it was retried) than were stored on a mapped substitute, the reply names at least that many of the failed fields alongside a control or filter (`status code` names `status_code`); a generic "some filters could not be added" does not count, and a failed control the agent replaced with a mapped one needs no mention
+- **Dashboard Panel Config Reference** (`CODE`): for the ML panel types the prompt asks for (`panelConfigTypes`), the agent reads the type's config reference (`panel_configs/<type>.md`) with `read_file` before its first `generate_dashboard` call that writes a panel of that type, since those config schemas are not in the tool schema. A write that came first counts as a failure even if it later succeeds. Scored as the fraction of gold types that hold. Skipped on examples without `panelConfigTypes`.
 - **Enhance Mode Question** (`CODE`): a bare "enhance" request ends the opening turn with one `ask_user_question` offering an appearance option and a content option, before anything is written. A request that names the mode does not ask.
 - **Enhance Mode Compliance** (`CODE`), binary:
   - Appearance mode keeps every panel id, every panel's ES|QL, the controls and filters unchanged (compared by content, not count), and the time range. It may delete markdown panels.
@@ -76,10 +77,11 @@ No LLM judge runs in this suite; every check is deterministic.
 
 ## Dataset
 
-Thirty examples, because each dashboard example costs 150k–300k input tokens:
+Thirty-two examples, because each dashboard example costs 150k–300k input tokens:
 
 - **Creation** (`datasets/creation.ts`, 4): a rich logs dashboard, two requested sections, six compact KPIs, and four KPIs above a time series.
 - **Routing** (`datasets/routing.ts`, 3): a standalone chart, ES|QL help, and field discovery. Nothing is generated, so these are cheap.
+- **ML panels** (`datasets/ml_panels.ts`, 2): a swim lane with anomaly charts, and a single metric viewer, each for a job named in the prompt. They check that the agent reads the panel config references.
 - **Enhance** (`datasets/enhance.ts`, 3), all over the same seeded dashboard:
   - `[/dashboards](skill://dashboards) Enhance this dashboard`, the prompt the dashboard's "Enhance this dashboard" action sends. The agent should ask for the mode, and the task answers the `ask_user_question` prompt by picking "Appearance only".
   - Appearance mode named up front.
@@ -89,7 +91,7 @@ Thirty examples, because each dashboard example costs 150k–300k input tokens:
   - The prompt from [#294133](https://github.com/elastic/kibana/issues/294133): the same dashboard plus controls for HTTP method, status code, path and HTTP version, which only exist as `DISSECT` output. The agent either substitutes mapped fields or says in plain words which filters it could not add.
   - Four KPIs and a status code breakdown plus a control on machine OS, a mapped field the results do not show, to prove requested controls still get added.
 
-Every example carries `metadata.behaviour` (`creation` | `routing` | `enhance` | `discover_results` | `layout_edit`) and `metadata.dataSource` (`logs`, or `logs_dissect` for the Discover results). Enhance examples also carry `metadata.enhanceMode`, so golden-cluster results can be sliced.
+Every example carries `metadata.behaviour` (`creation` | `routing` | `enhance` | `discover_results` | `layout_edit` | `ml_panels`) and `metadata.dataSource` (`logs`, or `logs_dissect` for the Discover results). Enhance examples also carry `metadata.enhanceMode`, so golden-cluster results can be sliced.
 
 - **Layout edit** (`datasets/layout_edit.ts`, 17), over the seeded sectioned dashboard: remove panels from one or two sections, remove a section, add a KPI, a chart in a section, or a section before or between others, move panels between sections and the top level, restyle or edit panels, set widths, add to a collapsed section, and empty a section.
 
@@ -196,6 +198,7 @@ Test titles, one per spec:
 - `enhances a seeded dashboard in the requested mode` (`dashboard_enhance.spec.ts`)
 - `builds dashboards from DISSECT results with controls on mapped fields only` (`dashboard_discover_results.spec.ts`)
 - `edits a sectioned dashboard and keeps the rest of the layout` (`dashboard_layout_edit.spec.ts`)
+- `reads the ML panel config references before writing ML panels` (`dashboard_ml_panels.spec.ts`)
 
 After the eval stack is already running, use `run` for faster iteration:
 
