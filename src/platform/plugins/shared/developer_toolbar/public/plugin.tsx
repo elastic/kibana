@@ -15,6 +15,11 @@ import type { InternalThemeServiceStart } from '@kbn/core-theme-browser-internal
 
 import { BehaviorSubject } from 'rxjs';
 import { type DeveloperToolbarItemProps } from '@kbn/developer-toolbar';
+import { FeatureFlagsHelperBadge } from './feature_flags_helper_badge';
+
+declare global {
+  var featureFlagsHelperInToolbar: boolean | undefined;
+}
 
 export type UnregisterItemFn = () => void;
 export interface DeveloperToolbarItemRegistry {
@@ -62,6 +67,7 @@ export class DeveloperToolbarPlugin
   }
 
   public start(core: CoreStart): DeveloperToolbarStart {
+    globalThis.featureFlagsHelperInToolbar = true;
     const LazyToolbar = React.lazy(() => import('./toolbar'));
     (core.chrome as InternalChromeStart).setGlobalFooter(
       <Suspense>
@@ -76,6 +82,11 @@ export class DeveloperToolbarPlugin
           <LazyColorThemeToggle theme={core.theme as InternalThemeServiceStart} />
         </Suspense>
       ),
+    });
+
+    this.registerItem({
+      id: 'Feature flags helper',
+      children: <FeatureFlagsHelperBadge />,
     });
 
     this.registerItem({
@@ -110,7 +121,9 @@ export class DeveloperToolbarPlugin
     };
   }
 
-  public stop() {}
+  public stop() {
+    globalThis.featureFlagsHelperInToolbar = false;
+  }
 
   private registerItem = (item: DeveloperToolbarItemProps) => {
     const currentItems = this.items$.value;

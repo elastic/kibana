@@ -64,6 +64,10 @@ export interface FeatureFlagsHelperDeps {
 
 declare global {
   var toggleFeatureFlagsHelper: (() => void) | undefined;
+  /** Opens the helper flyout. The developer toolbar pill calls this. */
+  var openFeatureFlagsHelper: (() => void) | undefined;
+  /** Set when the developer toolbar owns the helper button, so the corner button stays hidden. */
+  var featureFlagsHelperInToolbar: boolean | undefined;
 }
 
 interface ReportedFlagValue {
@@ -131,6 +135,7 @@ export class FeatureFlagsService {
   private readonly evaluatedFlags = new Map<string, FeatureFlagValue>();
   private helperDeps?: FeatureFlagsHelperDeps;
   private unmountHelper?: () => void;
+  private openHelper?: () => void;
   private isProviderReadyPromise?: Promise<void>;
   private context: MultiContextEvaluationContext = { kind: 'multi' };
   private http?: InternalHttpSetup;
@@ -226,6 +231,7 @@ export class FeatureFlagsService {
   public async stop() {
     this.unmountHelper?.();
     this.unmountHelper = undefined;
+    this.openHelper = undefined;
     await OpenFeature.close();
   }
 
@@ -243,15 +249,27 @@ export class FeatureFlagsService {
   public registerHelper(deps: FeatureFlagsHelperDeps): void {
     this.helperDeps = deps;
     this.logger.info(
-      'To inspect and override feature flags, run toggleFeatureFlagsHelper() in the browser console.'
+      globalThis.featureFlagsHelperInToolbar
+        ? 'Open the feature flags helper from the developer toolbar.'
+        : 'To inspect and override feature flags, run toggleFeatureFlagsHelper() in the browser console.'
     );
     globalThis.toggleFeatureFlagsHelper = () => {
       const enabled = localStorage.getItem(HELPER_STORAGE_KEY) !== 'true';
       void this.setHelperEnabled(enabled);
     };
+    globalThis.openFeatureFlagsHelper = () => {
+      void this.openHelperFlyout();
+    };
     if (localStorage.getItem(HELPER_STORAGE_KEY) === 'true') {
       void this.setHelperEnabled(true);
     }
+  }
+
+  private async openHelperFlyout(): Promise<void> {
+    if (!this.unmountHelper) {
+      await this.setHelperEnabled(true);
+    }
+    this.openHelper?.();
   }
 
   private async setHelperEnabled(enabled: boolean): Promise<void> {
@@ -259,6 +277,7 @@ export class FeatureFlagsService {
     if (!enabled) {
       this.unmountHelper?.();
       this.unmountHelper = undefined;
+      this.openHelper = undefined;
       this.logger.info('Feature flags helper disabled.');
       return;
     }
@@ -271,13 +290,15 @@ export class FeatureFlagsService {
     if (localStorage.getItem(HELPER_STORAGE_KEY) !== 'true' || this.unmountHelper) {
       return;
     }
-    this.unmountHelper = mountFeatureFlagsHelper({
+    const mounted = mountFeatureFlagsHelper({
       http: deps.http,
       overlays: deps.overlays,
       rendering: deps.rendering,
       refreshFlags: () => this.refresh(),
       getBrowserEvaluations: () => this.getEvaluatedFlags(),
-    }).unmount;
+    });
+    this.unmountHelper = mounted.unmount;
+    this.openHelper = mounted.open;
     this.logger.info('Feature flags helper enabled.');
   }
 

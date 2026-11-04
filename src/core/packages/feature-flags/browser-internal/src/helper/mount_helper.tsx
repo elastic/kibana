@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useRef } from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
+import { flushSync } from 'react-dom';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { RenderingService } from '@kbn/core-rendering-browser';
@@ -26,25 +27,33 @@ export interface MountFeatureFlagsHelperDeps {
   getBrowserEvaluations: () => Array<{ key: string; value: unknown }>;
 }
 
-/** Mounts the corner button. The flyout itself is opened through the overlays service. */
+/** Mounts the helper. The flyout is opened through the overlays service. */
 export function mountFeatureFlagsHelper(deps: MountFeatureFlagsHelperDeps): {
   unmount: () => void;
+  open: () => void;
 } {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);
-  root.render(
-    deps.rendering.addContext(
-      <FeatureFlagsHelper
-        http={deps.http}
-        overlays={deps.overlays}
-        rendering={deps.rendering}
-        refreshFlags={deps.refreshFlags}
-        getBrowserEvaluations={deps.getBrowserEvaluations}
-      />
-    )
-  );
+  let open = () => {};
+  flushSync(() => {
+    root.render(
+      deps.rendering.addContext(
+        <FeatureFlagsHelper
+          http={deps.http}
+          overlays={deps.overlays}
+          rendering={deps.rendering}
+          refreshFlags={deps.refreshFlags}
+          getBrowserEvaluations={deps.getBrowserEvaluations}
+          bindOpen={(next) => {
+            open = next;
+          }}
+        />
+      )
+    );
+  });
   return {
+    open: () => open(),
     unmount: () => {
       root.unmount();
       container.remove();
@@ -58,7 +67,8 @@ function FeatureFlagsHelper({
   rendering,
   refreshFlags,
   getBrowserEvaluations,
-}: MountFeatureFlagsHelperDeps) {
+  bindOpen,
+}: MountFeatureFlagsHelperDeps & { bindOpen: (open: () => void) => void }) {
   const flyoutRef = useRef<OverlayRef | undefined>(undefined);
 
   const toggleFlyout = () => {
@@ -104,6 +114,15 @@ function FeatureFlagsHelper({
     });
     flyoutRef.current = flyout;
   };
+  const toggleRef = useRef(toggleFlyout);
+  toggleRef.current = toggleFlyout;
+  useLayoutEffect(() => {
+    bindOpen(() => toggleRef.current());
+  }, [bindOpen]);
 
+  // The developer toolbar pill is the button when that toolbar is running.
+  if (globalThis.featureFlagsHelperInToolbar) {
+    return null;
+  }
   return <FeatureFlagsFloatingButton onClick={toggleFlyout} />;
 }

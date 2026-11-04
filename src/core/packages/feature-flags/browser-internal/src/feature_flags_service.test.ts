@@ -32,7 +32,7 @@ jest.mock('@openfeature/ofrep-web-provider', () => ({
 }));
 
 jest.mock('./helper', () => ({
-  mountFeatureFlagsHelper: jest.fn(() => ({ unmount: jest.fn() })),
+  mountFeatureFlagsHelper: jest.fn(() => ({ unmount: jest.fn(), open: jest.fn() })),
 }));
 
 /** Dynamic `import()` settles across more than one microtask. */
@@ -616,6 +616,8 @@ describe('FeatureFlagsService Browser', () => {
     beforeEach(() => {
       localStorage.clear();
       delete globalThis.toggleFeatureFlagsHelper;
+      delete globalThis.openFeatureFlagsHelper;
+      delete globalThis.featureFlagsHelperInToolbar;
       jest.mocked(mountFeatureFlagsHelper).mockClear();
     });
 
@@ -634,6 +636,19 @@ describe('FeatureFlagsService Browser', () => {
       globalThis.toggleFeatureFlagsHelper?.();
       expect(localStorage.getItem('core.featureFlags.helper.enabled')).toBe('false');
       expect(unmount).toHaveBeenCalledTimes(1);
+    });
+
+    test('opens the helper flyout from the developer toolbar', async () => {
+      const open = jest.fn();
+      jest.mocked(mountFeatureFlagsHelper).mockReturnValue({ unmount: jest.fn(), open });
+      featureFlagsService.registerHelper(helperDeps());
+
+      globalThis.openFeatureFlagsHelper?.();
+      await flushAsyncWork();
+
+      expect(localStorage.getItem('core.featureFlags.helper.enabled')).toBe('true');
+      expect(mountFeatureFlagsHelper).toHaveBeenCalledTimes(1);
+      expect(open).toHaveBeenCalledTimes(1);
     });
 
     test('restores the helper when it was left enabled', async () => {
