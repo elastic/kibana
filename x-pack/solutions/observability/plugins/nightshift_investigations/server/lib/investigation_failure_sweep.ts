@@ -15,6 +15,7 @@ import {
 } from '@kbn/workflows/managed';
 import type { GetTriggerEmitter } from '../types';
 import type { GetWorkflowsManagement } from '../routes/types';
+import { InvestigationNotFoundError } from '../client/errors';
 import type {
   InvestigationNotificationDeps,
   InvestigationNotificationSource,
@@ -27,6 +28,7 @@ export const FAILURE_SWEEP_BATCH_SIZE = 100;
 const RECENT_FAILURE_LOOKBACK_MS = 10 * 60_000;
 const checkpointSchema = lazySchema(() =>
   z.object({
+    completed_through: z.iso.datetime().optional(),
     through: z.iso.datetime().optional(),
     after_id: z.string().min(1).max(500).optional(),
   })
@@ -61,6 +63,7 @@ interface CandidateQuery {
 interface BatchProgress {
   scanned: number;
   afterId?: string;
+  retry: boolean;
 }
 interface BatchReporter {
   counts: Pick<SweepResult, 'checked' | 'errors'>;
@@ -159,42 +162,49 @@ const createBatchReporter = (
   deps: InvestigationFailureSweepDeps,
   context: SweepContext
 ): BatchReporter => {
-  const visited = new Set<string>();
+  const visited = new Map<string, boolean>();
   const counts = { checked: 0, errors: 0 };
-  const reportCandidate = async (candidate: WorkflowExecutionListItemDto): Promise<void> => {
-    if (visited.has(candidate.id)) return;
-    visited.add(candidate.id);
+  const reportCandidate = async (candidate: WorkflowExecutionListItemDto): Promise<boolean> => {
+    const previous = visited.get(candidate.id);
+    if (previous !== undefined) return previous;
+    let success = true;
     try {
       if (isInvestigationWorkflowExecution(candidate)) {
         await reportUnsuccessfulInvestigation(deps, { ...context, executionId: candidate.id });
       }
     } catch (error) {
-      counts.errors++;
+      // Deleted or invalid investigations cannot be reported and must not hold the history cursor.
+      success = error instanceof InvestigationNotFoundError;
+      if (!success) counts.errors++;
       context.logger.warn(
         `Could not reconcile investigation execution ${candidate.id}: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
     }
+    visited.set(candidate.id, success);
     counts.checked++;
+    return success;
   };
   const reportBatch = async (
     candidates: WorkflowExecutionListItemDto[]
   ): Promise<BatchProgress> => {
     let scanned = 0;
     let afterId: string | undefined;
+    let retry = false;
     for (const candidate of candidates) {
       if (context.abortSignal.aborted) break;
-      await reportCandidate(candidate);
+      if (!(await reportCandidate(candidate))) retry = true;
       scanned++;
-      afterId = candidate.id;
+      // Keep the cursor before the first failure so the next sweep retries that page.
+      if (!retry) afterId = candidate.id;
     }
-    return { scanned, afterId };
+    return { scanned, afterId, retry };
   };
   return { counts, reportBatch };
 };
 
-/** Reconciles bounded history and recent-failure batches, retaining only history progress in the checkpoint. */
+/** Reconciles bounded failure windows, retaining completed progress and unfinished page cursors. */
 export const sweepInvestigationFailures = async (
   deps: InvestigationFailureSweepDeps,
   context: SweepContext
@@ -209,15 +219,27 @@ export const sweepInvestigationFailures = async (
   };
   const createdAt = await validateSweepWorkflow(scope);
   const checkpoint = await loadCheckpoint(scope);
-  // Revisit retained failures after each fixed-window pass, including late recovery writes.
+  const finishedAfter = checkpoint.completed_through
+    ? new Date(
+        Math.max(
+          Date.parse(createdAt),
+          Date.parse(checkpoint.completed_through) - RECENT_FAILURE_LOOKBACK_MS
+        )
+      ).toISOString()
+    : createdAt;
+  // Re-read an overlap for late-visible terminal writes without rescanning all retained history.
   const through = checkpoint.through ?? new Date().toISOString();
   const history = await readFailureCandidates(scope, {
-    finishedAfter: createdAt,
+    finishedAfter,
     finishedBefore: through,
     afterId: checkpoint.after_id,
   });
   const reporter = createBatchReporter(deps, context);
-  if (checkpoint.after_id || history.results.length === FAILURE_SWEEP_BATCH_SIZE) {
+  if (
+    checkpoint.through ||
+    checkpoint.after_id ||
+    history.results.length === FAILURE_SWEEP_BATCH_SIZE
+  ) {
     const recent = await readFailureCandidates(scope, {
       finishedAfter: new Date(
         Math.max(Date.parse(createdAt), Date.now() - RECENT_FAILURE_LOOKBACK_MS)
@@ -229,11 +251,20 @@ export const sweepInvestigationFailures = async (
   }
   const progress = await reporter.reportBatch(history.results);
   const incomplete =
+    progress.retry ||
     progress.scanned < history.results.length ||
     history.results.length === FAILURE_SWEEP_BATCH_SIZE;
   const afterId = progress.afterId ?? checkpoint.after_id;
   return {
     ...reporter.counts,
-    checkpoint: incomplete ? { through, ...(afterId ? { after_id: afterId } : {}) } : {},
+    checkpoint: incomplete
+      ? {
+          ...(checkpoint.completed_through
+            ? { completed_through: checkpoint.completed_through }
+            : {}),
+          through,
+          ...(afterId ? { after_id: afterId } : {}),
+        }
+      : { completed_through: through },
   };
 };

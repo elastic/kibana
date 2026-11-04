@@ -22,7 +22,7 @@ import type {
   NotificationRouting,
   NotificationDestination,
 } from './notification_routing';
-import { repliesUnderCallerMessage } from './notification_routing';
+import { notificationPhaseSchema, repliesUnderCallerMessage } from './notification_routing';
 
 export interface DeliverInvestigationNotificationsResult {
   sent: number;
@@ -59,7 +59,9 @@ const countAttempts = (
   const counts = { sent: 0, failed: 0, unconfirmed: 0 };
   for (const attempt of routing?.attempts ?? []) {
     if (attempt.execution_id === executionId && attempt.phase === phase) {
-      counts[attempt.status]++;
+      const status =
+        attempt.status === 'sent' || attempt.status === 'failed' ? attempt.status : 'unconfirmed';
+      counts[status]++;
     }
   }
   return counts;
@@ -139,7 +141,8 @@ const prepareDestinationDelivery = (
       (attempt) =>
         attempt.destination_id === destination.id &&
         attempt.creates_root &&
-        attempt.status === 'unconfirmed'
+        attempt.status !== 'sent' &&
+        attempt.status !== 'failed'
     );
   let diagnostic = setupError;
   if (uncertainRoot) {
@@ -352,6 +355,13 @@ export const deliverInvestigationNotifications = async (
   const execution = routing.executions.find(({ id }) => id === executionId);
   if (!execution || execution.workflow_id !== workflowId) {
     throw new Error('Notification execution was not initialized for this workflow');
+  }
+  if (execution.terminal_phase) {
+    // A newer terminal outcome is authoritative even when this version cannot interpret it.
+    const terminalPhase = notificationPhaseSchema.safeParse(execution.terminal_phase);
+    if (!terminalPhase.success || terminalPhase.data === 'started') {
+      return countAttempts(routing, executionId, phase);
+    }
   }
   if (phase !== 'started' && execution.terminal_phase !== phase) {
     return countAttempts(routing, executionId, phase);

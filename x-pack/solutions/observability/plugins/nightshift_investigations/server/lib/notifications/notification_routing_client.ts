@@ -312,7 +312,7 @@ export class NotificationRoutingClient {
         if (!threadTs || !channel) {
           throw new Error('Confirmed notification has no thread reference');
         }
-        return { ...destination, thread: { channel, thread_ts: threadTs } };
+        return { ...destination, thread: { ...destination.thread, channel, thread_ts: threadTs } };
       });
       return {
         ...current,

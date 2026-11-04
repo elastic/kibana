@@ -57,6 +57,61 @@ const setup = (spaceId = 'default') => {
 };
 
 describe('investigation notification lifecycle', () => {
+  it.each(['started', 'failed'] as const)(
+    'does not deliver %s over a terminal phase written by a newer version',
+    async (phase) => {
+      const { client, storage, send, execute, getExecute } = setup();
+      const routing = await client.initialize('exec-1', 'system-nightshift-investigation', [
+        destination,
+      ]);
+      storage.put(client.id, {
+        ...routing,
+        executions: routing.executions.map((entry) => ({
+          ...entry,
+          terminal_phase: 'cancelled',
+          lifecycle_claim_id: 'newer-claim',
+        })),
+      });
+
+      expect(await send(phase)).toEqual({ sent: 0, failed: 0, unconfirmed: 0 });
+      expect(execute).not.toHaveBeenCalled();
+      expect(getExecute).not.toHaveBeenCalled();
+      expect((await client.get())?.executions[0]).toMatchObject({
+        terminal_phase: 'cancelled',
+        lifecycle_claim_id: 'newer-claim',
+      });
+    }
+  );
+
+  it.each(['started', 'paused'])(
+    'preserves unfamiliar root outcomes for %s and blocks duplicate roots',
+    async (phase) => {
+      const { client, storage, send, execute } = setup();
+      const routing = await client.initialize('exec-1', 'system-nightshift-investigation', [
+        destination,
+      ]);
+      const attempt = {
+        execution_id: 'exec-1',
+        destination_id: routing.destinations[0].id,
+        phase,
+        attempt_id: 'newer-attempt',
+        status: 'pending_confirmation',
+        attempted_at: '2026-11-04T10:00:00.000Z',
+        creates_root: true,
+      };
+      storage.put(client.id, { ...routing, attempts: [attempt] });
+
+      expect(await send('started')).toEqual({
+        sent: 0,
+        failed: phase === 'started' ? 0 : 1,
+        unconfirmed: phase === 'started' ? 1 : 0,
+      });
+      expect(await send('started', 'exec-2')).toEqual({ sent: 0, failed: 1, unconfirmed: 0 });
+      expect(execute).not.toHaveBeenCalled();
+      expect((await client.get())?.attempts).toContainEqual(attempt);
+    }
+  );
+
   it.each(['completed', 'failed', 'timed_out'] as const)(
     'posts a started root and updates it for %s',
     async (terminalPhase) => {

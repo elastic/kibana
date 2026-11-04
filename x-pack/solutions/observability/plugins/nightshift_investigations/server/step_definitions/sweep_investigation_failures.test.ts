@@ -13,6 +13,7 @@ import {
   NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { reportUnsuccessfulInvestigation } from '../lib/report_unsuccessful_investigation';
+import { InvestigationNotFoundError } from '../client/errors';
 import { FAILURE_SWEEP_BATCH_SIZE } from '../lib/investigation_failure_sweep';
 import { sweepInvestigationFailuresStepDefinition } from './sweep_investigation_failures';
 
@@ -64,7 +65,9 @@ describe('nightshift.sweepInvestigationFailures', () => {
   it('queries authorized persisted outcomes since installation, without collapsing follow-ups', async () => {
     const { management, request, run } = setup();
     management.searchExecutionsView.mockResolvedValue({ results: [candidate('source-run')] });
-    expect(await run()).toEqual({ output: { checked: 1, errors: 0, checkpoint: {} } });
+    expect(await run()).toEqual({
+      output: { checked: 1, errors: 0, checkpoint: { completed_through: expect.any(String) } },
+    });
     expect(management.searchExecutionsView).toHaveBeenCalledWith(
       expect.objectContaining({
         request,
@@ -90,7 +93,11 @@ describe('nightshift.sweepInvestigationFailures', () => {
 
   it('persists a bounded cursor and resumes the same fixed window from the last completed sweep', async () => {
     const { management, run } = setup();
-    const checkpoint = { through: '2026-10-29T10:00:00.000Z', after_id: 'run-001' };
+    const checkpoint = {
+      completed_through: '2026-10-29T09:00:00.000Z',
+      through: '2026-10-29T10:00:00.000Z',
+      after_id: 'run-001',
+    };
     management.getWorkflowExecutions.mockResolvedValue({ results: [{ id: 'previous-sweep' }] });
     management.getWorkflowExecution.mockResolvedValue({
       context: { output: { checked: 100, errors: 0, checkpoint } },
@@ -105,6 +112,7 @@ describe('nightshift.sweepInvestigationFailures', () => {
     });
     expect(management.searchExecutionsView).toHaveBeenCalledWith(
       expect.objectContaining({
+        finishedAfter: '2026-10-29T08:50:00.000Z',
         finishedBefore: checkpoint.through,
         query: expect.objectContaining({
           bool: expect.objectContaining({
@@ -116,17 +124,94 @@ describe('nightshift.sweepInvestigationFailures', () => {
     );
   });
 
-  it('finishes a pass so the next pass revisits late persistence and reporting failures', async () => {
+  it('retries a failed page without advancing past a failure seen in both queries', async () => {
     const { management, run, logger } = setup();
+    const checkpoint = { through: '2026-10-29T10:00:00.000Z', after_id: '0' };
+    management.getWorkflowExecutions.mockResolvedValue({ results: [{ id: 'previous-sweep' }] });
+    management.getWorkflowExecution.mockResolvedValue({
+      context: { output: { checked: 100, errors: 0, checkpoint } },
+    });
     management.searchExecutionsView.mockResolvedValue({
       results: [candidate('a'), candidate('b')],
     });
     report.mockRejectedValueOnce(new Error('Conversation write denied'));
-    expect(await run()).toEqual({ output: { checked: 2, errors: 1, checkpoint: {} } });
+    const first = await run();
+    expect(first).toEqual({ output: { checked: 2, errors: 1, checkpoint } });
     expect(report).toHaveBeenCalledTimes(2);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Conversation write denied'));
-    await run();
+    management.getWorkflowExecution.mockResolvedValue({ context: first });
+    expect(await run()).toEqual({
+      output: { checked: 2, errors: 0, checkpoint: { completed_through: checkpoint.through } },
+    });
     expect(report).toHaveBeenCalledTimes(4);
+  });
+
+  it('advances completed windows while overlapping late-visible failures instead of all history', async () => {
+    jest.useFakeTimers({ now: new Date('2026-11-04T12:00:00.000Z') });
+    try {
+      const { management, run } = setup();
+      const executions = [{ ...candidate('old-run'), finishedAt: '2026-11-04T11:00:00.000Z' }];
+      management.searchExecutionsView.mockImplementation(
+        async ({
+          finishedAfter,
+          finishedBefore,
+        }: {
+          finishedAfter: string;
+          finishedBefore: string;
+        }) => ({
+          results: executions.filter(
+            (execution) =>
+              execution.finishedAt >= finishedAfter && execution.finishedAt <= finishedBefore
+          ),
+        })
+      );
+      const first = await run();
+      expect(first).toEqual({
+        output: {
+          checked: 1,
+          errors: 0,
+          checkpoint: { completed_through: '2026-11-04T12:00:00.000Z' },
+        },
+      });
+      management.getWorkflowExecutions.mockResolvedValue({ results: [{ id: 'previous-sweep' }] });
+      management.getWorkflowExecution.mockResolvedValue({ context: first });
+      executions.push(
+        { ...candidate('late-visible-run'), finishedAt: '2026-11-04T11:59:00.000Z' },
+        { ...candidate('new-run'), finishedAt: '2026-11-04T12:03:00.000Z' }
+      );
+      jest.setSystemTime(new Date('2026-11-04T12:05:00.000Z'));
+
+      expect(await run()).toEqual({
+        output: {
+          checked: 2,
+          errors: 0,
+          checkpoint: { completed_through: '2026-11-04T12:05:00.000Z' },
+        },
+      });
+      expect(report.mock.calls.map(([, source]) => source.executionId)).toEqual([
+        'old-run',
+        'late-visible-run',
+        'new-run',
+      ]);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('advances past investigations that no longer exist without blocking later failures', async () => {
+    const { management, run } = setup();
+    management.searchExecutionsView.mockResolvedValue({
+      results: [candidate('deleted-run'), candidate('reportable-run')],
+    });
+    report.mockRejectedValueOnce(new InvestigationNotFoundError('deleted-investigation'));
+
+    expect(await run()).toEqual({
+      output: { checked: 2, errors: 0, checkpoint: { completed_through: expect.any(String) } },
+    });
+    expect(report.mock.calls.map(([, source]) => source.executionId)).toEqual([
+      'deleted-run',
+      'reportable-run',
+    ]);
   });
 
   it('ignores foreign workflows and retains the cursor when interrupted', async () => {

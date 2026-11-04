@@ -34,10 +34,12 @@ export const reportUnsuccessfulInvestigation = async (
           defaultMessage: 'Investigation stopped unexpectedly',
         }))
   ).slice(0, 10_000);
+  let recoveryError: Error | undefined;
   // A subject attachment failure must not prevent notification delivery; the event may already exist.
   try {
     await client.ensureForFailure(investigationId, execution.id, reason);
   } catch (error) {
+    recoveryError = error instanceof Error ? error : new Error(String(error));
     source.logger.warn(
       `Could not recover investigation ${investigationId}: ${
         error instanceof Error ? error.message : String(error)
@@ -84,4 +86,6 @@ export const reportUnsuccessfulInvestigation = async (
         }
       : undefined,
   });
+  // Slack delivery remains independent; retain this candidate for context recovery on the next sweep.
+  if (recoveryError) throw recoveryError;
 };

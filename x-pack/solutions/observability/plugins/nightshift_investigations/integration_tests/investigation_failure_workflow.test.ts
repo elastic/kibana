@@ -299,7 +299,7 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
       });
       await fixture.driveToTerminal();
     },
-    sweep: async () => {
+    sweep: async (errors = 0) => {
       const sweepFixture = createNightshiftWorkflowFixture();
       const definition = sweepInvestigationFailuresStepDefinition({
         ...deps,
@@ -338,7 +338,13 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
       );
       expect(sweepRun?.error).toBeUndefined();
       expect(sweepRun?.status).toBe(ExecutionStatus.COMPLETED);
-      expect(sweepRun?.context?.output).toEqual({ checked: 1, errors: 0, checkpoint: {} });
+      expect(sweepRun?.context?.output).toEqual({
+        checked: 1,
+        errors,
+        checkpoint: errors
+          ? { through: expect.any(String) }
+          : { completed_through: expect.any(String) },
+      });
     },
     execution: () =>
       engine.workflowExecutionRepositoryMock.workflowExecutions.get('fake_workflow_execution_id'),
@@ -452,6 +458,25 @@ describe('managed investigation workflow failure handling', () => {
     ]);
     expect(context.storedSubjects.get('inv-1')).toHaveLength(1);
     expect(context.lifecycleEmissions).toHaveLength(1);
+  });
+
+  it('keeps failed context recovery retryable after delivering Slack', async () => {
+    const context = setup('workflow_timeout');
+    await context.run();
+    const originalError = context.execution()?.error;
+    context.ensureForFailure.mockRejectedValueOnce(new Error('Conversation write unavailable'));
+
+    await context.sweep(1);
+    expect(context.delivered).toHaveLength(2);
+    expect(context.storedConversations.has('inv-1')).toBe(false);
+
+    await context.sweep();
+    expect(context.storedConversations.get('inv-1')?.events).toEqual([
+      expect.objectContaining({ type: 'investigation_run_timed_out' }),
+    ]);
+    expect(context.delivered).toHaveLength(2);
+    expect(context.execution()?.status).toBe(ExecutionStatus.TIMED_OUT);
+    expect(context.execution()?.error).toEqual(originalError);
   });
 
   it('recovers a failed fallback through the sweep without replacing the original error', async () => {
