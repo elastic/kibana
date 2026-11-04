@@ -78,6 +78,26 @@ describe('ConnectTypeCard', () => {
     });
   });
 
+  it('limits a new spec connector to its test sub-action', async () => {
+    const github = actionType('.github', { source: 'spec' });
+    const { getAddConnectorFlyout } = mockKibanaServices({ types: [github], connectors: [] });
+    renderWithProviders(
+      <ConnectTypeCard group={{ actionType: github, connectors: [], assignedCount: 0 }} />
+    );
+    await waitFor(() => expect(screen.getByTestId('.github-connect')).toBeEnabled());
+
+    fireEvent.click(screen.getByTestId('.github-connect'));
+
+    expect(await screen.findByTestId('addConnectorFlyoutStub')).toBeInTheDocument();
+    const props = (getAddConnectorFlyout.mock.calls as unknown as Array<[unknown]>)[0][0] as {
+      initialConnector: unknown;
+    };
+    expect(props.initialConnector).toEqual({
+      actionTypeId: '.github',
+      config: { selectedActions: ['_test'] },
+    });
+  });
+
   describe('with connectors of the type', () => {
     it('counts the assigned ones on the card', async () => {
       setup();

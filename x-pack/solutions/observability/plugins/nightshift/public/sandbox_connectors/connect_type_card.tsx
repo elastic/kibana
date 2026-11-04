@@ -72,7 +72,7 @@ export function ConnectTypeCard({
                 label: connectLabel,
                 icon: 'plugs',
                 disabledReason: createDisabledReason,
-                onClick: () => openAdd(actionType.id),
+                onClick: () => openAdd(actionType),
                 'data-test-subj': `${actionType.id}-connect`,
               }
         }
@@ -87,7 +87,7 @@ export function ConnectTypeCard({
               canDelete={application.capabilities.actions?.delete === true}
               onDelete={requestDelete}
               createDisabledReason={createDisabledReason}
-              onCreate={() => openAdd(actionType.id)}
+              onCreate={() => openAdd(actionType)}
             />
           ) : undefined
         }

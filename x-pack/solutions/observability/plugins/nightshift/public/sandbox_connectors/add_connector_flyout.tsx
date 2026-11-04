@@ -142,7 +142,7 @@ export function AddConnectorFlyout({ onClose }: { onClose: () => void }): React.
                           ? undefined
                           : enabledCheck.message
                       }
-                      onCreate={() => openAdd(group.actionType.id)}
+                      onCreate={() => openAdd(group.actionType)}
                       assignedIds={assignedIds}
                       isSearching={query.length > 0}
                       canToggle={canEditAgent}
