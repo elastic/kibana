@@ -341,7 +341,7 @@ export const DependencyGraph = ({
           proOptions={{ hideAttribution: true }}
         >
           <Background />
-          <Controls showInteractive={false} />
+          <Controls showInteractive={false} showFitView={false} />
         </ReactFlow>
       )}
     </div>
