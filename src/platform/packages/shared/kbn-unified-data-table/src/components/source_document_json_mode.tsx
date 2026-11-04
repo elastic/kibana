@@ -86,13 +86,14 @@ export const SourceDocumentJsonMode = ({
       }
       // For array items, we wrap the value in an array so it's filtered by using MV_CONTAINS.
       const filterValue = dataSource?.kind === 'esql' && isArrayItem ? [value] : value;
+      const fieldDisplayName = field?.displayName ?? fieldName;
       return [
         {
           id: 'filterFor',
           iconType: 'plusCircle',
           label: i18n.translate('unifiedDataTable.grid.filterForAria', {
             defaultMessage: 'Filter for this {value}',
-            values: { value: fieldName },
+            values: { value: fieldDisplayName },
           }),
           'data-test-subj': `jsonTreeViewerFilterFor-${path.join('.')}`,
           onClick: () => onFilter?.(field, filterValue, '+'),
@@ -102,7 +103,7 @@ export const SourceDocumentJsonMode = ({
           iconType: 'minusCircle',
           label: i18n.translate('unifiedDataTable.grid.filterOutAria', {
             defaultMessage: 'Filter out this {value}',
-            values: { value: fieldName },
+            values: { value: fieldDisplayName },
           }),
           'data-test-subj': `jsonTreeViewerFilterOut-${path.join('.')}`,
           onClick: () => onFilter?.(field, filterValue, '-'),

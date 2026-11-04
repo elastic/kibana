@@ -28,6 +28,8 @@ import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 const FUNCTION_NAME_MAX_LENGTH = 170;
 const QUALIFIER_MAX_LENGTH = 128;
 const MARKER_MAX_LENGTH = 2048;
+// https://docs.aws.amazon.com/lambda/latest/api/API_ListFunctions.html
+const LIST_FUNCTIONS_MAX_ITEMS = 10000;
 
 interface LambdaApiResponse {
   data: unknown;
@@ -236,8 +238,11 @@ export const AwsLambdaConnector: ConnectorSpec = {
         z.object({
           maxItems: z
             .number()
+            .int()
+            .min(1)
+            .max(LIST_FUNCTIONS_MAX_ITEMS)
             .optional()
-            .describe('Maximum number of functions to return (1-10000)'),
+            .describe(`Maximum number of functions to return (1-${LIST_FUNCTIONS_MAX_ITEMS})`),
           marker: z
             .string()
             .max(MARKER_MAX_LENGTH)

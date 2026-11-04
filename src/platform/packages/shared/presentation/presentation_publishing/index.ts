@@ -137,10 +137,10 @@ export {
   type PublishesDataLoading,
 } from './interfaces/publishes_data_loading';
 export {
-  apiPublishesDataViews,
-  type PublishesDataViews,
-  type PublishesWritableDataViews,
-} from './interfaces/publishes_data_views';
+  apiPublishesDataSources,
+  type PublishesDataSources,
+  type PublishesWritableDataSources,
+} from './interfaces/publishes_data_sources';
 export {
   apiPublishesDisabledActionIds,
   type PublishesDisabledActionIds,

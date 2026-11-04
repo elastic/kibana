@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
 import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
@@ -18,7 +18,11 @@ import {
   isManualTrigger,
   LegacyWorkflowInputSchema,
 } from './schema/triggers/manual_trigger_schema';
-import { CONNECTOR_ID_MAX_LENGTH, IF_CONDITION_MAX_LENGTH } from '../common/constants';
+import {
+  CONNECTOR_ID_MAX_LENGTH,
+  IF_CONDITION_MAX_LENGTH,
+  WORKFLOW_RUN_NAME_MAX_LENGTH,
+} from '../common/constants';
 import {
   HITL_EXTERNAL_APPROVE_LINK_CONTEXT_KEY,
   HITL_EXTERNAL_CHANNELS_DESCRIPTION,
@@ -700,6 +704,7 @@ export const ElasticsearchStepSchema = BaseStepSchema.extend({
     message: 'Elasticsearch step type must start with "elasticsearch."',
   }),
   with: ElasticsearchStepInputSchema,
+  timeout: DynamicTimeoutSchema.optional(),
 });
 export type ElasticsearchStep = z.infer<typeof ElasticsearchStepSchema>;
 
@@ -761,6 +766,7 @@ export const KibanaStepSchema = BaseStepSchema.extend({
     message: 'Kibana step type must start with "kibana."',
   }),
   with: KibanaStepInputSchema,
+  timeout: DynamicTimeoutSchema.optional(),
 });
 export type KibanaStep = z.infer<typeof KibanaStepSchema>;
 
@@ -1171,6 +1177,36 @@ export type WorkflowRunAsMode = z.infer<typeof WorkflowRunAsModeSchema>;
 // Base schema shared by both workflow.execute and workflow.executeAsync
 export const WorkflowExecuteStepInputSchema = z.object({
   'workflow-id': z.string().min(1).max(1024),
+  'allowed-workflow-ids': z
+    .array(
+      z
+        .string()
+        .min(1)
+        .max(1024)
+        .regex(/^(?![\s\S]*\{[{%])[\s\S]+$/, 'Allowed workflow IDs must be literal IDs')
+    )
+    .min(1)
+    .max(100)
+    .optional()
+    .describe(
+      'Literal child workflow IDs permitted to receive the parent service account. A templated workflow-id with inherit or override requires allowed-workflow-ids or allowed-workflow-tags; checked against the saved parent definition.'
+    )
+    .meta({ doNotSuggest: true }),
+  'allowed-workflow-tags': z
+    .array(
+      z
+        .string()
+        .min(1)
+        .max(1024)
+        .regex(/^(?![\s\S]*\{[{%])[\s\S]+$/, 'Allowed workflow tags must be literal tags')
+    )
+    .min(1)
+    .max(100)
+    .optional()
+    .describe(
+      'Literal tags permitting managed children to receive the parent service account. At least one must match the saved child definition. When IDs are also supplied, both restrictions must pass.'
+    )
+    .meta({ doNotSuggest: true }),
   inputs: z.record(z.string(), z.unknown()).optional(),
   'run-as-mode': WorkflowRunAsModeSchema.optional()
     .describe(
@@ -1208,15 +1244,18 @@ export const WorkflowOutputStepSchema = BaseStepSchema.extend({
 });
 export type WorkflowOutputStep = z.infer<typeof WorkflowOutputStepSchema>;
 
-export const WorkflowFailStepSchema = BaseStepSchema.extend({
-  type: z.literal('workflow.fail'),
-  with: z
-    .object({
-      message: z.string().optional(),
-      reason: z.string().optional(),
-    })
-    .optional(),
-});
+export const WorkflowFailStepSchema = lazySchema(() =>
+  BaseStepSchema.extend({
+    type: z.literal('workflow.fail'),
+    with: z
+      .object({
+        message: z.string().optional(),
+        reason: z.string().optional(),
+        type: z.string().optional(),
+      })
+      .optional(),
+  })
+);
 export type WorkflowFailStep = z.infer<typeof WorkflowFailStepSchema>;
 
 /* --- Outputs --- */
@@ -1289,17 +1328,26 @@ export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 
 /* --- Workflow --- */
 // Base schema without transform - can be extended (used in generate_yaml_schema_from_connectors.ts)
-const WorkflowSchemaBase = z.object({
-  version: z.literal('1').optional().default('1').describe('The version of the workflow schema'),
-  name: z.string().min(1),
-  description: z.string().optional(),
-  settings: WorkflowSettingsSchema.optional(),
-  enabled: z.boolean().default(true),
-  tags: z.array(z.string()).optional(),
-  outputs: z.union([JsonModelSchema, z.array(WorkflowOutputSchema)]).optional(),
-  consts: WorkflowConstsSchema.optional(),
-  steps: z.array(StepSchema).min(1),
-});
+const WorkflowSchemaBase = lazySchema(() =>
+  z.object({
+    version: z.literal('1').optional().default('1').describe('The version of the workflow schema'),
+    name: z.string().min(1),
+    'run-name': z
+      .string()
+      .max(WORKFLOW_RUN_NAME_MAX_LENGTH)
+      .optional()
+      .describe(
+        'Execution name, evaluated once at creation using Liquid and the workflow context.'
+      ),
+    description: z.string().optional(),
+    settings: WorkflowSettingsSchema.optional(),
+    enabled: z.boolean().default(true),
+    tags: z.array(z.string()).optional(),
+    outputs: z.union([JsonModelSchema, z.array(WorkflowOutputSchema)]).optional(),
+    consts: WorkflowConstsSchema.optional(),
+    steps: z.array(StepSchema).min(1),
+  })
+);
 
 /** Normalize inputs or outputs from either JSON Schema or legacy array format to JsonModelSchema. */
 function normalizeFieldsToJsonSchema(value: unknown): z.infer<typeof JsonModelSchema> | undefined {
@@ -1356,46 +1404,49 @@ export type WorkflowYaml = z.infer<typeof WorkflowSchema>;
 // The schema captures all possible fields and passes them through for consumption by WorkflowGraph.
 // We build this from the base object schema (before the pipe) to avoid issues with .partial() on piped schemas
 // Base schema without transform - can be extended
-const WorkflowSchemaForAutocompleteBase = z
-  .object({
-    version: z.literal('1').optional(),
-    name: z.string().min(1).optional(),
-    description: z.string().optional(),
-    settings: WorkflowSettingsSchema.optional(),
-    enabled: z.boolean().default(true).optional(),
-    tags: z.array(z.string()).optional(),
-    triggers: z
-      .array(z.object({ type: z.string().catch('') }).passthrough())
-      .catch([])
-      .default([]),
-    outputs: z
-      .union([
-        JsonModelSchema,
-        z.array(
+const WorkflowSchemaForAutocompleteBase = lazySchema(() =>
+  z
+    .object({
+      version: z.literal('1').optional(),
+      name: z.string().min(1).optional(),
+      'run-name': WorkflowSchemaBase.shape['run-name'],
+      description: z.string().optional(),
+      settings: WorkflowSettingsSchema.optional(),
+      enabled: z.boolean().default(true).optional(),
+      tags: z.array(z.string()).optional(),
+      triggers: z
+        .array(z.object({ type: z.string().catch('') }).passthrough())
+        .catch([])
+        .default([]),
+      outputs: z
+        .union([
+          JsonModelSchema,
+          z.array(
+            z
+              .object({
+                name: z.string().catch(''),
+                type: z.string().catch(''),
+              })
+              .passthrough()
+          ),
+        ])
+        .optional()
+        .catch(undefined),
+      consts: WorkflowConstsSchema.optional(),
+      steps: z
+        .array(
           z
             .object({
-              name: z.string().catch(''),
               type: z.string().catch(''),
+              name: z.string().catch(''),
             })
             .passthrough()
-        ),
-      ])
-      .optional()
-      .catch(undefined),
-    consts: WorkflowConstsSchema.optional(),
-    steps: z
-      .array(
-        z
-          .object({
-            type: z.string().catch(''),
-            name: z.string().catch(''),
-          })
-          .passthrough()
-      )
-      .catch([])
-      .default([]),
-  })
-  .passthrough();
+        )
+        .catch([])
+        .default([]),
+    })
+    .passthrough()
+);
 
 // Final schema with transform - ensure version default is applied
 export const WorkflowSchemaForAutocomplete = WorkflowSchemaForAutocompleteBase.transform(

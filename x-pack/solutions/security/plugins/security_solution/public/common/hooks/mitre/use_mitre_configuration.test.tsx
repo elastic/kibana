@@ -282,6 +282,59 @@ describe('useMitreConfiguration', () => {
     });
   });
 
+  describe('framework param', () => {
+    it('returns an error with empty buckets for a non-default framework when managed is off', () => {
+      setupKibanaMock(false);
+      mockUseFetchLegacyMitreQuery.mockReturnValue(makeQueryResult(mockLegacyData));
+
+      const { result } = renderHook(() => useMitreConfiguration({ framework: 'atlas' }));
+
+      expect(result.current.isError).toBe(true);
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.tactics).toEqual([]);
+      expect(result.current.techniques).toEqual([]);
+      expect(result.current.subtechniques).toEqual([]);
+      expect(result.current.frameworkVersion).toBeUndefined();
+      expect(mockUseFetchLegacyMitreQuery).toHaveBeenCalledWith(
+        undefined,
+        expect.objectContaining({ enabled: false })
+      );
+    });
+
+    it('returns bundled data for framework enterprise when managed is off', () => {
+      setupKibanaMock(false);
+      mockUseFetchLegacyMitreQuery.mockReturnValue(makeQueryResult(mockLegacyData));
+
+      const { result } = renderHook(() => useMitreConfiguration({ framework: 'enterprise' }));
+
+      expect(result.current.isError).toBe(false);
+      expect(result.current.tactics).toEqual(mockLegacyData.tactics);
+      expect(result.current.frameworkVersion).toBe(LEGACY_FRAMEWORK_VERSION);
+    });
+
+    it('returns bundled data when no framework is given and managed is off', () => {
+      setupKibanaMock(false);
+      mockUseFetchLegacyMitreQuery.mockReturnValue(makeQueryResult(mockLegacyData));
+
+      const { result } = renderHook(() => useMitreConfiguration({ types: ['tactic'] }));
+
+      expect(result.current.isError).toBe(false);
+      expect(result.current.tactics).toEqual(mockLegacyData.tactics);
+      expect(result.current.frameworkVersion).toBe(LEGACY_FRAMEWORK_VERSION);
+    });
+
+    it('returns the managed result for framework atlas when managed is on', () => {
+      setupKibanaMock(true);
+      mockUseFetchMitreEntitiesQuery.mockReturnValue(makeQueryResult(mockManagedData));
+
+      const { result } = renderHook(() => useMitreConfiguration({ framework: 'atlas' }));
+
+      expect(result.current.isError).toBe(false);
+      expect(result.current.tactics).toEqual(mockManagedData.tactics);
+      expect(result.current.frameworkVersion).toBe('16.1');
+    });
+  });
+
   describe('when mitreAttack service is absent', () => {
     it('defaults to the legacy hook', () => {
       mockUseKibana.mockReturnValue({ services: { http: {} } });

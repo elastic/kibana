@@ -351,6 +351,39 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     ]);
   });
 
+  it('folds a feature held by several sources and reports every holder as a slug', async () => {
+    const sourcesById = new Map(
+      ['checkout', 'payments'].map((slug): [string, NightshiftSource] => [
+        `id-${slug}`,
+        { ...[...catalogFor([slug]).byId.values()][0], id: `id-${slug}` },
+      ])
+    );
+    catalog = {
+      byId: sourcesById,
+      bySlug: new Map([...sourcesById.values()].map((source) => [source.slug, source])),
+    };
+    kiClient.getFeatures = jest.fn(async (sourceId: string) => ({
+      hits: [makeFeature({ id: 'redis', type: 'technology', uuid: sourceId, source_id: sourceId })],
+    }));
+
+    const result = await searchKnowledgeIndicatorsToolHandler({
+      catalog,
+      kiClient,
+      logger,
+      params: { kind: ['feature'] },
+      view: 'compact',
+    });
+
+    expect(result.total).toBe(1);
+    const [indicator] = result.knowledge_indicators;
+    expect(indicator.kind === 'feature' && indicator.feature.sources).toEqual([
+      'checkout',
+      'payments',
+    ]);
+    expect(indicator).not.toHaveProperty('feature.instances');
+    expect(result.sources.map(({ slug }) => slug)).toEqual(['checkout', 'payments']);
+  });
+
   it('searches every catalog source when slugs are omitted', async () => {
     catalog = catalogFor(['logs.checkout', 'logs.payments']);
     kiClient.getFeatures = jest.fn().mockResolvedValue({ hits: [], total: 0 });

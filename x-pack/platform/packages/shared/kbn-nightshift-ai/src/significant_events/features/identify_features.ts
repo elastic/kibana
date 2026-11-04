@@ -76,7 +76,11 @@ export interface SimilarFeatureHit {
   id: string;
   title: string;
   description: string;
+  type: string;
+  subtype?: string;
+  properties: Record<string, unknown>;
   confidence: number;
+  sources: string[];
 }
 
 export interface IdentifyFeaturesOptions {

@@ -1,5 +1,5 @@
 {
-  "sha1": "f556032c0be30c40106c1a1240f5ff49d7df13e1",
+  "sha1": "888a3f761eadbe8b8ce58d81f36325a83ce2e882",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -34,7 +34,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
-        "line": 52,
+        "line": 53,
         "column": 25
       }
     },
@@ -54,7 +54,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
-        "line": 58,
+        "line": 59,
         "column": 26
       }
     },
@@ -74,7 +74,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
-        "line": 70,
+        "line": 71,
         "column": 25
       }
     },
@@ -94,7 +94,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
-        "line": 78,
+        "line": 79,
         "column": 17
       }
     },
@@ -114,7 +114,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
-        "line": 109,
+        "line": 110,
         "column": 27
       }
     },
@@ -134,7 +134,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
-        "line": 150,
+        "line": 151,
         "column": 26
       }
     },
@@ -154,7 +154,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
-        "line": 157,
+        "line": 158,
         "column": 5
       }
     },
@@ -174,7 +174,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
-        "line": 160,
+        "line": 161,
         "column": 96
       }
     },
@@ -194,7 +194,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
-        "line": 170,
+        "line": 171,
         "column": 5
       }
     },
@@ -214,7 +214,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
-        "line": 179,
+        "line": 180,
         "column": 85
       }
     },
@@ -234,7 +234,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
-        "line": 190,
+        "line": 191,
         "column": 60
       }
     },
@@ -254,7 +254,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
-        "line": 191,
+        "line": 192,
         "column": 59
       }
     },
@@ -274,7 +274,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
-        "line": 200,
+        "line": 201,
         "column": 5
       }
     },

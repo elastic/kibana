@@ -10,6 +10,7 @@ import { MAX_TAG_LENGTH, TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants'
 import { createRuleDataSchema } from './rule_data_schema';
 import {
   findRuleTemplatesRequestSchema,
+  findRuleTemplatesResponseSchema,
   ruleTemplateDataSchema,
   ruleTemplateIdParamsSchema,
   ruleTemplateTagsParamsSchema,
@@ -843,5 +844,33 @@ describe('ruleTemplateTagsResponseSchema', () => {
     { tags: Array.from({ length: TAGS_RESPONSE_LIMIT + 1 }, (_, index) => `tag-${index}`) },
   ])('rejects invalid or oversized responses', (response) => {
     expect(ruleTemplateTagsResponseSchema.safeParse(response).success).toBe(false);
+  });
+});
+
+describe('findRuleTemplatesResponseSchema', () => {
+  const item = { id: 'template-1', ...exampleTemplateAttributes, rule_count: 2 };
+  const page = { items: [item], total: 1, page: 1, per_page: 20 };
+
+  it('accepts templates with a rule count', () => {
+    expect(findRuleTemplatesResponseSchema.parse(page).items[0].rule_count).toBe(2);
+  });
+
+  it('accepts a template that no rule was created from', () => {
+    const emptyPage = { ...page, items: [{ ...item, rule_count: 0 }] };
+
+    expect(findRuleTemplatesResponseSchema.safeParse(emptyPage).success).toBe(true);
+  });
+
+  it('accepts a template without a rule count', () => {
+    const { rule_count: _ruleCount, ...itemWithoutCount } = item;
+    const pageWithoutCount = { ...page, items: [itemWithoutCount] };
+
+    expect(findRuleTemplatesResponseSchema.safeParse(pageWithoutCount).success).toBe(true);
+  });
+
+  it.each([-1, 1.5, '2'])('rejects rule_count %p', (ruleCount) => {
+    const invalidPage = { ...page, items: [{ ...item, rule_count: ruleCount }] };
+
+    expect(findRuleTemplatesResponseSchema.safeParse(invalidPage).success).toBe(false);
   });
 });

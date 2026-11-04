@@ -15,6 +15,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { AdditionalControls } from '../../entities_table/additional_controls';
 import { LastUpdated } from '../../last_updated';
+import { loadingPlaceholderCss } from './entities_grid_styles';
 
 const RESOLVED_ROWS_TOTAL_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.grid.resolvedRowsTotalTitle',
@@ -27,8 +28,9 @@ const INDIVIDUAL_ROWS_TOTAL_TITLE = i18n.translate(
 );
 
 interface EntityGridToolbarTotalProps {
-  total: number;
+  total?: number;
   shown?: number;
+  limitNote?: string;
   isIndividualRows: boolean;
   visibleColumns: string[];
   onAddColumn: (columnId: string) => void;
@@ -53,6 +55,13 @@ const EntityGridToolbarTotal: React.FC<EntityGridToolbarTotalProps> = ({
           border-inline-end: ${euiTheme.border.thin};
           padding-inline-end: ${euiTheme.size.m};
           margin-inline-end: ${euiTheme.size.xs};
+        }
+        .entityAnalyticsDataTableTotalLoading {
+          ${loadingPlaceholderCss};
+          inline-size: 10em;
+          block-size: ${lineHeight};
+          border-radius: ${euiTheme.border.radius.small};
+          background: ${euiTheme.colors.lightShade};
         }
       `}
     >

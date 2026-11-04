@@ -56,7 +56,7 @@ jest.mock('@kbn/tooling-log', () => ({
 
 const mockRunJestViaMoon = jest.fn();
 
-jest.mock('@kbn/test', () => ({
+jest.mock('@kbn/jest', () => ({
   runJestViaMoon: (...args: unknown[]) => mockRunJestViaMoon(...args),
   JEST_CONFIG_NAMES: [
     'jest.config.dev.js',
@@ -317,18 +317,49 @@ describe('run_check', () => {
     expect(output).toContain('lint  ✓ 10 files (fixed 2 files)');
   });
 
+  it('prints lint warning details when there are no errors', async () => {
+    interface MockLog {
+      writers: Array<{ write: (msg: { args: unknown[]; type: string }) => boolean }>;
+    }
+    const warn = (log: MockLog, text: string) =>
+      log.writers.forEach((writer) => writer.write({ type: 'warning', args: [text] }));
+
+    mockExecuteOxlintValidation.mockImplementation(async ({ log }: { log: MockLog }) => {
+      warn(log, 'src/foo.ts:1:1  warning  Unexpected console  no-console');
+      return { fileCount: 3, failedFiles: [], warningCount: 1 };
+    });
+    mockExecuteEslintValidation.mockImplementation(async ({ log }: { log: MockLog }) => {
+      warn(log, 'src/bar.ts\n  2:3  warning  Unexpected any  @typescript-eslint/no-explicit-any');
+      return { fileCount: 3, fixedFiles: [], failedFiles: [], warningCount: 1 };
+    });
+
+    await handler(createArgs());
+
+    expect(process.exitCode).toBeUndefined();
+    const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+    expect(output).toContain('oxlint⚠ 3 files (1 warning)');
+    expect(output).toContain('    src/foo.ts:1:1  warning  Unexpected console  no-console');
+    expect(output).toContain('lint  ⚠ 3 files (1 warning)');
+    expect(output).toContain(
+      '    src/bar.ts\n      2:3  warning  Unexpected any  @typescript-eslint/no-explicit-any'
+    );
+  });
+
   it('skips fast path for integration test files', async () => {
     mockResolveValidationBaseContext.mockResolvedValue({
       ...baseContext,
       runContext: {
         ...baseContext.runContext,
-        changedFiles: ['src/core/server/integration_tests/user_storage/remove.test.ts'],
+        changedFiles: [
+          'src/core/packages/core/server/integration_tests/user_storage/remove.test.ts',
+        ],
       },
     });
 
     mockExistsSync.mockImplementation(
       (p: string) =>
-        p === '/repo/src/core/server/integration_tests/user_storage/jest.integration.config.js'
+        p ===
+        '/repo/src/core/packages/core/server/integration_tests/user_storage/jest.integration.config.js'
     );
 
     await handler(createArgs());

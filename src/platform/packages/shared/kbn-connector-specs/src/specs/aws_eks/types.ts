@@ -39,6 +39,16 @@ const KUBERNETES_NAME_PATTERN = /^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$/;
 const LABEL_KEY_PATTERN =
   /^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*\/)?[A-Za-z0-9]([-A-Za-z0-9_.]{0,61}[A-Za-z0-9])?$/;
 const LABEL_VALUE_PATTERN = /^([A-Za-z0-9]([-A-Za-z0-9_.]{0,61}[A-Za-z0-9])?)?$/;
+/**
+ * Taint keys may carry a DNS subdomain prefix, allowing up to 253 characters:
+ * https://docs.aws.amazon.com/eks/latest/userguide/node-taints-managed-node-groups.html
+ */
+const TAINT_KEY_MAX_LENGTH = 253;
+/**
+ * EKS documents no maximum for node group labels, access entry Kubernetes groups, or access scope
+ * namespaces; this ceiling only guards against unbounded input.
+ */
+const UNDOCUMENTED_LIST_MAX = 1000;
 
 const region = () =>
   z
@@ -131,7 +141,7 @@ const kubernetesGroups = () =>
         .max(253)
         .regex(/^[^\s]+$/, { message: 'Group names must not contain whitespace' })
     )
-    .max(20)
+    .max(UNDOCUMENTED_LIST_MAX)
     .describe(
       'Kubernetes group names the principal is mapped to inside the cluster, for example ["viewers"] or ["platform-admins"]. RBAC bindings on these groups (or an associated access policy) decide what the principal can do.'
     );
@@ -155,8 +165,8 @@ const labelsMap = () =>
       z.string().max(253).regex(LABEL_KEY_PATTERN, { message: 'Invalid Kubernetes label key' }),
       z.string().max(63).regex(LABEL_VALUE_PATTERN, { message: 'Invalid Kubernetes label value' })
     )
-    .refine((value) => Object.keys(value).length <= 50, {
-      message: 'At most 50 labels are allowed per call',
+    .refine((value) => Object.keys(value).length <= UNDOCUMENTED_LIST_MAX, {
+      message: `At most ${UNDOCUMENTED_LIST_MAX} labels are allowed per call`,
     });
 
 const taint = () =>
@@ -164,7 +174,7 @@ const taint = () =>
     key: z
       .string()
       .min(1)
-      .max(63)
+      .max(TAINT_KEY_MAX_LENGTH)
       .regex(LABEL_KEY_PATTERN, { message: 'Invalid taint key' })
       .describe('Taint key, for example "dedicated".'),
     value: z
@@ -258,7 +268,9 @@ export const UpdateNodegroupConfigInputSchema = lazySchema(() =>
       ).optional(),
       maxSize: capacity(
         'Maximum node count the group may scale up to (1 or more). Omit to keep the current value.'
-      ).optional(),
+      )
+        .min(1)
+        .optional(),
       desiredSize: capacity(
         'Node count to run right now. Must stay within minSize and maxSize. The scale-up/scale-down lever: raise it to absorb load, lower it (down to minSize) to drain capacity.'
       ).optional(),
@@ -269,7 +281,7 @@ export const UpdateNodegroupConfigInputSchema = lazySchema(() =>
         ),
       labelsToRemove: z
         .array(z.string().max(253).regex(LABEL_KEY_PATTERN, { message: 'Invalid label key' }))
-        .max(50)
+        .max(UNDOCUMENTED_LIST_MAX)
         .optional()
         .describe('Kubernetes node label keys to remove from the group.'),
       taintsToAdd: z
@@ -600,7 +612,7 @@ export const AssociateAccessPolicyInputSchema = lazySchema(() =>
             .regex(KUBERNETES_NAME_PATTERN, { message: 'Must be a Kubernetes namespace name' })
         )
         .min(1)
-        .max(50)
+        .max(UNDOCUMENTED_LIST_MAX)
         .optional()
         .describe(
           'Namespaces the policy applies to. Required when accessScopeType is "namespace".'

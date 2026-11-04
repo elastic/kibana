@@ -20,12 +20,11 @@ import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
 import { useIsActionPoliciesLicenseValid } from '../../../hooks/use_is_action_policies_license_valid';
 import { UserCapabilities } from '../../../services/user_capabilities';
 import { collectActorUids, resolveDisplayName } from '../../../utils/resolve_display_name';
-import { ActionPolicyActionsMenu } from '../action_policy_actions_menu';
 import { BadgeList } from '../badge_list';
 import { isSnoozed } from '../is_snoozed';
 import {
@@ -37,11 +36,11 @@ import {
   getGroupingModeLabel,
 } from '../labels';
 import { AffectedRulesFlyout } from './affected_rules_flyout';
+import { ACTION_POLICY_MENU_ARIA_LABEL, useActionPolicyMenu } from '../use_action_policy_menu';
 import { DestinationCard } from './destination_card';
 import { POLICY_SCOPE_LABEL, PolicyScopeSummary, getPolicyScopeKind } from './policy_scope_summary';
 import { Column, SubsectionColumns } from './subsection_columns';
 
-const TAKE_ACTION_BUTTON_ID = 'actionPolicyDetailsFlyoutTakeAction';
 const EMPTY_VALUE = '-';
 const HISTORY_KEY = Symbol('actionPolicyDetailsFlyout');
 
@@ -102,8 +101,32 @@ export const ActionPolicyDetailsFlyout = ({
   const showAffectedRulesLink =
     canReadRules && (scopeKind === 'tagsOnly' || scopeKind === 'tagsAndExpression');
 
-  const [isTakeActionOpen, setIsTakeActionOpen] = useState(false);
   const [isAffectedRulesOpen, setIsAffectedRulesOpen] = useState(false);
+
+  const handleEdit = useCallback(
+    (id: string) => {
+      onClose();
+      onEdit(id);
+    },
+    [onClose, onEdit]
+  );
+
+  const { panels: takeActionPanels, modal: takeActionModal } = useActionPolicyMenu({
+    policy,
+    ...(canWrite && {
+      onEdit: handleEdit,
+      onClone,
+      onDelete,
+      onEnable,
+      onDisable,
+      onSnooze,
+      onCancelSnooze,
+      onUpdateApiKey,
+    }),
+    isStateLoading,
+    isSnoozeLoading,
+    flyoutHistoryKey: HISTORY_KEY,
+  });
 
   return (
     <>
@@ -319,18 +342,14 @@ export const ActionPolicyDetailsFlyout = ({
         </Body>
 
         <Footer>
-          {canWrite && (
-            <Footer.PrimaryAction
-              id={TAKE_ACTION_BUTTON_ID}
-              label={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.takeAction', {
-                defaultMessage: 'Take action',
-              })}
-              iconType={isTakeActionOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
-              iconSide="right"
-              onClick={() => setIsTakeActionOpen((open) => !open)}
-              data-test-subj="detailsFlyoutTakeActionButton"
-            />
-          )}
+          <Footer.PrimaryActionMenu
+            label={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.takeAction', {
+              defaultMessage: 'Take action',
+            })}
+            aria-label={ACTION_POLICY_MENU_ARIA_LABEL}
+            panels={takeActionPanels}
+            data-test-subj="detailsFlyoutTakeActionButton"
+          />
         </Footer>
       </FlyoutTemplate>
       {isAffectedRulesOpen && (
@@ -341,28 +360,7 @@ export const ActionPolicyDetailsFlyout = ({
           onClose={() => setIsAffectedRulesOpen(false)}
         />
       )}
-      {canWrite && (
-        <ActionPolicyActionsMenu
-          policy={policy}
-          anchorId={TAKE_ACTION_BUTTON_ID}
-          isOpen={isTakeActionOpen}
-          onOpenChange={setIsTakeActionOpen}
-          anchorPosition="upRight"
-          onEdit={(id) => {
-            onClose();
-            onEdit(id);
-          }}
-          onClone={onClone}
-          onDelete={onDelete}
-          onEnable={onEnable}
-          onDisable={onDisable}
-          onSnooze={onSnooze}
-          onCancelSnooze={onCancelSnooze}
-          onUpdateApiKey={onUpdateApiKey}
-          isStateLoading={isStateLoading}
-          isSnoozeLoading={isSnoozeLoading}
-        />
-      )}
+      {takeActionModal}
     </>
   );
 };

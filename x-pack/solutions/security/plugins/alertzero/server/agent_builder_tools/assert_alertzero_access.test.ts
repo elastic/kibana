@@ -7,6 +7,8 @@
 
 import { coreMock, httpServerMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALERTZERO_ENABLED_SETTING_ID } from '@kbn/alertzero-common';
 import {
   ALERTZERO_API_PRIVILEGE_READ,
@@ -23,8 +25,20 @@ const setup = () => {
   const uiSettingsClient = uiSettingsServiceMock.createClient();
   core.uiSettings.asScopedToClient.mockReturnValue(uiSettingsClient);
   uiSettingsClient.get.mockResolvedValue(true);
-  const assertAccess = createAssertAlertZeroAccess(async () => ({ core, security }));
-  return { core, security, checkPrivileges, request, uiSettingsClient, assertAccess };
+  const spaces = spacesMock.createStart();
+  spaces.spacesService.getActiveSpace.mockResolvedValue({
+    id: DEFAULT_SPACE_ID,
+    name: 'Default',
+    disabledFeatures: [],
+    solution: 'security',
+  });
+  const assertAccess = createAssertAlertZeroAccess(async () => ({
+    core,
+    security,
+    spaces,
+    isServerless: false,
+  }));
+  return { core, security, spaces, checkPrivileges, request, uiSettingsClient, assertAccess };
 };
 
 describe('createAssertAlertZeroAccess', () => {
@@ -74,9 +88,22 @@ describe('createAssertAlertZeroAccess', () => {
     await expect(assertAccess(request, 'read')).rejects.toThrow('Missing AlertZero Read');
   });
 
+  it('rejects a Classic space even when the setting is on', async () => {
+    const { request, spaces, uiSettingsClient, assertAccess } = setup();
+    spaces.spacesService.getActiveSpace.mockResolvedValue({
+      id: DEFAULT_SPACE_ID,
+      name: 'Default',
+      disabledFeatures: [],
+    });
+    await expect(assertAccess(request, 'read')).rejects.toThrow(
+      'AlertZero is available only in a Security solution space.'
+    );
+    expect(uiSettingsClient.get).not.toHaveBeenCalled();
+  });
+
   it('fails closed when security is unavailable', async () => {
     const { core, request } = setup();
-    const assertAccess = createAssertAlertZeroAccess(async () => ({ core }));
+    const assertAccess = createAssertAlertZeroAccess(async () => ({ core, isServerless: false }));
     await expect(assertAccess(request, 'write')).rejects.toThrow('security is unavailable');
   });
 
@@ -91,12 +118,15 @@ describe('createAssertAlertZeroAccess', () => {
 
 describe('assertAlertZeroEnabled', () => {
   it('checks the space setting without requiring AlertZero privileges', async () => {
-    const { core, request, checkPrivileges, uiSettingsClient } = setup();
+    const { core, spaces, request, checkPrivileges, uiSettingsClient } = setup();
+    const services = { core, spaces, isServerless: false };
     checkPrivileges.mockResolvedValue({ hasAllRequested: false });
-    await expect(assertAlertZeroEnabled(core, request)).resolves.toBeUndefined();
+    await expect(assertAlertZeroEnabled(services, request)).resolves.toBeUndefined();
     expect(checkPrivileges).not.toHaveBeenCalled();
     expect(uiSettingsClient.get).toHaveBeenCalledWith(ALERTZERO_ENABLED_SETTING_ID);
     uiSettingsClient.get.mockResolvedValue(false);
-    await expect(assertAlertZeroEnabled(core, request)).rejects.toThrow('AlertZero is disabled');
+    await expect(assertAlertZeroEnabled(services, request)).rejects.toThrow(
+      'AlertZero is disabled'
+    );
   });
 });

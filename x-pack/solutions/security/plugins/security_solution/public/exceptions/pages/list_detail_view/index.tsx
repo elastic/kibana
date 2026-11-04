@@ -8,12 +8,9 @@
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import {
-  EmptyViewerState,
-  ExceptionListHeader,
-  ViewerStatus,
-} from '@kbn/securitysolution-exception-list-components';
-import { EuiScreenReaderLive, EuiSkeletonText } from '@elastic/eui';
+import { EmptyViewerState, ViewerStatus } from '@kbn/securitysolution-exception-list-components';
+import { AppHeaderLoading } from '@kbn/app-header';
+import { EuiScreenReaderLive, EuiSpacer } from '@elastic/eui';
 import { useLocation, useParams } from 'react-router-dom';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { SecurityPageName } from '../../../../common/constants';
@@ -23,7 +20,11 @@ import type { Rule } from '../../../detection_engine/rule_management/logic/types
 import { MissingDetectionsPrivilegesCallOut } from '../../../detections/components/callouts/missing_detections_privileges_callout';
 import { NotFoundPage } from '../../../app/404';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
-import { LinkToRuleDetails, ListWithSearch, ManageRules } from '../../components';
+import { ListWithSearch, ManageRules } from '../../components';
+import {
+  ListDetailsAppHeader,
+  ListDetailsFallbackAppHeader,
+} from '../../components/list_details_app_header';
 import { useListDetailsView } from '../../hooks';
 import * as i18n from '../../translations';
 import type { CheckExceptionTtlActionTypes } from '../../components/expired_exceptions_list_items_modal';
@@ -47,7 +48,6 @@ export const ListsDetailViewComponent: FC = () => {
     listName,
     listDescription,
     showManageRulesFlyout,
-    headerBackOptions,
     showReferenceErrorModal,
     referenceModalState,
     showManageButtonLoader,
@@ -99,31 +99,39 @@ export const ListsDetailViewComponent: FC = () => {
 
   const detailsViewContent = useMemo(() => {
     if (viewerStatus === ViewerStatus.ERROR)
-      return <EmptyViewerState isReadOnly={isReadOnly} viewerStatus={viewerStatus} />;
+      return (
+        <>
+          <ListDetailsFallbackAppHeader />
+          <EmptyViewerState isReadOnly={isReadOnly} viewerStatus={viewerStatus} />
+        </>
+      );
 
-    if (isLoading) return <EuiSkeletonText lines={4} data-test-subj="loading" />;
+    if (isLoading) return <AppHeaderLoading />;
 
-    if (invalidListId || !listName || !list) return <NotFoundPage />;
+    if (invalidListId || !listName || !list)
+      return (
+        <>
+          <ListDetailsFallbackAppHeader />
+          <NotFoundPage />
+        </>
+      );
     return (
       <>
-        <MissingDetectionsPrivilegesCallOut />
-        <ExceptionListHeader
+        <ListDetailsAppHeader
           name={listName}
           description={listDescription}
           listId={listId}
           linkedRules={linkedRules}
-          isReadonly={isReadOnly}
+          isReadOnly={isReadOnly}
           canUserEditList={canUserEditList}
-          backOptions={headerBackOptions}
-          securityLinkAnchorComponent={LinkToRuleDetails}
           onEditListDetails={onEditListDetails}
           onExportList={handleExportList}
+          onDuplicateList={handleDuplicateList}
           onDeleteList={handleDelete}
           onManageRules={onManageRules}
-          onDuplicateList={handleDuplicateList}
-          dataTestSubj="exceptionListManagement"
         />
-
+        <EuiSpacer size="m" />
+        <MissingDetectionsPrivilegesCallOut />
         <AutoDownload blob={exportedList} name={`${listId}.ndjson`} onDownload={handleOnDownload} />
         <ListWithSearch list={list} refreshExceptions={refreshExceptions} isReadOnly={isReadOnly} />
         <ReferenceErrorModal
@@ -169,7 +177,6 @@ export const ListsDetailViewComponent: FC = () => {
     listId,
     linkedRules,
     canUserEditList,
-    headerBackOptions,
     onEditListDetails,
     handleExportList,
     handleDelete,

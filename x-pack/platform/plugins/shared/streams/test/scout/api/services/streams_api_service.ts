@@ -7,14 +7,26 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { Condition, StreamlangDSL } from '@kbn/streamlang';
-import type { RoutingStatus, Streams } from '@kbn/streams-schema';
-import type { IngestStream, IngestUpsertRequest } from '@kbn/streams-schema';
+import {
+  Streams,
+  emptyAssets,
+  type FailureStore,
+  type IngestStream,
+  type IngestUpsertRequest,
+  type RoutingStatus,
+} from '@kbn/streams-schema';
 import {
   OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
 } from '@kbn/management-settings-ids';
 import type { KbnClient, ScoutLogger } from '@kbn/scout/src/common';
 import { measurePerformanceAsync } from '@kbn/scout/src/common';
+
+// The ES client types `failure_store` without its `lifecycle`.
+export interface DataStreamFailureStore {
+  enabled?: boolean;
+  lifecycle?: { enabled?: boolean; data_retention?: string };
+}
 
 export interface StreamsTestApiService {
   enable: () => Promise<void>;
@@ -48,6 +60,15 @@ export interface StreamsTestApiService {
     documentsWithRuntimeFieldsApplied: Array<Record<string, unknown>> | null;
   }>;
   getLifecycleStats: (streamName: string) => Promise<{ phases: unknown }>;
+  updateFailureStore: (streamName: string, failureStore: FailureStore) => Promise<void>;
+  getDataStreamFailureStore: (
+    streamNames: string[]
+  ) => Promise<Record<string, DataStreamFailureStore | undefined>>;
+  createClassicDataStream: (
+    name: string,
+    failureStore: { enabled: boolean; dataRetention?: string }
+  ) => Promise<void>;
+  deleteClassicDataStream: (name: string) => Promise<void>;
   enableQueryStreams: () => Promise<void>;
   disableQueryStreams: () => Promise<void>;
   enableWiredStreamViews: () => Promise<void>;
@@ -247,6 +268,84 @@ export function getStreamsTestApiService({
           path: `/internal/streams/${streamName}/lifecycle/_stats`,
         });
         return response.data as { phases: unknown };
+      });
+    },
+
+    async updateFailureStore(streamName: string, failureStore: FailureStore) {
+      await measurePerformanceAsync(log, 'streamsTestApi.updateFailureStore', async () => {
+        const definition = Streams.ingest.all.GetResponse.parse(await this.getStream(streamName));
+        const description = definition.stream.description || '';
+
+        if (Streams.WiredStream.GetResponse.is(definition)) {
+          const { updated_at: _, ...processing } = definition.stream.ingest.processing;
+          await this.createStream(streamName, {
+            ...emptyAssets,
+            stream: {
+              type: 'wired',
+              description,
+              ingest: { ...definition.stream.ingest, processing, failure_store: failureStore },
+            },
+          });
+        } else if (Streams.ClassicStream.GetResponse.is(definition)) {
+          const { updated_at: _, ...processing } = definition.stream.ingest.processing;
+          await this.createStream(streamName, {
+            ...emptyAssets,
+            stream: {
+              type: 'classic',
+              description,
+              ingest: { ...definition.stream.ingest, processing, failure_store: failureStore },
+            },
+          });
+        } else {
+          throw new Error(`Unsupported stream type for ${streamName}`);
+        }
+      });
+    },
+
+    async getDataStreamFailureStore(streamNames: string[]) {
+      return measurePerformanceAsync(log, 'streamsTestApi.getDataStreamFailureStore', async () => {
+        const { data_streams: dataStreams } = await esClient.indices.getDataStream({
+          name: streamNames,
+        });
+        return Object.fromEntries(
+          dataStreams.map((dataStream) => [
+            dataStream.name,
+            (dataStream as { failure_store?: DataStreamFailureStore }).failure_store,
+          ])
+        );
+      });
+    },
+
+    async createClassicDataStream(name, { enabled, dataRetention }) {
+      await measurePerformanceAsync(log, 'streamsTestApi.createClassicDataStream', async () => {
+        await esClient.indices.putIndexTemplate({
+          name,
+          index_patterns: [name],
+          data_stream: {},
+          template: {
+            settings: { 'index.default_pipeline': 'logs@default-pipeline' },
+            data_stream_options: {
+              failure_store: {
+                enabled,
+                ...(enabled && dataRetention
+                  ? { lifecycle: { enabled: true, data_retention: dataRetention } }
+                  : {}),
+              },
+            },
+          },
+        });
+        await esClient.index({ index: name, document: { '@timestamp': new Date() } });
+      });
+    },
+
+    async deleteClassicDataStream(name: string) {
+      await measurePerformanceAsync(log, 'streamsTestApi.deleteClassicDataStream', async () => {
+        await kbnClient.request({
+          method: 'DELETE',
+          path: `/api/streams/${name}`,
+          ignoreErrors: [404],
+        });
+        await esClient.indices.deleteIndexTemplate({ name }, { ignore: [404] });
       });
     },
 

@@ -9,6 +9,7 @@ import type { TimeRange } from '../../entities_grid/common';
 import { buildLookback, getRiskScoreIndex } from '../../entities_grid/queries/esql';
 import {
   BOUNDARY_WINDOW_HOURS,
+  RISK_MOVER_MIN_SCORE_CHANGE,
   buildRiskLevelHistoryBranch,
   buildRiskScoreHistoryBranch,
 } from './risk_history';
@@ -28,7 +29,8 @@ export const buildJoinTail = (
   entityFilterClauses: string[]
 ): string[] => [
   `| LOOKUP JOIN ${entitiesIndexName} ON entity.id`,
-  `| WHERE entity.name IS NOT NULL`,
+  // Aliases are left out: the group is judged by its main entity, whose history holds the group's score.
+  `| WHERE entity.name IS NOT NULL AND \`entity.relationships.resolution.resolved_to\` IS NULL`,
   ...entityFilterClauses,
   `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`,
   // One row per resolved entity, then a plain COUNT: exact, unlike the approximate COUNT_DISTINCT.
@@ -37,7 +39,7 @@ export const buildJoinTail = (
   `| STATS value = COUNT(effective_id)`,
 ];
 
-/** Builds the Risk movers query for the previous period: score up by 10 or more over that period. */
+/** Builds the Risk movers query for the previous period: score up by the minimum rise or more over that period. */
 export const buildPreviousRiskMoversQuery = (
   spaceId: string,
   entitiesIndexName: string,
@@ -55,7 +57,7 @@ export const buildPreviousRiskMoversQuery = (
     `| STATS boundary_score = MAX(boundary_score),`,
     `        current_score  = MAX(current_score)`,
     `        BY \`entity.id\``,
-    `| WHERE current_score - boundary_score >= 10`,
+    `| WHERE current_score - boundary_score >= ${RISK_MOVER_MIN_SCORE_CHANGE}`,
     ...buildJoinTail(entitiesIndexName, entityFilterClauses),
   ].join('\n');
 };

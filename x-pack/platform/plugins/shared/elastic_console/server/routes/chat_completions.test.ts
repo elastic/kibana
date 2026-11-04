@@ -15,7 +15,13 @@ import type {
 } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ElasticConsolePluginStart, ElasticConsoleStartDependencies } from '../types';
-import { MAX_CONTENT_PARTS, MAX_MESSAGES, registerChatCompletionsRoute } from './chat_completions';
+import {
+  MAX_CONTENT_PARTS,
+  MAX_IDENTIFIER_LENGTH,
+  MAX_MESSAGES,
+  MAX_TEXT_LENGTH,
+  registerChatCompletionsRoute,
+} from './chat_completions';
 
 const setup = () => {
   const chatComplete = jest
@@ -108,6 +114,30 @@ describe('chat completions route config', () => {
     ).not.toThrow();
     expect(() =>
       validateBody({ messages: [{ role: 'user', content: content(MAX_CONTENT_PARTS + 1) }] })
+    ).toThrow();
+  });
+
+  it('bounds identifier-like strings to MAX_IDENTIFIER_LENGTH', () => {
+    const messages = [{ role: 'user', content: 'hi' }];
+    expect(() =>
+      validateBody({ model: 'a'.repeat(MAX_IDENTIFIER_LENGTH), messages })
+    ).not.toThrow();
+    expect(() =>
+      validateBody({ model: 'a'.repeat(MAX_IDENTIFIER_LENGTH + 1), messages })
+    ).toThrow();
+    expect(() =>
+      validateBody({
+        messages: [{ role: 'a'.repeat(MAX_IDENTIFIER_LENGTH + 1), content: 'hi' }],
+      })
+    ).toThrow();
+  });
+
+  it('bounds message content to MAX_TEXT_LENGTH', () => {
+    expect(() =>
+      validateBody({ messages: [{ role: 'user', content: 'a'.repeat(MAX_TEXT_LENGTH) }] })
+    ).not.toThrow();
+    expect(() =>
+      validateBody({ messages: [{ role: 'user', content: 'a'.repeat(MAX_TEXT_LENGTH + 1) }] })
     ).toThrow();
   });
 });

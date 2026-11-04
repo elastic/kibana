@@ -22,8 +22,6 @@ import type {
   NotificationRouting,
   NotificationDestination,
 } from './notification_routing';
-import { repliesUnderCallerMessage } from './notification_routing';
-
 export interface DeliverInvestigationNotificationsResult {
   sent: number;
   failed: number;
@@ -79,28 +77,25 @@ const hasDeliveryAttempt = (
   );
 
 /**
- * The message this execution's phase posted or edited under the caller's message. Undefined for
- * other destinations and when that delivery was not confirmed.
+ * The message this execution's phase posted or edited, whether the root post, a reply in the
+ * retained thread, or a reply under the caller's message. Undefined when that delivery was not
+ * confirmed.
  */
 export const getSentMessageTs = (
   routing: NotificationRouting,
   executionId: string,
   destination: NotificationDestination,
   phase: NotificationPhase
-): string | undefined => {
-  if (!repliesUnderCallerMessage(destination)) {
-    return undefined;
-  }
-  return routing.attempts.find(
+): string | undefined =>
+  routing.attempts.find(
     (attempt) =>
       attempt.execution_id === executionId &&
       attempt.destination_id === destination.id &&
       attempt.phase === phase &&
       attempt.status === 'sent'
   )?.message_ts;
-};
 
-/** The thread's single message: the one this execution's started phase posted. */
+/** The execution's single message: the one its started phase posted, edited by the terminal phase. */
 export const getStartedMessageTs = (
   routing: NotificationRouting,
   executionId: string,

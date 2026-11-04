@@ -16,7 +16,7 @@ import type { GetStateReturn } from './services/context_state';
 import type { SortDirection } from '@kbn/data-plugin/public';
 import type { ContextAppContentProps } from './context_app_content';
 import { ContextAppContent } from './context_app_content';
-import { LoadingStatus } from './services/context_query_state';
+import { FailureReason, LoadingStatus } from './services/context_query_state';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
@@ -53,8 +53,8 @@ describe('ContextAppContent test', () => {
       dataView: dataViewMock,
       stateContainer: {} as unknown as GetStateReturn,
       anchorStatus: LoadingStatus.LOADED,
-      predecessorsStatus: LoadingStatus.LOADED,
-      successorsStatus: LoadingStatus.LOADED,
+      predecessorsStatus: { value: LoadingStatus.LOADED },
+      successorsStatus: { value: LoadingStatus.LOADED },
       rows: [buildDataTableRecord(hit, dataViewMock)],
       predecessors: [],
       successors: [],
@@ -114,6 +114,23 @@ describe('ContextAppContent test', () => {
 
     expect(screen.getByTestId('unifiedDataTableToolbar')).toBeVisible();
     expect(screen.queryByTestId('dataGridDisplaySelectorButton')).not.toBeInTheDocument();
+  });
+
+  it('should show inline error callouts instead of the "no documents found" callouts when fetching fails', async () => {
+    const error = new Error('Something went wrong');
+
+    await renderComponent({
+      predecessorsStatus: { value: LoadingStatus.FAILED, reason: FailureReason.UNKNOWN, error },
+      successorsStatus: { value: LoadingStatus.FAILED, reason: FailureReason.UNKNOWN, error },
+    });
+
+    // rendered inside the grid toolbar so it remains visible in full-screen mode
+    const toolbarBottom = screen.getByTestId('unifiedDataTableToolbarBottom');
+
+    expect(within(toolbarBottom).getByTestId('predecessorsErrorMsg')).toBeVisible();
+    expect(screen.getByTestId('successorsErrorMsg')).toBeVisible();
+    expect(screen.queryByTestId('predecessorsWarningMsg')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('successorsWarningMsg')).not.toBeInTheDocument();
   });
 
   it('should reset column width in surrounding documents app state', async () => {

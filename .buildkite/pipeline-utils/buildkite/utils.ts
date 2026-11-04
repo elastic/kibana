@@ -30,7 +30,7 @@ function isObj(x: unknown): x is Record<string, unknown> {
   return typeof x === 'object' && x !== null;
 }
 
-function isCommandStep(step: Record<string, unknown>): step is Record<string, unknown> & {
+export function isCommandStep(step: Record<string, unknown>): step is Record<string, unknown> & {
   command: string | string[];
 } {
   return (

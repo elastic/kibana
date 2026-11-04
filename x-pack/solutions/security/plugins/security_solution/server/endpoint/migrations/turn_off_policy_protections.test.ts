@@ -466,6 +466,81 @@ describe('Turn Off Policy Protections Migration', () => {
       });
     });
 
+    describe('Registry credential hardening', () => {
+      const generatePolicyWithRegistryCredentialHardening = (
+        enabled: boolean | undefined
+      ): PolicyData => {
+        const policy = new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy();
+        const attackSurfaceReduction =
+          policy.inputs[0].config.policy.value.windows.attack_surface_reduction;
+
+        if (enabled === undefined) {
+          delete attackSurfaceReduction.registry_credential_hardening;
+        } else {
+          attackSurfaceReduction.registry_credential_hardening = { enabled };
+        }
+
+        return policy;
+      };
+
+      it('should update a policy with registry credential hardening enabled when the product feature is disabled', async () => {
+        productFeatureService = createFilteredProductFeaturesServiceMock([
+          'endpoint_registry_credential_hardening',
+        ]);
+        const policy = generatePolicyWithRegistryCredentialHardening(true);
+
+        mockPolicyListResponse({ total: 1, items: [policy] });
+
+        await callTurnOffPolicyProtections();
+
+        const mockCalls = (fleetServices.packagePolicy.bulkUpdate as jest.Mock).mock.calls;
+        expect(mockCalls.length).toBeGreaterThan(0);
+        const mockArguments = mockCalls[0][2];
+        expect(mockArguments.length).toBe(1);
+        expect(
+          mockArguments[0].inputs[0].config.policy.value.windows.attack_surface_reduction
+            .registry_credential_hardening
+        ).toEqual({ enabled: false });
+      });
+
+      it('should not update a policy with no registry credential hardening key when the product feature is disabled', async () => {
+        productFeatureService = createFilteredProductFeaturesServiceMock([
+          'endpoint_registry_credential_hardening',
+        ]);
+        const policy = generatePolicyWithRegistryCredentialHardening(undefined);
+
+        mockPolicyListResponse({ total: 1, items: [policy] });
+
+        await callTurnOffPolicyProtections();
+
+        expect(fleetServices.packagePolicy.bulkUpdate).not.toHaveBeenCalled();
+      });
+
+      it('should not update a policy with registry credential hardening disabled when the product feature is disabled', async () => {
+        productFeatureService = createFilteredProductFeaturesServiceMock([
+          'endpoint_registry_credential_hardening',
+        ]);
+        const policy = generatePolicyWithRegistryCredentialHardening(false);
+
+        mockPolicyListResponse({ total: 1, items: [policy] });
+
+        await callTurnOffPolicyProtections();
+
+        expect(fleetServices.packagePolicy.bulkUpdate).not.toHaveBeenCalled();
+      });
+
+      it('should not update a policy with registry credential hardening enabled when all features are enabled', async () => {
+        productFeatureService = createProductFeaturesServiceMock();
+        const policy = generatePolicyWithRegistryCredentialHardening(true);
+
+        mockPolicyListResponse({ total: 1, items: [policy] });
+
+        await callTurnOffPolicyProtections();
+
+        expect(fleetServices.packagePolicy.bulkUpdate).not.toHaveBeenCalled();
+      });
+    });
+
     describe('Essentials tier (endpointCustomNotification disabled, endpointTrustedDevices disabled)', () => {
       beforeEach(() => {
         productFeatureService = createProductFeaturesServiceMock(

@@ -19,6 +19,7 @@ import {
   ExecuteRuleQueryStep,
   CreateAlertEventsStep,
   ClassifyAbsentGroupsStep,
+  SuppressRedundantNoDataEventsStep,
 } from '../lib/rule_executor/steps';
 import {
   CancellationBoundaryMiddleware,
@@ -32,6 +33,7 @@ import {
 } from '../lib/rule_executor/otel/rule_execution_telemetry';
 import { DirectorStep } from '../lib/rule_executor/steps/director_step';
 import { StoreAlertEventsStep } from '../lib/rule_executor/steps/store_alert_events';
+import { PublishAlertStatusChangesStep } from '../lib/rule_executor/steps/publish_alert_status_changes_step';
 import {
   EmittedCountersRecorder,
   MetricCollectorFactory,
@@ -91,7 +93,9 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
   bind(RuleExecutionStepsToken).to(CreateAlertEventsStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(ClassifyAbsentGroupsStep).inRequestScope();
   bind(RuleExecutionStepsToken).to(DirectorStep).inSingletonScope();
+  bind(RuleExecutionStepsToken).to(SuppressRedundantNoDataEventsStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(StoreAlertEventsStep).inSingletonScope();
+  bind(RuleExecutionStepsToken).to(PublishAlertStatusChangesStep).inRequestScope();
 
   bind(RuleExecutionPipeline).toSelf().inRequestScope();
 };

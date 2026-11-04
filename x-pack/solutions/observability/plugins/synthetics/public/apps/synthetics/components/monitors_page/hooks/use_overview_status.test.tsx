@@ -9,7 +9,7 @@ import React from 'react';
 import { renderHook } from '@testing-library/react';
 import * as redux from 'react-redux-v7';
 import { mockState } from '../../../utils/testing/__mocks__/synthetics_store.mock';
-import { WrappedHelper } from '../../../utils/testing';
+import { HookWrapper } from '../../../utils/testing/hook_helpers';
 import {
   fetchOverviewStatusAction,
   quietFetchOverviewStatusAction,
@@ -46,7 +46,7 @@ describe('useOverviewStatus', () => {
   describe('initial mount fetch', () => {
     it('dispatches `fetchOverviewStatusAction.get` on initial mount when not yet loaded', () => {
       renderHook(() => useOverviewStatus({ scopeStatusByLocation: true }), {
-        wrapper: ({ children }) => React.createElement(WrappedHelper, null, children),
+        wrapper: ({ children }) => React.createElement(HookWrapper, null, children),
       });
 
       expect(dispatchMockFn).toHaveBeenCalledWith(
@@ -64,7 +64,7 @@ describe('useOverviewStatus', () => {
       renderHook(() => useOverviewStatus({ scopeStatusByLocation: false }), {
         wrapper: ({ children }) =>
           React.createElement(
-            WrappedHelper,
+            HookWrapper,
             { state: { overviewStatus: { ...mockState.overviewStatus, loaded: true } } },
             children
           ),
@@ -86,7 +86,7 @@ describe('useOverviewStatus', () => {
 
     it('dispatches the initial fetch exactly once on mount', () => {
       renderHook(() => useOverviewStatus({ scopeStatusByLocation: true }), {
-        wrapper: ({ children }) => React.createElement(WrappedHelper, null, children),
+        wrapper: ({ children }) => React.createElement(HookWrapper, null, children),
       });
 
       const initialFetchCalls = dispatchMockFn.mock.calls.filter(
@@ -101,7 +101,7 @@ describe('useOverviewStatus', () => {
       const stateRef: { current: any } = { current: undefined };
 
       const wrapper = ({ children }: React.PropsWithChildren<{}>) =>
-        React.createElement(WrappedHelper, { state: stateRef.current }, children);
+        React.createElement(HookWrapper, { state: stateRef.current }, children);
 
       const { rerender } = renderHook(() => useOverviewStatus({ scopeStatusByLocation: true }), {
         wrapper,
@@ -162,7 +162,7 @@ describe('useOverviewStatus', () => {
       const { rerender } = renderHook(() => useOverviewStatus({ scopeStatusByLocation: true }), {
         wrapper: ({ children }) =>
           React.createElement(
-            WrappedHelper,
+            HookWrapper,
             {
               state: {
                 overview: {
@@ -199,7 +199,7 @@ describe('useOverviewStatus', () => {
       const { rerender } = renderHook(() => useOverviewStatus({ scopeStatusByLocation: true }), {
         wrapper: ({ children }) =>
           React.createElement(
-            WrappedHelper,
+            HookWrapper,
             {
               state: {
                 overview: {
@@ -240,7 +240,7 @@ describe('useOverviewStatus', () => {
       const { rerender } = renderHook(() => useOverviewStatus({ scopeStatusByLocation: true }), {
         wrapper: ({ children }) =>
           React.createElement(
-            WrappedHelper,
+            HookWrapper,
             {
               state: {
                 overview: {
@@ -282,7 +282,7 @@ describe('useOverviewStatus', () => {
       const { rerender } = renderHook(() => useOverviewStatus({ scopeStatusByLocation: true }), {
         wrapper: ({ children }) =>
           React.createElement(
-            WrappedHelper,
+            HookWrapper,
             {
               state: {
                 overview: {
@@ -318,7 +318,7 @@ describe('useOverviewStatus', () => {
       renderHook(() => useOverviewStatus({ scopeStatusByLocation: true }), {
         wrapper: ({ children }) =>
           React.createElement(
-            WrappedHelper,
+            HookWrapper,
             {
               state: {
                 overview: {

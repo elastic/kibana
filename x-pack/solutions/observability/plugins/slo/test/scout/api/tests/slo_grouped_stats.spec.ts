@@ -161,9 +161,7 @@ apiTest.describe(
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(400);
-      expect((response.body as { message: string }).message).toContain(
-        '"unsupported-type" does not match expected type'
-      );
+      expect((response.body as { message: string }).message).toContain('Invalid input: expected');
     });
 
     apiTest('returns 400 for invalid size parameter', async ({ apiClient }) => {

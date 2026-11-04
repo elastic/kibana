@@ -116,12 +116,6 @@ export type AttackDiscoveryAgentBuilderExample = Example<
  * happened at all. `none` is also what an example that declares no scope
  * reports — it asks no retrieval question, so its count stays `null` and the
  * evaluator leaves the evidence incomplete.
- *
- * The distinction matters for triage, which reads the source next to
- * `agentEsqlRowCounts`: a scoped run that returned 2 rows against a 2-alert
- * fixture and reports `none` reads as "the agent did not retrieve" when it did
- * retrieve, and the missing identity is a property of the QUERY's projection
- * (`KEEP` without `_id`) rather than of the retrieval.
  */
 export type RetrievedAlertCountSource =
   | 'pipeline_alert_retrieval'

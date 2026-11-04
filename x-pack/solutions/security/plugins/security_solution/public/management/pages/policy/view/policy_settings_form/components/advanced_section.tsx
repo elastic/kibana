@@ -29,6 +29,11 @@ import type { PolicyFormComponentCommonProps } from '../types';
 import { AdvancedPolicySchema } from '../../../../../../../common/endpoint/service/policy/advanced_policy_schema';
 import { CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS } from '../../../../../../../common/endpoint/service/policy/custom_yara_signatures';
 import { useIsCustomYaraSignaturesAvailable } from '../hooks/use_is_custom_yara_signatures_available';
+import { useIsRegistryCredentialHardeningAvailable } from '../hooks/use_is_registry_credential_hardening_available';
+
+/** Advanced policy key gated behind the Registry Credential Hardening feature. */
+const REGISTRY_CREDENTIAL_HARDENING_ADVANCED_KEY =
+  'windows.advanced.kernel.registry_credential_hardening.descendants';
 
 function setValue(obj: Record<string, unknown>, value: string, path: string[]) {
   let newPolicyConfig = obj;
@@ -123,6 +128,8 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const isEnterprise = useLicense().isEnterprise();
     const { isAvailable: isCustomYaraSignaturesAvailable } = useIsCustomYaraSignaturesAvailable();
+    const { isAvailable: isRegistryCredentialHardeningAvailable } =
+      useIsRegistryCredentialHardeningAvailable();
 
     const isEditMode = mode === 'edit';
     const visibleAdvancedPolicySchema = omitKeys?.length
@@ -221,6 +228,13 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
                   if (
                     CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS.has(key) &&
                     !isCustomYaraSignaturesAvailable
+                  ) {
+                    return <React.Fragment key={key} />;
+                  }
+
+                  if (
+                    key === REGISTRY_CREDENTIAL_HARDENING_ADVANCED_KEY &&
+                    !isRegistryCredentialHardeningAvailable
                   ) {
                     return <React.Fragment key={key} />;
                   }

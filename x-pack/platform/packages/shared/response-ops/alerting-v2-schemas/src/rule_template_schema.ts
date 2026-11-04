@@ -43,6 +43,14 @@ export const ruleTemplateResponseSchema = lazySchema(() =>
       rule: createRuleDataSchema.describe(
         'Create-rule payload the template installs. Can be submitted to the create rule API as-is.'
       ),
+      rule_count: z
+        .number()
+        .int()
+        .min(0)
+        .optional()
+        .describe(
+          'The number of rules in the current space that were created from this rule template. Only returned when listing rule templates.'
+        ),
     })
     .describe('An alerting v2 rule template.')
 );

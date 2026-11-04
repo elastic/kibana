@@ -38,7 +38,7 @@ const SETUP_METHOD_OPTIONS: FederatedIdentitySetupMethodOption[] = [
     label: s3FederatedIdentitySetupStrings.cloudFormationMethod,
     icon: 'logoAWS',
   },
-  { id: 'manual', label: s3FederatedIdentitySetupStrings.manualMethod, icon: 'consoleApp' },
+  { id: 'manual', label: s3FederatedIdentitySetupStrings.manualMethod, icon: 'commandLine' },
 ];
 
 export function CreateDataSourceFlyoutTypeSettingsS3Region({

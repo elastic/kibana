@@ -21,17 +21,77 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout, type KbnCalloutProps } from '@kbn/ui-callout';
 import type { SlackChannelBinding } from '@kbn/significant-events-plugin/common';
-import { useRelayAppBindings, useBindChannel, useUnbindChannel } from './use_relay_app_bindings';
-
-const channelLabel = (binding: SlackChannelBinding) =>
-  binding.displayName != null ? `#${binding.displayName}` : binding.channel ?? '';
+import {
+  formatChannelLabel,
+  type BindFailure,
+  useRelayAppBindings,
+  useBindChannel,
+  useUnbindChannel,
+} from './use_relay_app_bindings';
+import { ChannelLabel } from './channel_label';
+import { parseSlackChannelInput } from './parse_slack_channel_input';
 
 interface SlackConnectionBindingsProps {
   canEdit: boolean;
+  onReconnect: () => void;
 }
 
-export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProps) {
+const failureCopy = ({ reason, message }: BindFailure): string => {
+  switch (reason) {
+    case 'not_a_member':
+      // The Relay sends this for any channel it can't see, private or not.
+      return i18n.translate('xpack.nightshift.settings.apps.bindNotMember', {
+        defaultMessage:
+          'Invite @Elastic to the channel, then try again. If the channel is private, you may also need to reconnect Slack and allow private channel access.',
+      });
+    case 'private_channel_access_required':
+      return i18n.translate('xpack.nightshift.settings.apps.bindPrivateAccessRequired', {
+        defaultMessage:
+          'Private channels need private channel access, which applies to the whole Slack workspace and every Elastic deployment connected to it. Reconnect Slack and allow it, then try again.',
+      });
+    default:
+      return message;
+  }
+};
+
+const bindFailureActions = ({
+  failure: { reason },
+  onReconnect,
+  onRetry,
+  canRetry,
+}: {
+  failure: BindFailure;
+  onReconnect: () => void;
+  onRetry: () => void;
+  canRetry: boolean;
+}): KbnCalloutProps['actionProps'] => {
+  const retry = {
+    children: i18n.translate('xpack.nightshift.settings.apps.slackBindRetry', {
+      defaultMessage: 'Try again',
+    }),
+    onClick: onRetry,
+    isDisabled: !canRetry,
+    'data-test-subj': 'streamsSlackAppBindFailureRetry',
+  };
+  if (reason === 'channel_taken') return undefined;
+  if (reason === 'not_a_member' || reason === 'private_channel_access_required') {
+    return {
+      primary: {
+        children: i18n.translate('xpack.nightshift.settings.apps.slackReconnect', {
+          defaultMessage: 'Reconnect Slack',
+        }),
+        onClick: onReconnect,
+        'data-test-subj': 'streamsSlackAppBindFailureReconnect',
+      },
+      secondary: retry,
+    };
+  }
+  return { primary: retry };
+};
+
+export function SlackConnectionBindings({ canEdit, onReconnect }: SlackConnectionBindingsProps) {
   // Cursor-based pagination: `cursors[i]` is the opaque cursor used to fetch page `i`
   // (undefined for the first page). The Relay only exposes forward `nextCursor` values, so
   // we remember the cursors we've visited to allow stepping back and forth.
@@ -42,11 +102,12 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
     true,
     cursors[pageIndex]
   );
-  const { bind, isLoading: isBinding } = useBindChannel();
-  const [channelId, setChannelId] = useState('');
+  const { bind, isLoading: isBinding, failure, clearFailure } = useBindChannel();
+  const [channelInput, setChannelInput] = useState('');
 
-  const trimmedChannelId = channelId.trim();
-  const canBind = canEdit && !isBinding && trimmedChannelId.length > 0;
+  const parsedChannelId = parseSlackChannelInput(channelInput);
+  const hasUnparsableInput = channelInput.trim().length > 0 && parsedChannelId === undefined;
+  const canBind = canEdit && !isBinding && parsedChannelId !== undefined;
 
   const resetToFirstPage = useCallback(() => {
     setCursors([undefined]);
@@ -54,14 +115,14 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
   }, []);
 
   const onBind = () => {
-    if (!canBind) {
+    if (!canBind || parsedChannelId === undefined) {
       return;
     }
     // Binding changes the connected set, so return to the first page after it succeeds.
-    // Failure is surfaced via a toast in useBindChannel; ignore the rejection here.
-    bind(trimmedChannelId)
+    // Failure renders inline from useBindChannel's `failure`; ignore the rejection here.
+    bind(parsedChannelId)
       .then(() => {
-        setChannelId('');
+        setChannelInput('');
         resetToFirstPage();
       })
       .catch(() => undefined);
@@ -92,7 +153,13 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
           defaultMessage: 'Channel',
         }),
         render: (_: unknown, binding: SlackChannelBinding) => (
-          <EuiText size="s">{channelLabel(binding)}</EuiText>
+          <EuiText size="s">
+            <ChannelLabel
+              label={formatChannelLabel(binding)}
+              channelId={binding.channel}
+              isPrivate={binding.visibility === 'private' && binding.displayName == null}
+            />
+          </EuiText>
         ),
       },
       {
@@ -152,8 +219,12 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
               <EuiFieldText
                 compressed
                 css={{ minWidth: '240px' }}
-                value={channelId}
-                onChange={(e) => setChannelId(e.target.value)}
+                value={channelInput}
+                isInvalid={hasUnparsableInput}
+                onChange={(e) => {
+                  setChannelInput(e.target.value);
+                  clearFailure();
+                }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     onBind();
@@ -162,12 +233,12 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
                 disabled={!canEdit || isBinding}
                 placeholder={i18n.translate(
                   'xpack.nightshift.settings.apps.slackChannelIdPlaceholder',
-                  { defaultMessage: 'Enter a Slack channel ID' }
+                  { defaultMessage: 'Slack channel ID or link' }
                 )}
                 aria-label={i18n.translate(
                   'xpack.nightshift.settings.apps.slackChannelIdAriaLabel',
                   {
-                    defaultMessage: 'Slack channel ID',
+                    defaultMessage: 'Slack channel ID or link',
                   }
                 )}
                 data-test-subj="streamsSlackAppChannelIdInput"
@@ -190,6 +261,38 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="xs" />
+      <EuiText
+        size="xs"
+        color={hasUnparsableInput ? 'danger' : 'subdued'}
+        data-test-subj="streamsSlackAppChannelInputHelp"
+      >
+        {hasUnparsableInput
+          ? i18n.translate('xpack.nightshift.settings.apps.slackChannelInputInvalid', {
+              defaultMessage:
+                'Enter a channel ID such as C0123456789, or a link copied from the channel in Slack.',
+            })
+          : i18n.translate('xpack.nightshift.settings.apps.slackChannelInputHelp', {
+              defaultMessage: 'Invite @Elastic to the channel first.',
+            })}
+      </EuiText>
+      {failure && (
+        <>
+          <EuiSpacer size="s" />
+          <KbnDangerCallout
+            announceOnMount
+            size="s"
+            title={failureCopy(failure)}
+            actionProps={bindFailureActions({
+              failure,
+              onReconnect,
+              onRetry: onBind,
+              canRetry: canBind,
+            })}
+            data-test-subj="streamsSlackAppBindFailure"
+          />
+        </>
+      )}
       <EuiSpacer size="m" />
       <EuiBasicTable
         css={{ width: '100%' }}
@@ -200,7 +303,7 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
           <EuiText size="xs" color="subdued">
             {i18n.translate('xpack.nightshift.settings.apps.slackNoChannels', {
               defaultMessage:
-                'Invite @Elastic to a Slack channel, enter the channel ID, and connect.',
+                'Invite @Elastic to a Slack channel, enter its ID or link, and connect.',
             })}
           </EuiText>
         }
@@ -271,7 +374,8 @@ function BindingActionCell({ binding, canEdit, onDisconnected }: BindingActionCe
   const [confirmOpen, setConfirmOpen] = useState(false);
   const modalTitleId = useGeneratedHtmlId();
 
-  const channelName = channelLabel(binding);
+  const channelName = formatChannelLabel(binding);
+  const isPrivate = binding.visibility === 'private' && binding.displayName == null;
 
   return (
     <>
@@ -289,10 +393,16 @@ function BindingActionCell({ binding, canEdit, onDisconnected }: BindingActionCe
       </EuiButtonEmpty>
       {confirmOpen && (
         <EuiConfirmModal
-          title={i18n.translate('xpack.nightshift.settings.apps.slackUnbindConfirmTitle', {
-            defaultMessage: 'Disconnect {channel}?',
-            values: { channel: channelName },
-          })}
+          title={
+            isPrivate
+              ? i18n.translate('xpack.nightshift.settings.apps.slackUnbindPrivateConfirmTitle', {
+                  defaultMessage: 'Disconnect private channel?',
+                })
+              : i18n.translate('xpack.nightshift.settings.apps.slackUnbindConfirmTitle', {
+                  defaultMessage: 'Disconnect {channel}?',
+                  values: { channel: channelName },
+                })
+          }
           onCancel={() => setConfirmOpen(false)}
           onConfirm={() => {
             if (binding.channel != null) {

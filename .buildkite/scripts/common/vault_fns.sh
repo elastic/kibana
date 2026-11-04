@@ -1,17 +1,6 @@
 #!/bin/bash
 
-# TODO: rewrite after https://github.com/elastic/kibana-operations/issues/15 is done
 export LEGACY_VAULT_ADDR="https://secrets.elastic.co:8200"
-if [[ "${VAULT_ADDR:-}" == "$LEGACY_VAULT_ADDR" ]]; then
-  VAULT_PATH_PREFIX="secret/kibana-issues/dev"
-  VAULT_KV_PREFIX="secret/kibana-issues/dev"
-  IS_LEGACY_VAULT_ADDR=true
-else
-  VAULT_PATH_PREFIX="secret/ci/elastic-kibana"
-  VAULT_KV_PREFIX="kv/ci-shared/kibana-deployments"
-  IS_LEGACY_VAULT_ADDR=false
-fi
-export IS_LEGACY_VAULT_ADDR
 
 retry() {
   local retries=$1; shift
@@ -38,7 +27,7 @@ vault_get() {
   key_path=${1:-}
   field=${2:-}
 
-  fullPath="$VAULT_PATH_PREFIX/$key_path"
+  fullPath="secret/ci/elastic-kibana/$key_path"
 
   if [[ -z "$field" || "$field" =~ ^-.* ]]; then
     retry 5 5 vault read "$fullPath" "${@:2}"
@@ -53,29 +42,10 @@ vault_set() {
   fields=("$@")
 
 
-  fullPath="$VAULT_PATH_PREFIX/$key_path"
+  fullPath="secret/ci/elastic-kibana/$key_path"
 
   # shellcheck disable=SC2068
   retry 5 5 vault write "$fullPath" ${fields[@]}
-}
-
-vault_kv_get() {
-  local kv_path=${1:-}
-  local field=${2:-}
-
-  if [[ -z "$field" || "$field" =~ ^-.* ]]; then
-    retry 5 5 vault read "$kv_path" "${@:2}"
-  else
-    retry 5 5 vault read -field="$field" "$kv_path" "${@:3}"
-  fi
-}
-
-vault_kv_set() {
-  kv_path=$1
-  shift
-  fields=("$@")
-
-  vault kv put "$VAULT_KV_PREFIX/$kv_path" "${fields[@]}"
 }
 
 function set_in_legacy_vault() {

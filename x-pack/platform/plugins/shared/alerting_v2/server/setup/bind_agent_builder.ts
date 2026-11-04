@@ -15,7 +15,7 @@ import { createAlertAttachmentType } from '../agent_builder/attachments/alert_at
 import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
 import { resolveRequestScoped } from '../agent_builder/resolve_request_scoped';
 import { registerSkills } from '../agent_builder/skills/register_skills';
-import { createAlertingV2Availability } from '../agent_builder/skills/alerting_v2_experimental_availability';
+import { createAlertingV2Availability } from '../agent_builder/skills/alerting_v2_availability';
 import { createActionPolicySmlType } from '../agent_builder/sml/action_policy_sml_type';
 import { createRuleSmlType } from '../agent_builder/sml/rule_sml_type';
 import { AttachmentTypeToken } from '../agent_builder/tokens';
@@ -143,8 +143,14 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
     const projectType = container.isBound(cloudToken)
       ? container.get(cloudToken).serverless.projectType
       : undefined;
+    const getInjection = () => container.get(CoreStart('injection'));
     registerSkills(agentBuilder, {
       logger: agentBuilderLogger,
+      getRulesClient: ({ request }) => resolveRequestScoped(getInjection(), request, RulesClient),
+      getActionPolicyClient: ({ request }) =>
+        resolveRequestScoped(getInjection(), request, ActionPolicyClient),
+      getPrivilegeChecker: ({ request }) =>
+        resolveRequestScoped(getInjection(), request, PrivilegeChecker),
       getWorkflowClient: (request) => workflowsManagementApi.getClient(request),
       getAvailableConnectors: (sid, req) => workflowsManagementApi.getAvailableConnectors(sid, req),
       availability: createAlertingV2Availability({

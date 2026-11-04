@@ -122,16 +122,9 @@ export const ALERT_INDEX_FAMILY = attackDiscoveryFixtureIndex.replace(/-default$
 
 /**
  * The columns an ES|QL result can carry an alert's identity in, in priority
- * order. The observed population is counted by these (see
- * `extractAgentAlertRetrievalPopulation`).
- *
- * `_id` is the row's own document identity, present only when the query asked
- * for it (`METADATA _id`) and kept it (`KEEP _id`).
- * `kibana.alert.uuid` is the ALERT's own identity, and a retrieval that keeps
- * no `_id` still returns it whenever it projects any alert fields at all —
- * which is what makes an exact-population retrieval attributable even when the
- * query did not request the metadata. Both name exactly one alert per row, so
- * either supports a distinct-alert count; neither is a row count.
+ * order (see `extractAgentAlertRetrievalPopulation`). `_id` is present only
+ * with `METADATA _id`; `kibana.alert.uuid` survives any projection that keeps
+ * alert fields. Both name exactly one alert per row.
  */
 const ALERT_IDENTITY_COLUMNS = ['_id', 'kibana.alert.uuid'] as const;
 
@@ -811,22 +804,14 @@ export const extractAgentAlertRetrievalPopulation = (
 };
 
 /**
- * Whether the run's scoped alerts retrievals returned rows but carried no alert
- * identity in ANY of them — the case `extractAgentAlertRetrievalPopulation`
- * reports as `null` even though rows came back, and which the count's
- * provenance has to distinguish from "no scoped retrieval ran".
+ * Whether the run's scoped alerts retrievals returned rows but none of them
+ * carried an alert identity — `extractAgentAlertRetrievalPopulation` reports
+ * that as `null`, the same as "no scoped retrieval ran", so the count's
+ * provenance needs this to tell the two apart.
  *
- * It is a property of the QUERY's projection, not of the retrieval: a scoped
- * query that keeps alert fields without asking for `METADATA _id` returns its
- * rows with no identity to union, so the run retrieved and the population still
- * cannot be counted. Reporting that as `none` ("the agent did not retrieve")
- * contradicts the row counts recorded beside it, which is what made a correct
- * 2-of-2 retrieval read as a missing one.
- *
- * `false` when no scoped retrieval ran at all, when none of them returned a row
- * (an empty result is an empty retrieval, not an unattributable one, whatever
- * its projection), and when at least one scoped retrieval carried identities
- * (the union then covers every alert any of them observed).
+ * `false` when no scoped retrieval ran, when none returned a row (an empty
+ * result is empty, not unattributable), and when at least one carried
+ * identities.
  */
 export const hasScopedAgentAlertRetrievalWithoutIdentity = (
   steps: AttackDiscoveryAgentBuilderTaskOutput['steps'],
@@ -883,7 +868,7 @@ export const extractAdToolEsqlQuery = (
  *   (`get_pipeline_data.ts` Step 2.5, `alerts_context_count: providedAlerts.length`).
  *   That branch is the reading for a supplied-alerts run, not a defensive case:
  *   no alert-retrieval workflow executes, so `alertRetrievalData` stays null and
- *   Step 2.5 is what fills the block (build 01a12766: every entry it carries).
+ *   Step 2.5 is what fills the block.
  *   The count is the set the model SUPPLIED, so admitting it would answer how
  *   many alerts the model handed over instead of how many it retrieved.
  * - `skill` — the gate (skill) decision run, merged into `alert_retrieval` by
@@ -1499,9 +1484,6 @@ const buildTask =
       response.steps,
       retrievalScope
     );
-    // A scoped retrieval whose rows carried no alert identity retrieves but
-    // cannot be counted; reporting it as `none` ("did not retrieve") would
-    // contradict the row counts recorded beside it.
     const scopedAgentRetrievalWithoutIdentity = hasScopedAgentAlertRetrievalWithoutIdentity(
       response.steps,
       retrievalScope

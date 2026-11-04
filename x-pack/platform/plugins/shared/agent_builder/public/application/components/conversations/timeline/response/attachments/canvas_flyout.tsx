@@ -34,7 +34,7 @@ interface CanvasFlyoutProps {
 /**
  * Flyout component for displaying attachments in canvas mode (expanded view).
  * Consumes canvas state from context. In full-screen context, renders at 50% screen width.
- * In sidebar context, uses default flyout width.
+ * In sidebar context, fills the available width up to 50% of the screen.
  */
 export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }) => {
   const { euiTheme } = useEuiTheme();
@@ -109,7 +109,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
         isSidebar: canvasState.isSidebar,
         agentId,
         updateOrigin,
-        openSidebarConversation: canvasState.isSidebar ? undefined : openSidebarConversation,
+        openSidebarConversation,
         isCanvas: true,
         closeCanvas,
       }) ?? [];
@@ -135,7 +135,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
 
   const flyoutType = isSidebar || isNarrowViewport ? 'overlay' : 'push';
   const width = uiDefinition.canvasWidth ?? DEFAULT_CANVAS_WIDTH;
-  const flyoutSize = isSidebar || isNarrowViewport ? 'full' : width;
+  const flyoutSize = isSidebar || isNarrowViewport ? 'fill' : width;
 
   const flyoutBodyStyles = css`
     padding-top: ${uiDefinition.canvasHideTopPadding ? 0 : euiTheme.size.m};
@@ -183,7 +183,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
               {
                 attachment,
                 isSidebar,
-                openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+                openSidebarConversation,
               },
               {
                 registerActionButtons,

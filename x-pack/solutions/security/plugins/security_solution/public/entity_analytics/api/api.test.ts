@@ -147,4 +147,20 @@ describe('useEntityAnalyticsRoutes — executionContext propagation on entity de
       })
     );
   });
+
+  it('passes mode as a query param in fetchPersistedAiSummary when provided', async () => {
+    const { result } = renderHook(() => useEntityAnalyticsRoutes());
+
+    await result.current.fetchPersistedAiSummary({
+      params: { entityType: 'user', entityIdentifier: 'alice', mode: 'resolved' },
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        method: 'GET',
+        query: { entityId: 'alice', entityType: 'user', mode: 'resolved' },
+      })
+    );
+  });
 });

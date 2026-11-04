@@ -315,7 +315,7 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
       delete viz.curveType; // curveType only preserved for line/area charts
     }
     if (hasAreas) {
-      viz.areaFill ??= 'solid';
+      viz.areaFill ??= 'gradient';
       viz.fillOpacity ??= 0.3;
     } else {
       delete viz.fillOpacity; // fillOpacity only preserved for area charts

@@ -30,6 +30,12 @@ const makeManagement = (
   };
 };
 
+// Every valid action declares an approval policy; fixtures that omit one get a default.
+const withApprovalPolicy = (actionMetadata: unknown): unknown =>
+  typeof actionMetadata === 'object' && actionMetadata !== null
+    ? { approvalPolicy: 'autonomy-dependent', ...actionMetadata }
+    : actionMetadata;
+
 const workflowItem = (
   id: string,
   actionMetadata: unknown,
@@ -44,7 +50,10 @@ const workflowItem = (
   managedBy: 'alertzero',
   definition: (actionMetadata === null
     ? null
-    : { consts: { actionMetadata }, ...extraDefinition }) as WorkflowListItemDto['definition'],
+    : {
+        consts: { actionMetadata: withApprovalPolicy(actionMetadata) },
+        ...extraDefinition,
+      }) as WorkflowListItemDto['definition'],
   createdAt: '2026-01-01T00:00:00.000Z',
   tags,
   valid: true,

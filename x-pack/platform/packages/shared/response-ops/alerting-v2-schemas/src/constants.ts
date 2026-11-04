@@ -41,6 +41,14 @@ export const BULK_FILTER_MAX_RESOURCES = 10_000;
  */
 export const ID_MAX_LENGTH = 150;
 
+/**
+ * Maximum length for an alert series id. A series id is base64url of a payload
+ * holding a space id, an owner (up to `ID_MAX_LENGTH` characters) and a 64
+ * character hash, so even a multi-byte external `source` stays far below this.
+ * Space ids have no length limit of their own, hence the headroom.
+ */
+export const SERIES_ID_MAX_LENGTH = 2048;
+
 /** Maximum length for KQL/filter query strings (e.g. action policy matcher, bulk operation filter). */
 export const MAX_KQL_LENGTH = 4096;
 

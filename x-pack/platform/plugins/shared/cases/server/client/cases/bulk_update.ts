@@ -32,7 +32,7 @@ import type {
   CasesPatchResponse,
   CaseWithUpdateSummary,
 } from '../../../common/types/api';
-import { PatchCasesResponseRt, CasesPatchRequestRt } from '../../../common/types/api';
+import { PatchCasesResponseSchema, CasesPatchRequestSchema } from '../../../common/types/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_ATTACHMENT_SAVED_OBJECT,
@@ -68,7 +68,7 @@ import {
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
-import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
+import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 import type {
   CaseAttributes,
   User,
@@ -76,7 +76,7 @@ import type {
   AttachmentAttributes,
   CustomFieldsConfiguration,
 } from '../../../common/types/domain';
-import { CaseStatuses, AttachmentType } from '../../../common/types/domain';
+import { CaseStatuses, AttachmentType, UserActionTypes } from '../../../common/types/domain';
 import {
   validateCustomFields,
   validateCaseExtendedFields,
@@ -120,9 +120,12 @@ function throwIfUpdateOwner(requests: UpdateRequestWithOriginalCase[]) {
   }
 }
 
+const isCloseCaseUserAction = ({ parameters: { attributes } }: UserActionEvent): boolean =>
+  attributes.type === UserActionTypes.status && attributes.payload.status === CaseStatuses.closed;
+
 /**
  * Throws an error if any of the requests attempt to create a number of user actions that would put
- * it's case over the limit.
+ * it's case over the limit. Closing a case is exempt so a case at the limit can always be closed.
  */
 async function throwIfMaxUserActionsReached({
   userActionsDict,
@@ -140,9 +143,11 @@ async function throwIfMaxUserActionsReached({
   });
 
   Object.keys(currentTotals).forEach((caseId) => {
-    const totalToAdd = userActionsDict?.[caseId]?.length ?? 0;
+    const totalToAdd = (userActionsDict?.[caseId] ?? []).filter(
+      (userAction) => !isCloseCaseUserAction(userAction)
+    ).length;
 
-    if (currentTotals[caseId] + totalToAdd > MAX_USER_ACTIONS_PER_CASE) {
+    if (totalToAdd > 0 && currentTotals[caseId] + totalToAdd > MAX_USER_ACTIONS_PER_CASE) {
       throw Boom.badRequest(
         `The case with case id ${caseId} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
       );
@@ -592,7 +597,7 @@ export const bulkUpdate = async (
   } = clientArgs;
 
   try {
-    const rawQuery = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
+    const rawQuery = decodeWithExcessOrThrowZod(CasesPatchRequestSchema)(cases);
     const query = emptyCasesAssigneesSanitizer(rawQuery);
     const caseIds = query.cases.map((q) => q.id);
     const myCases = await caseService.getCases({
@@ -1058,7 +1063,7 @@ export const bulkUpdate = async (
 
     await notificationService.bulkNotifyAssignees(casesAndAssigneesToNotifyForAssignment);
 
-    const updatedCasesResponse = decodeOrThrow(PatchCasesResponseRt)(returnUpdatedCase);
+    const updatedCasesResponse = decodeOrThrowZod(PatchCasesResponseSchema)(returnUpdatedCase);
 
     const { appliedCases, clearedCases, casesPerTemplateId } = countTemplateChanges(
       casesToUpdate,
@@ -1309,9 +1314,18 @@ const createPatchCasesPayload = async ({
             updateReq.template === null
               ? undefined
               : updateReq.template?.version ?? originalCase.attributes.template?.version;
+          // Validate only what this request touched (written keys + keys pairing derived): the
+          // merged map intentionally retains keys from other template versions, which a pinned
+          // definition would otherwise reject as unknown. The full map is still passed so field
+          // conditions (`show_when` / `required_when`) see the stored values of untouched fields.
+          const touchedKeys = new Set([
+            ...Object.keys(updateCaseAttributes.extended_fields ?? {}),
+            ...Object.values(paired.pairedKeyToStorageKey),
+          ]);
           const globalFields = await resolveCachedGlobalFields(originalCase.attributes.owner);
           await validateCaseExtendedFields({
             extendedFields: finalExtendedFields,
+            touchedKeys,
             templateId,
             templateVersion,
             globalFields,

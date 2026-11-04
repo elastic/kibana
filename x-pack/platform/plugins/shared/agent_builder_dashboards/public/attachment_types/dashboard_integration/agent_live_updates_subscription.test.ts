@@ -89,6 +89,7 @@ describe('createAgentLiveUpdatesSubscription', () => {
 
     expect(getChatEvents$).toHaveBeenCalledWith('new-conversation');
     expect(setState).toHaveBeenCalledTimes(1);
+    expect(setState).toHaveBeenCalledWith(expect.anything(), { changedBy: ['agent'] });
     subscription.unsubscribe();
   });
 

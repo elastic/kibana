@@ -10,6 +10,7 @@
 import type { Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { KQLSyntaxError } from '@kbn/es-query';
+import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { SearchTriggerEventLogResult } from '@kbn/workflows-ui';
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
@@ -50,6 +51,7 @@ describe('Internal Routes', () => {
       (spaceId: string, request: unknown) => Promise<unknown>
     >;
     getHistoryForWorkflow: jest.Mock;
+    getReadableWorkflowIds: jest.Mock;
     restoreWorkflowVersion: jest.Mock;
   };
   let mockAudit: {
@@ -102,6 +104,7 @@ describe('Internal Routes', () => {
     mockApi = {
       disableAllWorkflows: jest.fn(),
       getHistoryForWorkflow: jest.fn(),
+      getReadableWorkflowIds: jest.fn(),
       restoreWorkflowVersion: jest.fn(),
     };
     mockAudit = {
@@ -204,6 +207,46 @@ describe('Internal Routes', () => {
 
     expect(response.ok).toHaveBeenCalledWith({
       body: { eventDrivenExecutionEnabled: false },
+    });
+  });
+
+  it('returns the workflow ids readable in the request space', async () => {
+    mockApi.getReadableWorkflowIds.mockResolvedValue(['a', 'b']);
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest();
+
+    await routeHandlers['GET:/internal/workflows/readable_workflow_ids'].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockApi.getReadableWorkflowIds).toHaveBeenCalledWith('default', request, {
+      includeManaged: false,
+    });
+    expect(response.ok).toHaveBeenCalledWith({ body: { workflowIds: ['a', 'b'] } });
+  });
+
+  it('includes managed workflows for callers who can read managed executions', async () => {
+    mockApi.getReadableWorkflowIds.mockResolvedValue(['a']);
+
+    const response = httpServerMock.createResponseFactory();
+    const request = Object.assign(httpServerMock.createKibanaRequest(), {
+      authzResult: {
+        [WorkflowsManagementApiActions.readExecution]: true,
+        [WorkflowsManagementApiActions.readManagedExecution]: true,
+      },
+    });
+
+    await routeHandlers['GET:/internal/workflows/readable_workflow_ids'].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockApi.getReadableWorkflowIds).toHaveBeenCalledWith('default', request, {
+      includeManaged: true,
     });
   });
 
