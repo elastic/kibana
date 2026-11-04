@@ -65,6 +65,7 @@ jest.mock('@kbn/unified-data-table', () => ({
       () =>
         leftSide
   ),
+  getRowHeight: jest.fn(() => 3),
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes');
@@ -108,7 +109,7 @@ jest.mock('../../components/rule/flyouts/rule_summary/rule_summary_flyout_contai
 
 jest.mock('../../hooks/use_breadcrumbs', () => ({ useBreadcrumbs: jest.fn() }));
 
-jest.mock('./components/episodes_kpis', () => ({
+jest.mock('@kbn/alerting-v2-episodes-ui/components/episodes_kpis', () => ({
   EpisodesKpis: () => null,
 }));
 
@@ -132,7 +133,7 @@ jest.mock('./components/episodes_filter_bar', () => ({
   ),
 }));
 
-jest.mock('./components/episodes_histogram', () => ({
+jest.mock('@kbn/alerting-v2-episodes-ui/components/episodes_histogram', () => ({
   EpisodesHistogram: () => null,
 }));
 

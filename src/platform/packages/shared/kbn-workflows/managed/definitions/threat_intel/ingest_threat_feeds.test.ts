@@ -49,7 +49,7 @@ describe('THREAT_INTEL_INGEST_FEEDS_WORKFLOW yaml', () => {
   // Load-bearing invariant: a disabled source must cause no fetch. The only source
   // enumeration the workflow does is `load_sources`, and every fetch runs inside the
   // foreach over its hits — so filtering `enabled: true` here is what keeps a disabled
-  // AWS or FortiGuard pack from ever being requested. Enablement is per-document, so this
+  // source from ever being requested. Enablement is per-document, so this
   // also means enabling one source never enables another.
   it('loads only enabled sources', () => {
     const step = findStepByName(workflow.steps, 'load_sources') as {

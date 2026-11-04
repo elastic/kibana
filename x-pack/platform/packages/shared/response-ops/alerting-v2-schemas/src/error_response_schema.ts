@@ -17,8 +17,14 @@ import { lazySchema, z } from '@kbn/zod/v4';
  * - `message` — A human-friendly explanation. Can be
  *               rephrased, localized, or have typos fixed without breaking
  *               clients. Do not parse this field in client code.
- * - `details` — An optional structured context (e.g. the resource id that
- *               conflicted, per-field validation issues).
+ * - `details` — An optional structured context whose keys depend on `code`.
+ *               Identifier keys (`rule_id`, `action_policy_id`, `group_hash`, …)
+ *               are stable, permanent public identifiers. On a request-validation
+ *               400, `details.source` (`params` | `query` | `body`) names the part
+ *               that failed and is the only guaranteed key; the sibling
+ *               `details.errors` is a validation-library-generated tree whose
+ *               internal shape is NOT part of the contract and can change on a
+ *               dependency upgrade — do not branch on it.
  */
 export const errorResponseSchema = lazySchema(() =>
   z
@@ -42,7 +48,7 @@ export const errorResponseSchema = lazySchema(() =>
         .record(z.string(), z.unknown())
         .optional()
         .describe(
-          'Optional extra information about the error, for example field validation issues or the `rule_id` when that ID already exists.'
+          'Optional structured context whose keys depend on `code`. Identifier keys such as `rule_id`, `action_policy_id` and `group_hash` are stable, permanent public identifiers. On a 400 request-validation error, `details.source` (`params`, `query`, or `body`) names the failing part and is the only guaranteed key. The sibling `details.errors` may change. Do not branch on it.'
         ),
     })
     .meta({ id: 'alerting_error_response' })

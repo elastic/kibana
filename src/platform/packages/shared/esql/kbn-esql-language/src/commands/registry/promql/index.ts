@@ -27,7 +27,7 @@ export const promqlCommand = {
   metadata: {
     type: 'source' as const,
     preview: true,
-    description: i18n.translate('kbn-esql-language.esql.definitions.promqlDoc', {
+    description: i18n.translate('esqlLanguage.esql.definitions.promqlDoc', {
       defaultMessage:
         'Execute PromQL queries against time series data. Use time= for instant queries, or step= or buckets= for range query time resolution. The index= parameter defaults to * if not specified.',
     }),

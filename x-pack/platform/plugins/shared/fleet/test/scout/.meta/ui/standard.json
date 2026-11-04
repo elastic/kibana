@@ -1,5 +1,5 @@
 {
-  "sha1": "a85c3868fa4faea6e936e04d1177421b0323b94f",
+  "sha1": "57c4e7d2ee465aae56464128402b2994460742ac",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -83,7 +83,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/integration_tile_navigation.spec.ts",
-        "line": 20,
+        "line": 21,
         "column": 45
       }
     },
@@ -97,7 +97,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/integration_tile_navigation.spec.ts",
-        "line": 32,
+        "line": 33,
         "column": 9
       }
     },
@@ -148,12 +148,13 @@
       "title": "When the user has Fleet Agents Read built-in role is accessible but user cannot perform any write actions on agent tabs",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_agents_read_integrations_none.spec.ts",
-        "line": 15,
-        "column": 3
+        "line": 14,
+        "column": 14
       }
     },
     {
@@ -161,12 +162,13 @@
       "title": "When the user has Fleet Agents Read built-in role is accessible and user only see agents tab",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_agents_read_integrations_none.spec.ts",
-        "line": 26,
-        "column": 23
+        "line": 27,
+        "column": 24
       }
     },
     {
@@ -174,11 +176,12 @@
       "title": "When the user has All privilege for Fleet but None for integrations Fleet is accessible",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_all_integrations_none.spec.ts",
-        "line": 13,
+        "line": 14,
         "column": 14
       }
     },

@@ -10,6 +10,7 @@ import type { ActionsClientLlm } from '@kbn/langchain/server';
 import type { ZodType } from '@kbn/zod/v4';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import { FakeLLM } from '@langchain/core/utils/testing';
+import { ModelRefusalError } from '@kbn/langchain/server';
 
 import type { AttackDiscoveryGraphState } from '../../../graphs';
 import {
@@ -50,6 +51,7 @@ jest.mock('../helpers/get_chain_with_format_instructions', () => {
 
 const mockLogger = {
   debug: (x: Function) => x(),
+  warn: jest.fn(),
 } as unknown as Logger;
 
 let mockLlm: ActionsClientLlm;
@@ -388,5 +390,30 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
       generations: [firstResponse, secondResponse],
       unrefinedResults: getParsedAttackDiscoveriesMock(attackDiscoveryTimestamp), // <-- generated from the combined response
     });
+  });
+
+  it('stops on a model refusal instead of recording a retryable parse error', async () => {
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+    mockInvoke.mockRejectedValueOnce(
+      new ModelRefusalError({
+        connectorId: 'mock-connector',
+        partialContentLength: 0,
+        refusal:
+          'The response was stopped by the provider content filter (finish_reason: content_filter).',
+      })
+    );
+
+    const generateNode = getGenerateNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    await expect(generateNode(initialGraphState)).rejects.toThrow(
+      'content filter (finish_reason: content_filter)'
+    );
   });
 });

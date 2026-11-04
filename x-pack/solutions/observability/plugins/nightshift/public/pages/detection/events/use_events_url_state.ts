@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useDebounceFn } from '@kbn/react-hooks';
 import {
   isSignificantEventsSortField,
   MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH,
@@ -21,8 +20,7 @@ import {
   type Severity,
   type SignificantEventStatus,
 } from '@kbn/significant-events-schema';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import type React from 'react';
+import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
   clearNightshiftEventIdParam,
@@ -30,6 +28,7 @@ import {
   setNightshiftEventIdParam,
 } from '../../../common/url_params';
 import { PAGE_QUERY_PARAM } from '../constants';
+import { useUrlSearchParam } from '../use_url_search_param';
 
 // PAGE_QUERY_PARAM lives in ../constants because the time range hook also resets it.
 const SEARCH_QUERY_PARAM = 'search';
@@ -40,9 +39,6 @@ const SORT_FIELD_QUERY_PARAM = 'sortField';
 const SORT_ORDER_QUERY_PARAM = 'sortOrder';
 // The design leads with the most severe events.
 const DEFAULT_SORT: EventsSort = { field: 'severity', order: 'desc' };
-// Module-level so useDebounceFn keeps one debounced function across renders.
-const SEARCH_DEBOUNCE_OPTIONS = { wait: 300 };
-
 const isSignificantEventStatus = (value: string): value is SignificantEventStatus =>
   SIGNIFICANT_EVENT_STATUS_OPTIONS.includes(value as SignificantEventStatus);
 
@@ -75,12 +71,12 @@ export const useEventsUrlState = () => {
   const history = useHistory();
   const { pathname, search } = useLocation();
   const params = useMemo(() => new URLSearchParams(search), [search]);
-  const urlSearch = (params.get(SEARCH_QUERY_PARAM) ?? '').slice(
-    0,
-    MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH
-  );
-  const [searchValue, setSearchValue] = useState(urlSearch);
-  const searchQuery = urlSearch.trim();
+  const {
+    value: searchValue,
+    query: searchQuery,
+    onChange: onSearchChange,
+    clear: clearSearch,
+  } = useUrlSearchParam(SEARCH_QUERY_PARAM, MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH);
   const status = params.getAll(STATUS_QUERY_PARAM).filter(isSignificantEventStatus);
   const severity = params.getAll(SEVERITY_QUERY_PARAM).filter(isSeverity);
   const investigation = params.getAll(INVESTIGATION_QUERY_PARAM).filter(isInvestigationState);
@@ -102,41 +98,6 @@ export const useEventsUrlState = () => {
     [history, pathname, search]
   );
 
-  // Only typing writes the search to the URL, so Back/Forward can't be overwritten by a stale value.
-  const { run: writeSearch, cancel: cancelSearchWrite } = useDebounceFn((value: string) => {
-    updateParams((nextParams) => {
-      if (value.trim()) {
-        nextParams.set(SEARCH_QUERY_PARAM, value);
-      } else {
-        nextParams.delete(SEARCH_QUERY_PARAM);
-      }
-      nextParams.delete(PAGE_QUERY_PARAM);
-    }, true);
-  }, SEARCH_DEBOUNCE_OPTIONS);
-
-  useEffect(() => {
-    cancelSearchWrite();
-    setSearchValue(urlSearch);
-  }, [cancelSearchWrite, urlSearch]);
-
-  // Back/Forward within the debounce window must drop the pending write, even when both
-  // entries have the same search.
-  useEffect(
-    () =>
-      history.listen((location, action) => {
-        if (action === 'POP') {
-          cancelSearchWrite();
-          setSearchValue(
-            (new URLSearchParams(location.search).get(SEARCH_QUERY_PARAM) ?? '').slice(
-              0,
-              MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH
-            )
-          );
-        }
-      }),
-    [cancelSearchWrite, history]
-  );
-
   const setListParam = useCallback(
     (
       key:
@@ -152,15 +113,6 @@ export const useEventsUrlState = () => {
       });
     },
     [updateParams]
-  );
-
-  const onSearchChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const value = event.target.value.slice(0, MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH);
-      setSearchValue(value);
-      writeSearch(value);
-    },
-    [writeSearch]
   );
 
   const setPage = useCallback(
@@ -202,8 +154,7 @@ export const useEventsUrlState = () => {
   );
 
   const clearFilters = useCallback(() => {
-    cancelSearchWrite();
-    setSearchValue('');
+    clearSearch();
     updateParams((nextParams) => {
       nextParams.delete(SEARCH_QUERY_PARAM);
       nextParams.delete(STATUS_QUERY_PARAM);
@@ -211,7 +162,7 @@ export const useEventsUrlState = () => {
       nextParams.delete(INVESTIGATION_QUERY_PARAM);
       nextParams.delete(PAGE_QUERY_PARAM);
     });
-  }, [cancelSearchWrite, updateParams]);
+  }, [clearSearch, updateParams]);
 
   return {
     searchValue,

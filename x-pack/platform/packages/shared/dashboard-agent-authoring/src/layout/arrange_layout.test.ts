@@ -390,6 +390,7 @@ describe('arrangeDashboardLayout', () => {
     expect(result.dashboardData).toBe(dashboardWithNewPanel);
     expect(result.failure).toEqual({
       type: DASHBOARD_FAILURE_TYPES.layout,
+      kind: 'dashboard',
       identifier: 'layout',
       error: expect.stringContaining('section "section-a" is missing'),
     });

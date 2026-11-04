@@ -65,4 +65,13 @@ export const SAMPLE_FEATURES = {
     feature_id: 'attack_discovery',
     endpoints: [{ id: '.eis-claude-3.7-sonnet' }],
   },
+  agentBuilderWithParameters: {
+    feature_id: 'agent_builder',
+    endpoints: [
+      {
+        id: '.endpoint-a',
+        parameters: { reasoning: { effort: 'high' } },
+      },
+    ],
+  },
 };

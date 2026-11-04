@@ -12,6 +12,7 @@ import {
   SECURITY_ENTITY_ATTACHMENT_TYPE,
   SECURITY_TIMELINE_ATTACHMENT_TYPE,
   SECURITY_ATTACK_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
@@ -37,7 +38,7 @@ const formatZodIssues = (issues: Array<{ path: PropertyKey[]; message: string }>
 describe('registerCaseAttachments', () => {
   const experimentalFeatures: ExperimentalFeatures = {
     entityAttachmentsEnabled: false,
-    attackAttachmentsEnabled: false,
+    attackAttachments: false,
   } as ExperimentalFeatures;
 
   const deps = { getStartServices: jest.fn(), logger: loggerMock.create() };
@@ -130,7 +131,7 @@ describe('registerCaseAttachments', () => {
       framework,
       {
         ...experimentalFeatures,
-        attackAttachmentsEnabled: true,
+        attackAttachments: true,
       } as ExperimentalFeatures,
       deps
     );
@@ -138,7 +139,10 @@ describe('registerCaseAttachments', () => {
     expect(framework.registerAttachment).toHaveBeenCalledWith({
       id: SECURITY_ATTACK_ATTACHMENT_TYPE,
       schema: AttackAttachmentPayloadSchema,
-      getRelatedAttachments: expect.any(Function),
+      relatedAttachments: {
+        readTypes: [SECURITY_ATTACK_ATTACHMENT_TYPE, SECURITY_ALERT_ATTACHMENT_TYPE],
+        get: expect.any(Function),
+      },
       workflow: { validateTargets: expect.any(Function) },
     });
   });
@@ -153,7 +157,7 @@ describe('registerCaseAttachments', () => {
       .find(({ id }) => id === SECURITY_ATTACK_ATTACHMENT_TYPE);
 
     expect(registered).toBeDefined();
-    expect(registered!.getRelatedAttachments).toEqual(expect.any(Function));
+    expect(registered!.relatedAttachments?.get).toEqual(expect.any(Function));
     expect(registered!.schema).not.toBe(AttackAttachmentPayloadSchema);
 
     const result = registered!.schema.safeParse({
@@ -174,7 +178,7 @@ describe('registerCaseAttachments', () => {
       // name the flag rather than read as a generic type mismatch.
       expect(
         result.error.issues.map((issue: { message: string }) => issue.message).join('; ')
-      ).toContain('attackAttachmentsEnabled');
+      ).toContain('attackAttachments');
     }
   });
 

@@ -1,5 +1,5 @@
 {
-  "sha1": "a46ef9d3adf416a3221a17506f895ec708ea9aa3",
+  "sha1": "b1be5946fc021e07842ecd90fbc9e6a2b23770d6",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -2860,7 +2860,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_grouped_stats.spec.ts",
-        "line": 167,
+        "line": 165,
         "column": 7
       }
     },

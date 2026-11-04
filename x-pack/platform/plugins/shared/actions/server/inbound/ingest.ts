@@ -15,6 +15,7 @@ import type { SpaceId } from '@kbn/core-spaces-common';
 import {
   connectorTypeIsDual,
   getConnectorSpec,
+  type HandleEventsHttpResponse,
   MAX_CONNECTOR_TYPE_ID_LENGTH,
   normalizeConnectorTypeId,
   parseHandleEventsResult,
@@ -55,11 +56,11 @@ export interface IngestInboundEventInput {
   connectorTypeId: string;
   connectorId: string;
   spaceId: SpaceId;
-  requestId?: string;
-  headers: Record<string, string | string[] | undefined>;
-  query: IngestEventsRequestQuery;
-  body: unknown;
-  remoteAddress: string | undefined;
+  /**
+   * The route request. Headers, query, body, the socket address, and the request id are
+   * read from it. A UIAM service-account bearer is authenticated on this same object.
+   */
+  request: KibanaRequest<unknown, IngestEventsRequestQuery, unknown>;
 }
 
 export interface IngestInboundEventParams extends IngestInboundEventInput {
@@ -77,6 +78,19 @@ export interface IngestInboundEventParams extends IngestInboundEventInput {
   rateLimiter: InboundEventRateLimiter;
 }
 
+const toEmittedHttpResult = (
+  httpResponse: HandleEventsHttpResponse,
+  headers: Record<string, string> | undefined
+): IngestInboundEventResult => {
+  const { status, body: spokeBody } = httpResponse;
+  return {
+    status: 'spoke_http',
+    statusCode: status,
+    ...(spokeBody !== undefined ? { body: spokeBody } : {}),
+    ...(headers !== undefined ? { headers } : {}),
+  };
+};
+
 const stripIngestTokenHash = (config: Record<string, unknown>): Record<string, unknown> => {
   const { ingestTokenHash: _omit, ...spokeConfig } = config;
   return spokeConfig;
@@ -89,11 +103,7 @@ export async function ingestInboundEvent({
   connectorTypeId: connectorTypeIdParam,
   connectorId,
   spaceId,
-  requestId,
-  headers,
-  query,
-  body,
-  remoteAddress,
+  request,
   inboundEventsEnabled,
   isActionTypeEnabled,
   maxEmitted,
@@ -107,6 +117,8 @@ export async function ingestInboundEvent({
   inMemoryConnectors,
   rateLimiter,
 }: IngestInboundEventParams): Promise<IngestInboundEventResult> {
+  const { headers, query, body, id: requestId } = request;
+  const remoteAddress = request.socket.remoteAddress;
   const connectorTypeId = normalizeConnectorTypeId(connectorTypeIdParam);
   const baseLog = {
     spaceId,
@@ -204,15 +216,18 @@ export async function ingestInboundEvent({
   }
 
   let kibanaScheduleRequest: KibanaRequest | undefined;
+  let authenticatedUser: string | undefined;
   // In-memory events-on connectors have no ingest token. A saved identity stays on the token path.
   if (connectorEventsEnabled && connector.hasInboundEventIdentity !== true) {
     try {
-      kibanaScheduleRequest = await resolveKibanaInboundRequest({
-        headers,
+      const resolvedInboundRequest = await resolveKibanaInboundRequest({
+        inboundRequest: request,
         spaceId,
         elasticsearchClient: await getElasticsearchClient(),
         getKibanaRequestAccess,
       });
+      kibanaScheduleRequest = resolvedInboundRequest?.request;
+      authenticatedUser = resolvedInboundRequest?.authenticatedUser;
     } catch (error) {
       logInboundIngressOutcome(logger, {
         ...baseLog,
@@ -324,6 +339,30 @@ export async function ingestInboundEvent({
       };
     }
 
+    const emitHttpResponse = result.httpResponse;
+    let emitHttpHeaders: Record<string, string> | undefined;
+    if (emitHttpResponse !== undefined) {
+      const spokeHeaders = validateSpokeHttpHeaders(emitHttpResponse.headers);
+      if (spokeHeaders === 'invalid') {
+        logInboundIngressOutcome(logger, {
+          ...baseLog,
+          outcome: 'handle_fail',
+          detail: 'invalid_http_ack',
+        });
+        return {
+          status: 'error',
+          statusCode: 500,
+          body: INBOUND_EVENTS_UNEXPECTED_ERROR_MESSAGE,
+        };
+      }
+      emitHttpHeaders = spokeHeaders;
+    }
+
+    const finishEmit = (): IngestInboundEventResult =>
+      emitHttpResponse !== undefined
+        ? toEmittedHttpResult(emitHttpResponse, emitHttpHeaders)
+        : { status: 'accepted', body: { ok: true } };
+
     if (result.events.length > maxEmitted) {
       logInboundIngressOutcome(logger, {
         ...baseLog,
@@ -356,7 +395,7 @@ export async function ingestInboundEvent({
         ...baseLog,
         outcome: 'accepted',
       });
-      return { status: 'accepted', body: { ok: true } };
+      return finishEmit();
     }
 
     let scheduleRequest = kibanaScheduleRequest;
@@ -370,7 +409,7 @@ export async function ingestInboundEvent({
           outcome: 'identity_missing',
           detail: `decrypt_failed ${error instanceof Error ? error.message : String(error)}`,
         });
-        return { status: 'accepted', body: { ok: true } };
+        return finishEmit();
       }
     }
 
@@ -380,7 +419,7 @@ export async function ingestInboundEvent({
         outcome: 'identity_missing',
         detail: 'missing_api_key',
       });
-      return { status: 'accepted', body: { ok: true } };
+      return finishEmit();
     }
 
     let emitFailures = 0;
@@ -395,6 +434,7 @@ export async function ingestInboundEvent({
           connectorTypeId,
           correlationKey: event.correlationKey,
           request: scheduleRequest,
+          ...(authenticatedUser ? { authenticatedUser } : {}),
         });
         // HTTP stays 202; ingest logs a single emit_partial outcome.
         if (!emitResult.ok) {
@@ -425,7 +465,7 @@ export async function ingestInboundEvent({
       });
     }
 
-    return { status: 'accepted', body: { ok: true } };
+    return finishEmit();
   } catch (error) {
     logInboundIngressOutcome(logger, {
       ...baseLog,

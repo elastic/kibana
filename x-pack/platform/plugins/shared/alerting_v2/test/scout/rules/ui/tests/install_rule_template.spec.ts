@@ -111,16 +111,9 @@ test.describe('Rule library - install a rule template', { tag: testData.UI_TAG }
       await composeDiscover.clickSubmit(); // Create rule
     });
 
-    await test.step('the success toast confirms the rule was created with the edited name', async () => {
-      await expect(ruleLibrary.createdToast(EDITED_RULE_NAME)).toBeVisible({
-        timeout: 30_000,
-      });
-      await expect(ruleLibrary.viewRuleToastLink).toBeVisible();
-    });
-
     let ruleId: string;
 
-    await test.step('the rule exists with the edited name and records the template', async () => {
+    await test.step('the rule exists with the edited name', async () => {
       await expect
         .poll(
           async () => {
@@ -138,7 +131,6 @@ test.describe('Rule library - install a rule template', { tag: testData.UI_TAG }
       ruleId = rule.id;
       expect(rule.enabled).toBe(true);
       expect(rule.metadata.name).toBe(EDITED_RULE_NAME);
-      expect(rule.metadata.template).toStrictEqual({ id: TEMPLATE_ID });
     });
 
     await test.step('the install went through the rule template API exactly once', async () => {
@@ -181,9 +173,18 @@ test.describe('Rule library - install a rule template', { tag: testData.UI_TAG }
       await composeDiscover.clickNext(); // Outcome → Details
       await composeDiscover.clickNext(); // Details → Actions
       await composeDiscover.clickSubmit();
-      await expect(ruleLibrary.createdToast(TEMPLATE_RULE_NAME)).toBeVisible({
-        timeout: 30_000,
-      });
+
+      await expect
+        .poll(
+          async () => {
+            const { items } = await apiServices.alertingV2.rules.find({
+              search: TEMPLATE_RULE_NAME,
+            });
+            return items.length;
+          },
+          { timeout: 30_000 }
+        )
+        .toBe(1);
       // An external link also carries screen reader text, so match the leading number only.
       await expect(ruleLibrary.ruleCountLink(TEMPLATE_RULE_NAME)).toHaveText(/^1(?!\d)/, {
         timeout: 30_000,

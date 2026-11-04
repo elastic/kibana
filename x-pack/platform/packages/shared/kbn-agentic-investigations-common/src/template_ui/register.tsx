@@ -19,6 +19,7 @@ import { ConversationTitle } from './conversation_title';
 import type {
   RenderAssignees,
   RenderStatus,
+  RenderSeverity,
   RenderLinkedInvestigations,
   RenderOverview,
   RenderLiveState,
@@ -94,6 +95,11 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    */
   renderStatus?: RenderStatus;
   /**
+   * When provided, the header renders an interactive severity picker beside status and
+   * assignees. Supplied by the caller so the picker can use HTTP hooks unavailable here.
+   */
+  renderSeverity?: RenderSeverity;
+  /**
    * When provided, the "Close investigation" footer action renders a confirmation modal.
    * Supplied by the caller so the modal can use HTTP hooks unavailable in this package.
    */
@@ -144,6 +150,7 @@ export const registerAgenticInvestigationTemplateUI = ({
   renderProposedActionsCount,
   renderAssignees,
   renderStatus,
+  renderSeverity,
   renderCloseInvestigationModal,
   renderOverview,
   renderLiveState,
@@ -207,6 +214,7 @@ export const registerAgenticInvestigationTemplateUI = ({
                 conversation={conversation}
                 renderAssignees={renderAssignees}
                 renderStatus={renderStatus}
+                renderSeverity={renderSeverity}
                 renderLiveState={renderLiveState}
                 renderTitle={renderTitle}
                 refetchConversation={refetchConversation}

@@ -7,7 +7,7 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   ExecutionStatus,
   TerminalExecutionStatuses,
@@ -19,6 +19,7 @@ import {
   DRAFT_STEP_ID,
   REVIEW_STEP_ID,
   RULE_CREATION_WORKFLOW_ID,
+  SCORING_INVESTIGATION_ID,
   WORKFLOWS_API_VERSION,
 } from './constants';
 import { draftRuleSchema, type DraftRule } from './types';
@@ -37,36 +38,33 @@ const shouldStopPolling = (status: ExecutionStatus) =>
 // `steps.draft_creation.output.structured_output.rule.query`). Parsing structured_output
 // as the rule itself strips the wrapper and yields an empty object — every evaluator
 // then sees a rule with no fields (the false-zero failure this fixed).
-const stepOutputSchema = z
-  .object({
-    structured_output: z
-      .object({
-        rule: draftRuleSchema,
-        // v3 quality gate: the agent refuses unwinnable gaps instead of drafting.
-        // A refusal is a CORRECT outcome, not a missing rule — evaluators must be
-        // able to tell the two apart (a crashed draft also yields no rule).
-        skipped: z.boolean(),
-        reason: z.string(),
-      })
-      .partial(),
-  })
-  .partial();
+const stepOutputSchema = lazySchema(() =>
+  z
+    .object({
+      structured_output: z
+        .object({
+          rule: draftRuleSchema,
+          reason: z.string(),
+        })
+        .partial(),
+    })
+    .partial()
+);
 
 // Each step produces two entries in stepExecutions: an "enter" record (output: null)
 // and a "result" record (output: data). Find the result record for draft_creation.
-const extractDraftFromSteps = (
+export const extractDraftFromSteps = (
   steps: WorkflowStepExecutionDto[]
 ): { rule: DraftRule | undefined; skipped: boolean; skipReason: string | undefined } => {
   const draftSteps = steps.filter((s) => s.stepId === DRAFT_STEP_ID);
   const resultRecord = draftSteps.find((s) => s.output != null);
   const parsed = stepOutputSchema.safeParse(resultRecord?.output);
   if (!parsed.success) return { rule: undefined, skipped: false, skipReason: undefined };
-  const out = parsed.data.structured_output;
-  return {
-    rule: out?.rule,
-    skipped: out?.skipped === true,
-    skipReason: out?.reason,
-  };
+  const { rule, reason } = parsed.data.structured_output ?? {};
+  if (rule && rule.name === '' && rule.query === '') {
+    return { rule: undefined, skipped: true, skipReason: reason || undefined };
+  }
+  return { rule, skipped: false, skipReason: undefined };
 };
 
 export interface RuleCreationResult {
@@ -123,6 +121,7 @@ export class RuleCreationClient {
 
   async run({
     input,
+    investigationId = SCORING_INVESTIGATION_ID,
     maxWaitMs = 10 * 60_000,
     pollIntervalMs = 5_000,
   }: {
@@ -132,6 +131,7 @@ export class RuleCreationClient {
       evidence: string;
       confidence: number;
     };
+    investigationId?: string;
     maxWaitMs?: number;
     pollIntervalMs?: number;
   }): Promise<RuleCreationResult> {
@@ -141,7 +141,7 @@ export class RuleCreationClient {
         method: 'POST',
         version: WORKFLOWS_API_VERSION,
         headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
-        body: JSON.stringify({ inputs: input }),
+        body: JSON.stringify({ inputs: { ...input, investigation_id: investigationId } }),
       }
     );
 

@@ -56,16 +56,20 @@ const statusSlackAppRoute = createServerRoute({
     access: 'internal',
     summary: 'Get Elastic Slack App connection status',
     description:
-      'Returns whether the Elastic Slack App is available and its current connection state, advancing an in-progress install when the Relay reports completion.',
+      'Returns whether the Elastic Slack App is available and its current connection state. For callers who can manage the connection, it also advances an in-progress install when the Relay reports completion.',
   },
   security: {
     authz: {
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
+      extendedPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
     },
   },
   params: z.object({}),
   handler: async ({ request, server }): Promise<SlackAppStatusResponse> => {
-    return new SlackAppService(server).getStatus(request);
+    const canAdvanceInstall =
+      request.authzResult?.[NIGHTSHIFT_API_PRIVILEGES.manage] === true &&
+      request.authzResult?.[NIGHTSHIFT_API_PRIVILEGES.configure] === true;
+    return new SlackAppService(server).getStatus(request, { canAdvanceInstall });
   },
 });
 
@@ -147,10 +151,12 @@ const bindingsSlackAppRoute = createServerRoute({
 
 function throwRelayError(error: RelayRequestError): never {
   const msg = error.relayMessage ?? error.message;
-  if (error.statusCode === 409) throw conflict(msg);
-  if (error.statusCode === 403) throw forbidden(msg);
-  if (error.statusCode === 404) throw notFound(msg);
-  throw badGateway(msg);
+  // Boom `data` becomes the response's `attributes.data`, where the UI reads `reason`.
+  const data = error.reason ? { reason: error.reason } : undefined;
+  if (error.statusCode === 409) throw conflict(msg, data ?? { reason: 'channel_taken' });
+  if (error.statusCode === 403) throw forbidden(msg, data);
+  if (error.statusCode === 404) throw notFound(msg, data);
+  throw badGateway(msg, data);
 }
 
 const bindChannelSlackAppRoute = createServerRoute({

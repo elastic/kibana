@@ -74,9 +74,23 @@ const VALID_FIELDS: Readonly<Record<ReportWorkerOutcomeEvent, Override>> = {
     verdicts_inconclusive: 5,
     verdicts_true_positive: 10,
   },
+  alert_triage_batch_grouped: {
+    alerts_joined: 0,
+    alerts_pooled: 0,
+    alerts_with_strict_key: 36,
+    conversation_created: false,
+    fp_candidates_on_fallback: 4,
+    grouping: 'on',
+    proposals_created: 0,
+    strict_keys: 12,
+    strict_keys_single_alert: 5,
+    wide_keys: 8,
+    wide_keys_single_alert: 3,
+  },
   alert_triage_closure_resolved: {
     alerts_proposed: 20,
     alerts_retag_failed: 0,
+    revisions: 1,
     auto_approve_requested: false,
     investigation_id: INVESTIGATION_ID,
     outcome: 'dismissed',
@@ -285,6 +299,7 @@ describe('alertzero.reportWorkerOutcome common definition', () => {
       'worker_investigation_closed',
       'worker_run_completed',
       'alert_triage_batch_classified',
+      'alert_triage_batch_grouped',
       'alert_triage_closure_resolved',
       'rule_tuning_review_completed',
       'rule_coverage_review_completed',
@@ -299,6 +314,19 @@ describe('alertzero.reportWorkerOutcome common definition', () => {
 });
 
 describe('alertzero.reportWorkerOutcome input schema', () => {
+  // A batch has no Investigation of its own, so its classification report sends none.
+  it.each([undefined, ''])(
+    'accepts alert_triage_batch_classified with investigation_id %p',
+    (id) => {
+      const parsed = reportWorkerOutcomeStepInputSchema.safeParse({
+        ...inputFor('alert_triage_batch_classified'),
+        investigation_id: id,
+      });
+
+      expect(parsed.success).toBe(true);
+    }
+  );
+
   it.each<ReportWorkerOutcomeEvent>([
     'ad_worker_run_completed',
     'ad_worker_review_started',
@@ -306,6 +334,7 @@ describe('alertzero.reportWorkerOutcome input schema', () => {
     'worker_investigation_closed',
     'worker_run_completed',
     'alert_triage_batch_classified',
+    'alert_triage_batch_grouped',
     'alert_triage_closure_resolved',
     'rule_tuning_review_completed',
     'rule_coverage_review_completed',
@@ -607,12 +636,8 @@ describe('alertzero.reportWorkerOutcome input schema', () => {
       { investigation_id: 'Alert Triage - rule' },
     ],
     ['alert_triage_batch_classified', 'a rule name', { rule_name: 'Suspicious PowerShell' }],
-    [
-      'alert_triage_batch_classified',
-      'a missing investigation id',
-      { investigation_id: undefined },
-    ],
-    ['alert_triage_batch_classified', 'an empty investigation id', { investigation_id: '' }],
+    ['alert_triage_batch_grouped', 'a negative count', { strict_keys: -1 }],
+    ['alert_triage_batch_grouped', 'a rule id', { rule_id: 'abc' }],
     ['alert_triage_closure_resolved', 'an unknown outcome', { outcome: 'failed' }],
     [
       'alert_triage_closure_resolved',

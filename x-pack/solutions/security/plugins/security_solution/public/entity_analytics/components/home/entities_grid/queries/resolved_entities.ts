@@ -7,7 +7,10 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { escapeStringValue } from '@kbn/esql-utils';
-import { CriticalityLevels } from '../../../../../../common/entity_analytics/asset_criticality/constants';
+import {
+  CRITICALITY_LEVELS,
+  getCriticalityRank,
+} from '../../../../../../common/entity_analytics/entity_store/resolution_group_values';
 import {
   CRITICALITY_FIELD,
   ENTITY_ID_FIELD,
@@ -31,8 +34,8 @@ import type { EntityAggregation } from './esql';
 import { buildSearchedTargetsQuery } from './entities_in_view';
 import type { EsqlRunner } from './types';
 
-const SOURCE_FIELD = 'entity.source';
-const WATCHLISTS_FIELD = 'entity.attributes.watchlists';
+export const SOURCE_FIELD = 'entity.source';
+export const WATCHLISTS_FIELD = 'entity.attributes.watchlists';
 const FIRST_SEEN_FIELD = 'entity.lifecycle.first_seen';
 const LAST_SEEN_FIELD = '`@timestamp`';
 
@@ -44,26 +47,15 @@ const GROUP_VALUE_FIELDS = [
   LAST_SEEN_FIELD,
 ];
 
-/** Criticality levels from the highest: a resolved entity shows the highest of its aliases. */
-export const CRITICALITY_LEVELS = Object.values(CriticalityLevels);
-
-const getCriticalityRank = (index: number): number => CRITICALITY_LEVELS.length - index;
-
 const buildCriticalityRankExpression = (field: string): string =>
   `CASE(${CRITICALITY_LEVELS.map(
-    (level, index) => `${field} == ${escapeStringValue(level)}, ${getCriticalityRank(index)}`
+    (level) => `${field} == ${escapeStringValue(level)}, ${getCriticalityRank(level)}`
   ).join(', ')})`;
 
 const buildCriticalityLevelExpression = (rankField: string): string =>
   `CASE(${CRITICALITY_LEVELS.map(
-    (level, index) => `${rankField} == ${getCriticalityRank(index)}, ${escapeStringValue(level)}`
+    (level) => `${rankField} == ${getCriticalityRank(level)}, ${escapeStringValue(level)}`
   ).join(', ')})`;
-
-/** The sort rank of a criticality: extreme the highest, unassigned the lowest (0). */
-export const getCriticalitySortRank = (level: unknown): number => {
-  const index = CRITICALITY_LEVELS.findIndex((criticality) => criticality === level);
-  return index === -1 ? 0 : getCriticalityRank(index);
-};
 
 /** `GREATEST` or `LEAST` of two values, either of which may be missing. */
 const buildExtreme = (fn: 'GREATEST' | 'LEAST', a: string, b: string): string =>
@@ -179,16 +171,28 @@ export const isFilteringByGroupValue = ({
     entityExpression.includes(field)
   );
 
-/** Resolved entities whose group passes the filters differently from their main entity alone. */
-const buildResolvedEntityFilterOverridesQuery = (
-  args: Required<Pick<QueryArgs, 'namespace' | 'concreteEntityIndexName' | 'entityExpression'>>
-): string[] => [
-  `FROM ${getEntityAlias(args.namespace)}`,
+/** One condition, written for what is stored on the main entity and for what the row shows. */
+export interface ResolvedEntityConditions {
+  /** On the main entity's stored values: what a plain query matches. */
+  own: string;
+  /** On the group's values (main entity and aliases rolled up): what the row shows. */
+  group: string;
+}
+
+/** The groups that match on the group's values but not on the main entity's, or the reverse. */
+const buildResolvedEntityOverridesQuery = ({
+  namespace,
+  concreteEntityIndexName,
+  own,
+  group,
+}: Pick<QueryArgs, 'namespace' | 'concreteEntityIndexName'> &
+  ResolvedEntityConditions): string[] => [
+  `FROM ${getEntityAlias(namespace)}`,
   `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NOT NULL`,
-  ...buildResolvedEntityAliasSteps(args),
-  `| EVAL own_matches = COALESCE(${args.entityExpression}, false)`,
+  ...buildResolvedEntityAliasSteps({ concreteEntityIndexName }),
+  `| EVAL own_matches = COALESCE(${own}, false)`,
   ...buildResolvedEntityValueSteps(),
-  `| EVAL resolved_entity_matches = COALESCE(${args.entityExpression}, false)`,
+  `| EVAL resolved_entity_matches = COALESCE(${group}, false)`,
   '| WHERE own_matches != resolved_entity_matches',
   '| KEEP `entity.id`, resolved_entity_matches',
   `| LIMIT ${MAX_RESOLVED_ENTITY_FILTER_OVERRIDES + 1}`,
@@ -196,18 +200,15 @@ const buildResolvedEntityFilterOverridesQuery = (
 
 const EMPTY_OVERRIDES: ResolvedEntityFilterOverrides = { include: [], exclude: [] };
 
-export const fetchResolvedEntityFilterOverrides = async (
-  args: Pick<QueryArgs, 'namespace' | 'concreteEntityIndexName' | 'entityExpression' | 'rowsMode'>,
+/** Ids to add to (`include`) and remove from (`exclude`) what a plain query matches. */
+export const fetchResolvedEntityOverrides = async (
+  args: Pick<QueryArgs, 'namespace' | 'concreteEntityIndexName'> & ResolvedEntityConditions,
   runQuery: EsqlRunner
 ): Promise<ResolvedEntityFilterOverrides> => {
-  const { entityExpression } = args;
-  if (!entityExpression || !isFilteringByGroupValue(args)) return EMPTY_OVERRIDES;
-  const rows = await runQuery(
-    buildResolvedEntityFilterOverridesQuery({ ...args, entityExpression })
-  );
+  const rows = await runQuery(buildResolvedEntityOverridesQuery(args));
   if (rows.length > MAX_RESOLVED_ENTITY_FILTER_OVERRIDES) {
     throw new Error(
-      'The filters match too many resolved entities differently from their main entity'
+      'The filters or the search match too many resolved entities differently from their main entity'
     );
   }
   const idsOf = (matches: boolean) =>
@@ -217,7 +218,22 @@ export const fetchResolvedEntityFilterOverrides = async (
   return { include: idsOf(true), exclude: idsOf(false) };
 };
 
-/** Entity docs hold own values, so the filters add or drop the resolved entities that pass differently. */
+export const fetchResolvedEntityFilterOverrides = async (
+  args: Pick<QueryArgs, 'namespace' | 'concreteEntityIndexName' | 'entityExpression' | 'rowsMode'>,
+  runQuery: EsqlRunner
+): Promise<ResolvedEntityFilterOverrides> => {
+  const { entityExpression } = args;
+  if (!entityExpression || !isFilteringByGroupValue(args)) return EMPTY_OVERRIDES;
+  return fetchResolvedEntityOverrides(
+    { ...args, own: entityExpression, group: entityExpression },
+    runQuery
+  );
+};
+
+/**
+ * Entity docs hold own values, so the filters add or drop the resolved entities that pass differently.
+ * The result is wrapped when it holds an `OR`, so that joining it with `AND` keeps its meaning.
+ */
 export const applyResolvedEntityFilterOverrides = (
   expression: string,
   { include = [], exclude = [] }: Partial<ResolvedEntityFilterOverrides> = {}
@@ -225,7 +241,7 @@ export const applyResolvedEntityFilterOverrides = (
   const passing = exclude.length
     ? `(${expression}) AND NOT ${ENTITY_ID_FIELD} IN (${toList(exclude)})`
     : expression;
-  return include.length ? `(${passing}) OR ${ENTITY_ID_FIELD} IN (${toList(include)})` : passing;
+  return include.length ? `((${passing}) OR ${ENTITY_ID_FIELD} IN (${toList(include)}))` : passing;
 };
 
 /** The DSL form of `applyResolvedEntityFilterOverrides`, for the reads that run on DSL. */

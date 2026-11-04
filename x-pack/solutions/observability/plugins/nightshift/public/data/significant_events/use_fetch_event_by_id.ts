@@ -6,20 +6,23 @@
  */
 
 import { useQuery, type UseQueryResult } from '@kbn/react-query';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type { SignificantEventResponse } from '@kbn/significant-events-schema';
 import { useKibana } from '../../hooks/use_kibana';
 import { EVENT_BY_ID_QUERY_KEY } from '../query_keys';
+import { hasInvestigationsToPoll } from './investigation_state';
+
+const RUNNING_INVESTIGATIONS_REFETCH_INTERVAL_MS = 5_000;
 
 /** Fetches one significant event by its stable `event_id`, unfiltered by the landing list's severity and time range. */
 export const useFetchEventById = (
   eventId: string | undefined,
   { enabled = true }: { enabled?: boolean } = {}
-): UseQueryResult<SignificantEvent | null, Error> => {
+): UseQueryResult<SignificantEventResponse | null, Error> => {
   const {
     significantEvents: { significantEventsRepositoryClient },
   } = useKibana().services;
 
-  return useQuery<SignificantEvent | null, Error>({
+  return useQuery<SignificantEventResponse | null, Error>({
     queryKey: [...EVENT_BY_ID_QUERY_KEY, eventId],
     enabled: enabled && Boolean(eventId),
     queryFn: async ({ signal }) => {
@@ -33,5 +36,9 @@ export const useFetchEventById = (
 
       return response.hits.at(0) ?? null;
     },
+    refetchInterval: (event) =>
+      event && hasInvestigationsToPoll([event])
+        ? RUNNING_INVESTIGATIONS_REFETCH_INTERVAL_MS
+        : false,
   });
 };

@@ -142,7 +142,7 @@ const combineExtractors =
  * excluded, consistent with the rationale for the excluded types listed below.
  *
  * Must be defensive against undecoded payloads: `findWithSearch` calls `findAll` with
- * `decode: false`, so io-ts has not validated `payload.workflow` before this runs.
+ * `decode: false`, so zod has not validated `payload.workflow` before this runs.
  */
 const extractWorkflowContent: SearchableContentExtractor = (payload) => {
   const workflow = payload.workflow as Record<string, unknown> | undefined;

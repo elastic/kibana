@@ -25,7 +25,8 @@ import { apiTest } from '../fixtures';
 
 const TOOLS_EXECUTE_API = '/api/agent_builder/tools/_execute';
 const SML_CRAWLER_TASK_TYPE = 'agent_builder_sml:sml_crawler';
-const CRAWL_POLL_TIMEOUT_MS = 45_000;
+// Must outlive one fully missed 1m crawl cycle (the crawler's `fetchFrequency`) plus a slow Cloud crawl.
+const CRAWL_POLL_TIMEOUT_MS = 150_000;
 const CRAWL_POLL_INTERVAL_MS = 1_000;
 
 const EXECUTE_HEADERS = {
@@ -134,6 +135,8 @@ apiTest.describe('Agent Builder — alerting V2 SML type access', { tag: API_ENG
   };
 
   apiTest.beforeAll(async ({ requestAuth, kbnClient, apiClient, apiServices }) => {
+    apiTest.setTimeout(CRAWL_POLL_TIMEOUT_MS + 30_000);
+
     await kbnClient.uiSettings.update({
       [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
     });

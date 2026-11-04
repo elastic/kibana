@@ -15,6 +15,11 @@ import {
   alertingV1RawRuleTemplateSchemaV4,
   alertingV2RawRuleTemplateSchemaV4,
 } from './v4';
+import {
+  rawRuleTemplateSchema as rawRuleTemplateSchemaV5,
+  alertingV1RawRuleTemplateSchemaV5,
+  alertingV2RawRuleTemplateSchemaV5,
+} from './v5';
 
 export {
   rawRuleTemplateSchemaV1,
@@ -22,11 +27,14 @@ export {
   rawRuleTemplateSchemaV3,
   alertingV1RawRuleTemplateSchemaV4,
   alertingV2RawRuleTemplateSchemaV4,
+  alertingV1RawRuleTemplateSchemaV5,
+  alertingV2RawRuleTemplateSchemaV5,
+  rawRuleTemplateSchemaV5,
 };
 export { rawRuleTemplateSchema as rawRuleTemplateSchemaV4 };
 
-export type RawRuleTemplate = TypeOf<typeof rawRuleTemplateSchema>;
-export type AlertingV1RawRuleTemplate = TypeOf<typeof alertingV1RawRuleTemplateSchemaV4>;
-export type AlertingV2RawRuleTemplate = TypeOf<typeof alertingV2RawRuleTemplateSchemaV4>;
+export type RawRuleTemplate = TypeOf<typeof rawRuleTemplateSchemaV5>;
+export type AlertingV1RawRuleTemplate = TypeOf<typeof alertingV1RawRuleTemplateSchemaV5>;
+export type AlertingV2RawRuleTemplate = TypeOf<typeof alertingV2RawRuleTemplateSchemaV5>;
 
 export { assertAlertingV1RawRuleTemplate, isAlertingV2RawRuleTemplate } from './guards';

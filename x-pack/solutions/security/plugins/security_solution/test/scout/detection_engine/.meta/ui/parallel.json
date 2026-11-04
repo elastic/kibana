@@ -1,5 +1,5 @@
 {
-  "sha1": "ae36625c711253f959355b317542bee476410033",
+  "sha1": "f69afa7c49914432dcb457e4f4fe95e890a1cbda",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -179,7 +179,7 @@
     {
       "id": "291e2d875a93447-ea82c2b7874f3df",
       "title": "Indicator match rule creation: indicator mapping validates the indicator mapping when continuing",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -188,8 +188,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/indicator_match_mapping.spec.ts",
-        "line": 30,
-        "column": 34
+        "line": 31,
+        "column": 22
       }
     },
     {
