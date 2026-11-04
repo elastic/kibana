@@ -65,6 +65,9 @@ const WorkflowDestinationCard = ({ id }: { id: string }) => {
   } = useFetchWorkflow(id, true, { notifyOnError: false });
   const application = useService(CoreStart('application'));
   const href = application.getUrlForApp(WORKFLOWS_APP_ID, { path: `/${id}` });
+  const isNotFound = isNotFoundError(error);
+  // A failed background refetch keeps the cached workflow visible unless it was deleted.
+  const showError = isError && (isNotFound || !workflow);
 
   return (
     <EuiPanel
@@ -76,8 +79,8 @@ const WorkflowDestinationCard = ({ id }: { id: string }) => {
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow css={{ minWidth: 0 }}>
           {isLoading && <LoadingBody />}
-          {!isLoading && isError && <ErrorBody id={id} isNotFound={isNotFoundError(error)} />}
-          {!isLoading && !isError && (
+          {!isLoading && showError && <ErrorBody id={id} isNotFound={isNotFound} />}
+          {!isLoading && !showError && (
             <WorkflowBody
               name={workflow?.name ?? id}
               description={workflow?.description}

@@ -121,6 +121,29 @@ describe('DestinationCard', () => {
     expect(screen.getByTestId('actionPolicyDestinationCardLink')).toBeInTheDocument();
   });
 
+  it('keeps the cached workflow when a background refetch fails', () => {
+    mockUseFetchWorkflow.mockReturnValue({
+      ...errorState(500),
+      data: successState('wf-42').data,
+    });
+    renderCard({ type: 'workflow', id: 'wf-42' });
+
+    expect(screen.getByTestId('actionPolicyDestinationCardTitle')).toHaveTextContent(
+      'Workflow wf-42'
+    );
+    expect(screen.queryByTestId('actionPolicyDestinationCardError')).toBeNull();
+  });
+
+  it('renders a not found message when a refetch finds the workflow deleted', () => {
+    mockUseFetchWorkflow.mockReturnValue({
+      ...errorState(404),
+      data: successState('wf-42').data,
+    });
+    renderCard({ type: 'workflow', id: 'wf-42' });
+
+    expect(screen.getByTestId('actionPolicyDestinationCardNotFound')).toBeInTheDocument();
+  });
+
   it('renders a workflow card with the workflow name in bold', () => {
     renderCard({ type: 'workflow', id: 'wf-42' });
 
