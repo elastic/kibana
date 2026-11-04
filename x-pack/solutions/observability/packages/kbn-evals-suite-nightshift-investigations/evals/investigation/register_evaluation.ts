@@ -14,7 +14,7 @@ import {
   createHttpServiceAccountsApi,
   ensureNightshiftServiceAccountRoles,
   ensureNightshiftServiceAccounts,
-} from '@kbn/nightshift-investigations-plugin/common';
+} from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { evaluate } from '../../src/evaluate';
 import { loadInvestigationDataset } from './datasets';

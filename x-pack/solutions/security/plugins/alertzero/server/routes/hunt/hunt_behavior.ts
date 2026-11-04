@@ -44,7 +44,7 @@ export const registerHuntBehaviorRoute = ({
           requiredPrivileges: [ALERTZERO_API_PRIVILEGE_WRITE],
         },
       },
-      summary: 'Run Tier 2 behavioral corroboration against a threat report',
+      summary: 'Run Behavior Hunt against a threat report',
     })
     .addVersion(
       {

@@ -15,11 +15,11 @@ export const configSchema = schema.object({
    * evals product: HTTP routes, the `evals` feature and privileges, data streams, the app,
    * the management section and the `ai.evals.*` workflow steps.
    *
-   * Defaults to `full` until deployments that need the evals product (the golden cluster) set it
-   * explicitly; the default then moves to `runtime`.
+   * Defaults to `runtime`, so enabling the plugin exposes no evals UI, API or privileges unless
+   * `full` is set explicitly.
    */
   mode: schema.oneOf([schema.literal('runtime'), schema.literal('full')], {
-    defaultValue: 'full',
+    defaultValue: 'runtime',
   }),
 });
 

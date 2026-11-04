@@ -66,6 +66,8 @@ const createInvestigationConfig = (
         '--xpack.agenticInvestigations.enabled=true',
         '--xpack.proposals.enabled=true',
         '--feature_flags.overrides.nightshift.enabled=true',
+        // The suite judges investigations offline; online evals would run its judges again on every one.
+        '--feature_flags.overrides.nightshift.onlineEvals.paused=true',
         '--xpack.nightshift_investigations.cortex.enabled=false',
         '--xpack.nightshift_investigations.memory.enabled=false',
         '--xpack.nightshift_investigations.findings_recorder.enabled=false',
@@ -73,7 +75,6 @@ const createInvestigationConfig = (
         ...(connectorsConfig ? [`--config=${connectorsConfig}`] : []),
         '--uiSettings.overrides.workflows:ui:enabled=true',
         '--uiSettings.overrides.workflows:aiAgent:enabled=true',
-        '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
         // The tracing config set already lifts the content redaction settings.
         '--uiSettings.overrides.agentBuilder:tracing:enabled=true',
         '--uiSettings.overrides.agentBuilder:tracing:includeUserData=true',

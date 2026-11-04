@@ -12,7 +12,7 @@ This package runs in CI on every PR. It compares the current branch's OAS files 
 git show base OAS → oasdiff diff → parse → apply allowlist → classify by tier → report → notify
 ```
 
-The check is a hard gate: a BC detected in stable/tech_preview fails the check (non-zero exit), and the failed API Contracts step blocks merge. Adding `soft_fail` to `.buildkite/pipelines/pull_request/api_contracts.yml` would turn it back into a soft gate.
+The check is a hard gate: a BC detected in stable/tech_preview fails the check (non-zero exit), and the failed API Contracts step blocks merge. Adding `soft_fail` to `.buildkite/pipeline-utils/step-library/steps/api_contracts.ts` would turn it back into a soft gate.
 
 **Key components:**
 

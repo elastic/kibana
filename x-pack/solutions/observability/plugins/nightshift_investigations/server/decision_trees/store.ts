@@ -101,6 +101,11 @@ export interface DecisionTreeStore {
     roundId?: string;
     workflowExecutionId?: string;
   }) => Promise<DecisionTreeDetail>;
+  /**
+   * Ids of the trees with a version written from this investigation's rounds. The investigation id
+   * is its conversation id, which `commit` stamps on each version as `conversation_id`.
+   */
+  listTreeIdsForInvestigation: (investigationId: string) => Promise<string[]>;
   listVersions: (treeId: string) => Promise<DecisionTreeVersionSummary[]>;
   getVersion: (treeId: string, version: number) => Promise<DecisionTreeVersionDetail | undefined>;
   archive: (treeId: string) => Promise<void>;
@@ -380,6 +385,38 @@ export const createDecisionTreeStore = ({
 
       logger.debug(`Committed decision tree ${fullTreeId} v${nextVersion}`);
       return headToDetail(headDoc);
+    },
+
+    listTreeIdsForInvestigation: async (investigationId) => {
+      // Buckets by tree rather than reading version hits, so a tree with many versions cannot
+      // push the investigation's other trees out of the response.
+      const response = await esClient.search<
+        DecisionTreeVersionSource,
+        { tree_ids: { buckets: Array<{ key: string }> } }
+      >(
+        {
+          index: DECISION_TREE_AI_INDEX_DEST,
+          ignore_unavailable: true,
+          allow_no_indices: true,
+          size: 0,
+          track_total_hits: false,
+          query: {
+            bool: {
+              filter: [
+                // The head carries the last writer's conversation, so only versions say every
+                // investigation that wrote the tree.
+                { term: { type: 'decision_tree_version' } },
+                { term: { 'attributes.conversation_id': investigationId } },
+                { term: { [SPACE_ID_FIELD]: spaceId } },
+              ],
+            },
+          },
+          aggs: { tree_ids: { terms: { field: 'attributes.tree_id', size: MAX_TREES } } },
+        },
+        { signal }
+      );
+
+      return (response.aggregations?.tree_ids.buckets ?? []).map((bucket) => bucket.key);
     },
 
     listVersions: async (treeId) => {

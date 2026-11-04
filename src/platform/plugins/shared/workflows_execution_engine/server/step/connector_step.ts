@@ -92,7 +92,7 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
   }
 
   public getInput() {
-    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
+    return this.stepExecutionRuntime.contextManager.renderObjectAccordingToContextAsync(
       this.step.with || {}
     );
   }

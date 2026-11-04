@@ -26,6 +26,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
   const createManagedClient = () => ({
     install: jest.fn().mockResolvedValue(undefined),
     uninstall: jest.fn().mockResolvedValue(undefined),
+    disable: jest.fn().mockResolvedValue(true),
     ready: jest.fn().mockResolvedValue(undefined),
     execute: jest.fn().mockResolvedValue('mock-execution-id'),
     getInstalledWorkflowState: jest.fn().mockResolvedValue(null),

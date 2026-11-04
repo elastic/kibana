@@ -51,6 +51,7 @@ const setup = ({
       actionTypeId: '.http',
       config: { url: 'https://api.example.com' },
       headers: { Authorization: SAVED_CONNECTOR_AUTHORIZATION },
+      hosts: ['api.example.com'],
     };
   });
   actionsClient.getAll.mockImplementation(
@@ -273,6 +274,7 @@ describe('withSandboxOutputRedaction', () => {
       actionTypeId: '.http',
       config: { url: 'https://api.example.com' },
       headers: { Authorization: `Basic ${basicToken}` },
+      hosts: ['api.example.com'],
     });
 
     // A call that injected nothing reads the header value back from a file.

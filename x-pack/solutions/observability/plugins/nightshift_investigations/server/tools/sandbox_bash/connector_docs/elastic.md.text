@@ -2,8 +2,12 @@
 
 Use for: querying cluster telemetry (logs, metrics, traces) with ES|QL or the REST API.
 
-Check `/workspace/connectors.md` for an Elasticsearch connector. Query that cluster by passing its id
-as `connector_id: "<connector-id>"` to `nightshift_sandbox_bash`.
+Query Elasticsearch by passing an Elasticsearch connector's `connector_id` to
+`nightshift_sandbox_bash`. Take it from `/workspace/connectors.md`: an External
+Elasticsearch (`.elasticsearch`) connector, or an HTTP (`.http`) connector whose URL is an
+Elasticsearch cluster. If several fit, pick the one for the cluster the question is about. If
+none is listed, Elasticsearch is not reachable: say so instead of guessing credentials.
+
 Credentials are not stored here: for that single command only, the environment contains
 
 - `CONNECTOR_CONFIG_URL` — Elasticsearch URL
