@@ -28,6 +28,30 @@ export const ENTITY_TYPE_PREFIX = 'entity.';
 export const isDreamedKiType = (type: string): boolean =>
   type.startsWith(FACT_TYPE_PREFIX) || type.startsWith(ENTITY_TYPE_PREFIX);
 
+/** The KI types of the memories dreaming reads: what agents saved with the `remember` tool. */
+export const DREAMING_MEMORY_KI_TYPES: readonly string[] = [
+  'memory.session_fact',
+  'memory.session',
+];
+
+/**
+ * Attributes dreaming keeps on every fact and entity: how many memories it was seen in, and when
+ * the latest of them was recorded.
+ */
+export const OCCURRENCES_ATTRIBUTE = 'memory.number_of_occurrences';
+export const LAST_SEEN_AT_ATTRIBUTE = 'memory.last_seen_at';
+
+/** Cap on each list in a change set returned by the model. */
+export const MAX_DREAMING_CHANGE_SET_ITEMS = 200;
+/** Memories one dreaming step may be given. */
+export const MAX_DREAMING_STEP_MEMORIES = 200;
+
+/** Access patterns one entity or fact may carry, and the bounds on each of their fields. */
+export const MAX_DREAMING_ACCESS_PATTERNS = 5;
+export const MAX_ACCESS_PATTERN_LABEL_LENGTH = 256;
+export const MAX_ACCESS_PATTERN_RETURNS_LENGTH = 1024;
+export const MAX_ACCESS_PATTERN_ESQL_LENGTH = 4096;
+
 /**
  * Attribute keys dreaming writes on every entity for itself, so an entity type can't configure
  * them: the access pattern queries the ES|QL verifiers check, and the patterns as JSON.

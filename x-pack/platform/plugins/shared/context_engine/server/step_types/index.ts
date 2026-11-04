@@ -13,8 +13,9 @@ import { getUpdateKiStepDefinition } from './update_ki';
 import { getDeleteKiStepDefinition } from './delete_ki';
 import { getFeedbackContextStepDefinition } from './feedback_context';
 import { getRecordImprovementsStepDefinition } from './record_improvements';
+import { getApplyDreamChangesStepDefinition } from './apply_dream_changes';
 
-/** Registers the KI and feedback analysis workflow steps. */
+/** Registers the KI, feedback analysis and dreaming workflow steps. */
 export const registerStepDefinitions = ({
   workflowsExtensions,
   feedbackAnalysis,
@@ -30,4 +31,5 @@ export const registerStepDefinitions = ({
   workflowsExtensions.registerStepDefinition(getDeleteKiStepDefinition(deps));
   workflowsExtensions.registerStepDefinition(getFeedbackContextStepDefinition(feedbackAnalysis));
   workflowsExtensions.registerStepDefinition(getRecordImprovementsStepDefinition(feedbackAnalysis));
+  workflowsExtensions.registerStepDefinition(getApplyDreamChangesStepDefinition(deps));
 };
