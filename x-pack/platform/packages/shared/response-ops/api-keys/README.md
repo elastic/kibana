@@ -25,6 +25,16 @@ The package reads stored keys as `StoredApiKeys`, which uses the alerting rule f
 
 `toFakeRequest` picks the credential from `StoredApiKeys` and builds the request. Code that already has the credential (the Task Manager and actions task runners, the alerting v2 dispatcher) calls `buildFakeRequest` directly; Task Manager picks it with `pickCredential` first.
 
+## Client or function?
+
+`ApiKeysClient` holds what every security API call needs (the security service, a logger, the plugin's UIAM log tags and whether UIAM is enabled). Use it to create, clone or parse a key, or to invalidate one right away.
+
+Everything else is a plain function:
+
+- Stored-key and fake-request helpers (`encodeApiKey`, `decodeApiKey`, `getUiamApiKeySecret`, `getInvalidationTargets`, `pickCredential`, `buildFakeRequest`, `toFakeRequest`) have no dependencies, so they work anywhere, including task runners.
+- `queueInvalidationTargets` needs a saved objects client and the plugin's pending-invalidation type.
+- `runInvalidate` takes its clients and invalidate functions from the task's context at run time.
+
 ## To change X, edit Y
 
 | To change | Edit |
