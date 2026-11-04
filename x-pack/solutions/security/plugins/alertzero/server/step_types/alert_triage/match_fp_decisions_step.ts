@@ -37,6 +37,7 @@ import {
   closeAlertsAsFalsePositive,
   countClosedByDecision,
   fetchDecisionCandidates,
+  findOpenAlertIds,
   statusCodeOf,
   tagAlerts,
   writeAlertNotes,
@@ -160,13 +161,35 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
         };
 
         /**
+         * Takes the decision's tag off the alerts a failed close left open. Candidates leave out
+         * every alert with that tag, so a tag left on an open alert would stop the next sweep from
+         * trying again. Alerts the close did reach keep it, so revoke can find them. Best effort:
+         * when this fails too, the alerts stay with analysis.
+         */
+        const untagStillOpen = async (id: string, alertIds: string[]) => {
+          if (alertIds.length === 0) return;
+          try {
+            const open = await findOpenAlertIds(contextManager, alertIds);
+            if (open.length === 0) return;
+            await tagInChunks(write, {
+              alertIds: open,
+              add: [],
+              remove: [`${TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX}${id}`],
+            });
+          } catch (error) {
+            warn(`Could not take the tag of decision ${id} off alerts that stayed open`, error);
+          }
+        };
+
+        /**
          * Closes what each decision may still close today. The decision's tag goes on first, so a
-         * close that lands is always findable by revoke; a close that fails leaves tagged open
-         * alerts, which the next sweep tries again. When the daily count cannot be read nothing is
+         * close that lands is always findable by revoke. A failure takes the tag off the alerts that
+         * stayed open, so the next sweep tries them again. When the daily count cannot be read nothing is
          * closed, because the cap could not be applied.
          */
         const close = async (byDecision: Map<string, string[]>) => {
           for (const [id, alertIds] of byDecision) {
+            let tagged: string[] = [];
             try {
               if (!room.has(id)) {
                 room.set(
@@ -181,6 +204,7 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
               const allowed = alertIds.slice(0, room.get(id));
               totals.capped += alertIds.length - allowed.length;
               if (allowed.length === 0) continue;
+              tagged = allowed;
               await tagInChunks(write, {
                 alertIds: allowed,
                 add: [`${TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX}${id}`],
@@ -196,6 +220,7 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
             } catch (error) {
               totals.close_failures++;
               warn(`Could not close the alerts of decision ${id}`, error);
+              await untagStillOpen(id, tagged);
             }
           }
         };
