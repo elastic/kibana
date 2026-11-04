@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/core-elasticsearch-server-utils'
   - '@kbn/core-plugins-server'
+  - '@kbn/cps'
   - '@kbn/cps-server-utils'
   - '@kbn/es-errors'
   - '@kbn/features-plugin'
@@ -29,6 +30,7 @@ dependsOn:
   - '@kbn/server-route-repository-client'
   - '@kbn/scout-oblt'
   - '@kbn/streams-schema'
+  - '@kbn/task-manager-plugin'
   - '@kbn/zod'
 tags:
   - plugin
