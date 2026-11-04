@@ -21,6 +21,12 @@ version: "1"
 #      there directly: column names are derived from field names, so a new metric is one edit.
 #   3. Set `corpus_filter` to a `| WHERE` clause to restrict which units are profiled.
 #
+# `instructions` and `connector_id` can be edited after install, like the other consts.
+# `instructions` is the guidance on what to write. The prompt around it carries the unit, the
+# mapping, the aggregations, the output fields and the ES|QL rules the verifiers enforce, and stays
+# as it is. `instructions` is plain text, not Liquid: refer to the unit and the index as given
+# above it.
+#
 # A re-run regenerates every unit and replaces its KI, because `ki_id` is derived from the unit.
 name: Unit profile KI automation
 description: >
@@ -53,6 +59,20 @@ consts:
   # The KI budget: the most active units profiled in one run, one model call each. 100 is the
   # onboarding ceiling; raise it once the output is trusted.
   max_units: __MAX_UNITS__
+  # The AI connector the profiles are written with. "" uses Context Engine's default model.
+  connector_id: ""
+  # What each profile should say. Plain text, inserted into the prompt as written.
+  instructions: |
+    Write a structured profile grounded strictly in the data above.
+
+    This profile sits alongside one sibling KI per other unit, all with near-identical titles.
+    The `summary` is what a retriever uses to tell them apart, so lead it with the numbers that
+    make this unit different from its siblings rather than with what they all have in common.
+
+    For `access_patterns` give up to 3 distinct analyst questions about this unit that
+    the data above can actually answer. Return an empty array rather than an invented
+    query when none can; a profile that only orients is allowed, a query that answers
+    nothing is not.
 
 tags:
   - unit-profile
@@ -78,8 +98,19 @@ steps:
       method: GET
       path: /{{ consts.unit_index }}/_mapping
 
+  # The configured fields must still exist. A renamed or removed field fails the run here, with
+  # Elasticsearch naming it, instead of failing every unit inside the loop, which continues.
+  - name: check_fields
+    type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM {{ consts.unit_index }}
+        | KEEP `{{ consts.unit_key }}`, `{{ consts.activity_field }}`, `{{ consts.breakdown_field }}`{% for field in consts.metric_fields %}, `{{ field }}`{% endfor %}
+        | LIMIT 0
+
   # All units in one query, ranked by activity descending, capped at `max_units`. No paging.
   # A pilot takes the top `pilot_size` of the same ranking, so the full run replaces its KIs.
+  # A record whose key holds several values counts once for each. An empty key is not a unit.
   - name: discover_units
     type: elasticsearch.esql.query
     with:
@@ -88,6 +119,7 @@ steps:
         | WHERE `{{ consts.unit_key }}` IS NOT NULL
         {{ consts.corpus_filter }}
         | STATS docs = COUNT(*) BY `{{ consts.unit_key }}`
+        | WHERE `{{ consts.unit_key }}` != ""
         | SORT docs DESC, `{{ consts.unit_key }}` ASC
         | LIMIT {{ inputs.pilot_size | default: consts.max_units | at_most: consts.max_units }}
         | KEEP `{{ consts.unit_key }}`
@@ -126,6 +158,8 @@ steps:
               # produce distinct, non-colliding KIs.
               ki_id: "{{ consts.automation_name }}/{{ foreach.item[0] }}"
 
+          # The unit filter is MV_CONTAINS, not ==: `==` is null on a multi-valued key, so it would
+          # leave out every record that references this unit alongside another.
           # Grounding 1: totals over every row referencing the unit, then one average per
           # `metric_fields` entry. Column names are derived from field names, so every column
           # propagates through the description and content automatically. The metrics come last
@@ -135,7 +169,7 @@ steps:
             with:
               query: |
                 FROM {{ consts.unit_index }}
-                | WHERE `{{ consts.unit_key }}` == "{{ steps.unit_context.output.unit_escaped }}"
+                | WHERE MV_CONTAINS(`{{ consts.unit_key }}`, "{{ steps.unit_context.output.unit_escaped }}")
                 {{ consts.corpus_filter }}
                 | STATS records = COUNT(*),
                         `distinct {{ consts.breakdown_field | remove: '`' }} values` = COUNT_DISTINCT(`{{ consts.breakdown_field }}`),
@@ -149,15 +183,17 @@ steps:
             with:
               query: |
                 FROM {{ consts.unit_index }}
-                | WHERE `{{ consts.unit_key }}` == "{{ steps.unit_context.output.unit_escaped }}"
+                | WHERE MV_CONTAINS(`{{ consts.unit_key }}`, "{{ steps.unit_context.output.unit_escaped }}")
                 {{ consts.corpus_filter }}
                 | STATS count = COUNT(*) BY `{{ consts.breakdown_field }}`
                 | SORT count DESC
                 | LIMIT 10
 
+          # `== blank` covers an empty or missing `connector_id`; an empty `connector-id` is unset.
           - name: profile_unit
             type: ai.prompt
-            connector-id-by-feature: context_engine_prompt
+            connector-id: "{{ consts.connector_id }}"
+            connector-id-by-feature: "{% if consts.connector_id == blank %}context_engine_prompt{% endif %}"
             with:
               systemPrompt: |
                 You are a precise data analyst assistant. Ground every statement strictly in the
@@ -185,20 +221,13 @@ steps:
                 ### Breakdown by {{ consts.breakdown_field }} (ES|QL result)
                 {{ steps.unit_breakdown.output | json }}
 
-                Write a structured profile grounded strictly in the data above.
+                {{ consts.instructions }}
 
-                This profile sits alongside one sibling KI per other {{ consts.unit_key }} value,
-                all with near-identical titles. The `summary` is what a retriever uses to tell them
-                apart, so lead it with the numbers that make this unit different from its siblings
-                rather than with what they all have in common.
-
-                For `access_patterns` give up to 3 distinct analyst questions about this unit that
-                the data above can actually answer. Return an empty array rather than an invented
-                query when none can; a profile that only orients is allowed, a query that answers
-                nothing is not. Each entry has:
+                Each `access_patterns` entry has:
                 - question_type: a short label for the kind of question.
                 - esql_template: an ES|QL query scoped to this unit using the filter
-                  `{{ consts.unit_key }} == ?unit` — a bare named parameter without quotes.
+                  `MV_CONTAINS({{ consts.unit_key }}, ?unit)` — a bare named parameter without
+                  quotes.
                 - esql_example: the same query with ?unit replaced by the string literal
                   "{{ steps.unit_context.output.unit_escaped }}"; copy it exactly as written,
                   every backslash included.
@@ -208,7 +237,9 @@ steps:
                 - Start with `FROM {{ consts.unit_index }}`; use `|` between commands; use real field
                   names only, exactly as they appear in the mapping above, including backticks around
                   names with spaces.
-                - Scope every query to this unit with `WHERE {{ consts.unit_key }} == "..."`.
+                - Scope every query to this unit with
+                  `WHERE MV_CONTAINS({{ consts.unit_key }}, "...")`. A record can hold several
+                  {{ consts.unit_key }} values, and `==` never matches those records.
                 - Quote string literals with double quotes; do not quote numbers or booleans.
                 - Boolean fields take `COUNT(*) WHERE field == true`, never SUM()/AVG()/MIN()/MAX(),
                   which fail at runtime on a boolean. For a rate, divide that count by the total with
