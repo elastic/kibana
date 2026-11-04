@@ -16,6 +16,11 @@ describe('getApiKeyAuthErrorKind', () => {
     ).toBe('missing');
     expect(getApiKeyAuthErrorKind('... [0xD38358] ...')).toBe('revoked');
     expect(getApiKeyAuthErrorKind('... [0x7E0116] ...')).toBe('expired');
+    expect(
+      getApiKeyAuthErrorKind(
+        'security_exception: failed to authenticate cloud API key: [0xE436AE], caused by: "failed to authenticate cloud API key: [0xE436AE]"'
+      )
+    ).toBe('expired');
   });
 
   it('detects Elasticsearch API key rejections without a UIAM code', () => {

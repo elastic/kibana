@@ -9,11 +9,18 @@ import { UIAM_ERROR_CODES } from '@kbn/core-security-common';
 
 export type ApiKeyAuthErrorKind = 'missing' | 'revoked' | 'expired' | 'rejected';
 
+/**
+ * Code UIAM returns when a cloud API key is past its expiration. `UIAM_ERROR_CODES.TOKEN_EXPIRED`
+ * covers session tokens only; this one was observed from the UIAM service for an expired API key.
+ */
+export const UIAM_API_KEY_EXPIRED_ERROR_CODE = '0xE436AE';
+
 /** UIAM error codes that Elasticsearch embeds in the reason when it rejects a cloud API key. */
 export const API_KEY_AUTH_ERROR_CODES: Readonly<Record<string, ApiKeyAuthErrorKind>> = {
   [UIAM_ERROR_CODES.APIKEY_MISSING]: 'missing',
   [UIAM_ERROR_CODES.APIKEY_REVOKED]: 'revoked',
   [UIAM_ERROR_CODES.TOKEN_EXPIRED]: 'expired',
+  [UIAM_API_KEY_EXPIRED_ERROR_CODE]: 'expired',
 };
 
 /**

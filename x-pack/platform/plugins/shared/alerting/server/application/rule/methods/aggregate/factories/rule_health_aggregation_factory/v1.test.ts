@@ -22,7 +22,7 @@ describe('ruleHealthAggregationFactory', () => {
           },
           "terms": Object {
             "field": "alert.attributes.executionStatus.error.message",
-            "include": ".*(0x28D520|0xD38358|0x7E0116|api key has been invalidated|api key is expired|failed to authenticate cloud API key|unable to authenticate with provided credentials|missing authentication credentials).*",
+            "include": ".*(0x28D520|0xD38358|0x7E0116|0xE436AE|api key has been invalidated|api key is expired|failed to authenticate cloud API key|unable to authenticate with provided credentials|missing authentication credentials).*",
             "size": 100,
           },
         },
