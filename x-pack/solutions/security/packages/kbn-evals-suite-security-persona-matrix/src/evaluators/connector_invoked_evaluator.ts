@@ -26,48 +26,71 @@ export interface ConnectorExpectation {
   expectedStepType?: string;
 }
 
-const WORKFLOW_ARTIFACT_TOOL_IDS = new Set([
-  'platform.core.generate_workflow',
-  'platform.workflows.validate_workflow',
-]);
+const GENERATE_WORKFLOW_TOOL_ID = 'platform.core.generate_workflow';
+const VALIDATE_WORKFLOW_TOOL_ID = 'platform.workflows.validate_workflow';
 
-const collectStrings = (node: unknown, parts: string[]): void => {
-  if (typeof node === 'string') {
-    parts.push(node);
-  } else if (Array.isArray(node)) {
-    node.forEach((child) => collectStrings(child, parts));
-  } else if (node && typeof node === 'object') {
-    Object.values(node as Record<string, unknown>).forEach((child) => collectStrings(child, parts));
-  }
-};
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
 
 /**
- * Pull the text that can contain the authored workflow: the final answer
- * messages plus the `results` of the workflow-authoring tools. The YAML can
- * surface in either depending on whether the model rendered it inline or left
- * it in the generate_workflow response.
+ * Pull the text that can contain the authored workflow. In Agent Builder runs
+ * the YAML is NOT in the `generate_workflow` result (it returns only
+ * attachment/proposal ids plus a prose comment) and `validate_workflow`
+ * returns only `{ result }`, so the artifact lives in three places:
+ *  - the conversation's `workflow.yaml` attachments (`workflowAttachments`,
+ *    read back by the chat client) -- the generate_workflow output;
+ *  - `params.yaml` of `validate_workflow` calls -- the YAML the agent
+ *    validated, i.e. something it produced, not the prompt echoed back;
+ *  - the final answer messages, when the model pastes the YAML inline.
+ * `data.yaml` of a `generate_workflow` result is also read: that is the shape
+ * the tool returns to non-agent callers.
  *
- * Deliberately NOT scanned: tool-call `params` (the agent echoes the
- * prompt's connector id there), reasoning steps, and the precomputed
+ * Deliberately NOT scanned: `generate_workflow` params (`query`/`context` are
+ * the model restating the prompt, connector id included), params of every
+ * other tool, `validate_workflow` results (diagnostics, not the artifact), the
+ * generate_workflow `comment` prose, reasoning steps, and the precomputed
  * correctness/groundedness analyses. An echo in any of those is not an
  * authored workflow targeting the connector.
  */
 export const collectProducedText = (output: unknown): string => {
   const parts: string[] = [];
-  const { messages, steps } = (output ?? {}) as { messages?: unknown; steps?: unknown };
+  const { messages, steps, workflowAttachments } = (output ?? {}) as {
+    messages?: unknown;
+    steps?: unknown;
+    workflowAttachments?: unknown;
+  };
   if (Array.isArray(messages)) {
     messages.forEach((entry) => {
-      const message = (entry as { message?: unknown } | undefined)?.message;
+      const message = isRecord(entry) ? entry.message : undefined;
       if (typeof message === 'string') {
         parts.push(message);
       }
     });
   }
+  if (Array.isArray(workflowAttachments)) {
+    workflowAttachments.forEach((attachment) => {
+      const yaml = isRecord(attachment) ? attachment.yaml : undefined;
+      if (typeof yaml === 'string') {
+        parts.push(yaml);
+      }
+    });
+  }
   if (Array.isArray(steps)) {
     steps.forEach((step) => {
-      const { tool_id: toolId, results } = (step ?? {}) as { tool_id?: string; results?: unknown };
-      if (toolId && WORKFLOW_ARTIFACT_TOOL_IDS.has(toolId)) {
-        collectStrings(results, parts);
+      if (!isRecord(step)) return;
+      const { tool_id: toolId, params, results } = step;
+      if (toolId === VALIDATE_WORKFLOW_TOOL_ID && isRecord(params)) {
+        if (typeof params.yaml === 'string') {
+          parts.push(params.yaml);
+        }
+      }
+      if (toolId === GENERATE_WORKFLOW_TOOL_ID && Array.isArray(results)) {
+        results.forEach((result) => {
+          const data = isRecord(result) ? result.data : undefined;
+          if (isRecord(data) && typeof data.yaml === 'string') {
+            parts.push(data.yaml);
+          }
+        });
       }
     });
   }

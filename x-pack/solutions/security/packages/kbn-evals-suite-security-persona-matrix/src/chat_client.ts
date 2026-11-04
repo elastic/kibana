@@ -51,6 +51,37 @@ export interface ConverseResponse {
   };
   /** sha256 of the ordered tool_id + params sequence (provider ids excluded). */
   trajectoryFingerprint: string;
+  /**
+   * Current-version YAML of each `workflow.yaml` conversation attachment.
+   * In Agent Builder runs `generate_workflow` keeps the YAML in the attachment
+   * and returns only its id, so this is the only place the authored workflow
+   * is recoverable. Empty when the run authored no workflow attachment.
+   */
+  workflowAttachments: WorkflowAttachmentYaml[];
+}
+
+export interface WorkflowAttachmentYaml {
+  id: string;
+  version: number;
+  yaml: string;
+}
+
+const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
+
+const WORKFLOW_AUTHORING_TOOL_IDS = new Set([
+  'platform.core.generate_workflow',
+  'platform.workflows.validate_workflow',
+]);
+
+interface ConversationAttachment {
+  id?: string;
+  type?: string;
+  current_version?: number;
+  versions?: Array<{ version?: number; data?: { yaml?: unknown } }>;
+}
+
+interface ConversationApiResponse {
+  attachments?: ConversationAttachment[];
 }
 
 interface ConverseApiResponse {
@@ -137,6 +168,7 @@ export class PersonaMatrixChatClient {
           seed: null,
         },
         trajectoryFingerprint,
+        workflowAttachments: await this.fetchWorkflowAttachments(resp.conversation_id, steps),
       };
 
       return result;
@@ -148,5 +180,49 @@ export class PersonaMatrixChatClient {
         this.log.warning(`[persona-matrix] converse retry (attempt ${attempt}): ${String(error)}`);
       },
     });
+  }
+
+  /**
+   * Reads the workflow YAML back from the conversation. Only done when the run
+   * called a workflow-authoring tool, so unrelated cells pay no extra request.
+   * A failed read degrades to "no attachments" (the evaluator then scores what
+   * it can see) rather than failing the converse call.
+   */
+  private async fetchWorkflowAttachments(
+    conversationId: string | undefined,
+    steps: ConverseStep[]
+  ): Promise<WorkflowAttachmentYaml[]> {
+    const authoredWorkflow = steps.some(
+      (step) => step.type === 'tool_call' && WORKFLOW_AUTHORING_TOOL_IDS.has(step.tool_id ?? '')
+    );
+    if (!conversationId || !authoredWorkflow) {
+      return [];
+    }
+    try {
+      const conversation = await this.fetch<ConversationApiResponse>({
+        path: `/api/agent_builder/conversations/${conversationId}`,
+        method: 'GET',
+        version: '2023-10-31',
+      });
+      return (conversation.attachments ?? []).flatMap((attachment) => {
+        if (attachment.type !== WORKFLOW_YAML_ATTACHMENT_TYPE || !attachment.id) {
+          return [];
+        }
+        const current = attachment.versions?.find(
+          (candidate) => candidate.version === attachment.current_version
+        );
+        const yaml = current?.data?.yaml;
+        return typeof yaml === 'string' && typeof current?.version === 'number'
+          ? [{ id: attachment.id, version: current.version, yaml }]
+          : [];
+      });
+    } catch (error) {
+      this.log.warning(
+        `[persona-matrix] could not read workflow attachments for ${conversationId}: ${String(
+          error
+        )}`
+      );
+      return [];
+    }
   }
 }

@@ -95,33 +95,103 @@ describe('ConnectorInvoked evaluator', () => {
     expect(result.label).toBe('N/A');
   });
 
-  it('finds the workflow whether it is in the final answer or a tool result', async () => {
-    const inToolResult = {
+  // Real agent-mode shapes, captured from a golden security-persona-matrix run:
+  // generate_workflow returns only ids + prose (the YAML stays in the
+  // attachment) and validate_workflow returns only `{ result }`.
+  const agentGenerateStep = (query = 'post to Slack') => ({
+    type: 'tool_call',
+    tool_id: 'platform.core.generate_workflow',
+    params: { query, context: `Connector ID: ${SLACK_CONNECTOR_ID}` },
+    results: [
+      {
+        type: 'other',
+        data: {
+          comment: 'The workflow is ready and valid.',
+          success: true,
+          attachment_id: 'att-1',
+          attachment_version: 1,
+          proposal_id: 'prop-1',
+          diff_attachment_id: 'diff-1',
+          presentation: 'Render the workflow with "<render_attachment id="att-1" version="1"/>".',
+          created: true,
+        },
+      },
+    ],
+  });
+  const agentValidateStep = (yaml: string) => ({
+    type: 'tool_call',
+    tool_id: 'platform.workflows.validate_workflow',
+    params: { yaml },
+    results: [{ type: 'other', data: { result: { valid: true, diagnostics: [] } } }],
+  });
+  const renderOnlyMessage = {
+    messages: [{ message: 'I created the workflow. <render_attachment id="att-1" version="1"/>' }],
+  };
+
+  it('passes an agent-mode run whose YAML lives only in validate_workflow params.yaml', async () => {
+    const result = await run({
+      ...renderOnlyMessage,
+      steps: [agentGenerateStep(), agentValidateStep(WORKFLOW_WITH_SLACK)],
+    });
+    expect(result.score).toBe(1);
+  });
+
+  it('passes an agent-mode run whose YAML lives only in the workflow attachment', async () => {
+    const result = await run({
+      ...renderOnlyMessage,
+      steps: [agentGenerateStep()],
+      workflowAttachments: [{ id: 'att-1', version: 1, yaml: WORKFLOW_WITH_SLACK }],
+    });
+    expect(result.score).toBe(1);
+  });
+
+  it('passes when generate_workflow returns the YAML itself (non-agent callers)', async () => {
+    const result = await run({
       messages: [{ message: 'Here is your workflow.' }],
       steps: [
         {
           type: 'tool_call',
           tool_id: 'platform.core.generate_workflow',
           params: { query: 'post to Slack' },
-          results: [{ type: 'other', data: { workflow: { yaml: WORKFLOW_WITH_SLACK } } }],
+          results: [{ type: 'other', data: { yaml: WORKFLOW_WITH_SLACK } }],
         },
       ],
-    };
-    const result = await run(inToolResult);
+    });
     expect(result.score).toBe(1);
   });
 
-  // The agent echoes the prompt's connector id into generate_workflow params
-  // and judge analyses; neither is an authored workflow.
-  it('does not credit a connector id echoed in tool params, reasoning or analyses', async () => {
+  it('scores 0 for an agent-mode run whose validated YAML targets the wrong connector', async () => {
+    const wrong = WORKFLOW_WITH_SLACK.replace(
+      SLACK_CONNECTOR_ID,
+      '00000000-dead-beef-0000-000000000000'
+    );
+    const result = await run({
+      ...renderOnlyMessage,
+      steps: [agentGenerateStep(), agentValidateStep(wrong)],
+      workflowAttachments: [{ id: 'att-1', version: 1, yaml: wrong }],
+    });
+    expect(result.score).toBe(0);
+    expect(result.metadata).toMatchObject({ connectorPresent: false });
+  });
+
+  // The agent echoes the prompt's connector id into generate_workflow params,
+  // its own comment prose, reasoning and judge analyses; none is an authored
+  // workflow.
+  it('does not credit a connector id echoed in tool params, comment, reasoning or analyses', async () => {
+    const echoingGenerate = agentGenerateStep(
+      `http step on connector ${SLACK_CONNECTOR_ID}, type: http`
+    );
+    echoingGenerate.results[0].data.comment = `Used connector ${SLACK_CONNECTOR_ID}, type: http.`;
     const result = await run({
       messages: [{ message: 'Done.' }],
       steps: [
+        echoingGenerate,
+        agentValidateStep(WORKFLOW_WITHOUT_SLACK),
         {
           type: 'tool_call',
-          tool_id: 'platform.core.generate_workflow',
-          params: { query: `http step on connector ${SLACK_CONNECTOR_ID}, type: http` },
-          results: [{ type: 'other', data: { workflow: { yaml: WORKFLOW_WITHOUT_SLACK } } }],
+          tool_id: 'platform.workflows.get_connectors',
+          params: { note: `connector ${SLACK_CONNECTOR_ID} type: http` },
+          results: [],
         },
         { type: 'reasoning', reasoning: `use connector ${SLACK_CONNECTOR_ID} with type: http` },
       ],
@@ -132,15 +202,38 @@ describe('ConnectorInvoked evaluator', () => {
     expect(result.metadata).toMatchObject({ connectorPresent: false, stepPresent: false });
   });
 
-  it('ignores results of tools that are not workflow-authoring tools', async () => {
+  it('ignores yaml params of tools other than validate_workflow', async () => {
     const result = await run({
       messages: [{ message: 'Done.' }],
       steps: [
         {
           type: 'tool_call',
+          tool_id: 'platform.core.generate_workflow',
+          params: { yaml: WORKFLOW_WITH_SLACK },
+          results: [],
+        },
+        {
+          type: 'tool_call',
           tool_id: 'platform.core.search',
-          params: {},
-          results: [{ type: 'other', data: WORKFLOW_WITH_SLACK }],
+          params: { yaml: WORKFLOW_WITH_SLACK },
+          results: [{ type: 'other', data: { yaml: WORKFLOW_WITH_SLACK } }],
+        },
+      ],
+    });
+    expect(result.score).toBe(0);
+  });
+
+  it('does not read validate_workflow results as the authored artifact', async () => {
+    const result = await run({
+      messages: [{ message: 'Done.' }],
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: 'platform.workflows.validate_workflow',
+          params: { yaml: WORKFLOW_WITHOUT_SLACK },
+          results: [
+            { type: 'other', data: { result: { diagnostics: [`unknown ${SLACK_CONNECTOR_ID}`] } } },
+          ],
         },
       ],
     });
@@ -158,22 +251,31 @@ describe('ConnectorInvoked evaluator', () => {
   });
 
   describe('collectProducedText', () => {
-    it('gathers final messages and workflow tool results, nothing else', () => {
+    it('gathers messages, attachments, validate params.yaml and generate data.yaml, nothing else', () => {
       const text = collectProducedText({
         messages: [{ message: 'one' }],
+        workflowAttachments: [{ id: 'a', version: 1, yaml: 'attachment-yaml' }],
         steps: [
           {
             tool_id: 'platform.workflows.validate_workflow',
-            params: { yaml: 'param-only' },
-            results: [{ data: { yaml: ['two'] } }],
+            params: { yaml: 'validated-yaml' },
+            results: [{ data: { result: 'validate-result-only' } }],
+          },
+          {
+            tool_id: 'platform.core.generate_workflow',
+            params: { query: 'generate-param-only', yaml: 'generate-param-yaml' },
+            results: [{ data: { yaml: 'generated-yaml', comment: 'comment-only' } }],
           },
         ],
         correctnessAnalysis: 'analysis-only',
       });
       expect(text).toContain('one');
-      expect(text).toContain('two');
-      expect(text).not.toContain('param-only');
-      expect(text).not.toContain('analysis-only');
+      expect(text).toContain('attachment-yaml');
+      expect(text).toContain('validated-yaml');
+      expect(text).toContain('generated-yaml');
+      ['validate-result-only', 'generate-param', 'comment-only', 'analysis-only'].forEach(
+        (excluded) => expect(text).not.toContain(excluded)
+      );
     });
   });
 });

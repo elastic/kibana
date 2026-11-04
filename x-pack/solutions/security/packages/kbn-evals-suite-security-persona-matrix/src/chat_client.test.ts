@@ -82,4 +82,80 @@ describe('PersonaMatrixChatClient provenance', () => {
     expect(res.messages[0].message).toBe('');
     expect(res.messageSource).toBe('response');
   });
+
+  describe('workflowAttachments', () => {
+    const generateStep = {
+      type: 'tool_call',
+      tool_id: 'platform.core.generate_workflow',
+      params: { query: 'x' },
+    };
+    const conversation = {
+      attachments: [
+        { id: 'text-1', type: 'text', current_version: 1, versions: [{ version: 1, data: {} }] },
+        {
+          id: 'wf-1',
+          type: 'workflow.yaml',
+          current_version: 2,
+          versions: [
+            { version: 1, data: { yaml: 'old: yaml' } },
+            { version: 2, data: { yaml: 'new: yaml' } },
+          ],
+        },
+      ],
+    };
+
+    it('reads the current version of workflow.yaml attachments after a workflow-authoring call', async () => {
+      const fetch = jest
+        .fn()
+        .mockResolvedValueOnce({
+          conversation_id: 'conv-1',
+          response: { message: 'ok' },
+          steps: [generateStep],
+        })
+        .mockResolvedValueOnce(conversation);
+      const client = new PersonaMatrixChatClient(fetch, { warning: jest.fn() } as never, 'c');
+
+      const res = await client.query('q');
+
+      expect(fetch).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          path: '/api/agent_builder/conversations/conv-1',
+          method: 'GET',
+        })
+      );
+      expect(res.workflowAttachments).toEqual([{ id: 'wf-1', version: 2, yaml: 'new: yaml' }]);
+    });
+
+    it('does not fetch the conversation when no workflow-authoring tool ran', async () => {
+      const fetch = jest.fn().mockResolvedValue({
+        conversation_id: 'conv-1',
+        response: { message: 'ok' },
+        steps: [{ type: 'tool_call', tool_id: 'search', params: {} }],
+      });
+      const client = new PersonaMatrixChatClient(fetch, { warning: jest.fn() } as never, 'c');
+
+      const res = await client.query('q');
+
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(res.workflowAttachments).toEqual([]);
+    });
+
+    it('degrades to no attachments when the conversation read fails', async () => {
+      const fetch = jest
+        .fn()
+        .mockResolvedValueOnce({
+          conversation_id: 'conv-1',
+          response: { message: 'ok' },
+          steps: [generateStep],
+        })
+        .mockRejectedValueOnce(new Error('boom'));
+      const log = { warning: jest.fn() };
+      const client = new PersonaMatrixChatClient(fetch, log as never, 'c');
+
+      const res = await client.query('q');
+
+      expect(res.workflowAttachments).toEqual([]);
+      expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('boom'));
+    });
+  });
 });
