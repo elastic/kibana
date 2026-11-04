@@ -63,6 +63,9 @@ import {
 import type { AiIndexDataReadServiceApi } from '../ai_indices/data_read_service';
 import type { AiIndexService } from '../ai_indices/service';
 import type { FeedbackAnalysisScheduleService } from '../feedback_analysis/schedule';
+import { createFeedbackAnalysisChangeHandler } from '../feedback_analysis/change_handler';
+import { AiIndexChangeNotifier } from '../ai_indices/changes';
+import type { AiIndexChangeEvent } from '../ai_indices/changes';
 import type { ImprovementsServiceApi } from '../improvements/service';
 import type { DeleteWorkflowsApi } from '../types';
 import type { GetAiIndexDataReadServiceParams } from '../types';
@@ -132,6 +135,7 @@ describe('ai indices routes', () => {
   let improvementsService: jest.Mocked<Pick<ImprovementsServiceApi, 'deleteByAiIndex'>>;
   let workflowsManagementApi: jest.Mocked<DeleteWorkflowsApi>;
   let scheduleService: jest.Mocked<FeedbackAnalysisScheduleService>;
+  const onAiIndexChange = jest.fn<Promise<void>, [AiIndexChangeEvent]>();
   let readService: jest.Mocked<AiIndexDataReadServiceApi>;
   let readServiceParams: GetAiIndexDataReadServiceParams[];
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
@@ -155,6 +159,13 @@ describe('ai indices routes', () => {
   let analyticsService: jest.Mocked<Pick<ContextEngineAnalyticsService, 'reportKiWrite'>>;
   const logger = loggerMock.create();
   const defaultSpaceId = 'default';
+
+  const createAiIndexChanges = () => {
+    const notifier = new AiIndexChangeNotifier(logger);
+    notifier.register(createFeedbackAnalysisChangeHandler(() => scheduleService));
+    notifier.register({ id: 'spy', onChange: onAiIndexChange });
+    return notifier;
+  };
 
   const createContext = () =>
     ({
@@ -289,7 +300,7 @@ describe('ai indices routes', () => {
         improvementsSpaceIds.push(spaceId);
         return improvementsService as unknown as ImprovementsServiceApi;
       },
-      getScheduleService: () => scheduleService as unknown as FeedbackAnalysisScheduleService,
+      aiIndexChanges: createAiIndexChanges(),
       isMemoryEnabled: async () => memoryFlagEnabled,
       getActions: async () => actions,
       getAgentBuilder,
@@ -2058,7 +2069,7 @@ describe('ai indices routes', () => {
           getAiIndexService: () => aiIndexService as unknown as AiIndexService,
           getAiIndexDataReadService: () => readService,
           getImprovementsService: () => improvementsService as unknown as ImprovementsServiceApi,
-          getScheduleService: () => scheduleService as unknown as FeedbackAnalysisScheduleService,
+          aiIndexChanges: createAiIndexChanges(),
           isMemoryEnabled: async () => memoryFlagEnabled,
           getActions: async () => actions,
           getAgentBuilder,
@@ -2417,6 +2428,117 @@ describe('ai indices routes', () => {
         spaceId: 'marketing',
       });
       expect(improvementsSpaceIds).toEqual(['marketing']);
+    });
+  });
+
+  describe('AI index change notifications', () => {
+    const body = {
+      dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
+      automations: [],
+      sources: [],
+      traces: [],
+    };
+
+    it('passes no previous AI index when one is created', async () => {
+      aiIndexService.create.mockResolvedValue(undefined);
+
+      await callRoute('POST', AI_INDEX_PATH, { body: { id: 'customer_support', ...body } });
+
+      expect(onAiIndexChange).toHaveBeenCalledTimes(1);
+      const [event] = onAiIndexChange.mock.calls[0];
+      expect(event.previous).toBeUndefined();
+      expect(event.current).toEqual(aiIndexItem);
+      expect(event.saved).toBeUndefined();
+    });
+
+    it('passes the AI index before and after a full update, and what changed', async () => {
+      const updated = { ...aiIndexItem, description: 'Support cases' };
+      aiIndexService.get.mockResolvedValueOnce(aiIndexItem).mockResolvedValueOnce(updated);
+      aiIndexService.put.mockResolvedValue('updated');
+
+      await callRoute('PUT', AI_INDEX_BY_ID_PATH, {
+        params: { aiIndexId: 'customer_support' },
+        body: { ...body, description: 'Support cases' },
+      });
+
+      expect(onAiIndexChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          aiIndexId: 'customer_support',
+          spaceId: defaultSpaceId,
+          previous: aiIndexItem,
+          current: updated,
+          changed: new Set(['description']),
+        })
+      );
+    });
+
+    it('passes no previous AI index when a full update creates it', async () => {
+      aiIndexService.get
+        .mockRejectedValueOnce(new AiIndexNotFoundError('customer_support'))
+        .mockResolvedValueOnce(aiIndexItem);
+      aiIndexService.put.mockResolvedValue('created');
+
+      await callRoute('PUT', AI_INDEX_BY_ID_PATH, {
+        params: { aiIndexId: 'customer_support' },
+        body,
+      });
+
+      expect(response.created).toHaveBeenCalled();
+      const [event] = onAiIndexChange.mock.calls[0];
+      expect(event.previous).toBeUndefined();
+      expect(event.current).toEqual(aiIndexItem);
+    });
+
+    it('names feedback_analysis as the only field the feedback analysis save wrote', async () => {
+      aiIndexService.setFeedbackAnalysis.mockResolvedValue({ enabled: false });
+
+      await callRoute('PUT', AI_INDEX_FEEDBACK_ANALYSIS_PATH, {
+        params: { aiIndexId: 'customer_support' },
+        body: { enabled: false },
+      });
+
+      const [event] = onAiIndexChange.mock.calls[0];
+      expect(event.saved).toEqual(new Set(['feedback_analysis']));
+    });
+
+    it('passes no current AI index when one is deleted', async () => {
+      aiIndexService.delete.mockResolvedValue(undefined);
+
+      await callRoute('DELETE', AI_INDEX_BY_ID_PATH, { params: { aiIndexId: 'customer_support' } });
+
+      const [event] = onAiIndexChange.mock.calls[0];
+      expect(event.previous).toEqual(aiIndexItem);
+      expect(event.current).toBeUndefined();
+    });
+
+    it('does not notify when the save fails', async () => {
+      aiIndexService.put.mockRejectedValue(new AiIndexConflictError('customer_support'));
+
+      await callRoute('PUT', AI_INDEX_BY_ID_PATH, {
+        params: { aiIndexId: 'customer_support' },
+        body,
+      });
+
+      expect(response.conflict).toHaveBeenCalled();
+      expect(onAiIndexChange).not.toHaveBeenCalled();
+    });
+
+    it('keeps the save and logs when the AI index cannot be read back', async () => {
+      aiIndexService.get
+        .mockResolvedValueOnce(aiIndexItem)
+        .mockRejectedValueOnce(new Error('cluster unavailable'));
+      aiIndexService.put.mockResolvedValue('updated');
+
+      await callRoute('PUT', AI_INDEX_BY_ID_PATH, {
+        params: { aiIndexId: 'customer_support' },
+        body,
+      });
+
+      expect(response.ok).toHaveBeenCalledWith({ body: { status: 'updated' } });
+      expect(onAiIndexChange).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('could not read it back to apply the change: cluster unavailable')
+      );
     });
   });
 
