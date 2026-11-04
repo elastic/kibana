@@ -50,10 +50,10 @@ const investigation: InvestigationSummary = {
   subjects: [],
 };
 
-const renderActions = () =>
+const renderActions = (assignees?: React.ReactNode) =>
   render(
     <I18nProvider>
-      <InvestigationCardActions investigation={investigation} />
+      <InvestigationCardActions investigation={investigation} assignees={assignees} />
     </I18nProvider>
   );
 
@@ -71,6 +71,29 @@ describe('InvestigationCardActions', () => {
     fireEvent.click(screen.getByTestId('nightshiftInvestigationCardOpenInChat'));
 
     expect(openChat).toHaveBeenCalledWith('investigation-1', 'nightshift.investigation');
+  });
+
+  it('shows the assignees before the other actions', () => {
+    renderActions(<span data-test-subj="assigneesControl" />);
+
+    expect(screen.getByTestId('nightshiftInvestigationCardAssignees')).toContainElement(
+      screen.getByTestId('assigneesControl')
+    );
+    expect(
+      screen
+        .getAllByTestId(/^nightshiftInvestigationCard(Assignees|OpenInChat|Actions)$/)
+        .map((element) => element.getAttribute('data-test-subj'))
+    ).toEqual([
+      'nightshiftInvestigationCardAssignees',
+      'nightshiftInvestigationCardOpenInChat',
+      'nightshiftInvestigationCardActions',
+    ]);
+  });
+
+  it('leaves the assignees out when none are given', () => {
+    renderActions();
+
+    expect(screen.queryByTestId('nightshiftInvestigationCardAssignees')).not.toBeInTheDocument();
   });
 
   it('copies the Nightshift flyout share URL from the overflow menu', () => {

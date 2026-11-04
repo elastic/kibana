@@ -21,6 +21,9 @@ import { useDetectionSetupBanner } from './use_detection_setup_banner';
 jest.mock('../data/investigations/use_investigation_sections');
 jest.mock('../hooks/use_kibana');
 jest.mock('@kbn/ebt-tools');
+jest.mock('../components/entities/investigation/use_investigation_assignees', () => ({
+  useInvestigationAssignees: () => () => null,
+}));
 jest.mock('./use_detection_setup_banner');
 
 const mockUseInvestigationSections = useInvestigationSections as jest.Mock;

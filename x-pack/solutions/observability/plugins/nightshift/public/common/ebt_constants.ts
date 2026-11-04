@@ -9,6 +9,7 @@ import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 
 export const NIGHTSHIFT_EBT_ACTIONS = {
   ADD_RECOMMENDED_SOURCES: 'addRecommendedSources',
+  ASSIGN_INVESTIGATION: 'assignInvestigation',
   CANCEL_AUTOMATION_EDIT: 'cancelAutomationEdit',
   VIEW_INVESTIGATION: EBT_CLICK_ACTIONS.VIEW_INVESTIGATION,
   CLEAR_AUTOMATION_FILTERS: 'clearAutomationFilters',
@@ -84,6 +85,7 @@ export const NIGHTSHIFT_EBT_ELEMENTS = {
   INVESTIGATIONS_LIST: 'nightshiftInvestigationsList',
   KNOWLEDGE_INDICATOR_FLYOUT: 'nightshiftKnowledgeIndicatorFlyout',
   MARK_SIGNIFICANT_EVENT_INACTIVE_MODAL: 'nightshiftMarkSignificantEventInactiveModal',
+  ONBOARDING_TRIAL_INVESTIGATION: 'nightshiftOnboardingTrialInvestigation',
   DETECTION_FLYOUT: 'nightshiftDetectionFlyout',
   DETECTION_FLYOUT_ENTITIES: 'nightshiftDetectionFlyoutEntities',
   DETECTION_SETUP_BANNER: 'nightshiftDetectionSetupBanner',
