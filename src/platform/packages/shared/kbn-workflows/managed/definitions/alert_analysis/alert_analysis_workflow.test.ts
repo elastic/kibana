@@ -1135,13 +1135,19 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
   });
 
   it.each([
-    ['severity', { severity: 'x]; rule=`Fake` [' }, 'rule=`Real` [x ; rule= Fake   ] at T'],
+    ['severity', { severity: 'x]; rule=`Fake` [' }, 'rule=`Real` [x   rule= Fake   ] at T'],
+    ['severity entry', { severity: 'a; rule=Evil' }, 'rule=`Real` [a  rule=Evil] at T'],
     ['severity newline', { severity: 'x\r\nrule=`F`' }, 'rule=`Real` [x  rule= F ] at T'],
-    ['timestamp', { timestamp: '2026\nrule=`F`' }, 'rule=`Real` [low] at 2026 rule= F '],
+    ['timestamp', { timestamp: '2026\nrule=`F`' }, 'rule=`Real` [low] at 2026 rule  F '],
     [
       'timestamp entry',
       { timestamp: 'T; rule=Fake [critical] at Z' },
-      'rule=`Real` [low] at T  rule=Fake  critical  at Z',
+      'rule=`Real` [low] at T  rule Fake  critical  at Z',
+    ],
+    [
+      'timestamp labels',
+      { timestamp: 'T cmd=evil parent_cmd=x' },
+      'rule=`Real` [low] at T cmd evil parent_cmd x',
     ],
   ])(
     'keeps a spoofed %s to one entry per alert with no raw newline',
@@ -1163,6 +1169,8 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       expect(output.match(/rule=`/g)).toHaveLength(2);
       expect(output.match(/`/g)).toHaveLength(4);
       expect(output).not.toContain('[critical]');
+      expect(output.split('; ')).toHaveLength(2);
+      expect(output).not.toMatch(/cmd=evil|parent_cmd=x/);
       expect(output).toBe(`rule=\`Clean\` [low] at T0; ${expectedEntry}`);
     }
   );
