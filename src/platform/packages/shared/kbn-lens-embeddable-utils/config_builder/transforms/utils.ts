@@ -299,8 +299,8 @@ export function buildDataViewSpecDataSource(
 
 /**
  * Resolves the data view id for a NoESQL layer. The id is taken, in priority
- * order, from an ad hoc reference (`state.internalReferences`), a persisted
- * reference (top-level `references`), or the layer's own inline `indexPatternId`.
+ * order, from a persisted reference (top-level `references`), an ad hoc
+ * reference (`state.internalReferences`), or the layer's own inline `indexPatternId`.
  * Data layers and XY annotation layers persist their data view under different
  * reference names, hence the `referenceName` parameter.
  */
@@ -312,7 +312,7 @@ export function resolveDataViewId(
 ): string | undefined {
   const matchesName = (ref: SavedObjectReference) => ref.name === referenceName;
   return (
-    adhocReferences.find(matchesName)?.id ?? references.find(matchesName)?.id ?? inlineDataViewId
+    references.find(matchesName)?.id ?? adhocReferences.find(matchesName)?.id ?? inlineDataViewId
   );
 }
 
