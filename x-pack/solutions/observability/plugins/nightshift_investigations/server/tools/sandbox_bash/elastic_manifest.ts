@@ -8,45 +8,67 @@
 import type { Logger } from '@kbn/core/server';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import { SANDBOX_BASH_TOOL_ID } from './tool';
-import { ELASTIC_MANIFEST_PATH } from './connector_docs';
+import { CONNECTOR_MANIFEST_PATH, ELASTIC_MANIFEST_PATH } from './connector_docs';
 
-/** Where the sandbox gets Elasticsearch credentials: the telemetry connector. */
+/** The deployment's configured telemetry connector, which the agent is allowed to use. */
 export interface ElasticCredentials {
   kind: 'connector';
   connectorId: string;
 }
 
-const describeCredentials = (credentials: ElasticCredentials) => ({
-  urlVar: 'CONNECTOR_CONFIG_URL',
-  authVar: 'CONNECTOR_HEADER_AUTHORIZATION',
-  authDescription: 'full Authorization header value (`ApiKey <key>`)',
-  authHeader: '$CONNECTOR_HEADER_AUTHORIZATION',
-  parameterName: 'connector_id',
-  parameter: `connector_id: "${credentials.connectorId}"`,
-});
+const DEFAULT_READABLE_INDICES = 'Readable indices: `logs-*`, `metrics-*`, `traces-*`.';
 
-/** How to query cluster telemetry from the sandbox. Names env vars; never embeds secrets. */
+const describeTelemetry = (
+  credentials: ElasticCredentials | undefined,
+  readableIndices: string | undefined
+): string[] =>
+  credentials
+    ? [
+        '## Investigation telemetry',
+        '',
+        `This deployment's telemetry cluster is \`connector_id: "${credentials.connectorId}"\`. Use it`,
+        'for incident telemetry unless the question names another cluster.',
+        '',
+        readableIndices?.trim() || DEFAULT_READABLE_INDICES,
+        '',
+      ]
+    : [
+        'Telemetry usually lives in `logs-*`, `metrics-*` and `traces-*`, locally or on remote',
+        'clusters. Check what a cluster holds before querying it, as shown below.',
+        '',
+      ];
+
+/**
+ * How to query Elasticsearch from the sandbox through any Elasticsearch connector, plus the
+ * configured telemetry connector when there is one. Names env vars; never embeds secrets.
+ */
 export const renderElasticManifest = (
-  credentials: ElasticCredentials,
+  credentials?: ElasticCredentials,
   { readableIndices }: { readableIndices?: string } = {}
 ): string => {
-  const { urlVar, authVar, authDescription, authHeader, parameterName, parameter } =
-    describeCredentials(credentials);
+  const urlVar = 'CONNECTOR_CONFIG_URL';
+  const authVar = 'CONNECTOR_HEADER_AUTHORIZATION';
+  const authHeader = `$${authVar}`;
+  const parameterName = 'connector_id';
   const url = `$${urlVar}`;
   return [
     '# Elasticsearch telemetry',
     '',
-    `Query this cluster by passing \`${parameter}\` to \`${SANDBOX_BASH_TOOL_ID}\`.`,
+    `Query Elasticsearch by passing an Elasticsearch connector's \`${parameterName}\` to`,
+    `\`${SANDBOX_BASH_TOOL_ID}\`. Take it from \`${CONNECTOR_MANIFEST_PATH}\`: an External`,
+    'Elasticsearch (`.elasticsearch`) connector, or an HTTP (`.http`) connector whose URL is an',
+    'Elasticsearch cluster. If several fit, pick the one for the cluster the question is about. If',
+    'none is listed, Elasticsearch is not reachable: say so instead of guessing credentials.',
+    '',
     'Credentials are not stored here: for that single command only, the environment contains',
     '',
     `- \`${urlVar}\` — Elasticsearch URL`,
-    `- \`${authVar}\` — ${authDescription}`,
+    `- \`${authVar}\` — full Authorization header value (\`ApiKey <key>\`)`,
     '',
     'Reference those variables directly and never hard-code their values. A command that omits',
     `\`${parameterName}\` gets no credentials and cannot reach Elasticsearch.`,
     '',
-    readableIndices?.trim() || 'Readable indices: `logs-*`, `metrics-*`, `traces-*`.',
-    '',
+    ...describeTelemetry(credentials, readableIndices),
     '## Query guidance',
     '',
     '- Use the readable patterns above in place of `logs-*` in the example below.',
@@ -120,7 +142,7 @@ export const writeElasticManifest = async ({
   logger,
 }: {
   session: SandboxSession;
-  credentials: ElasticCredentials;
+  credentials?: ElasticCredentials;
   readableIndices?: string;
   logger: Logger;
 }): Promise<void> => {

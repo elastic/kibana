@@ -27,8 +27,8 @@ import { useKibana } from '../hooks/use_kibana';
 import { NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 import { InvestigationCardActions } from '../components/entities/investigation/investigation_card_actions';
 import { useInvestigationAssignees } from '../components/entities/investigation/use_investigation_assignees';
-import { useAgentConnectors } from '../sandbox_connectors/use_agent_connectors';
-import { useFetchSandboxConnectors } from '../sandbox_connectors/use_fetch_sandbox_connectors';
+import { useAgentConnectors } from '../data/sandbox_connectors/use_agent_connectors';
+import { useFetchSandboxConnectors } from '../data/sandbox_connectors/use_fetch_sandbox_connectors';
 
 interface SuggestedAutomation {
   id: string;

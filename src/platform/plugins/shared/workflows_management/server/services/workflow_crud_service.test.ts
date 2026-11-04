@@ -3911,6 +3911,40 @@ describe('bound workflow deletion errors', () => {
     expect(deleteDocuments).not.toHaveBeenCalled();
   });
 
+  it('rejects a plain delete of a bound workflow with an active execution', async () => {
+    const { service, request, deps, bindings, deleteDocuments } = setup();
+    jest
+      .mocked(deps.executionQueryService.getWorkflowExecutions)
+      .mockResolvedValue({ total: 1, results: [], page: 1, size: 1 });
+    await expect(service.deleteWorkflows(['bound'], 'default', {}, request)).rejects.toThrow(
+      'Cannot delete workflow with running executions: bound'
+    );
+    expect(deps.executionQueryService.getWorkflowExecutions).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowId: 'bound' }),
+      'default'
+    );
+    expect(bindings.unbindWorkload).not.toHaveBeenCalled();
+    expect(deleteDocuments).not.toHaveBeenCalled();
+  });
+
+  it('keeps a bound workflow with an active execution out of a bulk delete', async () => {
+    const { service, request, deps, bindings, deleteDocuments } = setup();
+    jest
+      .mocked(deps.executionQueryService.getWorkflowExecutions)
+      .mockResolvedValue({ total: 1, results: [], page: 1, size: 1 });
+    deleteDocuments
+      .mockReset()
+      .mockResolvedValue({ total: 1, deleted: 1, failures: [], successfulIds: ['ordinary'] });
+    await expect(
+      service.deleteWorkflows(['bound', 'ordinary'], 'default', {}, request)
+    ).resolves.toMatchObject({
+      deleted: 1,
+      successfulIds: ['ordinary'],
+      failures: [{ id: 'bound', error: expect.stringContaining('running executions') }],
+    });
+    expect(bindings.unbindWorkload).not.toHaveBeenCalled();
+  });
+
   it('preserves a concurrent winning binding and returns a typed deletion conflict', async () => {
     const { service, request, bindings, deleteDocuments } = setup();
     bindings.getWorkloadBinding
