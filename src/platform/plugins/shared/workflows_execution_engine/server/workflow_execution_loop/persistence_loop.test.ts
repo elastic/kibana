@@ -116,6 +116,35 @@ describe('persistenceLoop', () => {
     process.off('unhandledRejection', unhandledRejectionSpy);
   });
 
+  it('writes step metadata only after the IO flush settles', async () => {
+    let resolveIo: () => void = () => {};
+    const params = makeParams({ isExecuting: true });
+    params.stepIoService.flush.mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveIo = resolve;
+        })
+    );
+
+    const abortController = new AbortController();
+    const loopPromise = persistenceLoop(params, abortController.signal);
+
+    expect(params.eventQueue.flush).toHaveBeenCalledWith({
+      signal: params.signal,
+    });
+    expect(params.workflowExecutionState.flush).not.toHaveBeenCalled();
+
+    resolveIo();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(params.workflowExecutionState.flush).toHaveBeenCalledTimes(1);
+
+    abortController.abort();
+    jest.advanceTimersByTime(500);
+    await expect(loopPromise).resolves.toBeUndefined();
+  });
+
   it('exits when the persistenceAbortSignal is already aborted before the loop starts', async () => {
     const abortController = new AbortController();
     abortController.abort();
