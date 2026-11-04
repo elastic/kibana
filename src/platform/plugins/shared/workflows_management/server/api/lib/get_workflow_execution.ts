@@ -82,12 +82,21 @@ export const getWorkflowExecution = async ({
       }
     }
 
-    await hydrateExecutionIo({
-      executionsIoDataClient,
-      stepExecutions,
-      includeInput,
-      includeOutput,
-    });
+    try {
+      await hydrateExecutionIo({
+        executionsIoDataClient,
+        stepExecutions,
+        includeInput,
+        includeOutput,
+      });
+    } catch (error) {
+      if (!isMaximumResponseSizeExceededError(error)) {
+        throw error;
+      }
+      logger.warn(
+        `Failed to load step IO for workflow execution ${workflowExecutionId}: Elasticsearch response exceeded the maximum size Kibana can process`
+      );
+    }
 
     return transformToWorkflowExecutionDetailDto(workflowExecutionId, doc, stepExecutions, logger);
   } catch (error) {

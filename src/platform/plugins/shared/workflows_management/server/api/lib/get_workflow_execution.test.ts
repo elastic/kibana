@@ -543,5 +543,31 @@ describe('getWorkflowExecution', () => {
       );
       expect(result?.stepExecutions?.[0].output).toBeUndefined();
     });
+
+    it('returns step metadata when the IO lookup exceeds the response size', async () => {
+      mockExecutionsIoDataClient.getByIds.mockRejectedValue(
+        new errors.RequestAbortedError(
+          'The content length (9000) is bigger than the maximum allowed buffer (42)'
+        )
+      );
+
+      const result = await getWorkflowExecution({
+        ...baseParams,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
+        executionsIoDataClient: mockExecutionsIoDataClient,
+        logger: mockLogger,
+        includeOutput: true,
+      });
+
+      expect(result).not.toBeNull();
+      expect(result?.id).toBe('exec-1');
+      expect(result?.stepExecutions).toHaveLength(1);
+      expect(result?.stepExecutions?.[0].output).toBeUndefined();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Failed to load step IO for workflow execution exec-1: Elasticsearch response exceeded the maximum size Kibana can process'
+      );
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
   });
 });
