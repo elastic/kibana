@@ -20,6 +20,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiLoadingSpinner,
+  EuiProgress,
   EuiSpacer,
   EuiSuperDatePicker,
   EuiText,
@@ -31,9 +32,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { KbnDangerCallout, KbnSuccessCallout } from '@kbn/ui-callout';
 import { JOB_ID_MAX_LENGTH } from '@kbn/ml-validators';
-import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
-import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import { JOB_TYPE } from '../../../../../common/constants/new_job';
 import type { JobSuggestion } from '../../../../../common/types/job_suggestions';
 import { basicJobValidation } from '../../../../../common/util/job_utils';
 import type { CreateState } from '../../../../application/jobs/new_job/job_from_dashboard';
@@ -42,6 +40,7 @@ import type {
   TimeRangeMs,
 } from '../../../../application/jobs/new_job/job_from_suggestion';
 import { useMlApi, useMlKibana } from '../../../../application/contexts/kibana';
+import { setSelectedJobId } from '../../../../application/components/job_suggestion/selected_job';
 import { SuggestionBadges } from '../../../../application/components/job_suggestion/suggestion_badges';
 
 type TimeRangeMode = 'all' | 'custom';
@@ -62,7 +61,7 @@ type CreateStatus =
   | { status: 'idle' }
   | { status: 'creating' }
   | { status: 'failed'; message: string }
-  | { status: 'created'; timeRange: TimeRangeMs };
+  | { status: 'created'; timeRange: TimeRangeMs; runInRealTime: boolean };
 
 const getFailureMessage = ({
   jobCreated,
@@ -100,6 +99,8 @@ const formatTime = (time: number) => moment(time).format('lll');
 
 interface Props {
   suggestion: JobSuggestion;
+  /** The index pattern of the Discover chart which the results of the job can be added to. */
+  indexPattern: string;
   creator: QuickSuggestedJobCreator;
   onClose: () => void;
 }
@@ -108,12 +109,10 @@ interface Props {
  * Lets the user name the job of a suggestion and choose the data it analyzes,
  * then creates the job and starts it.
  */
-export const JobConfigStep: FC<Props> = ({ suggestion, creator, onClose }) => {
+export const JobConfigStep: FC<Props> = ({ suggestion, indexPattern, creator, onClose }) => {
   const { euiTheme } = useEuiTheme();
   const {
     services: {
-      application,
-      share,
       data: {
         query: {
           timefilter: { timefilter },
@@ -132,6 +131,8 @@ export const JobConfigStep: FC<Props> = ({ suggestion, creator, onClose }) => {
   const [runInRealTime, setRunInRealTime] = useState(true);
   const [fullTimeRange, setFullTimeRange] = useState<FullTimeRange>({ status: 'loading' });
   const [createStatus, setCreateStatus] = useState<CreateStatus>({ status: 'idle' });
+  // how much of the data the started job has analyzed, as a percentage
+  const [progress, setProgress] = useState<number>();
 
   useEffect(() => {
     let cancelled = false;
@@ -233,44 +234,51 @@ export const JobConfigStep: FC<Props> = ({ suggestion, creator, onClose }) => {
     !isValidatingJobId &&
     createStatus.status !== 'creating';
 
+  useEffect(() => {
+    if (createStatus.status !== 'created') return;
+    setProgress(0);
+    const subscription = creator
+      .watchProgress({
+        jobId,
+        timeRange: createStatus.timeRange,
+        runInRealTime: createStatus.runInRealTime,
+      })
+      .subscribe({
+        next: setProgress,
+        // the job has been started, so it is only the progress which is not shown
+        error: () => setProgress(undefined),
+      });
+    return () => subscription.unsubscribe();
+  }, [creator, createStatus, jobId]);
+
   const createJob = useCallback(async () => {
     if (timeRange === undefined) return;
     setCreateStatus({ status: 'creating' });
     try {
+      const isRealTime = timeRangeMode === 'all' && runInRealTime;
       const result = await creator.createAndSaveJob({
         suggestion,
         jobId,
         timeRange,
         startJob: true,
-        runInRealTime: timeRangeMode === 'all' && runInRealTime,
+        runInRealTime: isRealTime,
       });
       const message = getFailureMessage(result);
-      setCreateStatus(message ? { status: 'failed', message } : { status: 'created', timeRange });
+      setCreateStatus(
+        message
+          ? { status: 'failed', message }
+          : { status: 'created', timeRange, runInRealTime: isRealTime }
+      );
     } catch (error) {
       setCreateStatus({ status: 'failed', message: extractErrorMessage(error) });
     }
   }, [creator, suggestion, jobId, timeRange, timeRangeMode, runInRealTime]);
 
-  const viewResults = useCallback(async () => {
-    if (createStatus.status !== 'created') return;
-    const locator = share.url.locators.get(ML_APP_LOCATOR);
-    if (!locator) return;
-    const url = await locator.getUrl({
-      page:
-        suggestion.jobType === JOB_TYPE.SINGLE_METRIC
-          ? ML_PAGES.SINGLE_METRIC_VIEWER
-          : ML_PAGES.ANOMALY_EXPLORER,
-      pageState: {
-        jobIds: [jobId],
-        timeRange: {
-          from: moment(createStatus.timeRange.start).toISOString(),
-          to: moment(createStatus.timeRange.end).toISOString(),
-        },
-      },
-    });
+  // The results of the job are then shown on the Discover chart
+  const addResultsToChart = useCallback(() => {
+    setSelectedJobId(indexPattern, jobId);
     onClose();
-    await application.navigateToUrl(url);
-  }, [createStatus, share, suggestion.jobType, jobId, onClose, application]);
+  }, [indexPattern, jobId, onClose]);
 
   const timeRangeOptions = useMemo(
     () => [
@@ -331,18 +339,39 @@ export const JobConfigStep: FC<Props> = ({ suggestion, creator, onClose }) => {
             }
             data-test-subj="mlDiscoverADManagementCreated"
           />
+          {progress !== undefined && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiProgress
+                size="m"
+                value={progress}
+                max={100}
+                label={
+                  progress < 100
+                    ? i18n.translate('xpack.ml.discoverADManagement.progressLabel', {
+                        defaultMessage: 'Analyzing the data',
+                      })
+                    : i18n.translate('xpack.ml.discoverADManagement.progressCompleteLabel', {
+                        defaultMessage: 'Finished analyzing the data',
+                      })
+                }
+                valueText
+                data-test-subj="mlDiscoverADManagementProgress"
+              />
+            </>
+          )}
           <EuiSpacer size="m" />
           <EuiFlexGroup gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
                 size="s"
-                onClick={viewResults}
-                data-test-subj="mlDiscoverADManagementViewResults"
+                onClick={addResultsToChart}
+                data-test-subj="mlDiscoverADManagementAddResultsToChart"
               >
                 <FormattedMessage
-                  id="xpack.ml.discoverADManagement.viewResultsButton"
-                  defaultMessage="View results"
+                  id="xpack.ml.discoverADManagement.addResultsToChartButton"
+                  defaultMessage="Add results to chart"
                 />
               </EuiButton>
             </EuiFlexItem>

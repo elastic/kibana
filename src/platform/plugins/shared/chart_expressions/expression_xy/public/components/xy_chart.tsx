@@ -317,6 +317,22 @@ export function XYChart({
 
   const [showLegend, setShowLegend] = useState<boolean>(() => getShowLegendDefault());
 
+  // Memoized, as the annotation tooltips are remounted, and lose the hover, when the range annotations change
+  const [rangeAnnotations, lineAnnotations] = useMemo(
+    () => (isTimeVis ? partition(annotations?.datatable.rows, isRangeAnnotation) : [[], []]),
+    [isTimeVis, annotations?.datatable.rows]
+  );
+
+  // Kept here, outside the chart's children, which the chart doesn't render again when they change their own state
+  const [hoveredRangeAnnotationId, setHoveredRangeAnnotationId] = useState<string>();
+  const onRangeAnnotationHoverChange = useCallback((id: string, isHovered: boolean) => {
+    // Moving to another annotation shows its tooltip before the previous one is removed
+    setHoveredRangeAnnotationId((current) => {
+      if (isHovered) return id;
+      return current === id ? undefined : current;
+    });
+  }, []);
+
   useEffect(() => {
     const legendShow = getShowLegendDefault();
     setShowLegend(legendShow);
@@ -499,9 +515,6 @@ export function XYChart({
   };
 
   const referenceLineLayers = getReferenceLayers(layers);
-  const [rangeAnnotations, lineAnnotations] = isTimeVis
-    ? partition(annotations?.datatable.rows, isRangeAnnotation)
-    : [[], []];
 
   const groupedLineAnnotations = getAnnotationsGroupedByInterval(
     lineAnnotations as PointEventAnnotationRow[],
@@ -1151,6 +1164,8 @@ export function XYChart({
             {(rangeAnnotations.length || lineAnnotations.length) && isTimeVis ? (
               <Annotations
                 rangeAnnotations={rangeAnnotations}
+                isRangeAnnotationsHovered={hoveredRangeAnnotationId !== undefined}
+                onRangeAnnotationHoverChange={onRangeAnnotationHoverChange}
                 groupedLineAnnotations={groupedLineAnnotations}
                 timeFormat={timeFormat}
                 isHorizontal={shouldRotate}

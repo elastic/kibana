@@ -5,10 +5,15 @@
  * 2.0.
  */
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
-import { CurrentJobs, filterJobsByIndex } from './current_jobs';
+import { filterJobsByIndex } from '../../../../application/components/job_suggestion/filter_jobs_by_index';
+import {
+  getSelectedJobId$,
+  setSelectedJobId,
+} from '../../../../application/components/job_suggestion/selected_job';
+import { CurrentJobs } from './current_jobs';
 
 const mockJobsSummary = jest.fn();
 
@@ -72,5 +77,55 @@ describe('CurrentJobs', () => {
     renderIt();
 
     expect(await screen.findByText('The jobs could not be loaded')).toBeInTheDocument();
+  });
+
+  describe('selecting a job', () => {
+    const getRadio = (testSubj: string) => within(screen.getByTestId(testSubj)).getByRole('radio');
+
+    beforeEach(() => {
+      window.localStorage.clear();
+      setSelectedJobId('logs-*', undefined);
+      mockJobsSummary.mockResolvedValue([job('a', ['logs-*']), job('b', ['logs-*'])]);
+    });
+
+    it('has no job selected by default', async () => {
+      renderIt();
+      await screen.findByTestId('mlDiscoverADManagementCurrentJobRadioNone');
+      expect(getRadio('mlDiscoverADManagementCurrentJobRadioNone')).toBeChecked();
+      expect(getRadio('mlDiscoverADManagementCurrentJobRadio-a')).not.toBeChecked();
+    });
+
+    it('shows the job which is selected', async () => {
+      setSelectedJobId('logs-*', 'b');
+      renderIt();
+      await screen.findByTestId('mlDiscoverADManagementCurrentJobRadio-b');
+      expect(getRadio('mlDiscoverADManagementCurrentJobRadio-b')).toBeChecked();
+      expect(getRadio('mlDiscoverADManagementCurrentJobRadioNone')).not.toBeChecked();
+    });
+
+    it('selects a job, then another, then no job', async () => {
+      renderIt();
+
+      await screen.findByTestId('mlDiscoverADManagementCurrentJobRadio-a');
+      fireEvent.click(getRadio('mlDiscoverADManagementCurrentJobRadio-a'));
+      expect(getSelectedJobId$('logs-*').getValue()).toBe('a');
+      expect(getRadio('mlDiscoverADManagementCurrentJobRadio-a')).toBeChecked();
+
+      fireEvent.click(getRadio('mlDiscoverADManagementCurrentJobRadio-b'));
+      expect(getSelectedJobId$('logs-*').getValue()).toBe('b');
+
+      fireEvent.click(getRadio('mlDiscoverADManagementCurrentJobRadioNone'));
+      expect(getSelectedJobId$('logs-*').getValue()).toBeUndefined();
+      expect(getRadio('mlDiscoverADManagementCurrentJobRadioNone')).toBeChecked();
+    });
+
+    it('does not offer no job when there are no jobs', async () => {
+      mockJobsSummary.mockResolvedValue([]);
+      renderIt();
+      await screen.findByTestId('mlDiscoverADManagementCurrentJobsEmpty');
+      expect(
+        screen.queryByTestId('mlDiscoverADManagementCurrentJobRadioNone')
+      ).not.toBeInTheDocument();
+    });
   });
 });

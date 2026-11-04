@@ -11,6 +11,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DataSource } from '@kbn/data-source';
 import type { DISCOVER_AD_MANAGEMENT_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { UnifiedHistogramServices } from '../../../types';
+import { useAdIndexPattern } from './use_ad_index_pattern';
 
 // Avoid taking a dependency on uiActionsPlugin just for this const
 const discoverAdManagementTrigger: typeof DISCOVER_AD_MANAGEMENT_TRIGGER =
@@ -29,20 +30,7 @@ export const useDiscoverAdManagement = ({
 }) => {
   const [isCompatible, setIsCompatible] = useState(false);
 
-  // Primitives, so a new data source object for the same data view doesn't restart the check
-  const { indexPattern, dataViewId } = useMemo(() => {
-    if (dataSource?.kind === 'esql') {
-      // The index pattern is the one the query reads from
-      return dataSource.timeFieldName ? { indexPattern: dataSource.title } : {};
-    }
-    if (dataSource?.kind !== 'index-pattern') {
-      return {};
-    }
-    const dataView = dataSource.getDataView();
-    return dataView.isTimeBased()
-      ? { indexPattern: dataView.getIndexPattern(), dataViewId: dataView.id }
-      : {};
-  }, [dataSource]);
+  const { indexPattern, dataViewId } = useAdIndexPattern(dataSource);
 
   const triggerContext = useMemo(
     () => (indexPattern ? { indexPattern, dataViewId } : undefined),

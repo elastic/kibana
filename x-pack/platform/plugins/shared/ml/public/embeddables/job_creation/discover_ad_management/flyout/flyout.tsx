@@ -41,6 +41,7 @@ import { useSuggestionHistory } from '../../../../application/components/job_sug
 import { SuggestionBadges } from '../../../../application/components/job_suggestion/suggestion_badges';
 import { SuggestionStatus } from '../../../../application/components/job_suggestion/suggestion_status';
 import { CurrentJobs } from './current_jobs';
+import { SelectedJob } from './selected_job';
 import { JobConfigStep } from './job_config_step';
 import { SlidingPanels } from './sliding_panels';
 
@@ -50,7 +51,7 @@ const suggestSectionTitle = i18n.translate(
 );
 const currentSectionTitle = i18n.translate(
   'xpack.ml.discoverADManagementFlyout.currentSectionTitle',
-  { defaultMessage: 'Current jobs' }
+  { defaultMessage: 'Select job' }
 );
 const managementTitle = i18n.translate('xpack.ml.discoverADManagementFlyout.managementTitle', {
   defaultMessage: 'Anomaly detection management',
@@ -249,10 +250,15 @@ export const DiscoverADManagementFlyout: FC<Props> = ({ onClose, indexPattern })
       selected && {
         title: selected.suggestion.title,
         content: (
-          <JobConfigStep suggestion={selected.suggestion} creator={creator} onClose={onClose} />
+          <JobConfigStep
+            suggestion={selected.suggestion}
+            indexPattern={indexPattern}
+            creator={creator}
+            onClose={onClose}
+          />
         ),
       },
-    [selected, creator, onClose]
+    [selected, indexPattern, creator, onClose]
   );
 
   const suggestSection = (
@@ -307,6 +313,7 @@ export const DiscoverADManagementFlyout: FC<Props> = ({ onClose, indexPattern })
 
   const home = (
     <>
+      <SelectedJob indexPattern={indexPattern} />
       {renderSectionCard(
         'current',
         currentSectionTitle,

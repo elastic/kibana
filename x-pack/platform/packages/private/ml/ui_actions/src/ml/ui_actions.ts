@@ -78,3 +78,43 @@ export interface DiscoverADManagementContext {
 }
 
 export const DISCOVER_AD_MANAGEMENT_ACTION = 'discoverADManagementAction';
+
+/**
+ * A time range in which anomaly detection jobs found anomalies.
+ */
+export interface DiscoverADAnomalyRange {
+  /** Start of the range, in epoch ms */
+  start: number;
+  /** End of the range, in epoch ms */
+  end: number;
+  /** Highest anomaly score (0-100) in the range */
+  score: number;
+}
+
+/**
+ * Context for the action which provides the anomalies to show on the Discover chart.
+ */
+export interface DiscoverADAnomaliesContext {
+  /**
+   * The index name or index pattern the chart shows, for which a job is selected.
+   */
+  indexPattern: string;
+  /**
+   * The time range of the chart, in epoch ms.
+   */
+  timeRange: { from: number; to: number };
+  /**
+   * The width in pixels of the chart, used to choose the size of the anomaly buckets.
+   */
+  chartWidth?: number;
+  /**
+   * Aborted when the result is no longer needed.
+   */
+  signal?: AbortSignal;
+  /**
+   * Called with the anomaly ranges found, which are empty when there are no matching jobs or anomalies.
+   */
+  onAnomalyRanges: (ranges: DiscoverADAnomalyRange[]) => void;
+}
+
+export const DISCOVER_AD_ANOMALIES_ACTION = 'discoverADAnomaliesAction';

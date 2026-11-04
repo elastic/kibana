@@ -15,6 +15,7 @@ export { createCategorizationADJobAction } from './open_create_categorization_jo
 export { updateADJobsProjectRouting } from './open_update_ad_jobs_project_routing_action';
 export { createSuggestADJobsAction } from './open_suggest_ad_jobs_action';
 export { createDiscoverADManagementAction } from './open_discover_ad_management_action';
+export { createDiscoverADAnomaliesAction } from './discover_ad_anomalies_action';
 export { createOpenInExplorerAction } from './open_in_anomaly_explorer_action';
 export { createOpenInSingleMetricViewerAction } from './open_in_single_metric_viewer_action';
 export { createVisToADJobAction } from './open_vis_in_ml_action';

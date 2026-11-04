@@ -5,13 +5,17 @@
  * 2.0.
  */
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { BehaviorSubject } from 'rxjs';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { JOB_TYPE } from '../../../../../common/constants/new_job';
 import type { JobSuggestion } from '../../../../../common/types/job_suggestions';
 import type { SuggestionsState } from '../../../../application/components/job_suggestion/job_suggestion_service';
 import { useSuggestionHistory } from '../../../../application/components/job_suggestion/use_suggestion_history';
+import {
+  getSelectedJobId$,
+  setSelectedJobId,
+} from '../../../../application/components/job_suggestion/selected_job';
 import { DiscoverADManagementFlyout } from './flyout';
 
 const mockState$ = new BehaviorSubject<SuggestionsState>({ status: 'loading' });
@@ -34,17 +38,22 @@ jest.mock('../../../../application/components/job_suggestion/job_suggestion_serv
 
 const mockGetFullTimeRange = jest.fn();
 const mockCreateAndSaveJob = jest.fn();
+const mockWatchProgress = jest.fn();
 
 jest.mock('../../../../application/jobs/new_job/job_from_suggestion', () => ({
   QuickSuggestedJobCreator: jest.fn().mockImplementation(() => ({
     getFullTimeRange: mockGetFullTimeRange,
     createAndSaveJob: mockCreateAndSaveJob,
+    watchProgress: mockWatchProgress,
   })),
 }));
 
 jest.mock('../../../../application/components/job_suggestion/use_suggestion_history');
 
 const mockJobsExist = jest.fn();
+const mockJobsSummary = jest.fn();
+// The same api each render, as the real context gives.
+const mockMlApi = { jobs: { jobsExist: mockJobsExist, jobsSummary: mockJobsSummary } };
 const mockCalculateBounds = jest.fn();
 
 jest.mock('../../../../application/services/ml_api_service/jobs', () => ({
@@ -54,8 +63,6 @@ jest.mock('../../../../application/services/ml_api_service/jobs', () => ({
 jest.mock('../../../../application/contexts/kibana', () => ({
   useMlKibana: () => ({
     services: {
-      application: { navigateToUrl: jest.fn() },
-      share: { url: { locators: { get: jest.fn() } } },
       uiSettings: {},
       cps: undefined,
       data: {
@@ -64,7 +71,7 @@ jest.mock('../../../../application/contexts/kibana', () => ({
       },
     },
   }),
-  useMlApi: () => ({ jobs: { jobsExist: mockJobsExist } }),
+  useMlApi: () => mockMlApi,
 }));
 
 const useSuggestionHistoryMock = jest.mocked(useSuggestionHistory);
@@ -96,6 +103,8 @@ const loaded = (suggestions: JobSuggestion[]): SuggestionsState => ({
   timeRange: { from: 'now-30d', to: 'now' },
   ranAt: Date.now(),
 });
+
+let mockProgress$ = new Subject<number>();
 
 const FULL_RANGE = { start: Date.UTC(2024, 0, 1), end: Date.UTC(2024, 2, 1) };
 const SUCCESS = {
@@ -133,13 +142,20 @@ const enabledCreateButton = async () => {
 };
 
 describe('DiscoverADManagementFlyout', () => {
+  afterEach(() => {
+    act(() => setSelectedJobId('logs-*', undefined));
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockState$.next(loaded([suggestion('a'), suggestion('b')]));
     useSuggestionHistoryMock.mockReturnValue(undefined);
     mockGetFullTimeRange.mockResolvedValue(FULL_RANGE);
     mockCreateAndSaveJob.mockResolvedValue(SUCCESS);
+    mockProgress$ = new Subject<number>();
+    mockWatchProgress.mockReturnValue(mockProgress$.asObservable());
     mockJobsExist.mockResolvedValue({});
+    mockJobsSummary.mockResolvedValue([]);
     mockCalculateBounds.mockReturnValue({
       min: { valueOf: () => FULL_RANGE.start },
       max: { valueOf: () => FULL_RANGE.end },
@@ -216,6 +232,108 @@ describe('DiscoverADManagementFlyout', () => {
       timeRange: FULL_RANGE,
       startJob: true,
       runInRealTime: true,
+    });
+  });
+
+  describe('adding the results of the started job to the chart', () => {
+    beforeEach(() => {
+      window.localStorage.clear();
+      setSelectedJobId('logs-*', undefined);
+    });
+
+    it('is offered once the job is started, in place of viewing the results', async () => {
+      renderFlyout();
+      await openConfigStep('a');
+      expect(
+        screen.queryByTestId('mlDiscoverADManagementAddResultsToChart')
+      ).not.toBeInTheDocument();
+
+      fireEvent.click(await enabledCreateButton());
+      await screen.findByTestId('mlDiscoverADManagementCreated');
+
+      expect(screen.getByTestId('mlDiscoverADManagementAddResultsToChart')).toBeInTheDocument();
+      expect(screen.queryByTestId('mlDiscoverADManagementViewResults')).not.toBeInTheDocument();
+    });
+
+    it('selects the new job for the chart, and closes the flyout', async () => {
+      setSelectedJobId('logs-*', 'another-job');
+      const { onClose } = renderFlyout();
+      await openConfigStep('a');
+      fireEvent.change(screen.getByTestId('mlDiscoverADManagementJobId'), {
+        target: { value: 'my-own-id' },
+      });
+      fireEvent.click(await enabledCreateButton());
+      await screen.findByTestId('mlDiscoverADManagementCreated');
+
+      fireEvent.click(screen.getByTestId('mlDiscoverADManagementAddResultsToChart'));
+
+      expect(getSelectedJobId$('logs-*').getValue()).toBe('my-own-id');
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('progress of the started job', () => {
+    const createJob = async () => {
+      renderFlyout();
+      await openConfigStep('a');
+      fireEvent.click(await enabledCreateButton());
+      await screen.findByTestId('mlDiscoverADManagementCreated');
+    };
+
+    it('follows the job which was started over the range which it analyzes', async () => {
+      await createJob();
+
+      expect(mockWatchProgress).toHaveBeenCalledWith({
+        jobId: 'job-a',
+        timeRange: FULL_RANGE,
+        runInRealTime: true,
+      });
+    });
+
+    it('is not shown before the job is started', async () => {
+      renderFlyout();
+      await openConfigStep('a');
+
+      expect(screen.queryByTestId('mlDiscoverADManagementProgress')).not.toBeInTheDocument();
+      expect(mockWatchProgress).not.toHaveBeenCalled();
+    });
+
+    it('shows the progress of the job, until it has finished analyzing the data', async () => {
+      await createJob();
+      const progressBar = () => screen.getByTestId('mlDiscoverADManagementProgress');
+
+      expect(progressBar()).toHaveAttribute('value', '0');
+      expect(screen.getByText('Analyzing the data')).toBeInTheDocument();
+
+      act(() => mockProgress$.next(45));
+      expect(progressBar()).toHaveAttribute('value', '45');
+
+      act(() => mockProgress$.next(100));
+      expect(progressBar()).toHaveAttribute('value', '100');
+      expect(screen.getByText('Finished analyzing the data')).toBeInTheDocument();
+    });
+
+    it('is not shown when the progress cannot be followed', async () => {
+      await createJob();
+
+      act(() => mockProgress$.error(new Error('boom')));
+
+      expect(screen.queryByTestId('mlDiscoverADManagementProgress')).not.toBeInTheDocument();
+      expect(screen.getByTestId('mlDiscoverADManagementCreated')).toBeInTheDocument();
+    });
+
+    it('is not shown when the job could not be started', async () => {
+      mockCreateAndSaveJob.mockResolvedValue({
+        ...SUCCESS,
+        datafeedStarted: { success: false, error: new Error('datafeed refused') },
+      });
+      renderFlyout();
+      await openConfigStep('a');
+      fireEvent.click(await enabledCreateButton());
+      await screen.findByTestId('mlDiscoverADManagementFailed');
+
+      expect(mockWatchProgress).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('mlDiscoverADManagementProgress')).not.toBeInTheDocument();
     });
   });
 

@@ -175,4 +175,123 @@ describe('QuickSuggestedJobCreator', () => {
       expect(mlApi.startDatafeed).not.toHaveBeenCalled();
     });
   });
+
+  describe('watchProgress', () => {
+    const params = {
+      jobId: 'my-job',
+      timeRange: { start: 1000, end: 5000 },
+      runInRealTime: false,
+    };
+
+    const progressResponse = (progress: number, isRunning = true, isJobClosed = false) => ({
+      progress,
+      isRunning,
+      isJobClosed,
+    });
+
+    const createProgressMlApi = (
+      responses: Array<ReturnType<typeof progressResponse>>,
+      nodes: Array<string | undefined> = ['node-1']
+    ) => {
+      const mlApi = createMlApi() as jest.Mocked<MlApi> & {
+        jobs: { getLookBackProgress: jest.Mock };
+        getJobStats: jest.Mock;
+      };
+      const getJobStats = jest.fn();
+      nodes.forEach((node) => getJobStats.mockResolvedValueOnce({ jobs: [{ node }], count: 1 }));
+      getJobStats.mockResolvedValue({ jobs: [{ node: nodes[nodes.length - 1] }], count: 1 });
+      const getLookBackProgress = jest.fn();
+      responses.forEach((response) => getLookBackProgress.mockResolvedValueOnce(response));
+      getLookBackProgress.mockResolvedValue(responses[responses.length - 1]);
+      Object.assign(mlApi, { getJobStats, jobs: { getLookBackProgress } });
+      return mlApi;
+    };
+
+    // Lets the pending promises settle, then runs the timers which they scheduled
+    const advance = async (ms: number) => {
+      await jest.advanceTimersByTimeAsync(ms);
+    };
+
+    beforeEach(() => jest.useFakeTimers());
+    afterEach(() => jest.useRealTimers());
+
+    it('starts at 0, and follows the progress until the job has finished', async () => {
+      const mlApi = createProgressMlApi([
+        progressResponse(20),
+        progressResponse(60),
+        progressResponse(100, true, false),
+        progressResponse(100, false, true),
+      ]);
+      const emitted: number[] = [];
+      const complete = jest.fn();
+      createCreator(mlApi)
+        .watchProgress(params)
+        .subscribe({ next: (p) => emitted.push(p), complete });
+
+      await advance(0);
+      expect(emitted).toEqual([0, 20]);
+      await advance(250);
+      expect(emitted).toEqual([0, 20, 60]);
+      // 100 is only reached once the job is not running any more
+      await advance(250);
+      expect(emitted).toEqual([0, 20, 60, 99]);
+      expect(complete).not.toHaveBeenCalled();
+      await advance(250);
+      expect(emitted).toEqual([0, 20, 60, 99, 100]);
+      expect(complete).toHaveBeenCalledTimes(1);
+      expect(mlApi.jobs.getLookBackProgress).toHaveBeenCalledWith('my-job', 1000, 5000);
+    });
+
+    it('waits for the job to be assigned to a node before it follows the progress', async () => {
+      const mlApi = createProgressMlApi([progressResponse(10)], [undefined, undefined, 'node-1']);
+      const emitted: number[] = [];
+      createCreator(mlApi)
+        .watchProgress(params)
+        .subscribe((p) => emitted.push(p));
+
+      await advance(0);
+      expect(emitted).toEqual([0]);
+      expect(mlApi.jobs.getLookBackProgress).not.toHaveBeenCalled();
+      await advance(2000);
+      expect(mlApi.jobs.getLookBackProgress).not.toHaveBeenCalled();
+      await advance(2000);
+      expect(emitted).toEqual([0, 10]);
+    });
+
+    it('completes when a job left running in real time has caught up', async () => {
+      const mlApi = createProgressMlApi([progressResponse(50), progressResponse(100, true, false)]);
+      const emitted: number[] = [];
+      const complete = jest.fn();
+      createCreator(mlApi)
+        .watchProgress({ ...params, runInRealTime: true })
+        .subscribe({ next: (p) => emitted.push(p), complete });
+
+      await advance(250);
+      expect(emitted).toEqual([0, 50, 100]);
+      expect(complete).toHaveBeenCalledTimes(1);
+    });
+
+    it('stops checking when it is unsubscribed from', async () => {
+      const mlApi = createProgressMlApi([progressResponse(10)]);
+      const subscription = createCreator(mlApi).watchProgress(params).subscribe();
+
+      await advance(0);
+      const checks = mlApi.jobs.getLookBackProgress.mock.calls.length;
+      subscription.unsubscribe();
+      await advance(5000);
+
+      expect(mlApi.jobs.getLookBackProgress).toHaveBeenCalledTimes(checks);
+    });
+
+    it('errors when the progress cannot be loaded', async () => {
+      const mlApi = createProgressMlApi([progressResponse(10)]);
+      mlApi.jobs.getLookBackProgress.mockReset();
+      mlApi.jobs.getLookBackProgress.mockRejectedValue(new Error('boom'));
+      const error = jest.fn();
+      createCreator(mlApi).watchProgress(params).subscribe({ error });
+
+      await advance(0);
+      expect(error).toHaveBeenCalledWith(new Error('boom'));
+    });
+  });
 });

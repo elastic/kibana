@@ -8,22 +8,17 @@ import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLoadingSpinner, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiPanel, EuiRadio, EuiSpacer, EuiText } from '@elastic/eui';
 import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useMlApi } from '../../../../application/contexts/kibana';
+import { filterJobsByIndex } from '../../../../application/components/job_suggestion/filter_jobs_by_index';
+import { useSelectedJobId } from '../../../../application/components/job_suggestion/use_selected_job_id';
 
 interface Props {
   indexPattern: string;
 }
-
-/** The jobs whose datafeed reads an index which is, or together make up, the index pattern. */
-export const filterJobsByIndex = (jobs: MlSummaryJob[], indexPattern: string): MlSummaryJob[] =>
-  jobs.filter(
-    ({ datafeedIndices }) =>
-      datafeedIndices.includes(indexPattern) || datafeedIndices.join(',') === indexPattern
-  );
 
 type State =
   | { status: 'loading' }
@@ -33,6 +28,7 @@ type State =
 export const CurrentJobs: FC<Props> = ({ indexPattern }) => {
   const mlApi = useMlApi();
   const [state, setState] = useState<State>({ status: 'loading' });
+  const [selectedJobId, selectJob] = useSelectedJobId(indexPattern);
 
   useEffect(() => {
     let isCurrent = true;
@@ -77,6 +73,35 @@ export const CurrentJobs: FC<Props> = ({ indexPattern }) => {
           />
         </EuiText>
       )}
+      {state.status === 'loaded' && state.jobs.length > 0 && (
+        <>
+          <EuiText size="s" color="subdued">
+            <FormattedMessage
+              id="xpack.ml.discoverADManagementFlyout.currentJobsSelectionDescription"
+              defaultMessage="The results of the selected job are shown on the chart."
+            />
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiPanel
+            hasShadow={false}
+            hasBorder
+            paddingSize="m"
+            data-test-subj="mlDiscoverADManagementCurrentJobNone"
+          >
+            <EuiRadio
+              id="mlDiscoverADManagementCurrentJobNone"
+              name="mlDiscoverADManagementCurrentJob"
+              label={i18n.translate('xpack.ml.discoverADManagementFlyout.noJobSelected', {
+                defaultMessage: 'No job selected',
+              })}
+              checked={selectedJobId === undefined}
+              onChange={() => selectJob(undefined)}
+              data-test-subj="mlDiscoverADManagementCurrentJobRadioNone"
+            />
+          </EuiPanel>
+          <EuiSpacer size="s" />
+        </>
+      )}
       {state.status === 'loaded' &&
         state.jobs.map(({ id, description }) => (
           <React.Fragment key={id}>
@@ -86,14 +111,25 @@ export const CurrentJobs: FC<Props> = ({ indexPattern }) => {
               paddingSize="m"
               data-test-subj={`mlDiscoverADManagementCurrentJob-${id}`}
             >
-              <EuiText size="s">
-                <strong>{id}</strong>
-              </EuiText>
-              {description ? (
-                <EuiText size="s" color="subdued">
-                  {description}
-                </EuiText>
-              ) : null}
+              <EuiRadio
+                id={`mlDiscoverADManagementCurrentJob-${id}`}
+                name="mlDiscoverADManagementCurrentJob"
+                label={
+                  <>
+                    <EuiText size="s">
+                      <strong>{id}</strong>
+                    </EuiText>
+                    {description ? (
+                      <EuiText size="s" color="subdued">
+                        {description}
+                      </EuiText>
+                    ) : null}
+                  </>
+                }
+                checked={selectedJobId === id}
+                onChange={() => selectJob(id)}
+                data-test-subj={`mlDiscoverADManagementCurrentJobRadio-${id}`}
+              />
             </EuiPanel>
             <EuiSpacer size="s" />
           </React.Fragment>

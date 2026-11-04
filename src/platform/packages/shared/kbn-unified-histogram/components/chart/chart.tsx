@@ -51,6 +51,8 @@ import { useDiscoverAdManagement } from './hooks/use_discover_ad_management';
 import type { LensVisService } from '../../services/lens_vis_service';
 import { removeTablesFromLensAttributes } from '../../utils/lens_vis_from_table';
 import { useLensProps } from './hooks/use_lens_props';
+import { useAnomalyRanges } from './hooks/use_anomaly_ranges';
+import { addAnomalyOverlayToAttributes } from '../../utils/anomaly_overlay';
 import { buildBucketInterval } from './utils/build_bucket_interval';
 import { ChartSectionTemplate } from './chart_section_template';
 
@@ -228,10 +230,29 @@ export function UnifiedHistogramChart({
     }
   );
 
-  const lensPropsContext = useLensProps({
+  const baseLensPropsContext = useLensProps({
     fetch$,
     onLoad,
   });
+
+  const anomalyOverlay = useAnomalyRanges({ services, dataSource, fetch$ });
+  const lensPropsContext = useMemo(
+    () =>
+      baseLensPropsContext && anomalyOverlay?.ranges.length
+        ? {
+            ...baseLensPropsContext,
+            lensProps: {
+              ...baseLensPropsContext.lensProps,
+              attributes: addAnomalyOverlayToAttributes(
+                baseLensPropsContext.lensProps.attributes,
+                anomalyOverlay.ranges,
+                anomalyOverlay.timeRange
+              ),
+            },
+          }
+        : baseLensPropsContext,
+    [baseLensPropsContext, anomalyOverlay]
+  );
 
   const { chartToolbarCss, histogramCss } = useChartStyles(chartVisible);
 
