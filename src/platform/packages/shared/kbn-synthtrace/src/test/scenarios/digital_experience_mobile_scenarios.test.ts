@@ -15,6 +15,7 @@ import { createLogger, LogLevel } from '../../lib/utils/create_logger';
 import type { OtelDocument } from '../../lib/otel/otel_synthtrace_es_client';
 import type { SynthGenerator } from '../../lib/utils/with_client';
 import singleInstallation from '../../scenarios/digital_experience_mobile_single_installation';
+import singleSession from '../../scenarios/digital_experience_mobile_single_session';
 
 const MINUTE_MS = 60_000;
 const logger = createLogger(LogLevel.error);
@@ -81,6 +82,40 @@ describe('digital experience mobile scenarios', () => {
           expect(start - sessions[i].end).toBeGreaterThan(30 * MINUTE_MS);
         });
       }
+    });
+  });
+
+  describe('digital_experience_mobile_single_session', () => {
+    const from = new Date('2026-10-16T12:00:00.000Z').getTime();
+    const to = from + 30 * MINUTE_MS;
+
+    it('indexes the session once when the run is split among workers', async () => {
+      const scenarioOpts = { platform: 'ios', health: 'critical', visits: 2, screenViews: 6 };
+      const unsplit = await run(singleSession, { scenarioOpts, from, to });
+      // Like a historical run with 10 workers, each evaluating the scenario with the run's from/to
+      const bounds = Array.from({ length: 11 }, (_, i) => from + i * 3 * MINUTE_MS);
+      const split = (
+        await Promise.all(
+          bounds.slice(1).map((end, i) =>
+            run(singleSession, {
+              scenarioOpts,
+              from,
+              to,
+              range: timerange(bounds[i], end, logger),
+            })
+          )
+        )
+      ).flat();
+
+      expect(unsplit.length).toBeGreaterThan(0);
+      const sortKey = (doc: OtelDocument) => JSON.stringify(doc);
+      expect(split.map(sortKey).sort()).toEqual(unsplit.map(sortKey).sort());
+      const spanIds = unsplit.filter((doc) => 'kind' in doc).map((doc) => doc.span_id);
+      expect(new Set(spanIds).size).toBe(spanIds.length);
+      unsplit.forEach((doc) => {
+        expect(Number(doc['@timestamp'])).toBeGreaterThanOrEqual(from);
+        expect(Number(doc['@timestamp'])).toBeLessThan(to);
+      });
     });
   });
 });

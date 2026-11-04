@@ -9,7 +9,7 @@
 
 /**
  * Generates one EDOT React Native session of one app on one device, starting at the
- * run's `from`. Not meant for `--live`.
+ * run's `from`. What happens after the run's `to` is cut off. Not meant for `--live`.
  *
  * Scenario options:
  * - platform (android | ios, default: android): a Pixel 8 or an iPhone 15 Pro
@@ -38,6 +38,7 @@ import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environmen
 import { withClient } from '../lib/utils/with_client';
 import {
   getDefaultSeed,
+  getTimestamp,
   parseBooleanOption,
   parseSeed,
   randomUuid,
@@ -138,13 +139,22 @@ const scenario: Scenario<OtelDocument> = async ({ scenarioOpts = {}, logger, fro
     start: from,
   });
 
+  const timedEvents = events.map((event) => ({ event, time: getTimestamp(event) }));
+
   return {
+    // Synthtrace splits a run into ranges, one per worker, and evaluates the scenario in each, so
+    // every interval emits only the events that happen in it
     generate: ({ range, clients: { otelEsClient } }) =>
       withClient(
         otelEsClient,
         range
           .interval('1m')
-          .generator<EdotReactNativeDocument>((_timestamp, index) => (index === 0 ? events : []))
+          .generator<EdotReactNativeDocument>((timestamp, _index, { stepMilliseconds }) => {
+            const end = Math.min(timestamp + stepMilliseconds, range.to.getTime());
+            return timedEvents
+              .filter(({ time }) => time >= timestamp && time < end)
+              .map(({ event }) => event);
+          })
       ),
   };
 };
