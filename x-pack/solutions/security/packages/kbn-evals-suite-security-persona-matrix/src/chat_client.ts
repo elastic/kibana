@@ -11,6 +11,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 // eslint-disable-next-line import/no-nodejs-modules
 import { createHash } from 'crypto';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { withRetry } from '@kbn/evals';
 
 interface ConverseStep {
@@ -73,15 +74,8 @@ const WORKFLOW_AUTHORING_TOOL_IDS = new Set([
   'platform.workflows.validate_workflow',
 ]);
 
-interface ConversationAttachment {
-  id?: string;
-  type?: string;
-  current_version?: number;
-  versions?: Array<{ version?: number; data?: { yaml?: unknown } }>;
-}
-
 interface ConversationApiResponse {
-  attachments?: ConversationAttachment[];
+  attachments?: Array<VersionedAttachment<string, { yaml?: unknown }>>;
 }
 
 interface ConverseApiResponse {
@@ -205,14 +199,14 @@ export class PersonaMatrixChatClient {
         version: '2023-10-31',
       });
       return (conversation.attachments ?? []).flatMap((attachment) => {
-        if (attachment.type !== WORKFLOW_YAML_ATTACHMENT_TYPE || !attachment.id) {
+        if (attachment.type !== WORKFLOW_YAML_ATTACHMENT_TYPE) {
           return [];
         }
-        const current = attachment.versions?.find(
+        const current = attachment.versions.find(
           (candidate) => candidate.version === attachment.current_version
         );
-        const yaml = current?.data?.yaml;
-        return typeof yaml === 'string' && typeof current?.version === 'number'
+        const yaml = current?.data.yaml;
+        return current && typeof yaml === 'string'
           ? [{ id: attachment.id, version: current.version, yaml }]
           : [];
       });
