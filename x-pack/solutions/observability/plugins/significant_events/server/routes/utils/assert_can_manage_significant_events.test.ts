@@ -43,11 +43,11 @@ describe('Nightshift privilege checks', () => {
   describe('assertCanChangeSources', () => {
     const serverWith = (granted: string[]) => {
       const security = securityMock.createStart();
-      security.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue((async ({
-        kibana,
-      }: {
-        kibana: string[];
-      }) => ({ hasAllRequested: kibana.every((action) => granted.includes(action)) })) as never);
+      security.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
+        jest.fn(async ({ kibana = [] }: { kibana?: string | string[] }) => ({
+          hasAllRequested: [kibana].flat().every((action) => granted.includes(action)),
+        }))
+      );
       security.authz.actions.api.get = jest.fn((privilege: string) => `api:${privilege}`);
       return { security };
     };
