@@ -105,11 +105,10 @@ const DreamingJsonModal = ({
 interface DreamingEditorProps {
   aiIndexId: string;
   dreaming: AiIndexDreamingConfig;
-  memoryEnabled: boolean;
 }
 
 /** Whether and how often dreaming runs, its instructions and the types it builds, then saved. */
-const DreamingEditor = ({ aiIndexId, dreaming, memoryEnabled }: DreamingEditorProps) => {
+const DreamingEditor = ({ aiIndexId, dreaming }: DreamingEditorProps) => {
   const saved = useMemo(() => draftOf(dreaming), [dreaming]);
   const [edited, setEdited] = useState<DreamingConfigDraft>();
   const [editedInstructions, setEditedInstructions] = useState<string>();
@@ -157,19 +156,6 @@ const DreamingEditor = ({ aiIndexId, dreaming, memoryEnabled }: DreamingEditorPr
 
   return (
     <>
-      {!memoryEnabled && (
-        <>
-          <KbnInfoCallout
-            size="s"
-            title={i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.memoryOffTitle', {
-              defaultMessage:
-                'Dreaming builds long-term memory from the memories this AI index holds. Turn on memory for this AI index to run it.',
-            })}
-            data-test-subj="contextAiIndexDreamingMemoryOff"
-          />
-          <EuiSpacer size="l" />
-        </>
-      )}
       <EuiFlexGroup gutterSize="l" alignItems="flexEnd" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <EuiFormRow
@@ -183,7 +169,6 @@ const DreamingEditor = ({ aiIndexId, dreaming, memoryEnabled }: DreamingEditorPr
                 defaultMessage: 'Dream on a schedule',
               })}
               checked={enabled}
-              disabled={!memoryEnabled && !enabled}
               onChange={(event) => setEditedEnabled(event.target.checked)}
               data-test-subj="contextAiIndexDreamingEnabled"
             />
@@ -250,11 +235,7 @@ const DreamingEditor = ({ aiIndexId, dreaming, memoryEnabled }: DreamingEditorPr
                 fill
                 onClick={save}
                 isLoading={isSaving}
-                isDisabled={
-                  !draftBuildsAnything(draft) ||
-                  intervalError !== undefined ||
-                  (enabled && !memoryEnabled)
-                }
+                isDisabled={!draftBuildsAnything(draft) || intervalError !== undefined}
                 data-test-subj="contextAiIndexDreamingSave"
               >
                 {i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.save', {
@@ -322,7 +303,6 @@ export const DreamingPanel = ({ aiIndex }: DreamingPanelProps) => {
           key={JSON.stringify(dreaming)}
           aiIndexId={aiIndex.id}
           dreaming={dreaming}
-          memoryEnabled={aiIndex.memory_enabled}
         />
       ) : (
         <>
@@ -338,7 +318,6 @@ export const DreamingPanel = ({ aiIndex }: DreamingPanelProps) => {
           <EuiButton
             size="s"
             onClick={() => navigateToContextEngine(getAiIndexDreamingTemplatePath(aiIndex.id))}
-            isDisabled={!aiIndex.memory_enabled}
             data-test-subj="contextAiIndexDreamingSetUp"
           >
             {i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.setUp', {

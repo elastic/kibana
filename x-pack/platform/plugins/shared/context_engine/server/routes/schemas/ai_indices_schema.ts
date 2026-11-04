@@ -267,7 +267,9 @@ const aiIndexPropertiesSchema = {
   memory_enabled: schema.maybe(
     schema.boolean({
       meta: {
-        description: 'Whether this AI index accepts memory writes. Defaults to true when omitted.',
+        description:
+          'Deprecated and ignored. An AI Index takes memories while its `dreaming` config is set up.',
+        deprecated: true,
       },
     })
   ),
@@ -544,9 +546,6 @@ export const aiIndexHttpItemResponseSchema = () =>
       meta: {
         description: 'Whether the AI Index is managed by a plugin and therefore immutable.',
       },
-    }),
-    memory_enabled: schema.boolean({
-      meta: { description: 'Whether this AI Index accepts memory writes.' },
     }),
     date_created: schema.string({
       meta: { description: 'ISO 8601 timestamp of when the AI Index was created.' },

@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { dreamingBuildsAnything, dreamingTypesOf, validateDreamingTypes } from './dreaming';
+import {
+  dreamingBuildsAnything,
+  dreamingTypesOf,
+  isDreamingConfigured,
+  validateDreamingTypes,
+} from './dreaming';
 
 const customer = { type: 'customer', attributes: ['tier'] };
 const city = { type: 'city' };
@@ -49,6 +54,18 @@ describe('dreamingBuildsAnything', () => {
   it('is false with neither', () => {
     expect(dreamingBuildsAnything({})).toBe(false);
     expect(dreamingBuildsAnything({ facts: [], entities: { nodes: [] } })).toBe(false);
+  });
+});
+
+describe('isDreamingConfigured', () => {
+  it('is set up when dreaming is on, or paused with a type to build', () => {
+    expect(isDreamingConfigured({ enabled: true })).toBe(true);
+    expect(isDreamingConfigured({ enabled: false, facts: [{ type: 'preference' }] })).toBe(true);
+  });
+
+  it('is not set up without a config, or switched off with nothing to build', () => {
+    expect(isDreamingConfigured(undefined)).toBe(false);
+    expect(isDreamingConfigured({ enabled: false })).toBe(false);
   });
 });
 

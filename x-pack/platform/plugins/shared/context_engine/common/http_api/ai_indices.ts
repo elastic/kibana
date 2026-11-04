@@ -87,20 +87,21 @@ export interface AiIndexFeedbackAnalysis {
 
 export interface AiIndexProperties {
   description?: string;
-  memory_enabled?: boolean;
   dest: AiIndexDest;
   automations: AiIndexAutomation[];
   sources: AiIndexSource[];
   traces: AiIndexTrace[];
   feedback_analysis?: AiIndexFeedbackAnalysis;
-  /** What the AI index learns from its memories, and how often. Missing: dreaming is off. */
+  /**
+   * What the AI index learns from its memories, and how often. An AI index takes memories only
+   * while it is set up; see `isDreamingConfigured`.
+   */
   dreaming?: AiIndexDreamingConfig;
 }
 
 export interface AiIndexHttpItem extends Omit<AiIndexProperties, 'traces'> {
   id: string;
   managed: boolean;
-  memory_enabled: boolean;
   date_created: string;
   date_modified: string;
   traces: AiIndexTraceWithQuery[];

@@ -32,6 +32,7 @@ const storageSettings = {
       space: types.keyword({}),
       description: types.text({}),
       managed: types.boolean({}),
+      // No longer written: an AI index takes memories while its dreaming config is set up.
       memory_enabled: types.boolean({}),
       date_created: types.date({}),
       date_modified: types.date({}),
@@ -72,9 +73,6 @@ interface AiIndexDocumentFields {
   description?: string;
   feedback_analysis?: AiIndexFeedbackAnalysis;
   dreaming?: AiIndexDreamingConfig;
-  // Optional for backward compatibility with entries written before memory
-  // support existed; absence is treated as enabled (`true`) on read.
-  memory_enabled?: boolean;
   // Optional for backward compatibility with entries written before managed
   // indices existed; absence is treated as unmanaged (`false`) on read.
   managed?: boolean;
@@ -89,6 +87,8 @@ interface AiIndexDocumentFields {
 
 /** What the index may hold: pre-upgrade documents predate `id` and `space`. */
 export interface StoredAiIndexDocument extends AiIndexDocumentFields {
+  // Written before the dreaming config replaced it; dropped on read.
+  memory_enabled?: boolean;
   // The logical id was the ES `_id` before ids became a field.
   id?: string;
   // The space was implicitly default before space support existed.

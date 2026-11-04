@@ -42,7 +42,6 @@ const aiIndexWith = (
 ): AiIndexHttpItem => ({
   id: 'tickets',
   managed: false,
-  memory_enabled: true,
   dest: { type: 'index', value: 'ai-index-idx-tickets' },
   automations: [],
   sources: [],
@@ -89,12 +88,6 @@ describe('DreamingPanel', () => {
     fireEvent.click(screen.getByTestId('contextAiIndexDreamingSetUp'));
 
     expect(navigateToContextEngine).toHaveBeenCalledWith('/ai_index/tickets/dreaming_template');
-  });
-
-  it('does not offer the setup to an AI index without memory', () => {
-    renderPanel(aiIndexWith(undefined, { memory_enabled: false }));
-
-    expect(screen.getByTestId('contextAiIndexDreamingSetUp')).toBeDisabled();
   });
 
   it('shows the config as JSON in a modal', () => {
@@ -187,14 +180,6 @@ describe('DreamingPanel', () => {
     });
 
     expect(screen.getByText('Must be at least 15 minutes.')).toBeInTheDocument();
-    expect(screen.getByTestId('contextAiIndexDreamingSave')).toBeDisabled();
-  });
-
-  it('explains that dreaming needs memory, and does not save it turned on without it', () => {
-    renderPanel(aiIndexWith(factsOnly, { memory_enabled: false }));
-
-    expect(screen.getByTestId('contextAiIndexDreamingMemoryOff')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('contextDreamingConfigFact-policy-delete'));
     expect(screen.getByTestId('contextAiIndexDreamingSave')).toBeDisabled();
   });
 

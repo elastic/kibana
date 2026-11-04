@@ -125,29 +125,7 @@ describe('CreateAiIndexPage', () => {
     expect(screen.getByTestId('contextCreateAiIndexButton')).toBeEnabled();
   });
 
-  it('creates with memory enabled by default when the global memory feature is enabled', async () => {
-    mockUseMemoryEnabled.mockReturnValue(true);
-    const services = coreMock.createStart();
-    services.http.post.mockResolvedValue({});
-
-    renderWithProviders(services);
-
-    expect(screen.getByTestId('contextCreateAiIndexMemoryToggle')).toBeChecked();
-
-    typeId(VALID_ID);
-    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
-
-    await waitFor(() => {
-      expect(services.http.post).toHaveBeenCalledWith(
-        '/api/context_engine/ai_index',
-        expect.objectContaining({
-          body: expect.stringContaining('"memory_enabled":true'),
-        })
-      );
-    });
-  });
-
-  it('continues to the dreaming setup after creating an AI index with memory', async () => {
+  it('continues to the dreaming setup after creating an AI index while memory is on', async () => {
     mockUseMemoryEnabled.mockReturnValue(true);
     const services = coreMock.createStart();
     services.http.post.mockResolvedValue({});
@@ -163,56 +141,10 @@ describe('CreateAiIndexPage', () => {
     });
   });
 
-  it('continues to the AI index when it is created without memory', async () => {
-    mockUseMemoryEnabled.mockReturnValue(true);
-    const services = coreMock.createStart();
-    services.http.post.mockResolvedValue({});
-
-    renderWithProviders(services);
-    typeId(VALID_ID);
-    fireEvent.click(screen.getByTestId('contextCreateAiIndexMemoryToggle'));
-    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
-
-    await waitFor(() => {
-      expect(services.application.navigateToApp).toHaveBeenCalledWith(CONTEXT_ENGINE_APP_ID, {
-        path: '/ai_index/support-ticket-triage',
-        state: AI_INDEX_CREATED_LOCATION_STATE,
-      });
-    });
-  });
-
-  it('does not show memory settings when the global memory feature is disabled', () => {
+  it('does not ask about memory: an AI index takes memories once dreaming is set up', () => {
     renderWithProviders(coreMock.createStart());
 
     expect(screen.queryByTestId('contextCreateAiIndexMemoryToggle')).not.toBeInTheDocument();
-  });
-
-  it('creates the AI index with the selected memory setting', async () => {
-    mockUseMemoryEnabled.mockReturnValue(true);
-    const services = coreMock.createStart();
-    services.http.post.mockResolvedValue({});
-
-    renderWithProviders(services);
-
-    typeId(VALID_ID);
-    fireEvent.click(screen.getByTestId('contextCreateAiIndexMemoryToggle'));
-    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
-
-    await waitFor(() => {
-      expect(services.http.post).toHaveBeenCalledWith(
-        '/api/context_engine/ai_index',
-        expect.objectContaining({
-          body: JSON.stringify({
-            id: VALID_ID,
-            memory_enabled: false,
-            dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
-            automations: [],
-            sources: [],
-            traces: [],
-          }),
-        })
-      );
-    });
   });
 
   it('creates an AI index without any source', async () => {
