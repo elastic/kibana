@@ -8,7 +8,12 @@
 import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import { apiTest, DEFAULT_COMPOSITE_SLO, mergeSloApiHeaders } from '../../fixtures';
+import {
+  apiTest,
+  DEFAULT_COMPOSITE_SLO,
+  mergeSloApiHeaders,
+  sloApiPathWithQuery,
+} from '../../fixtures';
 
 apiTest.describe(
   'Update Composite SLOs',
@@ -91,6 +96,55 @@ apiTest.describe(
       expect(definitionRes).toHaveStatusCode(200);
       expect(definitionRes.body).toMatchObject(update);
     });
+
+    apiTest(
+      'reflects the updated name, tags and enabled flag in find results',
+      async ({ apiClient }) => {
+        const createRes = await apiClient.post('api/observability/slo_composites', {
+          headers,
+          body: {
+            ...DEFAULT_COMPOSITE_SLO,
+            name: 'Searchable Original',
+            tags: ['rename-test'],
+            enabled: false,
+          },
+          responseType: 'json',
+        });
+        expect(createRes).toHaveStatusCode(200);
+        const { id } = createRes.body as { id: string };
+
+        const updateRes = await apiClient.put(`api/observability/slo_composites/${id}`, {
+          headers,
+          body: { name: 'Searchable Renamed', tags: [], enabled: true },
+          responseType: 'json',
+        });
+        expect(updateRes).toHaveStatusCode(200);
+
+        const find = async (query: Record<string, string>) => {
+          const response = await apiClient.get(
+            sloApiPathWithQuery('api/observability/slo_composites', query),
+            { headers, responseType: 'json' }
+          );
+          expect(response).toHaveStatusCode(200);
+          return response.body as {
+            total: number;
+            results: Array<{ id: string; name: string; tags: string[]; enabled: boolean }>;
+          };
+        };
+
+        const byNewName = await find({ search: 'Renamed' });
+        expect(byNewName.total).toBe(1);
+        expect(byNewName.results[0]).toMatchObject({
+          id,
+          name: 'Searchable Renamed',
+          tags: [],
+          enabled: true,
+        });
+
+        expect((await find({ search: 'Original' })).total).toBe(0);
+        expect((await find({ tags: 'rename-test' })).total).toBe(0);
+      }
+    );
 
     apiTest('returns 404 when updating a non-existent composite SLO', async ({ apiClient }) => {
       const response = await apiClient.put('api/observability/slo_composites/non-existent-id', {
