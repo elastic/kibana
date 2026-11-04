@@ -513,8 +513,8 @@ describe('CreateConnectorFlyout', () => {
     });
 
     it('keeps the flyout mounted when the selected type icon is lazy', async () => {
-      let resolveIcon: (value: { default: React.FC<React.SVGProps<SVGSVGElement>> }) => void =
-        () => undefined;
+      let resolveIcon: (value: { default: React.FC<React.SVGProps<SVGSVGElement>> }) => void = () =>
+        undefined;
       const deferred = new Promise<{ default: React.FC<React.SVGProps<SVGSVGElement>> }>(
         (resolve) => {
           resolveIcon = resolve;

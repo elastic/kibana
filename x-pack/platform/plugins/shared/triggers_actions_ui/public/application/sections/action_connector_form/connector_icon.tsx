@@ -17,7 +17,9 @@ interface ConnectorIconProps {
   'data-test-subj'?: string;
 }
 
-const toSkeletonSize = (size: NonNullable<EuiIconProps['size']>): EuiSkeletonCircleProps['size'] => {
+const toSkeletonSize = (
+  size: NonNullable<EuiIconProps['size']>
+): EuiSkeletonCircleProps['size'] => {
   if (size === 'original') return 'm';
   if (size === 'xxl') return 'xl';
   return size;

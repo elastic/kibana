@@ -121,8 +121,8 @@ describe('connector_add_flyout', () => {
     });
 
     it('renders cards immediately when icons are lazy', async () => {
-      let resolveIcon: (value: { default: React.FC<React.SVGProps<SVGSVGElement>> }) => void =
-        () => undefined;
+      let resolveIcon: (value: { default: React.FC<React.SVGProps<SVGSVGElement>> }) => void = () =>
+        undefined;
       const deferred = new Promise<{ default: React.FC<React.SVGProps<SVGSVGElement>> }>(
         (resolve) => {
           resolveIcon = resolve;
