@@ -6,7 +6,9 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { getLatestEntityIndexPattern } from '@kbn/entity-store/common';
 import { runEntityGraphTraversalHopStepCommonDefinition } from '../../../../common/workflows/step_types/entity_graph_traversal/run_entity_graph_traversal_hop_step_common';
+import { resolveSpaceId } from '../get_alert_entities_step/resolve_space_id';
 import { runHop, type EsqlResult, type ExecuteHopQuery } from './run_hop';
 
 export const runEntityGraphTraversalHopStepDefinition = createServerStepDefinition({
@@ -18,6 +20,7 @@ export const runEntityGraphTraversalHopStepDefinition = createServerStepDefiniti
       visited,
       edges_so_far,
       truncated_so_far,
+      direction,
       limits,
       lookback,
       exclusions,
@@ -25,6 +28,10 @@ export const runEntityGraphTraversalHopStepDefinition = createServerStepDefiniti
     } = context.input;
     const esClient = context.contextManager.getScopedEsClient();
     const { logger, abortSignal } = context;
+    // The graph is the entity store of the execution space: nodes are its entities and edges
+    // their relationship ids, so every hop reads the space's latest entity index.
+    const spaceId = await resolveSpaceId(context.contextManager);
+    const index = getLatestEntityIndexPattern(spaceId);
 
     const execute: ExecuteHopQuery = async ({ query, params }) => {
       logger.debug(
@@ -48,6 +55,8 @@ export const runEntityGraphTraversalHopStepDefinition = createServerStepDefiniti
       const output = await runHop(
         {
           hop,
+          index,
+          direction,
           frontier,
           visited,
           edgesSoFar: edges_so_far,

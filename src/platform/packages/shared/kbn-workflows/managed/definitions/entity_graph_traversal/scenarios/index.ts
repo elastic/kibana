@@ -8,7 +8,6 @@
  */
 
 import { parse } from 'yaml';
-import AWS_CLOUDTRAIL_OBSERVED_ACTIVITY_YAML from './aws_cloudtrail_observed_activity.yaml';
 import AWS_ROLE_BLAST_RADIUS_YAML from './aws_role_blast_radius.yaml';
 import ENDPOINT_SHARED_INDICATOR_SPREAD_YAML from './endpoint_shared_indicator_spread.yaml';
 import OKTA_USER_TO_AWS_RESOURCES_YAML from './okta_user_to_aws_resources.yaml';
@@ -23,13 +22,16 @@ import {
 export {
   ENTITY_GRAPH_TRAVERSAL_DEFAULT_LIMITS,
   ENTITY_GRAPH_TRAVERSAL_HARD_LIMITS,
-  ENTITY_GRAPH_TRAVERSAL_MATCH_VALUE_TYPES,
+  ENTITY_GRAPH_TRAVERSAL_DIRECTIONS,
+  ENTITY_GRAPH_TRAVERSAL_NODE_ID_FIELD,
+  entityGraphTraversalRelationshipField,
+  entityGraphTraversalRelationshipKey,
   ESQL_FIELD_NAME_PATTERN,
-  INDEX_PATTERN_PATTERN,
   LOOKBACK_PATTERN,
   MAX_HOP_SPECS_PER_SCENARIO,
   MAX_PAYLOAD_FIELDS_PER_HOP,
-  MAX_TARGET_FIELDS_PER_HOP,
+  MAX_RELATIONSHIPS_PER_HOP,
+  RELATIONSHIP_KEY_PATTERN,
   buildEntityGraphTraversalPlan,
   entityGraphTraversalHopSchema,
   entityGraphTraversalLimitOverridesSchema,
@@ -42,7 +44,7 @@ export {
 export type {
   EntityGraphTraversalExpandedHop,
   EntityGraphTraversalHopSpec,
-  EntityGraphTraversalMatchValueType,
+  EntityGraphTraversalDirection,
   EntityGraphTraversalLimitOverrides,
   EntityGraphTraversalLimits,
   EntityGraphTraversalPlan,
@@ -60,16 +62,11 @@ export interface EntityGraphTraversalScenarioDefinition {
 
 export const OKTA_USER_TO_AWS_RESOURCES_SCENARIO_ID = 'okta-user-to-aws-resources';
 export const AWS_ROLE_BLAST_RADIUS_SCENARIO_ID = 'aws-role-blast-radius';
-export const AWS_CLOUDTRAIL_OBSERVED_ACTIVITY_SCENARIO_ID = 'aws-cloudtrail-observed-activity';
 export const ENDPOINT_SHARED_INDICATOR_SPREAD_SCENARIO_ID = 'endpoint-shared-indicator-spread';
 
 export const entityGraphTraversalScenarioDefinitions = [
   { id: OKTA_USER_TO_AWS_RESOURCES_SCENARIO_ID, yaml: OKTA_USER_TO_AWS_RESOURCES_YAML },
   { id: AWS_ROLE_BLAST_RADIUS_SCENARIO_ID, yaml: AWS_ROLE_BLAST_RADIUS_YAML },
-  {
-    id: AWS_CLOUDTRAIL_OBSERVED_ACTIVITY_SCENARIO_ID,
-    yaml: AWS_CLOUDTRAIL_OBSERVED_ACTIVITY_YAML,
-  },
   { id: ENDPOINT_SHARED_INDICATOR_SPREAD_SCENARIO_ID, yaml: ENDPOINT_SHARED_INDICATOR_SPREAD_YAML },
 ] as const satisfies readonly EntityGraphTraversalScenarioDefinition[];
 

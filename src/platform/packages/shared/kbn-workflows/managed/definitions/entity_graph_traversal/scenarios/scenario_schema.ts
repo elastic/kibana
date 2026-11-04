@@ -41,29 +41,44 @@ export const ENTITY_GRAPH_TRAVERSAL_DEFAULT_LIMITS = {
   hub_degree: 500,
 } as const;
 
-/** Entries in one hop's `target_fields` and `payload_fields`. */
-export const MAX_TARGET_FIELDS_PER_HOP = 8;
+/** Relationship keys one hop may follow, and payload fields it may read. */
+export const MAX_RELATIONSHIPS_PER_HOP = 8;
 export const MAX_PAYLOAD_FIELDS_PER_HOP = 5;
 /** Entries in `hops` (before `repeat`). */
 export const MAX_HOP_SPECS_PER_SCENARIO = 20;
 
 /**
- * Entity store entity types a hop may match by EUID. Mirrors the store's `EntityType` enum;
- * kept literal here so this package does not depend on the entity store.
+ * Entity store entity types. Mirrors the store's `EntityType` enum; kept literal here so this
+ * package does not depend on the entity store.
  */
 export const ENTITY_GRAPH_TRAVERSAL_EUID_TYPES = ['user', 'host', 'service', 'generic'] as const;
 
 export type EntityGraphTraversalEuidType = (typeof ENTITY_GRAPH_TRAVERSAL_EUID_TYPES)[number];
 
 /**
- * Value types a `match_fields` entry may declare. ES|QL rejects a whole query when a bound
- * value cannot be cast to the field's type, so a hop that matches a mixed frontier (hashes
- * and addresses, say) against an `ip` field binds only the values of that type to it.
+ * The graph lives in the entity store's latest index: every node is an entity document, its
+ * `entity.id` is the node id (the store EUID), and every edge is an entry in one of the
+ * document's `entity.relationships.<key>.ids` arrays, holding the target's `entity.id`.
  */
-export const ENTITY_GRAPH_TRAVERSAL_MATCH_VALUE_TYPES = ['ip'] as const;
+export const ENTITY_GRAPH_TRAVERSAL_NODE_ID_FIELD = 'entity.id';
 
-export type EntityGraphTraversalMatchValueType =
-  (typeof ENTITY_GRAPH_TRAVERSAL_MATCH_VALUE_TYPES)[number];
+export const entityGraphTraversalRelationshipField = (key: string): string =>
+  `entity.relationships.${key}.ids`;
+
+/** The relationship key an `entity.relationships.<key>.ids` field holds, or undefined. */
+export const entityGraphTraversalRelationshipKey = (field: string): string | undefined => {
+  const match = field.match(/^entity\.relationships\.([a-z][a-z0-9_]*)\.ids$/);
+  return match ? match[1] : undefined;
+};
+
+/**
+ * Which way a walk follows the stored edges. `out` follows a node's own relationship ids;
+ * `both` also reaches the nodes whose relationships point at the frontier, so a walk can go
+ * host, indicator, host over edges that only the hosts carry.
+ */
+export const ENTITY_GRAPH_TRAVERSAL_DIRECTIONS = ['out', 'both'] as const;
+
+export type EntityGraphTraversalDirection = (typeof ENTITY_GRAPH_TRAVERSAL_DIRECTIONS)[number];
 
 type LimitKey = keyof typeof ENTITY_GRAPH_TRAVERSAL_HARD_LIMITS;
 
@@ -75,11 +90,8 @@ const LIMIT_KEYS = Object.keys(ENTITY_GRAPH_TRAVERSAL_HARD_LIMITS) as LimitKey[]
  */
 export const ESQL_FIELD_NAME_PATTERN = /^[A-Za-z_@][A-Za-z0-9_.@-]*$/;
 
-/**
- * An index pattern as accepted by ES|QL `FROM`: names, wildcards, comma lists and
- * remote-cluster prefixes. No whitespace, quotes or pipes.
- */
-export const INDEX_PATTERN_PATTERN = /^[A-Za-z0-9_.*,:-]+$/;
+/** A relationship key as stored under `entity.relationships`. */
+export const RELATIONSHIP_KEY_PATTERN = /^[a-z][a-z0-9_]*$/;
 
 /** A lookback such as `24h`, `7d` or `30m`. */
 export const LOOKBACK_PATTERN = /^[0-9]{1,5}(m|h|d)$/;
@@ -111,9 +123,9 @@ export type EntityGraphTraversalLimitOverrides = z.infer<
 const esqlFieldName = () => z.string().min(1).max(256).regex(ESQL_FIELD_NAME_PATTERN);
 
 /**
- * An ES|QL boolean expression AND-ed onto the hop's `WHERE`. Scenario YAML ships inside
- * Kibana, so the expression is trusted, but a pipe or a newline would let it append whole
- * commands, which is never what a filter means.
+ * An ES|QL boolean expression over the entity document a hop expands, AND-ed onto the hop's
+ * `WHERE`. Scenario YAML ships inside Kibana, so the expression is trusted, but a pipe or a
+ * newline would let it append whole commands, which is never what a filter means.
  */
 const esqlFilterExpression = () =>
   z
@@ -124,79 +136,29 @@ const esqlFilterExpression = () =>
       message: 'filter must be a single ES|QL boolean expression without pipes or newlines',
     });
 
-const targetFieldSchema = () =>
-  z.union([
-    esqlFieldName(),
-    z.object({
-      field: esqlFieldName(),
-      relation: z.string().min(1).max(64),
-    }),
-  ]);
-
-const matchFieldSchema = () =>
-  z.union([
-    esqlFieldName(),
-    z.object({
-      field: esqlFieldName(),
-      value_type: z.enum(ENTITY_GRAPH_TRAVERSAL_MATCH_VALUE_TYPES).optional(),
-    }),
-  ]);
-
 export const entityGraphTraversalHopSchema = lazySchema(() =>
-  z
-    .object({
-      name: z
-        .string()
-        .min(1)
-        .max(64)
-        .regex(/^[a-z][a-z0-9_]*$/, 'hop name must be snake_case'),
-      description: z.string().max(1_000).optional(),
-      index: z.string().min(1).max(512).regex(INDEX_PATTERN_PATTERN),
-      /** Match the frontier against this stored field. Exactly one of match_field / match_fields / match_euid. */
-      match_field: esqlFieldName().optional(),
-      /**
-       * Match the frontier against any of these stored fields (OR). For a frontier that mixes
-       * value kinds, an entry may declare the `value_type` its field holds so only values of
-       * that type are bound to it.
-       */
-      match_fields: z.array(matchFieldSchema()).min(1).max(MAX_TARGET_FIELDS_PER_HOP).optional(),
-      /**
-       * Match the frontier against the entity store EUID computed from each document with the
-       * named entity type's identity rules. The frontier values are then EUIDs such as
-       * `user:john.doe@acme.com@okta`.
-       */
-      match_euid: z.enum(ENTITY_GRAPH_TRAVERSAL_EUID_TYPES).optional(),
-      /** Fields whose values become the next frontier. Exactly one of target_fields / target_euid. */
-      target_fields: z.array(targetFieldSchema()).min(1).max(MAX_TARGET_FIELDS_PER_HOP).optional(),
-      /**
-       * Emit, as the target, the entity store EUID computed from each document with the named
-       * entity type's identity rules, labelled with the hop's `relation`. The reached nodes are
-       * then store ids (`host:...`) that later hops can match with `match_euid`.
-       */
-      target_euid: z.enum(ENTITY_GRAPH_TRAVERSAL_EUID_TYPES).optional(),
-      payload_fields: z.array(esqlFieldName()).max(MAX_PAYLOAD_FIELDS_PER_HOP).optional(),
-      filter: esqlFilterExpression().optional(),
-      /** Relation label for edges whose target field does not name its own. */
-      relation: z.string().min(1).max(64).optional(),
-      /** When set, a run's `lookback` input is applied to this hop as `time_field >= NOW() - lookback`. */
-      time_field: esqlFieldName().optional(),
-      source_type: z.string().min(1).max(64).optional(),
-      target_type: z.string().min(1).max(64).optional(),
-      /** How many consecutive hops reuse this spec. */
-      repeat: z.number().int().min(1).max(ENTITY_GRAPH_TRAVERSAL_HARD_LIMITS.max_hops).default(1),
-    })
-    .refine(
-      (hop) =>
-        [hop.match_field, hop.match_fields, hop.match_euid].filter((v) => v !== undefined)
-          .length === 1,
-      { message: 'a hop must set exactly one of match_field, match_fields or match_euid' }
-    )
-    .refine((hop) => (hop.target_fields === undefined) !== (hop.target_euid === undefined), {
-      message: 'a hop must set exactly one of target_fields or target_euid',
-    })
-    .refine((hop) => hop.target_euid === undefined || hop.relation !== undefined, {
-      message: 'a hop with target_euid must set relation',
-    })
+  z.object({
+    name: z
+      .string()
+      .min(1)
+      .max(64)
+      .regex(/^[a-z][a-z0-9_]*$/, 'hop name must be snake_case'),
+    description: z.string().max(1_000).optional(),
+    /** Relationship keys followed on this hop; each becomes the relation label of its edges. */
+    relationships: z
+      .array(z.string().min(1).max(64).regex(RELATIONSHIP_KEY_PATTERN))
+      .min(1)
+      .max(MAX_RELATIONSHIPS_PER_HOP),
+    /** Fields of the expanded entity document carried on its edges, for example `entity.name`. */
+    payload_fields: z.array(esqlFieldName()).max(MAX_PAYLOAD_FIELDS_PER_HOP).optional(),
+    /** Only expand entity documents matching this, for example `entity.source == "okta"`. */
+    filter: esqlFilterExpression().optional(),
+    /** Display type hints for nodes reached on the frontier side and on the pointed side. */
+    source_type: z.string().min(1).max(64).optional(),
+    target_type: z.string().min(1).max(64).optional(),
+    /** How many consecutive hops reuse this spec. */
+    repeat: z.number().int().min(1).max(ENTITY_GRAPH_TRAVERSAL_HARD_LIMITS.max_hops).default(1),
+  })
 );
 
 export type EntityGraphTraversalHopSpec = z.infer<typeof entityGraphTraversalHopSchema>;
@@ -215,7 +177,7 @@ export type EntityGraphTraversalStopCondition = z.infer<
 
 export const entityGraphTraversalScenarioSchema = lazySchema(() =>
   z.object({
-    version: z.literal('1'),
+    version: z.literal('2'),
     id: z
       .string()
       .min(1)
@@ -227,6 +189,7 @@ export const entityGraphTraversalScenarioSchema = lazySchema(() =>
       type: z.string().min(1).max(64),
       description: z.string().max(1_000).optional(),
     }),
+    direction: z.enum(ENTITY_GRAPH_TRAVERSAL_DIRECTIONS).default('out'),
     limits: entityGraphTraversalLimitOverridesSchema.optional(),
     hops: z.array(entityGraphTraversalHopSchema).min(1).max(MAX_HOP_SPECS_PER_SCENARIO),
     /**
@@ -241,24 +204,18 @@ export const entityGraphTraversalScenarioSchema = lazySchema(() =>
 export type EntityGraphTraversalScenario = z.infer<typeof entityGraphTraversalScenarioSchema>;
 
 /**
- * One hop as the workflow executes it: `repeat` is unrolled, every target field carries a
- * relation label, and `hop_number` is the 1-based position in the run. Exactly one of
- * `match_field` / `match_fields` / `match_euid` is set, and exactly one of `target_fields` /
- * `target_euid` is populated.
+ * One hop as the workflow executes it: `repeat` is unrolled, the relationship keys are the
+ * stored fields the hop reads, and `hop_number` is the 1-based position in the run. The
+ * frontier is matched on `match_field` (always `entity.id`) and every target field names the
+ * relation its values carry.
  */
 export interface EntityGraphTraversalExpandedHop {
   hop_number: number;
   name: string;
-  index: string;
-  match_field?: string;
-  match_fields?: Array<{ field: string; value_type?: EntityGraphTraversalMatchValueType }>;
-  match_euid?: EntityGraphTraversalEuidType;
-  /** Empty when the hop targets an EUID. */
+  match_field: string;
   target_fields: Array<{ field: string; relation: string }>;
-  target_euid?: { type: EntityGraphTraversalEuidType; relation: string };
   payload_fields: string[];
   filter?: string;
-  time_field?: string;
   source_type?: string;
   target_type?: string;
 }
@@ -268,6 +225,7 @@ export interface EntityGraphTraversalPlan {
   name: string;
   description?: string;
   seed: EntityGraphTraversalScenario['seed'];
+  direction: EntityGraphTraversalDirection;
   limits: EntityGraphTraversalLimits;
   hops: EntityGraphTraversalExpandedHop[];
   /** The scenario's stop conditions; empty when it declares none. */
@@ -305,31 +263,13 @@ export const expandEntityGraphTraversalHops = (
       expanded.push({
         hop_number: expanded.length + 1,
         name: hop.name,
-        index: hop.index,
-        ...(hop.match_field !== undefined && { match_field: hop.match_field }),
-        ...(hop.match_fields !== undefined && {
-          match_fields: hop.match_fields.map((match) =>
-            typeof match === 'string'
-              ? { field: match }
-              : {
-                  field: match.field,
-                  ...(match.value_type !== undefined && { value_type: match.value_type }),
-                }
-          ),
-        }),
-        ...(hop.match_euid !== undefined && { match_euid: hop.match_euid }),
-        target_fields: (hop.target_fields ?? []).map((target) =>
-          typeof target === 'string'
-            ? { field: target, relation: hop.relation ?? target }
-            : { field: target.field, relation: target.relation }
-        ),
-        ...(hop.target_euid !== undefined &&
-          hop.relation !== undefined && {
-            target_euid: { type: hop.target_euid, relation: hop.relation },
-          }),
+        match_field: ENTITY_GRAPH_TRAVERSAL_NODE_ID_FIELD,
+        target_fields: hop.relationships.map((key) => ({
+          field: entityGraphTraversalRelationshipField(key),
+          relation: key,
+        })),
         payload_fields: hop.payload_fields ?? [],
         ...(hop.filter !== undefined && { filter: hop.filter }),
-        ...(hop.time_field !== undefined && { time_field: hop.time_field }),
         ...(hop.source_type !== undefined && { source_type: hop.source_type }),
         ...(hop.target_type !== undefined && { target_type: hop.target_type }),
       });
@@ -351,6 +291,7 @@ export const buildEntityGraphTraversalPlan = (
     name: scenario.name,
     ...(scenario.description !== undefined && { description: scenario.description }),
     seed: scenario.seed,
+    direction: scenario.direction,
     limits,
     hops: expandEntityGraphTraversalHops(scenario, limits),
     until: scenario.until ?? [],

@@ -24,6 +24,7 @@ export type BlastRadiusNodeKind =
   | 'user'
   | 'role'
   | 'policy'
+  | 'indicator'
   | 'instance'
   | 'bucket'
   | 'host'
@@ -63,6 +64,7 @@ const PRESENTATION: Record<BlastRadiusNodeKind, NodePresentation> = {
   bucket: { shape: 'rectangle', icon: 'storage', tag: 'S3 bucket' },
   host: { shape: 'hexagon', icon: 'storage', tag: 'Host' },
   service: { shape: 'rectangle', icon: 'node', tag: 'Service' },
+  indicator: { shape: 'rectangle', icon: 'bullseye', tag: 'Indicator' },
   entity: { shape: 'hexagon', icon: 'globe', tag: 'Asset' },
 };
 
@@ -98,6 +100,7 @@ const kindFromEntity = (entity?: GraphTraversalEntity): BlastRadiusNodeKind | un
   ) {
     return entity.engine_type;
   }
+  if (entity.type === 'Indicator') return 'indicator';
   const subType = entity.sub_type?.toLowerCase() ?? '';
   if (subType.endsWith(' role')) return 'role';
   if (subType.endsWith(' policy')) return 'policy';

@@ -37,10 +37,12 @@ describe('security.loadEntityGraphTraversalScenario', () => {
       limits: { max_hops: 6 },
     });
     expect(result.output?.hops).toHaveLength(6);
+    expect(result.output).toMatchObject({ direction: 'out' });
     expect(result.output?.hops[0]).toMatchObject({
       hop_number: 1,
       name: 'okta_federation_roles',
-      match_euid: 'user',
+      match_field: 'entity.id',
+      target_fields: [{ field: 'entity.relationships.can_assume.ids', relation: 'can_assume' }],
     });
   });
 

@@ -6,7 +6,15 @@
  */
 
 import { loadEntityGraphTraversalPlan } from '@kbn/workflows/managed';
-import { buildGraphExpandStatement, relationForColumn } from './build_graph_expand';
+import {
+  buildEntityLookupQuery,
+  buildGraphExpandStatement,
+  GRAPH_EXPAND_PREAMBLE,
+  relationForField,
+} from './build_graph_expand';
+
+const INDEX = '.entities.v2.latest.default-*';
+const LOOKUP = '.entities.v2.latest.default-00001';
 
 const plan = (id: string) => {
   const loaded = loadEntityGraphTraversalPlan(id);
@@ -15,160 +23,122 @@ const plan = (id: string) => {
 };
 
 describe('buildGraphExpandStatement', () => {
-  describe('endpoint-shared-indicator-spread (inverse hop pair)', () => {
+  describe('okta-user-to-aws-resources', () => {
     const statement = buildGraphExpandStatement({
-      plan: plan('endpoint-shared-indicator-spread'),
-      seedId: 'host:WKSTN-RECV01',
+      plan: plan('okta-user-to-aws-resources'),
+      indexPattern: INDEX,
+      lookupIndex: LOOKUP,
+      seedId: 'user:john.doe@acmecrm.com@okta',
     });
 
-    it('projects the first spec only and walks in both directions', () => {
-      expect(statement.direction).toBe('both');
-      expect(statement.relations).toEqual(['executed', 'dropped', 'connected_to']);
-      expect(statement.query).toContain('FROM logs-endpoint.events.*,logs-endpoint.alerts-*');
-      expect(statement.query).not.toContain('observed_on');
-      expect(statement.query).toContain('"direction":"both"');
-    });
-
-    it('computes the host EUID with the store rules and binds the seed as a parameter', () => {
-      expect(statement.params).toEqual(['host:WKSTN-RECV01']);
-      expect(statement.query.split('\n').slice(0, 2)).toEqual([
-        'SET unmapped_fields="load";',
-        'ROW node_id = ?',
+    it('walks the entity index on entity.id over the union of the scenario relationships', () => {
+      expect(statement.direction).toBe('out');
+      expect(statement.targets).toEqual([
+        { field: 'entity.relationships.can_assume.ids', relation: 'can_assume' },
+        { field: 'entity.relationships.can_connect.ids', relation: 'can_connect' },
+        { field: 'entity.relationships.runs_as.ids', relation: 'runs_as' },
+        { field: 'entity.relationships.grants_access_to.ids', relation: 'grants_access_to' },
       ]);
-      expect(statement.query).toContain('__euid_0 = CONCAT("host:"');
-      expect(statement.query).toContain('__id = CASE(destination.ip IS NULL OR NOT CIDR_MATCH(');
-      expect(statement.query).toContain('ON node_id == __id TO (__rel_0, __rel_1, __rel_2)');
-    });
-
-    it('casts every relation value to a string and gates it with the spec filter', () => {
-      expect(statement.query).toContain('__rel_2 = CASE(destination.ip IS NULL OR NOT CIDR_MATCH(');
-      expect(statement.query).toContain('TO_STRING(`destination.ip`), NULL)');
-      expect(statement.query).toContain('TO_STRING(`process.hash.sha256`)');
-    });
-
-    it('carries the scenario limits and payload fields', () => {
-      expect(statement.query).toContain(
-        'STATS __count = COUNT(*), __payload_0 = VALUES(`process.name`), __payload_1 = VALUES(`event.action`)'
+      expect(statement.query).toBe(
+        [
+          GRAPH_EXPAND_PREAMBLE,
+          'ROW node_id = ?',
+          `| GRAPH EXPAND ${INDEX} ON node_id == \`entity.id\``,
+          '    TO (`entity.relationships.can_assume.ids`, `entity.relationships.can_connect.ids`, `entity.relationships.runs_as.ids`, `entity.relationships.grants_access_to.ids`)',
+          '    STATS __count = COUNT(*), __payload_0 = VALUES(`entity.name`), __payload_1 = VALUES(`entity.sub_type`)',
+          '    WITH {"max_hops":6,"max_nodes":2000,"max_frontier":500,"hub_degree":500,"direction":"out"}',
+          '| RENAME node_reached AS `entity.id`',
+          `| LOOKUP JOIN ${LOOKUP} ON \`entity.id\``,
+        ].join('\n')
       );
-      expect(statement.query).toContain('"max_hops":6');
-      expect(statement.query).toContain('"hub_degree":200');
-      expect(statement.query).not.toContain('"exclude"');
-      expect(statement.payloadFields).toEqual(['process.name', 'event.action']);
+      expect(statement.params).toEqual(['user:john.doe@acmecrm.com@okta']);
+      expect(statement.payloadFields).toEqual(['entity.name', 'entity.sub_type']);
       expect(statement.maxHops).toBe(6);
     });
+
+    it('reads the reached node off the joined entity.id column', () => {
+      expect(statement.enriched).toBe(true);
+      expect(statement.reachedColumn).toBe('entity.id');
+    });
   });
 
-  describe('okta-user-to-aws-resources (forward chain)', () => {
-    const statement = buildGraphExpandStatement({
-      plan: plan('okta-user-to-aws-resources'),
-      seedId: 'user:john.doe@acmecrm.com@okta',
-      lookback: '7d',
-      exclusions: [
-        { field: 'entity.id', values: ['arn:aws:iam::1:role/skip'] },
-        { field: 'entity.sub_type', values: ['AWS S3 Bucket'] },
-      ],
-    });
-
-    it('unions both indices under one coalesced id', () => {
-      expect(statement.direction).toBe('out');
-      expect(statement.query).toContain(
-        'FROM logs-entityanalytics_okta.user-*,logs-cloud_asset_inventory.asset_inventory-*'
-      );
-      expect(statement.query).toContain('__euid_0 = CONCAT("user:"');
-      expect(statement.query).toContain(
-        '__id = COALESCE(__euid_0, CASE(cloud.provider == "aws", TO_STRING(`entity.id`), NULL))'
-      );
-    });
-
-    it('coalesces the fields that emit the same relation across specs', () => {
-      expect(statement.relations).toEqual([
-        'can_assume',
-        'can_connect',
-        'runs_as',
-        'grants_access_to',
-      ]);
-      expect(statement.query).toContain(
-        '__rel_0 = COALESCE(TO_STRING(`user.entity.relationships.can_assume.entity.id`), CASE(cloud.provider == "aws", TO_STRING(`entity.relationships.can_assume.entity.id`), NULL))'
-      );
-      expect(statement.relationTypes).toEqual({
-        can_assume: { source_type: 'user', target_type: 'role' },
-        can_connect: { source_type: 'asset', target_type: 'asset' },
-        runs_as: { source_type: 'asset', target_type: 'asset' },
-        grants_access_to: { source_type: 'asset', target_type: 'asset' },
+  describe('endpoint-shared-indicator-spread', () => {
+    it('walks in both directions and binds the seed, exclusions and stop ids as parameters', () => {
+      const statement = buildGraphExpandStatement({
+        plan: plan('endpoint-shared-indicator-spread'),
+        indexPattern: INDEX,
+        seedId: 'host:WKSTN-RECV01',
+        lookback: '7d',
+        exclusions: [
+          { field: 'entity.id', values: ['185.220.101.42'] },
+          { field: 'entity.sub_type', values: ['IP address'] },
+        ],
+        until: [{ field: 'entity.id', values: ['host:WIN-FIN-03'] }],
       });
-    });
-
-    it('applies lookback, document exclusions and node exclusions as parameters', () => {
-      // No hop declares a time field, so the lookback adds nothing.
-      expect(statement.query).not.toContain('NOW()');
+      expect(statement.direction).toBe('both');
+      expect(statement.enriched).toBe(false);
+      expect(statement.reachedColumn).toBe('node_reached');
       expect(statement.query).toContain(
-        '| WHERE `entity.sub_type` IS NULL OR NOT (MV_CONTAINS(`entity.sub_type`, ?))'
+        '    WHERE `entity.lifecycle.last_seen` >= NOW() - 7 days AND (`entity.sub_type` IS NULL OR NOT (MV_CONTAINS(`entity.sub_type`, ?)))'
       );
-      expect(statement.query).toContain('| WHERE NOT __id IN (?)');
-      expect(statement.query).toContain('"exclude":["arn:aws:iam::1:role/skip"]');
-      expect(statement.params).toEqual([
-        'user:john.doe@acmecrm.com@okta',
-        'AWS S3 Bucket',
-        'arn:aws:iam::1:role/skip',
-      ]);
-      expect(statement.excludedIds).toEqual(['arn:aws:iam::1:role/skip']);
+      expect(statement.query).toContain('    UNTIL node_reached IN (?)');
+      expect(statement.query).toContain(
+        '"hub_degree":200,"direction":"both","exclude":["185.220.101.42"]}'
+      );
+      expect(statement.query).not.toContain('LOOKUP JOIN');
+      expect(statement.params).toEqual(['host:WKSTN-RECV01', 'IP address', 'host:WIN-FIN-03']);
+      expect(statement.excludedIds).toEqual(['185.220.101.42']);
+      expect(statement.untilIds).toEqual(['host:WIN-FIN-03']);
     });
   });
 
-  it('turns node-id stop conditions into UNTIL on the reached node, bound after every other parameter', () => {
-    const statement = buildGraphExpandStatement({
-      plan: plan('okta-user-to-aws-resources'),
-      seedId: 'user:john.doe@acmecrm.com@okta',
-      exclusions: [{ field: 'entity.id', values: ['arn:aws:iam::1:role/skip'] }],
-      until: [
-        {
-          field: 'entity.id',
-          values: ['arn:aws:s3:::acme-data-lake', 'arn:aws:s3:::acme-web-assets'],
-        },
-      ],
-    });
-    const lines = statement.query.split('\n');
-    const untilAt = lines.findIndex((l) => l.startsWith('  UNTIL node_reached IN (?, ?)'));
-    expect(untilAt).toBeGreaterThan(lines.findIndex((l) => l.startsWith('  STATS ')));
-    expect(lines[untilAt + 1]).toMatch(/^ {2}WITH /);
-    expect(statement.params).toEqual([
-      'user:john.doe@acmecrm.com@okta',
-      'arn:aws:iam::1:role/skip',
-      'arn:aws:s3:::acme-data-lake',
-      'arn:aws:s3:::acme-web-assets',
-    ]);
-    expect(statement.untilIds).toEqual([
-      'arn:aws:s3:::acme-data-lake',
-      'arn:aws:s3:::acme-web-assets',
-    ]);
+  it('applies one hop filter shared by every hop and refuses differing ones', () => {
+    const base = plan('aws-role-blast-radius');
+    const filtered = {
+      ...base,
+      hops: base.hops.map((hop) => ({ ...hop, filter: 'entity.source == "aws"' })),
+    };
+    expect(
+      buildGraphExpandStatement({ plan: filtered, indexPattern: INDEX, seedId: 'r' }).query
+    ).toContain('    WHERE (entity.source == "aws")');
+
+    const differing = {
+      ...base,
+      hops: base.hops.map((hop, index) => ({
+        ...hop,
+        filter: index === 0 ? 'entity.source == "aws"' : undefined,
+      })),
+    };
+    expect(() =>
+      buildGraphExpandStatement({ plan: differing, indexPattern: INDEX, seedId: 'r' })
+    ).toThrow('different filters');
   });
 
-  it('refuses a stop condition on a payload field', () => {
+  it('refuses stop conditions on anything but entity.id', () => {
     expect(() =>
       buildGraphExpandStatement({
-        plan: plan('okta-user-to-aws-resources'),
-        seedId: 'user:a',
-        until: [{ field: 'entity.sub_type', values: ['AWS S3 Bucket'] }],
+        plan: plan('aws-role-blast-radius'),
+        indexPattern: INDEX,
+        seedId: 'r',
+        until: [{ field: 'entity.name', values: ['x'] }],
       })
     ).toThrow('only supports stop conditions on entity.id');
   });
 
-  it('applies a lookback to every distinct time field, null-safe', () => {
-    const statement = buildGraphExpandStatement({
-      plan: plan('aws-cloudtrail-observed-activity'),
-      seedId: 'arn:aws:iam::1:role/x',
-      lookback: '24h',
-    });
-    expect(statement.query).toContain(
-      '| WHERE `@timestamp` IS NULL OR `@timestamp` >= NOW() - 24 hours'
-    );
-    expect(statement.direction).toBe('out');
+  it('maps a relation column back to its key, falling back to the field name convention', () => {
+    const targets = [{ field: 'entity.relationships.can_assume.ids', relation: 'can_assume' }];
+    expect(relationForField({ targets }, 'entity.relationships.can_assume.ids')).toBe('can_assume');
+    expect(relationForField({ targets }, undefined)).toBe('can_assume');
+    expect(relationForField({ targets }, 'entity.relationships.owns.ids')).toBe('owns');
+    expect(relationForField({ targets: [...targets, ...targets] }, undefined)).toBeUndefined();
   });
 
-  it('maps relation result columns back to labels, and a single TO to its only relation', () => {
-    expect(relationForColumn({ relations: ['a', 'b'] }, '__rel_1')).toBe('b');
-    expect(relationForColumn({ relations: ['a', 'b'] }, undefined)).toBeUndefined();
-    expect(relationForColumn({ relations: ['only'] }, undefined)).toBe('only');
-    expect(relationForColumn({ relations: ['a'] }, 'garbage')).toBeUndefined();
+  it('builds a one-document lookup for the seed with the join columns', () => {
+    const { query, params } = buildEntityLookupQuery(INDEX, 'host:a');
+    expect(params).toEqual(['host:a']);
+    expect(query).toContain(`FROM ${INDEX}`);
+    expect(query).toContain('| WHERE `entity.id` == ?');
+    expect(query).toContain('| KEEP entity.id, entity.name, entity.type');
+    expect(query).toContain('| LIMIT 1');
   });
 });

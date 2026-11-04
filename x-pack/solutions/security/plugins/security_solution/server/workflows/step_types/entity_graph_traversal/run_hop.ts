@@ -6,6 +6,7 @@
  */
 
 import type {
+  TraversalDirection,
   TraversalExclusion,
   TraversalStopCondition,
   TraversalEdge,
@@ -17,13 +18,11 @@ import type {
 import { TRAVERSAL_NODE_ID_FIELD } from '../../../../common/workflows/step_types/entity_graph_traversal/entity_graph_traversal_common';
 import {
   buildHopQuery,
-  frontierForMatchField,
   HOP_COUNT_COLUMN,
   HOP_SOURCE_COLUMN,
   HOP_TARGET_COLUMN,
   hopPayloadColumn,
   type HopQuery,
-  type HopTarget,
 } from './build_hop_query';
 
 export interface EsqlResult {
@@ -35,6 +34,9 @@ export type ExecuteHopQuery = (query: HopQuery) => Promise<EsqlResult>;
 
 export interface RunHopInput {
   hop: TraversalHop;
+  /** The entity store's latest index pattern for the execution space. */
+  index: string;
+  direction: TraversalDirection;
   frontier: string[];
   visited: string[];
   edgesSoFar: number;
@@ -55,7 +57,7 @@ export interface RunHopStats {
   dropped_edges: number;
   /** Frontier ids removed by an `entity.id` exclusion. */
   excluded_frontier: number;
-  /** Edges removed because their target is excluded on `entity.id`. */
+  /** Edges removed because one of their ends is excluded on `entity.id`. */
   excluded_edges: number;
   /** Nodes admitted this hop that matched a stop condition. */
   until_matched: number;
@@ -77,6 +79,18 @@ export interface RunHopResult {
   stats: RunHopStats;
 }
 
+/**
+ * An edge as a hop query returned it, in stored orientation (`source` holds the relationship
+ * field, `target` is the id it points at), with the end that lies on the frontier and the
+ * end the edge reaches: the target on an outbound leg, the source on an inbound one.
+ */
+interface CollectedEdge {
+  edge: TraversalEdge;
+  frontierNode: string;
+  reached: string;
+  inbound: boolean;
+}
+
 const toId = (value: unknown): string | undefined => {
   if (typeof value === 'string') return value;
   if (typeof value === 'number' || typeof value === 'boolean') return String(value);
@@ -87,20 +101,22 @@ const toCount = (value: unknown): number =>
   typeof value === 'number' && Number.isFinite(value) ? value : 1;
 
 /**
- * Parse one ES|QL result into edges. Rows whose source is not in the frontier (possible when
- * the match field is multi-valued) are dropped.
+ * Parse one ES|QL result into edges. Rows whose frontier end is not in the frontier are
+ * dropped (a multi-valued match field can produce them).
  */
 const parseRows = ({
   result,
   hop,
   relation,
   frontier,
+  inbound,
 }: {
   result: EsqlResult;
   hop: TraversalHop;
   relation: string;
   frontier: Set<string>;
-}): TraversalEdge[] => {
+  inbound: boolean;
+}): CollectedEdge[] => {
   const columnIndex = (name: string): number => result.columns.findIndex((c) => c.name === name);
   const sourceIdx = columnIndex(HOP_SOURCE_COLUMN);
   const targetIdx = columnIndex(HOP_TARGET_COLUMN);
@@ -114,11 +130,14 @@ const parseRows = ({
     .map((field, index) => ({ field, idx: columnIndex(hopPayloadColumn(index)) }))
     .filter(({ idx }) => idx >= 0);
 
-  const edges: TraversalEdge[] = [];
+  const edges: CollectedEdge[] = [];
   for (const row of result.values) {
     const source = toId(row[sourceIdx]);
     const target = toId(row[targetIdx]);
-    if (source !== undefined && target !== undefined && frontier.has(source)) {
+    const frontierNode = inbound ? target : source;
+    const onFrontier =
+      source !== undefined && target !== undefined && frontier.has(frontierNode ?? '');
+    if (onFrontier) {
       const payloadEntries = payloadColumns
         .map(({ field, idx }) => [field, row[idx]] as const)
         .filter(([, value]) => value !== null && value !== undefined)
@@ -126,12 +145,17 @@ const parseRows = ({
       const payload = payloadEntries.length > 0 ? Object.fromEntries(payloadEntries) : undefined;
 
       edges.push({
-        hop: hop.hop_number,
-        relation,
-        source,
-        target,
-        count: countIdx >= 0 ? toCount(row[countIdx]) : 1,
-        ...(payload && { payload }),
+        edge: {
+          hop: hop.hop_number,
+          relation,
+          source,
+          target,
+          count: countIdx >= 0 ? toCount(row[countIdx]) : 1,
+          ...(payload && { payload }),
+        },
+        frontierNode: frontierNode as string,
+        reached: inbound ? source : target,
+        inbound,
       });
     }
   }
@@ -142,35 +166,38 @@ const parseRows = ({
  * Whether the node an edge admits matches a stop condition: by id on `entity.id`, otherwise
  * by a value of that field in the edge payload (the hop's `payload_fields`).
  */
-const matchesStopCondition = (edge: TraversalEdge, until: TraversalStopCondition[]): boolean =>
+const matchesStopCondition = (
+  { edge, reached }: CollectedEdge,
+  until: TraversalStopCondition[]
+): boolean =>
   until.some(({ field, values }) => {
-    if (field === TRAVERSAL_NODE_ID_FIELD) return values.includes(edge.target);
+    if (field === TRAVERSAL_NODE_ID_FIELD) return values.includes(reached);
     const payload = edge.payload?.[field];
     return (
       Array.isArray(payload) && payload.some((v) => typeof v === 'string' && values.includes(v))
     );
   });
 
-/** Sources with more distinct targets than `hubDegree`. */
-const findHubs = (edges: TraversalEdge[], hubDegree: number): Set<string> => {
-  const targetsBySource = new Map<string, Set<string>>();
-  for (const edge of edges) {
-    const targets = targetsBySource.get(edge.source) ?? new Set<string>();
-    targets.add(edge.target);
-    targetsBySource.set(edge.source, targets);
+/** Frontier nodes that reach more distinct nodes than `hubDegree`. */
+const findHubs = (edges: CollectedEdge[], hubDegree: number): Set<string> => {
+  const reachedByFrontier = new Map<string, Set<string>>();
+  for (const { frontierNode, reached } of edges) {
+    const reachedSet = reachedByFrontier.get(frontierNode) ?? new Set<string>();
+    reachedSet.add(reached);
+    reachedByFrontier.set(frontierNode, reachedSet);
   }
   const hubs = new Set<string>();
-  for (const [source, targets] of targetsBySource) {
-    if (targets.size > hubDegree) hubs.add(source);
+  for (const [frontierNode, reachedSet] of reachedByFrontier) {
+    if (reachedSet.size > hubDegree) hubs.add(frontierNode);
   }
   return hubs;
 };
 
-/** Drop edges from hub sources and repeated (relation, source, target) triples. */
-const dedupeEdges = (edges: TraversalEdge[], hubs: Set<string>): TraversalEdge[] => {
+/** Drop edges of hub frontier nodes and repeated (relation, source, target) triples. */
+const dedupeEdges = (edges: CollectedEdge[], hubs: Set<string>): CollectedEdge[] => {
   const seen = new Set<string>();
-  return edges.filter((edge) => {
-    if (hubs.has(edge.source)) return false;
+  return edges.filter(({ edge, frontierNode }) => {
+    if (hubs.has(frontierNode)) return false;
     const key = `${edge.relation}\u0000${edge.source}\u0000${edge.target}`;
     if (seen.has(key)) return false;
     seen.add(key);
@@ -179,25 +206,27 @@ const dedupeEdges = (edges: TraversalEdge[], hubs: Set<string>): TraversalEdge[]
 };
 
 /**
- * Expand one hop. Pure apart from `execute`, so the bounding logic is unit-testable without
- * Elasticsearch.
+ * Expand one hop over the entity store's latest index. Pure apart from `execute`, so the
+ * bounding logic is unit-testable without Elasticsearch.
  *
  * Order of operations, each a circuit breaker on its own:
  * 1. Frontier beyond `max_frontier` is dropped before any query.
  * 2. Remaining node and edge capacity is checked before any query; none left means stop.
- * 3. One query per target (each target field, or the single EUID target), each capped by
- *    `LIMIT max_edges_per_hop`. A `match_fields` hop whose fields can bind none of the
- *    frontier's values runs no query.
- * 4. Sources with more distinct targets than `hub_degree` are dropped (hubs).
+ * 3. One query per relationship field, outbound; with direction `both`, one more per field
+ *    inbound. Each is capped by `LIMIT max_edges_per_hop`.
+ * 4. Frontier nodes reaching more distinct nodes than `hub_degree` are dropped (hubs).
  * 5. Edges are deduplicated and capped by the remaining edge capacity.
- * 6. New nodes are capped by the remaining node capacity; targets already visited only
+ * 6. New nodes are capped by the remaining node capacity; nodes already visited only
  *    produce closing edges.
+ *
+ * Edges keep the stored orientation: the source is the entity whose relationship field holds
+ * the edge, whichever end the hop reached it from.
  */
 export const runHop = async (
   input: RunHopInput,
   execute: ExecuteHopQuery
 ): Promise<RunHopResult> => {
-  const { hop, limits, lookback, exclusions = [], until = [] } = input;
+  const { hop, index, direction, limits, lookback, exclusions = [], until = [] } = input;
   const visitedSet = new Set(input.visited);
   const excludedIds = new Set(
     exclusions.filter((e) => e.field === TRAVERSAL_NODE_ID_FIELD).flatMap((e) => e.values)
@@ -263,33 +292,34 @@ export const runHop = async (
     return finish([], []);
   }
 
-  // 3. One query per target
-  const collected: TraversalEdge[] = [];
-  const targets: Array<{ target: HopTarget; relation: string }> = hop.target_euid
-    ? [{ target: { euid: hop.target_euid.type }, relation: hop.target_euid.relation }]
-    : hop.target_fields.map(({ field, relation }) => ({ target: { field }, relation }));
-  const bindable =
-    hop.match_fields === undefined ||
-    hop.match_fields.some((match) => frontierForMatchField(match, frontier).length > 0);
-  for (const { target, relation } of bindable ? targets : []) {
-    const query = buildHopQuery({
-      hop,
-      target,
-      frontier,
-      limit: limits.max_edges_per_hop,
-      lookback,
-      exclusions,
-    });
-    const result = await execute(query);
-    stats.queries += 1;
-    stats.rows_returned += result.values.length;
-    if (result.values.length >= limits.max_edges_per_hop) truncated = true;
-    collected.push(...parseRows({ result, hop, relation, frontier: frontierSet }));
+  // 3. One query per relationship field and leg
+  const collected: CollectedEdge[] = [];
+  const legs = direction === 'both' ? [false, true] : [false];
+  for (const inbound of legs) {
+    for (const { field, relation } of hop.target_fields) {
+      const query = buildHopQuery({
+        hop,
+        index,
+        targetField: field,
+        frontier,
+        limit: limits.max_edges_per_hop,
+        lookback,
+        exclusions,
+        inbound,
+      });
+      const result = await execute(query);
+      stats.queries += 1;
+      stats.rows_returned += result.values.length;
+      if (result.values.length >= limits.max_edges_per_hop) truncated = true;
+      collected.push(...parseRows({ result, hop, relation, frontier: frontierSet, inbound }));
+    }
   }
 
-  // 4. Excluded targets (exclusions on the hop's own target field were applied in the query;
-  //    this covers target fields named differently from entity.id)
-  const kept = collected.filter((edge) => !excludedIds.has(edge.target));
+  // 4. Excluded nodes (the query already left out excluded documents and pointer values;
+  //    this covers whichever end the query could not filter)
+  const kept = collected.filter(
+    ({ edge }) => !excludedIds.has(edge.source) && !excludedIds.has(edge.target)
+  );
   stats.excluded_edges = collected.length - kept.length;
 
   // 5. Hub exclusion
@@ -299,11 +329,15 @@ export const runHop = async (
     stats.hubs_skipped = Array.from(hubs);
   }
 
-  // 6. Dedupe and edge cap
-  const deduped = dedupeEdges(kept, hubs);
-  const edges = deduped.slice(0, edgeCapacity);
-  stats.dropped_edges = deduped.length - edges.length;
-  stats.edges_added = edges.length;
+  // 6. Dedupe and edge cap. In a `both` walk an edge onto a node already visited was
+  //    recorded from that node's side when it was expanded, so it is a repeat, not a closing
+  //    edge; outbound walks keep closing edges, which are new paths.
+  const deduped = dedupeEdges(kept, hubs).filter(
+    ({ reached }) => direction !== 'both' || !visitedSet.has(reached)
+  );
+  const admittedEdges = deduped.slice(0, edgeCapacity);
+  stats.dropped_edges = deduped.length - admittedEdges.length;
+  stats.edges_added = admittedEdges.length;
   if (stats.dropped_edges > 0) {
     truncated = true;
     stopReason = 'max_edges_total';
@@ -313,22 +347,26 @@ export const runHop = async (
   const nodes: TraversalNode[] = [];
   const admitted = new Set<string>();
   let nodeCapHit = false;
-  for (const edge of edges) {
-    if (visitedSet.has(edge.target)) {
+  for (const collectedEdge of admittedEdges) {
+    const { edge, reached, inbound } = collectedEdge;
+    if (visitedSet.has(reached)) {
       stats.closing_edges += 1;
-    } else if (!admitted.has(edge.target)) {
+    } else if (!admitted.has(reached)) {
       if (nodes.length >= nodeCapacity) {
         nodeCapHit = true;
       } else {
-        admitted.add(edge.target);
+        admitted.add(reached);
+        // Reached on the pointed side, the node is the hop's target type; reached as the
+        // holder of the relationship (inbound), it is the source type.
+        const type = inbound ? hop.source_type : hop.target_type;
         nodes.push({
-          id: edge.target,
+          id: reached,
           hop: hop.hop_number,
           via: edge.relation,
-          ...(hop.target_type && { type: hop.target_type }),
+          ...(type && { type }),
         });
-        if (until.length > 0 && matchesStopCondition(edge, until)) {
-          untilMatches.push(edge.target);
+        if (until.length > 0 && matchesStopCondition(collectedEdge, until)) {
+          untilMatches.push(reached);
         }
       }
     }
@@ -349,5 +387,8 @@ export const runHop = async (
     stopReason = 'frontier_exhausted';
   }
 
-  return finish(edges, nodes);
+  return finish(
+    admittedEdges.map(({ edge }) => edge),
+    nodes
+  );
 };

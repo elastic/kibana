@@ -247,6 +247,12 @@ describe('inferBlastRadiusNodeKind', () => {
 
   it('prefers what the entity store says about a resolved node', () => {
     expect(inferBlastRadiusNodeKind('some-id', 'asset', { engine_type: 'host' })).toBe('host');
+    expect(
+      inferBlastRadiusNodeKind('a3f5c9d1', 'indicator', {
+        engine_type: 'generic',
+        type: 'Indicator',
+      })
+    ).toBe('indicator');
     expect(inferBlastRadiusNodeKind('some-id', 'asset', { sub_type: 'AWS IAM Role' })).toBe('role');
     expect(inferBlastRadiusNodeKind('some-id', 'asset', { sub_type: 'AWS EC2 Instance' })).toBe(
       'instance'

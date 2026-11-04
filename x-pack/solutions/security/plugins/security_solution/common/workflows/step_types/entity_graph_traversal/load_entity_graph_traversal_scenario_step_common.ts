@@ -10,6 +10,7 @@ import { StepCategory } from '@kbn/workflows';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
 import {
+  ENTITY_GRAPH_TRAVERSAL_DIRECTIONS,
   traversalHopSchema,
   traversalLimitOverridesSchema,
   traversalLimitsSchema,
@@ -41,6 +42,7 @@ export const loadEntityGraphTraversalScenarioOutputSchema = lazySchema(() =>
     name: z.string(),
     description: z.string().optional(),
     seed: z.object({ type: z.string(), description: z.string().optional() }),
+    direction: z.enum(ENTITY_GRAPH_TRAVERSAL_DIRECTIONS),
     limits: traversalLimitsSchema,
     hops: z.array(traversalHopSchema),
     /** The scenario's stop conditions followed by the run's. */

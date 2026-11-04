@@ -15,16 +15,27 @@ import { lazySchema, z } from '@kbn/zod/v4';
  */
 
 export const ENTITY_GRAPH_TRAVERSAL_FIELD_PATTERN = /^[A-Za-z_@][A-Za-z0-9_.@-]*$/;
-export const ENTITY_GRAPH_TRAVERSAL_INDEX_PATTERN = /^[A-Za-z0-9_.*,:-]+$/;
 export const ENTITY_GRAPH_TRAVERSAL_LOOKBACK_PATTERN = /^[0-9]{1,5}(m|h|d)$/;
 
-/** Entity store entity types a hop may match by EUID (mirrors the store's `EntityType`). */
+/** Entity store entity types (mirrors the store's `EntityType`). */
 export const ENTITY_GRAPH_TRAVERSAL_EUID_TYPES = ['user', 'host', 'service', 'generic'] as const;
 
 export type EntityGraphTraversalEuidType = (typeof ENTITY_GRAPH_TRAVERSAL_EUID_TYPES)[number];
 
-/** Value types a `match_fields` entry may declare (mirrors the scenario schema). */
-export const ENTITY_GRAPH_TRAVERSAL_MATCH_VALUE_TYPES = ['ip'] as const;
+/**
+ * Which way a hop follows the stored edges: `out` reads the frontier entities' own
+ * relationship ids; `both` also reaches the entities whose relationship ids point at the
+ * frontier (mirrors the scenario schema).
+ */
+export const ENTITY_GRAPH_TRAVERSAL_DIRECTIONS = ['out', 'both'] as const;
+
+export const traversalDirectionSchema = () =>
+  z.preprocess(
+    (value) => (value === '' || value === null || value === undefined ? 'out' : value),
+    z.enum(ENTITY_GRAPH_TRAVERSAL_DIRECTIONS)
+  );
+
+export type TraversalDirection = (typeof ENTITY_GRAPH_TRAVERSAL_DIRECTIONS)[number];
 
 const MAX_ID_LENGTH = 2048;
 const MAX_IDS = 10_000;
@@ -73,58 +84,30 @@ export type TraversalLimits = z.infer<typeof traversalLimitsSchema>;
 
 /**
  * One expanded hop of a scenario, as the load step emits it and the hop step consumes it.
- * Exactly one of `match_field` (a stored field), `match_fields` (several stored fields, OR-ed)
- * or `match_euid` (an entity type whose EUID is computed from each document) is set, and
- * exactly one of `target_fields` or `target_euid` is populated.
+ * The hop reads the entity store's latest index: the frontier is matched on `match_field`
+ * (`entity.id`) and each target field is an `entity.relationships.<key>.ids` array whose
+ * values are the ids reached, labelled with the key as the relation.
  */
 export const traversalHopSchema = lazySchema(() =>
-  z
-    .object({
-      hop_number: z.number().int().min(1),
-      name: z.string().min(1).max(64),
-      index: z.string().min(1).max(512).regex(ENTITY_GRAPH_TRAVERSAL_INDEX_PATTERN),
-      match_field: fieldName().optional(),
-      match_fields: z
-        .array(
-          z.object({
-            field: fieldName(),
-            value_type: z.enum(ENTITY_GRAPH_TRAVERSAL_MATCH_VALUE_TYPES).optional(),
-          })
-        )
-        .min(1)
-        .max(8)
-        .optional(),
-      match_euid: z.enum(ENTITY_GRAPH_TRAVERSAL_EUID_TYPES).optional(),
-      target_fields: z
-        .array(z.object({ field: fieldName(), relation: z.string().min(1).max(64) }))
-        .max(8),
-      target_euid: z
-        .object({
-          type: z.enum(ENTITY_GRAPH_TRAVERSAL_EUID_TYPES),
-          relation: z.string().min(1).max(64),
-        })
-        .optional(),
-      payload_fields: z.array(fieldName()).max(5).default([]),
-      filter: z
-        .string()
-        .max(1_000)
-        .refine((value) => !/[|\n\r]/.test(value), {
-          message: 'filter must be a single ES|QL boolean expression without pipes or newlines',
-        })
-        .optional(),
-      time_field: fieldName().optional(),
-      source_type: z.string().max(64).optional(),
-      target_type: z.string().max(64).optional(),
-    })
-    .refine(
-      (hop) =>
-        [hop.match_field, hop.match_fields, hop.match_euid].filter((v) => v !== undefined)
-          .length === 1,
-      { message: 'a hop must set exactly one of match_field, match_fields or match_euid' }
-    )
-    .refine((hop) => hop.target_fields.length > 0 !== (hop.target_euid !== undefined), {
-      message: 'a hop must set exactly one of target_fields or target_euid',
-    })
+  z.object({
+    hop_number: z.number().int().min(1),
+    name: z.string().min(1).max(64),
+    match_field: fieldName(),
+    target_fields: z
+      .array(z.object({ field: fieldName(), relation: z.string().min(1).max(64) }))
+      .min(1)
+      .max(8),
+    payload_fields: z.array(fieldName()).max(5).default([]),
+    filter: z
+      .string()
+      .max(1_000)
+      .refine((value) => !/[|\n\r]/.test(value), {
+        message: 'filter must be a single ES|QL boolean expression without pipes or newlines',
+      })
+      .optional(),
+    source_type: z.string().max(64).optional(),
+    target_type: z.string().max(64).optional(),
+  })
 );
 
 export type TraversalHop = z.infer<typeof traversalHopSchema>;

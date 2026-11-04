@@ -45,7 +45,7 @@ triggers:
         lookback:
           type: string
           pattern: '^[0-9]{1,5}(m|h|d)$'
-          description: Only consider documents newer than this on hops that declare a time_field, for example 7d
+          description: Only expand entities seen within this window (entity.lifecycle.last_seen), for example 7d
         max_hops:
           type: integer
           minimum: 1
@@ -178,6 +178,7 @@ steps:
           visited: '${{ variables.visited }}'
           edges_so_far: '${{ variables.edges.size }}'
           truncated_so_far: '${{ variables.truncated }}'
+          direction: '{{ steps.load_scenario.output.direction }}'
           limits: '${{ steps.load_scenario.output.limits }}'
           lookback: '{{ inputs.lookback }}'
           exclusions: '${{ inputs.exclusions }}'
@@ -222,7 +223,7 @@ steps:
       until_matches: '${{ variables.until_matches }}'
       routes: '${{ steps.trace_routes.output.routes }}'
       limits: '${{ steps.load_scenario.output.limits }}'
-      hops_planned: '${{ steps.load_scenario.output.hops.size }}'
+      hops_planned: '${{ steps.load_scenario.output.hops | size }}'
       hops_executed: '${{ variables.hops_executed }}'
       stop_reason: '{{ variables.stop_reason }}'
       truncated: '${{ variables.truncated }}'

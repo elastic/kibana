@@ -10,7 +10,11 @@ import {
   listEntityGraphTraversalScenarioIds,
   loadEntityGraphTraversalPlan,
 } from '@kbn/workflows/managed';
-import { getLatestEntityIndexPattern } from '../../../../common/domain/entity_index';
+import {
+  ENTITY_LATEST,
+  getEntitiesAlias,
+  getLatestEntityIndexPattern,
+} from '../../../../common/domain/entity_index';
 import type {
   GraphTraversalExclusion,
   GraphTraversalNode,
@@ -18,9 +22,8 @@ import type {
   RunGraphTraversalResponse,
 } from '../../../../common/graph_traversal';
 import { GraphTraversalError } from '../graph_traversal_error';
-import { buildGraphExpandStatement } from './build_graph_expand';
-import { mapGraphExpandResult, type EsqlResult } from './map_graph_expand_result';
-import { resolveGraphTraversalNodes } from './resolve_nodes';
+import { buildEntityLookupQuery, buildGraphExpandStatement } from './build_graph_expand';
+import { mapGraphExpandResult, readEntity, type EsqlResult } from './map_graph_expand_result';
 
 export const ESQL_GRAPH_TRAVERSAL_EXECUTION_ID = 'esql';
 
@@ -40,10 +43,10 @@ export interface RunEsqlGraphTraversalParams {
 }
 
 /**
- * Runs a traversal scenario as one ES|QL `GRAPH EXPAND` statement instead of the workflow:
- * the scenario's hops are translated into a subquery edge whose ids are computed with the
- * entity store's identity rules, Elasticsearch walks it with the scenario's limits, and the
- * reached nodes are resolved against the entity store the way the workflow's last step does.
+ * Runs a traversal scenario as one ES|QL `GRAPH EXPAND` statement over the entity store's
+ * latest index instead of the workflow: the scenario's relationship keys are the statement's
+ * `TO` fields, Elasticsearch walks them with the scenario's limits and direction, and a
+ * `LOOKUP JOIN` on the same (lookup-mode) index attaches each reached node's entity document.
  * `GRAPH EXPAND` exists in snapshot builds only; the statement fails with 400 elsewhere.
  */
 export class EsqlGraphTraversalClient {
@@ -78,15 +81,27 @@ export class EsqlGraphTraversalClient {
         400
       );
     }
-    const statement = buildGraphExpandStatement({ plan, seedId, lookback, exclusions, until });
-    this.logger.info(
+    const indexPattern = getLatestEntityIndexPattern(this.namespace);
+    const lookupIndex = await this.resolveLookupIndex();
+    const statement = buildGraphExpandStatement({
+      plan,
+      indexPattern,
+      lookupIndex,
+      seedId,
+      lookback,
+      exclusions,
+      until,
+    });
+    this.logger.debug(
       `entity graph traversal (ES|QL) scenario "${plan.id}" from ${seedId}, issuing:\n${
         statement.query
       }\nparams: ${JSON.stringify(statement.params)}`
     );
-    const result = await this.execute(statement.query, statement.params);
-    const mapped = mapGraphExpandResult(result, statement, plan, seedId);
-    const nodes = await this.resolveNodes(mapped.output.nodes);
+    const [result, seed] = await Promise.all([
+      this.execute(statement.query, statement.params),
+      this.lookupSeed(indexPattern, seedId, plan.seed.type),
+    ]);
+    const mapped = mapGraphExpandResult(result, statement, plan, seed);
     if (mapped.hubs.length > 0) {
       this.logger.debug(
         `entity graph traversal (ES|QL) skipped hubs: ${mapped.hubs
@@ -103,7 +118,6 @@ export class EsqlGraphTraversalClient {
         scenario_name: plan.name,
         seed_id: seedId,
         ...mapped.output,
-        nodes,
         limits: plan.limits,
         ...(exclusions !== undefined && { exclusions }),
         until: [...plan.until, ...(until ?? [])],
@@ -112,21 +126,55 @@ export class EsqlGraphTraversalClient {
     };
   }
 
-  /** Nodes stay unresolved when the space has no entity store index yet. */
-  private async resolveNodes(nodes: GraphTraversalNode[]): Promise<GraphTraversalNode[]> {
+  /**
+   * The concrete latest index behind the space's alias, which `LOOKUP JOIN` needs by name.
+   * Without one (the store is not installed) the walk still runs; nodes come back unresolved.
+   */
+  private async resolveLookupIndex(): Promise<string | undefined> {
+    const alias = getEntitiesAlias(ENTITY_LATEST, this.namespace);
     try {
-      return await resolveGraphTraversalNodes(
-        nodes,
-        getLatestEntityIndexPattern(this.namespace),
-        ({ query, params }) => this.execute(query, params)
-      );
+      const indices = Object.keys(await this.esClient.indices.getAlias({ name: alias }));
+      return indices.length > 0 ? indices.sort()[indices.length - 1] : undefined;
     } catch (error) {
       this.logger.debug(
-        `entity graph traversal (ES|QL) could not resolve nodes against the entity store: ${
+        `entity graph traversal (ES|QL) found no latest entity index behind ${alias}: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
-      return nodes.map((node) => ({ ...node, euid: node.id, resolved: false }));
+      return undefined;
+    }
+  }
+
+  /** The seed is not a walk row, so its entity document is read on its own. */
+  private async lookupSeed(
+    indexPattern: string,
+    seedId: string,
+    type: string
+  ): Promise<GraphTraversalNode> {
+    const node: GraphTraversalNode = { id: seedId, hop: 0, via: 'seed', type, euid: seedId };
+    try {
+      const { query, params } = buildEntityLookupQuery(indexPattern, seedId);
+      const result = await this.execute(query, params);
+      const row = result.values[0];
+      const stored = row
+        ? readEntity((name) => {
+            const index = result.columns.findIndex((c) => c.name === name);
+            return index >= 0 ? row[index] : undefined;
+          })
+        : undefined;
+      return {
+        ...node,
+        resolved: stored !== undefined,
+        ...(stored?.resolvedTo !== undefined && { canonical_euid: stored.resolvedTo }),
+        ...(stored && { entity: stored.entity }),
+      };
+    } catch (error) {
+      this.logger.debug(
+        `entity graph traversal (ES|QL) could not read the seed entity ${seedId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return { ...node, resolved: false };
     }
   }
 

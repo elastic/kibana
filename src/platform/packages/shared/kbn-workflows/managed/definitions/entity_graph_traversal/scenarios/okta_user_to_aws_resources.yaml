@@ -1,19 +1,16 @@
-version: '1'
+version: '2'
 id: okta-user-to-aws-resources
 name: Okta user to AWS resources
 description: >
-  Blast radius of a compromised Okta user across AWS. Hop 1 matches the seed EUID against the
-  user EUID computed from each Okta user document (the same identity rules the entity store
-  uses) and reads the IAM roles the user's groups federate into. The following hops walk the
-  Cloud Asset Discovery documents from role to role (trust policies), role to instance
-  (Session Manager access), instance to instance role (instance profile) and role to bucket
-  (attached policies and bucket policies), until the hop budget or the frontier runs out.
-  Asset documents are generic entities, whose EUID is their entity.id, so later hops match
-  on that field directly.
+  Blast radius of a compromised Okta user across AWS, from the entity store alone. The user
+  entity lists the IAM roles its Okta groups federate into; role, instance and bucket entities
+  list what they reach through configuration: roles they may assume (trust policies),
+  instances they may open a session on, the role an instance runs as (instance profile), and
+  the buckets a role may access (attached and bucket policies). The walk follows those
+  relationships until the hop budget or the frontier runs out.
 seed:
   type: user
-  description: >-
-    The entity store EUID of the compromised user, for example user:john.doe@acmecrm.com@okta
+  description: The entity store id of the compromised user, for example user:john.doe@acmecrm.com@okta
 limits:
   max_hops: 6
   max_nodes: 2000
@@ -24,35 +21,25 @@ limits:
 hops:
   - name: okta_federation_roles
     description: IAM roles the user's Okta groups map to on the AWS federation app
-    index: logs-entityanalytics_okta.user-*
-    match_euid: user
-    target_fields:
-      - user.entity.relationships.can_assume.entity.id
+    relationships:
+      - can_assume
     payload_fields:
-      - user.group.name
-    relation: can_assume
+      - entity.name
     source_type: user
     target_type: role
   - name: aws_asset_relationships
     description: >
-      Configuration edges on Cloud Asset Discovery documents: trust policies, Session Manager
-      access, instance profiles and bucket access. Repeated so a role can chain into another
-      role, reach an instance, pick up the instance role and reach a bucket.
-    index: logs-cloud_asset_inventory.asset_inventory-*
-    match_field: entity.id
-    target_fields:
-      - field: entity.relationships.can_assume.entity.id
-        relation: can_assume
-      - field: entity.relationships.can_connect.entity.id
-        relation: can_connect
-      - field: entity.relationships.runs_as.entity.id
-        relation: runs_as
-      - field: entity.relationships.grants_access_to.entity.id
-        relation: grants_access_to
+      Configuration edges on AWS asset entities: trust policies, Session Manager access,
+      instance profiles and bucket access. Repeated so a role can chain into another role,
+      reach an instance, pick up the instance role and reach a bucket.
+    relationships:
+      - can_assume
+      - can_connect
+      - runs_as
+      - grants_access_to
     payload_fields:
       - entity.name
       - entity.sub_type
-    filter: 'cloud.provider == "aws"'
     source_type: asset
     target_type: asset
     repeat: 5

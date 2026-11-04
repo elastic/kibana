@@ -15,6 +15,7 @@ import {
   traversalStopConditionsSchema,
   traversalHopSchema,
   traversalIdListSchema,
+  traversalDirectionSchema,
   traversalLimitsSchema,
   traversalLookbackSchema,
   traversalNodeSchema,
@@ -36,9 +37,12 @@ export const runEntityGraphTraversalHopInputSchema = lazySchema(() =>
       .boolean()
       .default(false)
       .describe('Whether an earlier hop already dropped data'),
+    direction: traversalDirectionSchema().describe(
+      "out follows the frontier entities' relationship ids; both also reaches the entities whose relationship ids point at the frontier"
+    ),
     limits: traversalLimitsSchema.describe('Effective limits from the load step'),
     lookback: traversalLookbackSchema().describe(
-      'Only consider documents newer than this on hops that declare a time_field, for example 7d'
+      'Only expand entities seen within this window (entity.lifecycle.last_seen), for example 7d'
     ),
     exclusions: traversalExclusionsSchema().describe(
       'Field/values pairs to leave out: documents carrying one of the values are not read, and values on entity.id are removed from the frontier and from the targets'

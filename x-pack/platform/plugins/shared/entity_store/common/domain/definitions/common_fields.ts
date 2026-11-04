@@ -43,6 +43,17 @@ export const ENTITY_RELATIONSHIP_COLLECT_LEAVES = [
   'accesses_frequently',
   'owns',
   'supervises',
+  // Graph traversal relations. Configuration edges from identity and cloud asset sources
+  // (a principal may assume a role, connect to an instance, an instance runs as a role, a
+  // role grants access to a resource) and artifact edges from endpoint telemetry (a host
+  // executed a hash, dropped a file hash, connected to an address).
+  'can_assume',
+  'can_connect',
+  'runs_as',
+  'grants_access_to',
+  'executed',
+  'dropped',
+  'connected_to',
 ] as const;
 
 export type EntityRelationshipKey = (typeof ENTITY_RELATIONSHIP_COLLECT_LEAVES)[number];

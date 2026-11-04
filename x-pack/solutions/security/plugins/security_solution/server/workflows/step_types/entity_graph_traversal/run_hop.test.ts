@@ -20,7 +20,6 @@ import { runHop, type EsqlResult, type ExecuteHopQuery } from './run_hop';
 const hop: TraversalHop = {
   hop_number: 1,
   name: 'assets',
-  index: 'assets-*',
   match_field: 'entity.id',
   target_fields: [
     { field: 'rel.can_assume', relation: 'can_assume' },
@@ -29,6 +28,8 @@ const hop: TraversalHop = {
   payload_fields: ['entity.name'],
   target_type: 'asset',
 };
+
+const INDEX = '.entities.v2.latest.default-*';
 
 const limits: TraversalLimits = {
   max_hops: 6,
@@ -78,6 +79,8 @@ describe('runHop', () => {
     const out = await runHop(
       {
         hop,
+        index: INDEX,
+        direction: 'out',
         frontier: ['role-a', 'role-x'],
         visited: ['seed', 'role-a', 'role-x'],
         edgesSoFar: 0,
@@ -117,6 +120,8 @@ describe('runHop', () => {
     const out = await runHop(
       {
         hop,
+        index: INDEX,
+        direction: 'out',
         frontier: ['role-a'],
         visited: ['seed', 'role-a'],
         edgesSoFar: 0,
@@ -175,6 +180,8 @@ describe('runHop', () => {
     const out = await runHop(
       {
         hop,
+        index: INDEX,
+        direction: 'out',
         frontier: ['role-a'],
         visited: ['seed', 'role-a'],
         edgesSoFar: 0,
@@ -199,6 +206,8 @@ describe('runHop', () => {
     const out = await runHop(
       {
         hop,
+        index: INDEX,
+        direction: 'out',
         frontier: ['role-a'],
         visited: ['role-a'],
         edgesSoFar: 0,
@@ -215,6 +224,8 @@ describe('runHop', () => {
     const out = await runHop(
       {
         hop,
+        index: INDEX,
+        direction: 'out',
         frontier: ['role-a'],
         visited: ['role-a'],
         edgesSoFar: 0,
@@ -230,7 +241,16 @@ describe('runHop', () => {
   it('stops without querying when the frontier is empty', async () => {
     const execute = executor([]);
     const out = await runHop(
-      { hop, frontier: [], visited: ['seed'], edgesSoFar: 0, truncatedSoFar: false, limits },
+      {
+        hop,
+        index: INDEX,
+        direction: 'out',
+        frontier: [],
+        visited: ['seed'],
+        edgesSoFar: 0,
+        truncatedSoFar: false,
+        limits,
+      },
       execute
     );
     expect(execute.calls).toEqual([]);
@@ -241,7 +261,16 @@ describe('runHop', () => {
     const execute = executor([result([]), result([])]);
     const frontier = Array.from({ length: 15 }, (_, i) => `n${i}`);
     const out = await runHop(
-      { hop, frontier, visited: frontier, edgesSoFar: 0, truncatedSoFar: false, limits },
+      {
+        hop,
+        index: INDEX,
+        direction: 'out',
+        frontier,
+        visited: frontier,
+        edgesSoFar: 0,
+        truncatedSoFar: false,
+        limits,
+      },
       execute
     );
     expect(execute.calls[0]).toHaveLength(10);
@@ -257,7 +286,16 @@ describe('runHop', () => {
     const execute = executor([]);
     const visited = Array.from({ length: limits.max_nodes }, (_, i) => `n${i}`);
     const out = await runHop(
-      { hop, frontier: ['n0'], visited, edgesSoFar: 0, truncatedSoFar: false, limits },
+      {
+        hop,
+        index: INDEX,
+        direction: 'out',
+        frontier: ['n0'],
+        visited,
+        edgesSoFar: 0,
+        truncatedSoFar: false,
+        limits,
+      },
       execute
     );
     expect(execute.calls).toEqual([]);
@@ -270,6 +308,8 @@ describe('runHop', () => {
     const out = await runHop(
       {
         hop,
+        index: INDEX,
+        direction: 'out',
         frontier: ['a'],
         visited: ['a'],
         edgesSoFar: limits.max_edges_total,
@@ -294,6 +334,8 @@ describe('runHop', () => {
     const out = await runHop(
       {
         hop,
+        index: INDEX,
+        direction: 'out',
         frontier: ['a'],
         visited: ['a'],
         edgesSoFar: 0,
@@ -318,7 +360,16 @@ describe('runHop', () => {
       result([]),
     ]);
     const out = await runHop(
-      { hop, frontier: ['a'], visited: ['a'], edgesSoFar: 98, truncatedSoFar: false, limits },
+      {
+        hop,
+        index: INDEX,
+        direction: 'out',
+        frontier: ['a'],
+        visited: ['a'],
+        edgesSoFar: 98,
+        truncatedSoFar: false,
+        limits,
+      },
       execute
     );
     expect(out.edges.map((e) => e.target)).toEqual(['b', 'c']);
@@ -333,6 +384,8 @@ describe('runHop', () => {
     const out = await runHop(
       {
         hop,
+        index: INDEX,
+        direction: 'out',
         frontier: ['hub', 'small'],
         visited: ['hub', 'small'],
         edgesSoFar: 0,
@@ -353,6 +406,8 @@ describe('runHop', () => {
     const out = await runHop(
       {
         hop,
+        index: INDEX,
+        direction: 'out',
         frontier: ['a'],
         visited: ['a'],
         edgesSoFar: 0,
@@ -374,7 +429,16 @@ describe('runHop', () => {
       result([]),
     ]);
     const out = await runHop(
-      { hop, frontier: ['a', 'a'], visited: ['a'], edgesSoFar: 0, truncatedSoFar: true, limits },
+      {
+        hop,
+        index: INDEX,
+        direction: 'out',
+        frontier: ['a', 'a'],
+        visited: ['a'],
+        edgesSoFar: 0,
+        truncatedSoFar: true,
+        limits,
+      },
       execute
     );
     expect(out.edges).toHaveLength(1);
@@ -382,70 +446,132 @@ describe('runHop', () => {
     expect(out.stats.frontier_size).toBe(1);
   });
 
-  it('runs a single query for an EUID target and labels its edges with the hop relation', async () => {
-    const euidHop: TraversalHop = {
-      ...hop,
-      name: 'indicators_to_hosts',
-      match_field: undefined,
-      match_fields: [
-        { field: 'process.hash.sha256' },
-        { field: 'destination.ip', value_type: 'ip' },
-      ],
-      target_fields: [],
-      target_euid: { type: 'host', relation: 'observed_on' },
-      target_type: 'host',
-    };
+  it('walks both directions: an inbound leg per field reaches the holders of the relationship', async () => {
     const execute = executor([
+      // outbound can_assume, outbound runs_as, inbound can_assume, inbound runs_as
+      result([['hash-1', 'x']]),
+      result([]),
       result([
-        ['hash-1', 'host:SRV-DC01'],
-        ['1.2.3.4', 'host:WIN-FIN-03'],
+        ['host:SRV-DC01', 'hash-1', 1, 'SRV-DC01'],
+        ['host:WIN-FIN-03', 'hash-1', 1, 'WIN-FIN-03'],
       ]),
+      result([]),
     ]);
     const out = await runHop(
       {
-        hop: euidHop,
-        frontier: ['hash-1', '1.2.3.4'],
-        visited: ['host:WKSTN-RECV01', 'hash-1', '1.2.3.4'],
+        hop: { ...hop, source_type: 'host', target_type: 'indicator' },
+        index: INDEX,
+        direction: 'both',
+        frontier: ['hash-1'],
+        visited: ['host:WKSTN-RECV01', 'hash-1'],
         edgesSoFar: 0,
         truncatedSoFar: false,
         limits,
       },
       execute
     );
-    expect(execute.calls).toHaveLength(1);
-    expect(out.stats.queries).toBe(1);
+    expect(execute.calls).toEqual([['hash-1'], ['hash-1'], ['hash-1'], ['hash-1']]);
+    expect(out.stats.queries).toBe(4);
+    // Edges keep the stored orientation: the host holds the relationship to the hash.
     expect(out.edges.map((e) => [e.source, e.target, e.relation])).toEqual([
-      ['hash-1', 'host:SRV-DC01', 'observed_on'],
-      ['1.2.3.4', 'host:WIN-FIN-03', 'observed_on'],
+      ['hash-1', 'x', 'can_assume'],
+      ['host:SRV-DC01', 'hash-1', 'can_assume'],
+      ['host:WIN-FIN-03', 'hash-1', 'can_assume'],
     ]);
+    // Nodes reached on the inbound leg are the holders, typed as the hop's source type.
     expect(out.nodes.map((n) => [n.id, n.type, n.via])).toEqual([
-      ['host:SRV-DC01', 'host', 'observed_on'],
-      ['host:WIN-FIN-03', 'host', 'observed_on'],
+      ['x', 'indicator', 'can_assume'],
+      ['host:SRV-DC01', 'host', 'can_assume'],
+      ['host:WIN-FIN-03', 'host', 'can_assume'],
     ]);
   });
 
-  it('runs no query when a match_fields hop can bind none of the frontier', async () => {
-    const ipOnlyHop: TraversalHop = {
-      ...hop,
-      match_field: undefined,
-      match_fields: [{ field: 'destination.ip', value_type: 'ip' }],
-    };
-    const execute = executor([]);
+  it('drops repeats of edges already recorded from the other side in a both walk', async () => {
+    const execute = executor([
+      // outbound from hash-1 finds nothing; inbound finds the seed host again and a new host
+      result([]),
+      result([]),
+      result([
+        ['host:WKSTN-RECV01', 'hash-1'],
+        ['host:WIN-FIN-03', 'hash-1'],
+      ]),
+      result([]),
+    ]);
     const out = await runHop(
       {
-        hop: ipOnlyHop,
-        frontier: ['not-an-address'],
-        visited: ['not-an-address'],
-        edgesSoFar: 0,
+        hop,
+        index: INDEX,
+        direction: 'both',
+        frontier: ['hash-1'],
+        visited: ['host:WKSTN-RECV01', 'hash-1'],
+        edgesSoFar: 1,
         truncatedSoFar: false,
         limits,
       },
       execute
     );
-    expect(execute.calls).toHaveLength(0);
-    expect(out.stats.queries).toBe(0);
+    expect(out.edges.map((e) => e.source)).toEqual(['host:WIN-FIN-03']);
+    expect(out.nodes.map((n) => n.id)).toEqual(['host:WIN-FIN-03']);
+    expect(out.stats.closing_edges).toBe(0);
+  });
+
+  it('counts hub degree by the frontier node whichever end it is on, and drops rows whose frontier end is unknown', async () => {
+    const execute = executor([
+      result([]),
+      result([]),
+      result([
+        ['holder-1', 'hash-1'],
+        ['holder-2', 'hash-1'],
+        ['holder-3', 'hash-1'],
+        ['holder-4', 'not-in-frontier'],
+      ]),
+      result([]),
+    ]);
+    const out = await runHop(
+      {
+        hop,
+        index: INDEX,
+        direction: 'both',
+        frontier: ['hash-1'],
+        visited: ['hash-1'],
+        edgesSoFar: 0,
+        truncatedSoFar: false,
+        limits: { ...limits, hub_degree: 2 },
+      },
+      execute
+    );
+    expect(out.stats.hubs_skipped).toEqual(['hash-1']);
     expect(out.edges).toEqual([]);
-    expect(out.stop_reason).toBe('frontier_exhausted');
+    expect(out.truncated).toBe(true);
+  });
+
+  it('drops edges whose source is an excluded node as well as those whose target is', async () => {
+    const execute = executor([
+      result([]),
+      result([]),
+      result([
+        ['host:excluded', 'hash-1'],
+        ['host:kept', 'hash-1'],
+      ]),
+      result([]),
+    ]);
+    const out = await runHop(
+      {
+        hop,
+        index: INDEX,
+        direction: 'both',
+        frontier: ['hash-1'],
+        visited: ['hash-1'],
+        edgesSoFar: 0,
+        truncatedSoFar: false,
+        limits,
+        exclusions: [{ field: 'entity.id', values: ['host:excluded'] }],
+      },
+      execute
+    );
+    expect(out.edges.map((e) => e.source)).toEqual(['host:kept']);
+    expect(out.nodes.map((n) => n.id)).toEqual(['host:kept']);
+    expect(out.stats.excluded_edges).toBe(1);
   });
 
   it('ends the traversal when a hop admits a node matching a stop condition, by id or by payload', async () => {
@@ -459,6 +585,8 @@ describe('runHop', () => {
     const out = await runHop(
       {
         hop,
+        index: INDEX,
+        direction: 'out',
         frontier: ['role-a'],
         visited: ['role-a'],
         edgesSoFar: 0,
@@ -483,6 +611,8 @@ describe('runHop', () => {
     const out = await runHop(
       {
         hop,
+        index: INDEX,
+        direction: 'out',
         frontier: ['role-a'],
         visited: ['role-a', 'role-x'],
         edgesSoFar: 0,
