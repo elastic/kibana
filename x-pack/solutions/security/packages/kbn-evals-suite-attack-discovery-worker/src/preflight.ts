@@ -25,6 +25,7 @@ import {
 } from './constants';
 import { readFeatures, writeFeatures, type InferenceFeatureSetting } from './inference_override';
 import { apiVersion, errorMessage, spacePath } from './kibana_api';
+import { enableFloorWorker, ensureFloorServiceAccount } from './floor_worker';
 import { kbnRequestFromFetch } from './kbn_request';
 import { pauseEntityExtraction, prepareWorkerSpace } from './seed';
 
@@ -126,6 +127,8 @@ export const assertWorkflowsInstalled = async (fetch: HttpHandler): Promise<void
 
 export interface PreflightResult {
   routing: CohortRouting;
+  /** Per-space floor worker workflow that every row starts. */
+  floorWorkflowId: string;
   restore: () => Promise<void>;
 }
 
@@ -202,6 +205,13 @@ export const runPreflight = async ({
   cohort: Cohort;
   referenceModel?: string;
 }): Promise<PreflightResult> => {
+  if (cohort !== 'whole') {
+    // The floor worker passes the runner no `connector_id`, so generation and review resolve
+    // to the same feature routing and cannot be given different models.
+    throw new Error(
+      `The "${cohort}" cohort is not supported: runs start through the floor worker, which cannot pin generation to a different model than review. Use the "whole" cohort.`
+    );
+  }
   const modelUnderTest = getInferenceEndpointId(connector);
   if (!modelUnderTest) {
     throw new Error(
@@ -240,14 +250,22 @@ export const runPreflight = async ({
     spaceId: EVAL_SPACE_ID,
     entityStoreStatus,
   });
+  let restoreFloorWorker: (() => Promise<void>) | undefined;
   const restore = () =>
     runAll('Could not restore the stack after the run', [
+      () => restoreFloorWorker?.() ?? Promise.resolve(),
       () => writeFeatures(fetch, EVAL_SPACE_ID, original),
       restoreExtraction,
     ]);
 
+  let floorWorkflowId: string;
   try {
     await writeFeatures(fetch, EVAL_SPACE_ID, routing.features);
+    // After the routing is written: enabling is refused while the space has no AI model.
+    const serviceAccountId = await ensureFloorServiceAccount(fetch, log);
+    const floor = await enableFloorWorker({ fetch, log, serviceAccountId });
+    floorWorkflowId = floor.workflowId;
+    restoreFloorWorker = floor.restore;
   } catch (error) {
     await restore().catch((restoreError) => log.error(`[ad-worker] ${errorMessage(restoreError)}`));
     throw error;
@@ -256,5 +274,5 @@ export const runPreflight = async ({
     `[ad-worker] cohort "${cohort}": generation=${routing.generationModel}, review=${routing.reviewModel}`
   );
 
-  return { routing, restore };
+  return { routing, floorWorkflowId, restore };
 };

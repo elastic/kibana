@@ -22,11 +22,16 @@ import {
   parseStepNames,
   runPreflight,
 } from './preflight';
+import { enableFloorWorker, ensureFloorServiceAccount } from './floor_worker';
 import { pauseEntityExtraction, prepareWorkerSpace } from './seed';
 
 jest.mock('@kbn/evals', () => ({
   getInferenceEndpointId: (connector: { id: string }) => connector.id,
   inferenceEndpointExists: jest.fn(async () => true),
+}));
+jest.mock('./floor_worker', () => ({
+  ensureFloorServiceAccount: jest.fn(),
+  enableFloorWorker: jest.fn(),
 }));
 jest.mock('./seed', () => ({ prepareWorkerSpace: jest.fn(), pauseEntityExtraction: jest.fn() }));
 jest.mock('./inference_override', () => ({
@@ -197,6 +202,7 @@ describe('runPreflight', () => {
     { feature_id: ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID, endpoints: [{ id: 'baseline' }] },
   ];
   const restartExtraction = jest.fn();
+  const restoreFloorWorker = jest.fn();
   const mockedFetch = jest.fn();
 
   const run = () =>
@@ -219,6 +225,12 @@ describe('runPreflight', () => {
     (readFeatures as jest.Mock).mockResolvedValue(original);
     (writeFeatures as jest.Mock).mockResolvedValue(undefined);
     restartExtraction.mockResolvedValue(undefined);
+    (ensureFloorServiceAccount as jest.Mock).mockResolvedValue('sa-1');
+    (enableFloorWorker as jest.Mock).mockResolvedValue({
+      workflowId: 'floor-wf',
+      restore: restoreFloorWorker,
+    });
+    restoreFloorWorker.mockResolvedValue(undefined);
   });
 
   it('does not stop Entity Store extraction when a workflow is missing a required step', async () => {
@@ -238,6 +250,51 @@ describe('runPreflight', () => {
     await expect(run()).rejects.toThrow(/already routes AlertZero inference/);
     expect(pauseEntityExtraction).not.toHaveBeenCalled();
     expect(writeFeatures).not.toHaveBeenCalled();
+  });
+
+  it.each(['generation', 'review'] as const)(
+    'rejects the unsupported %s cohort',
+    async (cohort) => {
+      await expect(
+        runPreflight({
+          fetch: mockedFetch as unknown as HttpHandler,
+          esClient: {} as Client,
+          log,
+          connector,
+          cohort,
+          referenceModel: 'reference',
+        })
+      ).rejects.toThrow(/not supported/);
+      expect(pauseEntityExtraction).not.toHaveBeenCalled();
+    }
+  );
+
+  it('enables the floor worker after the routing is written and returns its workflow id', async () => {
+    const result = await run();
+    expect(result.floorWorkflowId).toBe('floor-wf');
+    expect(enableFloorWorker).toHaveBeenCalledWith(
+      expect.objectContaining({ serviceAccountId: 'sa-1' })
+    );
+    expect((writeFeatures as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
+      (enableFloorWorker as jest.Mock).mock.invocationCallOrder[0]
+    );
+  });
+
+  it('restores extraction and the routing when the floor worker cannot be enabled', async () => {
+    (enableFloorWorker as jest.Mock).mockRejectedValueOnce(new Error('blocked'));
+    await expect(run()).rejects.toThrow('blocked');
+    expect(restartExtraction).toHaveBeenCalledTimes(1);
+    expect(writeFeatures).toHaveBeenLastCalledWith(expect.anything(), expect.anything(), original);
+  });
+
+  it('disables the floor worker on restore, before the routing is written back', async () => {
+    const { restore } = await run();
+    (writeFeatures as jest.Mock).mockClear();
+    await restore();
+    expect(restoreFloorWorker).toHaveBeenCalledTimes(1);
+    expect(restoreFloorWorker.mock.invocationCallOrder[0]).toBeLessThan(
+      (writeFeatures as jest.Mock).mock.invocationCallOrder[0]
+    );
   });
 
   it('restores extraction and rethrows when writing the routing fails', async () => {

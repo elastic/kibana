@@ -262,6 +262,7 @@ const evaluateExamples = (
     fetch: jest.fn() as unknown as HttpHandler,
     log,
     routing,
+    floorWorkflowId: 'floor-wf',
   })({
     dataset: { name: 'seam', description: 'real-style', examples },
     evaluatorOverrides,
@@ -281,6 +282,7 @@ const evaluateRows = (
     fetch: jest.fn() as unknown as HttpHandler,
     log,
     routing,
+    floorWorkflowId: 'floor-wf',
   })({
     dataset: { name: 'seam', description: 'real-style', examples: scenarioIds.map(rowFor) },
   });
@@ -311,12 +313,12 @@ describe('createEvaluateDataset', () => {
     });
   });
 
-  it('seeds, runs the Worker in manual autonomy, routes the runner model and cleans up', async () => {
+  it('seeds, starts the floor worker in the eval space and cleans up', async () => {
     collect.mockResolvedValue(quietArtifacts());
     await expect(evaluateRow('benign-batch')).resolves.toBeUndefined();
     expect(client.run).toHaveBeenCalledWith(
       expect.objectContaining({
-        inputs: expect.objectContaining({ autonomy: 'manual', connector_id: 'model-under-test' }),
+        floorWorkflowId: 'floor-wf',
       })
     );
     expect(cleanup).toHaveBeenCalledTimes(1);
@@ -529,6 +531,7 @@ describe('createEvaluateDataset', () => {
           fetch: jest.fn() as unknown as HttpHandler,
           log,
           routing,
+          floorWorkflowId: 'floor-wf',
         })({
           dataset: {
             name: 'seam',
@@ -658,6 +661,7 @@ describe('createEvaluateDataset', () => {
             fetch: jest.fn() as unknown as HttpHandler,
             log,
             routing,
+            floorWorkflowId: 'floor-wf',
           })({
             dataset: { name: 'seam', description: 'real-style', examples: ROWS.map(rowFor) },
             evaluatorOverrides: overrides,
@@ -721,6 +725,7 @@ describe('createEvaluateDataset', () => {
             fetch: jest.fn() as unknown as HttpHandler,
             log,
             routing,
+            floorWorkflowId: 'floor-wf',
           })({
             dataset: { name: 'seam', description: 'real-style', examples: ROWS.map(rowFor) },
           })
@@ -802,6 +807,7 @@ describe('createEvaluateDataset', () => {
           fetch: jest.fn() as unknown as HttpHandler,
           log,
           routing,
+          floorWorkflowId: 'floor-wf',
         })({
           dataset: { name: 'seam', description: 'real-style', examples: ROWS.map(rowFor) },
           evaluatorOverrides: [counting],

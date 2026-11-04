@@ -11,11 +11,20 @@ import { AttackDiscoveryWorkerClient, usingClient } from './worker_client';
 
 const log = { info: jest.fn(), warning: jest.fn(), debug: jest.fn() } as unknown as ToolingLog;
 
-const clientReturning = (execution: Record<string, unknown>) =>
+const RUNNER = 'system-security-attack-discovery-worker';
+
+const clientReturning = (
+  execution: Record<string, unknown>,
+  children: Array<{ workflowId: string; executionId: string }> = [
+    { workflowId: RUNNER, executionId: 'run-1' },
+  ]
+) =>
   new AttackDiscoveryWorkerClient(
-    jest.fn(async (path: string) =>
-      path.includes('/workflow/') ? { workflowExecutionId: 'run-1' } : execution
-    ) as unknown as HttpHandler,
+    jest.fn(async (path: string) => {
+      if (path.includes('/workflow/')) return { workflowExecutionId: 'floor-1' };
+      if (path.endsWith('/children')) return children;
+      return execution;
+    }) as unknown as HttpHandler,
     log
   );
 
@@ -35,8 +44,28 @@ describe('AttackDiscoveryWorkerClient timeouts', () => {
 
   it('returns a zero-step runner execution instead of throwing', async () => {
     const client = clientReturning({ id: 'run-1', status: 'failed', stepExecutions: [] });
-    const polled = await client.run({ spaceId: 's', inputs: {} as never, maxWaitMs: 0 });
+    const polled = await client.run({ spaceId: 's', floorWorkflowId: 'floor', maxWaitMs: 0 });
     expect(polled.execution.stepExecutions).toHaveLength(0);
+  });
+
+  it('falls back to the floor execution when the worker ends without starting a runner', async () => {
+    const client = clientReturning({ id: 'floor-1', status: 'failed', stepExecutions: [] }, []);
+    const polled = await client.run({ spaceId: 's', floorWorkflowId: 'floor', maxWaitMs: 0 });
+    expect(polled.execution.id).toBe('floor-1');
+    expect(log.warning).toHaveBeenCalled();
+  });
+
+  it('tracks both executions until the runner settles, then forgets them', async () => {
+    const fetch = jest.fn(async (path: string) => {
+      if (path.includes('/workflow/')) return { workflowExecutionId: 'floor-1' };
+      if (path.endsWith('/children')) return [{ workflowId: RUNNER, executionId: 'run-1' }];
+      if (path.includes('/cancel')) return {};
+      return { id: 'run-1', status: 'completed', stepExecutions: [] };
+    });
+    const client = new AttackDiscoveryWorkerClient(fetch as unknown as HttpHandler, log);
+    await client.run({ spaceId: 's', floorWorkflowId: 'floor', maxWaitMs: 0 });
+    await client.cancelPending();
+    expect(fetch.mock.calls.some(([path]) => String(path).includes('/cancel'))).toBe(false);
   });
 });
 

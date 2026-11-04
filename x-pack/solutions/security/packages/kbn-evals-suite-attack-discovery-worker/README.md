@@ -133,19 +133,11 @@ escalation gate instead of proceeding.
 
 ## Cohorts
 
-`AD_WORKER_EVAL_COHORT` selects which stage the model under test drives. The other stage is pinned to
-`AD_WORKER_EVAL_REFERENCE_MODEL`.
-
-| Cohort       | Generation                | Review                    |
-| ------------ | ------------------------- | ------------------------- |
-| `whole`      | model under test          | model under test          |
-| `generation` | model under test          | reference model           |
-| `review`     | reference model           | model under test          |
-
-The `generation` and `review` cohorts require a reference model that differs from the model under
-test; the suite throws otherwise. Every score document carries the cohort, generation model, review
-model and stage in its metadata. A unit test (`cohort_routing.test.ts`) proves each cohort resolves
-the two stages to the expected models.
+`AD_WORKER_EVAL_COHORT` defaults to `whole`: generation and review both run the model under test. Runs
+start through the per-space floor worker, which passes the runner no `connector_id`, so generation
+cannot be pinned to a different model than review. The `generation` and `review` cohorts (the other
+stage pinned to `AD_WORKER_EVAL_REFERENCE_MODEL`) are therefore rejected by the preflight. Every score
+document carries the cohort, generation model, review model and stage in its metadata.
 
 The `alertzero_frontier` and `alertzero_template_models` inference features are routed for the
 duration of the run and restored afterwards.
@@ -154,21 +146,16 @@ duration of the run and restored afterwards.
 # whole pipeline on one model
 AD_WORKER_EVAL_COHORT=whole \
   node scripts/evals start --suite security-attack-discovery-worker --model <model-id>
-
-# generation under test, review pinned to the reference model
-AD_WORKER_EVAL_COHORT=generation AD_WORKER_EVAL_REFERENCE_MODEL=<reference-id> \
-  node scripts/evals start --suite security-attack-discovery-worker --model <model-id>
-
-# review under test, generation pinned to the reference model
-AD_WORKER_EVAL_COHORT=review AD_WORKER_EVAL_REFERENCE_MODEL=<reference-id> \
-  node scripts/evals start --suite security-attack-discovery-worker --model <model-id>
 ```
 
 ## Running
 
-- The runner is manual-trigger only and is global, so the suite triggers it directly in the eval
-  space through `/s/<space>/api/workflows/workflow/<id>/run`. No per-space floor Worker has to be
-  installed.
+- The runner needs a delegated identity, so the engine refuses to start it standalone. The preflight
+  therefore finds or creates the built-in `alertzero_attack_discovery` service account (bound to
+  the reserved role of the same name), enables the per-space floor worker with it
+  (`autonomy: 'manual'`, a 24h schedule so no tick cancels the run) and each row starts that worker
+  through `/s/<space>/api/workflows/workflow/<id>/run`, then follows its child runner execution.
+  The restore step disables the worker again if it was off.
 - The Scout config set `evals_attack_discovery_worker` starts the stack with
   `xpack.alertzero.enabled`, `xpack.agenticInvestigations.enabled`, `xpack.proposals.enabled` and
   service accounts enabled. Without service accounts AlertZero installs no managed workflows.

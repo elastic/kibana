@@ -79,8 +79,12 @@ export const FP_TP_ANALYZE_STEP_ID = 'analyze';
 
 export const FP_TP_REQUIRED_STEP_IDS: readonly string[] = [FP_TP_ANALYZE_STEP_ID];
 
-/** Lookback handed to the runner; seeded alert timestamps are placed inside it. */
-export const SCHEDULE_INTERVAL = '30m';
+/**
+ * Schedule interval of the floor worker. It is also the runner's lookback, and seeded alert
+ * timestamps sit well inside it. It is long so no scheduled tick starts a run during a row: the
+ * worker's concurrency cancels the run in progress, which would cancel the manual run.
+ */
+export const FLOOR_SCHEDULE_INTERVAL = '24h';
 export const SEED_WINDOW_MS = 20 * 60_000;
 export const SEED_WINDOW_END_OFFSET_MS = 60_000;
 

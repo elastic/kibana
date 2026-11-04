@@ -21,7 +21,6 @@ import {
 } from '../audit_failure_classes/registry';
 import { collectWorkerArtifacts } from '../collect';
 import type { CohortRouting } from '../cohort_routing';
-import { SCHEDULE_INTERVAL } from '../constants';
 import { errorMessage } from '../kibana_api';
 import { assertCleanSpace, cleanupSeed, seedScenario } from '../seed';
 import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from '../types';
@@ -308,6 +307,7 @@ export const createEvaluateDataset =
     fetch,
     log,
     routing,
+    floorWorkflowId,
     judge,
   }: {
     client: AttackDiscoveryWorkerClient;
@@ -317,6 +317,8 @@ export const createEvaluateDataset =
     fetch: HttpHandler;
     log: ToolingLog;
     routing: CohortRouting;
+    /** Per-space floor worker workflow that every row starts. */
+    floorWorkflowId: string;
     judge?: JudgeProvenance;
   }) =>
   async ({
@@ -382,12 +384,9 @@ export const createEvaluateDataset =
         seeded = await seedScenario({ esClient, log, scenario, spaceId });
         const { execution: run, timedOutAfterMs } = await client.run({
           spaceId,
-          inputs: {
-            schedule_interval: SCHEDULE_INTERVAL,
-            // Manual autonomy keeps true-positive and inconclusive verdicts at the gate.
-            autonomy: 'manual',
-            ...(routing.runnerConnectorId ? { connector_id: routing.runnerConnectorId } : {}),
-          },
+          // The floor worker is enabled with manual autonomy, which keeps true-positive and
+          // inconclusive verdicts at the gate.
+          floorWorkflowId,
         });
         artifacts = await collectWorkerArtifacts({
           client,

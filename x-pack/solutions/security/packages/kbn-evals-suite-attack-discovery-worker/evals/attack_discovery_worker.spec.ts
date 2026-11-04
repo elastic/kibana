@@ -29,7 +29,7 @@ evaluate.describe('Attack Discovery Worker', { tag: tags.stateful.classic }, () 
       log,
       evaluationConnector,
     }) => {
-      const { routing } = adWorkerPreflight;
+      const { routing, floorWorkflowId } = adWorkerPreflight;
       const evaluateDataset = createEvaluateDataset({
         client: adWorkerClient,
         evaluators,
@@ -38,6 +38,7 @@ evaluate.describe('Attack Discovery Worker', { tag: tags.stateful.classic }, () 
         fetch,
         log,
         routing,
+        floorWorkflowId,
         judge: {
           judgeConnectorId: evaluationConnector.id,
           judgeConnectorName: evaluationConnector.name,

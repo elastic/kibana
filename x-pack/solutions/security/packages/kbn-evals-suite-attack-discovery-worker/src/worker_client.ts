@@ -30,16 +30,10 @@ export interface PolledExecution {
   timedOutAfterMs?: number;
 }
 
-export interface RunnerInputs {
-  schedule_interval: string;
-  autonomy: 'manual' | 'supervised';
-  connector_id?: string;
-  max_alerts?: number;
-}
-
 /**
- * Triggers the Attack Discovery runner directly in a space and reads executions back. The
- * runner is a global workflow whose only trigger is manual, so it needs no per-space Worker.
+ * Starts the per-space floor Attack Discovery worker and reads executions back. The runner has
+ * to be started by that worker: it dispatches the runner as its service account, and the
+ * engine refuses a standalone start of a workflow that needs a delegated identity.
  */
 export class AttackDiscoveryWorkerClient {
   private readonly pendingExecutions: Array<{ spaceId: string; executionId: string }> = [];
@@ -93,30 +87,74 @@ export class AttackDiscoveryWorkerClient {
   }
 
   /**
-   * Runs the runner to completion. A timeout or an execution with no steps is returned, not
-   * thrown, so the row is scored (and fails by name) instead of vanishing from the results.
+   * Finds the runner execution the floor worker started. The runner is a child of the worker's
+   * `workflow.execute` step, so it appears only once that step has begun. Returns undefined when
+   * the worker ended without ever starting one (it failed or was refused first).
+   */
+  private async findRunnerExecution({
+    spaceId,
+    floorExecutionId,
+    maxWaitMs,
+  }: {
+    spaceId: string;
+    floorExecutionId: string;
+    maxWaitMs: number;
+  }): Promise<string | undefined> {
+    const deadline = Date.now() + maxWaitMs;
+    for (;;) {
+      const children = await this.fetch<Array<{ workflowId: string; executionId: string }>>(
+        this.executionPath(spaceId, floorExecutionId, '/children'),
+        { method: 'GET', headers: apiVersion(PUBLIC_API_VERSION) }
+      );
+      const runner = children.find(({ workflowId }) => workflowId === RUNNER_WORKFLOW_ID);
+      if (runner) return runner.executionId;
+      const floor = await this.getExecution(spaceId, floorExecutionId);
+      if (isTerminal(floor.status) || Date.now() >= deadline) return undefined;
+      await sleep(POLL_INTERVAL_MS);
+    }
+  }
+
+  /**
+   * Starts the per-space floor worker and follows it to the runner it dispatches, then polls the
+   * runner to completion. A timeout or an execution with no steps is returned, not thrown, so the
+   * row is scored (and fails by name) instead of vanishing from the results. When the worker
+   * ends without starting a runner, the worker's own execution is returned.
    */
   async run({
     spaceId,
-    inputs,
+    floorWorkflowId,
     maxWaitMs = RUNNER_TIMEOUT_MS,
   }: {
     spaceId: string;
-    inputs: RunnerInputs;
+    floorWorkflowId: string;
     maxWaitMs?: number;
   }): Promise<PolledExecution> {
-    const { workflowExecutionId } = await this.fetch<{ workflowExecutionId: string }>(
-      spacePath(spaceId, `/api/workflows/workflow/${encodeURIComponent(RUNNER_WORKFLOW_ID)}/run`),
-      {
-        method: 'POST',
-        headers: apiVersion(PUBLIC_API_VERSION),
-        body: JSON.stringify({ inputs }),
-      }
-    );
-    this.pendingExecutions.push({ spaceId, executionId: workflowExecutionId });
-    const polled = await this.poll({ spaceId, executionId: workflowExecutionId, maxWaitMs });
+    const { workflowExecutionId: floorExecutionId } = await this.fetch<{
+      workflowExecutionId: string;
+    }>(spacePath(spaceId, `/api/workflows/workflow/${encodeURIComponent(floorWorkflowId)}/run`), {
+      method: 'POST',
+      headers: apiVersion(PUBLIC_API_VERSION),
+      body: JSON.stringify({ inputs: {} }),
+    });
+    this.pendingExecutions.push({ spaceId, executionId: floorExecutionId });
+    const runnerExecutionId = await this.findRunnerExecution({
+      spaceId,
+      floorExecutionId,
+      maxWaitMs,
+    });
+    if (!runnerExecutionId) {
+      this.log.warning(
+        `Floor worker execution ${floorExecutionId} did not start a runner; scoring its own execution`
+      );
+      const polled = await this.poll({ spaceId, executionId: floorExecutionId, maxWaitMs });
+      if (isTerminal(polled.execution.status)) this.forget(floorExecutionId);
+      return polled;
+    }
+    this.pendingExecutions.push({ spaceId, executionId: runnerExecutionId });
+    const polled = await this.poll({ spaceId, executionId: runnerExecutionId, maxWaitMs });
     if (isTerminal(polled.execution.status)) {
-      this.forget(workflowExecutionId);
+      this.forget(runnerExecutionId);
+      this.forget(floorExecutionId);
     }
     return polled;
   }
