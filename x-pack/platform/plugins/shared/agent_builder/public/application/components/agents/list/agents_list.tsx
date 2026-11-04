@@ -16,7 +16,6 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiIconTip,
   EuiInMemoryTable,
   EuiLink,
@@ -29,7 +28,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_EVENT_TYPES, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { countBy } from 'lodash';
 import moment from 'moment';
 import React, { useMemo } from 'react';
@@ -182,7 +181,7 @@ export const AgentsList: React.FC = () => {
   const { manageAgents } = useUiPrivileges();
   const { addSuccessToast, addErrorToast } = useToasts();
   const {
-    services: { settings },
+    services: { analytics, settings },
   } = useKibana();
   const dateFormat = settings?.client.get<string>('dateFormat');
   const { defaultAgentId: spaceDefaultAgentId } = useSpaceDefaultAgent();
@@ -425,30 +424,20 @@ export const AgentsList: React.FC = () => {
           },
         },
         {
-          // Have to use a custom action to display the danger color
-          // Can use default action if this proposal is implemented: https://github.com/elastic/eui/discussions/8735
-          render: (agent) => {
-            return (
-              <EuiToolTip position="right" content={actionLabels.deleteDescription}>
-                <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-                  <EuiIcon type="trash" color="danger" aria-hidden={true} />
-                  <EuiLink
-                    data-test-subj={`agentBuilderAgentsListDelete-${agent.id}`}
-                    onClick={() => {
-                      deleteAgent({ agent });
-                    }}
-                    color="danger"
-                    {...getEbtProps({
-                      element: AGENT_BUILDER_UI_EBT.element.pageContent,
-                      action: AGENT_BUILDER_UI_EBT.action.agentList.AGENT_DELETE,
-                      detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
-                    })}
-                  >
-                    {actionLabels.delete}
-                  </EuiLink>
-                </EuiFlexGroup>
-              </EuiToolTip>
-            );
+          type: 'icon',
+          icon: 'trash',
+          color: 'danger',
+          name: actionLabels.delete,
+          description: actionLabels.deleteDescription,
+          'data-test-subj': (agent) => `agentBuilderAgentsListDelete-${agent.id}`,
+          showOnHover: true,
+          onClick: (agent) => {
+            analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.UiClick, {
+              ebt_element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              ebt_action: AGENT_BUILDER_UI_EBT.action.agentList.AGENT_DELETE,
+              element_kind: 'button',
+            });
+            deleteAgent({ agent });
           },
           available: canEditAgent,
         },
@@ -466,6 +455,7 @@ export const AgentsList: React.FC = () => {
       agentActions,
     ];
   }, [
+    analytics,
     createAgentBuilderUrl,
     deleteAgent,
     manageAgents,

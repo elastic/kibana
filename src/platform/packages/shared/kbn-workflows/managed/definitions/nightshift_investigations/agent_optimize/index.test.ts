@@ -196,6 +196,16 @@ describe('nightshift agent optimize workflow', () => {
     expect(ensure?.with?.agent_id).toBe('significant-events.decision-tree-reinforcement');
   });
 
+  // The round's place in its conversation is what tells a first round from a follow-up.
+  it('hands the turn preparation the conversation and the round', () => {
+    const prepare = workflow.steps.find((step) => step.name === 'prepare_turn');
+    expect(prepare?.with).toMatchObject({
+      conversation_id: '{{ inputs.conversation_id }}',
+      round_id: '{{ inputs.round_id }}',
+    });
+    expect(prepare?.with).not.toHaveProperty('response');
+  });
+
   // The agent replays the investigator's round as tool messages, so it needs the calls, their
   // results, and the round's prompt and answer. ${{ }} keeps the arrays intact.
   it("hands the reinforcement step the investigator's whole round and the prepared turn", () => {
