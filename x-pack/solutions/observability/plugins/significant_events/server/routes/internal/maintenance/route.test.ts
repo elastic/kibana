@@ -6,6 +6,8 @@
  */
 
 import { NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import { StatusError } from '../../../lib/errors/status_error';
+import { assertCanChangeBoundWorkflows } from '../../../lib/service_accounts/detection_engine_account';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { internalMaintenanceRoutes } from './route';
 
@@ -13,69 +15,9 @@ jest.mock('../../utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
 }));
 
-const route =
-  internalMaintenanceRoutes['POST /internal/significant_events/maintenance/cleanup/_bootstrap'];
-type HandlerParams = Parameters<typeof route.handler>[0];
-
-describe('cleanup workflow bootstrap route', () => {
-  beforeEach(() => jest.clearAllMocks());
-
-  const createHandlerParams = (ensureEnabled = jest.fn().mockResolvedValue(undefined)) => {
-    const request = {};
-    const licensing = {};
-    const server = {};
-    const logger = { warn: jest.fn() };
-    const maintenanceService = { getState: jest.fn().mockResolvedValue('enabled') };
-    const getSpaceId = jest.fn().mockResolvedValue('space-a');
-
-    return {
-      request,
-      licensing,
-      server,
-      logger,
-      ensureEnabled,
-      handlerParams: {
-        request,
-        server,
-        logger,
-        maintenanceService,
-        getSpaceId,
-        cleanupWorkflowService: { ensureEnabled },
-        getScopedClients: jest.fn().mockResolvedValue({ licensing }),
-      } as unknown as HandlerParams,
-    };
-  };
-
-  it('requires Nightshift manage and enables cleanup in the current space', async () => {
-    const params = createHandlerParams();
-
-    await expect(route.handler(params.handlerParams)).resolves.toEqual({ success: true });
-
-    expect(route.security.authz).toEqual({
-      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
-    });
-    expect(assertSignificantEventsAccess).toHaveBeenCalledWith({
-      server: params.server,
-      licensing: params.licensing,
-    });
-    expect(params.ensureEnabled).toHaveBeenCalledWith({
-      request: params.request,
-      spaceId: 'space-a',
-    });
-  });
-
-  it('returns success when cleanup enablement fails', async () => {
-    const params = createHandlerParams(
-      jest.fn().mockRejectedValue(new Error('workflow unavailable'))
-    );
-
-    await expect(route.handler(params.handlerParams)).resolves.toEqual({ success: true });
-
-    expect(params.logger.warn).toHaveBeenCalledWith(
-      'Failed to ensure Significant Events cleanup workflow is enabled: workflow unavailable'
-    );
-  });
-});
+jest.mock('../../../lib/service_accounts/detection_engine_account', () => ({
+  assertCanChangeBoundWorkflows: jest.fn().mockResolvedValue(undefined),
+}));
 
 describe('reset route', () => {
   const resetRoute =
@@ -100,6 +42,7 @@ describe('reset route', () => {
       server,
       maintenanceService: { reset },
       getScopedClients: jest.fn().mockResolvedValue({ licensing }),
+      getSpaceId: jest.fn().mockResolvedValue('default'),
     } as unknown as Parameters<typeof resetRoute.handler>[0]);
 
     expect(resetRoute.security.authz).toEqual({
@@ -107,6 +50,25 @@ describe('reset route', () => {
     });
     expect(assertSignificantEventsAccess).toHaveBeenCalledWith({ server, licensing });
     expect(reset).toHaveBeenCalledWith({ request, updatedBy: 'operator' });
+  });
+
+  it('refuses before touching the space when the caller cannot change the bound workflows', async () => {
+    jest
+      .mocked(assertCanChangeBoundWorkflows)
+      .mockRejectedValueOnce(new StatusError('requires manage_security', 403));
+    const reset = jest.fn();
+
+    await expect(
+      resetRoute.handler({
+        request: {},
+        server: { core: { security: { authc: { getCurrentUser: jest.fn() } } } },
+        maintenanceService: { reset },
+        getScopedClients: jest.fn().mockResolvedValue({ licensing: {} }),
+        getSpaceId: jest.fn().mockResolvedValue('space-a'),
+      } as unknown as Parameters<typeof resetRoute.handler>[0])
+    ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+    expect(reset).not.toHaveBeenCalled();
   });
 });
 
@@ -120,6 +82,7 @@ describe('pause, resume, and status routes', () => {
       request: {},
       server,
       getScopedClients: jest.fn().mockResolvedValue({ licensing }),
+      getSpaceId: jest.fn().mockResolvedValue('default'),
       maintenanceService: {
         pause: jest.fn(),
         resume: jest.fn(),
@@ -143,4 +106,34 @@ describe('pause, resume, and status routes', () => {
       [{ server, licensing }],
     ]);
   });
+
+  it.each([
+    ['pause', 'POST /internal/significant_events/maintenance/_pause'],
+    ['resume', 'POST /internal/significant_events/maintenance/_resume'],
+  ] as const)(
+    'refuses %s before touching the space when the caller cannot change the bound workflows',
+    async (action, endpoint) => {
+      jest
+        .mocked(assertCanChangeBoundWorkflows)
+        .mockRejectedValueOnce(new StatusError('requires manage_security', 403));
+      const maintenanceService = { pause: jest.fn(), resume: jest.fn() };
+      const handlerParams = {
+        request: {},
+        server: { core: { security: { authc: { getCurrentUser: jest.fn() } } } },
+        getScopedClients: jest.fn().mockResolvedValue({ licensing: {} }),
+        getSpaceId: jest.fn().mockResolvedValue('space-a'),
+        maintenanceService,
+      };
+      const { handler } = internalMaintenanceRoutes[endpoint];
+
+      await expect(
+        handler(handlerParams as unknown as Parameters<typeof handler>[0])
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      expect(maintenanceService[action]).not.toHaveBeenCalled();
+      expect(assertCanChangeBoundWorkflows).toHaveBeenCalledWith(
+        expect.objectContaining({ spaceId: 'space-a' })
+      );
+    }
+  );
 });

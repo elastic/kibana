@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from './serverless.base.config';
+import { defaultConfig, withUiamCertOfProject } from './serverless.base.config';
 import type { ScoutServerConfig } from '../../../../../types';
 
 export const servers: ScoutServerConfig = {
@@ -19,7 +19,7 @@ export const servers: ScoutServerConfig = {
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
     serverArgs: [
-      ...defaultConfig.kbnTestServer.serverArgs,
+      ...withUiamCertOfProject(defaultConfig.kbnTestServer.serverArgs, 'observability'),
       '--serverless=oblt',
       '--coreApp.allowDynamicConfigOverrides=true',
       // Synthetics service config — matches the FTR deployment-agnostic serverless base
@@ -28,6 +28,12 @@ export const servers: ScoutServerConfig = {
       '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
       '--xpack.uptime.service.devUrl=mockDevUrl',
       '--xpack.uptime.service.manifestUrl=mockDevUrl',
+      // The Nightshift detection engine only runs as a service account, and its Significant Events
+      // API tests set a space up to do so. UIAM is already on in the base Serverless config.
+      '--xpack.security.serviceAccounts.enabled=true',
+      // A UIAM service account that schedules a task gets a UIAM API key and no Elasticsearch key,
+      // and Task Manager only grants UIAM keys when this is on.
+      '--xpack.task_manager.grant_uiam_api_keys=true',
     ],
   },
 };

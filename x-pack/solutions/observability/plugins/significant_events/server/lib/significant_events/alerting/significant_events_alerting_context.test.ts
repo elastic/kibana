@@ -6,7 +6,7 @@
  */
 
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
-import { RulesAdapterV2 } from '../../knowledge_indicators/knowledge_indicator_client/rules/v2_rules_adapter';
+import { DetectionEngineRulesClient } from '../../service_accounts/detection_engine_rules_client';
 import { ALERTS_READER_V2 } from './alerts_reader';
 import {
   createSignificantEventsAlertingContextResolver,
@@ -48,14 +48,18 @@ describe('canQueryBeRuleBacked', () => {
 describe('createSignificantEventsAlertingContextResolver', () => {
   const v2Client = {} as RulesClientApi;
 
-  it('returns the v2 alerts reader and rules adapter', async () => {
+  const withAccountRulesClient = async <T>(fn: (client: RulesClientApi) => Promise<T>) =>
+    fn(v2Client);
+
+  it('returns the v2 alerts reader and the detection engine rules client', async () => {
     const context = await createSignificantEventsAlertingContextResolver({
       getAlertingV2RulesClient: async () => v2Client,
+      withAccountRulesClient,
       cpsEnabled: false,
     })();
 
     expect(context.alertsReader).toBe(ALERTS_READER_V2);
-    expect(context.rulesClient).toBeInstanceOf(RulesAdapterV2);
+    expect(context.rulesClient).toBeInstanceOf(DetectionEngineRulesClient);
     expect(context.alertingV2RulesClient).toBe(v2Client);
   });
 
@@ -63,6 +67,7 @@ describe('createSignificantEventsAlertingContextResolver', () => {
     const getAlertingV2RulesClient = jest.fn().mockResolvedValue(v2Client);
     const resolveContext = createSignificantEventsAlertingContextResolver({
       getAlertingV2RulesClient,
+      withAccountRulesClient,
       cpsEnabled: false,
     });
 
@@ -75,11 +80,10 @@ describe('createSignificantEventsAlertingContextResolver', () => {
 
   it.each([true, false])('forwards cpsEnabled=%s to the rules adapter', async (cpsEnabled) => {
     const createRule = jest.fn().mockResolvedValue({});
+    const accountClient = { createRule } as unknown as RulesClientApi;
     const context = await createSignificantEventsAlertingContextResolver({
-      getAlertingV2RulesClient: async () =>
-        ({
-          createRule,
-        } as unknown as RulesClientApi),
+      getAlertingV2RulesClient: async () => v2Client,
+      withAccountRulesClient: async (fn) => fn(accountClient),
       cpsEnabled,
     })();
 

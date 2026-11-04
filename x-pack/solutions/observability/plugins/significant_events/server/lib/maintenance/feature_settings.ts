@@ -12,7 +12,10 @@ import {
   OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
 } from '@kbn/management-settings-ids';
-import { SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  getNightshiftBoundKiContinuousOnboardingWorkflowId,
+  NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import type { SignificantEventsServer } from '../../types';
 import type { SignificantEventsMaintenanceFailure } from '../../../common/maintenance/types';
 import type { GetScopedClients } from '../../routes/types';
@@ -62,13 +65,13 @@ const scheduledSettingTarget = (spaceId: SpaceId): string =>
 
 /** Matches the per-space continuous onboarding documents (`<id>-<spaceId>`). */
 export const isContinuousOnboardingWorkflowId = (workflowId: string): boolean =>
-  workflowId.startsWith(`${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-`);
+  workflowId.startsWith(`${NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-`);
 
 /** The per-space continuous onboarding document of a space. */
 export const continuousOnboardingWorkflowTarget = (
   spaceId: SpaceId
 ): MaintenanceWorkflowTarget => ({
-  id: `${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${spaceId}`,
+  id: getNightshiftBoundKiContinuousOnboardingWorkflowId(spaceId),
   spaceId,
 });
 

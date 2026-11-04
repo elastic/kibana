@@ -6,19 +6,20 @@
  */
 
 import {
-  SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
   getManagedWorkflowDefinition,
 } from '@kbn/workflows/managed';
 
-// The cleanup workflow YAML lives in the managed Significant Events definition.
+// The cleanup workflow YAML lives in the managed Significant Events definition, which the space's
+// setup installs bound to the detection engine service account.
 // These tests keep that YAML in sync with the significant_events constants.
-const definition = getManagedWorkflowDefinition(SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID);
+const definition = getManagedWorkflowDefinition(NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID);
 
 const getWorkflowYaml = (): string => {
-  if (!definition || !('yaml' in definition) || typeof definition.yaml !== 'string') {
-    throw new Error('Significant Events cleanup workflow definition is missing inline YAML');
+  if (!definition || !('yamlTemplate' in definition) || !definition.yamlTemplate) {
+    throw new Error('Significant Events cleanup workflow definition is missing its YAML template');
   }
-  return definition.yaml;
+  return definition.yamlTemplate({ serviceAccountId: 'service-account-id' });
 };
 
 const WORKFLOW_YAML = getWorkflowYaml();
@@ -36,8 +37,12 @@ describe('cleanup.yaml managed workflow definition', () => {
     });
   });
 
-  it('is disabled by default so CleanupWorkflowService controls enablement', () => {
+  it('is disabled by default so the space setup controls enablement', () => {
     assertYamlContains('enabled: false');
+  });
+
+  it('runs as the service account it is installed with', () => {
+    assertYamlContains('run_as: "service-account-id"');
   });
 
   it('drops overlapping runs via a single-instance concurrency key', () => {

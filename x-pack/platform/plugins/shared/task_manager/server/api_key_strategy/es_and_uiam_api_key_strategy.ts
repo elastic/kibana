@@ -82,7 +82,7 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     const cloneApiKey = shouldCloneApiKeyFromRequest(security, request, opts, user);
     // When cloning, both the ES and UIAM credentials are freshly minted/Task-Manager-owned, so
     // apiKeyCreatedByUser must be false (the caller's transient key is not reused).
-    const apiKeyCreatedByUser = hasApiKey(user, request) && !cloneApiKey;
+    const apiKeyCreatedByUser = hasApiKey(user, request, security) && !cloneApiKey;
 
     // UIAM's authoritative verdict on whether the request's API key is an external
     // (user-created Cloud) key, reported by the UIAM authentication provider on the current

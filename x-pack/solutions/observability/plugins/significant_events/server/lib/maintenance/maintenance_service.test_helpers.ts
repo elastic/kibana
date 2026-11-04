@@ -14,8 +14,8 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
 } from '@kbn/management-settings-ids';
 import {
-  SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { GetScopedClients } from '../../routes/types';
@@ -42,11 +42,11 @@ export const SYSTEM_REQUEST = expect.objectContaining({
 
 /** The per-space continuous onboarding document of a space. */
 export const continuousDocumentId = (spaceId: string): string =>
-  `${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${spaceId}`;
+  `${NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${spaceId}`;
 
 /** The per-space cleanup document of a space: scheduled, and not backed by a Settings toggle. */
 export const cleanupDocumentId = (spaceId: string): string =>
-  `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-${spaceId}`;
+  `${NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID}-${spaceId}`;
 
 /** The space a saved-objects call was scoped to; it travels as `this` (see `mock.contexts`). */
 interface SoCallContext {
@@ -194,6 +194,25 @@ export function makeManagementApi(options?: {
     }
   );
 
+  // The owner's managed client reads and switches off the same workflows as the management API.
+  const disable = jest.fn(
+    async (
+      definitionId: string,
+      { workflowId, spaceId }: { workflowId?: string; spaceId: string }
+    ) => {
+      const id = workflowId ?? definitionId;
+      const workflow = await getWorkflow(id, spaceId);
+      if (!workflow?.enabled) {
+        return false;
+      }
+      if (options?.failUpdateFor === id) {
+        throw new Error(`update failed for ${id}`);
+      }
+      enabled.set(stateKey(id, spaceId), false);
+      return true;
+    }
+  );
+
   return {
     api: {
       getWorkflow,
@@ -201,8 +220,10 @@ export function makeManagementApi(options?: {
       cancelAllActiveWorkflowExecutions,
       getClient: jest.fn(() => ({ getWorkflow })),
     },
+    managedWorkflows: { disable },
     getWorkflow,
     updateWorkflow,
+    disable,
     cancelAllActiveWorkflowExecutions,
   };
 }
@@ -254,6 +275,8 @@ export function makeUiSettingsClient(
 
 export function makeService(params?: {
   management?: ReturnType<typeof makeManagementApi>['api'];
+  /** The owner's managed workflows client, used by sweeps with no user behind them. */
+  managedWorkflows?: ReturnType<typeof makeManagementApi>['managedWorkflows'];
   ruleBackedRuleIds?: string[];
   /** Rule ids whose owning source is disabled in the catalog; the others belong to an enabled one. */
   disabledSourceRuleIds?: string[];
@@ -277,6 +300,8 @@ export function makeService(params?: {
   knowledgeIndicatorCounts?: Partial<Record<KnowledgeIndicatorType, number>>;
   ownedRuleIdsBySource?: Record<string, string[]>;
   dataStreams?: Record<string, number>;
+  /** Whether the space has a detection engine service account bound (default: yes). */
+  serviceAccountSetUp?: boolean;
 }) {
   const soClient = makeSoClient();
   // `null` models the alerting v2 plugin being unavailable.
@@ -442,8 +467,22 @@ export function makeService(params?: {
 
   // No `globalAsScopedToClient`: continuous onboarding is a space setting, so a
   // leftover global read or write fails the test.
+  // The detection engine account: rules are turned back on as the account, so Resume needs it bound.
+  const serviceAccounts = {
+    isEnabled: jest.fn(() => true),
+    getWorkloadBinding: jest.fn(async () =>
+      params?.serviceAccountSetUp === false ? undefined : { serviceAccountId: 'account-id' }
+    ),
+    withScopedRequestForWorkload: jest.fn(
+      async (
+        { spaceId }: { spaceId: string },
+        fn: (accountRequest: KibanaRequest) => Promise<unknown>
+      ) => fn(requestInSpace(spaceId))
+    ),
+  };
   const server = {
     core: {
+      security: { serviceAccounts },
       savedObjects,
       dataStreams: { initializeClient },
       elasticsearch: {
@@ -459,6 +498,9 @@ export function makeService(params?: {
       },
     },
     workflowsManagement: params?.management ? { management: params.management } : undefined,
+    workflowsExtensions: params?.managedWorkflows
+      ? { initManagedWorkflowsClient: jest.fn(async () => params.managedWorkflows) }
+      : undefined,
     spaces: {
       spacesService: {
         createSpacesClient: jest.fn(() => ({
@@ -516,5 +558,6 @@ export function makeService(params?: {
     asScoped,
     spaceUiSettingsClient,
     getInternalSpaceUiSettingsClient,
+    serviceAccounts,
   };
 }

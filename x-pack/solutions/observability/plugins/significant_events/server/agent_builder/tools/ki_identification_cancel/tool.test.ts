@@ -27,6 +27,7 @@ describe('createKiIdentificationCancelTool', () => {
       cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
     };
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
+      isServiceAccountsEnabled: async () => true,
       managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry: { trackOnboardingScheduled: jest.fn() } as never,
       getSourcesClient: jest.fn().mockResolvedValue({

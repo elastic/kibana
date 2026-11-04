@@ -3,6 +3,8 @@ name: "Source knowledge reconciliation"
 enabled: true
 description: "Applies source changes before onboarding the current query."
 settings:
+  # Rendered with the detection engine service account of the space.
+  run_as: __SERVICE_ACCOUNT_ID__
   timeout: "60m"
   concurrency:
     key: "nightshift-source-reconciliation-{{ inputs.sourceId }}"
@@ -18,6 +20,20 @@ triggers:
         type: string
         required: true
 steps:
+  # Only the detection engine may start this workflow: it checks who changed the source before
+  # starting a run. Anyone allowed to run workflows could otherwise apply any source change as the
+  # service account. Only server code sets `triggeredBy`.
+  - name: refuse_direct_runs
+    type: if
+    condition: 'not execution.triggeredBy : "nightshift-detection-engine"'
+    steps:
+      - name: refuse
+        type: workflow.fail
+        with:
+          message: >-
+            This workflow applies source changes as the Nightshift service account and cannot be
+            run directly. This run was started by {{ execution.triggeredBy }}.
+
   - name: reconcile_source
     type: kibana.request
     with:

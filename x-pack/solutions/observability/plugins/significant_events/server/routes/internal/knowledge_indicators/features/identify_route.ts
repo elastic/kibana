@@ -28,9 +28,6 @@ import {
   prepareInferredSampling,
 } from '../../../../lib/significant_events/features';
 import { shouldIdentifyFeatures } from '../../../../lib/significant_events/features/should_identify_features';
-import type { SyncWorkflowService } from '../../../../lib/workflows/sync_workflow';
-import type { SignificantEventsMaintenanceService } from '../../../../lib/maintenance/maintenance_service';
-import { stateBlocksNewActivity } from '../../../../../common/maintenance/state_machine';
 import { sourceToAnalysisTarget } from '../../../../lib/significant_events/source_to_analysis_target';
 import { installFeatureIdentificationAgent } from '../../../../agent_builder/agents/feature_identification';
 import { createSignificantEventsAvailability } from '../../../../agent_builder/tools/significant_events_availability';
@@ -58,40 +55,6 @@ const inferenceDocumentsSchema = z
   .refine((documents) => getSerializedByteLength(documents) <= MAX_INFERENCE_DOCUMENTS_BYTES, {
     message: `Documents cannot exceed ${MAX_INFERENCE_DOCUMENTS_BYTES} serialized bytes in aggregate`,
   });
-
-// Best-effort bootstrap of the standalone KI sync (groundedness) sweep workflow of the
-// request space, which runs under a request whose API key can schedule the workflow trigger.
-// Only the inferred route bootstraps: it runs at least once per identification
-// pass and always precedes computed identification, so hooking it covers every
-// path. Idempotent and non-blocking — a failure here must never fail extraction.
-const bootstrapSyncWorkflow = async ({
-  syncWorkflowService,
-  maintenanceService,
-  request,
-  logger,
-}: {
-  syncWorkflowService: SyncWorkflowService | undefined;
-  maintenanceService: SignificantEventsMaintenanceService;
-  request: Parameters<SyncWorkflowService['ensureEnabled']>[0]['request'];
-  logger: { warn: (message: string) => void };
-}): Promise<void> => {
-  if (!syncWorkflowService) {
-    return;
-  }
-  try {
-    const state = await maintenanceService.getState({ request });
-    if (stateBlocksNewActivity(state)) {
-      return;
-    }
-    await syncWorkflowService.ensureEnabled({ request, spaceId: request.spaceId });
-  } catch (error) {
-    logger.warn(
-      `Failed to ensure KI sync workflow is enabled: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
-  }
-};
 
 const prepareInferredSamplingRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{sourceId}/features/_identify/inferred/prepare',
@@ -203,7 +166,6 @@ const identifyInferredFeaturesRoute = createServerRoute({
     server,
     logger,
     telemetry,
-    syncWorkflowService,
     maintenanceService,
   }) => {
     const scopedClients = await getScopedClients({ request });
@@ -271,13 +233,6 @@ const identifyInferredFeaturesRoute = createServerRoute({
           maxPreviouslyIdentifiedFeatures,
         },
         trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),
-      });
-
-      await bootstrapSyncWorkflow({
-        syncWorkflowService,
-        maintenanceService,
-        request,
-        logger: routeLogger,
       });
 
       return { ...result, connectorId };

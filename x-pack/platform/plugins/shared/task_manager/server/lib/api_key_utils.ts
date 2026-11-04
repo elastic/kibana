@@ -100,13 +100,28 @@ export const isRequestApiKeyType = (user: AuthenticatedUser | null) => {
   return user?.authentication_type === 'api_key';
 };
 
-export const hasApiKey = (user: AuthenticatedUser | null, request: KibanaRequest) => {
-  return request.isFakeRequest || (user != null && isRequestApiKeyType(user));
+/**
+ * The fake request of a stack service account carries its service account token, not an API key,
+ * so there is no key to reuse or clone: one is granted for the account instead.
+ */
+const isStackServiceAccountRequest = (security: SecurityServiceStart, request: KibanaRequest) => {
+  const principal = security.authc.getPrincipal(request);
+  return principal?.type === 'service_account' && principal.variant === 'stack';
+};
+
+export const hasApiKey = (
+  user: AuthenticatedUser | null,
+  request: KibanaRequest,
+  security?: SecurityServiceStart
+) => {
+  const fakeRequestCarriesApiKey =
+    request.isFakeRequest && !(security && isStackServiceAccountRequest(security, request));
+  return fakeRequestCarriesApiKey || (user != null && isRequestApiKeyType(user));
 };
 
 export const requestHasApiKey = (security: SecurityServiceStart, request: KibanaRequest) => {
   const user = security.authc.getCurrentUser(request);
-  return hasApiKey(user, request);
+  return hasApiKey(user, request, security);
 };
 
 export const getApiKeyFromRequest = (request: KibanaRequest): RequestApiKeyCredentials | null => {
@@ -135,9 +150,11 @@ export const shouldCloneApiKeyFromRequest = (
   options?: GrantApiKeysOpts,
   user: AuthenticatedUser | null = security.authc.getCurrentUser(request)
 ) => {
-  const requestCarriesApiKey = (user && isRequestApiKeyType(user)) || request.isFakeRequest;
+  const fakeRequestCarriesApiKey =
+    request.isFakeRequest && !isStackServiceAccountRequest(security, request);
+  const requestCarriesApiKey = (user && isRequestApiKeyType(user)) || fakeRequestCarriesApiKey;
 
-  return requestCarriesApiKey && (options?.cloneApiKey === true || request.isFakeRequest);
+  return requestCarriesApiKey && (options?.cloneApiKey === true || fakeRequestCarriesApiKey);
 };
 
 const grantApiKeysForTaskTypes = async ({
@@ -201,7 +218,8 @@ export const createApiKey = async (
   }
 
   const user = preResolved?.user ?? security.authc.getCurrentUser(request);
-  const apiKeyCreatedByUser = preResolved?.apiKeyCreatedByUser ?? hasApiKey(user, request);
+  const apiKeyCreatedByUser =
+    preResolved?.apiKeyCreatedByUser ?? hasApiKey(user, request, security);
 
   const apiKeyByTaskIdMap = new Map<string, EncodedApiKeyResult>();
   const cloneApiKey = shouldCloneApiKeyFromRequest(security, request, options, user);
@@ -278,7 +296,7 @@ export const getApiKeyAndUserScope = async (
   const cloneApiKey = shouldCloneApiKeyFromRequest(security, request, options, user);
   // When cloning, the resulting key is owned by Task Manager (not the caller), so it must not be
   // treated as user-created and must be invalidated on task removal.
-  const apiKeyCreatedByUser = hasApiKey(user, request) && !cloneApiKey;
+  const apiKeyCreatedByUser = hasApiKey(user, request, security) && !cloneApiKey;
 
   const apiKeyByTaskIdMap = await createApiKey(taskInstances, request, security, options, {
     user,

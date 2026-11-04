@@ -16,43 +16,7 @@ import type {
 } from '../../../../common/maintenance/types';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
-import { bootstrapCleanupWorkflow } from '../../../lib/workflows/cleanup_workflow';
-
-const bootstrapCleanupRoute = createServerRoute({
-  endpoint: 'POST /internal/significant_events/maintenance/cleanup/_bootstrap',
-  options: {
-    access: 'internal',
-    summary: 'Bootstrap stale Significant Events cleanup for the current space',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
-    },
-  },
-  params: z.object({}),
-  handler: async ({
-    request,
-    server,
-    getScopedClients,
-    getSpaceId,
-    cleanupWorkflowService,
-    maintenanceService,
-    logger,
-  }): Promise<{ success: true }> => {
-    const { licensing } = await getScopedClients({ request });
-    await assertSignificantEventsAccess({ server, licensing });
-
-    await bootstrapCleanupWorkflow({
-      cleanupWorkflowService,
-      maintenanceService,
-      request,
-      spaceId: await getSpaceId(request),
-      logger,
-    });
-
-    return { success: true };
-  },
-});
+import { assertCanChangeBoundWorkflows } from '../../../lib/service_accounts/detection_engine_account';
 
 const pauseRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/maintenance/_pause',
@@ -74,10 +38,16 @@ const pauseRoute = createServerRoute({
     request,
     server,
     getScopedClients,
+    getSpaceId,
     maintenanceService,
   }): Promise<SignificantEventsMaintenanceSummary> => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing, ignore: ['feature_flag'] });
+    await assertCanChangeBoundWorkflows({
+      core: server.core,
+      request,
+      spaceId: await getSpaceId(request),
+    });
 
     const updatedBy = server.core.security.authc.getCurrentUser(request)?.username;
     return maintenanceService.pause({ request, updatedBy });
@@ -102,10 +72,16 @@ const resumeRoute = createServerRoute({
     request,
     server,
     getScopedClients,
+    getSpaceId,
     maintenanceService,
   }): Promise<SignificantEventsMaintenanceSummary> => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
+    await assertCanChangeBoundWorkflows({
+      core: server.core,
+      request,
+      spaceId: await getSpaceId(request),
+    });
 
     const updatedBy = server.core.security.authc.getCurrentUser(request)?.username;
     return maintenanceService.resume({ request, updatedBy });
@@ -132,10 +108,16 @@ const resetRoute = createServerRoute({
     request,
     server,
     getScopedClients,
+    getSpaceId,
     maintenanceService,
   }): Promise<SignificantEventsMaintenanceSummary> => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
+    await assertCanChangeBoundWorkflows({
+      core: server.core,
+      request,
+      spaceId: await getSpaceId(request),
+    });
 
     const updatedBy = server.core.security.authc.getCurrentUser(request)?.username;
     return maintenanceService.reset({ request, updatedBy });
@@ -170,7 +152,6 @@ const statusRoute = createServerRoute({
 });
 
 export const internalMaintenanceRoutes = {
-  ...bootstrapCleanupRoute,
   ...pauseRoute,
   ...resumeRoute,
   ...resetRoute,

@@ -25,6 +25,7 @@ describe('cancelKiIdentificationToolHandler', () => {
     };
     const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
+      isServiceAccountsEnabled: async () => true,
       managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry,
       getSourcesClient,
@@ -56,6 +57,7 @@ describe('cancelKiIdentificationToolHandler', () => {
     };
     const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
+      isServiceAccountsEnabled: async () => true,
       managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry,
       getSourcesClient,

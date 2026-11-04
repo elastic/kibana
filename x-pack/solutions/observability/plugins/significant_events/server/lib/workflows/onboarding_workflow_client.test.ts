@@ -11,6 +11,7 @@ import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema'
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
+  getNightshiftBoundKiOnboardingWorkflowId,
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
@@ -23,20 +24,38 @@ import {
 } from './onboarding_workflow_client';
 const statusRequest = httpServerMock.createKibanaRequest();
 
-const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => {
+const ENTRY_POINT_ID = getNightshiftBoundKiOnboardingWorkflowId('default');
+
+// With `entryPointExecutions`, the management API answers the executions of the entry point from
+// them and those of every other workflow from the `getWorkflowExecutions` override. Without, the
+// override answers for every workflow.
+const createMockManagementApi = (
+  overrides: Record<string, jest.Mock> = {},
+  entryPointExecutions?: Array<Record<string, unknown>>
+) => {
+  const { getWorkflowExecutions: workflowExecutions, ...otherOverrides } = overrides;
+  const executions = workflowExecutions ?? jest.fn().mockResolvedValue({ results: [], total: 0 });
+  const getWorkflowExecutions =
+    entryPointExecutions === undefined
+      ? executions
+      : jest.fn(async (params: { workflowId: string }, spaceId: string) =>
+          params.workflowId === ENTRY_POINT_ID
+            ? { results: entryPointExecutions, total: entryPointExecutions.length }
+            : executions(params, spaceId)
+        );
   const api = {
     getWorkflow: jest.fn().mockResolvedValue({
-      id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
+      id: ENTRY_POINT_ID,
       name: 'onboarding',
       enabled: true,
-      definition: {},
+      definition: { settings: { run_as: 'service-account-id' } },
       yaml: '',
     }),
     runWorkflow: jest.fn().mockResolvedValue('execution-id'),
-    getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+    getWorkflowExecutions,
     getWorkflowExecution: jest.fn().mockResolvedValue(null),
     cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
-    ...overrides,
+    ...otherOverrides,
   };
   return { ...api, getClient: jest.fn(() => api) };
 };
@@ -44,21 +63,53 @@ const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => {
 const slugOf = (sourceId: string): string => `${sourceId}-slug`;
 const onboardingKeyOf = (sourceId: string): string =>
   `nightshift-source-onboarding-${slugOf(sourceId)}:${sourceId}`;
+const entryPointKeyOf = (sourceId: string): string =>
+  `nightshift-source-onboarding-bound-${slugOf(sourceId)}:${sourceId}`;
 
-const createClient = (overrides: Record<string, jest.Mock> = {}) => {
-  const managementApi = createMockManagementApi(overrides);
+const createClient = (
+  overrides: Record<string, jest.Mock> = {},
+  isServiceAccountsEnabled = true,
+  entryPointExecutions?: Array<Record<string, unknown>>
+) => {
+  const managementApi = createMockManagementApi(overrides, entryPointExecutions);
   const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
   const sourcesClientGet = jest.fn(async (sourceId: string) => ({
     source: { id: sourceId, slug: slugOf(sourceId), enabled: true, esql_updated_at: 'revision-2' },
   }));
   const getSourcesClient = jest.fn().mockResolvedValue({ get: sourcesClientGet });
   const client = new SignificantEventsKIsOnboardingClient({
+    isServiceAccountsEnabled: async () => isServiceAccountsEnabled,
     managementApi: managementApi as never,
     telemetry,
     getSourcesClient,
   });
   return { client, managementApi, telemetry };
 };
+
+// The runs of one source, the onboarding workflow's and the entry point's, which starts it.
+const onboardingRun = (overrides: Record<string, unknown> = {}) => ({
+  id: 'onboarding-1',
+  concurrencyGroupKey: onboardingKeyOf('logs.nginx'),
+  startedAt: '2026-10-30T10:00:05.000Z',
+  status: ExecutionStatus.RUNNING,
+  ...overrides,
+});
+const entryPointRun = (overrides: Record<string, unknown> = {}) => ({
+  id: 'entry-1',
+  concurrencyGroupKey: entryPointKeyOf('logs.nginx'),
+  startedAt: '2026-10-30T10:00:00.000Z',
+  status: ExecutionStatus.RUNNING,
+  ...overrides,
+});
+const withOnboardingRuns = (...results: Array<Record<string, unknown>>) => ({
+  getWorkflowExecutions: jest.fn().mockResolvedValue({ results, total: results.length }),
+});
+
+// A client whose entry point has the given runs, none by default: the status lookups look for them.
+const createStatusClient = (
+  overrides: Record<string, jest.Mock> = {},
+  entryPointExecutions: Array<Record<string, unknown>> = []
+) => createClient(overrides, true, entryPointExecutions);
 
 describe('SignificantEventsKIsOnboardingClient', () => {
   describe('buildConcurrencyKey', () => {
@@ -163,7 +214,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
       expect(managementApi.runWorkflow).not.toHaveBeenCalled();
     });
 
-    it('fetches the workflow definition and runs it and returns executionId', async () => {
+    it('runs the space entry point and returns the execution id', async () => {
       const { client, managementApi } = createClient();
       const request = httpServerMock.createKibanaRequest();
 
@@ -177,27 +228,42 @@ describe('SignificantEventsKIsOnboardingClient', () => {
       });
 
       expect(result).toEqual({ executionId: 'execution-id' });
-      expect(managementApi.getWorkflow).toHaveBeenCalledWith(
-        SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
-        '*'
-      );
+      expect(managementApi.getWorkflow).toHaveBeenCalledWith(ENTRY_POINT_ID, 'default');
       expect(managementApi.runWorkflow).toHaveBeenCalledWith(
-        expect.objectContaining({ id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID }),
+        expect.objectContaining({ id: ENTRY_POINT_ID }),
         'default',
         expect.objectContaining({
           sourceId: 'logs.nginx',
           sourceSlug: slugOf('logs.nginx'),
           sourceRevision: 'revision-2',
         }),
-        request
+        request,
+        expect.anything()
       );
     });
 
-    it('throws when the workflow is not found', async () => {
-      const { client } = createClient({
-        getWorkflow: jest.fn().mockResolvedValue(null),
-      });
-      const request = httpServerMock.createKibanaRequest();
+    it.each([
+      ['the entry point is not installed', { getWorkflow: jest.fn().mockResolvedValue(null) }],
+      [
+        'the entry point is not bound to a service account',
+        {
+          getWorkflow: jest
+            .fn()
+            .mockResolvedValue({ id: ENTRY_POINT_ID, enabled: true, definition: {} }),
+        },
+      ],
+      [
+        'the entry point is disabled',
+        {
+          getWorkflow: jest.fn().mockResolvedValue({
+            id: ENTRY_POINT_ID,
+            enabled: false,
+            definition: { settings: { run_as: 'service-account-id' } },
+          }),
+        },
+      ],
+    ])('is refused with a 503 when %s', async (_, overrides) => {
+      const { client, managementApi } = createClient(overrides);
 
       await expect(
         client.run({
@@ -206,16 +272,14 @@ describe('SignificantEventsKIsOnboardingClient', () => {
             features: { skip: false, start: 1000, end: 2000 },
             queries: { skip: false },
           },
-          request,
+          request: httpServerMock.createKibanaRequest(),
         })
-      ).rejects.toThrow(/not found/);
+      ).rejects.toMatchObject({ statusCode: 503 });
+      expect(managementApi.runWorkflow).not.toHaveBeenCalled();
     });
 
-    it('throws when the workflow has no definition', async () => {
-      const { client } = createClient({
-        getWorkflow: jest.fn().mockResolvedValue({ id: 'wf', definition: null }),
-      });
-      const request = httpServerMock.createKibanaRequest();
+    it('is refused with a 503 when service accounts are off', async () => {
+      const { client, managementApi } = createClient({}, false);
 
       await expect(
         client.run({
@@ -224,15 +288,16 @@ describe('SignificantEventsKIsOnboardingClient', () => {
             features: { skip: false, start: 1000, end: 2000 },
             queries: { skip: false },
           },
-          request,
+          request: httpServerMock.createKibanaRequest(),
         })
-      ).rejects.toThrow(/not found/);
+      ).rejects.toMatchObject({ statusCode: 503 });
+      expect(managementApi.runWorkflow).not.toHaveBeenCalled();
     });
   });
 
   describe('getStatus', () => {
     it('returns NotStarted when no executions exist', async () => {
-      const { client } = createClient();
+      const { client } = createStatusClient();
 
       const result = await client.getStatus({ request: statusRequest, sourceId: 'logs.nginx' });
 
@@ -243,7 +308,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
     });
 
     it('ignores a run that started before the current query, or before the source existed', async () => {
-      const { client } = createClient({
+      const { client } = createStatusClient({
         getWorkflowExecutions: jest.fn().mockResolvedValue({
           results: [
             {
@@ -268,7 +333,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
     });
 
     it('returns InProgress for a running execution', async () => {
-      const { client } = createClient({
+      const { client } = createStatusClient({
         getWorkflowExecutions: jest.fn().mockResolvedValue({
           results: [{ id: 'exec-1', status: ExecutionStatus.RUNNING }],
         }),
@@ -283,7 +348,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
     });
 
     it('returns Completed with output details for a completed execution', async () => {
-      const { client } = createClient({
+      const { client } = createStatusClient({
         getWorkflowExecutions: jest.fn().mockResolvedValue({
           results: [{ id: 'exec-1', status: ExecutionStatus.COMPLETED }],
         }),
@@ -325,7 +390,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
     });
 
     it('returns Completed with defaults when full execution fetch returns null', async () => {
-      const { client } = createClient({
+      const { client } = createStatusClient({
         getWorkflowExecutions: jest.fn().mockResolvedValue({
           results: [{ id: 'exec-1', status: ExecutionStatus.COMPLETED }],
         }),
@@ -354,7 +419,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
     });
 
     it('returns Failed with error message for a failed execution', async () => {
-      const { client } = createClient({
+      const { client } = createStatusClient({
         getWorkflowExecutions: jest.fn().mockResolvedValue({
           results: [
             {
@@ -376,7 +441,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
     });
 
     it('returns Failed with timeout message for a timed-out execution', async () => {
-      const { client } = createClient({
+      const { client } = createStatusClient({
         getWorkflowExecutions: jest.fn().mockResolvedValue({
           results: [{ id: 'exec-1', status: ExecutionStatus.TIMED_OUT, error: null }],
         }),
@@ -392,7 +457,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
     });
 
     it('returns Canceled for a cancelled execution', async () => {
-      const { client } = createClient({
+      const { client } = createStatusClient({
         getWorkflowExecutions: jest.fn().mockResolvedValue({
           results: [{ id: 'exec-1', status: ExecutionStatus.CANCELLED }],
         }),
@@ -407,7 +472,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
     });
 
     it('queries with the correct concurrency group key', async () => {
-      const { client, managementApi } = createClient();
+      const { client, managementApi } = createStatusClient();
 
       await client.getStatus({ request: statusRequest, sourceId: 'logs.nginx' });
 
@@ -419,13 +484,151 @@ describe('SignificantEventsKIsOnboardingClient', () => {
         'default'
       );
     });
+
+    describe('with a run of the space entry point', () => {
+      it('reports a run that has not started the onboarding yet, whatever the previous run was', async () => {
+        const { client } = createStatusClient(
+          withOnboardingRuns(
+            onboardingRun({
+              startedAt: '2026-10-29T10:00:00.000Z',
+              status: ExecutionStatus.COMPLETED,
+            })
+          ),
+          [entryPointRun({ status: ExecutionStatus.QUEUED })]
+        );
+
+        const result = await client.getStatus({ request: statusRequest, sourceId: 'logs.nginx' });
+
+        expect(result).toEqual({
+          status: SignificantEventsWorkflowStatus.InProgress,
+          executionId: 'entry-1',
+        });
+      });
+
+      it('reports a run that is still queued, which has no start time yet', async () => {
+        const { client } = createStatusClient(
+          withOnboardingRuns(
+            onboardingRun({
+              startedAt: '2026-10-29T10:00:00.000Z',
+              status: ExecutionStatus.COMPLETED,
+            })
+          ),
+          [entryPointRun({ startedAt: undefined, status: ExecutionStatus.PENDING })]
+        );
+
+        const result = await client.getStatus({ request: statusRequest, sourceId: 'logs.nginx' });
+
+        expect(result).toEqual({
+          status: SignificantEventsWorkflowStatus.InProgress,
+          executionId: 'entry-1',
+        });
+      });
+
+      it('reports a run that failed before it started the onboarding', async () => {
+        const { client } = createStatusClient(
+          withOnboardingRuns(
+            onboardingRun({
+              startedAt: '2026-10-29T10:00:00.000Z',
+              status: ExecutionStatus.COMPLETED,
+            })
+          ),
+          [
+            entryPointRun({
+              status: ExecutionStatus.FAILED,
+              error: { message: 'Error occurred during service account token exchange' },
+            }),
+          ]
+        );
+
+        const result = await client.getStatus({ request: statusRequest, sourceId: 'logs.nginx' });
+
+        expect(result).toEqual({
+          status: SignificantEventsWorkflowStatus.Failed,
+          executionId: 'entry-1',
+          error: 'Error occurred during service account token exchange',
+        });
+      });
+
+      it('reports a run that failed with nothing to compare it to, when the source never ran', async () => {
+        const { client } = createStatusClient({}, [
+          entryPointRun({ status: ExecutionStatus.FAILED, error: { message: 'boom' } }),
+        ]);
+
+        const result = await client.getStatus({ request: statusRequest, sourceId: 'logs.nginx' });
+
+        expect(result).toMatchObject({
+          status: SignificantEventsWorkflowStatus.Failed,
+          executionId: 'entry-1',
+        });
+      });
+
+      it('reports the onboarding run once it has started', async () => {
+        const { client } = createStatusClient(withOnboardingRuns(onboardingRun()), [
+          entryPointRun(),
+        ]);
+
+        const result = await client.getStatus({ request: statusRequest, sourceId: 'logs.nginx' });
+
+        expect(result).toEqual({
+          status: SignificantEventsWorkflowStatus.InProgress,
+          executionId: 'onboarding-1',
+        });
+      });
+
+      it('reports a run of the onboarding that started after the entry point run, such as a continuous one', async () => {
+        const { client } = createStatusClient(
+          withOnboardingRuns(onboardingRun({ startedAt: '2026-10-30T11:00:00.000Z' })),
+          [entryPointRun({ status: ExecutionStatus.FAILED, error: { message: 'old' } })]
+        );
+
+        const result = await client.getStatus({ request: statusRequest, sourceId: 'logs.nginx' });
+
+        expect(result).toMatchObject({ executionId: 'onboarding-1' });
+      });
+
+      it('ignores a run that started before the current query', async () => {
+        const { client } = createStatusClient({}, [entryPointRun()]);
+
+        const result = await client.getStatus({
+          request: statusRequest,
+          sourceId: 'logs.nginx',
+          queryUpdatedAt: '2026-10-30T09:00:00.000Z',
+        });
+        const afterwards = await client.getStatus({
+          request: statusRequest,
+          sourceId: 'logs.nginx',
+          queryUpdatedAt: '2026-10-30T10:30:00.000Z',
+        });
+
+        expect(result).toMatchObject({ executionId: 'entry-1' });
+        expect(afterwards).toEqual({
+          status: SignificantEventsWorkflowStatus.NotStarted,
+          executionId: null,
+        });
+      });
+
+      it('does not count a run the concurrency limit dropped, which started nothing', async () => {
+        const { client, managementApi } = createStatusClient(withOnboardingRuns(onboardingRun()));
+
+        await client.getStatus({ request: statusRequest, sourceId: 'logs.nginx' });
+
+        expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
+          expect.objectContaining({
+            workflowId: ENTRY_POINT_ID,
+            concurrencyGroupKey: entryPointKeyOf('logs.nginx'),
+            statuses: expect.not.arrayContaining([ExecutionStatus.SKIPPED]),
+          }),
+          'default'
+        );
+      });
+    });
   });
 
   describe('getStatuses', () => {
     const source = (id: string) => ({ id, slug: slugOf(id) });
 
     it('returns an empty map and skips the query for no sources', async () => {
-      const { client, managementApi } = createClient();
+      const { client, managementApi } = createStatusClient();
 
       const result = await client.getStatuses({ request: statusRequest, sources: [] });
 
@@ -433,15 +636,15 @@ describe('SignificantEventsKIsOnboardingClient', () => {
       expect(managementApi.getWorkflowExecutions).not.toHaveBeenCalled();
     });
 
-    it('fetches executions collapsed by concurrencyGroupKey in a single query', async () => {
-      const { client, managementApi } = createClient();
+    it('fetches the onboarding and the entry point executions, each collapsed by concurrencyGroupKey', async () => {
+      const { client, managementApi } = createStatusClient();
 
       await client.getStatuses({
         request: statusRequest,
         sources: [source('logs.nginx'), source('logs.apache')],
       });
 
-      expect(managementApi.getWorkflowExecutions).toHaveBeenCalledTimes(1);
+      expect(managementApi.getWorkflowExecutions).toHaveBeenCalledTimes(2);
       expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
         expect.objectContaining({
           workflowId: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
@@ -452,10 +655,19 @@ describe('SignificantEventsKIsOnboardingClient', () => {
         }),
         'default'
       );
+      expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowId: ENTRY_POINT_ID,
+          size: 10000,
+          collapse: 'concurrencyGroupKey',
+          statuses: expect.not.arrayContaining([ExecutionStatus.SKIPPED]),
+        }),
+        'default'
+      );
     });
 
     it('ignores a run of a deleted source that had the same slug as a live one', async () => {
-      const { client } = createClient({
+      const { client } = createStatusClient({
         getWorkflowExecutions: jest.fn().mockResolvedValue({
           results: [
             {
@@ -481,7 +693,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
     });
 
     it('maps each execution to a status keyed by source id and fills missing sources with NotStarted', async () => {
-      const { client } = createClient({
+      const { client } = createStatusClient({
         getWorkflowExecutions: jest.fn().mockResolvedValue({
           results: [
             {
@@ -528,7 +740,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
 
     it('does not fetch the completed output for completed executions', async () => {
       const getWorkflowExecution = jest.fn().mockResolvedValue(null);
-      const { client } = createClient({
+      const { client } = createStatusClient({
         getWorkflowExecutions: jest.fn().mockResolvedValue({
           results: [
             {
@@ -553,7 +765,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
     });
 
     it('ignores executions whose concurrency group key is unknown or unrequested', async () => {
-      const { client } = createClient({
+      const { client } = createStatusClient({
         getWorkflowExecutions: jest.fn().mockResolvedValue({
           results: [
             { id: 'exec-1', status: ExecutionStatus.RUNNING, concurrencyGroupKey: undefined },
@@ -577,7 +789,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
     });
 
     it('ignores the run of an earlier source that had the same slug', async () => {
-      const { client } = createClient({
+      const { client } = createStatusClient({
         getWorkflowExecutions: jest.fn().mockResolvedValue({
           results: [
             {
@@ -598,6 +810,43 @@ describe('SignificantEventsKIsOnboardingClient', () => {
       expect(result).toEqual({
         'logs.nginx': { status: SignificantEventsWorkflowStatus.NotStarted, executionId: null },
       });
+    });
+
+    it('reports a run of the entry point that has not started the onboarding', async () => {
+      const { client } = createStatusClient(
+        withOnboardingRuns(
+          onboardingRun({
+            startedAt: '2026-10-29T10:00:00.000Z',
+            status: ExecutionStatus.COMPLETED,
+          })
+        ),
+        [entryPointRun({ status: ExecutionStatus.QUEUED })]
+      );
+
+      const result = await client.getStatuses({
+        request: statusRequest,
+        sources: [source('logs.nginx'), source('logs.apache')],
+      });
+
+      expect(result['logs.nginx']).toEqual({
+        status: SignificantEventsWorkflowStatus.InProgress,
+        executionId: 'entry-1',
+      });
+      expect(result['logs.apache']).toEqual({
+        status: SignificantEventsWorkflowStatus.NotStarted,
+        executionId: null,
+      });
+    });
+
+    it('reports the onboarding run once it has started', async () => {
+      const { client } = createStatusClient(withOnboardingRuns(onboardingRun()), [entryPointRun()]);
+
+      const result = await client.getStatuses({
+        request: statusRequest,
+        sources: [source('logs.nginx')],
+      });
+
+      expect(result['logs.nginx']).toMatchObject({ executionId: 'onboarding-1' });
     });
   });
 
@@ -634,6 +883,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
     // `drop` concurrency keyed by slug and id, so a replacement run is dropped until they have stopped.
     const runningExecutionOf = (workflowId: string, concurrencyGroupKey: string) => {
       const ids: Record<string, string> = {
+        [ENTRY_POINT_ID]: 'entry-exec',
         [SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID]: 'onboarding-exec',
         [SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID]: 'features-exec',
         [SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID]: 'queries-exec',
@@ -675,6 +925,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
         'default'
       );
       expect(managementApi.cancelWorkflowExecution.mock.calls.map(([id]) => id)).toEqual([
+        'entry-exec',
         'onboarding-exec',
         'features-exec',
         'queries-exec',
@@ -695,6 +946,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
       ).resolves.toBeNull();
 
       expect(managementApi.cancelWorkflowExecution.mock.calls.map(([id]) => id)).toEqual([
+        'entry-exec',
         'features-exec',
         'queries-exec',
       ]);
@@ -712,6 +964,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
       const executions = await client.getNonTerminalExecutions({ request });
 
       expect(executions.map(({ id }) => id)).toEqual([
+        `${ENTRY_POINT_ID}-exec`,
         `${SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID}-exec`,
         `${SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID}-exec`,
         `${SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID}-exec`,
@@ -775,20 +1028,29 @@ describe('SignificantEventsKIsOnboardingClient', () => {
   });
 
   describe('cancelAllRunning', () => {
-    it('cancels all non-terminal onboarding executions', async () => {
+    it('cancels all non-terminal onboarding executions, and the entry point runs that wait for them', async () => {
       const { client, managementApi } = createClient({
-        getWorkflowExecutions: jest.fn().mockResolvedValue({
-          results: [
-            { id: 'exec-1', status: ExecutionStatus.RUNNING },
-            { id: 'exec-2', status: ExecutionStatus.PENDING },
-          ],
-        }),
+        getWorkflowExecutions: jest.fn(async ({ workflowId }: { workflowId: string }) =>
+          workflowId === ENTRY_POINT_ID
+            ? { results: [{ id: 'entry-exec', status: ExecutionStatus.RUNNING }] }
+            : {
+                results: [
+                  { id: 'exec-1', status: ExecutionStatus.RUNNING },
+                  { id: 'exec-2', status: ExecutionStatus.PENDING },
+                ],
+              }
+        ),
       });
       const request = httpServerMock.createKibanaRequest();
 
-      await expect(client.cancelAllRunning({ request })).resolves.toBe(2);
+      await expect(client.cancelAllRunning({ request })).resolves.toBe(3);
 
-      expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledTimes(2);
+      expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledTimes(3);
+      expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith(
+        'entry-exec',
+        'default',
+        request
+      );
       expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith(
         'exec-1',
         'default',
@@ -840,5 +1102,57 @@ describe('SignificantEventsKIsOnboardingClient', () => {
 
       expect(result).toEqual([]);
     });
+  });
+
+  it('lets a run of the entry point that started after the onboarding run stand for it', async () => {
+    const { client } = createStatusClient(
+      withOnboardingRuns(
+        onboardingRun({ startedAt: '2026-10-29T10:00:00.000Z', status: ExecutionStatus.COMPLETED })
+      ),
+      [entryPointRun({ status: ExecutionStatus.QUEUED })]
+    );
+
+    const result = await client.getRecentExecutions(statusRequest);
+
+    expect(result).toEqual([
+      expect.objectContaining({
+        id: 'entry-1',
+        concurrencyGroupKey: onboardingKeyOf('logs.nginx'),
+      }),
+    ]);
+  });
+
+  it('lets a run of the entry point that is still queued stand for the onboarding run', async () => {
+    const { client } = createStatusClient(
+      withOnboardingRuns(
+        onboardingRun({ startedAt: '2026-10-29T10:00:00.000Z', status: ExecutionStatus.COMPLETED })
+      ),
+      [entryPointRun({ startedAt: undefined, status: ExecutionStatus.PENDING })]
+    );
+
+    const result = await client.getRecentExecutions(statusRequest);
+
+    expect(result).toEqual([expect.objectContaining({ id: 'entry-1' })]);
+  });
+
+  it('adds the run of the entry point of a source that has no onboarding run', async () => {
+    const { client } = createStatusClient({}, [entryPointRun()]);
+
+    const result = await client.getRecentExecutions(statusRequest);
+
+    expect(result).toEqual([
+      expect.objectContaining({
+        id: 'entry-1',
+        concurrencyGroupKey: onboardingKeyOf('logs.nginx'),
+      }),
+    ]);
+  });
+
+  it('keeps the onboarding run when it started after the run of the entry point', async () => {
+    const { client } = createStatusClient(withOnboardingRuns(onboardingRun()), [entryPointRun()]);
+
+    const result = await client.getRecentExecutions(statusRequest);
+
+    expect(result).toEqual([expect.objectContaining({ id: 'onboarding-1' })]);
   });
 });

@@ -9,6 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { SignificantEventsMaintenanceFailure } from '../../../common/maintenance/types';
 import {
   shouldRestoreSettingsBackedWorkflow,
@@ -17,6 +18,7 @@ import {
 import {
   buildCancelTargets,
   buildDisableTargets,
+  type MaintenanceDisableTarget,
   type MaintenanceWorkflowTarget,
 } from './managed_workflow_targets';
 import { toMessage } from './to_message';
@@ -61,6 +63,23 @@ const disableWorkflow = async (
 };
 
 /**
+ * Disable a workflow as its owning plugin, with no user behind the call. Works on workflows bound
+ * to a service account, which only a user with `manage_security` could otherwise change.
+ */
+const disableAsOwner = async (
+  managedWorkflows: PluginScopedManagedWorkflowsApi,
+  { id, spaceId, definitionId }: MaintenanceDisableTarget,
+  failures: SignificantEventsMaintenanceFailure[]
+): Promise<boolean> => {
+  try {
+    return await managedWorkflows.disable(definitionId, { workflowId: id, spaceId });
+  } catch (error) {
+    failures.push({ target: `workflow:${id}@${spaceId}`, spaceId, error: toMessage(error) });
+    return false;
+  }
+};
+
+/**
  * Best-effort cancel of every non-terminal execution for a workflow target.
  * Delegates paging/cancel to workflows management; missing workflows are a no-op.
  */
@@ -87,15 +106,18 @@ const cancelTargetExecutions = async (
 /**
  * Disable every managed workflow target and cancel its executions. Returns
  * the targets this call actually disabled; records a single `workflows`
- * failure when workflows management is unavailable.
+ * failure when workflows management is unavailable. With `managedWorkflows`,
+ * targets are disabled as their owning plugin instead of as the request's user.
  */
 export const sweepWorkflows = async ({
   mgmt,
+  managedWorkflows,
   spaceIds,
   request,
   failures,
 }: {
   mgmt: ManagementApi | undefined;
+  managedWorkflows?: PluginScopedManagedWorkflowsApi;
   spaceIds: SpaceId[];
   request: KibanaRequest;
   failures: SignificantEventsMaintenanceFailure[];
@@ -109,8 +131,11 @@ export const sweepWorkflows = async ({
   }
   const newlyDisabled: MaintenanceWorkflowTarget[] = [];
   for (const target of buildDisableTargets(spaceIds)) {
-    if (await disableWorkflow(mgmt, target, request, failures)) {
-      newlyDisabled.push(target);
+    const disabled = managedWorkflows
+      ? await disableAsOwner(managedWorkflows, target, failures)
+      : await disableWorkflow(mgmt, target, request, failures);
+    if (disabled) {
+      newlyDisabled.push({ id: target.id, spaceId: target.spaceId });
     }
   }
   for (const target of buildCancelTargets(spaceIds)) {

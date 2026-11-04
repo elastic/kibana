@@ -89,8 +89,9 @@ export function getSignificantEventsTestApiService({
                 spaceId ? `/s/${spaceId}` : ''
               }/internal/significant_events/maintenance/_resume`,
               headers: COMMON_API_HEADERS,
-              // A space that no longer exists answers 404 and has nothing to resume.
-              ignoreErrors: [403, 404],
+              // A space that no longer exists answers 404, and one that was never set up answers 503:
+              // neither has anything to resume.
+              ignoreErrors: [403, 404, 503],
             });
             if (status !== 403) {
               return;

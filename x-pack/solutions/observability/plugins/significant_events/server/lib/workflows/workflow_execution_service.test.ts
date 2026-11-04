@@ -230,7 +230,27 @@ describe('WorkflowExecutionService', () => {
         expect.objectContaining({ id: WORKFLOW_ID }),
         'space-a',
         { foo: 'bar' },
-        request
+        request,
+        undefined
+      );
+    });
+
+    it('forwards the trigger source the run is started with', async () => {
+      const { service, managementApi } = createService();
+      const request = httpServerMock.createKibanaRequest();
+
+      await service.execute({
+        executionSpaceId: 'space-a',
+        request,
+        triggeredBy: 'nightshift-detection-engine',
+      });
+
+      expect(managementApi.runWorkflow).toHaveBeenCalledWith(
+        expect.anything(),
+        'space-a',
+        {},
+        request,
+        'nightshift-detection-engine'
       );
     });
 
@@ -244,7 +264,8 @@ describe('WorkflowExecutionService', () => {
         expect.anything(),
         'space-a',
         {},
-        request
+        request,
+        undefined
       );
     });
 

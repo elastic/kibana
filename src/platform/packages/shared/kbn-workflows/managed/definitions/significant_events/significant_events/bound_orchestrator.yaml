@@ -1,0 +1,54 @@
+version: '1'
+name: Detection and discovery (space entry point)
+description: >
+  Runs detection and discovery in this space as the Nightshift detection engine service account. It
+  only hands its inputs to the shared orchestrator, which runs with this workflow's identity.
+enabled: true
+settings:
+  # Replaced with the bound service account when the workflow is installed in a space.
+  run_as: __SERVICE_ACCOUNT_ID__
+  # Longer than the orchestrator's own timeout, since this run waits for it.
+  timeout: '60m'
+  # One run at a time, like the shared orchestrator. The key differs from the shared workflow's,
+  # which this run would otherwise block.
+  concurrency:
+    key: 'nightshift-discovery-bound'
+    strategy: drop
+    max: 1
+tags:
+  - observability
+  - significant-events
+  - orchestrator
+  - nightshift
+
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        connector_id:
+          type: string
+          maxLength: 255
+          description: 'Optional chat model connector or inference endpoint ID for discovery.'
+      additionalProperties: false
+
+steps:
+  # Only the detection engine may start this workflow: it checks the caller's privileges before
+  # starting a run. Anyone allowed to run workflows could otherwise run discovery as the service
+  # account. Only server code sets `triggeredBy`.
+  - name: refuse_direct_runs
+    type: if
+    condition: 'not execution.triggeredBy : "nightshift-detection-engine"'
+    steps:
+      - name: refuse
+        type: workflow.fail
+        with:
+          message: >-
+            This workflow runs detection and discovery as the Nightshift service account. Start
+            discovery from Nightshift instead. This run was started by {{ execution.triggeredBy }}.
+
+  - name: orchestrate
+    type: workflow.execute
+    with:
+      workflow-id: system-significant-events-orchestrator
+      run-as-mode: inherit
+      inputs: ${{ inputs }}

@@ -300,11 +300,13 @@ export async function applySourceEnabled({
   }
 }
 
-/** Queues source changes and enables periodic recovery independently so either can survive a failure. */
+/**
+ * Queues the reconciliation of a source whose query or enabled flag changed, and syncs continuous
+ * onboarding independently so either can survive a failure.
+ */
 export const createSourceChangeListener =
   ({
     enqueueReconciliation,
-    ensurePeriodicReconciliation,
     syncContinuousOnboarding,
   }: {
     enqueueReconciliation: (args: {
@@ -312,7 +314,6 @@ export const createSourceChangeListener =
       sourceSlug: string;
       request: KibanaRequest;
     }) => Promise<void>;
-    ensurePeriodicReconciliation: (request: KibanaRequest) => Promise<void>;
     syncContinuousOnboarding: (event: SourceChangeEvent) => Promise<void>;
   }): SourceChangeListener =>
   async (event) => {
@@ -329,7 +330,6 @@ export const createSourceChangeListener =
         sourceSlug: event.source.slug,
         request: event.request,
       }),
-      ensurePeriodicReconciliation(event.request),
       syncContinuousOnboarding(event),
     ]);
     const failures = results.flatMap((result) =>

@@ -16,16 +16,17 @@ describe('startKiIdentificationToolHandler', () => {
   const setup = (maintenanceState: 'enabled' | 'paused' = 'enabled') => {
     const managementApi = {
       getWorkflow: jest.fn().mockResolvedValue({
-        id: 'system-streams-ki-onboarding',
+        id: 'system-sources-ki-onboarding-bound-default',
         name: 'onboarding',
         enabled: true,
-        definition: {},
+        definition: { settings: { run_as: 'service-account-id' } },
         yaml: '',
       }),
       runWorkflow: jest.fn().mockResolvedValue('execution-id-123'),
     };
     const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
+      isServiceAccountsEnabled: async () => true,
       managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry,
       getSourcesClient: jest.fn().mockResolvedValue({
@@ -60,9 +61,12 @@ describe('startKiIdentificationToolHandler', () => {
       kibanaPath: '/app/nightshift/sources',
     });
 
-    expect(managementApi.getWorkflow).toHaveBeenCalledWith('system-streams-ki-onboarding', '*');
+    expect(managementApi.getWorkflow).toHaveBeenCalledWith(
+      'system-sources-ki-onboarding-bound-default',
+      'default'
+    );
     expect(managementApi.runWorkflow).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'system-streams-ki-onboarding' }),
+      expect.objectContaining({ id: 'system-sources-ki-onboarding-bound-default' }),
       'default',
       expect.objectContaining({
         sourceId: 'logs.nginx',
@@ -70,7 +74,8 @@ describe('startKiIdentificationToolHandler', () => {
         skipFeatures: false,
         skipQueries: false,
       }),
-      request
+      request,
+      'nightshift-detection-engine'
     );
   });
 
@@ -92,7 +97,7 @@ describe('startKiIdentificationToolHandler', () => {
     expect(managementApi.runWorkflow).not.toHaveBeenCalled();
   });
 
-  it('throws when workflow is not found', async () => {
+  it('is refused when the space is not set up', async () => {
     const { managementApi, streamsKIsOnboardingClient, maintenanceService, request } = setup();
     managementApi.getWorkflow.mockResolvedValue(null);
 
@@ -105,6 +110,6 @@ describe('startKiIdentificationToolHandler', () => {
         maintenanceService,
         request,
       })
-    ).rejects.toThrow(/Workflow .+ not found/);
+    ).rejects.toThrow(/not set up/);
   });
 });
