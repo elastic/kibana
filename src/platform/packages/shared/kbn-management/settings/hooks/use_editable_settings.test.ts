@@ -263,6 +263,26 @@ describe('useEditableSettings', () => {
     expect(result.current.isSaving).toBe(false);
   });
 
+  it('reports a request error once when several keys fail with the same error', async () => {
+    const { result, settingsClient, updateErrors$ } = setup();
+    const requestError = new Error('Request failed with status code: 500');
+    settingsClient.set.mockImplementation(async () => {
+      updateErrors$.next(requestError);
+      return false;
+    });
+
+    act(() => {
+      result.current.handleFieldChange(STRING_SETTING, { type: 'string', unsavedValue: 'a' });
+      result.current.handleFieldChange(RELOAD_SETTING, { type: 'boolean', unsavedValue: true });
+    });
+
+    await act(async () => {
+      await expect(result.current.saveAll()).rejects.toThrow(
+        new Error('Request failed with status code: 500')
+      );
+    });
+  });
+
   it('keeps failed changes unsaved and clears the ones that saved', async () => {
     const { result, settingsClient, updateErrors$ } = setup();
     settingsClient.set.mockImplementation(async (key: string) => {

@@ -188,7 +188,8 @@ export const useEditableSettings = ({
       }
     }
     if (failureMessages.length > 0) {
-      throw new Error(failureMessages.join('; '));
+      // The client batches queued updates, and every key in a failed batch reports the same error.
+      throw new Error([...new Set(failureMessages)].join('; '));
     }
 
     return { requiresReload: takePendingReload() };
