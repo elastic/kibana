@@ -8,7 +8,7 @@
 import type { EsClient } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import type { CreateSLOInput } from '@kbn/slo-schema';
+import type { CreateSLOInput, TimesliceMetricIndicator } from '@kbn/slo-schema';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
 import { apiTest, mergeSloApiHeaders, pollUntilTrue } from '../fixtures';
 
@@ -73,10 +73,11 @@ const CUSTOM_METRIC_SLO: CreateSLOInput = {
   },
 };
 
-// avg (5) + min (1.5) stays under the threshold, so every slice is good only if max or p99 is computed.
-const TIMESLICE_METRIC_SLO: CreateSLOInput = {
+type TimesliceMetric = TimesliceMetricIndicator['params']['metric']['metrics'][number];
+
+const createTimesliceMetricSlo = (metric: TimesliceMetric, threshold: number): CreateSLOInput => ({
   ...BASE_SLO,
-  name: 'Timeslice metric SLO on exponential_histogram',
+  name: `Timeslice metric SLO (${metric.aggregation}) on exponential_histogram`,
   budgetingMethod: 'timeslices',
   objective: { target: 0.9, timesliceTarget: 0.9, timesliceWindow: '1m' },
   indicator: {
@@ -85,20 +86,26 @@ const TIMESLICE_METRIC_SLO: CreateSLOInput = {
       index: SOURCE_INDEX,
       timestampField: '@timestamp',
       filter: '',
-      metric: {
-        metrics: [
-          { name: 'A', aggregation: 'avg', field: 'latency' },
-          { name: 'B', aggregation: 'max', field: 'latency' },
-          { name: 'C', aggregation: 'min', field: 'latency' },
-          { name: 'D', aggregation: 'percentile', field: 'latency', percentile: 99 },
-        ],
-        equation: 'A + B + C + D',
-        comparator: 'GT',
-        threshold: 40,
-      },
+      metric: { metrics: [metric], equation: 'A', comparator: 'GT', threshold },
     },
   },
-};
+});
+
+// Each threshold is above 0 and below the expected value, so a slice is good only when the aggregation reads the
+// histogram. max and p99 thresholds are also above 8, so reading only the low buckets is not enough.
+const TIMESLICE_METRIC_SLOS: CreateSLOInput[] = [
+  // avg = sum / count = 50 / 10 = 5
+  createTimesliceMetricSlo({ name: 'A', aggregation: 'avg', field: 'latency' }, 4),
+  // max = 40
+  createTimesliceMetricSlo({ name: 'A', aggregation: 'max', field: 'latency' }, 32),
+  // min = 1.5
+  createTimesliceMetricSlo({ name: 'A', aggregation: 'min', field: 'latency' }, 1),
+  // p99 falls in the (32, 64] bucket, capped at max (40)
+  createTimesliceMetricSlo(
+    { name: 'A', aggregation: 'percentile', field: 'latency', percentile: 99 },
+    16
+  ),
+];
 
 interface RollupTotals {
   docCount: number;
@@ -153,10 +160,15 @@ apiTest.describe(
   'SLOs on exponential_histogram fields',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    const createdSloIds: string[] = [];
-    let histogramSloId: string;
-    let customMetricSloId: string;
-    let timesliceMetricSloId: string;
+    const sloIds = new Map<CreateSLOInput, string>();
+
+    const getSloId = (slo: CreateSLOInput): string => {
+      const sloId = sloIds.get(slo);
+      if (!sloId) {
+        throw new Error(`SLO "${slo.name}" was not created`);
+      }
+      return sloId;
+    };
 
     apiTest.beforeAll(async ({ apiClient, esClient, requestAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKey('admin');
@@ -184,23 +196,21 @@ apiTest.describe(
       const bulkResponse = await esClient.bulk({ operations, refresh: 'wait_for' });
       expect(bulkResponse.errors).toBe(false);
 
-      [histogramSloId, customMetricSloId, timesliceMetricSloId] = await Promise.all(
-        [HISTOGRAM_SLO, CUSTOM_METRIC_SLO, TIMESLICE_METRIC_SLO].map(async (slo) => {
+      await Promise.all(
+        [HISTOGRAM_SLO, CUSTOM_METRIC_SLO, ...TIMESLICE_METRIC_SLOS].map(async (slo) => {
           const createResponse = await apiClient.post('api/observability/slos', {
             headers,
             body: slo,
             responseType: 'json',
           });
           expect(createResponse).toHaveStatusCode(200);
-          const sloId = createResponse.body.id as string;
-          createdSloIds.push(sloId);
-          return sloId;
+          sloIds.set(slo, createResponse.body.id as string);
         })
       );
     });
 
     apiTest.afterAll(async ({ apiServices, esClient }) => {
-      await Promise.all(createdSloIds.map((sloId) => apiServices.slo.delete(sloId)));
+      await Promise.all([...sloIds.values()].map((sloId) => apiServices.slo.delete(sloId)));
       await esClient.indices.delete({ index: SOURCE_INDEX, ignore_unavailable: true });
     });
 
@@ -209,7 +219,7 @@ apiTest.describe(
       async ({ esClient }) => {
         apiTest.setTimeout(TEST_TIMEOUT_MS);
 
-        const totals = await waitForRollupTotals(esClient, histogramSloId);
+        const totals = await waitForRollupTotals(esClient, getSloId(HISTOGRAM_SLO));
 
         expect(totals.numerator).toBe(DOC_COUNT * VALUES_UNDER_16_PER_DOC);
         expect(totals.denominator).toBe(DOC_COUNT * VALUES_PER_DOC);
@@ -219,21 +229,20 @@ apiTest.describe(
     apiTest('computes a custom metric indicator with a sum aggregation', async ({ esClient }) => {
       apiTest.setTimeout(TEST_TIMEOUT_MS);
 
-      const totals = await waitForRollupTotals(esClient, customMetricSloId);
+      const totals = await waitForRollupTotals(esClient, getSloId(CUSTOM_METRIC_SLO));
 
       expect(totals.numerator).toBe(DOC_COUNT * LATENCY_HISTOGRAM.sum);
       expect(totals.denominator).toBe(DOC_COUNT * LATENCY_HISTOGRAM.sum * 2);
     });
 
-    apiTest(
-      'computes a timeslice metric indicator with avg, max, min and percentile aggregations',
-      async ({ esClient }) => {
+    for (const slo of TIMESLICE_METRIC_SLOS) {
+      apiTest(`computes "${slo.name}"`, async ({ esClient }) => {
         apiTest.setTimeout(TEST_TIMEOUT_MS);
 
-        const totals = await waitForRollupTotals(esClient, timesliceMetricSloId);
+        const totals = await waitForRollupTotals(esClient, getSloId(slo));
 
         expect(totals.goodSlices).toBe(DOC_COUNT);
-      }
-    );
+      });
+    }
   }
 );
