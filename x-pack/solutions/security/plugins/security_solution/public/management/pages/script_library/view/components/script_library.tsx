@@ -7,8 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { EuiButton, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import type { AppHeaderMenu } from '@kbn/app-header';
 import type {
   ScriptLibraryAllowedFileType,
   ScriptTagKey,
@@ -25,6 +24,7 @@ import type {
 import { useKibana, useToasts } from '../../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { SCRIPT_LIBRARY_LABELS as pageLabels } from '../../translations';
+import { SCRIPT_LIBRARY } from '../../../../../app/translations';
 import { AdministrationListPage } from '../../../../components/administration_list_page';
 import { useWithScriptLibraryData } from '../../../../hooks/script_library';
 import { ScriptLibraryTable, type ScriptLibraryTableProps } from './script_library_table';
@@ -272,6 +272,23 @@ export const ScriptLibrary = memo<ScriptLibraryProps>(({ 'data-test-subj': dataT
     setSelectedItemForDelete(undefined);
   }, []);
 
+  // Only shown once there's data to manage - the `NoDataEmptyPrompt` renders its own equivalent
+  // "Upload script" call-to-action, so surfacing the header's primary action too would duplicate it.
+  const menu = useMemo<AppHeaderMenu | undefined>(() => {
+    if (!canWriteScriptsLibrary || !doesDataExist) {
+      return undefined;
+    }
+    return {
+      primaryActionItem: {
+        id: 'uploadScript',
+        label: pageLabels.pageAddButtonTitle,
+        iconType: 'upload',
+        run: () => onClickAction({ show: 'create' }),
+        testId: getTestId('upload-script-button'),
+      },
+    };
+  }, [canWriteScriptsLibrary, doesDataExist, onClickAction, getTestId]);
+
   const onSuccessCreateOrEdit = useCallback(() => {
     onConfirmCloseFlyout();
     setSelectedItemForFlyout(undefined);
@@ -289,42 +306,20 @@ export const ScriptLibrary = memo<ScriptLibraryProps>(({ 'data-test-subj': dataT
   }, [scriptsLibraryFetchError, toasts, isFetching]);
 
   if (isPageInitializing) {
-    return <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />;
+    return (
+      <AdministrationListPage data-test-subj={getTestId()} title={SCRIPT_LIBRARY} isHeaderLoading>
+        <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />
+      </AdministrationListPage>
+    );
   }
 
   return (
     <>
       <AdministrationListPage
         data-test-subj={getTestId()}
-        title={pageLabels.pageTitle}
-        subtitle={
-          <>
-            {pageLabels.pageAboutInfo}{' '}
-            <EuiLink
-              href={securitySolutionDocLinks.scriptLibrary}
-              target="_blank"
-              data-test-subj={getTestId('learnMoreLink')}
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.management.scriptLibrary.learnMoreLink"
-                defaultMessage="Learn more"
-              />
-            </EuiLink>
-          </>
-        }
-        hideHeader={!doesDataExist}
-        actions={
-          canWriteScriptsLibrary ? (
-            <EuiButton
-              fill
-              iconType="upload"
-              onClick={() => onClickAction({ show: 'create' })}
-              data-test-subj={getTestId('upload-script-button')}
-            >
-              {pageLabels.pageAddButtonTitle}
-            </EuiButton>
-          ) : null
-        }
+        title={SCRIPT_LIBRARY}
+        docLink={securitySolutionDocLinks.scriptLibrary}
+        menu={menu}
       >
         {shouldShowFlyoutForm && (
           <EndpointScriptFlyout

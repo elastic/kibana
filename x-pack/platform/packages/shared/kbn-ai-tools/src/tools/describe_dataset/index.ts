@@ -8,7 +8,6 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { timeoutSignal } from '@kbn/std';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { dateRangeQuery } from '@kbn/es-query';
 import { buildCountQuery } from '../../utils/build_count_query';
 import { getEsqlColumnSchema } from '../../utils/get_esql_column_schema';
 import { DEFAULT_ESQL_QUERY_TIMEOUT_MS } from '../../utils/default_esql_query_timeout';
@@ -96,8 +95,7 @@ async function runEsqlPopulationCount({
 }): Promise<number> {
   const response = (await esClient.esql.query(
     {
-      query: buildCountQuery({ index, kql }),
-      filter: { bool: { filter: dateRangeQuery(start, end) } },
+      query: buildCountQuery({ index, start, end, kql }),
       drop_null_columns: true,
     },
     { signal }

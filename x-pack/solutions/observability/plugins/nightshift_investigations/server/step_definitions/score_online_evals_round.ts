@@ -9,7 +9,7 @@ import { lazySchema, z } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import type { EvaluateFn } from '@kbn/evals-plugin/server';
+import type { EvaluateEvidence, EvaluateFn } from '@kbn/evals-plugin/server';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { buildOnlineEvalsEvidence } from '../online_evals/build_evidence';
@@ -35,7 +35,9 @@ const inputSchema = lazySchema(() =>
       .describe('What kind of round it is, from `classifyRound`.'),
     graded_report: z
       .enum(['first_round', 'pre_recovery', 'current'])
-      .describe('Which report the judges grade.'),
+      .describe(
+        "Which report the judges grade: `first_round` is the investigation's first round, `current` the round being scored. `pre_recovery`, the report just before an alert recovery, isn't supported yet."
+      ),
     evaluator_set: z
       .string()
       .min(1)
@@ -96,7 +98,31 @@ const skip = (skipReason: SkipReason) => ({
 const getErrorMessage = (error: unknown) =>
   error instanceof Error ? error.message : String(error);
 
-/** Reads the round to score. Throws a coded error, reported as a step failure, when it can't. */
+/**
+ * The round the judges grade. `first_round` is the investigation's first round, whatever round is
+ * being scored; an alert recovery is the ground truth, so it is never graded itself.
+ */
+const getGradedRound = (
+  input: ScoreInput,
+  rounds: ConversationRound[],
+  round: ConversationRound
+): ConversationRound => {
+  if (input.graded_report === 'first_round') {
+    return rounds[0];
+  }
+  if (input.graded_report === 'current' && input.round_kind !== 'alert_recovery') {
+    return round;
+  }
+  throw new OnlineEvalsStepError(
+    'invalid_input',
+    `Cannot grade the ${input.graded_report} report of a ${input.round_kind} round`
+  );
+};
+
+/**
+ * Reads the round to score and the round the judges grade. Throws a coded error, reported as a
+ * step failure, when it can't.
+ */
 const readRound = async ({
   input,
   getAgentBuilder,
@@ -105,7 +131,7 @@ const readRound = async ({
   input: ScoreInput;
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   request: KibanaRequest;
-}): Promise<{ agentId: string; round: ConversationRound }> => {
+}): Promise<{ agentId: string; round: ConversationRound; gradedRound: ConversationRound }> => {
   const agentBuilder = getAgentBuilder();
   if (!agentBuilder) {
     throw new OnlineEvalsStepError(
@@ -126,23 +152,27 @@ const readRound = async ({
       `Round "${input.round_id}" not found in the investigation`
     );
   }
-  return { agentId: conversation.agent_id, round };
+  return {
+    agentId: conversation.agent_id,
+    round,
+    gradedRound: getGradedRound(input, conversation.rounds, round),
+  };
 };
 
 /**
- * Runs the judges on the round. An `evaluate()` that throws is reported in the score event as
+ * Runs the judges on the evidence. An `evaluate()` that throws is reported in the score event as
  * every evaluator failing, rather than as a failed step.
  */
 const runJudges = async ({
   input,
-  round,
+  evidence,
   evaluate,
   request,
   spaceId,
   logger,
 }: {
   input: ScoreInput;
-  round: ConversationRound;
+  evidence: EvaluateEvidence;
   evaluate: EvaluateFn;
   request: KibanaRequest;
   spaceId: string;
@@ -152,7 +182,7 @@ const runJudges = async ({
     const results = await evaluate({
       request,
       spaceId,
-      evidence: buildOnlineEvalsEvidence({ round }),
+      evidence,
       evaluators: input.evaluators.map((evaluator) => ({
         ...evaluator,
         connector_id: input.judge_connector_id,
@@ -218,11 +248,19 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
 
         const request = context.contextManager.getFakeRequest();
 
-        const { agentId, round } = await readRound({ input, getAgentBuilder, request });
+        const { agentId, round, gradedRound } = await readRound({
+          input,
+          getAgentBuilder,
+          request,
+        });
         const roundTraceId = Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id;
         const { results, failedEvaluators } = await runJudges({
           input,
-          round,
+          evidence: buildOnlineEvalsEvidence({
+            round: gradedRound,
+            alertOutcome:
+              input.round_kind === 'alert_recovery' ? round.response.message : undefined,
+          }),
           evaluate,
           request,
           spaceId: workflow.spaceId,
