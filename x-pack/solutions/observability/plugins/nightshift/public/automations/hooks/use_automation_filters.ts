@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import type { Automation } from './use_automations';
+import type { Automation } from '../../data/automations/use_automations';
 import { TRIGGER_LABEL_ORDER } from '../utils/trigger_display';
 import {
   countFilterValues,

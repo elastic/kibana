@@ -10,7 +10,7 @@ import type {
   Automation,
   CreateAutomationBody,
   UpdateAutomationBody,
-} from '../../hooks/use_automations';
+} from '../../../data/automations/use_automations';
 import { UNLIMITED_DAILY_LIMIT } from '../../utils/daily_usage';
 import {
   SLACK_TRIGGER_EVENTS,
