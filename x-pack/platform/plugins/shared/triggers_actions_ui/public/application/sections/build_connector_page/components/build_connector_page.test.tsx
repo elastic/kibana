@@ -76,7 +76,7 @@ actions:
 `;
 
 const yamlEditor = () =>
-  within(screen.getByTestId('build-connector-page-yaml-panel')).getByTestId('mockedCodeEditor');
+  within(screen.getByTestId('build-connector-start-yaml')).getByTestId('mockedCodeEditor');
 const bodyEditor = (actionIndex: number) =>
   within(screen.getByTestId(`buildConnectorAction-${actionIndex}-body`)).getByTestId(
     'mockedCodeEditor'
@@ -98,7 +98,10 @@ const removeAuthType = async (label: string) => {
 };
 
 const typeYaml = async (yaml: string) => {
-  await userEvent.click(await screen.findByTestId('build-connector-page-yaml-toggle'));
+  if (screen.queryByTestId('build-connector-page-back-to-start')) {
+    await userEvent.click(screen.getByTestId('build-connector-page-back-to-start'));
+  }
+  await userEvent.click(await screen.findByTestId('build-connector-start-import-yaml'));
   fireEvent.change(yamlEditor(), { target: { value: yaml } });
 };
 
@@ -112,7 +115,7 @@ describe('BuildConnectorPage', () => {
   let appMockRenderer: AppMockRenderer;
   const history = createMemoryHistory({ initialEntries: ['/connectors/build'] });
 
-  const renderPage = () =>
+  const renderStartPage = () =>
     appMockRenderer.render(
       <Router history={history}>
         <MockAppHeaderProvider>
@@ -121,6 +124,12 @@ describe('BuildConnectorPage', () => {
       </Router>
     );
 
+  const renderPage = () => {
+    renderStartPage();
+    const startFromScratch = screen.queryByTestId('build-connector-start-scratch');
+    if (startFromScratch) fireEvent.click(startFromScratch);
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     history.push('/connectors/build');
@@ -128,15 +137,31 @@ describe('BuildConnectorPage', () => {
     createConnectorType.mockResolvedValue({ id: 'acme' });
   });
 
-  it('renders the header, breadcrumbs, the three steps and the actions', async () => {
+  it('shows AI first, with YAML and scratch as secondary paths', async () => {
+    renderStartPage();
+
+    expect(screen.getByTestId('build-connector-start')).toBeInTheDocument();
+    expect(screen.getByText('Generate with AI')).toBeInTheDocument();
+    expect(screen.getByTestId('build-connector-ai-url')).toBeInTheDocument();
+    expect(screen.getByTestId('build-connector-ai-generate-btn')).toHaveTextContent(
+      'Generate connector'
+    );
+    expect(screen.getByTestId('build-connector-start-import-yaml')).toBeInTheDocument();
+    expect(screen.getByTestId('build-connector-start-scratch')).toBeInTheDocument();
+    expect(screen.queryByTestId('build-connector-form')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('build-connector-page-save-btn')).not.toBeInTheDocument();
+  });
+
+  it('opens the empty form from Start from scratch', async () => {
     renderPage();
 
-    expect(await screen.findByRole('heading', { name: 'Build a connector' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: 'Connector type builder' })
+    ).toBeInTheDocument();
 
     const detailsStep = screen.getByTestId('build-connector-page-step-details');
     expect(detailsStep).toHaveTextContent('Connector details');
-    expect(within(detailsStep).getByTestId('build-connector-page-yaml-toggle')).toBeInTheDocument();
-    expect(within(detailsStep).getByTestId('build-connector-page-ai-toggle')).toBeInTheDocument();
+    expect(within(detailsStep).queryByTestId('build-connector-ai-url')).not.toBeInTheDocument();
     expect(within(detailsStep).getByTestId('buildConnectorNameInput')).toBeInTheDocument();
     expect(within(detailsStep).getByTestId('buildConnectorIdInput')).toBeInTheDocument();
     expect(within(detailsStep).getByTestId('buildConnectorDescriptionInput')).toBeInTheDocument();
@@ -161,8 +186,32 @@ describe('BuildConnectorPage', () => {
       expect.objectContaining({ text: 'Build' }),
     ]);
     expect(useKibanaMock().services.chrome.docTitle.change).toHaveBeenCalledWith(
-      'Build a connector'
+      'Connector type builder'
     );
+  });
+
+  it('returns to the start screen from an empty form', async () => {
+    renderPage();
+
+    await userEvent.click(screen.getByTestId('build-connector-page-back-to-start'));
+
+    expect(screen.getByTestId('build-connector-start')).toBeInTheDocument();
+    expect(useKibanaMock().services.overlays.openConfirm).not.toHaveBeenCalled();
+  });
+
+  it('confirms before discarding edits when returning to the start screen', async () => {
+    renderPage();
+    await userEvent.type(screen.getByTestId('buildConnectorNameInput'), 'Draft');
+    const confirm = jest.spyOn(useKibanaMock().services.overlays, 'openConfirm');
+    confirm.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+
+    await userEvent.click(screen.getByTestId('build-connector-page-back-to-start'));
+    expect(screen.getByTestId('build-connector-form')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('build-connector-page-back-to-start'));
+    expect(screen.getByTestId('build-connector-start')).toBeInTheDocument();
+    await userEvent.click(screen.getByTestId('build-connector-start-scratch'));
+    expect(screen.getByTestId('buildConnectorNameInput')).toHaveValue('');
   });
 
   it('starts from a draft handed off in the router state', async () => {
@@ -209,12 +258,7 @@ describe('BuildConnectorPage', () => {
   it('saves the definition and returns to the connectors list', async () => {
     renderPage();
 
-    await userEvent.click(await screen.findByTestId('build-connector-page-yaml-toggle'));
-    fireEvent.change(
-      within(screen.getByTestId('build-connector-page-yaml-panel')).getByTestId('mockedCodeEditor'),
-      { target: { value: minimalYamlDefinition } }
-    );
-    await userEvent.click(screen.getByTestId('build-connector-yaml-apply-btn'));
+    await applyYaml(minimalYamlDefinition);
     await waitFor(() => expect(screen.getByTestId('buildConnectorNameInput')).toHaveValue('Acme'));
     expect(screen.getByTestId('buildConnectorIdInput')).toHaveValue('acme');
 
@@ -241,11 +285,13 @@ describe('BuildConnectorPage', () => {
     expect(history.location.pathname).toBe('/connectors/build');
   });
 
-  it('renders the YAML import, the form fields, one empty action and the footer buttons', async () => {
+  it('renders the form fields, one empty action and the footer buttons', async () => {
     renderPage();
 
-    expect(await screen.findByRole('heading', { name: 'Build a connector' })).toBeInTheDocument();
-    expect(screen.getByTestId('build-connector-page-yaml-toggle')).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: 'Connector type builder' })
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('build-connector-start')).not.toBeInTheDocument();
     expect(screen.getByTestId('buildConnectorNameInput')).toBeInTheDocument();
     expect(screen.getByTestId('buildConnectorIdInput')).toBeInTheDocument();
     expect(screen.getByTestId('buildConnectorDescriptionInput')).toBeInTheDocument();
@@ -261,12 +307,14 @@ describe('BuildConnectorPage', () => {
   });
 
   it('lets the user drag the YAML and JSON body editors taller', async () => {
-    renderPage();
-    await screen.findByTestId('buildConnectorAction-0-body');
+    renderStartPage();
+    await userEvent.click(screen.getByTestId('build-connector-start-import-yaml'));
 
     expect(screen.getByTestId('build-connector-yaml-editor-container')).toHaveStyle({
       resize: 'vertical',
     });
+    await userEvent.click(screen.getByTestId('build-connector-start-scratch'));
+    await screen.findByTestId('buildConnectorAction-0-body');
     expect(screen.getByTestId('buildConnectorAction-0-body-editor-container')).toHaveStyle({
       resize: 'vertical',
     });
@@ -734,16 +782,19 @@ describe('BuildConnectorPage', () => {
     };
 
     const openAiPanel = async () => {
-      await userEvent.click(await screen.findByTestId('build-connector-page-ai-toggle'));
+      if (screen.queryByTestId('build-connector-page-back-to-start')) {
+        await userEvent.click(screen.getByTestId('build-connector-page-back-to-start'));
+      }
     };
 
-    it('renders the toggle and the URL field', async () => {
+    it('shows the URL field on the start screen', async () => {
       renderPage();
 
-      expect(await screen.findByTestId('build-connector-page-ai-toggle')).toBeInTheDocument();
       await openAiPanel();
       expect(screen.getByTestId('build-connector-ai-url')).toBeInTheDocument();
-      expect(screen.getByText('Fills the form without saving.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Enter a public API documentation URL. Review the draft before saving.')
+      ).toBeInTheDocument();
     });
 
     it('disables Generate for an empty or non-http URL', async () => {
@@ -786,9 +837,7 @@ describe('BuildConnectorPage', () => {
       expect(screen.getByTestId('buildConnectorAction-0-url')).toHaveValue(
         '{{config.baseUrl}}/ping'
       );
-      expect(screen.getByTestId('build-connector-ai-success')).toHaveTextContent(
-        'Review the draft before saving.'
-      );
+      expect(screen.queryByTestId('build-connector-start')).not.toBeInTheDocument();
       expect(createConnectorType).not.toHaveBeenCalled();
       expect(history.location.pathname).toBe('/connectors/build');
     });

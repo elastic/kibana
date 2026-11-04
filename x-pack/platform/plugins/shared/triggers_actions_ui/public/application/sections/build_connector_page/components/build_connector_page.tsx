@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
   EuiButton,
@@ -33,8 +33,9 @@ import { CreateConnectorTypeErrorCallout } from './create_connector_type_error_c
 import { ConfigFieldListEditor } from './config_field_list_editor';
 import { ConnectionTestEditor } from './connection_test_editor';
 import { ConnectorDetailsFields } from './connector_details_fields';
-import { DefinitionImportPanels } from './definition_import_panels';
+import { BuildConnectorStart } from './build_connector_start';
 import { useBuildConnectorForm } from '../hooks/use_build_connector_form';
+import { getEmptyFormData } from '../lib/form_serializers';
 
 /** Router state the connectors list passes along when a draft was handed off from chat. */
 export interface BuildConnectorPageLocationState {
@@ -42,7 +43,7 @@ export interface BuildConnectorPageLocationState {
 }
 
 const TITLE = i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.title', {
-  defaultMessage: 'Build a connector',
+  defaultMessage: 'Connector type builder',
 });
 
 const STEP_TITLES = {
@@ -61,9 +62,13 @@ const STEP_TITLES = {
 };
 
 export const BuildConnectorPage: React.FC = () => {
-  const { chrome, setBreadcrumbs } = useKibana().services;
+  const { chrome, setBreadcrumbs, overlays } = useKibana().services;
   const history = useHistory();
   const { state } = useLocation<BuildConnectorPageLocationState | undefined>();
+  const [showEditor, setShowEditor] = useState(Boolean(state?.initialDefinition));
+  const [hasPrefilledDefinition, setHasPrefilledDefinition] = useState(
+    Boolean(state?.initialDefinition)
+  );
 
   useEffect(() => {
     setBreadcrumbs([
@@ -81,6 +86,45 @@ export const BuildConnectorPage: React.FC = () => {
     });
   const { errors, isSubmitted } = methods.formState;
 
+  const openEditorWithDefinition = useCallback(
+    (definition: Partial<CreateConnectorTypeRequest>) => {
+      onApplyDefinition(definition);
+      setHasPrefilledDefinition(true);
+      setShowEditor(true);
+    },
+    [onApplyDefinition]
+  );
+
+  const startFromScratch = useCallback(() => {
+    methods.reset(getEmptyFormData());
+    setHasPrefilledDefinition(false);
+    setShowEditor(true);
+  }, [methods]);
+
+  const backToStart = useCallback(async () => {
+    if (methods.formState.isDirty || hasPrefilledDefinition) {
+      const confirmed = await overlays.openConfirm(
+        i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.leaveEditorMessage', {
+          defaultMessage: 'Your connector type draft will be discarded.',
+        }),
+        {
+          title: i18n.translate(
+            'xpack.triggersActionsUI.sections.buildConnectorPage.leaveEditorTitle',
+            { defaultMessage: 'Back to start?' }
+          ),
+          confirmButtonText: i18n.translate(
+            'xpack.triggersActionsUI.sections.buildConnectorPage.leaveEditorConfirm',
+            { defaultMessage: 'Discard draft' }
+          ),
+          buttonColor: 'danger',
+        }
+      );
+      if (!confirmed) return;
+    }
+    setHasPrefilledDefinition(false);
+    setShowEditor(false);
+  }, [hasPrefilledDefinition, methods.formState.isDirty, overlays]);
+
   // A step is flagged once a save attempt has shown it still has errors, as the rule form does.
   const stepStatus = (hasErrors: boolean): EuiStepStatus | undefined =>
     isSubmitted && hasErrors ? 'danger' : undefined;
@@ -94,12 +138,6 @@ export const BuildConnectorPage: React.FC = () => {
       'data-test-subj': 'build-connector-page-step-details',
       children: (
         <>
-          <DefinitionImportPanels
-            onApply={onApplyDefinition}
-            isDisabled={isSaving}
-            testSubjPrefix="build-connector-page"
-          />
-          <EuiSpacer size="m" />
           {errors.root?.message && (
             <EuiFormErrorText data-test-subj="build-connector-page-definition-error">
               {errors.root.message}
@@ -133,13 +171,14 @@ export const BuildConnectorPage: React.FC = () => {
     <>
       <AppHeader
         title={TITLE}
-        description={i18n.translate(
-          'xpack.triggersActionsUI.sections.buildConnectorPage.description',
-          {
-            defaultMessage:
-              'Define a custom HTTP connector type from its configuration, authentication and actions.',
-          }
-        )}
+        description={
+          showEditor
+            ? i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.description', {
+                defaultMessage:
+                  'Define a custom HTTP connector type from its configuration, authentication and actions.',
+              })
+            : undefined
+        }
         back={{
           href: history.createHref({ pathname: routeToConnectors }),
           label: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.backLabel', {
@@ -149,54 +188,73 @@ export const BuildConnectorPage: React.FC = () => {
         spacing="bleed"
       />
       <EuiSpacer size="l" />
-      <EuiPageTemplate.Section
-        grow={false}
-        paddingSize="none"
-        restrictWidth
-        data-test-subj="build-connector-page"
-      >
-        <CreateConnectorTypeErrorCallout
-          createConnectorTypeError={createConnectorTypeError}
-          data-test-subj="build-connector-page-api-error"
-        />
-        <FormProvider {...methods}>
-          <EuiForm data-test-subj="build-connector-form">
-            <EuiSteps headingElement="h2" steps={steps} />
-          </EuiForm>
-        </FormProvider>
-      </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section grow={false} paddingSize="none" restrictWidth>
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
+      {showEditor ? (
+        <>
+          <EuiPageTemplate.Section grow={false} paddingSize="none" restrictWidth>
             <EuiButtonEmpty
-              onClick={goToConnectors}
+              onClick={backToStart}
               isDisabled={isSaving}
-              data-test-subj="build-connector-page-cancel-btn"
+              data-test-subj="build-connector-page-back-to-start"
             >
-              {i18n.translate(
-                'xpack.triggersActionsUI.sections.buildConnectorPage.cancelButtonLabel',
-                {
-                  defaultMessage: 'Cancel',
-                }
-              )}
+              {i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.backToStart', {
+                defaultMessage: 'Back to start',
+              })}
             </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              color="primary"
-              isLoading={isSaving || isSubmitting}
-              onClick={submit}
-              data-test-subj="build-connector-page-save-btn"
-            >
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.buildConnectorPage.saveButtonLabel"
-                defaultMessage="Save"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPageTemplate.Section>
+          </EuiPageTemplate.Section>
+          <EuiSpacer size="m" />
+          <EuiPageTemplate.Section
+            grow={false}
+            paddingSize="none"
+            restrictWidth
+            data-test-subj="build-connector-page"
+          >
+            <CreateConnectorTypeErrorCallout
+              createConnectorTypeError={createConnectorTypeError}
+              data-test-subj="build-connector-page-api-error"
+            />
+            <FormProvider {...methods}>
+              <EuiForm data-test-subj="build-connector-form">
+                <EuiSteps headingElement="h2" steps={steps} />
+              </EuiForm>
+            </FormProvider>
+          </EuiPageTemplate.Section>
+          <EuiPageTemplate.Section grow={false} paddingSize="none" restrictWidth>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  onClick={goToConnectors}
+                  isDisabled={isSaving}
+                  data-test-subj="build-connector-page-cancel-btn"
+                >
+                  {i18n.translate(
+                    'xpack.triggersActionsUI.sections.buildConnectorPage.cancelButtonLabel',
+                    { defaultMessage: 'Cancel' }
+                  )}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  color="primary"
+                  isLoading={isSaving || isSubmitting}
+                  onClick={submit}
+                  data-test-subj="build-connector-page-save-btn"
+                >
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.buildConnectorPage.saveButtonLabel"
+                    defaultMessage="Save"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPageTemplate.Section>
+        </>
+      ) : (
+        <BuildConnectorStart
+          onApply={openEditorWithDefinition}
+          onStartFromScratch={startFromScratch}
+        />
+      )}
     </>
   );
 };

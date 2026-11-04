@@ -10,7 +10,7 @@ import { type Observable, debounceTime, map } from 'rxjs';
 
 import type { EuiSideNavItemType } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
@@ -31,6 +31,13 @@ const title = i18n.translate(
   }
 );
 const icon = 'logoElasticsearch';
+const stackManagementHomePath = '/app/management';
+const rulesManagementPath = '/app/management/insightsAndAlerting/triggersActions';
+const connectorsManagementPath = '/app/management/insightsAndAlerting/triggersActionsConnectors';
+const connectorTypeBuilderPath = `${connectorsManagementPath}/connectors/build`;
+
+const isAtOrBelowPath = (currentPath: string, path: string): boolean =>
+  currentPath === path || currentPath.startsWith(`${path}/`) || currentPath.startsWith(`${path}#`);
 
 /**
  * CONTEXT: After restructuring Dashboards to integrate the Visualize library,
@@ -237,6 +244,14 @@ export const getNavigationTreeDefinition = ({
                       // https://github.com/elastic/kibana/issues/240275
                       breadcrumbStatus: 'hidden',
                       link: 'management',
+                      getIsActive: ({ pathNameSerialized, prepend }) => {
+                        const homePath = prepend(stackManagementHomePath);
+                        return (
+                          pathNameSerialized === homePath ||
+                          pathNameSerialized === `${homePath}/` ||
+                          pathNameSerialized.startsWith(`${homePath}#`)
+                        );
+                      },
                       title: i18n.translate('xpack.enterpriseSearch.searchNav.management.home', {
                         defaultMessage: 'Home',
                       }),
@@ -257,8 +272,40 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     { link: 'management:triggersActionsAlerts' },
-                    { link: 'management:triggersActions' },
-                    { link: 'management:triggersActionsConnectors' },
+                    {
+                      link: 'management:triggersActions',
+                      getIsActive: ({ pathNameSerialized, prepend }) =>
+                        isAtOrBelowPath(pathNameSerialized, prepend(rulesManagementPath)),
+                    },
+                    {
+                      link: 'management:triggersActionsConnectors',
+                      getIsActive: ({ pathNameSerialized, prepend }) =>
+                        isAtOrBelowPath(pathNameSerialized, prepend(connectorsManagementPath)) &&
+                        !isAtOrBelowPath(pathNameSerialized, prepend(connectorTypeBuilderPath)),
+                    },
+                    ...(core.application.capabilities.actions?.save
+                      ? [
+                          {
+                            id: 'connector_type_builder',
+                            title: i18n.translate(
+                              'xpack.enterpriseSearch.searchNav.management.connectorTypeBuilder',
+                              { defaultMessage: 'Connector type builder' }
+                            ),
+                            href: core.application.getUrlForApp('management', {
+                              path: 'insightsAndAlerting/triggersActionsConnectors/connectors/build',
+                              absolute: true,
+                            }),
+                            getIsActive: ({
+                              pathNameSerialized,
+                              prepend,
+                            }: Parameters<NonNullable<NodeDefinition['getIsActive']>>[0]) =>
+                              isAtOrBelowPath(
+                                pathNameSerialized,
+                                prepend(connectorTypeBuilderPath)
+                              ),
+                          },
+                        ]
+                      : []),
                     { link: 'management:reporting' },
                     { link: 'management:jobsListLink' },
                     { link: 'management:watcher' },
