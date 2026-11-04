@@ -424,6 +424,10 @@ export const parseSeed = (value: unknown, defaultValue?: string): string | undef
  */
 export const getDefaultSeed = (from: number): string => String(from);
 
+/** Appended to the logged options: the default seed repeats the data of runs with the same `from`. */
+export const SEED_LOG_HINT =
+  'pass --scenarioOpts seed=<value> to vary the data for the same --from';
+
 /** Parses `--scenarioOpts` for the digital experience scenarios, rejecting unknown keys and values. */
 export const parseDigitalExperienceScenarioOpts = (
   opts: Record<string, unknown> | undefined

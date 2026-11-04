@@ -50,6 +50,7 @@ import {
   generateEdotBrowserSessions,
   getDefaultSeed,
   parseDigitalExperienceScenarioOpts,
+  SEED_LOG_HINT,
 } from './helpers/digital_experience_apps';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
@@ -57,7 +58,7 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 const scenario: Scenario<OtelDocument> = async ({ scenarioOpts, logger, from }) => {
   const parsedOpts = parseDigitalExperienceScenarioOpts(scenarioOpts);
   const opts = { ...parsedOpts, seed: parsedOpts.seed ?? getDefaultSeed(from) };
-  logger.info(`Generating EDOT Browser data with ${JSON.stringify(opts)}`);
+  logger.info(`Generating EDOT Browser data with ${JSON.stringify(opts)}; ${SEED_LOG_HINT}`);
 
   return {
     generate: ({ range, clients: { otelEsClient } }) =>

@@ -41,6 +41,7 @@ import {
   generateEdotBrowserSessions,
   getDefaultSeed,
   parseDigitalExperienceScenarioOpts,
+  SEED_LOG_HINT,
 } from './helpers/digital_experience_apps';
 import { generateClassicRumPageLoads } from './helpers/classic_rum_page_loads';
 import { generateEdotReactNativeSessions } from './helpers/digital_experience_mobile_apps';
@@ -52,7 +53,9 @@ const scenario: Scenario<OtelDocument | ApmFields> = async ({ scenarioOpts, logg
   // The EDOT Browser, EDOT React Native and classic RUM data derive from the same seed
   const opts = { ...parsedOpts, seed: parsedOpts.seed ?? getDefaultSeed(from) };
   logger.info(
-    `Generating EDOT Browser, EDOT React Native and classic RUM data with ${JSON.stringify(opts)}`
+    `Generating EDOT Browser, EDOT React Native and classic RUM data with ${JSON.stringify(
+      opts
+    )}; ${SEED_LOG_HINT}`
   );
 
   return {
