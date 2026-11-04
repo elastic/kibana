@@ -34,6 +34,8 @@ export interface ContinuousOnboardingWorkflowService {
     enabled: boolean;
     request: KibanaRequest;
     spaceId: string;
+    /** Only disable future schedules; the caller owns cleanup of affected source runs. */
+    skipExecutionDrain?: boolean;
   }): Promise<void>;
 }
 
@@ -126,7 +128,7 @@ export const createContinuousOnboardingWorkflowService = ({
   };
 
   return {
-    async ensureWorkflow({ enabled, request, spaceId }) {
+    async ensureWorkflow({ enabled, request, spaceId, skipExecutionDrain = false }) {
       const workflowId = `${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${spaceId}`;
       const managedWorkflowOptions = { spaceId, workflowIdSuffix: spaceId };
 
@@ -160,6 +162,11 @@ export const createContinuousOnboardingWorkflowService = ({
       // Disabling: stop scheduling new runs and drain in-flight work. The document
       // stays: uninstalling force-deletes it, which purges its execution history.
       await setManagedEnabled({ enabled: false, workflowId, spaceId, request });
+
+      if (skipExecutionDrain) {
+        log.info(`Disabled continuous KI onboarding workflow scheduling in space ${spaceId}`);
+        return;
+      }
 
       await cancelAndAwaitTermination({ workflowId, spaceId, request }).catch((err) =>
         log.warn(`Failed to cancel running continuous onboarding executions: ${err}`)

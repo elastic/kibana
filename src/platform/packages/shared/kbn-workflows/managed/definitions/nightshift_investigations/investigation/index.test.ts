@@ -69,7 +69,7 @@ const workflow = parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml) as {
 describe('Nightshift investigation workflow', () => {
   it('records the investigation through the agent tools rather than persist steps', () => {
     expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.id).toBe('system-nightshift-investigation');
-    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(4);
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(5);
     expect(investigation.name).toBe('Nightshift Investigation');
     expect(investigation.steps.map((step) => step.name)).toEqual([
       'resolve_model',
@@ -307,5 +307,16 @@ describe('Nightshift investigation workflow', () => {
 
   it('knows nothing about Slack', () => {
     expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml).not.toMatch(/slack/i);
+  });
+});
+
+it('accepts a telemetry target independently of the model and keeps the single investigator', () => {
+  expect(investigation.triggers[0].inputs.properties.telemetry_target).toMatchObject({
+    type: 'string',
+    maxLength: 64,
+  });
+  expect(requireStep('investigate')).toMatchObject({
+    'agent-id': 'nightshift.investigation',
+    'connector-id': '{{ steps.resolve_model.output.connector_id }}',
   });
 });

@@ -255,6 +255,7 @@ describe('WorkflowDetailEditor', () => {
       setEditorView: jest.fn(),
       setGraphDirection: jest.fn(),
       setSelectedExecution: jest.fn(),
+      selectEditorRun: jest.fn(),
       setSelectedStepExecution: jest.fn(),
       setSelectedStep: jest.fn(),
       updateUrlState: jest.fn(),
@@ -301,6 +302,7 @@ describe('WorkflowDetailEditor', () => {
         ...mockUseWorkflowUrlState(),
         activeTab: 'executions',
         selectedExecutionId: 'execution-1',
+        isViewingExecution: true,
       });
 
       const { getByTestId } = renderEditor();
@@ -313,6 +315,7 @@ describe('WorkflowDetailEditor', () => {
         ...mockUseWorkflowUrlState(),
         activeTab: 'executions',
         selectedExecutionId: 'execution-1',
+        isViewingExecution: true,
       });
 
       const { queryByTestId, getByTestId } = renderEditor();
@@ -441,6 +444,7 @@ describe('WorkflowDetailEditor', () => {
         setEditorView: jest.fn(),
         setGraphDirection: jest.fn(),
         setSelectedExecution: jest.fn(),
+        selectEditorRun: jest.fn(),
         setSelectedStepExecution: jest.fn(),
         setSelectedStep: jest.fn(),
         updateUrlState: jest.fn(),
@@ -468,6 +472,7 @@ describe('WorkflowDetailEditor', () => {
         setEditorView: jest.fn(),
         setGraphDirection: jest.fn(),
         setSelectedExecution: jest.fn(),
+        selectEditorRun: jest.fn(),
         setSelectedStepExecution: jest.fn(),
         setSelectedStep: jest.fn(),
         updateUrlState: jest.fn(),
@@ -535,11 +540,11 @@ describe('WorkflowDetailEditor', () => {
         mockUseWorkflowUrlState.mockReturnValue({
           ...mockUseWorkflowUrlState(),
           editorView: 'graph',
-          setSelectedExecution: mockSetSelectedExecution,
+          selectEditorRun: mockSelectEditorRun,
         });
         return renderEditor();
       };
-      const mockSetSelectedExecution = jest.fn();
+      const mockSelectEditorRun = jest.fn();
 
       it('records a direct run instead of selecting the execution', async () => {
         mockUseContextOverrideData.mockReturnValue({ stepContext: {}, schema: {} } as any);
@@ -554,7 +559,7 @@ describe('WorkflowDetailEditor', () => {
             { executionId: 'exec-123', stepId: 'test-step' },
           ]);
         });
-        expect(mockSetSelectedExecution).not.toHaveBeenCalled();
+        expect(mockSelectEditorRun).not.toHaveBeenCalled();
       });
 
       it('opens the step modal in stay-in-editor mode when the step needs inputs', async () => {

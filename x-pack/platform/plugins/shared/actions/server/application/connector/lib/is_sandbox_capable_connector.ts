@@ -6,6 +6,18 @@
  */
 
 import type { ActionTypeRegistry } from '../../../action_type_registry';
+import type { ActionType } from '../../../types';
+
+/** Whether instances of a connector type can hand credentials to a sandbox  */
+export const isSandboxCapableConnectorType = (
+  actionType: Pick<
+    ActionType,
+    'isSystemActionType' | 'sandboxSupportedAuthTypes' | 'isSandboxCapable'
+  >
+): boolean =>
+  !actionType.isSystemActionType &&
+  (typeof actionType.isSandboxCapable === 'function' ||
+    (actionType.sandboxSupportedAuthTypes?.length ?? 0) > 0);
 
 /**
  * True when the connector can use sandbox credential injection: either the action type opts in

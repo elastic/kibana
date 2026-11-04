@@ -52,6 +52,8 @@ export {
   mapVariableToColumn,
   getValuesFromQueryField,
   getESQLQueryVariables,
+  getESQLControlVariablesFromState,
+  castESQLValue,
   fixESQLQueryWithVariables,
   replaceESQLQueryIndexPattern,
   getCategorizeColumns,

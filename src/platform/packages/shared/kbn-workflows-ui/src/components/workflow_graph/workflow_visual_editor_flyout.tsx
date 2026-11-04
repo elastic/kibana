@@ -27,10 +27,7 @@ import { deslugifyStepName } from './deslugify_step_name';
 import { NodeIconChip, NodeStepIcon } from './node_icon_chip';
 import { resolveNodeChipStyle } from './resolve_node_chip_style';
 import type { RenderStepIcon } from './workflow_graph_actions_context';
-import {
-  useWorkflowsMonacoTheme,
-  WORKFLOWS_MONACO_EDITOR_THEME,
-} from '../../hooks/use_workflows_monaco_theme';
+import { workflowsEditorChromeOverrides } from '../../lib/workflow_monaco_layout_options';
 import { TypeIcon } from '../step_icons';
 import { getStepIconType } from '../step_icons/get_step_icon_type';
 
@@ -80,9 +77,6 @@ export function WorkflowVisualEditorFlyout({
   onMoreMenuOpen,
   renderStepIcon,
 }: WorkflowVisualEditorFlyoutProps) {
-  // Register the workflows Monaco theme so the CodeEditor below renders with
-  // the same colors as the main YAML editor.
-  useWorkflowsMonacoTheme();
   const { euiTheme } = useEuiTheme();
   const isTrigger = target.kind === 'trigger';
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -325,6 +319,7 @@ export function WorkflowVisualEditorFlyout({
         {yamlSlice ? (
           <CodeEditor
             languageId="yaml"
+            chromeOverrides={workflowsEditorChromeOverrides}
             value={yamlSlice}
             height="100%"
             width="100%"
@@ -336,7 +331,6 @@ export function WorkflowVisualEditorFlyout({
               folding: false,
               fontSize: 12,
               renderLineHighlight: 'none',
-              theme: WORKFLOWS_MONACO_EDITOR_THEME,
               padding: { top: 12, bottom: 12 },
             }}
           />

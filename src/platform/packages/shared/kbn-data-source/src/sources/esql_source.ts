@@ -379,6 +379,7 @@ export class EsqlSource implements DataSourceBase {
   public async toFilterableSource(http?: HttpStart): Promise<FilterableSource> {
     const dataset = await this.getDatasetSource(http);
     dataset.filterableSource ??= {
+      kind: this.kind,
       id: dataset.datasetId,
       title: dataset.title,
       name: dataset.name,

@@ -293,7 +293,10 @@ const workflowDetailSlice = createSlice({
         requestId: meta.requestId,
         loadMore: meta.arg.loadMore ?? false,
       };
-      state.executionError = undefined;
+      // Keep an ongoing failure streak for the same execution so polling can back off and toast once.
+      if (state.executionError?.id !== meta.arg.id) {
+        state.executionError = undefined;
+      }
     });
     builder.addCase(loadExecutionThunk.fulfilled, (state, { meta, payload }) => {
       if (state.executionRequest?.requestId !== meta.requestId) {
@@ -304,6 +307,7 @@ const workflowDetailSlice = createSlice({
       state.stepExecutionsTotal = payload.stepExecutionsTotal;
       state.computedExecution = payload.computedExecution;
       state.executionRequest = undefined;
+      state.executionError = undefined;
     });
     builder.addCase(loadExecutionThunk.rejected, (state, { meta, payload }) => {
       if (state.executionRequest?.requestId !== meta.requestId) {
@@ -311,7 +315,14 @@ const workflowDetailSlice = createSlice({
       }
       state.executionRequest = undefined;
       if (!meta.aborted && !meta.arg.loadMore) {
-        state.executionError = { id: meta.arg.id, message: payload ?? 'Failed to load execution' };
+        const previousFailureCount =
+          state.executionError?.id === meta.arg.id ? state.executionError.failureCount : 0;
+        state.executionError = {
+          id: meta.arg.id,
+          message: payload?.message ?? 'Failed to load execution',
+          isNotFound: payload?.isNotFound ?? false,
+          failureCount: previousFailureCount + 1,
+        };
       }
     });
     addLoadingStateReducers(builder);

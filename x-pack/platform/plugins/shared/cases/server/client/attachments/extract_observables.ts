@@ -77,10 +77,10 @@ const toFlattedEcsData = (flatDoc: Record<string, unknown>): FlattedEcsData[] =>
 export const extractAndAddObservables = async (
   caseId: string,
   attachments: UnifiedAttachmentPayload[],
-  updatedCase: Case,
+  { settings }: Pick<Case, 'settings'>,
   clientArgs: CasesClientArgs
 ): Promise<void> => {
-  if (!updatedCase.settings?.extractObservables) {
+  if (!settings?.extractObservables) {
     return;
   }
 

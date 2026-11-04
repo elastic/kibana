@@ -33,7 +33,11 @@ import {
 } from './workflow_execution_list_filters';
 import { WorkflowExecutionListFooter } from './workflow_execution_list_footer';
 import type { ExecutionListFiltersQueryParams } from './workflow_execution_list_stateful';
-import { getExecutedByLabel, useUserProfilesByUid } from '../../../entities/user_profiles';
+import {
+  executedByFallbackLabel,
+  getExecutedByLabel,
+  getExecutedByProfiles,
+} from '../../../entities/user_profiles';
 import { useKibana } from '../../../hooks/use_kibana';
 
 export interface WorkflowExecutionListProps {
@@ -93,16 +97,19 @@ export const WorkflowExecutionList = ({
     return Array.from(uniqueUsers).sort();
   }, [executions, filters.executedBy]);
 
-  const { data: executedByUserProfiles = EMPTY_EXECUTED_BY_USER_PROFILES } = useUserProfilesByUid({
-    enabled: showExecutor,
-    uids: executedByValuesToResolve,
-  });
+  const executedByUserProfiles = useMemo(
+    () =>
+      showExecutor
+        ? getExecutedByProfiles(executions?.results ?? [])
+        : EMPTY_EXECUTED_BY_USER_PROFILES,
+    [executions, showExecutor]
+  );
 
   const availableExecutedByOptions = useMemo<ExecutedByFilterOption[]>(() => {
     const options = executedByValuesToResolve.flatMap((executedBy) => {
       const label = getExecutedByLabel(
         executedByUserProfiles.get(executedBy),
-        showUnresolvedExecutors ? executedBy : undefined
+        executedByFallbackLabel(executedBy, showUnresolvedExecutors)
       );
 
       return label ? [{ label, value: executedBy }] : [];
@@ -152,7 +159,13 @@ export const WorkflowExecutionList = ({
     if (scrollableContentRef.current) {
       scrollableContentRef.current.scrollTop = 0;
     }
-  }, [filters.statuses, filters.executionTypes, filters.executedBy]);
+  }, [filters.statuses, filters.executionTypes, filters.executedBy, filters.runName]);
+
+  const hasActiveFilters =
+    filters.statuses.length > 0 ||
+    filters.executionTypes.length > 0 ||
+    (showExecutor && filters.executedBy.length > 0) ||
+    Boolean(filters.runName?.trim());
 
   let content: React.ReactNode = null;
 
@@ -205,10 +218,17 @@ export const WorkflowExecutionList = ({
         }
         body={
           <p>
-            <FormattedMessage
-              id="workflows.workflowExecutionList.noExecutionsFoundDescription"
-              defaultMessage="Workflow has not been executed yet."
-            />
+            {hasActiveFilters ? (
+              <FormattedMessage
+                id="workflows.workflowExecutionList.noExecutionsMatchFiltersDescription"
+                defaultMessage="No executions match the filters."
+              />
+            ) : (
+              <FormattedMessage
+                id="workflows.workflowExecutionList.noExecutionsFoundDescription"
+                defaultMessage="Workflow has not been executed yet."
+              />
+            )}
           </p>
         }
       />
@@ -232,10 +252,9 @@ export const WorkflowExecutionList = ({
               'data-selected': isSelected ? 'true' : 'false',
               'data-last-viewed': isLastViewed ? 'true' : 'false',
               'data-started-at': execution.startedAt || 'null',
-              'data-executed-by-label':
-                showExecutor && showUnresolvedExecutors && execution.executedBy
-                  ? execution.executedBy
-                  : undefined,
+              'data-executed-by-label': showExecutor
+                ? executedByFallbackLabel(execution.executedBy, showUnresolvedExecutors)
+                : undefined,
               onClick: () => handleRowClick(execution),
               onKeyDown: (e: React.KeyboardEvent) => {
                 if (e.key === 'Enter' || e.key === ' ') {

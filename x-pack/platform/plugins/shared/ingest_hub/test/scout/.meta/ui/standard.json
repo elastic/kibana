@@ -1,5 +1,5 @@
 {
-  "sha1": "d77928bb43ab5e37612dbfaccb44920b60bf7209",
+  "sha1": "6916ab159df38e61776b30d43d0e76526837e131",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -369,8 +369,8 @@
       }
     },
     {
-      "id": "cac3a28fa43b605-f68d8446dd46be4",
-      "title": "Onboarding — managed integrations add a service to the existing package policy a service with its own namespace gets its own policy",
+      "id": "cac3a28fa43b605-fdc284c7891dd2d",
+      "title": "Onboarding — managed integrations add a service to the existing package policy a duplicate with its own namespace gets its own policy",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -383,6 +383,20 @@
       }
     },
     {
+      "id": "cac3a28fa43b605-166a9a3636d3a3e",
+      "title": "Onboarding — managed integrations add a service to the existing package policy changing the global namespace of a deployed flow updates the policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_policy_updates_mi.spec.ts",
+        "line": 92,
+        "column": 23
+      }
+    },
+    {
       "id": "cac3a28fa43b605-2ff2fa08bb6f90c",
       "title": "Onboarding — managed integrations add a service to the existing package policy a duplicated service gets its own policy",
       "expectedStatus": "passed",
@@ -392,8 +406,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_policy_updates_mi.spec.ts",
-        "line": 87,
-        "column": 13
+        "line": 111,
+        "column": 26
       }
     },
     {
@@ -644,13 +658,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 519,
-        "column": 93
+        "line": 522,
+        "column": 9
       }
     },
     {
-      "id": "f11cb343b6e8637-adcc1c2a7e5b675",
-      "title": "Onboarding Service Settings step duplicate keeps its own namespace across reloads",
+      "id": "f11cb343b6e8637-32562b2df667c0b",
+      "title": "Onboarding Service Settings step duplicate starts from the global namespace and keeps its own across reloads",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -658,8 +672,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 558,
-        "column": 11
+        "line": 560,
+        "column": 5
       }
     },
     {
@@ -672,8 +686,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 598,
-        "column": 20
+        "line": 602,
+        "column": 7
       }
     },
     {
@@ -686,8 +700,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 627,
-        "column": 7
+        "line": 630,
+        "column": 10
       }
     },
     {
@@ -700,8 +714,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 692,
-        "column": 24
+        "line": 696,
+        "column": 5
       }
     },
     {
@@ -714,7 +728,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 760,
+        "line": 762,
         "column": 24
       }
     },
@@ -728,7 +742,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 788,
+        "line": 790,
         "column": 24
       }
     },

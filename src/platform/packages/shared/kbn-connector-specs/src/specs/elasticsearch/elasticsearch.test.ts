@@ -64,6 +64,14 @@ describe('Elasticsearch connector', () => {
       expect(apiKeyAuth?.isRecommended).toBe(true);
       expect(basicAuth).toBeDefined();
     });
+
+    it('marks both auth types as sandbox capable', () => {
+      const types = Elasticsearch.auth?.types ?? [];
+      expect(types).toEqual([
+        expect.objectContaining({ type: 'api_key_header', supportsSandbox: true }),
+        expect.objectContaining({ type: 'basic', supportsSandbox: true }),
+      ]);
+    });
   });
 
   // ============================================================================

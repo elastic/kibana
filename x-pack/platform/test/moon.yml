@@ -158,6 +158,7 @@ tags:
   - dev
   - group-platform
   - shared
+  - jest-unit-tests
 fileGroups:
   src:
     - index.d.ts

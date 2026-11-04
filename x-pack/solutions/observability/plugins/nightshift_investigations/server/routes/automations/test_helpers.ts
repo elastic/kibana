@@ -16,3 +16,9 @@ export const createRouteContext = () => ({
   }),
   resolve: jest.fn(),
 });
+
+/** The service account service as the automation routes use it. */
+export const createServiceAccountService = () => ({
+  resolveAutomationRunAs: jest.fn().mockResolvedValue('kibana/nightshift_automations'),
+  assertCanModifyBoundAutomations: jest.fn().mockResolvedValue(undefined),
+});

@@ -343,9 +343,36 @@ describe('WorkflowDetailHeader', () => {
     expect(getByTestId('saveWorkflowHeaderButton')).not.toBeDisabled();
   });
 
-  it('does not expose a Run action in the header app menu', () => {
+  it('does not expose a Run action in the header app menu behind the experimental flag', () => {
+    // Run lives on the visual-builder bottom bar when the experimental UI is on.
+    (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
     renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
     expect(screen.queryByTestId('runWorkflowHeaderButton')).not.toBeInTheDocument();
+  });
+
+  it('exposes a Run action in the header app menu without the experimental flag', () => {
+    renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+    expect(screen.getByTestId('runWorkflowHeaderButton')).not.toBeDisabled();
+  });
+
+  it('keeps Run enabled while only the execution list is open', () => {
+    mockUseWorkflowUrlState.mockReturnValue({
+      activeTab: 'executions',
+      isViewingExecution: false,
+      setActiveTab: jest.fn(),
+    });
+    renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+    expect(screen.getByTestId('runWorkflowHeaderButton')).not.toBeDisabled();
+  });
+
+  it('disables Run while an execution is shown', () => {
+    mockUseWorkflowUrlState.mockReturnValue({
+      activeTab: 'executions',
+      isViewingExecution: true,
+      setActiveTab: jest.fn(),
+    });
+    renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+    expect(screen.getByTestId('runWorkflowHeaderButton')).toBeDisabled();
   });
 
   it('disables enabled toggle when yaml has validation errors', () => {
@@ -384,6 +411,27 @@ describe('WorkflowDetailHeader', () => {
     fireEvent.click(result.getByTestId('workflowUnsavedChangesBadge'));
 
     expect(setHighlightDiff).toHaveBeenCalledTimes(1);
+  });
+
+  it('includes the visible badge text in the unsaved changes badge accessible name', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      hasChanges: true,
+    });
+
+    expect(result.getByTestId('workflowUnsavedChangesBadge')).toHaveAccessibleName(
+      'Unsaved changes, show diff highlighting'
+    );
+  });
+
+  it('does not make the unsaved changes badge a toggle for a new workflow', () => {
+    mockUseParams.mockReturnValue({});
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      hasChanges: true,
+    });
+
+    const badge = result.getByTestId('workflowUnsavedChangesBadge');
+    expect(badge).toHaveTextContent('Unsaved changes');
+    expect(badge.tagName).not.toBe('BUTTON');
   });
 
   it('keeps the enabled toggle editable for managed workflows', () => {
@@ -587,9 +635,10 @@ describe('WorkflowDetailHeader', () => {
     expect(changeHistoryModal.openModal).toHaveBeenCalledTimes(1);
   });
 
-  it('does not expose the change history entry point on the executions tab', () => {
+  it('does not expose the change history entry point while an execution is shown', () => {
     mockUseWorkflowUrlState.mockReturnValue({
       activeTab: 'executions',
+      isViewingExecution: true,
       setActiveTab: jest.fn(),
     });
 
@@ -613,5 +662,34 @@ describe('WorkflowDetailHeader', () => {
     );
 
     expect(queryByTestId('workflowDetailHistoryButton')).not.toBeInTheDocument();
+  });
+
+  it('selects Executions and keeps the history entry point while only the list is open', () => {
+    mockUseWorkflowUrlState.mockReturnValue({
+      activeTab: 'executions',
+      isViewingExecution: false,
+      setActiveTab: jest.fn(),
+    });
+
+    const store = createMockStore();
+    store.dispatch(setWorkflow(mockWorkflow));
+    store.dispatch(setYamlString(mockWorkflow.yaml));
+
+    const changeHistoryModal = {
+      isOpen: false,
+      openModal: jest.fn(),
+      closeModal: jest.fn(),
+    };
+    const { getByRole, getByTestId } = render(
+      <ChangeHistoryModalContext.Provider value={changeHistoryModal}>
+        <WorkflowDetailHeader {...defaultProps} onOpenExecutionList={jest.fn()} />
+      </ChangeHistoryModalContext.Provider>,
+      {
+        wrapper: ({ children }) => <TestWrapper store={store}>{children}</TestWrapper>,
+      }
+    );
+
+    expect(getByRole('button', { name: 'Executions' })).toHaveAttribute('aria-pressed', 'true');
+    expect(getByTestId('workflowDetailHistoryButton')).toBeInTheDocument();
   });
 });

@@ -1,5 +1,5 @@
 {
-  "sha1": "a0a74b67fa01d01d4c03bf83991c6b2637420d4e",
+  "sha1": "b2c24d8992f33a5b06ca57e3b4ff8bce238ec5c9",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -105,8 +105,8 @@
       }
     },
     {
-      "id": "6a1a7d28753a6bb-7b800df61936e84",
-      "title": "POST api/data_views/data_view - main (data view api) can create data view with empty title",
+      "id": "6a1a7d28753a6bb-cd88c2ca7f17d00",
+      "title": "POST api/data_views/data_view - main (data view api) can create a data view with allowNoIndex targeting a non-existing remote cluster",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -125,6 +125,26 @@
       }
     },
     {
+      "id": "6a1a7d28753a6bb-7b800df61936e84",
+      "title": "POST api/data_views/data_view - main (data view api) can create data view with empty title",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
+        "line": 182,
+        "column": 20
+      }
+    },
+    {
       "id": "6a1a7d28753a6bb-e1c60040870223d",
       "title": "POST api/data_views/data_view - main (data view api) can specify optional fields attribute when creating a data view",
       "expectedStatus": "passed",
@@ -140,8 +160,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
-        "line": 174,
-        "column": 79
+        "line": 203,
+        "column": 13
       }
     },
     {
@@ -160,8 +180,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
-        "line": 206,
-        "column": 14
+        "line": 233,
+        "column": 17
       }
     },
     {
@@ -180,8 +200,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
-        "line": 239,
-        "column": 12
+        "line": 266,
+        "column": 15
       }
     },
     {
@@ -200,8 +220,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
-        "line": 281,
-        "column": 19
+        "line": 308,
+        "column": 14
       }
     },
     {
@@ -220,8 +240,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
-        "line": 307,
-        "column": 14
+        "line": 334,
+        "column": 24
       }
     },
     {
@@ -240,8 +260,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
-        "line": 327,
-        "column": 14
+        "line": 353,
+        "column": 9
       }
     },
     {
@@ -260,8 +280,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
-        "line": 356,
-        "column": 25
+        "line": 383,
+        "column": 16
       }
     },
     {
@@ -280,8 +300,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
-        "line": 392,
-        "column": 32
+        "line": 420,
+        "column": 7
       }
     },
     {
@@ -582,6 +602,26 @@
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_get_main.spec.ts",
         "line": 25,
         "column": 32
+      }
+    },
+    {
+      "id": "d7a01c9bea5cfca-98f79c56f8a7f76",
+      "title": "GET api/data_views/data_view/{id} - main (data view api) can retrieve a data view with allowNoIndex targeting a non-existing remote cluster",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_get_main.spec.ts",
+        "line": 53,
+        "column": 18
       }
     },
     {
@@ -2611,7 +2651,7 @@
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/response.spec.ts",
         "line": 303,
-        "column": 17
+        "column": 6
       }
     },
     {
@@ -2630,8 +2670,48 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/response.spec.ts",
-        "line": 312,
-        "column": 14
+        "line": 317,
+        "column": 10
+      }
+    },
+    {
+      "id": "0ee43e9dd0c5ceb-eb0ae82ac16c18e",
+      "title": "GET /internal/data_views/_fields_for_wildcard - response returns 200 when remote cluster does not exist and allow_no_index is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/response.spec.ts",
+        "line": 328,
+        "column": 24
+      }
+    },
+    {
+      "id": "0ee43e9dd0c5ceb-a09a5ab8864f93b",
+      "title": "GET /internal/data_views/_fields_for_wildcard - response returns fields of the existing indices when the pattern also targets a non-existing remote cluster",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/response.spec.ts",
+        "line": 346,
+        "column": 9
       }
     },
     {
@@ -2650,8 +2730,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/response.spec.ts",
-        "line": 326,
-        "column": 9
+        "line": 365,
+        "column": 16
       }
     },
     {
@@ -2670,8 +2750,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/response.spec.ts",
-        "line": 343,
-        "column": 26
+        "line": 381,
+        "column": 23
       }
     },
     {
@@ -2690,7 +2770,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/response.spec.ts",
-        "line": 333,
+        "line": 363,
         "column": 24
       }
     },

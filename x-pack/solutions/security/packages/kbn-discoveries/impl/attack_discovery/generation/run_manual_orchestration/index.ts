@@ -38,6 +38,7 @@ import { shouldRunGate } from '../should_run_gate';
 import { buildExecutionSummaryLog } from './helpers/build_execution_summary_log';
 import { getStepStatuses } from './helpers/get_step_statuses';
 import { handleNoAlerts } from './helpers/handle_no_alerts';
+import { hasAlertsForGate } from './helpers/has_alerts_for_gate';
 import { mapFailedStepToTelemetry } from './helpers/map_failed_step_to_telemetry';
 import { PipelineStepError } from './helpers/pipeline_step_error';
 import { resolveFailedStep } from './helpers/resolve_failed_step';
@@ -283,7 +284,20 @@ export const runManualOrchestration = async ({
     // final arbiter of the candidate set: it keeps a subset by `_id` (original
     // bytes pass through), may add net-new alerts (Skill toggle), and threads a
     // `conversation_id` for the report phase. Fail-closed: a gate failure throws.
-    if (shouldRunGate(trigger, workflowConfig.ground_truth_gate_enabled)) {
+    if (
+      shouldRunGate(trigger, workflowConfig.ground_truth_gate_enabled) &&
+      // Skip the gate's LLM calls when it has nothing to work on.
+      (await hasAlertsForGate({
+        alertsIndexPattern,
+        candidateCount: candidateCountBeforeGate,
+        end,
+        esClient,
+        executionUuid,
+        logger,
+        skillEnabled: workflowConfig.skill_enabled,
+        start,
+      }))
+    ) {
       timings.gateStart = Date.now();
       candidateResult = await runGatePhase({
         alertsIndexPattern,

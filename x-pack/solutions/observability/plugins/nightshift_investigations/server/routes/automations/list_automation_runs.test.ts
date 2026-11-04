@@ -385,3 +385,22 @@ it('reports budget denials as skipped, preserving the limit at dispatch and excl
   });
   expect(result.runs[0].investigationId).toBeUndefined();
 });
+
+it('reports global investigation-limit denials as skipped with their own reason', async () => {
+  mockGet.mockResolvedValueOnce({
+    attributes: { workflowId: 'wf-1', runtime: { dailyDispatchLimit: 10 } },
+  });
+  mockGetWorkflowExecutions.mockResolvedValue({
+    results: [{ id: 'exec-1', status: 'completed', triggeredBy: 'scheduled' }],
+    total: 1,
+    page: 1,
+    size: 20,
+  });
+  mockSearchStepExecutions.mockResolvedValue({
+    results: [{ workflowRunId: 'exec-1', output: { skip_reason: 'investigation_limit' } }],
+  });
+
+  const result = await call('auto-1');
+  expect(result.runs[0]).toMatchObject({ status: 'skipped', skipReason: 'investigation_limit' });
+  expect(result.runs[0].dailyLimit).toBeUndefined();
+});

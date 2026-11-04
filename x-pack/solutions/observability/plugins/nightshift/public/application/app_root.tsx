@@ -13,6 +13,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Router } from '@kbn/shared-ux-router';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
+import type { FocusedSignificantEventService } from '../chat/focused_significant_event_service';
 import { NightshiftPage } from '../nightshift_page';
 import type { NightshiftStartDependencies } from '../types';
 
@@ -23,19 +24,27 @@ export function AppRoot({
   coreStart,
   pluginsStart,
   isServerless,
+  focusedSignificantEventService,
 }: {
   appMountParameters: AppMountParameters;
   coreStart: CoreStart;
   pluginsStart: NightshiftStartDependencies;
   isServerless: boolean;
+  focusedSignificantEventService: FocusedSignificantEventService;
 }) {
   const { history } = appMountParameters;
 
   // Flat shape so `useKibana().services` destructures the same way it did while
   // this app lived inside the observability plugin.
   const services = useMemo(
-    () => ({ ...coreStart, ...pluginsStart, isServerless, appParams: { history } }),
-    [coreStart, history, pluginsStart, isServerless]
+    () => ({
+      ...coreStart,
+      ...pluginsStart,
+      isServerless,
+      appParams: { history },
+      focusedSignificantEventService,
+    }),
+    [coreStart, history, pluginsStart, isServerless, focusedSignificantEventService]
   );
 
   return (

@@ -117,20 +117,44 @@ const SCENARIOS: Scenario[] = [
     changedFiles: ['x-pack/platform/plugins/shared/alerting/server/index.ts'],
   },
   {
+    name: 'response ops step definition path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/response_ops.ts'],
+  },
+  {
     name: 'cases path',
     changedFiles: ['x-pack/platform/plugins/shared/cases/server/index.ts'],
+  },
+  {
+    name: 'response ops cases step definition path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/response_ops_cases.ts'],
   },
   {
     name: 'fleet path',
     changedFiles: ['x-pack/platform/plugins/shared/fleet/server/index.ts'],
   },
   {
+    name: 'fleet cypress step definition path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/fleet_cypress.ts'],
+  },
+  {
+    name: 'scout fleet real agent step definition path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/scout_fleet_real_agent.ts'],
+  },
+  {
     name: 'ai infra path',
     changedFiles: ['x-pack/platform/plugins/shared/inference/server/index.ts'],
   },
   {
+    name: 'ai infra gen ai step definition path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/ai_infra_gen_ai.ts'],
+  },
+  {
     name: 'agent builder path',
     changedFiles: ['x-pack/platform/plugins/shared/agent_builder/server/index.ts'],
+  },
+  {
+    name: 'agent builder smoke tests step definition path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/agent_builder_smoke_tests.ts'],
   },
   {
     name: 'security solution path',
@@ -154,7 +178,87 @@ const SCENARIOS: Scenario[] = [
       'x-pack/solutions/security/plugins/security_solution/public/asset_inventory/index.ts',
     ],
   },
+  {
+    name: 'security solution ai4dsoc step path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/security_solution/ai4dsoc.ts'],
+  },
+  {
+    name: 'security solution ai_assistant step path',
+    changedFiles: [
+      '.buildkite/pipeline-utils/step-library/steps/security_solution/ai_assistant.ts',
+    ],
+  },
+  {
+    name: 'security solution asset_inventory step path',
+    changedFiles: [
+      '.buildkite/pipeline-utils/step-library/steps/security_solution/asset_inventory.ts',
+    ],
+  },
+  {
+    name: 'security solution cloud_security_posture step path',
+    changedFiles: [
+      '.buildkite/pipeline-utils/step-library/steps/security_solution/cloud_security_posture.ts',
+    ],
+  },
+  {
+    name: 'security solution cypress_burn step path',
+    changedFiles: [
+      '.buildkite/pipeline-utils/step-library/steps/security_solution/cypress_burn.ts',
+    ],
+  },
+  {
+    name: 'security solution defend_workflows step path',
+    changedFiles: [
+      '.buildkite/pipeline-utils/step-library/steps/security_solution/defend_workflows.ts',
+    ],
+  },
+  {
+    name: 'security solution detection_engine step path',
+    changedFiles: [
+      '.buildkite/pipeline-utils/step-library/steps/security_solution/detection_engine.ts',
+    ],
+  },
+  {
+    name: 'security solution entity_analytics step path',
+    changedFiles: [
+      '.buildkite/pipeline-utils/step-library/steps/security_solution/entity_analytics.ts',
+    ],
+  },
+  {
+    name: 'security solution explore step path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/security_solution/explore.ts'],
+  },
+  {
+    name: 'security solution investigations step path',
+    changedFiles: [
+      '.buildkite/pipeline-utils/step-library/steps/security_solution/investigations.ts',
+    ],
+  },
+  {
+    name: 'security solution osquery_cypress step path',
+    changedFiles: [
+      '.buildkite/pipeline-utils/step-library/steps/security_solution/osquery_cypress.ts',
+    ],
+  },
+  {
+    name: 'security solution rule_management step path',
+    changedFiles: [
+      '.buildkite/pipeline-utils/step-library/steps/security_solution/rule_management.ts',
+    ],
+  },
   { name: 'edr real fleet path', changedFiles: ['fleet_packages.json'] },
+  {
+    name: 'cspm agentless scout step definition path',
+    changedFiles: [
+      '.buildkite/pipeline-utils/step-library/steps/security_solution/cspm_agentless_scout.ts',
+    ],
+  },
+  {
+    name: 'scout edr real fleet step definition path',
+    changedFiles: [
+      '.buildkite/pipeline-utils/step-library/steps/security_solution/scout_edr_real_fleet.ts',
+    ],
+  },
   {
     name: 'prompt change path',
     changedFiles: [
@@ -165,13 +269,26 @@ const SCENARIOS: Scenario[] = [
     name: 'workflows schema path',
     changedFiles: ['src/platform/plugins/shared/workflows_management/common/schema/index.ts'],
   },
+  {
+    name: 'workflows oom testing step definition path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/workflows_oom_testing.ts'],
+  },
   { name: 'storybook path', changedFiles: ['x-pack/example/button.stories.tsx'] },
   { name: 'storybook lockfile path', changedFiles: ['pnpm-lock.yaml'] },
+  {
+    name: 'storybooks definition path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/storybooks.ts'],
+  },
   { name: 'storybook toolchain package affected', affectedPackages: ['@kbn/storybook'] },
   {
     name: 'docs path on main',
     targetBranch: 'main',
     changedFiles: ['dev_docs/some_page.mdx'],
+  },
+  {
+    name: 'docs definition path on main',
+    targetBranch: 'main',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/check_next_docs.ts'],
   },
   {
     name: 'docs path off main',

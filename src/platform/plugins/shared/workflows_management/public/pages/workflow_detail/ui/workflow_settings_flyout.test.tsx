@@ -134,13 +134,14 @@ describe('WorkflowSettingsFlyout', () => {
     expect(selectYamlString(store.getState())).toContain('region');
   });
 
-  it('shows the outputs empty state when none are defined', () => {
+  it('shows the outputs empty state when none are defined', async () => {
     renderFlyout();
 
     fireEvent.click(screen.getByTestId('workflowSettingsTab-outputs'));
     expect(screen.getByTestId('workflowSettingsOutputEmpty')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('workflowSettingsOutputAdd'));
     expect(screen.queryByTestId('workflowSettingsOutputEmpty')).not.toBeInTheDocument();
-    expect(screen.getByTestId(/workflowSettingsOutputValue-/)).toBeInTheDocument();
+    // The output fields load lazily.
+    expect(await screen.findByTestId(/workflowSettingsOutputValue-/)).toBeInTheDocument();
   });
 });

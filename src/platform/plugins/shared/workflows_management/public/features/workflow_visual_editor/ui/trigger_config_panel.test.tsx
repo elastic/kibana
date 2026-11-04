@@ -33,7 +33,7 @@ jest.mock('@kbn/code-editor', () => {
 
 jest.mock('@kbn/monaco', () => ({ YAML_LANG_ID: 'yaml' }));
 jest.mock('@kbn/workflows-ui', () => ({
-  WORKFLOWS_MONACO_EDITOR_THEME: 'theme',
+  workflowsEditorChromeOverrides: {},
   ensureWorkflowGraphEuiIcons: jest.fn(),
   resolveNodeChipStyle: () => ({
     background: 'bg-accent',

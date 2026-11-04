@@ -167,6 +167,7 @@ describe('WorkflowDetailTestModal', () => {
 
     mockUseWorkflowUrlState.mockReturnValue({
       setSelectedExecution: jest.fn(),
+      selectEditorRun: jest.fn(),
     });
   });
 
@@ -228,8 +229,10 @@ describe('WorkflowDetailTestModal', () => {
     expectedCalledFunction.mockResolvedValue({ workflowExecutionId: 'exec-123' });
 
     const mockSetSelectedExecution = jest.fn();
+    const mockSelectEditorRun = jest.fn();
     mockUseWorkflowUrlState.mockReturnValue({
       setSelectedExecution: mockSetSelectedExecution,
+      selectEditorRun: mockSelectEditorRun,
     });
 
     const { getByTestId } = renderModal();
@@ -245,25 +248,28 @@ describe('WorkflowDetailTestModal', () => {
     });
     expect(mockRunWorkflow).not.toHaveBeenCalled();
     expect(getByTestId('workflow-execute-modal')).toHaveAttribute('data-is-test-run', 'true');
+    // A run from the editor keeps the draft editable, so it opens on the workflow tab.
+    await waitFor(() => expect(mockSelectEditorRun).toHaveBeenCalledWith('exec-123'));
+    expect(mockSetSelectedExecution).not.toHaveBeenCalled();
   });
 
   it('selects the new execution after a regular test run', async () => {
     mockTestWorkflow.mockResolvedValue({ workflowExecutionId: 'exec-123' });
-    const mockSetSelectedExecution = jest.fn();
-    mockUseWorkflowUrlState.mockReturnValue({ setSelectedExecution: mockSetSelectedExecution });
+    const mockSelectEditorRun = jest.fn();
+    mockUseWorkflowUrlState.mockReturnValue({ selectEditorRun: mockSelectEditorRun });
 
     const { getByTestId, store } = renderModal();
     fireEvent.click(getByTestId('submit-modal'));
 
-    await waitFor(() => expect(mockSetSelectedExecution).toHaveBeenCalledWith('exec-123'));
+    await waitFor(() => expect(mockSelectEditorRun).toHaveBeenCalledWith('exec-123'));
     expect(store.getState().detail.treeRuns).toEqual([]);
   });
 
   it('records the run instead of selecting it when started from the reference tree', async () => {
     (selectTestModalStayInEditor as unknown as jest.Mock).mockReturnValue(true);
     mockTestWorkflow.mockResolvedValue({ workflowExecutionId: 'exec-123' });
-    const mockSetSelectedExecution = jest.fn();
-    mockUseWorkflowUrlState.mockReturnValue({ setSelectedExecution: mockSetSelectedExecution });
+    const mockSelectEditorRun = jest.fn();
+    mockUseWorkflowUrlState.mockReturnValue({ selectEditorRun: mockSelectEditorRun });
 
     const { getByTestId, store } = renderModal();
     fireEvent.click(getByTestId('submit-modal'));
@@ -271,7 +277,7 @@ describe('WorkflowDetailTestModal', () => {
     await waitFor(() =>
       expect(store.getState().detail.treeRuns).toEqual([{ executionId: 'exec-123' }])
     );
-    expect(mockSetSelectedExecution).not.toHaveBeenCalled();
+    expect(mockSelectEditorRun).not.toHaveBeenCalled();
   });
 
   it('submits a production run through useRunWorkflow when replaying an execution', async () => {

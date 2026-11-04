@@ -51,6 +51,14 @@ const NIGHTSHIFT_OPERATOR_ROLE: KibanaRole = {
   ],
 };
 
+const NIGHTSHIFT_V2_ALERT_OPERATOR_ROLE: KibanaRole = {
+  ...NIGHTSHIFT_OPERATOR_ROLE,
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: ['.rule-events'], privileges: ['read'] }],
+  },
+};
+
 const setNightshiftEnabled = (apiServices: ApiServicesFixture, enabled: boolean | null) =>
   apiServices.core.settings({ 'feature_flags.overrides': { [NIGHTSHIFT_ENABLED_FLAG]: enabled } });
 
@@ -126,6 +134,56 @@ apiTest.describe(
             trigger_type: 'manual',
           }),
         ]);
+      }
+    );
+
+    apiTest(
+      'starts an investigation for a v2 alert without a rule',
+      async ({ apiClient, samlAuth, esClient }) => {
+        const episodeId = uniqueId('episode');
+        const ruleName = `Ad hoc ${episodeId}`;
+        await esClient.index({
+          index: '.rule-events',
+          op_type: 'create',
+          refresh: true,
+          document: {
+            '@timestamp': new Date().toISOString(),
+            scheduled_timestamp: new Date().toISOString(),
+            type: 'alert',
+            source: 'elastic.significant_events',
+            status: 'breached',
+            severity: 'medium',
+            alert: { id: episodeId, status: 'active' },
+            group_hash: episodeId,
+            space_id: 'default',
+            data: { rule_name: ruleName },
+          },
+        });
+        try {
+          const { cookieHeader: v2CookieHeader } = await samlAuth.asInteractiveUser(
+            NIGHTSHIFT_V2_ALERT_OPERATOR_ROLE
+          );
+          const response = await startInvestigation(apiClient, v2CookieHeader, {
+            subject: { type: 'alert', ids: [episodeId] },
+          });
+          expect(response).toHaveStatusCode(200);
+          const investigation = await waitForInvestigation(
+            apiClient,
+            v2CookieHeader,
+            response.body.investigation_id
+          );
+          expect(investigation.subjects[0].snapshot).toMatchObject({
+            alert_version: 'v2',
+            rule_name: ruleName,
+          });
+          expect(investigation.subjects[0].snapshot?.rule_id).toBeUndefined();
+        } finally {
+          await esClient.deleteByQuery({
+            index: '.rule-events',
+            query: { term: { 'alert.id': episodeId } },
+            refresh: true,
+          });
+        }
       }
     );
 

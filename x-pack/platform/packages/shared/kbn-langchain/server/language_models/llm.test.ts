@@ -13,6 +13,7 @@ import { ActionsClientLlm } from './llm';
 import { mockActionResponse } from './mocks';
 import { getDefaultArguments } from '..';
 import { DEFAULT_TIMEOUT } from './constants';
+import { ModelRefusalError } from './model_refusal_error';
 
 const connectorId = 'mock-connector-id';
 
@@ -344,6 +345,30 @@ describe('ActionsClientLlm', () => {
         });
 
         await expect(actionsClientLlm._call(prompt)).rejects.toThrow('quota exceeded');
+      });
+
+      it('throws a ModelRefusalError when the response carries a content filter refusal', async () => {
+        (mockInferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+          content: '{"insights":[{"title":',
+          refusal:
+            'The response was stopped by the provider content filter (finish_reason: content_filter).',
+        });
+
+        const actionsClientLlm = new ActionsClientLlm({
+          actionsClient,
+          connectorId,
+          inferenceClient: mockInferenceClient,
+          isInferenceEndpoint: true,
+          logger: mockLogger,
+          model: 'claude-opus-5-5',
+        });
+
+        await expect(actionsClientLlm._call(prompt)).rejects.toThrow(ModelRefusalError);
+        await expect(actionsClientLlm._call(prompt)).rejects.toMatchObject({
+          connectorId,
+          model: 'claude-opus-5-5',
+          partialContentLength: 22,
+        });
       });
     });
   });

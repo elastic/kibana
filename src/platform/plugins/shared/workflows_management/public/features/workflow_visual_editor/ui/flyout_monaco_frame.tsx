@@ -10,7 +10,6 @@
 import { useEuiTheme } from '@elastic/eui';
 import type { EuiThemeComputed } from '@elastic/eui';
 import React from 'react';
-import { WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
 
 /**
  * Monaco padding so the first/last lines are not flush to the editor chrome.
@@ -25,7 +24,6 @@ export const getFlyoutMonacoEditorOptions = (
 ) => {
   const pad = flyoutMonacoContentPaddingPx(euiTheme);
   return {
-    theme: WORKFLOWS_MONACO_EDITOR_THEME,
     automaticLayout: true,
     fontSize: 12,
     minimap: { enabled: false },

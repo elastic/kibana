@@ -322,7 +322,9 @@ reinstalling an index-metadata automation from before `sources` existed, whose s
 is the one attached to the conversation.
 Pass `corpusFilter`, `maxDocuments` and `bodyMaxChars` when the corpus needs a bound; they default
 to an empty filter, 50 documents and 12000 characters. Keep `maxDocuments` within the KI budget
-(`strategy_catalog`, "The KI budget"). `corpusFilter` is inserted after `FROM`.
+(`strategy_catalog`, "The KI budget"); the tool rejects more than 2,000. When the run must cover
+more than 2,000 documents, scope it with `corpusFilter` or use `index_metadata` or `unit_profile`.
+`corpusFilter` is inserted after `FROM`.
 A `WHERE` line may omit the leading `|`; the tool adds it. The tool attaches only the orchestration.
 Each parallel branch summarizes one document and writes it through `context-engine.createKi` with its
 verifiers. Do not save it and do not start a subagent. When the pass yields many near-identically-titled entries, say so: the installed
@@ -345,7 +347,7 @@ the query for every unit.
 Pass `corpusFilter`, a `WHERE` line, to profile only some units: it bounds both which units are
 found and which of their rows the figures describe. It defaults to taking every row.
 `maxUnits` bounds the run: one KI and one model call per unit. It defaults to 100, the KI budget;
-keep it within that budget (`strategy_catalog`, "The KI budget").
+keep it within that budget (`strategy_catalog`, "The KI budget"); the tool rejects more than 2,000.
 Units are found by one ranked query capped at `maxUnits`, most active first, and
 a re-run regenerates every unit and replaces its indicator.
 The template reads one index. A unit that needs data from a second index — a customer's profile

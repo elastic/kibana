@@ -46,7 +46,7 @@ import {
   ensureWorkflowGraphEuiIcons,
   resolveNodeChipStyle,
   stepSupportsErrorHandling,
-  WORKFLOWS_MONACO_EDITOR_THEME,
+  workflowsEditorChromeOverrides,
 } from '@kbn/workflows-ui';
 import type { DataReferenceRunControls } from './data_reference_catalog_tree';
 import { FieldEditorSubFlyout } from './field_editor_sub_flyout';
@@ -860,6 +860,7 @@ export function StepConfigPanel({
             <FlyoutMonacoFrame>
               <CodeEditor
                 languageId={YAML_LANG_ID}
+                chromeOverrides={workflowsEditorChromeOverrides}
                 value={fragment}
                 onChange={setFragment}
                 editorDidMount={onYamlEditorMount}
@@ -2061,6 +2062,7 @@ function CodeField({
             </div>
             <CodeEditor
               languageId={monacoLanguageFor(field)}
+              chromeOverrides={workflowsEditorChromeOverrides}
               value={draft}
               onChange={(text, event) => {
                 const last = event?.changes?.[event.changes.length - 1];
@@ -2116,7 +2118,6 @@ function CodeField({
                 registerSelection(bridge);
               }}
               options={{
-                theme: WORKFLOWS_MONACO_EDITOR_THEME,
                 automaticLayout: true,
                 fontSize: 12,
                 minimap: { enabled: false },

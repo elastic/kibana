@@ -587,6 +587,40 @@ describe('invokeGenerationWorkflow', () => {
     });
   });
 
+  describe('when workflow execution fails because the model refused the request', () => {
+    const mockContentFilterExecution: WorkflowExecutionDto = {
+      ...mockCompletedExecution,
+      error: {
+        message:
+          'The model (claude-opus-5-5) refused to complete the response, so generation stopped without retrying. Sending fewer alerts or events will not help, and retrying is unlikely to; choose a different model or connector. Details: The model refused to complete the response: The response was stopped by the provider content filter (finish_reason: content_filter).',
+        type: 'Error',
+      },
+      status: ExecutionStatus.FAILED,
+    };
+
+    beforeEach(() => {
+      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
+        'workflow-run-id'
+      );
+      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+        mockContentFilterExecution
+      );
+    });
+
+    it('throws with errorCategory content_filter', async () => {
+      await expect(invokeGenerationWorkflow(defaultProps)).rejects.toMatchObject({
+        errorCategory: 'content_filter',
+      });
+    });
+
+    it('keeps the content filter details in the message', async () => {
+      await expect(invokeGenerationWorkflow(defaultProps)).rejects.toThrow(
+        'content filter (finish_reason: content_filter)'
+      );
+    });
+  });
+
   describe('when workflow execution fails with a context-length error', () => {
     const mockContextLengthExecution: WorkflowExecutionDto = {
       ...mockCompletedExecution,

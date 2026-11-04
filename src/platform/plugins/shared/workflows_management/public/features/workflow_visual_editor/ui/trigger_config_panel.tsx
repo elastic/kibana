@@ -31,7 +31,11 @@ import { isMap, parseDocument, stringify as stringifyYaml } from 'yaml';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { YAML_LANG_ID } from '@kbn/monaco';
-import { ensureWorkflowGraphEuiIcons, resolveNodeChipStyle } from '@kbn/workflows-ui';
+import {
+  ensureWorkflowGraphEuiIcons,
+  resolveNodeChipStyle,
+  workflowsEditorChromeOverrides,
+} from '@kbn/workflows-ui';
 import { FlyoutMonacoFrame, getFlyoutMonacoEditorOptions } from './flyout_monaco_frame';
 import {
   findStepsReferencingInput,
@@ -422,6 +426,7 @@ export function TriggerConfigPanel({
             <FlyoutMonacoFrame minHeight={200}>
               <CodeEditor
                 languageId={YAML_LANG_ID}
+                chromeOverrides={workflowsEditorChromeOverrides}
                 value={fragment}
                 onChange={setFragment}
                 height="100%"
@@ -466,6 +471,7 @@ export function TriggerConfigPanel({
                       <FlyoutMonacoFrame height={280} variant="inset">
                         <CodeEditor
                           languageId={YAML_LANG_ID}
+                          chromeOverrides={workflowsEditorChromeOverrides}
                           value={inputsJsonDraft}
                           onChange={handleInputsJsonChange}
                           height="100%"

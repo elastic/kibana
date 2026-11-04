@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-import { APP_ALERTS_PATH } from '../../../../common/constants';
-import { loadPage } from '../tasks/common';
-
-export const navigateToAlertsList = (urlQueryParams: string = '') => {
-  loadPage(`${APP_ALERTS_PATH}${urlQueryParams ? `?${urlQueryParams}` : ''}`);
-};
-
 export const clickAlertListRefreshButton = (): Cypress.Chainable => {
   cy.getByTestSubj('querySubmitButton').first().click();
   return cy.getByTestSubj('querySubmitButton').should('be.enabled');

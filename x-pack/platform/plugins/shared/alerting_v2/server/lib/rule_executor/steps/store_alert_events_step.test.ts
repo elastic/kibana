@@ -30,7 +30,7 @@ describe('StoreAlertEventsStep', () => {
   });
 
   describe('execute', () => {
-    it('stores alert events and emits the persistence outcome on meta.persistence.alertEventsBatch', async () => {
+    it('stores alert events, threads them onto storedAlertEvents and emits the persistence outcome', async () => {
       const alertEventsBatch = [
         createAlertEvent({ group_hash: 'hash-1', status: 'breached' }),
         createAlertEvent({ group_hash: 'hash-2', status: 'recovered' }),
@@ -52,7 +52,7 @@ describe('StoreAlertEventsStep', () => {
 
       expect(result).toEqual({
         type: 'continue',
-        state,
+        state: { ...state, storedAlertEvents: alertEventsBatch },
         meta: {
           observations: {
             bulkIndexResult: {
@@ -98,7 +98,7 @@ describe('StoreAlertEventsStep', () => {
 
       expect(result).toEqual({
         type: 'continue',
-        state,
+        state: { ...state, storedAlertEvents: [] },
         meta: {
           observations: {
             bulkIndexResult: { attempted: 0, docs: [], errors: [] },
@@ -108,7 +108,7 @@ describe('StoreAlertEventsStep', () => {
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
     });
 
-    it('surfaces per-doc failures on meta.observations.bulkIndexResult.errors with the original document', async () => {
+    it('keeps rejected docs out of storedAlertEvents and surfaces them on meta.observations.bulkIndexResult.errors', async () => {
       const alertEventsBatch = [
         createAlertEvent({ group_hash: 'hash-1', status: 'breached' }),
         createAlertEvent({ group_hash: 'hash-2', status: 'breached' }),
@@ -138,7 +138,7 @@ describe('StoreAlertEventsStep', () => {
 
       expect(result).toEqual({
         type: 'continue',
-        state,
+        state: { ...state, storedAlertEvents: [alertEventsBatch[0]] },
         meta: {
           observations: {
             bulkIndexResult: {

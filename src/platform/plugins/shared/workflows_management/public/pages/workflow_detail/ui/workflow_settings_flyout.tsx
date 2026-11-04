@@ -26,6 +26,7 @@ import {
   EuiText,
   EuiTextArea,
   EuiTitle,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -90,6 +91,7 @@ export const WorkflowSettingsFlyout = ({
   readOnly = false,
 }: WorkflowSettingsFlyoutProps) => {
   const titleId = useGeneratedHtmlId();
+  const { euiTheme } = useEuiTheme();
   const dispatch = useDispatch();
   const yamlString = useSelector(selectYamlString) ?? '';
   const definition = useSelector(selectEditorWorkflowDefinition);
@@ -276,13 +278,13 @@ export const WorkflowSettingsFlyout = ({
     >
       <EuiFlyoutHeader
         hasBorder
-        css={({ euiTheme }) => ({
+        css={{
           '&&': {
             paddingTop: euiTheme.size.base,
             paddingInline: euiTheme.size.base,
             paddingBottom: 0,
           },
-        })}
+        }}
       >
         <EuiTitle size="s">
           <h2 id={titleId}>
@@ -308,11 +310,11 @@ export const WorkflowSettingsFlyout = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody
-        css={({ euiTheme }) => ({
+        css={{
           '.euiFlyoutBody__overflowContent': {
             padding: euiTheme.size.base,
           },
-        })}
+        }}
       >
         {selectedTabId === 'general' ? (
           <>

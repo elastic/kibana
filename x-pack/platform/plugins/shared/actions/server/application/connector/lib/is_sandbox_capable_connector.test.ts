@@ -7,7 +7,34 @@
 
 import type { ActionType } from '../../../types';
 import type { ActionTypeRegistry } from '../../../action_type_registry';
-import { isSandboxCapableConnector } from './is_sandbox_capable_connector';
+import {
+  isSandboxCapableConnector,
+  isSandboxCapableConnectorType,
+} from './is_sandbox_capable_connector';
+
+describe('isSandboxCapableConnectorType', () => {
+  it('is true for a type whose spec auth types opted in', () => {
+    expect(isSandboxCapableConnectorType({ sandboxSupportedAuthTypes: ['bearer'] })).toBe(true);
+  });
+
+  it('is true for a type with a per-instance hook, whatever the hook would answer', () => {
+    expect(isSandboxCapableConnectorType({ isSandboxCapable: () => false })).toBe(true);
+  });
+
+  it('is false for a type without either', () => {
+    expect(isSandboxCapableConnectorType({ sandboxSupportedAuthTypes: [] })).toBe(false);
+    expect(isSandboxCapableConnectorType({})).toBe(false);
+  });
+
+  it('is false for a system action type', () => {
+    expect(
+      isSandboxCapableConnectorType({
+        isSystemActionType: true,
+        sandboxSupportedAuthTypes: ['bearer'],
+      })
+    ).toBe(false);
+  });
+});
 
 describe('isSandboxCapableConnector', () => {
   const createRegistry = ({

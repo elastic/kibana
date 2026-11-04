@@ -18,12 +18,14 @@ import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import type { ContentClient } from '../lib/content/content_client';
 import type { AttachmentClient } from '../lib/streams/attachments/attachment_client';
 import type { StreamsClient } from '../lib/streams/client';
+import type { UnitStatsClient } from '../lib/unit_stats/client';
 import type { EbtTelemetryClient } from '../lib/telemetry';
 import type { StreamsServer } from '../types';
 import type { ProcessorSuggestionsService } from '../lib/streams/ingest_pipelines/processor_suggestions_service';
 import type { IPatternExtractionService } from '../lib/pattern_extraction/pattern_extraction_service';
 import type { StreamsSettingsStorageClient } from '../lib/streams/storage/streams_settings_storage_client';
 import type { UnitConfigHooks } from '../lib/unit_config/types';
+import type { ComponentCatalogueService } from '../lib/component_catalogue/component_catalogue_service';
 
 export type GetScopedClients = (params: {
   request: KibanaRequest;
@@ -37,6 +39,7 @@ export interface RouteHandlerScopedClients {
   canEncrypt: boolean;
   attachmentClient: AttachmentClient;
   streamsClient: StreamsClient;
+  unitStatsClient: UnitStatsClient;
   inferenceClient: InferenceClient;
   contentClient: ContentClient;
   licensing: LicensingPluginStart;
@@ -55,6 +58,7 @@ export interface RouteDependencies {
   patternExtractionService: IPatternExtractionService;
   getSpaceId: (request: KibanaRequest) => Promise<string>;
   unitConfigHooks: UnitConfigHooks;
+  componentCatalogue: ComponentCatalogueService;
 }
 
 export type StreamsRouteHandlerResources = RouteDependencies & DefaultRouteHandlerResources;

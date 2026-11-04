@@ -250,7 +250,6 @@ pivot:
       - 'Feature:Streams'
       - 'Feature:Metrics in Discover'
       - 'Team:obs-presentation'
-      - 'Team:obs-onboarding'
       - 'Team:obs-ux-management'
       - 'Team:actionable-obs'
       - 'Team:obs-ai - DEPRECATED'

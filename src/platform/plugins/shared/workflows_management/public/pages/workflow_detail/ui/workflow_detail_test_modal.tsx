@@ -40,7 +40,7 @@ export const WorkflowDetailTestModal = () => {
   const workflow = useSelector(selectWorkflow);
   const canExecuteWorkflow = hasExecutePrivilege && workflow?.permissions?.execute !== false;
 
-  const { setSelectedExecution } = useWorkflowUrlState();
+  const { setSelectedExecution, selectEditorRun } = useWorkflowUrlState();
 
   const isTestModalOpen = useSelector(selectIsTestModalOpen);
   const stayInEditor = useSelector(selectTestModalStayInEditor);
@@ -101,7 +101,7 @@ export const WorkflowDetailTestModal = () => {
         if (stayInEditor) {
           dispatch(addTreeRun({ executionId: executionId.workflowExecutionId }));
         } else {
-          setSelectedExecution(executionId.workflowExecutionId);
+          selectEditorRun(executionId.workflowExecutionId);
         }
       }
     },
@@ -113,6 +113,7 @@ export const WorkflowDetailTestModal = () => {
       replayIsTestRun,
       runWorkflow,
       setSelectedExecution,
+      selectEditorRun,
       testSavedWorkflow,
       testWorkflow,
       workflowId,
