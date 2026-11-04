@@ -15,13 +15,23 @@ import type { ChatCompletionReasoningEffort } from '../chat_complete/reasoning';
 
 /**
  * Retrieve the context window size for the default model of the given connector, if available.
+ *
+ * Resolution order: the explicit `contextWindowLength` connector setting, then the
+ * `context_window.max_input_tokens` capability advertised by EIS on the inference endpoint,
+ * then the static lookup by model name.
  */
 export const getContextWindowSize = (connector: InferenceConnector): number | undefined => {
-  if (!connector.config) {
-    return undefined;
-  }
   if (connector.config?.contextWindowLength) {
     return connector.config.contextWindowLength;
+  }
+
+  const advertisedWindow = connector.metadata?.capabilities?.context_window?.max_input_tokens;
+  if (advertisedWindow && advertisedWindow > 0) {
+    return advertisedWindow;
+  }
+
+  if (!connector.config) {
+    return undefined;
   }
 
   const defaultModel = getConnectorDefaultModel(connector);
