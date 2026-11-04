@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiLink, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { SuggestionsState } from './job_suggestion_service';
@@ -18,6 +18,8 @@ interface Props {
   state: SuggestionsState;
   onStop: () => void;
   onRunAgain: () => void;
+  /** When provided, an error offers to analyze the current time range instead. */
+  onUseCurrentTimeRange?: () => void;
   testSubjPrefix: string;
 }
 
@@ -25,7 +27,13 @@ interface Props {
  * What to show instead of suggestions while they are loading, or when there are none to show.
  * Renders nothing when the state has suggestions.
  */
-export const SuggestionStatus: FC<Props> = ({ state, onStop, onRunAgain, testSubjPrefix }) => {
+export const SuggestionStatus: FC<Props> = ({
+  state,
+  onStop,
+  onRunAgain,
+  onUseCurrentTimeRange,
+  testSubjPrefix,
+}) => {
   if (state.status === 'loading') {
     return (
       <EuiEmptyPrompt
@@ -101,6 +109,20 @@ export const SuggestionStatus: FC<Props> = ({ state, onStop, onRunAgain, testSub
         })}
       >
         {extractErrorMessage(state.error)}
+        {onUseCurrentTimeRange ? (
+          <>
+            <EuiSpacer size="s" />
+            <EuiLink
+              onClick={onUseCurrentTimeRange}
+              data-test-subj={`${testSubjPrefix}UseCurrentTimeRange`}
+            >
+              <FormattedMessage
+                id="xpack.ml.suggestADJobsFlyout.useCurrentTimeRangeLink"
+                defaultMessage="Use current time range"
+              />
+            </EuiLink>
+          </>
+        ) : null}
       </KbnDangerCallout>
     );
   }

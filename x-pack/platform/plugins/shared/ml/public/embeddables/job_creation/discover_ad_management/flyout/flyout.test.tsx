@@ -269,6 +269,47 @@ describe('DiscoverADManagementFlyout', () => {
     expect(mockCancel).toHaveBeenCalled();
   });
 
+  describe('the section to select a job', () => {
+    const jobFor = (datafeedIndices: string[]) => ({ id: 'job', description: '', datafeedIndices });
+
+    it('is shown when there are jobs for the index', async () => {
+      mockJobsSummary.mockResolvedValue([jobFor(['logs-*'])]);
+      renderFlyout({ openSuggestions: false });
+
+      expect(await screen.findByTestId('mlDiscoverADManagementCurrentSection')).toBeInTheDocument();
+    });
+
+    it('is hidden when there are no jobs for the index', async () => {
+      mockJobsSummary.mockResolvedValue([jobFor(['metrics-*'])]);
+      renderFlyout({ openSuggestions: false });
+
+      await waitFor(() => expect(mockJobsSummary).toHaveBeenCalled());
+      expect(screen.getByTestId('mlDiscoverADManagementSuggestSection')).toBeInTheDocument();
+      expect(screen.queryByTestId('mlDiscoverADManagementCurrentSection')).not.toBeInTheDocument();
+    });
+
+    it('is shown when the jobs could not be loaded, so that it can say so', async () => {
+      mockJobsSummary.mockRejectedValue(new Error('boom'));
+      renderFlyout({ openSuggestions: false });
+
+      expect(await screen.findByTestId('mlDiscoverADManagementCurrentSection')).toBeInTheDocument();
+    });
+  });
+
+  it('analyzes the current time range from the error', () => {
+    mockState$.next({ status: 'error', error: 'The time range has no data' });
+    renderFlyout();
+    mockSuggest.mockClear();
+
+    expect(screen.getByTestId('mlDiscoverADManagementError')).toHaveTextContent(
+      'The time range has no data'
+    );
+    fireEvent.click(screen.getByTestId('mlDiscoverADManagementUseCurrentTimeRange'));
+
+    expect(mockSuggest).toHaveBeenCalledTimes(1);
+    expect(mockSuggest).toHaveBeenCalledWith('logs-*', { from: 'now-7d', to: 'now' });
+  });
+
   it('moves to the job configuration without creating anything', async () => {
     renderFlyout();
 

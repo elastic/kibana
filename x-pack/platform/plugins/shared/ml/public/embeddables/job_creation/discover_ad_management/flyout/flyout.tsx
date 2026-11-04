@@ -40,6 +40,7 @@ import { useSuggestionHistory } from '../../../../application/components/job_sug
 import { SuggestionBadges } from '../../../../application/components/job_suggestion/suggestion_badges';
 import { SuggestionStatus } from '../../../../application/components/job_suggestion/suggestion_status';
 import { CurrentJobs } from './current_jobs';
+import { filterJobsByIndex } from '../../../../application/components/job_suggestion/filter_jobs_by_index';
 import { SelectedJob } from './selected_job';
 import { JobConfigStep } from './job_config_step';
 import { SlidingPanels } from './sliding_panels';
@@ -97,6 +98,22 @@ export const DiscoverADManagementFlyout: FC<Props> = ({ onClose, indexPattern })
   const [section, setSection] = useState<'suggest' | 'current'>();
   const isSuggesting = section === 'suggest';
 
+  // The jobs to select from are only offered when there are some for the index. When that can't be
+  // told, they are offered so that the section can say what went wrong.
+  const [hasJobsToSelect, setHasJobsToSelect] = useState<boolean>();
+  useEffect(() => {
+    let isCurrent = true;
+    mlApi.jobs
+      .jobsSummary([])
+      .then(
+        (jobs) => isCurrent && setHasJobsToSelect(filterJobsByIndex(jobs, indexPattern).length > 0)
+      )
+      .catch(() => isCurrent && setHasJobsToSelect(true));
+    return () => {
+      isCurrent = false;
+    };
+  }, [mlApi, indexPattern]);
+
   const jobSuggestionService = useMemo(
     () => new JobSuggestionService(jobsApi, timefilter),
     [jobsApi, timefilter]
@@ -111,6 +128,14 @@ export const DiscoverADManagementFlyout: FC<Props> = ({ onClose, indexPattern })
   const runAnalysis = (range: SuggestionTimeRange) => {
     setHasRequested(true);
     void jobSuggestionService.suggest(indexPattern, range);
+  };
+
+  // Analyzes the time range of the page, which is the chart's in Discover
+  const useCurrentTimeRange = () => {
+    const { from, to } = timefilter.getTime();
+    const range = { from, to };
+    setTimeRange(range);
+    runAnalysis(range);
   };
 
   useEffect(() => {
@@ -204,6 +229,7 @@ export const DiscoverADManagementFlyout: FC<Props> = ({ onClose, indexPattern })
             state={state}
             onStop={() => jobSuggestionService.cancel()}
             onRunAgain={() => void jobSuggestionService.reload()}
+            onUseCurrentTimeRange={useCurrentTimeRange}
             testSubjPrefix={TEST_SUBJ_PREFIX}
           />
           {latest.map((item) => (
@@ -332,16 +358,20 @@ export const DiscoverADManagementFlyout: FC<Props> = ({ onClose, indexPattern })
   const home = (
     <>
       <SelectedJob indexPattern={indexPattern} />
-      {renderSectionCard(
-        'current',
-        currentSectionTitle,
-        <FormattedMessage
-          id="xpack.ml.discoverADManagementFlyout.currentSectionDescription"
-          defaultMessage="Jobs which match {indexPattern}"
-          values={{ indexPattern: <strong>{indexPattern}</strong> }}
-        />
-      )}
-      <EuiSpacer size="s" />
+      {hasJobsToSelect ? (
+        <>
+          {renderSectionCard(
+            'current',
+            currentSectionTitle,
+            <FormattedMessage
+              id="xpack.ml.discoverADManagementFlyout.currentSectionDescription"
+              defaultMessage="Jobs which match {indexPattern}"
+              values={{ indexPattern: <strong>{indexPattern}</strong> }}
+            />
+          )}
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
       {renderSectionCard(
         'suggest',
         suggestSectionTitle,
