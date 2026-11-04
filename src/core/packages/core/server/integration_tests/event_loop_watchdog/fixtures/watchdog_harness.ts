@@ -123,13 +123,15 @@ const scenarios: Record<string, () => Promise<void>> = {
     await watchdog.stop();
   },
   // Short blocks use up the warning burst, with one more whose warning is suppressed, then a block
-  // that never ends: the test kills the process once the block is reported as ongoing and repeated.
+  // that never ends: the test kills the process once the worker reports it.
   permanent_block: async () => {
     await startRunning();
     for (let i = 0; i < REPORT_BURST + 1; i++) {
       blockFor(500);
       await sleep(BLOCK_GAP_MS);
     }
+    // Written synchronously, so the line is out before the main thread blocks.
+    writeMainLogLine('info', 'blocking');
     for (;;) {
       // blocks the main thread until the process is killed
     }

@@ -20,8 +20,10 @@ export const REPORT_BURST = 5;
 export const REPORT_REFILL_MS = 60_000;
 
 /**
- * A block still ongoing after this long is reported before it ends, so a block that outlives the
- * process still leaves a log line.
+ * Time threshold that distinguishes short-lived blocks from ongoing blocks.
+ * Blocks shorter than this are reported once after they end.
+ * Blocks lasting this long or longer are reported as ongoing, with elapsed time,
+ * and repeated until they end or the process terminates.
  */
 export const ONGOING_REPORT_AFTER_MS = 2_000;
 /** Ongoing reports repeat this often while the block is shorter than the next constant... */

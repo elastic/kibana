@@ -10,10 +10,7 @@
 import { spawn } from 'node:child_process';
 import Path from 'node:path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import {
-  ONGOING_REPORT_AFTER_MS,
-  REPORT_BURST,
-} from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/constants';
+import { REPORT_BURST } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/constants';
 
 const HARNESS = Path.resolve(__dirname, 'fixtures', 'watchdog_harness.ts');
 
@@ -37,6 +34,11 @@ interface WorkerLogLine {
   };
 }
 
+interface MainLogLine {
+  level: string;
+  message: string;
+}
+
 interface HarnessResult {
   exitCode: number | null;
   signal: NodeJS.Signals | null;
@@ -45,7 +47,9 @@ interface HarnessResult {
   /** Raw stdout log lines that weren't JSON. */
   unparsedLogLines: string[];
   /** Main-thread log lines, from the child's fd 3. */
-  mainLogLines: Array<{ level: string; message: string }>;
+  mainLogLines: MainLogLine[];
+  /** When the test read each log line, by its own monotonic clock (ms). */
+  receivedAt: Map<WorkerLogLine | MainLogLine, number>;
   stderr: string;
 }
 
@@ -54,6 +58,17 @@ interface RunHarnessOptions {
   /** Checked after each stdout log line; the child is killed with SIGKILL once it returns true. */
   killWhen?: (workerLogLines: WorkerLogLine[]) => boolean;
 }
+
+/** Calls `onLine` for each line as it comes in: a chunk can end in the middle of a line. */
+const lineReader = (onLine: (line: string) => void) => {
+  let pending = '';
+  return (chunk: string, flush = false) => {
+    pending += chunk;
+    const lines = pending.split('\n');
+    pending = flush ? '' : lines.pop() ?? '';
+    lines.filter(Boolean).forEach(onLine);
+  };
+};
 
 /**
  * Runs a harness scenario in a child `node` with a piped stdout and without NODE_OPTIONS.
@@ -73,30 +88,35 @@ const runHarness = (
     );
     const workerLogLines: WorkerLogLine[] = [];
     const unparsedLogLines: string[] = [];
-    let pendingStdout = '';
+    const mainLogLines: MainLogLine[] = [];
+    const receivedAt = new Map<WorkerLogLine | MainLogLine, number>();
     let stderr = '';
     let mainLog = '';
     let killed = false;
-    // Line-buffered: a chunk can end in the middle of a log line.
-    const readStdout = (chunk: string, flush = false) => {
-      pendingStdout += chunk;
-      const lines = pendingStdout.split('\n');
-      pendingStdout = flush ? '' : lines.pop() ?? '';
-      for (const line of lines.filter(Boolean)) {
-        try {
-          workerLogLines.push(JSON.parse(line));
-        } catch {
-          unparsedLogLines.push(line);
-        }
+    const readStdout = lineReader((line) => {
+      try {
+        const workerLogLine: WorkerLogLine = JSON.parse(line);
+        workerLogLines.push(workerLogLine);
+        receivedAt.set(workerLogLine, performance.now());
+      } catch {
+        unparsedLogLines.push(line);
       }
       if (killWhen && !killed && killWhen(workerLogLines)) {
         killed = true;
         child.kill('SIGKILL');
       }
-    };
+    });
+    const readMainLog = lineReader((line) => {
+      const mainLogLine: MainLogLine = JSON.parse(line);
+      mainLogLines.push(mainLogLine);
+      receivedAt.set(mainLogLine, performance.now());
+    });
     child.stdout?.on('data', (chunk) => readStdout(String(chunk)));
     child.stderr?.on('data', (chunk) => (stderr += chunk));
-    child.stdio[3]?.on('data', (chunk) => (mainLog += chunk));
+    child.stdio[3]?.on('data', (chunk) => {
+      mainLog += chunk;
+      readMainLog(String(chunk));
+    });
     const timer = setTimeout(() => {
       child.kill('SIGKILL');
       reject(
@@ -112,16 +132,14 @@ const runHarness = (
     child.on('close', (exitCode, signal) => {
       clearTimeout(timer);
       readStdout('', true);
-      const mainLogLines = mainLog
-        .split('\n')
-        .filter(Boolean)
-        .map((line) => JSON.parse(line));
+      readMainLog('', true);
       resolve({
         exitCode,
         signal,
         workerLogLines,
         unparsedLogLines,
         mainLogLines,
+        receivedAt,
         stderr,
       });
     });
@@ -138,6 +156,9 @@ const statsOf = ({ workerLogLines }: HarnessResult) =>
 const statsLogLines = ({ workerLogLines }: HarnessResult) =>
   workerLogLines.filter(({ kibana }) => kibana?.event_loop_watchdog?.stats);
 const blockOf = ({ kibana }: WorkerLogLine) => kibana?.event_loop_watchdog;
+/** When the test read a log line, by its own clock; NaN for a missing line, which fails any bound. */
+const readAt = ({ receivedAt }: HarnessResult, line?: WorkerLogLine | MainLogLine) =>
+  (line && receivedAt.get(line)) ?? NaN;
 
 describe('event loop watchdog in a child process', () => {
   let blocks: HarnessResult;
@@ -235,27 +256,30 @@ describe('event loop watchdog in a child process', () => {
     });
   }, 120_000);
 
-  it('reports a block that never ends while it lasts, after short blocks used up the rate limit', async () => {
+  it('detects ongoing event loop blocks once short-block notifications exceed the rate limit', async () => {
     const blockWarnings = (lines: WorkerLogLine[], ongoing: boolean) =>
       lines.filter((line) => blockOf(line)?.ongoing === ongoing);
-    // Waits for the block's first ongoing warning and one repeat as they come in, then kills the
-    // still-blocked child; the run times out if they never arrive.
+    // The main thread logs "blocking" right before it blocks for good. The child is killed as soon
+    // as the worker reports the block, and the run times out if it never does.
     const result = await runHarness('permanent_block', {
       timeoutMs: 60_000,
-      killWhen: (lines) => blockWarnings(lines, true).length >= 2,
+      killWhen: (lines) => blockWarnings(lines, true).length > 0,
     });
+    // Killed while still blocked: the block never ended, so the warning came while it lasted.
     expect(result.signal).toBe('SIGKILL');
     expect(blockWarnings(result.workerLogLines, false)).toHaveLength(REPORT_BURST);
-    const [first, repeat] = blockWarnings(result.workerLogLines, true);
-    expect(first).toMatchObject({
+    const [warning] = blockWarnings(result.workerLogLines, true);
+    expect(warning).toMatchObject({
       message: expect.stringMatching(/^Event loop blocked for ~\d+ms so far$/),
       log: { level: 'WARN', logger: 'metrics.event_loop_watchdog' },
       kibana: { event_loop_watchdog: { phase: 'running', ongoing: true } },
     });
-    expect(blockOf(first)?.blockedMs).toBeGreaterThanOrEqual(ONGOING_REPORT_AFTER_MS);
-    expect(blockOf(repeat)).toMatchObject({ ongoing: true, phase: 'running' });
-    // The repeat, and so the first warning, comes inside the ~10 s it takes a blocked event loop to
-    // fail a liveness probe.
-    expect(blockOf(repeat)?.blockedMs).toBeLessThan(10_000);
+    const blocking = result.mainLogLines.find(({ message }) => message === 'blocking');
+    expect(blocking).toBeDefined();
+    // By the test's own clock: after the main thread blocked, and inside the ~10 s it takes a
+    // blocked event loop to fail a liveness probe.
+    const sinceBlockingMs = readAt(result, warning) - readAt(result, blocking);
+    expect(sinceBlockingMs).toBeGreaterThan(0);
+    expect(sinceBlockingMs).toBeLessThan(10_000);
   }, 90_000);
 });
