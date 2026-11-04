@@ -24,12 +24,14 @@ const setup = ({
   workflow = { id: NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID, definition: {} },
   agentInstalled = true,
   withAgentBuilder = true,
+  assistantEnabled = false,
 }: {
   executions?: Array<{ id: string }>;
   execution?: Record<string, unknown>;
   workflow?: Record<string, unknown> | null;
   agentInstalled?: boolean;
   withAgentBuilder?: boolean;
+  assistantEnabled?: boolean;
 } = {}) => {
   const management = {
     getWorkflowExecutions: jest.fn().mockResolvedValue({ results: executions }),
@@ -49,6 +51,7 @@ const setup = ({
         ? ({ agents } as unknown as AgentBuilderPluginStart)
         : undefined,
       agentAvailability,
+      assistantEnabled,
     }),
     logger: loggingSystemMock.createLogger(),
   });
@@ -77,10 +80,24 @@ describe('createOnboardingClient', () => {
     const { client, agents, request } = setup({ agentInstalled: false });
 
     expect(await client.enable(request)).toEqual({ agent_installed: true });
+    expect(agents.ensure).toHaveBeenCalledTimes(1);
     expect(agents.ensure).toHaveBeenCalledWith(
       expect.objectContaining({
         spaceId: 'default',
         agent: expect.objectContaining({ id: 'nightshift.investigation' }),
+      })
+    );
+  });
+
+  it('also installs the assistant in the space when it is enabled', async () => {
+    const { client, agents, request } = setup({ agentInstalled: false, assistantEnabled: true });
+
+    await client.enable(request);
+
+    expect(agents.ensure).toHaveBeenCalledWith(
+      expect.objectContaining({
+        spaceId: 'default',
+        agent: expect.objectContaining({ id: 'nightshift.assistant' }),
       })
     );
   });
