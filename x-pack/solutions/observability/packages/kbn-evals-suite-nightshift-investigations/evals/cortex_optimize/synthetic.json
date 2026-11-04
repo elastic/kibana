@@ -53,8 +53,8 @@
       },
       "output": {
         "must_capture": [
-          { "entity_type": "integration", "section": "Tool failures", "terms": ["timed out"] },
-          { "entity_type": "integration", "section": "Tool failures", "terms": ["remote cluster"] }
+          { "entity_type": "integration", "section": "Tool failures", "terms": ["timed out|timeout"] },
+          { "entity_type": "integration", "section": "Tool failures", "terms": ["remote cluster|no_such_remote_cluster"] }
         ],
         "must_not": ["120001", "412"],
         "effects": [],

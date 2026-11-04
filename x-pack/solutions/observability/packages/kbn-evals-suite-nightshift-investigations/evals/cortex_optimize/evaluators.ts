@@ -18,9 +18,15 @@ import type {
 const pageText = ({ slug, title, content }: CortexPageSnapshot): string =>
   `${slug}\n${title}\n${content}`.toLowerCase();
 
+/** A term is present when the text holds it, or any of its `|`-separated alternatives, ignoring case. */
+export const hasTerm = (text: string, term: string): boolean => {
+  const lowered = text.toLowerCase();
+  return term.split('|').some((alternative) => lowered.includes(alternative.trim().toLowerCase()));
+};
+
 const matchesPage = (page: CortexPageSnapshot, { entity_type: entityType, terms }: CortexPageMatch) =>
   (entityType === undefined || page.entity_type === entityType) &&
-  terms.every((term) => pageText(page).includes(term.toLowerCase()));
+  terms.every((term) => hasTerm(pageText(page), term));
 
 const describeMatch = ({ entity_type: entityType, terms }: CortexPageMatch): string =>
   `${entityType ?? 'any page'} with ${terms.map((term) => `"${term}"`).join(' and ')}`;
@@ -142,7 +148,7 @@ export const captureRecallEvaluator: CortexOptimizeEvaluator = {
             capture.section === undefined ? page.content : sectionBody(page.content, capture.section);
           return (
             scope !== undefined &&
-            capture.terms.every((term) => scope.toLowerCase().includes(term.toLowerCase()))
+            capture.terms.every((term) => hasTerm(scope, term))
           );
         })
     );

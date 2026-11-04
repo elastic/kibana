@@ -70,7 +70,10 @@ const seedPageSchema = z.object({
   conversation_id: z.string().max(200).optional(),
 });
 
-/** A page matches when its type fits and every term appears in its slug, title or content. */
+/**
+ * A page matches when its type fits and every term appears in its slug, title or content. A term may
+ * list alternatives separated by `|`, any of which satisfies it.
+ */
 const pageMatchSchema = z.object({
   entity_type: entityTypeSchema.optional(),
   terms: z.array(z.string().min(1).max(200)).min(1).max(10),

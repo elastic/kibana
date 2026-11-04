@@ -8,6 +8,7 @@
 import {
   captureRecallEvaluator,
   effectsMetEvaluator,
+  hasTerm,
   mustNotAbsentEvaluator,
   newPagesTentativeEvaluator,
   nonTemporalEvaluator,
@@ -69,6 +70,17 @@ const run = (
     expected,
     metadata: { case_id: 'case', kind: 'noop' },
   } as never);
+
+describe('hasTerm', () => {
+  it('matches a term ignoring case', () => {
+    expect(hasTerm('Narrow the window and retry', 'NARROW')).toBe(true);
+  });
+
+  it('matches when any `|`-separated alternative is present', () => {
+    expect(hasTerm('the call timed out', 'timeout|timed out')).toBe(true);
+    expect(hasTerm('the call failed', 'timeout|timed out')).toBe(false);
+  });
+});
 
 describe('sectionBody', () => {
   it('returns the text under a heading until the next heading', () => {
