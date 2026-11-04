@@ -76,13 +76,13 @@ describe('useSearchSessionMemory', () => {
     const { result } = renderWithQueryClient(core, () => useSearchSessionMemory());
 
     await act(async () => {
-      result.current.mutate({ query: 'dark mode', user_id: 'u-1' });
+      result.current.mutate({ query: 'dark mode', session_id: 's-1' });
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(core.http.post).toHaveBeenCalledWith(
       '/internal/context_engine/session_memory/_search',
-      expect.objectContaining({ body: JSON.stringify({ query: 'dark mode', user_id: 'u-1' }) })
+      expect.objectContaining({ body: JSON.stringify({ query: 'dark mode', session_id: 's-1' }) })
     );
     expect(result.current.data).toEqual(hits);
   });

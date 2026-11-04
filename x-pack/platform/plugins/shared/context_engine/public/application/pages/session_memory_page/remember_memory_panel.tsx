@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnSuccessCallout } from '@kbn/ui-callout';
 import React, { useState } from 'react';
 import type {
-  RememberSessionMemoryBody,
+  RememberSessionMemoryRequestBody,
   SessionMemoryMediaItem,
 } from '../../../../common/http_api/session_memory';
 import { useRememberSessionMemory } from '../../hooks/use_session_memory_mutations';
@@ -41,12 +41,10 @@ const labels = {
 };
 
 export const buildRememberBody = (
-  { sessionId, userId, spaceId, aiIndexIds }: SessionContextValue,
+  { sessionId, aiIndexIds }: SessionContextValue,
   { content, media }: { content: string; media?: SessionMemoryMediaItem }
-): RememberSessionMemoryBody => ({
+): RememberSessionMemoryRequestBody => ({
   session_id: sessionId.trim(),
-  user_id: userId ?? '',
-  ...(spaceId ? { space: spaceId } : {}),
   ...(aiIndexIds.length ? { ai_index_ids: aiIndexIds } : {}),
   ...(content.trim() ? { content: content.trim() } : {}),
   ...(media ? { media: [media] } : {}),

@@ -28,7 +28,9 @@ interface RegisteredRoute {
   validate: unknown;
 }
 
-const scope = { session_id: 's-1', user_id: 'u-1' };
+const scope = { session_id: 's-1' };
+/** What the routes add from the request: the current user and the active space. */
+const callerScope = { user_id: 'u-1', space: 'default' };
 
 describe('session memory routes', () => {
   let routes: Record<string, RegisteredRoute>;
@@ -36,6 +38,7 @@ describe('session memory routes', () => {
   let featureFlagEnabled: boolean;
   let memoryEnabled: boolean;
   let transportRequest: jest.Mock;
+  let currentUser: { username: string } | null;
 
   const createContext = () =>
     ({
@@ -43,6 +46,7 @@ describe('session memory routes', () => {
         uiSettings: {
           client: { get: jest.fn().mockImplementation(async () => featureFlagEnabled) },
         },
+        security: { authc: { getCurrentUser: () => currentUser } },
         elasticsearch: {
           client: { asInternalUser: { transport: { request: transportRequest } } },
         },
@@ -66,6 +70,7 @@ describe('session memory routes', () => {
     memoryEnabled = true;
     response = httpServerMock.createResponseFactory();
     transportRequest = jest.fn();
+    currentUser = { username: 'u-1' };
 
     const createVersionedRoute = (method: string) => (config: RegisteredRoute['config']) => ({
       addVersion: (versionConfig: { validate: unknown }, handler: RequestHandler) => {
@@ -83,6 +88,7 @@ describe('session memory routes', () => {
     registerSessionMemoryRoutes({
       router,
       logger: loggingSystemMock.createLogger(),
+      getSpaces: async () => undefined,
       isMemoryEnabled: async () => memoryEnabled,
     });
   });
@@ -132,9 +138,9 @@ describe('session memory routes', () => {
     expect(transportRequest).not.toHaveBeenCalled();
   });
 
-  it('proxies remember to ES as the internal user and returns the stored memory', async () => {
+  it('proxies remember to ES as the internal user, scoped to the caller', async () => {
     const body = { ...scope, content: 'Prefers dark mode', media: [] };
-    const stored = { ...body, id: 'm-1', '@timestamp': '2026-01-01T00:00:00.000Z' };
+    const stored = { ...body, ...callerScope, id: 'm-1', '@timestamp': '2026-01-01T00:00:00.000Z' };
     transportRequest.mockResolvedValue(stored);
 
     await callRoute('POST', SESSION_MEMORY_REMEMBER_PATH, { body });
@@ -142,13 +148,13 @@ describe('session memory routes', () => {
     expect(transportRequest).toHaveBeenCalledWith({
       method: 'POST',
       path: '/_context_engine/session_memory/_remember',
-      body,
+      body: { ...body, ...callerScope },
     });
     expect(response.ok).toHaveBeenCalledWith({ body: stored });
   });
 
-  it('proxies search to ES with the filters and size', async () => {
-    const body = { query: 'dark mode', user_id: 'u-1', size: 5 };
+  it('proxies search to ES with the filters, size, and the caller scope', async () => {
+    const body = { query: 'dark mode', size: 5 };
     const hits = { count: 1, results: [{ _score: 0.9, memory: { id: 'm-1' } }] };
     transportRequest.mockResolvedValue(hits);
 
@@ -157,38 +163,54 @@ describe('session memory routes', () => {
     expect(transportRequest).toHaveBeenCalledWith({
       method: 'POST',
       path: '/_context_engine/session_memory/_search',
-      body,
+      body: { ...body, ...callerScope },
     });
     expect(response.ok).toHaveBeenCalledWith({ body: hits });
   });
 
-  it('lists memories with the filters as a querystring', async () => {
+  it('lists memories with the filters and the caller scope as a querystring', async () => {
     transportRequest.mockResolvedValue({ count: 0, results: [] });
-    const query = { ...scope, space: 'default', ai_index_ids: 'idx', size: 10 };
+    const query = { ...scope, ai_index_ids: 'idx', size: 10 };
 
     await callRoute('GET', SESSION_MEMORY_LIST_PATH, { query });
 
     expect(transportRequest).toHaveBeenCalledWith({
       method: 'GET',
       path: '/_context_engine/session_memory',
-      querystring: query,
+      querystring: { ...query, ...callerScope },
     });
     expect(response.ok).toHaveBeenCalledWith({ body: { count: 0, results: [] } });
   });
 
-  it('accepts a listing with no filters and defaults the size', () => {
+  it('returns 401 on every route when there is no current user', async () => {
+    currentUser = null;
+
+    await callRoute('POST', SESSION_MEMORY_REMEMBER_PATH, { body: { ...scope, content: 'x' } });
+    await callRoute('POST', SESSION_MEMORY_SEARCH_PATH, { body: { query: 'x' } });
+    await callRoute('GET', SESSION_MEMORY_LIST_PATH, { query: { size: 10 } });
+    await callRoute('POST', SESSION_EVENTS_SAVE_PATH, { body: { ...scope, transcript: 'x' } });
+    await callRoute('GET', SESSION_EVENTS_BY_SESSION_PATH, { params: { sessionId: 's-1' } });
+
+    expect(response.unauthorized).toHaveBeenCalledTimes(5);
+    expect(transportRequest).not.toHaveBeenCalled();
+  });
+
+  it('accepts a listing with no filters, defaults the size, and rejects a caller-chosen scope', () => {
     const { validate } = getRoute('GET', SESSION_MEMORY_LIST_PATH);
     const querySchema = (validate as { request: { query: { validate: (v: unknown) => unknown } } })
       .request.query;
 
     expect(querySchema.validate({})).toEqual({ size: 100 });
-    expect(() => querySchema.validate({ user_id: 'u-1', size: 1001 })).toThrow();
+    expect(() => querySchema.validate({ size: 1001 })).toThrow();
+    expect(() => querySchema.validate({ user_id: 'u-1' })).toThrow(/user_id/);
+    expect(() => querySchema.validate({ space: 'other' })).toThrow(/space/);
   });
 
-  it('proxies save event and lists a session’s events', async () => {
+  it('proxies save event and lists a session’s events in the caller’s space', async () => {
     const body = { ...scope, round_id: 'r-1', transcript: 'user: hi' };
-    transportRequest.mockResolvedValueOnce({ ...body, id: 'e-1' });
-    transportRequest.mockResolvedValueOnce({ count: 1, results: [{ ...body, id: 'e-1' }] });
+    const saved = { ...body, ...callerScope, id: 'e-1' };
+    transportRequest.mockResolvedValueOnce(saved);
+    transportRequest.mockResolvedValueOnce({ count: 1, results: [saved] });
 
     await callRoute('POST', SESSION_EVENTS_SAVE_PATH, { body });
     await callRoute('GET', SESSION_EVENTS_BY_SESSION_PATH, {
@@ -199,12 +221,12 @@ describe('session memory routes', () => {
     expect(transportRequest).toHaveBeenNthCalledWith(1, {
       method: 'POST',
       path: '/_context_engine/session_events/_save',
-      body,
+      body: { ...body, ...callerScope },
     });
     expect(transportRequest).toHaveBeenNthCalledWith(2, {
       method: 'GET',
       path: '/_context_engine/session_events/s-1',
-      querystring: { size: 100 },
+      querystring: { size: 100, space: 'default' },
     });
     expect(response.ok).toHaveBeenCalledTimes(2);
   });
@@ -249,6 +271,9 @@ describe('session memory routes', () => {
       })
     ).not.toThrow();
     expect(() => bodySchema.validate({ ...scope, '@timestamp': 'now', content: 'x' })).toThrow();
+    expect(() => bodySchema.validate({ ...scope, user_id: 'u-1', content: 'x' })).toThrow(
+      /user_id/
+    );
   });
 
   it('accepts a text or media search query and defaults the size', () => {

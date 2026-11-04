@@ -29,8 +29,8 @@ import {
   MAX_SESSION_MEMORY_SEARCH_SIZE,
 } from '../../../../common/constants';
 import type {
-  ListSessionMemoryQuery,
-  SearchSessionMemoryBody,
+  ListSessionMemoryRequestQuery,
+  SearchSessionMemoryRequestBody,
   SessionMemory,
   SessionMemoryMediaItem,
 } from '../../../../common/http_api/session_memory';
@@ -48,11 +48,10 @@ import { SessionMemoryCard } from './session_memory_card';
 type QueryMode = 'text' | 'file' | 'list';
 
 /** Which parts of the session context narrow the search. */
-export type SearchFilterKey = 'user' | 'session' | 'aiIndex';
+export type SearchFilterKey = 'session' | 'aiIndex';
 export type SearchFilters = Record<SearchFilterKey, boolean>;
 
 export const DEFAULT_SEARCH_FILTERS: SearchFilters = {
-  user: true,
   session: false,
   aiIndex: false,
 };
@@ -85,9 +84,6 @@ const labels = {
   filters: i18n.translate('xpack.contextEngine.sessionMemory.search.filters', {
     defaultMessage: 'Only memories from',
   }),
-  filterUser: i18n.translate('xpack.contextEngine.sessionMemory.search.filterUser', {
-    defaultMessage: 'this user',
-  }),
   filterSession: i18n.translate('xpack.contextEngine.sessionMemory.search.filterSession', {
     defaultMessage: 'this session',
   }),
@@ -110,13 +106,11 @@ const labels = {
 
 /** The session context fields the checked filters select; shared by search and list. */
 export const buildListQuery = (
-  { sessionId, userId, spaceId, aiIndexIds }: SessionContextValue,
+  { sessionId, aiIndexIds }: SessionContextValue,
   filters: SearchFilters,
   size: number
-): ListSessionMemoryQuery => ({
+): ListSessionMemoryRequestQuery => ({
   ...(filters.session && sessionId.trim() ? { session_id: sessionId.trim() } : {}),
-  ...(filters.user && userId ? { user_id: userId } : {}),
-  ...(spaceId ? { space: spaceId } : {}),
   // The APIs filter on a single AI index, so the filter only applies to a lone selection.
   ...(filters.aiIndex && aiIndexIds.length === 1 ? { ai_index_ids: aiIndexIds[0] } : {}),
   size,
@@ -127,7 +121,7 @@ export const buildSearchBody = (
   filters: SearchFilters,
   query: string | SessionMemoryMediaItem,
   size: number
-): SearchSessionMemoryBody => ({ query, ...buildListQuery(session, filters, size) });
+): SearchSessionMemoryRequestBody => ({ query, ...buildListQuery(session, filters, size) });
 
 interface ResultRow {
   memory: SessionMemory;
@@ -168,11 +162,6 @@ export const SearchMemoryPanel = () => {
 
   const filterOptions = [
     {
-      id: 'user',
-      label: labels.filterUser,
-      'data-test-subj': 'contextSessionMemorySearch-filter-user',
-    },
-    {
       id: 'session',
       label: labels.filterSession,
       'data-test-subj': 'contextSessionMemorySearch-filter-session',
@@ -198,7 +187,7 @@ export const SearchMemoryPanel = () => {
         description={
           <FormattedMessage
             id="xpack.contextEngine.sessionMemory.search.description"
-            defaultMessage="Find memories by meaning with free text, an image, or a PDF, or list them newest first. Filters narrow the candidates."
+            defaultMessage="Find memories by meaning with free text, an image, or a PDF, or list them newest first. Results are always the current user's memories in this space; filters narrow them further."
           />
         }
       />

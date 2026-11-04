@@ -13,11 +13,11 @@ import {
   SESSION_MEMORY_SEARCH_PATH,
 } from '../../../common/constants';
 import type {
-  ListSessionMemoryQuery,
+  ListSessionMemoryRequestQuery,
   ListSessionMemoryResponse,
-  RememberSessionMemoryBody,
+  RememberSessionMemoryRequestBody,
   RememberSessionMemoryResponse,
-  SearchSessionMemoryBody,
+  SearchSessionMemoryRequestBody,
   SearchSessionMemoryResponse,
 } from '../../../common/http_api/session_memory';
 
@@ -25,12 +25,12 @@ interface WithSignal {
   signal?: AbortSignal;
 }
 
-const toListQuery = (query: ListSessionMemoryQuery) =>
+const toListQuery = (query: ListSessionMemoryRequestQuery) =>
   Object.fromEntries(Object.entries(query).filter(([, value]) => value !== undefined));
 
 export const rememberSessionMemory = (
   http: HttpStart,
-  { body, signal }: { body: RememberSessionMemoryBody } & WithSignal
+  { body, signal }: { body: RememberSessionMemoryRequestBody } & WithSignal
 ): Promise<RememberSessionMemoryResponse> =>
   http.post<RememberSessionMemoryResponse>(SESSION_MEMORY_REMEMBER_PATH, {
     version: SESSION_MEMORY_INTERNAL_API_VERSION,
@@ -40,7 +40,7 @@ export const rememberSessionMemory = (
 
 export const searchSessionMemory = (
   http: HttpStart,
-  { body, signal }: { body: SearchSessionMemoryBody } & WithSignal
+  { body, signal }: { body: SearchSessionMemoryRequestBody } & WithSignal
 ): Promise<SearchSessionMemoryResponse> =>
   http.post<SearchSessionMemoryResponse>(SESSION_MEMORY_SEARCH_PATH, {
     version: SESSION_MEMORY_INTERNAL_API_VERSION,
@@ -50,7 +50,7 @@ export const searchSessionMemory = (
 
 export const listSessionMemory = (
   http: HttpStart,
-  { signal, ...query }: ListSessionMemoryQuery & WithSignal
+  { signal, ...query }: ListSessionMemoryRequestQuery & WithSignal
 ): Promise<ListSessionMemoryResponse> =>
   http.get<ListSessionMemoryResponse>(SESSION_MEMORY_LIST_PATH, {
     version: SESSION_MEMORY_INTERNAL_API_VERSION,

@@ -104,3 +104,13 @@ export interface ListSessionEventsResponse {
   /** Newest first. */
   results: SessionEvent[];
 }
+
+/**
+ * Request shapes of the Kibana session memory routes. The routes set `user_id` to the current user
+ * and `space` to the active space on the server, so a caller never chooses either.
+ */
+export type RememberSessionMemoryRequestBody = Omit<RememberSessionMemoryBody, 'user_id' | 'space'>;
+export type SearchSessionMemoryRequestBody = Omit<SearchSessionMemoryBody, 'user_id' | 'space'>;
+export type ListSessionMemoryRequestQuery = Omit<ListSessionMemoryQuery, 'user_id' | 'space'>;
+export type SaveSessionEventRequestBody = Omit<SaveSessionEventBody, 'user_id' | 'space'>;
+export type ListSessionEventsRequestQuery = Omit<SessionScopeQuery, 'space'>;

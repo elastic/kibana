@@ -54,15 +54,14 @@ describe('listSessionMemory', () => {
     http.get.mockResolvedValue({ count: 0, results: [] });
 
     await listSessionMemory(http, {
-      user_id: 'u-1',
-      space: 'default',
+      session_id: 's-1',
       ai_index_ids: undefined,
       size: 10,
     });
 
     expect(http.get).toHaveBeenCalledWith(SESSION_MEMORY_LIST_PATH, {
       version: SESSION_MEMORY_INTERNAL_API_VERSION,
-      query: { user_id: 'u-1', space: 'default', size: 10 },
+      query: { session_id: 's-1', size: 10 },
     });
   });
 });

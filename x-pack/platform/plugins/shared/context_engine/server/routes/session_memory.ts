@@ -11,9 +11,11 @@ import type {
   KibanaRequest,
   KibanaResponseFactory,
   Logger,
+  RequestHandlerContext,
 } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import { isResponseError } from '@kbn/es-errors';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   ES_SESSION_EVENTS_PATH,
   ES_SESSION_MEMORY_PATH,
@@ -25,16 +27,17 @@ import {
   SESSION_MEMORY_SEARCH_PATH,
 } from '../../common/constants';
 import type {
+  ListSessionEventsRequestQuery,
   ListSessionEventsResponse,
-  ListSessionMemoryQuery,
+  ListSessionMemoryRequestQuery,
   ListSessionMemoryResponse,
   RememberSessionMemoryResponse,
   SaveSessionEventResponse,
   SearchSessionMemoryResponse,
-  SessionScopeQuery,
 } from '../../common/http_api/session_memory';
 import { apiPrivileges } from '../../common/features';
 import { formatErrorMessage } from '../utils/format_es_error';
+import { resolveSpaceId } from '../utils/resolve_space_id';
 import {
   listSessionMemoryQuerySchema,
   rememberSessionMemoryBodySchema,
@@ -70,8 +73,27 @@ const handleSessionMemoryError = (
   return response.customError({ statusCode: 500, body: { message: formatErrorMessage(error) } });
 };
 
-const toListQuerystring = (query: ListSessionMemoryQuery | SessionScopeQuery) =>
+const toListQuerystring = (query: ListSessionMemoryRequestQuery | ListSessionEventsRequestQuery) =>
   Object.fromEntries(Object.entries(query).filter(([, value]) => value !== undefined));
+
+/**
+ * The caller's scope: `user_id` is the current user and `space` the active space. Neither is taken
+ * from the request, so a caller can only read and write their own memories in their space.
+ */
+const resolveScope = async (
+  ctx: RequestHandlerContext,
+  request: KibanaRequest,
+  getSpaces: () => Promise<SpacesPluginStart | undefined>
+): Promise<{ user_id: string; space: string } | undefined> => {
+  const userId = (await ctx.core).security.authc.getCurrentUser()?.username;
+  if (!userId) {
+    return undefined;
+  }
+  return { user_id: userId, space: resolveSpaceId(await getSpaces(), request) };
+};
+
+const noCurrentUser = (response: KibanaResponseFactory) =>
+  response.unauthorized({ body: { message: 'Cannot determine the current user.' } });
 
 type TransportParams = Parameters<ElasticsearchClient['transport']['request']>[0];
 
@@ -81,16 +103,19 @@ const esRequest = <T>(esClient: ElasticsearchClient, params: TransportParams): P
 /**
  * Registers the session memory and session events routes. They proxy to the Elasticsearch
  * `_context_engine` APIs as the INTERNAL USER: the backing system data streams are owned by ES, and
- * `kibana_system` holds the `manage_context_engine` cluster privilege the APIs require, so the
- * Kibana-side `contextEngine` feature privileges are the only access control applied here.
+ * `kibana_system` holds the `manage_context_engine` cluster privilege the APIs require. Access
+ * control is the Kibana-side `contextEngine` feature privileges plus the scope every proxied call
+ * gets from the request: the current user and the active space (see `resolveScope`).
  */
 export const registerSessionMemoryRoutes = ({
   router,
   logger,
+  getSpaces,
   isMemoryEnabled,
 }: {
   router: IRouter;
   logger: Logger;
+  getSpaces: () => Promise<SpacesPluginStart | undefined>;
   /** Reads the global `contextEngine:memoryEnabled` setting; routes 404 while it is off. */
   isMemoryEnabled: (request: KibanaRequest) => Promise<boolean>;
 }) => {
@@ -113,11 +138,15 @@ export const registerSessionMemoryRoutes = ({
           return response.notFound();
         }
         try {
+          const scope = await resolveScope(ctx, request, getSpaces);
+          if (!scope) {
+            return noCurrentUser(response);
+          }
           const esClient = (await ctx.core).elasticsearch.client.asInternalUser;
           const body = await esRequest<RememberSessionMemoryResponse>(esClient, {
             method: 'POST',
             path: `${ES_SESSION_MEMORY_PATH}/_remember`,
-            body: request.body,
+            body: { ...request.body, ...scope },
           });
           return response.ok({ body });
         } catch (error) {
@@ -145,11 +174,15 @@ export const registerSessionMemoryRoutes = ({
           return response.notFound();
         }
         try {
+          const scope = await resolveScope(ctx, request, getSpaces);
+          if (!scope) {
+            return noCurrentUser(response);
+          }
           const esClient = (await ctx.core).elasticsearch.client.asInternalUser;
           const body = await esRequest<SearchSessionMemoryResponse>(esClient, {
             method: 'POST',
             path: `${ES_SESSION_MEMORY_PATH}/_search`,
-            body: request.body,
+            body: { ...request.body, ...scope },
           });
           return response.ok({ body });
         } catch (error) {
@@ -176,11 +209,15 @@ export const registerSessionMemoryRoutes = ({
           return response.notFound();
         }
         try {
+          const scope = await resolveScope(ctx, request, getSpaces);
+          if (!scope) {
+            return noCurrentUser(response);
+          }
           const esClient = (await ctx.core).elasticsearch.client.asInternalUser;
           const body = await esRequest<ListSessionMemoryResponse>(esClient, {
             method: 'GET',
             path: ES_SESSION_MEMORY_PATH,
-            querystring: toListQuerystring(request.query),
+            querystring: { ...toListQuerystring(request.query), ...scope },
           });
           return response.ok({ body });
         } catch (error) {
@@ -208,11 +245,15 @@ export const registerSessionMemoryRoutes = ({
           return response.notFound();
         }
         try {
+          const scope = await resolveScope(ctx, request, getSpaces);
+          if (!scope) {
+            return noCurrentUser(response);
+          }
           const esClient = (await ctx.core).elasticsearch.client.asInternalUser;
           const body = await esRequest<SaveSessionEventResponse>(esClient, {
             method: 'POST',
             path: `${ES_SESSION_EVENTS_PATH}/_save`,
-            body: request.body,
+            body: { ...request.body, ...scope },
           });
           return response.ok({ body });
         } catch (error) {
@@ -227,7 +268,7 @@ export const registerSessionMemoryRoutes = ({
       security: READ_SECURITY,
       access: 'internal',
       summary: 'List session events',
-      description: 'Returns the events stored for a session, newest first.',
+      description: 'Returns the events stored for a session in the active space, newest first.',
     })
     .addVersion(
       {
@@ -239,11 +280,16 @@ export const registerSessionMemoryRoutes = ({
           return response.notFound();
         }
         try {
+          const scope = await resolveScope(ctx, request, getSpaces);
+          if (!scope) {
+            return noCurrentUser(response);
+          }
+          // The ES session events API filters by space but not by user.
           const esClient = (await ctx.core).elasticsearch.client.asInternalUser;
           const body = await esRequest<ListSessionEventsResponse>(esClient, {
             method: 'GET',
             path: `${ES_SESSION_EVENTS_PATH}/${encodeURIComponent(request.params.sessionId)}`,
-            querystring: toListQuerystring(request.query),
+            querystring: { ...toListQuerystring(request.query), space: scope.space },
           });
           return response.ok({ body });
         } catch (error) {

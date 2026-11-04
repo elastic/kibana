@@ -15,8 +15,8 @@ import { latestRevisionPipeline, probeColumns } from '../ai_indices/ki_list';
 import { listAiIndexRecords } from '../ai_indices/registry_api';
 import { formatErrorMessage } from '../utils/format_es_error';
 
-/** Upper bound on AI index entries read per collection. */
-const MAX_COLLECTED_AI_INDICES = 10_000;
+/** Upper bound on AI index entries read per collection: the most the ES list API returns. */
+const MAX_COLLECTED_AI_INDICES = 1_000;
 const COUNT_KIS_CONCURRENCY = 5;
 /** How long to wait on one backing index before giving up on it. */
 const ESQL_REQUEST_TIMEOUT_MS = 30_000;

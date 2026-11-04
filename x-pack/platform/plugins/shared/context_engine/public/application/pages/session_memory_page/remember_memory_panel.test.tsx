@@ -65,8 +65,6 @@ describe('RememberMemoryPanel', () => {
 
     expect(mutate).toHaveBeenCalledWith({
       session_id: 'session-1',
-      user_id: 'kathleen',
-      space: 'default',
       ai_index_ids: ['support', 'sales'],
       content: 'Prefers dark mode',
     });
@@ -86,8 +84,6 @@ describe('RememberMemoryPanel', () => {
 
     expect(mutate).toHaveBeenCalledWith({
       session_id: 'session-1',
-      user_id: 'kathleen',
-      space: 'default',
       media: [{ type: 'image', value: 'data:image/png;base64,iVBORw==', format: 'base64' }],
     });
   });
@@ -106,8 +102,6 @@ describe('RememberMemoryPanel', () => {
 
     expect(mutate).toHaveBeenCalledWith({
       session_id: 'session-1',
-      user_id: 'kathleen',
-      space: 'default',
       media: [{ type: 'pdf', value: 'data:application/pdf;base64,JVBERg==', format: 'base64' }],
     });
   });

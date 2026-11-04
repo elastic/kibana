@@ -103,7 +103,7 @@ describe('context_engine usage collector', () => {
     expect(esClient.transport.request).toHaveBeenCalledWith({
       method: 'GET',
       path: '/_context_engine/ai_index',
-      querystring: { size: 10_000 },
+      querystring: { size: 1_000 },
     });
     expect(usage).toEqual({
       ai_indices: { user: 3, managed: 0 },

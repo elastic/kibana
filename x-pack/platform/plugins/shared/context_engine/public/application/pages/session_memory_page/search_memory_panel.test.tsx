@@ -48,7 +48,7 @@ describe('SearchMemoryPanel', () => {
 
   afterEach(() => jest.clearAllMocks());
 
-  it('searches by text, scoped to the current user and space by default', () => {
+  it('searches by text with the size', () => {
     const mutate = jest.fn();
     mockUseSearchSessionMemory.mockReturnValue(mutationResult({ mutate }));
     renderWithProviders(<SearchMemoryPanel />);
@@ -64,8 +64,6 @@ describe('SearchMemoryPanel', () => {
 
     expect(mutate).toHaveBeenCalledWith({
       query: 'dark mode',
-      user_id: 'kathleen',
-      space: 'default',
       size: 5,
     });
   });
@@ -80,7 +78,6 @@ describe('SearchMemoryPanel', () => {
     fireEvent.change(screen.getByTestId('contextSessionMemorySearch-text'), {
       target: { value: 'dark mode' },
     });
-    fireEvent.click(screen.getByTestId('contextSessionMemorySearch-filter-user'));
     fireEvent.click(screen.getByTestId('contextSessionMemorySearch-filter-session'));
     fireEvent.click(screen.getByTestId('contextSessionMemorySearch-filter-aiIndex'));
     fireEvent.click(screen.getByTestId('contextSessionMemorySearch-submit'));
@@ -88,7 +85,6 @@ describe('SearchMemoryPanel', () => {
     expect(mutate).toHaveBeenCalledWith({
       query: 'dark mode',
       session_id: 'session-1',
-      space: 'default',
       ai_index_ids: 'support',
       size: 10,
     });
@@ -120,8 +116,6 @@ describe('SearchMemoryPanel', () => {
 
     expect(mutate).toHaveBeenCalledWith({
       query: { type: 'image', value: 'data:image/png;base64,iVBORw==', format: 'base64' },
-      user_id: 'kathleen',
-      space: 'default',
       size: 10,
     });
   });
@@ -141,8 +135,6 @@ describe('SearchMemoryPanel', () => {
 
     expect(mutate).toHaveBeenCalledWith({
       query: { type: 'pdf', value: 'data:application/pdf;base64,JVBERg==', format: 'base64' },
-      user_id: 'kathleen',
-      space: 'default',
       size: 10,
     });
   });
@@ -159,9 +151,7 @@ describe('SearchMemoryPanel', () => {
     fireEvent.click(screen.getByTestId('contextSessionMemorySearch-submit'));
 
     expect(mutate).toHaveBeenCalledWith({
-      user_id: 'kathleen',
       session_id: 'session-1',
-      space: 'default',
       size: 10,
     });
   });

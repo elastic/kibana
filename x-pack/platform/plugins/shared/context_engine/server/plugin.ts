@@ -328,6 +328,10 @@ export class ContextEnginePlugin
     registerSessionMemoryRoutes({
       router,
       logger: this.logger.get('routes'),
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
       isMemoryEnabled,
     });
 

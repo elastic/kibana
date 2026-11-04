@@ -8,11 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import { useMutation } from '@kbn/react-query';
 import type {
-  ListSessionMemoryQuery,
+  ListSessionMemoryRequestQuery,
   ListSessionMemoryResponse,
-  RememberSessionMemoryBody,
+  RememberSessionMemoryRequestBody,
   RememberSessionMemoryResponse,
-  SearchSessionMemoryBody,
+  SearchSessionMemoryRequestBody,
   SearchSessionMemoryResponse,
 } from '../../../common/http_api/session_memory';
 import {
@@ -42,7 +42,7 @@ export const useRememberSessionMemory = () => {
     })
   );
 
-  return useMutation<RememberSessionMemoryResponse, Error, RememberSessionMemoryBody>({
+  return useMutation<RememberSessionMemoryResponse, Error, RememberSessionMemoryRequestBody>({
     mutationFn: (body) => rememberSessionMemory(http, { body }),
     onError,
   });
@@ -58,7 +58,7 @@ export const useSearchSessionMemory = () => {
     })
   );
 
-  return useMutation<SearchSessionMemoryResponse, Error, SearchSessionMemoryBody>({
+  return useMutation<SearchSessionMemoryResponse, Error, SearchSessionMemoryRequestBody>({
     mutationFn: (body) => searchSessionMemory(http, { body }),
     onError,
   });
@@ -74,7 +74,7 @@ export const useListSessionMemory = () => {
     })
   );
 
-  return useMutation<ListSessionMemoryResponse, Error, ListSessionMemoryQuery>({
+  return useMutation<ListSessionMemoryResponse, Error, ListSessionMemoryRequestQuery>({
     mutationFn: (query) => listSessionMemory(http, query),
     onError,
   });
