@@ -95,7 +95,7 @@ describe('CreateAutomationFlyout', () => {
           tags: ['oncall'],
           isEnabled: false,
           trigger: { rows: [{ kind: 'alert' }] },
-          execution: { promptTemplate: 'Find the root cause', reasoningMode: 'investigate' },
+          execution: { promptTemplate: 'Find the root cause' },
           completions: [],
           runtime: { dailyDispatchLimit: 20 },
         },
@@ -106,18 +106,46 @@ describe('CreateAutomationFlyout', () => {
     expect(onCreated).toHaveBeenCalledWith('created-1');
   });
 
-  it('requires instructions for a scheduled automation', async () => {
+  it('shows missing scheduled instructions and name on save without disabling the buttons', async () => {
     renderFlyout();
     await addTrigger('Every…');
-    expect(screen.getByTestId('submitAutomation')).toBeDisabled();
     const instructions = screen.getByTestId('automationInstructions');
     expect(instructions).toHaveAttribute('maxlength', '5000');
+    expect(instructions).toBeValid();
+    expect(screen.getByTestId('submitAutomation')).toBeEnabled();
+    expect(screen.getByTestId('submitAndEnableAutomation')).toBeEnabled();
+
+    fireEvent.click(screen.getByTestId('submitAutomation'));
+    expect(mutate).not.toHaveBeenCalled();
+    expect(screen.getByTestId('automationName')).toBeInvalid();
+    expect(screen.getByText('Give this automation a name.')).toBeInTheDocument();
+    expect(instructions).toBeInvalid();
+    expect(
+      screen.getByText(
+        'Add instructions describing what this scheduled automation should investigate.'
+      )
+    ).toBeInTheDocument();
+
+    rename('Checkout health');
+    fireEvent.change(instructions, { target: { value: '   ' } });
+    expect(screen.getByTestId('submitAndEnableAutomation')).toBeEnabled();
+    fireEvent.click(screen.getByTestId('submitAndEnableAutomation'));
+    expect(mutate).not.toHaveBeenCalled();
+    expect(instructions).toBeInvalid();
+
     fireEvent.change(instructions, {
       target: { value: 'Review checkout errors over the last hour.' },
     });
-    expect(screen.getByTestId('submitAutomation')).toBeEnabled();
-    fireEvent.change(instructions, { target: { value: '   ' } });
-    expect(screen.getByTestId('submitAutomation')).toBeDisabled();
+    expect(instructions).toBeValid();
+    fireEvent.click(screen.getByTestId('submitAndEnableAutomation'));
+    expect(mutate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Checkout health',
+        isEnabled: true,
+        execution: { promptTemplate: 'Review checkout errors over the last hour.' },
+      }),
+      expect.any(Object)
+    );
   });
 
   it('requires the daily trigger limit to be between 1 and 50', async () => {
