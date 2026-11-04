@@ -415,6 +415,9 @@ importers:
       '@elastic/filesaver':
         specifier: 1.1.2
         version: 1.1.2
+      '@elastic/isomer-primitives-charts':
+        specifier: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c1.ab920b2.tgz
+        version: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c1.ab920b2.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
       '@elastic/isomer-runtime':
         specifier: 0.4.0
         version: 0.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
@@ -11226,6 +11229,12 @@ packages:
 
   '@elastic/filesaver@1.1.2':
     resolution: {integrity: sha512-YZbSufYFBhAj+S2cJgiKALoxIJevqXN2MSr6Yqr42rJdaPuM31cj6pUDwflkql1oDjupqD9la+MfxPFjXI1JFQ==}
+
+  '@elastic/isomer-primitives-charts@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c1.ab920b2.tgz':
+    resolution: {integrity: sha512-m08/OjT90RPEd34+9Bdp+f0VECfwM9DUBEdMgAApCmOrlPy8Tz8jZ2gp7IM5GJy+UCNMEKrkLoYIEUhvBX7kHA==, tarball: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c1.ab920b2.tgz}
+    version: 0.0.0-c1.ab920b2
+    peerDependencies:
+      zod: 4.6.5
 
   '@elastic/isomer-runtime@0.4.0':
     resolution: {integrity: sha512-4joLm1LFziM+OGUwQmpCb6QL/X7jw5K1xWiL+9I14QWamnPJbX/eVfb7Wc428pq/HMnL7INwhYQqaucOXIeNBw==}
@@ -27375,6 +27384,15 @@ snapshots:
       vfile: 4.2.1
 
   '@elastic/filesaver@1.1.2': {}
+
+  '@elastic/isomer-primitives-charts@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c1.ab920b2.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)':
+    dependencies:
+      '@elastic/isomer-sdk': 0.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
+      zod: 4.6.5
+    transitivePeerDependencies:
+      - react
+      - react-dom
+      - supports-color
 
   '@elastic/isomer-runtime@0.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)':
     dependencies:

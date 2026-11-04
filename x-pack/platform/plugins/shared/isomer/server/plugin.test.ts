@@ -137,7 +137,9 @@ describe('IsomerPlugin', () => {
       asScoped(request).materialize({ type: 'note', config: { text: '' } })
     ).resolves.toEqual({
       type: 'unsupported',
+      title: 'Content not available',
       reason: expect.stringMatching(/^The note materialized into an invalid node: text /),
+      source: expect.objectContaining({ kind: 'kibana', materializer: 'note' }),
     });
     expect(data.search.asScoped).toHaveBeenCalledWith(request);
   });

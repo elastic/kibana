@@ -122,6 +122,7 @@ export const LICENSE_OVERRIDES = {
   '@elastic/pretty-printer': ['Elastic License 2.0'],
   '@elastic/statistics': ['Elastic License 2.0'],
   '@elastic/distillate': ['Elastic License 2.0'],
+  '@elastic/isomer-primitives-charts': ['Elastic License 2.0'],
   '@elastic/isomer-runtime': ['Elastic License 2.0'],
   '@elastic/isomer-sdk': ['Elastic License 2.0'],
   '@elastic/eui': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],
