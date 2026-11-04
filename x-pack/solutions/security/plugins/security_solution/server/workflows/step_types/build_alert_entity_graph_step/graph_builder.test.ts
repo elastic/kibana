@@ -362,7 +362,7 @@ describe('buildRelatedAlertsGraph', () => {
         ['host.id']
       );
 
-      expect(result.stats.depth_reached).toBe(0);
+      expect(result.stats?.depth_reached).toBe(0);
       expect(result.alerts).toEqual([
         expect.objectContaining({
           alert_id: 'A',
