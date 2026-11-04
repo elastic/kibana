@@ -12,6 +12,7 @@ import { isConversationNotFoundError } from '@kbn/agent-builder-common';
 import type {
   CallbackAdmissionCheck,
   CallbackAdmissionContext,
+  CallbackAdmissionRelease,
   CallbackConversationResolver,
   CallbackConversationResolverContext,
   CallbacksSetup,
@@ -99,11 +100,39 @@ export class CallbackDeliveryService {
     return conversation ? { conversationId: conversation.id } : undefined;
   }
 
-  /** Runs the registered admission checks in order; the first that throws refuses the execution. */
-  async admitNewConversation(context: CallbackAdmissionContext): Promise<void> {
-    for (const check of this.admissionChecks) {
-      await check(context);
+  /**
+   * Runs the registered admission checks in order; the first that throws refuses the execution and
+   * gives back what the checks before it took. Resolves to the release of everything the checks
+   * took, which never throws.
+   */
+  async admitNewConversation(context: CallbackAdmissionContext): Promise<CallbackAdmissionRelease> {
+    const releases: CallbackAdmissionRelease[] = [];
+    const releaseAll = async () => {
+      for (const release of releases.splice(0).reverse()) {
+        try {
+          await release();
+        } catch (error) {
+          this.logger.warn(
+            `Could not release a callback admission: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+      }
+    };
+
+    try {
+      for (const check of this.admissionChecks) {
+        const release = await check(context);
+        if (release) {
+          releases.push(release);
+        }
+      }
+    } catch (error) {
+      await releaseAll();
+      throw error;
     }
+    return releaseAll;
   }
 
   validateCallbackUrl(callbackUrl: string): void {

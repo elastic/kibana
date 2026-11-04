@@ -70,6 +70,8 @@ export const RunLimitsSection = ({
     prefix: 'saveRunLimitsConfirmationModalTitle',
   });
   const response = quotas.data;
+  const sharedSwitchOn =
+    draftState !== undefined && groups.some((group) => draftState.draft.limits[group] !== 0);
 
   return (
     <>
@@ -128,7 +130,7 @@ export const RunLimitsSection = ({
                         'xpack.nightshift.settings.runLimits.sharedEnabledSwitchLabel',
                         { defaultMessage: 'Enforce daily limits' }
                       )}
-                      checked={groups.some((group) => draftState.draft.limits[group] !== 0)}
+                      checked={sharedSwitchOn}
                       disabled={!canManage || isSaving}
                       onChange={(event) =>
                         groups.forEach((group) => setLimitEnabled(group, event.target.checked))
@@ -169,6 +171,7 @@ export const RunLimitsSection = ({
                       onEnabledChange={
                         sharedSwitch ? undefined : (enabled) => setLimitEnabled(group, enabled)
                       }
+                      sectionEnabled={sharedSwitchOn}
                     />
                   </React.Fragment>
                 );

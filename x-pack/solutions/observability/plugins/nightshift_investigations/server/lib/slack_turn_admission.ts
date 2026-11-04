@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { serverUnavailable, tooManyRequests } from '@hapi/boom';
+import { tooManyRequests } from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
-import { ConversationOriginType } from '@kbn/agent-builder-common';
+import { ConversationOriginType, createInternalError } from '@kbn/agent-builder-common';
 import type { CallbackAdmissionCheck } from '@kbn/agent-builder-server';
 import { NIGHTSHIFT_ASSISTANT_AGENT_ID, NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common';
 import { evaluateInvestigationQuota } from '../client/evaluate_investigation_quota';
@@ -21,7 +21,8 @@ const SLACK_AGENT_IDS: ReadonlySet<string> = new Set([
 
 /**
  * Charges the daily manual investigation quota for a Slack mention of a Nightshift agent that
- * opens a new conversation. A mention in a thread that already has a conversation is not charged.
+ * opens a new conversation, and gives the slot back when the turn writes no conversation. A
+ * mention in a thread that already has a conversation is not charged.
  */
 export const createSlackTurnAdmissionCheck =
   ({
@@ -36,16 +37,18 @@ export const createSlackTurnAdmissionCheck =
       return;
     }
 
-    const { allowed, deniedBy } = await evaluateInvestigationQuota({
+    const { allowed, deniedBy, release } = await evaluateInvestigationQuota({
       callback: getQuotaCallback(),
       trigger: 'manual',
       logger,
     }).catch((error) => {
+      // Agent Builder's routes keep the status of its own errors but turn a 5xx Boom into a 500.
       throw error instanceof InvestigationUnavailableError
-        ? serverUnavailable(error.message)
+        ? createInternalError(error.message, { statusCode: 503 })
         : error;
     });
     if (!allowed) {
       throw tooManyRequests(new InvestigationQuotaDeniedError(deniedBy ?? 'manual').message);
     }
+    return release;
   };

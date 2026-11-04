@@ -27,8 +27,17 @@ export interface CallbackAdmissionContext extends CallbackConversationResolverCo
   agentId: string;
 }
 
-/** Throws to refuse a turn that would open a new conversation; the error is returned to the caller. */
-export type CallbackAdmissionCheck = (context: CallbackAdmissionContext) => Promise<void>;
+/** Gives back what an admission check took, when the turn it admitted writes no conversation after all. */
+export type CallbackAdmissionRelease = () => Promise<void>;
+
+/**
+ * Throws to refuse a turn that would open a new conversation; the error is returned to the caller.
+ * Runs after the caller is authorized to run the agent and never for a replayed delivery. Resolves
+ * to a release when it took something that a turn which writes no conversation must give back.
+ */
+export type CallbackAdmissionCheck = (
+  context: CallbackAdmissionContext
+) => Promise<CallbackAdmissionRelease | void>;
 
 /** Delivers callback payloads to the callback URLs it handles. */
 export interface CallbackTransportDefinition {

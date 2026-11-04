@@ -247,6 +247,66 @@ describe('RunLimitsSection', () => {
     );
   });
 
+  it('restores the previous limits after saving the shared switch off', async () => {
+    const groups = ['investigation', 'manual_investigation', 'total_investigation'] as const;
+    const limits = {
+      detection: 100,
+      investigation: 4,
+      manual_investigation: 6,
+      total_investigation: 9,
+      ki_extraction: 20,
+    };
+    setup(response({ limits }), groups, 'automations', true);
+    save.mockResolvedValueOnce(
+      response({
+        limits: { ...limits, investigation: 0, manual_investigation: 0, total_investigation: 0 },
+      })
+    );
+
+    fireEvent.click(screen.getByTestId('nightshiftRunLimitsEnabledSwitch'));
+    fireEvent.click(screen.getByTestId('streams-settings-save-button'));
+    await waitFor(() =>
+      expect(screen.getByTestId('nightshiftRunLimitsEnabledSwitch')).not.toBeChecked()
+    );
+
+    fireEvent.click(screen.getByTestId('nightshiftRunLimitsEnabledSwitch'));
+    expect(screen.getByTestId('nightshiftRunLimitInput-investigation')).toHaveValue(4);
+    expect(screen.getByTestId('nightshiftRunLimitInput-manual_investigation')).toHaveValue(6);
+    expect(screen.getByTestId('nightshiftRunLimitInput-total_investigation')).toHaveValue(9);
+  });
+
+  it('edits a single unlimited limit under the shared switch, where empty means no limit', async () => {
+    setup(
+      response({
+        limits: {
+          detection: 100,
+          investigation: 0,
+          manual_investigation: 5,
+          total_investigation: 10,
+          ki_extraction: 20,
+        },
+      }),
+      ['investigation', 'manual_investigation', 'total_investigation'],
+      'automations',
+      true
+    );
+
+    const automatic = screen.getByTestId('nightshiftRunLimitInput-investigation');
+    expect(automatic).toHaveValue(null);
+    expect(automatic).toHaveAttribute('placeholder', 'No limit');
+    fireEvent.change(automatic, { target: { value: '7' } });
+    fireEvent.change(screen.getByTestId('nightshiftRunLimitInput-manual_investigation'), {
+      target: { value: '' },
+    });
+    fireEvent.click(screen.getByTestId('streams-settings-save-button'));
+
+    await waitFor(() =>
+      expect(save).toHaveBeenCalledWith({
+        limits: { investigation: 7, manual_investigation: null },
+      })
+    );
+  });
+
   it('cancels run-limit changes through the shared save bar', () => {
     setup(response(), ['investigation']);
     fireEvent.change(screen.getByTestId('nightshiftRunLimitInput-investigation'), {

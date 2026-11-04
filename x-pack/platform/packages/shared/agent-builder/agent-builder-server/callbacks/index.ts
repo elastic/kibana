@@ -8,6 +8,7 @@
 export type {
   CallbackAdmissionCheck,
   CallbackAdmissionContext,
+  CallbackAdmissionRelease,
   CallbackConversationResolver,
   CallbackConversationResolverContext,
   CallbackTransportDefinition,

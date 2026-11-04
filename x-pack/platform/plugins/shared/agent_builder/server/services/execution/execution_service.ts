@@ -39,6 +39,7 @@ import {
 } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { attachmentChangesToEvents } from '@kbn/agent-builder-server/attachments';
+import type { CallbackAdmissionContext } from '@kbn/agent-builder-server/callbacks';
 import type {
   AbortExecutionOptions,
   AbortExecutionResult,
@@ -188,6 +189,14 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       }
     }
 
+    // After the caller is authorized, and never for a replayed delivery, which the original already
+    // paid for. Given back below whenever the turn writes no conversation.
+    const admission = resolvedConversation?.admission;
+    const releaseAdmission =
+      admission && !(await this.isIdempotentReplay({ executionClient, executionId, metadata }))
+        ? await this.deps.callbackDeliveryService.admitNewConversation(admission)
+        : undefined;
+
     // Reserved for the round this run opens, so its events are named after it.
     const roundId = uuidv4();
 
@@ -222,6 +231,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         interactivity,
       });
     } catch (err) {
+      await releaseAdmission?.();
       if (isVersionConflictError(err)) {
         if (metadata?.execution_idempotency_key) {
           this.logger.debug(
@@ -281,6 +291,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
         activeConversationId = conversation.id;
       } catch (err) {
+        await releaseAdmission?.();
         // A refused run never started, so it leaves no execution record behind: a keyed
         // redelivery then starts afresh instead of replaying the refusal.
         if (isConversationBusyError(err) || isConversationWriteConflictError(err)) {
@@ -408,26 +419,35 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     }
 
     const conversationClient = await this.deps.conversationService.getScopedClient({ request });
-    const { validatedParams, conversation, receivedAt } = await this.resolveConversationRequest({
-      params,
-      request,
-      conversationClient,
-      spaceId: getCurrentSpaceId({ request, spaces: this.deps.spaces }),
-    });
+    const { validatedParams, conversation, receivedAt, admission } =
+      await this.resolveConversationRequest({
+        params,
+        request,
+        conversationClient,
+        spaceId: getCurrentSpaceId({ request, spaces: this.deps.spaces }),
+      });
 
     const created = conversation.operation === 'CREATE';
+    const releaseAdmission = admission
+      ? await this.deps.callbackDeliveryService.admitNewConversation(admission)
+      : undefined;
 
-    await this.writeUserMessage({
-      conversation,
-      conversationClient,
-      params: validatedParams,
-      request,
-      receivedAt,
-      // A uuid, so no round write can claim this message as its own.
-      eventId: uuidv4(),
-      // With no run to merge them later, the attachments become conversation-level versions here.
-      mergeAttachments: true,
-    });
+    try {
+      await this.writeUserMessage({
+        conversation,
+        conversationClient,
+        params: validatedParams,
+        request,
+        receivedAt,
+        // A uuid, so no round write can claim this message as its own.
+        eventId: uuidv4(),
+        // With no run to merge them later, the attachments become conversation-level versions here.
+        mergeAttachments: true,
+      });
+    } catch (err) {
+      await releaseAdmission?.();
+      throw err;
+    }
 
     // The conversation events a run would emit, so a caller reads its id the one way whether or
     // not the agent was asked to answer.
@@ -984,6 +1004,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     validatedParams: ConversationExecutionParams;
     conversation: ConversationWithOperation;
     receivedAt: Date;
+    admission?: CallbackAdmissionContext;
   }> {
     const validatedParams = await this.validateAttachments(params, request);
     const receivedAt = new Date();
@@ -1008,13 +1029,18 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       subagentCreation: resolvedParams.subagentCreation,
     });
 
-    return { validatedParams: resolvedParams, conversation, receivedAt };
+    return {
+      validatedParams: resolvedParams,
+      conversation,
+      receivedAt,
+      admission: resolved.admission,
+    };
   }
 
   /**
    * The conversation an execution continues and the agent it runs on: the ones it names, else the
-   * ones its origin resolves to. No conversation id starts a new conversation, which an origin's
-   * execution only does once the admission checks allow it.
+   * ones its origin resolves to. No conversation id starts a new conversation; for an origin's
+   * execution, `admission` is what the admission checks must allow before it is written.
    */
   private async resolveConversation({
     params,
@@ -1026,7 +1052,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     spaceId: string;
     request: KibanaRequest;
     conversationClient: ConversationClient;
-  }): Promise<{ conversationId?: string; agentId: string }> {
+  }): Promise<{ conversationId?: string; agentId: string; admission?: CallbackAdmissionContext }> {
     const { conversationId, origin } = params;
     const agentId = this.requestedAgentId(params);
 
@@ -1040,13 +1066,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     );
 
     if (!resolution) {
-      await this.deps.callbackDeliveryService.admitNewConversation({
-        origin,
-        spaceId,
-        request,
-        agentId,
-      });
-      return { agentId };
+      return { agentId, admission: { origin, spaceId, request, agentId } };
     }
 
     return {

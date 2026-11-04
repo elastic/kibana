@@ -74,8 +74,13 @@ interface RunLimitRowProps {
   limit: RunLimitDraft;
   disabled: boolean;
   onChange: (limit: RunLimitDraft) => void;
-  /** Without it the row has no switch of its own, and a section-wide switch turns it on and off. */
+  /**
+   * Without it the row has no switch of its own: a section-wide switch shows its input, in which
+   * an empty value means no limit.
+   */
   onEnabledChange?: (enabled: boolean) => void;
+  /** Whether the section-wide switch is on, for a row without a switch of its own. */
+  sectionEnabled?: boolean;
 }
 
 export const RunLimitRow = ({
@@ -85,8 +90,11 @@ export const RunLimitRow = ({
   disabled,
   onChange,
   onEnabledChange,
+  sectionEnabled = false,
 }: RunLimitRowProps) => {
+  const hasOwnSwitch = onEnabledChange !== undefined;
   const limitEnabled = limit !== 0;
+  const showInput = hasOwnSwitch ? limitEnabled : sectionEnabled;
   const invalid = limitEnabled && !isValidLimitedRunLimitDraft(limit);
   const dailyLimitLabel = i18n.translate(
     'xpack.nightshift.settings.runLimits.dailyLimitInputLabel',
@@ -142,7 +150,7 @@ export const RunLimitRow = ({
         </>
       ) : null}
 
-      {limitEnabled ? (
+      {showInput ? (
         <EuiFormRow
           label={dailyLimitLabel}
           helpText={countDescription}
@@ -167,7 +175,14 @@ export const RunLimitRow = ({
               }
             )}
             data-test-subj={`nightshiftRunLimitInput-${group}`}
-            value={limit}
+            value={limitEnabled ? limit : ''}
+            placeholder={
+              hasOwnSwitch
+                ? undefined
+                : i18n.translate('xpack.nightshift.settings.runLimits.noLimitPlaceholder', {
+                    defaultMessage: 'No limit',
+                  })
+            }
             min={MIN_LIMITED_RUN_LIMIT}
             max={MAX_RUN_LIMIT}
             step={1}
@@ -175,7 +190,9 @@ export const RunLimitRow = ({
             disabled={disabled}
             onChange={(event) => {
               const nextLimit = parseRunLimitDraft(event.target.value);
-              if (nextLimit !== 0) {
+              if (nextLimit === '' && !hasOwnSwitch) {
+                onChange(0);
+              } else if (nextLimit !== 0) {
                 onChange(nextLimit);
               }
             }}

@@ -279,9 +279,34 @@ describe('admitNewConversation', () => {
   };
 
   it('admits when no check is registered', async () => {
-    await expect(
-      createCallbackDeliveryService().admitNewConversation(context)
-    ).resolves.toBeUndefined();
+    await expect(createCallbackDeliveryService().admitNewConversation(context)).resolves.toEqual(
+      expect.any(Function)
+    );
+  });
+
+  it('gives back what earlier checks took when a later check refuses', async () => {
+    const service = createCallbackDeliveryService();
+    const release = jest.fn().mockResolvedValue(undefined);
+    service.setup().registerAdmissionCheck(jest.fn().mockResolvedValue(release));
+    service.setup().registerAdmissionCheck(jest.fn().mockRejectedValue(new Error('refused')));
+
+    await expect(service.admitNewConversation(context)).rejects.toThrow('refused');
+    expect(release).toHaveBeenCalledTimes(1);
+  });
+
+  it('releases every admission once, without throwing when a release fails', async () => {
+    const service = createCallbackDeliveryService();
+    const failing = jest.fn().mockRejectedValue(new Error('storage down'));
+    const release = jest.fn().mockResolvedValue(undefined);
+    service.setup().registerAdmissionCheck(jest.fn().mockResolvedValue(release));
+    service.setup().registerAdmissionCheck(jest.fn().mockResolvedValue(failing));
+
+    const releaseAll = await service.admitNewConversation(context);
+    await expect(releaseAll()).resolves.toBeUndefined();
+    await releaseAll();
+
+    expect(failing).toHaveBeenCalledTimes(1);
+    expect(release).toHaveBeenCalledTimes(1);
   });
 
   it('runs every registered check in order', async () => {

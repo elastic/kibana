@@ -17,6 +17,7 @@ import {
   createRunQuotaDraftState,
   hasRunQuotaDraftChanges,
   isLowerFiniteLimit,
+  keepRestoreLimits,
   setRunLimitEnabled,
   type RunLimitDraft,
   type RunQuotaDraftState,
@@ -44,7 +45,9 @@ export const useRunLimitsForm = ({ groups }: { groups: readonly RunQuotaGroup[] 
       return;
     }
     setDraftState((current) =>
-      current && hasRunQuotaDraftChanges(current) ? current : createRunQuotaDraftState(quotas.data)
+      current && hasRunQuotaDraftChanges(current)
+        ? current
+        : keepRestoreLimits(createRunQuotaDraftState(quotas.data), current)
     );
   }, [quotas.data]);
 
@@ -82,7 +85,7 @@ export const useRunLimitsForm = ({ groups }: { groups: readonly RunQuotaGroup[] 
     setSaveError(undefined);
     try {
       const response = await save(update);
-      setDraftState(createRunQuotaDraftState(response));
+      setDraftState((current) => keepRestoreLimits(createRunQuotaDraftState(response), current));
       setShowConfirmation(false);
       return 'saved';
     } catch (error) {
@@ -132,8 +135,9 @@ export const useRunLimitsForm = ({ groups }: { groups: readonly RunQuotaGroup[] 
   }, []);
 
   const cancel = useCallback(() => {
-    if (quotas.data) {
-      setDraftState(createRunQuotaDraftState(quotas.data));
+    const loaded = quotas.data;
+    if (loaded) {
+      setDraftState((current) => keepRestoreLimits(createRunQuotaDraftState(loaded), current));
     }
     setSaveError(undefined);
     setShowConfirmation(false);

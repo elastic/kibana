@@ -93,6 +93,31 @@ export const createRunQuotaDraftState = ({
   };
 };
 
+/**
+ * Keeps the finite limit to restore for each limit `next` stores as unlimited, so turning a limit
+ * back on after a save or a refresh restores the value it had rather than the default.
+ */
+export const keepRestoreLimits = (
+  next: RunQuotaDraftState,
+  previous?: RunQuotaDraftState
+): RunQuotaDraftState =>
+  previous
+    ? {
+        ...next,
+        draft: {
+          ...next.draft,
+          restoreLimits: Object.fromEntries(
+            RUN_QUOTA_GROUPS.map((group) => [
+              group,
+              next.saved.limits[group] === MIN_RUN_LIMIT
+                ? previous.draft.restoreLimits[group]
+                : next.draft.restoreLimits[group],
+            ])
+          ) as Record<RunQuotaGroup, number>,
+        },
+      }
+    : next;
+
 export const hasRunQuotaDraftChanges = ({ saved, draft }: RunQuotaDraftState): boolean =>
   saved.enabled !== draft.enabled ||
   RUN_QUOTA_GROUPS.some((group) => saved.limits[group] !== draft.limits[group]);

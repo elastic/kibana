@@ -7,7 +7,7 @@
 
 import { isBoom } from '@hapi/boom';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { ConversationOriginType } from '@kbn/agent-builder-common';
+import { ConversationOriginType, isAgentBuilderError } from '@kbn/agent-builder-common';
 import { NIGHTSHIFT_ASSISTANT_AGENT_ID, NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common';
 import type { InvestigationQuotaCallback } from '../types';
 import { createSlackTurnAdmissionCheck } from './slack_turn_admission';
@@ -24,11 +24,12 @@ const admit = (agentId: string, callback?: InvestigationQuotaCallback) =>
 
 describe('createSlackTurnAdmissionCheck', () => {
   it.each([NIGHTSHIFT_ASSISTANT_AGENT_ID, NIGHTSHIFT_INVESTIGATION_AGENT_ID])(
-    'charges the manual investigation quota for a new %s conversation',
+    'charges the manual investigation quota for a new %s conversation and returns its release',
     async (agentId) => {
-      const callback = jest.fn().mockResolvedValue({ allowed: true });
+      const release = jest.fn();
+      const callback = jest.fn().mockResolvedValue({ allowed: true, release });
 
-      await expect(admit(agentId, callback)).resolves.toBeUndefined();
+      await expect(admit(agentId, callback)).resolves.toBe(release);
       expect(callback).toHaveBeenCalledWith('manual');
     }
   );
@@ -52,9 +53,9 @@ describe('createSlackTurnAdmissionCheck', () => {
     expect(callback).not.toHaveBeenCalled();
   });
 
-  it('refuses with 503 when the quota check is unavailable', async () => {
+  it('refuses with a 503 Agent Builder error when the quota check is unavailable', async () => {
     const error = await admit(NIGHTSHIFT_ASSISTANT_AGENT_ID).catch((e) => e);
 
-    expect(isBoom(error) && error.output.statusCode).toBe(503);
+    expect(isAgentBuilderError(error) && error.meta.statusCode).toBe(503);
   });
 });

@@ -1786,7 +1786,7 @@ describe('AgentExecutionService', () => {
         expect(mockExecutionClient.create).not.toHaveBeenCalled();
       });
 
-      it('admits a new conversation on the requested agent before creating it', async () => {
+      it('admits a new conversation on the requested agent before recording the execution', async () => {
         await converse({ conversationId: undefined, origin });
 
         expect(admitNewConversation).toHaveBeenCalledWith({
@@ -1796,8 +1796,58 @@ describe('AgentExecutionService', () => {
           agentId: 'agent-1',
         });
         expect(admitNewConversation.mock.invocationCallOrder[0]).toBeLessThan(
-          conversationClient.create.mock.invocationCallOrder[0]
+          mockExecutionClient.create.mock.invocationCallOrder[0]
         );
+      });
+
+      it('does not admit a caller who may not run the agent', async () => {
+        agentRegistry.get.mockImplementation(async (agentId, options) => {
+          if (options?.access === 'use') {
+            throw new Error('forbidden');
+          }
+          return createMockedInternalAgent({ id: agentId });
+        });
+
+        await expect(converse({ conversationId: undefined, origin })).rejects.toThrow('forbidden');
+        expect(admitNewConversation).not.toHaveBeenCalled();
+      });
+
+      it('does not admit a replayed delivery', async () => {
+        mockExecutionClient.peek.mockResolvedValue({
+          status: ExecutionStatus.scheduled,
+          eventCount: 0,
+        });
+        mockExecutionClient.create.mockRejectedValueOnce(conflictError());
+
+        await service.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request: httpServerMock.createKibanaRequest(),
+          executionId: 'exec-1',
+          metadata: { execution_idempotency_key: 'Ev123' },
+          params: { agentId: 'agent-1', origin, nextInput: { message: 'Hello' } },
+        });
+
+        expect(admitNewConversation).not.toHaveBeenCalled();
+      });
+
+      it('gives the admission back when the opening message is not written', async () => {
+        const release = jest.fn().mockResolvedValue(undefined);
+        admitNewConversation.mockResolvedValueOnce(release);
+        conversationClient.create.mockRejectedValueOnce(new Error('write failed'));
+
+        await expect(converse({ conversationId: undefined, origin })).rejects.toThrow(
+          'write failed'
+        );
+        expect(release).toHaveBeenCalledTimes(1);
+      });
+
+      it('keeps the admission once the opening message is written', async () => {
+        const release = jest.fn().mockResolvedValue(undefined);
+        admitNewConversation.mockResolvedValueOnce(release);
+
+        await converse({ conversationId: undefined, origin });
+
+        expect(release).not.toHaveBeenCalled();
       });
 
       it('writes nothing when the admission is refused', async () => {
