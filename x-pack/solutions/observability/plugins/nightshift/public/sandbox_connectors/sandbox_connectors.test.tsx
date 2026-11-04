@@ -48,7 +48,7 @@ const setup = ({
   assigned = connectors.map(({ id }) => id),
   fetchError,
   agentError,
-  capabilities = { show: true, save: true, delete: true },
+  capabilities = { show: true, save: true, delete: true, execute: true },
   canUpdateAgent = true,
   canManageAgents = true,
   withTriggersActionsUi = true,
@@ -58,7 +58,7 @@ const setup = ({
   assigned?: string[];
   fetchError?: Error;
   agentError?: Error;
-  capabilities?: { show?: boolean; save?: boolean; delete?: boolean };
+  capabilities?: { show?: boolean; save?: boolean; delete?: boolean; execute?: boolean };
   canUpdateAgent?: boolean;
   canManageAgents?: boolean;
   withTriggersActionsUi?: boolean;
@@ -186,28 +186,24 @@ describe('SandboxConnectorsTable', () => {
     );
   });
 
-  it('locks remove and delete when the user cannot edit the agent', async () => {
+  it('locks disable when the user cannot edit the agent', async () => {
     setup({ connectors: [connector('github')], canUpdateAgent: false });
 
     expect(await screen.findByTestId('nightshiftConnectorRemove-github')).toBeDisabled();
-    expect(screen.getByTestId('nightshiftConnectorDelete-github')).toBeDisabled();
   });
 
-  it('locks remove and delete without the Agent Builder manage agents privilege', async () => {
+  it('locks disable without the Agent Builder manage agents privilege', async () => {
     setup({ connectors: [connector('github')], canManageAgents: false });
 
     expect(await screen.findByTestId('nightshiftConnectorRemove-github')).toBeDisabled();
-    expect(screen.getByTestId('nightshiftConnectorDelete-github')).toBeDisabled();
   });
 
-  it('locks delete without the connector delete privilege', async () => {
-    setup({
-      connectors: [connector('github')],
-      capabilities: { show: true, save: true, delete: false },
-    });
+  it('has no delete or test action; those live in Stack Management', async () => {
+    setup({ connectors: [connector('github')] });
 
-    expect(await screen.findByTestId('nightshiftConnectorDelete-github')).toBeDisabled();
-    expect(screen.getByTestId('nightshiftConnectorRemove-github')).toBeEnabled();
+    await screen.findByTestId('nightshiftConnectorRemove-github');
+    expect(screen.queryByTestId('nightshiftConnectorDelete-github')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftConnectorTest-github')).not.toBeInTheDocument();
   });
 
   it('reports an update that failed', async () => {
@@ -221,44 +217,6 @@ describe('SandboxConnectorsTable', () => {
         title: 'Could not update the investigation agent',
       })
     );
-  });
-
-  it('takes a connector off the agent, deletes it after confirmation and refreshes the list', async () => {
-    const { http, fetch, agents } = setup({ connectors: [connector('github')] });
-
-    fireEvent.click(await screen.findByTestId('nightshiftConnectorDelete-github'));
-    fireEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
-
-    await expectRemoved(agents, 'github');
-    await waitFor(() => expect(http.delete).toHaveBeenCalledWith('/api/actions/connector/github'));
-    expect(agents.removeConnectorFromAgent.mock.invocationCallOrder[0]).toBeLessThan(
-      http.delete.mock.invocationCallOrder[0]
-    );
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // The agent is read again, so the row cannot come back from a stale assignment.
-    await waitFor(() => expect(agents.get).toHaveBeenCalledTimes(2));
-  });
-
-  it('reports a failed delete and still refreshes', async () => {
-    const { http, addError, fetch } = setup({ connectors: [connector('github')] });
-    http.delete.mockRejectedValueOnce(forbiddenError());
-
-    fireEvent.click(await screen.findByTestId('nightshiftConnectorDelete-github'));
-    fireEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
-
-    await waitFor(() =>
-      expect(addError).toHaveBeenCalledWith(expect.any(Error), {
-        title: 'Could not delete connector Connector github',
-      })
-    );
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-  });
-
-  it('locks delete for preconfigured connectors', async () => {
-    setup({ connectors: [connector('telemetry', true), connector('github')] });
-
-    expect(await screen.findByTestId('nightshiftConnectorDelete-telemetry')).toBeDisabled();
-    expect(screen.getByTestId('nightshiftConnectorDelete-github')).toBeEnabled();
   });
 
   it('shows an error with a retry when the connectors cannot be loaded', async () => {
