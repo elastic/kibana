@@ -7,14 +7,12 @@
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
-import { DATASTREAM_DATASET } from '@kbn/metrics-data-access-plugin/common';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { termQuery } from '../../../common/utils/term_query';
 import type { IEnvOptions } from './get_service_map';
 import { recordByService } from './record_by_service';
 
@@ -25,13 +23,6 @@ const SIXTY_MINUTE_ROLLUP_LAG_MS = 60 * 60 * 1000;
 /** A 10-minute rollup can omit calls from the last 10 minutes. */
 const TEN_MINUTE_ROLLUP_LAG_MS = 10 * 60 * 1000;
 
-function apmDataset(rollupInterval: RollupInterval): string {
-  return `apm.service_destination.${rollupInterval}`;
-}
-
-function otelDataset(rollupInterval: RollupInterval): string {
-  return `service_destination.${rollupInterval}.otel`;
-}
 /** A gateway calls hundreds of destinations. Keep a bounded list per service. */
 const MAX_DESTINATIONS_PER_SERVICE = 1000;
 /** (service, destination) pairs per page, one bucket each. */
@@ -65,9 +56,8 @@ interface ServiceCallAggregate {
 
 /**
  * Reads each service's calls over the last day from the coarsest rollup that has data.
- * Pairs already in that rollup keep its count. Two gaps are filled without reading the
- * rollup's own finer copy: OpenTelemetry calls, which stay on the 1-minute data stream,
- * and APM calls newer than the rollup's lag.
+ * APM and OpenTelemetry both write that rollup. Pairs already in it keep its count.
+ * Calls newer than the rollup's lag are read from the next finer interval.
  */
 export async function getServiceCallGraph(
   options: ServiceCallGraphOptions
@@ -102,41 +92,30 @@ async function readCoarseRollup(
   return mergeServiceCalls([coarse, ...(await callsMissingFromCoarse(options, rollupInterval))]);
 }
 
-/** OpenTelemetry calls for the whole day, then APM calls from the coarse rollup's lag. */
+/** Calls from the coarse rollup's lag. The same intervals cover APM and OpenTelemetry. */
 async function callsMissingFromCoarse(
   options: ServiceCallGraphOptions,
   rollupInterval: RollupInterval.SixtyMinutes | RollupInterval.TenMinutes
 ): Promise<ServiceCallGraph[]> {
-  const otelOnly = readServiceCalls({
-    ...options,
-    rollupInterval: RollupInterval.OneMinute,
-    dataset: otelDataset(RollupInterval.OneMinute),
-  });
-
   if (rollupInterval === RollupInterval.SixtyMinutes) {
     return Promise.all([
-      otelOnly,
       readServiceCalls({
         ...options,
         rollupInterval: RollupInterval.TenMinutes,
-        dataset: apmDataset(RollupInterval.TenMinutes),
         sinceMs: SIXTY_MINUTE_ROLLUP_LAG_MS,
       }),
       readServiceCalls({
         ...options,
         rollupInterval: RollupInterval.OneMinute,
-        dataset: apmDataset(RollupInterval.OneMinute),
         sinceMs: TEN_MINUTE_ROLLUP_LAG_MS,
       }),
     ]);
   }
 
   return Promise.all([
-    otelOnly,
     readServiceCalls({
       ...options,
       rollupInterval: RollupInterval.OneMinute,
-      dataset: apmDataset(RollupInterval.OneMinute),
       sinceMs: TEN_MINUTE_ROLLUP_LAG_MS,
     }),
   ]);
@@ -175,11 +154,9 @@ async function readServiceCalls({
   end,
   serviceGroupKuery,
   rollupInterval,
-  dataset,
   sinceMs = SERVICE_CALL_GRAPH_WINDOW_MS,
 }: ServiceCallGraphOptions & {
   rollupInterval: RollupInterval;
-  dataset?: string;
   sinceMs?: number;
 }): Promise<ServiceCallGraph> {
   const graph = new Map<string, ServiceDestinationCall[]>();
@@ -198,7 +175,6 @@ async function readServiceCalls({
             ...rangeQuery(end - sinceMs, end),
             ...environmentQuery(environment),
             ...kqlQuery(serviceGroupKuery),
-            ...termQuery(DATASTREAM_DATASET, dataset),
           ],
         },
       },
