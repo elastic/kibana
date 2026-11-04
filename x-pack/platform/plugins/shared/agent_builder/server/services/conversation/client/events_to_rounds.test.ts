@@ -16,6 +16,7 @@ import {
   ConversationRoundStatus,
   ConversationRoundStepType,
   EventActorType,
+  LEGACY_TODOS_STEP_TYPE,
   TimelineEventType,
   TimelineTriggerType,
   ZERO_MODEL_USAGE,
@@ -500,6 +501,54 @@ describe('eventsToRounds — interrupted executions', () => {
     ]);
     expect((round.steps[0] as { interrupted?: true }).interrupted).toBe(true);
     expect(round.model_usage).toEqual(usage); // exec_0's usage + ZERO
+  });
+});
+
+describe('eventsToRounds — legacy steps', () => {
+  /** A step persisted by the removed todo tool, as found in conversations stored before its removal. */
+  const legacyTodosStep = step({
+    type: LEGACY_TODOS_STEP_TYPE as ConversationRoundStepType,
+    todos: [{ content: 'x', status: 'pending' }],
+  } as never);
+
+  it('drops the todos steps of a round persisted while the todo tool existed', () => {
+    const rounds = eventsToRounds([
+      userMessage('r1', '2024-01-01T00:00:00.000Z'),
+      ...executionEvents({
+        roundId: 'r1',
+        executionId: 'r1::execution',
+        triggerEventId: 'r1::user_message',
+        triggerType: TimelineTriggerType.userMessage,
+        steps: [legacyTodosStep, reasoningStep('thinking'), toolStep('tc1', []), legacyTodosStep],
+        outcome: { type: 'responded', response: { message: 'done' } },
+        createdAt: '2024-01-01T00:00:00.000Z',
+      }),
+    ]);
+    expect(rounds).toHaveLength(1);
+    expect(rounds[0].steps).toEqual([reasoningStep('thinking'), toolStep('tc1', [])]);
+    expect(rounds[0].status).toBe(ConversationRoundStatus.completed);
+  });
+
+  it('drops the todos steps carried by a terminal snapshot', () => {
+    const terminalEvents = executionEvents({
+      roundId: 'r1',
+      executionId: 'r1::execution',
+      triggerEventId: 'r1::user_message',
+      triggerType: TimelineTriggerType.userMessage,
+      steps: [],
+      outcome: { type: 'responded', response: { message: 'done' } },
+      createdAt: '2024-01-01T00:00:00.000Z',
+    }).map((event) =>
+      event.type === TimelineEventType.executionTerminated
+        ? { ...event, data: { ...event.data, steps: [reasoningStep('thinking'), legacyTodosStep] } }
+        : event
+    ) as TimelineEvent[];
+
+    const rounds = eventsToRounds([
+      userMessage('r1', '2024-01-01T00:00:00.000Z'),
+      ...terminalEvents,
+    ]);
+    expect(rounds[0].steps).toEqual([reasoningStep('thinking')]);
   });
 });
 
