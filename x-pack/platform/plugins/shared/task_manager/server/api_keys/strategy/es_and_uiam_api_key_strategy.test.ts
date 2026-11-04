@@ -535,6 +535,57 @@ describe('EsAndUiamApiKeyStrategy', () => {
       });
     });
 
+    test.each([
+      [
+        'throws',
+        (uiam: { invalidate: jest.Mock }) =>
+          uiam.invalidate.mockRejectedValue(new Error('invalidate failed')),
+      ],
+      [
+        'reports errors',
+        (uiam: { invalidate: jest.Mock }) =>
+          uiam.invalidate.mockResolvedValue({
+            invalidated_api_keys: [],
+            previously_invalidated_api_keys: [],
+            error_count: 1,
+            error_details: [{ type: 'error', reason: 'invalidate failed' }],
+          }),
+      ],
+    ])(
+      'reports the UIAM key when the ES grant fails and the UIAM rollback %s',
+      async (_, failRollback) => {
+        const { strategy, coreStart, mockUiam } = createStrategy();
+        const request = httpServerMock.createKibanaRequest({
+          headers: { authorization: 'Bearer essu_session-token' },
+        });
+        const onApiKeyCreated = jest.fn();
+
+        (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
+          username: 'testuser',
+          authentication_type: 'token',
+        });
+        mockUiam.grant.mockResolvedValue({ id: 'uiam-id', name: 'test', api_key: 'essu_secret' });
+        failRollback(mockUiam);
+        jest
+          .mocked(coreStart.security.authc.apiKeys.grantAsInternalUser)
+          .mockRejectedValue(new Error('es grant failed'));
+
+        await expect(
+          strategy.grantApiKeys(
+            [{ id: 'task-1', taskType: 'report', params: {}, state: {} }],
+            request,
+            coreStart.security,
+            { onApiKeyCreated }
+          )
+        ).rejects.toThrow('es grant failed');
+
+        expect(mockUiam.invalidate).toHaveBeenCalledWith(request, { id: 'uiam-id' });
+        expect(onApiKeyCreated.mock.calls).toEqual([
+          [{ apiKeyId: 'uiam-id', uiamApiKey: 'essu_secret' }],
+        ]);
+      }
+    );
+
     test('persists a raw user-created UIAM API key as-is (UIAM-only, no id) without minting any keys', async () => {
       const { strategy, coreStart, mockUiam } = createStrategy();
       // User-created Cloud API keys are presented as the raw `essu_` secret, not `base64(id:key)`

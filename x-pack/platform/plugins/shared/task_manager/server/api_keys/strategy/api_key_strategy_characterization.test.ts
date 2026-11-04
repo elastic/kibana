@@ -353,12 +353,12 @@ const uiamGrantSequence = (withUser = true) => [
 const uiamAndEsGrantSequence = (options: { refresh?: boolean } = {}) => [
   API_KEYS_ENABLED_CALL,
   uiamGrantCall('report'),
-  esGrantCall('report', options),
   uiamCreated(1),
+  esGrantCall('report', options),
   created('es-granted-1'),
   uiamGrantCall('alert'),
-  esGrantCall('alert', options),
   uiamCreated(2),
+  esGrantCall('alert', options),
   created('es-granted-2'),
 ];
 
@@ -601,8 +601,8 @@ const GRANT_ROWS: GrantRow[] = [
           esGrantCall('report'),
           created('es-granted-1'),
           uiamGrantCall('alert'),
-          esGrantCall('alert'),
           uiamCreated(2),
+          esGrantCall('alert'),
           created('es-granted-2'),
         ],
         logs: {
@@ -639,8 +639,8 @@ const GRANT_ROWS: GrantRow[] = [
       calls: [
         API_KEYS_ENABLED_CALL,
         uiamGrantCall('report'),
-        esGrantCall('report'),
         uiamCreated(1),
+        esGrantCall('report'),
         created('es-granted-1'),
         uiamGrantCall('alert'),
       ],

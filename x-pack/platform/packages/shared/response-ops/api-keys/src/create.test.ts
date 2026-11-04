@@ -116,6 +116,30 @@ describe('ApiKeysClient', () => {
       expect(uiam.invalidate).toHaveBeenCalledWith(request, { id: 'uiam-id' });
     });
 
+    test('reports each key as soon as it is created', async () => {
+      const { client, security, request } = setup({ authorization: 'Bearer essu_token' });
+      const onKeyCreated = jest.fn();
+      security.authc.apiKeys.grantAsInternalUser.mockImplementationOnce(async () => {
+        expect(onKeyCreated.mock.calls).toEqual([['uiam', UIAM_GRANT]]);
+        return ES_GRANT;
+      });
+
+      await client.grant(request, { ...options, onKeyCreated });
+      expect(onKeyCreated.mock.calls).toEqual([
+        ['uiam', UIAM_GRANT],
+        ['es', ES_GRANT],
+      ]);
+    });
+
+    test('reports the UIAM key even when the ES grant fails', async () => {
+      const { client, security, request } = setup({ authorization: 'Bearer essu_token' });
+      const onKeyCreated = jest.fn();
+      security.authc.apiKeys.grantAsInternalUser.mockRejectedValueOnce(new Error('es down'));
+
+      await expect(client.grant(request, { ...options, onKeyCreated })).rejects.toThrow('es down');
+      expect(onKeyCreated.mock.calls).toEqual([['uiam', UIAM_GRANT]]);
+    });
+
     test('rethrows the ES error and logs when the UIAM rollback also fails', async () => {
       const { client, uiam, security, logger, request } = setup({
         authorization: 'Bearer essu_token',

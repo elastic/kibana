@@ -43,6 +43,11 @@ export interface CreateOptions {
   /** Log level for a request without UIAM credentials. Defaults to `error`. */
   missingUiamCredentialsLogLevel?: 'error' | 'debug';
   refresh?: boolean | 'wait_for';
+  /**
+   * Called as soon as each key is created, before the next grant runs, so the caller can queue
+   * keys a later failure leaves behind (for example, when a UIAM rollback fails).
+   */
+  onKeyCreated?: (type: 'es' | 'uiam', key: GrantAPIKeyResult) => void;
 }
 
 /** The API key the caller authenticated with. */
@@ -59,7 +64,14 @@ const isUiamRequest = (request: KibanaRequest): boolean => {
 const grantUiam = async (
   context: ClientContext,
   request: KibanaRequest,
-  { name, subject, uiam, uiamName, missingUiamCredentialsLogLevel = 'error' }: CreateOptions,
+  {
+    name,
+    subject,
+    uiam,
+    uiamName,
+    missingUiamCredentialsLogLevel = 'error',
+    onKeyCreated,
+  }: CreateOptions,
   { only }: { only: boolean }
 ): Promise<GrantAPIKeyResult | undefined> => {
   const { security, logger, tags, uiamEnabled } = context;
@@ -88,6 +100,7 @@ const grantUiam = async (
     if (!result) {
       throw new Error(`Failed to create a Cloud API key for ${subject}`);
     }
+    onKeyCreated?.('uiam', result);
     return result;
   } catch (err) {
     const { message, stack } = errorDetails(err);
@@ -183,6 +196,7 @@ export const grant = async (
     return null;
   }
 
+  options.onKeyCreated?.('es', es);
   return { es, ...(uiam ? { uiam } : {}) };
 };
 
@@ -209,6 +223,7 @@ export const clone = async (
   if (!es) {
     throw new Error('API key clone returned null (security feature may be disabled)');
   }
+  options.onKeyCreated?.('es', es);
   return { es };
 };
 

@@ -142,15 +142,13 @@ export const getApiKeyAndUserScope = async (
           uiam: uiamRequired ? 'required' : 'optional',
           missingUiamCredentialsLogLevel: 'debug',
           ...(options?.refreshApiKey === false ? { refresh: false } : {}),
+          onKeyCreated: (type, { id, api_key: secret }) =>
+            options?.onApiKeyCreated?.(
+              type === 'uiam' ? { apiKeyId: id, uiamApiKey: secret } : { apiKeyId: id }
+            ),
         },
         clone
       );
-      if (uiam) {
-        options?.onApiKeyCreated?.({ apiKeyId: uiam.id, uiamApiKey: uiam.api_key });
-      }
-      if (es) {
-        options?.onApiKeyCreated?.({ apiKeyId: es.id });
-      }
 
       const apiKeyId = es?.id ?? uiam?.id;
       if (apiKeyId) {

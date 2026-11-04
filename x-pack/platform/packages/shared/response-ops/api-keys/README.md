@@ -39,7 +39,7 @@ Everything else is a plain function:
 
 | To change | Edit |
 | --- | --- |
-| How keys are granted or cloned, or which UIAM failures are fatal (including the `uiam: 'optional' | 'required' | 'only'`, `uiamName` and `missingUiamCredentialsLogLevel` options) | `src/create.ts` |
+| How keys are granted or cloned, or which UIAM failures are fatal (including the `uiam`, `uiamName`, `missingUiamCredentialsLogLevel` and `onKeyCreated` options) | `src/create.ts` |
 | How a request's own key is parsed | `fromRequest` in `src/create.ts` |
 | How stored keys are encoded, decoded, or turned into invalidation targets | `src/stored_keys.ts` |
 | Which credential a background run uses, and external UIAM marking | `src/fake_request.ts` |
