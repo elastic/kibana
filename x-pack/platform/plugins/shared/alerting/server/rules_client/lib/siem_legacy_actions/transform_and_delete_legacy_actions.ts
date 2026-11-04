@@ -6,7 +6,7 @@
  */
 
 import { chunk, isEqual } from 'lodash';
-import { asyncForEach, asyncMap } from '@kbn/std';
+import { asyncForEach, asyncMapWithLimit } from '@kbn/std';
 import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { RulesClientContext } from '../..';
@@ -94,22 +94,27 @@ const toRuleReferences = (ruleIds: string[]) =>
 // The ids are looked up in chunks, and each lookup asks for more objects than a chunk of rules can own.
 const RULE_IDS_CHUNK_SIZE = 100;
 const LEGACY_OBJECTS_PER_PAGE = 1000;
+const CHUNK_LOOKUPS_CONCURRENCY = 5;
 
 // The legacy `siem.notifications` rules that point at the given rules
 const findNotificationRuleIds = async (
   context: RulesClientContext,
   ruleIds: string[]
 ): Promise<string[]> => {
-  const notificationRuleIds = await asyncMap(chunk(ruleIds, RULE_IDS_CHUNK_SIZE), async (ids) => {
-    const notificationRules = await findRules(context, {
-      options: {
-        filter: 'alert.attributes.alertTypeId:(siem.notifications)',
-        hasReference: toRuleReferences(ids),
-        perPage: LEGACY_OBJECTS_PER_PAGE,
-      },
-    });
-    return notificationRules?.data.map((rule) => rule.id) ?? [];
-  });
+  const notificationRuleIds = await asyncMapWithLimit(
+    chunk(ruleIds, RULE_IDS_CHUNK_SIZE),
+    CHUNK_LOOKUPS_CONCURRENCY,
+    async (ids) => {
+      const notificationRules = await findRules(context, {
+        options: {
+          filter: 'alert.attributes.alertTypeId:(siem.notifications)',
+          hasReference: toRuleReferences(ids),
+          perPage: LEGACY_OBJECTS_PER_PAGE,
+        },
+      });
+      return notificationRules?.data.map((rule) => rule.id) ?? [];
+    }
+  );
   return notificationRuleIds.flat();
 };
 
@@ -118,14 +123,20 @@ const findSidecars = async (
   context: RulesClientContext,
   ruleIds: string[]
 ): Promise<LegacySidecar[]> => {
-  const sidecars = await asyncMap(chunk(ruleIds, RULE_IDS_CHUNK_SIZE), async (ids) => {
-    const response = await context.unsecuredSavedObjectsClient.find<LegacyIRuleActionsAttributes>({
-      type: legacyRuleActionsSavedObjectType,
-      hasReference: toRuleReferences(ids),
-      perPage: LEGACY_OBJECTS_PER_PAGE,
-    });
-    return response?.saved_objects ?? [];
-  });
+  const sidecars = await asyncMapWithLimit(
+    chunk(ruleIds, RULE_IDS_CHUNK_SIZE),
+    CHUNK_LOOKUPS_CONCURRENCY,
+    async (ids) => {
+      const response = await context.unsecuredSavedObjectsClient.find<LegacyIRuleActionsAttributes>(
+        {
+          type: legacyRuleActionsSavedObjectType,
+          hasReference: toRuleReferences(ids),
+          perPage: LEGACY_OBJECTS_PER_PAGE,
+        }
+      );
+      return response?.saved_objects ?? [];
+    }
+  );
   return sidecars.flat();
 };
 
