@@ -297,10 +297,11 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
           });
 
           if (mode === 'on') {
-            await close(matches.wouldClose);
             // A dismissed pattern is a verdict of its own: `az:inconclusive` takes the alert out of
-            // the sweep and keeps it from a proposal, and the decision tag says why.
+            // the sweep and keeps it from a proposal, and the decision tag says why. It goes first:
+            // it is one cheap call per decision, and when time runs out the closes are what wait.
             await tagSkipped(matches.wouldSkip);
+            await close(matches.wouldClose);
           } else {
             await tag(TRIAGE_WOULD_CLOSE_TAG_PREFIX, matches.wouldClose);
             await tag(TRIAGE_WOULD_SKIP_TAG_PREFIX, matches.wouldSkip);
