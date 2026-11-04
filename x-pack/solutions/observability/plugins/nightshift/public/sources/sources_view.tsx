@@ -64,7 +64,7 @@ export function SourcesView() {
     },
     notifications: { toasts },
   } = useKibana().services;
-  const { canManage } = getNightshiftCapabilities(nightshift);
+  const { canManageAndConfigure: canChangeSources } = getNightshiftCapabilities(nightshift);
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const [searchText, setSearchText] = useState('');
   const [sourceCreationState, setSourceCreationState] = useState<RecommendedSourcesCreationState>(
@@ -115,10 +115,10 @@ export function SourcesView() {
   const closeFlyout = () => history.push({ pathname: '/sources', search });
 
   useEffect(() => {
-    if (isCreating && !canManage) {
+    if (isCreating && !canChangeSources) {
       history.replace({ pathname: '/sources', search });
     }
-  }, [canManage, history, isCreating, search]);
+  }, [canChangeSources, history, isCreating, search]);
 
   useEffect(() => {
     // A cached list can predate the linked source, so wait for any refetch to finish too.
@@ -244,7 +244,7 @@ export function SourcesView() {
                 isClearable
               />
             </EuiFlexItem>
-            {canManage && !showInitialSourceSetup && (
+            {canChangeSources && !showInitialSourceSetup && (
               <EuiFlexItem grow={false}>
                 <EuiButton
                   data-test-subj="significantEventsAppCreateSourceButton"
@@ -256,7 +256,7 @@ export function SourcesView() {
                 </EuiButton>
               </EuiFlexItem>
             )}
-            {hasSources && canManage && (
+            {hasSources && canChangeSources && (
               <EuiFlexItem grow={false}>
                 <GenerateSplitButton
                   size="s"
@@ -309,7 +309,7 @@ export function SourcesView() {
           <>
             {showSourceCreation && (
               <EuiFlexItem key="sourceCreation">
-                {canManage ? (
+                {canChangeSources ? (
                   <EuiFlexGroup direction="column" gutterSize="xl">
                     {showInitialSourceSetup && (
                       <EuiFlexItem grow={false}>
@@ -387,9 +387,9 @@ export function SourcesView() {
                     generatingSourceIds={generatingSourceIds}
                     awaitingRunSourceIds={awaitingRunSourceIds}
                     activityBlockTooltip={activityBlockTooltip}
-                    canManage={canManage}
+                    canManage={canChangeSources}
                     selection={
-                      canManage
+                      canChangeSources
                         ? {
                             selected: selectedSources,
                             onSelectionChange: (selected) =>
@@ -418,12 +418,12 @@ export function SourcesView() {
         )}
       </EuiFlexGroup>
 
-      {((isCreating && canManage) || routedSource) && (
+      {((isCreating && canChangeSources) || routedSource) && (
         <React.Suspense fallback={null}>
           <SourceFlyout
             key={routedSource?.id ?? 'new'}
             source={routedSource}
-            readOnly={!canManage}
+            readOnly={!canChangeSources}
             onClose={closeFlyout}
           />
         </React.Suspense>
