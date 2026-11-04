@@ -9,3 +9,9 @@ export {
   NightshiftSettingsLocatorDefinition,
   type NightshiftSettingsLocator,
 } from './nightshift_settings_locator';
+export {
+  NIGHTSHIFT_EVENT_ID_QUERY_PARAM,
+  SignificantEventLocatorDefinition,
+  type SignificantEventLocator,
+  type SignificantEventLocatorParams,
+} from './significant_event_locator';

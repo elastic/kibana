@@ -34,8 +34,14 @@ describe('getSubjectLocatorTarget', () => {
     });
   });
 
-  it('has no page for significant events, questions and Slack threads', () => {
-    expect(getSubjectLocatorTarget({ type: 'significant_event', id: 'se-1' })).toBeUndefined();
+  it("opens a significant event's flyout in Nightshift by its event id", () => {
+    expect(getSubjectLocatorTarget({ type: 'significant_event', id: 'se-1' })).toEqual({
+      locatorId: 'NIGHTSHIFT_SIGNIFICANT_EVENT_LOCATOR',
+      params: { eventId: 'se-1' },
+    });
+  });
+
+  it('has no page for questions and Slack threads', () => {
     expect(getSubjectLocatorTarget({ type: 'manual', id: 'q-1' })).toBeUndefined();
     expect(getSubjectLocatorTarget({ type: 'slack_thread', id: 't-1' })).toBeUndefined();
   });

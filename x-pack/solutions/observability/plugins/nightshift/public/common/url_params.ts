@@ -10,6 +10,7 @@ import {
   NIGHTSHIFT_SEVERITY_QUERY_PARAM,
   NIGHTSHIFT_INVESTIGATION_ID_QUERY_PARAM,
 } from '@kbn/nightshift-investigations-plugin/common';
+import { NIGHTSHIFT_EVENT_ID_QUERY_PARAM } from '../../common/locators';
 
 export {
   NIGHTSHIFT_SEARCH_QUERY_PARAM,
@@ -18,7 +19,7 @@ export {
 };
 
 /** Query param that restores the open event flyout on load or from a shared link. */
-export const NIGHTSHIFT_EVENT_ID_QUERY_PARAM = 'eventId';
+export { NIGHTSHIFT_EVENT_ID_QUERY_PARAM };
 
 export const getNightshiftEventIdFromSearch = (search: string): string | undefined =>
   new URLSearchParams(search).get(NIGHTSHIFT_EVENT_ID_QUERY_PARAM) ?? undefined;

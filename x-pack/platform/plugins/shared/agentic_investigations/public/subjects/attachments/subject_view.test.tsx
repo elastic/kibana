@@ -154,6 +154,23 @@ describe('SubjectView', () => {
     expect(screen.getByTestId('investigationSubjectTitle')).toHaveTextContent('CPU high');
   });
 
+  it('links a significant event to its flyout in Nightshift, and opens it in Kibana', async () => {
+    const { services, navigate } = createShare();
+    renderView(
+      { ...base, subjectType: 'significant_event', subjectId: 'event-1', summary: 'Errors spiked' },
+      services
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('investigationSubject-significant_event')).toHaveAttribute(
+        'href',
+        '/located/NIGHTSHIFT_SIGNIFICANT_EVENT_LOCATOR?{"eventId":"event-1"}'
+      )
+    );
+    fireEvent.click(screen.getByTestId('investigationSubject-significant_event'));
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith({ eventId: 'event-1' }));
+  });
+
   it('renders a significant event and a question by their summary, without a link', () => {
     renderView({
       ...base,

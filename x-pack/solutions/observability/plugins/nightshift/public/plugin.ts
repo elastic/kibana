@@ -17,7 +17,10 @@ import { NIGHTSHIFT_APP_ID, type NightshiftLinkId } from '@kbn/deeplinks-observa
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, type Subscription } from 'rxjs';
 import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
-import { NightshiftSettingsLocatorDefinition } from '../common/locators';
+import {
+  NightshiftSettingsLocatorDefinition,
+  SignificantEventLocatorDefinition,
+} from '../common/locators';
 import { FocusedSignificantEventService } from './chat/focused_significant_event_service';
 import type {
   NightshiftPublicSetup,
@@ -50,6 +53,7 @@ export class NightshiftPlugin
     const startServicesPromise = coreSetup.getStartServices();
 
     pluginsSetup.share.url.locators.create(new NightshiftSettingsLocatorDefinition());
+    pluginsSetup.share.url.locators.create(new SignificantEventLocatorDefinition());
 
     coreSetup.application.register({
       id: NIGHTSHIFT_APP_ID,

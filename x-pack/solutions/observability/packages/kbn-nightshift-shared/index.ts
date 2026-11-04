@@ -152,6 +152,8 @@ export {
   type SettingsTabId,
 } from './src/settings';
 
+export type { NightshiftSignificantEventLocatorParams } from './src/significant_event_locator';
+
 export {
   createHttpServiceAccountsApi,
   ensureNightshiftServiceAccounts,
