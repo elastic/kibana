@@ -434,6 +434,8 @@ export class NodesFactory {
           workflowsExecutionEngine: this.dependencies.workflowsExecutionEngine,
           workflowExecutionRepository: this.dependencies.workflowExecutionRepository,
           stepExecutionRepository: this.dependencies.stepExecutionRepository,
+          executionsIoDataClient:
+            this.dependencies.workflowsExecutionEngine.__internalStorage.executionsIoDataClient,
           workflowLogger: stepExecutionRuntime.stepLogger,
           config: this.dependencies.config,
         });
