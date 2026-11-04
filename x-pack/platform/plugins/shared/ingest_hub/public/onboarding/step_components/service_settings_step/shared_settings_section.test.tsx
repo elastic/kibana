@@ -184,6 +184,19 @@ describe('SharedSettingsSection', () => {
   });
 
   describe('output', () => {
+    const outputProps = (
+      overrides: Partial<
+        NonNullable<React.ComponentProps<typeof SharedSettingsSection>['output']>
+      > = {}
+    ) => ({
+      value: '',
+      onChange: jest.fn(),
+      packageName: 'aws',
+      inputTypes: ['aws-s3'],
+      isInheritedOutputDefault: true,
+      ...overrides,
+    });
+
     it('is hidden unless the deployment is agent-based', () => {
       renderSection();
 
@@ -191,7 +204,7 @@ describe('SharedSettingsSection', () => {
     });
 
     it('offers the inherited output and the allowed ones', () => {
-      renderSection({ showOutput: true, outputId: '' });
+      renderSection({ output: outputProps() });
 
       const select = screen.getByTestId('sharedSettingsOutput');
       expect(select).toHaveValue('');
@@ -201,15 +214,33 @@ describe('SharedSettingsSection', () => {
       expect(screen.getByText('My Logstash')).toBeInTheDocument();
     });
 
+    it('does not name the inherited output when the agent policies may set their own', () => {
+      renderSection({ output: outputProps({ isInheritedOutputDefault: false }) });
+
+      expect(screen.getByText('Inherited from agent policy')).toBeInTheDocument();
+      expect(
+        screen.queryByText('Inherited from agent policy (currently Default)')
+      ).not.toBeInTheDocument();
+    });
+
+    it('offers the outputs the input types of the selected services accept', () => {
+      renderSection({ output: outputProps({ inputTypes: ['otelcol'] }) });
+
+      expect(mockUseOutputs).toHaveBeenCalledWith(
+        { inputs: [{ type: 'otelcol', enabled: true }] },
+        'aws'
+      );
+    });
+
     it('reports the chosen output', () => {
-      const onOutputIdChange = jest.fn();
-      renderSection({ showOutput: true, onOutputIdChange });
+      const onChange = jest.fn();
+      renderSection({ output: outputProps({ onChange }) });
 
       fireEvent.change(screen.getByTestId('sharedSettingsOutput'), {
         target: { value: 'logstash-1' },
       });
 
-      expect(onOutputIdChange).toHaveBeenCalledWith('logstash-1');
+      expect(onChange).toHaveBeenCalledWith('logstash-1');
     });
 
     it('is hidden when the license does not allow an output per integration', () => {
@@ -219,7 +250,7 @@ describe('SharedSettingsSection', () => {
         allowedOutputs: [],
         inheritedOutputName: undefined,
       });
-      renderSection({ showOutput: true });
+      renderSection({ output: outputProps() });
 
       expect(screen.queryByTestId('sharedSettingsOutput')).not.toBeInTheDocument();
     });

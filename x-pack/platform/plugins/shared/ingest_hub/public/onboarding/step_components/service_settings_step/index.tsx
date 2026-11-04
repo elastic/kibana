@@ -88,6 +88,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     servicesStep,
     refetchAwsServiceMatrix,
     deploymentMethod,
+    agentBasedDeployment,
   } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
@@ -108,6 +109,14 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     Object.values(detectAndReviewStep.serviceStatuses).some(
       (s) => s !== 'error' && s !== 'timeout'
     );
+
+  // Input types of the selected services, which decide the output types their policies accept.
+  const outputInputTypes = useMemo(
+    () => [
+      ...new Set(instances.flatMap((inst) => awsServicesMap?.get(inst.serviceId)?.inputs ?? [])),
+    ],
+    [instances, awsServicesMap]
+  );
 
   const [activeFlyoutInstanceId, setActiveFlyoutInstanceId] = useState<string | null>(null);
   const [openMenuInstanceId, setOpenMenuInstanceId] = useState<string | null>(null);
@@ -452,10 +461,17 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         onNamespaceChange={setNamespace}
         namespaceError={namespaceError}
         hasDeployedServices={isRegionDisabled}
-        showOutput={deploymentMethod === 'agent_based'}
-        outputId={outputId}
-        onOutputIdChange={setOutputId}
-        outputPackageName={bareNamePackage}
+        output={
+          deploymentMethod === 'agent_based'
+            ? {
+                value: outputId,
+                onChange: setOutputId,
+                packageName: bareNamePackage,
+                inputTypes: outputInputTypes,
+                isInheritedOutputDefault: agentBasedDeployment.agentHostsMode === 'new',
+              }
+            : undefined
+        }
       />
       <EuiSpacer size="m" />
 

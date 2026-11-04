@@ -29,6 +29,7 @@ import { i18n } from '@kbn/i18n';
 
 import { GlobalRegionField } from './global_region_field';
 import { SharedAdvancedSettings } from './shared_advanced_settings';
+import type { OutputFieldProps } from './instance_output_field';
 import { MAX_DESCRIPTION_LENGTH, MAX_INTEGRATION_NAME_LENGTH } from './integration_settings';
 
 const ADVANCED_ANIMATION_MS = 300;
@@ -52,12 +53,8 @@ interface SharedSettingsSectionProps {
   namespaceError?: string;
   /** Whether services are already deployed, which changes what a new namespace means. */
   hasDeployedServices?: boolean;
-  /** Whether to offer the output, which only an agent-based deploy can set. */
-  showOutput?: boolean;
-  outputId?: string;
-  onOutputIdChange?: (outputId: string) => void;
-  /** Package of the policies the output applies to. */
-  outputPackageName?: string;
+  /** The output field, offered only where an agent-based deploy can set it. */
+  output?: OutputFieldProps;
 }
 
 /**
@@ -81,10 +78,7 @@ export function SharedSettingsSection({
   onNamespaceChange,
   namespaceError,
   hasDeployedServices = false,
-  showOutput = false,
-  outputId = '',
-  onOutputIdChange = () => {},
-  outputPackageName = 'aws',
+  output,
 }: SharedSettingsSectionProps) {
   // Show errors once the field was edited, so the prefilled form does not open with errors.
   const [nameTouched, setNameTouched] = useState(false);
@@ -264,10 +258,7 @@ export function SharedSettingsSection({
             namespace={namespace}
             onNamespaceChange={onNamespaceChange}
             hasDeployedServices={hasDeployedServices}
-            showOutput={showOutput}
-            outputId={outputId}
-            onOutputIdChange={onOutputIdChange}
-            outputPackageName={outputPackageName}
+            output={output}
           />
         </div>
       </div>
