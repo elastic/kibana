@@ -146,9 +146,3 @@ export interface SignificantEventResponse extends SignificantEvent {
   /** The `alert.id` of the series' latest version: the episode an operator deactivation addresses. */
   episode_id?: string;
 }
-
-/** An operator deactivation recorded for an Alerting v2 episode. */
-export interface EventDeactivation {
-  episode_id: string;
-  reason: string;
-}

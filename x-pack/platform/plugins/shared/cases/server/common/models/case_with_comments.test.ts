@@ -414,6 +414,50 @@ describe('CaseCommentModel', () => {
   });
 
   describe('bulkCreate', () => {
+    it('skips the duplicate lookups when the request has no alerts, events or attacks', async () => {
+      const { getter } = clientArgs.services.attachmentService;
+
+      await model.bulkCreate({ attachments: [{ id: 'comment-1', ...unifiedComment }] });
+
+      expect(getter.getAllAlertIds).not.toHaveBeenCalled();
+      expect(getter.getAllEventIds).not.toHaveBeenCalled();
+      expect(getter.getAttachedAttackIds).not.toHaveBeenCalled();
+    });
+
+    it('looks up only the id types the request carries', async () => {
+      const { getter } = clientArgs.services.attachmentService;
+
+      await model.bulkCreate({ attachments: [{ id: 'comment-1', ...unifiedAlertComment }] });
+
+      expect(getter.getAllAlertIds).toHaveBeenCalledTimes(1);
+      expect(getter.getAllEventIds).not.toHaveBeenCalled();
+      expect(getter.getAttachedAttackIds).not.toHaveBeenCalled();
+    });
+
+    it('runs the alert and event lookups in parallel', async () => {
+      const { getter } = clientArgs.services.attachmentService;
+      let resolveAlerts: (ids: Set<string>) => void = () => {};
+      getter.getAllAlertIds.mockReturnValueOnce(
+        new Promise((resolve) => {
+          resolveAlerts = resolve;
+        })
+      );
+
+      const bulkCreate = model.bulkCreate({
+        attachments: [
+          { id: 'comment-1', ...unifiedAlertComment },
+          { id: 'comment-2', ...unifiedEventComment },
+        ],
+      });
+
+      // Let validation run up to the lookups while the alert lookup is still pending.
+      await new Promise(setImmediate);
+      expect(getter.getAllEventIds).toHaveBeenCalledTimes(1);
+
+      resolveAlerts(new Set());
+      await bulkCreate;
+    });
+
     it('does not remove user comments when filtering out duplicate alerts', async () => {
       await model.bulkCreate({
         attachments: [

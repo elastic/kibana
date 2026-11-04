@@ -226,7 +226,7 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 | 5   | `HydrateAlertDataStep`       | Fetch `data` payloads for the surviving dispatchable alerts only, via `getAlertDataQueries`.     |
 | 6   | `FetchRulesStep`             | Load rule metadata for the remaining dispatchable set.                                           |
 | 7   | `ApplyMaintenanceWindowStep` | Suppress alerts whose timestamp falls within an active maintenance window in the same space.     |
-| 8   | `FetchPoliciesStep`          | Load enabled action policies for the space. Skipped when no alert is dispatchable.               |
+| 8   | `FetchPoliciesStep`          | Load enabled action policies in the spaces of the dispatchable alerts. Skipped when no alert is dispatchable. |
 | 9   | `EvaluateMatchersStep`       | Evaluate each policy matcher against each alert context.                                         |
 | 10  | `BuildGroupsStep`            | Build `ActionGroup` objects based on policy grouping settings.                                   |
 | 11  | `ApplyAlreadyNotifiedStep`   | Move the alerts whose `notified` record (per group and alert) covers their current content out of their groups, into `alreadyNotified`. |

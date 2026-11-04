@@ -33,14 +33,14 @@ import {
   type InvestigationViewSource,
 } from '../common/ebt_events';
 import { RETRY_BUTTON_LABEL } from '../common/messages';
-import { useInvestigationSections } from '../hooks/use_investigation_sections';
+import { useInvestigationSections } from '../data/investigations/use_investigation_sections';
 import {
   InvestigationList,
   type InvestigationListHandle,
-} from '../investigation/investigation_list';
-import { isInvestigationSectionVisible } from '../investigation/investigation_section';
-import { InvestigationSeverityTiles } from '../investigation/investigation_severity_tiles';
-import { useFlyoutShareUrlCustomAction } from '../common/flyout_share_url_button';
+} from '../components/entities/investigation/investigation_list';
+import { isInvestigationSectionVisible } from '../components/entities/investigation/investigation_section';
+import { InvestigationSeverityTiles } from '../components/entities/investigation/investigation_severity_tiles';
+import { useFlyoutShareUrlCustomAction } from '../components/ui/flyout_share_url_button';
 import {
   buildNightshiftInvestigationFlyoutShareUrl,
   clearNightshiftInvestigationIdParam,
@@ -87,12 +87,10 @@ export function NightshiftApp(): React.ReactElement {
     sections,
     severityCounts,
     areSeverityCountsLoading,
-    areSeverityCountsFetching,
     hasActiveInvestigations,
     isInitialLoading,
     isFetching,
     totalCount,
-    matchedCount,
     loadedCount,
     refetchAll,
   } = useInvestigationSections({ query: debouncedSearchQuery });
@@ -282,17 +280,15 @@ export function NightshiftApp(): React.ReactElement {
       reportedSearchQuery.current = undefined;
       return;
     }
-    // `matchedCount` is built from the severity counts query, so that has to have landed too.
-    if (isFetching || areSeverityCountsFetching || reportedSearchQuery.current === query) {
+    if (isFetching || reportedSearchQuery.current === query) {
       return;
     }
     reportedSearchQuery.current = query;
     reportNightshiftInvestigationsSearched(analytics, {
       queryLength: query.length,
-      // Each matching investigation once: the section totals overlap.
-      resultCount: matchedCount,
+      resultCount: totalCount,
     });
-  }, [analytics, areSeverityCountsFetching, debouncedSearchQuery, isFetching, matchedCount]);
+  }, [analytics, debouncedSearchQuery, isFetching, totalCount]);
 
   usePageReady({
     isReady: !isInitialLoading && !allFailed,

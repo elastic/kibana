@@ -1053,6 +1053,27 @@ describe('ConversationClient', () => {
       expect(result.id).toBe('conversation-1');
     });
 
+    it('resolves the agent for the service account a bound run executes as', async () => {
+      const boundRunClient = createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        executionClient: mockExecutionClient as unknown as AgentExecutionClient,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        conversationEvents: mockConversationEvents,
+        user: { id: 'user-1', username: 'test-user', isAdmin: false },
+        runAs: 'kibana/sa-1',
+      });
+      mockGetDocumentResponse(createConversationDocument());
+
+      await boundRunClient.get('conversation-1');
+
+      expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', {
+        access: 'use',
+        runAs: 'kibana/sa-1',
+      });
+    });
+
     it('returns not found when conversation access passes but agent use access fails', async () => {
       agentRegistry.get.mockRejectedValue(createAgentNotFoundError({ agentId: 'agent-1' }));
       mockGetDocumentResponse(

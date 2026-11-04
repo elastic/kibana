@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AWS_ONBOARDING_PACKAGE_NAMES } from '@kbn/fleet-plugin/common/constants';
 import type { AwsServiceMatrixEntry, DeploymentMethod, SignalType } from './aws_service_matrix';
 import {
   AWS_SERVICES_STATIC,
@@ -63,6 +64,12 @@ const MOCK_PACKAGES: Record<string, any> = {
 const BUILT_MATRIX = buildAwsServiceMatrix(MOCK_PACKAGES, AWS_SERVICES_STATIC);
 
 describe('AWS service matrix', () => {
+  it('should cover the packages Fleet marks as part of the AWS onboarding flow', () => {
+    expect([...new Set(AWS_SERVICES_STATIC.map((s) => s.packageName))].sort()).toEqual(
+      [...AWS_ONBOARDING_PACKAGE_NAMES].sort()
+    );
+  });
+
   it('should have at least 40 entries', () => {
     expect(BUILT_MATRIX.length).toBeGreaterThanOrEqual(40);
   });

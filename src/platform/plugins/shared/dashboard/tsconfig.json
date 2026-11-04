@@ -140,7 +140,9 @@
     "@kbn/change-history",
     "@kbn/change-history-ui",
     "@kbn/spaces-plugin",
-    "@kbn/core-http-server-mocks"
+    "@kbn/core-http-server-mocks",
+    "@kbn/content-list-page",
+    "@kbn/shared-ux-error-boundary"
   ],
   "exclude": ["target/**/*"]
 }

@@ -141,6 +141,25 @@ describe('createUpdateCustomContentTool handler', () => {
       );
     });
 
+    it('hands the control values the panel was sent with to the template resolver', async () => {
+      const esqlVariables = [{ key: 'host', value: 'web-1', type: 'values' }];
+      await callHandler(
+        {
+          embeddable_id: 'p1',
+          prompt: 'Show hits for the selected host',
+          esqlQuery: 'FROM logs | WHERE host.name == ?host | STATS hits = COUNT(*)',
+        },
+        { ...existing, esql_variables: esqlVariables }
+      );
+
+      expect(mockResolver).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esqlQuery: 'FROM logs | WHERE host.name == ?host | STATS hits = COUNT(*)',
+          esqlVariables,
+        })
+      );
+    });
+
     it('samples esqlQuery when query is also changing', async () => {
       await callHandler(
         { embeddable_id: 'p1', prompt: 'Show revenue by region', esqlQuery: 'FROM metrics' },
@@ -216,6 +235,20 @@ describe('createUpdateCustomContentTool handler', () => {
       expect(mockResolver).toHaveBeenCalledWith(
         expect.objectContaining({ esqlQuery: undefined, hasExistingQuery: true })
       );
+    });
+
+    it('hands the control values the panel was sent with to the query generator', async () => {
+      const esqlVariables = [{ key: 'host', value: 'web-1', type: 'values' }];
+      await callHandler(
+        { embeddable_id: 'p1', prompt: 'Also show the error count', regenerateEsql: true },
+        {
+          ...existing,
+          esql_query: 'FROM logs | WHERE host.name == ?host | STATS hits = COUNT(*)',
+          esql_variables: esqlVariables,
+        }
+      );
+
+      expect(mockGenerateEsql).toHaveBeenCalledWith(expect.objectContaining({ esqlVariables }));
     });
 
     it('lets an explicit query win over regenerateEsql', async () => {

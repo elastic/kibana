@@ -381,6 +381,20 @@ if (window.__kbnHmrActive__ && module.hot) {
           return;
         }
 
+        if (data.reload) {
+          // Replay of a reload this page already applied would loop. sessionStorage
+          // survives the reload, so the new EventSource can recognize the same id.
+          if (data.id && window.sessionStorage.getItem('__kbnHmrReloadId__') === data.id) {
+            return;
+          }
+          if (data.id) {
+            window.sessionStorage.setItem('__kbnHmrReloadId__', data.id);
+          }
+          console.log(LOG_PREFIX + ' Shared bundles updated, reloading page...');
+          window.location.reload();
+          return;
+        }
+
         if (data.errors && data.errors.length > 0) {
           console.error(LOG_PREFIX + ' Build failed with ' + data.errors.length + ' error(s)');
           if (!data.replay) {

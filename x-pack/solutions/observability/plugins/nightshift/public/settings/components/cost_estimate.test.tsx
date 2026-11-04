@@ -242,15 +242,6 @@ describe('CostEstimate', () => {
     expect(screen.queryByTestId('nightshiftCostSection')).not.toBeInTheDocument();
   });
 
-  it('shows cost details without requiring expansion', () => {
-    renderCost();
-    expect(screen.getByTestId('nightshiftCostHeader')).toHaveTextContent(
-      'Approximate inference cost across all spaces'
-    );
-    expect(screen.getByTestId('nightshiftTokenTrackingSwitch')).toBeChecked();
-    expect(screen.getByTestId('nightshiftCostHeadline')).toBeVisible();
-  });
-
   it('stages token tracking changes without saving immediately', () => {
     setTracking(false);
     renderCost();

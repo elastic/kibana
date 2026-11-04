@@ -48,6 +48,10 @@ if [[ -z "${EVAL_SCOUT_DOMAIN:-}" && "${EVAL_SCOUT_ARCH:-stateful}" == "$_suite_
   EVAL_SCOUT_DOMAIN="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.scoutDomain // empty' 2>/dev/null || true)"
 fi
 unset _suite_scout_arch
+# Resolve the Scout serverConfigSet: explicit override, else the suite's own (the on-demand pipeline
+# doesn't forward it, and the default evals_tracing stack disables suite plugins), else evals_tracing.
+source .buildkite/scripts/steps/evals/resolve_server_config_set.sh
+EVAL_SERVER_CONFIG_SET="$(resolve_server_config_set "${EVAL_SUITE_INFO}")"
 
 cleanup() {
   if [[ -n "${SCOUT_PID:-}" ]]; then
@@ -541,11 +545,7 @@ es_curl() {
 
 # Start Scout server in background (run Kibana from the distributable)
 SCOUT_SERVER_ARGS=(start-server --location local --arch "$SCOUT_ARCH" --domain "$SCOUT_DOMAIN" --kibanaInstallDir "${KIBANA_BUILD_LOCATION:?}")
-if [[ -n "${EVAL_SERVER_CONFIG_SET:-}" ]]; then
-  SCOUT_SERVER_ARGS+=(--serverConfigSet "$EVAL_SERVER_CONFIG_SET")
-else
-  SCOUT_SERVER_ARGS+=(--serverConfigSet evals_tracing)
-fi
+SCOUT_SERVER_ARGS+=(--serverConfigSet "$EVAL_SERVER_CONFIG_SET")
 
 node scripts/scout "${SCOUT_SERVER_ARGS[@]}" &
 SCOUT_PID=$!

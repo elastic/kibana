@@ -407,10 +407,11 @@ export class StepExecutionRuntime {
 
   /**
    * Attempts to enter a wait state for the step execution based on a relative delay duration.
-   * If the step is already in a wait state, it exits the wait state instead.
+   * If the step is already waiting and its stored `resumeAt` has passed, it exits the wait.
+   * A re-entry before that time stays parked, so an earlier scheduler tick cannot shorten it.
    *
    * @param delay - The delay duration as a string (e.g., "5s", "1m", "2h").
-   * @returns A boolean indicating whether the step has entered a wait state (true) or exited it (false).
+   * @returns A boolean indicating whether the step is waiting (true) or has exited the wait (false).
    */
   public tryEnterDelay(delay: string): boolean {
     return this.tryEnterWaitUntil(new Date(new Date().getTime() + parseDuration(delay)));
@@ -418,7 +419,9 @@ export class StepExecutionRuntime {
 
   /**
    * Attempts to enter a wait state for the step execution.
-   * If the step is already in a wait state, it clears the state and returns false (exit wait).
+   * If the step is already waiting on a timer whose `resumeAt` has passed, it clears that
+   * sentinel and returns false (exit wait). A timer re-entered before `resumeAt` stays parked
+   * and returns true — a parallel floor tick or an earlier sibling `resumeAt` must not finish it.
    *
    * "Already waiting" is detected by two complementary signals:
    * - `state.resumeAt` is present: used by timer-based waits (e.g. `wait` step) where a resume
@@ -429,7 +432,7 @@ export class StepExecutionRuntime {
    * @param resumeDate - When provided, stored as `resumeAt` so the scheduler can wake the step
    *   at that time. Omit for indefinite waits triggered externally (e.g. resume API).
    * @param waitingStatus - Status to set while waiting. Defaults to `ExecutionStatus.WAITING`.
-   * @returns `true` if the step has entered a wait state, `false` if it has exited one.
+   * @returns `true` if the step is waiting, `false` if it has exited a wait.
    */
   public tryEnterWaitUntil(
     resumeDate?: Date,
@@ -443,6 +446,9 @@ export class StepExecutionRuntime {
         : this.stepExecution?.status === waitingStatus;
 
     if (alreadyWaiting) {
+      if (resumeDate != null && this.isStoredResumeAtPending()) {
+        return true;
+      }
       const newState = { ...(this.stepExecution?.state || {}) };
       delete newState.resumeAt;
       this.workflowExecutionState.upsertStep({
@@ -463,6 +469,19 @@ export class StepExecutionRuntime {
       state: this.buildWaitState(resumeDate),
     });
     return true;
+  }
+
+  /**
+   * True when a timer wait's stored `resumeAt` is still in the future. Re-entering the step
+   * before then (another branch's wake, a concurrency floor tick) must leave the wait parked.
+   */
+  private isStoredResumeAtPending(): boolean {
+    const resumeAt = this.stepExecution?.state?.resumeAt;
+    if (typeof resumeAt !== 'string') {
+      return false;
+    }
+    const resumeAtMs = new Date(resumeAt).getTime();
+    return Number.isFinite(resumeAtMs) && new Date().getTime() < resumeAtMs;
   }
 
   /**

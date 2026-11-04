@@ -17,7 +17,7 @@ import type { StartServices } from '../hooks/use_kibana';
 import {
   NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
   type NightshiftSignificantEventsQueryData,
-} from '../hooks/use_fetch_significant_events';
+} from '../data/significant_events/use_fetch_significant_events';
 import {
   checkoutFeature,
   checkoutLifecycle,
