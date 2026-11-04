@@ -23,7 +23,7 @@ import {
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
 
 import { useEuiTheme } from '@elastic/eui';
-import { getScrollContainer } from '@kbn/core-chrome-layout-utils';
+import { getScrollContainer, type ScrollContainer } from '@kbn/core-chrome-layout-utils';
 
 import type { ActivePanelEvent } from './grid_panel';
 import type { ActiveSectionEvent } from './grid_section';
@@ -45,12 +45,14 @@ export const useGridLayoutState = ({
   gridSettings,
   expandedPanelId,
   accessMode,
+  scrollContainer,
 }: {
   layout: GridLayoutData;
   layoutRef: React.MutableRefObject<HTMLDivElement | null>;
   gridSettings: GridSettings;
   expandedPanelId?: string;
   accessMode: GridAccessMode;
+  scrollContainer?: ScrollContainer | null;
 }): {
   gridLayoutStateManager: GridLayoutStateManager;
   setDimensionsRef: (instance: HTMLDivElement | null) => void;
@@ -105,7 +107,7 @@ export const useGridLayoutState = ({
     const orderedLayout = getOrderedLayout(layout, gridSettings);
     const gridLayout$ = new BehaviorSubject<OrderedLayout>(orderedLayout);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
-    const scrollContainer$ = new BehaviorSubject(getScrollContainer());
+    const scrollContainer$ = new BehaviorSubject(scrollContainer ?? getScrollContainer());
     const activePanelEvent$ = new BehaviorSubject<ActivePanelEvent | undefined>(undefined);
     const activeSectionEvent$ = new BehaviorSubject<ActiveSectionEvent | undefined>(undefined);
 
@@ -142,6 +144,13 @@ export const useGridLayoutState = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const nextScrollContainer = scrollContainer ?? getScrollContainer();
+    if (nextScrollContainer !== gridLayoutStateManager.scrollContainer$.getValue()) {
+      gridLayoutStateManager.scrollContainer$.next(nextScrollContainer);
+    }
+  }, [scrollContainer, gridLayoutStateManager]);
 
   useEffect(() => {
     /**

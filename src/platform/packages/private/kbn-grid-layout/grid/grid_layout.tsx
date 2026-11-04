@@ -13,6 +13,7 @@ import { combineLatest } from 'rxjs';
 import { cloneDeep } from 'lodash';
 
 import { css } from '@emotion/react';
+import type { ScrollContainer } from '@kbn/core-chrome-layout-utils';
 
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridPanel, GridPanelDragPreview } from './grid_panel';
@@ -41,6 +42,8 @@ export type GridLayoutProps = {
   expandedPanelId?: string;
   accessMode?: GridAccessMode;
   className?: string; // this makes it so that custom CSS can be passed via Emotion
+  /** The element that scrolls while dragging; defaults to the page's main scroll container. */
+  scrollContainer?: ScrollContainer | null;
 } & UseCustomDragHandle;
 
 type GridLayoutElementsInOrder = Array<{
@@ -57,6 +60,7 @@ export const GridLayout = ({
   accessMode = 'EDIT',
   className,
   useCustomDragHandle = false,
+  scrollContainer,
 }: GridLayoutProps) => {
   const layoutRef = useRef<HTMLDivElement | null>(null);
   const { gridLayoutStateManager, setDimensionsRef } = useGridLayoutState({
@@ -65,6 +69,7 @@ export const GridLayout = ({
     gridSettings,
     expandedPanelId,
     accessMode,
+    scrollContainer,
   });
   const [elementsInOrder, setElementsInOrder] = useState<GridLayoutElementsInOrder>([]);
 

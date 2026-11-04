@@ -383,9 +383,11 @@ const getGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
 const AppGrid = ({
   app,
   onRevealCell,
+  scrollContainer,
 }: {
   app: NotebookApp;
   onRevealCell: (cellId: string) => void;
+  scrollContainer: HTMLDivElement | null;
 }) => {
   const { store } = useNotebook();
   const { euiTheme } = useEuiTheme();
@@ -451,6 +453,7 @@ const AppGrid = ({
         key={`${app.freePlacement ? 'free' : 'compact'}-${snapToGrid ? 'snap' : 'fine'}-${columns}`}
         layout={layout}
         gridSettings={gridSettings}
+        scrollContainer={scrollContainer}
         renderPanelContents={renderPanelContents}
         useCustomDragHandle
         onLayoutChange={onLayoutChange}
@@ -660,6 +663,7 @@ export const AppFlyout = ({
   const apps = useStateFromPublishingSubject(store.apps$);
   const activeAppId = useStateFromPublishingSubject(activeAppId$);
   const app = apps.find(({ id }) => id === activeAppId) ?? apps[0];
+  const [bodyScrollContainer, setBodyScrollContainer] = useState<HTMLDivElement | null>(null);
 
   return (
     <NotebookFlyout
@@ -675,9 +679,9 @@ export const AppFlyout = ({
           <EuiFlyoutHeader>
             <AppToolbar app={app} apps={apps} />
           </EuiFlyoutHeader>
-          <EuiFlyoutBody>
+          <EuiFlyoutBody scrollContainerRef={setBodyScrollContainer}>
             <AppHeader app={app} />
-            <AppGrid app={app} onRevealCell={onRevealCell} />
+            <AppGrid app={app} onRevealCell={onRevealCell} scrollContainer={bodyScrollContainer} />
           </EuiFlyoutBody>
         </>
       ) : (

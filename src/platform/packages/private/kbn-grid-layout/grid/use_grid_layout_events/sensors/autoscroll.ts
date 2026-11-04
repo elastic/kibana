@@ -39,9 +39,11 @@ export const startAutoScroll = (container: ScrollContainer) => {
     const deltaTime = (now - lastFrameTime) / 1000;
 
     if (latestMouseEvent) {
-      // Scroll faster depending on how far the user's drag is from the center of the screen.
+      // Scroll faster depending on how far the user's drag is from the center of the container.
       const clientHeight = getViewportHeight(container);
-      const distanceFromCenterOfScreen = clientHeight / 2 - latestMouseEvent.clientY;
+      const containerTop =
+        container === document.documentElement ? 0 : container.getBoundingClientRect().top;
+      const distanceFromCenterOfScreen = containerTop + clientHeight / 2 - latestMouseEvent.clientY;
       const scrollDirection = distanceFromCenterOfScreen > 0 ? 'up' : 'down';
       const distanceFromCenterOfScreenPercentage = distanceFromCenterOfScreen / clientHeight;
 
