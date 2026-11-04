@@ -146,7 +146,7 @@ export const InspectOverlay = ({
       });
 
       if (isGrabMode) {
-        resolveRepoRoot(elementFiber.fiber._debugSource.fileName);
+        resolveRepoRoot(elementFiber.source.fileName);
       }
     },
     [isGrabMode, resolveRepoRoot]

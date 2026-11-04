@@ -80,7 +80,8 @@ describe('InspectOverlay', () => {
     (getElementFromPoint as jest.Mock).mockReturnValue(fakeTarget);
     (findFiberWithDebugSource as jest.Mock).mockReturnValue({
       element: fakeTarget,
-      fiber: { type: 'div', _debugSource: { fileName: 'a.tsx', lineNumber: 1, columnNumber: 1 } },
+      fiber: { type: 'div' },
+      source: { fileName: 'a.tsx', lineNumber: 1, columnNumber: 1 },
     });
     (findSourceComponentName as jest.Mock).mockReturnValue('FakeComponent');
 
@@ -132,7 +133,7 @@ describe('InspectOverlay', () => {
     const setFlyoutOverlayRef = jest.fn();
     const setIsInspecting = jest.fn();
     const fakeSource = { fileName: '/repo/src/save_button.tsx', lineNumber: 1, columnNumber: 1 };
-    const fakeFiber = { type: 'button', _debugSource: fakeSource };
+    const fakeFiber = { type: 'button' };
     const expectedContext = '<div>Save</div>\n  in SaveButton (/repo/src/save_button.tsx:42:7)';
     let fakeTarget: HTMLElement;
 
@@ -145,6 +146,7 @@ describe('InspectOverlay', () => {
       (findFiberWithDebugSource as jest.Mock).mockReturnValue({
         element: fakeTarget,
         fiber: fakeFiber,
+        source: fakeSource,
       });
       (findSourceComponentName as jest.Mock).mockReturnValue('SaveButton');
       (getComponentStack as jest.Mock).mockReturnValue([

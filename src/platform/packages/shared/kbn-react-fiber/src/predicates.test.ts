@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { hasDebugSource, isComponentFiber, isSourceComponent } from './predicates';
+import { isComponentFiber, isSourceComponent } from './predicates';
 
 describe('isComponentFiber', () => {
   it('should accept function components and the `forwardRef` and `memo` objects wrapping them', () => {
@@ -34,17 +34,5 @@ describe('isSourceComponent', () => {
 
   it('should accept application components', () => {
     expect(isSourceComponent({ type: { name: 'SaveButton' } })).toBe(true);
-  });
-});
-
-describe('hasDebugSource', () => {
-  it('should only accept fibers with source information', () => {
-    expect(hasDebugSource({ type: 'div' })).toBe(false);
-    expect(
-      hasDebugSource({
-        type: 'div',
-        _debugSource: { fileName: 'a.tsx', lineNumber: 1, columnNumber: 1 },
-      })
-    ).toBe(true);
   });
 });
