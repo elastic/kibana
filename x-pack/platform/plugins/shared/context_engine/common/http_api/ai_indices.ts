@@ -87,20 +87,26 @@ export interface AiIndexFeedbackAnalysis {
 
 export interface AiIndexProperties {
   description?: string;
+  /**
+   * @deprecated Ignored. An AI index takes memories while its `dreaming` config is set up; see
+   * `isDreamingConfigured`. Still accepted so existing callers keep compiling and working.
+   */
   memory_enabled?: boolean;
   dest: AiIndexDest;
   automations: AiIndexAutomation[];
   sources: AiIndexSource[];
   traces: AiIndexTrace[];
   feedback_analysis?: AiIndexFeedbackAnalysis;
-  /** What the AI index learns from its memories, and how often. Missing: dreaming is off. */
+  /**
+   * What the AI index learns from its memories, and how often. An AI index takes memories only
+   * while it is set up; see `isDreamingConfigured`.
+   */
   dreaming?: AiIndexDreamingConfig;
 }
 
-export interface AiIndexHttpItem extends Omit<AiIndexProperties, 'traces'> {
+export interface AiIndexHttpItem extends Omit<AiIndexProperties, 'traces' | 'memory_enabled'> {
   id: string;
   managed: boolean;
-  memory_enabled: boolean;
   date_created: string;
   date_modified: string;
   traces: AiIndexTraceWithQuery[];

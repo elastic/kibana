@@ -86,7 +86,7 @@ describe('forget tool', () => {
     update.mockResolvedValue({ result: 'updated' });
     get.mockResolvedValue({
       id: 'support',
-      memory_enabled: true,
+      dreaming: { enabled: true, facts: [{ type: 'preference' }] },
       dest: { type: 'index', value: 'ai-index-idx-support' },
     });
     search.mockResolvedValue({
@@ -190,7 +190,7 @@ describe('forget tool', () => {
   it('appends a tombstone revision for a data-stream-backed memory', async () => {
     get.mockResolvedValue({
       id: 'support',
-      memory_enabled: true,
+      dreaming: { enabled: true, facts: [{ type: 'preference' }] },
       dest: { type: 'data_stream', value: 'ai-index-ds-support' },
     });
     search.mockResolvedValue({
@@ -308,10 +308,9 @@ describe('forget tool', () => {
     });
   });
 
-  it('rejects an AI index that does not have memory enabled', async () => {
+  it('rejects an AI index whose dreaming is not set up', async () => {
     get.mockResolvedValue({
       id: 'support',
-      memory_enabled: false,
       dest: { type: 'index', value: 'ai-index-idx-support' },
     });
 
@@ -322,7 +321,8 @@ describe('forget tool', () => {
         {
           type: ToolResultType.error,
           data: {
-            message: "Failed to forget memory: AI index 'support' does not have memory enabled.",
+            message:
+              "Failed to forget memory: AI index 'support' does not take memories: dreaming is not set up.",
           },
         },
       ],

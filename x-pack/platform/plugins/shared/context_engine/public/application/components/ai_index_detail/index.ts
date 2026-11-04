@@ -11,7 +11,6 @@ export { AutomationsPanel } from './automations_panel';
 export { ConnectAgentPanel } from './connect_agent_panel';
 export { DescriptionPanel } from './description_panel';
 export { LockedSectionPanel } from './locked_section_panel';
-export { MemoryPanel } from './memory_panel';
 export { SignalsPanel } from './signals_panel';
 export { SourcesPanel } from './sources_panel';
 export { TracesPanel } from './traces_panel';

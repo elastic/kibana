@@ -15,13 +15,13 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation, useParams, useRouteMatch } from 'react-router-dom';
 import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
+import { isDreamingConfigured } from '../../../common/dreaming';
 import {
   AiIndexCreatedCallout,
   AutomationsPanel,
   ConnectAgentPanel,
   DescriptionPanel,
   LockedSectionPanel,
-  MemoryPanel,
   SignalsPanel,
   SourcesPanel,
 } from '../components/ai_index_detail';
@@ -290,7 +290,7 @@ export const AiIndexDetailPage = () => {
       {showCreatedCallout && (
         <AiIndexCreatedCallout
           onDismiss={() => setShowCreatedCallout(false)}
-          showMemory={isMemoryEnabled && aiIndex?.memory_enabled === true}
+          showMemory={isMemoryEnabled && isDreamingConfigured(aiIndex?.dreaming)}
         />
       )}
       {showOnboardingPanel && (
@@ -305,12 +305,6 @@ export const AiIndexDetailPage = () => {
         onSaved={refetch}
         isManaged={!!aiIndex?.managed}
       />
-      {isMemoryEnabled && (
-        <>
-          <EuiSpacer size="m" />
-          <MemoryPanel isLoading={isLoading} aiIndex={aiIndex} onSaved={refetch} />
-        </>
-      )}
       <EuiSpacer size="m" />
       {showAutomationsPanel ? (
         <AutomationsPanel

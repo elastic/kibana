@@ -123,14 +123,14 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     expect(getAiIndexDataReadService).toHaveBeenCalledWith({ esClient: asCurrentUser, request });
   });
 
-  it('registers a resolver mapping registry items to id, esqlTarget (dest.value) and description', async () => {
+  it('registers a resolver mapping registry items to id, esqlTarget (dest.value), description and whether dreaming takes memories', async () => {
     const { resolver } = setup({
       aiIndices: [
         {
           id: 'my-custom',
           dest: { type: 'index', value: 'ai-index-idx-custom' },
           description: 'Support tickets.',
-          memory_enabled: true,
+          dreaming: { enabled: true, facts: [{ type: 'preference' }] },
         },
       ],
     });
@@ -151,7 +151,6 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
         {
           id: 'wanted',
           dest: { type: 'index', value: 'idx-wanted' },
-          memory_enabled: false,
         },
       ],
     });

@@ -23,7 +23,6 @@ const aiIndex: AiIndexHttpItem = {
   description: 'Support KIs',
   dest: { type: 'index', value: 'ai-index-idx-support*' },
   managed: false,
-  memory_enabled: false,
   automations: [],
   sources: [],
   traces: [],
@@ -186,11 +185,13 @@ describe('describeAiIndex', () => {
 
     const response = await describeAiIndex({
       ...params,
-      aiIndex: { ...aiIndex, memory_enabled: true },
+      aiIndex: { ...aiIndex, dreaming: { enabled: true, facts: [{ type: 'preference' }] } },
       includeMemory: true,
     });
 
-    expect(response).toContain('\nMemory\nMemory writes are enabled');
+    expect(response).toContain(
+      '\nMemory\nThis AI index takes memories: dreaming is set up for it.'
+    );
     expect(response).toContain('\nKnowledge item types\n"document": 3\n');
     expect(response).not.toContain('"memory.session": 2');
     expect(response).not.toContain('"memory.session_fact": 7');
@@ -218,7 +219,7 @@ describe('describeAiIndex', () => {
     expect(response.endsWith(memoryAwareExampleQueriesBlock)).toBe(true);
   });
 
-  it('omits memory capability when memory writes are disabled', async () => {
+  it('omits memory capability when dreaming is not set up', async () => {
     const response = await describeAiIndex(params);
 
     expect(response).not.toContain('\nMemory\n');
@@ -228,7 +229,7 @@ describe('describeAiIndex', () => {
   it('omits memory capability when the memory feature flag is disabled', async () => {
     const response = await describeAiIndex({
       ...params,
-      aiIndex: { ...aiIndex, memory_enabled: true },
+      aiIndex: { ...aiIndex, dreaming: { enabled: true, facts: [{ type: 'preference' }] } },
     });
 
     expect(response).not.toContain('\nMemory\n');

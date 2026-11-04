@@ -20,7 +20,6 @@ import type { GetAiIndexResponse } from '../../../../../../common/http_api/ai_in
 export const listKiTestAiIndex: GetAiIndexResponse = {
   id: 'sample-ki',
   managed: false,
-  memory_enabled: false,
   dest: { type: 'index', value: 'ai-index-idx-sample-ki' },
   automations: [],
   sources: [{ type: 'connector', value: 'connector-1' }],

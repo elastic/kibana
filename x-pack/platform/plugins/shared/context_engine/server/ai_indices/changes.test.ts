@@ -14,7 +14,6 @@ import { AiIndexChangeNotifier, diffAiIndex } from './changes';
 const aiIndex: AiIndexHttpItem = {
   id: 'support',
   managed: false,
-  memory_enabled: true,
   dest: { type: 'index', value: 'ai-index-support' },
   automations: [],
   sources: [],
@@ -63,7 +62,7 @@ describe('diffAiIndex', () => {
   });
 
   it('lists every field that holds a value on create and delete', () => {
-    const fields = ['managed', 'memory_enabled', 'dest', 'automations', 'sources', 'traces'];
+    const fields = ['managed', 'dest', 'automations', 'sources', 'traces'];
 
     expect([...diffAiIndex(undefined, aiIndex)].sort()).toEqual([...fields].sort());
     expect([...diffAiIndex(aiIndex, undefined)].sort()).toEqual([...fields].sort());

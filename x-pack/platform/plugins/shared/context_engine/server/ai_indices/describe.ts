@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AiIndexHttpItem, KiTypeCount } from '../../common/http_api/ai_indices';
 import { MEMORY_KI_TYPES } from '../../common/memory';
+import { isDreamingConfigured } from '../../common/dreaming';
 import { describeAiIndexAggregations } from './describe_aggregations';
 import { describeAiIndexFields } from './describe_fields';
 import { buildExampleQueries, EXCLUDE_MEMORY_KI_TYPES_FILTER } from './example_queries';
@@ -67,11 +68,8 @@ const tagCountsSection = (counts: AiIndexTagCount[]): string[] =>
     counts.map(({ tag, count }) => [tag, count])
   );
 
-const memorySection = (
-  { memory_enabled: memoryEnabled }: AiIndexHttpItem,
-  target: string
-): string[] => {
-  if (!memoryEnabled) {
+const memorySection = ({ dreaming }: AiIndexHttpItem, target: string): string[] => {
+  if (!isDreamingConfigured(dreaming)) {
     return [];
   }
 
@@ -79,7 +77,7 @@ const memorySection = (
 
   return [
     'Memory',
-    'Memory writes are enabled for this AI-index registry entry.',
+    'This AI index takes memories: dreaming is set up for it.',
     'Available memory types',
     'memory.session',
     'memory.session_fact',
