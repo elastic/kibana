@@ -50,6 +50,8 @@ export const ALERTZERO_ATTACHMENT_TYPES = {
   significantSecurityEvent: 'security.significant_security_event',
   /** Hidden start+poll handoff; server-registered only. */
   huntCoordinatorResult: 'security.hunt_coordinator_result',
+  /** The durable record of a Hunt Library session on an Investigation. */
+  huntSession: 'security.hunt_session',
 } as const;
 
 /** Prefix for `hunt-coordinator-result-{runId}`; the route returns the full id. */
