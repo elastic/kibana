@@ -49,6 +49,18 @@ jest.mock('../../../../../components', () => ({
   PackageIcon: () => null,
 }));
 
+const packageInfo: PackageInfo = {
+  name: 'nginx',
+  title: 'Nginx',
+  version: '1.0.0',
+  description: '',
+  format_version: '',
+  owner: { github: '' },
+  latestVersion: '',
+  assets: { kibana: undefined, elasticsearch: undefined },
+  status: 'not_installed',
+};
+
 const renderLayout = (useWidePageLayout?: boolean) =>
   render(
     <I18nProvider>
@@ -66,18 +78,6 @@ describe('CreatePackagePolicySinglePageLayout', () => {
   it.each(['edit', 'package-edit', 'installed-integrations'] as const)(
     'shows the edit context when opened from %s',
     (from) => {
-      const packageInfo: PackageInfo = {
-        name: 'nginx',
-        title: 'Nginx',
-        version: '1.0.0',
-        description: '',
-        format_version: '',
-        owner: { github: '' },
-        latestVersion: '',
-        assets: { kibana: undefined, elasticsearch: undefined },
-        status: 'not_installed',
-      };
-
       render(
         <I18nProvider>
           <CreatePackagePolicySinglePageLayout from={from} cancelUrl="/" packageInfo={packageInfo}>
@@ -90,6 +90,32 @@ describe('CreatePackagePolicySinglePageLayout', () => {
       expect(
         screen.getByText(
           'Modify integration settings and deploy changes to the selected agent policies.'
+        )
+      ).toBeInTheDocument();
+    }
+  );
+
+  it.each([packageInfo, undefined])(
+    'shows upgrade context from Installed integrations with package details %p',
+    (info) => {
+      render(
+        <I18nProvider>
+          <CreatePackagePolicySinglePageLayout
+            from="upgrade-from-installed-integrations"
+            cancelUrl="/"
+            packageInfo={info}
+          >
+            form
+          </CreatePackagePolicySinglePageLayout>
+        </I18nProvider>
+      );
+
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+        info ? 'Upgrade Nginx integration' : 'Upgrade integration'
+      );
+      expect(
+        screen.getByText(
+          'Upgrade this integration and deploy changes to the selected agent policies.'
         )
       ).toBeInTheDocument();
     }

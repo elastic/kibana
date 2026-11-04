@@ -79,6 +79,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
         [
           'upgrade-from-fleet-policy-list',
           'upgrade-from-integrations-policy-list',
+          'upgrade-from-installed-integrations',
           'upgrade-from-extension',
         ].includes(from),
       [from]
