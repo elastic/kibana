@@ -10,7 +10,7 @@ import type { RegistrableEntityDefinition } from '@kbn/entity-store/server';
 import { MANAGED_BY } from '../constants';
 
 /**
- * A Kubernetes deployment, identified by `<namespace>/<name>`. The ranking reads the OpenTelemetry
+ * A Kubernetes deployment, identified by `<cluster>/<namespace>/<name>`. The ranking reads the OpenTelemetry
  * names first and falls back to the Elastic Agent ones, so the same deployment reported under both
  * conventions gets the same id and merges into one entity.
  */
@@ -25,8 +25,16 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
       branches: [
         {
           ranking: [
-            [{ field: 'k8s.namespace.name' }, { sep: '/' }, { field: 'k8s.deployment.name' }],
             [
+              { field: 'k8s.cluster.name' },
+              { sep: '/' },
+              { field: 'k8s.namespace.name' },
+              { sep: '/' },
+              { field: 'k8s.deployment.name' },
+            ],
+            [
+              { field: 'orchestrator.cluster.name' },
+              { sep: '/' },
               { field: 'kubernetes.namespace' },
               { sep: '/' },
               { field: 'kubernetes.deployment.name' },
@@ -36,8 +44,8 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
       ],
     },
     documentsFilter: getPresenceFilter([
-      ['k8s.namespace.name', 'k8s.deployment.name'],
-      ['kubernetes.namespace', 'kubernetes.deployment.name'],
+      ['k8s.cluster.name', 'k8s.namespace.name', 'k8s.deployment.name'],
+      ['orchestrator.cluster.name', 'kubernetes.namespace', 'kubernetes.deployment.name'],
     ]),
   },
   dynamic: {
