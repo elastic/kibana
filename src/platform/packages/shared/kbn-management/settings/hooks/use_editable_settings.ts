@@ -77,22 +77,26 @@ export const useEditableSettings = ({
   const settingsKeysJson = JSON.stringify(settingsKeys);
   const trackedKeys = useMemo<string[]>(() => JSON.parse(settingsKeysJson), [settingsKeysJson]);
 
-  const [fields, setFields] = useState(() => getSettingsFields(trackedKeys, settingsClient));
+  const [settingsVersion, setSettingsVersion] = useState(0);
   const [unsavedChanges, setUnsavedChanges] = useState<Record<string, UnsavedFieldChange>>({});
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    const refreshFields = () => setFields(getSettingsFields(trackedKeys, settingsClient));
-    refreshFields();
-
     const subscription = settingsClient.getUpdate$().subscribe(({ key }) => {
       if (trackedKeys.includes(key)) {
-        refreshFields();
+        setSettingsVersion((version) => version + 1);
       }
     });
 
     return () => subscription.unsubscribe();
   }, [settingsClient, trackedKeys]);
+
+  const fields = useMemo(
+    () => getSettingsFields(trackedKeys, settingsClient),
+    // The client is mutable, so `settingsVersion` stands in for its tracked values changing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [trackedKeys, settingsClient, settingsVersion]
+  );
 
   const handleFieldChange = useCallback<OnFieldChangeFn>((id, change) => {
     if (!change) {

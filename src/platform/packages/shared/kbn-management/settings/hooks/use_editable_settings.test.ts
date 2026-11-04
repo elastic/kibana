@@ -81,6 +81,30 @@ describe('useEditableSettings', () => {
     expect(settingsClient.getAll).toHaveBeenCalledTimes(getAllCalls);
   });
 
+  it('reads the settings once on mount', () => {
+    const { settingsClient } = setup();
+
+    expect(settingsClient.getAll).toHaveBeenCalledTimes(1);
+  });
+
+  it('has fields for added keys, and none for removed keys, in the render that changes them', () => {
+    const { settingsClient } = setup();
+    const renderedFieldKeys: string[][] = [];
+    const { rerender } = renderHook(
+      (keys: string[]) => {
+        const editable = useEditableSettings({ settingsKeys: keys, settingsClient });
+        renderedFieldKeys.push(Object.keys(editable.fields));
+        return editable;
+      },
+      { initialProps: [STRING_SETTING] }
+    );
+    renderedFieldKeys.length = 0;
+
+    rerender([RELOAD_SETTING]);
+
+    expect(renderedFieldKeys).toEqual([[RELOAD_SETTING]]);
+  });
+
   it('refreshes fields when a tracked setting is updated', () => {
     const { result, settingsClient, update$ } = setup();
 
