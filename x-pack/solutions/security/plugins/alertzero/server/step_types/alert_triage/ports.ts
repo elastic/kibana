@@ -644,7 +644,7 @@ export const findKeyTagsWithVerdicts = async (
   return found;
 };
 
-/** Breaks ties between alerts of one timestamp, so a `search_after` cursor never skips one. */
+/** Orders alerts of one timestamp the same way on every page. */
 const ALERT_UUID_FIELD = 'kibana.alert.uuid';
 
 /** The status code of an Elasticsearch or Kibana client error, whichever shape the client used. */
@@ -655,10 +655,33 @@ export const statusCodeOf = (error: unknown): number | undefined => {
   return typeof code === 'number' ? code : undefined;
 };
 
+/**
+ * Where the next page of candidates starts: the last timestamp read, and the ids already read at
+ * that timestamp. The alerts route drops `search_after`, so a page is read as "from this
+ * timestamp on, except these ids" instead.
+ */
+export interface DecisionCursor {
+  timestamp: number;
+  seenIds: string[];
+}
+
+const nextCursor = (
+  hits: ReadonlyArray<{ _id: string; sort?: unknown[] }>,
+  lastTimestamp: number,
+  previous: DecisionCursor | undefined
+): DecisionCursor => {
+  const atLast = hits
+    .filter(({ sort }) => Number(sort?.[0]) === lastTimestamp)
+    .map(({ _id }) => _id);
+  // A page that stayed inside one timestamp keeps the ids read there before.
+  const earlier = previous?.timestamp === lastTimestamp ? previous.seenIds : [];
+  return { timestamp: lastTimestamp, seenIds: [...earlier, ...atLast] };
+};
+
 export interface DecisionCandidatesPage {
   candidates: MatchCandidate[];
   /** The cursor of the next page. Absent on the last page. */
-  after?: unknown[];
+  after?: DecisionCursor;
 }
 
 /**
@@ -666,7 +689,8 @@ export interface DecisionCandidatesPage {
  * so the alerts closest to ageing out are matched first. They are the alerts the planner would
  * consider, not only the ones it picks, so a match never has to wait for a batch. Alerts already
  * tagged by a decision match are left out. Only the fields a key reads are fetched. A page is at
- * most `ALERT_FETCH_LIMIT` alerts; pass `after` of the last page to read the next.
+ * most `ALERT_FETCH_LIMIT` alerts; pass `after` of the last page to read the next. A timestamp with
+ * more than one page of alerts is read through its `seenIds`, so no alert is read twice or missed.
  */
 export const fetchDecisionCandidates = async (
   { callKibanaApi }: KibanaApi,
@@ -676,7 +700,7 @@ export const fetchDecisionCandidates = async (
   {
     after,
     includeTaggedByShadow = false,
-  }: { after?: unknown[]; includeTaggedByShadow?: boolean } = {}
+  }: { after?: DecisionCursor; includeTaggedByShadow?: boolean } = {}
 ): Promise<DecisionCandidatesPage> => {
   const { body } = await callKibanaApi<{
     hits?: { hits?: Array<AlertHit & { sort?: unknown[] }> };
@@ -687,16 +711,25 @@ export const fetchDecisionCandidates = async (
       size: ALERT_FETCH_LIMIT,
       _source: [...PATTERN_KEY_FIELDS, SEVERITY_FIELD],
       sort: [{ [ALERT_FIELDS.timestamp]: 'asc' }, { [ALERT_UUID_FIELD]: 'asc' }],
-      ...(after ? { search_after: after } : {}),
       query: {
         bool: {
           filter: [
             { terms: { [ALERT_FIELDS.status]: [...OPEN_ALERT_STATUSES] } },
             { range: { [ALERT_FIELDS.timestamp]: { gte: new Date(windowStart).toISOString() } } },
             ...severityFilter(filters.minSeverity),
+            ...(after
+              ? [
+                  {
+                    range: {
+                      [ALERT_FIELDS.timestamp]: { gte: after.timestamp, format: 'epoch_millis' },
+                    },
+                  },
+                ]
+              : []),
           ],
           must_not: [
             ...UNTRIAGED_MUST_NOT(analysisTagPrefix),
+            ...(after ? [{ ids: { values: after.seenIds } }] : []),
             // An alert a decision closed and an analyst reopened keeps this tag. It must not be
             // closed again: the analyst's act wins, and revoke still finds it by the tag.
             { prefix: { [ALERT_FIELDS.tags]: TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX } },
@@ -714,7 +747,7 @@ export const fetchDecisionCandidates = async (
     },
   });
   const hits = body.hits?.hits ?? [];
-  const last = hits[hits.length - 1]?.sort;
+  const lastTimestamp = Number(hits[hits.length - 1]?.sort?.[0]);
   return {
     candidates: hits.map(({ _id, _source = {} }) => {
       const severity = readField(_source, SEVERITY_FIELD);
@@ -724,7 +757,9 @@ export const fetchDecisionCandidates = async (
         ...(typeof severity === 'string' ? { severity } : {}),
       };
     }),
-    ...(hits.length === ALERT_FETCH_LIMIT && last ? { after: last } : {}),
+    ...(hits.length === ALERT_FETCH_LIMIT && Number.isFinite(lastTimestamp)
+      ? { after: nextCursor(hits, lastTimestamp, after) }
+      : {}),
   };
 };
 
