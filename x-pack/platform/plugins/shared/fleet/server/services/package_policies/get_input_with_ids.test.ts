@@ -363,6 +363,41 @@ describe('getInputsWithIds', () => {
       expect(() => getInputsWithIds(policy, 'policy123')).toThrow('path traversal');
     });
 
+    it('throws when input.config.streams.value[*].id contains a traversal sequence', () => {
+      const policy = policyWithInputId('safe-input-id') as any;
+      policy.inputs[0].config = { streams: { value: [{ id: 'a/../../../../tmp/evil' }] } };
+      expect(() => getInputsWithIds(policy, 'policy123')).toThrow('path traversal');
+    });
+
+    it('throws when input.config.streams.value adds a traversal stream to an input with no streams', () => {
+      const policy = policyWithInputId('safe-input-id') as any;
+      policy.inputs[0].streams = [];
+      policy.inputs[0].config = { streams: { value: [{ id: '../../../../tmp/evil' }] } };
+      expect(() => getInputsWithIds(policy, 'policy123')).toThrow('path traversal');
+    });
+
+    it('throws when input.config.streams.value is an index-keyed object with a traversal id', () => {
+      const policy = policyWithInputId('safe-input-id') as any;
+      policy.inputs[0].config = { streams: { value: { 0: { id: '../../../../tmp/evil' } } } };
+      expect(() => getInputsWithIds(policy, 'policy123')).toThrow('path traversal');
+    });
+
+    it('does not throw for safe input.config.streams.value ids', () => {
+      const policy = policyWithInputId('safe-input-id') as any;
+      policy.inputs[0].config = {
+        streams: { value: [{ id: 'logfile-system.syslog-policy123', paths: ['/var/log/../x'] }] },
+      };
+      expect(() => getInputsWithIds(policy, 'policy123')).not.toThrow();
+    });
+
+    it('does not throw for non-identity nested ids in input.config.streams.value', () => {
+      const policy = policyWithInputId('safe-input-id') as any;
+      policy.inputs[0].config = {
+        streams: { value: [{ processors: [{ add_fields: { fields: { id: '../../x' } } }] }] },
+      };
+      expect(() => getInputsWithIds(policy, 'policy123')).not.toThrow();
+    });
+
     it('does not throw for a non-identity nested id in an override (e.g. event-data field)', () => {
       const policy = policyWithInputId('safe-input-id') as any;
       policy.overrides = {
