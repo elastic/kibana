@@ -8,12 +8,16 @@
 import type {
   CoreSetup,
   CoreStart,
+  KibanaRequest,
   Logger,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { EntityStoreSetupContract, EntityStoreStartContract } from '@kbn/entity-store/server';
+import { registerRoutes } from '@kbn/server-route-repository';
 import { ENTITY_DEFINITIONS } from './definitions';
+import { InventoryService } from './inventory/inventory_service';
+import { entityInventoryRouteRepository } from './routes';
 import type { EntityInventoryConfig } from './config';
 import type {
   EntityInventoryPluginSetup,
@@ -40,10 +44,17 @@ export class EntityInventoryPlugin
   }
 
   public setup(
-    _core: CoreSetup<EntityInventoryStartDependencies, EntityInventoryPluginStart>,
+    core: CoreSetup<EntityInventoryStartDependencies, EntityInventoryPluginStart>,
     { entityStore }: EntityInventorySetupDependencies
   ): EntityInventoryPluginSetup {
     this.registerEntityDefinitions(entityStore);
+    registerRoutes({
+      repository: entityInventoryRouteRepository,
+      dependencies: { getInventoryService: this.createInventoryService(core) },
+      core,
+      logger: this.logger,
+      runDevModeChecks: false,
+    });
     this.logger.debug('Entity inventory plugin set up');
   }
 
@@ -56,6 +67,21 @@ export class EntityInventoryPlugin
   }
 
   public stop(): void {}
+
+  /**
+   * Builds an `InventoryService` over the entity definitions client for the request's space, using
+   * `DEFAULT_SPACE_ID` when the spaces plugin is not available.
+   */
+  private createInventoryService =
+    (core: CoreSetup<EntityInventoryStartDependencies, EntityInventoryPluginStart>) =>
+    async (request: KibanaRequest): Promise<InventoryService> => {
+      const [, { entityStore, spaces }] = await core.getStartServices();
+      const spaceId = spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+      return new InventoryService(
+        entityStore.getEntityDefinitionsClientForSpace(spaceId),
+        this.logger
+      );
+    };
 
   /**
    * Registers every definition in `ENTITY_DEFINITIONS` with the entity store. The registry logs and

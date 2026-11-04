@@ -11,7 +11,7 @@
     "server": true,
     "configPath": ["xpack", "entityInventory"],
     "requiredPlugins": ["entityStore"],
-    "optionalPlugins": [],
+    "optionalPlugins": ["spaces"],
     "requiredBundles": []
   }
 }
