@@ -66,7 +66,7 @@ import { ResultGrid } from './result_preview';
 const APP_ROW_HEIGHT = 40;
 
 const REMOVE_PANEL_LABEL = i18n.translate('xpack.notebook.app.removePanel', {
-  defaultMessage: 'Remove from app',
+  defaultMessage: 'Remove',
 });
 
 const ChartPanelContent = ({ panelId, cell }: { panelId: string; cell: ChartCellDefinition }) => {
@@ -227,6 +227,7 @@ const AppGridPanel = ({
     <EuiContextMenuItem
       key="remove"
       icon="trash"
+      color="danger"
       onClick={() => {
         closeMenu();
         store.updateApp(app.id, (current) => ({
