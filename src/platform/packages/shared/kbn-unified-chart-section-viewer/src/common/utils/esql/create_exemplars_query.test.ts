@@ -8,11 +8,11 @@
  */
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/discover-utils';
 import type { ParsedMetricItem } from '../../../types';
 import { createExemplarsQuery } from './create_exemplars_query';
 
 const mockMetric: ParsedMetricItem = {
-  // METRICS_INFO returns the `metrics.`-prefixed field name; the builder strips the prefix.
   metricName: 'metrics.http.server.request.duration',
   indexName: 'metrics-generic.otel-default',
   units: ['ms'],
@@ -23,36 +23,23 @@ const mockMetric: ParsedMetricItem = {
     { name: 'resource.attributes.service.name' },
   ],
 };
-const TEST_EXEMPLARS_INDEX = 'exemplars-generic.otel-default';
+
+const STATS_CLAUSE = 'STATS PERCENTILE(metrics.http.server.request.duration, 95) BY TBUCKET(100)';
 
 describe('createExemplarsQuery', () => {
-  it('builds the exemplars query for an OTel metric', () => {
-    expect(
-      createExemplarsQuery({ exemplarsIndex: TEST_EXEMPLARS_INDEX, metricItem: mockMetric })
-    ).toBe(
+  it('prefixes SET exemplars onto the chart time-series query', () => {
+    expect(createExemplarsQuery({ metricItem: mockMetric })).toBe(
       `
-SET unmapped_fields = "NULLIFY";
-FROM exemplars-generic.otel-default
-  | WHERE metric_name == "http.server.request.duration"
-  | SORT @timestamp DESC
-  | LIMIT 500
+SET exemplars = TRUE;
+TS metrics-generic.otel-default
+  | ${STATS_CLAUSE}
 `.trim()
     );
   });
 
-  it('nullifies unmapped fields so an inherited WHERE on a metrics-only field cannot fail verification', () => {
-    const query = createExemplarsQuery({
-      exemplarsIndex: TEST_EXEMPLARS_INDEX,
-      metricItem: mockMetric,
-    });
-
-    expect(query.startsWith('SET unmapped_fields = "NULLIFY";\n')).toBe(true);
-  });
-
-  it('appends each non-empty where statement as its own WHERE pipe before SORT', () => {
+  it('keeps inherited WHERE clauses and nullifies unmapped fields when they name a user column', () => {
     expect(
       createExemplarsQuery({
-        exemplarsIndex: TEST_EXEMPLARS_INDEX,
         metricItem: mockMetric,
         whereStatements: [
           ' attributes.http.route == "/orders" ',
@@ -64,83 +51,127 @@ FROM exemplars-generic.otel-default
     ).toBe(
       `
 SET unmapped_fields = "NULLIFY";
-FROM exemplars-generic.otel-default
-  | WHERE metric_name == "http.server.request.duration"
+SET exemplars = TRUE;
+TS metrics-generic.otel-default
   | WHERE attributes.http.route == "/orders"
   | WHERE attributes.http.response.status_code >= 500
-  | SORT @timestamp DESC
-  | LIMIT 500
+  | ${STATS_CLAUSE}
 `.trim()
     );
   });
 
-  it('honours an explicit maxRows override', () => {
+  it('declares metadata fields the WHERE statements use', () => {
     expect(
       createExemplarsQuery({
-        exemplarsIndex: TEST_EXEMPLARS_INDEX,
-        metricItem: { ...mockMetric, dimensionFields: [] },
-        maxRows: 25,
+        metricItem: mockMetric,
+        whereStatements: ['_ignored IS NULL'],
+        metadataFields: ['_ignored'],
       })
     ).toBe(
       `
 SET unmapped_fields = "NULLIFY";
-FROM exemplars-generic.otel-default
-  | WHERE metric_name == "http.server.request.duration"
-  | SORT @timestamp DESC
-  | LIMIT 25
+SET exemplars = TRUE;
+TS metrics-generic.otel-default METADATA _ignored
+  | WHERE _ignored IS NULL
+  | ${STATS_CLAUSE}
 `.trim()
     );
   });
 
-  it('escapes double quotes in the metric name string value', () => {
+  it('queries a Prometheus remote-write source the same way as an OTel source', () => {
+    const prometheusMetric: ParsedMetricItem = {
+      ...mockMetric,
+      metricName: 'metrics.http_requests_total',
+      indexName: 'metrics-prometheus.remote_write-default',
+      metricTypes: ['counter'],
+      fieldTypes: [ES_FIELD_TYPES.LONG],
+      dimensionFields: [],
+    };
+
+    expect(createExemplarsQuery({ metricItem: prometheusMetric })).toBe(
+      `
+SET exemplars = TRUE;
+TS metrics-prometheus.remote_write-default
+  | STATS SUM(RATE(metrics.http_requests_total)) BY TBUCKET(100)
+`.trim()
+    );
+  });
+
+  it('uses a concrete user source, including a remote cluster prefix', () => {
     expect(
       createExemplarsQuery({
-        exemplarsIndex: TEST_EXEMPLARS_INDEX,
-        metricItem: {
-          ...mockMetric,
-          metricName: 'metrics.odd"name',
-          dimensionFields: [{ name: 'attributes.odd`dimension' }],
-        },
+        metricItem: mockMetric,
+        originalSource: 'remote:metrics-generic.otel-default',
       })
     ).toBe(
       `
-SET unmapped_fields = "NULLIFY";
-FROM exemplars-generic.otel-default
-  | WHERE metric_name == "odd\\"name"
-  | SORT @timestamp DESC
-  | LIMIT 500
+SET exemplars = TRUE;
+TS remote:metrics-generic.otel-default
+  | ${STATS_CLAUSE}
 `.trim()
     );
   });
 
-  it('escapes backslashes in the metric name string value', () => {
+  it('follows the cluster-qualified metric index when the typed source is a remote or wildcard-cluster pattern', () => {
+    const cases = [
+      {
+        originalSource: 'remote:metrics-*',
+        indexName: 'remote:metrics-generic.otel-default',
+      },
+      {
+        originalSource: '*:metrics-*',
+        indexName: 'other:metrics-generic.otel-default',
+      },
+    ];
+
+    for (const { originalSource, indexName } of cases) {
+      expect(
+        createExemplarsQuery({
+          metricItem: { ...mockMetric, indexName },
+          originalSource,
+        })
+      ).toBe(
+        `
+SET exemplars = TRUE;
+TS ${indexName}
+  | ${STATS_CLAUSE}
+`.trim()
+      );
+    }
+  });
+
+  it('applies the grid aggregation settings', () => {
     expect(
       createExemplarsQuery({
-        exemplarsIndex: TEST_EXEMPLARS_INDEX,
-        metricItem: { ...mockMetric, metricName: 'metrics.odd\\name', dimensionFields: [] },
+        metricItem: mockMetric,
+        gridSettings: { ...METRICS_GRID_SETTINGS_DEFAULTS, histogramPercentile: 'p50' },
       })
-    ).toContain('WHERE metric_name == "odd\\\\name"');
+    ).toContain('PERCENTILE(metrics.http.server.request.duration, 50)');
+  });
+
+  it('aggregates by the time bucket only, so a grid breakdown cannot change the fetch', () => {
+    const query = createExemplarsQuery({ metricItem: mockMetric });
+
+    expect(query).toContain('BY TBUCKET(100)');
+    expect(query).not.toContain('attributes.http.route');
+    expect(query).not.toContain('resource.attributes.service.name');
   });
 
   describe('returns an empty string so callers skip the fetch', () => {
-    it('when the metric name is missing', () => {
+    it('when the metric has no field type', () => {
       expect(
         createExemplarsQuery({
-          exemplarsIndex: TEST_EXEMPLARS_INDEX,
-          metricItem: { ...mockMetric, metricName: '' },
+          metricItem: { ...mockMetric, fieldTypes: [] },
         })
       ).toBe('');
     });
-  });
 
-  it('never aggregates, so a grid breakdown cannot change which exemplars are fetched', () => {
-    const query = createExemplarsQuery({
-      exemplarsIndex: TEST_EXEMPLARS_INDEX,
-      metricItem: mockMetric,
+    it('when the metric has no instrument', () => {
+      expect(
+        createExemplarsQuery({
+          metricItem: { ...mockMetric, metricTypes: [] },
+        })
+      ).toBe('');
     });
-
-    expect(query).not.toContain('STATS');
-    expect(query).not.toContain(' BY ');
-    expect(query).not.toContain('TBUCKET');
   });
 });

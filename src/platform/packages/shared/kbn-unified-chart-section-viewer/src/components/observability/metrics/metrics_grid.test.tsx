@@ -31,6 +31,8 @@ import {
   FEATURE_FLAGS,
 } from '../../../common/constants';
 import { useFeatureFlag } from '../../../hooks/use_feature_flag';
+import { EXEMPLARS_FETCH_FAILED_USER_MESSAGE } from '../../../common/utils/user_messages';
+import { useFetchExemplars } from './hooks/use_fetch_exemplars';
 import { dismissAllFlyoutsExceptFor, METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/discover-utils';
 import {
   MetricsExperienceStateProvider,
@@ -40,7 +42,7 @@ import { withRestorableState } from '../../../restorable_state';
 import type { FlyoutState } from '../../../restorable_state';
 
 jest.mock('./hooks/use_fetch_exemplars', () => ({
-  useFetchExemplars: jest.fn(() => undefined),
+  useFetchExemplars: jest.fn(() => ({ exemplars: undefined, hasError: false })),
 }));
 
 jest.mock('@kbn/discover-utils', () => {
@@ -182,6 +184,7 @@ describe('MetricsGrid', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(useFeatureFlag).mockImplementation((_flag, fallback) => fallback);
+    jest.mocked(useFetchExemplars).mockReturnValue({ exemplars: undefined, hasError: false });
     discoverFetch$ = getFetch$Mock(fetchParams);
   });
 
@@ -296,6 +299,58 @@ describe('MetricsGrid', () => {
     expect(Chart).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({ userMessages: undefined }),
+      expect.anything()
+    );
+  });
+
+  it('adds an exemplars warning without failing the chart when the fetch fails', () => {
+    jest.mocked(useFetchExemplars).mockReturnValue({ exemplars: undefined, hasError: true });
+
+    renderMetricsGrid();
+
+    expect(Chart).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        error: undefined,
+        userMessages: [EXEMPLARS_FETCH_FAILED_USER_MESSAGE],
+        lensConfig: expect.objectContaining({
+          dataset: expect.objectContaining({
+            esql: expect.stringContaining('system.cpu.utilization'),
+          }),
+        }),
+      }),
+      expect.anything()
+    );
+  });
+
+  it('keeps an existing chart warning when the exemplars fetch also fails', () => {
+    jest.mocked(useFetchExemplars).mockReturnValue({ exemplars: undefined, hasError: true });
+    const messagesForCpu = [
+      {
+        uniqueId: 'cpu-message',
+        severity: 'warning' as const,
+        shortMessage: 'CPU',
+        longMessage: 'CPU message',
+        fixableInEditor: false,
+        displayLocations: [{ id: 'embeddableBadge' as const }],
+      },
+    ];
+
+    renderMetricsGrid({
+      getUserMessages: (metric) =>
+        metric.metricName === 'system.cpu.utilization' ? messagesForCpu : undefined,
+    });
+
+    expect(Chart).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        userMessages: [...messagesForCpu, EXEMPLARS_FETCH_FAILED_USER_MESSAGE],
+      }),
+      expect.anything()
+    );
+    expect(Chart).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ userMessages: [EXEMPLARS_FETCH_FAILED_USER_MESSAGE] }),
       expect.anything()
     );
   });

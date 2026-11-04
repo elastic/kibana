@@ -45,6 +45,7 @@ import {
 } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
+import { EXEMPLARS_FETCH_FAILED_USER_MESSAGE } from '../../../common/utils/user_messages';
 import { useFetchExemplars } from './hooks/use_fetch_exemplars';
 
 const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
@@ -402,17 +403,28 @@ const ChartItem = React.memo(
       metricItem.dimensionFields
     );
 
-    const exemplars = useFetchExemplars({
+    const { exemplars, hasError: exemplarsFetchFailed } = useFetchExemplars({
       fetchParams,
       services,
       metricItem,
       whereStatements,
+      metadataFields,
       originalSource: userSource,
+      gridSettings,
       profileId,
       isComponentVisible,
     });
     // TODO(kibana#289722): feed `exemplars` into useChartLayers as a points layer.
     void exemplars;
+
+    const chartUserMessages = useMemo(() => {
+      if (!exemplarsFetchFailed) {
+        return userMessages;
+      }
+      return userMessages
+        ? [...userMessages, EXEMPLARS_FETCH_FAILED_USER_MESSAGE]
+        : [EXEMPLARS_FETCH_FAILED_USER_MESSAGE];
+    }, [exemplarsFetchFailed, userMessages]);
 
     const { shouldRenderHistogram, boundsError, distributionQuery, heatmapConfig } =
       useHistogramHeatmap({
@@ -546,7 +558,7 @@ const ChartItem = React.memo(
           titleHighlight={titleHighlight}
           extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
           quickActionIds={METRICS_QUICK_ACTION_IDS}
-          userMessages={userMessages}
+          userMessages={chartUserMessages}
           profileId={profileId}
         />
       </A11yGridCell>
