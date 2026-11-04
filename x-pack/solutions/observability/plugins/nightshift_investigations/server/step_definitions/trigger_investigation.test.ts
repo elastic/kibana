@@ -405,7 +405,7 @@ describe('triggerInvestigationStepDefinition', () => {
   });
 
   it('skips a start denied by the global limit without retrying', async () => {
-    const start = jest.fn().mockRejectedValue(new InvestigationQuotaDeniedError());
+    const start = jest.fn().mockRejectedValue(new InvestigationQuotaDeniedError('all'));
     const { definition } = createDefinition(start);
 
     expect(
@@ -419,7 +419,7 @@ describe('triggerInvestigationStepDefinition', () => {
     ).toEqual({ output: { skip_reason: 'investigation_limit' } });
     expect(start).toHaveBeenCalledTimes(1);
     expect(logger.info).toHaveBeenCalledWith(
-      'Skipped investigation of significant_event/event-1: global investigation limit reached'
+      'Skipped investigation of significant_event/event-1: The daily limit for all investigations has been reached'
     );
   });
 });
@@ -435,7 +435,7 @@ describe('investigation quota notice', () => {
   beforeEach(() => jest.mocked(notifyInvestigationQuotaReached).mockClear());
 
   it('tells the Slack thread when the global limit denies the start', async () => {
-    const error = new InvestigationQuotaDeniedError();
+    const error = new InvestigationQuotaDeniedError('all');
     const soClient = savedObjectsClientMock.create();
     const { definition, getActions } = createDefinition(
       jest.fn().mockRejectedValue(error),
@@ -462,7 +462,7 @@ describe('investigation quota notice', () => {
     ['an alert', { subject_type: 'alert', subject_id: 'alert-1', context: { alerts: [] } }],
     ['a manual question', { subject_type: 'manual', message: 'Review errors.' }],
   ])('does not post for %s', async (_name, input) => {
-    const error = new InvestigationQuotaDeniedError();
+    const error = new InvestigationQuotaDeniedError('all');
     const { definition } = createDefinition(jest.fn().mockRejectedValue(error));
 
     expect(await definition.handler(createContext(input))).toEqual({

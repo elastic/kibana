@@ -7,7 +7,7 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RunQuotaGroup } from '../../../common/run_quotas';
-import { consumeRunQuota, releaseRunQuota } from './consume';
+import { consumeInvestigationRunQuota, consumeRunQuota, releaseRunQuota } from './consume';
 import {
   getRunQuotaLedgerId,
   patchRunQuotaSettings,
@@ -258,6 +258,60 @@ describe('run quota admission behavior', () => {
     await expect(
       consumeRunQuota({ internalRepository: repository.client, group: 'investigation' })
     ).resolves.toEqual({ allowed: true });
+  });
+
+  describe('investigation starts', () => {
+    const date = '2026-08-31';
+    const setup = async (limits: Partial<Record<RunQuotaGroup, number>>) => {
+      const repository = createRepository();
+      await patchRunQuotaSettings(repository.client, { enabled: false, limits });
+      const consume = (group: 'investigation' | 'manual_investigation') =>
+        consumeInvestigationRunQuota({ internalRepository: repository.client, group, date });
+      const counts = async () => ({
+        automatic: await repository.count(date, 'investigation'),
+        manual: await repository.count(date, 'manual_investigation'),
+        total: await repository.count(date, 'total_investigation'),
+      });
+      return { consume, counts };
+    };
+
+    it('charges the trigger limit and the total, and gives both back on release', async () => {
+      const { consume, counts } = await setup({ manual_investigation: 5, total_investigation: 5 });
+
+      const result = await consume('manual_investigation');
+
+      expect(await counts()).toEqual({ automatic: 0, manual: 1, total: 1 });
+      if (!result.allowed) throw new Error('Expected the start to be allowed');
+      await result.release();
+      expect(await counts()).toEqual({ automatic: 0, manual: 0, total: 0 });
+    });
+
+    it('denies at the total limit without charging the trigger limit', async () => {
+      const { consume, counts } = await setup({
+        investigation: 5,
+        manual_investigation: 5,
+        total_investigation: 2,
+      });
+      await consume('investigation');
+      await consume('manual_investigation');
+
+      await expect(consume('manual_investigation')).resolves.toEqual({
+        allowed: false,
+        deniedBy: 'total_investigation',
+      });
+      expect(await counts()).toEqual({ automatic: 1, manual: 1, total: 2 });
+    });
+
+    it('denies at the trigger limit without charging the total', async () => {
+      const { consume, counts } = await setup({ manual_investigation: 1, total_investigation: 10 });
+      await consume('manual_investigation');
+
+      await expect(consume('manual_investigation')).resolves.toEqual({
+        allowed: false,
+        deniedBy: 'manual_investigation',
+      });
+      expect(await counts()).toEqual({ automatic: 0, manual: 1, total: 1 });
+    });
   });
 
   it('never over-grants concurrent attempts competing for the final slot', async () => {

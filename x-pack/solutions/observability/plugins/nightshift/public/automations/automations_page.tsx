@@ -43,7 +43,7 @@ import { AutomationDetailFlyout } from './detail_flyout/automation_detail_flyout
 import {
   getAutomationFacets,
   isAutomationRateLimited,
-  isGlobalInvestigationLimitReached,
+  getAutomationBlockingLimit,
   isOnlyRateLimitedFilter,
   statusLabels,
 } from './utils/filter_automations';
@@ -106,7 +106,8 @@ export const AutomationsPage = (): React.ReactElement => {
     options,
   } = useAutomationFilters(automations, getFacets);
   const { data: quotas, refetch: refetchQuotas } = useRunQuotas();
-  const isGlobalLimitReached = isGlobalInvestigationLimitReached(quotas);
+  const blockingLimit = getAutomationBlockingLimit(quotas);
+  const isGlobalLimitReached = blockingLimit !== undefined;
   const globalLimitSettingsHref = quotas?.canManage
     ? services.application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/settings/investigations' })
     : undefined;
@@ -196,10 +197,11 @@ export const AutomationsPage = (): React.ReactElement => {
       )}
       {!isEmpty && (
         <>
-          {isGlobalLimitReached && quotas && (
+          {blockingLimit && quotas && (
             <>
               <GlobalLimitCallout
-                limit={quotas.limits.investigation}
+                group={blockingLimit}
+                limit={quotas.limits[blockingLimit]}
                 settingsHref={globalLimitSettingsHref}
               />
               <EuiSpacer size="m" />

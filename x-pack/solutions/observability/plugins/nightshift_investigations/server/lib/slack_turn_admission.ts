@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { tooManyRequests } from '@hapi/boom';
+import { serverUnavailable, tooManyRequests } from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
 import { ConversationOriginType } from '@kbn/agent-builder-common';
 import type { CallbackAdmissionCheck } from '@kbn/agent-builder-server';
 import { NIGHTSHIFT_ASSISTANT_AGENT_ID, NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common';
 import { evaluateInvestigationQuota } from '../client/evaluate_investigation_quota';
-import { InvestigationQuotaDeniedError } from '../client/errors';
+import { InvestigationQuotaDeniedError, InvestigationUnavailableError } from '../client/errors';
 import type { InvestigationQuotaCallback } from '../types';
 
 const SLACK_AGENT_IDS: ReadonlySet<string> = new Set([
@@ -20,7 +20,7 @@ const SLACK_AGENT_IDS: ReadonlySet<string> = new Set([
 ]);
 
 /**
- * Charges the daily automatic investigation quota for a Slack mention of a Nightshift agent that
+ * Charges the daily manual investigation quota for a Slack mention of a Nightshift agent that
  * opens a new conversation. A mention in a thread that already has a conversation is not charged.
  */
 export const createSlackTurnAdmissionCheck =
@@ -36,11 +36,16 @@ export const createSlackTurnAdmissionCheck =
       return;
     }
 
-    const { allowed } = await evaluateInvestigationQuota({
+    const { allowed, deniedBy } = await evaluateInvestigationQuota({
       callback: getQuotaCallback(),
+      trigger: 'manual',
       logger,
+    }).catch((error) => {
+      throw error instanceof InvestigationUnavailableError
+        ? serverUnavailable(error.message)
+        : error;
     });
     if (!allowed) {
-      throw tooManyRequests(new InvestigationQuotaDeniedError().message);
+      throw tooManyRequests(new InvestigationQuotaDeniedError(deniedBy ?? 'manual').message);
     }
   };

@@ -10,13 +10,19 @@ import React from 'react';
 import {
   EuiConfirmModal,
   EuiForm,
+  EuiFormRow,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isRunQuotaReached, type RunQuotaGroup } from '@kbn/significant-events-plugin/common';
+import {
+  isInvestigationRunQuotaGroup,
+  isRunQuotaReached,
+  type RunQuotaGroup,
+} from '@kbn/significant-events-plugin/common';
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import {
   isDetectionRunQuotaGroup,
@@ -33,6 +39,7 @@ export const RunLimitsSection = ({
   form,
   description,
   exhaustionCallouts,
+  sharedSwitch = false,
   onSave,
   onConfirmSave,
 }: {
@@ -40,6 +47,8 @@ export const RunLimitsSection = ({
   form: RunLimitsForm;
   description?: ReactNode;
   exhaustionCallouts: 'automations' | 'groups';
+  /** One switch turns every limit of the section on or off, instead of one switch per limit. */
+  sharedSwitch?: boolean;
   onSave: () => Promise<void>;
   onConfirmSave: () => Promise<void>;
 }) => {
@@ -106,12 +115,31 @@ export const RunLimitsSection = ({
                 enabled={response.enabled}
                 limits={response.limits}
                 counts={response.counts}
-                groups={groups}
+                groups={groups.filter(isInvestigationRunQuotaGroup)}
               />
             ) : null}
 
             <EuiForm component="div">
-              {groups.map((group) => {
+              {sharedSwitch ? (
+                <>
+                  <EuiFormRow>
+                    <EuiSwitch
+                      label={i18n.translate(
+                        'xpack.nightshift.settings.runLimits.sharedEnabledSwitchLabel',
+                        { defaultMessage: 'Enforce daily limits' }
+                      )}
+                      checked={groups.some((group) => draftState.draft.limits[group] !== 0)}
+                      disabled={!canManage || isSaving}
+                      onChange={(event) =>
+                        groups.forEach((group) => setLimitEnabled(group, event.target.checked))
+                      }
+                      data-test-subj="nightshiftRunLimitsEnabledSwitch"
+                    />
+                  </EuiFormRow>
+                  <EuiSpacer size="m" />
+                </>
+              ) : null}
+              {groups.map((group, index) => {
                 const showGroupCallout =
                   exhaustionCallouts === 'groups' &&
                   isDetectionRunQuotaGroup(group) &&
@@ -124,6 +152,7 @@ export const RunLimitsSection = ({
 
                 return (
                   <React.Fragment key={group}>
+                    {index > 0 && !showGroupCallout ? <EuiSpacer size="l" /> : null}
                     {showGroupCallout ? (
                       <>
                         <EuiSpacer size="m" />
@@ -137,7 +166,9 @@ export const RunLimitsSection = ({
                       limit={draftState.draft.limits[group]}
                       disabled={!canManage || isSaving}
                       onChange={(limit) => updateLimitDraft(group, limit)}
-                      onEnabledChange={(enabled) => setLimitEnabled(group, enabled)}
+                      onEnabledChange={
+                        sharedSwitch ? undefined : (enabled) => setLimitEnabled(group, enabled)
+                      }
                     />
                   </React.Fragment>
                 );

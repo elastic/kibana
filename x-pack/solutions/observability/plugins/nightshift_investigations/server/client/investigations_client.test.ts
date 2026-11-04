@@ -308,7 +308,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       NIGHTSHIFT_DEFAULT_MODELS.investigation,
       mockRequest
     );
-    expect(investigationQuotaCallback).not.toHaveBeenCalled();
+    expect(investigationQuotaCallback).toHaveBeenCalledWith('manual');
   });
 
   it('keeps operator instructions outside the alert evidence and leaves default briefs unchanged', async () => {
@@ -1584,6 +1584,21 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
 
     await expect(startAlerts('alert-1')).rejects.toThrow(InvestigationQuotaDeniedError);
 
+    expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
+    expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('denies a new manual investigation with the limit that was reached', async () => {
+    investigationQuotaCallback.mockResolvedValue({ allowed: false, deniedBy: 'all' });
+
+    await expect(
+      startFromApi(makeClient(), {
+        subject: { type: 'manual', id: 'question' },
+        trigger_type: 'manual',
+      })
+    ).rejects.toThrow('The daily limit for all investigations has been reached');
+
+    expect(investigationQuotaCallback).toHaveBeenCalledWith('manual');
     expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
     expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
   });

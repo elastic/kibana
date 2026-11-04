@@ -5,11 +5,19 @@
  * 2.0.
  */
 
+import type { InvestigationQuotaLimit } from '../../types';
+
+const MESSAGES: Record<InvestigationQuotaLimit, string> = {
+  automatic: 'The daily limit for automatic investigations has been reached',
+  manual: 'The daily limit for manual investigations has been reached',
+  all: 'The daily limit for all investigations has been reached',
+};
+
 export class InvestigationQuotaDeniedError extends Error {
   public readonly statusCode = 429;
 
-  constructor() {
-    super('The daily investigation limit has been reached');
+  constructor(public readonly deniedBy: InvestigationQuotaLimit) {
+    super(MESSAGES[deniedBy]);
     this.name = 'InvestigationQuotaDeniedError';
   }
 }

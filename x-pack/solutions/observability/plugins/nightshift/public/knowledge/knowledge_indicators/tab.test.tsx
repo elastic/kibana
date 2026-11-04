@@ -27,11 +27,15 @@ const response = (kiExtractionLimit: number): RunQuotasResponse => ({
   limits: {
     detection: 3,
     investigation: 1,
+    manual_investigation: 0,
+    total_investigation: 0,
     ki_extraction: kiExtractionLimit,
   },
   counts: {
     detection: 3,
     investigation: 1,
+    manual_investigation: 0,
+    total_investigation: 0,
     ki_extraction: 2,
   },
   window: {

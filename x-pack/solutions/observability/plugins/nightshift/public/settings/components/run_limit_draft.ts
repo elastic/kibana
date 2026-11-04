@@ -7,9 +7,12 @@
 
 import {
   DEFAULT_RUN_LIMITS,
+  INVESTIGATION_RUN_QUOTA_GROUPS,
+  isInvestigationRunQuotaGroup,
   MAX_RUN_LIMIT,
   MIN_RUN_LIMIT,
   RUN_QUOTA_GROUPS,
+  type InvestigationRunLimitsUpdate,
   type RunQuotaGroup,
   type RunQuotaSettingsUpdate,
   type RunQuotasResponse,
@@ -17,7 +20,11 @@ import {
 
 export { MAX_RUN_LIMIT, MIN_RUN_LIMIT, RUN_QUOTA_GROUPS };
 
-const isGloballyGated = (group: RunQuotaGroup): boolean => group !== 'investigation';
+const isGloballyGated = (group: RunQuotaGroup): boolean => !isInvestigationRunQuotaGroup(group);
+
+/** An investigation limit turned off is sent as `null`. */
+const toLimitUpdate = (group: RunQuotaGroup, limit: number): number | null =>
+  isInvestigationRunQuotaGroup(group) && limit === MIN_RUN_LIMIT ? null : limit;
 
 export type RunLimitDraft = number | '';
 
@@ -158,17 +165,16 @@ export const buildRunQuotaSettingsUpdate = (
       )
     ) as Partial<Record<RunQuotaGroup, number>>;
 
-    const investigationLimit = state.draft.limits.investigation;
+    const investigationLimits: InvestigationRunLimitsUpdate = Object.fromEntries(
+      INVESTIGATION_RUN_QUOTA_GROUPS.flatMap((group) => {
+        const next = state.draft.limits[group];
+        return state.saved.limits[group] === next ? [] : [[group, toLimitUpdate(group, next)]];
+      })
+    );
     return Object.keys(activateLimits).length > 0
       ? {
           activateLimits,
-          ...(state.saved.limits.investigation === investigationLimit
-            ? {}
-            : {
-                limits: {
-                  investigation: investigationLimit === MIN_RUN_LIMIT ? null : investigationLimit,
-                },
-              }),
+          ...(Object.keys(investigationLimits).length > 0 ? { limits: investigationLimits } : {}),
         }
       : undefined;
   }
@@ -184,7 +190,7 @@ export const buildRunQuotaSettingsUpdate = (
       if (state.saved.limits[group] === next) {
         return [];
       }
-      return [[group, group === 'investigation' && next === MIN_RUN_LIMIT ? null : next]];
+      return [[group, toLimitUpdate(group, next)]];
     })
   ) as NonNullable<RunQuotaSettingsUpdate['limits']>;
 

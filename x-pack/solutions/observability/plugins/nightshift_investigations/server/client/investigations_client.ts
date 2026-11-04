@@ -62,6 +62,7 @@ import type {
   AutomationBudget,
   InvestigationQuotaCallback,
   InvestigationQuotaResult,
+  InvestigationQuotaTrigger,
 } from '../types';
 import type {
   AlertInvestigationContext,
@@ -561,13 +562,13 @@ export class NightshiftInvestigationsClient {
     const conversations = await agentBuilder.conversations.getScopedClient({
       request: this.request,
     });
-    const globalBudget = this.createGlobalBudget();
+    const globalBudget = this.createGlobalBudget(trigger_type);
     const { id: investigationId, recorded } = await this.resolveInvestigation({
       conversations,
       agenticInvestigations,
       subjects,
       newInvestigationId,
-      // Only a start that opens a new investigation counts against the daily automatic quota:
+      // Only a start that opens a new investigation counts against the daily quotas:
       // a follow-up adds a round to an investigation that was already paid for.
       assertCanOpenNew: () =>
         this.assertQuotaForNewInvestigation(trigger_type, automationBudget, globalBudget),
@@ -754,16 +755,18 @@ export class NightshiftInvestigationsClient {
     );
   }
 
-  private createGlobalBudget(): AutomationBudget {
+  /** The daily limits for the trigger type and for all investigations. */
+  private createGlobalBudget(triggerType: InvestigationQuotaTrigger): AutomationBudget {
     let release: InvestigationQuotaResult['release'];
     return {
       consume: async () => {
         const result = await evaluateInvestigationQuota({
           callback: this.investigationQuotaCallback,
+          trigger: triggerType,
           logger: this.logger,
         });
         if (!result.allowed) {
-          throw new InvestigationQuotaDeniedError();
+          throw new InvestigationQuotaDeniedError(result.deniedBy ?? triggerType);
         }
         release = result.release;
       },
@@ -777,7 +780,8 @@ export class NightshiftInvestigationsClient {
 
   /**
    * Charges the automation budget, then the global quota. A global denial releases the automation
-   * budget, so a denied start never uses up the automation limit.
+   * budget, so a denied start never uses up the automation limit. A manual start has no
+   * automation budget and is charged to the global quota only.
    */
   private async assertQuotaForNewInvestigation(
     triggerType: StartInvestigationRequest['trigger_type'],
@@ -786,6 +790,7 @@ export class NightshiftInvestigationsClient {
   ): Promise<void> {
     switch (triggerType) {
       case 'manual':
+        await globalBudget.consume();
         return;
       case 'automatic': {
         await automationBudget?.consume();

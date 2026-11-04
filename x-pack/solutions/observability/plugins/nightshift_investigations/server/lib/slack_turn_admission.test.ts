@@ -24,22 +24,25 @@ const admit = (agentId: string, callback?: InvestigationQuotaCallback) =>
 
 describe('createSlackTurnAdmissionCheck', () => {
   it.each([NIGHTSHIFT_ASSISTANT_AGENT_ID, NIGHTSHIFT_INVESTIGATION_AGENT_ID])(
-    'charges the investigation quota for a new %s conversation',
+    'charges the manual investigation quota for a new %s conversation',
     async (agentId) => {
       const callback = jest.fn().mockResolvedValue({ allowed: true });
 
       await expect(admit(agentId, callback)).resolves.toBeUndefined();
-      expect(callback).toHaveBeenCalledTimes(1);
+      expect(callback).toHaveBeenCalledWith('manual');
     }
   );
 
-  it('refuses with 429 when the quota is exhausted', async () => {
-    const callback = jest.fn().mockResolvedValue({ allowed: false });
+  it.each([
+    ['manual', 'The daily limit for manual investigations has been reached'],
+    ['all', 'The daily limit for all investigations has been reached'],
+  ] as const)('refuses with 429 when the %s limit is reached', async (deniedBy, message) => {
+    const callback = jest.fn().mockResolvedValue({ allowed: false, deniedBy });
 
     const error = await admit(NIGHTSHIFT_ASSISTANT_AGENT_ID, callback).catch((e) => e);
 
     expect(isBoom(error) && error.output.statusCode).toBe(429);
-    expect(error.message).toBe('The daily investigation limit has been reached');
+    expect(error.message).toBe(message);
   });
 
   it('does not charge turns for other agents', async () => {
@@ -49,7 +52,9 @@ describe('createSlackTurnAdmissionCheck', () => {
     expect(callback).not.toHaveBeenCalled();
   });
 
-  it('admits when no quota callback is registered', async () => {
-    await expect(admit(NIGHTSHIFT_ASSISTANT_AGENT_ID)).resolves.toBeUndefined();
+  it('refuses with 503 when the quota check is unavailable', async () => {
+    const error = await admit(NIGHTSHIFT_ASSISTANT_AGENT_ID).catch((e) => e);
+
+    expect(isBoom(error) && error.output.statusCode).toBe(503);
   });
 });

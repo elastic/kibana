@@ -18,7 +18,9 @@ const response = {
   enabled: false,
   limits: {
     detection: 15,
-    investigation: 3,
+    investigation: 5,
+    manual_investigation: 5,
+    total_investigation: 10,
     ki_extraction: 3,
   },
 };
@@ -30,7 +32,9 @@ describe('run quota drafts', () => {
         enabled: false,
         limits: {
           detection: 0,
-          investigation: 3,
+          investigation: 5,
+          manual_investigation: 5,
+          total_investigation: 10,
           ki_extraction: 0,
         },
       },
@@ -38,7 +42,9 @@ describe('run quota drafts', () => {
         enabled: false,
         limits: {
           detection: 0,
-          investigation: 3,
+          investigation: 5,
+          manual_investigation: 5,
+          total_investigation: 10,
           ki_extraction: 0,
         },
         restoreLimits: response.limits,
@@ -62,18 +68,20 @@ describe('run quota drafts', () => {
     const unlimited = setRunLimitEnabled(state, 'investigation', false);
 
     expect(unlimited.draft.limits.investigation).toBe(0);
-    expect(unlimited.draft.restoreLimits.investigation).toBe(3);
+    expect(unlimited.draft.restoreLimits.investigation).toBe(5);
 
     const limited = setRunLimitEnabled(unlimited, 'investigation', true);
-    expect(limited.draft.limits.investigation).toBe(3);
+    expect(limited.draft.limits.investigation).toBe(5);
   });
 
   it('builds a partial update with only settings changed by the user', () => {
     const state = createRunQuotaDraftState({ ...response, enabled: true });
     state.draft.limits.investigation = 0;
+    state.draft.limits.manual_investigation = 0;
+    state.draft.limits.total_investigation = 8;
 
     expect(buildRunQuotaSettingsUpdate(state)).toEqual({
-      limits: { investigation: null },
+      limits: { investigation: null, manual_investigation: null, total_investigation: 8 },
     });
   });
 
@@ -84,10 +92,10 @@ describe('run quota drafts', () => {
     expect(buildRunQuotaSettingsUpdate(state)).toEqual({ limits: { investigation: null } });
 
     state = setRunLimitEnabled(state, 'investigation', true);
-    state.draft.limits.investigation = 5;
+    state.draft.limits.investigation = 7;
 
     expect(state.draft.enabled).toBe(false);
-    expect(buildRunQuotaSettingsUpdate(state)).toEqual({ limits: { investigation: 5 } });
+    expect(buildRunQuotaSettingsUpdate(state)).toEqual({ limits: { investigation: 7 } });
   });
 
   it('builds an atomic activation for legacy globally disabled settings', () => {
@@ -100,18 +108,19 @@ describe('run quota drafts', () => {
 
   it('keeps an investigation edit made in the same save as a legacy activation', () => {
     let state = setRunLimitEnabled(createRunQuotaDraftState(response), 'detection', true);
-    state.draft.limits.investigation = 5;
+    state.draft.limits.investigation = 4;
+    state.draft.limits.total_investigation = 8;
 
     expect(buildRunQuotaSettingsUpdate(state)).toEqual({
       activateLimits: { detection: 15 },
-      limits: { investigation: 5 },
+      limits: { investigation: 4, total_investigation: 8 },
     });
 
     state = setRunLimitEnabled(state, 'investigation', false);
 
     expect(buildRunQuotaSettingsUpdate(state)).toEqual({
       activateLimits: { detection: 15 },
-      limits: { investigation: null },
+      limits: { investigation: null, total_investigation: 8 },
     });
   });
 

@@ -52,6 +52,8 @@ describe('run quota settings repository', () => {
       limits: {
         detection: 100,
         investigation: 30,
+        manual_investigation: 5,
+        total_investigation: 10,
         ki_extraction: 20,
         future_group: 9,
       },
@@ -63,6 +65,8 @@ describe('run quota settings repository', () => {
       limits: {
         ...first.limits,
         investigation: 40,
+        manual_investigation: 5,
+        total_investigation: 10,
       },
       futureTopLevel: { retained: 'winner' },
     };
@@ -85,6 +89,8 @@ describe('run quota settings repository', () => {
       limits: {
         detection: 120,
         investigation: 40,
+        manual_investigation: 5,
+        total_investigation: 10,
         ki_extraction: 20,
         future_group: 9,
       },
@@ -98,6 +104,8 @@ describe('run quota settings repository', () => {
       limits: {
         detection: 100,
         investigation: 30,
+        manual_investigation: 5,
+        total_investigation: 10,
         ki_extraction: 20,
         future_group: 9,
       },
@@ -107,6 +115,8 @@ describe('run quota settings repository', () => {
       limits: {
         detection: 15,
         investigation: 0,
+        manual_investigation: 5,
+        total_investigation: 10,
         ki_extraction: 0,
         future_group: 9,
       },
@@ -129,6 +139,8 @@ describe('run quota settings repository', () => {
       limits: {
         detection: 15,
         investigation: 0,
+        manual_investigation: 5,
+        total_investigation: 10,
         ki_extraction: 3,
         future_group: 9,
       },
@@ -139,6 +151,8 @@ describe('run quota settings repository', () => {
       limits: {
         detection: 0,
         investigation: 30,
+        manual_investigation: 5,
+        total_investigation: 10,
         ki_extraction: 3,
         future_group: 9,
       },

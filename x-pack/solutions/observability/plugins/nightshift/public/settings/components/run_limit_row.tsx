@@ -15,7 +15,10 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { RunQuotaGroup } from '@kbn/significant-events-plugin/common';
+import {
+  isInvestigationRunQuotaGroup,
+  type RunQuotaGroup,
+} from '@kbn/significant-events-plugin/common';
 import {
   MAX_RUN_LIMIT,
   isValidLimitedRunLimitDraft,
@@ -29,12 +32,39 @@ export const RUN_QUOTA_GROUP_LABELS: Record<RunQuotaGroup, string> = {
   detection: i18n.translate('xpack.nightshift.settings.runLimits.discoveryRowTitle', {
     defaultMessage: 'Discovery',
   }),
-  investigation: i18n.translate('xpack.nightshift.settings.runLimits.investigationRowTitle', {
-    defaultMessage: 'Investigation',
-  }),
+  investigation: i18n.translate(
+    'xpack.nightshift.settings.runLimits.automaticInvestigationsRowTitle',
+    { defaultMessage: 'Automatic investigations' }
+  ),
+  manual_investigation: i18n.translate(
+    'xpack.nightshift.settings.runLimits.manualInvestigationsRowTitle',
+    { defaultMessage: 'Manual investigations' }
+  ),
+  total_investigation: i18n.translate(
+    'xpack.nightshift.settings.runLimits.allInvestigationsRowTitle',
+    { defaultMessage: 'All investigations' }
+  ),
   ki_extraction: i18n.translate(
     'xpack.nightshift.settings.runLimits.knowledgeIndicatorExtractionRowTitle',
     { defaultMessage: 'Knowledge indicators extraction' }
+  ),
+};
+
+const RUN_QUOTA_GROUP_DESCRIPTIONS: Partial<Record<RunQuotaGroup, string>> = {
+  investigation: i18n.translate(
+    'xpack.nightshift.settings.runLimits.automaticInvestigationsRowDescription',
+    { defaultMessage: 'All automations combined.' }
+  ),
+  manual_investigation: i18n.translate(
+    'xpack.nightshift.settings.runLimits.manualInvestigationsRowDescription',
+    { defaultMessage: 'Started from the home page, a Slack mention, the API or the CLI.' }
+  ),
+  total_investigation: i18n.translate(
+    'xpack.nightshift.settings.runLimits.allInvestigationsRowDescription',
+    {
+      defaultMessage:
+        'Automatic and manual investigations together. It can be lower than the two limits added up.',
+    }
   ),
 };
 
@@ -44,7 +74,8 @@ interface RunLimitRowProps {
   limit: RunLimitDraft;
   disabled: boolean;
   onChange: (limit: RunLimitDraft) => void;
-  onEnabledChange: (enabled: boolean) => void;
+  /** Without it the row has no switch of its own, and a section-wide switch turns it on and off. */
+  onEnabledChange?: (enabled: boolean) => void;
 }
 
 export const RunLimitRow = ({
@@ -64,35 +95,52 @@ export const RunLimitRow = ({
       values: { group: RUN_QUOTA_GROUP_LABELS[group] },
     }
   );
+  const groupDescription = RUN_QUOTA_GROUP_DESCRIPTIONS[group];
   const countDescription = (
-    <span data-test-subj={`nightshiftRunLimitCount-${group}`}>
-      {i18n.translate('xpack.nightshift.settings.runLimits.countDescription', {
-        defaultMessage:
-          '{count, plural, one {# counted scheduled admission today} other {# counted scheduled admissions today}}',
-        values: { count },
-      })}
-    </span>
+    <>
+      {groupDescription ? <span>{groupDescription} </span> : null}
+      <span data-test-subj={`nightshiftRunLimitCount-${group}`}>
+        {isInvestigationRunQuotaGroup(group)
+          ? i18n.translate('xpack.nightshift.settings.runLimits.investigationCountDescription', {
+              defaultMessage:
+                '{count, plural, one {# investigation started today} other {# investigations started today}}',
+              values: { count },
+            })
+          : i18n.translate('xpack.nightshift.settings.runLimits.countDescription', {
+              defaultMessage:
+                '{count, plural, one {# counted scheduled admission today} other {# counted scheduled admissions today}}',
+              values: { count },
+            })}
+      </span>
+    </>
   );
 
   return (
     <>
-      <EuiFormRow>
-        <EuiSwitch
-          label={i18n.translate('xpack.nightshift.settings.runLimits.enabledSwitchLabel', {
-            defaultMessage: 'Enforce daily limits',
-          })}
-          aria-label={i18n.translate('xpack.nightshift.settings.runLimits.enabledSwitchAriaLabel', {
-            defaultMessage: 'Enforce daily limits for {group}',
-            values: { group: RUN_QUOTA_GROUP_LABELS[group] },
-          })}
-          checked={limitEnabled}
-          disabled={disabled}
-          onChange={(event) => onEnabledChange(event.target.checked)}
-          data-test-subj={`nightshiftRunLimitEnabledSwitch-${group}`}
-        />
-      </EuiFormRow>
+      {onEnabledChange ? (
+        <>
+          <EuiFormRow>
+            <EuiSwitch
+              label={i18n.translate('xpack.nightshift.settings.runLimits.enabledSwitchLabel', {
+                defaultMessage: 'Enforce daily limits',
+              })}
+              aria-label={i18n.translate(
+                'xpack.nightshift.settings.runLimits.enabledSwitchAriaLabel',
+                {
+                  defaultMessage: 'Enforce daily limits for {group}',
+                  values: { group: RUN_QUOTA_GROUP_LABELS[group] },
+                }
+              )}
+              checked={limitEnabled}
+              disabled={disabled}
+              onChange={(event) => onEnabledChange(event.target.checked)}
+              data-test-subj={`nightshiftRunLimitEnabledSwitch-${group}`}
+            />
+          </EuiFormRow>
 
-      <EuiSpacer size="m" />
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
 
       {limitEnabled ? (
         <EuiFormRow

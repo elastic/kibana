@@ -7,6 +7,7 @@
 
 import {
   isRunQuotaReached,
+  type InvestigationRunQuotaGroup,
   type RunQuotaConsumeResponse,
   type RunQuotaGroup,
 } from '../../../common/run_quotas';
@@ -41,6 +42,53 @@ export const consumeRunQuota = async ({
       };
     },
   });
+};
+
+export type InvestigationRunQuotaConsumeResult =
+  | { allowed: true; release: () => Promise<void> }
+  | { allowed: false; deniedBy: InvestigationRunQuotaGroup };
+
+/**
+ * Charges an investigation start to its own limit (`investigation` or `manual_investigation`) and
+ * to `total_investigation`. A start denied by either limit leaves both counts unchanged.
+ */
+export const consumeInvestigationRunQuota = async ({
+  internalRepository,
+  group,
+  date,
+}: {
+  internalRepository: RunQuotaSavedObjectsRepository;
+  group: Exclude<InvestigationRunQuotaGroup, 'total_investigation'>;
+  date: string;
+}): Promise<InvestigationRunQuotaConsumeResult> => {
+  const release = (releasedGroup: RunQuotaGroup) =>
+    releaseRunQuota({ internalRepository, group: releasedGroup, date });
+
+  const own = await consumeRunQuota({ internalRepository, group, date });
+  if (!own.allowed) {
+    return { allowed: false, deniedBy: group };
+  }
+
+  const total = await consumeRunQuota({
+    internalRepository,
+    group: 'total_investigation',
+    date,
+  }).catch(async (error) => {
+    await release(group);
+    throw error;
+  });
+  if (!total.allowed) {
+    await release(group);
+    return { allowed: false, deniedBy: 'total_investigation' };
+  }
+
+  return {
+    allowed: true,
+    release: async () => {
+      await release('total_investigation');
+      await release(group);
+    },
+  };
 };
 
 export const releaseRunQuota = async ({

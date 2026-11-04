@@ -9,6 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   DEFAULT_RUN_QUOTA_SETTINGS,
+  isInvestigationRunQuotaGroup,
   RUN_QUOTA_GROUPS,
   type RunQuotaGroup,
   type RunQuotaSettingsPatch,
@@ -64,7 +65,10 @@ const applySettingsPatch = (
   const normalizedLegacyLimits =
     activateLimits && !current.enabled
       ? Object.fromEntries(
-          RUN_QUOTA_GROUPS.filter((group) => group !== 'investigation').map((group) => [group, 0])
+          RUN_QUOTA_GROUPS.filter((group) => !isInvestigationRunQuotaGroup(group)).map((group) => [
+            group,
+            0,
+          ])
         )
       : {};
 

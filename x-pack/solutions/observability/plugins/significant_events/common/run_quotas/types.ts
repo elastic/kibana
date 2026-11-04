@@ -5,9 +5,30 @@
  * 2.0.
  */
 
-export const RUN_QUOTA_GROUPS = ['detection', 'investigation', 'ki_extraction'] as const;
+/**
+ * `investigation` counts automatic investigations, `manual_investigation` counts manual ones (the
+ * start API, the homepage, the CLI and Slack mentions), and `total_investigation` counts both.
+ */
+export const INVESTIGATION_RUN_QUOTA_GROUPS = [
+  'investigation',
+  'manual_investigation',
+  'total_investigation',
+] as const;
+
+export const RUN_QUOTA_GROUPS = [
+  'detection',
+  ...INVESTIGATION_RUN_QUOTA_GROUPS,
+  'ki_extraction',
+] as const;
 
 export type RunQuotaGroup = (typeof RUN_QUOTA_GROUPS)[number];
+export type InvestigationRunQuotaGroup = (typeof INVESTIGATION_RUN_QUOTA_GROUPS)[number];
+
+/** Investigation limits are enforced on their own, whatever the settings' `enabled` flag says. */
+export const isInvestigationRunQuotaGroup = (
+  group: RunQuotaGroup
+): group is InvestigationRunQuotaGroup =>
+  (INVESTIGATION_RUN_QUOTA_GROUPS as readonly RunQuotaGroup[]).includes(group);
 
 export const MIN_RUN_LIMIT = 0;
 export const MAX_RUN_LIMIT = 10_000;
@@ -15,7 +36,9 @@ export const DEFAULT_RUN_QUOTA_TIME_ZONE = 'UTC';
 
 export const DEFAULT_RUN_LIMITS: Readonly<Record<RunQuotaGroup, number>> = {
   detection: 15,
-  investigation: 3,
+  investigation: 5,
+  manual_investigation: 5,
+  total_investigation: 10,
   ki_extraction: 3,
 };
 
@@ -34,7 +57,8 @@ export const isRunQuotaReached = ({
   enabled: boolean;
   limit: number;
   count: number;
-}): boolean => (group === 'investigation' || enabled) && limit > MIN_RUN_LIMIT && count >= limit;
+}): boolean =>
+  (isInvestigationRunQuotaGroup(group) || enabled) && limit > MIN_RUN_LIMIT && count >= limit;
 
 export const DEFAULT_RUN_QUOTA_SETTINGS: Readonly<RunQuotaSettings> = {
   enabled: true,
@@ -67,12 +91,16 @@ export type RunQuotaSettingsPatch =
       limits?: Partial<Record<RunQuotaGroup, number>>;
     };
 
+/** `null` removes an investigation limit. */
+export type InvestigationRunLimitsUpdate = Partial<
+  Record<InvestigationRunQuotaGroup, number | null>
+>;
+
 export type RunQuotaSettingsUpdate =
   | {
       enabled?: boolean;
-      limits?: Partial<Record<Exclude<RunQuotaGroup, 'investigation'>, number>> & {
-        investigation?: number | null;
-      };
+      limits?: Partial<Record<Exclude<RunQuotaGroup, InvestigationRunQuotaGroup>, number>> &
+        InvestigationRunLimitsUpdate;
       activateLimits?: never;
     }
   | {
@@ -82,7 +110,7 @@ export type RunQuotaSettingsUpdate =
        */
       activateLimits: Partial<Record<RunQuotaGroup, number>>;
       enabled?: never;
-      limits?: { investigation: number | null };
+      limits?: InvestigationRunLimitsUpdate;
     };
 
 export type RunQuotaConsumeRequest =
