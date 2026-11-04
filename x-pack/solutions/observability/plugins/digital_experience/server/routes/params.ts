@@ -8,16 +8,24 @@
 import { isoDateTime, z } from '@kbn/zod/v4';
 import { MAX_ENVIRONMENT_LENGTH } from '../lib/constants';
 
+/** The params of a route over a time range and an optional environment. */
+export const timeRangeShape = () => ({
+  start: isoDateTime(),
+  end: isoDateTime(),
+  // All environments when left out.
+  environment: z.string().min(1).max(MAX_ENVIRONMENT_LENGTH).optional(),
+});
+
+/** Whether the `start` of a query of `timeRangeShape` (and more) precedes its `end`. */
+export const isStartBeforeEnd = ({ start, end }: { start: string; end: string }) =>
+  Date.parse(start) < Date.parse(end);
+
+/** Reported on `end` when `isStartBeforeEnd` fails. */
+export const START_AFTER_END_ISSUE = {
+  message: '`start` must be before `end`',
+  path: ['end'],
+};
+
 /** The query of a route over a time range and an optional environment; `start` precedes `end`. */
 export const timeRangeQuery = () =>
-  z
-    .object({
-      start: isoDateTime(),
-      end: isoDateTime(),
-      // All environments when left out.
-      environment: z.string().min(1).max(MAX_ENVIRONMENT_LENGTH).optional(),
-    })
-    .refine(({ start, end }) => Date.parse(start) < Date.parse(end), {
-      message: '`start` must be before `end`',
-      path: ['end'],
-    });
+  z.object(timeRangeShape()).refine(isStartBeforeEnd, START_AFTER_END_ISSUE);
