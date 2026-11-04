@@ -22,6 +22,7 @@ import { WorkflowsManagementApiToken } from '../lib/dispatcher/steps/dispatch_st
 import { LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { createLoggerService } from '../lib/services/logger_service/logger_service.mock';
 import { UiSettingsClientToken } from '../lib/services/settings_service/tokens';
+import { SpacesService } from '../lib/services/spaces_service/spaces_service';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 import { bindAgentBuilder } from './bind_agent_builder';
 
@@ -124,6 +125,7 @@ describe('bindAgentBuilder', () => {
     container
       .bind(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
       .toConstantValue(spacesMock.createStart());
+    container.bind(SpacesService).toSelf().inSingletonScope();
     container.bind(LoggerServiceToken).toConstantValue(loggerService);
     container.bind(UiSettingsClientToken).toConstantValue(uiSettingsClient as never);
     container.bind(WorkflowsManagementApiToken).toConstantValue(workflowsManagementApi as never);
