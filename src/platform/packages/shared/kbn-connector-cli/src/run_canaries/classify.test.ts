@@ -52,19 +52,29 @@ describe('classifyErrorResult', () => {
     expect(classifyErrorResult(result).outcome).toBe('auth');
   });
 
-  it.each(['Request failed with status code 401', 'HTTP 403', 'status: 401'])(
-    'classifies a status-less error naming the status ("%s") as auth',
-    (message) => {
-      expect(classifyErrorResult(errorResult({ message })).outcome).toBe('auth');
-    }
-  );
+  it.each([
+    'Request failed with status code 401',
+    'HTTP 403',
+    'status: 401',
+    'HTTP error 403: access denied by policy',
+    'Received HTTP/1.1 401',
+    'status of 401',
+    'Error POSTing to endpoint (HTTP 403)',
+    'HTTPS 403 from upstream',
+    'HTTPS error 401',
+    'status=403',
+  ])('classifies a status-less error naming the status ("%s") as auth', (message) => {
+    expect(classifyErrorResult(errorResult({ message })).outcome).toBe('auth');
+  });
 
-  it.each(['returned 14031 rows', 'Tool call failed after 403 ms', 'retry in 401s'])(
-    'does not treat a status-less error with an unrelated number ("%s") as auth',
-    (message) => {
-      expect(classifyErrorResult(errorResult({ message })).outcome).toBe('misc');
-    }
-  );
+  it.each([
+    'returned 14031 rows',
+    'Tool call failed after 403 ms',
+    'retry in 401s',
+    'connect ECONNREFUSED http://403.internal.example/mcp',
+  ])('does not treat a status-less error with an unrelated number ("%s") as auth', (message) => {
+    expect(classifyErrorResult(errorResult({ message })).outcome).toBe('misc');
+  });
 
   it('ignores a non-numeric status code', () => {
     const result = errorResult({ error_meta: { statusCode: 'nope' } });

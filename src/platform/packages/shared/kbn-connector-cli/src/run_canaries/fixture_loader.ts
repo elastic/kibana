@@ -74,7 +74,11 @@ const validate = (raw: unknown, filename: string): FixtureFile => {
 
 /** Loads all YAML fixture files from the canary directory. */
 export const loadFixtures = (fixturesDir: string = FIXTURES_DIR): FixtureFile[] => {
-  const files = fs.readdirSync(fixturesDir).filter((f) => f.endsWith('.yaml'));
+  const allFiles = fs.readdirSync(fixturesDir);
+  // A `.yml` file would otherwise be skipped without a word, leaving its connector untested.
+  const misnamed = allFiles.find((f) => f.endsWith('.yml'));
+  if (misnamed) throw new Error(`Fixture ${misnamed}: fixture files must use the .yaml extension`);
+  const files = allFiles.filter((f) => f.endsWith('.yaml'));
   const seen = new Map<string, string>();
   return files.map((file) => {
     const content = fs.readFileSync(path.join(fixturesDir, file), 'utf-8');

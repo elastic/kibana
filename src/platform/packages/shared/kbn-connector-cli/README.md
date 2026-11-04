@@ -118,7 +118,7 @@ The runner needs the same prerequisites as `create_connectors` (`vault login`, E
 
 ### Fixtures
 
-A fixture file in `src/canary/` pairs with the manifest that has the same `spec_id`. The fixture's existence opts that connector in. The runner creates the `(testing)` connector from the manifest if it doesn't exist yet. If it does, the runner reuses it and re-syncs its config and secrets from the manifest and Vault first, so a rotated credential is picked up (this needs Vault access on every run). Fixture files run concurrently, and each one's output is printed as a block when it finishes (the returned results stay in fixture order). A spec id can have only one fixture file, so concurrent files never race to create the same connector.
+A fixture file in `src/canary/` (it must end in `.yaml`; a `.yml` file is rejected) pairs with the manifest that has the same `spec_id`. The fixture's existence opts that connector in. The runner creates the `(testing)` connector from the manifest if it doesn't exist yet. If it does, the runner reuses it and re-syncs its config and secrets from the manifest and Vault first, so a rotated credential is picked up (this needs Vault access on every run). Fixture files run concurrently, and each one's output is printed as a block when it finishes (the returned results stay in fixture order). A spec id can have only one fixture file, so concurrent files never race to create the same connector.
 
 ```yaml
 spec_id: .jira-cloud

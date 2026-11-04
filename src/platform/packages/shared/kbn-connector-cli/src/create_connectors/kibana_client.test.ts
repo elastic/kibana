@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EventEmitter } from 'events';
 import http from 'http';
 import {
   detectKibana,
@@ -89,6 +90,90 @@ describe('listConnectors', () => {
       auth: 'elastic:changeme',
     });
     expect(result).toEqual(connectors);
+  });
+});
+
+describe('request lifecycle', () => {
+  const connection = () => ({ url: `http://localhost:${port}`, auth: 'elastic:changeme' });
+
+  const dropSocketMidBody: http.RequestListener = (req, res) => {
+    res.writeHead(200, { 'Content-Length': '1000' });
+    res.write('{"partial":');
+    setTimeout(() => req.socket.destroy(), 10);
+  };
+
+  it('rejects when the connection drops mid-body instead of never settling', async () => {
+    await createTestServer(dropSocketMidBody);
+    await expect(listConnectors(connection())).rejects.toThrow(
+      /aborted|before the response was complete/
+    );
+  });
+
+  it('rejects an execute whose response is cut off mid-body', async () => {
+    await createTestServer(dropSocketMidBody);
+    await expect(
+      executeConnector(connection(), 'abc', { subAction: 'getMe', subActionParams: {} })
+    ).rejects.toThrow(/aborted|before the response was complete/);
+  });
+
+  it('reports the timeout, not "aborted", when the deadline hits mid-body', async () => {
+    await createTestServer((_req, res) => {
+      res.writeHead(200, { 'Content-Length': '1000' });
+      res.write('{"partial":');
+      // never finishes
+    });
+    await expect(
+      executeConnector(
+        connection(),
+        'abc',
+        { subAction: 'getMe', subActionParams: {} },
+        {
+          timeoutMs: 100,
+        }
+      )
+    ).rejects.toThrow(/timed out after 100ms/);
+  });
+
+  it('rejects from the response close handler alone when no error event fires', async () => {
+    // A fake request whose response closes incomplete without emitting any error, to isolate the backstop.
+    const spy = jest.spyOn(http, 'request').mockImplementation(((
+      _url: unknown,
+      _options: unknown,
+      callback: (res: EventEmitter) => void
+    ) => {
+      const req = Object.assign(new EventEmitter(), {
+        write: jest.fn(),
+        destroy: jest.fn(),
+        end: () => {
+          const res = Object.assign(new EventEmitter(), { complete: false, statusCode: 200 });
+          callback(res);
+          res.emit('close');
+          req.emit('close');
+        },
+      });
+      return req;
+    }) as unknown as typeof http.request);
+    try {
+      await expect(listConnectors(connection())).rejects.toThrow(
+        'Connection closed before the response was complete'
+      );
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('leaves no deadline timer behind after a successful request', async () => {
+    await createTestServer((_req, res) => {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end('[]');
+    });
+    jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
+    try {
+      await expect(listConnectors(connection())).resolves.toEqual([]);
+      expect(jest.getTimerCount()).toBe(0);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });
 
@@ -281,6 +366,25 @@ describe('updateConnector', () => {
     expect(receivedUrl).toBe('/api/actions/connector/abc');
     expect(JSON.parse(receivedBody)).toEqual(payload);
     expect(result).toEqual({ id: 'abc', name: 'GitHub (testing)' });
+  });
+
+  it('gives up after the default deadline when Kibana never answers', async () => {
+    await createTestServer(() => {
+      // never respond
+    });
+    jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
+    try {
+      const pending = updateConnector(
+        { url: `http://localhost:${port}`, auth: 'elastic:changeme' },
+        'abc',
+        { name: 'x', config: {}, secrets: {} }
+      );
+      const assertion = expect(pending).rejects.toThrow(/timed out after 30000ms/);
+      jest.advanceTimersByTime(30_000);
+      await assertion;
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('throws on a non-2xx response', async () => {

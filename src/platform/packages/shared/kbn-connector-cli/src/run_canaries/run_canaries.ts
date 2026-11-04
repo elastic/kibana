@@ -56,6 +56,25 @@ const OUTCOME_TAGS: Record<CanaryOutcome, string> = {
 
 const normalizeSpecId = (specId: string): string => specId.replace(/^\./, '');
 
+const MAX_ERROR_SUMMARY_LENGTH = 300;
+
+/** Joins the lines of an error's first paragraph, which keeps Vault's own explanation but drops the how-to text. */
+const firstParagraph = (err: unknown): string =>
+  (err instanceof Error ? err.message : String(err))
+    .split(/\n\s*\n/)[0]
+    .replace(/\s*\n\s*/g, ' ')
+    .trim();
+
+/** Caps the text by code points, so an emoji at the cut is not split into a lone surrogate. */
+const truncate = (text: string): string => {
+  const chars = Array.from(text);
+  return chars.length > MAX_ERROR_SUMMARY_LENGTH
+    ? `${chars.slice(0, MAX_ERROR_SUMMARY_LENGTH).join('')}…`
+    : text;
+};
+
+const summarizeError = (err: unknown): string => truncate(firstParagraph(err));
+
 const describeCase = (specId: string, fixtureCase: FixtureCase): string =>
   `${specId} ${fixtureCase.action}${fixtureCase.name ? ` (${fixtureCase.name})` : ''}`;
 
@@ -124,6 +143,23 @@ const ensureConnector = async (
   existing.push({ id: created.id, name: created.name, connector_type_id: resolved.specId });
   return created.id;
 };
+
+/** Returns the connector id, or the `misc` classification explaining why it could not be set up. */
+const setUpConnector = (
+  connection: KibanaConnection,
+  existing: ExistingConnector[],
+  manifest: Manifest
+): Promise<string | Classification> =>
+  ensureConnector(connection, existing, manifest).catch((err): Classification => {
+    // The hint is decided on the full text, so a long message cannot push "vault" past the cap.
+    const detail = firstParagraph(err);
+    return {
+      outcome: 'misc',
+      reason: `could not set up the "${manifest.name}" connector: ${truncate(detail)}${
+        /vault/i.test(detail) ? ' (try: vault login --method oidc)' : ''
+      }`,
+    };
+  });
 
 const executeCase = async (
   connection: KibanaConnection,
@@ -211,10 +247,8 @@ export const runCanaries = async ({
   }
 
   // Each fixture file targets its own connector (spec ids are unique), so files run concurrently.
-  const runFixture = async (fixture: FixtureFile, run: FixtureRun): Promise<void> => {
-    const record = (fixtureCase: FixtureCase, classification: Classification) =>
-      recordResult(run, fixture.spec_id, fixtureCase, classification);
-
+  const runFixture = async (fixture: FixtureFile): Promise<FixtureRun> => {
+    const run: FixtureRun = { results: [], lines: [] };
     const cases = fixture.cases.filter((c) => c.enabled !== false);
     const skipped = fixture.cases.length - cases.length;
     run.lines.push(
@@ -222,73 +256,56 @@ export const runCanaries = async ({
         (skipped > 0 ? ` (${skipped} disabled)` : '')
     );
 
-    const spec = getConnectorSpec(fixture.spec_id);
-    const manifest = manifests.find((m) => m.spec_id === fixture.spec_id);
-    if (!spec || !manifest) {
-      const reason = !spec
-        ? `no connector spec with id ${fixture.spec_id}`
-        : `no enabled manifest with spec_id ${fixture.spec_id}`;
-      cases.forEach((fixtureCase) => record(fixtureCase, { outcome: 'fixture', reason }));
-      return;
+    // Resolved once per fixture; a failure here becomes the outcome of every case.
+    let target: { spec: ConnectorSpec; manifest: Manifest } | Classification;
+    try {
+      const spec = getConnectorSpec(fixture.spec_id);
+      const manifest = manifests.find((m) => m.spec_id === fixture.spec_id);
+      if (!spec) {
+        target = { outcome: 'fixture', reason: `no connector spec with id ${fixture.spec_id}` };
+      } else if (!manifest) {
+        target = {
+          outcome: 'fixture',
+          reason: `no enabled manifest with spec_id ${fixture.spec_id}`,
+        };
+      } else {
+        target = { spec, manifest };
+      }
+    } catch (err) {
+      target = { outcome: 'misc', reason: `unexpected runner error: ${summarizeError(err)}` };
     }
 
-    let connectorId: string | undefined;
-    let connectorFailure: Classification | undefined;
+    // Set up on the first case that needs it, then shared by the rest, whether it succeeded or failed.
+    let connector: Promise<string | Classification> | undefined;
+
+    // Never throws: an unexpected error fails only the case that hit it, so every case still gets one result.
+    const classifyCase = async (fixtureCase: FixtureCase): Promise<Classification> => {
+      if ('outcome' in target) return target;
+      const { spec, manifest } = target;
+      try {
+        const invalid = validateCase(spec, fixtureCase);
+        if (invalid) return invalid;
+        if (!connection) return { outcome: 'ok', reason: 'dry run' };
+
+        connector ??= setUpConnector(connection, existing, manifest);
+        const connectorId = await connector;
+        if (typeof connectorId !== 'string') return connectorId;
+        return await executeCase(connection, connectorId, spec, fixtureCase);
+      } catch (err) {
+        return { outcome: 'misc', reason: `unexpected runner error: ${summarizeError(err)}` };
+      }
+    };
 
     for (const fixtureCase of cases) {
-      const invalid = validateCase(spec, fixtureCase);
-      if (invalid) {
-        record(fixtureCase, invalid);
-        continue;
-      }
-      if (!connection) {
-        record(fixtureCase, { outcome: 'ok', reason: 'dry run' });
-        continue;
-      }
-
-      if (!connectorId && !connectorFailure) {
-        try {
-          connectorId = await ensureConnector(connection, existing, manifest);
-        } catch (err) {
-          const message = err instanceof Error ? err.message.split('\n')[0] : String(err);
-          connectorFailure = {
-            outcome: 'misc',
-            reason: `could not set up the "${manifest.name}" connector: ${message}${
-              message.includes('vault') ? ' (try: vault login --method oidc)' : ''
-            }`,
-          };
-        }
-      }
-      if (!connectorId) {
-        record(
-          fixtureCase,
-          connectorFailure ?? { outcome: 'misc', reason: 'connector unavailable' }
-        );
-        continue;
-      }
-
-      record(fixtureCase, await executeCase(connection, connectorId, spec, fixtureCase));
+      recordResult(run, fixture.spec_id, fixtureCase, await classifyCase(fixtureCase));
     }
+    return run;
   };
 
-  // A fixture's block is printed as soon as it finishes, and an unexpected throw only fails that fixture's remaining cases.
+  // A fixture's block is printed as soon as it finishes, without waiting for the slower ones.
   const runs = await Promise.all(
     fixtures.map(async (fixture) => {
-      const run: FixtureRun = { results: [], lines: [] };
-      try {
-        await runFixture(fixture, run);
-      } catch (err) {
-        const message = err instanceof Error ? err.message.split('\n')[0] : String(err);
-        fixture.cases
-          .filter((c) => c.enabled !== false)
-          .slice(run.results.length)
-          .forEach((fixtureCase) =>
-            recordResult(run, fixture.spec_id, fixtureCase, {
-              outcome: 'misc',
-              reason: `unexpected runner error: ${message}`,
-            })
-          );
-      }
+      const run = await runFixture(fixture);
       run.lines.forEach((line) => log.info(line));
       return run;
     })

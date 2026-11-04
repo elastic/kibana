@@ -240,22 +240,30 @@ describe('runCanaries', () => {
       manifest,
       { ...manifest, spec_id: '.other', name: 'Other' },
     ]);
+    // Both promises are created before the run starts, so the test waits on events, not on timers.
     let releaseSlow: () => void = () => {};
+    const slowGate = new Promise<void>((resolve) => {
+      releaseSlow = resolve;
+    });
     executeConnectorMock.mockImplementation(async (_conn, id, params) => {
-      if (params.subAction === 'getMe')
-        await new Promise<void>((resolve) => (releaseSlow = resolve));
+      if (params.subAction === 'getMe') await slowGate;
       return { connector_id: id, status: 'ok', data: { login: 'a' } };
     });
     const printed: string[] = [];
+    let onFastPrinted: () => void = () => {};
+    const fastPrinted = new Promise<void>((resolve) => {
+      onFastPrinted = resolve;
+    });
     const recordingLog = new ToolingLog();
     jest.spyOn(recordingLog, 'info').mockImplementation((...args) => {
-      printed.push(String(args[0]));
+      const line = String(args[0]);
+      printed.push(line);
+      if (line.includes('search')) onFastPrinted();
       return true;
     });
 
     const pending = runCanaries({ log: recordingLog, dryRun: false });
-    await new Promise((resolve) => setTimeout(resolve, 20));
-    expect(printed.some((line) => line.includes('search'))).toBe(true);
+    await fastPrinted;
     expect(printed.some((line) => line.includes('getMe'))).toBe(false);
 
     releaseSlow();
@@ -263,7 +271,7 @@ describe('runCanaries', () => {
     expect(printed.some((line) => line.includes('getMe'))).toBe(true);
   });
 
-  it('fails only the remaining cases of a fixture that throws unexpectedly, keeping other results', async () => {
+  it('fails every case of a fixture whose spec lookup throws, keeping other fixtures', async () => {
     loadFixturesMock.mockReturnValue([
       fixtureFile([caseFor(), caseFor({ name: 'second' })]),
       { spec_id: '.other', cases: [caseFor()] },
@@ -290,6 +298,38 @@ describe('runCanaries', () => {
       ['.other', 'ok'],
     ]);
     expect(results[0].reason).toContain('spec exploded');
+  });
+
+  it('fails only the case that hits an unexpected error, not the rest of its fixture', async () => {
+    loadFixturesMock.mockReturnValue([
+      fixtureFile([caseFor({ name: 'first' }), caseFor({ name: 'second' })]),
+    ]);
+    // `executeCase` classifies thrown execute errors itself, so the unexpected one comes from output parsing.
+    getConnectorSpecMock.mockReturnValue(
+      specWith({
+        getMe: {
+          scope: 'read',
+          output: {
+            safeParse: jest
+              .fn()
+              .mockImplementationOnce(() => {
+                throw new Error('schema exploded');
+              })
+              .mockReturnValue({ success: true }),
+          },
+        },
+      })
+    );
+    executeConnectorMock.mockResolvedValue({
+      connector_id: 'x',
+      status: 'ok',
+      data: { login: 'a' },
+    });
+
+    const results = await runCanaries({ log, dryRun: false });
+
+    expect(results.map((r) => r.outcome)).toEqual(['misc', 'ok']);
+    expect(results[0].reason).toContain('schema exploded');
   });
 
   it('runs the _test sub-action and checks the response root with a $ path', async () => {
@@ -401,6 +441,48 @@ describe('runCanaries', () => {
     expect(results[0].reason).toContain('vault login');
     expect(resolveSecretsMock).toHaveBeenCalledTimes(1);
     expect(executeConnectorMock).not.toHaveBeenCalled();
+  });
+
+  it('caps a very long setup error so one case stays on one readable line', async () => {
+    resolveSecretsMock.mockRejectedValue(
+      new Error(`Failed to update connector: ${'x'.repeat(2000)}`)
+    );
+    const [result] = await runCanaries({ log, dryRun: false });
+    expect(result.reason?.length).toBeLessThan(450);
+    expect(result.reason).toContain('…');
+  });
+
+  it('still hints about vault when the mention is past the length cap', async () => {
+    resolveSecretsMock.mockRejectedValue(new Error(`${'x'.repeat(400)} vault`));
+    const [result] = await runCanaries({ log, dryRun: false });
+    expect(result.reason).toContain('vault login');
+  });
+
+  it('does not split an emoji at the length cap', async () => {
+    resolveSecretsMock.mockRejectedValue(new Error(`${'x'.repeat(299)}😀 and more text after it`));
+    const [result] = await runCanaries({ log, dryRun: false });
+    expect(result.reason).toContain('😀…');
+    expect(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/.test(result.reason ?? '')).toBe(false);
+  });
+
+  it('keeps Vault output in the reason but not the how-to text, and hints on any capitalisation', async () => {
+    resolveSecretsMock.mockRejectedValue(
+      new Error(
+        [
+          'Failed to read secret from vault (path: p, field: f).',
+          'Vault output: permission denied',
+          '',
+          'Make sure you are logged in:',
+        ].join('\n')
+      )
+    );
+    const [first] = await runCanaries({ log, dryRun: false });
+    expect(first.reason).toContain('Vault output: permission denied');
+    expect(first.reason).not.toContain('Make sure you are logged in');
+
+    resolveSecretsMock.mockRejectedValue(new Error('Vault returned an empty value for path: p'));
+    const [second] = await runCanaries({ log, dryRun: false });
+    expect(second.reason).toContain('vault login');
   });
 
   it('reports a fixture problem when no enabled manifest matches the spec', async () => {

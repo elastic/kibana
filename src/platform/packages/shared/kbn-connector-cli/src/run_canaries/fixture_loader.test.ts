@@ -94,6 +94,11 @@ describe('loadFixtures', () => {
     expect(loadFixtures(dir)).toHaveLength(1);
   });
 
+  it('rejects a .yml fixture instead of silently skipping it', () => {
+    write('slack.yml', 'spec_id: .slack\ncases: []');
+    expect(() => loadFixtures(dir)).toThrow(/slack\.yml: fixture files must use the \.yaml/);
+  });
+
   it('ignores non-yaml files', () => {
     write('README.md', '# not a fixture');
     expect(loadFixtures(dir)).toEqual([]);

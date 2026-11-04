@@ -25,36 +25,38 @@ interface ConnectorPayload {
 const DEFAULT_URLS = ['http://localhost:5601', 'https://localhost:5601'];
 const DEFAULT_AUTHS = ['elastic:changeme', 'elastic_serverless:changeme'];
 
+const DEFAULT_REQUEST_DEADLINE_MS = 30_000;
+
 /** `deadlineMs` bounds the whole request, unlike `options.timeout`, which only catches an idle socket. */
 function request(
   url: string,
   options: http.RequestOptions,
   body?: string,
-  deadlineMs?: number
+  deadlineMs: number = DEFAULT_REQUEST_DEADLINE_MS
 ): Promise<{ statusCode: number; data: string }> {
   return new Promise((resolve, reject) => {
     const isSsl = url.startsWith('https');
     const requestFn = isSsl ? https.request : http.request;
-    let deadline: NodeJS.Timeout | undefined;
+    // Destroying the request also makes an in-flight response emit 'aborted', so the timeout error must win.
+    let timeoutError: Error | undefined;
+    const fail = (err: Error) => reject(timeoutError ?? err);
     const req = requestFn(url, { ...options, rejectUnauthorized: false }, (res) => {
       let data = '';
       res.on('data', (chunk) => (data += chunk));
-      res.on('end', () => {
-        clearTimeout(deadline);
-        resolve({ statusCode: res.statusCode || 0, data });
+      res.on('end', () => resolve({ statusCode: res.statusCode || 0, data }));
+      res.on('error', fail);
+      // A dropped connection ends the response without 'end' or a request error, so it must be rejected here.
+      res.on('close', () => {
+        if (!res.complete) fail(new Error('Connection closed before the response was complete'));
       });
     });
-    req.on('error', (err) => {
-      clearTimeout(deadline);
-      reject(err);
-    });
+    req.on('error', fail);
     // Armed only once `requestFn` has returned, so a synchronous throw leaves no timer behind.
-    if (deadlineMs !== undefined) {
-      deadline = setTimeout(
-        () => req.destroy(new Error(`Request timed out after ${deadlineMs}ms`)),
-        deadlineMs
-      );
-    }
+    const deadline = setTimeout(() => {
+      timeoutError = new Error(`Request timed out after ${deadlineMs}ms`);
+      req.destroy(timeoutError);
+    }, deadlineMs);
+    req.on('close', () => clearTimeout(deadline));
     if (body) req.write(body);
     req.end();
   });
