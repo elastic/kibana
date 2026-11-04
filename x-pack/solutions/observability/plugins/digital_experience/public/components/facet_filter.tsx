@@ -11,6 +11,9 @@ import type { FacetBucket } from '../../common/sessions';
 import type { Formatters } from '../hooks/use_formatters';
 import { SingleSelectFilter } from './single_select_filter';
 
+/** Facet values such as URLs are long, so the button truncates them to leave room for the others. */
+const MAX_BUTTON_SIZE = '12em';
+
 /** The "any value" option of a facet, which removes its filter. */
 const ANY_VALUE = '';
 
@@ -71,6 +74,7 @@ export function FacetFilter({
       onChange={(value) => onChange(value || undefined)}
       searchable
       isLoading={isLoading}
+      maxButtonInlineSize={MAX_BUTTON_SIZE}
     />
   );
 }
