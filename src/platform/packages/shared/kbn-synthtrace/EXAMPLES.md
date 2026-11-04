@@ -971,7 +971,7 @@ Every span and log carries the `session.id` of its session, lowercase on Android
 
 Each app has a pool of installations, and each installation keeps its device and app version: 70% run the newest version, 25% the one before and 5% an older one. An installation opens the app every 90 minutes, so that its sessions are more than 30 minutes apart. Over a few hours, installations have several sessions, which sets crash-free users apart from crash-free sessions; within an hour, most have one.
 
-Some sessions have a second visit: the user leaves the app and comes back within 30 minutes, which keeps the session. In code and Scout tests, use the `edotReactNative` DSL from `@kbn/synthtrace-client` (`edotReactNative.app()`, `app.client()`, `edotReactNative.session()`) with the `otelSynthtraceEsClient` fixture, and pass `random: createSeededRandom('my-test')` for reproducible sessions.
+Some sessions have a second visit: the user leaves the app and comes back within 30 minutes, which keeps the session. Sessions end within the time range, and what happens before `--from` is cut off: each span and log is dropped on its own timestamp. So at the start of a run, some sessions miss their launch and first screens, and an `exception` span event can point to a request span that starts just before `--from` and isn't indexed. In code and Scout tests, use the `edotReactNative` DSL from `@kbn/synthtrace-client` (`edotReactNative.app()`, `app.client()`, `edotReactNative.session()`) with the `otelSynthtraceEsClient` fixture, and pass `random: createSeededRandom('my-test')` for reproducible sessions.
 
 **Options:**
 
