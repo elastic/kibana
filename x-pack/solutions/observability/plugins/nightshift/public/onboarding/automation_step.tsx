@@ -24,8 +24,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { useKibana } from '../hooks/use_kibana';
-import { useAgentConnectors } from '../sandbox_connectors/use_agent_connectors';
-import { useFetchSandboxConnectors } from '../sandbox_connectors/use_fetch_sandbox_connectors';
+import { useAgentConnectors } from '../data/sandbox_connectors/use_agent_connectors';
+import { useFetchSandboxConnectors } from '../data/sandbox_connectors/use_fetch_sandbox_connectors';
 
 interface SuggestedAutomation {
   id: string;
