@@ -33,7 +33,8 @@ export interface FpTpChainProcess {
 }
 
 export interface FpTpChainDestination {
-  readonly domain: string;
+  /** Absent for a connection to a bare IP, as endpoint network events record it. */
+  readonly domain?: string;
   readonly ip: string;
   readonly port: number;
 }

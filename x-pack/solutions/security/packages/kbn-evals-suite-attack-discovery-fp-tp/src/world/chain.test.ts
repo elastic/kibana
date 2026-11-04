@@ -9,6 +9,7 @@ import { buildChainWorld, getChainIds, type FpTpChainDefinition } from './chain'
 import { FP_TP_BASE_TIME, FP_TP_RAW_EVENT_WINDOW_MS } from './constants';
 import {
   withCommandLine,
+  withEventDestination,
   withFilePath,
   withNetworkDestination,
   withoutAlertBridges,
@@ -176,6 +177,28 @@ describe('chain mutations', () => {
     );
   });
 
+  it('returns the new destination in the message after withEventDestination', () => {
+    const [, event] = withEventDestination(world, ids.eventId('beacon'), {
+      domain: 'manage.microsoft.com',
+      ip: '20.190.128.10',
+      port: 443,
+    }).events;
+    expect(event.source.message).toBe(
+      'powershell.exe connected to manage.microsoft.com (20.190.128.10:443)'
+    );
+  });
+
+  it('returns a message with only the address after withEventDestination without a domain', () => {
+    const [, event] = withEventDestination(world, ids.eventId('beacon'), {
+      ip: '198.51.100.7',
+      port: 8443,
+    }).events;
+    expect([event.source.destination, event.source.message]).toEqual([
+      { ip: '198.51.100.7', port: 8443 },
+      'powershell.exe connected to 198.51.100.7:8443',
+    ]);
+  });
+
   it('returns a message without a parent after withoutProcessParent', () => {
     const [event] = withoutProcessParent(world, 'powershell.exe').events;
     expect(event.source.message).toBe('powershell.exe started');
@@ -216,6 +239,10 @@ describe('chain mutations', () => {
     [
       'withNetworkDestination',
       () => withNetworkDestination(world, 'nope.example', { domain: 'a', ip: '1.1.1.1', port: 1 }),
+    ],
+    [
+      'withEventDestination',
+      () => withEventDestination(world, ids.eventId('start'), { ip: '1.1.1.1', port: 1 }),
     ],
     ['withoutEventIds', () => withoutEventIds(world, [ids.eventId('start'), 'nope'])],
   ])('throws from %s when no raw event matches', (_name, rewrite) => {

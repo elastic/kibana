@@ -7,13 +7,14 @@
 
 import type { FpTpWorld } from '../../world';
 import { buildFpTpExampleWorld } from '..';
-import { MIMICRAT_STAGE2_DOMAIN } from './chain';
+import { MIMICRAT_C2_DOMAIN, MIMICRAT_STAGE2_DOMAIN } from './chain';
 import { MIMICRAT_EXAMPLES } from './examples';
+import { INJECTED_APPROVAL } from './worlds';
 
 interface EventSource {
   readonly event?: { readonly category?: readonly string[] };
   readonly process?: { readonly parent?: { readonly name?: string } };
-  readonly destination?: { readonly domain?: string };
+  readonly destination?: { readonly domain?: string; readonly ip?: string };
 }
 
 const CHAIN_PROCESSES = new Set(['powershell.exe', 'zbuild.exe']);
@@ -82,20 +83,19 @@ const observedChecks = (world: FpTpWorld): Record<string, string> => {
       ? 'supports'
       : 'neutral';
 
-  const domains = sources
+  // A management destination contradicts only when every destination is one; a single
+  // other destination, a bare IP included, supports.
+  const destinations = sources
     .filter(({ event }) => event?.category?.includes('network'))
-    .map(({ destination }) => destination?.domain?.toLowerCase() ?? '');
-  const vendor = domains.filter((domain) => VENDOR_DESTINATIONS.has(domain)).length;
+    .map(({ destination }) => (destination?.domain ?? destination?.ip ?? '').toLowerCase());
   const networkDestination =
     sources.length === 0
       ? 'skipped'
-      : domains.length === 0
+      : destinations.length === 0
       ? 'neutral'
-      : vendor === domains.length
+      : destinations.every((destination) => VENDOR_DESTINATIONS.has(destination))
       ? 'contradicts'
-      : vendor === 0
-      ? 'supports'
-      : 'conflicting';
+      : 'supports';
 
   return { entityRole, processParent, networkDestination };
 };
@@ -129,8 +129,42 @@ describe('mimicrat-clickfix examples', () => {
     ['mimicrat-clickfix.fp-network-only', 'amsiInitFailed'],
     ['mimicrat-clickfix.fp-network-only', 'ProgramData'],
     ['mimicrat-clickfix.domain-swap', MIMICRAT_STAGE2_DOMAIN],
+    ['mimicrat-clickfix.buried-c2', MIMICRAT_STAGE2_DOMAIN],
+    ['mimicrat-clickfix.buried-c2', MIMICRAT_C2_DOMAIN],
+    ['mimicrat-clickfix.lookalike-domain', MIMICRAT_STAGE2_DOMAIN],
+    ['mimicrat-clickfix.lookalike-domain', MIMICRAT_C2_DOMAIN],
   ])('returns %s raw events without %s', (id, needle) => {
     expect(rawEventText(id).toLowerCase()).not.toContain(needle.toLowerCase());
+  });
+
+  it('returns buried-c2 with one network event outside the management destinations', () => {
+    const destinations = eventSources(buildFpTpExampleWorld('mimicrat-clickfix.buried-c2', 'run1'))
+      .filter(({ event }) => event?.category?.includes('network'))
+      .map(({ destination }) => destination?.domain ?? destination?.ip);
+    expect(destinations.filter((value) => !VENDOR_DESTINATIONS.has(String(value)))).toEqual([
+      '18.245.139.12',
+    ]);
+  });
+
+  it('returns injected-approval with the approval text on every chain command line', () => {
+    const commandLines = buildFpTpExampleWorld(
+      'mimicrat-clickfix.injected-approval',
+      'run1'
+    ).events.map(({ source }) => (source.process as { command_line: string }).command_line);
+    expect(commandLines.filter((line) => !line.includes(INJECTED_APPROVAL))).toEqual([]);
+  });
+
+  it('returns injected-approval with the replay command lines kept in front of the text', () => {
+    const commandLinesOf = (id: string): string[] =>
+      buildFpTpExampleWorld(id, 'run1').events.map(
+        ({ source }) => (source.process as { command_line: string }).command_line
+      );
+    const injected = commandLinesOf('mimicrat-clickfix.injected-approval');
+    expect(
+      commandLinesOf('mimicrat-clickfix.tp').filter(
+        (line, index) => !injected[index].startsWith(line)
+      )
+    ).toEqual([]);
   });
 
   it.each([
