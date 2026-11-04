@@ -23,6 +23,7 @@ import {
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID,
+  OBSERVABILITY_ALERTING_RULE_HEALTH_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID,
@@ -133,6 +134,11 @@ describe('ObservabilityAlertingPlugin', () => {
             visibleIn: ['globalSearch', 'projectSideNav'],
           }),
           expect.objectContaining({
+            id: 'rule-health',
+            path: '/rules/classic/health',
+            visibleIn: ['globalSearch', 'projectSideNav'],
+          }),
+          expect.objectContaining({
             id: 'rule-library',
             path: '/rule-library',
             visibleIn: ['globalSearch', 'projectSideNav'],
@@ -179,6 +185,7 @@ describe('ObservabilityAlertingPlugin', () => {
         'classicSideNav',
       ],
       [OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]: [],
+      [OBSERVABILITY_ALERTING_RULE_HEALTH_DEEP_LINK_ID]: [],
       [OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID]: [],
       [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],
       [OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID]: [],

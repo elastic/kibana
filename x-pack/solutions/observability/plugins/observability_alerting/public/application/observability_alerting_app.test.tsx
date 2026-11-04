@@ -33,6 +33,7 @@ import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
   OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
+  OBSERVABILITY_ALERTING_RULE_HEALTH_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
@@ -303,6 +304,16 @@ describe('ObservabilityAlertingApp', () => {
       })
     );
     expect(mockTriggersActionsUi.getClassicRulesPage.mock.calls[0][0].showClassicBadge).toBe(false);
+  });
+
+  it('serves the Health deep link from the classic rules mount', async () => {
+    const { getByTestId, history } = renderAt(OBSERVABILITY_ALERTING_RULE_HEALTH_PATH);
+
+    await waitFor(() => {
+      expect(getByTestId('classicRulesPage')).toBeInTheDocument();
+    });
+    // The classic page owns the `/health` sub-route, so the mount is anchored at the classic prefix.
+    expect(history.createSubHistory).toHaveBeenCalledWith(OBSERVABILITY_ALERTING_RULES_V1_PATH);
   });
 
   it('shows both rules tabs for a mixed v1 and v2 user on the classic rules page', async () => {
