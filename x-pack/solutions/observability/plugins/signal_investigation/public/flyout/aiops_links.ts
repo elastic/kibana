@@ -98,12 +98,13 @@ const logCategorizationParams = (seed: InvestigationSeed): MlLocatorParams => {
 
 const logRateAnalysisParams = (seed: InvestigationSeed): MlLocatorParams => {
   const timeRange = { from: seed.timeRange.from, to: seed.timeRange.to };
+  const dataViewId = seed.query && isEsqlQuery(seed.query) ? undefined : seed.dataViewId;
   return {
-    page: seed.dataViewId
+    page: dataViewId
       ? ML_PAGES.AIOPS_LOG_RATE_ANALYSIS
       : ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT,
     pageState: {
-      ...(seed.dataViewId ? { index: seed.dataViewId } : {}),
+      ...(dataViewId ? { index: dataViewId } : {}),
       globalState: { time: timeRange },
     },
   };
@@ -351,7 +352,12 @@ export const buildLeadDrilldownHref = ({
   }
 
   if (lead.analyzerId === 'log_rate_analysis') {
-    const dataViewId = typeof params.dataViewId === 'string' ? params.dataViewId : seed.dataViewId;
+    const isEsql = Boolean(seed.query && isEsqlQuery(seed.query));
+    const dataViewId = isEsql
+      ? undefined
+      : typeof params.dataViewId === 'string'
+      ? params.dataViewId
+      : seed.dataViewId;
     const indexPattern = typeof params.indexPattern === 'string' ? params.indexPattern : undefined;
     const timeField = typeof params.timeField === 'string' ? params.timeField : '@timestamp';
     const query = seed.query && !isEsqlQuery(seed.query) ? seed.query : undefined;

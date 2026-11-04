@@ -105,6 +105,16 @@ describe('buildAnalysisToolLink', () => {
       'aiops/log_rate_analysis',
       'aiops/log_rate_analysis_index_select',
     ]);
+
+    buildAnalysisToolLink({
+      analyzerId: 'log_rate_analysis',
+      seed: seed({ dataViewId: 'esql-session-view', query: { esql: 'FROM logs-*' } }),
+      share,
+      canUseAiops: true,
+    });
+    expect((calls[2]?.params as { page: string }).page).toBe(
+      'aiops/log_rate_analysis_index_select'
+    );
   });
 
   it('omits the href when the ML locator is not registered', () => {
@@ -293,6 +303,32 @@ describe('buildLeadDrilldownHref', () => {
       ],
     });
     expect(calls[1]?.params).not.toHaveProperty('dataViewSpec');
+
+    buildLeadDrilldownHref({
+      lead: {
+        id: 'esql-lead',
+        analyzerId: 'log_rate_analysis',
+        summary: 'log.level error',
+        relevance: 'Logs in the selected window',
+        ranking: { signal: 'strong', timing: 'during', relationship: 'unknown' },
+        locatorParams: {
+          leadField: 'log.level',
+          leadValue: 'error',
+          dataViewId: 'esql-session-view',
+          indexPattern: 'logs-payments-*',
+          timeField: '@timestamp',
+        },
+      },
+      seed: seed({
+        dataViewId: 'esql-session-view',
+        query: { esql: 'FROM logs-payments-* | SORT @timestamp DESC' },
+      }),
+      share,
+    });
+    expect(calls[2]?.params).not.toHaveProperty('dataViewId');
+    expect(calls[2]?.params).toMatchObject({
+      dataViewSpec: { title: 'logs-payments-*', timeFieldName: '@timestamp' },
+    });
   });
 
   it('builds drill-downs for host metric change points and service anomalies, plus the anomaly settings link when not set up', () => {

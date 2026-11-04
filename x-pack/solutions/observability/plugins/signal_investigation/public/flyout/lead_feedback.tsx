@@ -9,8 +9,9 @@ import React from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
+import type { LeadFeedbackVerdict } from '../../common/findings_attachment';
 
-export type LeadFeedbackVerdict = 'useful' | 'not_useful';
+export type { LeadFeedbackVerdict };
 
 export const toggleLeadFeedback = (
   current: LeadFeedbackVerdict | undefined,

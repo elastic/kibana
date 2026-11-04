@@ -46,6 +46,10 @@ export const attachmentPlanItemSchema = lazySchema(() =>
   })
 );
 
+export const LEAD_FEEDBACK_VERDICTS = ['useful', 'not_useful'] as const;
+
+export type LeadFeedbackVerdict = (typeof LEAD_FEEDBACK_VERDICTS)[number];
+
 export const attachmentLeadSchema = lazySchema(() =>
   z.strictObject({
     id: boundedFieldSchema,
@@ -58,6 +62,7 @@ export const attachmentLeadSchema = lazySchema(() =>
       timing: z.enum(['before', 'during', 'after', 'unknown']),
       relationship: z.enum(['service', 'dependency', 'host', 'unknown']),
     }),
+    verdict: z.enum(LEAD_FEEDBACK_VERDICTS).optional(),
   })
 );
 
@@ -88,10 +93,12 @@ export const buildSignalInvestigationFindingsPayload = ({
   seed,
   plan,
   leads,
+  feedbackByLead,
 }: {
   seed: InvestigationSeed;
   plan: readonly SignalInvestigationPlanItem[];
   leads: readonly InvestigationLead[];
+  feedbackByLead?: Readonly<Record<string, LeadFeedbackVerdict | undefined>>;
 }): SignalInvestigationFindingsAttachmentData => ({
   seed,
   plan: plan.slice(0, MAX_ATTACHMENT_PLAN_ITEMS).map((item) => ({
@@ -102,18 +109,22 @@ export const buildSignalInvestigationFindingsPayload = ({
     foundCount: Math.min(Math.max(Math.trunc(item.foundCount), 0), 1_000),
     ...(item.message ? { message: boundString(item.message) } : {}),
   })),
-  leads: leads.slice(0, MAX_ATTACHMENT_LEADS).map((lead) => ({
-    id: boundString(lead.id),
-    analyzerId: boundString(lead.analyzerId),
-    summary: boundString(lead.summary),
-    ...(lead.occurredAt ? { occurredAt: boundString(lead.occurredAt) } : {}),
-    relevance: boundString(lead.relevance),
-    ranking: {
-      signal: lead.ranking.signal,
-      timing: lead.ranking.timing,
-      relationship: lead.ranking.relationship,
-    },
-  })),
+  leads: leads.slice(0, MAX_ATTACHMENT_LEADS).map((lead) => {
+    const verdict = feedbackByLead?.[lead.id];
+    return {
+      id: boundString(lead.id),
+      analyzerId: boundString(lead.analyzerId),
+      summary: boundString(lead.summary),
+      ...(lead.occurredAt ? { occurredAt: boundString(lead.occurredAt) } : {}),
+      relevance: boundString(lead.relevance),
+      ranking: {
+        signal: lead.ranking.signal,
+        timing: lead.ranking.timing,
+        relationship: lead.ranking.relationship,
+      },
+      ...(verdict ? { verdict } : {}),
+    };
+  }),
 });
 
 /**
@@ -124,12 +135,19 @@ export const buildSignalInvestigationChatAttachments = ({
   seed,
   plan,
   leads,
+  feedbackByLead,
 }: {
   seed: InvestigationSeed;
   plan: readonly SignalInvestigationPlanItem[];
   leads: readonly InvestigationLead[];
+  feedbackByLead?: Readonly<Record<string, LeadFeedbackVerdict | undefined>>;
 }): SignalInvestigationChatAttachment[] => {
-  const findingsPayload = buildSignalInvestigationFindingsPayload({ seed, plan, leads });
+  const findingsPayload = buildSignalInvestigationFindingsPayload({
+    seed,
+    plan,
+    leads,
+    feedbackByLead,
+  });
   const attachments: SignalInvestigationChatAttachment[] = [];
 
   if (seed.origin.app === 'alerts') {
@@ -175,7 +193,7 @@ export const formatSignalInvestigationFindingsForAgent = (
               lead.occurredAt ? `, ${lead.occurredAt}` : ''
             }; signal=${lead.ranking.signal}, timing=${lead.ranking.timing}, relationship=${
               lead.ranking.relationship
-            })`
+            }${lead.verdict ? `, userVerdict=${lead.verdict}` : ''})`
         )
       : ['(no leads found)'];
 

@@ -72,12 +72,14 @@ import {
   type CoverageStatus,
   type DateFormatter,
   applyEntityPivot,
+  buildAgentVerifyInitialMessage,
   canOfferWindowEntityPivot,
   createDateFormatter,
   extractLeadEntityPivot,
   formatAnchorDescription,
   formatComparisonWindows,
   formatCoverageLineText,
+  formatLeadShiftMultiplier,
   formatPivotEntityLabel,
   formatSeedStepLabel,
   selectEmptyLeadsKind,
@@ -287,6 +289,57 @@ const LeadCard = ({
           : lead.relevance}
       </p>
     </EuiText>
+    {lead.shift ? (
+      <div
+        role="group"
+        aria-label={i18n.translate('xpack.signalInvestigation.flyout.shiftAriaLabel', {
+          defaultMessage: 'Normalized document rate comparison',
+        })}
+        data-test-subj={`signalInvestigationLeadShift-${lead.id}`}
+      >
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem>
+            <EuiProgress
+              size="xs"
+              color="subdued"
+              value={lead.shift.baseline}
+              max={Math.max(lead.shift.baseline, lead.shift.deviation, 1)}
+              valueText={String(lead.shift.baseline)}
+              label={i18n.translate('xpack.signalInvestigation.flyout.shiftBaselineRateLabel', {
+                defaultMessage: 'Baseline normalized rate',
+              })}
+              data-test-subj={`signalInvestigationShiftBaseline-${lead.id}`}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiProgress
+              size="xs"
+              color="primary"
+              value={lead.shift.deviation}
+              max={Math.max(lead.shift.baseline, lead.shift.deviation, 1)}
+              valueText={String(lead.shift.deviation)}
+              label={i18n.translate('xpack.signalInvestigation.flyout.shiftDeviationRateLabel', {
+                defaultMessage: 'Deviation normalized rate',
+              })}
+              data-test-subj={`signalInvestigationShiftDeviation-${lead.id}`}
+            />
+          </EuiFlexItem>
+          {(() => {
+            const multiplierLabel = formatLeadShiftMultiplier(lead.shift);
+            return multiplierLabel ? (
+              <EuiFlexItem grow={false}>
+                <EuiBadge
+                  color="default"
+                  data-test-subj={`signalInvestigationShiftMultiplier-${lead.id}`}
+                >
+                  {multiplierLabel}
+                </EuiBadge>
+              </EuiFlexItem>
+            ) : null;
+          })()}
+        </EuiFlexGroup>
+      </div>
+    ) : null}
     <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiBadge color="hollow">{signalLabel(lead.ranking.signal)}</EuiBadge>
@@ -973,9 +1026,11 @@ export const InvestigationFlyoutBody = ({
                 seed,
                 plan: coverage,
                 leads,
+                feedbackByLead,
               });
               agentBuilder?.openChat({
                 newConversation: true,
+                initialMessage: buildAgentVerifyInitialMessage(leads, feedbackByLead),
                 attachments,
               });
             }}

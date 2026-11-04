@@ -19,6 +19,7 @@ export type {
   AnalyzerEntities,
   AnalyzerResultStatus,
   InvestigationLead,
+  InvestigationLeadShift,
   LeadRanking,
   LeadRelationship,
   LeadSignalBand,

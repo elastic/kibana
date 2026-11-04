@@ -39,6 +39,12 @@ export interface LeadRanking {
   relationship: LeadRelationship;
 }
 
+export interface InvestigationLeadShift {
+  baseline: number;
+  deviation: number;
+  kind: 'document_rate';
+}
+
 export interface InvestigationLead {
   id: string;
   analyzerId: string;
@@ -46,6 +52,7 @@ export interface InvestigationLead {
   occurredAt?: string;
   relevance: string;
   ranking: LeadRanking;
+  shift?: InvestigationLeadShift;
   locatorParams?: Readonly<Record<string, string | number>>;
 }
 

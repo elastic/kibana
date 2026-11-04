@@ -38,9 +38,6 @@ export const analyzerApplies = (analyzerId: string, seed: InvestigationSeed): bo
     return hasServiceOrHost(seed);
   }
   if (analyzerId === LOG_RATE_ANALYZER_ID) {
-    if (seed.query && isEsqlQuery(seed.query)) {
-      return false;
-    }
     return isLogVolumeAnchor(seed);
   }
   return true;
@@ -68,11 +65,6 @@ export const inapplicabilityMessage = (
     }
   }
   if (analyzerId === LOG_RATE_ANALYZER_ID) {
-    if (seed.query && isEsqlQuery(seed.query)) {
-      return i18n.translate('xpack.signalInvestigation.flyout.esqlUnsupported', {
-        defaultMessage: 'Does not run on ES|QL queries',
-      });
-    }
     if (seed.origin.app === 'discover' && seed.origin.surface === 'document') {
       return i18n.translate('xpack.signalInvestigation.flyout.notVolumeDocument', {
         defaultMessage: 'Single log documents are not a log-volume anchor',

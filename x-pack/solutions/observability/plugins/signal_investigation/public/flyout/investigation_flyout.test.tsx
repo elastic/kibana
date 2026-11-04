@@ -394,6 +394,7 @@ describe('InvestigationFlyoutBody', () => {
     );
     expect(openChat).toHaveBeenCalledWith({
       newConversation: true,
+      initialMessage: 'Verify the top investigation leads and summarize what they suggest.',
       attachments: [
         {
           id: 'alert-99',
@@ -410,6 +411,34 @@ describe('InvestigationFlyoutBody', () => {
                 ruleTypeId: 'apm.transaction_duration',
               },
             }),
+          }),
+        }),
+      ],
+    });
+
+    openChat.mockClear();
+    await user.click(screen.getByTestId('signalInvestigationFeedbackUseful-svc-lead'));
+    await user.click(continueButton);
+
+    expect(openChat).toHaveBeenCalledWith({
+      newConversation: true,
+      initialMessage:
+        'Verify the investigation leads marked useful, treat leads marked not useful as dismissed, and summarize what the remaining evidence suggests.',
+      attachments: [
+        {
+          id: 'alert-99',
+          type: OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
+          data: { alertId: 'alert-99' },
+        },
+        expect.objectContaining({
+          type: SIGNAL_INVESTIGATION_FINDINGS_ATTACHMENT_TYPE_ID,
+          data: expect.objectContaining({
+            leads: [
+              expect.objectContaining({
+                id: 'svc-lead',
+                verdict: 'useful',
+              }),
+            ],
           }),
         }),
       ],
@@ -678,5 +707,85 @@ describe('InvestigationFlyoutBody', () => {
       'aria-pressed',
       'false'
     );
+  });
+
+  it('renders baseline and deviation comparison bars with spike and dip multipliers and omits the multiplier when the baseline is zero', async () => {
+    const get = jest.fn(async () => ({
+      analyzers: [
+        { id: 'log_rate_analysis', displayName: 'Log rate analysis' },
+        { id: 'service_change_points', displayName: 'Service change points' },
+      ],
+    }));
+    const post = jest.fn(async (path: string): Promise<SignalAnalyzerResult> => {
+      if (path === signalInvestigationLeadsPath('log_rate_analysis')) {
+        return {
+          leads: [
+            {
+              id: 'lra-spike',
+              analyzerId: 'log_rate_analysis',
+              summary: 'log.level: "error" spike',
+              relevance: 'Logs for service checkout',
+              ranking: { signal: 'strong', timing: 'during', relationship: 'service' },
+              shift: { baseline: 10, deviation: 50, kind: 'document_rate' },
+            },
+            {
+              id: 'lra-dip',
+              analyzerId: 'log_rate_analysis',
+              summary: 'log.level: "info" dip',
+              relevance: 'Logs for service checkout',
+              ranking: { signal: 'moderate', timing: 'during', relationship: 'service' },
+              shift: { baseline: 40, deviation: 10, kind: 'document_rate' },
+            },
+            {
+              id: 'lra-zero',
+              analyzerId: 'log_rate_analysis',
+              summary: 'log.level: "fatal" new',
+              relevance: 'Logs for service checkout',
+              ranking: { signal: 'weak', timing: 'during', relationship: 'service' },
+              shift: { baseline: 0, deviation: 25, kind: 'document_rate' },
+            },
+          ],
+          entities: {},
+          status: 'found',
+        };
+      }
+      return {
+        leads: [
+          {
+            id: 'svc-no-shift',
+            analyzerId: 'service_change_points',
+            summary: 'p95 latency spike on checkout',
+            relevance: 'Same service',
+            ranking: { signal: 'strong', timing: 'during', relationship: 'service' },
+          },
+        ],
+        entities: {},
+        status: 'found',
+      };
+    });
+
+    const { core } = makeCore({ get, post });
+    renderFlyout({
+      core,
+      seed: makeSeed({
+        origin: { app: 'discover', surface: 'histogram' },
+      }),
+      onClose: jest.fn(),
+    });
+
+    expect(await screen.findByTestId('signalInvestigationLeadShift-lra-spike')).toBeInTheDocument();
+    expect(screen.getByTestId('signalInvestigationShiftMultiplier-lra-spike')).toHaveTextContent(
+      '5× higher'
+    );
+    expect(screen.getByTestId('signalInvestigationShiftMultiplier-lra-dip')).toHaveTextContent(
+      '4× lower'
+    );
+    expect(screen.getByTestId('signalInvestigationLeadShift-lra-zero')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('signalInvestigationShiftMultiplier-lra-zero')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('signalInvestigationLeadShift-svc-no-shift')
+    ).not.toBeInTheDocument();
   });
 });

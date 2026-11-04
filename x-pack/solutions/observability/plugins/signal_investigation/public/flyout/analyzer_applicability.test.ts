@@ -110,6 +110,19 @@ describe('analyzerApplies', () => {
     ).toBe(false);
 
     expect(
+      analyzerApplies(
+        'log_rate_analysis',
+        seed(
+          {},
+          { esql: 'FROM logs-*' },
+          {
+            origin: { app: 'discover', surface: 'appMenu' },
+          }
+        )
+      )
+    ).toBe(true);
+
+    expect(
       inapplicabilityMessage(
         'log_rate_analysis',
         seed({}, undefined, {

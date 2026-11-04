@@ -13,10 +13,11 @@ import type {
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { i18n } from '@kbn/i18n';
-import type { InvestigationSeed } from '@kbn/investigation-seed';
+import { isEsqlQuery, type InvestigationSeed } from '@kbn/investigation-seed';
 import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import type { LogsSharedPluginStart } from '@kbn/logs-shared-plugin/server';
 import type { SignalAnalyzerResult } from '@kbn/signal-investigation-contract';
+import { extractReadOnlyEsqlIndexPattern } from './esql_index_source';
 
 export type ResolvedLogIndex =
   | { kind: 'resolved'; index: string; timeField: string }
@@ -77,6 +78,13 @@ export const resolveLogIndex = async ({
       }
     }
     return { kind: 'unavailable' };
+  }
+
+  if (seed.query && isEsqlQuery(seed.query)) {
+    const esqlIndex = extractReadOnlyEsqlIndexPattern(seed.query.esql);
+    if (esqlIndex) {
+      return { kind: 'resolved', index: esqlIndex, timeField: DEFAULT_TIME_FIELD };
+    }
   }
 
   if (seed.indexPattern) {

@@ -105,7 +105,7 @@ describe('signalInvestigationFindingsAttachmentSchema', () => {
     ]);
   });
 
-  it('formats findings with the non-causal verification reminder', () => {
+  it('formats findings with the non-causal verification reminder and optional user verdicts', () => {
     const payload = buildSignalInvestigationFindingsPayload({
       seed: makeSeed(),
       plan: [
@@ -117,12 +117,19 @@ describe('signalInvestigationFindingsAttachmentSchema', () => {
           foundCount: 1,
         },
       ],
-      leads: [makeLead(1)],
+      leads: [makeLead(1), makeLead(2)],
+      feedbackByLead: { 'lead-1': 'useful', 'lead-2': 'not_useful' },
     });
+
+    expect(signalInvestigationFindingsAttachmentSchema.safeParse(payload).success).toBe(true);
+    expect(payload.leads[0].verdict).toBe('useful');
+    expect(payload.leads[1].verdict).toBe('not_useful');
 
     const text = formatSignalInvestigationFindingsForAgent(payload);
     expect(text).toContain('service.name=checkout');
     expect(text).toContain('Latency spike on redis-1');
+    expect(text).toContain('userVerdict=useful');
+    expect(text).toContain('userVerdict=not_useful');
     expect(text).toContain('verify with tools');
   });
 });

@@ -6,13 +6,16 @@
  */
 
 import type { InvestigationSeed } from '@kbn/investigation-seed';
+import { MAX_ATTACHMENT_LEADS } from '../../common/findings_attachment';
 import {
   applyEntityPivot,
+  buildAgentVerifyInitialMessage,
   canOfferWindowEntityPivot,
   createDateFormatter,
   extractLeadEntityPivot,
   formatAnchorDescription,
   formatCoverageLineText,
+  formatLeadShiftMultiplier,
   formatPivotEntityLabel,
   selectEmptyLeadsKind,
 } from './flyout_state';
@@ -220,6 +223,46 @@ describe('entity pivot helpers', () => {
         { ...seed, entities: {} }
       )
     ).toEqual({ field: 'service.name', value: 'payments' });
+  });
+
+  it('formats spike and dip shift multipliers and omits zero-denominator or equal shifts', () => {
+    expect(formatLeadShiftMultiplier({ baseline: 10, deviation: 50, kind: 'document_rate' })).toBe(
+      '5× higher'
+    );
+    expect(formatLeadShiftMultiplier({ baseline: 50, deviation: 10, kind: 'document_rate' })).toBe(
+      '5× lower'
+    );
+    expect(
+      formatLeadShiftMultiplier({ baseline: 0, deviation: 50, kind: 'document_rate' })
+    ).toBeUndefined();
+    expect(
+      formatLeadShiftMultiplier({ baseline: 50, deviation: 0, kind: 'document_rate' })
+    ).toBeUndefined();
+    expect(
+      formatLeadShiftMultiplier({ baseline: 20, deviation: 20, kind: 'document_rate' })
+    ).toBeUndefined();
+  });
+
+  it('selects the voted prompt only when a vote belongs to an attached lead', () => {
+    const attachedLeads = [{ id: 'lead-1' }];
+    const defaultPrompt = 'Verify the top investigation leads and summarize what they suggest.';
+    const votedPrompt =
+      'Verify the investigation leads marked useful, treat leads marked not useful as dismissed, and summarize what the remaining evidence suggests.';
+
+    expect(buildAgentVerifyInitialMessage([], {})).toBe(defaultPrompt);
+    expect(buildAgentVerifyInitialMessage(attachedLeads, { 'lead-1': 'useful' })).toBe(votedPrompt);
+
+    const rankedLeads = Array.from({ length: MAX_ATTACHMENT_LEADS + 1 }, (_, index) => ({
+      id: `lead-${index}`,
+    }));
+    expect(
+      buildAgentVerifyInitialMessage(rankedLeads, {
+        [`lead-${MAX_ATTACHMENT_LEADS}`]: 'useful',
+      })
+    ).toBe(defaultPrompt);
+    expect(buildAgentVerifyInitialMessage(rankedLeads, { 'lead-0': 'not_useful' })).toBe(
+      votedPrompt
+    );
   });
 });
 

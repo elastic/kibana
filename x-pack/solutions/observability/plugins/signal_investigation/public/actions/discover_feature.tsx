@@ -72,7 +72,8 @@ export const buildDiscoverAppMenuSeed = ({
 
   const boundedFilters = filters.slice(0, MAX_INVESTIGATION_FILTERS);
   const effectiveQuery = nonEmptyQuery(query);
-  const boundedDataViewId = asBoundedField(dataViewId);
+  const isEsql = Boolean(effectiveQuery && isEsqlQuery(effectiveQuery));
+  const boundedDataViewId = isEsql ? undefined : asBoundedField(dataViewId);
   const boundedIndexPattern = asBoundedText(indexPattern);
 
   return {

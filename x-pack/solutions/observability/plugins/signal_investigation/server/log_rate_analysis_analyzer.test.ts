@@ -89,6 +89,27 @@ describe('logRateAnalysisApplicability', () => {
           query: { esql: 'FROM logs-*' },
         })
       ).applicable
+    ).toBe(true);
+    expect(
+      logRateAnalysisApplicability(
+        seed({
+          query: { esql: 'FROM logs-* | SORT @timestamp DESC | LIMIT 100' },
+        })
+      ).applicable
+    ).toBe(true);
+    expect(
+      logRateAnalysisApplicability(
+        seed({
+          query: { esql: 'FROM logs-* | WHERE log.level == "error"' },
+        })
+      ).applicable
+    ).toBe(false);
+    expect(
+      logRateAnalysisApplicability(
+        seed({
+          query: { esql: 'FROM metrics-*' },
+        })
+      ).applicable
     ).toBe(false);
   });
 });
@@ -240,13 +261,45 @@ describe('mapLogRateAnalysisResult', () => {
     expect(mapped.leads).toHaveLength(MAX_LOG_RATE_LEADS);
     expect(mapped.message).toBe('Showing the first 10 leads.');
     expect(mapped.leads[0].summary).toContain(
-      'log.level: "error-1" (10 in baseline to 50 in deviation, p = 0.001)'
+      'log.level: "error-1" (normalized rate 10 in baseline to 50 in deviation, p = 0.001)'
     );
+    expect(mapped.leads[0].shift).toEqual({
+      baseline: 10,
+      deviation: 50,
+      kind: 'document_rate',
+    });
     expect(mapped.leads[0].ranking).toEqual({
       signal: 'strong',
       timing: 'during',
       relationship: 'service',
     });
+
+    const esqlSeed = chartSeed({
+      query: { esql: 'FROM logs-* | SORT @timestamp DESC' },
+    });
+    const esqlZeroDocs = mapLogRateAnalysisResult({
+      result: {
+        logRateAnalysisType: 'spike',
+        zeroDocsFallback: true,
+        significantItems: [],
+      },
+      seed: esqlSeed,
+      windowParameters,
+    });
+    expect(esqlZeroDocs.message).toBe(
+      'Not enough data in the baseline or deviation window. Analyzed on @timestamp.'
+    );
+
+    const esqlCapped = mapLogRateAnalysisResult({
+      result: {
+        logRateAnalysisType: 'spike',
+        zeroDocsFallback: false,
+        significantItems: items,
+      },
+      seed: esqlSeed,
+      windowParameters,
+    });
+    expect(esqlCapped.message).toBe('Showing the first 10 leads. Analyzed on @timestamp.');
     expect(mapped.leads[0].locatorParams).toEqual({
       'entity.0.field': 'service.name',
       'entity.0.value': 'checkout',
@@ -649,5 +702,40 @@ describe('createLogRateAnalysisAnalyzer', () => {
     await expect(
       analyzer.run(seed({ indexPattern: 'logs-*', entities: {} }), deps, controller.signal)
     ).rejects.toThrow('aborted');
+  });
+
+  it('resolves the index from a read-only ES|QL FROM query and omits the session dataViewId from lead locatorParams', async () => {
+    runLogRateAnalysisMock.mockResolvedValueOnce({
+      logRateAnalysisType: 'spike',
+      zeroDocsFallback: false,
+      significantItems: [item()],
+    } as never);
+
+    const esqlResult = await analyzer.run(
+      seed({
+        origin: { app: 'discover', surface: 'appMenu' },
+        dataViewId: 'esql-session-view',
+        indexPattern: 'wrong-index-*',
+        query: { esql: 'FROM logs-payments.api-* | SORT @timestamp DESC | LIMIT 100' },
+      }),
+      deps,
+      new AbortController().signal
+    );
+
+    expect(runLogRateAnalysisMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        arguments: expect.objectContaining({
+          index: 'logs-payments.api-*',
+          timefield: '@timestamp',
+        }),
+      })
+    );
+    expect(esqlResult.status).toBe('found');
+    expect(esqlResult.message).toBe('Analyzed on @timestamp.');
+    expect(esqlResult.leads[0].locatorParams).not.toHaveProperty('dataViewId');
+    expect(esqlResult.leads[0].locatorParams).toMatchObject({
+      indexPattern: 'logs-payments.api-*',
+      timeField: '@timestamp',
+    });
   });
 });

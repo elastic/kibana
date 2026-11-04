@@ -15,10 +15,12 @@ import {
 import type {
   AnalyzerResultStatus,
   InvestigationLead,
+  InvestigationLeadShift,
   SignalAnalyzerComparison,
   SignalAnalyzerPivot,
 } from '@kbn/signal-investigation-contract';
 import { truncate } from 'lodash';
+import { MAX_ATTACHMENT_LEADS, type LeadFeedbackVerdict } from '../../common/findings_attachment';
 
 export type CoverageStatus = AnalyzerResultStatus | 'running';
 
@@ -136,6 +138,59 @@ export const formatSeedStepLabel = (seed: InvestigationSeed): string => {
   }
   return i18n.translate('xpack.signalInvestigation.flyout.initialScopeLabel', {
     defaultMessage: 'initial scope',
+  });
+};
+
+/** Formats a multiplier badge label for a lead's rate shift, or `undefined` when either rate is zero or equal. */
+export const formatLeadShiftMultiplier = (shift: InvestigationLeadShift): string | undefined => {
+  const { baseline, deviation } = shift;
+  if (
+    !Number.isFinite(baseline) ||
+    !Number.isFinite(deviation) ||
+    baseline <= 0 ||
+    deviation <= 0
+  ) {
+    return undefined;
+  }
+  if (deviation > baseline) {
+    const ratio = deviation / baseline;
+    const formatted =
+      ratio >= 10 ? Math.round(ratio).toString() : Number(ratio.toFixed(1)).toString();
+    return i18n.translate('xpack.signalInvestigation.flyout.shiftHigherLabel', {
+      defaultMessage: '{multiplier}× higher',
+      values: { multiplier: formatted },
+    });
+  }
+  if (baseline > deviation) {
+    const ratio = baseline / deviation;
+    const formatted =
+      ratio >= 10 ? Math.round(ratio).toString() : Number(ratio.toFixed(1)).toString();
+    return i18n.translate('xpack.signalInvestigation.flyout.shiftLowerLabel', {
+      defaultMessage: '{multiplier}× lower',
+      values: { multiplier: formatted },
+    });
+  }
+  return undefined;
+};
+
+/** Builds the i18n prompt prefilled into Agent Builder when clicking Continue with AI agent. */
+export const buildAgentVerifyInitialMessage = (
+  leads: readonly Pick<InvestigationLead, 'id'>[],
+  feedbackByLead: Readonly<Record<string, LeadFeedbackVerdict | undefined>>
+): string => {
+  const attachedLeadIds = new Set(leads.slice(0, MAX_ATTACHMENT_LEADS).map((lead) => lead.id));
+  const hasAttachedVote = Object.entries(feedbackByLead).some(
+    ([leadId, verdict]) =>
+      attachedLeadIds.has(leadId) && (verdict === 'useful' || verdict === 'not_useful')
+  );
+  if (hasAttachedVote) {
+    return i18n.translate('xpack.signalInvestigation.flyout.agentPromptWithVotesMessage', {
+      defaultMessage:
+        'Verify the investigation leads marked useful, treat leads marked not useful as dismissed, and summarize what the remaining evidence suggests.',
+    });
+  }
+  return i18n.translate('xpack.signalInvestigation.flyout.agentPromptDefaultMessage', {
+    defaultMessage: 'Verify the top investigation leads and summarize what they suggest.',
   });
 };
 

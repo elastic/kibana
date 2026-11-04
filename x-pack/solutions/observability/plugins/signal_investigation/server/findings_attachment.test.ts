@@ -44,6 +44,7 @@ describe('createSignalInvestigationFindingsAttachmentType', () => {
             timing: 'during' as const,
             relationship: 'service' as const,
           },
+          verdict: 'useful' as const,
         },
       ],
     };

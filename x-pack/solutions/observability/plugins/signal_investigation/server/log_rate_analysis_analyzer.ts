@@ -36,6 +36,7 @@ import type {
 import { truncate } from 'lodash';
 import { isLogVolumeAnchor, isNonLogsIndexPattern } from '../common/log_volume_anchor';
 import { compareLeads } from '../common/rank_leads';
+import { extractReadOnlyEsqlIndexPattern } from './esql_index_source';
 import { hashLeadIdValue } from './lead_id';
 import { resolveLogIndex, unavailableDataViewResult } from './resolve_log_index';
 
@@ -72,13 +73,26 @@ export interface LogRateAnalysisRunResult {
 
 export const logRateAnalysisApplicability = (seed: InvestigationSeed): AnalyzerApplicability => {
   if (seed.query && isEsqlQuery(seed.query)) {
-    return {
-      applicable: false,
-      status: 'not_applicable',
-      message: i18n.translate('xpack.signalInvestigation.logRateAnalysis.esqlUnsupported', {
-        defaultMessage: 'Log rate analysis does not run on ES|QL queries.',
-      }),
-    };
+    const esqlIndex = extractReadOnlyEsqlIndexPattern(seed.query.esql);
+    if (!esqlIndex) {
+      return {
+        applicable: false,
+        status: 'not_applicable',
+        message: i18n.translate(
+          'xpack.signalInvestigation.logRateAnalysis.esqlReadOnlyIndexMessage',
+          {
+            defaultMessage: 'Runs on ES|QL queries that only read from an index.',
+          }
+        ),
+      };
+    }
+    if (isNonLogsIndexPattern(esqlIndex)) {
+      return {
+        applicable: false,
+        status: 'not_applicable',
+        message: needsLogVolumeAnchorMessage(),
+      };
+    }
   }
   if (seed.origin.app === 'discover' && seed.origin.surface === 'document') {
     return {
@@ -422,14 +436,26 @@ export const mapLogRateAnalysisResult = ({
   const comparison = toComparisonWindows(windowParameters);
   const pivotField = pivot ? { pivot } : {};
 
+  const isEsql = Boolean(seed.query && isEsqlQuery(seed.query));
+  const esqlNote = isEsql
+    ? i18n.translate('xpack.signalInvestigation.logRateAnalysis.esqlTimestampNoteMessage', {
+        defaultMessage: 'Analyzed on @timestamp.',
+      })
+    : undefined;
+
   if (result.zeroDocsFallback) {
     return {
       leads: [],
       entities: {},
       status: 'indeterminable',
-      message: i18n.translate('xpack.signalInvestigation.logRateAnalysis.indeterminable', {
-        defaultMessage: 'Not enough data in the baseline or deviation window',
-      }),
+      message: isEsql
+        ? i18n.translate('xpack.signalInvestigation.logRateAnalysis.indeterminableEsqlMessage', {
+            defaultMessage:
+              'Not enough data in the baseline or deviation window. Analyzed on @timestamp.',
+          })
+        : i18n.translate('xpack.signalInvestigation.logRateAnalysis.indeterminable', {
+            defaultMessage: 'Not enough data in the baseline or deviation window',
+          }),
       comparison,
       ...pivotField,
     };
@@ -440,6 +466,7 @@ export const mapLogRateAnalysisResult = ({
       leads: [],
       entities: {},
       status: 'no_change',
+      ...(esqlNote ? { message: esqlNote } : {}),
       comparison,
       ...pivotField,
     };
@@ -457,7 +484,7 @@ export const mapLogRateAnalysisResult = ({
       analyzerId: LOG_RATE_ANALYSIS_ANALYZER_ID,
       summary: i18n.translate('xpack.signalInvestigation.logRateAnalysis.summary', {
         defaultMessage:
-          '{fieldName}: "{fieldValue}" ({baseline} in baseline to {deviation} in deviation, p = {pValue})',
+          '{fieldName}: "{fieldValue}" (normalized rate {baseline} in baseline to {deviation} in deviation, p = {pValue})',
         values: {
           fieldName: item.fieldName,
           fieldValue,
@@ -473,6 +500,11 @@ export const mapLogRateAnalysisResult = ({
         timing: timingBand(occurredAt, seed.timeRange.from, seed.timeRange.to),
         relationship,
       },
+      shift: {
+        baseline: item.change.baseline,
+        deviation: item.change.deviation,
+        kind: 'document_rate',
+      },
       locatorParams: {
         ...entityLocatorParams(entities),
         ...(item.fieldType === 'log message pattern'
@@ -480,7 +512,7 @@ export const mapLogRateAnalysisResult = ({
           : { leadField: item.fieldName, leadValue: item.fieldValue }),
         rangeFrom,
         rangeTo,
-        ...(seed.dataViewId ? { dataViewId: seed.dataViewId } : {}),
+        ...(!isEsql && seed.dataViewId ? { dataViewId: seed.dataViewId } : {}),
         ...(index ? { indexPattern: index } : {}),
         ...(timeField ? { timeField } : {}),
       },
@@ -491,16 +523,23 @@ export const mapLogRateAnalysisResult = ({
   const leads = ranked.slice(0, MAX_LOG_RATE_LEADS);
   const truncated = ranked.length > MAX_LOG_RATE_LEADS;
 
+  const message = truncated
+    ? isEsql
+      ? i18n.translate('xpack.signalInvestigation.logRateAnalysis.leadCapEsqlMessage', {
+          defaultMessage: 'Showing the first {max} leads. Analyzed on @timestamp.',
+          values: { max: leads.length },
+        })
+      : i18n.translate('xpack.signalInvestigation.logRateAnalysis.leadCap', {
+          defaultMessage: 'Showing the first {max} leads.',
+          values: { max: leads.length },
+        })
+    : esqlNote;
+
   return {
     leads,
     entities: {},
     status: 'found',
-    message: truncated
-      ? i18n.translate('xpack.signalInvestigation.logRateAnalysis.leadCap', {
-          defaultMessage: 'Showing the first {max} leads.',
-          values: { max: leads.length },
-        })
-      : undefined,
+    message,
     comparison,
     ...pivotField,
   };

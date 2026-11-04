@@ -69,6 +69,19 @@ describe('buildDiscoverAppMenuSeed', () => {
       },
     });
   });
+
+  it('omits the session dataViewId when the Discover query is ES|QL', () => {
+    const seed = buildDiscoverAppMenuSeed({
+      timeRange: { from: 'now-15m', to: 'now' },
+      query: { esql: 'FROM logs-* | SORT @timestamp DESC' },
+      dataViewId: 'esql-temp-view',
+      indexPattern: 'logs-*',
+    });
+
+    expect(seed?.dataViewId).toBeUndefined();
+    expect(seed?.indexPattern).toBe('logs-*');
+    expect(seed?.query).toEqual({ esql: 'FROM logs-* | SORT @timestamp DESC' });
+  });
 });
 
 describe('createDiscoverInvestigationFeature', () => {
