@@ -12,15 +12,10 @@ export {
 } from './src/upsert';
 export type { DashboardUpsert, DashboardUpsertResult } from './src/upsert';
 
-export {
-  arrangeDashboardLayout,
-  buildLayoutPrompt,
-  parseLayoutAnswer,
-  startEarlyLayout,
-} from './src/layout';
+export { buildLayoutPrompt, createDashboardLayout, parseLayoutAnswer } from './src/layout';
 export type {
   ArrangeDashboardLayout,
-  EarlyLayout,
+  DashboardLayout,
   LayoutArrangement,
   LayoutRequest,
 } from './src/layout';
