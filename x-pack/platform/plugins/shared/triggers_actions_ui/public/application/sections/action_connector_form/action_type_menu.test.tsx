@@ -5,8 +5,40 @@
  * 2.0.
  */
 
-import * as React from 'react';
-import { screen } from '@testing-library/react';
+import React, { lazy, Suspense } from 'react';
+import { act, screen } from '@testing-library/react';
+
+// Jest resolves @elastic/eui to test-env, whose EuiIcon ignores component types.
+// Production EuiIcon renders them, so a lazy icon suspends. Mirror that here.
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const ReactActual = jest.requireActual('react');
+
+  const EuiIcon = ({
+    type,
+    className,
+    ...rest
+  }: {
+    type?: unknown;
+    className?: string;
+    [key: string]: unknown;
+  }) => {
+    const classes = ['euiIcon', className].filter(Boolean).join(' ');
+    if (typeof type === 'string' || type == null) {
+      return ReactActual.createElement('span', {
+        ...rest,
+        className: classes,
+        'data-euiicon-type': type,
+      });
+    }
+    return ReactActual.createElement(type as React.ElementType, { ...rest, className: classes });
+  };
+
+  return {
+    ...actual,
+    EuiIcon,
+  };
+});
 import { coreMock } from '@kbn/core/public/mocks';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
@@ -86,6 +118,64 @@ describe('connector_add_flyout', () => {
       );
 
       expect(await screen.findByTestId('my-action-type-card')).toBeInTheDocument();
+    });
+
+    it('renders cards immediately when icons are lazy', async () => {
+      let resolveIcon: (value: { default: React.FC<React.SVGProps<SVGSVGElement>> }) => void =
+        () => undefined;
+      const deferred = new Promise<{ default: React.FC<React.SVGProps<SVGSVGElement>> }>(
+        (resolve) => {
+          resolveIcon = resolve;
+        }
+      );
+      const ResolvedIcon = (props: React.SVGProps<SVGSVGElement>) => (
+        <svg {...props} data-test-subj="resolved-connector-icon" />
+      );
+      const onActionTypeChange = jest.fn();
+      const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+        id: 'my-action-type',
+        iconClass: lazy(() => deferred),
+        selectMessage: 'test',
+        validateParams: (): Promise<GenericValidationResult<unknown>> => {
+          const validationResult = { errors: {} };
+          return Promise.resolve(validationResult);
+        },
+        actionConnectorFields: null,
+      });
+      actionTypeRegistry.get.mockReturnValue(actionType);
+      loadActionTypes.mockResolvedValue([
+        {
+          id: actionType.id,
+          enabled: true,
+          name: 'Test',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+        },
+      ]);
+
+      appMockRenderer.render(
+        <Suspense fallback={<div data-test-subj="outer-fallback" />}>
+          <ActionTypeMenu
+            onActionTypeChange={onActionTypeChange}
+            actionTypeRegistry={actionTypeRegistry}
+          />
+        </Suspense>
+      );
+
+      const card = await screen.findByTestId('my-action-type-card');
+      expect(screen.queryByTestId('sectionLoading')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('outer-fallback')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('resolved-connector-icon')).not.toBeInTheDocument();
+
+      await act(async () => {
+        resolveIcon({ default: ResolvedIcon });
+      });
+
+      expect(await screen.findByTestId('resolved-connector-icon')).toBeInTheDocument();
+      expect(screen.getByTestId('my-action-type-card')).toBe(card);
+      expect(screen.queryByTestId('outer-fallback')).not.toBeInTheDocument();
     });
 
     it(`doesn't renders action types that are disabled via config`, async () => {

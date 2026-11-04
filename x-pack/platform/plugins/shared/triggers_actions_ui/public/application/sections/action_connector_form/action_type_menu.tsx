@@ -10,7 +10,6 @@ import type { IconType } from '@elastic/eui';
 import {
   EuiFlexItem,
   EuiCard,
-  EuiIcon,
   EuiFlexGrid,
   EuiSpacer,
   EuiIconTip,
@@ -37,6 +36,7 @@ import { loadActionTypes } from '../../lib/action_connector_api';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { useKibana } from '../../../common/lib/kibana';
 import { SectionLoading } from '../../components/section_loading';
+import { ConnectorIcon } from './connector_icon';
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
@@ -250,7 +250,7 @@ export const ActionTypeMenu = ({
           role="listitem"
           titleSize="xs"
           data-test-subj={`${item.actionType.id}-card`}
-          icon={<EuiIcon size="xl" type={item.iconClass} aria-hidden={true} />}
+          icon={<ConnectorIcon type={item.iconClass} size="xl" />}
           title={item.name}
           description={description}
           isDisabled={!checkEnabledResult.isEnabled}
