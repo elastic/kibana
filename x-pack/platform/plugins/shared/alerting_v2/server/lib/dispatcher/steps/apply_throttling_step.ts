@@ -41,7 +41,7 @@ export class ApplyThrottlingStep implements DispatcherStep {
       alreadyNotified = [],
       policies = PolicyCatalog.empty(),
       triage = AlertTriage.empty(),
-      input,
+      input: { startedAt, signal },
     } = state;
     const { dispatchable } = triage;
 
@@ -57,15 +57,15 @@ export class ApplyThrottlingStep implements DispatcherStep {
     const lastNotifiedMap = await this.fetchLastNotifiedTimestamps(
       groups,
       policies,
-      input.startedAt,
-      input.signal
+      startedAt,
+      signal
     );
 
     const { dispatch, throttled } = applyThrottling(
       groups,
       policies,
       lastNotifiedMap,
-      input.startedAt,
+      startedAt,
       logger
     );
 
