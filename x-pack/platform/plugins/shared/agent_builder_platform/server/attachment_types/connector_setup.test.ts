@@ -265,10 +265,13 @@ describe('connector_setup toSurfaceComposition', () => {
     logger: loggingSystemMock.createLogger(),
   });
   const configureLink = {
-    type: 'link',
-    label: 'Configure in Kibana',
-    app: 'agent_builder',
-    path: '/manage/connectors',
+    type: 'actions',
+    buttons: [
+      {
+        label: 'Configure in Kibana',
+        url: `${SURFACE_BASE_URL}/app/agent_builder/manage/connectors`,
+      },
+    ],
   };
 
   beforeEach(() => {
@@ -290,9 +293,7 @@ describe('connector_setup toSurfaceComposition', () => {
 
     const { valid, slack } = await renderSurface(composition);
     expect(valid).toBe(true);
-    expect(slack).toContain(
-      `<${SURFACE_BASE_URL}/app/agent_builder/manage/connectors|Configure in Kibana>`
-    );
+    expect(slack).toContain(`"url":"${SURFACE_BASE_URL}/app/agent_builder/manage/connectors"`);
   });
 
   it('says it is connected once the connector is created, and still links to it', async () => {

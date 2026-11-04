@@ -10,7 +10,7 @@ import type {
   RoundCompleteEvent,
   SurfacePayload,
 } from '@kbn/agent-builder-common';
-import type { AttachmentSurfaceCompositionContext } from '@kbn/agent-builder-server/attachments';
+import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { IBasePath } from '@kbn/core/server';
 import type { IsomerPluginStart } from '@kbn/isomer-plugin/server';
@@ -25,7 +25,7 @@ export interface SurfacesService {
   /** Renders the round's surface payload, or resolves to nothing when unavailable or rendering fails. */
   renderPayload(
     event: RoundCompleteEvent,
-    options: { originType?: ConversationOriginType } & AttachmentSurfaceCompositionContext
+    options: { originType?: ConversationOriginType } & AttachmentFormatContext
   ): Promise<SurfacePayload | undefined>;
 }
 
@@ -63,7 +63,7 @@ export class SurfacesServiceImpl implements SurfacesService {
       originType,
       request,
       spaceId,
-    }: { originType?: ConversationOriginType } & AttachmentSurfaceCompositionContext
+    }: { originType?: ConversationOriginType } & AttachmentFormatContext
   ): Promise<SurfacePayload | undefined> {
     const renderer = this.surfaceRenderers.find(({ id }) => id === originType);
 
@@ -73,20 +73,19 @@ export class SurfacesServiceImpl implements SurfacesService {
 
     try {
       const runtime = await this.isomer.getRuntime();
+      const kibanaUrl = getPublicKibanaUrl(this.basePath, this.cloud, spaceId);
 
       const composition = await buildComposition({
         round,
         attachments,
         attachmentsService: this.attachmentsService,
-        context: { request, spaceId },
+        context: { request, spaceId, kibanaUrl },
         logger: this.logger,
         runtime,
       });
 
-      const baseUrl = getPublicKibanaUrl(this.basePath, this.cloud, spaceId);
-
       return composition.body.length > 0
-        ? renderer.render(composition, runtime, { baseUrl })
+        ? renderer.render(composition, runtime, { baseUrl: kibanaUrl })
         : undefined;
     } catch (error) {
       this.logger.error(`Failed to render the ${renderer.id} surface payload: ${error.message}`);

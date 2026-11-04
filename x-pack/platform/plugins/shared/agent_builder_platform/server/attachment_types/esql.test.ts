@@ -38,10 +38,13 @@ describe('esql attachment type', () => {
           { type: 'markdown', text: 'Latest logs' },
           { type: 'code', language: 'esql', text: 'FROM logs | LIMIT 10' },
           {
-            type: 'link',
-            label: 'Open in Discover',
-            app: 'discover',
-            path: "#/?_a=(query:(esql:'FROM%20logs%20%7C%20LIMIT%2010'))",
+            type: 'actions',
+            buttons: [
+              {
+                label: 'Open in Discover',
+                url: `${SURFACE_BASE_URL}/app/discover#/?_a=(query:(esql:'FROM%20logs%20%7C%20LIMIT%2010'))`,
+              },
+            ],
           },
         ],
       });
@@ -58,7 +61,18 @@ describe('esql attachment type', () => {
     it('leaves out the description when there is none', async () => {
       const composition = await toComposition({ query: 'FROM logs' }, discoverLocator);
 
-      expect(composition?.body.map(({ type }) => type)).toEqual(['code', 'link']);
+      expect(composition?.body.map(({ type }) => type)).toEqual(['code', 'actions']);
+    });
+
+    it('leaves out the link when Kibana has no public URL', async () => {
+      const composition = await createEsqlAttachmentType({
+        getDiscoverLocator: () => discoverLocator,
+      }).toSurfaceComposition?.(
+        { id: 'esql-1', type: AttachmentType.esql, data: { query: 'FROM logs' } },
+        { ...surfaceContext, kibanaUrl: undefined }
+      );
+
+      expect(composition?.body.map(({ type }) => type)).toEqual(['code']);
     });
 
     it('leaves out the link when Discover has no locator', async () => {

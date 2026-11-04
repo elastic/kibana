@@ -15,6 +15,7 @@ import type {
   SurfaceComposition,
 } from '@kbn/agent-builder-server/attachments';
 import type { ComponentsNode } from '@kbn/isomer-components';
+import { toKibanaAppUrl } from '@kbn/agent-builder-plugin/server';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -45,10 +46,13 @@ export const createEsqlAttachmentType = ({
   AttachmentType.esql,
   EsqlAttachmentData
 > => {
-  /** The query in Discover, as an app path, or nothing when it can't be resolved. */
-  const toDiscoverLink = async (query: string): Promise<ComponentsNode[]> => {
+  /** A button that opens the query in Discover, or nothing when it can't be resolved. */
+  const toDiscoverButton = async (
+    query: string,
+    kibanaUrl: string | undefined
+  ): Promise<ComponentsNode[]> => {
     const locator = getDiscoverLocator?.();
-    if (!locator) {
+    if (!locator || !kibanaUrl) {
       return [];
     }
 
@@ -57,15 +61,18 @@ export const createEsqlAttachmentType = ({
 
       return [
         {
-          type: 'link',
-          label: i18n.translate(
-            'xpack.agentBuilderPlatform.attachments.esql.surface.openInDiscover',
+          type: 'actions',
+          buttons: [
             {
-              defaultMessage: 'Open in Discover',
-            }
-          ),
-          app,
-          path,
+              label: i18n.translate(
+                'xpack.agentBuilderPlatform.attachments.esql.surface.openInDiscover',
+                {
+                  defaultMessage: 'Open in Discover',
+                }
+              ),
+              url: toKibanaAppUrl(kibanaUrl, app, path),
+            },
+          ],
         },
       ];
     } catch (error) {
@@ -106,9 +113,10 @@ export const createEsqlAttachmentType = ({
         },
       };
     },
-    toSurfaceComposition: async ({
-      data: { query, description },
-    }): Promise<SurfaceComposition> => ({
+    toSurfaceComposition: async (
+      { data: { query, description } },
+      { kibanaUrl }
+    ): Promise<SurfaceComposition> => ({
       type: 'view',
       body: [
         ...(description ? [{ type: 'markdown' as const, text: description }] : []),
@@ -119,7 +127,7 @@ export const createEsqlAttachmentType = ({
                 language: 'esql',
                 text: query,
               },
-              ...(await toDiscoverLink(query)),
+              ...(await toDiscoverButton(query, kibanaUrl)),
             ]
           : []),
       ],

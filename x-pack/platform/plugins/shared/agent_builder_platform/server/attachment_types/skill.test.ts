@@ -154,12 +154,26 @@ describe('skill toSurfaceComposition', () => {
           language: 'markdown',
           text: '## When to Use\n\nUse this skill when triaging incidents.',
         },
-        { type: 'link', label: 'Manage skills', app: 'agent_builder', path: '/manage/skills' },
+        {
+          type: 'actions',
+          buttons: [
+            { label: 'Manage skills', url: `${SURFACE_BASE_URL}/app/agent_builder/manage/skills` },
+          ],
+        },
       ],
     });
 
     const { valid, slack } = await renderSurface(composition);
     expect(valid).toBe(true);
     expect(slack).toContain(`${SURFACE_BASE_URL}/app/agent_builder/manage/skills`);
+  });
+
+  it('leaves out the button when Kibana has no public URL', async () => {
+    const composition = await definition.toSurfaceComposition?.(buildAttachment(validSkill), {
+      ...surfaceContext,
+      kibanaUrl: undefined,
+    });
+
+    expect(composition?.body.some(({ type }) => type === 'actions')).toBe(false);
   });
 });

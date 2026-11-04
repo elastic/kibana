@@ -144,9 +144,12 @@ export interface AttachmentResolveContext extends AttachmentFormatContext {
 
 /**
  * Context passed to the {@link AttachmentTypeDefinition.toSurfaceComposition} function: the
- * request and space it renders for, like {@link AttachmentFormatContext}.
+ * request and space it renders for, like {@link AttachmentFormatContext}, and the space's public
+ * Kibana URL, undefined when Kibana has none.
  */
-export type AttachmentSurfaceCompositionContext = AttachmentFormatContext;
+export interface AttachmentSurfaceCompositionContext extends AttachmentFormatContext {
+  kibanaUrl: string | undefined;
+}
 
 /**
  * An [Isomer](https://github.com/elastic/isomer) composition built from Agent Builder's node
