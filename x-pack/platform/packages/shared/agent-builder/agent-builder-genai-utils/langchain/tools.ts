@@ -42,18 +42,27 @@ export interface ToolsAndMappings {
   agentBuilderToLangchainIdMap: ToolIdMapping;
 }
 
+/**
+ * Name of the optional parameter injected into every tool schema (when `addIntentParam` is set),
+ * used by the model to describe what it is doing with the call. Stripped before the tool runs.
+ */
+export const INTENT_PARAM = '_intent';
+
+const INTENT_PARAM_DESCRIPTION =
+  'Clear, concise description of what you are doing by calling this tool';
+
 export const toolsToLangchain = async ({
   request,
   tools,
   logger,
   sendEvent,
-  addReasoningParam = true,
+  addIntentParam = false,
 }: {
   request: KibanaRequest;
   tools: ToolProvider | ExecutableTool[];
   logger: Logger;
   sendEvent?: AgentEventEmitterFn;
-  addReasoningParam?: boolean;
+  addIntentParam?: boolean;
 }): Promise<ToolsAndMappings> => {
   const allTools = Array.isArray(tools) ? tools : await tools.list({ request });
   const agentBuilderToLangchainIdMap = createToolIdMappings(allTools);
@@ -61,7 +70,7 @@ export const toolsToLangchain = async ({
   const convertedTools = await Promise.all(
     allTools.map((tool) => {
       const toolId = agentBuilderToLangchainIdMap.get(tool.id);
-      return toolToLangchain({ tool, logger, toolId, sendEvent, addReasoningParam });
+      return toolToLangchain({ tool, logger, toolId, sendEvent, addIntentParam });
     })
   );
 
@@ -114,14 +123,14 @@ export const toolToLangchain = async ({
   toolId,
   logger,
   sendEvent,
-  addReasoningParam = false,
+  addIntentParam = false,
   buildContent = ({ results }) => JSON.stringify({ results }),
 }: {
   tool: ExecutableTool;
   toolId?: string;
   logger: Logger;
   sendEvent?: AgentEventEmitterFn;
-  addReasoningParam?: boolean;
+  addIntentParam?: boolean;
   buildContent?: BuildToolContentFn;
 }): Promise<StructuredTool> => {
   const description = tool.getLlmDescription
@@ -143,7 +152,7 @@ export const toolToLangchain = async ({
       }
 
       // remove internal parameters before calling tool handler.
-      const input = omit(rawInput, ['_reasoning']);
+      const input = omit(rawInput, [INTENT_PARAM]);
 
       try {
         const toolReturn = await tool.execute({
@@ -172,12 +181,9 @@ export const toolToLangchain = async ({
     },
     {
       name: toolId ?? tool.id,
-      schema: addReasoningParam
+      schema: addIntentParam
         ? z.object({
-            _reasoning: z
-              .string()
-              .optional()
-              .describe('Brief reasoning of why you are calling this tool'),
+            [INTENT_PARAM]: z.string().optional().describe(INTENT_PARAM_DESCRIPTION),
             ...schema.shape,
           })
         : schema,
