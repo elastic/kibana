@@ -33,7 +33,6 @@ import type { ConversationsService } from '../services/conversations/conversatio
 import type { ConversationTemplatesService } from '../services/conversation_templates';
 import { useConversation } from '../application/hooks/use_conversation';
 import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
-import { flyoutMenuRowStyles } from './flyout_menu_row_styles';
 import { getConversationDetailsFlyoutWidthProps } from './conversation_details_flyout_width';
 
 export const FLYOUT_TITLE = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.title', {
@@ -307,7 +306,6 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
       {...widthPropsRef.current}
       type="push"
       paddingSize="m"
-      css={flyoutMenuRowStyles}
       role="region"
       aria-labelledby={titleId}
       data-test-subj="agentBuilderConversationDetailsFlyout-live"
