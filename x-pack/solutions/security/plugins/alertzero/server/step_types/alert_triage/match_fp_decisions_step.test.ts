@@ -260,10 +260,18 @@ describe('triage match decisions step', () => {
       expect.objectContaining({ candidates: ALERT_FETCH_LIMIT + 1, would_close: 1 })
     );
     expect(tags()[0].ids).toEqual(['late']);
-    expect(callKibanaApi.mock.calls[1][0].body!.search_after).toEqual([
-      ALERT_FETCH_LIMIT - 1,
-      `u${ALERT_FETCH_LIMIT - 1}`,
-    ]);
+    // The alerts route drops `search_after`, so the next page is read from the last timestamp on,
+    // without the ids already read at it.
+    const next = callKibanaApi.mock.calls[1][0].body!;
+    expect(next.search_after).toBeUndefined();
+    expect(JSON.stringify(next.query)).toContain(
+      JSON.stringify({
+        range: { '@timestamp': { gte: ALERT_FETCH_LIMIT - 1, format: 'epoch_millis' } },
+      })
+    );
+    expect(JSON.stringify(next.query)).toContain(
+      JSON.stringify({ ids: { values: [`old${ALERT_FETCH_LIMIT - 1}`] } })
+    );
   });
 
   it('does nothing when the kill switch is off, without any read', async () => {
