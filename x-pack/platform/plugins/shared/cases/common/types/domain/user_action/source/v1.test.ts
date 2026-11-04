@@ -9,7 +9,7 @@ import { MAX_ACTION_SOURCE_NAME_LENGTH } from '../../../../constants';
 import {
   ActionSourceRt,
   ActionSourceTypes,
-  PersistedActionSourceSchema,
+  PersistedActionSourceRt,
   isActionSource,
   isHeaderActionSource,
   toActionSource,
@@ -33,14 +33,14 @@ describe('ActionSource', () => {
     expect(ActionSourceRt.decode(value)).toEqual({ _tag: 'Right', right: value });
   });
 
-  it('ActionSourceSchema rejects an unknown type', () => {
-    expect(ActionSourceSchema.safeParse({ type: 'futuristic', id: 'x1' }).success).toBe(false);
+  it('ActionSourceRt rejects an unknown type', () => {
+    expect(ActionSourceRt.decode({ type: 'futuristic', id: 'x1' })._tag).toBe('Left');
   });
 
-  it('PersistedActionSourceSchema accepts an unknown type', () => {
+  it('PersistedActionSourceRt accepts an unknown type', () => {
     const value = { type: 'futuristic', id: 'x1' };
 
-    expect(PersistedActionSourceSchema.safeParse(value)).toEqual({ success: true, data: value });
+    expect(PersistedActionSourceRt.decode(value)).toEqual({ _tag: 'Right', right: value });
   });
 
   it('hides unknown types from the header', () => {

@@ -6,12 +6,12 @@
  */
 
 import { AttachmentType } from '../attachment/v1';
+import { UserActionTypes } from './action/v1';
 import {
-  CaseUserActionWithoutReferenceIdsSchema,
-  CaseUserActionWithoutReferenceIdsWriteSchema,
-  UserActionTypes,
-} from './action/v1';
-import { UserActionsRt } from './v1';
+  CaseUserActionWithoutReferenceIdsRt,
+  CaseUserActionWithoutReferenceIdsWriteRt,
+  UserActionsRt,
+} from './v1';
 import { UserActionsSchema } from '../../domain_zod/user_action/v1';
 
 describe('User actions', () => {
@@ -83,13 +83,19 @@ describe('User actions', () => {
 
     it('accepts a source with an unknown type', () => {
       const withSource = [{ ...defaultRequest[0], source: { type: 'futuristic', id: 'x1' } }];
+
+      expect(UserActionsRt.decode(withSource)).toStrictEqual({ _tag: 'Right', right: withSource });
+    });
+
+    it('zod: accepts a source with an unknown type', () => {
+      const withSource = [{ ...defaultRequest[0], source: { type: 'futuristic', id: 'x1' } }];
       const result = UserActionsSchema.safeParse(withSource);
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(withSource);
     });
   });
 
-  describe('CaseUserActionWithoutReferenceIds schemas', () => {
+  describe('CaseUserActionWithoutReferenceIds codecs', () => {
     const userAction = {
       type: UserActionTypes.title,
       payload: { title: 'new title' },
@@ -105,20 +111,16 @@ describe('User actions', () => {
     const knownSource = { ...userAction, source: { type: 'api', id: 'api' } };
     const unknownSource = { ...userAction, source: { type: 'futuristic', id: 'x1' } };
 
-    it('read schema accepts a source with an unknown type', () => {
-      expect(CaseUserActionWithoutReferenceIdsSchema.safeParse(unknownSource).success).toBe(true);
+    it('read codec accepts a source with an unknown type', () => {
+      expect(CaseUserActionWithoutReferenceIdsRt.decode(unknownSource)._tag).toBe('Right');
     });
 
-    it('write schema accepts a source with a known type', () => {
-      expect(CaseUserActionWithoutReferenceIdsWriteSchema.safeParse(knownSource).success).toBe(
-        true
-      );
+    it('write codec accepts a source with a known type', () => {
+      expect(CaseUserActionWithoutReferenceIdsWriteRt.decode(knownSource)._tag).toBe('Right');
     });
 
-    it('write schema rejects a source with an unknown type', () => {
-      expect(CaseUserActionWithoutReferenceIdsWriteSchema.safeParse(unknownSource).success).toBe(
-        false
-      );
+    it('write codec rejects a source with an unknown type', () => {
+      expect(CaseUserActionWithoutReferenceIdsWriteRt.decode(unknownSource)._tag).toBe('Left');
     });
   });
 });
