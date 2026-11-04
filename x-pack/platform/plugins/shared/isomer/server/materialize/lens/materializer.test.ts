@@ -186,6 +186,9 @@ describe('Lens materializer: through the pipeline', () => {
       },
       {
         executeEsql: async () => ({ table: corpusTable('logsVisits'), losses: [] }),
+        executeAggs: async () => {
+          throw new Error('No aggs.');
+        },
         materialize: async () => {
           throw new Error('Not nested.');
         },
