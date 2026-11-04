@@ -332,6 +332,42 @@ export type ObservabilityTracesFeature =
 
 /** ****************************************************************************************/
 
+/** **************** Hunt sessions ****************/
+
+/** What a verified Hunt session resolves to, for Discover's Hunt mode. */
+export interface HuntSessionInfo {
+  sessionId: string;
+  sessionExecutionId: string;
+  /** Set when the session continues an existing Investigation. */
+  investigationId?: string;
+  /** ISO-8601 time the signed state stops being accepted. */
+  expiresAt: string;
+  definition: {
+    id: string;
+    version: number;
+    name: string;
+    hypothesis: string;
+    references: string[];
+    guidance: {
+      analystNotes: string[];
+      expectedFalsePositives: string[];
+      suggestedPivots: string[];
+    };
+  };
+}
+
+/**
+ * Lets Discover enter Hunt mode only for genuine sessions. The owner of Hunt sessions verifies the
+ * signed state opaque to Discover and returns the hunt to show, or `undefined` when the state is
+ * forged, expired, malformed or belongs to another space.
+ */
+export interface HuntSessionFeature {
+  id: 'hunt-session';
+  verifySession: (token: string) => Promise<HuntSessionInfo | undefined>;
+}
+
+/** ****************************************************************************************/
+
 // This should be a union of all the available client features.
 export type DiscoverFeature =
   | ObservabilityStreamsFeature
@@ -342,7 +378,8 @@ export type DiscoverFeature =
   | ObservabilityLogEventsFeature
   | ObservabilityTracesFeature
   | ObservabilityLogsFetchDocumentByIdFeature
-  | SecuritySolutionFeature;
+  | SecuritySolutionFeature
+  | HuntSessionFeature;
 
 /**
  * Service types

@@ -9,6 +9,7 @@ import type { AgenticInvestigationsPublicPluginStart } from '@kbn/agentic-invest
 import type { ProposalsPublicPluginStart } from '@kbn/proposals-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { DiscoverSharedPublicSetup } from '@kbn/discover-shared-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -23,6 +24,8 @@ export interface AlertZeroClientConfig {
 export interface AlertZeroSetupDependencies {
   /** Required plugin, see `requiredPlugins` in kibana.jsonc. */
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
+  /** Optional; without it Discover never enters Hunt mode. */
+  discoverShared?: DiscoverSharedPublicSetup;
 }
 
 export interface AlertZeroStartDependencies {

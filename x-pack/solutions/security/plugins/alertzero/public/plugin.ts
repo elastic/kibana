@@ -40,6 +40,7 @@ import { getAlertZeroDeepLinks } from './deep_links';
 import { isSpaceSupported$ } from './is_space_supported';
 import { registerAlertZeroAttachmentTypesUI } from './agent_builder/attachment_types';
 import { registerAlertZeroPublicStepDefinitions } from './step_types';
+import { registerHuntSessionFeature } from './hunt_library/register_hunt_session_feature';
 import type {
   AlertZeroClientConfig,
   AlertZeroPublicSetup,
@@ -91,13 +92,20 @@ export class AlertZeroPublicPlugin
 
   public setup(
     coreSetup: CoreSetup<AlertZeroStartDependencies, AlertZeroPublicStart>,
-    { workflowsExtensions }: AlertZeroSetupDependencies
+    { workflowsExtensions, discoverShared }: AlertZeroSetupDependencies
   ): AlertZeroPublicSetup {
     if (!this.config.enabled) {
       return { enabled: false };
     }
 
     registerAlertZeroPublicStepDefinitions(workflowsExtensions);
+
+    if (discoverShared) {
+      registerHuntSessionFeature({
+        discoverShared,
+        getHttp: async () => (await coreSetup.getStartServices())[0].http,
+      });
+    }
 
     coreSetup.application.register({
       id: ALERTZERO_APP_ID,

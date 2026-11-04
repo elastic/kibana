@@ -24,6 +24,8 @@ export type {
   ObservabilityStreamsFeature,
   ObservabilityServiceFlyoutFeatureRenderDeps,
   ObservabilityServiceFlyoutFeature,
+  HuntSessionFeature,
+  HuntSessionInfo,
   SecuritySolutionCellRendererFeature,
   SecuritySolutionAlertFlyoutOverviewTabFeature,
   SecuritySolutionAttackFlyoutOverviewTabFeature,
