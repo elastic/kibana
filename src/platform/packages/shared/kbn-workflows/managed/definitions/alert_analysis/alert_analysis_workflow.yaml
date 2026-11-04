@@ -1238,7 +1238,7 @@ steps:
                     summary: >-
                       {%- assign related = steps.get_related_alerts.output.alerts -%}
                       {%- for r in related -%}
-                      {{ r.rule_name | default: 'unknown rule' }} [{{ r.severity | default: 'unknown severity' }}] at {{ r.timestamp }}{% if r.process_name != blank %} process={{ r.process_name | truncate: 60 }}{% endif %}{% if r.process_executable != blank %} exe={{ r.process_executable | truncate: 100 }}{% endif %}{% if r.process_command_line != blank %} cmd={{ r.process_command_line | truncate: 200 }}{% endif %}{% if r.process_parent_command_line != blank %} parent_cmd={{ r.process_parent_command_line | truncate: 200 }}{% endif %}{% unless forloop.last %}; {% endunless %}
+                      {{ r.rule_name | default: 'unknown rule' | truncate: 80 }} [{{ r.severity | default: 'unknown severity' }}] at {{ r.timestamp }}{% if r.process_name != blank %} process={{ r.process_name | truncate: 40 }}{% endif %}{% if r.process_command_line != blank %} cmd={{ r.process_command_line | truncate: 120 }}{% endif %}{% if r.process_parent_command_line != blank %} parent_cmd={{ r.process_parent_command_line | truncate: 80 }}{% endif %}{% unless forloop.last %}; {% endunless %}
                       {%- endfor -%}
 
               - name: push_related_summary
@@ -1585,7 +1585,7 @@ steps:
                 {% comment %}── Related alerts (per alert, from the entity graph) ─{% endcomment %}
                 {% assign related = variables.related_summaries | where: 'id', a._id | first -%}
                 {% if related.count > 0 -%}
-                - related alerts ({{ related.count }} sharing strong entity identifiers): {{ related.summary | truncate: 500 | escape }}
+                - related alerts ({{ related.count }} sharing strong entity identifiers): {{ related.summary | truncate: 3200 | escape }}
                 {% endif -%}
                 </alert>
                 {% endfor %}

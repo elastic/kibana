@@ -971,9 +971,10 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       },
     });
 
-    expect(output).toContain('process=sshd exe=/usr/sbin/sshd cmd=/usr/sbin/sshd -R');
-    expect(output).toContain(`parent_cmd=${'B'.repeat(197)}...`);
-    expect(output).not.toContain('B'.repeat(201));
+    expect(output).toContain('process=sshd cmd=/usr/sbin/sshd -R');
+    expect(output).not.toContain('exe=');
+    expect(output).toContain(`parent_cmd=${'B'.repeat(77)}...`);
+    expect(output).not.toContain('B'.repeat(81));
     expect(output).toContain('; Bare rule [low] at 2026-01-01T00:01:00Z');
     expect(output).not.toContain('cmd=; ');
   });
@@ -996,7 +997,36 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     const messageStep = findStepByName(workflow.steps, 'build_agent_message') as {
       with: { message: string };
     };
-    expect(messageStep.with.message).toContain('related.summary | truncate: 500');
+    expect(messageStep.with.message).toContain('related.summary | truncate: 3200');
+  });
+
+  it('keeps 8 worst-case related alert lines inside the related summary cap', () => {
+    const summaryStep = findStepByName(workflow.steps, 'build_related_summary') as {
+      with: { related_summary: { summary: string } };
+    };
+    const messageStep = findStepByName(workflow.steps, 'build_agent_message') as {
+      with: { message: string };
+    };
+    const cap = Number(/related\.summary \| truncate: (\d+)/.exec(messageStep.with.message)?.[1]);
+    const worstCase = {
+      rule_name: 'R'.repeat(500),
+      severity: 'critical',
+      timestamp: '2026-01-01T00:00:00.000Z',
+      process_name: 'N'.repeat(500),
+      process_command_line: 'C'.repeat(2000),
+      process_parent_command_line: 'P'.repeat(2000),
+    };
+    const summary = createWorkflowLiquidEngine().parseAndRenderSync(
+      summaryStep.with.related_summary.summary,
+      {
+        steps: {
+          get_related_alerts: { output: { alerts: Array.from({ length: 8 }, () => worstCase) } },
+        },
+      }
+    );
+
+    expect(summary.length).toBeLessThanOrEqual(cap);
+    expect(summary.split('; ')).toHaveLength(8);
   });
 
   it('auto_close_ids is initialised to empty in set_workflow_variables', () => {
