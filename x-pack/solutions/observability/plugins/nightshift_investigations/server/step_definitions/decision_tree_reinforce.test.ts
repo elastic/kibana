@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolResultType } from '@kbn/agent-builder-common';
+import { createConversationNotFoundError, ToolResultType } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../agents/decision_tree_reinforcement';
@@ -80,6 +80,34 @@ describe('decisionTreeReinforceStepDefinition', () => {
         steps: [expect.objectContaining({ tool_call_id: 'toolu_1', results })],
       }),
     ]);
+  });
+
+  it('skips a round in a conversation the caller cannot read, without running the agent', async () => {
+    const get = jest
+      .fn()
+      .mockRejectedValue(createConversationNotFoundError({ conversationId: 'private-1' }));
+    const withConversations = {
+      agents: { runAgent },
+      conversations: { getScopedClient: jest.fn().mockResolvedValue({ get }) },
+    } as unknown as AgentBuilderPluginStart;
+
+    const output = await decisionTreeReinforceStepDefinition({
+      getAgentBuilder: () => withConversations,
+    }).handler(
+      createContext({
+        prompt: 'Why is checkout slow?',
+        response: 'Connection pool exhausted.',
+        conversation_id: 'private-1',
+        round_id: 'round-1',
+        message: 'Task: create a new decision tree',
+        turn_kind: 'initial_investigation',
+        tool_calls: [{ tool_id: SANDBOX_BASH_TOOL_ID, tool_call_id: 'toolu_1', params: {} }],
+      })
+    );
+
+    expect(output).toEqual({ output: { message: '', skipped: true } });
+    expect(get).toHaveBeenCalledTimes(1);
+    expect(runAgent).not.toHaveBeenCalled();
   });
 
   it('withholds the learning tools on an initial investigation', async () => {

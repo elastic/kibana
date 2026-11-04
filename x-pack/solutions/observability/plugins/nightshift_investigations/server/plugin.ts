@@ -911,6 +911,8 @@ export class NightshiftInvestigationsPlugin
         return client ? client.getInstalledWorkflowState(workflowId, spaceId) : null;
       },
       spaces: this.spaces,
+      getAgentBuilder: () => this.agentBuilder,
+      getAgentAvailability: () => this.getInvestigationAvailability(),
       getAutomationsSoClient: this.getAutomationsSoClient,
       isServerless: this.ctx.env.packageInfo.buildFlavor === 'serverless',
       logger: this.logger.get('service_account'),
