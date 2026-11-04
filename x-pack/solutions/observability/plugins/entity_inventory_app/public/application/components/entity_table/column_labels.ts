@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { NAME_COLUMN_ID } from './entity_type_config';
+import { NAME_COLUMN_ID, NAMESPACE_COLUMN_ID } from './entity_type_config';
 
 /** Display labels of the output columns, keyed by column name. */
 export const COLUMN_LABELS: Readonly<Record<string, string>> = {
@@ -60,17 +60,45 @@ export const COLUMN_LABELS: Readonly<Record<string, string>> = {
     'xpack.entityInventoryApp.entityTable.columns.availabilityZone',
     { defaultMessage: 'Availability zone' }
   ),
-  'cloud.account.id': i18n.translate(
-    'xpack.entityInventoryApp.entityTable.columns.cloudAccountId',
-    { defaultMessage: 'Cloud account ID' }
-  ),
-  'kubernetes.namespace': i18n.translate('xpack.entityInventoryApp.entityTable.columns.namespace', {
+  'cloud.account.id': i18n.translate('xpack.entityInventoryApp.entityTable.columns.cloudAccount', {
+    defaultMessage: 'Cloud account',
+  }),
+  [NAMESPACE_COLUMN_ID]: i18n.translate('xpack.entityInventoryApp.entityTable.columns.namespace', {
     defaultMessage: 'Namespace',
   }),
-  'kubernetes.deployment.name': i18n.translate(
-    'xpack.entityInventoryApp.entityTable.columns.deployment',
-    { defaultMessage: 'Deployment' }
+  'k8s.namespace.name': i18n.translate(
+    'xpack.entityInventoryApp.entityTable.columns.namespaceOtel',
+    { defaultMessage: 'Namespace (OpenTelemetry)' }
   ),
+  'kubernetes.namespace': i18n.translate(
+    'xpack.entityInventoryApp.entityTable.columns.namespaceElasticAgent',
+    { defaultMessage: 'Namespace (Elastic Agent)' }
+  ),
+  'k8s.deployment.name': i18n.translate(
+    'xpack.entityInventoryApp.entityTable.columns.deploymentOtel',
+    { defaultMessage: 'Deployment (OpenTelemetry)' }
+  ),
+  'kubernetes.deployment.name': i18n.translate(
+    'xpack.entityInventoryApp.entityTable.columns.deploymentElasticAgent',
+    { defaultMessage: 'Deployment (Elastic Agent)' }
+  ),
+  'orchestrator.cluster.name': i18n.translate(
+    'xpack.entityInventoryApp.entityTable.columns.clusterElasticAgent',
+    { defaultMessage: 'Cluster (Elastic Agent)' }
+  ),
+  available_replicas: i18n.translate(
+    'xpack.entityInventoryApp.entityTable.columns.availableReplicas',
+    { defaultMessage: 'Available replicas' }
+  ),
+  desired_replicas: i18n.translate('xpack.entityInventoryApp.entityTable.columns.desiredReplicas', {
+    defaultMessage: 'Desired replicas',
+  }),
+  app: i18n.translate('xpack.entityInventoryApp.entityTable.columns.app', {
+    defaultMessage: 'App',
+  }),
+  resource_id: i18n.translate('xpack.entityInventoryApp.entityTable.columns.resourceId', {
+    defaultMessage: 'Resource ID',
+  }),
   cluster: i18n.translate('xpack.entityInventoryApp.entityTable.columns.cluster', {
     defaultMessage: 'Cluster',
   }),

@@ -28,9 +28,9 @@ import { EntityCell, EntityNameCell } from './entity_table_cells';
 import { EntityTableResetButton } from './entity_table_reset_button';
 import {
   NAME_COLUMN_ID,
+  getColumnValue,
   getDefaultVisibleColumns,
   getDisplayConfig,
-  getEntityName,
 } from './entity_type_config';
 import { getTableAriaLabel } from './translations';
 import { PAGE_SIZE_OPTIONS, useEntityTableState } from './use_entity_table_state';
@@ -58,7 +58,8 @@ export const EntityTable = ({ entityType, list }: EntityTableProps) => {
     services: { uiSettings },
   } = useKibana();
   const { type, name: typeName } = entityType;
-  const { iconType, nameFields, badgeColumns } = getDisplayConfig(type);
+  const displayConfig = useMemo(() => getDisplayConfig(type), [type]);
+  const { iconType, mergedColumns, badgeColumns } = displayConfig;
   const dateFormat: string = uiSettings.get(UI_SETTINGS.DATE_FORMAT);
 
   const defaultVisibleColumns = useMemo(
@@ -83,19 +84,21 @@ export const EntityTable = ({ entityType, list }: EntityTableProps) => {
   );
   const columns = useMemo<EuiDataGridColumn[]>(
     () =>
-      [NAME_COLUMN_ID, ...list.columns.map(({ name }) => name)].map((id) => ({
-        id,
-        displayAsText: getColumnLabel(id),
-        isSortable: true,
-        initialWidth: columnKinds.get(id) === 'last_seen' ? LAST_SEEN_COLUMN_WIDTH : undefined,
-      })),
-    [list.columns, columnKinds]
+      [NAME_COLUMN_ID, ...Object.keys(mergedColumns), ...list.columns.map(({ name }) => name)].map(
+        (id) => ({
+          id,
+          displayAsText: getColumnLabel(id),
+          isSortable: true,
+          initialWidth: columnKinds.get(id) === 'last_seen' ? LAST_SEEN_COLUMN_WIDTH : undefined,
+        })
+      ),
+    [mergedColumns, list.columns, columnKinds]
   );
 
   const getSortValue = useCallback(
     (row: InventoryRow, columnId: string): InventoryCellValue | undefined =>
-      columnId === NAME_COLUMN_ID ? getEntityName(row, nameFields) : row[columnId],
-    [nameFields]
+      getColumnValue(row, columnId, displayConfig),
+    [displayConfig]
   );
   const sortedRows = useMemo(
     () => sortEntityRows(list.rows, sortingColumns, getSortValue),
@@ -108,24 +111,20 @@ export const EntityTable = ({ entityType, list }: EntityTableProps) => {
       if (!row) {
         return null;
       }
+      const value = getColumnValue(row, columnId, displayConfig);
       if (columnId === NAME_COLUMN_ID) {
-        return (
-          <EntityNameCell
-            name={formatCellValue(getEntityName(row, nameFields))}
-            iconType={iconType}
-          />
-        );
+        return <EntityNameCell name={formatCellValue(value)} iconType={iconType} />;
       }
       return (
         <EntityCell
-          value={row[columnId]}
+          value={value}
           kind={columnKinds.get(columnId)}
           isBadge={badgeColumns.includes(columnId)}
           dateFormat={dateFormat}
         />
       );
     },
-    [sortedRows, nameFields, iconType, badgeColumns, columnKinds, dateFormat]
+    [sortedRows, displayConfig, iconType, badgeColumns, columnKinds, dateFormat]
   );
 
   const toolbarVisibility = useMemo<EuiDataGridToolBarVisibilityOptions>(

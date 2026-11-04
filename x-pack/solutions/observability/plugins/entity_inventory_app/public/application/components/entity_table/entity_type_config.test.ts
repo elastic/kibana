@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import { HOST_TYPE_FIXTURE } from '../../../inventory_api/fixture_data';
+import {
+  HOST_TYPE_FIXTURE,
+  K8S_DEPLOYMENT_TYPE_FIXTURE,
+} from '../../../inventory_api/fixture_data';
 import type { InventoryListColumn } from '../../../inventory_api/types';
 import {
   ENTITY_TYPE_BY_CATEGORY,
   NAME_COLUMN_ID,
+  NAMESPACE_COLUMN_ID,
+  getColumnValue,
   getDefaultVisibleColumns,
   getDisplayConfig,
-  getEntityName,
+  getFirstValue,
 } from './entity_type_config';
 import { COLUMN_LABELS, getColumnLabel } from './column_labels';
 
@@ -63,12 +68,58 @@ describe('entity type config', () => {
     ]);
   });
 
+  it('shows the k8s.deployment default columns in the spec order, Name first', () => {
+    expect(
+      getDefaultVisibleColumns(
+        'k8s.deployment',
+        K8S_DEPLOYMENT_TYPE_FIXTURE.columns.map(({ name, kind }) => ({ name, kind, type: null }))
+      )
+    ).toEqual([NAME_COLUMN_ID, NAMESPACE_COLUMN_ID, 'cluster', 'available_replicas', 'last_seen']);
+  });
+
+  describe('getColumnValue for a deployment', () => {
+    const { nameFields, mergedColumns } = getDisplayConfig('k8s.deployment');
+    const config = { nameFields, mergedColumns };
+    const row = {
+      'entity.id': 'prod/payments/frontend',
+      'k8s.deployment.name': 'frontend',
+      'kubernetes.deployment.name': 'frontend-ea',
+      'k8s.namespace.name': 'payments',
+      'kubernetes.namespace': 'payments-ea',
+      cluster: 'prod',
+    };
+
+    it('names the deployment from the OpenTelemetry field first, then the Elastic Agent one', () => {
+      expect(getColumnValue(row, NAME_COLUMN_ID, config)).toBe('frontend');
+      expect(getColumnValue({ ...row, 'k8s.deployment.name': null }, NAME_COLUMN_ID, config)).toBe(
+        'frontend-ea'
+      );
+    });
+
+    it('merges the namespace reported under either naming convention', () => {
+      expect(getColumnValue(row, NAMESPACE_COLUMN_ID, config)).toBe('payments');
+      expect(
+        getColumnValue({ ...row, 'k8s.namespace.name': null }, NAMESPACE_COLUMN_ID, config)
+      ).toBe('payments-ea');
+      expect(getColumnValue({}, NAMESPACE_COLUMN_ID, config)).toBeNull();
+    });
+
+    it('returns any other column as it is', () => {
+      expect(getColumnValue(row, 'cluster', config)).toBe('prod');
+    });
+  });
+
+  it('has no merged columns for types that do not configure any', () => {
+    expect(getDisplayConfig('host').mergedColumns).toEqual({});
+    expect(getDisplayConfig('service').mergedColumns).toEqual({});
+  });
+
   it('uses the type icons of host and k8s.deployment', () => {
     expect(getDisplayConfig('host').iconType).toBe('compute');
     expect(getDisplayConfig('k8s.deployment').iconType).toBe('logoKubernetes');
   });
 
-  describe('getEntityName', () => {
+  describe('getFirstValue', () => {
     const { nameFields } = getDisplayConfig('host');
     const row = {
       'entity.id': 'host:abc',
@@ -78,16 +129,16 @@ describe('entity type config', () => {
     };
 
     it('prefers the first name field with a value', () => {
-      expect(getEntityName(row, nameFields)).toBe('web-001');
+      expect(getFirstValue(row, nameFields)).toBe('web-001');
     });
 
     it('falls back through the name fields in order', () => {
-      expect(getEntityName({ ...row, 'host.name': null }, nameFields)).toBe('web-001.internal');
-      expect(getEntityName({ ...row, 'host.name': null, 'host.hostname': null }, nameFields)).toBe(
+      expect(getFirstValue({ ...row, 'host.name': null }, nameFields)).toBe('web-001.internal');
+      expect(getFirstValue({ ...row, 'host.name': null, 'host.hostname': null }, nameFields)).toBe(
         'abc'
       );
       expect(
-        getEntityName(
+        getFirstValue(
           { ...row, 'host.name': null, 'host.hostname': null, 'host.id': null },
           nameFields
         )
@@ -95,11 +146,11 @@ describe('entity type config', () => {
     });
 
     it('takes the first value of a multi-value field', () => {
-      expect(getEntityName({ ...row, 'host.name': ['web-a', 'web-b'] }, nameFields)).toBe('web-a');
+      expect(getFirstValue({ ...row, 'host.name': ['web-a', 'web-b'] }, nameFields)).toBe('web-a');
     });
 
     it('returns null when no name field has a value', () => {
-      expect(getEntityName({}, nameFields)).toBeNull();
+      expect(getFirstValue({}, nameFields)).toBeNull();
     });
   });
 

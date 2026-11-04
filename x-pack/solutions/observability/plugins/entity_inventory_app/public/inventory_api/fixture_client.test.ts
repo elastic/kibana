@@ -52,6 +52,22 @@ describe('createFixtureEntityInventoryApiClient', () => {
     expect(rows.some((row) => row['host.id'] === null && row['host.name'] !== null)).toBe(true);
   });
 
+  it('reports deployments under the OpenTelemetry names, the Elastic Agent names, or both', async () => {
+    const { rows } = await createFixtureEntityInventoryApiClient().listEntities(
+      'k8s.deployment',
+      REQUEST,
+      {}
+    );
+    const reportedBy = (row: (typeof rows)[number]) => ({
+      otel: row['k8s.deployment.name'] !== null,
+      elasticAgent: row['kubernetes.deployment.name'] !== null,
+    });
+
+    expect(rows.some((row) => reportedBy(row).otel && !reportedBy(row).elasticAgent)).toBe(true);
+    expect(rows.some((row) => !reportedBy(row).otel && reportedBy(row).elasticAgent)).toBe(true);
+    expect(rows.some((row) => reportedBy(row).otel && reportedBy(row).elasticAgent)).toBe(true);
+  });
+
   it('includes a paused deployment', async () => {
     const { rows } = await createFixtureEntityInventoryApiClient().listEntities(
       'k8s.deployment',

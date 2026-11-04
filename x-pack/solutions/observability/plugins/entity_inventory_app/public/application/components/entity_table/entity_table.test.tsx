@@ -17,7 +17,11 @@ import {
 import type { InventoryListResponse, InventoryRow } from '../../../inventory_api/types';
 import { createAppServicesMock } from '../../../mocks';
 import { EntityTable } from './entity_table';
-import { NAME_COLUMN_ID, getDefaultVisibleColumns } from './entity_type_config';
+import {
+  NAME_COLUMN_ID,
+  NAMESPACE_COLUMN_ID,
+  getDefaultVisibleColumns,
+} from './entity_type_config';
 import { NO_VALUE_LABEL, RESET_TO_DEFAULT_LABEL } from './translations';
 import { DEFAULT_PAGE_SIZE } from './use_entity_table_state';
 
@@ -175,7 +179,7 @@ describe('EntityTable', () => {
             list={{
               ...k8sList,
               rows: [
-                row({ 'kubernetes.deployment.name': 'frontend', cluster: 'prod-cluster-0' }),
+                row({ 'k8s.deployment.name': 'frontend', cluster: 'prod-cluster-0' }),
                 row({ 'kubernetes.deployment.name': 'cart', cluster: null }),
               ],
               total: 2,
@@ -193,6 +197,40 @@ describe('EntityTable', () => {
       within(getCell(1, 'cluster') as HTMLElement).queryByTestId('entityInventoryCellBadge')
     ).not.toBeInTheDocument();
     expect(within(getCell(1, 'cluster') as HTMLElement).getByText(NO_VALUE_LABEL)).toBeTruthy();
+  });
+
+  it('shows the deployment name and namespace reported under either naming convention', () => {
+    const k8sList = buildListResponseFixture('k8s.deployment', 'normal');
+    if (!k8sList) {
+      throw new Error('Missing k8s.deployment fixture');
+    }
+    const row = (overrides: InventoryRow): InventoryRow => ({
+      ...Object.fromEntries(k8sList.columns.map(({ name }) => [name, null])),
+      ...overrides,
+    });
+    render(
+      <I18nProvider>
+        <KibanaContextProvider services={createAppServicesMock()}>
+          <EntityTable
+            entityType={K8S_DEPLOYMENT_TYPE_FIXTURE}
+            list={{
+              ...k8sList,
+              rows: [
+                row({ 'k8s.deployment.name': 'frontend', 'k8s.namespace.name': 'payments' }),
+                row({ 'kubernetes.deployment.name': 'cart', 'kubernetes.namespace': 'checkout' }),
+              ],
+              total: 2,
+              truncated: false,
+            }}
+          />
+        </KibanaContextProvider>
+      </I18nProvider>
+    );
+
+    expect(getCell(0, NAME_COLUMN_ID)).toHaveTextContent('frontend');
+    expect(getCell(0, NAMESPACE_COLUMN_ID)).toHaveTextContent('payments');
+    expect(getCell(1, NAME_COLUMN_ID)).toHaveTextContent('cart');
+    expect(getCell(1, NAMESPACE_COLUMN_ID)).toHaveTextContent('checkout');
   });
 
   it('keeps cells of other columns as plain text', () => {

@@ -8,6 +8,7 @@
 import type { IconType } from '@elastic/eui';
 import type {
   InventoryCellScalar,
+  InventoryCellValue,
   InventoryListColumn,
   InventoryRow,
 } from '../../../inventory_api/types';
@@ -27,10 +28,18 @@ export const ENTITY_TYPE_BY_CATEGORY: Readonly<
  */
 export const NAME_COLUMN_ID = 'entityInventory.name';
 
+/** Id of the app-side Namespace column, which merges the namespace of both naming conventions. */
+export const NAMESPACE_COLUMN_ID = 'entityInventory.namespace';
+
 export interface EntityTypeDisplayConfig {
   iconType: IconType;
   /** Columns tried in order for the Name column. */
   nameFields: readonly string[];
+  /**
+   * App-side columns that show the first value among several output columns, keyed by column id.
+   * They sit after the Name column, for entities reported under more than one naming convention.
+   */
+  mergedColumns: Readonly<Record<string, readonly string[]>>;
   /** Columns visible by default, in order; `undefined` shows every attribute. */
   defaultVisibleColumns?: readonly string[];
   /** Columns whose values render as badges, for values that name a group such as a cluster. */
@@ -55,8 +64,16 @@ const ENTITY_TYPE_DISPLAY_CONFIG: Readonly<Record<string, Partial<EntityTypeDisp
   },
   'k8s.deployment': {
     iconType: 'logoKubernetes',
-    nameFields: ['kubernetes.deployment.name', 'entity.id'],
-    defaultVisibleColumns: [NAME_COLUMN_ID, 'kubernetes.namespace', 'cluster', 'last_seen'],
+    nameFields: ['k8s.deployment.name', 'kubernetes.deployment.name', 'entity.id'],
+    mergedColumns: { [NAMESPACE_COLUMN_ID]: ['k8s.namespace.name', 'kubernetes.namespace'] },
+    // Last seen stands in for Restarts and Up time until the metrics exist (#6272).
+    defaultVisibleColumns: [
+      NAME_COLUMN_ID,
+      NAMESPACE_COLUMN_ID,
+      'cluster',
+      'available_replicas',
+      'last_seen',
+    ],
     badgeColumns: ['cluster'],
   },
 };
@@ -64,6 +81,7 @@ const ENTITY_TYPE_DISPLAY_CONFIG: Readonly<Record<string, Partial<EntityTypeDisp
 const DEFAULT_DISPLAY_CONFIG: EntityTypeDisplayConfig = {
   iconType: 'grid',
   nameFields: ['entity.id'],
+  mergedColumns: {},
   badgeColumns: [],
 };
 
@@ -87,15 +105,18 @@ export const getDefaultVisibleColumns = (
     ];
   }
   const available = new Set(columns.map(({ name }) => name));
-  return defaultVisibleColumns.filter((id) => id === NAME_COLUMN_ID || available.has(id));
+  const { mergedColumns } = getDisplayConfig(type);
+  return defaultVisibleColumns.filter(
+    (id) => id === NAME_COLUMN_ID || id in mergedColumns || available.has(id)
+  );
 };
 
-/** The display name of an entity: the first value among `nameFields`, or `null`. */
-export const getEntityName = (
+/** The first value among `fields` of a row, or `null`. */
+export const getFirstValue = (
   row: InventoryRow,
-  nameFields: readonly string[]
+  fields: readonly string[]
 ): InventoryCellScalar => {
-  for (const field of nameFields) {
+  for (const field of fields) {
     const value = row[field];
     const scalar = Array.isArray(value) ? value[0] : value;
     if (scalar !== null && scalar !== undefined) {
@@ -103,4 +124,19 @@ export const getEntityName = (
     }
   }
   return null;
+};
+
+/** The value of a grid column: the Name and merged columns are derived, any other is a row field. */
+export const getColumnValue = (
+  row: InventoryRow,
+  columnId: string,
+  { nameFields, mergedColumns }: Pick<EntityTypeDisplayConfig, 'nameFields' | 'mergedColumns'>
+): InventoryCellValue | undefined => {
+  if (columnId === NAME_COLUMN_ID) {
+    return getFirstValue(row, nameFields);
+  }
+  if (columnId in mergedColumns) {
+    return getFirstValue(row, mergedColumns[columnId]);
+  }
+  return row[columnId];
 };
