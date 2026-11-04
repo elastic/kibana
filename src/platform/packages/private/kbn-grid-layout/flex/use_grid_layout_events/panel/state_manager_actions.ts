@@ -69,6 +69,7 @@ export const moveAction = (
 
   const { columnCount, gutterSize, rowHeight, columnPixelWidth } = runtimeSettings;
   const isResize = activePanel.type === 'resize';
+  const gridLayoutRect = gridLayoutElement?.getBoundingClientRect();
 
   const previewRect = (() => {
     if (isResize) {
@@ -88,79 +89,72 @@ export const moveAction = (
     }
   })();
 
-  // calculate the requested grid position
-  const gridLayoutRect = gridLayoutElement?.getBoundingClientRect();
-  // const targetWidth = (() => {
-  //   const targetedGridLeft = gridLayoutRect?.left ?? 0;
-  //   const localXCoordinate = isResize
-  //     ? previewRect.right - targetedGridLeft
-  //     : previewRect.left - targetedGridLeft;
-  //   return localXCoordinate;
-  //   // const maxColumn = isResize ? columnCount : columnCount - currentPanelData.width;
-  //   // return Math.min(
-  //   //   Math.max(Math.round(localXCoordinate / (columnPixelWidth + gutterSize)), 0),
-  //   //   maxColumn
-  //   // );
-  // })();
-
-  // console.log({ targetColumn: targetWidth });
-
   const requestedPanelData = { ...currentPanelData };
+  const numberOfRows = Math.floor(
+    ((gridLayoutRect?.bottom ?? 0) - (gridLayoutRect?.top ?? 0)) / (rowHeight + gutterSize / 2)
+  );
+  console.log({ numberOfRows });
+  const getRow = (rect: { top: number; bottom: number }) => {
+    // this section already exists, so use the wrapper element to figure out target row
+    const gridTop = gridLayoutRect?.top ?? 0;
+    const localYCoordinate = (rect.top ?? 0) - gridTop;
+    // console.log({
+    //   gridTop,
+    //   rect,
+    //   localYCoordinate,
+    //   ROW: Math.min(
+    //     Math.max(Math.ceil(localYCoordinate / (rowHeight + gutterSize / 2)), 1),
+    //     numberOfRows
+    //   ),
+    // });
+    return Math.min(
+      Math.max(Math.ceil(localYCoordinate / (rowHeight + gutterSize / 2)), 1),
+      numberOfRows
+    );
+  };
+  console.log({ previewRect });
   if (isResize) {
     const targetWidth = previewRect.right - previewRect.left;
     requestedPanelData.width = Math.max(targetWidth, 1);
+    if (!isEqual(requestedPanelData, lastRequestedPanelPosition.current)) {
+      lastRequestedPanelPosition.current = { ...requestedPanelData };
+
+      let nextLayout = cloneDeep(currentLayout) ?? {};
+      delete nextLayout[activePanel.id];
+      nextLayout[requestedPanelData.id] = requestedPanelData;
+
+      gridLayout$.next(nextLayout);
+    }
   } else {
-    // TODO: Determine order
-    // get all panels to the left
-    // order = length of left panels
+    console.log({ panelElements });
     const sorted = Object.entries(panelElements)
       .map(([id, panel]) => {
+        const comparison = panel?.getBoundingClientRect();
+        const row = getRow(comparison);
+        console.log({
+          id,
+          row,
+          left: comparison?.left,
+        });
         return {
           id,
-          left:
-            id === activePanel.id ? previewRect.left : panel?.getBoundingClientRect()?.left ?? 0,
+          ...(comparison ?? { left: 0 }),
+          row,
+          test: (comparison?.left ?? 0) + row * (gridLayoutRect?.width ?? 1),
         };
       })
-      .sort((a, b) => a.left - b.left);
+      .sort((a, b) => {
+        return a.test - b.test;
+        // if (a.row === b.row) return a.left - b.left;
+        // return a.row - b.row;
+      });
     console.log({ sorted });
 
     const nextLayout: FlexLayoutData = {};
     sorted.forEach(({ id }, index) => {
       nextLayout[id] = { ...currentLayout[id], order: index };
     });
-    console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!', { nextLayout });
     gridLayout$.next(nextLayout);
-    return;
-    // requestedPanelData.order = toTheLeft;
-  }
-  console.log({ requestedPanelData, tessxt: lastRequestedPanelPosition.current });
-
-  // resolve the new grid layout
-  if (!isEqual(requestedPanelData, lastRequestedPanelPosition.current)) {
-    lastRequestedPanelPosition.current = { ...requestedPanelData };
-
-    let nextLayout = cloneDeep(currentLayout) ?? {};
-
-    // remove the panel from where it started so that we can apply the drag request
-    delete nextLayout[activePanel.id];
-    nextLayout[requestedPanelData.id] = requestedPanelData;
-
-    // resolve grid
-    // const resolvedDestinationGrid = resolveLayout(nextLayout.panels, requestedPanelData);
-    // nextLayout[targetSectionId].panels = resolvedDestinationGrid;
-
-    // // resolve sections to remove empty main sections + ensure orders are valid
-    // nextLayout = resolveSections(nextLayout);
-    // if (!nextLayout[targetSectionId]) {
-    //   // resolving the sections possibly removed + renamed sections, so reset target section
-    //   const { order } = nextLayout[previousSection!];
-    //   targetSectionId = `main-${order + 1}`;
-    // }
-
-    // if (currentLayout && !isOrderedLayoutEqual(currentLayout, nextLayout)) {
-    console.log('!!!!!!!!!!!!!!!!!', { nextLayout, panelElements });
-    gridLayout$.next(nextLayout);
-    // }
   }
 
   // re-render the active panel

@@ -29,11 +29,6 @@ export interface ActivePanelEvent {
   id: string;
 
   /**
-   * The index of the grid row this panel interaction is targeting.
-   */
-  targetSection?: string;
-
-  /**
    * The pixel rect of the panel being interacted with.
    */
   panelDiv: HTMLDivElement;

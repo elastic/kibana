@@ -38,6 +38,7 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
     return css`
       position: relative;
       width: ${initialPanel.width}px;
+      order: ${initialPanel.order + 1};
       .kbnGridPanel--dragHandle,
       .kbnGridPanel--resizeHandle {
         touch-action: none; // prevent scrolling on touch devices
@@ -105,6 +106,7 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
           ref.style.left = ``;
           ref.style.top = ``;
           ref.style.width = `${currentPanel.width}px`;
+          ref.style.order = `${currentPanel.order + 1}`;
         }
       });
 

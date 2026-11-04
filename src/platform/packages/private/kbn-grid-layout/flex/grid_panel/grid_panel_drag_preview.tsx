@@ -24,21 +24,15 @@ export const GridPanelDragPreview = React.memo(() => {
       const styleSubscription = gridLayoutStateManager.activePanelEvent$
         .pipe(skip(1)) // skip the first emit because the drag preview is only rendered after a user action
         .subscribe((activePanel) => {
-          console.log({ activePanel });
-          if (!dragPreviewRef.current) return;
+          if (activePanel?.type === 'resize' || !dragPreviewRef.current) return;
           const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
-          const sectionId = activePanel?.targetSection;
-          if (!activePanel || !sectionId || !gridLayout[sectionId]?.panels[activePanel.id]) {
+          const panel = activePanel ? gridLayout[activePanel.id] : undefined;
+          if (!panel) {
             dragPreviewRef.current.style.display = 'none';
           } else {
-            const panel = gridLayout[sectionId].panels[activePanel.id];
             dragPreviewRef.current.style.display = 'block';
-            dragPreviewRef.current.style.gridColumnStart = `${panel.column + 1}`;
-            dragPreviewRef.current.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
-            dragPreviewRef.current.style.gridRowStart = `${`gridRow-${sectionId}`} ${
-              panel.row + 1
-            }`;
-            dragPreviewRef.current.style.gridRowEnd = `span ${panel.height}`;
+            dragPreviewRef.current.style.width = `${panel.width}px`;
+            dragPreviewRef.current.style.order = `${panel.order + 1}`;
           }
         });
 
@@ -53,6 +47,6 @@ export const GridPanelDragPreview = React.memo(() => {
   return <div ref={dragPreviewRef} className={'kbnGridPanel--dragPreview'} css={styles} />;
 });
 
-const styles = css({ display: 'none', pointerEvents: 'none' });
+const styles = css({ display: 'none', pointerEvents: 'none', backgroundColor: 'red' });
 
 GridPanelDragPreview.displayName = 'KbnGridLayoutPanelDragPreview';
