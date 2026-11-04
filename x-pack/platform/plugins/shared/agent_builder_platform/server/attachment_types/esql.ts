@@ -17,7 +17,6 @@ import type {
 import type { ComponentsNode } from '@kbn/isomer-components';
 import { toKibanaAppUrl } from '@kbn/agent-builder-plugin/server';
 import { i18n } from '@kbn/i18n';
-import type { Logger } from '@kbn/logging';
 import type { SerializableRecord } from '@kbn/utility-types';
 
 /** The params of Discover's locator that an ES|QL attachment opens it with. */
@@ -33,7 +32,6 @@ export interface DiscoverEsqlLocator {
 export interface EsqlAttachmentTypeDeps {
   /** Discover's locator, registered on the server, or nothing when Discover is off. */
   getDiscoverLocator?: () => DiscoverEsqlLocator | undefined;
-  logger?: Logger;
 }
 
 /**
@@ -41,7 +39,6 @@ export interface EsqlAttachmentTypeDeps {
  */
 export const createEsqlAttachmentType = ({
   getDiscoverLocator,
-  logger,
 }: EsqlAttachmentTypeDeps = {}): AttachmentTypeDefinition<
   AttachmentType.esql,
   EsqlAttachmentData
@@ -75,8 +72,7 @@ export const createEsqlAttachmentType = ({
           ],
         },
       ];
-    } catch (error) {
-      logger?.debug(`Leaving out the Discover link of an ES|QL attachment: ${error.message}`);
+    } catch {
       return [];
     }
   };

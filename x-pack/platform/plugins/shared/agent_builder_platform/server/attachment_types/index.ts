@@ -56,7 +56,6 @@ export const registerAttachmentTypes = ({
     createEsqlAttachmentType({
       getDiscoverLocator: () =>
         setupDeps.share.url.locators.get<DiscoverEsqlLocatorParams>(DISCOVER_APP_LOCATOR),
-      logger: logger.get('esql'),
     }),
     createGraphAttachmentType(),
     createConnectorAttachmentType(),
