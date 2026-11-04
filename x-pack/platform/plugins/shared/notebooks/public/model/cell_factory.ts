@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   CellDefinition,
@@ -18,16 +19,22 @@ export type NewCellKind = Exclude<CellType, 'input'> | `input:${InputKind}`;
 
 interface CellBlueprint {
   namePrefix: string;
-  build: (base: { id: string; name: string }, sourceCell: string | null) => CellDefinition;
+  labelPrefix: string;
+  build: (
+    base: { id: string; name: string; label: string },
+    sourceCell: string | null
+  ) => CellDefinition;
 }
 
 const BLUEPRINTS: Record<NewCellKind, CellBlueprint> = {
   esql: {
     namePrefix: 'esql',
+    labelPrefix: i18n.translate('xpack.notebook.cell.label.esql', { defaultMessage: 'ES|QL' }),
     build: (base) => ({ ...base, type: 'esql', runMode: 'auto', query: '' }),
   },
   chart: {
     namePrefix: 'chart',
+    labelPrefix: i18n.translate('xpack.notebook.cell.label.chart', { defaultMessage: 'Chart' }),
     build: (base, sourceCell) => ({
       ...base,
       type: 'chart',
@@ -38,10 +45,12 @@ const BLUEPRINTS: Record<NewCellKind, CellBlueprint> = {
   },
   markdown: {
     namePrefix: 'notes',
+    labelPrefix: i18n.translate('xpack.notebook.cell.label.markdown', { defaultMessage: 'Notes' }),
     build: (base) => ({ ...base, type: 'markdown', content: '' }),
   },
   'input:time': {
     namePrefix: 'period',
+    labelPrefix: i18n.translate('xpack.notebook.cell.label.time', { defaultMessage: 'Period' }),
     build: (base) => ({
       ...base,
       type: 'input',
@@ -50,6 +59,7 @@ const BLUEPRINTS: Record<NewCellKind, CellBlueprint> = {
   },
   'input:dropdown': {
     namePrefix: 'choice',
+    labelPrefix: i18n.translate('xpack.notebook.cell.label.dropdown', { defaultMessage: 'Choice' }),
     build: (base) => ({
       ...base,
       type: 'input',
@@ -58,6 +68,7 @@ const BLUEPRINTS: Record<NewCellKind, CellBlueprint> = {
   },
   'input:range': {
     namePrefix: 'range',
+    labelPrefix: i18n.translate('xpack.notebook.cell.label.range', { defaultMessage: 'Range' }),
     build: (base) => ({
       ...base,
       type: 'input',
@@ -66,30 +77,48 @@ const BLUEPRINTS: Record<NewCellKind, CellBlueprint> = {
   },
 };
 
-export const getUniqueName = (prefix: string, cells: Record<string, CellDefinition>): string => {
+/** The lowest number N for which `{prefix}_N` is not already a cell name. */
+const getUniqueIndex = (prefix: string, cells: Record<string, CellDefinition>): number => {
   const taken = new Set(Object.values(cells).map(({ name }) => name));
   let index = 1;
   while (taken.has(`${prefix}_${index}`)) index++;
-  return `${prefix}_${index}`;
+  return index;
 };
 
+export const getUniqueName = (prefix: string, cells: Record<string, CellDefinition>): string =>
+  `${prefix}_${getUniqueIndex(prefix, cells)}`;
+
+/** New cells get a matching label and name, e.g. "Chart 1" and `chart_1`. */
 export const createCell = (
   kind: NewCellKind,
   cells: Record<string, CellDefinition>,
   sourceCell: string | null = null
 ): CellDefinition => {
-  const { namePrefix, build } = BLUEPRINTS[kind];
-  return build({ id: uuidv4(), name: getUniqueName(namePrefix, cells) }, sourceCell);
+  const { namePrefix, labelPrefix, build } = BLUEPRINTS[kind];
+  const index = getUniqueIndex(namePrefix, cells);
+  return build(
+    { id: uuidv4(), name: `${namePrefix}_${index}`, label: `${labelPrefix} ${index}` },
+    sourceCell
+  );
 };
 
+const NUMBERED_LABEL = /^(.*) \d+$/;
+
+/** A copy with the next free name; a numbered label like "Chart 1" is renumbered to match. */
 export const duplicateCell = (
   cell: CellDefinition,
   cells: Record<string, CellDefinition>
-): CellDefinition => ({
-  ...cell,
-  id: uuidv4(),
-  name: getUniqueName(cell.name.replace(/_\d+$/, ''), cells),
-});
+): CellDefinition => {
+  const prefix = cell.name.replace(/_\d+$/, '');
+  const index = getUniqueIndex(prefix, cells);
+  const labelBase = cell.label?.match(NUMBERED_LABEL)?.[1];
+  return {
+    ...cell,
+    id: uuidv4(),
+    name: `${prefix}_${index}`,
+    ...(labelBase !== undefined ? { label: `${labelBase} ${index}` } : {}),
+  };
+};
 
 export const isPinnedTimeCell = (cell: CellDefinition): cell is InputCellDefinition =>
   cell.type === 'input' && cell.input.kind === 'time' && cell.input.pinned === true;

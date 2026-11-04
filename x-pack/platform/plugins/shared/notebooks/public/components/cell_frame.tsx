@@ -45,6 +45,10 @@ const ACTIONS_LABEL = i18n.translate('xpack.notebook.cell.actions', {
   defaultMessage: 'Cell actions',
 });
 
+const NAME_TOOLTIP = i18n.translate('xpack.notebook.cell.nameTooltip', {
+  defaultMessage: 'Reference name other cells use to refer to this one',
+});
+
 interface CellFrameProps {
   cell: CellDefinition;
   runtime?: CellRuntime;
@@ -99,6 +103,13 @@ export const CellFrame = ({
     if (!CELL_NAME_PATTERN.test(name)) return false;
     store.updateCell(cell.id, (current) => ({ ...current, name }));
     return true;
+  };
+
+  const relabel = (value: string): void => {
+    const label = value.trim();
+    store.updateCell(cell.id, ({ label: _previous, ...current }) =>
+      label ? { ...current, label } : current
+    );
   };
 
   const menuItems = [
@@ -182,12 +193,30 @@ export const CellFrame = ({
           <EuiFlexItem grow={false} css={{ minWidth: 160 }}>
             <EuiInlineEditText
               size="s"
-              inputAriaLabel={i18n.translate('xpack.notebook.cell.nameAriaLabel', {
-                defaultMessage: 'Cell name',
+              inputAriaLabel={i18n.translate('xpack.notebook.cell.labelAriaLabel', {
+                defaultMessage: 'Cell label',
               })}
-              defaultValue={cell.name}
-              onSave={rename}
+              placeholder={i18n.translate('xpack.notebook.cell.labelPlaceholder', {
+                defaultMessage: 'Add a label',
+              })}
+              defaultValue={cell.label ?? ''}
+              onSave={relabel}
+              data-test-subj="notebookCellLabel"
             />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={NAME_TOOLTIP} disableScreenReaderOutput>
+              <EuiInlineEditText
+                size="xs"
+                inputAriaLabel={i18n.translate('xpack.notebook.cell.nameAriaLabel', {
+                  defaultMessage: 'Cell reference name',
+                })}
+                defaultValue={cell.name}
+                onSave={rename}
+                readModeProps={{ color: 'text' }}
+                data-test-subj="notebookCellName"
+              />
+            </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem />
           {headerActions}

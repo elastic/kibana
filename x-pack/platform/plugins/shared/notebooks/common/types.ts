@@ -44,7 +44,10 @@ export type InputKind = InputDefinition['kind'];
 
 interface CellBase {
   id: string;
+  /** Identifier other cells reference, e.g. `?chart_1`. */
   name: string;
+  /** Free-text display title, e.g. "Chart 1". */
+  label?: string;
 }
 
 export interface EsqlCellDefinition extends CellBase {

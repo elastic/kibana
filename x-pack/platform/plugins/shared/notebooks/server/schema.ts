@@ -71,6 +71,7 @@ const inputSchema = schema.discriminatedUnion('kind', [
 const cellBaseProps = {
   id: idSchema,
   name: schema.string({ maxLength: MAX_NAME_LENGTH }),
+  label: schema.maybe(schema.string({ maxLength: MAX_TITLE_LENGTH })),
 };
 
 const cellSchema = schema.discriminatedUnion('type', [
