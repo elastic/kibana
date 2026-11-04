@@ -210,7 +210,7 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
   ),
   policySettings: schema.maybe(
     PolicySettingsSchema(
-      'Package policy settings from the Service settings step that apply to every package policy of the deployment, keyed by package policy field (for example `output_id`).'
+      'Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).'
     )
   ),
   namespace: schema.maybe(
@@ -275,7 +275,7 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
       maxSize: 1000,
       meta: {
         description:
-          'Package policy IDs created for this deployment (managed_integration and agent_based).',
+          'Integration policy IDs created for this deployment (managed_integration and agent_based).',
       },
     })
   ),
@@ -364,7 +364,7 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
     ),
     policySettings: schema.maybe(
       PolicySettingsSchema(
-        'Package policy settings from the Service settings step that apply to every package policy of the deployment, keyed by package policy field (for example `output_id`).'
+        'Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).'
       )
     ),
     namespace: schema.maybe(
@@ -462,7 +462,7 @@ const CloudOnboardingDeploymentListItemSchema = CloudOnboardingDeploymentItemSch
       maxSize: 100,
       meta: {
         description:
-          'Packages of the deployment instance package policies with their deployed versions. Empty for ECF-only deployment instances.',
+          'Packages of the deployment instance integration policies with their deployed versions. Empty for ECF-only deployment instances.',
       },
     }
   ),
@@ -607,7 +607,7 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
     ),
     policySettings: schema.maybe(
       PolicySettingsSchema(
-        'Package policy settings that apply to every package policy of the deployment, keyed by package policy field (for example `output_id`). Replaces the stored settings; omit it to keep them.'
+        'Integration policy settings that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`). Replaces the stored settings; omit it to keep them.'
       )
     ),
     services: schema.maybe(
@@ -657,7 +657,7 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
         maxSize: 1000,
         meta: {
           description:
-            'Package policy IDs created for this deployment (managed_integration and agent_based).',
+            'Integration policy IDs created for this deployment (managed_integration and agent_based).',
         },
       })
     ),
