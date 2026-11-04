@@ -54,7 +54,6 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
         indexPattern: 'metrics-kubernetes.state_deployment-*',
         filter: 'metricset.name == "state_deployment"',
         attributes: [
-          { name: 'cluster', field: 'orchestrator.cluster.name' },
           { name: 'available_replicas', field: 'kubernetes.deployment.replicas.available' },
           { name: 'desired_replicas', field: 'kubernetes.deployment.replicas.desired' },
           { name: 'paused', field: 'kubernetes.deployment.paused' },
@@ -64,7 +63,6 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
       {
         indexPattern: 'metrics-k8sclusterreceiver.otel-*',
         attributes: [
-          { name: 'cluster', field: 'k8s.cluster.name' },
           { name: 'available_replicas', field: 'k8s.deployment.available' },
           { name: 'desired_replicas', field: 'k8s.deployment.desired' },
           { name: 'resource_id', field: 'k8s.deployment.uid' },
