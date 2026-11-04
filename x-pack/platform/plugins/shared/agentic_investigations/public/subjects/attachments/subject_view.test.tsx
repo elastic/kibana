@@ -318,6 +318,23 @@ describe('SubjectList', () => {
     expect(screen.queryByTestId('investigationSubject-alerts')).not.toBeInTheDocument();
   });
 
+  it('hides a Slack thread that no trigger started and keeps one that did', () => {
+    renderList([
+      { type: 'manual', id: 'q-1', summary: 'Why is it slow?' },
+      { type: 'slack_thread', id: 'notification', slack: { channel: 'C1', thread_ts: '1.1' } },
+      {
+        type: 'slack_thread',
+        id: 'trigger',
+        trigger_type: 'automatic',
+        slack: { channel: 'C2', thread_ts: '2.2' },
+      },
+    ]);
+
+    const rows = screen.getAllByTestId('investigationSubject-slack_thread');
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toHaveTextContent('#C2');
+  });
+
   it('lists several alerts inline when there is no alerts list to link to', () => {
     renderList([
       alertSubject('a-1'),
