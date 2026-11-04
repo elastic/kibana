@@ -69,7 +69,8 @@ export const AddMetadataPinToRow = ({
 
   return (
     <span className={showOnRowHoverCss}>
-      <EuiToolTip content={tooltipContent}>
+      {/* The button's aria-label already names the action and the field */}
+      <EuiToolTip content={tooltipContent} disableScreenReaderOutput>
         <EuiButtonIcon
           size="s"
           color="primary"
