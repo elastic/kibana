@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+  EuiFieldNumber,
   EuiFieldText,
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -18,9 +19,66 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { MAX_DESCRIPTION_LENGTH, MAX_TITLE_LENGTH } from '../../common/constants';
+import {
+  MAX_DESCRIPTION_LENGTH,
+  MAX_GRID_COLUMNS,
+  MAX_TITLE_LENGTH,
+  MIN_GRID_COLUMNS,
+} from '../../common/constants';
+import { getGridColumns, setGridColumns } from '../model/app_layout';
 import { useNotebook } from './notebook_context';
 import { NotebookFlyout } from './notebook_flyout';
+
+/** Applies the number when it is committed rather than on each keystroke, since resizing panels to fit is lossy. */
+const GridColumnsField = ({
+  columns,
+  onChange,
+}: {
+  columns: number;
+  onChange: (columns: number) => void;
+}) => {
+  const [draft, setDraft] = useState(String(columns));
+  useEffect(() => setDraft(String(columns)), [columns]);
+  const value = Number(draft);
+  const isValid =
+    draft !== '' &&
+    Number.isInteger(value) &&
+    value >= MIN_GRID_COLUMNS &&
+    value <= MAX_GRID_COLUMNS;
+
+  const commit = () => {
+    if (!isValid) return setDraft(String(columns));
+    if (value !== columns) onChange(value);
+  };
+
+  return (
+    <EuiFormRow
+      label={i18n.translate('xpack.notebook.appSettings.gridColumns', {
+        defaultMessage: 'Grid columns',
+      })}
+      helpText={i18n.translate('xpack.notebook.appSettings.gridColumnsHelp', {
+        defaultMessage:
+          'Between {min} and {max}. Panels are resized to keep their share of the width.',
+        values: { min: MIN_GRID_COLUMNS, max: MAX_GRID_COLUMNS },
+      })}
+      isInvalid={!isValid}
+    >
+      <EuiFieldNumber
+        min={MIN_GRID_COLUMNS}
+        max={MAX_GRID_COLUMNS}
+        step={1}
+        value={draft}
+        isInvalid={!isValid}
+        onChange={({ target }) => setDraft(target.value)}
+        onBlur={commit}
+        onKeyDown={({ key }) => {
+          if (key === 'Enter') commit();
+        }}
+        data-test-subj="notebookAppSettingsGridColumns"
+      />
+    </EuiFormRow>
+  );
+};
 
 /** Settings for one app, opened from its tab menu. */
 export const AppSettingsFlyout = ({ appId, onClose }: { appId: string; onClose: () => void }) => {
@@ -141,6 +199,14 @@ export const AppSettingsFlyout = ({ appId, onClose }: { appId: string; onClose: 
             data-test-subj="notebookAppSettingsSnapToGrid"
           />
         </EuiFormRow>
+        {(app.snapToGrid ?? true) && (
+          <GridColumnsField
+            columns={getGridColumns(app)}
+            onChange={(columns) =>
+              store.updateApp(appId, (current) => setGridColumns(current, columns))
+            }
+          />
+        )}
       </EuiFlyoutBody>
     </NotebookFlyout>
   );

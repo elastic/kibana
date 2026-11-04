@@ -6,7 +6,13 @@
  */
 
 import { schema, type TypeOf } from '@kbn/config-schema';
-import { GRID_SUBDIVISIONS, MAX_DESCRIPTION_LENGTH, MAX_TITLE_LENGTH } from '../common/constants';
+import {
+  GRID_SUBDIVISIONS,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_GRID_COLUMNS,
+  MAX_TITLE_LENGTH,
+  MIN_GRID_COLUMNS,
+} from '../common/constants';
 
 export const MAX_CELLS = 200;
 export const MAX_QUERY_LENGTH = 20_000;
@@ -138,6 +144,14 @@ const appSchema = schema.object({
   hideTimePicker: schema.maybe(schema.boolean()),
   freePlacement: schema.maybe(schema.boolean()),
   snapToGrid: schema.maybe(schema.boolean()),
+  gridColumns: schema.maybe(
+    schema.number({
+      min: MIN_GRID_COLUMNS,
+      max: MAX_GRID_COLUMNS,
+      validate: (value) =>
+        Number.isInteger(value) ? undefined : 'gridColumns must be a whole number',
+    })
+  ),
   heading: schema.maybe(schema.string({ maxLength: MAX_TITLE_LENGTH })),
   description: schema.maybe(schema.string({ maxLength: MAX_DESCRIPTION_LENGTH })),
 });

@@ -45,9 +45,9 @@ import type {
 import {
   appDependsOn,
   applyGridLayout,
-  APP_GRID_COLUMNS,
   createEmptyApp,
   generateDefaultApp,
+  getGridColumns,
   getNewAppTitle,
   reconcileApps,
   toGridLayout,
@@ -394,16 +394,17 @@ const AppGrid = ({
   // Without snapping, the engine works on a finer grid with no gutter; panels inset themselves by
   // half a gutter so they keep the same spacing and row height as the snapped grid.
   const scale = snapToGrid ? 1 : GRID_SUBDIVISIONS;
+  const columns = getGridColumns(app);
   const layout = useMemo(() => toGridLayout(app.panels, scale), [app.panels, scale]);
   const gridSettings = useMemo<GridSettings>(
     () => ({
       gutterSize: snapToGrid ? gutterSize : 0,
       rowHeight: snapToGrid ? APP_ROW_HEIGHT : (APP_ROW_HEIGHT + gutterSize) / scale,
-      columnCount: APP_GRID_COLUMNS * scale,
+      columnCount: columns * scale,
       keyboardDragTopLimit: 0,
       allowGaps: app.freePlacement ?? false,
     }),
-    [snapToGrid, gutterSize, scale, app.freePlacement]
+    [snapToGrid, gutterSize, scale, columns, app.freePlacement]
   );
   const gridStyles = useMemo(() => getGridStyles(euiTheme), [euiTheme]);
 
@@ -447,7 +448,7 @@ const AppGrid = ({
   return (
     <div data-test-subj="notebookAppGrid">
       <GridLayout
-        key={`${app.freePlacement ? 'free' : 'compact'}-${snapToGrid ? 'snap' : 'fine'}`}
+        key={`${app.freePlacement ? 'free' : 'compact'}-${snapToGrid ? 'snap' : 'fine'}-${columns}`}
         layout={layout}
         gridSettings={gridSettings}
         renderPanelContents={renderPanelContents}

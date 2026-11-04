@@ -109,6 +109,8 @@ export interface NotebookApp {
   freePlacement?: boolean;
   /** Set to false to move and resize panels in fine steps instead of whole grid cells. */
   snapToGrid?: boolean;
+  /** How many columns the grid has; panel `x` and `width` are measured in these columns. */
+  gridColumns?: number;
   /** Shown at the top of the app; the tab title is separate and only labels the tab. */
   heading?: string;
   description?: string;

@@ -16,6 +16,7 @@ import {
   getAppStatusGroups,
   getNewAppTitle,
   reconcileApps,
+  setGridColumns,
 } from './app_layout';
 import type { CellStatus } from './types';
 import { createPinnedTimeCell } from './cell_factory';
@@ -102,6 +103,43 @@ describe('appendPanel', () => {
     };
     const next = appendPanel(app, dropdown('host'), () => 'new');
     expect(next.panels[1]).toEqual({ id: 'new', cellId: 'host', x: 0, y: 9, width: 4, height: 2 });
+  });
+
+  it('sizes the panel for the app grid columns', () => {
+    const app: NotebookApp = { id: 'app', title: 'App 1', panels: [], gridColumns: 24 };
+    expect(appendPanel(app, dropdown('host'), () => 'new').panels[0]).toMatchObject({ width: 8 });
+  });
+});
+
+describe('setGridColumns', () => {
+  const app: NotebookApp = {
+    id: 'app',
+    title: 'App 1',
+    panels: [
+      { id: 'left', cellId: 'a', x: 0, y: 0, width: 6, height: 4 },
+      { id: 'right', cellId: 'b', x: 6, y: 0, width: 6, height: 4 },
+    ],
+  };
+
+  it('keeps each panel share of the width', () => {
+    const wider = setGridColumns(app, 24);
+    expect(wider.gridColumns).toBe(24);
+    expect(wider.panels.map(({ x, width }) => [x, width])).toEqual([
+      [0, 12],
+      [12, 12],
+    ]);
+  });
+
+  it('keeps panels inside the grid and at least one column wide', () => {
+    const narrow = setGridColumns(app, 1);
+    expect(narrow.panels.map(({ x, width }) => [x, width])).toEqual([
+      [0, 1],
+      [0, 1],
+    ]);
+  });
+
+  it('drops the setting when going back to the default', () => {
+    expect(setGridColumns(setGridColumns(app, 24), 12)).toEqual(app);
   });
 });
 

@@ -131,11 +131,21 @@ describe('notebookAttributesSchema', () => {
         hideTimePicker: true,
         freePlacement: true,
         snapToGrid: false,
+        gridColumns: 24,
         heading: 'Traffic overview',
         description: 'Daily visits by host',
       })),
     };
     expect(notebookAttributesSchema.validate(withSetting)).toEqual(withSetting);
+  });
+
+  it.each([0, 49, 6.5])('rejects %s grid columns', (gridColumns) => {
+    const notebook = withApp('visits');
+    const withColumns = {
+      ...notebook,
+      panels: notebook.panels.map((app) => ({ ...app, gridColumns })),
+    };
+    expect(() => notebookAttributesSchema.validate(withColumns)).toThrow();
   });
 
   const manyCells = toNotebook(

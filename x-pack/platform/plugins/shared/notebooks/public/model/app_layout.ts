@@ -8,12 +8,14 @@
 import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import type { GridLayoutData } from '@kbn/grid-layout';
+import { DEFAULT_GRID_COLUMNS } from '../../common/constants';
 import type { AppPanel, CellDefinition, NotebookApp } from '../../common/types';
 import { isPinnedTimeCell } from './cell_factory';
 import type { CellStatus } from './types';
 import { buildGraph, getDescendants } from './graph';
 
-export const APP_GRID_COLUMNS = 12;
+export const getGridColumns = ({ gridColumns }: NotebookApp): number =>
+  gridColumns ?? DEFAULT_GRID_COLUMNS;
 
 const getAppTitle = (number: number): string =>
   i18n.translate('xpack.notebook.app.defaultTitle', {
@@ -39,18 +41,27 @@ interface PanelSize {
   height: number;
 }
 
-/** How much of the grid a cell takes when it is first placed on an app. */
-export const getDefaultPanelSize = (cell: CellDefinition): PanelSize => {
+/** The size a cell takes on the default 12-column grid when it is first placed on an app. */
+const getBasePanelSize = (cell: CellDefinition): PanelSize => {
   switch (cell.type) {
     case 'input':
       return { width: 4, height: 2 };
     case 'markdown':
-      return { width: APP_GRID_COLUMNS, height: 3 };
+      return { width: DEFAULT_GRID_COLUMNS, height: 3 };
     case 'chart':
       return { width: 6, height: 7 };
     case 'esql':
-      return { width: APP_GRID_COLUMNS, height: 8 };
+      return { width: DEFAULT_GRID_COLUMNS, height: 8 };
   }
+};
+
+/** How much of a grid with the given number of columns a cell takes when it is first placed. */
+export const getDefaultPanelSize = (
+  cell: CellDefinition,
+  columns: number = DEFAULT_GRID_COLUMNS
+): PanelSize => {
+  const { width, height } = getBasePanelSize(cell);
+  return { width: Math.max(1, Math.round((width * columns) / DEFAULT_GRID_COLUMNS)), height };
 };
 
 const getBottom = (panels: readonly AppPanel[]): number =>
@@ -60,14 +71,15 @@ const getBottom = (panels: readonly AppPanel[]): number =>
 const packPanels = (
   cells: readonly CellDefinition[],
   top: number,
-  createId: () => string
+  createId: () => string,
+  columns: number = DEFAULT_GRID_COLUMNS
 ): AppPanel[] => {
   let x = 0;
   let y = top;
   let rowHeight = 0;
   return cells.map((cell) => {
-    const { width, height } = getDefaultPanelSize(cell);
-    if (x + width > APP_GRID_COLUMNS) {
+    const { width, height } = getDefaultPanelSize(cell, columns);
+    if (x + width > columns) {
       x = 0;
       y += rowHeight;
       rowHeight = 0;
@@ -86,8 +98,28 @@ export const appendPanel = (
   createId: () => string = uuidv4
 ): NotebookApp => ({
   ...app,
-  panels: [...app.panels, ...packPanels([cell], getBottom(app.panels), createId)],
+  panels: [
+    ...app.panels,
+    ...packPanels([cell], getBottom(app.panels), createId, getGridColumns(app)),
+  ],
 });
+
+/**
+ * The app on a grid with a different number of columns. Panels keep their share of the width,
+ * rounded to whole columns, so switching back and forth can shift them slightly.
+ */
+export const setGridColumns = (app: NotebookApp, columns: number): NotebookApp => {
+  const { gridColumns: _previous, ...rest } = app;
+  const ratio = columns / getGridColumns(app);
+  const panels = app.panels.map((panel) => {
+    const x = Math.min(Math.round(panel.x * ratio), columns - 1);
+    const width = Math.min(Math.max(1, Math.round(panel.width * ratio)), columns - x);
+    return { ...panel, x, width };
+  });
+  return columns === DEFAULT_GRID_COLUMNS
+    ? { ...rest, panels }
+    : { ...rest, gridColumns: columns, panels };
+};
 
 /**
  * The app's panels in the shape the grid layout engine edits, keyed by panel id. `scale` is how
