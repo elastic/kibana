@@ -1,0 +1,305 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { createSeededRandom, syntheticsMonitor } from '@kbn/synthtrace-client';
+import type {
+  SyntheticsMonitorConfig,
+  SyntheticsMonitorConfigType,
+} from '../../lib/synthetics/synthetics_monitors_api';
+import { getMonitorConfigId } from '../../lib/synthetics/synthetics_monitors_api';
+import { getBooleanOpt, getNumberOpt, getStringOpt } from './scenario_opts_helpers';
+import type { CheckOutcome, OutcomePattern } from './synthetics_check_outcomes';
+import { getCheckDurationUs, getCheckOutcomes } from './synthetics_check_outcomes';
+
+export const SYNTHETICS_OVERVIEW_TAG = 'synthtrace-synthetics_overview';
+
+const DEFAULT_MONITORS = 8;
+const DEFAULT_SEED = 'synthtrace';
+const DEFAULT_SPACE_ID = 'default';
+
+const MONITOR_TYPES: SyntheticsMonitorConfigType[] = ['http', 'tcp', 'icmp', 'browser'];
+
+const SCHEDULE_MINUTES: Record<SyntheticsMonitorConfigType, number> = {
+  http: 3,
+  tcp: 3,
+  icmp: 5,
+  browser: 10,
+};
+
+const PATTERN_CYCLE: OutcomePattern[] = [
+  { type: 'healthy' },
+  { type: 'healthy' },
+  { type: 'flapping' },
+  { type: 'healthy' },
+  { type: 'down' },
+  { type: 'healthy' },
+  { type: 'outage', downChecks: 3 },
+];
+
+const ERROR_MESSAGES: Record<Exclude<SyntheticsMonitorConfigType, 'browser'>, string> = {
+  http: 'received status code 503',
+  tcp: 'connection refused',
+  icmp: 'request timeout',
+};
+
+const HTTP_HEADERS_UP = { 'Content-Type': 'application/json', Server: 'nginx' };
+const HTTP_HEADERS_DOWN = { 'Content-Type': 'text/html', Server: 'nginx', 'Retry-After': '120' };
+const HTTP_DOWN_BODY =
+  '<html><head><title>503 Service Unavailable</title></head>' +
+  '<body><h1>Service Unavailable</h1><p>The server is temporarily unable to handle the request.</p></body></html>';
+
+const BROWSER_STEP_ERROR = 'locator.click: Timeout 30000ms exceeded';
+
+export interface PrivateLocation {
+  id: string;
+  label: string;
+}
+
+export interface SyntheticsOverviewOpts {
+  privateLocation: PrivateLocation;
+  monitors: number;
+  seed: string;
+  spaceId: string;
+  deleteMonitorsOnExit: boolean;
+}
+
+export const parseSyntheticsOverviewOpts = (
+  scenarioOpts: Record<string, unknown> | undefined
+): SyntheticsOverviewOpts => {
+  const id = getStringOpt(scenarioOpts, 'privateLocationId');
+  const label = getStringOpt(scenarioOpts, 'privateLocationLabel');
+  if (!id || !label) {
+    throw new Error(
+      'synthetics_overview needs --scenarioOpts.privateLocationId and --scenarioOpts.privateLocationLabel. ' +
+        'List your private locations with GET <kibana>/api/synthetics/private_locations, ' +
+        'or create one first (for example with `run-data synthetics`).'
+    );
+  }
+
+  const monitors = getNumberOpt(scenarioOpts, 'monitors', DEFAULT_MONITORS);
+  if (!Number.isInteger(monitors) || monitors < 1) {
+    throw new Error('monitors must be a positive integer');
+  }
+
+  return {
+    privateLocation: { id, label },
+    monitors,
+    seed: getStringOpt(scenarioOpts, 'seed') ?? DEFAULT_SEED,
+    spaceId: getStringOpt(scenarioOpts, 'spaceId') ?? DEFAULT_SPACE_ID,
+    deleteMonitorsOnExit: getBooleanOpt(scenarioOpts, 'deleteMonitorsOnExit', false),
+  };
+};
+
+export interface OverviewMonitor {
+  config: SyntheticsMonitorConfig;
+  pattern: OutcomePattern;
+}
+
+const getTarget = (type: SyntheticsMonitorConfigType, number: number): string | undefined => {
+  switch (type) {
+    case 'http':
+      return `https://service-${number}.example.com/health`;
+    case 'tcp':
+      return `db-${number}.example.com:5432`;
+    case 'icmp':
+      return `gw-${number}.example.com`;
+    case 'browser':
+      return undefined;
+  }
+};
+
+/** The monitors of the scenario: types, patterns and ids are a function of their position. */
+export const getOverviewMonitors = ({
+  monitors,
+  privateLocation,
+}: Pick<SyntheticsOverviewOpts, 'monitors' | 'privateLocation'>): OverviewMonitor[] =>
+  Array.from({ length: monitors }, (_, index) => {
+    const type = MONITOR_TYPES[index % MONITOR_TYPES.length];
+    const number = index + 1;
+
+    return {
+      pattern: PATTERN_CYCLE[index % PATTERN_CYCLE.length],
+      config: {
+        id: getMonitorConfigId(`${SYNTHETICS_OVERVIEW_TAG}:${number}`),
+        type,
+        name: `Synthtrace ${type.toUpperCase()} ${number}`,
+        target: getTarget(type, number),
+        scheduleMinutes: SCHEDULE_MINUTES[type],
+        tags: [type],
+        privateLocations: [privateLocation.id],
+      },
+    };
+  });
+
+/** Numbers the runs of identical consecutive outcomes, so each up or down streak has an index. */
+export const getStreakIndexes = (outcomes: CheckOutcome[]): number[] => {
+  let streak = 0;
+
+  return outcomes.map((outcome, index) => {
+    if (index > 0 && outcome !== outcomes[index - 1]) {
+      streak++;
+    }
+    return streak;
+  });
+};
+
+/**
+ * Returns the timestamp of the check that a range has to generate, or undefined if none is due.
+ *
+ * A range as long as the schedule or longer (historical runs) generates a check at every
+ * timestamp it is given. A shorter one (live runs generate 1 s buckets) generates the check
+ * whose schedule point, `from` plus a multiple of the schedule, falls inside it. Without this,
+ * a live run would generate a check per bucket instead of one per schedule interval.
+ */
+export const getCheckTimestamp = ({
+  timestamp,
+  rangeFrom,
+  rangeTo,
+  from,
+  scheduleMinutes,
+}: {
+  timestamp: number;
+  rangeFrom: number;
+  rangeTo: number;
+  from: number;
+  scheduleMinutes: number;
+}): number | undefined => {
+  const intervalMs = scheduleMinutes * 60 * 1000;
+  if (rangeTo - rangeFrom >= intervalMs) {
+    return timestamp;
+  }
+
+  const schedulePoint = from + Math.ceil((rangeFrom - from) / intervalMs) * intervalMs;
+  return schedulePoint < rangeTo ? schedulePoint : undefined;
+};
+
+/**
+ * Decides the outcome of the check at a timestamp. The outcomes are laid out over the whole
+ * run range, not the range of the worker that asks, so every worker agrees on them. A live run
+ * goes on after `to`: the timeline is extended, so later checks follow the pattern as well.
+ */
+export const createCheckTimeline = ({
+  pattern,
+  scheduleMinutes,
+  monitorId,
+  seed,
+  from,
+  to,
+}: {
+  pattern: OutcomePattern;
+  scheduleMinutes: number;
+  monitorId: string;
+  seed: string;
+  from: number;
+  to: number;
+}) => {
+  const intervalMs = scheduleMinutes * 60 * 1000;
+  const layOut = (count: number) => {
+    const laidOut = getCheckOutcomes({
+      pattern,
+      count,
+      random: createSeededRandom(`${seed}:${monitorId}`),
+    });
+    return { outcomes: laidOut, streaks: getStreakIndexes(laidOut) };
+  };
+
+  let { outcomes, streaks } = layOut(Math.max(1, Math.ceil((to - from) / intervalMs)));
+
+  return (timestamp: number): { index: number; outcome: CheckOutcome; streak: number } => {
+    const index = Math.max(Math.floor((timestamp - from) / intervalMs), 0);
+    if (index >= outcomes.length) {
+      ({ outcomes, streaks } = layOut(index + 1));
+    }
+    return { index, outcome: outcomes[index], streak: streaks[index] };
+  };
+};
+
+/** The documents of one check of a monitor: one for http, tcp and icmp, a whole run for browser. */
+export const buildCheck = ({
+  config,
+  location,
+  spaceId,
+  timestamp,
+  outcome,
+  streak,
+  random,
+}: {
+  config: SyntheticsMonitorConfig;
+  location: PrivateLocation;
+  spaceId: string;
+  timestamp: number;
+  outcome: CheckOutcome;
+  streak: number;
+  random: () => number;
+}): Array<ReturnType<typeof syntheticsMonitor.create>> => {
+  const { id, type, name, target, scheduleMinutes, tags = [] } = config;
+  const stateId = `${id}-${streak}`;
+  const checkGroup = `${id}-${timestamp}`;
+  const isUp = outcome === 'up';
+
+  const monitor = syntheticsMonitor
+    .create()
+    .dataset(type)
+    .name(name)
+    .origin('ui')
+    .configId(id)
+    .spaceId(spaceId)
+    .tags([SYNTHETICS_OVERVIEW_TAG, ...tags])
+    .interval(scheduleMinutes * 60)
+    .location(location)
+    .timestamp(timestamp)
+    .overrides({
+      'monitor.id': id,
+      'monitor.check_group': checkGroup,
+      'monitor.fleet_managed': true,
+      'monitor.timespan.gte': new Date(timestamp).toISOString(),
+      'monitor.timespan.lt': new Date(timestamp + scheduleMinutes * 60 * 1000).toISOString(),
+      'agent.type': 'heartbeat',
+    });
+
+  if (type === 'browser') {
+    const steps = [
+      { name: 'Open the home page', durationUs: getCheckDurationUs('up', random) },
+      {
+        name: 'Submit the form',
+        durationUs: getCheckDurationUs(outcome, random),
+        ...(isUp ? {} : { error: BROWSER_STEP_ERROR }),
+      },
+    ];
+    const documents = monitor.journey({
+      id: 'journey',
+      name,
+      checkGroup,
+      steps,
+    });
+    documents[documents.length - 1].overrides({ 'state.id': stateId });
+
+    return documents;
+  }
+
+  if (target) {
+    monitor.url(target);
+  }
+  monitor.duration(getCheckDurationUs(outcome, random));
+  if (type === 'http') {
+    monitor.httpResponse(
+      isUp
+        ? { statusCode: 200, headers: HTTP_HEADERS_UP }
+        : { statusCode: 503, headers: HTTP_HEADERS_DOWN, body: HTTP_DOWN_BODY }
+    );
+  }
+  if (isUp) {
+    monitor.up();
+  } else {
+    monitor.down().error({ message: ERROR_MESSAGES[type], type: 'io' });
+  }
+  monitor.overrides({ 'state.id': stateId });
+
+  return [monitor];
+};
