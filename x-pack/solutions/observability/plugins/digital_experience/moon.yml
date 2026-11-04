@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/elastic-agent-utils'
   - '@kbn/es-errors'
   - '@kbn/es-query'
+  - '@kbn/event-stacktrace'
   - '@kbn/features-plugin'
   - '@kbn/field-formats-plugin'
   - '@kbn/i18n'
