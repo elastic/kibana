@@ -130,7 +130,7 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
   return (
     <NotebookContext.Provider value={notebook}>
       {sidePanel === 'graph' && <GraphFlyout onClose={closeSidePanel} onSelectCell={focusCell} />}
-      {sidePanel === 'app' && <AppFlyout onClose={closeSidePanel} />}
+      {sidePanel === 'app' && <AppFlyout onClose={closeSidePanel} onRevealCell={focusCell} />}
       <EuiPageTemplate restrictWidth={1200} paddingSize="m">
         <EuiPageTemplate.Section paddingSize="m" grow={false}>
           <NotebookHeader

@@ -187,10 +187,12 @@ const AppGridPanel = ({
   app,
   panel,
   setDragHandles,
+  onRevealCell,
 }: {
   app: NotebookApp;
   panel: AppPanel;
   setDragHandles: (refs: Array<HTMLElement | null>) => void;
+  onRevealCell: (cellId: string) => void;
 }) => {
   const { store } = useNotebook();
   const euiThemeContext = useEuiTheme();
@@ -209,6 +211,19 @@ const AppGridPanel = ({
 
   const closeMenu = () => setIsMenuOpen(false);
   const menuItems = [
+    <EuiContextMenuItem
+      key="reveal"
+      icon="eye"
+      onClick={() => {
+        closeMenu();
+        onRevealCell(cell.id);
+      }}
+      data-test-subj="notebookAppPanelReveal"
+    >
+      {i18n.translate('xpack.notebook.app.revealInNotebook', {
+        defaultMessage: 'Reveal in notebook',
+      })}
+    </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="remove"
       icon="trash"
@@ -359,7 +374,13 @@ const getGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
   `;
 };
 
-const AppGrid = ({ app }: { app: NotebookApp }) => {
+const AppGrid = ({
+  app,
+  onRevealCell,
+}: {
+  app: NotebookApp;
+  onRevealCell: (cellId: string) => void;
+}) => {
   const { store } = useNotebook();
   const { euiTheme } = useEuiTheme();
   const layout = useMemo(() => toGridLayout(app.panels), [app.panels]);
@@ -387,10 +408,15 @@ const AppGrid = ({ app }: { app: NotebookApp }) => {
     (panelId: string, setDragHandles: (refs: Array<HTMLElement | null>) => void) => {
       const panel = app.panels.find(({ id }) => id === panelId);
       return panel ? (
-        <AppGridPanel app={app} panel={panel} setDragHandles={setDragHandles} />
+        <AppGridPanel
+          app={app}
+          panel={panel}
+          setDragHandles={setDragHandles}
+          onRevealCell={onRevealCell}
+        />
       ) : null;
     },
-    [app]
+    [app, onRevealCell]
   );
 
   if (app.panels.length === 0) {
@@ -606,7 +632,14 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: NotebookApp[] }) =>
 };
 
 /** The notebook's apps in a push flyout, beside the notebook that feeds them. */
-export const AppFlyout = ({ onClose }: { onClose: () => void }) => {
+export const AppFlyout = ({
+  onClose,
+  onRevealCell,
+}: {
+  onClose: () => void;
+  /** Scrolls the notebook to the cell and flashes it. */
+  onRevealCell: (cellId: string) => void;
+}) => {
   const { store, activeAppId$ } = useNotebook();
   const apps = useStateFromPublishingSubject(store.apps$);
   const activeAppId = useStateFromPublishingSubject(activeAppId$);
@@ -628,7 +661,7 @@ export const AppFlyout = ({ onClose }: { onClose: () => void }) => {
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <AppHeader app={app} />
-            <AppGrid app={app} />
+            <AppGrid app={app} onRevealCell={onRevealCell} />
           </EuiFlyoutBody>
         </>
       ) : (

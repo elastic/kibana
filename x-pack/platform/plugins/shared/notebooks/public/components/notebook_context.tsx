@@ -15,7 +15,7 @@ export interface NotebookContextValue {
   scheduler: NotebookScheduler;
   /** Number of notebook flyouts currently open. */
   openFlyouts$: BehaviorSubject<number>;
-  /** The cell selected in the dependency graph, highlighted in the notebook. */
+  /** The cell selected in the dependency graph or revealed from an app, highlighted in the notebook. */
   focusedCell$: BehaviorSubject<string | undefined>;
   /** What the panel beside the notebook shows, if it is open. */
   sidePanel$: BehaviorSubject<SidePanel | undefined>;
