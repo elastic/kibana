@@ -6,7 +6,7 @@
  */
 
 import type { PresetSchedule } from '@kbn/nightshift-investigations-plugin/common';
-import type { Automation } from '../../hooks/use_automations';
+import type { Automation } from '../../../data/automations/use_automations';
 import { toAutomationFormValues, toPresetSchedule } from './automation_form_values';
 
 describe('automation form values', () => {
@@ -94,7 +94,6 @@ describe('automation form values', () => {
       },
       dailyDispatchLimit: '12',
       instructions: 'Investigate',
-      mode: 'investigate',
       slackAction: { target: 'self', destination: '@me' },
       isEnabled: true,
     });
