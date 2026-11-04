@@ -8,13 +8,13 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { useKibana } from '../hooks/use_kibana';
+import { useKibana } from '../../hooks/use_kibana';
 import {
   isNightshiftSetUp,
   useSetUpNightshiftServiceAccount,
 } from './use_investigator_service_account';
 
-jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+jest.mock('../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 jest.mock('@kbn/nightshift-shared', () => ({
   ...jest.requireActual('@kbn/nightshift-shared'),
   ensureNightshiftServiceAccounts: jest

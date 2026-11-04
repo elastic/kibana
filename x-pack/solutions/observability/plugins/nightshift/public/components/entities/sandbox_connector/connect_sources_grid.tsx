@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../hooks/use_kibana';
-import { useConnectorsByType } from './use_connectors_by_type';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useConnectorsByType } from '../../../data/sandbox_connectors/use_connectors_by_type';
 import { SandboxConnectorsError } from './sandbox_connectors_error';
 import { ConnectTypeCard } from './connect_type_card';
 import { sourceGridStyles } from './source_grid_styles';

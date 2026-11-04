@@ -22,8 +22,8 @@ import {
   MAX_SANDBOX_ALLOWLIST_HOSTS,
   validateSandboxAllowlist,
 } from '@kbn/nightshift-investigations-plugin/common';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
-import { SettingsSectionRow } from '../settings/components/settings_section';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { SettingsSectionRow } from '../settings_section';
 import { useFetchSandboxAllowlist } from './use_fetch_sandbox_allowlist';
 import { useSaveSandboxAllowlist } from './use_save_sandbox_allowlist';
 

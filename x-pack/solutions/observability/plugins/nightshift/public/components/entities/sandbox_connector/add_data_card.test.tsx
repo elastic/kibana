@@ -8,9 +8,12 @@
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { AddDataCard } from './add_data_card';
-import { mockKibanaServices, renderWithProviders } from './test_utils';
+import {
+  mockKibanaServices,
+  renderWithProviders,
+} from '../../../data/sandbox_connectors/test_utils';
 
-jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+jest.mock('../../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 
 describe('AddDataCard', () => {
   it('sends to the Observability onboarding flow through its locator', () => {

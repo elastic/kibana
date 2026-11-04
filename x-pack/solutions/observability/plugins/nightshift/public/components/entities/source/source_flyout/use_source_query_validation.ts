@@ -7,8 +7,8 @@
 
 import { useDebouncedValue } from '@kbn/react-hooks';
 import { useQuery } from '@kbn/react-query';
-import { getFormattedError } from '../../common/errors';
-import { useKibana } from '../../hooks/use_kibana';
+import { getFormattedError } from '../../../../common/errors';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { validateSourceEsql } from './validate_source_esql';
 
 export const SOURCE_QUERY_VALIDATION_DEBOUNCE_MS = 500;

@@ -16,7 +16,7 @@ const mockFetch = jest.fn<Promise<ValidateSourceQueryResponse>, [string, unknown
 const mockCreateSource = jest.fn();
 const mockUpdateSource = jest.fn();
 
-jest.mock('../../hooks/use_kibana', () => ({
+jest.mock('../../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       notifications: { toasts: { addError: jest.fn() } },
@@ -24,7 +24,7 @@ jest.mock('../../hooks/use_kibana', () => ({
     },
   }),
 }));
-jest.mock('../../data/sources/use_sources_api', () => ({
+jest.mock('../../../../data/sources/use_sources_api', () => ({
   useSourcesApi: () => ({
     createSource: { mutateAsync: mockCreateSource },
     updateSource: { mutateAsync: mockUpdateSource, isLoading: false },

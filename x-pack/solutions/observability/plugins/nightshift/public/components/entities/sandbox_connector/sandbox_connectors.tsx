@@ -23,10 +23,13 @@ import { i18n } from '@kbn/i18n';
 import { KbnInfoCallout } from '@kbn/ui-callout';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
-import { isHttpNotFoundError } from '../common/http_error';
-import { useKibana } from '../hooks/use_kibana';
-import { useFetchSandboxConnectors } from './use_fetch_sandbox_connectors';
-import { noAgentPermissionReason, useAgentConnectors } from './use_agent_connectors';
+import { isHttpNotFoundError } from '../../../common/http_error';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useFetchSandboxConnectors } from '../../../data/sandbox_connectors/use_fetch_sandbox_connectors';
+import {
+  noAgentPermissionReason,
+  useAgentConnectors,
+} from '../../../data/sandbox_connectors/use_agent_connectors';
 import { useEditConnector } from './use_edit_connector';
 import { getConnectorTypeIcon } from './connector_type_icon';
 import { SandboxConnectorsError } from './sandbox_connectors_error';

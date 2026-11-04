@@ -8,9 +8,9 @@
 import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import { appendLimitToQuery, getESQLResults } from '@kbn/esql-utils';
 import { useQuery } from '@kbn/react-query';
-import { useKibana } from '../../hooks/use_kibana';
-import { useTimefilter } from '../../hooks/use_timefilter';
-import { esqlResultToRows } from '../../common/esql_result_to_rows';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
+import { esqlResultToRows } from '../../../../common/esql_result_to_rows';
 
 // A preview only needs a sample; the default ES|QL limit would ship up to 1000 rows.
 const PREVIEW_ROW_LIMIT = 100;

@@ -10,16 +10,16 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import { getESQLResults } from '@kbn/esql-utils';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { useKibana } from '../../hooks/use_kibana';
-import { useTimefilter } from '../../hooks/use_timefilter';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { useSourcePreview } from './use_source_preview';
 
 jest.mock('@kbn/esql-utils', () => ({
   ...jest.requireActual('@kbn/esql-utils'),
   getESQLResults: jest.fn(),
 }));
-jest.mock('../../hooks/use_kibana');
-jest.mock('../../hooks/use_timefilter');
+jest.mock('../../../../hooks/use_kibana');
+jest.mock('../../../../hooks/use_timefilter');
 
 const getESQLResultsMock = getESQLResults as jest.MockedFunction<typeof getESQLResults>;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;

@@ -15,7 +15,7 @@ import {
   sandboxConnector,
 } from './test_utils';
 
-jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+jest.mock('../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 
 describe('useConnectorsByType', () => {
   it('groups the space connectors by type and counts the ones the agent has', async () => {

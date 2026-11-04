@@ -39,9 +39,9 @@ import {
 import { hasSameEsql } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import { useKibana } from '../../hooks/use_kibana';
-import { useSourcesApi } from '../../data/sources/use_sources_api';
-import { getFormattedError } from '../../common/errors';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { useSourcesApi } from '../../../../data/sources/use_sources_api';
+import { getFormattedError } from '../../../../common/errors';
 import { ConfirmSourceActionModal } from '../confirm_source_action_modal';
 import { SourcePreview } from './source_preview';
 import { useSourceQueryValidation } from './use_source_query_validation';

@@ -11,7 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { ActionType } from '@kbn/actions-types';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
-import { useKibana } from '../hooks/use_kibana';
+import { useKibana } from '../../hooks/use_kibana';
 
 export const actionType = (id: string, overrides: Partial<ActionType> = {}): ActionType => ({
   id,

@@ -8,9 +8,13 @@
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { ConnectorList } from './connector_list';
-import { mockKibanaServices, renderWithProviders, sandboxConnector } from './test_utils';
+import {
+  mockKibanaServices,
+  renderWithProviders,
+  sandboxConnector,
+} from '../../../data/sandbox_connectors/test_utils';
 
-jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+jest.mock('../../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 
 const connectors = [
   sandboxConnector('a'),

@@ -11,7 +11,7 @@ import type {
   PutSandboxAllowlistRequest,
   PutSandboxAllowlistResponse,
 } from '@kbn/nightshift-investigations-plugin/common';
-import { useKibana } from '../hooks/use_kibana';
+import { useKibana } from '../../../hooks/use_kibana';
 import { NIGHTSHIFT_SANDBOX_ALLOWLIST_QUERY_KEY } from './use_fetch_sandbox_allowlist';
 
 const SAVE_SUCCESS_TOAST_TITLE = i18n.translate(

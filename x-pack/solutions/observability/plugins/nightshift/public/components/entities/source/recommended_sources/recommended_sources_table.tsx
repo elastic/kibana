@@ -23,9 +23,9 @@ import {
 import { getEbtProps } from '@kbn/ebt-click';
 import type { RecommendedSource } from '@kbn/nightshift-sources-plugin/public';
 import React, { useEffect, useRef, useState } from 'react';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
-import { useCreateSources } from '../../data/sources/use_create_sources';
-import { useRecommendedSources } from '../../data/sources/use_recommended_sources';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../../common/ebt_constants';
+import { useCreateSources } from '../../../../data/sources/use_create_sources';
+import { useRecommendedSources } from '../../../../data/sources/use_recommended_sources';
 import type { SourceFormValues } from '../source_flyout/source_flyout';
 import {
   ADD_SELECTED_SOURCE_LABEL,

@@ -10,8 +10,8 @@ import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { AgentWithPermissions } from '@kbn/agent-builder-browser';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '@kbn/nightshift-investigations-plugin/common';
-import { isHttpClientError } from '../common/http_error';
-import { useKibana } from '../hooks/use_kibana';
+import { isHttpClientError } from '../../common/http_error';
+import { useKibana } from '../../hooks/use_kibana';
 
 export const INVESTIGATION_AGENT_QUERY_KEY = ['nightshift.investigationAgent'] as const;
 

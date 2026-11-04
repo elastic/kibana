@@ -9,7 +9,10 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
-import { noAgentPermissionReason, useAgentConnectors } from './use_agent_connectors';
+import {
+  noAgentPermissionReason,
+  useAgentConnectors,
+} from '../../../data/sandbox_connectors/use_agent_connectors';
 import { deleteNoPermissionTooltip, preconfiguredTooltip } from './sandbox_connectors';
 import { ConnectorListItem } from './connector_list_item';
 

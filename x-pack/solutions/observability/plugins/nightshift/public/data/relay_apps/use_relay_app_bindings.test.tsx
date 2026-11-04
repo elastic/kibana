@@ -16,9 +16,9 @@ import {
   useBindChannel,
   useUnbindChannel,
 } from './use_relay_app_bindings';
-import { useKibana } from '../../../hooks/use_kibana';
+import { useKibana } from '../../hooks/use_kibana';
 
-jest.mock('../../../hooks/use_kibana', () => ({
+jest.mock('../../hooks/use_kibana', () => ({
   useKibana: jest.fn(),
 }));
 

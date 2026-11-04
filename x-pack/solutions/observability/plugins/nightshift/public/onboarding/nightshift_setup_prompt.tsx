@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { InvestigatorServiceAccountStatus } from '@kbn/nightshift-investigations-plugin/common';
 import { getNightshiftCapabilities, getNightshiftServiceAccountName } from '@kbn/nightshift-shared';
 import { useKibana } from '../hooks/use_kibana';
-import { useSetUpNightshiftServiceAccount } from './use_investigator_service_account';
+import { useSetUpNightshiftServiceAccount } from '../data/service_accounts/use_investigator_service_account';
 
 /** The accounts, roles and privileges `_enable` grants, until product docs exist. */
 export const NIGHTSHIFT_SERVICE_ACCOUNT_PRIVILEGES_HREF =

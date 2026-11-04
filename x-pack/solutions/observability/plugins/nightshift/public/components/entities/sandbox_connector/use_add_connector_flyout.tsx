@@ -8,9 +8,12 @@
 import type React from 'react';
 import { useMemo, useState } from 'react';
 import type { ActionType } from '@kbn/actions-types';
-import { useKibana } from '../hooks/use_kibana';
-import { useRefreshSandboxConnectors } from './use_fetch_sandbox_connectors';
-import { useAgentConnectors, type ConnectorRef } from './use_agent_connectors';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useRefreshSandboxConnectors } from '../../../data/sandbox_connectors/use_fetch_sandbox_connectors';
+import {
+  useAgentConnectors,
+  type ConnectorRef,
+} from '../../../data/sandbox_connectors/use_agent_connectors';
 import { getInitialSandboxConnector } from './initial_sandbox_connector';
 
 export function useAddConnectorFlyout({

@@ -13,7 +13,7 @@ import {
   type ListedServiceAccountsPage,
   type NightshiftServiceAccountsApi,
 } from '@kbn/nightshift-shared';
-import { getHttpErrorStatus } from '../common/http_error';
+import { getHttpErrorStatus } from '../../common/http_error';
 
 /** The security APIs as the current user, for `ensureNightshiftServiceAccounts` in the browser. */
 export const createBrowserServiceAccountsApi = ({

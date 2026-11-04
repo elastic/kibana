@@ -12,7 +12,7 @@ import {
   OBSERVABILITY_ONBOARDING_LOCATOR,
   type ObservabilityOnboardingLocatorParams,
 } from '@kbn/deeplinks-observability';
-import { useKibana } from '../hooks/use_kibana';
+import { useKibana } from '../../../hooks/use_kibana';
 import { SourceCard } from './source_card';
 import { LogoStack } from './logo_stack';
 import openTelemetryLogoSrc from './assets/opentelemetry.svg';

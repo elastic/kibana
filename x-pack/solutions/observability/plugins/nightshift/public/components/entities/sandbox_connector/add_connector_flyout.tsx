@@ -31,9 +31,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
-import { useKibana } from '../hooks/use_kibana';
-import { useConnectorsByType, type ConnectorTypeGroup } from './use_connectors_by_type';
-import { noAgentPermissionReason, useAgentConnectors } from './use_agent_connectors';
+import { useKibana } from '../../../hooks/use_kibana';
+import {
+  useConnectorsByType,
+  type ConnectorTypeGroup,
+} from '../../../data/sandbox_connectors/use_connectors_by_type';
+import {
+  noAgentPermissionReason,
+  useAgentConnectors,
+} from '../../../data/sandbox_connectors/use_agent_connectors';
 import { useAddConnectorFlyout } from './use_add_connector_flyout';
 import { getSourceCardItem } from './source_card_item';
 import { SandboxConnectorsError } from './sandbox_connectors_error';

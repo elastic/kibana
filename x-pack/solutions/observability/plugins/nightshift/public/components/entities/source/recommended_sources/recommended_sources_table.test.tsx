@@ -23,7 +23,7 @@ const mockToasts = { addSuccess: jest.fn(), addError: jest.fn() };
 const mockOnCreationStateChange = jest.fn();
 let mockRecommendations: RecommendedSource[];
 
-jest.mock('../../hooks/use_kibana', () => ({
+jest.mock('../../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       notifications: { toasts: mockToasts },
@@ -33,10 +33,10 @@ jest.mock('../../hooks/use_kibana', () => ({
     },
   }),
 }));
-jest.mock('../../data/maintenance/use_significant_events_maintenance', () => ({
+jest.mock('../../../../data/maintenance/use_significant_events_maintenance', () => ({
   useBlocksNewActivity: () => ({ isBlocked: false }),
 }));
-jest.mock('../../data/sources/use_recommended_sources', () => ({
+jest.mock('../../../../data/sources/use_recommended_sources', () => ({
   useRecommendedSources: () => ({
     data: mockRecommendations,
     isLoading: false,

@@ -11,8 +11,8 @@ import { i18n } from '@kbn/i18n';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { fetchConnector } from '@kbn/alerts-ui-shared/src/common/apis/fetch_connector';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
-import { useKibana } from '../hooks/use_kibana';
-import { useRefreshSandboxConnectors } from './use_fetch_sandbox_connectors';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useRefreshSandboxConnectors } from '../../../data/sandbox_connectors/use_fetch_sandbox_connectors';
 
 export function useEditConnector(): {
   canEdit: boolean;

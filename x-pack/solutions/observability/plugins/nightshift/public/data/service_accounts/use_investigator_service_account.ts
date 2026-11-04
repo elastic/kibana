@@ -19,9 +19,9 @@ import {
   ensureNightshiftServiceAccounts,
   NightshiftServiceAccountSetupError,
 } from '@kbn/nightshift-shared';
-import { isHttpClientError } from '../common/http_error';
-import { useKibana } from '../hooks/use_kibana';
-import { NIGHTSHIFT_ONBOARDING_QUERY_KEY } from '../onboarding/use_onboarding';
+import { isHttpClientError } from '../../common/http_error';
+import { useKibana } from '../../hooks/use_kibana';
+import { NIGHTSHIFT_ONBOARDING_QUERY_KEY } from '../../onboarding/use_onboarding';
 import { createBrowserServiceAccountsApi } from './browser_service_accounts_api';
 
 const QUERY_KEY = ['nightshift.investigatorServiceAccount'] as const;

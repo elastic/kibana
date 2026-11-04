@@ -17,8 +17,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { SignificantEventsSearchBar } from '../../components/search_bar';
-import { getFormattedError } from '../../common/errors';
+import { SignificantEventsSearchBar } from '../../../search_bar';
+import { getFormattedError } from '../../../../common/errors';
 import { useSourcePreview } from './use_source_preview';
 
 interface SourcePreviewProps {

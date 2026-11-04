@@ -7,8 +7,8 @@
 
 import { useQuery, type UseQueryResult } from '@kbn/react-query';
 import type { SandboxConnectorType } from '@kbn/nightshift-investigations-plugin/common';
-import { isHttpClientError } from '../common/http_error';
-import { useKibana } from '../hooks/use_kibana';
+import { isHttpClientError } from '../../common/http_error';
+import { useKibana } from '../../hooks/use_kibana';
 
 const NIGHTSHIFT_SANDBOX_CONNECTOR_TYPES_QUERY_KEY = ['nightshift.sandboxConnectorTypes'] as const;
 
