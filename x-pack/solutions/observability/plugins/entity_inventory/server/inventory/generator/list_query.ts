@@ -61,9 +61,20 @@ export const buildListQuery = ({
   const { engine, indexPattern, filter } = plan;
   const { groupingFields, presenceFilter, idEvaluation } = identity;
 
-  // `TS` reads only the time-series indices behind the pattern; the `FROM` plan reads the rest, so
-  // no index is read twice. The mode predicate is resolved at planning, so time-series shards are
-  // never opened. `METADATA` takes the name bare: Elasticsearch rejects a quoted one there.
+  // One source becomes two plans that together read every index behind the pattern exactly once.
+  // Both name the pattern as the author wrote it, so Elasticsearch applies index privileges, alias
+  // filters and routing itself; naming an alias's backing indices would bypass its filter, and no
+  // metadata call is needed to learn them.
+  // - `TS <pattern>` resolves only `index.mode: time_series` indices and silently skips the rest.
+  //   It is built only when the probe found a readable time-series index (see probe_query.ts),
+  //   because over a pattern with none `TS ... | STATS` fails verification.
+  // - `FROM <pattern> METADATA _index_mode | WHERE _index_mode != "time_series"` reads the rest.
+  //   `_index_mode` is per-index metadata (`standard`, `time_series`, `logsdb`, `lookup`), so the
+  //   predicate is resolved at planning and time-series shards are never opened; verified with the
+  //   query profile, not documented. `METADATA` takes the name bare: Elasticsearch rejects a quoted
+  //   one there.
+  // Under `unmapped_fields="nullify"` a field mapped in no index a plan reads comes back as a column
+  // of type `null`; the executor reads readability and availability from that (plan_result.ts).
   const sourceCommand =
     engine === 'TS' ? `TS ${indexPattern}` : `FROM ${indexPattern} METADATA _index_mode`;
   const predicates = [

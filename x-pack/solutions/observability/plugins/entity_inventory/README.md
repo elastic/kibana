@@ -87,3 +87,5 @@ No metadata API is called and no concrete index is named: the executor learns ev
 **Reading results.** Every query runs with `unmapped_fields="nullify"`, so a field no index maps comes back as a column of type `null`. `last_seen` of type `null` means no readable index maps `@timestamp` and the plan is unusable. A plan is also unusable when no identity composition has every field mapped. An attribute of type `null` is an unavailable field, not fatal. A plan that returns its full limit is cut; `total` is the merged row count, exact, only when no plan is cut or partial, otherwise null, and `truncated` is true whenever rows were left out.
 
 Nothing is cached yet.
+
+The reasoning behind the probe, the result reading and the absence of a count query, with the Elasticsearch behaviours relied on and which of them are documented, is in the note `docs/infra-inventory/notes/entity_inventory_minimal_resolver_proposal.md` in `elastic/observability-dev`.

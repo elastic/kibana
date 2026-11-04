@@ -11,6 +11,22 @@ import { isVerificationError, toSourceError } from './errors/source_error';
 import { executeEsql } from './esql_client';
 import type { EsqlQueryResult } from './esql_client';
 
+// The only question the executor asks Elasticsearch before the list queries. On purpose it makes
+// no metadata calls (no resolve-index, `_has_privileges` or field capabilities) and never learns a
+// concrete index name: Elasticsearch applies privileges and alias filters when the queries run, and
+// each result is read afterwards for what the query could not do (plan_result.ts). Outcomes:
+//
+//   `@timestamp` typed `date`/`date_nanos`  a readable time-series index exists   TS and FROM plans
+//   `@timestamp` typed `null`               none readable, or none at all         FROM plan only
+//   `verification_exception`                a concrete index that is not time     FROM plan only
+//                                           series, or a name that does not exist
+//                                           (the FROM plan then fails visibly)
+//   any other failure                       unknown; reported as a source error   no plan runs
+//
+// The last row matters: the FROM plan excludes time-series indices, so reading a timeout or a
+// rejection as "no time-series index" would silently drop them. The error class comes from the
+// response body's `error.type`, never from the message, which is undocumented and may change.
+
 /** What the probe found behind one pattern, or why it could not tell. */
 export type ProbeResult =
   | { failed: false; hasTimeSeries: boolean }
