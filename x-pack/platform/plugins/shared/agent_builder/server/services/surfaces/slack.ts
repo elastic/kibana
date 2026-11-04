@@ -14,7 +14,6 @@ export const slackSurface: SurfaceRenderer = {
   render: (composition, runtime, { baseUrl }) => {
     const { text, blocks } = runtime.surfaces.slack.render(composition, {
       heading: false,
-      // Kibana app links resolve against it; `actions` take absolute URLs only.
       ...(baseUrl ? { baseUrl } : {}),
     });
 
