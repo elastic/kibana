@@ -113,14 +113,15 @@ export const getDisplayedItemsAllowedAmount = (
   config: AppMenuConfig,
   hasStaticItems: boolean = false
 ) => {
+  const { itemLimit = APP_MENU_ITEM_LIMIT } = config;
   const totalItems = config.items?.length ?? 0;
   const hasForcedOverflowItems = config.items?.some((item) => item.overflow) ?? false;
 
-  if (!hasForcedOverflowItems && !hasStaticItems && totalItems <= APP_MENU_ITEM_LIMIT) {
-    return APP_MENU_ITEM_LIMIT;
+  if (!hasForcedOverflowItems && !hasStaticItems && totalItems <= itemLimit) {
+    return itemLimit;
   }
   // Reserve one slot for the overflow button
-  return APP_MENU_ITEM_LIMIT - 1;
+  return itemLimit - 1;
 };
 
 /**

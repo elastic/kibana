@@ -128,6 +128,19 @@ describe('utils', () => {
       expect(result).toBe(APP_MENU_ITEM_LIMIT - 1);
     });
 
+    it('should use itemLimit when provided', () => {
+      const items = Array.from({ length: 4 }, (_, i) => ({
+        id: `${i}`,
+        label: `Item ${i}`,
+        run: jest.fn(),
+        iconType: 'gear' as const,
+        order: i,
+      }));
+
+      expect(getDisplayedItemsAllowedAmount({ items, itemLimit: 4 })).toBe(4);
+      expect(getDisplayedItemsAllowedAmount({ items, itemLimit: 3 })).toBe(2);
+    });
+
     it('should not be affected by primaryActionItem', () => {
       const items = Array.from({ length: 5 }, (_, i) => ({
         id: `${i}`,

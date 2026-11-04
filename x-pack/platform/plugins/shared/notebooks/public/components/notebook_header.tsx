@@ -157,6 +157,7 @@ export const NotebookHeader = ({
 
   const appMenu = useMemo<AppMenuConfig>(
     () => ({
+      itemLimit: 4,
       items: [
         {
           id: 'runAll',

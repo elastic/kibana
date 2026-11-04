@@ -407,6 +407,11 @@ export interface AppMenuConfig {
    */
   items?: AppMenuItemType[];
   /**
+   * Overrides how many items show before the rest overflow into the "More" popover.
+   * Defaults to APP_MENU_ITEM_LIMIT.
+   */
+  itemLimit?: number;
+  /**
    * Primary action button to display in the app menu.
    * Can be a simple button, a button with a popover, or a split button.
    */
