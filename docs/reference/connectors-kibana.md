@@ -11,7 +11,7 @@ applies_to:
 :::{important}
 These Kibana connectors are used to connect to external services for GenAI, alerting, and case management use cases.
 
-To learn about connectors for syncing data to {{es}} for search use cases, refer to [content crawlers](elasticsearch://reference/search-connectors/index.md).
+To learn about connectors for syncing data to {{es}} for search use cases, refer to [content connectors](elasticsearch://reference/search-connectors/index.md).
 :::
 
 Connectors provide a central place to store connection information for services and integrations with Elastic or third-party systems.
