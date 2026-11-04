@@ -31,8 +31,13 @@ const queryOperationSchema = z
 
 const actionFixtureSchema = z
   .object({
-    /** Merged into each generated input. */
-    input: z.record(z.string(), z.unknown()).optional(),
+    /**
+     * Merged into each generated input. A list generates the inputs once per entry, for schemas
+     * whose cross-field rules no single override satisfies in every input.
+     */
+    input: z
+      .union([z.record(z.string(), z.unknown()), z.array(z.record(z.string(), z.unknown())).min(1)])
+      .optional(),
     /** Merged into the connector config, e.g. to set an optional setting the action needs. */
     config: z.record(z.string(), z.unknown()).optional(),
     /**

@@ -1,5 +1,5 @@
 {
-  "sha1": "c8b77ac3368cc9e00315cc36e27f543dba35ef07",
+  "sha1": "0087b84fa57e436571a9ad10767a3a004773bb54",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -220,8 +220,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_write_path.spec.ts",
-        "line": 89,
-        "column": 55
+        "line": 102,
+        "column": 7
+      }
+    },
+    {
+      "id": "630943ff7e82a22-a5dd36a74ce27a8",
+      "title": "Nightshift investigations on Agent Builder conversations starts an investigation for a v2 alert without a rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_write_path.spec.ts",
+        "line": 132,
+        "column": 15
       }
     },
     {
@@ -234,8 +248,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_write_path.spec.ts",
-        "line": 118,
-        "column": 31
+        "line": 183,
+        "column": 20
       }
     },
     {
@@ -248,8 +262,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_write_path.spec.ts",
-        "line": 175,
-        "column": 12
+        "line": 236,
+        "column": 11
       }
     },
     {
@@ -262,8 +276,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_write_path.spec.ts",
-        "line": 200,
-        "column": 33
+        "line": 259,
+        "column": 19
       }
     },
     {

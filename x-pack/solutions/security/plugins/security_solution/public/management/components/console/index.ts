@@ -18,6 +18,7 @@ export type { ArgSelectorState } from './components/console_state/types';
 export type {
   ConsoleRegistrationInterface,
   ManagedConsoleExtensionComponentProps,
+  ManagedConsoleHeaderActionsComponentProps,
   RegisteredConsoleClient,
   ConsoleManagerClient,
 } from './components/console_manager/types';

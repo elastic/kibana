@@ -324,6 +324,54 @@ describe('MetricsExperienceGridContent', () => {
     );
   });
 
+  it('passes only the metadata fields that the WHERE uses to the grid and the histogram bounds fetch', () => {
+    const loadedFetchParams = {
+      ...fetchParams,
+      query: {
+        esql: 'TS test-metrics-histograms METADATA _id, _ignored | WHERE _ignored IS NULL',
+      },
+    };
+
+    render(
+      <MetricsExperienceGridContent
+        {...defaultProps}
+        fetchParams={loadedFetchParams}
+        loadedFetchParams={loadedFetchParams}
+      />,
+      { wrapper: IntlProvider }
+    );
+
+    expect(useFetchHistogramBoundsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ metadataFields: ['_ignored'] })
+    );
+
+    const { MetricsGrid } = jest.requireMock('./metrics_grid');
+    expect(MetricsGrid).toHaveBeenLastCalledWith(
+      expect.objectContaining({ metadataFields: ['_ignored'] }),
+      expect.anything()
+    );
+  });
+
+  it('passes no metadata fields when the WHERE does not use them', () => {
+    const loadedFetchParams = {
+      ...fetchParams,
+      query: { esql: 'TS test-metrics-histograms METADATA _id | WHERE host.name == "a"' },
+    };
+
+    render(
+      <MetricsExperienceGridContent
+        {...defaultProps}
+        fetchParams={loadedFetchParams}
+        loadedFetchParams={loadedFetchParams}
+      />,
+      { wrapper: IntlProvider }
+    );
+
+    expect(useFetchHistogramBoundsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ metadataFields: [] })
+    );
+  });
+
   it('sends no fetch params to the histogram bounds hook before METRICS_INFO has landed', () => {
     render(<MetricsExperienceGridContent {...defaultProps} />, { wrapper: IntlProvider });
 

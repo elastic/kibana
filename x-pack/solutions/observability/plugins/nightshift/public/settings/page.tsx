@@ -99,6 +99,7 @@ export function SettingsPage({ headerProps }: { headerProps: SettingsPageHeaderP
           <InvestigationsSettingsTab
             onCustomContextClick={onCustomContextClick}
             canEditCustomContext={canManage}
+            canManageSandboxAllowlist={canManage}
           />
         )}
         {tab === 'detections' && <DetectionsSettingsTab />}

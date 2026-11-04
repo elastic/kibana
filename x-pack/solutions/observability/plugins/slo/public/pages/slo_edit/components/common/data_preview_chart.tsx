@@ -39,7 +39,7 @@ import React, { useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useFormValues } from '../../hooks/use_form_values';
 import { useDebouncedGetPreviewData } from '../../hooks/use_preview';
-import { useIndicatorSectionValidation } from '../../hooks/use_section_form_validation';
+import { useIndicatorSectionValidity } from '../../context/indicator_section_validity';
 
 interface DataPreviewChartProps {
   formatPattern?: string;
@@ -60,7 +60,7 @@ export function DataPreviewChart({
   ignoreMoreThan100,
 }: DataPreviewChartProps) {
   const { charts, uiSettings } = useKibana().services;
-  const isIndicatorSectionValid = useIndicatorSectionValidation();
+  const isIndicatorSectionValid = useIndicatorSectionValidity();
 
   const [range, _] = useState({
     from: moment().subtract(1, 'day').toDate(),
