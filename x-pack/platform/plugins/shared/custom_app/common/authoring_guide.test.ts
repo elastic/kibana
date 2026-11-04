@@ -32,7 +32,6 @@ describe('the authoring guide', () => {
     'text',
     'callout',
     'stat',
-    'chart',
     'table',
     'key_value',
     'select',
@@ -148,15 +147,8 @@ describe('the authoring guide', () => {
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('makes a list of that one value');
   });
 
-  it('teaches clicking a chart: the actions, the row behind a bar and how to get back', () => {
-    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain(
-      'clicking a bar, a point or a slice runs the actions'
-    );
-    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain(
-      'a chart split by a series gives both the bar and the series'
-    );
-    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('keep a way to clear the value');
-    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('a chart\'s "onClick"');
+  it('says that a component has a query or a source, not both', () => {
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('either a "query" or a "source", never both');
   });
 
   it('teaches links: where they can go, that they stay in Kibana, and not to guess a path', () => {
@@ -177,10 +169,5 @@ describe('the authoring guide', () => {
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain(
       'There are no other colours, fonts or sizes to choose'
     );
-  });
-
-  it('says that a component has a query or a source, not both, and that a chart cannot show cases', () => {
-    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('either a "query" or a "source", never both');
-    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('A chart cannot show cases');
   });
 });

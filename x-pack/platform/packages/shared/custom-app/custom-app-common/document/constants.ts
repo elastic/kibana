@@ -10,6 +10,11 @@ export const CUSTOM_APP_EMBEDDABLE_TYPE = 'custom_app';
 /** Version of the stored panel state. Bump it, with an upgrade step, on any breaking change. */
 export const CUSTOM_APP_STATE_VERSION = 1;
 
+/** The id of the standalone application, which is also its route: `/app/customApp`. */
+export const CUSTOM_APP_APPLICATION_ID = 'customApp';
+export const SAVED_APPS_API_PATH = '/internal/custom_app/apps';
+export const SAVED_APPS_API_VERSION = '1';
+
 export const MAX_NODE_COUNT = 200;
 export const MAX_NODE_DEPTH = 8;
 export const MAX_HEADING_LENGTH = 200;

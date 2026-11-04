@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { registerCapability } from '@kbn/custom-app-registry';
 import type {
   Plugin,
   CoreSetup,
@@ -35,6 +36,7 @@ import {
   LENS_CONTENT_TYPE,
   LENS_ITEM_LATEST_VERSION,
 } from '@kbn/lens-common/content_management/constants';
+import { lensChartCapability } from '../common/custom_app/chart/manifest';
 import { setupSavedObjects } from './saved_objects';
 import { setupExpressions } from './expressions';
 import { makeLensEmbeddableFactory } from './embeddable/make_lens_embeddable_factory';
@@ -89,6 +91,7 @@ export class LensServerPlugin
   }
 
   setup(core: CoreSetup<PluginStartContract>, plugins: PluginSetupContract): LensServerPluginSetup {
+    registerCapability(lensChartCapability);
     const getFilterMigrations = plugins.data.query.filterManager.getAllMigrations.bind(
       plugins.data.query.filterManager
     );

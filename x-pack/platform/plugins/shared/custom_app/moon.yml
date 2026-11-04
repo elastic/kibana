@@ -45,7 +45,6 @@ dependsOn:
   - '@kbn/react-kibana-mount'
   - '@kbn/shared-ux-router'
   - '@kbn/es-types'
-  - '@kbn/lens-plugin'
   - '@kbn/data-views-plugin'
   - '@kbn/visualization-utils'
   - '@kbn/field-types'
@@ -58,9 +57,5 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '*.ts'
-    - common/**/*
-    - public/**/*
-    - server/**/*
     - '!target/**/*'
 tasks: {}

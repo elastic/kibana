@@ -17,13 +17,10 @@ import {
 } from '@kbn/custom-app-registry';
 import { CUSTOM_APP_STATE_VERSION } from './constants';
 import { bindable, stateKeySchema, themeAccentSchema, themeShapeSchema } from './bindings';
-import { registerBuiltinCapabilities } from '../capabilities/builtin';
 import { actionSchema, stateDeclarationSchema } from './action_schemas';
 import type { casesSourceSchema } from './data_fields';
 import type { formFieldSchema } from './input_schemas';
 import { validateDocument } from './validate_document';
-
-registerBuiltinCapabilities();
 
 export { stateKeySchema, actionSchema, stateDeclarationSchema, nodeSchema, getNodeSchemas };
 export type { AppNode, AppNodeOfType, AppNodeType, ContainerNode };
@@ -45,7 +42,20 @@ export const themeSchema = lazySchema(() =>
   })
 );
 
-export const appDocumentShapeSchema = lazySchema(() =>
+export type StateDeclaration = z.output<typeof stateDeclarationSchema>;
+export type AppTheme = z.output<typeof themeSchema>;
+
+/**
+ * An app. It is written out, and not worked out from the schema, so that the nodes stay the ones
+ * that are registered where the type is used: a package that registers none cannot know them.
+ */
+export interface AppDocument {
+  state: Record<string, StateDeclaration>;
+  root: AppNode;
+  theme?: AppTheme;
+}
+
+export const appDocumentShapeSchema: z.ZodType<AppDocument, unknown> = lazySchema(() =>
   z.object({
     state: z.record(stateKeySchema, stateDeclarationSchema).default({}),
     root: nodeSchema,
@@ -53,13 +63,9 @@ export const appDocumentShapeSchema = lazySchema(() =>
   })
 );
 
-export const appDocumentSchema = lazySchema(() =>
+export const appDocumentSchema: z.ZodType<AppDocument, unknown> = lazySchema(() =>
   appDocumentShapeSchema.superRefine(validateDocument)
 );
-
-export type StateDeclaration = z.output<typeof stateDeclarationSchema>;
-export type AppTheme = z.output<typeof themeSchema>;
-export type AppDocument = z.output<typeof appDocumentSchema>;
 
 /** The panel's own state, without the titles and time range every panel shares. */
 export const customAppStateSchema = lazySchema(() =>

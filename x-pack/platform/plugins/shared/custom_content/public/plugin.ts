@@ -13,18 +13,17 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ADD_PANEL_TRIGGER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
-import type { CustomAppPublicSetup } from '@kbn/custom-app-plugin/public';
+import { registerCapability } from '@kbn/custom-app-registry';
 import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_attachment';
 import { customContentContextAttachmentUiDefinition } from './attachment_types/custom_content_context';
 import { setServices } from './services';
 import { ADD_CUSTOM_CONTENT_ACTION_ID } from '../common/constants';
-import { customContentCapability } from '../common/custom_app/custom_content_capability';
-import { SAVE_AS_CUSTOM_APP_ACTION_ID } from '../common/custom_app/constants';
+import { customContentCapability } from '../common/capabilities/custom_content/manifest';
+import { SAVE_AS_CUSTOM_APP_ACTION_ID } from '../common/capabilities/custom_content/constants';
 import { setAnalyticsSetup } from './telemetry/analytics_setup';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
-  customApp?: CustomAppPublicSetup;
 }
 
 interface StartDeps {
@@ -34,18 +33,13 @@ interface StartDeps {
 }
 
 export class CustomContentPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
-  private hasCustomApp = false;
-
-  setup(core: CoreSetup, { embeddable, customApp }: SetupDeps) {
+  setup(core: CoreSetup, { embeddable }: SetupDeps) {
     setAnalyticsSetup(core.analytics);
-    this.hasCustomApp = Boolean(customApp);
-    customApp?.registerCapability<typeof customContentCapability>({
-      manifest: customContentCapability,
-      view: () =>
-        import('./custom_app/custom_content_view').then(({ CustomContentView }) => ({
-          default: CustomContentView,
-        })),
-    });
+    registerCapability(customContentCapability, () =>
+      import('./capabilities/custom_content/view').then(({ CustomContentView }) => ({
+        default: CustomContentView,
+      }))
+    );
     embeddable.registerEmbeddablePublicDefinition(CUSTOM_CONTENT_EMBEDDABLE_TYPE, async () => {
       const { customContentEmbeddableFactory } = await import('./async_services');
       return customContentEmbeddableFactory;
@@ -61,16 +55,13 @@ export class CustomContentPlugin implements Plugin<void, void, SetupDeps, StartD
     });
     uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_CUSTOM_CONTENT_ACTION_ID);
 
-    if (this.hasCustomApp) {
-      uiActions.registerActionAsync<EmbeddableApiContext>(
-        SAVE_AS_CUSTOM_APP_ACTION_ID,
-        async () => {
-          const { getSaveAsAppAction } = await import('./custom_app/save_as_app_action');
-          return getSaveAsAppAction();
-        }
+    uiActions.registerActionAsync<EmbeddableApiContext>(SAVE_AS_CUSTOM_APP_ACTION_ID, async () => {
+      const { getSaveAsAppAction } = await import(
+        './capabilities/custom_content/save_as_app_action'
       );
-      uiActions.attachAction(ON_OPEN_PANEL_MENU, SAVE_AS_CUSTOM_APP_ACTION_ID);
-    }
+      return getSaveAsAppAction();
+    });
+    uiActions.attachAction(ON_OPEN_PANEL_MENU, SAVE_AS_CUSTOM_APP_ACTION_ID);
 
     if (agentBuilder) {
       agentBuilder.attachments.addAttachmentType(

@@ -9,25 +9,22 @@ import type { CoreSetup, Plugin } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
-import type { CustomAppServerSetup } from '@kbn/custom-app-plugin/server';
-import { customContentCapability } from '../common/custom_app/custom_content_capability';
+import { registerCapability } from '@kbn/custom-app-registry';
+import { customContentCapability } from '../common/capabilities/custom_content/manifest';
 import { createCustomContentContextAttachmentType } from './attachment_types/custom_content_context';
 import { createUpdateCustomContentTool } from './tools/update_custom_content_tool';
 import { customContentEmbeddableSchema } from './embeddable/schemas';
-import { registerCustomContentResolver } from './custom_app/register_custom_content_resolver';
+import { registerCustomContentResolver } from './capabilities/custom_content/register_custom_content_resolver';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
   agentBuilder?: AgentBuilderPluginSetup;
-  customApp?: CustomAppServerSetup;
 }
 
 export class CustomContentPlugin implements Plugin<void, void, SetupDeps> {
-  setup(_core: CoreSetup, { embeddable, agentBuilder, customApp }: SetupDeps) {
-    if (customApp) {
-      customApp.registerCapability(customContentCapability);
-      registerCustomContentResolver(customApp.registerDocumentResolver);
-    }
+  setup(_core: CoreSetup, { embeddable, agentBuilder }: SetupDeps) {
+    registerCapability(customContentCapability);
+    registerCustomContentResolver();
 
     embeddable.registerEmbeddableServerDefinition(CUSTOM_CONTENT_EMBEDDABLE_TYPE, {
       title: 'Custom panel',

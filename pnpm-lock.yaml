@@ -1771,9 +1771,6 @@ importers:
       '@kbn/custom-app-common':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/custom-app/custom-app-common
-      '@kbn/custom-app-esql-plugin':
-        specifier: workspace:*
-        version: link:x-pack/platform/plugins/shared/custom_app_esql
       '@kbn/custom-app-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/custom_app
@@ -9459,8 +9456,6 @@ importers:
   x-pack/platform/plugins/shared/context_engine_agent_builder: {}
 
   x-pack/platform/plugins/shared/custom_app: {}
-
-  x-pack/platform/plugins/shared/custom_app_esql: {}
 
   x-pack/platform/plugins/shared/custom_content: {}
 

@@ -13,8 +13,21 @@ export type {
   CapabilityManifest,
   CapabilityValidationContext,
 } from './define_capability';
-export { getCapability, listCapabilities, registerCapability } from './capability_registry';
-export type { AnyCapability } from './capability_registry';
+export {
+  getCapability,
+  getCapabilityViewLoader,
+  listCapabilities,
+  listDocumentResolvers,
+  registerCapability,
+  registerDocumentResolver,
+} from './capability_registry';
+export type { AnyCapability, CapabilityViewLoader } from './capability_registry';
+export type {
+  CapabilityQueryResult,
+  CapabilitySourceState,
+  CapabilityViewProps,
+} from './capability_view_props';
+export type { DocumentResolution, DocumentResolver, ResolvableDocument } from './document_resolver';
 export { capabilityNodeSchema } from './capability_node_schema';
 export type { CapabilityNode, CapabilityNodeOf } from './capability_node_schema';
 export { getNodeSchemas, nodeSchema } from './node_schema';
@@ -43,9 +56,23 @@ export interface NodeTypeMap {
 
 type RegisteredType = Exclude<keyof NodeTypeMap, '__none'>;
 
-/** A node of any type that has been defined. */
-export type AppNode = NodeTypeMap[RegisteredType];
+/**
+ * What any node is, whatever its type. Code that works on documents without knowing the types,
+ * such as a package that registers none, sees the nodes as this.
+ */
+export interface GenericNode {
+  type: string;
+  id: string;
+  visibleWhen?: { $state: string; equals?: string | number | boolean };
+  children?: GenericNode[];
+  [prop: string]: unknown;
+}
+
+/** A node of any type that has been defined, or a generic node when none are known here. */
+export type AppNode = [RegisteredType] extends [never] ? GenericNode : NodeTypeMap[RegisteredType];
 export type AppNodeType = RegisteredType;
 export type AppNodeOfType<T extends AppNodeType> = NodeTypeMap[T];
 /** The nodes that hold other nodes. */
-export type ContainerNode = Extract<AppNode, { children: unknown }>;
+export type ContainerNode = [RegisteredType] extends [never]
+  ? GenericNode & { children: GenericNode[] }
+  : Extract<AppNode, { children: unknown }>;

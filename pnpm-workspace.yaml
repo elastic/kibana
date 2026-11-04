@@ -1479,7 +1479,6 @@ packages:
   - 'x-pack/platform/plugins/shared/context_engine'
   - 'x-pack/platform/plugins/shared/context_engine_agent_builder'
   - 'x-pack/platform/plugins/shared/custom_app'
-  - 'x-pack/platform/plugins/shared/custom_app_esql'
   - 'x-pack/platform/plugins/shared/custom_content'
   - 'x-pack/platform/plugins/shared/data_quality'
   - 'x-pack/platform/plugins/shared/dataset_quality'

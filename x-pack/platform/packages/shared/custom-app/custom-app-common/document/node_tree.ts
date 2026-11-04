@@ -18,7 +18,7 @@ export const getNodeChildren = (node: AppNode): readonly AppNode[] =>
  * like this, and is shown an empty state, not a blank panel, until something is added.
  */
 export const isEmptyDocument = (document: { root: AppNode }): boolean =>
-  document.root.type === 'stack' && document.root.children.length === 0;
+  document.root.type === 'stack' && (document.root.children?.length ?? 0) === 0;
 
 /** The props of a node whose text may contain `{{state.key}}` references. */
 export const getInterpolatedText = (node: AppNode): ReadonlyArray<{ prop: string; text: string }> =>

@@ -8,6 +8,9 @@
 module.exports = {
   preset: '@kbn/jest',
   rootDir: '../../../../..',
+  setupFilesAfterEnv: [
+    '<rootDir>/x-pack/platform/plugins/shared/custom_app/common/capabilities/register_in_tests.ts',
+  ],
   roots: ['<rootDir>/x-pack/platform/plugins/shared/custom_app'],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/custom_app',

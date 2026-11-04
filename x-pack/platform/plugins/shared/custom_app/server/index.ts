@@ -15,10 +15,3 @@ export const plugin = async () => {
   const { CustomAppPlugin } = await import('./plugin');
   return new CustomAppPlugin();
 };
-
-export type { CustomAppServerSetup } from './plugin';
-export type {
-  DocumentResolver,
-  DocumentResolverContext,
-  DocumentResolution,
-} from './tools/document_resolvers';

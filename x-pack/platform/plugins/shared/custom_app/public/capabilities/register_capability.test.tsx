@@ -10,12 +10,12 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { z } from '@kbn/zod/v4';
 import { appDocumentSchema } from '@kbn/custom-app-common';
-import { defineCapability } from '@kbn/custom-app-registry';
-import { renderApp } from '../components/test_utils';
 import {
-  registerCustomAppCapability,
-  type CustomAppCapabilityViewProps,
-} from './register_capability';
+  defineCapability,
+  registerCapability,
+  type CapabilityViewProps as CustomAppCapabilityViewProps,
+} from '@kbn/custom-app-registry';
+import { renderApp } from '../components/test_utils';
 
 const mockRun = jest.fn();
 jest.mock('../services', () => ({
@@ -69,12 +69,7 @@ const Gauge = ({
 );
 
 describe('a capability that another plugin registers', () => {
-  beforeAll(() =>
-    registerCustomAppCapability<typeof gauge>({
-      manifest: gauge,
-      view: async () => ({ default: Gauge }),
-    })
-  );
+  beforeAll(() => registerCapability(gauge, async () => ({ default: Gauge })));
 
   const document = () =>
     appDocumentSchema.parse({

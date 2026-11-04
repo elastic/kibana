@@ -16,7 +16,8 @@ export const CUSTOM_APP_FEATURE_ID = 'customApp';
 export const MAX_APP_TITLE_LENGTH = 256;
 export const MAX_APP_DESCRIPTION_LENGTH = 2_000;
 
-/** The id of the standalone application, which is also its route: `/app/customApp`. */
-export const CUSTOM_APP_APPLICATION_ID = 'customApp';
-export const SAVED_APPS_API_PATH = '/internal/custom_app/apps';
-export const SAVED_APPS_API_VERSION = '1';
+export {
+  CUSTOM_APP_APPLICATION_ID,
+  SAVED_APPS_API_PATH,
+  SAVED_APPS_API_VERSION,
+} from '@kbn/custom-app-common';

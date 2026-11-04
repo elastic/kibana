@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { registerDocumentResolver, resolveDocument } from './document_resolvers';
+import { registerDocumentResolver } from '@kbn/custom-app-registry';
+import { resolveDocument } from './document_resolvers';
 
 const context = {} as Parameters<typeof resolveDocument>[1];
 const documentOf = (title: string) =>

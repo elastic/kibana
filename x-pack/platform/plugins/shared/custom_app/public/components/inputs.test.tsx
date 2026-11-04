@@ -8,7 +8,7 @@
 import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MAX_QUERY_OPTIONS, appDocumentSchema } from '@kbn/custom-app-common';
-import { SEARCH_DEBOUNCE_MS } from './search_node';
+import { SEARCH_DEBOUNCE_MS } from '../capabilities/search/view';
 import { renderApp } from './test_utils';
 
 const noData = async () => ({ columns: [], rows: [] });

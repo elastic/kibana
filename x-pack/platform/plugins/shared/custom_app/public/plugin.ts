@@ -10,7 +10,6 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
@@ -18,7 +17,6 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ADD_PANEL_TRIGGER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { CUSTOM_APP_EMBEDDABLE_TYPE } from '@kbn/custom-app-common';
-import { registerCustomAppCapability } from './capabilities/register_capability';
 import { CUSTOM_APP_CONTEXT_ATTACHMENT_TYPE } from '../common/app_context_attachment';
 import type { CustomAppByReferenceState } from '../server';
 import {
@@ -29,6 +27,7 @@ import {
   VIEW_CUSTOM_APP_SOURCE_ACTION_ID,
 } from '../common/constants';
 import { customAppContextAttachmentUiDefinition } from './attachment_types/custom_app_context';
+import { registerBuiltinCapabilities } from '../common/capabilities/manifests';
 import { setServices } from './services';
 
 interface SetupDeps {
@@ -39,19 +38,12 @@ interface StartDeps {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   embeddable: EmbeddableStart;
-  lens: LensPublicStart;
   uiActions: UiActionsStart;
   agentBuilder?: AgentBuilderPluginStart;
   share?: SharePluginStart;
 }
 
-/** What other plugins can use to add capabilities to custom apps. */
-export interface CustomAppPublicSetup {
-  /** Adds a capability: its manifest, and the code that draws it. */
-  registerCapability: typeof registerCustomAppCapability;
-}
-
-export class CustomAppPlugin implements Plugin<CustomAppPublicSetup, void, SetupDeps, StartDeps> {
+export class CustomAppPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   setup(core: CoreSetup<StartDeps>, { embeddable }: SetupDeps) {
     core.application.register({
       id: CUSTOM_APP_APPLICATION_ID,
@@ -91,14 +83,14 @@ export class CustomAppPlugin implements Plugin<CustomAppPublicSetup, void, Setup
       getIconForSavedObject: () => 'apps',
     });
 
-    return { registerCapability: registerCustomAppCapability };
+    registerBuiltinCapabilities();
   }
 
   start(
     core: CoreStart,
-    { data, dataViews, embeddable, lens, uiActions, agentBuilder, share }: StartDeps
+    { data, dataViews, embeddable, uiActions, agentBuilder, share }: StartDeps
   ) {
-    setServices(core, data.search.search, embeddable, dataViews, lens, agentBuilder, share);
+    setServices(core, data.search.search, embeddable, dataViews, agentBuilder, share);
 
     uiActions.registerActionAsync<EmbeddableApiContext>(ADD_CUSTOM_APP_ACTION_ID, async () => {
       const { getAddCustomAppAction } = await import('./actions/add_custom_app_action');

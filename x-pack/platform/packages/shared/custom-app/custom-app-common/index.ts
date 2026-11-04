@@ -7,7 +7,10 @@
 
 export {
   CUSTOM_APP_EMBEDDABLE_TYPE,
+  CUSTOM_APP_APPLICATION_ID,
   CUSTOM_APP_STATE_VERSION,
+  SAVED_APPS_API_PATH,
+  SAVED_APPS_API_VERSION,
   CASES_FILTERS,
   CASES_SEVERITIES,
   CASES_SORT_FIELDS,
@@ -96,4 +99,32 @@ export {
 export { getStateDefaults } from './document/state_defaults';
 export { getDocumentIssues, type DocumentIssue } from './document/document_issues';
 
-export * from './capabilities';
+export { actionsSchema } from './document/action_schemas';
+export {
+  annotationsVisibleSchema,
+  badgeColorSchema,
+  betterWhenSchema,
+  calloutColorSchema,
+  cardIconSchema,
+  chartTypeSchema,
+  columnsCountSchema,
+  progressColorSchema,
+  progressMaxSchema,
+  sectionOpenSchema,
+  stackDirectionSchema,
+} from './document/bindings';
+export {
+  MAX_BUTTON_GROUP_OPTIONS,
+  MAX_INPUT_OPTIONS,
+  MAX_KEY_VALUE_FIELDS,
+  MAX_NODE_COUNT,
+  MAX_NODE_DEPTH,
+  MAX_TABLE_COLUMNS,
+} from './document/constants';
+export { casesSourceSchema, describedDataFields } from './document/data_fields';
+export {
+  describedInputProps,
+  formFieldSchema,
+  inputOptionSchema,
+  linkTargetSchema,
+} from './document/input_schemas';

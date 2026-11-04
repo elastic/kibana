@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { registerCapability } from '@kbn/custom-app-registry';
 import type { CoreSetup, Plugin } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { CUSTOM_APP_EMBEDDABLE_TYPE } from '@kbn/custom-app-common';
 import { createCustomAppContextAttachmentType } from './attachment_types/custom_app_context';
+import { registerBuiltinCapabilities } from '../common/capabilities/manifests';
 import { customAppFeature } from './feature';
 import { registerSavedAppRoutes } from './routes/register_routes';
 import { customAppSavedObjectType } from './saved_objects';
 import { customAppEmbeddableSchema } from './embeddable/schemas';
 import { getTransforms } from './embeddable/transforms/get_transforms';
 import { customAppCreationSkill } from './skills/custom_app_creation_skill';
-import { registerDocumentResolver } from './tools/document_resolvers';
 import { createCreateCustomAppTool } from './tools/create_custom_app_tool';
 import { createUpdateCustomAppTool } from './tools/update_custom_app_tool';
 
@@ -28,19 +27,12 @@ interface SetupDeps {
   agentBuilder?: AgentBuilderPluginSetup;
 }
 
-/** What other plugins can use to add capabilities to custom apps. */
-export interface CustomAppServerSetup {
-  /** Adds a capability, so that the apps that use it can be checked and saved. */
-  registerCapability: typeof registerCapability;
-  /** Adds a step that finishes the document the agent wrote, before it is checked and kept. */
-  registerDocumentResolver: typeof registerDocumentResolver;
-}
-
-export class CustomAppPlugin implements Plugin<CustomAppServerSetup, void, SetupDeps> {
+export class CustomAppPlugin implements Plugin<void, void, SetupDeps> {
   setup(core: CoreSetup, { embeddable, features, agentBuilder }: SetupDeps) {
     // Registered unconditionally: the saved objects check can only vouch for what it can see.
     core.savedObjects.registerType(customAppSavedObjectType);
     features.registerKibanaFeature(customAppFeature);
+    registerBuiltinCapabilities();
     registerSavedAppRoutes(core.http.createRouter());
 
     embeddable.registerEmbeddableServerDefinition(CUSTOM_APP_EMBEDDABLE_TYPE, {
@@ -65,8 +57,6 @@ export class CustomAppPlugin implements Plugin<CustomAppServerSetup, void, Setup
       );
       agentBuilder.skills.register(customAppCreationSkill);
     }
-
-    return { registerCapability, registerDocumentResolver };
   }
 
   start() {}

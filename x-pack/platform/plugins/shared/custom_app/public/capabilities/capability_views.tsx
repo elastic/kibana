@@ -7,6 +7,8 @@
 
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 import type { AppNode } from '@kbn/custom-app-common';
+import { getCapabilityViewLoader } from '@kbn/custom-app-registry';
+import { withHostProps, type HostView } from './register_capability';
 
 export interface CapabilityViewProps<Node extends AppNode> {
   node: Node;
@@ -22,63 +24,76 @@ const component = (load: () => Promise<Record<string, unknown>>, name: string) =
   load().then((module) => ({ default: module[name] as unknown as View }));
 
 const CORE_LOADERS: Readonly<Record<string, Loader>> = {
-  stack: component(() => import('./stack_view'), 'StackView'),
-  flyout: component(() => import('./flyout_view'), 'FlyoutView'),
-  card: component(() => import('./card_view'), 'CardView'),
-  columns: component(() => import('./columns_view'), 'ColumnsView'),
-  section: component(() => import('./sections_view'), 'SectionView'),
-  tabs: component(() => import('./sections_view'), 'TabsView'),
-  accordion: component(() => import('./sections_view'), 'AccordionView'),
-  chart: component(() => import('../components/chart_node'), 'ChartNode'),
-  table: component(() => import('../components/table_node'), 'TableNode'),
-  key_value: component(() => import('../components/key_value_node'), 'KeyValueNode'),
-  select: component(() => import('../components/select_node'), 'SelectNode'),
-  button_group: component(() => import('../components/button_group_node'), 'ButtonGroupNode'),
-  switch: component(() => import('../components/switch_node'), 'SwitchNode'),
-  search: component(() => import('../components/search_node'), 'SearchNode'),
-  list_input: component(() => import('../components/list_input_node'), 'ListInputNode'),
-  button: component(() => import('../components/button_node'), 'ButtonNode'),
-  link: component(() => import('../components/link_node'), 'LinkNode'),
-  form: component(() => import('../components/form_node'), 'FormNode'),
-  time_range: component(() => import('../components/time_range_node'), 'TimeRangeNode'),
+  stack: component(() => import('./stack/view'), 'StackView'),
+  flyout: component(() => import('./flyout/view'), 'FlyoutView'),
+  card: component(() => import('./card/view'), 'CardView'),
+  columns: component(() => import('./columns/view'), 'ColumnsView'),
+  section: component(() => import('./section/view'), 'SectionView'),
+  tabs: component(() => import('./tabs/view'), 'TabsView'),
+  accordion: component(() => import('./accordion/view'), 'AccordionView'),
+  table: component(() => import('./table/view'), 'TableNode'),
+  key_value: component(() => import('./key_value/view'), 'KeyValueNode'),
+  select: component(() => import('./select/view'), 'SelectNode'),
+  button_group: component(() => import('./button_group/view'), 'ButtonGroupNode'),
+  switch: component(() => import('./switch/view'), 'SwitchNode'),
+  search: component(() => import('./search/view'), 'SearchNode'),
+  list_input: component(() => import('./list_input/view'), 'ListInputNode'),
+  button: component(() => import('./button/view'), 'ButtonNode'),
+  link: component(() => import('./link/view'), 'LinkNode'),
+  form: component(() => import('./form/view'), 'FormNode'),
+  time_range: component(() => import('./time_range/view'), 'TimeRangeNode'),
   heading: () =>
-    import('./heading_view').then(({ HeadingView }) => ({
+    import('./heading/view').then(({ HeadingView }) => ({
       default: HeadingView as unknown as View,
     })),
   text: () =>
-    import('./text_view').then(({ TextView }) => ({ default: TextView as unknown as View })),
+    import('./text/view').then(({ TextView }) => ({
+      default: TextView as unknown as View,
+    })),
   callout: () =>
-    import('./callout_view').then(({ CalloutView }) => ({
+    import('./callout/view').then(({ CalloutView }) => ({
       default: CalloutView as unknown as View,
     })),
   metric: () =>
-    import('../components/metric_node').then(({ MetricNode }) => ({
+    import('./metric/view').then(({ MetricNode }) => ({
       default: MetricNode as unknown as View,
     })),
   progress: () =>
-    import('../components/progress_node').then(({ ProgressNode }) => ({
+    import('./progress/view').then(({ ProgressNode }) => ({
       default: ProgressNode as unknown as View,
     })),
   stat: () =>
-    import('../components/stat_node').then(({ StatNode }) => ({
+    import('./stat/view').then(({ StatNode }) => ({
       default: StatNode as unknown as View,
     })),
   badge: () =>
-    import('./badge_view').then(({ BadgeView }) => ({ default: BadgeView as unknown as View })),
+    import('./badge/view').then(({ BadgeView }) => ({
+      default: BadgeView as unknown as View,
+    })),
 };
 
-const loaders = new Map<string, Loader>(Object.entries(CORE_LOADERS));
 const loaded = new Map<string, LazyExoticComponent<View>>();
 
-/** Says how to draw a capability that another plugin registered. */
-export const registerCapabilityView = (type: string, load: Loader): void => {
-  loaders.set(type, load);
-  loaded.delete(type);
-};
-
+/**
+ * The code that draws a capability. The built-in ones are known here; any other was registered by
+ * a plugin, with the registry, and is given what it needs from the app.
+ */
 export const getCapabilityView = (type: string): LazyExoticComponent<View> | undefined => {
-  const load = loaders.get(type);
+  const cached = loaded.get(type);
+  if (cached) return cached;
+
+  const core = CORE_LOADERS[type];
+  const registered = getCapabilityViewLoader(type);
+  const load: Loader | undefined =
+    core ??
+    (registered &&
+      (async () => {
+        const { default: view } = await registered();
+        return { default: withHostProps(view as HostView) };
+      }));
   if (!load) return undefined;
-  if (!loaded.has(type)) loaded.set(type, lazy(load));
-  return loaded.get(type);
+
+  const view = lazy(load);
+  loaded.set(type, view);
+  return view;
 };

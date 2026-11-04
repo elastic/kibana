@@ -17,8 +17,7 @@
       "uiActions"
     ],
     "optionalPlugins": [
-      "agentBuilder",
-      "customApp"
+      "agentBuilder"
     ]
   }
 }

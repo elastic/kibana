@@ -18,6 +18,8 @@ project:
   sourceRoot: x-pack/platform/packages/shared/custom-app/custom-app-registry
 dependsOn:
   - '@kbn/zod'
+  - '@kbn/presentation-publishing'
+  - '@kbn/esql-types'
 tags:
   - shared-common
   - package
