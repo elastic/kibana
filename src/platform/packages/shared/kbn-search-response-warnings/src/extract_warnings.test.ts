@@ -336,4 +336,211 @@ describe('extract search response warnings', () => {
       expect(warnings).toEqual([]);
     });
   });
+
+  describe('ignoreEmptyClusters', () => {
+    // A reachable remote cluster with no index matching the pattern (for example FROM *:logs-myapp)
+    // is reported by Elasticsearch as skipped, with zero shards and no failures.
+    const emptyRemote: estypes.ClusterDetails = {
+      status: 'skipped',
+      indices: 'remote_empty:logs-myapp',
+      took: 0,
+      timed_out: false,
+      _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
+    };
+    const successfulRemote: estypes.ClusterDetails = {
+      status: 'successful',
+      indices: 'remote_ok:logs-myapp',
+      took: 3,
+      timed_out: false,
+      _shards: { total: 2, successful: 2, skipped: 0, failed: 0 },
+    };
+    const disconnectedRemote: estypes.ClusterDetails = {
+      status: 'skipped',
+      indices: 'remote_down:logs-myapp',
+      took: 0,
+      timed_out: false,
+      _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
+      failures: [
+        {
+          shard: -1,
+          reason: { type: 'connect_transport_exception', reason: 'Unable to connect to remote' },
+        },
+      ],
+    };
+    const partialRemote: estypes.ClusterDetails = {
+      status: 'partial',
+      indices: 'remote_partial:logs-myapp',
+      took: 7,
+      timed_out: false,
+      _shards: { total: 2, successful: 1, skipped: 0, failed: 1 },
+      failures: [
+        {
+          shard: 0,
+          index: 'remote_partial:logs-myapp',
+          reason: { type: 'query_shard_exception', reason: 'failed to create query' },
+        },
+      ],
+    };
+
+    const createCcsResponse = (
+      details: Record<string, estypes.ClusterDetails>
+    ): estypes.SearchResponse => {
+      const countByStatus = (status: estypes.ClusterSearchStatus) =>
+        Object.values(details).filter((cluster) => cluster.status === status).length;
+      return {
+        took: 5,
+        timed_out: false,
+        _shards: { total: 2, successful: 2, skipped: 0, failed: 0 },
+        _clusters: {
+          total: Object.keys(details).length,
+          successful: countByStatus('successful'),
+          skipped: countByStatus('skipped'),
+          running: countByStatus('running'),
+          partial: countByStatus('partial'),
+          failed: countByStatus('failed'),
+          details,
+        },
+        hits: { hits: [] },
+      };
+    };
+
+    it('should not warn when the only skipped cluster has no index matching the pattern', () => {
+      const response = createCcsResponse({
+        remote_ok: successfulRemote,
+        remote_empty: emptyRemote,
+      });
+
+      const warnings = extractWarnings(
+        response,
+        mockInspectorService,
+        mockRequestAdapter,
+        'My request',
+        undefined,
+        { ignoreEmptyClusters: true }
+      );
+
+      expect(warnings).toEqual([]);
+    });
+
+    it.each([
+      ['not provided', undefined],
+      ['false', { ignoreEmptyClusters: false }],
+    ])('should warn about an empty cluster when the option is %s', (_label, options) => {
+      const response = createCcsResponse({
+        remote_ok: successfulRemote,
+        remote_empty: emptyRemote,
+      });
+
+      const warnings = extractWarnings(
+        response,
+        mockInspectorService,
+        mockRequestAdapter,
+        'My request',
+        undefined,
+        options
+      );
+
+      expect(warnings).toEqual([
+        {
+          type: 'incomplete',
+          requestName: 'My request',
+          clusters: { remote_ok: successfulRemote, remote_empty: emptyRemote },
+          openInInspector: expect.any(Function),
+        },
+      ]);
+    });
+
+    it('should treat an empty failures array like no failures', () => {
+      const response = createCcsResponse({
+        remote_empty: { ...emptyRemote, failures: [] },
+      });
+
+      const warnings = extractWarnings(
+        response,
+        mockInspectorService,
+        mockRequestAdapter,
+        'My request',
+        undefined,
+        { ignoreEmptyClusters: true }
+      );
+
+      expect(warnings).toEqual([]);
+    });
+
+    it('should still warn about a skipped cluster that has failures and leave out empty clusters', () => {
+      const response = createCcsResponse({
+        remote_ok: successfulRemote,
+        remote_empty: emptyRemote,
+        remote_down: disconnectedRemote,
+      });
+
+      const warnings = extractWarnings(
+        response,
+        mockInspectorService,
+        mockRequestAdapter,
+        'My request',
+        undefined,
+        { ignoreEmptyClusters: true }
+      );
+
+      expect(warnings).toEqual([
+        {
+          type: 'incomplete',
+          requestName: 'My request',
+          clusters: { remote_ok: successfulRemote, remote_down: disconnectedRemote },
+          openInInspector: expect.any(Function),
+        },
+      ]);
+    });
+
+    it('should still warn about a partial cluster and leave out empty clusters', () => {
+      const response = createCcsResponse({
+        remote_empty: emptyRemote,
+        remote_partial: partialRemote,
+      });
+
+      const warnings = extractWarnings(
+        response,
+        mockInspectorService,
+        mockRequestAdapter,
+        'My request',
+        undefined,
+        { ignoreEmptyClusters: true }
+      );
+
+      expect(warnings).toEqual([
+        {
+          type: 'incomplete',
+          requestName: 'My request',
+          clusters: { remote_partial: partialRemote },
+          openInInspector: expect.any(Function),
+        },
+      ]);
+    });
+
+    it('should still warn about skipped clusters when there are no cluster details to inspect', () => {
+      const response: estypes.SearchResponse = {
+        ...createCcsResponse({ remote_ok: successfulRemote, remote_empty: emptyRemote }),
+        _clusters: {
+          total: 2,
+          successful: 1,
+          skipped: 1,
+          running: 0,
+          partial: 0,
+          failed: 0,
+        },
+      };
+
+      const warnings = extractWarnings(
+        response,
+        mockInspectorService,
+        mockRequestAdapter,
+        'My request',
+        undefined,
+        { ignoreEmptyClusters: true }
+      );
+
+      expect(warnings).toHaveLength(1);
+    });
+  });
 });
