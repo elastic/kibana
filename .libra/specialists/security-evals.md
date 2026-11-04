@@ -23,16 +23,7 @@ When the PR only touches `evals.suites.json` or `llm_evals.yml`, review only the
 
 Do not review backport pull requests. Use a version-prefixed title such as `[9.x]` or the `backport` label as the available backport signal.
 
-## Libra-specific evidence addendum
-
-In addition to the SKILL.md evidence gate:
-
-- Treat operational failures, truncated results, and incomplete tool responses as unresolved verification, never as evidence of absence.
-- Before calling `report_findings`, re-read every final `claim` and `evidence` value. Ensure code samples preserve their quotes.
-
 ## Reporting
-
-Report only concrete findings tied to a file and line, or to a specific missing entry in a named file. Do not report lint, formatting, or naming nits.
 
 - Use Libra's injected severity rubric to determine finding severity. The skill's check IDs are categories, not severity levels.
 - Cite the matching check ID (for example C2, S3, W1) in each finding's `evidence`.
