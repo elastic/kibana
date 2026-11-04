@@ -135,7 +135,8 @@ const invalidKeyReason = (key: SessionsApiKey) =>
 
 /**
  * Adds what the stored API key means for `status`: whether a needed update applies by itself, or
- * whether the key stopped working, which leaves the transforms failing until a user updates them.
+ * whether the key stopped working, which makes the transforms fail at their next checkpoint until
+ * a user updates them.
  */
 export const withApiKeyStatus = async (
   status: SessionsStatus,
@@ -145,8 +146,8 @@ export const withApiKeyStatus = async (
   if (!key) {
     return status;
   }
-  // An unusable key makes the transforms fail, so a healthy status needs no check.
-  if (status.health === 'degraded' && !(await apiKeys.isValid(key))) {
+  // Checked even while the transforms look healthy, so a deleted key shows before they fail.
+  if (!(await apiKeys.isValid(key))) {
     const newer =
       status.installedVersion != null && status.installedVersion > status.currentVersion;
     return {

@@ -33,7 +33,9 @@ export const SESSIONS_API_KEY_SO_TYPE = 'digital-experience-sessions-api-key';
  * accept predefined ids that are.
  */
 export const SESSIONS_API_KEY_SO_ID = '669aceac-05f5-437a-ad7c-5cc31ecaa83b';
-export const SESSIONS_API_KEY_NAME = 'Digital Experience sessions';
+/** Shown on the API keys page, so whoever is about to delete it sees what depends on it. */
+export const SESSIONS_API_KEY_NAME =
+  'Digital Experience sessions (used by the sessions transforms)';
 
 /** The key the sessions transforms run with, and who granted it. */
 export interface SessionsApiKey {

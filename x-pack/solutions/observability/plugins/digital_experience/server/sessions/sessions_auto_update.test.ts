@@ -217,8 +217,19 @@ describe('sessions auto update', () => {
       const { apiKeys, typed } = createApiKeys({ stored: keyOf('old') });
 
       expect(await withApiKeyStatus(status, typed)).toEqual({ ...status, autoUpdate: true });
-      // Only failing transforms are worth checking the key for.
-      expect(apiKeys.isValid).not.toHaveBeenCalled();
+      expect(apiKeys.isValid).toHaveBeenCalledWith(keyOf('old'));
+    });
+
+    it('reports a deleted key before the transforms fail', async () => {
+      const { typed } = createApiKeys({ stored: keyOf('old'), valid: false });
+      const healthy = { ...status, health: 'healthy' as const, needsUpdate: false };
+
+      expect(await withApiKeyStatus(healthy, typed)).toEqual({
+        ...healthy,
+        needsUpdate: true,
+        apiKeyInvalid: true,
+        reason: expect.stringContaining('was invalidated or has expired'),
+      });
     });
 
     it('explains failing transforms by an invalidated key and asks for an update', async () => {

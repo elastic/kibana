@@ -30,6 +30,7 @@ const stateSchemaV1 = schema.object({
 /** Adds the last automatic update failure, so a run only logs a new one. */
 const stateSchemaV2 = stateSchemaV1.extends({
   autoUpdateError: schema.maybe(schema.string()),
+  apiKeyInvalid: schema.maybe(schema.boolean()),
 });
 type SessionsHealthTaskState = TypeOf<typeof stateSchemaV2>;
 
@@ -53,7 +54,11 @@ const logHealthChanges = (
   } else if (isProblem(previous.health) && !isProblem(status.health)) {
     logger.info(`Sessions transforms are no longer ${previous.health}.`);
   }
-  if (status.needsUpdate && previous.needsUpdate !== true) {
+  if (status.apiKeyInvalid && previous.apiKeyInvalid !== true) {
+    logger.error(
+      `${status.reason} A user with the Digital Experience "Set up and update session summaries" privilege can open the Sessions tab, which grants a new one.`
+    );
+  } else if (status.needsUpdate && !status.apiKeyInvalid && previous.needsUpdate !== true) {
     logger.warn(
       `${status.reason} A user with the Digital Experience "Set up and update session summaries" privilege must enable sessions again.`
     );
@@ -61,7 +66,12 @@ const logHealthChanges = (
   if (newerVersion && previous.newerVersion !== true) {
     logger.warn(`${status.reason}`);
   }
-  return { health: status.health, needsUpdate: status.needsUpdate, newerVersion };
+  return {
+    health: status.health,
+    needsUpdate: status.needsUpdate,
+    newerVersion,
+    apiKeyInvalid: status.apiKeyInvalid,
+  };
 };
 
 const messageOf = (error: unknown): string =>

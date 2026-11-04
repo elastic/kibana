@@ -193,8 +193,14 @@ applies the update with that same key, so they keep running with the same access
 sessions index and rebuilds it from up to 30 days of data. The task never updates transforms from a
 newer Kibana, and never updates a transform as the internal user: an update re-stamps the transform
 with the updater's privileges, which as the internal user would bypass the enabling user's index
-privileges. If someone invalidates the stored key, the transforms fail; the status then says so and
-asks a user with the manage sessions privilege to update sessions, which grants a new key. If
+privileges. Elasticsearch can't protect an API key from deletion: anyone with `manage_api_key` or
+`manage_security`, or the enabling user with `manage_own_api_key`, can invalidate it. The key is
+named "Digital Experience sessions (used by the sessions transforms)" and marked managed, so the API
+keys page warns before deleting it. Status checks the key on every read and the health task on every
+run, so a deleted key shows up within 5 minutes, logged once as an error, before the transforms fail
+at their next checkpoint. The next time a user with the manage sessions privilege opens the Sessions
+tab, it grants a new key automatically, as the **Update sessions** button would; everyone else sees
+a warning to ask such a user. If
 transforms fall behind under peak traffic, they lag and then catch up; no data is lost.
 
 There is no disable action yet. One must invalidate the stored API key and delete its saved object.

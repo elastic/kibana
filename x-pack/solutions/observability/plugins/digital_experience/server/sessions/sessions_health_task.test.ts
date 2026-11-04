@@ -96,7 +96,7 @@ describe('sessions health task', () => {
     const [coreStart] = await core.getStartServices();
 
     expect(await run()).toEqual({
-      state: { health: 'healthy', needsUpdate: false, newerVersion: false },
+      state: { health: 'healthy', needsUpdate: false, newerVersion: false, apiKeyInvalid: false },
     });
 
     expect(getSessionsStatus).toHaveBeenCalledWith(coreStart.elasticsearch.client.asInternalUser, {
@@ -118,7 +118,7 @@ describe('sessions health task', () => {
     const [coreStart] = await core.getStartServices();
 
     expect(await run()).toEqual({
-      state: { health: 'healthy', needsUpdate: false, newerVersion: false },
+      state: { health: 'healthy', needsUpdate: false, newerVersion: false, apiKeyInvalid: false },
     });
     expect(updateSessionsWithApiKey).toHaveBeenCalledWith({
       status: outdatedStatus,
@@ -155,6 +155,7 @@ describe('sessions health task', () => {
         health: 'outdated',
         needsUpdate: true,
         newerVersion: false,
+        apiKeyInvalid: false,
         autoUpdateError: 'unable to authenticate',
       },
     });
@@ -204,6 +205,36 @@ describe('sessions health task', () => {
     );
   });
 
+  it('logs a deleted API key once, as an error, without trying to update with it', async () => {
+    const invalid: SessionsStatus = {
+      ...healthyStatus,
+      needsUpdate: true,
+      apiKeyInvalid: true,
+      reason:
+        'The API key [x] that the sessions transforms run with was invalidated or has expired.',
+    };
+    jest.mocked(getSessionsStatus).mockResolvedValue(invalid);
+    const first = setup();
+
+    expect(await first.run()).toEqual({
+      state: { health: 'healthy', needsUpdate: true, newerVersion: false, apiKeyInvalid: true },
+    });
+    expect(updateSessionsWithApiKey).not.toHaveBeenCalled();
+    expect(first.logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('can open the Sessions tab, which grants a new one')
+    );
+    expect(first.logger.warn).not.toHaveBeenCalled();
+
+    const second = setup({
+      health: 'healthy',
+      needsUpdate: true,
+      newerVersion: false,
+      apiKeyInvalid: true,
+    });
+    await second.run();
+    expect(second.logger.error).not.toHaveBeenCalled();
+  });
+
   it('logs a problem once, not on every run while it lasts', async () => {
     jest.mocked(getSessionsStatus).mockResolvedValue({ ...healthyStatus, health: 'lagging' });
     const { logger, run } = setup({ health: 'lagging', needsUpdate: false, newerVersion: false });
@@ -218,7 +249,7 @@ describe('sessions health task', () => {
     const { logger, run } = setup({ health: 'degraded', needsUpdate: false, newerVersion: false });
 
     expect(await run()).toEqual({
-      state: { health: 'healthy', needsUpdate: false, newerVersion: false },
+      state: { health: 'healthy', needsUpdate: false, newerVersion: false, apiKeyInvalid: false },
     });
     expect(logger.info).toHaveBeenCalledWith('Sessions transforms are no longer degraded.');
     expect(logger.warn).not.toHaveBeenCalled();
@@ -234,7 +265,7 @@ describe('sessions health task', () => {
     const first = setup();
 
     expect(await first.run()).toEqual({
-      state: { health: 'healthy', needsUpdate: false, newerVersion: true },
+      state: { health: 'healthy', needsUpdate: false, newerVersion: true, apiKeyInvalid: false },
     });
     expect(first.logger.warn).toHaveBeenCalledWith(newer.reason);
 

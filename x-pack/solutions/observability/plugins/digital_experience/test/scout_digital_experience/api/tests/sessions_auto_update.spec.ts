@@ -23,7 +23,7 @@ const { COMMON_HEADERS } = testData;
 const STATUS_PATH = 'internal/digital_experience/sessions/status';
 const ENABLE_PATH = 'internal/digital_experience/sessions/enable';
 const HEALTH_TASK_ID = 'digital_experience:sessions-health:1.0.0';
-const API_KEY_NAME = 'Digital Experience sessions';
+const API_KEY_NAME = 'Digital Experience sessions (used by the sessions transforms)';
 
 /** The health task runs within seconds of `run_soon`; a minute leaves room for the update. */
 const UPDATE_TIMEOUT_MS = 60_000;
@@ -37,12 +37,23 @@ apiTest.describe(
   { tag: DIGITAL_EXPERIENCE_STATEFUL_TAGS },
   () => {
     let headers: Record<string, string>;
-    let apiKeyId: string | null = null;
+    /** Every key enabling granted, so none outlives the suite. */
+    const grantedKeyIds = new Set<string>();
 
     const getStatus = async (apiClient: ApiClientFixture) => {
       const response = await apiClient.get(STATUS_PATH, { headers, responseType: 'json' });
       expect(response).toHaveStatusCode(200);
       return response.body as SessionsStatus;
+    };
+
+    const enable = async (apiClient: ApiClientFixture) => {
+      const response = await apiClient.post(ENABLE_PATH, { headers, responseType: 'json' });
+      expect(response).toHaveStatusCode(200);
+      const status = response.body as SessionsStatus;
+      const keyId = status.authorization?.apiKeyId;
+      expect(typeof keyId).toBe('string');
+      grantedKeyIds.add(keyId ?? '');
+      return { status, keyId: keyId ?? '' };
     };
 
     apiTest.beforeAll(async ({ esClient, samlAuth }) => {
@@ -53,31 +64,26 @@ apiTest.describe(
 
     apiTest.afterAll(async ({ esClient }) => {
       await deleteSessionsData(esClient);
-      if (apiKeyId) {
-        await esClient.security.invalidateApiKey({ ids: [apiKeyId] });
+      if (grantedKeyIds.size > 0) {
+        await esClient.security.invalidateApiKey({ ids: [...grantedKeyIds] });
       }
     });
 
     apiTest(
       'updates outdated transforms with the stored API key, which only reads the source data and writes sessions',
       async ({ apiClient, esClient, kbnClient }) => {
-        const enabled = await apiClient.post(ENABLE_PATH, { headers, responseType: 'json' });
-        expect(enabled).toHaveStatusCode(200);
-        const afterEnable = enabled.body as SessionsStatus;
+        const { status: afterEnable, keyId: grantedKeyId } = await enable(apiClient);
         expect(afterEnable).toMatchObject({
           installed: true,
           needsUpdate: false,
           autoUpdate: true,
         });
         expect(afterEnable.authorization?.apiKeyName).toBe(API_KEY_NAME);
-        const grantedKeyId = afterEnable.authorization?.apiKeyId;
-        expect(typeof grantedKeyId).toBe('string');
-        apiKeyId = grantedKeyId ?? null;
 
         // The key may only read the source data and manage the sessions index.
         const {
           api_keys: [apiKey],
-        } = await esClient.security.getApiKey({ id: grantedKeyId ?? '' });
+        } = await esClient.security.getApiKey({ id: grantedKeyId });
         expect(apiKey.invalidated).toBe(false);
         const { cluster, indices = [] } = Object.values(apiKey.role_descriptors ?? {})[0];
         expect(cluster).toStrictEqual([]);
@@ -115,10 +121,39 @@ apiTest.describe(
         const afterUpdate = await getStatus(apiClient);
         expect(afterUpdate.transforms.map(({ id }) => id)).toStrictEqual([SESSIONS_TRANSFORM_ID]);
         // Same key, and who enabled sessions, and when, are kept from enable time.
-        expect(afterUpdate.authorization?.apiKeyId).toBe(apiKeyId);
+        expect(afterUpdate.authorization?.apiKeyId).toBe(grantedKeyId);
         expect(afterUpdate.enabledBy).toBe(afterEnable.enabledBy);
         expect(afterUpdate.enabledAt).toBe(afterEnable.enabledAt);
         expect(afterUpdate.autoUpdate).toBe(true);
+      }
+    );
+
+    apiTest(
+      'reports a deleted API key right away, and enabling again grants a new one',
+      async ({ apiClient, esClient }) => {
+        const { keyId: deletedKeyId } = await enable(apiClient);
+
+        await esClient.security.invalidateApiKey({ ids: [deletedKeyId] });
+
+        // Before the transforms fail at their next checkpoint.
+        expect(await getStatus(apiClient)).toMatchObject({
+          apiKeyInvalid: true,
+          needsUpdate: true,
+          autoUpdate: false,
+        });
+
+        // What the Sessions tab does when a user who can set sessions up opens it.
+        const { status: recovered, keyId: newKeyId } = await enable(apiClient);
+        expect(newKeyId).not.toBe(deletedKeyId);
+        expect(recovered).toMatchObject({
+          apiKeyInvalid: false,
+          needsUpdate: false,
+          autoUpdate: true,
+        });
+        const {
+          api_keys: [newKey],
+        } = await esClient.security.getApiKey({ id: newKeyId });
+        expect(newKey.invalidated).toBe(false);
       }
     );
   }
