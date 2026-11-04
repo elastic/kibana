@@ -16,8 +16,9 @@ export interface ModelUsageTally {
 }
 
 /**
- * Adds up the tokens of an evaluator's model calls. Every call counts, including retries and
- * failures, and the totals follow Agent Builder's round usage: output includes reasoning.
+ * Adds up the tokens of an evaluator's model calls, following Agent Builder's round usage: output
+ * includes reasoning. The callbacks fire once per call, after the inference client's own retries,
+ * so a retried call counts once with its final attempt's tokens and a failed call with none.
  */
 export const createModelUsageTally = (): ModelUsageTally => {
   let llmCalls = 0;
