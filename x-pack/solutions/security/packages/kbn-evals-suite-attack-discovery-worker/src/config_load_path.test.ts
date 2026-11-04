@@ -34,13 +34,22 @@ const loadedBy = (entry: string): string[] => {
   return Object.keys(require.cache);
 };
 
-/** Jest transformers other than the swc/babel ones that parse source: each handles a file type. */
+const JS_MODULE_PATHS = ['js', 'mjs', 'cjs', 'jsx', 'ts', 'tsx'].map((ext) => `/x/module.${ext}`);
+
+/**
+ * The transform keys that handle anything other than JS/TS modules, whatever their transformer:
+ * each is a file type the Playwright loader may not parse.
+ */
+const nonJsTransforms = (transform: Record<string, string>): Array<[string, string]> =>
+  Object.entries(transform).filter(
+    ([key]) => !JS_MODULE_PATHS.some((path) => new RegExp(key).test(path))
+  );
+
 const presetTransforms = (): Array<[string, string]> => {
   const entries = ['@kbn/jest/jest-preset', '@kbn/jest/jest_node/jest-preset'].flatMap((preset) =>
     Object.entries((jest.requireActual(preset) as { transform: Record<string, string> }).transform)
   );
-  const unique = new Map(entries);
-  return [...unique].filter(([, transformer]) => !/swc|babel/.test(transformer));
+  return nonJsTransforms(Object.fromEntries(entries));
 };
 
 /**
@@ -49,7 +58,7 @@ const presetTransforms = (): Array<[string, string]> => {
  * the empty extension, and kept when the key matches them.
  */
 const pathsMatchedBy = (key: string): string[] => {
-  const words = key.match(/[a-z]+/g) ?? [];
+  const words = key.match(/[a-z0-9]+/gi) ?? [];
   const extensions = new Set(['', ...words, ...words.map((word) => word.slice(0, -1))]);
   const matcher = new RegExp(key);
   return [...extensions].map((ext) => `/x/module.${ext}`).filter((path) => matcher.test(path));
@@ -70,6 +79,21 @@ describe('Playwright config load path', () => {
       extensions.map(() => true)
     );
     expect(RAW_TEXT_MODULE.test('/x/module.ts')).toBe(false);
+  });
+
+  describe('transform key helpers', () => {
+    it('builds a candidate for an extension with digits', () => {
+      expect(pathsMatchedBy('^.+\\.(txt|json5)?$')).toContain('/x/module.json5');
+    });
+
+    it('keeps a babel-based non-JS transform and drops the JS/TS ones, by key', () => {
+      const kept = nonJsTransforms({
+        '^.+\\.(js|mjs|cjs|jsx|tsx?)$': '<rootDir>/transforms/swc/index.js',
+        '^.+\\.mdx$': '<rootDir>/transforms/babel_mdx.js',
+        '^.+\\.json5$': '<rootDir>/transforms/json5.js',
+      }).map(([key]) => key);
+      expect(kept).toEqual(['^.+\\.mdx$', '^.+\\.json5$']);
+    });
   });
 
   describe('against the Jest preset transforms', () => {

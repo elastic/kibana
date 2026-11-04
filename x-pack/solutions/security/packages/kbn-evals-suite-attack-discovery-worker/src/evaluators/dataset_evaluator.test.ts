@@ -149,7 +149,9 @@ const attackArtifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifa
  *
  * `onJobs` receives the queued job promises as soon as they exist, so a test can await the jobs
  * that outlive the rejected `runExperiment` (`Promise.allSettled(jobs)`) or react to one job's
- * rejection, without any timer.
+ * rejection, without any timer. A `during-task` row's task keeps running after the throw, and the
+ * real executor then scores its output; `onJobs` also receives that scoring promise (it resolves
+ * to the evaluator results).
  */
 interface ExecutorAbort {
   index: number;
@@ -159,7 +161,7 @@ interface ExecutorAbort {
 
 const realStyleExecutor = (
   abort?: ExecutorAbort,
-  onJobs?: (jobs: Array<Promise<void>>) => void
+  onJobs?: (jobs: Array<Promise<void>>, detachedScoring: Array<Promise<unknown[]>>) => void
 ): EvalsExecutorClient =>
   ({
     runExperiment: async (
@@ -178,29 +180,32 @@ const realStyleExecutor = (
         tail = run.catch(() => undefined);
         return run;
       };
+      const score = (example: WorkerExample, taskOutput: WorkerArtifacts) =>
+        Promise.all(
+          evaluators.map((evaluator) =>
+            evaluator.evaluate({
+              input: example.input,
+              output: { ...taskOutput, traceId: 'trace-1' } as WorkerArtifacts,
+              expected: example.output,
+              metadata: example.metadata,
+            })
+          )
+        );
+      const detachedScoring: Array<Promise<unknown[]>> = [];
       const jobs = datasets.flatMap(({ examples }) =>
         examples.map((example, index) =>
           limited(async () => {
             if (abort?.index === index && abort.when === 'during-task') {
-              void task(example);
+              detachedScoring.push(task(example).then((taskOutput) => score(example, taskOutput)));
               throw abort.error;
             }
             const taskOutput = await task(example);
             if (abort?.index === index) throw abort.error;
-            await Promise.all(
-              evaluators.map((evaluator) =>
-                evaluator.evaluate({
-                  input: example.input,
-                  output: { ...taskOutput, traceId: 'trace-1' } as WorkerArtifacts,
-                  expected: example.output,
-                  metadata: example.metadata,
-                })
-              )
-            );
+            await score(example, taskOutput);
           })
         )
       );
-      onJobs?.(jobs);
+      onJobs?.(jobs, detachedScoring);
       await Promise.all(jobs);
       return [];
     },
@@ -249,7 +254,7 @@ const evaluateExamples = (
 const evaluateRows = (
   scenarioIds: string[],
   abort?: ExecutorAbort,
-  onJobs?: (jobs: Array<Promise<void>>) => void
+  onJobs?: (jobs: Array<Promise<void>>, detachedScoring: Array<Promise<unknown[]>>) => void
 ) =>
   createEvaluateDataset({
     client,
@@ -579,7 +584,7 @@ describe('createEvaluateDataset', () => {
         expect(seedCallsAtSettle).toBeLessThan(ROWS.length);
         expect(error.message).toContain('executor span failed');
         expect(error.message).toContain(
-          `the experiment aborted after ${seedCallsAtSettle} row run(s) started; any row queued after that was skipped`
+          `the experiment aborted after ${seedCallsAtSettle} row run(s) started; rows queued after that are skipped (no seed) and are not part of this report`
         );
       });
 
@@ -591,6 +596,69 @@ describe('createEvaluateDataset', () => {
         expect(error.message).toContain('executor span failed');
         expect(error.message).toContain('the experiment aborted after 1 row run(s) started');
         expect(error.message).not.toMatch(/\d+ queued row/);
+      });
+
+      it('withholds the real output of the row still running at the abort and reports it', async () => {
+        const judgeCalls = jest.fn();
+        const spyJudge = (): Evaluator => ({
+          name: 'criteria',
+          kind: 'LLM',
+          direction: 'maximize',
+          evaluate: async () => {
+            judgeCalls();
+            return { score: 1 };
+          },
+        });
+        // One deferred for every collect: the next queued job can start in the tick the executor
+        // rejects, so it may be mid-row too, and must not be left waiting.
+        let release: (artifacts: WorkerArtifacts) => void = () => undefined;
+        const released = new Promise<WorkerArtifacts>((resolve) => {
+          release = resolve;
+        });
+        collect.mockImplementation(() => released);
+        let scoring: Array<Promise<unknown[]>> = [];
+        const error = await rejectionOf(
+          createEvaluateDataset({
+            client,
+            evaluators: {
+              criteria: spyJudge,
+              correctnessAnalysis: spyJudge,
+              groundednessAnalysis: spyJudge,
+            } as unknown as DefaultEvaluators,
+            executorClient: realStyleExecutor(
+              { index: 0, when: 'during-task', error: executorError },
+              (jobs, detachedScoring) => {
+                scoring = detachedScoring;
+                // Real output that does not match the row's gold (a benign row with an attack).
+                jobs[0].catch(() => release(attackArtifacts()));
+              }
+            ),
+            esClient: {} as Client,
+            fetch: jest.fn() as unknown as HttpHandler,
+            log,
+            routing,
+          })({
+            dataset: { name: 'seam', description: 'real-style', examples: ROWS.map(rowFor) },
+          })
+        );
+        expect(error.message).toContain('executor span failed');
+        expect(error.message).toMatch(
+          /: benign-batch failed: aborted mid-row; its output is not scored/
+        );
+        // The executor scores the row after the report. It sees the placeholder, not real output.
+        expect(scoring).toHaveLength(1);
+        const results = (await scoring[0]) as Array<{ label?: string }>;
+        expect(results.length).toBeGreaterThan(0);
+        expect(results.map(({ label }) => label)).toEqual(results.map(() => 'ROW_FAILED'));
+        expect(judgeCalls).not.toHaveBeenCalled();
+        // The row was cleaned up before the space was checked.
+        const finalCheck = assertClean.mock.calls.findIndex(
+          ([args]) => args.when === 'after the last row'
+        );
+        expect(cleanup).toHaveBeenCalledTimes(seed.mock.calls.length);
+        cleanup.mock.invocationCallOrder.forEach((order) =>
+          expect(order).toBeLessThan(assertClean.mock.invocationCallOrder[finalCheck])
+        );
       });
 
       it('checks the space only after the row that was still running has cleaned up', async () => {

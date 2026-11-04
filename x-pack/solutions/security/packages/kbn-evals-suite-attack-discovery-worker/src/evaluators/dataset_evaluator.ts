@@ -343,9 +343,11 @@ export const createEvaluateDataset =
       rowErrors.push(new Error(`${rowLabel} failed: ${errorMessage(error)}`, { cause: error }));
 
     // Set once the executor has rejected. A job still queued in the executor's limiter starts
-    // after that, so `runRow` must not seed for it; the rows already running are awaited below.
-    // Those gated jobs still run their evaluators after this function returns: they write no ES
-    // data, but their `ROW_FAILED` scores may reach `collector` after `logRunSummary`.
+    // after that, so `runRow` must not seed for it, and the row already running is awaited below
+    // but handed the placeholder instead of its real output (see `task`). The executor still runs
+    // every evaluator on those placeholders after this function returns: they write no ES data
+    // and make no judge call on real output, but their `ROW_FAILED` scores may reach `collector`
+    // after `logRunSummary`.
     let closed = false;
     let rowsStarted = 0;
     const inFlight = new Set<Promise<WorkerArtifacts>>();
@@ -433,7 +435,15 @@ export const createEvaluateDataset =
             review_model: routing.reviewModel,
           },
           task: ({ input }) => {
-            const row = runRow(input);
+            // The row's seed is already cancelled and cleaned up when `runRow` settles. If the
+            // executor rejected meanwhile, the report is built without this row's evaluators
+            // (they run after it), so its real output is withheld and the row is reported here.
+            const row = runRow(input).then((artifacts) => {
+              if (!closed || artifacts.rowError !== undefined) return artifacts;
+              const reason = 'aborted mid-row; its output is not scored';
+              recordRowError(describeRow(input), new Error(reason));
+              return failedRowArtifacts(`experiment ${reason}`);
+            });
             inFlight.add(row);
             return row.finally(() => inFlight.delete(row));
           },
@@ -466,10 +476,11 @@ export const createEvaluateDataset =
     // Rows queued behind the abort only get the placeholder, and start after this point, so how
     // many there are is not known here (the executor queues one job per example per repetition).
     // One summary error, not one per row, and no count: it keeps them from reading as passes.
+    // They are not part of this report: their scores land after it is built.
     if (closed) {
       rowErrors.push(
         new Error(
-          `the experiment aborted after ${rowsStarted} row run(s) started; any row queued after that was skipped (no seed, scored ROW_FAILED)`
+          `the experiment aborted after ${rowsStarted} row run(s) started; rows queued after that are skipped (no seed) and are not part of this report`
         )
       );
     }
