@@ -8,7 +8,7 @@
 import { ENTITY_ID_COLUMN } from '../generator';
 import type { OutputColumn } from '../generator';
 import { lastSeenInstant } from './utils';
-import type { InventoryRow } from './types';
+import type { InventoryRow, PlanResult } from './types';
 
 const compareIds = (a: InventoryRow, b: InventoryRow): number => {
   const idA = String(a[ENTITY_ID_COLUMN]);
@@ -37,9 +37,36 @@ export const orderRows = (rows: InventoryRow[]): InventoryRow[] =>
 export const applyLimit = (rows: InventoryRow[], limit: number): InventoryRow[] =>
   rows.slice(0, Math.max(0, limit));
 
-/** Whether rows were left out: always when the count is unknown, else when it exceeds the rows returned. */
-export const isTruncated = (total: number | null, returned: number): boolean =>
-  total === null || total > returned;
+// Every plan asks for one row more than the request, so a request may ask for at most `MAX_PLAN_ROWS - 1`.
+export const MAX_PLAN_ROWS = 10_000;
+
+/** The `LIMIT` of every plan's list query: one row more than requested, so a cut plan shows. */
+export const planRowLimit = (requested: number): number => {
+  if (!Number.isInteger(requested) || requested < 1 || requested > MAX_PLAN_ROWS - 1) {
+    throw new RangeError(
+      `requested rows must be an integer between 1 and ${MAX_PLAN_ROWS - 1}, got ${requested}`
+    );
+  }
+  return requested + 1;
+};
+
+/**
+ * The total and whether rows were left out: the total is exact only when no plan returned its full
+ * limit and none was partial, since then the merge holds every entity in the window.
+ */
+export const summarizeResults = (
+  results: PlanResult[],
+  requested: number,
+  mergedRowCount: number
+): { total: number | null; truncated: boolean } => {
+  const limit = planRowLimit(requested);
+  const cut = results.some(({ rows }) => rows.length >= limit);
+  const partial = results.some(({ isPartial }) => isPartial);
+  return {
+    total: cut || partial ? null : mergedRowCount,
+    truncated: cut || partial || mergedRowCount > requested,
+  };
+};
 
 /** Gives every row every output column, in column order, null where nothing produced it. */
 export const fillColumns = (rows: InventoryRow[], columns: OutputColumn[]): InventoryRow[] =>

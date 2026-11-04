@@ -7,11 +7,11 @@
 
 import type { DynamicSource, EntityDefinitionWithoutId } from '@kbn/entity-store/common';
 import { k8sDeploymentFixture, k8sNodeFixture } from '../__fixtures__/definitions';
-import { resolveAllAs } from '../__fixtures__/resolved_sources';
+import { probeAllAs } from '../__fixtures__/source_probes';
 import { InventoryDefinitionError } from './errors';
 import { assertSafeIndexPattern } from './esql_syntax';
 import { planSources } from './source_plans';
-import type { ResolvedSource } from './types';
+import type { SourceProbe } from './types';
 import { MAX_QUERY_PLANS } from './types';
 
 const withSources = (sources: DynamicSource[]): EntityDefinitionWithoutId => ({
@@ -19,9 +19,8 @@ const withSources = (sources: DynamicSource[]): EntityDefinitionWithoutId => ({
   dynamic: { sources },
 });
 
-const standard = (...names: string[]): ResolvedSource => ({
-  indices: names.map((name) => ({ name, mode: 'standard' })),
-});
+const TIME_SERIES: SourceProbe = { hasTimeSeries: true };
+const NO_TIME_SERIES: SourceProbe = { hasTimeSeries: false };
 
 const messageOf = (fn: () => void): string => {
   try {
@@ -33,41 +32,26 @@ const messageOf = (fn: () => void): string => {
 };
 
 describe('planSources', () => {
-  it('returns one plan per single-mode source of k8s.deployment, in definition order', () => {
-    const resolved: ResolvedSource[] = [
-      {
-        indices: [
-          {
-            name: '.ds-metrics-kubeletstatsreceiver.otel-default-2026.10.19-000002',
-            mode: 'time_series',
-          },
-          {
-            name: '.ds-metrics-kubeletstatsreceiver.otel-default-2026.10.18-000001',
-            mode: 'time_series',
-          },
-        ],
-      },
-      standard('.ds-metrics-kubernetes.state_deployment-default-2026.10.19-000001'),
-    ];
-    expect(planSources(k8sDeploymentFixture, resolved)).toEqual([
+  it('gives a source with a time-series index a TS plan then a FROM plan, numbered across sources', () => {
+    expect(planSources(k8sDeploymentFixture, [TIME_SERIES, NO_TIME_SERIES])).toEqual([
       {
         index: 0,
         sourceIndex: 0,
         indexPattern: 'metrics-kubeletstatsreceiver.otel-default',
-        indices: [
-          '.ds-metrics-kubeletstatsreceiver.otel-default-2026.10.18-000001',
-          '.ds-metrics-kubeletstatsreceiver.otel-default-2026.10.19-000002',
-        ],
-        queryTarget: 'pattern',
         attributes: [{ name: 'cluster', field: 'orchestrator.cluster.name' }],
         engine: 'TS',
       },
       {
         index: 1,
+        sourceIndex: 0,
+        indexPattern: 'metrics-kubeletstatsreceiver.otel-default',
+        attributes: [{ name: 'cluster', field: 'orchestrator.cluster.name' }],
+        engine: 'FROM',
+      },
+      {
+        index: 2,
         sourceIndex: 1,
         indexPattern: 'metrics-kubernetes.state_deployment-*',
-        indices: ['.ds-metrics-kubernetes.state_deployment-default-2026.10.19-000001'],
-        queryTarget: 'pattern',
         filter: 'metricset.name == "state_deployment"',
         attributes: [
           { name: 'cluster', field: 'orchestrator.cluster.name' },
@@ -78,19 +62,38 @@ describe('planSources', () => {
     ]);
   });
 
+  it('gives a source without a time-series index only a FROM plan', () => {
+    const plans = planSources(k8sDeploymentFixture, probeAllAs(k8sDeploymentFixture, false));
+    expect(plans.map(({ index, sourceIndex, engine }) => ({ index, sourceIndex, engine }))).toEqual(
+      [
+        { index: 0, sourceIndex: 0, engine: 'FROM' },
+        { index: 1, sourceIndex: 1, engine: 'FROM' },
+      ]
+    );
+  });
+
+  it('numbers the plans in order when a later source has a time-series index', () => {
+    const plans = planSources(k8sDeploymentFixture, [NO_TIME_SERIES, TIME_SERIES]);
+    expect(plans.map(({ index, sourceIndex, engine }) => ({ index, sourceIndex, engine }))).toEqual(
+      [
+        { index: 0, sourceIndex: 0, engine: 'FROM' },
+        { index: 1, sourceIndex: 1, engine: 'TS' },
+        { index: 2, sourceIndex: 1, engine: 'FROM' },
+      ]
+    );
+  });
+
   it('gives a source without attributes an empty attribute list', () => {
-    const [plan] = planSources(withSources([{ indexPattern: 'metrics-*' }]), [
-      standard('metrics-a'),
-    ]);
+    const [plan] = planSources(withSources([{ indexPattern: 'metrics-*' }]), [NO_TIME_SERIES]);
     expect(plan.attributes).toEqual([]);
     expect(plan).not.toHaveProperty('filter');
   });
 
-  it('throws when the resolved sources do not match the sources', () => {
-    const resolved = [standard('metrics-a')];
-    expect(() => planSources(k8sDeploymentFixture, resolved)).toThrow(InventoryDefinitionError);
-    expect(() => planSources(k8sDeploymentFixture, resolved)).toThrow(
-      'definition "k8s.deployment" has 2 sources but 1 resolved sources were given'
+  it('throws when the probes do not match the sources', () => {
+    const probes = [TIME_SERIES];
+    expect(() => planSources(k8sDeploymentFixture, probes)).toThrow(InventoryDefinitionError);
+    expect(() => planSources(k8sDeploymentFixture, probes)).toThrow(
+      'definition "k8s.deployment" has 2 sources but 1 probes were given'
     );
   });
 
@@ -108,9 +111,9 @@ describe('planSources', () => {
       { length: MAX_QUERY_PLANS + 1 },
       (_, index): DynamicSource => ({ indexPattern: `metrics-${index}-*` })
     );
-    const resolved = sources.map((_, index) => standard(`metrics-${index}-a`));
-    expect(() => planSources(withSources(sources), resolved)).toThrow(InventoryDefinitionError);
-    expect(() => planSources(withSources(sources), resolved)).toThrow(
+    const probes = sources.map(() => NO_TIME_SERIES);
+    expect(() => planSources(withSources(sources), probes)).toThrow(InventoryDefinitionError);
+    expect(() => planSources(withSources(sources), probes)).toThrow(
       `definition "k8s.node" expands to 33 query plans; at most ${MAX_QUERY_PLANS} are allowed`
     );
   });
@@ -118,106 +121,32 @@ describe('planSources', () => {
   it('throws on an unsafe index pattern with the pattern rule message', () => {
     const indexPattern = 'metrics-* | DROP x';
     const expected = messageOf(() => assertSafeIndexPattern(indexPattern));
-    expect(() => planSources(withSources([{ indexPattern }]), [standard('metrics-a')])).toThrow(
+    expect(() => planSources(withSources([{ indexPattern }]), [NO_TIME_SERIES])).toThrow(
       InventoryDefinitionError
     );
-    expect(() => planSources(withSources([{ indexPattern }]), [standard('metrics-a')])).toThrow(
-      expected
-    );
+    expect(() => planSources(withSources([{ indexPattern }]), [NO_TIME_SERIES])).toThrow(expected);
   });
 
-  it('stores the canonical form of a source filter on its plans', () => {
-    const [plan] = planSources(
+  it('stores the canonical form of a source filter on every plan of the source', () => {
+    const plans = planSources(
       withSources([{ indexPattern: 'metrics-*', filter: '(state=="idle"  OR  a>1) // note' }]),
-      [standard('metrics-a')]
+      [TIME_SERIES]
     );
-    expect(plan.filter).toBe('(state == "idle" OR a > 1)');
+    expect(plans.map(({ filter }) => filter)).toEqual([
+      '(state == "idle" OR a > 1)',
+      '(state == "idle" OR a > 1)',
+    ]);
   });
 
   it('throws on a bad filter with the filter rule message, labelled by the source', () => {
     const indexPattern = 'metrics-*';
     const filter = 'true | LIMIT 1';
     const expected = 'source metrics-* filter must be a single ES|QL expression: ';
-    const resolved = [standard('metrics-a')];
-    expect(() => planSources(withSources([{ indexPattern, filter }]), resolved)).toThrow(
+    const probes = [NO_TIME_SERIES];
+    expect(() => planSources(withSources([{ indexPattern, filter }]), probes)).toThrow(
       InventoryDefinitionError
     );
-    expect(() => planSources(withSources([{ indexPattern, filter }]), resolved)).toThrow(expected);
-  });
-
-  it('splits a mixed source into a TS plan then a FROM plan over its own indices', () => {
-    const definition = withSources([
-      { indexPattern: 'metrics-a-*', attributes: [{ name: 'os', field: 'host.os.name' }] },
-      { indexPattern: 'metrics-*-*', filter: 'service.type == "kubernetes"' },
-    ]);
-    const plans = planSources(definition, [
-      standard('metrics-a-1'),
-      {
-        indices: [
-          { name: '.ds-metrics-kubernetes.event-default-2026.10.19-000001', mode: 'standard' },
-          { name: '.ds-metrics-kubernetes.pod-default-2026.10.19-000001', mode: 'time_series' },
-          { name: '.ds-metrics-kubernetes.node-default-2026.10.19-000001', mode: 'time_series' },
-          { name: 'metrics-legacy-2026', mode: 'standard' },
-        ],
-      },
-    ]);
-    expect(plans).toEqual([
-      {
-        index: 0,
-        sourceIndex: 0,
-        indexPattern: 'metrics-a-*',
-        indices: ['metrics-a-1'],
-        queryTarget: 'pattern',
-        attributes: [{ name: 'os', field: 'host.os.name' }],
-        engine: 'FROM',
-      },
-      {
-        index: 1,
-        sourceIndex: 1,
-        indexPattern: 'metrics-*-*',
-        indices: [
-          '.ds-metrics-kubernetes.node-default-2026.10.19-000001',
-          '.ds-metrics-kubernetes.pod-default-2026.10.19-000001',
-        ],
-        queryTarget: 'indices',
-        filter: 'service.type == "kubernetes"',
-        attributes: [],
-        engine: 'TS',
-      },
-      {
-        index: 2,
-        sourceIndex: 1,
-        indexPattern: 'metrics-*-*',
-        indices: ['.ds-metrics-kubernetes.event-default-2026.10.19-000001', 'metrics-legacy-2026'],
-        queryTarget: 'indices',
-        filter: 'service.type == "kubernetes"',
-        attributes: [],
-        engine: 'FROM',
-      },
-    ]);
-  });
-
-  it('queries a single-mode source by its pattern under its one engine', () => {
-    const plans = planSources(k8sNodeFixture, resolveAllAs(k8sNodeFixture, 'time_series'));
-    expect(plans).toHaveLength(1);
-    expect(plans[0]).toMatchObject({ engine: 'TS', queryTarget: 'pattern' });
-  });
-
-  it('emits no plan for a source without indices and keeps the plan order dense', () => {
-    const plans = planSources(k8sDeploymentFixture, [
-      { indices: [] },
-      standard('.ds-metrics-kubernetes.state_deployment-default-2026.10.19-000001'),
-    ]);
-    expect(plans.map(({ index, sourceIndex }) => ({ index, sourceIndex }))).toEqual([
-      { index: 0, sourceIndex: 1 },
-    ]);
-  });
-
-  it('lists an index the resolver reported twice once', () => {
-    const [plan] = planSources(withSources([{ indexPattern: 'metrics-*' }]), [
-      standard('metrics-b', 'metrics-a', 'metrics-b'),
-    ]);
-    expect(plan.indices).toEqual(['metrics-a', 'metrics-b']);
+    expect(() => planSources(withSources([{ indexPattern, filter }]), probes)).toThrow(expected);
   });
 
   it('counts the plans after the split against the budget', () => {
@@ -226,22 +155,16 @@ describe('planSources', () => {
       { length: half + 1 },
       (_, index): DynamicSource => ({ indexPattern: `metrics-${index}-*` })
     );
-    const mixed = (index: number): ResolvedSource => ({
-      indices: [
-        { name: `metrics-${index}-ts`, mode: 'time_series' },
-        { name: `metrics-${index}-std`, mode: 'standard' },
-      ],
-    });
     expect(
       planSources(
         withSources(sources.slice(0, half)),
-        sources.slice(0, half).map((_, index) => mixed(index))
+        sources.slice(0, half).map(() => TIME_SERIES)
       )
     ).toHaveLength(MAX_QUERY_PLANS);
     expect(() =>
       planSources(
         withSources(sources),
-        sources.map((_, index) => mixed(index))
+        sources.map(() => TIME_SERIES)
       )
     ).toThrow(
       `definition "k8s.node" expands to ${

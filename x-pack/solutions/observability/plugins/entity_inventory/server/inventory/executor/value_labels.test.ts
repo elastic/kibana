@@ -12,8 +12,6 @@ const plan: QueryPlan = {
   index: 0,
   sourceIndex: 0,
   indexPattern: 'metrics-*',
-  indices: [],
-  queryTarget: 'pattern',
   engine: 'FROM',
   attributes: [
     { name: 'phase', field: 'k8s.pod.phase', valueLabels: { '2': 'running', Running: 'running' } },

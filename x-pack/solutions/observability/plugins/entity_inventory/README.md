@@ -12,7 +12,7 @@ At start it logs the names of the entity definitions registered in the entity st
 
 ## Query generation
 
-`server/inventory/generator/` turns a definition that carries a `dynamic` block into ES|QL. It is a pure function of the definition, the request and what the caller resolved behind each source's pattern: no Elasticsearch calls, so the same inputs always give the same text, and the tests are snapshots. The design and the reasons behind each rule are in the Observability design doc "Entity inventory query generation" (`docs/infra-inventory/design/` in `elastic/observability-dev`); this section is the map.
+`server/inventory/generator/` turns a definition that carries a `dynamic` block into ES|QL. It is a pure function of the definition, the request and the probe result for each source's pattern: no Elasticsearch calls, so the same inputs always give the same text, and the tests are snapshots. The design and the reasons behind each rule are in the Observability design doc "Entity inventory query generation" (`docs/infra-inventory/design/` in `elastic/observability-dev`); this section is the map.
 
 | module | does |
 | --- | --- |
@@ -21,21 +21,23 @@ At start it logs the names of the entity definitions registered in the entity st
 | `filters.ts` | Canonicalises an author's filter: parses it as one boolean expression without parameters and re-prints it from its syntax tree, checking the re-print parses back to itself. |
 | `parse_guard.ts` | Parses generated text before it is returned; a failure is a generator bug. |
 | `identity.ts` | The `BY` keys, the identity-presence predicate, the `entity.id` evaluation and the identity compositions as field lists. The predicate and the evaluation come from the entity store's id compiler verbatim. |
-| `source_plans.ts` | Query plans from the sources and their resolved concrete indices: one plan per index mode a source has, validated once. A later phase also splits a source by metric filter. |
+| `source_plans.ts` | Query plans from the sources and their probe results: a `FROM` plan per source, and a `TS` plan before it when the probe found a time-series index, validated once. A later phase also splits a source by metric filter. |
 | `columns.ts` | The output columns in order: `entity.id`, identity fields, attributes (one column per name across sources), `last_seen`. |
 | `list_query.ts` | One list query per plan. |
-| `count_query.ts` | One count query across all plans. |
+| `probe_query.ts` | The probe deciding whether a source gets a `TS` plan. |
 
 Attributes only for now; metrics, detail and the document filter are later phases.
 
-**Planning.** `planSources(definition, resolved)` takes one `ResolvedSource` per source, in source order: the readable concrete indices behind its pattern, each with its index mode (`time_series` or `standard`). A source's `time_series` indices become a `TS` plan and its `standard` indices a `FROM` plan, `TS` first; a source with no indices gives no plan, and the caller reports it. Plans are numbered in the resulting order, carry their sorted concrete indices and `sourceIndex`, and the 32-plan budget counts them after the split. Resolved index names pass the same character-set rule as an author's pattern.
+**Planning.** `planSources(definition, probes)` takes one `SourceProbe` per source, in source order: `{ hasTimeSeries }`, whether a readable time-series index exists behind its pattern. Every source gives a `FROM` plan; one with `hasTimeSeries` also gives a `TS` plan, listed first. Plans are numbered in the resulting order, carry `sourceIndex` and the pattern as the author wrote it, and the 32-plan budget counts them after the split. No concrete index name reaches a query.
 
 **List query**, one per plan:
 
 ```
 SET unmapped_fields="nullify";
-TS|FROM <index pattern, or the plan's indices>
-| WHERE `@timestamp` >= ?from AND `@timestamp` < ?to
+TS <index pattern>                            -- TS plan
+FROM <index pattern> METADATA _index_mode     -- FROM plan
+| WHERE [`_index_mode` != "time_series" AND]   -- FROM plan only
+    `@timestamp` >= ?from AND `@timestamp` < ?to
     [AND (<plan filter>)]
     AND <identity present>
 | STATS `<attr>` = LAST(`<field>`, `@timestamp`) WHERE `<field>` IS NOT NULL, ...,
@@ -47,24 +49,20 @@ TS|FROM <index pattern, or the plan's indices>
 | LIMIT <limit>
 ```
 
-The source keyword is the plan's engine. A plan covering every index of its source (`queryTarget: 'pattern'`) names the pattern; a plan split from a mixed source (`queryTarget: 'indices'`) names its concrete indices, so `TS` never sees a standard index. Attributes are never `BY` keys. Identity is grouped on the raw fields and the id is computed on the aggregated rows.
+The source keyword is the plan's engine and both name the pattern. `TS` reads only the time-series indices behind it and the `FROM` plan excludes them, a predicate resolved at planning, so no index is read twice and no time-series shard is opened by `FROM`. `METADATA _index_mode` is bare, since Elasticsearch rejects a quoted name there. Attributes are never `BY` keys. Identity is grouped on the raw fields and the id is computed on the aggregated rows.
 
-**Count query**, one for the type:
+**Probe query**, one per distinct pattern, run by the executor:
 
 ```
 SET unmapped_fields="nullify";
-FROM <patterns> METADATA _index
-| WHERE <time> AND <identity present>
-    AND ((`_index` IN (?i0_0, ?i0_1) AND (<plan 0 filter>)) OR (`_index` IN (?i1_0)) ...)
-| STATS BY <identity fields>
-| STATS `count` = COUNT(*), `raw_groups` = COUNT(*)        -- single identity field; otherwise:
-| EVAL <entity.id> | STATS `rows` = COUNT(*) BY `entity.id`
-| STATS `count` = COUNT(*), `raw_groups` = COALESCE(SUM(`rows`), 0)
+TS <index pattern>
+| KEEP `@timestamp`
+| LIMIT 0
 ```
 
-Each plan matches its documents by the concrete index names it was planned from, passed as named parameters `?i<plan>_<n>`, so an alias or a failure store matches exactly and one stream never matches a longer-named one. A single plan over its whole pattern has no `METADATA _index` and no per-plan clause; a single plan split from its source keeps its clause, since the pattern covers more than the plan. An identity with more than one field is counted by distinct id, exactly, because a ranked fallback or a composed id can give two raw groups the same id. `raw_groups` is the number of raw identity groups before that merge, equal to `count` for a single field; the difference is the number of id collisions.
+The executor reads the type of the `@timestamp` column to decide whether the source gets a `TS` plan.
 
-**Safety.** The window travels as the named parameters `?from` and `?to`, and the count query's index names as `?i<plan>_<n>`. Every reference the generator writes is backticked. An index pattern may contain only letters, digits, `_`, `.`, `-`, `*`, `?` and `:`, may not start with `-`, and must parse. An author's filter is parsed as a single boolean expression without query parameters and re-printed from its syntax tree; only that canonical text reaches a query, so comments are dropped and string literals may contain anything. Every generated query is parsed before it leaves the generator. Anything a definition gets wrong throws `InventoryDefinitionError`; anything the generator gets wrong throws a plain `Error`.
+**Safety.** The window travels as the named parameters `?from` and `?to`. Every reference the generator writes is backticked. An index pattern may contain only letters, digits, `_`, `.`, `-`, `*`, `?` and `:`, may not start with `-`, and must parse. An author's filter is parsed as a single boolean expression without query parameters and re-printed from its syntax tree; only that canonical text reaches a query, so comments are dropped and string literals may contain anything. Every generated query is parsed before it leaves the generator. Anything a definition gets wrong throws `InventoryDefinitionError`; anything the generator gets wrong throws a plain `Error`.
 
 **Fixtures.** `server/inventory/__fixtures__/definitions.ts` holds test-only definitions (`k8s.deployment`, `k8s.node`, a host-like ranked identity) in the store's `dynamic` shape. Nothing registers them.
 
@@ -74,15 +72,18 @@ Each plan matches its documents by the concrete index names it was planned from,
 
 | module | does |
 | --- | --- |
-| `source_metadata.ts` | Resolves each pattern to its concrete indices and their index mode (`time_series`, or `standard` for anything else, `logsdb` included), then checks field availability and whether each plan can serve its identity. |
+| `source_probe.ts` | Runs the probe once per distinct pattern and reads whether a time-series index exists behind it. |
 | `esql_client.ts` | Runs one generated query with its named parameters and `include_execution_metadata`, returning rows as objects keyed by column name (multi-values stay arrays) with `took`, documents found, values loaded and the row count. `drop_null_columns` stays off so every plan returns the same columns. |
 | `errors/source_error.ts` | Flattens a failed query to `{ indexPattern, status, reason }`; never a stack or the raw body. |
 | `value_labels.ts` | Maps an attribute's raw values to its `valueLabels` per plan, before the merge; an unmapped value passes through stringified. |
 | `merge.ts` | One row per `entity.id` across plans: attributes from the row with the newest `last_seen`, identity fields and `entity.id` first non-null, `last_seen` newest, a null never replacing a value; `provenance` names the source pattern behind each attribute value; column types come from the first plan that returned the column. |
-| `output.ts` | Orders by `last_seen` descending with ties on `entity.id`, takes the limit from the front, decides `truncated` (`total > rows`, or the count failed), and fills every row with every column. |
+| `plan_result.ts` | Reads from a plan's column types whether it is usable and which of its attribute fields no index maps. |
+| `output.ts` | Orders by `last_seen` descending with ties on `entity.id`, takes the limit from the front, sets each plan's `LIMIT` one above the request, derives `total` and `truncated` from plan cuts and partial results (there is no count query), and fills every row with every column. |
 
-**Readability.** Index metadata and field capabilities succeed with metadata privileges alone, while ES\|QL silently drops indices the user cannot read. One `_has_privileges` call checks `read` over every resolved concrete index and its data stream (`_has_privileges` matches names literally, so a grant on a stream does not show on its backing indices); a failure store index needs `read_failure_store` on its stream. An unreadable index is removed from its source, a source left with none is reported. The check is skipped when security is off. Access granted only through an alias is not recognised, and a remote pattern (`cluster:index`) resolves to nothing, since the get-index API is local only.
+No metadata API is called and no concrete index is named: the executor learns everything from ES\|QL results.
 
-**Availability.** One field-capabilities call covers every source's indices and fields; if it fails, each pattern is retried alone so the failure stays with that pattern. A plan is usable if one of its indices maps every field of one identity composition. Attribute fields no index maps stay in the query and come back null.
+**Probe.** One probe per distinct pattern, concurrently: `TS <pattern> | KEEP @timestamp | LIMIT 0`. `@timestamp` of type `date` or `date_nanos` means a time-series index exists and the source gets a `TS` plan. Any other type, no column, or a verification error (a concrete index that is not time series, a name that does not exist) means none. Any other failure is a source error and no plan of the source runs: the `FROM` plan excludes time-series indices, so reading the failure as "none" would silently leave them out. The decision reads the error type, never the message. Elasticsearch drops indices the user cannot read like indices that do not exist.
+
+**Reading results.** Every query runs with `unmapped_fields="nullify"`, so a field no index maps comes back as a column of type `null`. `last_seen` of type `null` means no readable index maps `@timestamp` and the plan is unusable. A plan is also unusable when no identity composition has every field mapped. An attribute of type `null` is an unavailable field, not fatal. A plan that returns its full limit is cut; `total` is the merged row count, exact, only when no plan is cut or partial, otherwise null, and `truncated` is true whenever rows were left out.
 
 Nothing is cached yet.

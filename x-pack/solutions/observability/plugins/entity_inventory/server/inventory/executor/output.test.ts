@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import type { OutputColumn } from '../generator';
-import { applyLimit, fillColumns, isTruncated, orderRows } from './output';
-import type { InventoryRow } from './types';
+import type { OutputColumn, QueryPlan } from '../generator';
+import {
+  applyLimit,
+  fillColumns,
+  MAX_PLAN_ROWS,
+  orderRows,
+  planRowLimit,
+  summarizeResults,
+} from './output';
+import type { InventoryRow, PlanResult } from './types';
 
 describe('orderRows', () => {
   it('orders by last_seen descending as instants', () => {
@@ -48,16 +55,61 @@ describe('applyLimit', () => {
   });
 });
 
-describe('isTruncated', () => {
-  it('is true when the count is unknown', () => {
-    expect(isTruncated(null, 0)).toBe(true);
-    expect(isTruncated(null, 5)).toBe(true);
+describe('planRowLimit', () => {
+  it('asks for one row more than requested', () => {
+    expect(planRowLimit(1)).toBe(2);
+    expect(planRowLimit(MAX_PLAN_ROWS - 1)).toBe(MAX_PLAN_ROWS);
   });
 
-  it('is true only when the count exceeds the rows returned', () => {
-    expect(isTruncated(6, 5)).toBe(true);
-    expect(isTruncated(5, 5)).toBe(false);
-    expect(isTruncated(4, 5)).toBe(false);
+  it('throws outside 1 to MAX_PLAN_ROWS - 1 or for a non-integer', () => {
+    expect(() => planRowLimit(0)).toThrow(RangeError);
+    expect(() => planRowLimit(MAX_PLAN_ROWS)).toThrow(RangeError);
+    expect(() => planRowLimit(2.5)).toThrow(RangeError);
+    expect(() => planRowLimit(NaN)).toThrow(RangeError);
+  });
+});
+
+describe('summarizeResults', () => {
+  const plan: QueryPlan = {
+    index: 0,
+    sourceIndex: 0,
+    indexPattern: 'p',
+    engine: 'FROM',
+    attributes: [],
+  };
+  const result = (rowCount: number, isPartial = false): PlanResult => ({
+    plan,
+    columns: [],
+    rows: Array.from({ length: rowCount }, (_, position) => ({ 'entity.id': `e${position}` })),
+    isPartial,
+  });
+
+  it('is exact and not truncated when no plan is cut and fewer rows merged than requested', () => {
+    expect(summarizeResults([result(3), result(2)], 10, 4)).toEqual({
+      total: 4,
+      truncated: false,
+    });
+  });
+
+  it('is exact and truncated when more rows merged than requested', () => {
+    expect(summarizeResults([result(5), result(5)], 5, 8)).toEqual({
+      total: 8,
+      truncated: true,
+    });
+  });
+
+  it('has no total and is truncated when a plan returned its full limit', () => {
+    expect(summarizeResults([result(6), result(1)], 5, 6)).toEqual({
+      total: null,
+      truncated: true,
+    });
+  });
+
+  it('has no total and is truncated when a plan was partial', () => {
+    expect(summarizeResults([result(1), result(1, true)], 5, 2)).toEqual({
+      total: null,
+      truncated: true,
+    });
   });
 });
 

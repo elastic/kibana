@@ -7,14 +7,14 @@
 
 import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
 import { hostLikeFixture, k8sDeploymentFixture, k8sNodeFixture } from '../__fixtures__/definitions';
-import { resolveAllAs } from '../__fixtures__/resolved_sources';
+import { probeAllAs } from '../__fixtures__/source_probes';
 import { buildColumns, planColumnNames } from './columns';
 import { InventoryDefinitionError } from './errors';
 import { resolveIdentityPlan } from './identity';
 import { planSources } from './source_plans';
 
 const plansOf = (definition: EntityDefinitionWithoutId) =>
-  planSources(definition, resolveAllAs(definition, 'standard'));
+  planSources(definition, probeAllAs(definition, false));
 
 const columnsOf = (definition: EntityDefinitionWithoutId) =>
   buildColumns(definition, plansOf(definition), resolveIdentityPlan(definition));

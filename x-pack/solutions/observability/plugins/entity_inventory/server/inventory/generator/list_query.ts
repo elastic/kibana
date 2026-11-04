@@ -8,7 +8,7 @@
 import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
 import type { OutputColumn } from './columns';
 import { LAST_SEEN_COLUMN, buildColumns, planColumnNames } from './columns';
-import { quoteIdentifier, quoteIndexName } from './esql_syntax';
+import { quoteIdentifier } from './esql_syntax';
 import type { IdentityPlan } from './identity';
 import { resolveIdentityPlan } from './identity';
 import { assertParses } from './parse_guard';
@@ -24,6 +24,7 @@ export interface ListQueryInput {
 }
 
 const TIMESTAMP = quoteIdentifier('@timestamp');
+const INDEX_MODE = quoteIdentifier('_index_mode');
 const CONTINUATION = '\n    ';
 
 const assertValidLimit = (limit: number): void => {
@@ -57,10 +58,16 @@ export const buildListQuery = ({
   limit,
 }: ListQueryInput): GeneratedQuery => {
   assertValidLimit(limit);
-  const { engine, indexPattern, indices, queryTarget, filter } = plan;
+  const { engine, indexPattern, filter } = plan;
   const { groupingFields, presenceFilter, idEvaluation } = identity;
 
+  // `TS` reads only the time-series indices behind the pattern; the `FROM` plan reads the rest, so
+  // no index is read twice. The mode predicate is resolved at planning, so time-series shards are
+  // never opened. `METADATA` takes the name bare: Elasticsearch rejects a quoted one there.
+  const sourceCommand =
+    engine === 'TS' ? `TS ${indexPattern}` : `FROM ${indexPattern} METADATA _index_mode`;
   const predicates = [
+    ...(engine === 'FROM' ? [`${INDEX_MODE} != "time_series"`] : []),
     `${TIMESTAMP} >= ?from AND ${TIMESTAMP} < ?to`,
     ...(filter !== undefined ? [`(${filter})`] : []),
     presenceFilter,
@@ -72,9 +79,7 @@ export const buildListQuery = ({
 
   const esql = [
     'SET unmapped_fields="nullify";',
-    `${engine} ${
-      queryTarget === 'pattern' ? indexPattern : indices.map(quoteIndexName).join(', ')
-    }`,
+    sourceCommand,
     `| WHERE ${predicates.join(`${CONTINUATION}AND `)}`,
     `| STATS ${aggregations.join(`,${CONTINUATION}`)}${CONTINUATION}BY ${groupingFields
       .map(quoteIdentifier)

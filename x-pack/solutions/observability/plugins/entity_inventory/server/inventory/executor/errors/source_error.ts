@@ -40,3 +40,12 @@ export const toSourceError = (indexPattern: string, error: unknown): SourceError
     reason,
   };
 };
+
+/**
+ * Whether the error is an Elasticsearch `verification_exception`, read from the response body,
+ * never from the message text.
+ */
+export const isVerificationError = (error: unknown): boolean => {
+  const { meta }: ErrorLike = typeof error === 'object' && error !== null ? error : {};
+  return meta?.body?.error?.type === 'verification_exception';
+};

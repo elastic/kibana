@@ -23,9 +23,6 @@ export const hasValue = (value: ESQLValue | undefined): value is ESQLValue =>
 export const isNewer = (candidate: number | null, current: number | null): boolean =>
   candidate !== null && (current === null || candidate > current);
 
-export const asList = (names: string | string[]): string[] =>
-  Array.isArray(names) ? names : [names];
-
 export const asNumber = (value: unknown): number | null =>
   typeof value === 'number' ? value : null;
 

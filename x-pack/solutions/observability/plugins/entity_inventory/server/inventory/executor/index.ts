@@ -7,7 +7,18 @@
 
 export { applyValueLabels } from './value_labels';
 export { mergeRows } from './merge';
-export { orderRows, applyLimit, isTruncated, fillColumns } from './output';
+export {
+  orderRows,
+  applyLimit,
+  fillColumns,
+  MAX_PLAN_ROWS,
+  planRowLimit,
+  summarizeResults,
+} from './output';
+export { probeSources } from './source_probe';
+export type { ProbeResult } from './source_probe';
+export { interpretPlanResult } from './plan_result';
+export type { PlanAvailability } from './plan_result';
 export type {
   ESQLValue,
   InventoryRow,
@@ -18,21 +29,5 @@ export type {
 } from './types';
 export { executeEsql } from './esql_client';
 export type { EsqlQueryResult, EsqlStats, ExecuteEsqlOptions } from './esql_client';
-export { toSourceError } from './errors/source_error';
+export { toSourceError, isVerificationError } from './errors/source_error';
 export type { SourceError } from './errors/source_error';
-export {
-  planAvailability,
-  resolveFieldAvailability,
-  resolveSourceIndices,
-} from './source_metadata';
-export type {
-  FieldAvailabilityRequest,
-  FieldAvailabilityResult,
-  MappedFieldsByIndex,
-  PlanAvailability,
-  ResolveSourceIndicesOptions,
-  SourceIndicesResult,
-  UnusableSourceCause,
-  UnusableSourceIndices,
-  UsableSourceIndices,
-} from './source_metadata';

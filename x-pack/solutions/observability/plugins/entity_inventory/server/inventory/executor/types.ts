@@ -20,6 +20,8 @@ export interface PlanResult {
   plan: QueryPlan;
   columns: ESQLColumn[];
   rows: InventoryRow[];
+  /** Elasticsearch answered with `is_partial`: some shards or clusters did not contribute. */
+  isPartial: boolean;
 }
 
 /** An output column with the first non-`null` Elasticsearch type a plan returned for it, else null. */

@@ -23,8 +23,6 @@ const plan = (index: number, indexPattern = `pattern-${index}`): QueryPlan => ({
   index,
   sourceIndex: index,
   indexPattern,
-  indices: [],
-  queryTarget: 'pattern',
   engine: 'FROM',
   attributes: [],
 });
@@ -34,7 +32,12 @@ const result = (
   rows: InventoryRow[],
   esqlColumns: ESQLColumn[] = [],
   indexPattern?: string
-): PlanResult => ({ plan: plan(index, indexPattern), columns: esqlColumns, rows });
+): PlanResult => ({
+  plan: plan(index, indexPattern),
+  columns: esqlColumns,
+  rows,
+  isPartial: false,
+});
 
 describe('mergeRows', () => {
   it('keeps an entity returned by any plan', () => {
@@ -269,8 +272,6 @@ describe('mergeRows', () => {
         index,
         sourceIndex: index,
         indexPattern,
-        indices: [],
-        queryTarget: 'pattern',
         engine: 'FROM',
         attributes,
       })
@@ -286,11 +287,13 @@ describe('mergeRows', () => {
           plan: plans[0],
           columns: [],
           rows: [{ 'entity.id': 'ns/d', cluster: 'c0', last_seen: 1 }],
+          isPartial: false,
         },
         {
           plan: plans[1],
           columns: [],
           rows: [{ 'entity.id': 'ns/d', cluster: 'c1', paused: false, last_seen: 2 }],
+          isPartial: false,
         },
       ],
       fixtureColumns
