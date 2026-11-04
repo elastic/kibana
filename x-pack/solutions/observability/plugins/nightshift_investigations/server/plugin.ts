@@ -262,6 +262,7 @@ export class NightshiftInvestigationsPlugin
         spaces: this.spaces,
         agentBuilder: this.agentBuilder,
         agentAvailability: this.getInvestigationAvailability(),
+        assistantEnabled: this.assistantEnabled,
       }),
       logger: this.logger.get('onboarding'),
       ensureFailureSweep: this.ensureFailureSweep,
@@ -798,6 +799,8 @@ export class NightshiftInvestigationsPlugin
         agentBuilder,
         spaceId: DEFAULT_SPACE_ID,
         availability: this.getInvestigationAvailability(),
+        // Users pick the assistant when it exists and reach the investigator through investigations.
+        hidden: this.assistantEnabled,
       }).catch((err) => {
         this.logger.error(`Failed to install investigation agent in default space: ${err.message}`);
       });
