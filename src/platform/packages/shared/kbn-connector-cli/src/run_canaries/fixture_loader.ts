@@ -72,7 +72,7 @@ const validate = (raw: unknown, filename: string): FixtureFile => {
   return { spec_id: raw.spec_id, cases };
 };
 
-/** Loads all YAML fixture files from the canary directory. */
+/** Loads and validates the `.yaml` fixture files in the canary directory; a `.yml` file or a repeated `spec_id` is an error. */
 export const loadFixtures = (fixturesDir: string = FIXTURES_DIR): FixtureFile[] => {
   const allFiles = fs.readdirSync(fixturesDir);
   // A `.yml` file would otherwise be skipped without a word, leaving its connector untested.

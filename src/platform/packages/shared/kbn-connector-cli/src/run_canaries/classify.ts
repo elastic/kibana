@@ -25,7 +25,7 @@ const getStatusCode = (result: ExecuteConnectorResult): number | undefined => {
   return Number.isInteger(statusCode) && statusCode > 0 ? statusCode : undefined;
 };
 
-/** Classifies an execute response with `status: 'error'`, reading the vendor status from `error_meta.statusCode`. */
+/** Classifies an execute response with `status: 'error'` by `error_name`, then `error_meta.statusCode`, then (with no status) the message wording. */
 export const classifyErrorResult = (result: ExecuteConnectorResult): Classification => {
   const statusCode = getStatusCode(result);
   const detail = result.message ?? 'no message';
@@ -48,7 +48,7 @@ export const classifyErrorResult = (result: ExecuteConnectorResult): Classificat
   return { outcome: 'error', reason: `HTTP ${statusCode}: ${detail}` };
 };
 
-/** Classifies a failure to get an execute response at all: a network error, a timeout, or Kibana rejecting the request. */
+/** Classifies a failure to get an execute response at all: a network error, a dropped connection, a timeout, or Kibana rejecting the request. */
 export const classifyThrown = (error: unknown): Classification => {
   const detail = error instanceof Error ? error.message : String(error);
   // Kibana rejected the params outright, so the fixture does not match what the action accepts.

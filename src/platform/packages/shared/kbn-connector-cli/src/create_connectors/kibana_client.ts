@@ -27,7 +27,7 @@ const DEFAULT_AUTHS = ['elastic:changeme', 'elastic_serverless:changeme'];
 
 const DEFAULT_REQUEST_DEADLINE_MS = 30_000;
 
-/** `deadlineMs` bounds the whole request, unlike `options.timeout`, which only catches an idle socket. */
+/** `deadlineMs` (default 30s) bounds the whole request, unlike `options.timeout`, which only catches an idle socket. */
 function request(
   url: string,
   options: http.RequestOptions,
@@ -45,7 +45,8 @@ function request(
       res.on('data', (chunk) => (data += chunk));
       res.on('end', () => resolve({ statusCode: res.statusCode || 0, data }));
       res.on('error', fail);
-      // A dropped connection ends the response without 'end' or a request error, so it must be rejected here.
+      // A dropped connection ends the response without 'end' (and, depending on the Node version, without an error
+      // event), so an incomplete response must be rejected here.
       res.on('close', () => {
         if (!res.complete) fail(new Error('Connection closed before the response was complete'));
       });

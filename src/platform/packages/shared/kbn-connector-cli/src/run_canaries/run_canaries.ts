@@ -115,7 +115,7 @@ export const validateCase = (
   return undefined;
 };
 
-/** Finds the manifest's connector, or creates it; an existing one gets its secrets re-synced so rotated credentials apply. */
+/** Finds the manifest's connector, or creates it; an existing one gets its name, config and secrets re-synced so rotated credentials apply. */
 const ensureConnector = async (
   connection: KibanaConnection,
   existing: ExistingConnector[],

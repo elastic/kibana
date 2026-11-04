@@ -1,6 +1,6 @@
 # @kbn/connector-cli
 
-CLI tool for bulk-creating testing connector instances in a running Kibana.
+CLI tools for a running Kibana: bulk-create testing connector instances (`create_connectors`), and run read-only canary checks against real vendor APIs through them (`run_canaries`, see [Canary Testing](#canary-testing-proof-of-concept)).
 
 ## Quick Start
 
@@ -114,7 +114,7 @@ node scripts/run_canaries.js                 # run everything
 node scripts/run_canaries.js --only .github  # one spec (repeatable, leading dot optional)
 ```
 
-The runner needs the same prerequisites as `create_connectors` (`vault login`, ES and Kibana running). It exits non-zero if any case is not `ok`, or if no case ran at all.
+A real run needs the same prerequisites as `create_connectors` (`vault login`, ES and Kibana running); `--dry-run` needs none of them. The runner exits non-zero if any case is not `ok`, or if no case ran at all.
 
 ### Fixtures
 
@@ -134,7 +134,7 @@ cases:
         type: string
 ```
 
-Types are `string`, `number`, `boolean`, `object`, `array` and `null`. The path `$` is the response itself. Paths split on `.`, so a response key that itself contains a dot can't be addressed, and only a response's own properties are matched. Empty segments (`items.`, `a..b`) are rejected, and array segments must be plain non-negative integers. If the action declares an `output` schema, the response is also parsed with it. Most actions don't have one, so the `expect` list is the real assertion.
+Types are `string`, `number`, `boolean`, `object`, `array` and `null`. The path `$` is the response itself. Paths split on `.`, so a response key that itself contains a dot can't be addressed, and only a response's own properties are matched. Empty segments (`items.`, `a..b`) are rejected, and array segments must be plain non-negative integers. If the action declares an `output` schema, the response is also parsed with it. The `.github` and `.jira-cloud` actions don't declare one, so for them the `expect` list is the only assertion.
 
 The reserved `_test` action (a spec's connection check, when it enables one) is also allowed. It is the way to prove credentials are valid when no read action fails on bad credentials, as with Jira's `getProjects`, which succeeds anonymously.
 
@@ -145,13 +145,15 @@ Only actions declared `scope: 'read'` are allowed. The scope is advisory and set
 | Outcome | Meaning |
 | --- | --- |
 | `ok` | Executed and the response matched |
-| `auth` | HTTP 401/403 from the vendor, or a connector authorization error |
+| `auth` | HTTP 401/403 from the vendor, a connector authorization error, or (when there is no status) auth wording in the message, see below |
 | `test` | Executed, but the response no longer matches the fixture (the drift signal) |
 | `error` | Other 4xx or any 5xx from the vendor: drift or an outage |
-| `misc` | No HTTP status, timeout, network failure, 408/429, or the connector couldn't be set up |
-| `fixture` | The fixture doesn't fit the current spec (unknown action, wrong scope, input fails the action's schema), or Kibana rejected the params. Not vendor drift |
+| `misc` | No HTTP status, timeout, network failure or dropped connection, 408/429, Kibana itself failing the request (other than a 400), the connector couldn't be set up (for example Vault), or an unexpected runner error |
+| `fixture` | The fixture doesn't fit the current spec (no spec or enabled manifest for its `spec_id`, unknown action, wrong scope, input fails the action's schema), or Kibana answered the execute call with HTTP 400. Not vendor drift |
 
-The vendor status comes from `error_meta.statusCode` in the execute response. MCP-backed connectors such as `.github` may not set it. For errors with no status, the message is matched against common auth wording (`HTTP`/`status` followed by 401 or 403, unauthorized, forbidden, bad credentials, invalid token) to still report `auth`; anything else is `misc`. Checked live against `.github` with a bad token ("unauthorized: token authentication failed").
+The vendor status comes from `error_meta.statusCode` in the execute response. MCP-backed connectors such as `.github` may not set it. For errors with no status, the message is matched against common auth wording (`HTTP`/`HTTPS`/`status` followed by 401 or 403, unauthorized, forbidden, bad credentials, invalid key or token, authentication failed) to still report `auth`; anything else is `misc`. Checked live against `.github` with a bad token ("unauthorized: token authentication failed").
+
+Timeouts: each execute call is cut off after 60 seconds, and the Kibana calls that set up a connector (list, create, update) after 30 seconds. Either is reported as `misc`.
 
 ## Vault
 

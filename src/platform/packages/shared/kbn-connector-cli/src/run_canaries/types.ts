@@ -13,7 +13,7 @@ export type ExpectedType = (typeof EXPECTED_TYPES)[number];
 
 /** A value that must be present in the response `data`, addressed by a dot-separated path. */
 export interface FixtureExpectation {
-  /** Path into the response `data`, e.g. `login` or `items.0.name`. Array indices are numeric segments. */
+  /** Path into the response `data`, e.g. `login` or `items.0.name`, or `$` for the response itself. Array indices are plain non-negative integer segments. */
   path: string;
   type: ExpectedType;
 }
@@ -40,8 +40,8 @@ export interface FixtureFile {
  * - `auth`: credentials rejected.
  * - `test`: executed, but the response no longer matches the fixture (the drift signal).
  * - `error`: the vendor rejected or failed the call (drift or an outage).
- * - `misc`: transient or unclassifiable (timeouts, network, rate limits).
- * - `fixture`: the fixture itself is invalid for the current spec; not vendor drift.
+ * - `misc`: transient or unclassifiable (timeouts, network, rate limits, connector setup or runner failures).
+ * - `fixture`: the fixture itself is invalid for the current spec, or Kibana rejected its params; not vendor drift.
  */
 export type CanaryOutcome = 'ok' | 'auth' | 'test' | 'error' | 'misc' | 'fixture';
 
