@@ -131,7 +131,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: elastic/kibana
-          ref: main
+          ref: stelios/flaky-fix-retrospective-test
           sparse-checkout: .github/scripts
           persist-credentials: false
       - name: Classify the fix outcome and prefetch the evidence
