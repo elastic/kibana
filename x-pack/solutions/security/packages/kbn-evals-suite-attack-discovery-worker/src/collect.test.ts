@@ -6,10 +6,12 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import {
   analysisUsageOf,
+  collectWorkerArtifacts,
   countIndexedAttacks,
   generationUsageOf,
   isParkedAtGate,
@@ -18,6 +20,7 @@ import {
   toInsights,
 } from './collect';
 import { attackDiscoveryIndexForSpace } from './constants';
+import type { AttackDiscoveryWorkerClient } from './worker_client';
 
 const step = (
   stepId: string,
@@ -352,5 +355,43 @@ describe('splitFingerprintMatch', () => {
   it('is undefined when the output carries no reviews or attachments list', () => {
     expect(splitFingerprintMatch(undefined)).toBeUndefined();
     expect(splitFingerprintMatch({ reviews: [] })).toBeUndefined();
+  });
+});
+
+describe('collectWorkerArtifacts', () => {
+  it('wires the fingerprint split into the artifacts', async () => {
+    const run = {
+      id: 'run-1',
+      status: 'completed',
+      stepExecutions: [
+        step('match_fingerprints', 'completed', {
+          reviews: [{ attack_discovery_id: 'a', sibling_attack_discovery_ids: ['b'] }],
+          attachments: [{ attack_discovery_id: 'b' }, { attack_discovery_id: 'c' }],
+        }),
+      ],
+    } as unknown as WorkflowExecutionDto;
+
+    const artifacts = await collectWorkerArtifacts({
+      client: { track: jest.fn() } as unknown as AttackDiscoveryWorkerClient,
+      esClient: {} as Client,
+      run,
+      spaceId: 'space',
+      seeded: {
+        runMarker: 'marker',
+        spaceId: 'space',
+        goldIdBySeededId: new Map(),
+        alertCount: 0,
+        openAlertIds: [],
+      },
+      fetch: jest.fn() as unknown as HttpHandler,
+      log: { info: jest.fn(), warning: jest.fn(), debug: jest.fn() } as unknown as ToolingLog,
+    });
+
+    expect(artifacts).toMatchObject({
+      fingerprintReviewedAttackIds: ['a'],
+      fingerprintSiblingAttackIds: ['b'],
+      fingerprintAttachCount: 2,
+      fingerprintExistingAttachCount: 1,
+    });
   });
 });

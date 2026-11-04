@@ -479,7 +479,9 @@ export interface FingerprintMatchSplit {
 /**
  * Splits the matcher's attachments. In a reviewed group the first attack is the review and the
  * rest are attached to the same new Investigation; the review lists them in
- * `sibling_attack_discovery_ids`. Any other attachment went to an existing fingerprint.
+ * `sibling_attack_discovery_ids`. Any other attachment went to an existing fingerprint. The matcher
+ * declares at most `MAX_ALERT_IDS` siblings per group, so a group larger than that would count its
+ * extras as attaches; the datasets stay far below it.
  */
 export const splitFingerprintMatch = (
   matchOutput: Record<string, unknown> | undefined

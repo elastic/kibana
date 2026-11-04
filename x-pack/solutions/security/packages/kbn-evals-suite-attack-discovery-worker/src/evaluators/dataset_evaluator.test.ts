@@ -144,8 +144,12 @@ const attackArtifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifa
  * evaluators inside the job, no per-row catch, and `Promise.all` over the jobs. The first throw
  * rejects `runExperiment` at once while later queued jobs keep running detached.
  *
- * `abort` models a throw from the executor's own code (a span wrapper, `getModel`) in the job at
- * `index`: `after-task` once that row's task has settled, `during-task` while it is still running.
+ * `abort` models a throw from the executor's own code (a span wrapper, `getModel`) in the job of
+ * the example at `index` in repetition 0: `after-task` once that row's task has settled,
+ * `during-task` while it is still running, `during-scoring` once its first evaluator has resolved
+ * while its siblings (run under `Promise.all`, as the real executor does) are still pending.
+ *
+ * `repetitions` queues one job per example per repetition, repetition-major like `client.ts`.
  *
  * `onJobs` receives the queued job promises as soon as they exist, so a test can await the jobs
  * that outlive the rejected `runExperiment` (`Promise.allSettled(jobs)`) or react to one job's
@@ -155,13 +159,14 @@ const attackArtifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifa
  */
 interface ExecutorAbort {
   index: number;
-  when: 'after-task' | 'during-task';
+  when: 'after-task' | 'during-task' | 'during-scoring';
   error: Error;
 }
 
 const realStyleExecutor = (
   abort?: ExecutorAbort,
-  onJobs?: (jobs: Array<Promise<void>>, detachedScoring: Array<Promise<unknown[]>>) => void
+  onJobs?: (jobs: Array<Promise<void>>, detachedScoring: Array<Promise<unknown[]>>) => void,
+  repetitions = 1
 ): EvalsExecutorClient =>
   ({
     runExperiment: async (
@@ -180,29 +185,40 @@ const realStyleExecutor = (
         tail = run.catch(() => undefined);
         return run;
       };
+      const startScoring = (example: WorkerExample, taskOutput: WorkerArtifacts) =>
+        evaluators.map((evaluator) =>
+          evaluator.evaluate({
+            input: example.input,
+            output: { ...taskOutput, traceId: 'trace-1' } as WorkerArtifacts,
+            expected: example.output,
+            metadata: example.metadata,
+          })
+        );
       const score = (example: WorkerExample, taskOutput: WorkerArtifacts) =>
-        Promise.all(
-          evaluators.map((evaluator) =>
-            evaluator.evaluate({
-              input: example.input,
-              output: { ...taskOutput, traceId: 'trace-1' } as WorkerArtifacts,
-              expected: example.output,
-              metadata: example.metadata,
+        Promise.all(startScoring(example, taskOutput));
+      const detachedScoring: Array<Promise<unknown[]>> = [];
+      const jobs = Array.from({ length: repetitions }, (_, rep) => rep).flatMap((rep) =>
+        datasets.flatMap(({ examples }) =>
+          examples.map((example, index) =>
+            limited(async () => {
+              const aborts = rep === 0 && abort?.index === index ? abort : undefined;
+              if (aborts?.when === 'during-task') {
+                detachedScoring.push(
+                  task(example).then((taskOutput) => score(example, taskOutput))
+                );
+                throw aborts.error;
+              }
+              const taskOutput = await task(example);
+              if (aborts?.when === 'during-scoring') {
+                const running = startScoring(example, taskOutput);
+                detachedScoring.push(Promise.all(running));
+                await running[0];
+                throw aborts.error;
+              }
+              if (aborts) throw aborts.error;
+              await score(example, taskOutput);
             })
           )
-        );
-      const detachedScoring: Array<Promise<unknown[]>> = [];
-      const jobs = datasets.flatMap(({ examples }) =>
-        examples.map((example, index) =>
-          limited(async () => {
-            if (abort?.index === index && abort.when === 'during-task') {
-              detachedScoring.push(task(example).then((taskOutput) => score(example, taskOutput)));
-              throw abort.error;
-            }
-            const taskOutput = await task(example);
-            if (abort?.index === index) throw abort.error;
-            await score(example, taskOutput);
-          })
         )
       );
       onJobs?.(jobs, detachedScoring);
@@ -254,12 +270,13 @@ const evaluateExamples = (
 const evaluateRows = (
   scenarioIds: string[],
   abort?: ExecutorAbort,
-  onJobs?: (jobs: Array<Promise<void>>, detachedScoring: Array<Promise<unknown[]>>) => void
+  onJobs?: (jobs: Array<Promise<void>>, detachedScoring: Array<Promise<unknown[]>>) => void,
+  repetitions = 1
 ) =>
   createEvaluateDataset({
     client,
     evaluators,
-    executorClient: realStyleExecutor(abort, onJobs),
+    executorClient: realStyleExecutor(abort, onJobs, repetitions),
     esClient: {} as Client,
     fetch: jest.fn() as unknown as HttpHandler,
     log,
@@ -588,6 +605,73 @@ describe('createEvaluateDataset', () => {
         );
       });
 
+      it('names the row whose job the executor cut short after its task', async () => {
+        collect.mockResolvedValue(quietArtifacts());
+        const error = await rejectionOf(
+          evaluateRows(ROWS, { index: 0, when: 'after-task', error: executorError })
+        );
+        expect(error.message).toMatch(
+          /: benign-batch was cut short by the executor abort; its scores may be incomplete/
+        );
+      });
+
+      it('waits for sibling evaluators of the aborting row and reports their misses', async () => {
+        // `fast` resolves first and the stub then throws the job; `slow` is still pending on the
+        // row's real output. It is released only after the macrotask queue turns, i.e. after any
+        // report built from microtasks alone (the mocked space checks) would have been written.
+        const afterMicrotasks = () => new Promise<void>((resolve) => setImmediate(resolve));
+        let release: () => void = () => undefined;
+        const gateOpen = new Promise<void>((resolve) => {
+          release = resolve;
+        });
+        const codeEvaluator = (
+          name: string,
+          evaluate: (scenarioId: unknown) => Promise<{ score: number }>
+        ): Evaluator<WorkerExample, WorkerArtifacts> => ({
+          name,
+          kind: 'CODE',
+          direction: 'maximize',
+          evaluate: ({ input }) => evaluate((input as { scenarioId?: string })?.scenarioId),
+        });
+        const assertCallsWhenSlowSettled: number[] = [];
+        const overrides = [
+          codeEvaluator('fast', async () => ({ score: 1 })),
+          codeEvaluator('slow', async (scenarioId) => {
+            if (scenarioId !== 'benign-batch') return { score: 1 };
+            await gateOpen;
+            assertCallsWhenSlowSettled.push(assertClean.mock.calls.length);
+            return { score: 0 };
+          }),
+        ];
+        collect.mockResolvedValue(quietArtifacts());
+        const error = await rejectionOf(
+          createEvaluateDataset({
+            client,
+            evaluators,
+            executorClient: realStyleExecutor(
+              { index: 0, when: 'during-scoring', error: executorError },
+              (jobs) => {
+                jobs[0].catch(() => afterMicrotasks().then(release));
+              }
+            ),
+            esClient: {} as Client,
+            fetch: jest.fn() as unknown as HttpHandler,
+            log,
+            routing,
+          })({
+            dataset: { name: 'seam', description: 'real-style', examples: ROWS.map(rowFor) },
+            evaluatorOverrides: overrides,
+          })
+        );
+        expect(error.message).toContain('executor span failed');
+        // The sibling's miss is in the report, and it settled before any space check.
+        expect(error.message).toMatch(/slow \[.*benign-batch\]: 0/);
+        expect(assertCallsWhenSlowSettled).toEqual([0]);
+        expect(error.message).toMatch(
+          /: benign-batch was cut short by the executor abort; its scores may be incomplete/
+        );
+      });
+
       it('reports an abort even for a single row, without claiming a count of skipped rows', async () => {
         collect.mockResolvedValue(quietArtifacts());
         const error = await rejectionOf(
@@ -689,6 +773,65 @@ describe('createEvaluateDataset', () => {
         cleanup.mock.invocationCallOrder.forEach((order) =>
           expect(order).toBeLessThan(assertClean.mock.invocationCallOrder[finalCheck])
         );
+      });
+    });
+
+    describe('with repetitions: 2', () => {
+      const ROWS = ['benign-batch', 'shared-ci-egress'];
+      const spaceCount = new Set(ROWS.map((id) => rowFor(id).input?.spaceId)).size;
+      const finalChecks = () =>
+        assertClean.mock.calls.filter(([args]) => args.when === 'after the last row');
+
+      it('seeds, cleans up and scores each row once per repetition', async () => {
+        collect.mockResolvedValue(quietArtifacts());
+        const scored: string[] = [];
+        const counting: Evaluator<WorkerExample, WorkerArtifacts> = {
+          name: 'counting',
+          kind: 'CODE',
+          direction: 'maximize',
+          evaluate: async ({ input }) => {
+            scored.push(String((input as { scenarioId?: string })?.scenarioId));
+            return { score: 1 };
+          },
+        };
+        await createEvaluateDataset({
+          client,
+          evaluators,
+          executorClient: realStyleExecutor(undefined, undefined, 2),
+          esClient: {} as Client,
+          fetch: jest.fn() as unknown as HttpHandler,
+          log,
+          routing,
+        })({
+          dataset: { name: 'seam', description: 'real-style', examples: ROWS.map(rowFor) },
+          evaluatorOverrides: [counting],
+        });
+        expect(seed).toHaveBeenCalledTimes(ROWS.length * 2);
+        expect(cleanup).toHaveBeenCalledTimes(ROWS.length * 2);
+        expect([...scored].sort()).toEqual([...ROWS, ...ROWS].sort());
+        expect(finalChecks()).toHaveLength(spaceCount);
+      });
+
+      it('seeds no later job of either repetition after an abort, and reports it once', async () => {
+        collect.mockResolvedValue(quietArtifacts());
+        let jobs: Array<Promise<void>> = [];
+        const error = await rejectionOf(
+          evaluateRows(
+            ROWS,
+            { index: 0, when: 'after-task', error: new Error('executor span failed') },
+            (queued) => {
+              jobs = queued;
+            },
+            2
+          )
+        );
+        const seedCallsAtSettle = seed.mock.calls.length;
+        expect(jobs).toHaveLength(ROWS.length * 2);
+        await Promise.allSettled(jobs);
+        expect(seed).toHaveBeenCalledTimes(seedCallsAtSettle);
+        expect(seedCallsAtSettle).toBeLessThan(ROWS.length * 2);
+        expect(error.message.match(/the experiment aborted after/g)).toHaveLength(1);
+        expect(finalChecks()).toHaveLength(spaceCount);
       });
     });
 

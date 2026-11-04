@@ -351,6 +351,12 @@ export const createEvaluateDataset =
     let closed = false;
     let rowsStarted = 0;
     const inFlight = new Set<Promise<WorkerArtifacts>>();
+    // Evaluations running on a row's real output; the abort path waits for them (see below).
+    const pendingEvaluations = new Set<Promise<unknown>>();
+    // The last row to return real output before the abort: normally the job the executor cut short,
+    // in its own span code or while its evaluators were still running. A row that starts while the
+    // rejection propagates only gets the placeholder, so it does not replace this.
+    let lastRealRow: string | undefined;
 
     const runRow = async (
       input: { scenarioId: string; spaceId: string } | undefined
@@ -415,7 +421,7 @@ export const createEvaluateDataset =
         // Collect worked but cancel or cleanup did not: the row still fails, and these are the
         // real artifacts it discards.
         log.warning(
-          `${rowLabel} discarded collected artifacts (runner ${artifacts.runnerExecutionId} ${artifacts.runnerStatus}, ${artifacts.reviews.length} reviews) because cleanup failed`
+          `${rowLabel} discarded collected artifacts (runner ${artifacts.runnerExecutionId} ${artifacts.runnerStatus}, ${artifacts.reviews.length} reviews) because cancel or cleanup failed`
         );
       }
       errors.forEach((error) => recordRowError(rowLabel, error));
@@ -439,6 +445,9 @@ export const createEvaluateDataset =
             // executor rejected meanwhile, the report is built without this row's evaluators
             // (they run after it), so its real output is withheld and the row is reported here.
             const row = runRow(input).then((artifacts) => {
+              if (!closed && artifacts.rowError === undefined) {
+                lastRealRow = describeRow(input);
+              }
               if (!closed || artifacts.rowError !== undefined) return artifacts;
               const reason = 'aborted mid-row; its output is not scored';
               recordRowError(describeRow(input), new Error(reason));
@@ -452,15 +461,20 @@ export const createEvaluateDataset =
         // thrown into the executor. Overrides are opaque test doubles, so they are not given the
         // `rowError` placeholder check the built-in evaluators have; a failed row is reported by
         // `rowErrors` either way.
-        withScoreCollection(all, collector, log, (input, evaluatorName, error) =>
-          rowErrors.push(
-            new Error(
-              `${describeRow(input)} evaluator ${evaluatorName} failed: ${errorMessage(error)}`,
-              {
-                cause: error,
-              }
-            )
-          )
+        withScoreCollection(
+          all,
+          collector,
+          log,
+          (input, evaluatorName, error) =>
+            rowErrors.push(
+              new Error(
+                `${describeRow(input)} evaluator ${evaluatorName} failed: ${errorMessage(error)}`,
+                {
+                  cause: error,
+                }
+              )
+            ),
+          pendingEvaluations
         )
       );
     } catch (error) {
@@ -468,12 +482,24 @@ export const createEvaluateDataset =
       // (not one of ours, e.g. its own span or model lookup) should land here. `runExperiment`
       // rejected at once, so a row may still be mid-run and later jobs are still queued: close the
       // gate so none of those seeds, then let every running row finish its cleanup before the
-      // space is checked.
+      // space is checked. The job that threw may have left sibling evaluators of its row running
+      // on real output (the executor runs them under `Promise.all`), so those are awaited too; their
+      // misses and throws are then in the report. Guarantee: every evaluation started on real
+      // output before the report is built has settled. A row queued after `closed` is set only gets
+      // the placeholder, which scores `ROW_FAILED` and is not tracked, so the loop ends.
       closed = true;
       problems.push(error);
       await Promise.allSettled([...inFlight]);
+      while (pendingEvaluations.size > 0) await Promise.allSettled([...pendingEvaluations]);
+      if (lastRealRow !== undefined) {
+        rowErrors.push(
+          new Error(
+            `${lastRealRow} was cut short by the executor abort; its scores may be incomplete`
+          )
+        );
+      }
     }
-    // Rows queued behind the abort only get the placeholder, and start after this point, so how
+    // Rows queued behind the abort only get the placeholder, and start after `closed` is set, so how
     // many there are is not known here (the executor queues one job per example per repetition).
     // One summary error, not one per row, and no count: it keeps them from reading as passes.
     // They are not part of this report: their scores land after it is built.

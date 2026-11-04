@@ -34,24 +34,6 @@ const loadedBy = (entry: string): string[] => {
   return Object.keys(require.cache);
 };
 
-const JS_MODULE_PATHS = ['js', 'mjs', 'cjs', 'jsx', 'ts', 'tsx'].map((ext) => `/x/module.${ext}`);
-
-/**
- * The transform keys that handle anything other than JS/TS modules, whatever their transformer:
- * each is a file type the Playwright loader may not parse.
- */
-const nonJsTransforms = (transform: Record<string, string>): Array<[string, string]> =>
-  Object.entries(transform).filter(
-    ([key]) => !JS_MODULE_PATHS.some((path) => new RegExp(key).test(path))
-  );
-
-const presetTransforms = (): Array<[string, string]> => {
-  const entries = ['@kbn/jest/jest-preset', '@kbn/jest/jest_node/jest-preset'].flatMap((preset) =>
-    Object.entries((jest.requireActual(preset) as { transform: Record<string, string> }).transform)
-  );
-  return nonJsTransforms(Object.fromEntries(entries));
-};
-
 /**
  * Module paths a transform key matches. The keys are regexes, so the candidates are built from the
  * words in the pattern (each as written, and with its last letter dropped for a trailing `?`) plus
@@ -62,6 +44,23 @@ const pathsMatchedBy = (key: string): string[] => {
   const extensions = new Set(['', ...words, ...words.map((word) => word.slice(0, -1))]);
   const matcher = new RegExp(key);
   return [...extensions].map((ext) => `/x/module.${ext}`).filter((path) => matcher.test(path));
+};
+
+const JS_MODULE_PATHS = ['js', 'mjs', 'cjs', 'jsx', 'ts', 'tsx'].map((ext) => `/x/module.${ext}`);
+
+/**
+ * The paths a transform key matches that are not JS/TS modules, whatever its transformer: each is
+ * a file type the Playwright loader may not parse. Filtering per path, not per key, keeps a key
+ * like `(js|svg)` from hiding `.svg` behind `.js`.
+ */
+const nonJsPathsMatchedBy = (key: string): string[] =>
+  pathsMatchedBy(key).filter((path) => !JS_MODULE_PATHS.includes(path));
+
+const presetKeys = (): string[] => {
+  const keys = ['@kbn/jest/jest-preset', '@kbn/jest/jest_node/jest-preset'].flatMap((preset) =>
+    Object.keys((jest.requireActual(preset) as { transform: Record<string, string> }).transform)
+  );
+  return [...new Set(keys)];
 };
 
 const rawTextIn = (paths: string[]): string[] => paths.filter((path) => RAW_TEXT_MODULE.test(path));
@@ -86,27 +85,26 @@ describe('Playwright config load path', () => {
       expect(pathsMatchedBy('^.+\\.(txt|json5)?$')).toContain('/x/module.json5');
     });
 
-    it('keeps a babel-based non-JS transform and drops the JS/TS ones, by key', () => {
-      const kept = nonJsTransforms({
-        '^.+\\.(js|mjs|cjs|jsx|tsx?)$': '<rootDir>/transforms/swc/index.js',
-        '^.+\\.mdx$': '<rootDir>/transforms/babel_mdx.js',
-        '^.+\\.json5$': '<rootDir>/transforms/json5.js',
-      }).map(([key]) => key);
-      expect(kept).toEqual(['^.+\\.mdx$', '^.+\\.json5$']);
+    it('keeps a non-JS path of a key that also matches JS, and drops the JS ones', () => {
+      expect(nonJsPathsMatchedBy('^.+\\.(js|svg)$')).toEqual(['/x/module.svg']);
+    });
+
+    it('keeps a key whatever its transformer is, since selection is by path', () => {
+      expect(nonJsPathsMatchedBy('^.+\\.mdx$')).toEqual(['/x/module.mdx']);
     });
   });
 
   describe('against the Jest preset transforms', () => {
-    const transforms = presetTransforms();
+    const keys = presetKeys();
 
-    it('finds the transforms that handle raw text', () => {
-      expect(transforms.length).toBeGreaterThanOrEqual(3);
+    it('finds the transforms that handle non-JS files', () => {
+      expect(
+        keys.filter((key) => nonJsPathsMatchedBy(key).length > 0).length
+      ).toBeGreaterThanOrEqual(3);
     });
 
-    it.each(transforms)('flags every path the %s transform handles', (key) => {
-      const paths = pathsMatchedBy(key);
-      expect(paths.length).toBeGreaterThan(0);
-      expect(paths.filter((path) => !RAW_TEXT_MODULE.test(path))).toEqual([]);
+    it.each(keys)('flags every non-JS path the %s transform handles', (key) => {
+      expect(nonJsPathsMatchedBy(key).filter((path) => !RAW_TEXT_MODULE.test(path))).toEqual([]);
     });
   });
 

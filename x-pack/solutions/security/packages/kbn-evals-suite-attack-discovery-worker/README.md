@@ -92,17 +92,18 @@ space's fingerprints and its discoveries, and fails if a delete reports failures
 conflicts, a timeout, or fewer deletions than matches.
 
 `src/config_load_path.test.ts` loads `playwright.config.ts` and fails if any module the Jest preset
-transforms without swc (`.yaml`, `.yml`, `.txt`, `.html`, `.peggy`, `.pegg`, `.text`, `.tex`, or a path ending in a bare `.`) ends up loaded at
-config time (the `@kbn/workflows/managed` barrel and deep imports of its definitions both do). Jest
-transforms those but the Playwright loader cannot parse them. The guard covers only the static load
-chain of `playwright.config.ts`, the modules loaded synchronously while the config evaluates. It
-does not cover a dynamic `import()` or `require` inside a function that runs later (fixtures,
-global setup) or Playwright's own runner modules. Imports that Jest's resolver
-(`kbn-jest/src/resolver.js`) redirects to a mock file never reach `require.cache` under their real
-path, so the guard cannot see them: styles (`.css`, `.scss`, `.less`), static files (`.jpg`,
-`.jpeg`, `.png`, `.gif`, `.eot`, `.otf`, `.webp`, `.svg`, `.ttf`, `.woff`, `.woff2`, `.mp4`,
-`.webm`, `.wav`, `.mp3`, `.m4a`, `.aac`, `.oga`), `.editor.worker` modules and `?asUrl` requests.
-It mocks `@kbn/evals`, so it assumes that package loads no such module itself.
+transforms without swc (`.yaml`, `.yml`, `.txt`, `.html`, `.peggy`, `.pegg`, `.text`, `.tex`, or a
+path ending in a bare `.`) ends up loaded at config time (the `@kbn/workflows/managed` barrel and
+deep imports of its definitions both do). Jest transforms those but the Playwright loader cannot
+parse them. The guard covers only the static load chain of `playwright.config.ts`, the modules
+loaded synchronously while the config evaluates. It does not cover a dynamic `import()` or `require`
+inside a function that runs later (fixtures, global setup) or Playwright's own runner modules.
+Imports that Jest's resolver (`kbn-jest/src/resolver.js`) redirects to a mock file never reach
+`require.cache` under their real path, so the guard cannot see them: styles (`.css`, `.scss`,
+`.less`), static files (`.jpg`, `.jpeg`, `.png`, `.gif`, `.eot`, `.otf`, `.webp`, `.svg`, `.ttf`,
+`.woff`, `.woff2`, `.mp4`, `.webm`, `.wav`, `.mp3`, `.m4a`, `.aac`, `.oga`), `.editor.worker`
+modules and `?asUrl` requests. It mocks `@kbn/evals`, so it assumes that package loads no such
+module itself.
 
 `StageModelResolved` reads what each stage actually ran on and fails on a mismatch or when it
 cannot be read. Generation is read from `api_config.connector_id` on the persisted discoveries;

@@ -75,6 +75,10 @@ export const ROW_FAILED_LABEL = 'ROW_FAILED';
  * `null` score labelled `EVALUATOR_FAILED` (a miss for CODE evaluators; a judge's null is
  * excluded from its mean, never counted as a pass) and is handed to `onEvaluatorError`, which is
  * what makes the run fail.
+ *
+ * `pending`, when given, holds every evaluation that runs on a row's real output until it settles,
+ * its collector and `onEvaluatorError` writes included, so a caller can wait for them. An
+ * evaluation of a `rowError` placeholder is left out: it scores `ROW_FAILED` and makes no judge call.
  */
 export const withScoreCollection = (
   evaluators: WorkerEvaluator[],
@@ -84,11 +88,11 @@ export const withScoreCollection = (
     input: { scenarioId?: string; spaceId?: string } | undefined,
     evaluatorName: string,
     error: unknown
-  ) => void
+  ) => void,
+  pending?: Set<Promise<unknown>>
 ): WorkerEvaluator[] =>
-  evaluators.map((evaluator) => ({
-    ...evaluator,
-    evaluate: async (args: Parameters<WorkerEvaluator['evaluate']>[0]) => {
+  evaluators.map((evaluator) => {
+    const evaluateAndCollect = async (args: Parameters<WorkerEvaluator['evaluate']>[0]) => {
       let result: Awaited<ReturnType<WorkerEvaluator['evaluate']>>;
       try {
         result = await evaluator.evaluate(args);
@@ -124,8 +128,20 @@ export const withScoreCollection = (
         );
       }
       return result;
-    },
-  }));
+    };
+    return {
+      ...evaluator,
+      evaluate: (args: Parameters<WorkerEvaluator['evaluate']>[0]) => {
+        const run = evaluateAndCollect(args);
+        if (pending && args.output?.rowError === undefined) {
+          pending.add(run);
+          const done = () => pending.delete(run);
+          run.then(done, done);
+        }
+        return run;
+      },
+    };
+  });
 
 /**
  * The pass criterion for CODE evaluators: every applicable check scores 1 on every row, except
