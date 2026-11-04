@@ -32,6 +32,14 @@ dependsOn:
   - '@kbn/palettes'
   - '@kbn/core-ui-settings-server-internal'
   - '@kbn/datemath'
+  - '@kbn/coloring'
+  - '@kbn/chart-expressions-common'
+  - '@kbn/embeddable-plugin'
+  - '@kbn/event-annotation-common'
+  - '@kbn/lens-embeddable-utils'
+  - '@kbn/as-code-filters-transforms'
+  - '@kbn/ui-theme'
+  - '@kbn/rison'
 tags:
   - plugin
   - prod
