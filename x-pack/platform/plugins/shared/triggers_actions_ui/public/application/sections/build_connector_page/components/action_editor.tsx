@@ -22,14 +22,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Controller, useFormContext, useFormState } from 'react-hook-form';
-import type {
-  BuildConnectorFormData,
-  ConnectorTypeActionScope,
-  ConnectorTypeHttpMethod,
-} from '../types';
+import type { BuildConnectorFormData, ConnectorTypeActionScope } from '../types';
 import { FieldListEditor } from './field_list_editor';
-import { HeaderListEditor } from './header_list_editor';
-import { JsonBodyEditor } from './json_body_editor';
+import { RequestEditor } from './request_editor';
 
 interface Props {
   index: number;
@@ -56,10 +51,6 @@ const scopeOptions: Array<{ value: ConnectorTypeActionScope; text: string }> = [
     }),
   },
 ];
-
-const methodOptions: Array<{ value: ConnectorTypeHttpMethod; text: string }> = (
-  ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const
-).map((method) => ({ value: method, text: method }));
 
 const PARAMS_TOOLTIP = (
   <p>
@@ -241,96 +232,8 @@ const ActionEditorComponent: React.FC<Props> = ({ index, onRemove }) => {
           />
         </h5>
       </EuiTitle>
-      {actionErrors?.request?.root?.message && (
-        <EuiFormErrorText data-test-subj={`${testSubj}-request-error`}>
-          {actionErrors.request.root.message}
-        </EuiFormErrorText>
-      )}
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <Controller
-            name={`actions.${index}.request.method`}
-            control={control}
-            render={({ field, fieldState: { error } }) => (
-              <EuiFormRow
-                label={i18n.translate(
-                  'xpack.triggersActionsUI.sections.buildConnectorPage.methodLabel',
-                  { defaultMessage: 'Method' }
-                )}
-                isInvalid={!!error}
-                error={error?.message}
-              >
-                <EuiSelect
-                  isInvalid={!!error}
-                  options={methodOptions}
-                  data-test-subj={`${testSubj}-method`}
-                  value={field.value}
-                  onChange={(e) => field.onChange(e.target.value)}
-                  onBlur={field.onBlur}
-                  inputRef={field.ref}
-                />
-              </EuiFormRow>
-            )}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <Controller
-            name={`actions.${index}.request.url`}
-            control={control}
-            render={({ field, fieldState: { error } }) => (
-              <EuiFormRow
-                label={i18n.translate(
-                  'xpack.triggersActionsUI.sections.buildConnectorPage.urlLabel',
-                  { defaultMessage: 'URL' }
-                )}
-                fullWidth
-                isInvalid={!!error}
-                error={error?.message}
-              >
-                <EuiFieldText
-                  fullWidth
-                  isInvalid={!!error}
-                  data-test-subj={`${testSubj}-url`}
-                  placeholder="{{config.baseUrl}}/path"
-                  value={field.value ?? ''}
-                  onChange={(e) => field.onChange(e.target.value)}
-                  onBlur={field.onBlur}
-                  inputRef={field.ref}
-                />
-              </EuiFormRow>
-            )}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <Controller
-        name={`actions.${index}.request.path`}
-        control={control}
-        render={({ field, fieldState: { error } }) => (
-          <EuiFormRow
-            label={i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.pathLabel', {
-              defaultMessage: 'Path',
-            })}
-            fullWidth
-            isInvalid={!!error}
-            error={error?.message}
-          >
-            <EuiFieldText
-              fullWidth
-              isInvalid={!!error}
-              data-test-subj={`${testSubj}-path`}
-              value={field.value ?? ''}
-              onChange={(e) => field.onChange(e.target.value)}
-              onBlur={field.onBlur}
-              inputRef={field.ref}
-            />
-          </EuiFormRow>
-        )}
-      />
-      <EuiSpacer size="s" />
-      <HeaderListEditor actionIndex={index} testSubjPrefix={`${testSubj}-headers`} />
-      <EuiSpacer size="s" />
-      <JsonBodyEditor actionIndex={index} testSubj={`${testSubj}-body`} />
+      <RequestEditor requestPath={`actions.${index}.request`} testSubj={testSubj} />
     </EuiPanel>
   );
 };

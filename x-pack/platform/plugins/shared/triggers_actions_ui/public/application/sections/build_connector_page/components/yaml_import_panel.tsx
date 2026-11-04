@@ -8,11 +8,12 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
-  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CodeEditorProps } from '@kbn/code-editor';
@@ -133,15 +134,16 @@ const YamlImportPanelComponent: React.FC<Props> = ({ onApply, isDisabled = false
       <EuiSpacer size="s" />
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            iconType="brush"
-            aria-label={BEAUTIFY_LABEL}
-            onClick={onBeautify}
-            isDisabled={!canApply}
-            data-test-subj="build-connector-yaml-beautify-btn"
-          >
-          </EuiButtonEmpty>
+          <EuiToolTip content={BEAUTIFY_LABEL} disableScreenReaderOutput>
+            <EuiButtonIcon
+              size="s"
+              iconType="brush"
+              aria-label={BEAUTIFY_LABEL}
+              onClick={onBeautify}
+              isDisabled={!canApply}
+              data-test-subj="build-connector-yaml-beautify-btn"
+            />
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton

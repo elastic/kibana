@@ -12,7 +12,10 @@ import type {
   BuildConnectorFormData,
   ConnectorTypeAction,
   ConnectorTypeActionForm,
+  ConnectorTypeAuthType,
   ConnectorTypeField,
+  ConnectorTypeRequestForm,
+  ConnectorTypeTestForm,
 } from '../types';
 import { parseJsonObject } from './json_body';
 
@@ -31,12 +34,27 @@ const normalizeConnectorTypeId = (id: string | undefined): string => {
   return isValidBareId ? bareId : id;
 };
 
+const createEmptyRequest = (
+  method: ConnectorTypeRequestForm['method']
+): ConnectorTypeRequestForm => ({
+  method,
+  url: '',
+  path: '',
+  headers: [],
+  body: '',
+});
+
 export const createEmptyAction = (): ConnectorTypeActionForm => ({
   name: '',
   description: '',
   scope: 'write',
   input: [],
-  request: { method: 'POST', url: '', path: '', headers: [], body: '' },
+  request: createEmptyRequest('POST'),
+});
+
+export const createEmptyTest = (): ConnectorTypeTestForm => ({
+  description: '',
+  request: createEmptyRequest('GET'),
 });
 
 /** A blank form with the one action the form shows by default. */
@@ -44,57 +62,78 @@ export const getEmptyFormData = (): BuildConnectorFormData => ({
   id: '',
   displayName: '',
   description: '',
-  auth: { type: 'none' },
+  auth: { types: ['none'] },
   config: [],
   actions: [createEmptyAction()],
+  test: createEmptyTest(),
 });
 
 const toRequestField = (field: ConnectorTypeField): ConnectorTypeField => ({
   name: field.name,
   type: field.type,
   required: field.required ?? false,
-  ...(field.default !== undefined ? { default: field.default } : {}),
-  ...(field.type === 'array' && field.items ? { items: field.items } : {}),
-  ...(field.type === 'string' && field.format ? { format: field.format } : {}),
-  ...(field.label ? { label: field.label } : {}),
-  ...(field.description ? { description: field.description } : {}),
+  default: field.default,
+  items: field.items,
+  format: field.format,
+  label: field.label,
+  description: field.description,
 });
 
-const toRequestAuth = (
-  auth: BuildConnectorFormData['auth']
-): CreateConnectorTypeRequest['auth'] => {
-  switch (auth.type) {
-    case 'api_key_header':
-      return { type: 'api_key_header', headerName: auth.headerName ?? '' };
-    case 'basic':
-      return { type: 'basic' };
-    case 'bearer':
-      return { type: 'bearer' };
-    default:
-      return { type: 'none' };
+const toRequestAuth = ({
+  types,
+  headerName,
+}: BuildConnectorFormData['auth']): CreateConnectorTypeRequest['auth'] => {
+  if (types.length === 1) {
+    const [type] = types;
+    return type === 'api_key_header' ? { type, headerName: headerName ?? '' } : { type };
   }
+  return {
+    types: types.map((type) =>
+      type === 'api_key_header' ? { type, defaults: { headerField: headerName ?? '' } } : type
+    ),
+  };
 };
 
-const toRequestAction = (action: ConnectorTypeActionForm): ConnectorTypeAction => {
-  const { path, headers, body } = action.request;
+const toRequest = (request: ConnectorTypeRequestForm): ConnectorTypeAction['request'] => {
+  const { method, url, path, headers, body } = request;
   // Invalid JSON is reported by the form resolver; the schema only sees parsed bodies.
   const { value: parsedBody } = parseJsonObject(body);
 
   return {
-    description: action.description,
-    scope: action.scope,
-    input: action.input.map(toRequestField),
-    request: {
-      method: action.request.method,
-      url: action.request.url,
-      ...(path ? { path } : {}),
-      ...(headers.length > 0
-        ? { headers: Object.fromEntries(headers.map(({ key, value }) => [key, value])) }
-        : {}),
-      ...(parsedBody ? { body: parsedBody } : {}),
-    },
+    method,
+    url,
+    path: path || undefined,
+    body: parsedBody,
+    ...(headers.length > 0
+      ? { headers: Object.fromEntries(headers.map((header) => [header.key, header.value])) }
+      : {}),
   };
 };
+
+const toRequestAction = (action: ConnectorTypeActionForm): ConnectorTypeAction => ({
+  description: action.description,
+  scope: action.scope,
+  input: action.input.map(toRequestField),
+  request: toRequest(action.request),
+});
+
+/** The test is optional: it is sent only once the user has filled something in. */
+const isTestDefined = ({ description, request }: ConnectorTypeTestForm): boolean =>
+  Boolean(
+    description.trim() ||
+      request.url.trim() ||
+      request.path.trim() ||
+      request.headers.length > 0 ||
+      request.body.trim()
+  );
+
+const toRequestTest = ({
+  description,
+  request,
+}: ConnectorTypeTestForm): NonNullable<CreateConnectorTypeRequest['test']> => ({
+  description: description || undefined,
+  request: toRequest(request),
+});
 
 /** Turns the form state into the POST /api/actions/connector_types body. */
 export const formDataToRequest = (
@@ -108,7 +147,22 @@ export const formDataToRequest = (
   actions: Object.fromEntries(
     formData.actions.map((action) => [action.name, toRequestAction(action)])
   ),
+  ...(isTestDefined(formData.test) ? { test: toRequestTest(formData.test) } : {}),
 });
+
+const toFormRequest = (
+  request: Partial<ConnectorTypeAction['request']> | undefined,
+  method: ConnectorTypeRequestForm['method']
+): ConnectorTypeRequestForm => {
+  const empty = createEmptyRequest(method);
+  return {
+    method: request?.method ?? empty.method,
+    url: request?.url ?? empty.url,
+    path: request?.path ?? empty.path,
+    headers: Object.entries(request?.headers ?? {}).map(([key, value]) => ({ key, value })),
+    body: request?.body ? JSON.stringify(request.body, null, 2) : '',
+  };
+};
 
 const toFormAction = (
   name: string,
@@ -120,17 +174,30 @@ const toFormAction = (
     description: action.description ?? empty.description,
     scope: action.scope ?? empty.scope,
     input: action.input ?? empty.input,
-    request: {
-      method: action.request?.method ?? empty.request.method,
-      url: action.request?.url ?? empty.request.url,
-      path: action.request?.path ?? empty.request.path,
-      headers: Object.entries(action.request?.headers ?? {}).map(([key, value]) => ({
-        key,
-        value,
-      })),
-      body: action.request?.body ? JSON.stringify(action.request.body, null, 2) : '',
-    },
+    request: toFormRequest(action.request, empty.request.method),
   };
+};
+
+const toFormAuth = (
+  auth: Partial<CreateConnectorTypeRequest>['auth']
+): BuildConnectorFormData['auth'] => {
+  if (!auth) {
+    return { types: ['none'] };
+  }
+  if ('type' in auth) {
+    return auth.type === 'api_key_header'
+      ? { types: [auth.type], headerName: auth.headerName }
+      : { types: [auth.type] };
+  }
+
+  const types: ConnectorTypeAuthType[] = auth.types.map((entry) =>
+    typeof entry === 'string' ? entry : entry.type
+  );
+  const apiKeyEntry = auth.types.find(
+    (entry): entry is Extract<typeof entry, { type: 'api_key_header' }> =>
+      typeof entry !== 'string' && entry.type === 'api_key_header'
+  );
+  return apiKeyEntry ? { types, headerName: apiKeyEntry.defaults.headerField } : { types };
 };
 
 /** Turns a (possibly partial) request body, e.g. parsed from YAML, into form state. */
@@ -140,14 +207,15 @@ export const requestToFormData = (
   id: normalizeConnectorTypeId(request.id),
   displayName: request.displayName ?? '',
   description: request.description ?? '',
-  auth:
-    request.auth && 'type' in request.auth && request.auth.type === 'api_key_header'
-      ? { type: 'api_key_header', headerName: request.auth.headerName }
-      : {
-          type: request.auth && 'type' in request.auth ? request.auth.type : ('none' as const),
-        },
+  auth: toFormAuth(request.auth),
   config: request.config ?? [],
   actions: Object.entries(request.actions ?? {}).map(([name, action]) =>
     toFormAction(name, action)
   ),
+  test: request.test
+    ? {
+        description: request.test.description ?? '',
+        request: toFormRequest(request.test.request, 'GET'),
+      }
+    : createEmptyTest(),
 });

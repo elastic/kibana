@@ -53,9 +53,28 @@ const unknownKeyError = (path: string, key: string, allowed: readonly string[]) 
         )
   );
 
-const DEFINITION_KEYS = ['id', 'displayName', 'description', 'auth', 'config', 'actions'] as const;
+const DEFINITION_KEYS = [
+  'id',
+  'displayName',
+  'description',
+  'auth',
+  'config',
+  'test',
+  'actions',
+] as const;
 const AUTH_KEYS = ['type', 'headerName'] as const;
-const FIELD_KEYS = ['name', 'type', 'required', 'label', 'description'] as const;
+const AUTH_TYPE_ENTRY_KEYS = ['type', 'defaults'] as const;
+const FIELD_KEYS = [
+  'name',
+  'type',
+  'items',
+  'format',
+  'default',
+  'required',
+  'label',
+  'description',
+] as const;
+const TEST_KEYS = ['description', 'request'] as const;
 const ACTION_KEYS = ['description', 'scope', 'input', 'request'] as const;
 const REQUEST_KEYS = ['method', 'url', 'path', 'headers', 'body'] as const;
 
@@ -70,6 +89,14 @@ const assertKnownKeys = (
   }
 };
 
+const authTypesError = () =>
+  new Error(
+    i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.yamlAuthTypesError', {
+      defaultMessage:
+        '"auth.types" must be a list of authentication types, each a name or an object with a type.',
+    })
+  );
+
 const assertFieldList = (value: unknown, path: string) => {
   if (value === undefined) {
     return;
@@ -80,6 +107,49 @@ const assertFieldList = (value: unknown, path: string) => {
   value.forEach((field, index) => assertKnownKeys(field, `${path}[${index}]`, FIELD_KEYS));
 };
 
+const assertRequest = (request: unknown, path: string) => {
+  if (request === undefined) {
+    return;
+  }
+  if (!isPlainObject(request)) {
+    throw objectError(path);
+  }
+  assertKnownKeys(request, path, REQUEST_KEYS);
+  if (request.headers !== undefined && !isPlainObject(request.headers)) {
+    throw mapError(`${path}.headers`, 'header name');
+  }
+  if (request.body !== undefined && !isPlainObject(request.body)) {
+    throw objectError(`${path}.body`);
+  }
+};
+
+/** `auth` is either one type (`type`, `headerName`) or a list of supported `types`. */
+const assertAuth = (auth: unknown) => {
+  if (auth === undefined) {
+    return;
+  }
+  if (!isPlainObject(auth)) {
+    throw objectError('auth');
+  }
+  if (!('types' in auth)) {
+    assertKnownKeys(auth, 'auth', AUTH_KEYS);
+    return;
+  }
+
+  assertKnownKeys(auth, 'auth', ['types']);
+  if (
+    !Array.isArray(auth.types) ||
+    !auth.types.every((t) => typeof t === 'string' || isPlainObject(t))
+  ) {
+    throw authTypesError();
+  }
+  auth.types.forEach((entry, index) => {
+    if (isPlainObject(entry)) {
+      assertKnownKeys(entry, `auth.types[${index}]`, AUTH_TYPE_ENTRY_KEYS);
+    }
+  });
+};
+
 /**
  * Checks the parts of the definition the form relies on to render it: known keys (the API is
  * strict, and an unknown key would otherwise be dropped silently) and lists vs. maps. Values are
@@ -88,11 +158,13 @@ const assertFieldList = (value: unknown, path: string) => {
 const assertStructure = (definition: Record<string, unknown>) => {
   assertKnownKeys(definition, '', DEFINITION_KEYS);
   assertFieldList(definition.config, 'config');
-  if (definition.auth !== undefined) {
-    if (!isPlainObject(definition.auth)) {
-      throw objectError('auth');
+  assertAuth(definition.auth);
+  if (definition.test !== undefined) {
+    if (!isPlainObject(definition.test)) {
+      throw objectError('test');
     }
-    assertKnownKeys(definition.auth, 'auth', AUTH_KEYS);
+    assertKnownKeys(definition.test, 'test', TEST_KEYS);
+    assertRequest(definition.test.request, 'test.request');
   }
   if (definition.actions === undefined) {
     return;
@@ -108,21 +180,7 @@ const assertStructure = (definition: Record<string, unknown>) => {
     }
     assertKnownKeys(action, actionPath, ACTION_KEYS);
     assertFieldList(action.input, `${actionPath}.input`);
-
-    const { request } = action;
-    if (request === undefined) {
-      continue;
-    }
-    if (!isPlainObject(request)) {
-      throw objectError(`${actionPath}.request`);
-    }
-    assertKnownKeys(request, `${actionPath}.request`, REQUEST_KEYS);
-    if (request.headers !== undefined && !isPlainObject(request.headers)) {
-      throw mapError(`${actionPath}.request.headers`, 'header name');
-    }
-    if (request.body !== undefined && !isPlainObject(request.body)) {
-      throw objectError(`${actionPath}.request.body`);
-    }
+    assertRequest(action.request, `${actionPath}.request`);
   }
 };
 

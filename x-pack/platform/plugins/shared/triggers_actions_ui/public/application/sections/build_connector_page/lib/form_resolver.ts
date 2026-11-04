@@ -26,14 +26,16 @@ const EDITABLE_PATHS = new Set([
   'displayName',
   'id',
   'description',
-  'auth.type',
+  'auth.types',
   'auth.headerName',
+  'test.description',
 ]);
 /** Row fields of a field list (`config`, action inputs). */
 const FIELD_ROW_KEYS = new Set([
   'name',
   'type',
   'items',
+  'format',
   'default',
   'required',
   'label',
@@ -79,6 +81,11 @@ const REQUIRED_MESSAGES: Record<string, string> = {
     { defaultMessage: 'URL is required.' }
   ),
   'actions.*.request.headers.*.key': HEADER_NAME_REQUIRED,
+  'test.request.url': i18n.translate(
+    'xpack.triggersActionsUI.sections.buildConnectorPage.error.requiredUrl',
+    { defaultMessage: 'URL is required.' }
+  ),
+  'test.request.headers.*.key': HEADER_NAME_REQUIRED,
 };
 
 /** Messages for `invalid_format` issues, keyed like `REQUIRED_MESSAGES`. */
@@ -91,7 +98,13 @@ const FORMAT_MESSAGES: Record<string, string> = {
   'actions.*.name': IDENTIFIER_FORMAT,
   'actions.*.input.*.name': IDENTIFIER_FORMAT,
   'actions.*.request.headers.*.key': HEADER_NAME_FORMAT,
+  'test.request.headers.*.key': HEADER_NAME_FORMAT,
 };
+
+const AUTH_TYPES_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.sections.buildConnectorPage.error.requiredAuthTypes',
+  { defaultMessage: 'Select at least one authentication type.' }
+);
 
 /** Normalizes a row path like `actions.1.input.3.name` to the `actions.*.input.*.name` message key. */
 const toMessageKey = (formPath: string): string => formPath.replace(/\.\d+(?=\.)/g, '.*');
@@ -126,23 +139,51 @@ const toActionFormPath = (
       : `${action}.input.root`;
   }
   if (section === 'request') {
-    if (part === 'method' || part === 'url' || part === 'path' || part === 'body') {
-      return `${action}.request.${part}`;
-    }
-    if (part === 'headers') {
-      const headerIndex = values.actions[actionIndex].request.headers.findIndex(
-        (header) => header.key === detail
-      );
-      if (detail === undefined || headerIndex < 0) {
-        return `${action}.request.headers.root`;
-      }
-      const isKeyIssue =
-        code === 'invalid_key' || code === 'invalid_format' || code === 'too_small';
-      return `${action}.request.headers.${headerIndex}.${isKeyIssue ? 'key' : 'value'}`;
-    }
-    return `${action}.request.root`;
+    return toRequestFormPath(
+      `${action}.request`,
+      values.actions[actionIndex].request,
+      part,
+      detail,
+      code
+    );
   }
   return `${action}.root`;
+};
+
+/** Maps an issue inside a request (an action's or the test's) onto its form field. */
+const toRequestFormPath = (
+  requestPath: string,
+  request: BuildConnectorFormData['actions'][number]['request'],
+  part: string | undefined,
+  detail: string | undefined,
+  code: string
+): string => {
+  if (part === 'method' || part === 'url' || part === 'path' || part === 'body') {
+    return `${requestPath}.${part}`;
+  }
+  if (part === 'headers') {
+    const headerIndex = request.headers.findIndex((header) => header.key === detail);
+    if (detail === undefined || headerIndex < 0) {
+      return `${requestPath}.headers.root`;
+    }
+    const isKeyIssue = code === 'invalid_key' || code === 'invalid_format' || code === 'too_small';
+    return `${requestPath}.headers.${headerIndex}.${isKeyIssue ? 'key' : 'value'}`;
+  }
+  return `${requestPath}.root`;
+};
+
+const toTestFormPath = (
+  segments: string[],
+  code: string,
+  values: BuildConnectorFormData
+): string => {
+  const [, section, part, detail] = segments;
+  if (section === 'description') {
+    return 'test.description';
+  }
+  return section === 'request'
+    ? toRequestFormPath('test.request', values.test.request, part, detail, code)
+    : 'test.root';
 };
 
 /** Maps a schema issue path (request shape) onto the form field that can fix it. */
@@ -152,8 +193,8 @@ const toFormPath = (issue: z.ZodIssue, values: BuildConnectorFormData): string =
   if (EDITABLE_PATHS.has(path)) {
     return path;
   }
-  if (path === 'auth') {
-    return 'auth.type';
+  if (segments[0] === 'auth') {
+    return 'auth.types';
   }
   const [root, index, key] = segments;
   if (root === 'config') {
@@ -163,6 +204,9 @@ const toFormPath = (issue: z.ZodIssue, values: BuildConnectorFormData): string =
   }
   if (root === 'actions') {
     return toActionFormPath(segments, issue.code, values);
+  }
+  if (root === 'test') {
+    return toTestFormPath(segments, issue.code, values);
   }
   return path ? root : 'root';
 };
@@ -249,6 +293,30 @@ const validateFormOnly = (
     duplicate: DUPLICATE_HEADER_NAME,
   };
 
+  const validateRequest = (
+    request: BuildConnectorFormData['actions'][number]['request'],
+    requestPath: string
+  ): BuildConnectorFormData['actions'][number]['request'] => {
+    const headerNames = new Set<string>();
+    const headers = request.headers.map((header, headerIndex) => {
+      const isKeyUsable = validateKey(
+        header.key,
+        headerNames,
+        headerNameSchema,
+        headerMessages,
+        `${requestPath}.headers.${headerIndex}.key`,
+        addError
+      );
+      return isKeyUsable ? header : { ...header, key: `placeholder-header-${headerIndex}` };
+    });
+
+    const { error: bodyError } = parseJsonObject(request.body);
+    if (bodyError) {
+      addError(`${requestPath}.body`, bodyError);
+    }
+    return { ...request, headers };
+  };
+
   const actions = values.actions.map((action, actionIndex) => {
     const actionPath = `actions.${actionIndex}`;
     const isNameUsable = validateKey(
@@ -260,32 +328,43 @@ const validateFormOnly = (
       addError
     );
 
-    const headerNames = new Set<string>();
-    const headers = action.request.headers.map((header, headerIndex) => {
-      const isKeyUsable = validateKey(
-        header.key,
-        headerNames,
-        headerNameSchema,
-        headerMessages,
-        `${actionPath}.request.headers.${headerIndex}.key`,
-        addError
-      );
-      return isKeyUsable ? header : { ...header, key: `placeholder-header-${headerIndex}` };
-    });
-
-    const { error: bodyError } = parseJsonObject(action.request.body);
-    if (bodyError) {
-      addError(`${actionPath}.request.body`, bodyError);
-    }
-
     return {
       ...action,
       name: isNameUsable ? action.name : `placeholderAction${actionIndex}`,
-      request: { ...action.request, headers },
+      request: validateRequest(action.request, `${actionPath}.request`),
     };
   });
 
-  return { ...values, actions };
+  const test = { ...values.test, request: validateRequest(values.test.request, 'test.request') };
+
+  return { ...values, actions, test, auth: validateAuth(values.auth, addError) };
+};
+
+/**
+ * The union of auth shapes yields only a generic issue when anything inside it is wrong, so the
+ * choices are checked here and a valid placeholder stands in for the schema pass.
+ */
+const validateAuth = (
+  auth: BuildConnectorFormData['auth'],
+  addError: AddError
+): BuildConnectorFormData['auth'] => {
+  if (auth.types.length === 0) {
+    addError('auth.types', AUTH_TYPES_REQUIRED);
+    return { types: ['none'] };
+  }
+  if (!auth.types.includes('api_key_header')) {
+    return auth;
+  }
+
+  const headerName = auth.headerName ?? '';
+  if (!headerName) {
+    addError('auth.headerName', HEADER_NAME_REQUIRED);
+  } else if (!headerNameSchema.safeParse(headerName).success) {
+    addError('auth.headerName', HEADER_NAME_FORMAT);
+  } else {
+    return auth;
+  }
+  return { ...auth, headerName: 'X-Placeholder' };
 };
 
 /**

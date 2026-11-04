@@ -31,6 +31,7 @@ import { getCurrentDocTitle } from '../../../lib/doc_title';
 import { ActionListEditor } from './action_list_editor';
 import { CreateConnectorTypeErrorCallout } from './create_connector_type_error_callout';
 import { ConfigFieldListEditor } from './config_field_list_editor';
+import { ConnectionTestEditor } from './connection_test_editor';
 import { ConnectorDetailsFields } from './connector_details_fields';
 import { DefinitionImportPanels } from './definition_import_panels';
 import { useBuildConnectorForm } from '../hooks/use_build_connector_form';
@@ -53,6 +54,9 @@ const STEP_TITLES = {
   }),
   actions: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.actionsStepTitle', {
     defaultMessage: 'Actions',
+  }),
+  test: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.testStepTitle', {
+    defaultMessage: 'Connection test',
   }),
 };
 
@@ -116,6 +120,12 @@ export const BuildConnectorPage: React.FC = () => {
       status: stepStatus(Boolean(errors.actions)),
       'data-test-subj': 'build-connector-page-step-actions',
       children: <ActionListEditor />,
+    },
+    {
+      title: STEP_TITLES.test,
+      status: stepStatus(Boolean(errors.test)),
+      'data-test-subj': 'build-connector-page-step-test',
+      children: <ConnectionTestEditor />,
     },
   ];
 

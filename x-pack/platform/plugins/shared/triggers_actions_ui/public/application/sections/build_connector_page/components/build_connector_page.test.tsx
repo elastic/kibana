@@ -81,6 +81,21 @@ const bodyEditor = (actionIndex: number) =>
     'mockedCodeEditor'
   );
 
+const authSelect = () => screen.getByTestId('buildConnectorAuthTypeSelect');
+
+const selectAuthType = async (label: string) => {
+  await userEvent.click(within(authSelect()).getByTestId('comboBoxToggleListButton'));
+  await userEvent.click(await screen.findByRole('option', { name: label }));
+};
+
+const removeAuthType = async (label: string) => {
+  await userEvent.click(
+    within(authSelect()).getByRole('button', {
+      name: `Remove ${label} from selection in this group`,
+    })
+  );
+};
+
 const typeYaml = async (yaml: string) => {
   await userEvent.click(await screen.findByTestId('build-connector-page-yaml-toggle'));
   fireEvent.change(yamlEditor(), { target: { value: yaml } });
@@ -233,7 +248,7 @@ describe('BuildConnectorPage', () => {
     expect(screen.getByTestId('buildConnectorNameInput')).toBeInTheDocument();
     expect(screen.getByTestId('buildConnectorIdInput')).toBeInTheDocument();
     expect(screen.getByTestId('buildConnectorDescriptionInput')).toBeInTheDocument();
-    expect(screen.getByTestId('buildConnectorAuthTypeSelect')).toHaveValue('none');
+    expect(within(authSelect()).getByText('None')).toBeInTheDocument();
     expect(screen.queryByTestId('buildConnectorAuthHeaderNameInput')).not.toBeInTheDocument();
     expect(screen.getByTestId('buildConnectorConfigFields')).toBeInTheDocument();
     expect(screen.getByTestId('buildConnectorAction-0')).toBeInTheDocument();
@@ -286,13 +301,11 @@ describe('BuildConnectorPage', () => {
   it('shows the header name field only for API key header auth', async () => {
     renderPage();
 
-    await userEvent.selectOptions(
-      await screen.findByTestId('buildConnectorAuthTypeSelect'),
-      'api_key_header'
-    );
+    await screen.findByTestId('buildConnectorAuthTypeSelect');
+    await selectAuthType('API key header');
     expect(await screen.findByTestId('buildConnectorAuthHeaderNameInput')).toBeInTheDocument();
 
-    await userEvent.selectOptions(screen.getByTestId('buildConnectorAuthTypeSelect'), 'bearer');
+    await removeAuthType('API key header');
     await waitFor(() =>
       expect(screen.queryByTestId('buildConnectorAuthHeaderNameInput')).not.toBeInTheDocument()
     );
@@ -391,7 +404,7 @@ describe('BuildConnectorPage', () => {
       fireEvent.change(yamlEditor(), { target: { value: 'name: Acme\n' } });
       expect(
         await screen.findByText(
-          'Unknown top-level key "name". Allowed keys: id, displayName, description, auth, config, actions.'
+          'Unknown top-level key "name". Allowed keys: id, displayName, description, auth, config, test, actions.'
         )
       ).toBeInTheDocument();
     });
@@ -425,7 +438,7 @@ describe('BuildConnectorPage', () => {
 
       expect(screen.getByTestId('buildConnectorIdInput')).toHaveValue('acme');
       expect(screen.getByTestId('buildConnectorDescriptionInput')).toHaveValue('Talks to Acme');
-      expect(screen.getByTestId('buildConnectorAuthTypeSelect')).toHaveValue('api_key_header');
+      expect(within(authSelect()).getByText('API key header')).toBeInTheDocument();
       expect(screen.getByTestId('buildConnectorAuthHeaderNameInput')).toHaveValue('X-Api-Key');
       expect(screen.getByTestId('buildConnectorConfigFields-0-name')).toHaveValue('baseUrl');
       expect(screen.getByTestId('buildConnectorConfigFields-0-required')).toBeChecked();
@@ -763,7 +776,7 @@ describe('BuildConnectorPage', () => {
         expect(screen.getByTestId('buildConnectorNameInput')).toHaveValue('Acme')
       );
       expect(screen.getByTestId('buildConnectorIdInput')).toHaveValue('acme');
-      expect(screen.getByTestId('buildConnectorAuthTypeSelect')).toHaveValue('api_key_header');
+      expect(within(authSelect()).getByText('API key header')).toBeInTheDocument();
       expect(screen.getByTestId('buildConnectorAuthHeaderNameInput')).toHaveValue('X-Api-Key');
       expect(screen.getByTestId('buildConnectorConfigFields-0-default')).toHaveValue(
         'https://api.acme.com'
@@ -975,6 +988,289 @@ describe('BuildConnectorPage', () => {
             },
           })
         )
+      );
+    });
+  });
+
+  describe('authentication', () => {
+    it('imports several authentication types and sends them as a list', async () => {
+      renderPage();
+
+      await applyYaml(
+        yamlDefinition.replace(
+          /auth:[\s\S]*?config:/,
+          `auth:
+  types:
+    - bearer
+    - type: api_key_header
+      defaults:
+        headerField: X-Key
+config:`
+        )
+      );
+
+      expect(within(authSelect()).getByText('Bearer token')).toBeInTheDocument();
+      expect(within(authSelect()).getByText('API key header')).toBeInTheDocument();
+      expect(screen.getByTestId('buildConnectorAuthHeaderNameInput')).toHaveValue('X-Key');
+
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
+
+      await waitFor(() =>
+        expect(createConnectorType).toHaveBeenCalledWith(
+          expect.objectContaining({
+            connectorType: expect.objectContaining({
+              auth: {
+                types: ['bearer', { type: 'api_key_header', defaults: { headerField: 'X-Key' } }],
+              },
+            }),
+          })
+        )
+      );
+    });
+
+    it('requires at least one authentication type', async () => {
+      renderPage();
+
+      await removeAuthType('None');
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
+
+      expect(
+        await screen.findByText('Select at least one authentication type.')
+      ).toBeInTheDocument();
+      expect(createConnectorType).not.toHaveBeenCalled();
+    });
+
+    it('requires the header name when API key header is selected', async () => {
+      renderPage();
+
+      await selectAuthType('API key header');
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
+
+      expect(await screen.findByText('Header name is required.')).toBeInTheDocument();
+      expect(createConnectorType).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('string format', () => {
+    const formatYaml = yamlDefinition.replace(
+      `  - name: baseUrl
+    type: string
+    required: true`,
+      `  - name: baseUrl
+    type: string
+    format: uri
+    default: https://api.acme.com
+    required: true`
+    );
+
+    it('imports a format and shows it only for string fields', async () => {
+      renderPage();
+
+      await applyYaml(formatYaml);
+
+      expect(screen.getByTestId('buildConnectorConfigFields-0-format')).toHaveValue('uri');
+
+      await userEvent.selectOptions(
+        screen.getByTestId('buildConnectorConfigFields-0-type'),
+        'number'
+      );
+      await waitFor(() =>
+        expect(screen.queryByTestId('buildConnectorConfigFields-0-format')).not.toBeInTheDocument()
+      );
+    });
+
+    it('sends the chosen format with the config field', async () => {
+      renderPage();
+
+      await applyYaml(formatYaml);
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
+
+      await waitFor(() =>
+        expect(createConnectorType).toHaveBeenCalledWith(
+          expect.objectContaining({
+            connectorType: expect.objectContaining({
+              config: [
+                {
+                  name: 'baseUrl',
+                  type: 'string',
+                  format: 'uri',
+                  default: 'https://api.acme.com',
+                  required: true,
+                },
+              ],
+            }),
+          })
+        )
+      );
+    });
+
+    it('shows an error when the default does not match the format', async () => {
+      renderPage();
+
+      await applyYaml(formatYaml);
+      await userEvent.clear(screen.getByTestId('buildConnectorConfigFields-0-default'));
+      await userEvent.type(screen.getByTestId('buildConnectorConfigFields-0-default'), 'not a url');
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
+
+      expect(
+        await screen.findByText('Default value must match the field format.')
+      ).toBeInTheDocument();
+      expect(createConnectorType).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('connection test (step 4)', () => {
+    const testYaml = `${yamlDefinition.trimEnd()}
+test:
+  description: Checks the API is reachable
+  request:
+    method: GET
+    url: "{{config.baseUrl}}"
+    path: /health
+    headers:
+      X-Check: "yes"
+`;
+
+    it('is the fourth step and is empty by default', async () => {
+      renderPage();
+
+      const testStep = await screen.findByTestId('build-connector-page-step-test');
+      expect(testStep).toHaveTextContent('Connection test');
+      expect(within(testStep).getByTestId('buildConnectorTest-method')).toHaveValue('GET');
+      expect(within(testStep).getByTestId('buildConnectorTest-url')).toHaveValue('');
+      expect(within(testStep).getByTestId('buildConnectorTest-intro')).toHaveTextContent(
+        'but not action input'
+      );
+    });
+
+    it('does not send a test when it is left empty', async () => {
+      renderPage();
+
+      await applyYaml(yamlDefinition);
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
+
+      await waitFor(() => expect(createConnectorType).toHaveBeenCalledTimes(1));
+      expect(createConnectorType.mock.calls[0][0].connectorType).not.toHaveProperty('test');
+    });
+
+    it('fills the test from the YAML and sends it', async () => {
+      renderPage();
+
+      await applyYaml(testYaml);
+
+      expect(screen.getByTestId('buildConnectorTest-description')).toHaveValue(
+        'Checks the API is reachable'
+      );
+      expect(screen.getByTestId('buildConnectorTest-url')).toHaveValue('{{config.baseUrl}}');
+      expect(screen.getByTestId('buildConnectorTest-path')).toHaveValue('/health');
+      expect(screen.getByTestId('buildConnectorTest-headers-0-key')).toHaveValue('X-Check');
+
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
+
+      await waitFor(() =>
+        expect(createConnectorType).toHaveBeenCalledWith(
+          expect.objectContaining({
+            connectorType: expect.objectContaining({
+              test: {
+                description: 'Checks the API is reachable',
+                request: {
+                  method: 'GET',
+                  url: '{{config.baseUrl}}',
+                  path: '/health',
+                  headers: { 'X-Check': 'yes' },
+                },
+              },
+            }),
+          })
+        )
+      );
+    });
+
+    it('builds a test in the form, including a JSON body', async () => {
+      renderPage();
+
+      await applyYaml(yamlDefinition);
+      await userEvent.selectOptions(screen.getByTestId('buildConnectorTest-method'), 'POST');
+      await userEvent.type(
+        screen.getByTestId('buildConnectorTest-url'),
+        'https://acme.example.com'
+      );
+      fireEvent.change(
+        within(screen.getByTestId('buildConnectorTest-body')).getByTestId('mockedCodeEditor'),
+        { target: { value: '{"ping": true}' } }
+      );
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
+
+      await waitFor(() =>
+        expect(createConnectorType).toHaveBeenCalledWith(
+          expect.objectContaining({
+            connectorType: expect.objectContaining({
+              test: {
+                request: {
+                  method: 'POST',
+                  url: 'https://acme.example.com',
+                  body: { ping: true },
+                },
+              },
+            }),
+          })
+        )
+      );
+    });
+
+    it('requires a URL once any test field is filled in', async () => {
+      renderPage();
+
+      await applyYaml(yamlDefinition);
+      await userEvent.type(screen.getByTestId('buildConnectorTest-description'), 'Only a note');
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
+
+      expect(
+        await within(screen.getByTestId('build-connector-page-step-test')).findByText(
+          'URL is required.'
+        )
+      ).toBeInTheDocument();
+      expect(createConnectorType).not.toHaveBeenCalled();
+    });
+
+    it('cannot reference action input', async () => {
+      renderPage();
+
+      await applyYaml(yamlDefinition);
+      await userEvent.type(screen.getByTestId('buildConnectorTest-url'), '{{{{input.message}}');
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
+
+      expect(await screen.findByTestId('buildConnectorTest-request-error')).toHaveTextContent(
+        'Template reference "input.message" is not declared for this connector test.'
+      );
+      expect(createConnectorType).not.toHaveBeenCalled();
+    });
+
+    it('rejects unknown keys in the test YAML', async () => {
+      renderPage();
+
+      await typeYaml(`${yamlDefinition.trimEnd()}\ntest:\n  url: https://x.example.com\n`);
+
+      expect(
+        await screen.findByText(
+          '"test" has an unknown key "url". Allowed keys: description, request.'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('flags the step after a failed save', async () => {
+      renderPage();
+
+      await applyYaml(yamlDefinition);
+      await userEvent.type(screen.getByTestId('buildConnectorTest-description'), 'Only a note');
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
+
+      await within(screen.getByTestId('build-connector-page-step-test')).findByText(
+        'URL is required.'
+      );
+      expect(screen.getByTestId('build-connector-page-step-test')).toHaveTextContent(/has errors/);
+      expect(screen.getByTestId('build-connector-page-step-config')).not.toHaveTextContent(
+        /has errors/
       );
     });
   });

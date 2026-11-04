@@ -10,13 +10,15 @@ import { EuiButtonIcon, EuiFormRow, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { useController, useFormContext } from 'react-hook-form';
-import type { BuildConnectorFormData } from '../types';
+import type { BuildConnectorFormData, RequestPath } from '../types';
 import { formatJson, parseJsonObject } from '../lib/json_body';
 import { ResizableCodeEditor } from './resizable_code_editor';
 
 interface Props {
-  actionIndex: number;
+  requestPath: RequestPath;
   testSubj: string;
+  /** The connection test has no action input to reference. */
+  allowInputReferences?: boolean;
 }
 
 const EDITOR_OPTIONS: CodeEditorProps['options'] = {
@@ -33,13 +35,17 @@ const BEAUTIFY_LABEL = i18n.translate(
   { defaultMessage: 'Beautify JSON' }
 );
 
-/** JSON editor for an action's request body, validated as you type. */
-const JsonBodyEditorComponent: React.FC<Props> = ({ actionIndex, testSubj }) => {
+/** JSON editor for a request body, validated as you type. */
+const JsonBodyEditorComponent: React.FC<Props> = ({
+  requestPath,
+  testSubj,
+  allowInputReferences = true,
+}) => {
   const { control } = useFormContext<BuildConnectorFormData>();
   const {
     field,
     fieldState: { error },
-  } = useController({ control, name: `actions.${actionIndex}.request.body` });
+  } = useController({ control, name: `${requestPath}.body` });
   const value = field.value ?? '';
   const syntaxError = useMemo(() => parseJsonObject(value).error, [value]);
   const message = syntaxError ?? error?.message;
@@ -61,17 +67,28 @@ const JsonBodyEditorComponent: React.FC<Props> = ({ actionIndex, testSubj }) => 
           />
         </EuiToolTip>
       }
-      helpText={i18n.translate(
-        'xpack.triggersActionsUI.sections.buildConnectorPage.bodyFieldHelpText',
-        {
-          defaultMessage: 'Optional. String values can reference {config}, {input} and {secrets}.',
-          values: {
-            config: '{{config.<name>}}',
-            input: '{{input.<name>}}',
-            secrets: '{{secrets.<name>}}',
-          },
-        }
-      )}
+      helpText={
+        allowInputReferences
+          ? i18n.translate(
+              'xpack.triggersActionsUI.sections.buildConnectorPage.bodyFieldHelpText',
+              {
+                defaultMessage:
+                  'Optional. String values can reference {config}, {input} and {secrets}.',
+                values: {
+                  config: '{{config.<name>}}',
+                  input: '{{input.<name>}}',
+                  secrets: '{{secrets.<name>}}',
+                },
+              }
+            )
+          : i18n.translate(
+              'xpack.triggersActionsUI.sections.buildConnectorPage.testBodyFieldHelpText',
+              {
+                defaultMessage: 'Optional. String values can reference {config} and {secrets}.',
+                values: { config: '{{config.<name>}}', secrets: '{{secrets.<name>}}' },
+              }
+            )
+      }
       fullWidth
       isInvalid={!!message}
       error={message}

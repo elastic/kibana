@@ -18,11 +18,12 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 import { Controller, useFieldArray, useFormContext, useFormState } from 'react-hook-form';
-import type { BuildConnectorFormData } from '../types';
+import type { BuildConnectorFormData, RequestPath } from '../types';
 
 interface Props {
-  actionIndex: number;
+  requestPath: RequestPath;
   testSubjPrefix: string;
 }
 
@@ -42,13 +43,13 @@ const LABELS = {
   }),
 };
 
-/** Key/value rows for an action's request headers. */
-const HeaderListEditorComponent: React.FC<Props> = ({ actionIndex, testSubjPrefix }) => {
-  const name = `actions.${actionIndex}.request.headers` as const;
+/** Key/value rows for a request's headers. */
+const HeaderListEditorComponent: React.FC<Props> = ({ requestPath, testSubjPrefix }) => {
+  const name = `${requestPath}.headers` as const;
   const { control } = useFormContext<BuildConnectorFormData>();
   const { fields, append, remove } = useFieldArray({ control, name });
   const { errors } = useFormState({ control, name });
-  const listError = errors.actions?.[actionIndex]?.request?.headers?.root?.message;
+  const listError: string | undefined = get(errors, `${name}.root.message`);
 
   return (
     <div data-test-subj={testSubjPrefix}>

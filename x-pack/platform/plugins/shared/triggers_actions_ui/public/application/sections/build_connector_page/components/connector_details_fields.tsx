@@ -6,34 +6,35 @@
  */
 
 import React, { memo, useEffect, useRef } from 'react';
-import { EuiFieldText, EuiFormRow, EuiSelect, EuiTextArea } from '@elastic/eui';
+import { EuiComboBox, EuiFieldText, EuiFormRow, EuiTextArea } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext, useFormState, useWatch } from 'react-hook-form';
 import type { BuildConnectorFormData, ConnectorTypeAuthType } from '../types';
 import { toConnectorTypeId } from '../lib/form_serializers';
 
-const authTypeOptions: Array<{ value: ConnectorTypeAuthType; text: string }> = [
+const authTypeOptions: Array<EuiComboBoxOptionOption<ConnectorTypeAuthType>> = [
   {
     value: 'none',
-    text: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.authType.none', {
+    label: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.authType.none', {
       defaultMessage: 'None',
     }),
   },
   {
     value: 'basic',
-    text: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.authType.basic', {
+    label: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.authType.basic', {
       defaultMessage: 'Basic',
     }),
   },
   {
     value: 'bearer',
-    text: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.authType.bearer', {
+    label: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.authType.bearer', {
       defaultMessage: 'Bearer token',
     }),
   },
   {
     value: 'api_key_header',
-    text: i18n.translate(
+    label: i18n.translate(
       'xpack.triggersActionsUI.sections.buildConnectorPage.authType.apiKeyHeader',
       { defaultMessage: 'API key header' }
     ),
@@ -44,9 +45,9 @@ const authTypeOptions: Array<{ value: ConnectorTypeAuthType; text: string }> = [
 const ConnectorDetailsFieldsComponent: React.FC = () => {
   const { control, setValue } = useFormContext<BuildConnectorFormData>();
   const { isSubmitted } = useFormState({ control });
-  const [displayName, id, authType] = useWatch({
+  const [displayName, id, authTypes] = useWatch({
     control,
-    name: ['displayName', 'id', 'auth.type'],
+    name: ['displayName', 'id', 'auth.types'],
   });
   const previousDisplayName = useRef<string>(displayName ?? '');
 
@@ -149,7 +150,7 @@ const ConnectorDetailsFieldsComponent: React.FC = () => {
         )}
       />
       <Controller
-        name="auth.type"
+        name="auth.types"
         control={control}
         render={({ field, fieldState: { error } }) => (
           <EuiFormRow
@@ -157,24 +158,37 @@ const ConnectorDetailsFieldsComponent: React.FC = () => {
               'xpack.triggersActionsUI.sections.buildConnectorPage.authTypeFieldLabel',
               { defaultMessage: 'Authentication' }
             )}
+            helpText={i18n.translate(
+              'xpack.triggersActionsUI.sections.buildConnectorPage.authTypeFieldHelpText',
+              {
+                defaultMessage:
+                  'Pick one type, or several to let users choose how a connector authenticates.',
+              }
+            )}
             fullWidth
             isInvalid={!!error}
             error={error?.message}
           >
-            <EuiSelect
+            <EuiComboBox<ConnectorTypeAuthType>
               fullWidth
+              isClearable={false}
               isInvalid={!!error}
               options={authTypeOptions}
+              selectedOptions={authTypeOptions.filter(({ value }) =>
+                (field.value ?? []).includes(value as ConnectorTypeAuthType)
+              )}
               data-test-subj="buildConnectorAuthTypeSelect"
-              value={field.value}
-              onChange={(e) => field.onChange(e.target.value)}
+              onChange={(selected) =>
+                field.onChange(
+                  selected.flatMap(({ value }) => (value === undefined ? [] : [value]))
+                )
+              }
               onBlur={field.onBlur}
-              inputRef={field.ref}
             />
           </EuiFormRow>
         )}
       />
-      {authType === 'api_key_header' && (
+      {authTypes?.includes('api_key_header') && (
         <Controller
           name="auth.headerName"
           control={control}
