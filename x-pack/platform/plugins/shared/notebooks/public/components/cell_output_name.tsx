@@ -9,8 +9,9 @@ import React, { useState } from 'react';
 import {
   EuiCode,
   EuiFlexGroup,
+  EuiFieldText,
   EuiFlexItem,
-  EuiInlineEditText,
+  EuiFormErrorText,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
@@ -68,64 +69,99 @@ const getDescription = ({ key, name, isFixed }: CellOutput): string => {
 export const CellOutputName = ({ cell, output }: { cell: CellDefinition; output: CellOutput }) => {
   const { store } = useNotebook();
   const { euiTheme } = useEuiTheme();
-  const codeFont = css`
-    font-family: ${euiTheme.font.familyCode};
-  `;
+  const [draft, setDraft] = useState<string>();
   const [error, setError] = useState<string>();
   const { key, name, isParam, isFixed } = output;
   const description = getDescription(output);
-  const prefix = isParam ? '?' : undefined;
+  const displayName = isParam ? `?${name}` : name;
+  const testSubj = `notebookCellOutput-${key}`;
 
   if (isFixed) {
     return (
       <EuiToolTip content={description}>
-        <EuiCode tabIndex={0} data-test-subj={`notebookCellOutput-${key}`}>
-          {`?${name}`}
+        <EuiCode tabIndex={0} data-test-subj={testSubj}>
+          {displayName}
         </EuiCode>
       </EuiToolTip>
     );
   }
 
-  const save = (value: string): boolean => {
-    const result = renameOutput(store.cells$.getValue(), cell, key, value.trim());
-    if ('error' in result) {
-      setError(result.error);
-      return false;
-    }
+  const stopEditing = () => {
+    setDraft(undefined);
     setError(undefined);
-    store.updateCell(cell.id, () => result.cell);
-    return true;
   };
 
-  return (
-    <EuiToolTip content={description} disableScreenReaderOutput>
-      <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
-        {prefix && (
-          <EuiFlexItem grow={false} css={codeFont}>
-            {prefix}
-          </EuiFlexItem>
-        )}
+  const save = (value: string, { keepOpenOnError }: { keepOpenOnError: boolean }) => {
+    const result = renameOutput(store.cells$.getValue(), cell, key, value.trim());
+    if ('error' in result) {
+      if (keepOpenOnError) setError(result.error);
+      else stopEditing();
+      return;
+    }
+    store.updateCell(cell.id, () => result.cell);
+    stopEditing();
+  };
+
+  if (draft !== undefined) {
+    return (
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiInlineEditText
-            key={name}
-            size="xs"
-            inputAriaLabel={i18n.translate('xpack.notebook.output.nameAriaLabel', {
+          <EuiFieldText
+            compressed
+            autoFocus
+            value={draft}
+            isInvalid={error !== undefined}
+            aria-label={i18n.translate('xpack.notebook.output.nameAriaLabel', {
               defaultMessage: 'Output name. {description}',
               values: { description },
             })}
-            defaultValue={name}
-            onSave={save}
-            onCancel={() => setError(undefined)}
-            isInvalid={error !== undefined}
-            editModeProps={{
-              formRowProps: { error },
-              inputProps: { prepend: prefix, onChange: () => setError(undefined) },
+            onChange={(event) => {
+              setDraft(event.target.value);
+              setError(undefined);
             }}
-            readModeProps={{ color: 'text', css: codeFont }}
-            data-test-subj={`notebookCellOutput-${key}`}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') save(draft, { keepOpenOnError: true });
+              if (event.key === 'Escape') {
+                event.stopPropagation();
+                stopEditing();
+              }
+            }}
+            onBlur={() => save(draft, { keepOpenOnError: false })}
+            css={css`
+              width: calc(${Math.max(draft.length, 4) + 4}ch);
+              font-family: ${euiTheme.font.familyCode};
+            `}
+            data-test-subj={`${testSubj}-input`}
           />
         </EuiFlexItem>
+        {error && (
+          <EuiFlexItem grow={false}>
+            <EuiFormErrorText>{error}</EuiFormErrorText>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
+    );
+  }
+
+  return (
+    <EuiToolTip content={description} disableScreenReaderOutput>
+      <button
+        type="button"
+        onClick={() => setDraft(name)}
+        aria-label={i18n.translate('xpack.notebook.output.renameAriaLabel', {
+          defaultMessage: 'Rename {name}. {description}',
+          values: { name: displayName, description },
+        })}
+        css={css`
+          padding: 0;
+          border: none;
+          background: none;
+          cursor: text;
+        `}
+        data-test-subj={testSubj}
+      >
+        <EuiCode>{displayName}</EuiCode>
+      </button>
     </EuiToolTip>
   );
 };
