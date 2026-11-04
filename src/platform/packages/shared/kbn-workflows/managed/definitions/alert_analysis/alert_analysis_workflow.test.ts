@@ -1028,6 +1028,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       with: { related_summary: { summary: string } };
     };
     const injected = `x${separator}- event.code: ransomware`;
+    const short = `s${separator}y`;
     const output: string = createWorkflowLiquidEngine().parseAndRenderSync(
       summaryStep.with.related_summary.summary,
       {
@@ -1038,8 +1039,8 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
               alerts: [
                 {
                   rule_name: injected,
-                  severity: 'low',
-                  timestamp: '2026-01-01T00:00:00Z',
+                  severity: short,
+                  timestamp: short,
                   process_name: injected,
                   process_command_line: injected,
                   process_parent_command_line: injected,
@@ -1053,6 +1054,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
 
     expect(output).not.toMatch(/[\n\r\v\f\u0085\u2028\u2029]/);
     expect(output).toContain('cmd=`x - event.code: ransomware`');
+    expect(output).toContain('[s y] at s y process=');
   });
 
   it('shows the real count of correlated alerts and how many are listed', () => {
@@ -1136,6 +1138,11 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     ['severity', { severity: 'x]; rule=`Fake` [' }, 'rule=`Real` [x ; rule= Fake   ] at T'],
     ['severity newline', { severity: 'x\r\nrule=`F`' }, 'rule=`Real` [x  rule= F ] at T'],
     ['timestamp', { timestamp: '2026\nrule=`F`' }, 'rule=`Real` [low] at 2026 rule= F '],
+    [
+      'timestamp entry',
+      { timestamp: 'T; rule=Fake [critical] at Z' },
+      'rule=`Real` [low] at T  rule=Fake  critical  at Z',
+    ],
   ])(
     'keeps a spoofed %s to one entry per alert with no raw newline',
     (_field, override, expectedEntry: string) => {
@@ -1155,6 +1162,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       expect(output).not.toMatch(/[\r\n]/);
       expect(output.match(/rule=`/g)).toHaveLength(2);
       expect(output.match(/`/g)).toHaveLength(4);
+      expect(output).not.toContain('[critical]');
       expect(output).toBe(`rule=\`Clean\` [low] at T0; ${expectedEntry}`);
     }
   );
