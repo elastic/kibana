@@ -14,12 +14,28 @@ import { apiTest, testData } from '../fixtures';
 
 const { COMMON_HEADERS, PROXY_PATH, TEST_INDEX, INDEX_SCOPED_ROLE } = testData;
 
+const SEED_DOCUMENT_ID = 'seed';
+
 apiTest.describe('Elasticsearch proxy', { tag: tags.deploymentAgnostic }, () => {
   let headers: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser(INDEX_SCOPED_ROLE);
     headers = { ...COMMON_HEADERS, ...cookieHeader };
+  });
+
+  apiTest.beforeEach(async ({ esClient }) => {
+    await esClient.indices.delete({ index: TEST_INDEX, ignore_unavailable: true });
+    await esClient.indices.create({
+      index: TEST_INDEX,
+      mappings: { properties: { message: { type: 'text' } } },
+    });
+    await esClient.index({
+      index: TEST_INDEX,
+      id: SEED_DOCUMENT_ID,
+      document: { message: 'seed document' },
+      refresh: true,
+    });
   });
 
   apiTest.afterAll(async ({ esClient }) => {
@@ -150,10 +166,13 @@ apiTest.describe('Elasticsearch proxy', { tag: tags.deploymentAgnostic }, () => 
   });
 
   apiTest('forwards DELETE requests', async ({ apiClient }) => {
-    const response = await apiClient.delete(`${PROXY_PATH}/${TEST_INDEX}/_doc/1`, {
-      headers,
-      responseType: 'json',
-    });
+    const response = await apiClient.delete(
+      `${PROXY_PATH}/${TEST_INDEX}/_doc/${SEED_DOCUMENT_ID}`,
+      {
+        headers,
+        responseType: 'json',
+      }
+    );
     expect(response).toHaveStatusCode(200);
     expect(response.body.result).toBe('deleted');
   });
