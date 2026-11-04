@@ -21,14 +21,7 @@ export type {
   FilterValueFnArgs,
   HoverActionComponentProps,
 } from './components/hover_actions/actions/types';
-export {
-  createFilter,
-  getAdditionalScreenReaderOnlyContext,
-} from './components/hover_actions/utils';
-
-// Clipboard
-export { Clipboard } from './components/clipboard/clipboard';
-export { WithCopyToClipboard } from './components/clipboard/with_copy_to_clipboard';
+export { getAdditionalScreenReaderOnlyContext } from './components/hover_actions/utils';
 
 // Tooltip
 export { PRESS, TooltipWithKeyboardShortcut } from './components/tooltip_with_keyboard_shortcut';
