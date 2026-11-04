@@ -22,7 +22,11 @@ import {
   type ServerStepDefinition,
 } from '@kbn/workflows-extensions/server';
 import { z } from '@kbn/zod/v4';
-import { ConversationRoundStatus, EventActorType } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  EventActorType,
+  createConversationNotFoundError,
+} from '@kbn/agent-builder-common';
 import type { ConversationWithPermissions, MetadataFieldValue } from '@kbn/agent-builder-common';
 import type {
   ConversationAddEventsRequest,
@@ -31,6 +35,7 @@ import type {
 import {
   INVESTIGATION_RUN_FAILED_EVENT_TYPE,
   investigationRunFailedEventSchema,
+  type Investigation,
 } from '@kbn/agentic-investigations-plugin/common';
 import { InvestigationLocatorDefinition } from '../common/locators';
 import { NightshiftInvestigationsClient } from '../server/client/investigations_client';
@@ -159,6 +164,24 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
       conversations: { getScopedClient: async () => conversations },
     } as never,
     agenticInvestigations: {
+      getInvestigationsClient: () => ({
+        get: async (id: string): Promise<Investigation> => {
+          const conversation = storedConversations.get(id);
+          if (!conversation) throw createConversationNotFoundError({ conversationId: id });
+          return {
+            id,
+            title: conversation.title,
+            title_pending: false,
+            created_at: conversation.created_at,
+            updated_at: conversation.updated_at,
+            agent_id: conversation.agent_id,
+            metadata: { status: conversation.metadata?.status === 'closed' ? 'closed' : 'open' },
+            in_progress: false,
+            subjects: [],
+            proposals: [],
+          };
+        },
+      }),
       getSubjectsClient: () => ({
         listByConversationIds: async () => [],
         upsertSubjects: async (id: string, subjects: WorkflowSubjectInput[]) => {
@@ -175,12 +198,6 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
   if (failure === 'handler') {
     ensureForFailure.mockRejectedValue(new Error('Failure handler unavailable'));
   }
-  const getInvestigationExecutionContext = jest.fn(async () => ({
-    investigation: { investigation_id: 'inv-1', title: 'Latency' },
-    conversationId: 'conv-1',
-    workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
-    notificationDestinations: destinations,
-  }));
   const lifecycleEmissions: number[] = [];
   const emitter = jest.fn(() => {
     lifecycleEmissions.push(1);
@@ -193,7 +210,7 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
       ensureForFailure: client.ensureForFailure.bind(client),
       getUnsuccessfulRun: client.getUnsuccessfulRun.bind(client),
       isLatestInvestigationRun: client.isLatestInvestigationRun.bind(client),
-      getInvestigationExecutionContext,
+      getInvestigationExecutionContext: client.getInvestigationExecutionContext.bind(client),
       getLifecycleSubject: async () => ({
         subject: { type: 'manual', id: 'question' },
         triggerType: 'manual',
@@ -211,6 +228,7 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
       if (failure === 'persistence' || persistenceAttempts <= persistenceFailures) {
         throw new Error('Persistence unavailable');
       }
+      await client.ensureOrCreate('inv-1', 'fake_workflow_execution_id');
     }
     return {
       request: { url: `http://localhost:5601${path}` },
@@ -280,6 +298,9 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
     storedConversations,
     storedSubjects,
     createConversation: conversations.create,
+    setEventWriteFailure: (fails: boolean) => {
+      eventWriteFailure = fails;
+    },
     persistenceAttempts: () => persistenceAttempts,
     run: async () => {
       await engine.runWorkflow({
@@ -342,7 +363,10 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
         checked: 1,
         errors,
         checkpoint: errors
-          ? { through: expect.any(String) }
+          ? {
+              through: expect.any(String),
+              retry: { execution_id: 'fake_workflow_execution_id', attempts: 1 },
+            }
           : { completed_through: expect.any(String) },
       });
     },
@@ -460,22 +484,39 @@ describe('managed investigation workflow failure handling', () => {
     expect(context.lifecycleEmissions).toHaveLength(1);
   });
 
-  it('keeps failed context recovery retryable after delivering Slack', async () => {
-    const context = setup('workflow_timeout');
+  it('retries a missing timeline entry after delivering Slack without sending it again', async () => {
+    const context = setup('workflow_timeout', 0, true);
     await context.run();
     const originalError = context.execution()?.error;
-    context.ensureForFailure.mockRejectedValueOnce(new Error('Conversation write unavailable'));
-
     await context.sweep(1);
     expect(context.delivered).toHaveLength(2);
-    expect(context.storedConversations.has('inv-1')).toBe(false);
+    expect(context.storedConversations.get('inv-1')?.events).toEqual([]);
+    expect(context.storedSubjects.get('inv-1')).toHaveLength(1);
 
+    context.setEventWriteFailure(false);
     await context.sweep();
     expect(context.storedConversations.get('inv-1')?.events).toEqual([
       expect.objectContaining({ type: 'investigation_run_timed_out' }),
     ]);
     expect(context.delivered).toHaveLength(2);
     expect(context.execution()?.status).toBe(ExecutionStatus.TIMED_OUT);
+    expect(context.execution()?.error).toEqual(originalError);
+  });
+
+  it('retries failed creation when notification lookup also finds no conversation', async () => {
+    const context = setup('model');
+    context.ensureForFailure.mockRejectedValueOnce(new Error('Conversation creation unavailable'));
+    await context.run();
+    const originalError = context.execution()?.error;
+    context.ensureForFailure.mockRejectedValueOnce(new Error('Conversation creation unavailable'));
+
+    await context.sweep(1);
+    expect(context.delivered).toHaveLength(0);
+    expect(context.storedConversations.has('inv-1')).toBe(false);
+
+    await context.sweep();
+    expect(context.storedConversations.get('inv-1')?.events).toHaveLength(1);
+    expect(context.delivered).toHaveLength(1);
     expect(context.execution()?.error).toEqual(originalError);
   });
 
@@ -527,7 +568,7 @@ describe('managed investigation workflow failure handling', () => {
     ]);
   });
 
-  it('preserves the agent error if the failure handler itself fails', async () => {
+  it('preserves the agent error if failure context recovery fails', async () => {
     const context = setup('handler');
     await context.run();
     expect(context.execution()?.status).toBe(ExecutionStatus.FAILED);
@@ -549,7 +590,7 @@ describe('managed investigation workflow failure handling', () => {
   });
 
   it('appends failure context to an existing conversation without changing earlier rounds or closed state', async () => {
-    const context = setup('permission');
+    const context = setup('model');
     const conversation = await context.createConversation({
       id: 'inv-1',
       templateId: 'investigation',

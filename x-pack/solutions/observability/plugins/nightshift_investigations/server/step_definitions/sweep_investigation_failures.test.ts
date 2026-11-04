@@ -136,7 +136,13 @@ describe('nightshift.sweepInvestigationFailures', () => {
     });
     report.mockRejectedValueOnce(new Error('Conversation write denied'));
     const first = await run();
-    expect(first).toEqual({ output: { checked: 2, errors: 1, checkpoint } });
+    expect(first).toEqual({
+      output: {
+        checked: 2,
+        errors: 1,
+        checkpoint: { ...checkpoint, retry: { execution_id: 'a', attempts: 1 } },
+      },
+    });
     expect(report).toHaveBeenCalledTimes(2);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Conversation write denied'));
     management.getWorkflowExecution.mockResolvedValue({ context: first });
@@ -144,6 +150,55 @@ describe('nightshift.sweepInvestigationFailures', () => {
       output: { checked: 2, errors: 0, checkpoint: { completed_through: checkpoint.through } },
     });
     expect(report).toHaveBeenCalledTimes(4);
+  });
+
+  it('releases a permanently failing candidate after three attempts and reaches the next backlog page', async () => {
+    const { management, run, logger } = setup();
+    const backlog = Array.from({ length: FAILURE_SWEEP_BATCH_SIZE }, (_, index) =>
+      candidate(`run-${String(index).padStart(3, '0')}`)
+    );
+    management.getWorkflowExecutions.mockResolvedValue({ results: [{ id: 'previous-sweep' }] });
+    management.searchExecutionsView.mockImplementation(async ({ sortField }) => ({
+      results: sortField === 'id' ? backlog : [],
+    }));
+    report.mockImplementation(async (_deps, source) => {
+      if (source.executionId === 'run-000') throw new Error('Telemetry target removed');
+    });
+
+    for (const attempts of [1, 2, 3]) {
+      const result = await run();
+      expect(result).toEqual({
+        output: {
+          checked: 100,
+          errors: 1,
+          checkpoint: {
+            through: expect.any(String),
+            ...(attempts < 3
+              ? { retry: { execution_id: 'run-000', attempts } }
+              : { after_id: 'run-099' }),
+          },
+        },
+      });
+      management.getWorkflowExecution.mockResolvedValue({ context: result });
+    }
+
+    management.searchExecutionsView.mockImplementation(async ({ sortField }) => ({
+      results: sortField === 'id' ? [candidate('run-100')] : [],
+    }));
+    expect(await run()).toEqual({
+      output: { checked: 1, errors: 0, checkpoint: { completed_through: expect.any(String) } },
+    });
+    expect(report.mock.calls.at(-1)?.[1].executionId).toBe('run-100');
+    expect(management.searchExecutionsView.mock.calls.at(-2)?.[0].query.bool.filter).toContainEqual(
+      {
+        range: { id: { gt: 'run-099' } },
+      }
+    );
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'Skipping investigation execution run-000 after 3 attempts while blocking the history cursor'
+      )
+    );
   });
 
   it('advances completed windows while overlapping late-visible failures instead of all history', async () => {
@@ -214,6 +269,31 @@ describe('nightshift.sweepInvestigationFailures', () => {
     ]);
   });
 
+  it('releases a pending retry when its execution is no longer in the history window', async () => {
+    const { management, run } = setup();
+    management.getWorkflowExecutions.mockResolvedValue({ results: [{ id: 'previous-sweep' }] });
+    management.getWorkflowExecution.mockResolvedValue({
+      context: {
+        output: {
+          checked: 1,
+          errors: 1,
+          checkpoint: {
+            through: '2026-10-29T10:00:00.000Z',
+            retry: { execution_id: 'expired-run', attempts: 1 },
+          },
+        },
+      },
+    });
+
+    expect(await run()).toEqual({
+      output: {
+        checked: 0,
+        errors: 0,
+        checkpoint: { completed_through: '2026-10-29T10:00:00.000Z' },
+      },
+    });
+  });
+
   it('ignores foreign workflows and retains the cursor when interrupted', async () => {
     const { management, run, controller } = setup();
     management.searchExecutionsView.mockResolvedValue({
@@ -253,7 +333,11 @@ describe('nightshift.sweepInvestigationFailures', () => {
 
   it('keeps the history cursor when reporting a recent failure exhausts the sweep budget', async () => {
     const { management, run, controller } = setup();
-    const checkpoint = { through: '2026-10-29T10:00:00.000Z', after_id: 'previous-history-run' };
+    const checkpoint = {
+      through: '2026-10-29T10:00:00.000Z',
+      after_id: 'previous-history-run',
+      retry: { execution_id: 'unprocessed-history-run', attempts: 2 },
+    };
     management.getWorkflowExecutions.mockResolvedValue({ results: [{ id: 'previous-sweep' }] });
     management.getWorkflowExecution.mockResolvedValue({
       context: { output: { checked: 100, errors: 0, checkpoint } },

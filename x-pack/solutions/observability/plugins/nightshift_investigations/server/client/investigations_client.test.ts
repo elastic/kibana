@@ -2329,20 +2329,25 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(conversations.addEvents).toHaveBeenCalledTimes(1);
   });
 
-  it('logs a rejected timeline write and still records subjects and execution association', async () => {
-    withExecution();
-    withConversations(makeConversation({ id: 'inv-1', status: 'closed' }));
-    conversations.addEvents.mockRejectedValueOnce(new Error('Timeline access denied'));
+  it.each(['get', 'addEvents'] as const)(
+    'surfaces a rejected timeline %s after recording subjects and execution association',
+    async (operation) => {
+      withExecution();
+      withConversations(makeConversation({ id: 'inv-1', status: 'closed' }));
+      conversations[operation].mockRejectedValueOnce(new Error('Timeline access denied'));
 
-    await expect(
-      makeClient().ensureForFailure('inv-1', 'exec-1', 'Permission denied')
-    ).resolves.toBe('inv-1');
-    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', subjects);
-    expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-1', {
-      workflow_execution_ids: ['exec-1'],
-    });
-    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Timeline access denied'));
-  });
+      await expect(
+        makeClient().ensureForFailure('inv-1', 'exec-1', 'Permission denied')
+      ).rejects.toThrow('Timeline access denied');
+      expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', subjects);
+      expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-1', {
+        workflow_execution_ids: ['exec-1'],
+      });
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Timeline access denied')
+      );
+    }
+  );
 
   it.each([undefined, '', ' \n '])(
     'omits an unavailable request (%p) and defaults an empty reason',

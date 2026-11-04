@@ -24,13 +24,21 @@ import { isInvestigationWorkflowExecution } from './managed_workflows/is_investi
 import { reportUnsuccessfulInvestigation } from './report_unsuccessful_investigation';
 
 export const FAILURE_SWEEP_BATCH_SIZE = 100;
+const MAX_BLOCKING_ATTEMPTS = 3;
 // Overlap the five-minute schedule to tolerate scheduling and persistence delays.
 const RECENT_FAILURE_LOOKBACK_MS = 10 * 60_000;
+const retrySchema = lazySchema(() =>
+  z.object({
+    execution_id: z.string().min(1).max(500),
+    attempts: z.number().int().min(1).max(MAX_BLOCKING_ATTEMPTS),
+  })
+);
 const checkpointSchema = lazySchema(() =>
   z.object({
     completed_through: z.iso.datetime().optional(),
     through: z.iso.datetime().optional(),
     after_id: z.string().min(1).max(500).optional(),
+    retry: retrySchema.optional(),
   })
 );
 export const investigationFailureSweepOutputSchema = lazySchema(() =>
@@ -42,6 +50,7 @@ export const investigationFailureSweepOutputSchema = lazySchema(() =>
 );
 
 type Checkpoint = z.infer<typeof checkpointSchema>;
+type ReportingRetry = z.infer<typeof retrySchema>;
 type SweepResult = z.infer<typeof investigationFailureSweepOutputSchema>;
 type SweepContext = Omit<InvestigationNotificationSource, 'executionId'> & { workflowId: string };
 export type InvestigationFailureSweepDeps = InvestigationNotificationDeps & {
@@ -63,11 +72,14 @@ interface CandidateQuery {
 interface BatchProgress {
   scanned: number;
   afterId?: string;
-  retry: boolean;
+  retry?: ReportingRetry;
 }
 interface BatchReporter {
   counts: Pick<SweepResult, 'checked' | 'errors'>;
-  reportBatch: (candidates: WorkflowExecutionListItemDto[]) => Promise<BatchProgress>;
+  reportBatch: (
+    candidates: WorkflowExecutionListItemDto[],
+    previousRetry?: ReportingRetry
+  ) => Promise<BatchProgress>;
 }
 
 const validateSweepWorkflow = async ({
@@ -187,16 +199,28 @@ const createBatchReporter = (
     return success;
   };
   const reportBatch = async (
-    candidates: WorkflowExecutionListItemDto[]
+    candidates: WorkflowExecutionListItemDto[],
+    previousRetry?: ReportingRetry
   ): Promise<BatchProgress> => {
     let scanned = 0;
     let afterId: string | undefined;
-    let retry = false;
+    let retry: ReportingRetry | undefined;
     for (const candidate of candidates) {
       if (context.abortSignal.aborted) break;
-      if (!(await reportCandidate(candidate))) retry = true;
+      const success = await reportCandidate(candidate);
+      if (!success && !retry) {
+        const attempts =
+          previousRetry?.execution_id === candidate.id ? previousRetry.attempts + 1 : 1;
+        if (attempts < MAX_BLOCKING_ATTEMPTS) {
+          retry = { execution_id: candidate.id, attempts };
+        } else {
+          context.logger.warn(
+            `Skipping investigation execution ${candidate.id} after ${attempts} attempts while blocking the history cursor; failure reporting may be incomplete`
+          );
+        }
+      }
       scanned++;
-      // Keep the cursor before the first failure so the next sweep retries that page.
+      // Retain the first retryable failure, but let an exhausted candidate release the cursor.
       if (!retry) afterId = candidate.id;
     }
     return { scanned, afterId, retry };
@@ -249,9 +273,12 @@ export const sweepInvestigationFailures = async (
     });
     await reporter.reportBatch(recent.results);
   }
-  const progress = await reporter.reportBatch(history.results);
+  const progress = await reporter.reportBatch(history.results, checkpoint.retry);
+  const retry =
+    progress.retry ??
+    (progress.scanned === 0 && history.results.length > 0 ? checkpoint.retry : undefined);
   const incomplete =
-    progress.retry ||
+    retry ||
     progress.scanned < history.results.length ||
     history.results.length === FAILURE_SWEEP_BATCH_SIZE;
   const afterId = progress.afterId ?? checkpoint.after_id;
@@ -264,6 +291,7 @@ export const sweepInvestigationFailures = async (
             : {}),
           through,
           ...(afterId ? { after_id: afterId } : {}),
+          ...(retry ? { retry } : {}),
         }
       : { completed_through: through },
   };

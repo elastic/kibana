@@ -56,36 +56,47 @@ export const reportUnsuccessfulInvestigation = async (
       }`
     );
   }
-  await sendInvestigationNotificationsForExecution(deps, source, {
-    investigationId,
-    phase,
-    reason,
-    onTerminalPhaseSelected: latestRun
-      ? async () => {
-          try {
-            const emitter = deps.getTriggerEmitter(source.request);
-            const subject = await client.getLifecycleSubject(investigationId);
-            if (!emitter || !subject) return;
-            // Timeouts remain unsuccessful outcomes for existing failure-trigger subscribers.
-            emitter(INVESTIGATION_FAILED_TRIGGER_ID, {
-              investigation_id: investigationId,
-              execution_id: execution.id,
-              subject: subject.subject,
-              trigger_type: subject.triggerType,
-              started_at: execution.startedAt || subject.startedAt,
-              status: 'failed',
-              completed_at: execution.finishedAt || subject.startedAt,
-            });
-          } catch (error) {
-            source.logger.warn(
-              `Could not emit investigation failure: ${
-                error instanceof Error ? error.message : String(error)
-              }`
-            );
+  try {
+    await sendInvestigationNotificationsForExecution(deps, source, {
+      investigationId,
+      phase,
+      reason,
+      onTerminalPhaseSelected: latestRun
+        ? async () => {
+            try {
+              const emitter = deps.getTriggerEmitter(source.request);
+              const subject = await client.getLifecycleSubject(investigationId);
+              if (!emitter || !subject) return;
+              // Timeouts remain unsuccessful outcomes for existing failure-trigger subscribers.
+              emitter(INVESTIGATION_FAILED_TRIGGER_ID, {
+                investigation_id: investigationId,
+                execution_id: execution.id,
+                subject: subject.subject,
+                trigger_type: subject.triggerType,
+                started_at: execution.startedAt || subject.startedAt,
+                status: 'failed',
+                completed_at: execution.finishedAt || subject.startedAt,
+              });
+            } catch (error) {
+              source.logger.warn(
+                `Could not emit investigation failure: ${
+                  error instanceof Error ? error.message : String(error)
+                }`
+              );
+            }
           }
-        }
-      : undefined,
-  });
+        : undefined,
+    });
+  } catch (error) {
+    if (!recoveryError) throw error;
+    source.logger.warn(
+      `Could not deliver investigation failure notification for ${investigationId}: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    // A missing notification context after failed creation is not proof of deletion.
+    throw recoveryError;
+  }
   // Slack delivery remains independent; retain this candidate for context recovery on the next sweep.
   if (recoveryError) throw recoveryError;
 };

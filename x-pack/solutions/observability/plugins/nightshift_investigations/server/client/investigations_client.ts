@@ -85,6 +85,7 @@ import {
 } from './build_investigation_message';
 import {
   InvestigationNotFoundError,
+  InvestigationFailureContextError,
   InvestigationQuotaDeniedError,
   InvalidInvestigationContextError,
   InvestigationUnavailableError,
@@ -980,8 +981,9 @@ export class NightshiftInvestigationsClient {
     });
 
     this.assertConversationTarget(conversation.telemetryTarget, requestedTarget);
+    let failureEventError: Error | undefined;
     if (failureReason !== undefined) {
-      await this.recordInvestigationRunFailure({
+      failureEventError = await this.recordInvestigationRunFailure({
         conversations,
         conversationId: conversation.id,
         executionId,
@@ -1028,6 +1030,8 @@ export class NightshiftInvestigationsClient {
       });
     }
 
+    // Preserve subject recovery while allowing the sweep to retry a missing timeline entry.
+    if (failureEventError) throw new InvestigationFailureContextError(failureEventError);
     return conversation.id;
   }
 
@@ -1047,7 +1051,7 @@ export class NightshiftInvestigationsClient {
     eventType:
       | typeof INVESTIGATION_RUN_FAILED_EVENT_TYPE
       | typeof INVESTIGATION_RUN_TIMED_OUT_EVENT_TYPE;
-  }): Promise<void> {
+  }): Promise<Error | undefined> {
     try {
       const existing = await conversations.get(conversationId);
       if (
@@ -1058,7 +1062,7 @@ export class NightshiftInvestigationsClient {
               executionId
         )
       )
-        return;
+        return undefined;
       await conversations.addEvents({
         conversationId,
         events: [
@@ -1079,12 +1083,14 @@ export class NightshiftInvestigationsClient {
           },
         ],
       });
+      return undefined;
     } catch (error) {
       this.logger.warn(
         `Could not record failure context for investigation "${conversationId}", execution "${executionId}": ${
           error instanceof Error ? error.message : String(error)
         }`
       );
+      return error instanceof Error ? error : new Error(String(error));
     }
   }
 
