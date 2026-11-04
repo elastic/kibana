@@ -187,7 +187,7 @@ describe('fetchClassicAlertsHistogram', () => {
       breakdownField: 'rule.id',
     });
 
-    expect(getRequestBody().aggs.breakdown.terms.size).toBe(8);
+    expect(getRequestBody().aggs.breakdown.terms.size).toBe(9);
     expect(result).toEqual({
       counts: [
         { bucketStart: buckets[0].start, count: 50, breakdown: 'rule-a' },

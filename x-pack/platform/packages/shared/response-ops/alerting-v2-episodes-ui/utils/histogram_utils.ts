@@ -182,27 +182,31 @@ const compareValues = (a: string, b: string): number => {
 /**
  * Keeps the `limit` breakdown values with the highest totals as their own series and folds every
  * other value, including counts a source already folded, into one `HISTOGRAM_OTHER_BREAKDOWN`
- * series. Bucket totals are unchanged.
+ * series. Bucket totals are unchanged. Series are ordered by rank with Other last, so the stack
+ * order is the same in every bucket.
  */
 export const limitBreakdownSeries = (
   counts: HistogramBucketCount[],
   totals: Record<string, number>,
   limit: number = HISTOGRAM_MAX_BREAKDOWN_SERIES
 ): HistogramBucketCount[] => {
-  const kept = new Set(
+  const ranks = new Map(
     Object.entries(totals)
       .filter(([value]) => value !== HISTOGRAM_OTHER_BREAKDOWN)
       .sort(([a, aTotal], [b, bTotal]) => bTotal - aTotal || compareValues(a, b))
       .slice(0, limit)
-      .map(([value]) => value)
+      .map(([value], rank) => [value, rank])
   );
+  const toRank = ({ breakdown }: HistogramBucketCount): number =>
+    (breakdown !== undefined ? ranks.get(breakdown) : undefined) ?? ranks.size;
+
   return mergeBucketCounts(
     counts.map((count) =>
-      count.breakdown === undefined || kept.has(count.breakdown)
+      count.breakdown === undefined || ranks.has(count.breakdown)
         ? count
         : { ...count, breakdown: HISTOGRAM_OTHER_BREAKDOWN }
     )
-  );
+  ).sort((a, b) => toRank(a) - toRank(b));
 };
 
 /** Formats overlap counts as a Lens-compatible Datatable for @kbn/unified-histogram. */

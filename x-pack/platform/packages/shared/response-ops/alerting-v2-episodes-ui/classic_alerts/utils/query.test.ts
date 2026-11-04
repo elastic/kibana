@@ -238,7 +238,7 @@ describe('buildClassicAlertsHistogramAggs', () => {
     expect(aggs.breakdown.terms).toEqual({
       field: 'kibana.alert.rule.uuid',
       missing: 'unknown',
-      size: 8,
+      size: 9,
     });
     expect(Object.keys(aggs.breakdown.aggs ?? {})).toEqual(['started', 'ended']);
   });

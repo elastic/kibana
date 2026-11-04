@@ -278,7 +278,7 @@ describe('useEpisodesHistogramQuery', () => {
       'rule.id': 'v2-rule',
     };
     mockExecuteEsqlQuery.mockResolvedValue([v2Row, v2Row, v2Row]);
-    const sourceRuleIds = Array.from({ length: 8 }, (_, i) => `v1-rule-${i}`);
+    const sourceRuleIds = Array.from({ length: 9 }, (_, i) => `v1-rule-${i}`);
     const fetchHistogram = jest.fn().mockResolvedValue({
       counts: [
         ...sourceRuleIds.map((breakdown) => ({ bucketStart: HOUR_0, count: 1, breakdown })),
@@ -305,12 +305,12 @@ describe('useEpisodesHistogramQuery', () => {
     const firstBucketRows = (result.current.table?.rows ?? []).filter(
       (row) => row.time_bucket === '2024-01-01T00:00:00.000Z'
     );
-    // v2-rule (3 episodes) plus the first 7 tied source rules are kept; v1-rule-7 joins Other.
-    expect(Object.fromEntries(firstBucketRows.map((row) => [row['rule.id'], row.count]))).toEqual({
-      'v2-rule': 3,
-      ...Object.fromEntries(sourceRuleIds.slice(0, 7).map((ruleId) => [ruleId, 1])),
-      [HISTOGRAM_OTHER_BREAKDOWN]: 6,
-    });
+    // v2-rule (3 episodes) plus the first 8 tied source rules are kept; v1-rule-8 joins Other.
+    expect(firstBucketRows.map((row) => [row['rule.id'], row.count])).toEqual([
+      ['v2-rule', 3],
+      ...sourceRuleIds.slice(0, 8).map((ruleId) => [ruleId, 1]),
+      [HISTOGRAM_OTHER_BREAKDOWN, 6],
+    ]);
   });
 
   it('clamps the bucket interval before generating buckets for sources', async () => {

@@ -310,9 +310,22 @@ describe('limitBreakdownSeries', () => {
     ];
 
     expect(limitBreakdownSeries(counts, { b: 1, a: 1 }, 1)).toEqual([
-      { bucketStart: 0, count: 1, breakdown: OTHER },
       { bucketStart: 0, count: 1, breakdown: 'a' },
+      { bucketStart: 0, count: 1, breakdown: OTHER },
     ]);
+  });
+
+  it('orders series by rank with Other last, keeping bucket order within a series', () => {
+    const counts = [
+      { bucketStart: 0, count: 1, breakdown: 'low' },
+      { bucketStart: 0, count: 2, breakdown: OTHER },
+      { bucketStart: 0, count: 3, breakdown: 'high' },
+      { bucketStart: HOUR, count: 4, breakdown: 'high' },
+    ];
+
+    expect(
+      limitBreakdownSeries(counts, { low: 1, high: 7 }).map(({ breakdown }) => breakdown)
+    ).toEqual(['high', 'high', 'low', OTHER]);
   });
 
   it('leaves counts unchanged when there are no more values than the limit', () => {
