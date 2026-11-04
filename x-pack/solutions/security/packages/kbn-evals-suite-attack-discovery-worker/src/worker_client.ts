@@ -51,7 +51,7 @@ export class AttackDiscoveryWorkerClient {
     return this.fetch<WorkflowExecutionDto>(this.executionPath(spaceId, executionId), {
       method: 'GET',
       headers: apiVersion(PUBLIC_API_VERSION),
-      query: { includeOutput: true },
+      query: { includeInput: true, includeOutput: true },
     });
   }
 

@@ -465,6 +465,52 @@ export const countIndexedAttacks = async ({
   }
 };
 
+/** Every attack id `match_fingerprints` handed back, as a review or an attachment. */
+const attackIdsOf = (matchOutput: Record<string, unknown> | undefined): string[] =>
+  distinct(
+    [matchOutput?.reviews, matchOutput?.attachments].flatMap((list) =>
+      Array.isArray(list) ? list.map((item) => asString(asRecord(item)?.attack_discovery_id)) : []
+    )
+  );
+
+/**
+ * Fallback for a runner step output that did not carry the discovery documents: reads the
+ * persisted attacks straight from the space's discovery index, by the ids the fingerprint matcher
+ * returned and then by generation uuid. A read that fails returns nothing, so the evaluators
+ * score what exists rather than the run erroring.
+ */
+const readPersistedAttacks = async ({
+  esClient,
+  spaceId,
+  attackIds,
+  executionUuids,
+  log,
+}: {
+  esClient: Client;
+  spaceId: string;
+  attackIds: readonly string[];
+  executionUuids: unknown;
+  log: ToolingLog;
+}): Promise<Record<string, unknown>[]> => {
+  const uuids = strings(executionUuids);
+  const filters = [
+    ...(attackIds.length > 0 ? [{ ids: { values: [...attackIds] } }] : []),
+    ...(uuids.length > 0 ? [{ terms: { [EXECUTION_UUID_FIELD]: uuids } }] : []),
+  ];
+  if (filters.length === 0) return [];
+  try {
+    const { hits } = await esClient.search<Record<string, unknown>>({
+      index: attackDiscoveryIndexForSpace(spaceId),
+      size: 1000,
+      query: { bool: { should: filters, minimum_should_match: 1 } },
+    });
+    return hits.hits.flatMap((hit) => (hit._source ? [hit._source] : []));
+  } catch (error) {
+    log.warning(`[ad-worker] could not read persisted attacks: ${errorMessage(error)}`);
+    return [];
+  }
+};
+
 /** What `match_fingerprints` did with the attacks, read from its output. */
 export interface FingerprintMatchSplit {
   /** `attack_discovery_id` of every review the matcher handed back. */
@@ -534,13 +580,35 @@ export const collectWorkerArtifacts = async ({
   const generation = outputOf(firstStep(run, RUN_GENERATION_STEP_ID));
   const fanout = outputOf(firstStep(run, RESOLVE_FANOUT_STEP_ID));
   const emit = outputOf(firstStep(run, 'emit_result'));
-  const docs = (Array.isArray(generation?.attack_discoveries) ? generation.attack_discoveries : [])
-    .map(asRecord)
-    .filter((doc): doc is Record<string, unknown> => doc !== undefined);
-  const { insights, ids } = toInsights(docs, seeded.goldIdBySeededId);
-
   const match = firstStep(run, MATCH_FINGERPRINTS_STEP_ID);
   const matchOutput = outputOf(match);
+  const reported = (
+    Array.isArray(generation?.attack_discoveries) ? generation.attack_discoveries : []
+  )
+    .map(asRecord)
+    .filter((doc): doc is Record<string, unknown> => doc !== undefined);
+  const docs =
+    reported.length > 0
+      ? reported
+      : await readPersistedAttacks({
+          esClient,
+          spaceId,
+          attackIds: attackIdsOf(matchOutput),
+          executionUuids: generation?.execution_uuids,
+          log,
+        });
+  if (reported.length === 0) {
+    log.warning(
+      `[ad-worker] run ${run.id}: run_generation output carried no attack_discoveries ` +
+        `(step ${
+          generation
+            ? `output keys: ${Object.keys(generation).join(',') || 'none'}`
+            : 'output missing'
+        }); ` +
+        `read ${docs.length} persisted attacks from the index instead`
+    );
+  }
+  const { insights, ids } = toInsights(docs, seeded.goldIdBySeededId);
   const fingerprintSplit = splitFingerprintMatch(matchOutput);
   const matchFailed = match !== undefined && (match.status === 'failed' || match.error != null);
 

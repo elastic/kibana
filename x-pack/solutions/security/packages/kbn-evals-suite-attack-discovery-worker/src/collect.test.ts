@@ -394,4 +394,50 @@ describe('collectWorkerArtifacts', () => {
       fingerprintExistingAttachCount: 1,
     });
   });
+  it('reads the persisted attacks from the index when the generation output carries none', async () => {
+    const search = jest.fn().mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _source: {
+              'kibana.alert.uuid': 'a',
+              'kibana.alert.attack_discovery.alert_ids': ['seeded-1'],
+              'kibana.alert.attack_discovery.title': 'Chain',
+            },
+          },
+        ],
+      },
+    });
+    const run = {
+      id: 'run-2',
+      status: 'completed',
+      stepExecutions: [
+        step('run_generation', 'completed', { execution_uuids: ['u1'] }),
+        step('match_fingerprints', 'completed', {
+          reviews: [{ attack_discovery_id: 'a' }],
+          attachments: [],
+        }),
+      ],
+    } as unknown as WorkflowExecutionDto;
+
+    const artifacts = await collectWorkerArtifacts({
+      client: { track: jest.fn() } as unknown as AttackDiscoveryWorkerClient,
+      esClient: { search, count: jest.fn().mockResolvedValue({ count: 1 }) } as unknown as Client,
+      run,
+      spaceId: 'space',
+      seeded: {
+        runMarker: 'marker',
+        spaceId: 'space',
+        goldIdBySeededId: new Map([['seeded-1', 'gold-1']]),
+        alertCount: 0,
+        openAlertIds: [],
+      },
+      fetch: jest.fn() as unknown as HttpHandler,
+      log: { info: jest.fn(), warning: jest.fn(), debug: jest.fn() } as unknown as ToolingLog,
+    });
+
+    expect(artifacts.insights).toHaveLength(1);
+    expect(artifacts.insights[0]).toMatchObject({ id: 'a', alertIds: ['gold-1'], title: 'Chain' });
+    expect(search).toHaveBeenCalledTimes(1);
+  });
 });
