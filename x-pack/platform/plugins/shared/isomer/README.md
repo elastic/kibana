@@ -52,6 +52,13 @@ The plugin registers the `lens` materializer. It takes a Lens chart in Lens's AP
 - **Interactions:** dimension columns are selectable (`tile` for a metric breakdown; `datum`, and `series` and `legend` with a split, for xy), a date x axis is brushable, and a saved chart links back to the Lens editor on the time range it was queried for.
 - Whatever doesn't carry over (a metric's trend line, distributed palettes, the compare badge's background, an inclusive last color band, a time range a query can't take) is a `losses` entry.
 
+### Instrumentation
+
+Sizes are measured as Isomer's input budget counts them (`measureInput` matches the SDK's `checkInputBudget`), and reported as event-based telemetry and debug logs (`plugins.isomer.instrumentation`):
+
+- **`isomer_materialize`**, once per node, nested ones included: saved object type, outcome, node type, depth, values, characters, time, planned data requests, how many hit the row cap, and whether the node was over the input budget.
+- **`isomer_render`**, once per HTML, text, Markdown or Slack render of a composition holding charts pack nodes, through the runtime `getRuntime()` returns: surface, node count, values and characters, render time, output characters, and whether the render refused the composition as over the budget.
+
 Materialization is off unless the `isomer.materializeEnabled` feature flag is on. While it's off, the route returns `404` and `materialize` returns `unsupported`. To turn it on locally, add this to `kibana.dev.yml`:
 
 ```yaml
