@@ -42,12 +42,24 @@ export const AddToAppButton = ({ cellId }: { cellId: string }) => {
     addTo(app.id);
   };
 
+  const onClick = () => {
+    const activeAppId = activeAppId$.getValue();
+    const openApp =
+      sidePanel$.getValue() === 'app'
+        ? apps.find(({ id }) => id === activeAppId) ?? apps[0]
+        : undefined;
+    if (openApp) return addTo(openApp.id);
+    if (apps.length === 0) return addToNewApp();
+    if (apps.length === 1) return addTo(apps[0].id);
+    setIsOpen((open) => !open);
+  };
+
   const button = (
     <EuiToolTip content={ADD_TO_APP_LABEL} disableScreenReaderOutput>
       <EuiButtonIcon
         iconType="addToDashboard"
         aria-label={ADD_TO_APP_LABEL}
-        onClick={() => (apps.length === 0 ? addToNewApp() : setIsOpen((open) => !open))}
+        onClick={onClick}
         data-test-subj="notebookCellAddToApp"
       />
     </EuiToolTip>
