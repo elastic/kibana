@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEvidenceQuoteGrounded, assertEsqlGroundedInReport } from './report_grounding';
+import { isEvidenceQuoteGrounded, assertEsqlGroundedInReport, clausesOf } from './report_grounding';
 import { UNGROUNDED_QUERY_FIXTURES } from './ungrounded_query_fixtures';
 
 describe('isEvidenceQuoteGrounded', () => {
@@ -928,4 +928,40 @@ describe('UNGROUNDED_QUERY_FIXTURES', () => {
       });
     }
   );
+});
+
+describe('clausesOf', () => {
+  it('extracts ==, IN and LIKE clauses with their literals', () => {
+    expect(
+      clausesOf(
+        'FROM logs-* | WHERE event.action == "AssumeRole" AND user.name IN ("alice", "bob") AND process.name LIKE "cmd*"'
+      )
+    ).toEqual([
+      { column: 'event.action', operator: '==', literals: ['AssumeRole'] },
+      { column: 'user.name', operator: 'in', literals: ['alice', 'bob'] },
+      { column: 'process.name', operator: 'like', literals: ['cmd*'] },
+    ]);
+  });
+
+  it('flattens nested OR and AND into one clause per leaf comparison', () => {
+    expect(
+      clausesOf(
+        'FROM logs-* | WHERE (event.action == "AssumeRole" OR event.action == "GetCallerIdentity") AND host.name == "WIN-1"'
+      )
+    ).toEqual([
+      { column: 'event.action', operator: '==', literals: ['AssumeRole'] },
+      { column: 'event.action', operator: '==', literals: ['GetCallerIdentity'] },
+      { column: 'host.name', operator: '==', literals: ['WIN-1'] },
+    ]);
+  });
+
+  it('yields no literals for rlike, match, or colon operators', () => {
+    expect(clausesOf('FROM logs-* | WHERE message RLIKE "Assume.*"')).toEqual([]);
+    expect(clausesOf('FROM logs-* | WHERE MATCH(message, "AssumeRole")')).toEqual([]);
+    expect(clausesOf('FROM logs-* | WHERE message:"AssumeRole"')).toEqual([]);
+  });
+
+  it('returns an empty list when the query does not parse', () => {
+    expect(clausesOf('FROM logs-* | WHERE !!!')).toEqual([]);
+  });
 });

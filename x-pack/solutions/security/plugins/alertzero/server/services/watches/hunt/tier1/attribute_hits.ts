@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { HuntForThreatHit, HuntIoc } from '@kbn/alertzero-common';
+import {
+  HUNT_EVIDENCE_FIELD_KEYS,
+  HUNT_EVIDENCE_FIELDS_MAX_KEYS,
+  HUNT_EVIDENCE_FIELD_VALUE_MAX,
+  type HuntForThreatHit,
+  type HuntIoc,
+} from '@kbn/alertzero-common';
 
 type HitMatched = NonNullable<HuntForThreatHit['matched']>;
 
@@ -54,23 +60,7 @@ export const IOC_FIELDS_BY_TYPE: Record<string, string[]> = {
  * Bounded evidence keys copied onto wire hits (D8). Order is the priority when
  * capping at 8 keys per event. Host and user are separate top-level fields.
  */
-export const EVIDENCE_SOURCE_FIELDS = [
-  'process.name',
-  'process.command_line',
-  'process.parent.name',
-  'process.executable',
-  'file.path',
-  'file.hash.sha256',
-  'dns.question.name',
-  'destination.ip',
-  'destination.domain',
-  'source.ip',
-  'url.full',
-  'event.action',
-] as const;
-
-const MAX_EVIDENCE_FIELDS = 8;
-const MAX_EVIDENCE_VALUE_LENGTH = 256;
+export const EVIDENCE_SOURCE_FIELDS = HUNT_EVIDENCE_FIELD_KEYS;
 
 /** Named Tier 1 clause: `ioc_<index>|<ecs.field>`. */
 const NAMED_CLAUSE_RE = /^ioc_(\d+)\|(.+)$/;
@@ -199,7 +189,7 @@ const copyEvidenceFields = (
 ): Record<string, string> | undefined => {
   const fields: Record<string, string> = {};
   for (const key of EVIDENCE_SOURCE_FIELDS) {
-    if (Object.keys(fields).length >= MAX_EVIDENCE_FIELDS) break;
+    if (Object.keys(fields).length >= HUNT_EVIDENCE_FIELDS_MAX_KEYS) break;
     // Prefer a top-level dotted key when the projection stored it that way; else walk nested.
     const raw =
       key in source
@@ -211,7 +201,9 @@ const copyEvidenceFields = (
     const str = firstStringValue(raw);
     if (str === undefined) continue;
     fields[key] =
-      str.length > MAX_EVIDENCE_VALUE_LENGTH ? str.slice(0, MAX_EVIDENCE_VALUE_LENGTH) : str;
+      str.length > HUNT_EVIDENCE_FIELD_VALUE_MAX
+        ? str.slice(0, HUNT_EVIDENCE_FIELD_VALUE_MAX)
+        : str;
   }
   return Object.keys(fields).length > 0 ? fields : undefined;
 };

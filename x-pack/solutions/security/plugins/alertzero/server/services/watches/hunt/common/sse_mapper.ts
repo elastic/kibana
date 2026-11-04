@@ -24,8 +24,15 @@ import dateMath from '@kbn/datemath';
 import { HuntIoc } from '@kbn/alertzero-common';
 import type { SignificantSecurityEventAttachmentData } from '../../../../../common/significant_security_event_schema';
 import type { SeverityLevel } from '../../../../../common/attachment_enums';
+import {
+  buildSummary,
+  classifyBasis,
+  deriveDetections,
+  type SseDetection,
+} from '../../../../../common/sse_view';
 import { splitRemoteCluster, stripBackingPrefix } from '../../../../../common/remote_cluster';
 import type { HuntCoordinatorCoreResult } from '../hunt_coordinator';
+import { clausesOf } from '../tier2/report_grounding';
 import { HostOrigins, toEntityOrigin } from './host_origin';
 
 /**
@@ -364,11 +371,52 @@ const toEventMatched = (
   // The coordinator types `ioc.type` as a free string; the SSE schema only
   // accepts the IOC enum, so drop an ioc the schema would reject.
   const ioc = matched.ioc ? HuntIoc.safeParse(matched.ioc) : undefined;
+  const iocs = (matched.iocs ?? [])
+    .map((entry) => {
+      const parsed = HuntIoc.safeParse({ type: entry.type, value: entry.value });
+      return parsed.success
+        ? { type: parsed.data.type, value: parsed.data.value, field: entry.field }
+        : undefined;
+    })
+    .filter((entry): entry is NonNullable<typeof entry> => entry !== undefined);
   return {
     field: matched.field,
     ...(ioc?.success ? { ioc: ioc.data } : {}),
+    ...(iocs.length > 0 ? { iocs } : {}),
     ...(matched.technique_id ? { technique_id: matched.technique_id } : {}),
   };
+};
+
+/** Resolve Tier 2 `matched.field` from the query's first comparable clause (never `_id`). */
+const behaviorMatchedField = (
+  behavior: CoordinatorBehavior,
+  fields: Record<string, string> | undefined
+): string => {
+  const query = behavior.validated_esql;
+  if (!query) return Object.keys(fields ?? {})[0] ?? 'host.name';
+  const clauses = clausesOf(query);
+  if (clauses.length === 0) {
+    return Object.keys(fields ?? {})[0] ?? 'host.name';
+  }
+  for (const clause of clauses) {
+    const value = fields?.[clause.column];
+    if (value === undefined) continue;
+    if (clause.operator === '==' || clause.operator === 'in') {
+      if (clause.literals.includes(value)) return clause.column;
+    }
+    if (clause.operator === 'like') {
+      const matched = clause.literals.some((pattern) => {
+        const escaped = pattern
+          .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+          .replace(/\*/g, '.*')
+          .replace(/\?/g, '.');
+        return new RegExp(`^${escaped}$`, 'i').test(value);
+      });
+      if (matched) return clause.column;
+    }
+  }
+  // No clause resolved against retained values: first filter column (never `_id`).
+  return clauses[0].column;
 };
 
 /**
@@ -413,6 +461,9 @@ const splitHits = (
         event_id: hit.id,
         source_index: hit.index,
         ...(timestamp ? { timestamp } : {}),
+        ...(hit.host ? { host: hit.host.slice(0, MAX_ENTITY_NAME_LENGTH) } : {}),
+        ...(hit.user ? { user: hit.user.slice(0, MAX_ENTITY_NAME_LENGTH) } : {}),
+        ...(hit.fields && Object.keys(hit.fields).length > 0 ? { fields: hit.fields } : {}),
         ...(matched ? { matched } : {}),
       });
     }
@@ -437,13 +488,17 @@ const behaviorHitRefs = (
           ...(timestamp ? { timestamp } : {}),
         });
       } else {
+        const fields = ref.fields && Object.keys(ref.fields).length > 0 ? ref.fields : undefined;
         events.push({
           event_id: ref.id,
           source_index: ref.index,
           ...(timestamp ? { timestamp } : {}),
+          ...(ref.host ? { host: ref.host.slice(0, MAX_ENTITY_NAME_LENGTH) } : {}),
+          ...(ref.user ? { user: ref.user.slice(0, MAX_ENTITY_NAME_LENGTH) } : {}),
+          ...(fields ? { fields } : {}),
           matched: {
             technique_id: behavior.technique_id,
-            field: '_id',
+            field: behaviorMatchedField(behavior, fields),
           },
         });
       }
@@ -622,6 +677,30 @@ const buildHuntResult = (
       resolved_iocs: tier1.resolved_iocs
         .slice(0, MAX_RESOLVED_IOCS)
         .map((ioc) => ({ type: ioc.type, value: ioc.value })),
+      ...(tier1.per_ioc && tier1.per_ioc.length > 0
+        ? {
+            per_ioc: tier1.per_ioc.slice(0, 30).flatMap((entry) => {
+              const parsed = HuntIoc.safeParse({ type: entry.type, value: entry.value });
+              if (!parsed.success) return [];
+              return [
+                {
+                  type: parsed.data.type,
+                  value: parsed.data.value,
+                  field: entry.field,
+                  count: entry.count,
+                  ...(entry.host_count !== undefined ? { host_count: entry.host_count } : {}),
+                  ...(entry.user_count !== undefined ? { user_count: entry.user_count } : {}),
+                  ...(entry.first_seen ? { first_seen: entry.first_seen } : {}),
+                  ...(entry.last_seen ? { last_seen: entry.last_seen } : {}),
+                },
+              ];
+            }),
+          }
+        : {}),
+      ...(tier1.per_ioc_truncated ? { per_ioc_truncated: true } : {}),
+      ...(typeof tier1.searched_ioc_count === 'number'
+        ? { searched_ioc_count: tier1.searched_ioc_count }
+        : {}),
       // `evidence_for` points readers at `per_index` for the breakdown, so a silent cut
       // would read as the whole distribution.
       ...(tier1.per_index.length > MAX_PER_INDEX ? { per_index_truncated: true } : {}),
@@ -824,10 +903,41 @@ const buildEntry = ({
     tier1RefCount,
   });
 
+  const detections = deriveDetections(
+    {
+      tier1: {
+        counts: result.tier1.counts,
+        per_ioc: result.tier1.per_ioc,
+        hits: result.tier1.hits,
+        resolved_iocs: result.tier1.resolved_iocs,
+      },
+      tier2: result.tier2 ? { behaviors: scopedBehaviors(result, techniqueId) } : undefined,
+    },
+    events,
+    { techniqueId }
+  );
+  const stampedEvents = stampMatchedDetection(events, detections);
+  const hasBehaviorHit = detections.some((d) => d.kind === 'behavior');
+  const basisIocs = detections
+    .filter((d) => d.kind === 'ioc')
+    .map((d) => {
+      const match = /^ioc:([^:]+):(.+)$/.exec(d.id);
+      return match
+        ? { type: match[1], value: match[2] }
+        : { type: 'ip', value: d.matched_on[0]?.value ?? d.id };
+    });
+  const basis = classifyBasis(basisIocs, hasBehaviorHit);
+  const summary = buildSummary(detections, {
+    techniqueId,
+    tier1Counts: { affected_hosts: result.tier1.counts.affected_hosts },
+  });
+
   return {
     attachment_id: buildSseAttachmentId({ spaceId, reportId, techniqueId }),
     data: {
       ...chrome,
+      ...(summary.length > 0 ? { summary } : {}),
+      ...(detections.length > 0 ? { basis, detections } : {}),
       source_watch: SOURCE_WATCH_MANAGED_ID,
       capability: CAPABILITY_ID,
       run_id: result.run_id,
@@ -836,7 +946,7 @@ const buildEntry = ({
       security_knowledge_indicators: buildSecurityKnowledgeIndicators(result, techniqueId),
       entities,
       alerts,
-      events,
+      events: stampedEvents,
       hunt_result: huntResult,
       ...(result.recommendations && result.recommendations.length > 0
         ? { maps_to_proposal: { manual_remediation: result.recommendations } }
@@ -844,6 +954,39 @@ const buildEntry = ({
       ...(truncated ? { truncated: true, truncated_original_count: originalCount } : {}),
     },
   };
+};
+
+/** Attach `matched.detection` pointing at an existing detection id (D13 write-side). */
+const stampMatchedDetection = (
+  events: SseEventRef[],
+  detections: SseDetection[]
+): SseEventRef[] => {
+  if (detections.length === 0) return events;
+  const byIocValue = new Map<string, string>();
+  const byTechnique = new Map<string, string>();
+  for (const detection of detections) {
+    if (detection.kind === 'ioc') {
+      const match = /^ioc:[^:]+:(.+)$/.exec(detection.id);
+      if (match) byIocValue.set(match[1], detection.id);
+    } else if (detection.technique_id) {
+      byTechnique.set(detection.technique_id.toUpperCase(), detection.id);
+    }
+  }
+  return events.map((event) => {
+    if (!event.matched) return event;
+    if (event.matched.detection) return event;
+    const iocValue = event.matched.ioc?.value ?? event.matched.iocs?.[0]?.value;
+    const detectionId =
+      (iocValue ? byIocValue.get(iocValue) : undefined) ??
+      (event.matched.technique_id
+        ? byTechnique.get(event.matched.technique_id.toUpperCase())
+        : undefined);
+    if (!detectionId) return event;
+    return {
+      ...event,
+      matched: { ...event.matched, detection: detectionId },
+    };
+  });
 };
 
 /**
