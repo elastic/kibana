@@ -28,6 +28,9 @@
  * - seed (string or number, default: the run's `from` in milliseconds): makes the data
  *   reproducible
  *
+ * The mobile apps always run on both platforms with their manual spans, so that every kind of app
+ * shows up; `platform` and `withManualSpans` are options of `digital_experience_mobile` only.
+ *
  * Run:
  *   node scripts/synthtrace digital_experience_mixed --from=now-30m --to=now
  */
