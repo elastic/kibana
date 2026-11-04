@@ -279,4 +279,132 @@ describe('getInputsWithIds', () => {
     expect(inputs[0].id).toBe('logfile-policy123');
     expect(inputs[0].streams[0].id).toBe('logfile-test-dataset-policy123');
   });
+
+  describe('path traversal validation', () => {
+    const policyWithInputId = (inputId: string, streamId?: string) =>
+      ({
+        name: 'test-policy',
+        namespace: 'default',
+        policy_ids: ['policy1'],
+        package: { name: 'test-package', title: 'Test Package', version: '1.0.0' },
+        enabled: true,
+        inputs: [
+          {
+            id: inputId,
+            type: 'logfile',
+            enabled: true,
+            streams: [
+              {
+                ...(streamId ? { id: streamId } : {}),
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'test-dataset' },
+              },
+            ],
+          },
+        ],
+      } as any);
+
+    it('throws when a client-supplied input id contains a traversal sequence', () => {
+      expect(() =>
+        getInputsWithIds(policyWithInputId('../../../../tmp/report-proof'), 'policy123')
+      ).toThrow('path traversal');
+    });
+
+    it('throws when a client-supplied stream id contains a traversal sequence', () => {
+      expect(() =>
+        getInputsWithIds(policyWithInputId('safe-input-id', 'a/../../etc'), 'policy123')
+      ).toThrow('path traversal');
+    });
+
+    it('does not throw for a client-supplied input id containing a legitimate slash', () => {
+      expect(() =>
+        getInputsWithIds(policyWithInputId('cloudbeat/cis_k8s-kspm-policy123'), 'policy123')
+      ).not.toThrow();
+    });
+
+    it('skips validation when validateIds is false (stored-data callers)', () => {
+      const inputs = getInputsWithIds(
+        policyWithInputId('../../../../tmp/report-proof'),
+        'policy123',
+        false,
+        undefined,
+        false
+      );
+      expect(inputs[0].id).toBe('../../../../tmp/report-proof');
+    });
+
+    it('throws when input.config.id override contains a traversal sequence', () => {
+      const policy = policyWithInputId('safe-input-id') as any;
+      policy.inputs[0].config = { id: { value: '../../../../tmp/evil' } };
+      expect(() => getInputsWithIds(policy, 'policy123')).toThrow('path traversal');
+    });
+
+    it('throws when stream.config.id override contains a traversal sequence', () => {
+      const policy = policyWithInputId('safe-input-id') as any;
+      policy.inputs[0].streams[0].config = { id: { value: 'a/../../../etc' } };
+      expect(() => getInputsWithIds(policy, 'policy123')).toThrow('path traversal');
+    });
+
+    it('throws when overrides.inputs[*].id contains a traversal sequence', () => {
+      const policy = policyWithInputId('safe-input-id') as any;
+      policy.overrides = { inputs: { 'safe-input-id': { id: '../../../../tmp/evil' } } };
+      expect(() => getInputsWithIds(policy, 'policy123')).toThrow('path traversal');
+    });
+
+    it('throws when overrides.inputs[*].streams[*].id contains a traversal sequence', () => {
+      const policy = policyWithInputId('safe-input-id') as any;
+      policy.overrides = {
+        inputs: {
+          'safe-input-id': {
+            streams: [{ id: 'a/../../../../tmp/evil' }],
+          },
+        },
+      };
+      expect(() => getInputsWithIds(policy, 'policy123')).toThrow('path traversal');
+    });
+
+    it('does not throw for a non-identity nested id in an override (e.g. event-data field)', () => {
+      const policy = policyWithInputId('safe-input-id') as any;
+      policy.overrides = {
+        inputs: {
+          'safe-input-id': {
+            processors: [{ add_fields: { target: '', fields: { id: 42 } } }],
+            streams: [{ meta: { nested: { id: '../../not-a-path' } } }],
+          },
+        },
+      };
+      expect(() => getInputsWithIds(policy, 'policy123')).not.toThrow();
+    });
+
+    it('does not throw for safe nested override ids', () => {
+      const policy = policyWithInputId('safe-input-id') as any;
+      policy.overrides = {
+        inputs: {
+          'safe-input-id': {
+            id: 'cloudbeat/cis_k8s-safe',
+            streams: [{ id: 'logfile-system.syslog-policy123' }],
+          },
+        },
+      };
+      expect(() => getInputsWithIds(policy, 'policy123')).not.toThrow();
+    });
+
+    it('does not throw for a safe input.config.id override', () => {
+      const policy = policyWithInputId('safe-input-id') as any;
+      policy.inputs[0].config = { id: { value: 'cloudbeat/cis_k8s-safe' } };
+      expect(() => getInputsWithIds(policy, 'policy123')).not.toThrow();
+    });
+
+    it('rejects a non-string config.id override without crashing (no 500)', () => {
+      const policy = policyWithInputId('safe-input-id') as any;
+      policy.inputs[0].config = { id: { value: 42 } };
+      expect(() => getInputsWithIds(policy, 'policy123')).toThrow('path traversal');
+    });
+
+    it('ignores a null config.id override value', () => {
+      const policy = policyWithInputId('safe-input-id') as any;
+      policy.inputs[0].config = { id: { value: null } };
+      expect(() => getInputsWithIds(policy, 'policy123')).not.toThrow();
+    });
+  });
 });
