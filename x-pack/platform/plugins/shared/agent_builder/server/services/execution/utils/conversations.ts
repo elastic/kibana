@@ -18,6 +18,7 @@ import type {
   ConversationRoundAuthor,
   ConversationRoundOrigin,
   ConverseInput,
+  EventActor,
   ExecutionInterruption,
   ExecutionPartialRunSummary,
   RoundCompleteEvent,
@@ -135,12 +136,14 @@ export const persistUserMessage = async ({
   input,
   author,
   origin,
+  actor,
   user,
   additionalEvents = [],
   attachments,
   activity,
   appendRefresh,
   activeExecution,
+  consumeBackgroundExecution,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
@@ -149,6 +152,7 @@ export const persistUserMessage = async ({
   input: ConverseInput;
   author?: ConversationRoundAuthor;
   origin?: ConversationRoundOrigin;
+  actor?: EventActor;
   /** Actor fallback when the poster has no author, for a conversation they do not own. */
   user?: UserIdAndName;
   /** Attachment change events to store in the same write, after the message. */
@@ -163,6 +167,7 @@ export const persistUserMessage = async ({
   appendRefresh?: Refresh;
   /** Makes the execution this message opens the conversation's active execution. */
   activeExecution?: AcquireActiveExecution;
+  consumeBackgroundExecution?: string;
 }): Promise<string> => {
   const event = userMessageEvent(
     {
@@ -171,6 +176,7 @@ export const persistUserMessage = async ({
       input: { message: input.message?.trim() ?? '' },
       ...(author ? { author } : {}),
       ...(origin ? { origin } : {}),
+      ...(actor ? { actor } : {}),
     },
     { ...conversation, ...(user ? { user } : {}) }
   );
@@ -218,6 +224,7 @@ export const persistUserMessage = async ({
       events,
       ...(attachments ? { attachments } : {}),
       ...(activeExecution ? { activeExecution } : {}),
+      ...(consumeBackgroundExecution ? { consumeBackgroundExecution } : {}),
     },
     {
       access: 'converse',

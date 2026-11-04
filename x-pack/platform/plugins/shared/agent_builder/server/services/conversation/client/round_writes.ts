@@ -9,6 +9,7 @@ import { isEqual } from 'lodash';
 import type { Conversation, ConversationEvent, ConversationRound } from '@kbn/agent-builder-common';
 import {
   CONVERSATION_EVENT_ID_DELIMITER,
+  EventActorType,
   TimelineEventType,
   createAttachmentPermanentDeleteBlockedError,
   lastExecutionTerminal,
@@ -57,7 +58,26 @@ const eventsForKnownRound = (
 ): ConversationEvent[] =>
   hasResumeExecution(round.id, storedForRound)
     ? storedForRound
-    : roundToEvents(round, conversation);
+    : keepStoredUserMessages(storedForRound, roundToEvents(round, conversation));
+
+/** A round carries no agent author, so a rewritten `user_message` keeps its stored agent actor. */
+export const keepStoredUserMessages = (
+  stored: ConversationEvent[],
+  events: ConversationEvent[]
+): ConversationEvent[] => {
+  const agentActorsById = new Map(
+    stored
+      .filter(
+        (event) =>
+          event.type === TimelineEventType.userMessage && event.actor.type === EventActorType.agent
+      )
+      .map((event) => [event.id, event.actor])
+  );
+  return events.map((event) => {
+    const actor = agentActorsById.get(event.id);
+    return actor ? { ...event, actor } : event;
+  });
+};
 
 /**
  * Whether a stored block absent from the caller's `rounds` was removed on purpose. It was when

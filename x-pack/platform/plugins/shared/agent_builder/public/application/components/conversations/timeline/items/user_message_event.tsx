@@ -11,8 +11,10 @@ import type {
   ConversationRoundAuthor,
   VersionedAttachment,
 } from '@kbn/agent-builder-common';
+import { EventActorType } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { UserMessage } from '../user_message/user_message';
+import { SubagentReportEvent } from './subagent_report_event';
 
 interface UserMessageEventProps {
   event: UserMessageEventData;
@@ -33,6 +35,10 @@ const UserMessageEventComponent: React.FC<UserMessageEventProps> = ({
   attachmentRefs,
   conversationAttachments,
 }) => {
+  if (event.actor.type === EventActorType.agent) {
+    return <SubagentReportEvent event={event} />;
+  }
+
   return (
     <UserMessage
       input={event.data.message}

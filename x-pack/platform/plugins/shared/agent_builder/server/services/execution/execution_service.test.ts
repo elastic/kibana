@@ -218,6 +218,84 @@ describe('AgentExecutionService', () => {
     });
   });
 
+  describe('a background sub-agent finishing', () => {
+    const request = httpServerMock.createKibanaRequest();
+    const childRecord = {
+      executionId: 'child-1',
+      '@timestamp': new Date().toISOString(),
+      status: ExecutionStatus.scheduled,
+      agentId: 'child-agent',
+      executionMode: AgentExecutionMode.standalone,
+      spaceId: 'default',
+      parentExecutionId: 'parent-1',
+      owner: { id: 'profile-1', username: 'alice' },
+      agentParams: { nextInput: { message: 'go' }, wakeParentOnCompletion: true },
+      eventCount: 0,
+      events: [],
+    };
+
+    let wakeRun: jest.SpyInstance;
+
+    afterEach(() => {
+      wakeRun.mockRestore();
+    });
+
+    it('wakes the parent conversation with its own request and leaves the retry to a task when it is busy', async () => {
+      let finish!: () => void;
+      mockHandleAgentExecution.mockResolvedValue(of());
+      mockCollectAndWriteEvents.mockReturnValue(new Promise<void>((resolve) => (finish = resolve)));
+      mockExecutionClient.create.mockResolvedValueOnce(childRecord as never);
+      mockExecutionClient.get.mockResolvedValue(childRecord as never);
+      mockExecutionClient.peek.mockResolvedValue({ conversationId: 'parent-conv' } as never);
+      conversationClient.get.mockResolvedValue({
+        id: 'parent-conv',
+        rounds: [],
+        events: [],
+        state: { background_executions: { 'child-1': { execution_id: 'child-1' } } },
+      } as never);
+
+      await service.executeAgent({
+        mode: AgentExecutionMode.standalone,
+        request,
+        params: {
+          agentId: 'child-agent',
+          nextInput: { message: 'go' },
+          parentExecutionId: 'parent-1',
+          wakeParentOnCompletion: true,
+        },
+        useTaskManager: false,
+      });
+
+      wakeRun = jest
+        .spyOn(service, 'executeAgent')
+        .mockRejectedValue(
+          createConversationBusyError({ conversationId: 'parent-conv', activeExecutionId: 'other' })
+        );
+      finish();
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(wakeRun).toHaveBeenCalledWith(
+        expect.objectContaining({
+          mode: AgentExecutionMode.conversation,
+          request,
+          useTaskManager: true,
+          params: expect.objectContaining({
+            conversationId: 'parent-conv',
+            actor: expect.objectContaining({ id: 'child-agent' }),
+          }),
+        })
+      );
+      expect(mockTaskManagerSchedule).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'agent-wake-child-1',
+          taskType: 'agent-builder:wake-parent',
+          params: { conversationId: 'parent-conv', childExecutionId: 'child-1' },
+        }),
+        { request, cloneApiKey: true }
+      );
+    });
+  });
+
   describe('executeAgent with an agent bound to a service account', () => {
     const boundAgent = createMockedInternalAgent({ id: 'agent-1', service_account_id: 'sa-1' });
     const checkPrivileges = jest.fn();
@@ -1534,6 +1612,32 @@ describe('AgentExecutionService', () => {
       await executeSubAgent();
 
       expect(conversationService.getScopedClientAsUser).not.toHaveBeenCalled();
+    });
+
+    it('a wake run acts as the owner of the sub-agent execution it reports', async () => {
+      mockExecutionClient.peek.mockResolvedValueOnce({
+        status: ExecutionStatus.completed,
+        eventCount: 0,
+        owner: { id: 'profile-1', username: 'alice' },
+      });
+
+      await service
+        .executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request: httpServerMock.createKibanaRequest(),
+          params: {
+            conversationId: 'conv-1',
+            nextInput: { message: 'finished' },
+            reportsBackgroundExecution: 'child-1',
+          },
+          useTaskManager: true,
+        })
+        .catch(() => undefined);
+
+      expect(mockExecutionClient.peek).toHaveBeenCalledWith('child-1');
+      expect(conversationService.getScopedClientAsUser).toHaveBeenCalledWith(
+        expect.objectContaining({ user: expect.objectContaining({ id: 'profile-1' }) })
+      );
     });
   });
 

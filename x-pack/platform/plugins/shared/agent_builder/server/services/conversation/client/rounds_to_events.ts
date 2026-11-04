@@ -81,19 +81,21 @@ export const userMessageEvent = (
     input,
     author,
     origin,
+    actor,
   }: {
     id: string;
     createdAt: string;
     input: RoundInput;
     author?: ConversationRoundAuthor;
     origin?: ConversationRoundOrigin;
+    actor?: EventActor;
   },
   conversation: ConversationForRoundEvents
 ): TimelineEvent => ({
   id,
   type: TimelineEventType.userMessage,
   created_at: createdAt,
-  actor: userMessageActor(conversation, { author, origin }),
+  actor: actor ?? userMessageActor(conversation, { author, origin }),
   data: input,
 });
 

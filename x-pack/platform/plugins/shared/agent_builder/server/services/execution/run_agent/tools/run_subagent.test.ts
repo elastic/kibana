@@ -364,16 +364,18 @@ describe('createSubagentTool', () => {
   it('returns execution_id immediately when run_in_background is true', async () => {
     const events$ = new ReplaySubject<ChatEvent>();
     const registerExecution = jest.fn();
+    const executeSubAgent = jest.fn().mockResolvedValue({
+      executionId: 'bg-exec-id',
+      events$: events$.asObservable(),
+    });
 
     const tool = createSubagentTool({
       ownerAgentId: 'test-agent',
       allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
       executionId: 'parent-exec-id',
+      parentConversationId: 'parent-convo',
       subAgentExecutor: {
-        executeSubAgent: jest.fn().mockResolvedValue({
-          executionId: 'bg-exec-id',
-          events$: events$.asObservable(),
-        }),
+        executeSubAgent,
         getExecution: jest.fn(),
         createSubAgent: jest.fn(),
         sendToSubAgent: jest.fn(),
@@ -404,6 +406,10 @@ describe('createSubagentTool', () => {
       status: 'queued',
     });
     expect(registerExecution).toHaveBeenCalledWith('bg-exec-id');
+    expect(executeSubAgent).toHaveBeenCalledWith(
+      expect.objectContaining({ runInBackground: true })
+    );
+    expect(executeSubAgent.mock.calls[0][0]).not.toHaveProperty('abortSignal');
 
     // Clean up — complete the observable (it's still running in the background)
     events$.complete();
@@ -644,6 +650,9 @@ describe('createSubagentTool', () => {
         status: 'queued',
       });
       expect(registerExecution).toHaveBeenCalledWith('bg-child');
+      expect(createSubAgent).toHaveBeenCalledWith(
+        expect.objectContaining({ runInBackground: true })
+      );
       expect(subagentTracker.get('bg-agent')).toBeDefined();
 
       events$.complete();

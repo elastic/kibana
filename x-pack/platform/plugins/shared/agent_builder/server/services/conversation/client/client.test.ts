@@ -20,6 +20,7 @@ import {
   TimelineTriggerType,
   createAgentNotFoundError,
   createAgentUnavailableError,
+  isBackgroundExecutionAlreadyReportedError,
   isConversationBusyError,
   isConversationWriteConflictError,
 } from '@kbn/agent-builder-common';
@@ -4420,6 +4421,32 @@ describe('ConversationClient', () => {
       });
     });
 
+    it('replaceRoundEvents keeps the actor the stored user message was received with', async () => {
+      const agentActor = { type: EventActorType.agent, id: 'child-agent', username: 'child-agent' };
+      mockGetDocumentResponse(
+        createConversationDocument({
+          schemaVersion: 1,
+          events: [{ ...userMessage('r1::user_message'), actor: agentActor }],
+        })
+      );
+
+      await clientWithCb.replaceRoundEvents(
+        {
+          id: 'conversation-1',
+          roundId: 'r1',
+          events: [
+            userMessage('r1::user_message'),
+            terminated('r1::execution_terminated', 'exec-1'),
+          ],
+        },
+        { source: 'execution' }
+      );
+
+      const written = (mockEsClient.index.mock.calls[0][0] as { document: Document['_source'] })
+        .document.events;
+      expect(written?.find((event) => event.id === 'r1::user_message')?.actor).toEqual(agentActor);
+    });
+
     it('a write skipped by the terminal guard emits nothing', async () => {
       mockGetDocumentResponse(
         createConversationDocument({
@@ -6262,6 +6289,60 @@ describe('ConversationClient', () => {
       await appendSettingActiveExecution(setActiveExecution('e2'));
 
       expect(indexedSource().active_execution).toEqual({ execution_id: 'e2' });
+    });
+
+    const documentWithPendingChild = (childIds: string[]): Document => {
+      const document = documentWithHolder();
+      return {
+        ...document,
+        _source: {
+          ...document._source,
+          state: {
+            prompt: { responses: {} },
+            dynamic_tool_ids: [],
+            background_executions: Object.fromEntries(
+              childIds.map((id) => [id, { execution_id: id, status: ExecutionStatus.running }])
+            ),
+          },
+        },
+      };
+    };
+
+    const appendConsuming = (childId: string) =>
+      client.appendEvents(
+        {
+          id: 'conversation-1',
+          events: [],
+          activeExecution: setActiveExecution('e2'),
+          consumeBackgroundExecution: childId,
+        },
+        { source: 'execution' }
+      );
+
+    it('appendEvents consuming a background execution drops it in the same write, refuses once it is gone and answers busy while held', async () => {
+      mockGetDocumentResponse(documentWithPendingChild(['child-1', 'child-2']));
+
+      await appendConsuming('child-1');
+
+      expect(indexedSource().state?.background_executions).toEqual({
+        'child-2': { execution_id: 'child-2', status: ExecutionStatus.running },
+      });
+      expect(indexedSource().active_execution).toEqual({ execution_id: 'e2' });
+
+      mockGetDocumentResponse(documentWithPendingChild(['child-2']));
+      const gone = await appendConsuming('child-1').catch((caught: unknown) => caught);
+      expect(isBackgroundExecutionAlreadyReportedError(gone)).toBe(true);
+
+      const held = documentWithPendingChild([]);
+      mockGetDocumentResponse({
+        ...held,
+        _source: { ...held._source, active_execution: activeExecution('e1') },
+      });
+      liveHolder();
+      const busy = await appendConsuming('child-1').catch((caught: unknown) => caught);
+      expect(isConversationBusyError(busy)).toBe(true);
+      expect(isBackgroundExecutionAlreadyReportedError(busy)).toBe(false);
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
     });
 
     it('appendEvents setting the active execution refuses when a concurrent one wins the version conflict', async () => {

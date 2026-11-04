@@ -7,19 +7,36 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { EventActorType } from '@kbn/agent-builder-common';
 import { UserMessage } from '../user_message/user_message';
 import { createUserMessageEvent } from './user_message_event.factory';
 import { UserMessageEvent } from './user_message_event';
+import { SubagentReportEvent } from './subagent_report_event';
 
 jest.mock('../user_message/user_message', () => ({
   UserMessage: jest.fn(() => null),
 }));
+jest.mock('./subagent_report_event', () => ({
+  SubagentReportEvent: jest.fn(() => null),
+}));
 
 const mockUserMessage = jest.mocked(UserMessage);
+const mockSubagentReportEvent = jest.mocked(SubagentReportEvent);
 
 describe('UserMessageEvent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('shows a message a sub-agent posted as a report, not as a user turn', () => {
+    const event = createUserMessageEvent({
+      actor: { type: EventActorType.agent, id: 'child-agent', username: 'child-agent' },
+    });
+
+    render(<UserMessageEvent event={event} />);
+
+    expect(mockSubagentReportEvent).toHaveBeenCalledWith({ event }, expect.anything());
+    expect(mockUserMessage).not.toHaveBeenCalled();
   });
 
   describe('rendering cost', () => {

@@ -16,6 +16,7 @@ import {
   AgentBuilderErrorCode,
   ConversationRoundStatus,
   ConversationRoundStepType,
+  EventActorType,
   TimelineEventType,
   attachmentTools,
 } from '@kbn/agent-builder-common';
@@ -84,6 +85,23 @@ describe('reconcileEvents', () => {
     const stored = roundToEvents(completedRound({ id: 'r1', started_at: T0 }), conversation);
     expect(stored.at(-1)!.id).toBe('r1::execution_terminated'); // fixture sanity
     expect(reconcile({ ...conversation, rounds: [], events: stored })).toEqual([]);
+  });
+
+  it('keeps the stored user_message of a regenerated round, with the actor it was received with', () => {
+    const r1 = completedRound({ id: 'r1', started_at: T0 });
+    const reportActor = { type: EventActorType.agent, id: 'child-agent', username: 'child-agent' };
+    const stored = roundToEvents(r1, conversation).map((event) =>
+      event.id === 'r1::user_message' ? { ...event, actor: reportActor } : event
+    );
+
+    const result = reconcile({ ...conversation, rounds: [r1], events: stored });
+
+    expect(result.find((event) => event.id === 'r1::user_message')?.actor).toEqual(reportActor);
+    expect(ids(result)).toEqual([
+      'r1::user_message',
+      'r1::execution_started',
+      'r1::execution_terminated',
+    ]);
   });
 
   it('regenerates an in-progress round that IS in rounds (unchanged behaviour)', () => {

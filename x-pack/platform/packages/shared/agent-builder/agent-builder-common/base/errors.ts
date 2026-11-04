@@ -26,6 +26,7 @@ export enum AgentBuilderErrorCode {
   conversationWriteConflict = 'conversationWriteConflict',
   conversationBusy = 'conversationBusy',
   conversationAlreadyExists = 'conversationAlreadyExists',
+  backgroundExecutionAlreadyReported = 'backgroundExecutionAlreadyReported',
   pluginNotFound = 'pluginNotFound',
   agentExecutionError = 'agentExecutionError',
   requestAborted = 'requestAborted',
@@ -363,6 +364,37 @@ export const createConversationBusyError = ({
     AgentBuilderErrorCode.conversationBusy,
     `Conversation ${conversationId} already has an execution in progress`,
     { ...meta, conversationId, activeExecutionId, statusCode: 409 }
+  );
+};
+
+/**
+ * Error thrown when a background sub-agent's result was already reported on its parent conversation.
+ */
+export type AgentBuilderBackgroundExecutionAlreadyReportedError =
+  AgentBuilderError<AgentBuilderErrorCode.backgroundExecutionAlreadyReported>;
+
+export const isBackgroundExecutionAlreadyReportedError = (
+  err: unknown
+): err is AgentBuilderBackgroundExecutionAlreadyReportedError => {
+  return (
+    isAgentBuilderError(err) &&
+    err.code === AgentBuilderErrorCode.backgroundExecutionAlreadyReported
+  );
+};
+
+export const createBackgroundExecutionAlreadyReportedError = ({
+  conversationId,
+  executionId,
+  meta = {},
+}: {
+  conversationId: string;
+  executionId: string;
+  meta?: Record<string, unknown>;
+}): AgentBuilderBackgroundExecutionAlreadyReportedError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.backgroundExecutionAlreadyReported,
+    `Background execution ${executionId} was already reported on conversation ${conversationId}`,
+    { ...meta, conversationId, executionId, statusCode: 409 }
   );
 };
 

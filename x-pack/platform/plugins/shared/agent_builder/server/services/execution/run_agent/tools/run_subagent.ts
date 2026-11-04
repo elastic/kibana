@@ -542,7 +542,7 @@ export const createSubagentTool = ({
             prompt: fullPrompt,
             connectorId: selectedConnectorId,
             ...(autoApprovedApis ? { autoApprovedApis } : {}),
-            ...(run_in_background ? {} : { abortSignal }),
+            ...(run_in_background ? { runInBackground: true } : { abortSignal }),
           });
 
           // Store the entry with the sentinel-shaped agent_id (not the
@@ -601,7 +601,7 @@ export const createSubagentTool = ({
           prompt: fullPrompt,
           ...(autoApprovedApis ? { autoApprovedApis } : {}),
           // background agents should continue running even if main execution completes
-          ...(run_in_background ? {} : { abortSignal }),
+          ...(run_in_background ? { runInBackground: true } : { abortSignal }),
         });
 
         events.reportProgress(`Sub-agent execution ${executionId} started`, {

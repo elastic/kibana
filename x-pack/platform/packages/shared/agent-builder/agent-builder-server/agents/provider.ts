@@ -106,6 +106,8 @@ export interface ExecuteSubAgentParams {
   agentId: string;
   parentExecutionId: string;
   prompt: string;
+  /** Wakes the parent conversation when this sub-agent finishes. */
+  runInBackground?: boolean;
   connectorId?: string;
   autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
@@ -116,6 +118,8 @@ export interface CreateSubAgentParams {
   agentId: string;
   parentConversationId: string;
   parentExecutionId: string;
+  /** Wakes the parent conversation when this sub-agent finishes. */
+  runInBackground?: boolean;
   subagentName: string;
   subagentPurpose?: string;
   /** Pre-allocated id for the child conversation (assigned by the caller). */

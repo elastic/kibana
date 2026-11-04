@@ -207,3 +207,56 @@ describe('createSubAgentExecutor', () => {
     });
   });
 });
+
+describe('createSubAgentExecutor and background sub-agents', () => {
+  it('asks a background sub-agent to wake the parent when it finishes', async () => {
+    const executor = createExecutorWith({ enabled: false });
+
+    await executor.executeSubAgent({
+      agentId: 'child',
+      prompt: 'go',
+      parentExecutionId: 'parent-execution-id',
+      runInBackground: true,
+    });
+    await executor.createSubAgent({
+      agentId: 'child',
+      prompt: 'go',
+      parentExecutionId: 'parent-execution-id',
+      conversationId: 'conversation-id',
+      parentConversationId: 'parent-conversation-id',
+      subagentName: 'child',
+      runInBackground: true,
+    });
+
+    for (const [params] of executeAgentMock.mock.calls) {
+      expect(params.params.wakeParentOnCompletion).toBe(true);
+      expect(params.useTaskManager).toBe(true);
+      expect(params.requestImmediateClaim).toBe(true);
+    }
+  });
+
+  it('leaves a foreground sub-agent alone', async () => {
+    const executor = createExecutorWith({ enabled: false });
+
+    await executor.executeSubAgent({
+      agentId: 'child',
+      prompt: 'go',
+      parentExecutionId: 'parent-execution-id',
+    });
+
+    expect(executeAgentMock.mock.calls[0][0].params.wakeParentOnCompletion).toBeUndefined();
+    expect(executeAgentMock.mock.calls[0][0].useTaskManager).toBeUndefined();
+  });
+
+  let executeAgentMock: jest.Mock;
+
+  const createExecutorWith = (interactivity: InteractivityConfig) => {
+    executeAgentMock = jest.fn().mockResolvedValue({ executionId: 'sub-exec-1', events$: EMPTY });
+    return createSubAgentExecutor({
+      request: httpServerMock.createKibanaRequest(),
+      getExecutionService: () =>
+        ({ executeAgent: executeAgentMock } as unknown as AgentExecutionService),
+      interactivity,
+    });
+  };
+});

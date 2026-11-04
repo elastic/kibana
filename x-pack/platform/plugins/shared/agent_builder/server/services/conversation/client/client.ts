@@ -40,6 +40,7 @@ import {
   isConversationAccessControlRole,
   isPublicConversation,
   normalizeConversationAccessControl,
+  createBackgroundExecutionAlreadyReportedError,
   createBadRequestError,
   createConversationAlreadyExistsError,
   createConversationBusyError,
@@ -52,6 +53,7 @@ import {
   isConversationNotFoundError,
   isExecutionTerminalEvent,
 } from '@kbn/agent-builder-common';
+import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
 import type {
   ConversationSearchOptions,
   SerializedMetadataValue,
@@ -120,7 +122,7 @@ export type { ActivityContext } from './activity_events';
 import { getTemplate } from '../templates/registry';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
 import { serializeMetadataValue, buildMetadataFromTemplate } from '../templates/serialize';
-import { reconcileAttachments } from './round_writes';
+import { keepStoredUserMessages, reconcileAttachments } from './round_writes';
 import { updateReadBy } from './read_by';
 import { updatePinnedBy } from './pinned_by';
 import { buildSearchSort, compileConversationFilter } from '../search';
@@ -368,6 +370,35 @@ const skipWrite = (current: NormalizedConversation): WriteSkipped => ({
 });
 const isWriteSkipped = (value: unknown): value is WriteSkipped =>
   typeof value === 'object' && value !== null && WRITE_SKIPPED in value;
+
+// Thrown from inside an OCC `fields` callback; the 409 error it becomes would be retried as a conflict.
+const BACKGROUND_EXECUTION_NOT_PENDING = Symbol('background execution not pending');
+interface BackgroundExecutionNotPending {
+  [BACKGROUND_EXECUTION_NOT_PENDING]: true;
+  executionId: string;
+}
+const backgroundExecutionNotPending = (executionId: string): BackgroundExecutionNotPending => ({
+  [BACKGROUND_EXECUTION_NOT_PENDING]: true,
+  executionId,
+});
+const isBackgroundExecutionNotPending = (value: unknown): value is BackgroundExecutionNotPending =>
+  typeof value === 'object' && value !== null && BACKGROUND_EXECUTION_NOT_PENDING in value;
+
+const consumeBackgroundExecution = (
+  current: NormalizedConversation,
+  executionId: string
+): ConversationInternalState | undefined => {
+  const stored = current.state;
+  if (!stored?.background_executions?.[executionId]) {
+    // A held conversation has not stored its state yet: the acquire decides, answering busy.
+    if (current.active_execution) {
+      return undefined;
+    }
+    throw backgroundExecutionNotPending(executionId);
+  }
+  const { [executionId]: consumed, ...remaining } = stored.background_executions;
+  return { ...stored, background_executions: remaining };
+};
 
 /** True when the stored events already end `executionId` with a terminal lifecycle event. */
 const hasTerminalEventFor = (current: NormalizedConversation, executionId: string): boolean =>
@@ -1098,6 +1129,7 @@ class ConversationClientImpl implements ConversationClient {
       workspaceId,
       skipIfTerminalExistsFor,
       activeExecution,
+      consumeBackgroundExecution: backgroundExecutionToConsume,
     } = request;
     const createdAt = new Date().toISOString();
 
@@ -1114,6 +1146,11 @@ class ConversationClientImpl implements ConversationClient {
         if (skipIfTerminalExistsFor && hasTerminalEventFor(current, skipIfTerminalExistsFor)) {
           throw skipWrite(current);
         }
+        const nextState =
+          state ??
+          (backgroundExecutionToConsume
+            ? consumeBackgroundExecution(current, backgroundExecutionToConsume)
+            : undefined);
         const currentEvents = current.events ?? [];
         const existingIds = new Set(currentEvents.map((event) => event.id));
         const newEvents = events.filter((event) => !existingIds.has(event.id));
@@ -1135,7 +1172,7 @@ class ConversationClientImpl implements ConversationClient {
           schema_version: CONVERSATION_SCHEMA_VERSION,
           ...(title !== undefined ? { title } : {}),
           ...(status ? { status } : {}),
-          ...(state ? { state } : {}),
+          ...(nextState ? { state: nextState } : {}),
           ...(attachments
             ? {
                 attachments: reconcileAttachments({
@@ -1192,7 +1229,10 @@ class ConversationClientImpl implements ConversationClient {
         const existingIds = new Set(nonRoundEvents.map((event) => event.id));
         // Round-derived events for this round were just wiped, so they always pass; additive ids
         // collide only when a caller re-inserts an existing uuid, which we drop.
-        const eventsToWrite = events.filter((event) => !existingIds.has(event.id));
+        const eventsToWrite = keepStoredUserMessages(
+          currentEvents.filter((event) => event.id.startsWith(roundPrefix)),
+          events.filter((event) => !existingIds.has(event.id))
+        );
         writtenEvents = eventsToWrite;
         const firstRoundIndex = currentEvents.findIndex((event) =>
           event.id.startsWith(roundPrefix)
@@ -1854,6 +1894,12 @@ class ConversationClientImpl implements ConversationClient {
         const { activeExecutionId } = error;
 
         throw createConversationBusyError({ conversationId, activeExecutionId });
+      }
+      if (isBackgroundExecutionNotPending(error)) {
+        throw createBackgroundExecutionAlreadyReportedError({
+          conversationId,
+          executionId: error.executionId,
+        });
       }
       // retries are exhausted
       if (isElasticsearchWriteConflict(error)) {
