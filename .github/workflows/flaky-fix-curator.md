@@ -180,7 +180,7 @@ Prompt bodies and the guidelines are loaded at run time, so a merged change take
    - For `reinforce` lessons the rule exists and did not bite. Move or sharpen it where the workflow makes the decision (the fixer's steps, the verifier's gate), or add the concrete tell that would have triggered it. Do not duplicate the bullet in a second place.
    - For `new` lessons add one bullet (two sentences at most) under the guideline section it belongs to, written as a condition and an action, in the voice of the surrounding bullets.
    - For `process` lessons change the workflow step that got the mechanics wrong, in the smallest way that fixes it.
-   - Never delete or weaken an existing rule, never rename a heading (other prompts link to them), and never grow `flaky-fix-guidelines.md` by more than six lines in one PR. If a lesson needs more than that, the file is the wrong place: propose it in the PR description instead and leave the file alone.
+   - Delete or weaken an existing rule only when the findings show it produced bad fixes, with the same evidence bar as any other change, and say so in the PR body. Never rename a heading (other prompts link to them), and never grow `flaky-fix-guidelines.md` by more than six lines in one PR. If a lesson needs more than that, the file is the wrong place: propose it in the PR description instead and leave the file alone.
 5. **Open the PR** with `create_pull_request`. Title: `[Flaky Test Fixer] <what the instructions now say to do>`, one line. Body:
 
    ```markdown
