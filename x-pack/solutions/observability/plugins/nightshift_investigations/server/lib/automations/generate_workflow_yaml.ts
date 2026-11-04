@@ -214,7 +214,7 @@ const RECOVERED_ALERT_V2_STEP = {
   with: {
     alert_uuid: '{{ event.alert.id }}',
     alert_id: '{{ event.alert.groupHash }}',
-    recovered_at: '{{ event.execution.scheduledAt }}',
+    recovered_at: '{{ event.timestamp }}',
     rule_id: '${{ event.rule.id }}',
     rule_name: '${{ event.rule.name }}',
     rule_tags: '${{ event.rule.tags }}',

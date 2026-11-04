@@ -399,7 +399,7 @@ describe('generateWorkflowYaml', () => {
         expect(recovered).toMatchObject({
           name: 'follow_up_recovered_alert_v2',
           if: "${{ event.alert.status == 'inactive' }}",
-          with: { alert_uuid: '{{ event.alert.id }}' },
+          with: { alert_uuid: '{{ event.alert.id }}', recovered_at: '{{ event.timestamp }}' },
         });
       });
     });
