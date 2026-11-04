@@ -1,0 +1,70 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { estypes } from '@elastic/elasticsearch';
+import { termQuery } from '@kbn/es-query';
+import { EXCEPTION_MESSAGE, EXCEPTION_TYPE, OTEL_EVENT_NAME } from '@kbn/apm-types';
+import { TOP_ROWS } from '../../../../common/top_rows';
+import {
+  EVENT_EXCEPTION,
+  EXCEPTION_STACKTRACE,
+  OTEL_LOGS_INDEX,
+} from '../../../../common/otel_data';
+import { LAST_SEEN_AGGREGATION } from '../../../lib/helpers/aggregations';
+import { applicationDocuments, byEnvironment, otelSearchDefaults } from '../../../lib/otel/queries';
+import type { ApplicationSearchParams } from '../../application_tab_route';
+
+/** Stands for a missing stack trace in a group's key, so those errors form a group per type. */
+export const NO_STACKTRACE = '__digital_experience_no_stacktrace__';
+
+const ERROR_GROUP_AGGS = {
+  message: {
+    top_hits: {
+      size: 1,
+      _source: false,
+      fields: [EXCEPTION_MESSAGE],
+      sort: [{ '@timestamp': { order: 'desc' as const } }],
+    },
+  },
+  lastSeen: LAST_SEEN_AGGREGATION,
+};
+
+/**
+ * The JS errors of one application, grouped by type and stack trace, and every environment for the
+ * picker.
+ *
+ * The message is never a group: it often holds ids or values that would split one error into many.
+ * A stack trace over the field's `ignore_above` is not indexed and falls in no group.
+ */
+export const errorsSearch = ({
+  environment,
+  ...application
+}: ApplicationSearchParams): estypes.SearchRequest => {
+  return {
+    ...otelSearchDefaults(OTEL_LOGS_INDEX),
+    query: {
+      bool: {
+        filter: [
+          ...applicationDocuments(application),
+          ...termQuery(OTEL_EVENT_NAME, EVENT_EXCEPTION),
+        ],
+      },
+    },
+    aggs: byEnvironment(environment, {
+      groups: {
+        multi_terms: {
+          terms: [
+            { field: EXCEPTION_TYPE },
+            { field: EXCEPTION_STACKTRACE, missing: NO_STACKTRACE },
+          ],
+          size: TOP_ROWS,
+        },
+        aggs: ERROR_GROUP_AGGS,
+      },
+    }),
+  };
+};
