@@ -14,12 +14,12 @@ import { checkServerImportGraph } from './src/check_server_import_graph';
 
 run(
   async ({ log, flagsReader }) => {
-    const result = await checkServerImportGraph({
+    const passed = await checkServerImportGraph({
       log,
       updateBaseline: flagsReader.boolean('update-baseline'),
     });
 
-    if (!result.passed) {
+    if (!passed) {
       throw createFailError(
         'Browser-only node modules are reachable from the Kibana server, or the baseline is stale. See the errors above.'
       );

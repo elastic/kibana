@@ -10,120 +10,88 @@
 import Fs from 'fs';
 import Path from 'path';
 
+import { ImportLocator } from '@kbn/import-locator';
 import { ImportResolver } from '@kbn/import-resolver';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getPackages } from '@kbn/repo-packages';
 import type { ToolingLog } from '@kbn/tooling-log';
 
-import { isBannedNodeModule } from './banned_packages';
-import {
-  diffBaseline,
-  readBaseline,
-  writeBaseline,
-  type BaselineDiff,
-  type BaselineViolations,
-} from './baseline';
-import { findValueImports } from './find_value_imports';
 import {
   walkServerImportGraph,
   type ImportTarget,
   type Violation,
 } from './walk_server_import_graph';
 
-export const BASELINE_PATH = Path.resolve(__dirname, '..', 'baseline.json');
+/**
+ * Browser-only node modules that must never be loaded by the Kibana server. Matched against the
+ * resolved node module name, so `@elastic/eui/lib/...` is caught while the pure
+ * `@elastic/eui-theme-*` packages are not. `react`, `react-dom` and `@emotion/*` are deliberately
+ * absent: core renders the bootstrap HTML template with React on the server.
+ */
+const BANNED_NODE_MODULES: ReadonlySet<string> = new Set([
+  '@elastic/eui',
+  '@elastic/apm-rum',
+  '@elastic/apm-rum-core',
+  '@elastic/apm-rum-react',
+  'react-intl',
+  'react-use',
+  'react-redux',
+  'react-redux-v7',
+  'redux',
+  'redux-v4',
+  '@reduxjs/toolkit',
+  'redux-toolkit-v1',
+  'refractor',
+  'prismjs',
+]);
 
-const CORE_SERVER_ENTRY = '@kbn/core/server';
+const BASELINE_PATH = Path.resolve(__dirname, '..', 'baseline.json');
+const BASELINE_COMMENT =
+  'Source files reachable from the Kibana server entry points that import browser-only node modules, ' +
+  'as "<importer> <node module>". This list may only shrink: fix the chain (move the browser-only code ' +
+  'out of the module the server imports) and run `node scripts/check_server_import_graph --update-baseline` ' +
+  'to remove the entry.';
 
-export interface CheckOptions {
-  log: ToolingLog;
-  /** Rewrite the baseline to the current violations instead of comparing against it. */
-  updateBaseline?: boolean;
-  baselinePath?: string;
-}
+const relative = (absolute: string): string => Path.relative(REPO_ROOT, absolute);
 
-export interface CheckResult {
-  passed: boolean;
-  entryCount: number;
-  fileCount: number;
-  violations: Violation[];
-  diff: BaselineDiff;
-}
+const readBaseline = (): Set<string> =>
+  new Set<string>(JSON.parse(Fs.readFileSync(BASELINE_PATH, 'utf8')).violations);
 
+const writeBaseline = (violations: Iterable<string>): void => {
+  const file = { '//': BASELINE_COMMENT, violations: [...violations].sort() };
+  Fs.writeFileSync(BASELINE_PATH, `${JSON.stringify(file, null, 2)}\n`);
+};
+
+/** Every plugin `server/index.ts` plus `@kbn/core/server`. */
 const findEntryPaths = (resolver: ImportResolver): string[] => {
-  const entries: string[] = [];
-
-  for (const pkg of getPackages(REPO_ROOT)) {
+  const entries = getPackages(REPO_ROOT).flatMap((pkg) => {
     if (!pkg.isPlugin() || !pkg.manifest.plugin.server) {
-      continue;
+      return [];
     }
     const serverDir = Path.resolve(REPO_ROOT, pkg.normalizedRepoRelativeDir, 'server');
     const entry = ['index.ts', 'index.js']
       .map((name) => Path.resolve(serverDir, name))
       .find((candidate) => Fs.existsSync(candidate));
-    if (entry) {
-      entries.push(entry);
-    }
-  }
+    return entry ? [entry] : [];
+  });
 
-  const core = resolver.resolve(CORE_SERVER_ENTRY, REPO_ROOT);
+  const core = resolver.resolve('@kbn/core/server', REPO_ROOT);
   if (core?.type === 'file') {
     entries.push(core.absolute);
   }
-
   return entries;
 };
 
-const toImportTarget =
-  (resolver: ImportResolver) =>
-  (request: string, dirname: string): ImportTarget => {
-    const result = resolver.resolve(request, dirname);
-    if (result?.type !== 'file') {
-      return { kind: 'other' };
-    }
-    if (result.nodeModule && !resolver.isRepoPkg(result.nodeModule)) {
-      return { kind: 'node_module', name: result.nodeModule };
-    }
-    return { kind: 'source', absolute: result.absolute };
-  };
-
-const readValueImports = (absolutePath: string): string[] => {
-  let content: string;
-  try {
-    content = Fs.readFileSync(absolutePath, 'utf8');
-  } catch {
-    return [];
-  }
-  return findValueImports(absolutePath, content);
-};
-
-const relative = (absolute: string): string => Path.relative(REPO_ROOT, absolute);
-
-const toBaselineViolations = (violations: Violation[]): BaselineViolations => {
-  const result: BaselineViolations = {};
-  for (const { importer, nodeModule } of violations) {
-    const key = relative(importer);
-    (result[key] ??= []).push(nodeModule);
-  }
-  return result;
-};
-
-const reportAdded = (log: ToolingLog, diff: BaselineDiff, violations: Violation[]): void => {
+const reportAdded = (log: ToolingLog, added: Violation[]): void => {
   log.error(
-    `${diff.added.length} new browser-only import(s) are reachable from the Kibana server entry points:`
+    `${added.length} new browser-only import(s) are reachable from the Kibana server entry points:`
   );
-  for (const { importer, nodeModule } of diff.added) {
-    const violation = violations.find(
-      (candidate) =>
-        relative(candidate.importer) === importer && candidate.nodeModule === nodeModule
-    );
-    if (!violation) {
-      continue;
-    }
+  for (const { importer, nodeModule, request, chain } of added) {
     log.write('');
     log.write(
-      `  ${importer} imports ${nodeModule} (\`${violation.request}\`) and is loaded by the server:`
+      `  ${relative(importer)} imports ${nodeModule} (\`${request}\`) and is loaded by the server:`
     );
-    violation.chain.forEach((file, index) => {
+    chain.forEach((file, index) => {
       log.write(`    ${'  '.repeat(index)}${index === 0 ? '' : '→ '}${relative(file)}`);
     });
   }
@@ -138,18 +106,23 @@ const reportAdded = (log: ToolingLog, diff: BaselineDiff, violations: Violation[
   );
 };
 
-const reportRemoved = (log: ToolingLog, diff: BaselineDiff, baselinePath: string): void => {
+const reportRemoved = (log: ToolingLog, removed: string[]): void => {
   log.error(
-    `${diff.removed.length} baseline entr${
-      diff.removed.length === 1 ? 'y is' : 'ies are'
-    } no longer reachable from the server. Nice! Remove them from the baseline with:`
+    `${removed.length} baseline entr${
+      removed.length === 1 ? 'y is' : 'ies are'
+    } no longer reachable from the server. Nice! Remove them from ${relative(BASELINE_PATH)} with:`
   );
-  log.write(`  node scripts/check_server_import_graph --update-baseline`);
-  for (const { importer, nodeModule } of diff.removed) {
-    log.write(`    - ${importer} (${nodeModule})`);
+  log.write('  node scripts/check_server_import_graph --update-baseline');
+  for (const entry of removed) {
+    log.write(`    - ${entry}`);
   }
-  log.write(`  (${relative(baselinePath)})`);
 };
+
+export interface CheckOptions {
+  log: ToolingLog;
+  /** Rewrite the baseline to the current violations instead of comparing against it. */
+  updateBaseline?: boolean;
+}
 
 /**
  * Walks the eagerly loaded import graph from every server entry point and fails when a source
@@ -159,51 +132,63 @@ const reportRemoved = (log: ToolingLog, diff: BaselineDiff, baselinePath: string
 export const checkServerImportGraph = async ({
   log,
   updateBaseline = false,
-  baselinePath = BASELINE_PATH,
-}: CheckOptions): Promise<CheckResult> => {
+}: CheckOptions): Promise<boolean> => {
   const resolver = ImportResolver.create(REPO_ROOT);
+  const locator = new ImportLocator({ ignoreTypeOnly: true });
   const entryPaths = findEntryPaths(resolver);
+
+  const getImports = (file: string): ImportTarget[] => {
+    const targets: ImportTarget[] = [];
+    for (const request of locator.get(file, Fs.readFileSync(file, 'utf8'))) {
+      const result = resolver.resolve(request, Path.dirname(file));
+      if (result?.type !== 'file') {
+        continue;
+      }
+      targets.push(
+        result.nodeModule && !resolver.isRepoPkg(result.nodeModule)
+          ? { request, kind: 'node_module', name: result.nodeModule }
+          : { request, kind: 'source', absolute: result.absolute }
+      );
+    }
+    return targets;
+  };
 
   const { violations, fileCount } = walkServerImportGraph({
     entryPaths,
-    readValueImports,
-    resolve: toImportTarget(resolver),
-    isBannedNodeModule,
+    getImports,
+    bannedNodeModules: BANNED_NODE_MODULES,
   });
-
-  const current = toBaselineViolations(violations);
+  const current = new Map(
+    violations.map((violation) => [
+      `${relative(violation.importer)} ${violation.nodeModule}`,
+      violation,
+    ])
+  );
 
   if (updateBaseline) {
-    writeBaseline(baselinePath, current);
-    log.success(
-      `wrote ${violations.length} violation(s) across ${
-        Object.keys(current).length
-      } file(s) to ${relative(baselinePath)}`
-    );
-    return {
-      passed: true,
-      entryCount: entryPaths.length,
-      fileCount,
-      violations,
-      diff: { added: [], removed: [] },
-    };
+    writeBaseline(current.keys());
+    log.success(`wrote ${current.size} violation(s) to ${relative(BASELINE_PATH)}`);
+    return true;
   }
 
-  const diff = diffBaseline(readBaseline(baselinePath), current);
-  const passed = diff.added.length === 0 && diff.removed.length === 0;
+  const baseline = readBaseline();
+  const added = [...current]
+    .filter(([key]) => !baseline.has(key))
+    .map(([, violation]) => violation);
+  const removed = [...baseline].filter((key) => !current.has(key));
 
-  if (diff.added.length > 0) {
-    reportAdded(log, diff, violations);
+  if (added.length > 0) {
+    reportAdded(log, added);
   }
-  if (diff.removed.length > 0) {
-    reportRemoved(log, diff, baselinePath);
+  if (removed.length > 0) {
+    reportRemoved(log, removed);
   }
+  const passed = added.length === 0 && removed.length === 0;
   if (passed) {
     log.success(
       `${fileCount} source files reachable from ${entryPaths.length} server entry points; ` +
-        `no new browser-only imports (${violations.length} baselined)`
+        `no new browser-only imports (${current.size} baselined)`
     );
   }
-
-  return { passed, entryCount: entryPaths.length, fileCount, violations, diff };
+  return passed;
 };

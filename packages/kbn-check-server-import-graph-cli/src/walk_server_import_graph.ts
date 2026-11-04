@@ -7,22 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Path from 'path';
-
-/** Where an import request resolved to, reduced to what the walk needs. */
+/** A resolved import of a source file: another source file, or a node module. */
 export type ImportTarget =
-  | { kind: 'source'; absolute: string }
-  | { kind: 'node_module'; name: string }
-  | { kind: 'other' };
+  | { request: string; kind: 'source'; absolute: string }
+  | { request: string; kind: 'node_module'; name: string };
 
 export interface WalkOptions {
   /** Absolute paths of the files to start from. */
   entryPaths: string[];
-  /** Returns the eagerly loaded import requests of a source file. */
-  readValueImports: (absolutePath: string) => string[];
-  /** Resolves an import request made from `dirname`. */
-  resolve: (request: string, dirname: string) => ImportTarget;
-  isBannedNodeModule: (name: string) => boolean;
+  /** Resolved eagerly loaded imports of a source file; unresolvable requests are left out. */
+  getImports: (absolutePath: string) => ImportTarget[];
+  bannedNodeModules: ReadonlySet<string>;
 }
 
 export interface Violation {
@@ -48,20 +43,14 @@ export interface WalkResult {
  */
 export const walkServerImportGraph = ({
   entryPaths,
-  readValueImports,
-  resolve,
-  isBannedNodeModule,
+  getImports,
+  bannedNodeModules,
 }: WalkOptions): WalkResult => {
   // BFS tree: file -> file it was first reached from (null for entries). Because the walk is
   // breadth-first, following parents from any file yields a shortest chain.
-  const parent = new Map<string, string | null>();
-  const queue: string[] = [];
-  for (const entry of entryPaths) {
-    if (!parent.has(entry)) {
-      parent.set(entry, null);
-      queue.push(entry);
-    }
-  }
+  const parent = new Map<string, string | null>(entryPaths.map((entry) => [entry, null]));
+  const queue = [...parent.keys()];
+  const violations = new Map<string, Violation>();
 
   const chainTo = (file: string): string[] => {
     const chain: string[] = [];
@@ -75,40 +64,29 @@ export const walkServerImportGraph = ({
     return chain;
   };
 
-  const violations: Violation[] = [];
-  const seenViolations = new Set<string>();
-
   for (let index = 0; index < queue.length; index++) {
     const file = queue[index];
-    const dirname = Path.dirname(file);
 
-    for (const request of readValueImports(file)) {
-      const target = resolve(request, dirname);
-
-      if (target.kind === 'node_module') {
-        if (!isBannedNodeModule(target.name)) {
-          continue;
+    for (const target of getImports(file)) {
+      if (target.kind === 'source') {
+        if (!parent.has(target.absolute)) {
+          parent.set(target.absolute, file);
+          queue.push(target.absolute);
         }
-        const key = `${file}\0${target.name}`;
-        if (seenViolations.has(key)) {
-          continue;
-        }
-        seenViolations.add(key);
-        violations.push({
-          importer: file,
-          nodeModule: target.name,
-          request,
-          chain: chainTo(file),
-        });
         continue;
       }
 
-      if (target.kind === 'source' && !parent.has(target.absolute)) {
-        parent.set(target.absolute, file);
-        queue.push(target.absolute);
+      const key = `${file}\0${target.name}`;
+      if (bannedNodeModules.has(target.name) && !violations.has(key)) {
+        violations.set(key, {
+          importer: file,
+          nodeModule: target.name,
+          request: target.request,
+          chain: chainTo(file),
+        });
       }
     }
   }
 
-  return { violations, fileCount: parent.size };
+  return { violations: [...violations.values()], fileCount: parent.size };
 };

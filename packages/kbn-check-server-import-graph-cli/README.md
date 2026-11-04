@@ -12,9 +12,9 @@ It also runs as part of `node scripts/check` and as a CI quick check.
 ## What it does
 
 1. Starts from every plugin `server/index.ts` (plugins with `plugin.server: true`) plus `@kbn/core/server`.
-2. Walks the import graph breadth-first, following every import that can load code: value `import`/`export ... from`, literal `require()`, and literal dynamic `import()`. `import type`, `export type` and all-`type` specifier lists are skipped because the compiler elides them.
-3. Stops at node modules and records every reachable source file that imports one of the banned modules (see `src/banned_packages.ts`), together with the shortest chain of imports from an entry point.
-4. Compares the result with `baseline.json` and fails on either direction of drift: a new violation, or a baseline entry that is no longer a violation.
+2. Walks the import graph breadth-first, following every import that can load code: value `import`/`export ... from`, literal `require()`, and literal dynamic `import()`. `import type`, `export type` and all-`type` specifier lists are skipped because the compiler elides them (`ImportLocator` from `@kbn/import-locator` with `ignoreTypeOnly`).
+3. Stops at node modules and records every reachable source file that imports one of the banned modules (`BANNED_NODE_MODULES` in `src/check_server_import_graph.ts`), together with the shortest chain of imports from an entry point.
+4. Compares the result with `baseline.json`, a sorted list of `"<importer> <node module>"` entries, and fails on either direction of drift: a new violation, or a baseline entry that is no longer a violation.
 
 The whole repo (~25k reachable files) takes about ten seconds.
 

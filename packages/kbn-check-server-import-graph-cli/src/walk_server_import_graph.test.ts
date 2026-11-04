@@ -11,27 +11,25 @@ import Path from 'path';
 
 import { walkServerImportGraph, type ImportTarget } from './walk_server_import_graph';
 
-/**
- * Builds the walk inputs from an in-memory graph. Keys are absolute paths, values are import
- * requests: relative requests resolve to source files, bare names to node modules.
- */
-const graph = (files: Record<string, string[]>) => ({
-  readValueImports: (path: string) => files[path] ?? [],
-  resolve: (request: string, dirname: string): ImportTarget => {
-    if (request.startsWith('.')) {
-      const absolute = Path.resolve(dirname, request);
-      return absolute in files ? { kind: 'source', absolute } : { kind: 'other' };
-    }
-    return { kind: 'node_module', name: request };
-  },
-  isBannedNodeModule: (name: string) => name === '@elastic/eui',
-});
+const bannedNodeModules = new Set(['@elastic/eui']);
+
+const getImports =
+  (files: Record<string, string[]>) =>
+  (file: string): ImportTarget[] =>
+    (files[file] ?? []).flatMap((request): ImportTarget[] => {
+      if (!request.startsWith('.')) {
+        return [{ request, kind: 'node_module', name: request }];
+      }
+      const absolute = Path.resolve(Path.dirname(file), request);
+      return absolute in files ? [{ request, kind: 'source', absolute }] : [];
+    });
 
 describe('walkServerImportGraph', () => {
   it('reports banned imports reachable from an entry with the shortest chain', () => {
     const result = walkServerImportGraph({
       entryPaths: ['/repo/plugin/server/index'],
-      ...graph({
+      bannedNodeModules,
+      getImports: getImports({
         '/repo/plugin/server/index': ['./routes', '../common/index'],
         '/repo/plugin/server/routes': ['../common/palette'],
         '/repo/plugin/common/index': ['./palette', './pure'],
@@ -58,7 +56,8 @@ describe('walkServerImportGraph', () => {
   it('does not report banned imports that are not reachable from any entry', () => {
     const result = walkServerImportGraph({
       entryPaths: ['/repo/plugin/server/index'],
-      ...graph({
+      bannedNodeModules,
+      getImports: getImports({
         '/repo/plugin/server/index': ['./pure'],
         '/repo/plugin/server/pure': [],
         '/repo/plugin/public/index': ['@elastic/eui'],
@@ -71,31 +70,29 @@ describe('walkServerImportGraph', () => {
 
   it('handles cycles and reports each importer/module pair once', () => {
     const result = walkServerImportGraph({
-      entryPaths: ['/repo/a', '/repo/b'],
-      ...graph({
+      entryPaths: ['/repo/a', '/repo/b', '/repo/a'],
+      bannedNodeModules,
+      getImports: getImports({
         '/repo/a': ['./b', '@elastic/eui'],
-        '/repo/b': ['./a', '@elastic/eui', '@elastic/eui/lib/thing'],
+        '/repo/b': ['./a', '@elastic/eui', '@elastic/eui'],
       }),
     });
 
+    expect(result.fileCount).toBe(2);
     expect(
       result.violations.map(({ importer, nodeModule }) => `${importer} ${nodeModule}`)
     ).toEqual(['/repo/a @elastic/eui', '/repo/b @elastic/eui']);
   });
 
-  it('does not descend into node modules or unresolved targets', () => {
-    const readValueImports = jest.fn((path: string) =>
-      path === '/repo/entry' ? ['lodash', './missing'] : []
-    );
+  it('does not descend into node modules', () => {
+    const getImportsMock = jest.fn(getImports({ '/repo/entry': ['lodash'] }));
     const result = walkServerImportGraph({
       entryPaths: ['/repo/entry'],
-      readValueImports,
-      resolve: (request): ImportTarget =>
-        request === 'lodash' ? { kind: 'node_module', name: 'lodash' } : { kind: 'other' },
-      isBannedNodeModule: () => false,
+      bannedNodeModules,
+      getImports: getImportsMock,
     });
 
     expect(result.violations).toEqual([]);
-    expect(readValueImports).toHaveBeenCalledTimes(1);
+    expect(getImportsMock).toHaveBeenCalledTimes(1);
   });
 });
