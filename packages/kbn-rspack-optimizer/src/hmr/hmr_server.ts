@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { randomUUID } from 'crypto';
 import http from 'http';
 import type { ToolingLog } from '@kbn/tooling-log';
 
@@ -125,9 +124,9 @@ export class HmrServer {
   }
 
   broadcastReload(files?: string[]): void {
-    // id makes the reload idempotent: the page that already applied it ignores the replay.
-    this.lastState = { reload: true, id: randomUUID(), files };
-    const payload = `data: ${JSON.stringify(this.lastState)}\n\n`;
+    // Not replayed: pages connecting after a reload already load the current shared bundles.
+    this.lastState = null;
+    const payload = `data: ${JSON.stringify({ reload: true, files })}\n\n`;
     for (const client of this.clients) {
       client.write(payload);
     }
