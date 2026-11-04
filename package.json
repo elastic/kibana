@@ -1584,7 +1584,7 @@
     "markdown-it": "14.3.3",
     "memoize-one": "6.0.0",
     "mime-types": "2.1.35",
-    "minimatch": "10.2.6",
+    "minimatch": "11.0.4",
     "moment": "2.31.0",
     "moment-duration-format": "2.3.2",
     "moment-timezone": "0.6.2",
