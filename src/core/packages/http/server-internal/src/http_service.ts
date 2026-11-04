@@ -110,7 +110,7 @@ export class HttpService
     ]).pipe(
       map(
         ([http, csp, externalUrl, permissionsPolicy]) =>
-          new HttpConfig(http, csp, externalUrl, permissionsPolicy)
+          new HttpConfig(http, csp, externalUrl, permissionsPolicy, env.packageInfo.buildFlavor)
       )
     );
     const shutdownTimeout$ = this.config$.pipe(map(({ shutdownTimeout }) => shutdownTimeout));

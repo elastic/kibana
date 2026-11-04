@@ -230,6 +230,7 @@ groups:
           stack: ga
           ech: unavailable
           self: ga
+        note: "From 9.7, Kibana allows images from `'self'`, `data:`, `blob:`, `https:` and `http:` by default. If you set `csp.img_src`, those defaults are not applied and only `'self'` and the sources you list are allowed. Include `data:` and `blob:` in your list if you need them."
 
       - setting: csp.object_src
         description: |
