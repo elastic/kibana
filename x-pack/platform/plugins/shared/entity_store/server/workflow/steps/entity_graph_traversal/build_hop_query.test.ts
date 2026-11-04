@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TraversalHop } from '../../../../common/workflows/step_types/entity_graph_traversal/entity_graph_traversal_common';
+import type { TraversalHop } from '../../../../common/workflow/steps/entity_graph_traversal/entity_graph_traversal_common';
 import { buildHopQuery, HOP_QUERY_PREAMBLE, lookbackToEsqlSpan } from './build_hop_query';
 
 const INDEX = '.entities.v2.latest.default-*';

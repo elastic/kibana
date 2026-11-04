@@ -7,12 +7,12 @@
 
 import React from 'react';
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
-import { loadEntityGraphTraversalScenarioStepCommonDefinition } from '../../../../common/workflows/step_types/entity_graph_traversal/load_entity_graph_traversal_scenario_step_common';
+import { resolveEntityGraphTraversalNodesStepCommonDefinition } from '../../../../common/workflow/steps/entity_graph_traversal/resolve_entity_graph_traversal_nodes_step_common';
 
-export const loadEntityGraphTraversalScenarioStepDefinition: PublicStepDefinition = {
-  ...loadEntityGraphTraversalScenarioStepCommonDefinition,
+export const resolveEntityGraphTraversalNodesStepDefinition: PublicStepDefinition = {
+  ...resolveEntityGraphTraversalNodesStepCommonDefinition,
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/document').then(({ icon }) => ({
+    import('@elastic/eui/es/components/icon/assets/database').then(({ icon }) => ({
       default: icon,
     }))
   ),

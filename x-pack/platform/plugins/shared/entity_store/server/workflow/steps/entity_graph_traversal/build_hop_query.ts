@@ -8,7 +8,7 @@
 import type {
   TraversalExclusion,
   TraversalHop,
-} from '../../../../common/workflows/step_types/entity_graph_traversal/entity_graph_traversal_common';
+} from '../../../../common/workflow/steps/entity_graph_traversal/entity_graph_traversal_common';
 
 export const HOP_SOURCE_COLUMN = '__source';
 export const HOP_TARGET_COLUMN = '__target';

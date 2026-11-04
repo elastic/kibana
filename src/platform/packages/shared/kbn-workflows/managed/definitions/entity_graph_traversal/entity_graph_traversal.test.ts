@@ -8,10 +8,7 @@
  */
 
 import { parse } from 'yaml';
-import {
-  SECURITY_ENTITY_GRAPH_TRAVERSAL_WORKFLOW,
-  SECURITY_ENTITY_GRAPH_TRAVERSAL_WORKFLOW_ID,
-} from '.';
+import { ENTITY_GRAPH_TRAVERSAL_WORKFLOW, ENTITY_GRAPH_TRAVERSAL_WORKFLOW_ID } from '.';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 import { buildFieldsZodValidator } from '../../../spec/lib/build_fields_zod_validator';
 import { getInputsFromDefinition } from '../../../spec/lib/field_conversion';
@@ -43,16 +40,14 @@ const evaluate = (
   return engine.evalValueSync(template.substring(open + 2, close).trim(), context);
 };
 
-describe('SECURITY_ENTITY_GRAPH_TRAVERSAL_WORKFLOW', () => {
-  const parsed = parse(SECURITY_ENTITY_GRAPH_TRAVERSAL_WORKFLOW.yaml);
+describe('ENTITY_GRAPH_TRAVERSAL_WORKFLOW', () => {
+  const parsed = parse(ENTITY_GRAPH_TRAVERSAL_WORKFLOW.yaml);
 
   it('is a valid workflow definition', () => {
     const result = WorkflowSchema.safeParse(parsed);
     expect(result.success).toBe(true);
-    expect(SECURITY_ENTITY_GRAPH_TRAVERSAL_WORKFLOW.id).toBe(
-      SECURITY_ENTITY_GRAPH_TRAVERSAL_WORKFLOW_ID
-    );
-    expect(SECURITY_ENTITY_GRAPH_TRAVERSAL_WORKFLOW.pluginId).toBe('securitySolution');
+    expect(ENTITY_GRAPH_TRAVERSAL_WORKFLOW.id).toBe(ENTITY_GRAPH_TRAVERSAL_WORKFLOW_ID);
+    expect(ENTITY_GRAPH_TRAVERSAL_WORKFLOW.pluginId).toBe('entityStore');
   });
 
   it('is manual only: no scheduled or alert triggers', () => {
@@ -127,21 +122,21 @@ describe('SECURITY_ENTITY_GRAPH_TRAVERSAL_WORKFLOW', () => {
 
   it('wires the two Security traversal steps around a bounded while loop', () => {
     const load = findStepByName(parsed.steps, 'load_scenario');
-    expect(load?.type).toBe('security.loadEntityGraphTraversalScenario');
+    expect(load?.type).toBe('entityStore.loadEntityGraphTraversalScenario');
 
     const traverse = findStepByName(parsed.steps, 'traverse');
     expect(traverse?.type).toBe('while');
     expect(traverse?.['max-iterations']).toEqual({ limit: 20, 'on-limit': 'continue' });
 
     const runHop = findStepByName(parsed.steps, 'run_hop');
-    expect(runHop?.type).toBe('security.runEntityGraphTraversalHop');
+    expect(runHop?.type).toBe('entityStore.runEntityGraphTraversalHop');
     expect((runHop?.with as Record<string, string>).exclusions).toBe('${{ inputs.exclusions }}');
     expect((runHop?.with as Record<string, string>).until).toBe(
       '${{ steps.load_scenario.output.until }}'
     );
 
     const resolve = findStepByName(parsed.steps, 'resolve_nodes');
-    expect(resolve?.type).toBe('security.resolveEntityGraphTraversalNodes');
+    expect(resolve?.type).toBe('entityStore.resolveEntityGraphTraversalNodes');
     expect((resolve?.with as Record<string, string>).nodes).toBe('${{ variables.nodes }}');
 
     const emit = findStepByName(parsed.steps, 'emit');
@@ -193,7 +188,7 @@ describe('SECURITY_ENTITY_GRAPH_TRAVERSAL_WORKFLOW', () => {
       with: Record<string, unknown>;
     }>;
     const trace = steps.find((s) => s.name === 'trace_routes');
-    expect(trace?.type).toBe('security.traceEntityGraphTraversalRoutes');
+    expect(trace?.type).toBe('entityStore.traceEntityGraphTraversalRoutes');
     expect(trace?.with).toEqual({
       seed_id: '{{ inputs.seed_id }}',
       edges: '${{ variables.edges }}',

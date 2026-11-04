@@ -87,24 +87,21 @@ export const runEntityGraphTraversalHopStepCommonDefinition: BaseStepDefinition<
   typeof runEntityGraphTraversalHopInputSchema,
   typeof runEntityGraphTraversalHopOutputSchema
 > = {
-  id: 'security.runEntityGraphTraversalHop',
-  label: i18n.translate('xpack.securitySolution.workflows.steps.runEntityGraphTraversalHop.label', {
+  id: 'entityStore.runEntityGraphTraversalHop',
+  label: i18n.translate('entityStore.workflow.steps.runEntityGraphTraversalHop.label', {
     defaultMessage: 'Run Entity Graph Traversal Hop',
   }),
-  description: i18n.translate(
-    'xpack.securitySolution.workflows.steps.runEntityGraphTraversalHop.description',
-    {
-      defaultMessage:
-        'Expand one hop of an entity graph traversal: query the hop index for the frontier ids, bound as ES|QL parameters, and return the edges found, the newly reached nodes, and the next frontier, within the run limits.',
-    }
-  ),
+  description: i18n.translate('entityStore.workflow.steps.runEntityGraphTraversalHop.description', {
+    defaultMessage:
+      'Expand one hop of an entity graph traversal: query the hop index for the frontier ids, bound as ES|QL parameters, and return the edges found, the newly reached nodes, and the next frontier, within the run limits.',
+  }),
   category: StepCategory.Kibana,
   stability: 'tech_preview',
   inputSchema: runEntityGraphTraversalHopInputSchema,
   outputSchema: runEntityGraphTraversalHopOutputSchema,
   documentation: {
     details: i18n.translate(
-      'xpack.securitySolution.workflows.steps.runEntityGraphTraversalHop.documentation.details',
+      'entityStore.workflow.steps.runEntityGraphTraversalHop.documentation.details',
       {
         defaultMessage:
           'For each target field of the hop the step runs one ES|QL query of the form FROM index | WHERE match_field IN (frontier) | MV_EXPAND target | STATS COUNT(*), VALUES(payload) BY source, target | LIMIT max_edges_per_hop. ' +
@@ -116,7 +113,7 @@ export const runEntityGraphTraversalHopStepCommonDefinition: BaseStepDefinition<
       `## Expand the current frontier inside a while loop
 \`\`\`yaml
 - name: run_hop
-  type: security.runEntityGraphTraversalHop
+  type: entityStore.runEntityGraphTraversalHop
   with:
     hop: "\${{ steps.load_scenario.output.hops[variables.hops_executed] }}"
     frontier: "\${{ variables.frontier }}"

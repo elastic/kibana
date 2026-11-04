@@ -14,8 +14,8 @@ import type {
   TraversalLimits,
   TraversalNode,
   TraversalStopReason,
-} from '../../../../common/workflows/step_types/entity_graph_traversal/entity_graph_traversal_common';
-import { TRAVERSAL_NODE_ID_FIELD } from '../../../../common/workflows/step_types/entity_graph_traversal/entity_graph_traversal_common';
+} from '../../../../common/workflow/steps/entity_graph_traversal/entity_graph_traversal_common';
+import { TRAVERSAL_NODE_ID_FIELD } from '../../../../common/workflow/steps/entity_graph_traversal/entity_graph_traversal_common';
 import {
   buildHopQuery,
   HOP_COUNT_COLUMN,

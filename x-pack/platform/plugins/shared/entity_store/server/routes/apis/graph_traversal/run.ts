@@ -7,7 +7,7 @@
 
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { z, lazySchema } from '@kbn/zod/v4';
-import { SECURITY_ENTITY_GRAPH_TRAVERSAL_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { ENTITY_GRAPH_TRAVERSAL_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import {
   API_VERSIONS,
@@ -118,7 +118,7 @@ export function registerRunGraphTraversal(router: EntityStorePluginRouter) {
             return res.ok({ body });
           }
           const body: RunGraphTraversalResponse = await graphTraversalClient.run({
-            workflowId: SECURITY_ENTITY_GRAPH_TRAVERSAL_WORKFLOW_ID,
+            workflowId: ENTITY_GRAPH_TRAVERSAL_WORKFLOW_ID,
             request: req,
             inputs: {
               scenario_id: effectiveScenarioId,

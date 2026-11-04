@@ -12,21 +12,21 @@ import type { ManagedWorkflowDefinition } from '../../types';
 
 export * from './scenarios';
 
-export const SECURITY_ENTITY_GRAPH_TRAVERSAL_WORKFLOW_ID = 'system-security-entity-graph-traversal';
+export const ENTITY_GRAPH_TRAVERSAL_WORKFLOW_ID = 'system-entity-graph-traversal';
 
 /**
  * Manual-only traversal of the entity graph by scenario. Installed once in the global space
- * by security_solution; never scheduled.
+ * by the entity store plugin; never scheduled.
  */
-export const SECURITY_ENTITY_GRAPH_TRAVERSAL_WORKFLOW = {
+export const ENTITY_GRAPH_TRAVERSAL_WORKFLOW = {
   billable: false,
-  id: SECURITY_ENTITY_GRAPH_TRAVERSAL_WORKFLOW_ID,
+  id: ENTITY_GRAPH_TRAVERSAL_WORKFLOW_ID,
   management: {
     enablement: 'restorable',
     lifecycle: 'static',
     versionStrategy: 'auto',
   },
-  pluginId: 'securitySolution',
+  pluginId: 'entityStore',
   version: 1,
   visibility: {
     solutions: ['security'],

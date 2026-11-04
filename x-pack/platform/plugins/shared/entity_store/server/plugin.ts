@@ -25,6 +25,10 @@ import { getExtractEntityTaskId } from './tasks/extract_entity_task';
 import { scheduleLegacySecurityAssetsMigrationIfNeeded } from './tasks/legacy_security_assets_migration_task';
 import { registerTriggers } from './workflow/triggers';
 import { registerSteps } from './workflow/steps';
+import {
+  installManagedWorkflows,
+  registerManagedWorkflowOwner,
+} from './workflow/managed_workflows';
 import { registerUiSettings } from './infra/feature_flags/register';
 import {
   EngineDescriptorType,
@@ -133,6 +137,7 @@ export class EntityStorePlugin
     registerTasks(plugins.taskManager, this.logger, core, this.isServerless);
     registerTriggers(plugins.workflowsExtensions);
     registerSteps(plugins.workflowsExtensions, core);
+    registerManagedWorkflowOwner(plugins.workflowsExtensions);
     this.logger.debug('Registering routes');
     registerRoutes(router);
 
@@ -173,6 +178,8 @@ export class EntityStorePlugin
     // Kibana starts plugins only after every plugin's setup has finished, so code registration closes here.
     this.entityDefinitionRegistry.closeSetupRegistration();
     this.logger.info('Initializing plugin');
+
+    void installManagedWorkflows(plugins.workflowsExtensions, this.logger);
 
     plugins.taskManager.registerEncryptedSavedObjectsClient(
       plugins.encryptedSavedObjects.getClient({

@@ -7,7 +7,7 @@
 
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { loadEntityGraphTraversalScenarioStepDefinition } from './load_entity_graph_traversal_scenario_step';
-import { loadEntityGraphTraversalScenarioInputSchema } from '../../../../common/workflows/step_types/entity_graph_traversal/load_entity_graph_traversal_scenario_step_common';
+import { loadEntityGraphTraversalScenarioInputSchema } from '../../../../common/workflow/steps/entity_graph_traversal/load_entity_graph_traversal_scenario_step_common';
 
 const createContext = (rawInput: unknown): StepHandlerContext =>
   ({
@@ -26,7 +26,7 @@ const createContext = (rawInput: unknown): StepHandlerContext =>
     stepType: loadEntityGraphTraversalScenarioStepDefinition.id,
   } as unknown as StepHandlerContext);
 
-describe('security.loadEntityGraphTraversalScenario', () => {
+describe('entityStore.loadEntityGraphTraversalScenario', () => {
   it('loads a shipped scenario and expands its hops', async () => {
     const result = await loadEntityGraphTraversalScenarioStepDefinition.handler(
       createContext({ scenario_id: 'okta-user-to-aws-resources' })

@@ -6,8 +6,8 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { traceGraphTraversalRoutes } from '@kbn/entity-store/common';
-import { traceEntityGraphTraversalRoutesStepCommonDefinition } from '../../../../common/workflows/step_types/entity_graph_traversal/trace_entity_graph_traversal_routes_step_common';
+import { traceGraphTraversalRoutes } from '../../../../common';
+import { traceEntityGraphTraversalRoutesStepCommonDefinition } from '../../../../common/workflow/steps/entity_graph_traversal/trace_entity_graph_traversal_routes_step_common';
 
 export const traceEntityGraphTraversalRoutesStepDefinition = createServerStepDefinition({
   ...traceEntityGraphTraversalRoutesStepCommonDefinition,

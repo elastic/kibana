@@ -10,7 +10,7 @@ import {
   listEntityGraphTraversalScenarioIds,
   loadEntityGraphTraversalPlan,
 } from '@kbn/workflows/managed';
-import { loadEntityGraphTraversalScenarioStepCommonDefinition } from '../../../../common/workflows/step_types/entity_graph_traversal/load_entity_graph_traversal_scenario_step_common';
+import { loadEntityGraphTraversalScenarioStepCommonDefinition } from '../../../../common/workflow/steps/entity_graph_traversal/load_entity_graph_traversal_scenario_step_common';
 
 export const loadEntityGraphTraversalScenarioStepDefinition = createServerStepDefinition({
   ...loadEntityGraphTraversalScenarioStepCommonDefinition,

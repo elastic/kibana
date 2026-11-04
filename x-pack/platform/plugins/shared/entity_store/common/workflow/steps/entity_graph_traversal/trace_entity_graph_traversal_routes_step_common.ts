@@ -40,13 +40,12 @@ export const traceEntityGraphTraversalRoutesStepCommonDefinition: BaseStepDefini
   typeof traceEntityGraphTraversalRoutesInputSchema,
   typeof traceEntityGraphTraversalRoutesOutputSchema
 > = {
-  id: 'security.traceEntityGraphTraversalRoutes',
-  label: i18n.translate(
-    'xpack.securitySolution.workflows.steps.traceEntityGraphTraversalRoutes.label',
-    { defaultMessage: 'Trace Entity Graph Traversal Routes' }
-  ),
+  id: 'entityStore.traceEntityGraphTraversalRoutes',
+  label: i18n.translate('entityStore.workflow.steps.traceEntityGraphTraversalRoutes.label', {
+    defaultMessage: 'Trace Entity Graph Traversal Routes',
+  }),
   description: i18n.translate(
-    'xpack.securitySolution.workflows.steps.traceEntityGraphTraversalRoutes.description',
+    'entityStore.workflow.steps.traceEntityGraphTraversalRoutes.description',
     {
       defaultMessage:
         'Trace the route from the seed of an entity graph traversal to each target node over the edges the traversal kept.',
@@ -58,7 +57,7 @@ export const traceEntityGraphTraversalRoutesStepCommonDefinition: BaseStepDefini
   outputSchema: traceEntityGraphTraversalRoutesOutputSchema,
   documentation: {
     details: i18n.translate(
-      'xpack.securitySolution.workflows.steps.traceEntityGraphTraversalRoutes.documentation.details',
+      'entityStore.workflow.steps.traceEntityGraphTraversalRoutes.documentation.details',
       {
         defaultMessage:
           'Edges are walked in both directions from the seed and the first route found to a target is a shortest one, as node ids from the seed to the target. A target the edges do not connect to the seed yields no route.',
@@ -68,7 +67,7 @@ export const traceEntityGraphTraversalRoutesStepCommonDefinition: BaseStepDefini
       `## Routes to the nodes that matched a stop condition
 \`\`\`yaml
 - name: trace_routes
-  type: security.traceEntityGraphTraversalRoutes
+  type: entityStore.traceEntityGraphTraversalRoutes
   with:
     seed_id: "{{ inputs.seed_id }}"
     edges: "\${{ variables.edges }}"

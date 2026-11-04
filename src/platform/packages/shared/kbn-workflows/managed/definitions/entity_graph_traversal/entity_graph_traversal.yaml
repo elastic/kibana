@@ -5,8 +5,8 @@ version: '1'
 # field the current frontier of ids is matched against, and the fields that yield the next
 # frontier. The workflow loads the scenario, then runs one hop per iteration until the hop
 # list, the frontier or a limit runs out. The two Security step types do the work that has to
-# be bounded in code: `security.loadEntityGraphTraversalScenario` clamps every limit to a
-# hard ceiling, and `security.runEntityGraphTraversalHop` binds the frontier as ES|QL
+# be bounded in code: `entityStore.loadEntityGraphTraversalScenario` clamps every limit to a
+# hard ceiling, and `entityStore.runEntityGraphTraversalHop` binds the frontier as ES|QL
 # parameters, caps the rows it reads, skips hub nodes, and refuses to grow the visited set or
 # the edge list past the limits. The loop state kept here is ids and compact edges only, and
 # `stop_reason` is what ends the loop: an exhausted frontier, the hop budget, or a cap.
@@ -131,7 +131,7 @@ consts:
   empty: []
 steps:
   - name: load_scenario
-    type: security.loadEntityGraphTraversalScenario
+    type: entityStore.loadEntityGraphTraversalScenario
     with:
       scenario_id: '{{ inputs.scenario_id }}'
       until: '${{ inputs.until }}'
@@ -171,7 +171,7 @@ steps:
       on-limit: continue
     steps:
       - name: run_hop
-        type: security.runEntityGraphTraversalHop
+        type: entityStore.runEntityGraphTraversalHop
         with:
           hop: '${{ steps.load_scenario.output.hops[variables.hops_executed] }}'
           frontier: '${{ variables.frontier }}'
@@ -200,13 +200,13 @@ steps:
   # about it: its EUID, whether the store has it, the canonical entity for aliases, and the
   # stored name, type, criticality and risk.
   - name: resolve_nodes
-    type: security.resolveEntityGraphTraversalNodes
+    type: entityStore.resolveEntityGraphTraversalNodes
     with:
       nodes: '${{ variables.nodes }}'
 
   # The route from the seed to every node that matched a stop condition, over the kept edges.
   - name: trace_routes
-    type: security.traceEntityGraphTraversalRoutes
+    type: entityStore.traceEntityGraphTraversalRoutes
     with:
       seed_id: '{{ inputs.seed_id }}'
       edges: '${{ variables.edges }}'

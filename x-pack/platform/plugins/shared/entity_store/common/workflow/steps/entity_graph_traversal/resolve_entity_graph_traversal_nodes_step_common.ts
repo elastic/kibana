@@ -39,13 +39,12 @@ export const resolveEntityGraphTraversalNodesStepCommonDefinition: BaseStepDefin
   typeof resolveEntityGraphTraversalNodesInputSchema,
   typeof resolveEntityGraphTraversalNodesOutputSchema
 > = {
-  id: 'security.resolveEntityGraphTraversalNodes',
-  label: i18n.translate(
-    'xpack.securitySolution.workflows.steps.resolveEntityGraphTraversalNodes.label',
-    { defaultMessage: 'Resolve Entity Graph Traversal Nodes' }
-  ),
+  id: 'entityStore.resolveEntityGraphTraversalNodes',
+  label: i18n.translate('entityStore.workflow.steps.resolveEntityGraphTraversalNodes.label', {
+    defaultMessage: 'Resolve Entity Graph Traversal Nodes',
+  }),
   description: i18n.translate(
-    'xpack.securitySolution.workflows.steps.resolveEntityGraphTraversalNodes.description',
+    'entityStore.workflow.steps.resolveEntityGraphTraversalNodes.description',
     {
       defaultMessage:
         'Look the nodes of an entity graph traversal up in the Entity Store of the execution space and annotate each with its EUID, whether the store knows it, the canonical entity it resolves to, and the stored name, type, criticality and risk.',
@@ -57,7 +56,7 @@ export const resolveEntityGraphTraversalNodesStepCommonDefinition: BaseStepDefin
   outputSchema: resolveEntityGraphTraversalNodesOutputSchema,
   documentation: {
     details: i18n.translate(
-      'xpack.securitySolution.workflows.steps.resolveEntityGraphTraversalNodes.documentation.details',
+      'entityStore.workflow.steps.resolveEntityGraphTraversalNodes.documentation.details',
       {
         defaultMessage:
           'Node ids are matched against entity.id in the latest entity index of the execution space, in chunks passed as ES|QL parameters. ' +
@@ -69,7 +68,7 @@ export const resolveEntityGraphTraversalNodesStepCommonDefinition: BaseStepDefin
       `## Annotate the traversed nodes before emitting the result
 \`\`\`yaml
 - name: resolve_nodes
-  type: security.resolveEntityGraphTraversalNodes
+  type: entityStore.resolveEntityGraphTraversalNodes
   with:
     nodes: "\${{ variables.nodes }}"
 \`\`\``,

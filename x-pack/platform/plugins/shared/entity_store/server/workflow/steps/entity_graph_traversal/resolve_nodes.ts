@@ -10,8 +10,8 @@ import type {
   ResolvedTraversalNode,
   TraversalEntity,
   TraversalNode,
-} from '../../../../common/workflows/step_types/entity_graph_traversal/entity_graph_traversal_common';
-import { ENTITY_GRAPH_TRAVERSAL_EUID_TYPES } from '../../../../common/workflows/step_types/entity_graph_traversal/entity_graph_traversal_common';
+} from '../../../../common/workflow/steps/entity_graph_traversal/entity_graph_traversal_common';
+import { ENTITY_GRAPH_TRAVERSAL_EUID_TYPES } from '../../../../common/workflow/steps/entity_graph_traversal/entity_graph_traversal_common';
 import { HOP_QUERY_PREAMBLE } from './build_hop_query';
 import type { EsqlResult } from './run_hop';
 

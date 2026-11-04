@@ -8,7 +8,7 @@
 import type {
   TraversalHop,
   TraversalLimits,
-} from '../../../../common/workflows/step_types/entity_graph_traversal/entity_graph_traversal_common';
+} from '../../../../common/workflow/steps/entity_graph_traversal/entity_graph_traversal_common';
 import {
   HOP_COUNT_COLUMN,
   HOP_SOURCE_COLUMN,

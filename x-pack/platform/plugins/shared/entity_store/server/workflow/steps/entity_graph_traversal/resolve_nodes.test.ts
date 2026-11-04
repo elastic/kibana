@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TraversalNode } from '../../../../common/workflows/step_types/entity_graph_traversal/entity_graph_traversal_common';
+import type { TraversalNode } from '../../../../common/workflow/steps/entity_graph_traversal/entity_graph_traversal_common';
 import type { EsqlResult } from './run_hop';
 import {
   buildResolveQuery,

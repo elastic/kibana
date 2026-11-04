@@ -7,7 +7,7 @@
 
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { traceEntityGraphTraversalRoutesStepDefinition } from './trace_entity_graph_traversal_routes_step';
-import { traceEntityGraphTraversalRoutesInputSchema } from '../../../../common/workflows/step_types/entity_graph_traversal/trace_entity_graph_traversal_routes_step_common';
+import { traceEntityGraphTraversalRoutesInputSchema } from '../../../../common/workflow/steps/entity_graph_traversal/trace_entity_graph_traversal_routes_step_common';
 
 const edge = (hop: number, source: string, target: string) => ({
   hop,
@@ -29,7 +29,7 @@ const createContext = (rawInput: Record<string, unknown>) =>
     stepType: traceEntityGraphTraversalRoutesStepDefinition.id,
   } as unknown as StepHandlerContext);
 
-describe('security.traceEntityGraphTraversalRoutes', () => {
+describe('entityStore.traceEntityGraphTraversalRoutes', () => {
   it('returns the route from the seed to each target and skips unreachable ones', async () => {
     const result = await traceEntityGraphTraversalRoutesStepDefinition.handler(
       createContext({

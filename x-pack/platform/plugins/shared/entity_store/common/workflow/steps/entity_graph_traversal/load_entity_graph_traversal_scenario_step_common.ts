@@ -54,13 +54,12 @@ export const loadEntityGraphTraversalScenarioStepCommonDefinition: BaseStepDefin
   typeof loadEntityGraphTraversalScenarioInputSchema,
   typeof loadEntityGraphTraversalScenarioOutputSchema
 > = {
-  id: 'security.loadEntityGraphTraversalScenario',
-  label: i18n.translate(
-    'xpack.securitySolution.workflows.steps.loadEntityGraphTraversalScenario.label',
-    { defaultMessage: 'Load Entity Graph Traversal Scenario' }
-  ),
+  id: 'entityStore.loadEntityGraphTraversalScenario',
+  label: i18n.translate('entityStore.workflow.steps.loadEntityGraphTraversalScenario.label', {
+    defaultMessage: 'Load Entity Graph Traversal Scenario',
+  }),
   description: i18n.translate(
-    'xpack.securitySolution.workflows.steps.loadEntityGraphTraversalScenario.description',
+    'entityStore.workflow.steps.loadEntityGraphTraversalScenario.description',
     {
       defaultMessage:
         'Load a shipped entity graph traversal scenario by id, apply per-run limit overrides clamped to hard ceilings, and expand its hop list into the plan the traversal workflow executes.',
@@ -72,19 +71,19 @@ export const loadEntityGraphTraversalScenarioStepCommonDefinition: BaseStepDefin
   outputSchema: loadEntityGraphTraversalScenarioOutputSchema,
   documentation: {
     details: i18n.translate(
-      'xpack.securitySolution.workflows.steps.loadEntityGraphTraversalScenario.documentation.details',
+      'entityStore.workflow.steps.loadEntityGraphTraversalScenario.documentation.details',
       {
         defaultMessage:
           'Scenarios are YAML definitions shipped with Kibana. Each one is an ordered list of hops; a hop names an index, the field the current frontier of ids is matched against, and the fields that yield the next frontier. ' +
           'The step resolves the effective limits (hard ceiling, then default, then the scenario value, then the override), unrolls hops that declare a repeat count, and truncates the list to max_hops. ' +
-          'Use the output hops and limits with security.runEntityGraphTraversalHop inside a while loop.',
+          'Use the output hops and limits with entityStore.runEntityGraphTraversalHop inside a while loop.',
       }
     ),
     examples: [
       `## Load a scenario with a smaller hop budget
 \`\`\`yaml
 - name: load_scenario
-  type: security.loadEntityGraphTraversalScenario
+  type: entityStore.loadEntityGraphTraversalScenario
   with:
     scenario_id: okta-user-to-aws-resources
     overrides:

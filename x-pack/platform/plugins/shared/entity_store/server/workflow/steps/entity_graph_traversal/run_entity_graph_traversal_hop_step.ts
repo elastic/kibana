@@ -6,9 +6,9 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { getLatestEntityIndexPattern } from '@kbn/entity-store/common';
-import { runEntityGraphTraversalHopStepCommonDefinition } from '../../../../common/workflows/step_types/entity_graph_traversal/run_entity_graph_traversal_hop_step_common';
-import { resolveSpaceId } from '../get_alert_entities_step/resolve_space_id';
+import { getLatestEntityIndexPattern } from '../../../../common';
+import { runEntityGraphTraversalHopStepCommonDefinition } from '../../../../common/workflow/steps/entity_graph_traversal/run_entity_graph_traversal_hop_step_common';
+import { resolveSpaceId } from './resolve_space_id';
 import { runHop, type EsqlResult, type ExecuteHopQuery } from './run_hop';
 
 export const runEntityGraphTraversalHopStepDefinition = createServerStepDefinition({

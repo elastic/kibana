@@ -7,10 +7,10 @@
 
 import React from 'react';
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
-import { traceEntityGraphTraversalRoutesStepCommonDefinition } from '../../../../common/workflows/step_types/entity_graph_traversal/trace_entity_graph_traversal_routes_step_common';
+import { runEntityGraphTraversalHopStepCommonDefinition } from '../../../../common/workflow/steps/entity_graph_traversal/run_entity_graph_traversal_hop_step_common';
 
-export const traceEntityGraphTraversalRoutesStepDefinition: PublicStepDefinition = {
-  ...traceEntityGraphTraversalRoutesStepCommonDefinition,
+export const runEntityGraphTraversalHopStepDefinition: PublicStepDefinition = {
+  ...runEntityGraphTraversalHopStepCommonDefinition,
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/branch').then(({ icon }) => ({
       default: icon,
