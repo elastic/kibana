@@ -91,6 +91,7 @@ export type MetricsGridProps = Pick<
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   metricItems: ParsedMetricItem[];
   whereStatements?: string[];
+  metadataFields?: string[];
   userSource?: string;
   getUserMessages?: (metricItem: ParsedMetricItem) => EmbeddableComponentProps['userMessages'];
   getDescription?: (metricItem: ParsedMetricItem) => EmbeddableComponentProps['description'];
@@ -129,6 +130,7 @@ export const MetricsGrid = ({
   actions,
   dimensions,
   whereStatements,
+  metadataFields,
   userSource,
   services,
   columns,
@@ -283,6 +285,7 @@ export const MetricsGrid = ({
                   onViewDetails={handleViewDetails}
                   searchTerm={searchTerm}
                   whereStatements={whereStatements}
+                  metadataFields={metadataFields}
                   userSource={userSource}
                   description={getDescription?.(metricItem)}
                   userMessages={getUserMessages ? getUserMessages(metricItem) : undefined}
@@ -329,6 +332,7 @@ interface ChartItemProps
   onViewDetails: (index: number, esqlQuery: string, metricItem: ParsedMetricItem) => void;
   description?: string;
   whereStatements?: string[];
+  metadataFields?: string[];
   userSource?: string;
   userMessages?: EmbeddableComponentProps['userMessages'];
   profileId: string;
@@ -358,6 +362,7 @@ const ChartItem = React.memo(
     isSelected,
     searchTerm,
     whereStatements,
+    metadataFields,
     userSource,
     description,
     onFocusCell,
@@ -416,6 +421,7 @@ const ChartItem = React.memo(
         histogramBounds,
         histogramBoundsLoading,
         whereStatements,
+        metadataFields,
         originalSource: userSource,
         histogramVisualization: gridSettings.histogramVisualization,
         description,
@@ -434,6 +440,7 @@ const ChartItem = React.memo(
             metricItem,
             splitAccessors: applicableDimensions.map((dim) => dim.name),
             whereStatements,
+            metadataFields,
             originalSource: userSource,
             gridSettings,
           })
@@ -444,6 +451,7 @@ const ChartItem = React.memo(
       metricItem,
       applicableDimensions,
       whereStatements,
+      metadataFields,
       userSource,
       gridSettings,
     ]);

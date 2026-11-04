@@ -27,13 +27,18 @@ import { isHttpNotFoundError } from '../common/http_error';
 import { useKibana } from '../hooks/use_kibana';
 import { useFetchSandboxConnectors } from './use_fetch_sandbox_connectors';
 import { noAgentPermissionReason, useAgentConnectors } from './use_agent_connectors';
-import { useDeleteConnector } from './use_delete_connector';
 import { useEditConnector } from './use_edit_connector';
+import { getConnectorTypeIcon } from './connector_type_icon';
 import { SandboxConnectorsError } from './sandbox_connectors_error';
 
 export const preconfiguredTooltip = i18n.translate(
   'xpack.nightshift.sandboxConnectors.preconfigured',
   { defaultMessage: 'This connector is configured in kibana.yml and cannot be changed here.' }
+);
+
+export const deleteNoPermissionTooltip = i18n.translate(
+  'xpack.nightshift.sandboxConnectors.deleteNoPermission',
+  { defaultMessage: 'You need permission to delete connectors.' }
 );
 
 const CONNECTORS_MANAGEMENT_PATH = '/insightsAndAlerting/triggersActionsConnectors';
@@ -58,7 +63,7 @@ export function ManageConnectorsLink(): React.ReactElement | null {
 
 /**
  * The connectors assigned to the investigation agent, one row each: name opening the connector,
- * its type, and the actions Remove (from the agent) and Delete (the connector).
+ * its type, and the action to disable it for Nightshift.
  */
 export function SandboxConnectorsTable(): React.ReactElement | null {
   const { application, triggersActionsUi } = useKibana().services;
@@ -66,9 +71,7 @@ export function SandboxConnectorsTable(): React.ReactElement | null {
   const { data, error, isLoading, refetch } = useFetchSandboxConnectors();
   const agent = useAgentConnectors();
   const { canEdit, openEdit, editFlyout } = useEditConnector();
-  const { requestDelete, confirmModal } = useDeleteConnector();
-  const canDelete = application.capabilities.actions?.delete === true;
-  const { canEditAgent, unassign, isUpdating } = agent;
+  const { canEditAgent, unassign, updatingId } = agent;
 
   const columns = useMemo((): Array<EuiBasicTableColumn<SandboxConnector>> => {
     const modelOf = (typeId: string) => (registry?.has(typeId) ? registry.get(typeId) : undefined);
@@ -78,104 +81,85 @@ export function SandboxConnectorsTable(): React.ReactElement | null {
         name: i18n.translate('xpack.nightshift.sandboxConnectors.nameColumn', {
           defaultMessage: 'Name',
         }),
-        width: '50%',
-        render: (name: string, connector) => {
-          const model = modelOf(connector.connector_type_id);
-          return (
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type={model?.iconClass ?? 'plugs'} size="m" aria-hidden={true} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {canEdit ? (
-                  <EuiLink
-                    onClick={() => openEdit(connector)}
-                    data-test-subj={`nightshiftConnectorName-${connector.id}`}
-                  >
-                    {name}
-                  </EuiLink>
-                ) : (
-                  name
-                )}
-              </EuiFlexItem>
-              {connector.is_preconfigured && (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow">
-                    {i18n.translate('xpack.nightshift.sandboxConnectors.preconfiguredBadge', {
-                      defaultMessage: 'Preconfigured',
-                    })}
-                  </EuiBadge>
-                </EuiFlexItem>
+        width: '54%',
+        render: (name: string, connector) => (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon
+                type={getConnectorTypeIcon(connector.connector_type_id, registry)}
+                size="m"
+                aria-hidden={true}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {canEdit ? (
+                <EuiLink
+                  onClick={() => openEdit(connector)}
+                  data-test-subj={`nightshiftConnectorName-${connector.id}`}
+                >
+                  {name}
+                </EuiLink>
+              ) : (
+                name
               )}
-            </EuiFlexGroup>
-          );
-        },
+            </EuiFlexItem>
+            {connector.is_preconfigured && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">
+                  {i18n.translate('xpack.nightshift.sandboxConnectors.preconfiguredBadge', {
+                    defaultMessage: 'Preconfigured',
+                  })}
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        ),
       },
       {
         field: 'connector_type_id',
         name: i18n.translate('xpack.nightshift.sandboxConnectors.typeColumn', {
           defaultMessage: 'Type',
         }),
-        width: '34%',
+        width: '36%',
         render: (typeId: string) => modelOf(typeId)?.actionTypeTitle ?? typeId,
       },
       {
         name: i18n.translate('xpack.nightshift.sandboxConnectors.actionsColumn', {
           defaultMessage: 'Actions',
         }),
-        width: '16%',
+        width: '10%',
+        align: 'right',
         render: (connector: SandboxConnector) => {
-          const removeLabel = i18n.translate('xpack.nightshift.sandboxConnectors.removeAction', {
-            defaultMessage: 'Remove {name} from the investigation agent',
+          const disableLabel = i18n.translate('xpack.nightshift.sandboxConnectors.disableAction', {
+            defaultMessage: 'Disable {name} for Elastic nightshift',
             values: { name: connector.name },
           });
-          const deleteLabel = i18n.translate('xpack.nightshift.sandboxConnectors.deleteAction', {
-            defaultMessage: 'Delete {name}',
-            values: { name: connector.name },
-          });
-          const deleteDisabledReason = connector.is_preconfigured
-            ? preconfiguredTooltip
-            : !canDelete
-            ? i18n.translate('xpack.nightshift.sandboxConnectors.deleteNoPermission', {
-                defaultMessage: 'You need permission to delete connectors.',
-              })
-            : !canEditAgent
-            ? noAgentPermissionReason
-            : undefined;
           return (
-            <EuiFlexGroup gutterSize="xs" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={canEditAgent ? removeLabel : noAgentPermissionReason}
-                  disableScreenReaderOutput
-                >
-                  <EuiButtonIcon
-                    iconType="minusCircle"
-                    aria-label={removeLabel}
-                    isDisabled={!canEditAgent || isUpdating}
-                    onClick={() => unassign(connector)}
-                    data-test-subj={`nightshiftConnectorRemove-${connector.id}`}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content={deleteDisabledReason ?? deleteLabel} disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    iconType="trash"
-                    color="danger"
-                    aria-label={deleteLabel}
-                    isDisabled={deleteDisabledReason !== undefined}
-                    onClick={() => requestDelete(connector)}
-                    data-test-subj={`nightshiftConnectorDelete-${connector.id}`}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiToolTip
+              content={
+                canEditAgent
+                  ? i18n.translate('xpack.nightshift.sandboxConnectors.disableTooltip', {
+                      defaultMessage: 'Disable for Elastic nightshift',
+                    })
+                  : noAgentPermissionReason
+              }
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="trash"
+                color="danger"
+                aria-label={disableLabel}
+                isLoading={updatingId === connector.id}
+                isDisabled={!canEditAgent}
+                onClick={() => unassign(connector)}
+                data-test-subj={`nightshiftConnectorRemove-${connector.id}`}
+              />
+            </EuiToolTip>
           );
         },
       },
     ];
-  }, [canDelete, canEdit, canEditAgent, isUpdating, openEdit, registry, requestDelete, unassign]);
+  }, [canEdit, canEditAgent, updatingId, openEdit, registry, unassign]);
 
   if (isLoading || agent.isLoading) return <EuiLoadingSpinner size="m" />;
   if (agent.error && isHttpNotFoundError(agent.error)) {
@@ -236,7 +220,6 @@ export function SandboxConnectorsTable(): React.ReactElement | null {
         data-test-subj="nightshiftSandboxConnectorsTable"
       />
       {editFlyout}
-      {confirmModal}
     </>
   );
 }

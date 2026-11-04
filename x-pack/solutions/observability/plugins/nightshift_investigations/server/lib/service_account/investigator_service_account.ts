@@ -21,11 +21,13 @@ import {
   getNightshiftRoleName,
   getNightshiftServiceAccountName,
   NIGHTSHIFT_SERVICE_ACCOUNT_KINDS,
-  type InvestigatorServiceAccountStatus,
-  type NightshiftBoundWorkflowStatus,
   type NightshiftServiceAccountIds,
-  type NightshiftServiceAccountInfo,
-  type NightshiftUnboundAutomation,
+} from '@kbn/nightshift-shared';
+import type {
+  InvestigatorServiceAccountStatus,
+  NightshiftBoundWorkflowStatus,
+  NightshiftServiceAccountInfo,
+  NightshiftUnboundAutomation,
 } from '../../../common';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from '../managed_workflows/constants';
 import { BOUND_WORKFLOW_IDS, type BoundWorkflowId } from './bound_workflows';
