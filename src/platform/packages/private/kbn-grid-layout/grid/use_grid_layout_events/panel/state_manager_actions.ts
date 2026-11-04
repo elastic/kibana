@@ -16,7 +16,7 @@ import type { GridLayoutContextType } from '../../use_grid_layout_context';
 import { isGridDataEqual, isOrderedLayoutEqual } from '../../utils/equality_checks';
 import { resolveGridSection } from '../../utils/resolve_grid_section';
 import { resolveSections } from '../../utils/section_management';
-import { getSensorType } from '../sensors';
+import { getSensorType, isMouseEvent } from '../sensors';
 import type { PointerPosition, UserInteractionEvent } from '../types';
 import { getDragPreviewRect, getResizePreviewRect, getSensorOffsets } from './utils';
 
@@ -70,8 +70,11 @@ export const moveAction = (
     return;
   }
 
-  const { columnCount, gutterSize, rowHeight, columnPixelWidth } = runtimeSettings;
+  const { columnCount, gutterSize, rowHeight, columnPixelWidth, shiftSnapSize } = runtimeSettings;
   const isResize = activePanel.type === 'resize';
+  const snapStep = shiftSnapSize && isMouseEvent(e) && e.shiftKey ? shiftSnapSize : 1;
+  const toGridLine = (pixels: number, cellPixels: number) =>
+    Math.round(pixels / cellPixels / snapStep) * snapStep;
 
   const previewRect = (() => {
     if (isResize) {
@@ -145,7 +148,7 @@ export const moveAction = (
       : previewRect.left - targetedGridLeft;
     const maxColumn = isResize ? columnCount : columnCount - currentPanelData.width;
     return Math.min(
-      Math.max(Math.round(localXCoordinate / (columnPixelWidth + gutterSize)), 0),
+      Math.max(toGridLine(localXCoordinate, columnPixelWidth + gutterSize), 0),
       maxColumn
     );
   })();
@@ -158,7 +161,7 @@ export const moveAction = (
       const localYCoordinate = isResize
         ? previewRect.bottom - targetedGridTop
         : previewRect.top - targetedGridTop;
-      return Math.max(Math.round(localYCoordinate / (rowHeight + gutterSize)), 0);
+      return Math.max(toGridLine(localYCoordinate, rowHeight + gutterSize), 0);
     } else {
       // this section doesn't exist yet, so target the first row of that section
       return 0;
@@ -167,8 +170,16 @@ export const moveAction = (
 
   const requestedPanelData = { ...currentPanelData };
   if (isResize) {
-    requestedPanelData.width = Math.max(targetColumn - requestedPanelData.column, 1);
-    requestedPanelData.height = Math.max(targetRow - requestedPanelData.row, 1);
+    const {
+      minWidth = 1,
+      maxWidth = Infinity,
+      minHeight = 1,
+      maxHeight = Infinity,
+    } = currentPanelData.resizeOptions ?? {};
+    const clamp = (value: number, min: number, max: number) =>
+      Math.min(Math.max(value, min, 1), max);
+    requestedPanelData.width = clamp(targetColumn - requestedPanelData.column, minWidth, maxWidth);
+    requestedPanelData.height = clamp(targetRow - requestedPanelData.row, minHeight, maxHeight);
   } else {
     requestedPanelData.column = targetColumn;
     requestedPanelData.row = targetRow;

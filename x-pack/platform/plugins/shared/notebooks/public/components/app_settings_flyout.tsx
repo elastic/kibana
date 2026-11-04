@@ -183,7 +183,7 @@ export const AppSettingsFlyout = ({ appId, onClose }: { appId: string; onClose: 
         <EuiFormRow
           helpText={i18n.translate('xpack.notebook.appSettings.snapToGridHelp', {
             defaultMessage:
-              'Panels line up with the grid as you move and resize them. Turn off to place them more precisely.',
+              'Panels line up with the grid as you move and resize them. Turn off to place them more precisely; hold Shift while dragging to line up with the grid again.',
           })}
         >
           <EuiSwitch
@@ -199,14 +199,12 @@ export const AppSettingsFlyout = ({ appId, onClose }: { appId: string; onClose: 
             data-test-subj="notebookAppSettingsSnapToGrid"
           />
         </EuiFormRow>
-        {(app.snapToGrid ?? true) && (
-          <GridColumnsField
-            columns={getGridColumns(app)}
-            onChange={(columns) =>
-              store.updateApp(appId, (current) => setGridColumns(current, columns))
-            }
-          />
-        )}
+        <GridColumnsField
+          columns={getGridColumns(app)}
+          onChange={(columns) =>
+            store.updateApp(appId, (current) => setGridColumns(current, columns))
+          }
+        />
       </EuiFlyoutBody>
     </NotebookFlyout>
   );

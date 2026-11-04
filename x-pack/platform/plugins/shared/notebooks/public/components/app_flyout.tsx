@@ -405,6 +405,7 @@ const AppGrid = ({
       columnCount: columns * scale,
       keyboardDragTopLimit: 0,
       allowGaps: app.freePlacement ?? false,
+      shiftSnapSize: snapToGrid ? undefined : scale,
     }),
     [snapToGrid, gutterSize, scale, columns, app.freePlacement]
   );

@@ -138,6 +138,40 @@ describe('panel state manager actions', () => {
         expect(panel.width).toBe(2);
       });
 
+      describe('with a shift snap size', () => {
+        beforeEach(() => {
+          gridLayoutStateManager.gridLayout$.next(getSampleOrderedLayout());
+          gridLayoutStateManager.runtimeSettings$.next({
+            ...gridLayoutStateManager.runtimeSettings$.getValue(),
+            shiftSnapSize: 4,
+          });
+        });
+        afterEach(() => {
+          const { shiftSnapSize, ...runtimeSettings } =
+            gridLayoutStateManager.runtimeSettings$.getValue();
+          gridLayoutStateManager.runtimeSettings$.next(runtimeSettings);
+        });
+
+        // a column is 10px wide plus an 8px gutter, and a row is 20px high plus an 8px gutter
+        const resizeTo = (shiftKey: boolean) => {
+          moveAction(
+            new MouseEvent('pointerdown', { clientX: 0, clientY: 0, shiftKey }),
+            gridLayoutStateManager,
+            { clientX: 5 * 18, clientY: 3 * 28 },
+            { current: undefined }
+          );
+          return gridLayoutStateManager.gridLayout$.getValue()['main-0'].panels.panel1;
+        };
+
+        it('resizes by single cells without shift', () => {
+          expect(resizeTo(false)).toMatchObject({ width: 5, height: 3 });
+        });
+
+        it('resizes in steps of the snap size while shift is held', () => {
+          expect(resizeTo(true)).toMatchObject({ width: 4, height: 4 });
+        });
+      });
+
       it('can extend panel to the full width of the layout when it is offset', () => {
         gridLayoutStateManager.layoutRef.current = {
           getBoundingClientRect: jest.fn().mockReturnValue({

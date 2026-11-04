@@ -94,7 +94,13 @@ export const useGridLayoutState = ({
     if (
       !deepEqual(
         gridSettings,
-        pick(runtimeSettings, ['gutterSize', 'rowHeight', 'columnCount', 'allowGaps'])
+        pick(runtimeSettings, [
+          'gutterSize',
+          'rowHeight',
+          'columnCount',
+          'allowGaps',
+          'shiftSnapSize',
+        ])
       )
     )
       runtimeSettings$.next({

@@ -31,6 +31,11 @@ export interface GridSettings {
    * above them. Collisions are still resolved. Defaults to false.
    */
   allowGaps?: boolean;
+  /**
+   * When set, holding Shift while dragging or resizing with the mouse moves panel edges in steps of
+   * this many columns and rows instead of one.
+   */
+  shiftSnapSize?: number;
 }
 
 /** The grid settings that change how a layout is resolved. */
