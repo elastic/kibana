@@ -238,7 +238,7 @@ export class AlertEventsClient {
     nextStatus: AlertEpisodeStatus,
     abortSignal?: AbortSignal
   ): Promise<ResolvedEpisode> {
-    const rows = await this.queryService.executeQueryRows<{
+    const rows = await this.queryService.executeQuery<{
       last_episode_id: string;
       last_episode_status: AlertEpisodeStatus;
     }>({

@@ -107,7 +107,7 @@ export class ApplyThrottlingStep implements DispatcherStep {
     );
     const responses = await Promise.all(
       requests.map((request) =>
-        this.queryService.executeQueryRows<LastNotifiedRecord>({ ...request, abortSignal: signal })
+        this.queryService.executeQuery<LastNotifiedRecord>({ ...request, abortSignal: signal })
       )
     );
     const records = responses.flat();
