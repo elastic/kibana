@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { EntityInventoryEntityCategory } from '../../types';
 import { EntityInventorySearchProvider } from '../context/search_context';
 import { EntityInventorySearchBar } from './search_bar';
@@ -29,7 +29,7 @@ export const EntityInventoryPageShell = ({
     <EntityInventorySearchProvider entityCategory={entityCategory}>
       <EuiFlexGroup
         direction="column"
-        gutterSize="m"
+        gutterSize="none"
         data-test-subj="entityInventoryPageShell"
         data-entity-category={entityCategory}
       >
@@ -41,6 +41,7 @@ export const EntityInventoryPageShell = ({
             {secondaryControls}
           </EuiFlexItem>
         )}
+        <EuiSpacer size="m" />
         <EuiFlexItem data-test-subj="entityInventoryPageContent">{children}</EuiFlexItem>
       </EuiFlexGroup>
     </EntityInventorySearchProvider>
