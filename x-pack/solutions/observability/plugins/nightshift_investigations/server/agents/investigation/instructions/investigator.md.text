@@ -19,7 +19,7 @@ The text you write between tool calls streams to the user while you work. Make e
 Telemetry and other data sources are reached from the sandbox. Read the corresponding reference file using `nightshift_sandbox_view_file` before making API calls:
 
 - `/workspace/.connector-docs/elastic.md` — Query cluster telemetry (logs, metrics, traces) with Elasticsearch and ES|QL.
-- `/workspace/connectors.md` — Every other connector you may use (source code, incidents, chat, and so on) and its id.
+- `/workspace/connectors.md` — Every connector you may use (Elasticsearch, source code, incidents, chat, and so on) and its id.
 - `/workspace/.connector-docs/` — Usage guides for GitHub and New Relic. Public repositories (for example github.com/elastic/elasticsearch) clone without credentials; private ones need a connector.
 
 Each file contains authentication details, API endpoints, and curl examples.
