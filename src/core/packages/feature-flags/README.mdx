@@ -198,13 +198,20 @@ DELETE kbn:/internal/feature-flags/overrides
 
 ### Flags helper
 
-In the browser console, run:
+Kibana includes a Feature flag helper that allows users to test and troubleshoot their feature flag evaluations. 
+Superusers can see and update the flags to see their effect in Kibana. 
+Lower privileged users only can see the evaluated values without an option to upate it.
+
+The button to open the Feature flag helper can be accessed in 2 ways:
+
+* When the Developer Toolbar is available, it shows the **Feature flags** pill (check the settings of the bar if it doesn't).
+* When the Developer Toolbar is not available, or the pill is disabled in its settings, a floating button will show up at the bottom-left corner of the screen. If it doesn't show up, run this in the browser console:
 
 ```js
 toggleFeatureFlagsHelper()
 ```
 
-This adds a `tableGear` button to the bottom-left of the screen. The choice is stored in `localStorage`, so the button stays until you run the command again. The button opens a flyout listing the server snapshot, flags this Kibana node and this browser tab have evaluated, and config and runtime overrides. Without provider credentials the snapshot is empty, and the flyout still lists the flags Kibana has evaluated, using the value that evaluation returned. A superuser can type a new value and save it as a runtime override, or clear one. Anyone else sees the values and a notice that a superuser is required to change them.
+Without provider credentials the snapshot is empty, and the flyout still lists the flags Kibana has evaluated, using the value that evaluation returned.
 
 ## Usage in Cloud
 
