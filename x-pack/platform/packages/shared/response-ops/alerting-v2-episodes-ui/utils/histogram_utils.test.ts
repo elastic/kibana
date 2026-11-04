@@ -315,7 +315,7 @@ describe('limitBreakdownSeries', () => {
     ]);
   });
 
-  it('orders series by rank with Other last, keeping bucket order within a series', () => {
+  it('orders series by rank with Other last', () => {
     const counts = [
       { bucketStart: 0, count: 1, breakdown: 'low' },
       { bucketStart: 0, count: 2, breakdown: OTHER },
