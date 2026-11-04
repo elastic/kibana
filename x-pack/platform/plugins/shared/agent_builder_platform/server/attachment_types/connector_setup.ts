@@ -9,7 +9,6 @@ import type { Logger } from '@kbn/logging';
 import type { AgentsStart } from '@kbn/agent-builder-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import { hasText } from '@kbn/agent-builder-server/attachments';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import { getConnectorSpec } from '@kbn/connector-specs';
@@ -107,12 +106,12 @@ export const createConnectorSetupAttachmentType = ({
     const displayName =
       connectorTypeName ?? getConnectorSpec(connectorType)?.metadata.displayName ?? connectorType;
 
-    const text = hasText(reason)
-      ? reason
-      : i18n.translate('xpack.agentBuilderPlatform.attachments.connectorSetup.surface.reason', {
-          defaultMessage: 'Configure the {displayName} connector so the agent can use it here.',
-          values: { displayName },
-        });
+    const text =
+      reason ||
+      i18n.translate('xpack.agentBuilderPlatform.attachments.connectorSetup.surface.reason', {
+        defaultMessage: 'Configure the {displayName} connector so the agent can use it here.',
+        values: { displayName },
+      });
 
     return {
       type: 'view',

@@ -44,14 +44,14 @@ describe('screen_context attachment type', () => {
       expect((await renderSurface(composition)).valid).toBe(true);
     });
 
-    it('shows additional data as fields, up to ten', async () => {
+    it('shows additional data as fields', async () => {
       const additionalData = Object.fromEntries(
-        Array.from({ length: 12 }, (_, index) => [`key ${index}`, `value ${index}`])
+        Array.from({ length: 3 }, (_, index) => [`key ${index}`, `value ${index}`])
       );
       const composition = await toComposition({ app: 'discover', additional_data: additionalData });
       const [fields] = composition?.body ?? [];
 
-      expect(fields.type === 'fields' && fields.items).toHaveLength(10);
+      expect(fields.type === 'fields' && fields.items).toHaveLength(4);
       expect(fields.type === 'fields' && fields.items[1]).toEqual({
         label: 'key 0',
         value: 'value 0',

@@ -10,7 +10,6 @@ import type {
   SurfaceComposition,
   SurfaceNode,
 } from '@kbn/agent-builder-server/attachments';
-import { hasText } from '@kbn/agent-builder-server/attachments';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import { i18n } from '@kbn/i18n';
 import {
@@ -118,9 +117,9 @@ const toSkillSurfaceComposition = ({
   ].filter((item): item is { label: string; value: string } => Boolean(item));
 
   const body: SurfaceNode[] = [
-    ...(hasText(description) ? [{ type: 'markdown' as const, text: description }] : []),
+    ...(description ? [{ type: 'markdown' as const, text: description }] : []),
     ...(items.length > 0 ? [{ type: 'fields' as const, items }] : []),
-    ...(hasText(content)
+    ...(content
       ? [
           {
             type: 'code' as const,

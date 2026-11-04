@@ -11,7 +11,6 @@ import {
 } from '@kbn/agent-builder-common/attachments';
 import type { ScreenContextAttachmentData } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import { SURFACE_LIMITS, hasText } from '@kbn/agent-builder-server/attachments';
 import { i18n } from '@kbn/i18n';
 
 /**
@@ -43,7 +42,7 @@ export const createScreenContextAttachmentType = (): AttachmentTypeDefinition<
       data: { app, url, description, time_range: timeRange, additional_data: additionalData },
     }) => {
       const items = [
-        hasText(app) && {
+        app && {
           label: i18n.translate(
             'xpack.agentBuilderPlatform.attachments.screenContext.surface.app',
             {
@@ -52,7 +51,7 @@ export const createScreenContextAttachmentType = (): AttachmentTypeDefinition<
           ),
           value: app,
         },
-        hasText(url) && {
+        url && {
           label: i18n.translate(
             'xpack.agentBuilderPlatform.attachments.screenContext.surface.url',
             {
@@ -61,7 +60,7 @@ export const createScreenContextAttachmentType = (): AttachmentTypeDefinition<
           ),
           value: url,
         },
-        hasText(description) && {
+        description && {
           label: i18n.translate(
             'xpack.agentBuilderPlatform.attachments.screenContext.surface.description',
             { defaultMessage: 'Description' }
@@ -82,11 +81,9 @@ export const createScreenContextAttachmentType = (): AttachmentTypeDefinition<
           ),
         },
         ...Object.entries(additionalData ?? {}).map(
-          ([key, value]) => hasText(key) && hasText(value) && { label: key, value }
+          ([key, value]) => key && value && { label: key, value }
         ),
-      ]
-        .filter((item): item is { label: string; value: string } => Boolean(item))
-        .slice(0, SURFACE_LIMITS.fieldItems);
+      ].filter((item): item is { label: string; value: string } => Boolean(item));
 
       return {
         type: 'view',

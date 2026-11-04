@@ -10,7 +10,6 @@ import type {
   SurfaceComposition,
   SurfaceNode,
 } from '@kbn/agent-builder-server/attachments';
-import { SURFACE_LIMITS, hasText } from '@kbn/agent-builder-server/attachments';
 import { i18n } from '@kbn/i18n';
 import type { GraphAttachment, GraphAttachmentData, GraphEdge } from '../../common/attachments';
 import { GRAPH_ATTACHMENT_TYPE, graphAttachmentDataSchema } from '../../common/attachments';
@@ -78,7 +77,6 @@ const getEdgeDisplayLabel = (edge: GraphEdge): string => {
 
 /**
  * The graph as a table of its relationships, by node label, followed by the nodes that have none.
- * Long graphs show their first rows, and the table counts the rest.
  */
 const toGraphSurfaceComposition = ({
   title,
@@ -87,13 +85,9 @@ const toGraphSurfaceComposition = ({
   edges,
 }: GraphAttachmentData): SurfaceComposition => {
   const labels = new Map(nodes.map(({ id, data }) => [id, data.label]));
-  const toCell = (id: string) => {
-    const label = labels.get(id);
-    return hasText(label) ? label : id;
-  };
+  const toCell = (id: string) => labels.get(id) || id;
 
-  const hasRelationshipLabels = edges.some(({ label }) => label && /\S/.test(label));
-  const shownEdges = edges.slice(0, SURFACE_LIMITS.tableRows);
+  const hasRelationshipLabels = edges.some(({ label }) => label);
 
   const relationships: SurfaceNode[] =
     edges.length > 0
@@ -122,19 +116,17 @@ const toGraphSurfaceComposition = ({
                 }),
               },
             ],
-            rows: shownEdges.map(({ source, target, label }) => [
+            rows: edges.map(({ source, target, label }) => [
               toCell(source),
-              ...(hasRelationshipLabels ? [hasText(label) ? label : null] : []),
+              ...(hasRelationshipLabels ? [label || null] : []),
               toCell(target),
             ]),
-            ...(edges.length > shownEdges.length ? { totalRows: edges.length } : {}),
           },
         ]
       : [];
 
   const connected = new Set(edges.flatMap(({ source, target }) => [source, target]));
   const unconnected = nodes.filter(({ id }) => !connected.has(id));
-  const shownNodes = unconnected.slice(0, SURFACE_LIMITS.tableRows);
 
   const otherNodes: SurfaceNode[] =
     unconnected.length > 0
@@ -154,8 +146,7 @@ const toGraphSurfaceComposition = ({
                       }),
               },
             ],
-            rows: shownNodes.map(({ id }) => [toCell(id)]),
-            ...(unconnected.length > shownNodes.length ? { totalRows: unconnected.length } : {}),
+            rows: unconnected.map(({ id }) => [toCell(id)]),
           },
         ]
       : [];

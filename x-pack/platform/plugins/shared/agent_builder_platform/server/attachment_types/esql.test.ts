@@ -75,14 +75,5 @@ describe('esql attachment type', () => {
 
       expect(composition?.body.map(({ type }) => type)).toEqual(['code']);
     });
-
-    it('leaves out the link when its path is too long for one', async () => {
-      const composition = await toComposition(
-        { query: `FROM logs | WHERE message == "${'x'.repeat(2500)}"` },
-        discoverLocator
-      );
-
-      expect(composition?.body.map(({ type }) => type)).toEqual(['code']);
-    });
   });
 });

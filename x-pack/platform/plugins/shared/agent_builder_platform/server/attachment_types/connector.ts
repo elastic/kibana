@@ -12,7 +12,6 @@ import {
   connectorAttachmentDataSchema,
 } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition, SurfaceNode } from '@kbn/agent-builder-server/attachments';
-import { hasText } from '@kbn/agent-builder-server/attachments';
 import { i18n } from '@kbn/i18n';
 import { formatSchemaForLlm } from '@kbn/agent-builder-server';
 import {
@@ -151,8 +150,8 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
         type: 'view',
         title: connectorName,
         body: [
-          ...(hasText(description) ? [{ type: 'markdown' as const, text: description }] : []),
-          ...(hasText(typeName) ? [fields] : []),
+          ...(description ? [{ type: 'markdown' as const, text: description }] : []),
+          ...(typeName ? [fields] : []),
         ],
       };
     },

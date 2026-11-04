@@ -73,26 +73,5 @@ describe('graph attachment type', () => {
         { type: 'table', columns: [{ label: 'Node' }], rows: [['A']] },
       ]);
     });
-
-    it('shows the first rows of a large graph and counts the rest, and still renders', async () => {
-      const nodes = Array.from({ length: 2000 }, (_, index) => node(`n${index}`, `node ${index}`));
-      const edges = nodes.slice(1, 120).map(({ id }) => edge('n0', id, 'calls'));
-
-      const composition = await toComposition({ nodes, edges });
-
-      expect(composition?.body).toEqual([
-        expect.objectContaining({ type: 'table', totalRows: 119 }),
-        expect.objectContaining({ type: 'table', totalRows: 1880 }),
-      ]);
-      expect(
-        composition?.body.map((bodyNode) => bodyNode.type === 'table' && bodyNode.rows.length)
-      ).toEqual([50, 50]);
-
-      const { valid, errors, slack } = await renderSurface(composition);
-      expect(errors).toEqual([]);
-      expect(valid).toBe(true);
-      expect(slack).toMatch(/Showing \d+ of 119 rows/);
-      expect(slack).toMatch(/Showing \d+ of 1,880 rows/);
-    });
   });
 });

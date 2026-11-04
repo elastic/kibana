@@ -23,7 +23,6 @@ import type {
   SurfaceComposition,
   SurfaceNode,
 } from '@kbn/agent-builder-server/attachments';
-import { hasText } from '@kbn/agent-builder-server/attachments';
 import type { KibanaIsomerRuntime } from '@kbn/isomer-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentServiceStart } from '../attachments';
@@ -76,8 +75,8 @@ const toMessageNodes = (message: string): MessageNode[] =>
  * `toSurfaceComposition` that decides whether an attachment has a heading.
  */
 const toHeadingNodes = ({ title, subtitle }: SurfaceComposition): SurfaceNode[] => [
-  ...(hasText(title) ? [{ type: 'header' as const, text: title, level: 2 as const }] : []),
-  ...(hasText(subtitle) ? [{ type: 'context' as const, items: [{ text: subtitle }] }] : []),
+  ...(title ? [{ type: 'header' as const, text: title, level: 2 as const }] : []),
+  ...(subtitle ? [{ type: 'context' as const, items: [{ text: subtitle }] }] : []),
 ];
 
 /**
