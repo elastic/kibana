@@ -3,25 +3,23 @@ navigation_title: "Inbound Webhook"
 type: reference
 description: "Use the Inbound Webhook connector to receive JSON from any tool that can send an HTTP POST request, and start a Kibana workflow for each request."
 applies_to:
-  stack: preview 9.6
   serverless: preview
+  stack: preview 9.6
 ---
 
 # Inbound Webhook connector [inbound-webhook-action-type]
 
-The Inbound Webhook connector gives {{kib}} a webhook URL that any external tool can send JSON to. Each request starts the workflows that subscribe to the connector, and those workflows can read the request body. Use it with any tool that has no built-in way to start a {{kib}} workflow, such as Prometheus Alertmanager, a CI/CD system, or an in-house service.
+The Inbound Webhook connector lets any tool that can send an HTTP `POST` request start {{kib}} workflows. The tool sends JSON to the connector's webhook URL. Each request starts the workflows that subscribe to the connector, and those workflows can read the request body. Use it with tools that have no built-in way to start a {{kib}} workflow, such as Prometheus Alertmanager, a CI/CD system, or an in-house service.
 
-::::{note}
-This connector is available in **Workflows** only. It receives requests and has no actions, so a workflow can't call it from a step.
-::::
+You can use this connector in **Workflows** only. It receives requests and has no actions, so workflows use it as a trigger, not as a step.
 
 ## Requirements [inbound-webhook-requirements]
 
 To receive requests with this connector, you need:
 
+- {applies_to}`serverless: preview` A [project feature tier](docs-content://deploy-manage/deploy/elastic-cloud/project-settings.md) that includes Workflows. The Security Analytics Essentials and Observability Logs Essentials tiers don't include it.
 - {applies_to}`stack: preview 9.6+` An Enterprise license, which Workflows requires.
 - {applies_to}`stack: preview 9.6+` The `xpack.actions.inboundEvents.enabled` setting in `kibana.yml` set to `true`, which is the default. When it's `false`, the Inbound Webhook connector type isn't available.
-- {applies_to}`serverless: preview` A [project feature tier](docs-content://deploy-manage/deploy/elastic-cloud/project-settings.md) that includes Workflows. The Security Analytics Essentials and Observability Logs Essentials tiers don't include it.
 - A {{kib}} URL that the external tool can reach. A tool that runs outside your network can't send requests to `localhost`.
 
 ## Create connectors in {{kib}} [define-inbound-webhook-ui]
@@ -39,7 +37,7 @@ When you select **Save**, the flyout stays open and shows the **Webhook URL** an
 
 If the flyout warns that `server.publicBaseUrl` is not set, the **Webhook URL** is a relative path that external tools can't use. Set [`server.publicBaseUrl`](/reference/configuration-reference/general-settings.md#server-publicbaseurl) to the {{kib}} host that the tool sends requests to.
 
-## Send requests to the webhook URL [inbound-webhook-url]
+## Connect an external tool [inbound-webhook-url]
 
 Configure the external tool to send each event as an HTTP `POST` request with a JSON body to the connector's webhook URL. The URL uses one of the following formats. URLs in the default space have no `/s/<space-id>` prefix.
 
@@ -50,22 +48,22 @@ https://<kibana-host>/s/<space-id>/api/actions/events/.inboundWebhook/<connector
 
 Authenticate each request with the ingest token in one of these ways:
 
-- Send an `Authorization: Bearer <ingest-token>` header. Use this method when the tool lets you set headers, because it keeps the token out of URLs and logs.
+- Send an `Authorization: Bearer <ingest-token>` header. If the tool lets you set headers, use this method, because it keeps the token out of URLs and logs.
 - Append `?token=<ingest-token>` to the URL. {{kib}} reads this parameter only when the request has no `Authorization` header.
 
 Some tools confirm a webhook URL by sending a verification value before they send events. When the JSON body has a top-level string field named `challenge`, the connector returns HTTP 200 with `{"challenge": "<value>"}` and doesn't start any workflows. The connector ignores a `challenge` field inside a nested object, so that request starts workflows as usual.
 
-The ingest token authenticates the request but doesn't set its privileges. The workflows that a request starts run with the privileges of the last user who saved the connector. Anyone who has the token can start those workflows as that user, so protect the token like a password.
+The ingest token proves that the sender may start workflows. The workflows themselves run with the privileges of the last user who saved the connector, so anyone who has the token can start them as that user. Protect the token like a password.
 
 ### Rotate the ingest token [inbound-webhook-rotate-token]
 
-If the ingest token is lost or exposed, open the connector, select **Rotate ingest token**, then select **Rotate token** to confirm. The previous token stops working immediately, and {{kib}} shows the new token only once. Update the token in the external tool after you rotate it.
+If you lose the ingest token or someone else might have it, open the connector, select **Rotate ingest token**, then select **Rotate token** to confirm. The previous token stops working immediately, and {{kib}} shows the new token only once. Update the token in the external tool after you rotate it.
 
 Rotating the token doesn't change which user the workflows run as. To run the workflows as a different user, have that user save the connector.
 
 ## Start a workflow from webhook requests [inbound-webhook-workflows]
 
-To run a workflow for each request, add the `inboundWebhook.received` trigger to the workflow. In the workflow editor's list of triggers, this trigger is named **Inbound Webhook - Received**. The trigger needs a `connector-id`, which is the last part of the connector's webhook URL. To subscribe to every Inbound Webhook connector in the space, set `connector-id` to `"*"`.
+To run a workflow for each request, add the `inboundWebhook.received` trigger to the workflow. The workflow editor lists this trigger as **Inbound Webhook - Received**. Set `connector-id` to the connector's ID, which is the last part of its webhook URL. To run the workflow for every Inbound Webhook connector in the space, set `connector-id` to `"*"`. Only enabled workflows in the same space as the connector run.
 
 This workflow logs a message for each request that a specific connector receives:
 
@@ -83,7 +81,7 @@ steps:
       message: "{{ event.body.alert_name }} is {{ event.body.status }} on {{ event.body.host }}"
 ```
 
-A request starts only the enabled workflows in the same space as the connector. Each workflow can read these fields from the `event` object:
+Workflow steps can use these fields from the `event` object:
 
 | Field | Description |
 | --- | --- |
@@ -133,7 +131,7 @@ The HTTP status that {{kib}} returns shows what happened to a request:
 | --- | --- |
 | 202 | {{kib}} accepted the request. If no workflow runs, check that the workflow is enabled, is in the connector's space, has the correct `connector-id`, and has an `on.condition` that matches the body. |
 | 200 | The body has a top-level `challenge` field. The connector answers the verification request and doesn't start any workflows. |
-| 403 | This deployment doesn't accept inbound connector events. |
+| 403 | This deployment doesn't accept webhook requests for any connector. |
 | 404 | The ingest token is missing or incorrect, or someone rotated it. The URL might also have the wrong connector ID or space. After repeated failed attempts from one address, {{kib}} returns 404 for that connector for up to a minute, even when the token is correct. |
 | 413 | The body is larger than the maximum size, which is 1 MB by default. |
-| 429 | The tool sent too many requests. Wait for the number of seconds in the `Retry-After` response header, then resend the request. By default, each {{kib}} instance accepts up to 300 requests per minute and 10 concurrent requests for one connector. |
+| 429 | The tool sent too many requests. Wait for the number of seconds in the `Retry-After` response header, then send the request again. By default, each {{kib}} instance accepts up to 300 requests per minute for one connector, and up to 10 at the same time. |
