@@ -43,7 +43,7 @@ describe('notifyInvestigationQuotaReached', () => {
     const getActions = jest.fn().mockReturnValue({
       getActionsClientWithRequestInSpace: jest.fn().mockResolvedValue({ execute }),
     });
-    const run = (channel = 'C1') =>
+    const run = (channel = 'C1', limit?: number) =>
       notifyInvestigationQuotaReached({
         getSoClient: () => soClient,
         getActions,
@@ -52,6 +52,7 @@ describe('notifyInvestigationQuotaReached', () => {
         slackThread: { channel, thread_ts: '1700000000.000100' },
         settingsLocator,
         kibanaUrl,
+        limit,
         signal,
         logger,
       });
@@ -77,7 +78,7 @@ describe('notifyInvestigationQuotaReached', () => {
         subAction: 'sendMessage',
         subActionParams: {
           channel: 'C1',
-          text: getInvestigationQuotaReachedMessage(settingsUrl),
+          text: getInvestigationQuotaReachedMessage({ settingsUrl }),
           threadTs: '1700000000.000100',
         },
       },
@@ -87,7 +88,7 @@ describe('notifyInvestigationQuotaReached', () => {
   it('links the settings page in the workflow space for an admin to follow', async () => {
     const { execute, run } = setup();
 
-    await run();
+    await run('C1', 5);
 
     expect(settingsLocator.getRedirectUrl).toHaveBeenCalledWith(
       { tab: 'investigations' },
@@ -95,7 +96,7 @@ describe('notifyInvestigationQuotaReached', () => {
     );
     const { text } = execute.mock.calls[0][0].params.subActionParams;
     expect(text).toBe(
-      `The daily limit for automatic investigations has been reached. An admin can raise the limit in <${settingsUrl}|Nightshift settings>.`
+      `The daily limit of 5 for automatic investigations has been reached. An admin can raise the limit in <${settingsUrl}|Nightshift settings>.`
     );
   });
 
@@ -176,6 +177,9 @@ describe('getNightshiftSettingsUrl', () => {
     ).toBeUndefined();
     expect(getInvestigationQuotaReachedMessage()).toBe(
       'The daily limit for automatic investigations has been reached. An admin can raise the limit in the Nightshift settings.'
+    );
+    expect(getInvestigationQuotaReachedMessage({ limit: 5 })).toBe(
+      'The daily limit of 5 for automatic investigations has been reached. An admin can raise the limit in the Nightshift settings.'
     );
   });
 });

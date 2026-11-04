@@ -96,7 +96,9 @@ apiTest.describe(
     ): Promise<void> => {
       const response = await consume(apiClient, body);
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({ allowed: true });
+      expect(response.body).toEqual(
+        expect.objectContaining({ allowed: true, limit: expect.any(Number) })
+      );
     };
 
     apiTest.beforeAll(async ({ samlAuth }) => {
@@ -128,7 +130,7 @@ apiTest.describe(
         const response = await consume(apiClient, { group: 'detection' });
 
         expect(response).toHaveStatusCode(200);
-        expect(response.body).toStrictEqual({ allowed: true });
+        expect(response.body).toStrictEqual({ allowed: true, limit: 0 });
         const after = await readSnapshot(apiClient);
         expect(after.enabled).toBe(false);
         expect(after.limits.detection).toBe(0);
@@ -155,7 +157,7 @@ apiTest.describe(
       const response = await consume(apiClient, { group: 'ki_extraction' });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({ allowed: false });
+      expect(response.body).toStrictEqual({ allowed: false, limit: finiteLimit });
       const after = await readSnapshot(apiClient);
       expect(after.counts.ki_extraction).toBe(before.counts.ki_extraction);
     });
@@ -181,7 +183,7 @@ apiTest.describe(
         const response = await consume(apiClient, { group: 'investigation' });
 
         expect(response).toHaveStatusCode(200);
-        expect(response.body).toStrictEqual({ allowed: false });
+        expect(response.body).toStrictEqual({ allowed: false, limit: finiteLimit });
         const after = await readSnapshot(apiClient);
         expect(after.counts.investigation).toBe(before.counts.investigation);
       }
