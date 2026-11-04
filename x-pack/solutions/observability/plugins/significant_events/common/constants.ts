@@ -40,6 +40,13 @@ export const SIGNIFICANT_EVENT_TIERED_FEATURES = [SIGNIFICANT_EVENTS_TIERED_FEAT
 export const LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID =
   'workflow-ad83678a-dba7-55d1-8caa-3010f6f46b81';
 
+/**
+ * The ids the continuous onboarding and sync workflows had before they were installed per space,
+ * kept to remove the documents an older version left in the default space.
+ */
+export const LEGACY_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID = 'system-streams-ki-continuous-onboarding';
+export const LEGACY_KI_SYNC_WORKFLOW_ID = 'system-streams-ki-sync';
+
 // Scheduling: the workflow runs every COORDINATOR_INTERVAL_MINUTES with a
 // timeout 1 minute shorter to avoid overlapping with the next run.
 //

@@ -11,8 +11,8 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
 } from '@kbn/management-settings-ids';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
-import { SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
-import { GLOBAL_MAINTENANCE_WORKFLOW_IDS } from './managed_workflow_targets';
+import { NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { GLOBAL_CORE_WORKFLOW_IDS } from './managed_workflow_targets';
 import {
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
@@ -56,13 +56,21 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(v2RulesClient?.bulkDisableRules).toHaveBeenCalledWith({ ids: ['rule-1', 'rule-2'] });
       // The shared workflows belong to every space: their executions in this space are
       // cancelled, but the workflow documents themselves are left enabled.
+      for (const sharedId of GLOBAL_CORE_WORKFLOW_IDS) {
+        expect(cancelAllActiveWorkflowExecutions).toHaveBeenCalledWith(
+          sharedId,
+          'default',
+          REQUEST
+        );
+      }
+      // The bound entry points are per-space documents, cancelled by their document id.
       expect(cancelAllActiveWorkflowExecutions).toHaveBeenCalledWith(
-        SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
+        `${NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID}-default`,
         'default',
         REQUEST
       );
       const disabledIds = updateWorkflow.mock.calls.map(([id]) => id);
-      for (const sharedId of GLOBAL_MAINTENANCE_WORKFLOW_IDS) {
+      for (const sharedId of GLOBAL_CORE_WORKFLOW_IDS) {
         expect(disabledIds).not.toContain(sharedId);
       }
       expect(updateWorkflow.mock.calls.every(([, , spaceId]) => spaceId === 'default')).toBe(true);
@@ -310,7 +318,7 @@ describe('SignificantEventsMaintenanceService', () => {
 
     it('records a failure when cancel-all for a workflow target throws', async () => {
       const { api } = makeManagementApi({
-        failCancelAllFor: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
+        failCancelAllFor: `${NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID}-default`,
       });
       const { service } = makeService({ management: api });
 
@@ -320,7 +328,7 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(summary.partialFailures).toContainEqual({
         spaceId: 'default',
         target: expect.stringContaining(
-          `execution:${SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID}@`
+          `execution:${NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID}-default@`
         ),
         error: expect.stringContaining('cancel-all failed'),
       });
@@ -329,7 +337,7 @@ describe('SignificantEventsMaintenanceService', () => {
     it('treats a missing workflow during cancel-all as already gone', async () => {
       const { api, cancelAllActiveWorkflowExecutions } = makeManagementApi();
       cancelAllActiveWorkflowExecutions.mockImplementation(async (workflowId: string) => {
-        if (workflowId === SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID) {
+        if (workflowId === `${NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID}-default`) {
           throw new WorkflowNotFoundError(workflowId);
         }
       });
@@ -340,7 +348,9 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(summary.state).toBe('paused');
       expect(
         summary.partialFailures.some((failure) =>
-          failure.target.includes(`execution:${SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID}@`)
+          failure.target.includes(
+            `execution:${NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID}-default@`
+          )
         )
       ).toBe(false);
     });

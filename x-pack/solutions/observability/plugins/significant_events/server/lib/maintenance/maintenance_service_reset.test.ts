@@ -6,7 +6,7 @@
  */
 
 import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
-import { SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../knowledge_indicators';
 import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../knowledge_indicators/data_stream';
 import { DETECTIONS_DATA_STREAM } from '../significant_events/detections/data_stream';
@@ -297,7 +297,7 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(
         updateWorkflow.mock.calls.some(
           ([id, patch]) =>
-            id.startsWith(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID) &&
+            id.startsWith(NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID) &&
             patch.enabled === true
         )
       ).toBe(false);
@@ -335,7 +335,7 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(
         updateWorkflow.mock.calls.some(
           ([id, patch]) =>
-            id.startsWith(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID) &&
+            id.startsWith(NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID) &&
             patch.enabled === true
         )
       ).toBe(false);

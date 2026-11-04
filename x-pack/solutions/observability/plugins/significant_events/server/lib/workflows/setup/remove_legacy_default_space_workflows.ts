@@ -8,20 +8,16 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
-import {
-  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
-  type ManagedWorkflowId,
-} from '@kbn/workflows/managed';
+import type { ManagedWorkflowId } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../../common/constants';
+import {
+  LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
+  LEGACY_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  LEGACY_KI_SYNC_WORKFLOW_ID,
+} from '../../../../common/constants';
 import { createMaintenanceSystemRequest } from '../../maintenance/system_request';
 import { pollUntil } from '../poll_until';
-
-// The managed continuous and sync workflows used to be single unsuffixed documents in the default
-// space. They are now installed per space as `${id}-${spaceId}`.
-const DEFAULT_SPACE_SYNC_WORKFLOW_ID = `${SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID}-${DEFAULT_SPACE_ID}`;
 
 const continuousOnboardingResetWarning = (id: string): string =>
   `Removed enabled legacy continuous KI onboarding workflow ${id} from the default space. ` +
@@ -107,7 +103,7 @@ export const removeLegacyContinuousOnboardingWorkflow = ({
   uninstallLegacyManagedWorkflow({
     getManagedWorkflowsClient,
     managementApi,
-    id: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+    id: LEGACY_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
     request,
   });
 
@@ -132,7 +128,7 @@ export const removeLegacySyncWorkflow = ({
   uninstallLegacyManagedWorkflow({
     getManagedWorkflowsClient,
     managementApi,
-    id: SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+    id: LEGACY_KI_SYNC_WORKFLOW_ID,
     request,
   });
 
@@ -143,10 +139,8 @@ export const removeLegacySyncWorkflow = ({
  * Continuous onboarding is not carried over: turning its workflow on needs a user API key, which
  * startup does not have, so an enabled legacy document is removed with a warning.
  *
- * The legacy sync document is kept until `${id}-default` is enabled. It already runs under a user
- * API key and startup upgrades it to the per-space YAML, so it keeps reconciling the default space
- * in the meantime. Removing it sooner would leave the space unreconciled until the next inferred
- * identification there.
+ * The legacy sync document runs under a user API key, and its replacement is the bound sync that
+ * the space's setup installs, so it is removed without waiting for one.
  *
  * Fully best-effort: every failure is logged and swallowed, so it can run on each install without
  * ever blocking startup. It is idempotent, so a document that fails to go is retried on the next
@@ -178,7 +172,7 @@ export const removeLegacyDefaultSpaceWorkflows = async ({
     }
   };
 
-  await attempt(SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID, async () => {
+  await attempt(LEGACY_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID, async () => {
     const wasEnabled = await removeLegacyContinuousOnboardingWorkflow({
       getManagedWorkflowsClient,
       managementApi,
@@ -186,24 +180,16 @@ export const removeLegacyDefaultSpaceWorkflows = async ({
     });
     if (wasEnabled) {
       logger.warn(
-        continuousOnboardingResetWarning(SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID)
+        continuousOnboardingResetWarning(LEGACY_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID)
       );
     }
   });
 
-  await attempt(SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID, async () => {
-    const replacement = await managementApi.getWorkflow(
-      DEFAULT_SPACE_SYNC_WORKFLOW_ID,
-      DEFAULT_SPACE_ID,
-      request
-    );
-    if (replacement?.enabled !== true) {
-      return;
-    }
+  await attempt(LEGACY_KI_SYNC_WORKFLOW_ID, async () => {
     await uninstallLegacyManagedWorkflow({
       getManagedWorkflowsClient,
       managementApi,
-      id: SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+      id: LEGACY_KI_SYNC_WORKFLOW_ID,
       request,
     });
   });

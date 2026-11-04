@@ -7,16 +7,14 @@
 
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import {
-  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
-} from '@kbn/workflows/managed';
-import { LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../../common/constants';
+  LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
+  LEGACY_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  LEGACY_KI_SYNC_WORKFLOW_ID,
+} from '../../../../common/constants';
 import { removeLegacyDefaultSpaceWorkflows } from './remove_legacy_default_space_workflows';
 
 // pollUntil waits 2s between polls; the waits themselves are not under test.
 jest.mock('timers/promises', () => ({ setTimeout: jest.fn().mockResolvedValue(undefined) }));
-
-const DEFAULT_SPACE_SYNC_WORKFLOW_ID = `${SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID}-default`;
 
 describe('removeLegacyDefaultSpaceWorkflows', () => {
   let logger: { info: jest.Mock; warn: jest.Mock };
@@ -54,82 +52,55 @@ describe('removeLegacyDefaultSpaceWorkflows', () => {
     uninstall = jest.fn().mockResolvedValue(undefined);
   });
 
-  it('keeps the legacy sync workflow while the default space replacement is missing', async () => {
-    givenWorkflows({ [SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID]: { enabled: true } });
-
-    await run();
-
-    expect(uninstall).not.toHaveBeenCalledWith(SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID, {
-      spaceId: 'default',
-    });
-  });
-
-  it('keeps the legacy sync workflow while the default space replacement is disabled', async () => {
+  it('disables, cancels and uninstalls the legacy sync workflow without waiting for a replacement', async () => {
     givenWorkflows({
-      [SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID]: { enabled: true },
-      [DEFAULT_SPACE_SYNC_WORKFLOW_ID]: { enabled: false },
-    });
-
-    await run();
-
-    expect(uninstall).not.toHaveBeenCalledWith(SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID, {
-      spaceId: 'default',
-    });
-  });
-
-  it('disables, cancels and uninstalls the legacy sync workflow once the replacement is enabled', async () => {
-    givenWorkflows({
-      [SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID]: { enabled: true },
-      [DEFAULT_SPACE_SYNC_WORKFLOW_ID]: { enabled: true },
+      [LEGACY_KI_SYNC_WORKFLOW_ID]: { enabled: true },
     });
 
     await run();
 
     expect(updateWorkflow).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+      LEGACY_KI_SYNC_WORKFLOW_ID,
       { enabled: false },
       'default',
       expect.anything()
     );
     expect(cancelAllActiveWorkflowExecutions).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+      LEGACY_KI_SYNC_WORKFLOW_ID,
       'default',
       expect.anything()
     );
-    expect(uninstall).toHaveBeenCalledWith(SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID, {
+    expect(uninstall).toHaveBeenCalledWith(LEGACY_KI_SYNC_WORKFLOW_ID, {
       spaceId: 'default',
     });
   });
 
   it('disables an enabled legacy continuous onboarding workflow and warns that it was reset', async () => {
     givenWorkflows({
-      [SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID]: { enabled: true },
+      [LEGACY_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID]: { enabled: true },
     });
 
     await run();
 
     expect(updateWorkflow).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+      LEGACY_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
       { enabled: false },
       'default',
       expect.anything()
     );
-    expect(uninstall).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-      {
-        spaceId: 'default',
-      }
-    );
+    expect(uninstall).toHaveBeenCalledWith(LEGACY_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID, {
+      spaceId: 'default',
+    });
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining(
-        `Removed enabled legacy continuous KI onboarding workflow ${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}`
+        `Removed enabled legacy continuous KI onboarding workflow ${LEGACY_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}`
       )
     );
   });
 
   it('uninstalls the legacy continuous onboarding workflow only after its cancelled runs finish', async () => {
     givenWorkflows({
-      [SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID]: { enabled: false },
+      [LEGACY_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID]: { enabled: false },
     });
     getWorkflowExecutions
       .mockResolvedValueOnce({ results: [{ id: 'exec-1' }], total: 1 })
@@ -146,7 +117,7 @@ describe('removeLegacyDefaultSpaceWorkflows', () => {
 
   it('keeps the legacy continuous onboarding workflow and logs when its runs never finish', async () => {
     givenWorkflows({
-      [SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID]: { enabled: false },
+      [LEGACY_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID]: { enabled: false },
     });
     getWorkflowExecutions.mockResolvedValue({ results: [{ id: 'exec-1' }], total: 1 });
 
@@ -154,7 +125,7 @@ describe('removeLegacyDefaultSpaceWorkflows', () => {
 
     expect(uninstall).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalledWith(
-      `Failed to remove legacy workflow ${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}: ` +
+      `Failed to remove legacy workflow ${LEGACY_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}: ` +
         'Condition not met after 30 attempts (polled every 2000ms)'
     );
   });
@@ -197,12 +168,11 @@ describe('removeLegacyDefaultSpaceWorkflows', () => {
 
   it('logs a failed removal and still handles the remaining workflows', async () => {
     givenWorkflows({
-      [SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID]: { enabled: false },
-      [SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID]: { enabled: true },
-      [DEFAULT_SPACE_SYNC_WORKFLOW_ID]: { enabled: true },
+      [LEGACY_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID]: { enabled: false },
+      [LEGACY_KI_SYNC_WORKFLOW_ID]: { enabled: true },
     });
     uninstall.mockImplementation(async (id: string) => {
-      if (id === SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID) {
+      if (id === LEGACY_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID) {
         throw new Error('uninstall failed');
       }
     });
@@ -210,9 +180,9 @@ describe('removeLegacyDefaultSpaceWorkflows', () => {
     await expect(run()).resolves.toBeUndefined();
 
     expect(logger.warn).toHaveBeenCalledWith(
-      `Failed to remove legacy workflow ${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}: uninstall failed`
+      `Failed to remove legacy workflow ${LEGACY_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}: uninstall failed`
     );
-    expect(uninstall).toHaveBeenCalledWith(SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID, {
+    expect(uninstall).toHaveBeenCalledWith(LEGACY_KI_SYNC_WORKFLOW_ID, {
       spaceId: 'default',
     });
   });

@@ -7,62 +7,65 @@
 
 import { DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
 import {
+  NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SOURCE_RECONCILIATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
-import { LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
+import {
+  LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
+  LEGACY_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  LEGACY_KI_SYNC_WORKFLOW_ID,
+} from '../../../common/constants';
 
 /**
- * Global-scope workflows installed by `install_workflows` (always-on core set).
+ * The shared workflows installed once at the global scope by `install_workflows`. They have no
+ * `run_as`: the bound entry points call them with `run-as-mode: inherit`, so they run as the
+ * space's service account.
  *
  * This file is the single source of truth for managed workflow IDs used by installers and by
- * Pause/Resume. Installers install subsets (feature-flagged); maintenance sweeps the union of
- * everything that can run Significant Events background activity.
+ * Pause/Resume.
  */
 export const GLOBAL_CORE_WORKFLOW_IDS = [
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SOURCE_RECONCILIATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID,
+] as const;
+
+/** Per-space bound entry points started by routes, which are blocked while the space is paused. */
+export const BOUND_ENTRY_POINT_WORKFLOW_IDS = [
+  NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
 ] as const;
 
 /** Scheduled discovery workflows controlled by the per-space Settings toggle. */
 export const SCHEDULED_DISCOVERY_WORKFLOW_IDS = [
-  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW_ID,
 ] as const;
 
-/** Per-space knowledge indicator workflows, installed on demand when a space needs them. */
+/** Per-space knowledge indicator workflows that run on a schedule. */
 export const KNOWLEDGE_INDICATOR_SCHEDULED_WORKFLOW_IDS = [
-  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
 ] as const;
 
 /** Scheduled workflows included in per-space maintenance sweeps. */
 export const SCHEDULED_MAINTENANCE_WORKFLOW_IDS = [
   ...SCHEDULED_DISCOVERY_WORKFLOW_IDS,
-  SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
   ...KNOWLEDGE_INDICATOR_SCHEDULED_WORKFLOW_IDS,
-] as const;
-
-/** Workflows installed once at the global scope (`spaceId: '*'`). */
-export const GLOBAL_MAINTENANCE_WORKFLOW_IDS = [
-  ...GLOBAL_CORE_WORKFLOW_IDS,
-  SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
 ] as const;
 
 /**
@@ -73,7 +76,7 @@ export const GLOBAL_MAINTENANCE_WORKFLOW_IDS = [
  * https://github.com/elastic/kibana/issues/294271
  */
 export const LEGACY_DEFAULT_SPACE_WORKFLOW_IDS: readonly string[] = [
-  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  LEGACY_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
 ];
 
@@ -83,7 +86,8 @@ export const LEGACY_DEFAULT_SPACE_WORKFLOW_IDS: readonly string[] = [
  */
 export const ALL_INSTALLABLE_WORKFLOW_IDS = [
   ...GLOBAL_CORE_WORKFLOW_IDS,
-  SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
+  ...BOUND_ENTRY_POINT_WORKFLOW_IDS,
+  NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW_ID,
   ...SCHEDULED_MAINTENANCE_WORKFLOW_IDS,
 ] as const;
 
@@ -102,7 +106,7 @@ export interface MaintenanceWorkflowTarget {
  * https://github.com/elastic/kibana/issues/294271
  */
 export const LEGACY_DEFAULT_SPACE_SYNC_TARGET: MaintenanceWorkflowTarget = {
-  id: SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+  id: LEGACY_KI_SYNC_WORKFLOW_ID,
   spaceId: DEFAULT_SPACE_ID,
 };
 
@@ -133,11 +137,14 @@ export const buildDisableTargets = (spaceIds: SpaceId[]): MaintenanceWorkflowTar
 ];
 
 /**
- * Targets whose in-flight executions are cancelled on pause.
- * Global workflow *documents* live in `*`, but executions run in the triggering
- * space, so cancellation sweeps each given space for those ids.
+ * Targets whose in-flight executions are cancelled on pause. The shared workflow *documents* live
+ * in `*`, but their executions run in the triggering space, so cancellation sweeps each given
+ * space for those ids, next to the space's own bound documents.
  */
 export const buildCancelTargets = (spaceIds: SpaceId[]): MaintenanceWorkflowTarget[] => [
-  ...spaceIds.flatMap((spaceId) => GLOBAL_MAINTENANCE_WORKFLOW_IDS.map((id) => ({ id, spaceId }))),
+  ...spaceIds.flatMap((spaceId) => [
+    ...GLOBAL_CORE_WORKFLOW_IDS.map((id) => ({ id, spaceId })),
+    ...BOUND_ENTRY_POINT_WORKFLOW_IDS.map((baseId) => ({ id: `${baseId}-${spaceId}`, spaceId })),
+  ]),
   ...buildDisableTargets(spaceIds),
 ];

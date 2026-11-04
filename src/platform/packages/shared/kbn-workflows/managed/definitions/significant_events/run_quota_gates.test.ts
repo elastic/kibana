@@ -96,24 +96,23 @@ const evaluateStepCondition = (step: WorkflowStep, context: Record<string, unkno
 };
 
 describe('Significant Events run quota workflow contracts', () => {
-  it('propagates scheduled and manual origins from both managed drivers', () => {
-    const scheduledReviewWorker = findStep(definitions.scheduledReview, 'discover');
-    const continuousKiWorker = findStep(definitions.continuousOnboarding, 'schedule_onboarding');
+  it('propagates scheduled and manual origins from the scheduled review driver', () => {
+    const worker = findStep(definitions.scheduledReview, 'discover');
+    const rootTriggeredBy = worker.with?.inputs?.rootTriggeredBy;
 
-    for (const worker of [scheduledReviewWorker, continuousKiWorker]) {
-      const rootTriggeredBy = worker.with?.inputs?.rootTriggeredBy;
-      expect(rootTriggeredBy).toBe('${{ execution.triggeredBy }}');
-      expect(
-        evaluateExpression(rootTriggeredBy as string, {
-          execution: { triggeredBy: 'scheduled' },
-        })
-      ).toBe('scheduled');
-      expect(
-        evaluateExpression(rootTriggeredBy as string, {
-          execution: { triggeredBy: 'manual' },
-        })
-      ).toBe('manual');
-    }
+    expect(rootTriggeredBy).toBe('${{ execution.triggeredBy }}');
+    expect(
+      evaluateExpression(rootTriggeredBy as string, { execution: { triggeredBy: 'scheduled' } })
+    ).toBe('scheduled');
+    expect(
+      evaluateExpression(rootTriggeredBy as string, { execution: { triggeredBy: 'manual' } })
+    ).toBe('manual');
+  });
+
+  it('marks continuous onboarding runs as scheduled, since it refuses every other origin', () => {
+    const worker = findStep(definitions.continuousOnboarding, 'schedule_onboarding');
+
+    expect(worker.with?.body?.rootTriggeredBy).toBe('scheduled');
   });
 
   it('runs detection and KI extraction gates only for workers whose root origin is scheduled', () => {

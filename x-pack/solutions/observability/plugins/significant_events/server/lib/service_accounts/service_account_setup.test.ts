@@ -28,10 +28,13 @@ const createWorkflowsExtensions = ({ bindInstalls = true }: { bindInstalls?: boo
   const workflowsExtensions = {
     getClient: async () => ({ managedWorkflows: { install } }),
   } as unknown as WorkflowsExtensionsServerPluginStart;
+  const getWorkflow = async (id: string) =>
+    boundTo.has(id) ? { definition: { settings: { run_as: boundTo.get(id) } } } : null;
   const workflowsManagement = {
     management: {
-      getWorkflow: async (id: string) =>
-        boundTo.has(id) ? { definition: { settings: { run_as: boundTo.get(id) } } } : null,
+      getWorkflow,
+      getClient: () => ({ getWorkflow }),
+      updateWorkflow: jest.fn().mockResolvedValue(undefined),
     },
   } as unknown as WorkflowsServerPluginSetup;
   return { workflowsExtensions, workflowsManagement, install };
@@ -245,6 +248,7 @@ describe('createDetectionEngineSetupService.enable workflows', () => {
       'system-sources-ki-sync-bound',
       'system-nightshift-cleanup-bound',
       'system-nightshift-source-reconciliation-bound',
+      'system-nightshift-investigation-completed-bound',
     ];
     expect(install.mock.calls.map(([, workflowId]) => workflowId)).toEqual(expectedIds);
     expect(install).toHaveBeenCalledWith('significantEvents', SETUP_WORKFLOW_IDS[0], {

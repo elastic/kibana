@@ -5,9 +5,9 @@
 #   1. Fetches eligible sources from the _eligible API endpoint. The enabled
 #      flag and interval come from the space's continuous onboarding Advanced
 #      Settings.
-#   2. Starts the managed onboarding workflow for ALL candidate sources via
-#      workflow.executeAsync (features AND queries generation), confirming each
-#      reaches in_progress before moving to the next.
+#   2. Starts onboarding for ALL candidate sources through the Kibana onboarding
+#      route (features AND queries generation), confirming each reaches
+#      in_progress before moving to the next.
 #   3. Polls each source sequentially until it reaches a terminal state
 #      (completed/failed), then captures the result.
 #
@@ -91,29 +91,25 @@ steps:
         iteration-on-failure:
           continue: true
         steps:
-          # Start the managed onboarding workflow directly (fire-and-forget).
-          # Both features identification and queries generation run; status is
+          # Onboarding is started by Kibana, which is the only caller the bound onboarding
+          # workflow accepts. Both features identification and queries generation run; status is
           # tracked via the _status endpoint below.
           - name: schedule_onboarding
-            type: workflow.executeAsync
+            type: kibana.request
             with:
-              workflow-id: 'system-streams-ki-onboarding'
-              # Onboarding runs as the service account this workflow is bound to.
-              run-as-mode: inherit
-              inputs:
-                sourceId: '${{ foreach.item.sourceId }}'
-                sourceSlug: '${{ foreach.item.sourceSlug }}'
-                sourceRevision: '${{ foreach.item.sourceRevision }}'
-                skipFeatures: false
-                skipQueries: false
-                rootTriggeredBy: '${{ execution.triggeredBy }}'
-                # Align the feature-recency guard with the user's onboarding
-                # interval so features refresh on the same cadence eligibility uses.
-                featuresRecencyThresholdHours: '${{ steps.get_eligible.output.settings.intervalHours }}'
-                # onboarding expects epoch ms; the eligibility endpoint returns
-                # ISO timestamps, so convert here (date '%s' yields epoch seconds).
-                featuresStart: "${{ steps.get_eligible.output.timeRange.from | date: '%s' | times: 1000 }}"
-                featuresEnd: "${{ steps.get_eligible.output.timeRange.to | date: '%s' | times: 1000 }}"
+              method: POST
+              path: '/s/{{ workflow.spaceId }}/internal/streams/{{ foreach.item.sourceId }}/onboarding/_execute'
+              headers:
+                x-elastic-internal-origin: 'kibana'
+              body:
+                action: schedule
+                rootTriggeredBy: scheduled
+                # Align the feature-recency guard with the user's onboarding interval so features
+                # refresh on the same cadence eligibility uses.
+                recencyThresholdHours: '${{ steps.get_eligible.output.settings.intervalHours }}'
+                # The eligibility endpoint returns ISO timestamps.
+                from: '${{ steps.get_eligible.output.timeRange.from }}'
+                to: '${{ steps.get_eligible.output.timeRange.to }}'
           - name: await_in_progress
             type: while
             condition: "${{ steps.verify_status.output.status == 'not_started' }}"

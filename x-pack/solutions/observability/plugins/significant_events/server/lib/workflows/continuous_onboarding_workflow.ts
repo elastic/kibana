@@ -9,8 +9,9 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
-import { SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
+import type { BoundWorkflowsInstaller } from './bound_workflows_installer';
 import type { SignificantEventsKIsOnboardingClient } from './onboarding_workflow_client';
 import { pollUntil } from './poll_until';
 import { removeLegacyContinuousOnboardingWorkflow } from './setup/remove_legacy_default_space_workflows';
@@ -43,11 +44,14 @@ export const createContinuousOnboardingWorkflowService = ({
   logger,
   managementApi,
   streamsKIsOnboardingClient,
+  installer,
   getManagedWorkflowsClient,
 }: {
   logger: Logger;
   managementApi: WorkflowsServerPluginSetup['management'];
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
+  installer: BoundWorkflowsInstaller;
+  /** Only removes the pre-per-space default-space document. */
   getManagedWorkflowsClient: () => Promise<PluginScopedManagedWorkflowsApi>;
 }): ContinuousOnboardingWorkflowService => {
   const log = logger.get('continuous-ki-onboarding-workflow');
@@ -129,8 +133,7 @@ export const createContinuousOnboardingWorkflowService = ({
 
   return {
     async ensureWorkflow({ enabled, request, spaceId, skipExecutionDrain = false }) {
-      const workflowId = `${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${spaceId}`;
-      const managedWorkflowOptions = { spaceId, workflowIdSuffix: spaceId };
+      const workflowId = `${NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${spaceId}`;
 
       // Startup removes the unsuffixed default-space document, but that cleanup is best-effort
       // and runs in the background, so the document can still be there when the setting is
@@ -149,11 +152,11 @@ export const createContinuousOnboardingWorkflowService = ({
       }
 
       if (enabled) {
-        const managedWorkflowsClient = await getManagedWorkflowsClient();
-        await managedWorkflowsClient.install(
-          SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-          managedWorkflowOptions
-        );
+        await installer.install({
+          request,
+          spaceId,
+          workflowId: NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+        });
         await setManagedEnabled({ enabled: true, workflowId, spaceId, request });
         log.info(`Enabled continuous KI onboarding workflow in space ${spaceId}`);
         return;

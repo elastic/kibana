@@ -230,7 +230,8 @@ describe('WorkflowExecutionService', () => {
         expect.objectContaining({ id: WORKFLOW_ID }),
         'space-a',
         { foo: 'bar' },
-        request
+        request,
+        undefined
       );
     });
 
@@ -244,7 +245,8 @@ describe('WorkflowExecutionService', () => {
         expect.anything(),
         'space-a',
         {},
-        request
+        request,
+        undefined
       );
     });
 
