@@ -1,0 +1,2325 @@
+{
+  "dropped": [
+    {
+      "message": "Panel schema not available for panel type: map. Panels without schemas are not supported by dashboard REST endpoints",
+      "panelType": "map"
+    },
+    {
+      "message": "Panel schema not available for panel type: legacy_vis. Panels without schemas are not supported by dashboard REST endpoints",
+      "panelType": "legacy_vis"
+    }
+  ],
+  "id": "722b74f0-b882-11e8-a6d9-e546fe2bba5f",
+  "name": "sample-ecommerce",
+  "panels": [
+    {
+      "api": [],
+      "attributes": [
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(order_date)>.customLabel"
+        },
+        {
+          "after": "",
+          "before": "order_date",
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(order_date)>.label"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(order_date)>.params.ignoreTimeRange"
+        },
+        {
+          "before": "interval",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(order_date)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)>.params.format.params.compact"
+        },
+        {
+          "after": 2,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)>.params.format.params.decimals"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.sampling"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_1>.columns.<layer_1:date_histogram(order_date)>.customLabel"
+        },
+        {
+          "after": "",
+          "before": "order_date",
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_1>.columns.<layer_1:date_histogram(order_date)>.label"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_1>.columns.<layer_1:date_histogram(order_date)>.params.ignoreTimeRange"
+        },
+        {
+          "before": "interval",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_1>.columns.<layer_1:date_histogram(order_date)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_1>.columns.<layer_1:sum(taxful_total_price)>.params.format.params.compact"
+        },
+        {
+          "after": 2,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_1>.columns.<layer_1:sum(taxful_total_price)>.params.format.params.decimals"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_1>.columns.<layer_1:sum(taxful_total_price)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_1>.ignoreGlobalFilters"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_1>.sampling"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_2>.columns.<layer_2:date_histogram(order_date)>.customLabel"
+        },
+        {
+          "after": "",
+          "before": "order_date",
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_2>.columns.<layer_2:date_histogram(order_date)>.label"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_2>.columns.<layer_2:date_histogram(order_date)>.params.ignoreTimeRange"
+        },
+        {
+          "before": "interval",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_2>.columns.<layer_2:date_histogram(order_date)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_2>.columns.<layer_2:sum(taxful_total_price)>.params.format.params.compact"
+        },
+        {
+          "after": 2,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_2>.columns.<layer_2:sum(taxful_total_price)>.params.format.params.decimals"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_2>.columns.<layer_2:sum(taxful_total_price)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_2>.ignoreGlobalFilters"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_2>.sampling"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_3>.columns.<layer_3:date_histogram(order_date)>.customLabel"
+        },
+        {
+          "after": "",
+          "before": "order_date",
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_3>.columns.<layer_3:date_histogram(order_date)>.label"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_3>.columns.<layer_3:date_histogram(order_date)>.params.ignoreTimeRange"
+        },
+        {
+          "before": "interval",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_3>.columns.<layer_3:date_histogram(order_date)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_3>.columns.<layer_3:sum(taxful_total_price)>.params.format.params.compact"
+        },
+        {
+          "after": 2,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_3>.columns.<layer_3:sum(taxful_total_price)>.params.format.params.decimals"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_3>.columns.<layer_3:sum(taxful_total_price)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_3>.ignoreGlobalFilters"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_3>.sampling"
+        },
+        {
+          "after": "LINEAR",
+          "kind": "added",
+          "path": "state.visualization.curveType"
+        },
+        {
+          "before": 0,
+          "kind": "removed",
+          "path": "state.visualization.fillOpacity"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.hideEndzones"
+        },
+        {
+          "before": "default",
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].palette.name"
+        },
+        {
+          "before": "palette",
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].palette.type"
+        },
+        {
+          "before": "default",
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_1>].palette.name"
+        },
+        {
+          "before": "palette",
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_1>].palette.type"
+        },
+        {
+          "before": "default",
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_2>].palette.name"
+        },
+        {
+          "before": "palette",
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_2>].palette.type"
+        },
+        {
+          "before": "default",
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_3>].palette.name"
+        },
+        {
+          "before": "palette",
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_3>].palette.type"
+        },
+        {
+          "after": "annotations_event_0",
+          "before": "c8c30be0-b88f-11e8-a451-f37365e9f268",
+          "kind": "changed",
+          "path": "state.visualization.layers[<layer_4>].annotations[0].id"
+        },
+        {
+          "after": "byValue",
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_4>].persistanceType"
+        },
+        {
+          "after": "auto",
+          "kind": "added",
+          "path": "state.visualization.pointVisibility"
+        },
+        {
+          "after": "line",
+          "before": "bar_stacked",
+          "kind": "changed",
+          "path": "state.visualization.preferredSeriesType"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.showCurrentTimeMarker"
+        },
+        {
+          "before": "hide",
+          "kind": "removed",
+          "path": "state.visualization.valueLabels"
+        },
+        {
+          "after": "dataBounds",
+          "kind": "added",
+          "path": "state.visualization.xExtent.mode"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.xExtent.niceValues"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.yLeftExtent.niceValues"
+        },
+        {
+          "before": "full",
+          "kind": "removed",
+          "path": "state.visualization.yRightExtent.mode"
+        },
+        {
+          "before": "linear",
+          "kind": "removed",
+          "path": "state.visualization.yRightScale"
+        },
+        {
+          "after": "",
+          "before": "[eCommerce] Promotion Tracking (converted)",
+          "kind": "changed",
+          "path": "title"
+        }
+      ],
+      "chartType": "xy",
+      "dashboard": "sample-ecommerce",
+      "panel": [],
+      "panelId": "5",
+      "status": "compared",
+      "title": "[eCommerce] Promotion Tracking",
+      "visualizationType": "lnsXY"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "before": "",
+          "kind": "removed",
+          "path": "description"
+        },
+        {
+          "after": [
+            "<layer_0:formula()>",
+            "<layer_0:static_value()>"
+          ],
+          "before": [
+            "<layer_0:count(___records___)>",
+            "<layer_0:time_range()>",
+            "<layer_0:math()>",
+            "<layer_0:formula()>",
+            "<layer_0:static_value()>"
+          ],
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columnOrder"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.dataType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.isBucketed"
+        },
+        {
+          "before": "Part of count() / (time_range() / 1000 / 60 / 60 / 24)",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.label"
+        },
+        {
+          "before": "count",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.operationType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.params.emptyAsNull"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.scale"
+        },
+        {
+          "before": "___records___",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.sourceField"
+        },
+        {
+          "after": 2,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.params.format.params.decimals"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.params.isFormulaBroken"
+        },
+        {
+          "after": [],
+          "before": [
+            "<layer_0:math()>"
+          ],
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.references"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.scale"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.dataType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.isBucketed"
+        },
+        {
+          "before": "Part of count() / (time_range() / 1000 / 60 / 60 / 24)",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.label"
+        },
+        {
+          "before": "math",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.operationType"
+        },
+        {
+          "before": [
+            "<layer_0:count(___records___)>",
+            {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "args": [
+                        {
+                          "args": [
+                            "<layer_0:time_range()>",
+                            1000
+                          ],
+                          "name": "divide",
+                          "type": "function"
+                        },
+                        60
+                      ],
+                      "name": "divide",
+                      "type": "function"
+                    },
+                    60
+                  ],
+                  "name": "divide",
+                  "type": "function"
+                },
+                24
+              ],
+              "location": {
+                "max": 45,
+                "min": 11
+              },
+              "name": "divide",
+              "text": "time_range() / 1000 / 60 / 60 / 24",
+              "type": "function"
+            }
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.args"
+        },
+        {
+          "before": 46,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.location.max"
+        },
+        {
+          "before": 0,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.location.min"
+        },
+        {
+          "before": "divide",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.name"
+        },
+        {
+          "before": "count() / (time_range() / 1000 / 60 / 60 / 24)",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.text"
+        },
+        {
+          "before": "function",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.type"
+        },
+        {
+          "before": [
+            "<layer_0:count(___records___)>",
+            "<layer_0:time_range()>"
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.references"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:static_value()>.customLabel"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:static_value()>.isStaticValue"
+        },
+        {
+          "after": "",
+          "before": "Static value: 300",
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:static_value()>.label"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:static_value()>.scale"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:time_range()>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:time_range()>.dataType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:time_range()>.isBucketed"
+        },
+        {
+          "before": "Part of count() / (time_range() / 1000 / 60 / 60 / 24)",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:time_range()>.label"
+        },
+        {
+          "before": "time_range",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:time_range()>.operationType"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:time_range()>.scale"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.sampling"
+        },
+        {
+          "after": "compact",
+          "kind": "added",
+          "path": "state.visualization.density"
+        },
+        {
+          "before": 5,
+          "kind": "removed",
+          "path": "state.visualization.palette.params.maxSteps"
+        },
+        {
+          "before": "fixed",
+          "kind": "removed",
+          "path": "state.visualization.palette.params.progression"
+        },
+        {
+          "before": 100,
+          "kind": "removed",
+          "path": "state.visualization.palette.params.rangeMax"
+        },
+        {
+          "before": 0,
+          "kind": "removed",
+          "path": "state.visualization.palette.params.rangeMin"
+        },
+        {
+          "after": false,
+          "before": true,
+          "kind": "changed",
+          "path": "state.visualization.palette.params.reverse"
+        },
+        {
+          "before": [
+            {
+              "color": "#23be8f",
+              "stop": 33.33
+            },
+            {
+              "color": "#fcd279",
+              "stop": 66.66
+            },
+            {
+              "color": "#f66d64",
+              "stop": 100
+            }
+          ],
+          "kind": "removed",
+          "path": "state.visualization.palette.params.stops"
+        },
+        {
+          "after": "right",
+          "kind": "added",
+          "path": "state.visualization.primaryAlign"
+        },
+        {
+          "after": "bottom",
+          "kind": "added",
+          "path": "state.visualization.primaryPosition"
+        },
+        {
+          "after": "left",
+          "kind": "added",
+          "path": "state.visualization.titlesTextAlign"
+        },
+        {
+          "after": "default",
+          "kind": "added",
+          "path": "state.visualization.valueFontMode"
+        },
+        {
+          "after": "",
+          "before": "Sold Products per Day",
+          "kind": "changed",
+          "path": "title"
+        }
+      ],
+      "chartType": "metric",
+      "dashboard": "sample-ecommerce",
+      "panel": [
+        {
+          "after": "Sold Products per Day",
+          "kind": "added",
+          "path": "title"
+        }
+      ],
+      "panelId": "7",
+      "status": "compared",
+      "title": "Sold Products per Day",
+      "visualizationType": "lnsMetric"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)>.params.emptyAsNull"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.sampling"
+        },
+        {
+          "after": "compact",
+          "kind": "added",
+          "path": "state.visualization.density"
+        },
+        {
+          "after": "right",
+          "kind": "added",
+          "path": "state.visualization.primaryAlign"
+        },
+        {
+          "after": "bottom",
+          "kind": "added",
+          "path": "state.visualization.primaryPosition"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.showBar"
+        },
+        {
+          "after": "left",
+          "kind": "added",
+          "path": "state.visualization.titlesTextAlign"
+        },
+        {
+          "after": "default",
+          "kind": "added",
+          "path": "state.visualization.valueFontMode"
+        },
+        {
+          "after": "",
+          "kind": "added",
+          "path": "title"
+        }
+      ],
+      "chartType": "metric",
+      "dashboard": "sample-ecommerce",
+      "panel": [],
+      "panelId": "75283285-dffd-48a7-a0c2-2235184b5282",
+      "status": "compared",
+      "title": "Sum of revenue",
+      "visualizationType": "lnsMetric"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:median(taxful_total_price)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.sampling"
+        },
+        {
+          "after": "compact",
+          "kind": "added",
+          "path": "state.visualization.density"
+        },
+        {
+          "after": "right",
+          "kind": "added",
+          "path": "state.visualization.primaryAlign"
+        },
+        {
+          "after": "bottom",
+          "kind": "added",
+          "path": "state.visualization.primaryPosition"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.showBar"
+        },
+        {
+          "after": "left",
+          "kind": "added",
+          "path": "state.visualization.titlesTextAlign"
+        },
+        {
+          "after": "default",
+          "kind": "added",
+          "path": "state.visualization.valueFontMode"
+        },
+        {
+          "after": "",
+          "before": "Median spending",
+          "kind": "changed",
+          "path": "title"
+        }
+      ],
+      "chartType": "metric",
+      "dashboard": "sample-ecommerce",
+      "panel": [],
+      "panelId": "58774330-b1b3-42dd-a04c-fbce9cc4d288",
+      "status": "compared",
+      "title": "Median spending",
+      "visualizationType": "lnsMetric"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:average(total_quantity)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.sampling"
+        },
+        {
+          "after": "compact",
+          "kind": "added",
+          "path": "state.visualization.density"
+        },
+        {
+          "after": "right",
+          "kind": "added",
+          "path": "state.visualization.primaryAlign"
+        },
+        {
+          "after": "bottom",
+          "kind": "added",
+          "path": "state.visualization.primaryPosition"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.showBar"
+        },
+        {
+          "after": "left",
+          "kind": "added",
+          "path": "state.visualization.titlesTextAlign"
+        },
+        {
+          "after": "default",
+          "kind": "added",
+          "path": "state.visualization.valueFontMode"
+        },
+        {
+          "after": "",
+          "kind": "added",
+          "path": "title"
+        }
+      ],
+      "chartType": "metric",
+      "dashboard": "sample-ecommerce",
+      "panel": [],
+      "panelId": "b63ec47d-aace-4980-b928-6be8adafa5a4",
+      "status": "compared",
+      "title": "Avg. items sold",
+      "visualizationType": "lnsMetric"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "before": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].id"
+        },
+        {
+          "before": "indexpattern-datasource-current-indexpattern",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].name"
+        },
+        {
+          "before": "index-pattern",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].type"
+        },
+        {
+          "after": "Transactions",
+          "before": "Tx. last week",
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.label"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.params.emptyAsNull"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.scale"
+        },
+        {
+          "before": "1w",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.timeShift"
+        },
+        {
+          "after": "Tx. last week",
+          "before": "Transactions",
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.label"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.params.emptyAsNull"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.scale"
+        },
+        {
+          "after": "1w",
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.timeShift"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(order_date)>.customLabel"
+        },
+        {
+          "after": "",
+          "before": "order_date",
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(order_date)>.label"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(order_date)>.params.dropPartials"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(order_date)>.params.ignoreTimeRange"
+        },
+        {
+          "before": "interval",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(order_date)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(products.quantity)#1>.params.emptyAsNull"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(products.quantity)#1>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(products.quantity)>.params.emptyAsNull"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(products.quantity)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.sampling"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.hideEndzones"
+        },
+        {
+          "after": 0,
+          "kind": "added",
+          "path": "state.visualization.labelsOrientation.x"
+        },
+        {
+          "after": 0,
+          "kind": "added",
+          "path": "state.visualization.labelsOrientation.yLeft"
+        },
+        {
+          "after": 0,
+          "kind": "added",
+          "path": "state.visualization.labelsOrientation.yRight"
+        },
+        {
+          "before": "top",
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].position"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].showGridlines"
+        },
+        {
+          "after": "left",
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_0>].yConfig[0].axisMode"
+        },
+        {
+          "after": "<layer_0:sum(products.quantity)>",
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_0>].yConfig[0].forAccessor"
+        },
+        {
+          "after": "left",
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_0>].yConfig[1].axisMode"
+        },
+        {
+          "after": "<layer_0:sum(products.quantity)#1>",
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_0>].yConfig[1].forAccessor"
+        },
+        {
+          "after": "left",
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_0>].yConfig[2].axisMode"
+        },
+        {
+          "after": "<layer_0:count(___records___)>",
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_0>].yConfig[2].forAccessor"
+        },
+        {
+          "after": "left",
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_0>].yConfig[3].axisMode"
+        },
+        {
+          "after": "<layer_0:count(___records___)#1>",
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_0>].yConfig[3].forAccessor"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.visualization.legend.maxLines"
+        },
+        {
+          "after": "auto",
+          "kind": "added",
+          "path": "state.visualization.pointVisibility"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.showCurrentTimeMarker"
+        },
+        {
+          "before": "hide",
+          "kind": "removed",
+          "path": "state.visualization.valueLabels"
+        },
+        {
+          "after": "dataBounds",
+          "kind": "added",
+          "path": "state.visualization.xExtent.mode"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.xExtent.niceValues"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.yLeftExtent.niceValues"
+        },
+        {
+          "after": "linear",
+          "kind": "added",
+          "path": "state.visualization.yLeftScale"
+        },
+        {
+          "before": "full",
+          "kind": "removed",
+          "path": "state.visualization.yRightExtent.mode"
+        },
+        {
+          "after": "",
+          "kind": "added",
+          "path": "title"
+        }
+      ],
+      "chartType": "xy",
+      "dashboard": "sample-ecommerce",
+      "panel": [],
+      "panelId": "d9495793-80ba-4a9a-b0e3-d1155ec99b09",
+      "status": "compared",
+      "title": "Transactions per day",
+      "visualizationType": "lnsXY"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "before": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].id"
+        },
+        {
+          "before": "indexpattern-datasource-current-indexpattern",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].name"
+        },
+        {
+          "before": "index-pattern",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].type"
+        },
+        {
+          "after": [
+            "<layer_0:date_histogram(order_date)>",
+            "<layer_0:sum(taxful_total_price)>",
+            "<layer_0:sum(taxful_total_price)#1>",
+            "<layer_0:formula()>"
+          ],
+          "before": [
+            "<layer_0:date_histogram(order_date)>",
+            "<layer_0:sum(taxful_total_price)>",
+            "<layer_0:sum(taxful_total_price)#1>",
+            "<layer_0:formula()>",
+            "<layer_0:sum(taxful_total_price)#2>",
+            "<layer_0:sum(taxful_total_price)#3>",
+            "<layer_0:math()>"
+          ],
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columnOrder"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(order_date)>.customLabel"
+        },
+        {
+          "after": "",
+          "before": "order_date",
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(order_date)>.label"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(order_date)>.params.dropPartials"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(order_date)>.params.ignoreTimeRange"
+        },
+        {
+          "before": "interval",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(order_date)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.params.format.params.compact"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.params.isFormulaBroken"
+        },
+        {
+          "after": [],
+          "before": [
+            "<layer_0:math()>"
+          ],
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.references"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.scale"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.dataType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.isBucketed"
+        },
+        {
+          "before": "Part of Difference",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.label"
+        },
+        {
+          "before": "math",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.operationType"
+        },
+        {
+          "before": [
+            "<layer_0:sum(taxful_total_price)#2>",
+            "<layer_0:sum(taxful_total_price)#3>"
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.args"
+        },
+        {
+          "before": 61,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.location.max"
+        },
+        {
+          "before": 0,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.location.min"
+        },
+        {
+          "before": "subtract",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.name"
+        },
+        {
+          "before": "sum(taxful_total_price) - sum(taxful_total_price, shift='1w')",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.text"
+        },
+        {
+          "before": "function",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.type"
+        },
+        {
+          "before": [
+            "<layer_0:sum(taxful_total_price)#2>",
+            "<layer_0:sum(taxful_total_price)#3>"
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.references"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)#1>.params.emptyAsNull"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)#1>.scale"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)#2>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)#2>.dataType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)#2>.isBucketed"
+        },
+        {
+          "before": "Part of Difference",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)#2>.label"
+        },
+        {
+          "before": "sum",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)#2>.operationType"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)#2>.scale"
+        },
+        {
+          "before": "taxful_total_price",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)#2>.sourceField"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)#3>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)#3>.dataType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)#3>.isBucketed"
+        },
+        {
+          "before": "Part of Difference",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)#3>.label"
+        },
+        {
+          "before": "sum",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)#3>.operationType"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)#3>.scale"
+        },
+        {
+          "before": "taxful_total_price",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)#3>.sourceField"
+        },
+        {
+          "before": "1w",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)#3>.timeShift"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)>.params.emptyAsNull"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.sampling"
+        },
+        {
+          "after": "left",
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:date_histogram(order_date)>].alignment"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:date_histogram(order_date)>].hidden"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:date_histogram(order_date)>].isMetric"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:date_histogram(order_date)>].isTransposed"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:date_histogram(order_date)>].oneClickFilter"
+        },
+        {
+          "after": "right",
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:formula()>].alignment"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:formula()>].hidden"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:formula()>].isMetric"
+        },
+        {
+          "after": "all",
+          "before": "above",
+          "kind": "changed",
+          "path": "state.visualization.columns[<layer_0:formula()>].palette.params.continuity"
+        },
+        {
+          "before": -2284.2265625,
+          "kind": "removed",
+          "path": "state.visualization.columns[<layer_0:formula()>].palette.params.rangeMin"
+        },
+        {
+          "after": false,
+          "before": true,
+          "kind": "changed",
+          "path": "state.visualization.columns[<layer_0:formula()>].palette.params.reverse"
+        },
+        {
+          "before": [
+            {
+              "color": "#23be8f",
+              "stop": 0
+            },
+            {
+              "color": "#9dedce",
+              "stop": 20
+            },
+            {
+              "color": "#fcd279",
+              "stop": 40
+            },
+            {
+              "color": "#ffc0b8",
+              "stop": 60
+            },
+            {
+              "color": "#f66d64",
+              "stop": 80
+            }
+          ],
+          "kind": "removed",
+          "path": "state.visualization.columns[<layer_0:formula()>].palette.params.stops"
+        },
+        {
+          "after": "right",
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:sum(taxful_total_price)#1>].alignment"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:sum(taxful_total_price)#1>].hidden"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:sum(taxful_total_price)#1>].isMetric"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:sum(taxful_total_price)#1>].isTransposed"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:sum(taxful_total_price)>].hidden"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:sum(taxful_total_price)>].isMetric"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:sum(taxful_total_price)>].isTransposed"
+        },
+        {
+          "after": "normal",
+          "kind": "added",
+          "path": "state.visualization.density"
+        },
+        {
+          "after": "custom",
+          "before": "single",
+          "kind": "changed",
+          "path": "state.visualization.rowHeight"
+        },
+        {
+          "after": "",
+          "kind": "added",
+          "path": "title"
+        }
+      ],
+      "chartType": "data_table",
+      "dashboard": "sample-ecommerce",
+      "panel": [],
+      "panelId": "bda054f7-2d06-4936-b461-365d1be621fa",
+      "status": "compared",
+      "title": "Daily comparison",
+      "visualizationType": "lnsDatatable"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "before": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].id"
+        },
+        {
+          "before": "indexpattern-datasource-current-indexpattern",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].name"
+        },
+        {
+          "before": "index-pattern",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].type"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.params.emptyAsNull"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.scale"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(products.product_name.keyword)>.params.missingBucket"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(products.product_name.keyword)>.params.otherBucket"
+        },
+        {
+          "before": "ordinal",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(products.product_name.keyword)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.sampling"
+        },
+        {
+          "before": "None",
+          "kind": "removed",
+          "path": "state.visualization.fittingFunction"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.hideEndzones"
+        },
+        {
+          "after": 0,
+          "kind": "added",
+          "path": "state.visualization.labelsOrientation.x"
+        },
+        {
+          "after": 0,
+          "kind": "added",
+          "path": "state.visualization.labelsOrientation.yLeft"
+        },
+        {
+          "after": 0,
+          "kind": "added",
+          "path": "state.visualization.labelsOrientation.yRight"
+        },
+        {
+          "before": "top",
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].position"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].showGridlines"
+        },
+        {
+          "after": [
+            {
+              "axisMode": "left",
+              "forAccessor": "<layer_0:count(___records___)>"
+            }
+          ],
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_0>].yConfig"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.visualization.legend.maxLines"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.visualization.minBarHeight"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.showCurrentTimeMarker"
+        },
+        {
+          "after": "dataBounds",
+          "kind": "added",
+          "path": "state.visualization.xExtent.mode"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.xExtent.niceValues"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.yLeftExtent.niceValues"
+        },
+        {
+          "after": "linear",
+          "kind": "added",
+          "path": "state.visualization.yLeftScale"
+        },
+        {
+          "before": "full",
+          "kind": "removed",
+          "path": "state.visualization.yRightExtent.mode"
+        },
+        {
+          "after": "",
+          "kind": "added",
+          "path": "title"
+        }
+      ],
+      "chartType": "xy",
+      "dashboard": "sample-ecommerce",
+      "panel": [],
+      "panelId": "d68e91dd-1539-48b0-9279-b43bba2054fe",
+      "status": "compared",
+      "title": "Top products this week",
+      "visualizationType": "lnsXY"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "before": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].id"
+        },
+        {
+          "before": "indexpattern-datasource-current-indexpattern",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].name"
+        },
+        {
+          "before": "index-pattern",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].type"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.params.emptyAsNull"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.scale"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(products.product_name.keyword)>.params.missingBucket"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(products.product_name.keyword)>.params.otherBucket"
+        },
+        {
+          "before": "ordinal",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(products.product_name.keyword)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.sampling"
+        },
+        {
+          "before": "None",
+          "kind": "removed",
+          "path": "state.visualization.fittingFunction"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.hideEndzones"
+        },
+        {
+          "after": 0,
+          "kind": "added",
+          "path": "state.visualization.labelsOrientation.x"
+        },
+        {
+          "after": 0,
+          "kind": "added",
+          "path": "state.visualization.labelsOrientation.yLeft"
+        },
+        {
+          "after": 0,
+          "kind": "added",
+          "path": "state.visualization.labelsOrientation.yRight"
+        },
+        {
+          "before": "top",
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].position"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].showGridlines"
+        },
+        {
+          "after": [
+            {
+              "axisMode": "left",
+              "forAccessor": "<layer_0:count(___records___)>"
+            }
+          ],
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_0>].yConfig"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.visualization.legend.maxLines"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.visualization.minBarHeight"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.showCurrentTimeMarker"
+        },
+        {
+          "after": "dataBounds",
+          "kind": "added",
+          "path": "state.visualization.xExtent.mode"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.xExtent.niceValues"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.yLeftExtent.niceValues"
+        },
+        {
+          "after": "linear",
+          "kind": "added",
+          "path": "state.visualization.yLeftScale"
+        },
+        {
+          "before": "full",
+          "kind": "removed",
+          "path": "state.visualization.yRightExtent.mode"
+        },
+        {
+          "after": "",
+          "kind": "added",
+          "path": "title"
+        }
+      ],
+      "chartType": "xy",
+      "dashboard": "sample-ecommerce",
+      "panel": [],
+      "panelId": "39d96714-152f-414b-992c-ce2492fc69f3",
+      "status": "compared",
+      "title": "Top products last week",
+      "visualizationType": "lnsXY"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "before": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].id"
+        },
+        {
+          "before": "indexpattern-datasource-current-indexpattern",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].name"
+        },
+        {
+          "before": "index-pattern",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].type"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.customLabel"
+        },
+        {
+          "after": "",
+          "before": "Count of records",
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.label"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.params.emptyAsNull"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(order_date)>.customLabel"
+        },
+        {
+          "after": "",
+          "before": "order_date",
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(order_date)>.label"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(order_date)>.params.dropPartials"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(order_date)>.params.ignoreTimeRange"
+        },
+        {
+          "before": "interval",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(order_date)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(category.keyword)>.customLabel"
+        },
+        {
+          "after": "",
+          "before": "Top values of category.keyword",
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(category.keyword)>.label"
+        },
+        {
+          "before": "ordinal",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(category.keyword)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.sampling"
+        },
+        {
+          "before": "None",
+          "kind": "removed",
+          "path": "state.visualization.fittingFunction"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.hideEndzones"
+        },
+        {
+          "after": 0,
+          "kind": "added",
+          "path": "state.visualization.labelsOrientation.x"
+        },
+        {
+          "after": 0,
+          "kind": "added",
+          "path": "state.visualization.labelsOrientation.yLeft"
+        },
+        {
+          "after": 0,
+          "kind": "added",
+          "path": "state.visualization.labelsOrientation.yRight"
+        },
+        {
+          "after": "categorical",
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_0>].colorMapping.colorMode.type"
+        },
+        {
+          "after": "default",
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_0>].colorMapping.paletteId"
+        },
+        {
+          "after": [
+            {
+              "color": {
+                "type": "loop"
+              },
+              "rules": [
+                {
+                  "type": "other"
+                }
+              ]
+            }
+          ],
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_0>].colorMapping.specialAssignments"
+        },
+        {
+          "before": "top",
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].position"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].showGridlines"
+        },
+        {
+          "after": [
+            {
+              "axisMode": "left",
+              "forAccessor": "<layer_0:count(___records___)>"
+            }
+          ],
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_0>].yConfig"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.visualization.legend.maxLines"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.visualization.minBarHeight"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.showCurrentTimeMarker"
+        },
+        {
+          "after": "dataBounds",
+          "kind": "added",
+          "path": "state.visualization.xExtent.mode"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.xExtent.niceValues"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.yLeftExtent.niceValues"
+        },
+        {
+          "after": "linear",
+          "kind": "added",
+          "path": "state.visualization.yLeftScale"
+        },
+        {
+          "before": "full",
+          "kind": "removed",
+          "path": "state.visualization.yRightExtent.mode"
+        },
+        {
+          "after": "",
+          "kind": "added",
+          "path": "title"
+        }
+      ],
+      "chartType": "xy",
+      "dashboard": "sample-ecommerce",
+      "panel": [],
+      "panelId": "cd47b7cb-0ac0-43e0-b8c6-53489648bdef",
+      "status": "compared",
+      "title": "Breakdown by category",
+      "visualizationType": "lnsXY"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "before": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].id"
+        },
+        {
+          "before": "indexpattern-datasource-current-indexpattern",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].name"
+        },
+        {
+          "before": "index-pattern",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].type"
+        },
+        {
+          "after": [
+            "<layer_0:date_histogram(order_date)>",
+            "<layer_0:formula()>"
+          ],
+          "before": [
+            "<layer_0:date_histogram(order_date)>",
+            "<layer_0:formula()>",
+            "<layer_0:sum(taxful_total_price)>",
+            "<layer_0:math()>"
+          ],
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columnOrder"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(order_date)>.customLabel"
+        },
+        {
+          "after": "",
+          "before": "order_date",
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(order_date)>.label"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(order_date)>.params.dropPartials"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(order_date)>.params.ignoreTimeRange"
+        },
+        {
+          "before": "interval",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(order_date)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.params.format.params.compact"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.params.isFormulaBroken"
+        },
+        {
+          "after": [],
+          "before": [
+            "<layer_0:math()>"
+          ],
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.references"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.scale"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.dataType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.isBucketed"
+        },
+        {
+          "before": "Part of Weekly revenue",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.label"
+        },
+        {
+          "before": "math",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.operationType"
+        },
+        {
+          "before": [
+            {
+              "args": [
+                "<layer_0:sum(taxful_total_price)>",
+                10000
+              ],
+              "location": {
+                "max": 32,
+                "min": 0
+              },
+              "name": "divide",
+              "text": "sum(taxful_total_price) / 10000 ",
+              "type": "function"
+            },
+            1
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.args"
+        },
+        {
+          "before": 35,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.location.max"
+        },
+        {
+          "before": 0,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.location.min"
+        },
+        {
+          "before": "subtract",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.name"
+        },
+        {
+          "before": "sum(taxful_total_price) / 10000 - 1",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.text"
+        },
+        {
+          "before": "function",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.type"
+        },
+        {
+          "before": [
+            "<layer_0:sum(taxful_total_price)>"
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.references"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.scale"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)>.dataType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)>.isBucketed"
+        },
+        {
+          "before": "Part of Weekly revenue",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)>.label"
+        },
+        {
+          "before": "sum",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)>.operationType"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)>.scale"
+        },
+        {
+          "before": "taxful_total_price",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:sum(taxful_total_price)>.sourceField"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.sampling"
+        },
+        {
+          "before": "None",
+          "kind": "removed",
+          "path": "state.visualization.fittingFunction"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.hideEndzones"
+        },
+        {
+          "after": 0,
+          "kind": "added",
+          "path": "state.visualization.labelsOrientation.x"
+        },
+        {
+          "after": 0,
+          "kind": "added",
+          "path": "state.visualization.labelsOrientation.yLeft"
+        },
+        {
+          "after": 0,
+          "kind": "added",
+          "path": "state.visualization.labelsOrientation.yRight"
+        },
+        {
+          "after": [
+            {
+              "axisMode": "left",
+              "forAccessor": "<layer_0:formula()>"
+            }
+          ],
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_0>].yConfig"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.visualization.legend.maxLines"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.visualization.minBarHeight"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.showCurrentTimeMarker"
+        },
+        {
+          "after": "dataBounds",
+          "kind": "added",
+          "path": "state.visualization.xExtent.mode"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.xExtent.niceValues"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.yLeftExtent.niceValues"
+        },
+        {
+          "after": "linear",
+          "kind": "added",
+          "path": "state.visualization.yLeftScale"
+        },
+        {
+          "before": "full",
+          "kind": "removed",
+          "path": "state.visualization.yRightExtent.mode"
+        },
+        {
+          "after": "",
+          "kind": "added",
+          "path": "title"
+        }
+      ],
+      "chartType": "xy",
+      "dashboard": "sample-ecommerce",
+      "panel": [],
+      "panelId": "bdb525ab-270b-46f1-a847-dd29be19aadb",
+      "status": "compared",
+      "title": "% of target revenue ($10k)",
+      "visualizationType": "lnsXY"
+    }
+  ]
+}

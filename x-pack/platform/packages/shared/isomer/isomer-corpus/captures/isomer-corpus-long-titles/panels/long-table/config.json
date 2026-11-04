@@ -2,57 +2,57 @@
   "dashboard_id": "isomer-corpus-long-titles",
   "in_as_code": true,
   "panel": {
-    "id": "long-table",
-    "type": "vis",
-    "grid": {
-      "x": 0,
-      "y": 12,
-      "w": 48,
-      "h": 10
-    },
     "config": {
-      "type": "data_table",
-      "title": "A panel title long enough to overflow the panel header at every grid width, so truncation, wrapping and tooltips are exercised by each renderer",
-      "sampling": 1,
-      "ignore_global_filters": false,
       "data_source": {
-        "type": "data_view_spec",
-        "name": "isomer-corpus-edge-cases",
         "index_pattern": "isomer-corpus-edge-cases",
-        "time_field": "@timestamp"
+        "name": "isomer-corpus-edge-cases",
+        "time_field": "@timestamp",
+        "type": "data_view_spec"
       },
+      "ignore_global_filters": false,
       "metrics": [
         {
-          "empty_as_null": false,
-          "operation": "count",
-          "visible": true,
+          "alignment": "right",
           "color": {
             "type": "auto"
           },
-          "alignment": "right"
+          "empty_as_null": false,
+          "operation": "count",
+          "visible": true
         }
       ],
       "rows": [
         {
-          "operation": "terms",
+          "alignment": "left",
+          "click_filter": false,
+          "color": {
+            "type": "auto"
+          },
           "fields": [
             "long_label"
           ],
           "limit": 10,
+          "operation": "terms",
           "rank_by": {
-            "type": "metric",
+            "direction": "desc",
             "metric_index": 0,
-            "direction": "desc"
+            "type": "metric"
           },
-          "visible": true,
-          "alignment": "left",
-          "color": {
-            "type": "auto"
-          },
-          "click_filter": false
+          "visible": true
         }
-      ]
+      ],
+      "sampling": 1,
+      "title": "A panel title long enough to overflow the panel header at every grid width, so truncation, wrapping and tooltips are exercised by each renderer",
+      "type": "data_table"
     },
-    "inCollapsedSection": false
+    "grid": {
+      "h": 10,
+      "w": 48,
+      "x": 0,
+      "y": 12
+    },
+    "id": "long-table",
+    "inCollapsedSection": false,
+    "type": "vis"
   }
 }

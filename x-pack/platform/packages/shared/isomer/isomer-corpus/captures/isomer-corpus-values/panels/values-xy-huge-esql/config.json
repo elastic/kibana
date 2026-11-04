@@ -2,35 +2,12 @@
   "dashboard_id": "isomer-corpus-values",
   "in_as_code": true,
   "panel": {
-    "id": "values-xy-huge-esql",
-    "type": "vis",
-    "grid": {
-      "x": 0,
-      "y": 18,
-      "w": 24,
-      "h": 12
-    },
     "config": {
-      "type": "xy",
-      "title": "Huge values per day (ES|QL)",
-      "legend": {
-        "visibility": "hidden",
-        "placement": "outside",
-        "layout": {
-          "type": "grid",
-          "truncate": {
-            "max_lines": 1
-          }
-        },
-        "position": "right"
-      },
       "axis": {
         "x": {
-          "title": {
-            "visible": true
-          },
-          "ticks": {
-            "visible": true
+          "domain": {
+            "rounding": false,
+            "type": "fit"
           },
           "grid": {
             "visible": true
@@ -39,17 +16,17 @@
             "orientation": "horizontal"
           },
           "scale": "ordinal",
-          "domain": {
-            "type": "fit",
-            "rounding": false
+          "ticks": {
+            "visible": true
+          },
+          "title": {
+            "visible": true
           }
         },
         "y": {
-          "title": {
-            "visible": true
-          },
-          "ticks": {
-            "visible": true
+          "domain": {
+            "rounding": true,
+            "type": "full"
           },
           "grid": {
             "visible": true
@@ -58,54 +35,77 @@
             "orientation": "horizontal"
           },
           "scale": "linear",
-          "domain": {
-            "type": "full",
-            "rounding": true
-          }
-        }
-      },
-      "styling": {
-        "overlays": {
-          "partial_buckets": {
-            "visible": false
+          "ticks": {
+            "visible": true
           },
-          "current_time_marker": {
-            "visible": false
+          "title": {
+            "visible": true
           }
-        },
-        "interpolation": "linear",
-        "points": {
-          "visibility": "auto"
-        },
-        "areas": {
-          "fill_opacity": 0.3,
-          "fill": "gradient"
         }
       },
       "layers": [
         {
-          "sampling": 1,
-          "ignore_global_filters": false,
           "data_source": {
-            "type": "esql",
-            "query": "FROM isomer-corpus-edge-cases | STATS total = SUM(huge) BY day = BUCKET(@timestamp, 1 day)"
+            "query": "FROM isomer-corpus-edge-cases | STATS total = SUM(huge) BY day = BUCKET(@timestamp, 1 day) | SORT day",
+            "type": "esql"
           },
+          "ignore_global_filters": false,
+          "sampling": 1,
           "type": "area",
+          "x": {
+            "column": "day"
+          },
           "y": [
             {
-              "column": "total",
               "axis": "y",
               "color": {
                 "type": "auto"
-              }
+              },
+              "column": "total"
             }
-          ],
-          "x": {
-            "column": "day"
-          }
+          ]
         }
-      ]
+      ],
+      "legend": {
+        "layout": {
+          "truncate": {
+            "max_lines": 1
+          },
+          "type": "grid"
+        },
+        "placement": "outside",
+        "position": "right",
+        "visibility": "hidden"
+      },
+      "styling": {
+        "areas": {
+          "fill": "gradient",
+          "fill_opacity": 0.3
+        },
+        "interpolation": "linear",
+        "overlays": {
+          "current_time_marker": {
+            "visible": false
+          },
+          "partial_buckets": {
+            "visible": false
+          }
+        },
+        "points": {
+          "visibility": "auto"
+        }
+      },
+      "title": "Huge values per day (ES|QL)",
+      "type": "xy"
     },
-    "inCollapsedSection": false
+    "grid": {
+      "h": 12,
+      "w": 24,
+      "x": 0,
+      "y": 18
+    },
+    "id": "values-xy-huge-esql",
+    "inCollapsedSection": false,
+    "type": "vis"
   }
 }

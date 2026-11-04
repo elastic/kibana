@@ -1,408 +1,68 @@
 {
-  "dashboard_id": "isomer-corpus-values",
-  "panel_id": "values-xy-negative",
-  "in_as_code": true,
-  "panel_type": "vis",
   "chart_type": "xy",
-  "theme": "light",
   "context": {
+    "grid": {
+      "h": 12,
+      "w": 24,
+      "x": 0,
+      "y": 6
+    },
     "now": "2025-01-15T12:00:00.000Z",
-    "time_range": {
-      "relative": {
-        "from": "2024-01-01T00:00:00.000Z",
-        "to": "2024-01-08T00:00:00.000Z"
-      },
-      "absolute": {
-        "from": "2024-01-01T00:00:00.000Z",
-        "to": "2024-01-08T00:00:00.000Z"
-      }
-    },
-    "time_picker": {
-      "start": "Jan 1, 2024 @ 00:00:00.000",
-      "end": "Jan 8, 2024 @ 00:00:00.000"
-    },
-    "ui_settings": {
-      "dateFormat:tz": "UTC"
-    },
     "page": {
-      "themeTag": "borealislight",
-      "timeZone": "America/Toronto",
+      "devicePixelRatio": 2,
       "locale": "en",
       "navigatorLanguages": [
         "en-US"
       ],
-      "devicePixelRatio": 2,
-      "viewport": {
-        "width": 1600,
-        "height": 1057
-      },
+      "themeTag": "borealislight",
+      "timeZone": "America/Toronto",
+      "url": "http://localhost:5620/app/dashboards#/view/isomer-corpus-values?_g=(time:(from:%272024-01-01T00:00:00.000Z%27,to:%272024-01-08T00:00:00.000Z%27))",
       "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
-      "url": "http://localhost:5620/app/dashboards#/view/isomer-corpus-values?_g=(time:(from:%272024-01-01T00:00:00.000Z%27,to:%272024-01-08T00:00:00.000Z%27))"
-    },
-    "grid": {
-      "x": 0,
-      "y": 6,
-      "w": 24,
-      "h": 12
+      "viewport": {
+        "height": 1057,
+        "width": 1600
+      }
     },
     "size": {
-      "width": 782.3125,
-      "height": 328
+      "height": 328,
+      "width": 787.9375
+    },
+    "time_picker": {
+      "end": "Jan 8, 2024 @ 00:00:00.000",
+      "start": "Jan 1, 2024 @ 00:00:00.000"
+    },
+    "time_range": {
+      "absolute": {
+        "from": "2024-01-01T00:00:00.000Z",
+        "to": "2024-01-08T00:00:00.000Z"
+      },
+      "relative": {
+        "from": "2024-01-01T00:00:00.000Z",
+        "to": "2024-01-08T00:00:00.000Z"
+      }
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
     }
   },
+  "dashboard_id": "isomer-corpus-values",
   "debug_state_complete": true,
-  "panel": {
-    "found": true,
-    "rect": {
-      "x": 8,
-      "y": 321,
-      "width": 782.3125,
-      "height": 328
-    },
-    "title": "Signed values per 6 hours (crosses zero)",
-    "renderComplete": true,
-    "errorText": null,
-    "charts": [
-      {
-        "renderComplete": true,
-        "renderCount": 10,
-        "rect": {
-          "width": 766.3125,
-          "height": 288
-        },
-        "debugState": {
-          "legend": {
-            "items": [
-              {
-                "key": "groupId{axis-left}spec{bar_0:bar_0_x:bar_0_y_0:-}yAccessor{bar_0_y_0}splitAccessors{}",
-                "name": "Sum of signed",
-                "color": "#16c5c0"
-              }
-            ]
-          },
-          "axes": {
-            "x": [
-              {
-                "id": "x",
-                "title": "@timestamp per 6 hours",
-                "position": "bottom",
-                "labels": [
-                  "1st",
-                  "January 2024",
-                  "2nd",
-                  "3rd",
-                  "4th",
-                  "5th",
-                  "6th",
-                  "7th",
-                  "8th"
-                ],
-                "values": [
-                  1704067200000,
-                  1704067200000,
-                  1704153600000,
-                  1704240000000,
-                  1704326400000,
-                  1704412800000,
-                  1704499200000,
-                  1704585600000,
-                  1704672000000
-                ],
-                "gridlines": [
-                  {
-                    "x": -1.1102230246251565e-16,
-                    "y": 0
-                  },
-                  {
-                    "x": 93.83620689655172,
-                    "y": 0
-                  },
-                  {
-                    "x": 187.67241379310343,
-                    "y": 0
-                  },
-                  {
-                    "x": 281.5086206896552,
-                    "y": 0
-                  },
-                  {
-                    "x": 375.34482758620686,
-                    "y": 0
-                  },
-                  {
-                    "x": 469.18103448275866,
-                    "y": 0
-                  },
-                  {
-                    "x": 563.0172413793103,
-                    "y": 0
-                  },
-                  {
-                    "x": 656.8534482758621,
-                    "y": 0
-                  }
-                ]
-              }
-            ],
-            "y": [
-              {
-                "id": "axis-left",
-                "title": "Sum of signed",
-                "position": "left",
-                "labels": [
-                  "-800",
-                  "-600",
-                  "-400",
-                  "-200",
-                  "0",
-                  "200",
-                  "400",
-                  "600"
-                ],
-                "values": [
-                  -800,
-                  -600,
-                  -400,
-                  -200,
-                  0,
-                  200,
-                  400,
-                  600
-                ],
-                "gridlines": [
-                  {
-                    "x": 0,
-                    "y": 0
-                  },
-                  {
-                    "x": 0,
-                    "y": 31.00000000000001
-                  },
-                  {
-                    "x": 0,
-                    "y": 62
-                  },
-                  {
-                    "x": 0,
-                    "y": 93
-                  },
-                  {
-                    "x": 0,
-                    "y": 124
-                  },
-                  {
-                    "x": 0,
-                    "y": 155
-                  },
-                  {
-                    "x": 0,
-                    "y": 186
-                  },
-                  {
-                    "x": 0,
-                    "y": 217
-                  }
-                ]
-              }
-            ]
-          },
-          "areas": [],
-          "lines": [],
-          "bars": [
-            {
-              "key": "groupId{axis-left}spec{bar_0:bar_0_x:bar_0_y_0:-}yAccessor{bar_0_y_0}splitAccessors{}",
-              "name": "Sum of signed",
-              "color": "#16c5c0",
-              "bars": [
-                {
-                  "x": 1704067200000,
-                  "y": 151.1,
-                  "mark": null
-                },
-                {
-                  "x": 1704088800000,
-                  "y": 440.8,
-                  "mark": null
-                },
-                {
-                  "x": 1704110400000,
-                  "y": 15.299999999999997,
-                  "mark": null
-                },
-                {
-                  "x": 1704132000000,
-                  "y": -583,
-                  "mark": null
-                },
-                {
-                  "x": 1704153600000,
-                  "y": -590.7,
-                  "mark": null
-                },
-                {
-                  "x": 1704175200000,
-                  "y": 1.7999999999999972,
-                  "mark": null
-                },
-                {
-                  "x": 1704196800000,
-                  "y": 439,
-                  "mark": null
-                },
-                {
-                  "x": 1704218400000,
-                  "y": 163.4,
-                  "mark": null
-                },
-                {
-                  "x": 1704240000000,
-                  "y": -473.5,
-                  "mark": null
-                },
-                {
-                  "x": 1704261600000,
-                  "y": -659.6,
-                  "mark": null
-                },
-                {
-                  "x": 1704283200000,
-                  "y": -157.5,
-                  "mark": null
-                },
-                {
-                  "x": 1704304800000,
-                  "y": 392.4,
-                  "mark": null
-                },
-                {
-                  "x": 1704326400000,
-                  "y": 288.8,
-                  "mark": null
-                },
-                {
-                  "x": 1704348000000,
-                  "y": -336,
-                  "mark": null
-                },
-                {
-                  "x": 1704369600000,
-                  "y": -685.5,
-                  "mark": null
-                },
-                {
-                  "x": 1704391200000,
-                  "y": -313.8,
-                  "mark": null
-                },
-                {
-                  "x": 1704412800000,
-                  "y": 305.1,
-                  "mark": null
-                },
-                {
-                  "x": 1704434400000,
-                  "y": 381.8,
-                  "mark": null
-                },
-                {
-                  "x": 1704456000000,
-                  "y": -181.5,
-                  "mark": null
-                },
-                {
-                  "x": 1704477600000,
-                  "y": -666.2,
-                  "mark": null
-                },
-                {
-                  "x": 1704499200000,
-                  "y": -454.5,
-                  "mark": null
-                },
-                {
-                  "x": 1704520800000,
-                  "y": 183.89999999999998,
-                  "mark": null
-                },
-                {
-                  "x": 1704542400000,
-                  "y": 434.6,
-                  "mark": null
-                },
-                {
-                  "x": 1704564000000,
-                  "y": -21.9,
-                  "mark": null
-                },
-                {
-                  "x": 1704585600000,
-                  "y": -603.7,
-                  "mark": null
-                },
-                {
-                  "x": 1704607200000,
-                  "y": -568.6,
-                  "mark": null
-                },
-                {
-                  "x": 1704628800000,
-                  "y": 38.5,
-                  "mark": null
-                },
-                {
-                  "x": 1704650400000,
-                  "y": 443.5,
-                  "mark": null
-                },
-                {
-                  "x": 1704672000000,
-                  "y": 0,
-                  "mark": null
-                }
-              ],
-              "labels": [],
-              "visible": true
-            }
-          ],
-          "annotations": [
-            {
-              "data": {
-                "coordinates": {
-                  "x0": 1704672000000
-                }
-              },
-              "id": "__endzones__",
-              "style": {
-                "strokeWidth": 0,
-                "opacity": 0.2,
-                "fill": "#5A6D8C",
-                "stroke": "#5A6D8C"
-              },
-              "type": "rectangle"
-            }
-          ]
-        }
-      }
-    ],
-    "metrics": [],
-    "dataGrids": []
-  },
+  "in_as_code": true,
   "inspector": {
-    "status": "ok",
     "adapters": [
       "requests",
       "tables",
       "expression"
     ],
+    "status": "ok",
     "tables": {
       "bar_0": {
-        "type": "datatable",
         "columns": [
           {
             "id": "bar_0_x",
-            "name": "@timestamp per 6 hours",
             "meta": {
-              "type": "date",
+              "dimensionName": "Horizontal axis",
+              "dimensionType": "x",
               "field": "@timestamp",
               "index": "isomer-corpus-edge-cases",
               "params": {
@@ -413,41 +73,41 @@
               },
               "source": "esaggs",
               "sourceParams": {
-                "hasPrecisionError": false,
-                "indexPatternId": "isomer-corpus-edge-cases-@timestamp-b6eac90083980d83be9026b0d32d464d37c39f9232217faacebecfff5e40e06a",
                 "appliedTimeRange": {
                   "from": "2024-01-01T00:00:00.000Z",
                   "to": "2024-01-08T00:00:00.000Z"
                 },
-                "id": "0",
                 "enabled": true,
-                "type": "date_histogram",
+                "hasPrecisionError": false,
+                "id": "0",
+                "indexPatternId": "isomer-corpus-edge-cases-@timestamp-b6eac90083980d83be9026b0d32d464d37c39f9232217faacebecfff5e40e06a",
                 "params": {
+                  "drop_partials": false,
+                  "extendToTimeRange": true,
+                  "extended_bounds": {},
                   "field": "@timestamp",
+                  "interval": "6h",
+                  "min_doc_count": 0,
+                  "scaleMetricValues": false,
                   "timeRange": {
                     "from": "2024-01-01T00:00:00.000Z",
                     "to": "2024-01-08T00:00:00.000Z"
                   },
                   "useNormalizedEsInterval": true,
-                  "extendToTimeRange": true,
-                  "scaleMetricValues": false,
-                  "interval": "6h",
-                  "used_interval": "6h",
-                  "drop_partials": false,
-                  "min_doc_count": 0,
-                  "extended_bounds": {}
+                  "used_interval": "6h"
                 },
-                "schema": "segment"
+                "schema": "segment",
+                "type": "date_histogram"
               },
-              "dimensionName": "Horizontal axis",
-              "dimensionType": "x"
-            }
+              "type": "date"
+            },
+            "name": "@timestamp per 6 hours"
           },
           {
             "id": "bar_0_y_0",
-            "name": "Sum of signed",
             "meta": {
-              "type": "number",
+              "dimensionName": "Vertical axis",
+              "dimensionType": "y",
               "field": "signed",
               "index": "isomer-corpus-edge-cases",
               "params": {
@@ -455,22 +115,29 @@
               },
               "source": "esaggs",
               "sourceParams": {
-                "hasPrecisionError": false,
-                "indexPatternId": "isomer-corpus-edge-cases-@timestamp-b6eac90083980d83be9026b0d32d464d37c39f9232217faacebecfff5e40e06a",
-                "id": "1",
                 "enabled": true,
-                "type": "sum",
+                "hasPrecisionError": false,
+                "id": "1",
+                "indexPatternId": "isomer-corpus-edge-cases-@timestamp-b6eac90083980d83be9026b0d32d464d37c39f9232217faacebecfff5e40e06a",
                 "params": {
-                  "field": "signed",
-                  "emptyAsNull": false
+                  "emptyAsNull": false,
+                  "field": "signed"
                 },
-                "schema": "metric"
+                "schema": "metric",
+                "type": "sum"
               },
-              "dimensionName": "Vertical axis",
-              "dimensionType": "y"
-            }
+              "type": "number"
+            },
+            "name": "Sum of signed"
           }
         ],
+        "meta": {
+          "source": "isomer-corpus-edge-cases-@timestamp-b6eac90083980d83be9026b0d32d464d37c39f9232217faacebecfff5e40e06a",
+          "statistics": {
+            "totalCount": 168
+          },
+          "type": "esaggs"
+        },
         "rows": [
           {
             "bar_0_x": 1704067200000,
@@ -589,14 +256,345 @@
             "bar_0_y_0": 0
           }
         ],
-        "meta": {
-          "type": "esaggs",
-          "source": "isomer-corpus-edge-cases-@timestamp-b6eac90083980d83be9026b0d32d464d37c39f9232217faacebecfff5e40e06a",
-          "statistics": {
-            "totalCount": 168
-          }
-        }
+        "type": "datatable"
       }
     }
-  }
+  },
+  "panel": {
+    "charts": [
+      {
+        "debugState": {
+          "annotations": [
+            {
+              "data": {
+                "coordinates": {
+                  "x0": 1704672000000
+                }
+              },
+              "id": "__endzones__",
+              "style": {
+                "fill": "#5A6D8C",
+                "opacity": 0.2,
+                "stroke": "#5A6D8C",
+                "strokeWidth": 0
+              },
+              "type": "rectangle"
+            }
+          ],
+          "areas": [],
+          "axes": {
+            "x": [
+              {
+                "gridlines": [
+                  {
+                    "x": -1.2212453270876722e-15,
+                    "y": 0
+                  },
+                  {
+                    "x": 94.61206896551724,
+                    "y": 0
+                  },
+                  {
+                    "x": 189.22413793103448,
+                    "y": 0
+                  },
+                  {
+                    "x": 283.8362068965517,
+                    "y": 0
+                  },
+                  {
+                    "x": 378.44827586206895,
+                    "y": 0
+                  },
+                  {
+                    "x": 473.0603448275862,
+                    "y": 0
+                  },
+                  {
+                    "x": 567.6724137931034,
+                    "y": 0
+                  },
+                  {
+                    "x": 662.2844827586207,
+                    "y": 0
+                  }
+                ],
+                "id": "x",
+                "labels": [
+                  "1st",
+                  "January 2024",
+                  "2nd",
+                  "3rd",
+                  "4th",
+                  "5th",
+                  "6th",
+                  "7th",
+                  "8th"
+                ],
+                "position": "bottom",
+                "title": "@timestamp per 6 hours",
+                "values": [
+                  1704067200000,
+                  1704067200000,
+                  1704153600000,
+                  1704240000000,
+                  1704326400000,
+                  1704412800000,
+                  1704499200000,
+                  1704585600000,
+                  1704672000000
+                ]
+              }
+            ],
+            "y": [
+              {
+                "gridlines": [
+                  {
+                    "x": 0,
+                    "y": 0
+                  },
+                  {
+                    "x": 0,
+                    "y": 31.00000000000001
+                  },
+                  {
+                    "x": 0,
+                    "y": 62
+                  },
+                  {
+                    "x": 0,
+                    "y": 93
+                  },
+                  {
+                    "x": 0,
+                    "y": 124
+                  },
+                  {
+                    "x": 0,
+                    "y": 155
+                  },
+                  {
+                    "x": 0,
+                    "y": 186
+                  },
+                  {
+                    "x": 0,
+                    "y": 217
+                  }
+                ],
+                "id": "axis-left",
+                "labels": [
+                  "-800",
+                  "-600",
+                  "-400",
+                  "-200",
+                  "0",
+                  "200",
+                  "400",
+                  "600"
+                ],
+                "position": "left",
+                "title": "Sum of signed",
+                "values": [
+                  -800,
+                  -600,
+                  -400,
+                  -200,
+                  0,
+                  200,
+                  400,
+                  600
+                ]
+              }
+            ]
+          },
+          "bars": [
+            {
+              "bars": [
+                {
+                  "mark": null,
+                  "x": 1704067200000,
+                  "y": 151.1
+                },
+                {
+                  "mark": null,
+                  "x": 1704088800000,
+                  "y": 440.8
+                },
+                {
+                  "mark": null,
+                  "x": 1704110400000,
+                  "y": 15.299999999999997
+                },
+                {
+                  "mark": null,
+                  "x": 1704132000000,
+                  "y": -583
+                },
+                {
+                  "mark": null,
+                  "x": 1704153600000,
+                  "y": -590.7
+                },
+                {
+                  "mark": null,
+                  "x": 1704175200000,
+                  "y": 1.7999999999999972
+                },
+                {
+                  "mark": null,
+                  "x": 1704196800000,
+                  "y": 439
+                },
+                {
+                  "mark": null,
+                  "x": 1704218400000,
+                  "y": 163.4
+                },
+                {
+                  "mark": null,
+                  "x": 1704240000000,
+                  "y": -473.5
+                },
+                {
+                  "mark": null,
+                  "x": 1704261600000,
+                  "y": -659.6
+                },
+                {
+                  "mark": null,
+                  "x": 1704283200000,
+                  "y": -157.5
+                },
+                {
+                  "mark": null,
+                  "x": 1704304800000,
+                  "y": 392.4
+                },
+                {
+                  "mark": null,
+                  "x": 1704326400000,
+                  "y": 288.8
+                },
+                {
+                  "mark": null,
+                  "x": 1704348000000,
+                  "y": -336
+                },
+                {
+                  "mark": null,
+                  "x": 1704369600000,
+                  "y": -685.5
+                },
+                {
+                  "mark": null,
+                  "x": 1704391200000,
+                  "y": -313.8
+                },
+                {
+                  "mark": null,
+                  "x": 1704412800000,
+                  "y": 305.1
+                },
+                {
+                  "mark": null,
+                  "x": 1704434400000,
+                  "y": 381.8
+                },
+                {
+                  "mark": null,
+                  "x": 1704456000000,
+                  "y": -181.5
+                },
+                {
+                  "mark": null,
+                  "x": 1704477600000,
+                  "y": -666.2
+                },
+                {
+                  "mark": null,
+                  "x": 1704499200000,
+                  "y": -454.5
+                },
+                {
+                  "mark": null,
+                  "x": 1704520800000,
+                  "y": 183.89999999999998
+                },
+                {
+                  "mark": null,
+                  "x": 1704542400000,
+                  "y": 434.6
+                },
+                {
+                  "mark": null,
+                  "x": 1704564000000,
+                  "y": -21.9
+                },
+                {
+                  "mark": null,
+                  "x": 1704585600000,
+                  "y": -603.7
+                },
+                {
+                  "mark": null,
+                  "x": 1704607200000,
+                  "y": -568.6
+                },
+                {
+                  "mark": null,
+                  "x": 1704628800000,
+                  "y": 38.5
+                },
+                {
+                  "mark": null,
+                  "x": 1704650400000,
+                  "y": 443.5
+                },
+                {
+                  "mark": null,
+                  "x": 1704672000000,
+                  "y": 0
+                }
+              ],
+              "color": "#16c5c0",
+              "key": "groupId{axis-left}spec{bar_0:bar_0_x:bar_0_y_0:-}yAccessor{bar_0_y_0}splitAccessors{}",
+              "labels": [],
+              "name": "Sum of signed",
+              "visible": true
+            }
+          ],
+          "legend": {
+            "items": [
+              {
+                "color": "#16c5c0",
+                "key": "groupId{axis-left}spec{bar_0:bar_0_x:bar_0_y_0:-}yAccessor{bar_0_y_0}splitAccessors{}",
+                "name": "Sum of signed"
+              }
+            ]
+          },
+          "lines": []
+        },
+        "rect": {
+          "height": 288,
+          "width": 771.9375
+        },
+        "renderComplete": true,
+        "renderCount": 10
+      }
+    ],
+    "dataGrids": [],
+    "errorText": null,
+    "found": true,
+    "metrics": [],
+    "rect": {
+      "height": 328,
+      "width": 787.9375
+    },
+    "renderComplete": true,
+    "title": "Signed values per 6 hours (crosses zero)"
+  },
+  "panel_id": "values-xy-negative",
+  "panel_type": "vis",
+  "theme": "light"
 }

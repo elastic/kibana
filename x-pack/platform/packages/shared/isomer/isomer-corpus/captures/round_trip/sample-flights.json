@@ -1,0 +1,2999 @@
+{
+  "dropped": [
+    {
+      "message": "Panel schema not available for panel type: map. Panels without schemas are not supported by dashboard REST endpoints",
+      "panelType": "map"
+    },
+    {
+      "message": "Panel schema not available for panel type: legacy_vis. Panels without schemas are not supported by dashboard REST endpoints",
+      "panelType": "legacy_vis"
+    },
+    {
+      "message": "Panel schema not available for panel type: legacy_vis. Panels without schemas are not supported by dashboard REST endpoints",
+      "panelType": "legacy_vis"
+    }
+  ],
+  "id": "7adfa750-4c81-11e8-b3d7-01146121b73d",
+  "name": "sample-flights",
+  "panels": [
+    {
+      "api": [],
+      "attributes": [
+        {
+          "after": [
+            "<layer_0:date_histogram(timestamp)>",
+            "<layer_0:formula()>"
+          ],
+          "before": [
+            "<layer_0:date_histogram(timestamp)>",
+            "<layer_0:count(___records___)>",
+            "<layer_0:count(___records___)#1>",
+            "<layer_0:math()>",
+            "<layer_0:formula()>"
+          ],
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columnOrder"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.dataType"
+        },
+        {
+          "before": "kuery",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.filter.language"
+        },
+        {
+          "before": "*",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.filter.query"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.isBucketed"
+        },
+        {
+          "before": "Part of count(lucene='FlightDelay:true') / count(kql='*')",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.label"
+        },
+        {
+          "before": "count",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.operationType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.params.emptyAsNull"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.scale"
+        },
+        {
+          "before": "___records___",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.sourceField"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.dataType"
+        },
+        {
+          "before": "lucene",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.filter.language"
+        },
+        {
+          "before": "FlightDelay:true",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.filter.query"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.isBucketed"
+        },
+        {
+          "before": "Part of count(lucene='FlightDelay:true') / count(kql='*')",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.label"
+        },
+        {
+          "before": "count",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.operationType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.params.emptyAsNull"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.scale"
+        },
+        {
+          "before": "___records___",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.sourceField"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(timestamp)>.customLabel"
+        },
+        {
+          "after": "",
+          "before": "timestamp",
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(timestamp)>.label"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(timestamp)>.params.ignoreTimeRange"
+        },
+        {
+          "before": "interval",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(timestamp)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.params.format.params.compact"
+        },
+        {
+          "after": 2,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.params.format.params.decimals"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.params.isFormulaBroken"
+        },
+        {
+          "after": [],
+          "before": [
+            "<layer_0:math()>"
+          ],
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.references"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.scale"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.dataType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.isBucketed"
+        },
+        {
+          "before": "Part of count(lucene='FlightDelay:true') / count(kql='*')",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.label"
+        },
+        {
+          "before": "math",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.operationType"
+        },
+        {
+          "before": [
+            "<layer_0:count(___records___)>",
+            "<layer_0:count(___records___)#1>"
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.args"
+        },
+        {
+          "before": 49,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.location.max"
+        },
+        {
+          "before": 0,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.location.min"
+        },
+        {
+          "before": "divide",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.name"
+        },
+        {
+          "before": "count(lucene='FlightDelay:true') / count(kql='*')",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.text"
+        },
+        {
+          "before": "function",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.type"
+        },
+        {
+          "before": [
+            "<layer_0:count(___records___)>",
+            "<layer_0:count(___records___)#1>"
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.references"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.sampling"
+        },
+        {
+          "after": "LINEAR",
+          "kind": "added",
+          "path": "state.visualization.curveType"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.hideEndzones"
+        },
+        {
+          "before": "default",
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].palette.name"
+        },
+        {
+          "before": "palette",
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].palette.type"
+        },
+        {
+          "after": "annotations_event_0",
+          "before": "53b7dff0-4c89-11e8-a66a-6989ad5a0a39",
+          "kind": "changed",
+          "path": "state.visualization.layers[<layer_1>].annotations[0].id"
+        },
+        {
+          "after": "byValue",
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_1>].persistanceType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.visualization.legend.showSingleSeries"
+        },
+        {
+          "after": "auto",
+          "kind": "added",
+          "path": "state.visualization.pointVisibility"
+        },
+        {
+          "after": "area",
+          "before": "bar_stacked",
+          "kind": "changed",
+          "path": "state.visualization.preferredSeriesType"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.showCurrentTimeMarker"
+        },
+        {
+          "before": "hide",
+          "kind": "removed",
+          "path": "state.visualization.valueLabels"
+        },
+        {
+          "after": "dataBounds",
+          "kind": "added",
+          "path": "state.visualization.xExtent.mode"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.xExtent.niceValues"
+        },
+        {
+          "after": "full",
+          "before": "custom",
+          "kind": "changed",
+          "path": "state.visualization.yLeftExtent.mode"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.yLeftExtent.niceValues"
+        },
+        {
+          "before": 1,
+          "kind": "removed",
+          "path": "state.visualization.yLeftExtent.upperBound"
+        },
+        {
+          "before": "full",
+          "kind": "removed",
+          "path": "state.visualization.yRightExtent.mode"
+        },
+        {
+          "before": "linear",
+          "kind": "removed",
+          "path": "state.visualization.yRightScale"
+        },
+        {
+          "after": "",
+          "before": "[Flights] Delays & Cancellations (converted)",
+          "kind": "changed",
+          "path": "title"
+        }
+      ],
+      "chartType": "xy",
+      "dashboard": "sample-flights",
+      "panel": [],
+      "panelId": "7",
+      "status": "compared",
+      "title": "[Flights] Delays & Cancellations",
+      "visualizationType": "lnsXY"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "before": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "kind": "removed",
+          "path": "references[c61f29fc-1ff3-4d46-a6c2-bde8a5b97f4a].id"
+        },
+        {
+          "before": "c61f29fc-1ff3-4d46-a6c2-bde8a5b97f4a",
+          "kind": "removed",
+          "path": "references[c61f29fc-1ff3-4d46-a6c2-bde8a5b97f4a].name"
+        },
+        {
+          "before": "index-pattern",
+          "kind": "removed",
+          "path": "references[c61f29fc-1ff3-4d46-a6c2-bde8a5b97f4a].type"
+        },
+        {
+          "after": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "kind": "added",
+          "path": "references[filter-ref-d3d7af60-4c81-11e8-b3d7-01146121b73d].id"
+        },
+        {
+          "after": "filter-ref-d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "kind": "added",
+          "path": "references[filter-ref-d3d7af60-4c81-11e8-b3d7-01146121b73d].name"
+        },
+        {
+          "after": "index-pattern",
+          "kind": "added",
+          "path": "references[filter-ref-d3d7af60-4c81-11e8-b3d7-01146121b73d].type"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.scale"
+        },
+        {
+          "before": 0,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:range(FlightDelayMin)>.params.ranges[0].from"
+        },
+        {
+          "before": "",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:range(FlightDelayMin)>.params.ranges[0].label"
+        },
+        {
+          "before": 1000,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:range(FlightDelayMin)>.params.ranges[0].to"
+        },
+        {
+          "before": "interval",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:range(FlightDelayMin)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.sampling"
+        },
+        {
+          "before": "appState",
+          "kind": "removed",
+          "path": "state.filters[0].$state.store"
+        },
+        {
+          "after": "FlightDelayMin",
+          "kind": "added",
+          "path": "state.filters[0].meta.field"
+        },
+        {
+          "after": "filter-ref-d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "before": "c61f29fc-1ff3-4d46-a6c2-bde8a5b97f4a",
+          "kind": "changed",
+          "path": "state.filters[0].meta.index"
+        },
+        {
+          "before": "phrase",
+          "kind": "removed",
+          "path": "state.filters[0].meta.params.type"
+        },
+        {
+          "before": "0",
+          "kind": "removed",
+          "path": "state.filters[0].meta.value"
+        },
+        {
+          "before": 0,
+          "kind": "removed",
+          "path": "state.filters[0].query.match.FlightDelayMin.query"
+        },
+        {
+          "before": "phrase",
+          "kind": "removed",
+          "path": "state.filters[0].query.match.FlightDelayMin.type"
+        },
+        {
+          "after": 0,
+          "kind": "added",
+          "path": "state.filters[0].query.match_phrase.FlightDelayMin"
+        },
+        {
+          "before": "LINEAR",
+          "kind": "removed",
+          "path": "state.visualization.curveType"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.hideEndzones"
+        },
+        {
+          "after": 0,
+          "before": -90,
+          "kind": "changed",
+          "path": "state.visualization.labelsOrientation.yRight"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].isHistogram"
+        },
+        {
+          "before": "default",
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].palette.name"
+        },
+        {
+          "before": "palette",
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].palette.type"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].simpleView"
+        },
+        {
+          "before": "linear",
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].xScaleType"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.visualization.legend.showSingleSeries"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.visualization.minBarHeight"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.showCurrentTimeMarker"
+        },
+        {
+          "after": "dataBounds",
+          "kind": "added",
+          "path": "state.visualization.xExtent.mode"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.xExtent.niceValues"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.visualization.yLeftExtent.enforce"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.yLeftExtent.niceValues"
+        },
+        {
+          "before": "linear",
+          "kind": "removed",
+          "path": "state.visualization.yRightScale"
+        },
+        {
+          "after": "",
+          "before": "[Flights] Delay Buckets (converted)",
+          "kind": "changed",
+          "path": "title"
+        }
+      ],
+      "chartType": "xy",
+      "dashboard": "sample-flights",
+      "panel": [],
+      "panelId": "10",
+      "status": "compared",
+      "title": "[Flights] Delay Buckets",
+      "visualizationType": "lnsXY"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "before": "",
+          "kind": "removed",
+          "path": "description"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.params.emptyAsNull"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.sampling"
+        },
+        {
+          "after": "compact",
+          "kind": "added",
+          "path": "state.visualization.density"
+        },
+        {
+          "after": "right",
+          "kind": "added",
+          "path": "state.visualization.primaryAlign"
+        },
+        {
+          "after": "bottom",
+          "kind": "added",
+          "path": "state.visualization.primaryPosition"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.showBar"
+        },
+        {
+          "after": "left",
+          "kind": "added",
+          "path": "state.visualization.titlesTextAlign"
+        },
+        {
+          "after": "default",
+          "kind": "added",
+          "path": "state.visualization.valueFontMode"
+        },
+        {
+          "after": "",
+          "before": "[Flights] Total Flights",
+          "kind": "changed",
+          "path": "title"
+        }
+      ],
+      "chartType": "metric",
+      "dashboard": "sample-flights",
+      "panel": [
+        {
+          "after": "[Flights] Total Flights",
+          "kind": "added",
+          "path": "title"
+        }
+      ],
+      "panelId": "392b4936-f753-47bc-a98d-a4e41a0a4cd4",
+      "status": "compared",
+      "title": "[Flights] Total Flights",
+      "visualizationType": "lnsMetric"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "after": [
+            "<layer_0:formula()>"
+          ],
+          "before": [
+            "<layer_0:formula()>",
+            "<layer_0:count(___records___)>",
+            "<layer_0:count(___records___)#1>",
+            "<layer_0:math()>"
+          ],
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columnOrder"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.dataType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.isBucketed"
+        },
+        {
+          "before": "Part of count(kql='FlightDelay : true') / count()",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.label"
+        },
+        {
+          "before": "count",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.operationType"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.scale"
+        },
+        {
+          "before": "___records___",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.sourceField"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.dataType"
+        },
+        {
+          "before": "kuery",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.filter.language"
+        },
+        {
+          "before": "FlightDelay : true",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.filter.query"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.isBucketed"
+        },
+        {
+          "before": "Part of count(kql='FlightDelay : true') / count()",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.label"
+        },
+        {
+          "before": "count",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.operationType"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.scale"
+        },
+        {
+          "before": "___records___",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.sourceField"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.params.isFormulaBroken"
+        },
+        {
+          "after": [],
+          "before": [
+            "<layer_0:math()>"
+          ],
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.references"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.scale"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.dataType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.isBucketed"
+        },
+        {
+          "before": "Part of count(kql='FlightDelay : true') / count()",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.label"
+        },
+        {
+          "before": "math",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.operationType"
+        },
+        {
+          "before": [
+            "<layer_0:count(___records___)>",
+            "<layer_0:count(___records___)#1>"
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.args"
+        },
+        {
+          "before": 41,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.location.max"
+        },
+        {
+          "before": 0,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.location.min"
+        },
+        {
+          "before": "divide",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.name"
+        },
+        {
+          "before": "count(kql='FlightDelay : true') / count()",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.text"
+        },
+        {
+          "before": "function",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.type"
+        },
+        {
+          "before": [
+            "<layer_0:count(___records___)>",
+            "<layer_0:count(___records___)#1>"
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.references"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.sampling"
+        },
+        {
+          "after": "compact",
+          "kind": "added",
+          "path": "state.visualization.density"
+        },
+        {
+          "after": "right",
+          "kind": "added",
+          "path": "state.visualization.primaryAlign"
+        },
+        {
+          "after": "bottom",
+          "kind": "added",
+          "path": "state.visualization.primaryPosition"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.showBar"
+        },
+        {
+          "after": "left",
+          "kind": "added",
+          "path": "state.visualization.titlesTextAlign"
+        },
+        {
+          "after": "default",
+          "kind": "added",
+          "path": "state.visualization.valueFontMode"
+        }
+      ],
+      "chartType": "metric",
+      "dashboard": "sample-flights",
+      "panel": [],
+      "panelId": "9271deff-5a61-4665-83fc-f9fdc6bf0c0b",
+      "status": "compared",
+      "title": "",
+      "visualizationType": "lnsMetric"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "before": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "kind": "removed",
+          "path": "references[c804c161-375f-4d52-a1cc-2e98b966957d].id"
+        },
+        {
+          "before": "c804c161-375f-4d52-a1cc-2e98b966957d",
+          "kind": "removed",
+          "path": "references[c804c161-375f-4d52-a1cc-2e98b966957d].name"
+        },
+        {
+          "before": "index-pattern",
+          "kind": "removed",
+          "path": "references[c804c161-375f-4d52-a1cc-2e98b966957d].type"
+        },
+        {
+          "after": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "kind": "added",
+          "path": "references[filter-ref-d3d7af60-4c81-11e8-b3d7-01146121b73d].id"
+        },
+        {
+          "after": "filter-ref-d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "kind": "added",
+          "path": "references[filter-ref-d3d7af60-4c81-11e8-b3d7-01146121b73d].name"
+        },
+        {
+          "after": "index-pattern",
+          "kind": "added",
+          "path": "references[filter-ref-d3d7af60-4c81-11e8-b3d7-01146121b73d].type"
+        },
+        {
+          "after": [
+            "<layer_0:formula()>"
+          ],
+          "before": [
+            "<layer_0:formula()>",
+            "<layer_0:math()>",
+            "<layer_0:count(___records___)>",
+            "<layer_0:count(___records___)#1>"
+          ],
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columnOrder"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.dataType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.isBucketed"
+        },
+        {
+          "before": "Part of Delayed",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.label"
+        },
+        {
+          "before": "count",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.operationType"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.scale"
+        },
+        {
+          "before": "___records___",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.sourceField"
+        },
+        {
+          "before": "1w",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.timeShift"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.dataType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.isBucketed"
+        },
+        {
+          "before": "Part of Delayed",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.label"
+        },
+        {
+          "before": "count",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.operationType"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.scale"
+        },
+        {
+          "before": "___records___",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.sourceField"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.params.isFormulaBroken"
+        },
+        {
+          "after": [],
+          "before": [
+            "<layer_0:math()>"
+          ],
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.references"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.scale"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.dataType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.isBucketed"
+        },
+        {
+          "before": "Part of Delayed",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.label"
+        },
+        {
+          "before": "math",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.operationType"
+        },
+        {
+          "before": [
+            {
+              "args": [
+                "<layer_0:count(___records___)>",
+                "<layer_0:count(___records___)#1>"
+              ],
+              "location": {
+                "max": 28,
+                "min": 0
+              },
+              "name": "divide",
+              "text": "count() / count(shift='1w') ",
+              "type": "function"
+            },
+            1
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.args"
+        },
+        {
+          "before": 31,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.location.max"
+        },
+        {
+          "before": 0,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.location.min"
+        },
+        {
+          "before": "subtract",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.name"
+        },
+        {
+          "before": "count() / count(shift='1w') - 1",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.text"
+        },
+        {
+          "before": "function",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.type"
+        },
+        {
+          "before": [
+            "<layer_0:count(___records___)>",
+            "<layer_0:count(___records___)#1>"
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.references"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.sampling"
+        },
+        {
+          "before": "appState",
+          "kind": "removed",
+          "path": "state.filters[0].$state.store"
+        },
+        {
+          "after": "FlightDelay",
+          "kind": "added",
+          "path": "state.filters[0].meta.field"
+        },
+        {
+          "after": "filter-ref-d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "before": "c804c161-375f-4d52-a1cc-2e98b966957d",
+          "kind": "changed",
+          "path": "state.filters[0].meta.index"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.filters[0].meta.negate"
+        },
+        {
+          "after": "compact",
+          "kind": "added",
+          "path": "state.visualization.density"
+        },
+        {
+          "after": "right",
+          "kind": "added",
+          "path": "state.visualization.primaryAlign"
+        },
+        {
+          "after": "bottom",
+          "kind": "added",
+          "path": "state.visualization.primaryPosition"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.showBar"
+        },
+        {
+          "after": "left",
+          "kind": "added",
+          "path": "state.visualization.titlesTextAlign"
+        },
+        {
+          "after": "default",
+          "kind": "added",
+          "path": "state.visualization.valueFontMode"
+        }
+      ],
+      "chartType": "metric",
+      "dashboard": "sample-flights",
+      "panel": [],
+      "panelId": "aa591c29-1a31-4ee1-a71d-b829c06fd162",
+      "status": "compared",
+      "title": "",
+      "visualizationType": "lnsMetric"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "after": [
+            "<layer_0:formula()>"
+          ],
+          "before": [
+            "<layer_0:formula()>",
+            "<layer_0:count(___records___)>",
+            "<layer_0:count(___records___)#1>",
+            "<layer_0:math()>"
+          ],
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columnOrder"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.dataType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.isBucketed"
+        },
+        {
+          "before": "Part of Cancelled",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.label"
+        },
+        {
+          "before": "count",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.operationType"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.scale"
+        },
+        {
+          "before": "___records___",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.sourceField"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.dataType"
+        },
+        {
+          "before": "kuery",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.filter.language"
+        },
+        {
+          "before": "Cancelled : true",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.filter.query"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.isBucketed"
+        },
+        {
+          "before": "Part of Cancelled",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.label"
+        },
+        {
+          "before": "count",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.operationType"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.scale"
+        },
+        {
+          "before": "___records___",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.sourceField"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.params.isFormulaBroken"
+        },
+        {
+          "after": [],
+          "before": [
+            "<layer_0:math()>"
+          ],
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.references"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.scale"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.dataType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.isBucketed"
+        },
+        {
+          "before": "Part of Cancelled",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.label"
+        },
+        {
+          "before": "math",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.operationType"
+        },
+        {
+          "before": [
+            "<layer_0:count(___records___)>",
+            "<layer_0:count(___records___)#1>"
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.args"
+        },
+        {
+          "before": 39,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.location.max"
+        },
+        {
+          "before": 0,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.location.min"
+        },
+        {
+          "before": "divide",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.name"
+        },
+        {
+          "before": "count(kql='Cancelled : true') / count()",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.text"
+        },
+        {
+          "before": "function",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.type"
+        },
+        {
+          "before": [
+            "<layer_0:count(___records___)>",
+            "<layer_0:count(___records___)#1>"
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.references"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.sampling"
+        },
+        {
+          "after": "compact",
+          "kind": "added",
+          "path": "state.visualization.density"
+        },
+        {
+          "after": "right",
+          "kind": "added",
+          "path": "state.visualization.primaryAlign"
+        },
+        {
+          "after": "bottom",
+          "kind": "added",
+          "path": "state.visualization.primaryPosition"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.showBar"
+        },
+        {
+          "after": "left",
+          "kind": "added",
+          "path": "state.visualization.titlesTextAlign"
+        },
+        {
+          "after": "default",
+          "kind": "added",
+          "path": "state.visualization.valueFontMode"
+        }
+      ],
+      "chartType": "metric",
+      "dashboard": "sample-flights",
+      "panel": [],
+      "panelId": "b766e3b8-4544-46ed-99e6-9ecc4847e2a2",
+      "status": "compared",
+      "title": "",
+      "visualizationType": "lnsMetric"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "before": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "kind": "removed",
+          "path": "references[14cea722-a629-4c69-a06d-94a4a4c9a718].id"
+        },
+        {
+          "before": "14cea722-a629-4c69-a06d-94a4a4c9a718",
+          "kind": "removed",
+          "path": "references[14cea722-a629-4c69-a06d-94a4a4c9a718].name"
+        },
+        {
+          "before": "index-pattern",
+          "kind": "removed",
+          "path": "references[14cea722-a629-4c69-a06d-94a4a4c9a718].type"
+        },
+        {
+          "after": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "kind": "added",
+          "path": "references[filter-ref-d3d7af60-4c81-11e8-b3d7-01146121b73d].id"
+        },
+        {
+          "after": "filter-ref-d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "kind": "added",
+          "path": "references[filter-ref-d3d7af60-4c81-11e8-b3d7-01146121b73d].name"
+        },
+        {
+          "after": "index-pattern",
+          "kind": "added",
+          "path": "references[filter-ref-d3d7af60-4c81-11e8-b3d7-01146121b73d].type"
+        },
+        {
+          "after": [
+            "<layer_0:formula()>"
+          ],
+          "before": [
+            "<layer_0:formula()>",
+            "<layer_0:math()>",
+            "<layer_0:count(___records___)>",
+            "<layer_0:count(___records___)#1>"
+          ],
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columnOrder"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.dataType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.isBucketed"
+        },
+        {
+          "before": "Part of Delayed vs 1 week earlier",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.label"
+        },
+        {
+          "before": "count",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.operationType"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.scale"
+        },
+        {
+          "before": "___records___",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.sourceField"
+        },
+        {
+          "before": "1w",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.timeShift"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.dataType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.isBucketed"
+        },
+        {
+          "before": "Part of Delayed vs 1 week earlier",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.label"
+        },
+        {
+          "before": "count",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.operationType"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.scale"
+        },
+        {
+          "before": "___records___",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.sourceField"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.params.isFormulaBroken"
+        },
+        {
+          "after": [],
+          "before": [
+            "<layer_0:math()>"
+          ],
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.references"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.scale"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.dataType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.isBucketed"
+        },
+        {
+          "before": "Part of Delayed vs 1 week earlier",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.label"
+        },
+        {
+          "before": "math",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.operationType"
+        },
+        {
+          "before": [
+            {
+              "args": [
+                "<layer_0:count(___records___)>",
+                "<layer_0:count(___records___)#1>"
+              ],
+              "location": {
+                "max": 28,
+                "min": 0
+              },
+              "name": "divide",
+              "text": "count() / count(shift='1w') ",
+              "type": "function"
+            },
+            1
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.args"
+        },
+        {
+          "before": 31,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.location.max"
+        },
+        {
+          "before": 0,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.location.min"
+        },
+        {
+          "before": "subtract",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.name"
+        },
+        {
+          "before": "count() / count(shift='1w') - 1",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.text"
+        },
+        {
+          "before": "function",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.type"
+        },
+        {
+          "before": [
+            "<layer_0:count(___records___)>",
+            "<layer_0:count(___records___)#1>"
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.references"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.sampling"
+        },
+        {
+          "before": "appState",
+          "kind": "removed",
+          "path": "state.filters[0].$state.store"
+        },
+        {
+          "after": "Cancelled",
+          "kind": "added",
+          "path": "state.filters[0].meta.field"
+        },
+        {
+          "after": "filter-ref-d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "before": "14cea722-a629-4c69-a06d-94a4a4c9a718",
+          "kind": "changed",
+          "path": "state.filters[0].meta.index"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.filters[0].meta.negate"
+        },
+        {
+          "after": "compact",
+          "kind": "added",
+          "path": "state.visualization.density"
+        },
+        {
+          "after": "right",
+          "kind": "added",
+          "path": "state.visualization.primaryAlign"
+        },
+        {
+          "after": "bottom",
+          "kind": "added",
+          "path": "state.visualization.primaryPosition"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.showBar"
+        },
+        {
+          "after": "left",
+          "kind": "added",
+          "path": "state.visualization.titlesTextAlign"
+        },
+        {
+          "after": "default",
+          "kind": "added",
+          "path": "state.visualization.valueFontMode"
+        }
+      ],
+      "chartType": "metric",
+      "dashboard": "sample-flights",
+      "panel": [],
+      "panelId": "2e33ade5-96e5-40b4-b460-493e5d4fa834",
+      "status": "compared",
+      "title": "",
+      "visualizationType": "lnsMetric"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "before": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].id"
+        },
+        {
+          "before": "indexpattern-datasource-current-indexpattern",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].name"
+        },
+        {
+          "before": "index-pattern",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].type"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.customLabel"
+        },
+        {
+          "after": "",
+          "before": "Count of records",
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.label"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.params.emptyAsNull"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(timestamp)>.customLabel"
+        },
+        {
+          "after": "",
+          "before": "timestamp",
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(timestamp)>.label"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(timestamp)>.params.dropPartials"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(timestamp)>.params.ignoreTimeRange"
+        },
+        {
+          "before": "interval",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(timestamp)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.sampling"
+        },
+        {
+          "before": "None",
+          "kind": "removed",
+          "path": "state.visualization.fittingFunction"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.hideEndzones"
+        },
+        {
+          "after": 0,
+          "kind": "added",
+          "path": "state.visualization.labelsOrientation.x"
+        },
+        {
+          "after": 0,
+          "kind": "added",
+          "path": "state.visualization.labelsOrientation.yLeft"
+        },
+        {
+          "after": 0,
+          "kind": "added",
+          "path": "state.visualization.labelsOrientation.yRight"
+        },
+        {
+          "before": "top",
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].position"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].showGridlines"
+        },
+        {
+          "after": [
+            {
+              "axisMode": "left",
+              "forAccessor": "<layer_0:count(___records___)>"
+            }
+          ],
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_0>].yConfig"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.visualization.legend.maxLines"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.visualization.minBarHeight"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.showCurrentTimeMarker"
+        },
+        {
+          "after": "dataBounds",
+          "kind": "added",
+          "path": "state.visualization.xExtent.mode"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.xExtent.niceValues"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.yLeftExtent.niceValues"
+        },
+        {
+          "after": "linear",
+          "kind": "added",
+          "path": "state.visualization.yLeftScale"
+        },
+        {
+          "before": 0,
+          "kind": "removed",
+          "path": "state.visualization.yRightExtent.lowerBound"
+        },
+        {
+          "before": "custom",
+          "kind": "removed",
+          "path": "state.visualization.yRightExtent.mode"
+        },
+        {
+          "before": 1,
+          "kind": "removed",
+          "path": "state.visualization.yRightExtent.upperBound"
+        }
+      ],
+      "chartType": "xy",
+      "dashboard": "sample-flights",
+      "panel": [],
+      "panelId": "086ac2e9-dd16-4b45-92b8-1e43ff7e3f65",
+      "status": "compared",
+      "title": "[Flights] Flight count",
+      "visualizationType": "lnsXY"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "before": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].id"
+        },
+        {
+          "before": "indexpattern-datasource-current-indexpattern",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].name"
+        },
+        {
+          "before": "index-pattern",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].type"
+        },
+        {
+          "after": [
+            "<layer_0:terms(OriginCityName)>",
+            "<layer_0:formula()>",
+            "<layer_0:formula()#1>"
+          ],
+          "before": [
+            "<layer_0:terms(OriginCityName)>",
+            "<layer_0:formula()>",
+            "<layer_0:count(___records___)>",
+            "<layer_0:count(___records___)#1>",
+            "<layer_0:math()>",
+            "<layer_0:count(___records___)#2>",
+            "<layer_0:count(___records___)#3>",
+            "<layer_0:math()#1>",
+            "<layer_0:formula()#1>"
+          ],
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columnOrder"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.dataType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.isBucketed"
+        },
+        {
+          "before": "Part of Delay %",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.label"
+        },
+        {
+          "before": "count",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.operationType"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.scale"
+        },
+        {
+          "before": "___records___",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#1>.sourceField"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#2>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#2>.dataType"
+        },
+        {
+          "before": "kuery",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#2>.filter.language"
+        },
+        {
+          "before": "Cancelled: true",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#2>.filter.query"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#2>.isBucketed"
+        },
+        {
+          "before": "Part of Cancel %",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#2>.label"
+        },
+        {
+          "before": "count",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#2>.operationType"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#2>.scale"
+        },
+        {
+          "before": "___records___",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#2>.sourceField"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#3>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#3>.dataType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#3>.isBucketed"
+        },
+        {
+          "before": "Part of Cancel %",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#3>.label"
+        },
+        {
+          "before": "count",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#3>.operationType"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#3>.scale"
+        },
+        {
+          "before": "___records___",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)#3>.sourceField"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.dataType"
+        },
+        {
+          "before": "kuery",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.filter.language"
+        },
+        {
+          "before": "FlightDelay : true ",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.filter.query"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.isBucketed"
+        },
+        {
+          "before": "Part of Delay %",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.label"
+        },
+        {
+          "before": "count",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.operationType"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.scale"
+        },
+        {
+          "before": "___records___",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.sourceField"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()#1>.params.format.params.compact"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()#1>.params.isFormulaBroken"
+        },
+        {
+          "after": [],
+          "before": [
+            "<layer_0:math()#1>"
+          ],
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()#1>.references"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()#1>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.params.format.params.compact"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.params.isFormulaBroken"
+        },
+        {
+          "after": [],
+          "before": [
+            "<layer_0:math()>"
+          ],
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.references"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:formula()>.scale"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()#1>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()#1>.dataType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()#1>.isBucketed"
+        },
+        {
+          "before": "Part of Cancel %",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()#1>.label"
+        },
+        {
+          "before": "math",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()#1>.operationType"
+        },
+        {
+          "before": [
+            "<layer_0:count(___records___)#2>",
+            "<layer_0:count(___records___)#3>"
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()#1>.params.tinymathAst.args"
+        },
+        {
+          "before": 38,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()#1>.params.tinymathAst.location.max"
+        },
+        {
+          "before": 0,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()#1>.params.tinymathAst.location.min"
+        },
+        {
+          "before": "divide",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()#1>.params.tinymathAst.name"
+        },
+        {
+          "before": "count(kql='Cancelled: true') / count()",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()#1>.params.tinymathAst.text"
+        },
+        {
+          "before": "function",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()#1>.params.tinymathAst.type"
+        },
+        {
+          "before": [
+            "<layer_0:count(___records___)#2>",
+            "<layer_0:count(___records___)#3>"
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()#1>.references"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()#1>.scale"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.customLabel"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.dataType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.isBucketed"
+        },
+        {
+          "before": "Part of Delay %",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.label"
+        },
+        {
+          "before": "math",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.operationType"
+        },
+        {
+          "before": [
+            "<layer_0:count(___records___)>",
+            "<layer_0:count(___records___)#1>"
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.args"
+        },
+        {
+          "before": 42,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.location.max"
+        },
+        {
+          "before": 0,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.location.min"
+        },
+        {
+          "before": "divide",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.name"
+        },
+        {
+          "before": "count(kql='FlightDelay : true ') / count()",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.text"
+        },
+        {
+          "before": "function",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.params.tinymathAst.type"
+        },
+        {
+          "before": [
+            "<layer_0:count(___records___)>",
+            "<layer_0:count(___records___)#1>"
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.references"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:math()>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(OriginCityName)>.customLabel"
+        },
+        {
+          "after": "",
+          "before": "Top values of OriginCityName",
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(OriginCityName)>.label"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(OriginCityName)>.params.orderBy.fallback"
+        },
+        {
+          "after": "terms",
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(OriginCityName)>.params.parentFormat.id"
+        },
+        {
+          "before": "ordinal",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(OriginCityName)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.sampling"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:formula()#1>].hidden"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:formula()#1>].isMetric"
+        },
+        {
+          "after": "all",
+          "before": "above",
+          "kind": "changed",
+          "path": "state.visualization.columns[<layer_0:formula()#1>].palette.params.continuity"
+        },
+        {
+          "before": 0,
+          "kind": "removed",
+          "path": "state.visualization.columns[<layer_0:formula()#1>].palette.params.rangeMin"
+        },
+        {
+          "after": "percent",
+          "before": "number",
+          "kind": "changed",
+          "path": "state.visualization.columns[<layer_0:formula()#1>].palette.params.rangeType"
+        },
+        {
+          "before": [
+            {
+              "color": "#fcdedc",
+              "stop": 0
+            },
+            {
+              "color": "#fec3bd",
+              "stop": 0.2
+            },
+            {
+              "color": "#fea79e",
+              "stop": 0.4
+            },
+            {
+              "color": "#fb8b81",
+              "stop": 0.6
+            },
+            {
+              "color": "#f66d64",
+              "stop": 0.8
+            }
+          ],
+          "kind": "removed",
+          "path": "state.visualization.columns[<layer_0:formula()#1>].palette.params.stops"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:formula()>].hidden"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:formula()>].isMetric"
+        },
+        {
+          "after": "all",
+          "before": "above",
+          "kind": "changed",
+          "path": "state.visualization.columns[<layer_0:formula()>].palette.params.continuity"
+        },
+        {
+          "before": 0,
+          "kind": "removed",
+          "path": "state.visualization.columns[<layer_0:formula()>].palette.params.rangeMin"
+        },
+        {
+          "after": "percent",
+          "before": "number",
+          "kind": "changed",
+          "path": "state.visualization.columns[<layer_0:formula()>].palette.params.rangeType"
+        },
+        {
+          "before": [
+            {
+              "color": "#fcdedc",
+              "stop": 0
+            },
+            {
+              "color": "#fec3bd",
+              "stop": 0.2
+            },
+            {
+              "color": "#fea79e",
+              "stop": 0.4
+            },
+            {
+              "color": "#fb8b81",
+              "stop": 0.6
+            },
+            {
+              "color": "#f66d64",
+              "stop": 0.8
+            }
+          ],
+          "kind": "removed",
+          "path": "state.visualization.columns[<layer_0:formula()>].palette.params.stops"
+        },
+        {
+          "after": "left",
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:terms(OriginCityName)>].alignment"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:terms(OriginCityName)>].hidden"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:terms(OriginCityName)>].isMetric"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:terms(OriginCityName)>].oneClickFilter"
+        },
+        {
+          "after": "normal",
+          "kind": "added",
+          "path": "state.visualization.density"
+        },
+        {
+          "after": "custom",
+          "before": "single",
+          "kind": "changed",
+          "path": "state.visualization.rowHeight"
+        },
+        {
+          "after": "",
+          "before": "Cities by delay, cancellation",
+          "kind": "changed",
+          "path": "title"
+        }
+      ],
+      "chartType": "data_table",
+      "dashboard": "sample-flights",
+      "panel": [],
+      "panelId": "fb86b32f-fb7a-45cf-9511-f366fef51bbd",
+      "status": "compared",
+      "title": "[Flights] Most delayed cities",
+      "visualizationType": "lnsDatatable"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "before": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].id"
+        },
+        {
+          "before": "indexpattern-datasource-current-indexpattern",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].name"
+        },
+        {
+          "before": "index-pattern",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].type"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.customLabel"
+        },
+        {
+          "after": "",
+          "before": "Count of records",
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.label"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.params.emptyAsNull"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(timestamp)>.customLabel"
+        },
+        {
+          "after": "",
+          "before": "timestamp",
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(timestamp)>.label"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(timestamp)>.params.dropPartials"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(timestamp)>.params.ignoreTimeRange"
+        },
+        {
+          "before": "interval",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(timestamp)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(FlightDelayType)>.customLabel"
+        },
+        {
+          "after": "",
+          "before": "Top values of FlightDelayType",
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(FlightDelayType)>.label"
+        },
+        {
+          "after": "terms",
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(FlightDelayType)>.params.parentFormat.id"
+        },
+        {
+          "before": "ordinal",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(FlightDelayType)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.sampling"
+        },
+        {
+          "before": "None",
+          "kind": "removed",
+          "path": "state.visualization.fittingFunction"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.hideEndzones"
+        },
+        {
+          "after": 0,
+          "kind": "added",
+          "path": "state.visualization.labelsOrientation.x"
+        },
+        {
+          "after": 0,
+          "kind": "added",
+          "path": "state.visualization.labelsOrientation.yLeft"
+        },
+        {
+          "after": 0,
+          "kind": "added",
+          "path": "state.visualization.labelsOrientation.yRight"
+        },
+        {
+          "before": "top",
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].position"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].showGridlines"
+        },
+        {
+          "after": [
+            {
+              "axisMode": "left",
+              "forAccessor": "<layer_0:count(___records___)>"
+            }
+          ],
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_0>].yConfig"
+        },
+        {
+          "before": "auto",
+          "kind": "removed",
+          "path": "state.visualization.legend.legendSize"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.visualization.legend.maxLines"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.visualization.minBarHeight"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.showCurrentTimeMarker"
+        },
+        {
+          "after": "dataBounds",
+          "kind": "added",
+          "path": "state.visualization.xExtent.mode"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.xExtent.niceValues"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.yLeftExtent.niceValues"
+        },
+        {
+          "after": "linear",
+          "kind": "added",
+          "path": "state.visualization.yLeftScale"
+        },
+        {
+          "before": "full",
+          "kind": "removed",
+          "path": "state.visualization.yRightExtent.mode"
+        }
+      ],
+      "chartType": "xy",
+      "dashboard": "sample-flights",
+      "panel": [],
+      "panelId": "0cc42484-16f7-42ec-b38c-9bf8be69cde7",
+      "status": "compared",
+      "title": "[Flights] Delay Type",
+      "visualizationType": "lnsXY"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "before": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "kind": "removed",
+          "path": "references[filter-index-pattern-0].id"
+        },
+        {
+          "before": "filter-index-pattern-0",
+          "kind": "removed",
+          "path": "references[filter-index-pattern-0].name"
+        },
+        {
+          "before": "index-pattern",
+          "kind": "removed",
+          "path": "references[filter-index-pattern-0].type"
+        },
+        {
+          "after": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "kind": "added",
+          "path": "references[filter-ref-d3d7af60-4c81-11e8-b3d7-01146121b73d].id"
+        },
+        {
+          "after": "filter-ref-d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "kind": "added",
+          "path": "references[filter-ref-d3d7af60-4c81-11e8-b3d7-01146121b73d].name"
+        },
+        {
+          "after": "index-pattern",
+          "kind": "added",
+          "path": "references[filter-ref-d3d7af60-4c81-11e8-b3d7-01146121b73d].type"
+        },
+        {
+          "before": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].id"
+        },
+        {
+          "before": "indexpattern-datasource-current-indexpattern",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].name"
+        },
+        {
+          "before": "index-pattern",
+          "kind": "removed",
+          "path": "references[indexpattern-datasource-current-indexpattern].type"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.customLabel"
+        },
+        {
+          "after": "",
+          "before": "Count of records",
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.label"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.params.emptyAsNull"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(FlightDelayType)>.customLabel"
+        },
+        {
+          "after": "",
+          "before": "Top values of FlightDelayType",
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(FlightDelayType)>.label"
+        },
+        {
+          "after": "terms",
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(FlightDelayType)>.params.parentFormat.id"
+        },
+        {
+          "before": "ordinal",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(FlightDelayType)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.sampling"
+        },
+        {
+          "before": "appState",
+          "kind": "removed",
+          "path": "state.filters[0].$state.store"
+        },
+        {
+          "after": "FlightDelayType",
+          "kind": "added",
+          "path": "state.filters[0].meta.field"
+        },
+        {
+          "after": "filter-ref-d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "before": "filter-index-pattern-0",
+          "kind": "changed",
+          "path": "state.filters[0].meta.index"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_0>].allowMultipleMetrics"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_0>].legendMaxLines"
+        },
+        {
+          "after": "right",
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_0>].legendPosition"
+        },
+        {
+          "after": 2,
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_0>].percentDecimals"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_0>].truncateLegend"
+        }
+      ],
+      "chartType": "pie",
+      "dashboard": "sample-flights",
+      "panel": [],
+      "panelId": "5d53db36-2d5a-4adc-af7b-cec4c1a294e0",
+      "status": "compared",
+      "title": "[Flights] Delay Type",
+      "visualizationType": "lnsPie"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.customLabel"
+        },
+        {
+          "after": "",
+          "before": "Count of records",
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.label"
+        },
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(DestWeather)>.customLabel"
+        },
+        {
+          "after": "",
+          "before": "Top 10 values of DestWeather",
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(DestWeather)>.label"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(DestWeather)>.params.excludeIsRegex"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(DestWeather)>.params.includeIsRegex"
+        },
+        {
+          "before": "ordinal",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:terms(DestWeather)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.axisTitlesVisibilitySettings.x"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.axisTitlesVisibilitySettings.yLeft"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.axisTitlesVisibilitySettings.yRight"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.gridlinesVisibilitySettings.x"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.gridlinesVisibilitySettings.yLeft"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.gridlinesVisibilitySettings.yRight"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.hideEndzones"
+        },
+        {
+          "after": 0,
+          "kind": "added",
+          "path": "state.visualization.labelsOrientation.x"
+        },
+        {
+          "after": 0,
+          "kind": "added",
+          "path": "state.visualization.labelsOrientation.yLeft"
+        },
+        {
+          "after": 0,
+          "kind": "added",
+          "path": "state.visualization.labelsOrientation.yRight"
+        },
+        {
+          "before": "top",
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].position"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].showGridlines"
+        },
+        {
+          "after": [
+            {
+              "axisMode": "left",
+              "forAccessor": "<layer_0:count(___records___)>"
+            }
+          ],
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_0>].yConfig"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.visualization.legend.maxLines"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.visualization.minBarHeight"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.showCurrentTimeMarker"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.tickLabelsVisibilitySettings.x"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.tickLabelsVisibilitySettings.yLeft"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.tickLabelsVisibilitySettings.yRight"
+        },
+        {
+          "before": "Empty XY chart",
+          "kind": "removed",
+          "path": "state.visualization.title"
+        },
+        {
+          "after": "dataBounds",
+          "kind": "added",
+          "path": "state.visualization.xExtent.mode"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.xExtent.niceValues"
+        },
+        {
+          "after": "full",
+          "kind": "added",
+          "path": "state.visualization.yLeftExtent.mode"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.yLeftExtent.niceValues"
+        },
+        {
+          "after": "linear",
+          "kind": "added",
+          "path": "state.visualization.yLeftScale"
+        }
+      ],
+      "chartType": "xy",
+      "dashboard": "sample-flights",
+      "panel": [],
+      "panelId": "ecd89a7c-9124-4472-bdc6-9bdbd70d45d5",
+      "status": "compared",
+      "title": "",
+      "visualizationType": "lnsXY"
+    }
+  ]
+}

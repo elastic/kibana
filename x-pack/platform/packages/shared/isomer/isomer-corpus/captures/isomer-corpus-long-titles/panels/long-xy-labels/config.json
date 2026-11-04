@@ -2,35 +2,12 @@
   "dashboard_id": "isomer-corpus-long-titles",
   "in_as_code": true,
   "panel": {
-    "id": "long-xy-labels",
-    "type": "vis",
-    "grid": {
-      "x": 0,
-      "y": 0,
-      "w": 24,
-      "h": 12
-    },
     "config": {
-      "type": "xy",
-      "title": "A panel title long enough to overflow the panel header at every grid width, so truncation, wrapping and tooltips are exercised by each renderer",
-      "legend": {
-        "visibility": "hidden",
-        "placement": "outside",
-        "layout": {
-          "type": "grid",
-          "truncate": {
-            "max_lines": 1
-          }
-        },
-        "position": "right"
-      },
       "axis": {
         "x": {
-          "title": {
-            "visible": true
-          },
-          "ticks": {
-            "visible": true
+          "domain": {
+            "rounding": false,
+            "type": "fit"
           },
           "grid": {
             "visible": true
@@ -38,17 +15,17 @@
           "labels": {
             "orientation": "horizontal"
           },
-          "domain": {
-            "type": "fit",
-            "rounding": false
+          "ticks": {
+            "visible": true
+          },
+          "title": {
+            "visible": true
           }
         },
         "y": {
-          "title": {
-            "visible": true
-          },
-          "ticks": {
-            "visible": true
+          "domain": {
+            "rounding": true,
+            "type": "full"
           },
           "grid": {
             "visible": true
@@ -57,64 +34,87 @@
             "orientation": "horizontal"
           },
           "scale": "linear",
-          "domain": {
-            "type": "full",
-            "rounding": true
-          }
-        }
-      },
-      "styling": {
-        "overlays": {
-          "partial_buckets": {
-            "visible": false
+          "ticks": {
+            "visible": true
           },
-          "current_time_marker": {
-            "visible": false
-          }
-        },
-        "bars": {
-          "minimum_height": 1,
-          "data_labels": {
-            "visible": false
+          "title": {
+            "visible": true
           }
         }
       },
       "layers": [
         {
-          "sampling": 1,
-          "ignore_global_filters": false,
           "data_source": {
-            "type": "data_view_spec",
-            "name": "isomer-corpus-edge-cases",
             "index_pattern": "isomer-corpus-edge-cases",
-            "time_field": "@timestamp"
+            "name": "isomer-corpus-edge-cases",
+            "time_field": "@timestamp",
+            "type": "data_view_spec"
           },
+          "ignore_global_filters": false,
+          "sampling": 1,
           "type": "bar_horizontal",
-          "y": [
-            {
-              "empty_as_null": false,
-              "operation": "count",
-              "axis": "y",
-              "color": {
-                "type": "auto"
-              }
-            }
-          ],
           "x": {
-            "operation": "terms",
             "fields": [
               "long_label"
             ],
             "limit": 10,
+            "operation": "terms",
             "rank_by": {
-              "type": "metric",
+              "direction": "desc",
               "metric_index": 0,
-              "direction": "desc"
+              "type": "metric"
             }
+          },
+          "y": [
+            {
+              "axis": "y",
+              "color": {
+                "type": "auto"
+              },
+              "empty_as_null": false,
+              "operation": "count"
+            }
+          ]
+        }
+      ],
+      "legend": {
+        "layout": {
+          "truncate": {
+            "max_lines": 1
+          },
+          "type": "grid"
+        },
+        "placement": "outside",
+        "position": "right",
+        "visibility": "hidden"
+      },
+      "styling": {
+        "bars": {
+          "data_labels": {
+            "visible": false
+          },
+          "minimum_height": 1
+        },
+        "overlays": {
+          "current_time_marker": {
+            "visible": false
+          },
+          "partial_buckets": {
+            "visible": false
           }
         }
-      ]
+      },
+      "title": "A panel title long enough to overflow the panel header at every grid width, so truncation, wrapping and tooltips are exercised by each renderer",
+      "type": "xy"
     },
-    "inCollapsedSection": false
+    "grid": {
+      "h": 12,
+      "w": 24,
+      "x": 0,
+      "y": 0
+    },
+    "id": "long-xy-labels",
+    "inCollapsedSection": false,
+    "type": "vis"
   }
 }

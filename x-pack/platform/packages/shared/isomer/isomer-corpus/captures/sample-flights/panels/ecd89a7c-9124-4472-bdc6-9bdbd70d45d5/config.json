@@ -2,34 +2,12 @@
   "dashboard_id": "7adfa750-4c81-11e8-b3d7-01146121b73d",
   "in_as_code": true,
   "panel": {
-    "id": "ecd89a7c-9124-4472-bdc6-9bdbd70d45d5",
-    "type": "vis",
-    "grid": {
-      "x": 36,
-      "y": 58,
-      "w": 12,
-      "h": 11
-    },
     "config": {
-      "type": "xy",
-      "legend": {
-        "visibility": "auto",
-        "placement": "outside",
-        "layout": {
-          "type": "grid",
-          "truncate": {
-            "max_lines": 1
-          }
-        },
-        "position": "right"
-      },
       "axis": {
         "x": {
-          "title": {
-            "visible": true
-          },
-          "ticks": {
-            "visible": true
+          "domain": {
+            "rounding": false,
+            "type": "fit"
           },
           "grid": {
             "visible": true
@@ -37,17 +15,17 @@
           "labels": {
             "orientation": "horizontal"
           },
-          "domain": {
-            "type": "fit",
-            "rounding": false
+          "ticks": {
+            "visible": true
+          },
+          "title": {
+            "visible": true
           }
         },
         "y": {
-          "title": {
-            "visible": true
-          },
-          "ticks": {
-            "visible": true
+          "domain": {
+            "rounding": true,
+            "type": "full"
           },
           "grid": {
             "visible": true
@@ -56,70 +34,92 @@
             "orientation": "horizontal"
           },
           "scale": "linear",
-          "domain": {
-            "type": "full",
-            "rounding": true
-          }
-        }
-      },
-      "styling": {
-        "overlays": {
-          "partial_buckets": {
-            "visible": false
+          "ticks": {
+            "visible": true
           },
-          "current_time_marker": {
-            "visible": false
-          }
-        },
-        "bars": {
-          "minimum_height": 1,
-          "data_labels": {
-            "visible": false
+          "title": {
+            "visible": true
           }
         }
       },
       "layers": [
         {
-          "sampling": 1,
-          "ignore_global_filters": false,
-          "data_source": {
-            "type": "data_view_reference",
-            "ref_id": "d3d7af60-4c81-11e8-b3d7-01146121b73d"
-          },
-          "type": "bar_horizontal",
           "breakdown_by": {
-            "operation": "terms",
+            "color": {
+              "mapping": [],
+              "mode": "categorical",
+              "palette": "LEGACY_PALETTE_temperature"
+            },
             "fields": [
               "DestWeather"
             ],
             "limit": 10,
+            "operation": "terms",
             "other_bucket": {
               "include_documents_without_field": false
             },
             "rank_by": {
-              "type": "metric",
+              "direction": "desc",
               "metric_index": 0,
-              "direction": "desc"
-            },
-            "color": {
-              "mode": "categorical",
-              "palette": "LEGACY_PALETTE_temperature",
-              "mapping": []
+              "type": "metric"
             }
           },
+          "data_source": {
+            "ref_id": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+            "type": "data_view_reference"
+          },
+          "ignore_global_filters": false,
+          "sampling": 1,
+          "type": "bar_horizontal",
           "y": [
             {
-              "empty_as_null": true,
-              "operation": "count",
               "axis": "y",
               "color": {
                 "type": "auto"
-              }
+              },
+              "empty_as_null": true,
+              "operation": "count"
             }
           ]
         }
-      ]
+      ],
+      "legend": {
+        "layout": {
+          "truncate": {
+            "max_lines": 1
+          },
+          "type": "grid"
+        },
+        "placement": "outside",
+        "position": "right",
+        "visibility": "auto"
+      },
+      "styling": {
+        "bars": {
+          "data_labels": {
+            "visible": false
+          },
+          "minimum_height": 1
+        },
+        "overlays": {
+          "current_time_marker": {
+            "visible": false
+          },
+          "partial_buckets": {
+            "visible": false
+          }
+        }
+      },
+      "type": "xy"
     },
-    "inCollapsedSection": false
+    "grid": {
+      "h": 11,
+      "w": 12,
+      "x": 36,
+      "y": 58
+    },
+    "id": "ecd89a7c-9124-4472-bdc6-9bdbd70d45d5",
+    "inCollapsedSection": false,
+    "type": "vis"
   }
 }

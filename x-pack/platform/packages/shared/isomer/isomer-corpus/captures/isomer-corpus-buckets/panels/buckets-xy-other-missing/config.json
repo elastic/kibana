@@ -2,35 +2,12 @@
   "dashboard_id": "isomer-corpus-buckets",
   "in_as_code": true,
   "panel": {
-    "id": "buckets-xy-other-missing",
-    "type": "vis",
-    "grid": {
-      "x": 0,
-      "y": 0,
-      "w": 24,
-      "h": 12
-    },
     "config": {
-      "type": "xy",
-      "title": "Top 5 categories per day, with Other and missing",
-      "legend": {
-        "visibility": "hidden",
-        "placement": "outside",
-        "layout": {
-          "type": "grid",
-          "truncate": {
-            "max_lines": 1
-          }
-        },
-        "position": "right"
-      },
       "axis": {
         "x": {
-          "title": {
-            "visible": true
-          },
-          "ticks": {
-            "visible": true
+          "domain": {
+            "rounding": false,
+            "type": "fit"
           },
           "grid": {
             "visible": true
@@ -38,17 +15,17 @@
           "labels": {
             "orientation": "horizontal"
           },
-          "domain": {
-            "type": "fit",
-            "rounding": false
+          "ticks": {
+            "visible": true
+          },
+          "title": {
+            "visible": true
           }
         },
         "y": {
-          "title": {
-            "visible": true
-          },
-          "ticks": {
-            "visible": true
+          "domain": {
+            "rounding": true,
+            "type": "full"
           },
           "grid": {
             "visible": true
@@ -57,80 +34,103 @@
             "orientation": "horizontal"
           },
           "scale": "linear",
-          "domain": {
-            "type": "full",
-            "rounding": true
-          }
-        }
-      },
-      "styling": {
-        "overlays": {
-          "partial_buckets": {
-            "visible": false
+          "ticks": {
+            "visible": true
           },
-          "current_time_marker": {
-            "visible": false
-          }
-        },
-        "bars": {
-          "minimum_height": 1,
-          "data_labels": {
-            "visible": false
+          "title": {
+            "visible": true
           }
         }
       },
       "layers": [
         {
-          "sampling": 1,
-          "ignore_global_filters": false,
-          "data_source": {
-            "type": "data_view_spec",
-            "name": "isomer-corpus-edge-cases",
-            "index_pattern": "isomer-corpus-edge-cases",
-            "time_field": "@timestamp"
-          },
-          "type": "bar_stacked",
           "breakdown_by": {
-            "operation": "terms",
+            "color": {
+              "mapping": [],
+              "mode": "categorical",
+              "palette": "default"
+            },
             "fields": [
               "category"
             ],
             "limit": 5,
+            "operation": "terms",
             "other_bucket": {
               "include_documents_without_field": true
             },
             "rank_by": {
-              "type": "metric",
+              "direction": "desc",
               "metric_index": 0,
-              "direction": "desc"
-            },
-            "color": {
-              "mode": "categorical",
-              "palette": "default",
-              "mapping": []
+              "type": "metric"
             }
+          },
+          "data_source": {
+            "index_pattern": "isomer-corpus-edge-cases",
+            "name": "isomer-corpus-edge-cases",
+            "time_field": "@timestamp",
+            "type": "data_view_spec"
+          },
+          "ignore_global_filters": false,
+          "sampling": 1,
+          "type": "bar_stacked",
+          "x": {
+            "drop_partial_intervals": false,
+            "field": "@timestamp",
+            "include_empty_rows": true,
+            "operation": "date_histogram",
+            "suggested_interval": "1d",
+            "use_original_time_range": false
           },
           "y": [
             {
-              "empty_as_null": false,
-              "operation": "count",
               "axis": "y",
               "color": {
                 "type": "auto"
-              }
+              },
+              "empty_as_null": false,
+              "operation": "count"
             }
-          ],
-          "x": {
-            "operation": "date_histogram",
-            "field": "@timestamp",
-            "suggested_interval": "1d",
-            "use_original_time_range": false,
-            "include_empty_rows": true,
-            "drop_partial_intervals": false
+          ]
+        }
+      ],
+      "legend": {
+        "layout": {
+          "truncate": {
+            "max_lines": 1
+          },
+          "type": "grid"
+        },
+        "placement": "outside",
+        "position": "right",
+        "visibility": "hidden"
+      },
+      "styling": {
+        "bars": {
+          "data_labels": {
+            "visible": false
+          },
+          "minimum_height": 1
+        },
+        "overlays": {
+          "current_time_marker": {
+            "visible": false
+          },
+          "partial_buckets": {
+            "visible": false
           }
         }
-      ]
+      },
+      "title": "Top 5 categories per day, with Other and missing",
+      "type": "xy"
     },
-    "inCollapsedSection": false
+    "grid": {
+      "h": 12,
+      "w": 24,
+      "x": 0,
+      "y": 0
+    },
+    "id": "buckets-xy-other-missing",
+    "inCollapsedSection": false,
+    "type": "vis"
   }
 }

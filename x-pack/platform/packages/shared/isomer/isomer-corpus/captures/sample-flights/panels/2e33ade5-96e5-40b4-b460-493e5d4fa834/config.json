@@ -2,64 +2,64 @@
   "dashboard_id": "7adfa750-4c81-11e8-b3d7-01146121b73d",
   "in_as_code": true,
   "panel": {
-    "id": "2e33ade5-96e5-40b4-b460-493e5d4fa834",
-    "type": "vis",
-    "grid": {
-      "x": 40,
-      "y": 4,
-      "w": 8,
-      "h": 4
-    },
     "config": {
-      "type": "metric",
+      "data_source": {
+        "ref_id": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+        "type": "data_view_reference"
+      },
       "filters": [
         {
-          "disabled": false,
-          "data_view_id": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
-          "type": "condition",
           "condition": {
             "field": "Cancelled",
             "operator": "is",
             "value": true
-          }
+          },
+          "data_view_id": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "disabled": false,
+          "type": "condition"
+        }
+      ],
+      "ignore_global_filters": false,
+      "metrics": [
+        {
+          "color": {
+            "type": "auto"
+          },
+          "format": {
+            "compact": true,
+            "decimals": 1,
+            "type": "percent"
+          },
+          "formula": "count() / count(shift='1w') - 1",
+          "label": "Cancelled vs 1 week earlier",
+          "operation": "formula",
+          "type": "primary"
         }
       ],
       "sampling": 1,
-      "ignore_global_filters": false,
-      "data_source": {
-        "type": "data_view_reference",
-        "ref_id": "d3d7af60-4c81-11e8-b3d7-01146121b73d"
-      },
       "styling": {
         "density": "compact",
         "primary": {
-          "position": "bottom",
           "labels": {
             "alignment": "left"
           },
+          "position": "bottom",
           "value": {
             "alignment": "right",
             "sizing": "auto"
           }
         }
       },
-      "metrics": [
-        {
-          "format": {
-            "type": "percent",
-            "decimals": 1,
-            "compact": true
-          },
-          "label": "Cancelled vs 1 week earlier",
-          "operation": "formula",
-          "formula": "count() / count(shift='1w') - 1",
-          "type": "primary",
-          "color": {
-            "type": "auto"
-          }
-        }
-      ]
+      "type": "metric"
     },
-    "inCollapsedSection": false
+    "grid": {
+      "h": 4,
+      "w": 8,
+      "x": 40,
+      "y": 4
+    },
+    "id": "2e33ade5-96e5-40b4-b460-493e5d4fa834",
+    "inCollapsedSection": false,
+    "type": "vis"
   }
 }

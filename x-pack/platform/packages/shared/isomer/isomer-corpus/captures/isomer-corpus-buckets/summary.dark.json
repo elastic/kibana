@@ -1,67 +1,67 @@
 {
   "dashboard_id": "isomer-corpus-buckets",
-  "title": "Isomer corpus: buckets",
-  "theme": "dark",
   "debug_state_complete": true,
   "dropped_from_as_code": {
-    "warnings": 0,
-    "rendered": 0
+    "rendered": 0,
+    "warnings": 0
   },
   "panels": [
     {
+      "charts": 1,
+      "charts_with_debug_state": 1,
+      "data_grids": 0,
+      "error": null,
       "id": "buckets-xy-other-missing",
       "in_as_code": true,
-      "status": "captured",
-      "charts": 1,
-      "charts_with_debug_state": 1,
-      "metrics": 0,
-      "data_grids": 0,
       "inspector": "ok",
-      "error": null
+      "metrics": 0,
+      "status": "captured"
     },
     {
+      "charts": 1,
+      "charts_with_debug_state": 1,
+      "data_grids": 0,
+      "error": null,
       "id": "buckets-pie-other",
       "in_as_code": true,
-      "status": "captured",
-      "charts": 1,
-      "charts_with_debug_state": 1,
-      "metrics": 0,
-      "data_grids": 0,
       "inspector": "ok",
-      "error": null
+      "metrics": 0,
+      "status": "captured"
     },
     {
+      "charts": 0,
+      "charts_with_debug_state": 0,
+      "data_grids": 1,
+      "error": null,
       "id": "buckets-table-multivalue",
       "in_as_code": true,
-      "status": "captured",
-      "charts": 0,
-      "charts_with_debug_state": 0,
-      "metrics": 0,
-      "data_grids": 1,
       "inspector": "ok",
-      "error": null
+      "metrics": 0,
+      "status": "captured"
     },
     {
-      "id": "buckets-xy-multivalue-esql",
-      "in_as_code": true,
-      "status": "captured",
       "charts": 1,
       "charts_with_debug_state": 1,
-      "metrics": 0,
       "data_grids": 0,
+      "error": null,
+      "id": "buckets-xy-multivalue-esql",
+      "in_as_code": true,
       "inspector": "ok",
-      "error": null
+      "metrics": 0,
+      "status": "captured"
     },
     {
-      "id": "buckets-table-esql-missing",
-      "in_as_code": true,
-      "status": "captured",
       "charts": 0,
       "charts_with_debug_state": 0,
-      "metrics": 0,
       "data_grids": 1,
+      "error": null,
+      "id": "buckets-table-esql-missing",
+      "in_as_code": true,
       "inspector": "ok",
-      "error": null
+      "metrics": 0,
+      "status": "captured"
     }
-  ]
+  ],
+  "theme": "dark",
+  "title": "Isomer corpus: buckets"
 }

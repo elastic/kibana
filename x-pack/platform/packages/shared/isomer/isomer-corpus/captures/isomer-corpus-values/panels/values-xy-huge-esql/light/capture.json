@@ -1,91 +1,301 @@
 {
-  "dashboard_id": "isomer-corpus-values",
-  "panel_id": "values-xy-huge-esql",
-  "in_as_code": true,
-  "panel_type": "vis",
   "chart_type": "xy",
-  "theme": "light",
   "context": {
+    "grid": {
+      "h": 12,
+      "w": 24,
+      "x": 0,
+      "y": 18
+    },
     "now": "2025-01-15T12:00:00.000Z",
-    "time_range": {
-      "relative": {
-        "from": "2024-01-01T00:00:00.000Z",
-        "to": "2024-01-08T00:00:00.000Z"
-      },
-      "absolute": {
-        "from": "2024-01-01T00:00:00.000Z",
-        "to": "2024-01-08T00:00:00.000Z"
-      }
-    },
-    "time_picker": {
-      "start": "Jan 1, 2024 @ 00:00:00.000",
-      "end": "Jan 8, 2024 @ 00:00:00.000"
-    },
-    "ui_settings": {
-      "dateFormat:tz": "UTC"
-    },
     "page": {
-      "themeTag": "borealislight",
-      "timeZone": "America/Toronto",
+      "devicePixelRatio": 2,
       "locale": "en",
       "navigatorLanguages": [
         "en-US"
       ],
-      "devicePixelRatio": 2,
-      "viewport": {
-        "width": 1600,
-        "height": 1057
-      },
+      "themeTag": "borealislight",
+      "timeZone": "America/Toronto",
+      "url": "http://localhost:5620/app/dashboards#/view/isomer-corpus-values?_g=(time:(from:%272024-01-01T00:00:00.000Z%27,to:%272024-01-08T00:00:00.000Z%27))",
       "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
-      "url": "http://localhost:5620/app/dashboards#/view/isomer-corpus-values?_g=(time:(from:%272024-01-01T00:00:00.000Z%27,to:%272024-01-08T00:00:00.000Z%27))"
-    },
-    "grid": {
-      "x": 0,
-      "y": 18,
-      "w": 24,
-      "h": 12
+      "viewport": {
+        "height": 1057,
+        "width": 1600
+      }
     },
     "size": {
-      "width": 782.3125,
-      "height": 328
+      "height": 328,
+      "width": 787.9375
+    },
+    "time_picker": {
+      "end": "Jan 8, 2024 @ 00:00:00.000",
+      "start": "Jan 1, 2024 @ 00:00:00.000"
+    },
+    "time_range": {
+      "absolute": {
+        "from": "2024-01-01T00:00:00.000Z",
+        "to": "2024-01-08T00:00:00.000Z"
+      },
+      "relative": {
+        "from": "2024-01-01T00:00:00.000Z",
+        "to": "2024-01-08T00:00:00.000Z"
+      }
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
     }
   },
+  "dashboard_id": "isomer-corpus-values",
   "debug_state_complete": true,
+  "in_as_code": true,
+  "inspector": {
+    "adapters": [
+      "requests",
+      "tables",
+      "expression"
+    ],
+    "status": "ok",
+    "tables": {
+      "area_0": {
+        "columns": [
+          {
+            "id": "area_0_y_0",
+            "isComputedColumn": true,
+            "isNull": false,
+            "meta": {
+              "dimensionName": "Vertical axis",
+              "dimensionType": "y",
+              "esType": "double",
+              "params": {
+                "id": "number"
+              },
+              "sourceParams": {
+                "indexPattern": "isomer-corpus-edge-cases",
+                "isSourceFieldFilterable": false,
+                "sourceField": "total"
+              },
+              "type": "number"
+            },
+            "name": "total"
+          },
+          {
+            "id": "area_0_x",
+            "isComputedColumn": true,
+            "isNull": false,
+            "meta": {
+              "dimensionName": "Horizontal axis",
+              "dimensionType": "x",
+              "esMeta": {
+                "bucket": {
+                  "interval": 1,
+                  "unit": "day"
+                }
+              },
+              "esType": "date",
+              "params": {
+                "id": "date"
+              },
+              "sourceParams": {
+                "appliedTimeRange": {
+                  "from": "2024-01-01T00:00:00.000Z",
+                  "to": "2024-01-08T00:00:00.000Z"
+                },
+                "computedDomain": {
+                  "max": 1704585600000,
+                  "min": 1704067200000
+                },
+                "indexPattern": "isomer-corpus-edge-cases",
+                "isSourceFieldFilterable": false,
+                "params": {},
+                "sourceField": "day"
+              },
+              "type": "date"
+            },
+            "name": "day"
+          }
+        ],
+        "meta": {
+          "query": "FROM isomer-corpus-edge-cases | STATS total = SUM(huge) BY day = BUCKET(@timestamp, 1 day) | SORT day",
+          "statistics": {
+            "totalCount": 7
+          },
+          "type": "es_ql"
+        },
+        "rows": [
+          {
+            "area_0_x": 1704067200000,
+            "area_0_y_0": 32700000000000000000
+          },
+          {
+            "area_0_x": 1704153600000,
+            "area_0_y_0": 33600000000000000000
+          },
+          {
+            "area_0_x": 1704240000000,
+            "area_0_y_0": 33690000000000000000
+          },
+          {
+            "area_0_x": 1704326400000,
+            "area_0_y_0": 32700000000000000000
+          },
+          {
+            "area_0_x": 1704412800000,
+            "area_0_y_0": 33600000000000000000
+          },
+          {
+            "area_0_x": 1704499200000,
+            "area_0_y_0": 33690000000000000000
+          },
+          {
+            "area_0_x": 1704585600000,
+            "area_0_y_0": 32700000000000000000
+          }
+        ],
+        "type": "datatable",
+        "warning": "299 Elasticsearch-9.7.0-d943898b0d2905988036390c43e7eb38129f5095 \"No limit defined, adding default limit of [1000]\""
+      }
+    }
+  },
   "panel": {
-    "found": true,
-    "rect": {
-      "x": 8,
-      "y": 657,
-      "width": 782.3125,
-      "height": 328
-    },
-    "title": "Huge values per day (ES|QL)",
-    "renderComplete": true,
-    "errorText": null,
     "charts": [
       {
-        "renderComplete": true,
-        "renderCount": 14,
-        "rect": {
-          "width": 766.3125,
-          "height": 288
-        },
         "debugState": {
-          "legend": {
-            "items": [
-              {
-                "key": "groupId{axis-left}spec{area_0:area_0_x:area_0_y_0:-}yAccessor{area_0_y_0}splitAccessors{}",
-                "name": "total",
-                "color": "#16c5c0"
-              }
-            ]
-          },
+          "annotations": [
+            {
+              "data": {
+                "coordinates": {
+                  "x0": 1704672000000
+                }
+              },
+              "id": "__endzones__",
+              "style": {
+                "fill": "#5A6D8C",
+                "opacity": 0.2,
+                "stroke": "#5A6D8C",
+                "strokeWidth": 0
+              },
+              "type": "rectangle"
+            }
+          ],
+          "areas": [
+            {
+              "color": "#16c5c0",
+              "key": "groupId{axis-left}spec{area_0:area_0_x:area_0_y_0:-}yAccessor{area_0_y_0}splitAccessors{}",
+              "lines": {
+                "y1": {
+                  "path": "M0,14.260000000000002L80.84821428571428,8.680000000000007L161.69642857142856,8.12200000000001L242.54464285714283,14.260000000000002L323.3928571428571,8.680000000000007L404.24107142857144,8.12200000000001L485.08928571428567,14.260000000000002",
+                  "points": [
+                    {
+                      "datum": {
+                        "area_0_x": 1704067200000,
+                        "area_0_y_0": 32700000000000000000
+                      },
+                      "mark": null,
+                      "x": 1704067200000,
+                      "y": 32700000000000000000
+                    },
+                    {
+                      "datum": {
+                        "area_0_x": 1704153600000,
+                        "area_0_y_0": 33600000000000000000
+                      },
+                      "mark": null,
+                      "x": 1704153600000,
+                      "y": 33600000000000000000
+                    },
+                    {
+                      "datum": {
+                        "area_0_x": 1704240000000,
+                        "area_0_y_0": 33690000000000000000
+                      },
+                      "mark": null,
+                      "x": 1704240000000,
+                      "y": 33690000000000000000
+                    },
+                    {
+                      "datum": {
+                        "area_0_x": 1704326400000,
+                        "area_0_y_0": 32700000000000000000
+                      },
+                      "mark": null,
+                      "x": 1704326400000,
+                      "y": 32700000000000000000
+                    },
+                    {
+                      "datum": {
+                        "area_0_x": 1704412800000,
+                        "area_0_y_0": 33600000000000000000
+                      },
+                      "mark": null,
+                      "x": 1704412800000,
+                      "y": 33600000000000000000
+                    },
+                    {
+                      "datum": {
+                        "area_0_x": 1704499200000,
+                        "area_0_y_0": 33690000000000000000
+                      },
+                      "mark": null,
+                      "x": 1704499200000,
+                      "y": 33690000000000000000
+                    },
+                    {
+                      "datum": {
+                        "area_0_x": 1704585600000,
+                        "area_0_y_0": 32700000000000000000
+                      },
+                      "mark": null,
+                      "x": 1704585600000,
+                      "y": 32700000000000000000
+                    }
+                  ],
+                  "visible": true,
+                  "visiblePoints": true
+                }
+              },
+              "name": "total",
+              "path": "M0,14.260000000000002L80.84821428571428,8.680000000000007L161.69642857142856,8.12200000000001L242.54464285714283,14.260000000000002L323.3928571428571,8.680000000000007L404.24107142857144,8.12200000000001L485.08928571428567,14.260000000000002L485.08928571428567,217L404.24107142857144,217L323.3928571428571,217L242.54464285714283,217L161.69642857142856,217L80.84821428571428,217L0,217Z",
+              "visible": true
+            }
+          ],
           "axes": {
             "x": [
               {
+                "gridlines": [
+                  {
+                    "x": 0,
+                    "y": 0
+                  },
+                  {
+                    "x": 80.84821428571428,
+                    "y": 0
+                  },
+                  {
+                    "x": 161.69642857142856,
+                    "y": 0
+                  },
+                  {
+                    "x": 242.54464285714283,
+                    "y": 0
+                  },
+                  {
+                    "x": 323.3928571428571,
+                    "y": 0
+                  },
+                  {
+                    "x": 404.24107142857144,
+                    "y": 0
+                  },
+                  {
+                    "x": 485.08928571428567,
+                    "y": 0
+                  },
+                  {
+                    "x": 565.9375,
+                    "y": 0
+                  }
+                ],
                 "id": "x",
-                "title": "day",
-                "position": "bottom",
                 "labels": [
                   "1st",
                   "January 2024",
@@ -96,6 +306,8 @@
                   "6th",
                   "7th"
                 ],
+                "position": "bottom",
+                "title": "day",
                 "values": [
                   1704067200000,
                   1704067200000,
@@ -105,68 +317,11 @@
                   1704412800000,
                   1704499200000,
                   1704585600000
-                ],
-                "gridlines": [
-                  {
-                    "x": 0,
-                    "y": 0
-                  },
-                  {
-                    "x": 80.04464285714285,
-                    "y": 0
-                  },
-                  {
-                    "x": 160.0892857142857,
-                    "y": 0
-                  },
-                  {
-                    "x": 240.13392857142856,
-                    "y": 0
-                  },
-                  {
-                    "x": 320.1785714285714,
-                    "y": 0
-                  },
-                  {
-                    "x": 400.2232142857143,
-                    "y": 0
-                  },
-                  {
-                    "x": 480.2678571428571,
-                    "y": 0
-                  },
-                  {
-                    "x": 560.3125,
-                    "y": 0
-                  }
                 ]
               }
             ],
             "y": [
               {
-                "id": "axis-left",
-                "title": "total",
-                "position": "left",
-                "labels": [
-                  "0",
-                  "5,000,000,000,000,000,000",
-                  "10,000,000,000,000,000,000",
-                  "15,000,000,000,000,000,000",
-                  "20,000,000,000,000,000,000",
-                  "25,000,000,000,000,000,000",
-                  "30,000,000,000,000,000,000",
-                  "35,000,000,000,000,000,000"
-                ],
-                "values": [
-                  0,
-                  5000000000000000000,
-                  10000000000000000000,
-                  15000000000000000000,
-                  20000000000000000000,
-                  25000000000000000000,
-                  30000000000000000000,
-                  35000000000000000000
-                ],
                 "gridlines": [
                   {
                     "x": 0,
@@ -200,222 +355,65 @@
                     "x": 0,
                     "y": 217
                   }
+                ],
+                "id": "axis-left",
+                "labels": [
+                  "0",
+                  "5,000,000,000,000,000,000",
+                  "10,000,000,000,000,000,000",
+                  "15,000,000,000,000,000,000",
+                  "20,000,000,000,000,000,000",
+                  "25,000,000,000,000,000,000",
+                  "30,000,000,000,000,000,000",
+                  "35,000,000,000,000,000,000"
+                ],
+                "position": "left",
+                "title": "total",
+                "values": [
+                  0,
+                  5000000000000000000,
+                  10000000000000000000,
+                  15000000000000000000,
+                  20000000000000000000,
+                  25000000000000000000,
+                  30000000000000000000,
+                  35000000000000000000
                 ]
               }
             ]
           },
-          "areas": [
-            {
-              "path": "M0,14.260000000000002L80.04464285714285,8.680000000000007L160.0892857142857,8.12200000000001L240.13392857142856,14.260000000000002L320.1785714285714,8.680000000000007L400.2232142857143,8.12200000000001L480.2678571428571,14.260000000000002L480.2678571428571,217L400.2232142857143,217L320.1785714285714,217L240.13392857142856,217L160.0892857142857,217L80.04464285714285,217L0,217Z",
-              "color": "#16c5c0",
-              "key": "groupId{axis-left}spec{area_0:area_0_x:area_0_y_0:-}yAccessor{area_0_y_0}splitAccessors{}",
-              "name": "total",
-              "visible": true,
-              "lines": {
-                "y1": {
-                  "visible": true,
-                  "path": "M0,14.260000000000002L80.04464285714285,8.680000000000007L160.0892857142857,8.12200000000001L240.13392857142856,14.260000000000002L320.1785714285714,8.680000000000007L400.2232142857143,8.12200000000001L480.2678571428571,14.260000000000002",
-                  "points": [
-                    {
-                      "x": 1704067200000,
-                      "y": 32700000000000000000,
-                      "mark": null,
-                      "datum": {
-                        "area_0_y_0": 32700000000000000000,
-                        "area_0_x": 1704067200000
-                      }
-                    },
-                    {
-                      "x": 1704153600000,
-                      "y": 33600000000000000000,
-                      "mark": null,
-                      "datum": {
-                        "area_0_y_0": 33600000000000000000,
-                        "area_0_x": 1704153600000
-                      }
-                    },
-                    {
-                      "x": 1704240000000,
-                      "y": 33690000000000000000,
-                      "mark": null,
-                      "datum": {
-                        "area_0_y_0": 33690000000000000000,
-                        "area_0_x": 1704240000000
-                      }
-                    },
-                    {
-                      "x": 1704326400000,
-                      "y": 32700000000000000000,
-                      "mark": null,
-                      "datum": {
-                        "area_0_y_0": 32700000000000000000,
-                        "area_0_x": 1704326400000
-                      }
-                    },
-                    {
-                      "x": 1704412800000,
-                      "y": 33600000000000000000,
-                      "mark": null,
-                      "datum": {
-                        "area_0_y_0": 33600000000000000000,
-                        "area_0_x": 1704412800000
-                      }
-                    },
-                    {
-                      "x": 1704499200000,
-                      "y": 33690000000000000000,
-                      "mark": null,
-                      "datum": {
-                        "area_0_y_0": 33690000000000000000,
-                        "area_0_x": 1704499200000
-                      }
-                    },
-                    {
-                      "x": 1704585600000,
-                      "y": 32700000000000000000,
-                      "mark": null,
-                      "datum": {
-                        "area_0_y_0": 32700000000000000000,
-                        "area_0_x": 1704585600000
-                      }
-                    }
-                  ],
-                  "visiblePoints": true
-                }
-              }
-            }
-          ],
-          "lines": [],
           "bars": [],
-          "annotations": [
-            {
-              "data": {
-                "coordinates": {
-                  "x0": 1704672000000
-                }
-              },
-              "id": "__endzones__",
-              "style": {
-                "strokeWidth": 0,
-                "opacity": 0.2,
-                "fill": "#5A6D8C",
-                "stroke": "#5A6D8C"
-              },
-              "type": "rectangle"
-            }
-          ]
-        }
-      }
-    ],
-    "metrics": [],
-    "dataGrids": []
-  },
-  "inspector": {
-    "status": "ok",
-    "adapters": [
-      "requests",
-      "tables",
-      "expression"
-    ],
-    "tables": {
-      "area_0": {
-        "type": "datatable",
-        "meta": {
-          "type": "es_ql",
-          "query": "FROM isomer-corpus-edge-cases | STATS total = SUM(huge) BY day = BUCKET(@timestamp, 1 day)",
-          "statistics": {
-            "totalCount": 7
-          }
+          "legend": {
+            "items": [
+              {
+                "color": "#16c5c0",
+                "key": "groupId{axis-left}spec{area_0:area_0_x:area_0_y_0:-}yAccessor{area_0_y_0}splitAccessors{}",
+                "name": "total"
+              }
+            ]
+          },
+          "lines": []
         },
-        "columns": [
-          {
-            "id": "area_0_y_0",
-            "name": "total",
-            "meta": {
-              "type": "number",
-              "esType": "double",
-              "sourceParams": {
-                "indexPattern": "isomer-corpus-edge-cases",
-                "sourceField": "total",
-                "isSourceFieldFilterable": false
-              },
-              "params": {
-                "id": "number"
-              },
-              "dimensionName": "Vertical axis",
-              "dimensionType": "y"
-            },
-            "isNull": false,
-            "isComputedColumn": true
-          },
-          {
-            "id": "area_0_x",
-            "name": "day",
-            "meta": {
-              "type": "date",
-              "esType": "date",
-              "sourceParams": {
-                "appliedTimeRange": {
-                  "from": "2024-01-01T00:00:00.000Z",
-                  "to": "2024-01-08T00:00:00.000Z"
-                },
-                "params": {},
-                "indexPattern": "isomer-corpus-edge-cases",
-                "sourceField": "day",
-                "isSourceFieldFilterable": false,
-                "computedDomain": {
-                  "min": 1704067200000,
-                  "max": 1704585600000
-                }
-              },
-              "params": {
-                "id": "date"
-              },
-              "esMeta": {
-                "bucket": {
-                  "interval": 1,
-                  "unit": "day"
-                }
-              },
-              "dimensionName": "Horizontal axis",
-              "dimensionType": "x"
-            },
-            "isNull": false,
-            "isComputedColumn": true
-          }
-        ],
-        "rows": [
-          {
-            "area_0_y_0": 33690000000000000000,
-            "area_0_x": 1704240000000
-          },
-          {
-            "area_0_y_0": 32700000000000000000,
-            "area_0_x": 1704326400000
-          },
-          {
-            "area_0_y_0": 32700000000000000000,
-            "area_0_x": 1704067200000
-          },
-          {
-            "area_0_y_0": 33690000000000000000,
-            "area_0_x": 1704499200000
-          },
-          {
-            "area_0_y_0": 33600000000000000000,
-            "area_0_x": 1704153600000
-          },
-          {
-            "area_0_y_0": 32700000000000000000,
-            "area_0_x": 1704585600000
-          },
-          {
-            "area_0_y_0": 33600000000000000000,
-            "area_0_x": 1704412800000
-          }
-        ],
-        "warning": "299 Elasticsearch-9.7.0-d943898b0d2905988036390c43e7eb38129f5095 \"No limit defined, adding default limit of [1000]\""
+        "rect": {
+          "height": 288,
+          "width": 771.9375
+        },
+        "renderComplete": true,
+        "renderCount": 14
       }
-    }
-  }
+    ],
+    "dataGrids": [],
+    "errorText": null,
+    "found": true,
+    "metrics": [],
+    "rect": {
+      "height": 328,
+      "width": 787.9375
+    },
+    "renderComplete": true,
+    "title": "Huge values per day (ES|QL)"
+  },
+  "panel_id": "values-xy-huge-esql",
+  "panel_type": "vis",
+  "theme": "light"
 }

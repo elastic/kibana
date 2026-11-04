@@ -2,72 +2,72 @@
   "dashboard_id": "isomer-corpus-long-titles",
   "in_as_code": true,
   "panel": {
-    "id": "long-pie-legend",
-    "type": "vis",
-    "grid": {
-      "x": 24,
-      "y": 0,
-      "w": 12,
-      "h": 12
-    },
     "config": {
-      "type": "pie",
-      "title": "A panel title long enough to overflow the panel header at every grid width, so truncation, wrapping and tooltips are exercised by each renderer",
-      "sampling": 1,
-      "ignore_global_filters": false,
       "data_source": {
-        "type": "data_view_spec",
-        "name": "isomer-corpus-edge-cases",
         "index_pattern": "isomer-corpus-edge-cases",
-        "time_field": "@timestamp"
+        "name": "isomer-corpus-edge-cases",
+        "time_field": "@timestamp",
+        "type": "data_view_spec"
       },
-      "legend": {
-        "nested": false,
-        "truncate_after_lines": 1,
-        "visibility": "auto",
-        "position": "right"
-      },
-      "styling": {
-        "values": {
-          "visible": true,
-          "mode": "percentage",
-          "percent_decimals": 2
-        },
-        "labels": {
-          "visible": true,
-          "position": "outside"
-        },
-        "donut_hole": "m"
-      },
-      "metrics": [
-        {
-          "empty_as_null": false,
-          "operation": "count",
-          "color": {
-            "type": "auto"
-          }
-        }
-      ],
       "group_by": [
         {
-          "operation": "terms",
+          "color": {
+            "mapping": [],
+            "mode": "categorical",
+            "palette": "default"
+          },
           "fields": [
             "long_label"
           ],
           "limit": 10,
+          "operation": "terms",
           "rank_by": {
-            "type": "metric",
+            "direction": "desc",
             "metric_index": 0,
-            "direction": "desc"
-          },
-          "color": {
-            "mode": "categorical",
-            "palette": "default",
-            "mapping": []
+            "type": "metric"
           }
         }
-      ]
+      ],
+      "ignore_global_filters": false,
+      "legend": {
+        "nested": false,
+        "position": "right",
+        "truncate_after_lines": 1,
+        "visibility": "auto"
+      },
+      "metrics": [
+        {
+          "color": {
+            "type": "auto"
+          },
+          "empty_as_null": false,
+          "operation": "count"
+        }
+      ],
+      "sampling": 1,
+      "styling": {
+        "donut_hole": "m",
+        "labels": {
+          "position": "outside",
+          "visible": true
+        },
+        "values": {
+          "mode": "percentage",
+          "percent_decimals": 2,
+          "visible": true
+        }
+      },
+      "title": "A panel title long enough to overflow the panel header at every grid width, so truncation, wrapping and tooltips are exercised by each renderer",
+      "type": "pie"
     },
-    "inCollapsedSection": false
+    "grid": {
+      "h": 12,
+      "w": 12,
+      "x": 24,
+      "y": 0
+    },
+    "id": "long-pie-legend",
+    "inCollapsedSection": false,
+    "type": "vis"
   }
 }

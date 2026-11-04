@@ -2,49 +2,49 @@
   "dashboard_id": "isomer-corpus-values",
   "in_as_code": true,
   "panel": {
-    "id": "values-metric-null",
-    "type": "vis",
-    "grid": {
-      "x": 0,
-      "y": 0,
-      "w": 12,
-      "h": 6
-    },
     "config": {
-      "type": "metric",
-      "title": "Average of a field that is always null",
-      "sampling": 1,
-      "ignore_global_filters": false,
       "data_source": {
-        "type": "data_view_spec",
-        "name": "isomer-corpus-edge-cases",
         "index_pattern": "isomer-corpus-edge-cases",
-        "time_field": "@timestamp"
+        "name": "isomer-corpus-edge-cases",
+        "time_field": "@timestamp",
+        "type": "data_view_spec"
       },
+      "ignore_global_filters": false,
+      "metrics": [
+        {
+          "color": {
+            "type": "auto"
+          },
+          "field": "always_null",
+          "operation": "average",
+          "type": "primary"
+        }
+      ],
+      "sampling": 1,
       "styling": {
         "density": "default",
         "primary": {
-          "position": "bottom",
           "labels": {
             "alignment": "left"
           },
+          "position": "bottom",
           "value": {
             "alignment": "right",
             "sizing": "auto"
           }
         }
       },
-      "metrics": [
-        {
-          "field": "always_null",
-          "operation": "average",
-          "type": "primary",
-          "color": {
-            "type": "auto"
-          }
-        }
-      ]
+      "title": "Average of a field that is always null",
+      "type": "metric"
     },
-    "inCollapsedSection": false
+    "grid": {
+      "h": 6,
+      "w": 12,
+      "x": 0,
+      "y": 0
+    },
+    "id": "values-metric-null",
+    "inCollapsedSection": false,
+    "type": "vis"
   }
 }

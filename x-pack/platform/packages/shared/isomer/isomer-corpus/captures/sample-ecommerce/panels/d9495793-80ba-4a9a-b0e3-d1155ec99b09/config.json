@@ -2,36 +2,12 @@
   "dashboard_id": "722b74f0-b882-11e8-a6d9-e546fe2bba5f",
   "in_as_code": true,
   "panel": {
-    "id": "d9495793-80ba-4a9a-b0e3-d1155ec99b09",
-    "type": "vis",
-    "grid": {
-      "x": 0,
-      "y": 14,
-      "w": 24,
-      "h": 7
-    },
     "config": {
-      "type": "xy",
-      "title": "Transactions per day",
-      "legend": {
-        "visibility": "auto",
-        "placement": "outside",
-        "layout": {
-          "type": "grid",
-          "truncate": {
-            "max_lines": 1
-          }
-        },
-        "position": "right",
-        "size": "auto"
-      },
       "axis": {
         "x": {
-          "title": {
-            "visible": false
-          },
-          "ticks": {
-            "visible": true
+          "domain": {
+            "rounding": false,
+            "type": "fit"
           },
           "grid": {
             "visible": true
@@ -39,17 +15,17 @@
           "labels": {
             "orientation": "horizontal"
           },
-          "domain": {
-            "type": "fit",
-            "rounding": false
+          "ticks": {
+            "visible": true
+          },
+          "title": {
+            "visible": false
           }
         },
         "y": {
-          "title": {
-            "visible": false
-          },
-          "ticks": {
-            "visible": true
+          "domain": {
+            "rounding": true,
+            "type": "full"
           },
           "grid": {
             "visible": true
@@ -58,91 +34,115 @@
             "orientation": "horizontal"
           },
           "scale": "linear",
-          "domain": {
-            "type": "full",
-            "rounding": true
-          }
-        }
-      },
-      "styling": {
-        "overlays": {
-          "partial_buckets": {
-            "visible": false
+          "ticks": {
+            "visible": true
           },
-          "current_time_marker": {
+          "title": {
             "visible": false
           }
-        },
-        "fitting": {
-          "type": "none"
-        },
-        "interpolation": "linear",
-        "points": {
-          "visibility": "auto"
         }
       },
       "layers": [
         {
-          "sampling": 1,
-          "ignore_global_filters": false,
           "data_source": {
-            "type": "data_view_reference",
-            "ref_id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f"
+            "ref_id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+            "type": "data_view_reference"
           },
+          "ignore_global_filters": false,
+          "sampling": 1,
           "type": "line",
+          "x": {
+            "drop_partial_intervals": false,
+            "field": "order_date",
+            "include_empty_rows": true,
+            "operation": "date_histogram",
+            "suggested_interval": "1d",
+            "use_original_time_range": false
+          },
           "y": [
             {
+              "axis": "y",
+              "color": {
+                "type": "auto"
+              },
+              "empty_as_null": false,
+              "field": "products.quantity",
               "label": "Total items",
-              "field": "products.quantity",
-              "empty_as_null": false,
-              "operation": "sum",
+              "operation": "sum"
+            },
+            {
               "axis": "y",
               "color": {
                 "type": "auto"
-              }
-            },
-            {
+              },
+              "empty_as_null": false,
+              "field": "products.quantity",
               "label": "Last week",
-              "time_shift": "1w",
-              "field": "products.quantity",
-              "empty_as_null": false,
               "operation": "sum",
+              "time_shift": "1w"
+            },
+            {
               "axis": "y",
               "color": {
                 "type": "auto"
-              }
-            },
-            {
+              },
+              "empty_as_null": false,
               "label": "Tx. last week",
-              "time_shift": "1w",
-              "empty_as_null": false,
               "operation": "count",
-              "axis": "y",
-              "color": {
-                "type": "auto"
-              }
+              "time_shift": "1w"
             },
             {
-              "label": "Transactions",
-              "empty_as_null": false,
-              "operation": "count",
               "axis": "y",
               "color": {
                 "type": "auto"
-              }
+              },
+              "empty_as_null": false,
+              "label": "Transactions",
+              "operation": "count"
             }
-          ],
-          "x": {
-            "operation": "date_histogram",
-            "field": "order_date",
-            "suggested_interval": "1d",
-            "use_original_time_range": false,
-            "include_empty_rows": true,
-            "drop_partial_intervals": false
-          }
+          ]
         }
-      ]
+      ],
+      "legend": {
+        "layout": {
+          "truncate": {
+            "max_lines": 1
+          },
+          "type": "grid"
+        },
+        "placement": "outside",
+        "position": "right",
+        "size": "auto",
+        "visibility": "auto"
+      },
+      "styling": {
+        "fitting": {
+          "type": "none"
+        },
+        "interpolation": "linear",
+        "overlays": {
+          "current_time_marker": {
+            "visible": false
+          },
+          "partial_buckets": {
+            "visible": false
+          }
+        },
+        "points": {
+          "visibility": "auto"
+        }
+      },
+      "title": "Transactions per day",
+      "type": "xy"
     },
-    "inCollapsedSection": false
+    "grid": {
+      "h": 7,
+      "w": 24,
+      "x": 0,
+      "y": 14
+    },
+    "id": "d9495793-80ba-4a9a-b0e3-d1155ec99b09",
+    "inCollapsedSection": false,
+    "type": "vis"
   }
 }

@@ -2,46 +2,46 @@
   "dashboard_id": "isomer-corpus-values",
   "in_as_code": true,
   "panel": {
-    "id": "values-metric-esql",
-    "type": "vis",
-    "grid": {
-      "x": 0,
-      "y": 30,
-      "w": 12,
-      "h": 6
-    },
     "config": {
-      "type": "metric",
-      "title": "Signed average (ES|QL)",
-      "sampling": 1,
-      "ignore_global_filters": false,
       "data_source": {
-        "type": "esql",
-        "query": "FROM isomer-corpus-edge-cases | STATS signed = AVG(signed)"
+        "query": "FROM isomer-corpus-edge-cases | STATS signed = AVG(signed)",
+        "type": "esql"
       },
+      "ignore_global_filters": false,
+      "metrics": [
+        {
+          "color": {
+            "type": "auto"
+          },
+          "column": "signed",
+          "type": "primary"
+        }
+      ],
+      "sampling": 1,
       "styling": {
         "density": "default",
         "primary": {
-          "position": "bottom",
           "labels": {
             "alignment": "left"
           },
+          "position": "bottom",
           "value": {
             "alignment": "right",
             "sizing": "auto"
           }
         }
       },
-      "metrics": [
-        {
-          "column": "signed",
-          "type": "primary",
-          "color": {
-            "type": "auto"
-          }
-        }
-      ]
+      "title": "Signed average (ES|QL)",
+      "type": "metric"
     },
-    "inCollapsedSection": false
+    "grid": {
+      "h": 6,
+      "w": 12,
+      "x": 0,
+      "y": 30
+    },
+    "id": "values-metric-esql",
+    "inCollapsedSection": false,
+    "type": "vis"
   }
 }

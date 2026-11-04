@@ -2,35 +2,12 @@
   "dashboard_id": "isomer-corpus-values",
   "in_as_code": true,
   "panel": {
-    "id": "values-xy-negative",
-    "type": "vis",
-    "grid": {
-      "x": 0,
-      "y": 6,
-      "w": 24,
-      "h": 12
-    },
     "config": {
-      "type": "xy",
-      "title": "Signed values per 6 hours (crosses zero)",
-      "legend": {
-        "visibility": "hidden",
-        "placement": "outside",
-        "layout": {
-          "type": "grid",
-          "truncate": {
-            "max_lines": 1
-          }
-        },
-        "position": "right"
-      },
       "axis": {
         "x": {
-          "title": {
-            "visible": true
-          },
-          "ticks": {
-            "visible": true
+          "domain": {
+            "rounding": false,
+            "type": "fit"
           },
           "grid": {
             "visible": true
@@ -38,17 +15,17 @@
           "labels": {
             "orientation": "horizontal"
           },
-          "domain": {
-            "type": "fit",
-            "rounding": false
+          "ticks": {
+            "visible": true
+          },
+          "title": {
+            "visible": true
           }
         },
         "y": {
-          "title": {
-            "visible": true
-          },
-          "ticks": {
-            "visible": true
+          "domain": {
+            "rounding": true,
+            "type": "full"
           },
           "grid": {
             "visible": true
@@ -57,61 +34,84 @@
             "orientation": "horizontal"
           },
           "scale": "linear",
-          "domain": {
-            "type": "full",
-            "rounding": true
-          }
-        }
-      },
-      "styling": {
-        "overlays": {
-          "partial_buckets": {
-            "visible": false
+          "ticks": {
+            "visible": true
           },
-          "current_time_marker": {
-            "visible": false
-          }
-        },
-        "bars": {
-          "minimum_height": 1,
-          "data_labels": {
-            "visible": false
+          "title": {
+            "visible": true
           }
         }
       },
       "layers": [
         {
-          "sampling": 1,
-          "ignore_global_filters": false,
           "data_source": {
-            "type": "data_view_spec",
-            "name": "isomer-corpus-edge-cases",
             "index_pattern": "isomer-corpus-edge-cases",
-            "time_field": "@timestamp"
+            "name": "isomer-corpus-edge-cases",
+            "time_field": "@timestamp",
+            "type": "data_view_spec"
           },
+          "ignore_global_filters": false,
+          "sampling": 1,
           "type": "bar",
+          "x": {
+            "drop_partial_intervals": false,
+            "field": "@timestamp",
+            "include_empty_rows": true,
+            "operation": "date_histogram",
+            "suggested_interval": "6h",
+            "use_original_time_range": false
+          },
           "y": [
             {
-              "field": "signed",
-              "empty_as_null": false,
-              "operation": "sum",
               "axis": "y",
               "color": {
                 "type": "auto"
-              }
+              },
+              "empty_as_null": false,
+              "field": "signed",
+              "operation": "sum"
             }
-          ],
-          "x": {
-            "operation": "date_histogram",
-            "field": "@timestamp",
-            "suggested_interval": "6h",
-            "use_original_time_range": false,
-            "include_empty_rows": true,
-            "drop_partial_intervals": false
+          ]
+        }
+      ],
+      "legend": {
+        "layout": {
+          "truncate": {
+            "max_lines": 1
+          },
+          "type": "grid"
+        },
+        "placement": "outside",
+        "position": "right",
+        "visibility": "hidden"
+      },
+      "styling": {
+        "bars": {
+          "data_labels": {
+            "visible": false
+          },
+          "minimum_height": 1
+        },
+        "overlays": {
+          "current_time_marker": {
+            "visible": false
+          },
+          "partial_buckets": {
+            "visible": false
           }
         }
-      ]
+      },
+      "title": "Signed values per 6 hours (crosses zero)",
+      "type": "xy"
     },
-    "inCollapsedSection": false
+    "grid": {
+      "h": 12,
+      "w": 24,
+      "x": 0,
+      "y": 6
+    },
+    "id": "values-xy-negative",
+    "inCollapsedSection": false,
+    "type": "vis"
   }
 }

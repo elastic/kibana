@@ -1,0 +1,1684 @@
+{
+  "dropped": [
+    {
+      "message": "Panel schema not available for panel type: map. Panels without schemas are not supported by dashboard REST endpoints",
+      "panelType": "map"
+    },
+    {
+      "message": "Panel schema not available for panel type: legacy_vis. Panels without schemas are not supported by dashboard REST endpoints",
+      "panelType": "legacy_vis"
+    },
+    {
+      "message": "Panel schema not available for panel type: legacy_vis. Panels without schemas are not supported by dashboard REST endpoints",
+      "panelType": "legacy_vis"
+    },
+    {
+      "message": "Panel schema not available for panel type: legacy_vis. Panels without schemas are not supported by dashboard REST endpoints",
+      "panelType": "legacy_vis"
+    }
+  ],
+  "id": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b",
+  "name": "sample-logs",
+  "panels": [
+    {
+      "api": [],
+      "attributes": [
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.adHocDataViews.<data_view:kibana_sample_data_logs>.allowHidden"
+        },
+        {
+          "before": "@timestamp",
+          "kind": "removed",
+          "path": "state.adHocDataViews.<data_view:kibana_sample_data_logs>.timeFieldName"
+        },
+        {
+          "before": [
+            {
+              "id": "<data_view:kibana_sample_data_logs>",
+              "timeField": "@timestamp",
+              "title": "kibana_sample_data_logs"
+            }
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.indexPatternRefs"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Unique Visitors)>].inMetricDimension"
+        },
+        {
+          "before": "long",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Unique Visitors)>].meta.esType"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "before": "@timestamp",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.timeField"
+        },
+        {
+          "after": [
+            {
+              "id": "<data_view:kibana_sample_data_logs>",
+              "name": "indexpattern-datasource-layer-<layer_0>",
+              "type": "index-pattern"
+            }
+          ],
+          "kind": "added",
+          "path": "state.internalReferences"
+        },
+        {
+          "after": "compact",
+          "kind": "added",
+          "path": "state.visualization.density"
+        },
+        {
+          "before": 5,
+          "kind": "removed",
+          "path": "state.visualization.palette.params.maxSteps"
+        },
+        {
+          "before": "fixed",
+          "kind": "removed",
+          "path": "state.visualization.palette.params.progression"
+        },
+        {
+          "before": 3,
+          "kind": "removed",
+          "path": "state.visualization.palette.params.steps"
+        },
+        {
+          "after": null,
+          "before": 1640,
+          "kind": "changed",
+          "path": "state.visualization.palette.params.stops[2].stop"
+        },
+        {
+          "after": "right",
+          "kind": "added",
+          "path": "state.visualization.primaryAlign"
+        },
+        {
+          "after": "bottom",
+          "kind": "added",
+          "path": "state.visualization.primaryPosition"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.showBar"
+        },
+        {
+          "after": "left",
+          "kind": "added",
+          "path": "state.visualization.titlesTextAlign"
+        },
+        {
+          "after": "default",
+          "kind": "added",
+          "path": "state.visualization.valueFontMode"
+        },
+        {
+          "after": "",
+          "before": "Metric",
+          "kind": "changed",
+          "path": "title"
+        }
+      ],
+      "chartType": "metric",
+      "dashboard": "sample-logs",
+      "panel": [],
+      "panelId": "11",
+      "status": "compared",
+      "title": "",
+      "visualizationType": "lnsMetric"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "before": "ratio",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:count(___records___)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(timestamp)>.customLabel"
+        },
+        {
+          "after": "",
+          "before": "timestamp",
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(timestamp)>.label"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(timestamp)>.params.ignoreTimeRange"
+        },
+        {
+          "before": "interval",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:date_histogram(timestamp)>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:filters()>.customLabel"
+        },
+        {
+          "after": "",
+          "before": "Filters",
+          "kind": "changed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:filters()>.label"
+        },
+        {
+          "before": "ordinal",
+          "kind": "removed",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.columns.<layer_0:filters()>.scale"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.datasourceStates.formBased.layers.<layer_0>.sampling"
+        },
+        {
+          "after": "LINEAR",
+          "kind": "added",
+          "path": "state.visualization.curveType"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.hideEndzones"
+        },
+        {
+          "before": "rgba(115,216,255,1)",
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].yConfig[<layer_0:count(___records___)>].color"
+        },
+        {
+          "after": "annotations_event_0",
+          "before": "bd7548a0-2223-11e8-832f-d5027f3c8a47",
+          "kind": "changed",
+          "path": "state.visualization.layers[<layer_1>].annotations[0].id"
+        },
+        {
+          "after": "byValue",
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_1>].persistanceType"
+        },
+        {
+          "after": "auto",
+          "kind": "added",
+          "path": "state.visualization.pointVisibility"
+        },
+        {
+          "after": "area_percentage_stacked",
+          "before": "bar_stacked",
+          "kind": "changed",
+          "path": "state.visualization.preferredSeriesType"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.showCurrentTimeMarker"
+        },
+        {
+          "before": "hide",
+          "kind": "removed",
+          "path": "state.visualization.valueLabels"
+        },
+        {
+          "after": "dataBounds",
+          "kind": "added",
+          "path": "state.visualization.xExtent.mode"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.xExtent.niceValues"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.yLeftExtent.niceValues"
+        },
+        {
+          "before": "full",
+          "kind": "removed",
+          "path": "state.visualization.yRightExtent.mode"
+        },
+        {
+          "before": "linear",
+          "kind": "removed",
+          "path": "state.visualization.yRightScale"
+        },
+        {
+          "after": "",
+          "before": "[Logs] Response Codes Over Time + Annotations (converted)",
+          "kind": "changed",
+          "path": "title"
+        }
+      ],
+      "chartType": "xy",
+      "dashboard": "sample-logs",
+      "panel": [],
+      "panelId": "15",
+      "status": "compared",
+      "title": "[Logs] Response Codes Over Time + Annotations",
+      "visualizationType": "lnsXY"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.adHocDataViews.<data_view:kibana_sample_data_logs>.allowHidden"
+        },
+        {
+          "before": "@timestamp",
+          "kind": "removed",
+          "path": "state.adHocDataViews.<data_view:kibana_sample_data_logs>.timeFieldName"
+        },
+        {
+          "before": [
+            {
+              "id": "<data_view:kibana_sample_data_logs>",
+              "timeField": "@timestamp",
+              "title": "kibana_sample_data_logs"
+            }
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.indexPatternRefs"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Visits)>].inMetricDimension"
+        },
+        {
+          "before": "long",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Visits)>].meta.esType"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "before": "@timestamp",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.timeField"
+        },
+        {
+          "after": [
+            {
+              "id": "<data_view:kibana_sample_data_logs>",
+              "name": "indexpattern-datasource-layer-<layer_0>",
+              "type": "index-pattern"
+            }
+          ],
+          "kind": "added",
+          "path": "state.internalReferences"
+        },
+        {
+          "after": "compact",
+          "kind": "added",
+          "path": "state.visualization.density"
+        },
+        {
+          "after": "right",
+          "kind": "added",
+          "path": "state.visualization.primaryAlign"
+        },
+        {
+          "after": "bottom",
+          "kind": "added",
+          "path": "state.visualization.primaryPosition"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.showBar"
+        },
+        {
+          "after": "left",
+          "kind": "added",
+          "path": "state.visualization.titlesTextAlign"
+        },
+        {
+          "after": "default",
+          "kind": "added",
+          "path": "state.visualization.valueFontMode"
+        },
+        {
+          "after": "",
+          "before": "Metric",
+          "kind": "changed",
+          "path": "title"
+        }
+      ],
+      "chartType": "metric",
+      "dashboard": "sample-logs",
+      "panel": [],
+      "panelId": "bb94016e-f4a6-49ca-87a9-296a2869d570",
+      "status": "compared",
+      "title": "",
+      "visualizationType": "lnsMetric"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.adHocDataViews.<data_view:kibana_sample_data_logs>.allowHidden"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.adHocDataViews.<data_view:kibana_sample_data_logs>.managed"
+        },
+        {
+          "before": "@timestamp",
+          "kind": "removed",
+          "path": "state.adHocDataViews.<data_view:kibana_sample_data_logs>.timeFieldName"
+        },
+        {
+          "before": [
+            {
+              "id": "<data_view:kibana_sample_data_logs>",
+              "timeField": "@timestamp",
+              "title": "kibana_sample_data_logs"
+            }
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.indexPatternRefs"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(HTTP 5xx (%))>].inMetricDimension"
+        },
+        {
+          "before": "double",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(HTTP 5xx (%))>].meta.esType"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(HTTP 5xx (%))>].params.format.params.compact"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "before": "@timestamp",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.timeField"
+        },
+        {
+          "after": [
+            {
+              "id": "<data_view:kibana_sample_data_logs>",
+              "name": "indexpattern-datasource-layer-<layer_0>",
+              "type": "index-pattern"
+            }
+          ],
+          "kind": "added",
+          "path": "state.internalReferences"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.needsRefresh"
+        },
+        {
+          "after": "compact",
+          "kind": "added",
+          "path": "state.visualization.density"
+        },
+        {
+          "after": "right",
+          "kind": "added",
+          "path": "state.visualization.primaryAlign"
+        },
+        {
+          "after": "bottom",
+          "kind": "added",
+          "path": "state.visualization.primaryPosition"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.showBar"
+        },
+        {
+          "after": "left",
+          "kind": "added",
+          "path": "state.visualization.titlesTextAlign"
+        },
+        {
+          "after": "default",
+          "kind": "added",
+          "path": "state.visualization.valueFontMode"
+        },
+        {
+          "after": "",
+          "before": "Metric",
+          "kind": "changed",
+          "path": "title"
+        }
+      ],
+      "chartType": "metric",
+      "dashboard": "sample-logs",
+      "panel": [
+        {
+          "after": "Metric",
+          "kind": "added",
+          "path": "title"
+        }
+      ],
+      "panelId": "8c1456d4-1993-4ba2-b701-04aca02c9fef",
+      "status": "compared",
+      "title": "Metric",
+      "visualizationType": "lnsMetric"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.adHocDataViews.<data_view:kibana_sample_data_logs>.allowHidden"
+        },
+        {
+          "before": "@timestamp",
+          "kind": "removed",
+          "path": "state.adHocDataViews.<data_view:kibana_sample_data_logs>.timeFieldName"
+        },
+        {
+          "before": [
+            {
+              "id": "<data_view:kibana_sample_data_logs>",
+              "timeField": "@timestamp",
+              "title": "kibana_sample_data_logs"
+            }
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.indexPatternRefs"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(HTTP 4xx (%))>].inMetricDimension"
+        },
+        {
+          "before": "double",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(HTTP 4xx (%))>].meta.esType"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(HTTP 4xx (%))>].params.format.params.compact"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "before": "@timestamp",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.timeField"
+        },
+        {
+          "after": [
+            {
+              "id": "<data_view:kibana_sample_data_logs>",
+              "name": "indexpattern-datasource-layer-<layer_0>",
+              "type": "index-pattern"
+            }
+          ],
+          "kind": "added",
+          "path": "state.internalReferences"
+        },
+        {
+          "after": "compact",
+          "kind": "added",
+          "path": "state.visualization.density"
+        },
+        {
+          "after": "right",
+          "kind": "added",
+          "path": "state.visualization.primaryAlign"
+        },
+        {
+          "after": "bottom",
+          "kind": "added",
+          "path": "state.visualization.primaryPosition"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.showBar"
+        },
+        {
+          "after": "left",
+          "kind": "added",
+          "path": "state.visualization.titlesTextAlign"
+        },
+        {
+          "after": "default",
+          "kind": "added",
+          "path": "state.visualization.valueFontMode"
+        },
+        {
+          "after": "",
+          "before": "Metric",
+          "kind": "changed",
+          "path": "title"
+        }
+      ],
+      "chartType": "metric",
+      "dashboard": "sample-logs",
+      "panel": [],
+      "panelId": "01d8e435-91c0-484f-a11e-856747050b0a",
+      "status": "compared",
+      "title": "count_4xx & count_rest & HTTP 4xx of (empty)",
+      "visualizationType": "lnsMetric"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.adHocDataViews.<data_view:kibana_sample_data_logs>.allowHidden"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.adHocDataViews.<data_view:kibana_sample_data_logs>.managed"
+        },
+        {
+          "before": "@timestamp",
+          "kind": "removed",
+          "path": "state.adHocDataViews.<data_view:kibana_sample_data_logs>.timeFieldName"
+        },
+        {
+          "before": [
+            {
+              "id": "<data_view:kibana_sample_data_logs>",
+              "timeField": "@timestamp",
+              "title": "kibana_sample_data_logs"
+            }
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.indexPatternRefs"
+        },
+        {
+          "before": [
+            {
+              "columnId": "<layer_0:esql(Unique Visits (Last hour))>",
+              "customLabel": false,
+              "fieldName": "Unique Visits (Last hour)",
+              "inMetricDimension": true,
+              "label": "<layer_0:esql(Unique Visits (Last hour))>",
+              "meta": {
+                "esType": "long",
+                "type": "number"
+              }
+            },
+            {
+              "columnId": "<layer_0:esql(Bytes(Total))>",
+              "fieldName": "Bytes(Total)",
+              "label": "Bytes(Total)",
+              "meta": {
+                "esType": "double",
+                "params": {
+                  "id": "number"
+                },
+                "sourceParams": {
+                  "indexPattern": "kibana_sample_data_logs",
+                  "sourceField": "Bytes(Total)"
+                },
+                "type": "number"
+              },
+              "params": {
+                "format": {
+                  "id": "bytes",
+                  "params": {
+                    "decimals": 2
+                  }
+                }
+              }
+            },
+            {
+              "columnId": "<layer_0:esql(Bytes(Last hour))>",
+              "fieldName": "Bytes(Last hour)",
+              "label": "Bytes(Last hour)",
+              "meta": {
+                "esType": "double",
+                "params": {
+                  "id": "number"
+                },
+                "sourceParams": {
+                  "indexPattern": "kibana_sample_data_logs",
+                  "sourceField": "Bytes(Last hour)"
+                },
+                "type": "number"
+              },
+              "params": {
+                "format": {
+                  "id": "bytes",
+                  "params": {
+                    "decimals": 2
+                  }
+                }
+              }
+            },
+            {
+              "columnId": "<layer_0:esql(Unique Visits (Total))>",
+              "customLabel": false,
+              "fieldName": "Unique Visits (Total)",
+              "inMetricDimension": true,
+              "label": "<layer_0:esql(Unique Visits (Total))>",
+              "meta": {
+                "esType": "double",
+                "type": "number"
+              }
+            },
+            {
+              "columnId": "<layer_0:esql(Type)>",
+              "fieldName": "Type",
+              "meta": {
+                "esType": "keyword",
+                "type": "string"
+              }
+            },
+            {
+              "columnId": "Bytes(Total)",
+              "fieldName": "Bytes(Total)",
+              "label": "Bytes(Total)",
+              "meta": {
+                "esType": "double",
+                "type": "number"
+              }
+            },
+            {
+              "columnId": "Bytes(Last hour)",
+              "fieldName": "Bytes(Last hour)",
+              "label": "Bytes(Last hour)",
+              "meta": {
+                "esType": "double",
+                "type": "number"
+              }
+            },
+            {
+              "columnId": "Type",
+              "fieldName": "Type",
+              "label": "Type",
+              "meta": {
+                "esType": "keyword",
+                "type": "string"
+              }
+            }
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.allColumns"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Bytes(Last hour))>].inMetricDimension"
+        },
+        {
+          "before": "Bytes(Last hour)",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Bytes(Last hour))>].label"
+        },
+        {
+          "before": "double",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Bytes(Last hour))>].meta.esType"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Bytes(Last hour))>].meta.params.id"
+        },
+        {
+          "before": "kibana_sample_data_logs",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Bytes(Last hour))>].meta.sourceParams.indexPattern"
+        },
+        {
+          "before": "Bytes(Last hour)",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Bytes(Last hour))>].meta.sourceParams.sourceField"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Bytes(Total))>].inMetricDimension"
+        },
+        {
+          "before": "Bytes(Total)",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Bytes(Total))>].label"
+        },
+        {
+          "before": "double",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Bytes(Total))>].meta.esType"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Bytes(Total))>].meta.params.id"
+        },
+        {
+          "before": "kibana_sample_data_logs",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Bytes(Total))>].meta.sourceParams.indexPattern"
+        },
+        {
+          "before": "Bytes(Total)",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Bytes(Total))>].meta.sourceParams.sourceField"
+        },
+        {
+          "before": "keyword",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Type)>].meta.esType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Unique Visits (Last hour))>].customLabel"
+        },
+        {
+          "before": "<layer_0:esql(Unique Visits (Last hour))>",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Unique Visits (Last hour))>].label"
+        },
+        {
+          "before": "long",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Unique Visits (Last hour))>].meta.esType"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Unique Visits (Total))>].customLabel"
+        },
+        {
+          "before": "<layer_0:esql(Unique Visits (Total))>",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Unique Visits (Total))>].label"
+        },
+        {
+          "before": "double",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Unique Visits (Total))>].meta.esType"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "before": "@timestamp",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.timeField"
+        },
+        {
+          "after": [
+            {
+              "id": "<data_view:kibana_sample_data_logs>",
+              "name": "indexpattern-datasource-layer-<layer_0>",
+              "type": "index-pattern"
+            }
+          ],
+          "kind": "added",
+          "path": "state.internalReferences"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.needsRefresh"
+        },
+        {
+          "after": "right",
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Bytes(Last hour))>].alignment"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Bytes(Last hour))>].hidden"
+        },
+        {
+          "after": "right",
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Bytes(Total))>].alignment"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Bytes(Total))>].hidden"
+        },
+        {
+          "after": "left",
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Type)>].alignment"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Type)>].hidden"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Type)>].oneClickFilter"
+        },
+        {
+          "after": "right",
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Unique Visits (Last hour))>].alignment"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Unique Visits (Last hour))>].hidden"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Unique Visits (Last hour))>].isMetric"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Unique Visits (Last hour))>].isTransposed"
+        },
+        {
+          "after": "all",
+          "before": "above",
+          "kind": "changed",
+          "path": "state.visualization.columns[<layer_0:esql(Unique Visits (Last hour))>].palette.params.continuity"
+        },
+        {
+          "before": 0,
+          "kind": "removed",
+          "path": "state.visualization.columns[<layer_0:esql(Unique Visits (Last hour))>].palette.params.rangeMin"
+        },
+        {
+          "after": "percent",
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Unique Visits (Last hour))>].palette.params.rangeType"
+        },
+        {
+          "after": 5,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Unique Visits (Last hour))>].palette.params.steps"
+        },
+        {
+          "before": [
+            {
+              "color": "#24c292",
+              "stop": 0
+            },
+            {
+              "color": "#aee8d2",
+              "stop": 20
+            },
+            {
+              "color": "#fcd883",
+              "stop": 40
+            },
+            {
+              "color": "#ffc9c2",
+              "stop": 60
+            },
+            {
+              "color": "#f6726a",
+              "stop": 80
+            }
+          ],
+          "kind": "removed",
+          "path": "state.visualization.columns[<layer_0:esql(Unique Visits (Last hour))>].palette.params.stops"
+        },
+        {
+          "after": "right",
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Unique Visits (Total))>].alignment"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Unique Visits (Total))>].hidden"
+        },
+        {
+          "after": "all",
+          "before": "above",
+          "kind": "changed",
+          "path": "state.visualization.columns[<layer_0:esql(Unique Visits (Total))>].palette.params.continuity"
+        },
+        {
+          "before": 0,
+          "kind": "removed",
+          "path": "state.visualization.columns[<layer_0:esql(Unique Visits (Total))>].palette.params.rangeMin"
+        },
+        {
+          "after": "percent",
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Unique Visits (Total))>].palette.params.rangeType"
+        },
+        {
+          "after": 5,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Unique Visits (Total))>].palette.params.steps"
+        },
+        {
+          "before": [
+            {
+              "color": "#24c292",
+              "stop": 0
+            },
+            {
+              "color": "#aee8d2",
+              "stop": 20
+            },
+            {
+              "color": "#fcd883",
+              "stop": 40
+            },
+            {
+              "color": "#ffc9c2",
+              "stop": 60
+            },
+            {
+              "color": "#f6726a",
+              "stop": 80
+            }
+          ],
+          "kind": "removed",
+          "path": "state.visualization.columns[<layer_0:esql(Unique Visits (Total))>].palette.params.stops"
+        },
+        {
+          "after": "",
+          "before": "Table Unique Visits (Last hour) & Type & Unique Visits (Total)",
+          "kind": "changed",
+          "path": "title"
+        }
+      ],
+      "chartType": "data_table",
+      "dashboard": "sample-logs",
+      "panel": [],
+      "panelId": "21bb0939-ee09-4021-8848-6552b3a6a788",
+      "status": "compared",
+      "title": "SUM(bytes) & Unique Visits (Total - MB) & Bytes(Total) of Type",
+      "visualizationType": "lnsDatatable"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.adHocDataViews.<data_view:kibana_sample_data_logs>.allowHidden"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.adHocDataViews.<data_view:kibana_sample_data_logs>.managed"
+        },
+        {
+          "before": "@timestamp",
+          "kind": "removed",
+          "path": "state.adHocDataViews.<data_view:kibana_sample_data_logs>.timeFieldName"
+        },
+        {
+          "before": [
+            {
+              "id": "<data_view:kibana_sample_data_logs>",
+              "timeField": "@timestamp",
+              "title": "kibana_sample_data_logs"
+            }
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.indexPatternRefs"
+        },
+        {
+          "before": [
+            {
+              "columnId": "bytes",
+              "fieldName": "bytes",
+              "inMetricDimension": true,
+              "meta": {
+                "esType": "double",
+                "type": "number"
+              }
+            },
+            {
+              "columnId": "<layer_0:esql(percentage)>",
+              "fieldName": "percentage",
+              "inMetricDimension": true,
+              "meta": {
+                "esType": "double",
+                "type": "number"
+              }
+            }
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.allColumns"
+        },
+        {
+          "before": "double",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(bytes)>].meta.esType"
+        },
+        {
+          "before": true,
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(percentage)>].inMetricDimension"
+        },
+        {
+          "before": "double",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(percentage)>].meta.esType"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(percentage)>].params.format.params.compact"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "before": "@timestamp",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.timeField"
+        },
+        {
+          "after": [
+            {
+              "id": "<data_view:kibana_sample_data_logs>",
+              "name": "indexpattern-datasource-layer-<layer_0>",
+              "type": "index-pattern"
+            }
+          ],
+          "kind": "added",
+          "path": "state.internalReferences"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.needsRefresh"
+        },
+        {
+          "before": "None",
+          "kind": "removed",
+          "path": "state.visualization.fittingFunction"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.hideEndzones"
+        },
+        {
+          "before": "categorical",
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].colorMapping.colorMode.type"
+        },
+        {
+          "before": "eui_amsterdam_color_blind",
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].colorMapping.paletteId"
+        },
+        {
+          "before": [
+            {
+              "color": {
+                "type": "loop"
+              },
+              "rules": [
+                {
+                  "type": "other"
+                }
+              ],
+              "touched": false
+            }
+          ],
+          "kind": "removed",
+          "path": "state.visualization.layers[<layer_0>].colorMapping.specialAssignments"
+        },
+        {
+          "after": [
+            {
+              "axisMode": "left",
+              "forAccessor": "<layer_0:esql(percentage)>"
+            }
+          ],
+          "kind": "added",
+          "path": "state.visualization.layers[<layer_0>].yConfig"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.visualization.legend.maxLines"
+        },
+        {
+          "after": 1,
+          "kind": "added",
+          "path": "state.visualization.minBarHeight"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.showCurrentTimeMarker"
+        },
+        {
+          "after": "dataBounds",
+          "kind": "added",
+          "path": "state.visualization.xExtent.mode"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.xExtent.niceValues"
+        },
+        {
+          "after": "full",
+          "kind": "added",
+          "path": "state.visualization.yLeftExtent.mode"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.yLeftExtent.niceValues"
+        },
+        {
+          "after": "linear",
+          "kind": "added",
+          "path": "state.visualization.yLeftScale"
+        },
+        {
+          "after": "",
+          "before": "bytes & percentage of (empty)",
+          "kind": "changed",
+          "path": "title"
+        }
+      ],
+      "chartType": "xy",
+      "dashboard": "sample-logs",
+      "panel": [],
+      "panelId": "cbca842c-b9fa-4523-9ce0-14e350866e33",
+      "status": "compared",
+      "title": "[Logs] Bytes distribution",
+      "visualizationType": "lnsXY"
+    },
+    {
+      "api": [],
+      "attributes": [
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.adHocDataViews.<data_view:kibana_sample_data_logs>.allowHidden"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.adHocDataViews.<data_view:kibana_sample_data_logs>.managed"
+        },
+        {
+          "before": "@timestamp",
+          "kind": "removed",
+          "path": "state.adHocDataViews.<data_view:kibana_sample_data_logs>.timeFieldName"
+        },
+        {
+          "before": [
+            {
+              "id": "<data_view:kibana_sample_data_logs>",
+              "timeField": "@timestamp",
+              "title": "kibana_sample_data_logs"
+            }
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.indexPatternRefs"
+        },
+        {
+          "before": [
+            {
+              "columnId": "<layer_0:esql(Unique)>",
+              "fieldName": "Unique",
+              "inMetricDimension": true,
+              "meta": {
+                "esType": "long",
+                "type": "number"
+              }
+            },
+            {
+              "columnId": "<layer_0:esql(95th percentile of bytes)>",
+              "fieldName": "95th percentile of bytes",
+              "inMetricDimension": true,
+              "meta": {
+                "esType": "double",
+                "type": "number"
+              },
+              "params": {
+                "format": {
+                  "id": "bytes",
+                  "params": {
+                    "decimals": 0
+                  }
+                }
+              }
+            },
+            {
+              "columnId": "<layer_0:esql(Median of bytes)>",
+              "fieldName": "Median of bytes",
+              "inMetricDimension": true,
+              "meta": {
+                "esType": "double",
+                "type": "number"
+              },
+              "params": {
+                "format": {
+                  "id": "bytes",
+                  "params": {
+                    "decimals": 0
+                  }
+                }
+              }
+            },
+            {
+              "columnId": "<layer_0:esql(url.keyword)>",
+              "fieldName": "url.keyword",
+              "meta": {
+                "esType": "keyword",
+                "type": "string"
+              }
+            },
+            {
+              "columnId": "<layer_0:esql(Visits)>",
+              "fieldName": "Visits",
+              "label": "Visits",
+              "meta": {
+                "esType": "long",
+                "params": {
+                  "id": "number"
+                },
+                "sourceParams": {
+                  "indexPattern": "kibana_sample_data_logs",
+                  "sourceField": "Visits"
+                },
+                "type": "number"
+              }
+            },
+            {
+              "columnId": "Visits",
+              "fieldName": "Visits",
+              "label": "Visits",
+              "meta": {
+                "esType": "long",
+                "type": "number"
+              }
+            },
+            {
+              "columnId": "url.keyword",
+              "fieldName": "url.keyword",
+              "label": "url.keyword",
+              "meta": {
+                "esType": "keyword",
+                "type": "string"
+              }
+            }
+          ],
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.allColumns"
+        },
+        {
+          "before": "double",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(95th percentile of bytes)>].meta.esType"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(HTTP 4xx)>].inMetricDimension"
+        },
+        {
+          "before": "double",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(HTTP 4xx)>].meta.esType"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(HTTP 4xx)>].params.format.params.compact"
+        },
+        {
+          "before": "double",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(HTTP 5xx)>].meta.esType"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(HTTP 5xx)>].params.format.params.compact"
+        },
+        {
+          "before": "double",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Median of bytes)>].meta.esType"
+        },
+        {
+          "before": "long",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Unique)>].meta.esType"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Visits)>].inMetricDimension"
+        },
+        {
+          "before": "Visits",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Visits)>].label"
+        },
+        {
+          "before": "long",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Visits)>].meta.esType"
+        },
+        {
+          "before": "number",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Visits)>].meta.params.id"
+        },
+        {
+          "before": "kibana_sample_data_logs",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Visits)>].meta.sourceParams.indexPattern"
+        },
+        {
+          "before": "Visits",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(Visits)>].meta.sourceParams.sourceField"
+        },
+        {
+          "before": "keyword",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.columns[<layer_0:esql(url.keyword)>].meta.esType"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.ignoreGlobalFilters"
+        },
+        {
+          "before": "@timestamp",
+          "kind": "removed",
+          "path": "state.datasourceStates.textBased.layers.<layer_0>.timeField"
+        },
+        {
+          "after": [
+            {
+              "id": "<data_view:kibana_sample_data_logs>",
+              "name": "indexpattern-datasource-layer-<layer_0>",
+              "type": "index-pattern"
+            }
+          ],
+          "kind": "added",
+          "path": "state.internalReferences"
+        },
+        {
+          "before": false,
+          "kind": "removed",
+          "path": "state.needsRefresh"
+        },
+        {
+          "after": "right",
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(95th percentile of bytes)>].alignment"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(95th percentile of bytes)>].hidden"
+        },
+        {
+          "after": "right",
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(HTTP 4xx)>].alignment"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(HTTP 4xx)>].hidden"
+        },
+        {
+          "after": "all",
+          "before": "above",
+          "kind": "changed",
+          "path": "state.visualization.columns[<layer_0:esql(HTTP 4xx)>].palette.params.continuity"
+        },
+        {
+          "before": 0,
+          "kind": "removed",
+          "path": "state.visualization.columns[<layer_0:esql(HTTP 4xx)>].palette.params.rangeMin"
+        },
+        {
+          "after": "percent",
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(HTTP 4xx)>].palette.params.rangeType"
+        },
+        {
+          "after": 5,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(HTTP 4xx)>].palette.params.steps"
+        },
+        {
+          "before": [
+            {
+              "color": "#ffd2cc",
+              "stop": 0
+            },
+            {
+              "color": "#ffbbb3",
+              "stop": 20
+            },
+            {
+              "color": "#fea39a",
+              "stop": 40
+            },
+            {
+              "color": "#fb8b82",
+              "stop": 60
+            },
+            {
+              "color": "#f6726a",
+              "stop": 80
+            }
+          ],
+          "kind": "removed",
+          "path": "state.visualization.columns[<layer_0:esql(HTTP 4xx)>].palette.params.stops"
+        },
+        {
+          "after": "right",
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(HTTP 5xx)>].alignment"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(HTTP 5xx)>].hidden"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(HTTP 5xx)>].isMetric"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(HTTP 5xx)>].isTransposed"
+        },
+        {
+          "after": "all",
+          "before": "above",
+          "kind": "changed",
+          "path": "state.visualization.columns[<layer_0:esql(HTTP 5xx)>].palette.params.continuity"
+        },
+        {
+          "before": 0,
+          "kind": "removed",
+          "path": "state.visualization.columns[<layer_0:esql(HTTP 5xx)>].palette.params.rangeMin"
+        },
+        {
+          "after": "percent",
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(HTTP 5xx)>].palette.params.rangeType"
+        },
+        {
+          "after": 5,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(HTTP 5xx)>].palette.params.steps"
+        },
+        {
+          "before": [
+            {
+              "color": "#ffd2cc",
+              "stop": 0
+            },
+            {
+              "color": "#ffbbb3",
+              "stop": 20
+            },
+            {
+              "color": "#fea39a",
+              "stop": 40
+            },
+            {
+              "color": "#fb8b82",
+              "stop": 60
+            },
+            {
+              "color": "#f6726a",
+              "stop": 80
+            }
+          ],
+          "kind": "removed",
+          "path": "state.visualization.columns[<layer_0:esql(HTTP 5xx)>].palette.params.stops"
+        },
+        {
+          "after": "right",
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Median of bytes)>].alignment"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Median of bytes)>].hidden"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Median of bytes)>].isMetric"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Median of bytes)>].isTransposed"
+        },
+        {
+          "after": "right",
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Unique)>].alignment"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Unique)>].hidden"
+        },
+        {
+          "after": true,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Unique)>].isMetric"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Unique)>].isTransposed"
+        },
+        {
+          "after": "right",
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Visits)>].alignment"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(Visits)>].hidden"
+        },
+        {
+          "after": "left",
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(url.keyword)>].alignment"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(url.keyword)>].hidden"
+        },
+        {
+          "after": false,
+          "kind": "added",
+          "path": "state.visualization.columns[<layer_0:esql(url.keyword)>].oneClickFilter"
+        },
+        {
+          "after": "",
+          "before": "Unique & 95th percentile of bytes & Median of bytes & count_5xx of url.keyword",
+          "kind": "changed",
+          "path": "title"
+        }
+      ],
+      "chartType": "data_table",
+      "dashboard": "sample-logs",
+      "panel": [],
+      "panelId": "1d5f0b3f-d9d2-4b26-997b-83bc5ca3090b",
+      "status": "compared",
+      "title": "[Logs] Errors by host",
+      "visualizationType": "lnsDatatable"
+    }
+  ]
+}
