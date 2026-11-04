@@ -169,29 +169,27 @@ export function registerChatApiRoutes({
           },
         },
       },
-      wrapHandler(
-        async (ctx, request, response) => {
-          const {
-            message,
-            agent_id: agentId,
-            conversation_id: conversationId,
-          } = request.body as ChatMessageRequestBodyPayload;
-          const { execution: executionService } = getInternalServices();
-          const { events$ } = await executeAgent({
-            payload: { agent_id: agentId, conversation_id: conversationId, input: message },
-            request,
-            executionService,
-            interactive: createNonInteractiveConfig(),
-            autoCreateConversationWithId: false,
-          });
+      wrapHandler(async (ctx, request, response) => {
+        const {
+          message,
+          agent_id: agentId,
+          conversation_id: conversationId,
+        } = request.body as ChatMessageRequestBodyPayload;
+        const { execution: executionService } = getInternalServices();
+        const { events$ } = await executeAgent({
+          payload: { agent_id: agentId, conversation_id: conversationId, input: message },
+          request,
+          executionService,
+          interactive: createNonInteractiveConfig(),
+          autoCreateConversationWithId: false,
+        });
 
-          const events = await firstValueFrom(events$.pipe(toArray()));
+        const events = await firstValueFrom(events$.pipe(toArray()));
 
-          return response.ok<ChatMessageResponse>({
-            body: buildChatMessageResponseFromEvents(events),
-          });
-        }
-      )
+        return response.ok<ChatMessageResponse>({
+          body: buildChatMessageResponseFromEvents(events),
+        });
+      })
     );
 
   router.versioned
