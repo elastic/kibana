@@ -17,25 +17,40 @@ export const configSchema = schema.object({
    */
   enabled: schema.boolean({ defaultValue: false }),
   /** Hunt Library POC settings. Not exposed to the browser. */
-  huntLibrary: schema.object({
-    /**
-     * Secret key for occurrence-group identity. Set it through the Kibana keystore as
-     * `xpack.alertzero.huntLibrary.fingerprintKey`. Without it the Library Hunt worker cannot be
-     * enabled and no sweep runs; manual hunts are unaffected. The key must stay fixed during POC
-     * evaluation.
-     */
-    fingerprintKey: schema.maybe(schema.string({ minLength: 32, maxLength: 512 })),
-    /** Non-secret label recorded with results produced under the key. */
-    fingerprintKeyVersion: schema.string({
-      defaultValue: 'v1',
-      minLength: 1,
-      maxLength: 32,
-      validate: (value) =>
-        /^[a-z0-9][a-z0-9_.-]*$/.test(value)
-          ? undefined
-          : 'must be lower-case letters, digits, "_", "." or "-"',
-    }),
-  }),
+  huntLibrary: schema.object(
+    {
+      /**
+       * Secret key that signs the state opening Discover in Hunt mode. Set it through the Kibana
+       * keystore as `xpack.alertzero.huntLibrary.profileTokenKey`. It must differ from the
+       * fingerprint key. Without it, launch still opens Discover but without Hunt mode, and no
+       * preservation is possible.
+       */
+      profileTokenKey: schema.maybe(schema.string({ minLength: 32, maxLength: 512 })),
+      /**
+       * Secret key for occurrence-group identity. Set it through the Kibana keystore as
+       * `xpack.alertzero.huntLibrary.fingerprintKey`. Without it the Library Hunt worker cannot be
+       * enabled and no sweep runs; manual hunts are unaffected. The key must stay fixed during POC
+       * evaluation.
+       */
+      fingerprintKey: schema.maybe(schema.string({ minLength: 32, maxLength: 512 })),
+      /** Non-secret label recorded with results produced under the key. */
+      fingerprintKeyVersion: schema.string({
+        defaultValue: 'v1',
+        minLength: 1,
+        maxLength: 32,
+        validate: (value) =>
+          /^[a-z0-9][a-z0-9_.-]*$/.test(value)
+            ? undefined
+            : 'must be lower-case letters, digits, "_", "." or "-"',
+      }),
+    },
+    {
+      validate: ({ profileTokenKey, fingerprintKey }) =>
+        profileTokenKey && profileTokenKey === fingerprintKey
+          ? 'profileTokenKey must differ from fingerprintKey'
+          : undefined,
+    }
+  ),
 });
 
 export type AlertZeroConfig = TypeOf<typeof configSchema>;
