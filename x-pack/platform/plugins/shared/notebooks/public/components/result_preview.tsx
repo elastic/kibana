@@ -37,7 +37,8 @@ export const getResultSummary = (table: Datatable, durationMs?: number): string 
     },
   });
 
-const ResultGrid = ({ table }: { table: Datatable }) => {
+/** The first rows of a result; sized to its rows unless given a height. */
+export const ResultGrid = ({ table, height }: { table: Datatable; height?: string }) => {
   const columns = useMemo<EuiDataGridColumn[]>(
     () => table.columns.map(({ id, name }) => ({ id, displayAsText: name })),
     [table]
@@ -58,7 +59,7 @@ const ResultGrid = ({ table }: { table: Datatable }) => {
       renderCellValue={renderCellValue}
       gridStyle={{ border: 'horizontal', header: 'underline', fontSize: 's' }}
       toolbarVisibility={false}
-      height={Math.min(400, 40 + rows.length * 34)}
+      height={height ?? Math.min(400, 40 + rows.length * 34)}
     />
   );
 };

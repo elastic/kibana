@@ -80,11 +80,30 @@ export type CellDefinition =
 
 export type CellType = CellDefinition['type'];
 
+/** A cell placed on an app's grid, in grid columns and rows. */
+export interface AppPanel {
+  id: string;
+  cellId: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/** A dashboard-style view of some of a notebook's cells. */
+export interface NotebookApp {
+  id: string;
+  title: string;
+  panels: AppPanel[];
+}
+
 export interface NotebookAttributes {
   title: string;
   description?: string;
   cellOrder: string[];
   cells: Record<string, CellDefinition>;
+  /** The notebook's apps; absent until the user creates one. */
+  panels?: NotebookApp[];
 }
 
 export interface NotebookSavedObject {

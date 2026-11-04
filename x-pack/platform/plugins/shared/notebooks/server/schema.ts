@@ -17,6 +17,8 @@ const MAX_ID_LENGTH = 256;
 const MAX_NAME_LENGTH = 256;
 const MAX_VALUE_LENGTH = 1024;
 const MAX_STATIC_OPTIONS = 1000;
+const MAX_APPS = 20;
+const MAX_GRID_UNITS = 1000;
 
 const idSchema = schema.string({ minLength: 1, maxLength: MAX_ID_LENGTH });
 const runModeSchema = schema.oneOf([schema.literal('auto'), schema.literal('manual')]);
@@ -106,12 +108,32 @@ const cellsSchema = schema.recordOf(idSchema, cellSchema, {
   },
 });
 
+const gridUnitSchema = schema.number({ min: 0, max: MAX_GRID_UNITS });
+
+const appSchema = schema.object({
+  id: idSchema,
+  title: schema.string({ maxLength: MAX_TITLE_LENGTH }),
+  panels: schema.arrayOf(
+    schema.object({
+      id: idSchema,
+      cellId: idSchema,
+      x: gridUnitSchema,
+      y: gridUnitSchema,
+      width: schema.number({ min: 1, max: MAX_GRID_UNITS }),
+      height: schema.number({ min: 1, max: MAX_GRID_UNITS }),
+    }),
+    { maxSize: MAX_CELLS }
+  ),
+});
+
 const validateCellReferences = ({
   cellOrder,
   cells,
+  panels = [],
 }: {
   cellOrder: string[];
   cells: TypeOf<typeof cellsSchema>;
+  panels?: Array<TypeOf<typeof appSchema>>;
 }): string | undefined => {
   const mismatchedKey = Object.entries(cells).find(([key, { id }]) => key !== id);
   if (mismatchedKey) {
@@ -125,6 +147,10 @@ const validateCellReferences = ({
   if (cellIds.length !== orderedIds.size || cellIds.some((id) => !orderedIds.has(id))) {
     return 'cellOrder must list exactly the ids in cells';
   }
+  const orphan = panels.flatMap((app) => app.panels).find(({ cellId }) => !cells[cellId]);
+  if (orphan) {
+    return `panel [${orphan.id}] references unknown cell [${orphan.cellId}]`;
+  }
 };
 
 /** Validates notebook attributes on HTTP input and saved object creation. */
@@ -134,6 +160,7 @@ export const notebookAttributesSchema = schema.object(
     description: schema.maybe(schema.string({ maxLength: MAX_DESCRIPTION_LENGTH })),
     cellOrder: schema.arrayOf(idSchema, { maxSize: MAX_CELLS }),
     cells: cellsSchema,
+    panels: schema.maybe(schema.arrayOf(appSchema, { maxSize: MAX_APPS })),
   },
   { validate: validateCellReferences }
 );

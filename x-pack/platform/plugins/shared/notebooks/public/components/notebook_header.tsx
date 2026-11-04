@@ -25,14 +25,14 @@ import { MAX_DESCRIPTION_LENGTH } from '../../common/constants';
 import type { InputCellDefinition } from '../../common/types';
 import { findPinnedTimeCell } from '../model/cell_factory';
 import { useNotebookServices } from '../services';
-import { useNotebook } from './notebook_context';
+import { useNotebook, type SidePanel } from './notebook_context';
 import { NotebookSettingsFlyout } from './notebook_settings_flyout';
 
 const REFRESH_TOOLTIP = i18n.translate('xpack.notebook.header.refreshTooltip', {
   defaultMessage: 'Run all cells that use the global time range',
 });
 
-const PinnedTimePicker = ({ cell }: { cell: InputCellDefinition }) => {
+export const PinnedTimePicker = ({ cell }: { cell: InputCellDefinition }) => {
   const { store, scheduler } = useNotebook();
   const inputValues = useStateFromPublishingSubject(store.inputValues$);
   const value = inputValues[cell.id];
@@ -115,13 +115,13 @@ const NotebookDescription = () => {
 export const NotebookHeader = ({
   onSave,
   isSaving,
-  isGraphOpen,
-  onToggleGraph,
+  sidePanel,
+  onToggleSidePanel,
 }: {
   onSave?: () => void;
   isSaving?: boolean;
-  isGraphOpen: boolean;
-  onToggleGraph: () => void;
+  sidePanel: SidePanel | undefined;
+  onToggleSidePanel: (panel: SidePanel) => void;
 }) => {
   const { store, scheduler } = useNotebook();
   const { core } = useNotebookServices();
@@ -148,12 +148,21 @@ export const NotebookHeader = ({
           label: i18n.translate('xpack.notebook.header.graph', { defaultMessage: 'Graph' }),
           iconType: 'graphApp',
           testId: 'notebookGraphToggle',
-          isSelected: isGraphOpen,
-          run: onToggleGraph,
+          isSelected: sidePanel === 'graph',
+          run: () => onToggleSidePanel('graph'),
+        },
+        {
+          id: 'app',
+          order: 3,
+          label: i18n.translate('xpack.notebook.header.app', { defaultMessage: 'App' }),
+          iconType: 'dashboardApp',
+          testId: 'notebookAppToggle',
+          isSelected: sidePanel === 'app',
+          run: () => onToggleSidePanel('app'),
         },
         {
           id: 'settings',
-          order: 3,
+          order: 4,
           label: i18n.translate('xpack.notebook.header.settings', { defaultMessage: 'Settings' }),
           iconType: 'gear',
           testId: 'notebookSettings',
@@ -174,7 +183,7 @@ export const NotebookHeader = ({
           }
         : {}),
     }),
-    [scheduler, onSave, isSaving, isDirty, isGraphOpen, onToggleGraph]
+    [scheduler, onSave, isSaving, isDirty, sidePanel, onToggleSidePanel]
   );
 
   return (

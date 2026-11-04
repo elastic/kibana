@@ -21,9 +21,15 @@ import { ChartCell } from './chart_cell';
 import { EsqlCell } from './esql_cell';
 import { InputCell } from './input_cell';
 import { MarkdownCell } from './markdown_cell';
-import { NotebookContext, useNotebook, type NotebookContextValue } from './notebook_context';
+import {
+  NotebookContext,
+  useNotebook,
+  type NotebookContextValue,
+  type SidePanel,
+} from './notebook_context';
 import { NotebookHeader } from './notebook_header';
 import { getCellElementId } from './cell_display';
+import { AppFlyout } from './app_flyout';
 import { GraphFlyout } from './graph_flyout';
 
 const CellView = ({ cell }: { cell: CellDefinition }) => {
@@ -78,21 +84,27 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
       scheduler,
       openFlyouts$: new BehaviorSubject(0),
       focusedCell$: new BehaviorSubject<string | undefined>(undefined),
+      sidePanel$: new BehaviorSubject<SidePanel | undefined>(undefined),
+      activeAppId$: new BehaviorSubject<string | undefined>(undefined),
     };
   });
   const [isSaving, setIsSaving] = useState(false);
-  const [isGraphOpen, setIsGraphOpen] = useState(false);
+  const sidePanel = useStateFromPublishingSubject(notebook.sidePanel$);
   useEffect(() => {
     notebook.scheduler.start();
     return () => notebook.scheduler.stop();
   }, [notebook]);
 
   useEffect(() => {
-    if (!isGraphOpen) notebook.focusedCell$.next(undefined);
-  }, [notebook, isGraphOpen]);
+    if (sidePanel !== 'graph') notebook.focusedCell$.next(undefined);
+  }, [notebook, sidePanel]);
 
-  const toggleGraph = useCallback(() => setIsGraphOpen((isOpen) => !isOpen), []);
-  const closeGraph = useCallback(() => setIsGraphOpen(false), []);
+  const toggleSidePanel = useCallback(
+    (panel: SidePanel) =>
+      notebook.sidePanel$.next(notebook.sidePanel$.getValue() === panel ? undefined : panel),
+    [notebook]
+  );
+  const closeSidePanel = useCallback(() => notebook.sidePanel$.next(undefined), [notebook]);
   const focusCell = useCallback(
     (cellId: string | undefined) => {
       notebook.focusedCell$.next(cellId);
@@ -117,14 +129,15 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
 
   return (
     <NotebookContext.Provider value={notebook}>
-      {isGraphOpen && <GraphFlyout onClose={closeGraph} onSelectCell={focusCell} />}
+      {sidePanel === 'graph' && <GraphFlyout onClose={closeSidePanel} onSelectCell={focusCell} />}
+      {sidePanel === 'app' && <AppFlyout onClose={closeSidePanel} />}
       <EuiPageTemplate restrictWidth={1200} paddingSize="m">
         <EuiPageTemplate.Section paddingSize="m" grow={false}>
           <NotebookHeader
             onSave={onSave ? save : undefined}
             isSaving={isSaving}
-            isGraphOpen={isGraphOpen}
-            onToggleGraph={toggleGraph}
+            sidePanel={sidePanel}
+            onToggleSidePanel={toggleSidePanel}
           />
         </EuiPageTemplate.Section>
         <EuiPageTemplate.Section paddingSize="m">

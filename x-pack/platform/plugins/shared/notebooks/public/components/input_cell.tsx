@@ -140,6 +140,19 @@ const TimeControl = ({ cell }: { cell: InputCellDefinition }) => {
   );
 };
 
+/** The control a user sets an input's value with. */
+export const InputControl = ({ cell }: { cell: InputCellDefinition }) => {
+  const { input } = cell;
+  switch (input.kind) {
+    case 'dropdown':
+      return <DropdownControl cell={cell} />;
+    case 'range':
+      return <RangeControl cell={cell} input={input} />;
+    case 'time':
+      return <TimeControl cell={cell} />;
+  }
+};
+
 export const InputCell = ({ cell }: { cell: InputCellDefinition }) => {
   const { store } = useNotebook();
   const runtime = useStateFromPublishingSubject(store.getRuntime$(cell.id));
@@ -181,9 +194,7 @@ export const InputCell = ({ cell }: { cell: InputCellDefinition }) => {
           onClose={() => setIsEditing(false)}
         />
       )}
-      {input.kind === 'dropdown' && <DropdownControl cell={cell} />}
-      {input.kind === 'range' && <RangeControl cell={cell} input={input} />}
-      {input.kind === 'time' && <TimeControl cell={cell} />}
+      <InputControl cell={cell} />
     </CellFrame>
   );
 };

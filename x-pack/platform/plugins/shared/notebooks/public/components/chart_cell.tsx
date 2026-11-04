@@ -74,6 +74,58 @@ const metricContainerCss = css`
   height: 160px;
 `;
 
+/** The rendered chart, or a prompt explaining why there is none yet. */
+export const ChartCanvas = ({
+  id,
+  attributes,
+  hasSource,
+}: {
+  id: string;
+  attributes: LensAttributes | undefined;
+  hasSource: boolean;
+}) => {
+  const { plugins } = useNotebookServices();
+  const LensComponent = plugins.lens.EmbeddableComponent;
+  return attributes ? (
+    <LensComponent
+      id={id}
+      attributes={attributes}
+      style={{ height: '100%' }}
+      withDefaultActions={false}
+      disableTriggers
+      noPadding
+    />
+  ) : (
+    <EuiEmptyPrompt
+      titleSize="xs"
+      body={
+        hasSource
+          ? i18n.translate('xpack.notebook.chartCell.waiting', {
+              defaultMessage: 'Waiting for the source cell to produce results.',
+            })
+          : i18n.translate('xpack.notebook.chartCell.pickSource', {
+              defaultMessage: 'Pick an ES|QL cell as the source.',
+            })
+      }
+    />
+  );
+};
+
+/** The chart's saved Lens attributes bound to its latest results. */
+export const useChartAttributes = (
+  cell: ChartCellDefinition,
+  override?: LensAttributes
+): LensAttributes | undefined => {
+  const { store } = useNotebook();
+  const runtime = useStateFromPublishingSubject(store.getRuntime$(cell.id));
+  const table = runtime.output?.kind === 'table' ? runtime.output.table : undefined;
+  const rendered = override ?? cell.lensAttributes;
+  return useMemo(
+    () => (rendered && table ? injectTable(rendered, table) : undefined),
+    [rendered, table]
+  );
+};
+
 export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
   const { plugins } = useNotebookServices();
   const { store, scheduler } = useNotebook();
@@ -143,11 +195,7 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
     }
   }, [table, lensAttributes, suggest]);
 
-  const rendered = preview ?? lensAttributes;
-  const attributes = useMemo(
-    () => (rendered && table ? injectTable(rendered, table) : undefined),
-    [rendered, table]
-  );
+  const attributes = useChartAttributes(cell, preview);
 
   const openEditor = async () => {
     if (!attributes) return;
@@ -195,7 +243,6 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
   }, [editor, setAttributes, closeEditor]);
 
   const currentType = lensAttributes ? getChartType(lensAttributes) : undefined;
-  const LensComponent = plugins.lens.EmbeddableComponent;
 
   return (
     <CellFrame
@@ -294,29 +341,11 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
         css={[chartContainerCss, currentType === ChartType.Metric && metricContainerCss]}
         data-test-subj="notebookChartContainer"
       >
-        {attributes ? (
-          <LensComponent
-            id={`notebook-chart-${id}`}
-            attributes={attributes}
-            style={{ height: '100%' }}
-            withDefaultActions={false}
-            disableTriggers
-            noPadding
-          />
-        ) : (
-          <EuiEmptyPrompt
-            titleSize="xs"
-            body={
-              sourceCell
-                ? i18n.translate('xpack.notebook.chartCell.waiting', {
-                    defaultMessage: 'Waiting for the source cell to produce results.',
-                  })
-                : i18n.translate('xpack.notebook.chartCell.pickSource', {
-                    defaultMessage: 'Pick an ES|QL cell as the source.',
-                  })
-            }
-          />
-        )}
+        <ChartCanvas
+          id={`notebook-chart-${id}`}
+          attributes={attributes}
+          hasSource={sourceCell !== null}
+        />
       </div>
       {editPanel}
     </CellFrame>

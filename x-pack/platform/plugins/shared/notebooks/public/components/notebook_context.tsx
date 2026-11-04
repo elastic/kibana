@@ -17,7 +17,13 @@ export interface NotebookContextValue {
   openFlyouts$: BehaviorSubject<number>;
   /** The cell selected in the dependency graph, highlighted in the notebook. */
   focusedCell$: BehaviorSubject<string | undefined>;
+  /** What the panel beside the notebook shows, if it is open. */
+  sidePanel$: BehaviorSubject<SidePanel | undefined>;
+  /** The app the app panel shows; falls back to the first app when unset or deleted. */
+  activeAppId$: BehaviorSubject<string | undefined>;
 }
+
+export type SidePanel = 'graph' | 'app';
 
 export const NotebookContext = createContext<NotebookContextValue | null>(null);
 

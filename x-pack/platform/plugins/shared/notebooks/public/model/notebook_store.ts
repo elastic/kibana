@@ -7,7 +7,13 @@
 
 import objectHash from 'object-hash';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map, type Observable } from 'rxjs';
-import type { CellDefinition, InputDefinition, NotebookAttributes } from '../../common/types';
+import type {
+  CellDefinition,
+  InputDefinition,
+  NotebookApp,
+  NotebookAttributes,
+} from '../../common/types';
+import { appendPanel } from './app_layout';
 import { createPinnedTimeCell, findPinnedTimeCell } from './cell_factory';
 import type { CellRuntime, InputValue } from './types';
 
@@ -33,6 +39,7 @@ export class NotebookStore {
   readonly cellOrder$: BehaviorSubject<string[]>;
   readonly cells$: BehaviorSubject<Record<string, CellDefinition>>;
   readonly inputValues$: BehaviorSubject<Record<string, InputValue>>;
+  readonly apps$: BehaviorSubject<NotebookApp[]>;
   readonly isDirty$: Observable<boolean>;
 
   private readonly runtimes = new Map<string, BehaviorSubject<CellRuntime>>();
@@ -50,15 +57,17 @@ export class NotebookStore {
         )
       )
     );
+    this.apps$ = new BehaviorSubject(attributes.panels ?? []);
     this.savedHash$ = new BehaviorSubject(hashAttributes(this.toAttributes()));
     this.isDirty$ = combineLatest([
       this.title$,
       this.description$,
       this.cellOrder$,
       this.cells$,
+      this.apps$,
       this.savedHash$,
     ]).pipe(
-      map(([, , , , savedHash]) => hashAttributes(this.toAttributes()) !== savedHash),
+      map(([, , , , , savedHash]) => hashAttributes(this.toAttributes()) !== savedHash),
       distinctUntilChanged()
     );
   }
@@ -121,6 +130,34 @@ export class NotebookStore {
     this.inputValues$.next(inputValues);
     this.runtimes.get(id)?.complete();
     this.runtimes.delete(id);
+    if (this.apps$.getValue().some((app) => app.panels.some(({ cellId }) => cellId === id))) {
+      this.apps$.next(
+        this.apps$
+          .getValue()
+          .map((app) => ({ ...app, panels: app.panels.filter(({ cellId }) => cellId !== id) }))
+      );
+    }
+  }
+
+  addApp(app: NotebookApp): void {
+    this.apps$.next([...this.apps$.getValue(), app]);
+  }
+
+  updateApp(id: string, update: (app: NotebookApp) => NotebookApp): void {
+    this.apps$.next(this.apps$.getValue().map((app) => (app.id === id ? update(app) : app)));
+  }
+
+  removeApp(id: string): void {
+    this.apps$.next(this.apps$.getValue().filter((app) => app.id !== id));
+  }
+
+  /** Appends the cell to the app in a new row; does nothing if the app already shows it. */
+  addCellToApp(appId: string, cellId: string): void {
+    const cell = this.getCell(cellId);
+    if (!cell) return;
+    this.updateApp(appId, (app) =>
+      app.panels.some((panel) => panel.cellId === cellId) ? app : appendPanel(app, cell)
+    );
   }
 
   moveCell(id: string, offset: -1 | 1): void {
@@ -145,11 +182,13 @@ export class NotebookStore {
 
   toAttributes(): NotebookAttributes {
     const description = this.description$.getValue();
+    const apps = this.apps$.getValue();
     return {
       title: this.title$.getValue(),
       ...(description ? { description } : {}),
       cellOrder: this.cellOrder$.getValue(),
       cells: this.cells$.getValue(),
+      ...(apps.length > 0 ? { panels: apps } : {}),
     };
   }
 

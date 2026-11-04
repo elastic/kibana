@@ -111,6 +111,21 @@ describe('notebookAttributesSchema', () => {
     expect(notebookAttributesSchema.validate(notebook).cells.chart).toEqual(notebook.cells.chart);
   });
 
+  const withApp = (cellId: string) => ({
+    ...everyVariant,
+    panels: [
+      {
+        id: 'app',
+        title: 'App 1',
+        panels: [{ id: 'panel', cellId, x: 0, y: 0, width: 12, height: 8 }],
+      },
+    ],
+  });
+
+  it('accepts apps whose panels show existing cells', () => {
+    expect(notebookAttributesSchema.validate(withApp('visits'))).toEqual(withApp('visits'));
+  });
+
   const manyCells = toNotebook(
     Array.from({ length: MAX_CELLS + 1 }, (_, index) => ({
       id: `md${index}`,
@@ -176,6 +191,7 @@ describe('notebookAttributesSchema', () => {
       },
       /does not match its cell id/,
     ],
+    ['an app panel showing an unknown cell', withApp('gone'), /references unknown cell \[gone\]/],
   ])('rejects %s', (_label, attributes, reason) => {
     expect(() => notebookAttributesSchema.validate(attributes)).toThrow(reason);
   });

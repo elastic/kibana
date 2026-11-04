@@ -12,6 +12,7 @@ import { APP_ID, APP_ROUTE, NOTEBOOK_SAVED_OBJECT_TYPE } from '../common/constan
 import { notebookAttributesSchema, type StoredNotebookAttributes } from './schema';
 
 const V1_FIELDS = ['title', 'description', 'cellOrder', 'cells'];
+const V2_FIELDS = [...V1_FIELDS, 'panels'];
 
 export const notebookSavedObjectType: SavedObjectsType<StoredNotebookAttributes> = {
   name: NOTEBOOK_SAVED_OBJECT_TYPE,
@@ -41,6 +42,14 @@ export const notebookSavedObjectType: SavedObjectsType<StoredNotebookAttributes>
       schemas: {
         // Picks top-level fields only so a rollback can still read cells written by a newer version.
         forwardCompatibility: (attributes) => pick(attributes, V1_FIELDS),
+        create: notebookAttributesSchema,
+      },
+    },
+    2: {
+      // Adds the unindexed `panels` attribute, which holds the notebook's apps.
+      changes: [],
+      schemas: {
+        forwardCompatibility: (attributes) => pick(attributes, V2_FIELDS),
         create: notebookAttributesSchema,
       },
     },
