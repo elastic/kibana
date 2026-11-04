@@ -7,6 +7,7 @@
 
 import { defineCreateServiceAccountRoute } from './create';
 import { defineDeleteServiceAccountRoute } from './delete';
+import { defineFindServiceAccountsByRolesRoute } from './find_by_roles';
 import { defineGetServiceAccountRoute } from './get';
 import { defineListServiceAccountsRoute } from './list';
 import { defineListServiceAccountWorkloadsRoute } from './list_workloads';
@@ -18,4 +19,5 @@ export function defineServiceAccountsRoutes(params: RouteDefinitionParams) {
   defineGetServiceAccountRoute(params);
   defineDeleteServiceAccountRoute(params);
   defineListServiceAccountWorkloadsRoute(params);
+  defineFindServiceAccountsByRolesRoute(params);
 }

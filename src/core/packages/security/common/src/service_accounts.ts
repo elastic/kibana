@@ -116,6 +116,46 @@ export interface ServiceAccountBoundWorkload {
   href?: string;
 }
 
+/**
+ * A service account that holds at least one of the roles it was looked up by.
+ *
+ * @public
+ */
+export interface ServiceAccountRoleReference {
+  /**
+   * Unique identifier for the account.
+   * Its internal structure differs between backends and must not be parsed by clients.
+   */
+  id: string;
+  name: string;
+  /** The roles the account was looked up by that it holds. Never empty. */
+  roles: string[];
+  /**
+   * Whether the account can authenticate. A disabled account still references its roles, and
+   * re-enabling it restores what they grant.
+   */
+  enabled: boolean;
+  /**
+   * How many workloads are bound to the account, across every space. Absent when the count
+   * failed. The count isn't verified, so it's for display only.
+   */
+  workloadCount?: number;
+}
+
+/**
+ * The service accounts that hold any of a set of roles.
+ *
+ * @public
+ */
+export interface FindServiceAccountsByRolesResponse {
+  serviceAccounts: ServiceAccountRoleReference[];
+  /**
+   * Whether every account was checked. The lookup examines a bounded number of accounts, so
+   * `false` means there may be more accounts holding these roles than are listed.
+   */
+  complete: boolean;
+}
+
 /** Parameters for minting credentials for a workload, optionally pinned to an account. @public */
 export interface ServiceAccountWorkloadRequestParams extends ServiceAccountWorkloadCoordinates {
   /** Reject before minting if the verified binding points to another account. */

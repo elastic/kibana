@@ -24,6 +24,7 @@ import {
 import { EsServiceAccounts } from './es_service_accounts';
 import { UIAM_SERVICE_ACCOUNT_MAX_ROLES } from './uiam_role_limits';
 import { licenseMock } from '../../common/licensing/index.mock';
+import { SERVICE_ACCOUNT_FIND_BY_ROLES_MAX_SCANNED } from '../../common/service_accounts';
 import { auditLoggerMock, auditServiceMock } from '../audit/mocks';
 import { securityTelemetry } from '../otel/instrumentation';
 
@@ -1220,6 +1221,103 @@ describe('EsServiceAccounts', () => {
 
       expect(entries[0]).not.toHaveProperty('description');
       expect(entries[1]).not.toHaveProperty('description');
+    });
+  });
+
+  describe('#findByRoles', () => {
+    const QUERY_PATH = '/_security/_query/service';
+    const queried = (username: string, overrides = {}) => ({
+      username,
+      type: 'user_managed',
+      roles: ['viewer'],
+      enabled: true,
+      ...overrides,
+    });
+
+    it('queries the accounts holding any of the roles, keeping disabled ones', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        total: 2,
+        count: 2,
+        service_accounts: [
+          queried('acme/billing', { enabled: false, roles: ['billing_read', 'viewer'] }),
+          queried('kibana/nightshift-relay', { roles: ['editor', 'viewer', 'other'] }),
+        ],
+      });
+
+      const result = await serviceAccounts.findByRoles(request, ['viewer', 'editor']);
+
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
+        elasticsearch: { cluster: ['manage_security'], index: {} },
+      });
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: QUERY_PATH,
+        body: {
+          size: SERVICE_ACCOUNT_FIND_BY_ROLES_MAX_SCANNED,
+          sort: ['username'],
+          query: { terms: { roles: ['viewer', 'editor'] } },
+        },
+      });
+      expect(result).toEqual({
+        serviceAccounts: [
+          { id: 'acme/billing', name: 'billing', roles: ['viewer'], enabled: false },
+          {
+            id: 'kibana/nightshift-relay',
+            name: 'nightshift-relay',
+            roles: ['editor', 'viewer'],
+            enabled: true,
+          },
+        ],
+        complete: true,
+      });
+      // Only the directory needs to know whether Kibana holds a credential.
+      expect(credentialStore.findExisting).not.toHaveBeenCalled();
+    });
+
+    it('reports itself incomplete when Elasticsearch matched more accounts than it returned', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        total: 1500,
+        count: 1,
+        service_accounts: [queried('kibana/a')],
+      });
+
+      const { complete } = await serviceAccounts.findByRoles(request, ['viewer']);
+
+      expect(complete).toBe(false);
+    });
+
+    it('stays complete when an account it could not read was skipped', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        total: 2,
+        count: 2,
+        service_accounts: [queried('kibana/a'), queried('no-namespace')],
+      });
+
+      const result = await serviceAccounts.findByRoles(request, ['viewer']);
+
+      expect(result.serviceAccounts.map(({ id }) => id)).toEqual(['kibana/a']);
+      expect(result.complete).toBe(true);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Skipping service account [no-namespace], which Elasticsearch reported with an unrecognized principal'
+      );
+    });
+
+    it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
+      license.isEnabled.mockReturnValue(false);
+
+      await expect(serviceAccounts.findByRoles(request, ['viewer'])).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('rejects with a 403 when the caller lacks the `manage_security` cluster privilege', async () => {
+      mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+      await expect(serviceAccounts.findByRoles(request, ['viewer'])).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
     });
   });
 

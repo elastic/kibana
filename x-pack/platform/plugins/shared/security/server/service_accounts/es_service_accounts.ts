@@ -16,7 +16,10 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
-import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
+import type {
+  AuthenticatedPrincipal,
+  FindServiceAccountsByRolesResponse,
+} from '@kbn/core-security-common';
 import type { CreateServiceAccountServerParams, ServiceAccount } from '@kbn/core-security-server';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -52,6 +55,7 @@ import type {
 import {
   ES_SERVICE_ACCOUNT_NAMESPACE,
   ES_SERVICE_ACCOUNT_TOKEN_NAME,
+  SERVICE_ACCOUNT_FIND_BY_ROLES_MAX_SCANNED,
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
   SERVICE_ACCOUNT_NAME_MAX_LENGTH,
   SERVICE_ACCOUNT_NAME_REGEX,
@@ -434,21 +438,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       },
     });
 
-    // An account whose principal Kibana cannot split is skipped rather than taken as a reason to
-    // refuse the page: an oddity in one account must not make the whole directory unreadable.
-    const accounts = rawAccounts
-      .slice(0, limit)
-      .flatMap(({ username, roles, enabled, description }) => {
-        const principal = parseEsServiceAccountId(username);
-        if (!principal) {
-          this.logger.warn(
-            `Skipping service account [${username}], which Elasticsearch reported with an unrecognized principal`
-          );
-          return [];
-        }
-
-        return [{ id: username, ...principal, roles, enabled, description }];
-      });
+    const accounts = this.parseQueriedAccounts(rawAccounts.slice(0, limit));
 
     const credentialled = await this.credentialStore.findExisting(accounts.map(({ id }) => id));
 
@@ -463,6 +453,58 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     // The cursor comes off the raw page rather than the entries above, so that skipping an entry
     // cannot rewind paging over everything that followed it.
     return { serviceAccounts, nextPage: rawAccounts[limit - 1].username };
+  }
+
+  /**
+   * Finds the user-managed accounts holding any of `roles`, in every namespace, the same way
+   * {@link list} reads them. Disabled accounts are included: they still reference their roles.
+   */
+  async findByRoles(
+    request: KibanaRequest,
+    roles: string[]
+  ): Promise<FindServiceAccountsByRolesResponse> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot find service accounts: security features are disabled in Elasticsearch'
+      );
+    }
+
+    await ensureClusterPrivilege({
+      request,
+      checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
+      logger: this.logger,
+      privilege: 'manage_security',
+      action: 'find service accounts by role',
+    });
+
+    const esClient = this.clusterClient.asScoped(request).asCurrentUser;
+    const { total, service_accounts: rawAccounts } = await esClient.transport.request<{
+      total: number;
+      service_accounts: QueriedServiceAccount[];
+    }>({
+      method: 'POST',
+      path: '/_security/_query/service',
+      body: {
+        size: SERVICE_ACCOUNT_FIND_BY_ROLES_MAX_SCANNED,
+        sort: ['username'],
+        query: { terms: { roles } },
+      },
+    });
+
+    const wanted = new Set(roles);
+    return {
+      serviceAccounts: this.parseQueriedAccounts(rawAccounts).map(
+        ({ id, name, roles: held, enabled }) => ({
+          id,
+          name,
+          roles: held.filter((role) => wanted.has(role)),
+          enabled,
+        })
+      ),
+      // Judged on the raw page, so that an account skipped while parsing doesn't make every
+      // lookup look incomplete.
+      complete: rawAccounts.length >= total,
+    };
   }
 
   async get(request: KibanaRequest, id: string): Promise<ServiceAccountDirectoryEntry> {
@@ -892,6 +934,27 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
    * taken name on the strength of this, and the Elasticsearch PUT behind it is a full
    * replacement, so "I cannot parse this" must never read as "the name is free".
    */
+  /**
+   * Splits each queried account's principal. An account whose principal Kibana cannot split is
+   * skipped rather than taken as a reason to refuse the page: an oddity in one account must not
+   * make the whole directory unreadable.
+   */
+  private parseQueriedAccounts(
+    rawAccounts: QueriedServiceAccount[]
+  ): ElasticsearchServiceAccount[] {
+    return rawAccounts.flatMap(({ username, roles, enabled, description }) => {
+      const principal = parseEsServiceAccountId(username);
+      if (!principal) {
+        this.logger.warn(
+          `Skipping service account [${username}], which Elasticsearch reported with an unrecognized principal`
+        );
+        return [];
+      }
+
+      return [{ id: username, ...principal, roles, enabled, description }];
+    });
+  }
+
   private async readAccount(
     esClient: ElasticsearchClient,
     namespace: string,

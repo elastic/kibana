@@ -25,6 +25,7 @@ import { ServiceAccountsManagement } from './service_accounts_management';
 import { serviceAccountsServiceMock } from './service_accounts_service.mock';
 import type { ServiceAccountsBackend } from './types';
 import { licenseMock } from '../../common/licensing/index.mock';
+import { SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE } from '../../common/service_accounts';
 import { auditLoggerMock, auditServiceMock } from '../audit/mocks';
 
 const SERVICE_ACCOUNT_ID = 'service-account-id';
@@ -308,10 +309,43 @@ describe('ServiceAccountsManagement', () => {
       const counts = new Map([['service-account-id', 2]]);
       store.countByServiceAccountIds.mockResolvedValue(counts);
 
-      await expect(management.countBoundWorkloads(['service-account-id'])).resolves.toBe(counts);
+      await expect(management.countBoundWorkloads(['service-account-id'])).resolves.toEqual(counts);
       expect(store.countByServiceAccountIds).toHaveBeenCalledWith(['service-account-id']);
       expect(mockCheckPrivileges.globally).not.toHaveBeenCalled();
       expect(store.getVerified).not.toHaveBeenCalled();
+    });
+
+    it('counts a page of accounts at a time and merges the counts', async () => {
+      const ids = Array.from(
+        { length: SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE + 1 },
+        (_, index) => `service-account-${index}`
+      );
+      store.countByServiceAccountIds
+        .mockResolvedValueOnce(new Map([['service-account-0', 1]]))
+        .mockResolvedValueOnce(
+          new Map([[`service-account-${SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE}`, 4]])
+        );
+
+      await expect(management.countBoundWorkloads(ids)).resolves.toEqual(
+        new Map([
+          ['service-account-0', 1],
+          [`service-account-${SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE}`, 4],
+        ])
+      );
+      expect(store.countByServiceAccountIds).toHaveBeenCalledTimes(2);
+      expect(store.countByServiceAccountIds).toHaveBeenNthCalledWith(
+        1,
+        ids.slice(0, SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE)
+      );
+      expect(store.countByServiceAccountIds).toHaveBeenNthCalledWith(
+        2,
+        ids.slice(SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE)
+      );
+    });
+
+    it('does not query the store for no accounts', async () => {
+      await expect(management.countBoundWorkloads([])).resolves.toEqual(new Map());
+      expect(store.countByServiceAccountIds).not.toHaveBeenCalled();
     });
   });
 

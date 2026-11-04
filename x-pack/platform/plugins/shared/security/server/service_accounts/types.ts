@@ -6,7 +6,10 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
+import type {
+  AuthenticatedPrincipal,
+  FindServiceAccountsByRolesResponse,
+} from '@kbn/core-security-common';
 import type {
   CreateServiceAccountServerParams,
   ServiceAccount,
@@ -55,6 +58,13 @@ export interface ServiceAccountsBackend {
    * Fetches one service account by id, with the same authorization model as {@link list}.
    */
   get(request: KibanaRequest, id: string): Promise<ServiceAccountDirectoryEntry>;
+
+  /**
+   * Finds the service accounts this Kibana can see that hold any of the given roles, with the same
+   * authorization model as {@link list}. Examines at most `SERVICE_ACCOUNT_FIND_BY_ROLES_MAX_SCANNED`
+   * accounts and reports `complete: false` when there were more. No workload counts.
+   */
+  findByRoles(request: KibanaRequest, roles: string[]): Promise<FindServiceAccountsByRolesResponse>;
 
   /**
    * Deletes one service account, rejecting with a 404 when there is no such account. Requires the

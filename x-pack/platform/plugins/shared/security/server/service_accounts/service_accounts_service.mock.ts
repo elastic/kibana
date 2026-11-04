@@ -26,6 +26,7 @@ export const serviceAccountsServiceMock = {
         assumable: true,
         createdBy: { type: 'user' as const, username: 'mock-user-id' },
       }),
+      findByRoles: jest.fn().mockResolvedValue({ serviceAccounts: [], complete: true }),
       createFakeRequest: jest.fn().mockImplementation(async () =>
         httpServerMock.createFakeKibanaRequest({
           headers: { authorization: 'Bearer essu_mock-service-account-token' },

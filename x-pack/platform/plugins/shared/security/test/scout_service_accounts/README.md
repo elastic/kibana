@@ -17,6 +17,8 @@ Scout server configuration. Role loading and service account responses are not m
     workload is unbound. Both tests wait 65 seconds to outlive a token.
   - Classifies an inbound request carrying a UIAM service account token as that
     account.
+  - Finds the accounts whose roles include a requested role, for the warning the
+    role management pages show before a role changes.
   - Deletes an account, refuses to delete a bound one unless forced, and refuses
     a caller without `manage_security`, a credential UIAM did not issue, and a
     service account. A token issued before the delete keeps working until it

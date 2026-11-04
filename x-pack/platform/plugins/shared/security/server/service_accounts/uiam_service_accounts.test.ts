@@ -28,6 +28,7 @@ import { UiamServiceAccounts } from './uiam_service_accounts';
 import type { SecurityLicense } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
 import {
+  SERVICE_ACCOUNT_FIND_BY_ROLES_MAX_SCANNED,
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
   SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
 } from '../../common/service_accounts';
@@ -879,6 +880,128 @@ describe('UiamServiceAccounts', () => {
       const result = await serviceAccounts.list(createMockRequest('Bearer essu_my_token'));
 
       expect(result.serviceAccounts[0]).not.toHaveProperty('description');
+    });
+  });
+
+  describe('#findByRoles', () => {
+    const listed = (id: string, applicationRoles: string[]) => ({
+      ...validResponse,
+      id,
+      name: id,
+      revoked: false,
+      creator: { type: 'user' as const, id: 'user-id' },
+      role_assignments: {
+        organization: [
+          {
+            role_id: 'organization-application-only',
+            organization_id: 'organization-id',
+            application_roles: applicationRoles,
+          },
+        ],
+      },
+    });
+
+    it('pages through the directory and keeps the accounts holding any of the roles', async () => {
+      mockUiam.listServiceAccounts
+        .mockResolvedValueOnce({
+          service_accounts: [listed('a', ['viewer', 'other']), listed('b', ['other'])],
+          next_page: 'b',
+        })
+        .mockResolvedValueOnce({ service_accounts: [listed('c', ['editor', 'viewer'])] });
+
+      const result = await serviceAccounts.findByRoles(createMockRequest('Bearer essu_my_token'), [
+        'viewer',
+        'editor',
+      ]);
+
+      expect(result).toEqual({
+        serviceAccounts: [
+          { id: 'a', name: 'a', roles: ['viewer'], enabled: true },
+          { id: 'c', name: 'c', roles: ['editor', 'viewer'], enabled: true },
+        ],
+        complete: true,
+      });
+      expect(mockUiam.listServiceAccounts).toHaveBeenNthCalledWith(1, {
+        limit: SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
+      });
+      expect(mockUiam.listServiceAccounts).toHaveBeenNthCalledWith(2, {
+        limit: SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
+        after: 'b',
+      });
+    });
+
+    it('matches roles assigned to this project as well as organization-wide ones', async () => {
+      mockUiam.listServiceAccounts.mockResolvedValue({
+        service_accounts: [
+          {
+            ...listed('a', []),
+            role_assignments: {
+              project: {
+                security: [
+                  {
+                    role_id: 'security-custom',
+                    organization_id: 'organization-id',
+                    all: false,
+                    project_ids: ['project-id'],
+                    application_roles: ['analyst'],
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      });
+
+      const { serviceAccounts: found } = await serviceAccounts.findByRoles(
+        createMockRequest('Bearer essu_my_token'),
+        ['analyst']
+      );
+
+      expect(found).toEqual([{ id: 'a', name: 'a', roles: ['analyst'], enabled: true }]);
+    });
+
+    it('stops after examining the cap and reports itself incomplete', async () => {
+      mockUiam.listServiceAccounts.mockImplementation(async () => ({
+        service_accounts: [listed('a', ['viewer'])],
+        next_page: 'more',
+      }));
+
+      const result = await serviceAccounts.findByRoles(createMockRequest('Bearer essu_my_token'), [
+        'viewer',
+      ]);
+
+      expect(mockUiam.listServiceAccounts).toHaveBeenCalledTimes(
+        SERVICE_ACCOUNT_FIND_BY_ROLES_MAX_SCANNED / SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE
+      );
+      expect(result.complete).toBe(false);
+    });
+
+    it('rejects with a 403 when the caller lacks the `manage_security` cluster privilege', async () => {
+      mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+      await expect(
+        serviceAccounts.findByRoles(createMockRequest('Bearer essu_my_token'), ['viewer'])
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      expect(mockUiam.listServiceAccounts).not.toHaveBeenCalled();
+    });
+
+    it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
+      mockLicense.isEnabled.mockReturnValue(false);
+
+      await expect(
+        serviceAccounts.findByRoles(createMockRequest('Bearer essu_my_token'), ['viewer'])
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      expect(mockUiam.listServiceAccounts).not.toHaveBeenCalled();
+    });
+
+    it('propagates a UIAM failure', async () => {
+      mockUiam.listServiceAccounts.mockRejectedValue(Boom.badGateway('UIAM is down'));
+
+      await expect(
+        serviceAccounts.findByRoles(createMockRequest('Bearer essu_my_token'), ['viewer'])
+      ).rejects.toMatchObject({ output: { statusCode: 502 } });
     });
   });
 
