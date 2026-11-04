@@ -24,7 +24,7 @@ import {
   fetchInChunks,
 } from './esql';
 import type { EntityAggregation } from './esql';
-import { buildEuidStages } from './euid_pipeline';
+import { buildEuidStages } from '../../queries/euid_evals';
 import {
   buildRollUpOverAliasesSteps,
   getMergedRowsByEntity,
