@@ -25,8 +25,6 @@ export const getQueryParamNames = (query: string): string[] => {
 export interface CellOutput {
   key: CellOutputKey;
   name: string;
-  /** Bound as `?name` in queries; an ES|QL table is a source, not a param. */
-  isParam: boolean;
   /** The global time picker's `_tstart` and `_tend` cannot be renamed. */
   isFixed: boolean;
 }
@@ -36,18 +34,17 @@ const getDefaultOutputs = (cell: CellDefinition): CellOutput[] => {
   const param = (key: CellOutputKey, defaultName: string): CellOutput => ({
     key,
     name: defaultName,
-    isParam: true,
     isFixed: false,
   });
-  if (cell.type === 'esql') return [{ key: 'table', name, isParam: false, isFixed: false }];
+  if (cell.type === 'esql') return [{ key: 'table', name, isFixed: false }];
   if (cell.type !== 'input') return [];
   const { input } = cell;
   switch (input.kind) {
     case 'time':
       return input.pinned
         ? [
-            { key: 'start', name: '_tstart', isParam: true, isFixed: true },
-            { key: 'end', name: '_tend', isParam: true, isFixed: true },
+            { key: 'start', name: '_tstart', isFixed: true },
+            { key: 'end', name: '_tend', isFixed: true },
           ]
         : [param('start', `${name}_start`), param('end', `${name}_end`)];
     case 'dropdown':

@@ -101,9 +101,7 @@ describe('getCellOutputs', () => {
 
   it('exposes an ES|QL cell as a table, not a param', () => {
     const cell: CellDefinition = { id: 'q', name: 'q', type: 'esql', query: '', runMode: 'auto' };
-    expect(getCellOutputs(cell)).toEqual([
-      { key: 'table', name: 'q', isParam: false, isFixed: false },
-    ]);
+    expect(getCellOutputs(cell)).toEqual([{ key: 'table', name: 'q', isFixed: false }]);
   });
 });
 

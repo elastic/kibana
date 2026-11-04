@@ -52,8 +52,7 @@ const MANUAL_TOOLTIP = i18n.translate('xpack.notebook.status.staleManualTooltip'
   defaultMessage: 'This cell is in manual run mode and has not run yet. Run it to see results.',
 });
 
-const formatParams = (params: readonly string[]): string =>
-  params.map((param) => `?${param}`).join(', ');
+const formatParams = (params: readonly string[]): string => params.join(', ');
 
 const getChangedParamsTooltip = (params: readonly string[]): string =>
   i18n.translate('xpack.notebook.status.staleChangedParamsTooltip', {

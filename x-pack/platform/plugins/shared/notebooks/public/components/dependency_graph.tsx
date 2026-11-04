@@ -116,7 +116,7 @@ const getNodeSummary = (cell: CellDefinition, { error, output, durationMs }: Cel
   if (output?.kind === 'input') {
     const params = Object.entries(output.params);
     return params.length > 0
-      ? params.map(([name, value]) => `?${name} = ${formatParamValue(value)}`).join('\n')
+      ? params.map(([name, value]) => `${name} = ${formatParamValue(value)}`).join('\n')
       : undefined;
   }
   return getTypeLabel(cell);

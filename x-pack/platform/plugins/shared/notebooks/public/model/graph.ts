@@ -119,7 +119,7 @@ export const buildGraph = (
     if (ids.length < 2) return;
     ids.forEach((id) => {
       const others = ids.filter((other) => other !== id).map((other) => `"${nameOf(other)}"`);
-      addError(id, `Parameter ?${param} is also provided by ${others.join(', ')}`);
+      addError(id, `Variable "${param}" is also provided by ${others.join(', ')}`);
     });
   });
 

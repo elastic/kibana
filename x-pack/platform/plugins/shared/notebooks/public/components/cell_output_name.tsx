@@ -29,37 +29,37 @@ const getDescription = ({ key, name, isFixed }: CellOutput): string => {
       });
     case 'value':
       return i18n.translate('xpack.notebook.output.valueDescription', {
-        defaultMessage: 'The selected value. Use it in a query as ?{name}.',
+        defaultMessage: 'The selected value. In ES|QL, use it as ?{name}.',
         values: { name },
       });
     case 'start':
       return isFixed
         ? i18n.translate('xpack.notebook.output.globalStartDescription', {
-            defaultMessage: 'The start of the global time range. Use it in a query as ?{name}.',
+            defaultMessage: 'The start of the global time range. In ES|QL, use it as ?{name}.',
             values: { name },
           })
         : i18n.translate('xpack.notebook.output.startDescription', {
-            defaultMessage: 'The start of the time range. Use it in a query as ?{name}.',
+            defaultMessage: 'The start of the time range. In ES|QL, use it as ?{name}.',
             values: { name },
           });
     case 'end':
       return isFixed
         ? i18n.translate('xpack.notebook.output.globalEndDescription', {
-            defaultMessage: 'The end of the global time range. Use it in a query as ?{name}.',
+            defaultMessage: 'The end of the global time range. In ES|QL, use it as ?{name}.',
             values: { name },
           })
         : i18n.translate('xpack.notebook.output.endDescription', {
-            defaultMessage: 'The end of the time range. Use it in a query as ?{name}.',
+            defaultMessage: 'The end of the time range. In ES|QL, use it as ?{name}.',
             values: { name },
           });
     case 'min':
       return i18n.translate('xpack.notebook.output.minDescription', {
-        defaultMessage: 'The lower bound of the selected range. Use it in a query as ?{name}.',
+        defaultMessage: 'The lower bound of the selected range. In ES|QL, use it as ?{name}.',
         values: { name },
       });
     case 'max':
       return i18n.translate('xpack.notebook.output.maxDescription', {
-        defaultMessage: 'The upper bound of the selected range. Use it in a query as ?{name}.',
+        defaultMessage: 'The upper bound of the selected range. In ES|QL, use it as ?{name}.',
         values: { name },
       });
   }
@@ -71,16 +71,15 @@ export const CellOutputName = ({ cell, output }: { cell: CellDefinition; output:
   const { euiTheme } = useEuiTheme();
   const [draft, setDraft] = useState<string>();
   const [error, setError] = useState<string>();
-  const { key, name, isParam, isFixed } = output;
+  const { key, name, isFixed } = output;
   const description = getDescription(output);
-  const displayName = isParam ? `?${name}` : name;
   const testSubj = `notebookCellOutput-${key}`;
 
   if (isFixed) {
     return (
       <EuiToolTip content={description}>
         <EuiCode tabIndex={0} data-test-subj={testSubj}>
-          {displayName}
+          {name}
         </EuiCode>
       </EuiToolTip>
     );
@@ -150,7 +149,7 @@ export const CellOutputName = ({ cell, output }: { cell: CellDefinition; output:
         onClick={() => setDraft(name)}
         aria-label={i18n.translate('xpack.notebook.output.renameAriaLabel', {
           defaultMessage: 'Rename {name}. {description}',
-          values: { name: displayName, description },
+          values: { name, description },
         })}
         css={css`
           padding: 0;
@@ -160,7 +159,7 @@ export const CellOutputName = ({ cell, output }: { cell: CellDefinition; output:
         `}
         data-test-subj={testSubj}
       >
-        <EuiCode>{displayName}</EuiCode>
+        <EuiCode>{name}</EuiCode>
       </button>
     </EuiToolTip>
   );
