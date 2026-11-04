@@ -147,6 +147,21 @@ describe('entity_utils', () => {
       expect(result['file.path']).toBe(`${'f'.repeat(200)}${suffix}`);
     });
 
+    it('ignores inherited Object.prototype keys such as constructor and toString', () => {
+      const seven = ['1', '2', '3', '4', '5', '6', '7'];
+      const source = {
+        constructor: seven,
+        nested: { toString: seven, valueOf: longValue },
+        hasOwnProperty: longValue,
+      };
+      const result = truncateRelatedAlertLongFields(source) as typeof source;
+
+      expect(result.constructor).toEqual(seven);
+      expect(result.nested.toString).toEqual(seven);
+      expect(result.nested.valueOf).toBe(longValue);
+      expect(result.hasOwnProperty).toBe(longValue);
+    });
+
     it('keeps only the first 5 elements of capped array fields and leaves other arrays alone', () => {
       const result = truncateRelatedAlertLongFields({
         'process.command_line': ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7'],

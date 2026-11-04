@@ -67,7 +67,7 @@ Use this skill when:
 - Check entity risk scores for involved hosts and users using 'security.entity_risk_score' if it is available; otherwise use 'security.get_entity' (Entity Store v2; returns risk score, criticality and risk inputs for a host/user), otherwise report entity risk as unavailable; do not query risk indices directly
 - High risk scores (>80) on involved entities increase alert priority
 - Compare current risk level with historical baseline
-- For deeper entity profiling (asset criticality, behavioral history, entity store lookups), reference the entity-analytics skill
+- For deeper entity profiling (asset criticality, behavioral history, entity store lookups), reference the entity-analytics skill when available
 
 ### 5. Determine Disposition
 - **True Positive** → Escalate: Create a case, attach the alert, recommend containment actions
@@ -79,7 +79,7 @@ Use this skill when:
 - Compile a comprehensive analysis with supporting evidence
 - Provide clear threat assessment: severity, confidence level, affected scope
 - Recommend specific next steps based on disposition
-- Reference the entity-analytics skill for deeper entity profiling or asset criticality review
+- Reference the entity-analytics skill, when available, for deeper entity profiling or asset criticality review
 
 ## Tool Selection Guardrails
 - For list/prioritization/count questions about security alerts (e.g. "how many alerts", "high/critical alerts in last 24h"), use only 'security.alerts' unless explicit correlation by alertId is requested.

@@ -123,15 +123,14 @@ const isPlainObject = (value: unknown): value is Record<string, unknown> =>
 
 const truncateNode = (node: Record<string, unknown>, prefix: string): void => {
   const truncateValue = (value: unknown, path: string): unknown => {
+    const isCapped = Object.hasOwn(RELATED_ALERT_TRUNCATED_FIELD_MAX_LENGTHS, path);
     if (typeof value === 'string') {
-      const maxLength = RELATED_ALERT_TRUNCATED_FIELD_MAX_LENGTHS[path];
-      return maxLength === undefined ? value : truncateString(value, maxLength);
+      return isCapped
+        ? truncateString(value, RELATED_ALERT_TRUNCATED_FIELD_MAX_LENGTHS[path])
+        : value;
     }
     if (Array.isArray(value)) {
-      const items =
-        path in RELATED_ALERT_TRUNCATED_FIELD_MAX_LENGTHS
-          ? value.slice(0, CAPPED_FIELD_MAX_ARRAY_ITEMS)
-          : value;
+      const items = isCapped ? value.slice(0, CAPPED_FIELD_MAX_ARRAY_ITEMS) : value;
       return items.map((item) => truncateValue(item, path));
     }
     if (isPlainObject(value)) {
