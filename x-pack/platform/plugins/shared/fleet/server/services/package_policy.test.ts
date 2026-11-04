@@ -3557,6 +3557,58 @@ describe('Package policy service', () => {
           )
         ).toThrow('path traversal');
       });
+
+      describe('when recompiling for an agent version (agent policy generation)', () => {
+        // An `.hbs` asset with an agent version condition makes the recompile run instead of
+        // returning the stored input unchanged.
+        const assetsMapWithVersionCondition = new Map([
+          ...Array.from(ASSETS_MAP_FIXTURES.entries()),
+          [
+            '/ymlvarpkg-1.0.0/data_stream/ymlds/agent/stream/versioned.yml.hbs',
+            Buffer.from(
+              '{{#semverSatisfies _meta.agent.version "^9.0.0"}}a: 1{{/semverSatisfies}}'
+            ),
+          ],
+        ]) as PackagePolicyAssetsMap;
+
+        // Generation recompiles stored policies, so it must not throw on an ID that was already
+        // stored; the write paths are the ones that validate.
+        it('should not validate a traversal stream id in the template output', () => {
+          const inputs = _compilePackagePolicyInputs(
+            streamPkgInfo,
+            {},
+            streamInputWithCustom('id: ../../../../tmp/evil') as any,
+            assetsMapWithVersionCondition,
+            '9.3.0'
+          );
+
+          expect(inputs[0].streams[0].compiled_stream?.id).toBe('../../../../tmp/evil');
+        });
+
+        it('should not validate a traversal input id in the template output', () => {
+          const inputs = _compilePackagePolicyInputs(
+            {
+              name: 'ymlvarpkg',
+              version: '1.0.0',
+              data_streams: [],
+              policy_templates: [{ inputs: [{ type: 'log', template_path: 'input_custom.yml' }] }],
+            } as unknown as PackageInfo,
+            {},
+            [
+              {
+                type: 'log',
+                enabled: true,
+                vars: { custom: { value: 'id: ../../tmp/evil', type: 'yaml' } },
+                streams: [],
+              },
+            ] as any,
+            assetsMapWithVersionCondition,
+            '9.3.0'
+          );
+
+          expect(inputs[0].compiled_input?.id).toBe('../../tmp/evil');
+        });
+      });
     });
 
     it('should work with an input with a template and no streams', async () => {
