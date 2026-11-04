@@ -49,7 +49,12 @@ export class EndpointArtifactItemTracker {
     this.namesByList.set(listId, names);
   }
 
-  /** Creates an item with a unique name through the API and returns that name. */
+  /**
+   * Creates an item with a unique name through the API and returns that name.
+   * The name is tracked before the POST, so an item the route persisted but
+   * failed to acknowledge is still found at cleanup; once the `item_id` is
+   * known the name lookup is dropped and cleanup deletes by id only.
+   */
   async create({
     listId,
     name: base,
@@ -57,7 +62,7 @@ export class EndpointArtifactItemTracker {
     osTypes,
     policyId,
   }: CreateTrackedEndpointArtifactItemInput): Promise<string> {
-    const name = newName(base);
+    const name = this.uniqueName(listId, base);
     const { itemId } = await this.endpointArtifacts.createItem({
       name,
       listId,
@@ -65,6 +70,7 @@ export class EndpointArtifactItemTracker {
       osTypes,
       policyId,
     });
+    this.namesByList.get(listId)?.delete(name);
     this.itemIds.add(itemId);
     return name;
   }

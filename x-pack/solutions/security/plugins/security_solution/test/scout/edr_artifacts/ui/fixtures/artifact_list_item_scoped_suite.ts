@@ -28,6 +28,10 @@ const STATEFUL_ONLY_REASON =
  * - the READ empty-state assertion becomes "no add button in either state",
  *   because the list may hold items from another spec file;
  * - `endpointArtifactItems` deletes only what the test created.
+ *
+ * The list must already exist: items cannot be created through the API
+ * before that, and `global.setup.ts` creates it once so workers do not race
+ * the create POST.
  */
 export const describeArtifactListPageItemScoped = (
   artifact: ArtifactTabCase,
@@ -50,8 +54,6 @@ export const describeArtifactListPageItemScoped = (
         if (artifact.kind === 'endpointExceptions') {
           await apiServices.endpointArtifacts.optInEndpointExceptionsPerPolicy();
         }
-        // Items cannot be created through the API until the list exists.
-        await apiServices.endpointArtifacts.ensureList({ listId, type: artifact.listType });
       });
 
       spaceTest(

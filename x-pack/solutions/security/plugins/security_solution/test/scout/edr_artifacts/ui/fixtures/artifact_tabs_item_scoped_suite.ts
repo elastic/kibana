@@ -25,6 +25,10 @@ const STATEFUL_ONLY_REASON =
  * from the "unassigned" state instead. Each worker owns its policy and no
  * blocklist suite creates global items, so what is assigned to this policy
  * is exactly what this test assigned.
+ *
+ * The list must already exist: items cannot be created through the API
+ * before that, and `global.setup.ts` creates it once so workers do not race
+ * the create POST.
  */
 export const describeArtifactTabPolicyDetailsItemScoped = (
   artifact: ArtifactTabCase,
@@ -40,8 +44,6 @@ export const describeArtifactTabPolicyDetailsItemScoped = (
         if (artifact.kind === 'endpointExceptions') {
           await apiServices.endpointArtifacts.optInEndpointExceptionsPerPolicy();
         }
-        // Items cannot be created through the API until the list exists.
-        await apiServices.endpointArtifacts.ensureList({ listId, type: artifact.listType });
       });
 
       spaceTest(
