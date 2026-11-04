@@ -6,3 +6,20 @@
  */
 
 export { TaskErrorSource } from './constants';
+export type {
+  TaskOutcome,
+  TaskNode,
+  TaskDetails,
+  ListTasksResponse,
+  GetTaskResponse,
+  TaskTypesResponse,
+  TaskOutcomeRollup,
+  TaskTreeResponse,
+} from './observability';
+export {
+  TASKS_ROUTE,
+  TASK_ROUTE,
+  TASK_TREE_ROUTE,
+  TASK_TYPES_ROUTE,
+  MAX_TASKS_PAGE_SIZE,
+} from './observability';

@@ -15,6 +15,7 @@ import type {
   PartialConcreteTaskInstance,
   RruleSchedule,
 } from '../task';
+import { TaskStatus } from '../task';
 import type { Updatable } from './task_runner';
 
 /** Total attempts = 1 initial + (MAX_ATTEMPTS - 1) retries */
@@ -147,6 +148,15 @@ async function resolveTaskDocumentConflictsOnce({
     // schedule, so recompute it from the current one
     ...(!runAtChanged && scheduleChanged && getRunAtForSchedule && currentTask.schedule
       ? { runAt: getRunAtForSchedule(currentTask.schedule) }
+      : {}),
+    // a sub-task ended while this task was running: resume the yield now instead of at its deadline
+    ...(partialTask.status === TaskStatus.Waiting && currentTask.wakeRequested
+      ? { runAt: new Date(), wakeRequested: false }
+      : {}),
+    // the parent cancelled this sub-task while it was running: it ends as cancelled
+    ...(currentTask.cancelRequested &&
+    (partialTask.status === TaskStatus.Done || partialTask.status === TaskStatus.Failed)
+      ? { status: TaskStatus.Cancelled }
       : {}),
   };
 

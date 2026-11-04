@@ -22,6 +22,7 @@ export const taskPollingLifecycleMock = {
       attemptToRun: jest.fn(),
       stop: jest.fn(),
       getCurrentTasksInPool: jest.fn(),
+      setTaskScheduling: jest.fn(),
       get isStarted() {
         return opts.isStarted ?? true;
       },

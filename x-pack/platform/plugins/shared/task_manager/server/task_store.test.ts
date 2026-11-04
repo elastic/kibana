@@ -3669,6 +3669,176 @@ describe('TaskStore', () => {
     });
   });
 
+  describe('remove with sub-tasks', () => {
+    let store: TaskStore;
+    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+    const logger = mockLogger();
+
+    const attributes = {
+      attempts: 0,
+      params: '{}',
+      retryAt: null,
+      runAt: '2019-02-12T21:01:22.479Z',
+      scheduledAt: '2019-02-12T21:01:22.479Z',
+      startedAt: null,
+      state: '{}',
+      stateVersion: 1,
+      status: 'done',
+      taskType: 'report',
+      traceparent: '',
+    };
+    const savedObject = (id: string, extra: Record<string, unknown> = {}) => ({
+      id,
+      type: 'task',
+      attributes: { ...attributes, ...extra },
+      references: [],
+      version: '123',
+    });
+    const hit = (id: string, extra: Record<string, unknown> = {}) => ({
+      _id: `task:${id}`,
+      _index: 'tasky',
+      _seq_no: 1,
+      _primary_term: 1,
+      _source: { type: 'task', task: { ...attributes, ...extra }, references: [] },
+    });
+
+    beforeEach(() => {
+      const mockSerializer = savedObjectsServiceMock.createSerializer();
+      mockSerializer.isRawSavedObject = jest.fn().mockReturnValue(true);
+      mockSerializer.rawToSavedObject = jest.fn().mockImplementation((doc) => ({
+        id: doc._id.replace(/^task:/, ''),
+        version: '123',
+        type: 'task',
+        references: [],
+        attributes: { ...doc._source.task },
+      }));
+      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      store = new TaskStore({
+        logger,
+        index: 'tasky',
+        taskManagerId: '',
+        serializer: mockSerializer,
+        esClient,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        canEncryptSavedObjects: true,
+        getIsSecurityEnabled: () => true,
+        executionContext: mockExecutionContextStart,
+        apiKeyStrategy: new EsApiKeyStrategy(),
+      });
+      store.registerEncryptedSavedObjectsClient(esoClient);
+      savedObjectsClient.bulkDelete.mockResolvedValue({ statuses: [] });
+    });
+
+    test('removes the sub-tasks of a parent that has children, depth first', async () => {
+      savedObjectsClient.get.mockResolvedValueOnce(savedObject('parent', { hasChildren: true }));
+      esClient.search
+        // children of "parent"
+        .mockResponseOnce({
+          hits: {
+            hits: [
+              hit('parent:a', { parentId: 'parent', rootId: 'parent', depth: 1, hasChildren: true }),
+              hit('parent:b', { parentId: 'parent', rootId: 'parent', depth: 1 }),
+            ],
+            total: 2,
+          },
+        } as unknown as estypes.SearchResponse)
+        // grandchildren under "parent:a"
+        .mockResponseOnce({
+          hits: {
+            hits: [hit('parent:a:leaf', { parentId: 'parent:a', rootId: 'parent', depth: 2 })],
+            total: 1,
+          },
+        } as unknown as estypes.SearchResponse);
+      savedObjectsClient.bulkGet
+        .mockResolvedValueOnce({ saved_objects: [savedObject('parent:a:leaf')] })
+        .mockResolvedValueOnce({
+          saved_objects: [savedObject('parent:a'), savedObject('parent:b')],
+        });
+
+      await store.remove('parent');
+
+      expect(savedObjectsClient.delete).toHaveBeenCalledWith('task', 'parent', { refresh: false });
+      expect(esClient.search).toHaveBeenCalledTimes(2);
+      expect(esClient.search.mock.calls[0][0]).toMatchObject({
+        query: {
+          bool: { must: [{ term: { type: 'task' } }, { terms: { 'task.parentId': ['parent'] } }] },
+        },
+      });
+      expect(esClient.search.mock.calls[1][0]).toMatchObject({
+        query: {
+          bool: {
+            must: [{ term: { type: 'task' } }, { terms: { 'task.parentId': ['parent:a'] } }],
+          },
+        },
+      });
+      expect(savedObjectsClient.bulkDelete).toHaveBeenNthCalledWith(
+        1,
+        [{ id: 'parent:a:leaf', type: 'task' }],
+        { refresh: false }
+      );
+      expect(savedObjectsClient.bulkDelete).toHaveBeenNthCalledWith(
+        2,
+        [
+          { id: 'parent:a', type: 'task' },
+          { id: 'parent:b', type: 'task' },
+        ],
+        { refresh: false }
+      );
+    });
+
+    test('does not look for sub-tasks when the task never spawned any', async () => {
+      savedObjectsClient.get.mockResolvedValueOnce(savedObject('plain'));
+
+      await store.remove('plain');
+
+      expect(savedObjectsClient.delete).toHaveBeenCalledWith('task', 'plain', { refresh: false });
+      expect(esClient.search).not.toHaveBeenCalled();
+      expect(savedObjectsClient.bulkDelete).not.toHaveBeenCalled();
+    });
+
+    test('bulkRemove cascades for the removed tasks that have children', async () => {
+      savedObjectsClient.bulkGet
+        .mockResolvedValueOnce({
+          saved_objects: [savedObject('p1', { hasChildren: true }), savedObject('p2')],
+        })
+        .mockResolvedValueOnce({ saved_objects: [savedObject('p1:a')] });
+      esClient.search.mockResponseOnce({
+        hits: { hits: [hit('p1:a', { parentId: 'p1', rootId: 'p1', depth: 1 })], total: 1 },
+      } as unknown as estypes.SearchResponse);
+
+      await store.bulkRemove(['p1', 'p2']);
+
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+      expect(esClient.search.mock.calls[0][0]).toMatchObject({
+        query: {
+          bool: { must: [{ term: { type: 'task' } }, { terms: { 'task.parentId': ['p1'] } }] },
+        },
+      });
+      expect(savedObjectsClient.bulkDelete).toHaveBeenNthCalledWith(
+        2,
+        [{ id: 'p1:a', type: 'task' }],
+        { refresh: false }
+      );
+    });
+
+    test('a failure while removing sub-tasks is logged and does not fail the removal', async () => {
+      savedObjectsClient.get.mockResolvedValueOnce(savedObject('parent', { hasChildren: true }));
+      esClient.search.mockRejectedValueOnce(new Error('search exploded'));
+
+      await expect(store.remove('parent')).resolves.toBeUndefined();
+
+      expect(savedObjectsClient.delete).toHaveBeenCalledWith('task', 'parent', { refresh: false });
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Failed to remove the sub-tasks of task(s) parent: search exploded'
+      );
+    });
+  });
+
   describe('bulkRemove', () => {
     let store: TaskStore;
     const mockApiKey1 = Buffer.from('apiKeyId1:apiKey').toString('base64');

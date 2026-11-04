@@ -48,7 +48,7 @@ import { nodeBuilder } from '@kbn/es-query';
 import type { ExecutionContextStart } from '@kbn/core/server';
 
 import type { Result } from './lib/result_type';
-import { asOk, asErr, unwrap } from './lib/result_type';
+import { asOk, asErr, isOk, unwrap } from './lib/result_type';
 import type { ExecutionContextRunner } from './lib/execution_context';
 import { getExecutionContextRunner } from './lib/execution_context';
 
@@ -129,6 +129,9 @@ export interface ClaimCandidateFetchResult {
 // The claim phase only needs metadata to version-check, cost and select candidates, and the
 // winners are hydrated again by bulkGet afterwards. Excluding the API key fields also keeps
 // decryption off the candidate path entirely.
+/** Upper bound on the sub-tasks removed with a parent, per level of the tree. */
+export const MAX_CHILDREN_PER_REMOVE = 1000;
+
 const CLAIM_CANDIDATE_SOURCE_EXCLUDES = [
   'task.state',
   'task.params',
@@ -1327,6 +1330,41 @@ export class TaskStore {
       this.errors$.next(e);
       throw e;
     }
+
+    await this._removeDescendants([taskInstance]);
+  }
+
+  /**
+   * Removes the sub-tasks of the given tasks, depth first. Children are kept in a terminal status
+   * until their parent removes them, so removing a parent must take its tree with it. Best effort:
+   * a failure here must not fail the removal that already happened; the orphans are removed when
+   * they next reach a terminal status and find no parent.
+   */
+  private async _removeDescendants(parents: ConcreteTaskInstance[]): Promise<void> {
+    const parentIds = parents.filter((parent) => parent.hasChildren).map(({ id }) => id);
+    if (!parentIds.length) {
+      return;
+    }
+
+    try {
+      const { docs: children } = await this._search(
+        {
+          query: { terms: { 'task.parentId': parentIds } },
+          size: MAX_CHILDREN_PER_REMOVE,
+          sort: [{ 'task.runAt': 'asc' }],
+        },
+        true
+      );
+      if (!children.length) {
+        return;
+      }
+      await this._removeDescendants(children);
+      await this._bulkRemove(children.map(({ id }) => id));
+    } catch (e) {
+      this.logger.warn(
+        `Failed to remove the sub-tasks of task(s) ${parentIds.join(', ')}: ${e.message}`
+      );
+    }
   }
 
   /**
@@ -1361,13 +1399,21 @@ export class TaskStore {
       );
     }
 
+    let response: SavedObjectsBulkDeleteResponse;
     try {
       const savedObjectsToDelete = taskIds.map((taskId) => ({ id: taskId, type: 'task' }));
-      return await this.savedObjectsRepository.bulkDelete(savedObjectsToDelete, { refresh: false });
+      response = await this.savedObjectsRepository.bulkDelete(savedObjectsToDelete, {
+        refresh: false,
+      });
     } catch (e) {
       this.errors$.next(e);
       throw e;
     }
+
+    await this._removeDescendants(
+      taskInstances.filter(isOk).map(({ value }) => value as ConcreteTaskInstance)
+    );
+    return response;
   }
 
   /**
@@ -1538,6 +1584,40 @@ export class TaskStore {
       }
       return asOk(taskMap.get(task.id));
     });
+  }
+
+  /**
+   * Gets tasks by ids without decrypting their API keys: a realtime read for callers that only
+   * need status, state and params (e.g. a parent task reading its children). Ids that do not
+   * exist are left out of the result.
+   */
+  public async bulkGetWithoutApiKeys(ids: string[]): Promise<ConcreteTaskInstance[]> {
+    return this.executionContextRunner.run(() => this._bulkGetWithoutApiKeys(ids), {
+      id: 'bulk-get-without-api-keys',
+    });
+  }
+
+  private async _bulkGetWithoutApiKeys(ids: string[]): Promise<ConcreteTaskInstance[]> {
+    if (!ids.length) {
+      return [];
+    }
+    let result;
+    try {
+      result = await this.savedObjectsRepository.bulkGet<SerializedConcreteTaskInstance>(
+        ids.map((id) => ({ type: 'task', id }))
+      );
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
+
+    const tasks: ConcreteTaskInstance[] = [];
+    for (const so of result.saved_objects) {
+      if (!isSavedObjectErrorResult(so)) {
+        tasks.push(omit(savedObjectToConcreteTaskInstance(so), 'apiKey', 'uiamApiKey'));
+      }
+    }
+    return tasks;
   }
 
   /**

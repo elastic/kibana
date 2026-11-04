@@ -39,7 +39,15 @@ export {
   getTaskCostFromInstance,
   getYieldTaskRunResult,
 } from './task';
-export type { YieldTaskRunResultOptions } from './task';
+export type {
+  YieldTaskRunResultOptions,
+  TaskFanOut,
+  SpawnChildTask,
+  ChildTaskOutcome,
+  ChildTaskSummary,
+  ChildTaskView,
+} from './task';
+export { getChildTaskId, summarizeChildren } from './task_running/fan_out';
 
 export type { TaskRegisterDefinition, TaskDefinitionRegistry } from './task_type_dictionary';
 

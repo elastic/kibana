@@ -47,6 +47,7 @@ import { configMock } from '../config.mock';
 import { EsApiKeyStrategy } from '../api_key_strategy';
 import { taskManagerUiamTelemetry } from '../otel/uiam_telemetry';
 import { asSpaceId } from '@kbn/core-spaces-common';
+import type { TaskFanOutService, WakeParentResult } from './fan_out';
 
 const baseDelay = 5 * 60 * 1000;
 const executionContext = executionContextServiceMock.createSetupContract();
@@ -4773,6 +4774,278 @@ describe('TaskManagerRunner', () => {
     });
   });
 
+  describe('sub-tasks', () => {
+    const createFanOutServiceMock = (notifyResult: WakeParentResult = 'woken') => {
+      const context = {
+        spawn: jest.fn(),
+        getChildren: jest.fn(),
+        summarize: jest.fn(),
+        cancel: jest.fn(),
+        respawn: jest.fn(),
+        cleanup: jest.fn(),
+      };
+      let onSpawned: () => void = () => {};
+      const service = {
+        createContext: jest.fn((_task, opts) => {
+          onSpawned = opts.onSpawned;
+          return context;
+        }),
+        notifyParent: jest.fn().mockResolvedValue(notifyResult),
+      } as unknown as jest.Mocked<TaskFanOutService>;
+      return { service, context, markSpawned: () => onSpawned() };
+    };
+
+    const childInstance = {
+      id: 'parent:child-0',
+      parentId: 'parent',
+      rootId: 'parent',
+      depth: 1,
+      childKey: 'child-0',
+      status: TaskStatus.Running,
+      startedAt: new Date(),
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    test('hands the fan-out context to the task runner', async () => {
+      const { service, context } = createFanOutServiceMock();
+      const createTaskRunner = jest.fn(() => ({ run: async () => ({ state: {} }) }));
+      const { runner } = await readyToRunStageSetup({
+        instance: { status: TaskStatus.Running, startedAt: new Date() },
+        definitions: { bar: { title: 'Bar!', createTaskRunner } },
+        fanOutService: service,
+      });
+
+      await runner.run();
+
+      expect(createTaskRunner).toHaveBeenCalledWith(expect.objectContaining({ fanOut: context }));
+    });
+
+    test('keeps a successful sub-task as done with its state and wakes the parent', async () => {
+      const { service } = createFanOutServiceMock('woken');
+      const { runner, store } = await readyToRunStageSetup({
+        instance: childInstance,
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({ run: async () => ({ state: { result: 42 } }) }),
+          },
+        },
+        fanOutService: service,
+      });
+
+      await runner.run();
+
+      expect(store.remove).not.toHaveBeenCalled();
+      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+      const [update] = store.partialUpdate.mock.calls[0];
+      expect(update).toMatchObject({
+        id: 'parent:child-0',
+        status: TaskStatus.Done,
+        state: { result: 42 },
+        startedAt: null,
+        retryAt: null,
+        ownerId: null,
+      });
+      expect(service.notifyParent).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'parent:child-0', parentId: 'parent' })
+      );
+    });
+
+    test('keeps a sub-task that ran out of attempts as failed and wakes the parent', async () => {
+      const { service } = createFanOutServiceMock('woken');
+      const { runner, store } = await readyToRunStageSetup({
+        instance: { ...childInstance, attempts: 3 },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            maxAttempts: 3,
+            createTaskRunner: () => ({
+              run: async () => {
+                throw new Error('boom');
+              },
+            }),
+          },
+        },
+        fanOutService: service,
+      });
+
+      await runner.run();
+
+      expect(store.remove).not.toHaveBeenCalled();
+      const [update] = store.partialUpdate.mock.calls[0];
+      expect(update).toMatchObject({ id: 'parent:child-0', status: TaskStatus.Failed });
+      expect(service.notifyParent).toHaveBeenCalled();
+    });
+
+    test('retries a failed sub-task like any task and does not wake the parent', async () => {
+      const { service } = createFanOutServiceMock('woken');
+      const { runner, store } = await readyToRunStageSetup({
+        instance: { ...childInstance, attempts: 1 },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            maxAttempts: 3,
+            createTaskRunner: () => ({
+              run: async () => {
+                throw new Error('boom');
+              },
+            }),
+          },
+        },
+        fanOutService: service,
+      });
+
+      await runner.run();
+
+      const [update] = store.partialUpdate.mock.calls[0];
+      expect(update).toMatchObject({ status: TaskStatus.Idle, attempts: 1 });
+      expect(service.notifyParent).not.toHaveBeenCalled();
+    });
+
+    test('ends a sub-task as cancelled when its parent asked for it, even if the run succeeded', async () => {
+      const { service } = createFanOutServiceMock('woken');
+      const { runner, store } = await readyToRunStageSetup({
+        instance: { ...childInstance, cancelRequested: true },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              run: async () => getYieldTaskRunResult({ state: { phase: 'next' } }),
+            }),
+          },
+        },
+        fanOutService: service,
+      });
+
+      await runner.run();
+
+      const [update] = store.partialUpdate.mock.calls[0];
+      expect(update).toMatchObject({ status: TaskStatus.Cancelled, state: { phase: 'next' } });
+      expect(service.notifyParent).toHaveBeenCalled();
+    });
+
+    test('removes a finished sub-task whose parent no longer exists', async () => {
+      const { service } = createFanOutServiceMock('orphan');
+      const { runner, store } = await readyToRunStageSetup({
+        instance: childInstance,
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({ run: async () => ({ state: {} }) }),
+          },
+        },
+        fanOutService: service,
+      });
+
+      await runner.run();
+
+      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+      expect(store.remove).toHaveBeenCalledWith('parent:child-0');
+    });
+
+    test('discardOutOfAttemptsTask keeps a sub-task as failed instead of removing it', async () => {
+      const { service } = createFanOutServiceMock('woken');
+      const { runner, store } = await pendingStageSetup({
+        instance: { ...childInstance, status: TaskStatus.Idle, attempts: 5, state: { a: 1 } },
+        fanOutService: service,
+      });
+
+      await runner.discardOutOfAttemptsTask();
+
+      expect(store.remove).not.toHaveBeenCalled();
+      const [update] = store.partialUpdate.mock.calls[0];
+      expect(update).toMatchObject({ status: TaskStatus.Failed, state: { a: 1 } });
+      expect(service.notifyParent).toHaveBeenCalled();
+    });
+
+    test('discardOutOfAttemptsTask removes a task without a parent', async () => {
+      const { runner, store } = await pendingStageSetup({
+        instance: { status: TaskStatus.Idle, attempts: 5 },
+      });
+
+      await runner.discardOutOfAttemptsTask();
+
+      expect(store.remove).toHaveBeenCalledWith('foo');
+      expect(store.partialUpdate).not.toHaveBeenCalled();
+    });
+
+    test('a yield resumes at once when a sub-task woke the task while it was running', async () => {
+      const { service } = createFanOutServiceMock();
+      const { runner, store } = await readyToRunStageSetup({
+        instance: { status: TaskStatus.Running, startedAt: new Date(), wakeRequested: true },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              run: async () => getYieldTaskRunResult({ state: {}, delay: '10m' }),
+            }),
+          },
+        },
+        fanOutService: service,
+      });
+
+      await runner.run();
+
+      const [update] = store.partialUpdate.mock.calls[0];
+      expect(update).toMatchObject({
+        status: TaskStatus.Waiting,
+        runAt: new Date(),
+        wakeRequested: false,
+      });
+    });
+
+    test('a yield after spawning records that the task has children', async () => {
+      const { service, markSpawned } = createFanOutServiceMock();
+      const { runner, store } = await readyToRunStageSetup({
+        instance: { status: TaskStatus.Running, startedAt: new Date() },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              run: async () => {
+                markSpawned();
+                return getYieldTaskRunResult({ state: {}, delay: '10m' });
+              },
+            }),
+          },
+        },
+        fanOutService: service,
+      });
+
+      await runner.run();
+
+      const [update] = store.partialUpdate.mock.calls[0];
+      expect(update).toMatchObject({ status: TaskStatus.Waiting, hasChildren: true });
+      expect(update.runAt).toEqual(new Date(Date.now() + 10 * 60 * 1000));
+    });
+
+    test('a yield without a wake-up keeps its deadline', async () => {
+      const { service } = createFanOutServiceMock();
+      const { runner, store } = await readyToRunStageSetup({
+        instance: { status: TaskStatus.Running, startedAt: new Date() },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              run: async () => getYieldTaskRunResult({ state: {}, delay: '10m' }),
+            }),
+          },
+        },
+        fanOutService: service,
+      });
+
+      await runner.run();
+
+      const [update] = store.partialUpdate.mock.calls[0];
+      expect(update.runAt).toEqual(new Date(Date.now() + 10 * 60 * 1000));
+      expect(update).not.toHaveProperty('wakeRequested');
+      expect(update).not.toHaveProperty('hasChildren');
+    });
+  });
+
   interface TestOpts {
     instance?: Partial<ConcreteTaskInstance>;
     definitions?: TaskDefinitionRegistry;
@@ -4780,6 +5053,7 @@ describe('TaskManagerRunner', () => {
     allowReadingInvalidState?: boolean;
     enrichFakeRequest?: jest.Mock;
     beforeSave?: Middleware['beforeSave'];
+    fanOutService?: TaskFanOutService;
   }
 
   function withAnyTiming(taskRun: TaskRun) {
@@ -4861,6 +5135,7 @@ describe('TaskManagerRunner', () => {
       apiKeyStrategy: new EsApiKeyStrategy(),
       eventLogger: eventLoggerMock,
       enrichFakeRequest: opts.enrichFakeRequest,
+      fanOutService: opts.fanOutService,
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {

@@ -18,6 +18,7 @@ import {
 } from '@kbn/core-security-server';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import type { IntervalSchedule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
+import type { TaskOutcome } from '../common/observability';
 import { isErr, tryAsResult } from './lib/result_type';
 import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import type { DecoratedError } from './task_running';
@@ -183,6 +184,87 @@ export interface RunContext {
    *  dropped with a warning to protect the shared event log index.
    */
   setCustomTaskRunEventFields: (fields: Record<string, unknown>) => void;
+
+  /**
+   * Lets an ad-hoc task fan work out to sub-tasks and join their results across yields. Always
+   * set by Task Manager; optional only so hand-built contexts in tests keep compiling. See the
+   * "Sub-tasks" section of the Task Manager README.
+   */
+  fanOut?: TaskFanOut;
+}
+
+/**
+ * A sub-task to create from a running parent task. The child's id is derived from the parent id
+ * and `key` (`${parentId}:${key}`), so spawning the same key twice is a no-op.
+ */
+export interface SpawnChildTask {
+  /** Stable key, unique among the parent's children (e.g. `shard-3`). */
+  key: string;
+  taskType: string;
+  params?: Record<string, any>;
+  state?: Record<string, any>;
+  priority?: TaskPriority;
+  cost?: InstanceTaskCost;
+  timeoutOverride?: string;
+  scope?: string[];
+}
+
+/**
+ * Outcome of a child task as seen by its parent. `missing` means the task document could not be
+ * found for a key the parent expects; `inProgress` covers every non-terminal status, including a
+ * child waiting for its own retry.
+ */
+export type ChildTaskOutcome = TaskOutcome;
+
+export interface ChildTaskView {
+  id: string;
+  key: string;
+  taskType: string;
+  outcome: ChildTaskOutcome;
+  status?: TaskStatus;
+  attempts?: number;
+  /** The child's final `state` once it is `done` or `failed`. */
+  state?: Record<string, any>;
+}
+
+export interface ChildTaskSummary {
+  expected: number;
+  inProgress: number;
+  done: number;
+  failed: number;
+  cancelled: number;
+  missing: number;
+  unrecognized: number;
+  /** True when no expected child is still in progress. */
+  settled: boolean;
+  children: ChildTaskView[];
+}
+
+export interface TaskFanOut {
+  /**
+   * Creates the children that do not exist yet. Idempotent per key: a parent re-run after a crash
+   * mid-spawn does not duplicate children. Children inherit the parent's credential.
+   */
+  spawn(children: SpawnChildTask[]): Promise<ChildTaskView[]>;
+  /** Reads the current state of every child of this task from the task index. */
+  getChildren(): Promise<ChildTaskView[]>;
+  /**
+   * Reads the children and summarizes them against the keys the parent expects. Pass the keys the
+   * parent spawned; a key without a document is reported as `missing`, never as done.
+   */
+  summarize(expectedKeys: string[]): Promise<ChildTaskSummary>;
+  /**
+   * Cancels children by key (all children when omitted): children that are not running are
+   * removed, running ones are asked to stop and end as `cancelled`.
+   */
+  cancel(keys?: string[]): Promise<void>;
+  /**
+   * Removes a child so the same key can be spawned again, e.g. to retry a failed child with a new
+   * generation.
+   */
+  respawn(child: SpawnChildTask): Promise<ChildTaskView[]>;
+  /** Removes every terminal child document. Call it from the parent's final run. */
+  cleanup(): Promise<void>;
 }
 
 /**
@@ -511,11 +593,23 @@ export enum TaskStatus {
   Running = 'running',
   // Ad-hoc task that yielded and is waiting to be resumed (by `runAt` elapsing or `runSoon`)
   Waiting = 'waiting',
+  // Sub-task that completed successfully; kept with its final state until the parent removes it
+  Done = 'done',
+  // Sub-task that was cancelled by its parent while running
+  Cancelled = 'cancelled',
   Failed = 'failed',
   ShouldDelete = 'should_delete',
   Unrecognized = 'unrecognized',
   DeadLetter = 'dead_letter',
 }
+
+/** Statuses from which a sub-task never runs again. */
+export const TERMINAL_CHILD_STATUSES: ReadonlySet<TaskStatus> = new Set([
+  TaskStatus.Done,
+  TaskStatus.Failed,
+  TaskStatus.Cancelled,
+  TaskStatus.DeadLetter,
+]);
 
 export enum TaskLifecycleResult {
   NotFound = 'notFound',
@@ -712,6 +806,28 @@ export interface TaskInstance {
    * where it is stored as the task's `credential`; the batch `request` doesn't apply to it.
    */
   runAs?: TaskRunAs;
+
+  /**
+   * Id of the task that spawned this one. Set by `fanOut.spawn`; a task with a parent is kept
+   * in a terminal status (instead of being deleted) until the parent removes it.
+   */
+  parentId?: string;
+
+  /**
+   * Id of the task at the top of the tree this task belongs to. Equals `parentId` for a direct
+   * child of a root task.
+   */
+  rootId?: string;
+
+  /**
+   * Distance from the root task: 1 for a direct child of a root task.
+   */
+  depth?: number;
+
+  /**
+   * Key given by the parent, unique among its children. The task id is `${parentId}:${childKey}`.
+   */
+  childKey?: string;
 }
 
 /**
@@ -826,6 +942,22 @@ export interface ConcreteTaskInstance extends Omit<TaskInstance, 'runAs'> {
    * value whose decryption fails if `credential` was changed. Only written when the task is created.
    */
   encryptedCredential?: string;
+
+  /**
+   * Set when a child reached a terminal status while this task was running, so a yield that
+   * follows resumes immediately instead of waiting for its deadline.
+   */
+  wakeRequested?: boolean;
+
+  /**
+   * Set by the parent to stop a running child. The child ends as `cancelled`.
+   */
+  cancelRequested?: boolean;
+
+  /**
+   * Set once the task has spawned children, so removing the task also removes its tree.
+   */
+  hasChildren?: boolean;
 }
 
 export type PartialConcreteTaskInstance = Partial<ConcreteTaskInstance> & {

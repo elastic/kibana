@@ -22,6 +22,7 @@ import {
   taskSchemaV13,
   taskSchemaV14,
   taskSchemaV15,
+  taskSchemaV16,
 } from '../schemas/task';
 
 import { InstanceTaskCost } from '../../task';
@@ -214,6 +215,24 @@ export const taskModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: taskSchemaV15.extends({}, { unknowns: 'ignore' }),
       create: taskSchemaV15,
+    },
+  },
+  '16': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          parentId: { type: 'keyword', ignore_above: 1024 },
+          rootId: { type: 'keyword', ignore_above: 1024 },
+          depth: { type: 'integer' },
+          childKey: { type: 'keyword', ignore_above: 256 },
+          hasChildren: { type: 'boolean' },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: taskSchemaV16.extends({}, { unknowns: 'ignore' }),
+      create: taskSchemaV16,
     },
   },
 };

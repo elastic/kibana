@@ -1,0 +1,109 @@
+{
+  "10.15.0": [
+    {
+      "taskType": "sample-recurring-task",
+      "scheduledAt": "2026-09-29T10:00:00.000Z",
+      "startedAt": null,
+      "retryAt": null,
+      "runAt": "2026-09-29T10:05:00.000Z",
+      "schedule": {
+        "interval": "5m"
+      },
+      "params": "{}",
+      "state": "{\"runs\":1}",
+      "stateVersion": 1,
+      "traceparent": "",
+      "scope": [
+        "testing"
+      ],
+      "ownerId": null,
+      "enabled": true,
+      "attempts": 0,
+      "status": "idle",
+      "partition": 42,
+      "priority": 50,
+      "cost": "normal"
+    },
+    {
+      "taskType": "sample-yielding-task",
+      "scheduledAt": "2026-09-29T10:00:00.000Z",
+      "startedAt": null,
+      "retryAt": null,
+      "runAt": "2026-09-29T10:10:00.000Z",
+      "params": "{\"id\":\"sample\"}",
+      "state": "{\"phase\":\"resume\"}",
+      "traceparent": "",
+      "ownerId": null,
+      "enabled": true,
+      "attempts": 0,
+      "status": "waiting",
+      "partition": 7,
+      "cost": "normal"
+    }
+  ],
+  "10.16.0": [
+    {
+      "taskType": "sample-recurring-task",
+      "scheduledAt": "2026-09-29T10:00:00.000Z",
+      "startedAt": null,
+      "retryAt": null,
+      "runAt": "2026-09-29T10:05:00.000Z",
+      "schedule": {
+        "interval": "5m"
+      },
+      "params": "{}",
+      "state": "{\"runs\":1}",
+      "stateVersion": 1,
+      "traceparent": "",
+      "scope": [
+        "testing"
+      ],
+      "ownerId": null,
+      "enabled": true,
+      "attempts": 0,
+      "status": "idle",
+      "partition": 42,
+      "priority": 50,
+      "cost": "normal"
+    },
+    {
+      "taskType": "sample-parent-task",
+      "scheduledAt": "2026-09-29T10:00:00.000Z",
+      "startedAt": null,
+      "retryAt": null,
+      "runAt": "2026-09-29T10:10:00.000Z",
+      "params": "{\"id\":\"sample\"}",
+      "state": "{\"phase\":\"join\"}",
+      "traceparent": "",
+      "ownerId": null,
+      "enabled": true,
+      "attempts": 0,
+      "status": "waiting",
+      "partition": 7,
+      "cost": "normal",
+      "hasChildren": true,
+      "wakeRequested": false
+    },
+    {
+      "taskType": "sample-child-task",
+      "scheduledAt": "2026-09-29T10:00:00.000Z",
+      "startedAt": null,
+      "retryAt": null,
+      "runAt": "2026-09-29T10:00:00.000Z",
+      "params": "{\"shard\":0}",
+      "state": "{\"result\":42}",
+      "traceparent": "",
+      "ownerId": null,
+      "enabled": true,
+      "attempts": 0,
+      "status": "done",
+      "partition": 9,
+      "cost": "normal",
+      "parentId": "sample-parent-task-id",
+      "rootId": "sample-parent-task-id",
+      "depth": 1,
+      "childKey": "shard-0",
+      "cancelRequested": false
+    }
+  ]
+}

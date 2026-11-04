@@ -57,6 +57,8 @@ import { createTaskPoller, PollingError, PollingErrorType } from './polling';
 import { TaskPool, TaskPoolRunResult } from './task_pool';
 import type { TaskRunner } from './task_running';
 import { TaskManagerRunner } from './task_running';
+import { TaskFanOutService } from './task_running/fan_out';
+import type { TaskScheduling } from './task_scheduling';
 import type { TaskStore } from './task_store';
 import type { ApiKeyStrategy } from './api_key_strategy';
 import { identifyEsError, isEsCannotExecuteScriptError } from './lib/identify_es_error';
@@ -152,6 +154,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private enrichFakeRequest?: FakeRequestEnricher;
 
   private eventLogger: TaskEventLogger;
+  private readonly fanOutService: TaskFanOutService;
+  // Set by the plugin once scheduling exists; sub-tasks are created through it.
+  private taskScheduling?: TaskScheduling;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -279,6 +284,13 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.bufferedStore = new BufferedTaskStore(this.store, {
       bufferMaxOperations: MAX_BUFFER_OPERATIONS,
       logger,
+    });
+
+    this.fanOutService = new TaskFanOutService({
+      logger,
+      store: taskStore,
+      getScheduling: () => this.taskScheduling,
+      claimNudgeService,
     });
 
     this.pool = new TaskPool({
@@ -420,6 +432,13 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     return this.pool.getCurrentTasksInPool();
   }
 
+  /**
+   * Gives running tasks access to scheduling so they can spawn sub-tasks.
+   */
+  public setTaskScheduling(taskScheduling: TaskScheduling): void {
+    this.taskScheduling = taskScheduling;
+  }
+
   private emitEvent = (event: TaskLifecycleEvent) => {
     this.events$.next(event);
   };
@@ -442,6 +461,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       apiKeyStrategy: this.apiKeyStrategy,
       eventLogger: this.eventLogger,
       enrichFakeRequest: this.enrichFakeRequest,
+      fanOutService: this.fanOutService,
     });
   };
 
@@ -486,8 +506,8 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
               `Not running claimed task ${task} because task type "${task.taskType}" was paused mid-cycle.`
             );
           } else if (task.isAdHocTaskAndOutOfAttempts) {
-            this.logger.debug(`Removing ${task} because the max attempts have been reached.`);
-            removeTaskPromises.push(task.removeTask());
+            this.logger.debug(`Discarding ${task} because the max attempts have been reached.`);
+            removeTaskPromises.push(task.discardOutOfAttemptsTask());
           } else {
             tasksToRun.push(task);
           }

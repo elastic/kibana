@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { lazyObject } from '@kbn/lazy-object';
 import type { TaskManagerSetupContract, TaskManagerStartContract } from './plugin';
-import type { ConcreteTaskInstance, RunContext } from './task';
+import type { ConcreteTaskInstance, RunContext, TaskFanOut } from './task';
 import { TaskStatus } from './task';
 
 const createSetupMock = () => {
@@ -82,7 +82,27 @@ const createRunContextMock = (overrides: Partial<RunContext> = {}): RunContext =
   signal: new AbortController().signal,
   executionUuid: 'test-execution-uuid',
   setCustomTaskRunEventFields: jest.fn(),
+  fanOut: createFanOutMock(),
   ...overrides,
+});
+
+const createFanOutMock = (): jest.Mocked<TaskFanOut> => ({
+  spawn: jest.fn().mockResolvedValue([]),
+  getChildren: jest.fn().mockResolvedValue([]),
+  summarize: jest.fn().mockResolvedValue({
+    expected: 0,
+    inProgress: 0,
+    done: 0,
+    failed: 0,
+    cancelled: 0,
+    missing: 0,
+    unrecognized: 0,
+    settled: true,
+    children: [],
+  }),
+  cancel: jest.fn().mockResolvedValue(undefined),
+  respawn: jest.fn().mockResolvedValue([]),
+  cleanup: jest.fn().mockResolvedValue(undefined),
 });
 
 export const taskManagerMock = {

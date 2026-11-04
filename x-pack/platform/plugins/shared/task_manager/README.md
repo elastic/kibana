@@ -352,6 +352,81 @@ Params handed off by a yield go through the `beforeSave` middleware, exactly lik
 
 A yield is recorded in the event log (provider `taskManager`): the yielding run writes its normal `task-run` event plus a `task-yield` event carrying `kibana.task.yield.deadline`. The task's next `task-run-start` event is the resume; if it starts before the deadline, the task was resumed by `runSoon`.
 
+### Sub-tasks (fan-out)
+
+An ad-hoc task can split its work across **sub-tasks**: it spawns one or more children, yields, and is woken when a child finishes. The parent then reads its children's results, decides whether to wait again, and eventually finalizes. Sub-tasks are ordinary ad-hoc tasks, so they are claimed, run, retried, and reported like any other task and run on any Kibana node. The `fanOut` helper on the `RunContext` provides the API.
+
+A sub-task differs from a plain ad-hoc task in one way: it is **not deleted when it finishes**. A child that completes successfully is kept in the `done` status with its final `state`; one that exhausts its attempts is kept as `failed`; one its parent cancelled ends as `cancelled`. The document is the child's result, and it stays until the parent removes it (`fanOut.cleanup()`), or until the parent is removed (its whole tree is removed with it). A sub-task is therefore still a one-off: a `done` sub-task never runs again, and `runSoon` refuses it.
+
+Every sub-task that reaches a terminal status wakes its parent. A waiting parent becomes claimable immediately; a parent that is still running has a wake recorded so the yield it is about to persist resumes at once rather than at its deadline. The parent never counts wake-ups: on every resume it reads the child documents (`fanOut.summarize(keys)`) and decides from what it sees. This keeps the join correct when wake-ups coalesce, when a child finishes while the parent is running, or when a child document is missing — the yield `delay` acts as a safety net that re-reads the children even if a wake-up is lost.
+
+```js
+import { getYieldTaskRunResult } from '@kbn/task-manager-plugin/server';
+
+taskManager.registerTaskDefinitions({
+  reindexAll: {
+    createTaskRunner({ taskInstance, fanOut }) {
+      return {
+        async run() {
+          const { phase = 'spawn', keys = [] } = taskInstance.state;
+
+          if (phase === 'spawn') {
+            const shards = ['shard-0', 'shard-1', 'shard-2'];
+            // Idempotent per key: a re-run after a crash does not duplicate children.
+            await fanOut.spawn(
+              shards.map((key) => ({ key, taskType: 'reindexShard', params: { shard: key } }))
+            );
+            return getYieldTaskRunResult({ state: { phase: 'join', keys: shards }, delay: '5m' });
+          }
+
+          const summary = await fanOut.summarize(keys);
+          if (!summary.settled) {
+            // Still waiting on some children. The deadline is only a safety net; a finishing
+            // child wakes the task earlier.
+            return getYieldTaskRunResult({ state: { phase: 'join', keys }, delay: '5m' });
+          }
+
+          const results = summary.children.map(({ key, outcome, state }) => ({ key, outcome, state }));
+          await fanOut.cleanup(); // removes the done/failed/cancelled children
+          return { state: { phase: 'finalized', results } };
+        },
+      };
+    },
+  },
+  reindexShard: {
+    maxAttempts: 3,
+    createTaskRunner({ taskInstance }) {
+      return {
+        async run() {
+          const docs = await reindex(taskInstance.params.shard);
+          // Kept as the child's result until the parent cleans it up.
+          return { state: { docs } };
+        },
+      };
+    },
+  },
+});
+```
+
+The `fanOut` API:
+
+- `spawn(children)` creates the children that do not exist yet and returns a view of all of them. Each child has a stable `key` (letters, digits, `.`, `_`, `-`), unique among its siblings; its task id is `${parentId}:${key}`. Children inherit the parent's `scope`, `priority`, and credential (user API key or service account); `params`, `state`, `priority`, `cost`, `timeoutOverride`, and `scope` can be set per child.
+- `summarize(expectedKeys)` reads the given children by id (a realtime read) and returns counts per outcome plus `settled`, which is true when no expected child is still in progress. A key without a document is reported as `missing`, never as `done`. Children that are `done` or `failed` carry their final `state`.
+- `getChildren()` lists every child of this task from the index.
+- `cancel(keys?)` removes children that have not started and asks running ones to stop; a running child that is cancelled finishes its current run and ends as `cancelled` (the runner checks for cancellation on its heartbeat, so a cancelled child stops within about a minute).
+- `respawn(child)` removes a terminal child so the same key can be spawned again, e.g. to retry a failed shard with a new generation.
+- `cleanup()` removes every terminal child. Call it from the parent's final run.
+
+Rules and limits:
+
+- Only ad-hoc tasks can spawn sub-tasks; a recurring parent's `spawn` throws. Sub-tasks may themselves spawn sub-tasks, up to 3 levels deep, and a parent may have at most 100 children (spawn in waves for wider fan-outs).
+- `spawn` happens inside the parent's run, so it is not transactional with the yield. Keep the keys the parent spawned in its `state` and pass them to `summarize`, so a crash between spawn and yield is recovered by the idempotent re-spawn on the next run.
+- A sub-task that fails is retried like any task (`maxAttempts`) and only wakes the parent once it is terminal. Failure policy (fail fast, best effort, retry via `respawn`) is the parent's decision.
+- Removing a parent removes its whole tree. A terminal sub-task whose parent no longer exists removes itself.
+- A parent that spawns children and then completes without yielding leaves fire-and-forget children behind; they self-remove when they finish and find no parent.
+
+For debugging, **Stack Management → Background tasks** (superuser, provided by the `taskManagerUi` plugin) lists the tasks in the index grouped into parent / sub-task trees, with a details flyout per task. The same data is available from `GET /internal/task_manager/_tasks`, `GET /internal/task_manager/_task/{id}`, and `GET /internal/task_manager/_tree/{rootId}` (a task and every sub-task under it with a roll-up of outcomes).
+
 ### Force failing a task
 
 If you wish to purposely fail a task, you can throw an error of any kind and the retry logic will apply.

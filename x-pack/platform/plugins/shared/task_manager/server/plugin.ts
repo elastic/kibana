@@ -55,6 +55,8 @@ import {
   healthRoute,
   metricsRoute,
   executionControlRoutes,
+  taskTreeRoute,
+  tasksRoutes,
 } from './routes';
 import type { MonitoringStats } from './monitoring';
 import { createMonitoringStats } from './monitoring';
@@ -287,6 +289,15 @@ export class TaskManagerPlugin
       getExecutionControlService: () =>
         core.getStartServices().then(() => this.executionControlService!),
       getDefinitions: () => this.definitions,
+    });
+    taskTreeRoute({
+      router,
+      getTaskStore: () => core.getStartServices().then(() => this.taskStore!),
+    });
+    tasksRoutes({
+      router,
+      getTaskStore: () => core.getStartServices().then(() => this.taskStore!),
+      definitions: this.definitions,
     });
 
     core.status.derivedStatus$.subscribe((status) =>
@@ -532,6 +543,7 @@ export class TaskManagerPlugin
       taskPollingLifecycle: this.taskPollingLifecycle,
       claimNudgeService: this.claimNudgeService,
     });
+    this.taskPollingLifecycle?.setTaskScheduling(taskScheduling);
 
     scheduleEventLogTelemetryTask(this.logger, taskScheduling).catch(() => {});
     scheduleDeleteInactiveNodesTaskDefinition(this.logger, taskScheduling).catch(() => {});

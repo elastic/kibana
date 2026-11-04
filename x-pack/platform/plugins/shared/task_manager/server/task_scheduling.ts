@@ -403,7 +403,11 @@ export class TaskScheduling {
       throw new Error(`Task type "${task.taskType}" does not allow priority overrides`);
     }
 
-    if (task.status === TaskStatus.Unrecognized) {
+    if (
+      task.status === TaskStatus.Unrecognized ||
+      task.status === TaskStatus.Done ||
+      task.status === TaskStatus.Cancelled
+    ) {
       throw new Error(`Failed to run task "${taskId}" with status ${task.status}`);
     }
 

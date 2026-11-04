@@ -177,3 +177,25 @@ export const taskSchemaV15 = taskSchemaV14.extends({
     schema.literal('dead_letter'),
   ]),
 });
+
+export const taskSchemaV16 = taskSchemaV15.extends({
+  // Adds sub-task linkage and the 'done' / 'cancelled' terminal statuses for sub-tasks
+  status: schema.oneOf([
+    schema.literal('idle'),
+    schema.literal('claiming'),
+    schema.literal('running'),
+    schema.literal('waiting'),
+    schema.literal('done'),
+    schema.literal('cancelled'),
+    schema.literal('failed'),
+    schema.literal('unrecognized'),
+    schema.literal('dead_letter'),
+  ]),
+  parentId: schema.maybe(schema.string({ maxLength: 1024 })),
+  rootId: schema.maybe(schema.string({ maxLength: 1024 })),
+  depth: schema.maybe(schema.number({ min: 0 })),
+  childKey: schema.maybe(schema.string({ maxLength: 256 })),
+  wakeRequested: schema.maybe(schema.boolean()),
+  cancelRequested: schema.maybe(schema.boolean()),
+  hasChildren: schema.maybe(schema.boolean()),
+});

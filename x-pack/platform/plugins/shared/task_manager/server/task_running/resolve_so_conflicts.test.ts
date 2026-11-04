@@ -351,4 +351,90 @@ describe('resolveTaskDocumentConflicts', () => {
       LOG_META
     );
   });
+
+  test('resumes a yield at once when a sub-task woke the task while it was running', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2020-01-01T00:00:45.000Z'));
+    try {
+      const currentTask = createTask({
+        version: 'WzIsMV0=',
+        startedAt: originalTask.startedAt,
+        wakeRequested: true,
+      });
+      partialTask = {
+        ...partialTask,
+        status: TaskStatus.Waiting,
+        runAt: new Date('2020-01-01T00:10:00.000Z'),
+      };
+      store.get.mockResolvedValue(currentTask);
+      store.partialUpdate.mockResolvedValue(currentTask);
+
+      await resolve();
+
+      expect(store.partialUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: TaskStatus.Waiting,
+          runAt: new Date('2020-01-01T00:00:45.000Z'),
+          wakeRequested: false,
+        }),
+        { validate: false, doc: currentTask }
+      );
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  test('keeps the yield deadline when no sub-task woke the task', async () => {
+    const currentTask = createTask({ version: 'WzIsMV0=', startedAt: originalTask.startedAt });
+    partialTask = {
+      ...partialTask,
+      status: TaskStatus.Waiting,
+      runAt: new Date('2020-01-01T00:10:00.000Z'),
+    };
+    store.get.mockResolvedValue(currentTask);
+    store.partialUpdate.mockResolvedValue(currentTask);
+
+    await resolve();
+
+    expect(store.partialUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ runAt: new Date('2020-01-01T00:10:00.000Z') }),
+      expect.anything()
+    );
+  });
+
+  test('ends a sub-task as cancelled when its parent asked for it while it was running', async () => {
+    const currentTask = createTask({
+      version: 'WzIsMV0=',
+      startedAt: originalTask.startedAt,
+      parentId: 'parent',
+      cancelRequested: true,
+    });
+    partialTask = { ...partialTask, status: TaskStatus.Done };
+    store.get.mockResolvedValue(currentTask);
+    store.partialUpdate.mockResolvedValue(currentTask);
+
+    await resolve();
+
+    expect(store.partialUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ status: TaskStatus.Cancelled, state: { foo: 'bar' } }),
+      { validate: false, doc: currentTask }
+    );
+  });
+
+  test('does not cancel a sub-task that is merely retrying', async () => {
+    const currentTask = createTask({
+      version: 'WzIsMV0=',
+      startedAt: originalTask.startedAt,
+      parentId: 'parent',
+      cancelRequested: true,
+    });
+    store.get.mockResolvedValue(currentTask);
+    store.partialUpdate.mockResolvedValue(currentTask);
+
+    await resolve();
+
+    expect(store.partialUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ status: TaskStatus.Idle }),
+      expect.anything()
+    );
+  });
 });

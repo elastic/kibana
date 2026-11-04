@@ -46,6 +46,7 @@ export const taskStoreMock = {
       aggregate: jest.fn(),
       updateByQuery: jest.fn(),
       bulkGet: jest.fn(),
+      bulkGetWithoutApiKeys: jest.fn().mockResolvedValue([]),
       bulkGetVersions: jest.fn(),
       getDocVersions: jest.fn(),
       search: jest.fn(),

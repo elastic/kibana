@@ -46,11 +46,13 @@ import type {
   TaskCredential,
   TaskDefinition,
   TaskEventLogger,
+  TaskFanOut,
   TaskRunAsContext,
   TaskTypeGroup,
 } from '../task';
 import { isFailedRunResult, TaskStatus, TaskCost, getTaskCostFromInstance } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
+import type { TaskFanOutService } from './fan_out';
 import {
   createTaskRunError,
   isUnrecoverableError,
@@ -106,6 +108,7 @@ export interface TaskRunner {
   isSameTask: (executionId: string) => boolean;
   isAdHocTaskAndOutOfAttempts: boolean;
   removeTask: () => Promise<void>;
+  discardOutOfAttemptsTask: () => Promise<void>;
 }
 
 export enum TaskRunningStage {
@@ -145,6 +148,7 @@ type Opts = {
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
   enrichFakeRequest?: FakeRequestEnricher;
+  fanOutService?: TaskFanOutService;
 } & Pick<Middleware, 'beforeRun' | 'beforeSave'>;
 
 export enum TaskRunResult {
@@ -208,6 +212,9 @@ export class TaskManagerRunner implements TaskRunner {
   private scheduleAtRunStart?: IntervalSchedule | RruleSchedule;
   private readonly enrichFakeRequest?: FakeRequestEnricher;
   private taskRunEventCustomFields?: Record<string, unknown>;
+  private readonly fanOutService?: TaskFanOutService;
+  // Set once this run has spawned a sub-task, so the yield that follows records `hasChildren`.
+  private hasSpawnedChildren = false;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -236,8 +243,10 @@ export class TaskManagerRunner implements TaskRunner {
     apiKeyStrategy,
     eventLogger,
     enrichFakeRequest,
+    fanOutService,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
+    this.fanOutService = fanOutService;
     this.definitions = definitions;
     this.logger = logger;
     this.bufferedTaskStore = store;
@@ -542,6 +551,7 @@ export class TaskManagerRunner implements TaskRunner {
             signal: abortController.signal,
             executionUuid: this.uuid,
             setCustomTaskRunEventFields: this.setCustomTaskRunEventFields,
+            fanOut: this.createFanOutContext(fakeRequest),
           });
 
           const originalTaskCancel = this.task.cancel;
@@ -721,6 +731,10 @@ export class TaskManagerRunner implements TaskRunner {
       this.instance = asRan(task);
     }
 
+    if (this.isChildTask) {
+      await this.notifyParentOfTerminalChild();
+    }
+
     this.onTaskEvent(
       asTaskRunEvent(
         this.id,
@@ -767,6 +781,100 @@ export class TaskManagerRunner implements TaskRunner {
           `Error encountered when running onTaskRemoved() hook for ${this}: ${e.message}`
         );
       }
+    }
+  }
+
+  /**
+   * Handles an ad-hoc task that was claimed with no attempts left. A sub-task is kept as `failed`
+   * so its parent sees the outcome; any other task is removed.
+   */
+  public async discardOutOfAttemptsTask(): Promise<void> {
+    if (this.isChildTask) {
+      await this.completeChildTask(TaskStatus.Failed, this.instance.task.state);
+      return;
+    }
+    await this.removeTask();
+  }
+
+  private get isChildTask(): boolean {
+    return Boolean(this.instance.task.parentId);
+  }
+
+  private createFanOutContext(fakeRequest: ReturnType<typeof buildTaskFakeRequest>) {
+    const { fanOutService } = this;
+    if (!fanOutService) {
+      return unavailableFanOut;
+    }
+    return fanOutService.createContext(this.instance.task, {
+      fakeRequest,
+      onSpawned: () => {
+        this.hasSpawnedChildren = true;
+      },
+    });
+  }
+
+  /**
+   * Ends a sub-task in a terminal status instead of deleting it, keeping its final state for the
+   * parent, then wakes the parent. A sub-task whose parent no longer exists removes itself.
+   */
+  private async completeChildTask(
+    status: TaskStatus.Done | TaskStatus.Failed | TaskStatus.Cancelled,
+    state: ConcreteTaskInstance['state']
+  ): Promise<void> {
+    const { task } = this.instance;
+    const finalStatus = task.cancelRequested ? TaskStatus.Cancelled : status;
+    const partialTask: PartialConcreteTaskInstance = {
+      id: task.id,
+      version: task.version,
+      status: finalStatus,
+      state,
+      startedAt: null,
+      retryAt: null,
+      ownerId: null,
+    };
+    try {
+      this.instance = asRan(
+        await this.bufferedTaskStore.partialUpdate(partialTask, { validate: false, doc: task })
+      );
+    } catch (error) {
+      if (!isVersionConflictError(error)) {
+        throw error;
+      }
+      // A cancel request from the parent is the usual concurrent writer; the resolver merges it
+      // and gives up if the task was reclaimed by another node.
+      this.instance = asRan(task);
+      await resolveTaskDocumentConflicts({
+        taskId: this.id,
+        partialTask,
+        originalTask: task,
+        bufferedTaskStore: this.bufferedTaskStore,
+        logger: this.logger,
+      });
+    }
+
+    await this.notifyParentOfTerminalChild();
+  }
+
+  private async notifyParentOfTerminalChild(): Promise<void> {
+    const { task } = this.instance;
+    if (!this.fanOutService || !task.parentId) {
+      return;
+    }
+    try {
+      const outcome = await this.fanOutService.notifyParent(task);
+      if (outcome === 'orphan') {
+        this.logger.debug(
+          `Removing sub-task ${this} because its parent task "${task.parentId}" no longer exists`,
+          { tags: [this.id, this.taskType] }
+        );
+        await this.bufferedTaskStore.remove(this.id);
+      }
+    } catch (e) {
+      // The parent's yield deadline covers a lost wake-up.
+      this.logger.warn(
+        `Failed to wake parent task "${task.parentId}" after sub-task ${this} ended: ${e.message}`,
+        { tags: [this.id, this.taskType] }
+      );
     }
   }
 
@@ -916,6 +1024,13 @@ export class TaskManagerRunner implements TaskRunner {
   ): Promise<TaskRunResult> {
     const hasTaskRunFailed = isOk(result);
     let shouldTaskBeDisabled = false;
+
+    // A sub-task its parent asked to stop ends now, whatever its run returned: no retry, no yield.
+    if (this.isChildTask && this.instance.task.cancelRequested) {
+      await this.completeChildTask(TaskStatus.Cancelled, unwrap(result).state);
+      return TaskRunResult.Failed;
+    }
+
     // Params handed off by a yield are persisted by the framework, so run them through
     // the same `beforeSave` middleware that `schedule` applies to params.
     const resultToPersist = await this.applyBeforeSaveToYieldedParams(result);
@@ -999,9 +1114,17 @@ export class TaskManagerRunner implements TaskRunner {
       fieldUpdates.status === TaskStatus.Failed ||
       fieldUpdates.status === TaskStatus.ShouldDelete
     ) {
-      // Delete the SO instead so it doesn't remain in the index forever
-      this.instance = asRan(this.instance.task);
-      await this.removeTask();
+      if (this.isChildTask) {
+        // A sub-task is kept in a terminal status so its parent can read the outcome
+        await this.completeChildTask(
+          fieldUpdates.status === TaskStatus.Failed ? TaskStatus.Failed : TaskStatus.Done,
+          unwrap(result).state
+        );
+      } else {
+        // Delete the SO instead so it doesn't remain in the index forever
+        this.instance = asRan(this.instance.task);
+        await this.removeTask();
+      }
     } else {
       const { shouldValidate = true } = unwrap(result);
       const label = `${this.taskType}:${this.instance.task.id}`;
@@ -1052,6 +1175,9 @@ export class TaskManagerRunner implements TaskRunner {
           retryAt: null,
           ownerId: null,
           ...(shouldTaskBeDisabled ? { enabled: false } : {}),
+          ...(fieldUpdates.status === TaskStatus.Waiting
+            ? this.getYieldFanOutFields(fieldUpdates.runAt)
+            : {}),
         };
       }
 
@@ -1089,7 +1215,36 @@ export class TaskManagerRunner implements TaskRunner {
       : TaskRunResult.RetryScheduled;
   }
 
-  private async processResultWhenDone(): Promise<TaskRunResult> {
+  /**
+   * Fields a yield persists for sub-task coordination: a wake-up that arrived while the task was
+   * running makes the task claimable now instead of at its deadline, and a task that spawned
+   * children records it so removing the task removes its tree.
+   */
+  private getYieldFanOutFields(runAt?: Date): PartialConcreteTaskInstance {
+    const { task } = this.instance;
+    const wakeRequested = task.wakeRequested === true;
+    if (wakeRequested) {
+      this.logger.debug(
+        `Task ${this} was woken by a sub-task while running; resuming now instead of at ${runAt?.toISOString()}`,
+        { tags: [this.taskType, this.id, 'task:yield'] }
+      );
+    }
+    return {
+      id: task.id,
+      ...(wakeRequested ? { runAt: new Date(), wakeRequested: false } : {}),
+      ...(this.hasSpawnedChildren && !task.hasChildren ? { hasChildren: true } : {}),
+    };
+  }
+
+  private async processResultWhenDone(
+    result: Result<SuccessfulRunResult, FailedRunResult>
+  ): Promise<TaskRunResult> {
+    if (this.isChildTask) {
+      // A sub-task is kept in `done` with its final state until its parent removes it
+      await this.completeChildTask(TaskStatus.Done, unwrap(result).state);
+      return TaskRunResult.Success;
+    }
+
     // not a recurring task: clean up by removing the task instance from store
     try {
       this.instance = asRan(this.instance.task);
@@ -1129,7 +1284,7 @@ export class TaskManagerRunner implements TaskRunner {
             persistence: taskPersistence,
             result: await (runAt || schedule || task.schedule || shouldYieldTask
               ? this.processResultForRecurringTask(result)
-              : this.processResultWhenDone()),
+              : this.processResultWhenDone(result)),
           };
 
           // Alerting task runner returns SuccessfulRunResult with taskRunError
@@ -1281,6 +1436,10 @@ export class TaskManagerRunner implements TaskRunner {
             { validate: false, doc: taskInstance }
           );
           this.instance = asReadyToRun({ ...updatedTask, startedAt });
+          if (await this.cancelIfRequestedByParent()) {
+            stop();
+            return;
+          }
         } catch (error) {
           if (isVersionConflictError(error)) {
             let currentTask: ConcreteTaskInstance | undefined;
@@ -1309,6 +1468,10 @@ export class TaskManagerRunner implements TaskRunner {
                 `Conflict error trying to update retryAt for a long-running task: ${this.id} - updated to the current task document, will retry on the next interval`,
                 { tags: [this.id, this.taskType] }
               );
+              if (await this.cancelIfRequestedByParent()) {
+                stop();
+                return;
+              }
             }
           } else {
             this.logger.warn(
@@ -1328,6 +1491,21 @@ export class TaskManagerRunner implements TaskRunner {
       clearTimeout(timer);
     };
     return stop;
+  }
+
+  /**
+   * Stops a running sub-task whose parent cancelled it. Checked whenever the long-running
+   * heartbeat refreshes the task document, so cancellation reaches a child within one interval.
+   */
+  private async cancelIfRequestedByParent(): Promise<boolean> {
+    if (!this.isChildTask || !this.instance.task.cancelRequested || this.isCancelled) {
+      return false;
+    }
+    this.logger.info(`Cancelling sub-task ${this} because its parent requested it`, {
+      tags: [this.id, this.taskType],
+    });
+    await this.cancel();
+    return true;
   }
 
   private setCustomTaskRunEventFields = (fields: Record<string, unknown>): void => {
@@ -1450,6 +1628,19 @@ export class TaskManagerRunner implements TaskRunner {
     });
   }
 }
+
+const fanOutUnavailable = () =>
+  Promise.reject(new Error('Sub-tasks are not available: Task Manager has no fan-out service'));
+
+// Handed to task runners created without a fan-out service (e.g. in unit tests).
+const unavailableFanOut: TaskFanOut = {
+  spawn: fanOutUnavailable,
+  getChildren: fanOutUnavailable,
+  summarize: fanOutUnavailable,
+  cancel: fanOutUnavailable,
+  respawn: fanOutUnavailable,
+  cleanup: fanOutUnavailable,
+};
 
 function sanitizeInstance(instance: ConcreteTaskInstance): ConcreteTaskInstance {
   return {

@@ -1644,6 +1644,20 @@ describe('TaskScheduling', () => {
       }
     );
 
+    test.each([TaskStatus.Done, TaskStatus.Cancelled, TaskStatus.Unrecognized])(
+      'refuses to run a task with the terminal status %s',
+      async (status) => {
+        const task = taskManagerMock.createTask({ id: 'parent:child', status });
+        mockTaskStore.get.mockResolvedValueOnce(task);
+        const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+        await expect(taskScheduling.runSoon(task.id)).rejects.toThrow(
+          `Failed to run task "parent:child" with status ${status}`
+        );
+        expect(mockTaskStore.update).not.toHaveBeenCalled();
+      }
+    );
+
     test('rejects a priority override for a task type that has not opted in', async () => {
       const task = taskManagerMock.createTask({ status: TaskStatus.Idle });
       mockTaskStore.get.mockResolvedValueOnce(task);

@@ -13,6 +13,7 @@ const createTaskSchedulingMock = () => {
     bulkEnable: jest.fn(),
     ensureScheduled: jest.fn(),
     schedule: jest.fn(),
+    bulkSchedule: jest.fn(),
     runSoon: jest.fn(),
   } as unknown as jest.Mocked<TaskScheduling>;
 };

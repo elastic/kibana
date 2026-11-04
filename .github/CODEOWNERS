@@ -992,6 +992,7 @@ x-pack/examples/gen_ai_streaming_response_example @elastic/response-ops
 x-pack/examples/lens_config_builder_example @elastic/kibana-dashboards
 x-pack/examples/lens_embeddable_inline_editing_example @elastic/kibana-dashboards
 x-pack/examples/screenshotting_example @elastic/response-ops
+x-pack/examples/task_manager_fan_out_example @elastic/response-ops
 x-pack/examples/testing_embedded_lens @elastic/kibana-dashboards
 x-pack/examples/third_party_lens_navigation_prompt @elastic/kibana-dashboards
 x-pack/examples/third_party_maps_source_example @elastic/kibana-dashboards
@@ -1235,6 +1236,7 @@ x-pack/platform/plugins/private/runtime_fields @elastic/kibana-management
 x-pack/platform/plugins/private/snapshot_restore @elastic/kibana-management
 x-pack/platform/plugins/private/subscription_status @elastic/appex-sharedux
 x-pack/platform/plugins/private/task_manager_dependencies @elastic/response-ops
+x-pack/platform/plugins/private/task_manager_ui @elastic/response-ops
 x-pack/platform/plugins/private/telemetry_collection_xpack @elastic/kibana-core
 x-pack/platform/plugins/private/transform @elastic/kibana-management
 x-pack/platform/plugins/private/translations @elastic/kibana-localization

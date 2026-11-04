@@ -1,9 +1,35 @@
 {
-  "sha1": "f54275462182b3289ad28148bb35868982a353cf",
+  "sha1": "4a3838832da24a681f536a39d9118124d61959a7",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "d6cec9e5021c86e-98ed3eb703251bb",
+      "title": "Task Manager sub-tasks (fan-out) spawns children, is woken when they end, joins their results and removes them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_sample_tasks/api/tests/fan_out.spec.ts",
+        "line": 42,
+        "column": 10
+      }
+    },
+    {
+      "id": "d6cec9e5021c86e-b7d3c39c25da269",
+      "title": "Task Manager sub-tasks (fan-out) failFast cancels the remaining children when one fails",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_sample_tasks/api/tests/fan_out.spec.ts",
+        "line": 140,
+        "column": 10
+      }
+    },
     {
       "id": "eeb2690c4d4e256-8680f67fce17e97",
       "title": "Task Manager yield execution keeps an ad-hoc task that yields and resumes the same task",
@@ -13,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout_sample_tasks/api/tests/yield_execution.spec.ts",
-        "line": 26,
-        "column": 94
+        "line": 28,
+        "column": 10
       }
     }
   ]

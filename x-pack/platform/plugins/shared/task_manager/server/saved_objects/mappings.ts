@@ -123,6 +123,28 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
         },
       },
     },
+    // Sub-task linkage: parents find their children by parentId, trees are removed by rootId
+    parentId: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
+    rootId: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
+    depth: {
+      type: 'integer',
+    },
+    childKey: {
+      type: 'keyword',
+      ignore_above: 256,
+    },
+    hasChildren: {
+      type: 'boolean',
+    },
+    // NO NEED TO BE INDEXED
+    // wakeRequested: { type: 'boolean' },
+    // cancelRequested: { type: 'boolean' },
   },
 };
 

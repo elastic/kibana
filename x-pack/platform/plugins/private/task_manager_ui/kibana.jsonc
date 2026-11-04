@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/task-manager-ui-plugin",
+  "owner": [
+    "@elastic/response-ops"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "description": "Stack Management page that shows the tasks in the Task Manager index, grouped into parent and sub-task trees.",
+  "plugin": {
+    "id": "taskManagerUi",
+    "browser": true,
+    "server": false,
+    "requiredPlugins": [
+      "management"
+    ]
+  }
+}

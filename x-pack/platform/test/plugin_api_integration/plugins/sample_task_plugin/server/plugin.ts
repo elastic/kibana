@@ -659,6 +659,119 @@ export class SampleTaskManagerFixturePlugin
           },
         }),
       },
+      sampleFanOutParent: {
+        title: 'Sample Fan-Out Parent',
+        description:
+          'Spawns sampleFanOutChild sub-tasks, yields until they end, records the join result and removes them.',
+        timeout: '1m',
+        maxAttempts: 3,
+        // params:
+        //    children : number - how many children to spawn. Defaults to 2
+        //    failChildren : string[] - keys of the children that throw, e.g. ['child-1']
+        //    childDelayMs : number - how long each succeeding child runs (failing children fail at once)
+        //    joinDelay : string - yield deadline while waiting for children. Defaults to '1m'
+        //    policy : 'allSettled' | 'failFast' - cancel the remaining children on the first failure
+        createTaskRunner: ({ taskInstance, fanOut }: RunContext) => ({
+          async run() {
+            if (!fanOut) {
+              throw new Error('fanOut is not available');
+            }
+            const { params, state, id } = taskInstance;
+            const phase: string = state.phase ?? 'spawn';
+            const joinDelay: string = params.joinDelay ?? '1m';
+
+            if (phase === 'spawn') {
+              const count: number = params.children ?? 2;
+              const keys = Array.from({ length: count }, (_, index) => `child-${index}`);
+              const failChildren: string[] = params.failChildren ?? [];
+              await fanOut.spawn(
+                keys.map((key) => ({
+                  key,
+                  taskType: 'sampleFanOutChild',
+                  params: {
+                    key,
+                    ...(failChildren.includes(key)
+                      ? { failWith: `${key} failed` }
+                      : params.childDelayMs
+                      ? { delayMs: params.childDelayMs }
+                      : {}),
+                  },
+                }))
+              );
+              return getYieldTaskRunResult({
+                state: { phase: 'join', keys, wakes: 0 },
+                delay: joinDelay,
+              });
+            }
+
+            if (phase === 'join') {
+              const keys: string[] = state.keys ?? [];
+              const wakes: number = (state.wakes ?? 0) + 1;
+              const summary = await fanOut.summarize(keys);
+
+              if (params.policy === 'failFast' && summary.failed > 0 && !summary.settled) {
+                await fanOut.cancel();
+                return getYieldTaskRunResult({
+                  state: { ...state, wakes, cancelled: true },
+                  delay: joinDelay,
+                });
+              }
+
+              if (!summary.settled) {
+                return getYieldTaskRunResult({ state: { ...state, wakes }, delay: joinDelay });
+              }
+
+              const result = {
+                wakes,
+                done: summary.done,
+                failed: summary.failed,
+                cancelled: summary.cancelled,
+                missing: summary.missing,
+                results: summary.children.map(({ key, outcome, state: childState }) => ({
+                  key,
+                  outcome,
+                  result: childState?.result ?? null,
+                })),
+              };
+              const [{ elasticsearch }] = await core.getStartServices();
+              await elasticsearch.client.asInternalUser.index({
+                index: '.kibana_task_manager_test_result',
+                document: {
+                  type: 'fanOut',
+                  taskId: id,
+                  state: JSON.stringify(result),
+                  ranAt: new Date(),
+                },
+                refresh: true,
+              });
+              // Two-phase finish: persist the result before removing the children, so a crash in
+              // between cannot turn the result into "all children missing".
+              return getYieldTaskRunResult({ state: { phase: 'finalize', result } });
+            }
+
+            await fanOut.cleanup();
+            return { state: {} };
+          },
+        }),
+      },
+      sampleFanOutChild: {
+        title: 'Sample Fan-Out Child',
+        description: 'A sub-task of sampleFanOutParent; returns its key as its result or throws.',
+        timeout: '1m',
+        maxAttempts: 1,
+        createTaskRunner: ({ taskInstance }: RunContext) => ({
+          async run() {
+            const { key, failWith, delayMs } = taskInstance.params;
+            if (delayMs) {
+              await new Promise((resolve) => setTimeout(resolve, delayMs));
+            }
+            if (failWith) {
+              throw new Error(failWith);
+            }
+            return { state: { result: String(key).toUpperCase() } };
+          },
+        }),
+      },
       userInteractivePriorityTask: {
         title: 'Task used for testing user interactive priority claiming',
         priority: TaskPriority.UserInteractive,

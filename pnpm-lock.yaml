@@ -3809,6 +3809,9 @@ importers:
       '@kbn/task-manager-dependencies-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/task_manager_dependencies
+      '@kbn/task-manager-fan-out-example-plugin':
+        specifier: workspace:*
+        version: link:x-pack/examples/task_manager_fan_out_example
       '@kbn/task-manager-fixture-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture
@@ -3821,6 +3824,9 @@ importers:
       '@kbn/task-manager-service-accounts-test-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test/task_manager/plugins/service_accounts
+      '@kbn/task-manager-ui-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/private/task_manager_ui
       '@kbn/telemetry':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-telemetry
@@ -8864,6 +8870,8 @@ importers:
 
   x-pack/examples/screenshotting_example: {}
 
+  x-pack/examples/task_manager_fan_out_example: {}
+
   x-pack/examples/testing_embedded_lens: {}
 
   x-pack/examples/third_party_lens_navigation_prompt: {}
@@ -9349,6 +9357,8 @@ importers:
   x-pack/platform/plugins/private/subscription_status: {}
 
   x-pack/platform/plugins/private/task_manager_dependencies: {}
+
+  x-pack/platform/plugins/private/task_manager_ui: {}
 
   x-pack/platform/plugins/private/telemetry_collection_xpack: {}
 
@@ -14549,6 +14559,7 @@ packages:
   '@smithy/core@3.36.2':
     resolution: {integrity: sha512-oRw0rB9QSUiCZfEs23G5F4Af+b2rQt1lItIICWu5IejFNd+uPM8SWqiKLMpQ6bX1Q7slsLbjuoE2niErFtkVPQ==}
     engines: {node: '>=18.0.0'}
+    deprecated: Deprecated due to a bug in custom logger data redaction. See https://github.com/aws/aws-sdk-js-v3/issues/8393.
 
   '@smithy/credential-provider-imds@4.5.2':
     resolution: {integrity: sha512-A9uSdn72ozbRUSit0eib0TW7nXuNPlaeM0zcGkJ+nE6tFcSDbnmtwoxbTCFBukVQcszDAyvsd7+rTduPTXpygg==}
@@ -19760,6 +19771,7 @@ packages:
   http-call@5.3.0:
     resolution: {integrity: sha512-ahwimsC23ICE4kPl9xTBjKB4inbRaeLyZeRunC/1Jy/Z6X8tv22MEAjK+KBOMSVLaqXPTTmd8638waVIKLGx2w==}
     engines: {node: '>=8.0.0'}
+    deprecated: Renamed to @heroku/http-call — please install @heroku/http-call instead.
 
   http-deceiver@1.2.7:
     resolution: {integrity: sha512-LmpOGxTfbpgtGVxJrj5k7asXHCgNZp5nLfp+hWc8QQRqtb7fUy6kRY3BO1h9ddF6yIPYUARgxGOwB42DnxIaNw==}

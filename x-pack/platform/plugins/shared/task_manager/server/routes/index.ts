@@ -9,3 +9,5 @@ export { healthRoute } from './health';
 export { backgroundTaskUtilizationRoute } from './background_task_utilization';
 export { metricsRoute } from './metrics';
 export { executionControlRoutes } from './execution_control';
+export { taskTreeRoute } from './task_tree';
+export { tasksRoutes } from './tasks';

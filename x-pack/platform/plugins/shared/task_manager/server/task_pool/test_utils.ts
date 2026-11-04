@@ -30,6 +30,7 @@ export function mockTask(overrides = {}, definitionOverrides = {}) {
     toString: () => `TaskType "shooooo"`,
     isAdHocTaskAndOutOfAttempts: false,
     removeTask: jest.fn(),
+    discardOutOfAttemptsTask: jest.fn(),
     get expiration() {
       return new Date();
     },
