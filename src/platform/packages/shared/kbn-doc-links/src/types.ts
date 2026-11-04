@@ -412,6 +412,9 @@ export interface DocLinks {
     readonly signalsMigrationApi: string;
     readonly siemMigrations: string;
     readonly llmPerformanceMatrix: string;
+    readonly alertZero: {
+      readonly continuousThreatHunt: string;
+    };
   };
   readonly query: {
     readonly eql: string;

@@ -7,7 +7,12 @@
 
 import { parse } from 'yaml';
 
-import { parseYamlChangelog } from '.';
+import {
+  ChangeType,
+  getBreakingChangesInRange,
+  parseYamlChangelog,
+  type Changelog,
+} from './changelog_utils';
 
 describe('parseYamlChangelog', () => {
   const changelogText = `
@@ -117,5 +122,95 @@ describe('parseYamlChangelog', () => {
   });
   it('should return empty array if changelog text is null', () => {
     expect(parseYamlChangelog(parse, null, `2.4.0`, `2.2.0`)).toEqual([]);
+  });
+
+  it('should return empty array if changelog text is not valid YAML', () => {
+    expect(parseYamlChangelog(parse, 'foo: [bar', `2.4.0`, `2.2.0`)).toEqual([]);
+  });
+
+  it('should return empty array if changelog is not a list', () => {
+    expect(parseYamlChangelog(parse, 'foo: bar', `2.4.0`, `2.2.0`)).toEqual([]);
+  });
+
+  it('should ignore entries without a valid version', () => {
+    expect(
+      parseYamlChangelog(
+        parse,
+        `${changelogText}\n- foo\n- version: invalid\n  changes: []`,
+        `2.4.0`,
+        `2.3.0`
+      ).map(({ version }) => version)
+    ).toEqual(['2.4.0', '2.3.0']);
+  });
+});
+
+describe('getBreakingChangesInRange', () => {
+  const changelog: Changelog = [
+    {
+      version: '3.0.0',
+      changes: [
+        {
+          description: 'Breaking 3.0.0',
+          link: 'https://link/300',
+          type: ChangeType.BreakingChange,
+        },
+        {
+          description: 'Enhancement 3.0.0',
+          link: 'https://link/300e',
+          type: ChangeType.Enhancement,
+        },
+      ],
+    },
+    {
+      version: '2.1.0',
+      changes: [{ description: 'Bugfix 2.1.0', link: 'https://link/210', type: ChangeType.BugFix }],
+    },
+    {
+      version: '2.0.0',
+      changes: [
+        {
+          description: 'Breaking 2.0.0',
+          link: 'https://link/200',
+          type: ChangeType.BreakingChange,
+        },
+      ],
+    },
+    {
+      version: 'not-a-version',
+      changes: [
+        { description: 'Invalid version', link: 'https://link/x', type: ChangeType.BreakingChange },
+      ],
+    },
+  ];
+
+  it('should exclude the from version and include the to version', () => {
+    expect(getBreakingChangesInRange(changelog, '2.0.0', '3.0.0')).toEqual([
+      {
+        version: '3.0.0',
+        changes: [
+          {
+            description: 'Breaking 3.0.0',
+            link: 'https://link/300',
+            type: ChangeType.BreakingChange,
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('should return all breaking changes of the range', () => {
+    expect(
+      getBreakingChangesInRange(changelog, '1.0.0', '3.0.0').map(({ version }) => version)
+    ).toEqual(['3.0.0', '2.0.0']);
+  });
+
+  it('should return an empty array when the range has no breaking changes', () => {
+    expect(getBreakingChangesInRange(changelog, '2.0.0', '2.1.0')).toEqual([]);
+  });
+
+  it('should return an empty array for a changelog that is not an array', () => {
+    expect(
+      getBreakingChangesInRange({ foo: 'bar' } as unknown as Changelog, '1.0.0', '3.0.0')
+    ).toEqual([]);
   });
 });

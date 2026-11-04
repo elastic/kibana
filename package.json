@@ -76,7 +76,7 @@
   },
   "engines": {
     "node": "24.22.1",
-    "pnpm": "~12.4.2"
+    "pnpm": "~12.17.0"
   },
   "resolutions": {
     "**/@babel/core": "7.29.7",
@@ -1555,7 +1555,7 @@
     "io-ts": "2.2.22",
     "ipaddr.js": "2.3.0",
     "jest-diff": "29.7.0",
-    "joi": "18.2.9",
+    "joi": "18.3.1",
     "joi-to-json": "5.0.0",
     "jquery": "3.7.1",
     "js-search": "1.4.3",
@@ -2319,5 +2319,5 @@
     "xmlbuilder": "15.1.1",
     "yaml-language-server": "1.23.0"
   },
-  "packageManager": "pnpm@12.4.2"
+  "packageManager": "pnpm@12.17.0"
 }
