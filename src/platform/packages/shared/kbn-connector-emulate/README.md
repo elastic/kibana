@@ -100,7 +100,7 @@ Each call says where its response came from in `responseSource`: `runtime-fixtur
 
 ### Several connectors
 
-`combineEmulators` puts several connectors' emulators behind one `fetch`, so one proxy, and one Kibana, can serve them all. Each keeps its own specs, overlay, fixtures and recordings:
+`combineEmulators` puts several connectors' emulators behind one `fetch`, so one proxy, and one Kibana, can serve them all. Each keeps its own specs, overlay, fixtures and recordings: A request no connector's specs match gets 404, which only the `onCall` option of `combineEmulators` sees, as no emulator answers it.
 
 ```ts
 import { combineEmulators, emulatorCredential } from '@kbn/connector-emulate';

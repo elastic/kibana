@@ -165,6 +165,24 @@ describe('combineEmulators', () => {
     expect(calls.map(({ connector }) => connector)).toEqual(['sharepoint-online', 'sharepoint']);
   });
 
+  it('reports requests no connector matches to onCall, and only those', async () => {
+    const onCall = jest.fn();
+    const { fetch } = combineEmulators(
+      {
+        outlook: createEmulatorFetch({ specs: [graphSpec('/me/messages')] }),
+        one_drive: createEmulatorFetch({ specs: [graphSpec('/me/drive')] }),
+      },
+      { onCall }
+    );
+
+    await fetch(`${GRAPH}/me`, bearer(emulatorCredential('outlook')));
+    await fetch('https://unknown.example/path');
+
+    expect(onCall.mock.calls).toEqual([
+      [expect.objectContaining({ request: 'GET https://unknown.example/path', status: 404 })],
+    ]);
+  });
+
   it('answers 404 to requests no connector matches, and records them without a connector', async () => {
     const { fetch, calls } = createCombined();
 

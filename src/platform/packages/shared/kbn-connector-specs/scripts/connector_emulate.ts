@@ -264,7 +264,8 @@ run(
       fixtureCount += fixtures.length;
       recordingCount += recordings.length;
     }
-    const mock = combineEmulators(emulators);
+    // Each emulator logs its own calls; this logs requests none of them matches.
+    const mock = combineEmulators(emulators, { onCall: (call) => logCall(log, call) });
     for (const { connector, source, operation, violations } of mock.rejectedResponses) {
       log.warning(
         [

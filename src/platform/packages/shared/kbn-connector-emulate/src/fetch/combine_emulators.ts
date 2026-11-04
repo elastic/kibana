@@ -124,10 +124,12 @@ const tagTokens = async (response: Response, tag: string): Promise<Response> => 
  * body or a JWT assertion; the tokens that connector's token URLs issue carry the credential
  * too. Other requests go to the first connector whose specs match the URL, so connectors that
  * share a vendor host need the credential to get their own responses. Every call is recorded
- * in `calls` with its `connector`.
+ * in `calls` with its `connector`. `onCall` gets the calls no emulator sees, which are requests no
+ * connector matches; each emulator's own `onCall` gets the rest.
  */
 export const combineEmulators = (
-  emulators: Readonly<Record<string, Emulator>>
+  emulators: Readonly<Record<string, Emulator>>,
+  { onCall }: { readonly onCall?: (call: ContractCall) => void } = {}
 ): CombinedEmulator => {
   const connectors = Object.keys(emulators);
   const invalid = connectors.filter((name) => !CONNECTOR_NAME.test(name));
@@ -220,12 +222,14 @@ export const combineEmulators = (
 
     if (connector === undefined) {
       const description = `${request.method} ${url.origin}${url.pathname}`;
-      calls.push({
+      const call: ContractCall = {
         request: description,
         status: 404,
         requestViolations: [],
         responseViolations: [],
-      });
+      };
+      calls.push(call);
+      onCall?.(call);
       return new Response(
         JSON.stringify({
           title: 'No matching operation',
