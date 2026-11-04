@@ -268,6 +268,10 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: NotebookApp[] }) =>
     store.addApp(next);
     activeAppId$.next(next.id);
   };
+  const newAppLabel = i18n.translate('xpack.notebook.app.newApp', { defaultMessage: 'New app' });
+  const generateAppLabel = i18n.translate('xpack.notebook.app.generateAnother', {
+    defaultMessage: 'Generate app',
+  });
 
   return (
     // Leaves room for the flyout's close button in the top-right corner.
@@ -281,6 +285,36 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: NotebookApp[] }) =>
           maxItemsCount={MAX_APPS}
           services={{ core: { chrome: core.chrome } }}
           createItem={() => ({ id: uuidv4(), label: getNewAppTitle(apps) })}
+          customNewTabButton={
+            <EuiFlexGroup gutterSize="none" responsive={false}>
+              <EuiToolTip content={newAppLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="plus"
+                  color="text"
+                  aria-label={newAppLabel}
+                  onClick={() => addApp(createEmptyApp(apps))}
+                  data-test-subj="notebookAppNew"
+                />
+              </EuiToolTip>
+              <EuiToolTip content={generateAppLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="sparkles"
+                  color="text"
+                  aria-label={generateAppLabel}
+                  onClick={() =>
+                    addApp(
+                      generateDefaultApp(
+                        store.cells$.getValue(),
+                        store.cellOrder$.getValue(),
+                        getNewAppTitle(apps)
+                      )
+                    )
+                  }
+                  data-test-subj="notebookAppGenerateAnother"
+                />
+              </EuiToolTip>
+            </EuiFlexGroup>
+          }
           onChanged={async ({ items, selectedItem }) => {
             const kept = new Set(items.map(({ id }) => id));
             const deleted = apps.filter(({ id, panels }) => !kept.has(id) && panels.length > 0);
@@ -293,31 +327,11 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: NotebookApp[] }) =>
           data-test-subj="notebookAppTabs"
         />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem>{pinnedTime && <PinnedTimePicker cell={pinnedTime} />}</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              iconType="sparkles"
-              onClick={() =>
-                addApp(
-                  generateDefaultApp(
-                    store.cells$.getValue(),
-                    store.cellOrder$.getValue(),
-                    getNewAppTitle(apps)
-                  )
-                )
-              }
-              data-test-subj="notebookAppGenerateAnother"
-            >
-              {i18n.translate('xpack.notebook.app.generateAnother', {
-                defaultMessage: 'Generate',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+      {pinnedTime && (
+        <EuiFlexItem>
+          <PinnedTimePicker cell={pinnedTime} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
