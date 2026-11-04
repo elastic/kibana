@@ -199,6 +199,7 @@ describe('WorkflowExecutionsFilters', () => {
     expect(defaultControls?.map(({ field_name: fieldName }) => fieldName)).toEqual([
       'status',
       'workflowId',
+      'runName',
       'triggeredBy',
     ]);
     expect(controlsUrlState).toEqual([{ field_name: 'status' }]);
