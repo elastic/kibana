@@ -14,6 +14,7 @@ import type { APMDataTelemetry } from '../types';
 type CollectTelemetryParams = TelemetryTaskExecutorParams & {
   isProd: boolean;
   logger: Logger;
+  signal?: AbortSignal;
 };
 
 export function collectDataTelemetry({
@@ -22,9 +23,14 @@ export function collectDataTelemetry({
   savedObjectsClient,
   isProd,
   logger,
+  signal,
 }: CollectTelemetryParams) {
   return tasks.reduce((prev, task) => {
     return prev.then(async (data) => {
+      if (signal?.aborted) {
+        logger.debug(`Skipping APM telemetry task ${task.name}: collection was aborted`);
+        return data;
+      }
       logger.debug(`Executing APM telemetry task ${task.name}`);
       try {
         const time = process.hrtime();
