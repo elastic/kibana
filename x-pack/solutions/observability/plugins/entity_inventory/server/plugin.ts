@@ -63,7 +63,6 @@ export class EntityInventoryPlugin
    * leaves the rest registered; only the count is logged here, never the reason again.
    */
   private registerEntityDefinitions = (entityStore: EntityStoreSetupContract): void => {
-    console.log('Registering entity definitions', JSON.stringify(ENTITY_DEFINITIONS));
     const rejected = ENTITY_DEFINITIONS.filter(
       (definition) => !entityStore.registerEntityDefinition(definition).ok
     );
