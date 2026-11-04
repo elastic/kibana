@@ -72,27 +72,32 @@ describe('ConnectSourcesGrid', () => {
     expect(screen.getByTestId('.elasticsearch-card')).toHaveTextContent('External Elasticsearch');
   });
 
-  it('shows HTTP and the other sandbox-capable types as additional sources', async () => {
+  it('shows other sandbox-capable types as additional sources, without HTTP', async () => {
     setup({ types: allTypes(), group: 'additional' });
 
     await screen.findByTestId('nightshiftConnectSourcesGrid');
-    expect(cardIds()).toEqual(['.github-card', '.http-card']);
+    expect(cardIds()).toEqual(['.github-card']);
     expect(screen.getByTestId('.github-card')).toHaveTextContent('Repos');
+    expect(screen.queryByTestId('.http-card')).not.toBeInTheDocument();
   });
 
-  it('lists every connector of the type in the HTTP card, preconfigured ones included', async () => {
+  it('lists every connector of the type in the GitHub card, preconfigured ones included', async () => {
     setup({
-      types: [actionType('.http')],
+      types: [actionType('.github')],
       connectors: [
-        sandboxConnector('telemetry', { name: 'Elasticsearch telemetry', is_preconfigured: true }),
-        sandboxConnector('other'),
+        sandboxConnector('telemetry', {
+          name: 'GitHub org',
+          is_preconfigured: true,
+          connector_type_id: '.github',
+        }),
+        sandboxConnector('other', { connector_type_id: '.github' }),
       ],
       group: 'additional',
     });
 
-    fireEvent.click(await screen.findByTestId('.http-connect'));
+    fireEvent.click(await screen.findByTestId('.github-connect'));
 
-    await screen.findByTestId('.http-connectPopover');
+    await screen.findByTestId('.github-connectPopover');
     expect(screen.getByTestId('nightshiftConnectorListItem-telemetry')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftConnectorListItem-other')).toBeInTheDocument();
   });

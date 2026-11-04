@@ -14,7 +14,7 @@ export type ConnectSubStep = 'telemetry' | 'additional';
 
 export const CONNECT_SUB_STEP_TITLES: Record<ConnectSubStep, string> = {
   telemetry: i18n.translate('xpack.nightshift.onboarding.telemetry.title', {
-    defaultMessage: 'Add telemetry data',
+    defaultMessage: 'Add data',
   }),
   additional: i18n.translate('xpack.nightshift.onboarding.connectors.title', {
     defaultMessage: 'Connect other sources',

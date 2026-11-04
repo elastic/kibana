@@ -145,7 +145,7 @@ export function OnboardingFirstInvestigationStep({
           <EuiTitle size="xs">
             <h4>
               {i18n.translate('xpack.nightshift.onboarding.investigate.knowledgeSourcesTitle', {
-                defaultMessage: 'Additional knowledge sources',
+                defaultMessage: 'Connect other sources',
               })}
             </h4>
           </EuiTitle>

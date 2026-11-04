@@ -83,13 +83,14 @@ const SUGGESTED_AUTOMATIONS: SuggestedAutomation[] = [
   },
 ];
 
-/** Step 3: the trial investigation keeps running while the user sets up a first automation. */
+/** Last onboarding step: optional trial investigation plus suggested automations. */
 export function OnboardingAutomationStep({
   investigation,
   automationsHref,
   onInvestigationClick,
 }: {
-  investigation: InvestigationSummary;
+  /** Present when the user started an investigation on the previous step. */
+  investigation?: InvestigationSummary;
   /** Unset when automations are unavailable. */
   automationsHref?: string;
   onInvestigationClick: (investigation: InvestigationSummary) => void;
@@ -103,21 +104,24 @@ export function OnboardingAutomationStep({
 
   return (
     <div data-test-subj="nightshiftOnboardingAutomationStep">
-      <EuiTitle size="xs">
-        <h3>
-          {i18n.translate('xpack.nightshift.onboarding.automate.trialTitle', {
-            defaultMessage: 'Trial investigation',
-          })}
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <TrialInvestigationCard investigation={investigation} onClick={onInvestigationClick} />
-
-      <EuiSpacer size="xl" />
+      {investigation && (
+        <>
+          <EuiTitle size="xs">
+            <h3>
+              {i18n.translate('xpack.nightshift.onboarding.automate.trialTitle', {
+                defaultMessage: 'Your first investigation',
+              })}
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          <TrialInvestigationCard investigation={investigation} onClick={onInvestigationClick} />
+          <EuiSpacer size="xl" />
+        </>
+      )}
       <EuiTitle size="xs">
         <h3>
           {i18n.translate('xpack.nightshift.onboarding.automate.suggestedTitle', {
-            defaultMessage: 'Suggested automations',
+            defaultMessage: 'Create your first automation',
           })}
         </h3>
       </EuiTitle>

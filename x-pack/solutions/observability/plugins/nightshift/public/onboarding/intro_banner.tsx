@@ -6,7 +6,8 @@
  */
 
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   EuiButton,
@@ -38,12 +39,23 @@ const dismissLabel = i18n.translate('xpack.nightshift.onboarding.dismissIntroBan
 export function OnboardingIntroBanner(): React.ReactElement | null {
   const { euiTheme } = useEuiTheme();
   const { http } = useKibana().services;
+  const { search } = useLocation();
+  const forceShow = new URLSearchParams(search).get('onboarding') === '1';
   const [isDismissed = false, setIsDismissed] = useLocalStorage<boolean>(
     getDismissedStorageKey(http.basePath.get()),
     false
   );
 
-  if (isDismissed) return null;
+  // ?onboarding=1 is a deliberate walkthrough — bring the banner back if it was dismissed.
+  useEffect(() => {
+    if (forceShow && isDismissed) {
+      setIsDismissed(false);
+    }
+  }, [forceShow, isDismissed, setIsDismissed]);
+
+  if (isDismissed && !forceShow) {
+    return null;
+  }
 
   return (
     <EuiPanel
@@ -116,7 +128,8 @@ export function OnboardingIntroBanner(): React.ReactElement | null {
         <EuiTitle size="xs">
           <h2>
             {i18n.translate('xpack.nightshift.onboarding.introTitle', {
-              defaultMessage: 'Elastic nightshift is an SRE coworker that is always there for you',
+              defaultMessage:
+                'Elastic nightshift AI SRE is a co-worker that is always there for you',
             })}
           </h2>
         </EuiTitle>
@@ -129,8 +142,7 @@ export function OnboardingIntroBanner(): React.ReactElement | null {
         >
           <p>
             {i18n.translate('xpack.nightshift.onboarding.introDescription', {
-              defaultMessage:
-                'Elastic nightshift helps you detect, investigate and resolve problems faster. Once you add data, it will start analyzing.',
+              defaultMessage: 'It helps you detect, investigate and resolve problems faster.',
             })}
           </p>
         </EuiText>
