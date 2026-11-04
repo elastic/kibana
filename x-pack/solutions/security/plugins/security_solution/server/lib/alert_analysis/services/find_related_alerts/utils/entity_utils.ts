@@ -6,7 +6,6 @@
  */
 
 import { cloneDeep, get } from 'lodash';
-import { set } from '@kbn/safer-lodash-set';
 import { RELATED_ALERT_ENTITY_LIST_MAX_LENGTH } from '../../../../../../common/api/alert_analysis/related_alerts';
 
 export interface SourceEntities {
@@ -16,6 +15,8 @@ export interface SourceEntities {
   destIps: string[];
 }
 
+// Command lines, messages and rule descriptions are attacker-controllable free text that reaches the
+// model verbatim; the skill prompt tells it to treat them as data, never as instructions.
 export const RELATED_ALERT_SOURCE_ALLOWLIST = [
   '@timestamp',
   'kibana.alert.rule.name',
@@ -42,7 +43,10 @@ export const RELATED_ALERT_SOURCE_ALLOWLIST = [
 export const RELATED_ALERT_TRUNCATED_FIELD_MAX_LENGTHS: Readonly<Record<string, number>> = {
   'process.command_line': 300,
   'process.parent.command_line': 300,
+  message: 300,
   'kibana.alert.rule.description': 200,
+  'process.executable': 200,
+  'file.path': 200,
 };
 
 export const RELATED_ALERT_ENTITY_SOURCE_INCLUDES = [
@@ -97,26 +101,49 @@ export function normalizeToStringArray(value: unknown): string[] {
   return [];
 }
 
-const truncateString = (value: string, maxLength: number): string =>
-  value.length > maxLength ? `${value.slice(0, maxLength)}… [truncated]` : value;
+const TRUNCATION_SUFFIX = '… [truncated]';
 
-/** Caps long text fields; handles both nested and dotted `_source` shapes. Returns a copy. */
+const truncateString = (value: string, maxLength: number): string => {
+  if (value.length <= maxLength) {
+    return value;
+  }
+  const lastCode = value.charCodeAt(maxLength - 1);
+  // Don't end on a lone high surrogate: that would emit an invalid UTF-16 string.
+  const cut = lastCode >= 0xd800 && lastCode <= 0xdbff ? maxLength - 1 : maxLength;
+  return `${value.slice(0, cut)}${TRUNCATION_SUFFIX}`;
+};
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const truncateNode = (node: Record<string, unknown>, prefix: string): void => {
+  const truncateValue = (value: unknown, path: string): unknown => {
+    if (typeof value === 'string') {
+      const maxLength = RELATED_ALERT_TRUNCATED_FIELD_MAX_LENGTHS[path];
+      return maxLength === undefined ? value : truncateString(value, maxLength);
+    }
+    if (Array.isArray(value)) {
+      return value.map((item) => truncateValue(item, path));
+    }
+    if (isPlainObject(value)) {
+      truncateNode(value, path);
+    }
+    return value;
+  };
+
+  for (const [key, value] of Object.entries(node)) {
+    node[key] = truncateValue(value, prefix ? `${prefix}.${key}` : key);
+  }
+};
+
+/**
+ * Caps long text fields wherever they appear in `_source`: dotted keys, nested objects, mixed
+ * shapes (`{ 'process.parent': { command_line } }`) and arrays of objects. Returns a copy.
+ */
 export const truncateRelatedAlertLongFields = (
   source: Record<string, unknown>
 ): Record<string, unknown> => {
   const result = cloneDeep(source);
-  for (const [path, maxLength] of Object.entries(RELATED_ALERT_TRUNCATED_FIELD_MAX_LENGTHS)) {
-    const target: string | string[] = result[path] !== undefined ? [path] : path;
-    const value: unknown = get(result, target);
-    if (typeof value === 'string') {
-      set(result, target, truncateString(value, maxLength));
-    } else if (Array.isArray(value)) {
-      set(
-        result,
-        target,
-        value.map((item) => (typeof item === 'string' ? truncateString(item, maxLength) : item))
-      );
-    }
-  }
+  truncateNode(result, '');
   return result;
 };

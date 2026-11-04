@@ -52,7 +52,10 @@ describe('entity_utils', () => {
     const commandLineMax = RELATED_ALERT_TRUNCATED_FIELD_MAX_LENGTHS['process.command_line'];
     const longValue = 'a'.repeat(commandLineMax + 100);
 
-    it('truncates long nested command lines and keeps short values and other fields intact', () => {
+    const suffix = '… [truncated]';
+    const truncated = (max: number) => 'a'.repeat(max) + suffix;
+
+    it('truncates long nested command lines to exactly max + suffix and keeps other fields', () => {
       const source = {
         'host.name': 'h1',
         process: { command_line: longValue, parent: { command_line: '/usr/sbin/sshd -D' } },
@@ -61,9 +64,8 @@ describe('entity_utils', () => {
         process: { command_line: string; parent: { command_line: string } };
       };
 
-      expect(result.process.command_line.length).toBeLessThan(longValue.length);
-      expect(result.process.command_line.startsWith('a'.repeat(commandLineMax))).toBe(true);
-      expect(result.process.command_line).toContain('[truncated]');
+      expect(result.process.command_line).toBe(truncated(commandLineMax));
+      expect(result.process.command_line).toHaveLength(commandLineMax + suffix.length);
       expect(result.process.parent.command_line).toBe('/usr/sbin/sshd -D');
       expect(result).toHaveProperty(['host.name'], 'h1');
     });
@@ -76,9 +78,66 @@ describe('entity_utils', () => {
       };
       const result = truncateRelatedAlertLongFields(source);
 
-      expect((result['process.command_line'] as string[])[0]).toContain('[truncated]');
-      expect(result['kibana.alert.rule.description'] as string).toContain('[truncated]');
+      expect((result['process.command_line'] as string[])[0]).toBe(truncated(commandLineMax));
+      expect(result['kibana.alert.rule.description']).toBe('d'.repeat(200) + suffix);
       expect(source['kibana.alert.rule.description']).toBe(description);
+    });
+
+    it('truncates mixed shape: dotted parent key holding a nested command_line', () => {
+      const result = truncateRelatedAlertLongFields({
+        'process.parent': { command_line: longValue },
+      }) as Record<string, { command_line: string }>;
+
+      expect(result['process.parent'].command_line).toBe(truncated(commandLineMax));
+    });
+
+    it('truncates mixed shape: nested process holding a dotted parent.command_line key', () => {
+      const result = truncateRelatedAlertLongFields({
+        process: { 'parent.command_line': longValue },
+      }) as { process: Record<string, string> };
+
+      expect(result.process['parent.command_line']).toBe(truncated(commandLineMax));
+    });
+
+    it('truncates objects inside arrays', () => {
+      const result = truncateRelatedAlertLongFields({
+        process: [{ command_line: longValue }, { command_line: 'short' }],
+      }) as { process: Array<{ command_line: string }> };
+
+      expect(result.process[0].command_line).toBe(truncated(commandLineMax));
+      expect(result.process[1].command_line).toBe('short');
+    });
+
+    it('truncates both representations when dotted and nested keys are present together', () => {
+      const result = truncateRelatedAlertLongFields({
+        'process.command_line': longValue,
+        process: { command_line: longValue },
+      }) as Record<string, unknown> & { process: { command_line: string } };
+
+      expect(result['process.command_line']).toBe(truncated(commandLineMax));
+      expect(result.process.command_line).toBe(truncated(commandLineMax));
+    });
+
+    it('does not end on a lone high surrogate when the cut lands inside an emoji', () => {
+      const value = `${'a'.repeat(commandLineMax - 1)}😀tail`;
+      const result = truncateRelatedAlertLongFields({
+        'process.command_line': value,
+      })['process.command_line'] as string;
+
+      expect(result).toBe('a'.repeat(commandLineMax - 1) + suffix);
+      expect(result).not.toMatch(/[\ud800-\udbff](?![\udc00-\udfff])/);
+    });
+
+    it('caps message, process.executable and file.path', () => {
+      const result = truncateRelatedAlertLongFields({
+        message: 'm'.repeat(1000),
+        process: { executable: 'e'.repeat(1000) },
+        'file.path': 'f'.repeat(1000),
+      }) as Record<string, unknown> & { process: { executable: string } };
+
+      expect(result.message).toBe('m'.repeat(300) + suffix);
+      expect(result.process.executable).toBe('e'.repeat(200) + suffix);
+      expect(result['file.path']).toBe('f'.repeat(200) + suffix);
     });
   });
 });
