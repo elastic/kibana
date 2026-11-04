@@ -5,6 +5,12 @@
  * 2.0.
  */
 
-export { dashboardTools, DASHBOARDS_SKILL_ID, getDashboardsSkillBadge } from './constants';
+export {
+  dashboardTools,
+  DASHBOARDS_SKILL_ID,
+  getDashboardsSkillBadge,
+  PANEL_PREVIEW_ATTACHMENT_TYPE,
+} from './constants';
+export type { PanelPreviewAttachmentData } from './constants';
 export { DASHBOARD_UPDATED_UI_EVENT } from './ui_events';
 export type { DashboardUpdatedUiEventData } from './ui_events';

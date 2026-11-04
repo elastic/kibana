@@ -9,10 +9,12 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentBuilderSmlPluginSetup } from '@kbn/agent-builder-sml-plugin/server';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
+import type { MapsEmsPluginServerSetup } from '@kbn/maps-ems-plugin/server';
 
 export interface AgentBuilderDashboardsSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
   agentBuilderSml: AgentBuilderSmlPluginSetup;
+  mapsEms?: MapsEmsPluginServerSetup;
 }
 
 export interface AgentBuilderDashboardsStartDependencies {

@@ -184,7 +184,13 @@ export function getValueColumns(layer: unknown) {
     layer.group_by?.map((bucket, index) =>
       getValueColumn(getAccessorName('group_by', index), bucket)
     ) ?? [];
-  return esqlMetricColumns.concat(esqlBucketColumns);
+  const esqlSecondaryBucketColumns =
+    isAPIMosaicChartLayer(layer) && layer.group_breakdown_by
+      ? layer.group_breakdown_by.map((bucket, index) =>
+          getValueColumn(getAccessorName('group_breakdown_by', index), bucket)
+        )
+      : [];
+  return esqlMetricColumns.concat(esqlBucketColumns, esqlSecondaryBucketColumns);
 }
 
 function convertAPINumberDisplayOption(option: PartitionStyling['values']): {

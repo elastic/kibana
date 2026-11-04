@@ -11,6 +11,7 @@ import type {
   Plugin,
   PluginInitializerContext,
   Logger,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type {
@@ -20,7 +21,10 @@ import type {
   AgentBuilderDashboardsPluginStart,
 } from './types';
 import { registerSkills } from './skills';
-import { createDashboardAttachmentType } from './attachment_types';
+import {
+  createDashboardAttachmentType,
+  createPanelPreviewAttachmentType,
+} from './attachment_types';
 import { createDashboardSmlType } from './sml_types';
 import { createDashboardAppStateValidator } from './tools/generate/validate_dashboard_app_state';
 
@@ -65,9 +69,31 @@ export class AgentBuilderDashboardsPlugin
         getDashboardClient,
       }) as Parameters<typeof setupDeps.agentBuilder.attachments.registerType>[0]
     );
+    setupDeps.agentBuilder.attachments.registerType(
+      createPanelPreviewAttachmentType() as Parameters<
+        typeof setupDeps.agentBuilder.attachments.registerType
+      >[0]
+    );
     setupDeps.agentBuilderSml.registerType(createDashboardSmlType({ getDashboardClient }));
 
-    registerSkills(setupDeps.agentBuilder, { getDashboardValidator });
+    const emsSettings = setupDeps.mapsEms?.createEMSSettings();
+    const ems = emsSettings && {
+      isEnabled: emsSettings.isEMSEnabled(),
+      fileApiUrl: emsSettings.getEMSFileApiUrl(),
+      tileApiUrl: emsSettings.getEMSTileApiUrl(),
+      landingPageUrl: emsSettings.getEMSLandingPageUrl(),
+    };
+    const getPreviewSettings = async (savedObjectsClient: SavedObjectsClientContract) => {
+      const [coreStart] = await coreSetup.getStartServices();
+      const uiSettings = coreStart.uiSettings.asScopedToClient(savedObjectsClient);
+      const [timeZone, dateFormat] = await Promise.all([
+        uiSettings.get<string>('dateFormat:tz'),
+        uiSettings.get<string>('dateFormat'),
+      ]);
+      return { timeZone, dateFormat, ems };
+    };
+
+    registerSkills(setupDeps.agentBuilder, { getDashboardValidator, getPreviewSettings });
 
     return {};
   }

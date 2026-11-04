@@ -108,6 +108,8 @@ export type AttachmentChange = AttachmentChangeKind & {
   hidden?: boolean;
   /** The attachment's description when the change was recorded; never set on deletions. */
   description?: string;
+  /** Set through {@link AttachmentStateManager.showInline}. */
+  render_inline?: boolean;
 };
 
 /**
@@ -167,6 +169,8 @@ export interface AttachmentStateManager {
   forToolCall(toolCallId: string): AttachmentStateManager;
   /** Discard recorded mutations without returning them (e.g. after replaying legacy history). */
   clearChanges(): void;
+  /** Asks the chat to show the attachment where its pending add or update lands in the timeline. */
+  showInline(attachmentId: string): void;
 
   /** Resolve attachment references to their actual data */
   resolveRefs(refs: AttachmentVersionRef[]): ResolvedAttachmentRef[];
@@ -567,6 +571,15 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
 
   clearChanges(): void {
     this.store.changes = [];
+  }
+
+  showInline(attachmentId: string): void {
+    this.store.changes = this.store.changes.map((change) =>
+      change.attachment_id === attachmentId &&
+      (change.kind === 'added' || change.kind === 'updated')
+        ? { ...change, render_inline: true }
+        : change
+    );
   }
 
   private recordChange(attachment: VersionedAttachment, change: AttachmentChangeKind): void {

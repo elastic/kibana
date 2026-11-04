@@ -9,6 +9,7 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "agentBuilderDashboards"],
+    "optionalPlugins": ["mapsEms"],
     "requiredPlugins": [
       "agentBuilder",
       "dashboard",

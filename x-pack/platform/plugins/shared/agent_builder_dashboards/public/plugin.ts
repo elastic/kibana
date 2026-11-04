@@ -18,6 +18,7 @@ import type {
   AgentBuilderDashboardsPluginPublicStartDependencies,
 } from './types';
 import { createIdGenerator, registerDashboardAttachmentUiDefinition } from './attachment_types';
+import { registerPanelPreviewAttachmentUiDefinition } from './attachment_types/panel_preview';
 
 export class AgentBuilderDashboardsPlugin
   implements
@@ -60,6 +61,7 @@ export class AgentBuilderDashboardsPlugin
       dashboardPlugin: plugins.dashboard,
       draftAttachmentId,
     });
+    registerPanelPreviewAttachmentUiDefinition(plugins.agentBuilder);
 
     if (core.application.capabilities.agentBuilder?.show === true) {
       plugins.uiActions.registerActionAsync(OPEN_DASHBOARD_CHAT_ACTION_ID, async () => {

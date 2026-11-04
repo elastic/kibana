@@ -10,6 +10,7 @@ import {
   OPEN_DASHBOARD_CHAT_ACTION_ID,
   ENHANCE_DASHBOARD_ACTION_ID,
 } from '@kbn/dashboard-plugin/public';
+import { registerPanelPreviewAttachmentUiDefinition } from './attachment_types/panel_preview';
 import { AgentBuilderDashboardsPlugin } from './plugin';
 import type { AgentBuilderDashboardsPluginPublicStartDependencies } from './types';
 
@@ -19,6 +20,10 @@ jest.mock('./attachment_types', () => ({
     current: 'draft-id',
     next: jest.fn(),
   }),
+}));
+
+jest.mock('./attachment_types/panel_preview', () => ({
+  registerPanelPreviewAttachmentUiDefinition: jest.fn(),
 }));
 
 describe('AgentBuilderDashboardsPlugin', () => {
@@ -63,8 +68,12 @@ describe('AgentBuilderDashboardsPlugin', () => {
   it('registers the lazy chat and enhance actions when Agent Builder is available', async () => {
     const plugin = new AgentBuilderDashboardsPlugin({} as PluginInitializerContext);
 
-    plugin.start(createCoreStart(true), createStartDependencies());
+    const startDependencies = createStartDependencies();
+    plugin.start(createCoreStart(true), startDependencies);
 
+    expect(registerPanelPreviewAttachmentUiDefinition).toHaveBeenCalledWith(
+      startDependencies.agentBuilder
+    );
     expect(registerActionAsync).toHaveBeenCalledWith(
       OPEN_DASHBOARD_CHAT_ACTION_ID,
       expect.any(Function)

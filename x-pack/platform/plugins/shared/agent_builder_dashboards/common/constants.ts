@@ -37,3 +37,17 @@ export const DASHBOARDS_SKILL_ID = 'dashboards';
  */
 export const getDashboardsSkillBadge = (): string =>
   `[/${DASHBOARDS_SKILL_ID}](skill://${DASHBOARDS_SKILL_ID})`;
+
+/**
+ * Attachment type of a server-rendered PNG preview of one dashboard panel.
+ */
+export const PANEL_PREVIEW_ATTACHMENT_TYPE = 'platform.dashboard.panel_preview';
+
+/** Data of a {@link PANEL_PREVIEW_ATTACHMENT_TYPE} attachment. */
+export interface PanelPreviewAttachmentData {
+  panel_id: string;
+  title?: string;
+  mime_type: 'image/png';
+  /** The PNG, base64-encoded. */
+  data: string;
+}

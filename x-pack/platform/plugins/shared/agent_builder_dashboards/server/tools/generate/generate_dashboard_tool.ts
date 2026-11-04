@@ -11,6 +11,7 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
@@ -37,6 +38,11 @@ import { createControlFieldCapabilitiesResolver } from './resolvers/control_fiel
 import { createLayoutArranger } from './layout_arranger';
 import { createPanelResolver } from './resolvers/panel_resolver';
 import { applyDefaultDashboardTimeRange } from './time_range';
+import {
+  renderPanelPreviews,
+  type PanelPreview,
+  type PreviewSettings,
+} from '../preview/render_panel_previews';
 
 const newDashboardMetadataErrorMessage = 'New dashboards require a non-empty `title`.';
 
@@ -124,6 +130,8 @@ const summarizeDashboard = (
 
 export interface GenerateDashboardToolDeps {
   getDashboardValidator: () => Promise<DashboardValidator>;
+  /** Kibana settings of the request's space that panel previews follow. */
+  getPreviewSettings: (savedObjectsClient: SavedObjectsClientContract) => Promise<PreviewSettings>;
 }
 
 /**
@@ -140,6 +148,7 @@ export interface GenerateDashboardToolDeps {
  */
 export const generateDashboardTool = ({
   getDashboardValidator,
+  getPreviewSettings,
 }: GenerateDashboardToolDeps): BuiltinSkillBoundedTool<typeof generateDashboardSchema> => {
   return {
     id: dashboardTools.generateDashboard,
@@ -159,7 +168,7 @@ Panel positions and sizes are set automatically after the changes are applied, a
     schema: generateDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, layout, ...upsert },
-      { logger, attachments, events, esClient, modelProvider }
+      { logger, attachments, events, esClient, modelProvider, savedObjectsClient }
     ) => {
       try {
         const latestVersion = retrieveLatestVersion(attachments, previousAttachmentId);
@@ -211,7 +220,8 @@ Panel positions and sizes are set automatically after the changes are applied, a
         const toDashboardResult = (
           dashboardData: DashboardAttachmentData,
           attachmentId: string,
-          version: number
+          version: number,
+          previews: PanelPreview[] = []
         ) => ({
           results: [
             {
@@ -233,8 +243,25 @@ Panel positions and sizes are set automatically after the changes are applied, a
                 updated,
                 removed,
                 failures: failures.length > 0 ? failures : undefined,
+                panel_previews:
+                  previews.length > 0
+                    ? {
+                        note: 'PNG previews of the created and updated chart panels, rendered on the server from each panel config and its data, follow as images. Look at each one and check that it shows what was asked: the chart type, the values (for example, a total that shows only the first time bucket, or a map that colors only a few regions), labels and colors. Fix wrong panels with another call before you answer. The user already sees these previews in the chat, so do not render them again.',
+                        previews,
+                      }
+                    : undefined,
               },
             },
+            ...previews.map(({ attachment_id: previewAttachmentId, title }) => ({
+              type: ToolResultType.image,
+              tool_result_id: getToolResultId(),
+              data: {
+                attachment_id: previewAttachmentId,
+                mime_type: 'image/png',
+                name: title ?? previewAttachmentId,
+                description: `Preview of the "${title ?? previewAttachmentId}" panel`,
+              },
+            })),
           ],
         });
 
@@ -306,7 +333,21 @@ Panel positions and sizes are set automatically after the changes are applied, a
           }
         );
 
-        return toDashboardResult(dashboardData, attachment.id, attachment.current_version ?? 1);
+        const previews = await renderPanelPreviews({
+          dashboardData,
+          panelIds: [...created, ...updated],
+          esClient,
+          attachments,
+          settings: await getPreviewSettings(savedObjectsClient),
+          logger,
+        });
+
+        return toDashboardResult(
+          dashboardData,
+          attachment.id,
+          attachment.current_version ?? 1,
+          previews
+        );
       } catch (error) {
         const errorMessage = getErrorMessage(error);
         logger.error(`Error in generate_dashboard tool: ${errorMessage}`);

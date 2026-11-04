@@ -107,6 +107,27 @@ describe('Partition', () => {
     }
   });
 
+  describe('ES|QL mosaic', () => {
+    it('adds a text-based column for every group_breakdown_by the visualization references', () => {
+      const mosaic = esqlCharts.find(({ title }) => title === 'ESQL mosaic with breakdown');
+      const { state } = new LensConfigBuilder(undefined, true).fromAPIFormat(
+        mosaic as MosaicConfig
+      );
+      const [layer] = Object.values(state.datasourceStates.textBased?.layers ?? {});
+      const [visualizationLayer] = (state.visualization as LensPartitionVisualizationState).layers;
+
+      expect(visualizationLayer.secondaryGroups).toEqual([
+        'partition_value_accessor_group_breakdown_by_0',
+      ]);
+      expect(layer.columns).toContainEqual(
+        expect.objectContaining({
+          columnId: 'partition_value_accessor_group_breakdown_by_0',
+          fieldName: 'customer_gender',
+        })
+      );
+    });
+  });
+
   describe('empty string collapseFns handling', () => {
     it('should treat empty string collapseFns as undefined and apply color mapping to first group (Lens → API)', () => {
       const builder = new LensConfigBuilder(undefined, true);

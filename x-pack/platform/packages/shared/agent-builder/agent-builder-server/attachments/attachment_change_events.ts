@@ -17,7 +17,7 @@ import type { AttachmentChange } from './attachment_state_manager';
 export interface AttachmentChangesToEventsOptions {
   source: AttachmentEventSource;
   actor: EventActor;
-  /** Defaults to false. Ignored for deletions and restores. */
+  /** Defaults to false, unless the change asks for it. Ignored for deletions and restores. */
   render_inline?: boolean;
   /** Set for changes made inside an agent run. */
   execution_id?: string;
@@ -68,7 +68,7 @@ export const attachmentChangesToEvents = (
             ...common,
             ...described,
             current_version: change.current_version,
-            render_inline: renderInline,
+            render_inline: change.render_inline ?? renderInline,
           },
         };
       case 'updated':
@@ -81,7 +81,7 @@ export const attachmentChangesToEvents = (
             ...described,
             previous_version: change.previous_version,
             current_version: change.current_version,
-            render_inline: renderInline,
+            render_inline: change.render_inline ?? renderInline,
           },
         };
       case 'deleted':

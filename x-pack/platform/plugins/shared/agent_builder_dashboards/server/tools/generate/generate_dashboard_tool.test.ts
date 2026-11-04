@@ -89,6 +89,7 @@ const callHandler = async (
 ) => {
   const tool = generateDashboardTool({
     getDashboardValidator: jest.fn(),
+    getPreviewSettings: jest.fn().mockResolvedValue({ timeZone: 'UTC', dateFormat: 'MMM D, YYYY' }),
   });
   const sendUiEvent = jest.fn();
   const ctx = {

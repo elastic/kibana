@@ -44,6 +44,8 @@ export const executeEsql = async ({
   filter,
   dropNullColumns = true,
   includeFrozen = false,
+  timeZone,
+  columnMetadata = false,
   esClient,
 }: {
   query: string;
@@ -52,6 +54,10 @@ export const executeEsql = async ({
   filter?: QueryDslQueryContainer;
   dropNullColumns?: boolean;
   includeFrozen?: boolean;
+  /** Time zone for date functions and `BUCKET`, e.g. the user's `dateFormat:tz`. Defaults to UTC. */
+  timeZone?: string;
+  /** Adds `_meta` to the returned columns, e.g. the interval of `BUCKET` columns as `_meta.bucket`. */
+  columnMetadata?: boolean;
   esClient: ElasticsearchClient;
 }): Promise<EsqlResponse> => {
   const effectiveQuery = limit !== undefined ? applyLimit(query, limit) : query;
@@ -65,6 +71,8 @@ export const executeEsql = async ({
         allow_partial_results: true,
         ...(params && params.length > 0 ? { params: params as unknown as FieldValue[] } : {}),
         ...(effectiveFilter ? { filter: effectiveFilter } : {}),
+        ...(timeZone ? { time_zone: timeZone } : {}),
+        ...(columnMetadata ? { settings: { column_metadata: true } } : {}),
       },
       { maxResponseSize: MAX_ES_RESPONSE_SIZE_BYTES }
     );

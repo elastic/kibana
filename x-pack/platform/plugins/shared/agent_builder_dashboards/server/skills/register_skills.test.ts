@@ -11,7 +11,10 @@ import { createDashboardsSkill } from './dashboards_skill';
 import { ENHANCE_GUIDANCE_PATH } from './generation_guidance/enhance_guidance';
 import { registerSkills } from './register_skills';
 
-const skill = createDashboardsSkill({ getDashboardValidator: jest.fn() });
+const skill = createDashboardsSkill({
+  getDashboardValidator: jest.fn(),
+  getPreviewSettings: jest.fn(),
+});
 
 const enhanceGuidance = (): string => {
   const reference = skill.referencedContent?.find((item) => item.name === 'enhance');
@@ -28,7 +31,10 @@ describe('registerSkills', () => {
       skills: { register },
     } as unknown as AgentBuilderPluginSetup;
 
-    registerSkills(agentBuilder, { getDashboardValidator: jest.fn() });
+    registerSkills(agentBuilder, {
+      getDashboardValidator: jest.fn(),
+      getPreviewSettings: jest.fn(),
+    });
 
     expect(register).toHaveBeenCalledTimes(1);
     expect(register).toHaveBeenCalledWith(expect.objectContaining({ id: 'dashboards' }));

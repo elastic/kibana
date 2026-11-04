@@ -6,3 +6,4 @@
  */
 
 export { createDashboardAttachmentType } from './dashboard';
+export { createPanelPreviewAttachmentType } from './panel_preview';

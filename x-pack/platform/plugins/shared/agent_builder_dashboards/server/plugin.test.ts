@@ -9,6 +9,7 @@ import { coreMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/s
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
 import { AgentBuilderDashboardsPlugin } from './plugin';
+import { PANEL_PREVIEW_ATTACHMENT_TYPE } from '../common';
 
 const setupPlugin = (coreSetup = coreMock.createSetup()) => {
   const registerAttachmentType = jest.fn<void, [AttachmentTypeDefinition]>();
@@ -34,10 +35,13 @@ const setupPlugin = (coreSetup = coreMock.createSetup()) => {
 };
 
 describe('AgentBuilderDashboardsPlugin', () => {
-  it('registers the dashboard attachment type, skill, and SML type', () => {
+  it('registers the dashboard and panel preview attachment types, skill, and SML type', () => {
     const { registerAttachmentType, registerSkill, registerSmlType } = setupPlugin();
 
-    expect(registerAttachmentType).toHaveBeenCalledTimes(1);
+    expect(registerAttachmentType).toHaveBeenCalledTimes(2);
+    expect(registerAttachmentType).toHaveBeenCalledWith(
+      expect.objectContaining({ id: PANEL_PREVIEW_ATTACHMENT_TYPE })
+    );
     expect(registerSkill).toHaveBeenCalledTimes(1);
     expect(registerSkill).toHaveBeenCalledWith(expect.objectContaining({ id: 'dashboards' }));
     expect(registerSmlType).toHaveBeenCalledTimes(1);

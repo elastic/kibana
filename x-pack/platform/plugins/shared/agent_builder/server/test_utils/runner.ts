@@ -268,6 +268,7 @@ export const createAttachmentStateManagerMock = (): AttachmentStateManagerMock =
     drainChanges: jest.fn().mockReturnValue([]),
     forToolCall: jest.fn(),
     clearChanges: jest.fn(),
+    showInline: jest.fn(),
     resolveRefs: jest.fn(),
     evaluateStalenessForActiveAttachments: jest.fn(),
     getTotalTokenEstimate: jest.fn(),

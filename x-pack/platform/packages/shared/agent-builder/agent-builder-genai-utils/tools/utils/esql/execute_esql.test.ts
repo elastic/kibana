@@ -49,6 +49,26 @@ describe('executeEsql', () => {
     expect(lastRequest()).toEqual(expect.objectContaining({ drop_null_columns: false }));
   });
 
+  it('sends the time zone as time_zone only when one is given', async () => {
+    await executeEsql({ query: 'FROM idx', timeZone: 'Europe/Amsterdam', esClient });
+    await executeEsql({ query: 'FROM idx', esClient });
+
+    expect(esClient.esql.query.mock.calls[0][0]).toEqual(
+      expect.objectContaining({ time_zone: 'Europe/Amsterdam' })
+    );
+    expect(esClient.esql.query.mock.calls[1][0]).not.toHaveProperty('time_zone');
+  });
+
+  it('asks for column metadata only when requested', async () => {
+    await executeEsql({ query: 'FROM idx', columnMetadata: true, esClient });
+    await executeEsql({ query: 'FROM idx', esClient });
+
+    expect(esClient.esql.query.mock.calls[0][0]).toEqual(
+      expect.objectContaining({ settings: { column_metadata: true } })
+    );
+    expect(esClient.esql.query.mock.calls[1][0]).not.toHaveProperty('settings');
+  });
+
   it('excludes frozen tier indices by default', async () => {
     await executeEsql({ query: 'FROM idx', esClient });
 
