@@ -32,6 +32,9 @@ export interface ToolUsageScore {
   explanation: string;
 }
 
+/** The deadline in seconds the grounding skill requires on every `execute_esql` call. */
+const ESQL_DEADLINE_SECONDS = 60;
+
 const isTool = isToolId;
 
 const calledCanonical = (calledTools: Set<string>, canonical: string): boolean =>
@@ -294,6 +297,18 @@ export const scoreToolUsage = ({
       label: 'missing-topology-search',
       explanation:
         'A rule-filtered event search returned no candidates, but the agent wrote topology-bearing event data without running the required topology-filtered event search',
+    };
+  }
+
+  const esqlCalls = orderedCalls.filter(({ toolId }) => isTool(toolId, TOOL_ID_EXECUTE_ESQL));
+  const withoutDeadline = esqlCalls.filter(
+    ({ params }) => params.timeout_seconds !== ESQL_DEADLINE_SECONDS
+  );
+  if (withoutDeadline.length > 0) {
+    return {
+      score: (esqlCalls.length - withoutDeadline.length) / esqlCalls.length,
+      label: 'missing-esql-deadline',
+      explanation: `${withoutDeadline.length} of ${esqlCalls.length} ${TOOL_ID_EXECUTE_ESQL} calls did not pass timeout_seconds: ${ESQL_DEADLINE_SECONDS}`,
     };
   }
 
