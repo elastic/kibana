@@ -12,7 +12,7 @@ settings:
   # One run at a time, like the shared orchestrator. The key differs from the shared workflow's,
   # which this run would otherwise block.
   concurrency:
-    key: 'nightshift-discovery-bound'
+    key: 'nightshift-orchestrator-bound'
     strategy: drop
     max: 1
 tags:

@@ -13,7 +13,6 @@ import BOUND_ONBOARDING_YAML from './knowledge_indicators/bound_onboarding.yaml'
 import BOUND_SOURCE_RECONCILIATION_YAML from './knowledge_indicators/bound_source_reconciliation.yaml';
 import BOUND_SYNC_YAML from './knowledge_indicators/bound_sync.yaml';
 import BOUND_ORCHESTRATOR_YAML from './significant_events/bound_orchestrator.yaml';
-import { NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE } from './trigger_source';
 
 interface IParsedStep {
   name: string;
@@ -42,16 +41,16 @@ const startedByServerCode: Array<[string, string]> = [
 describe('bound detection engine workflows', () => {
   // Anyone allowed to run workflows can start one through the generic run API, with any inputs,
   // and a bound workflow runs as its service account whoever starts it.
-  it.each([
-    ...startedBySchedule,
-    ...startedByServerCode,
-  ])('%s refuses direct runs before doing anything', (_name, yaml) => {
-    const { steps }: IParsedWorkflow = parse(yaml);
+  it.each([...startedBySchedule, ...startedByServerCode])(
+    '%s refuses direct runs before doing anything',
+    (_name, yaml) => {
+      const { steps }: IParsedWorkflow = parse(yaml);
 
-    expect(steps[0]).toMatchObject({ name: 'refuse_direct_runs', type: 'if' });
-    expect(steps[0].condition).toMatch(/^not execution\.triggeredBy : /);
-    expect(steps[0].steps?.[0].type).toBe('workflow.fail');
-  });
+      expect(steps[0]).toMatchObject({ name: 'refuse_direct_runs', type: 'if' });
+      expect(steps[0].condition).toMatch(/^not execution\.triggeredBy : /);
+      expect(steps[0].steps?.[0].type).toBe('workflow.fail');
+    }
+  );
 
   it.each(startedBySchedule)('%s has no manual trigger', (_name, yaml) => {
     const { triggers }: IParsedWorkflow = parse(yaml);
@@ -64,9 +63,7 @@ describe('bound detection engine workflows', () => {
     (_name, yaml) => {
       const { steps }: IParsedWorkflow = parse(yaml);
 
-      expect(steps[0].condition).toBe(
-        `not execution.triggeredBy : "${NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE}"`
-      );
+      expect(steps[0].condition).toBe('not execution.triggeredBy : "nightshift-detection-engine"');
     }
   );
 

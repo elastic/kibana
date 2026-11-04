@@ -8,38 +8,15 @@
  */
 
 import SYNC_YAML from './bound_sync.yaml';
-import { renderRunAs } from '../../../render_bound_yaml';
-import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../../types';
+import { defineBoundWorkflow } from '../../../define_bound_workflow';
 
 export const NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID = 'system-sources-ki-sync-bound';
-
-/** Document id of the sync installed in a space (installed with `workflowIdSuffix`). */
-export const getNightshiftBoundKiSyncWorkflowId = (spaceId: string): string =>
-  `${NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID}-${spaceId}`;
-
-export interface NightshiftBoundKiSyncTemplateValues extends ManagedWorkflowTemplateValues {
-  /** The service account the detection engine runs as in the space. */
-  serviceAccountId: string;
-}
-
-/** Renders the KI sync YAML with `settings.run_as` set to the bound service account. */
-export const renderBoundSyncYaml = ({
-  serviceAccountId,
-}: NightshiftBoundKiSyncTemplateValues): string => renderRunAs(SYNC_YAML, serviceAccountId);
 
 /**
  * The space's KI sync, installed per space by the space's setup and bound to the detection engine
  * service account, so its scheduled sweeps run as that account.
  */
-export const NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW = {
+export const NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW = defineBoundWorkflow({
   id: NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
-  pluginId: 'significantEvents',
-  version: 1,
-  billable: false,
-  yamlTemplate: renderBoundSyncYaml,
-  management: {
-    lifecycle: 'dynamic',
-    versionStrategy: 'auto',
-    enablement: 'restorable',
-  },
-} as const satisfies ManagedWorkflowDefinition<NightshiftBoundKiSyncTemplateValues>;
+  yaml: SYNC_YAML,
+});

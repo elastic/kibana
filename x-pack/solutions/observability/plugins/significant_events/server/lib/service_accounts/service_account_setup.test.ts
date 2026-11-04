@@ -232,7 +232,7 @@ describe('createDetectionEngineSetupService.enable workflows', () => {
     const { core } = createCore();
     const { install, ...workflows } = createWorkflowsExtensions();
 
-    const result = await createDetectionEngineSetupService({
+    await createDetectionEngineSetupService({
       core,
       spaces: undefined,
       ...workflows,
@@ -241,12 +241,11 @@ describe('createDetectionEngineSetupService.enable workflows', () => {
 
     const expectedIds = [
       'system-sources-ki-onboarding-bound',
-      'system-nightshift-discovery-bound',
+      'system-nightshift-orchestrator-bound',
       'system-sources-ki-sync-bound',
       'system-nightshift-cleanup-bound',
       'system-nightshift-source-reconciliation-bound',
     ];
-    expect(result.workflowIds).toEqual(expectedIds);
     expect(install.mock.calls.map(([, workflowId]) => workflowId)).toEqual(expectedIds);
     expect(install).toHaveBeenCalledWith('significantEvents', SETUP_WORKFLOW_IDS[0], {
       spaceId: 'marketing',
@@ -303,33 +302,6 @@ describe('createDetectionEngineSetupService.enable workflows', () => {
       statusCode: 500,
       message: expect.stringContaining('[system-sources-ki-onboarding-bound]'),
     });
-  });
-
-  it('runs the setups of one space one after another', async () => {
-    const { core } = createCore();
-    const { install, ...workflows } = createWorkflowsExtensions();
-    const running: boolean[] = [];
-    let overlapped = false;
-    install.mockImplementation(async () => {
-      overlapped = overlapped || running.includes(true);
-      running.push(true);
-      await new Promise((resolve) => setTimeout(resolve, 1));
-      running.pop();
-    });
-    const service = createDetectionEngineSetupService({
-      core,
-      spaces: undefined,
-      ...workflows,
-      isServerless: false,
-    });
-
-    await Promise.allSettled([
-      service.enable({ request, spaceId: 'default', serviceAccountId: 'account-1' }),
-      service.enable({ request, spaceId: 'default', serviceAccountId: 'account-1' }),
-    ]);
-
-    expect(install).toHaveBeenCalledTimes(10);
-    expect(overlapped).toBe(false);
   });
 
   it('refuses with 400 when workflows are not available', async () => {

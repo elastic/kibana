@@ -10,7 +10,7 @@ import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import { getNightshiftRoleName } from '@kbn/nightshift-shared';
 import {
   NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
-  NIGHTSHIFT_BOUND_DISCOVERY_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
@@ -18,10 +18,7 @@ import {
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type {
-  DetectionEngineEnableResponse,
-  DetectionEngineServiceAccountStatus,
-} from '../../../common';
+import type { DetectionEngineServiceAccountStatus } from '../../../common';
 import { StatusError } from '../errors/status_error';
 import { SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER } from '../workflows/managed_workflow_owner';
 import {
@@ -33,13 +30,12 @@ import {
 
 /**
  * The bound workflows every set-up space gets, installed per space with the space id as suffix.
- * Left out until the switch-on: the bound investigation-completed workflow, which reacts to events
- * the existing global one already handles, so installing it now would attach every investigation
- * twice, and the ones a setting turns on (continuous onboarding, the scheduled discovery pair).
+ * The investigation-completed workflow, continuous onboarding and the scheduled discovery pair
+ * arrive with the switch-on, which installs them from their settings.
  */
 export const SETUP_WORKFLOW_IDS = [
   NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
-  NIGHTSHIFT_BOUND_DISCOVERY_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
@@ -56,17 +52,13 @@ export interface DetectionEngineSetupService {
     request: KibanaRequest;
     spaceId: string;
     serviceAccountId: string;
-  }) => Promise<DetectionEngineEnableResponse>;
+  }) => Promise<{ spaceId: string; serviceAccountId: string }>;
   /** What the current user can see about the space's setup. */
   getStatus: (params: {
     request: KibanaRequest;
     spaceId: string;
   }) => Promise<DetectionEngineServiceAccountStatus>;
 }
-
-// The service is created per request, so the queue of a space's setups lives here. Setups of one
-// space run one after another, so two clicks cannot interleave their installs.
-const enableQueues = new Map<string, Promise<unknown>>();
 
 /** Creates the setup service for one deployment. `isServerless` picks the name of the account's role. */
 export function createDetectionEngineSetupService({
@@ -120,15 +112,11 @@ export function createDetectionEngineSetupService({
     }
   };
 
-  const runEnable = async ({
+  const enable: DetectionEngineSetupService['enable'] = async ({
     request,
     spaceId,
     serviceAccountId,
-  }: {
-    request: KibanaRequest;
-    spaceId: string;
-    serviceAccountId: string;
-  }): Promise<DetectionEngineEnableResponse> => {
+  }) => {
     if (!core.security.serviceAccounts.isEnabled()) {
       throw new StatusError(
         'Service accounts are disabled. Set xpack.security.serviceAccounts.enabled: true.',
@@ -195,23 +183,11 @@ export function createDetectionEngineSetupService({
         500
       );
     }
-    return { spaceId, serviceAccountId, workflowIds: [...SETUP_WORKFLOW_IDS] };
+    return { spaceId, serviceAccountId };
   };
 
   return {
-    enable(params) {
-      const previous = enableQueues.get(params.spaceId) ?? Promise.resolve();
-      const run = previous.catch(() => undefined).then(() => runEnable(params));
-      enableQueues.set(params.spaceId, run);
-      run
-        .catch(() => undefined)
-        .finally(() => {
-          if (enableQueues.get(params.spaceId) === run) {
-            enableQueues.delete(params.spaceId);
-          }
-        });
-      return run;
-    },
+    enable,
 
     async getStatus({ request, spaceId }) {
       const serviceAccountsEnabled = core.security.serviceAccounts.isEnabled();

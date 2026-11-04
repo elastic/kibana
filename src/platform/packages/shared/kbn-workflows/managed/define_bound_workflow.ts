@@ -1,0 +1,38 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { renderRunAs } from './render_bound_yaml';
+import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
+
+/** The one template value a bound workflow takes: the account its `settings.run_as` names. */
+export interface IBoundWorkflowValues extends ManagedWorkflowTemplateValues {
+  /** The service account the detection engine runs as in the space. */
+  serviceAccountId: string;
+}
+
+/**
+ * Defines a Significant Events workflow that is installed once per space, with the space id as
+ * the document id suffix, and bound to the detection engine service account. `yaml` carries the
+ * `run_as: __SERVICE_ACCOUNT_ID__` placeholder that installing replaces.
+ */
+export function defineBoundWorkflow<TId extends string>({ id, yaml }: { id: TId; yaml: string }) {
+  return {
+    id,
+    pluginId: 'significantEvents',
+    version: 1,
+    billable: false,
+    yamlTemplate: ({ serviceAccountId }: IBoundWorkflowValues): string =>
+      renderRunAs(yaml, serviceAccountId),
+    management: {
+      lifecycle: 'dynamic',
+      versionStrategy: 'auto',
+      enablement: 'restorable',
+    },
+  } as const satisfies ManagedWorkflowDefinition<IBoundWorkflowValues>;
+}

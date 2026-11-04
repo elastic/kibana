@@ -7,41 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import BOUND_ONBOARDING_WORKFLOW_YAML from './bound_onboarding.yaml';
-import { renderRunAs } from '../../../render_bound_yaml';
-import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../../types';
+import ONBOARDING_YAML from './bound_onboarding.yaml';
+import { defineBoundWorkflow } from '../../../define_bound_workflow';
 
 export const NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID = 'system-sources-ki-onboarding-bound';
-
-/** Document id of the entry point installed in a space (installed with `workflowIdSuffix`). */
-export const getNightshiftBoundKiOnboardingWorkflowId = (spaceId: string): string =>
-  `${NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID}-${spaceId}`;
-
-export interface NightshiftBoundKiOnboardingTemplateValues extends ManagedWorkflowTemplateValues {
-  /** The service account KI onboarding runs as in the space. */
-  serviceAccountId: string;
-}
-
-/** Renders the space entry point with `settings.run_as` set to the bound service account. */
-export const renderBoundOnboardingYaml = ({
-  serviceAccountId,
-}: NightshiftBoundKiOnboardingTemplateValues): string =>
-  renderRunAs(BOUND_ONBOARDING_WORKFLOW_YAML, serviceAccountId);
 
 /**
  * The space's entry point to KI onboarding, installed per space and bound to the detection engine
  * service account. It calls the shared onboarding workflow, which inherits its identity and hands
  * it to the workflows it starts. A space without this entry point cannot run KI extraction.
  */
-export const NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW = {
+export const NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW = defineBoundWorkflow({
   id: NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
-  pluginId: 'significantEvents',
-  version: 1,
-  billable: false,
-  yamlTemplate: renderBoundOnboardingYaml,
-  management: {
-    lifecycle: 'dynamic',
-    versionStrategy: 'auto',
-    enablement: 'restorable',
-  },
-} as const satisfies ManagedWorkflowDefinition<NightshiftBoundKiOnboardingTemplateValues>;
+  yaml: ONBOARDING_YAML,
+});

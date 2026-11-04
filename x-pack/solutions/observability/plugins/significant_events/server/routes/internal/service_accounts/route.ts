@@ -8,7 +8,7 @@
 import { lazySchema, z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type {
-  DetectionEngineEnableResponse,
+  DetectionEngineEnableBody,
   DetectionEngineServiceAccountStatus,
 } from '../../../../common';
 import { createDetectionEngineSetupService } from '../../../lib/service_accounts/service_account_setup';
@@ -48,7 +48,7 @@ const enableServiceAccountRoute = createServerRoute({
     server,
     getScopedClients,
     getSpaceId,
-  }): Promise<DetectionEngineEnableResponse> => {
+  }): Promise<{ spaceId: string } & DetectionEngineEnableBody> => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
 
