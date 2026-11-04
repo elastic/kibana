@@ -58,6 +58,7 @@ dependsOn:
   - '@kbn/rule-registry-plugin'
   - '@kbn/actions-plugin'
   - '@kbn/actions-types'
+  - '@kbn/connector-specs'
   - '@kbn/alerting-plugin'
   - '@kbn/sandbox-plugin'
   - '@kbn/context-engine-plugin'
