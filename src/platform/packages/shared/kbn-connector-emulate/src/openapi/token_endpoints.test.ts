@@ -316,6 +316,14 @@ describe('token endpoints', () => {
       expect(body.error).toBe('invalid_request');
     });
 
+    it("doesn't serve Google's authorization URL for other vendors' specs", async () => {
+      const response = await flowFetch(
+        `https://accounts.google.com/o/oauth2/v2/auth?${new URLSearchParams(VALID)}`
+      );
+
+      expect(response.status).toBe(404);
+    });
+
     it('only serves GET at the authorization URL', async () => {
       const response = await flowFetch(`${AUTHORIZE_URL}?${new URLSearchParams(VALID)}`, {
         method: 'POST',

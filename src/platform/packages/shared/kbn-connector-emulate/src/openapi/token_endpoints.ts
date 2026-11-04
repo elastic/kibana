@@ -10,6 +10,7 @@
 import { createHash } from 'crypto';
 
 import type { ContractRequest, ContractResponse } from '../contract/types';
+import { AUTHORIZATION_URL as GOOGLE_AUTHORIZATION_URL } from './convert_discovery';
 import { compileUrlMatcher } from './match_operation';
 import { isRecord } from './schema_walk';
 import type { ContractOperation, OpenApiDocument, OperationServer, Violation } from './types';
@@ -212,6 +213,10 @@ export const findTokenEndpoints = (operations: readonly ContractOperation[]): To
     [refreshUrl === undefined ? 'tokenUrl' : 'refreshUrl', 'refresh_token'],
   ]);
 
+// Google's current authorization URL, which its connectors use. Discovery documents don't name
+// one, so specs converted from them, and the snapshots cut from those, declare the original.
+const GOOGLE_V2_AUTHORIZATION_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
+
 /**
  * Finds whether a URL is the `authorizationUrl` of an authorization code flow declared by the
  * operations' specs, resolved like token URLs. Throws on URLs that can't be parsed.
@@ -222,7 +227,12 @@ export const findAuthorizationEndpoints = (
   const endpoints = findFlowEndpoints(operations, (flow) =>
     flow === 'authorizationCode' ? [['authorizationUrl', 'code']] : []
   );
-  return (url) => endpoints(url) !== undefined;
+  return (url) =>
+    endpoints(
+      `${url.origin}${url.pathname}` === GOOGLE_V2_AUTHORIZATION_URL
+        ? new URL(GOOGLE_AUTHORIZATION_URL)
+        : url
+    ) !== undefined;
 };
 
 /** A token URL's response, with the OAuth error of a rejected request as a violation. */
