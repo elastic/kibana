@@ -32,6 +32,7 @@ import { KibanaSavedObjectType } from '../../../../../../../common/types/models'
 import { appendReturnParams } from '../../components/return_params';
 
 import {
+  ADD_INTEGRATION_CONFIGURABLE_PACKAGES,
   isAssetOnlyIntegrationPackage,
   isPackagePrerelease,
   splitPkgKey,
@@ -118,10 +119,6 @@ export interface DetailParams {
   panel?: DetailViewPanelName;
 }
 const CUSTOM_INTEGRATION_SOURCES = ['custom', 'upload'];
-// Packages that would otherwise get "Install assets" but keep "Add integration" because of a custom UI
-// registered by another plugin (cribl: Security's package-policy-replace-define-step extension).
-// Temporary: remove once the packages are re-typed and behavior is inferred from `type`.
-const INSTALL_ASSETS_CTA_EXCLUDED_PACKAGES = ['cribl'];
 const Divider = styled.div`
   width: 0;
   height: 100%;
@@ -670,7 +667,7 @@ export function Detail() {
   const isAssetOnlyPackage = useMemo(
     () =>
       packageInfo
-        ? !INSTALL_ASSETS_CTA_EXCLUDED_PACKAGES.includes(packageInfo.name) &&
+        ? !ADD_INTEGRATION_CONFIGURABLE_PACKAGES.includes(packageInfo.name) &&
           isAssetOnlyIntegrationPackage(packageInfo)
         : false,
     [packageInfo]

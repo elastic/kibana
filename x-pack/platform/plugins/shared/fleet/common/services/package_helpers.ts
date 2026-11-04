@@ -192,3 +192,27 @@ export function isAssetOnlyIntegrationPackage(pkg: AssetOnlyClassificationFields
     pkg.type === 'integration' && !shouldAddIntegrationFromCatalog(pkg) && hasInstallableAssets(pkg)
   );
 }
+
+/**
+ * Packages on ADD_INTEGRATION_EXCLUDED_PACKAGES that still configure something on an agent (a custom
+ * policy UI, or a real input), so they stay available when adding an integration to an agent policy
+ * and keep "Add integration" on their details page.
+ * Temporary: remove once packages are re-typed and behavior is inferred from `type`.
+ */
+export const ADD_INTEGRATION_CONFIGURABLE_PACKAGES: readonly string[] = ['cribl', 'supabase'];
+
+/**
+ * Return true if the package should be offered when adding an integration to an agent policy:
+ * packages with nothing to configure on an agent (assets-only, documentation-only) are hidden.
+ * Takes the fields of a catalog card, which carries the classification but not the package contents.
+ */
+export function canAddToAgentPolicy(pkg: {
+  name?: string;
+  addIntegrationFromCatalog?: boolean;
+}): boolean {
+  if (pkg.name && ADD_INTEGRATION_CONFIGURABLE_PACKAGES.includes(pkg.name)) {
+    return true;
+  }
+  // Cards without a classification (e.g. custom integrations) keep being offered
+  return pkg.addIntegrationFromCatalog !== false;
+}

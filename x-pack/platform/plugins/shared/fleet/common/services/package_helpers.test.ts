@@ -9,6 +9,7 @@ import { OTEL_COLLECTOR_INPUT_TYPE } from '../constants';
 import type { RegistryPolicyTemplate } from '../types';
 
 import {
+  canAddToAgentPolicy,
   getRootIntegrations,
   getRootPrivilegedDataStreams,
   hasInstallServersInputs,
@@ -588,5 +589,36 @@ describe('isAssetOnlyIntegrationPackage', () => {
     const pkg = { name, type: 'integration', assets, ...extra } as any;
     expect(isAssetOnlyIntegrationPackage(pkg)).toBe(true);
     expect(shouldAddIntegrationFromCatalog(pkg)).toBe(false);
+  });
+});
+
+describe('canAddToAgentPolicy', () => {
+  it('should return true for packages with something to configure on an agent', () => {
+    expect(canAddToAgentPolicy({ name: 'nginx', addIntegrationFromCatalog: true })).toBe(true);
+  });
+
+  it.each(['corelight', 'ded', 'vercel', 'awsfirehose', 'elastic_agent', 'keeper'])(
+    'should return false for %s, which has nothing to configure on an agent',
+    (name) => {
+      expect(canAddToAgentPolicy({ name, addIntegrationFromCatalog: false })).toBe(false);
+    }
+  );
+
+  it.each(['cribl', 'supabase'])(
+    'should return true for %s even though it is on the add integration exclusion list',
+    (name) => {
+      expect(canAddToAgentPolicy({ name, addIntegrationFromCatalog: false })).toBe(true);
+    }
+  );
+
+  it('should return true when the classification is not available', () => {
+    expect(canAddToAgentPolicy({ name: 'my_custom_integration' })).toBe(true);
+    expect(canAddToAgentPolicy({})).toBe(true);
+  });
+
+  it('should keep the configurable packages on the exclusion list used for tile navigation', () => {
+    ['cribl', 'supabase'].forEach((name) => {
+      expect(shouldAddIntegrationFromCatalog({ name, type: 'integration' })).toBe(false);
+    });
   });
 });
