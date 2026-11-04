@@ -74,4 +74,8 @@ export const summarizeResults = (
 
 /** Gives every row every output column, in column order, null where nothing produced it. */
 export const fillColumns = (rows: InventoryRow[], columns: OutputColumn[]): InventoryRow[] =>
-  rows.map((row) => Object.fromEntries(columns.map(({ name }) => [name, row[name] ?? null])));
+  rows.map((row) =>
+    Object.fromEntries(
+      columns.map(({ name }) => [name, Object.hasOwn(row, name) ? row[name] ?? null : null])
+    )
+  );

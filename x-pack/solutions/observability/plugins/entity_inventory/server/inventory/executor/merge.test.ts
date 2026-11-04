@@ -266,6 +266,53 @@ describe('mergeRows', () => {
     expect(rows).toEqual([{ 'entity.id': 'a', last_seen: 1 }]);
   });
 
+  it('merges columns named like Object.prototype members as plain values', () => {
+    const prototypeColumns: OutputColumn[] = [
+      { name: 'entity.id', kind: 'id' },
+      { name: 'constructor', kind: 'identity' },
+      { name: '__proto__', kind: 'attribute', fieldByPlan: { 0: 'a', 1: 'b' } },
+      { name: 'toString', kind: 'attribute', fieldByPlan: { 1: 'c' } },
+      { name: 'last_seen', kind: 'last_seen' },
+    ];
+    const { rows, provenance } = mergeRows(
+      [
+        result(
+          0,
+          [
+            Object.fromEntries([
+              ['entity.id', 'a'],
+              ['constructor', 'c'],
+              ['__proto__', 'old'],
+              ['last_seen', 1],
+            ]),
+          ],
+          [],
+          'metrics-a'
+        ),
+        result(
+          1,
+          [
+            Object.fromEntries([
+              ['entity.id', 'a'],
+              ['__proto__', ['x', 'y']],
+              ['last_seen', 2],
+            ]),
+          ],
+          [],
+          'metrics-b'
+        ),
+      ],
+      prototypeColumns
+    );
+    const [row] = rows;
+    expect(Object.keys(row)).toEqual(['entity.id', 'constructor', '__proto__', 'last_seen']);
+    expect(row.constructor).toBe('c');
+    expect(Object.getOwnPropertyDescriptor(row, '__proto__')?.value).toEqual(['x', 'y']);
+    expect(Object.hasOwn(row, 'toString')).toBe(false);
+    expect(JSON.parse(JSON.stringify(row))).toEqual(row);
+    expect(Object.getOwnPropertyDescriptor(provenance.a, '__proto__')?.value).toBe('metrics-b');
+  });
+
   it('merges against columns built from a fixture', () => {
     const plans: QueryPlan[] = (k8sDeploymentFixture.dynamic?.sources ?? []).map(
       ({ indexPattern, attributes = [] }, index) => ({

@@ -7,11 +7,15 @@
 
 import { ENTITY_ID_COLUMN } from '../generator';
 import type { OutputColumn } from '../generator';
-import type { InventoryRow, MergeResult, PlanResult, Provenance, TypedOutputColumn } from './types';
+import type { ESQLValue, InventoryRow, MergeResult, PlanResult, TypedOutputColumn } from './types';
 import { hasValue, isNewer, lastSeenInstant } from './utils';
 
+// Column names are authored data and may be `constructor` or `__proto__`, so the accumulator is a
+// Map, not an object whose inherited members would read as values; objects are built at the end.
 interface EntityState {
-  row: InventoryRow;
+  row: Map<string, ESQLValue>;
+  /** Attribute column to the index pattern of the source that supplied its value. */
+  provenance: Map<string, string>;
   lastSeen: number | null;
   /** Attribute column to the `last_seen` of the row that supplied its value. */
   attributeSeen: Map<string, number | null>;
@@ -35,35 +39,34 @@ const mergeInto = (
   state: EntityState,
   row: InventoryRow,
   columns: OutputColumn[],
-  provenance: Record<string, string>,
   indexPattern: string
 ): void => {
   const rowSeen = lastSeenInstant(row);
   columns.forEach(({ name, kind }) => {
-    const value = row[name];
+    const value = Object.hasOwn(row, name) ? row[name] : undefined;
     if (!hasValue(value)) {
       return;
     }
-    const current = state.row[name];
+    const current = state.row.get(name);
     if (kind === 'attribute') {
       // Compared with the row that supplied the current value, not the entity's newest row, so a
       // newer row without the attribute does not block an older row that has it.
       if (!hasValue(current) || isNewer(rowSeen, state.attributeSeen.get(name) ?? null)) {
-        state.row[name] = value;
+        state.row.set(name, value);
         state.attributeSeen.set(name, rowSeen);
-        provenance[name] = indexPattern;
+        state.provenance.set(name, indexPattern);
       }
       return;
     }
     if (kind === 'last_seen') {
       if (!hasValue(current) || isNewer(rowSeen, state.lastSeen)) {
-        state.row[name] = value;
+        state.row.set(name, value);
         state.lastSeen = rowSeen;
       }
       return;
     }
     if (!hasValue(current)) {
-      state.row[name] = value;
+      state.row.set(name, value);
     }
   });
 };
@@ -76,7 +79,6 @@ const mergeInto = (
 export const mergeRows = (results: PlanResult[], columns: OutputColumn[]): MergeResult => {
   const orderedPlans = [...results].sort((a, b) => a.plan.index - b.plan.index);
   const entities = new Map<string, EntityState>();
-  const provenance: Provenance = {};
   let droppedRows = 0;
 
   orderedPlans.forEach(({ plan, rows }) => {
@@ -87,24 +89,23 @@ export const mergeRows = (results: PlanResult[], columns: OutputColumn[]): Merge
         return;
       }
       const state: EntityState = entities.get(entityId) ?? {
-        row: {},
+        row: new Map(),
+        provenance: new Map(),
         lastSeen: null,
         attributeSeen: new Map(),
       };
+      entities.set(entityId, state);
 
-      if (!entities.has(entityId)) {
-        entities.set(entityId, state);
-        provenance[entityId] = {};
-      }
-
-      mergeInto(state, row, columns, provenance[entityId], plan.indexPattern);
+      mergeInto(state, row, columns, plan.indexPattern);
     });
   });
 
   return {
-    rows: [...entities.values()].map(({ row }) => row),
+    rows: [...entities.values()].map(({ row }) => Object.fromEntries(row)),
     columns: typeColumns(orderedPlans, columns),
-    provenance,
+    provenance: Object.fromEntries(
+      [...entities].map(([entityId, state]) => [entityId, Object.fromEntries(state.provenance)])
+    ),
     droppedRows,
   };
 };

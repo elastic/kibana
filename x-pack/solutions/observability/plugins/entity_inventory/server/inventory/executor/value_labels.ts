@@ -36,9 +36,9 @@ export const applyValueLabels = (rows: InventoryRow[], plan: QueryPlan): Invento
   return rows.map((row) => {
     const next = { ...row };
     labelled.forEach(({ name, valueLabels }) => {
-      const value = next[name];
-      if (value !== undefined) {
-        next[name] = labelValue(value, valueLabels);
+      // Own property only: `name` is authored and may be an `Object.prototype` member's name.
+      if (Object.hasOwn(next, name)) {
+        next[name] = labelValue(next[name], valueLabels);
       }
     });
     return next;

@@ -127,6 +127,18 @@ describe('fillColumns', () => {
     expect(Object.keys(filled)).toEqual(['entity.id', 'host.name', 'os', 'last_seen']);
   });
 
+  it('gives null for an absent column named like an Object.prototype member', () => {
+    const [filled] = fillColumns(
+      [{ 'entity.id': 'a' }],
+      [
+        { name: 'entity.id', kind: 'id' },
+        { name: 'toString', kind: 'attribute', fieldByPlan: {} },
+        { name: 'constructor', kind: 'identity' },
+      ]
+    );
+    expect(Object.values(filled)).toEqual(['a', null, null]);
+  });
+
   it('keeps false, zero and multi-values', () => {
     expect(
       fillColumns(
