@@ -103,6 +103,8 @@ export const wakeParent = async ({
       useTaskManager: true,
       requestImmediateClaim: true,
       params: {
+        // The service defaults a missing agent, it does not read the conversation's.
+        agentId: conversation.agent_id,
         conversationId,
         nextInput: { message: describeFinishedChild(child) },
         actor: { type: EventActorType.agent, id: child.agentId, username: child.agentId },

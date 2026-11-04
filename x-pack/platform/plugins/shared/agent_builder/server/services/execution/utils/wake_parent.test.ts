@@ -97,11 +97,12 @@ describe('wakeParent', () => {
     conversationClient = createConversationClientMock();
     conversationClient.get.mockResolvedValue({
       id: 'conversation-1',
+      agent_id: 'parent-agent',
       state: { background_executions: pendingState },
     } as never);
   });
 
-  it('reads the conversation as the owner and starts a run on the parent that carries the result', async () => {
+  it("reads the conversation as the owner and starts a run on the parent's agent that carries the result", async () => {
     await expect(wake()).resolves.toBe('woken');
 
     expect(getScopedClientAsUser).toHaveBeenCalledWith({
@@ -114,6 +115,7 @@ describe('wakeParent', () => {
       useTaskManager: true,
       requestImmediateClaim: true,
       params: {
+        agentId: 'parent-agent',
         conversationId: 'conversation-1',
         nextInput: { message: describeFinishedChild(finishedChild) },
         actor: { type: EventActorType.agent, id: 'child-agent', username: 'child-agent' },
