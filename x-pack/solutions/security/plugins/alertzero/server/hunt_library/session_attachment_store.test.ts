@@ -270,7 +270,10 @@ describe('upsertHuntSessionAttachment', () => {
         conversationId: CONVERSATION,
         mutate: () => draft(many),
       })
-    ).rejects.toThrow(`at most ${HUNT_SESSION_MAX_FINGERPRINTS}`);
+    ).rejects.toMatchObject({
+      code: 'invalid',
+      message: expect.stringContaining(`at most ${HUNT_SESSION_MAX_FINGERPRINTS}`),
+    });
     expect(fake.mocks.create).not.toHaveBeenCalled();
   });
 

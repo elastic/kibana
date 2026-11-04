@@ -119,3 +119,14 @@ export interface HuntSessionVerification {
     };
   };
 }
+
+/** The result of preserving selected rows as evidence on an Investigation. */
+export interface HuntPreserveResponse {
+  investigation_id: string;
+  /** Unique evidence rows on the Investigation after this request. */
+  evidence_count: number;
+  /** Rows this request added. Zero for a retry or a repeated selection. */
+  added_count: number;
+  /** True when this request created the Investigation. */
+  created: boolean;
+}

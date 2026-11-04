@@ -21,19 +21,21 @@ import { HUNT_SESSION_ATTACHMENT_TYPE } from '../agent_builder/attachments/hunt_
 
 export const HUNT_SESSION_MAX_WRITE_ATTEMPTS = 5;
 
-export type HuntSessionStoreErrorCode = 'too_large' | 'write_conflict';
+export type HuntSessionStoreErrorCode = 'too_large' | 'write_conflict' | 'invalid';
 
 const HUNT_SESSION_STORE_ERROR_MESSAGES: Record<HuntSessionStoreErrorCode, string> = {
   // The request would make the attachment larger than the limit; nothing was written.
   too_large: 'The Hunt session is too large. Select fewer rows and try again.',
   // Every write attempt lost a race; nothing is reported as saved.
   write_conflict: 'The Hunt session was changed by someone else. Try again.',
+  // The resulting document breaks a limit, such as the evidence fingerprint cap.
+  invalid: 'The Hunt session is not valid.',
 };
 
 /** A write the store refused or could not confirm. `code` says why; nothing partial is reported. */
 export class HuntSessionStoreError extends Error {
-  constructor(public readonly code: HuntSessionStoreErrorCode) {
-    super(HUNT_SESSION_STORE_ERROR_MESSAGES[code]);
+  constructor(public readonly code: HuntSessionStoreErrorCode, detail?: string) {
+    super(detail ?? HUNT_SESSION_STORE_ERROR_MESSAGES[code]);
     this.name = 'HuntSessionStoreError';
   }
 }
@@ -121,7 +123,12 @@ export const upsertHuntSessionAttachment = async ({
       throw new HuntSessionStoreError('too_large');
     }
     const valid = huntSessionAttachmentSchema.safeParse(next);
-    if (!valid.success) throw new Error(`Invalid Hunt session: ${valid.error.message}`);
+    if (!valid.success) {
+      throw new HuntSessionStoreError(
+        'invalid',
+        valid.error.issues.map(({ message }) => message).join('; ')
+      );
+    }
 
     try {
       if (!existing) {
