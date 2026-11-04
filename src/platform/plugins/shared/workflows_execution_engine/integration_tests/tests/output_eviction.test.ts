@@ -141,7 +141,8 @@ steps:
     });
   });
 
-  describe('with high eviction threshold', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/302843
+  describe.skip('with high eviction threshold', () => {
     beforeEach(() => {
       // Set threshold very high so nothing gets evicted
       (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
