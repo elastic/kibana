@@ -161,7 +161,7 @@ const { fetch, reset } = createEmulatorFetch({
 });
 ```
 
-- `context.next()` answers with the default chain: fixtures, recordings, then examples or samples, paged for operations in `pagination`. A responder that defers to it for an operation behaves as if it weren't there.
+- `context.next()` answers with the default chain: fixtures, recordings, then examples or samples, paged for operations in `pagination`. A responder that defers to it for an operation behaves as if it weren't there. Each call gets its own copy, so a responder can change it without affecting later requests.
 - `context.state` is a `Map` kept for the emulator's run; `reset()` empties it, along with `calls`. Responders keep their entries under keys of their own, such as a symbol, so several can share it.
 - Answers are validated against the spec like any other, so a responder that drifts from the vendor's contract shows up in `calls`.
 

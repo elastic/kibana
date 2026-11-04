@@ -296,7 +296,8 @@ export const createEmulatorFetch = ({
   const contextFor = (operation: ContractOperation, request: ContractRequest) => {
     const context: ResponderContext = {
       state,
-      next: async () => defaultChain(operation, request, context),
+      // A copy, as fixtures and recordings are one object shared by every request.
+      next: async () => structuredClone(await defaultChain(operation, request, context)),
     };
     return context;
   };

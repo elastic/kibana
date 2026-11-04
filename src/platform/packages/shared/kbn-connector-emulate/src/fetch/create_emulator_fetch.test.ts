@@ -192,6 +192,28 @@ describe('createEmulatorFetch', () => {
       expect(await response.json()).toEqual([{ name: 'fixture' }]);
     });
 
+    it('gives each next() its own copy, so changing it leaves later requests alone', async () => {
+      const { fetch } = createEmulatorFetch({
+        specs: [spec],
+        fixtures: [
+          {
+            operation: { method: 'get', path: '/items' },
+            response: { status: 200, body: [{ name: 'fixture' }] },
+          },
+        ],
+        respond: async (_operation, _request, { next }) => {
+          const response = await next();
+          (response.body as unknown[]).push({ name: 'added' });
+          return response;
+        },
+      });
+
+      await fetch(`${BASE_URL}/items`);
+      const second = await fetch(`${BASE_URL}/items`);
+
+      expect(await second.json()).toEqual([{ name: 'fixture' }, { name: 'added' }]);
+    });
+
     it('reports answers that break the spec', async () => {
       const { fetch, calls } = createEmulatorFetch({
         specs: [spec],
