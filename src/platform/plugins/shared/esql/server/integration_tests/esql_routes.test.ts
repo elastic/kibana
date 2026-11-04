@@ -8,7 +8,8 @@
  */
 
 import {
-  LOOKUP_INDEX_RECREATE_ROUTE,
+  INDEX_EDITOR_CREATE_ROUTE,
+  INDEX_EDITOR_RECREATE_ROUTE,
   JOIN_INDICES_AUTOCOMPLETE_ROUTE,
   TIMESERIES_INDICES_AUTOCOMPLETE_ROUTE,
   VIEWS_BULK_DELETE_ROUTE,
@@ -507,7 +508,47 @@ describe('ESQL routes', () => {
     });
   });
 
-  describe('POST /internal/esql/lookup_index/{indexName}/recreate', () => {
+  describe(`POST ${INDEX_EDITOR_CREATE_ROUTE}/{indexName}`, () => {
+    it('creates a lookup index when no mode is provided', async () => {
+      const indexName = 'test_index_editor_create_default';
+      const client = testbed.esClient();
+
+      const url = `${INDEX_EDITOR_CREATE_ROUTE}/${indexName}`;
+      const result = await testbed.POST(url).send().expect(200);
+
+      expect(result.body).toMatchObject({
+        acknowledged: true,
+        index: indexName,
+      });
+
+      const indexSettings = await client.indices.getSettings({ index: indexName });
+      expect(indexSettings[indexName].settings?.index?.mode).toBe('lookup');
+
+      // Cleanup
+      await client.indices.delete({ index: indexName });
+    });
+
+    it('creates a standard index when mode is "standard"', async () => {
+      const indexName = 'test_index_editor_create_standard';
+      const client = testbed.esClient();
+
+      const url = `${INDEX_EDITOR_CREATE_ROUTE}/${indexName}`;
+      const result = await testbed.POST(url).send({ mode: 'standard' }).expect(200);
+
+      expect(result.body).toMatchObject({
+        acknowledged: true,
+        index: indexName,
+      });
+
+      const indexSettings = await client.indices.getSettings({ index: indexName });
+      expect(indexSettings[indexName].settings?.index?.mode).toBeUndefined();
+
+      // Cleanup
+      await client.indices.delete({ index: indexName });
+    });
+  });
+
+  describe(`POST ${INDEX_EDITOR_RECREATE_ROUTE}/{indexName}`, () => {
     it('can recreate a lookup index', async () => {
       const indexName = 'test_lookup_index_recreate';
       const client = testbed.esClient();
@@ -532,7 +573,7 @@ describe('ESQL routes', () => {
       expect(searchResult.hits.total).toMatchObject({ value: 1 });
 
       // Recreate the index
-      const url = `${LOOKUP_INDEX_RECREATE_ROUTE}/${indexName}`;
+      const url = `${INDEX_EDITOR_RECREATE_ROUTE}/${indexName}`;
       const result = await testbed.POST(url).send().expect(200);
 
       expect(result.body).toMatchObject({

@@ -56,12 +56,12 @@ import { i18n } from '@kbn/i18n';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { Query } from '@kbn/es-query';
 import {
-  LOOKUP_INDEX_CREATE_ROUTE,
-  LOOKUP_INDEX_PRIVILEGES_ROUTE,
-  LOOKUP_INDEX_RECREATE_ROUTE,
-  LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE,
-  JOIN_INDICES_AUTOCOMPLETE_ROUTE,
-  type IndicesAutocompleteResult,
+  INDEX_EDITOR_CREATE_ROUTE,
+  INDEX_EDITOR_PRIVILEGES_ROUTE,
+  INDEX_EDITOR_RECREATE_ROUTE,
+  INDEX_EDITOR_RESOLVE_ROUTE,
+  INDEX_EDITOR_UPDATE_MAPPINGS_ROUTE,
+  type IndexEditorResolution,
 } from '@kbn/esql-types';
 import { isDocDelete, isDocUpdate, isPlaceholderColumn } from '../utils';
 import type {
@@ -70,6 +70,7 @@ import type {
   DeleteDocAction,
   DocUpdate,
   IndexEditorError,
+  IndexEditorIndexMode,
 } from '../types';
 import { IndexEditorErrors } from '../types';
 import { parsePrimitive } from '../utils';
@@ -81,7 +82,13 @@ import { bulkUpdate, type BulkUpdateOperations } from './bulk_update_service';
 
 const getIndexEsqlQuery = (indexName: string) => esql`FROM ${indexName}`.print();
 
-const DOCS_PER_FETCH = 1000;
+/** Reads the scalar produced by a `STATS … = COUNT(*)` ES|QL query. */
+const extractDocCount = (response: ESQLSearchResponse): number | undefined => {
+  const value = response.values?.[0]?.[0];
+  return typeof value === 'number' ? value : undefined;
+};
+
+const DOCS_PER_FETCH = 5000;
 const MAX_COLUMN_PLACEHOLDERS = 4;
 
 type Action =
@@ -112,7 +119,8 @@ export class IndexUpdateService {
     private readonly data: DataPublicPluginStart,
     private readonly notifications: NotificationsStart,
     private readonly telemetry: IndexEditorTelemetryService,
-    public readonly canEditIndex: boolean
+    public readonly canEditIndex: boolean,
+    public readonly indexMode: IndexEditorIndexMode = 'standard'
   ) {
     this.listenForUpdates();
   }
@@ -208,10 +216,38 @@ export class IndexUpdateService {
   private _pendingColumnsToBeSaved$ = new BehaviorSubject<ColumnAddition[]>([]);
   public readonly pendingColumnsToBeSaved$ = this._pendingColumnsToBeSaved$.asObservable();
 
+  /**
+   * Columns that exist in the index but cannot be edited here (e.g. runtime fields, whose values are
+   * computed at query time, so edits would never persist). The grid renders them read-only.
+   */
+  private readonly _readOnlyColumns$ = new BehaviorSubject<ReadonlySet<string>>(new Set());
+  public readonly readOnlyColumns$: Observable<ReadonlySet<string>> =
+    this._readOnlyColumns$.asObservable();
+
+  public setReadOnlyColumns(columns: readonly string[]): void {
+    this._readOnlyColumns$.next(new Set(columns));
+  }
+
   private placeholderIndex = 0;
 
   private readonly _totalHits$ = new BehaviorSubject<number>(0);
   public readonly totalHits$: Observable<number> = this._totalHits$.asObservable();
+
+  /** Whether the last fetch hit the per-fetch row cap, so the grid shows only a partial window. */
+  private readonly _loadedRowsAreCapped$ = new BehaviorSubject<boolean>(false);
+  public readonly loadedRowsAreCapped$: Observable<boolean> =
+    this._loadedRowsAreCapped$.asObservable();
+
+  /**
+   * Total documents matching the current filter. Only resolved while the window is capped, so the
+   * toolbar can show an honest "first N of M" instead of implying the window is the whole index.
+   */
+  private readonly _totalDocsCount$ = new BehaviorSubject<number | undefined>(undefined);
+  public readonly totalDocsCount$: Observable<number | undefined> =
+    this._totalDocsCount$.asObservable();
+
+  /** Emits the active count query whenever a fetch comes back capped. */
+  private readonly _cappedFetch$ = new Subject<string>();
 
   private readonly _refreshSubject$ = new BehaviorSubject<number>(0);
 
@@ -275,6 +311,26 @@ export class IndexUpdateService {
       const [firstSort, ...restSort] = sortOrder as Array<[string, ESQLOrderExpression['order']]>;
       query.sort(firstSort, ...restSort);
     }
+
+    return query.print('basic');
+  }
+
+  /** Builds a lightweight aggregate query that counts documents matching the current filter. */
+  private _buildCountQuery({
+    indexName,
+    filterQuery,
+  }: {
+    indexName: string;
+    filterQuery: Query;
+  }): string {
+    const query = esql`FROM ${indexName}`;
+
+    const filterExpression = convertQueryToESQLExpression(filterQuery);
+    if (filterExpression) {
+      query.where(filterExpression);
+    }
+
+    query.pipe`STATS total = COUNT(*)`;
 
     return query.print('basic');
   }
@@ -847,6 +903,19 @@ export class IndexUpdateService {
           next: (response) => {
             const { values, columns } = response.rawResponse;
 
+            // The read query caps results at DOCS_PER_FETCH. When we hit that cap the grid is only
+            // showing a window, so fetch the true matching total to drive an honest "first N of M".
+            const isCapped = values.length >= DOCS_PER_FETCH;
+            this._loadedRowsAreCapped$.next(isCapped);
+            const indexName = this._indexName$.getValue();
+            if (isCapped && indexName) {
+              this._cappedFetch$.next(
+                this._buildCountQuery({ indexName, filterQuery: this._filterQuery$.getValue() })
+              );
+            } else {
+              this._totalDocsCount$.next(undefined);
+            }
+
             // Populate unsupported ES|QL field types
             columns.forEach((col) => {
               if (col.type === 'unsupported' && col.original_types?.length) {
@@ -883,6 +952,27 @@ export class IndexUpdateService {
             this._isFetching$.next(false);
           },
         })
+    );
+
+    // Total matching-doc count, fetched only after a capped fetch, so the toolbar can show an
+    // honest "first N of M". It falls back to `undefined` on error, hiding the total rather than
+    // blocking the grid.
+    this._subscription.add(
+      this._cappedFetch$
+        .pipe(
+          switchMap((countQuery) =>
+            this.data.search
+              .search<{ params: ESQLSearchParams }, { rawResponse: ESQLSearchResponse }>(
+                { params: { query: countQuery } },
+                { strategy: 'esql_async' }
+              )
+              .pipe(
+                map(({ rawResponse }) => extractDocCount(rawResponse)),
+                catchError(() => of(undefined))
+              )
+          )
+        )
+        .subscribe((count) => this._totalDocsCount$.next(count))
     );
 
     // Maintains a list of pending columns to be saved,
@@ -1052,7 +1142,9 @@ export class IndexUpdateService {
   /** Reset index to original state */
   public async resetIndexMapping() {
     if (this.isIndexCreated()) {
-      await this.http.post<BulkResponse>(`${LOOKUP_INDEX_RECREATE_ROUTE}/${this.getIndexName()}`);
+      await this.http.post<BulkResponse>(`${INDEX_EDITOR_RECREATE_ROUTE}/${this.getIndexName()}`, {
+        body: JSON.stringify({ mode: this.indexMode }),
+      });
 
       // Refresh dataview fields
       const dataView = await firstValueFrom(this.dataView$);
@@ -1079,7 +1171,7 @@ export class IndexUpdateService {
 
     try {
       await this.http.put(
-        `${LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE}/${encodeURIComponent(indexName)}`,
+        `${INDEX_EDITOR_UPDATE_MAPPINGS_ROUTE}/${encodeURIComponent(indexName)}`,
         {
           body,
         }
@@ -1149,6 +1241,9 @@ export class IndexUpdateService {
     this._isFetching$.complete();
     this._docs$.complete();
     this._totalHits$.complete();
+    this._loadedRowsAreCapped$.complete();
+    this._totalDocsCount$.complete();
+    this._cappedFetch$.complete();
     this._actions$.complete();
     this._pendingColumnsToBeSaved$.complete();
     this._indexCreated$.complete();
@@ -1166,7 +1261,8 @@ export class IndexUpdateService {
     try {
       this._isSaving$.next(true);
       await this.http.post(
-        `${LOOKUP_INDEX_CREATE_ROUTE}/${encodeURIComponent(this.getIndexName()!)}`
+        `${INDEX_EDITOR_CREATE_ROUTE}/${encodeURIComponent(this.getIndexName()!)}`,
+        { body: JSON.stringify({ mode: this.indexMode }) }
       );
 
       this.setIndexCreated(true);
@@ -1205,17 +1301,24 @@ export class IndexUpdateService {
     }
   }
 
-  public async doesIndexExist(indexName: string): Promise<boolean> {
-    const lookupIndexesResult = await this.http.get<IndicesAutocompleteResult>(
-      JOIN_INDICES_AUTOCOMPLETE_ROUTE
-    );
-
-    return lookupIndexesResult.indices.some((index) => index.name === indexName);
+  /**
+   * Resolves a single index name so callers can decide whether it is editable. Resolution is
+   * best-effort: on failure it returns `null` so the editor can fall back to the caller-provided
+   * existence hint instead of blocking a valid edit.
+   */
+  public async fetchIndexResolution(indexName: string): Promise<IndexEditorResolution | null> {
+    try {
+      return await this.http.get<IndexEditorResolution>(
+        `${INDEX_EDITOR_RESOLVE_ROUTE}/${encodeURIComponent(indexName)}`
+      );
+    } catch (e) {
+      return null;
+    }
   }
 
   private async fetchUserCanResetIndex(indexName: string): Promise<boolean> {
     const lookupIndexesResult = await this.http.get<SecurityHasPrivilegesResponse['index']>(
-      LOOKUP_INDEX_PRIVILEGES_ROUTE,
+      INDEX_EDITOR_PRIVILEGES_ROUTE,
       {
         query: {
           indexName,

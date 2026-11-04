@@ -37,6 +37,9 @@ export const EmptyPrompt: FC = () => {
 
   const allowMappingsReset = useMemo(
     () =>
+      // Reset deletes and recreates the index, which is only safe for small, purpose-built
+      // lookup indices. It is intentionally unavailable for standard indices.
+      indexUpdateService.indexMode === 'lookup' &&
       indexUpdateService.isIndexCreated() &&
       indexUpdateService.userCanResetIndex &&
       columns?.some((col) => !isPlaceholderColumn(col.name)),
@@ -100,7 +103,7 @@ export const EmptyPrompt: FC = () => {
           <EuiText color="subdued" textAlign="center" size="s">
             <FormattedMessage
               id="indexEditor.emptyPrompt.description"
-              defaultMessage="Add data to your lookup index by specifying fields and cell values manually, by {uploading}, or by {dragAndDrop} a file."
+              defaultMessage="Add data to your index by specifying fields and cell values manually, by {uploading}, or by {dragAndDrop} a file."
               values={{ uploading, dragAndDrop }}
             />
           </EuiText>
@@ -157,7 +160,7 @@ export const EmptyPrompt: FC = () => {
               <p>
                 <FormattedMessage
                   id="indexEditor.mappingsWarningModal.body"
-                  defaultMessage="This action will permanently delete all existing fields of the lookup index and reset its configuration."
+                  defaultMessage="This action will permanently delete all existing fields of the index and reset its configuration."
                 />
               </p>
             </EuiConfirmModal>

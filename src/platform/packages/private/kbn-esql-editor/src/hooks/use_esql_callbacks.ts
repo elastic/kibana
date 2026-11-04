@@ -30,7 +30,7 @@ import { clearCacheWhenOld } from '../helpers';
 import { getHistoryItems } from '../history_local_storage';
 import type { ESQLEditorDeps } from '../types';
 import type { StarredQueryMetadata } from '../editor_footer/esql_starred_queries_service';
-import { useCanCreateLookupIndex } from '../lookup_join';
+import { useCanCreateIndex } from '../lookup_join';
 import { useCanSuggestResourceBrowser } from '../resource_browser/use_can_suggest_resource_browser';
 import {
   DATA_SOURCES_CACHE_KEY,
@@ -316,7 +316,7 @@ export const useEsqlCallbacks = ({
 
   const isServerless = Boolean(esqlService?.isServerless);
 
-  const canCreateLookupIndex = useCanCreateLookupIndex();
+  const canCreateLookupIndex = useCanCreateIndex();
   const canSuggestResourceBrowser = useCanSuggestResourceBrowser(enableResourceBrowser);
 
   const getKqlSuggestions = useCallback(

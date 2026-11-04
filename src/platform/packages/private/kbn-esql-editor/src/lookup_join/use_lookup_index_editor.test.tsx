@@ -14,10 +14,10 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { of } from 'rxjs';
 import {
   useLookupIndexCommand,
-  useCanCreateLookupIndex,
+  useCanCreateIndex,
   getMonacoCommandString,
 } from './use_lookup_index_editor';
-import { useLookupIndexPrivileges } from './use_lookup_index_privileges';
+import { useIndexPrivileges } from './use_index_privileges';
 import { coreMock } from '@kbn/core/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { getLookupIndicesFromQuery } from '@kbn/esql-utils';
@@ -32,8 +32,8 @@ jest.mock('@kbn/esql-utils', () => ({
   getLookupIndicesFromQuery: jest.fn(),
 }));
 
-jest.mock('./use_lookup_index_privileges', () => ({
-  useLookupIndexPrivileges: jest.fn(),
+jest.mock('./use_index_privileges', () => ({
+  useIndexPrivileges: jest.fn(),
 }));
 
 jest.mock('./append_index_to_join_command', () => ({
@@ -139,12 +139,12 @@ describe('getMonacoCommandString', () => {
   });
 });
 
-describe('useCanCreateLookupIndex', () => {
+describe('useCanCreateIndex', () => {
   const mockGetPermissions = jest.fn();
 
   beforeEach(() => {
     mockServices.application.currentAppId$ = of('discover');
-    (useLookupIndexPrivileges as jest.Mock).mockReturnValue({
+    (useIndexPrivileges as jest.Mock).mockReturnValue({
       getPermissions: mockGetPermissions,
     });
   });
@@ -158,7 +158,7 @@ describe('useCanCreateLookupIndex', () => {
       'test-index': { canCreateIndex: true },
     });
 
-    const { result } = renderHook(() => useCanCreateLookupIndex(), {
+    const { result } = renderHook(() => useCanCreateIndex(), {
       wrapper: createWrapper,
     });
 
@@ -171,7 +171,7 @@ describe('useCanCreateLookupIndex', () => {
       'test-index': { canCreateIndex: false },
     });
 
-    const { result } = renderHook(() => useCanCreateLookupIndex(), {
+    const { result } = renderHook(() => useCanCreateIndex(), {
       wrapper: createWrapper,
     });
 
@@ -182,7 +182,7 @@ describe('useCanCreateLookupIndex', () => {
   it('should return false when not in supported app', async () => {
     mockServices.application.currentAppId$ = of('dashboard');
 
-    const { result } = renderHook(() => useCanCreateLookupIndex(), { wrapper: createWrapper });
+    const { result } = renderHook(() => useCanCreateIndex(), { wrapper: createWrapper });
 
     const canCreate = await result.current('test-index');
     expect(canCreate).toBe(false);
@@ -221,7 +221,7 @@ describe('useLookupIndexCommand', () => {
 
     mockServices.application.currentAppId$ = of('discover');
 
-    (useLookupIndexPrivileges as jest.Mock).mockReturnValue({
+    (useIndexPrivileges as jest.Mock).mockReturnValue({
       getPermissions: mockGetPermissions,
     });
 

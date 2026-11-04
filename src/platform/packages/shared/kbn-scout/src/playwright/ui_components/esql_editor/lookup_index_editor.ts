@@ -30,7 +30,7 @@ export class LookupIndexEditor {
 
   constructor(private readonly page: ScoutPage, private readonly esqlEditor: EsqlEditor) {
     this.dataGrid = new DataGrid(page);
-    this.flyout = page.testSubj.locator('lookupIndexFlyout');
+    this.flyout = page.testSubj.locator('indexEditorFlyout');
     this.unsavedChangesModal = page.testSubj.locator('indexEditorUnsavedChangesModal');
   }
 

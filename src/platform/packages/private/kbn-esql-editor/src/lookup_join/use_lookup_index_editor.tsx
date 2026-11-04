@@ -13,7 +13,7 @@ import type { AggregateQuery } from '@kbn/es-query';
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
 import { getLookupIndicesFromQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
-import type { EditLookupIndexContentContext } from '@kbn/index-editor';
+import type { EditIndexContentContext } from '@kbn/index-editor';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { monaco } from '@kbn/code-editor';
 import { useDebounceFn } from '@kbn/react-hooks';
@@ -27,8 +27,8 @@ import {
   appendIndexToJoinCommandByName,
   appendIndexToJoinCommandByPosition,
 } from './append_index_to_join_command';
-import type { LookupIndexPrivileges } from './use_lookup_index_privileges';
-import { useLookupIndexPrivileges } from './use_lookup_index_privileges';
+import type { IndexPrivileges } from './use_index_privileges';
+import { useIndexPrivileges } from './use_index_privileges';
 
 /**
  * monaco editor command ID for opening the lookup index flyout.
@@ -43,7 +43,7 @@ export interface IndexEditorCommandArgs {
   highestPrivilege?: string; // The highest user privilege for the given index ( create, edit, read )
 }
 
-async function isCurrentAppSupported(
+export async function isCurrentAppSupported(
   currentAppId$: ApplicationStart['currentAppId$'] | undefined
 ): Promise<boolean> {
   const currentApp = await firstValueFrom(currentAppId$ ?? of(undefined));
@@ -56,7 +56,7 @@ async function isCurrentAppSupported(
 export function getMonacoCommandString(
   indexName: string,
   isExistingIndex: boolean,
-  indexPrivileges: LookupIndexPrivileges,
+  indexPrivileges: IndexPrivileges,
   isClosedIndex?: boolean
 ): string | undefined {
   if (isClosedIndex) {
@@ -108,11 +108,11 @@ const DEBOUNCE_OPTIONS_PRIVILEGE_CHECK = { wait: 300, leading: true, trailing: f
 /**
  * Hook to determine if the current user has the necessary privileges to create a lookup index.
  */
-export const useCanCreateLookupIndex = () => {
+export const useCanCreateIndex = () => {
   const {
     services: { application },
   } = useKibana<ESQLEditorDeps>();
-  const { getPermissions } = useLookupIndexPrivileges();
+  const { getPermissions } = useIndexPrivileges();
 
   const { run } = useDebounceFn(async (indexName?: string) => {
     if ((await isCurrentAppSupported(application?.currentAppId$)) === false) {
@@ -148,13 +148,13 @@ export const useLookupIndexCommand = (
   query: AggregateQuery,
   onIndexCreated: (resultQuery: string) => Promise<void>,
   onNewFieldsAddedToIndex?: (indexName: string) => void,
-  onOpenIndexInDiscover?: EditLookupIndexContentContext['onOpenIndexInDiscover']
+  onOpenIndexInDiscover?: EditIndexContentContext['onOpenIndexInDiscover']
 ) => {
   const { euiTheme } = useEuiTheme();
   const {
     services: { uiActions, application },
   } = useKibana<ESQLEditorDeps>();
-  const { getPermissions } = useLookupIndexPrivileges();
+  const { getPermissions } = useIndexPrivileges();
 
   const inQueryLookupIndices = useRef<string[]>([]);
   const decorationIdsRef = useRef<string[]>([]);
@@ -305,10 +305,11 @@ export const useLookupIndexCommand = (
       canEditIndex = true,
       triggerSource = 'esql_autocomplete'
     ) => {
-      await uiActions.executeTriggerActions('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID', {
+      await uiActions.executeTriggerActions('EDIT_INDEX_CONTENT_TRIGGER_ID', {
         indexName,
         doesIndexExist,
         canEditIndex,
+        indexMode: 'lookup',
         triggerSource,
         onClose: async ({
           indexName: resultIndexName,
@@ -323,7 +324,7 @@ export const useLookupIndexCommand = (
           );
         },
         onOpenIndexInDiscover,
-      } as EditLookupIndexContentContext);
+      } as EditIndexContentContext);
     },
     [onFlyoutClose, onOpenIndexInDiscover, uiActions]
   );
@@ -355,7 +356,7 @@ export const useLookupIndexCommand = (
 /**
  * Determines the highest privilege level.
  */
-function getHighestPrivilegeLevel(indexPrivileges: LookupIndexPrivileges): string {
+export function getHighestPrivilegeLevel(indexPrivileges: IndexPrivileges): string {
   const { canCreateIndex, canEditIndex, canReadIndex } = indexPrivileges;
 
   if (canCreateIndex) return 'create';

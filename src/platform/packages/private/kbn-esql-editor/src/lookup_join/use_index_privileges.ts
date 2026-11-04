@@ -11,39 +11,39 @@ import { useCallback, useRef } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 import { memoize } from 'lodash';
-import { LOOKUP_INDEX_PRIVILEGES_ROUTE } from '@kbn/esql-types';
+import { INDEX_EDITOR_PRIVILEGES_ROUTE } from '@kbn/esql-types';
 import { reportEsqlError } from '../report_error';
 import type { ESQLEditorDeps } from '../types';
 
-type IndexPrivileges = SecurityHasPrivilegesResponse['index'];
+type IndexPrivilegesResponse = SecurityHasPrivilegesResponse['index'];
 
 // By creating the cache at the module level, we ensure that all instances of the
-// useLookupIndexPrivileges hook share the same cache. This prevents duplicate API
+// useIndexPrivileges hook share the same cache. This prevents duplicate API
 // calls when the hook is used multiple times in the same component tree.
 // For later refactoring, we could introduce a context provider instead.
 const sharedCache = new Map();
 
 /** Helper to determine if a privilege is granted either globally (*) or for the specific index */
 const hasPrivilege = (
-  privileges: IndexPrivileges,
+  privileges: IndexPrivilegesResponse,
   index: string,
-  permission: keyof IndexPrivileges[string]
+  permission: keyof IndexPrivilegesResponse[string]
 ): boolean => !!(privileges['*']?.[permission] || privileges[index]?.[permission]);
 
-export interface LookupIndexPrivileges {
+export interface IndexPrivileges {
   canCreateIndex: boolean;
   canEditIndex: boolean;
   canReadIndex: boolean;
 }
 
-export const useLookupIndexPrivileges = () => {
+export const useIndexPrivileges = () => {
   const {
     services: { http },
   } = useKibana<ESQLEditorDeps>();
 
   const memoizedFetchPrivileges = useRef(
     memoize(
-      async (indexNames: string[]): Promise<IndexPrivileges> => {
+      async (indexNames: string[]): Promise<IndexPrivilegesResponse> => {
         const options =
           indexNames.length > 0
             ? {
@@ -53,9 +53,9 @@ export const useLookupIndexPrivileges = () => {
               }
             : {};
         try {
-          return await http!.get<IndexPrivileges>(LOOKUP_INDEX_PRIVILEGES_ROUTE, options);
+          return await http!.get<IndexPrivilegesResponse>(INDEX_EDITOR_PRIVILEGES_ROUTE, options);
         } catch (error) {
-          reportEsqlError(error, { errorType: 'LookupIndexPrivilegesFetch' });
+          reportEsqlError(error, { errorType: 'IndexPrivilegesFetch' });
           return {};
         }
       },
@@ -76,7 +76,7 @@ export const useLookupIndexPrivileges = () => {
         canReadIndex: hasPrivilege(privileges, indexName, 'read'),
       };
       return acc;
-    }, {} as Record<string, LookupIndexPrivileges>);
+    }, {} as Record<string, IndexPrivileges>);
 
     return permissions;
   }, []);

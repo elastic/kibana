@@ -46,7 +46,7 @@ import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { QuerySource } from '@kbn/esql-types';
 import { DEFAULT_HISTOGRAM_BAR_TARGET } from '@kbn/data-service';
-import { useLookupIndexCommand } from './lookup_join';
+import { useFromIndexCommand, useLookupIndexCommand } from './lookup_join';
 import { useCommentToEsql, useGhostLineHint, useVisorNlToEsql } from './comment_to_esql';
 import { useSuggestFix } from './suggest_fix/use_suggest_fix';
 import { useEditorAiStyle } from './editor_ai.styles';
@@ -766,6 +766,17 @@ const ESQLEditorInternal = function ESQLEditor({
     onOpenQueryInNewTab
   );
 
+  const { fromIndexBadgeStyle, addFromIndicesDecorator } = useFromIndexCommand(
+    editorRef,
+    editorModel,
+    esqlCallbacks.getSources,
+    query,
+    onLookupIndexCreate,
+    onNewFieldsAddedToLookupIndex,
+    onOpenQueryInNewTab,
+    effectiveProjectRouting
+  );
+
   const {
     esqlDepsByModelUri,
     suggestionProvider,
@@ -804,6 +815,7 @@ const ESQLEditorInternal = function ESQLEditor({
       <Global
         styles={css`
           ${lookupIndexBadgeStyle}
+          ${fromIndexBadgeStyle}
           ${sourcesBadgeStyle}
           ${ghostLineHintStyle}
           ${editorAiStyle}
@@ -888,6 +900,7 @@ const ESQLEditorInternal = function ESQLEditor({
                       getEditorMessages: () => editorMessagesRef.current,
                     });
                     await addLookupIndicesDecorator();
+                    await addFromIndicesDecorator();
                     if (enableResourceBrowser) {
                       addSourcesDecorator();
                     }
@@ -998,6 +1011,7 @@ const ESQLEditorInternal = function ESQLEditor({
                   const modelContentDisposable = editor.onDidChangeModelContent(async () => {
                     trackInputLatencyOnKeystroke(editor.getValue() ?? '');
                     await addLookupIndicesDecorator();
+                    await addFromIndicesDecorator();
                     if (enableResourceBrowser) {
                       addSourcesDecorator();
                     }

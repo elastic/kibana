@@ -24,22 +24,28 @@ import {
   type EuiDataGridRefProps,
 } from '@kbn/unified-data-table';
 import type { RestorableStateProviderApi } from '@kbn/restorable-state';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { difference, intersection, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { getColumnHeaderRenderer } from './grid_custom_renderers/column_header_renderer';
-import type { EditLookupIndexContentContext } from '../types';
+import {
+  EditingColumnIndexContext,
+  getColumnHeaderRenderer,
+} from './grid_custom_renderers/column_header_renderer';
+import type { EditIndexContentContext } from '../types';
 import { type KibanaContextExtra } from '../types';
 import { getCellValueRenderer } from './grid_custom_renderers/cell_value_renderer';
 import { getValueInputPopover } from './grid_custom_renderers/value_input_popover';
 import { getAddRowControl } from './grid_custom_renderers/add_row_control';
 import { getGridToolbar } from './grid_custom_renderers/grid_toolbar';
 import { getAddColumnControl } from './grid_custom_renderers/add_column_control';
+import { FieldsSelector } from './fields_selector';
+import { getRenderedColumns } from './rendered_columns';
+import { isPlaceholderColumn } from '../utils';
 
 interface ESQLDataGridProps {
   rows: DataTableRecord[];
@@ -51,12 +57,17 @@ interface ESQLDataGridProps {
   initialRowHeight?: number;
   controlColumnIds?: string[];
   totalHits?: number;
-  onOpenIndexInDiscover: EditLookupIndexContentContext['onOpenIndexInDiscover'];
+  onOpenIndexInDiscover: EditIndexContentContext['onOpenIndexInDiscover'];
 }
 
 const DEFAULT_INITIAL_ROW_HEIGHT = 1;
 const DEFAULT_ROWS_PER_PAGE = 50;
 const ROWS_PER_PAGE_OPTIONS = [25, 50, 100];
+
+// Cap the number of columns shown by default. EuiDataGrid virtualizes body cells but renders one
+// header cell per column, so displaying every field of a wide index freezes the browser. Hidden
+// columns remain reachable through the Fields selector in the toolbar.
+const MAX_DEFAULT_VISIBLE_COLUMNS = 50;
 
 const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const { euiTheme } = useEuiTheme();
@@ -80,41 +91,55 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
 
   const isFetching = useObservable(indexUpdateService.isFetching$, false);
   const sortOrder = useObservable(indexUpdateService.sortOrder$, []);
+  const loadedRowsAreCapped = useObservable(indexUpdateService.loadedRowsAreCapped$, false);
+  const totalDocsCount = useObservable(indexUpdateService.totalDocsCount$, undefined);
+  const readOnlyColumns = useObservable(indexUpdateService.readOnlyColumns$, new Set<string>());
 
-  const [activeColumns, setActiveColumns] = useState<string[]>(
-    (props.initialColumns || props.columns).map((c) => c.name)
+  const isColumnReadOnly = useCallback(
+    (columnName: string) => readOnlyColumns.has(columnName),
+    [readOnlyColumns]
+  );
+
+  const [activeColumns, setActiveColumns] = useState<string[]>(() =>
+    (props.initialColumns || props.columns).map((c) => c.name).slice(0, MAX_DEFAULT_VISIBLE_COLUMNS)
   );
 
   const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
 
+  // Real (non-placeholder) column names the grid has already accounted for. Columns present at
+  // mount seed this set so the default cap is respected; columns that appear later (fields the user
+  // adds) are revealed once and then behave like any other column, so they can be hidden again.
+  const [seenColumnNames] = useState(
+    () => new Set(props.columns.filter((c) => !isPlaceholderColumn(c.name)).map((c) => c.name))
+  );
+
   // These are the columns that are currently rendered in the grid.
   // The columns data is taken from the props.columns. It has all the available columns, including placeholders.
   // The order of the columns is determined by the activeColumns state.
-  const renderedColumns = useMemo(() => {
-    const currentColumnNames = props.columns.map((c) => c.name);
-
-    // Order the columns based on the activeColumns
-    const preservedOrder = intersection(activeColumns, currentColumnNames);
-
-    // Identify the new columns
-    const newColumns = difference(currentColumnNames, preservedOrder);
-
-    // We need to place the new columns, (the ones not present in activeColumns) at their original index.
-    if (newColumns.length > 0) {
-      newColumns.forEach((newColumn) => {
-        const newColumnIndex = currentColumnNames.findIndex((col) => col === newColumn);
-        // if there is a new column, we added at it original index
-        preservedOrder.splice(newColumnIndex, 0, newColumn);
-      });
-    }
-
-    return preservedOrder;
-  }, [props.columns, activeColumns]);
+  const renderedColumns = useMemo(
+    () =>
+      getRenderedColumns({
+        currentColumnNames: props.columns.map((c) => c.name),
+        activeColumns,
+        seenColumnNames,
+      }),
+    [props.columns, activeColumns, seenColumnNames]
+  );
 
   // We need to keep active columns in sync with rendered columns to not lose the user defined order.
   if (!isEqual(activeColumns, renderedColumns)) {
     setActiveColumns(renderedColumns);
   }
+
+  // Remember real columns once they have been accounted for, so that hiding a previously revealed
+  // field (e.g. one the user added and saved) is not undone by the auto-reveal above.
+  useEffect(() => {
+    props.columns.forEach((column) => {
+      if (!isPlaceholderColumn(column.name)) {
+        seenColumnNames.add(column.name);
+      }
+    });
+  }, [props.columns, seenColumnNames]);
 
   const services = useMemo(() => {
     return {
@@ -175,20 +200,34 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     return getCellValueRenderer(rows, dataTableRef, indexUpdateService.canEditIndex);
   }, [rows, indexUpdateService.canEditIndex]);
 
+  // Read-only columns (e.g. runtime fields) reuse the cell renderer with editing disabled, so their
+  // values still render but the cell exposes no edit affordance.
+  const ReadOnlyCellValueRenderer = useMemo(() => {
+    return getCellValueRenderer(rows, dataTableRef, false);
+  }, [rows]);
+
   const externalCustomRenderers: CustomCellRenderer = useMemo(() => {
     return renderedColumns.reduce((acc, columnId) => {
-      acc[columnId] = CellValueRenderer;
+      acc[columnId] = isColumnReadOnly(columnId) ? ReadOnlyCellValueRenderer : CellValueRenderer;
       return acc;
     }, {} as CustomCellRenderer);
-  }, [CellValueRenderer, renderedColumns]);
+  }, [CellValueRenderer, ReadOnlyCellValueRenderer, renderedColumns, isColumnReadOnly]);
+
+  // Index column meta by id for O(1) lookups while building the header config below,
+  // keeping that build linear in the number of columns.
+  const columnMetaById = useMemo(
+    () => new Map(props.columns.map((column) => [column.id, column.meta])),
+    [props.columns]
+  );
 
   // We render an editable header for columns that are not saved in the index.
+  // Edit-mode state is provided reactively via EditingColumnIndexContext so that focusing a
+  // single column does not rebuild this configuration for every column.
   const customGridColumnsConfiguration = useMemo<CustomGridColumnsConfiguration>(() => {
     return renderedColumns.reduce<CustomGridColumnsConfiguration>(
       (acc, columnName, columnIndex) => {
         const isSavedColumn = !!props.dataView.fields.getByName(columnName);
-        const editMode = editingColumnIndex === columnIndex;
-        const columnMeta = props.columns.find(({ id }) => id === columnName)?.meta;
+        const columnMeta = columnMetaById.get(columnName);
         const columnType = columnMeta?.esType ?? columnMeta?.type;
         const isUnsupportedESQLType = columnMeta?.type === KBN_FIELD_TYPES.UNKNOWN;
         acc[columnName] = memoize(
@@ -198,7 +237,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
             columnIndex,
             isSavedColumn,
             isUnsupportedESQLType,
-            editMode,
+            isColumnReadOnly(columnName),
             setEditingColumnIndex,
             indexUpdateService,
             indexEditorTelemetryService
@@ -212,8 +251,8 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   }, [
     renderedColumns,
     props.dataView.fields,
-    editingColumnIndex,
-    props.columns,
+    columnMetaById,
+    isColumnReadOnly,
     indexUpdateService,
     indexEditorTelemetryService,
   ]);
@@ -239,6 +278,25 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     ];
   }, [indexUpdateService]);
 
+  // Columns the user can toggle in the Fields selector (placeholders are excluded as they are the
+  // inline "add a field" headers, not real fields).
+  const selectableColumns = useMemo(
+    () => props.columns.filter((column) => !isPlaceholderColumn(column.name)),
+    [props.columns]
+  );
+  const visibleSelectableColumns = useMemo(
+    () => renderedColumns.filter((name) => !isPlaceholderColumn(name)),
+    [renderedColumns]
+  );
+  const onFieldsSelectionChange = useCallback(
+    (nextVisibleColumns: string[]) => {
+      // Preserve placeholder columns; the selector only governs real field visibility.
+      const placeholders = renderedColumns.filter(isPlaceholderColumn);
+      setActiveColumns([...nextVisibleColumns, ...placeholders]);
+    },
+    [renderedColumns]
+  );
+
   const gridToolbar = useMemo(() => {
     // Count all rows with at least one field (to avoid counting empty rows)
     const rowsCount = rows.reduce((acc, row) => {
@@ -246,9 +304,26 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     }, 0);
     return getGridToolbar({
       rowsCount,
+      isCapped: loadedRowsAreCapped,
+      totalDocsCount,
       onOpenIndexInDiscover: props.onOpenIndexInDiscover,
+      fieldsSelector: (
+        <FieldsSelector
+          columns={selectableColumns}
+          visibleColumns={visibleSelectableColumns}
+          onChange={onFieldsSelectionChange}
+        />
+      ),
     });
-  }, [props.onOpenIndexInDiscover, rows]);
+  }, [
+    props.onOpenIndexInDiscover,
+    rows,
+    loadedRowsAreCapped,
+    totalDocsCount,
+    selectableColumns,
+    visibleSelectableColumns,
+    onFieldsSelectionChange,
+  ]);
 
   const trailingControlColumns = useMemo(() => {
     return [getAddColumnControl(indexEditorTelemetryService)];
@@ -259,48 +334,51 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   }, [indexUpdateService, dataTableRef]);
 
   return (
-    <UnifiedDataTable
-      ref={dataTableRef}
-      customGridColumnsConfiguration={customGridColumnsConfiguration}
-      trailingControlColumns={trailingControlColumns}
-      rowAdditionalLeadingControls={leadingControlColumns}
-      columns={renderedColumns}
-      rows={rows}
-      dataSource={props.dataSource}
-      services={services}
-      enableInTableSearch={false}
-      showKeyboardShortcuts={false}
-      externalCustomRenderers={externalCustomRenderers}
-      renderCellPopover={indexUpdateService.canEditIndex ? renderCellPopover : undefined}
-      isSortEnabled={true}
-      isInMemorySortEnabled={false}
-      showMultiFields={false}
-      showColumnTokens
-      showTimeCol
-      enableComparisonMode={false}
-      isPaginationEnabled
-      totalHits={props.totalHits}
-      rowsPerPageState={rowsPerPage}
-      rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
-      sampleSizeState={10000}
-      canDragAndDropColumns={false}
-      loadingState={isFetching ? DataLoadingState.loading : DataLoadingState.loaded}
-      dataView={props.dataView}
-      onSetColumns={setActiveColumns}
-      onUpdateRowsPerPage={setRowsPerPage}
-      sort={sortOrder}
-      onSort={onSort}
-      getRowIndicator={getRowIndicator}
-      ariaLabelledBy="lookupIndexDataGrid"
-      maxDocFieldsDisplayed={100}
-      showFullScreenButton={false}
-      configRowHeight={DEFAULT_INITIAL_ROW_HEIGHT}
-      controlColumnIds={props.controlColumnIds}
-      customBulkActions={bulkActions}
-      rowLineHeightOverride={euiTheme.size.xl}
-      renderCustomToolbar={gridToolbar}
-      css={styles}
-    />
+    <EditingColumnIndexContext.Provider value={editingColumnIndex}>
+      <UnifiedDataTable
+        ref={dataTableRef}
+        customGridColumnsConfiguration={customGridColumnsConfiguration}
+        trailingControlColumns={trailingControlColumns}
+        rowAdditionalLeadingControls={leadingControlColumns}
+        columns={renderedColumns}
+        rows={rows}
+        dataSource={props.dataSource}
+        services={services}
+        enableInTableSearch={false}
+        showKeyboardShortcuts={false}
+        externalCustomRenderers={externalCustomRenderers}
+        renderCellPopover={indexUpdateService.canEditIndex ? renderCellPopover : undefined}
+        isSortEnabled={true}
+        isInMemorySortEnabled={false}
+        showMultiFields={false}
+        showColumnTokens
+        showTimeCol={false}
+        enableComparisonMode={false}
+        isPaginationEnabled
+        paginationMode="infinite"
+        totalHits={props.totalHits}
+        rowsPerPageState={rowsPerPage}
+        rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
+        sampleSizeState={10000}
+        canDragAndDropColumns={false}
+        loadingState={isFetching ? DataLoadingState.loading : DataLoadingState.loaded}
+        dataView={props.dataView}
+        onSetColumns={setActiveColumns}
+        onUpdateRowsPerPage={setRowsPerPage}
+        sort={sortOrder}
+        onSort={onSort}
+        getRowIndicator={getRowIndicator}
+        ariaLabelledBy="indexEditorDataGrid"
+        maxDocFieldsDisplayed={100}
+        showFullScreenButton={false}
+        configRowHeight={DEFAULT_INITIAL_ROW_HEIGHT}
+        controlColumnIds={props.controlColumnIds}
+        customBulkActions={bulkActions}
+        rowLineHeightOverride={euiTheme.size.xl}
+        renderCustomToolbar={gridToolbar}
+        css={styles}
+      />
+    </EditingColumnIndexContext.Provider>
   );
 };
 

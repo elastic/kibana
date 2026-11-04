@@ -43,6 +43,30 @@ export interface ResolveIndexResponse {
   data_streams?: ResolveIndexResponseItem[];
 }
 
+/** The kind of resource a single name resolves to, used to decide if the index editor can edit it. */
+export type IndexEditorResolutionKind = 'index' | 'alias' | 'dataStream' | 'none';
+
+/** Normalized resolution of a single index name, returned by the index editor resolve route. */
+export interface IndexEditorResolution {
+  kind: IndexEditorResolutionKind;
+  /** The explicit index mode (e.g. `lookup`, `logsdb`, `time_series`); absent for standard indices. */
+  mode?: string;
+  closed: boolean;
+  frozen: boolean;
+  /** Whether the index mapping marks `_routing` as required, which the editor cannot satisfy. */
+  routingRequired: boolean;
+  /** Whether `_source` is disabled, so the editor cannot read documents to edit. */
+  sourceDisabled: boolean;
+  /** Whether `_source` is synthetic, so round-tripping edits could silently alter stored values. */
+  sourceSynthetic: boolean;
+  /**
+   * Names of runtime fields defined in the index mapping. Their values are computed at query time,
+   * so edits never persist; the editor renders these columns read-only rather than blocking the
+   * whole index.
+   */
+  runtimeFields: string[];
+}
+
 export interface EsqlView {
   name: string;
   query: string;

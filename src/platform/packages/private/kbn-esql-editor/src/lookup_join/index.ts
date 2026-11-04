@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useLookupIndexCommand, useCanCreateLookupIndex } from './use_lookup_index_editor';
+export { useLookupIndexCommand, useCanCreateIndex } from './use_lookup_index_editor';
+export { useFromIndexCommand } from './use_from_index_editor';

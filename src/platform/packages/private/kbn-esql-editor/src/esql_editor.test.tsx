@@ -55,10 +55,14 @@ jest.mock('monaco-promql', () => ({
 
 jest.mock('./lookup_join', () => {
   return {
-    useCanCreateLookupIndex: jest.fn().mockReturnValue(jest.fn().mockReturnValue(true)),
+    useCanCreateIndex: jest.fn().mockReturnValue(jest.fn().mockReturnValue(true)),
     useLookupIndexCommand: jest.fn().mockReturnValue({
       lookupIndexBadgeStyle: {} as SerializedStyles,
       addLookupIndicesDecorator: jest.fn(),
+    }),
+    useFromIndexCommand: jest.fn().mockReturnValue({
+      fromIndexBadgeStyle: {} as SerializedStyles,
+      addFromIndicesDecorator: jest.fn(),
     }),
   };
 });

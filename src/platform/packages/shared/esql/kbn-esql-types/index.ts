@@ -27,6 +27,8 @@ export {
   type IndicesAutocompleteResult,
   type IndexAutocompleteItem,
   type ResolveIndexResponse,
+  type IndexEditorResolution,
+  type IndexEditorResolutionKind,
   type ESQLSourceResult,
   type EsqlView,
   type EsqlViewsResult,
@@ -62,11 +64,12 @@ export {
   SOURCE_INFO_ROUTE,
   FIX_WITH_AI_COMMAND_ID,
   SOURCES_TYPES,
-  LOOKUP_INDEX_CREATE_ROUTE,
-  LOOKUP_INDEX_UPDATE_ROUTE,
-  LOOKUP_INDEX_RECREATE_ROUTE,
-  LOOKUP_INDEX_PRIVILEGES_ROUTE,
-  LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE,
+  INDEX_EDITOR_CREATE_ROUTE,
+  INDEX_EDITOR_UPDATE_ROUTE,
+  INDEX_EDITOR_RECREATE_ROUTE,
+  INDEX_EDITOR_PRIVILEGES_ROUTE,
+  INDEX_EDITOR_UPDATE_MAPPINGS_ROUTE,
+  INDEX_EDITOR_RESOLVE_ROUTE,
 } from './src/constants';
 
 export {

@@ -31,14 +31,14 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ErrorCallout } from './error_callout';
 import { UnsavedChangesModal } from './modals/unsaved_changes_modal';
-import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
+import type { EditIndexContentContext, FlyoutDeps } from '../types';
 import { FileDropzone } from './file_drop_zone';
 import { FlyoutFooter } from './flyout_footer';
 import { IndexName } from './index_name';
 
 export interface FlyoutContentProps {
   deps: FlyoutDeps;
-  props: EditLookupIndexContentContext & { onClose: () => void };
+  props: EditIndexContentContext & { onClose: () => void };
 }
 
 const DataGridLazy = withSuspense(lazy(() => import('./data_grid')));
@@ -46,6 +46,8 @@ const DataGridLazy = withSuspense(lazy(() => import('./data_grid')));
 export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
   const { coreStart, ...restDeps } = deps;
   const { euiTheme } = useEuiTheme();
+
+  const indexMode = deps.indexUpdateService.indexMode;
 
   const dataView = useObservable(deps.indexUpdateService.dataView$);
   const dataViewColumns = useObservable(deps.indexUpdateService.dataTableColumns$);
@@ -75,8 +77,8 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
         false,
         true,
         existingIndex,
-        { index: { mode: 'lookup' } },
-        'lookup-index-editor'
+        indexMode === 'lookup' ? { index: { mode: 'lookup' } } : undefined,
+        'index-editor'
       );
     },
     [
@@ -86,6 +88,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
       deps.data,
       deps.fileUpload,
       coreStart.application.capabilities,
+      indexMode,
     ]
   );
 
@@ -134,7 +137,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
                   <FormattedMessage
                     id="indexEditor.flyout.headerDescription"
                     defaultMessage={
-                      'You can create lookup indices manually, by uploading data from a file, or by using the Elasticsearch API.'
+                      'You can create indices manually, by uploading data from a file, or by using the Elasticsearch API.'
                     }
                   />
                 </EuiText>
@@ -145,7 +148,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
                     defaultMessage: 'Technical preview',
                   })}
                   content={i18n.translate('indexEditor.flyout.experimentalLabel.content', {
-                    defaultMessage: 'The lookup index editor is currently in technical preview.',
+                    defaultMessage: 'The index editor is currently in technical preview.',
                   })}
                 >
                   <EuiBetaBadge

@@ -8,7 +8,7 @@
  */
 
 import type { BehaviorSubject } from 'rxjs';
-import { firstValueFrom } from 'rxjs';
+import { filter, firstValueFrom, of } from 'rxjs';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -24,7 +24,12 @@ import {
 import { IndexEditorTelemetryService } from '../telemetry/telemetry_service';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
-import { LOOKUP_INDEX_RECREATE_ROUTE } from '@kbn/esql-types';
+import {
+  INDEX_EDITOR_CREATE_ROUTE,
+  INDEX_EDITOR_RECREATE_ROUTE,
+  INDEX_EDITOR_RESOLVE_ROUTE,
+  type IndexEditorResolution,
+} from '@kbn/esql-types';
 
 jest.mock('@kbn/esql-utils', () => {
   const actual = jest.requireActual('@kbn/esql-utils');
@@ -80,7 +85,7 @@ describe('IndexUpdateService', () => {
       const query = await firstValueFrom(service.esqlQuery$);
 
       expect(query.toLowerCase()).toBe(
-        'from "my-index" metadata _id, _source | where kql("200") | limit 1000 | sort @timestamp desc'
+        'from "my-index" metadata _id, _source | where kql("200") | limit 5000 | sort @timestamp desc'
       );
     });
 
@@ -90,7 +95,7 @@ describe('IndexUpdateService', () => {
 
       const query = await firstValueFrom(service.esqlDiscoverQuery$);
 
-      expect(query).toBe('FROM "logs-*" | WHERE KQL("host.name: \\"test\\"") | LIMIT 1000');
+      expect(query).toBe('FROM "logs-*" | WHERE KQL("host.name: \\"test\\"") | LIMIT 5000');
     });
   });
 
@@ -271,8 +276,10 @@ describe('IndexUpdateService', () => {
 
       await service.resetIndexMapping();
 
-      // Verify the recreate endpoint was called
-      expect(http.post).toHaveBeenCalledWith(`${LOOKUP_INDEX_RECREATE_ROUTE}/my-index`);
+      // Verify the recreate endpoint was called with the index mode
+      expect(http.post).toHaveBeenCalledWith(`${INDEX_EDITOR_RECREATE_ROUTE}/my-index`, {
+        body: JSON.stringify({ mode: 'standard' }),
+      });
 
       // Verify unsaved changes were discarded
       const hasChangesAfterReset = await firstValueFrom(service.hasUnsavedChanges$);
@@ -290,6 +297,160 @@ describe('IndexUpdateService', () => {
       // Verify unsaved changes were discarded
       const hasChangesAfterReset = await firstValueFrom(service.hasUnsavedChanges$);
       expect(hasChangesAfterReset).toBe(false);
+    });
+  });
+
+  describe('createIndex', () => {
+    beforeEach(() => {
+      (http.post as jest.Mock).mockResolvedValue({
+        errors: false,
+        items: [],
+        took: 0,
+      } satisfies BulkResponse);
+    });
+
+    it('creates a standard index by posting the standard mode to the create endpoint', async () => {
+      service.setIndexName('my-index');
+
+      await service.createIndex({ exitAfterFlush: false });
+
+      expect(http.post).toHaveBeenCalledWith(`${INDEX_EDITOR_CREATE_ROUTE}/my-index`, {
+        body: JSON.stringify({ mode: 'standard' }),
+      });
+    });
+
+    it('creates a lookup index by posting the lookup mode to the create endpoint', async () => {
+      const lookupService = new IndexUpdateService(
+        http,
+        data,
+        notifications,
+        indexEditorTelemetryService,
+        true,
+        'lookup'
+      );
+      lookupService.setIndexName('my-lookup-index');
+
+      await lookupService.createIndex({ exitAfterFlush: false });
+
+      expect(http.post).toHaveBeenCalledWith(`${INDEX_EDITOR_CREATE_ROUTE}/my-lookup-index`, {
+        body: JSON.stringify({ mode: 'lookup' }),
+      });
+
+      lookupService.destroy();
+    });
+  });
+
+  describe('fetchIndexResolution', () => {
+    it('resolves the index name against the resolve route', async () => {
+      const resolution: IndexEditorResolution = {
+        kind: 'index',
+        mode: 'lookup',
+        closed: false,
+        frozen: false,
+        routingRequired: false,
+        sourceDisabled: false,
+        sourceSynthetic: false,
+        runtimeFields: [],
+      };
+      (http.get as jest.Mock).mockResolvedValue(resolution);
+
+      await expect(service.fetchIndexResolution('my-index')).resolves.toEqual(resolution);
+
+      expect(http.get).toHaveBeenCalledWith(`${INDEX_EDITOR_RESOLVE_ROUTE}/my-index`);
+    });
+
+    it('encodes the index name in the route', async () => {
+      (http.get as jest.Mock).mockResolvedValue({ kind: 'none', closed: false, frozen: false });
+
+      await service.fetchIndexResolution('my index/with:chars');
+
+      expect(http.get).toHaveBeenCalledWith(
+        `${INDEX_EDITOR_RESOLVE_ROUTE}/my%20index%2Fwith%3Achars`
+      );
+    });
+
+    it('returns null when resolution fails so the editor can fall back', async () => {
+      (http.get as jest.Mock).mockRejectedValue(new Error('boom'));
+
+      await expect(service.fetchIndexResolution('my-index')).resolves.toBeNull();
+    });
+  });
+
+  describe('readOnlyColumns', () => {
+    it('starts with no read-only columns', async () => {
+      await expect(firstValueFrom(service.readOnlyColumns$)).resolves.toEqual(new Set());
+    });
+
+    it('exposes the columns set as read-only', async () => {
+      service.setReadOnlyColumns(['day_of_week', 'customer.full_name']);
+
+      await expect(firstValueFrom(service.readOnlyColumns$)).resolves.toEqual(
+        new Set(['day_of_week', 'customer.full_name'])
+      );
+    });
+
+    it('replaces the previous read-only columns on each call', async () => {
+      service.setReadOnlyColumns(['a']);
+      service.setReadOnlyColumns(['b', 'c']);
+
+      await expect(firstValueFrom(service.readOnlyColumns$)).resolves.toEqual(new Set(['b', 'c']));
+    });
+  });
+
+  describe('capped results', () => {
+    const CAP = 5000;
+
+    const mockSearch = (docValues: unknown[][], totalCount?: number) => {
+      (data.search.search as jest.Mock).mockImplementation(
+        ({ params }: { params: { query: string } }) => {
+          if (params.query.includes('COUNT(*)')) {
+            return of({
+              rawResponse: { columns: [{ name: 'total', type: 'long' }], values: [[totalCount]] },
+            });
+          }
+          return of({
+            rawResponse: { columns: [{ name: '_id', type: 'keyword' }], values: docValues },
+          });
+        }
+      );
+    };
+
+    it('flags capping and resolves the true total when a fetch hits the row cap', async () => {
+      const docValues = Array.from({ length: CAP }, (_, i) => [`id-${i}`]);
+      mockSearch(docValues, 73421);
+
+      service.setIndexName('big-index');
+      service.setIndexCreated(true);
+
+      const capped = await firstValueFrom(service.loadedRowsAreCapped$.pipe(filter(Boolean)));
+      expect(capped).toBe(true);
+
+      const total = await firstValueFrom(
+        service.totalDocsCount$.pipe(filter((v): v is number => v !== undefined))
+      );
+      expect(total).toBe(73421);
+
+      const countQueried = (data.search.search as jest.Mock).mock.calls.some(([request]) =>
+        request.params.query.includes('COUNT(*)')
+      );
+      expect(countQueried).toBe(true);
+    });
+
+    it('does not query a count when the results fit within the cap', async () => {
+      mockSearch([['a'], ['b']]);
+
+      service.setIndexName('small-index');
+      service.setIndexCreated(true);
+
+      await firstValueFrom(service.rows$.pipe(filter((rows) => rows.length === 2)));
+
+      expect(await firstValueFrom(service.loadedRowsAreCapped$)).toBe(false);
+      expect(await firstValueFrom(service.totalDocsCount$)).toBeUndefined();
+
+      const countQueried = (data.search.search as jest.Mock).mock.calls.some(([request]) =>
+        request.params.query.includes('COUNT(*)')
+      );
+      expect(countQueried).toBe(false);
     });
   });
 });

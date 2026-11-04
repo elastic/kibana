@@ -21,7 +21,7 @@ import {
   VISUALIZE_GEO_FIELD_TRIGGER,
   CONTROL_HOVER_TRIGGER_ID,
   CONTROL_MENU_TRIGGER,
-  EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID,
+  EDIT_INDEX_CONTENT_TRIGGER_ID,
   SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
   DISCOVER_CELL_ACTIONS_TRIGGER_ID,
   PANEL_BADGE_TRIGGER,
@@ -159,10 +159,10 @@ export const triggers: { [key: string]: Trigger } = {
       defaultMessage: 'A new action will appear in the control type menu',
     }),
   },
-  [EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID]: {
-    id: EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID,
-    title: 'Edit Lookup Index',
-    description: 'This trigger is used to edit the lookup index content.',
+  [EDIT_INDEX_CONTENT_TRIGGER_ID]: {
+    id: EDIT_INDEX_CONTENT_TRIGGER_ID,
+    title: 'Edit Index',
+    description: 'This trigger is used to edit the index content.',
   },
   [SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID]: {
     id: SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,

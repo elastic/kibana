@@ -49,6 +49,7 @@ dependsOn:
   - '@kbn/esql-resource-browser'
   - '@kbn/data-views-plugin'
   - '@kbn/cps'
+  - '@kbn/cps-common'
   - '@kbn/es-types'
   - '@kbn/ui-ai-components'
   - '@kbn/ui-callout'

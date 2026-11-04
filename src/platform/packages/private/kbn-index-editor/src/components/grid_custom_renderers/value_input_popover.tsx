@@ -20,7 +20,7 @@ import { getInputComponentForType } from '../value_inputs_factory';
 import { getCellValue, isPlaceholderColumn } from '../../utils';
 import type { IndexEditorTelemetryService } from '../../telemetry/telemetry_service';
 
-export type OnCellValueChange = (docId: string, update: any) => void;
+export type OnCellValueChange = (docId: string, update: Record<string, unknown>) => void;
 export const getValueInputPopover =
   ({
     rows,
@@ -28,17 +28,30 @@ export const getValueInputPopover =
     onValueChange,
     dataTableRef,
     telemetryService: telemetry,
+    disableSpreadsheetNavigation = false,
+    getDisplayValue,
   }: {
     rows: DataTableRecord[];
     columns: DatatableColumn[];
     onValueChange: OnCellValueChange;
     dataTableRef: RefObject<EuiDataGridRefProps>;
-    telemetryService: IndexEditorTelemetryService;
+    /** Optional telemetry sink. When omitted, interactions are not tracked. */
+    telemetryService?: IndexEditorTelemetryService;
+    /**
+     * When true, the Tab key only saves and closes the popover instead of moving to the next cell.
+     * Used by hosts (e.g. Discover) whose grids have leading control columns that would offset the
+     * spreadsheet-style column math this popover relies on.
+     */
+    disableSpreadsheetNavigation?: boolean;
+    // Resolves the value to seed the input with, letting hosts reopen a cell on its unsaved edit.
+    getDisplayValue?: (row: DataTableRecord, columnId: string) => unknown;
   }) =>
   ({ rowIndex, colIndex, columnId, cellContentsElement }: EuiDataGridCellPopoverElementProps) => {
     const row = rows[rowIndex];
     const docId = row.id as string;
-    const cellValue = getCellValue(row.flattened[columnId]) ?? '';
+    const cellValue =
+      getCellValue(getDisplayValue ? getDisplayValue(row, columnId) : row.flattened[columnId]) ??
+      '';
 
     const isPlaceholder = isPlaceholderColumn(columnId);
 
@@ -64,7 +77,7 @@ export const getValueInputPopover =
       (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
           if (error) {
-            telemetry.trackEditInteraction({
+            telemetry?.trackEditInteraction({
               actionType: 'edit_cell',
               failureReason: 'type',
             });
@@ -76,7 +89,7 @@ export const getValueInputPopover =
           event.preventDefault();
 
           if (error) {
-            telemetry.trackEditInteraction({
+            telemetry?.trackEditInteraction({
               actionType: 'edit_cell',
               failureReason: 'type',
             });
@@ -87,6 +100,10 @@ export const getValueInputPopover =
           if (!dataTable) return;
 
           dataTable.closeCellPopover();
+
+          if (disableSpreadsheetNavigation) {
+            return;
+          }
 
           // Calculate next cell position
           const nextColIndex = colIndex + 1;

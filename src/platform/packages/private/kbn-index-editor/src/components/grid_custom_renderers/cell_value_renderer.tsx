@@ -15,15 +15,23 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getCellValue } from '../../utils';
 
+/** How the editable cell popover is opened: a single click (default) or a double click. */
+export type CellEditTrigger = 'onClick' | 'onDoubleClick';
+
 export const getCellValueRenderer =
   (
     rows: DataTableRecord[],
     dataTableRef: RefObject<EuiDataGridRefProps>,
-    canEditIndex: boolean
+    canEditIndex: boolean,
+    trigger: CellEditTrigger = 'onClick',
+    // Resolves the value to display, letting hosts overlay unsaved edits. Defaults to the fetched value.
+    getDisplayValue?: (row: DataTableRecord, columnId: string) => unknown
   ): FunctionComponent<DataGridCellValueElementProps> =>
   ({ rowIndex, colIndex, columnId }) => {
     const row = rows[rowIndex];
-    const cellValue = getCellValue(row.flattened[columnId]);
+    const cellValue = getCellValue(
+      getDisplayValue ? getDisplayValue(row, columnId) : row.flattened[columnId]
+    );
 
     const onEditStartHandler = () => {
       dataTableRef.current?.openCellPopover({
@@ -31,6 +39,8 @@ export const getCellValueRenderer =
         colIndex,
       });
     };
+
+    const triggerHandler = canEditIndex ? { [trigger]: onEditStartHandler } : {};
 
     return (
       <EuiFlexGroup gutterSize="s" responsive={false} style={{ height: '100%', width: '100%' }}>
@@ -44,7 +54,7 @@ export const getCellValueRenderer =
               display: 'flex',
               alignItems: 'center',
             }}
-            onClick={canEditIndex ? onEditStartHandler : undefined}
+            {...triggerHandler}
             onKeyDown={
               canEditIndex
                 ? (e) => {

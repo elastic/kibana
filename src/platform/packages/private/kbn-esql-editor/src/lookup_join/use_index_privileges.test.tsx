@@ -10,11 +10,11 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { useLookupIndexPrivileges } from './use_lookup_index_privileges';
+import { useIndexPrivileges } from './use_index_privileges';
 import { coreMock } from '@kbn/core/public/mocks';
-import { LOOKUP_INDEX_PRIVILEGES_ROUTE } from '@kbn/esql-types';
+import { INDEX_EDITOR_PRIVILEGES_ROUTE } from '@kbn/esql-types';
 
-describe('useLookupIndexPrivileges', () => {
+describe('useIndexPrivileges', () => {
   const services = coreMock.createStart();
 
   const wrapper = ({ children }: { children: React.ReactNode }) => {
@@ -39,7 +39,7 @@ describe('useLookupIndexPrivileges', () => {
     };
     services.http.get.mockResolvedValue(mockPrivileges);
 
-    const { result } = renderHook(() => useLookupIndexPrivileges(), {
+    const { result } = renderHook(() => useIndexPrivileges(), {
       wrapper,
     });
 
@@ -48,7 +48,7 @@ describe('useLookupIndexPrivileges', () => {
       permissions = await result.current.getPermissions(indexNames);
     });
 
-    expect(services.http.get).toHaveBeenCalledWith(LOOKUP_INDEX_PRIVILEGES_ROUTE, {
+    expect(services.http.get).toHaveBeenCalledWith(INDEX_EDITOR_PRIVILEGES_ROUTE, {
       query: { indexName: 'index-1,index-2' },
     });
     expect(permissions).toEqual({
@@ -71,14 +71,14 @@ describe('useLookupIndexPrivileges', () => {
     };
     services.http.get.mockResolvedValue(mockPrivileges);
 
-    const { result } = renderHook(() => useLookupIndexPrivileges(), { wrapper });
+    const { result } = renderHook(() => useIndexPrivileges(), { wrapper });
 
     let permissions;
     await act(async () => {
       permissions = await result.current.getPermissions();
     });
 
-    expect(services.http.get).toHaveBeenCalledWith(LOOKUP_INDEX_PRIVILEGES_ROUTE, {});
+    expect(services.http.get).toHaveBeenCalledWith(INDEX_EDITOR_PRIVILEGES_ROUTE, {});
     expect(permissions).toEqual({
       '*': {
         canCreateIndex: false,
@@ -90,7 +90,7 @@ describe('useLookupIndexPrivileges', () => {
 
   it('should handle empty index names array', async () => {
     services.http.get.mockResolvedValue({});
-    const { result } = renderHook(() => useLookupIndexPrivileges(), { wrapper });
+    const { result } = renderHook(() => useIndexPrivileges(), { wrapper });
 
     let permissions;
     await act(async () => {
@@ -113,7 +113,7 @@ describe('useLookupIndexPrivileges', () => {
     };
     services.http.get.mockResolvedValue(mockPrivileges);
 
-    const { result } = renderHook(() => useLookupIndexPrivileges(), { wrapper });
+    const { result } = renderHook(() => useIndexPrivileges(), { wrapper });
 
     await act(async () => {
       await result.current.getPermissions(indexNames);
@@ -127,7 +127,7 @@ describe('useLookupIndexPrivileges', () => {
 
   it('should handle API errors gracefully', async () => {
     services.http.get.mockRejectedValue(new Error('API Error'));
-    const { result } = renderHook(() => useLookupIndexPrivileges(), { wrapper });
+    const { result } = renderHook(() => useIndexPrivileges(), { wrapper });
 
     let permissions;
     await act(async () => {

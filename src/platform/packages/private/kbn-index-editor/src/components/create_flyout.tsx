@@ -13,10 +13,10 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { FC } from 'react';
 import React, { Suspense, lazy } from 'react';
 import { combineLatest, first, skip } from 'rxjs';
-import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
+import type { EditIndexContentContext, FlyoutDeps } from '../types';
 import { isPlaceholderColumn } from '../utils';
 
-export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentContext) {
+export function createFlyout(deps: FlyoutDeps, props: EditIndexContentContext) {
   const { http, overlays, ...startServices } = deps.coreStart;
 
   const indexUpdateService = deps.indexUpdateService;
@@ -64,7 +64,7 @@ export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentCont
       startServices
     ),
     {
-      'data-test-subj': 'lookupIndexFlyout',
+      'data-test-subj': 'indexEditorFlyout',
       ownFocus: true,
       onClose: onFlyoutClose,
       size: 'l',

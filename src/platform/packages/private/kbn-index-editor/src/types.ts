@@ -22,11 +22,16 @@ import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import type { IndexUpdateService } from './services/index_update_service';
 import type { IndexEditorTelemetryService } from './telemetry/telemetry_service';
 
-export interface EditLookupIndexContentContext {
+/** Index mode the editor operates in. Only `lookup` sets an explicit ES index mode. */
+export type IndexEditorIndexMode = 'standard' | 'lookup';
+
+export interface EditIndexContentContext {
   indexName?: string;
   doesIndexExist: boolean;
   canEditIndex: boolean;
   triggerSource: string;
+  /** Index mode used when creating/recreating the index. Defaults to `standard`. */
+  indexMode?: IndexEditorIndexMode;
   onClose?: (result: {
     indexName: string | null;
     /** Indicates if the index was created */
@@ -37,7 +42,7 @@ export interface EditLookupIndexContentContext {
   onOpenIndexInDiscover?: (indexName: string, esqlQuery: string) => Promise<void>;
 }
 
-export interface EditLookupIndexFlyoutDeps {
+export interface EditIndexFlyoutDeps {
   coreStart: CoreStart;
   data: DataPublicPluginStart;
   uiActions: UiActionsStart;
@@ -47,7 +52,7 @@ export interface EditLookupIndexFlyoutDeps {
   kql: KqlPluginStart;
 }
 
-export type FlyoutDeps = EditLookupIndexFlyoutDeps & {
+export type FlyoutDeps = EditIndexFlyoutDeps & {
   storage: Storage;
   indexUpdateService: IndexUpdateService;
   indexEditorTelemetryService: IndexEditorTelemetryService;

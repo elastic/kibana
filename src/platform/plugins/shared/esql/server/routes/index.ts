@@ -18,7 +18,7 @@ import { registerGetViewsRoute } from './get_views';
 import { registerViewsManagementRoutes } from './views_management';
 import { registerGetDatasetsRoute } from './get_datasets';
 import { registerESQLExtensionsRoute } from './get_esql_extensions_route';
-import { registerLookupIndexRoutes } from './lookup_index';
+import { registerIndexEditorRoutes } from './index_editor';
 import { registerGetSourcesRoute } from './get_all_sources';
 import { registerGetTimeFieldRoute } from './get_timefield';
 import { registerGetSourceInfoRoute } from './get_source_info';
@@ -39,7 +39,7 @@ export const registerRoutes = (
   registerGetDatasetsRoute(router, initContext);
   registerESQLExtensionsRoute(router, extensionsRegistry, initContext);
   registerGetInferenceEndpointsRoute(router, initContext);
-  registerLookupIndexRoutes(router, initContext);
+  registerIndexEditorRoutes(router, initContext);
   registerGetSourcesRoute(router, initContext);
   registerGetTimeFieldRoute(router, initContext);
   registerGetSourceInfoRoute(router, initContext);

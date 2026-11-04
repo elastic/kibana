@@ -145,7 +145,7 @@ export const AddColumnPopover = ({
             defaultMessage: 'Select a field type',
           })}
           helpText={i18n.translate('indexEditor.columnHeaderEdit.fieldTypeHelpText', {
-            defaultMessage: `You won't be able to change the type after saving the lookup index.`,
+            defaultMessage: `You won't be able to change the type after saving the index.`,
           })}
         >
           <FieldSelect

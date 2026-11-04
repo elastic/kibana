@@ -31,12 +31,13 @@ export const NL_TO_ESQL_ROUTE = '/internal/esql/nl_to_esql';
 export const SUGGEST_FIX_ROUTE = '/internal/esql/suggest_fix';
 export const FIX_WITH_AI_COMMAND_ID = 'esql.fixWithAI';
 
-const LOOKUP_INDEX_ROUTE = '/internal/esql/lookup_index';
-export const LOOKUP_INDEX_CREATE_ROUTE = `${LOOKUP_INDEX_ROUTE}/create`;
-export const LOOKUP_INDEX_UPDATE_ROUTE = `${LOOKUP_INDEX_ROUTE}/update`;
-export const LOOKUP_INDEX_RECREATE_ROUTE = `${LOOKUP_INDEX_ROUTE}/recreate`;
-export const LOOKUP_INDEX_PRIVILEGES_ROUTE = `${LOOKUP_INDEX_ROUTE}/privileges`;
-export const LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE = `${LOOKUP_INDEX_ROUTE}/update_mappings`;
+const INDEX_EDITOR_ROUTE = '/internal/esql/index_editor';
+export const INDEX_EDITOR_CREATE_ROUTE = `${INDEX_EDITOR_ROUTE}/create`;
+export const INDEX_EDITOR_UPDATE_ROUTE = `${INDEX_EDITOR_ROUTE}/update`;
+export const INDEX_EDITOR_RECREATE_ROUTE = `${INDEX_EDITOR_ROUTE}/recreate`;
+export const INDEX_EDITOR_PRIVILEGES_ROUTE = `${INDEX_EDITOR_ROUTE}/privileges`;
+export const INDEX_EDITOR_UPDATE_MAPPINGS_ROUTE = `${INDEX_EDITOR_ROUTE}/update_mappings`;
+export const INDEX_EDITOR_RESOLVE_ROUTE = `${INDEX_EDITOR_ROUTE}/resolve`;
 
 export enum SOURCES_TYPES {
   INDEX = 'Index',

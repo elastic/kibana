@@ -12,7 +12,7 @@ import { ROW_PLACEHOLDER_PREFIX } from '../constants';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { BulkOperationContainer, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import { BULK_UPDATE_CHUNK_SIZE, bulkUpdate } from './bulk_update_service';
-import { LOOKUP_INDEX_UPDATE_ROUTE } from '@kbn/esql-types';
+import { INDEX_EDITOR_UPDATE_ROUTE } from '@kbn/esql-types';
 import { times } from 'lodash';
 
 const INDEX_NAME = 'my-index';
@@ -49,7 +49,7 @@ describe('Bulk update', () => {
 
     expect(http.post).toHaveBeenCalledTimes(1);
     const [url, options] = (http.post as jest.Mock).mock.calls[0];
-    expect(url).toBe(`${LOOKUP_INDEX_UPDATE_ROUTE}/my-index`);
+    expect(url).toBe(`${INDEX_EDITOR_UPDATE_ROUTE}/my-index`);
 
     const body = JSON.parse(options.body);
     const operations: BulkOperationContainer[] = body.operations;

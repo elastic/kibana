@@ -13,7 +13,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import type { Query } from '@kbn/es-query';
-import type { EditLookupIndexContentContext, KibanaContextExtra } from '../types';
+import type { EditIndexContentContext, KibanaContextExtra } from '../types';
 
 const openInDiscoverTooltip = i18n.translate('indexEditor.toolbar.openInDiscoverTooltip', {
   defaultMessage: 'Open in Discover',
@@ -22,7 +22,7 @@ const openInDiscoverTooltip = i18n.translate('indexEditor.toolbar.openInDiscover
 export const QueryBar = ({
   onOpenIndexInDiscover,
 }: {
-  onOpenIndexInDiscover?: EditLookupIndexContentContext['onOpenIndexInDiscover'];
+  onOpenIndexInDiscover?: EditIndexContentContext['onOpenIndexInDiscover'];
 }) => {
   const {
     services: { share, data, indexUpdateService, indexEditorTelemetryService, kql },

@@ -8,7 +8,7 @@
  */
 
 import type { BulkRequest, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
-import { LOOKUP_INDEX_UPDATE_ROUTE } from '@kbn/esql-types';
+import { INDEX_EDITOR_UPDATE_ROUTE } from '@kbn/esql-types';
 import { groupBy, chunk } from 'lodash';
 import type { HttpStart } from '@kbn/core/public';
 import { ROW_PLACEHOLDER_PREFIX } from '../constants';
@@ -89,7 +89,7 @@ export async function bulkUpdate(
     });
 
     const response = await http.post<BulkResponse>(
-      `${LOOKUP_INDEX_UPDATE_ROUTE}/${encodeURIComponent(indexName)}`,
+      `${INDEX_EDITOR_UPDATE_ROUTE}/${encodeURIComponent(indexName)}`,
       {
         body,
       }
