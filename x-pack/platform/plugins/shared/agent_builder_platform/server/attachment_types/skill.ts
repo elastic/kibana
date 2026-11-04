@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type {
   AttachmentTypeDefinition,
   SurfaceComposition,
@@ -20,7 +19,7 @@ import {
   type SkillAttachmentData,
 } from '../../common/attachments';
 
-/** Agent Builder's skills page, which the browser card's "Edit in Management" opens. */
+/** Agent Builder's skills page in Management. */
 const SKILLS_MANAGE_PATH = '/manage/skills';
 
 /**
@@ -80,48 +79,25 @@ export const createSkillAttachmentType = (): AttachmentTypeDefinition<
       },
     };
   },
-  toSurfaceComposition: (attachment) =>
-    toSkillSurfaceComposition(
-      attachment.data.skill,
-      isCommitted(attachment) ? attachment.origin : undefined
-    ),
+  toSurfaceComposition: ({ data: { skill } }) => toSkillSurfaceComposition(skill),
   getAgentDescription: () => {
     return `A \`skill\` attachment is a versioned draft of an Agent Builder skill. When \`mode\` is "create" the card shows a "Create" button (POST). When \`mode\` is "edit" the card shows an "Edit in Management" link if the skill has no unsaved changes, or a "Save changes" button (PUT) once edits are present. \`skill.id\` always identifies the persisted skill. In both cases \`skill\` holds the full content including \`id\`. Render it inline by emitting <render_attachment id="ATTACHMENT_ID" />. Emit at most one render per round — if you call \`patch_skill\` after loading or proposing the skill, hold the render until after the final patch so the user sees a single up-to-date card. Do not invent attachment ids — only render ids returned by propose_skill, load_skill_for_editing, or patch_skill.`;
   },
 });
 
 /**
- * Whether the attachment is the latest version of a skill persisted with no draft changes since,
- * when the browser card offers "Edit in Management" instead of "Save changes".
+ * The skill's description, tools and files, and its content as code, with a link to the skills in
+ * Management. Not to the skill's own page, which doesn't exist until the skill is saved and shows
+ * the saved version, not the one in the conversation.
  */
-const isCommitted = ({
-  origin,
-  versionData,
-}: Attachment<typeof SKILL_ATTACHMENT_TYPE, SkillAttachmentData>): boolean => {
-  if (!origin || !versionData?.originSyncedAt) {
-    return false;
-  }
-
-  const { version, versionCount, createdAt, originSyncedAt } = versionData;
-
-  return version === versionCount && createdAt <= originSyncedAt;
-};
-
-/**
- * The skill's description, tools and files, and its content as code. With the `origin` of a
- * committed skill, it links to its page in Management, as the browser card does.
- */
-const toSkillSurfaceComposition = (
-  {
-    id,
-    name,
-    description,
-    content,
-    tool_ids: toolIds,
-    referenced_content: referencedContent,
-  }: SkillAttachmentData['skill'],
-  origin: string | undefined
-): SurfaceComposition => {
+const toSkillSurfaceComposition = ({
+  id,
+  name,
+  description,
+  content,
+  tool_ids: toolIds,
+  referenced_content: referencedContent,
+}: SkillAttachmentData['skill']): SurfaceComposition => {
   const files = (referencedContent ?? []).map(
     ({ relativePath, name: fileName }) => `${relativePath}/${fileName}.md`
   );
@@ -175,19 +151,14 @@ const toSkillSurfaceComposition = (
           },
         ]
       : []),
-    ...(origin
-      ? [
-          {
-            type: 'link' as const,
-            label: i18n.translate(
-              'xpack.agentBuilderPlatform.attachments.skill.surface.editInManagement',
-              { defaultMessage: 'Edit in Management' }
-            ),
-            app: AGENT_BUILDER_APP_ID,
-            path: `${SKILLS_MANAGE_PATH}/${encodeURIComponent(origin)}`,
-          },
-        ]
-      : []),
+    {
+      type: 'link',
+      label: i18n.translate('xpack.agentBuilderPlatform.attachments.skill.surface.manageSkills', {
+        defaultMessage: 'Manage skills',
+      }),
+      app: AGENT_BUILDER_APP_ID,
+      path: SKILLS_MANAGE_PATH,
+    },
   ];
 
   return { type: 'view', title: name, subtitle: id, body };

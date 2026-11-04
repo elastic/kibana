@@ -286,15 +286,7 @@ export const getVersion = <T = unknown>(
  * The attachment as it was at one of its versions, the shape attachment types receive.
  */
 export const toAttachment = <Type extends string, DataType>(
-  {
-    id,
-    type,
-    description,
-    hidden,
-    origin,
-    origin_snapshot_at: originSyncedAt,
-    versions,
-  }: VersionedAttachment<Type, DataType>,
+  { id, type, description, hidden, origin, versions }: VersionedAttachment<Type, DataType>,
   { version, data, created_at: createdAt }: AttachmentVersion<DataType>
 ): Attachment<Type, DataType> => ({
   id,
@@ -303,7 +295,7 @@ export const toAttachment = <Type extends string, DataType>(
   description,
   hidden,
   origin,
-  versionData: { version, versionCount: versions.length, createdAt, originSyncedAt },
+  versionData: { version, versionCount: versions.length, createdAt },
 });
 
 /**

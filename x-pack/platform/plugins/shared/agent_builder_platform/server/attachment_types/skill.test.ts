@@ -154,58 +154,13 @@ describe('skill toSurfaceComposition', () => {
           language: 'markdown',
           text: '## When to Use\n\nUse this skill when triaging incidents.',
         },
+        { type: 'link', label: 'Manage skills', app: 'agent_builder', path: '/manage/skills' },
       ],
-    });
-    expect((await renderSurface(composition)).valid).toBe(true);
-  });
-
-  const committed = {
-    origin: 'incident triage',
-    versionData: {
-      version: 2,
-      versionCount: 2,
-      createdAt: '2026-01-01T00:00:00.000Z',
-      originSyncedAt: '2026-01-02T00:00:00.000Z',
-    },
-  };
-
-  it('links to the skill in Management once it is persisted', async () => {
-    const composition = await definition.toSurfaceComposition?.(
-      { ...buildAttachment(validSkill), ...committed },
-      surfaceContext
-    );
-
-    expect(composition?.body.at(-1)).toEqual({
-      type: 'link',
-      label: 'Edit in Management',
-      app: 'agent_builder',
-      path: '/manage/skills/incident%20triage',
     });
 
     const { valid, slack } = await renderSurface(composition);
     expect(valid).toBe(true);
-    expect(slack).toContain(
-      `${SURFACE_BASE_URL}/app/agent_builder/manage/skills/incident%20triage`
-    );
-  });
-
-  it.each([
-    [
-      'it was never saved',
-      { versionData: { ...committed.versionData, originSyncedAt: undefined } },
-    ],
-    [
-      'it has draft changes',
-      { versionData: { ...committed.versionData, createdAt: '2026-01-03T00:00:00.000Z' } },
-    ],
-    ['it is an older version', { versionData: { ...committed.versionData, version: 1 } }],
-  ])('leaves out the Management link when %s', async (_case, overrides) => {
-    const composition = await definition.toSurfaceComposition?.(
-      { ...buildAttachment(validSkill), ...committed, ...overrides },
-      surfaceContext
-    );
-
-    expect(composition?.body.some(({ type }) => type === 'link')).toBe(false);
+    expect(slack).toContain(`${SURFACE_BASE_URL}/app/agent_builder/manage/skills`);
   });
 
   it('cuts long content and says so, and still renders', async () => {
