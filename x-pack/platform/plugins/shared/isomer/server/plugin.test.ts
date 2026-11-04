@@ -6,6 +6,7 @@
  */
 
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { createKibanaIsomerRuntime } from '@kbn/isomer';
 import type { MarkdownNode } from '@kbn/isomer-components';
 import { of } from 'rxjs';
@@ -25,7 +26,8 @@ const startPlugin = ({ enabled = true }: { enabled?: boolean } = {}) => {
   coreStart.featureFlags.getBooleanValue$.mockImplementation((flag) =>
     of(flag === MATERIALIZE_FEATURE_FLAG && enabled)
   );
-  return { ...plugin.start(coreStart), registerMaterializer, coreSetup, coreStart };
+  const data = dataPluginMock.createStartContract();
+  return { ...plugin.start(coreStart, { data }), registerMaterializer, coreSetup, coreStart, data };
 };
 
 const markdown: MarkdownNode = { type: 'markdown', text: 'There are **3** open alerts.' };
@@ -111,5 +113,32 @@ describe('IsomerPlugin', () => {
     await expect(
       asScoped(httpServerMock.createKibanaRequest()).materialize({ type: 'lens', id: 'abc' })
     ).resolves.toEqual(expect.objectContaining({ type: 'unsupported' }));
+  });
+
+  it("validates every result against the runtime's packs", async () => {
+    const { registerMaterializer, asScoped, data } = startPlugin();
+    registerMaterializer<{ text: string }>('note', {
+      version: 1,
+      parse: (config) => config as { text: string },
+      plan: () => [{ kind: 'esql', query: 'FROM alerts' }],
+      map: ({ text }) => ({ type: 'markdown', text }),
+    });
+    const scopedSearch = data.search.asScoped(httpServerMock.createKibanaRequest());
+    jest.mocked(scopedSearch.esql).mockResolvedValue({
+      rawResponse: { columns: [], values: [], is_running: false },
+      datatable: { type: 'datatable', columns: [], rows: [] },
+    });
+    const request = httpServerMock.createKibanaRequest();
+
+    await expect(
+      asScoped(request).materialize({ type: 'note', config: { text: markdown.text } })
+    ).resolves.toEqual(markdown);
+    await expect(
+      asScoped(request).materialize({ type: 'note', config: { text: '' } })
+    ).resolves.toEqual({
+      type: 'unsupported',
+      reason: expect.stringMatching(/^The note materialized into an invalid node: text /),
+    });
+    expect(data.search.asScoped).toHaveBeenCalledWith(request);
   });
 });

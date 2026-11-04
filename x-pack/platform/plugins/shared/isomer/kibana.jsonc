@@ -8,6 +8,7 @@
   "plugin": {
     "id": "isomer",
     "browser": false,
-    "server": true
+    "server": true,
+    "requiredPlugins": ["data"]
   }
 }

@@ -15,6 +15,7 @@
     "@kbn/esql-types",
     "@kbn/zod",
     "@kbn/data-plugin",
-    "@kbn/expressions-plugin"
+    "@kbn/expressions-plugin",
+    "@kbn/esql-utils"
   ]
 }

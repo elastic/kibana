@@ -6,10 +6,11 @@
  */
 
 import { httpServerMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import type { ValidationError } from '@kbn/isomer';
 import { createScopedMaterializeClient } from './materialize_client';
 import { MaterializerRegistry } from './registry';
 import type { MaterializedNode, UnsupportedNode } from './nodes';
-import type { DataRequest, MaterializeScope, Materializer } from './types';
+import type { DataRequest, MaterializeResults, MaterializeScope, Materializer } from './types';
 
 interface NoteConfig {
   title: string;
@@ -47,13 +48,19 @@ const setup = ({
     abortSignal: new AbortController().signal,
   };
   const logger = loggingSystemMock.createLogger();
+  const search = { esql: jest.fn() };
+  const validate = jest.fn(async (): Promise<ValidationError[]> => []);
   const client = createScopedMaterializeClient({
     registry,
     scope,
     isEnabled: async () => enabled,
     logger,
+    search,
+    validate,
+    kibanaVersion: '9.5.0',
+    limits: { maxDepth: 1 },
   });
-  return { client, scope, logger };
+  return { client, scope, logger, search, validate, registry };
 };
 
 const note: NoteConfig = { title: 'Open alerts', text: 'There are **3** open alerts.' };
@@ -145,22 +152,64 @@ describe('createScopedMaterializeClient', () => {
       const materializer = createNoteMaterializer({ plan: jest.fn(() => unsupported) });
       const { client } = setup({ materializer });
 
-      await expect(client.materialize({ type: 'note', config: note })).resolves.toBe(unsupported);
+      await expect(client.materialize({ type: 'note', config: note })).resolves.toEqual({
+        ...unsupported,
+        title: 'Open alerts',
+      });
       expect(materializer.map).not.toHaveBeenCalled();
     });
 
-    it('returns unsupported, titled from the config, when a plan needs data it cannot fetch', async () => {
+    it("runs ES|QL requests through the user's search client", async () => {
+      const datatable = {
+        type: 'datatable' as const,
+        columns: [{ id: 'count', name: 'count', meta: { type: 'number' as const } }],
+        rows: [{ count: 3 }],
+      };
       const materializer = createNoteMaterializer({
-        plan: jest.fn(() => [{ kind: 'esql' as const, query: 'FROM logs | STATS COUNT(*)' }]),
+        plan: jest.fn(() => [
+          { kind: 'esql' as const, query: 'FROM alerts | STATS count = COUNT(*)' },
+        ]),
+        map: jest.fn(
+          (_config: NoteConfig, { tables }: MaterializeResults): MaterializedNode => ({
+            type: 'markdown',
+            text: `There are **${tables[0].rows[0].count}** open alerts.`,
+          })
+        ),
+      });
+      const { client, search, scope, validate } = setup({ materializer });
+      search.esql.mockResolvedValue({ rawResponse: {}, datatable });
+
+      await expect(client.materialize({ type: 'note', config: note })).resolves.toEqual({
+        type: 'markdown',
+        text: 'There are **3** open alerts.',
+      });
+      expect(search.esql).toHaveBeenCalledWith(
+        expect.objectContaining({ query: 'FROM alerts | STATS count = COUNT(*)\n| LIMIT 1001' }),
+        expect.objectContaining({ includeDataTable: true })
+      );
+      expect(search.esql.mock.calls[0][1].abortSignal).not.toBe(scope.abortSignal);
+      expect(validate).toHaveBeenCalled();
+    });
+
+    it('returns unsupported for nesting past the depth limit', async () => {
+      const nest = (depth: number): NoteConfig => ({ title: `Level ${depth}`, text: '' });
+      const materializer = createNoteMaterializer({
+        plan: jest.fn(({ title }: NoteConfig) => [
+          {
+            kind: 'materialize' as const,
+            input: { type: 'note', config: nest(Number(title.slice(6)) + 1) },
+          },
+        ]),
+        map: jest.fn((_config: NoteConfig, { nodes }: MaterializeResults) => nodes[0]),
       });
       const { client } = setup({ materializer });
 
-      await expect(client.materialize({ type: 'note', config: note })).resolves.toEqual({
+      await expect(client.materialize({ type: 'note', config: nest(0) })).resolves.toEqual({
         type: 'unsupported',
-        title: 'Open alerts',
-        reason: 'Kibana cannot run "esql" data requests for materialization.',
+        title: 'Level 1',
+        reason: 'This note is nested more than 1 levels deep.',
       });
-      expect(materializer.map).not.toHaveBeenCalled();
+      expect(materializer.plan).toHaveBeenCalledTimes(2);
     });
 
     it('returns unsupported, titled from the config, and logs when a mapping throws', async () => {
