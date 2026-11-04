@@ -30,13 +30,19 @@ in `CODE_PASS_THRESHOLDS` (`run_summary.ts`): `PositiveControlRecall` passes at 
 more, the same threshold behind its `recalled`/`missed` label.
 
 Seeding cleans up after itself: if the bulk write or the read-back fails midway, `seedScenario`
-removes the alerts it already wrote (matched by its run marker) before it throws, so the next row
-starts in a clean space. Fingerprints and discoveries are left alone: the workflow has not started,
-so there are none from this seed. After a row has run, `cleanupSeed` also clears those.
+deletes the alerts it meant to write by exact document id before it throws, so the next row starts
+in a clean space. A delete by id also reaches documents that are indexed but not yet searchable
+after a transport failure; a missing document or index counts as cleaned, any other failed item is
+reported together with the seed error. Fingerprints and discoveries are left alone: the workflow has
+not started, so there are none from this seed. After a row has run, `cleanupSeed` clears the alerts
+(matched exactly by its run marker), the space's fingerprints and its discoveries, and fails if a
+delete reports failures or version conflicts.
 
-`src/config_load_path.test.ts` loads `playwright.config.ts` and fails if any `.yaml` module ends up
-loaded at config time (the `@kbn/workflows/managed` barrel and deep imports of its definitions
-both do). Jest transforms `.yaml` but the Playwright loader cannot parse it.
+`src/config_load_path.test.ts` loads `playwright.config.ts` and fails if any raw-text module
+(`.yaml`, `.yml`, `.txt`, `.html`, `.peggy`) ends up loaded at config time (the
+`@kbn/workflows/managed` barrel and deep imports of its definitions both do). Jest transforms those
+but the Playwright loader cannot parse them. The guard mocks `@kbn/evals`, so it assumes that
+package loads no such module itself.
 
 `StageModelResolved` reads what each stage actually ran on and fails on a mismatch or when it
 cannot be read. Generation is read from `api_config.connector_id` on the persisted discoveries;

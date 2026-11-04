@@ -140,109 +140,170 @@ describe('seedScenario', () => {
 describe('seedScenario partial failure', () => {
   const log = { info: jest.fn() } as unknown as ToolingLog;
   const scenario = AUDIT_SCENARIOS[0];
-  interface DeleteArgs {
-    index: string;
-    query?: unknown;
-    refresh?: boolean;
-    ignore_unavailable?: boolean;
+  interface BulkArgs {
+    refresh?: boolean | string;
+    operations: Array<Record<string, { _id?: string; _index?: string }>>;
   }
 
-  const failingBulk = () =>
-    jest.fn(async () => ({
-      errors: true,
-      items: [{ index: { error: { type: 'mapper_parsing_exception' } } }],
-    }));
-
-  /** The marker the seed wrote its alerts under, read from the bulk request. */
-  const markerOf = (bulk: jest.Mock): string => {
-    const [{ operations }] = bulk.mock.calls[0] as unknown as [
-      { operations: Array<{ index?: { _id: string } }> }
-    ];
-    const id = operations.find((op) => op.index)?.index?._id ?? '';
-    return id.slice(0, id.indexOf(`-${scenario.alerts[0].id}`));
+  const rejectedItems = {
+    errors: true,
+    items: [{ index: { error: { type: 'mapper_parsing_exception' } } }],
+  };
+  const notFound = { delete: { status: 404, result: 'not_found' } };
+  const indexMissing = {
+    delete: { status: 404, error: { type: 'index_not_found_exception' } },
   };
 
-  const expectOnlyThisSeedsAlertsDeleted = (deleteByQuery: jest.Mock, bulk: jest.Mock): void => {
-    expect(deleteByQuery).toHaveBeenCalledTimes(1);
-    expect(deleteByQuery).toHaveBeenCalledWith(
-      expect.objectContaining({
-        index: alertsIndexForSpace('s'),
-        query: { term: { tags: markerOf(bulk) } },
-        refresh: true,
-        ignore_unavailable: true,
-      })
+  /** The bulk calls the seed made: the seed write first, then the cleanup. */
+  const bulkCall = (bulk: jest.Mock, index: number): BulkArgs =>
+    bulk.mock.calls[index][0] as BulkArgs;
+
+  /** The ids the seed wrote its alerts under, read from the seed bulk request. */
+  const seededIds = (bulk: jest.Mock): string[] =>
+    bulkCall(bulk, 0).operations.flatMap((op) => (op.index?._id ? [op.index._id] : []));
+
+  const seed = (esClient: Client) => seedScenario({ esClient, log, scenario, spaceId: 's' });
+
+  const expectDeletedExactlyTheSeededIds = (bulk: jest.Mock): void => {
+    expect(bulk).toHaveBeenCalledTimes(2);
+    const { operations, refresh } = bulkCall(bulk, 1);
+    expect(refresh).toBe(true);
+    expect(operations.every((op) => Object.keys(op).join() === 'delete')).toBe(true);
+    expect(operations.map((op) => op.delete)).toEqual(
+      seededIds(bulk).map((_id) => ({ _index: alertsIndexForSpace('s'), _id }))
     );
-    expect(markerOf(bulk)).toMatch(/^adw-[0-9a-f]{10}$/);
+    expect(seededIds(bulk)).toHaveLength(scenario.alerts.length);
   };
 
-  it('removes only the seed alerts, by exact run marker, when the bulk write rejects some', async () => {
-    const deleteByQuery = jest.fn(async (_args: DeleteArgs) => ({}));
-    const bulk = failingBulk();
-    await expect(
-      seedScenario({ esClient: esWith({ bulk, deleteByQuery }), log, scenario, spaceId: 's' })
-    ).rejects.toThrow(/Seeding ".*" failed/);
-    expectOnlyThisSeedsAlertsDeleted(deleteByQuery, bulk);
+  it('deletes the seeded ids, and nothing else, after a transport failure of the seed bulk', async () => {
+    const deleteByQuery = jest.fn();
+    const bulk = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('socket hang up'))
+      .mockResolvedValueOnce({ errors: false, items: [notFound] });
+    await expect(seed(esWith({ bulk, deleteByQuery }))).rejects.toThrow(/socket hang up/);
+    expectDeletedExactlyTheSeededIds(bulk);
+    expect(deleteByQuery).not.toHaveBeenCalled();
   });
 
-  it('removes only the seed alerts when reading the open alerts back fails', async () => {
-    const deleteByQuery = jest.fn(async (_args: DeleteArgs) => ({}));
-    const bulk = jest.fn(async () => ({ errors: false, items: [] }));
+  it('deletes the seeded ids when the bulk write rejects some', async () => {
+    const bulk = jest
+      .fn()
+      .mockResolvedValueOnce(rejectedItems)
+      .mockResolvedValueOnce({ errors: false, items: [notFound] });
+    await expect(seed(esWith({ bulk }))).rejects.toThrow(/Seeding ".*" failed/);
+    expectDeletedExactlyTheSeededIds(bulk);
+  });
+
+  it('deletes the seeded ids when reading the open alerts back fails', async () => {
+    const bulk = jest
+      .fn()
+      .mockResolvedValueOnce({ errors: false, items: [] })
+      .mockResolvedValueOnce({ errors: false, items: [notFound] });
     const search = jest.fn().mockRejectedValue(new Error('search unavailable'));
-    await expect(
-      seedScenario({
-        esClient: esWith({ bulk, search, deleteByQuery }),
-        log,
-        scenario,
-        spaceId: 's',
-      })
-    ).rejects.toThrow(/search unavailable/);
-    expectOnlyThisSeedsAlertsDeleted(deleteByQuery, bulk);
+    await expect(seed(esWith({ bulk, search }))).rejects.toThrow(/search unavailable/);
+    expectDeletedExactlyTheSeededIds(bulk);
   });
 
-  it('never touches the fingerprints or the discoveries of the space', async () => {
-    const deleteByQuery = jest.fn(async (_args: DeleteArgs) => ({}));
-    await seedScenario({
-      esClient: esWith({ bulk: failingBulk(), deleteByQuery }),
-      log,
-      scenario,
-      spaceId: 's',
-    }).catch(() => undefined);
-    const indices = deleteByQuery.mock.calls.map(([{ index }]) => index);
-    expect(indices).toEqual([alertsIndexForSpace('s')]);
+  it('treats a missing document or index (404) as cleaned and rethrows the seed error', async () => {
+    const bulk = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('socket hang up'))
+      .mockResolvedValueOnce({ errors: true, items: [notFound, indexMissing] });
+    const error = await seed(esWith({ bulk })).catch((e: unknown) => e);
+    expect(error).not.toBeInstanceOf(AggregateError);
+    expect((error as Error).message).toMatch(/socket hang up/);
   });
 
-  it('reports both failures, in the message too, when the partial seed cannot be removed', async () => {
-    const deleteByQuery = jest.fn().mockRejectedValue(new Error('es unavailable'));
-    const error = await seedScenario({
-      esClient: esWith({ bulk: failingBulk(), deleteByQuery }),
-      log,
-      scenario,
-      spaceId: 's',
-    }).catch((e: unknown) => e);
+  it('reports both failures when a cleanup item fails for another reason', async () => {
+    const bulk = jest
+      .fn()
+      .mockResolvedValueOnce(rejectedItems)
+      .mockResolvedValueOnce({
+        errors: true,
+        items: [{ delete: { status: 503, error: { type: 'unavailable_shards_exception' } } }],
+      });
+    const error = await seed(esWith({ bulk })).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(AggregateError);
+    const { message, errors } = error as AggregateError;
+    expect(message).toMatch(/mapper_parsing_exception/);
+    expect(message).toMatch(/unavailable_shards_exception/);
+    expect(message).toMatch(/could not be removed/);
+    expect(errors).toHaveLength(2);
+  });
+
+  it('reports both failures, in the message too, when the cleanup request itself fails', async () => {
+    const bulk = jest
+      .fn()
+      .mockResolvedValueOnce(rejectedItems)
+      .mockRejectedValueOnce(new Error('es unavailable'));
+    const error = await seed(esWith({ bulk })).catch((e: unknown) => e);
     expect(error).toBeInstanceOf(AggregateError);
     expect((error as AggregateError).message).toMatch(/mapper_parsing_exception/);
     expect((error as AggregateError).message).toMatch(/es unavailable/);
-    expect((error as AggregateError).message).toMatch(/could not be removed/);
     expect((error as AggregateError).errors).toHaveLength(2);
   });
 
   it('deletes nothing when the space is dirty, because the leftovers are not this seed', async () => {
-    const deleteByQuery = jest.fn(async () => ({}));
+    const bulk = jest.fn();
+    const deleteByQuery = jest.fn();
     const count = jest.fn(async () => ({ count: 1 }));
-    await expect(
-      seedScenario({ esClient: esWith({ count, deleteByQuery }), log, scenario, spaceId: 's' })
-    ).rejects.toThrow(/not clean/);
+    await expect(seed(esWith({ count, bulk, deleteByQuery }))).rejects.toThrow(/not clean/);
+    expect(bulk).not.toHaveBeenCalled();
     expect(deleteByQuery).not.toHaveBeenCalled();
   });
 });
 
-describe('cleanupSeed on a partly seeded space', () => {
-  it('tolerates a missing alerts index', async () => {
-    const deleteByQuery = jest.fn(
-      async (_args: { index: string; ignore_unavailable?: boolean }) => ({})
+describe('cleanupSeed alert delete', () => {
+  interface DeleteArgs {
+    index: string;
+    query?: unknown;
+    ignore_unavailable?: boolean;
+  }
+
+  it('matches the alerts exactly by run marker, never by prefix', async () => {
+    const deleteByQuery = jest.fn(async (_args: DeleteArgs) => ({}));
+    await cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded });
+    const call = deleteByQuery.mock.calls.find(
+      ([{ index }]) => index === alertsIndexForSpace('space-a')
     );
+    expect(call?.[0].query).toEqual({ term: { tags: seeded.runMarker } });
+  });
+
+  it('tolerates a missing index', async () => {
+    const deleteByQuery = jest.fn(async (_args: DeleteArgs) => ({}));
     await cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded });
     expect(deleteByQuery.mock.calls.every(([args]) => args.ignore_unavailable === true)).toBe(true);
+  });
+
+  it('throws when a delete reports failures, after attempting the others', async () => {
+    const deleteByQuery = jest
+      .fn()
+      .mockResolvedValueOnce({ failures: [{ cause: { type: 'x' } }] })
+      .mockResolvedValue({});
+    await expect(cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded })).rejects.toThrow(
+      /Cleanup of space "space-a" failed/
+    );
+    expect(deleteByQuery).toHaveBeenCalledTimes(3);
+  });
+
+  it('throws when a delete reports version conflicts', async () => {
+    const deleteByQuery = jest
+      .fn()
+      .mockResolvedValueOnce({ version_conflicts: 2 })
+      .mockResolvedValue({});
+    const error = await cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded }).catch(
+      (e: unknown) => e
+    );
+    expect(error).toBeInstanceOf(AggregateError);
+    expect((error as AggregateError).errors[0].message).toMatch(/2 version conflicts/);
+  });
+
+  it('accepts a response with no failures and no conflicts', async () => {
+    const deleteByQuery = jest.fn(async () => ({ failures: [], version_conflicts: 0 }));
+    await expect(
+      cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded })
+    ).resolves.toBeUndefined();
   });
 });
 

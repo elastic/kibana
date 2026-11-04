@@ -6,7 +6,7 @@
  */
 
 import { createHash } from 'crypto';
-import type { Client } from '@elastic/elasticsearch';
+import type { Client, estypes } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { AuditAlert, AuditScenario } from './audit_failure_classes/types';
 import {
@@ -437,21 +437,67 @@ export const buildSeededAlert = ({
   };
 };
 
-/** Deletes the alerts written under one run marker; a missing index or an empty match is fine. */
-const removeSeededAlerts = ({
+/**
+ * Deletes by query and throws when the response says documents survived. `conflicts: 'proceed'`
+ * keeps the delete going past a version conflict, but a response that reports conflicts or
+ * failures means the space is still dirty, so it must not read as success.
+ */
+const deleteMatching = async ({
   esClient,
-  seeded: { spaceId, runMarker },
+  index,
+  query,
 }: {
   esClient: Client;
-  seeded: SeededScenario;
-}): Promise<unknown> =>
-  esClient.deleteByQuery({
-    index: alertsIndexForSpace(spaceId),
-    query: { term: { tags: runMarker } },
+  index: string;
+  query: estypes.QueryDslQueryContainer;
+}): Promise<void> => {
+  const { failures, version_conflicts: versionConflicts } = await esClient.deleteByQuery({
+    index,
+    query,
     conflicts: 'proceed',
     refresh: true,
     ignore_unavailable: true,
   });
+  if ((failures?.length ?? 0) > 0 || (versionConflicts ?? 0) > 0) {
+    throw new Error(
+      `delete on "${index}" left documents behind (${failures?.length ?? 0} failures, ${
+        versionConflicts ?? 0
+      } version conflicts)`
+    );
+  }
+};
+
+/**
+ * Deletes a partly written seed's alerts by exact document id. A delete by query only matches
+ * documents that are already searchable, and after a transport-level failure of the seed bulk some
+ * may be indexed but not refreshed. A delete by id reaches those and touches nothing else. A
+ * missing document or index (404) is the expected outcome for ids that were never written.
+ */
+const removeSeededAlertsById = async ({
+  esClient,
+  seeded: { spaceId, goldIdBySeededId },
+}: {
+  esClient: Client;
+  seeded: SeededScenario;
+}): Promise<void> => {
+  const operations = [...goldIdBySeededId.keys()].map((_id) => ({
+    delete: { _index: alertsIndexForSpace(spaceId), _id },
+  }));
+  if (operations.length === 0) {
+    return;
+  }
+  const { items } = await esClient.bulk({ refresh: true, operations });
+  const failed = items.flatMap(({ delete: result }) =>
+    result?.error && result.status !== 404 ? [result.error] : []
+  );
+  if (failed.length > 0) {
+    throw new Error(
+      `${failed.length} of ${
+        operations.length
+      } seeded alerts could not be deleted: ${JSON.stringify(failed[0])}`
+    );
+  }
+};
 
 /** Writes one scenario's alerts into the space's alerts index under a fresh run marker. */
 export const seedScenario = async ({
@@ -494,8 +540,9 @@ export const seedScenario = async ({
   };
   // The caller only receives `seeded` when this resolves, so it cannot clean up a seed that fails
   // midway. A bulk with some rejected items, or a failed read, has already left alerts behind and
-  // the next row would fail `assertCleanSpace`. Only this seed's alerts are removed: the workflow
-  // has not started, so there are no fingerprints or discoveries of this row to delete.
+  // the next row would fail `assertCleanSpace`. Only this seed's alerts are removed, by id because a
+  // transport failure can leave them unsearchable: the workflow has not started, so there are no
+  // fingerprints or discoveries of this row to delete.
   try {
     const response = await esClient.bulk({ refresh: 'wait_for', operations });
     if (response.errors) {
@@ -513,7 +560,7 @@ export const seedScenario = async ({
     );
   } catch (seedError) {
     try {
-      await removeSeededAlerts({ esClient, seeded });
+      await removeSeededAlertsById({ esClient, seeded });
     } catch (cleanupError) {
       throw new AggregateError(
         [seedError, cleanupError],
@@ -564,8 +611,9 @@ export const assertCleanSpace = async ({
 /**
  * Removes a seed's alerts, the space's fingerprints so the next row cannot match an attack from
  * this one, and the space's persisted discoveries. Every delete is attempted; any that fails is
- * thrown, because a space left dirty would poison the next row. For a seed that failed before the
- * workflow ran, only the alerts are removed (see `seedScenario`).
+ * thrown, because a space left dirty would poison the next row. Alerts match exactly by run marker (they
+ * are searchable here, the seed bulk waited for a refresh). A seed that failed before the workflow
+ * ran removes only its alerts, by id (see `seedScenario`).
  */
 export const cleanupSeed = async ({
   esClient,
@@ -574,32 +622,33 @@ export const cleanupSeed = async ({
   esClient: Client;
   seeded: SeededScenario;
 }): Promise<void> => {
-  const { spaceId } = seeded;
-  const deletions: Array<{ what: string; run: () => Promise<unknown> }> = [
+  const { spaceId, runMarker } = seeded;
+  const deletions: Array<{ what: string; run: () => Promise<void> }> = [
     {
       what: 'seeded alerts',
-      run: () => removeSeededAlerts({ esClient, seeded }),
+      run: () =>
+        deleteMatching({
+          esClient,
+          index: alertsIndexForSpace(spaceId),
+          query: { term: { tags: runMarker } },
+        }),
     },
     {
       what: 'fingerprints',
       run: () =>
-        esClient.deleteByQuery({
+        deleteMatching({
+          esClient,
           index: ATTACK_FINGERPRINT_INDEX,
           query: { term: { 'attributes.space_id': spaceId } },
-          conflicts: 'proceed',
-          refresh: true,
-          ignore_unavailable: true,
         }),
     },
     {
       what: 'persisted discoveries',
       run: () =>
-        esClient.deleteByQuery({
+        deleteMatching({
+          esClient,
           index: attackDiscoveryIndexForSpace(spaceId),
           query: { match_all: {} },
-          conflicts: 'proceed',
-          refresh: true,
-          ignore_unavailable: true,
         }),
     },
   ];

@@ -15,12 +15,13 @@
  */
 
 // The real `@kbn/evals` is loaded by Playwright from outside this package; this assumes it loads
-// no `.yaml` of its own, so it is replaced rather than walked.
+// no raw-text module of its own, so it is replaced rather than walked.
 jest.mock('@kbn/evals', () => ({
   createPlaywrightEvalsConfig: (config: Record<string, unknown>) => config,
 }));
 
-const YAML_MODULE = /\.ya?ml$/;
+// The extensions the Jest preset loads as raw text (`kbn-jest/jest-preset.js` `transform`).
+const RAW_TEXT_MODULE = /\.(ya?ml|txt|html|peggy)$/;
 
 /** Every module path that loading `entry` pulls in, from a registry emptied beforehand. */
 const loadedBy = (entry: string): string[] => {
@@ -29,13 +30,13 @@ const loadedBy = (entry: string): string[] => {
   return Object.keys(require.cache);
 };
 
-const yamlIn = (paths: string[]): string[] => paths.filter((path) => YAML_MODULE.test(path));
+const rawTextIn = (paths: string[]): string[] => paths.filter((path) => RAW_TEXT_MODULE.test(path));
 
 describe('Playwright config load path', () => {
-  it('loads no .yaml module at config time', () => {
+  it('loads no raw-text module (.yaml, .txt, .html, .peggy) at config time', () => {
     const loaded = loadedBy('../playwright.config');
 
-    expect(yamlIn(loaded)).toEqual([]);
+    expect(rawTextIn(loaded)).toEqual([]);
   });
 
   it('walks the whole chain the config loads', () => {
@@ -47,19 +48,19 @@ describe('Playwright config load path', () => {
 
   describe('guard liveness', () => {
     it('reports a deep import of a managed workflow definition', () => {
-      const found = yamlIn(loadedBy('./config_load_path_fixtures/deep_managed_import'));
+      const found = rawTextIn(loadedBy('./config_load_path_fixtures/deep_managed_import'));
 
       expect(found.map((path) => path.split('/').pop())).toContain('alert_analysis_workflow.yaml');
     });
 
     it('reports a direct .yaml import', () => {
-      const found = yamlIn(loadedBy('./config_load_path_fixtures/sample.yaml'));
+      const found = rawTextIn(loadedBy('./config_load_path_fixtures/sample.yaml'));
 
       expect(found.map((path) => path.split('/').pop())).toEqual(['sample.yaml']);
     });
 
     it('reports the managed barrel', () => {
-      expect(yamlIn(loadedBy('@kbn/workflows/managed')).length).toBeGreaterThan(0);
+      expect(rawTextIn(loadedBy('@kbn/workflows/managed')).length).toBeGreaterThan(0);
     });
   });
 });
