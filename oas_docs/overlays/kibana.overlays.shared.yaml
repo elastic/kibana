@@ -25,7 +25,7 @@ actions:
       externalDocs:
         description: Alerting documentation
         url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts
-      x-displayName: 'Alerting'
+      x-displayName: 'Kibana Classic Alerting'
   - target: '$.tags[?(@.name=="alerting-v2")]'
     description: Change tag description and displayName
     update:
