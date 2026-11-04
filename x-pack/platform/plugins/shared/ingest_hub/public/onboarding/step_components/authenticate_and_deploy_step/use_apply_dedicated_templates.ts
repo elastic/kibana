@@ -10,6 +10,8 @@ import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
+import { useOnboardingFlow } from '../../onboarding_flow_context';
+import { useOnboardingSO } from './use_onboarding_so';
 import type { DeployGroup } from './deploy_groups';
 import {
   applyDedicatedNamespaceTemplates,
@@ -43,6 +45,9 @@ export const useApplyDedicatedTemplates = ({
   const {
     services: { notifications },
   } = useKibana<CoreStart>();
+  const { detectAndReviewStep } = useOnboardingFlow();
+  const { updateDeployment } = useOnboardingSO();
+  const deploymentId = detectAndReviewStep?.onboardingDeploymentId;
   const lastRequestRef = useRef<string>();
   const wasDeployDoneRef = useRef(isDeployDone);
 
@@ -55,26 +60,42 @@ export const useApplyDedicatedTemplates = ({
     if (lastRequestRef.current === request) return;
     lastRequestRef.current = request;
 
-    const { failedPackages, conflictingDataStreams } = await applyDedicatedNamespaceTemplates(
-      packageNames,
-      globalNamespace
-    );
-    if (conflictingDataStreams.length > 0) {
+    const { failedPackages, blockedDataStreams, overriddenDataStreams } =
+      await applyDedicatedNamespaceTemplates(packageNames, globalNamespace);
+    if (blockedDataStreams.length > 0 || overriddenDataStreams.length > 0) {
+      const details = [
+        blockedDataStreams.length > 0
+          ? i18n.translate('xpack.ingestHub.dedicatedNamespaceTemplates.blockedText', {
+              defaultMessage:
+                'Existing index templates override or block the dedicated ones for: {dataStreams}.',
+              values: { dataStreams: blockedDataStreams.join(', ') },
+            })
+          : undefined,
+        overriddenDataStreams.length > 0
+          ? i18n.translate('xpack.ingestHub.dedicatedNamespaceTemplates.overriddenText', {
+              defaultMessage:
+                'The dedicated templates take priority over existing custom ones for: {dataStreams}, so their settings no longer apply.',
+              values: { dataStreams: overriddenDataStreams.join(', ') },
+            })
+          : undefined,
+      ].filter(Boolean);
       notifications.toasts.addWarning({
         title: i18n.translate('xpack.ingestHub.dedicatedNamespaceTemplates.conflictTitle', {
-          defaultMessage: 'Dedicated index templates may not apply',
+          defaultMessage: 'Check the dedicated index templates for "{namespace}"',
+          values: { namespace: globalNamespace },
         }),
-        text: i18n.translate('xpack.ingestHub.dedicatedNamespaceTemplates.conflictText', {
-          defaultMessage:
-            'The "{namespace}" namespace was enabled, but existing index templates override or block the dedicated ones for: {dataStreams}. Review them in Fleet.',
-          values: {
-            namespace: globalNamespace,
-            dataStreams: conflictingDataStreams.join(', '),
-          },
-        }),
+        text: `${details.join(' ')} ${i18n.translate(
+          'xpack.ingestHub.dedicatedNamespaceTemplates.conflictReview',
+          { defaultMessage: 'Review them in Fleet.' }
+        )}`,
       });
     }
-    if (failedPackages.length === 0) return;
+    if (failedPackages.length === 0) {
+      // Saved here, where the saved namespace is the one just applied, so the two cannot disagree.
+      // A first deploy has no record yet; the deploy creates it with the switch.
+      if (deploymentId) updateDeployment(deploymentId, { dedicatedNamespaceTemplates: true });
+      return;
+    }
     // Forget the request so a later change of the settings tries again.
     lastRequestRef.current = undefined;
     notifications.toasts.addWarning({
@@ -87,7 +108,7 @@ export const useApplyDedicatedTemplates = ({
         values: { namespace: globalNamespace, packages: failedPackages.join(', ') },
       }),
     });
-  }, [enabled, groups, globalNamespace, notifications]);
+  }, [enabled, groups, globalNamespace, notifications, deploymentId, updateDeployment]);
 
   useEffect(() => {
     // Only a deploy that finishes while this is mounted: a step that opens already done is a resume.

@@ -28,16 +28,22 @@ export interface ApplyDedicatedTemplatesResult {
   /** The packages that could not be updated. */
   failedPackages: string[];
   /**
-   * The data streams whose dedicated template is overridden or blocked by an index template that
-   * already exists. Fleet still opts the namespace in and reports these as warnings.
+   * The data streams whose dedicated template an existing index template overrides or blocks, so
+   * the dedicated one has no effect. Fleet still opts the namespace in and reports these.
    */
-  conflictingDataStreams: string[];
+  blockedDataStreams: string[];
+  /**
+   * The data streams where the dedicated template takes priority over an existing custom one, so
+   * that template's settings stop applying.
+   */
+  overriddenDataStreams: string[];
 }
 
 interface PackageResult {
   packageName: string;
   failed: boolean;
-  conflicts?: string[];
+  blocked?: string[];
+  overridden?: string[];
 }
 
 /**
@@ -64,15 +70,24 @@ export const applyDedicatedNamespaceTemplates = async (
         installationInfo.version,
         { namespace_customization_enabled_for: [...enabledFor, namespace] }
       );
+      const warnings = updated?.warnings ?? [];
+      const dataStreamsWhere = (matches: (conflictType: string) => boolean) =>
+        warnings
+          .filter(({ conflictingTemplates }) =>
+            conflictingTemplates.some(({ conflictType }) => matches(conflictType))
+          )
+          .map(({ dataStreamName }) => dataStreamName);
       return {
         packageName,
         failed: !!error,
-        conflicts: (updated?.warnings ?? []).map(({ dataStreamName }) => dataStreamName),
+        blocked: dataStreamsWhere((type) => type !== 'overridden_by_fleet'),
+        overridden: dataStreamsWhere((type) => type === 'overridden_by_fleet'),
       };
     })
   );
   return {
     failedPackages: results.filter(({ failed }) => failed).map(({ packageName }) => packageName),
-    conflictingDataStreams: [...new Set(results.flatMap(({ conflicts }) => conflicts ?? []))],
+    blockedDataStreams: [...new Set(results.flatMap(({ blocked }) => blocked ?? []))],
+    overriddenDataStreams: [...new Set(results.flatMap(({ overridden }) => overridden ?? []))],
   };
 };

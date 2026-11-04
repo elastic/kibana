@@ -8,12 +8,18 @@
 import { renderHook, act } from '@testing-library/react';
 
 import type { DeployGroup } from './deploy_groups';
+import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useApplyDedicatedTemplates } from './use_apply_dedicated_templates';
 import { applyDedicatedNamespaceTemplates } from './apply_dedicated_templates';
 
 const mockAddWarning = jest.fn();
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({ services: { notifications: { toasts: { addWarning: mockAddWarning } } } }),
+}));
+const mockUpdateDeployment = jest.fn();
+jest.mock('../../onboarding_flow_context', () => ({ useOnboardingFlow: jest.fn() }));
+jest.mock('./use_onboarding_so', () => ({
+  useOnboardingSO: () => ({ updateDeployment: mockUpdateDeployment }),
 }));
 jest.mock('./apply_dedicated_templates', () => ({
   ...jest.requireActual('./apply_dedicated_templates'),
@@ -50,7 +56,14 @@ const render = (props: Partial<Parameters<typeof useApplyDedicatedTemplates>[0]>
 describe('useApplyDedicatedTemplates', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    mockApply.mockResolvedValue({ failedPackages: [], conflictingDataStreams: [] });
+    mockApply.mockResolvedValue({
+      failedPackages: [],
+      blockedDataStreams: [],
+      overriddenDataStreams: [],
+    });
+    (useOnboardingFlow as jest.Mock).mockReturnValue({
+      detectAndReviewStep: { onboardingDeploymentId: 'dep-1' },
+    });
   });
 
   it('does nothing before the deploy is done', () => {
@@ -105,10 +118,11 @@ describe('useApplyDedicatedTemplates', () => {
     expect(mockApply).not.toHaveBeenCalled();
   });
 
-  it('warns about data streams whose dedicated template an existing one overrides', async () => {
+  it('says an existing template blocks the dedicated one where it does', async () => {
     mockApply.mockResolvedValueOnce({
       failedPackages: [],
-      conflictingDataStreams: ['logs-aws.cloudtrail-prod'],
+      blockedDataStreams: ['logs-aws.cloudtrail-prod'],
+      overriddenDataStreams: [],
     });
     const { result } = render();
 
@@ -116,12 +130,76 @@ describe('useApplyDedicatedTemplates', () => {
       await result.current();
     });
 
-    expect(mockAddWarning).toHaveBeenCalledTimes(1);
-    expect(mockAddWarning.mock.calls[0][0].text).toContain('logs-aws.cloudtrail-prod');
+    const { text } = mockAddWarning.mock.calls[0][0];
+    expect(text).toContain('override or block the dedicated ones for: logs-aws.cloudtrail-prod');
+    expect(text).not.toContain('no longer apply');
+  });
+
+  it('says the dedicated template replaces a custom one where it does', async () => {
+    mockApply.mockResolvedValueOnce({
+      failedPackages: [],
+      blockedDataStreams: [],
+      overriddenDataStreams: ['metrics-aws.ec2_metrics-prod'],
+    });
+    const { result } = render();
+
+    await act(async () => {
+      await result.current();
+    });
+
+    const { text } = mockAddWarning.mock.calls[0][0];
+    expect(text).toContain(
+      'take priority over existing custom ones for: metrics-aws.ec2_metrics-prod'
+    );
+    expect(text).toContain('no longer apply');
+    expect(text).not.toContain('override or block');
+  });
+
+  it('saves the switch with the deployment once it was applied', async () => {
+    const { result } = render();
+
+    await act(async () => {
+      await result.current();
+    });
+
+    expect(mockUpdateDeployment).toHaveBeenCalledWith('dep-1', {
+      dedicatedNamespaceTemplates: true,
+    });
+  });
+
+  it('does not save the switch when a package could not be updated', async () => {
+    mockApply.mockResolvedValueOnce({
+      failedPackages: ['aws'],
+      blockedDataStreams: [],
+      overriddenDataStreams: [],
+    });
+    const { result } = render();
+
+    await act(async () => {
+      await result.current();
+    });
+
+    expect(mockUpdateDeployment).not.toHaveBeenCalled();
+  });
+
+  it('writes no record before the first deploy has created one', async () => {
+    (useOnboardingFlow as jest.Mock).mockReturnValue({ detectAndReviewStep: {} });
+    const { result } = render();
+
+    await act(async () => {
+      await result.current();
+    });
+
+    expect(mockApply).toHaveBeenCalled();
+    expect(mockUpdateDeployment).not.toHaveBeenCalled();
   });
 
   it('warns about the packages that failed and allows a retry', async () => {
-    mockApply.mockResolvedValueOnce({ failedPackages: ['aws'], conflictingDataStreams: [] });
+    mockApply.mockResolvedValueOnce({
+      failedPackages: ['aws'],
+      blockedDataStreams: [],
+      overriddenDataStreams: [],
+    });
     const { result } = render();
 
     await act(async () => {

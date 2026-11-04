@@ -102,7 +102,8 @@ describe('applyDedicatedNamespaceTemplates', () => {
 
     expect(await applyDedicatedNamespaceTemplates(['aws'], 'prod')).toEqual({
       failedPackages: [],
-      conflictingDataStreams: [],
+      blockedDataStreams: [],
+      overriddenDataStreams: [],
     });
     expect(mockUpdate).not.toHaveBeenCalled();
   });
@@ -136,14 +137,18 @@ describe('applyDedicatedNamespaceTemplates', () => {
     expect(mockUpdate).not.toHaveBeenCalled();
   });
 
-  it('reports the data streams whose dedicated template an existing one overrides, without failing', async () => {
+  it('keeps apart the data streams an existing template blocks and the ones the dedicated template overrides, without failing', async () => {
     mockGetInfo.mockResolvedValue(info('2.1.0'));
+    const warning = (dataStreamName: string, ...conflictTypes: string[]) => ({
+      dataStreamName,
+      conflictingTemplates: conflictTypes.map((conflictType) => ({ conflictType })),
+    });
     mockUpdate.mockResolvedValue({
       data: {
         warnings: [
-          { dataStreamName: 'logs-aws.cloudtrail-prod' },
-          { dataStreamName: 'logs-aws.cloudtrail-prod' },
-          { dataStreamName: 'metrics-aws.ec2_metrics-prod' },
+          warning('logs-aws.cloudtrail-prod', 'overrides_fleet'),
+          warning('logs-aws.cloudtrail-prod', 'blocked_by_same_priority'),
+          warning('metrics-aws.ec2_metrics-prod', 'overridden_by_fleet'),
         ],
       },
       error: null,
@@ -151,7 +156,8 @@ describe('applyDedicatedNamespaceTemplates', () => {
 
     expect(await applyDedicatedNamespaceTemplates(['aws'], 'prod')).toEqual({
       failedPackages: [],
-      conflictingDataStreams: ['logs-aws.cloudtrail-prod', 'metrics-aws.ec2_metrics-prod'],
+      blockedDataStreams: ['logs-aws.cloudtrail-prod'],
+      overriddenDataStreams: ['metrics-aws.ec2_metrics-prod'],
     });
   });
 });

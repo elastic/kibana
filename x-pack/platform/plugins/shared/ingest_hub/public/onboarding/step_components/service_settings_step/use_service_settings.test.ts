@@ -1035,7 +1035,6 @@ describe('useServiceSettings — integration name and description', () => {
       expect(mockUpdateDeployment).toHaveBeenCalledWith('dep-1', {
         integrationName: 'my-aws',
         description: 'Production',
-        dedicatedNamespaceTemplates: false,
       });
       expect(onContinue).toHaveBeenCalled();
     });
@@ -1053,11 +1052,10 @@ describe('useServiceSettings — integration name and description', () => {
       expect(mockUpdateDeployment).toHaveBeenCalledWith('dep-1', {
         integrationName: 'aws-1',
         description: null,
-        dedicatedNamespaceTemplates: false,
       });
     });
 
-    it('saves a switch that was changed on its own, so a reopened deployment keeps it', async () => {
+    it('leaves the switch to the deploy, so it stays paired with the namespace', async () => {
       withDeployment('dep-1');
       const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
       await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
@@ -1066,9 +1064,9 @@ describe('useServiceSettings — integration name and description', () => {
 
       act(() => result.current.handleNext());
 
-      expect(mockUpdateDeployment.mock.calls[0][1]).toMatchObject({
-        dedicatedNamespaceTemplates: true,
-      });
+      expect(mockUpdateDeployment.mock.calls[0][1]).not.toHaveProperty(
+        'dedicatedNamespaceTemplates'
+      );
     });
 
     it('leaves the namespace to the deploy, so a change is still detected as drift', async () => {

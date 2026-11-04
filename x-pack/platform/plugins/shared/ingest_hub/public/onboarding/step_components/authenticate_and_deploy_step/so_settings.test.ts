@@ -88,14 +88,14 @@ describe('dedicatedNamespaceTemplates', () => {
     });
   });
 
-  it('is part of the metadata update, so a switch changed on its own is saved', () => {
+  it('is left out of the metadata update, so it stays paired with the namespace', () => {
     expect(
       toSOMetadataUpdate({
         integrationName: 'my-aws',
         namespace: 'prod',
         dedicatedNamespaceTemplates: true,
       })
-    ).toEqual({ integrationName: 'my-aws', description: null, dedicatedNamespaceTemplates: true });
+    ).toEqual({ integrationName: 'my-aws', description: null });
   });
 });
 
@@ -170,14 +170,13 @@ describe('toSOMetadataUpdate', () => {
   it('returns the name and description without the namespace', () => {
     expect(
       toSOMetadataUpdate({ integrationName: ' my-aws ', description: ' x ', namespace: 'prod' })
-    ).toEqual({ integrationName: 'my-aws', description: 'x', dedicatedNamespaceTemplates: false });
+    ).toEqual({ integrationName: 'my-aws', description: 'x' });
   });
 
   it('still sends null for a cleared description', () => {
     expect(toSOMetadataUpdate({ integrationName: 'my-aws', namespace: 'prod' })).toEqual({
       integrationName: 'my-aws',
       description: null,
-      dedicatedNamespaceTemplates: false,
     });
   });
 
@@ -191,7 +190,6 @@ describe('toSOMetadataUpdate', () => {
     ).toEqual({
       integrationName: 'my-aws',
       description: 'Production',
-      dedicatedNamespaceTemplates: false,
     });
   });
 });
