@@ -7,10 +7,10 @@
 
 import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import { toStoredQuery } from '@kbn/as-code-shared-transforms';
-import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { MaterializeContext } from '../../../common';
+import { resolveTimeRange } from '../../materialize/time_range';
 import type { MaterializeContextOverride } from '../../materialize/types';
 import type { DashboardConfig } from './config';
 import type { DashboardControl } from './controls';
@@ -39,7 +39,14 @@ export const dashboardContext = (
   now: Date
 ): DashboardContext => {
   const range = context.timeRange ?? state.time_range ?? resolved?.timeDefaults;
-  const timeRange = range ? getAbsoluteTimeRange(range, { forceNow: now }) : undefined;
+  // Resolved as the pipeline resolves the request's: in the context's time zone, then the user's
+  // `dateFormat:tz`, as Kibana's browser does.
+  const timeRange = range
+    ? resolveTimeRange(range, {
+        now,
+        timeZone: context.timeZone ?? resolved?.timeZone ?? 'Browser',
+      })
+    : undefined;
   const controlVariables = controlEsqlVariables(controls);
   const requestVariables = context.esqlVariables ?? [];
   const requestKeys = new Set(requestVariables.map(({ key }) => key));

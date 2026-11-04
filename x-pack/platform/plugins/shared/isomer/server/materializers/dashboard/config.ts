@@ -107,6 +107,8 @@ export interface ResolvedDashboard {
   unappliedControls: UnappliedControl[];
   /** `timepicker:timeDefaults`, for a dashboard and request without a time range. */
   timeDefaults?: TimeRange;
+  /** The user's `dateFormat:tz`, which the dashboard's relative time range resolves in. */
+  timeZone?: string;
   /** Where the dashboard opens in Kibana, for placeholders to link to. */
   href?: string;
 }
