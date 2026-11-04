@@ -11,7 +11,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { OnboardingUnavailableError } from './errors';
 import {
-  ensureLocalElasticsearchConnector,
+  createLocalElasticsearchConnector,
   resolveLocalElasticsearchUrl,
 } from './local_elasticsearch_connector';
 
@@ -29,11 +29,8 @@ const createEsClient = () => {
   };
 };
 
-const createActionsClient = (
-  connectors: Array<{ id: string; actionTypeId: string; config?: Record<string, unknown> }> = []
-) => {
+const createActionsClient = () => {
   const actionsClient = actionsClientMock.create();
-  actionsClient.getAll.mockResolvedValue(connectors as never);
   actionsClient.create.mockResolvedValue({ id: 'connector-1' } as never);
   return actionsClient;
 };
@@ -82,43 +79,14 @@ describe('resolveLocalElasticsearchUrl', () => {
   });
 });
 
-describe('ensureLocalElasticsearchConnector', () => {
+describe('createLocalElasticsearchConnector', () => {
   const logger = loggingSystemMock.createLogger();
-
-  it("reuses the space's Elasticsearch connector pointing at the local URL", async () => {
-    const { esClient, createApiKey } = createEsClient();
-    const actionsClient = createActionsClient([
-      { id: 'slack', actionTypeId: '.slack', config: {} },
-      { id: 'remote', actionTypeId: '.elasticsearch', config: { url: 'https://other:9243' } },
-      { id: 'local', actionTypeId: '.elasticsearch', config: { url: `${URL}/` } },
-    ]);
-
-    const connectorId = await ensureLocalElasticsearchConnector({
-      esClient,
-      actionsClient,
-      spaceId: 'space-1',
-      url: URL,
-      logger,
-    });
-
-    expect(connectorId).toBe('local');
-    expect(actionsClient.getAll).toHaveBeenCalledWith({
-      includeSystemActions: false,
-      sandboxCapableOnly: true,
-    });
-    expect(createApiKey).not.toHaveBeenCalled();
-    expect(actionsClient.create).not.toHaveBeenCalled();
-  });
 
   it('creates a read-only, non-expiring key as the current user and stores it in a new connector', async () => {
     const { esClient, createApiKey } = createEsClient();
-    // Connectors for other clusters, or without a URL, do not count as the local one.
-    const actionsClient = createActionsClient([
-      { id: 'remote', actionTypeId: '.elasticsearch', config: { url: 'https://other:9243' } },
-      { id: 'broken', actionTypeId: '.elasticsearch', config: {} },
-    ]);
+    const actionsClient = createActionsClient();
 
-    const connectorId = await ensureLocalElasticsearchConnector({
+    const connectorId = await createLocalElasticsearchConnector({
       esClient,
       actionsClient,
       spaceId: 'space-1',
@@ -152,6 +120,7 @@ describe('ensureLocalElasticsearchConnector', () => {
         secrets: { authType: 'api_key_header', Authorization: 'ApiKey ZW5jb2RlZA==' },
       },
     });
+    expect(actionsClient.getAll).not.toHaveBeenCalled();
   });
 
   it('invalidates the key when the connector cannot be created', async () => {
@@ -160,7 +129,7 @@ describe('ensureLocalElasticsearchConnector', () => {
     actionsClient.create.mockRejectedValue(new Error('license'));
 
     await expect(
-      ensureLocalElasticsearchConnector({ esClient, actionsClient, spaceId: 's', url: URL, logger })
+      createLocalElasticsearchConnector({ esClient, actionsClient, spaceId: 's', url: URL, logger })
     ).rejects.toThrow('license');
     expect(invalidateApiKey).toHaveBeenCalledWith({ ids: ['key-1'] });
   });
@@ -172,7 +141,7 @@ describe('ensureLocalElasticsearchConnector', () => {
     const actionsClient = createActionsClient();
 
     await expect(
-      ensureLocalElasticsearchConnector({ esClient, actionsClient, spaceId: 's', url: URL, logger })
+      createLocalElasticsearchConnector({ esClient, actionsClient, spaceId: 's', url: URL, logger })
     ).rejects.toMatchObject({
       isBoom: true,
       output: { statusCode: 400 },
@@ -181,7 +150,7 @@ describe('ensureLocalElasticsearchConnector', () => {
 
     createApiKey.mockRejectedValue(responseError(403, 'unauthorized'));
     await expect(
-      ensureLocalElasticsearchConnector({ esClient, actionsClient, spaceId: 's', url: URL, logger })
+      createLocalElasticsearchConnector({ esClient, actionsClient, spaceId: 's', url: URL, logger })
     ).rejects.toMatchObject({ isBoom: true, output: { statusCode: 403 } });
 
     expect(actionsClient.create).not.toHaveBeenCalled();
@@ -193,7 +162,7 @@ describe('ensureLocalElasticsearchConnector', () => {
     createApiKey.mockRejectedValue(responseError(503, 'unavailable'));
 
     await expect(
-      ensureLocalElasticsearchConnector({
+      createLocalElasticsearchConnector({
         esClient,
         actionsClient: createActionsClient(),
         spaceId: 's',

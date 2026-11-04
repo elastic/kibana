@@ -26,7 +26,7 @@ import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import { OnboardingUnavailableError } from './errors';
 import {
-  ensureLocalElasticsearchConnector,
+  createLocalElasticsearchConnector,
   resolveLocalElasticsearchUrl,
 } from './local_elasticsearch_connector';
 import { parseSuggestions } from './parse_suggestions';
@@ -165,7 +165,7 @@ export const createOnboardingClient = ({
           throw new OnboardingUnavailableError('Connectors are not available');
         }
         const url = resolveLocalElasticsearchUrl({ cloud, elasticsearch, esHosts });
-        const connectorId = await ensureLocalElasticsearchConnector({
+        const connectorId = await createLocalElasticsearchConnector({
           esClient: elasticsearch.client.asScoped(request).asCurrentUser,
           actionsClient: await actions.getActionsClientWithRequest(request),
           spaceId,

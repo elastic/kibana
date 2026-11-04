@@ -29,7 +29,6 @@ const setup = ({
   workflow = { id: NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID, definition: {} },
   agentInstalled = true,
   agentConnectorIds = [],
-  connectors = [],
   withAgentBuilder = true,
   withActions = true,
 }: {
@@ -39,8 +38,6 @@ const setup = ({
   agentInstalled?: boolean;
   /** The agent's connector list as read back after `ensure`. */
   agentConnectorIds?: string[];
-  /** The space's connectors, as `{ id, actionTypeId, config }`. */
-  connectors?: Array<{ id: string; actionTypeId: string; config?: Record<string, unknown> }>;
   withAgentBuilder?: boolean;
   withActions?: boolean;
 } = {}) => {
@@ -61,7 +58,6 @@ const setup = ({
   };
   const agentAvailability = { kind: 'always' } as never;
   const actionsClient = actionsClientMock.create();
-  actionsClient.getAll.mockResolvedValue(connectors as never);
   actionsClient.create.mockResolvedValue({ id: 'local-es' } as never);
   const actions = {
     getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClient),
@@ -122,10 +118,6 @@ describe('createOnboardingClient', () => {
   it('enables Nightshift by creating the local connector and installing the agent with it', async () => {
     const { client, agents, registry, actionsClient, esClient, request } = setup({
       agentInstalled: false,
-      connectors: [
-        { id: 'slack', actionTypeId: '.slack' },
-        { id: 'remote', actionTypeId: '.elasticsearch', config: { url: 'https://other:9243' } },
-      ],
     });
 
     expect(await client.enable(request)).toEqual({ agent_installed: true });
@@ -150,20 +142,6 @@ describe('createOnboardingClient', () => {
     });
   });
 
-  it("gives the agent the space's existing connector for the local cluster", async () => {
-    const { client, registry, actionsClient, esClient, request } = setup({
-      agentInstalled: false,
-      connectors: [{ id: 'mine', actionTypeId: '.elasticsearch', config: { url: `${ES_URL}/` } }],
-    });
-
-    expect(await client.enable(request)).toEqual({ agent_installed: true });
-    expect(esClient.security.createApiKey).not.toHaveBeenCalled();
-    expect(actionsClient.create).not.toHaveBeenCalled();
-    expect(registry.update).toHaveBeenCalledWith('nightshift.investigation', {
-      configuration: { connector_ids: ['mine'] },
-    });
-  });
-
   it('adds the connector to an agent that already existed without it', async () => {
     const { client, registry, request } = setup({
       agentInstalled: true,
@@ -174,17 +152,6 @@ describe('createOnboardingClient', () => {
     expect(registry.update).toHaveBeenCalledWith('nightshift.investigation', {
       configuration: { connector_ids: ['slack', 'local-es'] },
     });
-  });
-
-  it('leaves an agent that already has the local connector alone', async () => {
-    const { client, registry, actionsClient, request } = setup({
-      agentConnectorIds: ['mine'],
-      connectors: [{ id: 'mine', actionTypeId: '.elasticsearch', config: { url: ES_URL } }],
-    });
-
-    expect(await client.enable(request)).toEqual({ agent_installed: true });
-    expect(actionsClient.create).not.toHaveBeenCalled();
-    expect(registry.update).not.toHaveBeenCalled();
   });
 
   it('still enables when the connector cannot be added to the existing agent', async () => {

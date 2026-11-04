@@ -64,25 +64,6 @@ export const resolveLocalElasticsearchUrl = ({
   return url;
 };
 
-const findLocalElasticsearchConnectorId = async ({
-  actionsClient,
-  url,
-}: {
-  actionsClient: Pick<ActionsClient, 'getAll'>;
-  url: string;
-}): Promise<string | undefined> => {
-  // Only connectors the sandbox can use; every `.elasticsearch` auth type is sandbox capable.
-  const connectors = await actionsClient.getAll({
-    includeSystemActions: false,
-    sandboxCapableOnly: true,
-  });
-  return connectors.find(
-    (connector) =>
-      connector.actionTypeId === LOCAL_ELASTICSEARCH_CONNECTOR_TYPE_ID &&
-      normalizeUrlOrUndefined(connector.config?.url) === url
-  )?.id;
-};
-
 const createReadOnlyApiKey = async (esClient: ElasticsearchClient, spaceId: string) => {
   try {
     return await esClient.security.createApiKey({
@@ -101,7 +82,7 @@ const createReadOnlyApiKey = async (esClient: ElasticsearchClient, spaceId: stri
   }
 };
 
-export const ensureLocalElasticsearchConnector = async ({
+export const createLocalElasticsearchConnector = async ({
   esClient,
   actionsClient,
   spaceId,
@@ -109,16 +90,11 @@ export const ensureLocalElasticsearchConnector = async ({
   logger,
 }: {
   esClient: ElasticsearchClient;
-  actionsClient: Pick<ActionsClient, 'getAll' | 'create'>;
+  actionsClient: Pick<ActionsClient, 'create'>;
   spaceId: string;
   url: string;
   logger: Logger;
 }): Promise<string> => {
-  const existingId = await findLocalElasticsearchConnectorId({ actionsClient, url });
-  if (existingId) {
-    return existingId;
-  }
-
   const apiKey = await createReadOnlyApiKey(esClient, spaceId);
   try {
     const connector = await actionsClient.create({
