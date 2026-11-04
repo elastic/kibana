@@ -34,9 +34,7 @@ export interface RequestBucket {
   duration: PercentilesAggregation;
 }
 
-/** `httpRequestsSearch`: the HTTP requests in the selected environment. */
-export interface HttpRequestsAggregations {
-  inEnvironment: {
-    requests: { buckets: RequestBucket[] };
-  };
-}
+/** `httpRequestsSearch`: the HTTP requests in the selected environment, and every environment. */
+export type HttpRequestsAggregations = ByEnvironmentAggregations<{
+  requests: { buckets: RequestBucket[] };
+}>;

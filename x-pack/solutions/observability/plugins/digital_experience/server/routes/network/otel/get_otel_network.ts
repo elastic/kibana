@@ -35,7 +35,11 @@ export const getOtelNetwork = ({
       httpRequests: toHttpRequests(requests),
       slowestResources: toSlowestResources(resources),
       pageOrigin: toPageOrigin(resources),
-      environments: sortEnvironments(pickerEnvironments(resources)),
+      // Browser logs and client spans can each hold an environment the other lacks.
+      environments: sortEnvironments([
+        ...pickerEnvironments(resources),
+        ...pickerEnvironments(requests),
+      ]),
     };
   });
 };

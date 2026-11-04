@@ -82,10 +82,11 @@ describe('httpRequestsSearch', () => {
     expect(requests.aggs.duration.percentiles).toMatchObject({ field: 'duration', percents: [95] });
   });
 
-  it('filters the environment', () => {
-    const { inEnvironment } = httpRequestsSearch({ ...PARAMS, environment: 'staging' } as never)
-      .aggs as Aggs;
+  it('lists every environment for the picker and filters the requests to the selected one', () => {
+    const aggs = httpRequestsSearch({ ...PARAMS, environment: 'staging' } as never).aggs as Aggs;
 
-    expect(JSON.stringify(inEnvironment.filter)).toContain('staging');
+    expect(aggs.environments).toBeDefined();
+    expect(aggs.environmentNotDefined).toBeDefined();
+    expect(JSON.stringify(aggs.inEnvironment.filter)).toContain('staging');
   });
 });

@@ -22,8 +22,8 @@ import {
 } from '../../../lib/otel/queries';
 import type { ApplicationSearchParams } from '../../application_tab_route';
 
-/** Stands for a missing stack trace in a group's key, so those errors form a group per type. */
-export const NO_STACKTRACE = '__digital_experience_no_stacktrace__';
+/** A missing stack trace's key, the same as an empty one, so both form one group per type. */
+export const NO_STACKTRACE = '';
 
 const ERROR_GROUP_AGGS = {
   message: {

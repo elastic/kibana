@@ -58,6 +58,32 @@ describe('getOtelNetwork', () => {
     });
   });
 
+  it('lists the environments of both the browser logs and the client spans', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const withEnvironment = (environment: string, inEnvironment: object) => {
+      return {
+        aggregations: {
+          environments: { buckets: [] },
+          environmentNames: { buckets: [{ key: environment }] },
+          environmentNotDefined: { doc_count: 0 },
+          inEnvironment,
+        },
+      } as never;
+    };
+    esClient.search
+      .mockResolvedValueOnce(
+        withEnvironment('production', {
+          resources: { urls: { buckets: [] } },
+          pageLoads: { topPage: { buckets: [] } },
+        })
+      )
+      .mockResolvedValueOnce(withEnvironment('staging', { requests: { buckets: [] } }));
+
+    const { environments } = await getOtelNetwork({ esClient, ...PARAMS });
+
+    expect(environments).toEqual(['production', 'staging']);
+  });
+
   it('fails when a search fails, instead of reporting empty lists', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.search.mockRejectedValue(new Error('search_phase_execution_exception'));

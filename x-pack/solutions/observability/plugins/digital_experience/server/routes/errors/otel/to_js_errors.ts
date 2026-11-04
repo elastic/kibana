@@ -16,18 +16,13 @@ const toMessage = ({ hits }: MessageAggregation): string | null => {
   return typeof message === 'string' ? message : null;
 };
 
-// An empty stack trace can be indexed as `''`.
-const toStacktrace = (stacktrace: string): string | null => {
-  return stacktrace === NO_STACKTRACE || stacktrace === '' ? null : stacktrace;
-};
-
 /** Maps the error groups, most frequent first; missing aggregations map to no groups. */
 export const toJsErrors = (aggregations?: ErrorsAggregations): JsErrorGroup[] => {
   const buckets = aggregations?.inEnvironment.exceptions.groups.buckets ?? [];
   return buckets.map(({ key: [type, stacktrace], doc_count: count, message, lastSeen }) => {
     return {
       type,
-      stacktrace: toStacktrace(stacktrace),
+      stacktrace: stacktrace === NO_STACKTRACE ? null : stacktrace,
       message: toMessage(message),
       count,
       lastSeen: toLastSeen(lastSeen.value),

@@ -34,7 +34,7 @@ const TITLE = i18n.translate('xpack.digitalExperience.network.slowestResources.t
 
 const SUBTITLE = i18n.translate('xpack.digitalExperience.network.slowestResources.subtitle', {
   defaultMessage:
-    'The scripts, styles, images and fonts that took the longest to load. Render-blocking ones delay the first paint.',
+    'The scripts, styles, images and fonts with the longest p75 load time, an approximate ranking. Render-blocking ones delay the first paint.',
 });
 
 const RESOURCE_LABEL = i18n.translate('xpack.digitalExperience.network.slowestResources.resource', {

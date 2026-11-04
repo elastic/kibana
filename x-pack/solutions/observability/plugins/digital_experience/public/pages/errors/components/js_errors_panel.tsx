@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiInMemoryTable, EuiLink, EuiText } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -69,12 +69,18 @@ export function JsErrorsPanel({
 }) {
   const { formatNumber, formatDate } = useFormatters();
   const [selectedKey, setSelectedKey] = useState<ErrorGroupKey>();
-  // Looked up in the current errors, so the flyout never shows a stale group and closes without it.
+  // Looked up in the current errors, so the flyout never shows a stale group.
   const selected =
     selectedKey &&
     errors.find(({ type, stacktrace }) => {
       return type === selectedKey.type && stacktrace === selectedKey.stacktrace;
     });
+  // Forgotten once a loaded response lacks it, so the flyout never reopens by itself.
+  useEffect(() => {
+    if (selectedKey && !selected && !isLoading) {
+      setSelectedKey(undefined);
+    }
+  }, [selectedKey, selected, isLoading]);
   const isCompact = maxRows !== undefined;
   const items = isCompact ? errors.slice(0, maxRows) : errors;
 

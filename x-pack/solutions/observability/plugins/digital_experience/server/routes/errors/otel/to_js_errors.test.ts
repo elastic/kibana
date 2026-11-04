@@ -46,7 +46,6 @@ describe('toJsErrors', () => {
         group('TypeError', NO_STACKTRACE, 4, 'no stack', 7000),
         group('RangeError', 'RangeError\n at b.js', 3, null, null),
         group('TypeError', 'TypeError: x\n at a.js', 2, 'x is undefined', 5000),
-        group('Error', '', 1, 'empty stack', 4000),
       ])
     );
 
@@ -71,13 +70,6 @@ describe('toJsErrors', () => {
         message: 'x is undefined',
         count: 2,
         lastSeen: new Date(5000).toISOString(),
-      },
-      {
-        type: 'Error',
-        stacktrace: null,
-        message: 'empty stack',
-        count: 1,
-        lastSeen: new Date(4000).toISOString(),
       },
     ]);
   });

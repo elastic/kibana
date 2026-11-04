@@ -86,6 +86,29 @@ apiTest.describe('Digital Experience errors API', { tag: DIGITAL_EXPERIENCE_TAGS
     }
   );
 
+  apiTest(
+    'groups the missing and empty stack traces of a type together',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+
+      const response = await apiClient.get(applicationTabPath(OTEL_APPS.checkout, 'errors'), {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect((response.body as ApplicationErrorsResponse).errors).toStrictEqual([
+        {
+          type: 'TypeError',
+          stacktrace: null,
+          message: 'x is undefined',
+          count: 3,
+          lastSeen: '2021-01-18T12:23:00.000Z',
+        },
+      ]);
+    }
+  );
+
   apiTest('returns 403 without the APM privilege', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser(DIGITAL_EXPERIENCE_ONLY_ROLE);
 

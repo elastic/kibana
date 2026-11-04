@@ -41,6 +41,9 @@ describe('toHttpRequests', () => {
 
   it('maps each URL and method in the order of the search, durations from nanoseconds to milliseconds', () => {
     const aggregations: HttpRequestsAggregations = {
+      environments: { buckets: [] },
+      environmentNames: { buckets: [] },
+      environmentNotDefined: { doc_count: 0 },
       inEnvironment: {
         requests: {
           buckets: [

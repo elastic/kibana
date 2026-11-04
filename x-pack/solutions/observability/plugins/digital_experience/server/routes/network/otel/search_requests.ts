@@ -21,9 +21,7 @@ import {
   RESOURCE_TIMING_TRANSFER_SIZE,
 } from '../../../../common/otel_data';
 import { byP75Descending, p75Of, p95Of } from '../../../lib/helpers/aggregations';
-import { environmentFilter } from '../../../lib/helpers/environment';
 import {
-  ENVIRONMENT_FIELDS,
   applicationDocuments,
   byEnvironment,
   eventCount,
@@ -97,7 +95,7 @@ export const resourcesSearch = ({
   };
 };
 
-/** The HTTP requests of one application by URL and method, from the client spans. */
+/** One application's HTTP requests by URL and method, and its environments with client spans. */
 export const httpRequestsSearch = ({
   environment,
   ...application
@@ -109,24 +107,18 @@ export const httpRequestsSearch = ({
         filter: [...applicationDocuments(application), ...httpRequestDocuments()],
       },
     },
-    // Only the selected environment: the picker's environments come from the logs.
-    aggs: {
-      inEnvironment: {
-        filter: environmentFilter(ENVIRONMENT_FIELDS, environment),
+    aggs: byEnvironment(environment, {
+      requests: {
+        multi_terms: {
+          terms: [{ field: URL_FULL }, { field: HTTP_REQUEST_METHOD }],
+          size: TOP_ROWS,
+        },
         aggs: {
-          requests: {
-            multi_terms: {
-              terms: [{ field: URL_FULL }, { field: HTTP_REQUEST_METHOD }],
-              size: TOP_ROWS,
-            },
-            aggs: {
-              withOutcome: requestsWithOutcome(),
-              failed: failedRequests(),
-              duration: p95Of(DURATION),
-            },
-          },
+          withOutcome: requestsWithOutcome(),
+          failed: failedRequests(),
+          duration: p95Of(DURATION),
         },
       },
-    },
+    }),
   };
 };
