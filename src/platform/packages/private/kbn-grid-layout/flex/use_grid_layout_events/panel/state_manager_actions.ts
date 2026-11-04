@@ -16,6 +16,7 @@ import type { GridLayoutContextType } from '../../use_grid_layout_context';
 import { getSensorType } from '../sensors';
 import type { PointerPosition, UserInteractionEvent } from '../types';
 import { getDragPreviewRect, getResizePreviewRect, getSensorOffsets } from './utils';
+import { CONFIRM_BUTTON } from '@elastic/eui/src/components/modal/confirm_modal';
 
 let startingLayout: FlexLayoutData | undefined;
 
@@ -110,7 +111,27 @@ export const moveAction = (
     requestedPanelData.width = Math.max(targetWidth, 1);
   } else {
     // TODO: Determine order
-    // requestedPanelData.order = targetWidth;
+    // get all panels to the left
+    // order = length of left panels
+    const sorted = Object.entries(panelElements)
+      .map(([id, panel]) => {
+        return {
+          id,
+          left:
+            id === activePanel.id ? previewRect.left : panel?.getBoundingClientRect()?.left ?? 0,
+        };
+      })
+      .sort((a, b) => a.left - b.left);
+    console.log({ sorted });
+
+    const nextLayout: FlexLayoutData = {};
+    sorted.forEach(({ id }, index) => {
+      nextLayout[id] = { ...currentLayout[id], order: index };
+    });
+    console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!', { nextLayout });
+    gridLayout$.next(nextLayout);
+    return;
+    // requestedPanelData.order = toTheLeft;
   }
   console.log({ requestedPanelData, tessxt: lastRequestedPanelPosition.current });
 
@@ -149,11 +170,6 @@ export const moveAction = (
     position: previewRect,
   });
 };
-
-const resolveLayout = (
-  originalLayout: FlexLayoutData,
-  dragRequest: FlexPanelData
-): FlexLayoutData => {};
 
 export const commitAction = ({ activePanelEvent$, panelRefs }: FlexLayoutStateManager) => {
   const event = activePanelEvent$.getValue();
