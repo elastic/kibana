@@ -35,7 +35,7 @@ describe('saveConnectorSetOnInvestigator', () => {
   it('saves the default set and keeps the rest of the saved agent', async () => {
     const fetch = fetchAgent();
 
-    await saveConnectorSetOnInvestigator(fetch, { NIGHTSHIFT_CONNECTOR_SET: 'default' });
+    await saveConnectorSetOnInvestigator(fetch, { env: { NIGHTSHIFT_CONNECTOR_SET: 'default' } });
 
     expect(fetch).toHaveBeenCalledTimes(2);
     expect(fetch.mock.calls[0][0]).toBe('/api/agent_builder/agents/nightshift.investigation');
@@ -50,17 +50,31 @@ describe('saveConnectorSetOnInvestigator', () => {
   it('saves only the ORCA Elasticsearch connector for the orcabench set', async () => {
     const fetch = fetchAgent();
 
-    await saveConnectorSetOnInvestigator(fetch, { NIGHTSHIFT_CONNECTOR_SET: 'orcabench' });
+    await saveConnectorSetOnInvestigator(fetch, { env: { NIGHTSHIFT_CONNECTOR_SET: 'orcabench' } });
 
     expect(putBody(fetch as unknown as jest.Mock).configuration.connector_ids).toEqual([
       ...CONNECTOR_SETS.orcabench,
     ]);
   });
 
+  // A later dataset on the same stack must not inherit an earlier one's connectors.
+  it('saves no connectors for a dataset that must not reach the stack clusters', async () => {
+    const fetch = fetchAgent();
+
+    await saveConnectorSetOnInvestigator(fetch, {
+      env: { NIGHTSHIFT_CONNECTOR_SET: 'default' },
+      withoutConnectors: true,
+    });
+
+    expect(putBody(fetch as unknown as jest.Mock)).toEqual({
+      configuration: { ...savedAgent.configuration, connector_ids: [] },
+    });
+  });
+
   it('does nothing when the stack has no connector set', async () => {
     const fetch = jest.fn();
 
-    await saveConnectorSetOnInvestigator(fetch as unknown as HttpHandler, {});
+    await saveConnectorSetOnInvestigator(fetch as unknown as HttpHandler, { env: {} });
 
     expect(fetch).not.toHaveBeenCalled();
   });

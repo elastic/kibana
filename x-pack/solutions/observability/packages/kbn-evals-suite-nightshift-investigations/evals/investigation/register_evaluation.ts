@@ -75,6 +75,9 @@ export const registerInvestigationEvaluation = ({
           await assertOrcaSource();
         }
         const dataset = await loadDataset(evalsClient);
+        // The bundled synthetic examples supply their own evidence and must not query a cluster.
+        const bundledSynthetic =
+          !orca && !process.env.NIGHTSHIFT_EXAMPLES_FILE && !process.env.NIGHTSHIFT_DATASET_NAME;
         // The judges score with the evaluation connector, not the model under test.
         const judges = createInvestigationJudges({
           inferenceClient: inferenceClient.bindTo({ connectorId: evaluationConnector.id }),
@@ -153,7 +156,7 @@ export const registerInvestigationEvaluation = ({
             { timeout: 60_000 }
           )
           .toBe(true);
-        await saveConnectorSetOnInvestigator(fetch);
+        await saveConnectorSetOnInvestigator(fetch, { withoutConnectors: bundledSynthetic });
         await replaceCustomContext(fetch, getDatasetCustomContext(dataset));
         const [experiment] = await executorClient.runExperiment(
           {
@@ -216,11 +219,7 @@ export const registerInvestigationEvaluation = ({
               if (orca && hasOrcaTelemetryQuery(conversation.rounds)) {
                 casesWithOrcaTelemetry.push(output.case_id);
               }
-              if (
-                !orca &&
-                !process.env.NIGHTSHIFT_EXAMPLES_FILE &&
-                !process.env.NIGHTSHIFT_DATASET_NAME
-              ) {
+              if (bundledSynthetic) {
                 assertSuccessfulSandboxCommand(conversation.rounds);
               }
               expect(output.traceId).toMatch(/^[a-f0-9]{32}$/);

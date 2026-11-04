@@ -46,10 +46,14 @@ interface InvestigatorAgentResponse {
  * Saves the stack's connector set on the investigator the way a user would in the agent's
  * settings. The update merges `connector_ids` into the saved configuration, so tools and
  * instructions already stored on the agent stay. It is a no-op without a connector set.
+ * `withoutConnectors` saves none, for datasets that must not reach the stack's clusters.
  */
 export const saveConnectorSetOnInvestigator = async (
   fetch: HttpHandler,
-  env: NodeJS.ProcessEnv = process.env
+  {
+    env = process.env,
+    withoutConnectors = false,
+  }: { env?: NodeJS.ProcessEnv; withoutConnectors?: boolean } = {}
 ): Promise<void> => {
   const connectorSet = getConnectorSet(env);
   if (!connectorSet) return;
@@ -62,7 +66,7 @@ export const saveConnectorSetOnInvestigator = async (
     body: JSON.stringify({
       configuration: {
         ...current.configuration,
-        connector_ids: [...CONNECTOR_SETS[connectorSet]],
+        connector_ids: withoutConnectors ? [] : [...CONNECTOR_SETS[connectorSet]],
       },
     }),
   });
