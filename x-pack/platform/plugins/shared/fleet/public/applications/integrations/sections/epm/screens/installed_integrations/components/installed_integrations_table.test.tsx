@@ -138,6 +138,7 @@ describe('InstalledIntegrationsTable', () => {
     packages: InstalledPackageUIPackageListItem[],
     overrides?: {
       onboardingInstanceCounts?: Map<string, number>;
+      isOnboardingEnabled?: boolean;
       rollingbackIntegrations?: InstalledPackageUIPackageListItem[];
       rollbackAvailable?: Record<string, boolean>;
     }
@@ -167,6 +168,7 @@ describe('InstalledIntegrationsTable', () => {
         pagination={defaultPagination}
         selection={defaultSelection}
         onboardingInstanceCounts={overrides?.onboardingInstanceCounts}
+        isOnboardingEnabled={overrides?.isOnboardingEnabled}
       />
     );
 
@@ -255,6 +257,34 @@ describe('InstalledIntegrationsTable', () => {
       expect(
         screen.getByTestId('installedIntegrationsTable.instancesLink.test-package')
       ).toHaveTextContent('3');
+    });
+
+    it('shows the Collection badge only for a package with instances', () => {
+      renderComponent([basePackage], { onboardingInstanceCounts: new Map([['test-package', 1]]) });
+      expect(
+        screen.getByTestId('installedIntegrationsTable.collectionBadge.test-package')
+      ).toHaveTextContent('Collection');
+    });
+
+    it('shows the Collection badge for a package of the AWS flow without instances', () => {
+      renderComponent([{ ...basePackage, name: 'aws' }], { isOnboardingEnabled: true });
+      expect(
+        screen.getByTestId('installedIntegrationsTable.collectionBadge.aws')
+      ).toBeInTheDocument();
+    });
+
+    it('shows no Collection badge for a package of the AWS flow when onboarding is off', () => {
+      renderComponent([{ ...basePackage, name: 'aws' }]);
+      expect(
+        screen.queryByTestId('installedIntegrationsTable.collectionBadge.aws')
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows no Collection badge without instances', () => {
+      renderComponent([basePackage]);
+      expect(
+        screen.queryByTestId('installedIntegrationsTable.collectionBadge.test-package')
+      ).not.toBeInTheDocument();
     });
 
     it('opens the instances of the package on click', async () => {

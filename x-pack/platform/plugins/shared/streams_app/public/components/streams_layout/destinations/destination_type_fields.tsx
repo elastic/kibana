@@ -8,60 +8,28 @@
 import React from 'react';
 import { LocalElasticsearchFields } from './local_elasticsearch_fields';
 import { S3Fields } from './s3_fields';
-import type {
-  DestinationCreationFormErrors,
-  DestinationStorageKind,
-  ElasticsearchDestinationFormData,
-  S3DestinationFormData,
-  S3FieldsErrors,
-} from './types';
+import type { DestinationCreationFormErrors, DestinationStorageKind } from './types';
 
 interface DestinationTypeFieldsProps {
   storageKind: DestinationStorageKind;
-  auto: boolean;
-  logsIndex: string;
-  metricsIndex: string;
-  tracesIndex: string;
-  staticIndexesError?: DestinationCreationFormErrors['staticIndexes'];
-  logsIndexError?: DestinationCreationFormErrors['logsIndex'];
-  metricsIndexError?: DestinationCreationFormErrors['metricsIndex'];
-  tracesIndexError?: DestinationCreationFormErrors['tracesIndex'];
+  errors: DestinationCreationFormErrors;
   disabled: boolean;
-  onAutoChange: (auto: boolean) => void;
-  onIndexesChange: (
-    indexes: Partial<
-      Pick<ElasticsearchDestinationFormData, 'logsIndex' | 'metricsIndex' | 'tracesIndex'>
-    >
-  ) => void;
-  s3Form: S3DestinationFormData;
-  s3Errors: S3FieldsErrors;
-  onS3Change: (changes: Partial<S3DestinationFormData>) => void;
-  onBlur: () => void;
 }
 
 /**
  * Renders the form section for the selected destination type.
  * Add a case and a fields component when a new type becomes available.
+ * Fields read and write their values through the surrounding `FormProvider`.
  */
 export const DestinationTypeFields = ({
   storageKind,
-  s3Form,
-  s3Errors,
-  onS3Change,
-  ...fields
+  errors,
+  disabled,
 }: DestinationTypeFieldsProps) => {
   switch (storageKind) {
     case 'local_elasticsearch':
-      return <LocalElasticsearchFields {...fields} />;
+      return <LocalElasticsearchFields errors={errors} disabled={disabled} />;
     case 'external_storage':
-      return (
-        <S3Fields
-          values={s3Form}
-          errors={s3Errors}
-          disabled={fields.disabled}
-          onChange={onS3Change}
-          onBlur={fields.onBlur}
-        />
-      );
+      return <S3Fields errors={errors} disabled={disabled} />;
   }
 };

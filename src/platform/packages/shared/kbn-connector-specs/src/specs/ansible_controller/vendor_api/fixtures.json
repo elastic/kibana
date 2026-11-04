@@ -1,0 +1,9 @@
+{
+  "request": {
+    "input": {
+      "method": "GET",
+      "path": "/job_templates/",
+      "query": {}
+    }
+  }
+}

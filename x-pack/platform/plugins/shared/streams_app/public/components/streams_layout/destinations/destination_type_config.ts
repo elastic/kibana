@@ -22,7 +22,7 @@ export const getDestinationTypeLabel = (type: DestinationType): string =>
 
 export const DESTINATION_AUTO_MODE_LABEL = i18n.translate(
   'xpack.streams.destinations.autoModeLabel',
-  { defaultMessage: 'Auto' }
+  { defaultMessage: 'Auto (default)' }
 );
 
 export const DESTINATION_FIXED_INDEX_MODE_LABEL = i18n.translate(

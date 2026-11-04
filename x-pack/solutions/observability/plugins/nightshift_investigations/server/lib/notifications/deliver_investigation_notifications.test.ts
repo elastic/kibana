@@ -113,7 +113,7 @@ describe('investigation notification lifecycle', () => {
   );
 
   it.each(['completed', 'failed', 'timed_out'] as const)(
-    'posts a started root and updates it for %s',
+    'posts a started root and edits it for %s',
     async (terminalPhase) => {
       const { send, execute, client } = setup();
       expect(await send('started')).toEqual({ sent: 1, failed: 0, unconfirmed: 0 });
@@ -167,6 +167,7 @@ describe('investigation notification lifecycle', () => {
     await send('started', 'exec-2', []);
     await send('completed', 'exec-2', []);
     expect(execute).toHaveBeenCalledTimes(4);
+    // The later execution's started message replies in the thread, and its terminal phase edits it.
     expect(execute.mock.calls[2][0].params).toMatchObject({
       subAction: 'sendMessage',
       subActionParams: { channel: 'C123', threadTs: '1.000001' },

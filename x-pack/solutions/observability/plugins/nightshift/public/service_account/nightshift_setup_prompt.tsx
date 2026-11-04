@@ -19,11 +19,8 @@ import {
 import { openSourceAi } from '@elastic/eui-illustrations';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  getNightshiftServiceAccountName,
-  type InvestigatorServiceAccountStatus,
-} from '@kbn/nightshift-investigations-plugin/common';
-import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
+import type { InvestigatorServiceAccountStatus } from '@kbn/nightshift-investigations-plugin/common';
+import { getNightshiftCapabilities, getNightshiftServiceAccountName } from '@kbn/nightshift-shared';
 import { useKibana } from '../hooks/use_kibana';
 import { useSetUpNightshiftServiceAccount } from './use_investigator_service_account';
 
