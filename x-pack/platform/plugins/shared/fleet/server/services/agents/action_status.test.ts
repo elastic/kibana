@@ -283,3 +283,94 @@ describe('getActionStatuses policy change actions', () => {
     expect(JSON.stringify(agentsSearch.query)).toContain('"policy_base_id":["p1"]');
   });
 });
+
+describe('getActionStatuses version specific policy actions', () => {
+  const actionDoc = (actionId: string, agentCount: number, policyId?: string) => ({
+    _source: {
+      action_id: actionId,
+      type: 'POLICY_REASSIGN',
+      '@timestamp': '2026-01-01T00:00:00Z',
+      agents: Array.from({ length: agentCount }, (_, i) => `${actionId}-agent-${i}`),
+      ...(policyId ? { data: { policy_id: policyId } } : {}),
+    },
+  });
+
+  const makeEsClient = (actionPages: object[][]) => {
+    const pages = [...actionPages];
+    return {
+      search: jest.fn().mockImplementation(async (request: any) => {
+        if (request.index === '.fleet-actions') {
+          // getActions reads pages sorted by timestamp, getCancelledActions filters on CANCEL
+          if (request.sort) {
+            return { hits: { hits: pages.shift() ?? [] } };
+          }
+          return { hits: { hits: [] } };
+        }
+        if (request.index === '.fleet-actions-results') {
+          return {
+            hits: { hits: [], total: { value: 0 } },
+            aggregations: { ack_counts: { buckets: [] } },
+          };
+        }
+        if (request.index === '.fleet-policies') {
+          return { hits: { hits: [] } };
+        }
+        if (request.index === '.fleet-agents') {
+          return { aggregations: { policies: { buckets: [] } } };
+        }
+        return { hits: { hits: [] } };
+      }),
+    } as unknown as ElasticsearchClient;
+  };
+
+  const getActionsSearches = (esClient: ElasticsearchClient) =>
+    (esClient.search as jest.Mock).mock.calls
+      .map(([request]) => request)
+      .filter((request) => request.index === '.fleet-actions' && request.sort);
+
+  it('keeps reading action docs until the limit of non-version-specific docs is reached', async () => {
+    const sentinelPage = Array.from({ length: 20 }, (_, i) =>
+      actionDoc(`sentinel-${i}`, 1, 'p1#sentinel')
+    );
+    const esClient = makeEsClient([
+      sentinelPage,
+      [actionDoc('A', 10, 'p1'), actionDoc('A', 10, 'p1'), actionDoc('A', 10, 'p1')],
+    ]);
+
+    const actions = await getActionStatuses(esClient, { errorSize: 0 });
+
+    expect(actions.map((action) => action.actionId)).toEqual(['A']);
+    expect(actions[0].nbAgentsActionCreated).toBe(30);
+    const searches = getActionsSearches(esClient);
+    expect(searches.map((request) => request.from)).toEqual([0, 20]);
+    // stable order between pages when documents share a timestamp
+    expect(searches[0].sort).toEqual([{ '@timestamp': 'desc' }, { action_id: 'asc' }]);
+  });
+
+  it('does a single search when the first page has enough docs', async () => {
+    const esClient = makeEsClient([
+      Array.from({ length: 20 }, (_, i) => actionDoc(`action-${i}`, 2, 'p1')),
+    ]);
+
+    const actions = await getActionStatuses(esClient, { errorSize: 0 });
+
+    expect(actions).toHaveLength(20);
+    expect(getActionsSearches(esClient).map((request) => request.from)).toEqual([0]);
+  });
+
+  it('does not return version specific policy actions', async () => {
+    const esClient = makeEsClient([
+      [
+        actionDoc('A', 5, 'p1'),
+        actionDoc('B', 1, 'p1#sentinel'),
+        actionDoc('C', 1, 'p1#9.4'),
+        actionDoc('D', 3),
+      ],
+    ]);
+
+    const actions = await getActionStatuses(esClient, { errorSize: 0 });
+
+    expect(actions.map((action) => action.actionId).sort()).toEqual(['A', 'D']);
+    expect(getActionsSearches(esClient).map((request) => request.from)).toEqual([0]);
+  });
+});
