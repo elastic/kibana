@@ -9,17 +9,18 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DataSource } from '@kbn/data-source';
-import type { SUGGEST_AD_JOBS_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { DISCOVER_AD_MANAGEMENT_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { UnifiedHistogramServices } from '../../../types';
 
 // Avoid taking a dependency on uiActionsPlugin just for this const
-const suggestAdJobsTrigger: typeof SUGGEST_AD_JOBS_TRIGGER = 'SUGGEST_AD_JOBS_TRIGGER';
+const discoverAdManagementTrigger: typeof DISCOVER_AD_MANAGEMENT_TRIGGER =
+  'DISCOVER_AD_MANAGEMENT_TRIGGER';
 
 /**
  * Returns a callback which opens the anomaly detection job suggestions for the data view,
  * or undefined when the data source can't be analyzed or nothing handles the trigger.
  */
-export const useSuggestAdJobs = ({
+export const useDiscoverAdManagement = ({
   services,
   dataSource,
 }: {
@@ -51,7 +52,7 @@ export const useSuggestAdJobs = ({
       return;
     }
     services.uiActions
-      .getTriggerCompatibleActions(suggestAdJobsTrigger, triggerContext)
+      .getTriggerCompatibleActions(discoverAdManagementTrigger, triggerContext)
       .then((actions) => {
         if (isCurrent && actions.length > 0) {
           setIsCompatible(true);
@@ -67,7 +68,7 @@ export const useSuggestAdJobs = ({
     if (!triggerContext) {
       return;
     }
-    void services.uiActions.executeTriggerActions(suggestAdJobsTrigger, triggerContext);
+    void services.uiActions.executeTriggerActions(discoverAdManagementTrigger, triggerContext);
   }, [services.uiActions, triggerContext]);
 
   return isCompatible ? onSuggestAdJobs : undefined;

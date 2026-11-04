@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import type { JobSuggestion } from '../../../../common/types/job_suggestions';
-import type { jobsApiProvider } from '../../../application/services/ml_api_service/jobs';
+import type { jobsApiProvider } from '../../services/ml_api_service/jobs';
 
 export interface SuggestionTimeRange {
   from: string;

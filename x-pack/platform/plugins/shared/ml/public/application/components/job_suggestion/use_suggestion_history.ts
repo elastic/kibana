@@ -7,7 +7,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useMlKibana } from '../../../application/contexts/kibana';
+import { useMlKibana } from '../../contexts/kibana';
 import { getPreviousRun, saveRun } from './previous_runs';
 import type { SuggestionRun } from './previous_runs';
 import type { SuggestionsState } from './job_suggestion_service';

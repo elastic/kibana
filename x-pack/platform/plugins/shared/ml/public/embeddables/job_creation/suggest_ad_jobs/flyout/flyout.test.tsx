@@ -12,18 +12,18 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { JOB_TYPE } from '../../../../../common/constants/new_job';
 import type { JobSuggestion } from '../../../../../common/types/job_suggestions';
 import { SuggestADJobsFlyout } from './flyout';
-import type { SuggestionsState } from '../job_suggestion_service';
+import type { SuggestionsState } from '../../../../application/components/job_suggestion/job_suggestion_service';
 import { jobCloningService } from '../../../../application/services/job_cloning_service';
-import { useSuggestionHistory } from '../use_suggestion_history';
-import type { SuggestionRun } from '../previous_runs';
+import { useSuggestionHistory } from '../../../../application/components/job_suggestion/use_suggestion_history';
+import type { SuggestionRun } from '../../../../application/components/job_suggestion/previous_runs';
 
 const mockState$ = new BehaviorSubject<SuggestionsState>({ status: 'loading' });
 const mockSuggest = jest.fn();
 const mockReload = jest.fn();
 const mockCancel = jest.fn();
 
-jest.mock('../job_suggestion_service', () => ({
-  ...jest.requireActual('../job_suggestion_service'),
+jest.mock('../../../../application/components/job_suggestion/job_suggestion_service', () => ({
+  ...jest.requireActual('../../../../application/components/job_suggestion/job_suggestion_service'),
   JobSuggestionService: jest.fn().mockImplementation(() => ({
     get state() {
       return mockState$.getValue();
@@ -46,7 +46,7 @@ const mockNavigate = jest.fn();
 const mockAddDanger = jest.fn();
 const mockFind = jest.fn();
 
-jest.mock('../use_suggestion_history');
+jest.mock('../../../../application/components/job_suggestion/use_suggestion_history');
 
 jest.mock('../../../../application/contexts/kibana', () => ({
   useMlKibana: () => ({

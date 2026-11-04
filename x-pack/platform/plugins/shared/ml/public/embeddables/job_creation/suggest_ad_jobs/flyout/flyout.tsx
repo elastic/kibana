@@ -11,20 +11,16 @@ import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiButton,
   EuiButtonEmpty,
-  EuiEmptyPrompt,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiLoadingSpinner,
   EuiSpacer,
   EuiSuperDatePicker,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { JobSuggestion } from '../../../../../common/types/job_suggestions';
 import {
   useMlKibana,
@@ -33,11 +29,15 @@ import {
 } from '../../../../application/contexts/kibana';
 import { useJobsApiService } from '../../../../application/services/ml_api_service/jobs';
 import { getWizardPath, stashSuggestion } from '../open_suggestion_in_wizard';
-import { DEFAULT_SUGGESTION_TIME_RANGE, JobSuggestionService } from '../job_suggestion_service';
-import type { SuggestionTimeRange } from '../job_suggestion_service';
-import { useSuggestionHistory } from '../use_suggestion_history';
+import {
+  DEFAULT_SUGGESTION_TIME_RANGE,
+  JobSuggestionService,
+} from '../../../../application/components/job_suggestion/job_suggestion_service';
+import type { SuggestionTimeRange } from '../../../../application/components/job_suggestion/job_suggestion_service';
+import { useSuggestionHistory } from '../../../../application/components/job_suggestion/use_suggestion_history';
 import { PreviousRun } from './previous_run';
 import { SuggestionCards } from './suggestion_cards';
+import { SuggestionStatus } from '../../../../application/components/job_suggestion/suggestion_status';
 
 interface Props {
   onClose: () => void;
@@ -165,101 +165,19 @@ export const SuggestADJobsFlyout: FC<Props> = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        {state.status === 'loading' ? (
-          <EuiEmptyPrompt
-            data-test-subj="mlSuggestADJobsLoading"
-            icon={<EuiLoadingSpinner size="xl" />}
-            title={
-              <h3>
-                <FormattedMessage
-                  id="xpack.ml.suggestADJobsFlyout.loadingTitle"
-                  defaultMessage="Analyzing your data"
-                />
-              </h3>
-            }
-            body={
-              <p>
-                <FormattedMessage
-                  id="xpack.ml.suggestADJobsFlyout.loadingDescription"
-                  defaultMessage="This can take up to a minute."
-                />
-              </p>
-            }
-            actions={
-              <EuiButton
-                size="s"
-                iconType="stop"
-                onClick={() => jobSuggestionService.cancel()}
-                data-test-subj="mlSuggestADJobsStop"
-              >
-                <FormattedMessage
-                  id="xpack.ml.suggestADJobsFlyout.stopButton"
-                  defaultMessage="Stop"
-                />
-              </EuiButton>
-            }
-          />
-        ) : state.status === 'cancelled' ? (
-          <EuiEmptyPrompt
-            data-test-subj="mlSuggestADJobsCancelled"
-            title={
-              <h3>
-                <FormattedMessage
-                  id="xpack.ml.suggestADJobsFlyout.cancelledTitle"
-                  defaultMessage="Analysis stopped"
-                />
-              </h3>
-            }
-            body={
-              <p>
-                <FormattedMessage
-                  id="xpack.ml.suggestADJobsFlyout.cancelledDescription"
-                  defaultMessage="No jobs were suggested from this run."
-                />
-              </p>
-            }
-            actions={
-              <EuiButton
-                size="s"
-                onClick={() => void jobSuggestionService.reload()}
-                data-test-subj="mlSuggestADJobsRunAgain"
-              >
-                <FormattedMessage
-                  id="xpack.ml.suggestADJobsFlyout.runAgainButton"
-                  defaultMessage="Run again"
-                />
-              </EuiButton>
-            }
-          />
-        ) : state.status === 'error' ? (
-          <KbnDangerCallout
-            announceOnMount
-            data-test-subj="mlSuggestADJobsError"
-            title={i18n.translate('xpack.ml.suggestADJobsFlyout.errorTitle', {
-              defaultMessage: 'Could not suggest jobs',
-            })}
-          >
-            {extractErrorMessage(state.error)}
-          </KbnDangerCallout>
-        ) : state.suggestions.length === 0 ? (
-          <EuiEmptyPrompt
-            data-test-subj="mlSuggestADJobsEmpty"
-            body={
-              <p>
-                <FormattedMessage
-                  id="xpack.ml.suggestADJobsFlyout.emptyDescription"
-                  defaultMessage="No suitable jobs were found for this data. Try a different time range."
-                />
-              </p>
-            }
-          />
-        ) : (
+        <SuggestionStatus
+          state={state}
+          onStop={() => jobSuggestionService.cancel()}
+          onRunAgain={() => void jobSuggestionService.reload()}
+          testSubjPrefix="mlSuggestADJobs"
+        />
+        {state.status === 'loaded' && state.suggestions.length > 0 ? (
           <SuggestionCards
             suggestions={state.suggestions}
             onSelect={openInWizard}
             testSubjPrefix="mlSuggestADJobs"
           />
-        )}
+        ) : null}
 
         {previousRun ? <PreviousRun run={previousRun} onSelect={openInWizard} /> : null}
       </EuiFlyoutBody>

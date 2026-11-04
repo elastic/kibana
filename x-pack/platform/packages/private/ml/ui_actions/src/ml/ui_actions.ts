@@ -57,3 +57,24 @@ export interface SuggestADJobsContext {
 }
 
 export const SUGGEST_AD_JOBS_ACTION = 'suggestADJobsAction';
+
+/**
+ * Context for the Discover anomaly detection management action.
+ */
+export interface DiscoverADManagementContext {
+  /**
+   * The index name or index pattern to suggest jobs for.
+   */
+  indexPattern: string;
+  /**
+   * The data view of the index pattern. When it is not provided, a data view matching
+   * `indexPattern` is looked up.
+   */
+  dataViewId?: string;
+  /**
+   * Invoked after the flyout is closed.
+   */
+  onClose?: () => void;
+}
+
+export const DISCOVER_AD_MANAGEMENT_ACTION = 'discoverADManagementAction';

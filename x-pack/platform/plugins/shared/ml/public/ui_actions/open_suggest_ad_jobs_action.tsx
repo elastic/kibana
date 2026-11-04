@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type {
   ActionExecutionContext,
@@ -14,24 +13,7 @@ import type {
 import { SUGGEST_AD_JOBS_ACTION, type SuggestADJobsContext } from '@kbn/ml-ui-actions';
 import type { MlCoreSetup } from '../plugin';
 import { checkPermissionAsync } from '../application/capabilities/check_capabilities';
-
-const INFERENCE_CONNECTORS_ROUTE = '/internal/inference/connectors';
-
-/** Suggesting jobs needs an active Enterprise license and at least one AI connector. */
-const hasLicenseAndConnector = async (
-  getStartServices: MlCoreSetup['getStartServices']
-): Promise<boolean> => {
-  const [{ http }, { licensing }] = await getStartServices();
-  const license = await firstValueFrom(licensing.license$);
-  if (license.status !== 'active' || !license.hasAtLeast('enterprise')) return false;
-
-  try {
-    const { connectors } = await http.get<{ connectors: unknown[] }>(INFERENCE_CONNECTORS_ROUTE);
-    return connectors.length > 0;
-  } catch {
-    return false;
-  }
-};
+import { hasLicenseAndConnector } from './has_license_and_connector';
 
 export function createSuggestADJobsAction(
   getStartServices: MlCoreSetup['getStartServices']

@@ -11,8 +11,8 @@ import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHorizontalRule, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { JobSuggestion } from '../../../../../common/types/job_suggestions';
-import { describeTimeRange } from '../describe_time_range';
-import type { SuggestionRun } from '../previous_runs';
+import { describeTimeRange } from '../../../../application/components/job_suggestion/describe_time_range';
+import type { SuggestionRun } from '../../../../application/components/job_suggestion/previous_runs';
 import { SuggestionCards } from './suggestion_cards';
 
 interface Props {

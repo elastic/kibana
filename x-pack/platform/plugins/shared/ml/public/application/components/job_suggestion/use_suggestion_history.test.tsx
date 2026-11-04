@@ -16,7 +16,7 @@ import { useSuggestionHistory } from './use_suggestion_history';
 
 let mockSecurity: { authc: { getCurrentUser: jest.Mock } } | undefined;
 
-jest.mock('../../../application/contexts/kibana', () => ({
+jest.mock('../../contexts/kibana', () => ({
   useMlKibana: () => ({ services: { security: mockSecurity } }),
 }));
 
