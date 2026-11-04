@@ -54,6 +54,7 @@ import {
   validateSignalWindowCoversInterval,
 } from '../../../common/validation';
 import { validateSignalFilter } from '../../ai_indices/signal_filter';
+import { dreamingConfigSchema } from './dreaming_schema';
 
 const aiIndexIdSchema = schema.string({
   minLength: 1,
@@ -271,6 +272,7 @@ const aiIndexPropertiesSchema = {
     })
   ),
   feedback_analysis: schema.maybe(feedbackAnalysisSchema),
+  dreaming: schema.maybe(dreamingConfigSchema),
   dest: aiIndexDestSchema,
   automations: schema.arrayOf(aiIndexAutomationSchema, {
     maxSize: MAX_AI_INDEX_AUTOMATIONS,
@@ -571,6 +573,7 @@ export const aiIndexHttpItemResponseSchema = () =>
       },
     }),
     feedback_analysis: schema.maybe(feedbackAnalysisResponseSchema()),
+    dreaming: schema.maybe(dreamingConfigSchema),
   });
 
 export const createAiIndexResponseSchema = () =>

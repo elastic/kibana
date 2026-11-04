@@ -15,6 +15,7 @@ import type {
   AiIndexSource,
   AiIndexTrace,
 } from '../../common/http_api/ai_indices';
+import type { AiIndexDreamingConfig } from '../../common/dreaming';
 
 export const aiIndicesIndexName = '.contextengine-ai-indices';
 
@@ -61,6 +62,8 @@ const storageSettings = {
           allowed_actions: types.keyword({}),
         },
       }),
+      // Read back whole and never queried.
+      dreaming: types.object({ enabled: false }),
     },
   },
 } satisfies IndexStorageSettings;
@@ -68,6 +71,7 @@ const storageSettings = {
 interface AiIndexDocumentFields {
   description?: string;
   feedback_analysis?: AiIndexFeedbackAnalysis;
+  dreaming?: AiIndexDreamingConfig;
   // Optional for backward compatibility with entries written before memory
   // support existed; absence is treated as enabled (`true`) on read.
   memory_enabled?: boolean;

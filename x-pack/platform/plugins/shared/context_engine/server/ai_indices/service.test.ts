@@ -13,6 +13,7 @@ import { createSpaceDslFilter } from '../utils/space_filter';
 import { AiIndexService } from './service';
 import {
   InvalidAiIndexDestError,
+  InvalidDreamingConfigError,
   AiIndexConflictError,
   AiIndexManagedError,
   AiIndexNotFoundError,
@@ -841,6 +842,122 @@ describe('AiIndexService', () => {
       await expect(
         service.setFeedbackAnalysis('customer_support', DEFAULT_SPACE, feedbackAnalysis)
       ).rejects.toBeInstanceOf(AiIndexConflictError);
+    });
+  });
+
+  describe('dreaming', () => {
+    const dreaming = {
+      enabled: true,
+      instructions: 'Remember what customers prefer.',
+      facts: [{ type: 'preference', description: 'Something a customer wants.' }],
+    };
+
+    it('creates and replaces an AI index with its dreaming config', async () => {
+      await service.create('customer_support', DEFAULT_SPACE, { ...properties, dreaming });
+      await service.put('customer_support', DEFAULT_SPACE, { ...properties, dreaming });
+
+      for (const [indexArgs] of storageClient.index.mock.calls) {
+        expect(indexArgs.document?.dreaming).toEqual(dreaming);
+      }
+    });
+
+    it('refuses to turn dreaming on for an AI index without memory', async () => {
+      const withoutMemory = { ...properties, memory_enabled: false, dreaming };
+
+      await expect(
+        service.create('customer_support', DEFAULT_SPACE, withoutMemory)
+      ).rejects.toThrow(
+        new InvalidDreamingConfigError(
+          "AI index 'customer_support' does not have memory enabled, so it cannot dream."
+        )
+      );
+      await expect(service.put('customer_support', DEFAULT_SPACE, withoutMemory)).rejects.toThrow(
+        InvalidDreamingConfigError
+      );
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
+
+    it('keeps a disabled dreaming config on an AI index without memory', async () => {
+      await service.put('customer_support', DEFAULT_SPACE, {
+        ...properties,
+        memory_enabled: false,
+        dreaming: { ...dreaming, enabled: false },
+      });
+
+      expect(storageClient.index).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns the stored config on read', async () => {
+      mockSearchHits(storedHit({ ...aiIndexDocument, dreaming }));
+
+      await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.toEqual(
+        expect.objectContaining({ dreaming })
+      );
+    });
+
+    describe('setDreaming', () => {
+      it('writes the config and leaves the rest of the entry untouched', async () => {
+        mockSearchHits(storedHit(aiIndexDocument));
+
+        await expect(
+          service.setDreaming('customer_support', DEFAULT_SPACE, dreaming)
+        ).resolves.toEqual(dreaming);
+
+        const [indexArgs] = storageClient.index.mock.calls[0];
+        expect(indexArgs.document).toEqual(
+          expect.objectContaining({
+            dreaming,
+            description: aiIndexDocument.description,
+            dest: aiIndexDocument.dest,
+            automations: aiIndexDocument.automations,
+            date_created: aiIndexDocument.date_created,
+          })
+        );
+        expect(indexArgs.if_seq_no).toBe(7);
+        expect(indexArgs.if_primary_term).toBe(2);
+      });
+
+      it('replaces the previous config rather than merging into it', async () => {
+        mockSearchHits(storedHit({ ...aiIndexDocument, dreaming }));
+
+        await service.setDreaming('customer_support', DEFAULT_SPACE, { enabled: false });
+
+        const [indexArgs] = storageClient.index.mock.calls[0];
+        expect(indexArgs.document?.dreaming).toEqual({ enabled: false });
+      });
+
+      it('is permitted on managed AI indices with memory, and keeps them managed', async () => {
+        mockSearchHits(storedHit({ ...aiIndexDocument, managed: true, memory_enabled: true }));
+
+        await service.setDreaming('customer_support', DEFAULT_SPACE, dreaming);
+
+        const [indexArgs] = storageClient.index.mock.calls[0];
+        expect(indexArgs.document?.managed).toBe(true);
+      });
+
+      it('refuses to turn dreaming on when the stored AI index has no memory', async () => {
+        mockSearchHits(storedHit({ ...aiIndexDocument, managed: true }));
+
+        await expect(
+          service.setDreaming('customer_support', DEFAULT_SPACE, dreaming)
+        ).rejects.toBeInstanceOf(InvalidDreamingConfigError);
+        expect(storageClient.index).not.toHaveBeenCalled();
+      });
+
+      it('throws AiIndexNotFoundError when the AI index does not exist', async () => {
+        await expect(
+          service.setDreaming('missing', DEFAULT_SPACE, dreaming)
+        ).rejects.toBeInstanceOf(AiIndexNotFoundError);
+      });
+
+      it('throws AiIndexConflictError when a concurrent write wins (409)', async () => {
+        mockSearchHits(storedHit(aiIndexDocument));
+        storageClient.index.mockRejectedValue(createConflictError());
+
+        await expect(
+          service.setDreaming('customer_support', DEFAULT_SPACE, dreaming)
+        ).rejects.toBeInstanceOf(AiIndexConflictError);
+      });
     });
   });
 

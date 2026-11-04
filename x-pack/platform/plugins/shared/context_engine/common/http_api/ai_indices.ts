@@ -6,6 +6,7 @@
  */
 
 import type { EsqlEsqlColumnInfo, FieldValue } from '@elastic/elasticsearch/lib/api/types';
+import type { AiIndexDreamingConfig } from '../dreaming';
 import type { ImprovementAction } from './improvement_actions';
 
 /** The type of backing store an AI index is attached to. */
@@ -92,6 +93,8 @@ export interface AiIndexProperties {
   sources: AiIndexSource[];
   traces: AiIndexTrace[];
   feedback_analysis?: AiIndexFeedbackAnalysis;
+  /** What the AI index learns from its memories, and how often. Missing: dreaming is off. */
+  dreaming?: AiIndexDreamingConfig;
 }
 
 export interface AiIndexHttpItem extends Omit<AiIndexProperties, 'traces'> {

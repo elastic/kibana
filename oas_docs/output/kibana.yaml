@@ -23890,6 +23890,122 @@ paths:
                           required:
                             - type
                             - value
+                        dreaming:
+                          additionalProperties: false
+                          description: 'What the AI Index learns from its memories: facts, and entities with the relationships between them.'
+                          type: object
+                          properties:
+                            connector_id:
+                              description: "The AI connector dreaming prompts. Omitted: Context Engine's default model."
+                              maxLength: 256
+                              minLength: 1
+                              type: string
+                            enabled:
+                              description: Whether dreaming runs on its schedule.
+                              type: boolean
+                            entities:
+                              additionalProperties: false
+                              description: 'Entity types (nodes) and the relationships between them (edges). Omitted or null: no entities.'
+                              nullable: true
+                              type: object
+                              properties:
+                                edges:
+                                  description: 'Relationship types between entity types. Omitted or empty: no relationships.'
+                                  items:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      description:
+                                        description: What the type means, as the dreaming model reads it.
+                                        maxLength: 2048
+                                        type: string
+                                      source:
+                                        description: The entity type the relationship starts at.
+                                        maxLength: 128
+                                        minLength: 1
+                                        type: string
+                                      target:
+                                        description: The entity type the relationship points to.
+                                        maxLength: 128
+                                        minLength: 1
+                                        type: string
+                                      type:
+                                        description: The relationship type.
+                                        maxLength: 128
+                                        minLength: 1
+                                        type: string
+                                    required:
+                                      - type
+                                      - source
+                                      - target
+                                  maxItems: 50
+                                  nullable: true
+                                  type: array
+                                nodes:
+                                  description: 'Entity types to build. Empty: no entities.'
+                                  items:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      attributes:
+                                        description: Attribute keys, stored on the entity as they are, for example `tier`.
+                                        items:
+                                          maxLength: 128
+                                          minLength: 1
+                                          type: string
+                                        maxItems: 50
+                                        type: array
+                                      description:
+                                        description: What the type means, as the dreaming model reads it.
+                                        maxLength: 2048
+                                        type: string
+                                      type:
+                                        description: The entity type, stored as the KI type `entity.<type>`.
+                                        maxLength: 128
+                                        minLength: 1
+                                        type: string
+                                    required:
+                                      - type
+                                  maxItems: 50
+                                  type: array
+                              required:
+                                - nodes
+                            facts:
+                              description: 'Fact types to build. Omitted or empty: no facts.'
+                              items:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  description:
+                                    description: What the type means, as the dreaming model reads it.
+                                    maxLength: 2048
+                                    type: string
+                                  type:
+                                    description: The fact type, stored as the KI type `fact.<type>`.
+                                    maxLength: 128
+                                    minLength: 1
+                                    type: string
+                                required:
+                                  - type
+                              maxItems: 50
+                              nullable: true
+                              type: array
+                            instructions:
+                              description: 'What dreaming is told about the AI Index: what it holds, who uses it, and what to record or skip.'
+                              maxLength: 8192
+                              type: string
+                            schedule:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                interval:
+                                  description: How often to dream, for example `1h` or `24h`. At least 15 minutes. Defaults to `24h`.
+                                  maxLength: 16
+                                  type: string
+                              required:
+                                - interval
+                          required:
+                            - enabled
                         feedback_analysis:
                           additionalProperties: false
                           description: The recurring feedback analysis, which reads agent signals and proposes improvement actions for the AI Index.
@@ -24195,6 +24311,122 @@ paths:
                   required:
                     - type
                     - value
+                dreaming:
+                  additionalProperties: false
+                  description: 'What the AI Index learns from its memories: facts, and entities with the relationships between them.'
+                  type: object
+                  properties:
+                    connector_id:
+                      description: "The AI connector dreaming prompts. Omitted: Context Engine's default model."
+                      maxLength: 256
+                      minLength: 1
+                      type: string
+                    enabled:
+                      description: Whether dreaming runs on its schedule.
+                      type: boolean
+                    entities:
+                      additionalProperties: false
+                      description: 'Entity types (nodes) and the relationships between them (edges). Omitted or null: no entities.'
+                      nullable: true
+                      type: object
+                      properties:
+                        edges:
+                          description: 'Relationship types between entity types. Omitted or empty: no relationships.'
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              description:
+                                description: What the type means, as the dreaming model reads it.
+                                maxLength: 2048
+                                type: string
+                              source:
+                                description: The entity type the relationship starts at.
+                                maxLength: 128
+                                minLength: 1
+                                type: string
+                              target:
+                                description: The entity type the relationship points to.
+                                maxLength: 128
+                                minLength: 1
+                                type: string
+                              type:
+                                description: The relationship type.
+                                maxLength: 128
+                                minLength: 1
+                                type: string
+                            required:
+                              - type
+                              - source
+                              - target
+                          maxItems: 50
+                          nullable: true
+                          type: array
+                        nodes:
+                          description: 'Entity types to build. Empty: no entities.'
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              attributes:
+                                description: Attribute keys, stored on the entity as they are, for example `tier`.
+                                items:
+                                  maxLength: 128
+                                  minLength: 1
+                                  type: string
+                                maxItems: 50
+                                type: array
+                              description:
+                                description: What the type means, as the dreaming model reads it.
+                                maxLength: 2048
+                                type: string
+                              type:
+                                description: The entity type, stored as the KI type `entity.<type>`.
+                                maxLength: 128
+                                minLength: 1
+                                type: string
+                            required:
+                              - type
+                          maxItems: 50
+                          type: array
+                      required:
+                        - nodes
+                    facts:
+                      description: 'Fact types to build. Omitted or empty: no facts.'
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          description:
+                            description: What the type means, as the dreaming model reads it.
+                            maxLength: 2048
+                            type: string
+                          type:
+                            description: The fact type, stored as the KI type `fact.<type>`.
+                            maxLength: 128
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                      maxItems: 50
+                      nullable: true
+                      type: array
+                    instructions:
+                      description: 'What dreaming is told about the AI Index: what it holds, who uses it, and what to record or skip.'
+                      maxLength: 8192
+                      type: string
+                    schedule:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        interval:
+                          description: How often to dream, for example `1h` or `24h`. At least 15 minutes. Defaults to `24h`.
+                          maxLength: 16
+                          type: string
+                      required:
+                        - interval
+                  required:
+                    - enabled
                 feedback_analysis:
                   additionalProperties: false
                   description: The recurring feedback analysis, which reads agent signals and proposes improvement actions for the AI Index.
@@ -25061,6 +25293,122 @@ paths:
                     required:
                       - type
                       - value
+                  dreaming:
+                    additionalProperties: false
+                    description: 'What the AI Index learns from its memories: facts, and entities with the relationships between them.'
+                    type: object
+                    properties:
+                      connector_id:
+                        description: "The AI connector dreaming prompts. Omitted: Context Engine's default model."
+                        maxLength: 256
+                        minLength: 1
+                        type: string
+                      enabled:
+                        description: Whether dreaming runs on its schedule.
+                        type: boolean
+                      entities:
+                        additionalProperties: false
+                        description: 'Entity types (nodes) and the relationships between them (edges). Omitted or null: no entities.'
+                        nullable: true
+                        type: object
+                        properties:
+                          edges:
+                            description: 'Relationship types between entity types. Omitted or empty: no relationships.'
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                description:
+                                  description: What the type means, as the dreaming model reads it.
+                                  maxLength: 2048
+                                  type: string
+                                source:
+                                  description: The entity type the relationship starts at.
+                                  maxLength: 128
+                                  minLength: 1
+                                  type: string
+                                target:
+                                  description: The entity type the relationship points to.
+                                  maxLength: 128
+                                  minLength: 1
+                                  type: string
+                                type:
+                                  description: The relationship type.
+                                  maxLength: 128
+                                  minLength: 1
+                                  type: string
+                              required:
+                                - type
+                                - source
+                                - target
+                            maxItems: 50
+                            nullable: true
+                            type: array
+                          nodes:
+                            description: 'Entity types to build. Empty: no entities.'
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                attributes:
+                                  description: Attribute keys, stored on the entity as they are, for example `tier`.
+                                  items:
+                                    maxLength: 128
+                                    minLength: 1
+                                    type: string
+                                  maxItems: 50
+                                  type: array
+                                description:
+                                  description: What the type means, as the dreaming model reads it.
+                                  maxLength: 2048
+                                  type: string
+                                type:
+                                  description: The entity type, stored as the KI type `entity.<type>`.
+                                  maxLength: 128
+                                  minLength: 1
+                                  type: string
+                              required:
+                                - type
+                            maxItems: 50
+                            type: array
+                        required:
+                          - nodes
+                      facts:
+                        description: 'Fact types to build. Omitted or empty: no facts.'
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            description:
+                              description: What the type means, as the dreaming model reads it.
+                              maxLength: 2048
+                              type: string
+                            type:
+                              description: The fact type, stored as the KI type `fact.<type>`.
+                              maxLength: 128
+                              minLength: 1
+                              type: string
+                          required:
+                            - type
+                        maxItems: 50
+                        nullable: true
+                        type: array
+                      instructions:
+                        description: 'What dreaming is told about the AI Index: what it holds, who uses it, and what to record or skip.'
+                        maxLength: 8192
+                        type: string
+                      schedule:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          interval:
+                            description: How often to dream, for example `1h` or `24h`. At least 15 minutes. Defaults to `24h`.
+                            maxLength: 16
+                            type: string
+                        required:
+                          - interval
+                    required:
+                      - enabled
                   feedback_analysis:
                     additionalProperties: false
                     description: The recurring feedback analysis, which reads agent signals and proposes improvement actions for the AI Index.
@@ -25344,6 +25692,122 @@ paths:
                   required:
                     - type
                     - value
+                dreaming:
+                  additionalProperties: false
+                  description: 'What the AI Index learns from its memories: facts, and entities with the relationships between them.'
+                  type: object
+                  properties:
+                    connector_id:
+                      description: "The AI connector dreaming prompts. Omitted: Context Engine's default model."
+                      maxLength: 256
+                      minLength: 1
+                      type: string
+                    enabled:
+                      description: Whether dreaming runs on its schedule.
+                      type: boolean
+                    entities:
+                      additionalProperties: false
+                      description: 'Entity types (nodes) and the relationships between them (edges). Omitted or null: no entities.'
+                      nullable: true
+                      type: object
+                      properties:
+                        edges:
+                          description: 'Relationship types between entity types. Omitted or empty: no relationships.'
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              description:
+                                description: What the type means, as the dreaming model reads it.
+                                maxLength: 2048
+                                type: string
+                              source:
+                                description: The entity type the relationship starts at.
+                                maxLength: 128
+                                minLength: 1
+                                type: string
+                              target:
+                                description: The entity type the relationship points to.
+                                maxLength: 128
+                                minLength: 1
+                                type: string
+                              type:
+                                description: The relationship type.
+                                maxLength: 128
+                                minLength: 1
+                                type: string
+                            required:
+                              - type
+                              - source
+                              - target
+                          maxItems: 50
+                          nullable: true
+                          type: array
+                        nodes:
+                          description: 'Entity types to build. Empty: no entities.'
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              attributes:
+                                description: Attribute keys, stored on the entity as they are, for example `tier`.
+                                items:
+                                  maxLength: 128
+                                  minLength: 1
+                                  type: string
+                                maxItems: 50
+                                type: array
+                              description:
+                                description: What the type means, as the dreaming model reads it.
+                                maxLength: 2048
+                                type: string
+                              type:
+                                description: The entity type, stored as the KI type `entity.<type>`.
+                                maxLength: 128
+                                minLength: 1
+                                type: string
+                            required:
+                              - type
+                          maxItems: 50
+                          type: array
+                      required:
+                        - nodes
+                    facts:
+                      description: 'Fact types to build. Omitted or empty: no facts.'
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          description:
+                            description: What the type means, as the dreaming model reads it.
+                            maxLength: 2048
+                            type: string
+                          type:
+                            description: The fact type, stored as the KI type `fact.<type>`.
+                            maxLength: 128
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                      maxItems: 50
+                      nullable: true
+                      type: array
+                    instructions:
+                      description: 'What dreaming is told about the AI Index: what it holds, who uses it, and what to record or skip.'
+                      maxLength: 8192
+                      type: string
+                    schedule:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        interval:
+                          description: How often to dream, for example `1h` or `24h`. At least 15 minutes. Defaults to `24h`.
+                          maxLength: 16
+                          type: string
+                      required:
+                        - interval
+                  required:
+                    - enabled
                 feedback_analysis:
                   additionalProperties: false
                   description: The recurring feedback analysis, which reads agent signals and proposes improvement actions for the AI Index.
@@ -25930,6 +26394,523 @@ paths:
           source: |
             GET kbn:/api/context_engine/ai_index/customer_support/_describe
       x-state: Experimental; added in 9.6.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/context_engine/ai_index/{aiIndexId}/_dreaming:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/context_engine/ai_index/{aiIndexId}/_dreaming</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns what the AI Index learns from its memories: the fact types, entity types and relationship types dreaming builds, its instructions, and how often it runs. An AI Index that never configured dreaming returns `{ "enabled": false }`.
+
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
+      operationId: get-context-engine-ai-index-aiindexid-dreaming
+      parameters:
+        - description: The unique identifier of the AI Index.
+          in: path
+          name: aiIndexId
+          required: true
+          schema:
+            maxLength: 256
+            minLength: 1
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  dreaming:
+                    additionalProperties: false
+                    description: 'What the AI Index learns from its memories: facts, and entities with the relationships between them.'
+                    type: object
+                    properties:
+                      connector_id:
+                        description: "The AI connector dreaming prompts. Omitted: Context Engine's default model."
+                        maxLength: 256
+                        minLength: 1
+                        type: string
+                      enabled:
+                        description: Whether dreaming runs on its schedule.
+                        type: boolean
+                      entities:
+                        additionalProperties: false
+                        description: 'Entity types (nodes) and the relationships between them (edges). Omitted or null: no entities.'
+                        nullable: true
+                        type: object
+                        properties:
+                          edges:
+                            description: 'Relationship types between entity types. Omitted or empty: no relationships.'
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                description:
+                                  description: What the type means, as the dreaming model reads it.
+                                  maxLength: 2048
+                                  type: string
+                                source:
+                                  description: The entity type the relationship starts at.
+                                  maxLength: 128
+                                  minLength: 1
+                                  type: string
+                                target:
+                                  description: The entity type the relationship points to.
+                                  maxLength: 128
+                                  minLength: 1
+                                  type: string
+                                type:
+                                  description: The relationship type.
+                                  maxLength: 128
+                                  minLength: 1
+                                  type: string
+                              required:
+                                - type
+                                - source
+                                - target
+                            maxItems: 50
+                            nullable: true
+                            type: array
+                          nodes:
+                            description: 'Entity types to build. Empty: no entities.'
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                attributes:
+                                  description: Attribute keys, stored on the entity as they are, for example `tier`.
+                                  items:
+                                    maxLength: 128
+                                    minLength: 1
+                                    type: string
+                                  maxItems: 50
+                                  type: array
+                                description:
+                                  description: What the type means, as the dreaming model reads it.
+                                  maxLength: 2048
+                                  type: string
+                                type:
+                                  description: The entity type, stored as the KI type `entity.<type>`.
+                                  maxLength: 128
+                                  minLength: 1
+                                  type: string
+                              required:
+                                - type
+                            maxItems: 50
+                            type: array
+                        required:
+                          - nodes
+                      facts:
+                        description: 'Fact types to build. Omitted or empty: no facts.'
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            description:
+                              description: What the type means, as the dreaming model reads it.
+                              maxLength: 2048
+                              type: string
+                            type:
+                              description: The fact type, stored as the KI type `fact.<type>`.
+                              maxLength: 128
+                              minLength: 1
+                              type: string
+                          required:
+                            - type
+                        maxItems: 50
+                        nullable: true
+                        type: array
+                      instructions:
+                        description: 'What dreaming is told about the AI Index: what it holds, who uses it, and what to record or skip.'
+                        maxLength: 8192
+                        type: string
+                      schedule:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          interval:
+                            description: How often to dream, for example `1h` or `24h`. At least 15 minutes. Defaults to `24h`.
+                            maxLength: 16
+                            type: string
+                        required:
+                          - interval
+                    required:
+                      - enabled
+                required:
+                  - dreaming
+          description: The dreaming configuration of the AI Index.
+        '404':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: No AI Index with the given ID exists in the current space, or Context Engine is turned off in this space.
+      summary: Get the dreaming configuration of an AI Index
+      tags:
+        - context engine
+      x-state: Experimental; added in 9.7.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/context_engine/ai_index/{aiIndexId}/_dreaming</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Replaces the dreaming configuration of an AI Index without touching the rest of the entry. Permitted on managed AI Indices, whose definition is otherwise immutable. Turning dreaming on requires the AI Index to have memory enabled.
+
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
+      operationId: put-context-engine-ai-index-aiindexid-dreaming
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the AI Index.
+          in: path
+          name: aiIndexId
+          required: true
+          schema:
+            maxLength: 256
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              description: 'What the AI Index learns from its memories: facts, and entities with the relationships between them.'
+              type: object
+              properties:
+                connector_id:
+                  description: "The AI connector dreaming prompts. Omitted: Context Engine's default model."
+                  maxLength: 256
+                  minLength: 1
+                  type: string
+                enabled:
+                  description: Whether dreaming runs on its schedule.
+                  type: boolean
+                entities:
+                  additionalProperties: false
+                  description: 'Entity types (nodes) and the relationships between them (edges). Omitted or null: no entities.'
+                  nullable: true
+                  type: object
+                  properties:
+                    edges:
+                      description: 'Relationship types between entity types. Omitted or empty: no relationships.'
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          description:
+                            description: What the type means, as the dreaming model reads it.
+                            maxLength: 2048
+                            type: string
+                          source:
+                            description: The entity type the relationship starts at.
+                            maxLength: 128
+                            minLength: 1
+                            type: string
+                          target:
+                            description: The entity type the relationship points to.
+                            maxLength: 128
+                            minLength: 1
+                            type: string
+                          type:
+                            description: The relationship type.
+                            maxLength: 128
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                          - source
+                          - target
+                      maxItems: 50
+                      nullable: true
+                      type: array
+                    nodes:
+                      description: 'Entity types to build. Empty: no entities.'
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          attributes:
+                            description: Attribute keys, stored on the entity as they are, for example `tier`.
+                            items:
+                              maxLength: 128
+                              minLength: 1
+                              type: string
+                            maxItems: 50
+                            type: array
+                          description:
+                            description: What the type means, as the dreaming model reads it.
+                            maxLength: 2048
+                            type: string
+                          type:
+                            description: The entity type, stored as the KI type `entity.<type>`.
+                            maxLength: 128
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                      maxItems: 50
+                      type: array
+                  required:
+                    - nodes
+                facts:
+                  description: 'Fact types to build. Omitted or empty: no facts.'
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      description:
+                        description: What the type means, as the dreaming model reads it.
+                        maxLength: 2048
+                        type: string
+                      type:
+                        description: The fact type, stored as the KI type `fact.<type>`.
+                        maxLength: 128
+                        minLength: 1
+                        type: string
+                    required:
+                      - type
+                  maxItems: 50
+                  nullable: true
+                  type: array
+                instructions:
+                  description: 'What dreaming is told about the AI Index: what it holds, who uses it, and what to record or skip.'
+                  maxLength: 8192
+                  type: string
+                schedule:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    interval:
+                      description: How often to dream, for example `1h` or `24h`. At least 15 minutes. Defaults to `24h`.
+                      maxLength: 16
+                      type: string
+                  required:
+                    - interval
+              required:
+                - enabled
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  dreaming:
+                    additionalProperties: false
+                    description: 'What the AI Index learns from its memories: facts, and entities with the relationships between them.'
+                    type: object
+                    properties:
+                      connector_id:
+                        description: "The AI connector dreaming prompts. Omitted: Context Engine's default model."
+                        maxLength: 256
+                        minLength: 1
+                        type: string
+                      enabled:
+                        description: Whether dreaming runs on its schedule.
+                        type: boolean
+                      entities:
+                        additionalProperties: false
+                        description: 'Entity types (nodes) and the relationships between them (edges). Omitted or null: no entities.'
+                        nullable: true
+                        type: object
+                        properties:
+                          edges:
+                            description: 'Relationship types between entity types. Omitted or empty: no relationships.'
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                description:
+                                  description: What the type means, as the dreaming model reads it.
+                                  maxLength: 2048
+                                  type: string
+                                source:
+                                  description: The entity type the relationship starts at.
+                                  maxLength: 128
+                                  minLength: 1
+                                  type: string
+                                target:
+                                  description: The entity type the relationship points to.
+                                  maxLength: 128
+                                  minLength: 1
+                                  type: string
+                                type:
+                                  description: The relationship type.
+                                  maxLength: 128
+                                  minLength: 1
+                                  type: string
+                              required:
+                                - type
+                                - source
+                                - target
+                            maxItems: 50
+                            nullable: true
+                            type: array
+                          nodes:
+                            description: 'Entity types to build. Empty: no entities.'
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                attributes:
+                                  description: Attribute keys, stored on the entity as they are, for example `tier`.
+                                  items:
+                                    maxLength: 128
+                                    minLength: 1
+                                    type: string
+                                  maxItems: 50
+                                  type: array
+                                description:
+                                  description: What the type means, as the dreaming model reads it.
+                                  maxLength: 2048
+                                  type: string
+                                type:
+                                  description: The entity type, stored as the KI type `entity.<type>`.
+                                  maxLength: 128
+                                  minLength: 1
+                                  type: string
+                              required:
+                                - type
+                            maxItems: 50
+                            type: array
+                        required:
+                          - nodes
+                      facts:
+                        description: 'Fact types to build. Omitted or empty: no facts.'
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            description:
+                              description: What the type means, as the dreaming model reads it.
+                              maxLength: 2048
+                              type: string
+                            type:
+                              description: The fact type, stored as the KI type `fact.<type>`.
+                              maxLength: 128
+                              minLength: 1
+                              type: string
+                          required:
+                            - type
+                        maxItems: 50
+                        nullable: true
+                        type: array
+                      instructions:
+                        description: 'What dreaming is told about the AI Index: what it holds, who uses it, and what to record or skip.'
+                        maxLength: 8192
+                        type: string
+                      schedule:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          interval:
+                            description: How often to dream, for example `1h` or `24h`. At least 15 minutes. Defaults to `24h`.
+                            maxLength: 16
+                            type: string
+                        required:
+                          - interval
+                    required:
+                      - enabled
+                required:
+                  - dreaming
+          description: The stored dreaming configuration.
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: The configuration is invalid, or turns dreaming on for an AI Index without memory.
+        '404':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: No AI Index with the given ID exists in the current space, or Context Engine is turned off in this space.
+        '409':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: The write conflicted with a concurrent update.
+      summary: Configure dreaming for an AI Index
+      tags:
+        - context engine
+      x-state: Experimental; added in 9.7.0
       x-metaTags:
         - content: Kibana
           name: product_name
