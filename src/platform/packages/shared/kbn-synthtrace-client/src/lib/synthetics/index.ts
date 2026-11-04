@@ -53,6 +53,10 @@ export type SyntheticsMonitorDocument = Fields &
     'error.message'?: string;
     'error.type'?: string;
     'agent.type'?: string;
+    'http.response.status_code'?: number;
+    'http.response.body.content'?: string;
+    'http.response.body.bytes'?: number;
+    'http.response.body.content_bytes'?: number;
   }>;
 
 type MonitorDataStream =
@@ -62,6 +66,9 @@ type MonitorDataStream =
   | 'browser'
   | 'browser.screenshot'
   | 'browser.network';
+
+// Handles URLs ('https://a.com/x') and tcp/icmp targets ('db.example.com:5432') alike.
+const getDomain = (value: string): string => value.replace(/^[a-z]+:\/\//i, '').split(/[/:]/)[0];
 
 class SyntheticsMonitor extends Serializable<SyntheticsMonitorDocument> {
   constructor(fields: SyntheticsMonitorDocument) {
@@ -104,6 +111,70 @@ class SyntheticsMonitor extends Serializable<SyntheticsMonitorDocument> {
 
   status(value: string) {
     this.fields['monitor.status'] = value;
+    return this;
+  }
+
+  configId(value: string) {
+    this.fields.config_id = value;
+    return this;
+  }
+
+  spaceId(value: string) {
+    this.fields['meta.space_id'] = value;
+    return this;
+  }
+
+  tags(value: string[]) {
+    this.fields.tags = value;
+    return this;
+  }
+
+  interval(seconds: number) {
+    this.fields['monitor.interval'] = seconds;
+    return this;
+  }
+
+  location({ id, label }: { id: string; label: string }) {
+    this.fields['observer.name'] = id;
+    this.fields['observer.geo.name'] = label;
+    return this;
+  }
+
+  url(value: string) {
+    this.fields['url.full'] = value;
+    this.fields['url.domain'] = getDomain(value);
+    return this;
+  }
+
+  /** The response of an http check: its status code, headers and, optionally, its body. */
+  httpResponse({
+    statusCode,
+    headers = {},
+    body,
+  }: {
+    statusCode: number;
+    headers?: Record<string, string>;
+    body?: string;
+  }) {
+    this.fields['http.response.status_code'] = statusCode;
+    // One flat key per header, for example 'http.response.headers.Content-Type'. The header
+    // names are not known in advance, so they are not part of the document type.
+    const fields: Record<string, unknown> = this.fields;
+    Object.entries(headers).forEach(([name, value]) => {
+      fields[`http.response.headers.${name}`] = value;
+    });
+    if (body !== undefined) {
+      const bytes = Buffer.byteLength(body);
+      this.fields['http.response.body.content'] = body;
+      this.fields['http.response.body.bytes'] = bytes;
+      this.fields['http.response.body.content_bytes'] = bytes;
+    }
+    return this;
+  }
+
+  error({ message, type }: { message: string; type: string }) {
+    this.fields['error.message'] = message;
+    this.fields['error.type'] = type;
     return this;
   }
 

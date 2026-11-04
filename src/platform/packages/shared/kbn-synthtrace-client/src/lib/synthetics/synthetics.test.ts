@@ -23,6 +23,57 @@ describe('syntheticsMonitor', () => {
     });
   });
 
+  describe('setters', () => {
+    it('sets config, space, tags and interval', () => {
+      const [doc] = syntheticsMonitor
+        .create()
+        .configId('config-1')
+        .spaceId('team-a')
+        .tags(['production', 'critical'])
+        .interval(180)
+        .serialize();
+
+      expect(doc).toMatchObject({
+        config_id: 'config-1',
+        'meta.space_id': 'team-a',
+        tags: ['production', 'critical'],
+        'monitor.interval': 180,
+      });
+    });
+
+    it('uses the location id as observer.name and the label as observer.geo.name', () => {
+      const [doc] = syntheticsMonitor
+        .create()
+        .location({ id: 'loc-id', label: 'Loc label' })
+        .serialize();
+
+      expect(doc).toMatchObject({
+        'observer.name': 'loc-id',
+        'observer.geo.name': 'Loc label',
+      });
+    });
+
+    it.each([
+      ['https://www.elastic.co/docs', 'www.elastic.co'],
+      ['http://localhost:5601/app', 'localhost'],
+      ['db-primary.example.com:5432', 'db-primary.example.com'],
+      ['gw.example.com', 'gw.example.com'],
+    ])('derives url.domain from %s', (full, domain) => {
+      const [doc] = syntheticsMonitor.create().url(full).serialize();
+
+      expect(doc).toMatchObject({ 'url.full': full, 'url.domain': domain });
+    });
+
+    it('sets the error message and type', () => {
+      const [doc] = syntheticsMonitor
+        .create()
+        .error({ message: 'connection refused', type: 'io' })
+        .serialize();
+
+      expect(doc).toMatchObject({ 'error.message': 'connection refused', 'error.type': 'io' });
+    });
+  });
+
   it('accepts the summary, state, observer and config fields used by the Synthetics UI', () => {
     const fields: SyntheticsMonitorDocument = {
       config_id: 'config-1',
