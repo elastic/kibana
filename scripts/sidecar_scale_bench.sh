@@ -11,7 +11,7 @@
 #   - "stresstest" index loaded
 #
 # Usage:
-#   ./scripts/sidecar_scale_bench.sh [--url http://localhost:5601] [--connections 10] [--duration 30] [--threads 2]
+#   ./scripts/sidecar_scale_bench.sh [--url http://localhost:5601] [--connections 10] [--duration 30] [--threads 2] [--users 1]
 
 set -euo pipefail
 
@@ -19,6 +19,7 @@ KIBANA_URL="http://localhost:5601"
 CONNECTIONS=10
 DURATION=30
 THREADS=2
+USERS=1
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -26,6 +27,7 @@ while [[ $# -gt 0 ]]; do
     --connections) CONNECTIONS="$2"; shift 2 ;;
     --duration) DURATION="$2"; shift 2 ;;
     --threads) THREADS="$2"; shift 2 ;;
+    --users) USERS="$2"; shift 2 ;;
     *) echo "Unknown option: $1"; exit 1 ;;
   esac
 done
@@ -38,21 +40,28 @@ if ! command -v wrk &>/dev/null; then
   exit 1
 fi
 
-# Authenticate to get a session cookie
-echo "Authenticating..."
-COOKIE=$(curl -s -D - -o /dev/null \
-  "${KIBANA_URL}/internal/security/login" \
-  -H 'Content-Type: application/json' \
-  -H 'kbn-xsrf: true' \
-  -H 'x-elastic-internal-origin: Kibana' \
-  --data-raw '{"providerType":"basic","providerName":"basic","currentURL":"'${KIBANA_URL}'/login","params":{"username":"elastic","password":"changeme"}}' \
-  2>/dev/null | grep -i '^set-cookie:' | head -1 | sed 's/^[Ss]et-[Cc]ookie: //; s/;.*//')
+# Authenticate N sessions
+COOKIE_FILE=$(mktemp)
+echo "Authenticating $USERS session(s)..."
+for i in $(seq 1 "$USERS"); do
+  cookie=$(curl -s -D - -o /dev/null \
+    "${KIBANA_URL}/internal/security/login" \
+    -H 'Content-Type: application/json' \
+    -H 'kbn-xsrf: true' \
+    -H 'x-elastic-internal-origin: Kibana' \
+    --data-raw '{"providerType":"basic","providerName":"basic","currentURL":"'"${KIBANA_URL}"'/login","params":{"username":"elastic","password":"changeme"}}' \
+    2>/dev/null | grep -i '^set-cookie:' | head -1 | sed 's/^[Ss]et-[Cc]ookie: //; s/;.*//')
 
-if [ -z "$COOKIE" ]; then
-  echo "ERROR: Could not authenticate."
-  exit 1
-fi
-echo "Authenticated."
+  if [ -z "$cookie" ]; then
+    echo "ERROR: Could not authenticate session $i."
+    rm -f "$COOKIE_FILE"
+    exit 1
+  fi
+  echo "$cookie" >> "$COOKIE_FILE"
+done
+echo "Authenticated $USERS session(s)."
+
+FIRST_COOKIE=$(head -1 "$COOKIE_FILE")
 
 # Warmup
 echo "Warming up (3 requests)..."
@@ -60,7 +69,7 @@ for w in 1 2 3; do
   curl -s -o /dev/null \
     "${KIBANA_URL}/internal/search/ese" \
     -H 'Content-Type: application/json' \
-    -b "$COOKIE" \
+    -b "$FIRST_COOKIE" \
     -H 'elastic-api-version: 1' \
     -H 'kbn-build-number: 9007199254740991' \
     -H 'kbn-version: 9.7.0' \
@@ -117,12 +126,13 @@ sleep 3
 echo ""
 echo "ESE Stresstest Scale Benchmark"
 echo "URL: $KIBANA_URL"
-echo "Connections: $CONNECTIONS  Threads: $THREADS  Duration: ${DURATION}s"
+echo "Connections: $CONNECTIONS  Threads: $THREADS  Duration: ${DURATION}s  Users: $USERS"
 echo "========================================"
+
+export WRK_COOKIE_FILE="$COOKIE_FILE"
 
 wrk -t"$THREADS" -c"$CONNECTIONS" -d"${DURATION}s" \
   -s "$LUA_SCRIPT" \
-  -H "Cookie: $COOKIE" \
   "${KIBANA_URL}/internal/search/ese"
 
 # Let memory settle briefly after load
@@ -147,7 +157,7 @@ END {
   }
 }' "$MEM_CSV"
 
-rm -f "$MEM_CSV"
+rm -f "$MEM_CSV" "$COOKIE_FILE"
 
 echo ""
 echo "Done. Run again with/without sidecar to compare."
