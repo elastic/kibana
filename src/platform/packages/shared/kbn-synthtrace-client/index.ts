@@ -64,4 +64,8 @@ export {
   type EdotBrowserSpanDocument,
   type HealthProfileName,
 } from './src/lib/edot_browser';
-export { syntheticsMonitor, type SyntheticsMonitorDocument } from './src/lib/synthetics';
+export {
+  syntheticsMonitor,
+  type BrowserJourneyStep,
+  type SyntheticsMonitorDocument,
+} from './src/lib/synthetics';

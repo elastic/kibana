@@ -31,7 +31,16 @@ export type SyntheticsMonitorDocument = Fields &
     'monitor.status'?: string;
     'monitor.interval'?: number;
     'synthetics.type'?: string;
+    'synthetics.index'?: number;
+    'synthetics.package_version'?: string;
+    'synthetics.journey.id'?: string;
+    'synthetics.journey.name'?: string;
     'synthetics.step.index'?: number;
+    'synthetics.step.name'?: string;
+    'synthetics.step.status'?: string;
+    'synthetics.step.duration.us'?: number;
+    'synthetics.error.message'?: string;
+    'synthetics.error.name'?: string;
     'observer.os.name'?: string;
     'observer.product'?: string;
     'observer.name'?: string;
@@ -70,6 +79,25 @@ type MonitorDataStream =
 
 // Handles URLs ('https://a.com/x') and tcp/icmp targets ('db.example.com:5432') alike.
 const getDomain = (value: string): string => value.replace(/^[a-z]+:\/\//i, '').split(/[/:]/)[0];
+
+const JOURNEY_PACKAGE_VERSION = '1.0.0-beta.38';
+const DEFAULT_STEP_DURATION_US = 1_000_000;
+
+export interface BrowserJourneyStep {
+  name: string;
+  durationUs?: number;
+  // A failed step; the remaining steps of the journey are reported as skipped.
+  error?: string;
+}
+
+// Journey documents other than the summary carry no check result.
+const omitCheckResult = (fields: SyntheticsMonitorDocument): SyntheticsMonitorDocument =>
+  Object.fromEntries(
+    Object.entries(fields).filter(
+      ([key]) =>
+        !key.startsWith('summary.') && !key.startsWith('state.') && key !== 'monitor.status'
+    )
+  );
 
 class SyntheticsMonitor extends Serializable<SyntheticsMonitorDocument> {
   constructor(fields: SyntheticsMonitorDocument) {
@@ -209,6 +237,91 @@ class SyntheticsMonitor extends Serializable<SyntheticsMonitorDocument> {
   timestamp(time: number) {
     super.timestamp(time);
     return this;
+  }
+
+  /**
+   * Expands this monitor into the documents of one browser journey run: `journey/start`, one
+   * `step/end` per step and the `heartbeat/summary`. The monitor's timestamp is the journey
+   * start and its other fields (config, location, ...) are shared by every document.
+   */
+  journey({
+    id,
+    name,
+    checkGroup,
+    steps,
+  }: {
+    id: string;
+    name: string;
+    checkGroup: string;
+    steps: BrowserJourneyStep[];
+  }): SyntheticsMonitor[] {
+    const startTime = this.fields['@timestamp'];
+    if (startTime === undefined) {
+      throw new Error('timestamp() must be set before calling journey()');
+    }
+
+    const template = omitCheckResult(this.fields);
+    const createDocument = (time: number, fields: SyntheticsMonitorDocument) =>
+      new SyntheticsMonitor({
+        ...template,
+        'monitor.check_group': checkGroup,
+        'synthetics.journey.id': id,
+        'synthetics.journey.name': name,
+        ...fields,
+      })
+        .dataset('browser')
+        .timestamp(time);
+
+    let eventIndex = 0;
+    let elapsedUs = 0;
+    let failure: string | undefined;
+
+    const docs = [
+      createDocument(startTime, {
+        'synthetics.type': 'journey/start',
+        'synthetics.index': eventIndex++,
+        'synthetics.package_version': JOURNEY_PACKAGE_VERSION,
+      }),
+    ];
+
+    for (const [position, step] of steps.entries()) {
+      const isSkipped = failure !== undefined;
+      const isFailed = !isSkipped && step.error !== undefined;
+      const durationUs = isSkipped ? 0 : step.durationUs ?? DEFAULT_STEP_DURATION_US;
+      elapsedUs += durationUs;
+
+      docs.push(
+        createDocument(startTime + Math.round(elapsedUs / 1000), {
+          'synthetics.type': 'step/end',
+          'synthetics.index': eventIndex++,
+          'synthetics.package_version': JOURNEY_PACKAGE_VERSION,
+          'synthetics.step.index': position + 1,
+          'synthetics.step.name': step.name,
+          'synthetics.step.status': isSkipped ? 'skipped' : isFailed ? 'failed' : 'succeeded',
+          'synthetics.step.duration.us': durationUs,
+          ...(isFailed && step.error
+            ? {
+                'synthetics.error.message': step.error,
+                'synthetics.error.name': 'Error',
+                'error.message': step.error,
+              }
+            : {}),
+        })
+      );
+
+      if (isFailed) {
+        failure = step.error;
+      }
+    }
+
+    const summary = createDocument(startTime + Math.round(elapsedUs / 1000), {
+      'synthetics.type': 'heartbeat/summary',
+      'monitor.duration.us': elapsedUs,
+      ...(failure !== undefined ? { 'error.message': failure } : {}),
+    });
+    docs.push(failure !== undefined ? summary.down() : summary.up());
+
+    return docs;
   }
 
   // Fills the state fields that depend on other fields; explicit values are kept.
