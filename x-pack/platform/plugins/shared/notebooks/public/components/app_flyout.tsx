@@ -339,7 +339,7 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: NotebookApp[] }) =>
   };
   const newAppLabel = i18n.translate('xpack.notebook.app.newApp', { defaultMessage: 'New app' });
   const generateAppLabel = i18n.translate('xpack.notebook.app.generateAnother', {
-    defaultMessage: 'Generate app',
+    defaultMessage: 'Generate new app',
   });
 
   return (
@@ -437,7 +437,7 @@ export const AppFlyout = ({ onClose }: { onClose: () => void }) => {
     >
       {app ? (
         <>
-          <EuiFlyoutHeader hasBorder>
+          <EuiFlyoutHeader>
             <AppToolbar app={app} apps={apps} />
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
