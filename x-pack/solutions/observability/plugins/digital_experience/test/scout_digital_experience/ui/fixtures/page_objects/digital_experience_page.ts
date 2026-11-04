@@ -42,6 +42,7 @@ export class DigitalExperiencePage {
   public readonly sessionBack: Locator;
   public readonly sessionWaterfallSegments: Locator;
   public readonly sessionWaterfallErrors: Locator;
+  public readonly sessionPageVisits: Locator;
   public readonly breadcrumbs: Locator;
   public readonly navEntry: Locator;
   public readonly legacyNavEntry: Locator;
@@ -76,9 +77,11 @@ export class DigitalExperiencePage {
     this.sessionsKpis = page.getByTestId('digitalExperienceSessionsKpis');
     this.sessionsEmpty = page.getByTestId('digitalExperienceSessionsEmpty');
     this.sessionSummary = page.getByTestId('digitalExperienceSessionSummary');
-    this.sessionBack = page.getByTestId('digitalExperienceSessionBack');
+    // The session page's AppHeader back control.
+    this.sessionBack = page.getByTestId('appHeaderBack');
     this.sessionWaterfallSegments = page.getByTestId('digitalExperienceSessionWaterfallSegment');
     this.sessionWaterfallErrors = page.getByTestId('digitalExperienceSessionWaterfallError');
+    this.sessionPageVisits = page.getByTestId('digitalExperiencePageVisit');
     this.breadcrumbs = page.getByTestId('breadcrumbs');
     this.navEntry = page.getByTestId('observability-nav-digital_experience-applications');
     this.legacyNavEntry = page.getByTestId('observability-nav-ux-dashboard');

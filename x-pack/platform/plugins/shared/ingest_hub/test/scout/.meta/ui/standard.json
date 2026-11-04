@@ -1,5 +1,5 @@
 {
-  "sha1": "6916ab159df38e61776b30d43d0e76526837e131",
+  "sha1": "2cb40218f3c81087d1f0293f12a3c6a4aa23002d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -408,6 +408,62 @@
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_policy_updates_mi.spec.ts",
         "line": 111,
         "column": 26
+      }
+    },
+    {
+      "id": "39541aaf6ca2008-0dc61bf45f30569",
+      "title": "Onboarding Service Settings step — at least one source CloudWatch logs input without a log group blocks Continue until one is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_source_rule.spec.ts",
+        "line": 166,
+        "column": 13
+      }
+    },
+    {
+      "id": "39541aaf6ca2008-d28c0b9314ba144",
+      "title": "Onboarding Service Settings step — at least one source a log group name prefix satisfies the CloudWatch source rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_source_rule.spec.ts",
+        "line": 190,
+        "column": 13
+      }
+    },
+    {
+      "id": "39541aaf6ca2008-36265ae9268954f",
+      "title": "Onboarding Service Settings step — at least one source S3 toggle on requires a bucket ARN and keeps the manifest help text",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_source_rule.spec.ts",
+        "line": 210,
+        "column": 11
+      }
+    },
+    {
+      "id": "39541aaf6ca2008-62c04cc1e2edd6d",
+      "title": "Onboarding Service Settings step — at least one source S3 toggle off requires a queue URL instead of the bucket ARN",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_source_rule.spec.ts",
+        "line": 207,
+        "column": 24
       }
     },
     {

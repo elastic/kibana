@@ -9,17 +9,22 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
+import { isConversationNotFoundError } from '@kbn/agent-builder-common';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { usesDecisionTrees } from '../agents/agent_policy';
-import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
+import {
+  extractAccessedTreeIdsFromRounds,
+  roundsBefore,
+  type InvestigationToolCall,
+} from '../decision_trees/accessed_trees';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
 import { withToolResults } from '../investigation_round';
 import { withNightshiftBackgroundSpan } from '../tracing';
 import { toolCallsSchema, toolResultsSchema } from './tool_calls_schema';
 
-const MAX_INPUT_CHARS = 100_000;
-
 export const decisionTreePrepareStepDefinition = ({
   getTelemetryConnectorId,
+  getAgentBuilder,
   getSavedObjects,
   getUiSettings,
   logger,
@@ -29,6 +34,7 @@ export const decisionTreePrepareStepDefinition = ({
     request: KibanaRequest,
     conversationId?: string
   ) => string | undefined | Promise<string | undefined>;
+  getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   getSavedObjects?: () => CoreStart['savedObjects'] | undefined;
   getUiSettings?: () => CoreStart['uiSettings'] | undefined;
   logger: Logger;
@@ -40,13 +46,15 @@ export const decisionTreePrepareStepDefinition = ({
     category: StepCategory.Ai,
     description:
       'Builds the closing reinforcement message for a completed investigation round: the decision ' +
-      'trees available to edit, the learnings already on file, and the turn script.',
+      'trees available to edit, the learnings already on file, and the turn script. A follow-up ' +
+      'round only edits the trees of its own investigation, and is skipped when there are none.',
     inputSchema: z.object({
-      conversation_id: z.string().max(512).optional(),
-      response: z
+      conversation_id: z
         .string()
-        .max(MAX_INPUT_CHARS)
-        .describe("The investigator's final response for the round."),
+        .max(512)
+        .optional()
+        .describe('The investigation (conversation) the round belongs to.'),
+      round_id: z.string().max(1024).optional().describe('The completed round.'),
       agent_id: z
         .string()
         .max(1024)
@@ -78,7 +86,8 @@ export const decisionTreePrepareStepDefinition = ({
     }),
     handler: async (context) => {
       const {
-        response,
+        conversation_id: conversationId,
+        round_id: roundId,
         agent_id: agentId,
         tool_calls: toolCalls,
         tool_results: toolResults,
@@ -105,14 +114,39 @@ export const decisionTreePrepareStepDefinition = ({
         return skippedOutput;
       }
 
-      const telemetryConnectorId = await getTelemetryConnectorId(
-        context.contextManager.getFakeRequest(),
-        context.input.conversation_id
+      // Liquid renders an absent input as ''. A workflow definition stored before this step took
+      // `round_id` passes none; guessing a first round could seed a stray tree.
+      if (!conversationId || !roundId) {
+        context.logger.warn(
+          'Skipped decision tree reinforcement: without the conversation and round ids there is no telling a first round from a follow-up'
+        );
+        return skippedOutput;
+      }
+
+      const agentBuilder = getAgentBuilder();
+      if (!agentBuilder) {
+        throw new Error('Agent Builder is not available, so the investigation cannot be read');
+      }
+      const request = context.contextManager.getFakeRequest();
+      const conversations = await agentBuilder.conversations.getScopedClient({ request });
+      // A chat's conversation is only saved with its first round, so a missing one has no
+      // earlier rounds. Any other failure must not be read as a first round.
+      const rounds = await conversations.get(conversationId).then(
+        (conversation) => conversation.rounds,
+        (error) => {
+          if (isConversationNotFoundError(error)) {
+            return [];
+          }
+          throw error;
+        }
       );
+      const earlierRounds = roundsBefore(rounds, roundId);
+
+      const telemetryConnectorId = await getTelemetryConnectorId(request, conversationId);
       const workflowContext = context.contextManager.getContext();
       const { spaceId } = workflowContext.workflow;
       const executionId = workflowContext.execution?.id;
-      const { message, treeCount, turnKind, openedTreeIds } = await withNightshiftBackgroundSpan(
+      const turn = await withNightshiftBackgroundSpan(
         {
           name: 'nightshift.decisionTreePrepare',
           traceId: context.input.background_trace_id || executionId,
@@ -125,7 +159,10 @@ export const decisionTreePrepareStepDefinition = ({
         },
         async (span) => {
           const res = await prepareReinforcementTurn({
-            response,
+            turnKind:
+              earlierRounds.length === 0 ? 'initial_investigation' : 'feedback_reinforcement',
+            investigationId: conversationId,
+            earlierAccessedTreeIds: extractAccessedTreeIdsFromRounds(earlierRounds),
             connectorNames: telemetryConnectorId ? [telemetryConnectorId] : [],
             esClient: context.contextManager.getScopedEsClient(),
             logger,
@@ -135,22 +172,27 @@ export const decisionTreePrepareStepDefinition = ({
               toolResults ?? []
             ),
           });
+          if (res.skipped) {
+            span?.setAttribute('nightshift.skipped', true);
+            return res;
+          }
           span?.setAttribute('nightshift.tree_count', res.treeCount);
           span?.setAttribute('nightshift.turn_kind', res.turnKind);
-          if (res.openedTreeIds) {
-            span?.setAttribute('nightshift.opened_tree_ids', JSON.stringify(res.openedTreeIds));
-          }
+          span?.setAttribute('nightshift.opened_tree_ids', JSON.stringify(res.openedTreeIds));
           return res;
         }
       );
+      if (turn.skipped) {
+        return skippedOutput;
+      }
 
       return {
         output: {
-          message,
-          tree_count: treeCount,
-          turn_kind: turnKind,
+          message: turn.message,
+          tree_count: turn.treeCount,
+          turn_kind: turn.turnKind,
           skipped: false,
-          ...(openedTreeIds && openedTreeIds.length > 0 ? { opened_ids: openedTreeIds } : {}),
+          ...(turn.openedTreeIds.length > 0 ? { opened_ids: turn.openedTreeIds } : {}),
         },
       };
     },

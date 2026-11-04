@@ -73,6 +73,7 @@ import { NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW } from './nightshift_investig
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW } from './nightshift_investigations/investigation';
 import { NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW } from './nightshift_investigations/investigation/bound_investigation';
 import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW } from './nightshift_investigations/onboarding_suggestions';
+import { NIGHTSHIFT_ONLINE_EVALS_WORKFLOW } from './nightshift_investigations/online_evals';
 import { NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW } from './nightshift_investigations/sandbox_materialize_workspace';
 import { NIGHTSHIFT_SLACK_THREAD_WORKFLOW } from './nightshift_investigations/slack_thread';
 import { NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW } from './nightshift_investigations/slack_thread/bound_slack_thread';
@@ -205,6 +206,7 @@ export {
   type NightshiftBoundHookTemplateValues,
 } from './nightshift_investigations/bound_hooks';
 export { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from './nightshift_investigations/onboarding_suggestions';
+export { NIGHTSHIFT_ONLINE_EVALS_WORKFLOW_ID } from './nightshift_investigations/online_evals';
 export { CREATE_PROPOSAL_WORKFLOW_ID, RESOLVE_PROPOSAL_WORKFLOW_ID } from './proposals';
 export {
   ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID,
@@ -317,6 +319,7 @@ export const managedWorkflowDefinitions = [
   NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW,
   NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW,
   NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW,
+  NIGHTSHIFT_ONLINE_EVALS_WORKFLOW,
   ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW,
   ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW,
   ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW,
