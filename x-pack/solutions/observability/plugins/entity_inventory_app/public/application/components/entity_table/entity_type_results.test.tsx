@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -15,7 +15,10 @@ import type { FixtureScenario } from '../../../inventory_api/fixture_client';
 import { createFixtureEntityInventoryApiClient } from '../../../inventory_api/fixture_client';
 import { HOST_TYPE_FIXTURE } from '../../../inventory_api/fixture_data';
 import { createAppServicesMock } from '../../../mocks';
-import { EntityInventorySearchProvider } from '../../context/search_context';
+import {
+  EntityInventorySearchProvider,
+  useEntityInventorySearch,
+} from '../../context/search_context';
 import { EntityTypeResults } from './entity_type_results';
 import {
   EMPTY_BODY,
@@ -30,18 +33,33 @@ import {
 // EuiDataGrid's render cost is largely fixed and can exceed the default 5s budget under parallel CI load.
 jest.setTimeout(30_000);
 
-const renderResults = (inventoryApi: EntityInventoryApiClient, entityType = 'host') =>
-  render(
+const NEW_RANGE_LABEL = 'Pick a new range';
+
+const NewRangeButton = () => {
+  const { submit } = useEntityInventorySearch();
+  return (
+    <button onClick={() => submit({ dateRange: { from: 'now-1h', to: 'now' } })}>
+      {NEW_RANGE_LABEL}
+    </button>
+  );
+};
+
+const renderResults = (inventoryApi: EntityInventoryApiClient, entityType = 'host') => {
+  const results = (type: string) => (
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
           <EntityInventorySearchProvider entityCategory="hosts">
-            <EntityTypeResults entityType={entityType} />
+            <NewRangeButton />
+            <EntityTypeResults entityType={type} />
           </EntityInventorySearchProvider>
         </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>
   );
+  const { rerender, ...rest } = render(results(entityType));
+  return { ...rest, showType: (type: string) => rerender(results(type)) };
+};
 
 const renderScenario = (scenario: FixtureScenario) =>
   renderResults(createFixtureEntityInventoryApiClient({ scenario }));
@@ -125,5 +143,41 @@ describe('EntityTypeResults', () => {
       getTypeNotAvailableTitle('service')
     );
     expect(screen.queryByRole('button', { name: RETRY_LABEL })).not.toBeInTheDocument();
+  });
+
+  it('shows the columns and rows of the new type when the type changes', async () => {
+    const { showType } = renderResults(createFixtureEntityInventoryApiClient());
+    expect(
+      await screen.findByTestId('dataGridHeaderCell-entityInventory.name')
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('dataGridHeaderCell-cloud.account.id')).toBeInTheDocument();
+
+    showType('k8s.deployment');
+
+    await waitFor(() =>
+      expect(screen.getByTestId('entityInventoryTable')).toHaveAttribute(
+        'data-entity-type',
+        'k8s.deployment'
+      )
+    );
+    expect(screen.getByTestId('dataGridHeaderCell-entityInventory.namespace')).toBeInTheDocument();
+    expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument();
+  });
+
+  it('shows the error, not the previous results, when a later load fails', async () => {
+    const fixtureClient = createFixtureEntityInventoryApiClient();
+    const listEntities = jest
+      .fn(fixtureClient.listEntities)
+      .mockImplementationOnce(fixtureClient.listEntities)
+      .mockRejectedValueOnce(new Error('Request failed'));
+    renderResults({ ...fixtureClient, listEntities });
+    expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: NEW_RANGE_LABEL }));
+
+    expect(await screen.findByTestId('entityInventoryTableError')).toHaveTextContent(
+      'Request failed'
+    );
+    expect(screen.queryByTestId('entityInventoryTable')).not.toBeInTheDocument();
   });
 });

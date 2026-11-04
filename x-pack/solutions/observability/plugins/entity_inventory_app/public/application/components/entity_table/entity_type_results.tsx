@@ -20,19 +20,27 @@ import {
   EntityTableTypeNotAvailable,
 } from './entity_table_states';
 
-/** The results of one entity type over the committed time range, with its loading states. */
-export const EntityTypeResults = ({ entityType }: { entityType: string }) => {
+/**
+ * The results of one entity type over the committed time range, with its loading states. Keyed by
+ * type so that a type switch starts from a clean slate: no rows, no column choices of the last type.
+ */
+export const EntityTypeResults = ({ entityType }: { entityType: string }) => (
+  <EntityTypeResultsOfType key={entityType} entityType={entityType} />
+);
+
+const EntityTypeResultsOfType = ({ entityType }: { entityType: string }) => {
   const { entityType: description, list, loading, error, refresh } = useEntityList(entityType);
 
+  if (error instanceof EntityTypeNotFoundError) {
+    return <EntityTableTypeNotAvailable entityType={entityType} />;
+  }
+  // A failed reload replaces the results of the last range rather than leaving them up as current.
+  if (error && !loading) {
+    return (
+      <EntityTableLoadError entityType={entityType} message={error.message} onRetry={refresh} />
+    );
+  }
   if (!description || !list) {
-    if (error instanceof EntityTypeNotFoundError) {
-      return <EntityTableTypeNotAvailable entityType={entityType} />;
-    }
-    if (error && !loading) {
-      return (
-        <EntityTableLoadError entityType={entityType} message={error.message} onRetry={refresh} />
-      );
-    }
     return <EntityTableLoading />;
   }
 
