@@ -6,15 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiCode,
-  EuiFlexGroup,
-  EuiFieldText,
-  EuiFlexItem,
-  EuiFormErrorText,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { CellDefinition } from '../../common/types';
@@ -98,11 +90,12 @@ export const CellOutputName = ({ cell, output }: { cell: CellDefinition; output:
     return (
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiFieldText
-            compressed
+          <input
+            type="text"
             autoFocus
+            spellCheck={false}
             value={draft}
-            isInvalid={error !== undefined}
+            aria-invalid={error !== undefined}
             aria-label={i18n.translate('xpack.notebook.output.nameAriaLabel', {
               defaultMessage: 'Output name. {description}',
               values: { description },
@@ -120,15 +113,29 @@ export const CellOutputName = ({ cell, output }: { cell: CellDefinition; output:
             }}
             onBlur={() => save(draft, { keepOpenOnError: false })}
             css={css`
-              width: calc(${Math.max(draft.length, 4) + 4}ch);
+              box-sizing: content-box;
+              width: ${Math.max(draft.length, 1) + 1}ch;
+              margin: 0;
+              padding: 0.2em 0.5em;
+              border: none;
+              border-radius: ${euiTheme.border.radius.small};
               font-family: ${euiTheme.font.familyCode};
+              font-size: 0.9em;
+              font-weight: ${euiTheme.font.weight.bold};
+              line-height: normal;
+              color: ${euiTheme.components.codeInlineColor};
+              background-color: ${euiTheme.components.codeInlineBackground};
+              outline: ${euiTheme.border.width.thin} solid
+                ${error ? euiTheme.colors.danger : euiTheme.colors.primary};
             `}
             data-test-subj={`${testSubj}-input`}
           />
         </EuiFlexItem>
         {error && (
           <EuiFlexItem grow={false}>
-            <EuiFormErrorText>{error}</EuiFormErrorText>
+            <EuiText size="xs" color="danger" role="alert">
+              {error}
+            </EuiText>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
