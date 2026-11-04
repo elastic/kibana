@@ -11,15 +11,21 @@ import { commandStep } from '../helpers.ts';
 import { preemptibleAgent, retry } from '../presets.ts';
 import type { Step } from '../types.ts';
 
+const buildProjectImage = commandStep({
+  command: '.buildkite/scripts/steps/artifacts/docker_image.sh',
+  label: 'Build Project Image',
+  key: 'build_project_image',
+  agents: preemptibleAgent('n2-standard-16'),
+  timeout_in_minutes: 90,
+  retry: retry.agentLoss,
+});
+
+export const buildProjectSteps = (): readonly Step[] => [
+  { ...buildProjectImage, soft_fail: true },
+];
+
 export const deployProjectSteps = (): readonly Step[] => [
-  commandStep({
-    command: '.buildkite/scripts/steps/artifacts/docker_image.sh',
-    label: 'Build Project Image',
-    key: 'build_project_image',
-    agents: preemptibleAgent('n2-standard-16'),
-    timeout_in_minutes: 90,
-    retry: retry.agentLoss,
-  }),
+  buildProjectImage,
   commandStep({
     command: '.buildkite/scripts/steps/serverless/deploy.sh',
     label: 'Deploy Project',

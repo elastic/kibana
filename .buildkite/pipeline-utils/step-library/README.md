@@ -17,7 +17,9 @@ Buildkite does not, e.g., a `key`, a `label`, and an `agents` definition.
 
 New steps are written as exported fragments in `steps/<name>.ts`. Group
 fragments that belong to one product area in a subfolder named for it, e.g.,
-`steps/security_solution/<name>.ts`, rather than prefixing their filenames:
+`steps/security_solution/<name>.ts`, rather than prefixing their filenames.
+Fragments that share a step, e.g., a build step and the deploy step that reuses
+it, are exported from one file (see `steps/cloud.ts`):
 
 ```ts
 // Individual functions describe the CI intent and produce an array of Steps

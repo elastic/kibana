@@ -11,18 +11,26 @@ import { commandStep } from '../helpers.ts';
 import { preemptibleAgent, retry } from '../presets.ts';
 import type { Step } from '../types.ts';
 
+const buildCloudImage = commandStep({
+  command: '.buildkite/scripts/steps/cloud/build_cloud_image.sh',
+  label: 'Build Cloud Image',
+  key: 'build_cloud_image',
+  agents: preemptibleAgent('n2-standard-16'),
+  timeout_in_minutes: 60,
+  retry: retry.agentLoss,
+});
+
+export const buildCloudImageSteps = (): readonly Step[] => [
+  { ...buildCloudImage, soft_fail: true },
+];
+
 export const deployCloudSteps = (): readonly Step[] => [
-  commandStep({
-    command: '.buildkite/scripts/steps/cloud/build_cloud_image.sh',
-    label: 'Build Cloud Image',
-    key: 'build_cloud_image',
+  {
+    ...buildCloudImage,
     // Shared with kibana-deploy-cloud-from-pr so both pipelines never build or deploy the same PR at once
     concurrency: 1,
     concurrency_group: 'kibana/cloud-image/pr-${GITHUB_PR_NUMBER}',
-    agents: preemptibleAgent('n2-standard-16'),
-    timeout_in_minutes: 60,
-    retry: retry.agentLoss,
-  }),
+  },
   commandStep({
     command: '.buildkite/scripts/steps/cloud/deploy.sh',
     label: 'Deploy to Cloud',
