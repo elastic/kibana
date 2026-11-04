@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import {
   ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE,
   SECURITY_FEATURE_ID_V1,
@@ -14,7 +13,10 @@ import {
   SECURITY_FEATURE_ID_V4,
   SECURITY_FEATURE_ID_V5,
 } from '@kbn/security-solution-features/constants';
-import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
+import type { ApiClientFixture } from '@kbn/scout-security';
+import { PUBLIC_API_HEADERS, tags } from '@kbn/scout-security';
+import { expect } from '@kbn/scout-security/api';
+import { apiTest } from '../fixtures';
 
 /**
  * Deliberately pinned to the versions deprecated as of `SECURITY_FEATURE_ID_V5`. When a newer
@@ -114,70 +116,96 @@ const capabilitiesWithPrefix = (actions: string[], prefix: string): string[] =>
     .filter((action) => action.startsWith(prefix))
     .map((action) => action.slice(prefix.length));
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const isServerless: boolean = getService('config').get('serverless');
-
-  describe('@ess @serverless @skipInServerlessMKI deprecated `siem` versions map onto current `ui:` actions', () => {
-    let features: FeaturePrivileges;
-
-    before(async () => {
-      const { body } = await supertest
-        .get('/api/security/privileges')
-        .query({ includeActions: 'true' })
-        .set('kbn-xsrf', 'true')
-        .expect(200);
-
-      features = body.features as FeaturePrivileges;
-    });
-
-    for (const featureId of DEPRECATED_FEATURE_IDS) {
-      it(`maps ${featureId} ui: actions onto ${SECURITY_FEATURE_ID_V5} in both directions`, () => {
-        const privileges = features[featureId];
-        expect(privileges).to.be.an('object');
-
-        const deprecatedPrefix = `ui:${featureId}/`;
-        const currentPrefix = `ui:${SECURITY_FEATURE_ID_V5}/`;
-        const missing: string[] = [];
-        const unexpected: string[] = [];
-        let checked = 0;
-
-        for (const [privilegeId, actions] of Object.entries(privileges)) {
-          const deprecated = capabilitiesWithPrefix(actions, deprecatedPrefix).filter(
-            (capability) => !CAPABILITIES_WITHOUT_CURRENT_COUNTERPART.includes(capability)
-          );
-          const current = capabilitiesWithPrefix(actions, currentPrefix);
-          checked += deprecated.length + current.length;
-
-          for (const capability of deprecated) {
-            if (!current.includes(capability)) {
-              missing.push(
-                `${featureId}.${privilegeId} grants ${deprecatedPrefix}${capability} but not ${currentPrefix}${capability}`
-              );
-            }
-          }
-
-          // A privilege granting a current action it never held on the deprecated version widens
-          // what that version reaches, which the navigation specs asserted through the UI.
-          for (const capability of current) {
-            if (
-              deprecated.includes(capability) ||
-              isSanctionedWidening(isServerless, featureId, privilegeId, capability)
-            ) {
-              continue;
-            }
-
-            unexpected.push(
-              `${featureId}.${privilegeId} grants ${currentPrefix}${capability} without a ${deprecatedPrefix} counterpart`
-            );
-          }
-        }
-
-        // Guards against the assertion passing because nothing was inspected.
-        expect(checked).to.be.greaterThan(0);
-        expect(missing).to.eql([]);
-        expect(unexpected).to.eql([]);
-      });
-    }
-  });
+interface Comparison {
+  /** How many actions were inspected, so an empty result can be told from a vacuous one. */
+  checked: number;
+  missing: string[];
+  unexpected: string[];
 }
+
+const compareAgainstCurrentVersion = (
+  privileges: Record<string, string[]>,
+  featureId: string,
+  isServerless: boolean
+): Comparison => {
+  const deprecatedPrefix = `ui:${featureId}/`;
+  const currentPrefix = `ui:${SECURITY_FEATURE_ID_V5}/`;
+  const missing: string[] = [];
+  const unexpected: string[] = [];
+  let checked = 0;
+
+  for (const [privilegeId, actions] of Object.entries(privileges)) {
+    const deprecated = capabilitiesWithPrefix(actions, deprecatedPrefix).filter(
+      (capability) => !CAPABILITIES_WITHOUT_CURRENT_COUNTERPART.includes(capability)
+    );
+    const current = capabilitiesWithPrefix(actions, currentPrefix);
+    checked += deprecated.length + current.length;
+
+    for (const capability of deprecated) {
+      if (!current.includes(capability)) {
+        missing.push(
+          `${featureId}.${privilegeId} grants ${deprecatedPrefix}${capability} but not ${currentPrefix}${capability}`
+        );
+      }
+    }
+
+    // A privilege granting a current action it never held on the deprecated version widens
+    // what that version reaches, which the navigation specs asserted through the UI.
+    for (const capability of current) {
+      const isExpected =
+        deprecated.includes(capability) ||
+        isSanctionedWidening(isServerless, featureId, privilegeId, capability);
+
+      if (!isExpected) {
+        unexpected.push(
+          `${featureId}.${privilegeId} grants ${currentPrefix}${capability} without a ${deprecatedPrefix} counterpart`
+        );
+      }
+    }
+  }
+
+  return { checked, missing, unexpected };
+};
+
+const fetchFeaturePrivileges = async (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>
+): Promise<FeaturePrivileges> => {
+  const response = await apiClient.get('api/security/privileges?includeActions=true', {
+    headers: { ...headers, 'kbn-xsrf': 'true', ...PUBLIC_API_HEADERS },
+    responseType: 'json',
+  });
+
+  expect(response).toHaveStatusCode(200);
+
+  return (response.body as { features: FeaturePrivileges }).features;
+};
+
+apiTest.describe(
+  'deprecated `siem` versions map onto current `ui:` actions',
+  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  () => {
+    for (const featureId of DEPRECATED_FEATURE_IDS) {
+      apiTest(
+        `maps ${featureId} ui: actions onto ${SECURITY_FEATURE_ID_V5} in both directions`,
+        async ({ apiClient, requestAuth, config }) => {
+          const { apiKeyHeader } = await requestAuth.getApiKey('admin');
+          const features = await fetchFeaturePrivileges(apiClient, apiKeyHeader);
+          const privileges = features[featureId];
+          expect(privileges).toBeDefined();
+
+          const { checked, missing, unexpected } = compareAgainstCurrentVersion(
+            privileges,
+            featureId,
+            config.serverless
+          );
+
+          // Guards against the assertion passing because nothing was inspected.
+          expect(checked).toBeGreaterThan(0);
+          expect(missing).toStrictEqual([]);
+          expect(unexpected).toStrictEqual([]);
+        }
+      );
+    }
+  }
+);
