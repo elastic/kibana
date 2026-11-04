@@ -20,9 +20,11 @@ const GITHUB_TOKEN = 'ghp_sandbox_secret_value';
 
 const setup = ({
   resolveConnectorCredentials,
+  allowedHosts = [],
   stdout = '',
 }: {
   resolveConnectorCredentials?: ResolveConnectorCredentials;
+  allowedHosts?: string[];
   stdout?: string;
 } = {}) => {
   const runCommand = jest.fn().mockResolvedValue({
@@ -40,12 +42,16 @@ const setup = ({
   const sandboxWorkspaceManager = {
     ensureWorkspaceReady: jest.fn().mockResolvedValue(undefined),
   } as unknown as SandboxWorkspaceManager;
+  const sandboxAllowlistClient = {
+    getHostsForCommand: jest.fn().mockResolvedValue(allowedHosts),
+  };
   const logger = loggingSystemMock.createLogger();
 
   const tool = createSandboxBashTool({
     getSandboxStart: () => sandboxStart,
     sandboxWorkspaceManager,
     resolveConnectorCredentials,
+    sandboxAllowlistClient,
     logger,
   });
 
@@ -62,7 +68,7 @@ const setup = ({
       context
     );
 
-  return { tool, run, runCommand, writeFiles, request, logger, session };
+  return { tool, run, runCommand, writeFiles, request, logger, session, sandboxAllowlistClient };
 };
 
 describe('sandbox bash tool', () => {
@@ -135,6 +141,39 @@ describe('sandbox bash tool — connector credentials', () => {
     ]);
   });
 
+  it('passes space egress firewall rules in allowed_hosts when configured on the space', async () => {
+    const { run, runCommand } = setup({
+      resolveConnectorCredentials: resolved(),
+      allowedHosts: ['allow pypi.org GET,HEAD /simple/', 'deny api.github.com POST /gists'],
+    });
+
+    await run({ connector_id: 'connector-1' });
+
+    expect(runCommand.mock.calls[0][0].allowed_hosts).toEqual([
+      'allow pypi.org GET,HEAD /simple/',
+      'deny api.github.com POST /gists',
+    ]);
+  });
+
+  it('logs the error and returns a structured tool error without running the command when getHostsForCommand rejects', async () => {
+    const { run, runCommand, sandboxAllowlistClient, logger } = setup();
+    sandboxAllowlistClient.getHostsForCommand.mockRejectedValueOnce(new Error('corrupted policy'));
+
+    const res = await run({});
+
+    expect(res).toEqual({
+      results: [
+        {
+          type: ToolResultType.error,
+          data: { message: 'Space sandbox egress allowlist is invalid or unavailable.' },
+        },
+      ],
+    });
+    expect(logger.error).toHaveBeenCalledWith(
+      'Failed to load space sandbox egress allowlist: corrupted policy'
+    );
+    expect(runCommand).not.toHaveBeenCalled();
+  });
   it('passes no credentials without a connector_id', async () => {
     const resolveConnectorCredentials = resolved();
     const { run, runCommand } = setup({ resolveConnectorCredentials });

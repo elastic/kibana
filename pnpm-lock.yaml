@@ -5807,6 +5807,9 @@ importers:
       '@kbn/pubsub-example-topic':
         specifier: workspace:*
         version: link:examples/pubsub-example-topic
+      '@kbn/react-fiber':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-react-fiber
       '@kbn/relocate':
         specifier: workspace:*
         version: link:packages/kbn-relocate
@@ -8268,6 +8271,8 @@ importers:
   src/platform/packages/shared/kbn-profiler: {}
 
   src/platform/packages/shared/kbn-profiling-utils: {}
+
+  src/platform/packages/shared/kbn-react-fiber: {}
 
   src/platform/packages/shared/kbn-react-field: {}
 
