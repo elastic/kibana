@@ -8,19 +8,25 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
+import { ES_CLIENT_API_VERSION, ES_CLIENT_BASE_PATH } from '../common';
 import type { EsClient } from './es_client/types';
 import type { ProxyFetch } from './es_client/proxy_transport';
 import type { EsClientPluginSetup } from './plugin';
-import { proxyArgsToEsArgs } from './proxy_args_to_es_args';
 
 /**
  * Creates the browser client that sends requests through the Elasticsearch proxy.
  */
 export const proxyService = (http: HttpSetup): EsClientPluginSetup => {
-  const proxyFetch: ProxyFetch = (params, rawResponse) => {
-    const [path, options] = proxyArgsToEsArgs(params);
-    return http.fetch(path, { ...options, asResponse: true, rawResponse });
-  };
+  const proxyFetch: ProxyFetch = ({ path, body, ...options }, rawResponse) =>
+    // `no_unsafe_dynamic_http_path` warns here because it can't see that elasticsearch-js
+    // already URI-encodes every path param, so `path` is safe to append as-is.
+    http.fetch(`${ES_CLIENT_BASE_PATH}${path}`, {
+      ...options,
+      body: typeof body === 'object' ? JSON.stringify(body) : body,
+      version: ES_CLIENT_API_VERSION,
+      asResponse: true,
+      rawResponse,
+    });
   const loadClient = async (): Promise<EsClient> => {
     const { createEsClient } = await import('./es_client');
     return createEsClient(proxyFetch);

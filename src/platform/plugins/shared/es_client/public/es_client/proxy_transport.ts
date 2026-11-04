@@ -12,11 +12,23 @@ import type {
   TransportRequestOptionsWithMeta,
   TransportRequestParams,
 } from '@elastic/elasticsearch';
-import type { HttpFetchQuery, HttpResponse } from '@kbn/core-http-browser';
+import type { HttpFetchQuery, HttpHeadersInit, HttpResponse } from '@kbn/core-http-browser';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { PRODUCT_ORIGIN_HEADER } from '../../common';
-import type { EsClientRequestParams, HttpMethod } from '../../common/types';
 import type { EsClientResult, EsClientTransport, TransportRequestOptionsAsStream } from './types';
+
+type HttpMethod = 'GET' | 'HEAD' | 'PUT' | 'POST' | 'DELETE';
+
+export interface EsClientRequestParams {
+  method: HttpMethod;
+  /** The Elasticsearch path, already URI-encoded by the elasticsearch-js API, e.g. `/my-index/_doc/a%2Fb`. */
+  path: string;
+  /** Objects are sent as JSON. */
+  body?: string | object;
+  query?: HttpFetchQuery;
+  headers?: HttpHeadersInit;
+  signal?: AbortSignal;
+}
 
 /** Sends a request through the proxy. `rawResponse` leaves the response body unread. */
 export type ProxyFetch = (
@@ -37,15 +49,6 @@ const WARNING_SEPARATOR = /(?!\B"[^"]*),(?![^"]*"\B)/;
 const ELASTICSEARCH_WARNING = /^\d\d\d Elasticsearch-/;
 
 const isHttpMethod = (method: string): method is HttpMethod => HTTP_METHODS.has(method);
-
-/**
- * Splits the client's already-encoded path into decoded segments, which the proxy re-encodes.
- */
-const toPathSegments = (path: string): string[] =>
-  path
-    .split('/')
-    .filter((segment) => segment !== '')
-    .map(decodeURIComponent);
 
 const addQueryEntries = (query: HttpFetchQuery, querystring: Querystring): void => {
   if (querystring == null) {
@@ -208,7 +211,7 @@ export const createProxyTransport = (proxyFetch: ProxyFetch): EsClientTransport 
     let httpResponse: HttpResponse;
     try {
       httpResponse = await proxyFetch(
-        { method, path: toPathSegments(path), query, body, headers, signal: options.signal },
+        { method, path, query, body, headers, signal: options.signal },
         asStream
       );
     } catch (error) {
