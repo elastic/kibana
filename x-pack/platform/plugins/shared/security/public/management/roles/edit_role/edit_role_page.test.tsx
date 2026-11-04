@@ -220,7 +220,7 @@ function getProps({
   } as any);
 
   const { fatalErrors } = coreMock.createSetup();
-  const { http, docLinks, notifications, overlays, rendering } = coreMock.createStart();
+  const { http, docLinks, notifications, overlays, rendering, security } = coreMock.createStart();
   http.get.mockImplementation(async (path: any) => {
     if (path === '/api/spaces/space') {
       if (!spacesEnabled) {
@@ -269,6 +269,7 @@ function getProps({
     i18n: i18nMock,
     analytics: analyticsMock,
     rendering,
+    serviceAccounts: security.serviceAccounts,
   };
 }
 
@@ -1312,6 +1313,100 @@ describe('<EditRolePage />', () => {
       await waitFor(() => {
         expect(navigateToUrl).toHaveBeenCalledWith('/mock/', expect.anything());
       });
+    });
+  });
+
+  describe('service accounts holding the role', () => {
+    const role: Role = {
+      name: 'my custom role',
+      description: 'a role',
+      metadata: {},
+      elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+      kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+    };
+
+    const renderWithServiceAccounts = async (
+      props: ReturnType<typeof getProps> = getProps({ action: 'edit', role })
+    ) => {
+      props.serviceAccounts.isEnabled.mockReturnValue(true);
+      props.serviceAccounts.findByRoles.mockResolvedValue({
+        serviceAccounts: [
+          {
+            id: 'kibana/relay',
+            name: 'relay',
+            roles: [role.name],
+            enabled: true,
+            workloadCount: 2,
+          },
+        ],
+        complete: true,
+      });
+
+      render(
+        <TestProviders>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage {...props} />
+          </KibanaContextProvider>
+        </TestProviders>
+      );
+
+      await waitForRender();
+      return props;
+    };
+
+    it('warns about them when the role loads', async () => {
+      const { serviceAccounts } = await renderWithServiceAccounts();
+
+      const callout = await screen.findByTestId('serviceAccountRoleUsageCallout');
+      expect(callout).toHaveTextContent('1 service account uses this role');
+      expect(within(callout).getByText('relay')).toBeInTheDocument();
+      expect(serviceAccounts.findByRoles).toHaveBeenCalledWith([role.name]);
+    });
+
+    it('shows the save hint only once the role has unsaved changes', async () => {
+      await renderWithServiceAccounts();
+      await screen.findByTestId('serviceAccountRoleUsageCallout');
+
+      expect(screen.queryByTestId('serviceAccountRoleUsageSaveHint')).not.toBeInTheDocument();
+
+      fireEvent.change(screen.getByTestId('roleFormDescriptionInput'), {
+        target: { value: 'a different role' },
+      });
+
+      expect(screen.getByTestId('serviceAccountRoleUsageSaveHint')).toHaveTextContent(
+        'Saving affects 1 service account'
+      );
+    });
+
+    it('repeats the warning in the delete confirmation without looking them up again', async () => {
+      const { serviceAccounts } = await renderWithServiceAccounts();
+      await screen.findByTestId('serviceAccountRoleUsageCallout');
+
+      fireEvent.click(screen.getByText('Delete role'));
+
+      const modal = await screen.findByRole('alertdialog');
+      expect(within(modal).getByTestId('serviceAccountRoleUsageCallout')).toHaveTextContent(
+        'Deleting this role immediately removes the privileges it grants'
+      );
+      expect(serviceAccounts.findByRoles).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not look them up for a reserved role', async () => {
+      const { serviceAccounts } = await renderWithServiceAccounts(
+        getProps({ action: 'edit', role: { ...role, metadata: { _reserved: true } } })
+      );
+
+      expect(screen.queryByTestId('serviceAccountRoleUsageCallout')).not.toBeInTheDocument();
+      expect(serviceAccounts.findByRoles).not.toHaveBeenCalled();
+    });
+
+    it('does not look them up for a role being cloned', async () => {
+      const { serviceAccounts } = await renderWithServiceAccounts(
+        getProps({ action: 'clone', role })
+      );
+
+      expect(screen.queryByTestId('serviceAccountRoleUsageCallout')).not.toBeInTheDocument();
+      expect(serviceAccounts.findByRoles).not.toHaveBeenCalled();
     });
   });
 });

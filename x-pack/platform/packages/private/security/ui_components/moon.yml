@@ -24,6 +24,9 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/security-role-management-model'
   - '@kbn/features-plugin'
+  - '@kbn/core-security-browser'
+  - '@kbn/core-security-common'
+  - '@kbn/ui-callout'
 tags:
   - shared-browser
   - package

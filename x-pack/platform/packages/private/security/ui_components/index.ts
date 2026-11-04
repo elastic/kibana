@@ -11,3 +11,15 @@ export {
 } from './src/kibana_privilege_table';
 export { PrivilegeFormCalculator } from './src/privilege_form_calculator';
 export * as constants from './src/constants';
+export type {
+  ServiceAccountRoleUsage,
+  ServiceAccountRoleUsageCalloutProps,
+  ServiceAccountRoleUsageLookup,
+} from './src/service_accounts';
+export {
+  BoundWorkloadsTable,
+  hasServiceAccountRoleUsageCallout,
+  ServiceAccountRoleUsageCallout,
+  ServiceAccountRoleUsageSaveHint,
+  useServiceAccountRoleUsage,
+} from './src/service_accounts';

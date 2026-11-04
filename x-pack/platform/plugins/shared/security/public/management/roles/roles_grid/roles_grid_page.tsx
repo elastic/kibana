@@ -30,6 +30,7 @@ import type { FC } from 'react';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import type { BuildFlavor } from '@kbn/config';
 import type { NotificationsStart, ScopedHistory } from '@kbn/core/public';
+import type { CoreServiceAccountsService } from '@kbn/core-security-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
@@ -57,6 +58,7 @@ export interface Props extends StartServices {
   readOnly?: boolean;
   buildFlavor: BuildFlavor;
   cloudOrgUrl?: string;
+  serviceAccounts: CoreServiceAccountsService;
 }
 
 interface RolesTableState {
@@ -130,6 +132,7 @@ export const RolesGridPage: FC<Props> = ({
   readOnly,
   buildFlavor,
   cloudOrgUrl,
+  serviceAccounts,
   ...startServices
 }) => {
   const [rolesResponse, setRolesResponse] = useState<QueryRolesResult>({} as QueryRolesResult);
@@ -477,6 +480,7 @@ export const RolesGridPage: FC<Props> = ({
             notifications={notifications}
             rolesAPIClient={rolesAPIClient}
             buildFlavor={buildFlavor}
+            serviceAccounts={serviceAccounts}
             {...startServices}
           />
         ) : null}
