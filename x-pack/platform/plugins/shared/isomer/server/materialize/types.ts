@@ -14,8 +14,8 @@ import type { MaterializeContext, MaterializeInput } from '../../common';
 import type { ChartEvent, MaterializedNode, UnsupportedNode } from './nodes';
 
 /**
- * Intended overrides for one data request: fields replace the parent's, except `filters`, which
- * are added to the parent's. The current pipeline does not execute data requests.
+ * Context a parent passes down for one request: a dashboard's panel overrides, or a materializer's
+ * own. Fields replace the parent's, except `filters`, which are added to the parent's.
  */
 export interface MaterializeContextOverride extends MaterializeContext {
   /** Drops the parent's filters and query, as a panel's "ignore global filters" does. */
@@ -23,10 +23,10 @@ export interface MaterializeContextOverride extends MaterializeContext {
 }
 
 /** A named ES|QL param's value, as Kibana's ES|QL search takes it. */
-type EsqlParamValue = string | number | Array<string | number>;
+export type EsqlParamValue = string | number | Array<string | number>;
 
 /** An ES|QL query request, planned with the context's time range, filters, query, and controls. */
-interface EsqlDataRequest {
+export interface EsqlDataRequest {
   /** Request kind discriminator. */
   kind: 'esql';
   /** ES|QL query to run. */
@@ -81,10 +81,7 @@ interface MaterializeDataRequest {
   context?: MaterializeContextOverride;
 }
 
-/**
- * The requests a materializer plans. The current pipeline rejects non-empty plans; materializers
- * never query directly.
- */
+/** The requests a materializer plans. The pipeline runs them; materializers never query. */
 export type DataRequest =
   | EsqlDataRequest
   | AggsDataRequest

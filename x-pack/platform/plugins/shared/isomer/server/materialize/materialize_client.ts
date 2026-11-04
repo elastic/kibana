@@ -6,25 +6,42 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { i18n } from '@kbn/i18n';
+import type { ValidationError } from '@kbn/isomer';
 import type { MaterializeContext, MaterializeInput } from '../../common';
+import { executeEsql } from './executors/esql';
+import { DATA_REQUEST_TIMEOUT_MS, MAX_MATERIALIZE_DEPTH, MAX_ROWS_PER_REQUEST } from './limits';
 import type { MaterializedNode } from './nodes';
+import { isUnsupportedNode } from './nodes';
+import { runPipeline } from './pipeline';
 import type { MaterializerRegistry } from './registry';
 import type {
   MaterializeDescription,
   MaterializeScope,
   Materializer,
-  MaterializeResults,
   ScopedMaterializeClient,
 } from './types';
 import { createUnsupportedNode } from './unsupported';
 
-interface ScopedMaterializeClientDeps {
+export interface MaterializeLimits {
+  maxRowsPerRequest: number;
+  dataRequestTimeoutMs: number;
+  maxDepth: number;
+}
+
+export interface ScopedMaterializeClientDeps {
   registry: MaterializerRegistry;
   scope: MaterializeScope;
   isEnabled: () => Promise<boolean>;
-  validateNode: (node: MaterializedNode) => Promise<void>;
   logger: Logger;
+  /** The user's search client. */
+  search: Pick<IScopedSearchClient, 'esql'>;
+  /** The node's validation errors against the runtime's packs, with paths relative to the node. */
+  validate: (node: MaterializedNode) => Promise<ValidationError[]>;
+  kibanaVersion: string;
+  now?: () => Date;
+  limits?: Partial<MaterializeLimits>;
 }
 
 const MAX_UNSUPPORTED_REASON_LENGTH = 10_000;
@@ -56,79 +73,34 @@ const loadConfig = async (
   return materializer.load(input.id, scope);
 };
 
-const run = async (
-  materializer: Materializer,
-  config: unknown,
-  context: MaterializeContext,
-  describe: () => MaterializeDescription | undefined,
-  unsupported: (reason: string, description?: MaterializeDescription) => Promise<MaterializedNode>,
-  validateNode: (node: MaterializedNode) => Promise<void>
-): Promise<MaterializedNode> => {
-  const plan = materializer.plan(config, context);
-  let node: MaterializedNode;
-  if (!Array.isArray(plan)) {
-    node = plan;
-  } else {
-    const [request] = plan;
-    if (request) {
-      return unsupported(
-        i18n.translate('xpack.isomer.materialize.noExecutor', {
-          defaultMessage: 'Kibana cannot run "{kind}" data requests for materialization.',
-          values: { kind: request.kind },
-        }),
-        describe()
-      );
-    }
-    const results: MaterializeResults = { tables: [], nodes: [] };
-    node = materializer.map(config, results, { context });
-  }
-  await validateNode(node);
-  return node;
-};
-
 /** Materializes saved objects as the user `scope` belongs to. */
 export const createScopedMaterializeClient = ({
   registry,
   scope,
   isEnabled,
-  validateNode,
   logger,
-}: ScopedMaterializeClientDeps): ScopedMaterializeClient => ({
-  /** Creates and validates a node, using an `unsupported` primitive for failures. */
-  materialize: async (input, context = {}) => {
-    if (!(await isEnabled())) {
-      const node = createUnsupportedNode(
-        i18n.translate('xpack.isomer.materialize.disabled', {
-          defaultMessage: 'Materialization is not enabled in this Kibana.',
-        })
-      );
-      await validateNode(node);
-      return node;
+  search,
+  validate,
+  kibanaVersion,
+  now = () => new Date(),
+  limits: {
+    maxRowsPerRequest = MAX_ROWS_PER_REQUEST,
+    dataRequestTimeoutMs = DATA_REQUEST_TIMEOUT_MS,
+    maxDepth = MAX_MATERIALIZE_DEPTH,
+  } = {},
+}: ScopedMaterializeClientDeps): ScopedMaterializeClient => {
+  /** Throws when `node` does not validate against the runtime's packs. */
+  const validateNode = async (node: MaterializedNode): Promise<void> => {
+    const errors = await validate(node);
+    if (errors.length > 0) {
+      throw new Error(errors.map(({ path, message }) => `${path}: ${message}`).join('\n'));
     }
-    const materializer = registry.get(input.type);
-    if (!materializer) {
-      const node = createUnsupportedNode(
-        i18n.translate('xpack.isomer.materialize.noMaterializer', {
-          defaultMessage: 'Kibana cannot materialize saved objects of type "{type}".',
-          values: { type: input.type },
-        })
-      );
-      await validateNode(node);
-      return node;
-    }
+  };
 
-    const describe = (): MaterializeDescription | undefined => {
-      try {
-        return materializer.describe?.(config);
-      } catch (error) {
-        logger.warn(`Describing a ${input.type} config failed: ${errorMessage(error)}`);
-        return undefined;
-      }
-    };
-    const unsupported = async (
-      reason: string,
-      description?: MaterializeDescription
-    ): Promise<MaterializedNode> => {
+  /** A validated `unsupported` node, dropping a description that does not validate. */
+  const unsupportedFor =
+    (type: string) =>
+    async (reason: string, description?: MaterializeDescription): Promise<MaterializedNode> => {
       const boundedReason = reason.slice(0, MAX_UNSUPPORTED_REASON_LENGTH);
       const node = createUnsupportedNode(boundedReason, description);
       try {
@@ -138,12 +110,43 @@ export const createScopedMaterializeClient = ({
         if (!description) {
           throw error;
         }
-        logger.warn(
-          `Validating the ${input.type} unsupported description failed: ${errorMessage(error)}`
-        );
+        logger.warn(`Validating the ${type} unsupported description failed: ${errorMessage(error)}`);
         const fallback = createUnsupportedNode(boundedReason);
         await validateNode(fallback);
         return fallback;
+      }
+    };
+
+  const materializeAt = async (
+    input: MaterializeInput,
+    context: MaterializeContext,
+    depth: number
+  ): Promise<MaterializedNode> => {
+    const unsupported = unsupportedFor(input.type);
+    const materializer = registry.get(input.type);
+    if (!materializer) {
+      return unsupported(
+        i18n.translate('xpack.isomer.materialize.noMaterializer', {
+          defaultMessage: 'Kibana cannot materialize saved objects of type "{type}".',
+          values: { type: input.type },
+        })
+      );
+    }
+    if (depth > maxDepth) {
+      return unsupported(
+        i18n.translate('xpack.isomer.materialize.tooDeep', {
+          defaultMessage: 'This {type} is nested more than {maxDepth} levels deep.',
+          values: { type: input.type, maxDepth },
+        })
+      );
+    }
+
+    const describe = (): MaterializeDescription | undefined => {
+      try {
+        return materializer.describe?.(config);
+      } catch (error) {
+        logger.warn(`Describing a ${input.type} config failed: ${errorMessage(error)}`);
+        return undefined;
       }
     };
 
@@ -163,7 +166,35 @@ export const createScopedMaterializeClient = ({
     }
 
     try {
-      return await run(materializer, config, context, describe, unsupported, validateNode);
+      const node = await runPipeline(
+        {
+          type: input.type,
+          materializer,
+          config,
+          context,
+          describe,
+          ...(isByReference(input) ? { savedObjectId: input.id } : {}),
+        },
+        {
+          executeEsql: (request, requestContext, index) =>
+            executeEsql(request, requestContext, index, {
+              search,
+              abortSignal: scope.abortSignal,
+              maxRows: maxRowsPerRequest,
+              timeoutMs: dataRequestTimeoutMs,
+            }),
+          materialize: (nestedInput, nestedContext) =>
+            materializeAt(nestedInput, nestedContext, depth + 1),
+          validate,
+          kibanaVersion,
+          now,
+        }
+      );
+      if (isUnsupportedNode(node)) {
+        const { reason, title, link } = node;
+        return await unsupported(reason, { title, link });
+      }
+      return node;
     } catch (error) {
       logger.warn(`Materializing a ${input.type} config failed: ${errorMessage(error)}`);
       return unsupported(
@@ -174,15 +205,29 @@ export const createScopedMaterializeClient = ({
         describe()
       );
     }
-  },
+  };
 
-  /** Rejects until the materialization pipeline implements selection conversion. */
-  filtersForSelection: async ({ node }) => {
-    throw new Error(
-      i18n.translate('xpack.isomer.materialize.selectionUnsupported', {
-        defaultMessage: 'Kibana cannot turn a selection on node "{node}" into filters.',
-        values: { node },
-      })
-    );
-  },
-});
+  return {
+    /** Creates and validates a node, using an `unsupported` primitive for failures. */
+    materialize: async (input, context = {}) => {
+      if (!(await isEnabled())) {
+        return unsupportedFor(input.type)(
+          i18n.translate('xpack.isomer.materialize.disabled', {
+            defaultMessage: 'Materialization is not enabled in this Kibana.',
+          })
+        );
+      }
+      return materializeAt(input, context, 0);
+    },
+
+    /** Rejects until the materialization pipeline implements selection conversion. */
+    filtersForSelection: async ({ node }) => {
+      throw new Error(
+        i18n.translate('xpack.isomer.materialize.selectionUnsupported', {
+          defaultMessage: 'Kibana cannot turn a selection on node "{node}" into filters.',
+          values: { node },
+        })
+      );
+    },
+  };
+};
