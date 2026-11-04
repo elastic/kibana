@@ -418,8 +418,9 @@ const describeCrash = ({ client, app, random }: SessionContext, crashedAt: numbe
 
 /**
  * What the SDK has exported of a visit when the app crashes. Spans that were still running, and
- * spans and logs that had ended since the last export of their batch processor, are lost, span
- * events with their span. Nothing happens after the crash.
+ * spans and logs that had ended since the last export of their batch processor, are lost. Span
+ * events go through the span processor with their span, and only become logs in the exporter, so
+ * they are kept or lost with it. Nothing happens after the crash.
  */
 const exportedBeforeCrash = (
   { client, random }: SessionContext,
@@ -430,29 +431,25 @@ const exportedBeforeCrash = (
   // The processors last exported at some point of their interval before the crash
   const spansExportedUntil = crashedAt - random() * delays.spans;
   const logsExportedUntil = crashedAt - random() * delays.logs;
-  const lostSpanIds = new Set<string>();
-  return events
-    .filter(({ fields }) => {
+  const exportedSpanIds = new Set(
+    events.flatMap(({ fields }) => {
       if (!('kind' in fields)) {
-        return true;
+        return [];
       }
       const { '@timestamp': time = 0, duration = 0, span_id: spanId } = fields;
-      if (time + duration / 1_000_000 < spansExportedUntil) {
-        return true;
-      }
-      lostSpanIds.add(spanId);
-      return false;
+      return time + duration / 1_000_000 < spansExportedUntil ? [spanId] : [];
     })
-    .filter(({ fields }) => {
-      if ('kind' in fields) {
-        return true;
-      }
-      const { '@timestamp': time = 0, span_id: spanId } = fields;
-      if (spanId !== undefined && lostSpanIds.has(spanId)) {
-        return false;
-      }
-      return delays.logs > 0 ? time < logsExportedUntil : time <= crashedAt;
-    });
+  );
+  return events.filter(({ fields }) => {
+    if ('kind' in fields) {
+      return exportedSpanIds.has(fields.span_id);
+    }
+    const { '@timestamp': time = 0, span_id: spanId } = fields;
+    if (spanId !== undefined) {
+      return exportedSpanIds.has(spanId);
+    }
+    return delays.logs > 0 ? time < logsExportedUntil : time <= crashedAt;
+  });
 };
 
 /**

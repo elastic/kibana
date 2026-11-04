@@ -804,11 +804,20 @@ describe('edotReactNative', () => {
             (doc) => doc !== crash && timeOf(doc) >= crashedAt && timeOf(doc) < crashedAt + 60_000
           );
           expect(afterCrash).toEqual([]);
-          // Span events are lost with their span
+          // Span events are kept or lost with their span, whatever happens to the logs
           const spanIds = new Set(spans.map(({ span_id: spanId }) => spanId));
-          logs(docs)
-            .filter(({ span_id: spanId }) => spanId !== undefined)
-            .forEach(({ span_id: spanId }) => expect(spanIds.has(String(spanId))).toBe(true));
+          const spanEventIds = new Set(
+            logs(docs)
+              .filter(({ span_id: spanId }) => spanId !== undefined)
+              .map(({ span_id: spanId }) => String(spanId))
+          );
+          spanEventIds.forEach((spanId) => expect(spanIds.has(spanId)).toBe(true));
+          if (platform === 'ios') {
+            // Every failed request has an exception event on iOS
+            spans
+              .filter(({ kind, status }) => kind === 'Client' && status.code === 'Error')
+              .forEach(({ span_id: spanId }) => expect(spanEventIds.has(spanId)).toBe(true));
+          }
         }
       });
     });
