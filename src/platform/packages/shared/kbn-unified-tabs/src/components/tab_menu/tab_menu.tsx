@@ -73,6 +73,7 @@ export const TabMenu: React.FC<TabMenuProps> = ({
           key={`${index}-${itemConfig.name}`}
           data-test-subj={itemConfig['data-test-subj']}
           color={itemConfig.color}
+          icon={itemConfig.icon}
           onClick={() => {
             closePopover();
             setTimeout(onClick, 100); // run it after Eui handles closing the popover so our changes to focus work correctly

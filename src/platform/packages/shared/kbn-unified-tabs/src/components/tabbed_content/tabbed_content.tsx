@@ -71,6 +71,8 @@ export interface TabbedContentProps
   appendRight?: React.ReactNode;
   /** Hides the "Close other tabs" and "Close tabs to the right" menu items */
   disableCloseTabsMenuItems?: boolean;
+  /** Shows icons on the built-in tab menu items */
+  showTabMenuItemIcons?: boolean;
   /** Optional function to provide menu items placed after rename/duplicate */
   getTopTabMenuItems?: (item: TabItem) => TabMenuItem[];
   /** Optional function to provide additional menu items placed at the end of the menu */
@@ -120,6 +122,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   disableDragAndDrop = false,
   disableTabsBarMenu = false,
   disableCloseTabsMenuItems = false,
+  showTabMenuItemIcons = false,
   appendRight,
   getTopTabMenuItems,
   getAdditionalTabMenuItems,
@@ -420,6 +423,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       onCloseOtherTabs,
       onCloseTabsToTheRight,
       disableCloseTabsMenuItems,
+      showTabMenuItemIcons,
       getTopTabMenuItems,
       getAdditionalTabMenuItems,
     });
@@ -430,6 +434,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     onCloseOtherTabs,
     onCloseTabsToTheRight,
     disableCloseTabsMenuItems,
+    showTabMenuItemIcons,
     getTopTabMenuItems,
     getAdditionalTabMenuItems,
   ]);

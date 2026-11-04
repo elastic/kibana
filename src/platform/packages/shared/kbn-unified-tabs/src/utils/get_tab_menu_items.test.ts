@@ -88,6 +88,31 @@ describe('getTabMenuItemsFn', () => {
     ]);
   });
 
+  it('adds icons to the core menu items when showTabMenuItemIcons is set', () => {
+    const getTabMenuItems = getTabMenuItemsFn({
+      tabsState: { items, selectedItem: items[0] },
+      maxItemsCount: 10,
+      onDuplicate: jest.fn(),
+      onCloseOtherTabs: jest.fn(),
+      onCloseTabsToTheRight: jest.fn(),
+      showTabMenuItemIcons: true,
+    });
+    const icons = getTabMenuItems(items[0]).map((item) => (item === 'divider' ? item : item.icon));
+    expect(icons).toEqual(['pencil', 'copy', 'divider', 'cross', 'sortRight']);
+  });
+
+  it('omits icons by default', () => {
+    const getTabMenuItems = getTabMenuItemsFn({
+      tabsState: { items, selectedItem: items[0] },
+      maxItemsCount: 10,
+      onDuplicate: jest.fn(),
+      onCloseOtherTabs: jest.fn(),
+      onCloseTabsToTheRight: jest.fn(),
+    });
+    const icons = getTabMenuItems(items[0]).map((item) => (item === 'divider' ? item : item.icon));
+    expect(icons).toEqual([undefined, undefined, 'divider', undefined, undefined]);
+  });
+
   it('returns correct menu items for the last item of many tabs', () => {
     const getTabMenuItems = getTabMenuItemsFn({
       tabsState: { items, selectedItem: items[0] },

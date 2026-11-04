@@ -338,12 +338,14 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: NotebookApp[] }) =>
               label: i18n.translate('xpack.notebook.app.deleteApp', { defaultMessage: 'Delete' }),
               onClick: () => deleteTab(item),
               color: 'danger',
+              icon: 'trash',
             },
           ]}
           onEBTEvent={() => {}}
           disableTabsBarMenu
           disableCloseButton
           disableCloseTabsMenuItems
+          showTabMenuItemIcons
           data-test-subj="notebookAppTabs"
         />
       </EuiFlexItem>

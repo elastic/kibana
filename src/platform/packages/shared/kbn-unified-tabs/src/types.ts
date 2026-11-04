@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IconType } from '@elastic/eui';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { CoreStart } from '@kbn/core/public';
 import type { TabsEventDataKeys } from './event_data_keys';
@@ -56,6 +57,7 @@ export interface TabMenuItemWithClick {
   label: string;
   onClick: (() => void) | null; // `null` can be overridden inside tab menu
   color?: 'text' | 'danger';
+  icon?: IconType;
 }
 
 export type TabMenuItem = TabMenuItemWithClick | 'divider';

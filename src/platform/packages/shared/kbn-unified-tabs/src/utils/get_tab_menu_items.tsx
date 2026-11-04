@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { TabItem, GetTabMenuItems, TabMenuItemWithClick, TabMenuItem } from '../types';
 import { TabMenuItemName } from '../types';
@@ -19,6 +20,7 @@ interface TabMenuItemProps {
   label: string;
   item: TabItem;
   onClick: ((item: TabItem) => void) | null; // `null` can be overridden inside tab menu
+  icon?: IconType;
 }
 
 const getTabMenuItem = ({
@@ -26,11 +28,13 @@ const getTabMenuItem = ({
   label,
   item,
   onClick,
+  icon,
 }: TabMenuItemProps): TabMenuItemWithClick => ({
   'data-test-subj': `unifiedTabs_tabMenuItem_${name}`,
   name,
   label,
   onClick: onClick ? () => onClick(item) : null,
+  ...(icon ? { icon } : {}),
 });
 
 export interface GetTabMenuItemsFnProps {
@@ -41,6 +45,8 @@ export interface GetTabMenuItemsFnProps {
   onCloseTabsToTheRight: (item: TabItem) => void;
   /** Hides the "Close other tabs" and "Close tabs to the right" menu items */
   disableCloseTabsMenuItems?: boolean;
+  /** Shows icons on the core tab menu items */
+  showTabMenuItemIcons?: boolean;
   /** Optional function to provide menu items placed after the core tab menu items */
   getTopTabMenuItems?: (item: TabItem) => TabMenuItem[];
   /** Optional function to provide additional menu items placed at the end of the menu */
@@ -54,9 +60,11 @@ export const getTabMenuItemsFn = ({
   onCloseOtherTabs,
   onCloseTabsToTheRight,
   disableCloseTabsMenuItems = false,
+  showTabMenuItemIcons = false,
   getTopTabMenuItems,
   getAdditionalTabMenuItems,
 }: GetTabMenuItemsFnProps): GetTabMenuItems => {
+  const iconFor = (icon: IconType) => (showTabMenuItemIcons ? icon : undefined);
   return (item) => {
     const closeOtherTabsItem =
       disableCloseTabsMenuItems || hasSingleTab(tabsState)
@@ -68,6 +76,7 @@ export const getTabMenuItemsFn = ({
               defaultMessage: 'Close other tabs',
             }),
             onClick: onCloseOtherTabs,
+            icon: iconFor('cross'),
           });
 
     const closeTabsToTheRightItem =
@@ -80,6 +89,7 @@ export const getTabMenuItemsFn = ({
               defaultMessage: 'Close tabs to the right',
             }),
             onClick: onCloseTabsToTheRight,
+            icon: iconFor('sortRight'),
           });
 
     const items: TabMenuItem[] = [
@@ -90,6 +100,7 @@ export const getTabMenuItemsFn = ({
           defaultMessage: 'Rename',
         }),
         onClick: null,
+        icon: iconFor('pencil'),
       }),
     ];
 
@@ -102,6 +113,7 @@ export const getTabMenuItemsFn = ({
             defaultMessage: 'Duplicate',
           }),
           onClick: onDuplicate,
+          icon: iconFor('copy'),
         })
       );
     }
