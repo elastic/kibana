@@ -131,3 +131,36 @@ function validateNoTraversalInInputIdentity(value: unknown): void {
     }
   }
 }
+
+/**
+ * Validates the ids that package templates compile into `compiled_input` and
+ * `compiled_stream`. `storedPackagePolicyToAgentInputs` spreads both over the
+ * validated input/stream id, so a root-level `id` in the compiled output (for
+ * example from a user-supplied `yaml` variable such as "Custom configurations")
+ * would otherwise reach Agent. Call this after compiling, on create/update paths
+ * only: it throws, so it must not run when recompiling stored policies to
+ * generate the agent policy.
+ *
+ * Only string ids are checked: a non-string value cannot form a path segment,
+ * and templates are free to emit other `id` types.
+ */
+export function validateNoTraversalInCompiledIds(inputs: PackagePolicy['inputs']): void {
+  const validateIfString = (id: unknown) => {
+    if (typeof id === 'string') {
+      validateNoPathTraversalId(id);
+    }
+  };
+
+  for (const input of inputs) {
+    validateIfString(input.compiled_input?.id);
+    const compiledInputStreams = input.compiled_input?.streams;
+    if (compiledInputStreams && typeof compiledInputStreams === 'object') {
+      for (const stream of Object.values(compiledInputStreams)) {
+        validateIfString((stream as { id?: unknown } | null)?.id);
+      }
+    }
+    for (const stream of input.streams ?? []) {
+      validateIfString(stream.compiled_stream?.id);
+    }
+  }
+}
