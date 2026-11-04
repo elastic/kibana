@@ -343,7 +343,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
     async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
 
-      // All three fail on the same rule: `SERVICE_ACCOUNT_NAME_REGEX` rejects `/` outright, so a
+      // All three fail on the same rule: `ES_SERVICE_ACCOUNT_NAME_REGEX` rejects `/` outright, so a
       // bare separator and a name pointing at another namespace are refused alongside traversal.
       for (const name of ['../_cluster/settings', 'elastic/', '/']) {
         const response = await apiClient.post(CREATE_ENDPOINT, {

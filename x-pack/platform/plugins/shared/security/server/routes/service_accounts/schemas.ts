@@ -9,14 +9,20 @@ import type { BuildFlavor } from '@kbn/config/src/types';
 import { z } from '@kbn/zod';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
-import type { ServiceAccountRoleLimits } from '../../../common/service_accounts';
+import type {
+  ServiceAccountNameSchema,
+  ServiceAccountRoleLimits,
+} from '../../../common/service_accounts';
 import {
+  ES_SERVICE_ACCOUNT_NAME_MAX_LENGTH,
+  esServiceAccountNameSchema,
   getCreateServiceAccountParamsSchema,
   SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH,
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
-  SERVICE_ACCOUNT_NAME_MAX_LENGTH,
   serviceAccountIdSchema,
+  UIAM_SERVICE_ACCOUNT_NAME_MAX_LENGTH,
+  uiamServiceAccountNameSchema,
 } from '../../../common/service_accounts';
 import {
   ES_SERVICE_ACCOUNT_ROLE_LIMITS,
@@ -31,6 +37,10 @@ import {
 export const getServiceAccountRoleLimits = (buildFlavor: BuildFlavor): ServiceAccountRoleLimits =>
   buildFlavor === 'serverless' ? UIAM_SERVICE_ACCOUNT_ROLE_LIMITS : ES_SERVICE_ACCOUNT_ROLE_LIMITS;
 
+/** The name rule of the backend this build creates service accounts with, chosen like its limits. */
+export const getServiceAccountNameSchema = (buildFlavor: BuildFlavor): ServiceAccountNameSchema =>
+  buildFlavor === 'serverless' ? uiamServiceAccountNameSchema : esServiceAccountNameSchema;
+
 /** Two quotes and a comma around each role. */
 const ROLE_FRAMING_BYTES = 3;
 /** The keys, braces and quotes around the name and the role list. */
@@ -38,15 +48,23 @@ const BODY_FRAMING_BYTES = 64;
 /** The key, the quotes and the comma around the description. */
 const DESCRIPTION_FRAMING_BYTES = ',"description":""'.length;
 /** The length of a `\uXXXX` escape. */
-const DESCRIPTION_CHARACTER_BYTES = 6;
+const ESCAPED_CHARACTER_BYTES = 6;
+/**
+ * The widest name either backend accepts. An Elasticsearch name is ASCII letters, digits, hyphens
+ * and underscores, so one byte per character. A UIAM name is free text counted in UTF-16 code units,
+ * so six bytes per character, like the description.
+ */
+const NAME_MAX_BYTES = Math.max(
+  ES_SERVICE_ACCOUNT_NAME_MAX_LENGTH,
+  ESCAPED_CHARACTER_BYTES * UIAM_SERVICE_ACCOUNT_NAME_MAX_LENGTH
+);
 
 /**
  * The largest create body a request within `limits` can produce, used as the route's body cap so
  * that such a request gets a 400 naming the field rather than a 413 with no field-level message.
  *
  * Each role name character is counted as two bytes. Elasticsearch accepts only printable ASCII in
- * role names, and the widest of those in JSON are `"` and `\`, which escape to two bytes. The name
- * is limited to ASCII letters, digits, hyphens and underscores, so one byte each.
+ * role names, and the widest of those in JSON are `"` and `\`, which escape to two bytes.
  *
  * Each description character is counted as six bytes. The description cap counts UTF-16 code
  * units, and JSON writes control characters and lone surrogates as `\uXXXX` escapes.
@@ -56,13 +74,16 @@ export const getCreateServiceAccountMaxBodyBytes = ({
   maxRoleNameLength,
 }: ServiceAccountRoleLimits): number =>
   maxRoles * (2 * maxRoleNameLength + ROLE_FRAMING_BYTES) +
-  SERVICE_ACCOUNT_NAME_MAX_LENGTH +
-  DESCRIPTION_CHARACTER_BYTES * SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH +
+  NAME_MAX_BYTES +
+  ESCAPED_CHARACTER_BYTES * SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH +
   DESCRIPTION_FRAMING_BYTES +
   BODY_FRAMING_BYTES;
 
-export const getCreateServiceAccountBodySchema = (limits: ServiceAccountRoleLimits) =>
-  getCreateServiceAccountParamsSchema(limits)
+export const getCreateServiceAccountBodySchema = (
+  limits: ServiceAccountRoleLimits,
+  nameSchema: ServiceAccountNameSchema
+) =>
+  getCreateServiceAccountParamsSchema(limits, nameSchema)
     // Rejects unknown keys, so callers cannot supply `assumable_by` or `role_assignments`. Kibana
     // derives both itself.
     .strict();

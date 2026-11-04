@@ -38,11 +38,15 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ServiceAccountRoleSelector } from './service_account_role_selector';
 import {
   ES_SERVICE_ACCOUNT_MAX_ROLES,
+  ES_SERVICE_ACCOUNT_NAME_MAX_LENGTH,
   SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH,
-  SERVICE_ACCOUNT_NAME_MAX_LENGTH,
-  SERVICE_ACCOUNT_NAME_REGEX,
   UIAM_SERVICE_ACCOUNT_MAX_ROLES,
+  UIAM_SERVICE_ACCOUNT_NAME_MAX_LENGTH,
 } from '../../../common/service_accounts/constants';
+import {
+  esServiceAccountNameSchema,
+  uiamServiceAccountNameSchema,
+} from '../../../common/service_accounts/schemas';
 import type { ServiceAccountsAPIClient } from '../../service_accounts';
 import type { RolesAPIClient } from '../roles';
 
@@ -113,9 +117,23 @@ export const CreateServiceAccountFlyout = ({
           defaultMessage: 'Select at least one role.',
         });
   const normalizedName = name.trim();
-  const isNameInvalid =
-    !SERVICE_ACCOUNT_NAME_REGEX.test(normalizedName) ||
-    normalizedName.length > SERVICE_ACCOUNT_NAME_MAX_LENGTH;
+  const maxNameLength = isServerless
+    ? UIAM_SERVICE_ACCOUNT_NAME_MAX_LENGTH
+    : ES_SERVICE_ACCOUNT_NAME_MAX_LENGTH;
+  const isNameInvalid = !(
+    isServerless ? uiamServiceAccountNameSchema : esServiceAccountNameSchema
+  ).safeParse(normalizedName).success;
+  const nameError = isServerless
+    ? i18n.translate('xpack.security.management.serviceAccounts.create.uiamNameErrorMessage', {
+        defaultMessage:
+          'Enter a name of up to {maxLength} characters. It cannot be blank or contain control characters.',
+        values: { maxLength: maxNameLength },
+      })
+    : i18n.translate('xpack.security.management.serviceAccounts.create.nameErrorMessage', {
+        defaultMessage:
+          'Enter a name of up to {maxLength} characters, starting with a letter or digit and containing only letters, digits, hyphens, or underscores.',
+        values: { maxLength: maxNameLength },
+      });
 
   const submit = async () => {
     if (saving.current) return;
@@ -196,20 +214,13 @@ export const CreateServiceAccountFlyout = ({
               defaultMessage: 'Name',
             })}
             isInvalid={(hasSubmitted || nameTouched) && isNameInvalid}
-            error={i18n.translate(
-              'xpack.security.management.serviceAccounts.create.nameErrorMessage',
-              {
-                defaultMessage:
-                  'Enter a name of up to {maxLength} characters, starting with a letter or digit and containing only letters, digits, hyphens, or underscores.',
-                values: { maxLength: SERVICE_ACCOUNT_NAME_MAX_LENGTH },
-              }
-            )}
+            error={nameError}
           >
             <EuiFieldText
               onBlur={() => setNameTouched(true)}
               fullWidth
               value={name}
-              maxLength={SERVICE_ACCOUNT_NAME_MAX_LENGTH}
+              maxLength={maxNameLength}
               onChange={(event) => setName(event.target.value)}
               isInvalid={(hasSubmitted || nameTouched) && isNameInvalid}
               disabled={isSaving}

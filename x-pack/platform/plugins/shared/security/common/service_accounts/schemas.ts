@@ -5,31 +5,65 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { lazySchema, z } from '@kbn/zod';
 
 import {
+  ES_SERVICE_ACCOUNT_NAME_MAX_LENGTH,
+  ES_SERVICE_ACCOUNT_NAME_REGEX,
   SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH,
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
-  SERVICE_ACCOUNT_NAME_MAX_LENGTH,
-  SERVICE_ACCOUNT_NAME_REGEX,
+  UIAM_SERVICE_ACCOUNT_NAME_MAX_LENGTH,
 } from './constants';
 import type { ServiceAccountRoleLimits } from './constants';
 
 export const serviceAccountIdSchema = z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH);
 
 /**
- * Validates the name a caller asks for. Beyond the create parameters it is also what a refused
- * create checks before naming the account in its audit event, so a rejected name never reaches the
- * log as received.
+ * Validates the name a caller asks for on Elasticsearch, where the name is also part of the
+ * account's id. Beyond the create parameters it is also what a refused create checks before naming
+ * the account in its audit event, so a rejected name never reaches the log as received.
  */
-export const serviceAccountNameSchema = z
-  .string()
-  .min(1)
-  .max(SERVICE_ACCOUNT_NAME_MAX_LENGTH)
-  .regex(
-    SERVICE_ACCOUNT_NAME_REGEX,
-    'must begin with a letter or digit and may contain only letters, digits, hyphens and underscores'
-  );
+export const esServiceAccountNameSchema = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(ES_SERVICE_ACCOUNT_NAME_MAX_LENGTH)
+    .regex(
+      ES_SERVICE_ACCOUNT_NAME_REGEX,
+      'must begin with a letter or digit and may contain only letters, digits, hyphens and underscores'
+    )
+);
+
+const CONTROL_CHARACTER_REGEX = /\p{Cc}/u;
+
+/**
+ * Validates the name a caller asks for on UIAM. UIAM generates the account's id, so the name is free
+ * text: up to 100 UTF-16 code units, and not blank.
+ *
+ * Kibana is stricter than UIAM in two ways. It refuses control characters, because the name is
+ * written to logs and audit events. And it trims the name, so two names that differ only by
+ * surrounding whitespace cannot both pass UIAM's uniqueness check. The cap applies before the trim,
+ * like the description's.
+ */
+export const uiamServiceAccountNameSchema = lazySchema(() =>
+  z
+    .string()
+    // `.max()` counts code points. UIAM counts UTF-16 code units, and so do the UI and the body cap.
+    .refine((name) => name.length <= UIAM_SERVICE_ACCOUNT_NAME_MAX_LENGTH, {
+      message: `Too big: expected string to have <=${UIAM_SERVICE_ACCOUNT_NAME_MAX_LENGTH} characters`,
+      abort: true,
+    })
+    .refine((name) => !CONTROL_CHARACTER_REGEX.test(name), {
+      message: 'must not contain control characters',
+    })
+    .trim()
+    .min(1, 'must not be blank')
+);
+
+/** The name rule of one backend. */
+export type ServiceAccountNameSchema =
+  | typeof esServiceAccountNameSchema
+  | typeof uiamServiceAccountNameSchema;
 
 /**
  * The cap applies to the raw input, before the trim, so the body limit on the route covers every
@@ -66,16 +100,19 @@ export const getServiceAccountRolesSchema = ({
   );
 
 /**
- * Parameters for creating a service account, with roles held to `limits`. Validated in two
- * places: the route body, and again inside the backend, since callers of the server contract never
- * pass through the route. Both use the backend's own limits.
+ * Parameters for creating a service account, with roles held to `limits` and the name to
+ * `nameSchema`. Validated in two places: the route body, and again inside the backend, since
+ * callers of the server contract never pass through the route. Both use the backend's own rules.
  *
  * `roles` is required and non-empty. There is no "derive them from the creator" default: see
  * `CreateServiceAccountParams` in `@kbn/core-security-common`.
  */
-export const getCreateServiceAccountParamsSchema = (limits: ServiceAccountRoleLimits) =>
+export const getCreateServiceAccountParamsSchema = (
+  limits: ServiceAccountRoleLimits,
+  nameSchema: ServiceAccountNameSchema
+) =>
   z.object({
-    name: serviceAccountNameSchema,
+    name: nameSchema,
     description: serviceAccountDescriptionSchema.optional(),
     roles: getServiceAccountRolesSchema(limits),
   });

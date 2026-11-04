@@ -50,6 +50,7 @@ import {
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
   SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
+  uiamServiceAccountNameSchema,
 } from '../../common/service_accounts';
 import { ServiceAccountAuditAction, serviceAccountAuditEvent } from '../audit';
 import { getDetailedErrorMessage } from '../errors';
@@ -243,7 +244,8 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
 
     const { name, roles, description, platformAssumers } = parseCreateServiceAccountParams(
       params,
-      UIAM_SERVICE_ACCOUNT_ROLE_LIMITS
+      UIAM_SERVICE_ACCOUNT_ROLE_LIMITS,
+      uiamServiceAccountNameSchema
     );
 
     const authorization = getUiamAuthorizationHeaderFromRequest(request);

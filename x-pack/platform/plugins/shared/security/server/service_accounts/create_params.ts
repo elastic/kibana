@@ -11,18 +11,24 @@ import type { CreateServiceAccountServerParams } from '@kbn/core-security-server
 import { z } from '@kbn/zod';
 
 import { PLATFORM_ASSUMERS } from './platform_assumers';
-import type { ServiceAccountRoleLimits } from '../../common/service_accounts';
+import type {
+  ServiceAccountNameSchema,
+  ServiceAccountRoleLimits,
+} from '../../common/service_accounts';
 import {
+  esServiceAccountNameSchema,
   getCreateServiceAccountParamsSchema,
-  serviceAccountNameSchema,
 } from '../../common/service_accounts';
 
 /**
  * The route schema plus `platformAssumers`, which only server-side callers may pass. Duplicate
  * names are dropped, keeping first occurrences in order.
  */
-const getServerCreateServiceAccountParamsSchema = (limits: ServiceAccountRoleLimits) =>
-  getCreateServiceAccountParamsSchema(limits).extend({
+const getServerCreateServiceAccountParamsSchema = (
+  limits: ServiceAccountRoleLimits,
+  nameSchema: ServiceAccountNameSchema
+) =>
+  getCreateServiceAccountParamsSchema(limits, nameSchema).extend({
     platformAssumers: z
       .preprocess(
         (assumers) => (Array.isArray(assumers) ? Array.from(new Set(assumers)) : assumers),
@@ -41,16 +47,17 @@ export type ParsedCreateServiceAccountParams = ReturnType<
  * Callers of the server contract never pass through the route, and the name reaches an
  * Elasticsearch URL path from here.
  *
- * `limits` are the calling backend's own role limits. The schema drops duplicate roles before
- * counting them.
+ * `limits` and `nameSchema` are the calling backend's own rules. The schema drops duplicate roles
+ * before counting them.
  *
  * Rejects with a 400, so the failure looks the same whichever entry point the caller used.
  */
 export const parseCreateServiceAccountParams = (
   params: CreateServiceAccountServerParams,
-  limits: ServiceAccountRoleLimits
+  limits: ServiceAccountRoleLimits,
+  nameSchema: ServiceAccountNameSchema
 ): ParsedCreateServiceAccountParams => {
-  const parsed = getServerCreateServiceAccountParamsSchema(limits).safeParse(params);
+  const parsed = getServerCreateServiceAccountParamsSchema(limits, nameSchema).safeParse(params);
 
   if (!parsed.success) {
     throw Boom.badRequest(
@@ -72,6 +79,6 @@ export const parseCreateServiceAccountParams = (
 export const auditableName = (
   params: CreateServiceAccountServerParams
 ): { name: string } | undefined => {
-  const parsed = serviceAccountNameSchema.safeParse(params.name);
+  const parsed = esServiceAccountNameSchema.safeParse(params.name);
   return parsed.success ? { name: parsed.data } : undefined;
 };
