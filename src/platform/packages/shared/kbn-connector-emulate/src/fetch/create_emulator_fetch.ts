@@ -13,6 +13,7 @@ import type {
   ContractResponse,
   NamedOperationRef,
   Responder,
+  ResponderContext,
   Violation,
 } from '../contract/types';
 import type {
@@ -26,7 +27,7 @@ import { collectNamedResponses, rejectUnknownNamedResponses } from '../engine/na
 import { createResponseEngine } from '../engine/response_engine';
 import type { PaginationOptions } from '../engine/paginate';
 import { withPagination } from '../engine/paginate';
-import { sampleResponse } from '../engine/sample_response';
+import { sampleBoundaryResponse, sampleResponse } from '../engine/sample_response';
 import type { GraphQLSpec } from '../graphql/graphql_protocol';
 import { createGraphQLProtocol, isGraphQLSpec, toEndpoint } from '../graphql/graphql_protocol';
 import type { McpSpec } from '../mcp/mcp_protocol';
@@ -88,10 +89,17 @@ export interface EmulatorOptions extends PaginationOptions {
   /** Responses captured from the vendor, served when they still conform to the spec. */
   readonly recordings?: readonly Recording[];
   /**
-   * Answers operations without a fixture or recording; defaults to the spec's examples,
-   * then deterministic samples of its schemas.
+   * Answers OpenAPI operations in front of the default chain: fixtures, recordings, then
+   * examples or samples. `context.next()` gives the default chain's answer, and `context.state`
+   * keeps what the responder needs across requests, e.g. to read back what it created. Answers
+   * may be promises, and are validated like any other.
    */
   readonly respond?: Responder;
+  /**
+   * How the default chain samples responses the spec has no example for: `typical` values, or
+   * values at the schema's upper bounds (`boundary`), which also skips examples.
+   */
+  readonly sampling?: 'typical' | 'boundary';
   /**
    * Answer 403 `insufficient_scope` when a bearer token the mock issued lacks the scopes an
    * operation's OAuth 2 requirements list. Off by default, as some specs declare scopes loosely.
@@ -104,6 +112,8 @@ export interface Emulator {
   readonly calls: ContractCall[];
   /** Fixtures and recordings that aren't served because the spec contradicts them. */
   readonly rejectedResponses: readonly RejectedResponse[];
+  /** Empties `calls` and the responder state, e.g. between tests. */
+  readonly reset: () => void;
 }
 
 const JSON_HEADERS = { 'content-type': 'application/json' };
@@ -261,7 +271,8 @@ export const createEmulatorFetch = ({
   recordings,
   pagination,
   collectionSize,
-  respond = sampleResponse,
+  respond,
+  sampling = 'typical',
   checkScopes = false,
 }: EmulatorOptions): Emulator => {
   const operations = loadSpecs(specs);
@@ -269,17 +280,28 @@ export const createEmulatorFetch = ({
   const loadedProtocols = loadProtocols(specs, namedResponses);
   const protocols = toProtocolEndpoints(loadedProtocols);
   const tokenEndpoints = findTokenEndpoints(operations);
-  const engine = createResponseEngine(operations, { fixtures, recordings, fallback: respond });
-  const contract = createOpenApiAdapter(
+  const engine = createResponseEngine(operations, {
+    fixtures,
+    recordings,
+    fallback: sampling === 'boundary' ? sampleBoundaryResponse : sampleResponse,
+  });
+  // Paging applies to the default chain, so a responder that defers to `next()` pages too.
+  const defaultChain = withPagination(
     operations,
-    withPagination(
-      operations,
-      { pagination, collectionSize, recordedExchanges: engine.recordedExchanges },
-      engine.respond
-    ),
-    { checkScopes }
+    { pagination, collectionSize, recordedExchanges: engine.recordedExchanges },
+    engine.respond
   );
+  const contract = createOpenApiAdapter(operations, respond ?? defaultChain, { checkScopes });
   const awsJsonServices = loadAwsJsonServices(specs);
+  const state = new Map<unknown, unknown>();
+  const contextFor = (operation: ContractOperation, request: ContractRequest) => {
+    const context: ResponderContext = {
+      state,
+      // A copy, as fixtures and recordings are one object shared by every request.
+      next: async () => structuredClone(await defaultChain(operation, request, context)),
+    };
+    return context;
+  };
   const calls: ContractCall[] = [];
 
   const rejectAsJson = (
@@ -296,7 +318,7 @@ export const createEmulatorFetch = ({
 
   // Authenticates and validates a routed request, answers it and checks the answer, recording
   // the call under the request's description.
-  const serveOperation = (
+  const serveOperation = async (
     routed: OperationMatch,
     request: ContractRequest,
     description: string,
@@ -306,7 +328,7 @@ export const createEmulatorFetch = ({
       name: string,
       challenge?: string
     ) => ContractResponse
-  ): ContractResponse => {
+  ): Promise<ContractResponse> => {
     const { operation } = routed;
     const name = operation.id;
     const matched = toOperationRef(operation);
@@ -334,7 +356,7 @@ export const createEmulatorFetch = ({
       return response;
     }
 
-    const response = contract.respond(operation, request);
+    const response = await contract.respond(operation, request, contextFor(operation, request));
     const responseViolations = contract.validateResponse(operation, response);
     calls.push({
       request: description,
@@ -352,11 +374,11 @@ export const createEmulatorFetch = ({
 
   // AWS JSON RPC services answer every request to their hosts: `POST /` with the operation in
   // `X-Amz-Target`, served as the operation at `POST /<Operation>` of the service's document.
-  const serveAwsJson = (
+  const serveAwsJson = async (
     service: AwsJsonService,
     request: ContractRequest,
     description: string
-  ): ContractResponse => {
+  ): Promise<ContractResponse> => {
     const target = service.route(request);
     if ('response' in target) {
       calls.push({
@@ -384,7 +406,7 @@ export const createEmulatorFetch = ({
       };
     }
     return service.toResponse(
-      serveOperation(routed, target.request, description, (rejection, violations) =>
+      await serveOperation(routed, target.request, description, (rejection, violations) =>
         service.reject(rejection, violations)
       )
     );
@@ -464,5 +486,13 @@ export const createEmulatorFetch = ({
       loadedProtocols.map(({ source, protocol }) => ({ source, operations: protocol.operations }))
     ),
   ];
-  return { fetch: mockFetch, calls, rejectedResponses };
+  return {
+    fetch: mockFetch,
+    calls,
+    rejectedResponses,
+    reset: () => {
+      calls.length = 0;
+      state.clear();
+    },
+  };
 };
