@@ -39,6 +39,8 @@ import type { FixtureIndex } from './fixture_index';
  * `host.id`. One alert of host:h1 is also stamped with user:dave@okta, an entity outside the
  * store, so its `kibana.alert.entity.id` is multi-value. Anomaly records carry no entity id: theirs comes from `user.name` with
  * `event.module` (okta), or from `host.id`.
+ * One more alert of host:h1 is an unstamped failed login that also names user:bob@okta: the user's
+ * `documentsFilter` excludes failed outcomes, so it counts for host:h1 only.
  * Excluded alerts: a closed alert of host:h3, and an alert of host:h3 from 40 days ago.
  * Risk change is the current score minus the last score in the 2 hours before the window;
  * service:payments has no score there. host:h2 is on watchlist `wl-1`.
