@@ -60,11 +60,14 @@ describe('Playwright config load path', () => {
       expect(found.map((path) => path.split('/').pop())).toEqual(['sample.yaml']);
     });
 
-    it.each(['sample.txt', 'sample.text'])('reports a direct %s import', (fixture) => {
-      const found = rawTextIn(loadedBy(`./config_load_path_fixtures/${fixture}`));
+    it.each(['sample.yml', 'sample.txt', 'sample.text', 'sample.html', 'sample.peggy'])(
+      'reports a direct %s import',
+      (fixture) => {
+        const found = rawTextIn(loadedBy(`./config_load_path_fixtures/${fixture}`));
 
-      expect(found.map((path) => path.split('/').pop())).toEqual([fixture]);
-    });
+        expect(found.map((path) => path.split('/').pop())).toEqual([fixture]);
+      }
+    );
 
     it('reports the managed barrel', () => {
       expect(rawTextIn(loadedBy('@kbn/workflows/managed')).length).toBeGreaterThan(0);

@@ -113,6 +113,29 @@ describe('analysisUsageOf', () => {
     });
   });
 
+  it('leaves a token field no analyze entry reported undefined, not 0', () => {
+    const usage = analysisUsageOf(
+      'child-1',
+      child([
+        { stepId: 'analyze', connectorId: 'review-model', inputTokens: 5, outputTokens: 2 },
+        { stepId: 'analyze', connectorId: 'review-model', inputTokens: 7, outputTokens: 3 },
+      ])
+    );
+    expect(usage).toMatchObject({ inputTokens: 12, outputTokens: 5 });
+    expect(usage.cachedTokens).toBeUndefined();
+  });
+
+  it('sums a token field that only some analyze entries reported', () => {
+    const usage = analysisUsageOf(
+      'child-1',
+      child([
+        { stepId: 'analyze', connectorId: 'review-model', inputTokens: 5, cachedTokens: 4 },
+        { stepId: 'analyze', connectorId: 'review-model', inputTokens: 7 },
+      ])
+    );
+    expect(usage.cachedTokens).toBe(4);
+  });
+
   it('is unresolved when the engine reported the connector as unknown', () => {
     const usage = analysisUsageOf(
       'child-1',

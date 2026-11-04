@@ -13,13 +13,17 @@ import { AUDIT_SCENARIOS } from '../audit_failure_classes/registry';
 import { buildWorkerRows } from '../../datasets/worker_rows';
 import { collectWorkerArtifacts } from '../collect';
 import type { CohortRouting } from '../cohort_routing';
-import { cleanupSeed, seedScenario } from '../seed';
+import { assertCleanSpace, cleanupSeed, seedScenario } from '../seed';
 import type { WorkerArtifacts, WorkerExample } from '../worker_types';
 import type { AttackDiscoveryWorkerClient } from '../worker_client';
 import { createEvaluateDataset } from './dataset_evaluator';
 
 jest.mock('../collect', () => ({ collectWorkerArtifacts: jest.fn() }));
-jest.mock('../seed', () => ({ seedScenario: jest.fn(), cleanupSeed: jest.fn() }));
+jest.mock('../seed', () => ({
+  assertCleanSpace: jest.fn(),
+  seedScenario: jest.fn(),
+  cleanupSeed: jest.fn(),
+}));
 
 /**
  * Positive control for the gate seam. The scorers and the assertion each have unit tests; this
@@ -32,6 +36,7 @@ jest.mock('../seed', () => ({ seedScenario: jest.fn(), cleanupSeed: jest.fn() })
 const collect = collectWorkerArtifacts as jest.MockedFunction<typeof collectWorkerArtifacts>;
 const seed = seedScenario as jest.MockedFunction<typeof seedScenario>;
 const cleanup = cleanupSeed as jest.MockedFunction<typeof cleanupSeed>;
+const assertClean = assertCleanSpace as jest.MockedFunction<typeof assertCleanSpace>;
 
 const routing: CohortRouting = {
   cohort: 'generation',
@@ -294,6 +299,26 @@ describe('createEvaluateDataset', () => {
       attackArtifacts({ reviews: [{ ...artifacts.reviews[0], verdict: undefined }] })
     );
     await expect(evaluateRow('positive-chain-with-noise')).rejects.toThrow(/VerdictMatchesGold/);
+  });
+
+  it('checks the space once more after the last row and fails when a late write is there', async () => {
+    collect.mockResolvedValue(quietArtifacts());
+    await evaluateRow('benign-batch');
+    expect(assertClean).toHaveBeenCalledTimes(1);
+    expect(assertClean).toHaveBeenCalledWith(
+      expect.objectContaining({ when: 'after the last row' })
+    );
+
+    assertClean.mockRejectedValueOnce(new Error('Space is not clean after the last row'));
+    await expect(evaluateRow('benign-batch')).rejects.toThrow(/not clean after the last row/);
+  });
+
+  it('reports a dirty space together with failed code scores', async () => {
+    collect.mockResolvedValue(quietArtifacts());
+    assertClean.mockRejectedValueOnce(new Error('Space is not clean after the last row'));
+    await expect(evaluateRow('positive-chain-with-noise')).rejects.toThrow(
+      /not clean after the last row.*VerdictMatchesGold|VerdictMatchesGold.*not clean after the last row/s
+    );
   });
 
   it('cancels pending executions and removes the seed even when collection throws', async () => {

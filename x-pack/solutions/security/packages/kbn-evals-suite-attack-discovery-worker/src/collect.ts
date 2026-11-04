@@ -227,8 +227,11 @@ export const analysisUsageOf = (
       connectorId && connectorId !== UNKNOWN_CONNECTOR ? connectorId : undefined
     )
   );
-  const sum = (pick: (entry: (typeof entries)[number]) => number | undefined): number =>
-    entries.reduce((total, entry) => total + (pick(entry) ?? 0), 0);
+  // A field no entry reported stays undefined: a summed 0 would read as "reported zero tokens".
+  const sum = (pick: (entry: (typeof entries)[number]) => number | undefined): number | undefined =>
+    entries.some((entry) => pick(entry) !== undefined)
+      ? entries.reduce((total, entry) => total + (pick(entry) ?? 0), 0)
+      : undefined;
   const hasUnknown = entries.some(
     ({ connectorId }) => !connectorId || connectorId === UNKNOWN_CONNECTOR
   );

@@ -477,9 +477,14 @@ const deleteMatching = async ({
   }
 };
 
-/** Attempts at deleting a failed seed's alerts before giving up, and the pause growth between them. */
-const REMOVE_SEED_ATTEMPTS = 5;
-const REMOVE_SEED_BACKOFF_MS = 250;
+/**
+ * When the seed bulk itself rejected (a socket hang up or a client timeout), Elasticsearch may
+ * still be running it, so a missing document does not yet mean nothing will land. The delete and
+ * the read-back then repeat for `UNSETTLED_REMOVE_ROUNDS` rounds, `UNSETTLED_REMOVE_PAUSE_MS` apart:
+ * 8 rounds with 7 pauses, 3.5s in all.
+ */
+const UNSETTLED_REMOVE_ROUNDS = 8;
+const UNSETTLED_REMOVE_PAUSE_MS = 500;
 
 const isNotFound = (error: unknown): boolean =>
   typeof error === 'object' && error !== null && 'statusCode' in error && error.statusCode === 404;
@@ -510,24 +515,31 @@ const idsStillPresent = async ({
 };
 
 /**
- * Deletes a partly written seed's alerts by exact document id, then reads the ids back until none
- * exists. A delete by query only matches documents that are already searchable, and after a
- * transport-level failure of the seed bulk some may be indexed but not refreshed; a delete by id
- * reaches those and touches nothing else. A missing document or index (404) is the expected
- * outcome for ids that were never written.
+ * Deletes a partly written seed's alerts by exact document id, then reads the ids back. A delete
+ * by query only matches documents that are already searchable, and after a transport-level failure
+ * of the seed bulk some may be indexed but not refreshed; a delete by id reaches those and touches
+ * nothing else. A missing document or index (404) is the expected outcome for ids never written.
  *
- * After a client-side failure the seed bulk may still be running in Elasticsearch, so a 404 can
- * mean "not written yet". The delete and the read-back repeat, with a growing pause, up to
- * `REMOVE_SEED_ATTEMPTS` times (about 2.5s in all) until every id is gone, then this throws. A
- * write that lands after that is not removed here; the next row's `assertCleanSpace` reports it.
+ * - `bulkSettled`: the seed bulk returned (with rejected items) or failed after it returned, so
+ *   nothing of this seed is still in flight. One delete and one read-back; ids that remain throw.
+ * - not settled: the bulk itself rejected and may still be running in Elasticsearch. A first empty
+ *   read-back proves nothing, so the delete and read-back repeat for the whole
+ *   `UNSETTLED_REMOVE_ROUNDS` window (3.5s), and the seed is called clean only if the read-back of
+ *   the LAST round finds no id (a write that landed earlier was deleted by a later round). Ids
+ *   found then throw. One last pass per window instead of consecutive clean reads keeps the total
+ *   fixed. A write that lands after the window is not removed here; the final clean-space check
+ *   after the last row (`assertCleanSpace` in `createEvaluateDataset`) and the next row's own
+ *   check report it.
  */
 const removeSeededAlertsById = async ({
   esClient,
   seeded: { spaceId, goldIdBySeededId },
+  bulkSettled,
   wait,
 }: {
   esClient: Client;
   seeded: SeededScenario;
+  bulkSettled: boolean;
   wait: (ms: number) => Promise<void>;
 }): Promise<void> => {
   const index = alertsIndexForSpace(spaceId);
@@ -535,8 +547,9 @@ const removeSeededAlertsById = async ({
   if (ids.length === 0) {
     return;
   }
+  const rounds = bulkSettled ? 1 : UNSETTLED_REMOVE_ROUNDS;
   let remaining = ids;
-  for (let attempt = 1; attempt <= REMOVE_SEED_ATTEMPTS; attempt++) {
+  for (let round = 1; round <= rounds; round++) {
     const operations = ids.map((_id) => ({ delete: { _index: index, _id } }));
     const { items } = await esClient.bulk({ refresh: true, operations });
     const failed = items.flatMap(({ delete: result }) =>
@@ -550,16 +563,17 @@ const removeSeededAlertsById = async ({
       );
     }
     remaining = await idsStillPresent({ esClient, index, ids });
-    if (remaining.length === 0) {
-      return;
-    }
-    if (attempt < REMOVE_SEED_ATTEMPTS) {
-      await wait(REMOVE_SEED_BACKOFF_MS * attempt);
+    if (round < rounds) {
+      await wait(UNSETTLED_REMOVE_PAUSE_MS);
     }
   }
-  throw new Error(
-    `${remaining.length} of ${ids.length} seeded alerts still exist after ${REMOVE_SEED_ATTEMPTS} delete attempts`
-  );
+  if (remaining.length > 0) {
+    throw new Error(
+      `${remaining.length} of ${ids.length} seeded alerts still exist after ${rounds} delete ${
+        rounds === 1 ? 'round' : 'rounds'
+      }`
+    );
+  }
 };
 
 /** Writes one scenario's alerts into the space's alerts index under a fresh run marker. */
@@ -576,7 +590,7 @@ export const seedScenario = async ({
   scenario: AuditScenario;
   spaceId: string;
   now?: number;
-  /** Pause between attempts at removing a failed seed; injected so tests do not wait. */
+  /** Pause between rounds of removing a failed seed; injected so tests do not wait. */
   wait?: (ms: number) => Promise<void>;
 }): Promise<SeededScenario> => {
   await assertCleanSpace({ esClient, spaceId });
@@ -608,9 +622,12 @@ export const seedScenario = async ({
   // midway. A bulk with some rejected items, or a failed read, has already left alerts behind and
   // the next row would fail `assertCleanSpace`. Only this seed's alerts are removed, by id because a
   // transport failure can leave them unsearchable: the workflow has not started, so there are no
-  // fingerprints or discoveries of this row to delete.
+  // fingerprints or discoveries of this row to delete. `bulkSettled` is false only when the bulk
+  // call itself rejected, the one case where it may still be running in Elasticsearch.
+  let bulkSettled = false;
   try {
     const response = await esClient.bulk({ refresh: 'wait_for', operations });
+    bulkSettled = true;
     if (response.errors) {
       const failed = response.items.find((item) => item.index?.error)?.index?.error;
       throw new Error(`Seeding "${scenario.id}" failed: ${JSON.stringify(failed)}`);
@@ -626,7 +643,7 @@ export const seedScenario = async ({
     );
   } catch (seedError) {
     try {
-      await removeSeededAlertsById({ esClient, seeded, wait });
+      await removeSeededAlertsById({ esClient, seeded, bulkSettled, wait });
     } catch (cleanupError) {
       throw new AggregateError(
         [seedError, cleanupError],
@@ -651,9 +668,12 @@ export const seedScenario = async ({
 export const assertCleanSpace = async ({
   esClient,
   spaceId,
+  when = 'before the row',
 }: {
   esClient: Client;
   spaceId: string;
+  /** Where in the run the check happens, for the error message. */
+  when?: string;
 }): Promise<void> => {
   const [alerts, fingerprints] = await Promise.all([
     esClient.count({
@@ -669,7 +689,7 @@ export const assertCleanSpace = async ({
   ]);
   if (alerts.count > 0 || fingerprints.count > 0) {
     throw new Error(
-      `Space "${spaceId}" is not clean before the row: ${alerts.count} open alerts and ${fingerprints.count} attack fingerprints are left over from an earlier run.`
+      `Space "${spaceId}" is not clean ${when}: ${alerts.count} open alerts and ${fingerprints.count} attack fingerprints are left in it (leftovers of an earlier run, or writes that landed late).`
     );
   }
 };

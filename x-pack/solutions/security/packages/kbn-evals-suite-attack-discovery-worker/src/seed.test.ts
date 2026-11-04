@@ -38,6 +38,13 @@ const esWith = (overrides: Record<string, unknown>): Client =>
   } as unknown as Client);
 
 describe('assertCleanSpace', () => {
+  it('names where in the run it was checked', async () => {
+    const count = jest.fn(async () => ({ count: 1 }));
+    await expect(
+      assertCleanSpace({ esClient: esWith({ count }), spaceId: 's', when: 'after the last row' })
+    ).rejects.toThrow(/not clean after the last row/);
+  });
+
   it('passes an empty space', async () => {
     await expect(assertCleanSpace({ esClient: esWith({}), spaceId: 's' })).resolves.toBeUndefined();
   });
@@ -186,9 +193,14 @@ describe('seedScenario partial failure', () => {
     const bulk = jest
       .fn()
       .mockRejectedValueOnce(new Error('socket hang up'))
-      .mockResolvedValueOnce({ errors: false, items: [notFound] });
+      .mockResolvedValue({ errors: false, items: [notFound] });
     await expect(seed(esWith({ bulk, deleteByQuery }))).rejects.toThrow(/socket hang up/);
-    expectDeletedExactlyTheSeededIds(bulk);
+    const { operations, refresh } = bulkCall(bulk, 1);
+    expect(refresh).toBe(true);
+    expect(operations.every((op) => Object.keys(op).join() === 'delete')).toBe(true);
+    expect(operations.map((op) => op.delete)).toEqual(
+      seededIds(bulk).map((_id) => ({ _index: alertsIndexForSpace('s'), _id }))
+    );
     expect(deleteByQuery).not.toHaveBeenCalled();
   });
 
@@ -215,7 +227,7 @@ describe('seedScenario partial failure', () => {
     const bulk = jest
       .fn()
       .mockRejectedValueOnce(new Error('socket hang up'))
-      .mockResolvedValueOnce({ errors: true, items: [notFound, indexMissing] });
+      .mockResolvedValue({ errors: true, items: [notFound, indexMissing] });
     const error = await seed(esWith({ bulk })).catch((e: unknown) => e);
     expect(error).not.toBeInstanceOf(AggregateError);
     expect((error as Error).message).toMatch(/socket hang up/);
@@ -227,38 +239,75 @@ describe('seedScenario partial failure', () => {
     });
     const gone = (ids: string[]) => ({ docs: ids.map((_id) => ({ _id, found: false })) });
     const cleaned = { errors: false, items: [notFound] };
+    const ROUNDS = 8;
+    const PAUSE_MS = 500;
+    const rejectedBulk = () =>
+      jest.fn().mockRejectedValueOnce(new Error('socket hang up')).mockResolvedValue(cleaned);
 
-    it('deletes again, after a pause, when a read-back still finds a seeded id', async () => {
-      const bulk = jest
-        .fn()
-        .mockRejectedValueOnce(new Error('socket hang up'))
-        .mockResolvedValue(cleaned);
-      const mget = jest
-        .fn()
-        .mockImplementationOnce(async ({ ids }: { ids: string[] }) => stillThere(ids))
-        .mockImplementation(async ({ ids }: { ids: string[] }) => gone(ids));
-      await expect(seed(esWith({ bulk, mget }))).rejects.toThrow(/socket hang up/);
-      expect(bulk).toHaveBeenCalledTimes(3);
-      expect(mget).toHaveBeenCalledTimes(2);
-      expect(mget).toHaveBeenCalledWith(
-        expect.objectContaining({ index: alertsIndexForSpace('s'), ids: seededIds(bulk) })
-      );
-      expect(wait).toHaveBeenCalledTimes(1);
+    it('waits through the whole window when the bulk rejected and nothing ever shows up', async () => {
+      const bulk = rejectedBulk();
+      const mget = jest.fn(async ({ ids }: { ids: string[] }) => gone(ids));
+      const error = await seed(esWith({ bulk, mget })).catch((e: unknown) => e);
+      expect(error).not.toBeInstanceOf(AggregateError);
+      expect((error as Error).message).toMatch(/socket hang up/);
+      expect(bulk).toHaveBeenCalledTimes(1 + ROUNDS);
+      expect(mget).toHaveBeenCalledTimes(ROUNDS);
+      expect(wait.mock.calls).toEqual(Array.from({ length: ROUNDS - 1 }, () => [PAUSE_MS]));
     });
 
-    it('gives up after a bounded number of attempts and reports both failures', async () => {
-      const bulk = jest
+    it('deletes a write that lands mid-window and calls the seed clean once the last read-back is empty', async () => {
+      const bulk = rejectedBulk();
+      const mget = jest
         .fn()
-        .mockRejectedValueOnce(new Error('socket hang up'))
-        .mockResolvedValue(cleaned);
-      const mget = jest.fn(async ({ ids }: { ids: string[] }) => stillThere(ids));
+        .mockImplementationOnce(async ({ ids }: { ids: string[] }) => gone(ids))
+        .mockImplementationOnce(async ({ ids }: { ids: string[] }) => stillThere(ids))
+        .mockImplementation(async ({ ids }: { ids: string[] }) => gone(ids));
+      const error = await seed(esWith({ bulk, mget })).catch((e: unknown) => e);
+      expect(error).not.toBeInstanceOf(AggregateError);
+      expect(mget).toHaveBeenCalledTimes(ROUNDS);
+      expect(bulk).toHaveBeenCalledTimes(1 + ROUNDS);
+      expect(wait).toHaveBeenCalledTimes(ROUNDS - 1);
+    });
+
+    it('reports ids still present at the end of the window, even after earlier empty read-backs', async () => {
+      const bulk = rejectedBulk();
+      let reads = 0;
+      const mget = jest.fn(async ({ ids }: { ids: string[] }) =>
+        ++reads < ROUNDS ? gone(ids) : stillThere(ids)
+      );
       const error = await seed(esWith({ bulk, mget })).catch((e: unknown) => e);
       expect(error).toBeInstanceOf(AggregateError);
       expect((error as AggregateError).message).toMatch(/socket hang up/);
-      expect((error as AggregateError).message).toMatch(/still exist after 5 delete attempts/);
-      expect(bulk).toHaveBeenCalledTimes(1 + 5);
-      expect(mget).toHaveBeenCalledTimes(5);
-      expect(wait).toHaveBeenCalledTimes(4);
+      expect((error as AggregateError).message).toMatch(/still exist after 8 delete rounds/);
+    });
+
+    it('does one delete and one read-back, with no pause, when the bulk settled with rejected items', async () => {
+      const bulk = jest.fn().mockResolvedValueOnce(rejectedItems).mockResolvedValue(cleaned);
+      const mget = jest.fn(async ({ ids }: { ids: string[] }) => gone(ids));
+      await expect(seed(esWith({ bulk, mget }))).rejects.toThrow(/Seeding ".*" failed/);
+      expect(bulk).toHaveBeenCalledTimes(2);
+      expect(mget).toHaveBeenCalledTimes(1);
+      expect(wait).not.toHaveBeenCalled();
+    });
+
+    it('does one pass when only the read of the open alerts failed after the bulk returned', async () => {
+      const bulk = jest
+        .fn()
+        .mockResolvedValueOnce({ errors: false, items: [] })
+        .mockResolvedValue(cleaned);
+      const search = jest.fn().mockRejectedValue(new Error('search unavailable'));
+      await expect(seed(esWith({ bulk, search }))).rejects.toThrow(/search unavailable/);
+      expect(bulk).toHaveBeenCalledTimes(2);
+      expect(wait).not.toHaveBeenCalled();
+    });
+
+    it('reports a settled seed whose ids are still present after its single pass', async () => {
+      const bulk = jest.fn().mockResolvedValueOnce(rejectedItems).mockResolvedValue(cleaned);
+      const mget = jest.fn(async ({ ids }: { ids: string[] }) => stillThere(ids));
+      const error = await seed(esWith({ bulk, mget })).catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(AggregateError);
+      expect((error as AggregateError).message).toMatch(/still exist after 1 delete round\b/);
+      expect(wait).not.toHaveBeenCalled();
     });
 
     it('treats a missing index on the read-back as nothing left', async () => {
@@ -273,14 +322,10 @@ describe('seedScenario partial failure', () => {
         );
       const error = await seed(esWith({ bulk, mget: missingIndex })).catch((e: unknown) => e);
       expect(error).not.toBeInstanceOf(AggregateError);
-      expect(bulk).toHaveBeenCalledTimes(2);
     });
 
     it('fails the cleanup when the read-back itself errors', async () => {
-      const bulk = jest
-        .fn()
-        .mockRejectedValueOnce(new Error('socket hang up'))
-        .mockResolvedValue(cleaned);
+      const bulk = rejectedBulk();
       const mget = jest.fn().mockRejectedValue(new Error('es unavailable'));
       const error = await seed(esWith({ bulk, mget })).catch((e: unknown) => e);
       expect(error).toBeInstanceOf(AggregateError);

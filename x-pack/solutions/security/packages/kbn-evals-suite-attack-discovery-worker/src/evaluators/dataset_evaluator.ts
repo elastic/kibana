@@ -22,7 +22,8 @@ import {
 import { collectWorkerArtifacts } from '../collect';
 import type { CohortRouting } from '../cohort_routing';
 import { SCHEDULE_INTERVAL } from '../constants';
-import { cleanupSeed, seedScenario } from '../seed';
+import { errorMessage } from '../kibana_api';
+import { assertCleanSpace, cleanupSeed, seedScenario } from '../seed';
 import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from '../types';
 import type { AttackDiscoveryWorkerClient } from '../worker_client';
 import type { Stage, WorkerArtifacts, WorkerExample, WorkerExpected } from '../worker_types';
@@ -345,5 +346,25 @@ export const createEvaluateDataset =
     );
 
     logRunSummary({ sink: collector.scores, datasetName: dataset.name, log });
-    assertCodeScoresPass(dataset.name, collector.codeFailures);
+    // The next row's `seedScenario` is what reports a late write after an earlier row; nothing
+    // follows the last one, so each space is checked once more here. A dirty space and failed
+    // code scores are both reported.
+    const spaceIds = [...new Set(dataset.examples.flatMap(({ input }) => input?.spaceId ?? []))];
+    const problems: unknown[] = [];
+    for (const spaceId of spaceIds) {
+      try {
+        await assertCleanSpace({ esClient, spaceId, when: 'after the last row' });
+      } catch (error) {
+        problems.push(error);
+      }
+    }
+    try {
+      assertCodeScoresPass(dataset.name, collector.codeFailures);
+    } catch (error) {
+      problems.push(error);
+    }
+    if (problems.length === 1) throw problems[0];
+    if (problems.length > 1) {
+      throw new AggregateError(problems, problems.map((error) => errorMessage(error)).join('; '));
+    }
   };

@@ -32,16 +32,25 @@ more, the same threshold behind its `recalled`/`missed` label.
 Seeding cleans up after itself: if the bulk write or the read-back fails midway, `seedScenario`
 deletes the alerts it meant to write by exact document id before it throws, so the next row starts
 in a clean space. A delete by id also reaches documents that are indexed but not yet searchable
-after a transport failure. After a client-side failure the seed bulk may still be running in
-Elasticsearch, so a missing document does not yet prove nothing will land: the delete is followed by
-a read-back (`mget`) of the seeded ids and repeated, with a short growing pause, up to 5 times
-(about 2.5s in all) until none exists. A missing index counts as cleaned. If documents remain after
-that, or a delete item fails for another reason, the error is reported together with the seed error.
-A write that lands after the bound is not removed there; the next row's clean-space check reports
-it. Fingerprints and discoveries are left alone: the workflow has
-not started, so there are none from this seed. After a row has run, `cleanupSeed` clears the alerts
-(matched exactly by its run marker), the space's fingerprints and its discoveries, and fails if a
-delete reports failures or version conflicts.
+after a transport failure. What is guaranteed depends on whether the seed bulk settled:
+
+- The bulk returned (some items rejected), or the read of the open alerts failed after it returned:
+  nothing of this seed is in flight. One delete by id and one read-back (`mget`); ids still present
+  are an error.
+- The bulk call itself rejected (socket hang up, client timeout): Elasticsearch may still be running
+  it, so a missing document proves nothing yet. The delete and the read-back repeat for 8 rounds
+  with a 500ms pause between them (7 pauses, 3.5s), and the seed counts as removed only if the
+  read-back of the last round finds no id. Anything that landed earlier in the window was deleted
+  by a later round. A write that lands after the window is not removed there.
+
+A missing document or index counts as gone. Ids that remain, or a delete item that fails for another
+reason, are reported together with the seed error. A late write is reported by the next row's
+clean-space check, and after the last row by `createEvaluateDataset`, which asserts each row space
+is clean once the experiment ends (reported together with any failed code scores). Fingerprints and
+discoveries are left alone on a failed seed: the workflow has not started, so there are none from
+it. After a row has run, `cleanupSeed` clears the alerts (matched exactly by its run marker), the
+space's fingerprints and its discoveries, and fails if a delete reports failures, version
+conflicts, a timeout, or fewer deletions than matches.
 
 `src/config_load_path.test.ts` loads `playwright.config.ts` and fails if any module the Jest preset
 transforms without swc (`.yaml`, `.yml`, `.txt`, `.html`, `.peggy`, `.text`) ends up loaded at
@@ -49,8 +58,12 @@ config time (the `@kbn/workflows/managed` barrel and deep imports of its definit
 transforms those but the Playwright loader cannot parse them. The guard covers only the static load
 chain of `playwright.config.ts`, the modules loaded synchronously while the config evaluates. It
 does not cover a dynamic `import()` or `require` inside a function that runs later (fixtures,
-global setup) or Playwright's own runner modules. It mocks `@kbn/evals`, so it assumes that package
-loads no such module itself.
+global setup) or Playwright's own runner modules. Imports that Jest's resolver
+(`kbn-jest/src/resolver.js`) redirects to a mock file never reach `require.cache` under their real
+path, so the guard cannot see them: styles (`.css`, `.scss`, `.less`), static files (`.jpg`,
+`.jpeg`, `.png`, `.gif`, `.eot`, `.otf`, `.webp`, `.svg`, `.ttf`, `.woff`, `.woff2`, `.mp4`,
+`.webm`, `.wav`, `.mp3`, `.m4a`, `.aac`, `.oga`), `.editor.worker` modules and `?asUrl` requests.
+It mocks `@kbn/evals`, so it assumes that package loads no such module itself.
 
 `StageModelResolved` reads what each stage actually ran on and fails on a mismatch or when it
 cannot be read. Generation is read from `api_config.connector_id` on the persisted discoveries;

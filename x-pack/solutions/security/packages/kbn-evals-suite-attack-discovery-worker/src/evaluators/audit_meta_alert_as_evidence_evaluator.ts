@@ -19,7 +19,8 @@ export const AUDIT_META_ALERT_AS_EVIDENCE_EVALUATOR_NAME = 'MetaAlertAsEvidence'
  *
  * - no meta groups in the gold: score null (N/A)
  * - no discoveries: score 1, label `no_discoveries` (nothing was treated as evidence)
- * - discoveries but none cites any alert id: score null, label `no_citations`
+ * - discoveries but none cites any alert id: score null, label `no_citations`. The dataset gate
+ *   still counts it as a miss (`isCodeMiss`): a check that could not run is not a pass.
  * - otherwise 1 when no citing discovery is meta-only, else 0. Citing discoveries only are judged.
  *
  * Citation-based: it reads `alertIds`, not prose, so a discovery that cites the underlying alerts
