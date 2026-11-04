@@ -61,6 +61,7 @@ const createDeps = (overrides: Partial<PipelineDeps> = {}) => ({
     ReturnType<PipelineDeps['materialize']>,
     Parameters<PipelineDeps['materialize']>
   >(async (input) => ({ type: 'markdown', text: input.type })),
+  getTimeZone: jest.fn(async () => 'UTC'),
   createKit: jest.fn(
     async (kitContext: MaterializeContext) => ({ context: kitContext } as MaterializeKit)
   ),
@@ -381,6 +382,29 @@ describe('runPipeline', () => {
 
       expect(node.type).toBe('unsupported');
       expect(budgetRefused).toBe(true);
+    });
+  });
+
+  it("resolves relative times in the context's time zone, then the user's", async () => {
+    const materializer = chart();
+    const config: ChartConfig = { title: 'Requests', requests: [] };
+    const today = { timeRange: { from: 'now/d', to: 'now/d' } };
+
+    await runPipeline(
+      { type: 'lens', materializer, config, context: { ...today, timeZone: 'America/New_York' } },
+      createDeps()
+    );
+    expect(materializer.plan).toHaveBeenLastCalledWith(config, {
+      timeZone: 'America/New_York',
+      timeRange: { from: '2026-11-04T05:00:00.000Z', to: '2026-11-05T04:59:59.999Z' },
+    });
+
+    await runPipeline(
+      { type: 'lens', materializer, config, context: today },
+      createDeps({ getTimeZone: async () => 'Asia/Tokyo' })
+    );
+    expect(materializer.plan).toHaveBeenLastCalledWith(config, {
+      timeRange: { from: '2026-11-03T15:00:00.000Z', to: '2026-11-04T14:59:59.999Z' },
     });
   });
 });
