@@ -228,6 +228,16 @@ describe('clampBucketInterval', () => {
     expect(clampBucketInterval(0, 3000 * 5 * MIN, '5m')).toBe('15m');
   });
 
+  it('counts the extra bucket created by aligning an unaligned start', () => {
+    const startMs = 30_000;
+    const endMs = startMs + 1000 * MIN;
+
+    expect(generateTimeBuckets(startMs, endMs, '1m')).toHaveLength(1001);
+    const interval = clampBucketInterval(startMs, endMs, '1m');
+    expect(interval).toBe('2m');
+    expect(generateTimeBuckets(startMs, endMs, interval).length).toBeLessThanOrEqual(1000);
+  });
+
   it('returns unknown formats unchanged', () => {
     expect(clampBucketInterval(0, 365 * DAY, 'auto')).toBe('auto');
   });

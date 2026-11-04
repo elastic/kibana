@@ -52,6 +52,10 @@ export const intervalToMs = (interval: string): number => {
   return moment.duration(n, match[2] as moment.unitOfTime.DurationConstructor).asMilliseconds();
 };
 
+/** Number of buckets `generateTimeBuckets` yields; the first bucket starts at the boundary at or before `startMs`. */
+const countTimeBuckets = (startMs: number, endMs: number, ms: number): number =>
+  startMs >= endMs ? 0 : Math.ceil((endMs - Math.floor(startMs / ms) * ms) / ms);
+
 /**
  * Returns `interval` unchanged when it yields at most `maxBuckets` buckets over [startMs, endMs];
  * otherwise returns the smallest multiple of the same unit that fits.
@@ -62,14 +66,17 @@ export const clampBucketInterval = (
   interval: string,
   maxBuckets: number = HISTOGRAM_MAX_BUCKETS
 ): string => {
-  const ratio = (endMs - startMs) / intervalToMs(interval) / maxBuckets;
-  if (ratio <= 1) return interval;
+  if (countTimeBuckets(startMs, endMs, intervalToMs(interval)) <= maxBuckets) return interval;
 
   const match = interval.match(/^(\d*)([smhdwMy])$/);
   if (!match) return interval;
   const [, count, unit] = match;
   const n = count ? parseInt(count, 10) : 1;
-  return `${n * Math.ceil(ratio)}${unit}`;
+  let factor = Math.ceil((endMs - startMs) / intervalToMs(interval) / maxBuckets);
+  while (countTimeBuckets(startMs, endMs, intervalToMs(`${n * factor}${unit}`)) > maxBuckets) {
+    factor++;
+  }
+  return `${n * factor}${unit}`;
 };
 
 /** Generates non-overlapping buckets aligned to interval boundaries covering [startMs, endMs]. */
@@ -184,6 +191,11 @@ const compareValues = (a: string, b: string): number => {
  * other value, including counts a source already folded, into one `HISTOGRAM_OTHER_BREAKDOWN`
  * series. Bucket totals are unchanged. Series are ordered by rank with Other last, so the stack
  * order is the same in every bucket.
+ *
+ * Kept series are exact only if a value a source already folded (beyond its own top N) does not
+ * also appear in another source; otherwise that source's share stays in Other. The current
+ * breakdowns satisfy this: rule ids are disjoint across sources, and the classic source never
+ * folds status, ack or assignee values because it has at most a handful of each.
  */
 export const limitBreakdownSeries = (
   counts: HistogramBucketCount[],
