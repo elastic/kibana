@@ -660,6 +660,13 @@ describe('aiIndexAutomationsSkill', () => {
       expect(catalog).not.toMatch(/1,000 KIs/);
     });
 
+    it('steers runs past 2,000 documents to a corpus filter or an aggregate template', () => {
+      expect(catalog).toMatch(/Bottom-Up covers at most 2,000 documents per run/);
+      expect(catalog).toMatch(/When the source has more, say so in the\s+recommendation/);
+      expect(catalog).toMatch(/up to 2,000 documents or units per run/);
+      expect(content).toMatch(/When the run must cover\s+more than 2,000 documents/);
+    });
+
     it('lets the agent tell the user the KI count without presenting the budget as a limit', () => {
       expect(catalog).toMatch(/tell the user how many KIs a\s+run will write/);
       expect(catalog).toMatch(/do not present the budget itself as a limit or a policy/);
@@ -745,10 +752,12 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('projects only from a pilot whose every item wrote a KI, and reports a partial one', () => {
-      expect(prose).toMatch(/returns `status`, `durationMs` and `kisWritten`/);
+      expect(prose).toMatch(
+        /returns `status`, `durationMs`, `kisWritten` and `kisFailedVerification`/
+      );
       expect(prose).toMatch(/Project only when `kisWritten` equals the pilot size/);
       expect(prose).toMatch(
-        /When it is lower, say how many of the pilot's items wrote a KI and stop/
+        /When it is lower, say how many of the pilot's items wrote a KI and how many failed verification \(`kisFailedVerification`\) and stop/
       );
       expect(prose).not.toMatch(/the pilot wrote three units;/);
     });

@@ -6,16 +6,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import qs from 'query-string';
 import type { AppHeaderBack } from '@kbn/app-header';
 import { useLocation } from 'react-router-dom';
 import type { PathsOf } from '@kbn/typed-react-router-config';
-import { hasUsableProfilingData } from '@kbn/profiling-utils';
 import { useProfilingDependencies } from '../profiling_dependencies/use_profiling_dependencies';
 import { useProfilingStatus } from '../profiling_status/use_profiling_status';
 import type { ProfilingRoutes } from '../../../routing';
 import { PROFILING_PATHNAMES } from '../../../routing/pathnames';
-import { useSchemaQueryParam } from '../../../hooks/use_schema_query_param';
+import { hasProfilingData } from '../../../utils/has_profiling_data';
+import {
+  getNavigationLinkQuery,
+  withNavigationLinkQuery,
+} from '../../../utils/navigation_link_query';
 
 // Routes that render a back button in AppHeader.
 // NOTE: This is compared against raw location.pathname, NOT via useProfilingRoutePath(), because
@@ -36,12 +38,11 @@ export const hasBackNavigation = (pathname: string): boolean =>
  * has no back button.
  */
 export const useBackNavigation = (): AppHeaderBack | undefined => {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const {
     start: { core },
   } = useProfilingDependencies();
   const { data } = useProfilingStatus();
-  const schema = useSchemaQueryParam();
 
   if (!hasBackNavigation(pathname) || !data?.isEnabled) {
     return undefined;
@@ -52,17 +53,17 @@ export const useBackNavigation = (): AppHeaderBack | undefined => {
   // With data from before 8.9.1, going back would only redirect to this page again.
   if (
     pathname === PROFILING_PATHNAMES.addDataInstructions &&
-    (!hasUsableProfilingData(data) || data.universalProfiling.hasLegacyData)
+    (!hasProfilingData(data) || data.universalProfiling.hasLegacyData)
   ) {
     return undefined;
   }
 
   return {
     href: core.http.basePath.prepend(
-      qs.stringifyUrl({ url: '/app/profiling', query: schema ? { schema } : {} })
+      withNavigationLinkQuery('/app/profiling', getNavigationLinkQuery(search))
     ),
     label: i18n.translate('xpack.profiling.header.backTargetLabel', {
-      defaultMessage: 'Universal Profiling',
+      defaultMessage: 'Profiling',
     }),
   };
 };

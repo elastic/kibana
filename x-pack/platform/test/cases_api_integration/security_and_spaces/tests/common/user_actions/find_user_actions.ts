@@ -39,6 +39,8 @@ import {
   updateComment,
   deleteComment,
   getCaseUserActionStats,
+  addAttachmentV2,
+  updateAttachmentV2,
 } from '../../../../common/lib/api';
 
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -304,6 +306,74 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(commentUserAction.action).to.eql('create');
         expect(commentUserAction.payload).to.eql({
           comment: postCommentUserReq,
+        });
+      });
+
+      it('keeps the original payload on the create user action after the comment is edited', async () => {
+        const theCase = await createCase(supertest, getPostCaseRequest());
+        const caseWithComment = await createComment({
+          supertest,
+          caseId: theCase.id,
+          params: postCommentUserReq,
+        });
+        const comment = caseWithComment.comments![0];
+
+        await updateComment({
+          supertest,
+          caseId: theCase.id,
+          req: {
+            id: comment.id,
+            version: comment.version,
+            comment: 'updated comment',
+            type: postCommentUserReq.type,
+            owner: postCommentUserReq.owner,
+          },
+        });
+
+        const response = await findCaseUserActions({
+          caseID: theCase.id,
+          supertest,
+          options: { sortOrder: 'asc', types: [UserActionTypes.comment] },
+        });
+
+        const [createAction, updateAction] = response.userActions;
+        expect(response.userActions.map(({ action }) => action)).to.eql(['create', 'update']);
+        expect(createAction.payload).to.eql({ comment: postCommentUserReq });
+        expect(updateAction.payload).to.eql({
+          comment: { ...postCommentUserReq, comment: 'updated comment' },
+        });
+      });
+
+      it('keeps the original payload on the create user action after an attachment is replaced', async () => {
+        const theCase = await createCase(supertest, getPostCaseRequest());
+        const attachment = await addAttachmentV2({
+          supertest,
+          caseId: theCase.id,
+          params: postUnifiedCommentReq,
+        });
+
+        await updateAttachmentV2({
+          supertest,
+          caseId: theCase.id,
+          attachmentId: attachment.id,
+          req: {
+            ...postUnifiedCommentReq,
+            data: { content: 'updated comment' },
+            version: attachment.version,
+          },
+        });
+
+        const response = await findCaseUserActions({
+          caseID: theCase.id,
+          supertest,
+          options: { sortOrder: 'asc', types: [UserActionTypes.comment] },
+        });
+
+        const [createAction, updateAction] = response.userActions;
+        expect(response.userActions.map(({ action }) => action)).to.eql(['create', 'update']);
+        expect(createAction.payload).to.eql({ comment: postCommentUserReq });
+        expect(updateAction.payload).to.eql({
+          comment: { ...postCommentUserReq, comment: 'updated comment' },
         });
       });
 

@@ -22,7 +22,7 @@ import { ALERTS_INSIGHTS_TITLE } from '../../../../shared/constants/flyout_title
 import { getAlertHistoryTitle } from '../../../../document/main/utils/get_header_title';
 import { ALERTS_INSIGHTS_TOOL_TEST_ID } from './test_ids';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
-import type { EntityViewMode } from '../../../../../flyout/entity_details/shared/types';
+import type { EntityViewMode } from '../../../../../../common/entity_analytics/entity_store/resolution_group';
 
 const TITLE = ALERTS_INSIGHTS_TITLE;
 

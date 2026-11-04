@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { AttachmentsStart, ConversationsStart } from '@kbn/agent-builder-server';
 import type { AlertZeroRouter, AlertZeroSpaceIdResolver } from '../types';
+import type { WatchWorkflowsManagementClient } from '../services/watches/watch_workflows_management_client';
 import type { WatchesService } from '../services/watches/watches_service';
 import type { WorkersService } from '../services/workers/workers_service';
 import type { ConversationProposalsService } from '../services/conversation_proposals/conversation_proposals_service';
@@ -15,6 +16,7 @@ import type { ActionsService } from '../services/actions/actions_service';
 import type { HuntServices } from '../services/watches/hunt';
 import type { ScanFailuresService } from '../services/scan_failures/scan_failures_service';
 import type { ThreatIntelSupplyService } from '../services/threat_intel_supply';
+import type { AlertZeroTelemetryReporter } from '../telemetry';
 import { registerListWatchesRoute } from './watches/list_watches';
 import { registerGetWatchRoute } from './watches/get_watch';
 import { registerListWorkersRoute } from './workers/list_workers';
@@ -39,6 +41,12 @@ export interface RouteDependencies {
   getHuntServices: () => HuntServices;
   getScanFailuresService: () => ScanFailuresService;
   getThreatIntelSupplyService: () => ThreatIntelSupplyService | undefined;
+  /** True on Serverless, where built-in worker roles carry a `_` prefix. */
+  isServerless: boolean;
+  /** The workflows management client; undefined when workflows management is unavailable. */
+  getWorkflowsManagement: () => WatchWorkflowsManagementClient | undefined;
+  /** Reports an AlertZero telemetry event; never throws. */
+  reportTelemetryEvent: AlertZeroTelemetryReporter;
 }
 
 export const registerRoutes = (deps: RouteDependencies): void => {

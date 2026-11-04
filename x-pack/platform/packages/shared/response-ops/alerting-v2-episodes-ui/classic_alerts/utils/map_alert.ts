@@ -6,11 +6,13 @@
  */
 
 import {
+  ALERT_CASE_IDS,
   ALERT_DURATION,
   ALERT_END,
   ALERT_FLAPPING,
   ALERT_GROUPING,
   ALERT_INSTANCE_ID,
+  ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_NAME,
@@ -55,8 +57,10 @@ export const CLASSIC_ALERT_EPISODE_SOURCE_FIELDS = [
   ALERT_SEVERITY,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
+  ALERT_CASE_IDS,
   ALERT_GROUPING,
   ALERT_FLAPPING,
+  ALERT_MAINTENANCE_WINDOW_IDS,
 ] as const;
 
 /**
@@ -85,11 +89,14 @@ export interface ClassicAlertSource {
   [ALERT_RULE_UUID]?: string;
   [ALERT_RULE_NAME]?: string;
   [ALERT_RULE_CATEGORY]?: string;
+  [ALERT_RULE_TYPE_ID]?: string;
   [ALERT_SEVERITY]?: string;
   [ALERT_WORKFLOW_STATUS]?: string;
   [ALERT_WORKFLOW_TAGS]?: string | string[];
+  [ALERT_CASE_IDS]?: string | string[];
   [ALERT_GROUPING]?: Record<string, unknown>;
   [ALERT_FLAPPING]?: boolean;
+  [ALERT_MAINTENANCE_WINDOW_IDS]?: string | string[];
 }
 
 export interface ClassicAlertActionContext {
@@ -97,8 +104,10 @@ export interface ClassicAlertActionContext {
   readonly alertUuid: string;
   readonly instanceId: string | undefined;
   readonly ruleId: string;
+  readonly ruleTypeId: string | undefined;
   readonly workflowStatus: string | undefined;
   readonly workflowTags: string[];
+  readonly caseIds: string[];
 }
 
 const asStringArray = (value: string | string[] | undefined): string[] => {
@@ -147,8 +156,10 @@ export const mapClassicAlertToEpisode = (
     alertUuid: uuid,
     instanceId: source[ALERT_INSTANCE_ID],
     ruleId: source[ALERT_RULE_UUID] ?? '',
+    ruleTypeId: source[ALERT_RULE_TYPE_ID],
     workflowStatus: source[ALERT_WORKFLOW_STATUS],
     workflowTags,
+    caseIds: asStringArray(source[ALERT_CASE_IDS]),
   };
 
   return {
@@ -173,6 +184,7 @@ export const mapClassicAlertToEpisode = (
     source_action_context: actionContext,
     source_grouping: grouping ? flattenObject(grouping) : undefined,
     is_flapping: source[ALERT_FLAPPING] ?? false,
+    maintenance_window_ids: asStringArray(source[ALERT_MAINTENANCE_WINDOW_IDS]),
   };
 };
 

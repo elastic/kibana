@@ -86,6 +86,27 @@ describe('Inference Features API', () => {
       });
     });
 
+    it('should return recommended endpoint ids for entries registered with model parameters', async () => {
+      featureRegistry.register({
+        featureId: 'agent_builder_general',
+        featureName: 'Agent Builder — General Models',
+        featureDescription: 'Large, capable models for agent reasoning.',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [
+          { id: 'gemini-3.0-pro', parameters: { reasoning: { effort: 'low' } } },
+          'claude-sonnet-4.6',
+        ],
+      });
+
+      await mockRouter.callRoute({});
+
+      const body = mockRouter.response.ok.mock.calls[0][0]!.body as InferenceFeaturesResponse;
+      expect(body.features[0].recommendedEndpoints).toEqual([
+        'gemini-3.0-pro',
+        'claude-sonnet-4.6',
+      ]);
+    });
+
     it('should return multiple features with parent-child relationships when no conditions', async () => {
       featureRegistry.register({
         featureId: 'agent_builder',
@@ -168,6 +189,29 @@ describe('Inference Features API', () => {
 
       const body = mockRouter.response.ok.mock.calls[0][0]!.body as InferenceFeaturesResponse;
       expect(body.features.map((f) => f.featureId)).toEqual(['security']);
+    });
+
+    it('should exclude hidden features and keep visible ones', async () => {
+      featureRegistry.register({
+        featureId: 'visible_feature',
+        featureName: 'Visible',
+        featureDescription: 'Shown on Feature settings.',
+        taskType: 'chat_completion',
+        recommendedEndpoints: ['gemini-3.0-pro'],
+      });
+      featureRegistry.register({
+        featureId: 'hidden_feature',
+        featureName: 'Hidden',
+        featureDescription: 'Not shown on Feature settings.',
+        taskType: 'chat_completion',
+        recommendedEndpoints: ['claude-sonnet-4.6'],
+        isHidden: true,
+      });
+
+      await mockRouter.callRoute({});
+
+      const body = mockRouter.response.ok.mock.calls[0][0]!.body as InferenceFeaturesResponse;
+      expect(body.features.map((f) => f.featureId)).toEqual(['visible_feature']);
     });
 
     it('should fail open and include the feature when uiSettings.get throws', async () => {

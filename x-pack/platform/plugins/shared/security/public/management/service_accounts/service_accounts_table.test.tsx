@@ -178,10 +178,7 @@ describe('ServiceAccountsTable', () => {
 
   it('explains a workload count that could not be taken on keyboard focus', async () => {
     renderTable();
-    const row = screen.getByRole('row', { name: /incident-responder/ });
-    const cells = within(row).getAllByRole('cell');
-    const workloadCell = cells[cells.length - 1];
-    const unavailableCount = within(workloadCell).getByText('—');
+    const unavailableCount = screen.getByTestId('serviceAccountWorkloadCountUnavailable');
 
     expect(unavailableCount).toHaveAttribute('tabindex', '0');
     act(() => unavailableCount.focus());
@@ -193,26 +190,14 @@ describe('ServiceAccountsTable', () => {
   });
 
   describe('workload counts', () => {
-    const getWorkloadCell = (name: string) => {
-      const cells = within(screen.getByRole('row', { name: new RegExp(name) })).getAllByRole(
-        'cell'
-      );
-      return cells[cells.length - 1];
-    };
-
     it('opens the workloads of a bound account from its View link', () => {
       const onViewWorkloads = jest.fn();
       renderTable({ onViewWorkloads });
 
-      const workloadCell = getWorkloadCell('nightshift-relay');
-      expect(within(workloadCell).getByTestId('serviceAccountWorkloadCount')).toHaveTextContent(
-        '3'
-      );
-      fireEvent.click(
-        within(workloadCell).getByRole('button', {
-          name: 'View the workloads bound to nightshift-relay',
-        })
-      );
+      expect(screen.getByTestId('serviceAccountWorkloadCount')).toHaveTextContent('3');
+      const viewWorkloads = screen.getByTestId('serviceAccountViewWorkloads');
+      expect(viewWorkloads).toHaveAccessibleName('View the workloads bound to nightshift-relay');
+      fireEvent.click(viewWorkloads);
 
       expect(onViewWorkloads).toHaveBeenCalledWith(firstAccount);
     });
@@ -223,11 +208,8 @@ describe('ServiceAccountsTable', () => {
         serviceAccounts: [{ ...secondAccount, workloadCount: 0 }],
       });
 
-      const workloadCell = getWorkloadCell('incident-responder');
-      expect(within(workloadCell).getByTestId('serviceAccountWorkloadCount')).toHaveTextContent(
-        '0'
-      );
-      expect(within(workloadCell).queryByTestId('serviceAccountViewWorkloads')).toBeNull();
+      expect(screen.getByTestId('serviceAccountWorkloadCount')).toHaveTextContent('0');
+      expect(screen.queryByTestId('serviceAccountViewWorkloads')).toBeNull();
     });
 
     it('shows no View link when viewing is not offered', () => {

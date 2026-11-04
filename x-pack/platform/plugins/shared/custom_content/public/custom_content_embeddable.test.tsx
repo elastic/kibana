@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
+import { RequestAdapter, apiHasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import { render, screen, act } from '@testing-library/react';
 import { ChatEventType, TimelineEventType } from '@kbn/agent-builder-common';
 import { customContentEmbeddableFactory } from './custom_content_embeddable';
@@ -30,6 +31,7 @@ const mockApiIsPresentationContainer = apiIsPresentationContainer as jest.Mocked
 let capturedComponentProps:
   | {
       isGenerating?: boolean;
+      requestAdapter?: unknown;
       onGenerateWithChat?: () => void;
       onLoadingChange?: (isLoading: boolean) => void;
     }
@@ -43,6 +45,7 @@ jest.mock('@kbn/custom-content-renderer', () => ({
     timeRange: { from: string; to: string } | undefined;
     isGenerating?: boolean;
     isInteractive?: boolean;
+    requestAdapter?: unknown;
     onLoadingChange: (isLoading: boolean) => void;
     onGenerateWithChat?: () => void;
   }) => {
@@ -247,6 +250,38 @@ describe('customContentEmbeddableFactory', () => {
       expect(screen.getByTestId('mockCustomContentComponent')).toHaveAttribute(
         'data-time-range',
         `${dashboardRange.from}/${dashboardRange.to}`
+      );
+    });
+  });
+
+  describe('inspector', () => {
+    it('exposes the standard Inspect API with a request adapter when the panel has a query', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+
+      expect(apiHasInspectorAdapters(embeddable.api)).toBe(true);
+      expect(embeddable.api.getInspectorAdapters()?.requests).toBeInstanceOf(RequestAdapter);
+    });
+
+    it('offers no Inspect entry for a static panel, which makes no request', async () => {
+      const { embeddable } = await buildEmbeddable({ ...baseState, esql_query: undefined });
+
+      expect(embeddable.api.getInspectorAdapters()).toBeUndefined();
+    });
+
+    it('starts offering Inspect once a query is added', async () => {
+      const { embeddable } = await buildEmbeddable({ ...baseState, esql_query: undefined });
+
+      embeddable.api.applySerializedState({ ...baseState, esql_query: ['FROM logs | LIMIT 1'] });
+
+      expect(embeddable.api.getInspectorAdapters()?.requests).toBeInstanceOf(RequestAdapter);
+    });
+
+    it('hands the same adapter to the renderer that the Inspect API returns', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+
+      expect(capturedComponentProps?.requestAdapter).toBe(
+        embeddable.api.getInspectorAdapters()?.requests
       );
     });
   });
@@ -553,7 +588,7 @@ describe('customContentEmbeddableFactory', () => {
           events.forEach((event) => chatEvents$.next(event));
           await flush();
         });
-      return { embeddable, emit, activeConversation$, getChatEvents$ };
+      return { embeddable, emit, activeConversation$, getChatEvents$, openChat };
     };
 
     const expectGenerating = (isGenerating: boolean) =>
@@ -579,6 +614,57 @@ describe('customContentEmbeddableFactory', () => {
         hasEsqlQuery: false,
         templateSizeBytes: '<p>mine</p>'.length,
       });
+      expectGenerating(false);
+    });
+
+    const buildToolCallEvent = (toolId: string, params: Record<string, unknown>) => ({
+      type: 'tool_call',
+      data: { tool_call_id: 'tool-call-2', tool_id: toolId, params },
+    });
+
+    it('does not show the generating state again when a later message is submitted', async () => {
+      const { emit, openChat } = await renderGeneratingPanel();
+      await emit({ type: TimelineEventType.executionTerminated, execution_id: 'e1', data: {} });
+      expectGenerating(false);
+
+      await act(async () => {
+        openChat.mock.calls[0][0].onSubmit();
+        await flush();
+      });
+
+      expectGenerating(false);
+    });
+
+    it.each([
+      ['the update tool', 'custom_content_update_panel', { embeddable_id: 'test-uuid' }],
+      [
+        'the dashboard tool',
+        'platform.dashboard.generate_dashboard',
+        { panels: [{ id: 'other-uuid' }, { id: 'test-uuid' }] },
+      ],
+    ])('shows the generating state when %s targets this panel', async (_, toolId, params) => {
+      const { emit } = await renderGeneratingPanel();
+      await emit({ type: TimelineEventType.executionTerminated, execution_id: 'e1', data: {} });
+      expectGenerating(false);
+
+      await emit(buildToolCallEvent(toolId, params));
+
+      expectGenerating(true);
+    });
+
+    it.each([
+      ['the update tool', 'custom_content_update_panel', { embeddable_id: 'other-uuid' }],
+      [
+        'the dashboard tool',
+        'platform.dashboard.generate_dashboard',
+        { panels: [{ id: 'other-uuid' }] },
+      ],
+    ])('ignores %s calls that target another panel', async (_, toolId, params) => {
+      const { emit } = await renderGeneratingPanel();
+      await emit({ type: TimelineEventType.executionTerminated, execution_id: 'e1', data: {} });
+
+      await emit(buildToolCallEvent(toolId, params));
+
       expectGenerating(false);
     });
 

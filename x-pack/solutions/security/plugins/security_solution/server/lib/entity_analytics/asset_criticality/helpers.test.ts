@@ -5,7 +5,28 @@
  * 2.0.
  */
 import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import { applyCriticalityToScore, getMappingForFlattenedField } from './helpers';
+import { applyCriticalityToScore, bayesianUpdate, getMappingForFlattenedField } from './helpers';
+
+describe('bayesianUpdate', () => {
+  it.each([0.5, 1, 1.5, 2])(
+    'returns the maximum for a saturated score and modifier %s',
+    (modifier) => {
+      expect(bayesianUpdate({ modifier, score: 100 })).toBe(100);
+    }
+  );
+
+  it('returns the maximum when the score overshoots it', () => {
+    expect(bayesianUpdate({ modifier: 1.5, score: 100.0000001 })).toBe(100);
+  });
+
+  it('respects a custom maximum', () => {
+    expect(bayesianUpdate({ max: 10, modifier: 2, score: 10 })).toBe(10);
+  });
+
+  it('still updates scores just below the maximum', () => {
+    expect(bayesianUpdate({ modifier: 1, score: 99.99999999999994 })).toBeCloseTo(100, 10);
+  });
+});
 
 describe('applyCriticalityToScore', () => {
   describe('integer scores', () => {

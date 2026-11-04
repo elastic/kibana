@@ -10,6 +10,7 @@
 import Boom from '@hapi/boom';
 import path from 'path';
 import { schema } from '@kbn/config-schema';
+import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
@@ -69,6 +70,9 @@ export function registerDeleteWorkflowRoute(deps: RouteDependencies) {
           });
           if (result.failures.length > 0) {
             throw Boom.internal(result.failures[0].error);
+          }
+          if (result.deleted === 0) {
+            throw new WorkflowNotFoundError(id);
           }
           audit.logWorkflowDeleted(request, { id, force });
           return response.ok();

@@ -87,7 +87,7 @@ export const PagerdutyConnector: ConnectorSpec = {
   metadata: {
     id: '.pagerduty_mcp',
     displayName: 'PagerDuty (MCP)',
-    description: i18n.translate('core.kibanaConnectorSpecs.pagerduty.metadata.description', {
+    description: i18n.translate('connectorSpecs.pagerduty.metadata.description', {
       defaultMessage:
         'Trigger, acknowledge, resolve, and update PagerDuty incidents; list services, on-call schedules, escalation policies, and users.',
     }),

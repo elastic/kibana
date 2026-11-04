@@ -54,6 +54,7 @@ import { getTimeRangeFromFetchContext } from '../utils/update_search_source';
 import { createDataSource } from '../../../common/data_sources';
 import { replaceColumnsWithVariableDriven } from '../utils/replace_columns_with_variable_driven';
 import { getEmbeddableDisplayColumns } from '../utils/get_embeddable_display_columns';
+import { getDataGridRenderMode } from '../utils/get_data_grid_render_mode';
 import type { DiscoverAppLocatorParams } from '../../../common';
 import { getExpandedDocLinkability } from '../../application/main/utils/expanded_doc';
 import { getExpandedDocLocatorParams } from '../utils/get_discover_locator_params';
@@ -164,6 +165,7 @@ export function SearchEmbeddableGridComponent({
   const savedSearchFilters = apiFilters;
 
   const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
+  const renderMode = getDataGridRenderMode(viewMode);
 
   const sort = useMemo(
     () => getSortArray(savedSearch.sort ?? [], dataView, isEsql),
@@ -484,7 +486,7 @@ export function SearchEmbeddableGridComponent({
       showSortSelector={showSortSelector}
       searchContext={searchContext}
       flyoutMenuTrailingActions={flyoutMenuTrailingActions}
-      isInteractive={viewMode !== 'non-interactive'}
+      renderMode={renderMode}
     />
   );
 }

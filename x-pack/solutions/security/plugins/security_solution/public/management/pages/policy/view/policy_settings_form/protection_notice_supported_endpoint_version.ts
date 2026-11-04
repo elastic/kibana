@@ -12,6 +12,7 @@ export const PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION = Object.freeze({
   ransomware: '7.12+',
   memory_protection: '7.15+',
   behavior_protection: '7.15+',
+  ai_data_collection: '9.6+',
 });
 
 type NoticeProtection = keyof typeof PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION;

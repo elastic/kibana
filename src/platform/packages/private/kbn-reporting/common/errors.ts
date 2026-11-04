@@ -9,6 +9,7 @@
 
 /* eslint-disable max-classes-per-file */
 import { i18n } from '@kbn/i18n';
+import { RenderServiceRetryClass } from './render_retry';
 
 export interface ReportingError {
   /**
@@ -164,5 +165,90 @@ export class ReportingSavedObjectNotFoundError extends ReportingError {
   static code = 'reporting_saved_object_not_found_error' as const;
   public get code(): string {
     return ReportingSavedObjectNotFoundError.code;
+  }
+}
+
+export abstract class RenderServiceError extends ReportingError {
+  public abstract get retryClass(): RenderServiceRetryClass;
+}
+
+export class RenderServiceSaturatedError extends RenderServiceError {
+  static code = 'render_service_saturated_error' as const;
+  public get code(): string {
+    return RenderServiceSaturatedError.code;
+  }
+  public get retryClass() {
+    return RenderServiceRetryClass.CAPACITY as const;
+  }
+
+  public humanFriendlyMessage() {
+    return i18n.translate('reporting.common.renderServiceSaturatedErrorMessage', {
+      defaultMessage: `Can't generate this report because the rendering service is busy. Try again later.`,
+    });
+  }
+}
+
+export class RenderServiceUnavailableError extends RenderServiceError {
+  static code = 'render_service_unavailable_error' as const;
+  public get code(): string {
+    return RenderServiceUnavailableError.code;
+  }
+  public get retryClass() {
+    return RenderServiceRetryClass.UNAVAILABLE as const;
+  }
+
+  public humanFriendlyMessage() {
+    return i18n.translate('reporting.common.renderServiceUnavailableErrorMessage', {
+      defaultMessage: `Can't generate this report because the rendering service is unavailable. Try again later.`,
+    });
+  }
+}
+
+export class RenderFailedError extends RenderServiceError {
+  static code = 'render_failed_error' as const;
+  public get code(): string {
+    return RenderFailedError.code;
+  }
+  public get retryClass() {
+    return RenderServiceRetryClass.RENDER_FAILURE as const;
+  }
+
+  public humanFriendlyMessage() {
+    return i18n.translate('reporting.common.renderFailedErrorMessage', {
+      defaultMessage: `Can't generate this report because the rendering service could not render the page.`,
+    });
+  }
+}
+
+export class RenderRequestRejectedError extends RenderServiceError {
+  static code = 'render_request_rejected_error' as const;
+  public get code(): string {
+    return RenderRequestRejectedError.code;
+  }
+  public get retryClass() {
+    return RenderServiceRetryClass.UNRECOVERABLE as const;
+  }
+
+  public humanFriendlyMessage() {
+    return i18n.translate('reporting.common.renderRequestRejectedErrorMessage', {
+      defaultMessage: `Can't generate this report because the rendering service rejected the request.`,
+    });
+  }
+}
+
+/** Still no render capacity 10 minutes after the report was created. */
+export class RenderCapacityTimeoutError extends RenderServiceError {
+  static code = 'render_capacity_timeout_error' as const;
+  public get code(): string {
+    return RenderCapacityTimeoutError.code;
+  }
+  public get retryClass() {
+    return RenderServiceRetryClass.UNRECOVERABLE as const;
+  }
+
+  public humanFriendlyMessage() {
+    return i18n.translate('reporting.common.renderCapacityTimeoutErrorMessage', {
+      defaultMessage: `Can't generate this report because the rendering service was busy for too long. Try again later.`,
+    });
   }
 }

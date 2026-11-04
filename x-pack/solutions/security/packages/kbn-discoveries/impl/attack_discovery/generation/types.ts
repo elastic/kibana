@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import type {
   AnalyticsServiceSetup,
   CoreStart,
@@ -89,6 +90,16 @@ export interface WorkflowConfig {
   default_retrieval_enabled: boolean;
   /** Toggle 2 sub-field: ES|QL query (required when `alert_retrieval_mode` is `'esql'`). */
   esql_query?: string;
+  /**
+   * Whether the generation-phase ground-truth gate runs; omitted means it does. The
+   * run step sets `false` for callers that own the false-positive decision later.
+   */
+  ground_truth_gate_enabled?: boolean;
+  /**
+   * Producer identity forwarded to the validation workflow, where it contributes to the
+   * attack hash. Set by the run step; omitted for Kibana Attack Discovery.
+   */
+  generation_source?: string;
   /** Toggle 1: whether the attack discovery skill performs its own additional alert retrieval. */
   skill_enabled: boolean;
   /** ID of the validation workflow to use (or `'default'` for built-in). */
@@ -200,6 +211,11 @@ export interface ExecuteGenerationWorkflowParams {
   source?: AttackDiscoverySource;
   sourceMetadata?: SourceMetadata;
   start?: string;
+  /**
+   * Token-usage attribution forwarded to the generation model calls, so a caller can roll their
+   * cost up under its own parent feature. Omitted means the calls stay untagged.
+   */
+  telemetryMetadata?: TelemetryMetadata;
   trigger?: string;
   type: string;
   workflowConfig: WorkflowConfig;

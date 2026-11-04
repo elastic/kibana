@@ -41,7 +41,7 @@ export function ProfilingFlamegraphLink({
           })}
         >
           {i18n.translate('xpack.apm.profiling.flamegraph.link', {
-            defaultMessage: 'Go to Universal Profiling Flamegraph',
+            defaultMessage: 'Go to Profiling Flamegraph',
           })}
         </EuiLink>
       </EuiFlexItem>

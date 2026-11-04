@@ -1,5 +1,5 @@
 {
-  "sha1": "b128f893cc4368cfdb98bd68030f3c6afc85b420",
+  "sha1": "5711c423cc01c9388e8ee0c3f705208aee096250",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -76,7 +76,7 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
         "line": 145,
-        "column": 42
+        "column": 44
       }
     },
     {
@@ -91,7 +91,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 182,
+        "line": 183,
         "column": 29
       }
     },
@@ -224,6 +224,38 @@
       }
     },
     {
+      "id": "f5f998c6b345b96-d5d6b888321cf60",
+      "title": "Blocklist Match (wildcard) operator creates a blocklist item with the Match operator for the Path field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/blocklist_match_operator_suite.ts",
+        "line": 52,
+        "column": 9
+      }
+    },
+    {
+      "id": "f5f998c6b345b96-f18805c6040a899",
+      "title": "Blocklist Match (wildcard) operator creates a blocklist item with the Match operator for the File Name field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/blocklist_match_operator_suite.ts",
+        "line": 52,
+        "column": 9
+      }
+    },
+    {
       "id": "284eb0f2fe043d6-c7099999330dc71",
       "title": "Artifact tabs in Policy Details page — Endpoint exceptions Tab is hidden when the user has no artifact privilege",
       "expectedStatus": "passed",
@@ -276,7 +308,7 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
         "line": 145,
-        "column": 42
+        "column": 44
       }
     },
     {
@@ -289,7 +321,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 182,
+        "line": 183,
         "column": 29
       }
     },
@@ -386,7 +418,7 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
         "line": 145,
-        "column": 42
+        "column": 44
       }
     },
     {
@@ -401,7 +433,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 182,
+        "line": 183,
         "column": 29
       }
     },
@@ -466,7 +498,7 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
         "line": 145,
-        "column": 42
+        "column": 44
       }
     },
     {
@@ -481,7 +513,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 182,
+        "line": 183,
         "column": 29
       }
     },
@@ -546,7 +578,7 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
         "line": 145,
-        "column": 42
+        "column": 44
       }
     },
     {
@@ -561,7 +593,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 182,
+        "line": 183,
         "column": 29
       }
     },
@@ -626,7 +658,7 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
         "line": 145,
-        "column": 42
+        "column": 44
       }
     },
     {
@@ -641,7 +673,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 182,
+        "line": 183,
         "column": 29
       }
     },

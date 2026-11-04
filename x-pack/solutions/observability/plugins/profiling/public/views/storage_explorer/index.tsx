@@ -21,6 +21,7 @@ import { useProfilingDependencies } from '../../components/contexts/profiling_de
 import { useEnabledProfilingStatus } from '../../components/contexts/profiling_status/use_enabled_profiling_status';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { PrimaryProfilingSearchBar } from '../../components/profiling_app_page_template/primary_profiling_search_bar';
+import { UniversalProfilingSetupIncompleteCallout } from '../../components/universal_profiling_setup_incomplete_callout';
 import { AsyncStatus } from '../../hooks/use_async';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
@@ -42,11 +43,11 @@ export function StorageExplorerView() {
     data: { universalProfiling },
   } = useEnabledProfilingStatus();
   const profilingRouter = useProfilingRouter();
-  const {
-    query: { rangeFrom, rangeTo, kuery },
-  } = useProfilingParams('/storage-explorer');
+  const { query } = useProfilingParams('/storage-explorer');
+  const { rangeFrom, rangeTo, kuery, schema } = query;
 
   const availability = getStorageExplorerAvailability(universalProfiling);
+  const hasEcsSchema = schema === ProfilingSchema.ECS;
 
   // Direct links can still reach Storage explorer without Universal Profiling set up
   useEffect(() => {
@@ -57,10 +58,19 @@ export function StorageExplorerView() {
       });
     } else if (availability === StorageExplorerAvailability.NotAvailable) {
       profilingRouter.replace('/', { path: {}, query: { rangeFrom, rangeTo, kuery } });
+    } else if (!hasEcsSchema) {
+      // Storage explorer only covers Universal Profiling, so it selects that schema for the links
+      // leaving it
+      profilingRouter.replace('/storage-explorer', {
+        path: {},
+        query: { ...query, schema: ProfilingSchema.ECS },
+      });
     }
-  }, [availability, profilingRouter, rangeFrom, rangeTo, kuery]);
+  }, [availability, hasEcsSchema, profilingRouter, query, rangeFrom, rangeTo, kuery]);
 
-  return availability === StorageExplorerAvailability.Available ? <StorageExplorerContent /> : null;
+  return availability === StorageExplorerAvailability.Available && hasEcsSchema ? (
+    <StorageExplorerContent />
+  ) : null;
 }
 
 function StorageExplorerContent() {
@@ -135,6 +145,7 @@ function StorageExplorerContent() {
       showBetaBadge
     >
       <EuiFlexGroup direction="column">
+        <UniversalProfilingSetupIncompleteCallout />
         <OtelNotSupportedCallout />
         <EuiFlexItem grow={false}>
           <EuiPanel hasShadow={false} color="subdued">

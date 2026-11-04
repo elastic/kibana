@@ -9,32 +9,19 @@
 
 import Path from 'path';
 import Fs from 'fs';
-import type { Compiler, Stats } from '@rspack/core';
+import type { MultiCompiler, MultiStats, Stats } from '@rspack/core';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
 import type { KibanaGroup } from '@kbn/projects-solutions-groups';
 import { rspack } from './rspack_runtime';
-import { createSingleCompileConfig } from './config/create_single_compile_config';
 import { isHmrEnabled } from './hmr/hmr_enabled';
 import { HmrServer } from './hmr/hmr_server';
 import type { ThemeTag } from './types';
 import { BUNDLES_SUBDIR } from './paths';
+import { createMultiCompileConfig, KIBANA_COMPILER } from './config/create_multi_compile_config';
+import { getWatchOptions, IGNORED_WATCH_PATTERNS } from './watch_options';
 
-export const IGNORED_WATCH_PATTERNS: RegExp[] = [
-  /[\\/]node_modules[\\/]/,
-  /[\\/]target[\\/]/,
-  /\.tsbuildinfo$/,
-  /(^|[\\/])tsconfig[^\\/]*\.type_check\.json$/,
-  /\.test\.[jt]sx?$/,
-  /\.spec\.[jt]sx?$/,
-  /\.stories\.[jt]sx?$/,
-  /\.mock\.[jt]sx?$/,
-  /[\\/]__(?:mocks|snapshots|fixtures|jest)__[\\/]/,
-  /[\\/]jest(?:\.integration)?\.config\.[jt]s$/,
-  // Scout/Playwright output (test artifacts, reports, server configs) written
-  // into plugin dirs during test runs; must not trigger watch rebuilds.
-  /[\\/]\.scout[\\/]/,
-];
+export { IGNORED_WATCH_PATTERNS };
 
 export interface BuildOptions {
   repoRoot: string;
@@ -132,9 +119,9 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       hmrPort = await hmrServer.start();
     }
 
-    log?.info('Creating single-compilation RSPack config...');
+    log?.info('Creating RSPack multi-compiler config...');
 
-    const { config, bundleCount } = await createSingleCompileConfig({
+    const { configs, bundleCount } = await createMultiCompileConfig({
       repoRoot,
       outputRoot,
       dist,
@@ -158,7 +145,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
 
     log?.info('Starting RSPack compilation...');
 
-    const compiler = rspack(config) as Compiler;
+    const compiler = rspack(configs) as MultiCompiler;
 
     if (watch) {
       const result = await runWatchBuild(compiler, log, startTime, repoRoot, hmrServer);
@@ -184,7 +171,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
 }
 
 async function runProductionBuild(
-  compiler: Compiler,
+  compiler: MultiCompiler,
   log: ToolingLog | undefined,
   startTime: number,
   repoRoot: string
@@ -216,7 +203,7 @@ async function runProductionBuild(
         return;
       }
 
-      const result = processStats(stats, log, { duration });
+      const result = processMultiStats(stats, log, { duration });
 
       if (result.success) {
         log?.debug(`Bundles ready at ${BUNDLES_SUBDIR}/`);
@@ -230,17 +217,23 @@ async function runProductionBuild(
 }
 
 async function runWatchBuild(
-  compiler: Compiler,
+  compiler: MultiCompiler,
   log: ToolingLog | undefined,
   startTime: number,
   repoRoot: string,
   hmrServer?: HmrServer
 ): Promise<BuildResult> {
+  const kibanaCompiler = compiler.compilers.find(({ name }) => name === KIBANA_COMPILER);
+  if (!kibanaCompiler) {
+    throw new Error(`Missing ${KIBANA_COMPILER} compiler`);
+  }
+
   return new Promise((resolve) => {
     let isFirstBuild = true;
     let hasResolvedFirstBuild = false;
     let isShuttingDown = false;
     const previousAssetSizes = new Map<string, number>();
+    const previousSharedHashes = new Map<string, string>();
     let previousBuildHash: string | undefined;
     let resolveDone: () => void;
     const done = new Promise<void>((r) => {
@@ -251,11 +244,11 @@ async function runWatchBuild(
       const keepHash = previousBuildHash;
       previousBuildHash = newHash;
       if (!keepHash) return;
-      Fs.readdir(compiler.outputPath, (err, files) => {
+      Fs.readdir(kibanaCompiler.outputPath, (err, files) => {
         if (err) return;
         for (const file of files) {
           if (/\.hot-update\.(js|json)(\.map)?$/.test(file) && !file.includes(keepHash)) {
-            Fs.unlink(Path.join(compiler.outputPath, file), () => {});
+            Fs.unlink(Path.join(kibanaCompiler.outputPath, file), () => {});
           }
         }
       });
@@ -284,7 +277,7 @@ async function runWatchBuild(
     log?.debug('Aggregate timeout: 50ms');
 
     if (hmrServer) {
-      compiler.hooks.compile.tap('kbn-hmr-building', () => {
+      compiler.hooks.invalid.tap('kbn-hmr-building', () => {
         if (!isFirstBuild) {
           hmrServer.broadcastBuilding();
         }
@@ -292,12 +285,7 @@ async function runWatchBuild(
     }
 
     const watching = compiler.watch(
-      {
-        aggregateTimeout: 50,
-        // rspack's WatchOptions.ignored only types as string[] | string | RegExp
-        // | (path) => boolean (not RegExp[]), so use the predicate form.
-        ignored: (filePath: string) => IGNORED_WATCH_PATTERNS.some((re) => re.test(filePath)),
-      },
+      compiler.compilers.map(({ options }) => getWatchOptions(options.watchOptions)),
       (err, stats) => {
         if (isShuttingDown) {
           log?.debug('Ignoring callback - shutdown in progress');
@@ -337,7 +325,7 @@ async function runWatchBuild(
         }
 
         if (isFirstBuild && !hasResolvedFirstBuild) {
-          const result = processStats(stats, log, { duration });
+          const result = processMultiStats(stats, log, { duration });
           hasResolvedFirstBuild = true;
           isFirstBuild = false;
 
@@ -345,10 +333,13 @@ async function runWatchBuild(
             for (const asset of result.assets ?? []) {
               previousAssetSizes.set(asset.name, asset.size);
             }
+            // Seed hashes so a later Kibana-only rebuild is not treated as a shared rebuild.
+            sharedCompilersChanged(childCompilerHashes(stats), previousSharedHashes);
             log?.debug(`Bundles ready at ${BUNDLES_SUBDIR}/`);
-            if (stats.hash && hmrServer) {
-              hmrServer.broadcast(stats.hash);
-              cleanupStaleHotUpdates(stats.hash);
+            const kibanaStats = findKibanaStats(stats);
+            if (kibanaStats.hash && hmrServer) {
+              hmrServer.broadcast(kibanaStats.hash);
+              cleanupStaleHotUpdates(kibanaStats.hash);
             }
           } else if (hmrServer && result.errors?.length) {
             hmrServer.broadcastErrors(result.errors);
@@ -367,7 +358,7 @@ async function runWatchBuild(
         const hasErrors = stats.hasErrors();
 
         if (hasErrors) {
-          const timings = stats.toJson({
+          const timings = stats.stats[0]?.toJson({
             timings: true,
             assets: false,
             errors: false,
@@ -375,14 +366,15 @@ async function runWatchBuild(
             modules: false,
             chunks: false,
           });
-          const rebuildTime = timings.time ? (timings.time / 1000).toFixed(1) : '?';
-          const result = processStats(stats, log, { quiet: true });
+          const rebuildTime = timings?.time ? (timings.time / 1000).toFixed(1) : '?';
+          const result = processMultiStats(stats, log, { quiet: true });
           if (hmrServer && result.errors?.length) {
             hmrServer.broadcastErrors(result.errors);
           }
           log?.error(`Rebuild failed in ${rebuildTime}s — waiting for changes to fix errors...`);
         } else {
-          const timings = stats.toJson({
+          const kibanaStats = findKibanaStats(stats);
+          const timings = kibanaStats.toJson({
             timings: true,
             assets: false,
             errors: false,
@@ -393,17 +385,27 @@ async function runWatchBuild(
           const rebuildTime = timings.time ? (timings.time / 1000).toFixed(1) : '?';
 
           log?.debug(`Bundles ready at ${BUNDLES_SUBDIR}/`);
-          if (stats.hash && hmrServer) {
-            const changedFiles = compiler.modifiedFiles
-              ? [...compiler.modifiedFiles]
-                  .filter((f) => /\.\w+$/.test(f))
-                  .map((f) => f.replace(repoRoot + '/', ''))
-              : [];
-            hmrServer.broadcast(stats.hash, rebuildTime, changedFiles);
+          const changedFiles = compiler.compilers.flatMap(({ modifiedFiles }) =>
+            modifiedFiles
+              ? [...modifiedFiles]
+                  .filter((file) => /\.\w+$/.test(file))
+                  .map((file) => file.replace(repoRoot + '/', ''))
+              : []
+          );
+          const sharedCompilerChanged = sharedCompilersChanged(
+            childCompilerHashes(stats),
+            previousSharedHashes
+          );
+          if (hmrServer) {
+            if (sharedCompilerChanged) {
+              hmrServer.broadcastReload(changedFiles);
+            } else if (kibanaStats.hash) {
+              hmrServer.broadcast(kibanaStats.hash, rebuildTime, changedFiles);
+            }
           }
 
-          if (stats.hash) {
-            cleanupStaleHotUpdates(stats.hash);
+          if (kibanaStats.hash) {
+            cleanupStaleHotUpdates(kibanaStats.hash);
           }
 
           const isVerbose =
@@ -417,7 +419,7 @@ async function runWatchBuild(
               );
 
           if (isVerbose) {
-            const result = processStats(stats, log, { quiet: true });
+            const result = processStats(kibanaStats, log, { quiet: true });
             let changedCount = 0;
             let changedSize = 0;
             for (const asset of result.assets ?? []) {
@@ -449,6 +451,71 @@ interface ProcessStatsResult extends BuildResult {
   entryCount?: number;
   compilationTime?: number;
   assets?: Array<{ name: string; size: number }>;
+}
+
+function processMultiStats(
+  stats: MultiStats,
+  log: ToolingLog | undefined,
+  options: { duration?: number; quiet?: boolean } = {}
+): ProcessStatsResult {
+  const errors: string[] = [];
+
+  for (const childStats of stats.stats) {
+    if (childStats.compilation.name === KIBANA_COMPILER) {
+      continue;
+    }
+    const result = processStats(childStats, log, { ...options, quiet: true });
+    if (!result.success) {
+      const compilerName = childStats.compilation.name ?? 'unknown';
+      errors.push(
+        ...(result.errors ?? ['Build failed']).map((error) => `[${compilerName}] ${error}`)
+      );
+    }
+  }
+
+  if (errors.length > 0) {
+    return {
+      success: false,
+      errors,
+      duration: options.duration,
+    };
+  }
+
+  return processStats(findKibanaStats(stats), log, options);
+}
+
+export function sharedCompilersChanged(
+  children: ReadonlyArray<{ name?: string | null; hash?: string | null }>,
+  previousHashes: Map<string, string>
+): boolean {
+  let changed = false;
+  for (const child of children) {
+    if (!child.name || child.name === KIBANA_COMPILER) {
+      continue;
+    }
+    const hash = child.hash ?? '';
+    if (previousHashes.get(child.name) !== hash) {
+      changed = true;
+    }
+    previousHashes.set(child.name, hash);
+  }
+  return changed;
+}
+
+function childCompilerHashes(stats: MultiStats): Array<{ name?: string; hash?: string }> {
+  return stats.stats.map((child) => ({
+    name: child.compilation.name,
+    // Stats.hash is `Readonly<string | null>`; null means the compiler has no hash yet.
+    hash: child.hash ?? undefined,
+  }));
+}
+
+function findKibanaStats(stats: MultiStats): Stats {
+  const kibanaStats = stats.stats.find(({ compilation }) => compilation.name === KIBANA_COMPILER);
+  if (!kibanaStats) {
+    throw new Error(`Missing ${KIBANA_COMPILER} stats`);
+  }
+  return kibanaStats;
 }
 
 function processStats(

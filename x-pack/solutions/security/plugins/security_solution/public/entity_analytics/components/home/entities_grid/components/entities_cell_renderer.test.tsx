@@ -11,6 +11,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { TestProviders } from '../../../../../common/mock';
 import type { Row } from '../common';
 import { renderEntityCell } from './entities_cell_renderer';
+import type { RowCellHandlers } from './entities_cell_renderer';
 
 const WATCHLIST_NAMES = new Map<string, string>();
 
@@ -18,13 +19,15 @@ const EntityCell = ({
   columnId,
   row,
   isEnriching,
+  handlers,
 }: {
   columnId: string;
   row: Row;
   isEnriching?: boolean;
+  handlers?: RowCellHandlers;
 }) => {
   const { euiTheme } = useEuiTheme();
-  return renderEntityCell(columnId, row, WATCHLIST_NAMES, euiTheme, undefined, isEnriching);
+  return renderEntityCell(columnId, row, WATCHLIST_NAMES, euiTheme, handlers, isEnriching);
 };
 
 const renderCellText = (columnId: string, row: Row, isEnriching?: boolean): string | null =>
@@ -59,6 +62,30 @@ describe('renderEntityCell', () => {
     ['the case count', 2, '2'],
   ])('renders %s in the cases column', (_, value, expected) => {
     expect(renderCellText('case_count', { case_count: value })).toBe(expected);
+  });
+
+  it.each([
+    ['alert_count', 'host', true],
+    ['alert_count', 'user', true],
+    ['alert_count', 'generic', true],
+    ['alert_count', 'service', false],
+    ['anomaly_count', 'host', true],
+    ['anomaly_count', 'user', true],
+    ['anomaly_count', 'generic', false],
+    ['anomaly_count', 'service', false],
+  ])('opens the %s of a %s row: %s', (columnId, entityType, opens) => {
+    const handlers = { onAlertCountClick: jest.fn(), onAnomalyCountClick: jest.fn() };
+    const { queryByRole } = render(
+      <TestProviders>
+        <EntityCell
+          columnId={columnId}
+          row={{ [columnId]: 3, 'entity.EngineMetadata.Type': entityType }}
+          handlers={handlers}
+        />
+      </TestProviders>
+    );
+
+    expect(queryByRole('button') != null).toBe(opens);
   });
 
   it('renders a column it does not know as text', () => {

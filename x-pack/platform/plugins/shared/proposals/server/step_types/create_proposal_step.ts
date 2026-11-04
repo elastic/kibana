@@ -10,8 +10,10 @@ import { createProposalStepCommonDefinition } from '@kbn/proposals-common';
 import { resolveExpiresAt } from './resolve_expires_at';
 import type { ProposalsService } from '../services/proposals_service';
 import type { ResolveProposalUser } from '../services/resolve_proposal_user';
+import type { ResolveWorkerUser } from '../services/resolve_worker_user';
 import type { ProposalPrivilegesChecker } from '../services/check_proposal_privileges';
 import { parseStepInput } from './parse_step_input';
+import { resolveStepUser } from './resolve_step_user';
 import { toStepError } from './to_step_error';
 
 /**
@@ -22,10 +24,12 @@ import { toStepError } from './to_step_error';
 export const getCreateProposalStepDefinition = ({
   getProposalsService,
   resolveUser,
+  resolveWorkerUser,
   privileges,
 }: {
   getProposalsService: () => ProposalsService;
   resolveUser: ResolveProposalUser;
+  resolveWorkerUser: ResolveWorkerUser;
   privileges: ProposalPrivilegesChecker;
 }) =>
   createServerStepDefinition({
@@ -45,7 +49,13 @@ export const getCreateProposalStepDefinition = ({
         // retrying.
         await privileges.assertCanManage(request);
 
-        const user = await resolveUser(request);
+        const user = await resolveStepUser({
+          request,
+          executionId: workflowExecutionId,
+          spaceId,
+          resolveUser,
+          resolveWorkerUser,
+        });
 
         const proposal = await getProposalsService().create(
           {
@@ -76,10 +86,10 @@ export const getCreateProposalStepDefinition = ({
         );
 
         // Fail closed when the action did not resolve: `create` swallows both a
-        // workflow read failure and invalid `consts.actionMetadata`, and they
-        // arrive here indistinguishable from an action that simply declares no
-        // policy. Reading that as "auto-approval allowed" would run an action
-        // whose author forbade it on nothing more than a transient lookup error.
+        // workflow read failure and invalid `consts.actionMetadata` (which
+        // includes a missing policy). Reading that as "auto-approval allowed"
+        // would run an action whose author forbade it on nothing more than a
+        // transient lookup error.
         const alwaysGate = !proposal.action || proposal.action.approvalPolicy === 'always-gate';
 
         context.logger.debug(

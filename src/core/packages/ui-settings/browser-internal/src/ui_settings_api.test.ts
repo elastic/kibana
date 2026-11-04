@@ -347,6 +347,17 @@ describe('#stop', () => {
 });
 
 describe('#validate', () => {
+  it('encodes the setting key in the validation path', async () => {
+    fetchMock.mock('*', { body: { valid: true } });
+    const { uiSettingsApi } = setup();
+    await uiSettingsApi.validate('../a?b#c%/café', 'value');
+    expect(fetchMock.lastUrl()).toBe(
+      '/foo/bar/internal/kibana/settings/..%2Fa%3Fb%23c%25%2Fcaf%C3%A9/validate'
+    );
+    expect(fetchMock.lastOptions()).toMatchObject({ method: 'POST' });
+    await expect(fetchMock.lastOptions()?.body).resolves.toBe(JSON.stringify({ value: 'value' }));
+  });
+
   it('sends a validation request', async () => {
     fetchMock.mock('*', {
       body: { errorMessage: 'Test validation error message.' },

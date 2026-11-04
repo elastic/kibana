@@ -34,18 +34,17 @@ describe('MinimumConfidenceScoreField', () => {
     expect(input().value).toBe('100');
   });
 
-  it('persists once on blur, not per keystroke', () => {
+  it('publishes each valid keystroke and does not publish again on blur', () => {
     const { onChange, input } = renderField(0.85);
 
     fireEvent.change(input(), { target: { value: '9' } });
     fireEvent.change(input(), { target: { value: '90' } });
 
-    expect(onChange).not.toHaveBeenCalled();
+    expect(onChange.mock.calls).toEqual([[0.09], [0.9]]);
 
     fireEvent.blur(input());
 
-    expect(onChange).toHaveBeenCalledTimes(1);
-    expect(onChange).toHaveBeenCalledWith(0.9);
+    expect(onChange).toHaveBeenCalledTimes(2);
   });
 
   it('does not persist when blurred on the unchanged value', () => {
@@ -109,16 +108,18 @@ describe('MinimumConfidenceScoreField', () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
-  it('clearing, typing a new value, then blurring persists the typed value (not 0)', () => {
+  it('clearing then typing a new value publishes only the typed values (never 0)', () => {
     const { onChange, input } = renderField(0.85);
 
     fireEvent.change(input(), { target: { value: '' } });
     fireEvent.change(input(), { target: { value: '9' } });
     fireEvent.change(input(), { target: { value: '90' } });
+    expect(onChange.mock.calls).toEqual([[0.09], [0.9]]);
+
     fireEvent.blur(input());
 
-    expect(onChange).toHaveBeenCalledTimes(1);
-    expect(onChange).toHaveBeenCalledWith(0.9);
+    expect(onChange).toHaveBeenCalledTimes(2);
+    expect(onChange).not.toHaveBeenCalledWith(0);
   });
 
   it('does not fire onChange again after a server echo of the same value', () => {

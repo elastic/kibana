@@ -317,6 +317,20 @@ describe('createActionPolicySmlType', () => {
       expect(result?.data).toEqual(expect.objectContaining({ name: baseActionPolicyAttrs.name }));
     });
 
+    it('sets the attachment origin to the raw policy id instead of the SML origin URI', async () => {
+      getActionPolicy.mockResolvedValueOnce({
+        ...baseActionPolicyAttrs,
+        id: 'policy-1',
+      });
+
+      const result = await buildDefinition().toAttachment(
+        buildSmlDocument(),
+        buildToAttachmentContext()
+      );
+
+      expect(result?.origin).toBe('policy-1');
+    });
+
     it('returns undefined when getActionPolicy throws', async () => {
       // The entry surfaces in search results but the policy itself
       // was deleted between index time and read time — surface this

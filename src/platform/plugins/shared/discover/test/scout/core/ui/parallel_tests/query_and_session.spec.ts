@@ -21,7 +21,7 @@ const EMPTY_RANGE = {
   to: 'Jun 12, 1999 @ 11:21:04.000',
 };
 
-const EXPECTED_CHART_TIMESPAN = `${testData.DEFAULT_TIME_RANGE_DISPLAY.from} - ${testData.DEFAULT_TIME_RANGE_DISPLAY.to} (interval: Auto - hour)`;
+const EXPECTED_CHART_TIMESPAN = `${testData.DEFAULT_TIME_RANGE_DISPLAY.from} - ${testData.DEFAULT_TIME_RANGE_DISPLAY.to} (interval: Auto - 3 hours)`;
 
 spaceTest.describe('query and session', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {

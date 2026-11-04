@@ -56,6 +56,9 @@ const notifications: NotificationsStart = {
   tours: {
     isEnabled: () => true,
   },
+  screenReader: {
+    notify: () => {},
+  },
 };
 
 const userProfile = { getUserProfile$: () => of(null) };

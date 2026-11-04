@@ -48,10 +48,12 @@ jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
 
 const mockWriteOnOpen = jest.fn();
 const mockBuildOnClose = jest.fn(() => jest.fn());
+const mockReadRootDescriptor = jest.fn((): unknown => null);
 jest.mock('../shared/url_state/flyout_v2_url_writer', () => ({
   useFlyoutV2UrlWriter: jest.fn(() => ({
     writeOnOpen: mockWriteOnOpen,
     buildOnClose: mockBuildOnClose,
+    readRootDescriptor: mockReadRootDescriptor,
   })),
 }));
 
@@ -224,7 +226,7 @@ describe('useEntityFlyoutApi', () => {
       },
       'inherit'
     );
-    // readFirstDescriptor returns null (history has no location in tests)
+    // readRootDescriptor returns null (nothing is open in tests)
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);
   });
 
@@ -492,6 +494,23 @@ describe('useEntityFlyoutApi', () => {
     });
   });
 
+  it('openEntityRiskInputs persists the scopeId on the URL descriptor', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityRiskInputs({
+      entityType: EntityType.host,
+      entityName: 'my-host',
+      entityId: 'e-1',
+      scopeId: 'entity-analytics-new-entities-table-7d',
+    });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: FLYOUT_DESCRIPTOR_KIND.entityRiskInputs,
+        scopeId: 'entity-analytics-new-entities-table-7d',
+      })
+    );
+  });
+
   it('openEntityAnomalyInsights writes an entityAnomalyInsights descriptor and clears the param on close', () => {
     const { result } = renderHook(() => useEntityFlyoutApi());
     result.current.openEntityAnomalyInsights({
@@ -507,6 +526,47 @@ describe('useEntityFlyoutApi', () => {
       entityId: 'e-2',
     });
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);
+  });
+
+  it('openEntityAnomalyInsights persists the resolved mode in the descriptor', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityAnomalyInsights({
+      entityType: EntityType.user,
+      value: 'user-1',
+      entityId: 'e-2',
+      mode: 'resolved',
+    });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith(
+      expect.objectContaining({ entityId: 'e-2', mode: 'resolved' })
+    );
+  });
+
+  it('openEntityAnomalyInsights persists the originating scope in the descriptor', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityAnomalyInsights({
+      entityType: EntityType.user,
+      value: 'user-1',
+      entityId: 'e-2',
+      scopeId: 'entity-analytics-new-entities-table-7d',
+    });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith(
+      expect.objectContaining({ scopeId: 'entity-analytics-new-entities-table-7d' })
+    );
+  });
+
+  it('openEntityAnomalyInsights omits the mode from the descriptor in single mode', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityAnomalyInsights({
+      entityType: EntityType.user,
+      value: 'user-1',
+      entityId: 'e-2',
+      mode: 'single',
+    });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith(expect.objectContaining({ entityId: 'e-2' }));
+    expect(mockWriteOnOpen.mock.calls[0][0]).not.toHaveProperty('mode', 'single');
   });
 
   it('openEntityAlertsInsights writes null fallback for generic entity (no scopeId available)', () => {
@@ -562,6 +622,25 @@ describe('useEntityFlyoutApi', () => {
       scopeId: 'scope-1',
     });
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);
+  });
+
+  it('openEntityResolution persists the resolved mode of the originating flyout', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityResolution({
+      entityId: 'entity-1',
+      entityType: EntityType.host,
+      entityName: 'host-1',
+      scopeId: 'scope-1',
+      mode: 'resolved',
+    });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: FLYOUT_DESCRIPTOR_KIND.entityResolution,
+        entityId: 'entity-1',
+        mode: 'resolved',
+      })
+    );
   });
 
   it('openEntityEntraInsights writes an entityEntraInsights descriptor and clears the param on close', () => {

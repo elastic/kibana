@@ -20,11 +20,16 @@ import { SECURITY_FEATURE_ID } from '../../../../common';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
 import {
+  isCloudSecurityPosturePath,
   isDashboardViewPath,
   isDetectionsPath,
+  isEndpointManagementPath,
+  isManageLandingPath,
   isRuleChangesHistoryPath,
   isRulesAddPath,
   isRulesManagementPath,
+  isExceptionsPath,
+  isOnboardingPath,
 } from '../../../helpers';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/defaults';
@@ -66,6 +71,14 @@ export const GlobalHeader = React.memo(() => {
   const changesHistoryPath = isRuleChangesHistoryPath(pathname);
   const rulesManagementPath = isRulesManagementPath(pathname);
   const rulesAddPath = isRulesAddPath(pathname);
+  const exceptionsPath = isExceptionsPath(pathname);
+  const onboardingPath = isOnboardingPath(pathname);
+  // Cloud Security Posture pages own "Add integrations" in their own app header.
+  const cloudSecurityPosturePath = isCloudSecurityPosturePath(pathname);
+  // Endpoint management pages (Endpoints, Policies, Response actions history, Script library,
+  // Artifacts, Policy details) own "Add integrations" in their own `SecurityAppHeader`.
+  const managementPath = isEndpointManagementPath(pathname);
+  const manageLandingPath = isManageLandingPath(pathname);
 
   const { href, onClick } = useAddIntegrationsUrl();
 
@@ -74,9 +87,21 @@ export const GlobalHeader = React.memo(() => {
       return;
     }
 
-    // The Rules and Add Elastic rules page app headers render their own actions (ML job settings, Add integrations),
-    // so clear the global header action menu there to avoid duplicating them.
-    if (changesHistoryPath || rulesManagementPath || rulesAddPath) {
+    // The Rules, Add Elastic rules, Shared Exception Lists, Exception list details, Cloud Security
+    // Posture, Endpoint management and Manage page app headers render their own actions (ML job
+    // settings, Add integrations), so clear the global header action menu there to avoid
+    // duplicating them.
+    // Onboarding is a page without the global header action menu
+    if (
+      changesHistoryPath ||
+      rulesManagementPath ||
+      rulesAddPath ||
+      exceptionsPath ||
+      onboardingPath ||
+      cloudSecurityPosturePath ||
+      managementPath ||
+      manageLandingPath
+    ) {
       setHeaderActionMenu(undefined);
       return;
     }
@@ -106,6 +131,11 @@ export const GlobalHeader = React.memo(() => {
     changesHistoryPath,
     rulesManagementPath,
     rulesAddPath,
+    exceptionsPath,
+    onboardingPath,
+    cloudSecurityPosturePath,
+    managementPath,
+    manageLandingPath,
   ]);
 
   return (

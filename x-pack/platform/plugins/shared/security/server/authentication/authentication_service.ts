@@ -21,6 +21,7 @@ import type {
   LoggerFactory,
 } from '@kbn/core/server';
 import type { APIKeysType, UiamOAuthType } from '@kbn/core-security-server';
+import { UIAM_ERROR_CODES } from '@kbn/core-security-server';
 import type { UserActivityServiceStart } from '@kbn/core-user-activity-server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { i18n as i18nLib } from '@kbn/i18n';
@@ -645,6 +646,5 @@ function isTokenExpiredError(error: errors.ResponseError) {
     return true;
   }
 
-  // If expired the UIAM access token, it should have `authentication_error_code` set to `0x7E0116`.
-  return error.body?.error?.caused_by?.authentication_error_code === '0x7E0116';
+  return error.body?.error?.caused_by?.authentication_error_code === UIAM_ERROR_CODES.TOKEN_EXPIRED;
 }

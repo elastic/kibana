@@ -1071,7 +1071,7 @@ const buildSmlAutocompleteQuery = (
 };
 
 /**
- * Autocomplete the SML index. Prefix-only, with per-row provenance for the @ menu.
+ * Autocomplete the SML index. Prefix-only, with per-row provenance for the # menu.
  *
  * When the security plugin is absent (dev / test), privilege enforcement is
  * skipped but space scoping is still applied — only docs visible in the requested space are

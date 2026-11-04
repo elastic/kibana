@@ -14,8 +14,8 @@ import type {
   GetCaseConnectorsPushDetails,
   GetCaseConnectorsResponse,
 } from '../../../common/types/api';
-import { GetCaseConnectorsResponseRt } from '../../../common/types/api';
-import { decodeOrThrow } from '../../common/runtime_types';
+import { GetCaseConnectorsResponseSchema } from '../../../common/types/api';
+import { decodeOrThrowZod } from '../../common/runtime_types';
 import {
   isConnectorUserAction,
   isCreateCaseUserAction,
@@ -63,7 +63,7 @@ export const getConnectors = async (
       logger,
     });
 
-    return decodeOrThrow(GetCaseConnectorsResponseRt)(res);
+    return decodeOrThrowZod(GetCaseConnectorsResponseSchema)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to retrieve the case connectors case id: ${caseId}: ${error}`,

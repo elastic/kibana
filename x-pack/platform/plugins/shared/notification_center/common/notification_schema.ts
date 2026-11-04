@@ -42,7 +42,7 @@ export const SEVERITIES = [
 
 /**
  * Severities grouped by TTL window (days). Used for queries against the notifications
- * index and the cleanup task. Query will build one clause per time window.
+ * data stream and the cleanup task. Query will build one clause per time window.
  * e.g. 'error' and 'critical' both have a TTL of 180 days
  */
 export const SEVERITY_TTL_GROUPS: ReadonlyMap<number, Severity[]> = SEVERITIES.reduce(
@@ -92,6 +92,10 @@ const notificationObject = z
     description: z.string().min(1).max(2000),
     severity: z.enum(SEVERITIES).default('info'),
     cta: ctaSchema.optional(),
+    /** Target user; absent means every user sees it. */
+    profile_uid: z.string().min(1).max(256).optional(),
+    /** Target spaces; absent means the notification is not space-scoped. */
+    space_ids: z.array(z.string().min(1).max(1024)).min(1).max(100).optional(),
   })
   .strict();
 
@@ -110,7 +114,7 @@ export const notificationWriteSchema = notificationObject.superRefine((value, ct
 });
 
 /**
- * Shape of a notification stored in the NC index.
+ * Shape of a notification stored in the NC data stream.
  * `loose()` ensures reads don't fail for outdated documents.
  */
 export const notificationReadSchema = notificationObject

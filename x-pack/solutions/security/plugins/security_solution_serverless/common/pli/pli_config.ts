@@ -76,6 +76,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.endpointArtifactManagement,
       ProductFeatureKey.endpointExceptions,
       ProductFeatureKey.endpointCustomYaraSignatures,
+      ProductFeatureKey.endpointRegistryCredentialHardening,
       ProductFeatureKey.endpointTrustedDevices,
       ProductFeatureKey.endpointHostIsolationExceptions,
       ProductFeatureKey.endpointScriptsManagement,

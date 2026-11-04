@@ -78,9 +78,9 @@ The collapsible region uses a CSS grid trick (`grid-template-rows: 0fr / 1fr`) t
 
 ### Wheel forwarding
 
-The header does not scroll, so `wheel` events over it would normally scroll the page behind the flyout. To prevent this, the hook's `headerRef` callback adds one non-passive `wheel` listener to the `EuiFlyoutHeader` element. Listening on this outer element also covers the header's padding.
+The header does not scroll, so `wheel` events over it would normally scroll the page behind the flyout. To prevent this, `header.tsx` passes the hook's `headerRef` callback to `EuiFlyoutHeader`, which adds one non-passive `wheel` listener to the header element. Listening on this outer element also covers the header's padding.
 
-`EuiFlyoutHeader` does not forward a ref, so the callback finds it with `closest()`, using the Kibana-owned `FLYOUT_HEADER_CLASS_NAME` class applied in `header.tsx`. EUI's internal `euiFlyoutHeader` class is deliberately not used. The listener calls `event.preventDefault()` and forwards the scroll to the body's scroll container. The header component has no scroll logic of its own. Normal scrolling and forwarded wheel events both reach the same scroll container and run the same RAF-throttled `evaluate()` callback.
+The listener calls `event.preventDefault()` and forwards the scroll to the body's scroll container. The header component has no scroll logic of its own. Normal scrolling and forwarded wheel events both reach the same scroll container and run the same RAF-throttled `evaluate()` callback.
 
 The unit of `WheelEvent.deltaY` depends on `deltaMode`, but `scrollBy` only accepts pixels. Firefox's line-mode and page-mode deltas are therefore converted to pixels before being forwarded.
 

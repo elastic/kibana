@@ -15,6 +15,7 @@ import type { PaletteRegistry, CustomPaletteParams, PaletteOutput } from '@kbn/c
 import { CUSTOM_PALETTE, getOverridePaletteColors } from '@kbn/coloring';
 import type { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import { LENS_DEFAULT_LEGEND_SIZE } from '@kbn/chart-expressions-common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type {
   HeatmapExpressionFunctionDefinition,
@@ -379,7 +380,7 @@ export const getHeatmapVisualization = ({
       {
         isVisible: state.legend.isVisible,
         position: state.legend.position,
-        legendSize: state.legend.legendSize,
+        legendSize: state.legend.legendSize ?? LENS_DEFAULT_LEGEND_SIZE,
         shouldTruncate: state.legend.shouldTruncate,
         maxLines: state.legend.maxLines,
       }

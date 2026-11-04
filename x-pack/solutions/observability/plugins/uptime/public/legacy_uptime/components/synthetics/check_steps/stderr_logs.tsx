@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHighlight,
-  EuiLink,
   EuiSpacer,
   EuiTitle,
   formatDate,
@@ -112,16 +111,14 @@ export const StdErrorLogs = ({
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiLink data-test-subj="syntheticsStdErrorLogsLink">
-                <EuiButtonEmpty
-                  data-test-subj="syntheticsStdErrorLogsButton"
-                  href={discoverLink}
-                  iconType="discoverApp"
-                  isDisabled={!discoverLink}
-                >
-                  {VIEW_IN_DISCOVER_LABEL}
-                </EuiButtonEmpty>
-              </EuiLink>
+              <EuiButtonEmpty
+                data-test-subj="syntheticsStdErrorLogsButton"
+                href={discoverLink}
+                iconType="discoverApp"
+                isDisabled={!discoverLink}
+              >
+                {VIEW_IN_DISCOVER_LABEL}
+              </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
           <KbnDangerCallout announceOnMount title={ERROR_SUMMARY_LABEL} text={summaryMessage} />

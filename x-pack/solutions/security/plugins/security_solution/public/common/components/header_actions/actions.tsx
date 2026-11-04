@@ -58,6 +58,7 @@ export type ActionsComponentProps = Pick<
   | 'hit'
   | 'isEventViewer'
   | 'onEventDetailsPanelOpened'
+  | 'onRemoveFromCase'
   | 'onRuleChange'
   | 'refetch'
   | 'showNotes'
@@ -78,6 +79,7 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
   hit,
   isEventViewer = false,
   onEventDetailsPanelOpened,
+  onRemoveFromCase,
   onRuleChange,
   refetch,
   showNotes,
@@ -263,6 +265,7 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
           ecsRowData={ecsData}
           scopeId={timelineId}
           isRemoteDocument={isRemoteDocument}
+          onRemoveFromCase={onRemoveFromCase}
           onRuleChange={onRuleChange}
           refetch={refetch}
         />

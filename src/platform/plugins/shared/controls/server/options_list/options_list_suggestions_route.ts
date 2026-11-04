@@ -178,6 +178,9 @@ const getOptionsListDslSuggestions = async ({
     runtime_mappings: {
       ...runtimeFieldMap,
     },
+    // Same default as the data plugin search strategy. A data view title can name
+    // several concrete indices while only some exist.
+    ignore_unavailable: true,
   };
 
   /**

@@ -29,7 +29,8 @@ export const buildJoinTail = (
   entityFilterClauses: string[]
 ): string[] => [
   `| LOOKUP JOIN ${entitiesIndexName} ON entity.id`,
-  `| WHERE entity.name IS NOT NULL`,
+  // Aliases are left out: the group is judged by its main entity, whose history holds the group's score.
+  `| WHERE entity.name IS NOT NULL AND \`entity.relationships.resolution.resolved_to\` IS NULL`,
   ...entityFilterClauses,
   `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`,
   // One row per resolved entity, then a plain COUNT: exact, unlike the approximate COUNT_DISTINCT.

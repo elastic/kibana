@@ -91,6 +91,7 @@ const createWorkflowLookup = (): WorkflowLookup => ({
         type: { path: ['type'], keyNode: {} as any, valueNode: {} as any },
       },
       stepYamlNode: {} as any,
+      path: ['steps', 0],
     },
     set_vars: {
       stepId: 'set_vars',
@@ -106,6 +107,7 @@ const createWorkflowLookup = (): WorkflowLookup => ({
         },
       },
       stepYamlNode: {} as any,
+      path: ['steps', 0],
     },
     iterate: {
       stepId: 'iterate',
@@ -121,6 +123,7 @@ const createWorkflowLookup = (): WorkflowLookup => ({
         },
       },
       stepYamlNode: {} as any,
+      path: ['steps', 0],
     },
     process: {
       stepId: 'process',
@@ -132,6 +135,7 @@ const createWorkflowLookup = (): WorkflowLookup => ({
         type: { path: ['type'], keyNode: {} as any, valueNode: {} as any },
       },
       stepYamlNode: {} as any,
+      path: ['steps', 0],
     },
     loop_step: {
       stepId: 'loop_step',
@@ -147,6 +151,7 @@ const createWorkflowLookup = (): WorkflowLookup => ({
         },
       },
       stepYamlNode: {} as any,
+      path: ['steps', 0],
     },
     inner: {
       stepId: 'inner',
@@ -158,6 +163,7 @@ const createWorkflowLookup = (): WorkflowLookup => ({
         type: { path: ['type'], keyNode: {} as any, valueNode: {} as any },
       },
       stepYamlNode: {} as any,
+      path: ['steps', 0],
     },
   },
   triggersLineStart: 3,

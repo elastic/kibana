@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
@@ -126,6 +126,7 @@ export const ServiceAccountsPage = ({
       />
       <KibanaPageTemplate.Section
         alignment={isLoading || hasError || isEmpty ? 'center' : 'top'}
+        paddingSize={isLoading || hasError || isEmpty ? undefined : 'none'}
         grow
       >
         {isLoading ? (
@@ -170,15 +171,18 @@ export const ServiceAccountsPage = ({
         ) : isEmpty ? (
           <ServiceAccountsEmptyPrompt canCreate={canCreate} onCreateAccount={onCreateAccount} />
         ) : (
-          <ServiceAccountsTable
-            serviceAccounts={serviceAccounts}
-            hasMore={nextPage !== undefined}
-            isLoadingMore={isLoadingMore}
-            hasLoadMoreError={hasLoadMoreError}
-            onLoadMore={loadMoreServiceAccounts}
-            onDeleteAccount={onDeleteAccount}
-            onViewWorkloads={onViewWorkloads}
-          />
+          <>
+            <EuiSpacer size="l" />
+            <ServiceAccountsTable
+              serviceAccounts={serviceAccounts}
+              hasMore={nextPage !== undefined}
+              isLoadingMore={isLoadingMore}
+              hasLoadMoreError={hasLoadMoreError}
+              onLoadMore={loadMoreServiceAccounts}
+              onDeleteAccount={onDeleteAccount}
+              onViewWorkloads={onViewWorkloads}
+            />
+          </>
         )}
       </KibanaPageTemplate.Section>
     </>

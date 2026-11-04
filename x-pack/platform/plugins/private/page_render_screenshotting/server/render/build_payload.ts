@@ -7,11 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
-import {
-  HTTPAuthorizationHeader,
-  isExternalUiamCredential,
-  isUiamCredential,
-} from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import { KBN_SCREENSHOT_MODE_ENABLED_KEY } from '@kbn/screenshot-mode-plugin/common';
 import type { ScreenshotOptions } from '@kbn/screenshotting-plugin/server';
 import type { RenderPageRequest } from './types';
@@ -63,12 +59,7 @@ function getRequestAuthHeaders(
     const uiam = security.authc.apiKeys.uiam;
     // Externally created UIAM keys are not internal callers: UIAM rejects them when paired with the
     // attestation, so they are forwarded as-is.
-    if (
-      uiam &&
-      isUiamCredential(authHeader) &&
-      !isExternalUiamCredential(request) &&
-      !uiam.isExternalApiKey(request)
-    ) {
+    if (uiam && isUiamCredential(authHeader) && !uiam.isExternalApiKey(request)) {
       Object.assign(headers, uiam.getInternalCallerAttestationHeaders(authHeader));
     }
   }

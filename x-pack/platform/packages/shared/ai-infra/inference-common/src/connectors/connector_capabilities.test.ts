@@ -13,6 +13,7 @@ import {
   validateReasoningEffort,
   getContextWindowSize,
   getSupportedReasoningEffortLevels,
+  isTemplateRequiredConnector,
 } from './connector_capabilities';
 import { getModelDefinition } from './known_models';
 
@@ -163,5 +164,21 @@ describe('validateReasoningEffort', () => {
         meta: { status: 400 },
       })
     );
+  });
+});
+
+describe('isTemplateRequiredConnector', () => {
+  it('is true only when templates.policy is required', () => {
+    expect(
+      isTemplateRequiredConnector({
+        metadata: { capabilities: { templates: { policy: 'required' } } },
+      })
+    ).toBe(true);
+    expect(
+      isTemplateRequiredConnector({
+        metadata: { capabilities: { reasoning: { supported_effort_levels: ['low'] } } },
+      })
+    ).toBe(false);
+    expect(isTemplateRequiredConnector({})).toBe(false);
   });
 });

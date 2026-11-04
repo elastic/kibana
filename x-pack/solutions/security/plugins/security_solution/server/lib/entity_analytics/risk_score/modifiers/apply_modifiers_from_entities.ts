@@ -19,7 +19,6 @@ import { getGlobalWeightForIdentifierType, max10DecimalPlaces } from '../helpers
 import type { ParsedRiskScore } from '../maintainer/steps/parse_esql_row';
 import { getRiskLevel, RiskCategories } from '../../../../../common/entity_analytics/risk_engine';
 import { buildLegacyCriticalityFields } from './asset_criticality';
-import { RIEMANN_ZETA_VALUE } from '../constants';
 import { isDefined } from '../../../../../common/utils/nullable';
 
 /**
@@ -180,7 +179,7 @@ const v2RiskScoreDocFactory =
     watchlistModifiers: Array<Modifier<'watchlist'>>
   ): EntityRiskScoreRecord => {
     const alertsRiskScoreFields = {
-      category_1_score: max10DecimalPlaces(score.score / RIEMANN_ZETA_VALUE), // normalize value to be between 0-100
+      category_1_score: max10DecimalPlaces(score.normalized_score), // already normalized by the sample size the query used
       category_1_count: score.alert_count,
     };
 

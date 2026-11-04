@@ -206,6 +206,8 @@ export const EXPECTED_BUILTIN_ROLES_WITH_KIBANA_ACCESS: Record<
         privileges: [
           'feature_actions.read',
           'feature_agentBuilder.read',
+          'feature_agenticInvestigations.investigations_all',
+          'feature_agenticInvestigations.minimal_all',
           'feature_alertzero.all',
           'feature_contextEngine.all',
           'feature_proposals.all',
@@ -235,6 +237,8 @@ export const EXPECTED_BUILTIN_ROLES_WITH_KIBANA_ACCESS: Record<
         privileges: [
           'feature_actions.read',
           'feature_agentBuilder.read',
+          'feature_agenticInvestigations.investigations_all',
+          'feature_agenticInvestigations.minimal_all',
           'feature_alertzero.all',
           'feature_contextEngine.all',
           'feature_proposals.all',
@@ -262,9 +266,12 @@ export const EXPECTED_BUILTIN_ROLES_WITH_KIBANA_ACCESS: Record<
         privileges: [
           'feature_actions.read',
           'feature_agentBuilder.read',
+          'feature_agenticInvestigations.investigations_all',
+          'feature_agenticInvestigations.minimal_all',
           'feature_alertzero.all',
           'feature_contextEngine.all',
           'feature_proposals.all',
+          'feature_securitySolutionAlertsV1.all',
           'feature_siemV5.actions_log_management_read',
           'feature_siemV5.host_isolation_all',
           'feature_siemV5.minimal_read',
@@ -285,6 +292,8 @@ export const EXPECTED_BUILTIN_ROLES_WITH_KIBANA_ACCESS: Record<
         privileges: [
           'feature_actions.read',
           'feature_agentBuilder.read',
+          'feature_agenticInvestigations.investigations_all',
+          'feature_agenticInvestigations.minimal_all',
           'feature_alertzero.all',
           'feature_contextEngine.all',
           'feature_proposals.all',
@@ -308,6 +317,8 @@ export const EXPECTED_BUILTIN_ROLES_WITH_KIBANA_ACCESS: Record<
         privileges: [
           'feature_actions.read',
           'feature_agentBuilder.read',
+          'feature_agenticInvestigations.investigations_all',
+          'feature_agenticInvestigations.minimal_all',
           'feature_alertzero.all',
           'feature_contextEngine.all',
           'feature_proposals.all',
@@ -330,6 +341,8 @@ export const EXPECTED_BUILTIN_ROLES_WITH_KIBANA_ACCESS: Record<
         privileges: [
           'feature_actions.read',
           'feature_agentBuilder.read',
+          'feature_agenticInvestigations.investigations_all',
+          'feature_agenticInvestigations.minimal_all',
           'feature_alertzero.all',
           'feature_contextEngine.all',
           'feature_fleet.read',

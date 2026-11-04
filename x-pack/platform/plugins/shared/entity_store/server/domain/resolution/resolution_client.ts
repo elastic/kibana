@@ -36,13 +36,18 @@ import {
 
 const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
 const ENGINE_METADATA_TYPE_FIELD = 'entity.EngineMetadata.Type';
-const MAX_RESOLUTION_SEARCH_SIZE = 10_000;
+export const MAX_RESOLUTION_SEARCH_SIZE = 10_000;
 
 interface ResolutionClientOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   namespace: string;
   analytics?: TelemetryReporter;
+  /**
+   * Latest-entities index already resolved by the caller; reads by the caller
+   * and writes here must use the same one.
+   */
+  latestIndex?: string;
 }
 
 export interface LinkResult {
@@ -106,16 +111,18 @@ export class ResolutionClient {
   private readonly esClient: ElasticsearchClient;
   private readonly namespace: string;
   private readonly analytics?: TelemetryReporter;
+  private readonly latestIndex?: string;
 
-  constructor({ logger, esClient, namespace, analytics }: ResolutionClientOpts) {
+  constructor({ logger, esClient, namespace, analytics, latestIndex }: ResolutionClientOpts) {
     this.logger = logger;
     this.esClient = esClient;
     this.namespace = namespace;
     this.analytics = analytics;
+    this.latestIndex = latestIndex;
   }
 
   private async latestIndexName(): Promise<string> {
-    return resolveLatestEntitiesIndexName(this.esClient, this.namespace);
+    return this.latestIndex ?? resolveLatestEntitiesIndexName(this.esClient, this.namespace);
   }
 
   /**

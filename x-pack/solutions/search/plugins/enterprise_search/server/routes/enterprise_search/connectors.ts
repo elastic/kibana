@@ -129,7 +129,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       },
       validate: {
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
     },
@@ -151,7 +151,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       },
       validate: {
         params: schema.object({
-          syncJobId: schema.string(),
+          syncJobId: schema.string({ maxLength: 512 }),
         }),
       },
     },
@@ -195,7 +195,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
           schema.oneOf([schema.string({ maxLength: 100_000 }), schema.number(), schema.boolean()])
         ),
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
     },
@@ -235,7 +235,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
           }),
         }),
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
     },
@@ -261,7 +261,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       },
       validate: {
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
     },
@@ -283,7 +283,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       },
       validate: {
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
     },
@@ -305,7 +305,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       },
       validate: {
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
     },
@@ -345,12 +345,12 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       },
       validate: {
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
         query: schema.object({
           from: schema.number({ defaultValue: 0, min: 0 }),
           size: schema.number({ defaultValue: 10, min: 0 }),
-          type: schema.maybe(schema.string()),
+          type: schema.maybe(schema.string({ maxLength: 512 })),
         }),
       },
     },
@@ -384,7 +384,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
           run_ml_inference: schema.boolean(),
         }),
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
     },
@@ -451,7 +451,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       validate: {
         body: schema.object({ serviceType: schema.string({ maxLength: 512 }) }),
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
     },
@@ -478,7 +478,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       validate: {
         body: schema.object({ status: schema.string({ maxLength: 512 }) }),
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
     },
@@ -508,7 +508,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
           name: schema.string({ maxLength: 1000 }),
         }),
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
     },
@@ -554,7 +554,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
           ),
         }),
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
     },
@@ -601,7 +601,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
           })
         ),
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
     },
@@ -626,7 +626,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
           is_native: schema.boolean(),
         }),
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
     },
@@ -651,7 +651,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
         query: schema.object({
           fetchCrawlersOnly: schema.maybe(schema.boolean()),
           from: schema.number({ defaultValue: 0, min: 0 }),
-          searchQuery: schema.string({ defaultValue: '' }),
+          searchQuery: schema.string({ defaultValue: '', maxLength: 1000 }),
           size: schema.number({ defaultValue: 10, min: 0 }),
         }),
       },
@@ -732,7 +732,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       },
       validate: {
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
     },
@@ -759,7 +759,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       },
       validate: {
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
         query: schema.object({
           shouldDeleteIndex: schema.maybe(schema.boolean()),
@@ -838,8 +838,8 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       },
       validate: {
         params: schema.object({
-          connectorId: schema.string(),
-          indexName: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
+          indexName: schema.string({ maxLength: 1024 }),
         }),
       },
     },
@@ -886,7 +886,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       validate: {
         query: schema.object({
           from: schema.number({ defaultValue: 0, min: 0 }),
-          search_query: schema.maybe(schema.string()),
+          search_query: schema.maybe(schema.string({ maxLength: 1000 })),
           size: schema.number({ defaultValue: 40, min: 0 }),
         }),
       },
@@ -929,7 +929,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       },
       validate: {
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
     },
@@ -1052,7 +1052,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       },
       validate: {
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
     },

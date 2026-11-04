@@ -36,7 +36,7 @@ import {
 } from './handler';
 import {
   loadSourceCatalog,
-  resolveSourcesBySlug,
+  resolveSourcesBySlugOrId,
   restrictCatalogToReadable,
 } from '../../utils/resolve_source_slugs';
 
@@ -146,7 +146,9 @@ export function createSearchKnowledgeIndicatorsTool({
 
       Pass source slugs in \`slugs\`. Omit \`slugs\` to search every source in this space.
       Results report each source as its slug. The \`sources\` list gives \`slug\`, \`title\`, and
-      \`view_name\` for every source the results belong to, with or without \`slugs\`.
+      \`view_name\` for every source the results belong to, with or without \`slugs\`. Without \`slugs\`
+      it lists only the sources that own the returned KIs, so it is not the list of sources in this
+      space.
 
       Use this tool to:
       - Gather domain context for a specific source or group of sources
@@ -205,7 +207,7 @@ export function createSearchKnowledgeIndicatorsTool({
         const maxPerPage =
           view === 'full' ? KI_SEARCH_MAX_PER_PAGE_FULL : MAX_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE;
         const fullCatalog = await loadSourceCatalog(scopedClients.sourcesClient);
-        const sources = slugs ? resolveSourcesBySlug(fullCatalog, slugs) : undefined;
+        const sources = slugs ? resolveSourcesBySlugOrId(fullCatalog, slugs) : undefined;
         // Stored KIs are read as the internal user, so check the caller's own data access first.
         // Named sources must all be readable; an unscoped search covers only the readable ones.
         if (sources) {
