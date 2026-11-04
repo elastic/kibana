@@ -47,6 +47,14 @@ else
   fix_flag=""
 fi
 
+# Commit fixes to the PR's changed files before the full-repo pass below, which takes several minutes.
+if [[ -n "$fix_flag" ]]; then
+  echo '--- Lint: oxlint and eslint on changed files'
+  node scripts/eslint --scope branch --fix
+  report_oxlint_crashes
+  check_for_changed_files "node scripts/eslint --scope branch --fix" true
+fi
+
 echo '--- Lint: oxlint'
 node scripts/lint.js --quiet $fix_flag
 oxlint_exit=$?
