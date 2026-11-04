@@ -196,14 +196,11 @@ export class ManagedWorkflowsService {
     registeredPluginId: string,
     request?: KibanaRequest
   ): Promise<void> {
-    const definition = getManagedWorkflowDefinition(id);
-    if (!definition) {
-      throw new Error(`Unknown managed workflow id: ${id}`);
-    }
-    this.assertPluginRegistration(definition, registeredPluginId);
-
-    const workflowDocumentId = this.resolveWorkflowDocumentId(id, options);
-    const spaceId = this.getRequiredSpaceId(options);
+    const { definition, workflowDocumentId, spaceId } = this.resolveOwnedManagedWorkflow(
+      id,
+      options,
+      registeredPluginId
+    );
 
     // Abort before trackInstall; mark incomplete so ready() does not treat a gated skip
     // as "owner removed this workflow" and force-delete persisted docs.
@@ -371,14 +368,11 @@ export class ManagedWorkflowsService {
     registeredPluginId: string,
     request?: KibanaRequest
   ): Promise<void> {
-    const definition = getManagedWorkflowDefinition(id);
-    if (!definition) {
-      throw new Error(`Unknown managed workflow id: ${id}`);
-    }
-    this.assertPluginRegistration(definition, registeredPluginId);
-
-    const workflowDocumentId = this.resolveWorkflowDocumentId(id, options);
-    const spaceId = this.getRequiredSpaceId(options);
+    const { workflowDocumentId, spaceId } = this.resolveOwnedManagedWorkflow(
+      id,
+      options,
+      registeredPluginId
+    );
     const existing = await this.deps.crudService.getWorkflowDocumentSource(
       workflowDocumentId,
       spaceId,
@@ -407,19 +401,55 @@ export class ManagedWorkflowsService {
     });
   }
 
+  /** Switches an owned managed workflow off without a request and resolves to whether this call did. */
+  public async disableManagedWorkflow(
+    id: ManagedWorkflowId,
+    options: ManagedWorkflowOperationOptions,
+    registeredPluginId: string
+  ): Promise<boolean> {
+    const { definition, workflowDocumentId, spaceId } = this.resolveOwnedManagedWorkflow(
+      id,
+      options,
+      registeredPluginId
+    );
+    const document = await this.deps.crudService.disableManagedWorkflowWithoutRequest(
+      workflowDocumentId,
+      spaceId,
+      {
+        managedBy: registeredPluginId,
+        definitionId: id,
+      }
+    );
+    if (!document) {
+      return false;
+    }
+    await this.deps.crudService.logWorkflowChangesAfterWrite({
+      workflows: [{ id: workflowDocumentId, document }],
+      action: WorkflowChangeHistoryAction.workflowUpdate,
+      spaceId,
+      timestamp: new Date(),
+    });
+    this.deps.audit?.logWorkflowUpdated(undefined, {
+      id: workflowDocumentId,
+      managed: true,
+      originalWorkflowId: definition.id,
+      ownerPlugin: definition.pluginId,
+      spaceId,
+      reason: 'disable',
+    });
+    return true;
+  }
+
   public async getManagedWorkflowStatus(
     id: ManagedWorkflowId,
     options: GetManagedWorkflowStatusOptions,
     registeredPluginId: string
   ): Promise<ManagedWorkflowStatusReport> {
-    const definition = getManagedWorkflowDefinition(id);
-    if (!definition) {
-      throw new Error(`Unknown managed workflow id: ${id}`);
-    }
-    this.assertPluginRegistration(definition, registeredPluginId);
-
-    const workflowDocumentId = this.resolveWorkflowDocumentId(id, options);
-    const spaceId = this.getRequiredSpaceId(options);
+    const { definition, workflowDocumentId, spaceId } = this.resolveOwnedManagedWorkflow(
+      id,
+      options,
+      registeredPluginId
+    );
     const registryHash = this.computeManagedDefinitionHash(definition);
     const existing = await this.deps.crudService.getWorkflowDocumentSource(
       workflowDocumentId,
@@ -485,14 +515,11 @@ export class ManagedWorkflowsService {
     options: ExecuteManagedWorkflowOptions,
     registeredPluginId: string
   ): Promise<string> {
-    const definition = getManagedWorkflowDefinition(id);
-    if (!definition) {
-      throw new Error(`Unknown managed workflow id: ${id}`);
-    }
-    this.assertPluginRegistration(definition, registeredPluginId);
-
-    const workflowDocumentId = this.resolveWorkflowDocumentId(id, options);
-    const spaceId = this.getRequiredSpaceId(options);
+    const { workflowDocumentId, spaceId } = this.resolveOwnedManagedWorkflow(
+      id,
+      options,
+      registeredPluginId
+    );
     const existing = await this.deps.crudService.getWorkflowDocumentSource(
       workflowDocumentId,
       spaceId,
@@ -737,7 +764,7 @@ export class ManagedWorkflowsService {
     orphan: ManagedWorkflowOrphan
   ): Promise<void> {
     try {
-      await this.deps.crudService.disableManagedOrphan(workflowId, spaceId, orphan);
+      await this.deps.crudService.disableManagedWorkflowWithoutRequest(workflowId, spaceId, orphan);
     } catch (error) {
       this.logger.error(
         `Managed workflows: failed to disable orphaned workflow '${workflowId}' in space '${spaceId}'`,
@@ -849,6 +876,23 @@ export class ManagedWorkflowsService {
     return {
       ...this.applyManagedEnabledState(managedWorkflowData, enabled ?? workflowData.enabled),
       ...(createdAt ? { created_at: createdAt } : {}),
+    };
+  }
+
+  private resolveOwnedManagedWorkflow(
+    id: ManagedWorkflowId,
+    options: ManagedWorkflowOperationOptions,
+    registeredPluginId: string
+  ): { definition: ManagedWorkflowDefinition; workflowDocumentId: string; spaceId: string } {
+    const definition = getManagedWorkflowDefinition(id);
+    if (!definition) {
+      throw new Error(`Unknown managed workflow id: ${id}`);
+    }
+    this.assertPluginRegistration(definition, registeredPluginId);
+    return {
+      definition,
+      workflowDocumentId: this.resolveWorkflowDocumentId(id, options),
+      spaceId: this.getRequiredSpaceId(options),
     };
   }
 
