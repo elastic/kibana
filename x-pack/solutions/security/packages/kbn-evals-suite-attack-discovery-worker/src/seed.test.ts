@@ -560,3 +560,58 @@ describe('Entity Store extraction pause', () => {
     expect(entityStoreCalls(calls).filter((call) => call.startsWith('PUT'))).toEqual([]);
   });
 });
+
+describe('eval space solution view', () => {
+  const log = { info: jest.fn() } as unknown as ToolingLog;
+  const esClient = { indices: { exists: jest.fn(async () => true) } } as unknown as Client;
+
+  const stackWith = (space: { statusCode: number; body: Record<string, unknown> }) => {
+    const sent: Array<{ method: string; path: string; body?: unknown }> = [];
+    const request: KbnRequest = async ({ method, path, body }) => {
+      sent.push({ method, path, body });
+      if (method === 'GET' && path === '/api/spaces/space/eval') return space;
+      if (path.endsWith('/api/security/entity_store/status')) {
+        return { statusCode: 200, body: { status: 'stopped' } };
+      }
+      return { statusCode: 200, body: {} };
+    };
+    return { request, sent };
+  };
+
+  const spaceWrites = (sent: Array<{ method: string; path: string }>) =>
+    sent.filter(({ method, path }) => method !== 'GET' && path.includes('/api/spaces/space'));
+
+  it('creates a missing space with the security solution view', async () => {
+    const { request, sent } = stackWith({ statusCode: 404, body: {} });
+    await prepareWorkerSpace({ request, esClient, log, spaceId: 'eval' });
+    expect(spaceWrites(sent)).toEqual([
+      expect.objectContaining({
+        method: 'POST',
+        body: expect.objectContaining({ id: 'eval', solution: 'security' }),
+      }),
+    ]);
+  });
+
+  it('switches an existing Classic space to the security view, keeping its other fields', async () => {
+    const { request, sent } = stackWith({
+      statusCode: 200,
+      body: { id: 'eval', name: 'eval', disabledFeatures: ['x'] },
+    });
+    await prepareWorkerSpace({ request, esClient, log, spaceId: 'eval' });
+    expect(spaceWrites(sent)).toEqual([
+      expect.objectContaining({
+        method: 'PUT',
+        body: { id: 'eval', name: 'eval', disabledFeatures: ['x'], solution: 'security' },
+      }),
+    ]);
+  });
+
+  it('leaves a space that already has the security view alone', async () => {
+    const { request, sent } = stackWith({
+      statusCode: 200,
+      body: { id: 'eval', name: 'eval', solution: 'security' },
+    });
+    await prepareWorkerSpace({ request, esClient, log, spaceId: 'eval' });
+    expect(spaceWrites(sent)).toEqual([]);
+  });
+});

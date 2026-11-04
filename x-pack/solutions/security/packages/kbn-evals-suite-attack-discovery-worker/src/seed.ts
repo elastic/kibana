@@ -44,6 +44,11 @@ export const newRunMarker = (scenarioId: string): string =>
 
 const slug = (value: string): string => value.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
+/**
+ * AlertZero routes 404 in a Classic space, so the eval space needs the Security solution view.
+ */
+const EVAL_SPACE_SOLUTION = 'security';
+
 const ensureSpace = async ({
   request,
   log,
@@ -58,7 +63,21 @@ const ensureSpace = async ({
     path: `/api/spaces/space/${encodeURIComponent(spaceId)}`,
     version: PUBLIC_API_VERSION,
   });
-  if (existing.statusCode < 400) return;
+  if (existing.statusCode < 400) {
+    const space = existing.body as { solution?: string } & Record<string, unknown>;
+    if (space.solution === EVAL_SPACE_SOLUTION) return;
+    log.info(`[ad-worker] switching eval space "${spaceId}" to the ${EVAL_SPACE_SOLUTION} view`);
+    const updated = await request({
+      method: 'PUT',
+      path: `/api/spaces/space/${encodeURIComponent(spaceId)}`,
+      version: PUBLIC_API_VERSION,
+      body: { ...space, solution: EVAL_SPACE_SOLUTION },
+    });
+    if (updated.statusCode >= 400) {
+      throw new Error(`Could not update space "${spaceId}": ${kbnErrorMessage(updated.body)}`);
+    }
+    return;
+  }
   if (existing.statusCode !== 404) {
     throw new Error(`Could not read space "${spaceId}": ${kbnErrorMessage(existing.body)}`);
   }
@@ -67,7 +86,7 @@ const ensureSpace = async ({
     method: 'POST',
     path: '/api/spaces/space',
     version: PUBLIC_API_VERSION,
-    body: { id: spaceId, name: spaceId, disabledFeatures: [] },
+    body: { id: spaceId, name: spaceId, disabledFeatures: [], solution: EVAL_SPACE_SOLUTION },
   });
   if (created.statusCode >= 400 && created.statusCode !== 409) {
     throw new Error(`Could not create space "${spaceId}": ${kbnErrorMessage(created.body)}`);
