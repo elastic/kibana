@@ -534,7 +534,7 @@ export class DatePicker {
     }
 
     await this.openLegacyQuickMenu();
-    const interval = (await this.refreshIntervalInput.getAttribute('value')) ?? '';
+    const interval = await this.refreshIntervalInput.inputValue();
     const unit = (await this.refreshIntervalUnitSelect.inputValue()) as DateUnitSelector;
     const toggleChecked = (await this.toggleRefreshButton.getAttribute('aria-checked')) === 'true';
     await this.quickMenuButton.click();
