@@ -7,6 +7,8 @@
 
 export { defaultRuleAggregationFactory } from './factories/default_rule_aggregation_factory/latest';
 export { defaultRuleAggregationFactory as defaultRuleAggregationFactoryV1 } from './factories/default_rule_aggregation_factory/v1';
+export { ruleHealthAggregationFactory } from './factories/rule_health_aggregation_factory/latest';
+export { ruleHealthAggregationFactory as ruleHealthAggregationFactoryV1 } from './factories/rule_health_aggregation_factory/v1';
 // export { aggregateOptionsSchema } from './schemas';
 // export type { AggregateOptions, AggregateParams, DefaultRuleAggregationParams } from './types';
 

@@ -96,3 +96,41 @@ export interface IExecutionLogResult {
 }
 
 export type IExecutionKPIResult = typeof EMPTY_EXECUTION_KPI_RESULT;
+
+export interface IExecutionTrendsBucket {
+  timestamp: string;
+  total: number;
+  success: number;
+  failure: number;
+  warning: number;
+  unknown: number;
+  avgDurationMs: number;
+}
+
+export interface IExecutionTrendsFailingRule {
+  id: string;
+  name: string;
+  failures: number;
+  lastFailure: string | null;
+}
+
+export interface IExecutionTrendsSlowRule {
+  id: string;
+  name: string;
+  executions: number;
+  avgDurationMs: number;
+}
+
+export interface IExecutionTrendsResult {
+  interval: string;
+  buckets: IExecutionTrendsBucket[];
+  topFailingRules: IExecutionTrendsFailingRule[];
+  slowestRules: IExecutionTrendsSlowRule[];
+}
+
+export const EMPTY_EXECUTION_TRENDS_RESULT: IExecutionTrendsResult = {
+  interval: '1h',
+  buckets: [],
+  topFailingRules: [],
+  slowestRules: [],
+};

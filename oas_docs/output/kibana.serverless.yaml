@@ -177202,6 +177202,10 @@ components:
                     - timeout
                     - disabled
                     - validate
+                    - unauthorized
+                    - forbidden
+                    - notFound
+                    - unavailable
                   type: string
               required:
                 - reason
@@ -177302,6 +177306,10 @@ components:
                 - timeout
                 - disabled
                 - validate
+                - unauthorized
+                - forbidden
+                - notFound
+                - unavailable
                 - maxExecutableActions
                 - maxAlerts
                 - maxQueuedActions

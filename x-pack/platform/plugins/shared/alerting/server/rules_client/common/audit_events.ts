@@ -39,6 +39,7 @@ export enum RuleAuditAction {
   GET_GLOBAL_EXECUTION_LOG = 'rule_get_global_execution_log',
   GET_GLOBAL_EXECUTION_KPI = 'rule_get_global_execution_kpi',
   GET_GLOBAL_EXECUTION_SUMMARY = 'rule_get_global_execution_summary',
+  GET_GLOBAL_EXECUTION_TRENDS = 'rule_get_global_execution_trends',
   GET_ACTION_ERROR_LOG = 'rule_get_action_error_log',
   GET_HISTORY = 'rule_get_history',
   GET_RULE_EXECUTION_KPI = 'rule_get_execution_kpi',
@@ -144,6 +145,11 @@ const ruleEventVerbs: Record<RuleAuditAction, VerbsTuple> = {
     'accessing global execution summary for',
     'accessed global execution summary for',
   ],
+  rule_get_global_execution_trends: [
+    'access global execution trends for',
+    'accessing global execution trends for',
+    'accessed global execution trends for',
+  ],
   rule_alert_acknowledge: [
     'acknowledge alert of',
     'acknowledging alert of',
@@ -214,6 +220,7 @@ const ruleEventTypes: Record<RuleAuditAction, ArrayElement<EcsEvent['type']>> = 
   rule_get_execution_kpi: 'access',
   rule_get_global_execution_kpi: 'access',
   rule_get_global_execution_summary: 'access',
+  rule_get_global_execution_trends: 'access',
   rule_alert_acknowledge: 'change',
   rule_alert_unacknowledge: 'change',
   rule_alert_untrack: 'change',

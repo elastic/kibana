@@ -41,6 +41,24 @@ jest.mock('../rule_details/components/global_rule_event_log_list', () => {
   return () => <div data-test-subj="globalRuleEventLogList">{'Render Logs list component'}</div>;
 });
 
+jest.mock('../../hooks/use_load_rule_health_query', () => ({
+  useLoadRuleHealthQuery: () => ({
+    health: undefined,
+    isLoading: false,
+    isError: false,
+    loadRuleHealth: jest.fn(),
+  }),
+}));
+
+jest.mock('../../hooks/use_load_global_execution_trends_query', () => ({
+  useLoadGlobalExecutionTrendsQuery: () => ({
+    trends: undefined,
+    isLoading: false,
+    isError: false,
+    loadTrends: jest.fn(),
+  }),
+}));
+
 jest.mock('../rules_settings_page/rules_settings_page', () => ({
   RulesSettingsPageContainer: () => (
     <div data-test-subj="rulesSettingsPage">{'Render Rules Settings page component'}</div>
@@ -127,10 +145,13 @@ describe('rulesPage', () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
     renderRulesPage(history);
 
-    expect(await screen.findAllByRole('tab')).toHaveLength(2);
+    expect(await screen.findAllByRole('tab')).toHaveLength(3);
+    expect(screen.getByTestId('rulesTab')).toBeInTheDocument();
+    expect(screen.getByTestId('logsTab')).toBeInTheDocument();
+    expect(screen.getByTestId('healthTab')).toBeInTheDocument();
   });
 
-  it('hides the logs tab if the read rules privilege is missing', async () => {
+  it('hides the logs and health tabs if the read rules privilege is missing', async () => {
     useGetRuleTypesPermissions.mockReturnValue({
       authorizedToReadAnyRules: false,
     });
@@ -139,6 +160,16 @@ describe('rulesPage', () => {
     renderRulesPage(history);
 
     expect(await screen.findAllByRole('tab')).toHaveLength(1);
+    expect(screen.queryByTestId('healthTab')).not.toBeInTheDocument();
+  });
+
+  it('renders the health page on /health with the Health tab selected', async () => {
+    const history = createMemoryHistory({ initialEntries: ['/health'] });
+    renderRulesPage(history);
+
+    expect(await screen.findByTestId('ruleHealthOverview')).toBeInTheDocument();
+    expect(await screen.findByTestId('rulesListComponents')).toBeInTheDocument();
+    expect(screen.getByTestId('healthTab')).toHaveAttribute('aria-selected', 'true');
   });
 
   it('omits the list back button when hideListBackButton is set', async () => {
@@ -179,7 +210,7 @@ describe('rulesPage', () => {
     renderRulesPage(history);
 
     expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Rules');
-    expect(await screen.findAllByRole('tab')).toHaveLength(2);
+    expect(await screen.findAllByRole('tab')).toHaveLength(3);
     const back = await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.back);
     expect(back).toHaveAccessibleName('Back to Alerts');
     expect(back).toHaveAttribute('href', '/app/observability-overview/alerts');

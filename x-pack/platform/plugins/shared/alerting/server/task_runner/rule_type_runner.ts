@@ -28,7 +28,7 @@ import type {
   RuleTypeState,
   SanitizedRule,
 } from '../types';
-import { DEFAULT_FLAPPING_SETTINGS, RuleExecutionStatusErrorReasons } from '../types';
+import { DEFAULT_FLAPPING_SETTINGS } from '../types';
 import type { ExecutorServices } from './get_executor_services';
 import type { TaskRunnerTimer } from './task_runner_timer';
 import { TaskRunnerTimerSpan } from './task_runner_timer';
@@ -38,7 +38,7 @@ import type {
   RuleTypeRunnerContext,
   TaskRunnerContext,
 } from './types';
-import { withAlertingSpan } from './lib';
+import { getExecutorErrorReason, withAlertingSpan } from './lib';
 import type { WrappedSearchSourceClient } from '../lib/wrap_search_source_client';
 
 interface ConstructorOpts<
@@ -361,7 +361,7 @@ export class RuleTypeRunner<
 
             return {
               error: createTaskRunError(
-                new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err),
+                new ErrorWithReason(getExecutorErrorReason(err), err),
                 getErrorSource(err) || TaskErrorSource.FRAMEWORK
               ),
               stackTrace: { message: err, stackTrace: err.stack },
