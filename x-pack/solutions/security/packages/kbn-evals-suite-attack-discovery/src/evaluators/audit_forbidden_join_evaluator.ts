@@ -16,12 +16,14 @@ export const AUDIT_FORBIDDEN_JOIN_EVALUATOR_NAME = 'ForbiddenJoin';
  * joining (for example principals that only share an egress IP), else 1.
  *
  * The check reads `alertIds`, so a discovery that cites nothing cannot be judged, even if its
- * prose joins the pair. Semantics:
+ * prose joins the pair. The generation schema accepts any id string, so ids absent from
+ * `gold.alertGroups` (invented by the model) are ignored and do not make a discovery "citing".
+ * Semantics:
  * - no discoveries: score 1 (nothing was joined). It is the one case where a silent model scores
  *   well here, which is why `NegativeControl` and `PositiveControlRecall` exist beside it.
- * - discoveries exist but none cites any alert id: score null, label `no_citations`. A null score
- *   is left out of the per-evaluator mean, so an unjudgeable run neither pads nor drags it.
- * - a mix: only the citing discoveries are judged; the explanation counts the ones skipped.
+ * - discoveries exist but none cites a known alert id: score null, label `no_citations`. A null
+ *   score is left out of the per-evaluator mean, so an unjudgeable run neither pads nor drags it.
+ * - a mix: only the discoveries citing a known id are judged; the explanation counts the others.
  */
 export const createAuditForbiddenJoinEvaluator = (
   resolveReference?: AuditReferenceResolver
@@ -38,16 +40,23 @@ export const createAuditForbiddenJoinEvaluator = (
       return notApplicable('Scenario declares no forbidden joins.');
     }
 
-    const citing = discoveries.filter(({ alertIds }) => alertIds.length > 0);
+    const knownIds = new Set(Object.values(gold.alertGroups).flat());
+    const citing = discoveries
+      .map((discovery) => ({
+        title: discovery.title,
+        alertIds: discovery.alertIds.filter((id) => knownIds.has(id)),
+      }))
+      .filter(({ alertIds }) => alertIds.length > 0);
     if (discoveries.length > 0 && citing.length === 0) {
       return {
         score: null,
         label: 'no_citations',
-        explanation: `${discoveries.length} discoveries cite no alert ids, so joins cannot be checked`,
+        explanation: `${discoveries.length} discoveries cite no known alert ids, so joins cannot be checked`,
       };
     }
     const uncited = discoveries.length - citing.length;
-    const skipped = uncited > 0 ? ` (${uncited} discoveries without citations not judged)` : '';
+    const skipped =
+      uncited > 0 ? ` (${uncited} discoveries without known citations not judged)` : '';
 
     const violations = citing.flatMap((discovery) => {
       const cited = new Set(discovery.alertIds);
