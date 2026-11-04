@@ -70,13 +70,26 @@ describe('describeFinishedChild', () => {
   });
 });
 
+const chosenForParent = {
+  connectorId: 'connector-9',
+  projectRouting: 'project-a',
+  reasoningLevel: 'high',
+  configurationOverrides: { instructions: 'be brief' },
+  maxContentLength: 4000,
+  telemetryMetadata: { pluginId: 'security' },
+  workflowExecutionId: 'workflow-run-1',
+};
+
 const parentRun = {
   executionId: 'parent-1',
   agentId: 'parent-agent',
   agentParams: {
     conversationId: 'conversation-1',
     nextInput: { message: 'start' },
-    connectorId: 'connector-9',
+    structuredOutput: true,
+    browserApiTools: [{ id: 'browser-tool' }],
+    callback: { url: 'https://example.test/hook' },
+    ...chosenForParent,
   },
 } as unknown as AgentExecution;
 
@@ -133,7 +146,7 @@ describe('wakeParent', () => {
       requestImmediateClaim: true,
       params: {
         agentId: 'parent-agent',
-        connectorId: 'connector-9',
+        ...chosenForParent,
         conversationId: 'conversation-1',
         nextInput: { message: describeFinishedChild(finishedChild) },
         actor: { type: EventActorType.agent, id: 'child-agent', username: 'child-agent' },
@@ -143,14 +156,16 @@ describe('wakeParent', () => {
     });
   });
 
-  it('leaves the model to the agent when the run that spawned the child chose none', async () => {
+  it('leaves the agent defaults in place when the run that spawned the child chose nothing', async () => {
     get = executionById({
       ...parentRun,
       agentParams: { conversationId: 'conversation-1', nextInput: { message: 'start' } },
     } as AgentExecution);
 
     await expect(wake()).resolves.toBe('woken');
-    expect(maybeExecuteAgent.mock.calls[0][0].params).not.toHaveProperty('connectorId');
+    for (const key of Object.keys(chosenForParent)) {
+      expect(maybeExecuteAgent.mock.calls[0][0].params).not.toHaveProperty(key);
+    }
   });
 
   it('leaves the message for the next run when the sub-agent asked for never', async () => {

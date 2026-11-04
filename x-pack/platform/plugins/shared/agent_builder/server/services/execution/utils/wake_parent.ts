@@ -18,7 +18,11 @@ import {
   isConversationNotFoundError,
   isRoundCompleteEvent,
 } from '@kbn/agent-builder-common';
-import type { AgentExecution, AgentExecutionService } from '@kbn/agent-builder-server/execution';
+import type {
+  AgentExecution,
+  AgentExecutionService,
+  BaseExecutionParams,
+} from '@kbn/agent-builder-server/execution';
 import type { ConversationService } from '../../conversation';
 import type { AgentExecutionClient } from '../persistence';
 import {
@@ -37,6 +41,32 @@ export interface WakeParentParams {
   conversationService: ConversationService;
   executionService: AgentExecutionService;
 }
+
+/**
+ * The settings the user or caller chose for the run that spawned the child, which its wake
+ * continues: the model, project scope, effort, runtime overrides, size limit and tracing. Nothing
+ * that belongs to that one request or to conversation creation.
+ */
+export const inheritedRunSettings = ({
+  connectorId,
+  projectRouting,
+  reasoningLevel,
+  configurationOverrides,
+  maxContentLength,
+  telemetryMetadata,
+  workflowExecutionId,
+}: BaseExecutionParams): Partial<BaseExecutionParams> =>
+  Object.fromEntries(
+    Object.entries({
+      connectorId,
+      projectRouting,
+      reasoningLevel,
+      configurationOverrides,
+      maxContentLength,
+      telemetryMetadata,
+      workflowExecutionId,
+    }).filter(([, value]) => value !== undefined)
+  );
 
 export const describeFinishedChild = (child: AgentExecution): string => {
   const header = `Background sub-agent execution ${child.executionId} (agent ${child.agentId}) finished with status ${child.status}.`;
@@ -67,8 +97,8 @@ export const wakeParent = async ({
   if (!child?.owner || !child.parentExecutionId) {
     return 'skipped';
   }
-  // The run that spawned the child names the conversation and carries the model the user chose;
-  // the service would otherwise fall back to the agent's default.
+  // The run that spawned the child names the conversation and carries the settings the user
+  // chose for it; the service would otherwise fall back to the agent's defaults.
   const parent = await executionClient.get(child.parentExecutionId);
   const conversationId = parent?.agentParams.conversationId;
   if (!conversationId) {
@@ -102,7 +132,6 @@ export const wakeParent = async ({
   }
 
   const triggerMode = child.agentParams.parentTriggerMode ?? ChatTriggerMode.Always;
-  const connectorId = parent.agentParams.connectorId;
   try {
     await executionService.maybeExecuteAgent({
       mode: AgentExecutionMode.conversation,
@@ -112,7 +141,7 @@ export const wakeParent = async ({
       params: {
         // The service defaults a missing agent, it does not read the conversation's.
         agentId: conversation.agent_id,
-        ...(connectorId ? { connectorId } : {}),
+        ...inheritedRunSettings(parent.agentParams),
         conversationId,
         nextInput: { message: describeFinishedChild(child) },
         actor: { type: EventActorType.agent, id: child.agentId, username: child.agentId },
