@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ScreenContextAttachmentData } from '@kbn/agent-builder-common/attachments';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { Evaluator, Example } from '@kbn/evals';
 import type { EnhanceDefectId } from './evaluators/seed_defects';
@@ -68,6 +69,8 @@ export type DashboardDatasetExample = Example<
     modeAnswer?: EnhanceMode;
     /** Discover ES|QL results sent as an attachment with the opening turn, as the 'AI Agent' action does. */
     esqlResults?: EsqlQueryResultsData;
+    /** Screen context sent with the opening turn, as the app attaches it from the page the user is on. */
+    screenContext?: ScreenContextAttachmentData;
   },
   {
     route?: DashboardRoute;

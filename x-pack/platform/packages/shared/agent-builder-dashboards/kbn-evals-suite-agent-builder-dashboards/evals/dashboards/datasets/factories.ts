@@ -6,6 +6,7 @@
  */
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
+import type { ScreenContextAttachmentData } from '@kbn/agent-builder-common/attachments';
 import type {
   ControlsGold,
   DashboardDatasetExample,
@@ -31,15 +32,27 @@ export interface ExampleMetadata {
   [key: string]: unknown;
 }
 
-/** A dashboard request; `structure` holds only what the prompt pins down. */
+/** The screen context the app sends from the home page, with the global time picker default. */
+export const HOME_SCREEN_CONTEXT: ScreenContextAttachmentData = {
+  app: 'home',
+  url: '/app/home#/',
+  time_range: { from: 'now-15m', to: 'now' },
+};
+
+/**
+ * A dashboard request; `structure` holds only what the prompt pins down. With
+ * `screenContext`, a prompt that names no time window must not copy its time range.
+ */
 export const dashboardExample = ({
   question,
   structure,
+  screenContext,
 }: {
   question: string;
   structure: DashboardStructureGold;
+  screenContext?: ScreenContextAttachmentData;
 }): DashboardDatasetExample => ({
-  input: { question },
+  input: { question, ...(screenContext ? { screenContext } : {}) },
   metadata: { behaviour: 'creation', dataSource: 'logs' } satisfies ExampleMetadata,
   output: {
     route: 'dashboard',
