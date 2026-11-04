@@ -129,7 +129,7 @@ export class IsomerPlugin
     });
   };
 
-  private readonly validateNode = createNodeValidator(() => this.getRuntime());
+  private readonly validateNode = createNodeValidator();
 
   private readonly reportMaterialize = (event: MaterializeEvent) => {
     this.logger.get('instrumentation').debug(() => `Materialized: ${JSON.stringify(event)}`);

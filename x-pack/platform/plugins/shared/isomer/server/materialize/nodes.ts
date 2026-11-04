@@ -12,6 +12,7 @@
 
 import type {
   Cell,
+  ChartEvent,
   GridNode,
   Loss,
   MetricNode,
@@ -50,19 +51,7 @@ export type MaterializedNode =
 export type ChartCell = Cell;
 
 /** A gesture on a chart node, referring to rows and columns of the node's own `data`. */
-export type ChartEvent = { node: string } & (
-  | {
-      kind: 'select';
-      target: 'datum' | 'series' | 'category' | 'legend' | 'cell' | 'tile';
-      rows: number[];
-      columns: string[];
-      negate?: boolean;
-    }
-  | { kind: 'brush'; column: string; range: [number, number] }
-) & {
-    description: string;
-    values: Record<string, ChartCell>;
-  };
+export type { ChartEvent };
 
 export const UNSUPPORTED_NODE_TYPE = 'unsupported';
 
