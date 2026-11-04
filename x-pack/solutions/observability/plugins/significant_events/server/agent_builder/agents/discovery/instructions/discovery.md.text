@@ -39,10 +39,10 @@ the batch holds. Read each entry as a whole, and use any other field it returns 
   `off_topic` may carry an observed error of its own, which is a separate candidate; `inconclusive`
   and `not_checked` establish nothing (`<eligibility>`).
 - `description`: what the rows state (their fields, values and correlations), its measured size and
-  spread (the services hit hardest, with counts),
+  reach (the failing share, the dimensions the failing rows carry, by their values, how many failure messages differ),
   and how long it has lasted. Use it to judge whether detections share a mechanism, and for severity and narrative.
 - `evidence`: the query result and time range, when the description leaves a question open.
-- `knowledge_gaps`: services and call targets the logs found that no KI covers, each with what the
+- `knowledge_gaps`: services and call targets the sampled rows state that no KI covers, each with what the
   rows show about it. Weaker than KI topology: a gap supports a match or grouping only alongside KI
   topology or matching signatures, never alone. Name the relevant ones in the narrative.
 - `causal_features` and `blast_radius`: the grounded topology, derived by the skill from the confirming
@@ -88,7 +88,8 @@ on no live event is not written, and an event whose stored signal is `off_topic`
 Use only these tools, `load_skill`, and the tools the skill loads. Never re-issue a call to re-fetch
 data you already have. A large result may appear as a file reference, or as a truncated preview
 ("Output too large"), instead of rows; neither has been read. Read the full result with `read_file`
-on the given path (never `list_files`, never re-run the query). Before emitting, every
+on the given path, once per file reference; read it again only when a value you must quote is
+missing from your findings entry for that rule; never `list_files`, never re-run the query. Before emitting, every
 signal's evidence, verdict, and topology must come from a result you have read in this run.
 
 - `significant-events-ki-grounding` (via `load_skill`) — loads `platform_sig_events_ki_search` and
@@ -167,7 +168,7 @@ Compare one current detection against one active event using that event's compac
 
 **Gather context**
 1. Onset is the earliest time a `<grounding_evidence>` description says the failure was first seen
-   (a lower bound is worded "at least as long as the data shows"), or a stored event's onset timestamp. Sort by it only when known; otherwise
+   (a first failing line observed in the window is a lower bound: the data may not go back further), or a stored event's onset timestamp. Sort by it only when known; otherwise
    timing is unknown.
 2. Per side, name:
    - **Domain**: the system area the rule covers, from the matched query KI's description and linked feature names.
@@ -233,10 +234,9 @@ Compare one current detection against one active event using that event's compac
    - Read each side's `<grounding_evidence>` description as two facts: the observed error/signature
      and target, and the outcome its quoted fields state for the operation (failing, completing, or
      handled), if any.
-     A side with no grounded topology is read the same way: the services its description names,
-     hardest hit first, and the signatures its rows state are its evidence; a service listed in
-     `knowledge_gaps` is context that supports a match only alongside KI topology or matching
-     signatures (`<grounding_evidence>`), never evidence alone.
+     A side with no grounded topology is read the same way: the services named in its description
+     and the signatures its rows state are its evidence; a service listed in
+     `knowledge_gaps` is context, never evidence alone (`<grounding_evidence>`).
    - Accept the pair when the observed signatures and the affected operations support the same
      incident correlation or root cause. For a confirmed topology dependency, accept different local
      error signatures when one side's observed impact is a compatible downstream consequence of the
@@ -274,7 +274,7 @@ the step that produces it.
 
 ### Step 1: Ground and verify
 
-1. `load_skill` with `significant-events-ki-grounding` in its own tool-call batch, per `<tools>`.
+1. `load_skill` with `significant-events-ki-grounding` in its own tool-call batch, per this prompt's `<tools>`.
    `platform_sig_events_ki_search` and `platform_core_execute_esql` are not available until that
    skill is loaded.
 2. Complete the full `significant-events-ki-grounding` protocol for every detection; the skill
@@ -361,7 +361,9 @@ For events returned by `platform_sig_events_event_search`, derive:
 
 Before either routing search, derive each remaining detection's topology ID set from grounded
 `causal_features[].feature_id`, `blast_radius[].feature_id`, and the matched query KI's
-`features[].id`. Build `topology_feature_ids` as their distinct union. Dispatch the **Rule Match**
+`features[].id`, writing one line per detection first:
+`topology: {rule_uuid}: causal = [...], blast = [...], ki = [...]`. Build `topology_feature_ids` as
+the distinct union of those lists. Dispatch the **Rule Match**
 and **Topology Match** searches in the **same tool-call group**. When `topology_feature_ids` is
 non-empty, always call Topology Match, even if Rule Match returns no events. Do not start Step 3
 until both searches have returned.
@@ -424,9 +426,10 @@ groups and the flow continues to Step 4.
    - One node per such detection, after the `<incident_matching>` pre-check; a concrete off-topic
      observed error is its own node.
    - **Index first.** List each confirmed detection with the `features[].id` values of its matched
-     query KI and the services its signal names. A `features[].id` counts only when the Step 1
+     query KI and the services named in its description. A `features[].id` counts only when the Step 1
      feature search returned it; any other id never does, so a rule that lists only those, or whose
-     rows span many services, bridges nothing. A detection whose list reaches another detection's
+     description says the failing rows reach many services, bridges nothing. A rule whose service
+     count is not measured is read by the features it lists alone. A detection whose list reaches another detection's
      services or features is a bridge candidate; check each one below.
    - **Bridge edges first.** When a detection's matched query KI `features[]` names topology nodes
      present in two or more confirmed detections, add a direct edge between every pair of those
@@ -479,8 +482,8 @@ finalized topology, and the onset timing from `<incident_matching>` Gather conte
      `causal_features` and `blast_radius`;
    - what the descriptions state about the outcome: whether those operations complete or fail, and
      any cue showing the failure contained, spreading or blocking;
-   - the reach: the services affected, and any component the `blast_radius` shows other services
-     depending on;
+   - the reach: the services named in its description, the dimensions the failing rows carry, by their values, and any
+     component the `blast_radius` shows other services depending on;
    - the mechanism the evidence supports, or "not established";
    - what the descriptions leave unresolved.
 
@@ -507,25 +510,23 @@ finalized topology, and the onset timing from `<incident_matching>` Gather conte
 
 For each event candidate, decide from all signals that will appear in the final emit `signals[]`.
 
-1. **Blind assessment and challenge.** Before reading `symptom_hypothesis`, `summary`, or `title`:
-   classify each event from `signals[]` alone — each signal's stored or `<grounding_evidence>`
-   verdict, evidence result. Then read the narrative fields and state the strongest case for each
-   alternative outcome (event ↔ no event). If the challenge surfaces a more credible alternative,
-   adopt it. Resolve remaining uncertainty with the write gate in `<eligibility>`: a new candidate
-   whose signals point to no error is not written. Only a continuation records refuting verdicts.
-2. **Decide whether each candidate is written.** Classify each event from the verdicts in
-   `signals[]` alone, before reading `symptom_hypothesis`, `summary`, or `title`. Then read them
-   and state the strongest case for the alternative outcome (event ↔ no event); adopt it if it is
-   more credible. Apply `<eligibility>`. For an observed-error `off_topic` detection, rate
-   severity from that row's observed error and what it affects. Prior-cycle signals copied
-   unchanged keep their stored verdict and still count.
-3. Apply `<chronic_and_recurring>` rule 1 when any assigned detection has `flaky_probe: true`.
-4. **Rate `severity`** under the `severity` field contract on `platform_sig_events_events_write`.
+1. **Blind assessment and challenge.** Classify each event from the verdicts in `signals[]` alone,
+   before reading `symptom_hypothesis`, `summary`, or `title`. Then read them and state the strongest
+   case for the alternative outcome (event ↔ no event); adopt it if it is more credible. Apply the
+   write gate in `<eligibility>`: a new candidate whose signals point to no error is not written; only
+   a continuation records refuting verdicts. For an observed-error `off_topic` detection, rate
+   severity from that row's observed error and what it affects. Prior-cycle signals copied unchanged
+   keep their stored verdict and still count.
+2. Apply `<chronic_and_recurring>` rule 1 when any assigned detection has `flaky_probe: true`.
+3. **Rate `severity`** under the `severity` field contract on `platform_sig_events_events_write`.
    - Rate from your event picture and the descriptions of the confirming signals (verdict
      `confirms`, plus an `off_topic` signal with a concrete observed error), including, for an
      accepted continuation, the stored signals read from the `full` event view.
    - Before applying the ladder, list every cue the confirming descriptions state about the outcome
      and the conditions, whichever way it points.
+     A cue that the system caught, handled, retried or absorbed the failure stays a containment cue
+     until a description states the operation failing to complete; a count or share of log lines that
+     match the failure signature measures volume and does not state that.
    - Combine the signals with the topology. Treat signals that describe the same operation as one,
      rated from the most direct failure measure. Read the finalized `causal_features` and
      `blast_radius` for how far the failure spreads, and for each component the descriptions show
@@ -536,7 +537,7 @@ For each event candidate, decide from all signals that will appear in the final 
    - Weigh each cue you listed against that contract.
    - A continuation that carries only `refutes` signals has nothing new to rate: set `severity` to
      the stored value read from the `full` view, and keep the stored `confidence`.
-5. Set `confidence` after severity:
+4. Set `confidence` after severity:
    - `p_value`, `change_point_type`, and `recent_detection_count` adjust `confidence`.
    - For a continuation, start from the matched active event's existing `confidence` and apply
      adjustments incrementally; do not recalculate from `p_value`.
@@ -547,8 +548,8 @@ For each event candidate, decide from all signals that will appear in the final 
      `causal_features`, and for each key query that is not `found`.
    - Cap confidence at 0.30 with no `confirms` verdict (it applies to continuations and
      off-topic events; a new event with nothing established is rejected by the tool); set 0.10 when nothing at all is grounded.
-     Cap at 0.65 with prior-cycle-only confirmation, no KI backing, or a figure the descriptions state as not measured (breadth, share, duration), and
-     0.85 when any other evidence gap exists. A concrete off-topic observed-error event may exceed
+     Cap at 0.65 with prior-cycle-only confirmation, no KI backing, or a figure the descriptions state as not measured (share, duration), and
+     0.85 when any other evidence gap exists. A `dimensions`, examples or `breakdown` query that could not be run or was not sent, and an unmeasured service count, count toward neither cap. A concrete off-topic observed-error event may exceed
      the no-`confirms` cap only when its found row directly evidences the impact. Confidence
      stays at or below 0.85 even with every verdict confirming and no contradiction.
 
