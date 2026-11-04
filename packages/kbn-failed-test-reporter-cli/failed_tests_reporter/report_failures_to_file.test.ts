@@ -160,6 +160,22 @@ describe('reportFailuresToFile', () => {
     expect(html).toContain('>#42</a>');
   });
 
+  it('explains why no issue was created for infrastructure failures', async () => {
+    await report([
+      makeFailure('a', {
+        likelyIrrelevant: true,
+        infraReason: { category: 'auth', message: 'Authentication on Elastic Cloud failed.' },
+      }),
+    ]);
+
+    const html = readHtml();
+    expect(html).toContain(
+      '<strong>Likely infrastructure issue (auth), no GitHub issue created</strong>: ' +
+        'Authentication on Elastic Cloud failed.'
+    );
+    expect(html).not.toContain('badge');
+  });
+
   it('collapses standard output when there is any', async () => {
     await report([makeFailure('a', { 'system-out': 'the ftr log' })]);
 

@@ -167,9 +167,13 @@ const renderDetailsTable = (failure: TestFailure, bkMeta: BuildkiteMetadata) => 
         renderDetailsRow('Code owners', escape(formatOwners(failure.owners))),
         renderDetailsRow(
           'Failures in tracked branches',
-          `<span class="badge rounded-pill bg-danger">${failureCount}</span>${
-            failure.githubIssue ? ` ${renderIssueLink(failure.githubIssue)}` : ''
-          }`
+          failure.infraReason
+            ? `<strong>Likely infrastructure issue (${escape(
+                failure.infraReason.category
+              )}), no GitHub issue created</strong>: ${escape(failure.infraReason.message)}`
+            : `<span class="badge rounded-pill bg-danger">${failureCount}</span>${
+                failure.githubIssue ? ` ${renderIssueLink(failure.githubIssue)}` : ''
+              }`
         ),
         renderDetailsRow(
           'Buildkite job',
