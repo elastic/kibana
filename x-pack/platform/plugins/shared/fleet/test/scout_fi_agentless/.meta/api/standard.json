@@ -1,0 +1,36 @@
+{
+  "sha1": "9e41c09d6f26a3fe66de470d18e78696d954f994",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "f25a40a66863788-56a9cde31237127",
+      "title": "Cloud connector IaC upgrade status when the IaC Provisioner is unreachable a flyout re-check of a keyless connector neither reports nor stores an upgrade",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_fi_agentless/api/tests/iac_upgrade_status_provisioner_unreachable.spec.ts",
+        "line": 108,
+        "column": 27
+      }
+    },
+    {
+      "id": "f25a40a66863788-5289b4e3fb566a3",
+      "title": "Cloud connector IaC upgrade status when the IaC Provisioner is unreachable onboarding a new integration on a keyless identity does not block the deployment",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_fi_agentless/api/tests/iac_upgrade_status_provisioner_unreachable.spec.ts",
+        "line": 138,
+        "column": 27
+      }
+    }
+  ]
+}
