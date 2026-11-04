@@ -38,8 +38,9 @@ const logs = (
 
 const EMPTY = {
   topPages: [],
-  breakdowns: { browsers: [], operatingSystems: [], devices: [] },
+  breakdowns: { pageLoads: 0, browsers: [], operatingSystems: [], devices: [] },
   topClicks: [],
+  totalClicks: 0,
 };
 
 describe('toUsage', () => {
@@ -78,9 +79,10 @@ describe('toUsage', () => {
     ]);
   });
 
-  it('maps the breakdowns, devices from the boolean terms keys', () => {
+  it('maps the breakdowns, devices from the boolean terms keys, with every page load', () => {
     const usage = toUsage(
       logs({
+        doc_count: 8,
         browsers: {
           buckets: [
             { key: 'Chrome', doc_count: 3 },
@@ -98,6 +100,7 @@ describe('toUsage', () => {
     );
 
     expect(usage.breakdowns).toEqual({
+      pageLoads: 8,
       browsers: [
         { name: 'Chrome', pageLoads: 3 },
         { name: 'Safari', pageLoads: 2 },
@@ -110,12 +113,12 @@ describe('toUsage', () => {
     });
   });
 
-  it('maps the clicks with their tag name', () => {
+  it('maps the clicks with their tag name, with every click', () => {
     const usage = toUsage(
       logs(
         {},
         {
-          doc_count: 3,
+          doc_count: 7,
           selectors: {
             buckets: [
               { key: '#add-to-cart', doc_count: 2, tagName: { buckets: [{ key: 'BUTTON' }] } },
@@ -130,5 +133,6 @@ describe('toUsage', () => {
       { cssSelector: '#add-to-cart', tagName: 'BUTTON', count: 2 },
       { cssSelector: '.card', tagName: null, count: 1 },
     ]);
+    expect(usage.totalClicks).toBe(7);
   });
 });

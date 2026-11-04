@@ -16,6 +16,7 @@ import { BreakdownsPanel } from './breakdowns_panel';
 jest.mock('../../../../hooks/use_kibana_services');
 
 const BREAKDOWNS: Breakdowns = {
+  pageLoads: 40,
   browsers: [
     { name: 'Chrome', pageLoads: 30 },
     { name: 'Safari', pageLoads: 10 },
@@ -27,7 +28,7 @@ const BREAKDOWNS: Breakdowns = {
   ],
 };
 
-const EMPTY: Breakdowns = { browsers: [], operatingSystems: [], devices: [] };
+const EMPTY: Breakdowns = { pageLoads: 0, browsers: [], operatingSystems: [], devices: [] };
 
 const sessionsHref = jest.fn((query: Record<string, unknown>) => {
   return `/sessions?${new URLSearchParams(query as never)}`;
@@ -65,6 +66,14 @@ describe('BreakdownsPanel', () => {
     const [chrome] = browsers.getAllByRole('progressbar');
     expect(chrome).toHaveAttribute('value', '30');
     expect(chrome).toHaveAttribute('max', '40');
+  });
+
+  it('shares every page load, including those without the attribute', () => {
+    renderPanel({ ...BREAKDOWNS, pageLoads: 60 });
+
+    const browsers = within(screen.getByTestId('digitalExperienceOverviewBrowsers'));
+    expect(browsers.getByText(/50%/)).toBeInTheDocument();
+    expect(browsers.getAllByRole('progressbar')[0]).toHaveAttribute('max', '60');
   });
 
   it('links each browser and operating system to its sessions', () => {

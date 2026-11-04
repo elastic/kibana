@@ -10,7 +10,7 @@ import type {
   RequestBucket,
   ResourcesAggregations,
 } from './search_responses';
-import { toHttpRequests, toSlowestResources } from './to_network';
+import { toHttpRequests, toPageOrigin, toSlowestResources } from './to_network';
 
 const percentile = (value: number | null) => {
   return {
@@ -92,25 +92,28 @@ describe('toSlowestResources', () => {
       environmentNames: { buckets: [] },
       environmentNotDefined: { doc_count: 0 },
       inEnvironment: {
-        urls: {
-          buckets: [
-            {
-              key: 'https://cdn/app.js',
-              doc_count: 2,
-              duration: percentile(850.5),
-              transferSize: percentile(4096),
-              initiatorType: { buckets: [{ key: 'script' }] },
-              renderBlocking: { doc_count: 1 },
-            },
-            {
-              key: 'https://cdn/logo.svg',
-              doc_count: 1,
-              duration: percentile(null),
-              transferSize: percentile(null),
-              initiatorType: { buckets: [] },
-              renderBlocking: { doc_count: 0 },
-            },
-          ],
+        pageLoads: { topPage: { buckets: [] } },
+        resources: {
+          urls: {
+            buckets: [
+              {
+                key: 'https://cdn/app.js',
+                doc_count: 2,
+                duration: percentile(850.5),
+                transferSize: percentile(4096),
+                initiatorType: { buckets: [{ key: 'script' }] },
+                renderBlocking: { doc_count: 1 },
+              },
+              {
+                key: 'https://cdn/logo.svg',
+                doc_count: 1,
+                duration: percentile(null),
+                transferSize: percentile(null),
+                initiatorType: { buckets: [] },
+                renderBlocking: { doc_count: 0 },
+              },
+            ],
+          },
         },
       },
     };
@@ -133,5 +136,37 @@ describe('toSlowestResources', () => {
         transferSizeP75Bytes: null,
       },
     ]);
+  });
+});
+
+describe('toPageOrigin', () => {
+  const withTopPage = (keys: string[]): ResourcesAggregations => {
+    return {
+      environments: { buckets: [] },
+      environmentNames: { buckets: [] },
+      environmentNotDefined: { doc_count: 0 },
+      inEnvironment: {
+        resources: { urls: { buckets: [] } },
+        pageLoads: {
+          topPage: {
+            buckets: keys.map((key) => {
+              return { key };
+            }),
+          },
+        },
+      },
+    };
+  };
+
+  it('returns the origin of the most loaded page', () => {
+    expect(toPageOrigin(withTopPage(['https://shop.example.com/cart?id=1']))).toBe(
+      'https://shop.example.com'
+    );
+  });
+
+  it('returns null without a page load or with an invalid URL', () => {
+    expect(toPageOrigin(undefined)).toBeNull();
+    expect(toPageOrigin(withTopPage([]))).toBeNull();
+    expect(toPageOrigin(withTopPage(['not a url']))).toBeNull();
   });
 });

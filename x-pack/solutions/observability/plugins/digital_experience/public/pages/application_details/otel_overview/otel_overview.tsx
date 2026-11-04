@@ -46,8 +46,9 @@ const USAGE_FETCH_ERROR_TITLE = i18n.translate(
 
 const EMPTY_USAGE: ApplicationUsageResponse = {
   topPages: [],
-  breakdowns: { browsers: [], operatingSystems: [], devices: [] },
+  breakdowns: { pageLoads: 0, browsers: [], operatingSystems: [], devices: [] },
   topClicks: [],
+  totalClicks: 0,
 };
 
 /** The most frequent error groups on the Overview; the Errors tab lists the rest. */
@@ -120,7 +121,11 @@ function UsageAndErrorsPanels({
         </EuiFlexItem>
         {!usageError && (
           <EuiFlexItem grow={2}>
-            <TopClicksPanel clicks={usage.topClicks} isLoading={isLoading} />
+            <TopClicksPanel
+              clicks={usage.topClicks}
+              totalClicks={usage.totalClicks}
+              isLoading={isLoading}
+            />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

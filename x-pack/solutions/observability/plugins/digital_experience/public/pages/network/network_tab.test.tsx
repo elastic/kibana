@@ -66,6 +66,7 @@ const RESPONSE: ApplicationNetworkResponse = {
       transferSizeP75Bytes: 9000,
     },
   ],
+  pageOrigin: 'https://shop.example.com',
   environments: ['production'],
 };
 

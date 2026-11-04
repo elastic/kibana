@@ -19,9 +19,10 @@ export interface ResourceBucket {
   renderBlocking: { doc_count: number };
 }
 
-/** `resourcesSearch`: the slowest resources in the selected environment, and every environment. */
+/** `resourcesSearch`: the resources and top page in one environment, and every environment. */
 export type ResourcesAggregations = ByEnvironmentAggregations<{
-  urls: { buckets: ResourceBucket[] };
+  resources: { urls: { buckets: ResourceBucket[] } };
+  pageLoads: { topPage: { buckets: Array<{ key: string }> } };
 }>;
 
 /** The requests of one URL and method; the key is `[url, method]`. */

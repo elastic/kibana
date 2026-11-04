@@ -92,6 +92,20 @@ describe('JsErrorsPanel', () => {
     );
   });
 
+  it('shows the current counts of the open group and closes when a new response lacks it', () => {
+    const panel = (errors: JsErrorGroup[]) => {
+      return <JsErrorsPanel errors={errors} isLoading={false} sessionsWithErrorsHref="/sessions" />;
+    };
+    const { rerender } = render(panel(ERRORS), { wrapper: Wrapper });
+    openError('TypeError');
+
+    rerender(panel([{ ...ERRORS[0], count: 7 }]));
+    expect(screen.getByTestId('digitalExperienceErrorFlyout')).toHaveTextContent('7');
+
+    rerender(panel([ERRORS[1]]));
+    expect(screen.queryByTestId('digitalExperienceErrorFlyout')).not.toBeInTheDocument();
+  });
+
   it('says so when an error group has no stack trace', () => {
     renderPanel();
 

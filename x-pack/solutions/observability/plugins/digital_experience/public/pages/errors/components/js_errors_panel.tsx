@@ -40,6 +40,9 @@ const EMPTY_MESSAGE = i18n.translate('xpack.digitalExperience.errors.table.empty
   defaultMessage: 'No JS errors in this time range.',
 });
 
+/** What identifies a group across responses: its type and stack trace. */
+type ErrorGroupKey = Pick<JsErrorGroup, 'type' | 'stacktrace'>;
+
 const VIEW_ALL_LABEL = i18n.translate('xpack.digitalExperience.errors.table.viewAll', {
   defaultMessage: 'View all errors',
 });
@@ -65,7 +68,13 @@ export function JsErrorsPanel({
   viewAllHref?: string;
 }) {
   const { formatNumber, formatDate } = useFormatters();
-  const [selected, setSelected] = useState<JsErrorGroup>();
+  const [selectedKey, setSelectedKey] = useState<ErrorGroupKey>();
+  // Looked up in the current errors, so the flyout never shows a stale group and closes without it.
+  const selected =
+    selectedKey &&
+    errors.find(({ type, stacktrace }) => {
+      return type === selectedKey.type && stacktrace === selectedKey.stacktrace;
+    });
   const isCompact = maxRows !== undefined;
   const items = isCompact ? errors.slice(0, maxRows) : errors;
 
@@ -78,7 +87,7 @@ export function JsErrorsPanel({
           <div css={{ minWidth: 0 }}>
             <EuiLink
               onClick={() => {
-                return setSelected(error);
+                return setSelectedKey({ type: error.type, stacktrace: error.stacktrace });
               }}
               data-test-subj="digitalExperienceError"
               {...getEbtProps({
@@ -157,7 +166,7 @@ export function JsErrorsPanel({
           error={selected}
           sessionsWithErrorsHref={sessionsWithErrorsHref}
           onClose={() => {
-            return setSelected(undefined);
+            return setSelectedKey(undefined);
           }}
         />
       )}

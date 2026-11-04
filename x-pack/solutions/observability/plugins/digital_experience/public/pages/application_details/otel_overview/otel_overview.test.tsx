@@ -90,11 +90,13 @@ const NO_VITAL = { p75Ms: null, sampleCount: 0, ratings: null };
 const USAGE_RESPONSE: ApplicationUsageResponse = {
   topPages: [{ url: 'https://shop.example.com/', pageLoads: 9, loadTimeP75Ms: 1200 }],
   breakdowns: {
+    pageLoads: 9,
     browsers: [{ name: 'Chrome', pageLoads: 9 }],
     operatingSystems: [{ name: 'macOS', pageLoads: 9 }],
     devices: [{ name: 'desktop', pageLoads: 9 }],
   },
   topClicks: [{ cssSelector: '#add-to-cart', tagName: 'BUTTON', count: 5 }],
+  totalClicks: 5,
 };
 
 const response = (pageLoads: number): ApplicationOverviewResponse => ({

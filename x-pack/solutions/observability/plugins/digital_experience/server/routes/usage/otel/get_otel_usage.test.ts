@@ -31,8 +31,9 @@ describe('getOtelUsage', () => {
 
     await expect(getOtelUsage({ esClient, ...PARAMS })).resolves.toEqual({
       topPages: [],
-      breakdowns: { browsers: [], operatingSystems: [], devices: [] },
+      breakdowns: { pageLoads: 0, browsers: [], operatingSystems: [], devices: [] },
       topClicks: [],
+      totalClicks: 0,
     });
   });
 

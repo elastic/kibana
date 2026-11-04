@@ -20,8 +20,13 @@ const CLICKS: TopClick[] = [
   { cssSelector: '.card', tagName: null, count: 3 },
 ];
 
-const renderPanel = (clicks = CLICKS, isLoading = false) => {
-  return render(<TopClicksPanel clicks={clicks} isLoading={isLoading} />, { wrapper: EuiProvider });
+const renderPanel = (clicks = CLICKS, isLoading = false, totalClicks = 1203) => {
+  return render(
+    <TopClicksPanel clicks={clicks} totalClicks={totalClicks} isLoading={isLoading} />,
+    {
+      wrapper: EuiProvider,
+    }
+  );
 };
 
 beforeEach(() => {
@@ -41,6 +46,12 @@ describe('TopClicksPanel', () => {
     expect(screen.getByText('BUTTON')).toBeInTheDocument();
     expect(screen.getByText('1,200')).toBeInTheDocument();
     expect(screen.getByText('.card')).toBeInTheDocument();
+  });
+
+  it('shares every click, including those outside the top rows', () => {
+    renderPanel([{ cssSelector: '#buy', tagName: null, count: 20 }], false, 200);
+
+    expect(screen.getByText(/10%/)).toBeInTheDocument();
   });
 
   it('shows a spinner while loading', () => {

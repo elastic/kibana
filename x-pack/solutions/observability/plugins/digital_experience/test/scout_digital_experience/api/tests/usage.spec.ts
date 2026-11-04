@@ -22,8 +22,9 @@ const {
 
 const EMPTY_USAGE = {
   topPages: [],
-  breakdowns: { browsers: [], operatingSystems: [], devices: [] },
+  breakdowns: { pageLoads: 0, browsers: [], operatingSystems: [], devices: [] },
   topClicks: [],
+  totalClicks: 0,
 };
 
 const usagePath = (serviceName: string, environment?: string) => {
@@ -46,6 +47,7 @@ apiTest.describe('Digital Experience usage API', { tag: DIGITAL_EXPERIENCE_TAGS 
       expect(usage.topPages).toStrictEqual(OTEL_SHOP_USAGE.topPages);
       expect(usage.breakdowns).toStrictEqual(OTEL_SHOP_USAGE.breakdowns);
       expect(usage.topClicks).toStrictEqual(OTEL_SHOP_USAGE.topClicks);
+      expect(usage.totalClicks).toBe(OTEL_SHOP_USAGE.totalClicks);
     }
   );
 

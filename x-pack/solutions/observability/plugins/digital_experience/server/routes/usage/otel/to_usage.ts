@@ -22,6 +22,7 @@ const toBreakdowns = (logs?: UsageAggregations): Breakdowns => {
   };
 
   return {
+    pageLoads: pageLoads?.doc_count ?? 0,
     browsers: toItems(pageLoads?.browsers.buckets),
     operatingSystems: toItems(pageLoads?.operatingSystems.buckets),
     devices: (pageLoads?.devices.buckets ?? []).map((bucket) => {
@@ -59,5 +60,6 @@ export const toUsage = (logs?: UsageAggregations): ApplicationUsageResponse => {
         };
       }
     ),
+    totalClicks: metrics?.clicks.doc_count ?? 0,
   };
 };

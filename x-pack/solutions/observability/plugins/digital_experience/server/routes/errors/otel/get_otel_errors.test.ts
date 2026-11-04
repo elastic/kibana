@@ -42,7 +42,7 @@ describe('getOtelErrors', () => {
         environments: { buckets: [{ key: 'production' }] },
         environmentNames: { buckets: [{ key: 'staging' }] },
         environmentNotDefined: { doc_count: 1 },
-        inEnvironment: { groups: { buckets: [] } },
+        inEnvironment: { exceptions: { groups: { buckets: [] } } },
       },
     } as never);
 

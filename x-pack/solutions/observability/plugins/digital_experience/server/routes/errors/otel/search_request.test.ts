@@ -26,7 +26,7 @@ describe('errorsSearch', () => {
     expect(request).toMatchObject({ index: 'logs-*.otel-*', size: 0, ignore_unavailable: true });
     expect(filter).toContainEqual({ term: { 'telemetry.sdk.language': 'webjs' } });
     expect(filter).toContainEqual({ term: { 'service.name': 'shop' } });
-    expect(filter).toContainEqual({ term: { event_name: 'exception' } });
+    expect(JSON.stringify(filter)).not.toContain('exception');
   });
 
   it('lists every environment for the picker and filters the groups to the selected one', () => {
@@ -35,10 +35,13 @@ describe('errorsSearch', () => {
     expect(aggs.environments).toBeDefined();
     expect(aggs.environmentNotDefined).toBeDefined();
     expect(JSON.stringify(aggs.inEnvironment.filter)).toContain('production');
+    expect(aggs.inEnvironment.aggs.exceptions.filter.bool.filter).toEqual([
+      { term: { event_name: 'exception' } },
+    ]);
   });
 
   it('groups the errors by type and stack trace, never by message', () => {
-    const { groups } = aggsOf().inEnvironment.aggs;
+    const { groups } = aggsOf().inEnvironment.aggs.exceptions.aggs;
 
     expect(groups.multi_terms).toEqual({
       terms: [
@@ -51,7 +54,7 @@ describe('errorsSearch', () => {
   });
 
   it('gives each group its latest message and last occurrence', () => {
-    const groupAggs = aggsOf().inEnvironment.aggs.groups.aggs;
+    const groupAggs = aggsOf().inEnvironment.aggs.exceptions.aggs.groups.aggs;
 
     expect(groupAggs.message.top_hits).toMatchObject({ size: 1, fields: ['exception.message'] });
     expect(groupAggs.lastSeen).toEqual({ max: { field: '@timestamp' } });

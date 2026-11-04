@@ -16,6 +16,15 @@ import { useTimeRange } from '../../hooks/use_time_range';
 import { useEnvironment } from '../../hooks/use_environment';
 import { useApplicationLinks } from '../../hooks/use_application_links';
 
+const historyReplace = jest.fn();
+jest.mock('react-router-dom', () => {
+  return {
+    ...jest.requireActual('react-router-dom'),
+    useHistory: () => {
+      return { replace: historyReplace };
+    },
+  };
+});
 jest.mock('../../hooks/use_kibana_services');
 jest.mock('../../hooks/use_environment');
 jest.mock('../../breadcrumbs/use_route_breadcrumb');
@@ -64,8 +73,10 @@ const setTimeRange = jest.fn();
 const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: MockAppHeaderProvider });
 
 beforeEach(() => {
+  historyReplace.mockClear();
   jest.mocked(useApplicationLinks).mockReturnValue({
     overviewHref: '/overview-href',
+    overviewPath: '/my-app?source=classic',
     errorsHref: '/errors-href',
     networkHref: '/network-href',
     sessionsHref: () => '/sessions-href',
@@ -239,14 +250,25 @@ describe('ApplicationPage', () => {
     ]);
   });
 
-  it('shows the Overview of a Classic RUM application on the Errors and Network routes', async () => {
+  it.each(['errors', 'network'] as const)(
+    'replaces the %s route of a Classic RUM application with its Overview',
+    (tab) => {
+      useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+      render(<ApplicationPage serviceName="my-app" source="classic" selectedTab={tab} />);
+
+      expect(historyReplace).toHaveBeenCalledWith('/my-app?source=classic');
+      expect(screen.queryByTestId(`${tab}Tab`)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(`digitalExperienceTab-${tab}`)).not.toBeInTheDocument();
+    }
+  );
+
+  it('never redirects an EDOT Browser application', () => {
     useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
 
-    render(<ApplicationPage serviceName="my-app" source="classic" selectedTab="errors" />);
+    render(<ApplicationPage serviceName="my-app" source="otel" selectedTab="errors" />);
 
-    expect(await screen.findByTestId('digitalExperienceOverviewEmpty')).toBeInTheDocument();
-    expect(screen.queryByTestId('errorsTab')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('digitalExperienceTab-errors')).not.toBeInTheDocument();
+    expect(historyReplace).not.toHaveBeenCalled();
   });
 
   it('renders the sessions of the application on the Sessions tab', () => {

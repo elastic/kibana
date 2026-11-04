@@ -17,7 +17,6 @@ import { useEnvironment } from '../../hooks/use_environment';
 import { useLastEnvironments } from '../../hooks/use_last_environments';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { toTimeRangeQuery } from '../../utils/time_range_query';
-import { toMostCommonOrigin } from '../../utils/url_parts';
 import { HttpRequestsPanel } from './components/http_requests_panel';
 import { SlowestResourcesPanel } from './components/slowest_resources_panel';
 
@@ -79,12 +78,7 @@ export function NetworkTab({ serviceName }: { serviceName: string }) {
           <EuiSpacer size="m" />
           <SlowestResourcesPanel
             resources={resources}
-            // The most common origin is the application's own; resources of other origins show their host.
-            pageOrigin={toMostCommonOrigin(
-              resources.map(({ url }) => {
-                return url;
-              })
-            )}
+            pageOrigin={response?.pageOrigin ?? undefined}
             isLoading={isLoading}
           />
         </>

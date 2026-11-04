@@ -44,9 +44,10 @@ export const STAGING_ENVIRONMENT = 'staging';
 export const OTEL_SHOP_USAGE = {
   topPages: [
     { url: 'https://otel-shop.example.com/', pageLoads: 3, loadTimeP75Ms: null },
-    { url: 'https://otel-shop.example.com/products', pageLoads: 1, loadTimeP75Ms: null },
+    { url: 'https://otel-shop.example.com/products', pageLoads: 1, loadTimeP75Ms: 1200 },
   ],
   breakdowns: {
+    pageLoads: 4,
     browsers: [
       { name: 'Chrome', pageLoads: 3 },
       { name: 'Safari', pageLoads: 1 },
@@ -64,6 +65,7 @@ export const OTEL_SHOP_USAGE = {
     { cssSelector: '#add-to-cart', tagName: 'BUTTON', count: 2 },
     { cssSelector: '.nav-link', tagName: 'A', count: 1 },
   ],
+  totalClicks: 3,
 } as const;
 
 /** The Errors tab of `OTEL_APPS.shop` inside `TIME_RANGE`. */
@@ -123,6 +125,7 @@ export const OTEL_SHOP_NETWORK = {
       transferSizeP75Bytes: 4096,
     },
   ],
+  pageOrigin: 'https://otel-shop.example.com',
 } as const;
 
 export const createRole = (feature: KibanaRole['kibana'][number]['feature']): KibanaRole => ({

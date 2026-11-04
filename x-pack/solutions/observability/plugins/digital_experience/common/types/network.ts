@@ -35,8 +35,10 @@ export interface ApplicationNetworkResponse {
   serviceName: string;
   /** Client spans by method and URL, by count, descending; up to `TOP_ROWS`. */
   httpRequests: HttpRequestGroup[];
-  /** Scripts, styles, images and fonts, by p75 duration, descending; up to 50. */
+  /** Scripts, styles, images and fonts, by p75 duration, descending (approximate); up to 50. */
   slowestResources: SlowResource[];
-  /** The environments of the application, whatever the `environment` filter, for the picker. */
+  /** The origin of the most loaded page, `null` without a page load. */
+  pageOrigin: string | null;
+  /** The environments with browser data, whatever the `environment` filter, for the picker. */
   environments: string[];
 }

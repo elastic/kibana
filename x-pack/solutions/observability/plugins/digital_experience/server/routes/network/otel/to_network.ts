@@ -29,7 +29,7 @@ export const toHttpRequests = (aggregations?: HttpRequestsAggregations): HttpReq
 
 /** The slowest resources, in the order of the search (p75 duration, descending). */
 export const toSlowestResources = (aggregations?: ResourcesAggregations): SlowResource[] => {
-  return (aggregations?.inEnvironment.urls.buckets ?? []).map(
+  return (aggregations?.inEnvironment.resources.urls.buckets ?? []).map(
     ({ key: url, doc_count: count, initiatorType, renderBlocking, duration, transferSize }) => {
       return {
         url,
@@ -41,4 +41,17 @@ export const toSlowestResources = (aggregations?: ResourcesAggregations): SlowRe
       };
     }
   );
+};
+
+/** The origin of the most loaded page, `null` without a page load or with an invalid URL. */
+export const toPageOrigin = (aggregations?: ResourcesAggregations): string | null => {
+  const url = firstBucketKey(aggregations?.inEnvironment.pageLoads.topPage);
+  if (!url) {
+    return null;
+  }
+  try {
+    return new URL(url).origin;
+  } catch {
+    return null;
+  }
 };

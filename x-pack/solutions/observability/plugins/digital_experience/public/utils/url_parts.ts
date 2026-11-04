@@ -25,22 +25,3 @@ export const toUrlFileName = (url: string, pageOrigin?: string): string => {
   const fileName = parsed.pathname.split('/').pop() || parsed.pathname;
   return pageOrigin && parsed.origin !== pageOrigin ? `${parsed.host}/…/${fileName}` : fileName;
 };
-
-/** The origin of a URL, e.g. `https://shop.example.com`, `undefined` when it does not parse. */
-export const toUrlOrigin = (url: string): string | undefined => {
-  return parse(url)?.origin;
-};
-
-/** The origin most of the URLs share, e.g. the application's own among its resources. */
-export const toMostCommonOrigin = (urls: string[]): string | undefined => {
-  const counts = new Map<string, number>();
-  urls.forEach((url) => {
-    const origin = toUrlOrigin(url);
-    if (origin) {
-      counts.set(origin, (counts.get(origin) ?? 0) + 1);
-    }
-  });
-  return [...counts.entries()].sort(([, a], [, b]) => {
-    return b - a;
-  })[0]?.[0];
-};

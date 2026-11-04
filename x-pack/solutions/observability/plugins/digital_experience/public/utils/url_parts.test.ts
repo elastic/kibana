@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { toMostCommonOrigin, toUrlFileName, toUrlOrigin } from './url_parts';
+import { toUrlFileName } from './url_parts';
 
 describe('url parts', () => {
   it('names a resource by its file, with its host when it is another origin', () => {
@@ -14,14 +14,5 @@ describe('url parts', () => {
       'cdn.net/…/x.js'
     );
     expect(toUrlFileName('https://shop.example.com/', 'https://shop.example.com')).toBe('/');
-  });
-
-  it('finds the origin of a URL and the one most URLs share', () => {
-    expect(toUrlOrigin('https://shop.example.com/a')).toBe('https://shop.example.com');
-    expect(toUrlOrigin('nope')).toBeUndefined();
-    expect(
-      toMostCommonOrigin(['https://a.com/1', 'https://b.com/1', 'https://b.com/2', 'nope'])
-    ).toBe('https://b.com');
-    expect(toMostCommonOrigin([])).toBeUndefined();
   });
 });

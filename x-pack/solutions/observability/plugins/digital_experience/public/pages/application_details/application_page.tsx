@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { useHistory } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiLoadingLogo, EuiPageSection } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
@@ -150,10 +151,19 @@ export function ApplicationPage({
   selectedTab: ApplicationTabId;
 }) {
   const applicationsHref = useApplicationsHref();
-  const { overviewHref, errorsHref, networkHref, sessionsHref } = useApplicationLinks(
+  const history = useHistory();
+  const { overviewHref, overviewPath, errorsHref, networkHref, sessionsHref } = useApplicationLinks(
     serviceName,
     source
   );
+  // Classic RUM has no Errors or Network tab, so their URLs are replaced by the Overview's.
+  const isUnsupportedTab =
+    source !== APPLICATION_SOURCE.otel && (selectedTab === 'errors' || selectedTab === 'network');
+  useEffect(() => {
+    if (isUnsupportedTab) {
+      history.replace(overviewPath);
+    }
+  }, [history, isUnsupportedTab, overviewPath]);
   const tabHrefs: Record<ApplicationTabId, string> = {
     overview: overviewHref,
     errors: errorsHref,
@@ -183,9 +193,8 @@ export function ApplicationPage({
     );
 
   const renderTab = () => {
-    // A Classic RUM application only has its Overview, whichever tab a link asked for.
-    if (source !== APPLICATION_SOURCE.otel && selectedTab !== 'sessions') {
-      return renderOverview();
+    if (isUnsupportedTab) {
+      return null;
     }
     switch (selectedTab) {
       case 'errors':

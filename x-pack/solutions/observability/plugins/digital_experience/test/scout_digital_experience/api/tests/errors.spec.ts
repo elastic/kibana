@@ -67,6 +67,25 @@ apiTest.describe('Digital Experience errors API', { tag: DIGITAL_EXPERIENCE_TAGS
     }
   );
 
+  apiTest(
+    'lists an environment with browser data but no errors',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+
+      const response = await apiClient.get(applicationTabPath(OTEL_APPS.docs, 'errors'), {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toStrictEqual({
+        serviceName: OTEL_APPS.docs,
+        errors: [],
+        environments: [STAGING_ENVIRONMENT],
+      });
+    }
+  );
+
   apiTest('returns 403 without the APM privilege', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser(DIGITAL_EXPERIENCE_ONLY_ROLE);
 

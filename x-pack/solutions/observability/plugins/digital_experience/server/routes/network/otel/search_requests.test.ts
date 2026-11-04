@@ -15,27 +15,40 @@ interface Aggs {
 }
 
 describe('resourcesSearch', () => {
-  it('searches the resource timings of the application, without the API calls', () => {
+  it('searches every browser log, for the picker to list every environment', () => {
     const request = resourcesSearch(PARAMS);
-    const { filter, must_not: mustNot } = (request.query as Aggs).bool;
+    const { filter } = (request.query as Aggs).bool;
+    const aggs = request.aggs as Aggs;
 
     expect(request).toMatchObject({ index: 'logs-*.otel-*', size: 0 });
     expect(filter).toContainEqual({ term: { 'service.name': 'shop' } });
-    expect(filter).toContainEqual({ term: { event_name: 'browser.resource_timing' } });
-    expect(mustNot).toEqual([
-      { terms: { 'browser.resource_timing.initiator_type': ['fetch', 'xmlhttprequest'] } },
-    ]);
-  });
-
-  it('lists every environment for the picker', () => {
-    const aggs = resourcesSearch(PARAMS).aggs as Aggs;
-
+    expect(JSON.stringify(filter)).not.toContain('browser.resource_timing');
     expect(aggs.environments).toBeDefined();
     expect(aggs.inEnvironment.filter).toEqual({ match_all: {} });
   });
 
+  it('lists the resource timings without the API calls', () => {
+    const { resources } = (resourcesSearch(PARAMS).aggs as Aggs).inEnvironment.aggs;
+
+    expect(resources.filter.bool.filter).toEqual([
+      { term: { event_name: 'browser.resource_timing' } },
+    ]);
+    expect(resources.filter.bool.must_not).toEqual([
+      { terms: { 'browser.resource_timing.initiator_type': ['fetch', 'xmlhttprequest'] } },
+    ]);
+  });
+
+  it('finds the most loaded page, for the page origin', () => {
+    const { pageLoads } = (resourcesSearch(PARAMS).aggs as Aggs).inEnvironment.aggs;
+
+    expect(pageLoads.filter.bool.filter).toEqual([
+      { term: { event_name: 'browser.navigation_timing' } },
+    ]);
+    expect(pageLoads.aggs.topPage.terms).toEqual({ field: 'url.full', size: 1 });
+  });
+
   it('orders the resources by the p75 duration and flags the render-blocking ones', () => {
-    const { urls } = (resourcesSearch(PARAMS).aggs as Aggs).inEnvironment.aggs;
+    const { urls } = (resourcesSearch(PARAMS).aggs as Aggs).inEnvironment.aggs.resources.aggs;
 
     // 50, for the table to page through and filter on the render-blocking ones.
     expect(urls.terms).toEqual({ field: 'url.full', size: 50, order: { 'duration.75': 'desc' } });

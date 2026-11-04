@@ -23,6 +23,8 @@ export type DeviceName = 'mobile' | 'desktop';
 
 /** The page loads by browser, operating system and device type. */
 export interface Breakdowns {
+  /** Every page load, the denominator of each row's share. */
+  pageLoads: number;
   /** By page loads, descending. */
   browsers: BreakdownItem[];
   /** By page loads, descending. */
@@ -49,4 +51,6 @@ export interface ApplicationUsageResponse {
   breakdowns: Breakdowns;
   /** By count, descending. */
   topClicks: TopClick[];
+  /** Every click, the denominator of each row's share. */
+  totalClicks: number;
 }

@@ -53,6 +53,7 @@ describe('getOtelNetwork', () => {
       serviceName: 'shop',
       httpRequests: [],
       slowestResources: [],
+      pageOrigin: null,
       environments: [],
     });
   });

@@ -10,6 +10,7 @@ import { termQuery, termsQuery } from '@kbn/es-query';
 import { DURATION, HTTP_REQUEST_METHOD, OTEL_EVENT_NAME, URL_FULL } from '@kbn/apm-types';
 import { TOP_ROWS } from '../../../../common/top_rows';
 import {
+  EVENT_NAVIGATION_TIMING,
   EVENT_RESOURCE_TIMING,
   OTEL_LOGS_INDEX,
   OTEL_TRACES_INDEX,
@@ -25,6 +26,7 @@ import {
   ENVIRONMENT_FIELDS,
   applicationDocuments,
   byEnvironment,
+  eventCount,
   failedRequests,
   httpRequestDocuments,
   otelSearchDefaults,
@@ -32,16 +34,21 @@ import {
 } from '../../../lib/otel/queries';
 import type { ApplicationSearchParams } from '../../application_tab_route';
 
-/** Resource timings of `fetch` and `XMLHttpRequest` calls, which the traces hold as spans too. */
+/** Resource timings of `fetch` and `XMLHttpRequest` calls. */
 const API_CALL_INITIATOR_TYPES = ['fetch', 'xmlhttprequest'];
 
 /** The resources the Network tab lists, slowest first, for its table to page and filter. */
 export const SLOWEST_RESOURCES_ROWS = 50;
 
-/**
- * The slowest resources of one application, and every environment for the picker, leaving out API
- * calls since the HTTP requests list them from the traces.
- */
+// API calls are left out: the HTTP requests list them from the traces.
+const listedResources = {
+  bool: {
+    filter: termQuery(OTEL_EVENT_NAME, EVENT_RESOURCE_TIMING),
+    must_not: termsQuery(RESOURCE_TIMING_INITIATOR_TYPE, API_CALL_INITIATOR_TYPES),
+  },
+};
+
+/** One application's slowest resources, most loaded page and environments with browser data. */
 export const resourcesSearch = ({
   environment,
   ...application
@@ -50,35 +57,41 @@ export const resourcesSearch = ({
     ...otelSearchDefaults(OTEL_LOGS_INDEX),
     query: {
       bool: {
-        filter: [
-          ...applicationDocuments(application),
-          ...termQuery(OTEL_EVENT_NAME, EVENT_RESOURCE_TIMING),
-        ],
-        must_not: termsQuery(RESOURCE_TIMING_INITIATOR_TYPE, API_CALL_INITIATOR_TYPES),
+        filter: applicationDocuments(application),
       },
     },
     aggs: byEnvironment(environment, {
-      urls: {
-        terms: {
-          field: URL_FULL,
-          size: SLOWEST_RESOURCES_ROWS,
-          order: byP75Descending('duration'),
-        },
+      resources: {
+        filter: listedResources,
         aggs: {
-          duration: p75Of(RESOURCE_TIMING_DURATION),
-          transferSize: p75Of(RESOURCE_TIMING_TRANSFER_SIZE),
-          initiatorType: { terms: { field: RESOURCE_TIMING_INITIATOR_TYPE, size: 1 } },
-          renderBlocking: {
-            filter: {
-              bool: {
-                filter: termQuery(
-                  RESOURCE_TIMING_RENDER_BLOCKING_STATUS,
-                  RENDER_BLOCKING_STATUS_BLOCKING
-                ),
+          urls: {
+            terms: {
+              field: URL_FULL,
+              size: SLOWEST_RESOURCES_ROWS,
+              // Approximate: shards prune URLs before their percentiles are merged.
+              order: byP75Descending('duration'),
+            },
+            aggs: {
+              duration: p75Of(RESOURCE_TIMING_DURATION),
+              transferSize: p75Of(RESOURCE_TIMING_TRANSFER_SIZE),
+              initiatorType: { terms: { field: RESOURCE_TIMING_INITIATOR_TYPE, size: 1 } },
+              renderBlocking: {
+                filter: {
+                  bool: {
+                    filter: termQuery(
+                      RESOURCE_TIMING_RENDER_BLOCKING_STATUS,
+                      RENDER_BLOCKING_STATUS_BLOCKING
+                    ),
+                  },
+                },
               },
             },
           },
         },
+      },
+      pageLoads: {
+        ...eventCount(EVENT_NAVIGATION_TIMING),
+        aggs: { topPage: { terms: { field: URL_FULL, size: 1 } } },
       },
     }),
   };

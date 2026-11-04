@@ -25,10 +25,15 @@ const EMPTY_MESSAGE = i18n.translate('xpack.digitalExperience.overview.topClicks
 });
 
 /** The elements users clicked the most, by CSS selector. */
-export function TopClicksPanel({ clicks, isLoading }: { clicks: TopClick[]; isLoading: boolean }) {
-  const total = clicks.reduce((sum, { count }) => {
-    return sum + count;
-  }, 0);
+export function TopClicksPanel({
+  clicks,
+  totalClicks,
+  isLoading,
+}: {
+  clicks: TopClick[];
+  totalClicks: number;
+  isLoading: boolean;
+}) {
   const items = clicks.map(({ cssSelector, tagName, count }) => {
     return {
       key: cssSelector,
@@ -58,7 +63,7 @@ export function TopClicksPanel({ clicks, isLoading }: { clicks: TopClick[]; isLo
       showInstrumentationDocs
       data-test-subj="digitalExperienceOverviewTopClicks"
     >
-      <BarList items={items} total={total} aria-label={TITLE} />
+      <BarList items={items} total={totalClicks} aria-label={TITLE} />
     </DataPanel>
   );
 }

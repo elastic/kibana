@@ -15,7 +15,7 @@ import type { ApplicationSearchParams } from '../../application_tab_route';
 import { NETWORK_SEARCH_SPAN_NAME } from '../constants';
 import { httpRequestsSearch, resourcesSearch } from './search_requests';
 import type { HttpRequestsAggregations, ResourcesAggregations } from './search_responses';
-import { toHttpRequests, toSlowestResources } from './to_network';
+import { toHttpRequests, toPageOrigin, toSlowestResources } from './to_network';
 
 /** The HTTP requests and slowest resources of one EDOT Browser application, for its Network tab. */
 export const getOtelNetwork = ({
@@ -34,6 +34,7 @@ export const getOtelNetwork = ({
       serviceName: searchParams.serviceName,
       httpRequests: toHttpRequests(requests),
       slowestResources: toSlowestResources(resources),
+      pageOrigin: toPageOrigin(resources),
       environments: sortEnvironments(pickerEnvironments(resources)),
     };
   });

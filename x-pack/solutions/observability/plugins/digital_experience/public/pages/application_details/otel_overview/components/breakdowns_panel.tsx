@@ -50,15 +50,15 @@ const sessionsLinkLabel = (name: string) => {
 function Breakdown({
   label,
   items,
+  total,
   'data-test-subj': dataTestSubj,
 }: {
   label: string;
   items: BarListItem[];
+  /** The denominator of each row's share. */
+  total: number;
   'data-test-subj': string;
 }) {
-  const total = items.reduce((sum, { value }) => {
-    return sum + value;
-  }, 0);
   return (
     <section data-test-subj={dataTestSubj}>
       <EuiTitle size="xxs">
@@ -81,7 +81,7 @@ export function BreakdownsPanel({
   /** The sessions of the application, narrowed by the given filters. */
   sessionsHref: (query: SessionsListUrlQuery) => string;
 }) {
-  const { browsers, operatingSystems, devices } = breakdowns;
+  const { pageLoads: totalPageLoads, browsers, operatingSystems, devices } = breakdowns;
 
   const toLinkedItems = (
     items: Breakdowns['browsers'],
@@ -131,6 +131,7 @@ export function BreakdownsPanel({
           'browser',
           APPLICATION_OVERVIEW_EBT_ELEMENTS.BROWSER_SESSIONS_LINK
         )}
+        total={totalPageLoads}
         data-test-subj="digitalExperienceOverviewBrowsers"
       />
       <EuiSpacer size="m" />
@@ -141,12 +142,14 @@ export function BreakdownsPanel({
           'os',
           APPLICATION_OVERVIEW_EBT_ELEMENTS.OS_SESSIONS_LINK
         )}
+        total={totalPageLoads}
         data-test-subj="digitalExperienceOverviewOperatingSystems"
       />
       <EuiSpacer size="m" />
       <Breakdown
         label={DEVICE_LABEL}
         items={deviceItems}
+        total={totalPageLoads}
         data-test-subj="digitalExperienceOverviewDevices"
       />
     </DataPanel>
