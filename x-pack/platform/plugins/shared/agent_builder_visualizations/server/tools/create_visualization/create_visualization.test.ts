@@ -14,7 +14,7 @@ import {
 import {
   buildLensConfig,
   buildVegaConfig,
-  generateVisualizationEsql,
+  generateCustomContentEsql,
   selectDefaultTimeRange,
 } from '@kbn/agent-builder-visualizations-server';
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
@@ -23,7 +23,7 @@ import { createVisualizationTool } from './create_visualization';
 jest.mock('@kbn/agent-builder-visualizations-server', () => ({
   buildLensConfig: jest.fn(),
   buildVegaConfig: jest.fn(),
-  generateVisualizationEsql: jest.fn(),
+  generateCustomContentEsql: jest.fn(),
   selectDefaultTimeRange: jest.fn(),
 }));
 
@@ -34,7 +34,7 @@ jest.mock('@kbn/custom-content-server', () => ({
 const mockBuildLens = buildLensConfig as jest.Mock;
 const mockBuildVega = buildVegaConfig as jest.Mock;
 const mockSelectDefaultTimeRange = selectDefaultTimeRange as jest.Mock;
-const mockGenerateEsql = generateVisualizationEsql as jest.Mock;
+const mockGenerateEsql = generateCustomContentEsql as jest.Mock;
 const mockCreateTemplateResolver = createCustomContentTemplateResolver as jest.Mock;
 const mockResolveTemplate = jest.fn();
 
@@ -63,8 +63,9 @@ const lensTarget = (chartType: SupportedChartType = SupportedChartType.XY) => ({
   chartType,
 });
 const vegaTarget = { type: 'vega' as const };
-const customContentTarget = (rest: { esql?: string | null; has_data?: boolean | null } = {}) => ({
+const customContentTarget = (rest: { esql?: string | null; has_data?: boolean } = {}) => ({
   type: 'custom_content' as const,
+  has_data: true,
   ...rest,
 });
 const attachmentTarget = (
@@ -73,6 +74,7 @@ const attachmentTarget = (
     chartType?: SupportedChartType;
     esql?: string | null;
     has_data?: boolean | null;
+    regenerate_esql?: boolean | null;
   } = {}
 ) => ({ type: 'attachment' as const, attachment_id: attachmentId, ...rest });
 
@@ -128,6 +130,26 @@ describe('createVisualizationTool schema', () => {
     ).toBe(true);
   });
 
+  it('requires a new custom content visualization to state has_data, with no default', () => {
+    const { has_data: hasData, ...withoutHasData } = customContentTarget();
+
+    expect(
+      schema.safeParse({ query: 'a status board per host', target: withoutHasData }).success
+    ).toBe(false);
+    expect(
+      schema.safeParse({
+        query: 'a banner',
+        target: { ...withoutHasData, has_data: null },
+      }).success
+    ).toBe(false);
+    expect(
+      schema.safeParse({
+        query: 'a banner',
+        target: customContentTarget({ has_data: false }),
+      }).success
+    ).toBe(true);
+  });
+
   it('accepts leftover esql: null on every target and treats it as omitted', () => {
     const lens = schema.safeParse({
       query: 'errors over time',
@@ -170,6 +192,24 @@ describe('createVisualizationTool schema', () => {
     expect(lens.success).toBe(true);
     if (lens.success) {
       expect(lens.data.target).not.toHaveProperty('has_data');
+    }
+  });
+
+  it('accepts regenerate_esql only on attachment targets', () => {
+    expect(
+      schema.safeParse({
+        query: 'also split by os',
+        target: attachmentTarget('existing', { regenerate_esql: true }),
+      }).success
+    ).toBe(true);
+
+    const customContent = schema.safeParse({
+      query: 'a status board',
+      target: { ...customContentTarget(), regenerate_esql: true },
+    });
+    expect(customContent.success).toBe(true);
+    if (customContent.success) {
+      expect(customContent.data.target).not.toHaveProperty('regenerate_esql');
     }
   });
 
@@ -289,7 +329,7 @@ describe('createVisualizationTool handler', () => {
       to: 'now',
       mode: 'relative',
     });
-    mockGenerateEsql.mockResolvedValue({ query: 'FROM logs | STATS count() BY host' });
+    mockGenerateEsql.mockResolvedValue('FROM logs | STATS count() BY host');
     mockResolveTemplate.mockResolvedValue({
       template: '<div>{{ row["host"].value }}</div>',
       height: 420,
@@ -748,7 +788,11 @@ describe('createVisualizationTool handler', () => {
 
     // Data-free is a request, not what you get when a query cannot be generated.
     it('fails rather than falling back to a data-free panel when query generation fails', async () => {
-      mockGenerateEsql.mockResolvedValue({ error: 'no suitable index' });
+      mockGenerateEsql.mockRejectedValue(
+        new Error(
+          'Could not generate an ES|QL query for this panel: no suitable index. Pass a hint.'
+        )
+      );
 
       const { result } = await runHandler({
         query: 'a status board per host',
@@ -894,6 +938,66 @@ describe('createVisualizationTool handler', () => {
         expect.objectContaining({ esqlQuery: undefined, hasExistingQuery: true })
       );
       expect(result.results[0].data.esql).toBe('FROM logs | STATS count() BY host');
+    });
+
+    it('regenerates the stored query when an update passes regenerate_esql: true', async () => {
+      mockGenerateEsql.mockResolvedValue('FROM logs | STATS count() BY host, os');
+
+      const { result } = await runHandler(
+        {
+          query: 'also split by operating system',
+          index: 'logs',
+          target: attachmentTarget('att-1', { regenerate_esql: true }),
+        },
+        { attachments: dataAttachment() }
+      );
+
+      expect(mockGenerateEsql).toHaveBeenCalledWith(
+        expect.objectContaining({
+          nlQuery: 'also split by operating system',
+          index: 'logs',
+          existingQueries: ['FROM logs | STATS count() BY host'],
+        })
+      );
+      expect(mockResolveTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esqlQuery: 'FROM logs | STATS count() BY host, os',
+          existingTemplate: '<div>old</div>',
+          hasExistingQuery: false,
+        })
+      );
+      expect(result.results[0].data.esql).toBe('FROM logs | STATS count() BY host, os');
+    });
+
+    it('fails instead of silently dropping the query when regenerate_esql meets has_data: false', async () => {
+      const { result } = await runHandler(
+        {
+          query: 'also split by operating system',
+          target: attachmentTarget('att-1', { regenerate_esql: true, has_data: false }),
+        },
+        { attachments: dataAttachment() }
+      );
+
+      const [{ type, data }] = result.results;
+      expect(type).toBe(ToolResultType.error);
+      expect(data.message).toContain('regenerate_esql');
+      expect(mockGenerateEsql).not.toHaveBeenCalled();
+      expect(mockResolveTemplate).not.toHaveBeenCalled();
+    });
+
+    it('lets a supplied esql win over regenerate_esql', async () => {
+      await runHandler(
+        {
+          query: 'use my query',
+          target: attachmentTarget('att-1', {
+            esql: 'FROM logs | STATS errors = COUNT() BY host',
+            regenerate_esql: true,
+          }),
+        },
+        { attachments: dataAttachment() }
+      );
+
+      expect(mockGenerateEsql).not.toHaveBeenCalled();
     });
 
     it('re-samples when an update supplies a different esql', async () => {

@@ -81,6 +81,38 @@ describe('suggestionsApi', () => {
     expect(suggestions?.length).toEqual(0);
   });
 
+  test('passes each visualization its own default overrides', async () => {
+    const dataView = { id: 'index1' } as unknown as DataView;
+    const xyVis = createMockVisualization('lnsXY');
+    const otherVis = createMockVisualization('testVis');
+    const visualizationMap = { lnsXY: xyVis, testVis: otherVis };
+    datasourceMap.textBased.getDatasourceSuggestionsForVisualizeField.mockReturnValue([
+      generateSuggestion(),
+    ]);
+    const context = {
+      dataViewSpec: { id: 'index1', title: 'index1', name: 'DataView' },
+      fieldName: '',
+      textBasedColumns: textBasedQueryColumns,
+      query: { esql: 'FROM "index1" | keep field1, field2' },
+    };
+    const legend = { isVisible: true, position: 'right' as const };
+
+    suggestionsApi({
+      context,
+      dataView,
+      datasourceMap,
+      visualizationMap,
+      defaultVisualizationOverrides: { lnsXY: { legend } },
+    });
+
+    expect(xyVis.getSuggestions).toHaveBeenCalledWith(
+      expect.objectContaining({ defaultOverrides: { legend } })
+    );
+    expect(otherVis.getSuggestions).toHaveBeenCalledWith(
+      expect.objectContaining({ defaultOverrides: undefined })
+    );
+  });
+
   test('filters out approximation columns from textBasedColumns before passing to datasource', async () => {
     const dataView = { id: 'index1' } as unknown as DataView;
     const visualizationMap = {

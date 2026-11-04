@@ -9,7 +9,7 @@ import { isEmpty, isEqual, keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
-import type { BrowserFields } from '@kbn/timelines-plugin/common';
+import type { BrowserFields } from '@kbn/securitysolution-timeline-common';
 import type { FieldSpec, IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { buildBrowserFields } from '../../../data_view_manager/utils/build_browser_fields';

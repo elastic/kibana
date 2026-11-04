@@ -2485,12 +2485,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         });
 
         logger.debug(`saved object update document for package policy [${id}] was built`);
-      } catch (error) {
-        logger.debug(
-          () =>
-            `Preparing update to package policy [${
-              packagePolicyUpdate.id
-            }] failed:\n${JSON.stringify(error)}`
+      } catch (caughtError) {
+        const error = caughtError instanceof Error ? caughtError : new Error(String(caughtError));
+        logger.warn(
+          `Preparing update to package policy [${packagePolicyUpdate.id}] failed: [${error.name}] ${error.message}`
         );
 
         failedPolicies.push({
@@ -2655,6 +2653,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           (failedPolicy) => failedPolicy.packagePolicy.id === policy.id
         );
         if (!hasAlreadyFailed) {
+          logger.warn(
+            `Saving update to package policy [${policy.id}] failed: ${policy.error.message}`
+          );
           failedPolicies.push({
             packagePolicy: packagePolicyUpdates.find((p) => p.id === policy.id)!,
             error: policy.error,
@@ -3216,7 +3217,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                 } else if (externalCallbackType === 'packagePolicyUpdate') {
                   // id is stripped by the schema validation below; re-inject it so every
                   // callback in the chain receives it regardless of registration order.
-                  const packagePolicyId = (updatedNewData as UpdatePackagePolicyWithId).id;
+                  // onboarding_deployment_id is set by Fleet only, so the update schema rejects
+                  // it; internal updates such as package upgrades pass the stored value, which
+                  // is kept as is.
+                  const { id: packagePolicyId, onboarding_deployment_id: onboardingDeploymentId } =
+                    updatedNewData as UpdatePackagePolicyWithId &
+                      Pick<PackagePolicy, 'onboarding_deployment_id'>;
                   thisCallbackResponse = await (callback as PutPackagePolicyUpdateCallback)(
                     updatedNewData as UpdatePackagePolicyWithId,
                     soClient,
@@ -3235,6 +3241,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                       'created_at',
                       'created_by',
                       'elasticsearch',
+                      'onboarding_deployment_id',
                     ]),
                     inputs: thisCallbackResponse.inputs.map((input) =>
                       omit(input, ['compiled_input'])
@@ -3243,6 +3250,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                   updatedNewData = {
                     ...UpdatePackagePolicySchema.validate(omitted),
                     id: packagePolicyId,
+                    ...(onboardingDeploymentId !== undefined && {
+                      onboarding_deployment_id: onboardingDeploymentId,
+                    }),
                   };
                 } else {
                   thisCallbackResponse = await (callback as PostPackagePolicyCreateCallback)(
@@ -3661,6 +3671,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               inputs_for_versions: previousRevision?.attributes.inputs_for_versions ?? {},
               revision: (policy?.attributes.revision ?? 0) + 1, // Bump revision
               latest_revision: true,
+              // Ownership may have changed since the snapshot was taken; keep the current value.
+              ...(previousRevision.attributes.onboarding_deployment_id !== undefined && {
+                onboarding_deployment_id: policy.attributes.onboarding_deployment_id ?? null,
+              }),
             },
           });
         }

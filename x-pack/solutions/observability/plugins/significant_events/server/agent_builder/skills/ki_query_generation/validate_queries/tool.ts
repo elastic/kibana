@@ -31,7 +31,7 @@ import { getRequestAbortSignal } from '../../../../routes/utils/get_request_abor
 import { sourceToAnalysisTarget } from '../../../../lib/significant_events/source_to_analysis_target';
 import {
   loadSourceCatalog,
-  resolveSourcesBySlug,
+  resolveSourcesBySlugOrId,
   toSourceRef,
 } from '../../../utils/resolve_source_slugs';
 
@@ -134,7 +134,7 @@ export const createValidateQueriesTool = ({
 
         const scopedClients = await getScopedClients({ request: context.request });
         const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
-        const [source] = resolveSourcesBySlug(catalog, [slug]);
+        const [source] = resolveSourcesBySlugOrId(catalog, [slug]);
         // Stored features and queries are read as the internal user, and the results tell whether a
         // feature or a query exists, so check the caller's own data access first.
         await scopedClients.sourcesClient.assertReadable(source.id);

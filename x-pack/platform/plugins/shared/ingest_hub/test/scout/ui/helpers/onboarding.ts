@@ -111,6 +111,8 @@ export async function navigateToOnboardingStep(
     /** Data format to seed. Omitted leaves it unset, so the solution default applies. */
     dataFormat?: 'ecs' | 'otel';
     globalRegion?: string;
+    /** Global namespace to seed. Omitted leaves it empty. */
+    namespace?: string;
     /** Integration name to seed. Omitted leaves it for the app to prefill (`aws-<n>`). */
     integrationName?: string;
     serviceVars?: Record<string, ServiceVars>;
@@ -137,6 +139,7 @@ export async function navigateToOnboardingStep(
     selectedServiceIds,
     dataFormat,
     globalRegion = 'us-east-1',
+    namespace,
     integrationName,
     serviceVars = {},
     instances,
@@ -153,6 +156,7 @@ export async function navigateToOnboardingStep(
       ids,
       format,
       region,
+      globalNamespace,
       name,
       vars,
       insts,
@@ -168,6 +172,7 @@ export async function navigateToOnboardingStep(
       ids: string[];
       format: 'ecs' | 'otel' | undefined;
       region: string;
+      globalNamespace: string | undefined;
       name: string | undefined;
       vars: Record<string, ServiceVars>;
       insts: unknown[] | undefined;
@@ -197,6 +202,7 @@ export async function navigateToOnboardingStep(
       );
       const settingsPayload: Record<string, unknown> = { globalRegion: region, serviceVars: vars };
       if (name !== undefined) settingsPayload.integrationName = name;
+      if (globalNamespace !== undefined) settingsPayload.namespace = globalNamespace;
       if (insts !== undefined) settingsPayload.instances = insts;
       sessionStorage.setItem(settingsKey, JSON.stringify(settingsPayload));
       if (ecfStep !== undefined) {
@@ -220,6 +226,7 @@ export async function navigateToOnboardingStep(
       ids: selectedServiceIds,
       format: dataFormat,
       region: globalRegion,
+      globalNamespace: namespace,
       name: integrationName,
       vars: serviceVars,
       insts: instances,

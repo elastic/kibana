@@ -17,6 +17,8 @@
   ],
   "exclude": ["target/**/*", "test/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
   "kbn_references": [
+    "@kbn/data-source",
+    "@kbn/securitysolution-alerts-page-url",
     "@kbn/setup-node-env",
     "@kbn/core",
     "@kbn/data-plugin",
@@ -61,6 +63,7 @@
     "@kbn/std",
     "@kbn/rule-data-utils",
     "@kbn/securitysolution-t-grid",
+    "@kbn/securitysolution-timeline-common",
     "@kbn/rule-registry-plugin",
     "@kbn/securitysolution-utils",
     "@kbn/securitysolution-list-constants",

@@ -24,6 +24,15 @@ export interface CloudOnboardingEcfStack {
   stackArn?: string;
   /** Service IDs active when the stack was last launched or updated. Used to detect staleness on session resume. */
   serviceIds?: string[];
+  /** Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated. Used to detect settings drift on session resume. */
+  serviceConfigs?: CloudOnboardingEcfServiceConfig[];
+}
+
+/** The per-service values that feed an ECF stack's parameters. */
+export interface CloudOnboardingEcfServiceConfig {
+  serviceId: string;
+  bucketArns: string[];
+  logGroupArns: string[];
 }
 
 export type DeploymentMethod = 'managed_integration' | 'ecf' | 'agent_based';
@@ -38,6 +47,20 @@ export type CloudOnboardingDeploymentAuthMethod =
 export type CloudOnboardingDeploymentStatus = 'pending' | 'deploying' | 'succeeded' | 'failed';
 
 export type CloudOnboardingDeploymentServiceVars = Record<string, unknown>;
+
+/**
+ * One row of the Service settings step as of the last deploy: an original service
+ * (`instanceId === serviceId`) or a duplicate of one (`<serviceId>__dup-<n>`). Not the same as an
+ * instance on Installed integrations, which is the whole onboarding session (deployment).
+ */
+export interface CloudOnboardingInstance {
+  instanceId: string;
+  /** The service this instance belongs to. Policy-template key; unchanged for duplicates. */
+  serviceId: string;
+  /** Display name. */
+  name: string;
+  isDuplicate: boolean;
+}
 
 export interface CloudOnboardingDeployment {
   id: string;
@@ -58,6 +81,18 @@ export interface CloudOnboardingDeployment {
   integrationName?: string;
   /** Integration description as entered in the Service settings step. Set on every package policy created by the deploy. */
   description?: string;
+  /** Global data stream namespace from the Service settings step. Absent or empty means each policy inherits its agent policy's namespace. */
+  namespace?: string;
+  /** The service instances (originals and duplicates) of the last deploy. Hydrated into the Service settings step on resume so duplicates and their names come back. Absent on onboardings saved before this field existed. */
+  instances?: CloudOnboardingInstance[];
+  /** Names of the integration packages this deployment covers (e.g. 'aws', 'aws_bedrock'). Queryable, so a package can list the deployments that touched it. Absent on deployments saved before it existed. */
+  packageNames?: string[];
+  /** Display name of each service as shown in the onboarding flow, by service id. Written by the onboarding app so the list can show the names without knowing its service catalog. */
+  serviceNames?: Record<string, string>;
+  /** Username of the user who last wrote the deployment. Set by the server. */
+  updatedBy?: string;
+  /** ISO timestamp of the last write. Set by the server from saved object metadata. */
+  updatedAt?: string;
   /** Data format selected in the Services step. Used to hydrate the services step on resume so service filtering is consistent. */
   dataFormat?: 'ecs' | 'otel';
   packagePolicyIds?: string[];
@@ -88,18 +123,47 @@ export type CreateCloudOnboardingDeploymentInput = Omit<
   | 'deploymentName'
   | 'packagePolicyIds'
   | 'apiKeyId'
+  | 'updatedBy'
+  | 'updatedAt'
 >;
 
 export type UpdateCloudOnboardingDeploymentInput = Partial<
   Omit<
     CloudOnboardingDeployment,
-    'id' | 'provider' | 'connectorId' | 'globalRegion' | 'authMethod' | 'description'
+    | 'id'
+    | 'provider'
+    | 'connectorId'
+    | 'globalRegion'
+    | 'authMethod'
+    | 'description'
+    | 'namespace'
+    | 'updatedBy'
+    | 'updatedAt'
   >
 > & {
   /** Set to null to clear the description. */
   description?: string | null;
+  /** Set to null to clear the namespace. */
+  namespace?: string | null;
   /** Set to null to clear the connector association (e.g. on MI→ECF transition). */
   connectorId?: string | null;
   /** Set to null to clear the auth method (e.g. on MI→ECF transition). */
   authMethod?: CloudOnboardingDeploymentAuthMethod | null;
 };
+
+/** A package a deployment installed policies for, with the version those policies run. */
+export interface CloudOnboardingDeploymentPackage {
+  name: string;
+  title: string;
+  version: string;
+}
+
+/** A deployment as returned by the list API, with values resolved from its policies. */
+export interface CloudOnboardingDeploymentListItem extends CloudOnboardingDeployment {
+  /** Packages of the deployment's package policies with their deployed versions. Empty for ECF-only deployments, which have no policies. */
+  packages: CloudOnboardingDeploymentPackage[];
+  /** Service IDs by the delivery mechanism that deploys them. */
+  servicesByMethod: Partial<Record<DeploymentMethod, string[]>>;
+  /** Agents enrolled in the deployment's agent policies. Left out without permission to read agents. */
+  agentCount?: number;
+}

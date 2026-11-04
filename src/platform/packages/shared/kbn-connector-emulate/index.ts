@@ -55,8 +55,27 @@ export type {
   Responder,
   Violation,
 } from './src/contract/types';
+export {
+  convertMarkdownReference,
+  isMarkdownReferenceFormat,
+  MARKDOWN_REFERENCE_FORMATS,
+  readLlmsIndex,
+} from './src/markdown';
+export type {
+  MarkdownReferenceFormat,
+  MarkdownReferenceOptions,
+  MarkdownReferencePage,
+} from './src/markdown';
 export { applyOverlay, InvalidOverlayError, JsonPathError } from './src/overlay';
 export type { OverlayAction, OverlayDocument, OverlayFinding, OverlayResult } from './src/overlay';
+export {
+  AWS_JSON_EXTENSION,
+  convertSmithy,
+  isAwsJsonDocument,
+  isSmithyModel,
+  toAwsJsonDocument,
+} from './src/smithy';
+export type { AwsJsonServiceInfo, ConvertSmithyOptions, SmithyModel } from './src/smithy';
 export {
   convertDiscovery,
   convertSwagger2,

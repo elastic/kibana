@@ -1,0 +1,2084 @@
+{
+  "components": {
+    "responses": {
+      "TooManyRequestsResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/APIErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "APIErrorResponse": {
+        "properties": {
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "errors"
+        ],
+        "type": "object"
+      },
+      "Creator": {
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "handle": {
+            "type": "string"
+          },
+          "name": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      },
+      "Event": {
+        "properties": {
+          "alert_type": {
+            "$ref": "#/components/schemas/EventAlertType"
+          },
+          "date_happened": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "device_name": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "id_str": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "payload": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/EventPriority"
+          },
+          "source_type_name": {
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "text": {
+            "maxLength": 4000,
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EventAlertType": {
+        "enum": [
+          "error",
+          "warning",
+          "info",
+          "success",
+          "user_update",
+          "recommendation",
+          "snapshot"
+        ],
+        "type": "string"
+      },
+      "EventCreateRequest": {
+        "properties": {
+          "aggregation_key": {
+            "maxLength": 100,
+            "type": "string"
+          },
+          "alert_type": {
+            "$ref": "#/components/schemas/EventAlertType"
+          },
+          "date_happened": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "device_name": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/EventPriority"
+          },
+          "related_event_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "source_type_name": {
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "text": {
+            "maxLength": 4000,
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "text"
+        ],
+        "type": "object"
+      },
+      "EventCreateResponse": {
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/Event"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EventPriority": {
+        "enum": [
+          "normal",
+          "low"
+        ],
+        "nullable": true,
+        "type": "string"
+      },
+      "MatchingDowntime": {
+        "properties": {
+          "end": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "scope": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "start": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "MetricsQueryMetadata": {
+        "properties": {
+          "aggr": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "display_name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "end": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "expression": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "interval": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "length": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "metric": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "pointlist": {
+            "items": {
+              "$ref": "#/components/schemas/Point"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "query_index": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "scope": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "start": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "tag_set": {
+            "items": {
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "unit": {
+            "items": {
+              "$ref": "#/components/schemas/MetricsQueryUnit"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "readOnly": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "MetricsQueryResponse": {
+        "properties": {
+          "error": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "from_date": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "group_by": {
+            "items": {
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "message": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "query": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "res_type": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "series": {
+            "items": {
+              "$ref": "#/components/schemas/MetricsQueryMetadata"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "status": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "to_date": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "MetricsQueryUnit": {
+        "nullable": true,
+        "properties": {
+          "family": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "plural": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "scale_factor": {
+            "format": "double",
+            "readOnly": true,
+            "type": "number"
+          },
+          "short_name": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Monitor": {
+        "properties": {
+          "assets": {
+            "items": {
+              "$ref": "#/components/schemas/MonitorAsset"
+            },
+            "type": "array"
+          },
+          "created": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/Creator"
+          },
+          "deleted": {
+            "format": "date-time",
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "draft_status": {
+            "$ref": "#/components/schemas/MonitorDraftStatus"
+          },
+          "id": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "matching_downtimes": {
+            "items": {
+              "$ref": "#/components/schemas/MatchingDowntime"
+            },
+            "type": "array"
+          },
+          "message": {
+            "type": "string"
+          },
+          "modified": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "multi": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "options": {
+            "$ref": "#/components/schemas/MonitorOptions"
+          },
+          "overall_state": {
+            "$ref": "#/components/schemas/MonitorOverallStates"
+          },
+          "priority": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "query": {
+            "type": "string"
+          },
+          "restricted_roles": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "state": {
+            "$ref": "#/components/schemas/MonitorState"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "type": {
+            "$ref": "#/components/schemas/MonitorType"
+          }
+        },
+        "required": [
+          "type",
+          "query"
+        ],
+        "type": "object"
+      },
+      "MonitorAsset": {
+        "properties": {
+          "category": {
+            "$ref": "#/components/schemas/MonitorAssetCategory"
+          },
+          "name": {
+            "type": "string"
+          },
+          "resource_key": {
+            "type": "string"
+          },
+          "resource_type": {
+            "$ref": "#/components/schemas/MonitorAssetResourceType"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "url",
+          "category"
+        ],
+        "type": "object"
+      },
+      "MonitorAssetCategory": {
+        "enum": [
+          "runbook"
+        ],
+        "type": "string"
+      },
+      "MonitorAssetResourceType": {
+        "enum": [
+          "notebook"
+        ],
+        "type": "string"
+      },
+      "MonitorDeviceID": {
+        "enum": [
+          "laptop_large",
+          "tablet",
+          "mobile_small",
+          "chrome.laptop_large",
+          "chrome.tablet",
+          "chrome.mobile_small",
+          "firefox.laptop_large",
+          "firefox.tablet",
+          "firefox.mobile_small"
+        ],
+        "type": "string"
+      },
+      "MonitorDraftStatus": {
+        "default": "published",
+        "enum": [
+          "draft",
+          "published"
+        ],
+        "type": "string"
+      },
+      "MonitorFormulaAndFunctionAggregateAugmentQuery": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionEventQueryDefinition"
+          },
+          {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionReferenceTableQueryDefinition"
+          }
+        ]
+      },
+      "MonitorFormulaAndFunctionAggregateAugmentedDataSource": {
+        "enum": [
+          "aggregate_augmented_query"
+        ],
+        "type": "string"
+      },
+      "MonitorFormulaAndFunctionAggregateAugmentedQueryDefinition": {
+        "additionalProperties": false,
+        "properties": {
+          "augment_query": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionAggregateAugmentQuery"
+          },
+          "base_query": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionAggregateBaseQuery"
+          },
+          "compute": {
+            "items": {
+              "$ref": "#/components/schemas/MonitorFormulaAndFunctionEventQueryDefinitionCompute"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "data_source": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionAggregateAugmentedDataSource"
+          },
+          "group_by": {
+            "items": {
+              "$ref": "#/components/schemas/MonitorFormulaAndFunctionEventQueryGroupBy"
+            },
+            "type": "array"
+          },
+          "join_condition": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionAggregateQueryJoinCondition"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "data_source",
+          "base_query",
+          "augment_query",
+          "join_condition",
+          "compute",
+          "group_by"
+        ],
+        "type": "object"
+      },
+      "MonitorFormulaAndFunctionAggregateBaseQuery": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionEventQueryDefinition"
+          },
+          {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionMetricsQueryDefinition"
+          }
+        ]
+      },
+      "MonitorFormulaAndFunctionAggregateFilterQuery": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionEventQueryDefinition"
+          },
+          {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionReferenceTableQueryDefinition"
+          }
+        ]
+      },
+      "MonitorFormulaAndFunctionAggregateFilteredDataSource": {
+        "enum": [
+          "aggregate_filtered_query"
+        ],
+        "type": "string"
+      },
+      "MonitorFormulaAndFunctionAggregateFilteredQueryDefinition": {
+        "additionalProperties": false,
+        "properties": {
+          "base_query": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionAggregateBaseQuery"
+          },
+          "compute": {
+            "items": {
+              "$ref": "#/components/schemas/MonitorFormulaAndFunctionEventQueryDefinitionCompute"
+            },
+            "type": "array"
+          },
+          "data_source": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionAggregateFilteredDataSource"
+          },
+          "filter_query": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionAggregateFilterQuery"
+          },
+          "filters": {
+            "items": {
+              "$ref": "#/components/schemas/MonitorFormulaAndFunctionAggregateQueryFilter"
+            },
+            "type": "array"
+          },
+          "group_by": {
+            "items": {
+              "$ref": "#/components/schemas/MonitorFormulaAndFunctionEventQueryGroupBy"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "data_source",
+          "base_query",
+          "filter_query",
+          "filters"
+        ],
+        "type": "object"
+      },
+      "MonitorFormulaAndFunctionAggregateQueryFilter": {
+        "additionalProperties": false,
+        "properties": {
+          "base_attribute": {
+            "type": "string"
+          },
+          "exclude": {
+            "default": false,
+            "type": "boolean"
+          },
+          "filter_attribute": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "base_attribute",
+          "filter_attribute"
+        ],
+        "type": "object"
+      },
+      "MonitorFormulaAndFunctionAggregateQueryJoinCondition": {
+        "additionalProperties": false,
+        "properties": {
+          "augment_attribute": {
+            "type": "string"
+          },
+          "base_attribute": {
+            "type": "string"
+          },
+          "join_type": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionAggregateQueryJoinType"
+          }
+        },
+        "required": [
+          "base_attribute",
+          "augment_attribute",
+          "join_type"
+        ],
+        "type": "object"
+      },
+      "MonitorFormulaAndFunctionAggregateQueryJoinType": {
+        "enum": [
+          "inner",
+          "left"
+        ],
+        "type": "string"
+      },
+      "MonitorFormulaAndFunctionCostAggregator": {
+        "enum": [
+          "avg",
+          "sum",
+          "max",
+          "min",
+          "last",
+          "area",
+          "l2norm",
+          "percentile",
+          "stddev"
+        ],
+        "type": "string"
+      },
+      "MonitorFormulaAndFunctionCostDataSource": {
+        "enum": [
+          "metrics",
+          "cloud_cost",
+          "datadog_usage"
+        ],
+        "type": "string"
+      },
+      "MonitorFormulaAndFunctionCostQueryDefinition": {
+        "properties": {
+          "aggregator": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionCostAggregator"
+          },
+          "data_source": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionCostDataSource"
+          },
+          "name": {
+            "type": "string"
+          },
+          "query": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "data_source",
+          "query"
+        ],
+        "type": "object"
+      },
+      "MonitorFormulaAndFunctionDataJobsQueryDefinition": {
+        "properties": {
+          "job_type": {
+            "type": "string"
+          },
+          "jobs_query": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "query_dialect": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "jobs_query",
+          "job_type",
+          "query_dialect"
+        ],
+        "type": "object"
+      },
+      "MonitorFormulaAndFunctionDataQualityDataSource": {
+        "enum": [
+          "data_quality_metrics"
+        ],
+        "type": "string"
+      },
+      "MonitorFormulaAndFunctionDataQualityDiffFunction": {
+        "enum": [
+          "DIFF",
+          "DIFF_PERCENT"
+        ],
+        "type": "string"
+      },
+      "MonitorFormulaAndFunctionDataQualityDiffType": {
+        "enum": [
+          "absolute",
+          "diff_percent"
+        ],
+        "type": "string"
+      },
+      "MonitorFormulaAndFunctionDataQualityEntityMetricConfig": {
+        "properties": {
+          "custom_sql": {
+            "type": "string"
+          },
+          "custom_where": {
+            "type": "string"
+          },
+          "entity_id": {
+            "type": "string"
+          },
+          "entity_type": {
+            "type": "string"
+          },
+          "group_by_columns": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "entity_id",
+          "entity_type"
+        ],
+        "type": "object"
+      },
+      "MonitorFormulaAndFunctionDataQualityMeasure": {
+        "type": "string"
+      },
+      "MonitorFormulaAndFunctionDataQualityModelBoundsOverride": {
+        "enum": [
+          "UPPER_ONLY",
+          "LOWER_ONLY"
+        ],
+        "type": "string"
+      },
+      "MonitorFormulaAndFunctionDataQualityModelConfiguration": {
+        "properties": {
+          "auto_resolve_days": {
+            "format": "int32",
+            "maximum": 365,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "enable_flatline_detection": {
+            "type": "boolean"
+          },
+          "function": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionDataQualityDiffFunction"
+          },
+          "min_lower_bound_size": {
+            "format": "double",
+            "type": "number"
+          },
+          "min_upper_bound_size": {
+            "format": "double",
+            "type": "number"
+          },
+          "model_bounds_override": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionDataQualityModelBoundsOverride"
+          }
+        },
+        "type": "object"
+      },
+      "MonitorFormulaAndFunctionDataQualityModelTypeOverride": {
+        "enum": [
+          "freshness",
+          "percentage",
+          "any"
+        ],
+        "type": "string"
+      },
+      "MonitorFormulaAndFunctionDataQualityMonitorOptions": {
+        "properties": {
+          "crontab_override": {
+            "type": "string"
+          },
+          "custom_sql": {
+            "type": "string"
+          },
+          "custom_where": {
+            "type": "string"
+          },
+          "group_by_columns": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "model_configuration": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionDataQualityModelConfiguration"
+          },
+          "model_type_override": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionDataQualityModelTypeOverride"
+          },
+          "sensitivity": {
+            "format": "double",
+            "type": "number"
+          },
+          "source_to_target_config": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionDataQualitySourceToTargetConfig"
+          }
+        },
+        "type": "object"
+      },
+      "MonitorFormulaAndFunctionDataQualityQueryDefinition": {
+        "properties": {
+          "data_source": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionDataQualityDataSource"
+          },
+          "filter": {
+            "type": "string"
+          },
+          "group_by": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "measure": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionDataQualityMeasure"
+          },
+          "monitor_options": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionDataQualityMonitorOptions"
+          },
+          "name": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "data_source",
+          "measure",
+          "filter"
+        ],
+        "type": "object"
+      },
+      "MonitorFormulaAndFunctionDataQualitySourceToTargetConfig": {
+        "properties": {
+          "diff_type": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionDataQualityDiffType"
+          },
+          "entity_type": {
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionDataQualityEntityMetricConfig"
+          },
+          "target": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionDataQualityEntityMetricConfig"
+          }
+        },
+        "required": [
+          "source",
+          "target",
+          "diff_type",
+          "entity_type"
+        ],
+        "type": "object"
+      },
+      "MonitorFormulaAndFunctionEventAggregation": {
+        "enum": [
+          "count",
+          "cardinality",
+          "median",
+          "pc75",
+          "pc90",
+          "pc95",
+          "pc98",
+          "pc99",
+          "sum",
+          "min",
+          "max",
+          "avg"
+        ],
+        "type": "string"
+      },
+      "MonitorFormulaAndFunctionEventQueryDefinition": {
+        "properties": {
+          "compute": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionEventQueryDefinitionCompute"
+          },
+          "data_source": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionEventsDataSource"
+          },
+          "group_by": {
+            "items": {
+              "$ref": "#/components/schemas/MonitorFormulaAndFunctionEventQueryGroupBy"
+            },
+            "type": "array"
+          },
+          "indexes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "search": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionEventQueryDefinitionSearch"
+          }
+        },
+        "required": [
+          "data_source",
+          "compute",
+          "name"
+        ],
+        "type": "object"
+      },
+      "MonitorFormulaAndFunctionEventQueryDefinitionCompute": {
+        "properties": {
+          "aggregation": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionEventAggregation"
+          },
+          "interval": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "metric": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "aggregation"
+        ],
+        "type": "object"
+      },
+      "MonitorFormulaAndFunctionEventQueryDefinitionSearch": {
+        "properties": {
+          "query": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "type": "object"
+      },
+      "MonitorFormulaAndFunctionEventQueryGroupBy": {
+        "properties": {
+          "facet": {
+            "type": "string"
+          },
+          "limit": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionEventQueryGroupBySort"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "facet"
+        ],
+        "type": "object"
+      },
+      "MonitorFormulaAndFunctionEventQueryGroupBySort": {
+        "properties": {
+          "aggregation": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionEventAggregation"
+          },
+          "metric": {
+            "type": "string"
+          },
+          "order": {
+            "$ref": "#/components/schemas/QuerySortOrder"
+          }
+        },
+        "required": [
+          "aggregation"
+        ],
+        "type": "object"
+      },
+      "MonitorFormulaAndFunctionEventsDataSource": {
+        "enum": [
+          "rum",
+          "ci_pipelines",
+          "ci_tests",
+          "audit",
+          "events",
+          "logs",
+          "spans",
+          "database_queries",
+          "network",
+          "network_path"
+        ],
+        "type": "string"
+      },
+      "MonitorFormulaAndFunctionMetricsAggregator": {
+        "enum": [
+          "avg",
+          "min",
+          "max",
+          "sum",
+          "last",
+          "mean",
+          "area",
+          "l2norm",
+          "percentile",
+          "stddev",
+          "count_unique"
+        ],
+        "type": "string"
+      },
+      "MonitorFormulaAndFunctionMetricsDataSource": {
+        "enum": [
+          "metrics",
+          "cloud_cost",
+          "datadog_usage"
+        ],
+        "type": "string"
+      },
+      "MonitorFormulaAndFunctionMetricsQueryDefinition": {
+        "additionalProperties": false,
+        "properties": {
+          "aggregator": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionMetricsAggregator"
+          },
+          "data_source": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionMetricsDataSource"
+          },
+          "name": {
+            "type": "string"
+          },
+          "query": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "data_source",
+          "query"
+        ],
+        "type": "object"
+      },
+      "MonitorFormulaAndFunctionQueryDefinition": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionEventQueryDefinition"
+          },
+          {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionCostQueryDefinition"
+          },
+          {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionDataQualityQueryDefinition"
+          },
+          {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionDataJobsQueryDefinition"
+          },
+          {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionAggregateAugmentedQueryDefinition"
+          },
+          {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionAggregateFilteredQueryDefinition"
+          }
+        ]
+      },
+      "MonitorFormulaAndFunctionReferenceTableColumn": {
+        "additionalProperties": false,
+        "properties": {
+          "alias": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "MonitorFormulaAndFunctionReferenceTableDataSource": {
+        "enum": [
+          "reference_table"
+        ],
+        "type": "string"
+      },
+      "MonitorFormulaAndFunctionReferenceTableQueryDefinition": {
+        "additionalProperties": false,
+        "properties": {
+          "columns": {
+            "items": {
+              "$ref": "#/components/schemas/MonitorFormulaAndFunctionReferenceTableColumn"
+            },
+            "type": "array"
+          },
+          "data_source": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionReferenceTableDataSource"
+          },
+          "name": {
+            "type": "string"
+          },
+          "query_filter": {
+            "type": "string"
+          },
+          "table_name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "data_source",
+          "table_name"
+        ],
+        "type": "object"
+      },
+      "MonitorOptions": {
+        "properties": {
+          "aggregation": {
+            "$ref": "#/components/schemas/MonitorOptionsAggregation"
+          },
+          "device_ids": {
+            "deprecated": true,
+            "items": {
+              "$ref": "#/components/schemas/MonitorDeviceID"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "enable_logs_sample": {
+            "type": "boolean"
+          },
+          "enable_samples": {
+            "type": "boolean"
+          },
+          "escalation_message": {
+            "type": "string"
+          },
+          "evaluation_delay": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "group_retention_duration": {
+            "type": "string"
+          },
+          "groupby_simple_monitor": {
+            "deprecated": true,
+            "type": "boolean"
+          },
+          "include_tags": {
+            "default": true,
+            "type": "boolean"
+          },
+          "locked": {
+            "deprecated": true,
+            "type": "boolean"
+          },
+          "min_failure_duration": {
+            "default": 0,
+            "format": "int64",
+            "maximum": 7200,
+            "minimum": 0,
+            "nullable": true,
+            "type": "integer"
+          },
+          "min_location_failed": {
+            "default": 1,
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "new_group_delay": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "new_host_delay": {
+            "default": 300,
+            "deprecated": true,
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "no_data_timeframe": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "notification_preset_name": {
+            "$ref": "#/components/schemas/MonitorOptionsNotificationPresets"
+          },
+          "notify_audit": {
+            "default": false,
+            "type": "boolean"
+          },
+          "notify_by": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "notify_no_data": {
+            "type": "boolean"
+          },
+          "on_missing_data": {
+            "$ref": "#/components/schemas/OnMissingDataOption"
+          },
+          "renotify_interval": {
+            "default": null,
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "renotify_occurrences": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "renotify_statuses": {
+            "items": {
+              "$ref": "#/components/schemas/MonitorRenotifyStatusType"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "require_full_window": {
+            "type": "boolean"
+          },
+          "scheduling_options": {
+            "$ref": "#/components/schemas/MonitorOptionsSchedulingOptions"
+          },
+          "silenced": {
+            "additionalProperties": {
+              "format": "int64",
+              "nullable": true,
+              "type": "integer"
+            },
+            "deprecated": true,
+            "type": "object"
+          },
+          "synthetics_check_id": {
+            "deprecated": true,
+            "nullable": true,
+            "type": "string"
+          },
+          "threshold_windows": {
+            "$ref": "#/components/schemas/MonitorThresholdWindowOptions"
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/MonitorThresholds"
+          },
+          "timeout_h": {
+            "default": null,
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "variables": {
+            "items": {
+              "$ref": "#/components/schemas/MonitorFormulaAndFunctionQueryDefinition"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "MonitorOptionsAggregation": {
+        "properties": {
+          "group_by": {
+            "type": "string"
+          },
+          "metric": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      },
+      "MonitorOptionsCustomSchedule": {
+        "properties": {
+          "recurrences": {
+            "items": {
+              "$ref": "#/components/schemas/MonitorOptionsCustomScheduleRecurrence"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "MonitorOptionsCustomScheduleRecurrence": {
+        "properties": {
+          "rrule": {
+            "type": "string"
+          },
+          "start": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MonitorOptionsNotificationPresets": {
+        "default": "show_all",
+        "enum": [
+          "show_all",
+          "hide_query",
+          "hide_handles",
+          "hide_all",
+          "hide_query_and_handles",
+          "show_only_snapshot",
+          "hide_handles_and_footer"
+        ],
+        "type": "string"
+      },
+      "MonitorOptionsSchedulingOptions": {
+        "properties": {
+          "custom_schedule": {
+            "$ref": "#/components/schemas/MonitorOptionsCustomSchedule"
+          },
+          "evaluation_window": {
+            "$ref": "#/components/schemas/MonitorOptionsSchedulingOptionsEvaluationWindow"
+          }
+        },
+        "type": "object"
+      },
+      "MonitorOptionsSchedulingOptionsEvaluationWindow": {
+        "properties": {
+          "day_starts": {
+            "type": "string"
+          },
+          "hour_starts": {
+            "format": "int32",
+            "maximum": 59,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "month_starts": {
+            "format": "int32",
+            "maximum": 1,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "timezone": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MonitorOverallStates": {
+        "enum": [
+          "Alert",
+          "Ignored",
+          "No Data",
+          "OK",
+          "Skipped",
+          "Unknown",
+          "Warn"
+        ],
+        "readOnly": true,
+        "type": "string"
+      },
+      "MonitorRenotifyStatusType": {
+        "enum": [
+          "alert",
+          "warn",
+          "no data"
+        ],
+        "type": "string"
+      },
+      "MonitorState": {
+        "properties": {
+          "groups": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/MonitorStateGroup"
+            },
+            "type": "object"
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      },
+      "MonitorStateGroup": {
+        "properties": {
+          "last_nodata_ts": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "last_notified_ts": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "last_resolved_ts": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "last_triggered_ts": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/MonitorOverallStates"
+          }
+        },
+        "type": "object"
+      },
+      "MonitorThresholdWindowOptions": {
+        "properties": {
+          "recovery_window": {
+            "nullable": true,
+            "type": "string"
+          },
+          "trigger_window": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MonitorThresholds": {
+        "properties": {
+          "critical": {
+            "format": "double",
+            "type": "number"
+          },
+          "critical_query": {
+            "type": "string"
+          },
+          "critical_recovery": {
+            "format": "double",
+            "nullable": true,
+            "type": "number"
+          },
+          "critical_recovery_query": {
+            "type": "string"
+          },
+          "ok": {
+            "format": "double",
+            "nullable": true,
+            "type": "number"
+          },
+          "unknown": {
+            "format": "double",
+            "nullable": true,
+            "type": "number"
+          },
+          "warning": {
+            "format": "double",
+            "nullable": true,
+            "type": "number"
+          },
+          "warning_recovery": {
+            "format": "double",
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "MonitorType": {
+        "enum": [
+          "composite",
+          "event alert",
+          "log alert",
+          "metric alert",
+          "process alert",
+          "query alert",
+          "rum alert",
+          "service check",
+          "synthetics alert",
+          "trace-analytics alert",
+          "slo alert",
+          "event-v2 alert",
+          "audit alert",
+          "ci-pipelines alert",
+          "ci-tests alert",
+          "error-tracking alert",
+          "database-monitoring alert",
+          "network-performance alert",
+          "cost alert",
+          "data-quality alert",
+          "network-path alert",
+          "data-jobs alert",
+          "llm-observability alert"
+        ],
+        "type": "string"
+      },
+      "OnMissingDataOption": {
+        "enum": [
+          "default",
+          "show_no_data",
+          "show_and_notify_no_data",
+          "resolve"
+        ],
+        "type": "string"
+      },
+      "Point": {
+        "items": {
+          "format": "double",
+          "nullable": true,
+          "type": "number"
+        },
+        "maxItems": 2,
+        "minItems": 2,
+        "type": "array"
+      },
+      "QuerySortOrder": {
+        "default": "desc",
+        "enum": [
+          "asc",
+          "desc"
+        ],
+        "type": "string"
+      }
+    },
+    "securitySchemes": {
+      "AuthZ": {
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "/oauth2/v1/authorize",
+            "scopes": {
+              "apm_api_catalog_read": "View API catalog and API definitions.",
+              "apm_api_catalog_write": "Add, modify, and delete API catalog definitions.",
+              "apm_read": "Read and query APM and Trace Analytics.",
+              "apm_service_catalog_read": "View service catalog and service definitions.",
+              "apm_service_catalog_write": "Add, modify, and delete service catalog definitions when those definitions are maintained by Datadog.",
+              "billing_read": "View your organization's billing information.",
+              "cases_read": "View Cases.",
+              "cases_write": "Create and update cases.",
+              "ci_visibility_pipelines_write": "Create CI Visibility pipeline spans using the API.",
+              "ci_visibility_read": "View CI Visibility.",
+              "cloud_cost_management_read": "View Cloud Cost pages and the cloud cost data source in dashboards and notebooks. For more details, see the Cloud Cost Management docs.",
+              "cloud_cost_management_write": "Configure cloud cost accounts and global customizations. For more details, see the Cloud Cost Management docs.",
+              "code_analysis_read": "View Code Analysis.",
+              "continuous_profiler_pgo_read": "Read and query Continuous Profiler data for Profile-Guided Optimization (PGO).",
+              "coterm_read": "Read terminal recordings.",
+              "coterm_write": "Write terminal recordings.",
+              "create_webhooks": "Create webhooks integrations.",
+              "dashboards_embed_share": "Create, modify, and delete shared dashboards with share type 'embed'.",
+              "dashboards_invite_share": "Create, modify, and delete shared dashboards with share type 'invite'.",
+              "dashboards_public_share": "Generate public and authenticated links to share dashboards or embeddable graphs externally.",
+              "dashboards_read": "View dashboards.",
+              "dashboards_write": "Create and change dashboards.",
+              "data_scanner_read": "View Data Scanner configurations.",
+              "data_scanner_write": "Edit Data Scanner configurations.",
+              "embeddable_graphs_share": "Generate public links to share embeddable graphs externally.",
+              "events_read": "Read Events data.",
+              "hosts_read": "List hosts and their attributes.",
+              "incident_notification_settings_write": "Configure Incidents Notification settings.",
+              "incident_read": "View incidents in Datadog.",
+              "incident_settings_write": "Configure Incident Settings.",
+              "incident_write": "Create, view, and manage incidents in Datadog.",
+              "metrics_read": "View custom metrics.",
+              "monitors_downtime": "Set downtimes to suppress alerts from any monitor in an organization. Mute and unmute monitors. The ability to write monitors is not required to set downtimes.",
+              "monitors_draft_write": "Create, edit, and delete draft monitors. Does not allow editing live monitors or publishing drafts to production.",
+              "monitors_read": "View monitors.",
+              "monitors_write": "Edit, delete, and resolve individual monitors.",
+              "org_management": "Edit org configurations, including authentication and certain security preferences such as configuring SAML, renaming an org, configuring allowed login methods, creating child orgs, subscribing & unsubscribing from apps in the marketplace, and enabling & disabling Remote Configuration for the entire organization.",
+              "security_comments_read": "Read comments of vulnerabilities.",
+              "security_monitoring_filters_read": "Read Security Filters.",
+              "security_monitoring_filters_write": "Create, edit, and delete Security Filters.",
+              "security_monitoring_findings_read": "View a list of findings that include both misconfigurations and identity risks.",
+              "security_monitoring_rules_read": "Read Detection Rules.",
+              "security_monitoring_rules_write": "Create and edit Detection Rules.",
+              "security_monitoring_signals_read": "View Security Signals.",
+              "security_monitoring_suppressions_read": "Read Rule Suppressions.",
+              "security_monitoring_suppressions_write": "Write Rule Suppressions.",
+              "security_pipelines_read": "View Security Pipelines.",
+              "security_pipelines_write": "Create, edit, and delete CSM Security Pipelines.",
+              "slos_corrections": "Apply, edit, and delete SLO status corrections. A user with this permission can make status corrections, even if they do not have permission to edit those SLOs.",
+              "slos_read": "View SLOs and status corrections.",
+              "slos_write": "Create, edit, and delete SLOs.",
+              "synthetics_global_variable_read": "View, search, and use Synthetics global variables.",
+              "synthetics_global_variable_write": "Create, edit, and delete global variables for Synthetics.",
+              "synthetics_private_location_read": "View, search, and use Synthetics private locations.",
+              "synthetics_private_location_write": "Create and delete private locations in addition to having access to the associated installation guidelines.",
+              "synthetics_read": "List and view configured Synthetic tests and test results.",
+              "synthetics_write": "Create, edit, and delete Synthetic tests.",
+              "teams_manage": "Manage Teams. Create, delete, rename, and edit metadata of all Teams. To control Team membership across all Teams, use the User Access Manage permission.",
+              "teams_read": "Read Teams data. A User with this permission can view Team names, metadata, and which Users are on each Team.",
+              "test_optimization_read": "View Test Optimization.",
+              "timeseries_query": "Query Timeseries data.",
+              "usage_read": "View your organization's usage and usage attribution.",
+              "user_access_invite": "Invite other users to your organization.",
+              "user_access_manage": "Disable users, manage user roles, manage SAML-to-role mappings, and configure logs restriction queries.",
+              "user_access_read": "View users and their roles and settings.",
+              "workflows_read": "View workflows.",
+              "workflows_run": "Run workflows.",
+              "workflows_write": "Create, edit, and delete workflows."
+            },
+            "tokenUrl": "/oauth2/v1/token"
+          }
+        },
+        "type": "oauth2"
+      },
+      "apiKeyAuth": {
+        "in": "header",
+        "name": "DD-API-KEY",
+        "type": "apiKey"
+      },
+      "appKeyAuth": {
+        "in": "header",
+        "name": "DD-APPLICATION-KEY",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "Datadog API V1 Collection"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/v1/events": {
+      "post": {
+        "operationId": "CreateEvent",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventCreateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequestsResponse"
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/monitor": {
+      "get": {
+        "operationId": "ListMonitors",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "group_states",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tags",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "monitor_tags",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "with_downtimes",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "id_offset",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "format": "int32",
+              "maximum": 1000,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Monitor"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequestsResponse"
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": [],
+            "appKeyAuth": []
+          },
+          {
+            "AuthZ": [
+              "monitors_read"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/monitor/{monitor_id}": {
+      "get": {
+        "operationId": "GetMonitor",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "monitor_id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "group_states",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "with_downtimes",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "with_assets",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Monitor"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequestsResponse"
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": [],
+            "appKeyAuth": []
+          },
+          {
+            "AuthZ": [
+              "monitors_read"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/query": {
+      "get": {
+        "operationId": "QueryMetrics",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricsQueryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequestsResponse"
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": [],
+            "appKeyAuth": []
+          },
+          {
+            "AuthZ": [
+              "timeseries_query"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "security": [
+    {
+      "apiKeyAuth": [],
+      "appKeyAuth": []
+    },
+    {
+      "AuthZ": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://{subdomain}.{site}",
+      "variables": {
+        "site": {
+          "default": "datadoghq.com",
+          "enum": [
+            "datadoghq.com",
+            "us3.datadoghq.com",
+            "us5.datadoghq.com",
+            "ap1.datadoghq.com",
+            "ap2.datadoghq.com",
+            "uk1.datadoghq.com",
+            "datadoghq.eu",
+            "ddog-gov.com",
+            "us2.ddog-gov.com",
+            "uk1.datadoghq.com"
+          ]
+        },
+        "subdomain": {
+          "default": "api"
+        }
+      }
+    },
+    {
+      "url": "{protocol}://{name}",
+      "variables": {
+        "name": {
+          "default": "api.datadoghq.com"
+        },
+        "protocol": {
+          "default": "https"
+        }
+      }
+    },
+    {
+      "url": "https://{subdomain}.{site}",
+      "variables": {
+        "site": {
+          "default": "datadoghq.com"
+        },
+        "subdomain": {
+          "default": "api"
+        }
+      }
+    }
+  ]
+}
