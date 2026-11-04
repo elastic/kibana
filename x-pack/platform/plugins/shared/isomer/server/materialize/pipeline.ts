@@ -22,6 +22,7 @@ import type {
   DataRequest,
   EsqlDataRequest,
   MaterializeDescription,
+  MaterializeKit,
   Materializer,
   MaterializeResults,
 } from './types';
@@ -36,6 +37,8 @@ export interface PipelineDeps {
   ) => Promise<ExecutedTable>;
   /** Materializes a nested input, one level deeper. */
   materialize: (input: MaterializeInput, context: MaterializeContext) => Promise<MaterializedNode>;
+  /** The kit a materializer maps with, for the context its plan ran in. */
+  createKit: (context: MaterializeContext) => Promise<MaterializeKit>;
   /** The node's validation errors against the runtime's packs, with paths relative to the node. */
   validate: (node: MaterializedNode) => Promise<ValidationError[]>;
   kibanaVersion: string;
@@ -187,7 +190,7 @@ export const runPipeline = async <TConfig>(
     );
   }
 
-  const mapped = materializer.map(config, executed.results, { context });
+  const mapped = materializer.map(config, executed.results, await deps.createKit(context));
   if (isUnsupportedNode(mapped)) {
     return rebuildUnsupported(mapped, description, source);
   }
