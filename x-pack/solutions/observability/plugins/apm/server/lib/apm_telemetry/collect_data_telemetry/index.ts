@@ -14,7 +14,7 @@ import type { APMDataTelemetry } from '../types';
 type CollectTelemetryParams = TelemetryTaskExecutorParams & {
   isProd: boolean;
   logger: Logger;
-  signal?: AbortSignal;
+  signal: AbortSignal;
 };
 
 export function collectDataTelemetry({
@@ -27,7 +27,7 @@ export function collectDataTelemetry({
 }: CollectTelemetryParams) {
   return tasks.reduce((prev, task) => {
     return prev.then(async (data) => {
-      if (signal?.aborted) {
+      if (signal.aborted) {
         logger.debug(`Skipping APM telemetry task ${task.name}: collection was aborted`);
         return data;
       }
@@ -51,6 +51,10 @@ export function collectDataTelemetry({
           },
         });
       } catch (err) {
+        if (signal.aborted) {
+          logger.debug(`Aborted APM telemetry task ${task.name} while in flight`);
+          return data;
+        }
         // catch error and log as debug in production env and warn in dev env
         const logLevel = isProd ? logger.debug : logger.warn;
         logLevel.call(logger, `Failed executing the APM telemetry task: "${task.name}"`);

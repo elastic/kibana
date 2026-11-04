@@ -54,7 +54,7 @@ export async function getTelemetryClient({
   signal,
 }: {
   core: CoreSetup;
-  signal?: AbortSignal;
+  signal: AbortSignal;
 }): Promise<TelemetryClient> {
   const [{ elasticsearch }] = await core.getStartServices();
   const esClient = elasticsearch.client;
