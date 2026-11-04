@@ -1,0 +1,44 @@
+{
+  "templates": [
+    {
+      "id": "personal_assistant",
+      "name": "Personal assistant",
+      "description": "Preferences, routines, people, plans and life events from each user's conversations, notes and daily context."
+    },
+    {
+      "id": "customer_support",
+      "name": "Customer support",
+      "description": "Solutions, known issues, policies, workarounds and customer patterns from resolved tickets and support docs."
+    },
+    {
+      "id": "customer_insights",
+      "name": "Customer insights",
+      "description": "Customer problems, resolutions, churn risks and preferences, with program metrics, segment insights and trends, from support conversations and data queries."
+    },
+    {
+      "id": "technical_support",
+      "name": "Technical support",
+      "description": "Error resolutions, configuration, compatibility, migration steps and rate limits from API docs, error guides and integration help."
+    },
+    {
+      "id": "legal_assistant",
+      "name": "Legal assistant",
+      "description": "Obligations, clauses, precedents, deadlines and policy changes from contracts, regulations and compliance documents."
+    },
+    {
+      "id": "finance_assistant",
+      "name": "Finance assistant",
+      "description": "Metrics, budget items, compliance results, policies and forecasts from financial reports, budgets and compliance records."
+    },
+    {
+      "id": "healthcare_assistant",
+      "name": "Healthcare assistant",
+      "description": "Protocols, drug information, guidelines, dosages and updates from clinical guidelines and patient education material."
+    },
+    {
+      "id": "developer_documentation",
+      "name": "Developer documentation",
+      "description": "Endpoints, patterns, architecture, authentication and limits from API docs, guides and architecture decisions."
+    }
+  ]
+}

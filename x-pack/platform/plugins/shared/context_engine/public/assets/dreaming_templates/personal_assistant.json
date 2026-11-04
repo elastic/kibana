@@ -1,0 +1,103 @@
+{
+  "summary": "Personal assistant. Users save conversations, notes, and daily context. The assistant uses what it learns to help each person with their plans, routines and the people in their life.",
+  "rationale": "A personal assistant serves one person at a time, so memories are grouped by user and each user's are consolidated on their own. The ontology centers on the user and the people, places and organizations around them, so the assistant can pick up where it left off: who someone works for, where they live, what they prefer.",
+  "dreaming": {
+    "instructions": "Record what the user states or confirms about their own life: what they prefer, their routines, the people in it, their plans, and what has happened to them. Keep exact names, dates, days and places. Record each person the user mentions as an entity linked to the user.\n\nSkip:\n- Generic assistant suggestions the user did not confirm.\n- Pleasantries and small talk without factual content.\n- Scheduling details already recorded. Update the existing fact instead of repeating it.",
+    "facts": [
+      {
+        "type": "preference",
+        "description": "Something the user likes, dislikes, needs or must avoid, such as \"prefers morning meetings\" or \"allergic to peanuts\"."
+      },
+      {
+        "type": "routine",
+        "description": "Something the user does regularly, with when, such as \"works out every Tuesday and Thursday\"."
+      },
+      {
+        "type": "plan",
+        "description": "Something the user intends to do, with when, such as \"planning a trip to Japan in March\"."
+      },
+      {
+        "type": "life_event",
+        "description": "A change in the user's life, with when it happened, such as \"moved to Austin last month\" or \"started a new job\"."
+      }
+    ],
+    "entities": {
+      "nodes": [
+        {
+          "type": "user",
+          "description": "The person whose assistant this is. One per user.",
+          "attributes": [
+            "name",
+            "location",
+            "occupation"
+          ]
+        },
+        {
+          "type": "person",
+          "description": "Someone in the user's life, by name.",
+          "attributes": [
+            "role"
+          ]
+        },
+        {
+          "type": "place",
+          "description": "A city, country or venue the user lives in, visits or plans to visit.",
+          "attributes": [
+            "kind"
+          ]
+        },
+        {
+          "type": "organization",
+          "description": "An employer, school, club or other group the user belongs to.",
+          "attributes": [
+            "kind"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "type": "manages",
+          "source": "person",
+          "target": "user",
+          "description": "The person is the user's manager, as in \"Sarah is their manager\"."
+        },
+        {
+          "type": "lives_with",
+          "source": "user",
+          "target": "person",
+          "description": "The user lives with the person, as in \"lives with roommate Jake\"."
+        },
+        {
+          "type": "family_of",
+          "source": "person",
+          "target": "user",
+          "description": "The person is family of the user, with the relation in the fact."
+        },
+        {
+          "type": "friend_of",
+          "source": "person",
+          "target": "user",
+          "description": "The person is a friend of the user."
+        },
+        {
+          "type": "lives_in",
+          "source": "user",
+          "target": "place",
+          "description": "Where the user lives now."
+        },
+        {
+          "type": "visits",
+          "source": "user",
+          "target": "place",
+          "description": "Somewhere the user has visited or plans to visit."
+        },
+        {
+          "type": "member_of",
+          "source": "user",
+          "target": "organization",
+          "description": "The user works at, studies at or belongs to the organization."
+        }
+      ]
+    }
+  }
+}

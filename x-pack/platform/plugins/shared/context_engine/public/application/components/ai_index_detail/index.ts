@@ -10,6 +10,7 @@ export { AutomationRow } from './automation_row';
 export { AutomationsPanel } from './automations_panel';
 export { ConnectAgentPanel } from './connect_agent_panel';
 export { DescriptionPanel } from './description_panel';
+export { DreamingPanel } from './dreaming_panel';
 export { LockedSectionPanel } from './locked_section_panel';
 export { SignalsPanel } from './signals_panel';
 export { SourcesPanel } from './sources_panel';
