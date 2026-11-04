@@ -7,9 +7,11 @@
 
 import type React from 'react';
 import { useMemo, useState } from 'react';
+import type { ActionType } from '@kbn/actions-types';
 import { useKibana } from '../hooks/use_kibana';
 import { useRefreshSandboxConnectors } from './use_fetch_sandbox_connectors';
 import { useAgentConnectors, type ConnectorRef } from './use_agent_connectors';
+import { getInitialSandboxConnector } from './initial_sandbox_connector';
 
 export function useAddConnectorFlyout({
   onCreated,
@@ -17,26 +19,26 @@ export function useAddConnectorFlyout({
   onCreated?: (connector: ConnectorRef) => void;
 } = {}): {
   isAvailable: boolean;
-  openAdd: (typeId: string) => void;
+  openAdd: (actionType: ActionType) => void;
   addFlyout: React.ReactNode;
 } {
   const { triggersActionsUi } = useKibana().services;
   const { assign } = useAgentConnectors();
   const refresh = useRefreshSandboxConnectors();
-  const [typeId, setTypeId] = useState<string | undefined>();
+  const [addingType, setAddingType] = useState<ActionType | undefined>();
 
   const addFlyout = useMemo(() => {
-    if (!typeId || !triggersActionsUi) return null;
+    if (!addingType || !triggersActionsUi) return null;
     return triggersActionsUi.getAddConnectorFlyout({
-      initialConnector: { actionTypeId: typeId },
-      onClose: () => setTypeId(undefined),
+      initialConnector: getInitialSandboxConnector(addingType),
+      onClose: () => setAddingType(undefined),
       onConnectorCreated: (connector) => {
         assign(connector);
         refresh();
         onCreated?.(connector);
       },
     });
-  }, [assign, onCreated, refresh, triggersActionsUi, typeId]);
+  }, [assign, onCreated, refresh, triggersActionsUi, addingType]);
 
-  return { isAvailable: triggersActionsUi != null, openAdd: setTypeId, addFlyout };
+  return { isAvailable: triggersActionsUi != null, openAdd: setAddingType, addFlyout };
 }
