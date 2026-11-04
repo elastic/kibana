@@ -3191,6 +3191,11 @@ x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/
 x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/get_notes_step @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/update_note_step @elastic/security-investigations
 
+# Defend Workflows endpoint step types
+/x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/endpoint @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/endpoint @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/endpoint @elastic/security-defend-workflows
+
 # Significant Events managed workflows
 src/platform/packages/shared/kbn-workflows/managed/definitions/significant_events @elastic/nightshift
 
@@ -3203,6 +3208,9 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero @elasti
 
 # Actions directories
 src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/actions/defend @elastic/security-defend-workflows
+
+# Defend Workflows managed workflows
+src/platform/packages/shared/kbn-workflows/managed/definitions/endpoint @elastic/security-defend-workflows
 
 # Alert analysis workflow
 src/platform/packages/shared/kbn-workflows/managed/definitions/alert_analysis @elastic/security-investigations
