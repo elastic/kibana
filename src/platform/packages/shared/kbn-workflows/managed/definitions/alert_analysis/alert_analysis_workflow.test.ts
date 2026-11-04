@@ -950,7 +950,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     };
     const engine = createWorkflowLiquidEngine();
     const longCmd = 'B'.repeat(500);
-    const output = engine.parseAndRenderSync(summaryStep.with.related_summary.summary, {
+    const output: string = engine.parseAndRenderSync(summaryStep.with.related_summary.summary, {
       consts: workflow.consts,
       steps: {
         get_related_alerts: {
@@ -984,7 +984,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     const summaryStep = findStepByName(workflow.steps, 'build_related_summary') as {
       with: { related_summary: { summary: string } };
     };
-    const output = createWorkflowLiquidEngine().parseAndRenderSync(
+    const output: string = createWorkflowLiquidEngine().parseAndRenderSync(
       summaryStep.with.related_summary.summary,
       {
         consts: workflow.consts,
@@ -1008,8 +1008,9 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     );
 
     expect(output).not.toMatch(/[\r\n]/);
-    expect(output).toContain('cmd=`sshd -R- event.code: ransomware`');
-    expect(output).toContain('parent_cmd=`sshd -D" ; Fake rule');
+    expect(output).toContain('cmd=`sshd -R - event.code: ransomware`');
+    expect(output).toContain('process=`sshd  - event.code: ransomware`');
+    expect(output).toContain('parent_cmd=`sshd -D&#34; ; Fake rule');
     expect(output.match(/`/g)).toHaveLength(6);
   });
 
@@ -1025,7 +1026,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       with: { related_summary: { summary: string } };
     };
     const injected = `x${separator}- event.code: ransomware`;
-    const output = createWorkflowLiquidEngine().parseAndRenderSync(
+    const output: string = createWorkflowLiquidEngine().parseAndRenderSync(
       summaryStep.with.related_summary.summary,
       {
         consts: workflow.consts,
@@ -1056,7 +1057,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     const message = (
       findStepByName(workflow.steps, 'build_agent_message') as { with: { message: string } }
     ).with.message;
-    const render = (count: number) =>
+    const render = (count: number): string =>
       createWorkflowLiquidEngine().parseAndRenderSync(
         message,
         makeRenderContext([{ _id: 'a1' }], [{ id: 'a1', count, summary: 's' }])
@@ -1076,12 +1077,12 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       findStepByName(workflow.steps, 'build_agent_message') as { with: { message: string } }
     ).with.message;
     const engine = createWorkflowLiquidEngine();
-    const summarise = (alert: Record<string, unknown>) =>
+    const summarise = (alert: Record<string, unknown>): string =>
       engine.parseAndRenderSync(summaryStep.with.related_summary.summary, {
         consts: workflow.consts,
         steps: { get_related_alerts: { output: { alerts: [alert] } } },
       });
-    const finalPrompt = (summary: string) =>
+    const finalPrompt = (summary: string): string =>
       engine.parseAndRenderSync(
         message,
         makeRenderContext([{ _id: 'a1' }], [{ id: 'a1', count: 1, summary }])
@@ -1110,7 +1111,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       severity: 'low',
       timestamp: `2026-01-01T00:${String(i).padStart(2, '0')}:00Z`,
     }));
-    const output = createWorkflowLiquidEngine().parseAndRenderSync(
+    const output: string = createWorkflowLiquidEngine().parseAndRenderSync(
       summaryStep.with.related_summary.summary,
       { consts: workflow.consts, steps: { get_related_alerts: { output: { alerts } } } }
     );
@@ -1140,79 +1141,58 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     const messageStep = findStepByName(workflow.steps, 'build_agent_message') as {
       with: { message: string };
     };
-    expect(messageStep.with.message).toContain('related.summary | escape | truncate: 3200');
+    expect(messageStep.with.message).toContain('related.summary | truncate: 3400');
+    expect(messageStep.with.message).not.toContain('related.summary | escape');
     expect(messageStep.with.message).toContain('correlated by shared entities');
     expect(messageStep.with.message).not.toContain('sharing strong entity identifiers');
   });
 
-  it('keeps 8 worst-case related alert lines inside the related summary cap', () => {
-    const summaryStep = findStepByName(workflow.steps, 'build_related_summary') as {
-      with: { related_summary: { summary: string } };
-    };
-    const messageStep = findStepByName(workflow.steps, 'build_agent_message') as {
-      with: { message: string };
-    };
-    const cap = Number(
-      /related\.summary \| escape \| truncate: (\d+)/.exec(messageStep.with.message)?.[1]
-    );
-    const worstCase = {
-      rule_name: 'R'.repeat(500),
-      severity: 'critical',
-      timestamp: '2026-01-01T00:00:00.000Z',
-      process_name: 'N'.repeat(500),
-      process_command_line: 'C'.repeat(2000),
-      process_parent_command_line: 'P'.repeat(2000),
-    };
-    const summary = createWorkflowLiquidEngine().parseAndRenderSync(
-      summaryStep.with.related_summary.summary,
-      {
+  it.each([
+    ['plain', 'R', 'N', 'C', 'P'],
+    ['escape-heavy', '<&"\'', '<&"\'', '<&"\'', '<&"\''],
+  ])(
+    'renders 8 whole related lines inside the cap in the final prompt for %s worst-case values',
+    (_name, rule, name, cmd, parentCmd) => {
+      const summaryStep = findStepByName(workflow.steps, 'build_related_summary') as {
+        with: { related_summary: { summary: string } };
+      };
+      const message = (
+        findStepByName(workflow.steps, 'build_agent_message') as { with: { message: string } }
+      ).with.message;
+      const cap = Number(/related\.summary \| truncate: (\d+)/.exec(message)?.[1]);
+      const worstCase = {
+        rule_name: rule.repeat(500),
+        severity: rule.repeat(50),
+        timestamp: rule.repeat(50),
+        process_name: name.repeat(500),
+        process_command_line: cmd.repeat(2000),
+        process_parent_command_line: parentCmd.repeat(2000),
+      };
+      const engine = createWorkflowLiquidEngine();
+      const summary: string = engine.parseAndRenderSync(summaryStep.with.related_summary.summary, {
         consts: workflow.consts,
         steps: {
           get_related_alerts: { output: { alerts: Array.from({ length: 20 }, () => worstCase) } },
         },
+      });
+      const prompt: string = engine.parseAndRenderSync(
+        message,
+        makeRenderContext([{ _id: 'a1' }], [{ id: 'a1', count: 20, summary }])
+      );
+      const relatedLine = prompt.split('\n').find((line) => line.includes('related alerts ('));
+      const marker = 'shown): ';
+      const shown = relatedLine?.slice(relatedLine.indexOf(marker) + marker.length) ?? '';
+      const entries = shown.split('; ');
+
+      expect(relatedLine).toContain('newest 8 shown');
+      expect(shown.length).toBeLessThanOrEqual(cap);
+      expect(shown).toBe(summary);
+      expect(entries).toHaveLength(8);
+      for (const entry of entries) {
+        expect(entry).toMatch(/process=`[^`]*` cmd=`[^`]*` parent_cmd=`[^`]*`$/);
       }
-    );
-
-    expect(summary.length).toBeLessThanOrEqual(cap);
-    expect(summary.split('; ')).toHaveLength(8);
-  });
-
-  it('bounds the escaped related line in the final prompt even for escape-heavy values', () => {
-    const summaryStep = findStepByName(workflow.steps, 'build_related_summary') as {
-      with: { related_summary: { summary: string } };
-    };
-    const message = (
-      findStepByName(workflow.steps, 'build_agent_message') as { with: { message: string } }
-    ).with.message;
-    const cap = Number(/related\.summary \| escape \| truncate: (\d+)/.exec(message)?.[1]);
-    const heavy = '<&"\''.repeat(700);
-    const engine = createWorkflowLiquidEngine();
-    const summary = engine.parseAndRenderSync(summaryStep.with.related_summary.summary, {
-      consts: workflow.consts,
-      steps: {
-        get_related_alerts: {
-          output: {
-            alerts: Array.from({ length: 8 }, () => ({
-              rule_name: heavy,
-              severity: 'critical',
-              timestamp: '2026-01-01T00:00:00.000Z',
-              process_name: heavy,
-              process_command_line: heavy,
-              process_parent_command_line: heavy,
-            })),
-          },
-        },
-      },
-    });
-    const prompt = engine.parseAndRenderSync(
-      message,
-      makeRenderContext([{ _id: 'a1' }], [{ id: 'a1', count: 8, summary }])
-    );
-    const relatedLine = prompt.split('\n').find((line) => line.includes('related alerts ('));
-    const shown = relatedLine?.slice(relatedLine.indexOf('shown): ') + 'shown): '.length) ?? '';
-
-    expect(shown.length).toBeLessThanOrEqual(cap);
-  });
+    }
+  );
 
   it('auto_close_ids is initialised to empty in set_workflow_variables', () => {
     const initStep = findStepByName(workflow.steps, 'set_workflow_variables') as {
