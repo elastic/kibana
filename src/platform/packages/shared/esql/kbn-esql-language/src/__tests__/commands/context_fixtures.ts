@@ -225,7 +225,7 @@ export const getMockCallbacks = (): MockedICommandCallbacks => {
     getSuggestedUserDefinedColumnName: jest.fn(),
     getColumnsForQuery: jest.fn(),
     hasMinimumLicenseRequired: jest.fn().mockReturnValue(true),
-    canCreateLookupIndex: jest.fn().mockReturnValue(true),
+    canCreateIndex: jest.fn().mockReturnValue(true),
     isServerless: false,
   };
 };

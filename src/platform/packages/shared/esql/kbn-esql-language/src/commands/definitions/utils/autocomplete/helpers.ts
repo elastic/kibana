@@ -311,3 +311,38 @@ export function getLookupIndexCreateSuggestion(indexName?: string): ISuggestionI
     incomplete: true,
   } as ISuggestionItem;
 }
+
+/**
+ * Suggestion that opens the index editor flyout to create a new standard index referenced by a
+ * FROM command. Pass the index name when it is already being typed, or omit it in an empty source
+ * slot to let the user name the index in the flyout. The command id must match
+ * `FROM_INDEX_COMMAND_ID` registered by the ES|QL editor (`use_from_index_editor.tsx`); the
+ * language package cannot import it without a circular dependency.
+ */
+export function getFromIndexCreateSuggestion(indexName?: string): ISuggestionItem {
+  const detail = i18n.translate('esqlLanguage.esql.autocomplete.createIndexDetailLabel', {
+    defaultMessage: 'Click to create',
+  });
+
+  return {
+    label: indexName
+      ? i18n.translate('esqlLanguage.esql.autocomplete.createIndexWithName', {
+          defaultMessage: 'Create index "{indexName}"',
+          values: { indexName },
+        })
+      : i18n.translate('esqlLanguage.esql.autocomplete.createIndex', {
+          defaultMessage: 'Create index',
+        }),
+    text: indexName ?? '',
+    kind: 'Issue',
+    filterText: indexName,
+    detail,
+    category: SuggestionCategory.CUSTOM_ACTION,
+    command: {
+      id: 'esql.from_index.edit',
+      title: detail,
+      arguments: [{ indexName: indexName ?? '' }],
+    },
+    incomplete: true,
+  };
+}

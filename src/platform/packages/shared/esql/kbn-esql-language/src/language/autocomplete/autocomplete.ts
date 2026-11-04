@@ -339,7 +339,7 @@ async function getSuggestionsWithinCommandExpression(
         : undefined,
       hasMinimumLicenseRequired,
       getKqlSuggestions: callbacks?.getKqlSuggestions,
-      canCreateLookupIndex: callbacks?.canCreateLookupIndex,
+      canCreateIndex: callbacks?.canCreateIndex,
       canSuggestResourceBrowser: callbacks?.canSuggestResourceBrowser,
       isServerless: callbacks?.isServerless,
     },

@@ -172,7 +172,7 @@ export interface ESQLCallbacks {
   getLicense?: () => Promise<Pick<ILicense, 'hasAtLeast'> | undefined>;
   getActiveProduct?: () => PricingProduct | undefined;
   getHistoryStarredItems?: () => Promise<string[]>;
-  canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
+  canCreateIndex?: (indexName: string) => Promise<boolean>;
   isServerless?: boolean;
   /** Enables the "Browse indices" suggestion and command integration. */
   canSuggestResourceBrowser?: () => Promise<boolean>;

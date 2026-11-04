@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { SOURCES_TYPES } from '@kbn/esql-types';
+import { SOURCES_TYPES, type ESQLSourceResult } from '@kbn/esql-types';
 import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { isSubQuery, isSource } from '@elastic/esql';
 import {
@@ -24,7 +24,10 @@ import {
 } from '../../definitions/utils/sources';
 import { metadataSuggestion, getMetadataSuggestions } from '../options/metadata';
 import { getRecommendedQueriesSuggestions } from '../options/recommended_queries';
-import { withinQuotes } from '../../definitions/utils/autocomplete/helpers';
+import {
+  withinQuotes,
+  getFromIndexCreateSuggestion,
+} from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import { getOverlapRange, isRestartingExpression } from '../../definitions/utils/shared';
@@ -112,6 +115,14 @@ async function handleFromAutocomplete(
     );
     if (indicesBrowserSuggestion) {
       suggestions.unshift(indicesBrowserSuggestion);
+    }
+    // Creating from a subquery's empty slot is not offered: the created index is inserted into the
+    // outer FROM command, which would not match the user's intent.
+    if (!context?.isCursorInSubquery) {
+      const createIndexSuggestion = await suggestCreateIndex('', context?.sources ?? [], callbacks);
+      if (createIndexSuggestion) {
+        suggestions.unshift(createIndexSuggestion);
+      }
     }
     return suggestions;
   }
@@ -252,9 +263,39 @@ async function suggestAdditionalSources(
       filterText: lastIndex.name,
       rangeToReplace: { start: indexNameStart, end: innerText.length },
     });
+
+    const createIndexSuggestion = await suggestCreateIndex(lastIndex.name, sources, callbacks);
+    if (createIndexSuggestion) {
+      suggestions.unshift(createIndexSuggestion);
+    }
   }
 
   return suggestions;
+}
+
+/**
+ * Offers to create an index, opening the index editor flyout on accept. Pass the index name being
+ * typed, or an empty string in an empty source slot to let the user name it in the flyout. Only
+ * creatable targets the user is allowed to create are suggested: wildcards and remote-cluster
+ * references are skipped, as are concrete names that already resolve to an existing source (those
+ * are editable, not creatable).
+ */
+async function suggestCreateIndex(
+  indexName: string,
+  sources: ESQLSourceResult[],
+  callbacks: ICommandCallbacks | undefined
+): Promise<ISuggestionItem | undefined> {
+  if (indexName.includes('*') || indexName.includes(':')) {
+    return undefined;
+  }
+
+  const indexAlreadyExists = Boolean(indexName) && sources.some(({ name }) => name === indexName);
+  if (indexAlreadyExists) {
+    return undefined;
+  }
+
+  const canCreate = (await callbacks?.canCreateIndex?.(indexName)) ?? false;
+  return canCreate ? getFromIndexCreateSuggestion(indexName || undefined) : undefined;
 }
 
 function shouldSuggestSubquery(context: ICommandContext | undefined): boolean {

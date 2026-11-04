@@ -23,6 +23,7 @@ import { isEqual } from 'lodash';
 import type React from 'react';
 import { useCallback, useEffect, useRef } from 'react';
 import type { ESQLEditorDeps } from '../types';
+import { appendIndexToFromCommand } from './append_index_to_from_command';
 import type { IndexPrivileges } from './use_index_privileges';
 import { useIndexPrivileges } from './use_index_privileges';
 import {
@@ -275,16 +276,25 @@ export const useFromIndexCommand = (
   );
 
   const onFlyoutClose = useCallback(
-    async (resultIndexName: string | null, indexCreated: boolean, indexHasNewFields: boolean) => {
+    async (
+      initialIndexName: string,
+      resultIndexName: string | null,
+      indexCreated: boolean,
+      indexHasNewFields: boolean
+    ) => {
       if (indexHasNewFields && resultIndexName) {
         onNewFieldsAddedToIndex?.(resultIndexName);
       }
 
-      // The FROM source already references the index by name, so there is nothing to rewrite in
-      // the query. We force a re-validation (the query may now resolve) and refresh the badges so
-      // a newly created index flips from "Create" to "Edit".
+      // When the name was typed, the FROM source already references the index, so there is nothing
+      // to rewrite. When created from an empty slot the query does not reference it yet, so insert
+      // the new index into the FROM command. Either way we force a re-validation (the query may now
+      // resolve) and refresh the badges so a newly created index flips from "Create" to "Edit".
       if (indexCreated && resultIndexName !== null) {
-        await onIndexCreated(query.esql);
+        const resultQuery = initialIndexName
+          ? query.esql
+          : appendIndexToFromCommand(query.esql, resultIndexName);
+        await onIndexCreated(resultQuery);
       }
 
       await addFromIndicesDecorator();
@@ -310,7 +320,12 @@ export const useFromIndexCommand = (
           indexCreatedDuringFlyout,
           indexHasNewFields,
         }) => {
-          await onFlyoutClose(resultIndexName, indexCreatedDuringFlyout, indexHasNewFields);
+          await onFlyoutClose(
+            indexName,
+            resultIndexName,
+            indexCreatedDuringFlyout,
+            indexHasNewFields
+          );
         },
         onOpenIndexInDiscover,
       } as EditIndexContentContext);

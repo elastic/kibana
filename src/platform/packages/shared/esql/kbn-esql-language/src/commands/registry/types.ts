@@ -204,7 +204,7 @@ export interface ICommandCallbacks {
   getColumnsForQuery?: (query: string) => Promise<ESQLColumnData[]>;
   hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
   getJoinIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
-  canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
+  canCreateIndex?: (indexName: string) => Promise<boolean>;
   isServerless?: boolean;
   getKqlSuggestions?: ESQLCallbacks['getKqlSuggestions'];
   canSuggestResourceBrowser?: () => Promise<boolean>;

@@ -16,6 +16,7 @@ import {
 import type { ICommandCallbacks } from '../types';
 import { autocomplete } from './autocomplete';
 import { findAutocompleteAstPosition } from '../../../language/shared/parse_for_autocomplete_query';
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 
 const metadataFields = [...METADATA_FIELDS].sort();
 
@@ -454,6 +455,87 @@ describe('FROM Autocomplete', () => {
 
       expect(regularSuggestion).toBeDefined();
       expect(regularSuggestion!.text).not.toBe('');
+    });
+  });
+
+  describe('... create index suggestion', () => {
+    const getCreateIndexSuggestion = async (
+      query: string,
+      canCreate: boolean,
+      context = mockContext,
+      offset?: number
+    ) => {
+      const callbacks: ICommandCallbacks = {
+        ...mockCallbacks,
+        canCreateIndex: jest.fn().mockResolvedValue(canCreate),
+      };
+      const cursorPosition = offset ?? query.length;
+      const { command } = findAutocompleteAstPosition(query, cursorPosition);
+      const suggestions = await autocomplete(query, command!, callbacks, context, cursorPosition);
+      return suggestions.find((suggestion) => suggestion.label.startsWith('Create index'));
+    };
+
+    test('suggests creating the concrete index being typed when it does not exist', async () => {
+      expect(await getCreateIndexSuggestion('FROM new_index', true)).toEqual({
+        label: 'Create index "new_index"',
+        text: 'new_index',
+        kind: 'Issue',
+        filterText: 'new_index',
+        detail: 'Click to create',
+        category: SuggestionCategory.CUSTOM_ACTION,
+        command: {
+          id: 'esql.from_index.edit',
+          title: 'Click to create',
+          arguments: [{ indexName: 'new_index' }],
+        },
+        incomplete: true,
+      });
+    });
+
+    test('does not suggest creating an index that already exists', async () => {
+      expect(await getCreateIndexSuggestion('FROM index', true)).toBeUndefined();
+    });
+
+    test('does not suggest creating an index without create privileges', async () => {
+      expect(await getCreateIndexSuggestion('FROM new_index', false)).toBeUndefined();
+    });
+
+    test('does not suggest creating a wildcard pattern', async () => {
+      expect(await getCreateIndexSuggestion('FROM logs-*', true)).toBeUndefined();
+    });
+
+    test('does not suggest creating a remote-cluster index', async () => {
+      expect(await getCreateIndexSuggestion('FROM remote_cluster:new_index', true)).toBeUndefined();
+    });
+
+    test('suggests creating a new index in an empty source slot', async () => {
+      expect(await getCreateIndexSuggestion('FROM ', true)).toEqual({
+        label: 'Create index',
+        text: '',
+        kind: 'Issue',
+        detail: 'Click to create',
+        category: SuggestionCategory.CUSTOM_ACTION,
+        command: {
+          id: 'esql.from_index.edit',
+          title: 'Click to create',
+          arguments: [{ indexName: '' }],
+        },
+        incomplete: true,
+      });
+    });
+
+    test('does not suggest creating a new index in an empty slot without privileges', async () => {
+      expect(await getCreateIndexSuggestion('FROM ', false)).toBeUndefined();
+    });
+
+    test('does not suggest creating a new index in an empty subquery slot', async () => {
+      const query = 'FROM a, (FROM )';
+      const offset = query.lastIndexOf(')');
+      const contextWithSubquery = { ...mockContext, isCursorInSubquery: true };
+
+      expect(
+        await getCreateIndexSuggestion(query, true, contextWithSubquery, offset)
+      ).toBeUndefined();
     });
   });
 });

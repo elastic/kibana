@@ -316,7 +316,7 @@ export const useEsqlCallbacks = ({
 
   const isServerless = Boolean(esqlService?.isServerless);
 
-  const canCreateLookupIndex = useCanCreateIndex();
+  const canCreateIndex = useCanCreateIndex();
   const canSuggestResourceBrowser = useCanSuggestResourceBrowser(enableResourceBrowser);
 
   const getKqlSuggestions = useCallback(
@@ -378,7 +378,7 @@ export const useEsqlCallbacks = ({
       getLicense,
       getActiveProduct,
       getHistoryStarredItems,
-      canCreateLookupIndex,
+      canCreateIndex,
       isServerless,
       getKqlSuggestions,
       canSuggestResourceBrowser,
@@ -400,7 +400,7 @@ export const useEsqlCallbacks = ({
       getLicense,
       getActiveProduct,
       getHistoryStarredItems,
-      canCreateLookupIndex,
+      canCreateIndex,
       isServerless,
       getKqlSuggestions,
       canSuggestResourceBrowser,

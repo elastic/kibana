@@ -83,7 +83,7 @@ export async function autocomplete(
         ? indexNameInput.slice(COORDINATOR_LOOKUP_JOIN_QUALIFIER.length)
         : indexNameInput;
 
-      const canCreate = (await callbacks?.canCreateLookupIndex?.(lookupIndexName)) ?? false;
+      const canCreate = (await callbacks?.canCreateIndex?.(lookupIndexName)) ?? false;
 
       const indexAlreadyExists = joinSources?.some(
         (source) => source.name === lookupIndexName || source.aliases.includes(lookupIndexName)

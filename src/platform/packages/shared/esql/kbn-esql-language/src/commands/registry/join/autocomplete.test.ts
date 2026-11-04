@@ -164,7 +164,7 @@ describe('JOIN Autocomplete', () => {
     });
 
     test('does not suggest the create index command when a user does not have required privileges', async () => {
-      (mockCallbacks.canCreateLookupIndex as jest.Mock).mockResolvedValueOnce(false);
+      (mockCallbacks.canCreateIndex as jest.Mock).mockResolvedValueOnce(false);
       await joinExpectSuggestions(
         'FROM index | LEFT JOIN ',
         { notContains: ['Create lookup index'] },
