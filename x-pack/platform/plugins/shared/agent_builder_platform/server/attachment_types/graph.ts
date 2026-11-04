@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  AttachmentTypeDefinition,
-  SurfaceComposition,
-} from '@kbn/agent-builder-server/attachments';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { ComponentsNode } from '@kbn/isomer-components';
 import { i18n } from '@kbn/i18n';
 import type { GraphAttachment, GraphAttachmentData, GraphEdge } from '../../common/attachments';
@@ -37,7 +34,97 @@ export const createGraphAttachmentType = (): AttachmentTypeDefinition<
         }),
       };
     },
-    toSurfaceComposition: ({ data }) => toGraphSurfaceComposition(data),
+    /**
+     * The graph as a table of its relationships, by node label, followed by the nodes that have none.
+     */
+    toSurfaceComposition: ({ data: { title, description, nodes, edges } }) => {
+      const labels = new Map(nodes.map(({ id, data }) => [id, data.label]));
+      const toCell = (id: string) => labels.get(id) || id;
+
+      const hasRelationshipLabels = edges.some(({ label }) => label);
+
+      const relationships: ComponentsNode[] =
+        edges.length > 0
+          ? [
+              {
+                type: 'table',
+                columns: [
+                  {
+                    label: i18n.translate(
+                      'xpack.agentBuilderPlatform.attachments.graph.surface.from',
+                      {
+                        defaultMessage: 'From',
+                      }
+                    ),
+                  },
+                  ...(hasRelationshipLabels
+                    ? [
+                        {
+                          label: i18n.translate(
+                            'xpack.agentBuilderPlatform.attachments.graph.surface.relationship',
+                            { defaultMessage: 'Relationship' }
+                          ),
+                        },
+                      ]
+                    : []),
+                  {
+                    label: i18n.translate(
+                      'xpack.agentBuilderPlatform.attachments.graph.surface.to',
+                      {
+                        defaultMessage: 'To',
+                      }
+                    ),
+                  },
+                ],
+                rows: edges.map(({ source, target, label }) => [
+                  toCell(source),
+                  ...(hasRelationshipLabels ? [label || null] : []),
+                  toCell(target),
+                ]),
+              },
+            ]
+          : [];
+
+      const connected = new Set(edges.flatMap(({ source, target }) => [source, target]));
+      const unconnected = nodes.filter(({ id }) => !connected.has(id));
+
+      const otherNodes: ComponentsNode[] =
+        unconnected.length > 0
+          ? [
+              {
+                type: 'table',
+                columns: [
+                  {
+                    label:
+                      edges.length > 0
+                        ? i18n.translate(
+                            'xpack.agentBuilderPlatform.attachments.graph.surface.unconnectedNode',
+                            { defaultMessage: 'Not connected' }
+                          )
+                        : i18n.translate(
+                            'xpack.agentBuilderPlatform.attachments.graph.surface.node',
+                            {
+                              defaultMessage: 'Node',
+                            }
+                          ),
+                  },
+                ],
+                rows: unconnected.map(({ id }) => [toCell(id)]),
+              },
+            ]
+          : [];
+
+      return {
+        type: 'view',
+        title:
+          title ||
+          i18n.translate('xpack.agentBuilderPlatform.attachments.graph.surface.title', {
+            defaultMessage: 'Graph',
+          }),
+        ...(description ? { subtitle: description } : {}),
+        body: [...relationships, ...otherNodes],
+      };
+    },
     getAgentDescription: () => {
       return 'A graph attachment contains a graph visualization configuration. Use it when you need to represent or discuss entity relationships, dependencies, and graph connectivity in a structured way. Rendering it inline displays the graph as a dynamic, interactive component in the conversation UI.';
     },
@@ -73,92 +160,4 @@ const getEdgeDisplayLabel = (edge: GraphEdge): string => {
   const relation = `${edge.source} -> ${edge.target}`;
 
   return edge.label ? `${relation} (${edge.label})` : relation;
-};
-
-/**
- * The graph as a table of its relationships, by node label, followed by the nodes that have none.
- */
-const toGraphSurfaceComposition = ({
-  title,
-  description,
-  nodes,
-  edges,
-}: GraphAttachmentData): SurfaceComposition => {
-  const labels = new Map(nodes.map(({ id, data }) => [id, data.label]));
-  const toCell = (id: string) => labels.get(id) || id;
-
-  const hasRelationshipLabels = edges.some(({ label }) => label);
-
-  const relationships: ComponentsNode[] =
-    edges.length > 0
-      ? [
-          {
-            type: 'table',
-            columns: [
-              {
-                label: i18n.translate('xpack.agentBuilderPlatform.attachments.graph.surface.from', {
-                  defaultMessage: 'From',
-                }),
-              },
-              ...(hasRelationshipLabels
-                ? [
-                    {
-                      label: i18n.translate(
-                        'xpack.agentBuilderPlatform.attachments.graph.surface.relationship',
-                        { defaultMessage: 'Relationship' }
-                      ),
-                    },
-                  ]
-                : []),
-              {
-                label: i18n.translate('xpack.agentBuilderPlatform.attachments.graph.surface.to', {
-                  defaultMessage: 'To',
-                }),
-              },
-            ],
-            rows: edges.map(({ source, target, label }) => [
-              toCell(source),
-              ...(hasRelationshipLabels ? [label || null] : []),
-              toCell(target),
-            ]),
-          },
-        ]
-      : [];
-
-  const connected = new Set(edges.flatMap(({ source, target }) => [source, target]));
-  const unconnected = nodes.filter(({ id }) => !connected.has(id));
-
-  const otherNodes: ComponentsNode[] =
-    unconnected.length > 0
-      ? [
-          {
-            type: 'table',
-            columns: [
-              {
-                label:
-                  edges.length > 0
-                    ? i18n.translate(
-                        'xpack.agentBuilderPlatform.attachments.graph.surface.unconnectedNode',
-                        { defaultMessage: 'Not connected' }
-                      )
-                    : i18n.translate('xpack.agentBuilderPlatform.attachments.graph.surface.node', {
-                        defaultMessage: 'Node',
-                      }),
-              },
-            ],
-            rows: unconnected.map(({ id }) => [toCell(id)]),
-          },
-        ]
-      : [];
-
-  return {
-    type: 'view',
-    title:
-      title ||
-      i18n.translate('xpack.agentBuilderPlatform.attachments.graph.surface.title', {
-        defaultMessage: 'Graph',
-      }),
-    ...(description ? { subtitle: description } : {}),
-    body: [...relationships, ...otherNodes],
-  };
 };
