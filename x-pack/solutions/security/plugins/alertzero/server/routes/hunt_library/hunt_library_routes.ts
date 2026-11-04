@@ -15,7 +15,12 @@ import {
   getWorkerRoleName,
 } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_READ, HUNT_LIBRARY_URL } from '../../../common/constants';
-import type { HuntHistoryResponse, HuntLaunchResponse } from '../../../common/hunt_library';
+import type {
+  HuntHistoryResponse,
+  HuntLaunchResponse,
+  HuntSessionVerification,
+} from '../../../common/hunt_library';
+import { HUNT_PROFILE_TOKEN_MAX_BYTES } from '../../../common/hunt_library_profile_state';
 import type {
   HuntAvailability,
   HuntLibraryDetail,
@@ -91,6 +96,7 @@ export const registerHuntLibraryRoutes = ({
   logger,
   getSpaceId,
   getWorkflowsManagement,
+  getHuntProfileTokenSigner,
   resolveUserNames,
   isServerless,
 }: RouteDependencies) => {
@@ -363,10 +369,18 @@ export const registerHuntLibraryRoutes = ({
             sessionId: request.body.session_id,
             logger,
           });
+          const profileToken = getHuntProfileTokenSigner()?.issue({
+            spaceId,
+            definitionId: definition.id,
+            definitionVersion: definition.version,
+            sessionId: result.sessionId,
+            sessionExecutionId: result.executionId,
+          });
           const body: HuntLaunchResponse = {
             session_id: result.sessionId,
             execution_id: result.executionId,
             reused_existing: result.reusedExisting,
+            ...(profileToken ? { profile_token: profileToken } : {}),
           };
           return response.ok({ body });
         } catch (err) {
@@ -379,6 +393,76 @@ export const registerHuntLibraryRoutes = ({
             body: { message: 'Failed to launch Hunt Library session' },
           });
         }
+      })
+    );
+
+  router.versioned
+    .post({
+      path: `${HUNT_LIBRARY_URL}/profile_state/verify`,
+      access: INTERNAL_API_ACCESS,
+      security: { authz: { requiredPrivileges: [ALERTZERO_API_PRIVILEGE_READ] } },
+      summary: 'Verify signed Hunt session state and return the hunt guidance for Discover',
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: {
+            body: schema.object({
+              token: schema.string({ minLength: 1, maxLength: HUNT_PROFILE_TOKEN_MAX_BYTES }),
+            }),
+          },
+        },
+      },
+      withAlertZeroEnabled(async (_context, request, response) => {
+        const signer = getHuntProfileTokenSigner();
+        if (!signer) {
+          return response.customError({
+            statusCode: 503,
+            body: { message: 'Hunt mode is not configured' },
+          });
+        }
+
+        const result = signer.verify(request.body.token, { spaceId: getSpaceId(request) });
+        if (!result.ok) {
+          return response.badRequest({
+            body: {
+              message: 'Invalid Hunt session state',
+              attributes: { reason: result.reason },
+            },
+          });
+        }
+
+        const { payload } = result;
+        const definition = getHuntDefinition(payload.definitionId);
+        if (!definition || definition.version !== payload.definitionVersion) {
+          return response.conflict({
+            body: {
+              message: 'This hunt changed since the session started',
+              attributes: { reason: 'definition_changed' },
+            },
+          });
+        }
+
+        const body: HuntSessionVerification = {
+          session_id: payload.sessionId,
+          session_execution_id: payload.sessionExecutionId,
+          ...(payload.investigationId ? { investigation_id: payload.investigationId } : {}),
+          expires_at: new Date(payload.exp * 1000).toISOString(),
+          definition: {
+            id: definition.id,
+            version: definition.version,
+            name: definition.name,
+            hypothesis: definition.hypothesis,
+            references: [...definition.references],
+            guidance: {
+              analystNotes: [...definition.guidance.analystNotes],
+              expectedFalsePositives: [...definition.guidance.expectedFalsePositives],
+              suggestedPivots: [...definition.guidance.suggestedPivots],
+            },
+          },
+        };
+        return response.ok({ body });
       })
     );
 };

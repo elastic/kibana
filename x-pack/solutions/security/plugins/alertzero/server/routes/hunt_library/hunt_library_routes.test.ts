@@ -9,13 +9,26 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { RouteDependencies } from '../register_routes';
 import { HUNT_DEFINITIONS } from '../../hunt_library/seed';
+import {
+  createHuntProfileTokenSigner,
+  type HuntProfileTokenSigner,
+} from '../../hunt_library/profile_token';
 import { registerHuntLibraryRoutes } from './hunt_library_routes';
 
 const makeDeps = ({
   universe = ['logs-*'],
   isServerless = false,
   userName = 'analyst',
-}: { universe?: string[]; isServerless?: boolean; userName?: string } = {}) => {
+  signer = createHuntProfileTokenSigner({ key: 'k'.repeat(40) }),
+  spaceId = 'default',
+}: {
+  universe?: string[];
+  isServerless?: boolean;
+  userName?: string;
+  /** Pass `null` for a deployment with no signing key. */
+  signer?: HuntProfileTokenSigner | null;
+  spaceId?: string;
+} = {}) => {
   const get = jest.fn();
   const post = jest.fn();
   const addVersion = jest.fn();
@@ -40,8 +53,9 @@ const makeDeps = ({
   registerHuntLibraryRoutes({
     router: router as unknown as RouteDependencies['router'],
     logger: loggingSystemMock.createLogger(),
-    getSpaceId: () => 'default',
+    getSpaceId: () => spaceId,
     getWorkflowsManagement: () => managementRef.current,
+    getHuntProfileTokenSigner: () => signer ?? undefined,
     resolveUserNames,
     isServerless,
   } as unknown as RouteDependencies);
@@ -102,6 +116,9 @@ const makeDeps = ({
     launchRoute: post.mock.calls[0][0],
     launch: addVersion.mock.calls[3][1],
     launchValidate: addVersion.mock.calls[3][0].validate,
+    verifyRoute: post.mock.calls[1][0],
+    verify: addVersion.mock.calls[4][1],
+    verifyValidate: addVersion.mock.calls[4][0].validate,
     management,
     managementRef,
     context,
@@ -268,6 +285,116 @@ describe('registerHuntLibraryRoutes', () => {
   });
 });
 
+describe('hunt profile state verify route', () => {
+  const KEY = 'k'.repeat(40);
+  const claims = {
+    spaceId: 'default',
+    definitionId: 'rare_lsass_process_access',
+    definitionVersion: 1,
+    sessionId: '0b7c1a3e-5d2f-4c8a-9e61-3f4b8a7d2c10',
+    sessionExecutionId: 'a8c1d5f2-3b7e-5f4a-9d10-6e2b8c4a7f13',
+  };
+  const verifyRequest = (token: string) => httpServerMock.createKibanaRequest({ body: { token } });
+  const issue = (overrides: Partial<typeof claims> & { investigationId?: string } = {}) =>
+    createHuntProfileTokenSigner({ key: KEY }).issue({ ...claims, ...overrides });
+
+  it('requires only AlertZero Read and is internal', () => {
+    const { verifyRoute } = makeDeps();
+
+    expect(verifyRoute.access).toBe('internal');
+    expect(verifyRoute.security.authz.requiredPrivileges).toEqual(['alertzero_read']);
+  });
+
+  it('bounds the body to one token of at most 4 KB', () => {
+    const { verifyValidate } = makeDeps();
+    const body = verifyValidate.request.body;
+
+    expect(body.validate({ token: 'v1.a.b' })).toEqual({ token: 'v1.a.b' });
+    expect(() => body.validate({ token: '' })).toThrow();
+    expect(() => body.validate({ token: 'a'.repeat(4097) })).toThrow();
+    expect(() => body.validate({ token: 'a', space_id: 'other' })).toThrow();
+  });
+
+  it('returns the session and the hunt guidance for a valid token', async () => {
+    const { verify, context } = makeDeps();
+    const response = httpServerMock.createResponseFactory();
+
+    await verify(context, verifyRequest(issue({ investigationId: 'inv-1' })), response);
+
+    const body = response.ok.mock.calls[0][0]!.body as {
+      session_id: string;
+      session_execution_id: string;
+      investigation_id?: string;
+      expires_at: string;
+      definition: { id: string; hypothesis: string; guidance: { suggestedPivots: string[] } };
+    };
+    expect(body).toMatchObject({
+      session_id: claims.sessionId,
+      session_execution_id: claims.sessionExecutionId,
+      investigation_id: 'inv-1',
+    });
+    expect(Date.parse(body.expires_at)).toBeGreaterThan(Date.now());
+    expect(body.definition.id).toBe('rare_lsass_process_access');
+    expect(body.definition.hypothesis.length).toBeGreaterThan(0);
+    expect(body.definition).not.toHaveProperty('query');
+  });
+
+  it('rejects a token for another space', async () => {
+    const { verify, context } = makeDeps({ spaceId: 'other' });
+    const response = httpServerMock.createResponseFactory();
+
+    await verify(context, verifyRequest(issue()), response);
+
+    expect(response.badRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({ attributes: { reason: 'wrong_space' } }),
+      })
+    );
+    expect(response.ok).not.toHaveBeenCalled();
+  });
+
+  it('rejects a forged or malformed token', async () => {
+    const { verify, context } = makeDeps();
+    const forged = createHuntProfileTokenSigner({ key: 'z'.repeat(40) }).issue(claims);
+
+    for (const [token, reason] of [
+      [forged, 'bad_signature'],
+      ['not-a-token', 'malformed'],
+    ]) {
+      const response = httpServerMock.createResponseFactory();
+      await verify(context, verifyRequest(token), response);
+      expect(response.badRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({ attributes: { reason } }),
+        })
+      );
+    }
+  });
+
+  it('refuses a token for a hunt that no longer exists or changed version', async () => {
+    const { verify, context } = makeDeps();
+
+    for (const overrides of [{ definitionId: 'nope' }, { definitionVersion: 99 }]) {
+      const response = httpServerMock.createResponseFactory();
+      await verify(context, verifyRequest(issue(overrides)), response);
+      expect(response.conflict).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({ attributes: { reason: 'definition_changed' } }),
+        })
+      );
+    }
+  });
+
+  it('returns 503 when no signing key is configured', async () => {
+    const { verify, context } = makeDeps({ signer: null });
+    const response = httpServerMock.createResponseFactory();
+
+    await verify(context, verifyRequest(issue()), response);
+
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 503 }));
+  });
+});
+
 describe('hunt launch route', () => {
   const SESSION = '0b7c1a3e-5d2f-4c8a-9e61-3f4b8a7d2c10';
   const launchRequest = (id = 'rare_lsass_process_access', sessionId = SESSION) =>
@@ -343,6 +470,36 @@ describe('hunt launch route', () => {
 
     expect(response.conflict).toHaveBeenCalled();
     expect(management.executeLabeledWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('returns a signed profile token bound to the session and space', async () => {
+    const signer = createHuntProfileTokenSigner({ key: 'k'.repeat(40) });
+    const { launch, context } = makeDeps({ signer, spaceId: 'sec' });
+    const response = httpServerMock.createResponseFactory();
+
+    await launch(context, launchRequest(), response);
+
+    const body = response.ok.mock.calls[0][0]!.body as {
+      session_id: string;
+      execution_id: string;
+      profile_token?: string;
+    };
+    const verified = signer.verify(body.profile_token, { spaceId: 'sec' });
+    expect(verified.ok && verified.payload).toMatchObject({
+      spaceId: 'sec',
+      definitionId: 'rare_lsass_process_access',
+      sessionId: SESSION,
+      sessionExecutionId: body.execution_id,
+    });
+  });
+
+  it('launches without a profile token when no signing key is configured', async () => {
+    const { launch, context } = makeDeps({ signer: null });
+    const response = httpServerMock.createResponseFactory();
+
+    await launch(context, launchRequest(), response);
+
+    expect(response.ok.mock.calls[0][0]!.body).not.toHaveProperty('profile_token');
   });
 
   it('returns 503 when Workflows management is unavailable', async () => {

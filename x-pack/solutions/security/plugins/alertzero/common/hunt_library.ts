@@ -91,4 +91,31 @@ export interface HuntLaunchResponse {
   execution_id: string;
   /** True when this call was a retry of a launch that already recorded the session. */
   reused_existing: boolean;
+  /**
+   * Signed state that opens Discover in Hunt mode. Absent when no profile token key is configured,
+   * in which case Discover opens without Hunt mode.
+   */
+  profile_token?: string;
+}
+
+/** What a verified Hunt session token resolves to, for Discover's Hunt mode. */
+export interface HuntSessionVerification {
+  session_id: string;
+  session_execution_id: string;
+  /** Set when the session continues an existing Investigation. */
+  investigation_id?: string;
+  /** ISO-8601 time the token stops being accepted. */
+  expires_at: string;
+  definition: {
+    id: string;
+    version: number;
+    name: string;
+    hypothesis: string;
+    references: string[];
+    guidance: {
+      analystNotes: string[];
+      expectedFalsePositives: string[];
+      suggestedPivots: string[];
+    };
+  };
 }
