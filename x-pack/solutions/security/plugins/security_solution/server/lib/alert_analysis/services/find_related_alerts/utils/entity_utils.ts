@@ -44,10 +44,15 @@ export const RELATED_ALERT_TRUNCATED_FIELD_MAX_LENGTHS: Readonly<Record<string, 
   'process.command_line': 300,
   'process.parent.command_line': 300,
   message: 300,
+  'kibana.alert.reason': 300,
+  'kibana.alert.rule.name': 200,
   'kibana.alert.rule.description': 200,
   'process.executable': 200,
   'file.path': 200,
 };
+
+// Multi-valued capped fields keep only their first values so total payload stays bounded.
+const CAPPED_FIELD_MAX_ARRAY_ITEMS = 5;
 
 export const RELATED_ALERT_ENTITY_SOURCE_INCLUDES = [
   'host.name',
@@ -123,7 +128,11 @@ const truncateNode = (node: Record<string, unknown>, prefix: string): void => {
       return maxLength === undefined ? value : truncateString(value, maxLength);
     }
     if (Array.isArray(value)) {
-      return value.map((item) => truncateValue(item, path));
+      const items =
+        path in RELATED_ALERT_TRUNCATED_FIELD_MAX_LENGTHS
+          ? value.slice(0, CAPPED_FIELD_MAX_ARRAY_ITEMS)
+          : value;
+      return items.map((item) => truncateValue(item, path));
     }
     if (isPlainObject(value)) {
       truncateNode(value, path);
@@ -136,10 +145,7 @@ const truncateNode = (node: Record<string, unknown>, prefix: string): void => {
   }
 };
 
-/**
- * Caps long text fields wherever they appear in `_source`: dotted keys, nested objects, mixed
- * shapes (`{ 'process.parent': { command_line } }`) and arrays of objects. Returns a copy.
- */
+// Matches the joined path of each leaf, so dotted, nested and mixed `_source` shapes all work.
 export const truncateRelatedAlertLongFields = (
   source: Record<string, unknown>
 ): Record<string, unknown> => {

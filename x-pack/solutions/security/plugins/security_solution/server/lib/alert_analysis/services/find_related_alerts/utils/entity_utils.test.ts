@@ -128,16 +128,33 @@ describe('entity_utils', () => {
       expect(result).not.toMatch(/[\ud800-\udbff](?![\udc00-\udfff])/);
     });
 
-    it('caps message, process.executable and file.path', () => {
+    it('caps message, reason, rule name, process.executable and file.path', () => {
       const result = truncateRelatedAlertLongFields({
         message: 'm'.repeat(1000),
+        'kibana.alert.reason': 'r'.repeat(1000),
+        kibana: { alert: { rule: { name: 'n'.repeat(1000) } } },
         process: { executable: 'e'.repeat(1000) },
         'file.path': 'f'.repeat(1000),
-      }) as Record<string, unknown> & { process: { executable: string } };
+      }) as Record<string, unknown> & {
+        process: { executable: string };
+        kibana: { alert: { rule: { name: string } } };
+      };
 
-      expect(result.message).toBe('m'.repeat(300) + suffix);
-      expect(result.process.executable).toBe('e'.repeat(200) + suffix);
-      expect(result['file.path']).toBe('f'.repeat(200) + suffix);
+      expect(result.message).toBe(`${'m'.repeat(300)}${suffix}`);
+      expect(result['kibana.alert.reason']).toBe(`${'r'.repeat(300)}${suffix}`);
+      expect(result.kibana.alert.rule.name).toBe(`${'n'.repeat(200)}${suffix}`);
+      expect(result.process.executable).toBe(`${'e'.repeat(200)}${suffix}`);
+      expect(result['file.path']).toBe(`${'f'.repeat(200)}${suffix}`);
+    });
+
+    it('keeps only the first 5 elements of capped array fields and leaves other arrays alone', () => {
+      const result = truncateRelatedAlertLongFields({
+        'process.command_line': ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7'],
+        'host.name': ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7'],
+      });
+
+      expect(result['process.command_line']).toEqual(['c1', 'c2', 'c3', 'c4', 'c5']);
+      expect(result['host.name']).toHaveLength(7);
     });
   });
 });
