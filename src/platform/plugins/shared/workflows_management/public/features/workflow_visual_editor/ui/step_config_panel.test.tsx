@@ -1182,6 +1182,25 @@ with:
       );
     });
 
+    it('lets only the last text run shrink so a long sentence never squeezes a chip', () => {
+      renderPanel({
+        initialFragment:
+          'name: n\ntype: slack\nconnector-id: abc\nwith:\n  message: "Found {{ inputs.user }} in a long sentence"\n',
+      });
+      const readView = screen.getByTestId('workflowStepConfigField-with.message');
+      const flex = (element: Element) => {
+        const { flexGrow, flexShrink } = getComputedStyle(element);
+        return `${flexGrow} ${flexShrink}`;
+      };
+      const [leading, trailing] = Array.from(readView.querySelectorAll('[data-run-offset]'));
+      const chip = readView.querySelector('[data-ref-start]') as Element;
+      expect(flex(leading)).toBe('0 0');
+      expect(flex(chip)).toBe('0 0');
+      // The trailing text is the one that gives way (with an ellipsis).
+      expect(flex(trailing)).toBe('0 1');
+      expect(getComputedStyle(trailing).textOverflow).toBe('ellipsis');
+    });
+
     it('opens the picker on the chip to swap it when a chip is clicked', () => {
       renderPanel();
       const chip = within(screen.getByTestId('workflowStepConfigField-with.message')).getByTestId(

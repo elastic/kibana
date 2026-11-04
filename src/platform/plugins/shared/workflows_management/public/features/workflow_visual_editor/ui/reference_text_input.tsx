@@ -11,11 +11,11 @@ import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import type { monaco } from '@kbn/code-editor';
-import { i18n } from '@kbn/i18n';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 import { workflowsEditorChromeOverrides } from '@kbn/workflows-ui';
+import { createMonacoSelectionBridge } from './create_monaco_selection_bridge';
 import type { ReferenceCapableBind } from './reference_capable_field';
 import { ReferenceChip } from './reference_chip';
+import { ContainerInSentenceCallout } from './reference_container_callout';
 import {
   getReferenceChipEditorCss,
   useReferenceDecorations,
@@ -108,7 +108,7 @@ export function ReferenceTextInput({
   /** Reflected as `data-language` so the field's kind stays inspectable. */
   readonly language?: string;
 }) {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode } = useEuiTheme();
   const { fontSize } = useEuiFontSize('xs');
   const masks = useReferenceIconMasks();
   const { value, isOpen, appendControls, registerSelection, openPickerAtRange } = bind;
@@ -175,42 +175,7 @@ export function ReferenceTextInput({
     (mounted: Editor) => {
       const model = mounted.getModel();
       const clamp = (offset: number) => Math.max(0, Math.min(offset, model?.getValueLength() ?? 0));
-      const bridge = {
-        focus: () => mounted.focus(),
-        getCaret: () => {
-          const position = mounted.getPosition();
-          return model && position ? model.getOffsetAt(position) : valueRef.current.length;
-        },
-        setCaret: (offset: number) => {
-          if (!model) return;
-          const position = model.getPositionAt(clamp(offset));
-          mounted.setPosition(position);
-          mounted.revealPosition(position);
-          mounted.focus();
-        },
-        replaceText: (start: number, end: number, text: string) => {
-          if (!model) return false;
-          const from = model.getPositionAt(clamp(start));
-          const to = model.getPositionAt(clamp(end));
-          mounted.focus();
-          mounted.executeEdits('workflow-data-reference', [
-            {
-              range: {
-                startLineNumber: from.lineNumber,
-                startColumn: from.column,
-                endLineNumber: to.lineNumber,
-                endColumn: to.column,
-              },
-              text,
-              forceMoveMarkers: true,
-            },
-          ]);
-          const next = model.getPositionAt(clamp(start) + text.length);
-          mounted.setPosition(next);
-          mounted.revealPosition(next);
-          return true;
-        },
-      };
+      const bridge = createMonacoSelectionBridge(mounted, () => valueRef.current.length);
       registerSelection(bridge);
       // A single-line field: Enter does nothing.
       mounted.onKeyDown((event) => {
@@ -316,7 +281,7 @@ export function ReferenceTextInput({
         '.monaco-editor, .monaco-editor-background, .monaco-editor .margin': {
           backgroundColor: 'transparent',
         },
-        ...getReferenceChipEditorCss(euiTheme, masks),
+        ...getReferenceChipEditorCss(euiTheme, masks, colorMode),
       }}
       data-mode="edit"
     >
@@ -364,23 +329,37 @@ export function ReferenceTextInput({
   );
 }
 
+interface ReadSegment {
+  readonly start: number;
+  readonly end: number;
+  /** Set for a reference; plain text otherwise. */
+  readonly token?: ReferenceToken;
+}
+
+/**
+ * Text runs and chips in order. When the line is wider than the field, only the last text run
+ * gives way (it truncates with an ellipsis): a chip squeezed instead would collapse to a sliver
+ * while the text it makes room for is clipped anyway. A chip alone wider than the field still
+ * truncates its own path.
+ */
 const readRuns = (text: string, tokens: readonly ReferenceToken[]): React.ReactNode[] => {
-  const nodes: React.ReactNode[] = [];
+  const segments: ReadSegment[] = [];
   let cursor = 0;
   tokens.forEach((token) => {
-    if (token.start > cursor) {
-      nodes.push(
-        <span key={`t${cursor}`} data-run-offset={cursor} css={{ flex: '0 0 auto' }}>
-          {text.slice(cursor, token.start)}
-        </span>
-      );
-    }
-    nodes.push(
+    if (token.start > cursor) segments.push({ start: cursor, end: token.start });
+    segments.push({ start: token.start, end: token.end, token });
+    cursor = token.end;
+  });
+  if (cursor < text.length) segments.push({ start: cursor, end: text.length });
+  const lastTextIndex = segments.map((segment) => !segment.token).lastIndexOf(true);
+
+  return segments.map(({ start, end, token }, index) =>
+    token ? (
       <span
-        key={`c${token.start}`}
-        data-ref-start={token.start}
-        data-ref-end={token.end}
-        css={{ display: 'inline-flex', flex: '0 1 auto', minInlineSize: 0 }}
+        key={`c${start}`}
+        data-ref-start={start}
+        data-ref-end={end}
+        css={{ display: 'inline-flex', flex: '0 0 auto', maxInlineSize: '100%' }}
       >
         <ReferenceChip
           expression={token.expression}
@@ -390,60 +369,18 @@ const readRuns = (text: string, tokens: readonly ReferenceToken[]): React.ReactN
           data-test-subj="workflowReferenceChip"
         />
       </span>
-    );
-    cursor = token.end;
-  });
-  if (cursor < text.length) {
-    nodes.push(
-      <span key={`t${cursor}`} data-run-offset={cursor} css={{ flex: '0 0 auto' }}>
-        {text.slice(cursor)}
+    ) : (
+      <span
+        key={`t${start}`}
+        data-run-offset={start}
+        css={
+          index === lastTextIndex
+            ? { flex: '0 1 auto', minInlineSize: 0, overflow: 'hidden', textOverflow: 'ellipsis' }
+            : { flex: '0 0 auto' }
+        }
+      >
+        {text.slice(start, end)}
       </span>
-    );
-  }
-  return nodes;
-};
-
-function ContainerInSentenceCallout({
-  token,
-  onFix,
-  onDismiss,
-  testSubj,
-}: {
-  readonly token: ReferenceToken;
-  readonly onFix: () => void;
-  readonly onDismiss: () => void;
-  readonly testSubj: string;
-}) {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <KbnWarningCallout
-      size="s"
-      announceOnMount={false}
-      title={i18n.translate('workflows.stepConfigPanel.referenceCallout.title', {
-        defaultMessage: "A {type} can't go inside a sentence as it is",
-        values: { type: token.typeLabel ?? 'list' },
-      })}
-      text={i18n.translate('workflows.stepConfigPanel.referenceCallout.body', {
-        defaultMessage: "Insert it as JSON text to show what's in it.",
-      })}
-      actionProps={{
-        primary: {
-          children: i18n.translate('workflows.stepConfigPanel.referenceCallout.insertAsJson', {
-            defaultMessage: 'Insert as JSON text',
-          }),
-          onClick: onFix,
-          'data-test-subj': `${testSubj}-insertAsJson`,
-        },
-        secondary: {
-          children: i18n.translate('workflows.stepConfigPanel.referenceCallout.keepAsIs', {
-            defaultMessage: 'Keep as is',
-          }),
-          onClick: onDismiss,
-          'data-test-subj': `${testSubj}-keepAsIs`,
-        },
-      }}
-      css={{ marginBlockStart: euiTheme.size.xs }}
-      data-test-subj={`${testSubj}-containerCallout`}
-    />
+    )
   );
-}
+};

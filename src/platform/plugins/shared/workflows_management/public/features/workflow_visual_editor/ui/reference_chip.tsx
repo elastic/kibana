@@ -55,7 +55,7 @@ export function ReferenceChip({
   const content = (
     <>
       <span aria-hidden css={{ display: 'inline-flex', flex: '0 0 auto' }}>
-        <FieldIcon type={toReferenceIconType(resolvedType)} color="gray" size="s" />
+        <FieldIcon type={toReferenceIconType(resolvedType)} color="gray" size="s" shape="square" />
       </span>
       <span css={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {expression}

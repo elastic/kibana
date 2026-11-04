@@ -19,13 +19,28 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { CodeEditor } from '@kbn/code-editor';
+import type { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { XJSON_LANG_ID } from '@kbn/monaco';
+import { workflowsEditorChromeOverrides } from '@kbn/workflows-ui';
+import { createMonacoSelectionBridge } from './create_monaco_selection_bridge';
 import type { DataReferenceRunControls } from './data_reference_catalog_tree';
 import { DataReferenceCatalogTree } from './data_reference_catalog_tree';
 import { ReferenceCapableField } from './reference_capable_field';
+import type { ReferenceSelectionBridge } from './reference_capable_field';
+import { ContainerInSentenceCallout } from './reference_container_callout';
+import {
+  getReferenceChipEditorCss,
+  useReferenceDecorations,
+  useReferenceIconMasks,
+} from './use_reference_decorations';
 import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
+import { findReferenceTokens, insertTokenAsJsonText } from '../lib/reference_tokens';
+
+type Editor = monaco.editor.IStandaloneCodeEditor;
 
 export interface FieldEditorSubFlyoutProps {
   readonly fieldLabel: string;
@@ -46,17 +61,33 @@ const VALUE_LABEL = i18n.translate('workflows.fieldEditorSubFlyout.valueLabel', 
   defaultMessage: 'Value',
 });
 
-const MAX_DRAFT_HISTORY = 200;
-
-interface DraftHistory {
-  stack: string[];
-  index: number;
-}
-
-const createDraftHistory = (initial: string): DraftHistory => ({
-  stack: [initial],
-  index: 0,
-});
+const EDITOR_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
+  automaticLayout: true,
+  fontSize: 13,
+  minimap: { enabled: false },
+  lineNumbers: 'off',
+  lineNumbersMinChars: 0,
+  glyphMargin: false,
+  folding: false,
+  lineDecorationsWidth: 0,
+  scrollBeyondLastLine: false,
+  wordWrap: 'on',
+  renderLineHighlight: 'none',
+  overviewRulerLanes: 0,
+  scrollbar: { vertical: 'auto', horizontal: 'hidden' },
+  quickSuggestions: false,
+  suggestOnTriggerCharacters: false,
+  // Typed braces and quotes are plain text here: auto-closing `{` into `{}` would also hide
+  // the trigger the picker listens for.
+  autoClosingBrackets: 'never',
+  autoClosingQuotes: 'never',
+  autoSurround: 'never',
+  formatOnType: false,
+  formatOnPaste: false,
+  // Drops from the reference tree are inserted by the pane (exact position, once); Monaco's
+  // own drop handling would insert a second copy.
+  dropIntoEditor: { enabled: false },
+};
 
 /**
  * Expanded field editor stacked inside the canvas-bounded step panel.
@@ -68,23 +99,37 @@ export function FieldEditorSubFlyout({
   onChange,
   catalog,
   runControls,
+  language,
   onBack,
   onCloseStack,
 }: FieldEditorSubFlyoutProps) {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode } = useEuiTheme();
+  const masks = useReferenceIconMasks();
   const titleId = useGeneratedHtmlId({ prefix: 'workflowFieldEditorTitle' });
   const valueLabelId = useGeneratedHtmlId({ prefix: 'workflowFieldEditorValue' });
   const [draft, setDraft] = useState(value);
+  const [editor, setEditor] = useState<Editor | null>(null);
+  const [dismissed, setDismissed] = useState<ReadonlySet<string>>(() => new Set());
   const [isDragOver, setIsDragOver] = useState(false);
   const isDragOverRef = useRef(false);
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const caretRef = useRef(value.length);
-  const focusedOnceRef = useRef(false);
+  const bridgeRef = useRef<ReferenceSelectionBridge | null>(null);
+  const draftRef = useRef(draft);
+  draftRef.current = draft;
   const dragOverCaretRafRef = useRef<number | null>(null);
   const dragOverPointerRef = useRef({ x: 0, y: 0 });
   const editorFocusedForDragRef = useRef(false);
-  /** Scoped undo/redo — controlled React value resets the browser textarea stack. */
-  const draftHistoryRef = useRef<DraftHistory>(createDraftHistory(value));
+
+  // `{` is syntax in JSON and KQL, so only free text gets the `{` trigger and the "list inside a
+  // sentence" warning (same rule as the inline fields).
+  const isFreeText = language === undefined || language === 'plaintext';
+  const tokens = useMemo(
+    () => findReferenceTokens(draft, { catalog, warnContainersInSentence: isFreeText }),
+    [catalog, draft, isFreeText]
+  );
+  useReferenceDecorations(editor, draft, tokens);
+  const warning = tokens.find(
+    (token) => token.isContainerInSentence && !dismissed.has(token.expression)
+  );
 
   // Same kbd chip style as the inline data-reference picker footer.
   const keyChipCss = {
@@ -104,132 +149,58 @@ export function FieldEditorSubFlyout({
   // Sync when the parent field value changes from outside (not every keystroke
   // source — parent should push the same string we already wrote).
   useEffect(() => {
-    setDraft((prev) => {
-      if (prev === value) return prev;
-      draftHistoryRef.current = createDraftHistory(value);
-      caretRef.current = value.length;
-      return value;
-    });
+    setDraft((prev) => (prev === value ? prev : value));
   }, [value]);
 
-  // Focus the editor on open with the caret at the end.
-  useEffect(() => {
-    if (focusedOnceRef.current) return;
-    focusedOnceRef.current = true;
-    window.requestAnimationFrame(() => {
-      const el = textareaRef.current;
-      if (!el) return;
-      el.focus();
-      const end = el.value.length;
-      el.setSelectionRange(end, end);
-      caretRef.current = end;
-    });
-  }, []);
-
-  const recordDraftHistory = useCallback((next: string) => {
-    const history = draftHistoryRef.current;
-    if (history.stack[history.index] === next) return;
-    const stack = history.stack.slice(0, history.index + 1);
-    stack.push(next);
-    while (stack.length > MAX_DRAFT_HISTORY) {
-      stack.shift();
-    }
-    draftHistoryRef.current = { stack, index: stack.length - 1 };
-  }, []);
-
   const applyDraft = useCallback(
-    (next: string, caret?: number, options?: { readonly recordHistory?: boolean }) => {
-      if (options?.recordHistory !== false) {
-        recordDraftHistory(next);
-      }
+    (next: string) => {
       setDraft(next);
-      if (caret !== undefined) caretRef.current = caret;
       onChange(next);
     },
-    [onChange, recordDraftHistory]
+    [onChange]
   );
 
-  const restoreDraftFromHistory = useCallback(
-    (next: string) => {
-      const caret = next.length;
-      applyDraft(next, caret, { recordHistory: false });
-      window.requestAnimationFrame(() => {
-        const el = textareaRef.current;
-        if (!el) return;
-        el.focus();
-        el.setSelectionRange(caret, caret);
-      });
+  // Reference tree click-to-insert: at the editor's caret, as an undoable edit.
+  const insertAtCaret = useCallback(
+    (token: string) => {
+      const bridge = bridgeRef.current;
+      if (!bridge) {
+        applyDraft(`${draftRef.current}${token}`);
+        return;
+      }
+      const caret = bridge.getCaret();
+      bridge.replaceText?.(caret, caret, token);
     },
     [applyDraft]
   );
 
-  const undoDraft = useCallback(() => {
-    const history = draftHistoryRef.current;
-    if (history.index <= 0) return;
-    history.index -= 1;
-    restoreDraftFromHistory(history.stack[history.index]);
-  }, [restoreDraftFromHistory]);
-
-  const redoDraft = useCallback(() => {
-    const history = draftHistoryRef.current;
-    if (history.index >= history.stack.length - 1) return;
-    history.index += 1;
-    restoreDraftFromHistory(history.stack[history.index]);
-  }, [restoreDraftFromHistory]);
-
-  const insertAtOffset = useCallback(
-    (token: string, offset: number) => {
-      const start = Math.max(0, Math.min(offset, draft.length));
-      const next = `${draft.slice(0, start)}${token}${draft.slice(start)}`;
-      const nextCaret = start + token.length;
-      applyDraft(next, nextCaret);
-      window.requestAnimationFrame(() => {
-        const el = textareaRef.current;
-        if (!el) return;
-        el.focus();
-        el.setSelectionRange(nextCaret, nextCaret);
-      });
+  const handleEditorMount = useCallback(
+    (mounted: Editor, registerSelection: (bridge: ReferenceSelectionBridge) => void) => {
+      const bridge = createMonacoSelectionBridge(mounted, () => draftRef.current.length);
+      bridgeRef.current = bridge;
+      registerSelection(bridge);
+      setEditor((current) => current ?? mounted);
+      // Open focused, with the caret at the end.
+      bridge.setCaret(draftRef.current.length);
     },
-    [applyDraft, draft]
+    []
   );
 
-  const insertAtCaret = useCallback(
-    (token: string) => {
-      insertAtOffset(token, caretRef.current);
+  const offsetAtPointer = useCallback(
+    (clientX: number, clientY: number): number | undefined => {
+      const position = editor?.getTargetAtClientPoint(clientX, clientY)?.position;
+      const model = editor?.getModel();
+      return position && model ? model.getOffsetAt(position) : undefined;
     },
-    [insertAtOffset]
+    [editor]
   );
 
-  const caretFromPointer = useCallback(
-    (clientX: number, clientY: number, el: HTMLTextAreaElement): number => {
-      // Approximate drop caret from pointer position within a monospace-ish
-      // textarea. Good enough for JSON / text; click-to-insert remains exact.
-      const rect = el.getBoundingClientRect();
-      const style = getComputedStyle(el);
-      const lineHeight = parseFloat(style.lineHeight) || 20;
-      const fontSize = parseFloat(style.fontSize) || 13;
-      const paddingTop = parseFloat(style.paddingTop) || 0;
-      const paddingLeft = parseFloat(style.paddingLeft) || 0;
-      const approxLine = Math.max(
-        0,
-        Math.floor((clientY - rect.top - paddingTop + el.scrollTop) / lineHeight)
-      );
-      const approxCol = Math.max(
-        0,
-        Math.floor((clientX - rect.left - paddingLeft + el.scrollLeft) / (fontSize * 0.55))
-      );
-      const lines = draft.split('\n');
-      let offset = 0;
-      for (let i = 0; i < Math.min(approxLine, lines.length); i++) {
-        offset += lines[i].length + (i < lines.length - 1 ? 1 : 0);
-      }
-      if (approxLine < lines.length) {
-        offset += Math.min(approxCol, lines[approxLine].length);
-      }
-      return Math.min(offset, draft.length);
-    },
-    [draft]
-  );
+  const cancelDragFrame = () => {
+    if (dragOverCaretRafRef.current != null) {
+      window.cancelAnimationFrame(dragOverCaretRafRef.current);
+      dragOverCaretRafRef.current = null;
+    }
+  };
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -239,25 +210,34 @@ export function FieldEditorSubFlyout({
         return;
       }
 
-      // Keep Cmd/Ctrl+Z (and redo) inside this editor — never the canvas / YAML.
+      // The editor owns Cmd/Ctrl+Z (and redo) through its own undo stack; keep those keys
+      // inside it — never the canvas / YAML.
       const mod = e.metaKey || e.ctrlKey;
-      if (!mod) return;
-      const key = e.key.toLowerCase();
-      if (key === 'z') {
-        e.preventDefault();
+      if (mod && (e.key.toLowerCase() === 'z' || e.key.toLowerCase() === 'y')) {
         e.stopPropagation();
-        if (e.shiftKey) redoDraft();
-        else undoDraft();
-        return;
-      }
-      if (key === 'y') {
-        e.preventDefault();
-        e.stopPropagation();
-        redoDraft();
       }
     },
-    [onBack, redoDraft, undoDraft]
+    [onBack]
   );
+
+  const editorBoxCss = {
+    position: 'absolute',
+    inset: 0,
+    boxSizing: 'border-box',
+    overflow: 'hidden',
+    cursor: isDragOver ? 'text' : undefined,
+    border: `${euiTheme.border.width.thin} solid ${
+      isDragOver ? euiTheme.colors.borderStrongPrimary : euiTheme.colors.borderBasePlain
+    }`,
+    borderRadius: euiTheme.border.radius.small,
+    background: euiTheme.colors.backgroundBaseSubdued,
+    // Transparent so the box (border, background) shows through.
+    '.monaco-editor, .monaco-editor-background, .monaco-editor .margin': {
+      backgroundColor: 'transparent',
+    },
+    ...getReferenceChipEditorCss(euiTheme, masks, colorMode),
+  } as const;
+  const editorPaddingPx = parseInt(String(euiTheme.size.m), 10) || 12;
 
   return (
     <div
@@ -355,22 +335,19 @@ export function FieldEditorSubFlyout({
                 isDragOverRef.current = true;
                 setIsDragOver(true);
               }
-              const el = textareaRef.current;
-              if (!el) return;
+              if (!editor) return;
               dragOverPointerRef.current = { x: e.clientX, y: e.clientY };
               if (dragOverCaretRafRef.current != null) return;
               dragOverCaretRafRef.current = window.requestAnimationFrame(() => {
                 dragOverCaretRafRef.current = null;
-                const target = textareaRef.current;
-                if (!target) return;
                 const { x, y } = dragOverPointerRef.current;
-                const offset = caretFromPointer(x, y, target);
-                caretRef.current = offset;
+                const offset = offsetAtPointer(x, y);
+                if (offset === undefined) return;
                 if (!editorFocusedForDragRef.current) {
                   editorFocusedForDragRef.current = true;
-                  target.focus({ preventScroll: true });
+                  editor.focus();
                 }
-                target.setSelectionRange(offset, offset);
+                bridgeRef.current?.setCaret(offset);
               });
             }}
             onDragLeave={(e) => {
@@ -378,30 +355,23 @@ export function FieldEditorSubFlyout({
               if (e.currentTarget.contains(e.relatedTarget as Node)) return;
               isDragOverRef.current = false;
               editorFocusedForDragRef.current = false;
-              if (dragOverCaretRafRef.current != null) {
-                window.cancelAnimationFrame(dragOverCaretRafRef.current);
-                dragOverCaretRafRef.current = null;
-              }
+              cancelDragFrame();
               setIsDragOver(false);
             }}
             onDrop={(e) => {
               e.preventDefault();
               isDragOverRef.current = false;
               editorFocusedForDragRef.current = false;
-              if (dragOverCaretRafRef.current != null) {
-                window.cancelAnimationFrame(dragOverCaretRafRef.current);
-                dragOverCaretRafRef.current = null;
-              }
+              cancelDragFrame();
               setIsDragOver(false);
               const token = e.dataTransfer.getData('text/plain');
               if (!token) return;
-              const el = textareaRef.current;
-              if (!el) {
+              const offset = offsetAtPointer(e.clientX, e.clientY);
+              if (offset === undefined) {
                 insertAtCaret(token);
                 return;
               }
-              const offset = caretFromPointer(e.clientX, e.clientY, el);
-              insertAtOffset(token, offset);
+              bridgeRef.current?.replaceText?.(offset, offset, token);
             }}
             css={{
               flex: '1 1 auto',
@@ -469,8 +439,9 @@ export function FieldEditorSubFlyout({
                 value={draft}
                 onChange={applyDraft}
                 fillHeight
+                openOnBrace={isFreeText}
               >
-                {({ appendControls, reportChange, attachInputRef, isOpen }) => (
+                {({ appendControls, reportChange, registerSelection, teachingPlaceholder }) => (
                   <div
                     css={{
                       flex: '1 1 auto',
@@ -490,61 +461,44 @@ export function FieldEditorSubFlyout({
                     >
                       {appendControls}
                     </div>
-                    <textarea
-                      ref={(el) => {
-                        textareaRef.current = el;
-                        attachInputRef(el);
-                      }}
-                      value={draft}
-                      aria-labelledby={valueLabelId}
-                      aria-expanded={isOpen}
-                      data-test-subj="workflowFieldEditorSubFlyoutTextarea"
-                      onChange={(e) => {
-                        const next = e.target.value;
-                        const caret = e.target.selectionStart ?? next.length;
-                        caretRef.current = caret;
-                        reportChange(next, caret);
-                      }}
-                      onSelect={(e) => {
-                        caretRef.current = e.currentTarget.selectionStart ?? draft.length;
-                      }}
-                      onClick={(e) => {
-                        caretRef.current = e.currentTarget.selectionStart ?? draft.length;
-                      }}
-                      css={{
-                        // Absolute fill — textarea flex growth is unreliable across browsers.
-                        position: 'absolute',
-                        inset: 0,
-                        width: '100%',
-                        height: '100%',
-                        resize: 'none',
-                        boxSizing: 'border-box',
-                        padding: euiTheme.size.m,
-                        paddingRight: 56,
-                        cursor: isDragOver ? 'text' : undefined,
-                        // Primary blue drop caret so the insertion point reads
-                        // clearly against the draft text while dragging.
-                        caretColor: isDragOver
-                          ? euiTheme.colors.primary
-                          : euiTheme.colors.textParagraph,
-                        border: `${euiTheme.border.width.thin} solid ${
-                          isDragOver
-                            ? euiTheme.colors.borderStrongPrimary
-                            : euiTheme.colors.borderBasePlain
-                        }`,
-                        borderRadius: euiTheme.border.radius.small,
-                        background: euiTheme.colors.backgroundBaseSubdued,
-                        color: euiTheme.colors.textParagraph,
-                        fontFamily: euiTheme.font.familyCode,
-                        fontSize: 13,
-                        lineHeight: 1.5,
-                        outline: 'none',
-                      }}
-                    />
+                    <div css={editorBoxCss}>
+                      <CodeEditor
+                        languageId={language === 'json' ? XJSON_LANG_ID : 'plaintext'}
+                        chromeOverrides={workflowsEditorChromeOverrides}
+                        value={draft}
+                        onChange={(text, event) => {
+                          const last = event?.changes?.[event.changes.length - 1];
+                          const caret = last ? last.rangeOffset + last.text.length : text.length;
+                          reportChange(text, Math.min(caret, text.length));
+                        }}
+                        height="100%"
+                        aria-label={fieldLabel}
+                        dataTestSubj="workflowFieldEditorSubFlyoutTextarea"
+                        placeholder={draft.length === 0 ? teachingPlaceholder : undefined}
+                        editorDidMount={(mounted) => handleEditorMount(mounted, registerSelection)}
+                        options={{
+                          ...EDITOR_OPTIONS,
+                          padding: { top: editorPaddingPx, bottom: editorPaddingPx },
+                          lineDecorationsWidth: editorPaddingPx,
+                        }}
+                      />
+                    </div>
                   </div>
                 )}
               </ReferenceCapableField>
             </div>
+            {warning ? (
+              <div css={{ flex: '0 0 auto' }}>
+                <ContainerInSentenceCallout
+                  token={warning}
+                  onFix={() => applyDraft(insertTokenAsJsonText(draft, warning))}
+                  onDismiss={() =>
+                    setDismissed((current) => new Set(current).add(warning.expression))
+                  }
+                  testSubj="workflowFieldEditorSubFlyout"
+                />
+              </div>
+            ) : null}
           </div>
         </div>
       </div>

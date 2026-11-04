@@ -1922,7 +1922,7 @@ function CodeField({
   /** The engine reads this value exactly as typed: no picker, no references. */
   fixedOnly?: boolean;
 }) {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode } = useEuiTheme();
   const isJson = field.language === 'json';
   const isEsql = field.language === 'esql';
   const controlPaddingPx = parseInt(String(euiTheme.size.m), 10);
@@ -2026,7 +2026,7 @@ function CodeField({
               borderRadius: euiTheme.border.radius.small,
               background: euiTheme.colors.backgroundBaseSubdued,
               boxSizing: 'border-box',
-              ...getReferenceChipEditorCss(euiTheme, iconMasks),
+              ...getReferenceChipEditorCss(euiTheme, iconMasks, colorMode),
             }}
             data-test-subj={testSubj}
             data-language={field.language}
