@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { ValidationError } from '@kbn/isomer';
 import type { MaterializeContext, MaterializeInput } from '../../common';
@@ -47,6 +48,7 @@ export interface PipelineRun<TConfig> {
   config: TConfig;
   context: MaterializeContext;
   savedObjectId?: string;
+  spaceId?: string;
 }
 
 /** Raised for a data request kind the pipeline has no executor for. */
@@ -64,12 +66,14 @@ class UnsupportedRequestError extends Error {
 /** A materializer's own placeholder, rebuilt so only its known fields reach the result. */
 const rebuildUnsupported = (
   { reason, title, link }: UnsupportedNode,
-  description: MaterializeDescription = {}
+  description: MaterializeDescription = {},
+  source?: MaterializedNodeSource
 ): UnsupportedNode =>
-  createUnsupportedNode(reason, {
-    title: title ?? description.title,
-    link: link ?? description.link,
-  });
+  createUnsupportedNode(
+    reason,
+    { title: title || description.title, link: link ?? description.link },
+    source
+  );
 
 const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
@@ -101,6 +105,12 @@ const executePlan = async (
   };
 };
 
+/** The context with its time range resolved against `now`, so the queries and provenance agree. */
+const withAbsoluteTimeRange = (context: MaterializeContext, now: Date): MaterializeContext =>
+  context.timeRange
+    ? { ...context, timeRange: getAbsoluteTimeRange(context.timeRange, { forceNow: now }) }
+    : context;
+
 const withProvenance = (
   node: MaterializedNode,
   losses: MaterializeLoss[],
@@ -130,15 +140,36 @@ const invalidNode = (type: string, errors: ValidationError[]): string =>
  * becomes `unsupported` with a reason.
  */
 export const runPipeline = async <TConfig>(
-  { type, materializer, config, context, savedObjectId }: PipelineRun<TConfig>,
+  {
+    type,
+    materializer,
+    config,
+    context: callerContext,
+    savedObjectId,
+    spaceId,
+  }: PipelineRun<TConfig>,
   deps: PipelineDeps
 ): Promise<MaterializedNode> => {
+  const now = deps.now();
+  const context = withAbsoluteTimeRange(callerContext, now);
+  const source: MaterializedNodeSource = {
+    kind: 'kibana',
+    kibanaVersion: deps.kibanaVersion,
+    materializer: type,
+    materializerVersion: materializer.version,
+    ...(spaceId ? { spaceId } : {}),
+    ...(savedObjectId ? { savedObjectType: type, savedObjectId } : {}),
+    ...(context.timeRange
+      ? { timeRange: { from: context.timeRange.from, to: context.timeRange.to } }
+      : {}),
+    capturedAt: now.toISOString(),
+  };
   const description = materializer.describe?.(config);
-  const unsupported = (reason: string) => createUnsupportedNode(reason, description);
+  const unsupported = (reason: string) => createUnsupportedNode(reason, description, source);
 
   const plan = materializer.plan(config, context);
   if (!Array.isArray(plan)) {
-    return rebuildUnsupported(plan, description);
+    return rebuildUnsupported(plan, description, source);
   }
 
   let executed: Awaited<ReturnType<typeof executePlan>>;
@@ -155,21 +186,10 @@ export const runPipeline = async <TConfig>(
 
   const mapped = materializer.map(config, executed.results, { context });
   if (isUnsupportedNode(mapped)) {
-    return rebuildUnsupported(mapped, description);
+    return rebuildUnsupported(mapped, description, source);
   }
 
-  const node = withProvenance(mapped, executed.losses, {
-    kind: 'kibana-panel',
-    kibanaVersion: deps.kibanaVersion,
-    adapter: type,
-    adapterVersion: materializer.version,
-    ...(savedObjectId ? { savedObjectId } : {}),
-    ...(context.timeRange
-      ? { timeRange: { from: context.timeRange.from, to: context.timeRange.to } }
-      : {}),
-    capturedAt: deps.now().toISOString(),
-  });
-
+  const node = withProvenance(mapped, executed.losses, source);
   const errors = await deps.validate(node);
   return errors.length > 0 ? unsupported(invalidNode(type, errors)) : node;
 };

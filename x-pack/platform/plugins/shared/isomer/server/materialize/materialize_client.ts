@@ -122,6 +122,7 @@ export const createScopedMaterializeClient = ({
           materializer,
           config,
           context,
+          spaceId: scope.request.spaceId,
           ...(isMaterializeByReference(input) ? { savedObjectId: input.id } : {}),
         },
         {
