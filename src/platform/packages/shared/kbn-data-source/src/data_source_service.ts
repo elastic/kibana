@@ -50,15 +50,6 @@ export class DataSourceService {
     }
   }
 
-  /** Synchronous alternative to `get()` for callers that already have a `DataView` in hand. */
-  public fromDataView(dataView: DataView): DataSource | undefined {
-    if (!dataView.id) return undefined;
-    if (dataView.id.startsWith(ESQL_ID_PREFIX)) {
-      return this.esqlSources.get(dataView.id);
-    }
-    return new DataViewSource(dataView);
-  }
-
   public registerEsqlSource(source: EsqlSource): void {
     this.esqlSources.set(source.id, source);
   }

@@ -101,7 +101,13 @@ import {
 import { monitorTypeRequiresPrivateLocations } from '../../../../../../common/utils/monitor_location_support';
 import { getDefaultFormFields } from './defaults';
 import { parsePemCertificateEntries } from './parse_pem_certificate_entries';
-import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
+import {
+  validate,
+  validateHeaders,
+  validJSONFormat,
+  WHOLE_NUMBERS_ONLY,
+  FLOATS_ONLY,
+} from './validation';
 import type { KeyValuePairsFieldProps } from '../fields/key_value_field';
 
 export const API_PRIVATE_LOCATIONS_ONLY = i18n.translate(
@@ -1539,14 +1545,14 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       validate: {
         validParams: (value) => {
           const validateFn = validate[MonitorTypeEnum.BROWSER][ConfigKey.PARAMS];
-          if (validateFn) {
-            return validateFn({
-              [ConfigKey.PARAMS]: value,
-            })
-              ? i18n.translate('xpack.synthetics.monitorConfig.params.error', {
-                  defaultMessage: 'Invalid JSON format',
+          if (validateFn?.({ [ConfigKey.PARAMS]: value })) {
+            return validJSONFormat(value)
+              ? i18n.translate('xpack.synthetics.monitorConfig.params.objectError', {
+                  defaultMessage: 'Parameters must be a JSON object',
                 })
-              : true;
+              : i18n.translate('xpack.synthetics.monitorConfig.params.error', {
+                  defaultMessage: 'Invalid JSON format',
+                });
           }
 
           return true;

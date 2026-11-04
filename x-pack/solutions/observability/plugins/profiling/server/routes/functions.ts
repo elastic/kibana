@@ -15,6 +15,8 @@ import { IDLE_SOCKET_TIMEOUT } from '.';
 import { getRoutePaths, MAX_KUERY_LENGTH } from '../../common';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { getClient } from './compat';
+import { PROFILING_API_PRIVILEGE } from '../feature';
+import { profilingSchemaParam } from './default_api_types';
 
 const querySchema = schema.object({
   timeFrom: schema.number(),
@@ -22,6 +24,7 @@ const querySchema = schema.object({
   startIndex: schema.number(),
   endIndex: schema.number(),
   kuery: schema.string({ maxLength: MAX_KUERY_LENGTH }),
+  schema: profilingSchemaParam,
 });
 
 type QuerySchemaType = TypeOf<typeof querySchema>;
@@ -39,7 +42,7 @@ export function registerTopNFunctionsSearchRoute({
       path: paths.TopNFunctions,
       security: {
         authz: {
-          requiredPrivileges: ['profiling'],
+          requiredPrivileges: [PROFILING_API_PRIVILEGE],
         },
       },
       options: { timeout: { idleSocket: IDLE_SOCKET_TIMEOUT } },
@@ -49,7 +52,7 @@ export function registerTopNFunctionsSearchRoute({
       try {
         const core = await context.core;
 
-        const { timeFrom, timeTo, kuery }: QuerySchemaType = request.query;
+        const { timeFrom, timeTo, kuery, schema: profilingSchema }: QuerySchemaType = request.query;
         const startSecs = timeFrom / 1000;
         const endSecs = timeTo / 1000;
 
@@ -81,6 +84,7 @@ export function registerTopNFunctionsSearchRoute({
           query,
           aggregationFields: [SERVICE_NAME],
           totalSeconds,
+          schema: profilingSchema,
         });
 
         return response.ok({

@@ -44,3 +44,6 @@ export const AGENT_LOG_LEVELS = ['error', 'warning', 'info', 'debug'] as const;
 export const DEFAULT_LOG_LEVEL = 'info' as const;
 
 export const AGENT_POLICY_VERSION_SEPARATOR = '#';
+
+/** Version suffix used for the non-version-specific copy of a policy, e.g. `policy123#sentinel`. */
+export const AGENT_POLICY_SENTINEL_VERSION = 'sentinel';

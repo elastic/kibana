@@ -115,7 +115,6 @@ export const DocumentFlyout = memo(
     const isSecurityApp = useIsInSecurityApp();
     const { hasAlertsRead, loading } = useAlertsPrivileges();
     const missingAlertsPrivilege = !loading && !hasAlertsRead && isAlert;
-
     // The Table and JSON tabs are only available in Security Solution, not in Discover.
     // The selected tab is persisted to localStorage.
     const { selectedTabId, setSelectedTabId } = useTabs<DocumentFlyoutTabId>({

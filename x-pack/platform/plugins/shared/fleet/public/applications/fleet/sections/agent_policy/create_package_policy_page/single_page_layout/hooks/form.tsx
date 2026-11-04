@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEqual, pick } from 'lodash';
@@ -184,8 +185,8 @@ async function savePackagePolicy(
 export const updateAgentlessCloudConnectorConfig = (
   packagePolicy: NewPackagePolicy,
   newAgentPolicy: NewAgentPolicy,
-  setNewAgentPolicy: (policy: NewAgentPolicy) => void,
-  setPackagePolicy: (policy: NewPackagePolicy) => void,
+  setNewAgentPolicy: Dispatch<SetStateAction<NewAgentPolicy>>,
+  setPackagePolicy: Dispatch<SetStateAction<NewPackagePolicy>>,
   varGroups?: RegistryVarGroup[]
 ) => {
   const targetCsp = detectTargetCsp(packagePolicy, varGroups);
@@ -195,18 +196,19 @@ export const updateAgentlessCloudConnectorConfig = (
     !targetCsp &&
     (newAgentPolicy.agentless?.cloud_connectors || packagePolicy.supports_cloud_connector)
   ) {
-    setNewAgentPolicy({
-      ...newAgentPolicy,
+    // Functional updates, so that they apply on top of the changes queued earlier in the same render
+    setNewAgentPolicy((prev) => ({
+      ...prev,
       agentless: {
-        ...newAgentPolicy.agentless,
+        ...prev.agentless,
         cloud_connectors: undefined,
       },
-    });
+    }));
 
-    setPackagePolicy({
-      ...packagePolicy,
+    setPackagePolicy((prev) => ({
+      ...prev,
       supports_cloud_connector: false,
-    });
+    }));
     return;
   }
 
@@ -220,21 +222,21 @@ export const updateAgentlessCloudConnectorConfig = (
     (cloudConnectorPolicyMismatch ||
       newAgentPolicy.agentless?.cloud_connectors?.target_csp !== targetCsp)
   ) {
-    setNewAgentPolicy({
-      ...newAgentPolicy,
+    setNewAgentPolicy((prev) => ({
+      ...prev,
       agentless: {
-        ...newAgentPolicy.agentless,
+        ...prev.agentless,
         cloud_connectors: {
           enabled: cloudConnectorPolicyEnabled,
           target_csp: targetCsp as CloudProvider,
         },
       },
-    });
+    }));
 
-    setPackagePolicy({
-      ...packagePolicy,
+    setPackagePolicy((prev) => ({
+      ...prev,
       supports_cloud_connector: cloudConnectorPolicyEnabled,
-    });
+    }));
   }
 };
 
@@ -270,7 +272,7 @@ export function useOnSubmit({
   queryParamsPolicyId: string | undefined;
   integrationToEnable?: string;
   hasFleetAddAgentsPrivileges: boolean;
-  setNewAgentPolicy: (policy: NewAgentPolicy) => void;
+  setNewAgentPolicy: Dispatch<SetStateAction<NewAgentPolicy>>;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
   isAddIntegrationFlyout?: boolean;
   defaultPolicyData?: Partial<NewPackagePolicy>;

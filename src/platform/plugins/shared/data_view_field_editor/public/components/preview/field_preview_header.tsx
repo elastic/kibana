@@ -26,13 +26,13 @@ const i18nTexts = {
   }),
 };
 
-const isLoadingSelector = (state: PreviewState) => state.isLoadingDocuments;
+const isFetchingDocumentSelector = (state: PreviewState) => state.isFetchingDocument;
 const documentSourceSelector = (state: PreviewState) => state.documentSource;
 
 export const FieldPreviewHeader = () => {
   const { dataView } = useFieldEditorContext();
   const { controller } = useFieldPreviewContext();
-  const isFetchingDocument = useStateSelector(controller.state$, isLoadingSelector);
+  const isFetchingDocument = useStateSelector(controller.state$, isFetchingDocumentSelector);
   const documentSource = useStateSelector(controller.state$, documentSourceSelector);
 
   return (

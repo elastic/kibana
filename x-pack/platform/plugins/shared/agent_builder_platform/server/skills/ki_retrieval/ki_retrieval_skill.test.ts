@@ -7,6 +7,7 @@
 
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import { contextEngineAiIndexTools } from '@kbn/agent-builder-common/tools';
+import { contextEngineSkillAvailability } from '../context_engine_skill_availability';
 import { kiRetrievalSkill } from './ki_retrieval_skill';
 
 describe('kiRetrievalSkill', () => {
@@ -20,8 +21,13 @@ describe('kiRetrievalSkill', () => {
     expect(isAllowedBuiltinSkill(kiRetrievalSkill.id)).toBe(true);
   });
 
-  it('is gated behind experimental features', () => {
-    expect(kiRetrievalSkill.experimental).toBe(true);
+  it('is unavailable in spaces where the Context Engine is off', () => {
+    expect(kiRetrievalSkill.experimental).toBeFalsy();
+    expect(kiRetrievalSkill.availability).toBe(contextEngineSkillAvailability);
+  });
+
+  it('is hidden from skill listings, since Agent Builder grants it at runtime', () => {
+    expect(kiRetrievalSkill.hidden).toBe(true);
   });
 
   it('ships non-empty markdown content', () => {
@@ -53,7 +59,18 @@ describe('kiRetrievalSkill', () => {
     expect(templates?.length).toBeGreaterThan(0);
     expect(withLifecycle?.length).toBe(templates?.length);
     expect(kiRetrievalSkill.content).toContain('and `DROP governance.*`');
-    expect(kiRetrievalSkill.content).toContain('switches off its default only');
+    expect(kiRetrievalSkill.content).toContain('switches off its filter only');
+  });
+
+  it('keeps retrieval to the AI indices assigned to the agent', () => {
+    expect(kiRetrievalSkill.content).toContain('search the AI Indices assigned to you');
+    expect(kiRetrievalSkill.content).toContain('`assigned_to_agent: true`');
+  });
+
+  it('filters multi-valued tags with the match operator, not equality', () => {
+    expect(kiRetrievalSkill.content).toContain('| WHERE tags:"<tag>"\n');
+    expect(kiRetrievalSkill.content).toContain('filter `tags` with `:`, not `==`');
+    expect(kiRetrievalSkill.content).not.toMatch(/tags\s*==/);
   });
 
   it('has no referencedContent', () => {

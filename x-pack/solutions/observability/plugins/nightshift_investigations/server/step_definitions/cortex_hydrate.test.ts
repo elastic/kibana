@@ -30,8 +30,12 @@ describe('cortexHydrateStepDefinition', () => {
     getSessionForSpace: jest.fn().mockReturnValue(mockSession),
   });
 
+  // The handler logs the degradation through `context.logger`, not the injected one.
+  const contextLogger = loggerMock.create();
+
   beforeEach(() => {
     jest.clearAllMocks();
+    contextLogger.error.mockClear();
     getScopedEsClient.mockReturnValue(esClient);
   });
 
@@ -50,7 +54,7 @@ describe('cortexHydrateStepDefinition', () => {
         renderInputTemplate: jest.fn((val) => val),
         callKibanaApi: jest.fn(),
       },
-      logger: loggerMock.create(),
+      logger: contextLogger,
       abortSignal: new AbortController().signal,
       stepId: 'hydrate_cortex',
       stepType: 'nightshift.cortexHydrate',
@@ -177,5 +181,32 @@ describe('cortexHydrateStepDefinition', () => {
         notification: '',
       },
     });
+  });
+
+  // This is a before-agent hook, so throwing aborted the whole investigator round over
+  // one writer. It now degrades to a system_update line naming its own directory.
+  it('degrades to an incomplete-materialization notice when the write throws', async () => {
+    jest.mocked(hydrateCortexWorkspace).mockRejectedValueOnce(new Error('sandbox write refused'));
+    const definition = cortexHydrateStepDefinition({
+      getSandboxStart: () => makeSandboxStart(),
+      analytics,
+      logger: loggerMock.create(),
+    });
+
+    const result = await definition.handler(createContext('default__conv-1'));
+
+    expect(result).toEqual({
+      output: {
+        sandbox_id: 'default__conv-1',
+        conversation_id: 'conv-1',
+        failed: true,
+        notification:
+          'Materialization of /workspace/cortex/ encountered an error; ' +
+          'its contents may be incomplete or missing.',
+      },
+    });
+    expect(contextLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining('sandbox write refused')
+    );
   });
 });

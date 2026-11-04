@@ -45,10 +45,13 @@ interface ToggleOptions {
   isSavingSettings: boolean;
 }
 
+type EntityAnalyticsPendingAction = 'enable' | 'disable';
+
 interface UseToggleEntityAnalyticsReturn {
   status: EntityAnalyticsStatus;
   isLoading: boolean;
   isStatusLoading: boolean;
+  pendingAction: EntityAnalyticsPendingAction | null;
   toggle: () => Promise<void>;
   errors: EntityAnalyticsErrors;
 }
@@ -74,6 +77,7 @@ export const useToggleEntityAnalytics = ({
   const stopEntityStoreMutation = useStopEntityStoreMutation();
 
   const [isToggling, setIsToggling] = useState(false);
+  const [requestedAction, setRequestedAction] = useState<EntityAnalyticsPendingAction | null>(null);
 
   const entityStoreMutations: OperationStatus[] = [
     installEntityStoreMutation,
@@ -87,6 +91,7 @@ export const useToggleEntityAnalytics = ({
   const isStatusLoading = entityStoreStatusQuery.isLoading;
 
   const isLoading = isToggling || entityStoreState.isPending || isSavingSettings;
+  const pendingAction = isToggling || entityStoreState.isPending ? requestedAction : null;
 
   const status = useEntityAnalyticsStatus({
     entityStoreStatus,
@@ -121,10 +126,10 @@ export const useToggleEntityAnalytics = ({
       return;
     }
 
+    const storeOn = entityStoreStatus === StoreStatusEnum.running;
+    setRequestedAction(storeOn ? 'disable' : 'enable');
     setIsToggling(true);
     try {
-      const storeOn = entityStoreStatus === StoreStatusEnum.running;
-
       if (storeOn) {
         await stopEntityStore();
         addSuccess(i18n.ENTITY_ANALYTICS_TURNED_OFF, TOAST_OPTIONS);
@@ -157,6 +162,7 @@ export const useToggleEntityAnalytics = ({
     status,
     isLoading,
     isStatusLoading,
+    pendingAction,
     toggle,
     errors,
   };

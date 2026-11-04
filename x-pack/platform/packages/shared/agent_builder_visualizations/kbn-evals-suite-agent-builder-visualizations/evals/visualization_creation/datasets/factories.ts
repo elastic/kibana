@@ -30,7 +30,7 @@ export type ChartFamily =
   | 'query_only'
   | 'refusal';
 
-export type DataSource = 'logs' | 'ecommerce' | 'host_metrics';
+export type DataSource = 'logs' | 'ecommerce' | 'flights' | 'host_metrics';
 
 export type ConfigFeature = 'breakdown_by' | 'secondary_metric' | 'multi_series';
 
@@ -82,8 +82,15 @@ interface QuerySource {
 const statsList = (metrics: GoldMetric[]): string =>
   metrics.map(({ alias, expression }) => `\`${alias}\` = ${expression}`).join(', ');
 
-const timeWindow = (timeField: string): string =>
-  `| WHERE ${timeField} >= ?_tstart AND ${timeField} < ?_tend`;
+/**
+ * Kibana applies the time range to `@timestamp` on its own, so only other date fields
+ * need an explicit time-picker `WHERE`.
+ */
+const timeWindow = (timeField: string): string[] =>
+  timeField === '@timestamp' ? [] : [`| WHERE ${timeField} >= ?_tstart AND ${timeField} < ?_tend`];
+
+/** Join query commands, one per line; an empty group (e.g. no time window) adds no line. */
+const pipeline = (...commands: Array<string | string[]>): string => commands.flat().join('\n');
 
 /** Top-N by category in the agent's idiom: time window, STATS ... BY, SORT first metric, LIMIT. */
 export const categoricalQuery = ({
@@ -93,13 +100,25 @@ export const categoricalQuery = ({
   timeField = '@timestamp',
   limit = 10,
 }: QuerySource & { groupBy: string; limit?: number }): string =>
-  `FROM ${index}
-${timeWindow(timeField)}
-| STATS ${statsList(metrics)} BY ${groupBy}
-| SORT \`${metrics[0].alias}\` DESC
-| LIMIT ${limit}`;
+  pipeline(
+    `FROM ${index}`,
+    timeWindow(timeField),
+    `| STATS ${statsList(metrics)} BY ${groupBy}`,
+    `| SORT \`${metrics[0].alias}\` DESC`,
+    `| LIMIT ${limit}`
+  );
 
-/** Time series in the agent's idiom: auto-bucket count over the bind-param window. */
+/**
+ * `@timestamp` time series use `TBUCKET(100, ?_tstart, ?_tend)`. The bounds size the
+ * buckets, and Kibana binds them at render time, so the query omits a timestamp `WHERE`.
+ * Any other date field stays on `BUCKET` with `?_tstart` / `?_tend`, because `TBUCKET` only reads `@timestamp`.
+ */
+const timeBucketExpression = (timeField: string): string =>
+  timeField === '@timestamp'
+    ? 'TBUCKET(100, ?_tstart, ?_tend)'
+    : `BUCKET(${timeField}, 100, ?_tstart, ?_tend)`;
+
+/** Time series in the agent's idiom: auto-bucket count over the time-picker window. */
 export const timeSeriesQuery = ({
   index,
   metrics,
@@ -107,15 +126,13 @@ export const timeSeriesQuery = ({
   splitBy,
 }: QuerySource & { splitBy?: string }): string =>
   `FROM ${index}
-| STATS ${statsList(metrics)} BY \`Time Bucket\` = BUCKET(${timeField}, 75, ?_tstart, ?_tend)${
+| STATS ${statsList(metrics)} BY \`Time Bucket\` = ${timeBucketExpression(timeField)}${
     splitBy === undefined ? '' : `, ${splitBy}`
   }`;
 
 /** Single-row totals for metric and gauge charts. */
 export const totalsQuery = ({ index, metrics, timeField = '@timestamp' }: QuerySource): string =>
-  `FROM ${index}
-${timeWindow(timeField)}
-| STATS ${statsList(metrics)}`;
+  pipeline(`FROM ${index}`, timeWindow(timeField), `| STATS ${statsList(metrics)}`);
 
 export const TIME_BUCKET_COLUMN = 'Time Bucket';
 

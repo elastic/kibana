@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -224,6 +225,110 @@ describe('POST /internal/evals/evaluators/_test', () => {
     });
   });
 
+  it('reports each score with its own direction from both _test and _evaluate', async () => {
+    const mixedJudge: LlmJudgeConfig = {
+      ...JUDGE,
+      output: {
+        scores: [
+          { name: 'grounded', type: 'number' },
+          { name: 'hallucination', type: 'number', direction: 'minimize' },
+          {
+            name: 'tone',
+            type: 'categorical',
+            direction: 'neutral',
+            labels: [
+              { value: 'formal', score: 1 },
+              { value: 'casual', score: 0 },
+            ],
+          },
+        ],
+      },
+    };
+    const prompt = jest.fn().mockResolvedValue({
+      toolCalls: [
+        {
+          function: {
+            arguments: {
+              grounded: { score: 0.9, explanation: 'Cites the tool output.' },
+              hallucination: { score: 0.1, explanation: 'One unsupported claim.' },
+              tone: { label: 'formal', explanation: 'Formal register.' },
+            },
+          },
+        },
+      ],
+    });
+    const router = httpServiceMock.createRouter();
+    const inferenceStart = {
+      getClient: jest.fn().mockReturnValue({ prompt }),
+      getConnectorById: jest.fn().mockResolvedValue({ name: 'Test model', config: {} }),
+    } as unknown as InferenceServerStart;
+    const dependencies = {
+      router,
+      logger: loggingSystemMock.createLogger(),
+      canEncrypt: false,
+      evaluatorRegistry: createEvaluatorRegistryMock([
+        compileUserDefinedEvaluator({
+          id: 'stored-id',
+          name: 'quality',
+          version: '1.0.0',
+          kind: 'llm',
+          description: 'Rates response quality',
+          judge: mixedJudge,
+          created_at: '2026-01-01T00:00:00.000Z',
+          updated_at: '2026-01-01T00:00:00.000Z',
+        }),
+      ]),
+      getInferenceStart: async () => inferenceStart,
+      getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
+      getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+    };
+    registerTestEvaluatorRoute(dependencies);
+    registerEvaluateRoute(dependencies);
+
+    const versionedRouter = router.versioned as MockedVersionedRouter;
+    const testHandler = versionedRouter.getRoute('post', EVALS_TEST_EVALUATOR_URL).versions[
+      API_VERSIONS.internal.v1
+    ].handler;
+    const evaluateHandler = versionedRouter.getRoute('post', EVALS_EVALUATE_URL).versions[
+      API_VERSIONS.internal.v1
+    ].handler;
+    const context = {
+      core: Promise.resolve({
+        elasticsearch: { client: { asInternalUser: { search: jest.fn() } } },
+      }),
+    } as unknown as Parameters<typeof testHandler>[0];
+    const subject = { traces: [{ trace_id: TRACE_ID }] };
+
+    const draftResponse = await testHandler(
+      context,
+      request({
+        subject,
+        definition: { name: 'quality', description: 'Rates response quality', judge: mixedJudge },
+      }),
+      kibanaResponseFactory
+    );
+    const persistedResponse = await evaluateHandler(
+      context,
+      {
+        body: { subject, evaluators: [{ name: 'quality', connector_id: 'connector-1' }] },
+      } as unknown as Parameters<typeof evaluateHandler>[1],
+      kibanaResponseFactory
+    );
+
+    const directions = [
+      { name: 'grounded', direction: 'maximize' },
+      { name: 'hallucination', direction: 'minimize' },
+      { name: 'tone', direction: 'neutral' },
+    ];
+    const toDirections = (scores: Array<{ name: string; direction?: string }>) =>
+      scores.map(({ name, direction }) => ({ name, direction }));
+
+    expect(toDirections(draftResponse.payload.result.scores)).toEqual(directions);
+    expect(toDirections(persistedResponse.payload.results[0].scores)).toEqual(directions);
+    // The evaluator-level direction stays the fallback for readers that predate score direction.
+    expect(persistedResponse.payload.results[0].evaluator.direction).toBe('maximize');
+  });
+
   it('rejects semantic judge errors before reading the trace', async () => {
     const { handler, context, prompt } = setup();
     const response = await handler(
@@ -296,6 +401,29 @@ describe('POST /internal/evals/evaluators/_test', () => {
     // The caller supplies the trace id and the prompt, so the judge's explanation can
     // quote back whatever the read returned. It has to be their own privileges.
     expect(awaitTraceReadyMock.mock.calls[0][0].esClient).toBe(asCurrentUser);
+  });
+
+  it('returns 403 when the caller cannot read the trace', async () => {
+    awaitTraceReadyMock.mockRejectedValueOnce(
+      new errors.ResponseError({
+        statusCode: 403,
+        body: {},
+        headers: {},
+        warnings: [],
+        meta: {} as ConstructorParameters<typeof errors.ResponseError>[0]['meta'],
+      })
+    );
+    const prompt = jest.fn();
+    const { handler, context } = setup({ prompt });
+
+    const response = await handler(context, request(), kibanaResponseFactory);
+
+    expect(response.status).toBe(403);
+    expect(response.payload).toEqual({
+      message:
+        'Insufficient Elasticsearch privileges to read the trace. Grant read access to traces-* and logs-*.',
+    });
+    expect(prompt).not.toHaveBeenCalled();
   });
 
   it('does not retain the draft it rendered', async () => {

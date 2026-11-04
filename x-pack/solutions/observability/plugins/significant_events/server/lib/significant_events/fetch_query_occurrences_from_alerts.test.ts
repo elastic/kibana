@@ -30,7 +30,7 @@ const makeQueryLink = (overrides: Partial<QueryLink> & { id?: string } = {}): Qu
       esql: { query: 'FROM logs | WHERE body.text:"error"' },
       severity_score: 60,
     },
-    stream_name: 'logs.test',
+    source_id: 'logs.test',
     rule_backed: true,
     rule_id: `rule-${id}`,
     ...rest,
@@ -197,7 +197,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
       { kiClient, esClient }
     );
 
-    const ruleA = result.queries.find((e) => e.stream_name === 'logs.test' && e.id === 'qa');
+    const ruleA = result.queries.find((e) => e.source_id === 'logs.test' && e.id === 'qa');
     const ruleB = result.queries.find((e) => e.id === 'qb');
 
     expect(ruleA).toBeDefined();

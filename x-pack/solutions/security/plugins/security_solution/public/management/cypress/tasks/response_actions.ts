@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { inputConsoleCommand, submitCommand } from './response_console';
 import type { UserAuthzAccessLevel } from '../screens';
 import { request } from './common';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
@@ -26,27 +25,6 @@ import {
 } from '../../../../common/endpoint/constants';
 import type { ActionDetails, ActionDetailsApiResponse } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
-
-export const getRunningProcesses = (command: string): Cypress.Chainable<number> => {
-  inputConsoleCommand('processes');
-  submitCommand();
-  cy.contains('Action pending.').should('exist');
-
-  // on success
-  // find pid of process
-  // traverse back from last column to the second column that has pid
-  return cy
-    .getByTestSubj('processesOutput-processListTable', { timeout: 120000 })
-    .findByTestSubj('processesOutput-command')
-    .contains(command)
-    .parents('tr')
-    .findByTestSubj('processesOutput-pid')
-    .find('.euiTableCellContent')
-    .then((cellContent) => {
-      // get pid
-      return Number(cellContent.text());
-    });
-};
 
 /**
  * Continuously checks an Response Action until it completes (or timeout is reached)

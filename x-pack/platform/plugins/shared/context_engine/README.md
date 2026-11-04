@@ -72,10 +72,13 @@ and cannot be overridden:
   knowledge indicator lifecycle pipeline inserted after `FROM`: only
   indicators whose `governance.lifecycle.status` is unset or `active` and
   whose `expires_at` is unset or in the future are returned, and
-  `governance.*` is dropped from the result. Each lifecycle field the query
-  names itself switches off one default: `expires_at` the expiry filter,
-  `governance.lifecycle.status` the status filter, any `governance.*` the
-  drop. When a data stream is read, only the newest revision of each `id` per
+  `governance.*` is dropped from the result. A top-level `WHERE` command on a
+  lifecycle field switches off that filter: `WHERE expires_at < NOW()` the
+  expiry filter, `WHERE governance.lifecycle.status == "deleted"` the status
+  filter. Naming a lifecycle field in `KEEP`, `SORT` or `EVAL`, or in a
+  `WHERE` inside a `FORK` branch, leaves both filters on, and naming any
+  `governance.*` field keeps `governance` in the result. When a
+  data stream is read, only the newest revision of each `id` per
   target is considered in every case (`METADATA _id, _index` are added when
   missing). An index outside the registry is read as-is on its own; in a query
   that also reads a registered dest, the pipeline applies to every row.
@@ -100,9 +103,9 @@ query. It returns `{ response: string }`: a free-form text context block meant
 to be handed to an agent as-is, not parsed.
 
 ```
-AI index: sales-knowledge
+AI-index registry ID: sales-knowledge
 Curated sales knowledge.
-Query with ES|QL against: ai-index-idx-sales-knowledge
+Backing Elasticsearch target (use only in ES|QL queries): ai-index-idx-sales-knowledge
 
 Fields
 @timestamp: date, searchable, aggregatable
@@ -139,8 +142,8 @@ Count by type
 ...
 ```
 
-- The `Query with ES|QL against` line is `dest.value`, the string to put after
-  `FROM`.
+- The `Backing Elasticsearch target` line is `dest.value`, the string to put
+  after `FROM`.
 - `Fields` lists every mapped field, mapping-defined runtime fields included
   (`path: type`, then `searchable` and/or `aggregatable` when true), one per
   line, sorted by path and capped at 500;

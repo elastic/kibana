@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 import { test, testData } from '../../fixtures';
 
 test.describe('Storage explorer page', { tag: tags.stateful.classic }, () => {
@@ -28,6 +29,26 @@ test.describe('Storage explorer page', { tag: tags.stateful.classic }, () => {
     ).toBeVisible();
   });
 
+  test('remembers that the OpenTelemetry callout was dismissed', async ({
+    page,
+    pageObjects: { profilingStorageExplorerPage },
+  }) => {
+    await test.step('dismiss the callout', async () => {
+      // The callout shows because the global setup loads OTel profiling data
+      await profilingStorageExplorerPage.gotoWithTimeRange(rangeFrom, rangeTo);
+      await expect(profilingStorageExplorerPage.otelNotSupportedCallout).toBeVisible();
+
+      await profilingStorageExplorerPage.dismissOtelNotSupportedCallout();
+      await expect(profilingStorageExplorerPage.otelNotSupportedCallout).toBeHidden();
+    });
+
+    await test.step('reload the page', async () => {
+      await page.reload();
+      await expect(page.getByTestId('storageExplorer_hostBreakdownTab')).toBeVisible();
+      await expect(profilingStorageExplorerPage.otelNotSupportedCallout).toBeHidden();
+    });
+  });
+
   test('Host agent breakdown tab displays host agent details', async ({
     pageObjects: { profilingStorageExplorerPage },
   }) => {
@@ -46,7 +67,7 @@ test.describe('Storage explorer page', { tag: tags.stateful.classic }, () => {
       'href',
       `/app/profiling/flamegraphs/flamegraph?kuery=host.id%3A%20%228457605156473051743%22&rangeFrom=${encodeURIComponent(
         rangeFrom
-      )}&rangeTo=${encodeURIComponent(rangeTo)}`
+      )}&rangeTo=${encodeURIComponent(rangeTo)}&schema=${ProfilingSchema.ECS}`
     );
   });
 

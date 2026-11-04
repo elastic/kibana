@@ -7,7 +7,7 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { useLocationName } from './use_location_name';
-import { WrappedHelper } from '../utils/testing';
+import { HookWrapper } from '../utils/testing/hook_helpers';
 import type { OverviewStatusMetaData } from '../../../../common/runtime_types';
 
 describe('useLocationName', () => {
@@ -18,7 +18,7 @@ describe('useLocationName', () => {
   it('returns expected label', () => {
     const WrapperWithState = ({ children }: React.PropsWithChildren) => {
       return (
-        <WrappedHelper
+        <HookWrapper
           state={{
             serviceLocations: {
               locationsLoaded: true,
@@ -41,7 +41,7 @@ describe('useLocationName', () => {
           }}
         >
           {React.createElement(React.Fragment, null, children)}
-        </WrappedHelper>
+        </HookWrapper>
       );
     };
 
@@ -58,7 +58,7 @@ describe('useLocationName', () => {
   it('returns the location id if matching location cannot be found', () => {
     const WrapperWithState = ({ children }: React.PropsWithChildren) => {
       return (
-        <WrappedHelper
+        <HookWrapper
           state={{
             serviceLocations: {
               locationsLoaded: true,
@@ -81,7 +81,7 @@ describe('useLocationName', () => {
           }}
         >
           {React.createElement(React.Fragment, null, children)}
-        </WrappedHelper>
+        </HookWrapper>
       );
     };
 

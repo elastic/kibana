@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import { executeUntilValid } from '@kbn/inference-prompt-utils';
-import type { ToolChoice, BoundInferenceClient } from '@kbn/inference-common';
+import type { BoundInferenceClient, Message } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
+import {
+  extractJson,
+  getAttackDiscoveriesGenerationSchema,
+  getCombinedAttackDiscoveryPrompt,
+  getFormatInstructionsFromZodV4Schema,
+  getStructuredGenerationPrompt,
+} from '@kbn/discoveries';
 import Fs from 'fs/promises';
 import Path from 'path';
 import { getCurrentTraceId } from '@kbn/evals';
@@ -19,7 +26,17 @@ import type {
   AttackDiscoveryTaskOutput,
   AnonymizedAlert,
 } from '../types';
-import { AttackDiscoveryGenerationPrompt } from '../prompts/attack_discovery_generation_prompt';
+
+const MAX_GENERATION_ATTEMPTS = 3;
+
+const attackDiscoveryGenerationSchema = getAttackDiscoveriesGenerationSchema({
+  detailsMarkdown: 'The detailed explanation of the insight in Markdown.',
+  entitySummaryMarkdown: 'A summary of the entities involved in the insight in Markdown.',
+  mitreAttackTactics: 'The MITRE ATT&CK tactics relevant to the insight.',
+  summaryMarkdown: 'A one-sentence summary of the insight in Markdown.',
+  title: 'The title of the insight.',
+  insights: 'The generated insights.',
+});
 
 let defaultPromptPromise: Promise<string> | undefined;
 let continuePromptPromise: Promise<string> | undefined;
@@ -50,7 +67,7 @@ const toAlertStrings = (alerts: ReadonlyArray<AnonymizedAlert>): string[] => {
   return alerts.map((a) => a.pageContent);
 };
 
-const generateInsights = async ({
+export const generateInsights = async ({
   inferenceClient,
   log,
   prompt,
@@ -65,35 +82,49 @@ const generateInsights = async ({
   combinedMaybePartialResults?: string;
   continuePrompt?: string;
 }): Promise<{ insights: AttackDiscovery[]; traceId?: string }> => {
-  const response = await executeUntilValid({
-    prompt: AttackDiscoveryGenerationPrompt,
-    inferenceClient,
-    input: {
-      prompt,
-      alerts,
-      combinedMaybePartialResults,
-      continuePrompt,
-    },
-    finalToolChoice: {
-      function: 'generate',
-    } as ToolChoice<'generate'>,
-    maxRetries: 3,
-    toolCallbacks: {
-      generate: async (toolCall) => ({
-        response: toolCall.function.arguments,
-      }),
-    },
+  // Build the same request product Attack Discovery sends: the combined prompt
+  // with JSON Schema format instructions, no tools and no tool_choice.
+  const query = getCombinedAttackDiscoveryPrompt({
+    anonymizedDocs: alerts,
+    prompt,
+    combinedMaybePartialResults: combinedMaybePartialResults ?? '',
+    continuePrompt: continuePrompt ?? '',
   });
+  const message = getStructuredGenerationPrompt({
+    formatInstructions: getFormatInstructionsFromZodV4Schema(attackDiscoveryGenerationSchema),
+    query,
+  });
+  const messages: Message[] = [{ role: MessageRole.User, content: message }];
 
-  const toolCall = response.toolCalls[0];
-  if (!toolCall) {
-    throw new Error('No tool call found in LLM response');
+  let lastParseError: unknown;
+  for (let attempt = 1; attempt <= MAX_GENERATION_ATTEMPTS; attempt++) {
+    const response = await inferenceClient.chatComplete({ messages });
+
+    try {
+      // In continuation mode the model returns only the missing suffix of
+      // combinedMaybePartialResults, so concatenate before parsing (same as
+      // the product generate node's getCombined call).
+      const jsonText = extractJson(response.content);
+      const combinedResponse =
+        combinedMaybePartialResults != null && combinedMaybePartialResults.length > 0
+          ? `${combinedMaybePartialResults}${jsonText}`
+          : jsonText;
+      const validated = attackDiscoveryGenerationSchema.parse(JSON.parse(combinedResponse));
+      return {
+        insights: validated.insights as AttackDiscovery[],
+        traceId: getCurrentTraceId() ?? undefined,
+      };
+    } catch (error) {
+      lastParseError = error;
+      log.debug(
+        `attack discovery generation attempt ${attempt} failed to parse the LLM response: ${error}`
+      );
+    }
   }
 
-  return {
-    ...(toolCall.function.arguments as { insights: AttackDiscovery[] }),
-    traceId: getCurrentTraceId() ?? undefined,
-  };
+  throw new Error(
+    `Failed to parse insights from the LLM response after ${MAX_GENERATION_ATTEMPTS} attempts: ${lastParseError}`
+  );
 };
 
 export const runAttackDiscovery = async ({

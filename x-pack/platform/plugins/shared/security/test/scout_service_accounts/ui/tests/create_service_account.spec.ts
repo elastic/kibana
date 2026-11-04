@@ -36,7 +36,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
       const { serviceAccounts } = pageObjects;
       await serviceAccounts.openCreateFlyout();
-      await expect(serviceAccounts.description).toBeHidden();
+      await expect(serviceAccounts.description).toBeVisible();
       await expect(serviceAccounts.submitButton).toBeDisabled();
       await serviceAccounts.setName(`scout-sa-${randomUUID()}`);
       await serviceAccounts.openRoles();

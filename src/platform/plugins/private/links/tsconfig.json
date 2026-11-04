@@ -9,7 +9,8 @@
     "common/**/*",
     "server/**/*",
     "public/**/*.json",
-    "test/scout/**/*"
+    "test/scout/**/*",
+    "test/scout_links_external_url_policy/**/*"
   ],
   "kbn_references": [
     "@kbn/core",

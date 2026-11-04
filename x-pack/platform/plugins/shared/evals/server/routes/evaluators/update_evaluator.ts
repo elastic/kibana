@@ -47,7 +47,7 @@ export const registerUpdateEvaluatorRoute = ({
       },
       async (context, request, response) => {
         const { name } = request.params;
-        const { description, judge } = request.body;
+        const { description, judge, base_version: baseVersion } = request.body;
 
         if (description === undefined && judge === undefined) {
           return response.badRequest({
@@ -66,7 +66,7 @@ export const registerUpdateEvaluatorRoute = ({
 
           const evaluator = await evaluatorDefinitionService
             .getClient({ spaceId })
-            .update(name, { description, judge, createdBy });
+            .update(name, { description, judge, createdBy, baseVersion });
 
           return response.ok({ body: { evaluator: toPersistedEvaluatorResponse(evaluator) } });
         } catch (error) {

@@ -13,6 +13,7 @@ import {
   EIS_END_OF_LIFE_SORT_FIELD,
   EIS_NAME_SORT_FIELD,
   EIS_PROVIDER_FILTER_ID,
+  EIS_REGION_FILTER_ID,
   EIS_RELEASED_SORT_FIELD,
   EIS_TYPE_SORT_FIELD,
   getItemModelId,
@@ -193,6 +194,142 @@ describe('createEisFindItems', () => {
     expect(items.map(({ title }) => title)).toEqual(['Alpha Embedder', 'Jina Reranker v2']);
   });
 
+  it('filters by a geography, a region, or either of them', async () => {
+    const catalog = [
+      model('US Model', 'Anthropic', {
+        endpoints: [
+          {
+            inference_id: 'us-model',
+            task_type: 'chat_completion',
+            service: 'elastic',
+            service_settings: { model_id: 'us-model' },
+            metadata: { regions: [{ csp: 'aws', region: 'us-east-1', geo: 'us' }] },
+          },
+        ],
+      }),
+      model('EU Model', 'OpenRouter', {
+        endpoints: [
+          {
+            inference_id: 'eu-model',
+            task_type: 'chat_completion',
+            service: 'elastic',
+            service_settings: { model_id: 'eu-model' },
+            metadata: { regions: [{ geo: 'eu' }] },
+          },
+        ],
+      }),
+    ];
+    const findItemsForCatalog = createEisFindItems(catalog);
+
+    const byGeography = await findItemsForCatalog(
+      findParams({ filters: { [EIS_REGION_FILTER_ID]: { include: ['geo-eu'] } } })
+    );
+    expect(byGeography.items.map(({ title }) => title)).toEqual(['EU Model']);
+
+    const byRegion = await findItemsForCatalog(
+      findParams({
+        filters: { [EIS_REGION_FILTER_ID]: { include: ['region-aws-us-east-1'] } },
+      })
+    );
+    expect(byRegion.items.map(({ title }) => title)).toEqual(['US Model']);
+
+    const either = await findItemsForCatalog(
+      findParams({
+        filters: {
+          [EIS_REGION_FILTER_ID]: { include: ['geo-eu', 'region-aws-us-east-1'] },
+        },
+      })
+    );
+    expect(either.items.map(({ title }) => title)).toEqual(['EU Model', 'US Model']);
+  });
+
+  it('excludes models available in a selected region', async () => {
+    const catalog = [
+      model('US Model', 'Anthropic', {
+        endpoints: [
+          {
+            inference_id: 'us-model',
+            task_type: 'chat_completion',
+            service: 'elastic',
+            service_settings: { model_id: 'us-model' },
+            metadata: { regions: [{ csp: 'aws', region: 'us-east-1', geo: 'us' }] },
+          },
+        ],
+      }),
+      model('EU Model', 'OpenRouter'),
+    ];
+
+    const { items } = await createEisFindItems(catalog)(
+      findParams({ filters: { [EIS_REGION_FILTER_ID]: { exclude: ['geo-us'] } } })
+    );
+
+    expect(items.map(({ title }) => title)).toEqual(['EU Model']);
+  });
+
+  it('keeps models that do not match the excluded region', async () => {
+    const catalog = [
+      model('US Model', 'Anthropic', {
+        endpoints: [
+          {
+            inference_id: 'us-model',
+            task_type: 'chat_completion',
+            service: 'elastic',
+            service_settings: { model_id: 'us-model' },
+            metadata: { regions: [{ csp: 'aws', region: 'us-east-1', geo: 'us' }] },
+          },
+        ],
+      }),
+      model('EU Model', 'OpenRouter'),
+    ];
+
+    const { items } = await createEisFindItems(catalog)(
+      findParams({ filters: { [EIS_REGION_FILTER_ID]: { exclude: ['geo-apac'] } } })
+    );
+
+    expect(items.map(({ title }) => title)).toEqual(['EU Model', 'US Model']);
+  });
+
+  it('combines a region with search and model type', async () => {
+    const catalog = [
+      model('US Chat', 'Anthropic', {
+        endpoints: [
+          {
+            inference_id: 'us-chat',
+            task_type: 'chat_completion',
+            service: 'elastic',
+            service_settings: { model_id: 'us-chat' },
+            metadata: { regions: [{ csp: 'aws', region: 'us-east-1', geo: 'us' }] },
+          },
+        ],
+      }),
+      model('US Embedder', 'Anthropic', {
+        taskTypes: ['text_embedding'],
+        categories: ['Embedding'],
+        endpoints: [
+          {
+            inference_id: 'us-embedder',
+            task_type: 'text_embedding',
+            service: 'elastic',
+            service_settings: { model_id: 'us-embedder' },
+            metadata: { regions: [{ csp: 'aws', region: 'us-east-1', geo: 'us' }] },
+          },
+        ],
+      }),
+    ];
+
+    const { items } = await createEisFindItems(catalog)(
+      findParams({
+        searchQuery: 'chat',
+        filters: {
+          [EIS_REGION_FILTER_ID]: { include: ['geo-us'] },
+          [EIS_CATEGORY_FILTER_ID]: { include: ['LLM'] },
+        },
+      })
+    );
+
+    expect(items.map(({ title }) => title)).toEqual(['US Chat']);
+  });
+
   it('filters by the task-type category dimension', async () => {
     const { items } = await findItems(
       findParams({ filters: { [EIS_CATEGORY_FILTER_ID]: { include: ['Rerank', 'Embedding'] } } })
@@ -301,5 +438,31 @@ describe('createEisFieldDefinitions', () => {
     expect(category.resolveIdToDisplay('Rerank')).toBe('Rerank');
     expect(category.resolveDisplayToId('embedding')).toBe('Embedding');
     expect(category.resolveFuzzyDisplayToIds?.('rer')).toEqual(['Rerank']);
+  });
+
+  it('resolves region option labels to the flyout keys', () => {
+    const catalog = [
+      model('US Model', 'Anthropic', {
+        endpoints: [
+          {
+            inference_id: 'us-model',
+            task_type: 'chat_completion',
+            service: 'elastic',
+            service_settings: { model_id: 'us-model' },
+            metadata: { regions: [{ csp: 'aws', region: 'us-east-1', geo: 'us' }] },
+          },
+        ],
+      }),
+    ];
+    const region = createEisFieldDefinitions(catalog).find(
+      ({ fieldName }) => fieldName === EIS_REGION_FILTER_ID
+    );
+    if (!region) {
+      throw new Error('Expected a region field definition');
+    }
+
+    expect(region.resolveIdToDisplay('geo-us')).toBe('North America');
+    expect(region.resolveDisplayToId('us-east-1 - AWS')).toBe('region-aws-us-east-1');
+    expect(region.resolveFuzzyDisplayToIds?.('north')).toEqual(['geo-us']);
   });
 });

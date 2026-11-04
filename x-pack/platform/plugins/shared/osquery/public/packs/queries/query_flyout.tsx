@@ -44,7 +44,7 @@ import {
 } from '../../components/schedule_section/translations';
 import { CodeEditorField } from '../../saved_queries/form/code_editor_field';
 import { PlatformCheckBoxGroupField } from './platform_checkbox_group_field';
-import { ALL_OSQUERY_VERSIONS_OPTIONS } from './constants';
+import { useOsqueryVersionOptions } from './use_osquery_version_options';
 import type {
   UsePackQueryFormProps,
   PackQueryFormData,
@@ -80,12 +80,9 @@ const ALL_VERSIONS_PLACEHOLDER = i18n.translate(
   { defaultMessage: 'All' }
 );
 
-const PLAIN_VERSION_FIELD_PROPS = {
+const PLAIN_VERSION_FIELD_BASE = {
   noSuggestions: false,
   singleSelection: { asPlainText: true },
-  placeholder: ALL_VERSIONS_PLACEHOLDER,
-  options: ALL_OSQUERY_VERSIONS_OPTIONS,
-  onCreateOption: undefined,
 };
 
 const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
@@ -106,6 +103,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   } = useKibana().services;
   const [isEditMode] = useState(!!defaultValue);
   const isRruleSchedulingEnabled = ExperimentalFeaturesService.get().rruleScheduling;
+  const { options: versionOptions, helpText: versionHelpText } = useOsqueryVersionOptions();
   const { serializer, idSet, deserializedSchedule, ...hooksForm } = usePackQueryForm({
     uniqueQueryIds,
     defaultValue,
@@ -218,11 +216,29 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
 
   const versionFieldProps = useMemo(
     () => ({
-      ...PLAIN_VERSION_FIELD_PROPS,
+      ...PLAIN_VERSION_FIELD_BASE,
+      options: versionOptions,
       placeholder: packMinOsqueryVersion ?? ALL_VERSIONS_PLACEHOLDER,
       isDisabled: !overridePackDefaults,
     }),
-    [packMinOsqueryVersion, overridePackDefaults]
+    [versionOptions, packMinOsqueryVersion, overridePackDefaults]
+  );
+
+  // Mirrors the serializer: the query's `version` is dropped on save when it
+  // inherits the pack default (toggle off) or equals it (toggle on), so that
+  // value isn't checked here; the pack form still flags an invalid default.
+  const queryVersion = watch('version');
+  const isVersionInherited =
+    !!packMinOsqueryVersion &&
+    (!overridePackDefaults || queryVersion?.[0] === packMinOsqueryVersion);
+
+  const plainVersionFieldProps = useMemo(
+    () => ({
+      ...PLAIN_VERSION_FIELD_BASE,
+      options: versionOptions,
+      placeholder: ALL_VERSIONS_PLACEHOLDER,
+    }),
+    [versionOptions]
   );
 
   const handleScheduleChange = useCallback(
@@ -400,7 +416,11 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
               >
                 <EuiFlexGroup>
                   <EuiFlexItem>
-                    <VersionField euiFieldProps={versionFieldProps} />
+                    <VersionField
+                      euiFieldProps={versionFieldProps}
+                      helpText={versionHelpText}
+                      skipValidation={isVersionInherited}
+                    />
                     <EuiSpacer />
                     <ResultsTypeField euiFieldProps={disabledFieldProps} />
                   </EuiFlexItem>
@@ -451,7 +471,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
                     <EuiSpacer />
                   </>
                 ) : null}
-                <VersionField euiFieldProps={PLAIN_VERSION_FIELD_PROPS} />
+                <VersionField euiFieldProps={plainVersionFieldProps} helpText={versionHelpText} />
                 <EuiSpacer />
                 <ResultsTypeField />
               </EuiFlexItem>

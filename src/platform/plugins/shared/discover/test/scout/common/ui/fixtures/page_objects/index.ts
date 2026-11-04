@@ -8,4 +8,4 @@
  */
 
 export { InsightsAndAlerting } from './insights_and_alerting';
-export { LookupIndexEditor } from './lookup_index_editor';
+export { DiscoverPage } from './discover_page';

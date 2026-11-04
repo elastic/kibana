@@ -279,6 +279,85 @@ describe('executeGenerationWorkflow', () => {
     );
   });
 
+  describe('telemetryMetadata forwarding to runManualOrchestration', () => {
+    const runWithTelemetry = async (telemetryMetadata?: {
+      pluginId: string;
+      aggregateBy: string;
+    }) => {
+      const mockEventLogger: jest.Mocked<IEventLogger> = {
+        logEvent: jest.fn(),
+      } as unknown as jest.Mocked<IEventLogger>;
+
+      const coreStartMock: CoreStart = {
+        elasticsearch: {
+          client: {
+            asScoped: () => ({
+              asCurrentUser: {
+                indices: { refresh: jest.fn().mockResolvedValue(undefined) },
+                security: { authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }) },
+              },
+            }),
+          },
+        },
+        http: { basePath: { get: jest.fn().mockReturnValue('') } },
+      } as unknown as CoreStart;
+
+      await executeGenerationWorkflow({
+        alertsIndexPattern: '.alerts-security.alerts-default',
+        apiConfig: {
+          action_type_id: '.gen-ai',
+          connector_id: 'test-connector-id',
+          model: 'gpt-4',
+        },
+        authz: createAuthorizedAuthzMock(),
+        executionUuid: 'test-execution-uuid',
+        getEventLogIndex: async () => '.kibana-event-log-test',
+        getEventLogger: async () => mockEventLogger,
+        getStartServices: async () => ({ coreStart: coreStartMock, pluginsStart: {} }),
+        logger: {
+          debug: jest.fn(),
+          error: jest.fn(),
+          info: jest.fn(),
+          warn: jest.fn(),
+        } as unknown as Logger,
+        request: {} as unknown as KibanaRequest,
+        ...(telemetryMetadata != null ? { telemetryMetadata } : {}),
+        type: 'attack_discovery',
+        workflowConfig: {
+          alert_retrieval_workflow_ids: [],
+          alert_retrieval_mode: 'custom_query' as const,
+          alert_retrieval_workflows_enabled: false,
+          default_retrieval_enabled: true,
+          skill_enabled: true,
+          validation_workflow_id: 'default',
+        },
+        workflowsManagementApi: {
+          createWorkflow: jest.fn(),
+          getWorkflow: jest.fn(),
+          getWorkflowExecution: jest.fn(),
+          getWorkflows: jest.fn(),
+          runWorkflow: jest.fn(),
+        } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
+      });
+    };
+
+    it('forwards telemetryMetadata to runManualOrchestration when set', async () => {
+      const telemetryMetadata = { pluginId: 'alertzero', aggregateBy: 'alertzero-run-1' };
+
+      await runWithTelemetry(telemetryMetadata);
+
+      expect(mockRunManualOrchestration).toHaveBeenCalledWith(
+        expect.objectContaining({ telemetryMetadata })
+      );
+    });
+
+    it('omits telemetryMetadata from runManualOrchestration when unset', async () => {
+      await runWithTelemetry();
+
+      expect(mockRunManualOrchestration.mock.calls[0][0]).not.toHaveProperty('telemetryMetadata');
+    });
+  });
+
   it('returns the ManualOrchestrationOutcome from runManualOrchestration', async () => {
     const mockOutcome = {
       alertRetrievalResult: { alertsContextCount: 5 },

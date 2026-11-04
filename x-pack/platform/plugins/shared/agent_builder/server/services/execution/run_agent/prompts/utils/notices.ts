@@ -182,6 +182,34 @@ export const formatInterruptionNotice = (interruption: ExecutionInterruption): s
     ? formatExecutionFailedNotice(interruption.error)
     : formatExecutionAbortedNotice(interruption.aborted_by);
 
+/**
+ * The notice that stands in for the assistant answer of a round still waiting on the user. The
+ * question text comes from the model: it is XML-escaped by `generateXmlTree`.
+ */
+export const formatAwaitingPromptNotice = (questions: string[]): string =>
+  generateXmlTree({
+    tagName: 'system_notice',
+    children: [
+      {
+        tagName: 'message',
+        children: [
+          'The agent paused this round to wait for user input, and the user has not answered. The steps above were completed; tool calls waiting for a confirmation did not run, and no response was produced.',
+        ],
+      },
+      ...(questions.length > 0
+        ? [
+            {
+              tagName: 'unanswered_questions',
+              children: questions.map((question) => ({
+                tagName: 'question',
+                children: [question],
+              })),
+            },
+          ]
+        : []),
+    ],
+  });
+
 export const formatSystemNotice = (execution: BackgroundExecutionState): string => {
   const { status, execution_id: executionId } = execution;
 

@@ -47,6 +47,24 @@ describe('privateLocationsStateReducer', () => {
     );
   });
 
+  it('closes the editor and reloads locations when edit fails with a server error', () => {
+    const editing = privateLocationsStateReducer(undefined, setPrivateLocationToEdit(location));
+
+    const failed = privateLocationsStateReducer(
+      { ...editing, isPrivateLocationFlyoutVisible: true, editLoading: true },
+      editPrivateLocationAction.fail({ ...fetchError, body: { message: 'x', statusCode: 500 } })
+    );
+
+    expect(failed).toEqual(
+      expect.objectContaining({
+        privateLocationToEdit: undefined,
+        isPrivateLocationFlyoutVisible: false,
+        data: null,
+        editLoading: false,
+      })
+    );
+  });
+
   it('clears privateLocationToEdit and closes the flyout when edit succeeds', () => {
     const editing = privateLocationsStateReducer(undefined, setPrivateLocationToEdit(location));
 

@@ -50,8 +50,14 @@ describe('accessesFrequentlyMaintainer', () => {
       .mockImplementation(async ({ telemetryCollector }) => {
         if (telemetryCollector) {
           telemetryCollector.sources.push(
-            { id: 'elastic_defend', scanned: 10, qualified: 8, outcome: 'producing' },
-            { id: 'aws_cloudtrail', scanned: 0, qualified: 0, outcome: 'index_missing' }
+            { id: 'elastic_defend', scanned: 10, qualified: 8, outcome: 'producing', applied: 8 },
+            {
+              id: 'aws_cloudtrail',
+              scanned: 0,
+              qualified: 0,
+              outcome: 'index_missing',
+              applied: 0,
+            }
           );
           telemetryCollector.relationshipTypeApplied.accesses_frequently = 5;
           telemetryCollector.relationshipTypeApplied.accesses_infrequently = 3;
@@ -92,8 +98,8 @@ describe('accessesFrequentlyMaintainer', () => {
     });
 
     expect(payload.sources).toEqual([
-      { id: 'elastic_defend', scanned: 10, qualified: 8, outcome: 'producing' },
-      { id: 'aws_cloudtrail', scanned: 0, qualified: 0, outcome: 'index_missing' },
+      { id: 'elastic_defend', scanned: 10, qualified: 8, outcome: 'producing', applied: 8 },
+      { id: 'aws_cloudtrail', scanned: 0, qualified: 0, outcome: 'index_missing', applied: 0 },
     ]);
 
     expect(payload.breakdown).toEqual([
@@ -115,6 +121,7 @@ describe('accessesFrequentlyMaintainer', () => {
             scanned: 0,
             qualified: 0,
             outcome: 'index_missing',
+            applied: 0,
           });
           // relationshipTypeApplied intentionally empty
         }
@@ -179,6 +186,7 @@ describe('accessesFrequentlyMaintainer', () => {
             scanned: 5,
             qualified: 5,
             outcome: 'producing',
+            applied: 5,
           });
           telemetryCollector.relationshipTypeApplied.accesses_frequently = 5;
         }

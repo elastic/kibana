@@ -8,13 +8,14 @@
 import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { isContextLengthExceededError } from '@kbn/inference-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { THREAT_CATEGORIES, THREAT_REGIONS } from '../../../common/threat_intel';
 import { logStageUsage } from '../lib/cost_tracker';
 import {
   furtherShrinkOverflowArticleContext,
   selectOverflowRetryArticleContext,
 } from './article_context';
+import { requireParsedStructuredOutput } from './structured_output';
 
 /**
  * Keeps only values from the closed set and caps the array length. A filter
@@ -29,12 +30,14 @@ const closedSet = <T extends string>(allowed: readonly T[], max: number) =>
     .transform((values) => values.filter((v): v is T => (allowed as readonly string[]).includes(v)))
     .transform((values) => [...new Set(values)].slice(0, max));
 
-export const taxonomyOutputSchema = z.object({
-  categories: closedSet(THREAT_CATEGORIES, THREAT_CATEGORIES.length),
-  regions: closedSet(THREAT_REGIONS, THREAT_REGIONS.length),
-  relevance: z.number().min(0).max(1),
-  diamond_suitable: z.boolean(),
-});
+export const taxonomyOutputSchema = lazySchema(() =>
+  z.object({
+    categories: closedSet(THREAT_CATEGORIES, THREAT_CATEGORIES.length),
+    regions: closedSet(THREAT_REGIONS, THREAT_REGIONS.length),
+    relevance: z.number().min(0).max(1),
+    diamond_suitable: z.boolean(),
+  })
+);
 
 export type TaxonomyOutput = z.infer<typeof taxonomyOutputSchema>;
 
@@ -104,9 +107,6 @@ export const enrichTaxonomy = async (
     includeRaw: true,
   });
 
-  // withStructuredOutput casts the raw tool-call args to the schema's inferred
-  // type without validating them; re-parse so the categories/regions closed
-  // sets actually run instead of letting unbounded model output through.
   const invokeTaxonomy = async (
     promptText: string
   ): Promise<{ raw: { response_metadata: Record<string, unknown> }; parsed: TaxonomyOutput }> => {
@@ -114,9 +114,9 @@ export const enrichTaxonomy = async (
       buildTaxonomyPrompt({ ...params, text: promptText })
     )) as {
       raw: { response_metadata: Record<string, unknown> };
-      parsed: unknown;
+      parsed: TaxonomyOutput | null;
     };
-    return { raw: invoked.raw, parsed: taxonomyOutputSchema.parse(invoked.parsed) };
+    return requireParsedStructuredOutput(invoked, 'enrich_taxonomy');
   };
 
   let text = params.text;

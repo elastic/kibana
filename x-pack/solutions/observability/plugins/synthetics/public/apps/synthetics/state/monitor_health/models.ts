@@ -12,3 +12,5 @@ export {
   type MonitorHealthError,
   type MonitorsHealthResponse,
 } from '../../../../../common/runtime_types';
+
+export type MonitorHealthQuery = { monitorIds: string[] } | { locationIds: string[] };

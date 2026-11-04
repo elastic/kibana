@@ -25,6 +25,10 @@ import {
   rowItems,
 } from './helpers';
 import { useAuthentications } from '../../containers/authentications';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../common/utils/execution_context';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -32,6 +36,11 @@ import { usersActions, usersModel, usersSelectors } from '../../users/store';
 import type { AuthenticationsUserTableProps } from './types';
 
 const TABLE_QUERY_ID = 'authenticationsUsersTableQuery';
+
+const USERS_AUTHENTICATIONS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_USERS_PAGE,
+  'authentications'
+);
 
 const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps> = ({
   endDate,
@@ -113,6 +122,7 @@ const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps>
     activePage,
     limit,
     stackByField: userName ? AuthStackByField.hostName : AuthStackByField.userName,
+    executionContext: USERS_AUTHENTICATIONS_CONTEXT,
   });
 
   const columns = useMemo(

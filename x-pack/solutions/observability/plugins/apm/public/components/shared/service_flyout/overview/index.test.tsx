@@ -11,6 +11,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ServiceFlyoutTransactionsSection } from '@kbn/apm-ui-shared';
 import type { ServiceFlyoutService } from '..';
 import { ServiceFlyoutOverview } from '.';
+import type { ApmIndicesSource } from '../../../../hooks/use_apm_indices';
 
 const mockUseServiceHasSystemMetrics = jest.fn<
   { hasSystemMetrics: boolean | undefined; isLoading: boolean },
@@ -58,7 +59,7 @@ jest.mock('../../transaction_detail_flyout', () => ({
     onClose: () => void;
     preferDocumentBasedCharts?: boolean;
     schema?: string;
-    indices?: unknown;
+    indicesSource?: ApmIndicesSource;
     deps: { lens?: unknown; dataViews?: unknown };
   }) => {
     mockTransactionDetailFlyoutProps(props);
@@ -458,7 +459,7 @@ describe('ServiceFlyoutOverview transactions section props', () => {
       expect.objectContaining({
         preferDocumentBasedCharts: true,
         schema: 'ecs',
-        indices: null,
+        indicesSource: { indices: null },
         deps: expect.objectContaining({
           lens: undefined,
           dataViews: undefined,
@@ -474,6 +475,72 @@ describe('ServiceFlyoutOverview transactions section props', () => {
         errorRate: { value: 0 },
       })
     ).toBe(true);
+  });
+
+  it('passes alertsCount from the clicked transaction to TransactionDetailFlyout', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    renderOverview();
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        transactionType: 'request',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+        alertsCount: 3,
+      });
+    });
+
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alertsCount: 3,
+      })
+    );
+  });
+
+  it('updates alertsCount on TransactionDetailFlyout when the transactions list resettles', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    renderOverview();
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        transactionType: 'request',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+        alertsCount: 2,
+      });
+    });
+
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({ alertsCount: 2 })
+    );
+
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!(
+        [
+          {
+            name: 'GET /api/orders',
+            transactionType: 'request',
+            latency: { value: 1 },
+            throughput: { value: 1 },
+            errorRate: { value: 0 },
+            alertsCount: 5,
+          },
+        ],
+        {
+          isLoading: false,
+          filters: PRODUCTION_LIST_FILTERS,
+          isSearchFiltered: false,
+        }
+      );
+    });
+
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({ alertsCount: 5 })
+    );
   });
 
   it('closes TransactionDetailFlyout when the same transaction is clicked again', () => {

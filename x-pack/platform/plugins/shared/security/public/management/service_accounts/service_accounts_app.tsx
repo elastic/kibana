@@ -13,17 +13,26 @@ import type { ServiceAccount } from '@kbn/core-security-browser';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { CreateServiceAccountFlyout } from './create_service_account_flyout';
+import type { DeleteServiceAccountOutcome } from './delete_service_account_modal';
+import { DeleteServiceAccountModal } from './delete_service_account_modal';
 import { ServiceAccountsPage } from './service_accounts_page';
+import type { ServiceAccountTableItem } from './service_accounts_table';
+import { ServiceAccountWorkloadsModal } from './view_service_account_workloads_modal';
 import type { ServiceAccountsAPIClient } from '../../service_accounts';
 import type { RolesAPIClient } from '../roles';
 
 interface Props {
   isServerless: boolean;
   canCreate: boolean;
-  serviceAccountsAPIClient: Pick<PublicMethodsOf<ServiceAccountsAPIClient>, 'create' | 'list'>;
+  serviceAccountsAPIClient: Pick<
+    PublicMethodsOf<ServiceAccountsAPIClient>,
+    'create' | 'list' | 'delete' | 'listWorkloads'
+  >;
   rolesAPIClient: Pick<PublicMethodsOf<RolesAPIClient>, 'getRoles'>;
   createRoleUrl?: string;
   onCreated: (account: ServiceAccount) => void;
+  onDeleted: (account: ServiceAccountTableItem, outcome: DeleteServiceAccountOutcome) => void;
+  onError: (error: Error, title: string) => void;
 }
 
 export const ServiceAccountsApp = ({
@@ -33,10 +42,14 @@ export const ServiceAccountsApp = ({
   rolesAPIClient,
   createRoleUrl,
   onCreated,
+  onDeleted,
+  onError,
 }: Props) => {
   const history = useHistory();
   const location = useLocation();
   const [refreshKey, setRefreshKey] = useState(0);
+  const [accountToDelete, setAccountToDelete] = useState<ServiceAccountTableItem>();
+  const [accountToView, setAccountToView] = useState<ServiceAccountTableItem>();
   const isMounted = useMountedState();
   const creationClient = useMemo(
     () => ({
@@ -59,7 +72,33 @@ export const ServiceAccountsApp = ({
         canCreate={canCreate}
         serviceAccountsAPIClient={serviceAccountsAPIClient}
         onCreateAccount={() => history.push('/create')}
+        // Deleting takes the same privilege as creating.
+        onDeleteAccount={canCreate ? setAccountToDelete : undefined}
+        onViewWorkloads={setAccountToView}
       />
+      {accountToView && (
+        <ServiceAccountWorkloadsModal
+          key={accountToView.id}
+          serviceAccount={accountToView}
+          serviceAccountsAPIClient={serviceAccountsAPIClient}
+          onClose={() => setAccountToView(undefined)}
+          onError={onError}
+        />
+      )}
+      {accountToDelete && (
+        <DeleteServiceAccountModal
+          key={accountToDelete.id}
+          serviceAccount={accountToDelete}
+          serviceAccountsAPIClient={serviceAccountsAPIClient}
+          onClose={() => setAccountToDelete(undefined)}
+          onDeleted={(outcome) => {
+            setAccountToDelete(undefined);
+            setRefreshKey((value) => value + 1);
+            onDeleted(accountToDelete, outcome);
+          }}
+          onError={onError}
+        />
+      )}
       {canCreate && location.pathname === '/create' && (
         <CreateServiceAccountFlyout
           isServerless={isServerless}

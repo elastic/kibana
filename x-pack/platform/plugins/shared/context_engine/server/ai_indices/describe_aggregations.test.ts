@@ -32,6 +32,8 @@ const esResponseError = (statusCode: number, type: string) =>
 
 const LIFECYCLE =
   '| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"\n| WHERE expires_at IS NULL OR expires_at > NOW()';
+const MEMORY_EXCLUSION =
+  '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")';
 
 const emptyResponse = { columns: [], values: [] };
 
@@ -87,6 +89,7 @@ describe('describeAiIndexAggregations', () => {
       query: [
         'FROM ai-index-idx-* METADATA _id, _index',
         LIFECYCLE,
+        MEMORY_EXCLUSION,
         '| WHERE type IS NOT NULL',
         '| STATS count = COUNT(*) BY type',
         '| SORT count DESC, type ASC',
@@ -99,6 +102,7 @@ describe('describeAiIndexAggregations', () => {
       query: [
         'FROM ai-index-idx-* METADATA _id, _index',
         LIFECYCLE,
+        MEMORY_EXCLUSION,
         '| MV_EXPAND tags',
         '| WHERE tags IS NOT NULL',
         '| STATS count = COUNT(*) BY tags',

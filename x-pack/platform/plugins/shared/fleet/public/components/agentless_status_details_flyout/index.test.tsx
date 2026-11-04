@@ -6,9 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
-
-import { createIntegrationsTestRendererMock } from '../../mock';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { AgentlessStatusDetailsFlyout } from '.';
 
@@ -63,8 +61,7 @@ function renderFlyout({
   packagePolicy?: any;
   agentPolicy?: any;
 }) {
-  const renderer = createIntegrationsTestRendererMock();
-  return renderer.render(
+  return renderWithI18n(
     <AgentlessStatusDetailsFlyout
       onClose={onClose}
       policyName="My Integration"
@@ -76,60 +73,48 @@ function renderFlyout({
 }
 
 describe('AgentlessStatusDetailsFlyout', () => {
-  it('renders without a callout when all components are healthy', async () => {
+  it('renders without a callout when all components are healthy', () => {
     const agent = makeAgent([{ inputId: 'input-1', status: 'HEALTHY' }]);
     const { queryByTestId } = renderFlyout({ agent });
-    await waitFor(() => {
-      expect(queryByTestId('agentlessStatusDetailsFlyoutComponentsWarning')).toBeNull();
-    });
+    expect(queryByTestId('agentlessStatusDetailsFlyoutComponentsWarning')).toBeNull();
   });
 
-  it('renders a warning callout when a component is degraded', async () => {
+  it('renders a warning callout when a component is degraded', () => {
     const agent = makeAgent([{ inputId: 'input-1', status: 'DEGRADED' }]);
     const { getByTestId, getByText, queryByText } = renderFlyout({ agent });
-    await waitFor(() => {
-      expect(getByTestId('agentlessStatusDetailsFlyoutComponentsWarning')).not.toBeNull();
-      expect(getByText('One or more components are in a degraded state')).toBeInTheDocument();
-      expect(queryByText(/troubleshooting guide/i)).toBeNull();
-    });
+    expect(getByTestId('agentlessStatusDetailsFlyoutComponentsWarning')).not.toBeNull();
+    expect(getByText('One or more components are in a degraded state')).toBeInTheDocument();
+    expect(queryByText(/troubleshooting guide/i)).toBeNull();
   });
 
-  it('renders a danger callout with body text when a component is failed', async () => {
+  it('renders a danger callout with body text when a component is failed', () => {
     const agent = makeAgent([{ inputId: 'input-1', status: 'FAILED' }]);
     const { getByTestId, getByText } = renderFlyout({ agent });
-    await waitFor(() => {
-      expect(getByTestId('agentlessStatusDetailsFlyoutComponentsWarning')).not.toBeNull();
-      expect(getByText('One or more components are in a failed state')).toBeInTheDocument();
-      expect(getByText(/troubleshooting guide/i)).toBeInTheDocument();
-    });
+    expect(getByTestId('agentlessStatusDetailsFlyoutComponentsWarning')).not.toBeNull();
+    expect(getByText('One or more components are in a failed state')).toBeInTheDocument();
+    expect(getByText(/troubleshooting guide/i)).toBeInTheDocument();
   });
 
-  it('treats failed as higher severity than degraded', async () => {
+  it('treats failed as higher severity than degraded', () => {
     const agent = makeAgent([
       { inputId: 'input-1', status: 'DEGRADED' },
       { inputId: 'input-1', status: 'FAILED' },
     ]);
     const { getByText } = renderFlyout({ agent });
-    await waitFor(() => {
-      expect(getByText('One or more components are in a failed state')).toBeInTheDocument();
-    });
+    expect(getByText('One or more components are in a failed state')).toBeInTheDocument();
   });
 
-  it('detects degraded state on a non-first input (multi-input package)', async () => {
+  it('detects degraded state on a non-first input (multi-input package)', () => {
     // Only input-2 (the second input) has a degraded unit — the bug the PR review caught
     const agent = makeAgent([{ inputId: 'input-2', status: 'DEGRADED' }]);
     const packagePolicy = makePackagePolicy([{ id: 'input-1' }, { id: 'input-2' }]);
     const { getByText } = renderFlyout({ agent, packagePolicy });
-    await waitFor(() => {
-      expect(getByText('One or more components are in a degraded state')).toBeInTheDocument();
-    });
+    expect(getByText('One or more components are in a degraded state')).toBeInTheDocument();
   });
 
-  it('renders without a callout when agent has no components', async () => {
+  it('renders without a callout when agent has no components', () => {
     const agent = { id: 'agent-1', status: 'online' } as any;
     const { queryByTestId } = renderFlyout({ agent });
-    await waitFor(() => {
-      expect(queryByTestId('agentlessStatusDetailsFlyoutComponentsWarning')).toBeNull();
-    });
+    expect(queryByTestId('agentlessStatusDetailsFlyoutComponentsWarning')).toBeNull();
   });
 });

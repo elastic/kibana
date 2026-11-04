@@ -60,6 +60,7 @@ export interface RuleMetadata {
   enabled: boolean;
   description?: string;
   tags?: string[];
+  routingTags?: string[];
 }
 
 export interface RuleSchedule {

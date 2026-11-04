@@ -50,7 +50,7 @@ test.describe(
 
       await test.step('open the seeded episode flyout from the inbox', async () => {
         await alerting.gotoInboxFilteredByRule(ruleId);
-        await expect(alerting.pageTitle).toHaveText('Alert episodes', { timeout: 30_000 });
+        await expect(alerting.pageTitle).toHaveText('Alerts', { timeout: 30_000 });
         await expect(alerting.expandRowButton).toHaveCount(1);
         await alerting.openEpisodeFlyout();
       });
@@ -78,7 +78,7 @@ test.describe(
 
       await test.step('open the seeded episode flyout from the inbox', async () => {
         await alerting.gotoInboxFilteredByRule(ruleId);
-        await expect(alerting.pageTitle).toHaveText('Alert episodes', { timeout: 30_000 });
+        await expect(alerting.pageTitle).toHaveText('Alerts', { timeout: 30_000 });
         await expect(alerting.expandRowButton).toHaveCount(1);
         await alerting.openEpisodeFlyout();
       });
@@ -93,7 +93,7 @@ test.describe(
         await alerting.clickViewRuleDetails();
         await expect(page).toHaveURL(OBSERVABILITY_ALERTING_RULE_DETAILS_URL_RE);
         await expect(page).not.toHaveURL(MANAGEMENT_ALERTING_V2_RULES_URL_RE);
-        await expect(page).toHaveURL(new RegExp(`/rules/v2/${ruleId}(/|$|\\?|#)`));
+        await expect(page).toHaveURL(new RegExp(`/rules/universal/${ruleId}(/|$|\\?|#)`));
         await expect(alerting.ruleDetailLayout).toBeVisible();
       });
     });
@@ -122,7 +122,7 @@ test.describe(
         await alerting.clickViewRuleDetails();
         await expect(page).toHaveURL(OBSERVABILITY_ALERTING_RULE_DETAILS_URL_RE);
         await expect(page).not.toHaveURL(MANAGEMENT_ALERTING_V2_RULES_URL_RE);
-        await expect(page).toHaveURL(new RegExp(`/rules/v2/${ruleId}(/|$|\\?|#)`));
+        await expect(page).toHaveURL(new RegExp(`/rules/universal/${ruleId}(/|$|\\?|#)`));
         await expect(alerting.ruleDetailLayout).toBeVisible();
       });
     });

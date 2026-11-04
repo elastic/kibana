@@ -18,7 +18,6 @@ export interface ProcessLiveHistoryParams {
   liveHits: LiveActionHit[];
   osqueryContext: OsqueryAppContext;
   request: KibanaRequest;
-  spaceId: string;
   integrationNamespaces?: readonly string[];
   ccsEnabled?: boolean;
   cpsActive?: boolean;
@@ -41,7 +40,6 @@ export const processLiveHistory = async ({
   liveHits,
   osqueryContext,
   request,
-  spaceId,
   integrationNamespaces,
   ccsEnabled = false,
   cpsActive = false,
@@ -67,7 +65,6 @@ export const processLiveHistory = async ({
         liveRows,
         osqueryContext,
         request,
-        spaceId,
         integrationNamespaces,
         ccsEnabled,
         cpsActive
@@ -85,7 +82,6 @@ const enrichWithResultCounts = async (
   liveRows: LiveHistoryRow[],
   osqueryContext: OsqueryAppContext,
   request: KibanaRequest,
-  spaceId: string,
   integrationNamespaces: readonly string[] | undefined,
   ccsEnabled: boolean,
   cpsActive: boolean
@@ -100,7 +96,6 @@ const enrichWithResultCounts = async (
   const resultCountsMap = await getResultCountsForActions(
     readEsClient,
     uniqueActionIds,
-    spaceId,
     integrationNamespaces,
     ccsEnabled
   );

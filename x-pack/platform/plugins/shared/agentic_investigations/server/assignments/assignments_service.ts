@@ -46,8 +46,11 @@ export class AssignmentsService {
    *
    * Public conversations are unchanged — Agent Builder rejects ACL entries on them.
    *
-   * Order: add → patch metadata → remove. A partial failure always leaves extra access,
-   * never a listed assignee without visibility.
+   * Order: add → remove → patch metadata. `metadata.assignees` is the source of the diff, so it
+   * is written last: if any step fails, the previous assignee list is still intact and a retry
+   * recomputes the same diff, so no stale ACL entry can be orphaned. The trade-off is that a
+   * failure between remove and patch leaves a still-listed assignee without access until the
+   * retry succeeds.
    *
    * Edge cases:
    * - A caller can remove themselves; the request succeeds but they lose access afterwards.
@@ -81,11 +84,21 @@ export class AssignmentsService {
     const removed = previous.filter((id) => !next.includes(id));
 
     // For private conversations: add new assignees to the ACL first so they can see the
-    // conversation even if the metadata write later fails.
+    // conversation as soon as they are listed.
     if (isPrivate && added.length > 0) {
       await client.addAccessControlEntries(
         conversationId,
         added.map((id) => ({ type: 'user', id, role: ConversationAccessControlRole.Member })),
+        { access: 'converse' }
+      );
+    }
+
+    // Revoke before patching metadata: the diff is derived from `metadata.assignees`, so it must
+    // only change once the ACL is in sync, otherwise a failed revoke could never be retried.
+    if (isPrivate && removed.length > 0) {
+      await client.removeAccessControlEntries(
+        conversationId,
+        removed.map((id) => ({ type: 'user', id })),
         { access: 'converse' }
       );
     }
@@ -95,15 +108,6 @@ export class AssignmentsService {
       { assignees: next },
       { access: 'converse' }
     );
-
-    // Revoke removed assignees last so a partial failure leaves extra access, not missing access.
-    if (isPrivate && removed.length > 0) {
-      return client.removeAccessControlEntries(
-        conversationId,
-        removed.map((id) => ({ type: 'user', id })),
-        { access: 'converse' }
-      );
-    }
 
     return conversation;
   }

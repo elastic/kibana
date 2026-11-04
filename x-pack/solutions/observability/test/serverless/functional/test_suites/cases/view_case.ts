@@ -65,25 +65,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/239300
-    // TODO before unskipping: update stale selectors inside this block —
-    // editable-title-header-value/editable-title-input-field/editable-title-submit-btn
-    // are absent from the redesign DOM; use appHeaderTitle* equivalents instead.
-    describe.skip('properties', () => {
+    describe('properties', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
 
       it('edits a case title from the case view page', async () => {
         const newTitle = `test-${uuidv4()}`;
 
-        await testSubjects.click('editable-title-header-value');
-        await testSubjects.setValue('editable-title-input-field', newTitle);
-        await testSubjects.click('editable-title-submit-btn');
-
-        // wait for backend response
-        await retry.tryForTime(5000, async () => {
-          const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
-          expect(await title.getVisibleText()).equal(newTitle);
-        });
+        await cases.common.editCaseTitle(newTitle);
+        await cases.common.assertCaseTitle(newTitle);
 
         // validate user action
         await find.byCssSelector('[data-test-subj*="title-update-action"]');
@@ -107,32 +96,28 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('adds a category to a case', async () => {
         const category = uuidv4();
-        await testSubjects.click('category-edit-button');
-        await comboBox.setCustom('comboBoxInput', category);
-        await testSubjects.click('edit-category-submit');
+        await cases.common.addCategory(category);
 
         // validate category was added
-        await testSubjects.existOrFail('category-viewer-' + category);
+        expect(await comboBox.getComboBoxSelectedOptions('categories-list')).to.eql([category]);
 
         // validate user action
         await find.byCssSelector('[data-test-subj*="category-update-action"]');
       });
 
       it('deletes a category from a case', async () => {
-        await find.byCssSelector('[data-test-subj*="category-viewer-"]');
+        expect(await comboBox.getComboBoxSelectedOptions('categories-list')).length(1);
 
-        await testSubjects.click('category-remove-button');
+        await cases.common.removeCategory();
 
-        await testSubjects.existOrFail('no-categories');
+        expect(await comboBox.getComboBoxSelectedOptions('categories-list')).to.eql([]);
         // validate user action
         await find.byCssSelector('[data-test-subj*="category-delete-action"]');
       });
 
       it('adds a tag to a case', async () => {
         const tag = uuidv4();
-        await testSubjects.click('tag-list-edit-button');
-        await comboBox.setCustom('comboBoxInput', tag);
-        await testSubjects.click('edit-tags-submit');
+        await cases.common.addTag(tag);
 
         // validate tag was added
         await testSubjects.existOrFail('tag-' + tag);
@@ -142,11 +127,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('deletes a tag from a case', async () => {
-        await testSubjects.click('tag-list-edit-button');
-        // find the tag button and click the close button
-        const button = await find.byCssSelector('[data-test-subj="comboBoxInput"] button');
-        await button.click();
-        await testSubjects.click('edit-tags-submit');
+        // Clearing the combo box persists the removal immediately; there is no confirm step.
+        await comboBox.clear('case-tags');
+        await header.waitUntilLoadingHasFinished();
 
         // validate user action
         await find.byCssSelector('[data-test-subj*="tags-delete-action"]');
@@ -160,10 +143,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await find.byCssSelector(
             '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-closed"]'
           );
-          // validates dropdown tag
-          await testSubjects.existOrFail(
-            'case-view-status-dropdown > case-status-badge-popover-button-closed'
-          );
+          // validates the header status badge
+          expect(await testSubjects.getVisibleText('case-view-status-badge')).to.be('Closed');
         });
       });
 
@@ -302,12 +283,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/240911
-    // TODO before unskipping: update stale assertions inside this block —
-    // the redesign uses a single user-actions-list (not two); replace the
-    // two-list length/li-count assertions with the before/after count model
-    // used in the platform group1/view_case.ts pagination suite.
-    describe.skip('pagination', () => {
+    describe('pagination', () => {
       let createdCase: any;
 
       before(async () => {
@@ -349,17 +325,22 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           '[data-test-subj="user-actions-list"]'
         );
 
-        expect(userActionsLists).length(2);
+        expect(userActionsLists).length(1);
 
-        expect(await userActionsLists[0].findAllByCssSelector('li')).length(10);
-
-        expect(await userActionsLists[1].findAllByCssSelector('li')).length(4);
+        const countBefore = (await userActionsLists[0].findAllByCssSelector('li')).length;
 
         await testSubjects.click('cases-show-more-user-actions');
 
         await header.waitUntilLoadingHasFinished();
 
-        expect(await userActionsLists[0].findAllByCssSelector('li')).length(20);
+        // more items are loaded into the same single list
+        const countAfter = (
+          await (
+            await find.byCssSelector('[data-test-subj="user-actions-list"]')
+          ).findAllByCssSelector('li')
+        ).length;
+
+        expect(countAfter).to.be.greaterThan(countBefore);
       });
     });
 

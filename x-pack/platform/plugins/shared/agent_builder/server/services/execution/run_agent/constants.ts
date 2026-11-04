@@ -44,6 +44,7 @@ export const steps = {
   checkBackgroundWork: 'checkBackgroundWork',
   contextManagement: 'contextManagement',
   compactContext: 'compactContext',
+  cycleHooks: 'cycleHooks',
   researchAgent: 'researchAgent',
   executeTool: 'executeTool',
   handleToolInterrupt: 'handleToolInterrupt',

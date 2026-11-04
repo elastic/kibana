@@ -10,6 +10,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import type { ILicense, LicenseType } from '@kbn/licensing-types';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
+import { DATA_FEDERATION_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { PLUGIN_ID } from '../common';
 import { DataFederationPlugin } from './plugin';
 
@@ -18,15 +19,22 @@ const createLicense = (type: LicenseType) => licensingMock.createLicense({ licen
 const setup = ({
   license,
   canManageFederatedData = true,
+  isUiSettingEnabled = true,
 }: {
   license: ILicense;
   canManageFederatedData?: boolean;
+  isUiSettingEnabled?: boolean;
 }) => {
   const app = { enable: jest.fn(), disable: jest.fn() };
   const registerApp = jest.fn().mockReturnValue(app);
   const management = {
     sections: { section: { data: { registerApp } } },
   } as unknown as ManagementSetup;
+
+  const coreSetup = coreMock.createSetup();
+  coreSetup.settings.globalClient.get.mockImplementation((key: string) =>
+    key === DATA_FEDERATION_ENABLED_SETTING_ID ? isUiSettingEnabled : undefined
+  );
 
   const coreStart = coreMock.createStart();
   coreStart.application.capabilities = {
@@ -40,7 +48,7 @@ const setup = ({
   const plugin = new DataFederationPlugin(
     coreMock.createPluginInitializerContext({ enabled: true })
   );
-  plugin.setup(coreMock.createSetup(), { management });
+  plugin.setup(coreSetup, { management });
 
   return {
     app,
@@ -121,5 +129,29 @@ describe('DataFederationPlugin', () => {
 
     expect(app.enable).not.toHaveBeenCalled();
     expect(app.disable).not.toHaveBeenCalled();
+  });
+
+  describe('when the advanced setting is disabled', () => {
+    it('keeps the app disabled with an enterprise license and the capability', () => {
+      const { app, start } = setup({
+        license: createLicense('enterprise'),
+        isUiSettingEnabled: false,
+      });
+      start();
+
+      expect(app.enable).not.toHaveBeenCalled();
+    });
+
+    it('keeps the app disabled when the license is upgraded to enterprise', () => {
+      const { app, license$, start } = setup({
+        license: createLicense('basic'),
+        isUiSettingEnabled: false,
+      });
+      start();
+
+      license$.next(createLicense('enterprise'));
+
+      expect(app.enable).not.toHaveBeenCalled();
+    });
   });
 });

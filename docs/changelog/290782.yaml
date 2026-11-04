@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/290782
-issues:
-- https://github.com/elastic/security-team/issues/19307
-type: bug-fix
-products:
-- product: cloud-serverless
-- product: kibana
-title: "Show nested steps when you select an iteration in the workflow execution flyout"

@@ -7,6 +7,7 @@
 
 export * from './datetime_format_combo_box';
 export * from './described_option_display';
+export * from './eui_combo_box_no_custom_option';
 export * from './eui_combo_box_with_custom_option';
 export * from './form_row_label_with_info';
 export * from './fields';

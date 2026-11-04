@@ -117,6 +117,23 @@ export interface ParsedMetricItem {
   readonly dimensionFields: Dimension[];
 }
 
+export interface HistogramBounds {
+  readonly min: number;
+  readonly max: number;
+}
+
+/** A fetched min/max, or the request error. Missing bounds are omitted from the map. */
+export interface HistogramBoundsResult {
+  readonly bounds?: HistogramBounds;
+  readonly error?: Error;
+}
+
+export interface HistogramBoundsQuery {
+  readonly metricKey: string;
+  readonly source: string;
+  readonly esqlQuery: string;
+}
+
 export interface MetricsTelemetry {
   total_number_of_metrics: number;
   total_number_of_dimensions: number;
@@ -139,6 +156,8 @@ export interface MetricsInfo extends ParsedMetrics {
   loading: boolean;
   error: Error | null;
   activeDimensions: Dimension[];
+  /** Fetch params captured when the current `metricItems` landed. */
+  loadedFetchParams?: ChartSectionProps['fetchParams'];
 }
 
 export interface ParsedMetricsWithTelemetry extends ParsedMetrics {

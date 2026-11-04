@@ -8,12 +8,12 @@
 import React, { memo, useMemo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { css } from '@emotion/react';
-import { EuiText, EuiTextTruncate, useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiText, EuiTextTruncate, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import {
   LabelNodeContainer,
   LabelShape,
   HandleStyleOverride,
-  LabelShapeOnHover,
+  RoundedBadge,
   getRelationshipColors,
 } from '../styles';
 import type { RelationshipNodeViewModel, NodeProps } from '../../types';
@@ -21,12 +21,12 @@ import {
   GRAPH_RELATIONSHIP_NODE_ID,
   GRAPH_RELATIONSHIP_NODE_SHAPE_ID,
   GRAPH_RELATIONSHIP_NODE_HANDLE_ID,
-  GRAPH_RELATIONSHIP_NODE_HOVER_OUTLINE_ID,
   GRAPH_RELATIONSHIP_NODE_LABEL_TEXT_ID,
+  GRAPH_RELATIONSHIP_NODE_ICON_BADGE_ID,
 } from '../../test_ids';
 
 export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
-  const { id, label, interactive } = props.data as RelationshipNodeViewModel;
+  const { id, label } = props.data as RelationshipNodeViewModel;
 
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('m', { property: 'filter' });
@@ -40,12 +40,6 @@ export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
 
   return (
     <LabelNodeContainer data-test-subj={GRAPH_RELATIONSHIP_NODE_ID}>
-      {interactive && (
-        <LabelShapeOnHover
-          data-test-subj={GRAPH_RELATIONSHIP_NODE_HOVER_OUTLINE_ID}
-          color="primary"
-        />
-      )}
       <LabelShape
         data-test-subj={GRAPH_RELATIONSHIP_NODE_SHAPE_ID}
         backgroundColor={backgroundColor}
@@ -58,9 +52,13 @@ export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 4px;
             width: 100%;
           `}
         >
+          <RoundedBadge data-test-subj={GRAPH_RELATIONSHIP_NODE_ICON_BADGE_ID}>
+            <EuiIcon type="cluster" size="s" aria-hidden />
+          </RoundedBadge>
           <EuiText
             color={textColor}
             css={css`

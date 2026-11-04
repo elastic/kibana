@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   ENDPOINT_CONFIG_PRESET_DATA_COLLECTION,
   ENDPOINT_CONFIG_PRESET_EDR_COMPLETE,
@@ -16,13 +16,13 @@ import {
 export const POLICY_PATH_MAX_LENGTH = 256;
 export const POLICY_IDENTIFIER_MAX_LENGTH = 512;
 
-export const policyIdentifierInputSchema = z
-  .string()
-  .trim()
-  .min(1)
-  .max(POLICY_IDENTIFIER_MAX_LENGTH);
+export const policyIdentifierInputSchema = lazySchema(() =>
+  z.string().trim().min(1).max(POLICY_IDENTIFIER_MAX_LENGTH)
+);
 
-export const policyPathInputSchema = z.string().trim().min(1).max(POLICY_PATH_MAX_LENGTH);
+export const policyPathInputSchema = lazySchema(() =>
+  z.string().trim().min(1).max(POLICY_PATH_MAX_LENGTH)
+);
 
 export const ENDPOINT_POLICY_BASELINE_PRESETS = [
   ENDPOINT_CONFIG_PRESET_EDR_COMPLETE,
@@ -34,19 +34,21 @@ export const ENDPOINT_POLICY_BASELINE_PRESETS = [
 export type EndpointPolicyBaselinePreset = (typeof ENDPOINT_POLICY_BASELINE_PRESETS)[number];
 
 const baselinePresetDescription =
-  'A supported endpoint deployment preset. Mutually exclusive with idOrName; this selects the deployment default rather than a live policy.';
+  'An explicitly requested deployment baseline, not a live policy. Do not also pass a live identity; omit the unused selector entirely. Valid: {"preset":"EDRComplete"}. Invalid: {"idOrName":"Example policy","preset":"EDRComplete"}.';
 const policyIdentifierDescription =
-  'Saved-object id or exact full stored endpoint policy name in the current space. Mutually exclusive with preset. A presented name with name_string_truncated true is display-only; pass the policy id as later idOrName.';
+  'User-supplied live policy identity: saved-object id or exact full stored endpoint policy name in the current space, or a returned policy id. Do not also pass a preset; a creation preset does not select the live policy. Valid: {"idOrName":"Example policy"}. Invalid: {"idOrName":"Example policy","preset":"EDRComplete"}. Omit the unused property entirely. A presented name with name_string_truncated true is display-only; pass the policy id as later idOrName.';
 
-export const policyReferenceInputSchema = z
-  .object({
-    idOrName: policyIdentifierInputSchema.optional().describe(policyIdentifierDescription),
-    preset: z.enum(ENDPOINT_POLICY_BASELINE_PRESETS).optional().describe(baselinePresetDescription),
-  })
-  .strict()
-  .refine(({ idOrName, preset }) => (idOrName !== undefined) !== (preset !== undefined), {
-    message: 'Exactly one of idOrName or preset must be provided',
-  });
+export const policyReferenceInputSchema = lazySchema(() =>
+  z
+    .object({
+      idOrName: policyIdentifierInputSchema.optional().describe(policyIdentifierDescription),
+      preset: z
+        .enum(ENDPOINT_POLICY_BASELINE_PRESETS)
+        .optional()
+        .describe(baselinePresetDescription),
+    })
+    .strict()
+);
 
 export type PolicyReferenceInput = z.infer<typeof policyReferenceInputSchema>;
 
@@ -55,6 +57,10 @@ export type PolicyRef =
   | Readonly<{ type: 'baseline'; preset: EndpointPolicyBaselinePreset }>;
 
 export const toPolicyRef = (input: PolicyReferenceInput): PolicyRef => {
+  if (input.idOrName !== undefined && input.preset !== undefined) {
+    throw new Error('Invalid policy reference');
+  }
+
   if (input.idOrName !== undefined) {
     return { type: 'policy', idOrName: input.idOrName };
   }

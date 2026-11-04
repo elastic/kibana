@@ -8,7 +8,11 @@
 import type { ConfirmPromptDefinition } from '@kbn/agent-builder-common/agents';
 import type { ApplyPolicyChangePreview } from '../services/apply_policy_change';
 import type { EndpointCountResult } from '../services/count_endpoints';
-import { DEFAULT_TRIM_LIMITS, presentFromTo } from './trim_policy_result';
+import {
+  DEFAULT_TRIM_LIMITS,
+  capPresentedIdentityString,
+  presentFromTo,
+} from './trim_policy_result';
 
 export type ApplyPreviewChangeRow = Readonly<{
   path: string;
@@ -24,6 +28,7 @@ export type ApplyPreviewSideEffect = Readonly<{
 }>;
 
 export type ApplyPreviewFacts = Readonly<{
+  policyId: string;
   policyName: string;
   policyRevision: number;
   policyVersion: string;
@@ -31,6 +36,7 @@ export type ApplyPreviewFacts = Readonly<{
   directRows: readonly ApplyPreviewChangeRow[];
   coupledRows: readonly ApplyPreviewChangeRow[];
   sideEffects: readonly ApplyPreviewSideEffect[];
+  advisories?: readonly string[];
   blastRadius: Readonly<{
     agentPolicyCount: number;
     enrollment: EndpointCountResult;
@@ -49,6 +55,7 @@ export const selectApplyPreviewFacts = (preview: ApplyPolicyChangePreview): Appl
   }));
 
   return {
+    policyId: policy.id,
     policyName: policy.name,
     policyRevision: policy.revision,
     policyVersion: policy.version,
@@ -60,12 +67,19 @@ export const selectApplyPreviewFacts = (preview: ApplyPolicyChangePreview): Appl
       from: sideEffect.from,
       to: sideEffect.to,
     })),
+    advisories: assessment.advisories.map((advisory) => advisory.text),
     blastRadius: { agentPolicyCount, enrollment },
   };
 };
 
+const GFM_ESCAPABLE_CHARACTERS_REGEX = /[\\`*{}()[\]#+\-.!_>~|]/g;
+
 const escapeMarkdownText = (text: string): string =>
-  text.replace(/\\/g, '\\\\').replace(/\|/g, '\\|');
+  text
+    .replace(/\r\n|\r|\n/g, ' ')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(GFM_ESCAPABLE_CHARACTERS_REGEX, '\\$&');
 
 const renderValue = (value: unknown): string => {
   const serialized = value === undefined ? undefined : JSON.stringify(value);
@@ -95,7 +109,9 @@ const renderBlastRadius = (blastRadius: ApplyPreviewFacts['blastRadius']): reado
     agentPolicyCount === 0
       ? 'Enrolled agents: count unavailable because the policy has no agent policy assignments.'
       : enrollment.status.all !== undefined
-      ? `Enrolled agents: ${enrollment.status.all} (source: ${enrollment.source}).`
+      ? `Enrolled agents: ${enrollment.status.all} (source: ${escapeMarkdownText(
+          enrollment.source
+        )}).`
       : 'Enrolled agents: count unavailable.';
   const entries = Object.entries(enrollment.status);
   const statusLine =
@@ -110,16 +126,28 @@ const renderBlastRadius = (blastRadius: ApplyPreviewFacts['blastRadius']): reado
   ];
 };
 
+const formatConfirmationTitle = (changeTotal: number, policyName: string): string => {
+  const { text: capped, truncated } = capPresentedIdentityString(policyName);
+  const escaped = escapeMarkdownText(capped);
+  const boundedName = truncated ? `${escaped}…` : escaped;
+  return `Apply ${changeTotal} change(s) to "${boundedName}"?`;
+};
+
 export const renderApplyPolicyChangeConfirmation = (
   facts: ApplyPreviewFacts
 ): ApplyPolicyChangeConfirmation => {
   const rows = [...facts.directRows, ...facts.coupledRows].map(renderRow);
   const sideEffectLines =
     facts.sideEffects.length === 0
-      ? ['Side effects: none']
-      : facts.sideEffects.map(renderSideEffect);
+      ? ['Derived setting updates: none']
+      : ['Derived setting updates:', ...facts.sideEffects.map(renderSideEffect)];
+  const warningLines =
+    facts.advisories !== undefined && facts.advisories.length > 0
+      ? ['Warnings:', ...facts.advisories.map((text) => `- ${text}`), '']
+      : [];
 
   const message = [
+    ...warningLines,
     '| Setting | From | To | Origin |',
     '| --- | --- | --- | --- |',
     ...rows,
@@ -128,6 +156,7 @@ export const renderApplyPolicyChangeConfirmation = (
     '',
     ...renderBlastRadius(facts.blastRadius),
     '',
+    `Policy ID: ${escapeMarkdownText(facts.policyId)}`,
     `Checked policy revision ${facts.policyRevision}, version ${escapeMarkdownText(
       facts.policyVersion
     )} against the assessment.`,
@@ -136,7 +165,7 @@ export const renderApplyPolicyChangeConfirmation = (
 
   return {
     color: 'warning',
-    title: `Apply ${facts.changeTotal} change(s) to "${facts.policyName}"?`,
+    title: formatConfirmationTitle(facts.changeTotal, facts.policyName),
     message,
     confirm_text: 'Apply changes',
     cancel_text: 'Cancel',

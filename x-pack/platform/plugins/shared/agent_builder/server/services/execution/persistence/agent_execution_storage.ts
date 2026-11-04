@@ -51,6 +51,14 @@ const storageSettings = {
         properties: {
           id: types.keyword({}),
           username: types.keyword({}),
+          type: types.keyword({}),
+        },
+      }),
+      run_as: types.object({
+        dynamic: false,
+        properties: {
+          type: types.keyword({}),
+          service_account_id: types.keyword({}),
         },
       }),
       agent_params: types.object({ dynamic: false, properties: {} }),
@@ -85,6 +93,7 @@ export interface AgentExecutionProperties {
   parent_execution_id?: string;
   space_id: string;
   owner?: UserIdAndName;
+  run_as?: { type: 'service_account'; service_account_id: string };
   agent_params: AgentExecutionParams;
   error?: SerializedExecutionError;
   abort_reason?: ExecutionAbortReason;

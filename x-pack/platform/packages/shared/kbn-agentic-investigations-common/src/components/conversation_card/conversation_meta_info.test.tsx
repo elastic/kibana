@@ -17,7 +17,7 @@ describe('ConversationMetaInfo', () => {
   afterEach(() => jest.useRealTimers());
 
   it('ages on its own, without the card re-rendering', () => {
-    renderWithKibanaRenderContext(<ConversationMetaInfo createdAt={agedBy(90 * 1000)} />);
+    renderWithKibanaRenderContext(<ConversationMetaInfo timestamp={agedBy(90 * 1000)} />);
 
     expect(screen.getByText('1 minute ago')).toBeInTheDocument();
 
@@ -28,9 +28,24 @@ describe('ConversationMetaInfo', () => {
 
   it('renders an age react-intl refuses to schedule updates for', () => {
     renderWithKibanaRenderContext(
-      <ConversationMetaInfo createdAt={agedBy(2 * 24 * 3600 * 1000)} />
+      <ConversationMetaInfo timestamp={agedBy(2 * 24 * 3600 * 1000)} />
     );
 
     expect(screen.getByText('2 days ago')).toBeInTheDocument();
+  });
+
+  it('shows the in-flight status beside the age', () => {
+    renderWithKibanaRenderContext(
+      <ConversationMetaInfo timestamp={agedBy(90 * 1000)} inFlightStatus={<span>Applying</span>} />
+    );
+
+    expect(screen.getByText('Applying')).toBeInTheDocument();
+    expect(screen.getByText('1 minute ago')).toBeInTheDocument();
+  });
+
+  it('shows no status when none is in flight', () => {
+    renderWithKibanaRenderContext(<ConversationMetaInfo timestamp={agedBy(90 * 1000)} />);
+
+    expect(screen.queryByText('Applying')).not.toBeInTheDocument();
   });
 });

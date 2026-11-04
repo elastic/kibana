@@ -10,9 +10,9 @@ import { evaluateKql } from '@kbn/eval-kql';
 import { injectable } from 'inversify';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
-import { EpisodeTriage, PolicyCatalog, PolicyMatcher, RuleCatalog } from '../state';
+import { AlertTriage, PolicyCatalog, PolicyMatcher, RuleCatalog } from '../state';
 import type {
-  AlertEpisode,
+  Alert,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
@@ -29,7 +29,7 @@ export class EvaluateMatchersStep implements DispatcherStep {
     logger: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
     const {
-      triage = EpisodeTriage.empty(),
+      triage = AlertTriage.empty(),
       rules = RuleCatalog.empty(),
       policies = PolicyCatalog.empty(),
     } = state;
@@ -40,7 +40,7 @@ export class EvaluateMatchersStep implements DispatcherStep {
   }
 
   private evaluateMatchers(
-    dispatchable: readonly AlertEpisode[],
+    dispatchable: readonly Alert[],
     rules: RuleCatalog,
     policies: PolicyCatalog,
     logger: LoggerServiceContract
@@ -48,11 +48,11 @@ export class EvaluateMatchersStep implements DispatcherStep {
     const matched: MatchedPair[] = [];
     const now = Date.now();
 
-    for (const episode of dispatchable) {
-      if (rules.isOrphanedInternalEpisode(episode)) continue;
-      const rule = rules.forEpisode(episode);
+    for (const alert of dispatchable) {
+      if (rules.isOrphanedInternalAlert(alert)) continue;
+      const rule = rules.forAlert(alert);
 
-      const spacePolicies = policies.inSpace(episode.space_id);
+      const spacePolicies = policies.inSpace(alert.space_id);
       let context: MatcherContext | undefined;
 
       for (const policy of spacePolicies) {
@@ -61,19 +61,19 @@ export class EvaluateMatchersStep implements DispatcherStep {
 
         const policyMatcher = PolicyMatcher.of(policy.matcher);
         if (policyMatcher.isCatchAll()) {
-          matched.push({ episode, policy });
+          matched.push({ alert, policy });
           continue;
         }
 
-        if (!policyMatcher.matchesTags(rule?.tags)) continue;
+        if (!policyMatcher.matchesRoutingTags(rule?.routingTags)) continue;
 
         const expression = policyMatcher.expressionKql();
         if (expression === null) {
-          matched.push({ episode, policy });
+          matched.push({ alert, policy });
           continue;
         }
 
-        context ??= createMatcherContext(episode);
+        context ??= createMatcherContext(alert);
         let isMatch = false;
         try {
           isMatch = evaluateKql(expression, context);
@@ -83,16 +83,16 @@ export class EvaluateMatchersStep implements DispatcherStep {
             code: ALERTING_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
             labels: {
               policy_id: policy.id,
-              episode_id: episode.episode_id,
-              rule_id: episode.rule_id ?? undefined,
-              space_id: episode.space_id,
+              alert_id: alert.alert_id,
+              rule_id: alert.rule_id ?? undefined,
+              space_id: alert.space_id,
             },
           });
           continue;
         }
 
         if (isMatch) {
-          matched.push({ episode, policy });
+          matched.push({ alert, policy });
         }
       }
     }

@@ -1,5 +1,5 @@
 {
-  "sha1": "8e5bd7bba38f2683c15a9054f049a510792baea5",
+  "sha1": "30a4b4269a6f9f74ab7b240bdaba8092f1f1f287",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,6 +16,45 @@
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/ui/tests/create_service_account.spec.ts",
         "line": 32,
         "column": 10
+      }
+    },
+    {
+      "id": "b0651b7c1abad14-baae8caaa3d8be1",
+      "title": "Delete service accounts deletes an account that is not bound to any workload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/ui/tests/delete_service_account.spec.ts",
+        "line": 96,
+        "column": 23
+      }
+    },
+    {
+      "id": "b0651b7c1abad14-57e8d2074a9425a",
+      "title": "Delete service accounts force deletes an account that is still bound to a workload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/ui/tests/delete_service_account.spec.ts",
+        "line": 118,
+        "column": 8
+      }
+    },
+    {
+      "id": "053b70f6a4bcd73-f90fd3f895e3e8f",
+      "title": "View the workloads bound to service accounts counts the bound workloads and lists them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/ui/tests/view_service_account_workloads.spec.ts",
+        "line": 80,
+        "column": 24
       }
     }
   ]

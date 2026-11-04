@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { UserActionTypes } from '../action/v1';
 import {
   ATTACHMENTS_WORKFLOW_ORIGIN_TYPE,
@@ -16,10 +16,10 @@ import {
 } from './constants';
 
 /** Identifies the workflow plus the specific execution to link to. */
-export const WorkflowPayloadRt = rt.strict({
-  id: rt.string,
-  name: rt.string,
-  executionId: rt.string,
+export const WorkflowPayloadSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  executionId: z.string(),
 });
 
 /**
@@ -39,84 +39,58 @@ export const WorkflowPayloadRt = rt.strict({
  * - `cases.attachments` — triggered from a registered attachment bulk surface; carries its
  *                         normalized attachment type and optional count.
  */
-export const WorkflowOriginRt = rt.union([
-  rt.strict({
-    type: rt.literal(CASE_WORKFLOW_ORIGIN_TYPE),
+export const WorkflowOriginSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal(CASE_WORKFLOW_ORIGIN_TYPE),
     /** The primary identifier: caseId. */
-    id: rt.string,
+    id: z.string(),
   }),
-  rt.exact(
-    rt.intersection([
-      rt.type({
-        type: rt.literal(OBSERVABLE_WORKFLOW_ORIGIN_TYPE),
-        /** The primary identifier: observableId. */
-        id: rt.string,
-      }),
-      rt.partial({
-        /** The observable type key (e.g. 'ip', 'url'). */
-        typeKey: rt.string,
-        /** The observable value for display. */
-        value: rt.string,
-      }),
-    ])
-  ),
-  rt.exact(
-    rt.intersection([
-      rt.type({
-        type: rt.literal(OBSERVABLES_WORKFLOW_ORIGIN_TYPE),
-        /** The primary identifier: caseId. */
-        id: rt.string,
-      }),
-      rt.partial({
-        /** Number of observables in the selection, for display in the activity feed. */
-        count: rt.number,
-      }),
-    ])
-  ),
-  rt.exact(
-    rt.intersection([
-      rt.type({
-        type: rt.literal(ATTACHMENT_WORKFLOW_ORIGIN_TYPE),
-        /** The primary identifier: attachmentId. */
-        id: rt.string,
-        /** The normalized registered attachment type. */
-        attachmentType: rt.string,
-      }),
-      rt.partial({
-        /** Optional ES index used by document-backed attachment actions. */
-        index: rt.string,
-      }),
-    ])
-  ),
-  rt.exact(
-    rt.intersection([
-      rt.type({
-        type: rt.literal(ATTACHMENTS_WORKFLOW_ORIGIN_TYPE),
-        /** The primary identifier: caseId. */
-        id: rt.string,
-        /** The normalized registered attachment type. */
-        attachmentType: rt.string,
-      }),
-      rt.partial({
-        /** Number of selected attachment targets. */
-        count: rt.number,
-      }),
-    ])
-  ),
+  z.object({
+    type: z.literal(OBSERVABLE_WORKFLOW_ORIGIN_TYPE),
+    /** The primary identifier: observableId. */
+    id: z.string(),
+    /** The observable type key (e.g. 'ip', 'url'). */
+    typeKey: z.string().optional(),
+    /** The observable value for display. */
+    value: z.string().optional(),
+  }),
+  z.object({
+    type: z.literal(OBSERVABLES_WORKFLOW_ORIGIN_TYPE),
+    /** The primary identifier: caseId. */
+    id: z.string(),
+    /** Number of observables in the selection, for display in the activity feed. */
+    count: z.number().optional(),
+  }),
+  z.object({
+    type: z.literal(ATTACHMENT_WORKFLOW_ORIGIN_TYPE),
+    /** The primary identifier: attachmentId. */
+    id: z.string(),
+    /** The normalized registered attachment type. */
+    attachmentType: z.string(),
+    /** Optional ES index used by document-backed attachment actions. */
+    index: z.string().optional(),
+  }),
+  z.object({
+    type: z.literal(ATTACHMENTS_WORKFLOW_ORIGIN_TYPE),
+    /** The primary identifier: caseId. */
+    id: z.string(),
+    /** The normalized registered attachment type. */
+    attachmentType: z.string(),
+    /** Number of selected attachment targets. */
+    count: z.number().optional(),
+  }),
 ]);
 
-export const WorkflowUserActionPayloadRt = rt.exact(
-  rt.intersection([
-    rt.type({ workflow: WorkflowPayloadRt }),
-    rt.partial({ origin: WorkflowOriginRt }),
-  ])
-);
-
-export const WorkflowUserActionRt = rt.strict({
-  type: rt.literal(UserActionTypes.workflow),
-  payload: WorkflowUserActionPayloadRt,
+export const WorkflowUserActionPayloadSchema = z.object({
+  workflow: WorkflowPayloadSchema,
+  origin: WorkflowOriginSchema.optional(),
 });
 
-export type WorkflowPayload = rt.TypeOf<typeof WorkflowPayloadRt>;
-export type WorkflowOrigin = rt.TypeOf<typeof WorkflowOriginRt>;
-export type WorkflowUserActionPayload = rt.TypeOf<typeof WorkflowUserActionPayloadRt>;
+export const WorkflowUserActionSchema = z.object({
+  type: z.literal(UserActionTypes.workflow),
+  payload: WorkflowUserActionPayloadSchema,
+});
+
+export type WorkflowPayload = z.infer<typeof WorkflowPayloadSchema>;
+export type WorkflowOrigin = z.infer<typeof WorkflowOriginSchema>;
+export type WorkflowUserActionPayload = z.infer<typeof WorkflowUserActionPayloadSchema>;

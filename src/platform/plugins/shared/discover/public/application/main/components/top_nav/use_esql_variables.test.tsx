@@ -19,8 +19,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { internalStateActions } from '../../state_management/redux';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { InternalStateMockToolkit } from '../../../../__mocks__/discover_state.mock';
-import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
-import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
+import { createResolvedMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import * as resolveEsqlSourceModule from '../../data_fetching/resolve_esql_source';
 
 // Mock ControlGroupRendererApi
@@ -30,6 +29,7 @@ class MockControlGroupRendererApi {
   } | null>;
   esqlVariables$: BehaviorSubject<ESQLControlVariable[]>;
   addNewPanel: jest.Mock;
+  removePanel = jest.fn();
 
   constructor() {
     this.inputSubject = new BehaviorSubject<{
@@ -189,10 +189,7 @@ describe('useESQLVariables', () => {
       const { toolkit } = await renderUseESQLVariables({ isEsqlMode: true });
       const resolveSpy = jest
         .spyOn(resolveEsqlSourceModule, 'resolveEsqlSource')
-        .mockResolvedValue({
-          esqlSource: createMockEsqlSource(),
-          dataView: dataViewMockWithTimeField,
-        });
+        .mockResolvedValue(await createResolvedMockEsqlSource());
 
       act(() => {
         toolkit.internalState.dispatch(
@@ -335,6 +332,26 @@ describe('useESQLVariables', () => {
       });
 
       expect(getInputSpy.mock.calls.length).toBe(getInputCallsBeforeVariableRerender);
+    });
+
+    it.each([undefined, {}])('removes controls absent after a reset to %p', async (controls) => {
+      const { toolkit } = await renderUseESQLVariables({});
+      mockControlGroupAPI.updateInput.mockImplementation(() => {});
+
+      act(() => {
+        mockControlGroupAPI.simulateInput({ initialChildControlState: mockControlState });
+      });
+
+      act(() => {
+        toolkit.internalState.dispatch(
+          internalStateActions.updateAttributes({
+            tabId: toolkit.getCurrentTab().id,
+            attributes: { controlGroupState: controls },
+          })
+        );
+      });
+
+      expect(mockControlGroupAPI.removePanel).toHaveBeenCalledWith('panel1');
     });
 
     it('should reset control panels when tab attributes change', async () => {

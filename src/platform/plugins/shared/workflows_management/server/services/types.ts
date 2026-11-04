@@ -15,6 +15,8 @@ import type {
   Logger,
   SecurityServiceStart,
 } from '@kbn/core/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   IWorkflowLogsQueryService,
@@ -38,6 +40,7 @@ export interface WorkflowStorageDeps {
 
 /** Deps for WorkflowCrudService (CRUD + deletion + disable-all). */
 export interface WorkflowCrudDeps extends WorkflowStorageDeps {
+  authz?: { checkPrivilegesWithRequest: CheckPrivilegesWithRequest };
   getSpaceId: (request: KibanaRequest) => string;
   getServiceAccountBindings: () => WorkflowsExecutionEnginePluginStart['serviceAccountBindings'];
   getSecurity: () => SecurityServiceStart | undefined;
@@ -73,4 +76,6 @@ export interface WorkflowValidationDeps {
   getActionsClient: () => Promise<IUnsecuredActionsClient>;
   getActionsClientWithRequest: (request: KibanaRequest) => Promise<PublicMethodsOf<ActionsClient>>;
   getCoreStart: () => CoreStart;
+  licensing: LicensingPluginStart;
+  logger: Logger;
 }

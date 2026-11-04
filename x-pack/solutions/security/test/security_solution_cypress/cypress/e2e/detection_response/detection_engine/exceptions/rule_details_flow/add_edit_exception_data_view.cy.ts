@@ -8,14 +8,20 @@
 import { getNewRule } from '../../../../../objects/rule';
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../../../screens/alerts';
 import { createRule } from '../../../../../tasks/api_calls/rules';
+import { fetchRuleAlerts } from '../../../../../tasks/api_calls/alerts';
 import {
   goToClosedAlertsOnRuleDetailsPage,
   goToOpenedAlertsOnRuleDetailsPage,
 } from '../../../../../tasks/alerts';
 import {
+  addExceptionConditions,
+  addExceptionFlyoutItemName,
   editException,
   editExceptionFlyoutItemName,
+  selectBulkCloseAlerts,
+  selectCloseAlertsReason,
   submitEditedExceptionItem,
+  submitNewExceptionItem,
 } from '../../../../../tasks/exceptions';
 import { login } from '../../../../../tasks/login';
 import {
@@ -25,6 +31,7 @@ import {
   goToAlertsTab,
   goToExceptionsTab,
   openEditException,
+  openExceptionFlyoutFromEmptyViewerPrompt,
   removeException,
   visitRuleDetailsPage,
 } from '../../../../../tasks/rule_details';
@@ -46,6 +53,9 @@ import {
 import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 
 const DATAVIEW = 'auditbeat-exceptions-*';
+const RULE_ID = 'rule_testing';
+const ALERT_WORKFLOW_STATUS = 'kibana.alert.workflow_status';
+const ALERT_WORKFLOW_REASON = 'kibana.alert.workflow_reason';
 
 describe(
   'Add exception using data views from rule details',
@@ -71,7 +81,7 @@ describe(
         getNewRule({
           query: 'agent.name:*',
           data_view_id: DATAVIEW,
-          rule_id: 'rule_testing',
+          rule_id: RULE_ID,
           enabled: true,
         })
       ).then((rule) => visitRuleDetailsPage(rule.body.id, { tab: 'alerts' }));
@@ -136,6 +146,38 @@ describe(
       cy.get(ALERTS_COUNT).should('have.text', '2 alerts');
     });
 
+    it('Creates an exception item and closes all matching alerts with the selected reason', () => {
+      clickDisableRuleSwitch();
+
+      goToExceptionsTab();
+      openExceptionFlyoutFromEmptyViewerPrompt();
+      addExceptionFlyoutItemName(ITEM_NAME);
+      addExceptionConditions({
+        field: 'agent.name',
+        operator: 'is one of',
+        values: ['foo', 'FOO', 'bar'],
+      });
+      selectBulkCloseAlerts();
+      selectCloseAlertsReason('false_positive');
+      submitNewExceptionItem();
+
+      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+
+      fetchRuleAlerts({
+        ruleId: RULE_ID,
+        fields: [ALERT_WORKFLOW_STATUS, ALERT_WORKFLOW_REASON],
+        size: 10,
+      }).then(({ body }) => {
+        expect(body.hits.hits).to.have.length(3);
+        body.hits.hits.forEach(({ fields }) => {
+          expect(fields).to.deep.equal({
+            [ALERT_WORKFLOW_STATUS]: ['closed'],
+            [ALERT_WORKFLOW_REASON]: ['false_positive'],
+          });
+        });
+      });
+    });
+
     it('Edits an exception item', () => {
       const NEW_ITEM_NAME = 'Exception item-EDITED';
       const ITEM_FIELD = 'unique_value.test';
@@ -184,6 +226,47 @@ describe(
       // check that updates stuck
       cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', NEW_ITEM_NAME);
       cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).should('have.text', ' agent.nameIS foo');
+    });
+
+    it('Edits an exception item and closes matching alerts with the selected reason', () => {
+      clickDisableRuleSwitch();
+
+      goToExceptionsTab();
+      // add an item that matches no alerts, so nothing is closed until it is edited
+      addFirstExceptionFromRuleDetails(
+        {
+          field: 'unique_value.test',
+          operator: 'is',
+          values: ['foo'],
+        },
+        ITEM_NAME
+      );
+      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+
+      openEditException();
+      // change the condition to "agent.name is foo", which matches a single alert
+      editException('agent.name', 0, 0);
+      selectBulkCloseAlerts();
+      selectCloseAlertsReason('duplicate');
+      submitEditedExceptionItem();
+
+      cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).should('have.text', ' agent.nameIS foo');
+
+      fetchRuleAlerts({
+        ruleId: RULE_ID,
+        fields: ['agent.name', ALERT_WORKFLOW_STATUS, ALERT_WORKFLOW_REASON],
+        size: 10,
+      }).then(({ body }) => {
+        expect(body.hits.hits.map(({ fields }) => fields)).to.have.deep.members([
+          {
+            'agent.name': ['foo'],
+            [ALERT_WORKFLOW_STATUS]: ['closed'],
+            [ALERT_WORKFLOW_REASON]: ['duplicate'],
+          },
+          { 'agent.name': ['FOO'], [ALERT_WORKFLOW_STATUS]: ['open'] },
+          { 'agent.name': ['bar'], [ALERT_WORKFLOW_STATUS]: ['open'] },
+        ]);
+      });
     });
   }
 );

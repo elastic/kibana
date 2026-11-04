@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'path';
 import { z } from '@kbn/zod';
 import { MAX_PARAM_BULK_SIZE, routeId } from '../../zod_query';
 import { getExistingParamsInfo } from './delete_param';
@@ -22,11 +23,21 @@ export const deleteSyntheticsParamsBulkRoute: SyntheticsRestApiRouteFactory<
 > = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.PARAMS + '/_bulk_delete',
+  options: {
+    summary: 'Delete parameters',
+    description:
+      'Delete parameters from the Synthetics app.\n\nYou must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.',
+    operationId: 'delete-parameters',
+    oasOperationObject: () => path.join(__dirname, 'examples/delete_parameters.yaml'),
+  },
   validate: {},
   validation: {
     request: {
       body: z.strictObject({
-        ids: z.array(routeId).max(MAX_PARAM_BULK_SIZE),
+        ids: z
+          .array(routeId)
+          .max(MAX_PARAM_BULK_SIZE)
+          .describe('An array of parameter IDs to delete.'),
       }),
     },
   },

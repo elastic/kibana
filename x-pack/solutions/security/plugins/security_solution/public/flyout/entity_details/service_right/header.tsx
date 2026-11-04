@@ -25,11 +25,15 @@ interface ServicePanelHeaderProps {
   observedService: ObservedEntityData<ServiceItem>;
   isEntityInStore?: boolean;
   riskLevel?: RiskSeverity;
+  /** Resolution-group size shown in the entity source badge ("Resolved from N records"). */
+  resolvedFromCount?: number;
   /**
    * Overrides forwarded to the underlying {@link FlyoutHeader} (e.g. `css` / `panelProps` for
    * compact spacing in the EUI system flyout). Legacy callers omit this and keep the default.
    */
   flyoutHeaderProps?: Omit<React.ComponentProps<typeof FlyoutHeader>, 'children'>;
+  /** Extra header chrome, such as the new-flyout copy link. Legacy callers omit this. */
+  headerActions?: React.ReactNode;
 }
 
 export const ServicePanelHeader = ({
@@ -37,7 +41,9 @@ export const ServicePanelHeader = ({
   observedService,
   isEntityInStore,
   riskLevel,
+  resolvedFromCount,
   flyoutHeaderProps,
+  headerActions,
 }: ServicePanelHeaderProps) => {
   const lastSeenDate = useMemo(
     () => observedService.lastSeen.date && new Date(observedService.lastSeen.date),
@@ -46,6 +52,7 @@ export const ServicePanelHeader = ({
 
   return (
     <FlyoutHeader data-test-subj="service-panel-header" {...flyoutHeaderProps}>
+      {headerActions}
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
         <EuiFlexItem grow={false}>
           <EuiText size="xs" data-test-subj={'service-panel-header-lastSeen'}>
@@ -70,6 +77,7 @@ export const ServicePanelHeader = ({
               <EntitySourceBadge
                 isEntityInStore={!!isEntityInStore}
                 hasLastSeenDate={!!observedService.lastSeen.date}
+                resolvedFromCount={resolvedFromCount}
                 data-test-subj="service-panel-header-observed-badge"
               />
             </EuiFlexItem>

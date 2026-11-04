@@ -95,6 +95,24 @@ describe('FlyoutTemplate footer', () => {
     expect(screen.getByTestId('secondaryText')).toBeInTheDocument();
   });
 
+  // The footer and the header divider use `euiTheme.size.base` to match `paddingSize="m"`, which
+  // `EuiFlyout` gives the header and body. If this fails, the theme scale moved and they no longer
+  // match the designed 16px.
+  it('pads the footer evenly by 16px on every side', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never" data-test-subj="padded">
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+        <FlyoutTemplate.Footer>
+          <FlyoutTemplate.Footer.PrimaryAction label="Save" onClick={noop} />
+        </FlyoutTemplate.Footer>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByTestId('paddedFooter')).toHaveStyle({ padding: '16px' });
+  });
+
   it('shows an action tooltip on hover', async () => {
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never">

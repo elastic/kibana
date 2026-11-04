@@ -17,7 +17,7 @@ const entry = (overrides: Partial<OasdiffEntry> = {}): OasdiffEntry => ({
   level: 3,
   operation: 'GET',
   path: '/api/test',
-  source: 'test',
+  source: '/opt/buildkite-agent/builds/agent-1/kibana/oas_docs/output/kibana.yaml',
   ...overrides,
 });
 
@@ -42,7 +42,6 @@ describe('parseOasdiff', () => {
         method: 'GET',
         reason: 'GET /api/test removed',
         oasdiffId: 'api-removed-without-deprecation',
-        source: 'test',
       },
     ]);
   });
@@ -63,7 +62,6 @@ describe('parseOasdiff', () => {
         method: undefined,
         reason: '/api/spaces/space removed',
         oasdiffId: 'api-path-removed-without-deprecation',
-        source: 'test',
       },
     ]);
   });
@@ -84,7 +82,6 @@ describe('parseOasdiff', () => {
         method: 'DELETE',
         reason: 'DELETE /api/old removed before sunset',
         oasdiffId: 'api-removed-before-sunset',
-        source: 'test',
       },
     ]);
   });
@@ -105,7 +102,6 @@ describe('parseOasdiff', () => {
         method: 'POST',
         reason: 'something broke',
         oasdiffId: 'some-unknown-breaking-check',
-        source: 'test',
       },
     ]);
   });
@@ -117,7 +113,6 @@ describe('parseOasdiff', () => {
         text: 'request property removed',
         operation: 'PUT',
         path: '/api/test',
-        source: '/components/schemas/Output/properties/name',
       }),
     ]);
     expect(result).toEqual([
@@ -127,9 +122,18 @@ describe('parseOasdiff', () => {
         method: 'PUT',
         reason: 'request property removed',
         oasdiffId: 'request-property-removed',
-        source: '/components/schemas/Output/properties/name',
       },
     ]);
+  });
+
+  it("drops oasdiff's spec file path source so stack and serverless entries match", () => {
+    const [stack, serverless] = parseOasdiff([
+      entry({ source: '/agent-1/oas_docs/output/kibana.yaml' }),
+      entry({ source: '/agent-1/oas_docs/output/kibana.serverless.yaml' }),
+    ]);
+
+    expect(stack).not.toHaveProperty('source');
+    expect(stack).toEqual(serverless);
   });
 
   it('maps request-parameter-removed to parameter_removed', () => {
@@ -148,7 +152,6 @@ describe('parseOasdiff', () => {
         method: 'GET',
         reason: 'parameter removed',
         oasdiffId: 'request-parameter-removed',
-        source: 'test',
       },
     ]);
   });
@@ -169,7 +172,6 @@ describe('parseOasdiff', () => {
         method: 'GET',
         reason: 'required response property removed',
         oasdiffId: 'response-required-property-removed',
-        source: 'test',
       },
     ]);
   });
@@ -213,7 +215,6 @@ describe('parseOasdiff', () => {
         method: 'GET',
         reason: 'optional response property removed',
         oasdiffId: 'response-optional-property-removed',
-        source: 'test',
       },
     ]);
   });

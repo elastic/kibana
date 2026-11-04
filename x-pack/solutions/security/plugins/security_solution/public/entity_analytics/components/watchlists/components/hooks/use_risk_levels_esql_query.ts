@@ -16,9 +16,18 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_global_filter';
 import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_filter_query';
 import { esqlResponseToRecords } from '../../../../../common/utils/esql';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../../common/utils/execution_context';
 import { getWatchlistRiskLevelsQueryBodyV2 } from '../queries/watchlist_risk_level_query';
 import type { WatchlistRiskLevelsQueryResult } from './types';
 import { getEntitiesAlias, ENTITY_LATEST } from '../../../home/constants';
+
+const RISK_LEVEL_PANEL_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.HOME_PAGE,
+  'risk_level_panel'
+);
 
 export const useRiskLevelsEsqlQuery = ({
   watchlistId,
@@ -84,6 +93,7 @@ export const useRiskLevelsEsqlQuery = ({
             abortSignal: signal,
             strategy: 'esql_async',
             projectRouting: '_alias:_origin',
+            executionContext: RISK_LEVEL_PANEL_CONTEXT,
           }
         )
       );

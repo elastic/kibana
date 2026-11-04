@@ -6,7 +6,12 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 
-import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import {
+  AgentAlreadyAssignedError,
+  AgentReassignmentError,
+  AgentlessAgentRestrictionError,
+  HostedAgentPolicyRestrictionRelatedError,
+} from '../../errors';
 
 import { appContextService } from '../app_context';
 import { createAppContextStartContractMock } from '../../mocks';
@@ -77,6 +82,46 @@ describe('reassignAgent', () => {
       expect(esClient.update).toHaveBeenCalledTimes(0);
     });
 
+    it('cannot reassign from agentless agent policy', async () => {
+      const { soClient, esClient, agentInAgentlessDoc, regularAgentPolicySO } = mocks;
+      esClient.search.mockResponse({ hits: { hits: [agentInAgentlessDoc] } } as any);
+      await expect(
+        reassignAgent(soClient, esClient, agentInAgentlessDoc._id, regularAgentPolicySO.id)
+      ).rejects.toThrow(AgentlessAgentRestrictionError);
+      expect(esClient.update).toHaveBeenCalledTimes(0);
+    });
+
+    it('cannot reassign a regular agent to an agentless agent policy', async () => {
+      const { soClient, esClient, agentInRegularDoc, agentlessAgentPolicySO } = mocks;
+      esClient.search.mockResponse({ hits: { hits: [agentInRegularDoc] } } as any);
+      await expect(
+        reassignAgent(soClient, esClient, agentInRegularDoc._id, agentlessAgentPolicySO.id)
+      ).rejects.toThrow(AgentlessAgentRestrictionError);
+      expect(esClient.update).toHaveBeenCalledTimes(0);
+    });
+
+    it('can reassign an agentless agent between variants of its own policy', async () => {
+      const { soClient, esClient, agentInAgentlessDoc, agentInAgentlessVariantDoc } = mocks;
+
+      esClient.search.mockResponse({ hits: { hits: [agentInAgentlessDoc] } } as any);
+      await reassignAgent(
+        soClient,
+        esClient,
+        agentInAgentlessDoc._id,
+        'agentless-agent-policy#9.6'
+      );
+      expect(esClient.update).toHaveBeenCalledTimes(1);
+
+      esClient.search.mockResponse({ hits: { hits: [agentInAgentlessVariantDoc] } } as any);
+      await reassignAgent(
+        soClient,
+        esClient,
+        agentInAgentlessVariantDoc._id,
+        'agentless-agent-policy'
+      );
+      expect(esClient.update).toHaveBeenCalledTimes(2);
+    });
+
     it('update namespaces with reassign', async () => {
       const { soClient, esClient, agentInRegularDoc, regularAgentPolicySO } = mocks;
 
@@ -140,6 +185,83 @@ describe('reassignAgent', () => {
           'Cannot reassign an agent from hosted agent policy hosted-agent-policy in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
       });
       expect(calledWithActionResults.operations?.[1]).toEqual(expectedObject);
+    });
+
+    it('agentless agents are not reassigned to another policy', async () => {
+      const { soClient, esClient, agentInRegularDoc, agentInAgentlessDoc, regularAgentPolicySO2 } =
+        mocks;
+
+      esClient.search.mockResponse({
+        hits: { hits: [agentInRegularDoc, agentInAgentlessDoc] },
+      } as any);
+
+      await reassignAgents(
+        soClient,
+        esClient,
+        { agentIds: [agentInRegularDoc._id, agentInAgentlessDoc._id] },
+        regularAgentPolicySO2.id
+      );
+
+      const updated = esClient.bulk.mock.calls[0][0] as estypes.BulkRequest;
+      expect(updated.operations?.length).toBe(2);
+      // @ts-expect-error
+      expect(updated.operations[0].update._id).toEqual(agentInRegularDoc._id);
+
+      const actionResults = esClient.bulk.mock.calls[1][0] as estypes.BulkRequest;
+      expect(actionResults.operations?.[1]).toEqual(
+        expect.objectContaining({
+          agent_id: agentInAgentlessDoc._id,
+          error: expect.stringContaining('managed agent policy'),
+        })
+      );
+    });
+
+    it('agentless agents are reassigned to a variant of their own policy', async () => {
+      const { soClient, esClient, agentInAgentlessDoc } = mocks;
+
+      esClient.search.mockResponse({ hits: { hits: [agentInAgentlessDoc] } } as any);
+
+      await reassignAgents(
+        soClient,
+        esClient,
+        { agentIds: [agentInAgentlessDoc._id] },
+        'agentless-agent-policy#9.6'
+      );
+
+      const updated = esClient.bulk.mock.calls[0][0] as estypes.BulkRequest;
+      expect(updated.operations?.length).toBe(2);
+      // @ts-expect-error
+      expect(updated.operations[0].update._id).toEqual(agentInAgentlessDoc._id);
+    });
+
+    it('throws AgentAlreadyAssignedError when all agents are already assigned to the policy', async () => {
+      const { soClient, esClient, agentInRegularDoc, regularAgentPolicySO } = mocks;
+
+      esClient.search.mockResponse({ hits: { hits: [agentInRegularDoc] } } as any);
+
+      await expect(
+        reassignAgents(
+          soClient,
+          esClient,
+          { agentIds: [agentInRegularDoc._id] },
+          regularAgentPolicySO.id
+        )
+      ).rejects.toThrow(AgentAlreadyAssignedError);
+    });
+
+    it('throws AgentReassignmentError, not AgentAlreadyAssignedError, when the agents are hosted', async () => {
+      const { soClient, esClient, agentInHostedDoc, regularAgentPolicySO2 } = mocks;
+
+      esClient.search.mockResponse({ hits: { hits: [agentInHostedDoc] } } as any);
+
+      const error = await reassignAgents(
+        soClient,
+        esClient,
+        { agentIds: [agentInHostedDoc._id] },
+        regularAgentPolicySO2.id
+      ).catch((e) => e);
+      expect(error).toBeInstanceOf(AgentReassignmentError);
+      expect(error).not.toBeInstanceOf(AgentAlreadyAssignedError);
     });
 
     it('should report errors from ES agent update call', async () => {

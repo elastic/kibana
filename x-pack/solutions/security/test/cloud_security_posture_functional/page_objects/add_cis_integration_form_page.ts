@@ -281,17 +281,16 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const clickPolicyToBeEdited = async (name: string) => {
-    await retry.waitFor('integration policy name links to appear', async () =>
-      testSubjects.exists(TEST_IDS.INTEGRATION_NAME_LINK)
-    );
-    const nameLinks = await testSubjects.findAll(TEST_IDS.INTEGRATION_NAME_LINK);
-    for (const nameLink of nameLinks) {
-      if ((await nameLink.getVisibleText()).trim() === name) {
-        await nameLink.click();
-        return;
+    const policyLink = await retry.tryForTime(20_000, async () => {
+      const nameLinks = await testSubjects.findAll(TEST_IDS.INTEGRATION_NAME_LINK);
+      for (const nameLink of nameLinks) {
+        if ((await nameLink.getVisibleText()).trim() === name) {
+          return nameLink;
+        }
       }
-    }
-    throw new Error(`Integration policy "${name}" was not found in the policies table`);
+      throw new Error(`Integration policy "${name}" was not found in the policies table`);
+    });
+    await policyLink.click();
   };
 
   const clickFirstElementOnIntegrationTable = async () => {
@@ -535,7 +534,6 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const getValueInEditPage = async (field: string) => {
-    /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
     await PageObjects.header.waitUntilLoadingHasFinished();
     await retry.waitFor(`field ${field} to render on edit page`, async () =>
       testSubjects.exists(field)

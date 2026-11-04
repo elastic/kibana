@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { significantSecurityEventAttachmentDataSchema } from './significant_security_event_schema';
+import {
+  significantSecurityEventAttachmentDataSchema,
+  significantSecurityEventAttachmentReadSchema,
+} from './significant_security_event_schema';
 
 const validPayload = {
   attachmentLabel: 'Significant Security Event',
@@ -61,6 +64,45 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
     expect(result.success).toBe(false);
   });
 
+  it('keeps an entity origin when present', () => {
+    const origin = { local: false, remote_clusters: ['cluster_b'] };
+    const result = significantSecurityEventAttachmentDataSchema.safeParse({
+      ...validPayload,
+      entities: [{ field: 'host.name', value: 'srv-01', ...origin }],
+    });
+
+    expect(result.success && result.data.entities).toEqual([
+      { field: 'host.name', value: 'srv-01', ...origin },
+    ]);
+  });
+
+  it('rejects an entity origin naming more remote clusters than the bound', () => {
+    const result = significantSecurityEventAttachmentDataSchema.safeParse({
+      ...validPayload,
+      entities: [
+        {
+          field: 'host.name',
+          value: 'srv-01',
+          local: false,
+          remote_clusters: Array.from({ length: 21 }, (_, i) => `c${i}`),
+        },
+      ],
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects an entity origin with a cluster alias over 255 characters', () => {
+    const result = significantSecurityEventAttachmentDataSchema.safeParse({
+      ...validPayload,
+      entities: [
+        { field: 'host.name', value: 'srv-01', local: false, remote_clusters: ['c'.repeat(256)] },
+      ],
+    });
+
+    expect(result.success).toBe(false);
+  });
+
   it('rejects alerts missing index', () => {
     const result = significantSecurityEventAttachmentDataSchema.safeParse({
       ...validPayload,
@@ -89,7 +131,18 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
       '.preview.alerts-security.alerts-default',
       '.kibana',
       'logs-a,logs-b',
-      'remote:logs-default',
+      '*:logs-default',
+      're*:logs-default',
+      'remote:logs-*',
+      'remote:.alerts-security.alerts-default',
+      'remote:.ds-.alerts-security.alerts-default',
+      'a:b:logs-default',
+      '_coordinator:logs-default',
+      ':logs-default',
+      'remote:',
+      '-remote:logs-default',
+      'logs-default::failures',
+      'remote:logs-default::failures',
       '-logs-default',
       'logs default',
       '.ds-.alerts-security.alerts-default',
@@ -123,6 +176,19 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
       ],
     });
     expect(dataStreamBacking.success).toBe(true);
+
+    // A cross-cluster hit reports `<cluster>:<index>` in `_index`; one named cluster in front
+    // of an otherwise allowed concrete name is still a single source.
+    for (const remote of [
+      'infosec_zocalo:.ds-logs-aws.cloudtrail-default-2026.10.26-000001',
+      'infosec-redsector:logs-endpoint.events.process-default',
+    ]) {
+      const result = significantSecurityEventAttachmentDataSchema.safeParse({
+        ...validPayload,
+        events: [{ event_id: 'evt-1', source_index: remote }],
+      });
+      expect([remote, result.success]).toEqual([remote, true]);
+    }
   });
 
   it('rejects hunt results whose status contradicts its counts', () => {
@@ -216,7 +282,13 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
         tier1: {
           status: 'environment_hits_found',
           counts: { total_hits: 3, returned_hits: 3, affected_hosts: 1, affected_users: 1 },
-          per_index: [{ index: 'logs-aws.cloudtrail-default', hit_count: 3, required: true }],
+          per_index: [
+            {
+              index: 'logs-aws.cloudtrail-default',
+              hit_count: 3,
+              required: true,
+            },
+          ],
           resolved_iocs: [{ type: 'hash', value: 'abc123' }],
         },
         tier2: {
@@ -227,8 +299,8 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
               technique_name: 'Remote Services',
               tactic_ids: ['TA0008'],
               confidence: 0.8,
-              rule_name: 'Lateral movement via RDP',
-              proposed_esql_rule: 'FROM logs-* | WHERE true',
+              title: 'Lateral movement via RDP',
+              validated_esql: 'FROM logs-* | WHERE true',
               execution: { executed: true, row_count: 0, hit: false },
             },
           ],
@@ -259,8 +331,8 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
               technique_id: 'T1078.004',
               tactic_ids: ['TA0001'],
               confidence: 0.9,
-              rule_name: 'AssumeRole into high-risk policy boundary',
-              proposed_esql_rule: 'FROM logs-aws.cloudtrail-* | WHERE true',
+              title: 'AssumeRole into high-risk policy boundary',
+              validated_esql: 'FROM logs-aws.cloudtrail-* | WHERE true',
               execution: { executed: true, row_count: 3, hit: true },
               affected_hosts: ['WIN-ANALYST01'],
             },
@@ -270,6 +342,94 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
     });
 
     expect(result.success).toBe(true);
+  });
+
+  // The strict schema's parse failure mode is to skip the attachment, so a persisted payload
+  // that predates a rename would silently vanish from packaging and render as an empty card.
+  describe('significantSecurityEventAttachmentReadSchema', () => {
+    const preRenamePayload = {
+      ...validPayload,
+      hunt_result: {
+        has_confirmed_hit: true,
+        hit_sources: ['tier1'],
+        time_range: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-01T02:00:00.000Z' },
+        tier1: {
+          status: 'environment_hits_found',
+          counts: { total_hits: 4, returned_hits: 4, affected_hosts: 1, affected_users: 1 },
+          per_index: [
+            { index: 'logs-aws.cloudtrail-default', hit_count: 3, required: true },
+            { index: '.alerts-security.alerts-default', hit_count: 1, required: false },
+          ],
+          resolved_iocs: [{ type: 'hash', value: 'abc123' }],
+        },
+        tier2: {
+          status: 'behaviors_proposed',
+          behaviors: [
+            {
+              technique_id: 'T1021',
+              tactic_ids: ['TA0008'],
+              confidence: 0.8,
+              rule_name: 'Lateral movement via RDP',
+              proposed_esql_rule: 'FROM logs-* | WHERE true',
+              execution: { executed: true, row_count: 0, hit: false },
+            },
+          ],
+        },
+      },
+    };
+
+    it('reads a payload written before the renames', () => {
+      const result = significantSecurityEventAttachmentReadSchema.safeParse(preRenamePayload);
+      expect(result.success).toBe(true);
+    });
+
+    it('maps the retired behavior keys onto their current names', () => {
+      const result = significantSecurityEventAttachmentReadSchema.parse(preRenamePayload);
+
+      expect(result.hunt_result?.tier2?.behaviors[0]).toEqual(
+        expect.objectContaining({
+          title: 'Lateral movement via RDP',
+          validated_esql: 'FROM logs-* | WHERE true',
+        })
+      );
+    });
+
+    it('prefers the current key when a payload carries both', () => {
+      const result = significantSecurityEventAttachmentReadSchema.parse({
+        ...preRenamePayload,
+        hunt_result: {
+          ...preRenamePayload.hunt_result,
+          tier2: {
+            ...preRenamePayload.hunt_result.tier2,
+            behaviors: [
+              {
+                ...preRenamePayload.hunt_result.tier2.behaviors[0],
+                title: 'Current title',
+              },
+            ],
+          },
+        },
+      });
+
+      expect(result.hunt_result?.tier2?.behaviors[0].title).toBe('Current title');
+    });
+
+    it('still rejects a payload that is genuinely unreadable', () => {
+      const result = significantSecurityEventAttachmentReadSchema.safeParse({
+        ...preRenamePayload,
+        hunt_result: {
+          ...preRenamePayload.hunt_result,
+          tier1: { ...preRenamePayload.hunt_result.tier1, status: 'no_environment_hits' },
+        },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('keeps writes strict: the retired keys alone do not satisfy the write schema', () => {
+      const result = significantSecurityEventAttachmentDataSchema.safeParse(preRenamePayload);
+      expect(result.success).toBe(false);
+    });
   });
 
   it('rejects has_confirmed_hit with clean Tier 1 and no Tier 2 execution hit', () => {
@@ -292,7 +452,7 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
               technique_id: 'T1078.004',
               tactic_ids: ['TA0001'],
               confidence: 0.9,
-              rule_name: 'AssumeRole into high-risk policy boundary',
+              title: 'AssumeRole into high-risk policy boundary',
               execution: { executed: true, row_count: 0, hit: false },
             },
           ],
@@ -455,7 +615,7 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
           tier2: {
             status: 'no_behaviors_found',
             behaviors: [
-              { technique_id: 'T1021', tactic_ids: ['TA0008'], confidence: 0.8, rule_name: 'r' },
+              { technique_id: 'T1021', tactic_ids: ['TA0008'], confidence: 0.8, title: 'r' },
             ],
           },
         },
@@ -507,6 +667,38 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
       });
 
       expect(result.success).toBe(false);
+    });
+  });
+
+  describe('hunt_result.actionable_indices', () => {
+    const withActionable = (actionable_indices: unknown) =>
+      significantSecurityEventAttachmentDataSchema.safeParse({
+        ...validPayload,
+        hunt_result: {
+          has_confirmed_hit: true,
+          hit_sources: ['tier1'],
+          time_range: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-02T00:00:00.000Z' },
+          tier1: {
+            status: 'environment_hits_found',
+            counts: { total_hits: 1, returned_hits: 1, affected_hosts: 0, affected_users: 0 },
+            per_index: [{ index: 'logs-aws.cloudtrail-default', hit_count: 1, required: true }],
+            resolved_iocs: [],
+          },
+          actionable_indices,
+        },
+      });
+
+    it('accepts a bounded actionable_indices list', () => {
+      expect(withActionable(['logs-endpoint.events.process-*']).success).toBe(true);
+    });
+
+    it('rejects more than 64 actionable_indices entries', () => {
+      const tooMany = Array.from({ length: 65 }, (_, i) => `logs-endpoint.events.process-${i}-*`);
+      expect(withActionable(tooMany).success).toBe(false);
+    });
+
+    it('rejects an empty-string actionable_indices entry', () => {
+      expect(withActionable(['']).success).toBe(false);
     });
   });
 });

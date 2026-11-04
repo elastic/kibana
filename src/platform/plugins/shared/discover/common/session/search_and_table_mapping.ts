@@ -14,11 +14,14 @@ import type {
 } from '@kbn/as-code-discover-schema';
 import { fromStoredDataView, toStoredDataView } from '@kbn/as-code-data-views-transforms';
 import { fromStoredFilters, toStoredFilters } from '@kbn/as-code-filters-transforms';
+import type { AsCodeQuery } from '@kbn/as-code-shared-schemas';
 import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { extractReferences, type SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { isLegacySort, type SortOrder } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
+import { safeJsonParse } from '@kbn/std';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionTabAttributes } from '@kbn/saved-search-plugin/server';
@@ -97,7 +100,7 @@ export const toStoredSearchSource = (
 ): SerializedSearchSourceFields => {
   const query = isDiscoverSessionEsqlTab(apiTab)
     ? { esql: apiTab.data_source.query }
-    : toStoredQuery(apiTab.query);
+    : toStoredClassicQuery(apiTab.query);
   return {
     ...(query && { query }),
     ...('filters' in apiTab && { filter: toStoredFilters(apiTab.filters) }),
@@ -110,9 +113,9 @@ export const fromStoredSearchAndTable = (
   tab: DiscoverSessionTab | DiscoverSessionTabAttributes,
   searchSource: SerializedSearchSourceFields
 ): DiscoverSessionApiTabBase => {
-  const { sort, sampleSize, rowsPerPage, viewMode } = tab;
+  const { sort, sampleSize, viewMode } = tab;
   const apiTab = {
-    ...fromStoredTableSettings(tab),
+    ...fromStoredCommonTableSettings(tab),
     sort: fromStoredSort(sort),
   };
   const { index, query, filter } = searchSource;
@@ -126,9 +129,8 @@ export const fromStoredSearchAndTable = (
       }
     : {
         ...apiTab,
-        ...(sampleSize && { sample_size: sampleSize }),
-        ...(rowsPerPage && { rows_per_page: rowsPerPage }),
-        ...(query && { query: toAsCodeQuery(query) }),
+        ...(sampleSize && { sample_size: Math.max(10, sampleSize) }),
+        ...(query && { query: fromStoredClassicQuery(query) }),
         filters: fromStoredFilters(filter) ?? [],
         data_source: fromStoredDataView(index),
         view_mode: viewMode ?? VIEW_MODE.DOCUMENT_LEVEL,
@@ -136,14 +138,13 @@ export const fromStoredSearchAndTable = (
 };
 
 /** Converts the stored table settings that are set to API fields, without adding defaults. */
-export const fromStoredTableSettings = (
+export const fromStoredCommonTableSettings = (
   storedState: Partial<DiscoverSessionTabAttributes>
-): DiscoverSessionApiEmbeddableOverrides => {
+) => {
   const {
     sort,
     columns,
     rowHeight,
-    sampleSize,
     rowsPerPage,
     headerRowHeight,
     density,
@@ -156,7 +157,6 @@ export const fromStoredTableSettings = (
     ...(columns && { column_order: columns }),
     ...(grid?.columns && Object.keys(grid.columns).length > 0 && { column_settings: grid.columns }),
     ...(rowHeight && { row_height: fromStoredRowHeight(rowHeight) }),
-    ...(sampleSize && { sample_size: sampleSize }),
     ...(rowsPerPage && { rows_per_page: rowsPerPage }),
     ...(headerRowHeight && { header_row_height: fromStoredRowHeight(headerRowHeight) }),
     ...(density && { density }),
@@ -193,6 +193,27 @@ export const toStoredTableSettings = (
     ...(jsonModeSettings && { jsonModeSettings }),
     ...(columnSettings &&
       Object.keys(columnSettings).length > 0 && { grid: { columns: columnSettings } }),
+  };
+};
+
+const fromStoredClassicQuery = (query: Query): AsCodeQuery | undefined =>
+  toAsCodeQuery({
+    ...query,
+    query:
+      query.language === 'lucene' && typeof query.query === 'object'
+        ? JSON.stringify(query.query)
+        : query.query,
+  });
+
+const toStoredClassicQuery = (query: AsCodeQuery | undefined): Query | undefined => {
+  if (query?.language !== 'lucene' || !query.expression.trimStart().startsWith('{')) {
+    return toStoredQuery(query);
+  }
+
+  // Match the query bar: parse JSON objects, but keep malformed JSON as Lucene text.
+  return {
+    language: 'lucene',
+    query: safeJsonParse<Query['query']>(query.expression, () => query.expression),
   };
 };
 

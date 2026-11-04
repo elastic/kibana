@@ -67,13 +67,13 @@ describe('url_params', () => {
   });
 
   it('reads and writes the severity param', () => {
-    expect(getNightshiftSeverityFromSearch(`?${NIGHTSHIFT_SEVERITY_QUERY_PARAM}=80-critical`)).toBe(
-      '80-critical'
+    expect(getNightshiftSeverityFromSearch(`?${NIGHTSHIFT_SEVERITY_QUERY_PARAM}=critical`)).toBe(
+      'critical'
     );
     expect(getNightshiftSeverityFromSearch('')).toBeUndefined();
 
     const params = new URLSearchParams();
-    setNightshiftSeverityParam(params, '80-critical');
-    expect(params.get(NIGHTSHIFT_SEVERITY_QUERY_PARAM)).toBe('80-critical');
+    setNightshiftSeverityParam(params, 'critical');
+    expect(params.get(NIGHTSHIFT_SEVERITY_QUERY_PARAM)).toBe('critical');
   });
 });

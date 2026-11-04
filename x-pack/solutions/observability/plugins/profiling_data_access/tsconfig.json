@@ -15,6 +15,7 @@
     "@kbn/fleet-plugin",
     "@kbn/cloud-plugin",
     "@kbn/observability-plugin",
-    "@kbn/core-spaces-common"
+    "@kbn/core-spaces-common",
+    "@kbn/config"
   ]
 }

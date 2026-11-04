@@ -11,6 +11,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import expect from '@kbn/expect';
 import { kbnTestConfig } from '@kbn/test';
 import type { Dataset, PartialConfig } from '@kbn/data-forge';
@@ -18,10 +19,12 @@ import { cleanup, generate } from '@kbn/data-forge';
 import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { parseSearchParams } from '@kbn/share-plugin/common/url_service';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import type { ActionDocument } from './types';
+import { ISO_DATE_REGEX } from './constants';
+import type { ActionDocument, LogsExplorerLocatorParsedParams } from './types';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
@@ -43,6 +46,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     const DATA_VIEW_ID = 'data-view-id';
+    const SAVED_SEARCH_FILTER = {
+      meta: {},
+      query: { exists: { field: 'host.name' } },
+    };
     let dataForgeConfig: PartialConfig;
     let dataForgeIndices: string[];
     let actionId: string;
@@ -147,6 +154,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 language: 'kuery',
               },
               index: DATA_VIEW_ID,
+              filter: [SAVED_SEARCH_FILTER],
             },
             groupBy: ['host.name', 'container.id'],
           },
@@ -164,6 +172,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     host: '{{context.host}}',
                     group: '{{context.group}}',
                     grouping: '{{context.grouping}}',
+                    viewInAppUrl: '{{context.viewInAppUrl}}',
                   },
                 ],
               },
@@ -275,7 +284,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ],
             alertOnNoData: true,
             alertOnGroupDisappear: true,
-            searchConfiguration: { index: 'data-view-id', query: { query: '', language: 'kuery' } },
+            searchConfiguration: {
+              index: 'data-view-id',
+              query: { query: '', language: 'kuery' },
+              filter: [SAVED_SEARCH_FILTER],
+            },
             groupBy: ['host.name', 'container.id'],
           });
       });
@@ -303,6 +316,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(resp.hits.hits[0]._source?.grouping).eql(
           '{"host":{"name":"host-0"},"container":{"id":"container-0"}}'
         );
+
+        const parsedViewInAppUrl = parseSearchParams<LogsExplorerLocatorParsedParams>(
+          new URL(resp.hits.hits[0]._source?.viewInAppUrl || '').search
+        );
+
+        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('DISCOVER_APP_LOCATOR');
+        expect(omit(parsedViewInAppUrl.params, 'timeRange.from')).eql({
+          dataViewId: DATA_VIEW_ID,
+          timeRange: { to: 'now' },
+          query: { query: '', language: 'kuery' },
+          filters: [
+            SAVED_SEARCH_FILTER,
+            { meta: {}, query: { match_phrase: { 'host.name': 'host-0' } } },
+            { meta: {}, query: { match_phrase: { 'container.id': 'container-0' } } },
+          ],
+        });
+        expect(parsedViewInAppUrl.params.timeRange.from).match(ISO_DATE_REGEX);
       });
     });
   });

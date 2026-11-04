@@ -13,8 +13,8 @@ import type {
   DiscoverSessionApiTabBase,
 } from '@kbn/as-code-discover-schema';
 
-export function isDiscoverSessionEsqlTab(
-  tab: DiscoverSessionApiTabBase
-): tab is DiscoverSessionApiEsqlTabBase {
+export function isDiscoverSessionEsqlTab<T extends DiscoverSessionApiTabBase>(
+  tab: T
+): tab is Extract<T, DiscoverSessionApiEsqlTabBase> {
   return 'data_source' in tab && tab.data_source.type === AS_CODE_ESQL_DATA_SOURCE_TYPE;
 }

@@ -22,7 +22,9 @@ import { summarizeSeedData } from './task';
  * No model takes part, so a red score here means seed data loading, score ingestion or the
  * golden-cluster export is broken rather than that investigation quality regressed.
  */
-evaluate.describe('Nightshift investigations: smoke', { tag: tags.stateful.classic }, () => {
+const suiteTags = [...tags.stateful.classic, ...tags.serverless.observability.complete];
+
+evaluate.describe('Nightshift investigations: smoke', { tag: suiteTags }, () => {
   for (const dataset of getSmokeDatasets()) {
     evaluate.describe(dataset.id, () => {
       const seedData = withSeedData(dataset);

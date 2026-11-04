@@ -18,6 +18,7 @@ import type { CoreStart, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import {
@@ -41,12 +42,25 @@ export interface RunAutomationResult {
   enabledForRun?: boolean;
   /** Why the run did not start. */
   reason?: string;
+  /** Execution status, present when the call waited for the run. */
+  status?: ExecutionStatus;
+  /** Wall-clock run time, present when the call waited and the run finished. */
+  durationMs?: number;
+  /** Why the run failed, present when the call waited and the run failed. */
+  errorMessage?: string;
 }
 
 export interface SaveAutomationResult {
   aiIndexId: string;
   workflowId: string;
   status: 'saved_and_attached' | 'attached' | 'already_attached';
+  /**
+   * Whether the saved definition passed schema validation. `false` means it was stored but cannot
+   * be enabled or run.
+   */
+  valid?: boolean;
+  /** Validation diagnostics explaining why the saved definition is invalid, when `valid` is false. */
+  validationErrors?: string[];
 }
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
@@ -467,6 +481,42 @@ const syncAttachmentsToSavedWorkflow = async ({
   }
 };
 
+/** Error-severity validation diagnostics for a YAML definition; never throws. */
+export const collectWorkflowValidationErrors = async ({
+  yaml,
+  workflowsManagement,
+  spaceId,
+  request,
+  logger,
+}: {
+  yaml: string;
+  workflowsManagement: WorkflowsManagementApi;
+  spaceId: string;
+  request: KibanaRequest;
+  logger: Logger;
+}): Promise<string[]> => {
+  try {
+    const validation = await workflowsManagement.validateWorkflow(yaml, spaceId, request);
+    return validation.diagnostics
+      .filter((diagnostic) => diagnostic.severity === 'error')
+      .map((diagnostic) => diagnostic.message);
+  } catch (error) {
+    logger.warn(
+      `Could not collect workflow validation diagnostics: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    return [];
+  }
+};
+
+interface PersistedWorkflow {
+  workflowId: string;
+  newlyCreated: boolean;
+  valid: boolean;
+  validationErrors: string[];
+}
+
 const persistWorkflow = async ({
   yaml,
   existingWorkflowId,
@@ -474,6 +524,7 @@ const persistWorkflow = async ({
   spaceId,
   request,
   getSecurityStart,
+  logger,
 }: {
   yaml: string;
   existingWorkflowId?: string;
@@ -481,7 +532,8 @@ const persistWorkflow = async ({
   spaceId: string;
   request: KibanaRequest;
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
-}): Promise<{ workflowId: string; newlyCreated: boolean }> => {
+  logger: Logger;
+}): Promise<PersistedWorkflow> => {
   if (existingWorkflowId !== undefined) {
     await assertWorkflowUpdateAccess({
       workflowId: existingWorkflowId,
@@ -502,19 +554,45 @@ const persistWorkflow = async ({
       );
     }
 
-    await workflowsManagement.updateWorkflow(existingWorkflowId, { yaml }, spaceId, request);
-    return { workflowId: existingWorkflowId, newlyCreated: false };
+    const updated = await workflowsManagement.updateWorkflow(
+      existingWorkflowId,
+      { yaml },
+      spaceId,
+      request
+    );
+    return {
+      workflowId: existingWorkflowId,
+      newlyCreated: false,
+      valid: updated.valid,
+      validationErrors: updated.validationErrors ?? [],
+    };
   }
 
   await assertWorkflowCreateAccess({ spaceId, request, getSecurityStart });
   const created = await workflowsManagement.createWorkflow({ yaml }, spaceId, request);
 
-  return { workflowId: created.id, newlyCreated: true };
+  const validationErrors = created.valid
+    ? []
+    : await collectWorkflowValidationErrors({
+        yaml,
+        workflowsManagement,
+        spaceId,
+        request,
+        logger,
+      });
+
+  return {
+    workflowId: created.id,
+    newlyCreated: true,
+    valid: created.valid,
+    validationErrors,
+  };
 };
 
 /**
  * Starts a saved automation, enabling its definition first when it is disabled. Never throws: the
  * workflow is already saved and attached by this point, and a failed run must not undo that.
+ * With `completionTimeoutSec` it waits up to that long and reports the status and duration.
  */
 export const runSavedAutomation = async ({
   workflowId,
@@ -523,6 +601,8 @@ export const runSavedAutomation = async ({
   workflowsManagement,
   getSecurityStart,
   logger,
+  inputs = {},
+  completionTimeoutSec,
 }: {
   workflowId: string;
   spaceId: string;
@@ -530,6 +610,8 @@ export const runSavedAutomation = async ({
   workflowsManagement: WorkflowsManagementApi;
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
   logger: Logger;
+  inputs?: Record<string, unknown>;
+  completionTimeoutSec?: number;
 }): Promise<RunAutomationResult> => {
   try {
     const security = await getSecurityStart();
@@ -578,24 +660,48 @@ export const runSavedAutomation = async ({
       }
     }
 
+    const waitForCompletion = completionTimeoutSec !== undefined;
     const result = await executeWorkflow({
       workflowId,
-      workflowParams: {},
+      workflowParams: inputs,
       request,
       spaceId,
       workflowApi: workflowsManagement,
-      // A full-corpus run costs a model call per document, so return the execution id to poll
-      // rather than holding the turn open until it finishes.
-      waitForCompletion: false,
+      // A full-corpus run costs a model call per item, if any, so return the execution id to poll
+      // rather than holding the turn open until it finishes. Only a bounded run waits.
+      waitForCompletion,
+      ...(waitForCompletion && { completionTimeoutSec }),
     });
 
     if (!result.success) {
       return { started: false, reason: result.error, ...(enabledForRun && { enabledForRun }) };
     }
 
+    const { execution } = result;
+    if (!waitForCompletion) {
+      return {
+        started: true,
+        executionId: execution.execution_id,
+        ...(enabledForRun && { enabledForRun }),
+      };
+    }
+
+    const { status, started_at: startedAt, finished_at: finishedAt } = execution;
+    // Only a completed run measured anything; a cancelled or timed-out one stopped part-way.
+    const durationMs =
+      status === ExecutionStatus.COMPLETED && finishedAt
+        ? Date.parse(finishedAt) - Date.parse(startedAt)
+        : undefined;
+    const endedEarly = status !== ExecutionStatus.COMPLETED && isTerminalStatus(status);
+
     return {
       started: true,
-      executionId: result.execution.execution_id,
+      executionId: execution.execution_id,
+      status,
+      ...(durationMs !== undefined && { durationMs }),
+      ...(endedEarly && {
+        errorMessage: execution.error_message ?? `The run ended with status '${status}'.`,
+      }),
       ...(enabledForRun && { enabledForRun }),
     };
   } catch (error) {
@@ -678,13 +784,14 @@ export const saveAutomationHandler = async ({
     existingWorkflowId ? { type: 'workflow', value: existingWorkflowId } : undefined
   );
 
-  const { workflowId, newlyCreated } = await persistWorkflow({
+  const { workflowId, newlyCreated, valid, validationErrors } = await persistWorkflow({
     yaml: source.yaml,
     existingWorkflowId,
     workflowsManagement,
     spaceId,
     request,
     getSecurityStart,
+    logger,
   });
 
   let result: SaveAutomationResult;
@@ -700,6 +807,8 @@ export const saveAutomationHandler = async ({
       aiIndexId,
       workflowId,
       status: isUpdate || attachStatus === 'attached' ? 'saved_and_attached' : 'already_attached',
+      ...(valid === false && { valid: false }),
+      ...(validationErrors.length > 0 && { validationErrors }),
     };
   } catch (error) {
     if (newlyCreated) {

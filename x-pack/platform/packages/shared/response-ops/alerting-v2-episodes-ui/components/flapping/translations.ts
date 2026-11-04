@@ -33,7 +33,7 @@ export const FLAPPING_POPOVER_BODY = i18n.translate(
   'xpack.alertingV2EpisodesUi.flapping.popoverBody',
   {
     defaultMessage:
-      'This episode changed between active and recovering at least {statusChangeThreshold} times in the last {lookBackWindow} rule events.',
+      'This alert changed between active and recovering at least {statusChangeThreshold} times in the last {lookBackWindow} rule events.',
     values: {
       statusChangeThreshold: DEFAULT_EPISODE_FLAPPING_SETTINGS.statusChangeThreshold,
       lookBackWindow: DEFAULT_EPISODE_FLAPPING_SETTINGS.lookBackWindow,

@@ -12,7 +12,7 @@ import { getDoesMonitorMeetLocationThreshold, StatusRuleExecutor } from './statu
 import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { SyntheticsService } from '../../synthetics_service/synthetics_service';
+import { ServiceManagedLocations } from '../../synthetics_service/service_managed_locations';
 import * as locationsUtils from '../../synthetics_service/get_all_locations';
 import type { PublicLocation } from '../../../common/runtime_types';
 import type { SyntheticsServerSetup } from '../../types';
@@ -70,9 +70,9 @@ describe('StatusRuleExecutor', () => {
     encryptedSavedObjects: mockEncryptedSO(),
   } as unknown as SyntheticsServerSetup;
 
-  const syntheticsService = new SyntheticsService(serverMock);
+  const serviceManagedLocations = new ServiceManagedLocations(serverMock);
 
-  const monitorClient = new SyntheticsMonitorClient(syntheticsService, serverMock);
+  const monitorClient = new SyntheticsMonitorClient(serviceManagedLocations, serverMock);
 
   const mockStart = coreMock.createStart();
   const uiSettingsClient = mockStart.uiSettings.asScopedToClient(soClient);
@@ -1354,6 +1354,43 @@ describe('StatusRuleExecutor', () => {
             timestamp: undefined,
           },
         });
+      });
+
+      it('joins every location label when a monitor is pending in several locations', () => {
+        const firstConfig = mockPendingConfigs[FIRST_CONFIG_ID];
+        const secondLocationConfig = {
+          ...firstConfig,
+          locationId: MOCK_SECOND_LOCATION.id,
+          monitorInfo: {
+            ...firstConfig.monitorInfo,
+            observer: { geo: { name: MOCK_SECOND_LOCATION.name } },
+          },
+        };
+
+        const summary = statusRule.getUngroupedPendingSummary({
+          statusConfigs: [firstConfig, secondLocationConfig],
+        });
+
+        const expected = `${MOCK_FIRST_LOCATION.name} and ${MOCK_SECOND_LOCATION.name}`;
+        expect(summary.locationName).toBe(expected);
+        expect(summary.locationNames).toBe(expected);
+      });
+
+      it('uses the location label from monitor info since pending configs have no ping', async () => {
+        const { latestPing, ...pendingConfigWithoutPing } = mockPendingConfigs[FIRST_CONFIG_ID];
+
+        await statusRule.schedulePendingAlertPerConfigId({
+          pendingConfigs: { [FIRST_CONFIG_ID]: pendingConfigWithoutPing },
+          pendingThreshold: 1,
+        });
+
+        expect(scheduleAlertSpy).toHaveBeenCalledTimes(1);
+        expect(scheduleAlertSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            locationNames: [MOCK_FIRST_LOCATION.name],
+            locationIds: [MOCK_FIRST_LOCATION.id],
+          })
+        );
       });
 
       it('should do nothing if pendingConfigs is empty', async () => {

@@ -19,6 +19,7 @@ import { ObservableActionsPopoverButton } from './observable_actions_popover_but
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { ObservablesUtilityBar } from './observables_utility_bar';
 import { useCanRunCaseWorkflow } from '../workflows/use_run_case_workflow';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 const getColumns = (
   caseData: CaseUI,
@@ -93,6 +94,8 @@ export const ObservablesTable = ({
   onExtractObservablesChanged,
 }: ObservablesTableProps) => {
   const canRunWorkflow = useCanRunCaseWorkflow();
+  const { permissions } = useCasesContext();
+  const canSelectObservables = canRunWorkflow || permissions.update;
 
   const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(new Set());
 
@@ -116,9 +119,11 @@ export const ObservablesTable = ({
     []
   );
 
+  const onBulkActionSuccess = useCallback(() => setSelectedIds(new Set()), []);
+
   const selection: EuiTableSelectionType<Observable> | undefined = useMemo(
-    () => (canRunWorkflow ? { selected, onSelectionChange } : undefined),
-    [canRunWorkflow, onSelectionChange, selected]
+    () => (canSelectObservables ? { selected, onSelectionChange } : undefined),
+    [canSelectObservables, onSelectionChange, selected]
   );
 
   const filesTableRowProps = useCallback(
@@ -152,6 +157,7 @@ export const ObservablesTable = ({
         onExtractObservablesChanged={onExtractObservablesChanged}
         selectedObservables={selected}
         canRunWorkflow={canRunWorkflow}
+        onBulkActionSuccess={onBulkActionSuccess}
       />
       <EuiSpacer size="xs" />
       <EuiInMemoryTable

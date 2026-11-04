@@ -78,15 +78,10 @@ const meta: Meta<typeof ConversationInput> = {
       </AgentBuilderStorybookProvider>
     ),
   ],
-  parameters: {
-    layout: 'padded',
-  },
 };
 export default meta;
 
 type Story = StoryObj<typeof ConversationInput>;
-
-export const Empty: Story = {};
 
 let neverResolvingFileIdCounter = 0;
 const neverResolvingFilesClient = {

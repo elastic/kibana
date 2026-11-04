@@ -9,6 +9,7 @@ import type { CoreSetup } from '@kbn/core/public';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { IAggType } from '@kbn/data-plugin/public';
 import type { Datatable, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import type { ILensInterpreterRenderHandlers, LensCellValueAction } from '@kbn/lens-common';
 import type { FormatFactory } from '../../../../common/types';
 import type { DatatableProps } from '../../../../common/expressions';
@@ -20,6 +21,7 @@ export type DatatableRenderProps = DatatableProps & {
   paletteService: PaletteRegistry;
   theme: CoreSetup['theme'];
   interactive: boolean;
+  viewMode: ViewMode;
   renderComplete: () => void;
 
   /**

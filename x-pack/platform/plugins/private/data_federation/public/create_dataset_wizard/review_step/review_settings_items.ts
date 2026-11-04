@@ -6,7 +6,7 @@
  */
 
 import { decodeCsvCharacterSequence, type DatasetSettings } from '../../../common';
-import { getSchemaResolutionDisplayLabel } from '../components/fields/schema_resolution_field';
+import { getSchemaResolutionDisplayLabel } from '../components/fields/schema_resolution_select';
 import { getPartitionDetectionDisplayLabel } from '../components/fields/partition_detection_select';
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import { getFormatDisplayLabel } from '../define_step/fields/format_select';

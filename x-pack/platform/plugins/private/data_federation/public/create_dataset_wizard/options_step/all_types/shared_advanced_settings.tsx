@@ -8,12 +8,13 @@
 import React from 'react';
 import { EuiCode, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
-import { useController, useWatch } from 'react-hook-form';
+import { useController } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
 import {
   DEFAULT_FILE_EXCLUSIONS,
+  DEFAULT_PARTITION_DETECTION,
   validatePartitionPath,
   type CreateDatasetFormValues,
 } from '../../create_dataset_form_state';
@@ -21,13 +22,22 @@ import { ErrorConfig } from './fields/error_config';
 import { FormRowLabelWithInfo } from '../../components/form_row_label_with_info';
 import { FileExclusionsSelect } from './fields/file_exclusions_select';
 import { PartitionDetectionSelect } from '../../components/fields/partition_detection_select';
+import { useComboBoxSelectionValidity } from '../../components/combo_box_selection_validity';
 
 const DEFAULT_FILE_EXCLUSIONS_DISPLAY = `[${DEFAULT_FILE_EXCLUSIONS.map(
   (pattern) => `"${pattern}"`
 ).join(', ')}]`;
 
 export function SharedAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
-  const partitionDetection = useWatch({ control, name: 'settings.partition_detection' });
+  const {
+    field: partitionDetectionField,
+    fieldState: partitionDetectionState,
+    onChange: onPartitionDetectionChange,
+  } = useComboBoxSelectionValidity({
+    name: 'settings.partition_detection',
+    flag: 'partitionDetectionIsValid',
+  });
+
   const { field: partitionPathField, fieldState: partitionPathState } = useController({
     name: 'settings.partition_path',
     control,
@@ -65,15 +75,22 @@ export function SharedAdvancedSettings({ control }: { control: Control<CreateDat
           <FormattedMessage
             id="xpack.dataFederation.createDatasetForm.settingsPartitionDetectionHelp"
             defaultMessage="{defaultValue} by default"
-            values={{ defaultValue: <EuiCode>auto</EuiCode> }}
+            values={{ defaultValue: <EuiCode>{DEFAULT_PARTITION_DETECTION}</EuiCode> }}
           />
         }
         fullWidth
+        isInvalid={Boolean(partitionDetectionState.error)}
+        error={partitionDetectionState.error?.message}
       >
-        <PartitionDetectionSelect control={control} />
+        <PartitionDetectionSelect
+          value={partitionDetectionField.value}
+          onChange={onPartitionDetectionChange}
+          onBlur={partitionDetectionField.onBlur}
+          isInvalid={Boolean(partitionDetectionState.error)}
+        />
       </EuiFormRow>
 
-      {partitionDetection === 'template' ? (
+      {partitionDetectionField.value === 'template' ? (
         <EuiFormRow
           label={
             <FormRowLabelWithInfo

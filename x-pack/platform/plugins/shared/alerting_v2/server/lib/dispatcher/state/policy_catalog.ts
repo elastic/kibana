@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_GROUPING_MODE } from '../constants';
+import { DEFAULT_GROUPING } from '../constants';
 import type { ActionPolicy, ActionPolicyId } from '../types';
 
 const NO_POLICIES: readonly ActionPolicy[] = [];
@@ -43,8 +43,8 @@ export class PolicyCatalog {
   }
 
   /** Grouping mode of the policy; a policy missing from the catalog falls back to the default. */
-  public groupingModeOf(id: ActionPolicyId): ActionPolicy['groupingMode'] {
-    return this.byId.get(id)?.groupingMode ?? DEFAULT_GROUPING_MODE;
+  public groupingModeOf(id: ActionPolicyId): ActionPolicy['grouping']['mode'] {
+    return this.byId.get(id)?.grouping.mode ?? DEFAULT_GROUPING.mode;
   }
 
   public apiKeyOf(id: ActionPolicyId): string | undefined {

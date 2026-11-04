@@ -306,6 +306,7 @@ export function initRoutes(
             }),
           ]),
           regenerateApiKey: schema.maybe(schema.boolean({ defaultValue: false })),
+          includeRunningTasks: schema.maybe(schema.boolean({ defaultValue: false })),
         }),
       },
     },
@@ -315,11 +316,12 @@ export function initRoutes(
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       const taskManager = await taskManagerStart;
-      const { taskIds, schedule, regenerateApiKey } = req.body;
+      const { taskIds, schedule, regenerateApiKey, includeRunningTasks } = req.body;
 
       const taskResult = await taskManager.bulkUpdateSchedules(taskIds, schedule, {
         request: req,
         regenerateApiKey,
+        includeRunningTasks,
       });
 
       return res.ok({ body: taskResult });
@@ -545,6 +547,7 @@ export function initRoutes(
               }),
             }),
           ]),
+          includeRunningTasks: schema.maybe(schema.boolean({ defaultValue: false })),
         }),
       },
     },
@@ -553,10 +556,12 @@ export function initRoutes(
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
     ) {
-      const { taskIds, schedule } = req.body;
+      const { taskIds, schedule, includeRunningTasks } = req.body;
       try {
         const taskManager = await taskManagerStart;
-        return res.ok({ body: await taskManager.bulkUpdateSchedules(taskIds, schedule) });
+        return res.ok({
+          body: await taskManager.bulkUpdateSchedules(taskIds, schedule, { includeRunningTasks }),
+        });
       } catch (err) {
         return res.ok({ body: { taskIds, error: `${err}` } });
       }

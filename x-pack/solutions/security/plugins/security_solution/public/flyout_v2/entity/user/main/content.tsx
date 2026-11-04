@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { Entity } from '../../../../../common/api/entity_analytics';
+import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 import { useAnomalyOverview } from '../../../../entity_analytics/api/hooks/use_anomaly_overview';
 import { useAnomalyPrivileges } from '../../../../entity_analytics/api/hooks/use_anomaly_privileges';
+import { getScopeFlyoutTimeRangeMs } from '../../../../entity_analytics/common/scope_time_ranges';
 import { ObservedDataSection } from '../../shared/components/observed_data_section';
 import { useHasEntityResolutionLicense } from '../../../../common/hooks/use_has_entity_resolution_license';
 import { EntityHighlightsAccordion } from '../../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
@@ -27,6 +29,7 @@ import type { ObservedEntityData } from '../../shared/components/observed_entity
 import type { EntityRiskScore, UserItem } from '../../../../../common/search_strategy';
 import { VisualizationsSection } from '../../../../flyout/entity_details/shared/components/right/visualizations_section';
 import { ResolutionSection } from '../../../../entity_analytics/components/entity_resolution/resolution_section';
+import { useNewEntityAnalyticsPage } from '../../../../entity_analytics/hooks/use_new_entity_analytics_page';
 import {
   AnomaliesSection,
   EMPTY_ANOMALY_OVERVIEW,
@@ -61,13 +64,22 @@ export interface ContentProps {
   isPreviewMode: boolean;
   /** When using Entity Store v2: entity record for asset criticality upsert. */
   entityRecord?: Entity;
+  /**
+   * Resolution-group aliases of `entityRecord` (empty outside the group view). Insights (alerts,
+   * misconfigurations, vulnerabilities) are then counted across the whole group.
+   */
+  aliasRecords?: readonly EntityStoreRecord[];
   refetchEntityRecord?: () => void;
   /** When true (i.e. entity store v2 enabled but no entity found), hide entity highlights and risk score. */
   noEntityInStore?: boolean;
+  /** True while the entity store record is being resolved (v2); the AI summary waits for it. */
+  isEntityRecordLoading?: boolean;
   /** When `true`, hide the legacy asset criticality accordion. Required so every call site wires it explicitly. */
   entityStoreV2Enabled: boolean;
   /** Entity store entity ID for the user. */
   entityStoreEntityId?: string;
+  /** Entity view mode of the panel; `resolved` loads anomalies and the AI summary for the whole resolution group. */
+  mode?: EntityViewMode;
   /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
   prefetchedResolutionRisk?: EntityRiskScore<EntityType.user>;
   /**
@@ -93,6 +105,11 @@ export interface ContentProps {
    * their `useQueryInspector` registration
    */
   riskScoreQueryId: string;
+  /**
+   * True when the flyout shows a resolution group (alias records were loaded for the open target).
+   * The risk summary then shows only the group's risk score. See {@link RiskSummaryProps.isGroupView}.
+   */
+  isGroupView?: boolean;
 }
 
 /**
@@ -110,30 +127,55 @@ export const Content = ({
   onAssetCriticalityChange,
   isPreviewMode,
   entityRecord,
+  aliasRecords,
   refetchEntityRecord,
   noEntityInStore = false,
+  isEntityRecordLoading = false,
   entityStoreV2Enabled,
   entityStoreEntityId,
+  mode,
   prefetchedResolutionRisk,
   enableGraphAndResolutionNavigation = true,
   hideHeaderIcons = false,
   onShowEntity,
   riskScoreQueryId,
+  isGroupView = false,
 }: ContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
+  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
+
   const isAnomalyDetailsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAnomalyDetails');
   const { data: anomalyPrivilegesData } = useAnomalyPrivileges(isAnomalyDetailsEnabled);
   const hasAnomalyPrivileges = anomalyPrivilegesData?.has_all_required ?? false;
   const loadAnomalies = isAnomalyDetailsEnabled && hasAnomalyPrivileges && !!entityStoreEntityId;
-
+  const flyoutTimeRangeMs = useMemo(() => getScopeFlyoutTimeRangeMs(scopeId), [scopeId]);
   const anomalyOverview = useAnomalyOverview({
     entityId: entityStoreEntityId ?? '',
+    mode,
     entityType: EntityType.user,
+    from: flyoutTimeRangeMs?.from,
+    to: flyoutTimeRangeMs?.to,
     enabled: loadAnomalies,
   });
 
   const userName =
     identityFields[EntityIdentifierFields.userName] || Object.values(identityFields)[0] || '';
+
+  const resolutionSection =
+    entityStoreEntityId && !isPreviewMode && hasEntityResolutionLicense ? (
+      <>
+        <ResolutionSection
+          entityId={entityStoreEntityId}
+          entityType={EntityType.user}
+          scopeId={scopeId}
+          openDetailsPanel={enableGraphAndResolutionNavigation ? openDetailsPanel : undefined}
+          onShowEntity={onShowEntity}
+          hideHeaderIcons={hideHeaderIcons}
+          mode={mode}
+        />
+        <EuiHorizontalRule />
+      </>
+    ) : null;
 
   return (
     <>
@@ -143,6 +185,8 @@ export const Content = ({
           entityType={EntityType.user}
           entityRecord={entityRecord}
           refetchEntityRecord={refetchEntityRecord}
+          mode={mode}
+          isEntityRecordLoading={isEntityRecordLoading}
         />
       )}
       {!noEntityInStore &&
@@ -160,16 +204,20 @@ export const Content = ({
               entityId={entityRecord?.entity?.id}
               prefetchedResolutionRisk={prefetchedResolutionRisk}
               hideHeaderIcon={hideHeaderIcons}
+              isGroupView={isGroupView}
+              scopeId={scopeId}
             />
             <EuiHorizontalRule />
           </>
         )}
+      {isNewEntityAnalyticsPage && resolutionSection}
       {loadAnomalies &&
         (anomalyOverview.isLoading || anomalyOverview.isError || anomalyOverview.data) && (
           <>
             <AnomaliesSection
               data={anomalyOverview.data ?? EMPTY_ANOMALY_OVERVIEW}
               entityId={entityStoreEntityId}
+              scopeId={scopeId}
               isPreviewMode={isPreviewMode}
               openDetailsPanel={openDetailsPanel}
               hideHeaderIcons={hideHeaderIcons}
@@ -190,19 +238,7 @@ export const Content = ({
           <EuiHorizontalRule margin="m" />
         </>
       )}
-      {entityStoreEntityId && !isPreviewMode && hasEntityResolutionLicense && (
-        <>
-          <ResolutionSection
-            entityId={entityStoreEntityId}
-            entityType={EntityType.user}
-            scopeId={scopeId}
-            openDetailsPanel={enableGraphAndResolutionNavigation ? openDetailsPanel : undefined}
-            onShowEntity={onShowEntity}
-            hideHeaderIcons={hideHeaderIcons}
-          />
-          <EuiHorizontalRule />
-        </>
-      )}
+      {!isNewEntityAnalyticsPage && resolutionSection}
       {!entityStoreV2Enabled && (
         <AssetCriticalityAccordion
           entity={{ name: userName, type: EntityType.user }}
@@ -211,6 +247,7 @@ export const Content = ({
       )}
       <EntityInsight
         entityRecord={entityRecord}
+        aliasRecords={aliasRecords}
         identityFields={identityFields}
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}

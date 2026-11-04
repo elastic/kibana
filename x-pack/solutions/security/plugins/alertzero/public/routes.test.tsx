@@ -17,8 +17,8 @@ jest.mock('./pages/landing_page', () => ({
 }));
 jest.mock('./pages/escalations', () => ({ EscalationsPage: () => null }));
 jest.mock('./pages/watches/watch_detail', () => ({ WatchDetailPage: () => null }));
-jest.mock('./hooks/use_agentic_investigations_capabilities', () => ({
-  useAgenticInvestigationsCapabilities: () => ({ showEscalations: true }),
+jest.mock('./hooks/use_alertzero_investigations_capabilities', () => ({
+  useAlertZeroInvestigationsCapabilities: () => ({ showEscalations: true }),
 }));
 
 const renderAt = (path: string) => {

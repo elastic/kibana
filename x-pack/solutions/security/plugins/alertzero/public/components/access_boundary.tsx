@@ -80,20 +80,62 @@ const SubscriptionActions = ({ serverless }: { serverless: boolean }) => {
 /** Prevents feature content and data requests until space, subscription and read access are allowed. */
 export const AccessBoundary = ({
   availability$,
+  spaceSupported$,
+  serviceAccountsEnabled,
   children,
 }: React.PropsWithChildren<{
   availability$: Observable<SubscriptionAvailability>;
+  /** Emits `false` when the active space does not use the Security solution view. */
+  spaceSupported$: Observable<boolean>;
+  /**
+   * From core security, read before the Kibana context replaces `security` with the
+   * security plugin. That plugin contract does not carry this flag.
+   */
+  serviceAccountsEnabled: boolean;
 }>): React.ReactElement => {
   const {
     services: { application, uiSettings, agentBuilder, agenticInvestigations, proposals },
   } = useKibana<Services>();
   const subscription = useObservable(availability$, 'loading');
+  const spaceSupported = useObservable(spaceSupported$);
   const enabled$ = useMemo(
     () => uiSettings.get$<boolean>(ALERTZERO_ENABLED_SETTING_ID, false),
     [uiSettings]
   );
   const enabled = useObservable(enabled$, false);
 
+  if (spaceSupported === undefined) {
+    return (
+      <EuiEmptyPrompt
+        data-test-subj="alertzeroAccessLoading"
+        icon={<EuiLoadingSpinner size="xl" />}
+      />
+    );
+  }
+  if (!spaceSupported) {
+    return (
+      <EuiEmptyPrompt
+        data-test-subj="alertzeroUnsupportedSpace"
+        iconType="lock"
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.alertzero.access.unsupportedSpaceTitle"
+              defaultMessage="AlertZero is not available in this space"
+            />
+          </h2>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.alertzero.access.unsupportedSpaceDescription"
+              defaultMessage="AlertZero, Escalations, and Watches are available only in a Security solution space."
+            />
+          </p>
+        }
+      />
+    );
+  }
   if (!enabled) {
     return (
       <EuiEmptyPrompt
@@ -190,7 +232,7 @@ export const AccessBoundary = ({
       />
     );
   }
-  if (!agentBuilder || !agenticInvestigations || !proposals) {
+  if (!agentBuilder || !agenticInvestigations || !proposals || !serviceAccountsEnabled) {
     return (
       <EuiEmptyPrompt
         iconType="warning"

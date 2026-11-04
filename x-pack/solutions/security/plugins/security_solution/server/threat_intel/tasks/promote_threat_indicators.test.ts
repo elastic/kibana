@@ -62,7 +62,7 @@ const EXTRACTED_AT = '2024-05-31T12:00:00.000Z';
 const makeReport = ({
   id,
   iocs,
-  sourceName = 'maltrail',
+  sourceName = 'indicator list',
   sourceUrl = 'https://example.com/trail.txt',
   trailLabel,
   extractedAt = EXTRACTED_AT,
@@ -275,12 +275,12 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
     });
   });
 
-  describe('maltrail report', () => {
+  describe('indicator-list report', () => {
     it('carries trail label + per-IOC reference in scriptParams when present', () => {
       const ops = buildBulkOpsForTest(
         [
           makeReport({
-            id: 'r-maltrail',
+            id: 'r-indicator-list',
             iocs: [
               {
                 type: 'ip',
@@ -288,10 +288,9 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
                 reference: 'https://blog.example.com/malware-analysis',
               },
             ],
-            sourceName: 'maltrail',
-            sourceUrl:
-              'https://raw.githubusercontent.com/stamparm/trails/main/malware/cobaltstrike.txt',
-            trailLabel: 'cobaltstrike',
+            sourceName: 'indicator list',
+            sourceUrl: 'https://feeds.example.test/indicators.txt',
+            trailLabel: 'test-indicators',
           }),
         ],
         NOW
@@ -299,8 +298,8 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
 
       expect(ops).toHaveLength(1);
       const { scriptParams } = ops[0];
-      expect(scriptParams.provider).toBe('maltrail');
-      expect(scriptParams.trail).toBe('cobaltstrike');
+      expect(scriptParams.provider).toBe('indicator list');
+      expect(scriptParams.trail).toBe('test-indicators');
       // Per-IOC reference wins over source.url
       expect(scriptParams.reference).toBe('https://blog.example.com/malware-analysis');
     });
@@ -309,20 +308,17 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
       const ops = buildBulkOpsForTest(
         [
           makeReport({
-            id: 'r-maltrail-noref',
+            id: 'r-indicator-list-noref',
             iocs: [{ type: 'ip', value: '9.9.9.9' }],
-            sourceName: 'maltrail',
-            sourceUrl:
-              'https://raw.githubusercontent.com/stamparm/trails/main/malware/cobaltstrike.txt',
-            trailLabel: 'cobaltstrike',
+            sourceName: 'indicator list',
+            sourceUrl: 'https://feeds.example.test/indicators.txt',
+            trailLabel: 'test-indicators',
           }),
         ],
         NOW
       );
 
-      expect(ops[0].scriptParams.reference).toBe(
-        'https://raw.githubusercontent.com/stamparm/trails/main/malware/cobaltstrike.txt'
-      );
+      expect(ops[0].scriptParams.reference).toBe('https://feeds.example.test/indicators.txt');
     });
 
     it('removes credentials from report and IOC provenance before promotion', () => {
@@ -368,7 +364,7 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
     });
   });
 
-  describe('non-maltrail report (back-compat)', () => {
+  describe('report without indicator-list metadata (back-compat)', () => {
     it('produces a valid op with a single sources[] entry and no trail field', () => {
       const ops = buildBulkOpsForTest(
         [
@@ -501,7 +497,10 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
  * tests drive the real runner so that regression cannot come back silently.
  */
 describe('promote task runner', () => {
-  const setupRunner = (searchResponses: Array<Record<string, unknown>>) => {
+  const setupRunner = (
+    searchResponses: Array<Record<string, unknown>>,
+    getBootstrapReady: () => Promise<void> = () => Promise.resolve()
+  ) => {
     const coreStart = coreMock.createStart();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     let call = 0;
@@ -527,6 +526,7 @@ describe('promote task runner', () => {
       coreSetup,
       logger: loggingSystemMock.createLogger(),
       getReconcileAttributeWorkflows: jest.fn().mockResolvedValue(undefined),
+      getBootstrapReady,
     });
 
     const definition = definitions[PROMOTE_THREAT_INDICATORS_TASK_TYPE];
@@ -550,7 +550,7 @@ describe('promote task runner', () => {
     _id: id,
     sort: [extractedAt, 1],
     _source: {
-      source: { name: 'maltrail', url: 'https://example.com/trail.txt' },
+      source: { name: 'indicator list', url: 'https://example.com/trail.txt' },
       severity: { level: 'high' },
       // Needs a promotable tier: only `discriminating` and `contextual` reach the
       // index, so an untiered IOC produces no bulk operations at all.
@@ -572,6 +572,70 @@ describe('promote task runner', () => {
     expect(result.state).toEqual(
       expect.objectContaining({ lastSyncedAt: EXTRACTED_AT, totalReportsProcessed: 1 })
     );
+  });
+
+  describe('when bootstrap has not completed', () => {
+    const run = async () => {
+      const { definition, esClient } = setupRunner([{ hits: { hits: [reportHit('r-1')] } }], () =>
+        Promise.reject(new Error('bootstrap failed'))
+      );
+      const runner = definition.createTaskRunner(
+        runContext({
+          taskInstance: { state: { lastSyncedAt: 'now-30d' }, params: {} } as never,
+        })
+      );
+      const result = await runner.run();
+      return { result, esClient };
+    };
+
+    it('returns the previous state', async () => {
+      const { result } = await run();
+
+      expect(result.state).toEqual({ lastSyncedAt: 'now-30d' });
+    });
+
+    it('does not search reports', async () => {
+      const { esClient } = await run();
+
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
+    it('does not write indicators', async () => {
+      const { esClient } = await run();
+
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when the task is aborted while waiting for bootstrap', () => {
+    const run = async () => {
+      const controller = new AbortController();
+      const { definition, esClient } = setupRunner(
+        [{ hits: { hits: [reportHit('r-1')] } }],
+        () => new Promise<void>(() => {})
+      );
+      const runner = definition.createTaskRunner(
+        runContext({
+          taskInstance: { state: { lastSyncedAt: 'now-30d' }, params: {} } as never,
+          signal: controller.signal,
+        })
+      );
+      const pending = runner.run();
+      controller.abort();
+      return { result: await pending, esClient };
+    };
+
+    it('returns the previous state instead of timing out', async () => {
+      const { result } = await run();
+
+      expect(result.state).toEqual({ lastSyncedAt: 'now-30d' });
+    });
+
+    it('does not search reports', async () => {
+      const { esClient } = await run();
+
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
   });
 
   it('holds the cursor when the run is aborted mid-scan', async () => {

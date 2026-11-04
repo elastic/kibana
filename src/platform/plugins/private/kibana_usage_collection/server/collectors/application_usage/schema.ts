@@ -120,6 +120,7 @@ export const applicationUsageSchema = {
   // OSS
   dashboards: commonSchema,
   dev_tools: commonSchema,
+  digital_experience: commonSchema,
   discover: commonSchema,
   home: commonSchema,
   kibana: commonSchema, // It's a forward app so we'll likely never report it
@@ -195,6 +196,9 @@ export const applicationUsageSchema = {
    * @removeBy 9.0.0
    */
   siem: commonSchema,
+  /**
+   * @deprecated legacy key retained because persisted application usage totals for the removed Significant Events app are never expired
+   */
   significantEvents: commonSchema,
   space_selector: commonSchema,
   streams: commonSchema,

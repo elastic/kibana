@@ -41,8 +41,9 @@ import {
 
 const mapMetadata = (metadata: FormValues['metadata']) => ({
   name: metadata.name,
-  description: metadata.description,
+  ...(metadata.description ? { description: metadata.description } : {}),
   ...(metadata.tags?.length ? { tags: metadata.tags } : {}),
+  ...(metadata.routingTags?.length ? { routing_tags: metadata.routingTags } : {}),
 });
 
 const mapSchedule = (schedule: FormValues['schedule']) => ({
@@ -58,7 +59,7 @@ const mapGrouping = (grouping: FormValues['grouping']) =>
  * Contains all fields except `kind` (only required for create).
  */
 export interface RuleRequestCommon {
-  metadata: { name: string; description?: string; tags?: string[] };
+  metadata: { name: string; description?: string; tags?: string[]; routing_tags?: string[] };
   time_field: string;
   schedule: { every: string; lookback?: string };
   query: Query;
@@ -93,16 +94,53 @@ export const mapFormValuesToCreateRequest = (formValues: FormValues): CreateRule
   ...mapFormValuesToRuleRequest(formValues),
 });
 
-export const mapFormValuesToUpdateRequest = (formValues: FormValues): UpdateRuleData => {
-  const { grouping, state_transition, artifacts, ...rest } = mapFormValuesToRuleRequest(formValues);
+type UpdateStateTransition = NonNullable<UpdateRuleData['state_transition']>;
+
+/**
+ * A delay mode decides the whole phase, so every leaf of it is sent: switching from a duration to
+ * an immediate delay builds `{ count: 0 }`, and an omitted `timeframe` would keep the duration the
+ * user just removed.
+ */
+const mapStateTransitionPhase = (
+  phase: StateTransition['pending']
+): UpdateStateTransition['pending'] =>
+  phase == null
+    ? null
+    : {
+        count: phase.count ?? null,
+        timeframe: phase.timeframe ?? null,
+        operator: phase.operator ?? null,
+      };
+
+/**
+ * The form submits every field it owns, so anything the user emptied has to be sent as `null`:
+ * PATCH merges leaf by leaf, and an omitted leaf would keep the value they just cleared.
+ */
+export const toUpdateRuleData = (request: RuleRequestCommon): UpdateRuleData => {
+  const { grouping, state_transition, artifacts, metadata, query, ...rest } = request;
 
   return {
     ...rest,
+    metadata: {
+      ...metadata,
+      description: metadata.description || null,
+      tags: metadata.tags ?? null,
+      routing_tags: metadata.routing_tags ?? null,
+    },
+    query: { ...query, breach: query.breach ?? null },
     grouping: grouping ?? null,
-    state_transition: state_transition ?? null,
+    state_transition: state_transition
+      ? {
+          pending: mapStateTransitionPhase(state_transition.pending),
+          recovering: mapStateTransitionPhase(state_transition.recovering),
+        }
+      : null,
     artifacts: artifacts ?? null,
   };
 };
+
+export const mapFormValuesToUpdateRequest = (formValues: FormValues): UpdateRuleData =>
+  toUpdateRuleData(mapFormValuesToRuleRequest(formValues));
 
 // ---------------------------------------------------------------------------
 // API response → FormValues
@@ -118,6 +156,7 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
       description: rule.metadata.description,
       enabled: rule.enabled,
       tags: rule.metadata.tags,
+      routingTags: rule.metadata.routing_tags,
     },
     timeField: rule.time_field,
     schedule: {

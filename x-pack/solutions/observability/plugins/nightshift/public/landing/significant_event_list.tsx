@@ -26,7 +26,7 @@ import {
   NIGHTSHIFT_EBT_DETAILS,
   NIGHTSHIFT_EBT_ELEMENTS,
 } from '../common/ebt_constants';
-import { getLatestInvestigation } from '../event/significant_event_status';
+import { getLatestInvestigation } from '../components/entities/significant_event/significant_event_status';
 import { SignificantEventItem } from './significant_event_item';
 
 const getEventInvestigationRunStatus = (
@@ -165,7 +165,7 @@ export function SignificantEventList({
         >
           {events.map((event, index) => (
             <li
-              key={event.event_uuid}
+              key={event.event_id}
               css={
                 index < events.length - 1
                   ? css`
@@ -180,7 +180,7 @@ export function SignificantEventList({
                   event,
                   investigationStatuses
                 )}
-                isSelected={event.event_uuid === selectedEventUuid}
+                isSelected={event.event_id === selectedEventUuid}
                 onClick={onEventClick}
                 onChatClick={onChatClick}
                 onCloseClick={onCloseClick}

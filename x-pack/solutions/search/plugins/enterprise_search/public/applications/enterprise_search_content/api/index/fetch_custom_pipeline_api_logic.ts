@@ -19,7 +19,7 @@ export type FetchCustomPipelineApiLogicResponse = Record<string, IngestPipeline 
 export const fetchCustomPipeline = async ({
   indexName,
 }: FetchCustomPipelineApiLogicArgs): Promise<FetchCustomPipelineApiLogicResponse> => {
-  const route = `/internal/enterprise_search/indices/${indexName}/pipelines`;
+  const route = `/internal/enterprise_search/indices/${encodeURIComponent(indexName)}/pipelines`;
   const result = await HttpLogic.values.http.get<FetchCustomPipelineApiLogicResponse>(route);
   return result;
 };

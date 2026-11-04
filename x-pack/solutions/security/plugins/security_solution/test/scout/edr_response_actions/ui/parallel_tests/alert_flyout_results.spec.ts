@@ -7,6 +7,7 @@
 
 import { expect } from '@kbn/scout-security/ui';
 import { spaceTest, tags } from '../fixtures';
+import { openAlertFlyoutForRule } from '../fixtures/open_alert_flyout';
 import {
   seedAlertFlyoutResponseAction,
   type SeededAlertFlyoutResponseAction,
@@ -33,8 +34,9 @@ spaceTest.describe(
     let seeded: SeededAlertFlyoutResponseAction | undefined;
 
     spaceTest.beforeAll(async ({ apiServices, esClient, kbnClient, scoutSpace, config }) => {
-      // Endpoint host indexing installs Fleet and waits on metadata transforms.
-      spaceTest.setTimeout(600_000);
+      // Endpoint host indexing installs Fleet. One host seed waits up to 4 minutes
+      // per metadata index, after the other worker's metadata-transform lock.
+      spaceTest.setTimeout(1_200_000);
       // Serverless forces xpack.spaces.allowSolutionVisibility off, so the
       // solution property cannot be set. A security project is already that view.
       if (!config.serverless) {
@@ -58,22 +60,25 @@ spaceTest.describe(
       await seeded?.cleanup();
     });
 
-    spaceTest('shows the isolate action on the alert response details', async ({ pageObjects }) => {
-      // openForRule waits up to 60s for the alerts grid, and the suite timeout is also 60s.
-      spaceTest.setTimeout(180_000);
-      const { ruleName } = requireSeededAlert(seeded);
-      const { documentFlyout, responseTool } = pageObjects;
+    spaceTest(
+      'shows the isolate action on the alert response details',
+      async ({ page, pageObjects }) => {
+        // Filtering the alerts page and collapsing charts can take longer than the default 60s.
+        spaceTest.setTimeout(180_000);
+        const { ruleName } = requireSeededAlert(seeded);
+        const { responseTool } = pageObjects;
 
-      await spaceTest.step('open the seeded alert', async () => {
-        await documentFlyout.openForRule(ruleName);
-      });
+        await spaceTest.step('open the seeded alert', async () => {
+          await openAlertFlyoutForRule(page, pageObjects, ruleName);
+        });
 
-      await spaceTest.step('open the response details', async () => {
-        await responseTool.openResponseDetails();
-      });
+        await spaceTest.step('open the response details', async () => {
+          await responseTool.openResponseDetails();
+        });
 
-      await expect(responseTool.responseDetails).toContainText('executed isolate command');
-      await expect(responseTool.responseDetails).toContainText('isolate completed successfully');
-    });
+        await expect(responseTool.responseDetails).toContainText('executed isolate command');
+        await expect(responseTool.responseDetails).toContainText('isolate completed successfully');
+      }
+    );
   }
 );

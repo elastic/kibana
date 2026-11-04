@@ -76,6 +76,9 @@ const applyDefaultsToPolicyIfNeeded = (policyItem: PolicyData): void => {
   if (settings.mac.popup.ransomware.message === '') {
     settings.mac.popup.ransomware.message = DefaultPolicyNotificationMessage;
   }
+  if (settings.linux.popup.ransomware?.message === '') {
+    settings.linux.popup.ransomware.message = DefaultPolicyNotificationMessage;
+  }
   if (settings.windows.popup.memory_protection.message === '') {
     settings.windows.popup.memory_protection.message = DefaultPolicyRuleNotificationMessage;
   }

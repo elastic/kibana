@@ -32,7 +32,6 @@ export function convertToRawColorMappings(
       if (isValidColorMappingAssignment(oldAssignment)) return oldAssignment;
       return {
         color: oldAssignment.color as ColorMapping.Config['specialAssignments'][number]['color'],
-        touched: oldAssignment.touched,
         rules: [oldAssignment.rule],
       };
     }),
@@ -45,7 +44,6 @@ function convertColorMappingAssignment(
 ): ColorMapping.Assignment {
   return {
     color: oldAssignment.color as ColorMapping.Assignment['color'],
-    touched: oldAssignment.touched,
     rules: convertColorMappingRule(oldAssignment.rule, columnMeta),
   };
 }

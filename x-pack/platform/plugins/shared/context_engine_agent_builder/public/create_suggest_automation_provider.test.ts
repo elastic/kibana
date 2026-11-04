@@ -22,6 +22,7 @@ const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
   description: 'Support tickets',
   managed: false,
+  memory_enabled: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [{ type: 'workflow', value: 'wf-existing' }],
   sources: [{ type: 'esql', value: 'FROM tickets' }],

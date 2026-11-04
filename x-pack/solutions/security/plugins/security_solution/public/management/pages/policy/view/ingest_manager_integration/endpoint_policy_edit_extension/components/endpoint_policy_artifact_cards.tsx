@@ -31,6 +31,7 @@ import {
   getEventFiltersListPath,
   getHostIsolationExceptionsListPath,
   getPolicyBlocklistsPath,
+  getPolicyCustomYaraSignaturesPath,
   getPolicyEventFiltersPath,
   getPolicyHostIsolationExceptionsPath,
   getPolicyTrustedAppsPath,
@@ -240,13 +241,16 @@ const CustomYaraSignaturesPolicyCard = memo<PolicyArtifactCardProps>(({ policyId
     () => CustomYaraSignaturesApiClient.getInstance(http),
     [http]
   );
+  const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
 
-  // No policy-scoped YARA page exists yet; always link to the filtered global list.
-  // This should point at the policy tab once that page exists.
-  const getArtifactPathHandler: FleetIntegrationArtifactCardProps['getArtifactsPath'] = useCallback(
-    () => getCustomYaraSignaturesListPath({ includedPolicies: `${policyId},global` }),
-    [policyId]
-  );
+  const getArtifactPathHandler: FleetIntegrationArtifactCardProps['getArtifactsPath'] =
+    useCallback(() => {
+      if (canReadPolicyManagement) {
+        return getPolicyCustomYaraSignaturesPath(policyId);
+      }
+
+      return getCustomYaraSignaturesListPath({ includedPolicies: `${policyId},global` });
+    }, [canReadPolicyManagement, policyId]);
 
   return (
     <FleetIntegrationArtifactsCard

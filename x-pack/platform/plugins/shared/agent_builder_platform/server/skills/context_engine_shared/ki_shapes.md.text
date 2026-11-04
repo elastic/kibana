@@ -30,7 +30,7 @@ Systemic kinds, one per strategy, produced by an automation over a corpus:
 | `document` | document |
 | `event` | significant document in a stream |
 | `fact` | discrete claim inside a document |
-| `entity` | recurring unit (customer, product, host, case) enriched from one or more indices |
+| `entity` | recurring unit (customer, product, host, service) enriched from one or more indices |
 | `detection` | named runnable condition |
 | `feature` | inventory entry with a subtype and a stable slug |
 

@@ -288,14 +288,14 @@ describe('deletePackagePolicies', () => {
     });
   });
 
-  it('bumps each batch before deleting the next so an interrupted run cannot strand it', async () => {
+  it('bumps each agent policy once, after every batch is deleted', async () => {
     const order: string[] = [];
     const deleteMock = jest.fn().mockImplementation((_so, _es, batch: string[]) => {
       order.push(`delete:${batch.length}`);
-      return Promise.resolve(batch.map((id) => deleted(id, ['agent-a'])));
+      return Promise.resolve(batch.map((id) => deleted(id, ['agent-a', 'agent-b'])));
     });
-    const bumpRevisionMock = jest.fn().mockImplementation(async () => {
-      order.push('bump');
+    const bumpRevisionMock = jest.fn().mockImplementation(async (_so, _es, policyId: string) => {
+      order.push(`bump:${policyId}`);
     });
     const { server, soClient, esClient } = makeServer({ deleteMock, bumpRevisionMock });
     const ids = Array.from(
@@ -307,10 +307,30 @@ describe('deletePackagePolicies', () => {
 
     expect(order).toEqual([
       `delete:${DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE}`,
-      'bump',
       'delete:50',
-      'bump',
+      'bump:agent-a',
+      'bump:agent-b',
     ]);
+  });
+
+  it('still bumps agent policies of earlier batches when a later batch fails', async () => {
+    const deleteMock = jest
+      .fn()
+      .mockImplementationOnce((_so, _es, batch: string[]) =>
+        Promise.resolve(batch.map((id) => deleted(id, ['agent-a'])))
+      )
+      .mockRejectedValueOnce(new Error('fleet unavailable'));
+    const { server, soClient, esClient, bumpRevisionMock } = makeServer({ deleteMock });
+    const ids = Array.from(
+      { length: DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE + 50 },
+      (_, i) => `p-${i}`
+    );
+
+    await expect(deletePackagePolicies(ids, soClient, esClient, server)).rejects.toThrow(
+      'fleet unavailable'
+    );
+
+    expect(bumpRevisionMock.mock.calls.map((call) => call[2])).toEqual(['agent-a']);
   });
 
   it('bumps only agent policies whose package policies were actually deleted', async () => {

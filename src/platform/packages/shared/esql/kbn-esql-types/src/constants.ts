@@ -17,6 +17,16 @@ export const SOURCE_INFO_ROUTE = '/internal/esql/source_info';
 export const VIEWS_ROUTE = '/internal/esql/views';
 export const VIEWS_BULK_DELETE_ROUTE = `${VIEWS_ROUTE}/_bulk_delete`;
 export const DATASETS_ROUTE = '/internal/esql/datasets';
+
+/** Id of the Elasticsearch feature (and UI capabilities key) registered by the ES|QL Views plugin. */
+export const ESQL_VIEWS_FEATURE_ID = 'esqlViews';
+/** UI capabilities exposed under {@link ESQL_VIEWS_FEATURE_ID}, each backed by ES|QL view index privileges. */
+export const ESQL_VIEWS_CAPABILITIES = {
+  read: 'read',
+  create: 'create',
+  edit: 'edit',
+  delete: 'delete',
+} as const;
 export const NL_TO_ESQL_ROUTE = '/internal/esql/nl_to_esql';
 export const SUGGEST_FIX_ROUTE = '/internal/esql/suggest_fix';
 export const FIX_WITH_AI_COMMAND_ID = 'esql.fixWithAI';

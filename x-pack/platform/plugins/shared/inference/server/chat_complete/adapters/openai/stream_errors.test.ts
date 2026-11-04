@@ -46,6 +46,26 @@ describe('convertStreamError', () => {
     });
   });
 
+  it('keeps the HTTP status when the line carries one', () => {
+    const line: ElasticInferenceErrorLine = {
+      error: {
+        type: 'status_exception',
+        reason: 'not found',
+      },
+      status: 404,
+    };
+    const error = convertStreamError(line);
+
+    expect(error.toJSON()).toEqual({
+      type: 'error',
+      error: {
+        code: 'providerError',
+        message: 'status_exception - not found',
+        meta: { status: 404 },
+      },
+    });
+  });
+
   it('handles unknown formats', () => {
     const line: UnknownErrorLine = {
       error: {

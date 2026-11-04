@@ -103,7 +103,7 @@ export const EpisodeActionPolicyHistoryTab = ({ episodeId, episodeStart }: Props
             tableCaption={i18n.translate(
               'xpack.alertingV2.episodeDetails.actionPolicyHistory.tableCaption',
               {
-                defaultMessage: 'Action policy execution history for this episode',
+                defaultMessage: 'Action policy execution history for this alert',
               }
             )}
             items={items}

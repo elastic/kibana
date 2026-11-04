@@ -11,6 +11,8 @@ import {
   ALERTZERO_ALERT_TRIAGE_WORKFLOW_IDS,
   ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
   ALERTZERO_FORENSICS_WORKFLOW_IDS,
+  ALERTZERO_HUNT_CHILD_WORKFLOW_IDS,
+  ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW_IDS,
   ALERTZERO_PROPOSAL_WORKFLOW_IDS,
   ALERTZERO_RULE_WORKFLOW_IDS,
 } from '@kbn/workflows/managed';
@@ -18,7 +20,6 @@ import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { ALERTZERO_MANAGED_WORKFLOW_OWNER_ID } from '../../common/constants';
-import { applyMissingInstalledWorkerSettings } from './apply_missing_installed_worker_settings';
 
 export const initializeManagedWorkflows = async ({
   workflowsExtensions,
@@ -42,7 +43,9 @@ export const initializeManagedWorkflows = async ({
     ...ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
     ...ALERTZERO_FORENSICS_WORKFLOW_IDS,
     ...ALERTZERO_ALERT_TRIAGE_WORKFLOW_IDS,
+    ...ALERTZERO_HUNT_CHILD_WORKFLOW_IDS,
     ...ALERTZERO_PROPOSAL_WORKFLOW_IDS,
+    ...ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW_IDS,
   ] as const;
 
   const globalWorkflowInstalls = await Promise.allSettled(
@@ -59,10 +62,6 @@ export const initializeManagedWorkflows = async ({
       );
     }
   }
-
-  // Dynamic auto upgrade re-renders from stored template values. Fill missing defaults first so
-  // that upgrade persists them instead of keeping the old document.
-  await applyMissingInstalledWorkerSettings(client, logger);
 
   if (canReconcile) {
     try {

@@ -84,13 +84,22 @@ export function useFetchMetricsData({
   // Read inside the error effect without keying it on the query, so only a
   // freshly landed error triggers a report.
   const metricsInfoQueryRef = useLatest(metricsInfoQuery);
+  // Snapshot at execution time so consumers can key on the inputs that produced the landed items.
+  const fetchParamsRef = useLatest(fetchParams);
 
   const shouldFetch = isComponentVisible && !!metricsInfoQuery;
 
   const [{ value, error, loading }, executeFetch] = useAsyncFn(
     async (
       signal: AbortSignal
-    ): Promise<(ParsedMetrics & { activeDimensions: Dimension[] }) | null> => {
+    ): Promise<
+      | (ParsedMetrics & {
+          activeDimensions: Dimension[];
+          loadedFetchParams: ChartSectionProps['fetchParams'];
+        })
+      | null
+    > => {
+      const loadedFetchParams = fetchParamsRef.current;
       const documents = await trackRequest(
         'Grid of metrics',
         'This request queries Elasticsearch to fetch metrics info for the grid.',
@@ -134,6 +143,7 @@ export function useFetchMetricsData({
         metricItems: parsed.metricItems,
         allDimensions: [...parsed.allDimensions].sort((a, b) => a.name.localeCompare(b.name)),
         activeDimensions: appliedDimensions ?? [],
+        loadedFetchParams,
       };
     },
     [
@@ -211,5 +221,6 @@ export function useFetchMetricsData({
     metricItems: value?.metricItems ?? [],
     allDimensions: value?.allDimensions ?? [],
     activeDimensions: value?.activeDimensions ?? [],
+    loadedFetchParams: value?.loadedFetchParams,
   };
 }

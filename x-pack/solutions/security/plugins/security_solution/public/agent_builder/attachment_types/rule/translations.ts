@@ -76,11 +76,6 @@ export const TAGS_HEADING = i18n.translate(
   { defaultMessage: 'Tags' }
 );
 
-export const MITRE_HEADING = i18n.translate(
-  'xpack.securitySolution.agentBuilder.ruleAttachment.mitreHeading',
-  { defaultMessage: 'MITRE ATT&CK' }
-);
-
 export const INTERVAL_LABEL = i18n.translate(
   'xpack.securitySolution.agentBuilder.ruleAttachment.intervalLabel',
   { defaultMessage: 'Interval:' }

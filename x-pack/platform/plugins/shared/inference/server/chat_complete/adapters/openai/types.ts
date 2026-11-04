@@ -17,6 +17,17 @@ export type OpenAIRequest = Omit<OpenAI.ChatCompletionCreateParams, 'model'> & {
   reasoning?: ChatCompletionReasoning;
 };
 
+/** Chunk delta with `reasoning`, which the `openai` SDK types omit. */
+export type OpenAIChatCompletionChunkDelta =
+  OpenAI.ChatCompletionChunk['choices'][number]['delta'] & {
+    reasoning?: string | null;
+  };
+
+/** Completion message with `reasoning`, which the `openai` SDK types omit. */
+export type OpenAIChatCompletionMessage = OpenAI.ChatCompletionMessage & {
+  reasoning?: string | null;
+};
+
 // duplicated from x-pack/platform/plugins/shared/stack_connectors/common/openai/constants.ts
 // because depending on stack_connectors from the inference plugin creates a cyclic dependency...
 export enum OpenAiProviderType {

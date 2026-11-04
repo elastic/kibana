@@ -87,7 +87,7 @@ export const SourceDetailsFlyout = ({ sources, source, onClose }: SourceDetailsF
                 defaultMessage: 'No destinations connected',
               }),
               description: i18n.translate('xpack.streams.sources.noDestinationsDescription', {
-                defaultMessage: 'Connect this source from the canvas to route data.',
+                defaultMessage: 'Connect this source from the map to route data.',
               }),
             },
           ],

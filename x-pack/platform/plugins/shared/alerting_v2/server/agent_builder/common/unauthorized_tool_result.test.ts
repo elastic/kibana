@@ -13,7 +13,7 @@ describe('createUnauthorizedToolResult', () => {
   it('returns a ToolResultType.error with missingPrivileges metadata', () => {
     expect(
       createUnauthorizedToolResult({
-        action: 'fetch rule for episode',
+        action: 'fetch rule for alert',
         missingPrivileges: ['Rules: Read'],
       })
     ).toEqual({
@@ -22,7 +22,7 @@ describe('createUnauthorizedToolResult', () => {
           type: ToolResultType.error,
           data: {
             message:
-              'Unauthorized to fetch rule for episode. Missing Kibana privilege: Rules: Read. Ask an administrator to grant this privilege.',
+              'Unauthorized to fetch rule for alert. Missing Kibana privilege: Rules: Read. Ask an administrator to grant this privilege.',
             metadata: { missingPrivileges: ['Rules: Read'] },
           },
         },
@@ -74,7 +74,7 @@ describe('ensureToolPrivilege', () => {
         privilegeChecker,
         feature: 'alerts',
         level: 'read',
-        action: 'refresh episode',
+        action: 'refresh alert',
       })
     ).resolves.toBeUndefined();
 
@@ -89,7 +89,7 @@ describe('ensureToolPrivilege', () => {
         privilegeChecker,
         feature: 'rules',
         level: 'read',
-        action: 'fetch rule for episode',
+        action: 'fetch rule for alert',
       })
     ).resolves.toEqual({
       results: [
@@ -97,7 +97,7 @@ describe('ensureToolPrivilege', () => {
           type: ToolResultType.error,
           data: {
             message:
-              'Unauthorized to fetch rule for episode. Missing Kibana privilege: Rules: Read. Ask an administrator to grant this privilege.',
+              'Unauthorized to fetch rule for alert. Missing Kibana privilege: Rules: Read. Ask an administrator to grant this privilege.',
             metadata: { missingPrivileges: ['Rules: Read'] },
           },
         },

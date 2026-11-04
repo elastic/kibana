@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AIMessage } from '@langchain/core/messages';
 import { isAIMessage, isHumanMessage, isToolMessage } from '@langchain/core/messages';
 import { ExecutionStatus } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
@@ -13,6 +14,7 @@ import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors
 import {
   EXECUTION_FAILED_NOTICE_MAX_LENGTH,
   createCycleLimitSystemMessage,
+  formatAwaitingPromptNotice,
   formatExecutionAbortedNotice,
   formatExecutionFailedNotice,
   formatHandover,
@@ -83,6 +85,15 @@ describe('formatRetryNotice', () => {
     expect(isToolMessage(result)).toBe(true);
     expect(result.content).toContain('ERROR: tool_not_found');
     expect((result as any).tool_call_id).toBe((call as any).tool_calls[0].id);
+  });
+
+  it('sanitizes the tool name of a tool-not-found error', () => {
+    const error = createAgentExecutionError('no such tool', AgentExecutionErrorCode.toolNotFound, {
+      toolName: 'ghost.tool',
+      toolArgs: {},
+    });
+    const [call] = formatRetryNotice(error) as [AIMessage];
+    expect(call.tool_calls?.[0].name).toBe('ghost_tool');
   });
 
   it('renders a validation error as a failed tool call carrying the validation message', () => {
@@ -246,5 +257,19 @@ describe('formatInterruptionNotice', () => {
     expect(notice).toContain('<cause code="c">');
     expect(notice).toContain('root');
     expect(notice).toContain('…');
+  });
+});
+
+describe('formatAwaitingPromptNotice', () => {
+  it('says the round waits on the user and lists the unanswered questions, escaped', () => {
+    const notice = formatAwaitingPromptNotice(['Which index?', 'Use <prod>?']);
+    expect(notice).toContain('<system_notice>');
+    expect(notice).toContain('the user has not answered');
+    expect(notice).toContain('<question>Which index?</question>');
+    expect(notice).toContain('Use &lt;prod&gt;?');
+  });
+
+  it('omits the questions block when nothing was asked', () => {
+    expect(formatAwaitingPromptNotice([])).not.toContain('<unanswered_questions>');
   });
 });

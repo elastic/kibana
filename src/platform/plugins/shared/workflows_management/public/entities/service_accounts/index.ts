@@ -11,5 +11,6 @@ export { ServiceAccountName } from './ui/service_account_name';
 export { useServiceAccountDirectory } from './model/use_service_account_directory';
 export type {
   ServiceAccountDirectory,
+  ServiceAccountDirectoryError,
   WorkflowServiceAccount,
 } from './model/service_account_directory';

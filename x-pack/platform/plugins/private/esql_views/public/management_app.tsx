@@ -6,19 +6,21 @@
  */
 
 import type { ComponentType, FunctionComponent } from 'react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import type { IToasts } from '@kbn/core/public';
 import type { ESQLEditorProps } from '@kbn/esql-editor';
 import type { EsqlView } from '@kbn/esql-types';
+import { getViewEsqlQuery } from '@kbn/esql-utils';
 import type { EsqlViewsClient } from '@kbn/esql-utils';
 import { PLUGIN_NAME } from '../common';
 import { DeleteViewsModal } from './delete_views_modal';
 import { EsqlViewForm } from './esql_view_form';
 import { EsqlViewsTable } from './esql_views_table';
-import { getViewEsqlQuery } from './get_view_esql_query';
+import type { EsqlViewsTelemetryClient } from './telemetry';
 import { translations } from './translations';
+import type { EsqlViewPreviewDependencies } from './use_esql_view_preview';
 import type { DiscoverEsqlLocator } from './types';
 import { useDeleteEsqlViews } from './use_delete_esql_views';
 import { useEsqlViews } from './use_esql_views';
@@ -26,11 +28,14 @@ import { useEsqlViews } from './use_esql_views';
 interface ManagementAppProps {
   canCreate: boolean;
   canEdit: boolean;
+  canDelete: boolean;
   client: EsqlViewsClient;
   isDiscoverAvailable: boolean;
   discoverLocator?: DiscoverEsqlLocator;
   documentationUrl: string;
   EsqlEditor: ComponentType<Omit<ESQLEditorProps, 'ref'>>;
+  previewDependencies: EsqlViewPreviewDependencies;
+  telemetryClient?: EsqlViewsTelemetryClient;
   toasts: IToasts;
 }
 
@@ -39,16 +44,23 @@ type FormState = { type: 'create' } | { type: 'edit'; view: EsqlView };
 export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
   canCreate,
   canEdit,
+  canDelete,
   client,
   isDiscoverAvailable,
   discoverLocator,
   documentationUrl,
   EsqlEditor,
+  previewDependencies,
+  telemetryClient,
   toasts,
 }) => {
   const { error, isLoading, reload, status, views } = useEsqlViews(client);
   const [formState, setFormState] = useState<FormState>();
   const [selectedViews, setSelectedViews] = useState<EsqlView[]>([]);
+
+  useEffect(() => {
+    telemetryClient?.trackViewsPageVisited();
+  }, [telemetryClient]);
 
   const onDeleted = useCallback(() => {
     setSelectedViews([]);
@@ -56,7 +68,9 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
   }, [reload]);
 
   const { viewsPendingDelete, isDeleting, requestDelete, cancelDelete, confirmDelete } =
-    useDeleteEsqlViews({ client, toasts, onDeleted });
+    useDeleteEsqlViews({ client, telemetryClient, toasts, onDeleted });
+
+  const openEditForm = useCallback((view: EsqlView) => setFormState({ type: 'edit', view }), []);
 
   const openInDiscover = useCallback(
     (view: EsqlView) => {
@@ -118,9 +132,9 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
         isDiscoverAvailable={isDiscoverAvailable && discoverLocator !== undefined}
         selectedViews={selectedViews}
         onSelectionChange={setSelectedViews}
-        onEdit={canEdit ? (view) => setFormState({ type: 'edit', view }) : undefined}
+        onEdit={canEdit ? openEditForm : undefined}
         onReload={reload}
-        onDelete={requestDelete}
+        onDelete={canDelete ? requestDelete : undefined}
         onOpenInDiscover={openInDiscover}
       />
     );
@@ -154,6 +168,8 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
         <EsqlViewForm
           client={client}
           EsqlEditor={EsqlEditor}
+          previewDependencies={previewDependencies}
+          telemetryClient={telemetryClient}
           onClose={() => setFormState(undefined)}
           onSave={async () => {
             await reload();

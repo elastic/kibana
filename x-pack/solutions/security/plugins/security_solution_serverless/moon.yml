@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/solutions/security/plugins/security_solution_serverless
 dependsOn:
   - '@kbn/core'
+  - '@kbn/app-header'
   - '@kbn/config-schema'
   - '@kbn/management-plugin'
   - '@kbn/security-plugin'
@@ -54,7 +55,6 @@ dependsOn:
   - '@kbn/deeplinks-management'
   - '@kbn/connector-schemas'
   - '@kbn/management-settings-ids'
-  - '@kbn/alerting-v2-utils'
   - '@kbn/ai-assistant-common'
   - '@kbn/deeplinks-workflows'
   - '@kbn/workflows'
@@ -62,11 +62,14 @@ dependsOn:
   - '@kbn/workflows-management-plugin'
   - '@kbn/navigation-plugin'
   - '@kbn/scout-security'
+  - '@kbn/deeplinks-security'
 tags:
   - plugin
   - prod
   - group-security
   - private
+  - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - index.ts

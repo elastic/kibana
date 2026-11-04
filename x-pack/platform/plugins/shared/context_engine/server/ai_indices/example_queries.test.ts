@@ -6,13 +6,17 @@
  */
 
 import { Parser } from '@elastic/esql';
-import { buildExampleQueries } from './example_queries';
+import { buildExampleQueries, EXCLUDE_MEMORY_KI_TYPES_FILTER } from './example_queries';
 
 const LIFECYCLE =
   '| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"\n| WHERE expires_at IS NULL OR expires_at > NOW()';
 
 describe('buildExampleQueries', () => {
   const queries = buildExampleQueries({ type: 'index', value: 'ai-index-idx-support*' });
+  const queriesExcludingMemory = buildExampleQueries(
+    { type: 'index', value: 'ai-index-idx-support*' },
+    { excludeMemory: true }
+  );
 
   it('returns the three fixed shapes, targeting the given index', () => {
     expect(queries.map(({ title }) => title)).toEqual([
@@ -49,8 +53,17 @@ describe('buildExampleQueries', () => {
   });
 
   it('parses as valid ES|QL', () => {
-    for (const { esql } of queries) {
+    for (const { esql } of [...queries, ...queriesExcludingMemory]) {
       expect(Parser.parse(esql).errors).toEqual([]);
+    }
+  });
+
+  it('does not expose memory types unless exclusion is requested', () => {
+    for (const { esql } of queries) {
+      expect(esql).not.toContain('memory.session');
+    }
+    for (const { esql } of queriesExcludingMemory) {
+      expect(esql).toContain(EXCLUDE_MEMORY_KI_TYPES_FILTER);
     }
   });
 

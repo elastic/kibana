@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { cloneDeep, omit } from 'lodash';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
@@ -27,18 +28,27 @@ describe('filter normalization when loading a Discover session', () => {
     {
       path: 'legacy',
       useHttpApi: false,
+      storedFilterDefaults: { disabled: false, negate: false },
       expectedApiCalls: [],
       expectedLegacyCalls: [['session-id']],
     },
     {
       path: 'HTTP',
       useHttpApi: true,
+      storedFilterDefaults: { disabled: false, negate: false },
       expectedApiCalls: [['session-id']],
       expectedLegacyCalls: [],
     },
+    {
+      path: 'legacy with omitted filter defaults',
+      useHttpApi: false,
+      storedFilterDefaults: {},
+      expectedApiCalls: [],
+      expectedLegacyCalls: [['session-id']],
+    },
   ])(
     'does not mark a $path session as unsaved after initializing its filters',
-    async ({ useHttpApi, expectedApiCalls, expectedLegacyCalls }) => {
+    async ({ useHttpApi, storedFilterDefaults, expectedApiCalls, expectedLegacyCalls }) => {
       const services = createDiscoverServicesMock();
       const filterManager = new FilterManager(services.uiSettings);
       services.filterManager = filterManager;
@@ -63,6 +73,12 @@ describe('filter normalization when loading a Discover session', () => {
           }),
         ],
       });
+      // API-created documents can reach CM without FilterManager's boolean defaults.
+      legacySession.tabs[0].serializedSearchSource.filter = originalFilters.map((filter) => ({
+        ...filter,
+        meta: { ...omit(filter.meta, 'disabled', 'negate'), ...storedFilterDefaults },
+      }));
+      const beforeLoad = cloneDeep(legacySession);
       filterManager.setAppFilters([]);
 
       const apiResponse: DiscoverSessionClientGetResult = {
@@ -123,20 +139,21 @@ describe('filter normalization when loading a Discover session', () => {
         .unwrap();
       await toolkit.initializeSingleTab({ tabId: 'tab-id' });
 
-      expect(apiClient.get.mock.calls).toEqual(expectedApiCalls);
-      expect(legacyGet.mock.calls).toEqual(expectedLegacyCalls);
+      expect(apiClient.get.mock.calls).toStrictEqual(expectedApiCalls);
+      expect(legacyGet.mock.calls).toStrictEqual(expectedLegacyCalls);
 
       const filters = toolkit.getCurrentTab().appState.filters;
       expect(filters).toHaveLength(1);
-      expect(filters?.[0].query).toEqual(originalFilters[0].query);
+      expect(filters?.[0].query).toStrictEqual(originalFilters[0].query);
       expect(filters?.[0].meta.negate).toBe(false);
       expect(filters?.[0].meta.disabled).toBe(false);
-      expect(
-        selectHasUnsavedChanges(toolkit.internalState.getState(), {
-          services,
-          runtimeStateManager: toolkit.runtimeStateManager,
-        })
-      ).toEqual({ hasUnsavedChanges: false, unsavedTabIds: [] });
+      expect(legacySession).toStrictEqual(beforeLoad);
+      const unsavedChanges = selectHasUnsavedChanges(toolkit.internalState.getState(), {
+        services,
+        runtimeStateManager: toolkit.runtimeStateManager,
+      });
+      toolkit.internalState.dispatch(internalStateActions.disconnectTab({ tabId: 'tab-id' }));
+      expect(unsavedChanges).toStrictEqual({ hasUnsavedChanges: false, unsavedTabIds: [] });
     }
   );
 });

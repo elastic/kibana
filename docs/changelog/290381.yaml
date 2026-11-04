@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/290381
-issues:
-- https://github.com/elastic/kibana/issues/290384
-type: bug-fix
-products:
-- product: cloud-serverless
-- product: kibana
-title: Fix streaming Elasticsearch transport requests failing due to compression

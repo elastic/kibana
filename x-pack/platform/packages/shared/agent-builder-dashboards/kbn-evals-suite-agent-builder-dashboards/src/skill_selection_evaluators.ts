@@ -6,7 +6,7 @@
  */
 
 import type { EvaluationResult, Evaluator } from '@kbn/evals';
-import type { DashboardAgentTaskOutput, DashboardDatasetExample } from './evaluate_dataset';
+import type { DashboardAgentTaskOutput, DashboardDatasetExample } from './types';
 
 const DASHBOARD_GENERATE_TOOL_ID = 'platform.dashboard.generate_dashboard';
 
@@ -22,7 +22,7 @@ export const getSkillReadPaths = (output: DashboardAgentTaskOutput): string[] =>
       continue;
     }
 
-    if (step.tool_id === 'filestore.read') {
+    if (step.tool_id === 'read_file' || step.tool_id === 'filestore.read') {
       const params = step.params as { path?: string } | undefined;
       if (params?.path) {
         paths.push(params.path);
@@ -75,24 +75,30 @@ const didLoadVisualizationSkill = (output: DashboardAgentTaskOutput): boolean =>
 const didCallDashboardTool = (output: DashboardAgentTaskOutput): boolean =>
   getToolIds(output).includes(DASHBOARD_GENERATE_TOOL_ID);
 
-export const dashboardSkillActivatedEvaluator: Evaluator<
+export const dashboardSkillWithoutVisualizationEvaluator: Evaluator<
   DashboardDatasetExample,
   DashboardAgentTaskOutput
 > = {
-  name: 'Dashboard skill activated',
+  name: 'Dashboard skill activated without visualization',
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async ({ output }): Promise<EvaluationResult> => {
     const skillReadPaths = getSkillReadPaths(output);
     const dashboardSkillLoaded = didLoadDashboardSkill(output);
+    const visualizationSkillLoaded = didLoadVisualizationSkill(output);
+    const passed = dashboardSkillLoaded && !visualizationSkillLoaded;
 
     return {
-      score: dashboardSkillLoaded ? 1 : 0,
-      label: dashboardSkillLoaded ? 'PASS' : 'FAIL',
-      explanation: dashboardSkillLoaded
-        ? `Dashboard skill activation detected. Paths: ${skillReadPaths.join(', ') || 'n/a'}`
-        : `Dashboard skill activation not detected. Paths: ${skillReadPaths.join(', ') || 'none'}`,
-      metadata: { skillReadPaths, dashboardSkillLoaded },
+      score: passed ? 1 : 0,
+      label: passed ? 'PASS' : 'FAIL',
+      explanation: passed
+        ? `Dashboard skill loaded without visualization skill. Paths: ${
+            skillReadPaths.join(', ') || 'n/a'
+          }`
+        : `Expected dashboard skill without visualization skill. dashboardSkillLoaded=${dashboardSkillLoaded}, visualizationSkillLoaded=${visualizationSkillLoaded}. Paths: ${
+            skillReadPaths.join(', ') || 'none'
+          }`,
+      metadata: { skillReadPaths, dashboardSkillLoaded, visualizationSkillLoaded },
     };
   },
 };
@@ -151,8 +157,8 @@ export const dashboardSkillNotActivatedEvaluator: Evaluator<
       score: passed ? 1 : 0,
       label: passed ? 'PASS' : 'FAIL',
       explanation: passed
-        ? `Dashboard management was not used. Paths: ${skillReadPaths.join(', ') || 'n/a'}`
-        : `Expected no dashboard management. dashboardSkillLoaded=${dashboardSkillLoaded}, dashboardToolCalled=${dashboardToolCalled}. Paths: ${
+        ? `Dashboards skill was not used. Paths: ${skillReadPaths.join(', ') || 'n/a'}`
+        : `Expected no dashboards skill. dashboardSkillLoaded=${dashboardSkillLoaded}, dashboardToolCalled=${dashboardToolCalled}. Paths: ${
             skillReadPaths.join(', ') || 'none'
           }. Tool IDs: ${toolIds.join(', ') || 'none'}`,
       metadata: {

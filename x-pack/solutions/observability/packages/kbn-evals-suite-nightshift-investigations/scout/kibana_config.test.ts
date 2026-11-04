@@ -36,7 +36,7 @@ it('resolves credentials from the environment and preserves other preconfigured 
       existingConfig,
       Path.join(
         REPO_ROOT,
-        'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_nightshift_investigations/stateful/kibana.tracing.yml'
+        'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_nightshift_investigations/kibana.tracing.yml'
       ),
       Path.join(__dirname, 'kibana.sandbox.yml'),
       Path.join(__dirname, 'kibana.telemetry.yml'),
@@ -45,10 +45,9 @@ it('resolves credentials from the environment and preserves other preconfigured 
       existing: { name: 'Existing connector' },
       'nightshift-evals-telemetry': {
         name: 'Remote Elasticsearch telemetry',
-        actionTypeId: '.webhook',
+        actionTypeId: '.http',
         config: {
           url: 'https://telemetry.example.com',
-          method: 'post',
           hasAuth: false,
           authType: null,
         },

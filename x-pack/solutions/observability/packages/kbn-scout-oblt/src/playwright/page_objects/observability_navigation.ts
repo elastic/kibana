@@ -20,6 +20,13 @@ export const OBSERVABILITY_SPA_SHELL_TIMEOUT_MS = OBSERVABILITY_PRIMARY_NAV_LOAD
 export class ObservabilityNavigation {
   public readonly sidenav: Locator;
   public readonly primaryNav: Locator;
+  /**
+   * `primaryNav`, but only while its overflow split is measured (`data-overflow-measured`). Chrome
+   * publishes a new nav item set with every item in the primary menu and only then measures which
+   * ones fit, so reading placement from `primaryNav` alone can catch an item moments before it
+   * moves into the "More" overflow.
+   */
+  public readonly measuredPrimaryNav: Locator;
   public readonly footerNav: Locator;
   public readonly morePopover: Locator;
   public readonly moreMenuTrigger: Locator;
@@ -27,6 +34,9 @@ export class ObservabilityNavigation {
   constructor(private readonly page: ScoutPage) {
     this.sidenav = this.page.testSubj.locator('kbnChromeLayoutNavigation');
     this.primaryNav = this.page.testSubj.locator('kbnChromeNav-primaryNavigation');
+    this.measuredPrimaryNav = this.primaryNav.and(
+      this.page.locator('[data-overflow-measured="true"]')
+    );
     this.footerNav = this.page.testSubj.locator('kbnChromeNav-footer');
     this.morePopover = this.page.testSubj.locator('side-nav-popover-More');
     this.moreMenuTrigger = this.page.testSubj.locator('kbnChromeNav-moreMenuTrigger');
@@ -154,17 +164,24 @@ export class ObservabilityNavigation {
    * Wait for a placement signal before choosing a branch: chrome can paint the
    * More trigger (for other overflow items) before this item lands in primary,
    * or paint primary late after `waitForLoad()` only saw the nav container.
+   *
+   * The primary branch reads through `measuredPrimaryNav`, so an item that is
+   * only in the primary menu because the overflow split has not been measured
+   * yet does not win the branch.
    */
   async revealBodyNavItemByDeepLinkId(deepLinkId: string): Promise<Locator> {
     return this.revealBodyNavItem(
-      this.navItemInPrimaryByDeepLinkId(deepLinkId),
+      this.measuredPrimaryNav.locator(`[data-test-subj~="nav-item-deepLinkId-${deepLinkId}"]`),
       this.navItemInMoreByDeepLinkId(deepLinkId)
     );
   }
 
   /** Same overflow handling as `revealBodyNavItemByDeepLinkId`, keyed by node `id`. */
   async revealBodyNavItemById(id: string): Promise<Locator> {
-    return this.revealBodyNavItem(this.navItemInPrimaryById(id), this.navItemInMoreById(id));
+    return this.revealBodyNavItem(
+      this.measuredPrimaryNav.locator(`[data-test-subj~="nav-item-id-${id}"]`),
+      this.navItemInMoreById(id)
+    );
   }
 
   private async revealBodyNavItem(primaryItem: Locator, moreItem: Locator): Promise<Locator> {

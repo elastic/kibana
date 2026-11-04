@@ -9,6 +9,7 @@ import type { EuiIconProps } from '@elastic/eui';
 import { isColorDark, EuiIcon } from '@elastic/eui';
 import chroma from 'chroma-js';
 import React from 'react';
+import { resolveVisIcon } from '@kbn/chart-icons';
 import type { GenericIcon } from '../helpers/style_choices';
 import { MAKI_ICONS } from './maki_icons/assets';
 
@@ -62,7 +63,7 @@ export const IconRenderer = ({
   }
   return (
     <EuiIcon
-      type={icon.id}
+      type={resolveVisIcon(icon.id)}
       color={backgroundColor}
       className={className}
       onClick={onClick}

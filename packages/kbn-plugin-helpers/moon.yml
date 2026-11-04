@@ -25,12 +25,14 @@ dependsOn:
   - '@kbn/repo-info'
   - '@kbn/repo-packages'
   - '@kbn/utils'
+  - '@kbn/std'
 tags:
   - shared-server
   - package
   - dev
   - group-platform
   - private
+  - jest-integration-tests
 fileGroups:
   src:
     - '**/*.ts'

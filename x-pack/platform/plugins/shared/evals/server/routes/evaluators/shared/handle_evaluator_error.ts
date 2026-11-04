@@ -11,6 +11,7 @@ import { InvalidJudgeConfigError } from '../../../evaluators/user_defined/valida
 import { BuiltInEvaluatorNameError } from '../../../storage/evaluators/built_in_evaluator_name_error';
 import { EvaluatorAlreadyExistsError } from '../../../storage/evaluators/evaluator_already_exists_error';
 import { EvaluatorNotFoundError } from '../../../storage/evaluators/evaluator_not_found_error';
+import { EvaluatorVersionConflictError } from '../../../storage/evaluators/evaluator_version_conflict_error';
 import { InvalidEvaluatorNameError } from '../../../storage/evaluators/invalid_evaluator_name_error';
 
 /**
@@ -46,7 +47,11 @@ export const handleEvaluatorError = ({
     return response.notFound({ body: { message: error.message } });
   }
 
-  if (error instanceof EvaluatorAlreadyExistsError || error instanceof BuiltInEvaluatorNameError) {
+  if (
+    error instanceof EvaluatorAlreadyExistsError ||
+    error instanceof BuiltInEvaluatorNameError ||
+    error instanceof EvaluatorVersionConflictError
+  ) {
     return response.customError({ statusCode: 409, body: { message: error.message } });
   }
 

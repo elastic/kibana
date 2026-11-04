@@ -21,6 +21,7 @@ let services: ReturnType<typeof coreMock.createStart>;
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
   managed: false,
+  memory_enabled: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [],
@@ -46,9 +47,9 @@ const renderWithProviders = (
   );
 };
 
-const EMPTY_FALLBACK = /No description yet/;
+const EMPTY_PROMPT = /No description configured/;
 const ADD_ONE_HINT =
-  /Add a description to shape suggested automations and help agents decide when this AI index is relevant/;
+  /Shape suggested automations and help agents decide when this AI index is relevant/;
 
 describe('DescriptionPanel', () => {
   it('renders the provided description when not loading', () => {
@@ -62,7 +63,7 @@ describe('DescriptionPanel', () => {
     );
 
     expect(screen.getByText('My custom description')).toBeInTheDocument();
-    expect(screen.queryByText(EMPTY_FALLBACK)).not.toBeInTheDocument();
+    expect(screen.queryByText(EMPTY_PROMPT)).not.toBeInTheDocument();
   });
 
   it('renders the empty fallback when no description is provided', () => {
@@ -71,7 +72,7 @@ describe('DescriptionPanel', () => {
     );
 
     expect(screen.getByTestId('contextAiIndexDescriptionEmpty')).toBeInTheDocument();
-    expect(screen.getByText(EMPTY_FALLBACK)).toBeInTheDocument();
+    expect(screen.getByText(EMPTY_PROMPT)).toBeInTheDocument();
     expect(screen.getByText(ADD_ONE_HINT)).toBeInTheDocument();
     expect(screen.getByTestId('contextAddDescriptionButton')).toBeInTheDocument();
     expect(screen.queryByTestId('contextEditDescriptionButton')).not.toBeInTheDocument();
@@ -82,8 +83,9 @@ describe('DescriptionPanel', () => {
       <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged />
     );
 
-    expect(screen.getByText(EMPTY_FALLBACK)).toBeInTheDocument();
+    expect(screen.getByText(/No description configured/)).toBeInTheDocument();
     expect(screen.queryByText(ADD_ONE_HINT)).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddDescriptionButton')).not.toBeInTheDocument();
   });
 
   it('does not render the edit button while loading', () => {
@@ -105,7 +107,7 @@ describe('DescriptionPanel', () => {
     );
 
     expect(screen.queryByText('My custom description')).not.toBeInTheDocument();
-    expect(screen.queryByText(EMPTY_FALLBACK)).not.toBeInTheDocument();
+    expect(screen.queryByText(EMPTY_PROMPT)).not.toBeInTheDocument();
   });
 
   it('shows the editor when the edit button is clicked', () => {
@@ -157,6 +159,7 @@ describe('DescriptionPanel', () => {
         '/api/context_engine/ai_index/my-ai-index',
         expect.objectContaining({
           body: JSON.stringify({
+            memory_enabled: false,
             dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
             automations: [],
             sources: [],

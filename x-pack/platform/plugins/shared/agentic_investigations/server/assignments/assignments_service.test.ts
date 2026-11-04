@@ -116,7 +116,7 @@ describe('AssignmentsService.assign', () => {
     );
   });
 
-  it('private: add + remove → calls addAccessControlEntries([added]), patchMetadata, removeAccessControlEntries([removed]) in order', async () => {
+  it('private: add + remove → calls addAccessControlEntries([added]), removeAccessControlEntries([removed]), patchMetadata in order', async () => {
     const callOrder: string[] = [];
     const client = makeClient({
       get: jest
@@ -162,9 +162,103 @@ describe('AssignmentsService.assign', () => {
     );
     expect(callOrder).toEqual([
       'addAccessControlEntries',
-      'patchMetadata',
       'removeAccessControlEntries',
+      'patchMetadata',
     ]);
+  });
+
+  it('private: when removeAccessControlEntries fails, metadata is not patched so a retry re-diffs the same removal', async () => {
+    const client = makeClient({
+      get: jest
+        .fn()
+        .mockResolvedValue(withAssignees(MOCK_CONVERSATION_PRIVATE, ['user-a', 'user-b'])),
+      removeAccessControlEntries: jest.fn().mockRejectedValue(new Error('boom')),
+    });
+    const service = makeService(client);
+
+    await expect(
+      service.assign({
+        request,
+        conversationId: 'conv-1',
+        assignees: ['user-b'],
+        expectedTemplate: 'escalation',
+      })
+    ).rejects.toThrow('boom');
+
+    expect(client.patchMetadata).not.toHaveBeenCalled();
+  });
+
+  it('private: retrying after a failed removeAccessControlEntries re-sends the same removal', async () => {
+    // metadata is never patched on the failed attempt, so the second get() still lists user-a
+    const client = makeClient({
+      get: jest
+        .fn()
+        .mockResolvedValue(withAssignees(MOCK_CONVERSATION_PRIVATE, ['user-a', 'user-b'])),
+      removeAccessControlEntries: jest
+        .fn()
+        .mockRejectedValueOnce(new Error('boom'))
+        .mockResolvedValueOnce(MOCK_CONVERSATION_PRIVATE),
+    });
+    const service = makeService(client);
+    const params = {
+      request,
+      conversationId: 'conv-1',
+      assignees: ['user-b'],
+      expectedTemplate: 'escalation',
+    };
+
+    await expect(service.assign(params)).rejects.toThrow('boom');
+    await service.assign(params);
+
+    expect(client.removeAccessControlEntries).toHaveBeenCalledTimes(2);
+    expect(client.removeAccessControlEntries).toHaveBeenNthCalledWith(
+      2,
+      'conv-1',
+      [{ type: 'user', id: 'user-a' }],
+      { access: 'converse' }
+    );
+    expect(client.patchMetadata).toHaveBeenCalledTimes(1);
+  });
+
+  it('private: when addAccessControlEntries fails, nothing else is written', async () => {
+    const client = makeClient({
+      get: jest.fn().mockResolvedValue(withAssignees(MOCK_CONVERSATION_PRIVATE, ['user-a'])),
+      addAccessControlEntries: jest.fn().mockRejectedValue(new Error('boom')),
+    });
+    const service = makeService(client);
+
+    await expect(
+      service.assign({
+        request,
+        conversationId: 'conv-1',
+        assignees: ['user-b'],
+        expectedTemplate: 'escalation',
+      })
+    ).rejects.toThrow('boom');
+
+    expect(client.removeAccessControlEntries).not.toHaveBeenCalled();
+    expect(client.patchMetadata).not.toHaveBeenCalled();
+  });
+
+  it('private: when patchMetadata fails after the removal, the error propagates', async () => {
+    const client = makeClient({
+      get: jest
+        .fn()
+        .mockResolvedValue(withAssignees(MOCK_CONVERSATION_PRIVATE, ['user-a', 'user-b'])),
+      patchMetadata: jest.fn().mockRejectedValue(new Error('patch failed')),
+    });
+    const service = makeService(client);
+
+    await expect(
+      service.assign({
+        request,
+        conversationId: 'conv-1',
+        assignees: ['user-b'],
+        expectedTemplate: 'escalation',
+      })
+    ).rejects.toThrow('patch failed');
+
+    expect(client.removeAccessControlEntries).toHaveBeenCalledTimes(1);
   });
 
   it('private, only removals: addAccessControlEntries not called, removeAccessControlEntries called', async () => {
@@ -256,27 +350,7 @@ describe('AssignmentsService.assign', () => {
     expect(client.removeAccessControlEntries).not.toHaveBeenCalled();
   });
 
-  it('returns the conversation from removeAccessControlEntries when something was removed', async () => {
-    const removedConv = { ...MOCK_CONVERSATION_PRIVATE, metadata: { assignees: ['user-b'] } };
-    const client = makeClient({
-      get: jest
-        .fn()
-        .mockResolvedValue(withAssignees(MOCK_CONVERSATION_PRIVATE, ['user-a', 'user-b'])),
-      removeAccessControlEntries: jest.fn().mockResolvedValue(removedConv),
-    });
-    const service = makeService(client);
-
-    const result = await service.assign({
-      request,
-      conversationId: 'conv-1',
-      assignees: ['user-b'],
-      expectedTemplate: 'escalation',
-    });
-
-    expect(result).toBe(removedConv);
-  });
-
-  it('returns the conversation from patchMetadata when nothing was removed', async () => {
+  it('returns the conversation from patchMetadata', async () => {
     const updatedConv = { ...MOCK_CONVERSATION_PUBLIC, metadata: { assignees: ['user-1'] } };
     const client = makeClient({
       patchMetadata: jest.fn().mockResolvedValue({ conversation: updatedConv }),

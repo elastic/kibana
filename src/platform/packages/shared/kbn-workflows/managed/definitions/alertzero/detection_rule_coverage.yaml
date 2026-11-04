@@ -7,6 +7,8 @@ enabled: false
 tags:
   - watch
   - watch-detection
+settings:
+  __WORKER_RUN_AS_LINE__:
 triggers:
   - type: scheduled
     with:
@@ -34,6 +36,7 @@ steps:
     type: workflow.execute
     with:
       workflow-id: system-security-coverage-worker
+      run-as-mode: inherit
       inputs:
         autonomy_level: "{{ consts.worker_settings.autonomy }}"
         lookback_days: "${{ consts.worker_settings.extras.lookbackDays }}"

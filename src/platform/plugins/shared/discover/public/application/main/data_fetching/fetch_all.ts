@@ -81,7 +81,7 @@ export function fetchAll(
     onFetchRecordsComplete,
     esqlSource,
   } = params;
-  const { data, expressions } = services;
+  const { data } = services;
 
   try {
     const searchSource = originalSearchSource.createChild();
@@ -127,7 +127,6 @@ export function fetchAll(
           abortSignal: abortController.signal,
           inspectorAdapters,
           data,
-          expressions,
           scopedProfilesManager,
           timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
           esqlVariables: currentTab.esqlVariables,
@@ -152,7 +151,10 @@ export function fetchAll(
           dataSource: fetchedDataSource,
           approximationApplied,
         }) => {
-          fetchAllRequestsOnlyTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
+          fetchAllRequestsOnlyTracker.reportEvent({
+            requestAdapter: inspectorAdapters.requests,
+            approximationApplied,
+          });
 
           if (isEsqlQuery) {
             const fetchStatus =

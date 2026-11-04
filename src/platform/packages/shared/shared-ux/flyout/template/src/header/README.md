@@ -13,11 +13,12 @@ See the package README for the tab bar.
 - `title` — required `ReactNode`. Rendered as an `<h3>` with a generated id. That id labels the flyout (see the package README's [Labeling](../../README.md#labeling-and-the-flyout-menu-title)).
 - `titleIcon` — EUI icon type rendered after the title, in both the expanded and the compact layout. Without `titleTooltip`, it is decorative (`aria-hidden`).
 - `titleTooltip` — when set, the title icon becomes a focusable `EuiIconTip`. It uses `titleIcon` as its type, or `info` if `titleIcon` is not set.
+- `isLoading` — shows a loading spinner after the title and any title icon, in both the expanded and the compact layout. The spinner sits outside the `<h3>`, so it does not change the flyout's accessible name.
 - `description` — arbitrary `ReactNode` rendered below the title in subdued text. It is not wrapped in a `<p>`, so block content is valid.
 - `collapsed` — always renders the compact layout, regardless of scroll position. See [Starting collapsed](#starting-collapsed).
 - `children` — `Header.MetaBlock`, `Header.Badge`, and `Header.InfoBlock` parts. Anything else, such as elements, components, or bare text, is not rendered. The assembly library warns in development about unrecognized children.
 
-The bottom divider bleeds to the flyout edges using the root `paddingSize`, so it lines up with the flyout chrome at every padding size.
+The bottom divider bleeds past the header's padding to the flyout edges, so it lines up with the flyout chrome.
 
 ## Blocks
 
@@ -32,12 +33,16 @@ Three declarative parts add secondary content to the header. Declare them as `He
 ```
 
 - **`Header.MetaBlock`** — a compact key/value pair, rendered through `@kbn/flyout-meta-blocks`. `title` is the key, rendered bold. `children` is the value, and can hold rich content such as links. The rest of the `MetaBlock` props are also accepted. Use meta blocks for provenance, such as timestamps, owners, or authors.
-- **`Header.Badge`** — a status label, rendered through `EuiBadge`. `children` is the label, and the rest of `EuiBadgeProps` is accepted except the control props (`onClick`, `onClickAriaLabel`, `iconOnClick`, `iconOnClickAriaLabel`, `href`, `target`, `rel`). Badges are labels, not controls. Labels wider than 200px are truncated with an ellipsis.
+- **`Header.Badge`** — a status label, rendered through `EuiBadge`. `children` is the label, and the rest of `EuiBadgeProps` is accepted except `iconOnClick` and `iconOnClickAriaLabel`: the icon is decorative, so the badge is a single target rather than two. Labels wider than 200px are truncated with an ellipsis.
 - **`Header.InfoBlock`** — a titled value in a responsive grid, rendered through `@kbn/flyout-info-blocks`. `title` is a plain string label and `children` is the value. The rest of the `InfoBlockItem` props are also accepted, including `size` and `color` for emphasizing a headline figure. The number of columns depends on the number of blocks.
 
 All three also take an optional `id`. It identifies the part internally, is generated when omitted, and is not rendered as a DOM id. `data-test-subj` and any `data-*` attributes are passed through to the rendered element.
 
 **Badge overflow.** Up to five badges render inline. With more than five, the first four render inline and the rest collapse behind a `+N more` badge, which opens them in a popover.
+
+**Badges as labels or controls.** A badge is a label by default. Pass `href` (with `target`/`rel`) or `onClick` with `onClickAriaLabel` to make the whole badge navigate or act, which EUI renders as an `<a>` or a `<button>`.
+
+**Badge tooltips.** `toolTipContent` wraps the badge in an `EuiToolTip`, positioned by `toolTipPosition`. A tooltipped badge that is not a link or button gets a tab stop, so keyboard users can open the tooltip. Give it an `aria-label` and `role="img"` so screen readers announce it.
 
 All three groups live in the header's collapsible region. They animate away when the header collapses on scroll, and they never show when `collapsed` is set. Put content that must stay visible in the title or the tab bar.
 
@@ -45,7 +50,7 @@ All three groups live in the header's collapsible region. They animate away when
 
 ### Scroll behavior
 
-When the user scrolls the flyout body, the header collapses to a compact row that shows only the title and its icon. The title shrinks to an `xs` heading on one line, truncated with an ellipsis. If the title is a plain string, hovering shows the full text in a tooltip. The description, meta blocks, badges, and info blocks slide away, giving the space to the body. The title row, the tab bar, and the divider stay in place in both states.
+When the user scrolls the flyout body, the header collapses to a compact row that shows only the title and its icon. The title shrinks to an `xs` heading on one line, truncated with an ellipsis. A string title shows its full text in a native tooltip on hover. A `ReactNode` title gets no native tooltip, so its own tooltip is not covered. The description, meta blocks, badges, and info blocks slide away, giving the space to the body. The title row, the tab bar, and the divider stay in place in both states.
 
 Scrolling back to the top restores the full header with the same animation in reverse. With `prefers-reduced-motion`, the change is instant.
 
@@ -73,9 +78,9 @@ The collapsible region uses a CSS grid trick (`grid-template-rows: 0fr / 1fr`) t
 
 ### Wheel forwarding
 
-The header does not scroll, so `wheel` events over it would normally scroll the page behind the flyout. To prevent this, the hook's `headerRef` callback adds one non-passive `wheel` listener to the `EuiFlyoutHeader` element. Listening on this outer element also covers the header's padding.
+The header does not scroll, so `wheel` events over it would normally scroll the page behind the flyout. To prevent this, `header.tsx` passes the hook's `headerRef` callback to `EuiFlyoutHeader`, which adds one non-passive `wheel` listener to the header element. Listening on this outer element also covers the header's padding.
 
-`EuiFlyoutHeader` does not forward a ref, so the callback finds it with `closest()`, using the Kibana-owned `FLYOUT_HEADER_CLASS_NAME` class applied in `header.tsx`. EUI's internal `euiFlyoutHeader` class is deliberately not used. The listener calls `event.preventDefault()` and forwards the scroll to the body's scroll container. The header component has no scroll logic of its own. Normal scrolling and forwarded wheel events both reach the same scroll container and run the same RAF-throttled `evaluate()` callback.
+The listener calls `event.preventDefault()` and forwards the scroll to the body's scroll container. The header component has no scroll logic of its own. Normal scrolling and forwarded wheel events both reach the same scroll container and run the same RAF-throttled `evaluate()` callback.
 
 The unit of `WheelEvent.deltaY` depends on `deltaMode`, but `scrollBy` only accepts pixels. Firefox's line-mode and page-mode deltas are therefore converted to pixels before being forwarded.
 

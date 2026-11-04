@@ -5,136 +5,93 @@
  * 2.0.
  */
 
-import { BehaviorSubject, of } from 'rxjs';
 import { detectionsDataStream } from './detections';
-import { eventsDataStream } from './events';
+import { RuleEventsClient } from './events';
 import {
   createSignificantEventsClients,
   type SignificantEventsServices,
 } from './significant_events_clients';
 
 describe('createSignificantEventsClients', () => {
-  it('initializes each Core client only when requested', async () => {
+  it('initializes the detection Core client only when requested', async () => {
     const detectionClient = {};
-    const eventClient = {};
-    const detectionDataStreamClient = {};
-    const eventDataStreamClient = {};
     const services: SignificantEventsServices = {
       detection: { getClient: jest.fn().mockReturnValue(detectionClient) } as never,
-      event: { getClient: jest.fn().mockReturnValue(eventClient) } as never,
     };
-    const initializeClient = jest.fn(async (name: string) =>
-      name === detectionsDataStream.name ? detectionDataStreamClient : eventDataStreamClient
-    );
+    const initializeClient = jest.fn(async () => ({}));
 
     const clients = createSignificantEventsClients({
       services,
       dataStreams: { initializeClient } as never,
       esClient: {} as never,
       space: 'default',
+      getAlertEventsClient: jest.fn(),
     });
 
     expect(initializeClient).not.toHaveBeenCalled();
     await expect(clients.getDetectionClient()).resolves.toBe(detectionClient);
-    await expect(clients.getEventClient()).resolves.toBe(eventClient);
-    expect(initializeClient).toHaveBeenNthCalledWith(1, detectionsDataStream.name);
-    expect(initializeClient).toHaveBeenNthCalledWith(2, eventsDataStream.name);
+    expect(initializeClient).toHaveBeenCalledTimes(1);
+    expect(initializeClient).toHaveBeenCalledWith(detectionsDataStream.name);
   });
 
-  it('getEventClient() always returns EventClient, regardless of useRuleEventsRead$', async () => {
-    const eventClient = {};
-    const services: SignificantEventsServices = {
-      detection: { getClient: jest.fn() } as never,
-      event: { getClient: jest.fn().mockReturnValue(eventClient) } as never,
-    };
+  it('getEventSearchClient() always returns a RuleEventsClient', async () => {
     const clients = createSignificantEventsClients({
-      services,
-      dataStreams: { initializeClient: jest.fn().mockResolvedValue({}) } as never,
+      services: { detection: { getClient: jest.fn() } as never },
+      dataStreams: { initializeClient: jest.fn() } as never,
       esClient: {} as never,
       space: 'default',
-      useRuleEventsRead$: of(true),
+      getAlertEventsClient: jest.fn(),
     });
 
-    await expect(clients.getEventClient()).resolves.toBe(eventClient);
-    expect(services.event.getClient).toHaveBeenCalledWith(
-      expect.not.objectContaining({ useRuleEventsRead: expect.anything() })
-    );
+    await expect(clients.getEventSearchClient()).resolves.toBeInstanceOf(RuleEventsClient);
   });
 
-  it('getEventSearchClient() returns RuleEventsClient when useRuleEventsRead$ emits true and EventClient when false/omitted', async () => {
-    const ruleEventsClient = {};
-    const eventClient = {};
-    const getClient = jest.fn(({ useRuleEventsRead }: { useRuleEventsRead?: boolean }) =>
-      useRuleEventsRead ? ruleEventsClient : eventClient
-    );
-    const services: SignificantEventsServices = {
-      detection: { getClient: jest.fn() } as never,
-      event: { getClient } as never,
-    };
-
-    const clientsWithFlagOn = createSignificantEventsClients({
-      services,
-      dataStreams: { initializeClient: jest.fn().mockResolvedValue({}) } as never,
-      esClient: {} as never,
-      space: 'default',
-      useRuleEventsRead$: of(true),
-    });
-    await expect(clientsWithFlagOn.getEventSearchClient()).resolves.toBe(ruleEventsClient);
-
-    const clientsWithFlagOff = createSignificantEventsClients({
-      services,
-      dataStreams: { initializeClient: jest.fn().mockResolvedValue({}) } as never,
-      esClient: {} as never,
-      space: 'default',
-    });
-    await expect(clientsWithFlagOff.getEventSearchClient()).resolves.toBe(eventClient);
-  });
-
-  it('getEventSearchClient() follows a later useRuleEventsRead$ emission', async () => {
-    const ruleEventsClient = {};
-    const eventClient = {};
-    const getClient = jest.fn(({ useRuleEventsRead }: { useRuleEventsRead?: boolean }) =>
-      useRuleEventsRead ? ruleEventsClient : eventClient
-    );
-    const useRuleEventsRead$ = new BehaviorSubject(false);
+  it('exposes the provided trigger emitter', () => {
+    const triggerEmitter = jest.fn();
     const clients = createSignificantEventsClients({
-      services: {
-        detection: { getClient: jest.fn() } as never,
-        event: { getClient } as never,
+      services: { detection: { getClient: jest.fn() } as never },
+      dataStreams: { initializeClient: jest.fn() } as never,
+      esClient: {} as never,
+      space: 'default',
+      getAlertEventsClient: jest.fn(),
+      triggerEmitter,
+    });
+
+    expect(clients.emitTrigger).toBe(triggerEmitter);
+  });
+
+  it('gives the event client the writer lazily, and the trigger emitter, to write with', async () => {
+    const createAlertEvent = jest.fn().mockResolvedValue(undefined);
+    const getAlertEventsClient = jest.fn().mockResolvedValue({ createAlertEvent });
+    const triggerEmitter = jest.fn();
+    const clients = createSignificantEventsClients({
+      services: { detection: { getClient: jest.fn() } as never },
+      dataStreams: { initializeClient: jest.fn() } as never,
+      esClient: {} as never,
+      space: 'default',
+      getAlertEventsClient,
+      triggerEmitter,
+    });
+
+    const eventClient = await clients.getEventSearchClient();
+    expect(getAlertEventsClient).not.toHaveBeenCalled();
+
+    await eventClient.createEvent({
+      event: {
+        '@timestamp': '2026-01-01T00:00:00.000Z',
+        event_id: 'event-1',
+        status: 'active',
+        source_ids: ['logs.test'],
+        title: 'Test event',
+        summary: 'Test summary',
+        severity: 'medium',
+        confidence: 0.8,
       },
-      dataStreams: { initializeClient: jest.fn().mockResolvedValue({}) } as never,
-      esClient: {} as never,
-      space: 'default',
-      useRuleEventsRead$,
     });
 
-    await expect(clients.getEventSearchClient()).resolves.toBe(eventClient);
-
-    useRuleEventsRead$.next(true);
-
-    await expect(clients.getEventSearchClient()).resolves.toBe(ruleEventsClient);
-  });
-
-  it('returns the same EventClient from getEventClient() and getEventSearchClient() when the flag is off', async () => {
-    const eventClient = {};
-    const services: SignificantEventsServices = {
-      detection: { getClient: jest.fn() } as never,
-      event: { getClient: jest.fn().mockReturnValue(eventClient) } as never,
-    };
-    const clients = createSignificantEventsClients({
-      services,
-      dataStreams: { initializeClient: jest.fn().mockResolvedValue({}) } as never,
-      esClient: {} as never,
-      space: 'default',
-      useRuleEventsRead$: of(false),
-    });
-
-    const [fromEventClient, fromSearchClient] = await Promise.all([
-      clients.getEventClient(),
-      clients.getEventSearchClient(),
-    ]);
-
-    expect(fromSearchClient).toBe(fromEventClient);
-    expect(services.event.getClient).toHaveBeenCalledTimes(1);
+    expect(createAlertEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ fingerprint: 'event-1' })
+    );
+    expect(triggerEmitter).toHaveBeenCalledTimes(1);
   });
 });

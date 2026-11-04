@@ -119,21 +119,31 @@ export const HighlightedFields = memo(
 
     const euidApi = useEntityStoreEuidApi();
     const hostDocumentIdentityFields = useMemo(
-      () => euidApi?.euid.getEntityIdentifiersFromDocument('host', hit.flattened) ?? null,
-      [euidApi?.euid, hit.flattened]
+      () =>
+        euidApi?.euid.getEntityIdentifiersFromDocument(
+          euidApi.getBuiltInEntityDefinition('host'),
+          hit.flattened
+        ) ?? null,
+      [euidApi, hit.flattened]
     );
     const userDocumentIdentityFields = useMemo(
-      () => euidApi?.euid.getEntityIdentifiersFromDocument('user', hit.flattened) ?? null,
-      [euidApi?.euid, hit.flattened]
+      () =>
+        euidApi?.euid.getEntityIdentifiersFromDocument(
+          euidApi.getBuiltInEntityDefinition('user'),
+          hit.flattened
+        ) ?? null,
+      [euidApi, hit.flattened]
     );
     const isHostEntity = hostDocumentIdentityFields != null;
     const hostEuidFromDocument = useMemo(
-      () => euidApi?.euid.getEuidFromObject('host', hit.flattened),
-      [euidApi?.euid, hit.flattened]
+      () =>
+        euidApi?.euid.getEuidFromObject(euidApi.getBuiltInEntityDefinition('host'), hit.flattened),
+      [euidApi, hit.flattened]
     );
     const userEuidFromDocument = useMemo(
-      () => euidApi?.euid.getEuidFromObject('user', hit.flattened),
-      [euidApi?.euid, hit.flattened]
+      () =>
+        euidApi?.euid.getEuidFromObject(euidApi.getBuiltInEntityDefinition('user'), hit.flattened),
+      [euidApi, hit.flattened]
     );
     const hostEntityFromStore = useEntityFromStore({
       entityId: hostEuidFromDocument,

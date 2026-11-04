@@ -8,7 +8,11 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import {
+  AgentlessAgentRestrictionError,
+  FleetError,
+  HostedAgentPolicyRestrictionRelatedError,
+} from '../../errors';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
 import { restartAgent, bulkRestartAgents } from './restart';
@@ -118,6 +122,20 @@ describe('restart', () => {
 
       await expect(restartAgent(esClient, soClient, 'agent-1')).rejects.toThrow(
         HostedAgentPolicyRestrictionRelatedError
+      );
+      expect(mockCreateAgentAction).not.toHaveBeenCalled();
+    });
+
+    it('should throw AgentlessAgentRestrictionError for agentless agent', async () => {
+      mockGetAgentById.mockResolvedValue({ id: 'agent-1', policy_id: 'agentless-policy' } as any);
+      mockAgentPolicyGet.mockResolvedValue({
+        id: 'agentless-policy',
+        is_managed: false,
+        supports_agentless: true,
+      } as any);
+
+      await expect(restartAgent(esClient, soClient, 'agent-1')).rejects.toThrow(
+        AgentlessAgentRestrictionError
       );
       expect(mockCreateAgentAction).not.toHaveBeenCalled();
     });

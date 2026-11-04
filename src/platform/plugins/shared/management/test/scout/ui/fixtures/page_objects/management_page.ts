@@ -17,10 +17,22 @@ export interface SidebarSection {
 export class ManagementPage {
   readonly sidebar;
   readonly appNotFoundContent;
+  readonly cardsNavigationPage;
 
   constructor(private readonly page: ScoutPage) {
-    this.sidebar = page.locator('.kbnSolutionNav');
-    this.appNotFoundContent = page.testSubj.locator('appNotFoundPageContent');
+    this.sidebar = page.getByTestId('mgtSideBarNav');
+    this.appNotFoundContent = page.getByTestId('appNotFoundPageContent');
+    this.cardsNavigationPage = page.getByTestId('cards-navigation-page');
+  }
+
+  appCard(appId: string) {
+    return this.page.getByTestId(`app-card-${appId}`);
+  }
+
+  // Serverless projects replace the sidebar landing with a cards landing page.
+  async gotoCardsLanding(): Promise<void> {
+    await this.page.gotoApp('management');
+    await this.cardsNavigationPage.waitFor({ state: 'visible' });
   }
 
   async goto(): Promise<void> {

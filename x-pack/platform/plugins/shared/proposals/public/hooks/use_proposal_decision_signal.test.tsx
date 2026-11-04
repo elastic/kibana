@@ -34,7 +34,10 @@ describe('useProposalDecisionSignal', () => {
       proposalDecisionSignal.bump();
     });
 
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['proposals'] });
+    expect(invalidateSpy).toHaveBeenCalledWith(
+      { queryKey: ['proposals'] },
+      { cancelRefetch: false }
+    );
   });
 
   it('does not invalidate again on a render with no new bump', () => {
@@ -51,7 +54,13 @@ describe('useProposalDecisionSignal', () => {
       proposalDecisionSignal.bump();
     });
 
-    expect(first.invalidateSpy).toHaveBeenCalledWith({ queryKey: ['proposals'] });
-    expect(second.invalidateSpy).toHaveBeenCalledWith({ queryKey: ['proposals'] });
+    expect(first.invalidateSpy).toHaveBeenCalledWith(
+      { queryKey: ['proposals'] },
+      { cancelRefetch: false }
+    );
+    expect(second.invalidateSpy).toHaveBeenCalledWith(
+      { queryKey: ['proposals'] },
+      { cancelRefetch: false }
+    );
   });
 });

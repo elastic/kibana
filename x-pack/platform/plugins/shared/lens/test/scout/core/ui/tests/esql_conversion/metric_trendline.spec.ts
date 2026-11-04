@@ -87,7 +87,7 @@ test.describe(
       page,
       pageObjects,
     }) => {
-      const { dashboard, lens } = pageObjects;
+      const { dashboard, lens, esqlEditor } = pageObjects;
 
       await test.step('open dashboard and verify initial trendline', async () => {
         await browserAuth.loginAsPrivilegedUser();
@@ -103,7 +103,7 @@ test.describe(
       });
 
       await test.step('verify trendline renders after conversion', async () => {
-        await expect(page.getByTestId('ESQLEditor')).toBeVisible();
+        await expect(esqlEditor.editor).toBeVisible();
         await expect(lens.metric.trendline).toBeVisible();
       });
 

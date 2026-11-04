@@ -19,7 +19,8 @@ const CROWDSTRIKE_RULE_NAME = 'CrowdStrike External Alerts';
 
 const PROMOTION_RULES_BOOTSTRAP_TIMEOUT = 120_000; // 2 minutes
 
-describe('Promotion Rules', { tags: '@serverless' }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/299326
+describe.skip('Promotion Rules', { tags: '@serverless' }, () => {
   before(() => {
     cleanFleet();
     deleteAlertsAndRules();

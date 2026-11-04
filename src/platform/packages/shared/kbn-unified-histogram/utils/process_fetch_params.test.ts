@@ -8,8 +8,14 @@
  */
 
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { createMockDataViewsService } from '@kbn/data-source/src/__mocks__/data_views_service.mock';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { DataViewSource, EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
+import {
+  DataViewSource,
+  EsqlSource,
+  getRegisteredEsqlDataView,
+  registerEsqlSourceInDataViewsCache,
+} from '@kbn/data-source';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { dataViewMock } from '../__mocks__/data_view';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
@@ -18,13 +24,10 @@ import type { UnifiedHistogramFetchParamsExternal, UnifiedHistogramServices } fr
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { ESQLVariableType } from '@kbn/esql-types';
 
-const dataViewsStub = {
-  create: jest.fn(async (spec: { id: string }) => ({ ...spec })),
-  clearInstanceCache: jest.fn(),
-} as unknown as DataViewsPublicPluginStart;
+const dataViewsStub = createMockDataViewsService();
 
 const processParams = async (params: UnifiedHistogramFetchParamsExternal) => {
-  const { fetchParams } = await processFetchParams({
+  const fetchParams = await processFetchParams({
     params,
     services: {
       ...unifiedHistogramServicesMock,
@@ -74,42 +77,33 @@ describe('processFetchParams', () => {
     ).toBe(false);
   });
 
-  it('assigns isESQLQuery based on query type', async () => {
-    expect(
-      (
-        await processParams({
-          ...commonParams,
-          query: { query: 'foo', language: 'kuery' },
-        })
-      ).isESQLQuery
-    ).toBe(false);
-    expect(
-      (
-        await processParams({
-          ...commonParams,
-          query: { esql: 'from logs' },
-        })
-      ).isESQLQuery
-    ).toBe(true);
+  it('derives columns and columnsMap from the result columns of an ES|QL source', async () => {
+    const columns = [
+      { id: 'a', name: 'colA', meta: { type: 'string' } },
+      { id: 'b', name: 'colB', meta: { type: 'number' } },
+    ] as DatatableColumn[];
+    EsqlSource.clearCache();
+    const result = await processParams({
+      ...commonParams,
+      dataSource: await EsqlSource.create({
+        query: 'from logs',
+        timeFieldName: '@timestamp',
+        resultColumns: columns,
+      }),
+      query: { esql: 'from logs' },
+    });
+    expect(result.columns).toEqual(columns);
+    expect(result.columnsMap).toEqual({ a: columns[0], b: columns[1] });
   });
 
-  it('assigns columnsMap from columns', async () => {
-    const params: UnifiedHistogramFetchParamsExternal = {
-      ...commonParams,
-      columns: [
-        { id: 'a', name: 'colA' },
-        { id: 'b', name: 'colB' },
-      ] as any,
-    };
-    const result = await processParams(params);
-    expect(result.columnsMap).toEqual({
-      a: { id: 'a', name: 'colA' },
-      b: { id: 'b', name: 'colB' },
-    });
+  it('has no columns for a data view source', async () => {
+    const result = await processParams(commonParams);
+    expect(result.columns).toBeUndefined();
+    expect(result.columnsMap).toBeUndefined();
   });
 
   it('assigns breakdown using initialBreakdownField if not in params', async () => {
-    const { fetchParams: result } = await processFetchParams({
+    const result = await processFetchParams({
       params: commonParams,
       services: unifiedHistogramServicesMock,
       initialBreakdownField: 'extension',
@@ -122,7 +116,7 @@ describe('processFetchParams', () => {
       ...commonParams,
       breakdownField: 'bytes',
     };
-    const { fetchParams: result } = await processFetchParams({
+    const result = await processFetchParams({
       params,
       services: unifiedHistogramServicesMock,
       initialBreakdownField: 'extension',
@@ -140,6 +134,15 @@ describe('processFetchParams', () => {
     expect(result.breakdown).toBeUndefined();
   });
 
+  it('returns undefined breakdown field if the data view field is not aggregatable', async () => {
+    const params: UnifiedHistogramFetchParamsExternal = {
+      ...commonParams,
+      breakdownField: 'message',
+    };
+    const result = await processParams(params);
+    expect(result.breakdown).toEqual({ field: undefined });
+  });
+
   it('returns correct breakdown for an ES|QL source with a matching column', async () => {
     const columns = [{ id: '1', name: 'foo', meta: { type: 'string' } }] as DatatableColumn[];
     EsqlSource.clearCache();
@@ -151,11 +154,27 @@ describe('processFetchParams', () => {
     const result = await processParams({
       ...commonParams,
       dataSource: esqlSource,
-      columns,
       query: { esql: 'from logs' },
       breakdownField: 'foo',
     });
     expect(result.breakdown?.field?.name).toBe('foo');
+  });
+
+  it('returns undefined breakdown field for an ES|QL source with a non-groupable column', async () => {
+    const columns = [{ id: '1', name: 'foo', meta: { type: 'unknown' } }] as DatatableColumn[];
+    EsqlSource.clearCache();
+    const esqlSource = await EsqlSource.create({
+      query: 'from logs',
+      timeFieldName: '@timestamp',
+      resultColumns: columns,
+    });
+    const result = await processParams({
+      ...commonParams,
+      dataSource: esqlSource,
+      query: { esql: 'from logs' },
+      breakdownField: 'foo',
+    });
+    expect(result.breakdown).toEqual({ field: undefined });
   });
 
   it('returns undefined breakdown for an ES|QL source with a transformational command', async () => {
@@ -169,7 +188,6 @@ describe('processFetchParams', () => {
     const result = await processParams({
       ...commonParams,
       dataSource: esqlSource,
-      columns,
       query: { esql: 'from logs | stats count(*)' },
       breakdownField: 'foo',
     });
@@ -244,14 +262,7 @@ describe('processFetchParams ES|QL data view shim', () => {
     isNull,
   });
 
-  const createDataViews = () =>
-    ({
-      create: jest.fn(async (spec: { id: string }) => ({ ...spec })),
-      clearInstanceCache: jest.fn(),
-    } as unknown as DataViewsPublicPluginStart & {
-      create: jest.Mock;
-      clearInstanceCache: jest.Mock;
-    });
+  const createDataViews = () => createMockDataViewsService();
 
   const servicesFor = (dataViews: DataViewsPublicPluginStart): UnifiedHistogramServices =>
     ({
@@ -275,7 +286,7 @@ describe('processFetchParams ES|QL data view shim', () => {
     querySeq += 1;
   });
 
-  it('reuses the cached DataView when the id and field names still match', async () => {
+  it('reuses the cached DataView for the same source', async () => {
     const dataViews = createDataViews();
     const source = await EsqlSource.create({
       query: `FROM logs-* | LIMIT ${querySeq}`,
@@ -283,15 +294,16 @@ describe('processFetchParams ES|QL data view shim', () => {
       timeFieldName: '@timestamp',
     });
 
-    const first = await fetch(source, dataViews);
-    const second = await fetch(source, dataViews);
+    await fetch(source, dataViews);
+    const first = getRegisteredEsqlDataView(source);
+    await fetch(source, dataViews);
 
-    expect(second.lensDataView).toBe(first.lensDataView);
-    expect(dataViews.clearInstanceCache).toHaveBeenCalledTimes(1);
+    expect(first).toBeDefined();
+    expect(getRegisteredEsqlDataView(source)).toBe(first);
     expect(dataViews.create).toHaveBeenCalledTimes(1);
   });
 
-  it('reuses a DataView already registered for the same schema', async () => {
+  it('reuses a DataView already registered for the source', async () => {
     const dataViews = createDataViews();
     const source = await EsqlSource.create({
       query: `FROM logs-* | LIMIT ${querySeq}`,
@@ -300,14 +312,13 @@ describe('processFetchParams ES|QL data view shim', () => {
     });
 
     const registered = await registerEsqlSourceInDataViewsCache(dataViews, source);
-    const { lensDataView } = await fetch(source, dataViews);
+    await fetch(source, dataViews);
 
-    expect(lensDataView).toBe(registered);
-    expect(dataViews.clearInstanceCache).toHaveBeenCalledTimes(1);
+    expect(getRegisteredEsqlDataView(source)).toBe(registered);
     expect(dataViews.create).toHaveBeenCalledTimes(1);
   });
 
-  it('does not rebuild the shim when withColumns only changes nullability', async () => {
+  it('does not rebuild the shim when withColumns changes the columns', async () => {
     const dataViews = createDataViews();
     const source = await EsqlSource.create({
       query: `FROM logs-* | LIMIT ${querySeq}`,
@@ -315,35 +326,17 @@ describe('processFetchParams ES|QL data view shim', () => {
       timeFieldName: '@timestamp',
     });
 
-    const first = await fetch(source, dataViews);
-    const second = await fetch(source.withColumns([makeColumn('message', true)]), dataViews);
+    await fetch(source, dataViews);
+    const first = getRegisteredEsqlDataView(source);
+    const withColumns = source.withColumns([makeColumn('message', true), makeColumn('bytes')]);
+    await fetch(withColumns, dataViews);
 
-    expect(second.lensDataView).toBe(first.lensDataView);
-    expect(dataViews.clearInstanceCache).toHaveBeenCalledTimes(1);
+    expect(first).toBeDefined();
+    expect(getRegisteredEsqlDataView(withColumns)).toBe(first);
     expect(dataViews.create).toHaveBeenCalledTimes(1);
   });
 
-  it('re-registers when the field names change', async () => {
-    const dataViews = createDataViews();
-    const source = await EsqlSource.create({
-      query: `FROM logs-* | LIMIT ${querySeq}`,
-      resultColumns: [makeColumn('message')],
-      timeFieldName: '@timestamp',
-    });
-
-    const first = await fetch(source, dataViews);
-    const second = await fetch(
-      source.withColumns([makeColumn('message'), makeColumn('bytes')]),
-      dataViews
-    );
-
-    expect(second.lensDataView).not.toBe(first.lensDataView);
-    expect(dataViews.clearInstanceCache).toHaveBeenCalledTimes(2);
-    expect(dataViews.create).toHaveBeenCalledTimes(2);
-    expect(dataViews.clearInstanceCache).toHaveBeenLastCalledWith(source.id);
-  });
-
-  it('re-registers when the time field changes', async () => {
+  it('uses a different shim when the time field changes', async () => {
     const dataViews = createDataViews();
     const query = `FROM logs-* | LIMIT ${querySeq}`;
     const columns = [makeColumn('message')];
@@ -358,12 +351,14 @@ describe('processFetchParams ES|QL data view shim', () => {
       timeFieldName: 'event.ingested',
     });
 
-    const first = await fetch(firstSource, dataViews);
-    const second = await fetch(nextSource, dataViews);
+    await fetch(firstSource, dataViews);
+    await fetch(nextSource, dataViews);
+    const first = getRegisteredEsqlDataView(firstSource);
+    const second = getRegisteredEsqlDataView(nextSource);
 
     expect(nextSource.id).not.toBe(firstSource.id);
-    expect(second.lensDataView).not.toBe(first.lensDataView);
-    expect(dataViews.clearInstanceCache).toHaveBeenCalledTimes(2);
+    expect(second).not.toBe(first);
+    expect(second?.id).not.toBe(first?.id);
     expect(dataViews.create).toHaveBeenCalledTimes(2);
   });
 });

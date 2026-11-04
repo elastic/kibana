@@ -274,6 +274,75 @@ describe('useFetchMetricsData', () => {
     });
   });
 
+  describe('loadedFetchParams', () => {
+    it('reports the fetch params the metric items were fetched under, not the ones in flight', async () => {
+      let resolveSecondFetch: (value: unknown) => void = () => {};
+      const secondFetch = new Promise((resolve) => {
+        resolveSecondFetch = resolve;
+      });
+      const response = {
+        documents: [
+          {
+            metric_name: 'system.cpu.utilization',
+            index_name: 'metrics-*',
+            unit: null,
+            metric_type: 'gauge',
+            field_type: 'double',
+            dimension_fields: ['host.name'],
+          },
+        ],
+        rawResponse: {
+          columns: [],
+          values: [],
+          requestParams: { query: 'TS metrics-* | METRICS_INFO' },
+        },
+        requestParams: { query: 'TS metrics-* | METRICS_INFO' },
+      };
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(response)
+        .mockImplementationOnce(() => secondFetch as Promise<typeof response>);
+
+      const defaults = createDefaultParams();
+      const params = {
+        ...defaults,
+        fetchParams: {
+          ...defaults.fetchParams,
+          searchSessionId: 'session-1',
+        },
+      };
+      const { result, rerender } = renderHook(
+        (props: ReturnType<typeof createDefaultParams>) => useFetchMetricsData(props),
+        { initialProps: params }
+      );
+
+      await waitFor(() =>
+        expect(result.current.loadedFetchParams?.searchSessionId).toBe('session-1')
+      );
+
+      // A Discover refresh starts a new session and replaces the abort controller.
+      rerender({
+        ...params,
+        fetchParams: {
+          ...params.fetchParams,
+          searchSessionId: 'session-2',
+          abortController: new AbortController(),
+        },
+      });
+
+      await waitFor(() => expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2));
+      expect(result.current.loading).toBe(true);
+      expect(result.current.loadedFetchParams?.searchSessionId).toBe('session-1');
+
+      await act(async () => {
+        resolveSecondFetch(response);
+      });
+
+      await waitFor(() =>
+        expect(result.current.loadedFetchParams?.searchSessionId).toBe('session-2')
+      );
+    });
+  });
+
   describe('shouldFetch guard', () => {
     it('does not fetch when component is not visible', async () => {
       const params = createDefaultParams();

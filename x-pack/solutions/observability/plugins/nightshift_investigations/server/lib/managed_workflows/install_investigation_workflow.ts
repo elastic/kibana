@@ -9,6 +9,10 @@ import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 
+/**
+ * Installs the investigation globally, unbound. It runs through each space's bound entry point,
+ * which it inherits the service account from, so a code change updates this one copy.
+ */
 export const installInvestigationWorkflow = async ({
   client,
 }: {

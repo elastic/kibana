@@ -16,6 +16,7 @@ import {
   waitForRestoredIndicesToBeActive,
 } from '../restore/restore';
 import { createTimestampPipeline, deletePipeline } from './pipeline';
+import { copySourceMappings } from './mappings';
 import { getDestinationInfo, reindexAllIndices } from './reindex';
 
 export const TEMP_INDEX_PREFIX = 'snapshot-loader-temp-';
@@ -155,6 +156,13 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
       pipelineName,
       maxTimestamp,
       nowMs,
+    });
+
+    await copySourceMappings({
+      esClient,
+      log,
+      restoredIndices,
+      originalIndices: indicesToRestore,
     });
 
     log.info('Step 4/4: Reindexing with timestamp transformation...');

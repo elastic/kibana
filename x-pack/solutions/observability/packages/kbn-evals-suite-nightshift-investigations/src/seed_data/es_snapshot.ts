@@ -63,6 +63,10 @@ export const replayEsSnapshot = async ({
     repository: createGcsRepository({ bucket, basePath }),
     snapshotName,
     patterns: [...patterns],
+    // On serverless, "restore complete" only means the index-tier primary is up; ES|QL and reindex
+    // read from the search tier, so the loader must wait for every shard copy before querying.
+    // Passing index settings turns that wait on; `0-1` keeps single-node stateful clusters green.
+    indexSettings: { 'index.auto_expand_replicas': '0-1' },
   });
 
   if (!result.success) {
@@ -71,8 +75,9 @@ export const replayEsSnapshot = async ({
     throw new Error(
       `Failed to replay ${describeLocation(source)}: ` +
         `${result.errors.join('; ') || 'no error reported'}. ` +
-        `Elasticsearch reads this bucket through its keystore, so check that GCS_CREDENTIALS is ` +
-        `set and that the cluster was started with the "evals_tracing" Scout server config.`
+        `Elasticsearch reads this bucket through its secure settings, so check that ` +
+        `GCS_CREDENTIALS is set and that the cluster was started with the "evals_tracing" ` +
+        `Scout server config.`
     );
   }
 

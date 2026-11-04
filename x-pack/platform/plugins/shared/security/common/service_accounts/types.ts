@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { ServiceAccountWorkloadBinder } from '@kbn/core-security-common';
+import type {
+  ServiceAccountBoundWorkload,
+  ServiceAccountWorkloadBinder,
+} from '@kbn/core-security-common';
 
 /**
  * The principal that created an account.
@@ -21,6 +24,7 @@ export interface ServiceAccountDirectoryEntry {
   /** Opaque identifier. Its structure differs between backends and must not be parsed. */
   id: string;
   name: string;
+  /** The account's description. It is absent when the account has none. */
   description?: string;
   /**
    * Role names assigned to the account.
@@ -49,6 +53,11 @@ export interface ServiceAccountDirectoryEntry {
    * own, and absent on Elasticsearch until Elasticsearch stores one too.
    */
   createdBy?: ServiceAccountDirectoryCreator;
+  /**
+   * How many workloads are bound to the account, across every space. Only the list reports it,
+   * and it's absent when the count failed. The count isn't verified, so it's for display only.
+   */
+  workloadCount?: number;
   // No creation time. UIAM reports no timestamp of any kind, and the only one Elasticsearch could
   // offer is on the credential Kibana stored, which dates Kibana's record rather than the
   // account. It arrives with the same followup that brings the Elasticsearch creator.
@@ -61,4 +70,25 @@ export interface ServiceAccountDirectoryEntry {
 export interface ListServiceAccountsResponse {
   serviceAccounts: ServiceAccountDirectoryEntry[];
   nextPage?: string;
+}
+
+/** Every workload bound to one service account, across spaces. */
+export interface ListServiceAccountWorkloadsResponse {
+  workloads: ServiceAccountBoundWorkload[];
+}
+
+/**
+ * The body of a successful delete. `warnings` describes anything the delete left behind, and is
+ * empty when it cleaned up everything.
+ */
+export interface DeleteServiceAccountResponse {
+  warnings: string[];
+}
+
+/**
+ * The `attributes` of the 409 the delete route answers with when the account is still bound to
+ * workloads and the caller did not force the delete.
+ */
+export interface DeleteServiceAccountConflictAttributes {
+  workloads: ServiceAccountBoundWorkload[];
 }

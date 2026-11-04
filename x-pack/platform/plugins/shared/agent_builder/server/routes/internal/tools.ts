@@ -44,7 +44,6 @@ import { AGENT_BUILDER_READ_SECURITY, TOOLS_WRITE_SECURITY } from '../route_secu
 import { getToolTypeInfo, bulkCreateMcpTools } from '../../services/tools/utils';
 import { toConnectorItem } from '../utils';
 
-const USER_CONNECTOR_TOKEN_TYPE = 'user_connector_token';
 const PER_USER_AUTH_MODE = 'per-user';
 
 export function registerInternalToolsRoutes({
@@ -504,7 +503,7 @@ export function registerInternalToolsRoutes({
       security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
-      const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+      const [, pluginsStart] = await coreSetup.getStartServices();
       const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(request);
       const [allConnectors, compatibleTypes] = await Promise.all([
         actionsClient.getAll(),
@@ -514,39 +513,29 @@ export function registerInternalToolsRoutes({
       const compatibleTypeIds = new Set(compatibleTypes.map((t) => t.id));
       const { type } = request.query;
 
-      const filteredConnectors = allConnectors
-        .filter((connector) => compatibleTypeIds.has(connector.actionTypeId))
-        .filter((connector) => (type ? connector.actionTypeId === type : true));
+      // MCP v1 isn't Agent Builder-compatible (it can't be used as a generic tool), but
+      // the MCP server management UI still needs to list its own connectors by exact
+      // type; any other explicit type request must still be AB-compatible.
+      const filteredConnectors = allConnectors.filter((connector) => {
+        if (type !== undefined) {
+          return (
+            connector.actionTypeId === type &&
+            (type === MCP_CONNECTOR_ID || compatibleTypeIds.has(type))
+          );
+        }
+        return compatibleTypeIds.has(connector.actionTypeId);
+      });
 
-      // Check OAuth authorization status for per-user connectors.
-      // Batch query user_connector_token saved objects to determine which
-      // OAuth connectors the current user has authorized.
+      // OAuth connectors count as authorized only while the user's token is usable
+      // (unexpired, or refreshable).
       const oauthConnectorIds = filteredConnectors
         .filter((connector) => connector.authMode === PER_USER_AUTH_MODE)
         .map((connector) => connector.id);
 
-      const authorizedConnectorIds = new Set<string>();
-      if (oauthConnectorIds.length > 0) {
-        const currentUser = coreStart.security.authc.getCurrentUser(request);
-        if (currentUser?.profile_uid) {
-          const soClient = coreStart.savedObjects.getScopedClient(request, {
-            includedHiddenTypes: [USER_CONNECTOR_TOKEN_TYPE],
-          });
-          const connectorIdFilter = oauthConnectorIds
-            .map((id) => `${USER_CONNECTOR_TOKEN_TYPE}.attributes.connectorId: "${id}"`)
-            .join(' OR ');
-          const tokenResults = await soClient.find<{ connectorId: string }>({
-            type: USER_CONNECTOR_TOKEN_TYPE,
-            perPage: oauthConnectorIds.length,
-            filter: `${USER_CONNECTOR_TOKEN_TYPE}.attributes.profileUid: "${currentUser.profile_uid}" AND (${connectorIdFilter})`,
-          });
-          for (const token of tokenResults.saved_objects) {
-            if (token.attributes.connectorId) {
-              authorizedConnectorIds.add(token.attributes.connectorId);
-            }
-          }
-        }
-      }
+      const authorizedConnectorIds = await pluginsStart.actions.getUsableUserOAuthConnectorIds(
+        request,
+        oauthConnectorIds
+      );
 
       const connectors: ConnectorItem[] = filteredConnectors.map((connector) => {
         const isOAuth = connector.authMode === PER_USER_AUTH_MODE;
@@ -580,7 +569,7 @@ export function registerInternalToolsRoutes({
       security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
-      const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+      const [, pluginsStart] = await coreSetup.getStartServices();
       const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(request);
       const { connectorId } = request.params;
 
@@ -588,20 +577,13 @@ export function registerInternalToolsRoutes({
 
       let oauthStatus;
       if (connector.authMode === PER_USER_AUTH_MODE) {
-        const currentUser = coreStart.security.authc.getCurrentUser(request);
-        if (currentUser?.profile_uid) {
-          const soClient = coreStart.savedObjects.getScopedClient(request, {
-            includedHiddenTypes: [USER_CONNECTOR_TOKEN_TYPE],
-          });
-          const tokenResult = await soClient.find<{ connectorId: string }>({
-            type: USER_CONNECTOR_TOKEN_TYPE,
-            perPage: 1,
-            filter: `${USER_CONNECTOR_TOKEN_TYPE}.attributes.profileUid: "${currentUser.profile_uid}" AND ${USER_CONNECTOR_TOKEN_TYPE}.attributes.connectorId: "${connectorId}"`,
-          });
-          oauthStatus = tokenResult.total > 0 ? OAUTH_STATUS.AUTHORIZED : OAUTH_STATUS.DISCONNECTED;
-        } else {
-          oauthStatus = OAUTH_STATUS.DISCONNECTED;
-        }
+        const usableConnectorIds = await pluginsStart.actions.getUsableUserOAuthConnectorIds(
+          request,
+          [connectorId]
+        );
+        oauthStatus = usableConnectorIds.has(connectorId)
+          ? OAUTH_STATUS.AUTHORIZED
+          : OAUTH_STATUS.DISCONNECTED;
       }
 
       return response.ok<GetConnectorResponse>({

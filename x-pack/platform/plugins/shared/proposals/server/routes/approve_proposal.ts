@@ -20,7 +20,7 @@ import { INTERNAL_ACCESS, proposalIdParamsSchema } from './shared';
  * `requiredPrivileges` is what answers "may this caller decide?", and it is the
  * only place a human can actually be told no — synchronously, as a 403. The
  * decision is then written by the gate workflow's post-gate steps, so this
- * route performs no writes and the record still reads undecided when it
+ * route never writes one and the record still reads undecided when it
  * responds. Callers must refetch rather than trust the response body.
  */
 export const registerApproveProposalRoute = ({
@@ -51,7 +51,7 @@ export const registerApproveProposalRoute = ({
           // `waitForApproval` reduces its resume payload to a bare boolean, so
           // the rationale cannot reach the workflow through the gate and the
           // service writes it on the way past — after every refusal, so a
-          // rejected approval leaves the record untouched.
+          // rejected approval leaves no rationale behind.
           const proposal = await getProposalsService().releaseGate(request.params.id, {
             approved: true,
             actionInput: request.body.actionInput,

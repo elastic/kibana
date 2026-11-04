@@ -32,8 +32,10 @@ import { KibanaStyledComponentsThemeProvider } from '@kbn/react-kibana-context-s
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { makeDsView } from '../../aws_service_matrix';
 import {
+  ECF_TRIGGER_VAR_NAMES,
   REGION_FIELD_NAMES,
   getFlyoutFields,
+  getMissingSourceGroup,
   getRegionFieldName,
   getRequiredTextFields,
   isAdvancedVar,
@@ -71,10 +73,6 @@ export interface ServiceFieldsFormProps {
   onFieldChange: (dsId: string, input: string, fieldName: string, value: string) => void;
   onInputToggle: (dsId: string, input: string, enabled: boolean) => void;
 }
-
-// ECF trigger vars reference a "Collect logs via S3 Bucket" toggle that doesn't exist in
-// this UI. Strip the manifest description so the misleading help text isn't shown.
-const ECF_TRIGGER_VARS = new Set(['bucket_arn', 'log_group_arn']);
 
 function VarField({
   service,
@@ -129,9 +127,13 @@ function VarField({
           }),
         ]
       : null;
-  const varDef = ECF_TRIGGER_VARS.has(fieldName)
-    ? { ...meta.def, description: undefined, multi: true, required: true }
-    : meta.def;
+  // In the ECF view the trigger ARN is the only field, so it is required and multi-value. Its
+  // manifest description references a "Collect logs via S3 Bucket" toggle that the ECF view
+  // doesn't show, so strip it there. The agent-based view keeps the manifest definition.
+  const varDef =
+    service.settingsScope === 'ecf' && ECF_TRIGGER_VAR_NAMES.has(fieldName)
+      ? { ...meta.def, description: undefined, multi: true, required: true }
+      : meta.def;
   // KibanaStyledComponentsThemeProvider supplies the legacy styled-components EUI theme that
   // Fleet's var field accesses via props.theme.eui (e.g. FixedHeightDiv for yaml fields).
   return (
@@ -241,6 +243,12 @@ function InputVarFields({
     return typeof effective === 'string' && !effective.trim();
   });
 
+  // At least one of the input's source vars (bucket ARN / queue URL, log group ...) is mandatory.
+  const missingSourceGroup = getMissingSourceGroup(service, activeInput, draft);
+  const missingSourceLabels = (missingSourceGroup ?? []).map(
+    (f) => resolveFieldMeta(service, activeInput, f)?.def.title ?? f
+  );
+
   return (
     <>
       {regionMeta && (
@@ -310,6 +318,25 @@ function InputVarFields({
               />
             </React.Fragment>
           ))}
+        </>
+      )}
+
+      {missingSourceGroup && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiText
+            size="s"
+            color="danger"
+            data-test-subj="serviceSettingsFlyout-sourceRequiredHint"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.ingestHub.serviceSettingsStep.flyout.sourceRequiredHint"
+                defaultMessage="Provide at least one of: {fields}."
+                values={{ fields: missingSourceLabels.join(', ') }}
+              />
+            </p>
+          </EuiText>
         </>
       )}
 

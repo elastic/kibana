@@ -57,6 +57,24 @@ describe('useNetworkTls', () => {
     expect(mockSearch).toHaveBeenCalled();
   });
 
+  it('labels the search with the network page execution context', () => {
+    renderHook(() => useNetworkTls(props), {
+      wrapper: TestProviders,
+    });
+
+    expect(mockUseSearchStrategy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:explore-network_page',
+            id: 'network_tls',
+          },
+        },
+      })
+    );
+  });
+
   it('does not run search when skip = true', () => {
     const localProps = {
       ...props,

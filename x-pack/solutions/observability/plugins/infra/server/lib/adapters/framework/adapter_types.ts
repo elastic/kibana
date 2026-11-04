@@ -87,15 +87,23 @@ export interface CallWithRequestParams extends estypes.RequestBase {
   query?: string | object;
   track_total_hits?: boolean | number;
   body?: any;
+  /** Type of index that wildcard patterns can match (e.g. `['open', 'hidden']`). */
+  expand_wildcards?: string | string[];
+  /**
+   * Server-side timeout forwarded as a query parameter to the Elasticsearch
+   * API (e.g. for `_resolve/cluster`). Distinct from `requestTimeout`, which
+   * is a transport-level ceiling applied by the ES client itself.
+   */
+  timeout?: string;
   /**
    * Transport-level request timeout (e.g. '30s') applied to the underlying
    * Elasticsearch client call. Not part of the request body — it is
    * extracted and forwarded as a transport option so the call can't hang
    * indefinitely against a slow or unreachable cluster.
    *
-   * NOTE: currently only honored for the `search` endpoint in
-   * `KibanaFramework#callWithRequest`. Setting it for `msearch`/`indices.*`
-   * is a no-op until those call sites forward it too.
+   * NOTE: honored for the `search` and `indices.resolveCluster` endpoints in
+   * `KibanaFramework#callWithRequest`. Setting it for `msearch`/other
+   * `indices.*` endpoints is a no-op until those call sites forward it too.
    */
   requestTimeout?: string | number;
 }

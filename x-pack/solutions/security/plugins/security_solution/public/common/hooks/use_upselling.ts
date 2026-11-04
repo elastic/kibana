@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type React from 'react';
 import type {
+  UpsellingPageComponent,
   UpsellingSectionId,
   UpsellingMessageId,
 } from '@kbn/security-solution-upselling/service';
@@ -29,7 +30,7 @@ export const useUpsellingMessage = (id: UpsellingMessageId): string | undefined 
   return useMemo(() => upsellingMessages?.get(id), [id, upsellingMessages]);
 };
 
-export const useUpsellingPage = (pageName: SecurityPageName): React.ComponentType | null => {
+export const useUpsellingPage = (pageName: SecurityPageName): UpsellingPageComponent | null => {
   const upselling = useUpsellingService();
   const UpsellingPage = useMemo(() => upselling.getPageUpselling(pageName), [pageName, upselling]);
 

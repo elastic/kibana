@@ -22,6 +22,8 @@ interface FilterCreationOptions {
     | 'exists'
     | 'does not exist';
   value?: string | string[] | { from: string; to: string };
+  /** Data view to create the filter for. Only needed when the filter editor shows a data view picker. */
+  dataView?: string;
 }
 
 interface FilterFormOptions {
@@ -49,6 +51,11 @@ export class FilterBar {
     const previousCount = await this.getFilterCount();
     await this.page.testSubj.click('addFilter');
     await this.page.testSubj.locator('addFilterPopover').waitFor({ state: 'visible' });
+    if (options.dataView) {
+      await this.page.components
+        .comboBox('filterIndexPatternsSelect')
+        .setSelectedOptions([options.dataView]);
+    }
     // Prefer EUI comboBox helpers over typeWithDelay: under load the operator combo can be
     // "stable" while a character-by-character type still times out (overlay / remount race).
     await this.page.components

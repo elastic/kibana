@@ -35,5 +35,3 @@ export const EntityPanelParamByType: Record<EntityType, string | undefined> = {
   [EntityType.service]: 'serviceName',
   [EntityType.generic]: undefined, // TODO create generic flyout?
 };
-
-export const WatchlistsFlyoutKey = 'watchlists-flyout';
