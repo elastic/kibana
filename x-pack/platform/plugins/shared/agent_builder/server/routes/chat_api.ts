@@ -19,7 +19,6 @@ import {
   CONVERSATION_ID_MAX_LENGTH,
   createNonInteractiveConfig,
 } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type {
   ChatRequestBodyPayload,
   ChatConverseResponse,
@@ -141,15 +140,14 @@ export function registerChatApiRoutes({
       summary: 'Send a message and get the answer',
       description:
         'Send a message to an agent and get its text answer. Use this synchronous endpoint in scripts and command-line tools. The response contains only the answer and the conversation ID. To continue the conversation, include the returned `conversation_id` in the next request.\n\n' +
-        'The agent runs without a user, so the endpoint declines every prompt that the agent raises, such as a tool confirmation, a question, or a destructive API approval. The `declined_prompts` property lists these prompts. This endpoint does not support attachments.\n\n' +
-        'The `agentBuilder:experimentalFeatures` advanced setting must be enabled. If it is disabled, the endpoint returns a 404 response.',
+        'The agent runs without a user, so the endpoint declines every prompt that the agent raises, such as a tool confirmation, a question, or a destructive API approval. The `declined_prompts` property lists these prompts. This endpoint does not support attachments.',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,
         },
         tags: ['oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
+          stability: 'tech_preview',
           since: '9.6.0',
         },
       },
@@ -192,8 +190,7 @@ export function registerChatApiRoutes({
           return response.ok<ChatMessageResponse>({
             body: buildChatMessageResponseFromEvents(events),
           });
-        },
-        { featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID }
+        }
       )
     );
 
