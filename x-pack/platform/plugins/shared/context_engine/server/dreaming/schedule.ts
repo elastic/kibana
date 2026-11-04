@@ -57,13 +57,9 @@ export interface DreamingScheduleService {
 export const dreamingWorkflowIdFor = (aiIndexId: string, spaceId: string): string =>
   `${CONTEXT_ENGINE_DREAMING_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(aiIndexId, spaceId)}`;
 
-/** Whether an AI index should have a dreaming workflow: on, with memory, building something. */
-export const shouldDream = (
-  aiIndex: Pick<AiIndexHttpItem, 'memory_enabled'> & { dreaming?: AiIndexDreamingConfig }
-): boolean =>
-  aiIndex.memory_enabled &&
-  aiIndex.dreaming?.enabled === true &&
-  dreamingBuildsAnything(aiIndex.dreaming);
+/** Whether an AI index should have a dreaming workflow: dreaming is on and builds something. */
+export const shouldDream = ({ dreaming }: { dreaming?: AiIndexDreamingConfig }): boolean =>
+  dreaming?.enabled === true && dreamingBuildsAnything(dreaming);
 
 /** The dreaming workflow's template values: the saved config, as consts. */
 export const dreamingTemplateValuesFor = (

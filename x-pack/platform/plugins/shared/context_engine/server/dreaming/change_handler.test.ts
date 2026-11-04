@@ -14,7 +14,6 @@ import type { DreamingScheduleService } from './schedule';
 const aiIndex: AiIndexHttpItem = {
   id: 'support',
   managed: false,
-  memory_enabled: true,
   dest: { type: 'index', value: 'ai-index-idx-support' },
   automations: [],
   sources: [],
@@ -49,7 +48,7 @@ describe('createDreamingChangeHandler', () => {
     });
   });
 
-  it('reconciles when the backing store or memory changes, which the workflow depends on', async () => {
+  it('reconciles when the backing store changes, which the workflow reads', async () => {
     const previous = { ...aiIndex, dreaming };
 
     await notifier.notify({
@@ -57,9 +56,8 @@ describe('createDreamingChangeHandler', () => {
       previous,
       current: { ...previous, dest: { type: 'index', value: 'ai-index-idx-support-v2' } },
     });
-    await notifier.notify({ ...change, previous, current: { ...previous, memory_enabled: false } });
 
-    expect(scheduleService.reconcile).toHaveBeenCalledTimes(2);
+    expect(scheduleService.reconcile).toHaveBeenCalledTimes(1);
   });
 
   it('leaves the workflow alone when the dreaming config is saved unchanged', async () => {

@@ -33,7 +33,6 @@ const dreaming = {
 const aiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem => ({
   id: 'support',
   managed: false,
-  memory_enabled: true,
   dest: { type: 'index', value: 'ai-index-idx-support' },
   automations: [],
   sources: [],
@@ -45,9 +44,8 @@ const aiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem => (
 });
 
 describe('shouldDream', () => {
-  it('dreams only with memory on, dreaming on and a type to build', () => {
+  it('dreams only with dreaming on and a type to build', () => {
     expect(shouldDream(aiIndex())).toBe(true);
-    expect(shouldDream(aiIndex({ memory_enabled: false }))).toBe(false);
     expect(shouldDream(aiIndex({ dreaming: { ...dreaming, enabled: false } }))).toBe(false);
     expect(shouldDream(aiIndex({ dreaming: { enabled: true } }))).toBe(false);
     expect(shouldDream(aiIndex({ dreaming: undefined }))).toBe(false);
@@ -168,7 +166,6 @@ describe('createDreamingScheduleService', () => {
 
   it.each([
     ['dreaming is off', { dreaming: { ...dreaming, enabled: false } }],
-    ['memory is off', { memory_enabled: false }],
     ['dreaming was never configured', { dreaming: undefined }],
   ])('removes the workflow and detaches it when %s', async (_, overrides) => {
     await createService(workflowsManagement).reconcile({

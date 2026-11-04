@@ -12,14 +12,13 @@ export const DREAMING_CHANGE_HANDLER_ID = 'dreaming_schedule';
 
 /**
  * Keeps the dreaming workflow of an AI index in line with its dreaming config. The workflow reads
- * memories from the AI index backing store, and dreams only while memory is on, so a change to
- * either reinstalls it too.
+ * memories from the AI index backing store, so a change to it reinstalls the workflow too.
  */
 export const createDreamingChangeHandler = (
   getScheduleService: () => DreamingScheduleService
 ): AiIndexChangeHandler => ({
   id: DREAMING_CHANGE_HANDLER_ID,
-  fields: ['dreaming', 'dest', 'memory_enabled'],
+  fields: ['dreaming', 'dest'],
   onChange: async ({ aiIndexId, spaceId, request, current }) => {
     if (!current) {
       await getScheduleService().remove({ aiIndexId, spaceId, request });
