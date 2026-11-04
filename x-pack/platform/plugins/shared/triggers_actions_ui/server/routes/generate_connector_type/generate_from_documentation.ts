@@ -34,7 +34,7 @@ export const generateFromDocumentation = async ({
   if (!inference) {
     throw new GenerateConnectorTypeError(
       'no_model',
-      'No AI model is available. Set a default AI connector or pick a model for Connector builder in Feature Settings.',
+      'No AI model is available. Set a default AI connector or pick a model for Connector type builder in Feature Settings.',
       400
     );
   }

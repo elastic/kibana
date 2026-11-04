@@ -144,7 +144,7 @@ describe('BuildConnectorPage', () => {
     expect(screen.getByText('Generate with AI')).toBeInTheDocument();
     expect(screen.getByTestId('build-connector-ai-url')).toBeInTheDocument();
     expect(screen.getByTestId('build-connector-ai-generate-btn')).toHaveTextContent(
-      'Generate connector'
+      'Generate connector type'
     );
     expect(screen.getByTestId('build-connector-start-import-yaml')).toBeInTheDocument();
     expect(screen.getByTestId('build-connector-start-scratch')).toBeInTheDocument();
@@ -969,7 +969,7 @@ describe('BuildConnectorPage', () => {
 
       const callout = await screen.findByTestId('build-connector-ai-error');
       expect(callout).toHaveTextContent(
-        'Set a default AI connector, or pick a model for Connector builder in Feature Settings.'
+        'Set a default AI connector, or pick a model for Connector type builder in Feature Settings.'
       );
       expect(callout).not.toHaveTextContent('No AI model is available.');
     });

@@ -34,7 +34,7 @@ describe('registerConnectorBuilderInferenceFeature', () => {
 
     expect(register).toHaveBeenCalledWith({
       featureId: CONNECTOR_BUILDER_INFERENCE_FEATURE_ID,
-      featureName: 'Connector builder',
+      featureName: 'Connector type builder',
       featureDescription: 'Model used to draft connector types from API documentation.',
       taskType: 'chat_completion',
       recommendedEndpoints: [],

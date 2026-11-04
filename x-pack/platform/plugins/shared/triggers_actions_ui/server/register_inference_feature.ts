@@ -25,7 +25,7 @@ export interface ConnectorBuilderInferenceEndpoints {
   };
 }
 
-/** Registers the Connector builder model so admins can pick it in Feature Settings. */
+/** Registers the Connector type builder model so admins can pick it in Feature Settings. */
 export const registerConnectorBuilderInferenceFeature = (
   searchInferenceEndpoints: ConnectorBuilderInferenceEndpoints | undefined,
   logger: Logger
@@ -37,7 +37,7 @@ export const registerConnectorBuilderInferenceFeature = (
   const result = searchInferenceEndpoints.features.register({
     featureId: CONNECTOR_BUILDER_INFERENCE_FEATURE_ID,
     featureName: i18n.translate('xpack.triggersActionsUI.inferenceFeature.connectorBuilderName', {
-      defaultMessage: 'Connector builder',
+      defaultMessage: 'Connector type builder',
     }),
     featureDescription: i18n.translate(
       'xpack.triggersActionsUI.inferenceFeature.connectorBuilderDescription',

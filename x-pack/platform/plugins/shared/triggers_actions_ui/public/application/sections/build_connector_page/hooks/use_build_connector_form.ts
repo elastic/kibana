@@ -36,7 +36,7 @@ export interface UseBuildConnectorFormReturnValue {
   submit: () => Promise<void>;
 }
 
-/** Form state and submit flow of the connector builder page. */
+/** Form state and submit flow of the connector type builder page. */
 export const useBuildConnectorForm = ({
   onCreated,
   initialDefinition,

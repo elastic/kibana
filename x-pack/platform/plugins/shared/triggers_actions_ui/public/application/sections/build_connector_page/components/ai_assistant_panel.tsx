@@ -43,7 +43,7 @@ const getErrorGuidance = (reason?: GenerateConnectorTypeErrorReason): string | u
         'xpack.triggersActionsUI.sections.buildConnectorPage.aiNoModelGuidance',
         {
           defaultMessage:
-            'Set a default AI connector, or pick a model for Connector builder in Feature Settings.',
+            'Set a default AI connector, or pick a model for Connector type builder in Feature Settings.',
         }
       );
     case 'blocked_destination':
@@ -129,7 +129,7 @@ const AiAssistantPanelComponent: React.FC<Props> = ({ onApply, isDisabled = fals
           >
             {i18n.translate(
               'xpack.triggersActionsUI.sections.buildConnectorPage.aiGenerateButtonLabel',
-              { defaultMessage: 'Generate connector' }
+              { defaultMessage: 'Generate connector type' }
             )}
           </EuiButton>
         </EuiFlexItem>

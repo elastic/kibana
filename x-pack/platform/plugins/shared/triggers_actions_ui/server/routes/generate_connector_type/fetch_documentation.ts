@@ -314,7 +314,7 @@ export const fetchPublicResource = async <Result>({
     try {
       let response: DocumentationResponse;
       try {
-        logger.debug(`Fetching connector builder resource from ${current}`);
+        logger.debug(`Fetching connector type builder resource from ${current}`);
         response = await fetchImpl(current, {
           method: 'GET',
           redirect: 'manual',

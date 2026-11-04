@@ -139,7 +139,7 @@ export const generateConnectorTypeSpec = async ({
       parsed = JSON.parse(raw);
     } catch {
       lastIssues = 'Response was not valid JSON.';
-      logger.debug('Connector builder model output was not JSON.');
+      logger.debug('Connector type builder model output was not JSON.');
       continue;
     }
 
@@ -149,7 +149,7 @@ export const generateConnectorTypeSpec = async ({
     }
 
     lastIssues = formatIssues(result.error.issues);
-    logger.debug(`Connector builder model output failed validation: ${lastIssues}`);
+    logger.debug(`Connector type builder model output failed validation: ${lastIssues}`);
   }
 
   throw new GenerateConnectorTypeError(
