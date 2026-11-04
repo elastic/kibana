@@ -28,10 +28,31 @@ export type SyntheticsMonitorDocument = Fields &
     'monitor.project.id'?: string;
     'monitor.fleet_managed'?: boolean;
     'monitor.status'?: string;
+    'monitor.interval'?: number;
     'synthetics.type'?: string;
     'synthetics.step.index'?: number;
     'observer.os.name'?: string;
     'observer.product'?: string;
+    'observer.name'?: string;
+    'observer.geo.name'?: string;
+    config_id?: string;
+    'meta.space_id'?: string;
+    tags?: string[];
+    'summary.up'?: number;
+    'summary.down'?: number;
+    'summary.final_attempt'?: boolean;
+    'state.id'?: string;
+    'state.up'?: number;
+    'state.down'?: number;
+    'state.checks'?: number;
+    'state.status'?: string;
+    'state.started_at'?: string;
+    'state.duration_ms'?: number;
+    'url.full'?: string;
+    'url.domain'?: string;
+    'error.message'?: string;
+    'error.type'?: string;
+    'agent.type'?: string;
   }>;
 
 type MonitorDataStream =
