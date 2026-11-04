@@ -10,18 +10,24 @@ import type { QueryArgs } from '../common';
 import { ENTITY_TYPE_FILTER, buildRowRiskScoreSteps, getEntityAlias, toList } from './esql';
 import type { EntityAggregation } from './esql';
 
-export const buildEntityFilterConditions = ({ entityExpression }: QueryArgs): string[] =>
-  entityExpression ? [entityExpression] : [];
+export const buildEntityFilterConditions = ({
+  entityExpression,
+}: Pick<QueryArgs, 'entityExpression'>): string[] => (entityExpression ? [entityExpression] : []);
+
+type InViewArgs = Pick<
+  QueryArgs,
+  'namespace' | 'rowsMode' | 'searchExpression' | 'entityExpression'
+>;
 
 /** The grid's rows; on resolved rows only main entities, as their aliases count for them. */
-export const buildEntitiesInViewConditions = (args: QueryArgs): string[] => [
+export const buildEntitiesInViewConditions = (args: InViewArgs): string[] => [
   ENTITY_TYPE_FILTER,
   ...(args.rowsMode === 'resolved' ? [`${RESOLVED_TO_FIELD} IS NULL`] : []),
   ...(args.searchExpression ? [args.searchExpression] : []),
   ...buildEntityFilterConditions(args),
 ];
 
-export const buildEntitiesInViewSteps = (args: QueryArgs): string[] => [
+export const buildEntitiesInViewSteps = (args: InViewArgs): string[] => [
   `FROM ${getEntityAlias(args.namespace)}`,
   ...buildEntitiesInViewConditions(args).map((condition) => `| WHERE ${condition}`),
 ];
@@ -57,7 +63,7 @@ export const buildEntitiesInViewBranch = (
 
 /** Which of these ids are in view, search included: KQL can't run after a join, so joined rows are checked here. */
 export const buildSearchedTargetsQuery = (
-  args: QueryArgs,
+  args: InViewArgs,
   targetIds: readonly string[]
 ): string[] => [
   ...buildEntitiesInViewSteps(args),

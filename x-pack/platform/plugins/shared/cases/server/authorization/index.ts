@@ -137,6 +137,14 @@ const CaseOperations = {
     docType: 'cases',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
   },
+  [ReadOperations.GetCaseIDsByAttachmentIDs]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_CASE_OPERATION,
+    action: 'case_ids_by_attachment_ids_get',
+    verbs: accessVerbs,
+    docType: 'cases',
+    savedObjectType: CASE_SAVED_OBJECT,
+  },
   [ReadOperations.GetCaseMetrics]: {
     ecsType: EVENT_TYPES.access,
     name: ACCESS_CASE_OPERATION,

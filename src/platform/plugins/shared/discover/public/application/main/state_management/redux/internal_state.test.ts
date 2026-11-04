@@ -10,7 +10,10 @@
 import { ExistenceFetchStatus } from '@kbn/unified-field-list';
 import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
 import { createMockDataViewsService } from '@kbn/data-source/src/__mocks__/data_views_service.mock';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
+import { TABS_LOCAL_STORAGE_KEY } from '../tabs_storage_manager';
 import {
   createTabItem,
   DEFAULT_EXPANDED_DOC_OWNER,
@@ -771,6 +774,46 @@ describe('InternalStateStore', () => {
     expect(selectTab(store.getState(), tabId).expandedDoc).toBeUndefined();
     expect(selectTab(store.getState(), tabId).expandedDocOwner).toBeUndefined();
     expect(selectTab(store.getState(), tabId).renderDocumentViewMeta).toBeUndefined();
+  });
+
+  describe('local tabs persistence', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+      localStorage.removeItem(TABS_LOCAL_STORAGE_KEY);
+    });
+
+    it('should persist the unsaved tab ids only when they change', async () => {
+      const services = createDiscoverServicesMock();
+      services.storage = new Storage(localStorage);
+      const toolkit = getDiscoverInternalStateMock({
+        services,
+        tabsStorageEnabled: true,
+        persistedDataViews: [dataViewMock],
+      });
+      await toolkit.initializeTabs();
+      await jest.runAllTimersAsync();
+
+      const { internalState } = toolkit;
+      const unsavedTabIds = [internalState.getState().tabs.unsafeCurrentId];
+      const setStorageSpy = jest.spyOn(services.storage, 'set');
+
+      internalState.dispatch(
+        internalStateActions.setUnsavedChanges({ hasUnsavedChanges: true, unsavedTabIds })
+      );
+      await jest.runAllTimersAsync();
+      internalState.dispatch(
+        internalStateActions.setUnsavedChanges({ hasUnsavedChanges: true, unsavedTabIds })
+      );
+      await jest.runAllTimersAsync();
+
+      expect(setStorageSpy.mock.calls).toEqual([
+        [TABS_LOCAL_STORAGE_KEY, expect.objectContaining({ unsavedTabIds })],
+      ]);
+    });
   });
 
   describe('discardFlyoutsOnTabChange', () => {

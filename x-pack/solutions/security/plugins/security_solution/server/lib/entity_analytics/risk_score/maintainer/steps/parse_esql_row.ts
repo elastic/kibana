@@ -7,7 +7,7 @@
 
 import { omit } from 'lodash';
 import type { SearchHitRiskInput } from '../../../types';
-import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from '../../constants';
+import { RIEMANN_ZETA_S_VALUE, getRiemannZetaValue } from '../../constants';
 
 export interface ParsedRiskScore {
   entity_id: string;
@@ -32,9 +32,10 @@ export interface ParsedResolutionScore {
  * Parsing is kept local to this path to avoid coupling with legacy flow helpers.
  */
 export const parseEsqlBaseScoreRow =
-  (index: string) =>
+  (index: string, sampleSize: number) =>
   (row: unknown[]): ParsedRiskScore => {
     const [count, score, _inputs, entityId] = row as [number, number, string | string[], string];
+    const zetaValue = getRiemannZetaValue(sampleSize);
 
     const inputs = [_inputs]
       .flat()
@@ -74,7 +75,7 @@ export const parseEsqlBaseScoreRow =
           rule_name: ruleName,
           category,
           score: value,
-          contribution: currentScore / RIEMANN_ZETA_VALUE,
+          contribution: currentScore / zetaValue,
           index,
         } as SearchHitRiskInput;
       })
@@ -84,13 +85,13 @@ export const parseEsqlBaseScoreRow =
       entity_id: entityId,
       alert_count: count,
       score,
-      normalized_score: score / RIEMANN_ZETA_VALUE,
+      normalized_score: score / zetaValue,
       risk_inputs: inputs,
     };
   };
 
 export const parseEsqlResolutionScoreRow =
-  (index: string) =>
+  (index: string, sampleSize: number) =>
   (row: unknown[]): ParsedResolutionScore => {
     const [count, score, _inputs, contributingEntitiesRaw, resolutionTargetId] = row as [
       number,
@@ -100,7 +101,10 @@ export const parseEsqlResolutionScoreRow =
       string
     ];
 
-    const baseParsed = parseEsqlBaseScoreRow(index)([count, score, _inputs, resolutionTargetId]);
+    const baseParsed = parseEsqlBaseScoreRow(
+      index,
+      sampleSize
+    )([count, score, _inputs, resolutionTargetId]);
 
     const parsedRelatedEntities = [contributingEntitiesRaw]
       .flat()

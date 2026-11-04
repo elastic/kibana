@@ -404,6 +404,37 @@ describe('ResolutionClient', () => {
   });
 
   describe('cascadeLinkEntities', () => {
+    it('uses a caller-resolved latest index for every read and write', async () => {
+      const resolveSpy = jest.fn();
+      const pinnedEsClient = {
+        search: jest.fn(),
+        bulk: jest.fn(),
+        indices: new Proxy({}, { get: () => resolveSpy }),
+      } as unknown as jest.Mocked<ElasticsearchClient>;
+      const pinned = new ResolutionClient({
+        logger: mockLogger,
+        esClient: pinnedEsClient,
+        namespace: NAMESPACE,
+        latestIndex: '.entities.v2.latest.pinned',
+      });
+      pinnedEsClient.search
+        .mockResolvedValueOnce(
+          createSearchResponse([createEntityDoc('target'), createEntityDoc('member')]) as never
+        )
+        .mockResolvedValueOnce(createSearchResponse([]) as never);
+      pinnedEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
+
+      await pinned.cascadeLinkEntities('target', ['member']);
+
+      expect(resolveSpy).not.toHaveBeenCalled();
+      for (const [params] of pinnedEsClient.search.mock.calls) {
+        expect(params).toMatchObject({ index: '.entities.v2.latest.pinned' });
+      }
+      expect(JSON.stringify(pinnedEsClient.bulk.mock.calls[0][0])).toContain(
+        '.entities.v2.latest.pinned'
+      );
+    });
+
     it('links a clean entity and retargets its incoming aliases', async () => {
       mockEsClient.search
         .mockResolvedValueOnce(

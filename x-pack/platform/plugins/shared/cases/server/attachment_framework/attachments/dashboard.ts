@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DashboardAttachmentPayloadSchema } from '../../../common/types/domain_zod/attachment/dashboard/v2';
+import { DashboardAttachmentPayloadSchema } from '../../../common/types/domain/attachment/dashboard/v2';
 import type { UnifiedAttachmentTypeSetup } from '../types';
 import { DASHBOARD_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 

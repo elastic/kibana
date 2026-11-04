@@ -272,13 +272,12 @@ describe('runAutomationHandler', () => {
         });
       });
 
-      it('counts only completed createKi steps that returned an id', async () => {
+      it('counts written and failed-verification createKi steps separately', async () => {
         getWorkflowExecutionMock.mockResolvedValue({
           stepExecutions: [
             createKi({ id: 'pilot/a' }),
-            createKi({ id: 'pilot/b' }),
-            // Failed verification: the step completes but writes nothing.
-            createKi({ verification: { passed: false } }),
+            createKi({ id: 'pilot/b', verification: { passed: true } }),
+            createKi({ id: 'pilot/c', verification: { passed: false } }),
             createKi({}, 'failed'),
             {
               stepId: 'summarize',
@@ -297,6 +296,7 @@ describe('runAutomationHandler', () => {
           expect.objectContaining({ includeOutput: true, request })
         );
         expect(result.kisWritten).toBe(2);
+        expect(result.kisFailedVerification).toBe(1);
       });
 
       it('omits the count rather than failing when the execution cannot be read', async () => {

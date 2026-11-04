@@ -12,18 +12,12 @@ steps:
     label: Pre-Build
     timeout_in_minutes: 10
     agents:
+      image: family/kibana-minimal-ubuntu-2604
       machineType: n2-standard-2
     retry:
       automatic:
         - exit_status: '*'
           limit: 1
-  - command: .buildkite/scripts/steps/store_cache.sh
-    label: Store Cache for build
-    timeout_in_minutes: 10
-    id: store_cache
-    soft_fail: true
-    agents:
-      machineType: n2-highcpu-8
 
   - wait
 
@@ -44,6 +38,7 @@ steps:
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
     label: Mark CI Stats as ready
     agents:
+      image: family/kibana-minimal-ubuntu-2604
       machineType: n2-standard-2
     timeout_in_minutes: 10
     depends_on:
@@ -458,4 +453,5 @@ steps:
     label: Post-Build
     timeout_in_minutes: 10
     agents:
+      image: family/kibana-minimal-ubuntu-2604
       machineType: n2-standard-2

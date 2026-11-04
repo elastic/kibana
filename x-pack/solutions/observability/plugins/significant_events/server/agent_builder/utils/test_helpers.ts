@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { IUiSettingsClient } from '@kbn/core/server';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type {
+  BuiltinToolDefinition,
+  DynamicSchemaBuiltinToolDefinition,
+} from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { ZodObject } from '@kbn/zod/v4';
 import type { z } from '@kbn/zod/v4';
@@ -20,6 +25,7 @@ import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { KnowledgeIndicatorClient } from '../../lib/knowledge_indicators';
 import type { RouteHandlerScopedClients, GetScopedClients } from '../../routes/types';
 import type { SignificantEventsServer } from '../../types';
+import type { SourceToolDeps } from '../tools/sources/source_tool_deps';
 
 /**
  * Subset of RouteHandlerScopedClients that tools actually use.
@@ -100,7 +106,10 @@ export const mockSourcesClient = (slugs: readonly string[]) => ({
 export const createMockRequest = () => httpServerMock.createKibanaRequest();
 
 export const invokeHandler = async <TSchema extends ZodObject<any>>(
-  tool: BuiltinSkillBoundedTool<TSchema> | BuiltinToolDefinition<TSchema>,
+  tool:
+    | BuiltinSkillBoundedTool<TSchema>
+    | BuiltinToolDefinition<TSchema>
+    | DynamicSchemaBuiltinToolDefinition<TSchema>,
   input: z.infer<TSchema>,
   context: ToolHandlerContext
 ) => {
@@ -155,3 +164,16 @@ export const createSignificantEventsServer = ({
   const server: Pick<SignificantEventsServer, 'security'> = { security };
   return server as SignificantEventsServer;
 };
+
+/** The dependencies every source tool takes, with the given sources client behind the scoped clients. */
+export const createSourceToolDeps = ({
+  featurePrivilege,
+  sourcesClient,
+}: {
+  featurePrivilege: NightshiftFeaturePrivilege;
+  sourcesClient: Partial<SourcesClient>;
+}): SourceToolDeps => ({
+  getScopedClients: jest.fn().mockResolvedValue({ licensing: {}, sourcesClient }),
+  server: createSignificantEventsServer({ featurePrivilege }),
+  logger: loggingSystemMock.createLogger(),
+});

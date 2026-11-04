@@ -157,6 +157,19 @@ describe('UnifiedFieldList <FieldTopValuesBucket />', () => {
     ).toBeInTheDocument();
   });
 
+  it('uses the custom label for the filter button labels but not for the test subjects', () => {
+    const fieldWithCustomLabel = new DataViewField({
+      ...filterableField.toSpec(),
+      customLabel: 'File extension',
+    });
+
+    renderBucket({ field: fieldWithCustomLabel, onAddFilter: jest.fn() });
+
+    expect(
+      screen.getByRole('button', { name: 'Filter for File extension: "sourceA"' })
+    ).toHaveAttribute('data-test-subj', 'plus-extension-sourceA');
+  });
+
   it('calls overrideFieldTopValueBar and applies returned overrides', () => {
     const overrideFieldTopValueBar = jest.fn(() => ({
       formattedPercentage: '99.0%',

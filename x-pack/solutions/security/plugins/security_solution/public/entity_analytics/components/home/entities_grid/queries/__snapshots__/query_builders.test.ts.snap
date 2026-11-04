@@ -173,8 +173,13 @@ TRUE, _euid_branch_2_formula, NULL))
  _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
  entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
 | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
-| EVAL \`entity.id\` = COALESCE(user_euid, host_euid, service_euid)
-| WHERE \`entity.id\` IS NOT NULL
+| EVAL derived_euids = MV_DEDUPE(MV_APPEND(MV_APPEND(
+  COALESCE(user_euid, host_euid, service_euid),
+  COALESCE(host_euid, service_euid, user_euid)),
+  COALESCE(service_euid, user_euid, host_euid)))
+| MV_EXPAND derived_euids
+| WHERE derived_euids IS NOT NULL
+| RENAME derived_euids AS \`entity.id\`
 | WHERE \`entity.id\` IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\")
 | STATS anomaly_count = COUNT(*) BY \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
@@ -204,8 +209,11 @@ Array [
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL entity_id = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | WHERE entity_id IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\")
-| STATS group_reference = LAST(score, \`@timestamp\`) WHERE COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", own_reference = LAST(score, \`@timestamp\`) WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\") BY entity_id
-| EVAL reference_score = COALESCE(group_reference, own_reference)
+| EVAL is_group = CASE(COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", 1, 0)
+| STATS last_value = LAST(score, @timestamp) BY entity_id, is_group
+| EVAL group_part = CASE(is_group == 1, last_value, null), own_part = CASE(is_group == 0, last_value, null)
+| STATS group_value = MAX(group_part), own_value = MAX(own_part) BY entity_id
+| EVAL reference_score = COALESCE(group_value, own_value)
 | KEEP entity_id, reference_score",
 ]
 `;
@@ -522,8 +530,13 @@ TRUE, _euid_branch_2_formula, NULL))
  _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
  entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
 | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
-| EVAL \`entity.id\` = COALESCE(user_euid, host_euid, service_euid)
-| WHERE \`entity.id\` IS NOT NULL
+| EVAL derived_euids = MV_DEDUPE(MV_APPEND(MV_APPEND(
+  COALESCE(user_euid, host_euid, service_euid),
+  COALESCE(host_euid, service_euid, user_euid)),
+  COALESCE(service_euid, user_euid, host_euid)))
+| MV_EXPAND derived_euids
+| WHERE derived_euids IS NOT NULL
+| RENAME derived_euids AS \`entity.id\`
 | STATS anomaly_count = COUNT(*) BY \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
@@ -601,8 +614,13 @@ TRUE, _euid_branch_2_formula, NULL))
  _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
  entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
 | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
-| EVAL \`entity.id\` = COALESCE(user_euid, host_euid, service_euid)
-| WHERE \`entity.id\` IS NOT NULL
+| EVAL derived_euids = MV_DEDUPE(MV_APPEND(MV_APPEND(
+  COALESCE(user_euid, host_euid, service_euid),
+  COALESCE(host_euid, service_euid, user_euid)),
+  COALESCE(service_euid, user_euid, host_euid)))
+| MV_EXPAND derived_euids
+| WHERE derived_euids IS NOT NULL
+| RENAME derived_euids AS \`entity.id\`
 | STATS anomaly_count = COUNT(*) BY \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
@@ -1247,8 +1265,11 @@ FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
-| STATS group_reference = LAST(score, \`@timestamp\`) WHERE COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", own_reference = LAST(score, \`@timestamp\`) WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\") BY \`entity.id\`
-| EVAL reference_score = COALESCE(group_reference, own_reference)
+| EVAL is_group = CASE(COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", 1, 0)
+| STATS last_value = LAST(score, @timestamp) BY \`entity.id\`, is_group
+| EVAL group_part = CASE(is_group == 1, last_value, null), own_part = CASE(is_group == 0, last_value, null)
+| STATS group_value = MAX(group_part), own_value = MAX(own_part) BY \`entity.id\`
+| EVAL reference_score = COALESCE(group_value, own_value)
 | KEEP \`entity.id\`, reference_score
 ), (
 FROM entities-latest-default
@@ -1287,8 +1308,11 @@ FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
-| STATS group_reference = LAST(score, \`@timestamp\`) WHERE COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", own_reference = LAST(score, \`@timestamp\`) WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\") BY \`entity.id\`
-| EVAL reference_score = COALESCE(group_reference, own_reference)
+| EVAL is_group = CASE(COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", 1, 0)
+| STATS last_value = LAST(score, @timestamp) BY \`entity.id\`, is_group
+| EVAL group_part = CASE(is_group == 1, last_value, null), own_part = CASE(is_group == 0, last_value, null)
+| STATS group_value = MAX(group_part), own_value = MAX(own_part) BY \`entity.id\`
+| EVAL reference_score = COALESCE(group_value, own_value)
 | KEEP \`entity.id\`, reference_score
 ), (
 FROM entities-latest-default
@@ -1769,8 +1793,13 @@ TRUE, _euid_branch_2_formula, NULL))
  _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
  entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
 | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
-| EVAL \`entity.id\` = COALESCE(user_euid, host_euid, service_euid)
-| WHERE \`entity.id\` IS NOT NULL
+| EVAL derived_euids = MV_DEDUPE(MV_APPEND(MV_APPEND(
+  COALESCE(user_euid, host_euid, service_euid),
+  COALESCE(host_euid, service_euid, user_euid)),
+  COALESCE(service_euid, user_euid, host_euid)))
+| MV_EXPAND derived_euids
+| WHERE derived_euids IS NOT NULL
+| RENAME derived_euids AS \`entity.id\`
 | STATS anomaly_count = COUNT(*) BY \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
@@ -1850,8 +1879,13 @@ TRUE, _euid_branch_2_formula, NULL))
  _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
  entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
 | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
-| EVAL \`entity.id\` = COALESCE(user_euid, host_euid, service_euid)
-| WHERE \`entity.id\` IS NOT NULL
+| EVAL derived_euids = MV_DEDUPE(MV_APPEND(MV_APPEND(
+  COALESCE(user_euid, host_euid, service_euid),
+  COALESCE(host_euid, service_euid, user_euid)),
+  COALESCE(service_euid, user_euid, host_euid)))
+| MV_EXPAND derived_euids
+| WHERE derived_euids IS NOT NULL
+| RENAME derived_euids AS \`entity.id\`
 | STATS anomaly_count = COUNT(*) BY \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
@@ -1944,8 +1978,13 @@ TRUE, _euid_branch_2_formula, NULL))
  _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
  entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
 | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
-| EVAL \`entity.id\` = COALESCE(user_euid, host_euid, service_euid)
-| WHERE \`entity.id\` IS NOT NULL
+| EVAL derived_euids = MV_DEDUPE(MV_APPEND(MV_APPEND(
+  COALESCE(user_euid, host_euid, service_euid),
+  COALESCE(host_euid, service_euid, user_euid)),
+  COALESCE(service_euid, user_euid, host_euid)))
+| MV_EXPAND derived_euids
+| WHERE derived_euids IS NOT NULL
+| RENAME derived_euids AS \`entity.id\`
 | WHERE \`entity.id\` IN (\\"host:h-1\\", \\"host:h-1\\")
 | STATS anomaly_count = COUNT(*) BY \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
@@ -2010,8 +2049,13 @@ TRUE, _euid_branch_2_formula, NULL))
  _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
  entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
 | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
-| EVAL \`entity.id\` = COALESCE(user_euid, host_euid, service_euid)
-| WHERE \`entity.id\` IS NOT NULL
+| EVAL derived_euids = MV_DEDUPE(MV_APPEND(MV_APPEND(
+  COALESCE(user_euid, host_euid, service_euid),
+  COALESCE(host_euid, service_euid, user_euid)),
+  COALESCE(service_euid, user_euid, host_euid)))
+| MV_EXPAND derived_euids
+| WHERE derived_euids IS NOT NULL
+| RENAME derived_euids AS \`entity.id\`
 | STATS anomaly_count = COUNT(*) BY \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
@@ -2523,8 +2567,11 @@ FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
-| STATS group_reference = LAST(score, \`@timestamp\`) WHERE COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", own_reference = LAST(score, \`@timestamp\`) WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\") BY \`entity.id\`
-| EVAL reference_score = COALESCE(group_reference, own_reference)
+| EVAL is_group = CASE(COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", 1, 0)
+| STATS last_value = LAST(score, @timestamp) BY \`entity.id\`, is_group
+| EVAL group_part = CASE(is_group == 1, last_value, null), own_part = CASE(is_group == 0, last_value, null)
+| STATS group_value = MAX(group_part), own_value = MAX(own_part) BY \`entity.id\`
+| EVAL reference_score = COALESCE(group_value, own_value)
 | KEEP \`entity.id\`, reference_score
 ), (
 FROM entities-latest-default
@@ -2565,8 +2612,11 @@ FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
-| STATS group_reference = LAST(score, \`@timestamp\`) WHERE COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", own_reference = LAST(score, \`@timestamp\`) WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\") BY \`entity.id\`
-| EVAL reference_score = COALESCE(group_reference, own_reference)
+| EVAL is_group = CASE(COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", 1, 0)
+| STATS last_value = LAST(score, @timestamp) BY \`entity.id\`, is_group
+| EVAL group_part = CASE(is_group == 1, last_value, null), own_part = CASE(is_group == 0, last_value, null)
+| STATS group_value = MAX(group_part), own_value = MAX(own_part) BY \`entity.id\`
+| EVAL reference_score = COALESCE(group_value, own_value)
 | KEEP \`entity.id\`, reference_score
 ), (
 FROM entities-latest-default
@@ -2615,8 +2665,11 @@ Array [
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL entity_id = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | WHERE entity_id IN (\\"host:h-1\\")
-| STATS group_reference = LAST(score, \`@timestamp\`) WHERE COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", own_reference = LAST(score, \`@timestamp\`) WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\") BY entity_id
-| EVAL reference_score = COALESCE(group_reference, own_reference)
+| EVAL is_group = CASE(COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", 1, 0)
+| STATS last_value = LAST(score, @timestamp) BY entity_id, is_group
+| EVAL group_part = CASE(is_group == 1, last_value, null), own_part = CASE(is_group == 0, last_value, null)
+| STATS group_value = MAX(group_part), own_value = MAX(own_part) BY entity_id
+| EVAL reference_score = COALESCE(group_value, own_value)
 | KEEP entity_id, reference_score",
 ]
 `;
@@ -2628,8 +2681,11 @@ FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
-| STATS group_reference = LAST(score, \`@timestamp\`) WHERE COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", own_reference = LAST(score, \`@timestamp\`) WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\") BY \`entity.id\`
-| EVAL reference_score = COALESCE(group_reference, own_reference)
+| EVAL is_group = CASE(COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", 1, 0)
+| STATS last_value = LAST(score, @timestamp) BY \`entity.id\`, is_group
+| EVAL group_part = CASE(is_group == 1, last_value, null), own_part = CASE(is_group == 0, last_value, null)
+| STATS group_value = MAX(group_part), own_value = MAX(own_part) BY \`entity.id\`
+| EVAL reference_score = COALESCE(group_value, own_value)
 | KEEP \`entity.id\`, reference_score
 ), (
 FROM entities-latest-default

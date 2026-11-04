@@ -58,6 +58,7 @@ describe('handlePreview with a published dashboard', () => {
         time_range: { from: 'now-7d', to: 'now' },
         dashboardId,
         viewMode: 'edit',
+        changedBy: ['agent'],
       });
       expect(dashboardApi.locator.navigate).not.toHaveBeenCalled();
       expect(dashboardApi.setState).not.toHaveBeenCalled();
@@ -81,7 +82,8 @@ describe('handlePreview with a published dashboard', () => {
       expect.objectContaining({
         title: 'Agent dashboard',
         time_range: { from: 'now-7d', to: 'now' },
-      })
+      }),
+      { changedBy: ['agent'] }
     );
     expect(dashboardLocator.navigate).not.toHaveBeenCalled();
   });
@@ -100,7 +102,8 @@ describe('handlePreview with a published dashboard', () => {
     });
 
     expect(dashboardApi.setState).toHaveBeenCalledWith(
-      expect.objectContaining({ title: 'Agent dashboard' })
+      expect.objectContaining({ title: 'Agent dashboard' }),
+      { changedBy: ['agent'] }
     );
     expect(dashboardLocator.navigate).not.toHaveBeenCalled();
   });

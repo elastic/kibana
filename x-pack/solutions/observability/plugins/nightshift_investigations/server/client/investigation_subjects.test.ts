@@ -9,6 +9,7 @@ import type { AlertSnapshot } from '../../common';
 import {
   buildFollowUpMessage,
   recoverSubjectsFromInputs,
+  toSlackThreadKey,
   toStartSubjects,
   toSubjectKeys,
   withoutRecordedSubjects,
@@ -23,6 +24,15 @@ const makeAlert = (id: string): AlertSnapshot => ({
   reason: `Latency is 2.5s for ${id}`,
   status: 'active',
   start: '2026-08-24T12:00:00.000Z',
+});
+
+describe('toSlackThreadKey', () => {
+  // Must equal the key the Relay sends as `relay.origin.external_conversation_id`.
+  it("builds the Relay's thread key", () => {
+    expect(
+      toSlackThreadKey({ workspace: 'T1', channel: 'C1', threadTs: '1700000000.000100' })
+    ).toBe('slack:T1:C1:1700000000.000100');
+  });
 });
 
 describe('toStartSubjects', () => {
@@ -100,6 +110,30 @@ describe('toStartSubjects', () => {
     expect(toSubjectKeys(subjects, 'inv-1')).toEqual([
       { type: 'manual', id: 'slack:C1:1.1' },
       { type: 'slack_thread', id: 'slack:T1:C1:1.1' },
+    ]);
+  });
+
+  it('records a Slack thread that is the named subject once, under the Relay key', () => {
+    const subjects = toStartSubjects({
+      subject: { type: 'slack_thread', id: 'relay-key', summary: 'Disk full' },
+      triggerType: 'automatic',
+      investigationId: 'inv-1',
+      slackThread: {
+        workspace: 'T1',
+        channel: 'C1',
+        thread_ts: '1.1',
+        external_conversation_id: 'relay-key',
+      },
+    });
+
+    expect(subjects).toEqual([
+      {
+        type: 'slack_thread',
+        id: 'relay-key',
+        triggerType: 'automatic',
+        summary: 'Disk full',
+        slack: { channel: 'C1', thread_ts: '1.1' },
+      },
     ]);
   });
 });

@@ -257,10 +257,17 @@ export class ReportingPublicPlugin
     // Scheduling renders only when a PDF/PNG export item is available, so scheduled exports also
     // require the on-demand flag. Scheduled is never released without on-demand.
     if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
+      // PDF/PNG exports are experimental on serverless. Set this to false when they reach GA.
+      const isScreenCaptureExportExperimental = this.isServerless;
+
       shareSetup.registerShareIntegration<ExportShare>(
         // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
         withAvailabilityGate(
-          reportingPDFExportShareIntegration({ apiClient, startServices$ }),
+          reportingPDFExportShareIntegration({
+            apiClient,
+            startServices$,
+            isExperimental: isScreenCaptureExportExperimental,
+          }),
           isOnDemandExportAvailable
         )
       );
@@ -268,7 +275,11 @@ export class ReportingPublicPlugin
       shareSetup.registerShareIntegration<ExportShare>(
         // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
         withAvailabilityGate(
-          reportingPNGExportShareIntegration({ apiClient, startServices$ }),
+          reportingPNGExportShareIntegration({
+            apiClient,
+            startServices$,
+            isExperimental: isScreenCaptureExportExperimental,
+          }),
           isOnDemandExportAvailable
         )
       );

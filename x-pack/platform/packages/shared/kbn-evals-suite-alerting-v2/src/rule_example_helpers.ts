@@ -16,7 +16,7 @@ import { expect } from '@playwright/test';
 import {
   ALERTING_TOOL_IDS,
   DETECTION_RULE_EDIT_SKILL_ID,
-  RULE_MANAGEMENT_SKILL_ID,
+  RULE_AUTHORING_SKILL_ID,
 } from './constants';
 import { assertNoGenerationIndex } from './assert_no_generation_index';
 import {
@@ -32,7 +32,7 @@ import {
 export type QueryStyle = 'segmented' | 'single';
 
 export const MANAGE_RULE_SKILL_OUTPUT = {
-  expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
+  expectedSkills: [RULE_AUTHORING_SKILL_ID],
   notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
   expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
   expectRenderAttachment: [RULE_ATTACHMENT_TYPE],

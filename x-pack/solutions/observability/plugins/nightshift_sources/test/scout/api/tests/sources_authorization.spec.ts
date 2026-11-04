@@ -23,6 +23,7 @@ import {
   deleteTestIndex,
   findListed,
   getSource,
+  listRecommendedSources,
   listSources,
   setSourceEnabled,
   testIndexName,
@@ -75,6 +76,7 @@ apiTest.describe(
       );
       expect(listed).toHaveStatusCode(200);
       expect(findListed(listed.body, sourceId)?.id).toBe(sourceId);
+      expect(await listRecommendedSources(apiClient, cookieHeader)).toHaveStatusCode(200);
 
       const fetched = await getSource(apiClient, cookieHeader, sourceId);
       expect(fetched).toHaveStatusCode(200);
@@ -117,6 +119,7 @@ apiTest.describe(
       const { cookieHeader } = await samlAuth.asInteractiveUser(NO_NIGHTSHIFT_ROLE);
 
       expect(await listSources(apiClient, cookieHeader)).toHaveStatusCode(403);
+      expect(await listRecommendedSources(apiClient, cookieHeader)).toHaveStatusCode(403);
       expect(await getSource(apiClient, cookieHeader, sourceId)).toHaveStatusCode(403);
       expect(await createSource(apiClient, cookieHeader, body)).toHaveStatusCode(403);
       expect(await deleteSource(apiClient, cookieHeader, sourceId)).toHaveStatusCode(403);

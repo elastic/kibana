@@ -19,3 +19,6 @@ export { ResolutionSearchTruncatedError } from './resolution_search_truncated_er
 export { ResolutionUpdateError } from './resolution_update_error';
 export { EntityAlreadyExistsError } from './entity_already_exists';
 export { EntityStoreNotInstalledError } from './entity_store_not_installed';
+export { InvalidCustomResolutionRuleError } from './invalid_custom_resolution_rule_error';
+export { CustomResolutionRuleNotFoundError } from './custom_resolution_rule_not_found_error';
+export { MissingEntityIndexPrivilegeError } from './missing_entity_index_privilege_error';

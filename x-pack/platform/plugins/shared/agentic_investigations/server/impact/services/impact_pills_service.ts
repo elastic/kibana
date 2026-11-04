@@ -5,80 +5,98 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import { entityStoreIdType, type ImpactPill } from '@kbn/agentic-investigations-common';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
-import type { ImpactPill } from '@kbn/agentic-investigations-common';
-import type { ProposalImpactPillsQuery } from '../../../common/impact/impact_pills';
+import type {
+  ImpactPillsPageQuery,
+  ImpactPillsResponse,
+  ProposalImpactPillsQuery,
+} from '../../../common/impact/impact_pills';
 import type { EscalationsService } from '../../escalations/services/escalations_service';
+import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
+import { applyEntityStoreNames } from './entity_store_names';
 import { buildImpactPills } from './impact_pills';
 import type { ImpactPillEntity } from './impact_pills';
-import type { ImpactReadClient } from './impact_client';
-
-/** Conversations a queue can hold, matching the deepest page a queue can reach. */
-const MAX_PILL_CONVERSATIONS = 10_000;
+import type { ImpactService } from './impact_service';
+import { queryProposalPills } from './proposal_pills_query';
 
 export interface ImpactPillsServiceDeps {
-  getImpactClient: (request: KibanaRequest) => ImpactReadClient;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  getImpactService: () => ImpactService;
+  privileges: InvestigationsPrivilegesChecker;
   getSpaceId: (request: KibanaRequest) => string;
   getProposals: () => ProposalsPluginStart | undefined;
   getEscalationsService: () => EscalationsService | undefined;
+  /**
+   * Entity Store `entity.name` by id. Absent when Entity Store is not installed. Must not throw:
+   * a failed read is an empty map, and pills keep the name stored on the impact.
+   */
+  getEntityStoreNames?: (
+    request: KibanaRequest,
+    entityIds: readonly string[]
+  ) => Promise<ReadonlyMap<string, string>>;
 }
 
-/** Entity pills over a whole queue, so they do not move with paging or open sections. */
+const toResponse = (
+  pills: ImpactPill[],
+  total: number,
+  { from }: ImpactPillsPageQuery
+): ImpactPillsResponse => ({
+  pills,
+  total,
+  remaining: Math.max(0, total - from - pills.length),
+});
+
+/** Entity pills over a whole queue, one page at a time. */
 export class ImpactPillsService {
   constructor(private readonly deps: ImpactPillsServiceDeps) {}
 
   /** Pills over the open proposals of `categories` plus those decided within `decidedWithinHours`. */
   async forProposals(
     request: KibanaRequest,
-    { origin, categories, decidedWithinHours }: ProposalImpactPillsQuery
-  ): Promise<ImpactPill[]> {
+    query: ProposalImpactPillsQuery
+  ): Promise<ImpactPillsResponse> {
     const proposals = this.deps.getProposals();
-    if (!proposals) return [];
+    if (!proposals) return toResponse([], 0, query);
 
     await proposals.getProposalPrivileges().assertCanRead(request);
+    await this.deps.privileges.assertCanRead(request);
     const spaceId = this.deps.getSpaceId(request);
-    const service = proposals.getProposalsService();
-    const [open, closed] = await Promise.all([
-      service.countByConversation(
-        {
-          origin,
-          categories,
-          status: 'pending',
-          excludeSuperseded: true,
-          excludeExpired: false,
-        },
-        spaceId,
-        MAX_PILL_CONVERSATIONS
-      ),
-      decidedWithinHours === undefined
-        ? new Map<string, number>()
-        : service.countByConversation(
-            {
-              origin,
-              decidedWithinHours,
-              excludeSuperseded: true,
-              excludeExpired: false,
-            },
-            spaceId,
-            MAX_PILL_CONVERSATIONS
-          ),
-    ]);
+    const impact = this.deps.getImpactService();
+    await impact.reconcileMappings();
+    const { rows, total } = await queryProposalPills({
+      ...query,
+      esClient: this.deps.esClient,
+      logger: this.deps.logger,
+      spaceId,
+    });
 
-    const weights = new Map(open);
-    for (const [conversationId, count] of closed) {
-      weights.set(conversationId, (weights.get(conversationId) ?? 0) + count);
-    }
-    const entities = await this.deps
-      .getImpactClient(request)
-      .getEntitiesByConversationId([...weights.keys()]);
-    return buildImpactPills(weights, entities);
+    const labels = await impact.getEntityLabels(
+      rows.map(({ entityId }) => entityId),
+      spaceId
+    );
+    const pills = rows.map(({ entityId, count }): ImpactPill => {
+      const { type, name } = labels.get(entityId) ?? {};
+      const entityType = type ?? entityStoreIdType(entityId);
+      return {
+        entityId,
+        count,
+        ...(entityType ? { entityType } : {}),
+        ...(name ? { name } : {}),
+      };
+    });
+    return toResponse(await this.withEntityStoreNames(request, pills), total, query);
   }
 
   /** Pills over every open and closed escalation, one row each. */
-  async forEscalations(request: KibanaRequest): Promise<ImpactPill[]> {
+  async forEscalations(
+    request: KibanaRequest,
+    page: ImpactPillsPageQuery
+  ): Promise<ImpactPillsResponse> {
     const escalations = this.deps.getEscalationsService();
-    if (!escalations) return [];
+    if (!escalations) return toResponse([], 0, page);
 
     const [open, closed] = await Promise.all([
       escalations.scanWithEntityIds(request, { status: 'open' }),
@@ -86,13 +104,38 @@ export class ImpactPillsService {
     ]);
     const weights = new Map<string, number>();
     const entities = new Map<string, ImpactPillEntity[]>();
-    for (const { id, entity_ids: ids, entity_types: types } of [...open, ...closed]) {
+    for (const { id, entity_ids: ids, entity_types: types, entity_names: names } of [
+      ...open,
+      ...closed,
+    ]) {
       weights.set(id, 1);
       entities.set(
         id,
-        (ids ?? []).map((entityId) => ({ id: entityId, type: types?.[entityId] }))
+        (ids ?? []).map((entityId) => ({
+          id: entityId,
+          type: types?.[entityId],
+          name: names?.[entityId],
+        }))
       );
     }
-    return buildImpactPills(weights, entities);
+    const all = buildImpactPills(weights, entities);
+    const pills = all.slice(page.from, page.from + page.size);
+    return toResponse(await this.withEntityStoreNames(request, pills), all.length, page);
+  }
+
+  /** Replaces a stored name with Entity Store `entity.name` for ids the store knows. */
+  private async withEntityStoreNames(
+    request: KibanaRequest,
+    pills: ImpactPill[]
+  ): Promise<ImpactPill[]> {
+    const lookup = this.deps.getEntityStoreNames;
+    if (!lookup || pills.length === 0) {
+      return pills;
+    }
+    const ids = pills.map((pill) => pill.entityId).filter((id) => entityStoreIdType(id));
+    if (ids.length === 0) {
+      return pills;
+    }
+    return applyEntityStoreNames(pills, await lookup(request, ids));
   }
 }

@@ -296,6 +296,65 @@ describe('PerOsPolicySettingsForm', () => {
     });
   });
 
+  describe('endpointAiDataCollection gate', () => {
+    it('does not render the AI Data Collection card when the flag is off', () => {
+      mockedContext.setExperimentalFlag({
+        linuxDnsEvents: true,
+        trustedDevices: false,
+        endpointAiDataCollection: false,
+      });
+      render();
+
+      expect(
+        renderResult.queryByTestId(testSubj.perOsAiDataCollection.card)
+      ).not.toBeInTheDocument();
+    });
+
+    it('renders the AI Data Collection card when the flag is on', () => {
+      mockedContext.setExperimentalFlag({
+        linuxDnsEvents: true,
+        trustedDevices: false,
+        endpointAiDataCollection: true,
+      });
+      render();
+
+      expect(renderResult.getByTestId(testSubj.perOsAiDataCollection.card)).toBeInTheDocument();
+    });
+
+    it('still renders the AI Data Collection card when the protections upsell is active', () => {
+      mockedContext.setExperimentalFlag({
+        linuxDnsEvents: true,
+        trustedDevices: false,
+        endpointAiDataCollection: true,
+      });
+      useGetProtectionsUnavailableComponentMock.mockReturnValue(() => (
+        <div data-test-subj="paywall">{'pay up!'}</div>
+      ));
+      render();
+
+      expect(renderResult.getByTestId('paywall')).toBeInTheDocument();
+      expect(renderResult.getByTestId(testSubj.perOsAiDataCollection.card)).toBeInTheDocument();
+    });
+
+    it('renders before the Settings section, ahead of the Event collection card', () => {
+      mockedContext.setExperimentalFlag({
+        linuxDnsEvents: true,
+        trustedDevices: false,
+        endpointAiDataCollection: true,
+      });
+      render();
+
+      const aiDataCollectionCard = renderResult.getByTestId(testSubj.perOsAiDataCollection.card);
+      const eventCollectionCard = renderResult.getByTestId(testSubj.perOsEventCollection.card);
+
+      // The Event collection card sits inside the Settings section, so this confirms the
+      // AI Data Collection card renders ahead of that section rather than inside it.
+      expect(aiDataCollectionCard.compareDocumentPosition(eventCollectionCard)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING
+      );
+    });
+  });
+
   it('renders in view mode', () => {
     formProps.mode = 'view';
     render();

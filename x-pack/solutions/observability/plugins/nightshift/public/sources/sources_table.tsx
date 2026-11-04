@@ -91,12 +91,14 @@ export function SourcesTable({
 }: ISourcesTableProps) {
   const { cps } = useKibana().services;
   const isCpsMultiProject = useIsCpsMultiProject(cps?.cpsManager);
-  const items = filterSourcesByQuery(sources, searchText);
+  // Surrounding whitespace is ignored, for both the filter and the title highlight.
+  const searchTerm = searchText.trim();
+  const items = filterSourcesByQuery(sources, searchTerm);
   // Controlled: EuiInMemoryTable goes back to page 1 whenever `items` is a new array, which happens
   // after every toggle, save, delete or status poll. A new search still starts from page 1.
-  const [page, setPage] = useState({ index: 0, size: PAGE_SIZE_OPTIONS[0], searchText });
+  const [page, setPage] = useState({ index: 0, size: PAGE_SIZE_OPTIONS[0], searchTerm });
   const lastPageIndex = Math.max(0, Math.ceil(items.length / page.size) - 1);
-  const pageIndex = page.searchText === searchText ? Math.min(page.index, lastPageIndex) : 0;
+  const pageIndex = page.searchTerm === searchTerm ? Math.min(page.index, lastPageIndex) : 0;
 
   const onboardTooltip = getOnboardSourceTooltip({ activityBlockTooltip, isCpsMultiProject });
 
@@ -127,7 +129,7 @@ export function SourcesTable({
           data-test-subj={`significantEventsAppSourcesTableTitleLink-${source.id}`}
           onClick={() => onOpenSource(source)}
         >
-          <EuiHighlight search={searchText}>{title}</EuiHighlight>
+          <EuiHighlight search={searchTerm}>{title}</EuiHighlight>
         </EuiLink>
       ),
     },
@@ -253,7 +255,7 @@ export function SourcesTable({
       pagination={{ pageIndex, pageSize: page.size, pageSizeOptions: PAGE_SIZE_OPTIONS }}
       onTableChange={({ page: nextPage }: Criteria<NightshiftSource>) => {
         if (nextPage) {
-          setPage({ index: nextPage.index, size: nextPage.size, searchText });
+          setPage({ index: nextPage.index, size: nextPage.size, searchTerm });
         }
       }}
     />

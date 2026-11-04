@@ -1,0 +1,64 @@
+{
+  "sha1": "47d94d2b21c6772d261c064cdcff5cfcb496d2eb",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "50093965015de94-318b275ac633998",
+      "title": "Links panel - external URL policy can not add an external link that violates externalLinks.policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/links/test/scout_links_external_url_policy/ui/tests/links_external_url_policy.spec.ts",
+        "line": 23,
+        "column": 24
+      }
+    },
+    {
+      "id": "50093965015de94-1c1f1e62c26fd52",
+      "title": "Links panel - external URL policy should disable link if forbidden by external url policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/links/test/scout_links_external_url_policy/ui/tests/links_external_url_policy.spec.ts",
+        "line": 30,
+        "column": 5
+      }
+    },
+    {
+      "id": "50093965015de94-ba1284b162896d6",
+      "title": "Links panel - external URL policy should create an external link when openInNewTab is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/links/test/scout_links_external_url_policy/ui/tests/links_external_url_policy.spec.ts",
+        "line": 35,
+        "column": 9
+      }
+    },
+    {
+      "id": "50093965015de94-602dbeae3229650",
+      "title": "Links panel - external URL policy should open in same tab when openInNewTab is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/links/test/scout_links_external_url_policy/ui/tests/links_external_url_policy.spec.ts",
+        "line": 42,
+        "column": 22
+      }
+    }
+  ]
+}

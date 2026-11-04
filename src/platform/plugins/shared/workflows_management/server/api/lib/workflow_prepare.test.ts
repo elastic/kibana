@@ -65,7 +65,7 @@ describe('workflowYamlDeclaresTopLevelEnabled', () => {
     expect(workflowYamlDeclaresTopLevelEnabled('name: Test\ndescription: A workflow')).toBe(false);
   });
 
-  it('returns false for malformed YAML', () => {
+  it('returns false for malformed YAML', async () => {
     expect(workflowYamlDeclaresTopLevelEnabled('{{{')).toBe(false);
   });
 
@@ -220,8 +220,8 @@ describe('applyYamlUpdate', () => {
     safeParse: () => ({ success: false, error: { issues: [] } }),
   } as any;
 
-  it('coerces definition to null (not undefined) on the invalid branch so full-replace index does not drop the field', () => {
-    const result = applyYamlUpdate({
+  it('coerces definition to null (not undefined) on the invalid branch so full-replace index does not drop the field', async () => {
+    const result = await applyYamlUpdate({
       workflowYaml: 'not: valid: yaml:',
       zodSchema: failingSchema,
       triggerDefinitions: [],
@@ -234,7 +234,7 @@ describe('applyYamlUpdate', () => {
     expect(result.updatedDataPatch.triggerTypes).toEqual([]);
   });
 
-  it('surfaces validation errors when the renamed YAML still fails schema validation', () => {
+  it('surfaces validation errors when the renamed YAML still fails schema validation', async () => {
     const zodSchema = getWorkflowZodSchema({});
     const invalidYamlWithName = [
       'version: "1"',
@@ -248,7 +248,7 @@ describe('applyYamlUpdate', () => {
       '      message: hello',
     ].join('\n');
 
-    const result = applyYamlUpdate({
+    const result = await applyYamlUpdate({
       workflowYaml: invalidYamlWithName,
       zodSchema,
       triggerDefinitions: [],
@@ -257,7 +257,7 @@ describe('applyYamlUpdate', () => {
     expect(result.validationErrors.length).toBeGreaterThan(0);
   });
 
-  it('recovers tags from YAML that has valid tags but fails schema validation', () => {
+  it('recovers tags from YAML that has valid tags but fails schema validation', async () => {
     const zodSchema = getWorkflowZodSchema({});
     const invalidYamlWithTags = [
       'version: "1"',
@@ -274,7 +274,7 @@ describe('applyYamlUpdate', () => {
       '      message: hello',
     ].join('\n');
 
-    const result = applyYamlUpdate({
+    const result = await applyYamlUpdate({
       workflowYaml: invalidYamlWithTags,
       zodSchema,
       triggerDefinitions: [],
@@ -284,7 +284,7 @@ describe('applyYamlUpdate', () => {
     expect(result.updatedDataPatch.valid).toBe(false);
   });
 
-  it('recovers name/description from YAML that has a valid title but fails schema validation', () => {
+  it('recovers name/description from YAML that has a valid title but fails schema validation', async () => {
     const zodSchema = getWorkflowZodSchema({});
     const invalidYamlWithName = [
       'version: "1"',
@@ -299,7 +299,7 @@ describe('applyYamlUpdate', () => {
       '      message: hello',
     ].join('\n');
 
-    const result = applyYamlUpdate({
+    const result = await applyYamlUpdate({
       workflowYaml: invalidYamlWithName,
       zodSchema,
       triggerDefinitions: [],
@@ -313,7 +313,7 @@ describe('applyYamlUpdate', () => {
     expect(result.updatedDataPatch.definition).toBeNull();
   });
 
-  it('omits name/description from the patch when invalid YAML has no title, so the stored name is preserved', () => {
+  it('omits name/description from the patch when invalid YAML has no title, so the stored name is preserved', async () => {
     const zodSchema = getWorkflowZodSchema({});
     const invalidYamlWithoutName = [
       'version: "1"',
@@ -326,7 +326,7 @@ describe('applyYamlUpdate', () => {
       '      message: hello',
     ].join('\n');
 
-    const result = applyYamlUpdate({
+    const result = await applyYamlUpdate({
       workflowYaml: invalidYamlWithoutName,
       zodSchema,
       triggerDefinitions: [],
@@ -337,7 +337,7 @@ describe('applyYamlUpdate', () => {
     expect(result.updatedDataPatch).not.toHaveProperty('tags');
   });
 
-  it('logs kibana.request fetcher on YAML updates when the self-client path is on', () => {
+  it('logs kibana.request fetcher on YAML updates when the self-client path is on', async () => {
     const zodSchema = getWorkflowZodSchema({});
     const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
     const yaml = [
@@ -356,7 +356,7 @@ describe('applyYamlUpdate', () => {
       '        skip_ssl_verification: true',
     ].join('\n');
 
-    applyYamlUpdate({
+    await applyYamlUpdate({
       workflowYaml: yaml,
       zodSchema,
       triggerDefinitions: [],
@@ -373,7 +373,7 @@ describe('applyYamlUpdate', () => {
     );
   });
 
-  it('does not log kibana.request fetcher on YAML updates when the self-client path is off', () => {
+  it('does not log kibana.request fetcher on YAML updates when the self-client path is off', async () => {
     const zodSchema = getWorkflowZodSchema({});
     const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
     const yaml = [
@@ -392,7 +392,7 @@ describe('applyYamlUpdate', () => {
       '        skip_ssl_verification: true',
     ].join('\n');
 
-    applyYamlUpdate({
+    await applyYamlUpdate({
       workflowYaml: yaml,
       zodSchema,
       triggerDefinitions: [],
@@ -406,7 +406,7 @@ describe('applyYamlUpdate', () => {
 describe('prepareWorkflowDocumentFromYaml', () => {
   const now = new Date('2024-01-01T00:00:00.000Z');
 
-  it('recovers name/description from YAML that has a valid title but fails schema validation', () => {
+  it('recovers name/description from YAML that has a valid title but fails schema validation', async () => {
     const zodSchema = getWorkflowZodSchema({});
     const invalidYamlWithName = [
       'version: "1"',
@@ -421,7 +421,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
       '      message: hello',
     ].join('\n');
 
-    const result = prepareWorkflowDocumentFromYaml({
+    const result = await prepareWorkflowDocumentFromYaml({
       yaml: invalidYamlWithName,
       zodSchema,
       authenticatedUser: 'user1',
@@ -437,7 +437,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     expect(result.workflowData.definition).toBeNull();
   });
 
-  it('falls back to "Untitled workflow" when invalid YAML has no name', () => {
+  it('falls back to "Untitled workflow" when invalid YAML has no name', async () => {
     const zodSchema = getWorkflowZodSchema({});
     const invalidYamlWithoutName = [
       'version: "1"',
@@ -450,7 +450,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
       '      message: hello',
     ].join('\n');
 
-    const result = prepareWorkflowDocumentFromYaml({
+    const result = await prepareWorkflowDocumentFromYaml({
       yaml: invalidYamlWithoutName,
       zodSchema,
       authenticatedUser: 'user1',
@@ -463,7 +463,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     expect(result.workflowData.tags).toEqual([]);
   });
 
-  it('recovers tags from YAML that has valid tags but fails schema validation', () => {
+  it('recovers tags from YAML that has valid tags but fails schema validation', async () => {
     const zodSchema = getWorkflowZodSchema({});
     const invalidYamlWithTags = [
       'version: "1"',
@@ -480,7 +480,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
       '      message: hello',
     ].join('\n');
 
-    const result = prepareWorkflowDocumentFromYaml({
+    const result = await prepareWorkflowDocumentFromYaml({
       yaml: invalidYamlWithTags,
       zodSchema,
       authenticatedUser: 'user1',
@@ -492,12 +492,12 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     expect(result.workflowData.valid).toBe(false);
   });
 
-  it('uses nameFallback when the YAML root cannot carry a name (e.g. cloning invalid YAML)', () => {
+  it('uses nameFallback when the YAML root cannot carry a name (e.g. cloning invalid YAML)', async () => {
     const zodSchema = getWorkflowZodSchema({});
 
     // A scalar root has no `name` key to extract, so without the fallback this would
     // collapse to "Untitled workflow".
-    const result = prepareWorkflowDocumentFromYaml({
+    const result = await prepareWorkflowDocumentFromYaml({
       yaml: 'not-a-workflow',
       zodSchema,
       authenticatedUser: 'user1',
@@ -510,10 +510,10 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     expect(result.workflowData.valid).toBe(false);
   });
 
-  it('prefers the YAML-embedded name over nameFallback', () => {
+  it('prefers the YAML-embedded name over nameFallback', async () => {
     const zodSchema = getWorkflowZodSchema({});
 
-    const result = prepareWorkflowDocumentFromYaml({
+    const result = await prepareWorkflowDocumentFromYaml({
       yaml: 'name: From YAML\ndescription: still broken',
       zodSchema,
       authenticatedUser: 'user1',
@@ -525,7 +525,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     expect(result.workflowData.name).toBe('From YAML');
   });
 
-  it('logs once when kibana YAML still includes fetcher', () => {
+  it('logs once when kibana YAML still includes fetcher', async () => {
     const zodSchema = getWorkflowZodSchema({});
     const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
     const yaml = [
@@ -544,7 +544,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
       '        skip_ssl_verification: true',
     ].join('\n');
 
-    prepareWorkflowDocumentFromYaml({
+    await prepareWorkflowDocumentFromYaml({
       yaml,
       zodSchema,
       authenticatedUser: 'user1',
@@ -564,7 +564,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     );
   });
 
-  it('does not log kibana fetcher when the self-client path is off', () => {
+  it('does not log kibana fetcher when the self-client path is off', async () => {
     const zodSchema = getWorkflowZodSchema({});
     const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
     const yaml = [
@@ -583,7 +583,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
       '        skip_ssl_verification: true',
     ].join('\n');
 
-    prepareWorkflowDocumentFromYaml({
+    await prepareWorkflowDocumentFromYaml({
       yaml,
       zodSchema,
       authenticatedUser: 'user1',
@@ -595,7 +595,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  it('does not log generated kibana.* fetcher when the self-client flag is off', () => {
+  it('does not log generated kibana.* fetcher when the self-client flag is off', async () => {
     const zodSchema = getWorkflowZodSchema({});
     const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
     const yaml = [
@@ -613,7 +613,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
       '        skip_ssl_verification: true',
     ].join('\n');
 
-    prepareWorkflowDocumentFromYaml({
+    await prepareWorkflowDocumentFromYaml({
       yaml,
       zodSchema,
       authenticatedUser: 'user1',

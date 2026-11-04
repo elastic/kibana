@@ -9,14 +9,18 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
-import { HostedAgentPolicyRestrictionRelatedError, FleetError } from '../../errors';
+import {
+  AgentlessAgentRestrictionError,
+  HostedAgentPolicyRestrictionRelatedError,
+  FleetError,
+} from '../../errors';
 import { appContextService } from '../app_context';
 import { isAgentRestartSupported, MINIMUM_RESTART_AGENT_VERSION } from '../../../common/services';
 
 import { ActionRunner } from './action_runner';
 import { createAgentAction, createErrorActionResults } from './actions';
 import { BulkActionTaskType } from './bulk_action_types';
-import { getHostedPolicies, isHostedAgent } from './hosted_agent';
+import { getAgentPolicyRestrictions, isAgentlessAgent, isHostedAgent } from './hosted_agent';
 
 export class RestartActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
@@ -50,15 +54,19 @@ export async function restartBatch(
   const namespaces = spaceId ? [spaceId] : [];
   const internalSoClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
 
-  const hostedPolicies = await getHostedPolicies(internalSoClient, givenAgents);
+  const restrictions = await getAgentPolicyRestrictions(internalSoClient, givenAgents);
 
   const errors: Record<Agent['id'], Error> = {};
   const eligibleAgents: Agent[] = [];
 
   for (const agent of givenAgents) {
-    if (isHostedAgent(hostedPolicies, agent)) {
+    if (isHostedAgent(restrictions, agent)) {
       errors[agent.id] = new HostedAgentPolicyRestrictionRelatedError(
         `Cannot restart agent in hosted agent policy ${agent.policy_id}`
+      );
+    } else if (isAgentlessAgent(restrictions, agent)) {
+      errors[agent.id] = new AgentlessAgentRestrictionError(
+        `Cannot restart managed agent ${agent.id}`
       );
     } else if (!isAgentRestartSupported(agent)) {
       errors[agent.id] = new FleetError(

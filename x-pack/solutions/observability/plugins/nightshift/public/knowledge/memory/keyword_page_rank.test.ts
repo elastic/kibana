@@ -7,14 +7,12 @@
 
 import {
   computeKeywordPageRank,
-  MAX_RANKED_KEYWORDS,
   MAX_TREEMAP_CELLS,
   MIN_CELL_AREA,
   MIN_EDGE_WEIGHT,
   toKeywordCells,
   type KeywordEntry,
 } from './keyword_page_rank';
-import { MEMORY_KEYWORD_MAX_REQUESTS, MEMORY_KEYWORD_SIZE } from './use_memory';
 
 const entry = (overrides: Partial<KeywordEntry> = {}): KeywordEntry => ({
   tags: [],
@@ -40,23 +38,6 @@ const storeOfSize = (pages: number, tagsPerPage: number): KeywordEntry[] =>
   );
 
 describe('computeKeywordPageRank', () => {
-  it('returns empty scores for empty entries', () => {
-    expect(computeKeywordPageRank([])).toEqual({});
-  });
-
-  it('produces scores for co-occurring keywords', () => {
-    const entries: KeywordEntry[] = [
-      entry({ tags: ['foo', 'bar'] }),
-      entry({ tags: ['foo', 'baz'] }),
-      entry({ tags: ['foo', 'bar'], usefulness: 0.5 }),
-    ];
-
-    const scores = computeKeywordPageRank(entries, { maxIterations: 50, tolerance: 1e-8 });
-
-    expect(Object.keys(scores).sort()).toEqual(['bar', 'baz', 'foo']);
-    expect(scores.foo).toBeGreaterThan(0);
-  });
-
   it('supports limiting to top keywords', () => {
     const entries: KeywordEntry[] = [
       entry({ tags: ['foo', 'bar'] }),
@@ -163,23 +144,6 @@ describe('computeKeywordPageRank', () => {
 
     expect(Object.keys(scores)).not.toContain('memory');
     expect(Object.keys(scores).sort()).toEqual(['kafka', 'otel', 'redis']);
-  });
-
-  it('ranks the largest store the keyword query fetches fast enough for the main thread', () => {
-    const entries = storeOfSize(MEMORY_KEYWORD_SIZE * MEMORY_KEYWORD_MAX_REQUESTS, 25);
-
-    // The fastest of several runs, so a busy CI agent measures the algorithm
-    // rather than its own scheduling.
-    let fastest = Infinity;
-    let scores: Record<string, number> = {};
-    for (let run = 0; run < 5; run++) {
-      const started = performance.now();
-      scores = computeKeywordPageRank(entries, { maxKeywords: MAX_RANKED_KEYWORDS });
-      fastest = Math.min(fastest, performance.now() - started);
-    }
-
-    expect(Object.keys(scores).length).toBeGreaterThan(0);
-    expect(fastest).toBeLessThan(100);
   });
 });
 

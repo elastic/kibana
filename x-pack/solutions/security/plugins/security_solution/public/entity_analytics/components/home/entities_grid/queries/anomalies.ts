@@ -30,8 +30,12 @@ import {
   getMergedRowsByEntity,
   withEntityAliases,
 } from './resolved_entities';
-import type { EnrichedFields, SortPageContext } from './types';
-import { buildSortWithValueSteps, getComputedColumnQuerySpec } from './computed_column';
+import type { ColumnQuerySpec, EnrichedFields, SortPageContext } from './types';
+import {
+  buildSortWithValueSteps,
+  fetchEmptyColumnSortPage,
+  getComputedColumnQuerySpec,
+} from './computed_column';
 import type { ComputedColumn } from './computed_column';
 
 const ANOMALY_AGGREGATIONS: readonly EntityAggregation[] = [
@@ -116,4 +120,13 @@ const anomalyCountColumn: ComputedColumn = {
   fetchValues: fetchAnomalyCounts,
 };
 
-export const anomalyCountQuerySpec = getComputedColumnQuerySpec(anomalyCountColumn);
+const anomalyCountSpec = getComputedColumnQuerySpec(anomalyCountColumn);
+
+export const anomalyCountQuerySpec: Required<ColumnQuerySpec> = {
+  ...anomalyCountSpec,
+  // Without security jobs there is no anomaly index to read, and ES|QL fails on a missing one.
+  fetchSortPage: (args, ctx) =>
+    args.anomalyJobIds.length
+      ? anomalyCountSpec.fetchSortPage(args, ctx)
+      : fetchEmptyColumnSortPage(anomalyCountColumn, args, ctx),
+};

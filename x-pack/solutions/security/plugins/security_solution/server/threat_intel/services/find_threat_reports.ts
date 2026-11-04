@@ -6,6 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { HUNT_USABLE_FILTER, INDICATOR_ELIGIBLE_FILTER } from '@kbn/alertzero-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   FIND_THREAT_REPORTS_DEFAULT_PAGE_SIZE,
@@ -18,7 +19,6 @@ import {
 } from '../../../common/threat_intel';
 import { truncate } from './report_content';
 import { HIDDEN_INDEX_PIT_OPTIONS } from '../lib/es_options';
-import { HUNT_USABLE_FILTER, INDICATOR_ELIGIBLE_FILTER } from '../lib/usable_report_filter';
 import { buildSpaceFilterTerms } from '../lib/space_filter';
 import { decodeCursor, encodeCursor, InvalidCursorError } from '../lib/report_cursor';
 

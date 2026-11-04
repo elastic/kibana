@@ -11,10 +11,12 @@ import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgentBuilderPlatformPluginSetup } from '@kbn/agent-builder-platform-plugin/server';
+import type { EntityStoreStartContract } from '@kbn/entity-store/server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ImpactReadClient } from './impact/services/impact_client';
+import type { FindingsWriter } from './findings/findings_writer';
 import type { SubjectsClient } from './subjects/services/subjects_client';
 import type { EscalationsService } from './escalations/services/escalations_service';
 import type { DeleteInvestigationDataAcrossSpacesResult } from './investigations/services/delete_investigation_data_across_spaces';
@@ -53,6 +55,11 @@ export interface AgenticInvestigationsStartDependencies {
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   proposals?: ProposalsPluginStart;
+  /**
+   * Names pills with Entity Store `entity.name`, the same field the entity flyout titles with.
+   * Optional: without it, pills keep the name stored on the impact.
+   */
+  entityStore?: EntityStoreStartContract;
   agentBuilder: AgentBuilderPluginStart;
 }
 
@@ -89,6 +96,12 @@ export interface AgenticInvestigationsPluginStart {
    */
   deleteSubjectInvestigationDataAcrossSpaces: () => Promise<DeleteInvestigationDataAcrossSpacesResult>;
   getEscalationsService: () => EscalationsService;
+  /**
+   * Request-scoped writer for hypotheses and impact, for callers outside an agent's tool call
+   * (a hook or a workflow step). Writes need the investigations manage privilege; space and
+   * user come from the request.
+   */
+  getFindingsWriter: (request: KibanaRequest) => FindingsWriter;
 }
 
 export type AgenticInvestigationsPluginSetup = Record<string, never>;

@@ -78,6 +78,17 @@ describe('load_skill tool', () => {
     });
   });
 
+  it('resolves hidden skills, since built-in capability skills are hidden from listings', async () => {
+    const skill = createMockSkill({ hidden: true });
+    ctx.skills.list.mockResolvedValue([skill]);
+
+    const tool = createLoadSkillTool();
+    const result = await callHandler(tool, { skill: '/skills/platform/my-skill' }, ctx);
+
+    expect(ctx.skills.list).toHaveBeenCalledWith({ includePlugins: true, includeHidden: true });
+    expect(result.results[0].type).toBe(ToolResultType.other);
+  });
+
   it('surfaces resolveSkill errors as error tool results', async () => {
     ctx.skills.list.mockResolvedValue([]);
     const tool = createLoadSkillTool();

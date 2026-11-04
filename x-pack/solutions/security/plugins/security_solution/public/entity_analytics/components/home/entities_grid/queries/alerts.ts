@@ -43,7 +43,8 @@ import type { ComputedColumn } from './computed_column';
 const ALERT_COUNT_FIELD = 'alert_count';
 const LAST_SEEN_ALERT_FIELD = 'last_seen_alert';
 
-const ALERT_OPEN_STATUS_FILTER =
+/** Keeps the alerts that are not closed. The alert based tiles count the same alerts. */
+export const ALERT_OPEN_STATUS_FILTER =
   'kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != "closed"';
 
 const buildOpenAlertsCondition = (timeRange: QueryArgs['timeRange']): string =>

@@ -716,10 +716,9 @@ workflowsExecutionEngine:
   # Enable console logging for debugging
   logging:
     console: false
-  # Configure allowed hosts for HTTP steps
-  http:
-    allowedHosts: ['*']  # Use specific hosts in production
 ```
+
+Outbound hosts for HTTP steps are governed by the actions plugin `xpack.actions.allowedHosts` setting, since HTTP steps run through the `.http` connector.
 
 ### Event-driven and depth settings
 

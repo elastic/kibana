@@ -237,8 +237,8 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
       // Remove "Documentation: " from the description as we add it manually to hover content
       return connector.description.replace(/Documentation: .*$/, '');
     }
-    return i18n.translate('xpack.workflows.monaco.elasticsearch.connector.fallbackDescription', {
-      defaultMessage: 'Execute {{method}} request to {{path}}',
+    return i18n.translate('workflows.monaco.elasticsearch.connector.fallbackDescription', {
+      defaultMessage: 'Execute {method} request to {path}',
       values: {
         method: requestInfo.method,
         path: requestInfo.url,

@@ -33,6 +33,7 @@ export interface BuildWorkflowExecutionDocumentParams {
   now: Date;
   maxEventChainDepth: number;
   getConcurrencyGroupKey: (workflowExecution: WorkflowExecutionForInputRendering) => string | null;
+  getRunName: (workflowExecution: WorkflowExecutionForInputRendering) => string | undefined;
 }
 
 const stampExecutionWorkflowVersion = (
@@ -58,15 +59,22 @@ export const buildWorkflowExecutionDocument = (
     now,
     maxEventChainDepth,
     getConcurrencyGroupKey,
+    getRunName,
   } = params;
   const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
   // Strip the context's space so property order cannot override the trusted execution space.
   const executionContext = { spaceId, ...omit(context, 'spaceId') };
   const metadata = context.metadata as Record<string, unknown> | undefined;
   const eventPayload = context.event as Record<string, unknown> | undefined;
+  const hasEventChain =
+    eventPayload?.eventChainDepth !== undefined ||
+    eventPayload?.eventChainVisitedWorkflowIds !== undefined;
+  const chainSource = hasEventChain
+    ? eventPayload
+    : (context.parentEventChain as Record<string, unknown> | undefined);
   let rootEventChainDepth: number | undefined;
-  if (eventPayload) {
-    const rawDepth = eventPayload.eventChainDepth;
+  if (chainSource) {
+    const rawDepth = chainSource.eventChainDepth;
     if (typeof rawDepth === 'number' && !Number.isNaN(rawDepth) && rawDepth >= 0) {
       rootEventChainDepth = rawDepth;
     } else if (typeof rawDepth === 'string' && rawDepth.trim() !== '') {
@@ -77,7 +85,7 @@ export const buildWorkflowExecutionDocument = (
     }
   }
   const rootVisited = normalizeEventChainVisitedWorkflowIds(
-    eventPayload?.eventChainVisitedWorkflowIds,
+    chainSource?.eventChainVisitedWorkflowIds,
     maxEventChainDepth
   );
   const dispatchEventId =
@@ -123,6 +131,7 @@ export const buildWorkflowExecutionDocument = (
   };
 
   stampExecutionWorkflowVersion(workflowExecution, workflow);
+  workflowExecution.runName = getRunName(workflowExecution);
 
   const concurrencyGroupKey = getConcurrencyGroupKey(workflowExecution);
   if (concurrencyGroupKey) {

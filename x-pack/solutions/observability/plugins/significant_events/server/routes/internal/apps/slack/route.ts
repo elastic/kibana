@@ -147,10 +147,12 @@ const bindingsSlackAppRoute = createServerRoute({
 
 function throwRelayError(error: RelayRequestError): never {
   const msg = error.relayMessage ?? error.message;
-  if (error.statusCode === 409) throw conflict(msg);
-  if (error.statusCode === 403) throw forbidden(msg);
-  if (error.statusCode === 404) throw notFound(msg);
-  throw badGateway(msg);
+  // Boom `data` becomes the response's `attributes.data`, where the UI reads `reason`.
+  const data = error.reason ? { reason: error.reason } : undefined;
+  if (error.statusCode === 409) throw conflict(msg, data ?? { reason: 'channel_taken' });
+  if (error.statusCode === 403) throw forbidden(msg, data);
+  if (error.statusCode === 404) throw notFound(msg, data);
+  throw badGateway(msg, data);
 }
 
 const bindChannelSlackAppRoute = createServerRoute({

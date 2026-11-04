@@ -37,6 +37,56 @@ export const buildNightshiftEventFlyoutShareUrl = (eventId: string): string => {
   return url.toString();
 };
 
+export const NIGHTSHIFT_RULE_ID_QUERY_PARAM = 'ruleId';
+
+export const getNightshiftRuleIdFromSearch = (search: string): string | undefined =>
+  new URLSearchParams(search).get(NIGHTSHIFT_RULE_ID_QUERY_PARAM) ?? undefined;
+
+export const setNightshiftRuleIdParam = (params: URLSearchParams, ruleId: string): void => {
+  params.set(NIGHTSHIFT_RULE_ID_QUERY_PARAM, ruleId);
+};
+
+export const clearNightshiftRuleIdParam = (params: URLSearchParams): void => {
+  params.delete(NIGHTSHIFT_RULE_ID_QUERY_PARAM);
+};
+
+export const buildNightshiftRuleFlyoutShareUrl = (ruleId: string): string => {
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.set(NIGHTSHIFT_RULE_ID_QUERY_PARAM, ruleId);
+    return url.toString();
+  } catch {
+    const params = new URLSearchParams(window.location.search);
+    params.set(NIGHTSHIFT_RULE_ID_QUERY_PARAM, ruleId);
+    return `${window.location.pathname}?${params}`;
+  }
+};
+
+export const NIGHTSHIFT_SIGNAL_ID_QUERY_PARAM = 'signalId';
+
+export const getNightshiftSignalIdFromSearch = (search: string): string | undefined =>
+  new URLSearchParams(search).get(NIGHTSHIFT_SIGNAL_ID_QUERY_PARAM) ?? undefined;
+
+export const setNightshiftSignalIdParam = (params: URLSearchParams, signalId: string): void => {
+  params.set(NIGHTSHIFT_SIGNAL_ID_QUERY_PARAM, signalId);
+};
+
+export const clearNightshiftSignalIdParam = (params: URLSearchParams): void => {
+  params.delete(NIGHTSHIFT_SIGNAL_ID_QUERY_PARAM);
+};
+
+export const buildNightshiftSignalFlyoutShareUrl = (signalId: string): string => {
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.set(NIGHTSHIFT_SIGNAL_ID_QUERY_PARAM, signalId);
+    return url.toString();
+  } catch {
+    const params = new URLSearchParams(window.location.search);
+    params.set(NIGHTSHIFT_SIGNAL_ID_QUERY_PARAM, signalId);
+    return `${window.location.pathname}?${params}`;
+  }
+};
+
 export const getNightshiftSearchQueryFromSearch = (search: string): string | undefined =>
   new URLSearchParams(search).get(NIGHTSHIFT_SEARCH_QUERY_PARAM) ?? undefined;
 

@@ -48,7 +48,8 @@ const panels: FlyoutFooterMenuPanel[] = useMemo(() => [
 
 `panels` uses EUI's own panel descriptors, with these restrictions:
 
-- Panel `content` and item `renderItem` are not supported. Both are typed `?: never`, so they fail type checking.
+- Panel `content` is not supported. It is typed `?: never`, so it fails type checking.
+- Item `renderItem` is deprecated. See [Deprecated: custom items](#deprecated-custom-items).
 - `items` is required. Without `content`, a panel with no items is always a mistake.
 - Panel `title` and item `name` are `string`, not `ReactNode`. Type the array as `FlyoutFooterMenuPanel[]`. EUI's own type skips these restrictions.
 - A nested panel (one opened from another panel's item) must have a `title`, because EUI uses it for the back button. The template warns in development about any nested panel without one.
@@ -80,3 +81,22 @@ The template sets these trigger props itself, so passing them is a type error ra
 - `color` and `size`, so all footer actions look the same.
 - `isSelected`, because it sets `aria-pressed`, which is for toggle buttons. A popover trigger uses `aria-expanded`, which EUI already sets.
 - `type`, which is always `"button"`, so a trigger inside a `<form>` opens the menu without submitting the form.
+
+### Deprecated: custom items
+
+Custom items are a temporary allowance for existing menus with interactive items, such as an item that opens its own popover. Do not use them in new menus. Redesign existing ones with plain items and nested panels so custom items can be removed.
+
+Interactive content inside a context menu conflicts with the menu's keyboard navigation, and the template does not work around it:
+
+- **The menu claims the arrow keys.** Arrow keys pressed in a custom item's controls, including a text field or a field in a nested popover, move focus to other menu items or go back a panel.
+- **ArrowRight can open the wrong sub-panel.** EUI picks the sub-panel by the focused element's position among the panel's items, and a custom item throws that count off.
+
+A custom item (`FlyoutFooterMenuCustomItem`) takes a required `key` and a `renderItem` function. `renderItem` receives `{ closeMenu }` and returns the item's content.
+
+```tsx
+{ key: 'assignee', renderItem: ({ closeMenu }) => <AssigneeItem onApplied={closeMenu} /> }
+```
+
+- A custom item owns its clicks. Clicking it never closes the menu, whatever `closeOnItemClick` is set to. Call `closeMenu` when the item is done.
+- The template does not add a `menuitem` role, an icon, or keyboard handling to a custom item. Its content provides those itself.
+- `renderItem` runs again only when `panels` changes. Content that depends on other state should be a component that reads that state itself.

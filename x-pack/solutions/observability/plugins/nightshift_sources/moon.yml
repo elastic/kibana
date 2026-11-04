@@ -23,7 +23,6 @@ dependsOn:
   - '@kbn/core-plugins-server'
   - '@kbn/cps-server-utils'
   - '@kbn/es-errors'
-  - '@kbn/es-query'
   - '@kbn/features-plugin'
   - '@kbn/nightshift-shared'
   - '@kbn/server-route-repository'
@@ -37,12 +36,12 @@ tags:
   - group-observability
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
+    - common/**/*
     - server/**/*
     - public/**/*
     - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

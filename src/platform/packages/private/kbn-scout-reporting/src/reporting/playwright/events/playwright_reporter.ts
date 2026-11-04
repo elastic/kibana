@@ -25,6 +25,7 @@ import {
   SCOUT_REPORT_OUTPUT_ROOT,
   SCOUT_UNIFIED_CONFIG_PATH_REGEX,
   ScoutTestRunConfigCategory,
+  SCOUT_TEST_RUN_SCOPE,
 } from '@kbn/scout-info';
 import stripANSI from 'strip-ansi';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -81,6 +82,7 @@ export class ScoutPlaywrightReporter implements Reporter {
     this.baseTestRunInfo = {
       id: this.runId,
       target: buildScoutTargetInfo('unknown'),
+      scope: SCOUT_TEST_RUN_SCOPE,
     };
     this.codeOwnersEntries = getCodeOwnersEntries();
   }

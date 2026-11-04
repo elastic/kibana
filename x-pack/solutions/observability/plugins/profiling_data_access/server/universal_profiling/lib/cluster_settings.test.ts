@@ -6,24 +6,13 @@
  */
 
 import type { ProfilingSetupOptions } from './setup';
-import {
-  MAX_BUCKETS,
-  validateMaximumBuckets,
-  validateProfilingStatus,
-  validateResourceManagement,
-} from './cluster_settings';
+import { validateProfilingStatus, validateResourceManagement } from './cluster_settings';
 
 describe('cluster_settings validators', () => {
   function createSetupOptions() {
-    const getSettings = jest.fn();
     const universalProfilingStatus = jest.fn();
 
     const client = {
-      getEsClient: () => ({
-        cluster: {
-          getSettings,
-        },
-      }),
       universalProfiling: {
         status: universalProfilingStatus,
       },
@@ -39,67 +28,9 @@ describe('cluster_settings validators', () => {
 
     return {
       setupOptions,
-      getSettings,
       universalProfilingStatus,
     };
   }
-
-  describe('validateMaximumBuckets', () => {
-    it('returns configured true when search.max_buckets equals MAX_BUCKETS', async () => {
-      const { setupOptions, getSettings } = createSetupOptions();
-      getSettings.mockResolvedValue({
-        persistent: {
-          search: {
-            max_buckets: MAX_BUCKETS.toString(),
-          },
-        },
-      });
-
-      await expect(validateMaximumBuckets(setupOptions)).resolves.toEqual({
-        settings: {
-          configured: true,
-        },
-      });
-    });
-
-    it('returns configured false when search.max_buckets does not equal MAX_BUCKETS', async () => {
-      const { setupOptions, getSettings } = createSetupOptions();
-      getSettings.mockResolvedValue({
-        persistent: {
-          search: {
-            max_buckets: '42',
-          },
-        },
-      });
-
-      await expect(validateMaximumBuckets(setupOptions)).resolves.toEqual({
-        settings: {
-          configured: false,
-        },
-      });
-    });
-
-    it('forwards the abort signal to getSettings', async () => {
-      const { setupOptions, getSettings } = createSetupOptions();
-      const abortSignal = new AbortController().signal;
-      getSettings.mockResolvedValue({ persistent: {} });
-
-      await validateMaximumBuckets({ ...setupOptions, abortSignal });
-
-      expect(getSettings).toHaveBeenCalledWith({}, { signal: abortSignal });
-    });
-
-    it('returns configured false when getSettings throws', async () => {
-      const { setupOptions, getSettings } = createSetupOptions();
-      getSettings.mockRejectedValue(new Error('getSettings failed'));
-
-      await expect(validateMaximumBuckets(setupOptions)).resolves.toEqual({
-        settings: {
-          configured: false,
-        },
-      });
-    });
-  });
 
   describe('validateResourceManagement', () => {
     it('returns resource management and resource flags from status', async () => {

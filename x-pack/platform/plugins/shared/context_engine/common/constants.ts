@@ -24,6 +24,8 @@ export const AI_INDEX_SUGGEST_AUTOMATION_CONTEXT_PATH = `${INTERNAL_API_PATH}/ai
 /** Version of the internal suggest-automation-context API, shared between route registration and the browser client. */
 export const SUGGEST_AUTOMATION_CONTEXT_INTERNAL_API_VERSION = '1';
 
+export const AI_INDEX_KI_RESTORE_PATH = `${AI_INDEX_KI_BY_ID_PATH}/_restore`;
+
 /** Default and maximum page size when listing Knowledge Indicators for an AI index. */
 export const DEFAULT_KI_PAGE_SIZE = 25;
 export const MAX_KI_PAGE_SIZE = 100;
@@ -31,6 +33,9 @@ export const MAX_KI_PAGE_SIZE = 100;
 export const KI_SUMMARY_PAGE_SIZE = 0;
 
 export const MAX_KI_TYPE_FILTER_LENGTH = 256;
+export const MAX_KI_SEARCH_QUERY_LENGTH = 256;
+/** Max length of a Knowledge Indicator `content` field (bytes). */
+export const MAX_KI_CONTENT_LENGTH = 65536;
 
 /** Read-only Signals routes (internal): a preaggregated grouped list and a per-group fetch. */
 export const SIGNAL_GROUPS_PATH = `${INTERNAL_API_PATH}/signals/groups`;

@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AppHeader } from '@kbn/app-header';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 import { IndexLifecyclePhaseSelectOption } from '../../../common/storage_explorer';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
@@ -20,6 +21,7 @@ import { useDefaultTimeRange } from '../../hooks/use_default_time_range';
 import { useBackNavigation } from '../contexts/back_navigation/use_back_navigation';
 import { ProfilingSchemaContextProvider } from '../contexts/profiling_schema/profiling_schema_context';
 import { ProfilingAppSchemaSelector } from '../schema_selector';
+import { UniversalProfilingSetupIncompleteCallout } from '../universal_profiling_setup_incomplete_callout';
 import { useSchemaQueryParam } from '../../hooks/use_schema_query_param';
 import { useProfilingStatus } from '../contexts/profiling_status/use_profiling_status';
 import { AsyncStatus } from '../../hooks/use_async';
@@ -53,7 +55,7 @@ export function ProfilingAppPageTemplate({
   hideSearchBar = false,
   restrictWidth = false,
   pageTitle = i18n.translate('xpack.profiling.appPageTemplate.pageTitle', {
-    defaultMessage: 'Universal Profiling',
+    defaultMessage: 'Profiling',
   }),
   showBetaBadge = false,
   customSearchBar,
@@ -195,6 +197,9 @@ export function ProfilingAppPageTemplate({
                   : undefined
               }
             />
+            {showSchemaSelector && schema === ProfilingSchema.ECS && (
+              <UniversalProfilingSetupIncompleteCallout />
+            )}
             {!hideSearchBar && (
               <EuiFlexItem grow={false}>
                 {customSearchBar ?? (

@@ -9,16 +9,14 @@ import { createContext, useContext } from 'react';
 import type { EuiDataGridColumn, EuiDataGridStyleCellPaddings } from '@elastic/eui';
 import type { TimeRange } from '../common';
 import type { RowActions } from './cells/row_actions_cell';
-import type { EntityGridCellContext } from './entities_cell_renderer';
+import type {
+  EntityGridCellContext,
+  EntityGridRows,
+  RowCellHandlers,
+} from './entities_cell_renderer';
 
-/**
- * The React context of the custom body and the expander: the cell context plus the expanded
- * groups (expand state lives here, not in the cell context), the columns, the load-more state
- * and the callbacks. `timeRange` and `keepFields` are those of the expanded groups' records,
- * `cellPadding` is the display selector's density, which child rows match, and `total` is the
- * number of entities in view.
- */
-export interface EntityGridView extends EntityGridCellContext {
+/** Expand state lives here, not in the cell context, which must stay stable. */
+export interface EntityGridView extends EntityGridCellContext, EntityGridRows {
   expandedIds: ReadonlySet<string>;
   timeRange: TimeRange;
   keepFields: readonly string[];
@@ -26,13 +24,12 @@ export interface EntityGridView extends EntityGridCellContext {
   prefetchChildren: (entityId: string) => void;
   toggleExpandedId: (entityId: string) => void;
   rowActions?: RowActions;
+  /** The records an expanded group lists are individual rows, whatever the grid's rows mode. */
+  recordCellHandlers?: RowCellHandlers;
   isFetching: boolean;
   cellPadding: EuiDataGridStyleCellPaddings;
-  total: number;
-  canLoadMore: boolean;
-  isAtLoadLimit: boolean;
-  isLoadingMore: boolean;
-  loadMore: () => void;
+  /** The body reports the rows it renders, so only those are enriched. */
+  onRowsInViewChange: (firstRow: number, lastRow: number) => void;
 }
 
 export const EntityGridBodyContext = createContext<EntityGridView | null>(null);
