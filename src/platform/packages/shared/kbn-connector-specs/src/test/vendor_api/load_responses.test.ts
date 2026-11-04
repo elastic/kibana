@@ -10,6 +10,8 @@
 import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
+import { createEmulatorFetch } from '@kbn/connector-emulate';
+import type { OpenApiDocument } from '@kbn/connector-emulate';
 import { readRecordings, readResponseFixtures } from './load_responses';
 
 const recording = (name: string) => ({
@@ -58,6 +60,71 @@ describe('load_responses', () => {
           response: { status: 429, headers: { 'retry-after': '1' }, body: undefined },
         },
       ]);
+    });
+
+    it('reads when, so a fixture answers only the requests it names', async () => {
+      const items = {
+        '200': {
+          description: 'ok',
+          content: { 'application/json': { schema: { type: 'object' } } },
+        },
+      };
+      const spec: OpenApiDocument = {
+        openapi: '3.0.3',
+        info: { title: 'Test', version: '1' },
+        servers: [{ url: 'https://api.example.com' }],
+        paths: {
+          '/items': {
+            get: {
+              parameters: [{ name: 'cursor', in: 'query', schema: { type: 'string' } }],
+              responses: items,
+            },
+          },
+          '/items/{id}': {
+            get: {
+              parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+              responses: { ...items, '404': { description: 'not found' } },
+            },
+          },
+        },
+      };
+      const file = await write('fixtures.json', [
+        { method: 'GET', path: '/items', status: 200, body: { page: 1, next: 'two' } },
+        {
+          method: 'GET',
+          path: '/items',
+          when: { query: { cursor: 'two' } },
+          status: 200,
+          body: { page: 2 },
+        },
+        {
+          method: 'GET',
+          path: '/items/{id}',
+          when: { path: { id: 'missing' } },
+          status: 404,
+        },
+      ]);
+      const { fetch } = createEmulatorFetch({
+        specs: [spec],
+        fixtures: await readResponseFixtures(file),
+      });
+
+      const first = await fetch('https://api.example.com/items');
+      const second = await fetch('https://api.example.com/items?cursor=two');
+      const missing = await fetch('https://api.example.com/items/missing');
+      const found = await fetch('https://api.example.com/items/1');
+
+      expect(await first.json()).toEqual({ page: 1, next: 'two' });
+      expect(await second.json()).toEqual({ page: 2 });
+      expect([missing.status, found.status]).toEqual([404, 200]);
+    });
+
+    it('rejects a when it does not know', async () => {
+      const file = await write('fixtures.json', [
+        { method: 'GET', path: '/items', when: { params: { id: '1' } }, status: 200 },
+      ]);
+
+      await expect(readResponseFixtures(file)).rejects.toThrow(/Unrecognized key: "params"/);
     });
 
     it('names the file and the problem when the shape is wrong', async () => {

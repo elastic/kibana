@@ -357,9 +357,10 @@ run(
         --port        Port to listen on (default ${DEFAULT_PORT})
         --host        Address to listen on (default 127.0.0.1)
         --ca-dir      Where the CA's ca.crt and ca.key are kept, created on first use (default data/connector_emulate)
-        --fixtures    JSON file of responses to serve for this run, as a list of { method, path, status, headers, body, source },
-                      the format of the per-action responses in fixtures.json. With several connectors, name the connector
-                      as <connector>=<file>, and repeat the flag per connector
+        --fixtures    JSON file of responses to serve for this run, as a list of { method, path, when, status, headers, body, source },
+                      the format of the per-action responses in fixtures.json. when ({ path, query, headers, body }) limits a
+                      response to the requests with those values. With several connectors, name the connector as
+                      <connector>=<file>, and repeat the flag per connector
         --recordings  JSON file, or folder of them, of recordings ({ exchanges: [{ operation, request, response }] }) to serve
                       for this run, ahead of the connector's committed vendor_api/recordings. With several connectors, name
                       the connector as <connector>=<path>

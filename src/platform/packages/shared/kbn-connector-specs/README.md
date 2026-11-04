@@ -714,7 +714,7 @@ Per action:
 - `input`: merged into each generated input, for values the schema can't describe, such as cross-field rules or IDs with a vendor format. A list of inputs generates the inputs once per entry, for rules no single value satisfies in every input, such as two mutually exclusive options.
 - `config`: merged into the connector config for the action's runs. Recording samples only the required config fields, so use this to set an optional field the action needs, such as a second server URL.
 - `queries`: for a `read` action, operations that use another method but only query, such as a search sent as `POST`. Each entry states that the operation changes no vendor state, so reviewers should check it. A `source` restricts an entry to one spec. Requests that match no operation (those in `"unmatched"`, such as calls to a vendor's MCP server) are matched by their path, where a `{name}` segment matches any segment.
-- `responses`: served by the mock for the action's runs instead of sampled responses, so handlers that branch on a response take the intended path. A `source` restricts an override to one spec. Overrides that break the spec, or name an operation it lacks, are reported.
+- `responses`: served by the mock for the action's runs instead of sampled responses, so handlers that branch on a response take the intended path. A `source` restricts an override to one spec, and a `when` (`path`, `query` and `headers` by value, and the `body` fields it lists) to the requests with those values. Overrides that break the spec, or name an operation it lacks, are reported.
 
 `vendorApiFixturesSchema` is the schema.
 
@@ -766,6 +766,16 @@ The mock answers with the manifest's pagination, but not with the per-action `re
 node scripts/connector_emulate --connector firecrawl --fixtures scenarios/empty_results.json
 # Recordings ({ "exchanges": [{ operation, request, response }] }): one file, or a folder of them
 node scripts/connector_emulate --connector firecrawl --recordings scenarios/recorded/
+```
+
+A fixture can take a `when`, to answer only some requests. A request gets the matching fixture that checks the most values, else the operation's fixture without `when`. Fixtures are served as written, so on a paginated operation, give one per page:
+
+```json
+[
+  { "method": "GET", "path": "/items", "status": 200, "body": { "items": [{ "id": "1" }], "next": "two" } },
+  { "method": "GET", "path": "/items", "when": { "query": { "cursor": "two" } }, "status": 200, "body": { "items": [] } },
+  { "method": "GET", "path": "/items/{id}", "when": { "path": { "id": "missing" } }, "status": 404 }
+]
 ```
 
 Paths are the spec's path templates, relative to its server URL. Fixtures are served first, then conforming recordings (those given for the run ahead of any committed in `vendor_api/recordings/`), then the spec's examples and samples. Fixtures and recordings the spec rejects are listed on startup.
