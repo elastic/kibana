@@ -43,6 +43,7 @@ import {
   waitForConversationsReady,
 } from '../src/investigation';
 import { kbnRequestFromFetch } from '../src/kbn_request';
+import { selectExamplesById } from '../src/example_filter';
 import { buildFpTpExampleWorld, FP_TP_EXAMPLES } from '../src/scenarios';
 import { runFpTpAnalysisWorkflow } from '../src/workflow_task';
 import { ensureFpTpSeedPrerequisites, seedFixture, toSeededEvidence } from '../src/world';
@@ -137,7 +138,10 @@ evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classi
   evaluate(
     'classifies seeded Attack Discoveries with the expected outcome',
     async ({ executorClient, evaluators, esClient, fetch, log, traceEsClient }) => {
-      const examples: FpTpDatasetExample[] = FP_TP_EXAMPLES.map(
+      const examples: FpTpDatasetExample[] = selectExamplesById(
+        FP_TP_EXAMPLES,
+        process.env.FP_TP_EXAMPLE_IDS
+      ).map(
         ({
           id,
           scenarioKey,
