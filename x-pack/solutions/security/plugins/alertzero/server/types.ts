@@ -29,7 +29,10 @@ import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extens
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type { SubscriptionAvailability } from '../common/availability';
 
 export type AlertZeroRequestHandlerContext = CustomRequestHandlerContext<{
@@ -89,6 +92,7 @@ export interface AlertZeroSetupDependencies {
   features: FeaturesPluginSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
+  taskManager: TaskManagerSetupContract;
   agentBuilder?: AgentBuilderPluginSetup;
   agenticInvestigations?: AgenticInvestigationsPluginSetup;
   proposals?: ProposalsPluginSetup;

@@ -239,13 +239,63 @@ describe('preserveHuntEvidence', () => {
 
   it('refuses a second preservation while a different one is pending', async () => {
     const { run, attachments, conversations, labelWrites } = setup({
-      executionLabels: { 'hunt.outcome': 'pending_handoff', 'hunt.preservation_id': P2 },
+      executionLabels: {
+        'hunt.outcome': 'pending_handoff',
+        'hunt.preservation_id': P2,
+        'hunt.last_handoff_at': new Date().toISOString(),
+      },
     });
 
     await expect(run()).rejects.toMatchObject({ code: 'preservation_in_progress' });
     expect(conversations.create).not.toHaveBeenCalled();
     expect(attachments.client.create).not.toHaveBeenCalled();
     expect(labelWrites).toEqual([]);
+  });
+
+  describe('a stuck session', () => {
+    const stuckLabels = {
+      'hunt.kind': 'manual_session',
+      'hunt.definition_id': definition.id,
+      'hunt.session_id': SESSION,
+    };
+
+    it('finishes an abandoned handoff under the analyst request, then proceeds', async () => {
+      const { run, labelWrites, conversations } = setup({
+        existingInvestigation: true,
+        executionLabels: {
+          ...stuckLabels,
+          'hunt.outcome': 'pending_handoff',
+          'hunt.preservation_id': P2,
+          'hunt.last_handoff_at': '2020-01-01T00:00:00.000Z',
+        },
+      });
+      // The abandoned handoff left an empty Investigation and no attachment.
+      conversations.get.mockResolvedValue({ rounds: [], attachments: [] });
+
+      await expect(run()).resolves.toMatchObject({ evidenceCount: 1 });
+
+      expect(labelWrites.map((labels) => labels['hunt.outcome'])).toEqual([
+        'handoff_failed',
+        'pending_handoff',
+        'investigation_created',
+      ]);
+      expect(conversations.delete).toHaveBeenCalledWith(INVESTIGATION);
+    });
+
+    it('cleans up a session flagged for cleanup before writing new evidence', async () => {
+      const { run, labelWrites } = setup({
+        executionLabels: {
+          ...stuckLabels,
+          'hunt.outcome': 'handoff_cleanup_required',
+          'hunt.preservation_id': P2,
+        },
+      });
+
+      await expect(run()).resolves.toMatchObject({ evidenceCount: 1 });
+
+      expect(labelWrites[0]).toMatchObject({ 'hunt.outcome': 'handoff_failed' });
+      expect(labelWrites.at(-1)).toMatchObject({ 'hunt.outcome': 'investigation_created' });
+    });
   });
 
   it('lets the same preservation retry through while it is pending', async () => {

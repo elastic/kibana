@@ -144,7 +144,8 @@ export interface WatchWorkflowsManagementClient {
     key: string;
     value: string;
     spaceId: string;
-    request: KibanaRequest;
+    /** Omit it for a background read with no user, such as the handoff sweeper. */
+    request?: KibanaRequest;
     size?: number;
   }): Promise<WorkflowExecutionListDto['results']>;
 }

@@ -207,6 +207,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
           registerManagedWorkflowOwner: jest.fn(),
           registerStepDefinition: jest.fn(),
         },
+        taskManager: { registerTaskDefinitions: jest.fn() },
         workflowsManagement: {
           management: { registerExecutionLabelNamespace: jest.fn(), getExecutionRetention },
         },
@@ -229,6 +230,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         const dependencies = {
           features: { registerKibanaFeature: jest.fn() },
           workflowsExtensions,
+          taskManager: { registerTaskDefinitions: jest.fn() },
           workflowsManagement: { management: { registerExecutionLabelNamespace: jest.fn() } },
           agentBuilder: {},
           proposals: {},
@@ -262,6 +264,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
           registerManagedWorkflowOwner: jest.fn(),
           registerStepDefinition: jest.fn(),
         },
+        taskManager: { registerTaskDefinitions: jest.fn() },
         workflowsManagement: { management: { registerExecutionLabelNamespace } },
       } as never);
 
@@ -282,6 +285,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
             registerManagedWorkflowOwner: jest.fn(),
             registerStepDefinition: jest.fn(),
           },
+          taskManager: { registerTaskDefinitions: jest.fn() },
           workflowsManagement: { management: { registerExecutionLabelNamespace: jest.fn() } },
           contextEngine,
         } as never
@@ -313,6 +317,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
             registerManagedWorkflowOwner: jest.fn(),
             registerStepDefinition: jest.fn(),
           },
+          taskManager: { registerTaskDefinitions: jest.fn() },
           workflowsManagement: { management: { registerExecutionLabelNamespace: jest.fn() } },
           contextEngine: undefined,
         } as never
@@ -337,6 +342,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         {
           features,
           workflowsExtensions,
+          taskManager: { registerTaskDefinitions: jest.fn() },
           workflowsManagement: { management: { registerExecutionLabelNamespace: jest.fn() } },
           proposals: {},
           agenticInvestigations: {},
@@ -395,6 +401,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
             registerManagedWorkflowOwner: jest.fn(),
             registerStepDefinition: jest.fn(),
           },
+          taskManager: { registerTaskDefinitions: jest.fn() },
           workflowsManagement: { management: { registerExecutionLabelNamespace: jest.fn() } },
         } as never
       );
@@ -420,6 +427,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
             registerManagedWorkflowOwner: jest.fn(),
             registerStepDefinition: jest.fn(),
           },
+          taskManager: { registerTaskDefinitions: jest.fn() },
           workflowsManagement: { management: { registerExecutionLabelNamespace: jest.fn() } },
           agentBuilder: {
             tools: { register: jest.fn() },
@@ -446,6 +454,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         {
           features: { registerKibanaFeature: jest.fn() },
           workflowsExtensions,
+          taskManager: { registerTaskDefinitions: jest.fn() },
           workflowsManagement: { management: { registerExecutionLabelNamespace: jest.fn() } },
           proposals: {},
           agenticInvestigations: {},
@@ -475,6 +484,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
             registerManagedWorkflowOwner: jest.fn(),
             registerStepDefinition: jest.fn(),
           },
+          taskManager: { registerTaskDefinitions: jest.fn() },
           workflowsManagement: { management: { registerExecutionLabelNamespace: jest.fn() } },
           proposals: {},
           agenticInvestigations: {},
@@ -506,6 +516,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
             registerManagedWorkflowOwner: jest.fn(),
             registerStepDefinition: jest.fn(),
           },
+          taskManager: { registerTaskDefinitions: jest.fn() },
           workflowsManagement: { management: { registerExecutionLabelNamespace: jest.fn() } },
           proposals: {},
           agenticInvestigations: {},
@@ -548,6 +559,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         {
           features,
           workflowsExtensions,
+          taskManager: { registerTaskDefinitions: jest.fn() },
           workflowsManagement: { management: { registerExecutionLabelNamespace: jest.fn() } },
           proposals: {},
           agenticInvestigations: {},
@@ -556,7 +568,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       );
 
       expect(registerAgentType).toHaveBeenCalledWith(agentBuilder);
-      expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(3);
+      expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(4);
     });
 
     describe('ai.conversation.updated opt-in', () => {
@@ -572,6 +584,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
               registerManagedWorkflowOwner: jest.fn(),
               registerStepDefinition: jest.fn(),
             },
+            taskManager: { registerTaskDefinitions: jest.fn() },
             workflowsManagement: { management: { registerExecutionLabelNamespace: jest.fn() } },
             proposals: {},
             agenticInvestigations: {},
@@ -667,6 +680,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
             registerManagedWorkflowOwner: jest.fn(),
             registerStepDefinition: jest.fn(),
           },
+          taskManager: { registerTaskDefinitions: jest.fn() },
           workflowsManagement: { management: { registerExecutionLabelNamespace: jest.fn() } },
           proposals: {},
           agenticInvestigations: {},
@@ -753,5 +767,72 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         })
       );
     });
+  });
+});
+
+describe('AlertZeroPlugin Hunt handoff sweeper', () => {
+  const setupEnabled = () => {
+    const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+    const registerTaskDefinitions = jest.fn();
+    plugin.setup(
+      coreMock.createSetup() as never,
+      {
+        features: { registerKibanaFeature: jest.fn() },
+        workflowsExtensions: {
+          registerManagedWorkflowOwner: jest.fn(),
+          registerStepDefinition: jest.fn(),
+        },
+        taskManager: { registerTaskDefinitions },
+        workflowsManagement: { management: { registerExecutionLabelNamespace: jest.fn() } },
+      } as never
+    );
+    return { plugin, registerTaskDefinitions };
+  };
+
+  it('registers the sweeper task definition when enabled', () => {
+    const { registerTaskDefinitions } = setupEnabled();
+
+    expect(registerTaskDefinitions).toHaveBeenCalledWith({
+      'alertzero:hunt_handoff_sweeper': expect.objectContaining({
+        title: expect.any(String),
+        timeout: '2m',
+        createTaskRunner: expect.any(Function),
+      }),
+    });
+  });
+
+  it('does not register it when disabled', () => {
+    const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: false })));
+    const registerTaskDefinitions = jest.fn();
+
+    plugin.setup(
+      coreMock.createSetup() as never,
+      {
+        features: { registerKibanaFeature: jest.fn() },
+        workflowsExtensions: {},
+        taskManager: { registerTaskDefinitions },
+        workflowsManagement: undefined,
+      } as never
+    );
+
+    expect(registerTaskDefinitions).not.toHaveBeenCalled();
+  });
+
+  it('schedules the task at start without blocking it, and survives a scheduling failure', async () => {
+    const { plugin } = setupEnabled();
+    const ensureScheduled = jest.fn().mockRejectedValue(new Error('scheduling failed'));
+
+    expect(() =>
+      plugin.start(coreMock.createStart(), { taskManager: { ensureScheduled } } as never)
+    ).not.toThrow();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(ensureScheduled).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'alertzero-hunt-handoff-sweeper',
+        taskType: 'alertzero:hunt_handoff_sweeper',
+        schedule: { interval: '5m' },
+      })
+    );
   });
 });

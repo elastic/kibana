@@ -31,6 +31,7 @@ import { registerHuntRoutes } from './hunt/register_hunt_routes';
 import { registerHuntLibraryRoutes } from './hunt_library/hunt_library_routes';
 import { registerHuntPreserveRoute } from './hunt_library/preserve_route';
 import { registerHuntContinueRoute } from './hunt_library/continue_route';
+import { registerHuntHandoffCleanupRoute } from './hunt_library/handoff_cleanup_route';
 
 export interface RouteDependencies {
   router: AlertZeroRouter;
@@ -71,4 +72,5 @@ export const registerRoutes = (deps: RouteDependencies): void => {
   registerHuntLibraryRoutes(deps);
   registerHuntPreserveRoute(deps);
   registerHuntContinueRoute(deps);
+  registerHuntHandoffCleanupRoute(deps);
 };

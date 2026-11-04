@@ -14,6 +14,14 @@ import type { WatchWorkflowsManagementClient } from '../services/watches/watch_w
 import type { EvidenceSelection, PreservationContext } from './evidence';
 import { prepareEvidence } from './evidence';
 import { HUNT_LABEL_OWNER_ID } from './execution_labels';
+import {
+  HANDOFF_CLEANUP_REQUIRED,
+  HANDOFF_CREATED,
+  HANDOFF_FAILED,
+  HANDOFF_PENDING,
+  isStalePendingHandoff,
+  runHandoffCleanup,
+} from './handoff_cleanup';
 import type { HuntDefinition } from './hunt_definition';
 import {
   deleteEmptyCreatedInvestigation,
@@ -27,11 +35,6 @@ import {
   upsertHuntSessionAttachment,
   type HuntSessionDraft,
 } from './session_attachment_store';
-
-export const HANDOFF_PENDING = 'pending_handoff';
-export const HANDOFF_CREATED = 'investigation_created';
-export const HANDOFF_FAILED = 'handoff_failed';
-export const HANDOFF_CLEANUP_REQUIRED = 'handoff_cleanup_required';
 
 export type HuntPreserveErrorCode =
   | 'preservation_in_progress'
@@ -148,14 +151,28 @@ export const preserveHuntEvidence = async ({
   });
   const execution = executions.find(({ id }) => id === sessionExecutionId);
   const labels = execution?.labels;
-  if (
+  const foreignPending =
     labels?.['hunt.outcome'] === HANDOFF_PENDING &&
-    labels['hunt.preservation_id'] !== preservationId
-  ) {
+    labels['hunt.preservation_id'] !== preservationId;
+  if (foreignPending && !isStalePendingHandoff(labels, now())) {
     throw new HuntPreserveError(
       'preservation_in_progress',
       'Another preservation is still being saved for this session. Try again in a moment.'
     );
+  }
+  // An abandoned handoff, or one flagged for cleanup, is finished under this analyst's own request
+  // before anything new is written, so a stuck session unsticks itself.
+  if (labels && (foreignPending || labels['hunt.outcome'] === HANDOFF_CLEANUP_REQUIRED)) {
+    await runHandoffCleanup({
+      management,
+      conversations,
+      attachments,
+      logger,
+      spaceId,
+      executionId: sessionExecutionId,
+      labels,
+      now,
+    });
   }
   if (!execution) {
     // The execution expired under retention. Recreate it under the same identity.

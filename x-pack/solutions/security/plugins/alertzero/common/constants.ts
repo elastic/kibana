@@ -79,3 +79,6 @@ export const HUNT_GLOBAL_SPACE_ID = '*' as const;
 
 /** Read API for the curated Hunt Library catalog: list, and detail at `/{id}`. */
 export const HUNT_LIBRARY_URL = `${HUNT_BASE}/library` as const;
+
+/** Operator remediation: re-queue the cleanup of a Hunt session whose handoff did not complete. */
+export const HUNT_HANDOFF_CLEANUP_RETRY_URL = `${HUNT_BASE}/handoff_cleanup/retry` as const;

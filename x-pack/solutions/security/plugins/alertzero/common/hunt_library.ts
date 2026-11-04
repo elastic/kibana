@@ -153,3 +153,8 @@ export interface HuntContinueResponse {
     data_view_id: string;
   };
 }
+
+/** What re-running a session's handoff cleanup did. */
+export interface HuntHandoffCleanupRetryResponse {
+  result: 'nothing_to_do' | 'repaired' | 'finalized_failed' | 'retry_later' | 'exhausted';
+}
