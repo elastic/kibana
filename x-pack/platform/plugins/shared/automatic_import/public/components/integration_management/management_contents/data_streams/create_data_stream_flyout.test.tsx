@@ -21,6 +21,7 @@ import {
   useValidateIndex,
   useGetIntegrationById,
   useCreateUpdateIntegration,
+  useUploadSamples,
 } from '../../../../common';
 
 const mockAddWarning = jest.fn();
@@ -76,6 +77,7 @@ const mockUseFetchIndices = useFetchIndices as jest.Mock;
 const mockUseValidateIndex = useValidateIndex as jest.Mock;
 const mockUseGetIntegrationById = useGetIntegrationById as jest.Mock;
 const mockUseCreateUpdateIntegration = useCreateUpdateIntegration as jest.Mock;
+const mockUseUploadSamples = useUploadSamples as jest.Mock;
 const mockRefetch = jest.fn();
 
 const mockServices = coreMock.createStart();
@@ -163,6 +165,11 @@ describe('CreateDataStreamFlyout', () => {
       },
       isLoading: false,
       error: null,
+    });
+
+    mockUseUploadSamples.mockReturnValue({
+      uploadSamplesMutation: { mutateAsync: mockUploadMutateAsync, isLoading: false },
+      isLoading: false,
     });
 
     mockUploadMutateAsync.mockResolvedValue({ success: true });
@@ -517,6 +524,42 @@ describe('CreateDataStreamFlyout', () => {
 
       const indexSelect = getByTestId('indexSelect');
       expect(indexSelect.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+    });
+
+    it('disables the analyze button while the integration is being saved', async () => {
+      mockUseCreateUpdateIntegration.mockReturnValue({
+        createUpdateIntegrationMutation: { mutateAsync: mockMutateAsync, isLoading: true },
+        isLoading: true,
+        error: null,
+      });
+
+      const { getByTestId } = await renderFlyout(validForm);
+
+      expect(getByTestId('analyzeLogsButton')).toBeDisabled();
+    });
+
+    it('disables the analyze button while samples are uploading', async () => {
+      mockUseUploadSamples.mockReturnValue({
+        uploadSamplesMutation: { mutateAsync: mockUploadMutateAsync, isLoading: true },
+        isLoading: true,
+      });
+
+      const { getByTestId } = await renderFlyout(validForm);
+
+      expect(getByTestId('analyzeLogsButton')).toBeDisabled();
+    });
+
+    it('disables the analyze button while the index is being validated', async () => {
+      mockUseValidateIndex.mockReturnValue({
+        isValidating: true,
+        validationError: null,
+        validateIndex: mockValidateIndex,
+        clearValidationError: mockClearValidationError,
+      });
+
+      const { getByTestId } = await renderFlyout(validForm);
+
+      expect(getByTestId('analyzeLogsButton')).toBeDisabled();
     });
   });
 
