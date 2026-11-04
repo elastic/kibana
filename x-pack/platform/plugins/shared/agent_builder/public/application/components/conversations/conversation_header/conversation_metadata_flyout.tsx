@@ -21,6 +21,7 @@ import {
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import {
+  AGENT_BUILDER_UI_EBT,
   isPrivatelySharedConversation,
   isPublicConversation,
   normalizeConversationAccessControl,
@@ -28,6 +29,7 @@ import {
   type ConversationAccessControl,
 } from '@kbn/agent-builder-common';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useConversationPermissions } from '../../../hooks/use_conversation';
 import { useConversationFlyoutSessionProps } from '../../../hooks/use_conversation_flyout_session_props';
@@ -47,6 +49,13 @@ const getVisibilityLabel = (accessControl: ConversationAccessControl | undefined
 
   return isPrivatelySharedConversation(accessControl) ? labels.restricted : labels.private;
 };
+
+const getRenameEbtProps = (action: string) =>
+  getEbtProps({
+    element: AGENT_BUILDER_UI_EBT.element.pageContent,
+    action,
+    detail: 'conversation',
+  });
 
 interface MetadataRowProps {
   label: string;
@@ -139,10 +148,21 @@ export const ConversationMetadataFlyout: React.FC<ConversationMetadataFlyoutProp
             setDraftTitle(conversation.title);
           }}
           // An `xs` button keeps the title row as tall as the text rows; EuiText keeps the text at `s`.
-          readModeProps={{ size: 'xs', 'data-test-subj': 'agentBuilderConversationMetadataTitle' }}
+          readModeProps={{
+            size: 'xs',
+            'data-test-subj': 'agentBuilderConversationMetadataTitle',
+            ...getRenameEbtProps(AGENT_BUILDER_UI_EBT.action.conversation.RENAME),
+          }}
           editModeProps={{
             inputProps: { 'data-test-subj': 'agentBuilderConversationMetadataTitleInput' },
-            saveButtonProps: { 'data-test-subj': 'agentBuilderConversationMetadataTitleSave' },
+            saveButtonProps: {
+              'data-test-subj': 'agentBuilderConversationMetadataTitleSave',
+              ...getRenameEbtProps(AGENT_BUILDER_UI_EBT.action.conversation.RENAME_SAVE),
+            },
+            cancelButtonProps: {
+              'data-test-subj': 'agentBuilderConversationMetadataTitleCancel',
+              ...getRenameEbtProps(AGENT_BUILDER_UI_EBT.action.conversation.RENAME_CANCEL),
+            },
           }}
         />
       ),

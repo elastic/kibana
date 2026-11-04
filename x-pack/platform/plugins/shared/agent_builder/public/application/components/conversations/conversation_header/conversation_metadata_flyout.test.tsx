@@ -12,6 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { EuiThemeProvider } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
+  AGENT_BUILDER_UI_EBT,
   ConversationAccessControlMode,
   ConversationAccessControlRole,
   type Conversation,
@@ -229,6 +230,30 @@ describe('ConversationMetadataFlyout', () => {
       'Debugging high CPU usage'
     );
     expect(renameConversation).not.toHaveBeenCalled();
+  });
+
+  it('tracks rename clicks with the same telemetry as the rename modal', async () => {
+    const user = userEvent.setup();
+    renderFlyout();
+
+    const title = screen.getByTestId('agentBuilderConversationMetadataTitle');
+    expect(title).toHaveAttribute(
+      'data-ebt-action',
+      AGENT_BUILDER_UI_EBT.action.conversation.RENAME
+    );
+    expect(title).toHaveAttribute('data-ebt-element', AGENT_BUILDER_UI_EBT.element.pageContent);
+    expect(title).toHaveAttribute('data-ebt-detail', 'conversation');
+
+    await user.click(title);
+
+    expect(screen.getByTestId('agentBuilderConversationMetadataTitleSave')).toHaveAttribute(
+      'data-ebt-action',
+      AGENT_BUILDER_UI_EBT.action.conversation.RENAME_SAVE
+    );
+    expect(screen.getByTestId('agentBuilderConversationMetadataTitleCancel')).toHaveAttribute(
+      'data-ebt-action',
+      AGENT_BUILDER_UI_EBT.action.conversation.RENAME_CANCEL
+    );
   });
 
   it('keeps the editor open and saves nothing when the title is empty', async () => {
