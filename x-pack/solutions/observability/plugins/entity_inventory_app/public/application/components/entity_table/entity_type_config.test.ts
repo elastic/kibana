@@ -14,7 +14,7 @@ import {
   getDisplayConfig,
   getEntityName,
 } from './entity_type_config';
-import { COLUMN_LABELS, getColumnLabel } from './translations';
+import { COLUMN_LABELS, getColumnLabel } from './column_labels';
 
 const toListColumns = (names: string[]): InventoryListColumn[] =>
   names.map((name) => ({ name, kind: 'attribute', type: 'keyword' }));

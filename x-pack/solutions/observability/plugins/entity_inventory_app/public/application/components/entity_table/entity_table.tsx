@@ -5,32 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type {
   EuiDataGridColumn,
   EuiDataGridCellValueElementProps,
-  EuiDataGridSorting,
   EuiDataGridStyle,
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
-import {
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiDataGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiScreenReaderOnly,
-  EuiText,
-} from '@elastic/eui';
-import moment from 'moment';
+import { EuiDataGrid, EuiPanel } from '@elastic/eui';
 import { UI_SETTINGS } from '@kbn/data-service';
-import { getEbtProps } from '@kbn/ebt-click';
-import {
-  ENTITY_INVENTORY_EBT_ACTIONS,
-  ENTITY_INVENTORY_EBT_ELEMENTS,
-} from '../../../ebt_constants';
 import type {
   InventoryCellValue,
   InventoryEntityType,
@@ -40,21 +23,17 @@ import type {
 import { useKibana } from '../../../hooks/use_kibana';
 import { formatCellValue } from '../../utils/format_cell_value';
 import { sortEntityRows } from '../../utils/sort_entity_rows';
+import { getColumnLabel } from './column_labels';
+import { EntityCell, EntityNameCell } from './entity_table_cells';
+import { EntityTableResetButton } from './entity_table_reset_button';
 import {
   NAME_COLUMN_ID,
   getDefaultVisibleColumns,
   getDisplayConfig,
   getEntityName,
 } from './entity_type_config';
-import {
-  NO_VALUE_LABEL,
-  RESET_TO_DEFAULT_LABEL,
-  getColumnLabel,
-  getTableAriaLabel,
-} from './translations';
-
-export const DEFAULT_PAGE_SIZE = 10;
-const NO_BADGE_COLUMNS: readonly string[] = [];
+import { getTableAriaLabel } from './translations';
+import { PAGE_SIZE_OPTIONS, useEntityTableState } from './use_entity_table_state';
 
 /** Row rules only and a shaded header, as in the design's list tables. */
 const GRID_STYLE: EuiDataGridStyle = {
@@ -64,46 +43,36 @@ const GRID_STYLE: EuiDataGridStyle = {
   fontSize: 'm',
   cellPadding: 'm',
 };
-const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
-
-type SortingColumns = EuiDataGridSorting['columns'];
 
 export interface EntityTableProps {
   entityType: InventoryEntityType;
   list: InventoryListResponse;
 }
 
-const EmptyCellValue = () => (
-  <EuiText color="subdued" size="s">
-    <span aria-hidden={true}>—</span>
-    <EuiScreenReaderOnly>
-      <span>{NO_VALUE_LABEL}</span>
-    </EuiScreenReaderOnly>
-  </EuiText>
-);
-
-/**
- * One entity type's results as a data grid. Sorting and pagination run over the rows held in
- * memory; column visibility and sort are not persisted (#6330).
- */
+/** One entity type's results as a data grid. Sorting and pagination run over the loaded rows. */
 export const EntityTable = ({ entityType, list }: EntityTableProps) => {
   const {
     services: { uiSettings },
   } = useKibana();
   const { type, name: typeName } = entityType;
-  const { iconType, nameFields, badgeColumns = NO_BADGE_COLUMNS } = getDisplayConfig(type);
+  const { iconType, nameFields, badgeColumns } = getDisplayConfig(type);
+  const dateFormat: string = uiSettings.get(UI_SETTINGS.DATE_FORMAT);
 
   const defaultVisibleColumns = useMemo(
     () => getDefaultVisibleColumns(type, list.columns),
     [type, list.columns]
   );
-  const [visibleColumns, setVisibleColumns] = useState(defaultVisibleColumns);
-  // No sort keeps the server order: last seen, newest first.
-  const [sortingColumns, setSortingColumns] = useState<SortingColumns>([]);
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
-
-  useEffect(() => setPageIndex(0), [list]);
+  const {
+    visibleColumns,
+    setVisibleColumns,
+    sortingColumns,
+    onSort,
+    pageIndex,
+    setPageIndex,
+    pageSize,
+    onChangeItemsPerPage,
+    reset,
+  } = useEntityTableState({ defaultVisibleColumns, rows: list.rows });
 
   const columns = useMemo<EuiDataGridColumn[]>(
     () =>
@@ -114,35 +83,20 @@ export const EntityTable = ({ entityType, list }: EntityTableProps) => {
       })),
     [list.columns]
   );
+  const columnKinds = useMemo(
+    () => new Map(list.columns.map(({ name, kind }) => [name, kind])),
+    [list.columns]
+  );
 
   const getSortValue = useCallback(
     (row: InventoryRow, columnId: string): InventoryCellValue | undefined =>
       columnId === NAME_COLUMN_ID ? getEntityName(row, nameFields) : row[columnId],
     [nameFields]
   );
-
   const sortedRows = useMemo(
     () => sortEntityRows(list.rows, sortingColumns, getSortValue),
     [list.rows, sortingColumns, getSortValue]
   );
-
-  const onSort = useCallback((nextSortingColumns: SortingColumns) => {
-    setSortingColumns(nextSortingColumns);
-    setPageIndex(0);
-  }, []);
-
-  const onChangeItemsPerPage = useCallback((nextPageSize: number) => {
-    setPageSize(nextPageSize);
-    setPageIndex(0);
-  }, []);
-
-  const onReset = useCallback(() => {
-    setVisibleColumns(defaultVisibleColumns);
-    setSortingColumns([]);
-    setPageIndex(0);
-  }, [defaultVisibleColumns]);
-
-  const dateFormat: string = uiSettings.get(UI_SETTINGS.DATE_FORMAT);
 
   const renderCellValue = useCallback(
     ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
@@ -151,33 +105,23 @@ export const EntityTable = ({ entityType, list }: EntityTableProps) => {
         return null;
       }
       if (columnId === NAME_COLUMN_ID) {
-        const entityName = formatCellValue(getEntityName(row, nameFields));
         return (
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={iconType} aria-hidden={true} />
-            </EuiFlexItem>
-            <EuiFlexItem>{entityName ?? <EmptyCellValue />}</EuiFlexItem>
-          </EuiFlexGroup>
+          <EntityNameCell
+            name={formatCellValue(getEntityName(row, nameFields))}
+            iconType={iconType}
+          />
         );
       }
-      const value = row[columnId];
-      if (columnId === 'last_seen' && typeof value === 'string') {
-        return moment(value).format(dateFormat);
-      }
-      const text = formatCellValue(value);
-      if (text === null) {
-        return <EmptyCellValue />;
-      }
-      return badgeColumns.includes(columnId) ? (
-        <EuiBadge color="hollow" data-test-subj="entityInventoryCellBadge">
-          {text}
-        </EuiBadge>
-      ) : (
-        text
+      return (
+        <EntityCell
+          value={row[columnId]}
+          kind={columnKinds.get(columnId)}
+          isBadge={badgeColumns.includes(columnId)}
+          dateFormat={dateFormat}
+        />
       );
     },
-    [sortedRows, nameFields, iconType, badgeColumns, dateFormat]
+    [sortedRows, nameFields, iconType, badgeColumns, columnKinds, dateFormat]
   );
 
   const toolbarVisibility = useMemo<EuiDataGridToolBarVisibilityOptions>(
@@ -186,26 +130,9 @@ export const EntityTable = ({ entityType, list }: EntityTableProps) => {
       showSortSelector: true,
       showDisplaySelector: false,
       showFullScreenSelector: false,
-      additionalControls: {
-        right: (
-          <EuiButtonEmpty
-            size="xs"
-            color="text"
-            iconType="undo"
-            onClick={onReset}
-            data-test-subj="entityInventoryTableReset"
-            {...getEbtProps({
-              action: ENTITY_INVENTORY_EBT_ACTIONS.RESET_TABLE,
-              element: ENTITY_INVENTORY_EBT_ELEMENTS.ENTITY_TABLE,
-              detail: type,
-            })}
-          >
-            {RESET_TO_DEFAULT_LABEL}
-          </EuiButtonEmpty>
-        ),
-      },
+      additionalControls: { right: <EntityTableResetButton entityType={type} onReset={reset} /> },
     }),
-    [onReset, type]
+    [type, reset]
   );
 
   return (

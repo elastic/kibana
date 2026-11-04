@@ -16,9 +16,10 @@ import {
 } from '../../../inventory_api/fixture_data';
 import type { InventoryListResponse, InventoryRow } from '../../../inventory_api/types';
 import { createAppServicesMock } from '../../../mocks';
-import { DEFAULT_PAGE_SIZE, EntityTable } from './entity_table';
+import { EntityTable } from './entity_table';
 import { NAME_COLUMN_ID, getDefaultVisibleColumns } from './entity_type_config';
 import { NO_VALUE_LABEL, RESET_TO_DEFAULT_LABEL } from './translations';
+import { DEFAULT_PAGE_SIZE } from './use_entity_table_state';
 
 // EuiDataGrid's render cost is largely fixed and can exceed the default 5s budget under parallel CI load.
 jest.setTimeout(30_000);

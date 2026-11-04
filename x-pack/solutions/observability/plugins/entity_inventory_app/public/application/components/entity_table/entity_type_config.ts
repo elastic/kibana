@@ -34,10 +34,10 @@ export interface EntityTypeDisplayConfig {
   /** Columns visible by default, in order; `undefined` shows every attribute. */
   defaultVisibleColumns?: readonly string[];
   /** Columns whose values render as badges, for values that name a group such as a cluster. */
-  badgeColumns?: readonly string[];
+  badgeColumns: readonly string[];
 }
 
-const ENTITY_TYPE_DISPLAY_CONFIG: Readonly<Record<string, EntityTypeDisplayConfig>> = {
+const ENTITY_TYPE_DISPLAY_CONFIG: Readonly<Record<string, Partial<EntityTypeDisplayConfig>>> = {
   host: {
     iconType: 'compute',
     nameFields: ['host.name', 'host.hostname', 'host.id', 'entity.id'],
@@ -64,11 +64,14 @@ const ENTITY_TYPE_DISPLAY_CONFIG: Readonly<Record<string, EntityTypeDisplayConfi
 const DEFAULT_DISPLAY_CONFIG: EntityTypeDisplayConfig = {
   iconType: 'grid',
   nameFields: ['entity.id'],
+  badgeColumns: [],
 };
 
-/** Display settings of an entity type, with a generic fallback for unconfigured types. */
-export const getDisplayConfig = (type: string): EntityTypeDisplayConfig =>
-  ENTITY_TYPE_DISPLAY_CONFIG[type] ?? DEFAULT_DISPLAY_CONFIG;
+/** Display settings of an entity type: its own settings over the defaults for unconfigured ones. */
+export const getDisplayConfig = (type: string): EntityTypeDisplayConfig => ({
+  ...DEFAULT_DISPLAY_CONFIG,
+  ...ENTITY_TYPE_DISPLAY_CONFIG[type],
+});
 
 /** The columns visible by default, limited to the columns the response has. */
 export const getDefaultVisibleColumns = (

@@ -44,6 +44,8 @@ export const useEntityList = (entityType: string): UseEntityListResult => {
         throw new Error(`Invalid time range: ${dateRange.from} to ${dateRange.to}`);
       }
 
+      // Both requests start together. The type lookup is judged first, so an unknown type is
+      // reported even when the list request failed as well.
       const [typesResult, listResult] = await Promise.allSettled([
         inventoryApi.getTypes({ signal }),
         inventoryApi.listEntities(
