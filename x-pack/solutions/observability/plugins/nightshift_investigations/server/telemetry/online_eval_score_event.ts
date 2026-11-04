@@ -190,7 +190,8 @@ const onlineEvalScoreSchema: RootSchema<OnlineEvalScoreEvent> = {
   judge_llm_calls: {
     type: 'long',
     _meta: {
-      description: 'Judge model calls, including retries and calls that failed.',
+      description:
+        'Judge model calls attempted, including calls that failed before reaching a model. A call the inference client retried counts once.',
       optional: true,
     },
   },
