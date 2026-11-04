@@ -2147,6 +2147,8 @@
       "@kbn/random-sampling/*": ["./x-pack/platform/packages/private/kbn-random-sampling/*"],
       "@kbn/react-env": ["./src/platform/packages/shared/react/env"],
       "@kbn/react-env/*": ["./src/platform/packages/shared/react/env/*"],
+      "@kbn/react-fiber": ["./src/platform/packages/shared/kbn-react-fiber"],
+      "@kbn/react-fiber/*": ["./src/platform/packages/shared/kbn-react-fiber/*"],
       "@kbn/react-field": ["./src/platform/packages/shared/kbn-react-field"],
       "@kbn/react-field/*": ["./src/platform/packages/shared/kbn-react-field/*"],
       "@kbn/react-hooks": ["./src/platform/packages/shared/kbn-react-hooks"],

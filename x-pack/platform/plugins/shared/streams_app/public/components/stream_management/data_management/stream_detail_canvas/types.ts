@@ -12,7 +12,10 @@ import type {
   UnitEdgeForwarding,
   UnitEdgeProcessingTarget,
 } from '../../../../services/unit_graph';
-import type { DestinationSignal } from '../../../streams_layout/destinations/types';
+import type {
+  DestinationSignal,
+  DestinationViewModel,
+} from '../../../streams_layout/destinations/types';
 
 export const SOURCE_NODE_TYPE = 'source';
 export const DESTINATION_NODE_TYPE = 'destination';
@@ -38,6 +41,8 @@ export interface DestinationNodeData extends Record<string, unknown> {
   streamName?: string;
   bucket?: string;
   destinationId?: string;
+  /** Decides whether the node shows stats. A node without it shows none. */
+  destinationType?: DestinationViewModel['type'];
   signals?: DestinationSignal[];
   indexCount?: number;
   targetedIndexNames?: string[];

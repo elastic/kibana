@@ -141,6 +141,8 @@ export const Rootly: ConnectorSpec = {
 
   schema: lazySchema(() => z.object({})),
 
+  sandbox: { hosts: ['api.rootly.com'] },
+
   actions: {
     createIncident: {
       isTool: true,

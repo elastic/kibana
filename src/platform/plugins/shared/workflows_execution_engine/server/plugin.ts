@@ -58,6 +58,7 @@ import {
   UNKNOWN_EXECUTION_IDENTITY,
 } from './lib/execution_identity';
 import { getAuthenticatedUser } from './lib/get_user';
+import { getWorkflowExecutionName } from './lib/get_workflow_execution_name';
 import { checkWorkflowAccess, hasWorkflowAccess } from './lib/has_workflow_access';
 import { logWorkflowTaskFailure } from './lib/log_workflow_task_failure';
 import {
@@ -785,9 +786,8 @@ export class WorkflowsExecutionEnginePlugin
                     execution.context?.pendingInteractiveResume === true &&
                     execution.context?.resumeInput != null;
                 }
-                const accepted = await new WorkflowTaskManager(
-                  pluginsStart.taskManager
-                ).tryRunImmediateResume({
+                const workflowTaskManager = new WorkflowTaskManager(pluginsStart.taskManager);
+                const accepted = await workflowTaskManager.tryRunImmediateResume({
                   executionId: workflowRunId,
                   spaceId,
                   fakeRequest,
@@ -796,7 +796,7 @@ export class WorkflowsExecutionEnginePlugin
                   runAs: getWorkflowTaskRunAs(fakeRequest),
                 });
                 // A request never loads workflow checkpoints or invokes steps. Busy
-                // runners keep their claim; this notification retries durably in TM.
+                // runners keep their claim; the retained wake task retries durably in TM.
                 if (retainedWake) {
                   // Retention closes the ensure-vs-delete race, including approvals written mid-claim.
                   return {
@@ -807,7 +807,16 @@ export class WorkflowsExecutionEnginePlugin
                     priority: getTaskPriority({ isUserInteractive }),
                   };
                 }
-                return accepted ? undefined : { runAt: new Date(Date.now() + 1000), state: {} };
+                if (!accepted) {
+                  // Re-arming this task would let terminal cleanup delete it mid-claim; cleanup skips the wake task.
+                  await workflowTaskManager.handOffToWakeTask({
+                    executionId: workflowRunId,
+                    spaceId,
+                    fakeRequest,
+                    runAs: getWorkflowTaskRunAs(fakeRequest),
+                  });
+                }
+                return;
               }
 
               const currentExecution = await workflowExecutionRepository.getWorkflowExecutionById(
@@ -1124,6 +1133,7 @@ export class WorkflowsExecutionEnginePlugin
                   logger,
                   {
                     createSkippedForInFlightDuplicates: !deferInFlightDuplicatesToConcurrency,
+                    getRunName: (execution) => this.getRunName(execution, coreStart, dependencies),
                     hasActiveTaskForExecution: (executionId) =>
                       workflowTaskManager.hasActiveTaskForExecution(executionId),
                   }
@@ -1182,6 +1192,7 @@ export class WorkflowsExecutionEnginePlugin
                   authenticatedUser: executedBy,
                   now: workflowCreatedAt,
                   maxEventChainDepth: this.config.eventDriven.maxChainDepth,
+                  getRunName: (execution) => this.getRunName(execution, coreStart, dependencies),
                   getConcurrencyGroupKey: (execution) =>
                     this.getConcurrencyGroupKey(
                       execution,
@@ -1476,6 +1487,7 @@ export class WorkflowsExecutionEnginePlugin
       return buildWorkflowExecutionDocument({
         ...args,
         maxEventChainDepth: this.config.eventDriven.maxChainDepth,
+        getRunName: (execution) => this.getRunName(execution, coreStart, dependencies),
         getConcurrencyGroupKey: (execution) =>
           this.getConcurrencyGroupKey(
             execution,
@@ -2250,6 +2262,14 @@ export class WorkflowsExecutionEnginePlugin
 
   public stop() {
     void this.dataClientBundle.stop();
+  }
+
+  private getRunName(
+    execution: WorkflowExecutionForInputRendering,
+    coreStart: CoreStart,
+    dependencies: ContextDependencies
+  ): string | undefined {
+    return getWorkflowExecutionName(execution, this.logger, coreStart, dependencies);
   }
 
   /**
