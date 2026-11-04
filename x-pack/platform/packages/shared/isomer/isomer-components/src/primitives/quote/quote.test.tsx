@@ -9,6 +9,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createIsomerRuntime } from '@elastic/isomer-runtime';
 import { buildJsxShim } from '@elastic/isomer-sdk/author';
+import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 import { componentsPack, componentsPrimitives } from '../../pack';
 import type { QuoteNode } from '.';
 
@@ -18,9 +19,8 @@ const { Composition, Quote, toComposition } = buildJsxShim(componentsPrimitives)
 const quoted = (text: string): QuoteNode => ({ type: 'quote', text });
 
 describe('quote', () => {
-  it('takes up to 3,000 characters', () => {
-    expect(validate({ type: 'view', body: [quoted('x'.repeat(3000))] }).valid).toBe(true);
-    expect(validate({ type: 'view', body: [quoted('x'.repeat(3001))] }).valid).toBe(false);
+  it('takes text of any length, but not a blank one', () => {
+    expect(validate({ type: 'view', body: [quoted('x'.repeat(20000))] }).valid).toBe(true);
     expect(validate({ type: 'view', body: [quoted('')] }).valid).toBe(false);
     expect(validate({ type: 'view', body: [quoted(' \n ')] }).valid).toBe(false);
   });
@@ -34,6 +34,20 @@ describe('quote', () => {
         ],
       },
     ]);
+  });
+
+  it('clamps a long quote to a Slack section, with an ellipsis', () => {
+    const [block] = surfaces.slack.renderNode(quoted('x'.repeat(20000))).blocks;
+
+    expect(block).toEqual({
+      type: 'rich_text',
+      elements: [
+        {
+          type: 'rich_text_quote',
+          elements: [{ type: 'text', text: `${'x'.repeat(SLACK_LIMITS.sectionTextChars - 1)}…` }],
+        },
+      ],
+    });
   });
 
   it('keeps line breaks on the other surfaces', () => {

@@ -17,7 +17,7 @@ import { contextSlackRenderer } from './context_slack';
 
 const itemSchema = z
   .object({
-    text: plainText(500).describe('One short fact, in plain text.'),
+    text: plainText().describe('One short fact, in plain text.'),
   })
   .strict();
 

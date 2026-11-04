@@ -4,6 +4,8 @@ Kibana's [Isomer](https://github.com/elastic/isomer) pack of content and layout 
 
 ## Component Primitives
 
+Plain-text fields take text of any length. Each surface fits it: Slack clamps a slot past its limit with an ellipsis, or cuts it with a note, so a long value never fails validation.
+
 - `markdown`: GitHub-flavored Markdown.
   - `{ type: 'markdown', text }`, the same node as Agent Builder's `MarkdownNode`.
   - React and HTML render with the SDK's `renderMarkdownContent`, from the same parse as `md.authored`: raw HTML is text, `href` and `src` are sanitized, and source past the parse budget is inert text.
@@ -18,24 +20,24 @@ Kibana's [Isomer](https://github.com/elastic/isomer) pack of content and layout 
   - Plain text reaches every surface as written, so use Unicode emoji (⚠️), not Slack shortcodes (`:warning:`).
 - `divider`: a rule between sections, `{ type: 'divider' }`. Slack gets a `divider` block, React an `<hr>`, Markdown and text `---`.
 - `quote`: a quoted passage, such as a conclusion.
-  - `{ type: 'quote', text }`, plain text up to 3,000 characters, with line breaks kept. Slack gets one `rich_text` block with a `rich_text_quote`, so the text needs no `mrkdwn` escaping.
+  - `{ type: 'quote', text }`, plain text with line breaks kept. Slack gets one `rich_text` block with a `rich_text_quote`, so the text needs no `mrkdwn` escaping, clamped to 3,000 characters.
   - To title it, put it in a `section`.
 - `actions`: up to 5 link buttons, such as "View Full Investigation".
   - `{ type: 'actions', buttons: [{ label, url, primary? }] }`. Slack gets an `actions` block of URL buttons, with labels clamped to 75 characters; other surfaces render links.
   - `url` follows the navigation policy, so a relative path works in React and HTML. Slack can't open one, so it drops that button, and the block when no button is left. Hosts resolve Kibana paths to absolute URLs before building the node.
 - `link`: one link, to a page in Kibana or on the web, such as "Open in Discover".
-  - `{ type: 'link', label, app, path? }` for a Kibana app path, where `app` is the app's route after `/app/` (such as `security`), not its id (`securitySolutionUI`), or `{ type: 'link', label, url }` for an absolute URL. Slack gets an inline `mrkdwn` link in a `section`, or a `rich_text` link when the escaped URL won't fit one.
+  - `{ type: 'link', label, app, path? }` for a Kibana app path, where `app` is the app's route after `/app/` (such as `security`), not its id (`securitySolutionUI`), or `{ type: 'link', label, url }` for an absolute URL. Slack gets an inline `mrkdwn` link in a `section`, or a `rich_text` link when the escaped URL won't fit one, with the label clamped to 75 characters. A URL past Slack's 3,000 characters leaves the link out.
   - Each host resolves an app path. React calls `resolveKibanaPath('/app/{app}{path}')` from the render context (`ComponentsRenderContext`), such as `http.basePath.prepend` in the browser. Slack joins `/app/{app}{path}` onto the render's `baseUrl` (`runtime.surfaces.slack.render(composition, { baseUrl })`), keeping its base path and space, so pass the space-aware Kibana URL. Text and Markdown have no host input, so only `url` links render there.
   - A link that doesn't resolve renders nothing. Unlike `actions`, it isn't a call to action.
 - `fields`: up to 10 labeled values, such as an app and a time range.
-  - `{ type: 'fields', items: [{ label, value }] }`. `value` is plain text, or `{ raw, format?, precision?, currency? }` formatted by the SDK's `formatDisplayValue` the same on every surface. Slack gets one `section` with a `mrkdwn` field per item, the value clamped after escaping to 2,000 characters.
+  - `{ type: 'fields', items: [{ label, value }] }`. `value` is plain text, or `{ raw, format?, precision?, currency? }` formatted by the SDK's `formatDisplayValue` the same on every surface. Slack gets one `section` with a `mrkdwn` field per item, the label clamped to 150 characters and the value clamped after escaping to fit the field's 2,000.
 - `code`: code or source shown as written, such as an ES|QL query.
-  - `{ type: 'code', text, language? }`, up to 12,000 characters. Slack gets a `rich_text_preformatted` block, which needs no escaping and splits past 3,000 characters; Markdown gets a fence longer than any backtick run.
+  - `{ type: 'code', text, language? }`. Slack gets a `rich_text_preformatted` block, which needs no escaping and splits past 3,000 characters, of the first 12,000 characters, with a "Showing the first N of M characters" note when it's cut; Markdown gets a fence longer than any backtick run.
   - In a React host, pass `enhancements: [CODE_COPY_ENHANCEMENT]` (`'codeCopy'`) for a Copy button on each block, which reads "Copied" for two seconds after a copy. The button appears once the block has mounted and found `navigator.clipboard`, so static HTML never shows one. It has no script, which Kibana's CSP couldn't run.
 - `table`: rows of values under column headings.
   - `{ type: 'table', columns: [{ label, format?, precision?, currency?, align? }], rows, sort?, maxRows?, totalRows? }`, 1 to 20 columns and up to 1,000 rows of text, numbers or `null`. Numbers align right by default. Rows are sorted, then cut to `maxRows`, with a "Showing N of M rows" note; `totalRows` counts rows the caller already left out.
   - JSX: `<Table.Column format="number">Errors</Table.Column>` per column, and a `<Table.Row>` per row with one expression per cell, `{'checkout'}{1284}{null}`, or `cells={['checkout', 1284, null]}`. Expressions keep a number a number; text children would make it a string. `columns` and `rows` props work too.
-  - Slack gets a native `table` block of up to 99 rows under the header, cut by row before its cells pass Slack's 10,000-character budget, so it stays a table.
+  - Slack gets a native `table` block of up to 99 rows under the header, cut by row before its cells pass Slack's 10,000-character budget, so it stays a table. Each cell and heading is clamped to 500 characters, its share of that budget across 20 columns.
   - Pass `enhancements: [TABLE_SORT_ENHANCEMENT]` (`'tableSort'`) and readers can sort by clicking a column heading; a second click reverses it. It's a progressive enhancement: the table renders `data-*` hooks, and the enhancement's script wraps each heading in a button and reorders the rows, so without the script the table reads as it was sorted. It sorts by the raw values, the same way `sort` does. A table whose rows were cut keeps its order, since sorting only the shown rows would mislead. The script runs where the HTML surface's scripts run (`scripts: 'embedded'`, or `'host'` with `runEnhancementScript`) and on the React surface with `wrapper`. The SDK compiles it with `new Function`, which Kibana's CSP refuses, so a host inside Kibana shouldn't request it. In React and HTML, with or without the enhancement, the heading of the `sort` column shows an arrow and `aria-sort`.
 
 There's no list primitive. For a list built from data, such as a graph's nodes, build Markdown with the SDK's `md.list` and `serializeMarkdown` (`@elastic/isomer-sdk/markdown`), which escape each item, and put it in a `markdown` node.

@@ -33,7 +33,7 @@ describe('fields', () => {
     expect(view(fieldsOf(...Array(10).fill(item))).valid).toBe(true);
     expect(view(fieldsOf(...Array(11).fill(item))).valid).toBe(false);
     expect(view(fieldsOf({ label: ' ', value: 'x' })).valid).toBe(false);
-    expect(view(fieldsOf({ label: 'App', value: 'x'.repeat(1001) })).valid).toBe(false);
+    expect(view(fieldsOf({ label: 'x'.repeat(5000), value: 'x'.repeat(5000) })).valid).toBe(true);
     expect(view(fieldsOf({ label: 'Size', value: { raw: 1024, format: 'bytes' } })).valid).toBe(
       true
     );
@@ -60,6 +60,13 @@ describe('fields', () => {
 
     expect(field.text.length).toBeLessThanOrEqual(SLACK_LIMITS.sectionFieldChars);
     expect(field.text).toMatch(/^\*Note\*\n(&amp;)+…$/);
+  });
+
+  it('clamps a long label to a Slack header and still fits the value in the field', () => {
+    const [field] = slackFields(fieldsOf({ label: 'x'.repeat(5000), value: 'y'.repeat(5000) }));
+
+    expect(field.text.length).toBeLessThanOrEqual(SLACK_LIMITS.sectionFieldChars);
+    expect(field.text).toMatch(new RegExp(`^\\*x{${SLACK_LIMITS.headerTextChars - 1}}…\\*\\ny+…$`));
   });
 
   it('formats structured values the same on every surface', () => {

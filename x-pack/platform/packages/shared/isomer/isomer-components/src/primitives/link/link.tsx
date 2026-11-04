@@ -45,7 +45,6 @@ const staysInApp = (path: string): boolean => PROBE_APPS.every((app) => staysInP
 
 const pathSchema = z
   .string()
-  .max(2000)
   .refine((value) => /^[/?#]/.test(value) && !value.startsWith('//') && !value.includes('\\'), {
     error: 'must start with /, ? or #, and not with //',
   })
@@ -58,9 +57,7 @@ const linkSchema = z
   .object({
     type: z.literal('link'),
     label: fromTextChildren(
-      plainText(SLACK_LIMITS.buttonTextChars).describe(
-        'What the link opens, in a few words, such as "Open in Discover".'
-      )
+      plainText().describe('What the link opens, in a few words, such as "Open in Discover".')
     ),
     app: z
       .string()
