@@ -6364,6 +6364,30 @@ describe('ConversationClient', () => {
       expect(mockEsClient.index).toHaveBeenCalledTimes(2);
     });
 
+    it('appendEvents consuming a background execution answers busy while a live run holds it, even when the entry is stored', async () => {
+      // A run started after the child was stored carries the entry in memory and writes it back
+      // when it ends, so consuming it underneath that run would report the child twice.
+      const held = documentWithPendingChild(['child-1']);
+      mockGetDocumentResponse({
+        ...held,
+        _source: { ...held._source, active_execution: activeExecution('e1') },
+      });
+      liveHolder();
+
+      const busyWithoutRun = await appendConsuming('child-1', false).catch(
+        (caught: unknown) => caught
+      );
+      expect(isConversationBusyError(busyWithoutRun)).toBe(true);
+      const busyWithRun = await appendConsuming('child-1').catch((caught: unknown) => caught);
+      expect(isConversationBusyError(busyWithRun)).toBe(true);
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+
+      staleHolder();
+      await appendConsuming('child-1', false);
+      expect(indexedSource().state?.background_executions).toEqual({});
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+    });
+
     it('appendEvents setting the active execution refuses when a concurrent one wins the version conflict', async () => {
       mockGetDocumentResponse(documentWithHolder('e3'));
       mockGetDocumentResponseOnce(documentWithHolder());

@@ -391,15 +391,15 @@ const consumeBackgroundExecution = (
   executionId: string,
   acquiring: boolean
 ): ConversationInternalState | undefined => {
-  const stored = current.state;
+  const { state: stored, active_execution: held, execution } = current;
+  // A live holder may report this child itself and writes its in-memory state back when it ends,
+  // so it answers busy, through the acquire when there is one.
+  if (held && !acquiring && !isExecutionStale(execution)) {
+    throw new ConversationBusySignal(held.execution_id);
+  }
   if (!stored?.background_executions?.[executionId]) {
-    // A held conversation has not stored its state yet: a live holder answers busy, through the
-    // acquire when there is one; a dead holder's state is never coming.
-    const { active_execution: held, execution } = current;
+    // A held conversation has not stored its state yet; a dead holder's state is never coming.
     if (held) {
-      if (!acquiring && !isExecutionStale(execution)) {
-        throw new ConversationBusySignal(held.execution_id);
-      }
       return undefined;
     }
     throw backgroundExecutionNotPending(executionId);
