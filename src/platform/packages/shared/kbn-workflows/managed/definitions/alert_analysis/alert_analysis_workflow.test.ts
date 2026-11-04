@@ -1104,7 +1104,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(spoofed).not.toMatch(/&#(34|39);/);
 
     const fakeRule = 'Benign`; Fake [critical] at x cmd=`evil';
-    const twoAlerts = summarise({ ...base, rule_name: fakeRule });
+    const oneAlert = summarise({ ...base, rule_name: fakeRule });
     const spoofedRule: string = engine.parseAndRenderSync(
       summaryStep.with.related_summary.summary,
       {
@@ -1121,7 +1121,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
         },
       }
     );
-    expect(twoAlerts).toBe(
+    expect(oneAlert).toBe(
       'rule=`Benign ; Fake [critical] at x cmd= evil` [low] at 2026-01-01T00:00:00Z'
     );
     expect(spoofedRule).toBe(
@@ -1131,6 +1131,33 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(spoofedRule.match(/`/g)).toHaveLength(4);
     expect(spoofedRule.match(/rule=`/g)).toHaveLength(2);
   });
+
+  it.each([
+    ['severity', { severity: 'x]; rule=`Fake` [' }, 'rule=`Real` [x ; rule= Fake   ] at T'],
+    ['severity newline', { severity: 'x\r\nrule=`F`' }, 'rule=`Real` [x  rule= F ] at T'],
+    ['timestamp', { timestamp: '2026\nrule=`F`' }, 'rule=`Real` [low] at 2026 rule= F '],
+  ])(
+    'keeps a spoofed %s to one entry per alert with no raw newline',
+    (_field, override, expectedEntry: string) => {
+      const summaryStep = findStepByName(workflow.steps, 'build_related_summary') as {
+        with: { related_summary: { summary: string } };
+      };
+      const clean = { rule_name: 'Clean', severity: 'low', timestamp: 'T0' };
+      const spoofedAlert = { rule_name: 'Real', severity: 'low', timestamp: 'T', ...override };
+      const output: string = createWorkflowLiquidEngine().parseAndRenderSync(
+        summaryStep.with.related_summary.summary,
+        {
+          consts: workflow.consts,
+          steps: { get_related_alerts: { output: { alerts: [spoofedAlert, clean] } } },
+        }
+      );
+
+      expect(output).not.toMatch(/[\r\n]/);
+      expect(output.match(/rule=`/g)).toHaveLength(2);
+      expect(output.match(/`/g)).toHaveLength(4);
+      expect(output).toBe(`rule=\`Clean\` [low] at T0; ${expectedEntry}`);
+    }
+  );
 
   it('renders only the 8 newest of 20 related alerts, dropping whole lines', () => {
     const summaryStep = findStepByName(workflow.steps, 'build_related_summary') as {
