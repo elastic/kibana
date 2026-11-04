@@ -237,6 +237,12 @@ describe('digital experience mobile apps', () => {
               timerange(hours[i], end, {} as ToolingLog)
             )
           );
+        const unsplit = collect(
+          { seed: undefined, scale: 0.2, from },
+          timerange(hours[0], hours[3], {} as ToolingLog)
+        );
+        const sortKey = (doc: EdotReactNativeDocument) => JSON.stringify(doc);
+        expect(workerDocs.map(sortKey).sort()).toEqual(unsplit.map(sortKey).sort());
         DIGITAL_EXPERIENCE_MOBILE_APPS.forEach(({ serviceName }) => {
           const sessions = sessionsByInstallation(serviceName, workerDocs);
           const sessionCount = [...sessions.values()].reduce((sum, { size }) => sum + size, 0);

@@ -218,7 +218,16 @@ describe('digital experience apps', () => {
 
         expect(sorted(batched)).toEqual(sorted(generate(undefined)));
         expect(generate(undefined)).toEqual(generate(getDefaultSeed(from)));
-        expect(generate(undefined, { from: from - 1 })).not.toEqual(generate(undefined));
+        // A run that starts a millisecond earlier cuts off almost nothing else, but has other sessions
+        const earlier = generate(undefined, { from: from - 1 });
+        const sessionIds = (docs: EdotBrowserDocument[]) =>
+          new Set(docs.map(({ attributes }) => attributes?.['session.id']).filter(Boolean));
+        const earlierSessionIds = sessionIds(earlier);
+        expect(earlier).toEqual(generate(getDefaultSeed(from - 1), { from: from - 1 }));
+        expect(earlierSessionIds.size).toBeGreaterThan(0);
+        sessionIds(generate(undefined)).forEach((sessionId) =>
+          expect(earlierSessionIds.has(sessionId)).toBe(false)
+        );
       });
 
       it('generates the same data when the run is split into batches', () => {
