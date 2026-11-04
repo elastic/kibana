@@ -201,6 +201,78 @@ describe('protocol sources', () => {
       expect(projected).toContain('board(filter: BoardFilter, id: ID!): Board');
     });
 
+    it('keeps a root type whole when a result field reaches it', () => {
+      const projected = project(
+        'type Query { board: Board, other: String } type Board { parent: Query } type Mutation { create: String }',
+        ['query board']
+      );
+
+      expect(projected).toContain('other: String');
+      expect(projected).not.toContain('Mutation');
+    });
+
+    it('expands an interface only when a field returns it, not when a type implements it', () => {
+      const relay = `
+        type Query { board: Board, node: Node }
+        interface Node { id: ID! }
+        type Board implements Node { id: ID! }
+        type Card implements Node { id: ID! }
+      `;
+
+      const viaImplements = project(relay, ['query board']);
+      expect(viaImplements).toContain('interface Node');
+      expect(viaImplements).not.toContain('type Card');
+      expect(() => buildSchema(viaImplements)).not.toThrow();
+      expect(project(relay, ['query node'])).toContain('type Card');
+    });
+
+    it('expands an interface a kept type implements when a later field returns it', () => {
+      const projected = project(
+        `
+        type Query { board: Board }
+        interface Node { id: ID! }
+        type Board implements Node { id: ID!, parent: Node }
+        type Card implements Node { id: ID! }
+      `,
+        ['query board']
+      );
+
+      expect(projected).toContain('type Card');
+    });
+
+    it('keeps directives operations can use, with their argument types, and drops the others', () => {
+      const projected = project(
+        `
+        directive @cost(weight: Weight) on FIELD
+        directive @internal on FIELD_DEFINITION
+        type Query { board: String, other: Other }
+        input Weight { value: Int }
+        type Other { id: ID }
+      `,
+        ['query board']
+      );
+
+      expect(projected).toContain('directive @cost(weight: Weight) on FIELD');
+      expect(projected).toContain('input Weight');
+      expect(projected).not.toContain('@internal');
+      expect(projected).not.toContain('Other');
+      expect(() => buildSchema(projected)).not.toThrow();
+    });
+
+    it('keeps names in JSON Schema maps that look like documentation', () => {
+      const inputSchema = {
+        type: 'object',
+        dependentRequired: { description: ['title'], title: ['description'] },
+        dependencies: { $comment: ['title'], examples: { required: ['title'] } },
+      };
+
+      const { tools: projected } = JSON.parse(
+        projectProtocolSpec({ ...mcpSpec, tools: [{ name: 'search', inputSchema }] }, ['search'])
+      );
+
+      expect(projected[0].inputSchema).toEqual(inputSchema);
+    });
+
     it('is stable when projected again', () => {
       const projected = projectProtocolSpec(graphQLSpec, ['query board']);
 
@@ -264,7 +336,7 @@ describe('protocol sources', () => {
         'a deprecated field',
         schema('id: ID! @deprecated(reason: "gone") state: State'),
         'deprecation',
-        'FIELD_DEPRECATED',
+        'DEPRECATION_ADDED',
       ],
     ])('classifies %s in GraphQL', (_, current, kind, id) => {
       expect(diffOf('graphql', base, current)).toContainEqual([kind, id]);
@@ -360,6 +432,46 @@ describe('protocol sources', () => {
         'mcp-input-schema-changed',
       ],
       [
+        'a new enum on an input that had none',
+        (tool: SearchToolDraft) => {
+          tool.inputSchema.properties.query.enum = ['only'];
+        },
+        'breaking',
+        'mcp-input-enum-changed',
+      ],
+      [
+        'an enum dropped from an input',
+        (tool: SearchToolDraft) => {
+          delete tool.inputSchema.properties.mode.enum;
+        },
+        'non-breaking',
+        'mcp-input-enum-changed',
+      ],
+      [
+        'an enum dropped from an output',
+        (tool: SearchToolDraft) => {
+          delete tool.outputSchema.properties.kind.enum;
+        },
+        'breaking',
+        'mcp-output-enum-changed',
+      ],
+      [
+        'a new enum on an output that had none',
+        (tool: SearchToolDraft) => {
+          tool.outputSchema.properties.total.enum = [1];
+        },
+        'non-breaking',
+        'mcp-output-enum-changed',
+      ],
+      [
+        'a type dropped from an output',
+        (tool: SearchToolDraft) => {
+          delete tool.outputSchema.properties.total.type;
+        },
+        'breaking',
+        'mcp-output-type-changed',
+      ],
+      [
         'a tool that stops being read-only',
         (tool: SearchToolDraft) => {
           tool.annotations.readOnlyHint = false;
@@ -369,6 +481,48 @@ describe('protocol sources', () => {
       ],
     ])('classifies %s in MCP', (_, change, kind, id) => {
       expect(diffOf('mcp', mcpBase, snapshot(change))).toContainEqual([kind, id]);
+    });
+
+    it('compares enum values by content, so unchanged objects are no change', () => {
+      const withEnum = (values: unknown[]) =>
+        projectProtocolSpec(
+          {
+            ...mcpSpec,
+            tools: [
+              {
+                name: 'search',
+                inputSchema: { type: 'object', properties: { a: { enum: values } } },
+              },
+            ],
+          },
+          ['search']
+        );
+
+      expect(diffOf('mcp', withEnum([{ kind: 'a' }]), withEnum([{ kind: 'a' }]))).toEqual([]);
+      expect(diffOf('mcp', withEnum([{ kind: 'a' }]), withEnum([{ kind: 'b' }]))).toContainEqual([
+        'breaking',
+        'mcp-input-enum-changed',
+      ]);
+    });
+
+    it('reports deprecated GraphQL arguments, fields and enum values', () => {
+      const withDeprecated = (argument: string, field: string, value: string) =>
+        project(
+          `type Query { board(a: Int${argument}): Board } type Board { id: ID${field}, state: State } enum State { OPEN${value} }`,
+          ['query board']
+        );
+      const deprecated = ' @deprecated(reason: "gone")';
+      const undeprecated = withDeprecated('', '', '');
+
+      for (const current of [
+        withDeprecated(deprecated, '', ''),
+        withDeprecated('', deprecated, ''),
+        withDeprecated('', '', deprecated),
+      ]) {
+        expect(diffOf('graphql', undeprecated, current)).toEqual([
+          ['deprecation', 'DEPRECATION_ADDED'],
+        ]);
+      }
     });
 
     it('reports a removed MCP tool', () => {
@@ -682,6 +836,51 @@ describe('protocol sources', () => {
       expect(drift.sources.main.changes).toContainEqual(
         expect.objectContaining({ kind: 'breaking', id: 'mcp-input-required-changed' })
       );
+    });
+
+    const recordQuery = async (schema: string, query: string) => {
+      documents[GRAPHQL_SPEC_URL] = schema;
+      const connector: ConnectorSpec = {
+        ...graphQLConnector,
+        actions: {
+          run: {
+            scope: 'read',
+            input: z.object({}),
+            handler: async ({ client }) => (await client.post(GRAPHQL_ENDPOINT, { query })).data,
+          },
+        },
+      };
+      const recorded = await updateVendorApi({
+        connector,
+        directory,
+        sources: { main: GRAPHQL_SPEC_URL },
+        formats: { main: 'graphql' },
+        endpoints: { main: [GRAPHQL_ENDPOINT] },
+        fetchText,
+        now,
+        log,
+      });
+      return { recorded, offline: await offlineCheck(connector) };
+    };
+
+    it('re-records offline a query that reaches a root type through a field', async () => {
+      const { recorded, offline } = await recordQuery(
+        'type Query { board: Board, other: String } type Board { parent: Query }',
+        'query { board { parent { other } } }'
+      );
+
+      expect(recorded.problems).toEqual([]);
+      expect(offline).toEqual({ changed: [], problems: [] });
+    });
+
+    it('re-records offline a query that uses a custom directive', async () => {
+      const { recorded, offline } = await recordQuery(
+        'directive @cost(weight: Int) on FIELD type Query { board: String }',
+        'query { board @cost(weight: 1) }'
+      );
+
+      expect(recorded.problems).toEqual([]);
+      expect(offline).toEqual({ changed: [], problems: [] });
     });
 
     it('reports a source that serves something else as unreachable', async () => {

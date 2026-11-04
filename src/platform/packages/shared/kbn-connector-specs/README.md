@@ -719,9 +719,7 @@ Per action:
 
 `vendorApiFixturesSchema` is the schema.
 
-### Drift detection
-
-#### GraphQL and MCP sources
+### GraphQL and MCP sources
 
 Connectors that call a GraphQL API or an MCP server have no paths to record, so their operations go by name: `{ "source": "main", "name": "query boards" }` for a GraphQL root field, and `tools/call search` for an MCP tool. A connector can mix them with OpenAPI sources. Name the format, and the URLs the connector calls, as the spec's URL doesn't tell:
 
@@ -735,6 +733,8 @@ node scripts/connector_vendor_api --connector monday_com \
 - `--inspect` skips these sources, as it reads OpenAPI operations.
 - A `read` action may call GraphQL queries and MCP tools annotated `readOnlyHint`. Anything else needs a `{ "name": "..." }` entry in the action's `queries` in `fixtures.json`, which says it changes no vendor state.
 - `--drift` classifies changes to the operations the connector calls, as `oasdiff` does for OpenAPI. A response that widens is breaking, as a connector reading it may not handle the new value: for GraphQL a new enum value or union member (`findSchemaChanges`), and for MCP a new output enum value. New optional input is non-breaking. Any other change to an MCP schema, such as a tighter bound, is treated as breaking.
+
+### Drift detection
 
 `--drift` compares a connector's committed artifacts with the vendor's latest specs, without writing them:
 

@@ -19,12 +19,14 @@ import {
   buildClientSchema,
   buildSchema,
   DangerousChangeType,
+  DirectiveLocation,
   findSchemaChanges,
   getNamedType,
   isEnumType,
   isInputObjectType,
   isInterfaceType,
   isObjectType,
+  isSpecifiedDirective,
   isSpecifiedScalarType,
   isUnionType,
   Kind,
@@ -34,7 +36,7 @@ import {
   printSchema,
   visit,
 } from 'graphql';
-import { isEqual } from 'lodash';
+import { differenceWith, isEqual } from 'lodash';
 import type { GraphQLSpec, McpSpec, McpTool } from '@kbn/connector-emulate';
 import type { SpecChange } from './detect_drift';
 import { isJsonObject } from './json_pointer';
@@ -114,7 +116,8 @@ export const parseProtocolSnapshot = (
     ? { format, tools: readTools(snapshot), endpoints }
     : { format, sdl: snapshot, endpoints };
 
-const namedTypesOf = (type: GraphQLNamedType): GraphQLNamedType[] => {
+// The types a type's values and arguments can have; implemented interfaces aren't among them.
+const referencedTypesOf = (type: GraphQLNamedType): GraphQLNamedType[] => {
   if (isUnionType(type)) {
     return [...type.getTypes()];
   }
@@ -122,16 +125,25 @@ const namedTypesOf = (type: GraphQLNamedType): GraphQLNamedType[] => {
     return Object.values(type.getFields()).map((field) => getNamedType(field.type));
   }
   if (isObjectType(type) || isInterfaceType(type)) {
-    return [
-      ...type.getInterfaces(),
-      ...Object.values(type.getFields()).flatMap((field) => [
-        getNamedType(field.type),
-        ...field.args.map((arg) => getNamedType(arg.type)),
-      ]),
-    ];
+    return Object.values(type.getFields()).flatMap((field) => [
+      getNamedType(field.type),
+      ...field.args.map((arg) => getNamedType(arg.type)),
+    ]);
   }
   return [];
 };
+
+// Where operations can apply a directive; a request using one fails if the snapshot lacks it.
+const EXECUTABLE_DIRECTIVE_LOCATIONS = new Set<string>([
+  DirectiveLocation.QUERY,
+  DirectiveLocation.MUTATION,
+  DirectiveLocation.SUBSCRIPTION,
+  DirectiveLocation.FIELD,
+  DirectiveLocation.FRAGMENT_DEFINITION,
+  DirectiveLocation.FRAGMENT_SPREAD,
+  DirectiveLocation.INLINE_FRAGMENT,
+  DirectiveLocation.VARIABLE_DEFINITION,
+]);
 
 // The root fields to keep, by root type name. A schema needs a query root to be valid, so when no
 // action queries, the first query field stays.
@@ -166,45 +178,70 @@ const projectSdl = (sdl: string, names: readonly string[]): string => {
     ROOT_OPERATIONS.flatMap((operation) => rootTypeOf(schema, operation)?.name ?? [])
   );
 
+  // Kept whole, including a root type a result field reaches, as a selection can use any field.
   const reachable = new Set<string>();
-  const visitType = (type: GraphQLNamedType) => {
-    if (reachable.has(type.name) || rootNames.has(type.name) || isSpecifiedScalarType(type)) {
+  const expanded = new Set<string>();
+  const visitImplemented = (type: GraphQLNamedType) => {
+    if (isObjectType(type) || isInterfaceType(type)) {
+      type.getInterfaces().forEach((implemented) => visitType(implemented, false));
+    }
+  };
+  // A value typed as an interface can be any type that implements it, but a type implementing an
+  // interface doesn't need the others: with Relay's `Node`, that would be most of the schema.
+  const visitType = (type: GraphQLNamedType, isValueType = true) => {
+    if (isSpecifiedScalarType(type)) {
       return;
     }
-    reachable.add(type.name);
-    namedTypesOf(type).forEach(visitType);
-    // A field typed as an interface can answer with any type that implements it.
-    if (isInterfaceType(type)) {
-      schema.getPossibleTypes(type).forEach(visitType);
+    if (!reachable.has(type.name)) {
+      reachable.add(type.name);
+      visitImplemented(type);
+      referencedTypesOf(type).forEach((referenced) => visitType(referenced));
+    }
+    if (isValueType && isInterfaceType(type) && !expanded.has(type.name)) {
+      expanded.add(type.name);
+      schema.getPossibleTypes(type).forEach((possible) => visitType(possible));
     }
   };
   for (const [rootName, fields] of kept) {
     const root = schema.getType(rootName);
     if (isObjectType(root)) {
       const rootFields = root.getFields();
-      root.getInterfaces().forEach(visitType);
+      visitImplemented(root);
       for (const field of fields) {
         visitType(getNamedType(rootFields[field].type));
         rootFields[field].args.forEach((arg) => visitType(getNamedType(arg.type)));
       }
     }
   }
+  const directives = new Set<string>();
+  for (const directive of schema.getDirectives()) {
+    if (
+      !isSpecifiedDirective(directive) &&
+      directive.locations.some((location) => EXECUTABLE_DIRECTIVE_LOCATIONS.has(location))
+    ) {
+      directives.add(directive.name);
+      directive.args.forEach((arg) => visitType(getNamedType(arg.type)));
+    }
+  }
 
   const definitions = parse(normalized, { noLocation: true }).definitions.flatMap(
     (definition): DefinitionNode[] => {
       if (definition.kind === Kind.SCHEMA_DEFINITION) {
-        const operationTypes = definition.operationTypes.filter(({ type }) =>
-          kept.has(type.name.value)
+        const operationTypes = definition.operationTypes.filter(
+          ({ type }) => kept.has(type.name.value) || reachable.has(type.name.value)
         );
         return [{ ...definition, operationTypes }];
       }
       if (definition.kind === Kind.DIRECTIVE_DEFINITION) {
-        return [];
+        return directives.has(definition.name.value) ? [definition] : [];
       }
       if (!('name' in definition) || definition.name === undefined) {
         return [definition];
       }
       const { value: name } = definition.name;
+      if (reachable.has(name)) {
+        return [definition];
+      }
       if (rootNames.has(name)) {
         const fields = kept.get(name);
         return fields && definition.kind === Kind.OBJECT_TYPE_DEFINITION
@@ -216,7 +253,7 @@ const projectSdl = (sdl: string, names: readonly string[]): string => {
             ]
           : [];
       }
-      return reachable.has(name) ? [definition] : [];
+      return [];
     }
   );
   return `${print(withoutDescriptions({ kind: Kind.DOCUMENT, definitions }))}\n`;
@@ -229,8 +266,9 @@ const SCHEMA_NAME_MAPS = new Set([
   '$defs',
   'definitions',
   'dependentSchemas',
+  'dependencies',
 ]);
-const LITERAL_SCHEMA_KEYWORDS = new Set(['enum', 'const', 'default']);
+const LITERAL_SCHEMA_KEYWORDS = new Set(['enum', 'const', 'default', 'dependentRequired']);
 
 // Documentation changes without the contract changing.
 const contractOfSchema = (schema: unknown): unknown => {
@@ -308,6 +346,11 @@ const deprecationsOf = (schema: GraphQLSchema): Map<string, string> => {
         if (field.deprecationReason) {
           deprecated.set(`${type.name}.${field.name}`, field.deprecationReason);
         }
+        for (const arg of 'args' in field ? field.args : []) {
+          if (arg.deprecationReason) {
+            deprecated.set(`${type.name}.${field.name}(${arg.name})`, arg.deprecationReason);
+          }
+        }
       }
     }
     if (isEnumType(type)) {
@@ -337,7 +380,7 @@ const diffGraphQL = (base: string, current: string): SpecChange[] => {
     .map(
       ([name, reason]): SpecChange => ({
         kind: 'deprecation',
-        id: 'FIELD_DEPRECATED',
+        id: 'DEPRECATION_ADDED',
         text: `${name} is deprecated: ${reason}`,
       })
     );
@@ -346,8 +389,14 @@ const diffGraphQL = (base: string, current: string): SpecChange[] => {
 
 type SchemaDirection = 'input' | 'output';
 
-const typesOf = (schema: Record<string, unknown>): string[] =>
-  [schema.type].flat().filter((type): type is string => typeof type === 'string');
+// Undefined when the schema doesn't constrain it.
+const typesOf = (schema: Record<string, unknown>): string[] | undefined => {
+  const types = [schema.type].flat().filter((type): type is string => typeof type === 'string');
+  return types.length > 0 ? types : undefined;
+};
+
+const enumOf = ({ enum: values }: Record<string, unknown>): unknown[] | undefined =>
+  Array.isArray(values) ? values : undefined;
 
 const stringsOf = (value: unknown): unknown[] => (Array.isArray(value) ? value : []);
 
@@ -367,9 +416,32 @@ const diffSchema = (
     return;
   }
   // Input narrows and output widens in what a connector has to handle.
-  const compareValues = (keyword: string, before: unknown[], after: unknown[]) => {
-    const removed = before.filter((value) => !after.includes(value));
-    const added = after.filter((value) => !before.includes(value));
+  const compareValues = (
+    keyword: string,
+    before: unknown[] | undefined,
+    after: unknown[] | undefined
+  ) => {
+    if (before === undefined && after === undefined) {
+      return;
+    }
+    if (before === undefined || after === undefined) {
+      const narrowed = before === undefined;
+      const id = `mcp-${direction}-${keyword}-changed`;
+      if (narrowed === (direction === 'input')) {
+        report(
+          'breaking',
+          id,
+          direction === 'input'
+            ? `${at} now only takes ${keyword} ${JSON.stringify(after)}`
+            : `${at} is no longer limited to ${keyword} ${JSON.stringify(before)}`
+        );
+      } else {
+        report('non-breaking', id, `${at} ${keyword} changed`);
+      }
+      return;
+    }
+    const removed = differenceWith(before, after, isEqual);
+    const added = differenceWith(after, before, isEqual);
     const risky = direction === 'input' ? removed : added;
     if (risky.length > 0) {
       report(
@@ -384,7 +456,7 @@ const diffSchema = (
     }
   };
   compareValues('type', typesOf(base), typesOf(current));
-  compareValues('enum', stringsOf(base.enum), stringsOf(current.enum));
+  compareValues('enum', enumOf(base), enumOf(current));
 
   const [requiredBefore, requiredAfter] = [stringsOf(base.required), stringsOf(current.required)];
   // A required input the connector doesn't send, or an output property that may now be missing.
