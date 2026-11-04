@@ -32,7 +32,7 @@ import { useDigitalExperienceParams } from '../../hooks/use_digital_experience_p
 import { useFormatters } from '../../hooks/use_formatters';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { SESSIONS_LABEL } from '../../labels';
-import { pickSessionsListQuery } from '../sessions/hooks/use_sessions_list_query';
+import { pickSessionsListQuery } from '../../utils/sessions_list_query';
 import { PageJourney } from './components/page_journey';
 import { SessionSummary } from './components/session_summary';
 import { SessionWaterfall, pageColors } from './components/session_waterfall';
