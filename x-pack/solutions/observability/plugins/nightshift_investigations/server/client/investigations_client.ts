@@ -86,6 +86,7 @@ import {
   InvalidInvestigationContextError,
   InvestigationUnavailableError,
 } from './errors';
+import type { NightshiftTelemetryClient } from '../telemetry';
 import { evaluateInvestigationQuota } from './evaluate_investigation_quota';
 import {
   findInvestigationConversation,
@@ -366,6 +367,7 @@ export interface NightshiftInvestigationsClientDeps {
   assistantEnabled?: boolean;
   telemetryConfig?: NightshiftInvestigationsConfig['sandbox'];
   investigationQuotaCallback?: InvestigationQuotaCallback;
+  telemetry?: NightshiftTelemetryClient;
   inference?: InferenceServerStart;
   savedObjects?: CoreStart['savedObjects'];
   uiSettings?: CoreStart['uiSettings'];
@@ -387,6 +389,7 @@ export class NightshiftInvestigationsClient {
   private readonly assistantEnabled: boolean;
   private readonly telemetryConfig: NightshiftInvestigationsConfig['sandbox'];
   private readonly investigationQuotaCallback?: InvestigationQuotaCallback;
+  private readonly telemetry?: NightshiftTelemetryClient;
   private readonly inference?: InferenceServerStart;
   private readonly savedObjects?: CoreStart['savedObjects'];
   private readonly uiSettings?: CoreStart['uiSettings'];
@@ -406,6 +409,7 @@ export class NightshiftInvestigationsClient {
     this.assistantEnabled = deps.assistantEnabled ?? false;
     this.telemetryConfig = deps.telemetryConfig;
     this.investigationQuotaCallback = deps.investigationQuotaCallback;
+    this.telemetry = deps.telemetry;
     this.inference = deps.inference;
     this.savedObjects = deps.savedObjects;
     this.uiSettings = deps.uiSettings;
@@ -495,8 +499,13 @@ export class NightshiftInvestigationsClient {
     }: StartInvestigationRequest,
     {
       automationBudget,
+      automationId,
       entryPoint,
-    }: { automationBudget?: AutomationBudget; entryPoint: InvestigationEntryPoint }
+    }: {
+      automationBudget?: AutomationBudget;
+      automationId?: string;
+      entryPoint: InvestigationEntryPoint;
+    }
   ): Promise<StartInvestigationResponse> {
     if (!(await this.checkInfrastructureAvailability())) {
       throw new InvestigationUnavailableError('Investigations are not available');
@@ -554,8 +563,21 @@ export class NightshiftInvestigationsClient {
       newInvestigationId,
       // Only a start that opens a new investigation counts against the daily automatic quota:
       // a follow-up adds a round to an investigation that was already paid for.
-      assertCanOpenNew: () =>
-        this.assertQuotaForNewInvestigation(trigger_type, automationBudget, globalBudget),
+      assertCanOpenNew: async () => {
+        try {
+          await this.assertQuotaForNewInvestigation(trigger_type, automationBudget, globalBudget);
+        } catch (error) {
+          if (error instanceof InvestigationQuotaDeniedError) {
+            this.telemetry?.reportInvestigationSkipped({
+              trigger: automationId ? 'automation' : 'manual',
+              origin: subject.type,
+              ...(automationId ? { automation_id: automationId } : {}),
+              skip_reason: 'deployment_quota',
+            });
+          }
+          throw error;
+        }
+      },
     });
     const isFollowUp = investigationId !== newInvestigationId;
     if (isFollowUp) {
