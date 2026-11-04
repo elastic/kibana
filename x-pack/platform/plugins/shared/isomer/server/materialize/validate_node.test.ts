@@ -5,21 +5,19 @@
  * 2.0.
  */
 
+import type { GridNode } from '@kbn/isomer';
 import {
   MAX_INPUT_VALUES,
-  createKibanaIsomerRuntime,
   gridExamples,
   metricExamples,
   unsupportedExamples,
   xyChartExamples,
 } from '@kbn/isomer';
-import { componentsPack } from '@kbn/isomer-components';
+import type { MarkdownNode } from '@kbn/isomer-components';
 import type { MaterializedChartNode } from './nodes';
 import { createNodeValidator } from './validate_node';
 
-const validate = createNodeValidator(async () =>
-  createKibanaIsomerRuntime({ packs: [componentsPack] })
-);
+const validate = createNodeValidator();
 
 const [{ node: metric }] = metricExamples;
 
@@ -44,7 +42,27 @@ describe('createNodeValidator', () => {
     expect((await validate({ ...node, title: '' })).map(({ path }) => path)).toEqual(['title']);
   });
 
-  it("validates components nodes against the runtime's packs", async () => {
+  it('validates the nodes inside a grid, with their paths', async () => {
+    const [{ node: grid }] = gridExamples;
+    const [first, ...rest] = grid.panels;
+    const markdown: MarkdownNode = { type: 'markdown', text: 'There are **3** open alerts.' };
+    const brokenMetric: MaterializedChartNode = { ...metric, value: { column: 'missing' } };
+    const withMarkdown: GridNode = {
+      ...grid,
+      panels: [{ ...first, node: markdown }, ...rest],
+    };
+    expect(await validate(withMarkdown)).toEqual([]);
+
+    const withBrokenMetric: GridNode = {
+      ...grid,
+      panels: [{ ...first, node: brokenMetric }, ...rest],
+    };
+    expect((await validate(withBrokenMetric)).map(({ path }) => path)).toContain(
+      'panels[0].node.value.column'
+    );
+  });
+
+  it('validates components nodes against the components pack', async () => {
     expect(await validate({ type: 'markdown', text: 'There are **3** open alerts.' })).toEqual([]);
     expect((await validate({ type: 'markdown', text: '' })).map(({ path }) => path)).toEqual([
       'text',
