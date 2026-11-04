@@ -16,9 +16,11 @@ import { responseOverridesSchema, toResponseFixtures } from './fixtures';
 /** The folder of a connector's `vendor_api` that holds its recorded vendor responses. */
 export const RECORDINGS = 'recordings';
 
-const operationRefSchema = z
-  .object({ source: z.string().optional(), method: z.string(), path: z.string() })
-  .strict();
+// GraphQL and MCP operations are named; OpenAPI ones go by method and path template.
+const operationRefSchema = z.union([
+  z.object({ source: z.string().optional(), method: z.string(), path: z.string() }).strict(),
+  z.object({ source: z.string().optional(), name: z.string() }).strict(),
+]);
 
 const recordingSchema = z
   .object({
@@ -29,6 +31,7 @@ const recordingSchema = z
           operation: operationRefSchema,
           request: z
             .object({
+              pathParameters: z.record(z.string(), z.string()).optional(),
               query: z.record(z.string(), z.union([z.string(), z.array(z.string())])).optional(),
               headers: z.record(z.string(), z.string()).optional(),
               body: z.unknown().optional(),

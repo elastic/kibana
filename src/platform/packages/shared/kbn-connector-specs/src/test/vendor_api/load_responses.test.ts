@@ -76,6 +76,22 @@ describe('load_responses', () => {
       expect(await readRecordings(file)).toEqual([recording('a')]);
     });
 
+    it('reads recordings of named operations and of path parameters', async () => {
+      const content = {
+        exchanges: [
+          { operation: { name: 'query boards' }, response: { status: 200, body: {} } },
+          {
+            operation: { method: 'GET', path: '/users/{id}' },
+            request: { pathParameters: { id: '1' } },
+            response: { status: 200, body: {} },
+          },
+        ],
+      };
+      const file = await write('mixed.json', content);
+
+      expect(await readRecordings(file)).toEqual([content]);
+    });
+
     it('reads every JSON file of a folder, in name order', async () => {
       await write('recordings/b.json', recording('b'));
       await write('recordings/a.json', recording('a'));
