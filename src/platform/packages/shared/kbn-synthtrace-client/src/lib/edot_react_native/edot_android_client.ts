@@ -40,8 +40,9 @@ const SENSITIVE_QUERY_PARAMETERS: ReadonlySet<string> = new Set([
   'sig',
   'X-Goog-Signature',
 ]);
-// How EDOT Android's HttpSpanNameInterceptor finds the host in `url.full`
-const HTTP_SPAN_NAME_PATTERN = /^https?:\/\/([^/]+).*$/;
+// How EDOT Android's HttpSpanNameInterceptor finds the host in `url.full`, `https?://([^/]+).*`.
+// The trailing `.*` doesn't change the capture and would backtrack polynomially on long hosts.
+const HTTP_SPAN_NAME_PATTERN = /^https?:\/\/([^/]+)/;
 
 const redactQuery = (url: string): string => {
   const queryStart = url.indexOf('?');
