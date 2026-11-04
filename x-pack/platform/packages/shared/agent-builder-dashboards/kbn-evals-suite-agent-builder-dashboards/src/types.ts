@@ -77,6 +77,8 @@ export type DashboardDatasetExample = Example<
     structure?: DashboardStructureGold;
     enhance?: EnhanceGold;
     controls?: ControlsGold;
+    /** The time range the dashboard must end up with. */
+    timeRange?: { from: string; to: string };
     goldenToolPath?: string[];
   },
   {

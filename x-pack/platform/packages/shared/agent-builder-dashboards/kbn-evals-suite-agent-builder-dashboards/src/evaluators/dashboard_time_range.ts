@@ -10,33 +10,45 @@ import { noDashboardResult, skippedResult } from '../evaluator_utils';
 
 export const DASHBOARD_TIME_RANGE_EVALUATOR_NAME = 'Dashboard Time Range';
 
+const formatTimeRange = (timeRange?: { from: string; to: string }): string =>
+  timeRange ? `${timeRange.from} to ${timeRange.to}` : 'none';
+
 /**
- * Checks that a dashboard built from a request that names no time window does
- * not copy the screen context time range, which is the page's time picker and
- * not a request.
+ * Checks that the dashboard ends up with the gold time range. A copied screen
+ * context time range is called out, since it is the page's time picker and not a request.
  */
 export const dashboardTimeRangeEvaluator: DashboardAgentEvaluator = {
   name: DASHBOARD_TIME_RANGE_EVALUATOR_NAME,
   kind: 'CODE',
   direction: 'maximize',
-  evaluate: async ({ input, output }) => {
-    const screenTimeRange = input?.screenContext?.time_range;
-    if (!screenTimeRange) {
-      return skippedResult('No screen context time range.');
+  evaluate: async ({ input, expected, output }) => {
+    const gold = expected?.timeRange;
+    if (!gold) {
+      return skippedResult('No gold time range.');
     }
     const { dashboard } = output;
     if (!dashboard) {
       return noDashboardResult;
     }
     const { time_range: timeRange } = dashboard;
-    const copied = timeRange?.from === screenTimeRange.from && timeRange?.to === screenTimeRange.to;
-    const found = timeRange ? `${timeRange.from} to ${timeRange.to}` : 'none';
+    if (timeRange?.from === gold.from && timeRange?.to === gold.to) {
+      return {
+        score: 1,
+        label: 'match',
+        explanation: `The dashboard time range is ${formatTimeRange(gold)}.`,
+      };
+    }
+    const screenTimeRange = input?.screenContext?.time_range;
+    const copied =
+      screenTimeRange !== undefined &&
+      timeRange?.from === screenTimeRange.from &&
+      timeRange?.to === screenTimeRange.to;
     return {
-      score: copied ? 0 : 1,
-      label: copied ? 'copied-screen-time-range' : 'own-time-range',
-      explanation: copied
-        ? `The dashboard copied the screen context time range (${found}).`
-        : `The dashboard time range (${found}) is not the screen context's (${screenTimeRange.from} to ${screenTimeRange.to}).`,
+      score: 0,
+      label: copied ? 'copied-screen-time-range' : 'mismatch',
+      explanation: `Expected ${formatTimeRange(gold)}, found ${formatTimeRange(timeRange)}${
+        copied ? ' (copied from the screen context)' : ''
+      }.`,
     };
   },
 };

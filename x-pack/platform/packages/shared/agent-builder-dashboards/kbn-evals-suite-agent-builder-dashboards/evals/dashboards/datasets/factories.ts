@@ -33,9 +33,12 @@ export interface ExampleMetadata {
 }
 
 /**
- * A home page screen context. Its time range is one no data-aware default or
- * plausible guess produces, so a dashboard with it can only have copied it.
+ * The data-aware default for `kibana_sample_data_logs`. The sample data spans
+ * install time -10d to +50d, so it reads as live data and gets the 1-day window.
  */
+export const SAMPLE_LOGS_DEFAULT_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
+
+/** A home page screen context, whose time range a request that names no window must ignore. */
 export const HOME_SCREEN_CONTEXT: ScreenContextAttachmentData = {
   app: 'home',
   url: '/app/home#/',
@@ -44,8 +47,9 @@ export const HOME_SCREEN_CONTEXT: ScreenContextAttachmentData = {
 };
 
 /**
- * A dashboard request; `structure` holds only what the prompt pins down. With
- * `screenContext`, a prompt that names no time window must not copy its time range.
+ * A dashboard request; `structure` holds only what the prompt pins down. No
+ * prompt names a time window, so every dashboard must get the data-aware
+ * default, with or without a `screenContext`.
  */
 export const dashboardExample = ({
   question,
@@ -61,6 +65,7 @@ export const dashboardExample = ({
   output: {
     route: 'dashboard',
     structure,
+    timeRange: SAMPLE_LOGS_DEFAULT_TIME_RANGE,
     goldenToolPath: ['load_skill', GENERATE_DASHBOARD_TOOL_ID],
   },
 });
