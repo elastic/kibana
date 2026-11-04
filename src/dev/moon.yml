@@ -54,6 +54,7 @@ dependsOn:
   - '@kbn/swc-register'
   - '@kbn/dev-validation-runner'
   - '@kbn/test'
+  - '@kbn/moon'
 tags:
   - tooling
   - package

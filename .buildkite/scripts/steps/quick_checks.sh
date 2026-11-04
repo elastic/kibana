@@ -9,4 +9,4 @@ if [[ "${CI:-}" =~ ^(1|true)$ ]]; then
   .buildkite/scripts/bootstrap.sh
 fi
 
-node scripts/quick_checks --file .buildkite/scripts/steps/checks/quick_checks.json
+node scripts/quick_checks

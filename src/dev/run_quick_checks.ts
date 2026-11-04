@@ -9,18 +9,21 @@
 
 import { execFile, execFileSync, spawn } from 'child_process';
 import { availableParallelism } from 'os';
-import { isAbsolute, join } from 'path';
-import { existsSync, readdirSync, readFileSync, unlinkSync } from 'fs';
+import { isAbsolute, join, normalize, relative } from 'path';
+import { existsSync, readFileSync, rmSync, unlinkSync } from 'fs';
 
 import type { RunOptions } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { getMoonExecutablePath } from '@kbn/moon';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 const MAX_PARALLELISM = availableParallelism();
-const buildkiteQuickchecksFolder = join('.buildkite', 'scripts', 'steps', 'checks');
-const quickChecksList = join(buildkiteQuickchecksFolder, 'quick_checks.json');
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const MOON_PROJECT = 'quick-checks';
+const MOON_PROJECT_CONFIG = join('.moon', 'projects', 'quick-checks', 'moon.yml');
+const MOON_CACHE_DIR = join(REPO_ROOT, '.moon', 'cache');
+const MOON_RUN_REPORT = join(MOON_CACHE_DIR, 'runReport.json');
 const COLLECT_COMMITS_MARKER_FILE = join(REPO_ROOT, '.collect_commits_marker');
 const CANCEL_ON_GATE_FAILURE_SCRIPT = join(
   REPO_ROOT,
@@ -31,32 +34,57 @@ const CANCEL_ON_GATE_FAILURE_SCRIPT = join(
   'cancel.sh'
 );
 const MAX_ANNOTATION_OUTPUT_LINES = 50;
+const COMMIT_MARKER_POLL_INTERVAL_MS = 1000;
 
-interface QuickCheck {
+export interface QuickCheck {
+  /** Moon task ID in the `quick-checks` project. */
+  id: string;
+  /** Repository-relative path of the check script. */
   script: string;
-  mayChangeFiles?: boolean;
-  requiresStableWorkspace?: boolean;
-  // Additional properties can be added here in the future
+  /** True when the check holds a Moon mutex, so it never runs alongside other exclusive checks. */
+  exclusive: boolean;
 }
 
-interface CheckResult {
+export interface CheckResult {
   success: boolean;
+  check: string;
   script: string;
   output: string;
   durationMs: number;
 }
 
+interface MoonTask {
+  args?: string[];
+  options: { mutex?: string | null };
+}
+
+export interface MoonTaskQuery {
+  tasks: Record<string, Record<string, MoonTask>>;
+}
+
+interface MoonDuration {
+  secs: number;
+  nanos: number;
+}
+
+interface MoonRunAction {
+  status: string;
+  duration?: MoonDuration | null;
+  node: { action: string; params?: { target?: string } };
+}
+
+export interface MoonRunReport {
+  actions: MoonRunAction[];
+}
+
 const scriptOptions: RunOptions = {
   description: `
-    Runs sanity-testing quick-checks in parallel.
-      - arguments (--file, --dir, --checks) are exclusive - only one can be used at a time.
+    Runs sanity-testing quick-checks in parallel, as tasks of the '${MOON_PROJECT}' Moon project (${MOON_PROJECT_CONFIG}).
   `,
   flags: {
-    string: ['dir', 'checks', 'file'],
+    string: ['checks'],
     help: `
-        --file             Run all checks from a given file. (default='${quickChecksList}')
-        --dir              Run all checks in a given directory.
-        --checks           Runs all scripts given in this parameter. (comma or newline delimited)
+        --checks           Runs only the given checks, by Moon task ID or script path. (comma or newline delimited)
       `,
   },
   log: {
@@ -77,25 +105,22 @@ void run(async ({ log, flagsReader }) => {
   // Set environment variable so check scripts know where to write the marker file
   process.env.COLLECT_COMMITS_MARKER_FILE = COLLECT_COMMITS_MARKER_FILE;
 
-  const checksToRun = collectScriptsToRun({
-    targetFile: flagsReader.string('file'),
-    targetDir: flagsReader.string('dir'),
-    checks: flagsReader.string('checks'),
-  });
-
-  const workspaceExclusiveChecks = checksToRun
-    .filter((check) => check.mayChangeFiles || check.requiresStableWorkspace)
-    .map((check) => (isAbsolute(check.script) ? check.script : join(REPO_ROOT, check.script)));
-
-  const regularChecks = checksToRun
-    .filter((check) => !check.mayChangeFiles && !check.requiresStableWorkspace)
-    .map((check) => (isAbsolute(check.script) ? check.script : join(REPO_ROOT, check.script)));
+  const moon = await getMoonExecutablePath();
+  const checksToRun = selectQuickChecks(queryQuickChecks(moon), flagsReader.string('checks'));
+  const exclusiveCount = checksToRun.filter(({ exclusive }) => exclusive).length;
+  // A check waiting for the Moon mutex holds a pipeline slot, so reserve one per exclusive check.
+  const concurrency = MAX_PARALLELISM + exclusiveCount;
 
   logger.write(
-    `--- Running ${checksToRun.length} checks (${workspaceExclusiveChecks.length} workspace-exclusive with parallelism=1, ${regularChecks.length} regular with parallelism=${MAX_PARALLELISM})...`
+    `--- Running ${
+      checksToRun.length
+    } checks with Moon (${exclusiveCount} workspace-exclusive with parallelism=1, ${
+      checksToRun.length - exclusiveCount
+    } regular with parallelism=${MAX_PARALLELISM})...`
   );
   const startTime = Date.now();
-  const results = await runPartitionedChecks(workspaceExclusiveChecks, regularChecks);
+  const moonExitCode = await runMoonChecks(moon, checksToRun, concurrency);
+  const results = collectCheckResults(readMoonRunReport(), checksToRun, readTaskOutput);
 
   logger.write('--- All checks finished.');
   printResults(startTime, results);
@@ -103,7 +128,7 @@ void run(async ({ log, flagsReader }) => {
   // Check if any commits were made and push them in a single batch
   // This allows multiple quick-check fixes to be committed and pushed together,
   // avoiding multiple CI restarts when a PR has multiple offenses.
-  // File-changing checks run with parallelism=1 (sequentially), so commits happen
+  // File-changing checks share a Moon mutex and run one at a time, so commits happen
   // one at a time without conflicts.
   const commitsWereMade = existsSync(COLLECT_COMMITS_MARKER_FILE);
   if (commitsWereMade) {
@@ -127,8 +152,11 @@ void run(async ({ log, flagsReader }) => {
   const failedChecks = results.filter((check) => !check.success);
   if (failedChecks.length > 0) {
     logger.write(`--- ${failedChecks.length} quick check(s) failed. ❌`);
-    logger.write(`See the script(s) marked with ❌ above for details.`);
+    logger.write(`See the check(s) marked with ❌ above for details.`);
     annotateFailures(failedChecks);
+    process.exitCode = 1;
+  } else if (moonExitCode !== 0) {
+    logger.error(`--- Moon exited with code ${moonExitCode}. See the Moon output above.`);
     process.exitCode = 1;
   } else if (!commitsWereMade) {
     logger.write('--- All checks passed. ✅');
@@ -136,96 +164,164 @@ void run(async ({ log, flagsReader }) => {
   }
 }, scriptOptions);
 
-function collectScriptsToRun(inputOptions: {
-  targetFile: string | undefined;
-  targetDir: string | undefined;
-  checks: string | undefined;
-}): QuickCheck[] {
-  const { targetFile, targetDir, checks } = inputOptions;
-  if ([targetFile, targetDir, checks].filter(Boolean).length > 1) {
-    throw new Error('Only one of --file, --dir, or --checks can be used at a time.');
+const toRepoRelativePath = (path: string): string =>
+  normalize(isAbsolute(path) ? relative(REPO_ROOT, path) : path);
+
+/** Lists the quick checks defined as tasks of the `quick-checks` Moon project. */
+export const parseQuickChecks = ({ tasks }: MoonTaskQuery): QuickCheck[] =>
+  Object.entries(tasks[MOON_PROJECT] ?? {}).map(([id, { args = [], options }]) => ({
+    id,
+    script: args.find((arg) => arg.endsWith('.sh')) ?? '',
+    exclusive: Boolean(options.mutex),
+  }));
+
+const queryQuickChecks = (moon: string): QuickCheck[] => {
+  const query = execFileSync(moon, ['query', 'tasks', '--project', MOON_PROJECT], {
+    cwd: REPO_ROOT,
+    encoding: 'utf8',
+    maxBuffer: 30 * 1024 * 1024,
+  });
+  const checks = parseQuickChecks(JSON.parse(query) as MoonTaskQuery);
+  if (checks.length === 0) {
+    throw createFailError(`No quick checks found in Moon project '${MOON_PROJECT}'`);
   }
 
-  if (targetDir) {
-    const targetDirAbsolute = isAbsolute(targetDir) ? targetDir : join(REPO_ROOT, targetDir);
-    return readdirSync(targetDirAbsolute).map((file) => ({ script: join(targetDir, file) }));
-  } else if (checks) {
-    return checks
-      .trim()
-      .split(/[,\n]/)
-      .map((script) => ({ script: script.trim() }));
-  } else {
-    const targetFileWithDefault = targetFile || quickChecksList;
-    const targetFileAbsolute = isAbsolute(targetFileWithDefault)
-      ? targetFileWithDefault
-      : join(REPO_ROOT, targetFileWithDefault);
+  return checks;
+};
 
-    const fileContent = readFileSync(targetFileAbsolute, 'utf-8');
+/** Selects the checks named by `--checks` (task IDs or script paths), or every check. */
+export const selectQuickChecks = (checks: QuickCheck[], selection?: string): QuickCheck[] => {
+  const names = (selection ?? '')
+    .split(/[,\n]/)
+    .map((name) => name.trim())
+    .filter(Boolean);
+  if (names.length === 0) {
+    return checks;
+  }
 
-    // Support both JSON and legacy plain text formats for backward compatibility
-    if (targetFileAbsolute.endsWith('.json')) {
-      return JSON.parse(fileContent) as QuickCheck[];
+  const unknown: string[] = [];
+  const selected = new Set<QuickCheck>();
+  for (const name of names) {
+    const check = checks.find(
+      ({ id, script }) => id === name || script === toRepoRelativePath(name)
+    );
+    if (check) {
+      selected.add(check);
     } else {
-      // Legacy plain text format
-      return fileContent
-        .trim()
-        .split('\n')
-        .map((line) => ({ script: line.trim() }));
+      unknown.push(name);
     }
   }
-}
 
-async function runPartitionedChecks(
-  fileChangingChecks: string[],
-  regularChecks: string[]
-): Promise<CheckResult[]> {
-  // Run both partitions concurrently, but with different parallelism
-  const [fileChangingResults, regularResults] = await Promise.all([
-    runAllChecks(fileChangingChecks, 1), // File-changing checks run one at a time
-    runAllChecks(regularChecks, MAX_PARALLELISM), // Regular checks run with full parallelism
-  ]);
-
-  return [...fileChangingResults, ...regularResults];
-}
-
-async function runAllChecks(
-  scriptsToRun: string[],
-  parallelism = MAX_PARALLELISM
-): Promise<CheckResult[]> {
-  const checksRunning: Array<Promise<any>> = [];
-  const checksFinished: CheckResult[] = [];
-
-  while (scriptsToRun.length > 0 || checksRunning.length > 0) {
-    while (scriptsToRun.length > 0 && checksRunning.length < parallelism) {
-      const script = scriptsToRun.shift();
-      if (!script) {
-        continue;
-      }
-
-      const check = runCheckAsync(script);
-      checksRunning.push(check);
-      check
-        .then((result) => {
-          checksRunning.splice(checksRunning.indexOf(check), 1);
-          checksFinished.push(result);
-          cancelGatedStepsOnFirstCommit(logger);
-        })
-        .catch((error) => {
-          checksRunning.splice(checksRunning.indexOf(check), 1);
-          checksFinished.push({
-            success: false,
-            script,
-            output: error.message,
-            durationMs: 0,
-          });
-        });
-    }
-
-    await sleep(1000);
+  if (unknown.length > 0) {
+    throw createFailError(
+      `Unknown quick check(s): ${unknown.join(', ')}. Available checks: ${checks
+        .map(({ id }) => id)
+        .join(', ')}`
+    );
   }
 
-  return checksFinished;
-}
+  return [...selected];
+};
+
+const toMoonTarget = ({ id }: QuickCheck): string => `${MOON_PROJECT}:${id}`;
+
+const toMs = ({ secs, nanos }: MoonDuration): number => secs * 1000 + Math.round(nanos / 1e6);
+
+/** Builds a result for each check from Moon's run report. */
+export const collectCheckResults = (
+  report: MoonRunReport | undefined,
+  checks: QuickCheck[],
+  readOutput: (check: QuickCheck) => string
+): CheckResult[] => {
+  const actionsByTarget = new Map(
+    (report?.actions ?? [])
+      .filter(({ node }) => node.action === 'run-task' && node.params?.target)
+      .map((action) => [action.node.params?.target, action])
+  );
+
+  return checks.map((check) => {
+    const action = actionsByTarget.get(toMoonTarget(check));
+    if (!action) {
+      return {
+        success: false,
+        check: check.id,
+        script: check.script,
+        output: 'Moon did not report a result for this check. See the Moon output above.',
+        durationMs: 0,
+      };
+    }
+
+    const { status, duration } = action;
+    const output = readOutput(check);
+    return {
+      success: status === 'passed',
+      check: check.id,
+      script: check.script,
+      output: ['passed', 'failed'].includes(status)
+        ? output
+        : [output.trimEnd(), `Moon reported status '${status}' for this check.`]
+            .filter(Boolean)
+            .join('\n'),
+      durationMs: duration ? toMs(duration) : 0,
+    };
+  });
+};
+
+const readMoonRunReport = (): MoonRunReport | undefined => {
+  if (!existsSync(MOON_RUN_REPORT)) {
+    return undefined;
+  }
+
+  return JSON.parse(readFileSync(MOON_RUN_REPORT, 'utf8')) as MoonRunReport;
+};
+
+const readTaskOutput = ({ id }: QuickCheck): string =>
+  ['stdout.log', 'stderr.log']
+    .map((file) => join(MOON_CACHE_DIR, 'states', MOON_PROJECT, id, file))
+    .filter((file) => existsSync(file))
+    .map((file) => readFileSync(file, 'utf8'))
+    .join('');
+
+const runMoonChecks = async (
+  moon: string,
+  checks: QuickCheck[],
+  concurrency: number
+): Promise<number> => {
+  // Remove the previous report so a crashed run cannot report stale results.
+  rmSync(MOON_RUN_REPORT, { force: true });
+
+  const commitMarkerPoll = setInterval(
+    () => cancelGatedStepsOnFirstCommit(logger),
+    COMMIT_MARKER_POLL_INTERVAL_MS
+  );
+
+  try {
+    return await new Promise<number>((resolve, reject) => {
+      const moonProcess = spawn(
+        moon,
+        [
+          'exec',
+          ...checks.map(toMoonTarget),
+          // Run every check, not only those Moon considers affected in CI.
+          '--ci',
+          'false',
+          // Report every failed check, not only the first one.
+          '--on-failure',
+          'continue',
+          '--no-actions',
+          '--concurrency',
+          String(concurrency),
+        ],
+        { cwd: REPO_ROOT, env: { ...process.env }, stdio: 'inherit' }
+      );
+      moonProcess.on('error', reject);
+      moonProcess.on('exit', (code) => resolve(code ?? 1));
+    });
+  } finally {
+    clearInterval(commitMarkerPoll);
+    cancelGatedStepsOnFirstCommit(logger);
+  }
+};
 
 let gatedStepsCanceled = false;
 
@@ -250,40 +346,6 @@ export function cancelGatedStepsOnFirstCommit(log: ToolingLog): void {
   );
 }
 
-async function runCheckAsync(script: string): Promise<CheckResult> {
-  logger.info(`Starting check: ${script}`);
-  const startTime = Date.now();
-
-  return new Promise((resolve) => {
-    validateScriptPath(script);
-    // Pass environment variables to child process, including COLLECT_COMMITS_MARKER_FILE
-    const scriptProcess = execFile('bash', [script], {
-      env: { ...process.env },
-    });
-    let output = '';
-    const appendToOutput = (data: string | Buffer) => (output += data.toString());
-
-    scriptProcess.stdout?.on('data', appendToOutput);
-    scriptProcess.stderr?.on('data', appendToOutput);
-
-    scriptProcess.on('exit', (code) => {
-      const result: CheckResult = {
-        success: code === 0,
-        script,
-        output,
-        durationMs: Date.now() - startTime,
-      };
-      if (code === 0) {
-        logger.info(`Passed check: ${script} in ${humanizeTime(result.durationMs)}`);
-      } else {
-        logger.warning(`Failed check: ${script} in ${humanizeTime(result.durationMs)}`);
-      }
-
-      resolve(result);
-    });
-  });
-}
-
 function printResults(startTimestamp: number, results: CheckResult[]) {
   const totalDuration = results.reduce((acc, result) => acc + result.durationMs, 0);
   const total = humanizeTime(totalDuration);
@@ -292,9 +354,8 @@ function printResults(startTimestamp: number, results: CheckResult[]) {
 
   results.forEach((result) => {
     const resultLabel = result.success ? '✅' : '❌';
-    const scriptPath = stripRoot(result.script);
     const runtime = humanizeTime(result.durationMs);
-    logger.write(`--- ${resultLabel} ${scriptPath}: ${runtime}`);
+    logger.write(`--- ${resultLabel} ${result.check} (${result.script}): ${runtime}`);
     if (result.success) {
       logger.debug(result.output);
     } else {
@@ -317,32 +378,7 @@ function humanizeTime(ms: number) {
   }
 }
 
-function validateScriptPath(scriptPath: string) {
-  if (!isAbsolute(scriptPath)) {
-    logger.error(`Invalid script path: ${scriptPath}`);
-    throw new Error('Invalid script path');
-  } else if (!scriptPath.endsWith('.sh')) {
-    logger.error(`Invalid script extension: ${scriptPath}`);
-    throw new Error('Invalid script extension');
-  } else if (!existsSync(scriptPath)) {
-    logger.error(`Script not found: ${scriptPath}`);
-    throw new Error('Script not found');
-  } else {
-    return;
-  }
-}
-
-function stripRoot(script: string) {
-  return script.replace(REPO_ROOT, '');
-}
-
-interface FailureAnnotation {
-  scriptPath: string;
-  section: string;
-}
-
-function buildFailureAnnotation(check: CheckResult): FailureAnnotation {
-  const scriptPath = stripRoot(check.script).slice(1);
+function buildFailureAnnotation(check: CheckResult): string {
   const runtime = humanizeTime(check.durationMs);
   const lines = check.output.trim().split('\n');
   const truncated = lines.length > MAX_ANNOTATION_OUTPUT_LINES;
@@ -352,24 +388,20 @@ function buildFailureAnnotation(check: CheckResult): FailureAnnotation {
     ...outputToShow,
   ].join('\n');
 
-  return {
-    scriptPath,
-    section: [
-      `<details>`,
-      `<summary>❌ ${scriptPath} (ran in ${runtime})</summary>`,
-      '',
-      '```',
-      output,
-      '```',
-      `</details>`,
-    ].join('\n'),
-  };
+  return [
+    `<details>`,
+    `<summary>❌ ${check.check}: ${check.script} (ran in ${runtime})</summary>`,
+    '',
+    '```',
+    output,
+    '```',
+    `</details>`,
+  ].join('\n');
 }
 
 export function buildPipelineAnnotation(failedChecks: CheckResult[]): string {
-  const annotations = failedChecks.map(buildFailureAnnotation);
-  const sections = annotations.map((annotation) => annotation.section);
-  const reproduceScripts = annotations.map((annotation) => annotation.scriptPath).join(',');
+  const sections = failedChecks.map(buildFailureAnnotation);
+  const reproduceChecks = failedChecks.map(({ check }) => check).join(',');
 
   return [
     `## ❌ ${failedChecks.length} quick-check(s) failed`,
@@ -380,7 +412,7 @@ export function buildPipelineAnnotation(failedChecks: CheckResult[]): string {
     '',
     `To reproduce locally:`,
     '```',
-    `node scripts/quick_checks --checks ${reproduceScripts}`,
+    `node scripts/quick_checks --checks ${reproduceChecks}`,
     '```',
   ].join('\n');
 }

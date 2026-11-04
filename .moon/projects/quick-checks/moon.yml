@@ -1,0 +1,127 @@
+$schema: https://moonrepo.dev/schemas/project.json
+# This file is hand-authored and must be edited manually.
+# Each task runs one check of the CI Quick Checks step from
+# `.buildkite/scripts/steps/checks`. `node scripts/quick_checks` runs every task in
+# this project; `--checks i18n,licenses` runs a subset. A single check can also be
+# run with `moon run quick-checks:<task>`.
+id: quick-checks
+language: bash
+toolchains:
+  default: system
+owners:
+  defaultOwner: '@elastic/kibana-operations'
+project:
+  title: 'quick-checks'
+  description: CI quick checks run by the Quick Checks step
+
+workspace:
+  inheritedTasks:
+    include: []
+
+# The checks read and validate the whole repository, so they are not cached.
+# Checks that may auto-fix and commit files, or need a workspace that no other
+# check modifies, share the `workspace` mutex so they run one at a time. Other
+# checks run concurrently with them.
+taskOptions:
+  cache: false
+  outputStyle: buffer
+  runFromWorkspaceRoot: true
+
+tasks:
+  ts-projects:
+    command: bash .buildkite/scripts/steps/checks/ts_projects.sh
+    options:
+      mutex: workspace
+  packages:
+    command: bash .buildkite/scripts/steps/checks/packages.sh
+    options:
+      mutex: workspace
+  verify-notice:
+    command: bash .buildkite/scripts/steps/checks/verify_notice.sh
+    options:
+      mutex: workspace
+  plugin-list-docs:
+    command: bash .buildkite/scripts/steps/checks/plugin_list_docs.sh
+    options:
+      mutex: workspace
+  verify-user-activity-docs:
+    command: bash .buildkite/scripts/steps/checks/verify_user_activity_docs.sh
+    options:
+      mutex: workspace
+  event-log:
+    command: bash .buildkite/scripts/steps/checks/event_log.sh
+    options:
+      mutex: workspace
+  telemetry:
+    command: bash .buildkite/scripts/steps/checks/telemetry.sh
+    options:
+      mutex: workspace
+  jest-configs:
+    command: bash .buildkite/scripts/steps/checks/jest_configs.sh
+  bundle-limits:
+    command: bash .buildkite/scripts/steps/checks/bundle_limits.sh
+  i18n:
+    command: bash .buildkite/scripts/steps/checks/i18n.sh
+  file-casing:
+    command: bash .buildkite/scripts/steps/checks/file_casing.sh
+  licenses:
+    command: bash .buildkite/scripts/steps/checks/licenses.sh
+  test-projects:
+    command: bash .buildkite/scripts/steps/checks/test_projects.sh
+  test-hardening:
+    command: bash .buildkite/scripts/steps/checks/test_hardening.sh
+  ftr-configs:
+    command: bash .buildkite/scripts/steps/checks/ftr_configs.sh
+  deduplicate-dependencies:
+    command: bash .buildkite/scripts/steps/checks/deduplicate_dependencies.sh
+    options:
+      mutex: workspace
+  pkg-json-semver-ranges:
+    command: bash .buildkite/scripts/steps/checks/pkg_json_semver_ranges.sh
+    options:
+      mutex: workspace
+  prettier-topology:
+    command: bash .buildkite/scripts/steps/checks/prettier_topology.sh
+  renovate:
+    command: bash .buildkite/scripts/steps/checks/renovate.sh
+  native-modules:
+    command: bash .buildkite/scripts/steps/checks/native_modules.sh
+  test-files-missing-owner:
+    command: bash .buildkite/scripts/steps/checks/test_files_missing_owner.sh
+  styled-components-mapping:
+    command: bash .buildkite/scripts/steps/checks/styled_components_mapping.sh
+    options:
+      mutex: workspace
+  dependencies-missing-owner:
+    command: bash .buildkite/scripts/steps/checks/dependencies_missing_owner.sh
+  validate-pipelines:
+    command: bash .buildkite/scripts/steps/checks/validate_pipelines.sh
+    options:
+      mutex: workspace
+  sync-pull-request-fragments:
+    command: bash .buildkite/scripts/steps/checks/sync_pull_request_fragments.sh
+    options:
+      mutex: workspace
+  buildkite-unit-tests:
+    command: bash .buildkite/scripts/steps/checks/buildkite_unit_tests.sh
+  check-scout-config:
+    command: bash .buildkite/scripts/steps/checks/check_scout_config.sh
+  dependencies-diff:
+    command: bash .buildkite/scripts/steps/checks/dependencies_diff.sh
+    options:
+      mutex: workspace
+  verify-codeowners:
+    command: bash .buildkite/scripts/steps/checks/verify_codeowners.sh
+    options:
+      mutex: workspace
+  verify-moon-projects:
+    command: bash .buildkite/scripts/steps/checks/verify_moon_projects.sh
+    options:
+      mutex: workspace
+  unused-deps:
+    command: bash .buildkite/scripts/steps/checks/unused_deps.sh
+    options:
+      mutex: workspace
+  jest-negative:
+    command: bash .buildkite/scripts/steps/checks/jest_negative.sh
+

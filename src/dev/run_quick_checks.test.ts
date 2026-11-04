@@ -20,7 +20,13 @@ import fs from 'fs';
 import { join } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
-import { buildPipelineAnnotation } from './run_quick_checks';
+import type { MoonRunReport, MoonTaskQuery, QuickCheck } from './run_quick_checks';
+import {
+  buildPipelineAnnotation,
+  collectCheckResults,
+  parseQuickChecks,
+  selectQuickChecks,
+} from './run_quick_checks';
 
 describe('cancelGatedStepsOnFirstCommit', () => {
   const ORIGINAL_CHECK_GATE = process.env.CHECK_GATE;
@@ -78,12 +84,141 @@ describe('cancelGatedStepsOnFirstCommit', () => {
   });
 });
 
-describe('buildFailureAnnotation', () => {
+const i18nCheck: QuickCheck = {
+  id: 'i18n',
+  script: '.buildkite/scripts/steps/checks/i18n.sh',
+  exclusive: false,
+};
+const licensesCheck: QuickCheck = {
+  id: 'licenses',
+  script: '.buildkite/scripts/steps/checks/licenses.sh',
+  exclusive: false,
+};
+const telemetryCheck: QuickCheck = {
+  id: 'telemetry',
+  script: '.buildkite/scripts/steps/checks/telemetry.sh',
+  exclusive: true,
+};
+const allChecks = [i18nCheck, licensesCheck, telemetryCheck];
+
+describe('parseQuickChecks', () => {
+  it('lists the quick-checks Moon project tasks with their scripts and mutex', () => {
+    const query: MoonTaskQuery = {
+      tasks: {
+        'quick-checks': {
+          i18n: { args: [i18nCheck.script], options: { mutex: null } },
+          telemetry: { args: [telemetryCheck.script], options: { mutex: 'workspace' } },
+        },
+      },
+    };
+
+    expect(parseQuickChecks(query)).toEqual([i18nCheck, telemetryCheck]);
+  });
+
+  it('returns no checks when the project is missing', () => {
+    expect(parseQuickChecks({ tasks: {} })).toEqual([]);
+  });
+});
+
+describe('selectQuickChecks', () => {
+  it('selects every check without a selection', () => {
+    expect(selectQuickChecks(allChecks)).toEqual(allChecks);
+    expect(selectQuickChecks(allChecks, ' ')).toEqual(allChecks);
+  });
+
+  it('selects checks by task ID or script path', () => {
+    expect(
+      selectQuickChecks(
+        allChecks,
+        `telemetry,\n${REPO_ROOT}/.buildkite/scripts/steps/checks/i18n.sh, ./${licensesCheck.script}`
+      )
+    ).toEqual([telemetryCheck, i18nCheck, licensesCheck]);
+  });
+
+  it('selects a check once when it is named twice', () => {
+    expect(selectQuickChecks(allChecks, `i18n,${i18nCheck.script}`)).toEqual([i18nCheck]);
+  });
+
+  it('throws for unknown checks', () => {
+    expect(() => selectQuickChecks(allChecks, 'i18n,nope')).toThrow(
+      'Unknown quick check(s): nope. Available checks: i18n, licenses, telemetry'
+    );
+  });
+});
+
+describe('collectCheckResults', () => {
+  const runTask = (target: string, status: string, secs = 1): MoonRunReport['actions'][number] => ({
+    status,
+    duration: { secs, nanos: 500_000_000 },
+    node: { action: 'run-task', params: { target } },
+  });
+
+  it('maps Moon task results to check results', () => {
+    const report: MoonRunReport = {
+      actions: [
+        { status: 'passed', node: { action: 'sync-workspace' } },
+        runTask('quick-checks:i18n', 'passed', 12),
+        runTask('quick-checks:licenses', 'failed'),
+      ],
+    };
+
+    expect(
+      collectCheckResults(report, [i18nCheck, licensesCheck], ({ id }) => `${id} output`)
+    ).toEqual([
+      {
+        success: true,
+        check: 'i18n',
+        script: i18nCheck.script,
+        output: 'i18n output',
+        durationMs: 12500,
+      },
+      {
+        success: false,
+        check: 'licenses',
+        script: licensesCheck.script,
+        output: 'licenses output',
+        durationMs: 1500,
+      },
+    ]);
+  });
+
+  it('fails checks that Moon did not finish', () => {
+    const report: MoonRunReport = {
+      actions: [runTask('quick-checks:telemetry', 'aborted')],
+    };
+
+    expect(collectCheckResults(report, [i18nCheck, telemetryCheck], () => 'output\n')).toEqual([
+      {
+        success: false,
+        check: 'i18n',
+        script: i18nCheck.script,
+        output: 'Moon did not report a result for this check. See the Moon output above.',
+        durationMs: 0,
+      },
+      {
+        success: false,
+        check: 'telemetry',
+        script: telemetryCheck.script,
+        output: "output\nMoon reported status 'aborted' for this check.",
+        durationMs: 1500,
+      },
+    ]);
+  });
+
+  it('fails every check without a run report', () => {
+    expect(collectCheckResults(undefined, [i18nCheck], () => '')).toEqual([
+      expect.objectContaining({ success: false, check: 'i18n' }),
+    ]);
+  });
+});
+
+describe('buildPipelineAnnotation', () => {
   it('creates an annotation for a single failed check', () => {
     const failedChecks = [
       {
         success: false,
-        script: `${REPO_ROOT}/.buildkite/scripts/steps/checks/i18n.sh`,
+        check: 'i18n',
+        script: i18nCheck.script,
         output: 'Found 2 i18n errors',
         durationMs: 12000,
       },
@@ -98,7 +233,7 @@ describe('buildFailureAnnotation', () => {
         'The following quick-check(s) failed. Run them locally to reproduce and fix:',
         '',
         '<details>',
-        '<summary>❌ .buildkite/scripts/steps/checks/i18n.sh (ran in 12s)</summary>',
+        '<summary>❌ i18n: .buildkite/scripts/steps/checks/i18n.sh (ran in 12s)</summary>',
         '',
         '```',
         'Found 2 i18n errors',
@@ -107,7 +242,7 @@ describe('buildFailureAnnotation', () => {
         '',
         'To reproduce locally:',
         '```',
-        `node scripts/quick_checks --checks .buildkite/scripts/steps/checks/i18n.sh`,
+        `node scripts/quick_checks --checks i18n`,
         '```',
       ].join('\n')
     );
@@ -117,13 +252,15 @@ describe('buildFailureAnnotation', () => {
     const failedChecks = [
       {
         success: false,
-        script: `${REPO_ROOT}/.buildkite/scripts/steps/checks/i18n.sh`,
+        check: 'i18n',
+        script: i18nCheck.script,
         output: 'Found 2 i18n errors',
         durationMs: 12000,
       },
       {
         success: false,
-        script: `${REPO_ROOT}/.buildkite/scripts/steps/checks/licenses.sh`,
+        check: 'licenses',
+        script: licensesCheck.script,
         output: 'Found 1 unapproved license',
         durationMs: 500,
       },
@@ -133,14 +270,12 @@ describe('buildFailureAnnotation', () => {
 
     expect(annotation).toContain('## ❌ 2 quick-check(s) failed');
     expect(annotation).toContain(
-      '<summary>❌ .buildkite/scripts/steps/checks/i18n.sh (ran in 12s)</summary>'
+      '<summary>❌ i18n: .buildkite/scripts/steps/checks/i18n.sh (ran in 12s)</summary>'
     );
     expect(annotation).toContain(
-      '<summary>❌ .buildkite/scripts/steps/checks/licenses.sh (ran in 500ms)</summary>'
+      '<summary>❌ licenses: .buildkite/scripts/steps/checks/licenses.sh (ran in 500ms)</summary>'
     );
-    expect(annotation).toContain(
-      `node scripts/quick_checks --checks .buildkite/scripts/steps/checks/i18n.sh,.buildkite/scripts/steps/checks/licenses.sh`
-    );
+    expect(annotation).toContain(`node scripts/quick_checks --checks i18n,licenses`);
   });
 
   it('truncates long output to the last 50 lines', () => {
@@ -148,7 +283,8 @@ describe('buildFailureAnnotation', () => {
     const failedChecks = [
       {
         success: false,
-        script: `${REPO_ROOT}/.buildkite/scripts/steps/checks/telemetry.sh`,
+        check: 'telemetry',
+        script: telemetryCheck.script,
         output: lines.join('\n'),
         durationMs: 1000,
       },
@@ -167,7 +303,8 @@ describe('buildFailureAnnotation', () => {
     const failedChecks = [
       {
         success: false,
-        script: `${REPO_ROOT}/.buildkite/scripts/steps/checks/telemetry.sh`,
+        check: 'telemetry',
+        script: telemetryCheck.script,
         output: lines.join('\n'),
         durationMs: 1000,
       },

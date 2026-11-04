@@ -12,6 +12,7 @@ projects:
   sources:
     kibana-buildkite: .buildkite
     jest-tooling: .moon/projects/jest-tooling
+    quick-checks: .moon/projects/quick-checks
 vcs:
   defaultBranch: main
   client: git

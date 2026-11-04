@@ -65,3 +65,18 @@ schedulers. Scout's
 `scoutGlobals` group covers its runner and dependency manifests. Integration
 and Scout config tasks are no-ops, so they can participate in CI affected queries
 without running their test suites.
+
+## Quick checks
+
+The hand-authored `quick-checks` project (`.moon/projects/quick-checks/moon.yml`)
+defines one task per check of the CI Quick Checks step. `node scripts/quick_checks`
+runs them with `moon exec --on-failure continue`, so every check runs even after a
+failure, then reports, annotates, and pushes auto-fix commits. Pass `--checks` with
+task IDs or script paths to run a subset.
+
+Checks that may change files, or need a workspace no other check modifies, set
+`mutex: workspace` so they run one at a time. A task waiting for a mutex holds a
+pipeline slot, so the runner raises Moon's concurrency by the number of these
+checks. The tasks are not cached because each check reads the whole repository.
+To add a check, add its script under `.buildkite/scripts/steps/checks` and a task
+that runs it to the project.
