@@ -235,7 +235,7 @@ export const resolveTier2Targets = async ({
         : { status: matched.status };
     if (matched.status === 'matched') {
       logger?.debug(
-        `Hunt Tier 2 targets matched by the model: ${matched.scored
+        `Behavior Hunt targets matched by the model: ${matched.scored
           .map(({ dataset, confidence }) => `${dataset} (${confidence})`)
           .join(', ')}`
       );
@@ -255,7 +255,7 @@ export const resolveTier2Targets = async ({
           staysInsideUniverse(candidate, scope.index_patterns)
         );
         logger?.warn(
-          `Hunt Tier 2 target "${pattern}" reaches outside the hunt universe; ${
+          `Behavior Hunt target "${pattern}" reaches outside the hunt universe; ${
             allowed.length > 0 ? `narrowed to ${allowed.join(', ')}` : 'dropping it from this run'
           }`
         );
@@ -308,7 +308,7 @@ export const resolveTier2Targets = async ({
   const bounded = boundTargetPatterns(union);
   if (!bounded.fits) {
     logger?.warn(
-      `Hunt Tier 2 targets named ${union.length} index pattern(s), more than a request may carry even as vendor wildcards; Tier 2 gets no targets this run`
+      `Behavior Hunt targets named ${union.length} index pattern(s), more than a request may carry even as vendor wildcards; Behavior Hunt gets no targets this run`
     );
     return {
       tier2_targets: [],
@@ -320,7 +320,7 @@ export const resolveTier2Targets = async ({
   }
   if (bounded.collapsed) {
     logger?.warn(
-      `Hunt Tier 2 targets named ${union.length} index pattern(s), more than a request may carry; collapsed to ${bounded.patterns.length}`
+      `Behavior Hunt targets named ${union.length} index pattern(s), more than a request may carry; collapsed to ${bounded.patterns.length}`
     );
   }
 
@@ -341,7 +341,7 @@ export const resolveTier2Targets = async ({
   // `!bounded.fits` above already makes.
   if (bounded.collapsed && !fitsRequestPath(finalTargets)) {
     logger?.warn(
-      `Hunt Tier 2 targets narrowed back to ${finalTargets.length} backing stream pattern(s) after the universe check, more than a request may carry; Tier 2 gets no targets this run`
+      `Behavior Hunt targets narrowed back to ${finalTargets.length} backing stream pattern(s) after the universe check, more than a request may carry; Behavior Hunt gets no targets this run`
     );
     return {
       tier2_targets: [],

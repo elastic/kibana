@@ -169,6 +169,7 @@ describe('NightshiftInvestigationsPlugin setup', () => {
       expect.arrayContaining([
         'nightshift.resolveModel',
         'nightshift.onlineEvals.classifyRound',
+        'nightshift.onlineEvals.score',
         'nightshift.sendNotifications',
         'nightshift.obtainSandbox',
         'nightshift.cortexHydrate',

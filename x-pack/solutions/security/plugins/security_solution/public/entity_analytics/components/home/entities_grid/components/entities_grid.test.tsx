@@ -136,7 +136,9 @@ describe('EntitiesGrid', () => {
   it('expands only the groups that have records', () => {
     renderGrid();
 
-    const expanders = screen.getAllByRole('button', { name: 'Expand group' });
+    const expanders = screen.getAllByRole('button', {
+      name: 'Show records resolved to this entity',
+    });
     expect(expanders).toHaveLength(1);
 
     fireEvent.click(expanders[0]);
@@ -207,7 +209,9 @@ describe('EntitiesGrid', () => {
   it('has no expander when the rows are individual records', () => {
     renderGrid({ rowsMode: 'individual', columns: INDIVIDUAL_ROWS_COLUMNS });
 
-    expect(screen.queryByRole('button', { name: 'Expand group' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Show records resolved to this entity' })
+    ).not.toBeInTheDocument();
   });
 
   it.each([
