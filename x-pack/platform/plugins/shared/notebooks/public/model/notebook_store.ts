@@ -139,6 +139,10 @@ export class NotebookStore {
     }
   }
 
+  setApps(apps: NotebookApp[]): void {
+    this.apps$.next(apps);
+  }
+
   addApp(app: NotebookApp): void {
     this.apps$.next([...this.apps$.getValue(), app]);
   }

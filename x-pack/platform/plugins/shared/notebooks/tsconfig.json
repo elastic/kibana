@@ -28,6 +28,7 @@
     "@kbn/presentation-publishing",
     "@kbn/shared-ux-router",
     "@kbn/ui-callout",
+    "@kbn/unified-tabs",
     "@kbn/visualization-utils"
   ],
   "exclude": ["target/**/*"]

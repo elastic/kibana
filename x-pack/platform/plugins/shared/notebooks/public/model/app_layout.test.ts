@@ -12,6 +12,7 @@ import {
   createEmptyApp,
   generateDefaultApp,
   getNewAppTitle,
+  reconcileApps,
 } from './app_layout';
 import { createPinnedTimeCell } from './cell_factory';
 import { NotebookStore } from './notebook_store';
@@ -124,6 +125,39 @@ describe('appDependsOn', () => {
   it('is false when no shown cell uses the cell', () => {
     expect(appDependsOn(appOf('raw'), cells, order, time.id)).toBe(false);
     expect(appDependsOn(appOf(), cells, order, time.id)).toBe(false);
+  });
+});
+
+describe('reconcileApps', () => {
+  const sales: NotebookApp = {
+    id: 'sales',
+    title: 'Sales',
+    panels: [{ id: 'p1', cellId: 'trend', x: 0, y: 0, width: 6, height: 7 }],
+  };
+  const ops: NotebookApp = { id: 'ops', title: 'Ops', panels: [] };
+
+  it('reorders, renames and drops apps to match the tabs', () => {
+    const next = reconcileApps([sales, ops], [{ id: 'ops', label: 'Operations' }]);
+    expect(next).toEqual([{ ...ops, title: 'Operations' }]);
+  });
+
+  it('starts new tabs empty and copies the panels of duplicated ones', () => {
+    const next = reconcileApps(
+      [sales],
+      [
+        { id: 'sales', label: 'Sales' },
+        { id: 'copy', label: 'Sales (copy)', duplicatedFromId: 'sales' },
+        { id: 'fresh', label: 'App 3' },
+      ],
+      () => 'p2'
+    );
+    expect(next[0]).toBe(sales);
+    expect(next[1]).toEqual({
+      id: 'copy',
+      title: 'Sales (copy)',
+      panels: [{ ...sales.panels[0], id: 'p2' }],
+    });
+    expect(next[2]).toEqual({ id: 'fresh', title: 'App 3', panels: [] });
   });
 });
 

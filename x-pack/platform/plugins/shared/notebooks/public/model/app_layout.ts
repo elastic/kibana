@@ -87,6 +87,28 @@ export const appendPanel = (
   panels: [...app.panels, ...packPanels([cell], getBottom(app.panels), createId)],
 });
 
+/**
+ * The apps after the tabs bar changed them: tabs are reordered, renamed or closed in place, new
+ * tabs become empty apps, and duplicated tabs copy their source app's panels.
+ */
+export const reconcileApps = (
+  apps: readonly NotebookApp[],
+  tabs: ReadonlyArray<{ id: string; label: string; duplicatedFromId?: string }>,
+  createId: () => string = uuidv4
+): NotebookApp[] => {
+  const byId = new Map(apps.map((app) => [app.id, app]));
+  return tabs.map(({ id, label, duplicatedFromId }) => {
+    const existing = byId.get(id);
+    if (existing) return existing.title === label ? existing : { ...existing, title: label };
+    const source = duplicatedFromId ? byId.get(duplicatedFromId) : undefined;
+    return {
+      id,
+      title: label,
+      panels: source?.panels.map((panel) => ({ ...panel, id: createId() })) ?? [],
+    };
+  });
+};
+
 /** Whether any cell the app shows depends on the given cell, directly or through other cells. */
 export const appDependsOn = (
   app: NotebookApp,

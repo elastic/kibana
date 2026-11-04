@@ -15,11 +15,7 @@ import {
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiIcon,
-  EuiInlineEditTitle,
   EuiMarkdownFormat,
-  EuiTab,
-  EuiTabs,
   EuiText,
   EuiToolTip,
   useEuiTheme,
@@ -27,6 +23,8 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { UnifiedTabs, type TabItem } from '@kbn/unified-tabs';
+import { v4 as uuidv4 } from 'uuid';
 import type {
   AppPanel,
   CellDefinition,
@@ -39,7 +37,9 @@ import {
   createEmptyApp,
   generateDefaultApp,
   getNewAppTitle,
+  reconcileApps,
 } from '../model/app_layout';
+import { useNotebookServices } from '../services';
 import { findPinnedTimeCell } from '../model/cell_factory';
 import { ChartCanvas, useChartAttributes } from './chart_cell';
 import { InputControl } from './input_cell';
@@ -230,11 +230,16 @@ const NoApps = () => {
   );
 };
 
-const NEW_APP_LABEL = i18n.translate('xpack.notebook.app.new', { defaultMessage: 'New app' });
+const MAX_APPS = 20;
 
-const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: readonly NotebookApp[] }) => {
+const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: NotebookApp[] }) => {
   const { store, activeAppId$ } = useNotebook();
+  const { core } = useNotebookServices();
   const { euiTheme } = useEuiTheme();
+  const tabs = useMemo<TabItem[]>(
+    () => apps.map(({ id, title }) => ({ id, label: title })),
+    [apps]
+  );
   const cells = useStateFromPublishingSubject(store.cells$);
   const cellOrder = useStateFromPublishingSubject(store.cellOrder$);
   const pinnedTime = useMemo(() => {
@@ -250,42 +255,26 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: readonly NotebookAp
     // Leaves room for the flyout's close button in the top-right corner.
     <EuiFlexGroup direction="column" gutterSize="s" css={{ paddingRight: euiTheme.size.xl }}>
       <EuiFlexItem grow={false}>
-        <EuiTabs size="s" bottomBorder={false} data-test-subj="notebookAppTabs">
-          {apps.map(({ id, title }) => (
-            <EuiTab
-              key={id}
-              isSelected={id === app.id}
-              onClick={() => activeAppId$.next(id)}
-              data-test-subj={`notebookAppTab-${title}`}
-            >
-              {title}
-            </EuiTab>
-          ))}
-          <EuiTab
-            aria-label={NEW_APP_LABEL}
-            title={NEW_APP_LABEL}
-            onClick={() => addApp(createEmptyApp(apps))}
-            data-test-subj="notebookAppNew"
-          >
-            <EuiIcon type="plus" aria-hidden={true} />
-          </EuiTab>
-        </EuiTabs>
+        <UnifiedTabs
+          items={tabs}
+          selectedItemId={app.id}
+          recentlyClosedItems={[]}
+          onClearRecentlyClosed={() => {}}
+          maxItemsCount={MAX_APPS}
+          services={{ core: { chrome: core.chrome } }}
+          createItem={() => ({ id: uuidv4(), label: getNewAppTitle(apps) })}
+          onChanged={({ items, selectedItem }) => {
+            store.setApps(reconcileApps(apps, items));
+            activeAppId$.next(selectedItem?.id);
+          }}
+          onEBTEvent={() => {}}
+          disableTabsBarMenu
+          data-test-subj="notebookAppTabs"
+        />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem css={{ minWidth: 0 }}>
-            <EuiInlineEditTitle
-              key={app.id}
-              heading="h2"
-              size="xs"
-              inputAriaLabel={i18n.translate('xpack.notebook.app.titleAriaLabel', {
-                defaultMessage: 'App title',
-              })}
-              defaultValue={app.title}
-              onSave={(title) => store.updateApp(app.id, (current) => ({ ...current, title }))}
-              data-test-subj="notebookAppTitle"
-            />
-          </EuiFlexItem>
+          <EuiFlexItem>{pinnedTime && <PinnedTimePicker cell={pinnedTime} />}</EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="xs"
@@ -306,24 +295,8 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: readonly NotebookAp
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              iconType="trash"
-              color="danger"
-              onClick={() => store.removeApp(app.id)}
-              data-test-subj="notebookAppDelete"
-            >
-              {i18n.translate('xpack.notebook.app.delete', { defaultMessage: 'Delete' })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      {pinnedTime && (
-        <EuiFlexItem grow={false}>
-          <PinnedTimePicker cell={pinnedTime} />
-        </EuiFlexItem>
-      )}
     </EuiFlexGroup>
   );
 };
