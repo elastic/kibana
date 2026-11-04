@@ -22,10 +22,10 @@ export const DIGITAL_EXPERIENCE_EBT_ACTIONS = {
   ENABLE_SESSIONS: 'enableSessions',
   /** The user opens a session's details. */
   VIEW_SESSION: 'viewSession',
+  /** The user jumps from the session timeline to one of its page visits. */
+  SELECT_PAGE_VISIT: 'selectPageVisit',
   /** The user leaves a session for the sessions list. */
   BACK_TO_SESSIONS: 'backToSessions',
-  /** The user copies a session's ID. */
-  COPY_SESSION_ID: 'copySessionId',
   /** The user clears the list's search and filters. */
   CLEAR_FILTERS: 'clearFilters',
 } as const;
@@ -67,9 +67,8 @@ export const SESSIONS_EBT_ELEMENTS = {
   COUNTRY_FILTER: 'sessionsCountryFilter',
   ENTRY_PAGE_FILTER: 'sessionsEntryPageFilter',
   CLEAR_FILTERS: 'sessionsClearFilters',
+  WATERFALL_PAGE: 'sessionWaterfallPage',
   DOCS_LINK: 'sessionsDocsLink',
   COLUMN_SELECTOR: 'sessionsColumnSelector',
-  SESSION_BACK: 'sessionBack',
   SESSION_NOT_FOUND_BACK: 'sessionNotFoundBack',
-  SESSION_ID_COPY: 'sessionIdCopy',
 } as const;
