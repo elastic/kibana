@@ -49,6 +49,31 @@ describe('DailyLimitField', () => {
     expect(onChange).toHaveBeenCalledWith('15');
   });
 
+  it('replaces the per-automation callout with the deployment limit callout', () => {
+    render(
+      <I18nProvider>
+        <DailyLimitField
+          value="10"
+          helpText="Help text"
+          onChange={jest.fn()}
+          usedToday={10}
+          isGlobalLimitReached
+          globalInvestigationLimit={6}
+          globalLimitSettingsHref="/app/nightshift/settings/investigations"
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('automationsGlobalLimitBanner')).toHaveTextContent(
+      'Automations reached a daily run limit of 6 for this deployment'
+    );
+    expect(screen.queryByTestId('automationDailyLimitReachedCallout')).not.toBeInTheDocument();
+    expect(screen.getByTestId('automationsGlobalLimitSettingsLink')).toHaveAttribute(
+      'href',
+      '/app/nightshift/settings/investigations'
+    );
+  });
+
   it('shows the callout without the raise action when read-only', () => {
     render(
       <I18nProvider>

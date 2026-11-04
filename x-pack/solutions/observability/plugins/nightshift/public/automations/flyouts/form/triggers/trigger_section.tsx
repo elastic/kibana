@@ -30,6 +30,9 @@ export const AutomationTriggerSection = ({
   savedLimit,
   onRaiseLimit,
   readOnly = false,
+  isGlobalLimitReached = false,
+  globalInvestigationLimit,
+  globalLimitSettingsHref,
 }: {
   trigger?: TriggerFormValues;
   dailyDispatchLimit: string;
@@ -39,6 +42,9 @@ export const AutomationTriggerSection = ({
   savedLimit?: number;
   onRaiseLimit?: (limit: number) => void;
   readOnly?: boolean;
+  isGlobalLimitReached?: boolean;
+  globalInvestigationLimit?: number;
+  globalLimitSettingsHref?: string;
 }) => {
   const [stashedTriggers, setStashedTriggers] = useState<
     Partial<Record<TriggerFormValues['kind'], TriggerFormValues>>
@@ -120,6 +126,9 @@ export const AutomationTriggerSection = ({
             savedLimit={savedLimit}
             onRaiseLimit={onRaiseLimit}
             readOnly={readOnly}
+            isGlobalLimitReached={isGlobalLimitReached}
+            globalInvestigationLimit={globalInvestigationLimit}
+            globalLimitSettingsHref={globalLimitSettingsHref}
           />
         )}
       </EuiPanel>

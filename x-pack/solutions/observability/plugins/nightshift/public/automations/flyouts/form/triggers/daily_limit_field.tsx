@@ -16,6 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { GlobalLimitCallout } from '../../../list/global_limit_callout';
 import { Sentence } from './pills/sentence';
 import { triggerLabels } from './translations';
 import { isValidDailyLimit } from '../validation';
@@ -35,6 +36,9 @@ export const DailyLimitField = ({
   savedLimit,
   onRaiseLimit,
   readOnly = false,
+  isGlobalLimitReached = false,
+  globalInvestigationLimit,
+  globalLimitSettingsHref,
 }: {
   value: string;
   helpText: string;
@@ -43,6 +47,10 @@ export const DailyLimitField = ({
   savedLimit?: number;
   onRaiseLimit?: (limit: number) => void;
   readOnly?: boolean;
+  /** When the shared investigation quota is exhausted, show the deployment callout instead. */
+  isGlobalLimitReached?: boolean;
+  globalInvestigationLimit?: number;
+  globalLimitSettingsHref?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
   const isUnlimited = value === UNLIMITED_DAILY_LIMIT;
@@ -117,27 +125,38 @@ export const DailyLimitField = ({
       <EuiText size="s" color="subdued">
         {isUnlimited ? triggerLabels.noDailyLimitHelp : helpText}
       </EuiText>
-      {usedToday !== undefined && tone === 'exceeded' && (
-        <KbnWarningCallout
-          announceOnMount={false}
-          size="s"
-          css={calloutCss}
-          title={triggerLabels.dailyLimitReached}
-          text={triggerLabels.getDailyLimitReachedBody(usedToday, limit)}
-          actionProps={raiseAction}
-          data-test-subj="automationDailyLimitReachedCallout"
-        />
-      )}
-      {usedToday !== undefined && tone === 'high' && (
-        <KbnWarningCallout
-          announceOnMount={false}
-          size="s"
-          css={calloutCss}
-          title={triggerLabels.dailyLimitApproaching}
-          text={triggerLabels.getDailyLimitApproachingBody(usedToday, limit)}
-          actionProps={raiseAction}
-          data-test-subj="automationDailyLimitApproachingCallout"
-        />
+      {isGlobalLimitReached && globalInvestigationLimit !== undefined ? (
+        <div css={calloutCss}>
+          <GlobalLimitCallout
+            limit={globalInvestigationLimit}
+            settingsHref={globalLimitSettingsHref}
+          />
+        </div>
+      ) : (
+        <>
+          {usedToday !== undefined && tone === 'exceeded' && (
+            <KbnWarningCallout
+              announceOnMount={false}
+              size="s"
+              css={calloutCss}
+              title={triggerLabels.dailyLimitReached}
+              text={triggerLabels.getDailyLimitReachedBody(usedToday, limit)}
+              actionProps={raiseAction}
+              data-test-subj="automationDailyLimitReachedCallout"
+            />
+          )}
+          {usedToday !== undefined && tone === 'high' && (
+            <KbnWarningCallout
+              announceOnMount={false}
+              size="s"
+              css={calloutCss}
+              title={triggerLabels.dailyLimitApproaching}
+              text={triggerLabels.getDailyLimitApproachingBody(usedToday, limit)}
+              actionProps={raiseAction}
+              data-test-subj="automationDailyLimitApproachingCallout"
+            />
+          )}
+        </>
       )}
       {!isUnlimited && limit > SOFT_DAILY_LIMIT && (
         <KbnWarningCallout

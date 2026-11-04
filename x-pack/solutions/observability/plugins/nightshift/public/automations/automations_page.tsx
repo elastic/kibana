@@ -165,6 +165,7 @@ export const AutomationsPage = (): React.ReactElement => {
         usedToday={usedToday}
         getFacets={getFacets}
         isRateLimited={isRateLimited}
+        isGlobalLimitReached={isGlobalLimitReached}
         pageIndex={pageIndex}
         pageSize={page.size}
         onPageChange={(index, size) => setPage({ index, size })}
@@ -260,6 +261,9 @@ export const AutomationsPage = (): React.ReactElement => {
           canManage={canManage}
           editDisabledReason={editDisabledReason}
           usedToday={usedToday.get(detailAutomation.id) ?? 0}
+          isGlobalLimitReached={isGlobalLimitReached}
+          globalInvestigationLimit={quotas?.limits.investigation}
+          globalLimitSettingsHref={globalLimitSettingsHref}
           runRange={runRange}
           rangeLabel={rangeLabel}
           onClose={() => navigate('/automations')}

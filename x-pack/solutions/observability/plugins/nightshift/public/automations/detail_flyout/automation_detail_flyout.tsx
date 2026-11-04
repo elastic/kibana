@@ -21,7 +21,6 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiProgress,
   EuiPopover,
   EuiSpacer,
   EuiSwitch,
@@ -45,7 +44,6 @@ import {
   type AutomationFormValues,
 } from '../flyouts/form/automation_form_values';
 import { canSaveAutomation, getSaveBlocker, isTriggerValid } from '../flyouts/form/validation';
-import { triggerLabels } from '../flyouts/form/triggers/translations';
 import { toAutomationUpdateBody } from '../flyouts/form/to_automation_request';
 import { SectionHeader, FormSection } from '../flyouts/form/section_header';
 import {
@@ -54,9 +52,12 @@ import {
   useUpdateAutomation,
   type Automation,
 } from '../hooks/use_automations';
-import { getDailyUsageTone } from '../utils/daily_usage';
-import { statusLabels } from '../utils/filter_automations';
+import {
+  isAutomationRateLimited,
+  statusLabels,
+} from '../utils/filter_automations';
 import type { RunRange } from '../hooks/use_automation_usage';
+import { AutomationUsageCell } from '../list/cells/usage_cell';
 import { RunsSparkline } from '../list/cells/runs_sparkline';
 import { InfoStrip } from './info_strip';
 import { RunHistory, STATUSES, type Run } from './run_history';
@@ -131,6 +132,9 @@ export const AutomationDetailFlyout = ({
   canManage,
   editDisabledReason,
   usedToday,
+  isGlobalLimitReached = false,
+  globalInvestigationLimit,
+  globalLimitSettingsHref,
   runRange,
   rangeLabel,
   onClose,
@@ -143,6 +147,10 @@ export const AutomationDetailFlyout = ({
   /** Why editing is not possible, shown on the disabled controls instead of hiding them. */
   editDisabledReason?: string;
   usedToday: number;
+  /** When the shared investigation quota is exhausted, today's usage uses a disabled look. */
+  isGlobalLimitReached?: boolean;
+  globalInvestigationLimit?: number;
+  globalLimitSettingsHref?: string;
   runRange: RunRange;
   rangeLabel: string;
   onClose: () => void;
@@ -183,9 +191,6 @@ export const AutomationDetailFlyout = ({
   const skippedRuns = runs.filter(({ status }) => status === 'skipped').length;
   const startedRuns = (runsQuery.data?.total ?? 0) - skippedRuns;
   const dailyLimit = automation.runtime.dailyDispatchLimit;
-  const isLimitHigh =
-    dailyLimit !== undefined && getDailyUsageTone(usedToday, dailyLimit) !== 'healthy';
-  const limitColor = euiTheme.colors.vis.euiColorVisWarning0;
   const currentIndex = automations.findIndex(({ id: rowId }) => rowId === automation.id);
   const isInList = currentIndex !== -1;
   const previous = isInList ? automations[currentIndex - 1] : undefined;
@@ -474,25 +479,13 @@ export const AutomationDetailFlyout = ({
                         title: labels.todayUsage,
                         gap: 'xs',
                         value: (
-                          <div
-                            css={{
-                              inlineSize: '100%',
-                              color: isLimitHigh ? euiTheme.colors.textWarning : undefined,
-                            }}
-                          >
-                            {usedToday} / {dailyLimit ?? triggerLabels.noLimit}
-                            {dailyLimit !== undefined && (
-                              <>
-                                <EuiSpacer size="xs" />
-                                <EuiProgress
-                                  size="s"
-                                  color={isLimitHigh ? limitColor : 'success'}
-                                  value={usedToday}
-                                  max={dailyLimit}
-                                />
-                              </>
-                            )}
-                          </div>
+                          <AutomationUsageCell
+                            used={usedToday}
+                            limit={dailyLimit}
+                            isRateLimited={isAutomationRateLimited(automation, usedToday)}
+                            isGlobalLimitReached={isGlobalLimitReached}
+                            align="start"
+                          />
                         ),
                       },
                     ]}
@@ -525,6 +518,9 @@ export const AutomationDetailFlyout = ({
                     tagSuggestions={automations.flatMap(({ tags }) => tags ?? [])}
                     isNameInvalid={isNameInvalid}
                     savedLimit={dailyLimit}
+                    isGlobalLimitReached={isGlobalLimitReached}
+                    globalInvestigationLimit={globalInvestigationLimit}
+                    globalLimitSettingsHref={globalLimitSettingsHref}
                     onChange={(changes) => {
                       setValues((current) => ({ ...current, ...changes }));
                       if ('name' in changes) setIsNameInvalid(false);
@@ -571,6 +567,9 @@ export const AutomationDetailFlyout = ({
                       isNameInvalid={false}
                       readOnly
                       showIdentityFields={false}
+                      isGlobalLimitReached={isGlobalLimitReached}
+                      globalInvestigationLimit={globalInvestigationLimit}
+                      globalLimitSettingsHref={globalLimitSettingsHref}
                       onRaiseLimit={
                         canManage
                           ? (limit) => startEditing({ dailyDispatchLimit: String(limit) })
