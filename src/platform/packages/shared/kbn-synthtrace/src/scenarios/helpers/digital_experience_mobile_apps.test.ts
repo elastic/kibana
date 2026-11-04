@@ -15,6 +15,7 @@ import {
   type Timerange,
 } from '@kbn/synthtrace-client';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { getDefaultSeed } from './digital_experience_apps';
 import {
   DIGITAL_EXPERIENCE_MOBILE_APPS,
   generateEdotReactNativeSessions,
@@ -27,6 +28,8 @@ const range = timerange(
   new Date('2026-10-16T12:30:00.000Z'),
   {} as ToolingLog
 );
+
+const FROM = range.from.getTime();
 
 const collect = (
   opts: Partial<DigitalExperienceMobileScenarioOpts & { from: number }> = {},
@@ -66,8 +69,9 @@ describe('digital experience mobile apps', () => {
 
   describe('parseDigitalExperienceMobileScenarioOpts', () => {
     it('defaults to both platforms, manual spans and scale 1', () => {
-      expect(parseDigitalExperienceMobileScenarioOpts(undefined)).toEqual({
+      expect(parseDigitalExperienceMobileScenarioOpts(undefined, FROM)).toEqual({
         scale: 1,
+        seed: getDefaultSeed(FROM),
         platform: 'both',
         withManualSpans: true,
       });
@@ -75,25 +79,28 @@ describe('digital experience mobile apps', () => {
 
     it('parses string options from the CLI', () => {
       expect(
-        parseDigitalExperienceMobileScenarioOpts({
-          platform: 'iOS',
-          withManualSpans: 'false',
-          scale: '0.5',
-          seed: 42,
-        })
+        parseDigitalExperienceMobileScenarioOpts(
+          {
+            platform: 'iOS',
+            withManualSpans: 'false',
+            scale: '0.5',
+            seed: 42,
+          },
+          FROM
+        )
       ).toEqual({ platform: 'ios', withManualSpans: false, scale: 0.5, seed: '42' });
     });
 
     it('rejects unknown keys and invalid values', () => {
-      expect(() => parseDigitalExperienceMobileScenarioOpts({ withSessionId: true })).toThrow(
+      expect(() => parseDigitalExperienceMobileScenarioOpts({ withSessionId: true }, FROM)).toThrow(
         'Unknown scenarioOpts: withSessionId'
       );
-      expect(() => parseDigitalExperienceMobileScenarioOpts({ platform: 'web' })).toThrow(
+      expect(() => parseDigitalExperienceMobileScenarioOpts({ platform: 'web' }, FROM)).toThrow(
         'platform must be android, ios or both'
       );
-      expect(() => parseDigitalExperienceMobileScenarioOpts({ withManualSpans: 'yes' })).toThrow(
-        'withManualSpans must be true or false'
-      );
+      expect(() =>
+        parseDigitalExperienceMobileScenarioOpts({ withManualSpans: 'yes' }, FROM)
+      ).toThrow('withManualSpans must be true or false');
     });
   });
 
@@ -228,19 +235,13 @@ describe('digital experience mobile apps', () => {
       it('brings installations back across the workers of a run without a seed', () => {
         // Synthtrace evaluates the scenario again in each worker, one per hour of a long run
         const from = longRange.from.getTime();
+        // Like the scenario, without a seed option the parser defaults it to the run's start
+        const opts = { ...parseDigitalExperienceMobileScenarioOpts({ scale: 0.2 }, from), from };
         const hours = [0, 1, 2, 3].map((hour) => new Date(from + hour * 60 * 60_000));
         const workerDocs = hours
           .slice(1)
-          .flatMap((end, i) =>
-            collect(
-              { seed: undefined, scale: 0.2, from },
-              timerange(hours[i], end, {} as ToolingLog)
-            )
-          );
-        const unsplit = collect(
-          { seed: undefined, scale: 0.2, from },
-          timerange(hours[0], hours[3], {} as ToolingLog)
-        );
+          .flatMap((end, i) => collect(opts, timerange(hours[i], end, {} as ToolingLog)));
+        const unsplit = collect(opts, timerange(hours[0], hours[3], {} as ToolingLog));
         const sortKey = (doc: EdotReactNativeDocument) => JSON.stringify(doc);
         expect(workerDocs.map(sortKey).sort()).toEqual(unsplit.map(sortKey).sort());
         DIGITAL_EXPERIENCE_MOBILE_APPS.forEach(({ serviceName }) => {

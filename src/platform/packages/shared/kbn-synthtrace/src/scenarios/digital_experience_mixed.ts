@@ -39,7 +39,6 @@ import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environmen
 import { withClient } from '../lib/utils/with_client';
 import {
   generateEdotBrowserSessions,
-  getDefaultSeed,
   parseDigitalExperienceScenarioOpts,
   SEED_LOG_HINT,
 } from './helpers/digital_experience_apps';
@@ -49,9 +48,8 @@ import { generateEdotReactNativeSessions } from './helpers/digital_experience_mo
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<OtelDocument | ApmFields> = async ({ scenarioOpts, logger, from }) => {
-  const parsedOpts = parseDigitalExperienceScenarioOpts(scenarioOpts);
   // The EDOT Browser, EDOT React Native and classic RUM data derive from the same seed
-  const opts = { ...parsedOpts, seed: parsedOpts.seed ?? getDefaultSeed(from) };
+  const opts = parseDigitalExperienceScenarioOpts(scenarioOpts, from);
   logger.info(
     `Generating EDOT Browser, EDOT React Native and classic RUM data with ${JSON.stringify(
       opts

@@ -50,17 +50,16 @@ export interface DigitalExperienceScenarioOpts {
   scale: number;
   /**
    * Makes the data reproducible: every session, with its IDs, browser, page views and events, is
-   * derived from the seed, its app and its number since the epoch. Derived from the run's `from`
-   * when unset, see {@link getDefaultSeed}.
+   * derived from the seed, its app and its number since the epoch. The parser defaults it to
+   * {@link getDefaultSeed}.
    */
-  seed?: string;
+  seed: string;
 }
 
-const DEFAULT_SCENARIO_OPTS: DigitalExperienceScenarioOpts = {
+const DEFAULT_SCENARIO_OPTS: Omit<DigitalExperienceScenarioOpts, 'seed'> = {
   withSessionId: true,
   includeRawAttribution: false,
   scale: 1,
-  seed: undefined,
 };
 
 const STOREFRONT_ORIGIN = 'https://www.example-store.com';
@@ -407,7 +406,7 @@ export const parseScale = (value: unknown, defaultValue: number): number => {
 };
 
 /** Parses the `seed` scenario option, a non-empty string or a finite number. */
-export const parseSeed = (value: unknown, defaultValue?: string): string | undefined => {
+export const parseSeed = (value: unknown, defaultValue: string): string => {
   if (value === undefined) {
     return defaultValue;
   }
@@ -424,12 +423,16 @@ export const getDefaultSeed = (from: number): string => String(from);
 export const SEED_LOG_HINT =
   'pass --scenarioOpts seed=<value> to vary the data for the same --from';
 
-/** Parses `--scenarioOpts` for the digital experience scenarios, rejecting unknown keys and values. */
+/**
+ * Parses `--scenarioOpts` for the digital experience scenarios, rejecting unknown keys and values
+ * and defaulting the seed to the run's `from`.
+ */
 export const parseDigitalExperienceScenarioOpts = (
-  opts: Record<string, unknown> | undefined
+  opts: Record<string, unknown> | undefined,
+  from: number
 ): DigitalExperienceScenarioOpts => {
   const unknownKeys = Object.keys(opts ?? {}).filter(
-    (key) => !Object.hasOwn(DEFAULT_SCENARIO_OPTS, key)
+    (key) => key !== 'seed' && !Object.hasOwn(DEFAULT_SCENARIO_OPTS, key)
   );
   if (unknownKeys.length) {
     throw new Error(`Unknown scenarioOpts: ${unknownKeys.join(', ')}`);
@@ -439,7 +442,7 @@ export const parseDigitalExperienceScenarioOpts = (
     withSessionId: parseBooleanOpt(opts, 'withSessionId'),
     includeRawAttribution: parseBooleanOpt(opts, 'includeRawAttribution'),
     scale: parseScale(opts?.scale, DEFAULT_SCENARIO_OPTS.scale),
-    seed: parseSeed(opts?.seed, DEFAULT_SCENARIO_OPTS.seed),
+    seed: parseSeed(opts?.seed, getDefaultSeed(from)),
   };
 };
 
@@ -528,7 +531,7 @@ export const generateEdotBrowserSessions = (
     withSessionId,
     includeRawAttribution,
     scale,
-    seed = getDefaultSeed(from),
+    seed,
   }: DigitalExperienceScenarioOpts & { environment: string; from: number }
 ): Array<SynthtraceGenerator<EdotBrowserDocument>> =>
   DIGITAL_EXPERIENCE_APPS.map(

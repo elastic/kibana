@@ -48,7 +48,7 @@ import type { Scenario } from '../cli/scenario';
 import type { OtelDocument } from '../lib/otel/otel_synthtrace_es_client';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
-import { getDefaultSeed, SEED_LOG_HINT } from './helpers/digital_experience_apps';
+import { SEED_LOG_HINT } from './helpers/digital_experience_apps';
 import {
   generateEdotReactNativeSessions,
   parseDigitalExperienceMobileScenarioOpts,
@@ -57,8 +57,7 @@ import {
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<OtelDocument> = async ({ scenarioOpts, logger, from }) => {
-  const parsedOpts = parseDigitalExperienceMobileScenarioOpts(scenarioOpts);
-  const opts = { ...parsedOpts, seed: parsedOpts.seed ?? getDefaultSeed(from) };
+  const opts = parseDigitalExperienceMobileScenarioOpts(scenarioOpts, from);
   logger.info(`Generating EDOT React Native data with ${JSON.stringify(opts)}; ${SEED_LOG_HINT}`);
 
   return {

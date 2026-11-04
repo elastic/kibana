@@ -63,20 +63,16 @@ export interface DigitalExperienceMobileScenarioOpts {
    * time, so a scale below 1 thins out every app in proportion.
    */
   scale: number;
-  /**
-   * Makes the data reproducible. Derived from the run's `from` when unset, see
-   * {@link getDefaultSeed}.
-   */
-  seed?: string;
+  /** Makes the data reproducible. The parser defaults it to {@link getDefaultSeed}. */
+  seed: string;
   /** Generates sessions of one platform only. Apps without devices of that platform write nothing. */
   platform: MobilePlatformOpt;
   /** Write the `app.launch` and screen spans that some apps create themselves. */
   withManualSpans: boolean;
 }
 
-const DEFAULT_MOBILE_SCENARIO_OPTS: DigitalExperienceMobileScenarioOpts = {
+const DEFAULT_MOBILE_SCENARIO_OPTS: Omit<DigitalExperienceMobileScenarioOpts, 'seed'> = {
   scale: 1,
-  seed: undefined,
   platform: 'both',
   withManualSpans: true,
 };
@@ -370,12 +366,16 @@ const parsePlatform = (value: unknown): MobilePlatformOpt => {
   throw new Error('platform must be android, ios or both');
 };
 
-/** Parses `--scenarioOpts` for `digital_experience_mobile`, rejecting unknown keys and values. */
+/**
+ * Parses `--scenarioOpts` for `digital_experience_mobile`, rejecting unknown keys and values and
+ * defaulting the seed to the run's `from`.
+ */
 export const parseDigitalExperienceMobileScenarioOpts = (
-  opts: Record<string, unknown> | undefined
+  opts: Record<string, unknown> | undefined,
+  from: number
 ): DigitalExperienceMobileScenarioOpts => {
   const unknownKeys = Object.keys(opts ?? {}).filter(
-    (key) => !Object.hasOwn(DEFAULT_MOBILE_SCENARIO_OPTS, key)
+    (key) => key !== 'seed' && !Object.hasOwn(DEFAULT_MOBILE_SCENARIO_OPTS, key)
   );
   if (unknownKeys.length) {
     throw new Error(`Unknown scenarioOpts: ${unknownKeys.join(', ')}`);
@@ -383,7 +383,7 @@ export const parseDigitalExperienceMobileScenarioOpts = (
 
   return {
     scale: parseScale(opts?.scale, DEFAULT_MOBILE_SCENARIO_OPTS.scale),
-    seed: parseSeed(opts?.seed, DEFAULT_MOBILE_SCENARIO_OPTS.seed),
+    seed: parseSeed(opts?.seed, getDefaultSeed(from)),
     platform: parsePlatform(opts?.platform),
     withManualSpans: parseBooleanOption(
       'withManualSpans',
@@ -459,7 +459,7 @@ export const generateEdotReactNativeSessions = (
     environment,
     from,
     scale,
-    seed = getDefaultSeed(from),
+    seed,
     platform,
     withManualSpans,
   }: DigitalExperienceMobileScenarioOpts & { environment: string; from: number }
