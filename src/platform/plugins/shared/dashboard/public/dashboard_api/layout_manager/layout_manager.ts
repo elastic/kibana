@@ -757,6 +757,7 @@ const transformPinnedPanelsToGridLayout = (layout: DashboardLayout) => {
     const panel = layout.pinnedPanels[panelId];
     const basePanel = {
       id: panelId,
+      grow: panel.grow,
       order: panel.order,
       width: panel.width === 'large' ? 800 : panel.width === 'medium' ? 400 : 224,
     };

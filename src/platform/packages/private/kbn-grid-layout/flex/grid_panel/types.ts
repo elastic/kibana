@@ -9,6 +9,7 @@
 
 export interface FlexPanelData {
   order: number;
+  grow: boolean;
   width: number;
   id: string;
   resizeOptions?: {

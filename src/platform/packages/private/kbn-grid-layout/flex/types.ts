@@ -23,10 +23,10 @@ export interface GridSettings {
 
 export type RuntimeGridSettings = GridSettings & { columnPixelWidth: number };
 
-export type GridLayoutWidget = FlexPanelData & { type: 'panel' };
+export type FlexLayoutPanel = FlexPanelData & { type: 'panel' };
 
 export interface FlexLayoutData {
-  [key: string]: GridLayoutWidget;
+  [key: string]: FlexLayoutPanel;
 }
 
 export type FlexLayoutElementsInOrder = Array<{ id: string }>;

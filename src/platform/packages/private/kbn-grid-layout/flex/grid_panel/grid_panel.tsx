@@ -39,6 +39,7 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
       position: relative;
       width: ${initialPanel.width}px;
       order: ${initialPanel.order + 1};
+      flex-grow: ${initialPanel.grow ? '1' : '0'};
       .kbnGridPanel--dragHandle,
       .kbnGridPanel--resizeHandle {
         touch-action: none; // prevent scrolling on touch devices
@@ -84,6 +85,7 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
           ref.style.zIndex = `${euiTheme.levels.modal}`;
           if (activePanel.type === 'resize') {
             // // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
+            ref.style.flexGrow = '0';
             ref.style.width = `${Math.max(
               draggingPosition.right - draggingPosition.left,
               runtimeSettings.columnPixelWidth
@@ -105,6 +107,7 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
           ref.style.position = '';
           ref.style.left = ``;
           ref.style.top = ``;
+          ref.style.flexGrow = currentPanel.grow ? '1' : '0';
           ref.style.width = `${currentPanel.width}px`;
           ref.style.order = `${currentPanel.order + 1}`;
         }
