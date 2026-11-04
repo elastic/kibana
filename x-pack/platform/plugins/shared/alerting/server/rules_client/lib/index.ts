@@ -20,6 +20,7 @@ export { scheduleTask, bulkScheduleTask, buildTaskInstance } from './schedule_ta
 export { createNewAPIKeySet } from './create_new_api_key_set';
 export { untrackRuleAlerts } from './untrack_rule_alerts';
 export { bulkMigrateLegacyActions } from './siem_legacy_actions/migrate_legacy_actions';
+export { deleteLegacyActionsForRules } from './siem_legacy_actions/transform_and_delete_legacy_actions';
 export { formatLegacyActions } from './siem_legacy_actions/format_legacy_actions';
 export { addGeneratedActionValues } from './add_generated_action_values';
 export { incrementRevision } from './increment_revision';

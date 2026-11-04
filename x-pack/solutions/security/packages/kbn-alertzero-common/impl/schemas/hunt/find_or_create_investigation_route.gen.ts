@@ -40,11 +40,11 @@ export type FindOrCreateInvestigationRequestBodyInput = z.input<
 export const FindOrCreateInvestigationResponse = lazySchema(() =>
   z.object({
     /**
-     * uuidv5(hunt:report:{reportId}); minted or verified existing.
+     * uuidv5(hunt:report:{spaceId}|{reportId}); minted or verified existing.
      */
     investigationConversationId: z
       .string()
-      .describe('uuidv5(hunt:report:{reportId}); minted or verified existing.'),
+      .describe('uuidv5(hunt:report:{spaceId}|{reportId}); minted or verified existing.'),
     /**
      * trigger-{sha256(space|reportId)}; the security.threat attachment id the caller attaches to name this Investigation's report.
      */
@@ -62,7 +62,7 @@ export const FindOrCreateInvestigationResponse = lazySchema(() =>
         'True when this call minted the Investigation; false when it verified one that already existed (a rerun on the same report).'
       ),
     /**
-     * Descriptive facts about the report for the trigger message. Absent when the report could not be read in this space.
+     * Descriptive facts about the report for the trigger message. Absent when the report's facts could not be read or the read returned nothing.
      */
     report: z
       .object({
@@ -75,7 +75,7 @@ export const FindOrCreateInvestigationResponse = lazySchema(() =>
       })
       .optional()
       .describe(
-        'Descriptive facts about the report for the trigger message. Absent when the report could not be read in this space.'
+        "Descriptive facts about the report for the trigger message. Absent when the report's facts could not be read or the read returned nothing."
       ),
   })
 );

@@ -19,6 +19,7 @@ import {
 } from '../../entities_grid/queries/resolved_entities';
 import type { ResolvedEntityFilterOverrides } from '../../entities_grid/queries/resolved_entities';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
+import { retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
 
 /**
  * The entities index of the tile queries and their entity filter clauses. The tiles count groups,
@@ -49,12 +50,14 @@ export const useTileQueryInputs = (spaceId: string, entityFilters: EntityFilters
   const overrides = useQuery<ResolvedEntityFilterOverrides, Error>(
     ['tileEntityFilterOverrides', spaceId, indexName, entityExpression],
     ({ signal }) =>
-      fetchResolvedEntityFilterOverrides(overridesArgs, createEsqlRunner(data.search, signal)),
+      runWithTileTimeout(signal, (tileSignal) =>
+        fetchResolvedEntityFilterOverrides(overridesArgs, createEsqlRunner(data.search, tileSignal))
+      ),
     {
       enabled: needsOverrides && Boolean(indexName),
       ...TILE_QUERY_CACHE_OPTIONS,
       refetchOnWindowFocus: false,
-      retry: 1,
+      retry: retryUnlessTimedOut,
     }
   );
 

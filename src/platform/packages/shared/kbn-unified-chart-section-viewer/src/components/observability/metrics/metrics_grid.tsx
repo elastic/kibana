@@ -24,6 +24,7 @@ import { stableStringify } from '@kbn/std';
 import type { Dimension, UnifiedMetricsGridProps, ParsedMetricItem } from '../../../types';
 import type { ChartSize } from '../../chart';
 import { Chart } from '../../chart';
+import { buildXySeriesConfig } from '../../chart/build_xy_series_config';
 import { MetricInsightsFlyout } from '../../flyout';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useGridNavigation } from '../../../hooks/use_grid_navigation';
@@ -35,6 +36,7 @@ import {
   getMetricUniqueKey,
 } from '../../../common/utils';
 import type { HistogramBoundsByMetricKey } from './hooks/use_fetch_histogram_bounds';
+import { useHistogramHeatmap } from './hooks/use_histogram_heatmap';
 import {
   ACTION_COPY_TO_DASHBOARD,
   ACTION_EXPLORE_IN_DISCOVER_TAB,
@@ -44,7 +46,6 @@ import {
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { useFetchExemplars } from './hooks/use_fetch_exemplars';
-import { useHistogramHeatmap } from './hooks/use_histogram_heatmap';
 
 const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
 
@@ -90,6 +91,7 @@ export type MetricsGridProps = Pick<
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   metricItems: ParsedMetricItem[];
   whereStatements?: string[];
+  metadataFields?: string[];
   userSource?: string;
   getUserMessages?: (metricItem: ParsedMetricItem) => EmbeddableComponentProps['userMessages'];
   getDescription?: (metricItem: ParsedMetricItem) => EmbeddableComponentProps['description'];
@@ -120,6 +122,7 @@ const EMPTY_HISTOGRAM_BOUNDS: HistogramBoundsByMetricKey = new Map();
 const getItemKey = (metricItem: ParsedMetricItem, index: number) => {
   return `${metricItem.metricName}-${index}`;
 };
+
 export const MetricsGrid = ({
   metricItems,
   onBrushEnd,
@@ -127,6 +130,7 @@ export const MetricsGrid = ({
   actions,
   dimensions,
   whereStatements,
+  metadataFields,
   userSource,
   services,
   columns,
@@ -281,6 +285,7 @@ export const MetricsGrid = ({
                   onViewDetails={handleViewDetails}
                   searchTerm={searchTerm}
                   whereStatements={whereStatements}
+                  metadataFields={metadataFields}
                   userSource={userSource}
                   description={getDescription?.(metricItem)}
                   userMessages={getUserMessages ? getUserMessages(metricItem) : undefined}
@@ -327,6 +332,7 @@ interface ChartItemProps
   onViewDetails: (index: number, esqlQuery: string, metricItem: ParsedMetricItem) => void;
   description?: string;
   whereStatements?: string[];
+  metadataFields?: string[];
   userSource?: string;
   userMessages?: EmbeddableComponentProps['userMessages'];
   profileId: string;
@@ -356,6 +362,7 @@ const ChartItem = React.memo(
     isSelected,
     searchTerm,
     whereStatements,
+    metadataFields,
     userSource,
     description,
     onFocusCell,
@@ -373,6 +380,7 @@ const ChartItem = React.memo(
       () => Object.values(euiTheme.colors.vis).slice(0, 10),
       [euiTheme.colors.vis]
     );
+    const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
 
     const recordExploredMetric = useCallback<React.MouseEventHandler<HTMLDivElement>>(
       (event) => {
@@ -413,7 +421,12 @@ const ChartItem = React.memo(
         histogramBounds,
         histogramBoundsLoading,
         whereStatements,
+        metadataFields,
         originalSource: userSource,
+        histogramVisualization: gridSettings.histogramVisualization,
+        description,
+        seriesColor: color,
+        backgroundColor: euiTheme.colors.backgroundBasePlain,
       });
 
     const esqlQuery = useMemo(() => {
@@ -427,6 +440,7 @@ const ChartItem = React.memo(
             metricItem,
             splitAccessors: applicableDimensions.map((dim) => dim.name),
             whereStatements,
+            metadataFields,
             originalSource: userSource,
             gridSettings,
           })
@@ -437,6 +451,7 @@ const ChartItem = React.memo(
       metricItem,
       applicableDimensions,
       whereStatements,
+      metadataFields,
       userSource,
       gridSettings,
     ]);
@@ -446,13 +461,46 @@ const ChartItem = React.memo(
       return instrument ? getAggregationLabel({ instrument, gridSettings }) : undefined;
     }, [metricItem.metricTypes, gridSettings]);
 
-    const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
     const chartLayers = useChartLayers({
       dimensions: applicableDimensions,
       metricItem,
       color,
       gridSettings,
     });
+
+    const lensConfig = useMemo(() => {
+      if (heatmapConfig) {
+        return heatmapConfig;
+      }
+
+      // Bounds are loading or failed. No series yet; the empty XY config keeps the
+      // loader or the bounds error.
+      if (shouldRenderHistogram) {
+        return buildXySeriesConfig({
+          query: '',
+          title: metricItem.metricName,
+          description,
+          chartLayers: [],
+        });
+      }
+
+      return buildXySeriesConfig({
+        query: esqlQuery,
+        title: metricItem.metricName,
+        description,
+        chartLayers,
+        yAxisTitle,
+      });
+    }, [
+      heatmapConfig,
+      shouldRenderHistogram,
+      metricItem.metricName,
+      description,
+      esqlQuery,
+      chartLayers,
+      yAxisTitle,
+    ]);
+
     const handleViewDetailsCallback = useCallback(
       () => onViewDetails(index, esqlQuery, metricItem),
       [index, esqlQuery, metricItem, onViewDetails]
@@ -479,7 +527,10 @@ const ChartItem = React.memo(
         <Chart
           id={metricItem.metricName}
           isSelected={isSelected}
-          esqlQuery={esqlQuery}
+          lensConfig={lensConfig}
+          // Chart does not know which configs are heatmaps. Click-to-filter is
+          // disabled here because ES|QL cannot compare a histogram value to a number.
+          disableClickFilter={lensConfig.chartType === 'heatmap'}
           size={size}
           discoverFetch$={discoverFetch$}
           fetchParams={fetchParams}
@@ -488,11 +539,6 @@ const ChartItem = React.memo(
           onFilter={onFilter}
           onExploreInDiscoverTab={actions.openInNewTab}
           onViewDetails={handleViewDetailsCallback}
-          title={metricItem.metricName}
-          description={description}
-          chartLayers={shouldRenderHistogram ? [] : chartLayers}
-          yAxisTitle={shouldRenderHistogram ? undefined : yAxisTitle}
-          heatmapConfig={heatmapConfig}
           isLoading={shouldRenderHistogram && histogramBoundsLoading}
           error={shouldRenderHistogram ? boundsError : undefined}
           syncCursor

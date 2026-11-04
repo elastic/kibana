@@ -148,6 +148,79 @@ const stateSchemaV5 = stateSchemaV4.extends({
   action_policies_count_agent_builder_assisted: undefined,
 });
 
+const countSchema = schema.maybe(schema.number());
+
+const stateSchemaV6 = stateSchemaV5.extends({
+  action_policies_count_by_status: schema.maybe(
+    schema.object({ enabled: countSchema, disabled: countSchema, snoozed: countSchema })
+  ),
+  action_policies_count_by_grouping_mode: schema.maybe(
+    schema.object({ per_alert: countSchema, per_field: countSchema, all: countSchema })
+  ),
+  action_policies_count_by_throttle_strategy: schema.maybe(
+    schema.object({
+      on_status_change: countSchema,
+      per_status_interval: countSchema,
+      time_interval: countSchema,
+      every_time: countSchema,
+      none: countSchema,
+    })
+  ),
+  action_policies_workflows_per_policy: schema.maybe(
+    schema.object({
+      p50: schema.nullable(schema.number()),
+      p99: schema.nullable(schema.number()),
+      avg: schema.nullable(schema.number()),
+    })
+  ),
+  action_policies_count_with_multiple_workflows: schema.maybe(schema.number()),
+});
+
+const distributionSchema = schema.maybe(
+  schema.object({
+    p50: schema.nullable(schema.number()),
+    p99: schema.nullable(schema.number()),
+    avg: schema.nullable(schema.number()),
+  })
+);
+
+// Dispatcher activity over the last 24h, from the event log.
+const stateSchemaV7 = stateSchemaV6.extends({
+  dispatcher_alerts_count_by_outcome_24hr: schema.maybe(
+    schema.object({ dispatched: countSchema, throttled: countSchema, unmatched: countSchema })
+  ),
+  dispatcher_action_groups_count_by_outcome_24hr: schema.maybe(
+    schema.object({ dispatched: countSchema, throttled: countSchema })
+  ),
+  dispatcher_unique_alerts_dispatched_count_24hr: countSchema,
+  dispatcher_workflow_executions_count_24hr: countSchema,
+  dispatcher_unique_workflows_triggered_count_24hr: countSchema,
+  dispatcher_notifying_executions_count_24hr: countSchema,
+  dispatcher_notifying_spaces_count_24hr: countSchema,
+  dispatcher_policies_count_by_activity_24hr: schema.maybe(
+    schema.object({
+      dispatched: countSchema,
+      throttled: countSchema,
+      failing: countSchema,
+      broken: countSchema,
+    })
+  ),
+  dispatcher_action_groups_dispatched_per_policy_24hr: distributionSchema,
+  dispatcher_alerts_dispatched_per_policy_24hr: distributionSchema,
+  dispatcher_workflow_executions_per_policy_24hr: distributionSchema,
+  dispatcher_throttle_ratio_per_policy_24hr: distributionSchema,
+  dispatcher_uncovered_rules_count_24hr: countSchema,
+  dispatcher_dispatch_failures_count_by_reason_24hr: schema.maybe(
+    schema.object({
+      missing_api_key: countSchema,
+      workflow_not_found: countSchema,
+      workflow_disabled: countSchema,
+      schedule_error: countSchema,
+      license_not_supported: countSchema,
+    })
+  ),
+});
+
 export const stateSchemaByVersion = {
   1: {
     up: (state: Record<string, unknown>) => ({
@@ -223,9 +296,57 @@ export const stateSchemaByVersion = {
       omit(state, ['count_agent_builder_assisted', 'action_policies_count_agent_builder_assisted']),
     schema: stateSchemaV5,
   },
+  6: {
+    up: (state: Record<string, unknown>) => ({
+      ...state,
+      action_policies_count_by_status: state.action_policies_count_by_status ?? undefined,
+      action_policies_count_by_grouping_mode:
+        state.action_policies_count_by_grouping_mode ?? undefined,
+      action_policies_count_by_throttle_strategy:
+        state.action_policies_count_by_throttle_strategy ?? undefined,
+      action_policies_workflows_per_policy: state.action_policies_workflows_per_policy ?? undefined,
+      action_policies_count_with_multiple_workflows:
+        state.action_policies_count_with_multiple_workflows ?? undefined,
+    }),
+    schema: stateSchemaV6,
+  },
+  7: {
+    up: (state: Record<string, unknown>) => ({
+      ...state,
+      dispatcher_alerts_count_by_outcome_24hr:
+        state.dispatcher_alerts_count_by_outcome_24hr ?? undefined,
+      dispatcher_action_groups_count_by_outcome_24hr:
+        state.dispatcher_action_groups_count_by_outcome_24hr ?? undefined,
+      dispatcher_unique_alerts_dispatched_count_24hr:
+        state.dispatcher_unique_alerts_dispatched_count_24hr ?? undefined,
+      dispatcher_workflow_executions_count_24hr:
+        state.dispatcher_workflow_executions_count_24hr ?? undefined,
+      dispatcher_unique_workflows_triggered_count_24hr:
+        state.dispatcher_unique_workflows_triggered_count_24hr ?? undefined,
+      dispatcher_notifying_executions_count_24hr:
+        state.dispatcher_notifying_executions_count_24hr ?? undefined,
+      dispatcher_notifying_spaces_count_24hr:
+        state.dispatcher_notifying_spaces_count_24hr ?? undefined,
+      dispatcher_policies_count_by_activity_24hr:
+        state.dispatcher_policies_count_by_activity_24hr ?? undefined,
+      dispatcher_action_groups_dispatched_per_policy_24hr:
+        state.dispatcher_action_groups_dispatched_per_policy_24hr ?? undefined,
+      dispatcher_alerts_dispatched_per_policy_24hr:
+        state.dispatcher_alerts_dispatched_per_policy_24hr ?? undefined,
+      dispatcher_workflow_executions_per_policy_24hr:
+        state.dispatcher_workflow_executions_per_policy_24hr ?? undefined,
+      dispatcher_throttle_ratio_per_policy_24hr:
+        state.dispatcher_throttle_ratio_per_policy_24hr ?? undefined,
+      dispatcher_uncovered_rules_count_24hr:
+        state.dispatcher_uncovered_rules_count_24hr ?? undefined,
+      dispatcher_dispatch_failures_count_by_reason_24hr:
+        state.dispatcher_dispatch_failures_count_by_reason_24hr ?? undefined,
+    }),
+    schema: stateSchemaV7,
+  },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[5].schema;
+const latestTaskStateSchema = stateSchemaByVersion[7].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {

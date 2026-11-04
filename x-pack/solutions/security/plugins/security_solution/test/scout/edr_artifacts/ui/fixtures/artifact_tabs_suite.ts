@@ -164,7 +164,8 @@ export const describeArtifactTabPolicyDetails = (
             'back link returns to policy details and the next tab is reachable',
             async () => {
               await expect(pageObjects.policyDetailsPage.pageContainer).toHaveCount(0);
-              await expect(pageObjects.policyDetailsPage.backToOrigin).toHaveText(
+              // The back button is icon-only (tooltip/aria-label only, no visible text).
+              await expect(pageObjects.policyDetailsPage.backToOrigin).toHaveAccessibleName(
                 `Back to ${endpointPolicy.name} policy`
               );
               await pageObjects.policyDetailsPage.clickBackToOrigin();

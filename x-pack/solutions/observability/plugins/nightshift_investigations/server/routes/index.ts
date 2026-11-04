@@ -15,7 +15,9 @@ import { getCortexPageRoute } from './get_cortex_page';
 import { createCortexPageRoute, updateCortexPageRoute } from './write_cortex_page';
 import { archiveCortexPageRoute } from './archive_cortex_page';
 import { getCortexAvailabilityRoute } from './get_cortex_availability';
-import { sandboxSecretsRoutes } from './sandbox_secrets';
+import { getSandboxConnectorsRoute } from './get_sandbox_connectors';
+import { getSandboxConnectorTypesRoute } from './get_sandbox_connector_types';
+import { sandboxAllowlistRoutes } from './sandbox_allowlist';
 import { customContextRoutes } from './custom_context';
 import { onboardingRoutes } from './onboarding';
 import { getDecisionTreesAvailabilityRoute } from './get_decision_trees_availability';
@@ -37,6 +39,12 @@ import { getMemoryPageRoute } from './get_memory_page';
 import { archiveMemoryPageRoute } from './archive_memory_page';
 import { deleteMemoryPageRoute } from './delete_memory_page';
 import { getMemoryLineageRoute } from './get_memory_lineage';
+import {
+  disableInvestigatorServiceAccountRoute,
+  enableInvestigatorServiceAccountRoute,
+  getInvestigatorServiceAccountRoute,
+} from './investigator_service_account';
+import { previewKnowledgePurgeRoute, purgeKnowledgeRoute } from './purge_knowledge';
 
 export const nightshiftInvestigationsRouteRepository = {
   ...startInvestigationRoute,
@@ -50,7 +58,9 @@ export const nightshiftInvestigationsRouteRepository = {
   ...updateCortexPageRoute,
   ...archiveCortexPageRoute,
   ...getCortexAvailabilityRoute,
-  ...sandboxSecretsRoutes,
+  ...getSandboxConnectorsRoute,
+  ...getSandboxConnectorTypesRoute,
+  ...sandboxAllowlistRoutes,
   ...customContextRoutes,
   ...onboardingRoutes,
   ...getDecisionTreesAvailabilityRoute,
@@ -70,6 +80,11 @@ export const nightshiftInvestigationsRouteRepository = {
   ...archiveMemoryPageRoute,
   ...deleteMemoryPageRoute,
   ...getMemoryLineageRoute,
+  ...getInvestigatorServiceAccountRoute,
+  ...enableInvestigatorServiceAccountRoute,
+  ...disableInvestigatorServiceAccountRoute,
+  ...previewKnowledgePurgeRoute,
+  ...purgeKnowledgeRoute,
 };
 
 export type NightshiftInvestigationsRouteRepository =

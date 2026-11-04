@@ -21,27 +21,33 @@ import { Timeline } from './timeline';
 jest.mock('../../../context/conversation/use_conversation_id', () => ({
   useConversationId: () => 'conv-1',
 }));
+const mockOnResponseRender = jest.fn();
 jest.mock('./response/response_message', () => ({
   ResponseMessage: ({
     isLoading,
     conversationId,
+    executionId: responseExecutionId,
     attachmentRefs,
     conversationAttachments,
   }: {
     isLoading: boolean;
     conversationId?: string;
+    executionId?: string;
     attachmentRefs?: Array<{ attachment_id: string }>;
     conversationAttachments?: Array<{ id: string }>;
-  }) => (
-    <div
-      data-test-subj="response"
-      data-conversation-id={conversationId}
-      data-refs={attachmentRefs?.map((ref) => ref.attachment_id).join(',')}
-      data-attachments={conversationAttachments?.map((attachment) => attachment.id).join(',')}
-    >
-      {isLoading ? 'loading' : 'done'}
-    </div>
-  ),
+  }) => {
+    mockOnResponseRender(responseExecutionId);
+    return (
+      <div
+        data-test-subj="response"
+        data-conversation-id={conversationId}
+        data-refs={attachmentRefs?.map((ref) => ref.attachment_id).join(',')}
+        data-attachments={conversationAttachments?.map((attachment) => attachment.id).join(',')}
+      >
+        {isLoading ? 'loading' : 'done'}
+      </div>
+    );
+  },
 }));
 jest.mock('./attachments/attachment_references', () => ({
   AttachmentReferences: ({
@@ -105,6 +111,10 @@ const renderTimeline = (item: TimelineItem, conversationAttachments?: VersionedA
   );
 
 describe('AgentTurn', () => {
+  beforeEach(() => {
+    mockOnResponseRender.mockClear();
+  });
+
   it('gives the response what it needs to render attachments', () => {
     const conversationAttachments = [{ id: 'att-1' } as VersionedAttachment];
     renderTimeline(
@@ -207,5 +217,49 @@ describe('AgentTurn', () => {
       </I18nProvider>
     );
     expect(screen.getAllByTestId('agentBuilderToolCallStep')).toHaveLength(2);
+  });
+
+  describe('rendering cost while a later turn streams', () => {
+    const renderCount = (id: string) =>
+      mockOnResponseRender.mock.calls.filter(([renderedId]) => renderedId === id).length;
+
+    const oldTurn: TimelineItem = {
+      ...completedSaved,
+      key: 'round-0::execution',
+      executionId: 'round-0::execution',
+    };
+    const streamingTurn = (message: string): TimelineItem => ({
+      ...running,
+      key: 'round-1::execution',
+      executionId: 'round-1::execution',
+      response: { message },
+    });
+
+    const renderItems = (items: TimelineItem[]) => (
+      <I18nProvider>
+        <EuiProvider>
+          <Timeline items={items} />
+        </EuiProvider>
+      </I18nProvider>
+    );
+
+    it('does not render a completed turn again when only the streaming turn changes', () => {
+      const { rerender } = render(renderItems([oldTurn, streamingTurn('Hel')]));
+      expect(renderCount('round-0::execution')).toBe(1);
+      expect(renderCount('round-1::execution')).toBe(1);
+
+      rerender(renderItems([oldTurn, streamingTurn('Hello')]));
+
+      expect(renderCount('round-1::execution')).toBe(2);
+      expect(renderCount('round-0::execution')).toBe(1);
+    });
+
+    it('renders a completed turn again when its item changes', () => {
+      const { rerender } = render(renderItems([oldTurn]));
+
+      rerender(renderItems([{ ...oldTurn, steps: [...steps] }]));
+
+      expect(renderCount('round-0::execution')).toBe(2);
+    });
   });
 });

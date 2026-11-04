@@ -235,7 +235,10 @@
         "extras": {
           "autoCloseConfidenceScoreMinThreshold": 0.85,
           "budgetPerHour": 1300,
-          "lookbackHours": 24
+          "lookbackHours": 24,
+          "minSeverity": "low",
+          "excludeBuildingBlocks": false,
+          "excludedRuleTags": []
         }
       },
       "schema": {
@@ -280,12 +283,39 @@
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 168
+              },
+              "minSeverity": {
+                "kind": "leaf",
+                "type": "string",
+                "enum": [
+                  "low",
+                  "medium",
+                  "high",
+                  "critical"
+                ]
+              },
+              "excludeBuildingBlocks": {
+                "kind": "leaf",
+                "type": "boolean"
+              },
+              "excludedRuleTags": {
+                "kind": "array",
+                "items": {
+                  "kind": "leaf",
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "maxItems": 50
               }
             },
             "required": [
               "autoCloseConfidenceScoreMinThreshold",
               "budgetPerHour",
-              "lookbackHours"
+              "excludeBuildingBlocks",
+              "excludedRuleTags",
+              "lookbackHours",
+              "minSeverity"
             ],
             "additionalProperties": false
           },

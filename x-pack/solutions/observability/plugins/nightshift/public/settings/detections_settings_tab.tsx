@@ -14,6 +14,7 @@ import { ContinuousOnboardingSection } from './components/continuous_onboarding_
 import { CostEstimate } from './components/cost_estimate';
 import { DeveloperModeBadge } from '../components/ui/developer_mode_badge';
 import { MaintenanceSection } from './components/maintenance_section';
+import { ResetSection } from './components/reset_section';
 import { RunLimitsSection } from './components/run_limits_section';
 import { ScheduledDiscoverySection } from './components/scheduled_discovery_section';
 import { SettingsSaveBar } from './components/settings_save_bar';
@@ -115,6 +116,7 @@ export const DetectionsSettingsTab = () => {
         <RunLimitsSection
           groups={DETECTION_RUN_LIMIT_GROUPS}
           form={runLimits}
+          exhaustionCallouts="groups"
           description={i18n.translate('xpack.nightshift.settings.detectionRunLimitsDescription', {
             defaultMessage:
               'These limits apply only to scheduled detection, manual runs are not limited. When a limit is reached, new scheduled runs are blocked until it resets.',
@@ -146,6 +148,10 @@ export const DetectionsSettingsTab = () => {
             data-test-subj="nightshiftAdvancedDeveloperSettingsSection"
           >
             <StaleEventCleanupSection canManage={form.canManage} />
+
+            <EuiHorizontalRule margin="l" />
+
+            <ResetSection canManage={form.canManageAndConfigure} />
 
             <EuiHorizontalRule margin="l" />
 

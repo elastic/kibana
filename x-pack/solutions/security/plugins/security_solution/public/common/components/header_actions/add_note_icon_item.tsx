@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import { NotesButton } from '../../../timelines/components/timeline/notes/notes_button';
 import { type TimelineType, TimelineTypeEnum } from '../../../../common/api/timeline';
 import { useUserPrivileges } from '../user_privileges';

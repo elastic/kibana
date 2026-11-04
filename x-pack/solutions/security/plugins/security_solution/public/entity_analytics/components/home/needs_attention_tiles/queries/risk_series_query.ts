@@ -95,14 +95,23 @@ export const buildRiskTilesSeriesQuery = (
     `${riskMoversSeriesColumn(k)} = COUNT(${MOVER_FLAG(k)})`,
     `${newlyHighCriticalSeriesColumn(k)} = COUNT(${NEWLY_HIGH_FLAG(k)})`,
   ]);
+  // Keep only the docs in the two hours before a moment a dot needs, as plain @timestamp ranges, so
+  // that Elasticsearch reads only those instead of every doc since the oldest moment.
+  const slotWindows = slotIndexes
+    .map((slot) => {
+      const hoursBack = slotHoursBack(timeRange, slot);
+      return `(@timestamp > NOW() - ${
+        hoursBack + BOUNDARY_WINDOW_HOURS
+      }h AND @timestamp <= NOW() - ${hoursBack}h)`;
+    })
+    .join(' OR ');
 
   return [
     `SET unmapped_fields="nullify";`,
     `FROM ${getRiskScoreIndex(spaceId)}`,
     `| WHERE @timestamp >= NOW() - ${oldestSlotHoursBack + BOUNDARY_WINDOW_HOURS}h`,
+    `| WHERE ${slotWindows}`,
     `| EVAL ${HOURS_BACK_COLUMN} = DATE_DIFF("hour", @timestamp, NOW())`,
-    // Keep only the docs in the two hours before a moment a dot needs.
-    `| WHERE ${HOURS_BACK_COLUMN} % ${stepHours} < ${BOUNDARY_WINDOW_HOURS}`,
     ...buildRiskScoreAndLevelEvals(''),
     groupMarkerEval(''),
     // The moments whose window holds the doc: more than one when the windows overlap (a 1 hour step).

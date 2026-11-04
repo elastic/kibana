@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { APP_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
 
 const OVERVIEW_APP = 'security/overview';
 
@@ -42,6 +43,6 @@ export class SecurityOverviewPage {
       OVERVIEW_APP,
       timeRange ? { params: { timerange: toTimerangeParam(timeRange) } } : undefined
     );
-    await this.threatIntelPanel.waitFor({ state: 'visible' });
+    await this.threatIntelPanel.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
   }
 }

@@ -239,6 +239,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
             entityType: EntityType.service,
             entityName: serviceName,
             entityId: entityStoreEntityId,
+            scopeId,
             onShowEntity: onShowService,
             title: serviceName,
             subTab: path.subTab as RiskScoreLeftPanelSubTab | undefined,
@@ -288,6 +289,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
 
   const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
     entityRecord: entityFromStoreResult.entityRecord ?? null,
+    isGroupView,
   });
 
   const tabsNode = tabs ? (
@@ -337,6 +339,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
             onCriticalitySave={onCriticalitySave}
           />
         )}
+        {isGroupView && !tabs && <EuiSpacer size="l" />}
         {tabsNode}
         {tabs && <EuiSpacer size="l" />}
         {tabs && selectedTabId === TABLE_TAB_ID && entityFromStoreResult.entityRecord ? (

@@ -9,7 +9,7 @@ paths:
       x-labels: [ess, serverless]
       operationId: HuntCoordinator
       description: >-
-        Starts the two-tier hunt (Tier 1 chained into Tier 2 with tier2_when
+        Starts the two-stage hunt (IOC Hunt chained into Behavior Hunt with tier2_when
         gating and no-model degradation) and returns at once. The run writes
         its full result, a HuntCoordinatorResult, to a hidden attachment on
         the Investigation named by conversation_id; the caller polls that
@@ -157,7 +157,7 @@ components:
         index_patterns:
           type: array
           description: >-
-            What Tier 1 searched: the space's Security Solution default
+            What IOC Hunt searched: the space's Security Solution default
             data view patterns, exclusions included, never an alerts
             index. Empty when the scope was blocked or resolution failed.
           items:
@@ -165,10 +165,10 @@ components:
         tier2_targets:
           type: array
           description: >-
-            What Tier 2 was allowed to read, target, and count as a hit,
-            chosen after the report was read and Tier 1 ran: the union of
+            What Behavior Hunt was allowed to read, target, and count as a hit,
+            chosen after the report was read and IOC Hunt ran: the union of
             the datasets the report's vendor or product matched, the
-            indices Tier 1 hit, the model's matches (only when neither of
+            indices IOC Hunt hit, the model's matches (only when neither of
             those found anything), and `actionable_indices`, each
             `*`-suffixed. `tier2_target_sources` says which signals
             contributed. Empty when the scope was blocked, resolution
@@ -189,7 +189,7 @@ components:
           description: >-
             The datasets the report itself points at: the ones its vendor
             or product matched, or the model's match, without the indices
-            Tier 1 hit or the process-bearing streams in `tier2_targets`.
+            IOC Hunt hit or the process-bearing streams in `tier2_targets`.
             Hunt packaging names these as the data a detection would query
             when a run has no hit events to name. Empty when neither signal
             matched.
@@ -270,7 +270,7 @@ components:
                   validated_esql:
                     type: string
                     description: >-
-                      The query Tier 2 generated and validated (and, when grounded,
+                      The query Behavior Hunt generated and validated (and, when grounded,
                       executed) to hunt this technique.
                   title:
                     type: string
@@ -321,6 +321,15 @@ components:
                       rows, capped at 20.
                     items:
                       type: string
+                  affected_host_origins:
+                    type: array
+                    maxItems: 20
+                    description: >-
+                      Where each `affected_hosts` entry was seen (local
+                      cluster, remote clusters, or both), from the same rows'
+                      `_index`.
+                    items:
+                      $ref: '../components/hunt.schema.yaml#/components/schemas/HostOrigin'
                   affected_hosts_truncated:
                     type: boolean
                     description: >-
@@ -335,7 +344,7 @@ components:
                     description: >-
                       Required-index execute rows as Discover refs
                       (`id` + `index` + optional `timestamp`). Same
-                      shape as Tier 1 `hits[]`. Consumed by the SSE
+                      shape as IOC Hunt `hits[]`. Consumed by the SSE
                       mapper into `events[]` / `alerts[]`.
                     items:
                       $ref: '../components/hunt.schema.yaml#/components/schemas/HuntForThreatHit'
@@ -367,7 +376,7 @@ components:
             incomplete:
               type: array
               description: >-
-                Every technique Tier 2 was asked about but could not
+                Every technique Behavior Hunt was asked about but could not
                 corroborate, each with why. Absent or empty means every
                 extracted technique was searched.
               items:
@@ -380,18 +389,26 @@ components:
               type: boolean
               description: >-
                 True when any behavior's execute path found at least
-                one row in a required index. Independent of Tier 1.
+                one row in a required index. Independent of IOC Hunt.
             tier:
               type: integer
               enum: [2]
         tier2_skipped_reason:
           type: string
+        tier2_skip_detail:
+          type: string
+          maxLength: 200
+          description: >-
+            Why Behavior Hunt was skipped, when the reason alone is ambiguous.
+            Set when no_inference means the dataset-match model call
+            failed rather than that no model was configured. Capped to
+            match the producer clamp on the failure message.
         unavailable_model_tiers:
           type: array
           description: >-
             Model tiers that had no usable model on this run, in tier
             order. Absent when every tier resolved. A missing
-            balanced or frontier model is what makes Tier 2 report
+            balanced or frontier model is what makes Behavior Hunt report
             no_inference; a missing efficient model quietly degrades
             dataset matching and recommendations without skipping
             anything.
@@ -405,8 +422,8 @@ components:
         has_confirmed_hit:
           type: boolean
           description: >-
-            True when Tier 1 confirmed a hit in the searched universe or
-            any Tier 2 behavior executed with a hit in its targets.
+            True when IOC Hunt confirmed a hit in the searched universe or
+            any derived behavior executed with a hit in its targets.
             Callers that gate SSE emit or packaging on the hit bar
             must read this field, not tier1.has_confirmed_hit alone.
         completeness:
@@ -433,19 +450,77 @@ components:
             that writes "clean" off this flag alone will record a clean
             environment for a run that could not search it — use
             `completeness` for that.
+        searched_technique_ids:
+          type: array
+          maxItems: 100
+          description: >-
+            Technique ids this run settled in Behavior Hunt: behaviors whose query
+            executed and whose result a retry would not change (a conclusive
+            result, or an inconclusive one the completeness classifier treats
+            as final), plus techniques collapsed into a sibling whose query
+            executed conclusively. Techniques that were skipped, failed,
+            lost to the behavior budget, or whose sibling did not execute
+            conclusively are not listed. Absent or empty when Behavior Hunt did not
+            run. The caller records these so a later run can skip them.
+          items:
+            type: string
+            minLength: 1
+            maxLength: 32
+        pending_technique_ids:
+          type: array
+          maxItems: 100
+          description: >-
+            Technique ids this run could not search but a later run still
+            should: the ones a retryable coverage gap names. The caller
+            records these so the next run keeps them as pending even if
+            its own extraction no longer returns them. Absent when Behavior Hunt
+            did not run, which tells the caller to leave what it has
+            recorded alone; empty when nothing is pending.
+          items:
+            type: string
+            minLength: 1
+            maxLength: 32
+        replayed_whole_report:
+          type: boolean
+          description: >-
+            True when this was a manual run over the report's own text, so
+            Behavior Hunt searched the whole report without skipping anything an
+            earlier run searched. The caller reads it to let this run's result
+            replace an earlier finding, which a run that skipped techniques
+            cannot do. Absent when Behavior Hunt did not run.
+        retryable_reasons:
+          type: array
+          maxItems: 100
+          description: >-
+            The distinct reasons of the coverage gaps that kept this run
+            `incomplete_retryable`, from the coordinator and both tiers,
+            judged in the same context as `completeness`. A reason that is
+            final for this run (a technique it gave up on, a gate nothing
+            could pass) is left out. Empty when the run is not retryable;
+            absent on paths that record nothing.
+          items:
+            $ref: '../components/hunt.schema.yaml#/components/schemas/HuntIncompleteReason'
         incomplete:
           type: array
           description: >-
             The coordinator's own coverage gaps — input this run had to
-            truncate, and a Tier 2 that was requested but could not run,
+            truncate, and a Behavior Hunt that was requested but could not run,
             or had nothing to run against. Not a copy of
             `tier1.incomplete` / `tier2.incomplete`, which the caller
             already has; this is the part of `completeness` that would
             otherwise reach the caller only as an enum, or on the
-            Tier-1-only paths, not even that. Absent or empty means the
+            paths where only IOC Hunt ran, not even that. Absent or empty means the
             coordinator itself found nothing to report here.
           items:
             $ref: '../components/hunt.schema.yaml#/components/schemas/HuntIncompleteness'
+        excluded_report_iocs:
+          type: object
+          description: Report IOCs excluded by adjudication, not searched by this run.
+          required: [count]
+          properties:
+            count:
+              type: integer
+              minimum: 1
         recommendations:
           type: array
           maxItems: 8
@@ -453,7 +528,7 @@ components:
             Up to 8 analyst next-step lines for a confirmed hit,
             grounded to this run's own SSE-visible entities. Absent
             when there is no confirmed hit or the run stopped before
-            Tier 2.
+            Behavior Hunt.
           items:
             type: string
             minLength: 1
@@ -474,11 +549,11 @@ components:
         sse:
           type: array
           description: >-
-            Populated when `has_confirmed_hit` is true (Tier 1
-            environment hits or a Tier 2 executed required-index
+            Populated when `has_confirmed_hit` is true (IOC Hunt
+            environment hits or a Behavior Hunt executed required-index
             hit) and the request named a `report_id`: one entry per
             technique this run corroborated, meaning its ES|QL
-            executed and returned required-index rows or a Tier 1
+            executed and returned required-index rows or an IOC Hunt
             hit was attributed to it. A technique that was only
             proposed gets no entry of its own; when no technique was
             corroborated, a single report-scoped entry carries all of

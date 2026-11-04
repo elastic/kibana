@@ -16,7 +16,7 @@ import { createUnitTestExecutor } from '../test_helpers';
 import type { ExpressionFunctionDefinition } from '..';
 import { ExecutionContract } from './execution_contract';
 import type { ExpressionValueBoxed } from '../expression_types';
-import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { AbortReason, now } from '@kbn/kibana-utils-plugin/common';
 
 beforeAll(() => {
   if (typeof performance === 'undefined') {
@@ -1127,11 +1127,11 @@ describe('Execution', () => {
       });
 
       test('saves duration it took to execute each function', async () => {
-        const startTime = Date.now();
+        const startTime = now();
         const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
         execution.start(-1);
         await execution.result.toPromise();
-        const duration = Date.now() - startTime;
+        const duration = now() - startTime;
 
         for (const node of execution.state.get().ast.chain) {
           expect(typeof node.debug?.duration).toBe('number');

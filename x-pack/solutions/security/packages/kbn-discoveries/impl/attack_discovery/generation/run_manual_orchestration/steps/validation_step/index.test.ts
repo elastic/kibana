@@ -176,6 +176,17 @@ describe('runValidationStep', () => {
     );
   });
 
+  it('forwards workflowConfig.generation_source to invokeValidationWorkflow', async () => {
+    await runValidationStep({
+      ...baseParams,
+      workflowConfig: { ...baseParams.workflowConfig, generation_source: 'watch_floor_ad_worker' },
+    });
+
+    expect(mockInvokeValidationWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ generationSource: 'watch_floor_ad_worker' })
+    );
+  });
+
   it('re-throws non-Error rejection reasons', async () => {
     mockInvokeValidationWorkflow.mockRejectedValue('string-error');
 

@@ -112,6 +112,10 @@ describe('StreamDetailSchemaEditor', () => {
         telemetryClient: {
           trackSchemaUpdated: jest.fn(),
         } as unknown as StreamsAppKibanaContext['services']['telemetryClient'],
+        componentCatalogue: {
+          getCatalogue: jest.fn(),
+          getLastCatalogue: jest.fn(),
+        },
         version: 'test-version',
       },
       isServerless: false,

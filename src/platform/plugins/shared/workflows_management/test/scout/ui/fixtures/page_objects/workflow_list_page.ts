@@ -18,7 +18,12 @@ export class WorkflowListPage {
 
   /** Navigates to the workflows list page. */
   async navigate() {
-    await this.page.gotoApp(PLUGIN_ID);
+    // The list page and the access-denied screens are the app's two terminal render states.
+    await this.page.gotoApp(PLUGIN_ID, {
+      readyWhen: this.page.testSubj
+        .locator('workflowsPage')
+        .or(this.page.testSubj.locator('workflowsAccessDeniedEmptyState')),
+    });
   }
 
   /** Returns the table row locator for the specified workflow. */
@@ -99,7 +104,7 @@ export class WorkflowListPage {
   /** Returns workflow names in current table order (visible page only). */
   async getVisibleWorkflowNamesInOrder(): Promise<string[]> {
     await this.page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
-    const links = this.page.testSubj.locator('workflowListTable workflowNameLink');
+    const links = this.page.testSubj.locator('workflowListTable > workflowNameLink');
     const texts = await links.allTextContents();
     return texts.map((t) => t.trim());
   }
