@@ -408,7 +408,8 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
       expect(await client.indices.exists({ index: 'my-index' })).toBe(true);
       expect(fetch).toHaveBeenCalledWith(
         '/internal/es_client/my-index',
-        expect.objectContaining({ method: 'HEAD' })
+        // Elasticsearch sends a JSON content type without a body, which must not be parsed.
+        expect.objectContaining({ method: 'HEAD', rawResponse: true })
       );
     });
 

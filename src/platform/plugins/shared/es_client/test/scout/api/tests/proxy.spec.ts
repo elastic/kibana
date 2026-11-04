@@ -78,6 +78,8 @@ apiTest.describe('Elasticsearch proxy', { tag: tags.deploymentAgnostic }, () => 
   apiTest('answers HEAD requests', async ({ apiClient }) => {
     const existing = await apiClient.head(`${PROXY_PATH}/${TEST_INDEX}`, { headers });
     expect(existing).toHaveStatusCode(200);
+    // The browser client must not parse HEAD responses as JSON despite this content type.
+    expect(existing.headers['content-type']).toMatch(/^application\/json/);
 
     const missing = await apiClient.head(`${PROXY_PATH}/${TEST_INDEX}-missing`, { headers });
     expect(missing).toHaveStatusCode(404);

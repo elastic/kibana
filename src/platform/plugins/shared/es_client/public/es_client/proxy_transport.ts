@@ -193,6 +193,8 @@ export const createProxyTransport = (proxyFetch: ProxyFetch): EsClientTransport 
     }
 
     const asStream = options.asStream === true;
+    // HEAD responses keep GET's JSON content type with no body, which `http.fetch` fails to parse.
+    const rawResponse = asStream || method === 'HEAD';
     const body = toBody(params);
     const query = toQuery(params.querystring, options.querystring);
     const headers = toHeaders(options.headers, params.bulkBody != null);
@@ -213,7 +215,7 @@ export const createProxyTransport = (proxyFetch: ProxyFetch): EsClientTransport 
     try {
       httpResponse = await proxyFetch(
         { method, path, query, body, headers, signal: options.signal },
-        asStream
+        rawResponse
       );
     } catch (error) {
       if (!isHttpFetchError(error) || !error.response) {
@@ -226,7 +228,7 @@ export const createProxyTransport = (proxyFetch: ProxyFetch): EsClientTransport 
       if (!options.ignore?.includes(response.status)) {
         throw error;
       }
-      const errorBody = asStream ? await readBody(response) : error.body;
+      const errorBody = rawResponse ? await readBody(response) : error.body;
       return respond(toResult(response, errorBody, requestMeta));
     }
 
