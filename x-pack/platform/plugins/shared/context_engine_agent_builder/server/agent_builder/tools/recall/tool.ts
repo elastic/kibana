@@ -114,7 +114,7 @@ export const createRecallTool = ({
         user_id: userId,
         space: spaceId,
         ...(params.scope === 'session' ? { session_id: conversationId } : {}),
-        ...(params.aiIndexId ? { ai_index_id: params.aiIndexId } : {}),
+        ...(params.aiIndexId ? { ai_index_ids: params.aiIndexId } : {}),
         size: params.size,
       });
 

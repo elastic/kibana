@@ -134,7 +134,7 @@ describe('recall tool', () => {
       user_id: 'kathleen',
       space: 'space-1',
       session_id: 'conversation-1',
-      ai_index_id: 'support',
+      ai_index_ids: 'support',
       size: 5,
     });
   });

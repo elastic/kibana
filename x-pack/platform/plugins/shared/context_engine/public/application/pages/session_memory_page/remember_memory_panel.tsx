@@ -47,7 +47,7 @@ export const buildRememberBody = (
   session_id: sessionId.trim(),
   user_id: userId ?? '',
   ...(spaceId ? { space: spaceId } : {}),
-  ...(aiIndexIds.length ? { ai_index_id: aiIndexIds } : {}),
+  ...(aiIndexIds.length ? { ai_index_ids: aiIndexIds } : {}),
   ...(content.trim() ? { content: content.trim() } : {}),
   ...(media ? { media: [media] } : {}),
 });

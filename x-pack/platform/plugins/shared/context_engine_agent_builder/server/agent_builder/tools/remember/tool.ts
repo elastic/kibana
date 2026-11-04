@@ -117,7 +117,7 @@ export const createRememberTool = ({
         session_id: sessionId,
         user_id: userId,
         space: spaceId,
-        ...(params.aiIndexId ? { ai_index_id: [params.aiIndexId] } : {}),
+        ...(params.aiIndexId ? { ai_index_ids: [params.aiIndexId] } : {}),
         content: params.content,
       });
 

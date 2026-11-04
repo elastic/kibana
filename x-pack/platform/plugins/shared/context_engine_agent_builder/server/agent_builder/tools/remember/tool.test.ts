@@ -122,7 +122,7 @@ describe('remember tool', () => {
       session_id: 'conversation-1',
       user_id: 'kathleen',
       space: 'space-1',
-      ai_index_id: ['support'],
+      ai_index_ids: ['support'],
       content: 'Prefers dark mode.',
     });
     expect(result).toEqual({

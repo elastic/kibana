@@ -164,7 +164,7 @@ describe('session memory routes', () => {
 
   it('lists memories with the filters as a querystring', async () => {
     transportRequest.mockResolvedValue({ count: 0, results: [] });
-    const query = { ...scope, space: 'default', ai_index_id: 'idx', size: 10 };
+    const query = { ...scope, space: 'default', ai_index_ids: 'idx', size: 10 };
 
     await callRoute('GET', SESSION_MEMORY_LIST_PATH, { query });
 

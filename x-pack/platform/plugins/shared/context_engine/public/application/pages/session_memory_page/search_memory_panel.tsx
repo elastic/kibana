@@ -118,7 +118,7 @@ export const buildListQuery = (
   ...(filters.user && userId ? { user_id: userId } : {}),
   ...(spaceId ? { space: spaceId } : {}),
   // The APIs filter on a single AI index, so the filter only applies to a lone selection.
-  ...(filters.aiIndex && aiIndexIds.length === 1 ? { ai_index_id: aiIndexIds[0] } : {}),
+  ...(filters.aiIndex && aiIndexIds.length === 1 ? { ai_index_ids: aiIndexIds[0] } : {}),
   size,
 });
 
@@ -337,7 +337,7 @@ export const SearchMemoryPanel = () => {
                 data-test-subj="contextSessionMemorySearch-results"
               >
                 {results.map(({ memory, score }) => (
-                  <EuiFlexItem key={memory.id}>
+                  <EuiFlexItem key={`${memory.id}-${memory['@timestamp']}`}>
                     <SessionMemoryCard
                       memory={memory}
                       score={score}

@@ -89,7 +89,7 @@ describe('SearchMemoryPanel', () => {
       query: 'dark mode',
       session_id: 'session-1',
       space: 'default',
-      ai_index_id: 'support',
+      ai_index_ids: 'support',
       size: 10,
     });
   });

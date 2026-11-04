@@ -56,7 +56,7 @@ describe('listSessionMemory', () => {
     await listSessionMemory(http, {
       user_id: 'u-1',
       space: 'default',
-      ai_index_id: undefined,
+      ai_index_ids: undefined,
       size: 10,
     });
 

@@ -137,7 +137,7 @@ export const SessionMemoryCard = ({
                 {memory.user_id}
               </EuiBadge>
             </EuiFlexItem>
-            {memory.ai_index_id?.map((aiIndexId) => (
+            {memory.ai_index_ids?.map((aiIndexId) => (
               <EuiFlexItem grow={false} key={aiIndexId}>
                 <EuiBadge color="hollow" iconType="table">
                   {aiIndexId}

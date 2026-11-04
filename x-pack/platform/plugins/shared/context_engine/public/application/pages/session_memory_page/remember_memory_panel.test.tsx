@@ -67,7 +67,7 @@ describe('RememberMemoryPanel', () => {
       session_id: 'session-1',
       user_id: 'kathleen',
       space: 'default',
-      ai_index_id: ['support', 'sales'],
+      ai_index_ids: ['support', 'sales'],
       content: 'Prefers dark mode',
     });
   });

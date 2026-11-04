@@ -24,7 +24,7 @@ export interface RememberSessionMemoryBody {
   session_id: string;
   user_id: string;
   space?: string;
-  ai_index_id?: string[];
+  ai_index_ids?: string[];
   content?: string;
   media?: SessionMemoryMediaItem[];
   attributes?: Record<string, unknown>;
@@ -41,7 +41,8 @@ export type RememberSessionMemoryResponse = SessionMemory;
 /** Query of `GET /_context_engine/session_events/{session_id}`. */
 export interface SessionScopeQuery {
   space?: string;
-  ai_index_id?: string;
+  /** A single id; matches events whose `ai_index_ids` list contains it. */
+  ai_index_ids?: string;
   size?: number;
 }
 
@@ -66,7 +67,8 @@ export interface SearchSessionMemoryBody {
   session_id?: string;
   user_id?: string;
   space?: string;
-  ai_index_id?: string;
+  /** A single id; matches memories whose `ai_index_ids` list contains it. */
+  ai_index_ids?: string;
   size?: number;
 }
 
@@ -86,7 +88,7 @@ export interface SaveSessionEventBody {
   user_id: string;
   round_id?: string;
   space?: string;
-  ai_index_id?: string[];
+  ai_index_ids?: string[];
   transcript: string;
 }
 
