@@ -10,7 +10,7 @@ import {
   MAX_AUTOMATION_INSTRUCTIONS_LENGTH,
   parsePresetSchedule,
 } from '@kbn/nightshift-investigations-plugin/common';
-import { MAX_DAILY_LIMIT } from '../../utils/daily_usage';
+import { MAX_DAILY_LIMIT, UNLIMITED_DAILY_LIMIT } from '../../utils/daily_usage';
 import {
   isSlackTrigger,
   toPresetSchedule,
@@ -49,6 +49,7 @@ export const validationLabels = {
 };
 
 export const isValidDailyLimit = (value: string): boolean => {
+  if (value === UNLIMITED_DAILY_LIMIT) return true;
   const limit = Number(value);
   return value.trim() !== '' && Number.isInteger(limit) && limit >= 1 && limit <= MAX_DAILY_LIMIT;
 };
