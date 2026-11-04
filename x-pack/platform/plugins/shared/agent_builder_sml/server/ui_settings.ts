@@ -24,7 +24,7 @@ export const registerUISettings = ({
         defaultMessage: 'Enables the Context Engine.',
       }),
       schema: schema.boolean(),
-      value: false,
+      value: true,
       experimental: true,
       requiresPageReload: false,
       readonly: false,
