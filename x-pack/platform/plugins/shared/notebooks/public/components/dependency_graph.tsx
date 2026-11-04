@@ -249,8 +249,6 @@ export const DependencyGraph = ({ onSelectCell }: { onSelectCell: (cellId: strin
     <div
       css={css`
         height: 100%;
-        border: ${euiTheme.border.thin};
-        border-radius: ${euiTheme.border.radius.medium};
         overflow: hidden;
       `}
       data-test-subj="notebookGraph"
