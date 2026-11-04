@@ -14,11 +14,23 @@ import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-type
 import type { InternalThemeServiceStart } from '@kbn/core-theme-browser-internal-types';
 
 import { BehaviorSubject } from 'rxjs';
-import { type DeveloperToolbarItemProps } from '@kbn/developer-toolbar';
-import { FeatureFlagsHelperBadge } from './feature_flags_helper_badge';
+import {
+  type DeveloperToolbarItemProps,
+  isDeveloperToolbarItemEnabled,
+  subscribeToDeveloperToolbarState,
+} from '@kbn/developer-toolbar';
 
 declare global {
   var featureFlagsHelperInToolbar: boolean | undefined;
+}
+
+const FEATURE_FLAGS_HELPER_ITEM_ID = 'Feature flags helper';
+/** Tells an already mounted helper that the toolbar setting changed. */
+const FEATURE_FLAGS_HELPER_TOOLBAR_CHANGE = 'feature-flags-helper-toolbar-change';
+
+function publishFeatureFlagsHelperInToolbar(inToolbar: boolean) {
+  globalThis.featureFlagsHelperInToolbar = inToolbar;
+  window.dispatchEvent(new Event(FEATURE_FLAGS_HELPER_TOOLBAR_CHANGE));
 }
 
 export type UnregisterItemFn = () => void;
@@ -53,10 +65,17 @@ const LazyDesignToolsButton = lazy(() =>
   }))
 );
 
+const LazyFeatureFlagsHelperBadge = lazy(() =>
+  import('./feature_flags_helper_badge').then(({ FeatureFlagsHelperBadge }) => ({
+    default: FeatureFlagsHelperBadge,
+  }))
+);
+
 export class DeveloperToolbarPlugin
   implements Plugin<DeveloperToolbarSetup, DeveloperToolbarStart>
 {
   private items$ = new BehaviorSubject<DeveloperToolbarItemProps[]>([]);
+  private unsubscribeToolbarState?: () => void;
 
   constructor(private readonly context: PluginInitializerContext) {}
 
@@ -67,7 +86,14 @@ export class DeveloperToolbarPlugin
   }
 
   public start(core: CoreStart): DeveloperToolbarStart {
-    globalThis.featureFlagsHelperInToolbar = true;
+    const syncFeatureFlagsHelperButton = () => {
+      publishFeatureFlagsHelperInToolbar(
+        isDeveloperToolbarItemEnabled(FEATURE_FLAGS_HELPER_ITEM_ID)
+      );
+    };
+    syncFeatureFlagsHelperButton();
+    this.unsubscribeToolbarState = subscribeToDeveloperToolbarState(syncFeatureFlagsHelperButton);
+
     const LazyToolbar = React.lazy(() => import('./toolbar'));
     (core.chrome as InternalChromeStart).setGlobalFooter(
       <Suspense>
@@ -85,8 +111,12 @@ export class DeveloperToolbarPlugin
     });
 
     this.registerItem({
-      id: 'Feature flags helper',
-      children: <FeatureFlagsHelperBadge />,
+      id: FEATURE_FLAGS_HELPER_ITEM_ID,
+      children: (
+        <Suspense fallback={null}>
+          <LazyFeatureFlagsHelperBadge />
+        </Suspense>
+      ),
     });
 
     this.registerItem({
@@ -122,7 +152,9 @@ export class DeveloperToolbarPlugin
   }
 
   public stop() {
-    globalThis.featureFlagsHelperInToolbar = false;
+    this.unsubscribeToolbarState?.();
+    this.unsubscribeToolbarState = undefined;
+    publishFeatureFlagsHelperInToolbar(false);
   }
 
   private registerItem = (item: DeveloperToolbarItemProps) => {
