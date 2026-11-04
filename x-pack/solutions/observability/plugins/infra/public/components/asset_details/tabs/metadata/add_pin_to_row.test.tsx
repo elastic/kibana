@@ -24,7 +24,7 @@ const renderPin = (pinnedItems: string[]) =>
 describe('AddMetadataPinToRow', () => {
   it.each([
     { pinnedItems: [], name: 'Pin host.name', tooltip: 'Pin field' },
-    { pinnedItems: ['host.name'], name: 'Pinned host.name', tooltip: 'Unpin field' },
+    { pinnedItems: ['host.name'], name: 'Unpin host.name', tooltip: 'Unpin field' },
   ])(
     'does not describe the "$name" button with its visible tooltip for screen readers',
     async ({ pinnedItems, name, tooltip }) => {

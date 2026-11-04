@@ -58,8 +58,8 @@ export const AddMetadataPinToRow = ({
       });
 
   const ariaLabel = isPinned
-    ? i18n.translate('xpack.infra.metadata.pinnedAriaLabel', {
-        defaultMessage: 'Pinned {fieldName}',
+    ? i18n.translate('xpack.infra.metadataEmbeddable.unpinField.ariaLabel', {
+        defaultMessage: 'Unpin {fieldName}',
         values: { fieldName },
       })
     : i18n.translate('xpack.infra.metadataEmbeddable.pinField.ariaLabel', {
