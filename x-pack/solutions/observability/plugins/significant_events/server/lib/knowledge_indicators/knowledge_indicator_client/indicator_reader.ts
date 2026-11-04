@@ -33,9 +33,11 @@ import {
 } from '../fields';
 import { fromStoredFeature, fromStoredQuery } from './serializers';
 import { StatusError } from '../../errors/status_error';
-import type { RevisionReader } from './revision_reader';
+import type { LatestRevisionCursor, RevisionReader } from './revision_reader';
 import type { LatestSourceWhereCondition } from '../../significant_events/latest_source_query';
 import type { RuleUnbackedFilter } from './types';
+
+export type TopologyFeaturePageCursor = LatestRevisionCursor;
 
 function ruleUnbackedPostGroupingWhere(
   filter: RuleUnbackedFilter | undefined
@@ -62,6 +64,26 @@ export class IndicatorReader {
 
   countKnowledgeIndicators(type: KnowledgeIndicatorType): Promise<number> {
     return this.revisionReader.countLatestRevisions(inPredicate(TYPE, [type]), IS_NOT_DELETED);
+  }
+
+  /** Distinct live entity slugs, matching the entities `getFeatures` returns but without its limit. */
+  countEntities(sourceIds: string[]): Promise<number> {
+    if (sourceIds.length === 0) {
+      return Promise.resolve(0);
+    }
+
+    const where = combineWhere(
+      inPredicate(TYPE, [KI_TYPE_FEATURE]),
+      inPredicate(SOURCE_ID, sourceIds)
+    );
+    const postGroupingWhere = combineWhere(
+      IS_NOT_DELETED,
+      IS_NOT_EXCLUDED,
+      IS_NOT_EXPIRED,
+      inPredicate(FEATURE_TYPE, ['entity'])
+    );
+
+    return this.revisionReader.countLatestRevisions(where, postGroupingWhere, FEATURE_SLUG);
   }
 
   countFeatures(sourceIds: string[]): Promise<number> {
@@ -172,6 +194,47 @@ export class IndicatorReader {
     );
     const hits = docs.filter(isStoredFeatureKnowledgeIndicator).map(fromStoredFeature);
     return { hits };
+  }
+
+  async getTopologyFeaturesPage({
+    sourceIds,
+    featureTypes,
+    asOf,
+    after,
+    size,
+  }: {
+    sourceIds: string[];
+    featureTypes: string[];
+    asOf: string;
+    after?: TopologyFeaturePageCursor;
+    size: number;
+  }): Promise<{ hits: Feature[]; nextCursor?: TopologyFeaturePageCursor }> {
+    if (sourceIds.length === 0) {
+      return { hits: [] };
+    }
+
+    const where = combineWhere(
+      inPredicate(TYPE, [KI_TYPE_FEATURE]),
+      inPredicate(SOURCE_ID, sourceIds)
+    );
+    const postGroupingWhere = combineWhere(
+      IS_NOT_DELETED,
+      IS_NOT_EXCLUDED,
+      esql.exp`expires_at IS NULL OR expires_at >= TO_DATETIME(${esql.str(asOf)})`,
+      inPredicate(FEATURE_TYPE, featureTypes)
+    );
+    const { hits, nextCursor } = await this.revisionReader.fetchLatestRevisionsPage({
+      where,
+      postGroupingWhere,
+      asOf,
+      after,
+      size,
+    });
+
+    return {
+      hits: hits.filter(isStoredFeatureKnowledgeIndicator).map(fromStoredFeature),
+      ...(nextCursor ? { nextCursor } : {}),
+    };
   }
 
   async getExcludedFeatures(sourceId: string): Promise<{ hits: Feature[] }> {

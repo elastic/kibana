@@ -1,5 +1,5 @@
 {
-  "sha1": "26d935069783262b3831c65879d8bc996d1f4add",
+  "sha1": "1ae13e25c4621e788116ec36b5286b94d01c1173",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -483,6 +483,22 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
         "line": 107,
         "column": 7
+      }
+    },
+    {
+      "id": "e62204cec70f012-c52ccdcded22ef6",
+      "title": "Watchlist edit flyout with an authorized index source opens the edit flyout for the index source without the missing API key warning",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/watchlist_index_source_api_key.spec.ts",
+        "line": 63,
+        "column": 9
       }
     }
   ]

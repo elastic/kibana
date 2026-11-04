@@ -100,8 +100,6 @@ dependsOn:
   - '@kbn/flyout-template'
   - '@kbn/charts-plugin'
   - '@kbn/unified-data-table'
-  - '@kbn/unified-histogram'
-  - '@kbn/data-source'
   - '@kbn/cell-actions'
   - '@kbn/discover-utils'
   - '@kbn/shared-ux-page-kibana-template'
@@ -109,6 +107,7 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/usage-collection-plugin'
   - '@kbn/share-plugin'
+  - '@kbn/router-utils'
   - '@kbn/deeplinks-analytics'
   - '@kbn/deeplinks-agent-builder'
   - '@kbn/deeplinks-observability'
@@ -140,6 +139,7 @@ dependsOn:
   - '@kbn/core-application-browser-mocks'
   - '@kbn/alerts-ui-shared'
   - '@kbn/es-types'
+  - '@kbn/resizable-layout'
   - '@kbn/app-header'
   - '@kbn/flyout-template'
   - '@kbn/flyout-sections'
@@ -163,8 +163,6 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/test'
   - '@kbn/cloud-plugin'
-  - '@kbn/core-overlays-browser-mocks'
-  - '@kbn/core-rendering-browser-mocks'
   - '@kbn/announcement-banner'
   - '@kbn/ftr-llm-proxy'
 tags:
@@ -173,6 +171,8 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - .storybook/**/*

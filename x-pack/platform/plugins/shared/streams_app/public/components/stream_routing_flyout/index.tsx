@@ -16,12 +16,22 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useCanvasEvents } from '../stream_management/data_management/stream_detail_canvas/state_management';
 import { RoutingErrorPrompt } from './error_prompt';
 
-export function RoutingFlyout({ edge }: { edge: string }) {
+interface RoutingFlyoutProps {
+  edge: string;
+  /**
+   * Testing aid: routes the line through a routing node with one placeholder
+   * rule. Unset when the line cannot be routed.
+   */
+  onCreateTestRouting?: () => void;
+}
+
+export function RoutingFlyout({ edge, onCreateTestRouting }: RoutingFlyoutProps) {
   const { closeRoutingFlyout } = useCanvasEvents();
   const headerId = useGeneratedHtmlId();
 
@@ -65,6 +75,32 @@ export function RoutingFlyout({ edge }: { edge: string }) {
         <EuiSpacer size="s" />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        <KbnInfoCallout
+          size="s"
+          title={i18n.translate('xpack.streams.routingFlyout.testRoutingTitle', {
+            defaultMessage: 'Testing only',
+          })}
+          data-test-subj="streamsRoutingFlyoutTestRouting"
+          actionProps={{
+            primary: {
+              onClick: onCreateTestRouting,
+              isDisabled: !onCreateTestRouting,
+              'data-test-subj': 'streamsRoutingFlyoutCreateTestRoutingButton',
+              children: i18n.translate('xpack.streams.routingFlyout.createTestRoutingButtonLabel', {
+                defaultMessage: 'Create test routing node',
+              }),
+            },
+          }}
+          text={
+            <p>
+              {i18n.translate('xpack.streams.routingFlyout.testRoutingDescription', {
+                defaultMessage:
+                  'Route this line through a routing node with a single placeholder rule that matches all data.',
+              })}
+            </p>
+          }
+        />
+        <EuiSpacer size="m" />
         <RoutingErrorPrompt edge={edge} onClose={closeRoutingFlyout} />
       </EuiFlyoutBody>
     </EuiFlyout>

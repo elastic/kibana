@@ -7,9 +7,11 @@
 
 import type { QueryArgs, Row } from '../common';
 import type { EntityAggregation } from './esql';
+import { joinAnd } from './esql';
 import {
   applyResolvedEntityFilterOverrides,
   fetchResolvedEntityFilterOverrides,
+  fetchResolvedEntityOverrides,
   getMergedRowsByEntity,
   isFilteringByGroupValue,
   withEntityAliases,
@@ -190,6 +192,37 @@ describe('fetchResolvedEntityFilterOverrides', () => {
   });
 });
 
+describe('fetchResolvedEntityOverrides', () => {
+  const CONDITIONS = {
+    own: 'asset.criticality == "low_impact"',
+    group: 'asset.criticality == "low_impact"',
+  };
+
+  it('reads the own condition before the group values come in, and the group condition after', async () => {
+    const { runQuery, queries } = recordQueries();
+    await fetchResolvedEntityOverrides({ ...ARGS, ...CONDITIONS }, runQuery);
+
+    const [query] = queries;
+    const own = query.indexOf(`own_matches = COALESCE(${CONDITIONS.own}, false)`);
+    const group = query.indexOf(`resolved_entity_matches = COALESCE(${CONDITIONS.group}, false)`);
+    expect(own).toBeGreaterThan(query.indexOf('LOOKUP JOIN'));
+    expect(own).toBeLessThan(query.indexOf('EVAL own_rank'));
+    expect(group).toBeGreaterThan(query.indexOf('EVAL own_rank'));
+  });
+
+  it('splits the resolved entities into those the search adds and those it removes', async () => {
+    const runQuery = jest.fn(async () => [
+      row('host:a', { resolved_entity_matches: true }),
+      row('host:b', { resolved_entity_matches: false }),
+    ]);
+
+    expect(await fetchResolvedEntityOverrides({ ...ARGS, ...CONDITIONS }, runQuery)).toEqual({
+      include: ['host:a'],
+      exclude: ['host:b'],
+    });
+  });
+});
+
 describe('applyResolvedEntityFilterOverrides', () => {
   it('is the filters themselves without overrides', () => {
     expect(applyResolvedEntityFilterOverrides(CRITICALITY_FILTER)).toBe(CRITICALITY_FILTER);
@@ -207,7 +240,17 @@ describe('applyResolvedEntityFilterOverrides', () => {
   it('adds the resolved entities that pass, though their main entity does not', () => {
     expect(
       applyResolvedEntityFilterOverrides(CRITICALITY_FILTER, { include: ['host:b'], exclude: [] })
-    ).toBe(`(${CRITICALITY_FILTER}) OR entity.id IN ("host:b")`);
+    ).toBe(`((${CRITICALITY_FILTER}) OR entity.id IN ("host:b"))`);
+  });
+
+  it('keeps its meaning when it is joined with AND', () => {
+    const patched = applyResolvedEntityFilterOverrides(CRITICALITY_FILTER, {
+      include: ['host:b'],
+    });
+
+    expect(joinAnd(patched, 'group == "x"')).toBe(
+      `((${CRITICALITY_FILTER}) OR entity.id IN ("host:b")) AND group == "x"`
+    );
   });
 
   it('removes and adds resolved entities', () => {
@@ -216,7 +259,9 @@ describe('applyResolvedEntityFilterOverrides', () => {
         include: ['host:b'],
         exclude: ['host:a'],
       })
-    ).toBe(`((${CRITICALITY_FILTER}) AND NOT entity.id IN ("host:a")) OR entity.id IN ("host:b")`);
+    ).toBe(
+      `(((${CRITICALITY_FILTER}) AND NOT entity.id IN ("host:a")) OR entity.id IN ("host:b"))`
+    );
   });
 });
 

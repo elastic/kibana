@@ -29,15 +29,15 @@ export interface ExtractedIoc {
   tier_basis: string;
   port?: number;
   /**
-   * URL/domain kept at a heuristic promotable tier because semantic review did
-   * not run (batch budget / overflow). Promote must skip these; they are not a
-   * model rejection.
+   * URL/domain/hash kept at a heuristic promotable tier because semantic review
+   * did not run (batch budget / overflow). Promote must skip these; they are not
+   * a model rejection.
    */
   deferred_unreviewed?: boolean;
   /**
-   * Source-text window around the best occurrence of this value (url/domain
-   * only), for semantic adjudication to judge without re-finding the value in
-   * the article. Prompt-only: stripped before the result reaches persistence.
+   * Source-text window around the best occurrence of this value (url/domain/hash),
+   * for semantic adjudication to judge without re-finding the value in the
+   * article. Prompt-only: stripped before the result reaches persistence.
    */
   context?: string;
 }
@@ -1005,11 +1005,11 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
     }
   };
 
-  // Only url/domain candidates ever reach semantic adjudication (isSemanticCandidate
-  // in adjudicate_iocs.ts), so only those need a context window tracked across
-  // duplicate occurrences.
+  // Only url/domain/hash candidates ever reach semantic adjudication
+  // (isSemanticCandidate in adjudicate_iocs.ts), so only those need a context
+  // window tracked across duplicate occurrences.
   const isContextCandidate = (ioc: WorkingIoc): boolean =>
-    ioc.type === 'url' || ioc.type === 'domain';
+    ioc.type === 'url' || ioc.type === 'domain' || ioc.type === 'hash';
 
   const pushIoc = (ioc: WorkingIoc): WorkingIoc | undefined => {
     // An over-long value is not a usable indicator and it is actively harmful.
@@ -1419,7 +1419,7 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
   const cleanedIocs: ExtractedIoc[] = iocs.map(
     ({ _offset, _sectionKind, _hasAttributionCue, ...rest }) => ({
       ...rest,
-      ...(rest.type === 'url' || rest.type === 'domain'
+      ...(rest.type === 'url' || rest.type === 'domain' || rest.type === 'hash'
         ? _offset !== undefined
           ? {
               context: windowAround(refangedText, _offset, rest.value.length, CONTEXT_WINDOW_CHARS),

@@ -135,6 +135,82 @@ describe('dispatchToolCall', () => {
     expect(result.yaml).toContain('name: b');
   });
 
+  it('replaces a top-level property on modify_workflow_property and keeps comments', async () => {
+    const yaml = `# owner: soc\nname: demo\ntriggers:\n  - type: scheduled\n    with:\n      every: 5m\nsteps:\n  # say hi\n  - name: a\n    type: console\n    with:\n      message: hi\n`;
+    const result = await dispatchToolCall(
+      { yaml },
+      {
+        toolCallId: 't1',
+        toolName: 'modify_workflow_property',
+        args: {
+          property: 'triggers',
+          value: [
+            { type: 'scheduled', with: { every: '1h' } },
+            {
+              type: 'manual',
+              inputs: { properties: { host: { type: 'string' } }, required: ['host'] },
+            },
+          ],
+        },
+      },
+      baseDeps
+    );
+
+    expect(result.message.success).toBe(true);
+    expect(result.yaml).toContain('every: 1h');
+    expect(result.yaml).not.toContain('every: 5m');
+    expect(result.yaml).toContain('type: manual');
+    expect(result.yaml).toContain('# owner: soc');
+    expect(result.yaml).toContain('# say hi');
+    expect(result.yaml).toContain('message: hi');
+  });
+
+  it('sets a nested path on modify_workflow_property', async () => {
+    const result = await dispatchToolCall(
+      { yaml: twoStepYaml },
+      {
+        toolCallId: 't1',
+        toolName: 'modify_workflow_property',
+        args: { property: 'consts.url', value: 'https://example.com' },
+      },
+      baseDeps
+    );
+
+    expect(result.message.success).toBe(true);
+    expect(result.yaml).toContain('url: https://example.com');
+  });
+
+  it('rejects modify_workflow_property on an unknown top-level key', async () => {
+    const result = await dispatchToolCall(
+      { yaml: twoStepYaml },
+      {
+        toolCallId: 't1',
+        toolName: 'modify_workflow_property',
+        args: { property: 'trigger.0.with.every', value: '1h' },
+      },
+      baseDeps
+    );
+
+    expect(result.message.success).toBe(false);
+    expect(result.message.error).toContain('"trigger" is not a top-level workflow key');
+    expect(result.yaml).toBeUndefined();
+  });
+
+  it('rejects modify_workflow_property on steps', async () => {
+    const result = await dispatchToolCall(
+      { yaml: twoStepYaml },
+      {
+        toolCallId: 't1',
+        toolName: 'modify_workflow_property',
+        args: { property: 'steps', value: [] },
+      },
+      baseDeps
+    );
+
+    expect(result.message.success).toBe(false);
+    expect(result.yaml).toBeUndefined();
+  });
+
   it('removes a step by name on delete_step', async () => {
     const result = await dispatchToolCall(
       { yaml: twoStepYaml },

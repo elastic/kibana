@@ -61,6 +61,86 @@ describe('BaseActions copy link', () => {
   });
 });
 
+describe('BaseActions recommended action', () => {
+  it('does not offer the recommended action in the menu', () => {
+    renderWithKibanaRenderContext(
+      <BaseActions
+        investigation={{
+          ...investigation,
+          recommendedAction: 'respond',
+          primaryActionLabel: 'Revoke sessions',
+        }}
+        onClickAction={jest.fn()}
+        onCopyLink={jest.fn()}
+        data-test-subj="actions"
+      />
+    );
+
+    openMenu();
+
+    expect(screen.queryByText('Revoke sessions')).not.toBeInTheDocument();
+    expect(screen.getByText('Copy link')).toBeInTheDocument();
+  });
+});
+
+describe('BaseActions open and close', () => {
+  const renderMenu = (props: Partial<React.ComponentProps<typeof BaseActions>> = {}) => {
+    const onClickAction = jest.fn();
+    renderWithKibanaRenderContext(
+      <BaseActions
+        investigation={investigation}
+        canCloseInvestigation
+        onClickAction={onClickAction}
+        onCopyLink={jest.fn()}
+        data-test-subj="actions"
+        {...props}
+      />
+    );
+    openMenu();
+    return onClickAction;
+  };
+
+  it('offers Close, not Open, on an open investigation', () => {
+    renderMenu({ investigation: { ...investigation, conversationStatus: 'open' } });
+
+    expect(screen.getByText('Close investigation')).toBeInTheDocument();
+    expect(screen.queryByText('Open investigation')).not.toBeInTheDocument();
+  });
+
+  it('offers Open, not Close, on a closed investigation, and reports the reopen', () => {
+    const onClickAction = renderMenu({
+      investigation: { ...investigation, conversationStatus: 'closed' },
+    });
+
+    expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText('Open investigation'));
+
+    expect(onClickAction).toHaveBeenCalledWith('reopen', investigation.recordId);
+  });
+
+  it('offers Open on a closed investigation whose action is decided', () => {
+    renderMenu({
+      investigation: {
+        ...investigation,
+        conversationStatus: 'closed',
+        recommendedAction: 'closed',
+      },
+    });
+
+    expect(screen.getByText('Open investigation')).toBeInTheDocument();
+  });
+
+  it('offers neither without the capability', () => {
+    renderMenu({
+      canCloseInvestigation: false,
+      investigation: { ...investigation, conversationStatus: 'closed' },
+    });
+
+    expect(screen.queryByText('Open investigation')).not.toBeInTheDocument();
+    expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
+  });
+});
+
 describe('getCopyLinkFlyoutAction', () => {
   const renderTooltip = (action: ReturnType<typeof getCopyLinkFlyoutAction>) =>
     renderWithKibanaRenderContext(<>{action.toolTipContent}</>);

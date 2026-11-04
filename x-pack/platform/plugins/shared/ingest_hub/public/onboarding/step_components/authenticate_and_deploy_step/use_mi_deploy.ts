@@ -399,8 +399,10 @@ export function useMiDeploy({
               storedServiceVars: serviceSettings?.serviceVars ?? {},
               globalRegion: serviceSettings?.globalRegion ?? '',
               namespace,
+              globalNamespace: serviceSettings?.namespace,
               authenticateAndDeployStep: withSharedRefs(sharedRefs),
               servicesMap: servicesMap ?? new Map(),
+              onboardingDeploymentId,
               ...connectorOverride,
             }),
           getPolicyId: ([policyId]) => policyId,
@@ -533,6 +535,7 @@ export function useMiDeploy({
             storedServiceVars: serviceSettings?.serviceVars ?? {},
             globalRegion: serviceSettings?.globalRegion ?? '',
             namespace,
+            globalNamespace: serviceSettings?.namespace,
             // A dirty update may have just stored new keys for the policies this updates: keep
             // them instead of storing the typed ones again, which would orphan the shared refs.
             authenticateAndDeployStep: withSharedRefs(storedSharedRefs),
@@ -541,6 +544,7 @@ export function useMiDeploy({
             servicesMap: servicesMap ?? new Map(),
             addedInstanceIdsByPolicy: addedByPolicy,
             alreadyUpdatedPolicyIds: updatedPolicyIdsThisRun,
+            onboardingDeploymentId,
             ...connectorOverride,
           });
           storedSharedRefs = cleanupOps.sharedRefs ?? storedSharedRefs;
@@ -637,6 +641,7 @@ export function useMiDeploy({
             storedServiceVars: serviceSettings?.serviceVars ?? {},
             globalRegion: serviceSettings?.globalRegion ?? '',
             namespace,
+            globalNamespace: serviceSettings?.namespace,
             // A dirty update may have just stored new keys for the policies this updates: keep
             // them instead of storing the typed ones again, which would orphan the shared refs.
             authenticateAndDeployStep: withSharedRefs(storedSharedRefs),
@@ -645,6 +650,7 @@ export function useMiDeploy({
             servicesMap: servicesMap ?? new Map(),
             addedInstanceIdsByPolicy: addedByPolicy,
             alreadyUpdatedPolicyIds: updatedPolicyIdsThisRun,
+            onboardingDeploymentId,
             ...connectorOverride,
           });
           storedSharedRefs = cleanupOps.sharedRefs ?? storedSharedRefs;
@@ -753,9 +759,11 @@ export function useMiDeploy({
               instances: serviceSettings?.instances ?? [],
               storedServiceVars,
               globalRegion,
+              globalNamespace: serviceSettings?.namespace,
               namespace,
               authenticateAndDeployStep: withSharedRefs(sharedRefs),
               servicesMap: servicesMap ?? new Map(),
+              onboardingDeploymentId: currentOnboardingDeploymentId,
               ...connectorOverride,
             }),
           getPolicyId: ({ policyId }) => policyId,

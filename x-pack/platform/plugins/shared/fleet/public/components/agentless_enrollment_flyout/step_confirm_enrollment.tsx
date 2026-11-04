@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiPanel, EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
-import { KbnSuccessCallout, KbnDangerCallout } from '@kbn/ui-callout';
+import { KbnSuccessCallout, KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
 import type { Agent, AgentPolicy, PackagePolicy } from '../../types';
 import { useStartServices } from '../../hooks';
-import {
-  AgentlessComponentHealth,
-  getComponentAlertLevel,
-} from '../agentless_status_details_flyout/component_health';
+import { AgentlessComponentHealth } from '../agentless_status_details_flyout/component_health';
 import { AgentDetailsIntegrations } from '../../applications/fleet/sections/agents/agent_details_page/components/agent_details/agent_details_integrations';
+
+import { getAgentlessEnrollmentState, isAgentFailingElsewhere } from './utils';
 
 export const AgentlessStepConfirmEnrollment = ({
   agent,
@@ -33,23 +32,7 @@ export const AgentlessStepConfirmEnrollment = ({
   integrationTitle: string;
 }) => {
   const { docLinks } = useStartServices();
-  const [overallState, setOverallState] = useState<'pending' | 'success' | 'failure'>('pending');
-
-  // Calculate overall UI state from agent status
-  useEffect(() => {
-    const hasFailedComponents =
-      !!agent && !!packagePolicy && getComponentAlertLevel(agent, packagePolicy) === 'failed';
-    if (agent && agent.status === 'online' && !hasFailedComponents) {
-      setOverallState('success');
-    } else if (
-      agent &&
-      (agent.status === 'online' || agent.status === 'error' || agent.status === 'degraded')
-    ) {
-      setOverallState('failure');
-    } else {
-      setOverallState('pending');
-    }
-  }, [agent, packagePolicy]);
+  const overallState = getAgentlessEnrollmentState(agent, packagePolicy);
 
   if (overallState === 'success') {
     return (
@@ -75,6 +58,23 @@ export const AgentlessStepConfirmEnrollment = ({
             />
           </p>
         </EuiText>
+        {isAgentFailingElsewhere(agent, packagePolicy) && (
+          <>
+            <EuiSpacer size="m" />
+            <KbnWarningCallout
+              size="s"
+              data-test-subj="agentlessFailingElsewhere"
+              title={i18n.translate(
+                'xpack.fleet.agentlessEnrollmentFlyout.confirmEnrollment.failingElsewhereText',
+                {
+                  defaultMessage:
+                    'The agent reports problems outside this integration. This integration is running.',
+                }
+              )}
+              text={agent?.last_checkin_message}
+            />
+          </>
+        )}
         {agent && packagePolicy && (
           <>
             <EuiSpacer size="m" />

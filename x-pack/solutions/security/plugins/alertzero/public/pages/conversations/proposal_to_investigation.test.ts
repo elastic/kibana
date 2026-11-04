@@ -191,6 +191,24 @@ describe('proposalToInvestigation', () => {
         proposalToInvestigation({ ...baseProposal, status: 'succeeded' }).status
       ).toBeUndefined();
     });
+
+    it.each(['open', 'closed'] as const)(
+      'carries the investigation status %s as conversationStatus, never as status',
+      (conversationStatus) => {
+        const result = proposalToInvestigation({
+          ...baseProposal,
+          status: 'succeeded',
+          conversationStatus,
+        });
+
+        expect(result.conversationStatus).toBe(conversationStatus);
+        expect(result.status).toBeUndefined();
+      }
+    );
+
+    it('leaves conversationStatus unset when the investigation status is unknown', () => {
+      expect(proposalToInvestigation(baseProposal).conversationStatus).toBeUndefined();
+    });
   });
 
   describe('severity collapse', () => {

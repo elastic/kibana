@@ -106,6 +106,7 @@ export const InvestigationOverview: React.FC<
       proposedActionsContent={proposedActionsContent}
       proposedActionsCount={proposedActionsCount}
       sections={sections}
+      isRunning={data?.in_progress ?? false}
     />
   );
 };

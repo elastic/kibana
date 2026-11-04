@@ -25,3 +25,12 @@ export const CUSTOM_CONTENT_DEFAULT_HEIGHT = 320;
 /** Matches the renderer's iframe-container floor; below it the host container overflows. */
 export const CUSTOM_CONTENT_MIN_HEIGHT = 200;
 export const CUSTOM_CONTENT_MAX_HEIGHT = 1200;
+
+export const CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID = 'custom_content_update_panel';
+
+/**
+ * Id of the dashboard generation tool, which custom content flows name or match on. Inlined rather
+ * than imported from the `agent_builder_dashboards` plugin to avoid a plugin dependency for a
+ * string; keep in sync with `dashboardTools.generateDashboard` there.
+ */
+export const CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID = 'platform.dashboard.generate_dashboard';
