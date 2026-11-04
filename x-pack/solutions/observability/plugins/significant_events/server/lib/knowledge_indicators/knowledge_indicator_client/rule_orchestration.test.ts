@@ -58,6 +58,7 @@ const makeRulesClient = (): jest.Mocked<IRulesManagementClient> => ({
   bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
   setRulesEnabled: jest.fn().mockResolvedValue(undefined),
   findExistingRuleIds: jest.fn().mockResolvedValue([]),
+  findRuleEnabledStates: jest.fn().mockResolvedValue(new Map()),
   findOwnedRuleIds: jest.fn().mockResolvedValue([]),
   findSourceIdsWithOwnedRules: jest.fn().mockResolvedValue([]),
   findRuleIdsByTagPrefix: jest.fn().mockResolvedValue([]),

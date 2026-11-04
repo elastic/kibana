@@ -170,9 +170,14 @@ describe('AlertingDateRangePicker', () => {
     expect(lastPickerProps?.settings.autoRefresh).toBeUndefined();
   });
 
-  it('forwards time zone, date format, and advanced settings access from uiSettings/http/application', () => {
-    (core.uiSettings.get as jest.Mock).mockImplementation((key: string) =>
-      key === 'dateFormat:tz' ? 'America/New_York' : 'MMM D, YYYY @ HH:mm:ss.SSS'
+  it('forwards time zone, week start day, date format, and advanced settings access from uiSettings/http/application', () => {
+    const uiSettingsValues = {
+      'dateFormat:tz': 'America/New_York',
+      'dateFormat:dow': 'Wednesday',
+      dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
+    };
+    (core.uiSettings.get as jest.Mock).mockImplementation(
+      (key: keyof typeof uiSettingsValues) => uiSettingsValues[key]
     );
     core.application.capabilities = {
       ...core.application.capabilities,
@@ -189,6 +194,7 @@ describe('AlertingDateRangePicker', () => {
     );
 
     expect(lastPickerProps?.timeZone).toBe('America/New_York');
+    expect(lastPickerProps?.calendarOptions).toEqual({ firstDayOfWeek: 3 });
     expect(lastPickerProps?.inputDateFormats).toEqual(['MMM D, YYYY @ HH:mm:ss.SSS']);
     expect(lastPickerProps?.canAccessAdvancedSettings).toBe(true);
     expect(lastPickerProps?.prependBasePath).toBe(core.http.basePath.prepend);

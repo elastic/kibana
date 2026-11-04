@@ -80,6 +80,8 @@ export interface IntegrationCardItem {
   installStatus?: EpmPackageInstallStatus;
   integration: string;
   isCollectionCard?: boolean;
+  // Number of services a collection tile bundles behind it (e.g. AWS onboarding), shown as a badge.
+  collectionSize?: number;
   groupMembers?: IntegrationCardItem[];
   searchableContent?: string;
   // Services bundled behind a single tile (e.g. AWS onboarding). Used to tell the user which

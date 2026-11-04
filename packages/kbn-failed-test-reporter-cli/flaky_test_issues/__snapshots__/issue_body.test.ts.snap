@@ -11,8 +11,8 @@ exports[`refreshing a suite issue comments with the report's numbers for the sui
 
 1 distinct error:
 
-<details>
-<summary><b>100% of failures</b> (61 in 49 builds) · <code>Error: Timed out 30000ms waiting for expect(locator).toBeVisible()</code> · 2–9 Sep 2026</summary>
+<details open>
+<summary><b>100% of failed builds</b> (49 of 49) · <code>Error: Timed out 30000ms waiting for expect(locator).toBeVisible()</code> · 2–9 Sep 2026</summary>
 
 \`\`\`text
 Error: Timed out 30000ms waiting for expect(locator).toBeVisible()
@@ -20,18 +20,18 @@ Error: Timed out 30000ms waiting for expect(locator).toBeVisible()
 
 | Field | Value |
 |---|---|
-| **Pipelines** | \`kibana-on-merge\` (49), \`kibana-pull-request\` (12) |
+| **Pipelines** | \`kibana-on-merge\` (40), \`kibana-pull-request\` (9) |
 | **Branches** | \`main\`, 1 PR |
 | **Target** | \`stateful-classic\` |
 | **Last seen** | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
 
 </details>
 
-#### Failures by Branch
+#### Status by Branch
 
-| Branch | Failed builds | Sample failure |
-|---|---|---|
-| 🔴 \`main\` | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
+| Branch | Status | Failed builds | Sample failure |
+|---|---|---|---|
+| \`main\` | 🔴 Flaky | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
 
 #### Failures by Target
 
@@ -81,8 +81,8 @@ Latest run on \`main\` was skipped (2026-09-09).
 
 2 distinct errors:
 
-<details>
-<summary><b>96% of failures</b> (23 across 2 tests) · <code>Error: expect(locator).toBeVisible() failed</code> · 1–9 Sep 2026</summary>
+<details open>
+<summary><b>100% of failed builds</b> (21 of 21) · <code>Error: expect(locator).toBeVisible() failed</code> · 1–9 Sep 2026</summary>
 
 \`\`\`text
 Error: expect(locator).toBeVisible() failed
@@ -95,7 +95,7 @@ from b
 | Field | Value |
 |---|---|
 | **Tests** | *does not keep a hidden histogram after visiting Dashboard*, *reverts breakdown, interval, and visibility on a saved session* |
-| **Pipelines** | \`kibana-on-merge\` (15), \`kibana-pull-request\` (8) |
+| **Pipelines** | \`kibana-on-merge\` (13), \`kibana-pull-request\` (8) |
 | **Branches** | \`main\`, \`9.2\`, 2 PRs |
 | **Targets** | \`serverless-security_complete\`, \`stateful-classic\` |
 | **Last seen** | [#12350](https://buildkite.com/elastic/kibana-on-merge/builds/12350#0199-b000) · 2026-09-09 12:00 UTC |
@@ -103,7 +103,7 @@ from b
 </details>
 
 <details>
-<summary><b>4% of failures</b> (1 in 1 build) · <code>TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.</code> · 7 Sep 2026</summary>
+<summary><b>5% of failed builds</b> (1 of 21) · <code>TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.</code> · 7 Sep 2026</summary>
 
 \`\`\`text
 TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
@@ -120,13 +120,13 @@ TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
 
 *Errors that only appeared in PR builds were excluded.*
 
-#### Failures by Branch
+#### Status by Branch
 
-| Branch | Failed builds | Sample failure |
-|---|---|---|
-| 🔴 \`main\` | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
-| 🔴 \`9.2\` | 3 / 64 (**5%**) | [#12290](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200) · 2026-09-07 11:40 UTC |
-| ✅ \`9.1\` | 0 / 58 |  |
+| Branch | Status | Failed builds | Sample failure |
+|---|---|---|---|
+| \`main\` | 🔴 Flaky | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
+| \`9.2\` | 🔴 Flaky | 3 / 64 (**5%**) | [#12290](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200) · 2026-09-07 11:40 UTC |
+| \`9.1\` | ✅ No failures | 0 / 58 |  |
 
 #### Failures by Target
 
@@ -164,8 +164,8 @@ exports[`renderFlakySuiteIssueBody renders a single-test suite 1`] = `
 
 1 distinct error:
 
-<details>
-<summary><b>100% of failures</b> (61 in 49 builds) · <code>Error: Timed out 30000ms waiting for expect(locator).toBeVisible()</code> · 2–9 Sep 2026</summary>
+<details open>
+<summary><b>100% of failed builds</b> (49 of 49) · <code>Error: Timed out 30000ms waiting for expect(locator).toBeVisible()</code> · 2–9 Sep 2026</summary>
 
 \`\`\`text
 Error: Timed out 30000ms waiting for expect(locator).toBeVisible()
@@ -173,18 +173,18 @@ Error: Timed out 30000ms waiting for expect(locator).toBeVisible()
 
 | Field | Value |
 |---|---|
-| **Pipelines** | \`kibana-on-merge\` (49), \`kibana-pull-request\` (12) |
+| **Pipelines** | \`kibana-on-merge\` (40), \`kibana-pull-request\` (9) |
 | **Branches** | \`main\`, 1 PR |
 | **Target** | \`stateful-classic\` |
 | **Last seen** | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
 
 </details>
 
-#### Failures by Branch
+#### Status by Branch
 
-| Branch | Failed builds | Sample failure |
-|---|---|---|
-| 🔴 \`main\` | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
+| Branch | Status | Failed builds | Sample failure |
+|---|---|---|---|
+| \`main\` | 🔴 Flaky | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
 
 #### Failures by Target
 

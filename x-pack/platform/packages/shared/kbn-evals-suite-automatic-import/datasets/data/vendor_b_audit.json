@@ -1,0 +1,624 @@
+{
+  "id": "vendor_b_audit",
+  "title": "Vendor B audit",
+  "description": "Atlassian Cloud organization audit log events from the Admin API, in JSON:API format. The action is in attributes.action and the user who performed it is in attributes.actor.",
+  "cohort": "recent",
+  "format": "json",
+  "samples": [
+    {
+      "line": "{\"type\":\"events\",\"id\":\"a1000005-0000-4000-8000-000000000005\",\"attributes\":{\"time\":\"2026-05-19T10:10:00.000Z\",\"processedAt\":\"2026-05-19T10:10:01.000Z\",\"action\":\"api_token_created\",\"actor\":{\"id\":\"712020:ffffffff-ffff-ffff-ffff-ffffffffffff\",\"name\":\"Frank Nguyen\",\"email\":\"frank.nguyen@example.com\",\"auth\":{\"authType\":\"session\",\"tokenId\":\"token-00000001\",\"tokenLabel\":\"Example API Token\"}},\"location\":{\"ip\":\"198.51.100.30\",\"geo\":\"EU\",\"countryName\":\"Example Country\",\"city\":\"Example City\"}},\"message\":{\"content\":\"Frank Nguyen created an API token\",\"format\":\"simple\"}}",
+      "expected": {
+        "@timestamp": "2026-05-19T10:10:00.000Z",
+        "ecs": {
+          "version": "9.3.0"
+        },
+        "message": "Frank Nguyen created an API token",
+        "observer": {
+          "product": "Atlassian Cloud",
+          "type": "saas",
+          "vendor": "Atlassian"
+        },
+        "related": {
+          "ip": [
+            "198.51.100.30"
+          ],
+          "user": [
+            "Frank Nguyen",
+            "frank.nguyen@example.com"
+          ]
+        },
+        "source": {
+          "as": {
+            "number": 64501,
+            "organization": {
+              "name": "Documentation ASN"
+            }
+          },
+          "geo": {
+            "city_name": "Example City",
+            "country_name": "Example Country"
+          },
+          "ip": "198.51.100.30"
+        },
+        "tags": [
+          "forwarded",
+          "atlassian_cloud-audit",
+          "preserve_original_event"
+        ],
+        "user": {
+          "email": "frank.nguyen@example.com",
+          "id": "712020:ffffffff-ffff-ffff-ffff-ffffffffffff",
+          "name": "Frank Nguyen"
+        },
+        "event": {
+          "action": "api_token_created",
+          "category": [
+            "iam"
+          ],
+          "created": "2026-05-19T10:10:01.000Z",
+          "id": "a1000005-0000-4000-8000-000000000005",
+          "kind": "event",
+          "outcome": "success",
+          "type": [
+            "creation"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"type\":\"events\",\"id\":\"c3000003-0000-4000-8000-000000000003\",\"attributes\":{\"time\":\"2026-05-19T10:03:00.000Z\",\"processedAt\":\"2026-05-19T10:03:01.000Z\",\"action\":\"confluence_added_space_permission\",\"actor\":{\"id\":\"712020:dddddddd-dddd-dddd-dddd-dddddddddddd\",\"name\":\"Dana Wilson\",\"email\":\"dana.wilson@example.com\"},\"context\":[{\"id\":\"11111111-1111-1111-1111-111111111111\",\"type\":\"sites\",\"attributes\":{\"siteName\":\"example-corp\",\"siteHostName\":\"https://example-corp.atlassian.net\",\"permissionName\":\"Add Pages\"}},{\"id\":\"22222222-2222-2222-2222-222222222222\",\"type\":\"space\",\"attributes\":{\"name\":\"Example Space\",\"key\":\"EX\"}}],\"container\":[{\"id\":\"33333333-3333-3333-3333-333333333333\",\"type\":\"unit\",\"attributes\":{}}],\"location\":{\"ip\":\"203.0.113.21\",\"countryName\":\"Example Country\",\"city\":\"Example City\"}},\"message\":{\"content\":\"Dana Wilson added Confluence space permission Add Pages on example-corp\",\"format\":\"simple\"}}",
+      "expected": {
+        "@timestamp": "2026-05-19T10:03:00.000Z",
+        "ecs": {
+          "version": "9.3.0"
+        },
+        "message": "Dana Wilson added Confluence space permission Add Pages on example-corp",
+        "observer": {
+          "product": "Atlassian Cloud",
+          "type": "saas",
+          "vendor": "Atlassian"
+        },
+        "related": {
+          "ip": [
+            "203.0.113.21"
+          ],
+          "user": [
+            "Dana Wilson",
+            "dana.wilson@example.com"
+          ]
+        },
+        "source": {
+          "as": {
+            "number": 64502,
+            "organization": {
+              "name": "Documentation ASN"
+            }
+          },
+          "geo": {
+            "city_name": "Example City",
+            "country_name": "Example Country"
+          },
+          "ip": "203.0.113.21"
+        },
+        "tags": [
+          "forwarded",
+          "atlassian_cloud-audit",
+          "preserve_original_event"
+        ],
+        "user": {
+          "email": "dana.wilson@example.com",
+          "id": "712020:dddddddd-dddd-dddd-dddd-dddddddddddd",
+          "name": "Dana Wilson"
+        },
+        "event": {
+          "action": "confluence_added_space_permission",
+          "category": [
+            "configuration"
+          ],
+          "created": "2026-05-19T10:03:01.000Z",
+          "id": "c3000003-0000-4000-8000-000000000003",
+          "kind": "event",
+          "outcome": "success",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"type\":\"events\",\"id\":\"d4000004-0000-4000-8000-000000000004\",\"attributes\":{\"time\":\"2026-05-04T11:30:15.750Z\",\"processedAt\":\"2026-05-04T11:30:16.010Z\",\"action\":\"marketplace_app_installed\",\"actor\":{\"id\":\"712020:eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee\",\"name\":\"Eve Martinez\",\"email\":\"eve.martinez@example.com\"},\"context\":[{\"id\":\"ffeeddcc-bbaa-9988-7766-554433221100\",\"type\":\"apps\",\"attributes\":{\"name\":\"Example Time Tracking Helper\",\"vendor\":\"Example Vendor Inc\"}}],\"container\":[{\"id\":\"site-example-001\",\"type\":\"sites\",\"attributes\":{\"cloudUrl\":\"example.atlassian.net\"}}],\"location\":{\"ip\":\"198.51.100.50\",\"geo\":\"NA\",\"countryName\":\"Example Country\",\"city\":\"Example City\"}},\"message\":{\"content\":\"Eve Martinez installed Example Time Tracking Helper.\",\"format\":\"text/plain\"}}",
+      "expected": {
+        "@timestamp": "2026-05-04T11:30:15.750Z",
+        "ecs": {
+          "version": "9.3.0"
+        },
+        "message": "Eve Martinez installed Example Time Tracking Helper.",
+        "observer": {
+          "product": "Atlassian Cloud",
+          "type": "saas",
+          "vendor": "Atlassian"
+        },
+        "related": {
+          "ip": [
+            "198.51.100.50"
+          ],
+          "user": [
+            "Eve Martinez",
+            "eve.martinez@example.com"
+          ]
+        },
+        "source": {
+          "as": {
+            "number": 64501,
+            "organization": {
+              "name": "Documentation ASN"
+            }
+          },
+          "geo": {
+            "city_name": "Example City",
+            "country_name": "Example Country"
+          },
+          "ip": "198.51.100.50"
+        },
+        "tags": [
+          "forwarded",
+          "atlassian_cloud-audit",
+          "preserve_original_event"
+        ],
+        "user": {
+          "email": "eve.martinez@example.com",
+          "id": "712020:eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee",
+          "name": "Eve Martinez"
+        },
+        "event": {
+          "action": "marketplace_app_installed",
+          "category": [
+            "configuration",
+            "package"
+          ],
+          "created": "2026-05-04T11:30:16.010Z",
+          "id": "d4000004-0000-4000-8000-000000000004",
+          "kind": "event",
+          "outcome": "success",
+          "type": [
+            "installation"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"type\":\"events\",\"id\":\"f5000005-0000-4000-8000-000000000005\",\"attributes\":{\"time\":\"2026-05-19T13:50:44.742Z\",\"processedAt\":\"2026-05-19T13:50:45.198Z\",\"action\":\"org_settings_update\",\"actor\":{\"id\":\"712020:cccccccc-cccc-cccc-cccc-cccccccccccc\",\"name\":\"Carol Davis\",\"email\":\"carol.davis@example.com\"},\"context\":[],\"container\":[{\"id\":\"00000000-0000-0000-0000-000000000001\",\"type\":\"orgs\",\"attributes\":{\"name\":\"Example Corp\",\"settingName\":\"AuthenticationPolicy\",\"settingValues\":\"samlEnabled\"}}],\"location\":{\"ip\":\"192.0.2.10\",\"geo\":\"EU\",\"countryName\":\"Example Country\",\"city\":\"Example City\"}},\"message\":{\"content\":\"Carol Davis updated AuthenticationPolicy setting values samlEnabled\",\"format\":\"simple\"}}",
+      "expected": {
+        "@timestamp": "2026-05-19T13:50:44.742Z",
+        "ecs": {
+          "version": "9.3.0"
+        },
+        "message": "Carol Davis updated AuthenticationPolicy setting values samlEnabled",
+        "observer": {
+          "product": "Atlassian Cloud",
+          "type": "saas",
+          "vendor": "Atlassian"
+        },
+        "related": {
+          "ip": [
+            "192.0.2.10"
+          ],
+          "user": [
+            "Carol Davis",
+            "carol.davis@example.com"
+          ]
+        },
+        "source": {
+          "as": {
+            "number": 64500,
+            "organization": {
+              "name": "Documentation ASN"
+            }
+          },
+          "geo": {
+            "city_name": "Example City",
+            "country_name": "Example Country"
+          },
+          "ip": "192.0.2.10"
+        },
+        "tags": [
+          "forwarded",
+          "atlassian_cloud-audit",
+          "preserve_original_event"
+        ],
+        "user": {
+          "email": "carol.davis@example.com",
+          "id": "712020:cccccccc-cccc-cccc-cccc-cccccccccccc",
+          "name": "Carol Davis"
+        },
+        "event": {
+          "action": "org_settings_update",
+          "category": [
+            "iam",
+            "configuration"
+          ],
+          "created": "2026-05-19T13:50:45.198Z",
+          "id": "f5000005-0000-4000-8000-000000000005",
+          "kind": "event",
+          "outcome": "success",
+          "type": [
+            "change"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"type\":\"events\",\"id\":\"a1000002-0000-4000-8000-000000000002\",\"attributes\":{\"time\":\"2026-05-19T10:01:00.000Z\",\"processedAt\":\"2026-05-19T10:01:01.000Z\",\"action\":\"organization_users_viewed\",\"actor\":{\"id\":\"712020:bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb\",\"name\":\"Bob Smith\",\"email\":\"bob.smith@example.com\"},\"location\":{\"ip\":\"198.51.100.11\",\"geo\":\"NA\",\"countryName\":\"Example Country\",\"city\":\"Example City\"}},\"message\":{\"content\":\"Bob Smith viewed organization users\",\"format\":\"simple\"}}",
+      "expected": {
+        "@timestamp": "2026-05-19T10:01:00.000Z",
+        "ecs": {
+          "version": "9.3.0"
+        },
+        "message": "Bob Smith viewed organization users",
+        "observer": {
+          "product": "Atlassian Cloud",
+          "type": "saas",
+          "vendor": "Atlassian"
+        },
+        "related": {
+          "ip": [
+            "198.51.100.11"
+          ],
+          "user": [
+            "Bob Smith",
+            "bob.smith@example.com"
+          ]
+        },
+        "source": {
+          "as": {
+            "number": 64501,
+            "organization": {
+              "name": "Documentation ASN"
+            }
+          },
+          "geo": {
+            "city_name": "Example City",
+            "country_name": "Example Country"
+          },
+          "ip": "198.51.100.11"
+        },
+        "tags": [
+          "forwarded",
+          "atlassian_cloud-audit",
+          "preserve_original_event"
+        ],
+        "user": {
+          "email": "bob.smith@example.com",
+          "id": "712020:bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+          "name": "Bob Smith"
+        },
+        "event": {
+          "action": "organization_users_viewed",
+          "category": [
+            "iam"
+          ],
+          "created": "2026-05-19T10:01:01.000Z",
+          "id": "a1000002-0000-4000-8000-000000000002",
+          "kind": "event",
+          "outcome": "success",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"type\":\"events\",\"id\":\"g8000008-0000-4000-8000-000000000008\",\"attributes\":{\"time\":\"2026-05-19T14:00:00.000Z\",\"processedAt\":\"2026-05-19T14:00:01.000Z\",\"action\":\"data_classification_policy_update\",\"actor\":{\"id\":\"712020:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee\",\"name\":\"Grace Park\",\"email\":\"grace.park@example.com\"},\"context\":[],\"container\":[{\"id\":\"00000000-0000-0000-0000-000000000001\",\"type\":\"orgs\",\"attributes\":{\"name\":\"Example Corp\"}}],\"location\":{\"ip\":\"192.0.2.20\",\"geo\":\"NA\",\"countryName\":\"Example Country\",\"city\":\"Example City\"}},\"message\":{\"content\":\"Grace Park updated data classification policy\",\"format\":\"simple\"}}",
+      "expected": {
+        "@timestamp": "2026-05-19T14:00:00.000Z",
+        "ecs": {
+          "version": "9.3.0"
+        },
+        "message": "Grace Park updated data classification policy",
+        "observer": {
+          "product": "Atlassian Cloud",
+          "type": "saas",
+          "vendor": "Atlassian"
+        },
+        "related": {
+          "ip": [
+            "192.0.2.20"
+          ],
+          "user": [
+            "Grace Park",
+            "grace.park@example.com"
+          ]
+        },
+        "source": {
+          "as": {
+            "number": 64500,
+            "organization": {
+              "name": "Documentation ASN"
+            }
+          },
+          "geo": {
+            "city_name": "Example City",
+            "country_name": "Example Country"
+          },
+          "ip": "192.0.2.20"
+        },
+        "tags": [
+          "forwarded",
+          "atlassian_cloud-audit",
+          "preserve_original_event"
+        ],
+        "user": {
+          "email": "grace.park@example.com",
+          "id": "712020:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+          "name": "Grace Park"
+        },
+        "event": {
+          "action": "data_classification_policy_update",
+          "category": [
+            "iam",
+            "configuration"
+          ],
+          "created": "2026-05-19T14:00:01.000Z",
+          "id": "g8000008-0000-4000-8000-000000000008",
+          "kind": "event",
+          "outcome": "success",
+          "type": [
+            "change"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"type\":\"events\",\"id\":\"e6000006-0000-4000-8000-000000000006\",\"attributes\":{\"time\":\"2026-05-19T10:23:46.830Z\",\"processedAt\":\"2026-05-19T10:23:47.000Z\",\"action\":\"confluence_audit_record_removed_content_restriction\",\"actor\":{\"id\":\"confluence\",\"name\":\"Confluence\",\"email\":\"Atlassian app\",\"picture\":null,\"links\":{}},\"context\":[{\"id\":\"88888888-8888-8888-8888-888888888888\",\"type\":\"sites\",\"attributes\":{\"siteName\":\"example-corp\"}}],\"container\":[],\"location\":{\"geo\":\"EU\"}},\"message\":{\"content\":\"Confluence removed content restriction on example-corp\",\"format\":\"simple\"}}",
+      "expected": {
+        "@timestamp": "2026-05-19T10:23:46.830Z",
+        "ecs": {
+          "version": "9.3.0"
+        },
+        "message": "Confluence removed content restriction on example-corp",
+        "observer": {
+          "product": "Atlassian Cloud",
+          "type": "saas",
+          "vendor": "Atlassian"
+        },
+        "tags": [
+          "forwarded",
+          "atlassian_cloud-audit",
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "confluence_audit_record_removed_content_restriction",
+          "category": [
+            "configuration"
+          ],
+          "created": "2026-05-19T10:23:47.000Z",
+          "id": "e6000006-0000-4000-8000-000000000006",
+          "kind": "event",
+          "outcome": "success",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"type\":\"events\",\"id\":\"b2000002-0000-4000-8000-000000000002\",\"attributes\":{\"time\":\"2026-05-19T11:00:00.000Z\",\"processedAt\":\"2026-05-19T11:00:01.000Z\",\"action\":\"user_invitation_sent\",\"actor\":{\"id\":\"712020:bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb\",\"name\":\"Bob Smith\",\"email\":\"bob.smith@example.com\"},\"context\":[{\"id\":\"00000000-0000-0000-0000-000000000003\",\"type\":\"invited-user\",\"attributes\":{\"email\":\"carol.davis@example.com\"}}],\"container\":[{\"id\":\"00000000-0000-0000-0000-000000000001\",\"type\":\"organization\",\"attributes\":{\"name\":\"Example Corp\"}}],\"location\":{\"ip\":\"203.0.113.10\",\"geo\":\"EU\",\"countryName\":\"Example Country\",\"city\":\"Example City\"}},\"message\":{\"content\":\"Bob Smith invited carol.davis@example.com to the organization.\",\"format\":\"text/plain\"}}",
+      "expected": {
+        "@timestamp": "2026-05-19T11:00:00.000Z",
+        "ecs": {
+          "version": "9.3.0"
+        },
+        "message": "Bob Smith invited carol.davis@example.com to the organization.",
+        "observer": {
+          "product": "Atlassian Cloud",
+          "type": "saas",
+          "vendor": "Atlassian"
+        },
+        "related": {
+          "ip": [
+            "203.0.113.10"
+          ],
+          "user": [
+            "Bob Smith",
+            "bob.smith@example.com"
+          ]
+        },
+        "source": {
+          "as": {
+            "number": 64502,
+            "organization": {
+              "name": "Documentation ASN"
+            }
+          },
+          "geo": {
+            "city_name": "Example City",
+            "country_name": "Example Country"
+          },
+          "ip": "203.0.113.10"
+        },
+        "tags": [
+          "forwarded",
+          "atlassian_cloud-audit",
+          "preserve_original_event"
+        ],
+        "user": {
+          "email": "bob.smith@example.com",
+          "id": "712020:bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+          "name": "Bob Smith"
+        },
+        "event": {
+          "action": "user_invitation_sent",
+          "category": [
+            "iam"
+          ],
+          "created": "2026-05-19T11:00:01.000Z",
+          "id": "b2000002-0000-4000-8000-000000000002",
+          "kind": "event",
+          "outcome": "success",
+          "type": [
+            "user",
+            "creation"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"type\":\"events\",\"id\":\"f7000007-0000-4000-8000-000000000007\",\"attributes\":{\"time\":\"2026-05-19T10:15:00.000Z\",\"processedAt\":\"2026-05-19T10:15:01.000Z\",\"action\":\"user_login_failed\",\"actor\":{\"id\":\"712020:99999999-9999-9999-9999-999999999999\",\"name\":\"Unknown User\",\"email\":\"unknown@example.com\"},\"location\":{\"ip\":\"198.51.100.99\",\"geo\":\"NA\",\"countryName\":\"Example Country\",\"city\":\"Example City\"}},\"message\":{\"content\":\"Unknown User failed to log in\",\"format\":\"simple\"}}",
+      "expected": {
+        "@timestamp": "2026-05-19T10:15:00.000Z",
+        "ecs": {
+          "version": "9.3.0"
+        },
+        "message": "Unknown User failed to log in",
+        "observer": {
+          "product": "Atlassian Cloud",
+          "type": "saas",
+          "vendor": "Atlassian"
+        },
+        "related": {
+          "ip": [
+            "198.51.100.99"
+          ],
+          "user": [
+            "Unknown User",
+            "unknown@example.com"
+          ]
+        },
+        "source": {
+          "as": {
+            "number": 64501,
+            "organization": {
+              "name": "Documentation ASN"
+            }
+          },
+          "geo": {
+            "city_name": "Example City",
+            "country_name": "Example Country"
+          },
+          "ip": "198.51.100.99"
+        },
+        "tags": [
+          "forwarded",
+          "atlassian_cloud-audit",
+          "preserve_original_event"
+        ],
+        "user": {
+          "email": "unknown@example.com",
+          "id": "712020:99999999-9999-9999-9999-999999999999",
+          "name": "Unknown User"
+        },
+        "event": {
+          "action": "user_login_failed",
+          "category": [
+            "authentication"
+          ],
+          "created": "2026-05-19T10:15:01.000Z",
+          "id": "f7000007-0000-4000-8000-000000000007",
+          "kind": "event",
+          "outcome": "failure",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"type\":\"events\",\"id\":\"a1000001-0000-4000-8000-000000000001\",\"attributes\":{\"time\":\"2026-05-19T10:00:00.000Z\",\"processedAt\":\"2026-05-19T10:00:01.000Z\",\"action\":\"user_login\",\"actor\":{\"id\":\"712020:aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\",\"name\":\"Alice Johnson\",\"email\":\"alice.johnson@example.com\"},\"location\":{\"ip\":\"198.51.100.10\",\"geo\":\"NA\",\"countryName\":\"Example Country\",\"regionName\":\"Example Region\",\"city\":\"Example City\"}},\"message\":{\"content\":\"Alice Johnson logged in\",\"format\":\"simple\"}}",
+      "expected": {
+        "@timestamp": "2026-05-19T10:00:00.000Z",
+        "ecs": {
+          "version": "9.3.0"
+        },
+        "message": "Alice Johnson logged in",
+        "observer": {
+          "product": "Atlassian Cloud",
+          "type": "saas",
+          "vendor": "Atlassian"
+        },
+        "related": {
+          "ip": [
+            "198.51.100.10"
+          ],
+          "user": [
+            "Alice Johnson",
+            "alice.johnson@example.com"
+          ]
+        },
+        "source": {
+          "as": {
+            "number": 64501,
+            "organization": {
+              "name": "Documentation ASN"
+            }
+          },
+          "geo": {
+            "city_name": "Example City",
+            "country_name": "Example Country",
+            "region_name": "Example Region"
+          },
+          "ip": "198.51.100.10"
+        },
+        "tags": [
+          "forwarded",
+          "atlassian_cloud-audit",
+          "preserve_original_event"
+        ],
+        "user": {
+          "email": "alice.johnson@example.com",
+          "id": "712020:aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+          "name": "Alice Johnson"
+        },
+        "event": {
+          "action": "user_login",
+          "category": [
+            "authentication"
+          ],
+          "created": "2026-05-19T10:00:01.000Z",
+          "id": "a1000001-0000-4000-8000-000000000001",
+          "kind": "event",
+          "outcome": "success",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    }
+  ]
+}

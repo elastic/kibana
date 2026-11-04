@@ -310,7 +310,7 @@ describe('server/investigation_round', () => {
       ).toBe(true);
       expect(
         isSeededWorkspaceAccess(SANDBOX_VIEW_FILE_TOOL_ID, {
-          file_path: '/workspace/elastic.md',
+          file_path: '/workspace/.connector-docs/elastic.md',
         })
       ).toBe(true);
       expect(

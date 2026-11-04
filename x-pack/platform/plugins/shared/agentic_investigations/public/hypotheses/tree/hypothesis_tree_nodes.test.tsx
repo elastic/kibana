@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ReactFlowProvider, type NodeProps } from '@xyflow/react';
@@ -22,6 +22,8 @@ import {
   HypothesisTreeNode,
   type HypothesisTreeFlowNode,
 } from './hypothesis_tree_nodes';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { SubjectServices } from '../../subjects/attachments/subject_services';
 
 jest.mock('@kbn/proposals-plugin/public');
 
@@ -29,15 +31,20 @@ const flags = { isSelected: false, isDimmed: false, selectedActionIndex: null };
 
 const renderNode = (
   data: HypothesisTreeFlowNode['data'],
-  actions = { onSelectAction: jest.fn(), onSelectNode: jest.fn() }
+  actions = { onSelectAction: jest.fn(), onSelectNode: jest.fn() },
+  services: SubjectServices = {}
 ) => {
   render(
     <EuiProvider>
       <I18nProvider>
         <ReactFlowProvider>
-          <HypothesisTreeActionsContext.Provider value={actions}>
-            <HypothesisTreeNode {...({ id: 'node', data } as NodeProps<HypothesisTreeFlowNode>)} />
-          </HypothesisTreeActionsContext.Provider>
+          <KibanaContextProvider services={services}>
+            <HypothesisTreeActionsContext.Provider value={actions}>
+              <HypothesisTreeNode
+                {...({ id: 'node', data } as NodeProps<HypothesisTreeFlowNode>)}
+              />
+            </HypothesisTreeActionsContext.Provider>
+          </KibanaContextProvider>
         </ReactFlowProvider>
       </I18nProvider>
     </EuiProvider>
@@ -110,6 +117,48 @@ describe('HypothesisTreeNode', () => {
     const link = screen.getByTestId('investigationHypothesisTreeTriggerLink');
     expect(link).toHaveTextContent('View alert');
     expect(link).toHaveAttribute('href', '/app/observability/alerts/a-1');
+  });
+
+  it('links several alert triggers to the alerts list, filtered to them', async () => {
+    const services = {
+      share: {
+        url: {
+          locators: {
+            get: (locatorId: string) => ({
+              getUrl: async (params: object) => `/located/${locatorId}?${JSON.stringify(params)}`,
+              navigate: jest.fn(),
+            }),
+          },
+        },
+      },
+    } as unknown as SubjectServices;
+
+    renderNode(
+      {
+        kind: 'trigger',
+        title: 'Checkout latency spike',
+        subjects: [
+          {
+            type: 'alert',
+            id: 'a-1',
+            snapshot: { rule_name: 'Checkout p99 > 2s' },
+            created_at: 'x',
+          },
+          { type: 'alert', id: 'a-2', created_at: 'x' },
+        ],
+        ...flags,
+      },
+      undefined,
+      services
+    );
+
+    const link = await screen.findByTestId('investigationHypothesisTreeTriggerLink');
+    expect(link).toHaveTextContent('View 2 alerts');
+    await waitFor(() => expect(link).toHaveAttribute('href'));
+    expect(JSON.parse(link.getAttribute('href')!.split('?')[1]).filters).toEqual({
+      queryString: 'alert.id: ("a-1" or "a-2") or kibana.alert.uuid: ("a-1" or "a-2")',
+      status: 'all',
+    });
   });
 
   it('links a Slack trigger to the thread in a new tab', () => {

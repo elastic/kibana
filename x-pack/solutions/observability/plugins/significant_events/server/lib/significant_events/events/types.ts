@@ -22,6 +22,7 @@ export interface EventsFilterOptions {
   eventIds?: string[];
   ruleUuids?: string[];
   topologyFeatureIds?: string[];
+  unassignedEntityIds?: string[];
   investigationStates?: SignificantEventInvestigationState[];
 }
 

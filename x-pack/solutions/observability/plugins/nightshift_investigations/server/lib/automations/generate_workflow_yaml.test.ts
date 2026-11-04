@@ -8,6 +8,7 @@
 import { parse } from 'yaml';
 import { evaluateKql } from '@kbn/eval-kql';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
+import { WorkflowSchemaBase } from '@kbn/workflows';
 import { generateWorkflowYaml, SLACK_MESSAGE_TEXT_LIMIT } from './generate_workflow_yaml';
 import { MAX_PROMPT_TEMPLATE_LENGTH } from './schemas';
 import type { NightshiftAutomationAttributes, NightshiftTriggerRow } from './types';
@@ -40,20 +41,24 @@ describe('generateWorkflowYaml', () => {
       const automation = baseAutomation();
       automation.trigger.rows = rows;
       const workflow = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
-      for (const step of workflow.steps) {
-        for (const investigation of step.steps ?? [step]) {
-          expect(investigation.with.automation_id).toBe('auto-123');
-        }
+      const investigations = workflow.steps
+        .flatMap((step: { steps?: unknown[] }) => step.steps ?? [step])
+        .filter((step: { type: string }) => step.type === 'nightshift.triggerInvestigation');
+      expect(investigations).toHaveLength(rows.length);
+      for (const investigation of investigations) {
+        expect(investigation.with.automation_id).toBe('auto-123');
       }
     }
   );
 
   describe('concurrency settings', () => {
-    it('keys alert-triggered runs on the alert, so one alert does not drop the next', () => {
+    it('keys alert-triggered runs on the alert and its status, so a recovery is not dropped behind the activation', () => {
       const yaml = parse(
         generateWorkflowYaml({ automationId: 'auto-123', automation: baseAutomation() })
       );
-      expect(yaml.settings.concurrency.key).toBe('auto-123-{{ event.alert.uuid }}');
+      expect(yaml.settings.concurrency.key).toBe(
+        'auto-123-{{ event.alert.uuid }}-{{ event.alert.status }}'
+      );
     });
 
     it('keys slack-triggered runs on the message', () => {
@@ -70,7 +75,7 @@ describe('generateWorkflowYaml', () => {
       automation.trigger.rows = [{ kind: 'alert' }, { kind: 'slack', event: 'message' }];
       const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
       expect(yaml.settings.concurrency.key).toBe(
-        'auto-123-{{ event.alert.uuid }}{{ event.channel }}-{{ event.messageId }}'
+        'auto-123-{{ event.alert.uuid }}-{{ event.alert.status }}{{ event.channel }}-{{ event.messageId }}'
       );
     });
 
@@ -158,15 +163,29 @@ describe('generateWorkflowYaml', () => {
       return evaluateKql(yaml.triggers[0].on.condition, event);
     };
 
-    it('always filters on active alerts', () => {
+    it('matches active and recovered alerts', () => {
       const yaml = parse(
         generateWorkflowYaml({ automationId: 'auto-123', automation: baseAutomation() })
       );
-      expect(yaml.triggers[0].on.condition).toBe('event.alert.status: "active"');
+      expect(yaml.triggers[0].on.condition).toBe(
+        '(event.alert.status: "active" OR event.alert.status: "recovered")'
+      );
       expect(alertMatches({ kind: 'alert' }, alertEvent())).toBe(true);
       expect(alertMatches({ kind: 'alert' }, alertEvent({ alert: { status: 'recovered' } }))).toBe(
+        true
+      );
+      expect(alertMatches({ kind: 'alert' }, alertEvent({ alert: { status: 'untracked' } }))).toBe(
         false
       );
+    });
+
+    it('applies the rule filters to recoveries too', () => {
+      const row: AlertRow = { kind: 'alert', tags: ['prod'] };
+      const recovered = { status: 'recovered' };
+      expect(alertMatches(row, alertEvent({ rule: { tags: ['prod'] }, alert: recovered }))).toBe(
+        true
+      );
+      expect(alertMatches(row, alertEvent({ alert: recovered }))).toBe(false);
     });
 
     it('filters by substring rule name pattern as an unquoted wildcard', () => {
@@ -174,7 +193,7 @@ describe('generateWorkflowYaml', () => {
       automation.trigger.rows = [{ kind: 'alert', ruleNamePattern: 'cpu' }];
       const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
       expect(yaml.triggers[0].on.condition).toBe(
-        'event.alert.status: "active" AND event.rule.name: *cpu*'
+        '(event.alert.status: "active" OR event.alert.status: "recovered") AND event.rule.name: *cpu*'
       );
       expect(alertMatches({ kind: 'alert', ruleNamePattern: 'CPU' }, alertEvent())).toBe(true);
       expect(alertMatches({ kind: 'alert', ruleNamePattern: 'disk' }, alertEvent())).toBe(false);
@@ -195,8 +214,98 @@ describe('generateWorkflowYaml', () => {
       ];
       const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
       expect(yaml.triggers[0].on.condition).toBe(
-        '(event.alert.status: "active" AND event.rule.tags: "k8s") OR (event.alert.status: "active" AND event.rule.tags: "prod")'
+        '((event.alert.status: "active" OR event.alert.status: "recovered") AND event.rule.tags: "k8s") OR ((event.alert.status: "active" OR event.alert.status: "recovered") AND event.rule.tags: "prod")'
       );
+    });
+
+    it('starts investigations only for active alerts and follows up on recovered ones', () => {
+      const yaml = parse(
+        generateWorkflowYaml({ automationId: 'auto-123', automation: baseAutomation() })
+      );
+      expect(yaml.steps).toHaveLength(2);
+      const [active, recovered] = yaml.steps;
+      expect(active).toMatchObject({
+        name: 'trigger_investigation',
+        type: 'nightshift.triggerInvestigation',
+        if: "${{ event.alert.status == 'active' }}",
+      });
+      expect(recovered).toEqual({
+        name: 'follow_up_recovered_alert',
+        type: 'nightshift.followUpRecoveredAlert',
+        if: "${{ event.alert.status == 'recovered' }}",
+        with: {
+          alert_uuid: '{{ event.alert.uuid }}',
+          alert_id: '${{ event.alert.id }}',
+          alert_start: '${{ event.alert.start }}',
+          recovered_at: '{{ event.timestamp }}',
+          rule_id: '{{ event.rule.id }}',
+          rule_name: '${{ event.rule.name }}',
+          rule_type_id: '{{ event.rule.ruleTypeId }}',
+          rule_tags: '${{ event.rule.tags }}',
+        },
+      });
+    });
+
+    it('keeps both alert steps inside the alert guard of a mixed automation', () => {
+      const automation = baseAutomation();
+      automation.trigger.rows = [{ kind: 'alert' }, { kind: 'slack', event: 'message' }];
+      const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
+      expect(yaml.steps[0].steps.map((step: { name: string }) => step.name)).toEqual([
+        'trigger_investigation_alert',
+        'follow_up_recovered_alert',
+      ]);
+      expect(yaml.steps[1].steps.map((step: { name: string }) => step.name)).toEqual([
+        'trigger_investigation_slack',
+      ]);
+    });
+
+    it.each([
+      [[{ kind: 'alert' }]],
+      [[{ kind: 'alert', ruleNames: ['Disk full'], tags: ['prod'] }]],
+      [[{ kind: 'alert' }, { kind: 'slack', event: 'message' }]],
+      [
+        [
+          { kind: 'alert' },
+          { kind: 'slack', event: 'message' },
+          { kind: 'schedule', schedulePreset: 'daily', time: '09:00' },
+        ],
+      ],
+    ] as NightshiftTriggerRow[][][])(
+      'generates a workflow with status-guarded alert steps that the workflow schema accepts: %j',
+      (rows) => {
+        const automation = baseAutomation();
+        automation.trigger.rows = rows;
+        const workflow = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
+        const result = WorkflowSchemaBase.safeParse(workflow);
+        expect(result.error).toBeUndefined();
+      }
+    );
+
+    it('gives the recovery step none of the settings of the investigation it follows up', () => {
+      const automation = baseAutomation();
+      automation.execution.promptTemplate = 'Check the checkout service';
+      automation.runtime.timeoutSeconds = 600;
+      automation.completions = [
+        { action: 'post_to_slack', targetMode: 'channel', destination: 'C123' },
+      ];
+      const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
+      const [active, recovered] = yaml.steps;
+
+      expect(active.with).toMatchObject({
+        message: 'Check the checkout service',
+        timeout_seconds: 600,
+        notificationDestinations: [expect.objectContaining({ params: { channel: 'C123' } })],
+      });
+      expect(Object.keys(recovered.with).sort()).toEqual([
+        'alert_id',
+        'alert_start',
+        'alert_uuid',
+        'recovered_at',
+        'rule_id',
+        'rule_name',
+        'rule_tags',
+        'rule_type_id',
+      ]);
     });
 
     it('passes the alert to the investigation as context.alerts', () => {
@@ -218,10 +327,12 @@ describe('generateWorkflowYaml', () => {
       ]);
     });
 
-    it('adds no alert context to manual and scheduled steps', () => {
+    it('adds no alert context, status guard or recovery step to manual steps', () => {
       const automation = baseAutomation();
       automation.trigger.rows = [];
       const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
+      expect(yaml.steps).toHaveLength(1);
+      expect(yaml.steps[0]).not.toHaveProperty('if');
       expect(yaml.steps[0].with).not.toHaveProperty('context');
     });
   });

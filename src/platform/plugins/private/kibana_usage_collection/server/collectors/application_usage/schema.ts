@@ -196,6 +196,9 @@ export const applicationUsageSchema = {
    * @removeBy 9.0.0
    */
   siem: commonSchema,
+  /**
+   * @deprecated legacy key retained because persisted application usage totals for the removed Significant Events app are never expired
+   */
   significantEvents: commonSchema,
   space_selector: commonSchema,
   streams: commonSchema,

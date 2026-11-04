@@ -10,6 +10,7 @@ import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { NotificationPhase } from './notification_routing';
+import { repliesUnderCallerMessage } from './notification_routing';
 import type { NotificationRoutingClient } from './notification_routing_client';
 import type { InvestigationLocator } from '../../../common/locators';
 import type { GetInvestigationsClient } from '../../routes/types';
@@ -100,7 +101,80 @@ export const sendInvestigationNotifications = async (
     phase,
     logger: context.logger,
   });
+  await claimRootSlackThreads({
+    client,
+    routingClient,
+    investigationId,
+    executionId,
+    logger: context.logger,
+  });
   return result;
+};
+
+/**
+ * Claims each Slack thread this run's root post started, so a mention or reply in it reaches the
+ * investigation. Only the Elastic app's posts carry the thread key. A failure is logged rather
+ * than thrown: the post is already delivered and recorded.
+ */
+const claimRootSlackThreads = async ({
+  client,
+  routingClient,
+  investigationId,
+  executionId,
+  logger,
+}: {
+  client: ReturnType<GetInvestigationsClient>;
+  routingClient: NotificationRoutingClient;
+  investigationId: string;
+  executionId: string;
+  logger: Pick<Logger, 'warn'>;
+}): Promise<void> => {
+  const routing = await routingClient.get().catch((error: unknown) => {
+    logger.warn(
+      `Could not read notification routing to claim Slack threads for investigation "${investigationId}": ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    return undefined;
+  });
+  if (!routing) {
+    return;
+  }
+  for (const destination of routing.destinations) {
+    if (
+      destination.type !== 'slack' ||
+      destination.connector_id !== ELASTIC_APPS_SLACK_CONNECTOR_ID ||
+      repliesUnderCallerMessage(destination) ||
+      !destination.thread
+    ) {
+      continue;
+    }
+    const rootPost = routing.attempts.find(
+      (attempt) =>
+        attempt.execution_id === executionId &&
+        attempt.destination_id === destination.id &&
+        attempt.creates_root &&
+        attempt.status === 'sent' &&
+        attempt.external_conversation_id
+    );
+    if (!rootPost?.external_conversation_id) {
+      continue;
+    }
+    try {
+      await client.claimSlackThread({
+        investigationId,
+        externalConversationId: rootPost.external_conversation_id,
+        channel: destination.thread.channel,
+        threadTs: destination.thread.thread_ts,
+      });
+    } catch (error) {
+      logger.warn(
+        `Could not claim the Slack thread for investigation "${investigationId}": ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
 };
 
 /**

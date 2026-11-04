@@ -43,9 +43,12 @@ const createRawConnector = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-const createSessionMock = (): jest.Mocked<Pick<SandboxSession, 'writeFiles' | 'isReset'>> => ({
+const createSessionMock = (): jest.Mocked<
+  Pick<SandboxSession, 'writeFiles' | 'mkdirs' | 'isReset'>
+> => ({
   isReset: false,
   writeFiles: jest.fn().mockResolvedValue([{ path: '/workspace/connectors.md', success: true }]),
+  mkdirs: jest.fn().mockResolvedValue([true]),
 });
 
 const createCallContext = (allowedConnectorIds: readonly string[]): SandboxCallContext => ({
@@ -64,12 +67,10 @@ const renderManifest = async ({
   allowedConnectorIds = ['connector-1'],
   connectors = [createRawConnector()],
   withActionsClient = true,
-  secretKeys = [],
 }: {
   allowedConnectorIds?: readonly string[];
   connectors?: Array<Record<string, unknown>>;
   withActionsClient?: boolean;
-  secretKeys?: readonly string[];
 } = {}) => {
   const session = createSessionMock();
   const { getActionsClient } = createGetActionsClient(connectors);
@@ -79,7 +80,6 @@ const renderManifest = async ({
     session: session as unknown as SandboxSession,
     callContext: createCallContext(allowedConnectorIds),
     getActionsClient: withActionsClient ? (getActionsClient as any) : undefined,
-    secretKeys,
     logger,
   });
 
@@ -99,11 +99,35 @@ describe('writeConnectorManifest', () => {
 
   describe('file writing', () => {
     it('writes the manifest to /workspace/connectors.md', async () => {
-      const { files } = await renderManifest();
+      const { files } = await renderManifest({
+        connectors: [createRawConnector({ actionTypeId: '.webhook' })],
+      });
 
-      expect(files).toHaveLength(1);
       expect(files[0].path).toBe('/workspace/connectors.md');
       expect(files[0].content).toBeInstanceOf(Buffer);
+    });
+
+    it('writes every service guide under .connector-docs, even without connectors', async () => {
+      const { files, session } = await renderManifest({ allowedConnectorIds: [], connectors: [] });
+
+      expect(session.mkdirs).toHaveBeenCalledWith(['/workspace/.connector-docs']);
+      expect(files.map(({ path }) => path)).toEqual([
+        '/workspace/connectors.md',
+        '/workspace/.connector-docs/github.md',
+        '/workspace/.connector-docs/newrelic.md',
+      ]);
+      expect(files[1].content.toString('utf8')).toContain('# GitHub');
+      expect(files[2].content.toString('utf8')).toContain('CONNECTOR_HEADER_API_KEY');
+    });
+
+    it('lists every service guide, including the Elasticsearch manifest', async () => {
+      const { content } = await renderManifest();
+
+      expect(content).toContain('# Service guides');
+      expect(content).toContain('- Elasticsearch: `/workspace/.connector-docs/elastic.md`');
+      expect(content).toContain('- GitHub: `/workspace/.connector-docs/github.md`');
+      expect(content).toContain('- New Relic: `/workspace/.connector-docs/newrelic.md`');
+      expect(content).not.toContain('sentry.md');
     });
 
     it('documents the per-command credential injection contract', async () => {
@@ -157,24 +181,6 @@ describe('writeConnectorManifest', () => {
       const { content } = await renderManifest({ withActionsClient: false });
 
       expect(content).toContain('*(No connectors are assigned to this agent.)*');
-    });
-  });
-
-  describe('sandbox secrets', () => {
-    it('documents the secret_keys contract and lists every available key', async () => {
-      const { content } = await renderManifest({ secretKeys: ['GITHUB_TOKEN', 'PAGERDUTY_KEY'] });
-
-      expect(content).toContain('# Sandbox Secrets');
-      expect(content).toContain('`secret_keys` parameter of the bash tool');
-      expect(content).toContain('- `GITHUB_TOKEN`');
-      expect(content).toContain('- `PAGERDUTY_KEY`');
-    });
-
-    it('notes when no secrets are configured', async () => {
-      const { content } = await renderManifest({ secretKeys: [] });
-
-      expect(content).toContain('# Sandbox Secrets');
-      expect(content).toContain('*(No secrets are configured in this space.)*');
     });
   });
 

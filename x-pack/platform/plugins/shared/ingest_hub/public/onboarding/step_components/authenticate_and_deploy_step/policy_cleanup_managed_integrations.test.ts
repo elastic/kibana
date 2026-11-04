@@ -165,6 +165,42 @@ describe('updateManagedIntegrationsPolicy — payload shape', () => {
     expect(payload.name).toBe('existing-agentless-name');
   });
 
+  it('keeps the existing namespace of the policy without a global namespace', async () => {
+    mockGetAgentlessPolicy.mockResolvedValue({
+      item: {
+        name: 'existing-agentless-name',
+        namespace: 'existing-ns',
+        package: { version: '2.5.0' },
+      },
+    });
+    mockGetPackageInfo.mockResolvedValue({
+      data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
+    });
+    await cleanupManagedIntegrationsPolicies({
+      ...BASE_OPTS,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+    });
+    expect(mockUpdateAgentless.mock.calls[0][1].namespace).toBe('existing-ns');
+  });
+
+  it('sends the global namespace over the existing one', async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
+    });
+    await cleanupManagedIntegrationsPolicies({
+      ...BASE_OPTS,
+      globalNamespace: 'prod',
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+    });
+    expect(mockUpdateAgentless.mock.calls[0][1].namespace).toBe('prod');
+  });
+
   it('includes enabled input for the surviving service', async () => {
     mockGetPackageInfo.mockResolvedValue({
       data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },

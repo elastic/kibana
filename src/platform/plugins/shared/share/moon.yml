@@ -44,12 +44,15 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/scout'
   - '@kbn/ui-callout'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*

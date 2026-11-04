@@ -18,6 +18,7 @@ export {
   platformCoreTools,
   platformCoreCasesTools,
   platformSignificantEventsTools,
+  observabilityNightshiftSourceTools,
   contextEngineAiIndexTools,
   contextEngineMemoryTools,
   contextEngineAutomationTools,

@@ -5,25 +5,34 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
-import type { ImpactPill } from './impact_pills';
+import { useCallback, useState } from 'react';
+import type { ImpactPill, PagedImpactPills } from './impact_pills';
 
-/**
- * Selected Impact pill for a queue page. `pills` are the entities across the whole queue.
- * A poll can drop the selected entity from them, so the selection clears itself once its pill
- * is gone.
- */
-export const useEntityFilter = (pills: readonly ImpactPill[]) => {
-  const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
-  const availableEntityIds = useMemo(() => new Set(pills.map((pill) => pill.entityId)), [pills]);
-  const entityFilter =
-    selectedEntityId !== null && availableEntityIds.has(selectedEntityId) ? selectedEntityId : null;
+/** Selected Impact pill; kept as `selectedPill` while its entity sits past the loaded pages. */
+export const useEntityFilter = ({ pills, total }: Pick<PagedImpactPills, 'pills' | 'total'>) => {
+  const [selected, setSelected] = useState<ImpactPill | null>(null);
 
-  useEffect(() => {
-    if (selectedEntityId !== entityFilter) {
-      setSelectedEntityId(entityFilter);
-    }
-  }, [selectedEntityId, entityFilter]);
+  const setEntityFilter = useCallback(
+    (entityId: string | null) =>
+      setSelected((current) => {
+        if (entityId === null) return null;
+        return pills.find((pill) => pill.entityId === entityId) ?? current;
+      }),
+    [pills]
+  );
 
-  return { entityFilter, setEntityFilter: setSelectedEntityId };
+  const isQueueEmpty = pills.length === 0 && total === 0;
+  if (isQueueEmpty && selected !== null) {
+    setSelected(null);
+  }
+  const selectedPill =
+    isQueueEmpty || selected === null
+      ? null
+      : pills.find((pill) => pill.entityId === selected.entityId) ?? selected;
+
+  return {
+    entityFilter: selectedPill?.entityId ?? null,
+    selectedPill,
+    setEntityFilter,
+  };
 };

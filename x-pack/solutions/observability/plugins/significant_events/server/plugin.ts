@@ -40,6 +40,7 @@ import {
   createSourceKnowledgeStateClient,
   sourceKnowledgeStateSavedObjectType,
   SOURCE_KNOWLEDGE_STATE_TYPE,
+  SOURCE_WRITE_LEASE_WAIT_MS,
 } from './lib/knowledge_indicators/source_knowledge_state';
 import {
   getRelayAppConnectionSavedObjectType,
@@ -50,6 +51,9 @@ import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maint
 import {
   consumeRunQuota,
   createRunQuotaInternalRepository,
+  dayKey,
+  releaseRunQuota,
+  resolveDailyWindow,
   runQuotaLedgerSavedObjectType,
   runQuotaSettingsSavedObjectType,
 } from './lib/run_quotas';
@@ -129,10 +133,11 @@ import {
 import { createSignificantEventsAvailability } from './agent_builder/tools/significant_events_availability';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
+import { getRequestAbortSignal } from './routes/utils/get_request_abort_signal';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 import { WorkflowExecutionService } from './lib/workflows/workflow_execution_service';
 import { createSourceChangeListener } from './routes/internal/knowledge_indicators/reconcile_source_catalog';
-import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from './lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
+import { syncContinuousOnboarding } from './lib/continuous_onboarding/sync_continuous_onboarding';
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
 const SLACK_CONNECTOR_RECONCILE_INTERVAL_MS = 60_000;
@@ -187,10 +192,17 @@ export class SignificantEventsPlugin
       if (!this.server?.core) {
         throw new Error('Significant Events start services are unavailable');
       }
-      return consumeRunQuota({
-        internalRepository: createRunQuotaInternalRepository(this.server),
+      const internalRepository = createRunQuotaInternalRepository(this.server);
+      const date = dayKey(resolveDailyWindow());
+      const { allowed } = await consumeRunQuota({
+        internalRepository,
         group: 'investigation',
+        date,
       });
+      return {
+        allowed,
+        release: () => releaseRunQuota({ internalRepository, group: 'investigation', date }),
+      };
     });
 
     core.dataStreams.registerDataStream(detectionsDataStream);
@@ -250,6 +262,8 @@ export class SignificantEventsPlugin
         services: significantEventsServices,
         dataStreams: coreStart.dataStreams,
         esClient: scopedClusterClient.asCurrentUser,
+        internalEsClient: scopedClusterClient.asInternalUser,
+        logger: this.logger,
         space,
         getAlertEventsClient,
         triggerEmitter: createTriggerEmitter({
@@ -285,17 +299,21 @@ export class SignificantEventsPlugin
           space,
           context,
           config: tuningConfig,
-          withSourceWrite: (sourceId, run, options) =>
-            sourceKnowledgeState.write({
+          withSourceWrite: (sourceId, run, options) => {
+            const shouldWaitForLease = options?.waitForLease !== false;
+            return sourceKnowledgeState.write({
               sourceId,
               allowDisabled: options?.allowDisabled,
+              waitForLeaseMs: shouldWaitForLease ? SOURCE_WRITE_LEASE_WAIT_MS : undefined,
+              signal: shouldWaitForLease ? getRequestAbortSignal(request) : undefined,
               expectedRevision:
                 typeof request.headers['x-nightshift-source-revision'] === 'string' &&
                 request.headers['x-nightshift-source-revision']
                   ? request.headers['x-nightshift-source-revision']
                   : source?.esql_updated_at,
               run,
-            }),
+            });
+          },
         });
 
       let kiClientPromise: ReturnType<typeof createKnowledgeIndicatorClient> | undefined;
@@ -409,22 +427,19 @@ export class SignificantEventsPlugin
       });
       registerSignificantEventsKIQueryGenerationAgentTypes({
         agentBuilder: plugins.agentBuilder,
-        isSemanticCodeSearchGroundingEnabled: async () =>
-          this.server?.core
-            ? isSignificantEventsSemanticCodeSearchGroundingEnabled(this.server.core.featureFlags)
-            : false,
       });
       void core
         .getStartServices()
         .then(async () => {
-          const { getScopedClients, server } = this;
-          if (!getScopedClients || !server) return;
+          const { getScopedClients, server, maintenanceService } = this;
+          if (!getScopedClients || !server || !maintenanceService) return;
           await registerStreamsAgentBuilder({
             agentBuilder: plugins.agentBuilder!,
             getScopedClients,
             server,
             logger: this.logger,
             telemetry: telemetryClient,
+            maintenanceService,
           });
         })
         .catch((err) => {
@@ -556,6 +571,17 @@ export class SignificantEventsPlugin
             await syncWorkflowService?.ensureEnabled({ request, spaceId: request.spaceId });
           }
         },
+        syncContinuousOnboarding: (event) =>
+          syncContinuousOnboarding({
+            event,
+            workflowService: continuousOnboardingWorkflowService,
+            maintenanceService: this.maintenanceService,
+            getStartServices: async () => {
+              const [coreStart, pluginsStart] = await core.getStartServices();
+              return { coreStart, pluginsStart };
+            },
+            logger: this.logger,
+          }),
       })
     );
 

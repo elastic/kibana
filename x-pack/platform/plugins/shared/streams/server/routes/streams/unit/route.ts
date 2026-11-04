@@ -10,9 +10,12 @@ import { streamsUnitIdentifierSchema } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { StreamsUnitService } from '../../../lib/saved_objects/streams_unit_service';
+import { revokeRemovedComponentApiKeys } from '../../../lib/unit_config/revoke_removed_component_api_keys';
 import { createServerRoute } from '../../create_server_route';
 import { assertStreamsCanvasEnabled } from './assert_streams_canvas_enabled';
+import { indexMetadataRoute } from './index_metadata';
 import { assertUnitPutEnvelope, parseUnitPutBody } from './parse_unit_put_body';
+import { resolveUnitIndicesRoute } from './resolve_indices';
 import { unitStatsRoutes } from './stats_route';
 
 const UNIT_PUT_MAX_BYTES = 1_048_576;
@@ -94,9 +97,20 @@ export const putStreamsUnitRoute = createServerRoute({
     getScopedClients,
     logger,
     unitConfigHooks,
-  }): Promise<{ acknowledged: true; compiled_config?: string }> => {
-    const { soClient, uiSettingsClient, encryptedSavedObjectsClient, canEncrypt } =
-      await getScopedClients({ request });
+  }): Promise<{
+    acknowledged: true;
+    compiled_config?: string;
+    api_keys_may_remain?: true;
+    ui_metadata_not_persisted?: true;
+  }> => {
+    const {
+      soClient,
+      uiSettingsClient,
+      encryptedSavedObjectsClient,
+      canEncrypt,
+      scopedClusterClient,
+      isSecurityEnabled,
+    } = await getScopedClients({ request });
 
     await assertStreamsCanvasEnabled(uiSettingsClient);
 
@@ -117,16 +131,32 @@ export const putStreamsUnitRoute = createServerRoute({
       canEncrypt,
     });
 
-    const { compiled_config: compiledConfig } = await streamsUnitService.upsertUnit({
-      unitId: params.path.id,
-      unit: parsed.unit,
-      ui_metadata: uiMetadata,
-      secrets,
-    });
+    const { unit: previousUnit } = await streamsUnitService.getUnitOrEmpty(params.path.id);
+
+    let apiKeysMayRemain = false;
+    const { compiled_config: compiledConfig, ui_metadata_not_persisted: uiMetadataNotPersisted } =
+      await streamsUnitService.upsertUnit({
+        unitId: params.path.id,
+        unit: parsed.unit,
+        ui_metadata: uiMetadata,
+        secrets,
+        onPublished: async () => {
+          ({ apiKeysMayRemain } = await revokeRemovedComponentApiKeys({
+            client: scopedClusterClient.asCurrentUser,
+            logger,
+            isSecurityEnabled,
+            previousUnit,
+            nextUnit: parsed.unit,
+            unitId: params.path.id,
+          }));
+        },
+      });
 
     return {
       acknowledged: true,
       ...(compiledConfig !== undefined ? { compiled_config: compiledConfig } : {}),
+      ...(apiKeysMayRemain ? { api_keys_may_remain: true } : {}),
+      ...(uiMetadataNotPersisted ? { ui_metadata_not_persisted: true } : {}),
     };
   },
 });
@@ -150,8 +180,9 @@ export const resetStreamsUnitRoute = createServerRoute({
     request,
     getScopedClients,
     logger,
-  }): Promise<{ acknowledged: true }> => {
-    const { soClient, uiSettingsClient } = await getScopedClients({ request });
+  }): Promise<{ acknowledged: true; api_keys_may_remain?: true }> => {
+    const { soClient, uiSettingsClient, scopedClusterClient, isSecurityEnabled } =
+      await getScopedClients({ request });
 
     await assertStreamsCanvasEnabled(uiSettingsClient);
 
@@ -160,9 +191,20 @@ export const resetStreamsUnitRoute = createServerRoute({
       logger,
     });
 
+    const { unit: previousUnit } = await streamsUnitService.getUnitOrEmpty(params.path.id);
+
     await streamsUnitService.resetUnit(params.path.id);
 
-    return { acknowledged: true };
+    const { apiKeysMayRemain } = await revokeRemovedComponentApiKeys({
+      client: scopedClusterClient.asCurrentUser,
+      logger,
+      isSecurityEnabled,
+      previousUnit,
+      nextUnit: {},
+      unitId: params.path.id,
+    });
+
+    return { acknowledged: true, ...(apiKeysMayRemain ? { api_keys_may_remain: true } : {}) };
   },
 });
 
@@ -170,5 +212,7 @@ export const unitRoutes = {
   ...getStreamsUnitRoute,
   ...putStreamsUnitRoute,
   ...resetStreamsUnitRoute,
+  ...resolveUnitIndicesRoute,
+  ...indexMetadataRoute,
   ...unitStatsRoutes,
 };

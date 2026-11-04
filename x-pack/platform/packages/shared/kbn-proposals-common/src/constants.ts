@@ -23,6 +23,8 @@ export const PROPOSALS_INTERNAL_URL = '/internal/proposals' as const;
 export const PROPOSAL_BY_ID_URL = `${PROPOSALS_INTERNAL_URL}/{id}` as const;
 export const PROPOSAL_APPROVE_URL = `${PROPOSALS_INTERNAL_URL}/{id}/approve` as const;
 export const PROPOSAL_DISMISS_URL = `${PROPOSALS_INTERNAL_URL}/{id}/dismiss` as const;
+/** Marks a to-do proposal that was marked as applied as not applied, re-offering it. */
+export const PROPOSAL_REOPEN_URL = `${PROPOSALS_INTERNAL_URL}/{id}/reopen` as const;
 export const PROPOSAL_REVISIONS_URL = `${PROPOSALS_INTERNAL_URL}/{proposalId}/revisions` as const;
 export const PROPOSAL_CHARTS_SUMMARY_URL = `${PROPOSALS_INTERNAL_URL}/charts-summary` as const;
 

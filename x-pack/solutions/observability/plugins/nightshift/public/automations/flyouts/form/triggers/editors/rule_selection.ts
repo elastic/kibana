@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CatalogRule } from '../../../../../hooks/use_rule_catalog';
+import type { CatalogRule } from '../../../../../data/rules/use_rule_catalog';
 import { rulePickerLabels, triggerLabels } from '../translations';
 
 export interface RuleSelection {

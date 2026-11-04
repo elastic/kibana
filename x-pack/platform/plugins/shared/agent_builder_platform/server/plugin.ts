@@ -33,9 +33,11 @@ export class AgentBuilderPlatformPlugin
     >
 {
   private logger: Logger;
+  private readonly isServerless: boolean;
 
   constructor(context: PluginInitializerContext<PluginConfig>) {
     this.logger = context.logger.get();
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
   }
 
   setup(
@@ -45,6 +47,7 @@ export class AgentBuilderPlatformPlugin
     registerTools({
       coreSetup,
       setupDeps,
+      isServerless: this.isServerless,
     });
     registerAttachmentTypes({
       coreSetup,
