@@ -8,30 +8,37 @@
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { deleteAutomationRoute } from './delete_automation';
-import { createRouteContext, createServiceAccountService } from './test_helpers';
+import {
+  createActionsClient,
+  createRouteContext,
+  createServiceAccountService,
+} from './test_helpers';
 
 const { handler } = deleteAutomationRoute['DELETE /internal/nightshift/automations/{id}'];
 const soClient = savedObjectsClientMock.create();
 const deleteWorkflows = jest.fn();
 const getWorkflow = jest.fn();
 const serviceAccountService = createServiceAccountService();
+let actionsClient = createActionsClient();
 const call = () =>
   handler({
     request: httpServerMock.createKibanaRequest(),
     params: { path: { id: 'auto-1' } },
     getAutomationsSoClient: () => soClient,
     getWorkflowsManagement: () => ({ management: { deleteWorkflows, getWorkflow } }),
+    getActionsClient: async () => actionsClient,
     getInvestigatorServiceAccountService: () => serviceAccountService,
     context: createRouteContext(),
   } as never);
 
 beforeEach(() => {
   jest.clearAllMocks();
+  actionsClient = createActionsClient();
   soClient.get.mockResolvedValue({
     id: 'auto-1',
     type: 'nightshift-automation',
     references: [],
-    attributes: { workflowId: 'wf-1' },
+    attributes: { workflowId: 'wf-1', trigger: { rows: [{ kind: 'alert' }] } },
   });
   soClient.delete.mockResolvedValue({});
   getWorkflow.mockResolvedValue({ id: 'wf-1', definition: { settings: {} } });
@@ -44,6 +51,31 @@ it('deletes the backing workflow and daily budget with the automation', async ()
     ['nightshift-automation-budget', 'auto-1'],
     ['nightshift-automation', 'auto-1'],
   ]);
+});
+
+it('deletes the inbound webhook connector after the workflow', async () => {
+  soClient.get.mockResolvedValue({
+    id: 'auto-1',
+    type: 'nightshift-automation',
+    references: [],
+    attributes: {
+      workflowId: 'wf-1',
+      trigger: { rows: [{ kind: 'webhook', connectorId: 'webhook-connector-1' }] },
+    },
+  });
+
+  await call();
+
+  expect(actionsClient.delete).toHaveBeenCalledWith({ id: 'webhook-connector-1' });
+  expect(deleteWorkflows.mock.invocationCallOrder[0]).toBeLessThan(
+    actionsClient.delete.mock.invocationCallOrder[0]
+  );
+});
+
+it('leaves Actions alone for an automation without a webhook trigger', async () => {
+  await call();
+
+  expect(actionsClient.delete).not.toHaveBeenCalled();
 });
 
 it('also deletes automations which have never dispatched', async () => {

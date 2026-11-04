@@ -14,6 +14,7 @@ import { UNLIMITED_DAILY_LIMIT } from '../../utils/daily_usage';
 
 export type ScheduleUnit = 'hour' | 'day' | 'week';
 export type InstructionMode = 'ask' | 'investigate';
+export type WebhookMode = 'generic' | 'alert';
 export type SlackTarget = 'channel' | 'self' | 'thread';
 const SLACK_TARGETS: SlackTarget[] = ['channel', 'self', 'thread'];
 
@@ -52,6 +53,14 @@ export type TriggerFormValues =
       users: string[];
       bots: string[];
       messageFilter: string;
+    }
+  | {
+      kind: 'webhook';
+      mode: WebhookMode;
+      /** Set once the automation is saved: the connector the URL belongs to. */
+      connectorId?: string;
+      /** Alert mode: the External Elasticsearch connector for the cluster the alerts come from. */
+      clusterConnectorId?: string;
     };
 
 export type SlackTriggerFormValues = Extract<TriggerFormValues, { kind: SlackTriggerKind }>;
@@ -87,6 +96,11 @@ export const createTriggerFormValues = (kind: TriggerFormValues['kind']): Trigge
   }
   if (kind === 'alert') {
     return { kind, ruleNamePattern: '', ruleNames: [], ruleTags: [] };
+  }
+  if (kind === 'webhook') {
+    // The only webhook the UI offers is the remote Elastic alert. Request webhooks saved earlier
+    // are still read back as `generic`.
+    return { kind, mode: 'alert' };
   }
   return {
     kind,
@@ -156,6 +170,13 @@ export const toAutomationFormValues = (automation: Automation): AutomationFormVa
           users: row.users ?? [],
           bots: row.bots ?? [],
           messageFilter: row.messageFilter ?? '',
+        }
+      : row?.kind === 'webhook'
+      ? {
+          kind: 'webhook',
+          mode: row.mode === 'alert' ? 'alert' : 'generic',
+          connectorId: row.connectorId,
+          clusterConnectorId: row.clusterConnectorId,
         }
       : preset
       ? {

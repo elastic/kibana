@@ -26,6 +26,9 @@ jest.mock('../hooks/use_automations', () => ({
 }));
 jest.mock('../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 jest.mock('../../data/rules/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
+jest.mock('../../sandbox_connectors/use_connected_clusters', () => ({
+  useConnectedClusters: () => ({ clusters: [], known: false, none: false }),
+}));
 jest.mock('../../settings/components/apps_section/use_relay_app_bindings', () => ({
   ...jest.requireActual('../../settings/components/apps_section/use_relay_app_bindings'),
   useAllRelayAppBindings: () => ({

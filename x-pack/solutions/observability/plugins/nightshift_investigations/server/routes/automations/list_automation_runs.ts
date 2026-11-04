@@ -32,6 +32,10 @@ const mapRunStatus = (status: ExecutionStatus): 'succeeded' | 'running' | 'faile
   return 'failed';
 };
 
+// A recovery follow-up step has no `title` input, only the alert's name.
+const getRecoveredTitle = (ruleName: string | undefined) =>
+  ruleName ? `Recovered: ${ruleName}` : undefined;
+
 export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'GET /internal/nightshift/automations/{id}/runs',
   options: {
@@ -115,14 +119,15 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
       );
 
     const runs = executions.results.map((exec) => {
-      const step =
+      const startedStep =
         (exec.triggeredBy === 'alerting.v1.alertStatusChanged'
-          ? alertSteps.get(exec.id) ??
-            legacyAlertSteps.get(exec.id) ??
-            recoveredAlertSteps.get(exec.id)
+          ? alertSteps.get(exec.id) ?? legacyAlertSteps.get(exec.id)
           : exec.triggeredBy === 'slack2.message'
           ? slackSteps.get(exec.id)
           : undefined) ?? defaultSteps.get(exec.id);
+      const recoveredStep = recoveredAlertSteps.get(exec.id);
+      const isRecoveryFollowUp = startedStep === undefined && recoveredStep !== undefined;
+      const step = startedStep ?? recoveredStep;
       const input =
         step?.input && !Array.isArray(step.input) && typeof step.input === 'object'
           ? step.input
@@ -142,7 +147,9 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         finishedAt: exec.finishedAt,
         duration: exec.duration,
         triggeredBy: exec.triggeredBy,
-        title: getString(input['title']),
+        title: isRecoveryFollowUp
+          ? getRecoveredTitle(getString(input['rule_name']))
+          : getString(input['title']),
         message: getString(input['message']),
         investigationId: getString(output['investigation_id']),
         skipReason: skipReason ?? null,

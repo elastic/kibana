@@ -24,6 +24,10 @@ const mockUseRuleCatalog = jest.fn();
 jest.mock('../../../../data/rules/use_rule_catalog', () => ({
   useRuleCatalog: () => mockUseRuleCatalog(),
 }));
+const mockConnectedClusters = jest.fn();
+jest.mock('../../../../sandbox_connectors/use_connected_clusters', () => ({
+  useConnectedClusters: () => mockConnectedClusters(),
+}));
 jest.mock('../../../../settings/components/apps_section/use_relay_app_bindings', () => ({
   ...jest.requireActual('../../../../settings/components/apps_section/use_relay_app_bindings'),
   useAllRelayAppBindings: () => ({
@@ -71,6 +75,7 @@ const lastTrigger = () => onTriggerChange.mock.calls[onTriggerChange.mock.calls.
 describe('AutomationTriggerSection', () => {
   beforeEach(() => {
     mockUseRuleCatalog.mockReturnValue(defaultCatalog);
+    mockConnectedClusters.mockReturnValue({ clusters: [], known: false, none: false });
   });
 
   beforeEach(() => onTriggerChange.mockClear());
@@ -191,6 +196,50 @@ describe('AutomationTriggerSection', () => {
     expect(await screen.findByText('GMT+9')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Asia/Tokyo'));
     expect(lastTrigger()).toMatchObject({ kind: 'every', timezone: 'Asia/Tokyo' });
+  });
+
+  describe('remote Elastic alert', () => {
+    const remoteAlertOption = () => screen.findByRole('option', { name: /Remote Elastic alert/ });
+
+    it('is a trigger of its own, next to the alert trigger, once a cluster is connected', async () => {
+      mockConnectedClusters.mockReturnValue({
+        clusters: [{ id: 'es-a', name: 'Cluster A', connector_type_id: '.elasticsearch' }],
+        known: true,
+        none: false,
+      });
+      render(<TriggerSection />);
+      fireEvent.click(screen.getByTestId('automationAddTrigger'));
+      const option = await remoteAlertOption();
+      expect(option).not.toHaveAttribute('aria-disabled', 'true');
+      fireEvent.click(option);
+      expect(lastTrigger()).toEqual({ kind: 'webhook', mode: 'alert' });
+      expect(await screen.findByTestId('automationWebhookCluster')).toBeInTheDocument();
+    });
+
+    it('is disabled, and says why, while no cluster is connected', async () => {
+      mockConnectedClusters.mockReturnValue({ clusters: [], known: true, none: true });
+      render(<TriggerSection />);
+      fireEvent.click(screen.getByTestId('automationAddTrigger'));
+      const option = await remoteAlertOption();
+      expect(option).toHaveAttribute('aria-disabled', 'true');
+      expect(option).toHaveTextContent('Connect a cluster first');
+      fireEvent.click(option);
+      expect(onTriggerChange).not.toHaveBeenCalled();
+    });
+
+    it('is not disabled while the connected clusters are still unknown', async () => {
+      render(<TriggerSection />);
+      fireEvent.click(screen.getByTestId('automationAddTrigger'));
+      expect(await remoteAlertOption()).not.toHaveAttribute('aria-disabled', 'true');
+    });
+
+    it('no longer offers a request webhook', async () => {
+      render(<TriggerSection />);
+      fireEvent.click(screen.getByTestId('automationAddTrigger'));
+      await remoteAlertOption();
+      expect(screen.queryByRole('option', { name: /Webhook request/ })).not.toBeInTheDocument();
+      expect(screen.queryByText('Other tools')).not.toBeInTheDocument();
+    });
   });
 
   it('flags an invalid daily limit', async () => {

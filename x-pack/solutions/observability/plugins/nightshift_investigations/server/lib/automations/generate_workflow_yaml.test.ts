@@ -823,6 +823,174 @@ describe('generateWorkflowYaml', () => {
     });
   });
 
+  describe('webhook trigger', () => {
+    const webhookAutomation = (
+      row: Extract<NightshiftTriggerRow, { kind: 'webhook' }> = {
+        kind: 'webhook',
+        connectorId: 'connector-1',
+      }
+    ) => {
+      const automation = baseAutomation();
+      automation.trigger.rows = [row];
+      return automation;
+    };
+    const generate = (automation: NightshiftAutomationAttributes) =>
+      parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
+
+    it('triggers on the automation connector and rejects a row whose connector is not provisioned', () => {
+      expect(generate(webhookAutomation()).triggers).toEqual([
+        { type: 'inboundWebhook.received', 'connector-id': 'connector-1' },
+      ]);
+      expect(() => generate(webhookAutomation({ kind: 'webhook' }))).toThrow(
+        'needs its inbound webhook connector provisioned'
+      );
+    });
+
+    it('produces a workflow the schema accepts, in both modes', () => {
+      for (const mode of [undefined, 'generic', 'alert'] as const) {
+        const workflow = generate(
+          webhookAutomation({ kind: 'webhook', connectorId: 'connector-1', mode })
+        );
+        expect(WorkflowSchemaBase.safeParse(workflow).error).toBeUndefined();
+      }
+    });
+
+    describe('generic mode', () => {
+      it('starts a manual investigation with the posted body appended to the prompt', () => {
+        const automation = webhookAutomation();
+        automation.execution.promptTemplate = 'Look into this';
+        const [step] = generate(automation).steps;
+        expect(step.with).toMatchObject({
+          automation_id: 'auto-123',
+          subject_type: 'manual',
+          title: 'Test automation',
+        });
+        expect(step.with.message).toBe(
+          'Look into this\n\nPayload received by the inbound webhook:\n\n{{ event.body | json | truncate: 4000 }}'
+        );
+        expect(step.with.context).toBeUndefined();
+      });
+
+      it('keys runs on the automation, so a new post does not queue behind the previous one', () => {
+        expect(generate(webhookAutomation()).settings.concurrency.key).toBe('auto-123');
+      });
+    });
+
+    describe('alert mode', () => {
+      const alertAutomation = () =>
+        webhookAutomation({ kind: 'webhook', connectorId: 'connector-1', mode: 'alert' });
+
+      it('runs the investigation on the posted alert, passing its snapshot in the context', () => {
+        const [step] = generate(alertAutomation()).steps;
+        expect(step).toMatchObject({
+          type: 'nightshift.triggerInvestigation',
+          if: "${{ event.body.status != 'recovered' }}",
+          with: {
+            subject_type: 'alert',
+            subject_id: '{{ event.body.id }}',
+            title: '{{ event.body.name }}',
+            summary: 'Test automation',
+          },
+        });
+        expect(step.with.context.alerts).toEqual([
+          {
+            id: '{{ event.body.id }}',
+            rule_id: 'auto-123',
+            rule_name: '{{ event.body.name }}',
+            rule_type_id: 'external.webhook',
+            rule_category: 'External alert',
+            status: '{{ event.body.status }}',
+            start:
+              '{{ event.body.start | default: execution.startedAt | date: "%Y-%m-%dT%H:%M:%S.%L%:z" }}',
+          },
+        ]);
+      });
+
+      it('still hands the whole payload to the agent', () => {
+        const [step] = generate(alertAutomation()).steps;
+        expect(step.with.message).toContain('{{ event.body | json | truncate: 4000 }}');
+      });
+
+      describe('connected cluster', () => {
+        const withCluster = (name: string | undefined) => {
+          const automation = webhookAutomation({
+            kind: 'webhook',
+            connectorId: 'connector-1',
+            mode: 'alert',
+            clusterConnectorId: 'es-connector-1',
+            clusterConnectorName: name,
+          });
+          automation.execution.promptTemplate = 'Look into this';
+          return automation;
+        };
+
+        it('names the cluster connector between the prompt and the payload', () => {
+          const [step] = generate(withCluster('Cluster A')).steps;
+          const { message } = step.with;
+          expect(message.startsWith('Look into this\n\n')).toBe(true);
+          expect(message).toContain('the connector "Cluster A" (connector id es-connector-1)');
+          expect(message).toContain('connector_id "es-connector-1"');
+          expect(message.endsWith('{{ event.body | json | truncate: 4000 }}')).toBe(true);
+        });
+
+        it('falls back to the id when the name is unknown', () => {
+          const [step] = generate(withCluster(undefined)).steps;
+          expect(step.with.message).toContain('as connector id es-connector-1.');
+        });
+
+        it('drops braces from the name so it cannot be read as template syntax', () => {
+          const [step] = generate(withCluster('Cluster {{ event.body }}')).steps;
+          expect(step.with.message).toContain('the connector "Cluster  event.body"');
+          expect(step.with.message).not.toContain('{{ event.body }}")');
+        });
+
+        it('adds no hint without a cluster, or in generic mode', () => {
+          const [withoutCluster] = generate(alertAutomation()).steps;
+          expect(withoutCluster.with.message).not.toContain('connector_id');
+          const generic = webhookAutomation({
+            kind: 'webhook',
+            connectorId: 'connector-1',
+            mode: 'generic',
+            clusterConnectorId: 'es-connector-1',
+            clusterConnectorName: 'Cluster A',
+          });
+          const [genericStep] = generate(generic).steps;
+          expect(genericStep.with.message).not.toContain('connector_id');
+        });
+      });
+
+      it('follows up a recovery on the investigation holding the alert, and never starts one', () => {
+        const [, followUp] = generate(alertAutomation()).steps;
+        expect(followUp).toMatchObject({
+          name: 'follow_up_recovered_alert',
+          type: 'nightshift.followUpRecoveredAlert',
+          if: "${{ event.body.status == 'recovered' }}",
+          with: { alert_uuid: '{{ event.body.id }}', rule_id: 'auto-123' },
+        });
+      });
+
+      it('keys runs on the alert and its status, so a recovery is not dropped behind the activation', () => {
+        expect(generate(alertAutomation()).settings.concurrency.key).toBe(
+          'auto-123-{{ event.body.id }}-{{ event.body.status }}'
+        );
+      });
+
+      it('names its steps apart from the other triggers when combined with one', () => {
+        const automation = alertAutomation();
+        automation.trigger.rows.push({ kind: 'schedule', schedulePreset: 'daily', time: '09:00' });
+        const workflow = generate(automation);
+        expect(WorkflowSchemaBase.safeParse(workflow).error).toBeUndefined();
+        const guard = workflow.steps.find(
+          (step: { name: string }) => step.name === 'on_webhook_trigger'
+        );
+        expect(guard.steps.map((step: { name: string }) => step.name)).toEqual([
+          'trigger_investigation_webhook',
+          'follow_up_recovered_webhook_alert',
+        ]);
+      });
+    });
+  });
+
   describe('trigger_investigation step', () => {
     it('uses event.alert.uuid as subject_id for alert triggers', () => {
       const yaml = parse(

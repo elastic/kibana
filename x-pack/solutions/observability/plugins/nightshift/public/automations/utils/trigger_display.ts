@@ -16,6 +16,12 @@ export const triggerTypeLabels = {
   scheduled: i18n.translate('xpack.nightshift.automations.flyout.scheduledGroup', {
     defaultMessage: 'Scheduled',
   }),
+  webhook: i18n.translate('xpack.nightshift.automations.flyout.webhookTrigger', {
+    defaultMessage: 'Webhook request',
+  }),
+  webhookAlert: i18n.translate('xpack.nightshift.automations.flyout.webhookAlertTrigger', {
+    defaultMessage: 'Remote Elastic alert',
+  }),
 };
 
 export const slackTriggerLabels: Record<SlackTriggerKind, string> = {
@@ -26,7 +32,9 @@ export const slackTriggerLabels: Record<SlackTriggerKind, string> = {
 
 export const TRIGGER_LABEL_ORDER = [
   triggerTypeLabels.alertTriggered,
+  triggerTypeLabels.webhookAlert,
   ...Object.values(slackTriggerLabels),
+  triggerTypeLabels.webhook,
   triggerTypeLabels.scheduled,
 ];
 
@@ -43,11 +51,19 @@ export const getTriggerDisplay = (
   if (row.kind === 'schedule') {
     return { label: triggerTypeLabels.scheduled, icon: 'calendar' };
   }
+  if (row.kind === 'webhook') {
+    return row.mode === 'alert'
+      ? { label: triggerTypeLabels.webhookAlert, icon: 'logoElastic' }
+      : { label: triggerTypeLabels.webhook, icon: 'link' };
+  }
   return { label: triggerTypeLabels.alertTriggered, icon: 'logoElastic' };
 };
 
 export const getTriggerIcon = (label: string): string => {
-  if (label === triggerTypeLabels.alertTriggered) return 'logoElastic';
+  if (label === triggerTypeLabels.alertTriggered || label === triggerTypeLabels.webhookAlert) {
+    return 'logoElastic';
+  }
   if (label === triggerTypeLabels.scheduled) return 'calendar';
+  if (label === triggerTypeLabels.webhook) return 'link';
   return 'logoSlack';
 };

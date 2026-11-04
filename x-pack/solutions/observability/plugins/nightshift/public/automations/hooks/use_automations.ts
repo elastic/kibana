@@ -161,7 +161,10 @@ export const useCreateAutomation = (isClone = false) => {
   const { nightshiftInvestigations, notifications } = useKibana().services;
   const investigationsClient = nightshiftInvestigations?.investigationsClient;
 
-  return useAutomationMutation<CreateAutomationBody, { id: string }>(
+  return useAutomationMutation<
+    CreateAutomationBody,
+    { id: string; webhook?: { connectorId: string; ingestToken: string } }
+  >(
     (body) => {
       if (!investigationsClient) {
         throw new Error('Nightshift investigations plugin is unavailable');

@@ -16,7 +16,11 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useCreateAutomation } from '../../hooks/use_automations';
+import { getInboundWebhookUrl } from '../../utils/webhook_url';
+import { getWebhookExamplePayload } from '../../utils/webhook_example';
+import { WebhookCredentialsModal } from './webhook_credentials_modal';
 import {
   createAutomationFormValues,
   type AutomationFormValues,
@@ -78,6 +82,11 @@ export const CreateAutomationFlyout = ({
   const [values, setValues] = useState(initialValues);
   const [isNameInvalid, setIsNameInvalid] = useState(false);
   const [isDiscardOpen, setIsDiscardOpen] = useState(false);
+  // Held until dismissed: the token is only in this response, so leaving would lose it.
+  const [createdWebhook, setCreatedWebhook] = useState<
+    { id: string; url: string; token: string; payload: string } | undefined
+  >();
+  const { http } = useKibana().services;
   const titleId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
   const createAutomation = useCreateAutomation();
@@ -97,7 +106,20 @@ export const CreateAutomationFlyout = ({
       return;
     }
     createAutomation.mutate(toAutomationRequestBody({ ...values, isEnabled, trigger }), {
-      onSuccess: ({ id }) => onCreated(id),
+      onSuccess: ({ id, webhook }) => {
+        if (webhook) {
+          setCreatedWebhook({
+            id,
+            url: getInboundWebhookUrl(http, webhook.connectorId),
+            token: webhook.ingestToken,
+            payload: getWebhookExamplePayload(
+              trigger.kind === 'webhook' ? trigger.mode : 'generic'
+            ),
+          });
+        } else {
+          onCreated(id);
+        }
+      },
     });
   };
 
@@ -132,6 +154,14 @@ export const CreateAutomationFlyout = ({
         saveBlocker={saveBlocker}
         onSave={save}
       />
+      {createdWebhook && (
+        <WebhookCredentialsModal
+          url={createdWebhook.url}
+          token={createdWebhook.token}
+          payload={createdWebhook.payload}
+          onClose={() => onCreated(createdWebhook.id)}
+        />
+      )}
       {isDiscardOpen && (
         <EuiConfirmModal
           aria-label={labels.discardTitle}

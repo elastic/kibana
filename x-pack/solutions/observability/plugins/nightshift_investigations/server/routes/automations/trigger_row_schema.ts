@@ -41,5 +41,12 @@ export const triggerRowSchema = lazySchema(() =>
           ),
         { message: 'A Slack trigger needs at least one of channels, users, bots or messageFilter' }
       ),
+    // The webhook's own connector is provisioned by the server, so a request carries no id for it.
+    // `clusterConnectorId` is a different connector: the cluster an alert-mode webhook reports on.
+    z.object({
+      kind: z.literal('webhook'),
+      mode: z.enum(['generic', 'alert']).optional(),
+      clusterConnectorId: z.string().min(1).max(512).optional(),
+    }),
   ])
 );

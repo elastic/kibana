@@ -66,6 +66,56 @@ export const triggerLabels = {
   every: i18n.translate('xpack.nightshift.automations.flyout.everyOption', {
     defaultMessage: 'Every…',
   }),
+  remoteAlertSentence: i18n.translate('xpack.nightshift.automations.flyout.remoteAlertSentence', {
+    defaultMessage: 'When a remote Elastic alert is posted to this automation’s webhook URL',
+  }),
+  webhookRequestSentence: i18n.translate(
+    'xpack.nightshift.automations.flyout.webhookRequestSentence',
+    { defaultMessage: 'When a request is posted to this automation’s webhook URL' }
+  ),
+  remoteAlertUnavailable: i18n.translate(
+    'xpack.nightshift.automations.flyout.remoteAlertUnavailable',
+    { defaultMessage: 'Connect a cluster first' }
+  ),
+  webhookAlertHelp: i18n.translate('xpack.nightshift.automations.flyout.webhookAlertHelp', {
+    defaultMessage:
+      'Post id, name and status ("active" or "recovered"), and optionally start as an ISO 8601 time. Posting the same id again continues the same investigation, and a recovery follows it up. Any other fields are passed to the agent as they are.',
+  }),
+  webhookCluster: i18n.translate('xpack.nightshift.automations.flyout.webhookCluster', {
+    defaultMessage: 'Cluster the alerts come from',
+  }),
+  webhookClusterPlaceholder: i18n.translate(
+    'xpack.nightshift.automations.flyout.webhookClusterPlaceholder',
+    { defaultMessage: 'Select a connected cluster' }
+  ),
+  webhookClusterHelp: i18n.translate('xpack.nightshift.automations.flyout.webhookClusterHelp', {
+    defaultMessage:
+      'The investigation is told to query this cluster, through its External Elasticsearch connector, when it looks into an alert.',
+  }),
+  webhookClusterNone: i18n.translate('xpack.nightshift.automations.flyout.webhookClusterNone', {
+    defaultMessage:
+      'Alert webhooks need a connected cluster. Add an External Elasticsearch connector for it under Connectors first.',
+  }),
+  webhookClusterMissing: i18n.translate(
+    'xpack.nightshift.automations.flyout.webhookClusterMissing',
+    {
+      defaultMessage:
+        'The connector this automation was saved with is no longer connected to the investigation agent. Choose another, or add it back.',
+    }
+  ),
+  webhookUrlPending: i18n.translate('xpack.nightshift.automations.flyout.webhookUrlPending', {
+    defaultMessage: 'The URL and token are generated when you save, and the token is shown once.',
+  }),
+  webhookUrlLabel: i18n.translate('xpack.nightshift.automations.flyout.webhookUrlLabel', {
+    defaultMessage: 'Webhook URL',
+  }),
+  webhookDailyLimitHelp: i18n.translate(
+    'xpack.nightshift.automations.flyout.webhookDailyLimitHelp',
+    {
+      defaultMessage:
+        "When reached, new requests aren't investigated until the limit resets at 12:00 AM UTC. Skipped requests appear in this automation's history.",
+    }
+  ),
   whenAnAlert: i18n.translate('xpack.nightshift.automations.flyout.whenAnAlert', {
     defaultMessage: 'When an alert',
   }),

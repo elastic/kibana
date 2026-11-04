@@ -11,10 +11,12 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
+  EuiText,
   useEuiTheme,
   type EuiSelectableOption,
 } from '@elastic/eui';
 import type { SlackTriggerKind, TriggerFormValues } from '../automation_form_values';
+import { useConnectedClusters } from '../../../../sandbox_connectors/use_connected_clusters';
 import { triggerLabels } from './translations';
 import { slackTriggerLabels, triggerTypeLabels } from '../../../utils/trigger_display';
 
@@ -29,6 +31,9 @@ export const TriggerPicker = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
+  // A remote Elastic alert is investigated by querying the cluster it came from, so the trigger
+  // is unavailable until one is connected.
+  const { none: noClusters } = useConnectedClusters();
   const groupLabelCss = { paddingInline: euiTheme.size.s };
   const options: Array<EuiSelectableOption<{ kind?: TriggerFormValues['kind'] }>> = [
     { label: triggerLabels.elastic, isGroupLabel: true, css: groupLabelCss },
@@ -36,6 +41,19 @@ export const TriggerPicker = ({
       label: triggerTypeLabels.alertTriggered,
       kind: 'alert',
       prepend: <EuiIcon type="logoElastic" aria-hidden={true} />,
+    },
+    {
+      label: triggerTypeLabels.webhookAlert,
+      kind: 'webhook',
+      disabled: noClusters,
+      prepend: <EuiIcon type="logoElastic" aria-hidden={true} />,
+      ...(noClusters && {
+        append: (
+          <EuiText size="xs" color="subdued">
+            {triggerLabels.remoteAlertUnavailable}
+          </EuiText>
+        ),
+      }),
     },
     { label: triggerLabels.slack, isGroupLabel: true, css: groupLabelCss },
     ...(Object.keys(slackTriggerLabels) as SlackTriggerKind[]).map((kind) => ({

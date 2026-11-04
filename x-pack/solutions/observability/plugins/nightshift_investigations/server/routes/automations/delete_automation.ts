@@ -11,6 +11,10 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE } from '../../saved_objects/automation_budget_saved_object';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
+import {
+  deleteInboundWebhook,
+  getWebhookConnectorId,
+} from '../../lib/automations/inbound_webhook_connector';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
 
 export const deleteAutomationRoute = createNightshiftInvestigationsServerRoute({
@@ -31,6 +35,7 @@ export const deleteAutomationRoute = createNightshiftInvestigationsServerRoute({
     params,
     getAutomationsSoClient,
     getWorkflowsManagement,
+    getActionsClient,
     getInvestigatorServiceAccountService,
     context,
   }) => {
@@ -71,6 +76,15 @@ export const deleteAutomationRoute = createNightshiftInvestigationsServerRoute({
         } catch {
           // Intentionally swallowed — the SO delete below is the authoritative cleanup.
         }
+      }
+    }
+
+    // After the workflow, so the endpoint is revoked only once nothing is listening on it.
+    const webhookConnectorId = getWebhookConnectorId(existing.attributes.trigger);
+    if (webhookConnectorId) {
+      const actionsClient = await getActionsClient(request);
+      if (actionsClient) {
+        await deleteInboundWebhook(actionsClient, webhookConnectorId);
       }
     }
 

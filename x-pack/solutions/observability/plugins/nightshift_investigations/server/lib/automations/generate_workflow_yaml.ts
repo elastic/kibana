@@ -18,6 +18,7 @@ export const ELASTIC_APPS_SLACK_CONNECTOR_ID = 'elastic-apps-slack';
 
 const ALERT_TRIGGER_TYPE = 'alerting.v1.alertStatusChanged';
 const SLACK_MESSAGE_TRIGGER_TYPE = 'slack2.message';
+const WEBHOOK_TRIGGER_TYPE = 'inboundWebhook.received';
 const AUTOMATION_TIMEOUT_MARGIN_SECONDS = 60;
 
 // Top-level messages only, since replies are handled by the managed Slack thread workflow. Edits
@@ -45,6 +46,11 @@ const SLACK_MESSAGE_PROMPT = `Slack message from {{ event.botName | default: eve
 
 type AlertRow = Extract<NightshiftTriggerRow, { kind: 'alert' }>;
 type SlackRow = Extract<NightshiftTriggerRow, { kind: 'slack' }>;
+type WebhookRow = Extract<NightshiftTriggerRow, { kind: 'webhook' }>;
+
+// The posted body is the only context a webhook-triggered run has, so it is appended to the prompt.
+// Truncated like the Slack text, to stay under the investigation step's message limit.
+const WEBHOOK_PAYLOAD_PROMPT = `Payload received by the inbound webhook:\n\n{{ event.body | json | truncate: ${SLACK_MESSAGE_TEXT_LIMIT} }}`;
 
 // Maps our OverlapPolicy type to workflow engine concurrency strategy strings.
 const OVERLAP_POLICY_TO_STRATEGY: Record<OverlapPolicy, string> = {
@@ -67,12 +73,20 @@ export function generateWorkflowYaml({
   const alertRows = automation.trigger.rows.filter((row): row is AlertRow => row.kind === 'alert');
   const slackRows = automation.trigger.rows.filter(isSlackRow);
   const schedule = automation.trigger.rows.find((row) => row.kind === 'schedule');
+  const webhookRow = automation.trigger.rows.find(isWebhookRow);
   const hasMultipleTriggers =
-    Number(alertRows.length > 0) + Number(slackRows.length > 0) + Number(Boolean(schedule)) > 1;
+    Number(alertRows.length > 0) +
+      Number(slackRows.length > 0) +
+      Number(Boolean(schedule)) +
+      Number(Boolean(webhookRow)) >
+    1;
   const alertWorkflow =
-    alertRows.length > 0 || (slackRows.length === 0 && !schedule)
+    alertRows.length > 0 || (slackRows.length === 0 && !schedule && !webhookRow)
       ? generateAlertWorkflow(automationId, automation, alertRows, hasMultipleTriggers)
       : undefined;
+  const webhookWorkflow = webhookRow
+    ? generateWebhookWorkflow(automationId, automation, webhookRow, hasMultipleTriggers)
+    : undefined;
   const slackWorkflow =
     slackRows.length > 0
       ? generateSlackWorkflow(automationId, automation, slackRows, hasMultipleTriggers)
@@ -80,7 +94,7 @@ export function generateWorkflowYaml({
   const scheduledWorkflow = schedule
     ? generateScheduledWorkflow(automationId, automation, schedule)
     : undefined;
-  const workflowParts = [scheduledWorkflow, alertWorkflow, slackWorkflow].filter(
+  const workflowParts = [scheduledWorkflow, alertWorkflow, slackWorkflow, webhookWorkflow].filter(
     (part) => part !== undefined
   );
 
@@ -100,7 +114,12 @@ export function generateWorkflowYaml({
         ? { timeout: `${automation.runtime.timeoutSeconds + AUTOMATION_TIMEOUT_MARGIN_SECONDS}s` }
         : {}),
       concurrency: {
-        key: buildWorkflowConcurrencyKey(automationId, alertRows.length > 0, slackRows.length > 0),
+        key: buildWorkflowConcurrencyKey(
+          automationId,
+          alertRows.length > 0,
+          slackRows.length > 0,
+          webhookRow?.mode === 'alert'
+        ),
         strategy,
         max: 1,
       },
@@ -108,6 +127,7 @@ export function generateWorkflowYaml({
     triggers: [
       ...(alertWorkflow?.triggers ?? []),
       ...(slackWorkflow?.triggers ?? []),
+      ...(webhookWorkflow?.triggers ?? []),
       ...(scheduledWorkflow?.triggers ?? []),
     ],
     steps: workflowParts.flatMap((part) =>
@@ -248,7 +268,7 @@ function generateScheduledWorkflow(
   };
 }
 
-type TriggerKind = 'alert' | 'slack' | 'schedule';
+type TriggerKind = 'alert' | 'slack' | 'schedule' | 'webhook';
 
 /**
  * One investigation per alert and per Slack message, so a new one does not cancel or drop the
@@ -270,11 +290,22 @@ function buildConcurrencyKey(
 
 // A run only has the payload of the trigger that fired, and a missing variable renders as empty,
 // so the key can name both kinds.
+const WEBHOOK_ALERT_CONCURRENCY_SUFFIX = '{{ event.body.id }}-{{ event.body.status }}';
+
 function buildWorkflowConcurrencyKey(
   automationId: string,
   hasAlertRows: boolean,
-  hasSlackRows: boolean
+  hasSlackRows: boolean,
+  hasWebhookAlertRow: boolean
 ): string {
+  if (hasWebhookAlertRow) {
+    const suffixes = [
+      hasAlertRows ? ALERT_CONCURRENCY_SUFFIX : '',
+      hasSlackRows ? SLACK_CONCURRENCY_SUFFIX : '',
+      WEBHOOK_ALERT_CONCURRENCY_SUFFIX,
+    ];
+    return `${automationId}-${suffixes.join('')}`;
+  }
   if (hasAlertRows && hasSlackRows) {
     return `${automationId}-${ALERT_CONCURRENCY_SUFFIX}${SLACK_CONCURRENCY_SUFFIX}`;
   }
@@ -373,6 +404,151 @@ function buildNotificationDestinations(
 
 function isSlackRow(row: NightshiftTriggerRow): row is SlackRow {
   return row.kind === 'slack';
+}
+
+function isWebhookRow(row: NightshiftTriggerRow): row is WebhookRow {
+  return row.kind === 'webhook';
+}
+
+function generateWebhookWorkflow(
+  automationId: string,
+  automation: NightshiftAutomationAttributes,
+  webhookRow: WebhookRow,
+  hasMultipleTriggers: boolean
+) {
+  if (!webhookRow.connectorId) {
+    throw new Error('A webhook trigger needs its inbound webhook connector provisioned first');
+  }
+  const notificationDestinations = buildNotificationDestinations(
+    automationId,
+    automation,
+    'webhook'
+  );
+  const isAlert = webhookRow.mode === 'alert';
+  const clusterHint =
+    isAlert && webhookRow.clusterConnectorId
+      ? buildClusterHint(webhookRow.clusterConnectorId, webhookRow.clusterConnectorName)
+      : undefined;
+  const message = [automation.execution.promptTemplate, clusterHint, WEBHOOK_PAYLOAD_PROMPT]
+    .filter(Boolean)
+    .join('\n\n');
+  const timeout =
+    automation.runtime.timeoutSeconds !== undefined
+      ? { timeout_seconds: automation.runtime.timeoutSeconds }
+      : {};
+  const destinations = notificationDestinations ? { notificationDestinations } : {};
+
+  return {
+    kind: 'webhook' as const,
+    triggers: [{ type: WEBHOOK_TRIGGER_TYPE, 'connector-id': webhookRow.connectorId }],
+    steps: isAlert
+      ? [
+          {
+            name: hasMultipleTriggers ? 'trigger_investigation_webhook' : 'trigger_investigation',
+            type: 'nightshift.triggerInvestigation',
+            // Anything but a recovery starts or continues the investigation holding this alert id.
+            if: WEBHOOK_ALERT_ACTIVE_STEP_CONDITION,
+            with: {
+              automation_id: automationId,
+              subject_type: 'alert',
+              subject_id: '{{ event.body.id }}',
+              title: '{{ event.body.name }}',
+              summary: automation.name,
+              trigger_type: 'automatic',
+              message,
+              context: buildWebhookAlertContext(automationId),
+              ...timeout,
+              ...destinations,
+            },
+          },
+          {
+            ...buildWebhookRecoveredAlertStep(automationId),
+            name: hasMultipleTriggers
+              ? 'follow_up_recovered_webhook_alert'
+              : 'follow_up_recovered_alert',
+          },
+        ]
+      : [
+          {
+            name: hasMultipleTriggers ? 'trigger_investigation_webhook' : 'trigger_investigation',
+            type: 'nightshift.triggerInvestigation',
+            with: {
+              automation_id: automationId,
+              // An external payload has no Kibana subject to point at yet.
+              subject_type: 'manual',
+              subject_id: DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
+              title: automation.name,
+              summary: automation.name,
+              trigger_type: 'automatic',
+              message,
+              ...timeout,
+              ...destinations,
+            },
+          },
+        ],
+  };
+}
+
+/**
+ * Tells the agent which connected cluster the alert comes from. The name goes into a templated
+ * message, so braces are dropped to keep a connector name from being read as template syntax.
+ */
+function buildClusterHint(connectorId: string, connectorName: string | undefined): string {
+  const name = connectorName?.replace(/[{}]/g, '').trim();
+  const label = name
+    ? `the connector "${name}" (connector id ${connectorId})`
+    : `connector id ${connectorId}`;
+  return (
+    `This alert was raised on a remote Elasticsearch cluster that is connected to this cluster as ${label}. ` +
+    `To investigate it, query that cluster from the sandbox: pass connector_id "${connectorId}" to ` +
+    `nightshift_sandbox_bash and send requests to $CONNECTOR_CONFIG_URL with the header ` +
+    `"Authorization: $CONNECTOR_HEADER_AUTHORIZATION".`
+  );
+}
+
+const WEBHOOK_ALERT_ACTIVE_STEP_CONDITION = "${{ event.body.status != 'recovered' }}";
+
+// The fixed payload an alert-mode webhook accepts is `id`, `name`, `status` and an optional `start`.
+// The rule fields of an alert snapshot have no counterpart in an external payload, so they are
+// constants: the automation stands in for the rule, and the type says where the alert came from.
+const WEBHOOK_ALERT_RULE_TYPE_ID = 'external.webhook';
+const WEBHOOK_ALERT_RULE_CATEGORY = 'External alert';
+
+function buildWebhookAlertContext(automationId: string) {
+  return {
+    alerts: [
+      {
+        id: '{{ event.body.id }}',
+        rule_id: automationId,
+        rule_name: '{{ event.body.name }}',
+        rule_type_id: WEBHOOK_ALERT_RULE_TYPE_ID,
+        rule_category: WEBHOOK_ALERT_RULE_CATEGORY,
+        status: '{{ event.body.status }}',
+        start:
+          '{{ event.body.start | default: execution.startedAt | date: "%Y-%m-%dT%H:%M:%S.%L%:z" }}',
+      },
+    ],
+  };
+}
+
+/**
+ * Continues the open investigation that holds a recovered external alert with the recovery brief,
+ * or does nothing when none does. Like the alert version it never starts an investigation.
+ */
+function buildWebhookRecoveredAlertStep(automationId: string) {
+  return {
+    type: 'nightshift.followUpRecoveredAlert',
+    if: "${{ event.body.status == 'recovered' }}",
+    with: {
+      alert_uuid: '{{ event.body.id }}',
+      alert_id: '{{ event.body.id }}',
+      alert_start: '{{ event.body.start }}',
+      recovered_at: '{{ execution.startedAt }}',
+      rule_id: automationId,
+      rule_name: '{{ event.body.name }}',
+      rule_type_id: WEBHOOK_ALERT_RULE_TYPE_ID,
+    },
+  };
 }
 
 /**
