@@ -7,21 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import chalk from 'chalk';
 import execa from 'execa';
+import type { ScoutTestTarget } from '@kbn/scout-info';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { describeServerSet, describeTarget } from './labels';
+import type { PinnedConfig } from './pins';
+import { onBack, select } from './prompt';
 
 export interface RunningServers {
-  pid: string;
+  pid: number;
   arch?: string;
   domain?: string;
   configSet: string;
 }
 
+export type ServersMode = 'running' | 'with-run';
+
+const STOP_TIMEOUT_MS = 120_000;
+
 const getFlag = (args: string[], name: string) => {
   const index = args.findIndex((arg) => arg === `--${name}` || arg.startsWith(`--${name}=`));
   return index === -1 ? undefined : args[index].split('=')[1] ?? args[index + 1];
 };
-
-const STOP_TIMEOUT_MS = 120_000;
 
 /** `node scripts/scout start-server` processes with the target they were started for */
 export const getRunningServers = async (): Promise<RunningServers[]> => {
@@ -33,7 +41,7 @@ export const getRunningServers = async (): Promise<RunningServers[]> => {
     }
     return [
       {
-        pid,
+        pid: Number(pid),
         arch: getFlag(args, 'arch'),
         domain: getFlag(args, 'domain'),
         configSet: getFlag(args, 'serverConfigSet') ?? 'default',
@@ -42,28 +50,134 @@ export const getRunningServers = async (): Promise<RunningServers[]> => {
   });
 };
 
-const isGroupRunning = async (pgid: string) =>
-  (await execa('pgrep', ['-g', pgid], { reject: false })).exitCode === 0;
+export const isServingConfig = (
+  server: RunningServers,
+  { configSet }: PinnedConfig,
+  { arch, domain }: Pick<ScoutTestTarget, 'arch' | 'domain'>
+) => server.configSet === configSet && server.arch === arch && server.domain === domain;
+
+const describeServers = (servers: RunningServers[]) =>
+  servers
+    .map(
+      (server) =>
+        `${describeTarget(server)} · ${describeServerSet(server.configSet)} (PID ${server.pid})`
+    )
+    .join(', ');
+
+/** start-server with ES and Kibana and everything else they started */
+const getProcessTree = async (pid: number) => {
+  const { stdout } = await execa('ps', ['-ax', '-o', 'pid=,ppid=']);
+  const children = new Map<number, number[]>();
+  for (const line of stdout.split('\n')) {
+    const [child, parent] = line.trim().split(/\s+/).map(Number);
+    children.set(parent, [...(children.get(parent) ?? []), child]);
+  }
+  const tree = [pid];
+  for (let index = 0; index < tree.length; index++) {
+    tree.push(...(children.get(tree[index]) ?? []));
+  }
+  return tree;
+};
+
+const isAlive = (pid: number) => {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    return error.code === 'EPERM';
+  }
+};
 
 /** Stops start-server with ES and Kibana, and waits until they have exited */
-export const stopServers = async (servers: RunningServers[]) => {
-  const groups = await Promise.all(
-    servers.map(async ({ pid }) => {
-      const { stdout } = await execa('ps', ['-o', 'pgid=', '-p', pid], { reject: false });
-      // ES and Kibana outlive start-server on SIGTERM, so stop its whole process group when it leads one
-      const pgid = stdout.trim();
-      process.kill(pgid === pid ? -Number(pid) : Number(pid), 'SIGTERM');
-      return pgid;
-    })
-  );
+const stopServers = async (servers: RunningServers[]) => {
+  // ES and Kibana outlive start-server on SIGTERM, so each of them gets it too
+  const pids = (await Promise.all(servers.map(({ pid }) => getProcessTree(pid)))).flat();
+  for (const pid of pids) {
+    try {
+      process.kill(pid, 'SIGTERM');
+    } catch {
+      // already exited
+    }
+  }
 
   const deadline = Date.now() + STOP_TIMEOUT_MS;
-  while (Date.now() < deadline) {
-    const running = await Promise.all(groups.map(isGroupRunning));
-    if (!running.some(Boolean)) {
-      return;
+  while (pids.some(isAlive)) {
+    if (Date.now() > deadline) {
+      throw new Error(`Scout servers did not stop within ${STOP_TIMEOUT_MS / 1000}s`);
     }
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
-  throw new Error(`Scout servers did not stop within ${STOP_TIMEOUT_MS / 1000}s`);
 };
+
+const findServers = async (config: PinnedConfig, target: ScoutTestTarget) => {
+  const servers = await getRunningServers();
+  return { servers, matching: servers.find((server) => isServingConfig(server, config, target)) };
+};
+
+const askAboutServers = async (
+  log: ToolingLog,
+  config: PinnedConfig,
+  target: ScoutTestTarget
+): Promise<ServersMode | undefined> => {
+  const { servers, matching } = await findServers(config, target);
+  if (matching) {
+    log.write(chalk.dim(`Using the Scout servers running for this target (PID ${matching.pid})`));
+    return 'running';
+  }
+  if (servers.length) {
+    // servers for this target would fail to start on the ports they hold
+    log.write(
+      chalk.yellow(
+        `Scout servers are running for ${describeServers(
+          servers
+        )}, these tests need ${describeTarget(target)} · ${describeServerSet(config.configSet)}`
+      )
+    );
+    const stop = await select('Stop them?', [
+      { label: 'Yes, stop them', value: true },
+      { label: 'Cancel', value: false },
+    ]);
+    if (!stop) {
+      return undefined;
+    }
+    log.write(chalk.dim('Stopping Scout servers…'));
+    await stopServers(servers);
+  }
+
+  const mode = await select<ServersMode | 'other-terminal'>('Servers', [
+    { label: 'Start them in another terminal', value: 'other-terminal', hint: 'fast reruns' },
+    { label: 'Start them with the tests', value: 'with-run', hint: 'stopped after each run' },
+  ]);
+  if (mode !== 'other-terminal') {
+    return mode;
+  }
+
+  const startServer = [
+    'node scripts/scout start-server',
+    `--arch ${target.arch} --domain ${target.domain}`,
+    ...(config.configSet === 'default' ? [] : [`--serverConfigSet ${config.configSet}`]),
+  ].join(' ');
+  log.write(
+    `\nRun in another terminal and wait until the servers are ready:\n  ${chalk.cyan(
+      startServer
+    )}\n`
+  );
+
+  for (;;) {
+    const ready = await select('Servers ready?', [
+      { label: 'Yes', value: true },
+      { label: 'Cancel', value: false },
+    ]);
+    if (!ready) {
+      return undefined;
+    }
+    if ((await findServers(config, target)).matching) {
+      return 'running';
+    }
+    log.write(chalk.yellow(`No Scout servers for ${describeTarget(target)} found yet`));
+  }
+};
+
+/** Finds or starts servers for the tests; Esc or Cancel skips the run */
+export const prepareServers = (log: ToolingLog, config: PinnedConfig, target: ScoutTestTarget) =>
+  onBack(askAboutServers(log, config, target), undefined);

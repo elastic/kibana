@@ -17,8 +17,9 @@ import { validateAndProcessTestFiles } from '../../common/utils';
 
 export interface PickableConfig {
   path: string;
-  label: string;
   module: string;
+  /** Path relative to the module root */
+  file: string;
   group: string;
   configSet: string;
   category: string;
@@ -37,8 +38,8 @@ export const getConfigs = (): PickableConfig[] =>
   testableModules.allIncludingConfigs.flatMap((module) =>
     module.configs.map((config) => ({
       path: config.path,
-      label: `${module.name} · ${Path.relative(module.root, config.path)}`,
       module: module.name,
+      file: Path.relative(module.root, config.path),
       group: module.group,
       configSet: config.server.configSet,
       category: config.category,
@@ -46,7 +47,7 @@ export const getConfigs = (): PickableConfig[] =>
     }))
   );
 
-export const getConfigForSpec = (spec: string): string | undefined => {
+const getConfigForSpec = (spec: string): string | undefined => {
   try {
     return validateAndProcessTestFiles(spec).configPath;
   } catch {
@@ -76,17 +77,8 @@ const getMergeBase = async () => {
   return 'HEAD';
 };
 
-const SCOUT_DIR = /^(.*\/test\/scout[^/]*)\//;
-
-export interface ChangedTests {
-  /** Changed specs by their config */
-  specs: Map<string, string[]>;
-  /** Other changed files in Scout test dirs, e.g. page objects and fixtures */
-  helpers: string[];
-}
-
-/** Scout test files changed on this branch or not committed yet */
-export const getChangedTests = async (): Promise<ChangedTests> => {
+/** TypeScript files changed on this branch or not committed yet */
+export const getChangedFiles = async (): Promise<string[]> => {
   const [changed, untracked] = await Promise.all([
     getMergeBase().then((base) => git(['diff', '--name-only', base, '--', '*.ts'])),
     // `git status` finds untracked files faster than `git ls-files --others`
@@ -94,34 +86,25 @@ export const getChangedTests = async (): Promise<ChangedTests> => {
       lines.filter((line) => line.startsWith('??')).map((line) => line.slice(3))
     ),
   ]);
-
-  const specs = new Map<string, string[]>();
-  const helpers: string[] = [];
-  for (const file of new Set([...changed, ...untracked])) {
-    if (!SCOUT_DIR.test(file) || !Fs.existsSync(Path.resolve(REPO_ROOT, file))) {
-      continue;
-    }
-    if (!file.endsWith('.spec.ts')) {
-      helpers.push(file);
-      continue;
-    }
-    const config = getConfigForSpec(file);
-    if (config) {
-      specs.set(config, [...(specs.get(config) ?? []), file]);
-    }
-  }
-  return { specs, helpers };
+  return [...new Set([...changed, ...untracked])].filter((file) =>
+    Fs.existsSync(Path.resolve(REPO_ROOT, file))
+  );
 };
 
-/** Configs closest to a changed helper: from its own dir up to the Scout test dir */
-export const getConfigsForHelper = (helper: string, configs: PickableConfig[]) => {
-  const scoutDir = helper.match(SCOUT_DIR)?.[1];
-  for (let dir = Path.dirname(helper); scoutDir && dir.startsWith(scoutDir); ) {
-    const found = configs.filter(({ path }) => path.startsWith(`${dir}/`));
-    if (found.length) {
-      return found;
-    }
-    dir = Path.dirname(dir);
-  }
-  return [];
-};
+export interface ChangedConfig {
+  config: PickableConfig;
+  specs: string[];
+  /** Other changed files in the config dir, e.g. page objects and fixtures */
+  helpers: string[];
+}
+
+export const getChangedConfigs = (files: string[], configs: PickableConfig[]): ChangedConfig[] =>
+  configs.flatMap((config) => {
+    const dir = `${Path.dirname(config.path)}/`;
+    const inDir = files.filter((file) => file.startsWith(dir));
+    const specs = inDir.filter(
+      (file) => file.endsWith('.spec.ts') && getConfigForSpec(file) === config.path
+    );
+    const helpers = inDir.filter((file) => !file.endsWith('.spec.ts'));
+    return specs.length || helpers.length ? [{ config, specs, helpers }] : [];
+  });

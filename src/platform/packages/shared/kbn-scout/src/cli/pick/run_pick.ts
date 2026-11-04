@@ -7,574 +7,66 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Fs from 'fs';
-import Path from 'path';
-import Readline from 'readline';
-import { stripVTControlCharacters } from 'util';
 import chalk from 'chalk';
-import execa from 'execa';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { ScoutTestTarget } from '@kbn/scout-info';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { ChangedTests, PickableConfig } from './configs';
-import { getChangedTests, getConfigs, getConfigsForHelper, getSpecs } from './configs';
-import type { PinnedConfig } from './pins';
-import { readState, toPinned, updateState } from './pins';
-import type { RunningServers } from './servers';
-import { getRunningServers, stopServers } from './servers';
-import { getShownPrompts, GoBack, multiSelect, select } from './prompt';
+import { describeRun } from './labels';
+import type { Selection } from './pick_tests';
+import { pickTests } from './pick_tests';
+import { updateState } from './pins';
+import { onBack, select } from './prompt';
+import { runTests } from './run_tests';
+import { prepareServers } from './servers';
 
-const LOG_FILE = '.scout/logs/scout_pick.log';
+type Next = 'again' | 'failed' | 'settings' | 'pick' | 'exit';
 
-interface Selection {
-  config: PinnedConfig;
-  specs: string[];
-  target: ScoutTestTarget;
-  verbose: boolean;
-  headed: boolean;
-}
+const describeSettings = ({ config, headed, verbose }: Selection) =>
+  [
+    ...(config.category === 'api' ? [] : [headed ? 'browser shown' : 'headless']),
+    verbose ? 'all logs' : 'test results only',
+  ].join(' · ');
 
-type ServersMode = 'running' | 'with-run';
-
-const describeTarget = (arch?: string, domain?: string, configSet = 'default') =>
-  `${arch} · ${domain}${configSet === 'default' ? '' : ` (${configSet} servers)`}`;
-
-const describeServers = (servers: RunningServers[]) =>
-  servers
-    .map(
-      ({ pid, arch, domain, configSet }) =>
-        `${describeTarget(arch, domain, configSet)} (PID ${pid})`
-    )
-    .join(', ');
-
-const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? '' : 's'}`;
-
-const unique = (values: string[]) => [...new Set(values)].sort();
-
-/** Dims the parts of a config path that all configs share */
-const highlightPath = (path: string) =>
-  path
-    .split('/')
-    .map((part) => {
-      if (part === 'test' || part === 'scout' || part === 'playwright.config.ts') {
-        return chalk.dim(part);
-      }
-      if (part === 'parallel.playwright.config.ts') {
-        return `${chalk.bold('parallel')}${chalk.dim('.playwright.config.ts')}`;
-      }
-      return chalk.bold(part);
-    })
-    .join(chalk.dim('/'));
-
-/** Config labels look like `module · path` */
-const formatLabel = (label: string, withModule = true) => {
-  const [module, path] = label.split(' · ');
-  if (!path) {
-    return label;
-  }
-  return withModule ? `${module} ${chalk.dim('·')} ${highlightPath(path)}` : highlightPath(path);
-};
-
-const describeServerSet = ({ configSet, targets }: PinnedConfig, running: RunningServers[]) => {
-  const servers =
-    configSet === 'default' ? 'default servers' : chalk.yellow(`custom servers: ${configSet}`);
-  const isRunning = running.some(
-    (server) =>
-      server.configSet === configSet &&
-      targets.some((tag) => {
-        const { arch, domain } = ScoutTestTarget.fromTag(tag);
-        return server.arch === arch && server.domain === domain;
-      })
-  );
-  return isRunning ? `${servers}  ${chalk.green('● running')}` : servers;
-};
-
-const byServerSet = (a: PickableConfig, b: PickableConfig) =>
-  Number(a.configSet !== 'default') - Number(b.configSet !== 'default') ||
-  a.configSet.localeCompare(b.configSet) ||
-  a.path.localeCompare(b.path);
-
-const yesNo = [
-  { label: 'Yes', value: true },
-  { label: 'No', value: false },
-];
-
-const describeRun = ({ config, specs, target }: Pick<Selection, 'config' | 'specs' | 'target'>) =>
-  `${config.label} · ${specs.length ? plural(specs.length, 'spec') : 'all specs'} · ${
-    target.arch
-  } · ${target.domain}`;
-
-/** Asks questions step by step, Esc goes back to the last question that was asked */
-const runSteps = async <S extends string>(
-  first: S,
-  steps: Record<S, () => Promise<S | undefined>>
-) => {
-  const asked: S[] = [];
-  let step: S | undefined = first;
-  while (step) {
-    const shown = getShownPrompts();
-    try {
-      const next: S | undefined = await steps[step]();
-      if (getShownPrompts() > shown) {
-        asked.push(step);
-      }
-      step = next;
-    } catch (error) {
-      if (!(error instanceof GoBack)) {
-        throw error;
-      }
-      step = asked.pop() ?? step;
-    }
-  }
-};
-
-interface ChangedConfig {
-  config: PickableConfig;
-  specs: string[];
-  helpers: string[];
-}
-
-const groupChangedTests = ({ specs, helpers }: ChangedTests, configs: PickableConfig[]) => {
-  const byPath = new Map<string, ChangedConfig>();
-  const get = (config: PickableConfig) => {
-    const entry = byPath.get(config.path) ?? { config, specs: [], helpers: [] };
-    byPath.set(config.path, entry);
-    return entry;
-  };
-  for (const config of configs) {
-    get(config).specs.push(...(specs.get(config.path) ?? []));
-  }
-  for (const helper of helpers) {
-    getConfigsForHelper(helper, configs).forEach((config) => get(config).helpers.push(helper));
-  }
-  return [...byPath.values()].filter((entry) => entry.specs.length || entry.helpers.length);
-};
-
-type Step =
-  | 'group'
-  | 'module'
-  | 'config'
-  | 'pin'
-  | 'start'
-  | 'edit'
-  | 'changed'
-  | 'scope'
-  | 'specs'
-  | 'target'
-  | 'output';
-
-/** Picks what to run; Scout configs are only loaded when pinned ones are not enough */
-const pickTests = async (log: ToolingLog): Promise<Selection> => {
-  let configs: PickableConfig[] | undefined;
-  const loadConfigs = () => {
-    if (!configs) {
-      log.write(chalk.dim('Loading Scout configs…'));
-      configs = getConfigs();
-    }
-    return configs;
-  };
-
-  const state = readState();
-  const { last } = state;
-  let pins = state.pins ?? [];
-  let pinning = !state.pins;
-  let changed: ChangedTests | undefined;
-  let running: RunningServers[] = [];
-
-  let group = '';
-  let module = '';
-  let config: PinnedConfig | undefined;
-  let configSpecs: string[] = [];
-  let specs: string[] = [];
-  let target: ScoutTestTarget | undefined;
-  let pin = false;
-  let runLast = false;
-  let { verbose } = state;
-
-  const steps: Record<Step, () => Promise<Step | undefined>> = {
-    group: async () => {
-      const all = loadConfigs();
-      group = await select(
-        'Where are the tests?',
-        unique(all.map((item) => item.group)).map((value) => ({
-          label: value,
-          value,
-          hint: plural(all.filter((item) => item.group === value).length, 'config'),
-        }))
-      );
-      return 'module';
-    },
-    module: async () => {
-      const inGroup = loadConfigs().filter((item) => item.group === group);
-      module = await select(
-        'Module',
-        unique(inGroup.map((item) => item.module)).map((value) => ({
-          label: value,
-          value,
-          hint: plural(inGroup.filter((item) => item.module === value).length, 'config'),
-        }))
-      );
-      return 'config';
-    },
-    config: async () => {
-      running = await getRunningServers();
-      const choices = loadConfigs()
-        .filter((item) => item.group === group && item.module === module)
-        .sort(byServerSet)
-        .map((item) => ({
-          label: formatLabel(item.label, false),
-          value: item,
-          hint: describeServerSet(item, running),
-        }));
-      if (pinning) {
-        const picked =
-          choices.length === 1 ? [choices[0].value] : await multiSelect('Configs to pin', choices);
-        pins = picked.map(toPinned);
-        return undefined;
-      }
-      config = choices.length === 1 ? choices[0].value : await select('Config', choices);
-      return 'pin';
-    },
-    pin: async () => {
-      const path = config?.path;
-      pin =
-        !pins.some((item) => item.path === path) && (await select('Pin it for next time?', yesNo));
-      return 'scope';
-    },
-    start: async () => {
-      [changed, running] = await Promise.all([changed ?? getChangedTests(), getRunningServers()]);
-      const specCount = [...changed.specs.values()].flat().length;
-      const helperCount = changed.helpers.length;
-      const choice = await select('What do you want to run?', [
-        ...(last
-          ? [
-              {
-                label: 'Run last',
-                value: 'last',
-                hint: describeRun({ ...last, target: ScoutTestTarget.fromTag(last.target) }),
-              },
-            ]
-          : []),
-        ...(specCount || helperCount
-          ? [
-              {
-                label: 'Changed tests',
-                value: 'changed',
-                hint: [
-                  ...(specCount ? [plural(specCount, 'spec')] : []),
-                  ...(helperCount ? [plural(helperCount, 'page object or fixture file')] : []),
-                ].join(', '),
-              },
-            ]
-          : []),
-        ...pins.map((pinned) => ({
-          label: formatLabel(pinned.label),
-          value: pinned.path,
-          hint: `pinned · ${describeServerSet(pinned, running)}`,
-        })),
-        { label: 'Find another config', value: 'find' },
-        { label: 'Edit pins', value: 'edit' },
-      ]);
-
-      pin = false;
-      if (choice === 'last') {
-        runLast = true;
-        return undefined;
-      }
-      if (choice === 'find' || choice === 'edit' || choice === 'changed') {
-        return choice === 'find' ? 'group' : choice;
-      }
-      config = pins.find(({ path }) => path === choice);
-      return 'scope';
-    },
-    edit: async () => {
-      pins = await multiSelect(
-        'Pinned configs (space to unpin)',
-        pins.map((item) => ({ label: formatLabel(item.label), value: item, checked: true }))
-      );
-      updateState({ pins });
-      return 'start';
-    },
-    changed: async () => {
-      // changed configs may not be pinned, so their details come from all configs
-      const choices = groupChangedTests(changed ?? (await getChangedTests()), loadConfigs()).map(
-        (entry) => ({
-          label: formatLabel(entry.config.label),
-          value: entry,
-          hint: `${
-            entry.helpers.length
-              ? `all specs, ${plural(entry.helpers.length, 'changed file')}`
-              : plural(entry.specs.length, 'spec')
-          } · ${describeServerSet(entry.config, running)}`,
-        })
-      );
-      const picked = choices.length === 1 ? choices[0].value : await select('Config', choices);
-      config = picked.config;
-      // page objects and fixtures may be used by any spec of the config
-      specs = picked.helpers.length ? [] : picked.specs;
-      return 'target';
-    },
-    scope: async () => {
-      configSpecs = config ? getSpecs(config.path) : [];
-      const whole = await select('Run', [
-        { label: 'Whole config', value: true, hint: plural(configSpecs.length, 'spec') },
-        { label: 'Pick specs', value: false },
-      ]);
-      specs = [];
-      return whole ? 'target' : 'specs';
-    },
-    specs: async () => {
-      const configDir = Path.dirname(config?.path ?? '');
-      specs = await multiSelect(
-        'Specs',
-        configSpecs.map((spec) => ({ label: Path.relative(configDir, spec), value: spec }))
-      );
-      return 'target';
-    },
-    target: async () => {
-      const choices = (config?.targets ?? []).map((tag) => {
-        const value = ScoutTestTarget.fromTag(tag);
-        return { label: `${value.arch} · ${value.domain}`, value };
-      });
-      target = choices.length === 1 ? choices[0].value : await select('Target', choices);
-      return 'output';
-    },
-    output: async () => {
-      verbose =
-        state.verbose ??
-        (await select('Output', [
-          { label: 'Test results', value: false },
-          { label: 'Everything', value: true, hint: 'server and debug logs' },
-        ]));
-      return undefined;
-    },
-  };
-
-  if (pinning) {
-    log.write(chalk.dim("No pinned configs yet, let's find the ones you use\n"));
-    await runSteps<Step>('group', steps);
-    pinning = false;
-    updateState({ pins });
-  }
-  await runSteps<Step>('start', steps);
-
-  const headed = state.headed ?? false;
-  if (runLast && last) {
-    return {
-      ...last,
-      target: ScoutTestTarget.fromTag(last.target),
-      verbose: verbose ?? false,
-      headed,
-    };
-  }
-  if (!config || !target) {
-    throw new Error('No tests picked');
-  }
-  config = toPinned(config);
-  if (pin) {
-    updateState({ pins: [...pins, config] });
-  }
-  updateState({ last: { config, specs, target: target.tag }, verbose });
-  return { config, specs, target, verbose: verbose ?? false, headed };
-};
-
-const findRunningServers = async ({ config, target }: Selection) => {
-  const servers = await getRunningServers();
-  const matching = servers.find(
-    ({ arch, domain, configSet }) =>
-      arch === target.arch && domain === target.domain && configSet === config.configSet
-  );
-  return { servers, matching };
-};
-
-const askAboutServers = async (
-  log: ToolingLog,
-  selection: Selection
-): Promise<ServersMode | undefined> => {
-  const { servers, matching } = await findRunningServers(selection);
-  if (matching) {
-    log.write(chalk.dim(`Using the Scout servers running for this target (PID ${matching.pid})`));
-    return 'running';
-  }
-  const { config, target } = selection;
-  if (servers.length) {
-    // servers for this target would fail to start on the ports they hold
-    log.write(
-      chalk.yellow(
-        `Scout servers are running for ${describeServers(
-          servers
-        )}, these tests need ${describeTarget(target.arch, target.domain, config.configSet)}`
-      )
-    );
-    const stop = await select('Stop them?', [
-      { label: 'Yes, stop them', value: true },
-      { label: 'Cancel', value: false },
-    ]);
-    if (!stop) {
-      return undefined;
-    }
-    log.write(chalk.dim('Stopping Scout servers…'));
-    await stopServers(servers);
-  }
-
-  const mode = await select<ServersMode | 'other-terminal'>('Servers', [
-    { label: 'Start them in another terminal', value: 'other-terminal', hint: 'fast reruns' },
-    { label: 'Start them with the tests', value: 'with-run', hint: 'stopped after each run' },
-  ]);
-  if (mode !== 'other-terminal') {
-    return mode;
-  }
-
-  const startServer = [
-    'node scripts/scout start-server',
-    `--arch ${target.arch} --domain ${target.domain}`,
-    ...(config.configSet === 'default' ? [] : [`--serverConfigSet ${config.configSet}`]),
-  ].join(' ');
-  log.write(
-    `\nRun in another terminal and wait until the servers are ready:\n  ${chalk.cyan(
-      startServer
-    )}\n`
-  );
-
+const editSettings = async (selection: Selection) => {
   for (;;) {
-    const ready = await select('Servers ready?', [
-      { label: 'Yes', value: true },
-      { label: 'Cancel', value: false },
-    ]);
-    if (!ready) {
-      return undefined;
+    const setting = await onBack(
+      select<'headed' | 'verbose' | 'done'>('Settings', [
+        ...(selection.config.category === 'api'
+          ? []
+          : [
+              {
+                label: 'Browser',
+                value: 'headed' as const,
+                hint: selection.headed ? 'shown' : 'headless',
+              },
+            ]),
+        {
+          label: 'Output',
+          value: 'verbose',
+          hint: selection.verbose ? 'all logs' : 'test results only',
+        },
+        { label: 'Done', value: 'done' },
+      ]),
+      'done' as const
+    );
+    if (setting === 'done') {
+      return;
     }
-    if ((await findRunningServers(selection)).matching) {
-      return 'running';
-    }
-    log.write(chalk.yellow(`No Scout servers for ${target.arch} · ${target.domain} found yet`));
+    selection[setting] = !selection[setting];
+    updateState({ [setting]: selection[setting] });
   }
 };
-
-/** Esc in a question about servers cancels the run */
-const prepareServers = (log: ToolingLog, selection: Selection) =>
-  askAboutServers(log, selection).catch((error) => {
-    if (error instanceof GoBack) {
-      return undefined;
-    }
-    throw error;
-  });
-
-const getCommand = (
-  { config, specs, target, verbose, headed }: Selection,
-  mode: ServersMode,
-  onlyFailed: boolean
-): string[] =>
-  mode === 'running'
-    ? [
-        'node',
-        'scripts/playwright',
-        'test',
-        ...specs,
-        `--config=${config.path}`,
-        '--project=local',
-        `--grep=${target.playwrightTag}`,
-        ...(headed ? ['--headed'] : []),
-        ...(onlyFailed ? ['--last-failed'] : []),
-      ]
-    : [
-        'node',
-        'scripts/scout',
-        'run-tests',
-        ...(verbose ? [] : ['--quiet']),
-        `--arch=${target.arch}`,
-        `--domain=${target.domain}`,
-        ...(headed ? ['--headed'] : []),
-        specs.length ? `--testFiles=${specs.join(',')}` : `--config=${config.path}`,
-      ];
-
-/** Shows only the Playwright output of run-tests and keeps the rest in a log file */
-const runQuietly = async (command: string[]) => {
-  const logFile = Path.resolve(REPO_ROOT, LOG_FILE);
-  Fs.mkdirSync(Path.dirname(logFile), { recursive: true });
-  const output = Fs.createWriteStream(logFile);
-  const child = execa(command[0], command.slice(1), {
-    all: true,
-    reject: false,
-    env: { FORCE_COLOR: '1' },
-  });
-
-  if (child.all) {
-    Readline.createInterface({ input: child.all }).on('line', (line) => {
-      const plain = stripVTControlCharacters(line);
-      output.write(`${plain}\n`);
-      // proc runner lines look like ` proc [playwright] <output>`, with colors around the names
-      if (plain.includes('proc [playwright] ')) {
-        process.stdout.write(`${line.slice(line.indexOf('] ', line.indexOf('playwright')) + 2)}\n`);
-      } else if (plain.includes('ERROR')) {
-        process.stdout.write(`${line}\n`);
-      }
-    });
-  }
-
-  const { exitCode } = await child;
-  output.end();
-  return exitCode;
-};
-
-const runTests = async (
-  log: ToolingLog,
-  selection: Selection,
-  mode: ServersMode,
-  onlyFailed: boolean
-) => {
-  const command = getCommand(selection, mode, onlyFailed);
-  log.write(`\n${chalk.cyan('▶')} ${command.join(' ')}\n`);
-
-  let exitCode: number;
-  if (mode === 'with-run' && !selection.verbose) {
-    log.write(chalk.dim(`Starting servers, full output in ${LOG_FILE}\n`));
-    exitCode = await runQuietly(command);
-  } else {
-    ({ exitCode } = await execa(command[0], command.slice(1), {
-      stdio: 'inherit',
-      reject: false,
-      env: { SCOUT_LOG_LEVEL: selection.verbose ? 'debug' : 'quiet' },
-    }));
-  }
-
-  log.write(
-    exitCode === 0
-      ? chalk.green.bold('\n✔ Tests passed\n')
-      : chalk.red.bold(`\n✖ Tests failed (exit code ${exitCode})\n`)
-  );
-  return exitCode;
-};
-
-type Next = 'again' | 'failed' | 'toggle-headed' | 'toggle-output' | 'pick' | 'exit';
 
 const askNext = (selection: Selection, canRunFailed: boolean) =>
-  select<Next>('What next?', [
-    { label: 'Run the same tests again', value: 'again' },
-    ...(canRunFailed ? [{ label: 'Run failed tests only', value: 'failed' as const }] : []),
-    ...(selection.config.category === 'api'
-      ? []
-      : [
-          {
-            label: selection.headed ? 'Run again headless' : 'Run again with the browser shown',
-            value: 'toggle-headed' as const,
-          },
-        ]),
-    {
-      label: selection.verbose
-        ? 'Run again showing test results only'
-        : 'Run again showing all logs',
-      value: 'toggle-output',
-    },
-    { label: 'Pick other tests', value: 'pick' },
-    { label: 'Exit', value: 'exit' },
-  ]).catch((error) => {
+  onBack(
+    select<Next>('What next?', [
+      { label: 'Run the same tests again', value: 'again' },
+      ...(canRunFailed ? [{ label: 'Run failed tests only', value: 'failed' as const }] : []),
+      { label: 'Settings', value: 'settings', hint: describeSettings(selection) },
+      { label: 'Pick other tests', value: 'pick' },
+      { label: 'Exit', value: 'exit' },
+    ]),
     // Esc goes back to picking tests
-    if (error instanceof GoBack) {
-      return 'pick' as const;
-    }
-    throw error;
-  });
+    'pick' as const
+  );
 
 export const runPick = async (log: ToolingLog) => {
   for (;;) {
@@ -582,25 +74,21 @@ export const runPick = async (log: ToolingLog) => {
     log.write(chalk.dim(describeRun(selection)));
     let next: Next = 'again';
     let canRunFailed = false;
-    while (next !== 'pick' && next !== 'exit') {
-      if (next === 'toggle-output') {
-        selection.verbose = !selection.verbose;
-        updateState({ verbose: selection.verbose });
-      } else if (next === 'toggle-headed') {
-        selection.headed = !selection.headed;
-        updateState({ headed: selection.headed });
+    while (next !== 'pick') {
+      if (next === 'exit') {
+        return;
       }
-      const mode = await prepareServers(log, selection);
-      if (mode) {
-        // run-tests can't rerun failed tests, so this is only offered with running servers
-        const onlyFailed = next === 'failed' && mode === 'running';
-        process.exitCode = await runTests(log, selection, mode, onlyFailed);
-        canRunFailed = process.exitCode !== 0 && mode === 'running';
+      if (next === 'settings') {
+        await editSettings(selection);
+      } else {
+        const mode = await prepareServers(log, selection.config, selection.target);
+        if (mode) {
+          // run-tests can't rerun failed tests, so this is only offered with running servers
+          process.exitCode = await runTests(log, selection, mode, next === 'failed');
+          canRunFailed = process.exitCode !== 0 && mode === 'running';
+        }
       }
       next = await askNext(selection, canRunFailed);
-    }
-    if (next === 'exit') {
-      return;
     }
   }
 };

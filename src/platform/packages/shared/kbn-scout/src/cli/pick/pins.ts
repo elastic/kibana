@@ -17,7 +17,7 @@ const STATE_FILE = Path.resolve(REPO_ROOT, '.scout/pins.json');
 /** What the picker needs to run a config without loading all Scout configs */
 export type PinnedConfig = Pick<
   PickableConfig,
-  'path' | 'label' | 'configSet' | 'category' | 'targets'
+  'path' | 'module' | 'file' | 'configSet' | 'category' | 'targets'
 >;
 
 export interface LastRun {
@@ -35,14 +35,24 @@ export interface PickState {
 
 export const toPinned = ({
   path,
-  label,
+  module,
+  file,
   configSet,
   category,
   targets,
-}: PinnedConfig): PinnedConfig => ({ path, label, configSet, category, targets });
+}: PinnedConfig): PinnedConfig => ({ path, module, file, configSet, category, targets });
 
-export const readState = (): PickState =>
-  Fs.existsSync(STATE_FILE) ? JSON.parse(Fs.readFileSync(STATE_FILE, 'utf8')) : {};
+/** A missing or broken state file, or one from an older version, starts from scratch */
+export const readState = (): PickState => {
+  try {
+    const state: PickState = JSON.parse(Fs.readFileSync(STATE_FILE, 'utf8'));
+    const isValid = (config?: PinnedConfig) => Boolean(config?.file && config.targets);
+    const { pins = [], last } = state;
+    return pins.every(isValid) && (!last || isValid(last.config)) ? state : {};
+  } catch {
+    return {};
+  }
+};
 
 export const updateState = (changes: PickState) => {
   Fs.mkdirSync(Path.dirname(STATE_FILE), { recursive: true });

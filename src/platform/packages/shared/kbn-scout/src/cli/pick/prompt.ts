@@ -190,3 +190,12 @@ export const select = async <T>(message: string, choices: Array<Choice<T>>): Pro
 
 export const multiSelect = <T>(message: string, choices: Array<Choice<T>>): Promise<T[]> =>
   prompt({ message, choices, multiple: true });
+
+/** Resolves with `value` instead of rejecting when Esc is pressed */
+export const onBack = <T, U>(promise: Promise<T>, value: U): Promise<T | U> =>
+  promise.catch((error) => {
+    if (error instanceof GoBack) {
+      return value;
+    }
+    throw error;
+  });
