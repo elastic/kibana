@@ -34,6 +34,7 @@ const setup = ({
     actionTypeId: '.github',
     config: { apiUrl: 'https://api.github.com', owner: 'elastic' },
     headers: { Authorization: BEARER_AUTHORIZATION },
+    hosts: ['api.github.com'],
   },
   withActions = true,
   credentialsError,
@@ -43,6 +44,7 @@ const setup = ({
     actionTypeId: string;
     config: Record<string, unknown>;
     headers: Record<string, string>;
+    hosts: string[];
   };
   withActions?: boolean;
   credentialsError?: Error;
@@ -74,6 +76,7 @@ describe('buildConnectorEnv', () => {
       actionTypeId: '.github',
       config: { apiUrl: 'https://api.github.com', 'nested-opt': { a: 1 }, port: 443, tls: true },
       headers: { Authorization: BEARER_AUTHORIZATION, 'X-Api-Key': 'abc' },
+      hosts: ['api.example.com'],
     });
 
     expect(env).toEqual({
@@ -89,12 +92,34 @@ describe('buildConnectorEnv', () => {
     expect(secretValues).toEqual([BEARER_AUTHORIZATION, 'ghp_topsecrettokenvalue']);
   });
 
+  it('marks every header env var, and no config env var, as a secret bound to the hosts', () => {
+    const { secretEnvKeys } = buildConnectorEnv({
+      connectorId: CONNECTOR_ID,
+      actionTypeId: '.github',
+      config: { serverUrl: 'https://api.githubcopilot.com/mcp/' },
+      headers: { Authorization: BEARER_AUTHORIZATION, 'X-Api-Key': 'abcdefgh' },
+      hosts: ['api.github.com', 'api.githubcopilot.com'],
+    });
+
+    expect(secretEnvKeys).toEqual([
+      {
+        key: 'CONNECTOR_HEADER_AUTHORIZATION',
+        allowed_hosts: ['api.github.com', 'api.githubcopilot.com'],
+      },
+      {
+        key: 'CONNECTOR_HEADER_X_API_KEY',
+        allowed_hosts: ['api.github.com', 'api.githubcopilot.com'],
+      },
+    ]);
+  });
+
   it('adds the values derived from the Authorization header to secretValues', () => {
     const { secretValues } = buildConnectorEnv({
       connectorId: CONNECTOR_ID,
       actionTypeId: '.http',
       config: {},
       headers: { authorization: BASIC_AUTHORIZATION },
+      hosts: ['api.example.com'],
     });
 
     expect(secretValues).toEqual([
@@ -113,6 +138,7 @@ describe('buildConnectorEnv', () => {
         actionTypeId: '.http',
         config: {},
         headers: { Authorization: authorization },
+        hosts: ['api.example.com'],
       });
 
       expect(env.CONNECTOR_HEADER_AUTHORIZATION).toBe(authorization);
@@ -136,6 +162,7 @@ describe('buildConnectorEnv', () => {
       actionTypeId: '.http',
       config: {},
       headers: { Authorization: BEARER_AUTHORIZATION, authorization: 'ApiKey override-api-key-1' },
+      hosts: ['api.example.com'],
     });
 
     expect(env.CONNECTOR_HEADER_AUTHORIZATION).toBe('ApiKey override-api-key-1');
@@ -203,6 +230,7 @@ describe('createConnectorCredentialResolver', () => {
         CONNECTOR_HEADER_AUTHORIZATION: BEARER_AUTHORIZATION,
       },
       secretValues: [BEARER_AUTHORIZATION, 'ghp_topsecrettokenvalue'],
+      secretEnvKeys: [{ key: 'CONNECTOR_HEADER_AUTHORIZATION', allowed_hosts: ['api.github.com'] }],
     });
     expect(actionsClient.getSandboxCredentials).toHaveBeenCalledWith({ id: CONNECTOR_ID });
     expect(actionsClient.get).not.toHaveBeenCalled();
@@ -253,6 +281,7 @@ describe('createConnectorCredentialResolver', () => {
         actionTypeId: '.http',
         config: { url: 'https://api.example.com' },
         headers: { Authorization: BEARER_AUTHORIZATION },
+        hosts: ['api.example.com'],
       },
     });
     actions.inMemoryConnectors = [];
@@ -267,6 +296,9 @@ describe('createConnectorCredentialResolver', () => {
         CONNECTOR_HEADER_AUTHORIZATION: BEARER_AUTHORIZATION,
       },
       secretValues: [BEARER_AUTHORIZATION, 'ghp_topsecrettokenvalue'],
+      secretEnvKeys: [
+        { key: 'CONNECTOR_HEADER_AUTHORIZATION', allowed_hosts: ['api.example.com'] },
+      ],
     });
     expect(actionsClient.getSandboxCredentials).toHaveBeenCalledWith({ id: 'saved-object-1' });
     // The same call redacts the full header and the bare token from the command output.

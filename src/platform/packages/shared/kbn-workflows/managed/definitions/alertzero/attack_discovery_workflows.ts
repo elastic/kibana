@@ -106,14 +106,15 @@ export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW = {
  * Retrieves the open alerts for `lookback`, plus one minute, in batches. Skips
  * alerts tagged `az:ad_correlated` or `az:ad_fp_chain`. Passes
  * `generation_source` so these attacks do not dedupe against a manual run by
- * the same user.
+ * the same user. Tags the run step's generation model calls for token-usage
+ * attribution under the AlertZero parent feature.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW = {
   billable: true,
   id: ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 13,
+  version: 14,
   yaml: ATTACK_DISCOVERY_BATCHED_GENERATION_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 

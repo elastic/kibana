@@ -46,6 +46,18 @@ describe('buildOnlineEvalsEvidence', () => {
     });
   });
 
+  it('passes the alert outcome as the ground truth, apart from the graded round', () => {
+    const evidence = buildOnlineEvalsEvidence({
+      round: round([toolCall('call-1')]),
+      alertOutcome: 'Confirmed: rolling back the payments deploy cleared the alert.',
+    });
+
+    expect(evidence.reference_data).toEqual({
+      alert_outcome: 'Confirmed: rolling back the payments deploy cleared the alert.',
+    });
+    expect(evidence.round.response.message).toBe('A bad deploy of the payments service.');
+  });
+
   it('keeps the earliest tool calls when there are more than evaluate() accepts', () => {
     const calls = Array.from({ length: MAX_EVIDENCE_TOOL_CALLS + 5 }, (_, index) =>
       toolCall(`call-${index}`)
