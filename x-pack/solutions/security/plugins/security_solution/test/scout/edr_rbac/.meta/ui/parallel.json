@@ -1,5 +1,5 @@
 {
-  "sha1": "",
+  "sha1": "d70b43ce263cca88db43a02028d081fdd1213967",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -32,7 +32,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
-        "line": 53,
+        "line": 50,
         "column": 26
       }
     },
@@ -48,7 +48,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
-        "line": 53,
+        "line": 50,
         "column": 26
       }
     },
@@ -64,7 +64,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
-        "line": 53,
+        "line": 50,
         "column": 26
       }
     },
@@ -80,7 +80,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
-        "line": 53,
+        "line": 50,
         "column": 26
       }
     },
@@ -96,7 +96,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
-        "line": 53,
+        "line": 50,
         "column": 26
       }
     },
@@ -112,7 +112,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
-        "line": 53,
+        "line": 50,
         "column": 26
       }
     },
@@ -128,7 +128,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
-        "line": 53,
+        "line": 50,
         "column": 26
       }
     },
@@ -144,7 +144,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
-        "line": 53,
+        "line": 50,
         "column": 26
       }
     },
@@ -160,7 +160,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
-        "line": 53,
+        "line": 50,
         "column": 26
       }
     },
@@ -176,7 +176,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
-        "line": 53,
+        "line": 50,
         "column": 26
       }
     },
@@ -192,7 +192,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
-        "line": 53,
+        "line": 50,
         "column": 26
       }
     },
@@ -208,7 +208,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
-        "line": 53,
+        "line": 50,
         "column": 26
       }
     },
@@ -224,7 +224,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
-        "line": 53,
+        "line": 50,
         "column": 26
       }
     },
@@ -240,7 +240,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
-        "line": 53,
+        "line": 50,
         "column": 26
       }
     },
@@ -256,7 +256,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
-        "line": 53,
+        "line": 50,
         "column": 26
       }
     },
@@ -272,7 +272,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
-        "line": 53,
+        "line": 50,
         "column": 26
       }
     },
@@ -288,7 +288,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
-        "line": 53,
+        "line": 50,
         "column": 26
       }
     },
@@ -304,7 +304,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
-        "line": 53,
+        "line": 50,
         "column": 26
       }
     },
@@ -325,8 +325,8 @@
       }
     },
     {
-      "id": "32e1dd9ccbe300b-81f41f53e691574",
-      "title": "Endpoint management navigation for prebuilt roles detections_admin reaches no Endpoint management area",
+      "id": "32e1dd9ccbe300b-829701e381868d2",
+      "title": "Endpoint management navigation for prebuilt roles detections_admin reaches only Artifacts, through endpoint exceptions",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-security_complete",
@@ -334,8 +334,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/prebuilt_role_navigation.spec.ts",
-        "line": 27,
-        "column": 14
+        "line": 32,
+        "column": 1
       }
     },
     {
@@ -348,8 +348,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/prebuilt_role_navigation.spec.ts",
-        "line": 38,
-        "column": 32
+        "line": 46,
+        "column": 22
       }
     }
   ]
