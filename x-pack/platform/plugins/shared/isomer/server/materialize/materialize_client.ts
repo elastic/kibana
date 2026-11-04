@@ -13,7 +13,11 @@ import type { MaterializeContext, MaterializeInput } from '../../common';
 import { isMaterializeByReference } from '../../common';
 import { executeEsql } from './executors/esql';
 import { DATA_REQUEST_TIMEOUT_MS, MAX_MATERIALIZE_DEPTH, MAX_ROWS_PER_REQUEST } from './limits';
+import type { MaterializeEvent } from '../instrumentation/events';
+import { measureInput } from '../instrumentation/measure';
 import type { MaterializedNode } from './nodes';
+import { isUnsupportedNode } from './nodes';
+import type { PipelineResult } from './pipeline';
 import { runPipeline } from './pipeline';
 import type { MaterializerRegistry } from './registry';
 import type { MaterializeScope, Materializer, ScopedMaterializeClient } from './types';
@@ -37,6 +41,8 @@ export interface ScopedMaterializeClientDeps {
   kibanaVersion: string;
   now?: () => Date;
   limits?: Partial<MaterializeLimits>;
+  /** Receives one event per node materialized, nested ones included. */
+  report?: (event: MaterializeEvent) => void;
 }
 
 const errorMessage = (error: unknown): string =>
@@ -71,32 +77,44 @@ export const createScopedMaterializeClient = ({
   validate,
   kibanaVersion,
   now = () => new Date(),
+  report,
   limits: {
     maxRowsPerRequest = MAX_ROWS_PER_REQUEST,
     dataRequestTimeoutMs = DATA_REQUEST_TIMEOUT_MS,
     maxDepth = MAX_MATERIALIZE_DEPTH,
   } = {},
 }: ScopedMaterializeClientDeps): ScopedMaterializeClient => {
-  const materializeAt = async (
+  const bare = (node: MaterializedNode): PipelineResult => ({
+    node,
+    dataRequests: 0,
+    rowCapsHit: 0,
+    budgetRefused: false,
+  });
+
+  const resolveAt = async (
     input: MaterializeInput,
     context: MaterializeContext,
     depth: number
-  ): Promise<MaterializedNode> => {
+  ): Promise<PipelineResult> => {
     const materializer = registry.get(input.type);
     if (!materializer) {
-      return createUnsupportedNode(
-        i18n.translate('xpack.isomer.materialize.noMaterializer', {
-          defaultMessage: 'Kibana cannot materialize saved objects of type "{type}".',
-          values: { type: input.type },
-        })
+      return bare(
+        createUnsupportedNode(
+          i18n.translate('xpack.isomer.materialize.noMaterializer', {
+            defaultMessage: 'Kibana cannot materialize saved objects of type "{type}".',
+            values: { type: input.type },
+          })
+        )
       );
     }
     if (depth > maxDepth) {
-      return createUnsupportedNode(
-        i18n.translate('xpack.isomer.materialize.tooDeep', {
-          defaultMessage: 'This {type} is nested more than {maxDepth} levels deep.',
-          values: { type: input.type, maxDepth },
-        })
+      return bare(
+        createUnsupportedNode(
+          i18n.translate('xpack.isomer.materialize.tooDeep', {
+            defaultMessage: 'This {type} is nested more than {maxDepth} levels deep.',
+            values: { type: input.type, maxDepth },
+          })
+        )
       );
     }
 
@@ -107,11 +125,13 @@ export const createScopedMaterializeClient = ({
       logger.debug(
         `Could not load the ${input.type} config to materialize: ${errorMessage(error)}`
       );
-      return createUnsupportedNode(
-        i18n.translate('xpack.isomer.materialize.invalidConfig', {
-          defaultMessage: 'The {type} config could not be read: {message}',
-          values: { type: input.type, message: errorMessage(error) },
-        })
+      return bare(
+        createUnsupportedNode(
+          i18n.translate('xpack.isomer.materialize.invalidConfig', {
+            defaultMessage: 'The {type} config could not be read: {message}',
+            values: { type: input.type, message: errorMessage(error) },
+          })
+        )
       );
     }
 
@@ -142,14 +162,41 @@ export const createScopedMaterializeClient = ({
       );
     } catch (error) {
       logger.warn(`Materializing a ${input.type} config failed: ${errorMessage(error)}`);
-      return createUnsupportedNode(
-        i18n.translate('xpack.isomer.materialize.failed', {
-          defaultMessage: 'Materializing this {type} failed: {message}',
-          values: { type: input.type, message: errorMessage(error) },
-        }),
-        materializer.describe?.(config)
+      return bare(
+        createUnsupportedNode(
+          i18n.translate('xpack.isomer.materialize.failed', {
+            defaultMessage: 'Materializing this {type} failed: {message}',
+            values: { type: input.type, message: errorMessage(error) },
+          }),
+          materializer.describe?.(config)
+        )
       );
     }
+  };
+
+  const materializeAt = async (
+    input: MaterializeInput,
+    context: MaterializeContext,
+    depth: number
+  ): Promise<MaterializedNode> => {
+    const started = performance.now();
+    const { node, dataRequests, rowCapsHit, budgetRefused } = await resolveAt(
+      input,
+      context,
+      depth
+    );
+    report?.({
+      saved_object_type: input.type,
+      outcome: isUnsupportedNode(node) ? 'unsupported' : 'node',
+      node_type: node.type,
+      depth,
+      ...measureInput(node),
+      duration_ms: Math.round(performance.now() - started),
+      data_requests: dataRequests,
+      row_caps_hit: rowCapsHit,
+      budget_refused: budgetRefused,
+    });
+    return node;
   };
 
   return {
