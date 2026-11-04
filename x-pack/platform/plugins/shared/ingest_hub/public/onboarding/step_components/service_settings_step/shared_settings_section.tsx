@@ -50,6 +50,8 @@ interface SharedSettingsSectionProps {
   onNamespaceChange: (namespace: string) => void;
   /** Validation error of the namespace; the advanced section stays open while there is one. */
   namespaceError?: string;
+  dedicatedNamespaceTemplates: boolean;
+  onDedicatedNamespaceTemplatesChange: (enabled: boolean) => void;
   /** Whether services are already deployed, which changes what a new namespace means. */
   hasDeployedServices?: boolean;
 }
@@ -74,6 +76,8 @@ export function SharedSettingsSection({
   namespace,
   onNamespaceChange,
   namespaceError,
+  dedicatedNamespaceTemplates,
+  onDedicatedNamespaceTemplatesChange,
   hasDeployedServices = false,
 }: SharedSettingsSectionProps) {
   // Show errors once the field was edited, so the prefilled form does not open with errors.
@@ -253,6 +257,8 @@ export function SharedSettingsSection({
           <SharedAdvancedSettings
             namespace={namespace}
             onNamespaceChange={onNamespaceChange}
+            dedicatedNamespaceTemplates={dedicatedNamespaceTemplates}
+            onDedicatedNamespaceTemplatesChange={onDedicatedNamespaceTemplatesChange}
             hasDeployedServices={hasDeployedServices}
           />
         </div>

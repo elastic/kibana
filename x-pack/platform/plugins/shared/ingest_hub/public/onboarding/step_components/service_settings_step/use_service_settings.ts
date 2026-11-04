@@ -98,6 +98,11 @@ export interface ServiceSettingsPersistedState {
    * its own (`ServiceVars.namespace`). Empty or absent inherits the agent policy's.
    */
   namespace?: string;
+  /**
+   * Whether the global namespace uses dedicated index templates. Applied to the installed
+   * packages after a deploy; never applies to a duplicate's own namespace.
+   */
+  dedicatedNamespaceTemplates?: boolean;
   /** Keyed by instanceId. */
   serviceVars: Record<string, ServiceVars>;
   /** Absent in old sessions — reconciled on read from selectedServiceIds. */
@@ -231,6 +236,20 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       setPersisted({
         ...(persisted ?? { globalRegion: '', serviceVars: {} }),
         namespace: value,
+      });
+    },
+    [persisted, setPersisted]
+  );
+
+  // The switch means nothing without a namespace, so it reads as off while there is none.
+  const dedicatedNamespaceTemplates =
+    !!persisted?.dedicatedNamespaceTemplates && !!namespace.trim();
+
+  const setDedicatedNamespaceTemplates = useCallback(
+    (value: boolean) => {
+      setPersisted({
+        ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+        dedicatedNamespaceTemplates: value,
       });
     },
     [persisted, setPersisted]
@@ -576,6 +595,8 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     namespace,
     setNamespace,
     namespaceError,
+    dedicatedNamespaceTemplates,
+    setDedicatedNamespaceTemplates,
     bareNamePackage,
     instances,
     filteredInstances,

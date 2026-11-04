@@ -24,6 +24,11 @@ jest.mock('./duplicate_name', () => ({
   buildDuplicateName: (base: string) => `${base} [Duplicate]`,
 }));
 jest.mock('@kbn/ui-callout', () => ({ KbnWarningCallout: () => null }));
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: () => ({
+    services: { docLinks: { links: { fleet: { datastreams: 'https://example.com/datastreams' } } } },
+  }),
+}));
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useServiceSettings } from './use_service_settings';

@@ -25,6 +25,7 @@ import { useDeploy, toSOServiceVars } from './authenticate_and_deploy_step/use_d
 import { toSOSettings, toSOSettingsUpdate } from './authenticate_and_deploy_step/so_settings';
 import { useOnboardingDriftDetection } from './authenticate_and_deploy_step/use_onboarding_drift_detection';
 import { useAgentBasedDeploy } from './authenticate_and_deploy_step/use_agent_based_deploy';
+import { useApplyDedicatedTemplates } from './authenticate_and_deploy_step/use_apply_dedicated_templates';
 import { AgentBasedSection } from './authenticate_and_deploy_step/agent_based_section';
 import { useOnboardingSO } from './authenticate_and_deploy_step/use_onboarding_so';
 import { useEcfDeployment, EcfDeploymentSection } from './ecf_deployment_section';
@@ -332,6 +333,13 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     setAgentDeployAttempted(true);
     return handleAgentDeploy();
   }, [handleAgentDeploy]);
+
+  useApplyDedicatedTemplates({
+    enabled: !!serviceSettings.dedicatedNamespaceTemplates,
+    isDeployDone: isAgentBased ? isAgentDone : isMiDone,
+    groups: isAgentBased ? agentTargets : deployGroups,
+    globalNamespace: serviceSettings.namespace?.trim() ?? '',
+  });
 
   const isAwsIdentityFederationEnabled = useAwsIdentityFederationEnabled();
   const showIdentityFederation = useMemo(() => {

@@ -60,6 +60,8 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     namespace,
     setNamespace,
     namespaceError,
+    dedicatedNamespaceTemplates,
+    setDedicatedNamespaceTemplates,
     bareNamePackage,
     instances,
     filteredInstances,
@@ -449,6 +451,8 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         namespace={namespace}
         onNamespaceChange={setNamespace}
         namespaceError={namespaceError}
+        dedicatedNamespaceTemplates={dedicatedNamespaceTemplates}
+        onDedicatedNamespaceTemplatesChange={setDedicatedNamespaceTemplates}
         hasDeployedServices={isRegionDisabled}
       />
       <EuiSpacer size="m" />

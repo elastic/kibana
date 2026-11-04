@@ -10,7 +10,9 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({ services: { docLinks: undefined } }),
+  useKibana: () => ({
+    services: { docLinks: { links: { fleet: { datastreams: 'https://example.com/datastreams' } } } },
+  }),
 }));
 jest.mock('@kbn/fleet-plugin/public', () => ({
   NamespaceComboBox: ({
@@ -36,6 +38,7 @@ const renderSection = (props: Partial<React.ComponentProps<typeof SharedSettings
   const onIntegrationNameChange = jest.fn();
   const onDescriptionChange = jest.fn();
   const onNamespaceChange = jest.fn();
+  const onDedicatedNamespaceTemplatesChange = jest.fn();
   render(
     <I18nProvider>
       <SharedSettingsSection
@@ -49,6 +52,8 @@ const renderSection = (props: Partial<React.ComponentProps<typeof SharedSettings
         onGlobalRegionTouched={jest.fn()}
         namespace=""
         onNamespaceChange={onNamespaceChange}
+        dedicatedNamespaceTemplates={false}
+        onDedicatedNamespaceTemplatesChange={onDedicatedNamespaceTemplatesChange}
         {...props}
       />
     </I18nProvider>
@@ -57,6 +62,7 @@ const renderSection = (props: Partial<React.ComponentProps<typeof SharedSettings
     onIntegrationNameChange,
     onDescriptionChange,
     onNamespaceChange,
+    onDedicatedNamespaceTemplatesChange,
   };
 };
 
@@ -159,6 +165,42 @@ describe('SharedSettingsSection', () => {
 
       fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
       expect(screen.getByTestId('sharedSettingsNamespace-note')).toBeInTheDocument();
+    });
+
+    describe('dedicated index templates switch', () => {
+      const SWITCH = 'sharedSettingsDedicatedNamespaceTemplates';
+
+      it('is off and disabled while there is no namespace', () => {
+        renderSection({ namespace: '' });
+
+        fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
+        expect(screen.getByTestId(SWITCH)).not.toBeChecked();
+        expect(screen.getByTestId(SWITCH)).toBeDisabled();
+      });
+
+      it('is disabled while the namespace is invalid', () => {
+        renderSection({ namespace: 'Prod' });
+
+        fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
+        expect(screen.getByTestId(SWITCH)).toBeDisabled();
+      });
+
+      it('reflects its value and reports changes once there is a namespace', () => {
+        const { onDedicatedNamespaceTemplatesChange } = renderSection({ namespace: 'prod' });
+
+        fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
+        expect(screen.getByTestId(SWITCH)).toBeEnabled();
+        fireEvent.click(screen.getByTestId(SWITCH));
+
+        expect(onDedicatedNamespaceTemplatesChange).toHaveBeenCalledWith(true);
+      });
+
+      it('shows as on when it is on', () => {
+        renderSection({ namespace: 'prod', dedicatedNamespaceTemplates: true });
+
+        fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
+        expect(screen.getByTestId(SWITCH)).toBeChecked();
+      });
     });
 
     it('has no deployed note before anything is deployed', () => {
