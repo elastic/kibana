@@ -21,6 +21,11 @@ export interface OutputFieldProps {
    */
   inputTypes: string[];
   /**
+   * Whether `inputTypes` is complete: the services map and the manifests of every selected service
+   * have loaded. Until then the accepted output types are not known.
+   */
+  areInputTypesLoaded: boolean;
+  /**
    * Whether the inherited output is the Fleet default, as for a new agent policy. Existing agent
    * policies may set their own, which is not known here, so the inherited option is not named.
    */
@@ -36,6 +41,7 @@ export function OutputField({
   onChange,
   packageName,
   inputTypes,
+  areInputTypesLoaded,
   isInheritedOutputDefault,
 }: OutputFieldProps) {
   const packagePolicy = useMemo(
@@ -49,12 +55,19 @@ export function OutputField({
 
   // A chosen output the selected services no longer accept (an OTel service added after Logstash
   // was picked, or an output deleted in Fleet) falls back to the inherited one, as Fleet would
-  // reject the deploy. Only once the outputs have loaded: an empty list means they have not.
+  // reject the deploy. Only once both sides are known: the outputs (an empty list means they have
+  // not loaded) and the input types, which without the manifests would allow only Beats outputs
+  // and clear a valid OTLP choice.
   useEffect(() => {
-    if (value && allowedOutputs.length > 0 && !allowedOutputs.some(({ id }) => id === value)) {
+    if (
+      value &&
+      areInputTypesLoaded &&
+      allowedOutputs.length > 0 &&
+      !allowedOutputs.some(({ id }) => id === value)
+    ) {
       onChange('');
     }
-  }, [value, allowedOutputs, onChange]);
+  }, [value, areInputTypesLoaded, allowedOutputs, onChange]);
 
   if (!canUseOutputPerIntegration) return null;
 

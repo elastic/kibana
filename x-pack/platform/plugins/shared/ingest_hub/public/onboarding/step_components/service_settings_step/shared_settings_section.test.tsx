@@ -193,6 +193,7 @@ describe('SharedSettingsSection', () => {
       onChange: jest.fn(),
       packageName: 'aws',
       inputTypes: ['aws-s3'],
+      areInputTypesLoaded: true,
       isInheritedOutputDefault: true,
       ...overrides,
     });
@@ -255,6 +256,27 @@ describe('SharedSettingsSection', () => {
         inheritedOutputName: undefined,
       });
       renderSection({ output: outputProps({ value: 'logstash-1', onChange }) });
+
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('keeps the chosen output while the manifests of the selected services are loading', () => {
+      const onChange = jest.fn();
+      // Without the manifests only Beats outputs are allowed, which would drop a valid OTLP choice.
+      mockUseOutputs.mockReturnValue({
+        isLoading: false,
+        canUseOutputPerIntegration: true,
+        allowedOutputs: [{ id: 'es-1', name: 'Elasticsearch' }],
+        inheritedOutputName: 'Default',
+      });
+      renderSection({
+        output: outputProps({
+          value: 'otlp-1',
+          onChange,
+          inputTypes: [],
+          areInputTypesLoaded: false,
+        }),
+      });
 
       expect(onChange).not.toHaveBeenCalled();
     });

@@ -474,6 +474,11 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
                 onChange: setOutputId,
                 packageName: bareNamePackage,
                 inputTypes: outputInputTypes,
+                areInputTypesLoaded:
+                  !!awsServicesMap &&
+                  outputInputTypes.length > 0 &&
+                  !hasUnloadedSelectedManifests &&
+                  !hasErroredSelectedManifests,
                 isInheritedOutputDefault: agentBasedDeployment.agentHostsMode === 'new',
               }
             : undefined
