@@ -12,8 +12,11 @@ import { Settings } from '.';
 
 const mockUseEditableSettings = jest.fn();
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
+jest.mock('@kbn/management-settings-hooks', () => ({
   useEditableSettings: (...args: unknown[]) => mockUseEditableSettings(...args),
+}));
+
+jest.mock('@kbn/observability-shared-plugin/public', () => ({
   useUiTracker: () => jest.fn(),
 }));
 
