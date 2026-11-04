@@ -7,24 +7,27 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
-import { filter, isEmpty, isNumber, map, omit, pick, pickBy, some } from 'lodash';
+import { filter, map, omit, pick, some } from 'lodash';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
-import { createDynamicQueries, replacedQueries } from './create_queries';
+import { buildQueries } from './create_queries';
 import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import {
-  convertSOQueriesToPack,
-  isPackQueryEnabled,
-  resolveEffectiveQueryExecution,
-} from '../../routes/pack/utils';
 import { ACTIONS_INDEX, ACTION_EXPIRATION_WEEKS, QUERY_TIMEOUT } from '../../../common/constants';
 import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
 import type { PackSavedObject } from '../../common/types';
 import { CustomHttpRequestError } from '../../common/error';
+import {
+  PACK_LOOKUP_FAILED,
+  PACK_NOT_FOUND,
+  QUERY_NOT_PROVIDED,
+} from '../../../common/translations/errors';
 import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import type { DispatchEntryPoint } from './dispatch_source';
+import { resolveRuleRunDispatchSource } from './dispatch_source';
 
 interface Metadata {
   currentUser: string | undefined;
@@ -48,6 +51,7 @@ interface CreateActionHandlerOptions {
   metadata?: Metadata;
   alertData?: ParsedTechnicalFields & { _index: string };
   error?: string;
+  dispatch: DispatchEntryPoint;
 }
 
 export const createActionHandler = async (
@@ -57,13 +61,14 @@ export const createActionHandler = async (
 ) => {
   const [coreStartServices] = await osqueryContext.getStartServices();
   const esClientInternal = coreStartServices.elasticsearch.client.asInternalUser;
+  const actionSpaceId = options.space?.id ?? DEFAULT_SPACE_ID;
 
   const spaceScopedInternalSavedObjectsClient = getInternalSavedObjectsClientForSpaceId(
     coreStartServices,
-    options.space?.id ?? DEFAULT_SPACE_ID
+    actionSpaceId
   );
 
-  const { metadata, alertData, error } = options;
+  const { metadata, alertData, error, dispatch } = options;
   const elasticsearchClient = coreStartServices.elasticsearch.client.asInternalUser;
   const {
     agent_all: agentAll,
@@ -80,7 +85,7 @@ export const createActionHandler = async (
       allAgentsSelected: !!agentAll,
       platformsSelected: agentPlatforms,
       policiesSelected: agentPolicyIds,
-      spaceId: options.space?.id ?? DEFAULT_SPACE_ID,
+      spaceId: actionSpaceId,
     }
   );
 
@@ -88,14 +93,79 @@ export const createActionHandler = async (
     throw new CustomHttpRequestError('No agents found for selection', 400);
   }
 
-  let packSO;
+  // Resolve the dispatch source once per entry point.
+  let dispatchSource =
+    dispatch.entryPoint === 'live_query'
+      ? dispatch.source
+      : await resolveRuleRunDispatchSource(
+          params,
+          dispatch.preflight,
+          spaceScopedInternalSavedObjectsClient
+        );
 
-  if (params.pack_id) {
-    packSO = await spaceScopedInternalSavedObjectsClient.get<PackSavedObject>(
-      packSavedObjectType,
-      params.pack_id
-    );
+  // Load pack SO when the dispatch source references one, or when a caller is running pack_id.
+  let packSO:
+    | { attributes: PackSavedObject; id: string; references: Array<{ type: string }> }
+    | undefined;
+  const packId = params.pack_id?.trim();
+
+  const needsPackLoad =
+    (dispatchSource.kind === 'caller' && packId) || dispatchSource.kind === 'pack';
+
+  if (needsPackLoad) {
+    const resolvedPackId =
+      dispatchSource.kind === 'pack' ? dispatchSource.packSavedObjectId : packId!;
+
+    try {
+      packSO = await spaceScopedInternalSavedObjectsClient.get<PackSavedObject>(
+        packSavedObjectType,
+        resolvedPackId
+      );
+    } catch (packError) {
+      const isRuleRun = dispatch.entryPoint === 'rule_run';
+      const errorLabel = SavedObjectsErrorHelpers.isNotFoundError(packError)
+        ? PACK_NOT_FOUND
+        : PACK_LOOKUP_FAILED;
+
+      if (!isRuleRun) {
+        // Live queries throw — the caller gets a 400.
+        throw packError;
+      }
+
+      // Rule runs record an error row so the alert's Osquery Results tab shows why nothing ran.
+      dispatchSource = {
+        kind: 'unresolved',
+        referenceId: resolvedPackId,
+        error: errorLabel,
+      };
+    }
   }
+
+  const queries = await buildQueries({
+    source: dispatchSource,
+    params,
+    alertData,
+    agents: selectedAgents,
+    osqueryContext,
+    error,
+    spaceId: actionSpaceId,
+    spaceScopedClient: spaceScopedInternalSavedObjectsClient,
+    packSO,
+  });
+
+  // D5: empty-SQL invariant — every dispatchable row must carry non-empty SQL.
+  const isRuleRun = dispatch.entryPoint === 'rule_run';
+  const queriesWithEmptySqlFixed = queries.map((row) => {
+    if (!row.error && !row.query) {
+      if (!isRuleRun) {
+        throw new CustomHttpRequestError(QUERY_NOT_PROVIDED, 400);
+      }
+
+      return { ...row, error: QUERY_NOT_PROVIDED };
+    }
+
+    return row;
+  });
 
   const osqueryAction = {
     action_id: uuidv4(),
@@ -114,51 +184,12 @@ export const createActionHandler = async (
     user_id: metadata?.currentUser,
     user_profile_uid: metadata?.userProfileUid,
     metadata: params.metadata,
-    pack_id: params.pack_id,
+    pack_id: packId,
     pack_name: packSO?.attributes?.name,
-    pack_prebuilt: params.pack_id
-      ? some(packSO?.references, ['type', 'osquery-pack-asset'])
-      : undefined,
+    pack_prebuilt: packId ? some(packSO?.references, ['type', 'osquery-pack-asset']) : undefined,
     tags: [],
-    space_id: options.space?.id ?? DEFAULT_SPACE_ID,
-    queries: packSO
-      ? map(
-          pickBy(convertSOQueriesToPack(packSO.attributes.queries), isPackQueryEnabled),
-          (packQuery, packQueryId) => {
-            const replacedQuery = replacedQueries(packQuery.query, alertData);
-            // Same per-query-wins / empty-or-all-OS-inherits rule as the
-            // scheduled emit. `result_type` is intentionally not applied —
-            // live-query Fleet actions do not carry snapshot/removed.
-            const { version, platform } = resolveEffectiveQueryExecution(packQuery, {
-              min_osquery_version: packSO.attributes.min_osquery_version,
-              platform: packSO.attributes.platform ?? undefined,
-            });
-
-            return pickBy(
-              {
-                action_id: uuidv4(),
-                id: packQueryId,
-                ...replacedQuery,
-                ...(error ? { error } : {}),
-                ecs_mapping: packQuery.ecs_mapping,
-                version,
-                platform,
-                timeout: packQuery.timeout,
-                agents: selectedAgents,
-              },
-              (value) => !isEmpty(value) || isNumber(value)
-            );
-          }
-        )
-      : await createDynamicQueries({
-          params,
-          alertData,
-          agents: selectedAgents,
-          osqueryContext,
-          error,
-          spaceId: options.space?.id ?? DEFAULT_SPACE_ID,
-          spaceScopedClient: spaceScopedInternalSavedObjectsClient,
-        }),
+    space_id: actionSpaceId,
+    queries: queriesWithEmptySqlFixed,
   };
 
   const actionQueries = osqueryAction.queries as OsqueryActionQuery[];
@@ -173,9 +204,12 @@ export const createActionHandler = async (
           input_type: 'osquery',
           agents: query.agents as string[],
           user_id: metadata?.currentUser,
-          space_id: options.space?.id ?? DEFAULT_SPACE_ID,
+          space_id: actionSpaceId,
           ...(query.timeout !== QUERY_TIMEOUT.DEFAULT ? { timeout: query.timeout } : {}),
-          data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']) as {
+          data: {
+            ...pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
+            space_id: actionSpaceId,
+          } as {
             [k: string]: unknown;
           },
         })
@@ -191,10 +225,19 @@ export const createActionHandler = async (
   });
 
   if (actionsComponentTemplateExists) {
-    await esClientInternal.bulk({
+    const bulkResponse = await esClientInternal.bulk({
       refresh: 'wait_for',
       operations: [{ index: { _index: `${ACTIONS_INDEX}-default` } }, osqueryAction],
     });
+
+    // `bulk` reports item failures in the body instead of throwing. Result reads are
+    // authorized against this document, so without it they 404 for this action.
+    if (bulkResponse.errors) {
+      const reason = bulkResponse.items[0]?.index?.error?.reason ?? 'unknown error';
+      throw new Error(
+        `Failed to write osquery action document ${osqueryAction.action_id}: ${reason}`
+      );
+    }
   }
 
   osqueryContext.telemetryEventsSender.reportEvent(TELEMETRY_EBT_LIVE_QUERY_EVENT, {

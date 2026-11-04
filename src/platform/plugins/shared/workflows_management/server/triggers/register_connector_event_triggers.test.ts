@@ -100,7 +100,7 @@ describe('registerConnectorEventTriggers', () => {
     expect(registerTriggerDefinition).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'dual.received',
-        title: 'Dual received',
+        title: 'Dual - Dual received',
         description: 'A dual connector event',
         stability: 'tech_preview',
         requiresConnectorId: true,
@@ -121,7 +121,12 @@ describe('registerConnectorEventTriggers', () => {
     );
     expect(registered).toContain('inboundWebhook.received');
     expect(registered).toHaveLength(
-      Object.values(connectorsSpecs).filter(connectorSpecHasEvents).length
+      Object.values(connectorsSpecs).reduce((count, spec) => {
+        if (!connectorSpecHasEvents(spec) || spec.events === undefined) {
+          return count;
+        }
+        return count + Object.keys(spec.events.definitions).length;
+      }, 0)
     );
   });
 });

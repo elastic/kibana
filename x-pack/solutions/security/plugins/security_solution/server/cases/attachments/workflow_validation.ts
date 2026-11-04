@@ -11,19 +11,22 @@ import type { WorkflowAttachmentValidationContext } from '@kbn/cases-plugin/serv
 
 const getSelectedIds = (
   inputs: Record<string, unknown>,
-  field: 'alertIds' | 'documents'
+  fields: ReadonlyArray<'alertIds' | 'documents' | 'documentIds'>
 ): string[] => {
   const event = isPlainObject(inputs.event) ? (inputs.event as Record<string, unknown>) : undefined;
-  const pairs = event?.[field];
-  if (!Array.isArray(pairs)) {
-    return [];
-  }
 
-  return pairs.flatMap((pair) => {
-    if (!isPlainObject(pair) || typeof pair._id !== 'string') {
+  return fields.flatMap((field) => {
+    const pairs = event?.[field];
+    if (!Array.isArray(pairs)) {
       return [];
     }
-    return [pair._id];
+
+    return pairs.flatMap((pair) => {
+      if (!isPlainObject(pair) || typeof pair._id !== 'string') {
+        return [];
+      }
+      return [pair._id];
+    });
   });
 };
 
@@ -36,38 +39,48 @@ const targetsMatch = (targets: readonly string[], selectedIds: readonly string[]
   );
 };
 
-export const validateAlertWorkflowTargets = ({
-  targets,
-  inputs,
-}: WorkflowAttachmentValidationContext): void => {
-  const selectedIds = getSelectedIds(inputs, 'alertIds');
-  if (selectedIds.length === 0) {
-    throw Boom.badRequest('Alert attachment workflow origins require selected alert inputs.');
-  }
-  if (
-    !targetsMatch(
-      targets.map(({ id }) => id),
-      selectedIds
-    )
-  ) {
-    throw Boom.badRequest('Alert workflow origin targets must match the selected alerts.');
-  }
-};
+const createTargetValidator =
+  ({
+    inputKeys,
+    missingInputsMessage,
+    mismatchMessage,
+  }: {
+    inputKeys: ReadonlyArray<'alertIds' | 'documents' | 'documentIds'>;
+    missingInputsMessage: string;
+    mismatchMessage: string;
+  }) =>
+  ({ targets, inputs }: WorkflowAttachmentValidationContext): void => {
+    const selectedIds = getSelectedIds(inputs, inputKeys);
+    if (selectedIds.length === 0) {
+      throw Boom.badRequest(missingInputsMessage);
+    }
+    if (
+      !targetsMatch(
+        targets.map(({ id }) => id),
+        selectedIds
+      )
+    ) {
+      throw Boom.badRequest(mismatchMessage);
+    }
+  };
 
-export const validateEventWorkflowTargets = ({
-  targets,
-  inputs,
-}: WorkflowAttachmentValidationContext): void => {
-  const selectedIds = getSelectedIds(inputs, 'documents');
-  if (selectedIds.length === 0) {
-    throw Boom.badRequest('Event attachment workflow origins require selected document inputs.');
-  }
-  if (
-    !targetsMatch(
-      targets.map(({ id }) => id),
-      selectedIds
-    )
-  ) {
-    throw Boom.badRequest('Event workflow origin targets must match the selected documents.');
-  }
-};
+export const validateAlertWorkflowTargets = createTargetValidator({
+  inputKeys: ['alertIds'],
+  missingInputsMessage: 'Alert attachment workflow origins require selected alert inputs.',
+  mismatchMessage: 'Alert workflow origin targets must match the selected alerts.',
+});
+
+// Attacks are run through the alerts workflow panel, so the selected ids arrive in `event.alertIds`
+// exactly as they do for alerts — they are the attack ids rather than the ids of the alerts the
+// attacks group together.
+export const validateAttackWorkflowTargets = createTargetValidator({
+  inputKeys: ['alertIds'],
+  missingInputsMessage: 'Attack attachment workflow origins require selected attack inputs.',
+  mismatchMessage: 'Attack workflow origin targets must match the selected attacks.',
+});
+
+export const validateEventWorkflowTargets = createTargetValidator({
+  inputKeys: ['documents', 'documentIds'],
+  missingInputsMessage: 'Event attachment workflow origins require selected document inputs.',
+  mismatchMessage: 'Event workflow origin targets must match the selected documents.',
+});

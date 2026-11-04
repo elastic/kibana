@@ -34,7 +34,7 @@ jest.mock('../../../common/components/visualization_actions/visualization_embedd
 
 const mockedUseRiskScore = jest.fn().mockReturnValue(mockServiceRiskScoreState);
 jest.mock('../../../entity_analytics/api/hooks/use_risk_score', () => ({
-  useRiskScore: () => mockedUseRiskScore(),
+  useRiskScore: (params: unknown) => mockedUseRiskScore(params),
 }));
 
 const mockedUseEntityRiskScores = jest.fn();
@@ -90,6 +90,26 @@ describe('ServicePanel', () => {
     expect(getByTestId('service-panel-header')).toBeInTheDocument();
     expect(queryByTestId('securitySolutionFlyoutLoading')).not.toBeInTheDocument();
     expect(getByTestId('securitySolutionFlyoutNavigationExpandDetailButton')).toBeInTheDocument();
+  });
+
+  it('labels the risk score request with the entity details flyout execution context', () => {
+    render(
+      <TestProviders>
+        <ServicePanel {...mockProps} />
+      </TestProviders>
+    );
+
+    expect(mockedUseRiskScore).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:entity_details_flyout',
+            id: 'service_risk_score',
+          },
+        },
+      })
+    );
   });
 
   it('renders loading state when observed service is loading', () => {

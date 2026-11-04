@@ -36,6 +36,7 @@ describe('validateConfig', () => {
       aliases: [],
       data_streams: [],
       datasets: [],
+      views: [],
     });
 
     await validateConfig({ config, esClient });
@@ -57,6 +58,7 @@ describe('validateConfig', () => {
       aliases: [],
       data_streams: [],
       datasets: [],
+      views: [],
     });
 
     await expect(() =>
@@ -74,6 +76,7 @@ describe('validateConfig', () => {
       aliases: [],
       data_streams: [],
       datasets: [],
+      views: [],
     });
 
     await validateConfig({ config, esClient });

@@ -12,11 +12,8 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { TransactionTab, TransactionTabs } from './transaction_tabs';
 import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import type { UnifiedWaterfallFetcherResult } from '../use_unified_waterfall_fetcher';
-import {
-  GENAI_EBT_CLICK_ACTIONS,
-  GENAI_TAB_IMPRESSION_EVENT_TYPE,
-  type GenAiFields,
-} from '@kbn/apm-ui-shared';
+import type { GenAiFields } from '@kbn/genai-common';
+import { GENAI_EBT_CLICK_ACTIONS, GENAI_TAB_IMPRESSION_EVENT_TYPE } from '@kbn/apm-ui-shared';
 import { TRACE_SAMPLE_EBT_ELEMENTS } from './ebt_constants';
 
 const mockUseGenAiData = jest.fn();

@@ -17,6 +17,8 @@ export type EscalationStatus = 'open' | 'closed';
 export interface EscalationQueueItem {
   /** Escalation conversation id. */
   id: string;
+  /** Agent Builder agent id that owns this conversation. Used for direct deep-linking. */
+  agentId: string;
   title: string;
   status: EscalationStatus;
   /** ISO-8601 creation timestamp from `created_at`. */
@@ -27,4 +29,8 @@ export interface EscalationQueueItem {
   linkedInvestigationCount: number;
   /** User profile uids from `metadata.assignees`. */
   assigneeUids: readonly string[];
+  /** Entity ids from the Impact of the linked investigations; feeds the Impact pills. */
+  entityIds?: string[];
+  /** Entity type (`host`, `user`, …) by entity id, for the ids that have one. */
+  entityTypes?: Record<string, string>;
 }

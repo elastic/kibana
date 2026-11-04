@@ -46,6 +46,7 @@ const createStore = (existing?: DecisionTreeDetail): jest.Mocked<DecisionTreeSto
     list: jest.fn().mockResolvedValue([]),
     get: jest.fn().mockResolvedValue(existing),
     commit: jest.fn().mockResolvedValue(stored(FULL_TREE)),
+    listTreeIdsForInvestigation: jest.fn().mockResolvedValue([]),
     listVersions: jest.fn().mockResolvedValue([]),
     getVersion: jest.fn().mockResolvedValue(undefined),
     archive: jest.fn(),
@@ -111,7 +112,7 @@ const runSubmit = async ({
   return { result, session };
 };
 
-describe('submit_optimizer_result', () => {
+describe('nightshift_submit_optimizer_result', () => {
   it('reads the submitted file back from the sandbox and persists it', async () => {
     const store = createStore();
 

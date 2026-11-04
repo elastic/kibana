@@ -712,3 +712,52 @@ describe('renderDataMappingPopover', () => {
     expect(legendRow).toMatchSnapshot();
   });
 });
+
+describe('getValueSuggestions', () => {
+  test('should return empty array when field is null', async () => {
+    const colorProperty = new DynamicColorProperty(
+      {
+        type: COLOR_MAP_TYPE.CATEGORICAL,
+        colorCategory: 'palette_0',
+        fieldMetaOptions,
+      },
+      VECTOR_STYLES.FILL_COLOR,
+      null,
+      new MockLayer(new MockStyle()) as unknown as IVectorLayer,
+      () => {
+        return (value: RawValue) => value + '_format';
+      }
+    );
+
+    const suggestions = await colorProperty.getValueSuggestions('');
+    expect(suggestions).toEqual([]);
+  });
+
+  test('should return suggestions from field source', async () => {
+    const expectedSuggestions = ['ios', 'osx', 'win 7', 'win 8', 'win xp'];
+    const mockSource = {
+      getValueSuggestions: jest.fn().mockResolvedValue(expectedSuggestions),
+    };
+    const fieldWithSource = {
+      ...mockField,
+      getSource: () => mockSource,
+    } as unknown as IField;
+
+    const colorProperty = new DynamicColorProperty(
+      {
+        type: COLOR_MAP_TYPE.CATEGORICAL,
+        colorCategory: 'palette_0',
+        fieldMetaOptions,
+      },
+      VECTOR_STYLES.FILL_COLOR,
+      fieldWithSource,
+      new MockLayer(new MockStyle()) as unknown as IVectorLayer,
+      () => {
+        return (value: RawValue) => value + '_format';
+      }
+    );
+
+    const suggestions = await colorProperty.getValueSuggestions('');
+    expect(suggestions).toEqual(['ios', 'osx', 'win 7', 'win 8', 'win xp']);
+  });
+});

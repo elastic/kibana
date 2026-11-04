@@ -8,7 +8,7 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import type { SuggestAutomationProvider } from '../../types';
@@ -19,6 +19,7 @@ const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
   description: 'Support tickets',
   managed: false,
+  memory_enabled: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [{ type: 'workflow', value: 'wf-existing' }],
   sources: [{ type: 'esql', value: 'FROM tickets' }],
@@ -32,12 +33,14 @@ const renderSuggestHook = ({
   isManaged = false,
   canSuggest = true,
   hasProvider = true,
+  spaceId = 'default',
   onSaved = jest.fn(),
 }: {
   aiIndex?: GetAiIndexResponse;
   isManaged?: boolean;
   canSuggest?: boolean;
   hasProvider?: boolean;
+  spaceId?: string | undefined;
   onSaved?: jest.Mock;
 } = {}) => {
   const canSuggestMock = jest.fn().mockReturnValue(canSuggest);
@@ -59,6 +62,7 @@ const renderSuggestHook = ({
     share: {} as ContextEngineServices['share'],
     triggersActionsUi: {} as ContextEngineServices['triggersActionsUi'],
     getAgentBuilderIntegration: hasProvider ? () => ({ suggestAutomation: provider }) : undefined,
+    spaces: spaceId === undefined ? undefined : { getActiveSpace: async () => ({ id: spaceId }) },
   } as unknown as ContextEngineServices;
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -101,15 +105,39 @@ describe('useSuggestAutomation', () => {
     expect(result.current.canSuggest).toBe(false);
   });
 
-  it('delegates suggestAutomation to the provider', () => {
-    const { result, suggestAutomationMock } = renderSuggestHook();
+  it('delegates suggestAutomation to the provider with the resolved space id', async () => {
+    const { result, suggestAutomationMock } = renderSuggestHook({ spaceId: 'marketing' });
 
-    result.current.suggestAutomation();
-
-    expect(suggestAutomationMock).toHaveBeenCalledWith({
-      aiIndex,
-      onSaved: expect.any(Function),
+    await waitFor(() => {
+      act(() => {
+        result.current.suggestAutomation();
+      });
+      expect(suggestAutomationMock).toHaveBeenCalledWith({
+        aiIndex,
+        spaceId: 'marketing',
+        onSaved: expect.any(Function),
+      });
     });
+  });
+
+  it('does not call suggestAutomation when there is no spaces plugin', async () => {
+    const { result, suggestAutomationMock } = renderSuggestHook({ spaceId: undefined });
+
+    act(() => {
+      result.current.suggestAutomation();
+    });
+
+    expect(suggestAutomationMock).not.toHaveBeenCalled();
+  });
+
+  it('does not call suggestAutomation while the active space is still resolving', () => {
+    const { result, suggestAutomationMock } = renderSuggestHook({ spaceId: 'marketing' });
+
+    act(() => {
+      result.current.suggestAutomation();
+    });
+
+    expect(suggestAutomationMock).not.toHaveBeenCalled();
   });
 
   it('does not call suggestAutomation when canSuggest is false', () => {

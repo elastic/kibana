@@ -97,7 +97,8 @@ describe('invokeSkillReportWorkflow', () => {
 
     expect(workflowsManagementApi.getWorkflow).toHaveBeenCalledWith(
       'system-attack-discovery-skill-report',
-      'default'
+      'default',
+      baseParams.request
     );
   });
 

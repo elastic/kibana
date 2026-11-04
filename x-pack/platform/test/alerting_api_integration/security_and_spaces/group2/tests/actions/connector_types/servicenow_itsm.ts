@@ -705,9 +705,27 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
       describe('Execution', () => {
         // Connectors that use the Import set API
         describe('Import set API', () => {
+          let importSetActionId = '';
+
+          before(async () => {
+            const { body } = await supertest
+              .post('/api/actions/connector')
+              .set('kbn-xsrf', 'foo')
+              .send({
+                name: 'A servicenow simulator',
+                connector_type_id: '.servicenow',
+                config: {
+                  apiUrl: serviceNowSimulatorURL,
+                  usesTableApi: false,
+                },
+                secrets: mockServiceNowBasic.secrets,
+              });
+            importSetActionId = body.id;
+          });
+
           it('should handle creating an incident without comments', async () => {
             const { body: result } = await supertest
-              .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+              .post(`/api/actions/connector/${importSetActionId}/_execute`)
               .set('kbn-xsrf', 'foo')
               .send({
                 params: {
@@ -723,7 +741,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
             expect(proxyHaveBeenCalled).to.equal(true);
             expect(result).to.eql({
               status: 'ok',
-              connector_id: simulatedActionId,
+              connector_id: importSetActionId,
               data: {
                 id: '123',
                 title: 'INC01',
@@ -737,16 +755,16 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
                 getService,
                 spaceId: 'default',
                 type: 'action',
-                id: simulatedActionId,
+                id: importSetActionId,
                 provider: 'actions',
                 actions: new Map([
-                  ['execute-start', { equal: 12 }],
-                  ['execute', { equal: 12 }],
+                  ['execute-start', { gte: 1 }],
+                  ['execute', { gte: 1 }],
                 ]),
               });
             });
 
-            const executeEvent = events[events.length - 1];
+            const executeEvent = events.find((event) => event?.event?.action === 'execute');
             expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(283);
           });
         });

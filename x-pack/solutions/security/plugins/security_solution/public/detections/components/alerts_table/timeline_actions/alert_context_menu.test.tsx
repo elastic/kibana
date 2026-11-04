@@ -55,9 +55,6 @@ const ecsRowData: Ecs = {
 const props = {
   ariaLabel:
     'Select more actions for the alert or event in row 26, with columns 2021-08-12T11:07:10.552Z Malware Prevention Alert high 73  siem-windows-endpoint SYSTEM powershell.exe mimikatz.exe  ',
-  ariaRowindex: 26,
-  columnValues:
-    '2021-08-12T11:07:10.552Z Malware Prevention Alert high 73  siem-windows-endpoint SYSTEM powershell.exe mimikatz.exe  ',
   isRemoteDocument: false,
   ecsRowData,
   refetch: jest.fn(),
@@ -132,6 +129,7 @@ jest.mock('./use_add_to_chat_action', () => ({
 
 const actionMenuButton = 'timeline-context-menu-button';
 const addToCaseButton = 'add-to-case-action';
+const removeFromCaseButton = 'remove-from-case-action';
 const markAsOpenButton = 'open-alert-status';
 const markAsAcknowledgedButton = 'acknowledged-alert-status';
 const markAsClosedButton = 'alert-close-context-menu-item';
@@ -215,6 +213,37 @@ describe('Alert table context menu', () => {
       fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
       expect(wrapper.getByTestId(addToCaseButton)).toBeTruthy();
+    });
+
+    test('it renders RemoveFromCase and calls onRemoveFromCase when clicked', () => {
+      const onRemoveFromCase = jest.fn();
+      const wrapper = render(
+        <TestProviders>
+          <AlertContextMenu
+            {...props}
+            scopeId={TableId.alertsOnCasePage}
+            onRemoveFromCase={onRemoveFromCase}
+          />
+        </TestProviders>
+      );
+
+      fireEvent.click(wrapper.getByTestId(actionMenuButton));
+      fireEvent.click(wrapper.getByTestId(removeFromCaseButton));
+
+      expect(onRemoveFromCase).toHaveBeenCalledTimes(1);
+      expect(onRemoveFromCase).toHaveBeenCalledWith(props.ecsRowData._id);
+    });
+
+    test('it does not render RemoveFromCase without onRemoveFromCase', () => {
+      const wrapper = render(
+        <TestProviders>
+          <AlertContextMenu {...props} scopeId={TableId.alertsOnCasePage} />
+        </TestProviders>
+      );
+
+      fireEvent.click(wrapper.getByTestId(actionMenuButton));
+
+      expect(wrapper.queryByTestId(removeFromCaseButton)).not.toBeInTheDocument();
     });
   });
 
@@ -318,6 +347,7 @@ describe('Alert table context menu', () => {
   describe('Document workflow actions (events)', () => {
     const eventEcsRowData: Ecs = {
       _id: '1',
+      _index: 'test-index',
       agent: { type: ['blah'] },
       event: {
         kind: ['event'],
@@ -380,6 +410,20 @@ describe('Alert table context menu', () => {
       fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
       expect(wrapper.getByTestId(runDocumentWorkflowActionButton)).toBeInTheDocument();
+    });
+
+    test('it passes the document id rather than the row ECS fields', async () => {
+      render(
+        <TestProviders>
+          <AlertContextMenu {...eventProps} scopeId={TableId.hostsPageEvents} />
+        </TestProviders>
+      );
+
+      expect(mockUseRunDocumentWorkflowPanel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          documentIds: [{ _id: eventEcsRowData._id, _index: 'test-index' }],
+        })
+      );
     });
 
     test('it shows the document workflow panel when run workflow action is clicked', async () => {

@@ -30,9 +30,9 @@ export const metrics: InventoryMetricsConfig<PodAggregations> = {
     'podNetworkTraffic',
     ...nginxRequiredMetrics,
   ],
-  getAggregations: async () => {
+  getAggregations: async (args) => {
     const { snapshot } = await import('./snapshot');
-    const catalog = new MetricsCatalog(snapshot);
+    const catalog = new MetricsCatalog(snapshot, args?.schema);
     return catalog;
   },
   getWaffleMapTooltipMetrics: () => ['cpu', 'memory', 'rx', 'tx'],

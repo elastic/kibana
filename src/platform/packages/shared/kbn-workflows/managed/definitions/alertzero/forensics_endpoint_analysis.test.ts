@@ -121,7 +121,7 @@ describe('Endpoint analysis worker', () => {
     expect(search?.with?.allow_no_indices).toBe(true);
   });
 
-  it('dispatches the global analysis asynchronously and writes no indicators', () => {
+  it('dispatches the global analysis asynchronously', () => {
     const start = stepByName('start_run');
     expect(start?.type).toBe('workflow.executeAsync');
     expect(start?.with?.['workflow-id']).toBe(
@@ -131,10 +131,44 @@ describe('Endpoint analysis worker', () => {
       ki_id: '{{ foreach.item._source.id | default: foreach.item._id }}',
       ai_index_id: '{{ inputs.ai_index_id | default: consts.ai_index_id }}',
     });
+    // No `if` guard: set_ki_autonomy failing the iteration stops execution
+    // before start_run is reached, so the guard is redundant.
+    expect(start?.if).toBeUndefined();
 
-    expect(allSteps.some(({ type }) => type === 'context-engine.updateKi')).toBe(false);
+    expect(allSteps.filter(({ type }) => type === 'context-engine.updateKi')).toEqual([
+      expect.objectContaining({ name: 'set_ki_autonomy' }),
+    ]);
     expect(allSteps.some(({ type }) => type === 'context-engine.createKi')).toBe(false);
     expect(allSteps.some(({ type }) => type === 'ai.agent')).toBe(false);
+  });
+
+  // The saved watch setting applies to the schedule. A manual run of this worker
+  // must not carry `supervised` into the analysis, or containment runs on its own.
+  describe('the autonomy it records before dispatch', () => {
+    const liquid = createWorkflowLiquidEngine();
+    const autonomyTemplate = String(
+      (
+        (stepByName('set_ki_autonomy')?.with?.ki as { attributes?: { autonomy?: string } })
+          ?.attributes ?? {}
+      ).autonomy
+    );
+    const renderAutonomy = (triggeredBy: string): Promise<string> =>
+      liquid.parseAndRender(autonomyTemplate, {
+        execution: { triggeredBy },
+        consts: { worker_settings: { autonomy: 'supervised' } },
+      });
+
+    it('keeps the watch setting when the sweep is scheduled', async () => {
+      await expect(renderAutonomy('scheduled')).resolves.toBe('supervised');
+    });
+
+    it('forces manual when the worker is run by hand', async () => {
+      await expect(renderAutonomy('manual')).resolves.toBe('manual');
+    });
+
+    it('forces manual when some other workflow starts the worker', async () => {
+      await expect(renderAutonomy('workflow-step')).resolves.toBe('manual');
+    });
   });
 
   // `updateKi` resolves a write on the `id` field and only falls back to `_id` for
@@ -188,6 +222,9 @@ describe('Endpoint analysis worker', () => {
     expect(fanOut?.type).toBe('parallel');
     expect(fanOut?.mode).toBe('settled');
     expect(stepByName('start_run')?.['on-failure']).toBeUndefined();
+    // A failed autonomy write must fail the iteration, not silently continue;
+    // otherwise start_runs.output.failed stays 0 even when no child was started.
+    expect(stepByName('set_ki_autonomy')?.['on-failure']).toBeUndefined();
   });
 
   // A `foreach` publishes no aggregate and keeps only its last iteration, so the

@@ -25,5 +25,6 @@ export {
   type ReportHitlPromptShownParams,
   type ReportHitlQuestionAnsweredParams,
   type HitlQuestionAnsweredOutcome,
+  type CompactionTrigger,
 } from './agent_builder_events';
 export { AGENT_BUILDER_UI_EBT, type AgentBuilderUiEbt } from './agent_builder_ui_ebt';

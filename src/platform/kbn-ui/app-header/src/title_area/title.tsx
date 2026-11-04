@@ -55,14 +55,14 @@ export const isEditableTitle = (
 ): title is AppHeaderEditableTitle => typeof title !== 'string';
 
 /**
- * No-back start inset on the title (and matching placeholder). `xs` aligns a lone
- * title with the back-button slot. Compact's 8px shell sits too close to a rounded
- * workspace corner, so compact uses `s`.
+ * Compact no-back start inset so the title clears a rounded workspace corner.
+ * Standard headers do not need this offset. Callers also skip it when a back button
+ * is present.
  */
 export const getNoBackTitleOffset = (
-  euiTheme: { size: { xs: string; s: string } },
+  euiTheme: { size: { s: string } },
   compact?: boolean
-): string => (compact ? euiTheme.size.s : euiTheme.size.xs);
+): string | undefined => (compact ? euiTheme.size.s : undefined);
 
 // All of the title's layout/visual contract lives here, isolated from the behavior in
 // `Title`. The comments record the hard-won invariants behind read/edit pixel parity --
@@ -249,12 +249,13 @@ const useTitleStyles = (compact?: boolean) => {
       }
     `;
 
-    // Applied only when there is no back button, so a lone title lines up with where the
-    // text sits when a back button precedes it. Compact uses a larger token so the title
-    // clears a rounded workspace corner.
-    const titleOffsetStyle = css`
-      padding-inline-start: ${getNoBackTitleOffset(euiTheme, compact)};
-    `;
+    // Compact only: clears a rounded workspace corner when there is no back button.
+    const noBackOffset = getNoBackTitleOffset(euiTheme, compact);
+    const titleOffsetStyle = noBackOffset
+      ? css`
+          padding-inline-start: ${noBackOffset};
+        `
+      : undefined;
 
     return {
       titleWrapper,

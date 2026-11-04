@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable prettier/prettier */
-/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @kbn/compat/typescript-naming-convention */
 
 import type { IntegrationEvaluations } from "../types";
 
@@ -65,6 +65,12 @@ export const aws_bedrockEvaluations = {
   service.target.id = CASE(
     service.target.id IS NOT NULL, service.target.id,
     data_stream.dataset == "aws_bedrock.invocation" AND gen_ai.request.model.id IS NOT NULL, gen_ai.request.model.id,
+    null
+  ),
+  entity.target.id = CASE(
+    entity.target.id IS NOT NULL, entity.target.id,
+    data_stream.dataset == "aws_bedrock.invocation" AND gen_ai.request.model.id IS NOT NULL, gen_ai.request.model.id,
+    data_stream.dataset == "aws_bedrock.invocation" AND aws_bedrock.invocation.model_id IS NOT NULL, aws_bedrock.invocation.model_id,
     null
   ),
   service.target.type = CASE(

@@ -51,7 +51,7 @@ interface ScheduleIntervalFieldProps {
 }
 
 /**
- * "Every N unit" trigger row. Commits on change; an amount that is not a whole number of units
+ * "Runs every N unit" trigger row. Commits on change; an amount that is not a whole number of units
  * stays on screen flagged instead of being floored into a different cadence.
  */
 export const ScheduleIntervalField: React.FC<ScheduleIntervalFieldProps> = ({

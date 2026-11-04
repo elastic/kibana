@@ -7,31 +7,29 @@
 
 import React from 'react';
 
-import { waitFor } from '@testing-library/react';
-
-import { createFleetTestRendererMock } from '../../mock';
+import { screen } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { NonFipsIntegrationsCallout } from './non_fips_integrations_callout';
 
+jest.mock('../../hooks', () => ({
+  useStartServices: () => ({
+    docLinks: { links: { fleet: { fipsIngest: 'https://elastic.co/docs/fips-ingest' } } },
+  }),
+}));
+
 describe('NonFipsIntegrationsCallout', () => {
   function render(nonFipsIntegrations?: Array<{ name: string; title: string }>) {
-    const renderer = createFleetTestRendererMock();
-    const results = renderer.render(
-      <NonFipsIntegrationsCallout nonFipsIntegrations={nonFipsIntegrations} />
-    );
-
-    return results;
+    return renderWithI18n(<NonFipsIntegrationsCallout nonFipsIntegrations={nonFipsIntegrations} />);
   }
 
-  it('should render callout requiring root privileges', async () => {
-    const renderResult = render([{ name: 'mongodb', title: 'MongoDB' }]);
+  it('should render callout requiring root privileges', () => {
+    render([{ name: 'mongodb', title: 'MongoDB' }]);
 
-    await waitFor(() => {
-      expect(renderResult.getByText('FIPS mode compatibility')).toBeInTheDocument();
-      expect(renderResult.getByTestId('nonFipsIntegrationsCallout').textContent).toContain(
-        'This agent policy contains the following integrations that are not FIPS compatible. Enrolling an agent in FIPS mode might cause the agent to not ingest data properly.'
-      );
-      expect(renderResult.getByText('MongoDB')).toBeInTheDocument();
-    });
+    expect(screen.getByText('FIPS mode compatibility')).toBeInTheDocument();
+    expect(screen.getByTestId('nonFipsIntegrationsCallout').textContent).toContain(
+      'This agent policy contains the following integrations that are not FIPS compatible. Enrolling an agent in FIPS mode might cause the agent to not ingest data properly.'
+    );
+    expect(screen.getByText('MongoDB')).toBeInTheDocument();
   });
 });

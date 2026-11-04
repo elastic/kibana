@@ -20,9 +20,7 @@ export class InferenceWorkflowsPlugin
     deps.workflowsExtensions.registerStepDefinition(aiSummarizeStepDefinition(core));
     deps.workflowsExtensions.registerStepDefinition(aiClassifyStepDefinition(core));
 
-    if (deps.searchInferenceEndpoints) {
-      registerInferenceFeatures(deps.searchInferenceEndpoints);
-    }
+    registerInferenceFeatures(deps.searchInferenceEndpoints);
 
     return {};
   }

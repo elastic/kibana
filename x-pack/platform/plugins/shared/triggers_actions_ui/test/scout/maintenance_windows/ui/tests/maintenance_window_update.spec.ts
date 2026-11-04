@@ -83,7 +83,9 @@ const openEditFlow = async (
 
   // The MW page renders a single search field; the unrelated
   // sitewide-search input is excluded by the CSS selector.
-  const searchBox = page.locator('.euiFieldSearch:not(.euiSelectableTemplateSitewide__search)');
+  const searchBox = page.locator(
+    'input[type="search"]:not(.euiSelectableTemplateSitewide__search)'
+  );
   await searchBox.fill(name);
   // The pre-search table is already loaded, so wait for the search request itself: acting on the
   // stale table lets the re-render close the actions popover.
@@ -147,6 +149,9 @@ test.describe('Maintenance window update form', { tag: tags.stateful.classic }, 
     await page.testSubj.locator('recurringScheduleRepeatSelect').selectOption(dailyValue);
 
     await page.testSubj.click(SUBMIT_BUTTON);
+
+    // Alerts is on with no filter, so the "apply to all alerts" confirmation modal appears.
+    await page.testSubj.click('confirmModalConfirmButton');
 
     await expect(page.testSubj.locator(TOAST_TITLE)).toContainText(
       `Updated maintenance window '${updatedName}'`

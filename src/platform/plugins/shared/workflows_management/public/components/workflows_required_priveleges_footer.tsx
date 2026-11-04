@@ -29,7 +29,7 @@ export const PrivilegesFooter = ({ permissions }: { permissions: PermissionBadge
       <EuiText color="subdued" textAlign="center" size="xs">
         <p css={{ marginBlock: 0 }}>
           <FormattedMessage
-            id="platform.plugins.shared.workflows_management.ui.noReadAccess.requiredPrivileges"
+            id="workflows.ui.noReadAccess.requiredPrivileges"
             defaultMessage="Minimum privileges required:"
           />
         </p>

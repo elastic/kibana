@@ -6,8 +6,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { estypes } from '@elastic/elasticsearch';
 import { metrics } from './metrics';
 import { createInventoryModel } from '../../shared/create_inventory_model';
+import type { DataSchemaFormat } from '../../types';
+import {
+  DATASTREAM_DATASET,
+  EVENT_MODULE,
+  K8S_POD_NAME,
+  K8S_POD_UID,
+  KUBELET_STATS_RECEIVER_OTEL,
+} from '../../../constants';
+
 export const pod = createInventoryModel('pod', {
   displayName: i18n.translate('xpack.metricsData.inventoryModel.pod.displayName', {
     defaultMessage: 'Kubernetes Pods',
@@ -17,7 +27,7 @@ export const pod = createInventoryModel('pod', {
   }),
   requiredIntegration: {
     beats: 'kubernetes',
-    otel: 'kubeletstatsreceiver.otel',
+    otel: KUBELET_STATS_RECEIVER_OTEL,
   },
   crosslinkSupport: {
     details: true,
@@ -30,6 +40,20 @@ export const pod = createInventoryModel('pod', {
     name: 'kubernetes.pod.name',
     ip: 'kubernetes.pod.ip',
   },
+  // Whole SemConv identity: uid and name. These documents have no ip field.
+  schemaFields: {
+    semconv: { id: K8S_POD_UID, name: K8S_POD_NAME },
+  },
   metrics,
-  nodeFilter: () => [{ term: { 'event.module': 'kubernetes' } }],
+  nodeFilter: ({
+    schema,
+  }: { schema?: DataSchemaFormat } = {}): estypes.QueryDslQueryContainer[] => {
+    if (!schema) {
+      return [];
+    }
+
+    return schema === 'ecs'
+      ? [{ term: { [EVENT_MODULE]: 'kubernetes' } }]
+      : [{ term: { [DATASTREAM_DATASET]: KUBELET_STATS_RECEIVER_OTEL } }];
+  },
 });

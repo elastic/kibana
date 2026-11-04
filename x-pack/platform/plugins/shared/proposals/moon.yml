@@ -43,12 +43,15 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/proposals-common'
   - '@kbn/proposals-ui'
+  - '@kbn/user-profile-components'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - index.ts
@@ -56,6 +59,4 @@ fileGroups:
     - server/**/*
     - integration_tests/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

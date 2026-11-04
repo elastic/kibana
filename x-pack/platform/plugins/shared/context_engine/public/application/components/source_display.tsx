@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiAvatar, EuiCode } from '@elastic/eui';
+import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { ConnectorTypeIcon } from './connector_type_icon';
+import { ITEM_ROW_ICON_SIZE, ItemRowIcon } from './item_row_icon';
 import type { SourceType } from './source_picker';
 
 export interface SourceDisplay {
@@ -34,28 +35,23 @@ const SOURCE_DISPLAY: Record<SourceType, SourceDisplayFactory> = {
       defaultMessage: 'ES|QL',
     });
     return {
-      icon: (
-        <EuiAvatar
-          type="space"
-          size="m"
-          color="subdued"
-          name={typeLabel}
-          iconType="code"
-          iconColor="primary"
-          iconSize="m"
-        />
-      ),
+      icon: <ItemRowIcon iconType="code" />,
       typeLabel,
       label: value,
       content: (
-        <EuiCode language="sql" transparentBackground>
+        <EuiCode language="esql" transparentBackground>
           {value}
         </EuiCode>
       ),
     };
   },
   connector: (value, { connectorNameById, connectorActionTypeById }) => ({
-    icon: <ConnectorTypeIcon actionTypeId={connectorActionTypeById.get(value)} size="l" />,
+    icon: (
+      <ConnectorTypeIcon
+        actionTypeId={connectorActionTypeById.get(value)}
+        size={ITEM_ROW_ICON_SIZE}
+      />
+    ),
     typeLabel: i18n.translate('xpack.contextEngine.sourceType.connector', {
       defaultMessage: 'Connector',
     }),

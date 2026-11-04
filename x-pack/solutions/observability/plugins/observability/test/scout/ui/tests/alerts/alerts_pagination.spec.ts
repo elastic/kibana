@@ -51,16 +51,17 @@ test.describe(
     });
 
     test('navigates between pages', async ({ pageObjects }) => {
-      const { alertsTablePage, alertControls } = pageObjects;
+      const { alertsTablePage, controls } = pageObjects;
 
       await test.step('paginates the 30 recovered alerts into pages of 10', async () => {
         // Clear the default "active" selection first so only recovered alerts
         // remain (30 -> 3 pages of 10), then narrow to a 10-row page size.
-        await alertControls.clearControlSelections(ALERT_STATUS_CONTROL_ID);
+        await controls.clearSelections(ALERT_STATUS_CONTROL_ID);
         await alertsTablePage.waitForTableToLoad();
-        await alertControls.openOptionsListPopover(ALERT_STATUS_CONTROL_ID);
-        await alertControls.selectOption('recovered');
-        await alertControls.ensurePopoverIsClosed(ALERT_STATUS_CONTROL_ID);
+        await controls.optionsList.openPopover(ALERT_STATUS_CONTROL_ID);
+        // The alert status control has a fixed, static option set and renders no search input.
+        await controls.optionsList.selectOption('recovered', { search: false });
+        await controls.optionsList.ensurePopoverIsClosed();
         await alertsTablePage.waitForTableToLoad();
         await alertsTablePage.setPageSize(10);
       });

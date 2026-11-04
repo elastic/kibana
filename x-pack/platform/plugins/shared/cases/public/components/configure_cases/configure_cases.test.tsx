@@ -11,19 +11,21 @@ import userEvent from '@testing-library/user-event';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
 import { ConnectorTypes } from '../../../common/types/domain';
-import { ConfigureCasesRedesign } from './configure_cases';
+import { ConfigureCases } from './configure_cases';
 import {
   customFieldsConfigurationMock,
   observableTypesMock,
   templatesConfigurationMock,
 } from '../../containers/mock';
-import { renderWithTestingProviders } from '../../common/mock';
+import { noCasesSettingsPermission, renderWithTestingProviders } from '../../common/mock';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { usePersistConfiguration } from '../../containers/configure/use_persist_configuration';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
+import { useGetWorkflowTags } from '../../containers/configure/use_get_workflow_tags';
 import { useLicense } from '../../common/use_license';
 import { useKibana } from '../../common/lib/kibana';
+import { useAreWorkflowsAvailableForCases } from '../workflows/use_run_case_workflow';
 import {
   useActionTypesResponse,
   useCaseConfigureResponse,
@@ -41,7 +43,12 @@ jest.mock('../../containers/configure/use_get_supported_action_connectors');
 jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../../containers/configure/use_persist_configuration');
 jest.mock('../../containers/configure/use_action_types');
+jest.mock('../../containers/configure/use_get_workflow_tags');
 jest.mock('../../common/use_license');
+jest.mock('../workflows/use_run_case_workflow', () => ({
+  ...jest.requireActual('../workflows/use_run_case_workflow'),
+  useAreWorkflowsAvailableForCases: jest.fn(),
+}));
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
@@ -49,10 +56,12 @@ const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 const usePersistConfigurationMock = usePersistConfiguration as jest.Mock;
 const useGetActionTypesMock = useGetActionTypes as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
+const useGetWorkflowTagsMock = useGetWorkflowTags as jest.Mock;
+const useAreWorkflowsAvailableForCasesMock = useAreWorkflowsAvailableForCases as jest.Mock;
 const getAddConnectorFlyoutMock = jest.fn();
 const getEditConnectorFlyoutMock = jest.fn();
 
-describe('ConfigureCasesRedesign', () => {
+describe('ConfigureCases', () => {
   const persistCaseConfigure = jest.fn();
 
   beforeAll(() => {
@@ -93,6 +102,8 @@ describe('ConfigureCasesRedesign', () => {
       isAtLeastGold: () => true,
       isAtLeastPlatinum: () => true,
     });
+    useAreWorkflowsAvailableForCasesMock.mockReturnValue(false);
+    useGetWorkflowTagsMock.mockReturnValue({ data: ['soc-triage'], isLoading: false });
 
     const { useCasesConfig } = jest.requireMock('../../common/lib/kibana');
     useCasesConfig.mockReturnValue({
@@ -102,8 +113,8 @@ describe('ConfigureCasesRedesign', () => {
     });
   });
 
-  it('renders the redesigned settings page with the app header title', async () => {
-    renderWithTestingProviders(<ConfigureCasesRedesign />);
+  it('renders the settings page with the app header title', async () => {
+    renderWithTestingProviders(<ConfigureCases />);
 
     expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
       CASE_SETTINGS_TITLE
@@ -111,14 +122,12 @@ describe('ConfigureCasesRedesign', () => {
   });
 
   it('renders the three settings sections in a single panel', async () => {
-    renderWithTestingProviders(<ConfigureCasesRedesign />);
+    renderWithTestingProviders(<ConfigureCases />);
 
-    expect(await screen.findByTestId('cases-redesign-settings-panel')).toBeInTheDocument();
-    expect(
-      screen.getByTestId('cases-redesign-external-incident-management-section')
-    ).toBeInTheDocument();
-    expect(screen.getByTestId('cases-redesign-case-closures-section')).toBeInTheDocument();
-    expect(screen.getByTestId('cases-redesign-observable-types-section')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-settings-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('cases-external-incident-management-section')).toBeInTheDocument();
+    expect(screen.getByTestId('cases-case-closures-section')).toBeInTheDocument();
+    expect(screen.getByTestId('cases-observable-types-section')).toBeInTheDocument();
   });
 
   describe('when templates v2 is disabled', () => {
@@ -127,20 +136,18 @@ describe('ConfigureCasesRedesign', () => {
     // must remain the (only) place to manage custom fields and templates.
 
     it('renders the custom fields and templates section always expanded, without the show-legacy switch', async () => {
-      renderWithTestingProviders(<ConfigureCasesRedesign />);
+      renderWithTestingProviders(<ConfigureCases />);
 
-      expect(
-        await screen.findByTestId('cases-redesign-legacy-custom-fields-section')
-      ).toBeInTheDocument();
+      expect(await screen.findByTestId('cases-legacy-custom-fields-section')).toBeInTheDocument();
       expect(screen.getByTestId('custom-fields-list')).toBeInTheDocument();
       expect(screen.getByTestId('templates-list')).toBeInTheDocument();
       expect(screen.queryByTestId('show-legacy-custom-fields-switch')).not.toBeInTheDocument();
     });
 
     it('does not render migration copy, v2-page links, or deprecated badges', async () => {
-      renderWithTestingProviders(<ConfigureCasesRedesign />);
+      renderWithTestingProviders(<ConfigureCases />);
 
-      await screen.findByTestId('cases-redesign-legacy-custom-fields-section');
+      await screen.findByTestId('cases-legacy-custom-fields-section');
 
       expect(screen.queryByTestId('legacy-templates-view-new-link')).not.toBeInTheDocument();
       expect(screen.queryByTestId('legacy-custom-fields-view-new-link')).not.toBeInTheDocument();
@@ -158,7 +165,7 @@ describe('ConfigureCasesRedesign', () => {
         },
       }));
 
-      renderWithTestingProviders(<ConfigureCasesRedesign />);
+      renderWithTestingProviders(<ConfigureCases />);
 
       expect(await screen.findByTestId('add-custom-field')).toHaveTextContent(
         customFieldsI18n.ADD_CUSTOM_FIELD
@@ -167,7 +174,7 @@ describe('ConfigureCasesRedesign', () => {
     });
 
     it('persists custom field deletion', async () => {
-      renderWithTestingProviders(<ConfigureCasesRedesign />);
+      renderWithTestingProviders(<ConfigureCases />);
 
       const list = await screen.findByTestId('custom-fields-list');
       await userEvent.click(
@@ -195,11 +202,9 @@ describe('ConfigureCasesRedesign', () => {
       templatesEnabled: true,
     });
 
-    renderWithTestingProviders(<ConfigureCasesRedesign />);
+    renderWithTestingProviders(<ConfigureCases />);
 
-    expect(
-      await screen.findByTestId('cases-redesign-legacy-custom-fields-section')
-    ).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-legacy-custom-fields-section')).toBeInTheDocument();
     expect(screen.getByTestId('show-legacy-custom-fields-switch')).not.toBeChecked();
     expect(screen.queryByTestId('custom-fields-list')).not.toBeInTheDocument();
     expect(screen.queryByTestId('templates-list')).not.toBeInTheDocument();
@@ -213,7 +218,7 @@ describe('ConfigureCasesRedesign', () => {
       templatesEnabled: true,
     });
 
-    renderWithTestingProviders(<ConfigureCasesRedesign />);
+    renderWithTestingProviders(<ConfigureCases />);
 
     await userEvent.click(await screen.findByTestId('show-legacy-custom-fields-switch'));
 
@@ -245,7 +250,7 @@ describe('ConfigureCasesRedesign', () => {
       },
     }));
 
-    renderWithTestingProviders(<ConfigureCasesRedesign />);
+    renderWithTestingProviders(<ConfigureCases />);
 
     const toggle = await screen.findByTestId('show-legacy-custom-fields-switch');
     expect(toggle).toBeChecked();
@@ -269,11 +274,9 @@ describe('ConfigureCasesRedesign', () => {
       },
     }));
 
-    renderWithTestingProviders(<ConfigureCasesRedesign />);
+    renderWithTestingProviders(<ConfigureCases />);
 
-    expect(
-      await screen.findByTestId('cases-redesign-legacy-custom-fields-section')
-    ).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-legacy-custom-fields-section')).toBeInTheDocument();
 
     await userEvent.click(await screen.findByTestId('show-legacy-custom-fields-switch'));
 
@@ -295,7 +298,7 @@ describe('ConfigureCasesRedesign', () => {
       templatesEnabled: true,
     });
 
-    renderWithTestingProviders(<ConfigureCasesRedesign />);
+    renderWithTestingProviders(<ConfigureCases />);
 
     await userEvent.click(await screen.findByTestId('show-legacy-custom-fields-switch'));
     await userEvent.click(await screen.findByTestId('add-custom-field'));
@@ -314,7 +317,7 @@ describe('ConfigureCasesRedesign', () => {
       templatesEnabled: true,
     });
 
-    renderWithTestingProviders(<ConfigureCasesRedesign />);
+    renderWithTestingProviders(<ConfigureCases />);
 
     await userEvent.click(await screen.findByTestId('show-legacy-custom-fields-switch'));
 
@@ -343,7 +346,7 @@ describe('ConfigureCasesRedesign', () => {
       templatesEnabled: true,
     });
 
-    renderWithTestingProviders(<ConfigureCasesRedesign />);
+    renderWithTestingProviders(<ConfigureCases />);
 
     await userEvent.click(await screen.findByTestId('show-legacy-custom-fields-switch'));
 
@@ -365,7 +368,7 @@ describe('ConfigureCasesRedesign', () => {
   });
 
   it('renders connector and closure controls', async () => {
-    renderWithTestingProviders(<ConfigureCasesRedesign />);
+    renderWithTestingProviders(<ConfigureCases />);
 
     expect(await screen.findByTestId('dropdown-connectors')).toBeInTheDocument();
     expect(screen.getByTestId('automatic-closure-switch')).toBeInTheDocument();
@@ -377,7 +380,7 @@ describe('ConfigureCasesRedesign', () => {
   });
 
   it('persists closure type changes while preserving custom fields and templates', async () => {
-    renderWithTestingProviders(<ConfigureCasesRedesign />);
+    renderWithTestingProviders(<ConfigureCases />);
 
     await userEvent.click(await screen.findByTestId('automatic-closure-switch'));
 
@@ -388,6 +391,121 @@ describe('ConfigureCasesRedesign', () => {
         templates: templatesConfigurationMock,
       })
     );
+  });
+
+  describe('extract observables default switch', () => {
+    it('renders the extract observables section and switch checked by default', async () => {
+      renderWithTestingProviders(<ConfigureCases />);
+
+      expect(await screen.findByTestId('cases-extract-observables-section')).toBeInTheDocument();
+      expect(screen.getByTestId('extract-observables-default-switch')).toHaveAttribute(
+        'aria-checked',
+        'true'
+      );
+    });
+
+    it('persists extractObservables false when the switch is toggled off', async () => {
+      renderWithTestingProviders(<ConfigureCases />);
+
+      await userEvent.click(await screen.findByTestId('extract-observables-default-switch'));
+
+      expect(persistCaseConfigure).toHaveBeenCalledWith(
+        expect.objectContaining({
+          extractObservables: false,
+          customFields: customFieldsConfigurationMock,
+          templates: templatesConfigurationMock,
+        })
+      );
+    });
+
+    it('persists extractObservables true when the switch is toggled on', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: {
+          ...useCaseConfigureResponse.data,
+          customFields: customFieldsConfigurationMock,
+          templates: templatesConfigurationMock,
+          extractObservables: false,
+        },
+      }));
+
+      renderWithTestingProviders(<ConfigureCases />);
+
+      await userEvent.click(await screen.findByTestId('extract-observables-default-switch'));
+
+      expect(persistCaseConfigure).toHaveBeenCalledWith(
+        expect.objectContaining({
+          extractObservables: true,
+          customFields: customFieldsConfigurationMock,
+          templates: templatesConfigurationMock,
+        })
+      );
+    });
+
+    it('disables the switch when the configuration is being fetched', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        isLoading: false,
+        isFetching: true,
+        data: {
+          ...useCaseConfigureResponse.data,
+          id: '',
+          version: '',
+        },
+      }));
+
+      renderWithTestingProviders(<ConfigureCases />);
+
+      expect(await screen.findByTestId('extract-observables-default-switch')).toBeDisabled();
+    });
+
+    it('disables the switch when the configuration GET fails', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        isLoading: false,
+        isFetching: false,
+        isError: true,
+        data: {
+          ...useCaseConfigureResponse.data,
+          id: '',
+          version: '',
+        },
+      }));
+
+      renderWithTestingProviders(<ConfigureCases />);
+
+      expect(await screen.findByTestId('extract-observables-default-switch')).toBeDisabled();
+    });
+
+    it('disables the switch when the user lacks settings permissions', async () => {
+      renderWithTestingProviders(<ConfigureCases />, {
+        wrapperProps: { permissions: noCasesSettingsPermission() },
+      });
+
+      expect(await screen.findByTestId('extract-observables-default-switch')).toBeDisabled();
+    });
+
+    it('does not render the extract observables section when observables are disabled', async () => {
+      renderWithTestingProviders(<ConfigureCases />, {
+        wrapperProps: { owner: ['observability'] },
+      });
+
+      await screen.findByTestId('cases-settings-panel');
+
+      expect(screen.queryByTestId('cases-extract-observables-section')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('extract-observables-default-switch')).not.toBeInTheDocument();
+    });
+
+    it('does not render the extract observables section for the Stack owner', async () => {
+      renderWithTestingProviders(<ConfigureCases />, {
+        wrapperProps: { owner: ['cases'] },
+      });
+
+      await screen.findByTestId('cases-settings-panel');
+
+      expect(screen.queryByTestId('cases-extract-observables-section')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('extract-observables-default-switch')).not.toBeInTheDocument();
+    });
   });
 
   it('renders observable types as line-separated rows without a subdued panel', async () => {
@@ -401,7 +519,7 @@ describe('ConfigureCasesRedesign', () => {
       },
     }));
 
-    renderWithTestingProviders(<ConfigureCasesRedesign />);
+    renderWithTestingProviders(<ConfigureCases />);
 
     const row = await screen.findByTestId(`observable-type-${observableTypesMock[0].key}`);
 
@@ -430,7 +548,7 @@ describe('ConfigureCasesRedesign', () => {
       isLoading: false,
     }));
 
-    renderWithTestingProviders(<ConfigureCasesRedesign />);
+    renderWithTestingProviders(<ConfigureCases />);
 
     expect(await screen.findByTestId('configure-cases-warning-callout')).toBeInTheDocument();
     expect(
@@ -438,14 +556,129 @@ describe('ConfigureCasesRedesign', () => {
     ).not.toBeInTheDocument();
   });
 
+  describe('workflow tags', () => {
+    const configurationWithWorkflowSettings = {
+      ...useCaseConfigureResponse.data,
+      customFields: customFieldsConfigurationMock,
+      templates: templatesConfigurationMock,
+      observableTypes: observableTypesMock,
+      workflowTags: ['existing-tag'],
+    };
+
+    beforeEach(() => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: configurationWithWorkflowSettings,
+      }));
+    });
+
+    it('does not render the workflow tags section when workflows are unavailable for Cases', async () => {
+      renderWithTestingProviders(<ConfigureCases />);
+
+      await screen.findByTestId('cases-settings-panel');
+
+      expect(screen.queryByTestId('cases-workflow-tags-section')).not.toBeInTheDocument();
+    });
+
+    it('renders the workflow tags section when workflows are available for Cases', async () => {
+      useAreWorkflowsAvailableForCasesMock.mockReturnValue(true);
+
+      renderWithTestingProviders(<ConfigureCases />);
+
+      expect(await screen.findByTestId('cases-workflow-tags-section')).toBeInTheDocument();
+      expect(screen.getByText(configureCasesI18n.WORKFLOW_TAGS_TITLE)).toBeInTheDocument();
+    });
+
+    it('persists workflow tag changes with the rest of the configuration', async () => {
+      useAreWorkflowsAvailableForCasesMock.mockReturnValue(true);
+
+      renderWithTestingProviders(<ConfigureCases />);
+
+      const workflowTags = await screen.findByTestId('cases-workflow-tags');
+      await userEvent.type(within(workflowTags).getByRole('combobox'), 'soc-triage{enter}');
+
+      expect(persistCaseConfigure).toHaveBeenCalledWith({
+        connector: configurationWithWorkflowSettings.connector,
+        closureType: configurationWithWorkflowSettings.closureType,
+        customFields: customFieldsConfigurationMock,
+        templates: templatesConfigurationMock,
+        observableTypes: observableTypesMock,
+        workflowTags: ['existing-tag', 'soc-triage'],
+        id: configurationWithWorkflowSettings.id,
+        version: configurationWithWorkflowSettings.version,
+      });
+    });
+
+    it('disables workflow tags until the configuration has been fetched', async () => {
+      useAreWorkflowsAvailableForCasesMock.mockReturnValue(true);
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        isLoading: false,
+        isFetching: true,
+        isFetched: false,
+      }));
+
+      renderWithTestingProviders(<ConfigureCases />);
+
+      const workflowTags = await screen.findByTestId('cases-workflow-tags');
+      expect(within(workflowTags).getByRole('combobox')).toBeDisabled();
+    });
+
+    it('disables workflow tags when the configuration GET fails', async () => {
+      useAreWorkflowsAvailableForCasesMock.mockReturnValue(true);
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        isLoading: false,
+        isFetching: false,
+        isError: true,
+      }));
+
+      renderWithTestingProviders(<ConfigureCases />);
+
+      const workflowTags = await screen.findByTestId('cases-workflow-tags');
+      expect(within(workflowTags).getByRole('combobox')).toBeDisabled();
+    });
+
+    it('keeps workflow tags enabled while a fetched configuration is refetching', async () => {
+      useAreWorkflowsAvailableForCasesMock.mockReturnValue(true);
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: configurationWithWorkflowSettings,
+        isFetching: true,
+      }));
+
+      renderWithTestingProviders(<ConfigureCases />);
+
+      const workflowTags = await screen.findByTestId('cases-workflow-tags');
+      expect(within(workflowTags).getByRole('combobox')).toBeEnabled();
+    });
+
+    it('preserves observable types and workflow tags when deleting a custom field', async () => {
+      renderWithTestingProviders(<ConfigureCases />);
+
+      const list = await screen.findByTestId('custom-fields-list');
+      await userEvent.click(
+        within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
+      );
+      await userEvent.click(await screen.findByText('Delete'));
+
+      expect(persistCaseConfigure).toHaveBeenCalledWith(
+        expect.objectContaining({
+          observableTypes: observableTypesMock,
+          workflowTags: ['existing-tag'],
+        })
+      );
+    });
+  });
+
   it('does not render observable types when the observables feature is disabled', async () => {
-    renderWithTestingProviders(<ConfigureCasesRedesign />, {
+    renderWithTestingProviders(<ConfigureCases />, {
       wrapperProps: { owner: ['observability'] },
     });
 
-    await screen.findByTestId('cases-redesign-settings-panel');
+    await screen.findByTestId('cases-settings-panel');
 
-    expect(screen.queryByTestId('cases-redesign-observable-types-section')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('cases-observable-types-section')).not.toBeInTheDocument();
     expect(screen.queryByTestId('add-observable-type')).not.toBeInTheDocument();
   });
 });

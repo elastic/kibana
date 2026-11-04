@@ -20,6 +20,7 @@ import {
   sendAutomaticUpgradeAgentsActions,
 } from '../services/agents';
 import { isAgentUpgradeable } from '../../common/services';
+import { buildPolicyBaseIdWithFallbackKuery } from '../../common/services/version_specific_policies_utils';
 import type { Agent, AgentPolicy } from '../types';
 
 import { AutomaticAgentUpgradeTask, TYPE, VERSION } from './automatic_agent_upgrade_task';
@@ -211,6 +212,30 @@ describe('AutomaticAgentUpgradeTask', () => {
           version: '8.18.0',
         }
       );
+    });
+
+    it('Should find the agents of the agent policy by their base policy id, so agents on #sentinel are included', async () => {
+      const agents = generateAgents(10);
+      mockedGetAgentsByKuery
+        .mockResolvedValueOnce({ total: agents.length } as any) // active agents
+        .mockResolvedValueOnce({ total: 0 } as any); // agents on or updating to target version
+      mockedFetchAllAgentsByKuery
+        .mockResolvedValueOnce(getMockFetchAllAgentsByKuery([])) // agents marked for retry
+        .mockResolvedValueOnce(getMockFetchAllAgentsByKuery(agents)); // active agents
+
+      await runTask();
+
+      const policyKuery = buildPolicyBaseIdWithFallbackKuery('agent-policy-1');
+      const kueries = [
+        ...mockedGetAgentsByKuery.mock.calls.map(([, , options]) => options.kuery),
+        ...mockedFetchAllAgentsByKuery.mock.calls.map(([, , options]) => options.kuery),
+      ];
+      // active agents count, agents on or updating to the target version, retries and upgrades
+      expect(kueries).toHaveLength(4);
+      for (const kuery of kueries) {
+        expect(kuery).toContain(policyKuery);
+        expect(kuery).not.toContain('policy_id:"agent-policy-1" AND');
+      }
     });
 
     it('Should take agents already on target version into account', async () => {

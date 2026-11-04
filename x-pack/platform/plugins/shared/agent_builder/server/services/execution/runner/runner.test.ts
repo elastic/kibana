@@ -13,6 +13,7 @@ import type {
   RunAgentParams,
   ToolHandlerFn,
   RunApprovals,
+  AgentHandlerContext,
 } from '@kbn/agent-builder-server';
 import type {
   CreateScopedRunnerDepsMock,
@@ -30,6 +31,7 @@ import {
   createToolRegistryMock,
 } from '../../../test_utils';
 import { createScopedRunner, createRunner } from './runner';
+import { createEmptyConversation } from '../../../test_utils/conversations';
 import { createAgentHandler } from '../run_agent/create_handler';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server/tools/utils';
@@ -321,30 +323,62 @@ describe('AgentBuilder runner', () => {
       });
     });
 
+    describe('conversation access', () => {
+      const runWith = async (params: Partial<RunAgentParams>) => {
+        const runnerDeps = createRunnerDepsMock();
+        runnerDeps.agentsService.getRegistry.mockResolvedValue(agentClient);
+        await createRunner(runnerDeps).runAgent({
+          agentId: 'test-tool',
+          agentParams: {
+            nextInput: { message: 'dolly' },
+            conversation: createEmptyConversation({ id: 'conversation-1' }),
+          },
+          request: scopedRunnerDeps.request,
+          ...params,
+        } as RunAgentParams);
+        return (agentHandler.mock.calls[0][1] as AgentHandlerContext).conversationAccess;
+      };
+
+      it('defaults to readWrite', async () => {
+        expect(await runWith({})).toBe('readWrite');
+      });
+
+      it.each(['readWrite', 'readOnly', 'none'] as const)(
+        'passes %s to the agent handler',
+        async (conversationAccess) => {
+          expect(await runWith({ conversationAccess })).toBe(conversationAccess);
+        }
+      );
+    });
+
     it.each([
       {
         experimentalEnabled: false,
         contextEngineEnabled: false,
         expectedAiIndices: false,
+        expectedSml: false,
       },
       {
         experimentalEnabled: false,
         contextEngineEnabled: true,
-        expectedAiIndices: false,
+        expectedAiIndices: true,
+        expectedSml: false,
       },
       {
         experimentalEnabled: true,
         contextEngineEnabled: false,
         expectedAiIndices: false,
+        expectedSml: true,
       },
       {
         experimentalEnabled: true,
         contextEngineEnabled: true,
         expectedAiIndices: true,
+        expectedSml: true,
       },
     ])(
-      'sets AI index instructions to $expectedAiIndices when experimental=$experimentalEnabled and contextEngine=$contextEngineEnabled',
-      async ({ experimentalEnabled, contextEngineEnabled, expectedAiIndices }) => {
+      'sets aiIndices=$expectedAiIndices and sml=$expectedSml when experimental=$experimentalEnabled and contextEngine=$contextEngineEnabled',
+      async ({ experimentalEnabled, contextEngineEnabled, expectedAiIndices, expectedSml }) => {
         const runnerDeps = createRunnerDepsMock();
         runnerDeps.agentsService.getRegistry.mockResolvedValue(agentClient);
         (runnerDeps.uiSettings.asScopedToClient as jest.Mock).mockReturnValue({
@@ -377,6 +411,7 @@ describe('AgentBuilder runner', () => {
           expect.objectContaining({
             experimentalFeatures: expect.objectContaining({
               aiIndices: expectedAiIndices,
+              sml: expectedSml,
             }),
           })
         );

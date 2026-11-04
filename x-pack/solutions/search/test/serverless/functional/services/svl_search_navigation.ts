@@ -28,7 +28,7 @@ export function SvlSearchNavigationServiceProvider({
         await PageObjects.common.navigateToApp('searchHomepage', {
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('search-homepage', { timeout: 2000 });
+        await testSubjects.existOrFail('elasticsearchHomePage', { timeout: 2000 });
       });
     },
     async navigateToGettingStartedPage() {
@@ -46,24 +46,14 @@ export function SvlSearchNavigationServiceProvider({
           search: `indexName=${indexName}`,
           shouldLoginIfPrompted: false,
         });
+        // The first load of the index details page can exceed a single short wait, so
+        // keep the content check inside the retry to re-navigate on slow loads.
+        await testSubjects.existOrFail('indexDetailsContent', { timeout: 2000 });
       });
-      await testSubjects.existOrFail('indexDetailsContent', { timeout: 2000 });
     },
     async navigateToInferenceManagementPage() {
       await PageObjects.common.navigateToApp('searchInferenceEndpoints', {
         shouldLoginIfPrompted: false,
-      });
-    },
-    async navigateToSearchPlaygroundList() {
-      await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.common.navigateToApp('searchPlayground');
-        await testSubjects.existOrFail('playgroundsListPage', { timeout: 2000 });
-      });
-    },
-    async navigateToSearchPlayground() {
-      await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.common.navigateToApp('searchPlayground', { path: 'chat' });
-        await testSubjects.existOrFail('svlPlaygroundPage', { timeout: 2000 });
       });
     },
   };

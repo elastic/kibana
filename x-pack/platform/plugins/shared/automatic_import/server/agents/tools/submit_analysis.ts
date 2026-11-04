@@ -24,7 +24,7 @@ interface CreateSubmitToolConfig {
 
 export const createSubmitTool = (config: CreateSubmitToolConfig): DynamicStructuredTool => {
   const schema = z.object({
-    content: z.string().max(MAX_STRING_LENGTH.description).describe(config.contentDescription),
+    content: z.string().max(MAX_STRING_LENGTH.body).describe(config.contentDescription),
     summary: z.string().max(MAX_STRING_LENGTH.description).describe(config.summaryDescription),
   });
 

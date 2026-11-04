@@ -323,6 +323,60 @@ describe('updateLatestExecutedState', () => {
       });
     });
 
+    it('produces an .otel pattern for a data stream that only sets use_otel_suffix', async () => {
+      soClient.get.mockResolvedValue({
+        id: 'supabase',
+        version: 'WzEsMV0=',
+        attributes: {
+          title: 'title',
+          name: 'supabase',
+          version: '1.0.0',
+          install_source: 'registry',
+          install_status: 'installed',
+          package_assets: [],
+          es_index_patterns: {},
+        },
+      } as any);
+
+      await stepSaveSystemObject({
+        ...baseArgs,
+        savedObjectsClient: soClient,
+        esClient,
+        logger,
+        packageInstallContext: {
+          archiveIterator: createArchiveIteratorFromMap(new Map()),
+          paths: [],
+          packageInfo: {
+            title: 'title',
+            name: 'supabase',
+            version: '1.0.0',
+            description: 'test',
+            type: 'integration',
+            categories: ['cloud', 'custom'],
+            format_version: 'string',
+            release: 'experimental',
+            conditions: { kibana: { version: 'x.y.z' } },
+            owner: { github: 'elastic/fleet' },
+            data_streams: [
+              {
+                type: 'metrics',
+                dataset: 'supabase.metrics',
+                path: 'metrics',
+                title: 'metrics',
+                release: 'ga',
+                use_otel_suffix: true,
+              } as any,
+            ],
+          },
+        },
+      });
+
+      const [, , esIndexPatternsUpdate] = soClient.update.mock.calls[1];
+      expect(esIndexPatternsUpdate).toEqual({
+        es_index_patterns: { metrics: 'metrics-supabase.metrics.otel-*' },
+      });
+    });
+
     it('keeps a stored entry for a dataset absent from the manifest', async () => {
       soClient.get.mockResolvedValue({
         id: 'test-integration',

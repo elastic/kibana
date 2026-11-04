@@ -55,6 +55,7 @@ export const OnboardingPills = ({ pills, telemetryPrefix }: OnboardingPillsProps
             anchorPosition="downLeft"
             panelPaddingSize="m"
             panelStyle={{ maxWidth: euiTheme.base * 22.5 }}
+            panelProps={{ 'data-test-subj': `vectordbWizardPillPanel-${pill.id}` }}
             aria-label={pill.label}
           >
             <EuiText size="s">{pill.content}</EuiText>

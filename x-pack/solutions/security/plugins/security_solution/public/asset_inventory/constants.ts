@@ -28,7 +28,6 @@ export const LOCAL_STORAGE_ONBOARDING_SUCCESS_CALLOUT_KEY = `${LOCAL_STORAGE_PRE
 export const LOCAL_STORAGE_ASSETS_GROUPING_KEY = `${LOCAL_STORAGE_PREFIX}:grouping`;
 
 export const TEST_SUBJ_DATA_GRID = 'asset-inventory-test-subj-grid-wrapper';
-export const TEST_SUBJ_PAGE_TITLE = 'asset-inventory-test-subj-page-title';
 export const TEST_SUBJ_EMPTY_STATE = 'asset-inventory-empty-state';
 export const TEST_SUBJ_LOADING = 'asset-inventory-loading';
 export const TEST_SUBJ_ONBOARDING_GET_STARTED = 'asset-inventory-onboarding-get-started';

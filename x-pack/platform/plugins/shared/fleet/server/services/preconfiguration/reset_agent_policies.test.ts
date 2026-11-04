@@ -16,6 +16,7 @@ import { getAgentsByKuery, forceUnenrollAgent } from '../agents';
 import { listEnrollmentApiKeys, deleteEnrollmentApiKeys } from '../api_keys';
 
 import { resetPreconfiguredAgentPolicies } from './reset_agent_policies';
+import { buildPolicyBaseIdsWithFallbackKuery } from '../../../common/services/version_specific_policies_utils';
 
 jest.mock('../agent_policy');
 jest.mock('../package_policy');
@@ -122,6 +123,38 @@ describe('reset agent policies', () => {
     expect(mockedSetupFleet).toHaveBeenCalled();
     expect(mockedForceUnenrollAgent).toHaveBeenCalled();
     expect(mockedDeleteEnrollmentApiKeys).toHaveBeenCalled();
+  });
+
+  it('should find the agents by their base policy id, so agents on #sentinel are unenrolled, and the enrollment api keys by the policy id', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    mockedAgentPolicyService.list.mockResolvedValueOnce({
+      items: [{ id: 'policy1' }, { id: 'policy2' }],
+    } as any);
+    mockedPackagePolicyService.list.mockResolvedValueOnce({ items: [] } as any);
+    mockedGetAgentsByKuery.mockResolvedValueOnce({ agents: [] } as any);
+    mockedListEnrollmentApiKeys.mockResolvedValueOnce({ items: [] } as any);
+    soClient.find.mockImplementation(async (option) => {
+      if (option.type === PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE) {
+        return { saved_objects: [] } as any;
+      }
+      throw new Error('not mocked');
+    });
+
+    await resetPreconfiguredAgentPolicies(soClient, esClient);
+
+    expect(mockedGetAgentsByKuery).toHaveBeenCalledWith(
+      esClient,
+      soClient,
+      expect.objectContaining({
+        kuery: buildPolicyBaseIdsWithFallbackKuery(['policy1', 'policy2']),
+      })
+    );
+    // enrollment api keys always have the plain policy id
+    expect(mockedListEnrollmentApiKeys).toHaveBeenCalledWith(
+      esClient,
+      expect.objectContaining({ kuery: 'policy_id:"policy1" or policy_id:"policy2"' })
+    );
   });
 
   describe('_deleteGhostPackagePolicies with legacy (non-space-aware) saved object types', () => {

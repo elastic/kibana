@@ -512,4 +512,95 @@ describe('listSearchSources', () => {
       expect(results.warnings).toEqual([]);
     });
   });
+
+  describe('views', () => {
+    const viewResponse = {
+      views: [
+        { name: 'logs-proxy-parsed', query: 'FROM logs-* | KEEP status' },
+        {
+          name: 'errors-only',
+          query: 'FROM logs-* | WHERE status >= 400',
+          description: 'Non-success responses',
+        },
+      ],
+    };
+
+    it('does not fetch views when includeViews is not set', async () => {
+      esClient.esql.getView.mockResolvedValue(viewResponse as never);
+
+      const results = await listSearchSources({ pattern: '*', esClient });
+
+      expect(esClient.esql.getView).not.toHaveBeenCalled();
+      expect(results.views).toEqual([]);
+    });
+
+    it('returns ES|QL views from GET _query/view', async () => {
+      esClient.esql.getView.mockResolvedValue(viewResponse as never);
+
+      const results = await listSearchSources({ pattern: '*', includeViews: true, esClient });
+
+      expect(results.views).toEqual([
+        {
+          type: EsResourceType.view,
+          name: 'logs-proxy-parsed',
+          query: 'FROM logs-* | KEEP status',
+        },
+        {
+          type: EsResourceType.view,
+          name: 'errors-only',
+          query: 'FROM logs-* | WHERE status >= 400',
+          description: 'Non-success responses',
+        },
+      ]);
+    });
+
+    it('filters views by the provided pattern', async () => {
+      esClient.esql.getView.mockResolvedValue(viewResponse as never);
+
+      const results = await listSearchSources({
+        pattern: 'logs-*',
+        includeViews: true,
+        esClient,
+      });
+
+      expect(results.views.map((view) => view.name)).toEqual(['logs-proxy-parsed']);
+    });
+
+    it('honors `-`-prefixed exclusion patterns for views', async () => {
+      esClient.esql.getView.mockResolvedValue(viewResponse as never);
+
+      const results = await listSearchSources({
+        pattern: '*,-logs-proxy-parsed',
+        includeViews: true,
+        esClient,
+      });
+
+      expect(results.views.map((view) => view.name)).toEqual(['errors-only']);
+    });
+
+    it('degrades gracefully to no views when GET _query/view is unavailable', async () => {
+      esClient.esql.getView.mockRejectedValue(new Error('no handler found for uri'));
+
+      const results = await listSearchSources({ pattern: '*', includeViews: true, esClient });
+
+      expect(results.views).toEqual([]);
+    });
+
+    it('still returns matching views when resolveIndex throws not_found (exact view name)', async () => {
+      esClient.esql.getView.mockResolvedValue(viewResponse as never);
+      esClient.indices.resolveIndex.mockImplementation(async () => {
+        throw new esErrors.ResponseError({ statusCode: 404 } as any);
+      });
+
+      const results = await listSearchSources({
+        pattern: 'logs-proxy-parsed',
+        includeViews: true,
+        esClient,
+      });
+
+      expect(results.indices.length).toBe(0);
+      expect(results.views.map((view) => view.name)).toEqual(['logs-proxy-parsed']);
+      expect(results.warnings).toEqual([]);
+    });
+  });
 });

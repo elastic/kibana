@@ -20,6 +20,7 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_EXTENDED_FIELDS,
   CASE_EXTENDED_FIELDS_LABELS,
+  CASE_EXTENDED_FIELDS_CONTROLS,
   CASE_SAVED_OBJECT,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
@@ -63,7 +64,7 @@ import type {
 import {
   CasePersistedSeverity,
   CasePersistedStatus,
-  CaseTransformedAttributesRt,
+  CaseTransformedAttributesSchema,
 } from '../../common/types/case';
 import { transformSavedObjectToExternalModel } from './transform';
 import type { ConfigType } from '../../config';
@@ -199,6 +200,58 @@ describe('CasesService', () => {
 
   describe('execution', () => {
     describe('bulkCreateCases', () => {
+      describe('extract_observables_source', () => {
+        it('writes the server-owned attribute per case and leaves unset cases without it', async () => {
+          unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+            saved_objects: [
+              createCaseSavedObjectResponse({ caseId: '1' }),
+              createCaseSavedObjectResponse({ caseId: '2' }),
+            ],
+          });
+
+          await service.bulkCreateCases({
+            cases: [
+              {
+                ...createCasePostParams({ connector: getNoneCaseConnector() }),
+                id: '1',
+                extract_observables_source: 'rule',
+              },
+              { ...createCasePostParams({ connector: getNoneCaseConnector() }), id: '2' },
+            ],
+          });
+
+          const [requests] = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0];
+          const [first, second] = requests.map(
+            ({ attributes }) => attributes as CasePersistedAttributes
+          );
+          expect(first.extract_observables_source).toBe('rule');
+          expect(second).not.toHaveProperty('extract_observables_source');
+        });
+
+        it('does not return the attribute in the created cases', async () => {
+          unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+            saved_objects: [
+              createCaseSavedObjectResponse({
+                caseId: '1',
+                overrides: { extract_observables_source: 'rule' },
+              }),
+            ],
+          });
+
+          const res = await service.bulkCreateCases({
+            cases: [
+              {
+                ...createCasePostParams({ connector: getNoneCaseConnector() }),
+                id: '1',
+                extract_observables_source: 'rule',
+              },
+            ],
+          });
+
+          expect(res.saved_objects[0]).not.toHaveProperty('attributes.extract_observables_source');
+        });
+      });
+
       it('return cases with the SO errors correctly', async () => {
         unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
           // @ts-expect-error: SO client types are not correct
@@ -857,6 +910,84 @@ describe('CasesService', () => {
     });
 
     describe('createCase', () => {
+      describe('extract_observables_source', () => {
+        it('writes the server-owned extract_observables_source as a top-level attribute', async () => {
+          unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
+
+          await service.createCase({
+            attributes: {
+              ...createCasePostParams({ connector: getNoneCaseConnector() }),
+              extract_observables_source: 'rule',
+            },
+            id: '1',
+          });
+
+          const creationAttributes = unsecuredSavedObjectsClient.create.mock
+            .calls[0][1] as CasePersistedAttributes;
+          expect(creationAttributes.extract_observables_source).toBe('rule');
+        });
+
+        it('does not write the attribute when the caller did not set it', async () => {
+          unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
+
+          await service.createCase({
+            attributes: createCasePostParams({ connector: getNoneCaseConnector() }),
+            id: '1',
+          });
+
+          const creationAttributes = unsecuredSavedObjectsClient.create.mock
+            .calls[0][1] as CasePersistedAttributes;
+          expect(creationAttributes).not.toHaveProperty('extract_observables_source');
+        });
+
+        it('still drops other unknown top-level attributes', async () => {
+          unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
+
+          await service.createCase({
+            attributes: {
+              ...createCasePostParams({ connector: getNoneCaseConnector() }),
+              extract_observables_source: 'rule',
+              unknown_attribute: 'value',
+            } as CaseTransformedAttributes,
+            id: '1',
+          });
+
+          const creationAttributes = unsecuredSavedObjectsClient.create.mock
+            .calls[0][1] as CasePersistedAttributes;
+          expect(creationAttributes).not.toHaveProperty('unknown_attribute');
+        });
+
+        it('rejects a source value outside the allowed values', async () => {
+          unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
+
+          await expect(
+            service.createCase({
+              attributes: {
+                ...createCasePostParams({ connector: getNoneCaseConnector() }),
+                extract_observables_source: 'not-a-source',
+              } as unknown as CaseTransformedAttributes,
+              id: '1',
+            })
+          ).rejects.toThrow('extract_observables_source');
+        });
+
+        it('does not return the attribute in the created case', async () => {
+          unsecuredSavedObjectsClient.create.mockResolvedValue(
+            createCaseSavedObjectResponse({ overrides: { extract_observables_source: 'rule' } })
+          );
+
+          const res = await service.createCase({
+            attributes: {
+              ...createCasePostParams({ connector: getNoneCaseConnector() }),
+              extract_observables_source: 'rule',
+            },
+            id: '1',
+          });
+
+          expect(res.attributes).not.toHaveProperty('extract_observables_source');
+        });
+      });
+
       it('creates a null external_service field when the attribute was null in the creation parameters', async () => {
         unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
@@ -2286,10 +2417,7 @@ describe('CasesService', () => {
   });
 
   describe('Decoding responses', () => {
-    const caseTransformedAttributesProps = CaseTransformedAttributesRt.types.reduce(
-      (acc, type) => ({ ...acc, ...type.type.props }),
-      {}
-    );
+    const caseTransformedAttributesProps = CaseTransformedAttributesSchema.shape;
 
     /**
      * The following fields are set to a default value if missing:
@@ -2326,7 +2454,8 @@ describe('CasesService', () => {
       'time_to_investigate',
       'template',
       CASE_EXTENDED_FIELDS,
-      CASE_EXTENDED_FIELDS_LABELS
+      CASE_EXTENDED_FIELDS_LABELS,
+      CASE_EXTENDED_FIELDS_CONTROLS
     );
 
     describe('getCaseIdsByAlertId', () => {
@@ -2365,7 +2494,7 @@ describe('CasesService', () => {
         await expect(
           service.getCaseIdsByAlertId({ alertId: '1' })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"owner\\""`
+          `"owner: Invalid input: expected string, received undefined"`
         );
       });
 
@@ -2421,6 +2550,16 @@ describe('CasesService', () => {
         await expect(service.getCase({ id: 'a' })).resolves.not.toThrow();
       });
 
+      it('does not return the server-owned extract_observables_source attribute', async () => {
+        unsecuredSavedObjectsClient.get.mockResolvedValue(
+          createCaseSavedObjectResponse({ overrides: { extract_observables_source: 'rule' } })
+        );
+
+        const res = await service.getCase({ id: 'a' });
+
+        expect(res.attributes).not.toHaveProperty('extract_observables_source');
+      });
+
       it.each(Object.keys(attributesToValidateIfMissing))(
         'throws if %s is omitted',
         async (key) => {
@@ -2428,9 +2567,7 @@ describe('CasesService', () => {
           const attributes = omit({ ...theCase.attributes }, key);
           unsecuredSavedObjectsClient.get.mockResolvedValue({ ...theCase, attributes });
 
-          await expect(service.getCase({ id: 'a' })).rejects.toThrow(
-            `Invalid value "undefined" supplied to "${key}"`
-          );
+          await expect(service.getCase({ id: 'a' })).rejects.toThrow(`${key}: Invalid input`);
         }
       );
 
@@ -2525,7 +2662,7 @@ describe('CasesService', () => {
           });
 
           await expect(service.getResolveCase({ id: 'a' })).rejects.toThrow(
-            `Invalid value "undefined" supplied to "${key}"`
+            `${key}: Invalid input`
           );
         }
       );
@@ -2602,6 +2739,36 @@ describe('CasesService', () => {
             },
           }
         `);
+      });
+    });
+
+    describe('getCaseStatuses', () => {
+      it('reads only the status field, as a status name, leaving out cases not found', async () => {
+        unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            {
+              id: 'case-1',
+              type: CASE_SAVED_OBJECT,
+              references: [],
+              attributes: { status: CasePersistedStatus.CLOSED },
+            },
+            {
+              id: 'case-2',
+              type: CASE_SAVED_OBJECT,
+              references: [],
+              attributes: {},
+              error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+            },
+          ],
+        });
+
+        const statuses = await service.getCaseStatuses({ caseIds: ['case-1', 'case-2'] });
+
+        expect(unsecuredSavedObjectsClient.bulkGet).toHaveBeenCalledWith([
+          { type: CASE_SAVED_OBJECT, id: 'case-1', fields: ['status'] },
+          { type: CASE_SAVED_OBJECT, id: 'case-2', fields: ['status'] },
+        ]);
+        expect(statuses).toEqual(new Map([['case-1', CaseStatuses.closed]]));
       });
     });
 
@@ -2720,7 +2887,7 @@ describe('CasesService', () => {
           });
 
           await expect(service.getCases({ caseIds: ['a', 'b'] })).rejects.toThrow(
-            `Invalid value "undefined" supplied to "${key}"`
+            `${key}: Invalid input`
           );
         }
       );
@@ -2812,6 +2979,18 @@ describe('CasesService', () => {
         await expect(service.findCases()).resolves.not.toThrow();
       });
 
+      it('does not return the server-owned extract_observables_source attribute', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue(
+          createSOFindResponse([
+            createFindSO({ caseId: '1', overrides: { extract_observables_source: 'rule' } }),
+          ])
+        );
+
+        const res = await service.findCases();
+
+        expect(res.saved_objects[0].attributes).not.toHaveProperty('extract_observables_source');
+      });
+
       it.each(Object.keys(attributesToValidateIfMissing))(
         'throws if %s is omitted',
         async (key) => {
@@ -2824,9 +3003,7 @@ describe('CasesService', () => {
 
           unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
 
-          await expect(service.findCases()).rejects.toThrow(
-            `Invalid value "undefined" supplied to "${key}"`
-          );
+          await expect(service.findCases()).rejects.toThrow(`${key}: Invalid input`);
         }
       );
 
@@ -2996,7 +3173,7 @@ describe('CasesService', () => {
               attributes: createCasePostParams({ connector: createJiraConnector() }),
               id: '1',
             })
-          ).rejects.toThrow(`Invalid value "undefined" supplied to "${key}"`);
+          ).rejects.toThrow(`${key}: Invalid input`);
         }
       );
 
@@ -3110,7 +3287,7 @@ describe('CasesService', () => {
                 },
               ],
             })
-          ).rejects.toThrow(`Invalid value "undefined" supplied to "${key}"`);
+          ).rejects.toThrow(`${key}: Invalid input`);
         }
       );
 
@@ -3383,7 +3560,7 @@ describe('CasesService', () => {
             attributes,
             id: '1',
           })
-        ).rejects.toThrow(`Invalid value "undefined" supplied to "title"`);
+        ).rejects.toThrow(`title: Invalid input`);
       });
 
       it('remove excess fields', async () => {
@@ -3432,7 +3609,7 @@ describe('CasesService', () => {
 
         await expect(
           service.bulkCreateCases({ cases: [{ id: '1', ...attributes }] })
-        ).rejects.toThrow(`Invalid value "undefined" supplied to "title"`);
+        ).rejects.toThrow(`title: Invalid input`);
       });
 
       it('remove excess fields', async () => {

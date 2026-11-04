@@ -61,124 +61,175 @@ const openAdHocSessionWithRuntimeFields = async ({
   await pageObjects.discover.waitUntilTabIsLoaded();
 };
 
-spaceTest.describe('Discover sidebar runtime fields', { tag: tags.deploymentAgnostic }, () => {
-  spaceTest.beforeEach(async ({ browserAuth, discoverScoutSpace }) => {
-    await discoverScoutSpace.setupDiscoverDefaults();
-    await browserAuth.loginAsPrivilegedUser();
-  });
+// Suite consistently fails on ECH: https://github.com/elastic/kibana/issues/288845
+spaceTest.describe(
+  'Discover sidebar runtime fields',
+  {
+    tag: [
+      ...tags.serverless.observability.complete,
+      ...tags.serverless.security.complete,
+      ...tags.serverless.search,
+      '@local-stateful-classic',
+    ],
+  },
+  () => {
+    spaceTest.beforeEach(async ({ browserAuth, discoverScoutSpace }) => {
+      await discoverScoutSpace.setupDiscoverDefaults();
+      await browserAuth.loginAsPrivilegedUser();
+    });
 
-  spaceTest.afterEach(async ({ discoverScoutSpace }) => {
-    await discoverScoutSpace.teardownDiscoverDefaults();
-  });
+    spaceTest.afterEach(async ({ discoverScoutSpace }) => {
+      await discoverScoutSpace.teardownDiscoverDefaults();
+    });
 
-  spaceTest(
-    'supports ad-hoc data views with runtime field relabel and remove',
-    async ({ apiServices, discoverScoutSpace, pageObjects }) => {
-      const { discover, unifiedFieldList } = pageObjects;
-      const fieldName = '_bytes-runtimefield';
-      const labeledName = '_bytes-runtimefield2';
+    spaceTest(
+      'supports ad-hoc data views with runtime field relabel and remove',
+      async ({ apiServices, discoverScoutSpace, log, page, pageObjects }) => {
+        const { discover, unifiedFieldList } = pageObjects;
+        const fieldName = '_bytes-runtimefield';
+        const labeledName = '_bytes-runtimefield2';
 
-      await openAdHocSessionWithRuntimeFields({
-        apiServices,
-        discoverScoutSpace,
-        pageObjects,
-        fieldSettings: {
-          [fieldName]: {
-            type: 'keyword',
-            script: 'emit((doc["bytes"].value * 2).toString())',
+        // TODO(flaky-diagnostics): remove once the extra available field is identified.
+        // Log every field existence response (include_empty_fields=false) Discover receives.
+        const existenceLogs: Array<Promise<void>> = [];
+        page.on('response', (response) => {
+          const url = response.url();
+          if (
+            !url.includes('/internal/data_views/_fields_for_wildcard') ||
+            !url.includes('include_empty_fields=false')
+          ) {
+            return;
+          }
+          existenceLogs.push(
+            response
+              .text()
+              .then((body) =>
+                log.info(
+                  `field-existence-diagnostics: ${JSON.stringify({
+                    url,
+                    status: response.status(),
+                    requestBody: response.request().postData(),
+                  })} response: ${body}`
+                )
+              )
+              .catch((error) =>
+                log.info(`field-existence-diagnostics: failed to read ${url}: ${error}`)
+              )
+          );
+        });
+
+        await openAdHocSessionWithRuntimeFields({
+          apiServices,
+          discoverScoutSpace,
+          pageObjects,
+          fieldSettings: {
+            [fieldName]: {
+              type: 'keyword',
+              script: 'emit((doc["bytes"].value * 2).toString())',
+            },
           },
-        },
-      });
+        });
 
-      await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT + 1);
-      await unifiedFieldList.searchField(fieldName);
-      await expect(unifiedFieldList.getAvailableField(fieldName)).toBeVisible();
+        try {
+          await unifiedFieldList.expectAvailableFieldCount(
+            testData.LOGSTASH_AVAILABLE_FIELD_COUNT + 1
+          );
+        } finally {
+          await Promise.all(existenceLogs);
+        }
+        await unifiedFieldList.searchField(fieldName);
+        await expect(unifiedFieldList.getAvailableField(fieldName)).toBeVisible();
 
-      await unifiedFieldList.openFieldEditor(fieldName);
-      await discover.setCustomLabel(labeledName, { enableToggle: true });
-      await discover.saveOpenFieldEditor();
+        await unifiedFieldList.openFieldEditor(fieldName);
+        await discover.setCustomLabel(labeledName, { enableToggle: true });
+        await discover.saveOpenFieldEditor();
 
-      await unifiedFieldList.searchField(labeledName);
-      await expect(unifiedFieldList.getAvailableField(fieldName)).toBeVisible();
-      expect(await unifiedFieldList.getAllFieldNames()).toContain(labeledName);
-      expect(await unifiedFieldList.getAllFieldNames()).not.toContain(fieldName);
+        await unifiedFieldList.searchField(labeledName);
+        await expect(unifiedFieldList.getAvailableField(fieldName)).toBeVisible();
+        expect(await unifiedFieldList.getAllFieldNames()).toContain(labeledName);
+        expect(await unifiedFieldList.getAllFieldNames()).not.toContain(fieldName);
 
-      await discover.deleteRuntimeField(fieldName);
-      await unifiedFieldList.clearFieldSearch();
-      await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT);
-      await unifiedFieldList.searchField(fieldName);
-      await expect(unifiedFieldList.getAvailableField(fieldName)).toBeHidden();
-    }
-  );
+        await discover.deleteRuntimeField(fieldName);
+        await unifiedFieldList.clearFieldSearch();
+        await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT);
+        await unifiedFieldList.searchField(fieldName);
+        await expect(unifiedFieldList.getAvailableField(fieldName)).toBeHidden();
+      }
+    );
 
-  spaceTest(
-    'keeps the sidebar rendered when document retrieval fails',
-    async ({ apiServices, discoverScoutSpace, page, pageObjects }) => {
-      const { discover, unifiedFieldList } = pageObjects;
-      const invalidField = '_invalid-runtimefield';
+    spaceTest(
+      'keeps the sidebar rendered when document retrieval fails',
+      async ({ apiServices, discoverScoutSpace, page, pageObjects }) => {
+        const { discover, unifiedFieldList } = pageObjects;
+        const invalidField = '_invalid-runtimefield';
 
-      // Curly quotes make this an invalid Painless script (matches FTR).
-      await openAdHocSessionWithRuntimeFields({
-        apiServices,
-        discoverScoutSpace,
-        pageObjects,
-        fieldSettings: {
-          [invalidField]: {
-            type: 'keyword',
-            script: 'emit(\u2018\u2019);',
+        // Curly quotes make this an invalid Painless script (matches FTR).
+        await openAdHocSessionWithRuntimeFields({
+          apiServices,
+          discoverScoutSpace,
+          pageObjects,
+          fieldSettings: {
+            [invalidField]: {
+              type: 'keyword',
+              script: 'emit(\u2018\u2019);',
+            },
           },
-        },
-      });
+        });
 
-      await expect(discover.getErrorCalloutTitle()).toBeVisible();
+        await expect(discover.getErrorCalloutTitle()).toBeVisible();
 
-      await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT + 1);
-      await unifiedFieldList.searchField(invalidField);
-      await expect(unifiedFieldList.getAvailableField(invalidField)).toBeVisible();
+        await unifiedFieldList.expectAvailableFieldCount(
+          testData.LOGSTASH_AVAILABLE_FIELD_COUNT + 1
+        );
+        await unifiedFieldList.searchField(invalidField);
+        await expect(unifiedFieldList.getAvailableField(invalidField)).toBeVisible();
 
-      await page.reload();
-      await discover.waitUntilTabIsLoaded();
-      await expect(discover.getErrorCalloutTitle()).toBeVisible();
-      await unifiedFieldList.searchField(invalidField);
-      await expect(unifiedFieldList.getAvailableField(invalidField)).toBeVisible();
+        await page.reload();
+        await discover.waitUntilTabIsLoaded();
+        await expect(discover.getErrorCalloutTitle()).toBeVisible();
+        await unifiedFieldList.searchField(invalidField);
+        await expect(unifiedFieldList.getAvailableField(invalidField)).toBeVisible();
 
-      await discover.deleteRuntimeField(invalidField);
-      await discover.waitUntilSearchingHasFinished();
-    }
-  );
+        await discover.deleteRuntimeField(invalidField);
+        await discover.waitUntilSearchingHasFinished();
+      }
+    );
 
-  spaceTest(
-    'removes the data grid column after a runtime field is deleted',
-    async ({ apiServices, discoverScoutSpace, pageObjects }) => {
-      const { discover, unifiedFieldList } = pageObjects;
-      const newField = '_test_field_and_column_removal';
+    spaceTest(
+      'removes the data grid column after a runtime field is deleted',
+      async ({ apiServices, discoverScoutSpace, pageObjects }) => {
+        const { discover, unifiedFieldList } = pageObjects;
+        const newField = '_test_field_and_column_removal';
 
-      await openAdHocSessionWithRuntimeFields({
-        apiServices,
-        discoverScoutSpace,
-        pageObjects,
-        fieldSettings: {
-          [newField]: {
-            type: 'keyword',
-            script: 'emit("hi there")',
+        await openAdHocSessionWithRuntimeFields({
+          apiServices,
+          discoverScoutSpace,
+          pageObjects,
+          fieldSettings: {
+            [newField]: {
+              type: 'keyword',
+              script: 'emit("hi there")',
+            },
           },
-        },
-      });
+        });
 
-      await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT + 1);
+        await unifiedFieldList.expectAvailableFieldCount(
+          testData.LOGSTASH_AVAILABLE_FIELD_COUNT + 1
+        );
 
-      expect(await unifiedFieldList.isFieldSelected(newField)).toBe(false);
-      await expect.poll(() => discover.getDocHeader()).toStrictEqual(['@timestamp', 'Summary']);
+        expect(await unifiedFieldList.isFieldSelected(newField)).toBe(false);
+        await expect.poll(() => discover.getDocHeader()).toStrictEqual(['@timestamp', 'Summary']);
 
-      await unifiedFieldList.clickFieldListItemAdd(newField);
-      await discover.waitUntilSearchingHasFinished();
-      expect(await unifiedFieldList.isFieldSelected(newField)).toBe(true);
-      await expect.poll(() => discover.getDocHeader()).toStrictEqual(['@timestamp', newField]);
+        await unifiedFieldList.clickFieldListItemAdd(newField);
+        await discover.waitUntilSearchingHasFinished();
+        expect(await unifiedFieldList.isFieldSelected(newField)).toBe(true);
+        await expect.poll(() => discover.getDocHeader()).toStrictEqual(['@timestamp', newField]);
 
-      await discover.deleteRuntimeField(newField);
-      await unifiedFieldList.searchField(newField);
-      await expect(unifiedFieldList.getAvailableField(newField)).toBeHidden();
-      await expect.poll(() => discover.getDocHeader()).toStrictEqual(['@timestamp', 'Summary']);
-    }
-  );
-});
+        await discover.deleteRuntimeField(newField);
+        await unifiedFieldList.searchField(newField);
+        await expect(unifiedFieldList.getAvailableField(newField)).toBeHidden();
+        await expect.poll(() => discover.getDocHeader()).toStrictEqual(['@timestamp', 'Summary']);
+      }
+    );
+  }
+);

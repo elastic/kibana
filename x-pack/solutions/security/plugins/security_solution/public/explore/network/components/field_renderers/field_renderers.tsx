@@ -102,7 +102,7 @@ export const HostIdRenderer = ({
   const identityFields = useMemo((): IdentityFields => {
     if (euidApi?.euid) {
       const built = euidApi.euid.getEntityIdentifiersFromDocument(
-        'host',
+        euidApi.getBuiltInEntityDefinition('host'),
         ecsSliceToFlattenedDocument('host', host)
       ) as IdentityFields | undefined;
       if (built && Object.keys(built).length > 0) {
@@ -114,7 +114,7 @@ export const HostIdRenderer = ({
       return {};
     }
     return hostName != null ? { 'host.name': hostName } : {};
-  }, [euidApi?.euid, host, hostName]);
+  }, [euidApi, host, hostName]);
   return host.id && host.ip && (ipFilter == null || host.ip.includes(ipFilter)) ? (
     <>
       {hostName != null ? (
@@ -165,7 +165,7 @@ export const HostNameRenderer = ({
   const identityFields = useMemo((): IdentityFields => {
     if (euidApi?.euid) {
       const built = euidApi.euid.getEntityIdentifiersFromDocument(
-        'host',
+        euidApi.getBuiltInEntityDefinition('host'),
         ecsSliceToFlattenedDocument('host', host)
       ) as IdentityFields | undefined;
       if (built && Object.keys(built).length > 0) {
@@ -177,7 +177,7 @@ export const HostNameRenderer = ({
       return {};
     }
     return hostNameFirst != null ? { 'host.name': hostNameFirst } : {};
-  }, [euidApi?.euid, host, hostNameFirst]);
+  }, [euidApi, host, hostNameFirst]);
   return host.name &&
     host.name[0] &&
     host.ip &&

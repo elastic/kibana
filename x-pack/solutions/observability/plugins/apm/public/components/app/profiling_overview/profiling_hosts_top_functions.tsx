@@ -7,11 +7,12 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { EmbeddableFunctions } from '@kbn/observability-shared-plugin/public';
+import type { ProfilingSchema } from '@kbn/profiling-utils';
 import React from 'react';
 import type { ApmDataSourceWithSummary } from '../../../../common/data_source';
 import type { ApmDocumentType } from '../../../../common/document_type';
-import { CONTAINER_ID, HOST_NAME } from '../../../../common/es_fields/apm';
-import { mergeKueries, toKueryFilterFormat } from '../../../../common/utils/kuery_utils';
+import { getProfilingScopeKuery } from '../../../../common/profiling/hosts_scope';
+import { mergeKueries } from '../../../../common/utils/kuery_utils';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import { ProfilingTopNFunctionsLink } from '../../shared/profiling/top_functions/top_functions_link';
 import { FilterWarning } from './filter_warning';
@@ -29,6 +30,8 @@ interface Props {
   kuery: string;
   rangeFrom: string;
   rangeTo: string;
+  /** Undefined until a schema is selected, which the request waits for */
+  schema?: ProfilingSchema;
 }
 
 export function ProfilingHostsTopNFunctions({
@@ -42,10 +45,11 @@ export function ProfilingHostsTopNFunctions({
   kuery,
   rangeFrom,
   rangeTo,
+  schema,
 }: Props) {
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (dataSource) {
+      if (dataSource && schema) {
         return callApmApi('GET /internal/apm/services/{serviceName}/profiling/hosts/functions', {
           params: {
             path: { serviceName },
@@ -58,30 +62,34 @@ export function ProfilingHostsTopNFunctions({
               documentType: dataSource.documentType,
               rollupInterval: dataSource.rollupInterval,
               kuery,
+              schema,
             },
           },
         });
       }
     },
-    [dataSource, serviceName, start, end, environment, startIndex, endIndex, kuery]
+    [dataSource, schema, serviceName, start, end, environment, startIndex, endIndex, kuery]
   );
 
-  const profilingKueryFilter =
-    data?.containerIds && data.containerIds.length > 0
-      ? toKueryFilterFormat(CONTAINER_ID, data?.containerIds || [])
-      : toKueryFilterFormat(HOST_NAME, data?.hostNames || []);
+  const profilingKueryFilter = data ? getProfilingScopeKuery(data) : '';
 
   return (
     <>
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <FilterWarning containerIds={data?.containerIds} hostNames={data?.hostNames} />
+          <FilterWarning
+            scope={data?.scope}
+            containerIds={data?.containerIds}
+            hostNames={data?.hostNames}
+            workloadNames={data?.workloadNames}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <ProfilingTopNFunctionsLink
-            kuery={mergeKueries([`(${profilingKueryFilter})`, kuery])}
+            kuery={mergeKueries([profilingKueryFilter, kuery])}
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
+            schema={schema}
             justifyContent="flexEnd"
           />
         </EuiFlexItem>

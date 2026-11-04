@@ -14,7 +14,7 @@
  *   version: 2026-02-10
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 
 export type AnonymizationEntityClass = z.infer<typeof AnonymizationEntityClass>;
 export const AnonymizationEntityClass = z.enum([
@@ -125,8 +125,8 @@ export const AnonymizationProfile = z.object({
    */
   saltId: z.string(),
   namespace: z.string(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: isoDateTime(),
+  updatedAt: isoDateTime(),
   createdBy: z.string(),
   updatedBy: z.string(),
 });

@@ -28,6 +28,7 @@ import {
 } from '@kbn/user-profile-components';
 import { ConversationAccessModeSelect } from './conversation_access_mode_select';
 import { ConversationParticipantsList } from './conversation_participants_list';
+import type { ParticipantProfile } from './conversation_participants_list';
 import {
   agentAccessHelpAriaLabel,
   agentAccessHelpLabel,
@@ -88,7 +89,7 @@ interface ConversationShareAccessProps {
 }
 
 interface ConversationShareMembersProps {
-  ownerProfile?: UserProfileWithAvatar;
+  ownerProfile?: ParticipantProfile;
   profiles: UserProfileWithAvatar[];
   onRemove: (id: string) => void;
 }

@@ -33,6 +33,7 @@ describe('ColorMappingByValues', () => {
         paletteService={paletteService}
         panelRef={{ current: null }}
         dataBounds={{ min: 0, max: 100 }}
+        defaultBandCount={5}
       />
     );
 

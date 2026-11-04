@@ -12,9 +12,13 @@ import type { OperatorFunction } from 'rxjs';
 import { EMPTY, mergeMap, of } from 'rxjs';
 import type { BackgroundAgentCompleteStep, ChatAgentEvent } from '@kbn/agent-builder-common/chat';
 import {
+  ChatEventType,
+  createSubstitutionAppliedEvent,
   isBackgroundAgentCompleteStep,
+  isCompactionStep,
   isReasoningStep,
   isSubagentRosterUpdatedStep,
+  isSubstitutionStep,
 } from '@kbn/agent-builder-common/chat';
 import {
   createBrowserToolCallEvent,
@@ -47,6 +51,11 @@ interface ResearchNodeOutput {
   steps?: RunStepUpdate[];
   toolRenderState?: ToolRenderStateUpdate;
   researchOutcome?: ResearchOutcome;
+}
+
+/** What a `contextManagement` node returns, as seen on its `on_chain_end` event. */
+interface ContextManagementNodeOutput {
+  steps?: RunStepUpdate[];
 }
 
 /** What an `executeTool` node returns, as seen on its `on_chain_end` event. */
@@ -263,6 +272,32 @@ export const convertGraphEvents = ({
           if (resultEvents.length > 0) {
             return of(...resultEvents);
           }
+        }
+
+        // emit substitution events decided by the context-management node
+        if (isRootGraphNodeEnd(event, graphName) && matchName(event, steps.contextManagement)) {
+          const output = event.data.output as ContextManagementNodeOutput;
+          const contextEvents: ChatAgentEvent[] = [];
+          for (const update of output.steps ?? []) {
+            if (update.type === 'append' && isSubstitutionStep(update.step)) {
+              const { type, ...data } = update.step;
+              contextEvents.push(createSubstitutionAppliedEvent(data));
+            }
+          }
+          return contextEvents.length > 0 ? of(...contextEvents) : EMPTY;
+        }
+
+        // emit compaction completion events
+        if (isRootGraphNodeEnd(event, graphName) && matchName(event, steps.compactContext)) {
+          const output = event.data.output as { steps?: RunStepUpdate[] };
+          const completed: ChatAgentEvent[] = [];
+          for (const update of output.steps ?? []) {
+            if (update.type === 'append' && isCompactionStep(update.step)) {
+              const { type, ...data } = update.step;
+              completed.push({ type: ChatEventType.compactionCompleted, data });
+            }
+          }
+          return completed.length > 0 ? of(...completed) : EMPTY;
         }
 
         // emit background execution complete events

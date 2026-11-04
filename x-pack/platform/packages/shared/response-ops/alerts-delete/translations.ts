@@ -86,7 +86,8 @@ export const DELETE_PASSKEY = i18n.translate('responseOpsAlertDelete.deletePassk
 });
 
 export const DELETE_CONFIRMATION = i18n.translate('responseOpsAlertDelete.deleteConfirmation', {
-  defaultMessage: `Type "${DELETE_PASSKEY}" to confirm clean up task`,
+  defaultMessage: 'Type "{passkey}" to confirm clean up task',
+  values: { passkey: DELETE_PASSKEY },
 });
 
 export const THRESHOLD_ERROR_MAX = i18n.translate('responseOpsAlertDelete.thresholdErrorMax', {

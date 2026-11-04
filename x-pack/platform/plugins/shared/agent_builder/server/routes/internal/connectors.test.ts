@@ -101,7 +101,7 @@ describe('registerInternalConnectorRoutes', () => {
     } as unknown as RouteDependencies);
   });
 
-  describe('agent header scoping (resolveAllowedConnectorIds)', () => {
+  describe('agent header scoping (resolveAgentConnectorIdsFromRequest)', () => {
     it('passes allowedIds: undefined when no agent header is present', async () => {
       await handler(mockCtx, makeRequest(), mockResponse);
 

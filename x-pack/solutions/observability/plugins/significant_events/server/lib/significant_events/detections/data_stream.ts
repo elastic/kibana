@@ -6,7 +6,7 @@
  */
 
 import type { DataStreamDefinition } from '@kbn/core-data-streams-server';
-import type { Detection } from '@kbn/significant-events-schema';
+import type { Detection, DetectionSkip } from '@kbn/significant-events-schema';
 import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
 
@@ -23,10 +23,22 @@ export const detectionsMappings = {
     p_value: { type: 'double' as const },
     severity_score: mappings.integer(),
     processed_by: mappings.keyword(),
+    // Mapped so an event's skipped detections can be found by the event they rest on.
+    skip: mappings.object({ properties: { event_id: mappings.keyword() } }),
   },
 } satisfies MappingsDefinition;
 
-export type StoredDetection = GetFieldsOf<typeof detectionsMappings>;
+/** `_source`-only fields the Detection and Discovery workflows also persist (mappings are `dynamic: false`). */
+interface UnmappedDetectionFields {
+  source_id?: string;
+  alert_index?: string;
+  workflow_execution_id?: string;
+  scanned_by?: string;
+  /** Why the classifier closed the detection; only `event_id` is mapped, `checked_at` is the marker's own timestamp. */
+  skip?: Omit<DetectionSkip, 'checked_at'>;
+}
+
+export type StoredDetection = GetFieldsOf<typeof detectionsMappings> & UnmappedDetectionFields;
 export type { Detection };
 
 export const detectionsDataStream: DataStreamDefinition<
@@ -34,7 +46,7 @@ export const detectionsDataStream: DataStreamDefinition<
   StoredDetection
 > = {
   name: DETECTIONS_DATA_STREAM,
-  version: 8,
+  version: 9,
   hidden: true,
   template: {
     priority: 500,

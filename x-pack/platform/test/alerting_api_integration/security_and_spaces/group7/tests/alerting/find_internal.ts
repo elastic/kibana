@@ -93,6 +93,9 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 actions: [],
                 params: {},
                 created_by: 'elastic',
+                created_by_profile_uid: null,
+                updated_by_profile_uid: null,
+                api_key_owner_profile_uid: null,
                 api_key_created_by_user: false,
                 revision: 0,
                 scheduled_task_id: match.scheduled_task_id,
@@ -283,6 +286,9 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 ],
                 params: {},
                 created_by: 'elastic',
+                created_by_profile_uid: null,
+                updated_by_profile_uid: null,
+                api_key_owner_profile_uid: null,
                 api_key_created_by_user: null,
                 artifacts: {
                   dashboards: [],
@@ -795,6 +801,75 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           expect(response.body.total).to.equal(0);
         });
       }
+    });
+
+    describe('profile uid fields', () => {
+      const { user, space } = SuperuserAtSpace1;
+
+      async function loginAndGetSessionCookie() {
+        const response = await supertestWithoutAuth
+          .post('/internal/security/login')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            providerType: 'basic',
+            providerName: 'basic',
+            currentURL: '/',
+            params: { username: user.username, password: user.password },
+          })
+          .expect(200);
+
+        return (response.headers['set-cookie'] as unknown as string[])[0];
+      }
+
+      it('populates all of them with the profile uid of the user that created the rule, when created through an active session', async () => {
+        // Rules created via basic auth or an API key never carry a profile uid: Kibana only
+        // resolves `AuthenticatedUser.profile_uid` for requests authenticated through an active
+        // browser session (see `getCurrentUser` in the security plugin). A session cookie is
+        // required here to exercise that code path.
+        const sessionCookie = await loginAndGetSessionCookie();
+
+        const { body: currentUser } = await supertestWithoutAuth
+          .get('/internal/security/me')
+          .set('Cookie', sessionCookie)
+          .expect(200);
+        expect(typeof currentUser.profile_uid).to.be('string');
+
+        const { body: createdRule } = await supertestWithoutAuth
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .set('Cookie', sessionCookie)
+          .send(getTestRuleData())
+          .expect(200);
+        objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
+
+        const response = await supertestWithoutAuth
+          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
+          .set('kbn-xsrf', 'foo')
+          .set('Cookie', sessionCookie)
+          .send({ search: 'test.noop', search_fields: 'alertTypeId' })
+          .expect(200);
+
+        const match = response.body.data.find((obj: any) => obj.id === createdRule.id);
+        expect(match.created_by_profile_uid).to.eql(currentUser.profile_uid);
+        expect(match.updated_by_profile_uid).to.eql(currentUser.profile_uid);
+        expect(match.api_key_owner_profile_uid).to.eql(currentUser.profile_uid);
+      });
+
+      it('sets all of them to null when the rule is created without an active session (e.g. basic auth)', async () => {
+        const createdRule = await createNoOpAlert(space);
+
+        const response = await supertestWithoutAuth
+          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send({ search: 'test.noop', search_fields: 'alertTypeId' })
+          .expect(200);
+
+        const match = response.body.data.find((obj: any) => obj.id === createdRule.id);
+        expect(match.created_by_profile_uid).to.eql(null);
+        expect(match.updated_by_profile_uid).to.eql(null);
+        expect(match.api_key_owner_profile_uid).to.eql(null);
+      });
     });
 
     async function createNoOpAlert(space: Space, overrides = {}) {

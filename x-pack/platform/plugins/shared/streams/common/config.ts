@@ -13,9 +13,11 @@ export const configSchema = schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
   /**
-   * Outbound client for streams-config-distributor (`PUT /v1/units/<unit-id>`
-   * and `POST /v1/validate`). When `url` is unset, unit publish and validation
-   * are skipped so local canvas saves still work.
+   * Outbound client for streams-config-distributor (`PUT /v1/units/<unit-id>`,
+   * `POST /v1/units/validate`, `GET /v1/components` and `POST /v1/components/validate`).
+   * A unit write and the component catalogue require `url`. When it is unset, those
+   * calls log an error and do not run, the unit is not stored, and the catalogue
+   * routes answer 503.
    */
   distributor: schema.object(
     {
@@ -30,6 +32,13 @@ export const configSchema = schema.object({
       ),
     },
     { defaultValue: { ssl: {} } }
+  ),
+  /** Mount directory of the project-controller `streams-encryption-key` Secret. */
+  encryptionKey: schema.object(
+    {
+      path: schema.maybe(schema.string({ maxLength: 4096 })),
+    },
+    { defaultValue: {} }
   ),
   preconfigured: schema.object({
     enabled: schema.boolean({ defaultValue: true }),

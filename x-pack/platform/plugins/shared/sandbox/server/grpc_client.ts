@@ -109,11 +109,19 @@ function collectNestedBuffers(buf: Buffer, fieldNumber: number): Buffer[] {
   return results;
 }
 
+/** Marks an env key as a secret that the credential proxy only sends to `allowed_hosts`. */
+export interface SecretEnvKey {
+  key: string;
+  allowed_hosts: string[];
+}
+
 export interface RunCommandParams {
   command: string;
   directory?: string;
   env?: Record<string, string>;
   timeout_seconds?: number;
+  secret_env_keys?: SecretEnvKey[];
+  allowed_hosts?: string[];
 }
 
 export interface RunCommandResult {
@@ -129,15 +137,28 @@ interface RunCommandRequestProto {
   directory: string;
   timeout_seconds: number;
   task_group_id: string;
+  secret_env_keys: SecretEnvKey[];
+  allowed_hosts?: string[];
 }
 
-function serializeRunCommandRequest(req: RunCommandRequestProto): Buffer {
+function serializeSecretEnvKey({ key, allowed_hosts: allowedHosts }: SecretEnvKey): Buffer {
+  return Buffer.concat([
+    encodeStringField(1, key),
+    ...allowedHosts.map((host) => encodeStringField(2, host)),
+  ]);
+}
+
+export function serializeRunCommandRequest(req: RunCommandRequestProto): Buffer {
   return Buffer.concat([
     encodeStringField(1, req.command),
     encodeMapField(2, req.env),
     encodeStringField(3, req.directory),
     encodeDoubleField(4, req.timeout_seconds),
     encodeStringField(5, req.task_group_id),
+    ...req.secret_env_keys.map((secretEnvKey) =>
+      encodeNestedMessage(6, serializeSecretEnvKey(secretEnvKey))
+    ),
+    ...(req.allowed_hosts ?? []).map((rule) => encodeStringField(7, rule)),
   ]);
 }
 
@@ -432,6 +453,15 @@ const sandboxServiceDef: grpc.ServiceDefinition<any> = {
 
 const SandboxServiceConstructor = grpc.makeClientConstructor(sandboxServiceDef, 'SandboxService');
 
+// Deadlines cap every RPC. Without one, an RPC sent on a connection the load
+// balancer already dropped hangs forever: the transport keeps retransmitting
+// and nothing on either end fails the call.
+const FILE_RPC_DEADLINE_MS = 30_000;
+// The sandbox server caps a command at its timeout_seconds (600s when unset);
+// mirror that plus a margin so a legitimate long command is not cut short.
+const DEFAULT_COMMAND_TIMEOUT_SECONDS = 600;
+const COMMAND_DEADLINE_MARGIN_MS = 10_000;
+
 export class SandboxApiClient {
   private readonly client: grpc.Client;
   private readonly apiKey: string;
@@ -448,15 +478,23 @@ export class SandboxApiClient {
     port: number;
     apiKey: string;
     rootCertPem?: Buffer;
-    clientCertPem: Buffer;
-    clientKeyPem: Buffer;
+    clientCertPem?: Buffer;
+    clientKeyPem?: Buffer;
   }) {
+    // Without a client certificate this is plain TLS and sandbox-api relies on the API key.
     const credentials = grpc.credentials.createSsl(
       rootCertPem ?? null,
-      clientKeyPem,
-      clientCertPem
+      clientKeyPem ?? null,
+      clientCertPem ?? null
     );
-    this.client = new SandboxServiceConstructor(`${host}:${port}`, credentials);
+    // Keepalive pings keep the load-balanced connection warm (cloud LBs drop
+    // idle flows silently) and detect a blackholed connection within
+    // keepalive_timeout_ms so the channel reconnects instead of hanging RPCs.
+    this.client = new SandboxServiceConstructor(`${host}:${port}`, credentials, {
+      'grpc.keepalive_time_ms': 60_000,
+      'grpc.keepalive_timeout_ms': 20_000,
+      'grpc.keepalive_permit_without_calls': 1,
+    });
     this.apiKey = apiKey;
   }
 
@@ -467,14 +505,23 @@ export class SandboxApiClient {
     return md;
   }
 
+  private callOptions(deadlineMs: number): grpc.CallOptions {
+    return { deadline: Date.now() + deadlineMs };
+  }
+
   async runCommand(conversationId: string, params: RunCommandParams): Promise<RunCommandResult> {
     const call = promisify(
       (this.client as any).runCommand.bind(this.client) as (
         request: RunCommandRequestProto,
         metadata: grpc.Metadata,
+        options: grpc.CallOptions,
         callback: (err: grpc.ServiceError | null, response: RunCommandResult) => void
       ) => void
     );
+    const timeoutSeconds =
+      params.timeout_seconds && params.timeout_seconds > 0
+        ? params.timeout_seconds
+        : DEFAULT_COMMAND_TIMEOUT_SECONDS;
     return call(
       {
         command: params.command,
@@ -482,8 +529,11 @@ export class SandboxApiClient {
         env: params.env ?? {},
         timeout_seconds: params.timeout_seconds ?? 0,
         task_group_id: '',
+        secret_env_keys: params.secret_env_keys ?? [],
+        allowed_hosts: params.allowed_hosts ?? [],
       },
-      this.metadata(conversationId)
+      this.metadata(conversationId),
+      this.callOptions(timeoutSeconds * 1_000 + COMMAND_DEADLINE_MARGIN_MS)
     );
   }
 
@@ -492,10 +542,11 @@ export class SandboxApiClient {
       (this.client as any).statFiles.bind(this.client) as (
         request: string[],
         metadata: grpc.Metadata,
+        options: grpc.CallOptions,
         callback: (err: grpc.ServiceError | null, response: FileMetadata[]) => void
       ) => void
     );
-    return call(paths, this.metadata(conversationId));
+    return call(paths, this.metadata(conversationId), this.callOptions(FILE_RPC_DEADLINE_MS));
   }
 
   async readFiles(
@@ -506,10 +557,11 @@ export class SandboxApiClient {
       (this.client as any).readFiles.bind(this.client) as (
         request: Array<{ path: string; maxReadBytes?: number }>,
         metadata: grpc.Metadata,
+        options: grpc.CallOptions,
         callback: (err: grpc.ServiceError | null, response: ReadFileResult[]) => void
       ) => void
     );
-    return call(requests, this.metadata(conversationId));
+    return call(requests, this.metadata(conversationId), this.callOptions(FILE_RPC_DEADLINE_MS));
   }
 
   async writeFiles(
@@ -520,10 +572,11 @@ export class SandboxApiClient {
       (this.client as any).writeFiles.bind(this.client) as (
         request: Array<{ path: string; content: Buffer }>,
         metadata: grpc.Metadata,
+        options: grpc.CallOptions,
         callback: (err: grpc.ServiceError | null, response: WriteFileResult[]) => void
       ) => void
     );
-    return call(requests, this.metadata(conversationId));
+    return call(requests, this.metadata(conversationId), this.callOptions(FILE_RPC_DEADLINE_MS));
   }
 
   async mkdirs(conversationId: string, paths: string[]): Promise<boolean[]> {
@@ -531,10 +584,11 @@ export class SandboxApiClient {
       (this.client as any).mkdirs.bind(this.client) as (
         request: string[],
         metadata: grpc.Metadata,
+        options: grpc.CallOptions,
         callback: (err: grpc.ServiceError | null, response: boolean[]) => void
       ) => void
     );
-    return call(paths, this.metadata(conversationId));
+    return call(paths, this.metadata(conversationId), this.callOptions(FILE_RPC_DEADLINE_MS));
   }
 
   close(): void {

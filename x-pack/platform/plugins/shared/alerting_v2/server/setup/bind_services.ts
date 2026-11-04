@@ -24,15 +24,20 @@ import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strate
 import { CountTimeframeStrategy } from '../lib/director/strategies/count_timeframe_strategy';
 import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
 import { TransitionStrategyToken } from '../lib/director/strategies/types';
+import { getKibanaBaseUrl } from '../lib/dispatcher/kibana_base_url';
 import { DispatcherService } from '../lib/dispatcher/dispatcher';
-import { DispatcherServiceInternalToken } from '../lib/dispatcher/tokens';
+import { DispatcherServiceInternalToken, KibanaBaseUrlToken } from '../lib/dispatcher/tokens';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ActionPolicyNamespaceToken } from '../lib/action_policy_client/tokens';
 import { ActionPolicyExecutionHistoryClient } from '../lib/action_policy_execution_history_client';
+import { ActionPolicyTestService } from '../lib/action_policy_test/action_policy_test_service';
 import {
   ExecutionHistoryClient,
   ExecutionHistoryClientToken,
 } from '../lib/execution_history_client';
+import { EventOriginActorToken } from '../lib/event_origin/token';
+import { RulesClientOptionsToken } from '../lib/rules_client/tokens';
+import { InternalRulesClient, InternalRulesClientProvider } from '../lib/internal_rules_client';
 import { RulesClient } from '../lib/rules_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
 import {
@@ -102,6 +107,10 @@ import {
 import { UserService } from '../lib/services/user_service/user_service';
 import { WorkflowService } from '../lib/services/workflow_service/workflow_service';
 import { WorkflowServiceToken } from '../lib/services/workflow_service/tokens';
+import { LicenseService } from '../lib/services/license_service/license_service';
+import { LicenseServiceToken } from '../lib/services/license_service/tokens';
+import { EbtService } from '../lib/services/ebt_service/ebt_service';
+import { EbtServiceToken } from '../lib/services/ebt_service/tokens';
 import { ApiKeyServiceSavedObjectsClientToken } from '../lib/services/api_key_service/tokens';
 import {
   API_KEY_PENDING_INVALIDATION_TYPE,
@@ -123,6 +132,10 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertEventsClient).toSelf().inRequestScope();
   bind(EpisodesClient).toSelf().inRequestScope();
   bind(RulesClient).toSelf().inRequestScope();
+  bind(InternalRulesClientProvider).toSelf().inSingletonScope();
+  bind(InternalRulesClient).toSelf().inSingletonScope();
+  bind(EventOriginActorToken).toConstantValue('user');
+  bind(RulesClientOptionsToken).toConstantValue({});
   bind(ArtifactTypeRegistry).toSelf().inSingletonScope();
   bind(RequestSpaceIdToken)
     .toDynamicValue(({ get }) => {
@@ -141,6 +154,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .inRequestScope();
   bind(ActionPolicyClient).toSelf().inRequestScope();
   bind(ActionPolicyExecutionHistoryClient).toSelf().inRequestScope();
+  bind(ActionPolicyTestService).toSelf().inRequestScope();
   bind(RuleTemplatesClient).toSelf().inRequestScope();
   bind(ExecutionHistoryClient).toSelf().inRequestScope();
   bind(ExecutionHistoryClientToken).toService(ExecutionHistoryClient);
@@ -187,6 +201,10 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(EventLogServiceToken).toService(EventLogService);
   bind(WorkflowService).toSelf().inSingletonScope();
   bind(WorkflowServiceToken).toService(WorkflowService);
+  bind(LicenseService).toSelf().inSingletonScope();
+  bind(LicenseServiceToken).toService(LicenseService);
+  bind(EbtService).toSelf().inSingletonScope();
+  bind(EbtServiceToken).toService(EbtService);
   bind(ResourceManager).toSelf().inSingletonScope();
 
   bind(EsServiceInternalToken)
@@ -367,6 +385,16 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
         PluginSetup<AlertingServerSetupDependencies['workflowsManagement']>('workflowsManagement')
       );
       return wfm.management;
+    })
+    .inSingletonScope();
+
+  bind(KibanaBaseUrlToken)
+    .toDynamicValue(({ get }) => {
+      const http = get(CoreStart('http'));
+      const cloud = get(PluginSetup<AlertingServerSetupDependencies['cloud']>('cloud'), {
+        optional: true,
+      });
+      return getKibanaBaseUrl(http, cloud);
     })
     .inSingletonScope();
 

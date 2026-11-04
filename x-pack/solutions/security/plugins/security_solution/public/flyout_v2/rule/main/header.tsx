@@ -17,9 +17,11 @@ import {
 } from '@elastic/eui';
 import { DELETED_RULE } from '../../../detection_engine/rule_details_ui/pages/rule_details/translations';
 import { CreatedBy, UpdatedBy } from '../../../detections/components/rules/rule_info';
+import { useRuleAuthorDisplayNames } from '../../../detection_engine/rule_management/logic/use_rule_author_display_names';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { useRuleDetailsLink } from './hooks/use_rule_details_link';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
+import { FlyoutHeaderActions } from '../../shared/components/flyout_header_actions';
 import {
   RULE_DETAILS_TITLE_TEST_ID,
   RULE_DETAILS_TITLE_LINK_TEST_ID,
@@ -43,9 +45,16 @@ export interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = memo(({ rule, isSuppressed }) => {
   const href = useRuleDetailsLink({ ruleId: rule.id }, urlParamOverride);
+  const { createdBy, updatedBy } = useRuleAuthorDisplayNames({
+    createdBy: rule?.created_by,
+    createdByProfileUid: rule?.created_by_profile_uid,
+    updatedBy: rule?.updated_by,
+    updatedByProfileUid: rule?.updated_by_profile_uid,
+  });
 
   return (
     <>
+      <FlyoutHeaderActions />
       {href ? (
         <EuiLink
           href={href}
@@ -78,12 +87,12 @@ export const Header: React.FC<HeaderProps> = memo(({ rule, isSuppressed }) => {
       <EuiFlexGroup gutterSize="xs" direction="column">
         <EuiFlexItem data-test-subj={RULE_DETAILS_CREATED_BY_TEST_ID}>
           <EuiText size="xs">
-            <CreatedBy createdBy={rule?.created_by} createdAt={rule?.created_at} />
+            <CreatedBy createdBy={createdBy} createdAt={rule?.created_at} />
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem data-test-subj={RULE_DETAILS_UPDATED_BY_TEST_ID}>
           <EuiText size="xs">
-            <UpdatedBy updatedBy={rule?.updated_by} updatedAt={rule?.updated_at} />
+            <UpdatedBy updatedBy={updatedBy} updatedAt={rule?.updated_at} />
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

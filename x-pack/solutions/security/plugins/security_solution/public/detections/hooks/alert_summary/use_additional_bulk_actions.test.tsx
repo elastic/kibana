@@ -28,4 +28,20 @@ describe('useAdditionalBulkActions', () => {
       'panel',
     ]);
   });
+
+  it('appends the additional items after the alert tags items', () => {
+    (useBulkAlertTagsItems as jest.Mock).mockReturnValue({
+      alertTagsItems: [{ key: 'tags', label: 'tags' }],
+      alertTagsPanels: [],
+    });
+    const additionalItems = [{ key: 'remove', label: 'remove', disableOnQuery: true }];
+
+    const hookResult = renderHook(() =>
+      useAdditionalBulkActions({ refetch: jest.fn(), additionalItems })
+    );
+
+    expect(hookResult.result.current).toEqual([
+      { id: 0, items: [{ key: 'tags', label: 'tags' }, ...additionalItems] },
+    ]);
+  });
 });

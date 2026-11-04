@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type { AiIndexDest } from '../../common/http_api/ai_indices';
+import { kiLifecyclePipeline } from './ki_lifecycle';
+import { MEMORY_KI_TYPES } from '../../common/memory';
+
 export interface AiIndexExampleQuery {
   title: string;
   /** ES|QL with `?name` parameters; the caller supplies `params`. */
@@ -12,42 +16,49 @@ export interface AiIndexExampleQuery {
 }
 
 const KEEP = '| KEEP title, description, content, type, tags';
+export const EXCLUDE_MEMORY_KI_TYPES_CONDITION = `type IS NULL OR (${MEMORY_KI_TYPES.map(
+  (type) => `type != "${type}"`
+).join(' AND ')})`;
+export const EXCLUDE_MEMORY_KI_TYPES_FILTER = `| WHERE ${EXCLUDE_MEMORY_KI_TYPES_CONDITION}`;
 
 /**
  * Three fixed ES|QL shapes for the canonical KI schema (`title`, `description`, `content`, their
- * `.semantic` multi-fields, `type`, `tags`); only the `FROM` target changes. Indices with other
- * mappings need the field names adapted.
+ * `.semantic` multi-fields, `type`, `tags`), each opening with the lifecycle pipeline for the dest
+ * type. Memory exclusion is optional so a disabled global feature does not expose memory-specific
+ * instructions. Indices with other mappings need the field names adapted.
  */
-export const buildExampleQueries = (target: string): AiIndexExampleQuery[] => [
-  {
-    title: 'Full text search, lexical and semantic fused together (?query)',
-    esql: [
-      `FROM ${target} METADATA _id, _index, _score`,
-      '| FORK',
-      '    ( WHERE MATCH(title, ?query) OR MATCH(description, ?query) OR MATCH(content, ?query) | SORT _score DESC | LIMIT 20 )',
-      '    ( WHERE MATCH(title.semantic, ?query) OR MATCH(description.semantic, ?query) OR MATCH(content.semantic, ?query) | SORT _score DESC | LIMIT 20 )',
-      '| FUSE',
-      '| SORT _score DESC, _id ASC',
-      KEEP,
-      '| LIMIT 5',
-    ].join('\n'),
-  },
-  {
-    title: 'Filter by knowledge item type and tag (?type, ?tag; tags is multi-valued, so MATCH)',
-    esql: [
-      `FROM ${target}`,
-      '| WHERE type == ?type AND MATCH(tags, ?tag)',
-      KEEP,
-      '| LIMIT 20',
-    ].join('\n'),
-  },
-  {
-    title: 'Count by type',
-    esql: [
-      `FROM ${target}`,
-      '| STATS count = COUNT(*) BY type',
-      '| SORT count DESC',
-      '| LIMIT 20',
-    ].join('\n'),
-  },
-];
+export const buildExampleQueries = (
+  { type, value }: AiIndexDest,
+  { excludeMemory = false }: { excludeMemory?: boolean } = {}
+): AiIndexExampleQuery[] => {
+  const from = [
+    `FROM ${value} METADATA _id, _index, _score`,
+    ...kiLifecyclePipeline(type).map((command) => `| ${command}`),
+    ...(excludeMemory ? [EXCLUDE_MEMORY_KI_TYPES_FILTER] : []),
+  ];
+  return [
+    {
+      title: 'Full text search, lexical and semantic fused together (?query)',
+      esql: [
+        ...from,
+        '| FORK',
+        '    ( WHERE MATCH(title, ?query) OR MATCH(description, ?query) OR MATCH(content, ?query) | SORT _score DESC | LIMIT 20 )',
+        '    ( WHERE MATCH(title.semantic, ?query) OR MATCH(description.semantic, ?query) OR MATCH(content.semantic, ?query) | SORT _score DESC | LIMIT 20 )',
+        '| FUSE',
+        '| SORT _score DESC, _id ASC',
+        KEEP,
+        '| LIMIT 5',
+      ].join('\n'),
+    },
+    {
+      title: 'Filter by knowledge item type and tag (?type, ?tag; tags is multi-valued, so MATCH)',
+      esql: [...from, '| WHERE type == ?type AND MATCH(tags, ?tag)', KEEP, '| LIMIT 20'].join('\n'),
+    },
+    {
+      title: 'Count by type',
+      esql: [...from, '| STATS count = COUNT(*) BY type', '| SORT count DESC', '| LIMIT 20'].join(
+        '\n'
+      ),
+    },
+  ];
+};

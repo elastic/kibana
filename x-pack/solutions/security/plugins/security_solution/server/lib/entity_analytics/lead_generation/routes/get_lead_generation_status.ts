@@ -48,6 +48,7 @@ export const getLeadGenerationStatusRoute = (
           const spaceId = getSpaceId();
           const coreCtx = await context.core;
           const esClient = coreCtx.elasticsearch.client.asCurrentUser;
+          const internalEsClient = coreCtx.elasticsearch.client.asInternalUser;
           const soClient = coreCtx.savedObjects.client;
 
           let isEnabled = false;
@@ -63,7 +64,12 @@ export const getLeadGenerationStatusRoute = (
             isEnabled = false;
           }
 
-          const leadDataClient = createLeadDataClient({ esClient, logger, spaceId });
+          const leadDataClient = createLeadDataClient({
+            esClient,
+            internalEsClient,
+            logger,
+            spaceId,
+          });
           const status = await leadDataClient.getStatus({ isEnabled });
           const config = await getLeadGenerationConfig(soClient, spaceId);
 

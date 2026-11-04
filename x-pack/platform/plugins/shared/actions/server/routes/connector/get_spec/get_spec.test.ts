@@ -91,6 +91,7 @@ describe('getConnectorSpecRoute', () => {
         },
       },
       isTestable: true,
+      actions: [{ name: 'listIncidents', description: 'List incidents', isTool: true }],
     };
     const responseBody = {
       metadata: {
@@ -103,6 +104,7 @@ describe('getConnectorSpecRoute', () => {
       },
       schema: clientResult.schema,
       is_testable: true,
+      actions: [{ name: 'listIncidents', description: 'List incidents', is_tool: true }],
     };
     actionsClient.getConnectorSpec.mockResolvedValue(clientResult as never);
 
@@ -141,6 +143,7 @@ describe('getConnectorSpecRoute', () => {
       },
       schema: {},
       isTestable: false,
+      actions: [],
     } as never);
 
     getConnectorSpecRoute(router, licenseState, actionsConfigUtils);
@@ -177,6 +180,7 @@ describe('getConnectorSpecRoute', () => {
         supportedFeatureIds: ['alerting'],
       },
       schema: {},
+      actions: [],
     } as never);
 
     getConnectorSpecRoute(router, licenseState, actionsConfigUtils);
@@ -238,6 +242,7 @@ describe('getConnectorSpecRoute', () => {
         supportedFeatureIds: ['alerting'],
       },
       schema: {},
+      actions: [],
     } as never);
 
     getConnectorSpecRoute(router, licenseState, createActionsConfigUtilsMock());
