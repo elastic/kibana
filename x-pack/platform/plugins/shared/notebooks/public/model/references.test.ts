@@ -8,9 +8,11 @@
 import type { CellDefinition, InputCellDefinition, InputDefinition } from '../../common/types';
 import {
   CELL_NAME_PATTERN,
+  getCellOutputs,
   getCellParamNames,
   getExposedParamNames,
   getQueryParamNames,
+  renameOutput,
 } from './references';
 
 const input = (name: string, definition: InputDefinition): InputCellDefinition => ({
@@ -74,6 +76,62 @@ describe('getExposedParamNames', () => {
     expect(
       getExposedParamNames(input('bytes', { kind: 'range', min: 0, max: 10, defaultValue: null }))
     ).toEqual(['bytes_min', 'bytes_max']);
+  });
+});
+
+describe('getCellOutputs', () => {
+  const window = input('window', { kind: 'time', defaultValue: { from: 'now-1d', to: 'now' } });
+
+  it('applies renamed outputs and keeps the others derived from the name', () => {
+    expect(
+      getCellOutputs({ ...window, outputNames: { start: 'from' } }).map(({ name }) => name)
+    ).toEqual(['from', 'window_end']);
+  });
+
+  it('ignores renames of the global time range', () => {
+    const pinned = input('time', {
+      kind: 'time',
+      pinned: true,
+      defaultValue: { from: 'now-1d', to: 'now' },
+    });
+    expect(
+      getCellOutputs({ ...pinned, outputNames: { start: 'from' } }).map(({ name }) => name)
+    ).toEqual(['_tstart', '_tend']);
+  });
+
+  it('exposes an ES|QL cell as a table, not a param', () => {
+    const cell: CellDefinition = { id: 'q', name: 'q', type: 'esql', query: '', runMode: 'auto' };
+    expect(getCellOutputs(cell)).toEqual([
+      { key: 'table', name: 'q', isParam: false, isFixed: false },
+    ]);
+  });
+});
+
+describe('renameOutput', () => {
+  const window = input('window', { kind: 'time', defaultValue: { from: 'now-1d', to: 'now' } });
+  const os = input('os', { kind: 'dropdown', optionsQuery: '', defaultValue: null });
+  const cells = { [window.id]: window, [os.id]: os };
+
+  it('stores the new name for that output only', () => {
+    expect(renameOutput(cells, window, 'end', 'until')).toEqual({
+      cell: { ...window, outputNames: { end: 'until' } },
+    });
+  });
+
+  it('drops the override when renamed back to the default', () => {
+    const renamed = { ...window, outputNames: { end: 'until' } };
+    expect(renameOutput({ ...cells, [window.id]: renamed }, renamed, 'end', 'window_end')).toEqual({
+      cell: window,
+    });
+  });
+
+  it.each([
+    ['an invalid name', 'Until'],
+    ['a reserved name', '_until'],
+    ['a name another output uses', 'os'],
+    ['the name of its sibling output', 'window_start'],
+  ])('rejects %s', (_case, name) => {
+    expect(renameOutput(cells, window, 'end', name)).toHaveProperty('error');
   });
 });
 

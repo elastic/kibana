@@ -21,6 +21,7 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { ChartType } from '@kbn/visualization-utils';
 import type { ChartCellDefinition, LensAttributes } from '../../common/types';
+import { getCellDisplayName } from '../model/references';
 import {
   CHART_TYPE_OPTIONS,
   applyEditorState,
@@ -271,7 +272,10 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
             aria-label={SOURCE_LABEL}
             hasNoInitialSelection={!sourceCell}
             value={sourceCell ?? ''}
-            options={esqlCells.map((esqlCell) => ({ value: esqlCell.id, text: esqlCell.name }))}
+            options={esqlCells.map((esqlCell) => ({
+              value: esqlCell.id,
+              text: getCellDisplayName(esqlCell),
+            }))}
             onChange={(event) =>
               store.updateCell(id, (current) =>
                 current.type === 'chart'

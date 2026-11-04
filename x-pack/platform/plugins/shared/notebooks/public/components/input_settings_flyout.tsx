@@ -29,6 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { DropdownOptionsSource, InputDefinition } from '../../common/types';
+import { getCellDisplayName } from '../model/references';
 import { LazyEsqlEditor } from './lazy_esql_editor';
 import { useNotebook } from './notebook_context';
 import { NotebookFlyout } from './notebook_flyout';
@@ -333,7 +334,10 @@ const DynamicOptionsFields = ({
                 defaultMessage: 'Custom ES|QL query',
               }),
             },
-            ...esqlCells.map(({ id, name }) => ({ value: id, text: name })),
+            ...esqlCells.map((esqlCell) => ({
+              value: esqlCell.id,
+              text: getCellDisplayName(esqlCell),
+            })),
           ]}
           onChange={({ target: { value } }) =>
             onChange(

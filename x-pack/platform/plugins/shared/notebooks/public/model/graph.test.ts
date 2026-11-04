@@ -169,6 +169,26 @@ describe('buildGraph', () => {
     expect(graph.errors.get('bytes_min')).toMatch(/bytes_min/);
   });
 
+  it('links consumers through a renamed output', () => {
+    const graph = graphOf([
+      { ...dropdown('os'), outputNames: { value: 'platform' } },
+      esql('q', 'FROM x | WHERE os == ?platform'),
+    ]);
+    expect(graph.parents.get('q')).toEqual(['os']);
+    expect(graph.errors.size).toBe(0);
+  });
+
+  it('flags a renamed output that clashes with another cell output', () => {
+    const graph = graphOf([{ ...range('bytes'), outputNames: { min: 'q' } }, esql('q', 'FROM x')]);
+    expect(graph.errors.get('bytes')).toMatch(/"q"/);
+    expect(graph.errors.get('q')).toMatch(/"q"/);
+  });
+
+  it('flags an invalid renamed output', () => {
+    const graph = graphOf([{ ...range('bytes'), outputNames: { max: 'Max' } }]);
+    expect(graph.errors.get('bytes')).toMatch(/Max/);
+  });
+
   it('flags a second pinned time input', () => {
     const graph = graphOf([time('time'), time('time2')]);
     expect(graph.errors.has('time')).toBe(true);

@@ -72,6 +72,16 @@ const cellBaseProps = {
   id: idSchema,
   name: schema.string({ maxLength: MAX_NAME_LENGTH }),
   label: schema.maybe(schema.string({ maxLength: MAX_TITLE_LENGTH })),
+  outputNames: schema.maybe(
+    schema.object({
+      table: schema.maybe(schema.string({ maxLength: MAX_NAME_LENGTH })),
+      value: schema.maybe(schema.string({ maxLength: MAX_NAME_LENGTH })),
+      start: schema.maybe(schema.string({ maxLength: MAX_NAME_LENGTH })),
+      end: schema.maybe(schema.string({ maxLength: MAX_NAME_LENGTH })),
+      min: schema.maybe(schema.string({ maxLength: MAX_NAME_LENGTH })),
+      max: schema.maybe(schema.string({ maxLength: MAX_NAME_LENGTH })),
+    })
+  ),
 };
 
 const cellSchema = schema.discriminatedUnion('type', [

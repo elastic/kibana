@@ -43,6 +43,7 @@ import {
   type GetNodeWidth,
 } from '../model/graph_view';
 import type { CellRuntime, ParamValue } from '../model/types';
+import { getCellDisplayName } from '../model/references';
 import { TYPE_ICONS, getStatusBorderColor, getTypeLabel } from './cell_display';
 import { useNotebook } from './notebook_context';
 import { getResultSummary } from './result_preview';
@@ -87,7 +88,7 @@ const useGetNodeWidth = (cells: Readonly<Record<string, CellDefinition>>): GetNo
       if (!cell) return NODE_MIN_WIDTH;
       return fitWidth(
         Math.max(
-          measureText(cell.name, fontOf(font.scale.s, font.weight.bold)),
+          measureText(getCellDisplayName(cell), fontOf(font.scale.s, font.weight.bold)),
           measureText(getTypeLabel(cell), small)
         )
       );
@@ -165,7 +166,7 @@ const CellNode = ({ data: { cellId, width, highlight } }: NodeProps<CellFlowNode
           </EuiFlexItem>
           <EuiFlexItem css={{ minWidth: 0 }}>
             <EuiText size="s" className="eui-textTruncate">
-              <strong>{cell.name}</strong>
+              <strong>{getCellDisplayName(cell)}</strong>
             </EuiText>
             <EuiText size="xs" color="subdued" className="eui-textTruncate">
               {getTypeLabel(cell)}

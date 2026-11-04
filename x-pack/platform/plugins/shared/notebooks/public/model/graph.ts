@@ -6,7 +6,13 @@
  */
 
 import type { CellDefinition } from '../../common/types';
-import { CELL_NAME_PATTERN, getCellParamNames, getExposedParamNames } from './references';
+import {
+  getCellDisplayName,
+  getCellOutputs,
+  getCellParamNames,
+  getExposedParamNames,
+  getOutputNameError,
+} from './references';
 
 /** Dependencies between executable cells, derived from definitions on every change. */
 export interface NotebookGraph {
@@ -19,10 +25,8 @@ export interface NotebookGraph {
 }
 
 const getNameError = (name: string, isDuplicate: boolean): string | undefined => {
-  if (name.startsWith('_')) return `Names starting with "_" are reserved`;
-  if (!CELL_NAME_PATTERN.test(name)) {
-    return `"${name}" is not a valid name: use lowercase letters, digits and "_", starting with a letter`;
-  }
+  const invalid = getOutputNameError(name);
+  if (invalid) return invalid;
   if (isDuplicate) return `Another cell is already named "${name}"`;
 };
 
@@ -88,7 +92,10 @@ export const buildGraph = (
   );
   const executable = allCells.filter(({ type }) => type !== 'markdown');
   const executableIds = executable.map(({ id }) => id);
-  const nameOf = (id: string): string => cells[id]?.name ?? id;
+  const nameOf = (id: string): string => {
+    const cell = cells[id];
+    return cell ? getCellDisplayName(cell) : id;
+  };
 
   const errors = new Map<string, string>();
   const addError = (id: string, message: string): void => {
@@ -116,6 +123,19 @@ export const buildGraph = (
     });
   });
 
+  const outputs = allCells.flatMap((cell) =>
+    getCellOutputs(cell).map((output) => ({ ...output, cellId: cell.id }))
+  );
+  const outputsByName = groupBy(outputs, ({ name }) => name);
+  outputs.forEach(({ cellId, name, isFixed }) => {
+    if (isFixed) return;
+    const invalid = getOutputNameError(name);
+    if (invalid) addError(cellId, invalid);
+    if ((outputsByName.get(name) ?? []).length > 1) {
+      addError(cellId, `More than one output is named "${name}"`);
+    }
+  });
+
   const parents = new Map<string, string[]>();
   executable.forEach((cell) => {
     if (cell.type === 'chart') {
@@ -123,7 +143,7 @@ export const buildGraph = (
       const source = sourceCell === null ? undefined : cells[sourceCell];
       if (sourceCell !== null && !source) addError(cell.id, 'The source cell no longer exists');
       if (source && source.type !== 'esql') {
-        addError(cell.id, `Source "${source.name}" is not an ES|QL cell`);
+        addError(cell.id, `Source "${nameOf(source.id)}" is not an ES|QL cell`);
       }
       parents.set(cell.id, source?.type === 'esql' ? [source.id] : []);
       return;
@@ -137,7 +157,7 @@ export const buildGraph = (
       const source = optionsCell === null ? undefined : cells[optionsCell];
       if (optionsCell !== null && !source) addError(cell.id, 'The options cell no longer exists');
       if (source && source.type !== 'esql') {
-        addError(cell.id, `Options cell "${source.name}" is not an ES|QL cell`);
+        addError(cell.id, `Options cell "${nameOf(source.id)}" is not an ES|QL cell`);
       }
       parents.set(cell.id, source?.type === 'esql' ? [source.id] : []);
       return;

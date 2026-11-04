@@ -34,6 +34,16 @@ describe('duplicateCell', () => {
     });
   });
 
+  it('gives the copy default output names so they do not clash with the original', () => {
+    const original = { ...createCell('input:range', {}), outputNames: { min: 'lowest' } };
+    expect(duplicateCell(original, toRecord([original])).outputNames).toBeUndefined();
+  });
+
+  it('skips a number whose name a renamed output already uses', () => {
+    const renamed = { ...createCell('input:dropdown', {}), outputNames: { value: 'esql_1' } };
+    expect(createCell('esql', toRecord([renamed])).name).toBe('esql_2');
+  });
+
   it('keeps a custom label as is', () => {
     const original = { ...createCell('chart', {}), label: 'Visits by host' };
     expect(duplicateCell(original, toRecord([original])).label).toBe('Visits by host');

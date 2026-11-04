@@ -14,6 +14,7 @@ import type {
   InputKind,
   NotebookAttributes,
 } from '../../common/types';
+import { getAllOutputNames } from './references';
 
 export type NewCellKind = Exclude<CellType, 'input'> | `input:${InputKind}`;
 
@@ -79,9 +80,11 @@ const BLUEPRINTS: Record<NewCellKind, CellBlueprint> = {
 
 /** The lowest number N for which `{prefix}_N` is not already a cell name. */
 const getUniqueIndex = (prefix: string, cells: Record<string, CellDefinition>): number => {
-  const taken = new Set(Object.values(cells).map(({ name }) => name));
+  const taken = [...Object.values(cells).map(({ name }) => name), ...getAllOutputNames(cells)];
+  const isTaken = (name: string) =>
+    taken.some((other) => other === name || other.startsWith(`${name}_`));
   let index = 1;
-  while (taken.has(`${prefix}_${index}`)) index++;
+  while (isTaken(`${prefix}_${index}`)) index++;
   return index;
 };
 
@@ -104,7 +107,10 @@ export const createCell = (
 
 const NUMBERED_LABEL = /^(.*) \d+$/;
 
-/** A copy with the next free name; a numbered label like "Chart 1" is renumbered to match. */
+/**
+ * A copy with the next free name and default output names; a numbered label like "Chart 1" is
+ * renumbered to match.
+ */
 export const duplicateCell = (
   cell: CellDefinition,
   cells: Record<string, CellDefinition>
@@ -112,8 +118,9 @@ export const duplicateCell = (
   const prefix = cell.name.replace(/_\d+$/, '');
   const index = getUniqueIndex(prefix, cells);
   const labelBase = cell.label?.match(NUMBERED_LABEL)?.[1];
+  const { outputNames: _renamed, ...copy } = cell;
   return {
-    ...cell,
+    ...copy,
     id: uuidv4(),
     name: `${prefix}_${index}`,
     ...(labelBase !== undefined ? { label: `${labelBase} ${index}` } : {}),

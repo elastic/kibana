@@ -35,7 +35,7 @@ export const EsqlCell = ({ cell }: { cell: EsqlCellDefinition }) => {
   const { output } = runtime;
 
   return (
-    <CellFrame cell={cell} runtime={runtime} onRun={() => run(draft)} outputs={[cell.name]}>
+    <CellFrame cell={cell} runtime={runtime} onRun={() => run(draft)}>
       <Suspense fallback={<EuiLoadingSpinner />}>
         <LazyEsqlEditor
           query={{ esql: draft }}

@@ -19,6 +19,7 @@ import type {
 import { buildGraph, getDescendants, type NotebookGraph } from './graph';
 import { getDefaultInputValue, type NotebookStore } from './notebook_store';
 import { buildQueryParams, resolveInputParams } from './params';
+import { getCellDisplayName } from './references';
 import type {
   CellOutput,
   CellRuntime,
@@ -386,7 +387,8 @@ export class NotebookScheduler {
       const source = optionsCell === null ? undefined : this.runtime(optionsCell).output;
       const table = source?.kind === 'table' ? source.table : undefined;
       if (table && optionsColumn !== null && !findColumn(table, optionsColumn)) {
-        const sourceName = optionsCell === null ? '' : this.cells[optionsCell]?.name ?? '';
+        const sourceCell = optionsCell === null ? undefined : this.cells[optionsCell];
+        const sourceName = sourceCell ? getCellDisplayName(sourceCell) : '';
         this.publish(id, {
           status: 'error',
           error: `Column "${optionsColumn}" is not in the results of "${sourceName}"`,

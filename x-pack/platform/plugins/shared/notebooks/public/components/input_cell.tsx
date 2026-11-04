@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { debounce } from 'lodash';
 import type { InputCellDefinition, InputDefinition } from '../../common/types';
-import { getExposedParamNames } from '../model/references';
+import { getCellDisplayName } from '../model/references';
 import type { InputValue } from '../model/types';
 import { CellFrame } from './cell_frame';
 import { InputSettingsFlyout } from './input_settings_flyout';
@@ -53,7 +53,7 @@ const DropdownControl = ({ cell }: { cell: InputCellDefinition }) => {
       options={options.map((option) => ({ label: option }))}
       selectedOptions={selected === null ? [] : [{ label: selected }]}
       onChange={([choice]) => setValue({ kind: 'dropdown', value: choice?.label ?? null })}
-      aria-label={cell.name}
+      aria-label={getCellDisplayName(cell)}
       css={{ maxWidth: 400 }}
       data-test-subj={`notebookDropdown-${cell.name}`}
     />
@@ -97,7 +97,7 @@ const RangeControl = ({
             setLocal(next);
             commit(next);
           }}
-          aria-label={cell.name}
+          aria-label={getCellDisplayName(cell)}
           data-test-subj={`notebookRange-${cell.name}`}
         />
       </EuiFlexItem>
@@ -158,14 +158,12 @@ export const InputCell = ({ cell }: { cell: InputCellDefinition }) => {
   const runtime = useStateFromPublishingSubject(store.getRuntime$(cell.id));
   const [isEditing, setIsEditing] = useState(false);
   const { input } = cell;
-  const outputs = getExposedParamNames(cell).map((name) => `?${name}`);
   const configurable = input.kind === 'dropdown' || input.kind === 'range' ? input : undefined;
 
   return (
     <CellFrame
       cell={cell}
       runtime={runtime}
-      outputs={outputs}
       headerActions={
         configurable && (
           <EuiFlexItem grow={false}>
@@ -184,7 +182,7 @@ export const InputCell = ({ cell }: { cell: InputCellDefinition }) => {
       {isEditing && configurable && (
         <InputSettingsFlyout
           cellId={cell.id}
-          name={cell.name}
+          name={getCellDisplayName(cell)}
           input={configurable}
           onApply={(next) =>
             store.updateCell(cell.id, (current) =>

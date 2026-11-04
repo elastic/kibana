@@ -42,12 +42,17 @@ export type InputDefinition =
 
 export type InputKind = InputDefinition['kind'];
 
+/** The outputs a cell can expose: an ES|QL table, a dropdown value, or the bounds of a range. */
+export type CellOutputKey = 'table' | 'value' | 'start' | 'end' | 'min' | 'max';
+
 interface CellBase {
   id: string;
-  /** Identifier other cells reference, e.g. `?chart_1`. */
+  /** Seeds the default output names, e.g. `esql_1` or `period_1_start`. */
   name: string;
   /** Free-text display title, e.g. "Chart 1". */
   label?: string;
+  /** Renamed outputs; outputs not listed keep the name derived from `name`. */
+  outputNames?: Partial<Record<CellOutputKey, string>>;
 }
 
 export interface EsqlCellDefinition extends CellBase {

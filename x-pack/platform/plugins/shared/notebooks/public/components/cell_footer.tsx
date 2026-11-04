@@ -7,7 +7,6 @@
 
 import React, { useState } from 'react';
 import {
-  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -19,7 +18,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import moment from 'moment';
 import useInterval from 'react-use/lib/useInterval';
+import type { CellDefinition } from '../../common/types';
+import { getCellOutputs } from '../model/references';
 import type { CellRuntime } from '../model/types';
+import { CellOutputName } from './cell_output_name';
 import { CellStatusBadge } from './cell_status_badge';
 
 const RELATIVE_TIME_REFRESH_MS = 30_000;
@@ -60,13 +62,8 @@ const LastRun = ({ lastRunAt, durationMs }: { lastRunAt: number; durationMs?: nu
   );
 };
 
-export const CellFooter = ({
-  outputs = [],
-  runtime,
-}: {
-  outputs?: readonly string[];
-  runtime?: CellRuntime;
-}) => {
+export const CellFooter = ({ cell, runtime }: { cell: CellDefinition; runtime?: CellRuntime }) => {
+  const outputs = getCellOutputs(cell);
   const lastRunAt = runtime?.lastRunAt;
   const showStatus = runtime !== undefined && runtime.status !== 'done';
   if (outputs.length === 0 && lastRunAt === undefined && !showStatus) return null;
@@ -100,8 +97,8 @@ export const CellFooter = ({
                 />
               </EuiFlexItem>
               {outputs.map((output) => (
-                <EuiFlexItem grow={false} key={output}>
-                  <EuiCode>{output}</EuiCode>
+                <EuiFlexItem grow={false} key={output.key}>
+                  <CellOutputName cell={cell} output={output} />
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>

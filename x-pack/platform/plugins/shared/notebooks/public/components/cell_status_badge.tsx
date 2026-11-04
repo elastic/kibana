@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { getCellDisplayName } from '../model/references';
 import type { CellRuntime, CellStatus, StaleReason } from '../model/types';
 import { useNotebook } from './notebook_context';
 
@@ -109,7 +110,7 @@ export const CellStatusBadge = ({ runtime }: { runtime: CellRuntime }) => {
     if (status !== 'stale' || !staleReason) return error;
     const parentNames = staleParents.flatMap((parentId) => {
       const parent = cells[parentId];
-      return parent ? [parent.name] : [];
+      return parent ? [getCellDisplayName(parent)] : [];
     });
     return getStaleTooltip(staleReason, parentNames, changedParams);
   };

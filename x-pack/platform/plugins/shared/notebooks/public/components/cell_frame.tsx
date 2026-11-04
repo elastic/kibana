@@ -27,7 +27,6 @@ import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { CellDefinition } from '../../common/types';
-import { CELL_NAME_PATTERN } from '../model/references';
 import { duplicateCell } from '../model/cell_factory';
 import type { CellRuntime } from '../model/types';
 import { TYPE_ICONS, getCellElementId, getStatusBorderColor, getTypeLabel } from './cell_display';
@@ -45,17 +44,11 @@ const ACTIONS_LABEL = i18n.translate('xpack.notebook.cell.actions', {
   defaultMessage: 'Cell actions',
 });
 
-const NAME_TOOLTIP = i18n.translate('xpack.notebook.cell.nameTooltip', {
-  defaultMessage: 'Reference name other cells use to refer to this one',
-});
-
 interface CellFrameProps {
   cell: CellDefinition;
   runtime?: CellRuntime;
   onRun?: () => void;
   headerActions?: ReactNode;
-  /** Variable names the cell exposes to other cells, listed in the cell footer. */
-  outputs?: readonly string[];
 }
 
 export const CellFrame = ({
@@ -63,7 +56,6 @@ export const CellFrame = ({
   runtime,
   onRun,
   headerActions,
-  outputs,
   children,
 }: PropsWithChildren<CellFrameProps>) => {
   const { store, openFlyouts$, focusedCell$ } = useNotebook();
@@ -98,12 +90,6 @@ export const CellFrame = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isRunMenuOpen, setIsRunMenuOpen] = useState(false);
   const closeMenu = () => setIsMenuOpen(false);
-
-  const rename = (name: string): boolean => {
-    if (!CELL_NAME_PATTERN.test(name)) return false;
-    store.updateCell(cell.id, (current) => ({ ...current, name }));
-    return true;
-  };
 
   const relabel = (value: string): void => {
     const label = value.trim();
@@ -204,20 +190,6 @@ export const CellFrame = ({
               data-test-subj="notebookCellLabel"
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={NAME_TOOLTIP} disableScreenReaderOutput>
-              <EuiInlineEditText
-                size="xs"
-                inputAriaLabel={i18n.translate('xpack.notebook.cell.nameAriaLabel', {
-                  defaultMessage: 'Cell reference name',
-                })}
-                defaultValue={cell.name}
-                onSave={rename}
-                readModeProps={{ color: 'text' }}
-                data-test-subj="notebookCellName"
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
           <EuiFlexItem />
           {headerActions}
           <EuiFlexItem grow={false}>
@@ -257,7 +229,7 @@ export const CellFrame = ({
           </>
         )}
         {children}
-        <CellFooter outputs={outputs} runtime={runtime} />
+        <CellFooter cell={cell} runtime={runtime} />
       </EuiPanel>
       {onRun && 'runMode' in cell && !isFlyoutOpen && (
         <div
