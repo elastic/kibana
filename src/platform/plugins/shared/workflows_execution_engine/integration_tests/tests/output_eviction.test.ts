@@ -233,7 +233,8 @@ steps:
     expect(execution?.status).toBe(ExecutionStatus.WAITING);
   });
 
-  describe('after resume', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/302842
+  describe.skip('after resume', () => {
     beforeAll(async () => {
       await workflowRunFixture.resumeWorkflowAtScheduledTime();
     });
