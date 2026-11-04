@@ -12,6 +12,13 @@ export {
   type NightshiftCustomContextAttributes,
 } from './custom_context_saved_object';
 export {
+  nightshiftSandboxAllowlistAttributesSchemaV1,
+  nightshiftSandboxAllowlistSavedObjectType,
+  NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_TYPE,
+  NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_ID,
+  type NightshiftSandboxAllowlistAttributes,
+} from './sandbox_allowlist_saved_object';
+export {
   nightshiftAutomationSavedObjectType,
   NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './automation_saved_object';

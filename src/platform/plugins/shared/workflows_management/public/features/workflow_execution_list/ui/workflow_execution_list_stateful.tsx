@@ -10,6 +10,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useDebouncedValue } from '@kbn/react-hooks';
 import { type ExecutionStatus, type ExecutionType, isInProgressStatus } from '@kbn/workflows';
 import { WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID } from '@kbn/workflows/common/constants';
 import { useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
@@ -28,6 +29,7 @@ export interface ExecutionListFiltersQueryParams {
   statuses: ExecutionStatus[];
   executionTypes: ExecutionType[];
   executedBy: string[];
+  runName?: string;
 }
 
 interface WorkflowExecutionListProps {
@@ -42,6 +44,7 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
   const [isCancelInProgress, setIsCancelInProgress] = useState(false);
   const { selectedExecutionId, lastViewedExecutionId, executionListFilters, updateUrlState } =
     useWorkflowUrlState();
+  const runName = useDebouncedValue(executionListFilters.runName, 200);
 
   const { canCancelWorkflowExecution } = useWorkflowsCapabilities();
 
@@ -58,6 +61,7 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
     statuses: executionListFilters.statuses,
     executionTypes: executionListFilters.executionTypes,
     executedBy: executionListFilters.executedBy,
+    runName,
   });
 
   const workflowExecutionsRef = useRef(workflowExecutions);
@@ -87,6 +91,7 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
         executionStatuses: next.statuses,
         executionTypes: next.executionTypes,
         executedBy: next.executedBy,
+        runName: next.runName || undefined,
       });
     },
     [updateUrlState]

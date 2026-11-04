@@ -25,10 +25,16 @@ export type ManagedWorkerExitInfo =
     };
 
 export interface ManagedWorkerRestartOptions {
-  /** Consecutive failed starts or crashes before the worker is exhausted. Defaults to 3. */
+  /**
+   * Consecutive failed starts or crashes before the worker is exhausted. Unlimited by default:
+   * the worker keeps restarting at up to `maxDelayMs` apart and never exhausts. A finite number
+   * makes it `exhausted` after that many restarts.
+   */
   readonly maxAttempts?: number;
   /** Delay before the first restart; doubles on each attempt. Defaults to 1s. */
   readonly initialDelayMs?: number;
+  /** Upper bound on the delay between restarts. Defaults to 1 minute. */
+  readonly maxDelayMs?: number;
   /** Uptime after `ready` that resets the restart counter. Defaults to 10 minutes. */
   readonly stableUptimeMs?: number;
 }
@@ -38,7 +44,7 @@ export interface ManagedWorkerOptions<TData = unknown> {
   /**
    * Absolute path of the worker entry, usually `require.resolve('./worker')`.
    * The entry must keep a ref'd handle (e.g. its poll interval) open, otherwise the worker
-   * exits right after `ready` and uses up the restart budget.
+   * exits right after `ready` and restarts in a loop.
    * The entry reads `workerData` from `node:worker_threads` as `workerData.data`.
    */
   readonly entry: string;
@@ -55,7 +61,10 @@ export interface ManagedWorkerOptions<TData = unknown> {
   readonly healthIntervalMs?: number;
   /** Called when a worker goes away without `stop()`; `stop()` resolving is the stopped signal. */
   onExit?(info: ManagedWorkerExitInfo): void;
-  /** Called when the restart budget is used up; `start()` can be called again afterwards. */
+  /**
+   * Called when a finite `restart.maxAttempts` is used up; `start()` can be called again
+   * afterwards. Never called with the unlimited default.
+   */
   onExhausted?(): void;
 }
 
