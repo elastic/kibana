@@ -12,19 +12,21 @@ export type {
   DebugSource,
   ElementFiber,
   FiberComponentType,
-  FiberWithDebugSource,
   ReactFiberNode,
+  ReactFiberRoot,
 } from './src/types';
 
+export { getDebugSource } from './src/get_debug_source';
 export { getFiberFromElement } from './src/get_fiber_from_element';
 export { getFiberName } from './src/get_fiber_name';
+export { getFiberRoot } from './src/get_fiber_root';
 export { getOwnerChain } from './src/get_owner_chain';
 export {
-  hasDebugSource,
   isComponentFiber,
   isEuiComponentName,
   isHostFiber,
   isIgnoredComponentName,
+  isLegacyRoot,
   isSourceComponent,
 } from './src/predicates';
 
