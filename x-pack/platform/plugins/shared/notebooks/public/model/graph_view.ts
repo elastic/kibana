@@ -72,13 +72,13 @@ const getEdgeParams = (parent: CellDefinition | undefined, child: CellDefinition
 
 const sizeOf = ({ kind }: GraphViewNode) => (kind === 'cell' ? CELL_NODE_SIZE : SOURCE_NODE_SIZE);
 
-/** Positions nodes left to right by dependency depth; positions are top-left corners. */
+/** Positions nodes top to bottom by dependency depth; positions are top-left corners. */
 const layoutNodes = (
   nodes: readonly GraphViewNode[],
   edges: readonly GraphViewEdge[]
 ): GraphViewNode[] => {
   const graph = new graphlib.Graph();
-  graph.setGraph({ rankdir: 'LR', nodesep: 24, ranksep: 80 });
+  graph.setGraph({ rankdir: 'TB', nodesep: 32, ranksep: 64 });
   graph.setDefaultEdgeLabel(() => ({}));
   nodes.forEach((node) => graph.setNode(node.id, { ...sizeOf(node) }));
   edges.forEach(({ source, target }) => graph.setEdge(source, target));
@@ -97,7 +97,7 @@ export const buildGraphView = (
   cellOrder: readonly string[]
 ): GraphView => {
   const { parents } = buildGraph(cells, cellOrder);
-  const cellIds = cellOrder.filter((id) => parents.has(id));
+  const cellIds = cellOrder.filter((id) => cells[id] !== undefined);
   const origin = { x: 0, y: 0 };
 
   const sources = new Map<string, string[]>();

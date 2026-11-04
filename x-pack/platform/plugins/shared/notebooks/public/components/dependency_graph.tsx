@@ -86,7 +86,7 @@ const CellNode = ({ data: { cellId } }: NodeProps<CellFlowNode>) => {
       `}
       data-test-subj={`notebookGraphNode-${cell.name}`}
     >
-      <Handle type="target" position={Position.Left} isConnectable={false} css={hiddenHandleCss} />
+      <Handle type="target" position={Position.Top} isConnectable={false} css={hiddenHandleCss} />
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} css={{ minWidth: 0 }}>
         <EuiFlexItem grow css={{ minWidth: 0 }}>
           <EuiToolTip
@@ -108,13 +108,18 @@ const CellNode = ({ data: { cellId } }: NodeProps<CellFlowNode>) => {
             </EuiFlexGroup>
           </EuiToolTip>
         </EuiFlexItem>
-        {runtime.status !== 'done' && (
+        {cell.type !== 'markdown' && runtime.status !== 'done' && (
           <EuiFlexItem grow={false}>
             <CellStatusBadge runtime={runtime} />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      <Handle type="source" position={Position.Right} isConnectable={false} css={hiddenHandleCss} />
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        isConnectable={false}
+        css={hiddenHandleCss}
+      />
     </div>
   );
 };
@@ -145,14 +150,19 @@ const SourceNode = ({ data: { label } }: NodeProps<SourceFlowNode>) => {
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <Handle type="source" position={Position.Right} isConnectable={false} css={hiddenHandleCss} />
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        isConnectable={false}
+        css={hiddenHandleCss}
+      />
     </div>
   );
 };
 
 const NODE_TYPES: NodeTypes = { cell: CellNode, source: SourceNode };
 
-/** The notebook's cells and data sources as a left-to-right dependency graph. */
+/** The notebook's cells and data sources as a top-to-bottom dependency graph. */
 export const DependencyGraph = ({ onSelectCell }: { onSelectCell: (cellId: string) => void }) => {
   const { store } = useNotebook();
   const { euiTheme, colorMode } = useEuiTheme();

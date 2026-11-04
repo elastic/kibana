@@ -71,9 +71,16 @@ describe('buildGraphView', () => {
     { id: 'notes', name: 'notes', type: 'markdown', content: '# hi' } as const,
   ];
 
-  it('has a node per executable cell and per data source, without markdown', () => {
+  it('has a node per cell, including isolated ones, and per data source', () => {
     const { nodes } = viewOf(cells);
-    expect(nodes.map(({ id }) => id).sort()).toEqual(['bytes', 'c', 'os', 'q', 'source:logs']);
+    expect(nodes.map(({ id }) => id).sort()).toEqual([
+      'bytes',
+      'c',
+      'notes',
+      'os',
+      'q',
+      'source:logs',
+    ]);
     expect(nodeById(nodes, 'source:logs')).toMatchObject({ kind: 'source', label: 'logs' });
     expect(nodeById(nodes, 'q')).toMatchObject({ kind: 'cell', cellId: 'q' });
   });
@@ -92,12 +99,12 @@ describe('buildGraphView', () => {
     expect(edges).toHaveLength(5);
   });
 
-  it('lays nodes out left to right in dependency order', () => {
+  it('lays nodes out top to bottom in dependency order', () => {
     const { nodes } = viewOf(cells);
-    const x = (id: string) => nodeById(nodes, id).position.x;
-    expect(x('source:logs')).toBeLessThan(x('os'));
-    expect(x('os')).toBeLessThan(x('q'));
-    expect(x('bytes')).toBeLessThan(x('q'));
-    expect(x('q')).toBeLessThan(x('c'));
+    const y = (id: string) => nodeById(nodes, id).position.y;
+    expect(y('source:logs')).toBeLessThan(y('os'));
+    expect(y('os')).toBeLessThan(y('q'));
+    expect(y('bytes')).toBeLessThan(y('q'));
+    expect(y('q')).toBeLessThan(y('c'));
   });
 });
