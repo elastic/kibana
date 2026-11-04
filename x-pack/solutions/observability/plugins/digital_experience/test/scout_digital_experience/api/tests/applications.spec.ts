@@ -55,7 +55,8 @@ apiTest.describe('Digital Experience applications API', { tag: DIGITAL_EXPERIENC
           ttfb: { p75Ms: 950.25, sampleCount: 1, ratings: { needsImprovement: 1 } },
         },
         jsErrors: { count: 1, perPageLoad: 0.25 },
-        httpRequests: { count: 4, failedCount: 0, failedRatio: 0 },
+        // The four successful requests and the failed one the Overview details list.
+        httpRequests: { count: 5, failedCount: 1, failedRatio: 0.2 },
         lastSeen: '2021-01-18T12:33:00.000Z',
       });
       expect(shop?.webVitals.cls.p75).toBeCloseTo(0.045);
