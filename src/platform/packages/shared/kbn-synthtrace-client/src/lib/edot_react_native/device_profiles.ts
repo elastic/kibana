@@ -19,12 +19,12 @@ export type DeviceProfileId =
 
 /** Device and OS resource attributes, as EDOT Android and EDOT iOS detect them. */
 export interface DeviceProfile {
-  id: DeviceProfileId;
-  platform: MobilePlatform;
-  weight: number;
+  readonly id: DeviceProfileId;
+  readonly platform: MobilePlatform;
+  readonly weight: number;
   /** Slower devices take longer to launch the app and show screens. */
-  slowdown: number;
-  resourceAttributes: Readonly<Record<string, string>>;
+  readonly slowdown: number;
+  readonly resourceAttributes: Readonly<Record<string, string>>;
 }
 
 const androidAttributes = ({
