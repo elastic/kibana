@@ -142,6 +142,21 @@ describe('useRuleCatalog', () => {
     expect(result.current.isError).toBe(false);
   });
 
+  it('keeps the universal rules when the user cannot read classic rules', async () => {
+    post.mockRejectedValue(httpError(403));
+    get.mockResolvedValue({
+      items: [{ metadata: { name: 'Checkout errors', tags: ['prod'] } }],
+      total: 1,
+    });
+
+    const { result } = renderCatalog();
+
+    await waitFor(() =>
+      expect(result.current.data).toEqual([{ name: 'Checkout errors', tags: ['prod'] }])
+    );
+    expect(result.current.isError).toBe(false);
+  });
+
   it('reports an error when loading universal rules fails for another reason', async () => {
     get.mockRejectedValue(httpError(500));
 

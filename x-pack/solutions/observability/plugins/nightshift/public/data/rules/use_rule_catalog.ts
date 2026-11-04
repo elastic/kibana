@@ -15,6 +15,7 @@ import { getHttpErrorStatus } from '../../common/http_error';
 const FIND_RULES_PATH = '/internal/alerting/rules/_find';
 const MAX_RULES = 1000;
 const V2_PAGE_SIZE = 100;
+const CLASSIC_UNAVAILABLE_STATUSES = [403];
 const V2_UNAVAILABLE_STATUSES = [403, 404, 503];
 
 export interface CatalogRule {
@@ -79,17 +80,14 @@ const findV2Rules = async (
   return rules;
 };
 
-const isV2Unavailable = (error: unknown): boolean =>
-  V2_UNAVAILABLE_STATUSES.includes(getHttpErrorStatus(error) ?? 0);
-
-const findV2RulesWhenAvailable = async (
-  http: HttpSetup,
-  signal: AbortSignal | undefined
+const emptyWhenUnavailable = async (
+  find: () => Promise<CatalogRule[]>,
+  unavailableStatuses: number[]
 ): Promise<CatalogRule[]> => {
   try {
-    return await findV2Rules(http, signal);
+    return await find();
   } catch (error) {
-    if (isV2Unavailable(error)) return [];
+    if (unavailableStatuses.includes(getHttpErrorStatus(error) ?? 0)) return [];
     throw error;
   }
 };
@@ -101,8 +99,8 @@ export const useRuleCatalog = () => {
     queryKey: ['nightshift.ruleCatalog'],
     queryFn: async ({ signal }): Promise<CatalogRule[]> => {
       const [rules, v2Rules] = await Promise.all([
-        findRules(http, signal),
-        findV2RulesWhenAvailable(http, signal),
+        emptyWhenUnavailable(() => findRules(http, signal), CLASSIC_UNAVAILABLE_STATUSES),
+        emptyWhenUnavailable(() => findV2Rules(http, signal), V2_UNAVAILABLE_STATUSES),
       ]);
       return [...rules, ...v2Rules];
     },
