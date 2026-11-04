@@ -87,6 +87,11 @@ import {
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW,
 } from './significant_events';
 import { NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW } from './significant_events/bound_cleanup';
+import { NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW } from './significant_events/bound_investigation_completed';
+import {
+  NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW,
+  NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW,
+} from './significant_events/bound_scheduled';
 import {
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW,
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW,
@@ -95,6 +100,7 @@ import {
   SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW,
   SIGNIFICANT_EVENTS_SOURCE_RECONCILIATION_WORKFLOW,
 } from './significant_events/knowledge_indicators';
+import { NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW } from './significant_events/knowledge_indicators/bound_continuous_onboarding';
 import { NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW } from './significant_events/knowledge_indicators/bound_onboarding';
 import { NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW } from './significant_events/knowledge_indicators/bound_source_reconciliation';
 import { NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW } from './significant_events/knowledge_indicators/bound_sync';
@@ -149,11 +155,18 @@ export {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './significant_events';
+export { NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE } from './significant_events/trigger_source';
 export { NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID } from './significant_events/knowledge_indicators/bound_onboarding';
 export { NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID } from './significant_events/knowledge_indicators/bound_sync';
 export { NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID } from './significant_events/knowledge_indicators/bound_source_reconciliation';
 export { NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW_ID } from './significant_events/significant_events/bound_orchestrator';
 export { NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID } from './significant_events/bound_cleanup';
+export { NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW_ID } from './significant_events/bound_investigation_completed';
+export {
+  NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW_ID,
+} from './significant_events/bound_scheduled';
+export { NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID } from './significant_events/knowledge_indicators/bound_continuous_onboarding';
 export { NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID } from './nightshift_investigations/decision_tree_hydrate';
 export { NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID } from './nightshift_investigations/sandbox_materialize_workspace';
 export { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID } from './nightshift_investigations/agent_optimize';
@@ -293,6 +306,10 @@ export const managedWorkflowDefinitions = [
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW,
   NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW,
   NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW,
+  NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW,
+  NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW,
+  NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW,
+  NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW,
   ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW,
   ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW,
   ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW,

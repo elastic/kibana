@@ -9,20 +9,26 @@
 
 import { parse } from 'yaml';
 import BOUND_CLEANUP_YAML from './bound_cleanup.yaml';
+import BOUND_INVESTIGATION_COMPLETED_YAML from './bound_investigation_completed.yaml';
+import BOUND_SCHEDULED_DETECTION_YAML from './bound_scheduled_detection.yaml';
+import BOUND_SCHEDULED_REVIEW_YAML from './bound_scheduled_review.yaml';
+import BOUND_CONTINUOUS_ONBOARDING_YAML from './knowledge_indicators/bound_continuous_onboarding.yaml';
 import BOUND_ONBOARDING_YAML from './knowledge_indicators/bound_onboarding.yaml';
 import BOUND_SOURCE_RECONCILIATION_YAML from './knowledge_indicators/bound_source_reconciliation.yaml';
 import BOUND_SYNC_YAML from './knowledge_indicators/bound_sync.yaml';
 import BOUND_ORCHESTRATOR_YAML from './significant_events/bound_orchestrator.yaml';
+import { NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE } from './trigger_source';
 
 interface IParsedStep {
   name: string;
   type: string;
   condition?: string;
-  steps?: Array<{ type: string }>;
+  steps?: IParsedStep[];
   with?: Record<string, unknown>;
 }
 
 interface IParsedWorkflow {
+  settings?: Record<string, unknown>;
   triggers?: Array<{ type: string }>;
   steps: IParsedStep[];
 }
@@ -30,6 +36,9 @@ interface IParsedWorkflow {
 const startedBySchedule: Array<[string, string]> = [
   ['cleanup', BOUND_CLEANUP_YAML],
   ['sync', BOUND_SYNC_YAML],
+  ['continuous onboarding', BOUND_CONTINUOUS_ONBOARDING_YAML],
+  ['scheduled detection', BOUND_SCHEDULED_DETECTION_YAML],
+  ['scheduled review', BOUND_SCHEDULED_REVIEW_YAML],
 ];
 
 const startedByServerCode: Array<[string, string]> = [
@@ -37,6 +46,9 @@ const startedByServerCode: Array<[string, string]> = [
   ['discovery', BOUND_ORCHESTRATOR_YAML],
   ['source reconciliation', BOUND_SOURCE_RECONCILIATION_YAML],
 ];
+
+const collectSteps = (steps: IParsedStep[]): IParsedStep[] =>
+  steps.flatMap((step) => [step, ...collectSteps(step.steps ?? [])]);
 
 describe('bound detection engine workflows', () => {
   // Anyone allowed to run workflows can start one through the generic run API, with any inputs,
@@ -63,7 +75,9 @@ describe('bound detection engine workflows', () => {
     (_name, yaml) => {
       const { steps }: IParsedWorkflow = parse(yaml);
 
-      expect(steps[0].condition).toBe('not execution.triggeredBy : "nightshift-detection-engine"');
+      expect(steps[0].condition).toBe(
+        `not execution.triggeredBy : "${NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE}"`
+      );
     }
   );
 
@@ -75,13 +89,32 @@ describe('bound detection engine workflows', () => {
 
   // A child workflow only runs as the account when the call says so.
   it.each([
-    ['onboarding', BOUND_ONBOARDING_YAML, 'system-streams-ki-onboarding'],
-    ['discovery', BOUND_ORCHESTRATOR_YAML, 'system-significant-events-orchestrator'],
-  ])('%s hands its work down with the identity of the account', (_name, yaml, childId) => {
-    const { steps }: IParsedWorkflow = parse(yaml);
+    [
+      'onboarding',
+      BOUND_ONBOARDING_YAML,
+      ['system-streams-ki-features-identification', 'system-streams-ki-queries-generation'],
+    ],
+    [
+      'orchestrator',
+      BOUND_ORCHESTRATOR_YAML,
+      ['system-significant-events-detection', 'system-significant-events-discovery'],
+    ],
+  ])('%s hands its work down with the identity of the account', (_name, yaml, childIds) => {
+    const workflow: IParsedWorkflow = parse(yaml);
+    const children = collectSteps(workflow.steps).filter(({ type }) => type === 'workflow.execute');
 
-    expect(steps.find(({ type }) => type === 'workflow.execute')).toMatchObject({
-      with: { 'workflow-id': childId, 'run-as-mode': 'inherit' },
-    });
+    expect(children.map(({ with: args }) => args?.['workflow-id'])).toEqual(childIds);
+    children.forEach(({ with: args }) => expect(args?.['run-as-mode']).toBe('inherit'));
+  });
+
+  // A workflow-level `continue` would swallow the failure of the refusal step and run the rest.
+  it.each([
+    ...startedBySchedule,
+    ...startedByServerCode,
+    ['investigation completed', BOUND_INVESTIGATION_COMPLETED_YAML],
+  ])('%s does not continue past a failed step by default', (_name, yaml) => {
+    const { settings }: IParsedWorkflow = parse(yaml);
+
+    expect(settings?.['on-failure']).toBeUndefined();
   });
 });
