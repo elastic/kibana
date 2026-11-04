@@ -137,7 +137,7 @@ Examples and samples use the lowest declared 2xx response (then `2XX`, then `def
 
 `sampleJsonSchema(schema, { optional, boundary })` samples a standalone JSON Schema the same way, with refs resolving against the schema itself (`#/$defs/...`), for example to generate inputs from a zod schema converted with `z.toJSONSchema`. `optional: 'required'` leaves out optional properties at every depth, so object and array examples and defaults, which may include them, are skipped; `boundary: true` samples at the upper bounds, ignoring examples and defaults.
 
-To test how a connector handles extreme responses, pass `sampling: 'boundary'`. Fixtures and recordings still come first, but examples are skipped and bodies are sampled at the schema's upper bounds: strings at `maxLength` (1024 characters when unbounded), numbers at `maximum` or the largest value of their format (`int32`, `float`; `int64` and unbounded integers at `Number.MAX_SAFE_INTEGER`), arrays at `maxItems` (capped at 100; 3 items when unbounded, one for `uniqueItems`), and the last `enum` value. Fixtures and recordings are still preferred. Vendor `oneOf`s whose variants only differ in their examples can't be sampled without them, and are reported in the call's `responseViolations`; an overlay can correct them.
+To test how a connector handles extreme responses, pass `sampling: 'boundary'`. Fixtures and recordings still come first, but examples are skipped and bodies are sampled at the schema's upper bounds: strings at `maxLength` (1024 characters when unbounded), numbers at `maximum` or the largest value of their format (`int32`, `float`; `int64` and unbounded integers at `Number.MAX_SAFE_INTEGER`), arrays at `maxItems` (capped at 100; 3 items when unbounded, one for `uniqueItems`), and the last `enum` value. Vendor `oneOf`s whose variants only differ in their examples can't be sampled without them, and are reported in the call's `responseViolations`; an overlay can correct them.
 
 ### Responders
 
@@ -161,7 +161,7 @@ const { fetch, reset } = createEmulatorFetch({
 });
 ```
 
-- `context.next()` answers with the default chain: fixtures, recordings, then examples or samples, paged for operations in `pagination`. A responder that defers to it for an operation behaves as if it weren't there. Each call gets its own copy, so a responder can change it without affecting later requests.
+- `context.next()` answers with the default chain: fixtures, recordings, then examples or samples, paged for operations in `pagination`. A responder that defers to it for an operation behaves as if it weren't there. Each call gets its own copy, so a responder can change it without affecting later requests. Only `next()` is paged: a list a responder builds itself, for example from `state`, is answered whole.
 - `context.state` is a `Map` kept for the emulator's run; `reset()` empties it, along with `calls`. Responders keep their entries under keys of their own, such as a symbol, so several can share it.
 - Answers are validated against the spec like any other, so a responder that drifts from the vendor's contract shows up in `calls`.
 
