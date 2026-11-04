@@ -15,8 +15,8 @@ import { packagePolicyService } from '../package_policy';
  * Package policies managed by a cloud onboarding deployment can only be updated or deleted from the
  * onboarding flow, which identifies itself by passing the id of the deployment that manages them.
  * This guards against accidental changes from elsewhere in Fleet; it is not an authorization check.
- * Only the public update and delete routes apply it, so Fleet's own changes (agent policy deletes)
- * and package upgrades, which keep the policy's configuration, are not affected.
+ * The public update and delete routes and the agent policy delete route apply it. Package upgrades,
+ * which keep the policy's configuration, and Fleet's internal changes are not affected.
  */
 export function assertOnboardingAccess(
   packagePolicies: Array<Pick<PackagePolicy, 'id' | 'onboarding_deployment_id'>>,

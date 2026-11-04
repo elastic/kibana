@@ -3217,7 +3217,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                 } else if (externalCallbackType === 'packagePolicyUpdate') {
                   // id is stripped by the schema validation below; re-inject it so every
                   // callback in the chain receives it regardless of registration order.
-                  const packagePolicyId = (updatedNewData as UpdatePackagePolicyWithId).id;
+                  // onboarding_deployment_id is set by Fleet only, so the update schema rejects
+                  // it; internal updates such as package upgrades pass the stored value, which
+                  // is kept as is.
+                  const { id: packagePolicyId, onboarding_deployment_id: onboardingDeploymentId } =
+                    updatedNewData as UpdatePackagePolicyWithId &
+                      Pick<PackagePolicy, 'onboarding_deployment_id'>;
                   thisCallbackResponse = await (callback as PutPackagePolicyUpdateCallback)(
                     updatedNewData as UpdatePackagePolicyWithId,
                     soClient,
@@ -3236,6 +3241,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                       'created_at',
                       'created_by',
                       'elasticsearch',
+                      'onboarding_deployment_id',
                     ]),
                     inputs: thisCallbackResponse.inputs.map((input) =>
                       omit(input, ['compiled_input'])
@@ -3244,6 +3250,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                   updatedNewData = {
                     ...UpdatePackagePolicySchema.validate(omitted),
                     id: packagePolicyId,
+                    ...(onboardingDeploymentId !== undefined && {
+                      onboarding_deployment_id: onboardingDeploymentId,
+                    }),
                   };
                 } else {
                   thisCallbackResponse = await (callback as PostPackagePolicyCreateCallback)(

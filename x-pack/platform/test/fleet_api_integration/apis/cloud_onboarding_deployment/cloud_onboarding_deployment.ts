@@ -1638,6 +1638,19 @@ export default function (providerContext: FtrProviderContext) {
 
           await supertest.get(`/api/fleet/package_policies/${packagePolicyIds[0]}`).expect(404);
         });
+
+        it('rejects deleting the agent policy of the policy', async () => {
+          // Deleting the agent policy would delete the policy along with it.
+          const { body } = await supertest
+            .post('/api/fleet/agent_policies/delete')
+            .set('kbn-xsrf', 'xxxx')
+            .send({ agentPolicyId, force: true })
+            .expect(400);
+          expect(body.message).to.match(ONBOARDING_ONLY);
+
+          await supertest.get(`/api/fleet/agent_policies/${agentPolicyId}`).expect(200);
+          expect(await getOnboardingDeploymentId(packagePolicyIds[0])).to.equal(deploymentId);
+        });
       });
 
       describe('package upgrades', () => {
