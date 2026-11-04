@@ -14,7 +14,7 @@ import {
 } from '../../common/constants';
 import type { MaterializedNode } from '../materialize/nodes';
 import { isomerPluginMock } from '../mocks';
-import { registerMaterializeRoute } from './materialize_route';
+import { registerMaterializeRoute, toComposition } from './materialize_route';
 import { materializeRequestBodySchema } from './schemas';
 
 const node: MaterializedNode = { type: 'markdown', text: 'There are **3** open alerts.' };
@@ -106,6 +106,40 @@ describe('registerMaterializeRoute', () => {
         meta: { source: 'kibana', generatedAt: expect.any(String) },
       },
     });
+  });
+});
+
+describe('toComposition', () => {
+  const metric: MaterializedNode = {
+    type: 'metric',
+    data: {
+      columns: [{ id: 'count', label: 'Count', type: 'number', role: 'metric' }],
+      rows: [[1]],
+    },
+    value: { column: 'count' },
+  };
+  const unsupported: MaterializedNode = { type: 'unsupported', title: 'Map', reason: 'No.' };
+
+  it('titles the composition with a grid and marks it degraded when panels are placeholders', () => {
+    const composition = toComposition({
+      type: 'grid',
+      title: '[Logs] Web Traffic',
+      panels: [{ x: 0, y: 0, w: 24, h: 5, node: metric }],
+      sections: [{ title: 'More', y: 5, panels: [{ x: 0, y: 0, w: 24, h: 5, node: unsupported }] }],
+    });
+    expect(composition.title).toBe('[Logs] Web Traffic');
+    expect(composition.meta?.partialFailure).toEqual({
+      degraded: true,
+      reason: '1 of 2 panels could not be shown.',
+    });
+  });
+
+  it('leaves a whole grid undegraded', () => {
+    const composition = toComposition({
+      type: 'grid',
+      panels: [{ x: 0, y: 0, w: 24, h: 5, node: metric }],
+    });
+    expect(composition.meta).not.toHaveProperty('partialFailure');
   });
 });
 
