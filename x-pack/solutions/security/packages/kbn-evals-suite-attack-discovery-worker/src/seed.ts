@@ -31,6 +31,7 @@ import {
 } from './constants';
 import { errorMessage, sleep, spacePath } from './kibana_api';
 import { kbnErrorMessage, type KbnRequest } from './kbn_request';
+import { buildWorld, hasWorld, hostIdFor, type WorldDoc } from './worker_world';
 
 /** Index holding the fingerprints that `match_fingerprints` compares new attacks against. */
 export const ATTACK_FINGERPRINT_INDEX = 'ai-index-idx-security-attack-fingerprints';
@@ -350,6 +351,11 @@ export interface SeededScenario {
   goldIdBySeededId: ReadonlyMap<string, string>;
   alertCount: number;
   /**
+   * The entity store records and raw endpoint events written next to the alerts (see
+   * `worker_world.ts`), by index and `_id`. Removed with the seed.
+   */
+  worldDocs: ReadonlyArray<Pick<WorldDoc, 'index' | 'id'>>;
+  /**
    * Ids (mapped back to the scenario's own) of every open alert in the space right after seeding.
    * The generation step reports only how many alerts it read, so this is the id set it can read.
    */
@@ -399,12 +405,15 @@ export const buildSeededAlert = ({
   runMarker,
   spaceId,
   timestampMs,
+  withHostId = false,
 }: {
   alert: AuditAlert;
   seededId: string;
   runMarker: string;
   spaceId: string;
   timestampMs: number;
+  /** Adds the `host.id` the scenario's raw events are keyed on. */
+  withHostId?: boolean;
 }): Record<string, unknown> => {
   const timestamp = toIso(timestampMs);
   const ruleName = String(alert.fields['kibana.alert.rule.name'] ?? 'Seeded detection');
@@ -445,8 +454,13 @@ export const buildSeededAlert = ({
     'kibana.alert.uuid': seededId,
     'kibana.space_ids': [spaceId],
   };
+  const hostName = alert.fields['host.name'];
   return {
     ...base,
+    // Endpoint alerts carry only `host.name`; the review joins raw events on `host.id`.
+    ...(withHostId && hostName !== undefined && alert.fields['host.id'] === undefined
+      ? { 'host.id': hostIdFor(String(hostName)) }
+      : {}),
     ...alert.fields,
     '@timestamp': timestamp,
     'kibana.alert.original_time': timestamp,
@@ -612,6 +626,28 @@ const removeSeededAlertsById = async ({
   }
 };
 
+/**
+ * Deletes a seed's world documents by exact `_id`. A delete by query on the ids reaches an alias
+ * and a data stream alike, which a delete by id does not.
+ */
+const removeWorldDocs = async ({
+  esClient,
+  seeded: { worldDocs },
+}: {
+  esClient: Client;
+  seeded: SeededScenario;
+}): Promise<void> => {
+  const idsByIndex = new Map<string, string[]>();
+  for (const { index, id } of worldDocs) {
+    idsByIndex.set(index, [...(idsByIndex.get(index) ?? []), id]);
+  }
+  await Promise.all(
+    [...idsByIndex].map(([index, ids]) =>
+      deleteMatching({ esClient, index, query: { ids: { values: ids } } })
+    )
+  );
+};
+
 /** Writes one scenario's alerts into the space's alerts index under a fresh run marker. */
 export const seedScenario = async ({
   esClient,
@@ -644,14 +680,31 @@ export const seedScenario = async ({
         runMarker,
         spaceId,
         timestampMs: timestamps.get(alert.id) ?? now - SEED_WINDOW_MS,
+        withHostId: hasWorld(scenario.id),
       }),
     ];
   });
+  const anchorMsByHost = new Map<string, number>();
+  for (const alert of scenario.alerts) {
+    const host = alert.fields['host.name'];
+    const at = timestamps.get(alert.id);
+    if (host !== undefined && at !== undefined) {
+      anchorMsByHost.set(String(host), Math.min(at, anchorMsByHost.get(String(host)) ?? at));
+    }
+  }
+  const world = buildWorld({ scenarioId: scenario.id, runMarker, spaceId, anchorMsByHost });
+  // Events are written with `create` so a data stream (when the endpoint package is installed)
+  // accepts them; the entity store index takes `index`.
+  const worldOperations = world.flatMap(({ kind, id, index, body }) => [
+    { [kind === 'event' ? 'create' : 'index']: { _index: index, _id: id } },
+    body,
+  ]);
   const seeded: SeededScenario = {
     runMarker,
     spaceId,
     goldIdBySeededId,
     alertCount: scenario.alerts.length,
+    worldDocs: world.map(({ index, id }) => ({ index, id })),
     openAlertIds: [],
   };
   // The caller only receives `seeded` when this resolves, so it cannot clean up a seed that fails
@@ -665,7 +718,10 @@ export const seedScenario = async ({
   try {
     let response: Awaited<ReturnType<Client['bulk']>>;
     try {
-      response = await esClient.bulk({ refresh: 'wait_for', operations });
+      response = await esClient.bulk({
+        refresh: 'wait_for',
+        operations: [...operations, ...worldOperations],
+      });
     } catch (bulkError) {
       // A 4xx on the first attempt is Elasticsearch refusing the request before it ran anything.
       bulkSettled = isRefusedOnFirstAttempt(bulkError);
@@ -688,6 +744,7 @@ export const seedScenario = async ({
   } catch (seedError) {
     try {
       await removeSeededAlertsById({ esClient, seeded, bulkSettled, wait });
+      await removeWorldDocs({ esClient, seeded });
     } catch (cleanupError) {
       throw new AggregateError(
         [seedError, cleanupError],
@@ -699,7 +756,7 @@ export const seedScenario = async ({
     throw seedError;
   }
   log.info(
-    `[ad-worker] seeded ${scenario.alerts.length} alerts for "${scenario.id}" (${runMarker})`
+    `[ad-worker] seeded ${scenario.alerts.length} alerts and ${world.length} world documents for "${scenario.id}" (${runMarker})`
   );
   return seeded;
 };
@@ -772,6 +829,9 @@ export const cleanupSeed = async ({
           query: { term: { 'attributes.space_id': spaceId } },
         }),
     },
+    ...(seeded.worldDocs.length > 0
+      ? [{ what: 'world documents', run: () => removeWorldDocs({ esClient, seeded }) }]
+      : []),
     {
       what: 'persisted discoveries',
       run: () =>

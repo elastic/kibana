@@ -24,6 +24,7 @@ const seeded: SeededScenario = {
   spaceId: 'space-a',
   goldIdBySeededId: new Map(),
   alertCount: 0,
+  worldDocs: [],
   openAlertIds: [],
 };
 
@@ -144,6 +145,105 @@ describe('seedScenario', () => {
       spaceId: 's',
     });
     expect([...result.openAlertIds].sort()).toEqual(scenario.alerts.map(({ id }) => id).sort());
+  });
+});
+
+describe('seedScenario world documents', () => {
+  const log = { info: jest.fn() } as unknown as ToolingLog;
+  const scenarioById = (id: string) => {
+    const found = AUDIT_SCENARIOS.find((scenario) => scenario.id === id);
+    if (!found) throw new Error(`no scenario ${id}`);
+    return found;
+  };
+  type Op = Record<string, { _index?: string; _id?: string }> | Record<string, unknown>;
+  const seedWith = async (id: string) => {
+    const bulk = jest.fn(async () => ({ errors: false, items: [] }));
+    const search = jest.fn(async () => ({ hits: { hits: [] } }));
+    const seededScenario = await seedScenario({
+      esClient: esWith({ bulk, search }),
+      log,
+      scenario: scenarioById(id),
+      spaceId: 's',
+    });
+    const operations = (bulk.mock.calls[0] as unknown as [{ operations: Op[] }])[0].operations;
+    return { seededScenario, operations };
+  };
+  const bodies = (operations: Op[]) => operations.filter((_op, index) => index % 2 === 1);
+  const actions = (operations: Op[]) => operations.filter((_op, index) => index % 2 === 0);
+
+  it.each(['positive-chain-with-noise', 'benign-batch', 'threshold-meta-alerts'])(
+    'writes entities and raw events for %s, and every endpoint alert carries a host.id they share',
+    async (id) => {
+      const { seededScenario, operations } = await seedWith(id);
+      const docs = bodies(operations) as Array<Record<string, unknown>>;
+      const entities = docs.filter((doc) => 'entity.id' in doc);
+      const events = docs.filter((doc) => 'event.action' in doc && !('kibana.alert.uuid' in doc));
+      const alerts = docs.filter((doc) => 'kibana.alert.uuid' in doc);
+      expect(entities.length).toBeGreaterThan(0);
+      expect(events.length).toBeGreaterThan(0);
+      expect(seededScenario.worldDocs).toHaveLength(entities.length + events.length);
+      const alertHostIds = new Set(alerts.flatMap((a) => (a['host.id'] ? [a['host.id']] : [])));
+      const eventHostIds = new Set(events.map((e) => e['host.id']));
+      expect(alertHostIds.size).toBeGreaterThan(0);
+      for (const hostId of eventHostIds) expect(alertHostIds.has(hostId)).toBe(true);
+    }
+  );
+
+  it('writes raw events with create and entities with index', async () => {
+    const { operations } = await seedWith('positive-chain-with-noise');
+    const worldActions = actions(operations).filter(
+      (op) =>
+        !String(
+          Object.values(op)[0] && (Object.values(op)[0] as { _index: string })._index
+        ).startsWith('.alerts')
+    ) as Array<Record<string, { _index: string }>>;
+    for (const op of worldActions) {
+      const [[action, { _index }]] = Object.entries(op);
+      expect(action).toBe(_index.startsWith('entities-latest-') ? 'index' : 'create');
+    }
+  });
+
+  it('seeds no world for the cloud scenarios, which have no host', async () => {
+    const { seededScenario } = await seedWith('shared-ci-egress');
+    expect(seededScenario.worldDocs).toEqual([]);
+  });
+
+  it('puts the events inside the review window around the alerts', async () => {
+    const { operations } = await seedWith('benign-batch');
+    const docs = bodies(operations) as Array<Record<string, unknown>>;
+    const alertTimes = docs
+      .filter((doc) => 'kibana.alert.uuid' in doc)
+      .map((doc) => Date.parse(String(doc['@timestamp'])));
+    const eventTimes = docs
+      .filter((doc) => 'event.action' in doc && !('kibana.alert.uuid' in doc))
+      .map((doc) => Date.parse(String(doc['@timestamp'])));
+    const twoHours = 2 * 60 * 60 * 1000;
+    for (const time of eventTimes) {
+      expect(time).toBeGreaterThanOrEqual(Math.min(...alertTimes) - twoHours);
+      expect(time).toBeLessThanOrEqual(Math.max(...alertTimes) + twoHours);
+    }
+  });
+
+  it('removes the world documents by id when cleaning up', async () => {
+    const deleteByQuery = jest.fn(async (_args: { index: string; query?: unknown }) => ({}));
+    await cleanupSeed({
+      esClient: esWith({ deleteByQuery }),
+      seeded: {
+        ...seeded,
+        worldDocs: [
+          { index: 'entities-latest-space-a', id: 'adw-1-world-entity-0' },
+          { index: 'logs-endpoint.events.process-space-a', id: 'adw-1-world-process-1' },
+        ],
+      },
+    });
+    const worldCalls = deleteByQuery.mock.calls.filter(
+      ([{ index }]) => index.startsWith('entities-latest-') || index.startsWith('logs-endpoint')
+    );
+    expect(worldCalls.map(([{ index, query }]) => [index, query])).toEqual([
+      ['entities-latest-space-a', { ids: { values: ['adw-1-world-entity-0'] } }],
+      ['logs-endpoint.events.process-space-a', { ids: { values: ['adw-1-world-process-1'] } }],
+    ]);
+    expect(deleteByQuery).toHaveBeenCalledTimes(5);
   });
 });
 
