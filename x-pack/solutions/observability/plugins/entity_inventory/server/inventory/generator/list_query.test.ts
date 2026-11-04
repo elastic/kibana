@@ -101,7 +101,10 @@ describe('buildListQuery', () => {
           `| KEEP ${planColumnNames(columns, plan).map(quoteIdentifier).join(', ')}`
         );
 
-        expect(lines.slice(-2)).toEqual(['| SORT `last_seen` DESC NULLS LAST', `| LIMIT ${LIMIT}`]);
+        expect(lines.slice(-2)).toEqual([
+          '| SORT `last_seen` DESC NULLS LAST, `entity.id` ASC',
+          `| LIMIT ${LIMIT}`,
+        ]);
 
         expect(Parser.parse(esql).errors).toEqual([]);
         expect(assertParses).toHaveBeenCalledTimes(1);
@@ -257,7 +260,7 @@ describe('generateListQueries', () => {
  kubernetes_deployment_name_present_or_null = CASE(kubernetes_deployment_name_present, TO_STRING(kubernetes.deployment.name)),
  entity.id = CONCAT("k8s.deployment:", CONCAT(kubernetes_namespace_present_or_null, "/", kubernetes_deployment_name_present_or_null))
 | KEEP \`entity.id\`, \`kubernetes.namespace\`, \`kubernetes.deployment.name\`, \`cluster\`, \`paused\`, \`last_seen\`
-| SORT \`last_seen\` DESC NULLS LAST
+| SORT \`last_seen\` DESC NULLS LAST, \`entity.id\` ASC
 | LIMIT 10000`;
 
     expect(tsQuery.esql).toBe(`SET unmapped_fields="nullify";

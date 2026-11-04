@@ -45,7 +45,7 @@ FROM <index pattern> METADATA _index_mode     -- FROM plan
     BY <identity fields>
 | EVAL <entity.id, from the store's id compiler>
 | KEEP <this plan's columns>
-| SORT `last_seen` DESC NULLS LAST
+| SORT `last_seen` DESC NULLS LAST, `entity.id` ASC
 | LIMIT <limit>
 ```
 

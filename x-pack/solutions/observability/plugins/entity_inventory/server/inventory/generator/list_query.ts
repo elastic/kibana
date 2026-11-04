@@ -10,7 +10,7 @@ import type { OutputColumn } from './columns';
 import { LAST_SEEN_COLUMN, buildColumns, planColumnNames } from './columns';
 import { quoteIdentifier } from './esql_syntax';
 import type { IdentityPlan } from './identity';
-import { resolveIdentityPlan } from './identity';
+import { ENTITY_ID_COLUMN, resolveIdentityPlan } from './identity';
 import { assertParses } from './parse_guard';
 import type { GeneratedQuery, QueryPlan, TimeWindow } from './types';
 
@@ -97,7 +97,10 @@ export const buildListQuery = ({
       .join(', ')}`,
     `| EVAL ${idEvaluation}`,
     `| KEEP ${planColumnNames(columns, plan).map(quoteIdentifier).join(', ')}`,
-    `| SORT ${quoteIdentifier(LAST_SEEN_COLUMN)} DESC NULLS LAST`,
+    // Ties broken on `entity.id` as the merge does, so a cut plan returns a deterministic set of rows.
+    `| SORT ${quoteIdentifier(LAST_SEEN_COLUMN)} DESC NULLS LAST, ${quoteIdentifier(
+      ENTITY_ID_COLUMN
+    )} ASC`,
     `| LIMIT ${limit}`,
   ].join('\n');
 
