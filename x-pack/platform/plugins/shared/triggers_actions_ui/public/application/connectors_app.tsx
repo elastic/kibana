@@ -33,10 +33,16 @@ import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import { ConnectorProvider } from './context/connector_context';
 import type { Section } from './constants';
+import { routeToBuildConnector } from './constants';
 import { queryClient } from './query_client';
 
 const ActionsConnectorsHome = lazy(
   () => import('./sections/actions_connectors_list/components/actions_connectors_home')
+);
+const BuildConnectorPage = lazy(() =>
+  import('./sections/build_connector_page').then(({ BuildConnectorPage: component }) => ({
+    default: component,
+  }))
 );
 
 export interface TriggersAndActionsUiServices extends CoreStart {
@@ -112,6 +118,11 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
       }}
     >
       <Routes>
+        <Route
+          exact
+          path={routeToBuildConnector}
+          component={suspendedComponentWithProps(BuildConnectorPage, 'xl')}
+        />
         <Route
           path={`/:section(${sectionsRegex})`}
           component={suspendedComponentWithProps(ActionsConnectorsHome, 'xl')}

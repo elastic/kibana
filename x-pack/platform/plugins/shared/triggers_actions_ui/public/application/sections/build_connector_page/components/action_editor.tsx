@@ -26,7 +26,7 @@ import type {
   BuildConnectorFormData,
   ConnectorTypeActionScope,
   ConnectorTypeHttpMethod,
-} from './types';
+} from '../types';
 import { FieldListEditor } from './field_list_editor';
 import { HeaderListEditor } from './header_list_editor';
 import { JsonBodyEditor } from './json_body_editor';
@@ -39,19 +39,19 @@ interface Props {
 const scopeOptions: Array<{ value: ConnectorTypeActionScope; text: string }> = [
   {
     value: 'read',
-    text: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.scope.read', {
+    text: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.scope.read', {
       defaultMessage: 'Read',
     }),
   },
   {
     value: 'write',
-    text: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.scope.write', {
+    text: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.scope.write', {
       defaultMessage: 'Write',
     }),
   },
   {
     value: 'destroy',
-    text: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.scope.destroy', {
+    text: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.scope.destroy', {
       defaultMessage: 'Destroy',
     }),
   },
@@ -61,11 +61,10 @@ const methodOptions: Array<{ value: ConnectorTypeHttpMethod; text: string }> = (
   ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const
 ).map((method) => ({ value: method, text: method }));
 
-/** Explains action input fields; shown on the info icon of each action's field list. */
 const PARAMS_TOOLTIP = (
   <p>
     <FormattedMessage
-      id="xpack.triggersActionsUI.sections.buildConnectorFlyout.paramsTooltip"
+      id="xpack.triggersActionsUI.sections.buildConnectorPage.paramsTooltip"
       defaultMessage="The {input} object. Its fields are provided by a rule each time this action runs, for example a message, and are available in this action's request as {example}. In YAML they are listed under {yamlKey}."
       values={{
         input: <code>input</code>,
@@ -78,14 +77,14 @@ const PARAMS_TOOLTIP = (
 
 const PARAMS_DESCRIPTION = (
   <FormattedMessage
-    id="xpack.triggersActionsUI.sections.buildConnectorFlyout.paramsDescription"
+    id="xpack.triggersActionsUI.sections.buildConnectorPage.paramsDescription"
     defaultMessage="Provided by a rule each time this action runs. Use as {example}."
     values={{ example: <code>{'{{input.<name>}}'}</code> }}
   />
 );
 
 const REMOVE_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.buildConnectorFlyout.removeActionButtonLabel',
+  'xpack.triggersActionsUI.sections.buildConnectorPage.removeActionButtonLabel',
   { defaultMessage: 'Remove action' }
 );
 
@@ -108,7 +107,7 @@ const ActionEditorComponent: React.FC<Props> = ({ index, onRemove }) => {
           <EuiTitle size="xxs">
             <h5>
               <FormattedMessage
-                id="xpack.triggersActionsUI.sections.buildConnectorFlyout.actionTitle"
+                id="xpack.triggersActionsUI.sections.buildConnectorPage.actionTitle"
                 defaultMessage="Action {number}"
                 values={{ number: index + 1 }}
               />
@@ -141,11 +140,11 @@ const ActionEditorComponent: React.FC<Props> = ({ index, onRemove }) => {
             render={({ field, fieldState: { error } }) => (
               <EuiFormRow
                 label={i18n.translate(
-                  'xpack.triggersActionsUI.sections.buildConnectorFlyout.actionNameLabel',
+                  'xpack.triggersActionsUI.sections.buildConnectorPage.actionNameLabel',
                   { defaultMessage: 'Name' }
                 )}
                 helpText={i18n.translate(
-                  'xpack.triggersActionsUI.sections.buildConnectorFlyout.actionNameHelpText',
+                  'xpack.triggersActionsUI.sections.buildConnectorPage.actionNameHelpText',
                   { defaultMessage: 'Identifier a rule uses to pick this action.' }
                 )}
                 fullWidth
@@ -172,7 +171,7 @@ const ActionEditorComponent: React.FC<Props> = ({ index, onRemove }) => {
             render={({ field, fieldState: { error } }) => (
               <EuiFormRow
                 label={i18n.translate(
-                  'xpack.triggersActionsUI.sections.buildConnectorFlyout.actionScopeLabel',
+                  'xpack.triggersActionsUI.sections.buildConnectorPage.actionScopeLabel',
                   { defaultMessage: 'Scope' }
                 )}
                 fullWidth
@@ -200,7 +199,7 @@ const ActionEditorComponent: React.FC<Props> = ({ index, onRemove }) => {
         render={({ field, fieldState: { error } }) => (
           <EuiFormRow
             label={i18n.translate(
-              'xpack.triggersActionsUI.sections.buildConnectorFlyout.actionDescriptionLabel',
+              'xpack.triggersActionsUI.sections.buildConnectorPage.actionDescriptionLabel',
               { defaultMessage: 'Description' }
             )}
             fullWidth
@@ -222,13 +221,13 @@ const ActionEditorComponent: React.FC<Props> = ({ index, onRemove }) => {
       <EuiSpacer size="m" />
       <FieldListEditor
         name={`actions.${index}.input`}
-        title={i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.paramsTitle', {
+        title={i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.paramsTitle', {
           defaultMessage: 'Params',
         })}
         description={PARAMS_DESCRIPTION}
         tooltipContent={PARAMS_TOOLTIP}
         addButtonLabel={i18n.translate(
-          'xpack.triggersActionsUI.sections.buildConnectorFlyout.addParamButtonLabel',
+          'xpack.triggersActionsUI.sections.buildConnectorPage.addParamButtonLabel',
           { defaultMessage: 'Add param' }
         )}
         testSubjPrefix={`${testSubj}-input`}
@@ -237,7 +236,7 @@ const ActionEditorComponent: React.FC<Props> = ({ index, onRemove }) => {
       <EuiTitle size="xxs">
         <h5>
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.buildConnectorFlyout.requestTitle"
+            id="xpack.triggersActionsUI.sections.buildConnectorPage.requestTitle"
             defaultMessage="Request"
           />
         </h5>
@@ -256,7 +255,7 @@ const ActionEditorComponent: React.FC<Props> = ({ index, onRemove }) => {
             render={({ field, fieldState: { error } }) => (
               <EuiFormRow
                 label={i18n.translate(
-                  'xpack.triggersActionsUI.sections.buildConnectorFlyout.methodLabel',
+                  'xpack.triggersActionsUI.sections.buildConnectorPage.methodLabel',
                   { defaultMessage: 'Method' }
                 )}
                 isInvalid={!!error}
@@ -282,7 +281,7 @@ const ActionEditorComponent: React.FC<Props> = ({ index, onRemove }) => {
             render={({ field, fieldState: { error } }) => (
               <EuiFormRow
                 label={i18n.translate(
-                  'xpack.triggersActionsUI.sections.buildConnectorFlyout.urlLabel',
+                  'xpack.triggersActionsUI.sections.buildConnectorPage.urlLabel',
                   { defaultMessage: 'URL' }
                 )}
                 fullWidth
@@ -309,10 +308,9 @@ const ActionEditorComponent: React.FC<Props> = ({ index, onRemove }) => {
         control={control}
         render={({ field, fieldState: { error } }) => (
           <EuiFormRow
-            label={i18n.translate(
-              'xpack.triggersActionsUI.sections.buildConnectorFlyout.pathLabel',
-              { defaultMessage: 'Path' }
-            )}
+            label={i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.pathLabel', {
+              defaultMessage: 'Path',
+            })}
             fullWidth
             isInvalid={!!error}
             error={error?.message}

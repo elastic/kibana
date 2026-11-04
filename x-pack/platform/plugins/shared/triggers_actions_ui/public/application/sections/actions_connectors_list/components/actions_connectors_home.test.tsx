@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Router } from '@kbn/shared-ux-router';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -195,8 +195,9 @@ describe('ActionsConnectorsHome', () => {
     expect(selectConnectorFlyout).toBeInTheDocument();
   });
 
-  it('show "Build a connector" flyout when the secondary "Create connector" button pressed', async () => {
-    renderHome(connectorsTabProps());
+  it('navigates to the "Build a connector" page when the secondary "Create connector" button pressed', async () => {
+    const props = connectorsTabProps();
+    renderHome(props);
 
     const buildConnectorButton = await screen.findByTestId(
       'createConnectorButton-secondary-button'
@@ -204,7 +205,7 @@ describe('ActionsConnectorsHome', () => {
     expect(buildConnectorButton).toHaveAccessibleName('Build a connector');
     await userEvent.click(buildConnectorButton);
 
-    expect(await screen.findByRole('heading', { name: 'Build a connector' })).toBeInTheDocument();
+    expect(props.history.location.pathname).toBe('/connectors/build');
   });
 
   it('opens the builder with a draft handed off from chat', async () => {
@@ -235,8 +236,10 @@ describe('ActionsConnectorsHome', () => {
 
     renderHome(props);
 
-    expect(await screen.findByRole('heading', { name: 'Build a connector' })).toBeInTheDocument();
-    expect(screen.getByTestId('buildConnectorNameInput')).toHaveValue('JSONPlaceholder');
+    await waitFor(() => expect(props.history.location.pathname).toBe('/connectors/build'));
+    expect(props.history.location.state).toEqual({
+      initialDefinition: expect.objectContaining({ displayName: 'JSONPlaceholder' }),
+    });
     expect(props.history.location.search).toBe('');
     expect(sessionStorage.getItem(`${CONNECTOR_TYPE_DRAFT_STORAGE_PREFIX}${draftKey}`)).toBeNull();
   });

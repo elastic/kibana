@@ -27,13 +27,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { Controller, useFieldArray, useFormContext, useFormState } from 'react-hook-form';
-import type { BuildConnectorFormData, ConnectorTypeField, FieldListPath } from './types';
+import type { BuildConnectorFormData, ConnectorTypeField, FieldListPath } from '../types';
 
 interface Props {
   /** Form path of the field list. */
   name: FieldListPath;
   /** Name of the object the fields end up in, e.g. `Config`. */
   title: string;
+  /** Hide the title when the host already names the list, e.g. a step title; the info icon stays. */
+  showTitle?: boolean;
   /** One line under the title saying who fills these fields in and how to reference them. */
   description: React.ReactNode;
   /** Shown when hovering the info icon next to the title. */
@@ -53,26 +55,25 @@ const EMPTY_FIELD: ConnectorTypeField = {
 const fieldTypeOptions: Array<{ value: ConnectorTypeField['type']; text: string }> = [
   {
     value: 'string',
-    text: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.fieldType.string', {
+    text: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.fieldType.string', {
       defaultMessage: 'String',
     }),
   },
   {
     value: 'number',
-    text: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.fieldType.number', {
+    text: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.fieldType.number', {
       defaultMessage: 'Number',
     }),
   },
   {
     value: 'boolean',
-    text: i18n.translate(
-      'xpack.triggersActionsUI.sections.buildConnectorFlyout.fieldType.boolean',
-      { defaultMessage: 'Boolean' }
-    ),
+    text: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.fieldType.boolean', {
+      defaultMessage: 'Boolean',
+    }),
   },
   {
     value: 'array',
-    text: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.fieldType.array', {
+    text: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.fieldType.array', {
       defaultMessage: 'Array',
     }),
   },
@@ -82,7 +83,7 @@ const arrayItemTypeOptions = [
   {
     value: '',
     text: i18n.translate(
-      'xpack.triggersActionsUI.sections.buildConnectorFlyout.fieldType.selectItemType',
+      'xpack.triggersActionsUI.sections.buildConnectorPage.fieldType.selectItemType',
       { defaultMessage: 'Select item type' }
     ),
   },
@@ -111,41 +112,41 @@ const booleanDefaultOptions = [
 ];
 
 const LABELS = {
-  name: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.field.nameLabel', {
+  name: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.field.nameLabel', {
     defaultMessage: 'Name',
   }),
-  type: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.field.typeLabel', {
+  type: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.field.typeLabel', {
     defaultMessage: 'Type',
   }),
-  items: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.field.itemsLabel', {
+  items: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.field.itemsLabel', {
     defaultMessage: 'Item type',
   }),
   default: i18n.translate(
-    'xpack.triggersActionsUI.sections.buildConnectorFlyout.field.defaultLabel',
+    'xpack.triggersActionsUI.sections.buildConnectorPage.field.defaultLabel',
     {
       defaultMessage: 'Default value',
     }
   ),
   required: i18n.translate(
-    'xpack.triggersActionsUI.sections.buildConnectorFlyout.field.requiredLabel',
+    'xpack.triggersActionsUI.sections.buildConnectorPage.field.requiredLabel',
     { defaultMessage: 'Required' }
   ),
-  label: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.field.labelLabel', {
+  label: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.field.labelLabel', {
     defaultMessage: 'Label',
   }),
   labelTooltip: i18n.translate(
-    'xpack.triggersActionsUI.sections.buildConnectorFlyout.field.labelTooltip',
+    'xpack.triggersActionsUI.sections.buildConnectorPage.field.labelTooltip',
     {
       defaultMessage:
         'Display name of this field in the form where its value is entered. Defaults to the field name.',
     }
   ),
   description: i18n.translate(
-    'xpack.triggersActionsUI.sections.buildConnectorFlyout.field.descriptionLabel',
+    'xpack.triggersActionsUI.sections.buildConnectorPage.field.descriptionLabel',
     { defaultMessage: 'Description' }
   ),
   remove: i18n.translate(
-    'xpack.triggersActionsUI.sections.buildConnectorFlyout.field.removeButtonLabel',
+    'xpack.triggersActionsUI.sections.buildConnectorPage.field.removeButtonLabel',
     { defaultMessage: 'Remove field' }
   ),
 };
@@ -154,6 +155,7 @@ const LABELS = {
 const FieldListEditorComponent: React.FC<Props> = ({
   name,
   title,
+  showTitle = true,
   description,
   tooltipContent,
   addButtonLabel,
@@ -163,27 +165,31 @@ const FieldListEditorComponent: React.FC<Props> = ({
   const { fields, append, remove } = useFieldArray({ control, name });
   const { errors } = useFormState({ control, name });
   const listError: string | undefined = get(errors, `${name}.root.message`);
+  const infoIcon = (
+    <EuiIconTip
+      type="info"
+      color="subdued"
+      position="right"
+      content={tooltipContent}
+      iconProps={{ 'data-test-subj': `${testSubjPrefix}-info` }}
+    />
+  );
 
   return (
     <div data-test-subj={testSubjPrefix}>
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs">
-            <h4>{title}</h4>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIconTip
-            type="info"
-            color="subdued"
-            position="right"
-            content={tooltipContent}
-            iconProps={{ 'data-test-subj': `${testSubjPrefix}-info` }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {showTitle && (
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xxs">
+              <h4>{title}</h4>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{infoIcon}</EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       <EuiText size="xs" color="subdued" data-test-subj={`${testSubjPrefix}-description`}>
         {description}
+        {!showTitle && <> {infoIcon}</>}
       </EuiText>
       {fields.map((item, index) => (
         <React.Fragment key={item.id}>

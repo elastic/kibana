@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import type { CreateConnectorTypeRequest } from '@kbn/actions-plugin/common';
-import { formatConnectorTypeYaml, parseConnectorTypeYaml } from './parse_connector_type_yaml';
+import { formatConnectorTypeYaml, parseConnectorTypeYaml } from '../lib/parse_connector_type_yaml';
 import { ResizableCodeEditor } from './resizable_code_editor';
 
 interface Props {
@@ -66,6 +66,11 @@ actions:
       body:
         text: "{{input.message}}"`;
 
+const BEAUTIFY_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.buildConnectorPage.beautifyYamlButtonLabel',
+  { defaultMessage: 'Beautify YAML' }
+);
+
 const parseYaml = (yaml: string): ParsedYaml => {
   if (!yaml.trim()) {
     return {};
@@ -98,13 +103,13 @@ const YamlImportPanelComponent: React.FC<Props> = ({ onApply, isDisabled = false
     <>
       <EuiFormRow
         label={i18n.translate(
-          'xpack.triggersActionsUI.sections.buildConnectorFlyout.yamlFieldLabel',
+          'xpack.triggersActionsUI.sections.buildConnectorPage.yamlFieldLabel',
           {
             defaultMessage: 'YAML definition',
           }
         )}
         helpText={i18n.translate(
-          'xpack.triggersActionsUI.sections.buildConnectorFlyout.yamlFieldHelpText',
+          'xpack.triggersActionsUI.sections.buildConnectorPage.yamlFieldHelpText',
           {
             defaultMessage:
               'Uses the same keys as the connector type request body. Applying it fills the form without saving.',
@@ -122,7 +127,7 @@ const YamlImportPanelComponent: React.FC<Props> = ({ onApply, isDisabled = false
           minHeight={120}
           options={EDITOR_OPTIONS}
           placeholder={YAML_EXAMPLE}
-          dataTestSubj="build-connector-flyout-yaml-editor"
+          dataTestSubj="build-connector-yaml-editor"
         />
       </EuiFormRow>
       <EuiSpacer size="s" />
@@ -131,14 +136,11 @@ const YamlImportPanelComponent: React.FC<Props> = ({ onApply, isDisabled = false
           <EuiButtonEmpty
             size="s"
             iconType="brush"
+            aria-label={BEAUTIFY_LABEL}
             onClick={onBeautify}
             isDisabled={!canApply}
-            data-test-subj="build-connector-flyout-yaml-beautify-btn"
+            data-test-subj="build-connector-yaml-beautify-btn"
           >
-            {i18n.translate(
-              'xpack.triggersActionsUI.sections.buildConnectorFlyout.beautifyYamlButtonLabel',
-              { defaultMessage: 'Beautify' }
-            )}
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -146,10 +148,10 @@ const YamlImportPanelComponent: React.FC<Props> = ({ onApply, isDisabled = false
             size="s"
             onClick={onApplyClick}
             isDisabled={!canApply}
-            data-test-subj="build-connector-flyout-yaml-apply-btn"
+            data-test-subj="build-connector-yaml-apply-btn"
           >
             {i18n.translate(
-              'xpack.triggersActionsUI.sections.buildConnectorFlyout.applyYamlButtonLabel',
+              'xpack.triggersActionsUI.sections.buildConnectorPage.applyYamlButtonLabel',
               { defaultMessage: 'Apply to form' }
             )}
           </EuiButton>

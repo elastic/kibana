@@ -10,8 +10,8 @@ import { EuiButtonIcon, EuiFormRow, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { useController, useFormContext } from 'react-hook-form';
-import type { BuildConnectorFormData } from './types';
-import { formatJson, parseJsonObject } from './json_body';
+import type { BuildConnectorFormData } from '../types';
+import { formatJson, parseJsonObject } from '../lib/json_body';
 import { ResizableCodeEditor } from './resizable_code_editor';
 
 interface Props {
@@ -29,7 +29,7 @@ const EDITOR_OPTIONS: CodeEditorProps['options'] = {
 };
 
 const BEAUTIFY_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.buildConnectorFlyout.beautifyJsonButtonLabel',
+  'xpack.triggersActionsUI.sections.buildConnectorPage.beautifyJsonButtonLabel',
   { defaultMessage: 'Beautify JSON' }
 );
 
@@ -46,12 +46,9 @@ const JsonBodyEditorComponent: React.FC<Props> = ({ actionIndex, testSubj }) => 
 
   return (
     <EuiFormRow
-      label={i18n.translate(
-        'xpack.triggersActionsUI.sections.buildConnectorFlyout.bodyFieldLabel',
-        {
-          defaultMessage: 'Body (JSON)',
-        }
-      )}
+      label={i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.bodyFieldLabel', {
+        defaultMessage: 'Body (JSON)',
+      })}
       labelAppend={
         <EuiToolTip content={BEAUTIFY_LABEL} disableScreenReaderOutput>
           <EuiButtonIcon
@@ -65,7 +62,7 @@ const JsonBodyEditorComponent: React.FC<Props> = ({ actionIndex, testSubj }) => 
         </EuiToolTip>
       }
       helpText={i18n.translate(
-        'xpack.triggersActionsUI.sections.buildConnectorFlyout.bodyFieldHelpText',
+        'xpack.triggersActionsUI.sections.buildConnectorPage.bodyFieldHelpText',
         {
           defaultMessage: 'Optional. String values can reference {config}, {input} and {secrets}.',
           values: {

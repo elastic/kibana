@@ -15,7 +15,7 @@ import {
   headerNameSchema,
   identifierSchema,
 } from '@kbn/actions-plugin/common';
-import type { BuildConnectorFormData } from './types';
+import type { BuildConnectorFormData } from '../types';
 import { formDataToRequest } from './form_serializers';
 import { parseJsonObject } from './json_body';
 
@@ -41,33 +41,33 @@ const FIELD_ROW_KEYS = new Set([
 ]);
 
 const FIELD_NAME_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.sections.buildConnectorFlyout.error.requiredFieldName',
+  'xpack.triggersActionsUI.sections.buildConnectorPage.error.requiredFieldName',
   { defaultMessage: 'Field name is required.' }
 );
 const IDENTIFIER_FORMAT = i18n.translate(
-  'xpack.triggersActionsUI.sections.buildConnectorFlyout.error.invalidIdentifier',
+  'xpack.triggersActionsUI.sections.buildConnectorPage.error.invalidIdentifier',
   { defaultMessage: 'Must start with a letter and use only letters, numbers and "_".' }
 );
 const HEADER_NAME_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.sections.buildConnectorFlyout.error.requiredHeaderName',
+  'xpack.triggersActionsUI.sections.buildConnectorPage.error.requiredHeaderName',
   { defaultMessage: 'Header name is required.' }
 );
 const HEADER_NAME_FORMAT = i18n.translate(
-  'xpack.triggersActionsUI.sections.buildConnectorFlyout.error.invalidHeaderName',
+  'xpack.triggersActionsUI.sections.buildConnectorPage.error.invalidHeaderName',
   { defaultMessage: 'Use only letters, numbers and "-".' }
 );
 const ACTION_NAME_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.sections.buildConnectorFlyout.error.requiredActionName',
+  'xpack.triggersActionsUI.sections.buildConnectorPage.error.requiredActionName',
   { defaultMessage: 'Action name is required.' }
 );
 
 /** Messages for empty values, keyed by form path with `*` for row indexes. */
 const REQUIRED_MESSAGES: Record<string, string> = {
   displayName: i18n.translate(
-    'xpack.triggersActionsUI.sections.buildConnectorFlyout.error.requiredName',
+    'xpack.triggersActionsUI.sections.buildConnectorPage.error.requiredName',
     { defaultMessage: 'Name is required.' }
   ),
-  id: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.error.requiredId', {
+  id: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.error.requiredId', {
     defaultMessage: 'Connector type ID is required.',
   }),
   'auth.headerName': HEADER_NAME_REQUIRED,
@@ -75,7 +75,7 @@ const REQUIRED_MESSAGES: Record<string, string> = {
   'actions.*.name': ACTION_NAME_REQUIRED,
   'actions.*.input.*.name': FIELD_NAME_REQUIRED,
   'actions.*.request.url': i18n.translate(
-    'xpack.triggersActionsUI.sections.buildConnectorFlyout.error.requiredUrl',
+    'xpack.triggersActionsUI.sections.buildConnectorPage.error.requiredUrl',
     { defaultMessage: 'URL is required.' }
   ),
   'actions.*.request.headers.*.key': HEADER_NAME_REQUIRED,
@@ -83,12 +83,9 @@ const REQUIRED_MESSAGES: Record<string, string> = {
 
 /** Messages for `invalid_format` issues, keyed like `REQUIRED_MESSAGES`. */
 const FORMAT_MESSAGES: Record<string, string> = {
-  id: i18n.translate(
-    'xpack.triggersActionsUI.sections.buildConnectorFlyout.error.invalidIdFormat',
-    {
-      defaultMessage: 'Use only lowercase letters, numbers, "_" and "-".',
-    }
-  ),
+  id: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.error.invalidIdFormat', {
+    defaultMessage: 'Use only lowercase letters, numbers, "_" and "-".',
+  }),
   'auth.headerName': HEADER_NAME_FORMAT,
   'config.*.name': IDENTIFIER_FORMAT,
   'actions.*.name': IDENTIFIER_FORMAT,
@@ -189,11 +186,11 @@ const toMessage = (
 };
 
 const DUPLICATE_ACTION_NAME = i18n.translate(
-  'xpack.triggersActionsUI.sections.buildConnectorFlyout.error.duplicateActionName',
+  'xpack.triggersActionsUI.sections.buildConnectorPage.error.duplicateActionName',
   { defaultMessage: 'Action names must be unique.' }
 );
 const DUPLICATE_HEADER_NAME = i18n.translate(
-  'xpack.triggersActionsUI.sections.buildConnectorFlyout.error.duplicateHeaderName',
+  'xpack.triggersActionsUI.sections.buildConnectorPage.error.duplicateHeaderName',
   { defaultMessage: 'Header names must be unique.' }
 );
 

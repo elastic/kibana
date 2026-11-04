@@ -41,7 +41,7 @@ const getErrorGuidance = (reason?: GenerateConnectorTypeErrorReason): string | u
   switch (reason) {
     case 'no_model':
       return i18n.translate(
-        'xpack.triggersActionsUI.sections.buildConnectorFlyout.aiNoModelGuidance',
+        'xpack.triggersActionsUI.sections.buildConnectorPage.aiNoModelGuidance',
         {
           defaultMessage:
             'Set a default AI connector, or pick a model for Connector builder in Feature Settings.',
@@ -50,26 +50,23 @@ const getErrorGuidance = (reason?: GenerateConnectorTypeErrorReason): string | u
     case 'blocked_destination':
     case 'invalid_url':
       return i18n.translate(
-        'xpack.triggersActionsUI.sections.buildConnectorFlyout.aiPublicUrlGuidance',
+        'xpack.triggersActionsUI.sections.buildConnectorPage.aiPublicUrlGuidance',
         { defaultMessage: 'Use a public https documentation URL.' }
       );
     case 'unsupported_content':
     case 'too_large':
       return i18n.translate(
-        'xpack.triggersActionsUI.sections.buildConnectorFlyout.aiSinglePageGuidance',
+        'xpack.triggersActionsUI.sections.buildConnectorPage.aiSinglePageGuidance',
         { defaultMessage: 'Link to a single HTML or text page.' }
       );
     case 'invalid_output':
     case 'model_error':
-      return i18n.translate(
-        'xpack.triggersActionsUI.sections.buildConnectorFlyout.aiRetryGuidance',
-        {
-          defaultMessage: 'Try again or another page, then edit the form by hand.',
-        }
-      );
+      return i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.aiRetryGuidance', {
+        defaultMessage: 'Try again or another page, then edit the form by hand.',
+      });
     case 'fetch_failed':
       return i18n.translate(
-        'xpack.triggersActionsUI.sections.buildConnectorFlyout.aiFetchFailedGuidance',
+        'xpack.triggersActionsUI.sections.buildConnectorPage.aiFetchFailedGuidance',
         { defaultMessage: 'Check the URL and try again.' }
       );
     default:
@@ -100,11 +97,11 @@ const AiAssistantPanelComponent: React.FC<Props> = ({ onApply, isDisabled = fals
     <>
       <EuiFormRow
         label={i18n.translate(
-          'xpack.triggersActionsUI.sections.buildConnectorFlyout.aiUrlFieldLabel',
+          'xpack.triggersActionsUI.sections.buildConnectorPage.aiUrlFieldLabel',
           { defaultMessage: 'Documentation URL' }
         )}
         helpText={i18n.translate(
-          'xpack.triggersActionsUI.sections.buildConnectorFlyout.aiUrlFieldHelpText',
+          'xpack.triggersActionsUI.sections.buildConnectorPage.aiUrlFieldHelpText',
           { defaultMessage: 'Fills the form without saving.' }
         )}
         fullWidth
@@ -112,7 +109,7 @@ const AiAssistantPanelComponent: React.FC<Props> = ({ onApply, isDisabled = fals
         error={
           urlIsInvalid
             ? i18n.translate(
-                'xpack.triggersActionsUI.sections.buildConnectorFlyout.aiUrlFieldError',
+                'xpack.triggersActionsUI.sections.buildConnectorPage.aiUrlFieldError',
                 { defaultMessage: 'Enter an http or https URL.' }
               )
             : undefined
@@ -124,7 +121,7 @@ const AiAssistantPanelComponent: React.FC<Props> = ({ onApply, isDisabled = fals
           value={url}
           onChange={(event) => setUrl(event.target.value)}
           disabled={isDisabled || isLoading}
-          data-test-subj="build-connector-flyout-ai-url"
+          data-test-subj="build-connector-ai-url"
         />
       </EuiFormRow>
       <EuiSpacer size="s" />
@@ -135,10 +132,10 @@ const AiAssistantPanelComponent: React.FC<Props> = ({ onApply, isDisabled = fals
             onClick={onGenerate}
             isLoading={isLoading}
             isDisabled={!canGenerate}
-            data-test-subj="build-connector-flyout-ai-generate-btn"
+            data-test-subj="build-connector-ai-generate-btn"
           >
             {i18n.translate(
-              'xpack.triggersActionsUI.sections.buildConnectorFlyout.aiGenerateButtonLabel',
+              'xpack.triggersActionsUI.sections.buildConnectorPage.aiGenerateButtonLabel',
               { defaultMessage: 'Generate' }
             )}
           </EuiButton>
@@ -150,7 +147,7 @@ const AiAssistantPanelComponent: React.FC<Props> = ({ onApply, isDisabled = fals
           <KbnDangerCallout
             announceOnMount
             size="s"
-            data-test-subj="build-connector-flyout-ai-error"
+            data-test-subj="build-connector-ai-error"
             title={generateConnectorTypeError.title}
             text={
               generateConnectorTypeError.reason === 'no_model' && guidance ? (
@@ -168,8 +165,8 @@ const AiAssistantPanelComponent: React.FC<Props> = ({ onApply, isDisabled = fals
       {didApply && (
         <>
           <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued" data-test-subj="build-connector-flyout-ai-success">
-            {i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.aiSuccessHint', {
+          <EuiText size="s" color="subdued" data-test-subj="build-connector-ai-success">
+            {i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.aiSuccessHint', {
               defaultMessage: 'Review the draft before saving.',
             })}
           </EuiText>

@@ -8,10 +8,14 @@
 import React from 'react';
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { createMemoryHistory } from 'history';
+import { Router } from '@kbn/shared-ux-router';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { MockedCodeEditor } from '@kbn/code-editor-mock';
 import type { AppMockRenderer } from '../../test_utils';
 import { createAppMockRenderer } from '../../test_utils';
-import { BuildConnectorFlyout } from '.';
+import { useKibana } from '../../../../common/lib/kibana';
+import { BuildConnectorPage } from './build_connector_page';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../lib/action_connector_api', () => ({
@@ -30,6 +34,24 @@ jest.mock('@kbn/code-editor', () => ({
 const { createConnectorType, generateConnectorType } = jest.requireMock(
   '../../../lib/action_connector_api'
 );
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+
+const minimalYamlDefinition = `
+id: .acme
+displayName: Acme
+description: Talks to Acme
+auth:
+  type: none
+config: []
+actions:
+  ping:
+    description: Ping
+    scope: read
+    input: []
+    request:
+      method: GET
+      url: https://acme.example.com/ping
+`;
 
 const yamlDefinition = `
 id: .acme
@@ -53,38 +75,161 @@ actions:
 `;
 
 const yamlEditor = () =>
-  within(screen.getByTestId('build-connector-flyout-yaml-panel')).getByTestId('mockedCodeEditor');
+  within(screen.getByTestId('build-connector-page-yaml-panel')).getByTestId('mockedCodeEditor');
 const bodyEditor = (actionIndex: number) =>
   within(screen.getByTestId(`buildConnectorAction-${actionIndex}-body`)).getByTestId(
     'mockedCodeEditor'
   );
 
 const typeYaml = async (yaml: string) => {
-  await userEvent.click(await screen.findByTestId('build-connector-flyout-yaml-toggle'));
+  await userEvent.click(await screen.findByTestId('build-connector-page-yaml-toggle'));
   fireEvent.change(yamlEditor(), { target: { value: yaml } });
 };
 
 const applyYaml = async (yaml: string) => {
   await typeYaml(yaml);
-  await userEvent.click(screen.getByTestId('build-connector-flyout-yaml-apply-btn'));
+  await userEvent.click(screen.getByTestId('build-connector-yaml-apply-btn'));
   await waitFor(() => expect(screen.getByTestId('buildConnectorNameInput')).toHaveValue('Acme'));
 };
 
-describe('BuildConnectorFlyout', () => {
+describe('BuildConnectorPage', () => {
   let appMockRenderer: AppMockRenderer;
-  const onClose = jest.fn();
+  const history = createMemoryHistory({ initialEntries: ['/connectors/build'] });
+
+  const renderPage = () =>
+    appMockRenderer.render(
+      <Router history={history}>
+        <MockAppHeaderProvider>
+          <BuildConnectorPage />
+        </MockAppHeaderProvider>
+      </Router>
+    );
 
   beforeEach(() => {
     jest.clearAllMocks();
+    history.push('/connectors/build');
     appMockRenderer = createAppMockRenderer();
-    createConnectorType.mockResolvedValue({ id: '.my-service' });
+    createConnectorType.mockResolvedValue({ id: 'acme' });
+  });
+
+  it('renders the header, breadcrumbs, the three steps and the actions', async () => {
+    renderPage();
+
+    expect(await screen.findByRole('heading', { name: 'Build a connector' })).toBeInTheDocument();
+
+    const detailsStep = screen.getByTestId('build-connector-page-step-details');
+    expect(detailsStep).toHaveTextContent('Connector details');
+    expect(within(detailsStep).getByTestId('build-connector-page-yaml-toggle')).toBeInTheDocument();
+    expect(within(detailsStep).getByTestId('build-connector-page-ai-toggle')).toBeInTheDocument();
+    expect(within(detailsStep).getByTestId('buildConnectorNameInput')).toBeInTheDocument();
+    expect(within(detailsStep).getByTestId('buildConnectorIdInput')).toBeInTheDocument();
+    expect(within(detailsStep).getByTestId('buildConnectorDescriptionInput')).toBeInTheDocument();
+    expect(within(detailsStep).getByTestId('buildConnectorAuthTypeSelect')).toBeInTheDocument();
+
+    const configStep = screen.getByTestId('build-connector-page-step-config');
+    expect(configStep).toHaveTextContent('Configuration fields');
+    expect(within(configStep).getByTestId('buildConnectorConfigFields-add')).toBeInTheDocument();
+    expect(within(configStep).getByTestId('buildConnectorConfigFields-info')).toBeInTheDocument();
+    expect(within(configStep).queryByRole('heading', { name: 'Config' })).not.toBeInTheDocument();
+
+    const actionsStep = screen.getByTestId('build-connector-page-step-actions');
+    expect(actionsStep).toHaveTextContent('Actions');
+    expect(within(actionsStep).getByTestId('buildConnectorAction-0')).toBeInTheDocument();
+    expect(
+      within(actionsStep).queryByRole('heading', { name: 'Actions', level: 4 })
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('build-connector-page-cancel-btn')).toBeInTheDocument();
+    expect(screen.getByTestId('build-connector-page-save-btn')).toBeInTheDocument();
+    expect(useKibanaMock().services.setBreadcrumbs).toHaveBeenCalledWith([
+      expect.objectContaining({ text: 'Connectors', href: '/connectors' }),
+      expect.objectContaining({ text: 'Build' }),
+    ]);
+    expect(useKibanaMock().services.chrome.docTitle.change).toHaveBeenCalledWith(
+      'Build a connector'
+    );
+  });
+
+  it('starts from a draft handed off in the router state', async () => {
+    history.push({
+      pathname: '/connectors/build',
+      state: {
+        initialDefinition: {
+          id: 'jsonplaceholder',
+          displayName: 'JSONPlaceholder',
+          description: 'Read posts',
+          config: [],
+          auth: { type: 'none' },
+          actions: {
+            getPosts: {
+              description: 'Get posts',
+              scope: 'read',
+              input: [],
+              request: { method: 'GET', url: 'https://jsonplaceholder.typicode.com/posts' },
+            },
+          },
+        },
+      },
+    });
+
+    renderPage();
+
+    expect(await screen.findByTestId('buildConnectorNameInput')).toHaveValue('JSONPlaceholder');
+    expect(screen.getByTestId('buildConnectorIdInput')).toHaveValue('jsonplaceholder');
+    expect(screen.getByTestId('buildConnectorAction-0-name')).toHaveValue('getPosts');
+    expect(screen.getByTestId('buildConnectorAction-0-url')).toHaveValue(
+      'https://jsonplaceholder.typicode.com/posts'
+    );
+  });
+
+  it('goes back to the connectors list on Cancel without saving', async () => {
+    renderPage();
+
+    await userEvent.click(await screen.findByTestId('build-connector-page-cancel-btn'));
+
+    expect(history.location.pathname).toBe('/connectors');
+    expect(createConnectorType).not.toHaveBeenCalled();
+  });
+
+  it('saves the definition and returns to the connectors list', async () => {
+    renderPage();
+
+    await userEvent.click(await screen.findByTestId('build-connector-page-yaml-toggle'));
+    fireEvent.change(
+      within(screen.getByTestId('build-connector-page-yaml-panel')).getByTestId('mockedCodeEditor'),
+      { target: { value: minimalYamlDefinition } }
+    );
+    await userEvent.click(screen.getByTestId('build-connector-yaml-apply-btn'));
+    await waitFor(() => expect(screen.getByTestId('buildConnectorNameInput')).toHaveValue('Acme'));
+    expect(screen.getByTestId('buildConnectorIdInput')).toHaveValue('acme');
+
+    await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
+    expect(screen.getByTestId('buildConnectorIdInput')).toHaveValue('acme');
+
+    await waitFor(() =>
+      expect(createConnectorType).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorType: expect.objectContaining({ id: 'acme' }) })
+      )
+    );
+    await waitFor(() => expect(history.location.pathname).toBe('/connectors'));
+  });
+
+  it('stays on the page and shows the errors when the definition is invalid', async () => {
+    renderPage();
+
+    await userEvent.click(await screen.findByTestId('build-connector-page-save-btn'));
+
+    expect(await screen.findByText('Name is required.')).toBeInTheDocument();
+    expect(screen.getByText('URL is required.')).toBeInTheDocument();
+    expect(screen.queryByTestId('build-connector-page-definition-errors')).not.toBeInTheDocument();
+    expect(createConnectorType).not.toHaveBeenCalled();
+    expect(history.location.pathname).toBe('/connectors/build');
   });
 
   it('renders the YAML import, the form fields, one empty action and the footer buttons', async () => {
-    appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+    renderPage();
 
     expect(await screen.findByRole('heading', { name: 'Build a connector' })).toBeInTheDocument();
-    expect(screen.getByTestId('build-connector-flyout-yaml-toggle')).toBeInTheDocument();
+    expect(screen.getByTestId('build-connector-page-yaml-toggle')).toBeInTheDocument();
     expect(screen.getByTestId('buildConnectorNameInput')).toBeInTheDocument();
     expect(screen.getByTestId('buildConnectorIdInput')).toBeInTheDocument();
     expect(screen.getByTestId('buildConnectorDescriptionInput')).toBeInTheDocument();
@@ -95,15 +240,15 @@ describe('BuildConnectorFlyout', () => {
     expect(screen.queryByTestId('buildConnectorAction-1')).not.toBeInTheDocument();
     expect(screen.getByTestId('buildConnectorAction-0-scope')).toHaveValue('write');
     expect(screen.getByTestId('buildConnectorAction-0-method')).toHaveValue('POST');
-    expect(screen.getByTestId('build-connector-flyout-close-btn')).toBeInTheDocument();
-    expect(screen.getByTestId('build-connector-flyout-save-btn')).toBeInTheDocument();
+    expect(screen.getByTestId('build-connector-page-cancel-btn')).toBeInTheDocument();
+    expect(screen.getByTestId('build-connector-page-save-btn')).toBeInTheDocument();
   });
 
   it('lets the user drag the YAML and JSON body editors taller', async () => {
-    appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+    renderPage();
     await screen.findByTestId('buildConnectorAction-0-body');
 
-    expect(screen.getByTestId('build-connector-flyout-yaml-editor-container')).toHaveStyle({
+    expect(screen.getByTestId('build-connector-yaml-editor-container')).toHaveStyle({
       resize: 'vertical',
     });
     expect(screen.getByTestId('buildConnectorAction-0-body-editor-container')).toHaveStyle({
@@ -121,7 +266,7 @@ describe('BuildConnectorFlyout', () => {
   });
 
   it('derives the ID from the name until it is customized', async () => {
-    appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+    renderPage();
 
     await userEvent.type(await screen.findByTestId('buildConnectorNameInput'), 'My Service');
     await waitFor(() =>
@@ -139,7 +284,7 @@ describe('BuildConnectorFlyout', () => {
   });
 
   it('shows the header name field only for API key header auth', async () => {
-    appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+    renderPage();
 
     await userEvent.selectOptions(
       await screen.findByTestId('buildConnectorAuthTypeSelect'),
@@ -155,7 +300,7 @@ describe('BuildConnectorFlyout', () => {
 
   describe('tooltips', () => {
     it('explains the config object', async () => {
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
 
       expect(await screen.findByTestId('buildConnectorConfigFields-description')).toHaveTextContent(
         'Entered when a connector of this type is created. Use as {{config.<name>}}.'
@@ -167,7 +312,7 @@ describe('BuildConnectorFlyout', () => {
     });
 
     it('explains the params object of an action', async () => {
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
 
       expect(
         await screen.findByTestId('buildConnectorAction-0-input-description')
@@ -181,7 +326,7 @@ describe('BuildConnectorFlyout', () => {
     });
 
     it('explains the label property of a field', async () => {
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
 
       await userEvent.click(await screen.findByTestId('buildConnectorConfigFields-add'));
       fireEvent.mouseOver(screen.getByTestId('buildConnectorConfigFields-0-label-info'));
@@ -194,22 +339,22 @@ describe('BuildConnectorFlyout', () => {
 
   describe('YAML import', () => {
     it('shows an error and disables the YAML buttons while the YAML is invalid', async () => {
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
 
       await typeYaml('id: [unclosed');
       expect(await screen.findByText(/Flow sequence/)).toBeInTheDocument();
-      expect(screen.getByTestId('build-connector-flyout-yaml-apply-btn')).toBeDisabled();
-      expect(screen.getByTestId('build-connector-flyout-yaml-beautify-btn')).toBeDisabled();
+      expect(screen.getByTestId('build-connector-yaml-apply-btn')).toBeDisabled();
+      expect(screen.getByTestId('build-connector-yaml-beautify-btn')).toBeDisabled();
 
       fireEvent.change(yamlEditor(), { target: { value: '- just\n- a list\n' } });
       expect(
         await screen.findByText('The YAML must describe a single connector type definition.')
       ).toBeInTheDocument();
-      expect(screen.getByTestId('build-connector-flyout-yaml-apply-btn')).toBeDisabled();
+      expect(screen.getByTestId('build-connector-yaml-apply-btn')).toBeDisabled();
     });
 
     it('rejects a definition whose config or input is a map instead of a list', async () => {
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
 
       await typeYaml('displayName: Acme\nconfig:\n  baseUrl:\n    type: string\n');
       expect(
@@ -217,7 +362,7 @@ describe('BuildConnectorFlyout', () => {
           '"config" must be a list of fields, each with a name and a type (and optionally required, label and description).'
         )
       ).toBeInTheDocument();
-      expect(screen.getByTestId('build-connector-flyout-yaml-apply-btn')).toBeDisabled();
+      expect(screen.getByTestId('build-connector-yaml-apply-btn')).toBeDisabled();
 
       fireEvent.change(yamlEditor(), {
         target: { value: 'actions:\n  ping:\n    input:\n      message: string\n' },
@@ -233,7 +378,7 @@ describe('BuildConnectorFlyout', () => {
     });
 
     it('rejects unknown keys and names the allowed ones', async () => {
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
 
       await typeYaml(yamlDefinition.replace('input: []', 'params: []'));
       expect(
@@ -241,7 +386,7 @@ describe('BuildConnectorFlyout', () => {
           '"actions.ping" has an unknown key "params". Allowed keys: description, scope, input, request.'
         )
       ).toBeInTheDocument();
-      expect(screen.getByTestId('build-connector-flyout-yaml-apply-btn')).toBeDisabled();
+      expect(screen.getByTestId('build-connector-yaml-apply-btn')).toBeDisabled();
 
       fireEvent.change(yamlEditor(), { target: { value: 'name: Acme\n' } });
       expect(
@@ -252,7 +397,7 @@ describe('BuildConnectorFlyout', () => {
     });
 
     it('shows what the schema rejects right after applying, before Save', async () => {
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
 
       await applyYaml(yamlDefinition.replace('{{config.baseUrl}}', '{{config.missing}}'));
 
@@ -263,10 +408,10 @@ describe('BuildConnectorFlyout', () => {
     });
 
     it('beautifies the YAML in place', async () => {
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
 
       await typeYaml('{id: .acme, displayName: Acme,   auth: {type: none}}');
-      await userEvent.click(screen.getByTestId('build-connector-flyout-yaml-beautify-btn'));
+      await userEvent.click(screen.getByTestId('build-connector-yaml-beautify-btn'));
 
       await waitFor(() =>
         expect(yamlEditor()).toHaveValue('id: .acme\ndisplayName: Acme\nauth:\n  type: none\n')
@@ -274,7 +419,7 @@ describe('BuildConnectorFlyout', () => {
     });
 
     it('fills the whole form from the YAML without submitting', async () => {
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
 
       await applyYaml(yamlDefinition);
 
@@ -293,14 +438,14 @@ describe('BuildConnectorFlyout', () => {
       );
       expect(screen.queryByTestId('buildConnectorAction-1')).not.toBeInTheDocument();
       expect(createConnectorType).not.toHaveBeenCalled();
-      expect(onClose).not.toHaveBeenCalled();
+      expect(history.location.pathname).toBe('/connectors/build');
     });
 
     it('submits the applied definition unchanged when Save is clicked', async () => {
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
 
       await applyYaml(yamlDefinition);
-      await userEvent.click(screen.getByTestId('build-connector-flyout-save-btn'));
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
 
       await waitFor(() =>
         expect(createConnectorType).toHaveBeenCalledWith(
@@ -323,11 +468,11 @@ describe('BuildConnectorFlyout', () => {
           })
         )
       );
-      await waitFor(() => expect(onClose).toHaveBeenCalled());
+      await waitFor(() => expect(history.location.pathname).toBe('/connectors'));
     });
 
     it('carries an optional request path through the form and the request', async () => {
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
 
       await applyYaml(
         yamlDefinition.replace(
@@ -338,7 +483,7 @@ describe('BuildConnectorFlyout', () => {
       expect(screen.getByTestId('buildConnectorAction-0-url')).toHaveValue('{{config.baseUrl}}');
       expect(screen.getByTestId('buildConnectorAction-0-path')).toHaveValue('/v1/ping');
 
-      await userEvent.click(screen.getByTestId('build-connector-flyout-save-btn'));
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
 
       await waitFor(() =>
         expect(createConnectorType).toHaveBeenCalledWith(
@@ -356,10 +501,10 @@ describe('BuildConnectorFlyout', () => {
     });
 
     it('reports a template reference issue under the request that uses it', async () => {
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
 
       await applyYaml(yamlDefinition.replace('{{config.baseUrl}}', '{{config.missing}}'));
-      await userEvent.click(screen.getByTestId('build-connector-flyout-save-btn'));
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
 
       expect(await screen.findByTestId('buildConnectorAction-0-request-error')).toHaveTextContent(
         'Template reference "config.missing" is not declared for this connector or action.'
@@ -370,7 +515,7 @@ describe('BuildConnectorFlyout', () => {
 
   describe('config fields', () => {
     it('adds and removes rows', async () => {
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
 
       expect(screen.queryByTestId('buildConnectorConfigFields-row-0')).not.toBeInTheDocument();
 
@@ -396,11 +541,11 @@ describe('BuildConnectorFlyout', () => {
     });
 
     it('shows a row error for an invalid field name', async () => {
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
 
       await userEvent.click(await screen.findByTestId('buildConnectorConfigFields-add'));
       await userEvent.type(screen.getByTestId('buildConnectorConfigFields-0-name'), '1bad');
-      await userEvent.click(screen.getByTestId('build-connector-flyout-save-btn'));
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
 
       expect(
         await screen.findByText('Must start with a letter and use only letters, numbers and "_".')
@@ -409,13 +554,13 @@ describe('BuildConnectorFlyout', () => {
     });
 
     it('shows a list error for duplicate field names', async () => {
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
 
       await userEvent.click(await screen.findByTestId('buildConnectorConfigFields-add'));
       await userEvent.type(screen.getByTestId('buildConnectorConfigFields-0-name'), 'baseUrl');
       await userEvent.click(screen.getByTestId('buildConnectorConfigFields-add'));
       await userEvent.type(screen.getByTestId('buildConnectorConfigFields-1-name'), 'baseUrl');
-      await userEvent.click(screen.getByTestId('build-connector-flyout-save-btn'));
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
 
       expect(await screen.findByTestId('buildConnectorConfigFields-error')).toHaveTextContent(
         'Field names must be unique.'
@@ -426,7 +571,7 @@ describe('BuildConnectorFlyout', () => {
 
   describe('actions', () => {
     it('submits an action built in the form with input fields, headers and a JSON body', async () => {
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
 
       await userEvent.type(await screen.findByTestId('buildConnectorNameInput'), 'My Service');
       await userEvent.type(screen.getByTestId('buildConnectorAction-0-name'), 'notify');
@@ -447,7 +592,7 @@ describe('BuildConnectorFlyout', () => {
         'application/json'
       );
       fireEvent.change(bodyEditor(0), { target: { value: '{"text": "{{input.message}}"}' } });
-      await userEvent.click(screen.getByTestId('build-connector-flyout-save-btn'));
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
 
       await waitFor(() =>
         expect(createConnectorType).toHaveBeenCalledWith(
@@ -471,11 +616,11 @@ describe('BuildConnectorFlyout', () => {
           })
         )
       );
-      await waitFor(() => expect(onClose).toHaveBeenCalled());
+      await waitFor(() => expect(history.location.pathname).toBe('/connectors'));
     });
 
     it('adds and removes actions and requires at least one', async () => {
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
 
       await userEvent.click(await screen.findByTestId('buildConnectorActions-add'));
       expect(screen.getByTestId('buildConnectorAction-1')).toBeInTheDocument();
@@ -486,7 +631,7 @@ describe('BuildConnectorFlyout', () => {
         expect(screen.queryByTestId('buildConnectorAction-0')).not.toBeInTheDocument()
       );
 
-      await userEvent.click(screen.getByTestId('build-connector-flyout-save-btn'));
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
 
       expect(await screen.findByTestId('buildConnectorActions-error')).toHaveTextContent(
         'At least one action is required.'
@@ -495,14 +640,14 @@ describe('BuildConnectorFlyout', () => {
     });
 
     it('shows the required and format errors of an action on Save', async () => {
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
 
       await userEvent.click(await screen.findByTestId('buildConnectorAction-0-headers-add'));
       await userEvent.type(
         screen.getByTestId('buildConnectorAction-0-headers-0-key'),
         'bad header'
       );
-      await userEvent.click(screen.getByTestId('build-connector-flyout-save-btn'));
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
 
       expect(await screen.findByText('Name is required.')).toBeInTheDocument();
       expect(screen.getByText('Connector type ID is required.')).toBeInTheDocument();
@@ -510,23 +655,23 @@ describe('BuildConnectorFlyout', () => {
       expect(screen.getByText('URL is required.')).toBeInTheDocument();
       expect(screen.getByText('Use only letters, numbers and "-".')).toBeInTheDocument();
       expect(createConnectorType).not.toHaveBeenCalled();
-      expect(onClose).not.toHaveBeenCalled();
+      expect(history.location.pathname).toBe('/connectors/build');
     });
 
     it('rejects duplicate action names', async () => {
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
 
       await userEvent.type(await screen.findByTestId('buildConnectorAction-0-name'), 'ping');
       await userEvent.click(screen.getByTestId('buildConnectorActions-add'));
       await userEvent.type(screen.getByTestId('buildConnectorAction-1-name'), 'ping');
-      await userEvent.click(screen.getByTestId('build-connector-flyout-save-btn'));
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
 
       expect(await screen.findByText('Action names must be unique.')).toBeInTheDocument();
       expect(createConnectorType).not.toHaveBeenCalled();
     });
 
     it('validates the JSON body as you type and beautifies it', async () => {
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
 
       await screen.findByTestId('buildConnectorAction-0-body');
       const beautify = screen.getByTestId('buildConnectorAction-0-body-beautify');
@@ -575,47 +720,44 @@ describe('BuildConnectorFlyout', () => {
     };
 
     const openAiPanel = async () => {
-      await userEvent.click(await screen.findByTestId('build-connector-flyout-ai-toggle'));
+      await userEvent.click(await screen.findByTestId('build-connector-page-ai-toggle'));
     };
 
     it('renders the toggle and the URL field', async () => {
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
 
-      expect(await screen.findByTestId('build-connector-flyout-ai-toggle')).toBeInTheDocument();
+      expect(await screen.findByTestId('build-connector-page-ai-toggle')).toBeInTheDocument();
       await openAiPanel();
-      expect(screen.getByTestId('build-connector-flyout-ai-url')).toBeInTheDocument();
+      expect(screen.getByTestId('build-connector-ai-url')).toBeInTheDocument();
       expect(screen.getByText('Fills the form without saving.')).toBeInTheDocument();
     });
 
     it('disables Generate for an empty or non-http URL', async () => {
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
       await openAiPanel();
 
-      const generateButton = screen.getByTestId('build-connector-flyout-ai-generate-btn');
+      const generateButton = screen.getByTestId('build-connector-ai-generate-btn');
       expect(generateButton).toBeDisabled();
 
-      await userEvent.type(screen.getByTestId('build-connector-flyout-ai-url'), 'not-a-url');
+      await userEvent.type(screen.getByTestId('build-connector-ai-url'), 'not-a-url');
       expect(generateButton).toBeDisabled();
 
-      await userEvent.clear(screen.getByTestId('build-connector-flyout-ai-url'));
-      await userEvent.type(
-        screen.getByTestId('build-connector-flyout-ai-url'),
-        'ftp://example.com/docs'
-      );
+      await userEvent.clear(screen.getByTestId('build-connector-ai-url'));
+      await userEvent.type(screen.getByTestId('build-connector-ai-url'), 'ftp://example.com/docs');
       expect(generateButton).toBeDisabled();
       expect(generateConnectorType).not.toHaveBeenCalled();
     });
 
     it('fills the form from a generated draft and does not save it', async () => {
       generateConnectorType.mockResolvedValue({ connectorType: generatedConnectorType });
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
       await openAiPanel();
 
       await userEvent.type(
-        screen.getByTestId('build-connector-flyout-ai-url'),
+        screen.getByTestId('build-connector-ai-url'),
         'https://docs.example.com/api'
       );
-      await userEvent.click(screen.getByTestId('build-connector-flyout-ai-generate-btn'));
+      await userEvent.click(screen.getByTestId('build-connector-ai-generate-btn'));
 
       await waitFor(() =>
         expect(screen.getByTestId('buildConnectorNameInput')).toHaveValue('Acme')
@@ -630,11 +772,11 @@ describe('BuildConnectorFlyout', () => {
       expect(screen.getByTestId('buildConnectorAction-0-url')).toHaveValue(
         '{{config.baseUrl}}/ping'
       );
-      expect(screen.getByTestId('build-connector-flyout-ai-success')).toHaveTextContent(
+      expect(screen.getByTestId('build-connector-ai-success')).toHaveTextContent(
         'Review the draft before saving.'
       );
       expect(createConnectorType).not.toHaveBeenCalled();
-      expect(onClose).not.toHaveBeenCalled();
+      expect(history.location.pathname).toBe('/connectors/build');
     });
 
     it('keeps generated array item types when saving', async () => {
@@ -652,21 +794,19 @@ describe('BuildConnectorFlyout', () => {
           },
         },
       });
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
       await openAiPanel();
       await userEvent.type(
-        screen.getByTestId('build-connector-flyout-ai-url'),
+        screen.getByTestId('build-connector-ai-url'),
         'https://docs.example.com/api'
       );
-      await userEvent.click(screen.getByTestId('build-connector-flyout-ai-generate-btn'));
+      await userEvent.click(screen.getByTestId('build-connector-ai-generate-btn'));
 
       expect(await screen.findByTestId('buildConnectorAction-1-input-0-type')).toHaveValue('array');
       expect(screen.getByTestId('buildConnectorAction-1-input-0-items')).toHaveValue('string');
-      expect(
-        screen.queryByTestId('build-connector-flyout-definition-errors')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText('Array fields require an item type.')).not.toBeInTheDocument();
 
-      await userEvent.click(screen.getByTestId('build-connector-flyout-save-btn'));
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
       await waitFor(() => expect(createConnectorType).toHaveBeenCalledTimes(1));
       expect(createConnectorType).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -689,7 +829,7 @@ describe('BuildConnectorFlyout', () => {
       );
     });
 
-    it('lists a generated field error with its action and param near the top', async () => {
+    it('shows a generated field error under its param', async () => {
       generateConnectorType.mockResolvedValue({
         connectorType: {
           ...generatedConnectorType,
@@ -704,27 +844,25 @@ describe('BuildConnectorFlyout', () => {
           },
         },
       });
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
       await openAiPanel();
       await userEvent.type(
-        screen.getByTestId('build-connector-flyout-ai-url'),
+        screen.getByTestId('build-connector-ai-url'),
         'https://docs.example.com/api'
       );
-      await userEvent.click(screen.getByTestId('build-connector-flyout-ai-generate-btn'));
+      await userEvent.click(screen.getByTestId('build-connector-ai-generate-btn'));
 
-      const summary = await screen.findByTestId('build-connector-flyout-definition-errors');
-      expect(summary).toHaveTextContent(
-        'Action 2 (get_blacklist) > Param 1 (onlyCountries) > Item type: Array fields require an item type.'
-      );
+      expect(await screen.findByText('Array fields require an item type.')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('build-connector-page-definition-errors')
+      ).not.toBeInTheDocument();
       expect(screen.getByTestId('buildConnectorAction-1-input-0-items')).toHaveValue('');
       await userEvent.selectOptions(
         screen.getByTestId('buildConnectorAction-1-input-0-items'),
         'string'
       );
       await waitFor(() =>
-        expect(
-          screen.queryByTestId('build-connector-flyout-definition-errors')
-        ).not.toBeInTheDocument()
+        expect(screen.queryByText('Array fields require an item type.')).not.toBeInTheDocument()
       );
     });
 
@@ -735,16 +873,16 @@ describe('BuildConnectorFlyout', () => {
           attributes: { reason: 'blocked_destination' },
         },
       });
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
       await openAiPanel();
 
       await userEvent.type(
-        screen.getByTestId('build-connector-flyout-ai-url'),
+        screen.getByTestId('build-connector-ai-url'),
         'https://docs.example.com/api'
       );
-      await userEvent.click(screen.getByTestId('build-connector-flyout-ai-generate-btn'));
+      await userEvent.click(screen.getByTestId('build-connector-ai-generate-btn'));
 
-      const callout = await screen.findByTestId('build-connector-flyout-ai-error');
+      const callout = await screen.findByTestId('build-connector-ai-error');
       expect(callout).toHaveTextContent('That host is not allowed.');
       expect(callout).toHaveTextContent('Use a public https documentation URL.');
       expect(createConnectorType).not.toHaveBeenCalled();
@@ -757,16 +895,16 @@ describe('BuildConnectorFlyout', () => {
           attributes: { reason: 'no_model' },
         },
       });
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
       await openAiPanel();
 
       await userEvent.type(
-        screen.getByTestId('build-connector-flyout-ai-url'),
+        screen.getByTestId('build-connector-ai-url'),
         'https://docs.example.com/api'
       );
-      await userEvent.click(screen.getByTestId('build-connector-flyout-ai-generate-btn'));
+      await userEvent.click(screen.getByTestId('build-connector-ai-generate-btn'));
 
-      const callout = await screen.findByTestId('build-connector-flyout-ai-error');
+      const callout = await screen.findByTestId('build-connector-ai-error');
       expect(callout).toHaveTextContent(
         'Set a default AI connector, or pick a model for Connector builder in Feature Settings.'
       );
@@ -780,35 +918,35 @@ describe('BuildConnectorFlyout', () => {
           attributes: { reason: 'invalid_output' },
         },
       });
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
       await openAiPanel();
 
       await userEvent.type(
-        screen.getByTestId('build-connector-flyout-ai-url'),
+        screen.getByTestId('build-connector-ai-url'),
         'https://docs.example.com/api'
       );
-      await userEvent.click(screen.getByTestId('build-connector-flyout-ai-generate-btn'));
+      await userEvent.click(screen.getByTestId('build-connector-ai-generate-btn'));
 
-      expect(await screen.findByTestId('build-connector-flyout-ai-error')).toHaveTextContent(
+      expect(await screen.findByTestId('build-connector-ai-error')).toHaveTextContent(
         'Try again or another page, then edit the form by hand.'
       );
     });
 
     it('submits the generated draft when Save is clicked', async () => {
       generateConnectorType.mockResolvedValue({ connectorType: generatedConnectorType });
-      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      renderPage();
       await openAiPanel();
 
       await userEvent.type(
-        screen.getByTestId('build-connector-flyout-ai-url'),
+        screen.getByTestId('build-connector-ai-url'),
         'https://docs.example.com/api'
       );
-      await userEvent.click(screen.getByTestId('build-connector-flyout-ai-generate-btn'));
+      await userEvent.click(screen.getByTestId('build-connector-ai-generate-btn'));
       await waitFor(() =>
         expect(screen.getByTestId('buildConnectorNameInput')).toHaveValue('Acme')
       );
 
-      await userEvent.click(screen.getByTestId('build-connector-flyout-save-btn'));
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
 
       await waitFor(() =>
         expect(createConnectorType).toHaveBeenCalledWith(
@@ -842,7 +980,7 @@ describe('BuildConnectorFlyout', () => {
   });
 
   it('rejects an invalid ID format', async () => {
-    appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+    renderPage();
 
     await userEvent.type(await screen.findByTestId('buildConnectorIdInput'), 'No Dot');
     await userEvent.tab();

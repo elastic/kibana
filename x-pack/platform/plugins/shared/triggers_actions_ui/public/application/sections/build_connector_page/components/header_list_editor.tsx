@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFieldArray, useFormContext, useFormState } from 'react-hook-form';
-import type { BuildConnectorFormData } from './types';
+import type { BuildConnectorFormData } from '../types';
 
 interface Props {
   actionIndex: number;
@@ -27,22 +27,19 @@ interface Props {
 }
 
 const LABELS = {
-  key: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.header.nameLabel', {
+  key: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.header.nameLabel', {
     defaultMessage: 'Header',
   }),
-  value: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.header.valueLabel', {
+  value: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.header.valueLabel', {
     defaultMessage: 'Value',
   }),
   remove: i18n.translate(
-    'xpack.triggersActionsUI.sections.buildConnectorFlyout.header.removeButtonLabel',
+    'xpack.triggersActionsUI.sections.buildConnectorPage.header.removeButtonLabel',
     { defaultMessage: 'Remove header' }
   ),
-  add: i18n.translate(
-    'xpack.triggersActionsUI.sections.buildConnectorFlyout.header.addButtonLabel',
-    {
-      defaultMessage: 'Add header',
-    }
-  ),
+  add: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.header.addButtonLabel', {
+    defaultMessage: 'Add header',
+  }),
 };
 
 /** Key/value rows for an action's request headers. */

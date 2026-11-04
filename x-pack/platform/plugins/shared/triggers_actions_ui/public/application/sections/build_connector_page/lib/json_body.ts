@@ -8,12 +8,12 @@
 import { i18n } from '@kbn/i18n';
 
 export const INVALID_JSON_MESSAGE = i18n.translate(
-  'xpack.triggersActionsUI.sections.buildConnectorFlyout.error.invalidJson',
+  'xpack.triggersActionsUI.sections.buildConnectorPage.error.invalidJson',
   { defaultMessage: 'Must be valid JSON.' }
 );
 
 export const NOT_A_JSON_OBJECT_MESSAGE = i18n.translate(
-  'xpack.triggersActionsUI.sections.buildConnectorFlyout.error.notAJsonObject',
+  'xpack.triggersActionsUI.sections.buildConnectorPage.error.notAJsonObject',
   { defaultMessage: 'Must be a JSON object.' }
 );
 

@@ -12,7 +12,6 @@ import { useLocation, matchPath } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { createConnectorTypeRequestSchema } from '@kbn/actions-plugin/common';
-import type { CreateConnectorTypeRequest } from '@kbn/actions-plugin/common';
 import { EuiCallOut, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
@@ -21,7 +20,12 @@ import {
   CONNECTOR_TYPE_DRAFT_STORAGE_PREFIX,
 } from '../../../../common/connector_type_draft_handoff';
 import type { Section } from '../../../constants';
-import { routeToConnectorEdit, routeToConnectors, routeToLogs } from '../../../constants';
+import {
+  routeToBuildConnector,
+  routeToConnectorEdit,
+  routeToConnectors,
+  routeToLogs,
+} from '../../../constants';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
 import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
@@ -33,7 +37,6 @@ import type { ActionConnector } from '../../../../types';
 import type { EditConnectorTabs } from '../../../../types';
 import { CreateConnectorFlyout } from '../../action_connector_form/create_connector_flyout';
 import { EditConnectorFlyout } from '../../action_connector_form/edit_connector_flyout';
-import { BuildConnectorFlyout } from '../../action_connector_form/build_connector_flyout';
 import type { EditConnectorProps } from './types';
 import { loadAllActions, loadConnectorAuthStatus } from '../../../lib/action_connector_api';
 import { hasSaveActionsCapability } from '../../../lib/capabilities';
@@ -73,9 +76,6 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
   const { skippedPreconfiguredConnectorIds } = useSkippedPreconfiguredConnectorIds();
 
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
-  const [buildFlyoutVisible, setBuildFlyoutVisibility] = useState<boolean>(false);
-  const [initialBuildDefinition, setInitialBuildDefinition] =
-    useState<CreateConnectorTypeRequest>();
   const [editConnectorProps, setEditConnectorProps] = useState<EditConnectorProps>({});
   const [actions, setActions] = useState<ActionConnector[]>([]);
   const [isLoadingActions, setIsLoadingActions] = useState<boolean>(true);
@@ -182,8 +182,10 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
       });
       return;
     }
-    setInitialBuildDefinition(result.data);
-    setBuildFlyoutVisibility(true);
+    history.push({
+      pathname: routeToBuildConnector,
+      state: { initialDefinition: result.data },
+    });
   }, [history, location.pathname, location.search, toasts]);
 
   const tabs = useMemo<AppHeaderTab[]>(
@@ -226,15 +228,12 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
                 secondaryButtonIconType: 'wrench',
                 secondaryButtonAriaLabel: BUILD_CONNECTOR_LABEL,
                 secondaryButtonTooltipContent: BUILD_CONNECTOR_LABEL,
-                run: () => {
-                  setInitialBuildDefinition(undefined);
-                  setBuildFlyoutVisibility(true);
-                },
+                run: () => history.push(routeToBuildConnector),
               },
             }
           : undefined,
     }),
-    [canSave, isConnectorsSection]
+    [canSave, history, isConnectorsSection]
   );
 
   // Set breadcrumb and page title
@@ -321,15 +320,6 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
           }}
           onTestConnector={loadActions}
           actionTypeRegistry={actionTypeRegistry}
-        />
-      )}
-      {buildFlyoutVisible && (
-        <BuildConnectorFlyout
-          initialDefinition={initialBuildDefinition}
-          onClose={() => {
-            setBuildFlyoutVisibility(false);
-            setInitialBuildDefinition(undefined);
-          }}
         />
       )}
       {editConnectorProps.initialConnector && (

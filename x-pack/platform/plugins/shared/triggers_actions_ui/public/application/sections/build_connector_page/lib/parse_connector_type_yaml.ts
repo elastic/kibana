@@ -14,7 +14,7 @@ const isPlainObject = (value: unknown): value is Record<string, unknown> =>
 
 const listOfFieldsError = (path: string) =>
   new Error(
-    i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.yamlListOfFieldsError', {
+    i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.yamlListOfFieldsError', {
       defaultMessage:
         '"{path}" must be a list of fields, each with a name and a type (and optionally required, label and description).',
       values: { path },
@@ -23,7 +23,7 @@ const listOfFieldsError = (path: string) =>
 
 const mapError = (path: string, keyedBy: string) =>
   new Error(
-    i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.yamlMapError', {
+    i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.yamlMapError', {
       defaultMessage: '"{path}" must be a map keyed by {keyedBy}.',
       values: { path, keyedBy },
     })
@@ -31,7 +31,7 @@ const mapError = (path: string, keyedBy: string) =>
 
 const objectError = (path: string) =>
   new Error(
-    i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.yamlObjectError', {
+    i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.yamlObjectError', {
       defaultMessage: '"{path}" must be an object.',
       values: { path },
     })
@@ -40,15 +40,12 @@ const objectError = (path: string) =>
 const unknownKeyError = (path: string, key: string, allowed: readonly string[]) =>
   new Error(
     path
-      ? i18n.translate(
-          'xpack.triggersActionsUI.sections.buildConnectorFlyout.yamlUnknownKeyError',
-          {
-            defaultMessage: '"{path}" has an unknown key "{key}". Allowed keys: {allowed}.',
-            values: { path, key, allowed: allowed.join(', ') },
-          }
-        )
+      ? i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.yamlUnknownKeyError', {
+          defaultMessage: '"{path}" has an unknown key "{key}". Allowed keys: {allowed}.',
+          values: { path, key, allowed: allowed.join(', ') },
+        })
       : i18n.translate(
-          'xpack.triggersActionsUI.sections.buildConnectorFlyout.yamlUnknownTopLevelKeyError',
+          'xpack.triggersActionsUI.sections.buildConnectorPage.yamlUnknownTopLevelKeyError',
           {
             defaultMessage: 'Unknown top-level key "{key}". Allowed keys: {allowed}.',
             values: { key, allowed: allowed.join(', ') },
@@ -135,7 +132,7 @@ export const parseConnectorTypeYaml = (text: string): Partial<CreateConnectorTyp
 
   if (!isPlainObject(parsed)) {
     throw new Error(
-      i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.yamlNotAnObjectError', {
+      i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.yamlNotAnObjectError', {
         defaultMessage: 'The YAML must describe a single connector type definition.',
       })
     );

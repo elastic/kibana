@@ -13,7 +13,7 @@ import type {
   ConnectorTypeAction,
   ConnectorTypeActionForm,
   ConnectorTypeField,
-} from './types';
+} from '../types';
 import { parseJsonObject } from './json_body';
 
 /** Derives a connector type ID from its display name, e.g. 'My Service' → 'my-service'. */

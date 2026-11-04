@@ -6,63 +6,42 @@
  */
 
 import React, { memo, useEffect, useRef } from 'react';
-import { EuiFieldText, EuiFormRow, EuiSelect, EuiSpacer, EuiTextArea } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiSelect, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { Controller, useFormContext, useFormState, useWatch } from 'react-hook-form';
-import type { BuildConnectorFormData, ConnectorTypeAuthType } from './types';
-import { toConnectorTypeId } from './form_serializers';
-import { FieldListEditor } from './field_list_editor';
-import { ActionListEditor } from './action_list_editor';
+import type { BuildConnectorFormData, ConnectorTypeAuthType } from '../types';
+import { toConnectorTypeId } from '../lib/form_serializers';
 
 const authTypeOptions: Array<{ value: ConnectorTypeAuthType; text: string }> = [
   {
     value: 'none',
-    text: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.authType.none', {
+    text: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.authType.none', {
       defaultMessage: 'None',
     }),
   },
   {
     value: 'basic',
-    text: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.authType.basic', {
+    text: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.authType.basic', {
       defaultMessage: 'Basic',
     }),
   },
   {
     value: 'bearer',
-    text: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.authType.bearer', {
+    text: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.authType.bearer', {
       defaultMessage: 'Bearer token',
     }),
   },
   {
     value: 'api_key_header',
     text: i18n.translate(
-      'xpack.triggersActionsUI.sections.buildConnectorFlyout.authType.apiKeyHeader',
+      'xpack.triggersActionsUI.sections.buildConnectorPage.authType.apiKeyHeader',
       { defaultMessage: 'API key header' }
     ),
   },
 ];
 
-/** Explains the `config` object; shown on the info icon of the config field list. */
-const CONFIG_TOOLTIP = (
-  <p>
-    <FormattedMessage
-      id="xpack.triggersActionsUI.sections.buildConnectorFlyout.configTooltip"
-      defaultMessage="The {config} object. Its fields are entered once, when a user creates a connector of this type, for example a base URL, and are available in every action's request as {example}."
-      values={{ config: <code>config</code>, example: <code>{'{{config.<name>}}'}</code> }}
-    />
-  </p>
-);
-
-const CONFIG_DESCRIPTION = (
-  <FormattedMessage
-    id="xpack.triggersActionsUI.sections.buildConnectorFlyout.configDescription"
-    defaultMessage="Entered when a connector of this type is created. Use as {example}."
-    values={{ example: <code>{'{{config.<name>}}'}</code> }}
-  />
-);
-
-const BuildConnectorFormComponent: React.FC = () => {
+/** Name, ID, description and authentication of the connector type. */
+const ConnectorDetailsFieldsComponent: React.FC = () => {
   const { control, setValue } = useFormContext<BuildConnectorFormData>();
   const { isSubmitted } = useFormState({ control });
   const [displayName, id, authType] = useWatch({
@@ -95,7 +74,7 @@ const BuildConnectorFormComponent: React.FC = () => {
         render={({ field, fieldState: { error } }) => (
           <EuiFormRow
             label={i18n.translate(
-              'xpack.triggersActionsUI.sections.buildConnectorFlyout.nameFieldLabel',
+              'xpack.triggersActionsUI.sections.buildConnectorPage.nameFieldLabel',
               { defaultMessage: 'Name' }
             )}
             fullWidth
@@ -120,11 +99,11 @@ const BuildConnectorFormComponent: React.FC = () => {
         render={({ field, fieldState: { error } }) => (
           <EuiFormRow
             label={i18n.translate(
-              'xpack.triggersActionsUI.sections.buildConnectorFlyout.idFieldLabel',
+              'xpack.triggersActionsUI.sections.buildConnectorPage.idFieldLabel',
               { defaultMessage: 'Connector type ID' }
             )}
             helpText={i18n.translate(
-              'xpack.triggersActionsUI.sections.buildConnectorFlyout.idFieldHelpText',
+              'xpack.triggersActionsUI.sections.buildConnectorPage.idFieldHelpText',
               { defaultMessage: 'A unique identifier derived from the name. You can customize it.' }
             )}
             fullWidth
@@ -149,7 +128,7 @@ const BuildConnectorFormComponent: React.FC = () => {
         render={({ field, fieldState: { error } }) => (
           <EuiFormRow
             label={i18n.translate(
-              'xpack.triggersActionsUI.sections.buildConnectorFlyout.descriptionFieldLabel',
+              'xpack.triggersActionsUI.sections.buildConnectorPage.descriptionFieldLabel',
               { defaultMessage: 'Description' }
             )}
             fullWidth
@@ -175,7 +154,7 @@ const BuildConnectorFormComponent: React.FC = () => {
         render={({ field, fieldState: { error } }) => (
           <EuiFormRow
             label={i18n.translate(
-              'xpack.triggersActionsUI.sections.buildConnectorFlyout.authTypeFieldLabel',
+              'xpack.triggersActionsUI.sections.buildConnectorPage.authTypeFieldLabel',
               { defaultMessage: 'Authentication' }
             )}
             fullWidth
@@ -202,7 +181,7 @@ const BuildConnectorFormComponent: React.FC = () => {
           render={({ field, fieldState: { error } }) => (
             <EuiFormRow
               label={i18n.translate(
-                'xpack.triggersActionsUI.sections.buildConnectorFlyout.headerNameFieldLabel',
+                'xpack.triggersActionsUI.sections.buildConnectorPage.headerNameFieldLabel',
                 { defaultMessage: 'API key header name' }
               )}
               fullWidth
@@ -222,24 +201,8 @@ const BuildConnectorFormComponent: React.FC = () => {
           )}
         />
       )}
-      <EuiSpacer size="l" />
-      <FieldListEditor
-        name="config"
-        title={i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.configTitle', {
-          defaultMessage: 'Config',
-        })}
-        description={CONFIG_DESCRIPTION}
-        tooltipContent={CONFIG_TOOLTIP}
-        addButtonLabel={i18n.translate(
-          'xpack.triggersActionsUI.sections.buildConnectorFlyout.addConfigFieldButtonLabel',
-          { defaultMessage: 'Add config field' }
-        )}
-        testSubjPrefix="buildConnectorConfigFields"
-      />
-      <EuiSpacer size="l" />
-      <ActionListEditor />
     </>
   );
 };
 
-export const BuildConnectorForm = memo(BuildConnectorFormComponent);
+export const ConnectorDetailsFields = memo(ConnectorDetailsFieldsComponent);

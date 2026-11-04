@@ -21,7 +21,6 @@ export interface ConnectorTypeHeaderRow {
   value: string;
 }
 
-/** One action as edited in the form: identified by `name`, headers as rows, body as JSON text. */
 export interface ConnectorTypeActionForm {
   name: string;
   description: string;

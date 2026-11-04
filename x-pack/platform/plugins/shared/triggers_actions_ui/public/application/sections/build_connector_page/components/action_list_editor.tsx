@@ -6,15 +6,15 @@
  */
 
 import React, { memo } from 'react';
-import { EuiButtonEmpty, EuiFormErrorText, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFormErrorText, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useFieldArray, useFormContext, useFormState } from 'react-hook-form';
-import type { BuildConnectorFormData } from './types';
+import type { BuildConnectorFormData } from '../types';
 import { ActionEditor } from './action_editor';
-import { createEmptyAction } from './form_serializers';
+import { createEmptyAction } from '../lib/form_serializers';
 
-/** The list of actions a connector type offers; one is shown by default. */
+/** The list of actions a connector type offers; one is shown by default. Its step names it. */
 const ActionListEditorComponent: React.FC = () => {
   const { control } = useFormContext<BuildConnectorFormData>();
   const { fields, append, remove } = useFieldArray({ control, name: 'actions' });
@@ -23,17 +23,9 @@ const ActionListEditorComponent: React.FC = () => {
 
   return (
     <div data-test-subj="buildConnectorActions">
-      <EuiTitle size="xxs">
-        <h4>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.buildConnectorFlyout.actionsTitle"
-            defaultMessage="Actions"
-          />
-        </h4>
-      </EuiTitle>
       <EuiText size="xs" color="subdued">
         <FormattedMessage
-          id="xpack.triggersActionsUI.sections.buildConnectorFlyout.actionsDescription"
+          id="xpack.triggersActionsUI.sections.buildConnectorPage.actionsDescription"
           defaultMessage="The HTTP requests this connector type can make. A rule picks one and provides its input values."
         />
       </EuiText>
@@ -56,7 +48,7 @@ const ActionListEditorComponent: React.FC = () => {
         data-test-subj="buildConnectorActions-add"
       >
         {i18n.translate(
-          'xpack.triggersActionsUI.sections.buildConnectorFlyout.addActionButtonLabel',
+          'xpack.triggersActionsUI.sections.buildConnectorPage.addActionButtonLabel',
           {
             defaultMessage: 'Add action',
           }
