@@ -68,7 +68,7 @@ export const EvaluateResultError = lazySchema(() =>
 export type EvaluateResultError = z.infer<typeof EvaluateResultError>;
 
 /**
- * Tokens used by the evaluator's model calls, summed over every call it made, including retries and calls that failed. Absent when the evaluator made no model call. Named like Agent Builder's round usage, so the two can be summed.
+ * Tokens used by the evaluator's model calls, summed over every call it made. A call the inference client retried counts once, with the tokens of its final attempt, so tokens spent by the retried attempts aren't counted; a call that failed counts once with no tokens. Absent when the evaluator made no model call. Named like Agent Builder's round usage, so the two can be summed.
  */
 export const EvaluateResultUsage = lazySchema(() =>
   z.object({
@@ -105,9 +105,15 @@ export const EvaluateResultUsage = lazySchema(() =>
       .optional()
       .describe('Reasoning tokens (part of `output_tokens`), when reported.'),
     /**
-     * Model calls the evaluator made.
+     * Model calls the evaluator attempted, including calls that failed before reaching a model.
      */
-    llm_calls: z.number().int().min(0).describe('Model calls the evaluator made.'),
+    llm_calls: z
+      .number()
+      .int()
+      .min(0)
+      .describe(
+        'Model calls the evaluator attempted, including calls that failed before reaching a model.'
+      ),
     /**
      * Calls with no token counts in the totals: the call failed, or the provider reported no usage.
      */
