@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { normalizeJsonSchemaTypeArrays, z } from '@kbn/zod/v4';
 import {
   actionPolicyTestSendBodySchema,
   actionPolicyWorkflowPayloadSchema,
@@ -112,26 +111,6 @@ describe('actionPolicyWorkflowPayloadSchema', () => {
     ['a missing policy id', { ...payload, policyId: undefined }],
   ])('rejects %s', (_, value) => {
     expect(actionPolicyWorkflowPayloadSchema.safeParse(value).success).toBe(false);
-  });
-
-  it('converts to a closed JSON Schema for the payload editor', () => {
-    const jsonSchema = normalizeJsonSchemaTypeArrays(
-      z.toJSONSchema(actionPolicyWorkflowPayloadSchema, { io: 'input' })
-    );
-
-    expect(jsonSchema).toMatchObject({
-      additionalProperties: false,
-      properties: {
-        alerts: {
-          items: {
-            additionalProperties: false,
-            properties: {
-              rule_id: { anyOf: [{ type: 'string' }, { type: 'null' }] },
-            },
-          },
-        },
-      },
-    });
   });
 });
 

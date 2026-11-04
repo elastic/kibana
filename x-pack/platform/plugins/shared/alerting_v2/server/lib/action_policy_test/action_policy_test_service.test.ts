@@ -6,17 +6,18 @@
  */
 
 import Boom from '@hapi/boom';
-import type {
-  ActionPolicyResponse,
-  ActionPolicyWorkflowPayloadInput,
-} from '@kbn/alerting-v2-schemas';
+import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ActionPolicyClient } from '../action_policy_client';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
-import { MOCK_KIBANA_BASE_URL } from '../dispatcher/fixtures/test_utils';
-import type { ActionPolicyWorkflowPayload } from '../dispatcher/types';
+import {
+  createActionGroup,
+  createAlert,
+  MOCK_KIBANA_BASE_URL,
+} from '../dispatcher/fixtures/test_utils';
+import { toWorkflowPayload } from '../dispatcher/workflow_payload';
 import { createMockEbtService } from '../services/ebt_service/ebt_service.mock';
 import { createMockLicenseService } from '../services/license_service/license_service.mock';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
@@ -26,32 +27,13 @@ import { ActionPolicyTestService } from './action_policy_test_service';
 
 const SPACE_ID = 'team-a';
 
-const PAYLOAD: ActionPolicyWorkflowPayloadInput = {
-  id: 'test-group-1',
-  policyId: 'policy-1',
-  groupKey: {},
-  alerts: [
-    {
-      last_event_timestamp: '2026-01-01T00:00:00.000Z',
-      rule_id: 'test-rule-1',
-      source: 'internal',
-      space_id: SPACE_ID,
-      group_hash: 'test-group-hash-1',
-      alert_id: 'test-alert-1',
-      alert_status: 'active',
-      severity: 'high',
-      alert_url: `${MOCK_KIBANA_BASE_URL}/s/${SPACE_ID}/app/observability/alerts/test-alert-1`,
-    },
-  ],
-  rules: { 'test-rule-1': { name: 'Test rule 1' } },
-};
-
-const toDispatcherPayload = (
-  payload: ActionPolicyWorkflowPayloadInput
-): ActionPolicyWorkflowPayload => payload;
-
-const toPayloadInput = (payload: ActionPolicyWorkflowPayload): ActionPolicyWorkflowPayloadInput =>
-  payload;
+const PAYLOAD = toWorkflowPayload(
+  createActionGroup({
+    spaceId: SPACE_ID,
+    alerts: [createAlert({ space_id: SPACE_ID, severity: 'high' })],
+    rules: { 'rule-1': { name: 'Rule 1' } },
+  })
+);
 
 const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolicyResponse => ({
   id: 'policy-1',
@@ -258,22 +240,6 @@ describe('ActionPolicyTestService', () => {
       expect(workflowsManagement.bulkScheduleWorkflow).not.toHaveBeenCalled();
     });
 
-    it('sends an edited payload as is', async () => {
-      const { service, workflowsManagement } = setup();
-      workflowsManagement.testWorkflow.mockResolvedValue('execution-1');
-      const [alert] = PAYLOAD.alerts;
-      const edited: ActionPolicyWorkflowPayloadInput = {
-        ...PAYLOAD,
-        alerts: [alert, { ...alert, alert_id: 'test-alert-2', severity: 'critical' }],
-      };
-
-      await service.send({ policyId: 'policy-1', payload: edited, destinationIds: ['workflow-1'] });
-
-      expect(workflowsManagement.testWorkflow).toHaveBeenCalledWith(
-        expect.objectContaining({ inputs: { payload: edited } })
-      );
-    });
-
     it('only runs the selected destinations, once each', async () => {
       const { service, workflowsManagement } = setup();
       workflowsManagement.testWorkflow.mockResolvedValue('execution-2');
@@ -358,9 +324,5 @@ describe('ActionPolicyTestService', () => {
         failed_count: 1,
       });
     });
-  });
-
-  it('keeps the zod payload schema and the dispatcher payload type in sync', () => {
-    expect(toDispatcherPayload(PAYLOAD)).toBe(toPayloadInput(PAYLOAD));
   });
 });

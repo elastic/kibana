@@ -14,7 +14,6 @@ import {
   type ActionPolicyTestPreviewResponse,
   type ActionPolicyTestSendResponse,
   type ActionPolicyTestSendResult,
-  type ActionPolicyWorkflowPayloadInput,
 } from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -50,7 +49,7 @@ const createSeed = (): number => Math.floor(Math.random() * (ACTION_POLICY_TEST_
 
 export interface SendTestNotificationParams {
   policyId: string;
-  payload: ActionPolicyWorkflowPayloadInput;
+  payload: ActionPolicyWorkflowPayload;
   destinationIds: readonly string[];
 }
 
@@ -88,10 +87,15 @@ export class ActionPolicyTestService {
       this.actionPolicyClient.getActionPolicy({ id: policyId }),
       this.privilegeChecker.getWorkflowPrivileges(),
     ]);
-    const groups = this.buildScenario(policy, seed);
+    const groups = buildTestScenario({
+      policy: this.toDispatcherPolicy(policy),
+      kibanaBaseUrl: this.kibanaBaseUrl,
+      seed,
+      now: new Date(),
+    });
     const destinations = await this.describeDestinations(policy, workflowPrivileges);
 
-    return { seed, groups: groups.map((payload) => ({ ...payload })), destinations };
+    return { seed, groups, destinations };
   }
 
   public async send({
@@ -122,15 +126,6 @@ export class ActionPolicyTestService {
     this.reportSent(policy, payload, results);
 
     return { results };
-  }
-
-  private buildScenario(policy: ActionPolicyResponse, seed: number): ActionPolicyWorkflowPayload[] {
-    return buildTestScenario({
-      policy: this.toDispatcherPolicy(policy),
-      kibanaBaseUrl: this.kibanaBaseUrl,
-      seed,
-      now: new Date(),
-    });
   }
 
   private toDispatcherPolicy({
@@ -198,7 +193,7 @@ export class ActionPolicyTestService {
   private async runWorkflowTest(
     policyId: string,
     workflowId: string,
-    payload: ActionPolicyWorkflowPayloadInput
+    payload: ActionPolicyWorkflowPayload
   ): Promise<ActionPolicyTestSendResult> {
     try {
       const workflowExecutionId = await this.workflowsManagement.testWorkflow({
@@ -221,7 +216,7 @@ export class ActionPolicyTestService {
 
   private reportSent(
     policy: ActionPolicyResponse,
-    payload: ActionPolicyWorkflowPayloadInput,
+    payload: ActionPolicyWorkflowPayload,
     results: ActionPolicyTestSendResult[]
   ): void {
     const failedCount = results.filter((result) => 'error' in result).length;

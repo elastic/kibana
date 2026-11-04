@@ -42,11 +42,11 @@ describe('validatePayload', () => {
     expect(errors).toEqual([expect.stringMatching(/^Invalid JSON: /)]);
   });
 
-  it('reports an unknown key of the payload by name', () => {
+  it('reports an unknown key of the payload by name, without a path', () => {
     const { payload: parsed, errors } = validatePayload(toText({ ...payload, foo: 1 }));
 
     expect(parsed).toBeUndefined();
-    expect(errors).toEqual([expect.stringContaining('"foo"')]);
+    expect(errors).toEqual([expect.stringMatching(/^Unrecognized key.*"foo"/)]);
   });
 
   it('prefixes the error of a nested field with its path', () => {

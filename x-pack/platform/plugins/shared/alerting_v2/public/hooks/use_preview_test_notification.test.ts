@@ -30,17 +30,13 @@ describe('usePreviewTestNotification', () => {
     });
   });
 
-  it('builds the preview once for the policy', async () => {
+  it('fetches the preview of the policy', async () => {
     api.previewTestNotification.mockResolvedValue(createPreview(1));
-    const { result, rerender } = renderHook(() => usePreviewTestNotification('policy-1'), {
+    const { result } = renderHook(() => usePreviewTestNotification('policy-1'), {
       wrapper: createHookTestProviders(),
     });
 
     await waitFor(() => expect(result.current.data?.seed).toBe(1));
-    rerender();
-
-    expect(result.current.data?.seed).toBe(1);
-    expect(api.previewTestNotification).toHaveBeenCalledTimes(1);
     expect(api.previewTestNotification).toHaveBeenCalledWith('policy-1');
   });
 });

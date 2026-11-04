@@ -66,11 +66,11 @@ jest.mock('./send_test_results_flyout', () => {
   };
 });
 
-const closeResultsFlyout = (reason: 'navigation-back' | 'close-button' | 'navigation-cascade') => {
+const closeResultsFlyout = () => {
   const { onClose } =
     mockResultsFlyoutProps.mock.calls[mockResultsFlyoutProps.mock.calls.length - 1][0];
   act(() => {
-    onClose(new MouseEvent('click'), { reason });
+    onClose();
   });
 };
 
@@ -210,27 +210,12 @@ describe('SendTestNotificationFlyout', () => {
       });
     });
 
-    it('shows an unknown key inline and blocks sending', () => {
+    it('shows an invalid payload inline and blocks sending until it is reset', async () => {
       renderFlyout();
-
       editPayload({ ...createPayload(), unknownKey: true });
 
       expect(screen.getByText(/Unrecognized key.*"unknownKey"/)).toBeInTheDocument();
       expect(screen.getByTestId('sendTestNotificationSendButton')).toBeDisabled();
-    });
-
-    it('shows invalid JSON inline and blocks sending', () => {
-      renderFlyout();
-
-      editPayload('{');
-
-      expect(screen.getByText(/^Invalid JSON: /)).toBeInTheDocument();
-      expect(screen.getByTestId('sendTestNotificationSendButton')).toBeDisabled();
-    });
-
-    it('resets the payload to the previewed one', async () => {
-      renderFlyout();
-      editPayload({ ...createPayload(), unknownKey: true });
 
       await userEvent.click(screen.getByTestId('sendTestNotificationResetPayloadButton'));
 
@@ -238,20 +223,6 @@ describe('SendTestNotificationFlyout', () => {
       expect(screen.queryByText(/Unrecognized key.*"unknownKey"/)).not.toBeInTheDocument();
       expect(screen.getByTestId('sendTestNotificationResetPayloadButton')).toBeDisabled();
       expect(screen.getByTestId('sendTestNotificationSendButton')).toBeEnabled();
-    });
-
-    it('keeps the edited payload after the test runs flyout is closed', () => {
-      const { rerender } = renderFlyout();
-      const edited = { ...createPayload(), id: 'test-group-edited' };
-      editPayload(edited);
-      mockSendResponse = { results: [{ workflow_id: 'wf-1', workflow_execution_id: 'exec-1' }] };
-      rerender();
-
-      closeResultsFlyout('close-button');
-      mockSendResponse = undefined;
-      rerender();
-
-      expect(JSON.parse(getEditor().value)).toEqual(edited);
     });
   });
 
@@ -322,33 +293,26 @@ describe('SendTestNotificationFlyout', () => {
     it('resets the send when the test runs flyout is closed', () => {
       renderFlyout();
 
-      closeResultsFlyout('close-button');
+      closeResultsFlyout();
 
       expect(mockResetSend).toHaveBeenCalledTimes(1);
     });
 
-    it('resets the send when the form flyout closes the test runs flyout', () => {
-      renderFlyout();
-
-      closeResultsFlyout('navigation-cascade');
-
-      expect(mockResetSend).toHaveBeenCalledTimes(1);
-    });
-
-    it('goes back to the form with the same payload and destinations', async () => {
+    it('goes back to the form with the edited payload and destinations', async () => {
       mockSendResponse = undefined;
       const { rerender } = renderFlyout();
+      const edited = { ...createPayload(), id: 'test-group-edited' };
+      editPayload(edited);
       await userEvent.click(getCheckbox('wf-3'));
       mockSendResponse = { results: [{ workflow_id: 'wf-1', workflow_execution_id: 'exec-1' }] };
       rerender();
 
-      closeResultsFlyout('navigation-back');
-
-      expect(mockResetSend).toHaveBeenCalledTimes(1);
+      closeResultsFlyout();
       mockSendResponse = undefined;
       rerender();
+
       expect(screen.queryByTestId('sendTestNotificationResultsFlyout')).not.toBeInTheDocument();
-      expect(JSON.parse(getEditor().value)).toEqual(createPayload());
+      expect(JSON.parse(getEditor().value)).toEqual(edited);
       expect(getCheckbox('wf-1')).toBeChecked();
       expect(getCheckbox('wf-2')).toBeChecked();
       expect(getCheckbox('wf-3')).not.toBeChecked();

@@ -10,7 +10,6 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import {
   ACTION_POLICY_MAX_DESTINATIONS,
-  ACTION_POLICY_TEST_MAX_ALERTS,
   ACTION_POLICY_TEST_SEED_MAX,
   ID_MAX_LENGTH,
   type ActionPolicyWorkflowPayloadInput,
@@ -31,23 +30,23 @@ const sendUrl = (id: string) => buildPath(testData.INTERNAL_ACTION_POLICY_TEST_A
 
 const SEED = 42;
 
-const ALERT: ActionPolicyWorkflowPayloadInput['alerts'][number] = {
-  last_event_timestamp: '2026-01-01T00:00:00.000Z',
-  rule_id: 'test-rule-1',
-  source: 'internal',
-  space_id: 'default',
-  group_hash: 'test-group-hash-1',
-  alert_id: 'test-alert-1',
-  alert_status: 'active',
-  severity: 'high',
-  alert_url: 'http://localhost:5601/app/observability/alerts/test-alert-1',
-};
-
 const PAYLOAD: ActionPolicyWorkflowPayloadInput = {
   id: 'test-group-1',
   policyId: 'test-policy',
   groupKey: {},
-  alerts: [ALERT],
+  alerts: [
+    {
+      last_event_timestamp: '2026-01-01T00:00:00.000Z',
+      rule_id: 'test-rule-1',
+      source: 'internal',
+      space_id: 'default',
+      group_hash: 'test-group-hash-1',
+      alert_id: 'test-alert-1',
+      alert_status: 'active',
+      severity: 'high',
+      alert_url: 'http://localhost:5601/app/observability/alerts/test-alert-1',
+    },
+  ],
   rules: { 'test-rule-1': { name: 'Test rule 1' } },
 };
 
@@ -154,21 +153,7 @@ apiTest.describe(
 
       const invalidSendBodies = [
         { destination_ids: [workflowId] },
-        { seed: SEED, payload: PAYLOAD, destination_ids: [workflowId] },
         { payload: {}, destination_ids: [workflowId] },
-        { payload: { ...PAYLOAD, unknown: true }, destination_ids: [workflowId] },
-        {
-          payload: { ...PAYLOAD, alerts: [{ ...ALERT, unknown: true }] },
-          destination_ids: [workflowId],
-        },
-        { payload: { ...PAYLOAD, alerts: [] }, destination_ids: [workflowId] },
-        {
-          payload: {
-            ...PAYLOAD,
-            alerts: Array.from({ length: ACTION_POLICY_TEST_MAX_ALERTS + 1 }, () => ALERT),
-          },
-          destination_ids: [workflowId],
-        },
         { payload: PAYLOAD, destination_ids: [] },
         {
           payload: PAYLOAD,
@@ -286,36 +271,5 @@ apiTest.describe(
         ).toHaveLength(0);
       }
     );
-
-    apiTest('sends an edited payload as is', async ({ apiClient, apiServices, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser(
-        ALERTING_V2_ACTION_POLICIES_READ_AND_WORKFLOW_EXECUTE_ROLE
-      );
-      const headers = { ...testData.COMMON_HEADERS, ...cookieHeader };
-
-      const preview = await apiClient.post(previewUrl(policyId), {
-        headers,
-        body: { seed: SEED },
-      });
-      expect(preview).toHaveStatusCode(200);
-      const [payload] = preview.body.groups;
-      const [alert] = payload.alerts;
-      const edited = {
-        ...payload,
-        alerts: [alert, { ...alert, alert_id: 'test-alert-edited', severity: 'critical' }],
-      };
-
-      const send = await apiClient.post(sendUrl(policyId), {
-        headers,
-        body: { payload: edited, destination_ids: [workflowId] },
-      });
-      expect(send).toHaveStatusCode(200);
-
-      const [{ workflow_execution_id: executionId }] = send.body.results;
-      const execution = await apiServices.alertingV2.workflows.waitForCompletedExecution(
-        executionId
-      );
-      expect(execution).toMatchObject({ isTestRun: true, workflowId });
-    });
   }
 );

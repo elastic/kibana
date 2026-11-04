@@ -14,6 +14,10 @@ import * as labels from './translations';
 
 const SCHEMA_URI = 'inmemory://schemas/alerting-v2-action-policy-workflow-payload';
 
+/** JSON Schema of the workflow payload, for the editor diagnostics. */
+export const getPayloadJsonSchema = () =>
+  normalizeJsonSchemaTypeArrays(z.toJSONSchema(actionPolicyWorkflowPayloadSchema, { io: 'input' }));
+
 interface Props {
   value: string;
   generatedValue: string;
@@ -40,15 +44,18 @@ export const PayloadEditor = ({ value, generatedValue, errors, onChange, onReset
         {
           uri: SCHEMA_URI,
           fileMatch: [modelUri],
-          schema: normalizeJsonSchemaTypeArrays(
-            z.toJSONSchema(actionPolicyWorkflowPayloadSchema, { io: 'input' })
-          ),
+          schema: getPayloadJsonSchema(),
         },
       ],
     });
 
     return () => {
-      jsonDefaults.setDiagnosticsOptions(previousOptions);
+      // Remove only this editor's schema, so a JSON editor mounted meanwhile keeps its own.
+      const { schemas = [] } = jsonDefaults.diagnosticsOptions;
+      jsonDefaults.setDiagnosticsOptions({
+        ...previousOptions,
+        schemas: schemas.filter(({ uri }) => uri !== SCHEMA_URI),
+      });
     };
   }, [modelUri]);
 
