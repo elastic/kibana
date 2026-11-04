@@ -84,12 +84,17 @@ The connector automatically configures the correct {{sn}} OAuth endpoints for yo
 
 You can create connectors in **{{stack-manage-app}} → {{connectors-ui}}**.
 
-{{sn}} connectors support **OAuth 2.0 Client Credentials** and **OAuth 2.0 Authorization Code** authentication. Select the authentication type when you create or edit the connector.
+{{sn}} connectors support **OAuth Client Credentials** and **OAuth 2.0 Authorization Code** authentication. Select the authentication type when you create or edit the connector.
+
+:::{note}
+:applies_to: {"stack": "preview 9.5", "serverless": "preview"}
+The picker lists **OAuth 2.0 Authorization Code** first and marks it with a **Recommended** badge.
+:::
 
 Instance URL
 :   The URL of your {{sn}} instance (for example, `https://your-instance.service-now.com`).
 
-#### OAuth 2.0 Client Credentials
+#### OAuth Client Credentials
 
 Token URL
 :   The OAuth 2.0 token endpoint URL for your {{sn}} instance (for example, `https://your-instance.service-now.com/oauth_token.do`).
@@ -97,15 +102,15 @@ Token URL
 Client ID
 :   The OAuth client ID from your {{sn}} application registry.
 
-Client Secret
+Client secret
 :   The OAuth client secret for your {{sn}} application.
 
 #### OAuth 2.0 Authorization Code
 
 Client ID
-:   The OAuth client ID from your {{sn}} application registry. Refer to [OAuth Authorization Code setup](#servicenow-search-oauth-auth-code).
+:   The OAuth client ID from your {{sn}} application registry. Refer to [OAuth 2.0 Authorization Code setup](#servicenow-search-oauth-auth-code).
 
-Client Secret
+Client secret
 :   The OAuth client secret for your {{sn}} application.
 
 After you enter these values, authorize with your {{sn}} account.
