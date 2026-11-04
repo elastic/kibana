@@ -11,6 +11,7 @@ import type {
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import type { InvalidationTarget } from '@kbn/response-ops-api-keys';
 import { queueInvalidationTargets } from '@kbn/response-ops-api-keys';
 import type { ApiKeyType } from '../../config';
 import type { ConcreteTaskInstance, TaskInstance, TaskUserScope } from '../../task';
@@ -22,6 +23,7 @@ import {
 } from '../uiam_telemetry';
 
 export type { ApiKeyType } from '../../config';
+export type { InvalidationTarget };
 
 export interface ApiKeySOFields {
   apiKey?: string;
@@ -45,13 +47,6 @@ export interface GrantApiKeysOpts {
    * resolves. This lets callers clean up partial successes when a later grant fails.
    */
   onApiKeyCreated?: (target: InvalidationTarget) => void;
-}
-
-export interface InvalidationTarget {
-  apiKeyId: string;
-  uiamApiKey?: string;
-  taskId?: string;
-  taskStartedAt?: string;
 }
 
 /**

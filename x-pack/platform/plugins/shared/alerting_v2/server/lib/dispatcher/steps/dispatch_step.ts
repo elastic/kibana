@@ -16,7 +16,7 @@ import type {
   WorkflowsServerPluginSetup,
   WorkflowsManagementClient,
 } from '@kbn/workflows-management-plugin/server';
-import { toFakeRequest } from '@kbn/response-ops-api-keys';
+import { buildFakeRequest, getUiamApiKeySecret } from '@kbn/response-ops-api-keys';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { inject, injectable } from 'inversify';
 import { isError, uniqBy } from 'lodash';
@@ -289,7 +289,7 @@ export class DispatchStep implements DispatcherStep {
     const batches: DispatchBatch[] = [...groupsByApiKey].flatMap(([apiKey, keyGroups]) =>
       [...Map.groupBy(keyGroups, ({ spaceId }) => spaceId)].map(([spaceId, batchGroups]) => ({
         groups: batchGroups,
-        request: toFakeRequest({ uiamApiKey: apiKey }, { spaceId, prefer: 'uiam' }).request,
+        request: buildFakeRequest(getUiamApiKeySecret(apiKey), { spaceId }),
         workflowsBySpace: new Map(),
         failedSpaces: new Map(),
       }))

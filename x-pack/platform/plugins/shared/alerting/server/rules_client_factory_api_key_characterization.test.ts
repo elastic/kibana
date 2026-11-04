@@ -585,26 +585,32 @@ describe('RulesClientFactory API key characterization', () => {
       ]);
     });
 
-    test('a rejected UIAM rollback replaces the ES error (current behavior)', async () => {
+    const rollbackFailureLog = (error: Error) => [
+      `Failed to invalidate UIAM API key for alerting rule : test: ${error.message}`,
+      { tags: UIAM_LOGS_INVALIDATE_TAGS, error: { stack_trace: error.stack } },
+    ];
+
+    test('a rejected UIAM rollback is logged and the ES error is rethrown', async () => {
       const invalidateError = new Error('UIAM invalidate failed');
+      const esError = new Error('ES grant failed');
       const { context } = await setup({ config: 'uiamGrantEsRun', credential: 'rawUiamApiKey' });
       uiamApiKeys.grant.mockResolvedValue(UIAM_GRANTED);
       uiamApiKeys.invalidate.mockRejectedValue(invalidateError);
-      securityService.authc.apiKeys.grantAsInternalUser.mockRejectedValue(
-        new Error('ES grant failed')
-      );
+      securityService.authc.apiKeys.grantAsInternalUser.mockRejectedValue(esError);
 
-      await expect(context.createAPIKey('test')).rejects.toBe(invalidateError);
+      await expect(context.createAPIKey('test')).rejects.toBe(esError);
+      expect(logger.error.mock.calls).toContainEqual(rollbackFailureLog(invalidateError));
     });
 
-    test('a rejected UIAM rollback rejects createAPIKey when the ES grant returned null (current behavior)', async () => {
+    test('a rejected UIAM rollback is logged when the ES grant returned null', async () => {
       const invalidateError = new Error('UIAM invalidate failed');
       const { context } = await setup({ config: 'uiamGrantEsRun', credential: 'rawUiamApiKey' });
       uiamApiKeys.grant.mockResolvedValue(UIAM_GRANTED);
       uiamApiKeys.invalidate.mockRejectedValue(invalidateError);
       securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValue(null);
 
-      await expect(context.createAPIKey('test')).rejects.toBe(invalidateError);
+      expect(await context.createAPIKey('test')).toEqual({ apiKeysEnabled: false });
+      expect(logger.error.mock.calls).toContainEqual(rollbackFailureLog(invalidateError));
     });
 
     test('skips the rollback when the granted UIAM key has no id (current behavior)', async () => {

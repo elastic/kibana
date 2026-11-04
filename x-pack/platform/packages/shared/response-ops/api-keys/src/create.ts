@@ -33,13 +33,13 @@ export interface CreateOptions {
   /**
    * `optional`: a failed UIAM grant is logged and the ES key is still created.
    * `required`: a failed UIAM grant fails the whole call.
-   * Requests without UIAM credentials never get a UIAM key, in either mode.
+   * `only`: when UIAM is enabled, grant only a UIAM key, failing if it can't be granted. When
+   * UIAM is disabled, grant only an ES key.
+   * In `optional` and `required` mode, requests without UIAM credentials never get a UIAM key.
    */
-  uiam: 'optional' | 'required';
+  uiam: 'optional' | 'required' | 'only';
   /** Name of the UIAM key. Defaults to `uiam-<name>`. */
   uiamName?: string;
-  /** When UIAM is enabled, grant only a UIAM key (failing if it can't be granted). */
-  uiamOnly?: boolean;
   /** Log level for a request without UIAM credentials. Defaults to `error`. */
   missingUiamCredentialsLogLevel?: 'error' | 'debug';
   refresh?: boolean | 'wait_for';
@@ -95,7 +95,7 @@ const grantUiam = async (
       tags: tags.grant,
       error: { stack_trace: stack },
     });
-    if (only || uiam === 'required') {
+    if (only || uiam !== 'optional') {
       throw err;
     }
     return;
@@ -119,13 +119,31 @@ export const invalidateUiamApiKey = async (
   }
 };
 
+/** Invalidates a UIAM key whose ES counterpart couldn't be granted. Never throws. */
+const rollbackUiamApiKey = async (
+  context: ClientContext,
+  request: KibanaRequest,
+  subject: string,
+  id: string
+): Promise<void> => {
+  try {
+    await invalidateUiamApiKey(context, request, subject, id);
+  } catch (err) {
+    const { message, stack } = errorDetails(err);
+    context.logger.error(`Failed to invalidate UIAM API key for ${subject}: ${message}`, {
+      tags: context.tags.invalidate,
+      error: { stack_trace: stack },
+    });
+  }
+};
+
 const refreshOption = (refresh: CreateOptions['refresh']) =>
   refresh !== undefined ? { refresh } : {};
 
 /**
  * Grants an ES key and, when the request carries UIAM credentials, a UIAM key. A UIAM service
- * account, or a `uiamOnly` call while UIAM is enabled, only gets a UIAM key. Returns `null` when
- * API keys are disabled.
+ * account, or a `uiam: 'only'` call while UIAM is enabled, only gets a UIAM key. Returns `null`
+ * when API keys are disabled.
  */
 export const grant = async (
   context: ClientContext,
@@ -133,12 +151,12 @@ export const grant = async (
   options: CreateOptions
 ): Promise<ApiKeys | null> => {
   const { security, uiamEnabled } = context;
-  const { name, metadata, subject, refresh, uiamOnly } = options;
+  const { name, metadata, subject, refresh, uiam: uiamMode } = options;
 
   const principal = security.authc.getPrincipal(request);
   const isUiamServiceAccount =
     principal?.type === 'service_account' && principal.variant === 'uiam';
-  if (isUiamServiceAccount || (uiamOnly && uiamEnabled)) {
+  if (isUiamServiceAccount || (uiamMode === 'only' && uiamEnabled)) {
     return { uiam: await grantUiam(context, request, options, { only: true }) };
   }
 
@@ -153,14 +171,14 @@ export const grant = async (
     );
   } catch (err) {
     if (uiam?.id) {
-      await invalidateUiamApiKey(context, request, subject, uiam.id);
+      await rollbackUiamApiKey(context, request, subject, uiam.id);
     }
     throw err;
   }
 
   if (!es) {
     if (uiam?.id) {
-      await invalidateUiamApiKey(context, request, subject, uiam.id);
+      await rollbackUiamApiKey(context, request, subject, uiam.id);
     }
     return null;
   }

@@ -6,9 +6,9 @@
  */
 
 export { ApiKeysClient } from './src/client';
-export type { ApiKeysClientOptions } from './src/client';
 export type { ApiKeys, CreateOptions, RequestApiKey } from './src/create';
 export { UiamUnavailableError } from './src/errors';
+export { getUiamLogTags } from './src/log_tags';
 
 export {
   decodeApiKey,
@@ -19,22 +19,13 @@ export {
 } from './src/stored_keys';
 export type { InvalidationTarget, StoredApiKeys } from './src/stored_keys';
 
-export { buildFakeRequest, toFakeRequest } from './src/fake_request';
-export type { CredentialType, FakeRequestResult } from './src/fake_request';
+export { buildFakeRequest, pickCredential, toFakeRequest } from './src/fake_request';
 
 export { queueInvalidationTargets } from './src/queue';
 export type { QueueResult } from './src/queue';
 
 export { runInvalidate } from './src/task/run_invalidate';
-export type { RunInvalidateResult } from './src/task/run_invalidate';
-export type {
-  ApiKeyInvalidationFn,
-  GetIdsUsedByRunningTasks,
-  PendingApiKeyInvalidation,
-  RunningTask,
-  SavedObjectTypesToQuery,
-  UiamApiKeyInvalidationFn,
-} from './src/task/types';
+export type { ApiKeyInvalidationFn, RunningTask, UiamApiKeyInvalidationFn } from './src/task/types';
 export { apiKeyInvalidationTaskConfigSchema } from './src/task/config_schema';
 export {
   apiKeyInvalidationTaskStateSchemaByVersion,

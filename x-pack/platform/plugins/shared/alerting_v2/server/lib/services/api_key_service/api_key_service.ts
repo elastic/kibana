@@ -136,8 +136,7 @@ export class ApiKeyService implements ApiKeyServiceContract {
       name,
       metadata: { managed: true, kibana: { type: 'action_policy' } },
       subject: `action policy: ${name}`,
-      uiam: 'required',
-      uiamOnly: true,
+      uiam: 'only',
     });
 
     const key = keys?.uiam ?? keys?.es;

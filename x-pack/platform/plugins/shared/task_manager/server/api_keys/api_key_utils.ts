@@ -168,7 +168,11 @@ export const getApiKeyAndUserScope = async (
     const keys = keysByTaskType.get(task.taskType);
     // Without any key the task could never authenticate at run time.
     if (!keys) {
-      throw new Error(`Failed to grant UIAM API key for task "${task.id}"`);
+      throw new Error(
+        uiamEnabled
+          ? `Failed to grant UIAM API key for task "${task.id}"`
+          : `Cannot schedule task "${task.id}" with a UIAM API key because UIAM is not enabled`
+      );
     }
     const { apiKey, apiKeyId, uiamApiKey, uiamApiKeyId } = keys;
     result.set(task.id!, {

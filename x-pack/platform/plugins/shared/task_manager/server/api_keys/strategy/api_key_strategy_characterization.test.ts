@@ -776,7 +776,10 @@ const GRANT_ROWS: GrantRow[] = [
   ),
   row(
     { strategy: 'es', credential: 'uiam_raw_api_key', opts: { cloneApiKey: true } },
-    { error: 'Failed to grant UIAM API key for task "task-1"', calls: [API_KEYS_ENABLED_CALL] },
+    {
+      error: 'Cannot schedule task "task-1" with a UIAM API key because UIAM is not enabled',
+      calls: [API_KEYS_ENABLED_CALL],
+    },
     true
   ),
   ...ES_AND_UIAM_STRATEGIES.flatMap((strategy) => [
@@ -817,7 +820,10 @@ const GRANT_ROWS: GrantRow[] = [
         opts: { cloneApiKey: true },
         uiamAbsentAtGrant: true,
       },
-      { error: 'Failed to grant UIAM API key for task "task-1"', calls: [API_KEYS_ENABLED_CALL] }
+      {
+        error: 'Cannot schedule task "task-1" with a UIAM API key because UIAM is not enabled',
+        calls: [API_KEYS_ENABLED_CALL],
+      }
     ),
     row(
       { strategy, credential: 'uiam_raw_api_key', opts: { onEsKey: true } },
@@ -825,7 +831,10 @@ const GRANT_ROWS: GrantRow[] = [
     ),
     row(
       { strategy, credential: 'uiam_raw_api_key', opts: { onEsKey: true, cloneApiKey: true } },
-      { error: 'Failed to grant UIAM API key for task "task-1"', calls: [API_KEYS_ENABLED_CALL] },
+      {
+        error: 'Cannot schedule task "task-1" with a UIAM API key because UIAM is not enabled',
+        calls: [API_KEYS_ENABLED_CALL],
+      },
       true
     ),
   ]),
@@ -905,7 +914,10 @@ const GRANT_ROWS: GrantRow[] = [
   // Fake request carrying a UIAM credential (no resolved user).
   row(
     { strategy: 'es', credential: 'fake_uiam_api_key' },
-    { error: 'Failed to grant UIAM API key for task "task-1"', calls: [API_KEYS_ENABLED_CALL] },
+    {
+      error: 'Cannot schedule task "task-1" with a UIAM API key because UIAM is not enabled',
+      calls: [API_KEYS_ENABLED_CALL],
+    },
     true
   ),
   ...ES_AND_UIAM_STRATEGIES.flatMap((strategy) => [
@@ -921,7 +933,10 @@ const GRANT_ROWS: GrantRow[] = [
     ),
     row(
       { strategy, credential: 'fake_uiam_api_key', opts: { onEsKey: true } },
-      { error: 'Failed to grant UIAM API key for task "task-1"', calls: [API_KEYS_ENABLED_CALL] },
+      {
+        error: 'Cannot schedule task "task-1" with a UIAM API key because UIAM is not enabled',
+        calls: [API_KEYS_ENABLED_CALL],
+      },
       true
     ),
   ]),

@@ -15,21 +15,21 @@ flowchart LR
 
 ## Stored keys
 
-Plugins persist keys in the alerting rule attribute shape, `StoredApiKeys`:
+The package reads stored keys as `StoredApiKeys`, which uses the alerting rule field names. The other plugins map their own fields into it:
 
 - `apiKey`: an Elasticsearch key, stored as `base64(id:secret)`.
 - `uiamApiKey`: `base64(id:essu_…)` for keys Kibana granted, or a raw `essu_…` secret for user-created Cloud keys.
 - `uiamApiKeyId`: only needed when `uiamApiKey` is a raw secret Kibana owns.
 - `apiKeyCreatedByUser`: user-created keys are never invalidated.
-- `uiamApiKeyExternal`: UIAM's verdict that the key is external. When the credential a run uses is a UIAM key (by content, whichever field it came from), the fake request is marked so Elasticsearch doesn't attach the UIAM shared secret.
+- `uiamApiKeyExternal`: UIAM's verdict that the key is external. When the credential a run uses is a UIAM key, the fake request is marked so Elasticsearch doesn't attach the UIAM shared secret.
 
-Plugins that already know which credential to use (Task Manager, actions) call `buildFakeRequest` directly instead of `toFakeRequest`.
+`toFakeRequest` picks the credential from `StoredApiKeys` and builds the request. Code that already has the credential (the Task Manager and actions task runners, the alerting v2 dispatcher) calls `buildFakeRequest` directly; Task Manager picks it with `pickCredential` first.
 
 ## To change X, edit Y
 
 | To change | Edit |
 | --- | --- |
-| How keys are granted or cloned, or which UIAM failures are fatal (including the `uiamName`, `uiamOnly` and `missingUiamCredentialsLogLevel` options) | `src/create.ts` |
+| How keys are granted or cloned, or which UIAM failures are fatal (including the `uiam: 'optional' | 'required' | 'only'`, `uiamName` and `missingUiamCredentialsLogLevel` options) | `src/create.ts` |
 | How a request's own key is parsed | `fromRequest` in `src/create.ts` |
 | How stored keys are encoded, decoded, or turned into invalidation targets | `src/stored_keys.ts` |
 | Which credential a background run uses, and external UIAM marking | `src/fake_request.ts` |

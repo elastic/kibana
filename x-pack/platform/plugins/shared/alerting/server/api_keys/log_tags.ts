@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-const UIAM_LOGS_COMMON_TAGS = ['serverless', 'alerting', 'uiam'];
+import { getUiamLogTags } from '@kbn/response-ops-api-keys';
 
-export const UIAM_LOGS_GRANT_TAGS = [...UIAM_LOGS_COMMON_TAGS, 'uiam-api-key-grant'];
-export const UIAM_LOGS_INVALIDATE_TAGS = [...UIAM_LOGS_COMMON_TAGS, 'uiam-api-key-invalidate'];
-export const UIAM_LOGS_CREDENTIALS_TAGS = [
-  ...UIAM_LOGS_COMMON_TAGS,
-  'uiam-api-key-invalid-credentials',
-];
-export const UIAM_LOGS_USAGE_TAGS = [...UIAM_LOGS_COMMON_TAGS, 'uiam-api-key-missing'];
+const tags = getUiamLogTags('alerting');
+
+export const UIAM_LOGS_GRANT_TAGS = tags.grant;
+export const UIAM_LOGS_INVALIDATE_TAGS = tags.invalidate;
+export const UIAM_LOGS_CREDENTIALS_TAGS = tags.credentials;
+export const UIAM_LOGS_USAGE_TAGS = tags.usage;

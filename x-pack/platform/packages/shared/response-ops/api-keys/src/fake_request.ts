@@ -22,7 +22,8 @@ export interface FakeRequestResult {
   fellBack: boolean;
 }
 
-const pickCredential = (
+/** Picks the stored credential a run authenticates with, falling back to the other one. */
+export const pickCredential = (
   { apiKey, uiamApiKey }: StoredApiKeys,
   prefer: 'uiam' | 'es'
 ): Pick<FakeRequestResult, 'credentialType' | 'apiKey' | 'fellBack'> => {

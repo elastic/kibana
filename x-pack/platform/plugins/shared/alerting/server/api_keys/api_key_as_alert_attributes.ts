@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { encodeApiKey } from '@kbn/response-ops-api-keys';
 import type { RawRule } from '../types';
 import type { CreateAPIKeyResult } from '../rules_client/types';
 import type { RuleDomain } from '../application/rule/types';
@@ -41,9 +42,8 @@ interface ApiKeyRuleProperties {
   uiamApiKeyExternal?: boolean | null;
 }
 
-const encodeApiKey = (id?: string, key?: string): string | null => {
-  return id && key ? Buffer.from(`${id}:${key}`).toString('base64') : null;
-};
+const encodeGrantedApiKey = (id?: string, key?: string): string | null =>
+  id && key ? encodeApiKey(id, key) : null;
 
 const getApiKeyRuleProperties = (
   apiKey: CreateAPIKeyResult | null,
@@ -71,12 +71,13 @@ const getApiKeyRuleProperties = (
     );
   }
 
-  const encodedApiKey = encodeApiKey(esApiKeyId, esApiKey);
+  const encodedApiKey = encodeGrantedApiKey(esApiKeyId, esApiKey);
   // Framework-granted UIAM keys are stored as `base64(id:key)`. User-created Cloud API
   // keys are raw `essu_` credentials with no key id — store them as-is; alerting never
   // invalidates them, so no id is needed.
   const encodedUiamApiKey =
-    encodeApiKey(uiamApiKeyId, uiamApiKey) ?? (createdByUser && uiamApiKey ? uiamApiKey : null);
+    encodeGrantedApiKey(uiamApiKeyId, uiamApiKey) ??
+    (createdByUser && uiamApiKey ? uiamApiKey : null);
 
   return {
     apiKeyOwner: username,

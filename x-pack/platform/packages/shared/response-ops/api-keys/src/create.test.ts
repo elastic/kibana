@@ -116,6 +116,25 @@ describe('ApiKeysClient', () => {
       expect(uiam.invalidate).toHaveBeenCalledWith(request, { id: 'uiam-id' });
     });
 
+    test('rethrows the ES error and logs when the UIAM rollback also fails', async () => {
+      const { client, uiam, security, logger, request } = setup({
+        authorization: 'Bearer essu_token',
+      });
+      const failure = new Error('es down');
+      const rollbackFailure = new Error('uiam down');
+      security.authc.apiKeys.grantAsInternalUser.mockRejectedValueOnce(failure);
+      uiam.invalidate.mockRejectedValueOnce(rollbackFailure);
+
+      await expect(client.grant(request, options)).rejects.toBe(failure);
+      expect(logger.error).toHaveBeenCalledWith(
+        `Failed to invalidate UIAM API key for ${SUBJECT}: uiam down`,
+        {
+          tags: UIAM_TAGS('uiam-api-key-invalidate'),
+          error: { stack_trace: rollbackFailure.stack },
+        }
+      );
+    });
+
     test('rolls back the UIAM key and returns null when API keys are disabled', async () => {
       const { client, uiam, security, request } = setup({ authorization: 'Bearer essu_token' });
       security.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce(null);
@@ -177,11 +196,11 @@ describe('ApiKeysClient', () => {
       );
     });
 
-    describe('uiamOnly', () => {
+    describe("uiam: 'only'", () => {
       test('grants only a UIAM key when UIAM is enabled', async () => {
         const { client, security, request } = setup({ authorization: 'Bearer essu_token' });
 
-        await expect(client.grant(request, { ...options, uiamOnly: true })).resolves.toEqual({
+        await expect(client.grant(request, { ...options, uiam: 'only' })).resolves.toEqual({
           uiam: UIAM_GRANT,
         });
         expect(security.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
@@ -190,7 +209,7 @@ describe('ApiKeysClient', () => {
       test('throws when the request has no UIAM credentials', async () => {
         const { client, security, request } = setup({ authorization: 'Basic abc' });
 
-        await expect(client.grant(request, { ...options, uiamOnly: true })).rejects.toThrow(
+        await expect(client.grant(request, { ...options, uiam: 'only' })).rejects.toThrow(
           UiamUnavailableError
         );
         expect(security.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
@@ -199,7 +218,7 @@ describe('ApiKeysClient', () => {
       test('grants only an ES key when UIAM is disabled', async () => {
         const { client, uiam, request } = setup({ authorization: 'Basic abc', uiamEnabled: false });
 
-        await expect(client.grant(request, { ...options, uiamOnly: true })).resolves.toEqual({
+        await expect(client.grant(request, { ...options, uiam: 'only' })).resolves.toEqual({
           es: ES_GRANT,
         });
         expect(uiam.grant).not.toHaveBeenCalled();

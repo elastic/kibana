@@ -11,7 +11,7 @@ import type {
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { getUiamApiKeySecret } from '@kbn/response-ops-api-keys';
+import { pickCredential } from '@kbn/response-ops-api-keys';
 import { ApiKeyType } from '../../config';
 import type { ConcreteTaskInstance, TaskInstance } from '../../task';
 import { getApiKeyAndUserScope } from '../api_key_utils';
@@ -59,61 +59,59 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
   }
 
   getApiKeyForFakeRequest(taskInstance: ConcreteTaskInstance): string | undefined {
-    const { userScope, apiKey, uiamApiKey } = taskInstance;
+    const { userScope, apiKey: storedApiKey, uiamApiKey } = taskInstance;
     const record = recordTaskRunCredentialUsage(taskInstance);
+    const userCreated = userScope?.apiKeyCreatedByUser;
+    const { credentialType, apiKey, fellBack } = pickCredential(
+      { apiKey: storedApiKey, uiamApiKey },
+      this.typeToUse === ApiKeyType.UIAM ? 'uiam' : 'es'
+    );
 
-    if (this.typeToUse === ApiKeyType.UIAM) {
-      if (uiamApiKey) {
-        record('uiam_api_key', userScope?.apiKeyCreatedByUser ? 'user_created_key' : 'provisioned');
-        return getUiamApiKeySecret(uiamApiKey);
-      }
+    if (!apiKey) {
+      record('none', 'not_set');
+      return storedApiKey;
+    }
 
-      // No UIAM key available even though the strategy is configured to use UIAM.
-      // Fall back to the ES API key so the task can still run. Some deployments
-      // legitimately cannot mint UIAM keys, so this fallback is expected in the
-      // wild and is logged at debug level to avoid noise. Volume and reason are
-      // tracked via the `kibana.task_manager.task_run.uiam_api_key_fallback.count`
-      // OTel counter instead, which is broken down per project.
-      // Mirrors the alerting rule loader behavior (see PR #264434).
-      if (apiKey) {
-        if (userScope?.apiKeyCreatedByUser) {
-          record('es_api_key', 'user_created_key');
-          taskManagerUiamTelemetry.recordUiamApiKeyFallback('user_created_key');
-          this.logger.debug(
-            'UIAM API key is not provided to create a fake request, falling back to ES API key created by the user.',
-            { tags: UIAM_LOGS_USAGE_TAGS }
-          );
-        } else {
-          record('es_api_key', 'fallback_unexpected');
-          taskManagerUiamTelemetry.recordUiamApiKeyFallback('unexpected');
-          this.logger.debug(
-            'UIAM API key is not provided to create a fake request, falling back to regular API key.',
-            { tags: UIAM_LOGS_USAGE_TAGS }
-          );
-        }
-      } else {
-        record('none', 'not_set');
+    if (credentialType === 'uiam_api_key') {
+      record('uiam_api_key', userCreated ? 'user_created_key' : 'provisioned');
+      // A cloned UIAM request persists only a UIAM key (no ES `apiKey`) even when the
+      // strategy's `typeToUse` is ES (`grant_uiam_api_keys=true` while `api_key_type`
+      // defaults to `es`), so the task authenticates with the UIAM key instead.
+      if (fellBack) {
+        this.logger.debug(
+          'ES API key is not provided to create a fake request, falling back to UIAM API key.',
+          { tags: UIAM_LOGS_USAGE_TAGS }
+        );
       }
       return apiKey;
     }
 
-    // A cloned UIAM request persists only a UIAM key (no ES `apiKey`) even when the
-    // strategy's `typeToUse` is ES (`grant_uiam_api_keys=true` while `api_key_type`
-    // defaults to `es`). Fall back to the UIAM key so the task can still authenticate
-    // at run time instead of yielding an undefined credential.
-    if (!apiKey && uiamApiKey) {
-      record('uiam_api_key', userScope?.apiKeyCreatedByUser ? 'user_created_key' : 'provisioned');
-      this.logger.debug(
-        'ES API key is not provided to create a fake request, falling back to UIAM API key.',
-        { tags: UIAM_LOGS_USAGE_TAGS }
-      );
-      return getUiamApiKeySecret(uiamApiKey);
+    if (!fellBack) {
+      record('es_api_key', 'config');
+      return apiKey;
     }
 
-    if (apiKey) {
-      record('es_api_key', 'config');
+    // No UIAM key available even though the strategy is configured to use UIAM.
+    // Fall back to the ES API key so the task can still run. Some deployments
+    // legitimately cannot mint UIAM keys, so this fallback is expected in the
+    // wild and is logged at debug level to avoid noise. Volume and reason are
+    // tracked via the `kibana.task_manager.task_run.uiam_api_key_fallback.count`
+    // OTel counter instead, which is broken down per project.
+    // Mirrors the alerting rule loader behavior (see PR #264434).
+    if (userCreated) {
+      record('es_api_key', 'user_created_key');
+      taskManagerUiamTelemetry.recordUiamApiKeyFallback('user_created_key');
+      this.logger.debug(
+        'UIAM API key is not provided to create a fake request, falling back to ES API key created by the user.',
+        { tags: UIAM_LOGS_USAGE_TAGS }
+      );
     } else {
-      record('none', 'not_set');
+      record('es_api_key', 'fallback_unexpected');
+      taskManagerUiamTelemetry.recordUiamApiKeyFallback('unexpected');
+      this.logger.debug(
+        'UIAM API key is not provided to create a fake request, falling back to regular API key.',
+        { tags: UIAM_LOGS_USAGE_TAGS }
+      );
     }
     return apiKey;
   }
@@ -121,9 +119,9 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
   getApiKeyIdsForInvalidation(source: ApiKeyInvalidationSource): InvalidationTarget[] {
     const { userScope, uiamApiKey, apiKey } = source;
     // `apiKeyCreatedByUser` gates invalidation for BOTH the ES and UIAM keys.
-    // See the invariant documented in `grantApiKeys`: both credentials are
-    // currently persisted with the same ownership, so a single flag is
-    // sufficient. Revisit if ES and UIAM credentials ever diverge in ownership.
+    // See the invariant documented in `getApiKeyAndUserScope` (`api_key_utils.ts`): both
+    // credentials are persisted with the same ownership, so a single flag is sufficient.
+    // Revisit if ES and UIAM credentials ever diverge in ownership.
     if (!userScope || userScope.apiKeyCreatedByUser) {
       return [];
     }

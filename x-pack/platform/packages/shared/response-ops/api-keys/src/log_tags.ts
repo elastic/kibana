@@ -9,6 +9,7 @@ export interface UiamLogTags {
   grant: string[];
   invalidate: string[];
   credentials: string[];
+  usage: string[];
 }
 
 export const getUiamLogTags = (pluginTag: string): UiamLogTags => {
@@ -17,5 +18,6 @@ export const getUiamLogTags = (pluginTag: string): UiamLogTags => {
     grant: [...common, 'uiam-api-key-grant'],
     invalidate: [...common, 'uiam-api-key-invalidate'],
     credentials: [...common, 'uiam-api-key-invalid-credentials'],
+    usage: [...common, 'uiam-api-key-missing'],
   };
 };
