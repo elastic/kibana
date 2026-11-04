@@ -115,21 +115,23 @@ const customTriggerDefinition: PublicTriggerDefinition = {
 const getClientRuleIds = (results: YamlValidationResult[]): WorkflowValidationRuleId[] =>
   results.flatMap(({ ruleId }) => (ruleId ? [ruleId] : []));
 
-const getServerRuleIds = (
+const getServerRuleIds = async (
   yaml: string,
   options?: Parameters<typeof validateWorkflowYaml>[2]
-): WorkflowValidationRuleId[] =>
-  validateWorkflowYaml(
+): Promise<WorkflowValidationRuleId[]> => {
+  const { diagnostics } = await validateWorkflowYaml(
     yaml,
     options?.triggerDefinitions ? workflowSchemaWithCustomTrigger : workflowSchema,
     options
-  ).diagnostics.map(({ ruleId }) => ruleId);
+  );
+  return diagnostics.map(({ ruleId }) => ruleId);
+};
 
 interface RuleParityCase {
   name: string;
   expectedRuleId: WorkflowValidationRuleId;
   getClientRuleIds: () => WorkflowValidationRuleId[];
-  getServerRuleIds: () => WorkflowValidationRuleId[];
+  getServerRuleIds: () => Promise<WorkflowValidationRuleId[]>;
 }
 
 const ruleParityCases: RuleParityCase[] = [
@@ -218,9 +220,9 @@ const ruleParityCases: RuleParityCase[] = [
 describe('workflow validation rule parity', () => {
   it.each(ruleParityCases)(
     'uses $expectedRuleId for $name in both client and server validation',
-    ({ expectedRuleId, getClientRuleIds: getClientIds, getServerRuleIds: getServerIds }) => {
+    async ({ expectedRuleId, getClientRuleIds: getClientIds, getServerRuleIds: getServerIds }) => {
       const clientRuleId = getClientIds().find((ruleId) => ruleId === expectedRuleId);
-      const serverRuleId = getServerIds().find((ruleId) => ruleId === expectedRuleId);
+      const serverRuleId = (await getServerIds()).find((ruleId) => ruleId === expectedRuleId);
 
       expect(clientRuleId).toBe(expectedRuleId);
       expect(serverRuleId).toBe(clientRuleId);

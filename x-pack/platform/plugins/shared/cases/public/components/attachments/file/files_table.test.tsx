@@ -42,6 +42,28 @@ describe('FilesTable', () => {
     ).toBeInTheDocument();
   });
 
+  it('does not render row selection without onRemove', () => {
+    renderWithTestingProviders(<FilesTable {...defaultProps} />);
+
+    expect(screen.queryByTestId(`checkboxSelectRow-${basicFileMock.id}`)).not.toBeInTheDocument();
+  });
+
+  it('removes the selected files by file id', async () => {
+    const onRemove = jest.fn();
+    renderWithTestingProviders(<FilesTable {...defaultProps} onRemove={onRemove} />);
+
+    expect(screen.queryByTestId('cases-attachments-remove-selected')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId(`checkboxSelectRow-${basicFileMock.id}`));
+    expect(screen.getByTestId('cases-attachments-selected-count')).toHaveTextContent('1 selected');
+
+    await userEvent.click(screen.getByTestId('cases-attachments-remove-selected'));
+
+    expect(onRemove).toHaveBeenCalledWith([basicFileMock.id], {
+      onSuccess: expect.any(Function),
+    });
+  });
+
   it('renders loading state', async () => {
     renderWithTestingProviders(<FilesTable {...defaultProps} isLoading={true} />);
 

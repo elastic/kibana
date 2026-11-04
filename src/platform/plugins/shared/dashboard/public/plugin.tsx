@@ -78,6 +78,7 @@ import {
   SEARCH_SESSION_ID,
 } from '../common/page_bundle_constants';
 import { untilPluginStartServicesReady, setKibanaServices } from './services/kibana_services';
+import { dashboardAppClientApi$ } from './services/dashboard_app_client_api';
 import { getDashboardRecentlyAccessedService } from './services/dashboard_recently_accessed_service';
 import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
@@ -85,6 +86,8 @@ import { getDashboardPageTitle } from './dashboard_app/_dashboard_app_strings';
 import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
 import type { FindDashboardsService } from './dashboard_client';
 import { DASHBOARD_DURATION_START_MARK } from './dashboard_api/telemetry/dashboard_duration_start_mark';
+import { dashboardSavedEventSchema } from './dashboard_api/telemetry/report_dashboard_saved';
+import { DASHBOARD_SAVED_EVENT } from './utils/telemetry_constants';
 import type { DashboardApi } from './dashboard_api/types';
 
 export interface DashboardSetupDependencies {
@@ -144,6 +147,9 @@ export interface DashboardStart {
    */
   findDashboardsService: () => Promise<FindDashboardsService>;
 
+  /**
+   * The API of the loaded dashboard rendered with `publishAsAppClientApi`, if any.
+   */
   dashboardAppClientApi$: PublishingSubject<DashboardApi | undefined>;
 }
 
@@ -162,7 +168,6 @@ export class DashboardPlugin
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
   private listingViewRegistry: Set<DashboardListingTab> = new Set();
-  private dashboardAppApi$ = new BehaviorSubject<DashboardApi | undefined>(undefined);
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
@@ -172,6 +177,19 @@ export class DashboardPlugin
       eventType: 'dashboard_loaded_with_data',
       schema: {},
     });
+    core.analytics.registerEventType({
+      eventType: DASHBOARD_SAVED_EVENT,
+      schema: dashboardSavedEventSchema,
+    });
+
+    // Lazy-load via @kbn/change-history-ui/telemetry to avoid pulling React UI into page-load bundle.
+    void import('@kbn/change-history-ui/telemetry')
+      .then(({ registerChangeHistoryTelemetryEvents }) => {
+        registerChangeHistoryTelemetryEvents(core.analytics);
+      })
+      .catch(() => {
+        // Telemetry registration must not break plugin setup.
+      });
 
     if (share) {
       share.url.locators.create(
@@ -295,7 +313,6 @@ export class DashboardPlugin
           appUnMounted,
           element: params.element,
           mountContext,
-          setDashboardAppApi: (api) => this.dashboardAppApi$.next(api),
         });
       },
     };
@@ -399,7 +416,7 @@ export class DashboardPlugin
         const { findService } = await import('./dashboard_client');
         return findService;
       },
-      dashboardAppClientApi$: this.dashboardAppApi$,
+      dashboardAppClientApi$,
     };
   }
 

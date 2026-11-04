@@ -43,15 +43,20 @@ describe('setAlertAssigneesRoute', () => {
         body: getSetAlertAssigneesRequestMock(['assignee-id-1'], ['assignee-id-2'], ['alert-id']),
       });
 
-      context.core.elasticsearch.client.asCurrentUser.bulk.mockResponse({
-        errors: false,
-        took: 0,
-        items: [{ update: { result: 'updated', status: 200, _index: 'test-index' } }],
-      });
+      context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResponse(
+        getSuccessfulSignalUpdateResponse()
+      );
 
       const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
+      const auditLogger = context.securitySolution.getAuditLogger();
+      expect(auditLogger?.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'User is updating alert [id=alert-id]',
+          event: expect.objectContaining({ action: 'alert_update' }),
+        })
+      );
     });
   });
 

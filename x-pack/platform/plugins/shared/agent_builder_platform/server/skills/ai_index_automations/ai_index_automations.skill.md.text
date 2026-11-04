@@ -322,7 +322,9 @@ reinstalling an index-metadata automation from before `sources` existed, whose s
 is the one attached to the conversation.
 Pass `corpusFilter`, `maxDocuments` and `bodyMaxChars` when the corpus needs a bound; they default
 to an empty filter, 50 documents and 12000 characters. Keep `maxDocuments` within the KI budget
-(`strategy_catalog`, "The KI budget"). `corpusFilter` is inserted after `FROM`.
+(`strategy_catalog`, "The KI budget"); the tool rejects more than 2,000. When the run must cover
+more than 2,000 documents, scope it with `corpusFilter` or use `index_metadata` or `unit_profile`.
+`corpusFilter` is inserted after `FROM`.
 A `WHERE` line may omit the leading `|`; the tool adds it. The tool attaches only the orchestration.
 Each parallel branch summarizes one document and writes it through `context-engine.createKi` with its
 verifiers. Do not save it and do not start a subagent. When the pass yields many near-identically-titled entries, say so: the installed
@@ -345,7 +347,7 @@ the query for every unit.
 Pass `corpusFilter`, a `WHERE` line, to profile only some units: it bounds both which units are
 found and which of their rows the figures describe. It defaults to taking every row.
 `maxUnits` bounds the run: one KI and one model call per unit. It defaults to 100, the KI budget;
-keep it within that budget (`strategy_catalog`, "The KI budget").
+keep it within that budget (`strategy_catalog`, "The KI budget"); the tool rejects more than 2,000.
 Units are found by one ranked query capped at `maxUnits`, most active first, and
 a re-run regenerates every unit and replaces its indicator.
 The template reads one index. A unit that needs data from a second index — a customer's profile
@@ -729,13 +731,13 @@ corpus filter when there is no proposal; for Index/Table Metadata, the number of
 `pilotSize: 5` first. Every template's loop runs five items at a time, so a pilot of 5 is one
 batch of the full run, and the per-unit arithmetic above holds. The pilot runs the automation over
 the first five documents, the five most active units, or the first five sources of the same list the
-full run uses, waits for it, and returns `status`, `durationMs` and `kisWritten`. When the pilot
+full run uses, waits for it, and returns `status`, `durationMs`, `kisWritten` and `kisFailedVerification`. When the pilot
 ended with any `status` other than `completed`, report `errorMessage` and stop: there is no duration
 to project from, and a failed pilot means the full run would fail the same way. When it is still
 `running`, say the time is not yet measured, and check it with
 `platform.core.get_workflow_execution_status` before you start the full run. Project only when
-`kisWritten` equals the pilot size. When it is lower, say how many of the pilot's items wrote a KI and stop: the others failed or
-did not pass verification, and the full run would lose the same share. Then project the full run
+`kisWritten` equals the pilot size. When it is lower, say how many of the pilot's items wrote a KI and how many
+failed verification (`kisFailedVerification`) and stop: the full run would lose the same share. Then project the full run
 from `durationMs` and `kisWritten` as the time estimate above lays out — the full run writes the
 item count counted above — and state it. When it
 exceeds an hour, give the 🚨 warning and the cheaper option you would take in the same message. Then

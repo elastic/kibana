@@ -18,7 +18,6 @@ import {
   ruleOperationSchema,
   type RuleOperation,
 } from './operations';
-import { AGENT_BUILDER_TAG } from '../../common/constants';
 
 const createMockEsClient = () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -1119,7 +1118,7 @@ describe('executeRuleOperations', () => {
       const result = await executeRuleOperations(existing, ops, undefined, createMockSoClient());
 
       expect(result.data.metadata).not.toHaveProperty('routing_tags');
-      expect(result.data.metadata?.tags).toEqual(['prod', AGENT_BUILDER_TAG]);
+      expect(result.data.metadata?.tags).toEqual(['prod']);
     });
 
     it('throws when isNew is true and no name is provided', async () => {
@@ -1143,79 +1142,7 @@ describe('executeRuleOperations', () => {
     });
   });
 
-  describe('agent-builder provenance tag', () => {
-    it('stamps the agent-builder tag on a newly created rule', async () => {
-      const ops: RuleOperation[] = [{ operation: 'set_metadata', name: 'My Rule' }];
-
-      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), {
-        isNew: true,
-      });
-
-      expect(result.data.metadata?.tags).toEqual([AGENT_BUILDER_TAG]);
-    });
-
-    it('appends the tag without clobbering user/LLM-provided tags', async () => {
-      const ops: RuleOperation[] = [
-        { operation: 'set_metadata', name: 'My Rule', tags: ['production', 'cpu'] },
-      ];
-
-      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), {
-        isNew: true,
-      });
-
-      expect(result.data.metadata?.tags).toEqual(['production', 'cpu', AGENT_BUILDER_TAG]);
-    });
-
-    it('does not duplicate the tag when it is already present', async () => {
-      const ops: RuleOperation[] = [
-        { operation: 'set_metadata', name: 'My Rule', tags: [AGENT_BUILDER_TAG] },
-      ];
-
-      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), {
-        isNew: true,
-      });
-
-      expect(result.data.metadata?.tags).toEqual([AGENT_BUILDER_TAG]);
-    });
-
-    it('skips stamping when the 20-tag cap is already reached', async () => {
-      const maxTags = Array.from({ length: 20 }, (_, i) => `tag-${i}`);
-      const ops: RuleOperation[] = [{ operation: 'set_metadata', name: 'My Rule', tags: maxTags }];
-
-      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), {
-        isNew: true,
-      });
-
-      expect(result.data.metadata?.tags).toEqual(maxTags);
-      expect(result.data.metadata?.tags).toHaveLength(20);
-    });
-
-    it('stamps the tag when editing an existing rule, preserving existing tags', async () => {
-      const existing: Partial<RuleAttachmentData> = {
-        metadata: { name: 'Existing Rule', tags: ['cpu'] },
-      };
-      const ops: RuleOperation[] = [{ operation: 'set_metadata', description: 'updated' }];
-
-      const result = await executeRuleOperations(existing, ops, undefined, createMockSoClient(), {
-        isNew: false,
-      });
-
-      expect(result.data.metadata?.tags).toEqual(['cpu', AGENT_BUILDER_TAG]);
-    });
-
-    it('re-adds the tag on edit when the user previously removed it', async () => {
-      const existing: Partial<RuleAttachmentData> = {
-        metadata: { name: 'Existing Rule', tags: ['cpu'] },
-      };
-      const ops: RuleOperation[] = [{ operation: 'set_metadata', tags: ['cpu'] }];
-
-      const result = await executeRuleOperations(existing, ops, undefined, createMockSoClient(), {
-        isNew: false,
-      });
-
-      expect(result.data.metadata?.tags).toEqual(['cpu', AGENT_BUILDER_TAG]);
-    });
-
+  describe('kind and recovery constraints', () => {
     it('throws when state_transition is set on a non-alert kind', async () => {
       const ops: RuleOperation[] = [
         { operation: 'set_kind', kind: 'signal' },
@@ -1605,11 +1532,11 @@ describe('executeRuleOperations', () => {
       expect(result.data.metadata).toEqual({
         name: 'Test Rule',
         description: 'A test',
-        tags: ['test', AGENT_BUILDER_TAG],
+        tags: ['test'],
       });
     });
 
-    it('applies routing tags from set_metadata without the provenance tag', async () => {
+    it('applies routing tags from set_metadata', async () => {
       const ops: RuleOperation[] = [
         { operation: 'set_metadata', name: 'Test Rule', routing_tags: ['sre'] },
       ];
@@ -1619,7 +1546,6 @@ describe('executeRuleOperations', () => {
       expect(result.data.metadata).toEqual({
         name: 'Test Rule',
         routing_tags: ['sre'],
-        tags: [AGENT_BUILDER_TAG],
       });
     });
 

@@ -369,27 +369,136 @@ export const NewPackagePolicySchema = schema.object(
   { meta: { id: 'new_package_policy' } }
 );
 
+// REST-only input and stream IDs with reporting bounds. PackagePolicyInputsSchema and
+// PackagePolicyStreamsSchema stay unchanged because they feed the frozen SO model-version schemas.
+const RestPackagePolicyInputIdSchema = schema.maybe(
+  schema.savedObjectId.warn({ minLength: 0, label: 'fleet.package_policies.inputs.id' })
+);
+
+const RestPackagePolicyStreamSchema = schema.object({
+  ...PackagePolicyStreamsSchema,
+  id: schema.maybe(
+    schema.savedObjectId.warn({ minLength: 0, label: 'fleet.package_policies.inputs.streams.id' })
+  ), // BWC < 7.11
+});
+
 const CreatePackagePolicyProps = {
   ...PackagePolicyBaseSchema,
+  // REST-only reporting bounds: PackagePolicyBaseSchema stays unchanged so that they do not
+  // flow into the frozen SO model-version schemas (V22–V25).
+  name: schema.displayName.warn({
+    minLength: 0,
+    maxLength: PACKAGE_POLICY_NAME_MAX_LENGTH,
+    label: 'fleet.package_policies.name',
+    meta: {
+      description: 'Unique name for the package policy.',
+    },
+  }),
+  description: schema.maybe(
+    schema.description.warn({
+      maxLength: PACKAGE_POLICY_DESCRIPTION_MAX_LENGTH,
+      label: 'fleet.package_policies.description',
+      meta: {
+        description: 'Package policy description',
+      },
+    })
+  ),
+  policy_id: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.savedObjectId.warn({
+        minLength: 0,
+        maxLength: PACKAGE_POLICY_ID_MAX_LENGTH,
+        label: 'fleet.package_policies.policy_id',
+        meta: {
+          description: 'ID of the agent policy which the package policy will be added to.',
+          deprecated: true,
+        },
+      }),
+    ])
+  ),
+  policy_ids: schema.maybe(
+    schema.arrayOf(
+      schema.savedObjectId.warn({
+        minLength: 0,
+        maxLength: PACKAGE_POLICY_ID_MAX_LENGTH,
+        label: 'fleet.package_policies.policy_ids',
+        meta: {
+          description: 'IDs of the agent policies that the package policy will be added to.',
+        },
+      }),
+      {
+        maxSize: MAX_REUSABLE_AGENT_POLICIES_PER_PACKAGE_POLICY,
+      }
+    )
+  ),
+  output_id: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.savedObjectId.warn({
+        minLength: 0,
+        maxLength: PACKAGE_POLICY_ID_MAX_LENGTH,
+        label: 'fleet.package_policies.output_id',
+      }),
+    ])
+  ),
+  cloud_connector_id: schema.maybe(
+    schema.nullable(
+      schema.savedObjectId.warn({
+        minLength: 0,
+        maxLength: PACKAGE_POLICY_ID_MAX_LENGTH,
+        label: 'fleet.package_policies.cloud_connector_id',
+        meta: {
+          description: 'ID of the cloud connector associated with this package policy.',
+        },
+      })
+    )
+  ),
+  global_data_tags: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.arrayOf(
+        schema.object({
+          name: schema.displayName.warn({
+            minLength: 0,
+            maxLength: PACKAGE_POLICY_NAME_MAX_LENGTH,
+            label: 'fleet.package_policies.global_data_tags.name',
+            meta: { description: 'The name of the custom field. Cannot contain spaces.' },
+          }),
+          value: schema.oneOf([schema.string(), schema.number()], {
+            meta: { description: 'The value of the custom field.' },
+          }),
+        }),
+        { maxSize: 100 }
+      ),
+    ])
+  ),
   enabled: schema.maybe(schema.boolean()),
   package: schema.maybe(PackagePolicyPackageSchema),
   inputs: schema.arrayOf(
     schema.object({
       ...PackagePolicyInputsSchema,
-      streams: schema.maybe(
-        schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 })
-      ),
+      id: RestPackagePolicyInputIdSchema,
+      streams: schema.maybe(schema.arrayOf(RestPackagePolicyStreamSchema, { maxSize: 1000 })),
     }),
     { maxSize: 1000 }
   ),
-  spaceIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  spaceIds: schema.maybe(
+    schema.arrayOf(
+      schema.spaceId.warn({ minLength: 0, label: 'fleet.package_policies.spaceIds' }),
+      { maxSize: 100 }
+    )
+  ),
 };
 
 export const CreatePackagePolicyRequestBodySchema = schema.object(
   {
     ...CreatePackagePolicyProps,
     id: schema.maybe(
-      schema.string({
+      schema.savedObjectId.warn({
+        minLength: 0,
+        maxLength: PACKAGE_POLICY_ID_MAX_LENGTH,
+        label: 'fleet.package_policies.create.id',
         meta: {
           description: 'Package policy unique identifier',
         },
@@ -686,14 +795,19 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema =
 export const UpdatePackagePolicyRequestBodySchema = schema.object(
   {
     ...CreatePackagePolicyProps,
-    name: schema.maybe(schema.string()),
+    name: schema.maybe(
+      schema.displayName.warn({
+        minLength: 0,
+        maxLength: PACKAGE_POLICY_NAME_MAX_LENGTH,
+        label: 'fleet.package_policies.update.name',
+      })
+    ),
     inputs: schema.maybe(
       schema.arrayOf(
         schema.object({
           ...PackagePolicyInputsSchema,
-          streams: schema.maybe(
-            schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 })
-          ),
+          id: RestPackagePolicyInputIdSchema,
+          streams: schema.maybe(schema.arrayOf(RestPackagePolicyStreamSchema, { maxSize: 1000 })),
         }),
         { maxSize: 1000 }
       )

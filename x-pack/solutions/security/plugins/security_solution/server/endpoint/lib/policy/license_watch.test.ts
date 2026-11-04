@@ -257,6 +257,66 @@ describe('Policy-Changing license watcher', () => {
 
       expect(packagePolicySvcMock.update).toHaveBeenCalledTimes(1);
     });
+
+    it('resets registry_credential_hardening to false on downgrade while leaving credential_hardening alone', async () => {
+      packagePolicySvcMock.list.mockResolvedValueOnce({
+        items: [
+          MockPackagePolicyWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
+            pc.windows.attack_surface_reduction.registry_credential_hardening = {
+              enabled: true,
+            };
+            return pc;
+          }),
+        ],
+        total: 1,
+        page: 1,
+        perPage: 100,
+      });
+
+      const pw = new PolicyWatcher(endpointServiceMock);
+      await pw.watch(Platinum);
+
+      expect(packagePolicySvcMock.update).toHaveBeenCalledTimes(1);
+
+      const persistedPolicy = packagePolicySvcMock.update.mock.calls[0][3].inputs[0].config?.policy
+        .value as PolicyConfig;
+
+      expect(
+        persistedPolicy.windows.attack_surface_reduction.registry_credential_hardening?.enabled
+      ).toBe(false);
+      // credential_hardening is Platinum-tier, not Enterprise-tier, so it must be unaffected.
+      expect(persistedPolicy.windows.attack_surface_reduction.credential_hardening.enabled).toBe(
+        policyFactory().windows.attack_surface_reduction.credential_hardening.enabled
+      );
+    });
+
+    it('leaves registry_credential_hardening absent on downgrade when it was never set', async () => {
+      packagePolicySvcMock.list.mockResolvedValueOnce({
+        items: [
+          MockPackagePolicyWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
+            delete pc.windows.attack_surface_reduction.registry_credential_hardening;
+            return pc;
+          }),
+        ],
+        total: 1,
+        page: 1,
+        perPage: 100,
+      });
+
+      const pw = new PolicyWatcher(endpointServiceMock);
+      await pw.watch(Platinum);
+
+      // Device control is still Enterprise-only and enabled by `policyFactory()`, so the
+      // downgrade triggers an update - but not because of this field.
+      expect(packagePolicySvcMock.update).toHaveBeenCalledTimes(1);
+
+      const persistedPolicy = packagePolicySvcMock.update.mock.calls[0][3].inputs[0].config?.policy
+        .value as PolicyConfig;
+
+      expect(persistedPolicy.windows.attack_surface_reduction).not.toHaveProperty(
+        'registry_credential_hardening'
+      );
+    });
   });
 
   describe('Linux ransomware license downgrade', () => {

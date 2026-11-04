@@ -54,6 +54,10 @@ interface RACRule {
   };
 }
 
+// A 404 means the rule was deleted; retrying it only delays the alert fallback.
+export const retryUnlessNotFound = (failureCount: number, error: unknown) =>
+  !isNotFoundError(error) && failureCount < 3;
+
 const buildLastAlertQuery = (ruleId: string) => ({
   query: {
     bool: {
@@ -85,6 +89,7 @@ export const useRuleWithFallback = (ruleId: string): UseRuleWithFallback => {
     refetch,
   } = useRule(ruleId, false, {
     refetchOnWindowFocus: false,
+    retry: retryUnlessNotFound,
   });
   const { addError } = useAppToasts();
 

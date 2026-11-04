@@ -89,7 +89,7 @@ export function getConnectorType(
   };
 }
 
-function getWorkflowsConnectorTypeArgs(
+export function getWorkflowsConnectorTypeArgs(
   workflowsManagementApi: WorkflowsManagementApi
 ): GetWorkflowsConnectorTypeArgs {
   // Create workflows service function for the connector
@@ -102,7 +102,8 @@ function getWorkflowsConnectorTypeArgs(
 
       const workflowToRun: WorkflowExecutionEngineModel = toWorkflowExecutionEngineModel(workflow);
 
-      // Run the workflow, @tb: maybe switch to scheduler?
+      // Not the rule-action path. api.run schedules via getScheduleWorkflowService.
+      // runWorkflow still refuses delegated-identity-only workflows for callers of this service.
       return workflowsManagementApi.runWorkflow(workflowToRun, spaceId, inputs, request);
     };
   };
@@ -126,6 +127,8 @@ function getWorkflowsConnectorTypeArgs(
       const workflowToSchedule: WorkflowExecutionEngineModel =
         toWorkflowExecutionEngineModel(workflow);
 
+      // Rule actions and per-alert runs come through here. scheduleWorkflow refuses a
+      // delegated-identity-only workflow before the engine creates an execution.
       return workflowsManagementApi.scheduleWorkflow(
         workflowToSchedule,
         spaceId,

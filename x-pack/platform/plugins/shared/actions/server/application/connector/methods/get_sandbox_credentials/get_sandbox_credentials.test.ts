@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { ActionTypeRegistry } from '../../../../action_type_registry';
@@ -127,6 +128,11 @@ const inMemoryConnectors = [
   }),
 ];
 
+const getTestSandboxHosts = ({ config }: { config: Record<string, unknown> }): string[] => {
+  const url = config.apiUrl ?? config.url;
+  return typeof url === 'string' ? [new URL(url).hostname] : ['fallback.example.com'];
+};
+
 describe('getSandboxCredentials()', () => {
   let actionsClient: ActionsClient;
   let actionTypeRegistry: ActionTypeRegistry;
@@ -180,6 +186,7 @@ describe('getSandboxCredentials()', () => {
     actionTypeRegistry.register(
       getConnectorType({
         id: defaultConnectorTypeId,
+        getSandboxHosts: getTestSandboxHosts,
         sandboxSupportedAuthTypes: ['basic', 'oauth_authorization_code'],
         validate: {
           config: { schema: z.object({ apiUrl: z.string().optional() }).passthrough() },
@@ -206,6 +213,7 @@ describe('getSandboxCredentials()', () => {
       actionTypeId: defaultConnectorTypeId,
       config: { apiUrl: 'https://example.com' },
       headers: { Authorization: basicAuthorization },
+      hosts: ['example.com'],
     });
     expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       ACTION_SAVED_OBJECT_TYPE,
@@ -218,7 +226,7 @@ describe('getSandboxCredentials()', () => {
 
   it('decrypts persisted secrets in the current space namespace', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
-    actionsClient = createClient({ spaceId: 'space-1' });
+    actionsClient = createClient({ spaceId: asSpaceId('space-1') });
 
     await actionsClient.getSandboxCredentials({ id: defaultConnectorId });
 
@@ -233,6 +241,7 @@ describe('getSandboxCredentials()', () => {
     actionTypeRegistry.register(
       getConnectorType({
         id: inMemoryConnectorTypeId,
+        getSandboxHosts: getTestSandboxHosts,
         sandboxSupportedAuthTypes: ['basic'],
         validate: {
           config: { schema: z.object({ apiUrl: z.string().optional() }).passthrough() },
@@ -249,6 +258,7 @@ describe('getSandboxCredentials()', () => {
       actionTypeId: inMemoryConnectorTypeId,
       config: { apiUrl: 'https://preconfigured.example.com' },
       headers: { Authorization: basicAuthorization },
+      hosts: ['preconfigured.example.com'],
     });
     expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
@@ -259,6 +269,7 @@ describe('getSandboxCredentials()', () => {
     actionTypeRegistry.register(
       getConnectorType({
         id: inMemoryConnectorTypeId,
+        getSandboxHosts: getTestSandboxHosts,
         sandboxSupportedAuthTypes: ['basic'],
         validate: {
           config: { schema: z.object({ apiUrl: z.string().optional() }).passthrough() },
@@ -285,6 +296,7 @@ describe('getSandboxCredentials()', () => {
     actionTypeRegistry.register(
       getConnectorType({
         id: inMemoryConnectorTypeId,
+        getSandboxHosts: getTestSandboxHosts,
         sandboxSupportedAuthTypes: ['basic'],
         validate: {
           config: { schema: z.object({ apiUrl: z.string().optional() }).passthrough() },
@@ -352,6 +364,7 @@ describe('getSandboxCredentials()', () => {
       actionTypeRegistry.register(
         getConnectorType({
           id: newActionTypeId,
+          getSandboxHosts: getTestSandboxHosts,
           validate: {
             config: { schema: z.object({}).passthrough() },
             secrets: { schema: z.object({ foobar: z.string() }) },
@@ -396,6 +409,7 @@ describe('getSandboxCredentials()', () => {
       actionTypeRegistry.register(
         getConnectorType({
           id: inMemoryConnectorTypeId,
+          getSandboxHosts: getTestSandboxHosts,
           isSystemActionType: true,
           sandboxSupportedAuthTypes: ['basic'],
           validate: {
@@ -427,6 +441,203 @@ describe('getSandboxCredentials()', () => {
       await expect(actionsClient.getSandboxCredentials({ id: defaultConnectorId })).rejects.toThrow(
         /auth type "api_key_header" does not support sandbox/
       );
+    });
+  });
+
+  describe('sandbox hosts', () => {
+    const registerWithHosts = (getSandboxHosts?: () => string[]) =>
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: inMemoryConnectorTypeId,
+          ...(getSandboxHosts ? { getSandboxHosts } : {}),
+          sandboxSupportedAuthTypes: ['basic'],
+          validate: {
+            config: { schema: z.object({ apiUrl: z.string().optional() }).passthrough() },
+            secrets: secretsSchema,
+          },
+          executor: undefined,
+        })
+      );
+
+    it('drops hosts the credential proxy rejects', async () => {
+      registerWithHosts(() => [
+        'api.example.com',
+        '[::1]',
+        'under_score.example.com',
+        '.leading.example.com',
+        'trailing-',
+        `${'a'.repeat(254)}`,
+        '10.0.0.5',
+      ]);
+
+      const result = await actionsClient.getSandboxCredentials({ id: inMemoryConnectorId });
+
+      expect(result.hosts).toEqual(['api.example.com', '10.0.0.5']);
+    });
+
+    it('lowercases, trims, and deduplicates the hosts', async () => {
+      registerWithHosts(() => [' API.example.com ', 'api.example.com', 'other.example.com']);
+
+      const result = await actionsClient.getSandboxCredentials({ id: inMemoryConnectorId });
+
+      expect(result.hosts).toEqual(['api.example.com', 'other.example.com']);
+    });
+
+    it.each([
+      ['the action type has no getSandboxHosts hook', undefined],
+      ['getSandboxHosts returns no hosts', () => []],
+      ['getSandboxHosts only returns empty or wildcard hosts', () => ['', ' ', '*']],
+      ['getSandboxHosts only returns an IPv6 host', () => ['[::1]']],
+    ])('fails closed when %s', async (_name, getSandboxHosts) => {
+      registerWithHosts(getSandboxHosts);
+
+      await expect(
+        actionsClient.getSandboxCredentials({ id: inMemoryConnectorId })
+      ).rejects.toThrow(/it has no valid sandbox hosts\. Sandbox hosts must be hostnames/);
+    });
+  });
+
+  describe('stack connector sandbox hooks', () => {
+    const httpConnectorTypeId = 'test.http-sandbox';
+
+    const httpSecretsSchema = {
+      schema: z
+        .object({
+          secretHeaders: z
+            .union([z.string(), z.record(z.string(), z.string())])
+            .optional()
+            .nullable(),
+        })
+        .passthrough(),
+    };
+
+    beforeEach(() => {
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: httpConnectorTypeId,
+          getSandboxHosts: getTestSandboxHosts,
+          isSandboxCapable: ({ config }: { config: Record<string, unknown> }) =>
+            config.authType !== 'webhook-authentication-ssl',
+          getSandboxAuthHeaders: ({ secrets }: { secrets: Record<string, unknown> }) =>
+            typeof secrets.user === 'string' && typeof secrets.password === 'string'
+              ? {
+                  Authorization: `Basic ${Buffer.from(
+                    `${secrets.user}:${secrets.password}`
+                  ).toString('base64')}`,
+                }
+              : {},
+          validate: {
+            config: { schema: z.object({ url: z.string().optional() }).passthrough() },
+            secrets: httpSecretsSchema,
+          },
+          executor: undefined,
+        })
+      );
+    });
+
+    const mockConnector = (
+      config: Record<string, unknown>,
+      secrets: Record<string, unknown>
+    ): void => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        attributes: { actionTypeId: httpConnectorTypeId, config },
+      } as SavedObject);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        ...connectorSavedObject,
+        attributes: {
+          ...connectorSavedObject.attributes,
+          actionTypeId: httpConnectorTypeId,
+          config,
+          secrets,
+        },
+      });
+    };
+
+    it('returns the basic Authorization header built by getSandboxAuthHeaders', async () => {
+      mockConnector({ url: 'https://es.example.com' }, { user: 'elastic', password: 'changeme' });
+
+      const result = await actionsClient.getSandboxCredentials({ id: defaultConnectorId });
+
+      expect(result.headers).toEqual({
+        Authorization: `Basic ${Buffer.from('elastic:changeme').toString('base64')}`,
+      });
+    });
+
+    it('awaits an async getSandboxAuthHeaders and merges its result', async () => {
+      const asyncTypeId = 'test.http-sandbox-async';
+      const getSandboxAuthHeaders = jest
+        .fn()
+        .mockResolvedValue({ Authorization: 'Bearer async-token' });
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: asyncTypeId,
+          getSandboxHosts: getTestSandboxHosts,
+          isSandboxCapable: () => true,
+          getSandboxAuthHeaders,
+          validate: {
+            config: { schema: z.object({ url: z.string().optional() }).passthrough() },
+            secrets: httpSecretsSchema,
+          },
+          executor: undefined,
+        })
+      );
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        attributes: { actionTypeId: asyncTypeId, config: { url: 'https://es.example.com' } },
+      } as SavedObject);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        ...connectorSavedObject,
+        attributes: {
+          ...connectorSavedObject.attributes,
+          actionTypeId: asyncTypeId,
+          config: { url: 'https://es.example.com' },
+          secrets: {},
+        },
+      });
+
+      const result = await actionsClient.getSandboxCredentials({ id: defaultConnectorId });
+
+      expect(getSandboxAuthHeaders).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorId: defaultConnectorId })
+      );
+      expect(result.headers).toEqual({ Authorization: 'Bearer async-token' });
+    });
+
+    it('does not merge secretHeaders itself and returns only the hook headers', async () => {
+      mockConnector(
+        { url: 'https://es.example.com' },
+        {
+          user: 'elastic',
+          password: 'changeme',
+          secretHeaders: { 'X-Extra': 'value' },
+        }
+      );
+
+      const result = await actionsClient.getSandboxCredentials({ id: defaultConnectorId });
+
+      expect(result.headers).toEqual({
+        Authorization: `Basic ${Buffer.from('elastic:changeme').toString('base64')}`,
+      });
+    });
+
+    it('passes preconfigured secrets to the hook and returns the hook headers', async () => {
+      const preconfiguredId = 'preconfigured-http-sandbox';
+      actionsClient = createClient({
+        inMemoryConnectors: [
+          createMockInMemoryConnector({
+            id: preconfiguredId,
+            actionTypeId: httpConnectorTypeId,
+            isPreconfigured: true,
+            config: { url: 'https://preconfigured.example.com' },
+            secrets: { user: 'elastic', password: 'changeme' },
+          }),
+        ],
+      });
+
+      const result = await actionsClient.getSandboxCredentials({ id: preconfiguredId });
+
+      expect(result.headers).toEqual({
+        Authorization: `Basic ${Buffer.from('elastic:changeme').toString('base64')}`,
+      });
     });
   });
 

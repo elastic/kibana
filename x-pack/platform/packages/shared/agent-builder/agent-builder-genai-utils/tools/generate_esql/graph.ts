@@ -8,13 +8,14 @@
 import { z } from '@kbn/zod/v4';
 import { StateGraph, Annotation } from '@langchain/langgraph';
 import type { TimeRange } from '@kbn/agent-builder-common';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { ChatCompleteCacheControl } from '@kbn/inference-common';
 import type { InferenceChatModelCallOptions } from '@kbn/inference-langchain';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
-import { extractTextContent } from '../../langchain/messages';
+import { extractRefusal, extractTextContent } from '../../langchain/messages';
 import type { EsqlResponse } from '../utils/esql';
 import { resolveResourceForEsqlWithSamplingStats } from '../utils/resources';
 import type { ValidateEsqlQueryCallbacks } from '../utils/esql';
@@ -22,7 +23,7 @@ import {
   extractEsqlQueries,
   executeEsql,
   validateEsqlQuery,
-  buildTimeRangeParams,
+  buildEsqlParams,
   buildTimeSeriesTimeRangeFilter,
 } from '../utils/esql';
 import { createRequestDocumentationPrompt, createGenerateEsqlPrompt } from './prompts';
@@ -67,6 +68,7 @@ const StateAnnotation = Annotation.Root({
   rowLimit: Annotation<number | undefined>(),
   disableNamedParams: Annotation<boolean | undefined>(),
   timeRange: Annotation<TimeRange>(),
+  esqlVariables: Annotation<ESQLControlVariable[] | undefined>(),
   // internal
   resource: Annotation<ResolvedResourceWithSampling>(),
   currentTry: Annotation<number>({ reducer: (a, b) => b, default: () => 0 }),
@@ -184,12 +186,14 @@ export const createNlToEsqlGraph = ({
 
     const responseText = extractTextContent(response);
     const queries = extractEsqlQueries(responseText);
+    const refusal = extractRefusal(response);
 
     const action: GenerateQueryAction = {
       type: 'generate_query',
       success: queries.length > 0,
       query: queries[0],
       response: responseText,
+      ...(refusal && queries.length === 0 ? { refusal } : {}),
     };
 
     return {
@@ -216,7 +220,9 @@ export const createNlToEsqlGraph = ({
     }
     if (lastAction.success) {
       return 'autocorrect_query';
-    } else if (state.currentTry >= state.maxRetries) {
+    } else if (lastAction.refusal || state.currentTry >= state.maxRetries) {
+      // A refusal is the model declining the prompt, not failing at it: re-sending the same
+      // prompt with "please try again" appended gets the same refusal, so stop here.
       return 'finalize';
     } else {
       return 'generate_esql';
@@ -318,7 +324,11 @@ export const createNlToEsqlGraph = ({
     try {
       const results = await executeEsql({
         query,
-        params: buildTimeRangeParams(state.timeRange),
+        params: buildEsqlParams({
+          query,
+          timeRange: state.timeRange,
+          esqlVariables: state.esqlVariables,
+        }),
         // The schema probe only collects columns, so bounding it to the time range is safe and
         // keeps TS and PROMQL queries from aggregating all data.
         ...(schemaOnly
@@ -394,7 +404,9 @@ export const createNlToEsqlGraph = ({
     // ended via query generation - because the LLM didn't generate a query for some reason
     if (isGenerateQueryAction(lastAction)) {
       return {
-        error: 'No query was generated',
+        error: lastAction.refusal
+          ? `The model refused to generate a query: ${lastAction.refusal}`
+          : 'No query was generated',
         answer: lastAction.response,
         query: lastAction.query,
       };

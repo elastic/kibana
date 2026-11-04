@@ -27,8 +27,17 @@ import { useDateRangePickerContext } from '../date_range_picker_context';
 
 /** Calendar-based date selection panel. */
 export function CalendarPanel() {
-  const { applyRange, onPresetSave, setText, text, timeRange, calendarOptions, transformOptions } =
-    useDateRangePickerContext();
+  const {
+    applyRange,
+    onPresetSave,
+    setText,
+    text,
+    timeRange,
+    calendarOptions,
+    transformOptions,
+    timeZone,
+  } = useDateRangePickerContext();
+  const calendarTimeZone = timeZone === 'Browser' ? undefined : timeZone;
   const timePrecision = transformOptions.timePrecision ?? 's';
   const saveAsPresetCheckboxId = useGeneratedHtmlId({ prefix: 'saveAsPreset' });
 
@@ -64,14 +73,17 @@ export function CalendarPanel() {
     setText(originalTextRef.current);
   }, [setText]);
 
-  const getOrderedDates = useCallback((from: Date, to: Date): { start: Date; end: Date } => {
-    const startDate = getStartDate(from);
-    const endDate = getEndDate(to);
+  const getOrderedDates = useCallback(
+    (from: Date, to: Date): { start: Date; end: Date } => {
+      const startDate = getStartDate(from, calendarTimeZone);
+      const endDate = getEndDate(to, calendarTimeZone);
 
-    return startDate <= endDate
-      ? { start: startDate, end: endDate }
-      : { start: endDate, end: startDate };
-  }, []);
+      return startDate <= endDate
+        ? { start: startDate, end: endDate }
+        : { start: endDate, end: startDate };
+    },
+    [calendarTimeZone]
+  );
 
   const formatRangeText = useCallback(
     (from: Date, to: Date): string => {
@@ -175,6 +187,7 @@ export function CalendarPanel() {
           range={calendarRange}
           onRangeChange={handleRangeChange}
           firstDayOfWeek={calendarOptions?.firstDayOfWeek}
+          timeZone={calendarTimeZone}
         />
       </PanelBody>
       <PanelFooter primaryAction={applyButton}>

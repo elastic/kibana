@@ -52,6 +52,28 @@ describe('ListKiBody', () => {
     );
   });
 
+  it('shows table loading state while refetching results', () => {
+    mockUseListKi.mockReturnValue({
+      kis: [
+        {
+          id: 'ki-1',
+          index: 'ai-index-idx-sample-ki',
+          type: 'playbook',
+          title: 'Refund playbook',
+        },
+      ],
+      total: 1,
+      summary: { total: 1, countsByType: [] },
+      isLoading: false,
+      isFetching: true,
+      error: undefined,
+      refetch: jest.fn(),
+    });
+    renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
+    expect(screen.getByTestId('contextListKiRows')).toBeInTheDocument();
+    expect(screen.getByTestId('contextListKiTable')).toHaveClass('euiBasicTable-loading');
+  });
+
   it('shows empty state', () => {
     mockUseListKi.mockReturnValue({
       kis: [],
@@ -64,6 +86,7 @@ describe('ListKiBody', () => {
     });
     renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
     expect(screen.getByTestId('contextListKiEmpty')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextListKiTypeFilters')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextListKiSearchBox')).toBeInTheDocument();
+    expect(screen.getByTestId('contextListKiTypeFilters')).toBeInTheDocument();
   });
 });

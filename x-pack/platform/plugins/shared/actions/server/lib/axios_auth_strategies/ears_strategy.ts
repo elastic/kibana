@@ -11,6 +11,7 @@ import { normalizeAuthorizationHeaderValue, type GetTokenOpts } from '@kbn/conne
 import type { AxiosErrorWithRetry } from '../axios_utils';
 import { getEarsAccessToken } from '../ears';
 import type { AxiosAuthStrategy, AuthStrategyDeps } from './types';
+import { recordConnectorAuth } from '../connector_metrics';
 
 interface EarsSecrets {
   provider?: string;
@@ -29,6 +30,7 @@ export class EarsStrategy implements AxiosAuthStrategy {
   ): Promise<AxiosResponse> {
     const {
       connectorId,
+      connectorTypeId,
       secrets,
       connectorTokenClient,
       logger,
@@ -53,6 +55,13 @@ export class EarsStrategy implements AxiosAuthStrategy {
       authMode,
       profileUid,
       forceRefresh: true,
+    });
+
+    recordConnectorAuth({
+      phase: 'token',
+      authType: 'ears',
+      connectorType: connectorTypeId,
+      ...(newAccessToken ? {} : { errorType: 'token_request_failed' as const }),
     });
 
     if (!newAccessToken) {

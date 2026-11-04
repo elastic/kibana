@@ -104,7 +104,7 @@ const extractLooseMetadataFields = (
  * Validates YAML and builds a WorkflowProperties document ready for indexing.
  * Shared by user-created and managed workflow creation paths.
  */
-export const prepareWorkflowDocumentFromYaml = (params: {
+export const prepareWorkflowDocumentFromYaml = async (params: {
   id?: string;
   yaml: string;
   zodSchema: z.ZodType;
@@ -115,7 +115,7 @@ export const prepareWorkflowDocumentFromYaml = (params: {
   nameFallback?: string;
   logger?: Logger;
   warnIgnoredKibanaFetcher?: boolean;
-}): { id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml } => {
+}): Promise<{ id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml }> => {
   const {
     id: providedId,
     yaml,
@@ -143,7 +143,7 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     valid: false,
   };
 
-  const validation = validateWorkflowYaml(yaml, zodSchema, { triggerDefinitions });
+  const validation = await validateWorkflowYaml(yaml, zodSchema, { triggerDefinitions });
   if (validation.valid && validation.parsedWorkflow) {
     workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
   } else if (validation.parsedWorkflow) {
@@ -192,18 +192,18 @@ export const prepareWorkflowDocumentFromYaml = (params: {
  * Validates YAML update and returns the storage patch + validation errors.
  * Pure function — caller resolves zodSchema and triggerDefinitions before calling.
  */
-export const applyYamlUpdate = (params: {
+export const applyYamlUpdate = async (params: {
   workflowYaml: string;
   zodSchema: z.ZodType;
   triggerDefinitions: Array<{ id: string; eventSchema: z.ZodType }>;
   logger?: Logger;
   warnIgnoredKibanaFetcher?: boolean;
   workflowId?: string;
-}): {
+}): Promise<{
   updatedDataPatch: Partial<WorkflowProperties>;
   validationErrors: string[];
   shouldUpdateScheduler: boolean;
-} => {
+}> => {
   const {
     workflowYaml,
     zodSchema,
@@ -212,7 +212,7 @@ export const applyYamlUpdate = (params: {
     warnIgnoredKibanaFetcher = false,
     workflowId,
   } = params;
-  const validation = validateWorkflowYaml(workflowYaml, zodSchema, { triggerDefinitions });
+  const validation = await validateWorkflowYaml(workflowYaml, zodSchema, { triggerDefinitions });
   logIgnoredKibanaFetcherOnPersist({
     logger,
     warnIgnoredKibanaFetcher,

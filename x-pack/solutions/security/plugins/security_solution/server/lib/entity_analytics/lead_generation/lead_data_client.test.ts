@@ -9,13 +9,14 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 
 const mockCreateIndex = jest.fn().mockResolvedValue(undefined);
+const mockCreateLeadIndexService = jest.fn((_deps: unknown) => ({
+  createIndex: mockCreateIndex,
+  doesIndexExist: jest.fn().mockResolvedValue(true),
+  deleteIndex: jest.fn(),
+}));
 
 jest.mock('./indices/lead_index_service', () => ({
-  createLeadIndexService: () => ({
-    createIndex: mockCreateIndex,
-    doesIndexExist: jest.fn().mockResolvedValue(true),
-    deleteIndex: jest.fn(),
-  }),
+  createLeadIndexService: (deps: unknown) => mockCreateLeadIndexService(deps),
 }));
 
 import { createLeadDataClient } from './lead_data_client';
@@ -74,14 +75,16 @@ describe('LeadDataClient', () => {
   const indexName = getLeadsIndexName(spaceId);
 
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let internalEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let client: LeadDataClient;
 
   beforeEach(() => {
     jest.clearAllMocks();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
+    internalEsClient = elasticsearchServiceMock.createElasticsearchClient();
     logger = loggingSystemMock.createLogger();
-    client = createLeadDataClient({ esClient, logger, spaceId });
+    client = createLeadDataClient({ esClient, internalEsClient, logger, spaceId });
   });
 
   const toCandidate = (lead: SynthesizedLead) => ({
@@ -277,6 +280,28 @@ describe('LeadDataClient', () => {
       expect(mockCreateIndex).toHaveBeenCalled();
     });
 
+    it('provisions the index with the internal client and writes leads with the current-user client', async () => {
+      const lead = makeTestLead();
+      esClient.bulk.mockResolvedValueOnce({ errors: false, items: [], took: 1 });
+
+      await client.persistLeads({
+        executionId: 'exec-clients',
+        sourceType: 'adhoc',
+        timestamp: lead.timestamp,
+        refreshes: [],
+        creates: [lead],
+        updates: [],
+      });
+
+      expect(mockCreateLeadIndexService).toHaveBeenCalledWith({
+        esClient: internalEsClient,
+        logger,
+        spaceId,
+      });
+      expect(esClient.bulk).toHaveBeenCalled();
+      expect(internalEsClient.bulk).not.toHaveBeenCalled();
+    });
+
     it('handles leads creation successfully', async () => {
       const lead = makeTestLead();
       const entityKey = hashEuid(lead.entity.id);
@@ -413,6 +438,24 @@ describe('LeadDataClient', () => {
       await expect(
         client.persistLeads({
           executionId: 'exec-403',
+          sourceType: 'adhoc',
+          timestamp: new Date().toISOString(),
+          refreshes: [],
+          creates: [makeTestLead()],
+          updates: [],
+        })
+      ).rejects.toBe(securityException);
+
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('re-throws when index creation fails with a security_exception, instead of silently reporting no leads persisted', async () => {
+      const securityException = makeEsSecurityException();
+      mockCreateIndex.mockRejectedValueOnce(securityException);
+
+      await expect(
+        client.persistLeads({
+          executionId: 'exec-index-403',
           sourceType: 'adhoc',
           timestamp: new Date().toISOString(),
           refreshes: [],

@@ -23,9 +23,12 @@ export {
 
 export {
   THREAT_FRAMEWORK_NAME,
+  THREAT_FRAMEWORK_DISPLAY_NAME,
   getMitreFrameworkByThreatName,
   getMitreFrameworkById,
   buildMitreReferenceUrl,
+  MITRE_ATTACK_FRAMEWORK,
+  MITRE_ATLAS_FRAMEWORK,
 } from './src/threat_framework';
 
 export type {
@@ -48,6 +51,9 @@ export {
   GET_MITRE_ENTITIES_URL,
   MITRE_ATTACK_ENTITY_SO_TYPE,
 } from './src/constants';
+
+export { groupThreatsByFramework } from './src/group_threats_by_framework';
+export type { ThreatFrameworkGroup } from './src/group_threats_by_framework';
 
 export { buildSoId, getMitreEntityDisplayName } from './src/utils';
 

@@ -432,7 +432,7 @@ export const serviceDetailRoute = {
         ...page({
           tab: 'profiling',
           title: i18n.translate('xpack.apm.views.profiling.title', {
-            defaultMessage: 'Universal Profiling',
+            defaultMessage: 'Profiling',
           }),
           element: <ProfilingOverview />,
           searchBarOptions: {

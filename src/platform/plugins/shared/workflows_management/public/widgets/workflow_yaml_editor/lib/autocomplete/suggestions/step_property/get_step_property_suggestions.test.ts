@@ -31,6 +31,7 @@ describe('getStepPropertySuggestions', () => {
     focusedStepInfo: {
       stepId: '1',
       stepYamlNode: new YAMLMap(),
+      path: ['steps', 0],
       lineStart: 1,
       lineEnd: 1,
       stepType: 'custom-type',
@@ -145,6 +146,7 @@ describe('getStepPropertySuggestions', () => {
         focusedStepInfo: {
           stepId: '1',
           stepYamlNode: new YAMLMap(),
+          path: ['steps', 0],
           lineStart: 1,
           lineEnd: 1,
           stepType: null as unknown as string,
@@ -164,6 +166,7 @@ describe('getStepPropertySuggestions', () => {
         focusedStepInfo: {
           stepId: '1',
           stepYamlNode: new YAMLMap(),
+          path: ['steps', 0],
           lineStart: 1,
           lineEnd: 1,
           stepType: undefined as unknown as string,
@@ -585,6 +588,7 @@ describe('getStepPropertySuggestions', () => {
         focusedStepInfo: {
           stepId: '1',
           stepYamlNode: new YAMLMap(),
+          path: ['steps', 0],
           lineStart: 1,
           lineEnd: 1,
           stepType: 'slack',
@@ -601,6 +605,7 @@ describe('getStepPropertySuggestions', () => {
         focusedStepInfo: {
           stepId: '2',
           stepYamlNode: new YAMLMap(),
+          path: ['steps', 0],
           lineStart: 5,
           lineEnd: 10,
           stepType: 'elasticsearch.index',

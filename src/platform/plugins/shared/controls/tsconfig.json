@@ -12,6 +12,7 @@
     "./jest_setup.ts"
   ],
   "kbn_references": [
+    "@kbn/data-source",
     "@kbn/core",
     "@kbn/embeddable-plugin",
     "@kbn/dashboard-plugin",
@@ -32,6 +33,7 @@
     "@kbn/esql-types",
     "@kbn/css-utils",
     "@kbn/esql-utils",
+    "@kbn/esql-controls-utils",
     "@kbn/esql-browser",
     "@kbn/search-types",
     "@kbn/controls-constants",

@@ -9,11 +9,15 @@
 
 import { NEVER } from 'rxjs';
 import type {
+  AuthHeaders,
   HttpSelfUnauthorizedErrorHandler,
   IAuthHeadersStorage,
   KibanaRequest,
 } from '@kbn/core-http-server';
-import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
+import {
+  ES_CLIENT_AUTHENTICATION_HEADER,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+} from '@kbn/core-security-server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
@@ -23,8 +27,10 @@ import {
   createInternalHttpSelfClient,
   SELF_CALL_MTLS_ERROR,
   SELF_CALL_RECURSION_ERROR,
+  type SelfClientOwnClientAuthenticationCheck,
   type SelfClientUiamAttestationGetter,
 } from './self_client';
+import { SelfHttpDispatcherProvider } from './self_client_dispatcher';
 import { SELF_CALL_AUTH_CHALLENGE_HEADER } from './self_client_observer';
 
 const originalFetch = global.fetch;
@@ -61,16 +67,18 @@ const createClient = ({
   } as HttpConfig),
   serverProtocol = 'http',
   getUiamAttestationGetter,
+  getOwnClientAuthenticationCheck,
   unauthorizedErrorHandler,
 }: {
   publicBaseUrl?: string | null;
-  authHeaders?: Record<string, string>;
+  authHeaders?: AuthHeaders;
   authRequestHeaders?: IAuthHeadersStorage;
   target?: 'auto' | 'local';
   getHttpConfig?: jest.MockedFunction<() => HttpConfig>;
   serverProtocol?: 'http' | 'https';
   hostname?: string;
   getUiamAttestationGetter?: () => SelfClientUiamAttestationGetter | undefined;
+  getOwnClientAuthenticationCheck?: () => SelfClientOwnClientAuthenticationCheck | undefined;
   unauthorizedErrorHandler?: HttpSelfUnauthorizedErrorHandler;
 } = {}) => {
   const authRequestHeaders =
@@ -101,6 +109,7 @@ const createClient = ({
     log,
     target,
     getUiamAttestationGetter,
+    getOwnClientAuthenticationCheck,
     getUnauthorizedErrorHandler: () => unauthorizedErrorHandler,
   });
 
@@ -171,6 +180,37 @@ describe('InternalHttpSelfScopedClient', () => {
     await self.asScoped(createRequest()).fetch('/api/status', { target: 'local' });
     const request = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
     expect(request.url).toBe('http://localhost:5601/base/s/my-space/api/status');
+  });
+
+  it('passes a headers timeout to the dispatcher', async () => {
+    const { self } = createClient();
+    await self.asScoped(createRequest()).fetch('/api/status', { headersTimeout: 60_000 });
+
+    const fetchInit = (global.fetch as jest.Mock).mock.calls[0][1];
+    expect(fetchInit.dispatcher).toBeDefined();
+    await self.close();
+  });
+
+  it('rejects a non-integer headers timeout', async () => {
+    const { self } = createClient();
+
+    await expect(
+      self.asScoped(createRequest()).fetch('/api/status', { headersTimeout: 1.5 })
+    ).rejects.toThrow(
+      'Invalid self HTTP options, headersTimeout must be a positive integer or zero.'
+    );
+    await self.close();
+  });
+
+  it('rejects a negative headers timeout', async () => {
+    const { self } = createClient();
+
+    await expect(
+      self.asScoped(createRequest()).fetch('/api/status', { headersTimeout: -1 })
+    ).rejects.toThrow(
+      'Invalid self HTTP options, headersTimeout must be a positive integer or zero.'
+    );
+    await self.close();
   });
 
   it('brackets an IPv6 listener address on the local target', async () => {
@@ -915,6 +955,205 @@ describe('InternalHttpSelfScopedClient', () => {
     });
   });
 
+  describe('UIAM client authentication', () => {
+    const isOwnClientAuthentication = (value: string) => value === 'kibana-own-secret';
+
+    it("strips Kibana's own client authentication from the stored auth headers", async () => {
+      const { self } = createClient({
+        authHeaders: {
+          authorization: 'Bearer essu_token',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'kibana-own-secret',
+        },
+        getOwnClientAuthenticationCheck: () => isOwnClientAuthentication,
+      });
+
+      await self.asScoped(createRequest()).fetch('/api/status');
+
+      expect(sentRequest().headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBeNull();
+      expect(sentRequest().headers.get('authorization')).toBe('Bearer essu_token');
+    });
+
+    it('relays client authentication supplied by an upstream caller', async () => {
+      const { self } = createClient({
+        authHeaders: {
+          authorization: 'Bearer essu_token',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'upstream-secret',
+        },
+        getOwnClientAuthenticationCheck: () => isOwnClientAuthentication,
+      });
+
+      await self.asScoped(createRequest()).fetch('/api/status');
+
+      expect(sentRequest().headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBe('upstream-secret');
+    });
+
+    it("strips every entry of Kibana's own client authentication from an array value", async () => {
+      const { self } = createClient({
+        authHeaders: {
+          authorization: 'Bearer essu_token',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: ['kibana-own-secret', 'kibana-own-secret'],
+        },
+        getOwnClientAuthenticationCheck: () => isOwnClientAuthentication,
+      });
+
+      await self.asScoped(createRequest()).fetch('/api/status');
+
+      expect(sentRequest().headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBeNull();
+    });
+
+    it('relays only the upstream entry of a mixed array value', async () => {
+      const { self } = createClient({
+        authHeaders: {
+          authorization: 'Bearer essu_token',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: ['kibana-own-secret', 'upstream-secret'],
+        },
+        getOwnClientAuthenticationCheck: () => isOwnClientAuthentication,
+      });
+
+      await self.asScoped(createRequest()).fetch('/api/status');
+
+      expect(sentRequest().headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBe('upstream-secret');
+    });
+
+    it("strips Kibana's own client authentication regardless of header name case", async () => {
+      const { self } = createClient({
+        authHeaders: {
+          authorization: 'Bearer essu_token',
+          'X-Client-Authentication': 'kibana-own-secret',
+        },
+        getOwnClientAuthenticationCheck: () => isOwnClientAuthentication,
+      });
+
+      await self.asScoped(createRequest()).fetch('/api/status');
+
+      expect(sentRequest().headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBeNull();
+    });
+
+    it('leaves client authentication unchanged when no check is registered', async () => {
+      const { self } = createClient({
+        authHeaders: {
+          authorization: 'Bearer essu_token',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'kibana-own-secret',
+        },
+        getOwnClientAuthenticationCheck: () => undefined,
+      });
+
+      await self.asScoped(createRequest()).fetch('/api/status');
+
+      expect(sentRequest().headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBe('kibana-own-secret');
+    });
+
+    it("strips Kibana's own client authentication from the retry as well", async () => {
+      mockFetchResponses(unauthorizedResponse(), okResponse());
+      const { self } = createClient({
+        authHeaders: {
+          authorization: 'Bearer essu_expired',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'kibana-own-secret',
+        },
+        getOwnClientAuthenticationCheck: () => isOwnClientAuthentication,
+        getUiamAttestationGetter: () => () => 'attestation',
+        unauthorizedErrorHandler: jest.fn(async (options, toolkit) =>
+          toolkit.retry({ authHeaders: { authorization: 'Bearer essu_refreshed' } })
+        ),
+      });
+
+      await self.asScoped(createRequest()).fetch('/api/status');
+
+      expect(global.fetch).toHaveBeenCalledTimes(2);
+      expect(sentRequest(0).headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBeNull();
+      expect(sentRequest(1).headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBeNull();
+      expect(sentRequest(1).headers.get('authorization')).toBe('Bearer essu_refreshed');
+      expect(sentRequest(0).headers.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(
+        'attestation'
+      );
+      expect(sentRequest(1).headers.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(
+        'attestation'
+      );
+    });
+
+    describe('together with the attestation getter', () => {
+      const createWiredClient = (
+        clientAuthentication: string | string[],
+        getAttestation: SelfClientUiamAttestationGetter = jest.fn().mockReturnValue('attestation')
+      ) => {
+        const { self } = createClient({
+          authHeaders: {
+            authorization: 'Bearer essu_token',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication,
+          },
+          getOwnClientAuthenticationCheck: () => isOwnClientAuthentication,
+          getUiamAttestationGetter: () => getAttestation,
+        });
+        return { self, getAttestation };
+      };
+
+      it("attests when it strips Kibana's own client authentication", async () => {
+        const { self } = createWiredClient('kibana-own-secret');
+
+        await self.asScoped(createRequest()).fetch('/api/status');
+
+        expect(sentRequest().headers.has(ES_CLIENT_AUTHENTICATION_HEADER)).toBe(false);
+        expect(sentRequest().headers.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(
+          'attestation'
+        );
+      });
+
+      it('attests regardless of client authentication on request.headers', async () => {
+        const { self } = createWiredClient('kibana-own-secret');
+        const request = createRequest({
+          headers: { [ES_CLIENT_AUTHENTICATION_HEADER]: 'upstream-secret' },
+        });
+
+        await self.asScoped(request).fetch('/api/status');
+
+        expect(sentRequest().headers.has(ES_CLIENT_AUTHENTICATION_HEADER)).toBe(false);
+        expect(sentRequest().headers.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(
+          'attestation'
+        );
+      });
+
+      it('does not attest relayed client authentication', async () => {
+        const { self, getAttestation } = createWiredClient('upstream-secret');
+
+        await self.asScoped(createRequest()).fetch('/api/status');
+
+        expect(sentRequest().headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBe('upstream-secret');
+        expect(sentRequest().headers.has(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(false);
+        expect(getAttestation).not.toHaveBeenCalled();
+      });
+
+      it('does not attest the relayed entry of a mixed array value', async () => {
+        const { self } = createWiredClient(['kibana-own-secret', 'upstream-secret']);
+
+        await self.asScoped(createRequest()).fetch('/api/status');
+
+        expect(sentRequest().headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBe('upstream-secret');
+        expect(sentRequest().headers.has(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(false);
+      });
+
+      it('does not attest an empty relayed client authentication', async () => {
+        const { self } = createWiredClient('');
+
+        await self.asScoped(createRequest()).fetch('/api/status');
+
+        expect(sentRequest().headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBe('');
+        expect(sentRequest().headers.has(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(false);
+      });
+
+      it('does not attest when the getter declines the credential', async () => {
+        const { self } = createWiredClient(
+          'kibana-own-secret',
+          jest.fn().mockReturnValue(undefined)
+        );
+
+        await self.asScoped(createRequest()).fetch('/api/status');
+
+        expect(sentRequest().headers.has(ES_CLIENT_AUTHENTICATION_HEADER)).toBe(false);
+        expect(sentRequest().headers.has(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(false);
+      });
+    });
+  });
+
   describe('401 retry', () => {
     const retryHandler = (authHeaders: Record<string, string>): HttpSelfUnauthorizedErrorHandler =>
       jest.fn(async (options, toolkit) => toolkit.retry({ authHeaders }));
@@ -943,6 +1182,22 @@ describe('InternalHttpSelfScopedClient', () => {
         expect.objectContaining({ path: '/api/status', responseHeaders: expect.any(Headers) }),
         expect.anything()
       );
+    });
+
+    it('re-resolves the dispatcher for the credential-refresh retry', async () => {
+      mockFetchResponses(unauthorizedResponse(), okResponse());
+      const getSpy = jest.spyOn(SelfHttpDispatcherProvider.prototype, 'get');
+      const { self } = createClient({
+        unauthorizedErrorHandler: retryHandler({ authorization: 'Bearer essu_refreshed' }),
+      });
+
+      await self
+        .asScoped(createFakeRequest({ authorization: 'Bearer essu_expired' }))
+        .fetch('/api/status');
+
+      // One resolution per attempt, so a TLS config reload between attempts is honored.
+      expect(getSpy).toHaveBeenCalledTimes(2);
+      getSpy.mockRestore();
     });
 
     it('re-derives the attestation for the refreshed credential', async () => {

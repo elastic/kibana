@@ -114,8 +114,12 @@ export async function deserializeState(
         sharingSavedObjectProps,
       } satisfies LensRuntimeState;
     } catch (e) {
-      // return an empty Lens document if no saved object is found
-      return { ...state, attributes: fallbackAttributes };
+      // return an empty Lens document and keep the error to report it to the user
+      return {
+        ...state,
+        attributes: fallbackAttributes,
+        loadError: e instanceof Error ? e : new Error(String(e)),
+      };
     }
   }
 

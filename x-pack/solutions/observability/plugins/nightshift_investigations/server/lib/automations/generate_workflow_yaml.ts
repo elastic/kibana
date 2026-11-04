@@ -6,21 +6,19 @@
  */
 
 import { stringify } from 'yaml';
+import { IF_CONDITION_MAX_LENGTH } from '@kbn/workflows';
+import { DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID } from '../../../common';
+import { parsePresetSchedule } from '../../../common/automation_schedule';
 import type { InvestigationNotificationDestination } from '../../../common';
 import type { NightshiftAutomationAttributes, NightshiftTriggerRow, OverlapPolicy } from './types';
-
-// alerting.alertStatusChanged uses 'active'/'recovered'; our AlertStatus uses 'active'/'inactive'.
-const ALERT_STATUS_TO_KQL: Record<string, string> = {
-  active: 'active',
-  inactive: 'recovered',
-};
 
 // Defaults to the Elastic Slack app when no connector is selected; the channel remains user-selected.
 // Mirrors significant_events/server/lib/slack_app/service.ts, which depends on this plugin.
 export const ELASTIC_APPS_SLACK_CONNECTOR_ID = 'elastic-apps-slack';
 
-const ALERT_TRIGGER_TYPE = 'alerting.alertStatusChanged';
+const ALERT_TRIGGER_TYPE = 'alerting.v1.alertStatusChanged';
 const SLACK_MESSAGE_TRIGGER_TYPE = 'slack2.message';
+const AUTOMATION_TIMEOUT_MARGIN_SECONDS = 60;
 
 // Top-level messages only, since replies are handled by the managed Slack thread workflow. Edits
 // carry a subtype and are left out. Posts from other bots are allowed, so an alert another bot
@@ -31,23 +29,19 @@ const SLACK_MESSAGE_EXCLUSIONS = [
   '(not event.subtype:* or event.subtype:bot_message or event.subtype:file_share)',
 ];
 
-// One investigation per message, so concurrent messages in a channel do not share a subject.
-const SLACK_SUBJECT_ID = '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}';
-
-// The message's thread, which the managed Slack thread workflow looks the investigation up by when
-// someone replies. Only recorded for an automation that already reports in that thread: it makes
-// a reply there report the investigation, which a silent or channel-mode automation does not do.
-// The trigger condition guarantees a workspace.
+// The message's thread, keyed by the Relay's thread key so a later reply or mention in it continues
+// the investigation. Only top-level messages trigger, so each message is its own thread.
 const SLACK_THREAD = {
   workspace: '{{ event.workspace }}',
   channel: '{{ event.channel }}',
   thread_ts: '{{ event.messageId }}',
+  external_conversation_id: '{{ event.externalConversationId }}',
 };
 
 // See MAX_PROMPT_TEMPLATE_LENGTH: the template and this text share the step's message limit.
 export const SLACK_MESSAGE_TEXT_LIMIT = 4000;
 
-const SLACK_MESSAGE_PROMPT = `Slack message from {{ event.sender }} in channel {{ event.channel }}:\n\n{{ event.text | truncate: ${SLACK_MESSAGE_TEXT_LIMIT} }}`;
+const SLACK_MESSAGE_PROMPT = `Slack message from {{ event.botName | default: event.sender | default: event.botId }} in channel {{ event.channel }}:\n\n{{ event.text | truncate: ${SLACK_MESSAGE_TEXT_LIMIT} }}`;
 
 type AlertRow = Extract<NightshiftTriggerRow, { kind: 'alert' }>;
 type SlackRow = Extract<NightshiftTriggerRow, { kind: 'slack' }>;
@@ -59,57 +53,210 @@ const OVERLAP_POLICY_TO_STRATEGY: Record<OverlapPolicy, string> = {
   queue: 'queue',
 };
 
-/**
- * Generates a workflow YAML document from a nightshift automation config.
- *
- * Uses the yaml package to serialize all user-provided strings so that special
- * characters (newlines, colons, quotes) in prompt templates never corrupt the document.
- *
- * Alert-trigger support uses alerting.alertStatusChanged (#291886). The code is complete
- * and ready — it activates the moment #291886 lands with no follow-up change needed here.
- *
- * Dispatch budget gating (nightshift.checkBudget step) is added in a follow-up PR that
- * covers both per-automation daily limits and the global Nightshift cap together.
- */
-export function generateWorkflowYaml(
-  automationId: string,
-  automation: NightshiftAutomationAttributes
-): string {
-  const alertRows = automation.trigger.rows.filter(
-    (r): r is Extract<NightshiftTriggerRow, { kind: 'alert' }> => r.kind === 'alert'
-  );
+/** Generates a workflow document from an automation, serializing user input safely. */
+export function generateWorkflowYaml({
+  automationId,
+  automation,
+  serviceAccountId,
+}: {
+  automationId: string;
+  automation: NightshiftAutomationAttributes;
+  /** The account the automation runs as (`settings.run_as`); unbound when omitted. */
+  serviceAccountId?: string;
+}): string {
+  const alertRows = automation.trigger.rows.filter((row): row is AlertRow => row.kind === 'alert');
   const slackRows = automation.trigger.rows.filter(isSlackRow);
+  const schedule = automation.trigger.rows.find((row) => row.kind === 'schedule');
+  const hasMultipleTriggers =
+    Number(alertRows.length > 0) + Number(slackRows.length > 0) + Number(Boolean(schedule)) > 1;
+  const alertWorkflow =
+    alertRows.length > 0 || (slackRows.length === 0 && !schedule)
+      ? generateAlertWorkflow(automationId, automation, alertRows, hasMultipleTriggers)
+      : undefined;
+  const slackWorkflow =
+    slackRows.length > 0
+      ? generateSlackWorkflow(automationId, automation, slackRows, hasMultipleTriggers)
+      : undefined;
+  const scheduledWorkflow = schedule
+    ? generateScheduledWorkflow(automationId, automation, schedule)
+    : undefined;
+  const workflowParts = [scheduledWorkflow, alertWorkflow, slackWorkflow].filter(
+    (part) => part !== undefined
+  );
 
   const strategy = automation.runtime.overlapPolicy
     ? OVERLAP_POLICY_TO_STRATEGY[automation.runtime.overlapPolicy]
     : 'drop';
 
-  const workflowObj: Record<string, unknown> = {
+  const workflowObj = {
     name: automation.name,
     enabled: automation.isEnabled,
     tags: ['nightshift', 'automation'],
     settings: {
+      ...(serviceAccountId ? { run_as: serviceAccountId } : {}),
+      // The automation starts first and waits for the investigation, so its deadline
+      // needs extra time for setup and returning the investigation result.
+      ...(automation.runtime.timeoutSeconds !== undefined
+        ? { timeout: `${automation.runtime.timeoutSeconds + AUTOMATION_TIMEOUT_MARGIN_SECONDS}s` }
+        : {}),
       concurrency: {
         key: buildWorkflowConcurrencyKey(automationId, alertRows.length > 0, slackRows.length > 0),
         strategy,
         max: 1,
       },
     },
-    triggers: buildTriggers(alertRows, slackRows),
-    steps: buildSteps(automationId, automation, alertRows.length > 0, slackRows.length > 0),
+    triggers: [
+      ...(alertWorkflow?.triggers ?? []),
+      ...(slackWorkflow?.triggers ?? []),
+      ...(scheduledWorkflow?.triggers ?? []),
+    ],
+    steps: workflowParts.flatMap((part) =>
+      hasMultipleTriggers ? [guardedStep(part.kind, part.triggers[0].type, part.steps)] : part.steps
+    ),
   };
 
   return stringify(workflowObj, { lineWidth: 0 });
 }
 
-type TriggerKind = 'alert' | 'slack';
+function generateAlertWorkflow(
+  automationId: string,
+  automation: NightshiftAutomationAttributes,
+  alertRows: Array<Extract<NightshiftTriggerRow, { kind: 'alert' }>>,
+  hasMultipleTriggers: boolean
+) {
+  const condition = buildCondition(alertRows);
+  const notificationDestinations = buildNotificationDestinations(automationId, automation, 'alert');
+
+  return {
+    kind: 'alert' as const,
+    triggers: [
+      alertRows.length > 0
+        ? {
+            type: ALERT_TRIGGER_TYPE,
+            ...(condition ? { on: { condition } } : {}),
+          }
+        : { type: 'manual' },
+    ],
+    steps: [
+      {
+        name: hasMultipleTriggers ? 'trigger_investigation_alert' : 'trigger_investigation',
+        type: 'nightshift.triggerInvestigation',
+        ...(alertRows.length > 0 ? { if: ALERT_ACTIVE_STEP_CONDITION } : {}),
+        with: {
+          automation_id: automationId,
+          subject_type: alertRows.length > 0 ? 'alert' : 'manual',
+          subject_id: alertRows.length > 0 ? '{{ event.alert.uuid }}' : automationId,
+          title: alertRows.length > 0 ? '{{ event.rule.name }}' : automation.name,
+          summary: automation.name,
+          trigger_type: 'automatic',
+          ...(automation.execution.promptTemplate
+            ? { message: automation.execution.promptTemplate }
+            : {}),
+          ...(automation.runtime.timeoutSeconds !== undefined
+            ? { timeout_seconds: automation.runtime.timeoutSeconds }
+            : {}),
+          ...(alertRows.length > 0 ? { context: buildAlertContext() } : {}),
+          ...(notificationDestinations ? { notificationDestinations } : {}),
+        },
+      },
+      ...(alertRows.length > 0 ? [RECOVERED_ALERT_STEP] : []),
+    ],
+  };
+}
+
+const ALERT_ACTIVE_STEP_CONDITION = "${{ event.alert.status == 'active' }}";
+
+/**
+ * Continues the open investigation that holds a recovered alert with the recovery brief, or does
+ * nothing when no open investigation holds it. It never starts an investigation, so it does not
+ * consume the automation's daily limit.
+ */
+const RECOVERED_ALERT_STEP = {
+  name: 'follow_up_recovered_alert',
+  type: 'nightshift.followUpRecoveredAlert',
+  if: "${{ event.alert.status == 'recovered' }}",
+  with: {
+    alert_uuid: '{{ event.alert.uuid }}',
+    alert_id: '${{ event.alert.id }}',
+    alert_start: '${{ event.alert.start }}',
+    // Stamped when the event is dispatched to workflows, after the rule run that found the alert
+    // recovered has saved its state.
+    recovered_at: '{{ event.timestamp }}',
+    rule_id: '{{ event.rule.id }}',
+    rule_name: '${{ event.rule.name }}',
+    rule_type_id: '{{ event.rule.ruleTypeId }}',
+    rule_tags: '${{ event.rule.tags }}',
+  },
+};
+
+function buildAlertContext() {
+  return {
+    alerts: [
+      {
+        id: '${{ event.alert.uuid }}',
+        rule_id: '${{ event.rule.id }}',
+        rule_name: '${{ event.rule.name }}',
+        rule_type_id: '${{ event.rule.ruleTypeId }}',
+        rule_category: '${{ event.rule.ruleTypeName }}',
+        status: '${{ event.alert.status }}',
+        start:
+          '{{ event.alert.start | default: execution.startedAt | date: "%Y-%m-%dT%H:%M:%S.%L%:z" }}',
+        rule_tags: '${{ event.rule.tags }}',
+      },
+    ],
+  };
+}
+
+function generateScheduledWorkflow(
+  automationId: string,
+  automation: NightshiftAutomationAttributes,
+  schedule: Extract<NightshiftTriggerRow, { kind: 'schedule' }>
+) {
+  const parsed = parsePresetSchedule(schedule);
+  if (!parsed.success) throw new Error(parsed.error);
+  const notificationDestinations = buildNotificationDestinations(
+    automationId,
+    automation,
+    'schedule'
+  );
+
+  return {
+    kind: 'schedule' as const,
+    triggers: [parsed.trigger],
+    steps: [
+      {
+        name: 'trigger_investigation',
+        type: 'nightshift.triggerInvestigation',
+        with: {
+          automation_id: automationId,
+          subject_type: 'manual',
+          subject_id: DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
+          title: automation.name,
+          summary: automation.name,
+          trigger_type: 'automatic',
+          ...(automation.execution.promptTemplate
+            ? { message: automation.execution.promptTemplate }
+            : {}),
+          ...(schedule.scopeQuery ? { scope_query: schedule.scopeQuery } : {}),
+          ...(automation.runtime.timeoutSeconds !== undefined
+            ? { timeout_seconds: automation.runtime.timeoutSeconds }
+            : {}),
+          ...(notificationDestinations ? { notificationDestinations } : {}),
+        },
+      },
+    ],
+  };
+}
+
+type TriggerKind = 'alert' | 'slack' | 'schedule';
 
 /**
  * One investigation per alert and per Slack message, so a new one does not cancel or drop the
- * previous one. An automation with neither trigger kind runs from the manual trigger and has no
- * payload to key on.
+ * previous one. An alert's recovery is keyed apart from its activation, so it is not dropped while
+ * the activation's run is still in progress. Scheduled runs have no event payload and share one
+ * concurrency key per automation.
  */
-const ALERT_CONCURRENCY_SUFFIX = '{{ trigger.alert.uuid }}';
+const ALERT_CONCURRENCY_SUFFIX = '{{ event.alert.uuid }}-{{ event.alert.status }}';
 const SLACK_CONCURRENCY_SUFFIX = '{{ event.channel }}-{{ event.messageId }}';
 
 function buildConcurrencyKey(
@@ -134,34 +281,6 @@ function buildWorkflowConcurrencyKey(
   return buildConcurrencyKey(hasSlackRows ? 'slack' : 'alert', automationId, hasAlertRows);
 }
 
-/**
- * A run is started by exactly one trigger, but its payload differs by kind, so each kind gets its
- * own investigation step. With a single kind the step runs unguarded. With several, each kind's
- * step is guarded on `execution.triggeredBy`, which holds the id of the trigger that fired.
- */
-function buildSteps(
-  automationId: string,
-  automation: NightshiftAutomationAttributes,
-  hasAlertRows: boolean,
-  hasSlack: boolean
-): unknown[] {
-  const stepsFor = (kind: TriggerKind, name: string): unknown[] => [
-    buildInvestigationStep(kind, name, automationId, automation, hasAlertRows),
-  ];
-
-  if (hasAlertRows && hasSlack) {
-    return [
-      guardedStep('alert', ALERT_TRIGGER_TYPE, stepsFor('alert', 'trigger_investigation_alert')),
-      guardedStep(
-        'slack',
-        SLACK_MESSAGE_TRIGGER_TYPE,
-        stepsFor('slack', 'trigger_investigation_slack')
-      ),
-    ];
-  }
-  return stepsFor(hasSlack ? 'slack' : 'alert', 'trigger_investigation');
-}
-
 function guardedStep(
   kind: TriggerKind,
   triggerType: string,
@@ -175,41 +294,43 @@ function guardedStep(
   };
 }
 
-function buildInvestigationStep(
-  kind: TriggerKind,
-  name: string,
+function generateSlackWorkflow(
   automationId: string,
   automation: NightshiftAutomationAttributes,
-  hasAlertRows: boolean
-): Record<string, unknown> {
-  const notificationDestinations = buildNotificationDestinations(automationId, automation, kind);
-  const repliesInMessageThread = notificationDestinations?.some(({ params }) => params.thread_ts);
+  slackRows: SlackRow[],
+  hasMultipleTriggers: boolean
+) {
+  const notificationDestinations = buildNotificationDestinations(automationId, automation, 'slack');
+  const condition = buildSlackCondition(slackRows);
+  // One trigger combines all Slack rows so a message matching several rows starts only one run.
   return {
-    name,
-    type: 'nightshift.triggerInvestigation',
-    with: {
-      ...(kind === 'slack'
-        ? {
-            subject_type: 'manual',
-            subject_id: SLACK_SUBJECT_ID,
-            title: automation.name,
-            ...(repliesInMessageThread ? { slack_thread: SLACK_THREAD } : {}),
-          }
-        : hasAlertRows
-        ? {
-            subject_type: 'alert',
-            subject_id: '{{ trigger.alert.uuid }}',
-            title: '{{ trigger.rule.name }}',
-          }
-        : // An automation with no alert or Slack rows runs from the manual trigger and has no
-          // alert payload, and an alert investigation requires `context.alerts`, so the prompt
-          // is the whole subject.
-          { subject_type: 'manual', subject_id: automationId, title: automation.name }),
-      summary: automation.name,
-      trigger_type: 'automatic',
-      ...buildMessage(automation.execution.promptTemplate, kind === 'slack'),
-      ...(notificationDestinations ? { notificationDestinations } : {}),
-    },
+    kind: 'slack' as const,
+    triggers: [
+      {
+        type: SLACK_MESSAGE_TRIGGER_TYPE,
+        'connector-id': ELASTIC_APPS_SLACK_CONNECTOR_ID,
+        ...(condition ? { on: { condition } } : {}),
+      },
+    ],
+    steps: [
+      {
+        name: hasMultipleTriggers ? 'trigger_investigation_slack' : 'trigger_investigation',
+        type: 'nightshift.triggerInvestigation',
+        with: {
+          automation_id: automationId,
+          subject_type: 'slack_thread',
+          slack_thread: SLACK_THREAD,
+          title: automation.name,
+          summary: automation.name,
+          trigger_type: 'automatic',
+          ...buildMessage(automation.execution.promptTemplate, true),
+          ...(automation.runtime.timeoutSeconds !== undefined
+            ? { timeout_seconds: automation.runtime.timeoutSeconds }
+            : {}),
+          ...(notificationDestinations ? { notificationDestinations } : {}),
+        },
+      },
+    ],
   };
 }
 
@@ -271,42 +392,13 @@ function buildMessage(
   };
 }
 
-function buildTriggers(alertRows: AlertRow[], slackRows: SlackRow[]): unknown[] {
-  const triggers: unknown[] = [];
-
-  if (alertRows.length > 0) {
-    const trigger: Record<string, unknown> = { type: ALERT_TRIGGER_TYPE };
-    const condition = buildCondition(alertRows);
-    if (condition) {
-      trigger.on = { condition };
-    }
-    triggers.push(trigger);
-  }
-
-  if (slackRows.length > 0) {
-    // One trigger for all Slack rows: two triggers that both match a message would start the
-    // workflow twice for it.
-    const trigger: Record<string, unknown> = {
-      type: SLACK_MESSAGE_TRIGGER_TYPE,
-      'connector-id': ELASTIC_APPS_SLACK_CONNECTOR_ID,
-    };
-    const condition = buildSlackCondition(slackRows);
-    if (condition) {
-      trigger.on = { condition };
-    }
-    triggers.push(trigger);
-  }
-
-  return triggers.length > 0 ? triggers : [{ type: 'manual' }];
-}
-
 /**
  * KQL over the `slack2.message` event payload: the fixed exclusions, then the row filters.
  *
  * `channels` and `users` are matched against `event.channel` and `event.sender`, which are Slack
- * ids, so a channel name never matches. The message filter is a case sensitive contains check, see
- * `buildMessageFilterTerms`. A row with no filters matches every message the exclusions let
- * through.
+ * ids, so a channel name never matches. `bots` are matched by app id, bot id or bot name. The
+ * message filter is a case sensitive contains check, see `buildMessageFilterTerms`. A row with no
+ * filters matches every message the exclusions let through.
  */
 function buildSlackCondition(rows: SlackRow[]): string {
   const exclusions = SLACK_MESSAGE_EXCLUSIONS.join(' and ');
@@ -314,7 +406,12 @@ function buildSlackCondition(rows: SlackRow[]): string {
   if (rowConditions.some((c) => c === '')) return exclusions;
   const rowFilter =
     rowConditions.length === 1 ? rowConditions[0] : rowConditions.map((c) => `(${c})`).join(' or ');
-  return `${exclusions} and (${rowFilter})`;
+  const condition = `${exclusions} and (${rowFilter})`;
+  // The workflow API saves a longer condition as an invalid, disabled workflow without an error.
+  if (condition.length > IF_CONDITION_MAX_LENGTH) {
+    throw new Error('The Slack filters are too long. Remove some channels, users or apps.');
+  }
+  return condition;
 }
 
 function buildSlackRowCondition(row: SlackRow): string {
@@ -330,12 +427,26 @@ function buildSlackRowCondition(row: SlackRow): string {
     parts.push(kqlOneOf('event.sender', users));
   }
 
+  const bots = cleanValues(row.bots);
+  if (bots.length > 0) {
+    parts.push(buildBotCondition(bots));
+  }
+
   const messageFilter = row.messageFilter?.trim();
   if (messageFilter) {
     parts.push(buildMessageFilterTerms(messageFilter));
   }
 
   return parts.join(' and ');
+}
+
+/**
+ * Matches a post from any of the given apps or bots. Each value is compared with the app id, the
+ * bot id and the bot name, so the user can enter whichever one they have.
+ */
+function buildBotCondition(bots: string[]): string {
+  const fields = ['event.appId', 'event.botId', 'event.botName'];
+  return `(${fields.map((field) => kqlOneOf(field, bots)).join(' or ')})`;
 }
 
 /**
@@ -381,27 +492,18 @@ function buildCondition(rows: Array<Extract<NightshiftTriggerRow, { kind: 'alert
   return rowConditions.map((c) => `(${c})`).join(' OR ');
 }
 
-function buildRowCondition(row: Extract<NightshiftTriggerRow, { kind: 'alert' }>): string {
-  const parts: string[] = [];
+const ALERT_STATUS_CONDITION = '(event.alert.status: "active" OR event.alert.status: "recovered")';
 
-  if (row.alertStatus && row.alertStatus !== 'any') {
-    const kqlStatus = ALERT_STATUS_TO_KQL[row.alertStatus];
-    if (kqlStatus) {
-      parts.push(`alert.status: "${kqlStatus}"`);
-    }
-  }
+function buildRowCondition(row: Extract<NightshiftTriggerRow, { kind: 'alert' }>): string {
+  const parts: string[] = [ALERT_STATUS_CONDITION];
 
   if (row.ruleNamePattern) {
-    const mode = row.ruleNameMatchMode ?? 'substring';
-    if (mode === 'substring') {
-      parts.push(`rule.name: "*${escapeKql(row.ruleNamePattern)}*"`);
-    }
-    // regex mode: KQL does not natively support regex — filter applied at investigation time.
+    parts.push(`event.rule.name: *${escapeKqlWildcardTerm(row.ruleNamePattern)}*`);
   }
 
   const ruleMatchers = [
-    ...(row.ruleNames ?? []).map((name) => `rule.name: "${escapeKql(name)}"`),
-    ...(row.tags ?? []).map((tag) => `rule.tags: "${escapeKql(tag)}"`),
+    ...(row.ruleNames ?? []).map((name) => `event.rule.name: "${escapeKql(name)}"`),
+    ...(row.tags ?? []).map((tag) => `event.rule.tags: "${escapeKql(tag)}"`),
   ];
   if (ruleMatchers.length > 0) {
     parts.push(ruleMatchers.length === 1 ? ruleMatchers[0] : `(${ruleMatchers.join(' OR ')})`);

@@ -65,10 +65,25 @@ export interface CommonAttachmentViewProps {
   permissions: CasesPermissions;
 }
 
+/**
+ * Saved object ids, or ids that this list's type references (grouped attachments keep the rest).
+ * The confirmation counts ids, so use `savedObjectIds` only when each attachment references 1 id.
+ */
+export type AttachmentRemovalRequest = { savedObjectIds: string[] } | { attachmentIds: string[] };
+
+export interface AttachmentRemovalOptions {
+  /** Called once the attachments are removed, e.g. to clear a table selection. */
+  onSuccess?: () => void;
+}
+
 /** Props for case-level attachment lists (Alerts/Events/… table hosts). */
 export interface CommonAttachmentListViewProps {
   caseData: CaseUI;
   searchTerm?: string;
+  /** Asks the user to confirm, removes the attachments, and refreshes the case. */
+  onRemove?: (request: AttachmentRemovalRequest, options?: AttachmentRemovalOptions) => void;
+  /** True while a removal is in progress. `onRemove` is ignored until it finishes. */
+  isRemoving?: boolean;
 }
 
 export interface RowContext {
@@ -138,12 +153,37 @@ export interface AttachmentWorkflow {
   getActivityLabel: (props: WorkflowActivityLabelProps) => React.ReactNode;
 }
 
+export interface CountProps {
+  count: number;
+}
+
+export interface RelatedRemovalOptions {
+  /** Whether the related attachments leave the case too. */
+  includeRelated: boolean;
+}
+
+export interface RelatedRemovalChoice {
+  /** Which related attachments can leave the case with the removed ones. */
+  description: string;
+  /** Label of the button that removes only the selected attachments. */
+  removeOnlyLabel: string;
+  /** Label of the button that also removes the related attachments. */
+  removeWithRelatedLabel: string;
+}
+
 export interface AttachmentType<Props> {
   id: string;
   getIcon: (props: Props) => EuiCommentProps['timelineAvatar'];
   getLabel: () => string;
   getCreationActivity: (props: Props) => AttachmentCreationActivity<Props>;
   getRemovalActivity?: (props: Props) => AttachmentRemovalActivity<Props>;
+  /** Counted noun for `count` attachments of this type, e.g. "2 files". Lowercase except brand names. */
+  getCountLabel?: (props: CountProps) => string;
+  /**
+   * Lets the removal prompt offer to keep the attachments the server would remove with `count`
+   * attachments of this type, e.g. the alerts an attack brought to the case.
+   */
+  getRelatedRemoval?: (props: CountProps) => RelatedRemovalChoice;
   getAttachmentList?: (
     props?: CommonAttachmentListViewProps
   ) => AttachmentList<CommonAttachmentListViewProps>;

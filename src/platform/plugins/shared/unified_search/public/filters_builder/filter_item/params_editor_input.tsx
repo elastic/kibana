@@ -9,11 +9,11 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { EuiFieldText } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SuggestionsAbstraction } from '@kbn/kql/public';
+import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import {
   PhraseValueInput,
   PhrasesValuesInput,
@@ -36,13 +36,13 @@ export const strings = {
 };
 
 export interface ParamsEditorInputProps {
-  dataView: DataView;
+  dataView: FilterableSource;
   params: unknown;
   onParamsChange: (params: unknown) => void;
   onParamsUpdate: (value: unknown) => void;
   timeRangeForSuggestionsOverride?: boolean;
   filtersForSuggestions?: Filter[];
-  field?: DataViewField;
+  field?: FilterableField;
   operator?: Operator;
   invalid: boolean;
   disabled: boolean;

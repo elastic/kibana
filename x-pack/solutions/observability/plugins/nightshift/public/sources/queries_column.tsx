@@ -16,9 +16,15 @@ const ACTIVE_DRAFT_STATUS = ['active', 'draft'] as const;
 interface QueriesColumnProps {
   sourceId: string;
   streamOnboardingResult?: SignificantEventsWorkflowStatusResult;
+  /** The count belongs to the previous query until the new run is reported. */
+  isAwaitingRun: boolean;
 }
 
-export function QueriesColumn({ sourceId, streamOnboardingResult }: QueriesColumnProps) {
+export function QueriesColumn({
+  sourceId,
+  streamOnboardingResult,
+  isAwaitingRun,
+}: QueriesColumnProps) {
   const queriesFetchState = useFetchDiscoveryQueries(
     {
       name: sourceId,
@@ -41,7 +47,7 @@ export function QueriesColumn({ sourceId, streamOnboardingResult }: QueriesColum
         font-family: 'Roboto Mono', monospace;
       `}
     >
-      {isCountLoading || queriesFetchState.isError ? (
+      {isAwaitingRun || isCountLoading || queriesFetchState.isError ? (
         '—'
       ) : totalCount ? (
         <EuiI18nNumber value={totalCount} />
