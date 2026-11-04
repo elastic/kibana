@@ -77,6 +77,34 @@ describe('useAttributeValues', () => {
     expect(mockGetValues).toHaveBeenCalledTimes(1);
   });
 
+  it('does not load the values again when only the selection changes', async () => {
+    mockGetValues.mockResolvedValue(response(['linux', 'windows']));
+    const { result, rerender } = renderHook((hookParams) => useAttributeValues(hookParams), {
+      initialProps: params,
+    });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    rerender({ ...params, selected: ['linux'] });
+
+    expect(mockGetValues).toHaveBeenCalledTimes(1);
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it('sends the latest selection when the values are loaded again', async () => {
+    mockGetValues.mockResolvedValue(response(['linux', 'windows']));
+    const { result, rerender } = renderHook((hookParams) => useAttributeValues(hookParams), {
+      initialProps: params,
+    });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    rerender({ ...params, selected: ['linux'] });
+    const nextParams = { ...params, selected: ['linux'], filters: { 'cloud.provider': ['aws'] } };
+    rerender(nextParams);
+
+    await waitFor(() => expect(mockGetValues).toHaveBeenCalledTimes(2));
+    expect(mockGetValues).toHaveBeenLastCalledWith(nextParams);
+  });
+
   it('ignores a response that arrives after the params changed', async () => {
     let resolveFirst: (value: EntityInventoryAttributeValuesResponse) => void = () => {};
     mockGetValues
@@ -86,7 +114,7 @@ describe('useAttributeValues', () => {
       initialProps: params,
     });
 
-    rerender({ ...params, selected: ['linux'] });
+    rerender({ ...params, filters: { 'cloud.provider': ['aws'] } });
     await waitFor(() => expect(result.current.values).toEqual(['new']));
 
     await act(async () => resolveFirst(response(['old'])));
