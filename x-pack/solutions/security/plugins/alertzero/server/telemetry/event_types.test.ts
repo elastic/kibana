@@ -299,6 +299,23 @@ const FIXTURES: {
     watch_tag: 'watch-forensics',
     worker_id: 'system-security-forensics-endpoint-analysis',
   },
+  [ALERTZERO_TELEMETRY_EVENTS.HuntSessionPreserved]: {
+    added_count: 2,
+    evidence_count: 2,
+    hunt_id: 'aws_iam_cross_account_assume_role_creation',
+  },
+  [ALERTZERO_TELEMETRY_EVENTS.HuntEvidenceAppended]: {
+    added_count: 1,
+    evidence_count: 3,
+    hunt_id: 'aws_iam_cross_account_assume_role_creation',
+  },
+  [ALERTZERO_TELEMETRY_EVENTS.HuntContinued]: {
+    hunt_id: 'aws_iam_cross_account_assume_role_creation',
+  },
+  [ALERTZERO_TELEMETRY_EVENTS.HuntInvestigationCreated]: {
+    hunt_id: 'aws_iam_cross_account_assume_role_creation',
+    trigger: 'manual',
+  },
 };
 
 const README_PATH = join(__dirname, 'README.md');
@@ -685,6 +702,50 @@ describe('AlertZero telemetry event types', () => {
       expect(() =>
         analytics.reportEvent(ALERTZERO_TELEMETRY_EVENTS.WorkerRunCompleted, payload)
       ).toThrow();
+    });
+  });
+
+  describe('Hunt Library events', () => {
+    const HUNT_EVENTS = [
+      ALERTZERO_TELEMETRY_EVENTS.HuntSessionPreserved,
+      ALERTZERO_TELEMETRY_EVENTS.HuntEvidenceAppended,
+      ALERTZERO_TELEMETRY_EVENTS.HuntContinued,
+      ALERTZERO_TELEMETRY_EVENTS.HuntInvestigationCreated,
+    ] as const;
+
+    const schemaOf = (eventType: string): Record<string, unknown> =>
+      (ALERTZERO_TELEMETRY_EVENT_TYPES.find((opts) => opts.eventType === eventType)?.schema ??
+        {}) as Record<string, unknown>;
+
+    it.each(HUNT_EVENTS.map((eventType) => [eventType]))(
+      '%s carries the hunt id and no query, filter, row or model field',
+      (eventType) => {
+        const fields = Object.keys(schemaOf(eventType));
+
+        expect(fields).toContain('hunt_id');
+        expect(
+          fields.filter((field) =>
+            /query|filter|row|evidence_rows|candidate|summary|rationale|field_value/.test(field)
+          )
+        ).toEqual([]);
+      }
+    );
+
+    it.each(HUNT_EVENTS.map((eventType) => [eventType]))(
+      '%s rejects a payload without a hunt id in dev mode',
+      (eventType) => {
+        const analytics = createAnalytics({ isDev: true, logger: loggerMock.create() });
+        registerAlertZeroTelemetryEvents(analytics);
+        const { hunt_id: _omitted, ...payload } = FIXTURES[eventType];
+
+        expect(() => analytics.reportEvent(eventType, payload)).toThrow();
+      }
+    );
+
+    it('sends only counts alongside the hunt id on a preservation', () => {
+      expect(Object.keys(schemaOf(ALERTZERO_TELEMETRY_EVENTS.HuntSessionPreserved)).sort()).toEqual(
+        ['added_count', 'evidence_count', 'hunt_id']
+      );
     });
   });
 

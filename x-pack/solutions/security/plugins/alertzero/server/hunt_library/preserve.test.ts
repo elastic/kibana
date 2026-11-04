@@ -169,6 +169,8 @@ describe('preserveHuntEvidence', () => {
       evidenceCount: 1,
       addedCount: 1,
       created: true,
+      isRetry: false,
+      hadPriorEvidence: false,
     });
     expect(conversations.create).toHaveBeenCalledWith(
       expect.objectContaining({ id: INVESTIGATION, templateId: 'investigation' })
@@ -205,7 +207,13 @@ describe('preserveHuntEvidence', () => {
 
     const second = await run({ preservationId: P2, selection: [ref('e2')] });
 
-    expect(second).toMatchObject({ evidenceCount: 2, addedCount: 1, created: true });
+    expect(second).toMatchObject({
+      evidenceCount: 2,
+      addedCount: 1,
+      created: true,
+      isRetry: false,
+      hadPriorEvidence: true,
+    });
     const stored = attachments.versions.at(-1)!.data as {
       revision: number;
       preservations: unknown[];
@@ -231,8 +239,13 @@ describe('preserveHuntEvidence', () => {
     const retry = await run();
     const repeated = await run({ preservationId: P2 });
 
-    expect(retry).toMatchObject({ evidenceCount: 1, addedCount: 1 });
-    expect(repeated).toMatchObject({ evidenceCount: 1, addedCount: 0 });
+    expect(retry).toMatchObject({ evidenceCount: 1, addedCount: 1, isRetry: true });
+    expect(repeated).toMatchObject({
+      evidenceCount: 1,
+      addedCount: 0,
+      isRetry: false,
+      hadPriorEvidence: true,
+    });
     const stored = attachments.versions.at(-1)!.data as { preservations: unknown[] };
     expect(stored.preservations).toHaveLength(1);
   });

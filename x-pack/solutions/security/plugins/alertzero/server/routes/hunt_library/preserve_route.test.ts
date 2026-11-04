@@ -46,6 +46,7 @@ const makeDeps = ({
   const post = jest.fn();
   const addVersion = jest.fn();
   post.mockReturnValue({ addVersion });
+  const reportTelemetryEvent = jest.fn();
   registerHuntPreserveRoute({
     router: { versioned: { post } } as unknown as RouteDependencies['router'],
     logger: loggingSystemMock.createLogger(),
@@ -54,6 +55,7 @@ const makeDeps = ({
     getHuntProfileTokenSigner: () => signer ?? undefined,
     getAgentBuilderConversations: () => ({ getScopedClient: async () => ({ conv: true }) }),
     getAgentBuilderAttachments: () => ({ getScopedClient: async () => ({ att: true }) }),
+    reportTelemetryEvent,
   } as unknown as RouteDependencies);
 
   const context = {
@@ -73,6 +75,7 @@ const makeDeps = ({
     handler: addVersion.mock.calls[0][1],
     validate: addVersion.mock.calls[0][0].validate,
     context,
+    reportTelemetryEvent,
   };
 };
 
@@ -148,6 +151,8 @@ describe('hunt preserve route', () => {
       evidenceCount: 3,
       addedCount: 1,
       created: true,
+      isRetry: false,
+      hadPriorEvidence: false,
     });
     const deps = makeDeps();
 
@@ -179,6 +184,40 @@ describe('hunt preserve route', () => {
         context: expect.objectContaining({ dataViewId: 'dv-1' }),
       })
     );
+  });
+
+  it('reports the Investigation and first preservation with only the hunt id and counts', async () => {
+    mockPreserve.mockResolvedValue({
+      investigationId: 'inv-1',
+      evidenceCount: 3,
+      addedCount: 3,
+      created: true,
+      isRetry: false,
+      hadPriorEvidence: false,
+    });
+    const deps = makeDeps();
+
+    await call(deps);
+
+    expect(deps.reportTelemetryEvent.mock.calls).toEqual([
+      [
+        'alertzero_hunt_investigation_created',
+        { hunt_id: 'okta_failed_oauth_public_client_scope', trigger: 'manual' },
+      ],
+      [
+        'alertzero_hunt_session_preserved',
+        { hunt_id: 'okta_failed_oauth_public_client_scope', added_count: 3, evidence_count: 3 },
+      ],
+    ]);
+  });
+
+  it('reports nothing when the preservation fails', async () => {
+    mockPreserve.mockRejectedValue(new HuntPreserveError('handoff_failed', 'no'));
+    const deps = makeDeps();
+
+    await call(deps);
+
+    expect(deps.reportTelemetryEvent).not.toHaveBeenCalled();
   });
 
   it('rejects a forged, expired or malformed token before doing anything', async () => {

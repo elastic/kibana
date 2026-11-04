@@ -31,6 +31,7 @@ const makeDeps = ({
   const post = jest.fn();
   const addVersion = jest.fn();
   post.mockReturnValue({ addVersion });
+  const reportTelemetryEvent = jest.fn();
   registerHuntContinueRoute({
     router: { versioned: { post } } as unknown as RouteDependencies['router'],
     logger: loggingSystemMock.createLogger(),
@@ -39,6 +40,7 @@ const makeDeps = ({
     getHuntProfileTokenSigner: () => signer ?? undefined,
     getAgentBuilderConversations: () => ({ getScopedClient: async () => ({}) }),
     getAgentBuilderAttachments: () => ({ getScopedClient: async () => ({}) }),
+    reportTelemetryEvent,
   } as unknown as RouteDependencies);
   const context = {
     alertzero: Promise.resolve({
@@ -53,6 +55,7 @@ const makeDeps = ({
     handler: addVersion.mock.calls[0][1],
     validate: addVersion.mock.calls[0][0].validate,
     context,
+    reportTelemetryEvent,
   };
 };
 
@@ -100,6 +103,23 @@ describe('hunt continue route', () => {
     expect(mockContinue).toHaveBeenCalledWith(
       expect.objectContaining({ spaceId: 'default', investigationId: 'inv-1' })
     );
+  });
+
+  it('reports a continued hunt with only its hunt id, and nothing when it fails', async () => {
+    mockContinue.mockResolvedValueOnce({ session_id: 's', definition_id: 'hunt-a' });
+    const deps = makeDeps();
+
+    await call(deps);
+
+    expect(deps.reportTelemetryEvent).toHaveBeenCalledTimes(1);
+    expect(deps.reportTelemetryEvent).toHaveBeenCalledWith('alertzero_hunt_continued', {
+      hunt_id: 'hunt-a',
+    });
+
+    mockContinue.mockRejectedValueOnce(new HuntContinueError('no_hunt_session', 'none'));
+    const failed = makeDeps();
+    await call(failed);
+    expect(failed.reportTelemetryEvent).not.toHaveBeenCalled();
   });
 
   it.each([

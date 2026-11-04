@@ -16,6 +16,7 @@ import {
   HUNT_SESSION_MAX_FILTERS,
   HUNT_SESSION_MAX_ROWS_PER_PRESERVATION,
 } from '../../../common/hunt_session_attachment_schema';
+import { reportPreservationTelemetry } from '../../hunt_library/hunt_telemetry';
 import { HuntEvidenceRejectedError, type EvidenceSelection } from '../../hunt_library/evidence';
 import { HuntPreserveError, preserveHuntEvidence } from '../../hunt_library/preserve';
 import { getHuntDefinition } from '../../hunt_library/seed';
@@ -57,6 +58,7 @@ export const registerHuntPreserveRoute = ({
   getHuntProfileTokenSigner,
   getAgentBuilderConversations,
   getAgentBuilderAttachments,
+  reportTelemetryEvent,
 }: RouteDependencies) => {
   router.versioned
     .post({
@@ -158,6 +160,11 @@ export const registerHuntPreserveRoute = ({
             },
             columns: body.columns,
             selection: body.rows as EvidenceSelection[],
+          });
+          reportPreservationTelemetry({
+            report: reportTelemetryEvent,
+            huntId: definition.id,
+            result,
           });
           const responseBody: HuntPreserveResponse = {
             investigation_id: result.investigationId,

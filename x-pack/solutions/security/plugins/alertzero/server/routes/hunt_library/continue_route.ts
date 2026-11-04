@@ -10,6 +10,7 @@ import { ApiPrivileges } from '@kbn/core-security-server';
 import { API_VERSIONS, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_READ, HUNT_LIBRARY_URL } from '../../../common/constants';
 import { continueHuntSession, HuntContinueError } from '../../hunt_library/continue_session';
+import { ALERTZERO_TELEMETRY_EVENTS } from '../../telemetry/constants';
 import type { RouteDependencies } from '../register_routes';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 
@@ -25,6 +26,7 @@ export const registerHuntContinueRoute = ({
   getHuntProfileTokenSigner,
   getAgentBuilderConversations,
   getAgentBuilderAttachments,
+  reportTelemetryEvent,
 }: RouteDependencies) => {
   router.versioned
     .post({
@@ -77,6 +79,9 @@ export const registerHuntContinueRoute = ({
             logger,
             spaceId: getSpaceId(request),
             investigationId: request.body.investigation_id,
+          });
+          reportTelemetryEvent(ALERTZERO_TELEMETRY_EVENTS.HuntContinued, {
+            hunt_id: body.definition_id,
           });
           return response.ok({ body });
         } catch (err) {

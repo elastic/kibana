@@ -9,6 +9,7 @@ export {
   ALERTZERO_TELEMETRY_EVENTS,
   ALERTZERO_TELEMETRY_PREFIX,
   AUTONOMY_MODES,
+  HUNT_INVESTIGATION_TRIGGERS,
   OTHER_WATCH_TAG,
   OTHER_WORKER_ID,
   TRIGGER_TYPES,
@@ -20,6 +21,7 @@ export type {
   AlertZeroTriggerType,
   AlertZeroWatchTag,
   AlertZeroWorkerId,
+  HuntInvestigationTrigger,
 } from './constants';
 export { ALERTZERO_TELEMETRY_EVENT_TYPES } from './event_types';
 export type {
@@ -32,6 +34,9 @@ export type {
   AlertZeroAlertTriageClosureResolvedPayload,
   AlertZeroEndpointAnalysisCompletedPayload,
   AlertZeroEnvelope,
+  AlertZeroHuntContinuedPayload,
+  AlertZeroHuntEvidencePreservedPayload,
+  AlertZeroHuntInvestigationCreatedPayload,
   AlertZeroHuntReportCompletedPayload,
   AlertZeroRuleCoverageReviewCompletedPayload,
   AlertZeroRuleTuningReviewCompletedPayload,

@@ -58,6 +58,10 @@ export interface PreserveResult {
   addedCount: number;
   /** True when this request created the Investigation. */
   created: boolean;
+  /** True when this preservation id was already durable, so nothing new was written. */
+  isRetry: boolean;
+  /** True when the Investigation already held evidence before this request. */
+  hadPriorEvidence: boolean;
 }
 
 const countFingerprints = (attachment: HuntSessionAttachment) =>
@@ -204,6 +208,8 @@ export const preserveHuntEvidence = async ({
 
   // 4 and 5. Create the Investigation if needed and make the evidence durable.
   let created = false;
+  let isRetry = false;
+  let hadPriorEvidence = false;
   let attachment: HuntSessionAttachment;
   try {
     if (!linkedId) {
@@ -223,6 +229,11 @@ export const preserveHuntEvidence = async ({
         );
         const alreadyRecorded = preservations.some(
           ({ preservation_id: id }) => id === preservationId
+        );
+        isRetry = alreadyRecorded;
+        hadPriorEvidence = preservations.some(
+          ({ preservation_id: id, evidenceFingerprints }) =>
+            id !== preservationId && evidenceFingerprints.length > 0
         );
         const newRows = alreadyRecorded
           ? []
@@ -330,5 +341,7 @@ export const preserveHuntEvidence = async ({
     evidenceCount,
     addedCount: added?.evidenceFingerprints.length ?? 0,
     created,
+    isRetry,
+    hadPriorEvidence,
   };
 };
