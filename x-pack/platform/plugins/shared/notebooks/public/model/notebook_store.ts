@@ -112,6 +112,11 @@ export class NotebookStore {
     this.cells$.next({ ...cells, [id]: next });
   }
 
+  /** Replaces several cells in one update, so the graph never sees a half-applied edit. */
+  setCells(cells: Record<string, CellDefinition>): void {
+    this.cells$.next(cells);
+  }
+
   addCell(cell: CellDefinition, index = this.cellOrder$.getValue().length): void {
     if (cell.type === 'input') {
       this.setInputValue(cell.id, getDefaultInputValue(cell.input));

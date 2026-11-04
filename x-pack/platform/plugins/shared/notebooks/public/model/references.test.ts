@@ -13,6 +13,7 @@ import {
   getExposedParamNames,
   getQueryParamNames,
   renameOutput,
+  renameQueryParam,
 } from './references';
 
 const input = (name: string, definition: InputDefinition): InputCellDefinition => ({
@@ -110,17 +111,48 @@ describe('renameOutput', () => {
   const os = input('os', { kind: 'dropdown', optionsQuery: '', defaultValue: null });
   const cells = { [window.id]: window, [os.id]: os };
 
+  const renamedCell = (result: ReturnType<typeof renameOutput>, id: string) =>
+    'cells' in result ? result.cells[id] : undefined;
+
   it('stores the new name for that output only', () => {
-    expect(renameOutput(cells, window, 'end', 'until')).toEqual({
-      cell: { ...window, outputNames: { end: 'until' } },
+    expect(renamedCell(renameOutput(cells, window, 'end', 'until'), window.id)).toEqual({
+      ...window,
+      outputNames: { end: 'until' },
     });
   });
 
   it('drops the override when renamed back to the default', () => {
     const renamed = { ...window, outputNames: { end: 'until' } };
-    expect(renameOutput({ ...cells, [window.id]: renamed }, renamed, 'end', 'window_end')).toEqual({
-      cell: window,
+    const result = renameOutput({ ...cells, [window.id]: renamed }, renamed, 'end', 'window_end');
+    expect(renamedCell(result, window.id)).toEqual(window);
+  });
+
+  it('updates the queries and options queries that use the old name', () => {
+    const query: CellDefinition = {
+      id: 'q',
+      name: 'q',
+      type: 'esql',
+      query: 'FROM logs | WHERE @timestamp <= ?window_end AND message != "?window_end"',
+      runMode: 'auto',
+    };
+    const hosts = input('hosts', {
+      kind: 'dropdown',
+      optionsQuery: 'FROM logs | WHERE @timestamp <= ?window_end | STATS BY host',
+      defaultValue: null,
     });
+    const result = renameOutput(
+      { ...cells, [query.id]: query, [hosts.id]: hosts },
+      window,
+      'end',
+      'until'
+    );
+    expect(renamedCell(result, query.id)).toMatchObject({
+      query: 'FROM logs | WHERE @timestamp <= ?until AND message != "?window_end"',
+    });
+    expect(renamedCell(result, hosts.id)).toMatchObject({
+      input: { optionsQuery: 'FROM logs | WHERE @timestamp <= ?until | STATS BY host' },
+    });
+    expect(renamedCell(result, os.id)).toBe(os);
   });
 
   it.each([
@@ -130,6 +162,24 @@ describe('renameOutput', () => {
     ['the name of its sibling output', 'window_start'],
   ])('rejects %s', (_case, name) => {
     expect(renameOutput(cells, window, 'end', name)).toHaveProperty('error');
+  });
+});
+
+describe('renameQueryParam', () => {
+  it('renames value and identifier params but not longer names sharing the prefix', () => {
+    expect(
+      renameQueryParam(
+        'FROM logs | WHERE os == ?os OR ?os_min > 0 | STATS BY ??os',
+        'os',
+        'platform'
+      )
+    ).toBe('FROM logs | WHERE os == ?platform OR ?os_min > 0 | STATS BY ??platform');
+  });
+
+  it('leaves params inside string literals alone', () => {
+    expect(renameQueryParam('FROM logs | WHERE message == "?os"', 'os', 'platform')).toBe(
+      'FROM logs | WHERE message == "?os"'
+    );
   });
 });
 

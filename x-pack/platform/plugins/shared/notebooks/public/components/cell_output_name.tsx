@@ -90,7 +90,7 @@ export const CellOutputName = ({ cell, output }: { cell: CellDefinition; output:
       else stopEditing();
       return;
     }
-    store.updateCell(cell.id, () => result.cell);
+    store.setCells(result.cells);
     stopEditing();
   };
 

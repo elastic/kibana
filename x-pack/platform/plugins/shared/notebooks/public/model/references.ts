@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Parser, Walker } from '@elastic/esql';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import type { CellDefinition, CellOutputKey, InputCellDefinition } from '../../common/types';
 
@@ -77,19 +78,67 @@ export const getOutputNameError = (name: string): string | undefined => {
 export const getAllOutputNames = (cells: Readonly<Record<string, CellDefinition>>): Set<string> =>
   new Set(Object.values(cells).flatMap((cell) => getCellOutputs(cell).map(({ name }) => name)));
 
+const LEADING_PARAM_PREFIX = /^\?{1,2}/;
+
+const findParams = (query: string): Array<{ text: string; min: number }> => {
+  try {
+    return Walker.params(Parser.parse(query).root).map(({ text, location }) => ({
+      text,
+      min: location.min,
+    }));
+  } catch {
+    return [...query.matchAll(PARAM_FALLBACK_PATTERN)].map((match) => ({
+      text: match[0],
+      min: match.index ?? 0,
+    }));
+  }
+};
+
+/** The query with every `?from` and `??from` param reference renamed to `to`. */
+export const renameQueryParam = (query: string, from: string, to: string): string => {
+  const starts = new Set(
+    findParams(query)
+      .filter(({ text }) => text.replace(LEADING_PARAM_PREFIX, '') === from)
+      .map(({ min }) => min)
+  );
+  return [...starts]
+    .sort((a, b) => b - a)
+    .reduce((renamed, min) => {
+      const prefix = renamed.slice(min).match(LEADING_PARAM_PREFIX)?.[0];
+      if (!prefix || !renamed.startsWith(from, min + prefix.length)) return renamed;
+      return `${renamed.slice(0, min)}${prefix}${to}${renamed.slice(
+        min + prefix.length + from.length
+      )}`;
+    }, query);
+};
+
+const renameCellParam = (cell: CellDefinition, from: string, to: string): CellDefinition => {
+  if (cell.type === 'esql') {
+    const query = renameQueryParam(cell.query, from, to);
+    return query === cell.query ? cell : { ...cell, query };
+  }
+  if (cell.type === 'input' && cell.input.kind === 'dropdown') {
+    const optionsQuery = renameQueryParam(cell.input.optionsQuery, from, to);
+    return optionsQuery === cell.input.optionsQuery
+      ? cell
+      : { ...cell, input: { ...cell.input, optionsQuery } };
+  }
+  return cell;
+};
+
 /**
- * The cell with one output renamed, or the reason it can't be. Renaming back to the default
- * drops the override.
+ * The notebook with one output renamed and every query that referenced it updated, or the reason
+ * it can't be renamed. Renaming back to the default drops the override.
  */
 export const renameOutput = (
   cells: Readonly<Record<string, CellDefinition>>,
   cell: CellDefinition,
   key: CellOutputKey,
   name: string
-): { cell: CellDefinition } | { error: string } => {
+): { cells: Record<string, CellDefinition> } | { error: string } => {
   const current = getCellOutputs(cell).find((output) => output.key === key);
   if (!current || current.isFixed) return { error: 'This output cannot be renamed' };
-  if (name === current.name) return { cell };
+  if (name === current.name) return { cells: { ...cells } };
   const invalid = getOutputNameError(name);
   if (invalid) return { error: invalid };
   const others = { ...cells };
@@ -105,7 +154,16 @@ export const renameOutput = (
   const { [key]: _previous, ...kept } = cell.outputNames ?? {};
   const outputNames = isDefault ? kept : { ...kept, [key]: name };
   const { outputNames: _old, ...rest } = cell;
-  return { cell: Object.keys(outputNames).length > 0 ? { ...rest, outputNames } : rest };
+  const renamed: CellDefinition =
+    Object.keys(outputNames).length > 0 ? { ...rest, outputNames } : rest;
+
+  const rewritten = Object.fromEntries(
+    Object.entries({ ...cells, [cell.id]: renamed }).map(([id, other]) => [
+      id,
+      current.key === 'table' ? other : renameCellParam(other, current.name, name),
+    ])
+  );
+  return { cells: rewritten };
 };
 
 /** How a cell is named to people: its label, or its reference name when it has none. */
