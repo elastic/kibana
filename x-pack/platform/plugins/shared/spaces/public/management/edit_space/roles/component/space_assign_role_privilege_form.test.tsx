@@ -19,6 +19,7 @@ import {
   overlayServiceMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
+import { securityServiceMock } from '@kbn/core-security-browser-mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -46,6 +47,7 @@ const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
 const overlays = overlayServiceMock.createStartContract();
 const userProfile = userProfileServiceMock.createStart();
+const security = securityServiceMock.createStart();
 const theme = themeServiceMock.createStartContract();
 const i18n = i18nServiceMock.createStartContract();
 const logger = loggingSystemMock.createLogger();
@@ -95,6 +97,7 @@ const renderPrivilegeRolesForm = ({
             i18n,
             http,
             userProfile,
+            security,
             theme,
             overlays,
             notifications,
@@ -613,5 +616,30 @@ describe('PrivilegesRolesForm', () => {
         ).getByTestId('customizeSubFeaturePrivileges')
       ).not.toBeDisabled();
     });
+  });
+
+  it('warns about the service accounts holding the selected roles', async () => {
+    getRolesSpy.mockResolvedValue([]);
+    getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
+    security.serviceAccounts.isEnabled.mockReturnValue(true);
+    security.serviceAccounts.findByRoles.mockResolvedValue({
+      serviceAccounts: [
+        { id: 'kibana/relay', name: 'relay', roles: ['test_role_1'], enabled: true },
+      ],
+      complete: true,
+    });
+
+    renderPrivilegeRolesForm({
+      preSelectedRoles: [
+        createRole('test_role_1', [
+          { base: [FEATURE_PRIVILEGES_ALL], feature: {}, spaces: [space.id] },
+        ]),
+      ],
+    });
+
+    expect(await screen.findByTestId('serviceAccountRoleUsageCallout')).toHaveTextContent(
+      '1 service account uses this role'
+    );
+    expect(security.serviceAccounts.findByRoles).toHaveBeenCalledWith(['test_role_1']);
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 
@@ -17,6 +17,7 @@ import type { Role } from '@kbn/security-plugin-types-common';
 
 import { handleApiError } from './handle_api_error';
 import { EditSpaceProvider, useEditSpaceServices, useEditSpaceStore } from './provider';
+import { RemoveRoleConfirmModal } from './roles/component/remove_role_confirm_modal';
 import { PrivilegesRolesForm } from './roles/component/space_assign_role_privilege_form';
 import { SpaceAssignedRolesTable } from './roles/component/space_assigned_roles_table';
 import type { Space } from '../../../common';
@@ -39,6 +40,7 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
     logger,
     notifications,
     invokeClient,
+    security,
   } = services;
 
   const [removeRoleConfirm, setRemoveRoleConfirm] = useState<Role | null>(null);
@@ -209,34 +211,15 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
         </EuiFlexItem>
       </EuiFlexGroup>
       {removeRoleConfirm && (
-        <EuiConfirmModal
-          aria-labelledby="remove-role-confirm-modal"
-          titleProps={{ id: 'remove-role-confirm-modal' }}
-          title={i18n.translate('xpack.spaces.management.spaceDetails.roles.removeRoleModalTitle', {
-            defaultMessage: 'Remove role "{roleName}" from the space?',
-            values: { roleName: removeRoleConfirm.name },
-          })}
-          cancelButtonText={i18n.translate(
-            'xpack.spaces.management.spaceDetails.roles.removeRoleModalCancel',
-            { defaultMessage: 'Cancel' }
-          )}
-          confirmButtonText={i18n.translate(
-            'xpack.spaces.management.spaceDetails.roles.removeRoleModalConfirm',
-            { defaultMessage: 'Confirm' }
-          )}
+        <RemoveRoleConfirmModal
+          role={removeRoleConfirm}
+          serviceAccounts={security.serviceAccounts}
           onCancel={() => setRemoveRoleConfirm(null)}
           onConfirm={() => {
             removeRole([removeRoleConfirm]);
             setRemoveRoleConfirm(null);
           }}
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.spaces.management.spaceDetails.roles.removeRoleModalBody"
-              defaultMessage="You can't undo this operation."
-            />
-          </p>
-        </EuiConfirmModal>
+        />
       )}
     </>
   );

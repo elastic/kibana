@@ -21,6 +21,7 @@ import {
   themeServiceMock,
 } from '@kbn/core/public/mocks';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import { securityServiceMock } from '@kbn/core-security-browser-mocks';
 import { asSpaceId, type SpaceId } from '@kbn/core-spaces-common';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { KibanaFeature } from '@kbn/features-plugin/common';
@@ -49,6 +50,7 @@ const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
 const overlays = overlayServiceMock.createStartContract();
 const userProfile = userProfileServiceMock.createStart();
+const security = securityServiceMock.createStart();
 const theme = themeServiceMock.createStartContract();
 const i18n = i18nServiceMock.createStartContract();
 const logger = loggingSystemMock.createLogger();
@@ -90,6 +92,7 @@ describe('EditSpaceSettings', () => {
           getPrivilegesAPIClient={getPrivilegeAPIClient}
           getSecurityLicense={getSecurityLicenseMock}
           userProfile={userProfile}
+          security={security}
           theme={theme}
           i18n={i18n}
           logger={logger}
@@ -826,6 +829,7 @@ describe('EditSpaceSettings', () => {
               getPrivilegesAPIClient={getPrivilegeAPIClient}
               getSecurityLicense={getSecurityLicenseMock}
               userProfile={userProfile}
+              security={security}
               theme={theme}
               i18n={i18n}
               logger={logger}

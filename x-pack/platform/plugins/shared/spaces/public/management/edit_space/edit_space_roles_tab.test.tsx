@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 
 import {
@@ -16,6 +16,7 @@ import {
   overlayServiceMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
+import { securityServiceMock } from '@kbn/core-security-browser-mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -37,6 +38,7 @@ const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
 const overlays = overlayServiceMock.createStartContract();
 const userProfile = userProfileServiceMock.createStart();
+const security = securityServiceMock.createStart();
 const theme = themeServiceMock.createStartContract();
 const i18n = i18nServiceMock.createStartContract();
 const logger = loggingSystemMock.createLogger();
@@ -81,6 +83,7 @@ describe('EditSpaceAssignedRolesTab', () => {
           getPrivilegesAPIClient={getPrivilegeAPIClient}
           getSecurityLicense={getSecurityLicenseMock}
           userProfile={userProfile}
+          security={security}
           theme={theme}
           i18n={i18n}
           logger={logger}
@@ -147,5 +150,33 @@ describe('EditSpaceAssignedRolesTab', () => {
       expect(loadRolesSpy).not.toHaveBeenCalled();
       expect(toastErrorSpy).not.toHaveBeenCalled();
     });
+  });
+
+  it('warns about the service accounts holding a role before removing it from the space', async () => {
+    const role = {
+      name: 'test-role',
+      elasticsearch: { cluster: [], indices: [], run_as: [] },
+      kibana: [{ base: ['all'], feature: {}, spaces: [space.id] }],
+    };
+    loadRolesSpy.mockResolvedValue([role]);
+    security.serviceAccounts.isEnabled.mockReturnValue(true);
+    security.serviceAccounts.findByRoles.mockResolvedValue({
+      serviceAccounts: [{ id: 'kibana/relay', name: 'relay', roles: ['test-role'], enabled: true }],
+      complete: true,
+    });
+
+    render(
+      <TestComponent getIsRoleManagementEnabled={() => Promise.resolve(() => true)}>
+        <EditSpaceAssignedRolesTab space={space} isReadOnly={false} features={[]} />
+      </TestComponent>
+    );
+
+    fireEvent.click(await screen.findByTestId('spaceRoleCellDeleteAction'));
+
+    const modal = await screen.findByRole('alertdialog');
+    const callout = await within(modal).findByTestId('serviceAccountRoleUsageCallout');
+    expect(callout).toHaveTextContent('1 service account uses this role');
+    expect(within(callout).getByText('relay')).toBeInTheDocument();
+    expect(security.serviceAccounts.findByRoles).toHaveBeenCalledWith(['test-role']);
   });
 });

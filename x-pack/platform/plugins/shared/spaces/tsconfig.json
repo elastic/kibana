@@ -60,6 +60,8 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/security-role-management-model",
     "@kbn/security-ui-components",
+    "@kbn/core-security-browser",
+    "@kbn/core-security-browser-mocks",
     "@kbn/react-kibana-mount",
     "@kbn/shared-ux-utility",
     "@kbn/core-application-common",

@@ -37,7 +37,7 @@ import type { SpacesManager } from '../../../spaces_manager';
 export interface EditSpaceProviderRootProps
   extends Pick<
     CoreStart,
-    'userProfile' | 'theme' | 'i18n' | 'overlays' | 'http' | 'notifications'
+    'userProfile' | 'theme' | 'i18n' | 'overlays' | 'http' | 'notifications' | 'security'
   > {
   logger: Logger;
   capabilities: ApplicationStart['capabilities'];
