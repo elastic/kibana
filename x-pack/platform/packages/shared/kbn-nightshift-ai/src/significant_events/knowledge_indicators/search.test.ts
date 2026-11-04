@@ -21,7 +21,7 @@ function makeFeature(overrides: Partial<Feature> = {}): Feature {
   };
 }
 
-const noTopology = async (): Promise<string[] | undefined> => undefined;
+const noTopology = async () => undefined;
 
 function makeStreamQuery(overrides: Partial<StreamQuery> = {}): StreamQuery {
   return {
@@ -444,9 +444,10 @@ describe('searchKnowledgeIndicators', () => {
     });
 
     it('filters with topology-expanded ids', async () => {
-      const resolveTopologySeeds = jest
-        .fn()
-        .mockResolvedValue(['orders-api', 'orders-api-storage', 'storage']);
+      const resolveTopologySeeds = jest.fn().mockResolvedValue({
+        featureIds: ['orders-api', 'orders-api-storage', 'storage'],
+        selectedFeatureUuids: [],
+      });
       const getFeatures = jest.fn(async () => [dependency, storage, byNameOnly, unrelated]);
 
       const res = await searchKnowledgeIndicators({
@@ -482,7 +483,10 @@ describe('searchKnowledgeIndicators', () => {
         getSourceIds: async () => ['logs.test'],
         getFeatures,
         getQueries: async () => [],
-        resolveTopologySeeds: async () => expandedIds,
+        resolveTopologySeeds: async () => ({
+          featureIds: expandedIds,
+          selectedFeatureUuids: [],
+        }),
       });
 
       expect(getFeatures).toHaveBeenCalledTimes(2);

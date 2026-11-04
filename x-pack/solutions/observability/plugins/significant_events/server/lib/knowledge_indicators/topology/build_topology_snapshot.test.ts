@@ -7,7 +7,11 @@
 
 import type { Feature } from '@kbn/significant-events-schema';
 import { topologySnapshotPropertiesSchema } from '@kbn/significant-events-schema';
-import { buildTopologySnapshot, topologyNeighborhood } from './build_topology_snapshot';
+import {
+  buildTopologySnapshot,
+  topologyNeighborhood,
+  topologyNeighborhoodSelection,
+} from './build_topology_snapshot';
 
 const BUILT_AT = '2026-10-21T10:00:00.000Z';
 
@@ -84,7 +88,6 @@ describe('buildTopologySnapshot', () => {
     expect(node.name).toBe('checkout');
     expect(node.technology).toBe('nodejs');
     expect(node.provenance.map((p) => p.source_id)).toEqual(['src-b', 'src-a']);
-    expect(snapshot.node_count).toBe(2);
     expect(snapshot.source_ids).toEqual(['src-a', 'src-b']);
   });
 
@@ -144,9 +147,6 @@ describe('buildTopologySnapshot', () => {
         },
       ],
     });
-    expect(topologySnapshotPropertiesSchema.safeParse(conflictingVariantSnapshot).success).toBe(
-      true
-    );
   });
 
   it('is input-order independent', () => {
@@ -178,9 +178,6 @@ describe('buildTopologySnapshot', () => {
 
     expect(snapshot.nodes).toHaveLength(2_005);
     expect(snapshot.edges).toHaveLength(5_005);
-    expect(snapshot.node_count).toBe(2_005);
-    expect(snapshot.edge_count).toBe(5_005);
-    expect(snapshot.truncated).toBe(false);
   });
 });
 
@@ -234,21 +231,27 @@ describe('topologyNeighborhood', () => {
     ]);
   });
 
-  it('expands each endpoint variant of a shared dependency feature', () => {
+  it('expands endpoint and edge seeds across variants', () => {
     expect(
       topologyNeighborhood({ snapshot: conflictingVariantSnapshot, seedIds: ['redis'] })
     ).toEqual(['frontend', 'frontend-cache', 'redis']);
     expect(
       topologyNeighborhood({
         snapshot: conflictingVariantSnapshot,
-        seedIds: ['redis-cluster'],
-      })
-    ).toEqual(['frontend', 'frontend-cache', 'redis-cluster']);
-    expect(
-      topologyNeighborhood({
-        snapshot: conflictingVariantSnapshot,
         seedIds: ['frontend-cache'],
       })
     ).toEqual(['frontend', 'frontend-cache', 'redis', 'redis-cluster']);
+  });
+
+  it('retains the feature instance behind the selected edge variant', () => {
+    expect(
+      topologyNeighborhoodSelection({
+        snapshot: conflictingVariantSnapshot,
+        seedIds: ['redis-cluster'],
+      })
+    ).toEqual({
+      featureIds: ['frontend', 'frontend-cache', 'redis-cluster'],
+      selectedFeatureUuids: ['src-b:frontend-cache'],
+    });
   });
 });

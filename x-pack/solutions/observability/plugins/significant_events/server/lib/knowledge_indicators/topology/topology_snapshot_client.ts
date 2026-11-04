@@ -11,7 +11,7 @@ import type { KnowledgeIndicatorClient } from '../knowledge_indicator_client';
 import {
   TOPOLOGY_INPUT_FEATURE_TYPES,
   buildTopologySnapshot,
-  topologyNeighborhood,
+  topologyNeighborhoodSelection,
 } from './build_topology_snapshot';
 
 const TOPOLOGY_FEATURE_PAGE_SIZE = 5_000;
@@ -70,10 +70,11 @@ export class TopologySnapshotClient {
   async neighborhood(
     seedIds: string[],
     sourceIds: string[]
-  ): Promise<{ featureIds: string[]; truncated: boolean }> {
+  ): Promise<{ featureIds: string[]; selectedFeatureUuids: string[]; truncated: boolean }> {
     const snapshot = await this.get(sourceIds);
+    const selection = topologyNeighborhoodSelection({ snapshot, seedIds });
     return {
-      featureIds: topologyNeighborhood({ snapshot, seedIds }),
+      ...selection,
       truncated: snapshot.truncated,
     };
   }

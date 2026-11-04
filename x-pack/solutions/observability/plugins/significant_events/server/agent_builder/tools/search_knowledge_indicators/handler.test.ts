@@ -95,6 +95,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     catalog = catalogFor(['logs.test']);
     topologySnapshotClient.neighborhood.mockImplementation(async (seedIds: string[]) => ({
       featureIds: seedIds,
+      selectedFeatureUuids: [],
       truncated: false,
     }));
   });
@@ -279,6 +280,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
   it('uses topology-expanded ids', async () => {
     topologySnapshotClient.neighborhood.mockResolvedValueOnce({
       featureIds: ['orders-api', 'orders-api-storage', 'storage'],
+      selectedFeatureUuids: [],
       truncated: true,
     });
     kiClient.getFeatures = jest.fn().mockResolvedValue({
@@ -315,6 +317,53 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     expect(
       result.knowledge_indicators.map((ki) => (ki.kind === 'feature' ? ki.feature.id : null))
     ).toEqual(['orders-api-storage', 'storage']);
+  });
+
+  it('keeps the topology-selected dependency variant in the compact response', async () => {
+    catalog = catalogFor(['src-a', 'src-b']);
+    topologySnapshotClient.neighborhood.mockResolvedValueOnce({
+      featureIds: ['frontend', 'frontend-cache', 'redis-cluster'],
+      selectedFeatureUuids: ['src-b:frontend-cache'],
+      truncated: false,
+    });
+    kiClient.getFeatures = jest.fn(async (sourceId: string) => ({
+      hits: [
+        makeFeature({
+          id: 'frontend-cache',
+          uuid: `${sourceId}:frontend-cache`,
+          source_id: sourceId,
+          type: 'dependency',
+          confidence: sourceId === 'src-a' ? 90 : 60,
+          properties: {
+            source: 'frontend',
+            target: sourceId === 'src-a' ? 'redis' : 'redis-cluster',
+          },
+        }),
+      ],
+    }));
+
+    const result = await searchKnowledgeIndicatorsToolHandler({
+      catalog,
+      kiClient,
+      topologySnapshotClient,
+      logger,
+      params: {
+        kind: ['feature'],
+        feature_types: ['dependency'],
+        feature_ids: ['redis-cluster'],
+      },
+      view: 'compact',
+    });
+
+    expect(result.knowledge_indicators).toEqual([
+      expect.objectContaining({
+        kind: 'feature',
+        feature: expect.objectContaining({
+          source_id: 'src-b',
+          properties: { source: 'frontend', target: 'redis-cluster' },
+        }),
+      }),
+    ]);
   });
 
   it('presents a stored source id as its slug and includes view_name on the envelope', async () => {

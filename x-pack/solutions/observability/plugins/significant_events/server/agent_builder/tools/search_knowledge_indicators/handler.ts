@@ -303,7 +303,10 @@ export async function searchKnowledgeIndicatorsToolHandler({
       try {
         const neighborhood = await topologySnapshotClient.neighborhood(seedIds, sourceIds);
         topologyExpansion = { truncated: neighborhood.truncated };
-        return neighborhood.featureIds;
+        return {
+          featureIds: neighborhood.featureIds,
+          selectedFeatureUuids: neighborhood.selectedFeatureUuids,
+        };
       } catch (error) {
         logger.warn(
           `ki_search: topology unavailable, expanding in memory: ${

@@ -106,6 +106,7 @@ export type {
   SearchKnowledgeIndicatorsInput,
   SearchKnowledgeIndicatorsKind,
   SearchKnowledgeIndicatorsOutput,
+  TopologySeedResolution,
   KnowledgeIndicator,
   KnowledgeIndicatorFeature,
   KnowledgeIndicatorQuery,

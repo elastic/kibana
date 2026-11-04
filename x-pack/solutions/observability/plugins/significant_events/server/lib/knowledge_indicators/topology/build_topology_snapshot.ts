@@ -244,7 +244,12 @@ export function buildTopologySnapshot({
   };
 }
 
-export function topologyNeighborhood({
+interface TopologyNeighborhoodSelection {
+  featureIds: string[];
+  selectedFeatureUuids: string[];
+}
+
+export function topologyNeighborhoodSelection({
   snapshot,
   seedIds,
   hops = 1,
@@ -252,11 +257,12 @@ export function topologyNeighborhood({
   snapshot: Pick<TopologySnapshotProperties, 'edges'>;
   seedIds: string[];
   hops?: number;
-}): string[] {
+}): TopologyNeighborhoodSelection {
   const seeds = new Set(seedIds.map(normalizeFeatureSlug));
   const reached = new Set(seeds);
   const edgesReached = new Set<string>();
   const variantsReached = new Set<string>();
+  const selectedFeatureUuids = new Set<string>();
   let frontier = new Set(seeds);
 
   for (let hop = 0; hop < hops && frontier.size > 0; hop++) {
@@ -274,6 +280,9 @@ export function topologyNeighborhood({
         if (!touches) return;
         variantsReached.add(variantKey);
         edgesReached.add(edge.edge_id);
+        variant.provenance.forEach(({ feature_uuid: featureUuid }) =>
+          selectedFeatureUuids.add(featureUuid)
+        );
         for (const nodeId of [variant.source_node_id, variant.target_node_id]) {
           if (nodeId !== null && !reached.has(nodeId)) {
             reached.add(nodeId);
@@ -285,5 +294,14 @@ export function topologyNeighborhood({
     frontier = next;
   }
 
-  return [...new Set([...reached, ...edgesReached])].sort();
+  return {
+    featureIds: [...new Set([...reached, ...edgesReached])].sort(),
+    selectedFeatureUuids: [...selectedFeatureUuids].sort(),
+  };
+}
+
+export function topologyNeighborhood(
+  options: Parameters<typeof topologyNeighborhoodSelection>[0]
+): string[] {
+  return topologyNeighborhoodSelection(options).featureIds;
 }

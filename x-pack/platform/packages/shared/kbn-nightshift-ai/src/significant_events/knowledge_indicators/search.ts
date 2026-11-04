@@ -8,6 +8,7 @@
 import { chunk, compact, intersection, isString, uniq } from 'lodash';
 import {
   groupFeaturesAcrossSources,
+  type AggregatedFeature,
   type Feature,
   type QueryLink,
 } from '@kbn/significant-events-schema';
@@ -17,6 +18,7 @@ import type {
   KnowledgeIndicatorQuery,
   SearchKnowledgeIndicatorsInput,
   SearchKnowledgeIndicatorsOutput,
+  TopologySeedResolution,
 } from './types';
 import { featureToKnowledgeIndicatorFeature, queryLinkToKnowledgeIndicatorQuery } from './mappers';
 
@@ -176,6 +178,7 @@ async function fetchFeatureIndicators({
   searchText,
   featureTypes,
   featureIds,
+  selectedFeatureUuids,
   getFeatures,
   onFeatureFetchError,
 }: {
@@ -183,6 +186,7 @@ async function fetchFeatureIndicators({
   searchText: string | undefined;
   featureTypes: SearchKnowledgeIndicatorsInput['feature_types'];
   featureIds: string[] | undefined;
+  selectedFeatureUuids: string[] | undefined;
   getFeatures: (
     sourceId: string,
     options: {
@@ -216,7 +220,15 @@ async function fetchFeatureIndicators({
     features.push(...result.value);
   });
 
-  return groupFeaturesAcrossSources(features).map(featureToKnowledgeIndicatorFeature);
+  const selected = new Set(selectedFeatureUuids);
+  return groupFeaturesAcrossSources(features)
+    .map((feature): AggregatedFeature => {
+      const selectedInstance = feature.instances.find(({ uuid }) => selected.has(uuid));
+      return selectedInstance
+        ? { ...selectedInstance, sources: feature.sources, instances: feature.instances }
+        : feature;
+    })
+    .map(featureToKnowledgeIndicatorFeature);
 }
 
 async function fetchQueryIndicators(
@@ -320,7 +332,10 @@ export async function searchKnowledgeIndicators({
   getSourceIds(): Promise<string[]>;
   /** Slug of a source id, used to order results. Ids sort as is when it is omitted. */
   getSourceSlug?(sourceId: string): string | undefined;
-  resolveTopologySeeds(seedIds: string[], sourceIds: string[]): Promise<string[] | undefined>;
+  resolveTopologySeeds(
+    seedIds: string[],
+    sourceIds: string[]
+  ): Promise<TopologySeedResolution | undefined>;
   getFeatures(
     sourceId: string,
     options: {
@@ -362,10 +377,11 @@ export async function searchKnowledgeIndicators({
   }
 
   const seedIds = params.feature_ids?.length ? uniq(params.feature_ids) : undefined;
-  const expandedFeatureIds =
+  const topologyResolution =
     normalized.includeFeatures && seedIds
       ? await resolveTopologySeeds(seedIds, sourceIds)
       : undefined;
+  const expandedFeatureIds = topologyResolution?.featureIds;
 
   const features = normalized.includeFeatures
     ? await fetchFeatureIndicators({
@@ -373,6 +389,7 @@ export async function searchKnowledgeIndicators({
         searchText: normalized.searchText,
         featureTypes: params.feature_types,
         featureIds: expandedFeatureIds ?? (normalized.searchText ? seedIds : undefined),
+        selectedFeatureUuids: topologyResolution?.selectedFeatureUuids,
         getFeatures,
         onFeatureFetchError,
       })
