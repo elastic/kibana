@@ -119,6 +119,7 @@ describe('discovery workflow detection classifier wiring', () => {
         probe_concurrency: '${{ inputs.classifierProbeConcurrency }}',
         budget_ms: '${{ inputs.classifierBudgetMs }}',
         max_skip_age_hours: '${{ inputs.classifierMaxSkipAgeHours }}',
+        live_lookback_days: '${{ inputs.classifierLiveLookbackDays }}',
         review_fresh_minutes: '${{ inputs.classifierReviewFreshMinutes }}',
         baseline_bucket_minutes: '${{ inputs.classifierBaselineBucketMinutes }}',
         baseline_window_minutes: '${{ inputs.classifierBaselineWindowMinutes }}',
@@ -169,6 +170,7 @@ describe('discovery workflow detection classifier wiring', () => {
       ['classifierProbeConcurrency', 'number', 5, 1, 10],
       ['classifierBudgetMs', 'number', 20000, 2000, 60000],
       ['classifierReviewFreshMinutes', 'number', 240, 15, 1440],
+      ['classifierLiveLookbackDays', 'number', 90, 1, 90],
       ['classifierBaselineBucketMinutes', 'number', 5, 1, 60],
       ['classifierBaselineWindowMinutes', 'number', 300, 60, 1440],
     ])('declares %s with its default and bounds', (name, type, def, minimum, maximum) => {

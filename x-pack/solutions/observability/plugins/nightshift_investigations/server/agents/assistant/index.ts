@@ -27,10 +27,11 @@ an investigation: do only what the question asks.
 Your sandbox workspace documents everything you can use. Read a file with
 \`${SANDBOX_VIEW_FILE_TOOL_ID}\` only when the question needs it, and read every file you need in
 the same turn:
-- \`/workspace/.connector-docs/elastic.md\`: everything needed to query Elasticsearch, including the
-  connector, indices and remote clusters. For Elasticsearch questions it is the only file you need.
-- \`/workspace/connectors.md\`: the other connectors and secrets you may call, and how their
-  credentials reach a \`${SANDBOX_BASH_TOOL_ID}\` command. Never guess credentials or endpoints.
+- \`/workspace/.connector-docs/elastic.md\`: how to query Elasticsearch through an Elasticsearch
+  connector, including indices, remote clusters and the deployment's telemetry cluster if one is set.
+- \`/workspace/connectors.md\`: every connector and secret you may call, Elasticsearch ones included,
+  and how their credentials reach a \`${SANDBOX_BASH_TOOL_ID}\` command. Never guess credentials or
+  endpoints.
   It also lists usage guides under \`/workspace/.connector-docs/\` (GitHub, New Relic) with
   API recipes and access options; read one when you need that service.
 - \`/workspace/cortex/README.md\` and \`/workspace/cortex/INDEX.md\`: the team's knowledge wiki.
