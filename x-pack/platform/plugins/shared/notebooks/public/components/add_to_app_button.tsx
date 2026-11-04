@@ -7,11 +7,12 @@
 
 import React, { useState } from 'react';
 import {
-  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiHorizontalRule,
   EuiPopover,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
@@ -42,14 +43,14 @@ export const AddToAppButton = ({ cellId }: { cellId: string }) => {
   };
 
   const button = (
-    <EuiButtonEmpty
-      size="xs"
-      iconType="dashboardApp"
-      onClick={() => (apps.length === 0 ? addToNewApp() : setIsOpen((open) => !open))}
-      data-test-subj="notebookCellAddToApp"
-    >
-      {ADD_TO_APP_LABEL}
-    </EuiButtonEmpty>
+    <EuiToolTip content={ADD_TO_APP_LABEL} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="addToDashboard"
+        aria-label={ADD_TO_APP_LABEL}
+        onClick={() => (apps.length === 0 ? addToNewApp() : setIsOpen((open) => !open))}
+        data-test-subj="notebookCellAddToApp"
+      />
+    </EuiToolTip>
   );
 
   return (
