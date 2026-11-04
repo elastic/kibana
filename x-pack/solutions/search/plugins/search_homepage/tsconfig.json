@@ -38,7 +38,6 @@
     "@kbn/sample-data-ingest",
     "@kbn/core-elasticsearch-server",
     "@kbn/search-shared-ui",
-    "@kbn/shared-components",
     "@kbn/licensing-types",
     "@kbn/licensing-plugin",
     "@kbn/react-query",
@@ -49,6 +48,7 @@
     "@kbn/workflows-ui",
     "@kbn/scout-search",
     "@kbn/announcement-banner",
+    "@kbn/elasticsearch-home",
   ],
   "exclude": [
     "target/**/*"

@@ -143,8 +143,14 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
     const projectType = container.isBound(cloudToken)
       ? container.get(cloudToken).serverless.projectType
       : undefined;
+    const getInjection = () => container.get(CoreStart('injection'));
     registerSkills(agentBuilder, {
       logger: agentBuilderLogger,
+      getRulesClient: ({ request }) => resolveRequestScoped(getInjection(), request, RulesClient),
+      getActionPolicyClient: ({ request }) =>
+        resolveRequestScoped(getInjection(), request, ActionPolicyClient),
+      getPrivilegeChecker: ({ request }) =>
+        resolveRequestScoped(getInjection(), request, PrivilegeChecker),
       getWorkflowClient: (request) => workflowsManagementApi.getClient(request),
       getAvailableConnectors: (sid, req) => workflowsManagementApi.getAvailableConnectors(sid, req),
       availability: createAlertingV2Availability({

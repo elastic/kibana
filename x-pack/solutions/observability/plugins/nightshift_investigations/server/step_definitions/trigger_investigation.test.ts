@@ -75,14 +75,20 @@ describe('triggerInvestigationStepDefinition', () => {
       const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
       const { definition, getEpisodeLookup } = createDefinition(start);
 
-      await definition.handler(createContext({ subject_type: 'alert', subject_id: 'episode-1' }));
+      await definition.handler(
+        createContext({
+          subject_type: 'alert',
+          subject_id: 'episode-1',
+          telemetry_target: 'orca',
+        })
+      );
 
       expect(getEpisodeLookup).toHaveBeenCalledWith(request, 'test-space');
       expect(fetchInvestigationAlertSnapshots).toHaveBeenCalledWith(
         expect.objectContaining({ alertIds: ['episode-1'] })
       );
       expect(start).toHaveBeenCalledWith(
-        expect.objectContaining({ context: { alerts: snapshots } }),
+        expect.objectContaining({ context: { alerts: snapshots }, telemetry_target: 'orca' }),
         expect.anything()
       );
     });
@@ -100,6 +106,54 @@ describe('triggerInvestigationStepDefinition', () => {
       expect(fetchInvestigationAlertSnapshots).not.toHaveBeenCalled();
       expect(start).toHaveBeenCalledWith(expect.objectContaining({ context }), expect.anything());
     });
+  });
+
+  it.each([
+    [undefined, 'Legacy focus'],
+    ['', ''],
+    ['New focus', 'New focus'],
+  ])(
+    'uses explicit instructions ahead of legacy alert messages: %p',
+    async (instructions, expected) => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockResolvedValue({
+        id: 'a1',
+        type: 'nightshift-automation',
+        references: [],
+        attributes: { workflowId: 'wf-1', runtime: {} },
+      });
+      const start = jest.fn().mockResolvedValue({ investigation_id: 'inv-1' });
+      const { definition } = createDefinition(start, soClient);
+      await definition.handler(
+        createContext({
+          automation_id: 'a1',
+          subject_type: 'alert',
+          subject_id: 'alert-1',
+          context: { alerts: [{ id: 'alert-1' }] },
+          message: 'Legacy focus',
+          instructions,
+        })
+      );
+      expect(start).toHaveBeenCalledWith(
+        expect.objectContaining({ instructions: expected }),
+        expect.anything()
+      );
+    }
+  );
+
+  it('rejects oversized instructions before starting an investigation', async () => {
+    const start = jest.fn();
+    const { definition } = createDefinition(start);
+    await expect(
+      definition.handler(
+        createContext({
+          subject_type: 'manual',
+          message: 'Review errors.',
+          instructions: 'x'.repeat(5001),
+        })
+      )
+    ).rejects.toThrow();
+    expect(start).not.toHaveBeenCalled();
   });
 
   it('defaults an omitted trigger type to automatic', async () => {
@@ -120,6 +174,26 @@ describe('triggerInvestigationStepDefinition', () => {
       }),
       expect.anything()
     );
+  });
+
+  it.each([
+    [
+      'slack',
+      {
+        subject_type: 'slack_thread',
+        message: 'Review',
+        slack_thread: { workspace: 'T1', channel: 'C1', thread_ts: '1.1' },
+      },
+    ],
+    ['automation', { subject_type: 'significant_event', subject_id: 'event-1' }],
+    ['automation', { subject_type: 'manual', message: 'Review errors.' }],
+  ])('starts with entry point %s for %j', async (entryPoint, input) => {
+    const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+    const { definition } = createDefinition(start);
+
+    await definition.handler(createContext(input));
+
+    expect(start).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ entryPoint }));
   });
 
   it('starts without a title, which Agent Builder generates', async () => {

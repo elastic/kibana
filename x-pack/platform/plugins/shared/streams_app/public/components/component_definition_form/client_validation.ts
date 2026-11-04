@@ -15,7 +15,7 @@ import type {
 import { resolveEnumOptions } from '../../services/component_catalogue';
 import { findChoiceGroup, isUnselectedChoice } from './choice_groups';
 import { isFieldAvailable, isFieldRequired } from './conditions';
-import type { FormContextValues } from './serialize';
+import { mapItemScopes, readItemScope, type FormContextValues } from './serialize';
 import {
   isEmptyValue,
   isObjectValue,
@@ -73,6 +73,35 @@ const messages = {
   invalidOption: i18n.translate('xpack.streams.componentDefinitionForm.validation.invalidOption', {
     defaultMessage: 'Choose one of the available options',
   }),
+  itemTelemetry: i18n.translate('xpack.streams.componentDefinitionForm.validation.itemTelemetry', {
+    defaultMessage:
+      'Applies to signals this processor no longer handles. Change it or remove the item.',
+  }),
+};
+
+/** An item scoped to a signal the component no longer handles would silently stop applying. */
+const fitsTelemetry = (scope: FormValue, context: FormContextValues): boolean =>
+  readItemScope(scope).every((signal) => context.telemetry.some((allowed) => allowed === signal));
+
+/**
+ * Flags array items scoped to signals the component no longer applies to. Without any signals
+ * chosen there is nothing to compare against, so nothing is flagged.
+ */
+export const validateItemScopes = (
+  fields: readonly CatalogueNamedFieldDefinition[],
+  values: ObjectValue,
+  context: FormContextValues
+): FieldErrors => {
+  const errors: FieldErrors = {};
+  if (context.telemetry.length > 0) {
+    mapItemScopes(fields, values, (scope, pointer) => {
+      if (!fitsTelemetry(scope, context)) {
+        errors[pointer] = messages.itemTelemetry;
+      }
+      return scope;
+    });
+  }
+  return errors;
 };
 
 const safeRegExp = (pattern: string): RegExp | undefined => {
@@ -209,11 +238,13 @@ export const validateValues = (
   values: ObjectValue,
   context: FormContextValues,
   suppliedElsewhere: ReadonlySet<string> = new Set()
-): FieldErrors =>
-  validateObject(
+): FieldErrors => ({
+  ...validateObject(
     fields.filter(({ name }) => !(suppliedElsewhere.has(name) && isEmptyValue(values[name]))),
     undefined,
     values,
     '',
     context
-  );
+  ),
+  ...validateItemScopes(fields, values, context),
+});

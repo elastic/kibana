@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { randomUUID } from 'crypto';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { apiTest, FAVORITES_API_PATH, INTERNAL_HEADERS } from '../fixtures';
+import { apiTest, FAVORITES_API_PATH, FavoritesCleanup, INTERNAL_HEADERS } from '../fixtures';
 
 const FAVORITE_TYPE = 'esql_query';
 
@@ -27,14 +28,17 @@ const METADATA_2 = {
 
 apiTest.describe(
   'content management - esql_query favorites',
-  { tag: tags.stateful.classic },
+  { tag: tags.deploymentAgnostic },
   () => {
+    const favoritesCleanup = new FavoritesCleanup();
     let user1CookieHeader: Record<string, string>;
 
-    apiTest.beforeAll(async ({ samlAuth, config }) => {
-      const privilegedRoleName =
-        config.serverless && config.projectType === 'es' ? 'developer' : 'editor';
-      ({ cookieHeader: user1CookieHeader } = await samlAuth.asInteractiveUser(privilegedRoleName));
+    apiTest.beforeAll(async ({ samlAuth }) => {
+      ({ cookieHeader: user1CookieHeader } = await samlAuth.asInteractiveUser('viewer'));
+    });
+
+    apiTest.afterEach(async ({ apiClient }) => {
+      await favoritesCleanup.cleanup(apiClient);
     });
 
     apiTest('favoriting with missing or invalid metadata returns 400', async ({ apiClient }) => {
@@ -56,9 +60,20 @@ apiTest.describe(
     });
 
     apiTest('esql_query favorites: add, list with metadata, remove', async ({ apiClient }) => {
-      const suffix = `esql-${Date.now()}`;
+      const suffix = `esql-${randomUUID()}`;
       const qid1 = `${suffix}-q1`;
       const qid2 = `${suffix}-q2`;
+
+      favoritesCleanup.track({
+        favoriteType: FAVORITE_TYPE,
+        favoriteId: qid1,
+        cookieHeader: user1CookieHeader,
+      });
+      favoritesCleanup.track({
+        favoriteType: FAVORITE_TYPE,
+        favoriteId: qid2,
+        cookieHeader: user1CookieHeader,
+      });
 
       await apiTest.step('our IDs are absent before the test', async () => {
         const r = await apiClient.get(`${FAVORITES_API_PATH}/${FAVORITE_TYPE}`, {
@@ -82,6 +97,7 @@ apiTest.describe(
         const r = await apiClient.get(`${FAVORITES_API_PATH}/${FAVORITE_TYPE}`, {
           headers: { ...INTERNAL_HEADERS, ...user1CookieHeader },
         });
+        expect(r).toHaveStatusCode(200);
         expect(r.body.favoriteIds).toContain(qid1);
         expect(r.body.favoriteMetadata[qid1]).toStrictEqual(METADATA_1);
       });
@@ -100,6 +116,7 @@ apiTest.describe(
         const r = await apiClient.get(`${FAVORITES_API_PATH}/${FAVORITE_TYPE}`, {
           headers: { ...INTERNAL_HEADERS, ...user1CookieHeader },
         });
+        expect(r).toHaveStatusCode(200);
         expect(r.body.favoriteIds).toContain(qid1);
         expect(r.body.favoriteIds).toContain(qid2);
         expect(r.body.favoriteMetadata[qid1]).toStrictEqual(METADATA_1);
@@ -116,7 +133,7 @@ apiTest.describe(
         expect(r.body.favoriteIds).toContain(qid2);
       });
 
-      await apiTest.step('cleanup: unfavorite qid2', async () => {
+      await apiTest.step('unfavoriting qid2 removes it', async () => {
         const r = await apiClient.post(
           `${FAVORITES_API_PATH}/${FAVORITE_TYPE}/${qid2}/unfavorite`,
           { headers: { ...INTERNAL_HEADERS, ...user1CookieHeader } }
@@ -125,12 +142,15 @@ apiTest.describe(
         expect(r.body.favoriteIds).not.toContain(qid2);
       });
 
-      await apiTest.step('list is empty for our IDs after cleanup', async () => {
+      await apiTest.step('list no longer contains our IDs or metadata', async () => {
         const r = await apiClient.get(`${FAVORITES_API_PATH}/${FAVORITE_TYPE}`, {
           headers: { ...INTERNAL_HEADERS, ...user1CookieHeader },
         });
+        expect(r).toHaveStatusCode(200);
         expect(r.body.favoriteIds).not.toContain(qid1);
         expect(r.body.favoriteIds).not.toContain(qid2);
+        expect(r.body.favoriteMetadata[qid1]).toBeUndefined();
+        expect(r.body.favoriteMetadata[qid2]).toBeUndefined();
       });
     });
   }

@@ -9,7 +9,7 @@ import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { ReactElement } from 'react';
 import React from 'react';
 
-import type { ColumnHeaderOptions, TimelineItem } from '@kbn/timelines-plugin/common';
+import type { ColumnHeaderOptions, TimelineItem } from '@kbn/securitysolution-timeline-common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 

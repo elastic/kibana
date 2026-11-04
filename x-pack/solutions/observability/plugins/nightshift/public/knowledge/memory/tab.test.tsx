@@ -176,25 +176,6 @@ describe('MemoryTab', () => {
     expect(screen.getAllByText(/50% confidence/).length).toBeGreaterThan(0);
   });
 
-  it('renders a detail view without offering archive controls for a reader-less surface', () => {
-    mockUseMemoryPages.mockReturnValue(
-      asQueryResult({ rows: [summary()], stats: listResult([summary()]).stats })
-    );
-    // Selection starts on home; the detail view is exercised through the crumb
-    // and archive tests, which need a selected page.
-    mockUseMemoryPage.mockReturnValue({
-      data: {
-        page: summary(),
-        usefulness: 0.5,
-        confidence: 0.8,
-      },
-      isLoading: false,
-      isError: false,
-    } as unknown as ReturnType<typeof useMemoryPage>);
-    renderTab();
-    expect(screen.getByTestId('nightshiftMemoryHome')).toBeInTheDocument();
-  });
-
   it('answers a tag clicked on a memory by filtering home, and returns there', async () => {
     // Stored tags are canonical, so the tag is already the keyword the chart keys.
     const tagged = summary({ tags: ['memory', 'invoke-agent'] });

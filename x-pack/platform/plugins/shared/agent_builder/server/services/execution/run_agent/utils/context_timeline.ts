@@ -27,6 +27,7 @@ import {
   isEventsNativeVersion,
   isExecutionTerminalEvent,
   isTimelineEvent,
+  isUserMessageEvent,
   lastExecutionTerminal,
   parseExecutionId,
   pendingPromptRequest,
@@ -229,9 +230,7 @@ export const groupTimelineRounds = <E extends AnyTimelineEvent>(
 ): Array<TimelineRound<E>> => {
   const rounds: Array<TimelineRound<E>> = [];
   for (const execution of groupTimelineExecutions(timeline)) {
-    const userMessage = execution.triggers.find(
-      (event) => event.type === TimelineEventType.userMessage
-    ) as UserMessageOf<E> | undefined;
+    const userMessage = execution.triggers.find(isUserMessageEvent);
     const terminal = execution.events.find((event): event is E & ExecutionTerminalEvent =>
       isExecutionTerminalEvent(event)
     );
@@ -302,7 +301,7 @@ export const standaloneUserMessages = <E extends AnyTimelineEvent>(
   );
   return timeline.filter(
     (event): event is E & UserMessageOf<E> =>
-      event.type === TimelineEventType.userMessage &&
+      isUserMessageEvent(event) &&
       !event.execution_id &&
       !triggerIds.has(event.id) &&
       !isRoundDerivedEventId(event.id)

@@ -179,7 +179,7 @@ export const kibanaOverrides: OxlintOverride[] = [
       'src/platform/packages/shared/kbn-zod/**',
     ],
     rules: {
-      '@kbn/eslint/require_lazy_zod_schema': 'warn',
+      '@kbn/eslint/require_lazy_zod_schema': 'error',
     },
   },
   {
