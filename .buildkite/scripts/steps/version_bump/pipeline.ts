@@ -82,7 +82,7 @@ if (!BUMP_TYPE) {
 
       // Step 6: Wait, then bump main's package.json to the next dev version. This runs
       // after release-branch setup is complete so update_release_branch is not coupled to
-      // the PR-merge wait inside bump_package_json_versions_to_main (up to 60 minutes).
+      // the PR-merge wait inside bump_package_json_versions_to_main (up to 2 hours).
       pipeline.push('  - wait # before package.json bump on main');
       pipeline.push(
         getPipeline('.buildkite/pipelines/version_bump/bump_package_json_versions_to_main.yml')
