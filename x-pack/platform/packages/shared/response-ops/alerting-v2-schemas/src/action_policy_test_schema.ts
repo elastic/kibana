@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isoDateTime, lazySchema, z } from '@kbn/zod/v4';
+import { isoDateTime, lazySchema, spaceId, z } from '@kbn/zod/v4';
 import { alertEpisodeStatusSchema } from './alert_episode_schema';
 import {
   ACTION_POLICY_MAX_DESTINATIONS,
@@ -70,7 +70,7 @@ const actionPolicyWorkflowPayloadAlertSchema = lazySchema(() =>
       source: identifierSchema().describe(
         'Origin of the alert events for this alert (e.g. `internal`)'
       ),
-      space_id: identifierSchema().describe('Identifier of the space the alert belongs to'),
+      space_id: spaceId().describe('Identifier of the space the alert belongs to'),
       group_hash: z
         .string()
         .min(1)

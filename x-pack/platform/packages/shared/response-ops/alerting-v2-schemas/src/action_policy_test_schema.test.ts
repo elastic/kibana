@@ -10,7 +10,11 @@ import {
   actionPolicyWorkflowPayloadSchema,
   type ActionPolicyWorkflowPayloadInput,
 } from './action_policy_test_schema';
-import { ACTION_POLICY_TEST_MAX_ALERTS, MAX_ALERT_EVENT_DATA_KEYS } from './constants';
+import {
+  ACTION_POLICY_TEST_MAX_ALERTS,
+  ID_MAX_LENGTH,
+  MAX_ALERT_EVENT_DATA_KEYS,
+} from './constants';
 
 const alert = {
   last_event_timestamp: '2026-11-04T10:00:00.000Z',
@@ -52,6 +56,22 @@ describe('actionPolicyWorkflowPayloadSchema', () => {
       actionPolicyWorkflowPayloadSchema.safeParse({
         ...payload,
         alerts: [{ ...bareAlert, rule_id: null }],
+      }).success
+    ).toBe(true);
+  });
+
+  it('accepts an alert of a space whose id is longer than other identifiers', () => {
+    const longSpaceId = 'a'.repeat(ID_MAX_LENGTH + 1);
+    expect(
+      actionPolicyWorkflowPayloadSchema.safeParse({
+        ...payload,
+        alerts: [
+          {
+            ...alert,
+            space_id: longSpaceId,
+            alert_url: `http://localhost:5601/s/${longSpaceId}/app/observability/alerts/test-alert-0a1b2c3d`,
+          },
+        ],
       }).success
     ).toBe(true);
   });
