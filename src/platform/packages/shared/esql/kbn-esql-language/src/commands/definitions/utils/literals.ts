@@ -82,7 +82,7 @@ export const GEO_PRECISION_SYSTEM_PARAM_DESCRIPTIONS: Record<string, string> = {
   ),
 };
 
-export function getGeoPrecisionLiterals(systemParam: string, options?: DateLiteralsOptions) {
+export function getGeoPrecisionLiterals(systemParam: string, options?: BuildConstantsOptions) {
   return buildConstantsDefinitions(
     [systemParam],
     i18n.translate('esqlLanguage.esql.autocomplete.namedParamGeoPrecisionDefinition', {

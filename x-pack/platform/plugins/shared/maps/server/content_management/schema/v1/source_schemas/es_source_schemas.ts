@@ -26,6 +26,13 @@ const narrowByGlobalTime = z
   .optional()
   .meta({ description: `When true, results narrowed by page's time range.` });
 
+export const gridResolutionSchema = z.union([
+  z.literal(GRID_RESOLUTION.COARSE),
+  z.literal(GRID_RESOLUTION.FINE),
+  z.literal(GRID_RESOLUTION.MOST_FINE),
+  z.literal(GRID_RESOLUTION.SUPER_FINE),
+]);
+
 // base schema for Elasticsearch DSL sources
 export const BaseESSourceSchema = z
   .object({
@@ -109,17 +116,9 @@ export const ESQLSourceSchema = lazySchema(() =>
       }),
       narrowByGlobalSearch,
       narrowByGlobalTime,
-      resolution: z
-        .union([
-          z.literal(GRID_RESOLUTION.COARSE),
-          z.literal(GRID_RESOLUTION.FINE),
-          z.literal(GRID_RESOLUTION.MOST_FINE),
-          z.literal(GRID_RESOLUTION.SUPER_FINE),
-        ])
-        .optional()
-        .meta({
-          description: `Grid resolution used to calculate the values of the '?_geotile_precision', '?_geohex_precision' and '?_geohash_precision' ES|QL parameters from the map zoom level. Ignored when the ES|QL statement uses none of them. Defaults to '${DEFAULT_GRID_RESOLUTION}'.`,
-        }),
+      resolution: gridResolutionSchema.optional().meta({
+        description: `Grid resolution used to calculate the values of the '?_geotile_precision', '?_geohex_precision' and '?_geohash_precision' ES|QL parameters from the map zoom level. Ignored when the ES|QL statement uses none of them. Defaults to '${DEFAULT_GRID_RESOLUTION}'.`,
+      }),
       type: z.literal(SOURCE_TYPES.ESQL),
     })
     .strict()
