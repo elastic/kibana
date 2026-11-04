@@ -144,6 +144,7 @@ export const createConnectorSetupAttachmentType = ({
                       AGENT_BUILDER_APP_ID,
                       AGENT_BUILDER_MANAGE_PATHS.connectors
                     ),
+                    ...(origin ? {} : { primary: true }),
                   },
                 ],
               },

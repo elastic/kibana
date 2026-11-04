@@ -264,15 +264,16 @@ describe('connector_setup toSurfaceComposition', () => {
     getActionsStart: jest.fn(),
     logger: loggingSystemMock.createLogger(),
   });
-  const configureLink = {
+  const configureButton = (primary?: boolean) => ({
     type: 'actions',
     buttons: [
       {
         label: 'Configure in Kibana',
         url: `${SURFACE_BASE_URL}/app/agent_builder/manage/connectors`,
+        ...(primary ? { primary } : {}),
       },
     ],
-  };
+  });
 
   beforeEach(() => {
     getConnectorSpecMock.mockReturnValue(undefined);
@@ -288,12 +289,16 @@ describe('connector_setup toSurfaceComposition', () => {
       type: 'view',
       title: 'GitHub',
       subtitle: 'Setup',
-      body: [{ type: 'markdown', text: 'Investigate issues across services' }, configureLink],
+      body: [
+        { type: 'markdown', text: 'Investigate issues across services' },
+        configureButton(true),
+      ],
     });
 
     const { valid, slack } = await renderSurface(composition);
     expect(valid).toBe(true);
     expect(slack).toContain(`"url":"${SURFACE_BASE_URL}/app/agent_builder/manage/connectors"`);
+    expect(slack).toContain('"style":"primary"');
   });
 
   it('says it is connected once the connector is created, and still links to it', async () => {
@@ -311,7 +316,7 @@ describe('connector_setup toSurfaceComposition', () => {
           type: 'markdown',
           text: 'Configure the .github connector so the agent can use it here.',
         },
-        configureLink,
+        configureButton(),
       ],
     });
   });
