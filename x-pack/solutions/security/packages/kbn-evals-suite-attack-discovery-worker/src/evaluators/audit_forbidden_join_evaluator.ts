@@ -21,6 +21,8 @@ export const AUDIT_FORBIDDEN_JOIN_EVALUATOR_NAME = 'ForbiddenJoin';
  *   well here, which is why `NegativeControl` and `PositiveControlRecall` exist beside it.
  * - discoveries exist but none cites any alert id: score null, label `no_citations`. A null score
  *   is left out of the per-evaluator mean, so an unjudgeable run neither pads nor drags it.
+ *   The dataset gate still counts it as a miss (`isCodeMiss`): a check that could not run is not
+ *   a pass.
  * - a mix: only the citing discoveries are judged; the explanation counts the ones skipped.
  */
 export const createAuditForbiddenJoinEvaluator = (

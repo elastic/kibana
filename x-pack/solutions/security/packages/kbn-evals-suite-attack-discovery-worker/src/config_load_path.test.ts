@@ -20,8 +20,9 @@ jest.mock('@kbn/evals', () => ({
   createPlaywrightEvalsConfig: (config: Record<string, unknown>) => config,
 }));
 
-// The extensions the Jest preset loads as raw text (`kbn-jest/jest-preset.js` `transform`).
-const RAW_TEXT_MODULE = /\.(ya?ml|txt|html|peggy)$/;
+// The extensions the Jest preset transforms without swc (`kbn-jest/jest-preset.js` `transform`):
+// raw text (`.txt`, `.html`, `.yaml`, `.yml`), `.peggy` and `.text`. The Playwright loader parses none.
+const RAW_TEXT_MODULE = /\.(ya?ml|txt|html|peggy|text)$/;
 
 /** Every module path that loading `entry` pulls in, from a registry emptied beforehand. */
 const loadedBy = (entry: string): string[] => {
@@ -33,7 +34,7 @@ const loadedBy = (entry: string): string[] => {
 const rawTextIn = (paths: string[]): string[] => paths.filter((path) => RAW_TEXT_MODULE.test(path));
 
 describe('Playwright config load path', () => {
-  it('loads no raw-text module (.yaml, .txt, .html, .peggy) at config time', () => {
+  it('loads no raw-text module (.yaml, .txt, .html, .peggy, .text) at config time', () => {
     const loaded = loadedBy('../playwright.config');
 
     expect(rawTextIn(loaded)).toEqual([]);
@@ -57,6 +58,12 @@ describe('Playwright config load path', () => {
       const found = rawTextIn(loadedBy('./config_load_path_fixtures/sample.yaml'));
 
       expect(found.map((path) => path.split('/').pop())).toEqual(['sample.yaml']);
+    });
+
+    it.each(['sample.txt', 'sample.text'])('reports a direct %s import', (fixture) => {
+      const found = rawTextIn(loadedBy(`./config_load_path_fixtures/${fixture}`));
+
+      expect(found.map((path) => path.split('/').pop())).toEqual([fixture]);
     });
 
     it('reports the managed barrel', () => {

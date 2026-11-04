@@ -81,6 +81,12 @@ describe('CODE gate', () => {
     expect(isCodeMiss({ evaluator: 'NegativeControl', score: null })).toBe(true);
   });
 
+  it('keeps an unjudgeable check (null score, no_citations) a miss, though the mean skips it', () => {
+    expect(isCodeMiss({ evaluator: 'ForbiddenJoin', score: null, label: 'no_citations' })).toBe(
+      true
+    );
+  });
+
   it('records every score, including a passing fractional one, for the run summary', async () => {
     const collector = createRunCollector();
     const [wrapped] = withScoreCollection(

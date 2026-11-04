@@ -444,6 +444,8 @@ export const countIndexedAttacks = async ({
           .filter((uuid) => uuid !== '')
       : Array.isArray(executionUuids)
       ? strings(executionUuids)
+          .map((uuid) => uuid.trim())
+          .filter((uuid) => uuid !== '')
       : undefined;
   if (uuids === undefined) return undefined;
   if (uuids.length === 0) return 0;

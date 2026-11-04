@@ -451,52 +451,115 @@ const deleteMatching = async ({
   index: string;
   query: estypes.QueryDslQueryContainer;
 }): Promise<void> => {
-  const { failures, version_conflicts: versionConflicts } = await esClient.deleteByQuery({
+  const {
+    failures,
+    version_conflicts: versionConflicts,
+    timed_out: timedOut,
+    deleted,
+    total,
+  } = await esClient.deleteByQuery({
     index,
     query,
     conflicts: 'proceed',
     refresh: true,
     ignore_unavailable: true,
   });
-  if ((failures?.length ?? 0) > 0 || (versionConflicts ?? 0) > 0) {
-    throw new Error(
-      `delete on "${index}" left documents behind (${failures?.length ?? 0} failures, ${
-        versionConflicts ?? 0
-      } version conflicts)`
-    );
+  const problems = [
+    (failures?.length ?? 0) > 0 ? `${failures?.length} failures` : undefined,
+    (versionConflicts ?? 0) > 0 ? `${versionConflicts} version conflicts` : undefined,
+    timedOut ? 'timed out' : undefined,
+    deleted !== undefined && total !== undefined && deleted < total
+      ? `deleted ${deleted} of ${total} matches`
+      : undefined,
+  ].filter((problem): problem is string => problem !== undefined);
+  if (problems.length > 0) {
+    throw new Error(`delete on "${index}" left documents behind (${problems.join(', ')})`);
+  }
+};
+
+/** Attempts at deleting a failed seed's alerts before giving up, and the pause growth between them. */
+const REMOVE_SEED_ATTEMPTS = 5;
+const REMOVE_SEED_BACKOFF_MS = 250;
+
+const isNotFound = (error: unknown): boolean =>
+  typeof error === 'object' && error !== null && 'statusCode' in error && error.statusCode === 404;
+
+/** The ids among `ids` that still exist; a missing index means none do. */
+const idsStillPresent = async ({
+  esClient,
+  index,
+  ids,
+}: {
+  esClient: Client;
+  index: string;
+  ids: string[];
+}): Promise<string[]> => {
+  try {
+    const { docs } = await esClient.mget({ index, ids, _source: false });
+    return docs.flatMap((doc) => {
+      if ('error' in doc) {
+        if (doc.error.type === 'index_not_found_exception') return [];
+        throw new Error(`could not read back "${doc._id}": ${JSON.stringify(doc.error)}`);
+      }
+      return doc.found ? [doc._id] : [];
+    });
+  } catch (error) {
+    if (isNotFound(error)) return [];
+    throw error;
   }
 };
 
 /**
- * Deletes a partly written seed's alerts by exact document id. A delete by query only matches
- * documents that are already searchable, and after a transport-level failure of the seed bulk some
- * may be indexed but not refreshed. A delete by id reaches those and touches nothing else. A
- * missing document or index (404) is the expected outcome for ids that were never written.
+ * Deletes a partly written seed's alerts by exact document id, then reads the ids back until none
+ * exists. A delete by query only matches documents that are already searchable, and after a
+ * transport-level failure of the seed bulk some may be indexed but not refreshed; a delete by id
+ * reaches those and touches nothing else. A missing document or index (404) is the expected
+ * outcome for ids that were never written.
+ *
+ * After a client-side failure the seed bulk may still be running in Elasticsearch, so a 404 can
+ * mean "not written yet". The delete and the read-back repeat, with a growing pause, up to
+ * `REMOVE_SEED_ATTEMPTS` times (about 2.5s in all) until every id is gone, then this throws. A
+ * write that lands after that is not removed here; the next row's `assertCleanSpace` reports it.
  */
 const removeSeededAlertsById = async ({
   esClient,
   seeded: { spaceId, goldIdBySeededId },
+  wait,
 }: {
   esClient: Client;
   seeded: SeededScenario;
+  wait: (ms: number) => Promise<void>;
 }): Promise<void> => {
-  const operations = [...goldIdBySeededId.keys()].map((_id) => ({
-    delete: { _index: alertsIndexForSpace(spaceId), _id },
-  }));
-  if (operations.length === 0) {
+  const index = alertsIndexForSpace(spaceId);
+  const ids = [...goldIdBySeededId.keys()];
+  if (ids.length === 0) {
     return;
   }
-  const { items } = await esClient.bulk({ refresh: true, operations });
-  const failed = items.flatMap(({ delete: result }) =>
-    result?.error && result.status !== 404 ? [result.error] : []
-  );
-  if (failed.length > 0) {
-    throw new Error(
-      `${failed.length} of ${
-        operations.length
-      } seeded alerts could not be deleted: ${JSON.stringify(failed[0])}`
+  let remaining = ids;
+  for (let attempt = 1; attempt <= REMOVE_SEED_ATTEMPTS; attempt++) {
+    const operations = ids.map((_id) => ({ delete: { _index: index, _id } }));
+    const { items } = await esClient.bulk({ refresh: true, operations });
+    const failed = items.flatMap(({ delete: result }) =>
+      result?.error && result.status !== 404 ? [result.error] : []
     );
+    if (failed.length > 0) {
+      throw new Error(
+        `${failed.length} of ${ids.length} seeded alerts could not be deleted: ${JSON.stringify(
+          failed[0]
+        )}`
+      );
+    }
+    remaining = await idsStillPresent({ esClient, index, ids });
+    if (remaining.length === 0) {
+      return;
+    }
+    if (attempt < REMOVE_SEED_ATTEMPTS) {
+      await wait(REMOVE_SEED_BACKOFF_MS * attempt);
+    }
   }
+  throw new Error(
+    `${remaining.length} of ${ids.length} seeded alerts still exist after ${REMOVE_SEED_ATTEMPTS} delete attempts`
+  );
 };
 
 /** Writes one scenario's alerts into the space's alerts index under a fresh run marker. */
@@ -506,12 +569,15 @@ export const seedScenario = async ({
   scenario,
   spaceId,
   now = Date.now(),
+  wait = sleep,
 }: {
   esClient: Client;
   log: ToolingLog;
   scenario: AuditScenario;
   spaceId: string;
   now?: number;
+  /** Pause between attempts at removing a failed seed; injected so tests do not wait. */
+  wait?: (ms: number) => Promise<void>;
 }): Promise<SeededScenario> => {
   await assertCleanSpace({ esClient, spaceId });
   const runMarker = newRunMarker(scenario.id);
@@ -560,7 +626,7 @@ export const seedScenario = async ({
     );
   } catch (seedError) {
     try {
-      await removeSeededAlertsById({ esClient, seeded });
+      await removeSeededAlertsById({ esClient, seeded, wait });
     } catch (cleanupError) {
       throw new AggregateError(
         [seedError, cleanupError],
@@ -611,9 +677,9 @@ export const assertCleanSpace = async ({
 /**
  * Removes a seed's alerts, the space's fingerprints so the next row cannot match an attack from
  * this one, and the space's persisted discoveries. Every delete is attempted; any that fails is
- * thrown, because a space left dirty would poison the next row. Alerts match exactly by run marker (they
- * are searchable here, the seed bulk waited for a refresh). A seed that failed before the workflow
- * ran removes only its alerts, by id (see `seedScenario`).
+ * thrown, because a space left dirty would poison the next row. Alerts match exactly by run marker
+ * (they are searchable here, the seed bulk waited for a refresh). A seed that failed before the
+ * workflow ran removes only its alerts, by id (see `seedScenario`).
  */
 export const cleanupSeed = async ({
   esClient,
