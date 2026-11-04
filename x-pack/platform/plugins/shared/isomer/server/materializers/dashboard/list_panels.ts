@@ -142,6 +142,8 @@ export const listDashboard = ({
       ...headerFor(hidePanelTitles, config, label),
       target: dropped.savedObject
         ? { input: { type: dropped.savedObject.type, id: dropped.savedObject.id } }
+        : dropped.markdown !== undefined
+        ? { input: { type: 'markdown', config: { content: dropped.markdown } } }
         : { reason: noAsCodeReason(dropped.type) },
     };
     (section?.panels ?? panels).push(listed);

@@ -61,6 +61,11 @@ const toDroppedPanel = (panel: StoredPanel, sectionId?: string): DroppedPanel | 
   const savedVis = isRecord(stored.savedVis) ? stored.savedVis : {};
   const title = panelTitle(stored) ?? panelTitle(savedVis);
   const { savedObjectId } = stored;
+  const params = isRecord(savedVis.params) ? savedVis.params : {};
+  const markdown =
+    savedVis.type === 'markdown' && typeof params.markdown === 'string'
+      ? params.markdown
+      : undefined;
   return {
     id,
     type,
@@ -68,6 +73,7 @@ const toDroppedPanel = (panel: StoredPanel, sectionId?: string): DroppedPanel | 
     ...(sectionId ? { sectionId } : {}),
     ...(title !== undefined ? { title } : {}),
     ...(stored.hide_title === true ? { hideTitle: true } : {}),
+    ...(markdown !== undefined ? { markdown } : {}),
     ...(typeof savedObjectId === 'string' && savedObjectId.length > 0
       ? { savedObject: { type: savedObjectTypeForPanel(type), id: savedObjectId } }
       : {}),
