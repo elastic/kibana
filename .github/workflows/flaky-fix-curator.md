@@ -156,6 +156,7 @@ A deterministic pre-step collected the last `${{ env.FINDINGS_DAYS }}` days of f
 - `findings.jsonl`: one finding per line, each with its `case`, `fix_pr`, `divergence`, `guideline` (the quoted guideline phrase, or `none`), `guideline_followed`, `lesson_type`, `lesson`, `lesson_target`, `confidence`, and `comment_url` (the finding comment, which holds the evidence links).
 - `findings-summary.json`: counts by case, divergence, lesson type, target and guideline.
 - `curator-prs.json`: the curator PRs of the last 90 days with their bodies, so you never propose what is already open or merged.
+- `instruction-changes.json`: every commit that touched one of the files below during the window, with its date and title. Humans edit these prompts too, and a finding may already be addressed.
 
 The files you may change, and only these:
 
@@ -172,7 +173,8 @@ Prompt bodies and the guidelines are loaded at run time, so a merged change take
 3. **Qualify each cluster.** A cluster earns a proposal when:
    - at least two findings support it, or one `high` confidence `did-not-hold` or `diagnosis` finding states a condition that generalizes beyond its test; and
    - the instruction it calls for is not already in the target file (read the current file on `main`, do not rely on the quoted phrase alone); and
-   - no curator PR in `curator-prs.json` already proposed it.
+   - no curator PR in `curator-prs.json` already proposed it; and
+   - the finding was recorded after the last commit to its target file (`instruction-changes.json`). A finding older than a change to the file it targets is stale evidence: the fixer that produced it was running the old text. Re-read the current file for it, and do not count it toward the two-finding threshold.
    Keep at most three clusters, strongest evidence first. Everything else waits for more findings.
 4. **Write the change.** For each cluster, edit the target file:
    - For `reinforce` lessons the rule exists and did not bite. Move or sharpen it where the workflow makes the decision (the fixer's steps, the verifier's gate), or add the concrete tell that would have triggered it. Do not duplicate the bullet in a second place.

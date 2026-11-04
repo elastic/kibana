@@ -28,6 +28,15 @@ const FINDING_BLOCK = /```yaml flaky-fix-finding\n([\s\S]*?)\n```/;
 // The retrospective records findings through gh-aw's add-comment with the workflow token, so
 // this is the only author whose finding blocks count. Anyone can comment on a public issue.
 const FINDING_AUTHORS = new Set(['github-actions[bot]']);
+// The instruction files the curator may edit. A finding recorded before one of them changed is
+// stale evidence: a human may already have addressed it.
+const INSTRUCTION_PATHS = [
+  '.github/workflows/shared/flaky-fix-guidelines.md',
+  '.github/workflows/flaky-test-fixer.md',
+  '.github/workflows/flaky-fix-verifier.md',
+  '.github/workflows/failed-test-investigator.md',
+  '.agents/skills/flaky-test-investigator',
+];
 
 const parseScalar = (raw) => {
   const value = raw.trim();
@@ -106,8 +115,9 @@ const writeJson = (outputDir, filename, value) => {
 };
 
 /**
- * Gathers the findings recorded in the last `days` days plus the curator PRs of the last three
- * months (so proposals are not repeated), and writes them for the agent. Sets the `findings`
+ * Gathers the findings recorded in the last `days` days, the curator PRs of the last three
+ * months (so proposals are not repeated) and the commits that touched the instruction files in
+ * the window (so findings a human already addressed are not counted), and writes them for the agent. Sets the `findings`
  * output to the number of actionable findings so the workflow can skip the agent when there
  * is nothing to curate.
  */
@@ -174,6 +184,27 @@ const collectFlakyFixFindings = async ({
     body: pr.body ?? '',
   }));
 
+  const instructionChanges = [];
+  for (const instructionPath of INSTRUCTION_PATHS) {
+    const commits = await github.paginate(github.rest.repos.listCommits, {
+      owner: OWNER,
+      repo: REPO,
+      path: instructionPath,
+      since,
+      per_page: 100,
+    });
+    for (const commit of commits) {
+      instructionChanges.push({
+        path: instructionPath,
+        sha: commit.sha,
+        committed_at: commit.commit?.committer?.date ?? commit.commit?.author?.date ?? null,
+        title: (commit.commit?.message ?? '').split('\n')[0],
+        url: commit.html_url,
+      });
+    }
+  }
+  instructionChanges.sort((a, b) => (a.committed_at ?? '').localeCompare(b.committed_at ?? ''));
+
   fs.mkdirSync(outputDir, { recursive: true });
   fs.writeFileSync(
     path.join(outputDir, 'findings.jsonl'),
@@ -182,9 +213,10 @@ const collectFlakyFixFindings = async ({
   const summary = { since, days, ...summarize(findings) };
   writeJson(outputDir, 'findings-summary.json', summary);
   writeJson(outputDir, 'curator-prs.json', curatorPrs);
+  writeJson(outputDir, 'instruction-changes.json', instructionChanges);
 
   core.info(
-    `Collected ${findings.length} finding(s) since ${since}, ${summary.actionable} actionable; ${curatorPrs.length} curator PR(s) in the last ${CURATOR_PR_LOOKBACK_DAYS} days.`
+    `Collected ${findings.length} finding(s) since ${since}, ${summary.actionable} actionable; ${curatorPrs.length} curator PR(s) in the last ${CURATOR_PR_LOOKBACK_DAYS} days; ${instructionChanges.length} instruction change(s) in the window.`
   );
   core.setOutput('findings', String(summary.actionable));
   return summary;

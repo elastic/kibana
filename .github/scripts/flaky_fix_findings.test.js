@@ -127,6 +127,21 @@ test('collectFlakyFixFindings keeps only findings the retrospective recorded in 
         ],
       },
       search: { issuesAndPullRequests: async () => ({ data: { items: [] } }) },
+      repos: {
+        listCommits: async ({ path: instructionPath }) =>
+          instructionPath === '.github/workflows/flaky-test-fixer.md'
+            ? [
+                {
+                  sha: 'abc123',
+                  html_url: 'https://github.com/elastic/kibana/commit/abc123',
+                  commit: {
+                    message: '[Flaky Test Fixer] Wait on the assertion signal\n\nbody',
+                    committer: { date: '2026-11-02T09:00:00Z' },
+                  },
+                },
+              ]
+            : [],
+      },
     },
   };
   const outputs = {};
@@ -142,5 +157,17 @@ test('collectFlakyFixFindings keeps only findings the retrospective recorded in 
   assert.equal(
     JSON.parse(lines[0]).comment_url,
     'https://github.com/elastic/kibana/issues/1#issuecomment-1'
+  );
+  assert.deepEqual(
+    JSON.parse(fs.readFileSync(path.join(outputDir, 'instruction-changes.json'), 'utf8')),
+    [
+      {
+        path: '.github/workflows/flaky-test-fixer.md',
+        sha: 'abc123',
+        committed_at: '2026-11-02T09:00:00Z',
+        title: '[Flaky Test Fixer] Wait on the assertion signal',
+        url: 'https://github.com/elastic/kibana/commit/abc123',
+      },
+    ]
   );
 });
