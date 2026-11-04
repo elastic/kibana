@@ -335,7 +335,7 @@ describe('SendTestNotificationFlyout', () => {
       expect(mockResetSend).toHaveBeenCalledTimes(1);
     });
 
-    it('goes back to the form with the same payload and every destination selected', async () => {
+    it('goes back to the form with the same payload and destinations', async () => {
       mockSendResponse = undefined;
       const { rerender } = renderFlyout();
       await userEvent.click(getCheckbox('wf-3'));
@@ -351,7 +351,7 @@ describe('SendTestNotificationFlyout', () => {
       expect(JSON.parse(getEditor().value)).toEqual(createPayload());
       expect(getCheckbox('wf-1')).toBeChecked();
       expect(getCheckbox('wf-2')).toBeChecked();
-      expect(getCheckbox('wf-3')).toBeChecked();
+      expect(getCheckbox('wf-3')).not.toBeChecked();
     });
   });
 });

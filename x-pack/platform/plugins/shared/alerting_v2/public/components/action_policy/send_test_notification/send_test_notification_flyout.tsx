@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EuiFlyoutProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { normalizeMatcher } from '@kbn/alerting-v2-utils';
@@ -67,14 +66,6 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
       return;
     }
     sendTestNotification({ payload, destinationIds: selectedIds });
-  };
-
-  const closeResults: EuiFlyoutProps['onClose'] = (_event, meta) => {
-    resetSend();
-    if (meta?.reason === 'navigation-cascade') {
-      return;
-    }
-    setDeselectedIds(new Set());
   };
 
   return (
@@ -175,7 +166,7 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
           destinations={destinations}
           sendResponse={sendResponse}
           historyKey={flyoutHistoryKey}
-          onClose={closeResults}
+          onClose={resetSend}
         />
       )}
     </>
