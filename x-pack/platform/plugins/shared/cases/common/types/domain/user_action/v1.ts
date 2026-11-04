@@ -130,7 +130,11 @@ export const CaseUserActionBasicSchema = UserActionPayloadSchema.and(
   UserActionCommonAttributesSchema
 );
 
-export const CaseUserActionWithoutReferenceIdsSchema = lazySchema(() =>
+export const CaseUserActionWithoutReferenceIdsSchema = UserActionsWithoutIdsSchema.and(
+  UserActionCommonAttributesSchema
+);
+
+export const CaseUserActionWithoutReferenceIdsWriteSchema = lazySchema(() =>
   UserActionsWithoutIdsSchema.and(UserActionCommonWriteAttributesSchema)
 );
 

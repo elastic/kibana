@@ -6,7 +6,12 @@
  */
 
 import { AttachmentType } from '../attachment/v1';
-import { CaseUserActionWithoutReferenceIdsSchema, UserActionTypes, UserActionsSchema } from './v1';
+import {
+  CaseUserActionWithoutReferenceIdsSchema,
+  CaseUserActionWithoutReferenceIdsWriteSchema,
+  UserActionTypes,
+  UserActionsSchema,
+} from './v1';
 
 describe('User actions', () => {
   describe('UserActionsSchema', () => {
@@ -54,7 +59,7 @@ describe('User actions', () => {
     });
   });
 
-  describe('CaseUserActionWithoutReferenceIdsSchema', () => {
+  describe('CaseUserActionWithoutReferenceIds schemas', () => {
     const userAction = {
       type: UserActionTypes.title,
       payload: { title: 'new title' },
@@ -67,21 +72,23 @@ describe('User actions', () => {
       owner: 'cases',
       action: 'update',
     };
+    const knownSource = { ...userAction, source: { type: 'api', id: 'api' } };
+    const unknownSource = { ...userAction, source: { type: 'futuristic', id: 'x1' } };
 
-    it('accepts a source with a known type', () => {
-      const result = CaseUserActionWithoutReferenceIdsSchema.safeParse({
-        ...userAction,
-        source: { type: 'api', id: 'api' },
-      });
-      expect(result.success).toBe(true);
+    it('read schema accepts a source with an unknown type', () => {
+      expect(CaseUserActionWithoutReferenceIdsSchema.safeParse(unknownSource).success).toBe(true);
     });
 
-    it('rejects a source with an unknown type', () => {
-      const result = CaseUserActionWithoutReferenceIdsSchema.safeParse({
-        ...userAction,
-        source: { type: 'futuristic', id: 'x1' },
-      });
-      expect(result.success).toBe(false);
+    it('write schema accepts a source with a known type', () => {
+      expect(CaseUserActionWithoutReferenceIdsWriteSchema.safeParse(knownSource).success).toBe(
+        true
+      );
+    });
+
+    it('write schema rejects a source with an unknown type', () => {
+      expect(CaseUserActionWithoutReferenceIdsWriteSchema.safeParse(unknownSource).success).toBe(
+        false
+      );
     });
   });
 });

@@ -9,7 +9,7 @@ import type { SavedObject } from '@kbn/core/server';
 import type { PersistedActionSource, UserActionAttributes } from '../../../common/types/domain';
 import {
   UserActionAttributesSchema,
-  CaseUserActionWithoutReferenceIdsSchema,
+  CaseUserActionWithoutReferenceIdsWriteSchema,
 } from '../../../common/types/domain';
 import type { User } from './user';
 
@@ -27,7 +27,7 @@ export interface UserActionPersistedAttributes extends UserActionCommonPersisted
 }
 
 export const UserActionTransformedAttributesSchema = UserActionAttributesSchema;
-export const UserActionPersistedAttributesSchema = CaseUserActionWithoutReferenceIdsSchema;
+export const UserActionPersistedAttributesSchema = CaseUserActionWithoutReferenceIdsWriteSchema;
 
 export type UserActionTransformedAttributes = UserActionAttributes;
 export type UserActionSavedObjectTransformed = SavedObject<UserActionTransformedAttributes>;
