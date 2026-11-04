@@ -21,9 +21,9 @@ describe('getCategories', () => {
   });
 
   it('treats a type without a category as its own category', () => {
-    expect(getCategories([...types, { type: 'service', name: 'Service', attributes: [] }])).toEqual(
-      ['hosts', 'kubernetes', 'service']
-    );
+    expect(
+      getCategories([...types, { type: 'service', name: 'Service', sources: [], attributes: [] }])
+    ).toEqual(['hosts', 'kubernetes', 'service']);
   });
 });
 
@@ -67,6 +67,7 @@ describe('getFilterControls', () => {
           { name: 'kubernetes', label: 'Kubernetes' },
         ],
         types: [],
+        sources: [],
         attributes: [],
       });
     });
@@ -158,6 +159,7 @@ describe('getFilterControls', () => {
       {
         type: 'service',
         name: 'Service',
+        sources: [],
         attributes: [{ name: 'service.environment', dimension: true }],
       },
     ];
@@ -175,12 +177,14 @@ describe('getFilterControls', () => {
         type: 'a',
         name: 'A',
         category: 'group',
+        sources: [],
         attributes: [{ name: 'a.name', dimension: true }],
       },
       {
         type: 'b',
         name: 'B',
         category: 'group',
+        sources: [],
         attributes: [{ name: 'b.name', dimension: true }],
       },
     ];
@@ -198,6 +202,7 @@ describe('getFilterControls', () => {
         type: 'a',
         name: 'A',
         category: 'group',
+        sources: [],
         attributes: [
           { name: 'a.name', label: 'A name', dimension: true },
           { name: 'b.name', dimension: true },

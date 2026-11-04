@@ -12,6 +12,7 @@ export const typesFixture: EntityInventoryTypeDefinition[] = [
     type: 'host',
     name: 'Host',
     category: 'hosts',
+    sources: [{ indexPattern: 'metrics-hostmetricsreceiver.otel-*' }],
     attributes: [
       { name: 'os.type', dimension: true },
       { name: 'cloud.provider', dimension: true },
@@ -22,6 +23,7 @@ export const typesFixture: EntityInventoryTypeDefinition[] = [
     type: 'k8s.deployment',
     name: 'Deployment',
     category: 'kubernetes',
+    sources: [{ indexPattern: 'metrics-k8sclusterreceiver.otel-*' }],
     attributes: [
       { name: 'k8s.cluster.name', dimension: true },
       { name: 'k8s.namespace.name', dimension: true },
@@ -33,6 +35,7 @@ export const typesFixture: EntityInventoryTypeDefinition[] = [
     type: 'k8s.pod',
     name: 'Pod',
     category: 'kubernetes',
+    sources: [{ indexPattern: 'metrics-k8sclusterreceiver.otel-*' }],
     attributes: [
       { name: 'k8s.cluster.name', dimension: true },
       { name: 'k8s.namespace.name', dimension: true },

@@ -13,8 +13,13 @@ describe('getAttributeLabel', () => {
     expect(
       getAttributeLabel(
         [
-          { type: 'a', name: 'A', attributes: [{ name: 'os.type' }] },
-          { type: 'b', name: 'B', attributes: [{ name: 'os.type', label: 'Operating system' }] },
+          { type: 'a', name: 'A', sources: [], attributes: [{ name: 'os.type' }] },
+          {
+            type: 'b',
+            name: 'B',
+            sources: [],
+            attributes: [{ name: 'os.type', label: 'Operating system' }],
+          },
         ],
         'os.type'
       )

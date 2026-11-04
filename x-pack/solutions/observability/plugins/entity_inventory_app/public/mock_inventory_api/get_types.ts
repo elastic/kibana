@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { EntityInventoryTypeDefinition } from '../inventory_api_types';
+import type {
+  EntityInventoryTypeDefinition,
+  EntityInventoryTypeSource,
+} from '../inventory_api_types';
 
 // TODO: hardcoded types, as the `types` route would return them. Replace with the real route in https://github.com/elastic/observability-dev/issues/6355
 const OS = { name: 'os.type', label: 'Operating system', dimension: true };
@@ -18,7 +21,18 @@ const DEPLOYMENT = { name: 'k8s.deployment.name', label: 'Deployment', dimension
 
 const HOST_ATTRIBUTES = [OS, CLOUD_PROVIDER, SERVICE];
 
-const MOCK_TYPES: EntityInventoryTypeDefinition[] = [
+const SOURCES_BY_CATEGORY: Record<string, EntityInventoryTypeSource[]> = {
+  hosts: [
+    { indexPattern: 'metrics-hostmetricsreceiver.otel-*' },
+    { indexPattern: 'metrics-system.*' },
+  ],
+  kubernetes: [
+    { indexPattern: 'metrics-k8sclusterreceiver.otel-*' },
+    { indexPattern: 'metrics-kubeletstatsreceiver.otel-*' },
+  ],
+};
+
+const MOCK_TYPE_DEFINITIONS: Array<Omit<EntityInventoryTypeDefinition, 'sources'>> = [
   {
     type: 'host.aws_ec2',
     name: 'AWS EC2 instance',
@@ -84,8 +98,12 @@ const MOCK_TYPES: EntityInventoryTypeDefinition[] = [
     category: 'kubernetes',
     attributes: [CLUSTER, NAMESPACE],
   },
-  { type: 'postgres', name: 'Postgres', category: 'databases', attributes: [] },
 ];
+
+const MOCK_TYPES: EntityInventoryTypeDefinition[] = MOCK_TYPE_DEFINITIONS.map((definition) => ({
+  ...definition,
+  sources: SOURCES_BY_CATEGORY[definition.category ?? ''] ?? [],
+}));
 
 export const getEntityInventoryTypes = async (): Promise<EntityInventoryTypeDefinition[]> =>
   MOCK_TYPES;
