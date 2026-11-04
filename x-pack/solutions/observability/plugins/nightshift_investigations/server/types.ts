@@ -7,7 +7,10 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type {
+  PluginSetupContract as ActionsPluginSetup,
+  PluginStartContract as ActionsPluginStart,
+} from '@kbn/actions-plugin/server';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import type { AlertingServerStart as AlertingV2ServerStart } from '@kbn/alerting-v2-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
@@ -62,6 +65,7 @@ export interface NightshiftInvestigationsServerStart {
 
 export interface NightshiftInvestigationsSetupDeps {
   share: SharePluginSetup;
+  actions?: ActionsPluginSetup;
   agentBuilder?: AgentBuilderPluginSetup;
   alerting?: AlertingServerSetup;
   /**

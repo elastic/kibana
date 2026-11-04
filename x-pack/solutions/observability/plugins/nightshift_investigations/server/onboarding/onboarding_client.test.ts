@@ -121,10 +121,16 @@ describe('createOnboardingClient', () => {
     });
 
     expect(await client.enable(request)).toEqual({ agent_installed: true });
+    // The connector id is chosen before the key is created, and the key is named after it.
+    const connectorId = actionsClient.create.mock.calls[0][0].options?.id;
     expect(esClient.security.createApiKey).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'nightshift-local-elasticsearch-default' })
+      expect.objectContaining({
+        name: `nightshift-local-elasticsearch-${connectorId}`,
+        metadata: expect.objectContaining({ space_id: 'default', connector_id: connectorId }),
+      })
     );
     expect(actionsClient.create).toHaveBeenCalledWith({
+      options: { id: expect.any(String) },
       action: expect.objectContaining({
         actionTypeId: '.elasticsearch',
         config: { url: ES_URL, selectedActions: ['_test'] },

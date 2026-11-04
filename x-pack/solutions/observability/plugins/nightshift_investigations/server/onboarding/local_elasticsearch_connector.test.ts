@@ -12,8 +12,11 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { OnboardingUnavailableError } from './errors';
 import {
   createLocalElasticsearchConnector,
+  createLocalElasticsearchConnectorLifecycleListener,
   resolveLocalElasticsearchUrl,
 } from './local_elasticsearch_connector';
+
+jest.mock('uuid', () => ({ v4: () => 'connector-1' }));
 
 const URL = 'https://es.example.com:9243';
 
@@ -96,7 +99,7 @@ describe('createLocalElasticsearchConnector', () => {
 
     expect(connectorId).toBe('connector-1');
     expect(createApiKey).toHaveBeenCalledWith({
-      name: 'nightshift-local-elasticsearch-space-1',
+      name: 'nightshift-local-elasticsearch-connector-1',
       role_descriptors: {
         nightshift_local_read: {
           cluster: [],
@@ -109,10 +112,16 @@ describe('createLocalElasticsearchConnector', () => {
           ],
         },
       },
-      metadata: { managed: true, application: 'nightshift', space_id: 'space-1' },
+      metadata: {
+        managed: true,
+        application: 'nightshift',
+        space_id: 'space-1',
+        connector_id: 'connector-1',
+      },
     });
     expect(createApiKey.mock.calls[0][0]).not.toHaveProperty('expiration');
     expect(actionsClient.create).toHaveBeenCalledWith({
+      options: { id: 'connector-1' },
       action: {
         actionTypeId: '.elasticsearch',
         name: 'Local Elasticsearch',
@@ -170,5 +179,52 @@ describe('createLocalElasticsearchConnector', () => {
         logger,
       })
     ).rejects.toBeInstanceOf(errors.ResponseError);
+  });
+});
+
+describe('createLocalElasticsearchConnectorLifecycleListener', () => {
+  const deleteParams = { connectorId: 'connector-1', connectorType: '.elasticsearch' } as never;
+
+  const setup = () => {
+    const logger = loggingSystemMock.createLogger();
+    const invalidateApiKey = jest.fn().mockResolvedValue({ invalidated_api_keys: ['key-1'] });
+    const esClient = { security: { invalidateApiKey } } as unknown as ElasticsearchClient;
+    const listener = createLocalElasticsearchConnectorLifecycleListener({
+      getInternalEsClient: async () => esClient,
+      logger,
+    });
+    return { listener, invalidateApiKey, logger };
+  };
+
+  it('only listens to Elasticsearch connectors', () => {
+    expect(setup().listener.connectorTypes).toEqual(['.elasticsearch']);
+  });
+
+  it("invalidates the deleted connector's key by name", async () => {
+    const { listener, invalidateApiKey, logger } = setup();
+
+    await listener.onPostDelete!(deleteParams);
+
+    expect(invalidateApiKey).toHaveBeenCalledWith({
+      name: 'nightshift-local-elasticsearch-connector-1',
+    });
+    expect(logger.info).toHaveBeenCalled();
+  });
+
+  it('does not log an invalidation when the connector had no key', async () => {
+    const { listener, invalidateApiKey, logger } = setup();
+    invalidateApiKey.mockResolvedValue({ invalidated_api_keys: [] });
+
+    await listener.onPostDelete!(deleteParams);
+
+    expect(logger.info).not.toHaveBeenCalled();
+  });
+
+  it('logs and does not throw when the key cannot be invalidated', async () => {
+    const { listener, invalidateApiKey, logger } = setup();
+    invalidateApiKey.mockRejectedValue(new Error('unavailable'));
+
+    await expect(listener.onPostDelete!(deleteParams)).resolves.toBeUndefined();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('unavailable'));
   });
 });

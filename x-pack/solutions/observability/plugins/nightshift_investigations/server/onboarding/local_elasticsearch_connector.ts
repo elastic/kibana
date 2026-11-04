@@ -6,7 +6,8 @@
  */
 
 import { badRequest, forbidden } from '@hapi/boom';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { v4 as uuidv4 } from 'uuid';
+import type { ActionsClient, ConnectorLifecycleListener } from '@kbn/actions-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { connectorsSpecs } from '@kbn/connector-specs';
 import type { ElasticsearchClient, ElasticsearchServiceStart, Logger } from '@kbn/core/server';
@@ -64,12 +65,29 @@ export const resolveLocalElasticsearchUrl = ({
   return url;
 };
 
-const createReadOnlyApiKey = async (esClient: ElasticsearchClient, spaceId: string) => {
+/**
+ * The key is named after the connector it belongs to, so it can be found when the connector is
+ * deleted. Kibana's internal user may invalidate any key but cannot read other users' keys, so the
+ * name is the only lookup that works whoever created the key.
+ */
+export const getLocalElasticsearchApiKeyName = (connectorId: string): string =>
+  `nightshift-local-elasticsearch-${connectorId}`;
+
+const createReadOnlyApiKey = async (
+  esClient: ElasticsearchClient,
+  spaceId: string,
+  connectorId: string
+) => {
   try {
     return await esClient.security.createApiKey({
-      name: `nightshift-local-elasticsearch-${spaceId}`,
+      name: getLocalElasticsearchApiKeyName(connectorId),
       role_descriptors: LOCAL_ELASTICSEARCH_API_KEY_ROLE_DESCRIPTORS,
-      metadata: { managed: true, application: 'nightshift', space_id: spaceId },
+      metadata: {
+        managed: true,
+        application: 'nightshift',
+        space_id: spaceId,
+        connector_id: connectorId,
+      },
     });
   } catch (error) {
     if (isResponseError(error) && (error.statusCode === 400 || error.statusCode === 403)) {
@@ -95,9 +113,12 @@ export const createLocalElasticsearchConnector = async ({
   url: string;
   logger: Logger;
 }): Promise<string> => {
-  const apiKey = await createReadOnlyApiKey(esClient, spaceId);
+  // The id is chosen up front so the API key can be named after the connector.
+  const connectorId = uuidv4();
+  const apiKey = await createReadOnlyApiKey(esClient, spaceId, connectorId);
   try {
     const connector = await actionsClient.create({
+      options: { id: connectorId },
       action: {
         actionTypeId: LOCAL_ELASTICSEARCH_CONNECTOR_TYPE_ID,
         name: LOCAL_ELASTICSEARCH_CONNECTOR_NAME,
@@ -117,3 +138,38 @@ export const createLocalElasticsearchConnector = async ({
     throw error;
   }
 };
+
+/**
+ * Invalidates the API key of a deleted local Elasticsearch connector, whichever interface deleted
+ * it. Runs as Kibana's internal user because the person deleting the connector may not own the key.
+ * Connectors that were not created by onboarding have no matching key, so nothing is invalidated.
+ */
+export const createLocalElasticsearchConnectorLifecycleListener = ({
+  getInternalEsClient,
+  logger,
+}: {
+  getInternalEsClient: () => Promise<ElasticsearchClient>;
+  logger: Logger;
+}): ConnectorLifecycleListener => ({
+  connectorTypes: [LOCAL_ELASTICSEARCH_CONNECTOR_TYPE_ID],
+  onPostDelete: async ({ connectorId }) => {
+    const name = getLocalElasticsearchApiKeyName(connectorId);
+    try {
+      const esClient = await getInternalEsClient();
+      const { invalidated_api_keys: invalidated } = await esClient.security.invalidateApiKey({
+        name,
+      });
+      if (invalidated.length > 0) {
+        logger.info(
+          `Invalidated the API key of deleted local Elasticsearch connector "${connectorId}"`
+        );
+      }
+    } catch (error) {
+      logger.warn(
+        `Could not invalidate API key "${name}" of deleted connector "${connectorId}": ${
+          (error as Error).message
+        }`
+      );
+    }
+  },
+});
