@@ -63,6 +63,12 @@ triggers:
           minimum: 1
           maximum: 720
           description: "A detection is never skipped on the strength of a verdict older than this many hours (the rule's last verification in its live series): it goes to the agent, so a long-running event is re-judged at least this often."
+        classifierLiveLookbackDays:
+          type: number
+          default: 90
+          minimum: 1
+          maximum: 90
+          description: "How many days back the classifier looks for the live events a detection belongs to. It matches the default 90-day `.rule-events` retention and is capped at 90: if retention is raised, a live event with no version in the last 90 days reads as not a live member and its detections go to the agent, and nothing warns about it."
         classifierBudgetMs:
           type: number
           default: 20000
@@ -228,6 +234,7 @@ steps:
       probe_concurrency: '${{ inputs.classifierProbeConcurrency }}'
       budget_ms: '${{ inputs.classifierBudgetMs }}'
       max_skip_age_hours: '${{ inputs.classifierMaxSkipAgeHours }}'
+      live_lookback_days: '${{ inputs.classifierLiveLookbackDays }}'
       review_fresh_minutes: '${{ inputs.classifierReviewFreshMinutes }}'
       baseline_bucket_minutes: '${{ inputs.classifierBaselineBucketMinutes }}'
       baseline_window_minutes: '${{ inputs.classifierBaselineWindowMinutes }}'

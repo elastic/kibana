@@ -10,7 +10,6 @@
 import { isIgnoredElement } from './is_ignored_element';
 import {
   DEVELOPER_TOOLBAR_ID,
-  MEASURE_OVERLAY_ID,
   EDIT_OVERLAY_ID,
   LAYOUT_OVERLAY_ID,
   LAYOUT_SETTINGS_FLYOUT_ID,
@@ -22,17 +21,14 @@ describe('isIgnoredElement', () => {
     document.body.innerHTML = '';
   });
 
-  it.each([
-    DEVELOPER_TOOLBAR_ID,
-    MEASURE_OVERLAY_ID,
-    EDIT_OVERLAY_ID,
-    LAYOUT_OVERLAY_ID,
-    LAYOUT_SETTINGS_FLYOUT_ID,
-  ])('should ignore element with id "%s"', (id) => {
-    const el = document.createElement('div');
-    el.id = id;
-    expect(isIgnoredElement(el)).toBe(true);
-  });
+  it.each([DEVELOPER_TOOLBAR_ID, EDIT_OVERLAY_ID, LAYOUT_OVERLAY_ID, LAYOUT_SETTINGS_FLYOUT_ID])(
+    'should ignore element with id "%s"',
+    (id) => {
+      const el = document.createElement('div');
+      el.id = id;
+      expect(isIgnoredElement(el)).toBe(true);
+    }
+  );
 
   it('should ignore element with data-devtool-ignore attribute', () => {
     const el = document.createElement('div');

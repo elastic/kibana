@@ -362,6 +362,7 @@ export interface DocLinks {
     readonly avcResults: string;
     readonly bidirectionalIntegrations: string;
     readonly thirdPartyLlmProviders: string;
+    readonly endpoints: string;
     readonly endpointExceptions: string;
     readonly trustedApps: string;
     readonly trustedDevices: string;
@@ -369,8 +370,11 @@ export interface DocLinks {
     readonly eventFilters: string;
     readonly eventMerging: string;
     readonly blocklist: string;
+    readonly hostIsolationExceptions: string;
     readonly endpointArtifacts: string;
     readonly endpointArtifactsNoEscaping: string;
+    readonly policies: string;
+    readonly responseActionsHistory: string;
     readonly scriptLibrary: string;
     readonly policyResponseTroubleshooting: {
       full_disk_access: string;
