@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  PATTERN_KEY_FIELDS,
-  buildPatternKeys,
-  describePatternKey,
-  getField,
-} from './pattern_key';
+import { PATTERN_KEY_FIELDS, buildPatternKeys, describePatternKey, getField } from './pattern_key';
 
 const RULE = { 'kibana.alert.rule.uuid': 'rule-1', 'kibana.alert.rule.revision': 1 };
 const WINDOWS = { host: { os: { type: 'windows' } } };
