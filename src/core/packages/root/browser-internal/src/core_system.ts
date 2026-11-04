@@ -405,6 +405,8 @@ export class CoreSystem {
         chrome,
       });
 
+      this.featureFlags.registerHelper({ http, overlays, rendering });
+
       const notifications = this.notifications.start({
         analytics,
         overlays,

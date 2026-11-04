@@ -181,6 +181,31 @@ PUT kbn:/internal/core/_settings
 > coreApp.allowDynamicConfigOverrides: true
 > ```
 
+### Runtime overrides
+
+Runtime overrides are stored in the `feature-flags-overrides` saved object and applied on every Kibana node. They win over `feature_flags.overrides` from `kibana.yml`, and both win over the feature flag provider.
+
+Only a superuser can read or change them, through:
+
+```
+GET    kbn:/internal/feature-flags/overrides
+PUT    kbn:/internal/feature-flags/overrides/{flagKey}
+DELETE kbn:/internal/feature-flags/overrides/{flagKey}
+DELETE kbn:/internal/feature-flags/overrides
+```
+
+`PUT` sends `{ "value": <boolean | number | string> }`. A node applies its own write immediately. Other nodes see it on their next poll, which runs every 10 seconds. The browser then sees the new value on its own 10 second feature-flag poll, or immediately if you refresh the helper.
+
+### Flags helper
+
+In the browser console, run:
+
+```js
+toggleFeatureFlagsHelper()
+```
+
+This adds a `tableGear` button to the bottom-left of the screen. The choice is stored in `localStorage`, so the button stays until you run the command again. The button opens a flyout listing the flags returned by the server snapshot, including config and runtime overrides. A superuser can type a new value and save it as a runtime override, or clear one. Anyone else sees the values and a notice that a superuser is required to change them.
+
 ## Usage in Cloud
 
 Feature flags aren't whitelisted in Cloud, meaning that in production environments, users have to go through Support. Support sets feature flags as user setting overrides following a standard process for enabling non-whitelisted settings.
