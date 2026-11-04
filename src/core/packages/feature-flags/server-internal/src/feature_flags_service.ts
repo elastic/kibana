@@ -98,6 +98,30 @@ export interface InternalFeatureFlagsStart extends FeatureFlagsStart {
 }
 
 /**
+ * Config overrides are often the strings `"true"` and `"false"`.
+ * Boolean evaluation has to match the browser, which treats those strings as booleans.
+ * The provider is not asked, so LaunchDarkly never performs this conversion.
+ */
+function overrideForEvaluation<T extends string | boolean | number>(
+  override: unknown,
+  fallbackValue: T
+): T {
+  if (typeof fallbackValue !== 'boolean') {
+    return override as T;
+  }
+  if (typeof override === 'boolean') {
+    return override as T;
+  }
+  if (override === 'true') {
+    return true as T;
+  }
+  if (override === 'false') {
+    return false as T;
+  }
+  return override as T;
+}
+
+/**
  * The server-side Feature Flags Service
  * @internal
  */
@@ -258,7 +282,7 @@ export class FeatureFlagsService {
     flagName: string,
     fallbackValue: T
   ): Promise<T> {
-    const override = get(this.overrides$.value, flagName) as T | undefined; // using lodash get because flagName can come with dots and the config parser might structure it in objects.
+    const override = get(this.overrides$.value, flagName); // using lodash get because flagName can come with dots and the config parser might structure it in objects.
 
     // Only wait for the context to be ready if there is no override.
     if (typeof override === 'undefined') {
@@ -270,7 +294,7 @@ export class FeatureFlagsService {
 
     const value =
       typeof override !== 'undefined'
-        ? override
+        ? overrideForEvaluation(override, fallbackValue)
         : // We have to bind the evaluation or the client will lose its internal context
           await evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
 
