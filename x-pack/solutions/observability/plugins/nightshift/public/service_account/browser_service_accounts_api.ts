@@ -12,7 +12,7 @@ import {
   SECURITY_SERVICE_ACCOUNT_URL,
   type ListedServiceAccountsPage,
   type NightshiftServiceAccountsApi,
-} from '@kbn/nightshift-investigations-plugin/common';
+} from '@kbn/nightshift-shared';
 import { getHttpErrorStatus } from '../common/http_error';
 
 /** The security APIs as the current user, for `ensureNightshiftServiceAccounts` in the browser. */

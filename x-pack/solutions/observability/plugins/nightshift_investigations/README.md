@@ -2,6 +2,27 @@
 
 This plugin provides the domain API for starting and reading investigations, independent of which entity (significant event, alert, etc.) triggers them.
 
+## Automation instructions
+
+After choosing a trigger, its panel shows an instructions field limited to 5,000 characters.
+Alert and Slack triggers accept optional **Additional Instructions**. Scheduled triggers require
+**Instructions**, which define the task for each tick. Clearing optional instructions restores the
+default investigation behavior. The form and automation API enforce the same limit.
+
+Instructions are operator guidance for the current round, below agent and system rules. Alert
+snapshots and, in the new Slack workflow format, the triggering Slack message are untrusted
+evidence. Each automation that joins an open investigation supplies its own round's guidance;
+previous instructions remain in conversation history rather than being concatenated into a new
+configuration. The saved conversation input includes the effective instructions, so later edits
+to the automation do not change the record of earlier rounds.
+
+Automation configuration still stores `execution.promptTemplate`. New workflows send alert and
+Slack guidance separately as `instructions` to `nightshift.triggerInvestigation`; schedules keep
+using `message` as the task. Existing alert workflows that send guidance as `message` are supported.
+Legacy combined Slack messages retain their existing interpretation. New formatting takes effect
+on create or the next save; no bulk workflow regeneration or historical rewrite is performed.
+The stored `reasoningMode` remains compatible but is not exposed as an Investigate / Ask control.
+
 ## Scheduled automations
 
 Hourly, daily and weekly automation presets generate calendar-based workflow triggers. Daily and
@@ -29,11 +50,15 @@ creates no investigation and appears as skipped in automation history: with reas
 when the automation limit denies it, and with reason `investigation_limit` when the global quota
 denies it. The automation limit is checked first, so `daily_limit` wins when both are reached. When
 the global quota denies an attempt, the client gives back the automation slot. The client also gives
-it back when the attempt loses the subject claim to a concurrent start and continues that
-investigation instead; the global quota has no refund, so that case still counts against it. An
+back both slots when the attempt loses the subject claim to a concurrent start and continues that
+investigation instead. The global quota check fails closed:
+a missing callback, a timeout after ten seconds, or an error denies the attempt. An
 attempt that fails after claiming its subjects keeps its slot: the claim stays live for two minutes,
 and an attempt that joins it in that window continues the claimed investigation and gives back only
-its own slot, so the investigation counts once. A failure while the investigation runs does not give
+its own slot, so the investigation counts once. An attempt whose claim fails part way also keeps
+both slots. The claims it wrote are removed, but a concurrent start can join them before the
+removal, and a failed removal leaves them live. Keeping the slots means the count never falls below
+the number of investigations; a retry after such a failure is charged again. A failure while the investigation runs does not give
 back either slot. The limit is at least 1, and an omitted limit allows unlimited new investigations.
 To stop an automation from opening investigations, disable it. Changing the limit takes effect on
 the next attempt.
@@ -124,13 +149,14 @@ Every space does that: the account directory is the one source of which account 
 `_enable`:
 
 1. Refuses with 400 when service accounts are off, 403 without `manage_security`, and 404 when the space does not exist, before writing anything.
-2. Installs the space's bound workflows with `settings.run_as` set to the agent account, the entry point `system-nightshift-investigation-bound-<space>` last. The entry point also keeps the automations account's id, as its `automationsServiceAccountId` template value. A setup that fails part-way leaves the space reading as not set up. A failed install names the workflow.
-3. Turns bound workflows an admin disabled back on.
-4. Checks that every installed workflow is bound to the agent account and that the entry point is enabled, and fails otherwise.
+2. Installs the investigation agent if the space does not have it yet, and binds it to the agent account, so every run of it - a workflow's, a hook's or a user's chat - executes as that account. This happens before any workflow is installed, since installing the entry point is what makes the space read as set up: a failed binding cannot leave a setup that looks done. The decision-tree reinforcement agent stays unbound - only `nightshift.decisionTreeReinforce` runs it, through `agents.runAgent`, which runs it as that step's workflow and never consults a binding.
+3. Installs the space's bound workflows with `settings.run_as` set to the agent account, the entry point `system-nightshift-investigation-bound-<space>` last. The entry point also keeps the automations account's id, as its `automationsServiceAccountId` template value. A setup that fails part-way leaves the space reading as not set up. A failed install names the workflow.
+4. Turns bound workflows an admin disabled back on.
+5. Checks that every installed workflow is bound to the agent account and that the entry point is enabled, and fails otherwise.
 
 Setups of one space run one after another. `_enable` is idempotent: running it again repairs a space whose workflows were removed, disabled, or bound to another account. A workflow can only be bound from an authenticated request with `manage_security`, so setup cannot happen at startup. On later boots, the dynamic-workflow upgrade reuses the existing bindings.
 
-A space counts as set up when its entry point is installed, enabled and bound to an account; that account is the space's agent account, and every other bound workflow has to run as it too. Each space keeps its own ids, so spaces are set up independently. `_disable` uninstalls the space's bound workflows and keeps the accounts, which other spaces share.
+A space counts as set up when its entry point is installed, enabled and bound to an account; that account is the space's agent account, and every other bound workflow has to run as it too. Each space keeps its own ids, so spaces are set up independently. `_disable` unbinds the investigation agent and uninstalls the space's bound workflows, and keeps the accounts, which other spaces share. The agent goes first, so a space never reads as removed while its agent still runs as the account. Because Agent Builder refuses every binding change while service accounts are off, `_disable` refuses with 400 in that state whenever the agent is installed, and uninstalls nothing; a space whose agent was never installed is torn down normally.
 
 ### What setup changes
 

@@ -15,6 +15,7 @@ import {
   getSubPluginRoutesByCapabilities,
   isDashboardViewPath,
   isPageWithAppHeaderPath,
+  isEndpointManagementPath,
   isSubPluginAvailable,
   parseRoute,
 } from './helpers';
@@ -317,6 +318,7 @@ describe('isPageWithAppHeaderPath', () => {
     ['a cloud security posture page', '/cloud_security_posture/findings'],
     ['the cloud security posture base path', '/cloud_security_posture'],
     ['the Manage landing page', '/manage'],
+    ['an endpoint management page', '/administration/endpoints'],
     ['a rules tab with a trailing slash', '/rules/management/'],
     ['a rule details tab with a trailing slash', '/rules/id/rule-id/overview/'],
     ['a rule details path with an encoded rule id', '/rules/id/rule%20id/overview'],
@@ -335,6 +337,7 @@ describe('isPageWithAppHeaderPath', () => {
     ['an empty path', ''],
     ['the root path', '/'],
     ['a page under Manage', '/manage/sub-page'],
+    ['the administration notes page', '/administration/notes'],
     ['the rules page without a tab', '/rules'],
     ['a rule details tab with an extra segment', '/rules/id/rule-id/overview/extra'],
     [
@@ -352,4 +355,25 @@ describe('isPageWithAppHeaderPath', () => {
   ])('returns false for %s', (_name, pathname) => {
     expect(isPageWithAppHeaderPath(pathname)).toBe(false);
   });
+});
+
+describe('isEndpointManagementPath', () => {
+  it.each([
+    '/administration/endpoints',
+    '/administration/policy',
+    '/administration/policy/abc-123/settings',
+    '/administration/trusted_apps',
+    '/administration/custom_yara_signatures',
+    '/administration/response_actions_history',
+    '/administration/script_library',
+  ])('returns true for %s', (pathname) => {
+    expect(isEndpointManagementPath(pathname)).toEqual(true);
+  });
+
+  it.each(['/administration', '/administration/notes', '/manage', '/alerts'])(
+    'returns false for %s',
+    (pathname) => {
+      expect(isEndpointManagementPath(pathname)).toEqual(false);
+    }
+  );
 });

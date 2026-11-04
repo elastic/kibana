@@ -14,7 +14,7 @@ import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type { StartInvestigationResponse } from '@kbn/nightshift-investigations-plugin/common';
 import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
 import { extractAccessedDecisionTrees } from './decision_tree_evidence';
-import { extractToolCallTrajectory } from './tool_call_trajectory';
+import { extractFinalResponse, extractToolCallTrajectory } from './tool_call_trajectory';
 import { countToolCalls, extractUsage } from './usage';
 import type {
   InvestigationExample,
@@ -218,10 +218,6 @@ export const runInvestigation = async (
   try {
     output.workflow_status = investigation.in_progress ? 'running' : 'complete';
     output.structured_report = toInvestigationReport(investigation);
-    if (!investigation.in_progress && !investigation.metadata.verdict) {
-      // There is no failed state: a run that ended without a conclusion recorded none.
-      output.execution_error ??= NO_CONCLUSION_ERROR;
-    }
     if (!isPersisted(conversation)) {
       conversation = await readFinishedConversation(
         fetch,
@@ -232,6 +228,19 @@ export const runInvestigation = async (
     if (!conversation) throw new Error('Investigation conversation has no persisted rounds');
     if (!investigation.in_progress && !isPersisted(conversation)) {
       output.execution_error = UNPERSISTED_CONVERSATION_ERROR;
+    }
+    const reply = extractFinalResponse(conversation.rounds);
+    if (reply && !output.structured_report.conclusion) {
+      // The agent answers in its final message instead of recording a verdict on the investigation.
+      output.structured_report = {
+        ...output.structured_report,
+        summary: output.structured_report.summary ?? reply,
+        conclusion: reply,
+      };
+    }
+    if (!investigation.in_progress && !output.structured_report.conclusion) {
+      // There is no failed state: a run that ended without a conclusion recorded none.
+      output.execution_error ??= NO_CONCLUSION_ERROR;
     }
     output.conversation_round_count = conversation.rounds.length;
     output.usage = extractUsage(conversation.rounds);

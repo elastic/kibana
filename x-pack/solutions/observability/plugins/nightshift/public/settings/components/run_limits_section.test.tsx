@@ -157,9 +157,15 @@ describe('RunLimitsSection', () => {
     expect(screen.getByTestId('nightshiftRunLimitCount-detection')).toHaveTextContent(
       '14 counted scheduled admissions today'
     );
-    expect(screen.queryByTestId(/^nightshiftRunLimitInput-/)).not.toBeInTheDocument();
+    expect(screen.getAllByTestId(/^nightshiftRunLimitInput-/)).toHaveLength(1);
+    expect(screen.getByTestId('nightshiftRunLimitInput-investigation')).toHaveValue(30);
     for (const group of ALL_GROUPS) {
-      expect(screen.getByTestId(`nightshiftRunLimitEnabledSwitch-${group}`)).not.toBeChecked();
+      const switchElement = screen.getByTestId(`nightshiftRunLimitEnabledSwitch-${group}`);
+      if (group === 'investigation') {
+        expect(switchElement).toBeChecked();
+      } else {
+        expect(switchElement).not.toBeChecked();
+      }
     }
   });
 
