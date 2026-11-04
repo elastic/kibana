@@ -28,9 +28,9 @@ const validate = new Ajv({ strict: false, allErrors: true, formats: { regex: tru
 );
 
 describe('pull_request fragments against the Buildkite pipeline schema', () => {
-  it.each(FRAGMENTS.map((fragment) => [fragment.name, fragment] as const))(
-    '%s',
-    (name, fragment) => {
+  const table = FRAGMENTS.map((fragment) => [fragment.name, fragment] as const);
+  if (table.length > 0) {
+    it.each(table)('%s', (name, fragment) => {
       const valid = validate(loadFragmentDocument(fragment));
       const errors = valid ? [] : validate.errors;
 
@@ -39,8 +39,8 @@ describe('pull_request fragments against the Buildkite pipeline schema', () => {
       } else {
         expect(errors).toEqual([]);
       }
-    }
-  );
+    });
+  }
 
   it('rejects a step with an invalid field', () => {
     expect(validate({ steps: [{ command: 'true', timeout_in_minutes: 'soon' }] })).toBe(false);

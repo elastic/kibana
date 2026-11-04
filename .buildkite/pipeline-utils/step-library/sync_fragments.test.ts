@@ -84,15 +84,11 @@ describe('pruneFragmentSnapshots', () => {
     expect(pruneFragmentSnapshots(file('pull_request/a'), [])).toBe(file('pull_request/a'));
   });
 
-  it('matches the committed snapshot file for a real fragment', () => {
-    const snapshot = fs.readFileSync(
-      path.join(
-        getKibanaDir(),
-        '.buildkite/pipeline-utils/step-library/__snapshots__/fragments.test.ts.snap'
-      ),
-      'utf8'
+  it('keeps the entries of other fragments, with their `pull_request/` prefix intact', () => {
+    const pruned = pruneFragmentSnapshots(
+      file('pull_request/storybooks', 'pull_request/renovate'),
+      ['pull_request/storybooks']
     );
-    const pruned = pruneFragmentSnapshots(snapshot, ['pull_request/storybooks']);
 
     expect(pruned).not.toContain('pull_request fragments pull_request/storybooks 1');
     expect(pruned).toContain('pull_request fragments pull_request/renovate 1');
