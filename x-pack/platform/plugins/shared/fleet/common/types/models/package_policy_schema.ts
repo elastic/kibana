@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { isValidNamespace } from '../../services';
+import { isValidNamespace, validateNoPathTraversalIdSchema } from '../../services';
 import { MAX_REUSABLE_AGENT_POLICIES_PER_PACKAGE_POLICY } from '../../constants/package_policy';
 
 const PACKAGE_POLICY_ID_MAX_LENGTH = 255;
@@ -349,6 +349,19 @@ export const NewPackagePolicySchema = schema.object(
   { meta: { id: 'new_package_policy' } }
 );
 
+// REST-only input and stream IDs. PackagePolicyInputsSchema and PackagePolicyStreamsSchema stay
+// unchanged because they feed the frozen SO model-version schemas.
+// `validate` rejects path-traversal ids early; the service layer enforces the same check for
+// non-REST callers.
+const RestPackagePolicyInputIdSchema = schema.maybe(
+  schema.string({ validate: validateNoPathTraversalIdSchema })
+);
+
+const RestPackagePolicyStreamSchema = schema.object({
+  ...PackagePolicyStreamsSchema,
+  id: schema.maybe(schema.string({ validate: validateNoPathTraversalIdSchema })), // BWC < 7.11
+});
+
 const CreatePackagePolicyProps = {
   ...PackagePolicyBaseSchema,
   enabled: schema.maybe(schema.boolean()),
@@ -356,9 +369,8 @@ const CreatePackagePolicyProps = {
   inputs: schema.arrayOf(
     schema.object({
       ...PackagePolicyInputsSchema,
-      streams: schema.maybe(
-        schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 })
-      ),
+      id: RestPackagePolicyInputIdSchema,
+      streams: schema.maybe(schema.arrayOf(RestPackagePolicyStreamSchema, { maxSize: 1000 })),
     }),
     { maxSize: 1000 }
   ),
@@ -671,9 +683,8 @@ export const UpdatePackagePolicyRequestBodySchema = schema.object(
       schema.arrayOf(
         schema.object({
           ...PackagePolicyInputsSchema,
-          streams: schema.maybe(
-            schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 })
-          ),
+          id: RestPackagePolicyInputIdSchema,
+          streams: schema.maybe(schema.arrayOf(RestPackagePolicyStreamSchema, { maxSize: 1000 })),
         }),
         { maxSize: 1000 }
       )
