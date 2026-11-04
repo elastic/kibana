@@ -1163,10 +1163,10 @@ describe('EsServiceAccounts', () => {
           service_accounts: [
             queried('kibana/a', {
               created_by: {
-                username: 'elastic/fleet-server',
+                username: 'kibana/automation',
                 realm: '_service_account',
                 realm_type: '_service_account',
-                api_key: { id: 'key-1', name: 'agent-enrollment' },
+                api_key: { id: 'key-1', name: 'automation-key' },
               },
             }),
           ],
@@ -1180,8 +1180,8 @@ describe('EsServiceAccounts', () => {
           type: 'api_key',
           variant: 'stack',
           apiKeyId: 'key-1',
-          apiKeyName: 'agent-enrollment',
-          displayName: 'elastic/fleet-server',
+          apiKeyName: 'automation-key',
+          displayName: 'kibana/automation',
         });
       });
 
@@ -1190,7 +1190,7 @@ describe('EsServiceAccounts', () => {
           service_accounts: [
             queried('kibana/a', {
               created_by: {
-                username: 'elastic/fleet-server',
+                username: 'kibana/automation',
                 realm: '_service_account',
                 realm_type: '_service_account',
               },
@@ -1202,7 +1202,7 @@ describe('EsServiceAccounts', () => {
 
         expect(entry.createdBy).toEqual({
           type: 'service_account',
-          serviceAccountId: 'elastic/fleet-server',
+          serviceAccountId: 'kibana/automation',
         });
         expect(getUserProfiles).not.toHaveBeenCalled();
       });

@@ -150,8 +150,8 @@ describe('ServiceAccountsTable', () => {
       'deploy',
     ],
     [
-      { type: 'service_account' as const, serviceAccountId: 'elastic/fleet-server' },
-      'elastic/fleet-server',
+      { type: 'service_account' as const, serviceAccountId: 'kibana/automation' },
+      'kibana/automation',
     ],
   ])('names the creator %j as %s', (createdBy, label) => {
     renderTable({ serviceAccounts: [{ ...firstAccount, createdBy }] });

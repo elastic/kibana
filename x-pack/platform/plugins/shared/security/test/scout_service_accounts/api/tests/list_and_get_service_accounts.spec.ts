@@ -61,7 +61,10 @@ interface DirectoryCreator {
   apiKeyName?: string;
 }
 
-/** What this suite expects back. No creation time, which neither backend reports. */
+/**
+ * What this suite expects back. No creation time: Elasticsearch reports `created_at`, but UIAM
+ * reports no timestamp of any kind, so the directory leaves it out.
+ */
 interface DirectoryEntry {
   id: string;
   name: string;
