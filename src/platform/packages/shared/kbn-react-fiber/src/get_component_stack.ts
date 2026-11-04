@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getDebugSource } from './get_debug_source';
 import { getFiberName } from './get_fiber_name';
 import { getOwnerChain } from './get_owner_chain';
-import { hasDebugSource, isComponentFiber, isSourceComponent } from './predicates';
+import { isComponentFiber, isSourceComponent } from './predicates';
 import type { ComponentStackFrame, ReactFiberNode } from './types';
 
 export const ANONYMOUS_COMPONENT_NAME = 'Anonymous';
@@ -33,11 +34,12 @@ export const getComponentStack = (fiber: ReactFiberNode): ComponentStackFrame[] 
   const chain = getOwnerChain(fiber);
 
   return chain.flatMap((current, index) => {
-    if (!hasDebugSource(current)) return [];
+    const source = getDebugSource(current);
+    if (!source) return [];
 
     const owner = current._debugOwner ? chain.slice(index + 1).find(ownsFrame) : null;
     const name = (owner && getFiberName(owner)) ?? ANONYMOUS_COMPONENT_NAME;
 
-    return [{ name, source: current._debugSource }];
+    return [{ name, source }];
   });
 };
