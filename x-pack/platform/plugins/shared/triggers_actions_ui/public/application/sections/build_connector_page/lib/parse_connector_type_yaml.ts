@@ -57,6 +57,7 @@ const DEFINITION_KEYS = [
   'id',
   'displayName',
   'description',
+  'icon',
   'auth',
   'config',
   'test',

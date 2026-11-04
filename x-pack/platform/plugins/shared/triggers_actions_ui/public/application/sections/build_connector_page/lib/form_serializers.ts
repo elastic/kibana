@@ -62,6 +62,8 @@ export const getEmptyFormData = (): BuildConnectorFormData => ({
   id: '',
   displayName: '',
   description: '',
+  icon: '',
+  logoUrl: '',
   auth: { types: ['none'] },
   config: [],
   actions: [createEmptyAction()],
@@ -142,6 +144,7 @@ export const formDataToRequest = (
   id: formData.id,
   displayName: formData.displayName,
   description: formData.description,
+  ...(formData.icon ? { icon: formData.icon } : {}),
   config: formData.config.map(toRequestField),
   auth: toRequestAuth(formData.auth),
   actions: Object.fromEntries(
@@ -207,6 +210,8 @@ export const requestToFormData = (
   id: normalizeConnectorTypeId(request.id),
   displayName: request.displayName ?? '',
   description: request.description ?? '',
+  icon: request.icon ?? '',
+  logoUrl: '',
   auth: toFormAuth(request.auth),
   config: request.config ?? [],
   actions: Object.entries(request.actions ?? {}).map(([name, action]) =>

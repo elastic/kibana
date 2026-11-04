@@ -50,6 +50,10 @@ export interface BuildConnectorFormData {
   id: string;
   displayName: string;
   description: string;
+  /** The logo as a base64 `data:` URI; read from `logoUrl` by the server, or imported. */
+  icon: string;
+  /** Where the logo is loaded from. Only used to load it; never sent. */
+  logoUrl: string;
   auth: {
     types: ConnectorTypeAuthType[];
     /** Header carrying the key when `api_key_header` is one of the types. */

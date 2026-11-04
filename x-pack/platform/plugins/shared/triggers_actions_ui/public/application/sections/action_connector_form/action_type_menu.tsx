@@ -91,13 +91,14 @@ const filterActionTypes = (
   });
 };
 
-export function getConnectorIcon(id: string): IconType {
+/** A bundled connector icon, else the type's own logo (e.g. a custom type's), else a generic one. */
+export function getConnectorIcon(id: string, typeIcon?: string): IconType {
   const lazyIcon = ConnectorIconsMap.get(id);
   if (lazyIcon) {
     return lazyIcon;
   }
 
-  return 'plugs';
+  return typeIcon ?? 'plugs';
 }
 
 export const ActionTypeMenu = ({
@@ -182,7 +183,7 @@ export const ActionTypeMenu = ({
     .map(([id, actionType]) => {
       if (actionType.source === ACTION_TYPE_SOURCES.spec) {
         return {
-          iconClass: getConnectorIcon(actionType.id),
+          iconClass: getConnectorIcon(actionType.id, actionType.icon),
           selectMessage: actionType.description ?? '',
           actionType,
           name: actionType.name,

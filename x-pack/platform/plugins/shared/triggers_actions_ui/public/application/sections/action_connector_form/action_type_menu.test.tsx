@@ -397,6 +397,55 @@ describe('connector_add_flyout', () => {
       expect(screen.getByText('Send data via spec connector')).toBeInTheDocument();
     });
 
+    it('shows the logo of a spec connector that carries its own, e.g. a custom connector type', async () => {
+      const icon = 'data:image/png;base64,iVBORw0KGgo=';
+      loadActionTypes.mockResolvedValue([
+        {
+          id: 'my-custom-type',
+          source: ACTION_TYPE_SOURCES.spec,
+          enabled: true,
+          name: 'My Custom Type',
+          icon,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'enterprise',
+          supportedFeatureIds: ['alerting'],
+          isDeprecated: false,
+        },
+      ]);
+
+      appMockRenderer.render(
+        <ActionTypeMenu onActionTypeChange={jest.fn()} actionTypeRegistry={actionTypeRegistry} />
+      );
+
+      const card = await screen.findByTestId('my-custom-type-card');
+      expect(card.querySelector(`[data-euiicon-type="${icon}"]`)).toBeInTheDocument();
+    });
+
+    it('prefers a bundled icon over the logo a type carries', async () => {
+      loadActionTypes.mockResolvedValue([
+        {
+          id: '.notion',
+          source: ACTION_TYPE_SOURCES.spec,
+          enabled: true,
+          name: 'Notion',
+          icon: 'data:image/png;base64,iVBORw0KGgo=',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          isDeprecated: false,
+        },
+      ]);
+
+      appMockRenderer.render(
+        <ActionTypeMenu onActionTypeChange={jest.fn()} actionTypeRegistry={actionTypeRegistry} />
+      );
+
+      const card = await screen.findByTestId('.notion-card');
+      expect(card.querySelector('[data-euiicon-type^="data:image/png"]')).not.toBeInTheDocument();
+    });
+
     it('does not render a spec connector when enabledInConfig is false', async () => {
       const onActionTypeChange = jest.fn();
       loadActionTypes.mockResolvedValue([

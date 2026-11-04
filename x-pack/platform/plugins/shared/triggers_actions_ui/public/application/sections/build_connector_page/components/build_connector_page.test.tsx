@@ -22,6 +22,7 @@ jest.mock('../../../lib/action_connector_api', () => ({
   ...(jest.requireActual('../../../lib/action_connector_api') as object),
   createConnectorType: jest.fn(),
   generateConnectorType: jest.fn(),
+  fetchConnectorTypeLogo: jest.fn(),
 }));
 const mockCodeEditor = jest.fn();
 jest.mock('@kbn/code-editor', () => ({
@@ -31,7 +32,7 @@ jest.mock('@kbn/code-editor', () => ({
     return <MockedCodeEditor {...props} />;
   },
 }));
-const { createConnectorType, generateConnectorType } = jest.requireMock(
+const { createConnectorType, generateConnectorType, fetchConnectorTypeLogo } = jest.requireMock(
   '../../../lib/action_connector_api'
 );
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
@@ -404,7 +405,7 @@ describe('BuildConnectorPage', () => {
       fireEvent.change(yamlEditor(), { target: { value: 'name: Acme\n' } });
       expect(
         await screen.findByText(
-          'Unknown top-level key "name". Allowed keys: id, displayName, description, auth, config, test, actions.'
+          'Unknown top-level key "name". Allowed keys: id, displayName, description, icon, auth, config, test, actions.'
         )
       ).toBeInTheDocument();
     });
@@ -989,6 +990,133 @@ describe('BuildConnectorPage', () => {
           })
         )
       );
+    });
+  });
+
+  describe('logo', () => {
+    const logoDataUri = 'data:image/png;base64,iVBORw0KGgo=';
+    const typeLogoUrl = async (url: string) => {
+      await userEvent.type(await screen.findByTestId('buildConnectorLogoUrlInput'), url);
+    };
+
+    beforeEach(() => {
+      fetchConnectorTypeLogo.mockResolvedValue({ icon: logoDataUri });
+    });
+
+    it('enables Load only for an http(s) URL', async () => {
+      renderPage();
+
+      const load = await screen.findByTestId('buildConnectorLogoLoadButton');
+      expect(load).toBeDisabled();
+
+      await typeLogoUrl('not a url');
+      expect(load).toBeDisabled();
+
+      await userEvent.clear(screen.getByTestId('buildConnectorLogoUrlInput'));
+      await typeLogoUrl('ftp://example.com/logo.png');
+      expect(load).toBeDisabled();
+
+      await userEvent.clear(screen.getByTestId('buildConnectorLogoUrlInput'));
+      await typeLogoUrl('https://cdn.example.com/logo.png');
+      expect(load).toBeEnabled();
+    });
+
+    it('loads the logo, previews it and sends it with the connector type', async () => {
+      renderPage();
+
+      await applyYaml(yamlDefinition);
+      await typeLogoUrl('  https://cdn.example.com/logo.png ');
+      await userEvent.click(screen.getByTestId('buildConnectorLogoLoadButton'));
+
+      await waitFor(() =>
+        expect(fetchConnectorTypeLogo).toHaveBeenCalledWith(
+          expect.objectContaining({ url: 'https://cdn.example.com/logo.png' })
+        )
+      );
+      const preview = await screen.findByTestId('buildConnectorLogoPreview');
+      expect(preview.querySelector(`[data-euiicon-type="${logoDataUri}"]`)).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
+
+      await waitFor(() =>
+        expect(createConnectorType).toHaveBeenCalledWith(
+          expect.objectContaining({
+            connectorType: expect.objectContaining({ icon: logoDataUri }),
+          })
+        )
+      );
+      expect(createConnectorType.mock.calls[0][0].connectorType).not.toHaveProperty('logoUrl');
+    });
+
+    it('shows the server message when the logo cannot be loaded', async () => {
+      fetchConnectorTypeLogo.mockRejectedValue({
+        body: { message: 'The logo exceeds the 64 KB limit.' },
+      });
+      renderPage();
+
+      await typeLogoUrl('https://cdn.example.com/huge.png');
+      await userEvent.click(screen.getByTestId('buildConnectorLogoLoadButton'));
+
+      expect(await screen.findByText('The logo exceeds the 64 KB limit.')).toBeInTheDocument();
+      expect(screen.queryByTestId('buildConnectorLogoPreview')).not.toBeInTheDocument();
+    });
+
+    it('removes a loaded logo', async () => {
+      renderPage();
+
+      await typeLogoUrl('https://cdn.example.com/logo.png');
+      await userEvent.click(screen.getByTestId('buildConnectorLogoLoadButton'));
+      await screen.findByTestId('buildConnectorLogoPreview');
+
+      await userEvent.click(screen.getByTestId('buildConnectorLogoRemoveButton'));
+
+      await waitFor(() =>
+        expect(screen.queryByTestId('buildConnectorLogoPreview')).not.toBeInTheDocument()
+      );
+      expect(screen.getByTestId('buildConnectorLogoUrlInput')).toHaveValue('');
+    });
+
+    it('does not save while a typed URL has not been loaded', async () => {
+      renderPage();
+
+      await applyYaml(yamlDefinition);
+      await typeLogoUrl('https://cdn.example.com/logo.png');
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
+
+      expect(
+        await screen.findByText('Load the logo before saving, or clear the URL.')
+      ).toBeInTheDocument();
+      expect(createConnectorType).not.toHaveBeenCalled();
+    });
+
+    it('imports a logo from the YAML and shows it', async () => {
+      renderPage();
+
+      await applyYaml(`${yamlDefinition.trimEnd()}\nicon: ${logoDataUri}\n`);
+
+      const preview = await screen.findByTestId('buildConnectorLogoPreview');
+      expect(preview.querySelector(`[data-euiicon-type="${logoDataUri}"]`)).toBeInTheDocument();
+      expect(screen.getByTestId('buildConnectorLogoUrlInput')).toHaveValue('');
+
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
+      await waitFor(() =>
+        expect(createConnectorType).toHaveBeenCalledWith(
+          expect.objectContaining({
+            connectorType: expect.objectContaining({ icon: logoDataUri }),
+          })
+        )
+      );
+    });
+
+    it('flags an imported logo that is not a supported image', async () => {
+      renderPage();
+
+      await applyYaml(`${yamlDefinition.trimEnd()}\nicon: https://cdn.example.com/logo.png\n`);
+
+      expect(
+        await screen.findByText('Logo must be a base64 PNG, JPEG, GIF, WebP or SVG image.')
+      ).toBeInTheDocument();
+      expect(createConnectorType).not.toHaveBeenCalled();
     });
   });
 

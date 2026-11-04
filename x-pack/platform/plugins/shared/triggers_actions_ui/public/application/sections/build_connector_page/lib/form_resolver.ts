@@ -101,6 +101,11 @@ const FORMAT_MESSAGES: Record<string, string> = {
   'test.request.headers.*.key': HEADER_NAME_FORMAT,
 };
 
+const LOGO_NOT_LOADED = i18n.translate(
+  'xpack.triggersActionsUI.sections.buildConnectorPage.error.logoNotLoaded',
+  { defaultMessage: 'Load the logo before saving, or clear the URL.' }
+);
+
 const AUTH_TYPES_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.sections.buildConnectorPage.error.requiredAuthTypes',
   { defaultMessage: 'Select at least one authentication type.' }
@@ -192,6 +197,9 @@ const toFormPath = (issue: z.ZodIssue, values: BuildConnectorFormData): string =
   const path = segments.join('.');
   if (EDITABLE_PATHS.has(path)) {
     return path;
+  }
+  if (path === 'icon') {
+    return 'logoUrl';
   }
   if (segments[0] === 'auth') {
     return 'auth.types';
@@ -336,6 +344,11 @@ const validateFormOnly = (
   });
 
   const test = { ...values.test, request: validateRequest(values.test.request, 'test.request') };
+
+  // A URL that was typed but never loaded would be saved without its logo.
+  if (values.logoUrl.trim() && !values.icon) {
+    addError('logoUrl', LOGO_NOT_LOADED);
+  }
 
   return { ...values, actions, test, auth: validateAuth(values.auth, addError) };
 };

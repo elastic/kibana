@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext, useFormState, useWatch } from 'react-hook-form';
 import type { BuildConnectorFormData, ConnectorTypeAuthType } from '../types';
 import { toConnectorTypeId } from '../lib/form_serializers';
+import { ConnectorLogoField } from './connector_logo_field';
 
 const authTypeOptions: Array<EuiComboBoxOptionOption<ConnectorTypeAuthType>> = [
   {
@@ -149,6 +150,7 @@ const ConnectorDetailsFieldsComponent: React.FC = () => {
           </EuiFormRow>
         )}
       />
+      <ConnectorLogoField />
       <Controller
         name="auth.types"
         control={control}
