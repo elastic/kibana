@@ -17,6 +17,27 @@ export const USER_AVATAR_FALLBACK_CODE_POINT = 97; // code point for lowercase "
 export const USER_AVATAR_MAX_INITIALS = 2;
 
 /**
+ * Size cap for avatar initials in UTF-16 code units. A single grapheme can carry any number of combining
+ * marks, so the grapheme limit alone does not bound the input.
+ */
+export const USER_AVATAR_MAX_INITIALS_CODE_UNITS = 64;
+
+const graphemeSegmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+
+const getGraphemes = (value: string): string[] =>
+  Array.from(graphemeSegmenter.segment(value), ({ segment }) => segment);
+
+/**
+ * Checks that avatar initials are at most {@link USER_AVATAR_MAX_INITIALS} graphemes (user-perceived characters).
+ */
+export function isValidUserProfileAvatarInitials(initials: string): boolean {
+  return (
+    initials.length <= USER_AVATAR_MAX_INITIALS_CODE_UNITS &&
+    getGraphemes(initials).length <= USER_AVATAR_MAX_INITIALS
+  );
+}
+
+/**
  * Validates if the provided color string is a valid hex color.
  * @param color - The color to validate.
  * @returns True if the color is a valid hex color, false otherwise.
@@ -51,7 +72,7 @@ export function getUserAvatarInitials(
 
   words.splice(numInitials, words.length);
 
-  return words.map((word) => word.substring(0, 1)).join('');
+  return words.map((word) => getGraphemes(word)[0] ?? '').join('');
 }
 
 /**
