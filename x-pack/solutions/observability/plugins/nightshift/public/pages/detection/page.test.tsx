@@ -129,7 +129,9 @@ jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       application: {
-        capabilities: { nightshift: { show: true, manage: mockCanManage } },
+        capabilities: {
+          nightshift: { show: true, manage: mockCanManage, configure: mockCanManage },
+        },
         getUrlForApp: () => '/app/nightshift/',
       },
     },

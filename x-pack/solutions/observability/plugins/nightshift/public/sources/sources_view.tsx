@@ -64,7 +64,8 @@ export function SourcesView() {
     },
     notifications: { toasts },
   } = useKibana().services;
-  const { canManageAndConfigure: canChangeSources } = getNightshiftCapabilities(nightshift);
+  const { canManage, canManageAndConfigure: canChangeSources } =
+    getNightshiftCapabilities(nightshift);
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const [searchText, setSearchText] = useState('');
   const [sourceCreationState, setSourceCreationState] = useState<RecommendedSourcesCreationState>(
@@ -256,7 +257,7 @@ export function SourcesView() {
                 </EuiButton>
               </EuiFlexItem>
             )}
-            {hasSources && canChangeSources && (
+            {hasSources && canManage && (
               <EuiFlexItem grow={false}>
                 <GenerateSplitButton
                   size="s"
@@ -387,9 +388,10 @@ export function SourcesView() {
                     generatingSourceIds={generatingSourceIds}
                     awaitingRunSourceIds={awaitingRunSourceIds}
                     activityBlockTooltip={activityBlockTooltip}
-                    canManage={canChangeSources}
+                    canManage={canManage}
+                    canChangeSources={canChangeSources}
                     selection={
-                      canChangeSources
+                      canManage
                         ? {
                             selected: selectedSources,
                             onSelectionChange: (selected) =>

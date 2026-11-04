@@ -243,6 +243,13 @@ describe('SourcesView routes', () => {
     expect(screen.queryByRole('button', { name: 'Create source' })).not.toBeInTheDocument();
   });
 
+  it('shows an existing source as read-only to a user with manage but without configure', async () => {
+    mockCanConfigure = false;
+    renderSources('/sources/source-2');
+
+    expect(await screen.findByTestId('sourceFlyout')).toHaveTextContent('Read only');
+  });
+
   it('opens a source deep link and preserves the query string when closing', async () => {
     const { history } = renderSources('/sources/source-1?rangeFrom=now-24h&rangeTo=now');
 
