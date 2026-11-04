@@ -71,13 +71,14 @@ const uninstallLegacyManagedWorkflow = async ({
 }: {
   getManagedWorkflowsClient: () => Promise<PluginScopedManagedWorkflowsApi>;
   managementApi: ManagementApi;
-  id: ManagedWorkflowId;
+  id: string;
   request: KibanaRequest;
 }): Promise<boolean> => {
   const { exists, wasEnabled } = await stopAndDrain({ managementApi, id, request });
   if (exists) {
     const client = await getManagedWorkflowsClient();
-    await client.uninstall(id, { spaceId: DEFAULT_SPACE_ID });
+    // Legacy ids have no definition any more, so the typed id union no longer lists them.
+    await client.uninstall(id as ManagedWorkflowId, { spaceId: DEFAULT_SPACE_ID });
   }
   return wasEnabled;
 };
@@ -179,9 +180,7 @@ export const removeLegacyDefaultSpaceWorkflows = async ({
       request,
     });
     if (wasEnabled) {
-      logger.warn(
-        continuousOnboardingResetWarning(LEGACY_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID)
-      );
+      logger.warn(continuousOnboardingResetWarning(LEGACY_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID));
     }
   });
 

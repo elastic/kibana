@@ -44,7 +44,8 @@ export const LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID =
  * The ids the continuous onboarding and sync workflows had before they were installed per space,
  * kept to remove the documents an older version left in the default space.
  */
-export const LEGACY_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID = 'system-streams-ki-continuous-onboarding';
+export const LEGACY_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID =
+  'system-streams-ki-continuous-onboarding';
 export const LEGACY_KI_SYNC_WORKFLOW_ID = 'system-streams-ki-sync';
 
 // Scheduling: the workflow runs every COORDINATOR_INTERVAL_MINUTES with a

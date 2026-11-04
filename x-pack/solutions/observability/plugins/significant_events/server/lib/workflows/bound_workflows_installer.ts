@@ -81,8 +81,7 @@ export function createBoundWorkflowsInstaller({
   return {
     async install({ request, spaceId, workflowId, serviceAccountId, values }) {
       const { core } = await getStartDeps();
-      const accountId =
-        serviceAccountId ?? (await getDetectionEngineAccountId({ core, spaceId }));
+      const accountId = serviceAccountId ?? (await getDetectionEngineAccountId({ core, spaceId }));
       if (accountId === undefined) {
         throw createNotSetUpError({
           serviceAccountsEnabled: core.security.serviceAccounts.isEnabled(),
