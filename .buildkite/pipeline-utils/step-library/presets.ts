@@ -89,6 +89,9 @@ export const spotZones = {
 // NOTE: This *cannot* be `as const`, which would infer the arrays as `readonly`.
 // The SDK type expects mutable arrays.
 export const retry = {
+  none: {
+    automatic: false,
+  },
   agentLoss: {
     automatic: [{ exit_status: -1, limit: 3 }],
   },
@@ -139,14 +142,15 @@ export const spotAgent = (machineType: MachineType, zones: readonly Zone[]): Age
 
 export const mainTargetBranchOnly = "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'";
 
-export const securitySolutionCypressDefaults = {
+// A sharded or single-script test step on a preemptible agent; set `command`, `label` and `key`.
+export const testDefaults = {
   agents: spotAgent('n2-standard-4', spotZones.centralFCA),
   depends_on: ['build'],
   timeout_in_minutes: 60,
   retry: retry.agentLossOrAnyOnce,
 };
 
-export const securitySolutionHighMemoryCypressDefaults = {
-  ...securitySolutionCypressDefaults,
+export const highMemoryTestDefaults = {
+  ...testDefaults,
   agents: spotAgent('n2-highmem-4', spotZones.centralFCA),
 };

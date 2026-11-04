@@ -8,45 +8,45 @@
  */
 
 import { commandStep, withAgentOverrides } from '../../helpers.ts';
-import { mainTargetBranchOnly, securitySolutionCypressDefaults } from '../../presets.ts';
+import { mainTargetBranchOnly, retry, testDefaults } from '../../presets.ts';
 import type { Step } from '../../types.ts';
 
 export const cypressBurnSteps = (): readonly Step[] => [
   commandStep({
-    ...withAgentOverrides(securitySolutionCypressDefaults, { enableNestedVirtualization: true }),
+    ...withAgentOverrides(testDefaults, { enableNestedVirtualization: true }),
     command: '.buildkite/scripts/steps/functional/defend_workflows_burn.sh',
     label: '[Soft fail] Defend Workflows Cypress Tests, burning changed specs',
     key: 'defend-workflows-burn',
     soft_fail: true,
-    retry: { automatic: false },
+    retry: retry.none,
     parallelism: 1,
   }),
   commandStep({
-    ...withAgentOverrides(securitySolutionCypressDefaults, { enableNestedVirtualization: true }),
+    ...withAgentOverrides(testDefaults, { enableNestedVirtualization: true }),
     command: '.buildkite/scripts/steps/functional/defend_workflows_serverless_burn.sh',
     label: '[Soft fail] Defend Workflows Cypress Tests on Serverless, burning changed specs',
     key: 'defend-workflows-serverless-burn',
     if: mainTargetBranchOnly,
     soft_fail: true,
-    retry: { automatic: false },
+    retry: retry.none,
     parallelism: 1,
   }),
   commandStep({
-    ...securitySolutionCypressDefaults,
+    ...testDefaults,
     command: '.buildkite/scripts/steps/functional/security_solution_burn.sh',
     label: '[Soft fail] Security Solution Cypress tests, burning changed specs',
     key: 'security-solution-burn',
     soft_fail: true,
-    retry: { automatic: false },
+    retry: retry.none,
     parallelism: 1,
   }),
   commandStep({
-    ...securitySolutionCypressDefaults,
+    ...testDefaults,
     command: '.buildkite/scripts/steps/functional/osquery_cypress_burn.sh',
     label: '[Soft fail] Osquery Cypress Tests, burning changed specs',
     key: 'osquery-cypress-burn',
     timeout_in_minutes: 50,
     soft_fail: true,
-    retry: { automatic: false },
+    retry: retry.none,
   }),
 ];

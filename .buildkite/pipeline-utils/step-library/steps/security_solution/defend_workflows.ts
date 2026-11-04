@@ -8,12 +8,12 @@
  */
 
 import { commandStep, withAgentOverrides } from '../../helpers.ts';
-import { mainTargetBranchOnly, securitySolutionHighMemoryCypressDefaults } from '../../presets.ts';
+import { mainTargetBranchOnly, highMemoryTestDefaults } from '../../presets.ts';
 import type { Step } from '../../types.ts';
 
 export const defendWorkflowsSteps = (): readonly Step[] => [
   commandStep({
-    ...withAgentOverrides(securitySolutionHighMemoryCypressDefaults, {
+    ...withAgentOverrides(highMemoryTestDefaults, {
       enableNestedVirtualization: true,
     }),
     command: '.buildkite/scripts/steps/functional/defend_workflows.sh',
@@ -22,7 +22,7 @@ export const defendWorkflowsSteps = (): readonly Step[] => [
     parallelism: 24,
   }),
   commandStep({
-    ...withAgentOverrides(securitySolutionHighMemoryCypressDefaults, {
+    ...withAgentOverrides(highMemoryTestDefaults, {
       enableNestedVirtualization: true,
     }),
     command: '.buildkite/scripts/steps/functional/defend_workflows_serverless.sh',
