@@ -67,7 +67,7 @@ export interface SecurityPageObjects extends PageObjects {
   threatMatchRuleCreatePage: ThreatMatchRuleCreatePage;
   attackDetailsRightPanelPage: AttackDetailsRightPanelPage;
   serverlessProjectChromePage: ServerlessProjectChromePage;
-  /** Graph Visualization tab inside the alert/event details left panel. */
+  /** Graph tool of the v2 document flyout (alert / event), opened from the graph preview. */
   graphFlyoutPage: GraphFlyoutPage;
   /** v2 document flyout (alert / event) — opened from the alerts table or Timeline. */
   documentFlyout: DocumentFlyout;
