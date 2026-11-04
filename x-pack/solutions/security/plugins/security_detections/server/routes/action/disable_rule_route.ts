@@ -25,7 +25,7 @@
  */
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type {
   CoreSetup,
   IRouter,
@@ -57,9 +57,11 @@ export const DETECTION_ENGINE_V2_RULE_DISABLE_PATH =
 // ---------------------------------------------------------------------------
 
 /** Zod schema for the `{id}` path parameter. */
-const ruleIdParamsSchema = z.object({
-  id: z.string().min(1).describe('The object id of the detection rule to disable.'),
-});
+const ruleIdParamsSchema = lazySchema(() =>
+  z.object({
+    id: z.string().min(1).describe('The object id of the detection rule to disable.'),
+  })
+);
 
 // ---------------------------------------------------------------------------
 // Route registration

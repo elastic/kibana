@@ -23,7 +23,7 @@
  */
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CoreSetup, IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { AlertingServerStart } from '@kbn/alerting-v2-plugin/server';
 import { DetectionRulesClient } from '../../detection_rules_client';
@@ -71,77 +71,81 @@ const arrayOrSingleSchema = <T extends z.ZodType>(item: T, max: number) =>
  *
  * Ref: rule-fetch-api.md "The list endpoint" (parameter table)
  */
-export const listRulesQuerySchema = z.object({
-  /** Filter on rule enabled/disabled state. */
-  enabled: z
-    .preprocess((v) => (v === 'true' ? true : v === 'false' ? false : v), z.boolean())
-    .optional()
-    .describe('Filter on enabled/disabled state.'),
+export const listRulesQuerySchema = lazySchema(() =>
+  z.object({
+    /** Filter on rule enabled/disabled state. */
+    enabled: z
+      .preprocess((v) => (v === 'true' ? true : v === 'false' ? false : v), z.boolean())
+      .optional()
+      .describe('Filter on enabled/disabled state.'),
 
-  /** Filter on public type alias (query | threshold). */
-  type: arrayOrSingleSchema(z.enum(['query', 'threshold']), 100)
-    .optional()
-    .describe('Filter on rule type.'),
+    /** Filter on public type alias (query | threshold). */
+    type: arrayOrSingleSchema(z.enum(['query', 'threshold']), 100)
+      .optional()
+      .describe('Filter on rule type.'),
 
-  /** Filter on severity level. */
-  severity: arrayOrSingleSchema(z.enum(['low', 'medium', 'high', 'critical']), 100)
-    .optional()
-    .describe('Filter on severity.'),
+    /** Filter on severity level. */
+    severity: arrayOrSingleSchema(z.enum(['low', 'medium', 'high', 'critical']), 100)
+      .optional()
+      .describe('Filter on severity.'),
 
-  /** Filter on tags. */
-  tags: arrayOrSingleSchema(z.string().min(1).max(1000), 100)
-    .optional()
-    .describe('Filter on tags.'),
+    /** Filter on tags. */
+    tags: arrayOrSingleSchema(z.string().min(1).max(1000), 100)
+      .optional()
+      .describe('Filter on tags.'),
 
-  /** Filter on signature ids (the stable public rule id). */
-  rule_ids: arrayOrSingleSchema(z.string().min(1).max(500), 10000)
-    .optional()
-    .describe('Filter on signature ids.'),
+    /** Filter on signature ids (the stable public rule id). */
+    rule_ids: arrayOrSingleSchema(z.string().min(1).max(500), 10000)
+      .optional()
+      .describe('Filter on signature ids.'),
 
-  /** Prefix-match over rule names, descriptions, and text builder fields (note, setup, query). */
-  search: z
-    .string()
-    .optional()
-    .describe('Prefix search over rule names, descriptions, and text fields (note, setup, query).'),
+    /** Prefix-match over rule names, descriptions, and text builder fields (note, setup, query). */
+    search: z
+      .string()
+      .optional()
+      .describe(
+        'Prefix search over rule names, descriptions, and text fields (note, setup, query).'
+      ),
 
-  /**
-   * Sort field. `severity` is NOT accepted — lexicographic ordering is wrong
-   * and the API does not silently substitute `risk_score`.
-   *
-   * Ref: rule-fetch-api.md "Searching and sorting"
-   */
-  sort_field: z
-    .enum(['name', 'enabled', 'risk_score'])
-    .optional()
-    .describe('Sort field. Accepts name, enabled, or risk_score.'),
+    /**
+     * Sort field. `severity` is NOT accepted — lexicographic ordering is wrong
+     * and the API does not silently substitute `risk_score`.
+     *
+     * Ref: rule-fetch-api.md "Searching and sorting"
+     */
+    sort_field: z
+      .enum(['name', 'enabled', 'risk_score'])
+      .optional()
+      .describe('Sort field. Accepts name, enabled, or risk_score.'),
 
-  /** Sort direction. */
-  sort_order: z.enum(['asc', 'desc']).optional().describe('Sort direction.'),
+    /** Sort direction. */
+    sort_order: z.enum(['asc', 'desc']).optional().describe('Sort direction.'),
 
-  /** Page number, minimum 1. */
-  page: queryIntSchema({ min: 1, max: Number.MAX_SAFE_INTEGER })
-    .optional()
-    .describe('Page number (1-based). Defaults to 1.'),
+    /** Page number, minimum 1. */
+    page: queryIntSchema({ min: 1, max: Number.MAX_SAFE_INTEGER })
+      .optional()
+      .describe('Page number (1-based). Defaults to 1.'),
 
-  /**
-   * Page size. Default 20, capped at 1000.
-   *
-   * Ref: rule-fetch-api.md "Pagination and the response shape"
-   */
-  per_page: queryIntSchema({ min: 1, max: 1000 })
-    .optional()
-    .describe('Page size. Default 20, max 1000.'),
+    /**
+     * Page size. Default 20, capped at 1000.
+     *
+     * Ref: rule-fetch-api.md "Pagination and the response shape"
+     */
+    per_page: queryIntSchema({ min: 1, max: 1000 })
+      .optional()
+      .describe('Page size. Default 20, max 1000.'),
 
-  /**
-   * Public field names to project.  Applied in the API layer after conversion;
-   * `id` is always included regardless.
-   *
-   * Ref: rule-fetch-api.md "Field limitation"
-   */
-  fields: arrayOrSingleSchema(z.string().min(1).max(500), 500)
-    .optional()
-    .describe('Fields to return. id is always included.'),
-});
+    /**
+     * Public field names to project.  Applied in the API layer after conversion;
+     * `id` is always included regardless.
+     *
+     * Ref: rule-fetch-api.md "Field limitation"
+     */
+    fields: arrayOrSingleSchema(z.string().min(1).max(500), 500)
+      .optional()
+      .describe('Fields to return. id is always included.'),
+  })
+);
 
 export type ListRulesQuery = z.infer<typeof listRulesQuerySchema>;
 

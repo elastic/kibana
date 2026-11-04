@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 // ---------------------------------------------------------------------------
 // MITRE ATT&CK threat shapes
@@ -15,32 +15,38 @@ import { z } from '@kbn/zod/v4';
 // 512 KB bounded-schema budget at the array maximums below.
 // ---------------------------------------------------------------------------
 
-export const threatTacticSchema = z
-  .object({
-    id: z.string().max(32),
-    name: z.string().max(256),
-    reference: z.string().max(512),
-  })
-  .strict();
+export const threatTacticSchema = lazySchema(() =>
+  z
+    .object({
+      id: z.string().max(32),
+      name: z.string().max(256),
+      reference: z.string().max(512),
+    })
+    .strict()
+);
 
 export const threatSubtechniqueSchema = threatTacticSchema;
 
-export const threatTechniqueSchema = z
-  .object({
-    id: z.string().max(32),
-    name: z.string().max(256),
-    reference: z.string().max(512),
-    subtechnique: z.array(threatSubtechniqueSchema).max(3).optional(),
-  })
-  .strict();
+export const threatTechniqueSchema = lazySchema(() =>
+  z
+    .object({
+      id: z.string().max(32),
+      name: z.string().max(256),
+      reference: z.string().max(512),
+      subtechnique: z.array(threatSubtechniqueSchema).max(3).optional(),
+    })
+    .strict()
+);
 
-export const threatEntrySchema = z
-  .object({
-    framework: z.string().max(64),
-    tactic: threatTacticSchema,
-    technique: z.array(threatTechniqueSchema).max(5).optional(),
-  })
-  .strict();
+export const threatEntrySchema = lazySchema(() =>
+  z
+    .object({
+      framework: z.string().max(64),
+      tactic: threatTacticSchema,
+      technique: z.array(threatTechniqueSchema).max(5).optional(),
+    })
+    .strict()
+);
 
 // ---------------------------------------------------------------------------
 // Shared detection fragment
@@ -70,47 +76,51 @@ export const threatEntrySchema = z
 // ---------------------------------------------------------------------------
 
 export const detectionRuleCommonFields = {
-  severity: z.enum(['low', 'medium', 'high', 'critical']),
-  risk_score: z.number().int().min(0).max(100),
-  max_signals: z.number().int().min(1).max(10000).optional(),
-  threat: z.array(threatEntrySchema).max(5).optional(),
+  severity: lazySchema(() => z.enum(['low', 'medium', 'high', 'critical'])),
+  risk_score: lazySchema(() => z.number().int().min(0).max(100)),
+  max_signals: lazySchema(() => z.number().int().min(1).max(10000).optional()),
+  threat: lazySchema(() => z.array(threatEntrySchema).max(5).optional()),
   // Raised from 8,192 to 16,384: setup guides are short (longest fixture
   // ~1,500 chars), and 16,384 is generous headroom.
-  setup: z.string().max(16384).optional(),
+  setup: lazySchema(() => z.string().max(16384).optional()),
   // Raised from 8,192 to 65,536: a real prebuilt rule ships a 29,075-char
   // investigation guide, so 8,192 cannot hold the existing corpus.
-  note: z.string().max(65536).optional(),
-  references: z.array(z.string().max(1024)).max(32).optional(),
-  false_positives: z.array(z.string().max(1024)).max(16).optional(),
-  author: z.array(z.string().max(256)).max(16).optional(),
-  license: z.string().max(256).optional(),
-  related_integrations: z
-    .array(
-      z
-        .object({
-          package: z.string().max(64),
-          version: z.string().max(32),
-          integration: z.string().max(64).optional(),
-        })
-        .strict()
-    )
-    .max(16)
-    .optional(),
-  required_fields: z
-    .array(
-      z
-        .object({
-          name: z.string().max(128),
-          type: z.string().max(64),
-          ecs: z.boolean(),
-        })
-        .strict()
-    )
-    .max(32)
-    .optional(),
+  note: lazySchema(() => z.string().max(65536).optional()),
+  references: lazySchema(() => z.array(z.string().max(1024)).max(32).optional()),
+  false_positives: lazySchema(() => z.array(z.string().max(1024)).max(16).optional()),
+  author: lazySchema(() => z.array(z.string().max(256)).max(16).optional()),
+  license: lazySchema(() => z.string().max(256).optional()),
+  related_integrations: lazySchema(() =>
+    z
+      .array(
+        z
+          .object({
+            package: z.string().max(64),
+            version: z.string().max(32),
+            integration: z.string().max(64).optional(),
+          })
+          .strict()
+      )
+      .max(16)
+      .optional()
+  ),
+  required_fields: lazySchema(() =>
+    z
+      .array(
+        z
+          .object({
+            name: z.string().max(128),
+            type: z.string().max(64),
+            ecs: z.boolean(),
+          })
+          .strict()
+      )
+      .max(32)
+      .optional()
+  ),
 };
 
 // Derive DetectionRuleCommonFields by constructing a temporary strict schema
 // and inferring from it.  The enrichment helper imports this type.
-const _detectionRuleCommonSchema = z.object(detectionRuleCommonFields).strict();
+const _detectionRuleCommonSchema = lazySchema(() => z.object(detectionRuleCommonFields).strict());
 export type DetectionRuleCommonFields = z.infer<typeof _detectionRuleCommonSchema>;

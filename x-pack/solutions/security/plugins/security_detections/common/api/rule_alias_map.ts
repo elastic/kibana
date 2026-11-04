@@ -28,7 +28,7 @@
  * Ref: rule-domain-model.md "The type discriminator in the public model"
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { customQueryCreateSchema, thresholdCreateSchema } from './detection_rule_request_schemas';
 
 // ---------------------------------------------------------------------------
@@ -118,7 +118,7 @@ export const ALIAS_MAP: ReadonlyArray<AliasMapEntry> = ALIAS_MAP_ENTRIES;
  * All known public type aliases, as a Zod enum.
  * Use this in schemas that need to enumerate valid `type` values.
  */
-export const detectionRuleTypeSchema = z.enum(['query', 'threshold']);
+export const detectionRuleTypeSchema = lazySchema(() => z.enum(['query', 'threshold']));
 export type DetectionRuleType = z.infer<typeof detectionRuleTypeSchema>;
 
 // ---------------------------------------------------------------------------

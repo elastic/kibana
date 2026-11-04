@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { detectionRuleCommonFields } from './detection_rule_common_fields';
 
 // ---------------------------------------------------------------------------
@@ -24,30 +24,32 @@ import { detectionRuleCommonFields } from './detection_rule_common_fields';
 // No defaults, no transforms — see rule-validation.md "No defaults, no transforms".
 // ---------------------------------------------------------------------------
 
-export const thresholdBuilderFieldsSchema = z
-  .object({
-    ...detectionRuleCommonFields,
-    index: z.array(z.string().min(1).max(256)).min(1).max(32),
-    query: z.string().max(8192),
-    language: z.enum(['kuery', 'lucene']),
-    threshold: z
-      .object({
-        field: z.array(z.string().min(1).max(256)).max(5),
-        value: z.number().int().min(1),
-        cardinality: z
-          .array(
-            z
-              .object({
-                field: z.string().min(1).max(256),
-                value: z.number().int().min(0),
-              })
-              .strict()
-          )
-          .max(1)
-          .optional(),
-      })
-      .strict(),
-  })
-  .strict();
+export const thresholdBuilderFieldsSchema = lazySchema(() =>
+  z
+    .object({
+      ...detectionRuleCommonFields,
+      index: z.array(z.string().min(1).max(256)).min(1).max(32),
+      query: z.string().max(8192),
+      language: z.enum(['kuery', 'lucene']),
+      threshold: z
+        .object({
+          field: z.array(z.string().min(1).max(256)).max(5),
+          value: z.number().int().min(1),
+          cardinality: z
+            .array(
+              z
+                .object({
+                  field: z.string().min(1).max(256),
+                  value: z.number().int().min(0),
+                })
+                .strict()
+            )
+            .max(1)
+            .optional(),
+        })
+        .strict(),
+    })
+    .strict()
+);
 
 export type ThresholdBuilderFields = z.infer<typeof thresholdBuilderFieldsSchema>;
