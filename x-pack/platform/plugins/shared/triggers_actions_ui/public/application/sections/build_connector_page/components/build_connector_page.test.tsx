@@ -140,7 +140,7 @@ describe('BuildConnectorPage', () => {
     renderStartPage();
 
     expect(screen.getByTestId('build-connector-start')).toBeInTheDocument();
-    expect(screen.getByText('Build a connector from its documentation')).toBeInTheDocument();
+    expect(screen.getByText('Generate with AI')).toBeInTheDocument();
     expect(screen.getByTestId('build-connector-ai-url')).toBeInTheDocument();
     expect(screen.getByTestId('build-connector-ai-generate-btn')).toHaveTextContent(
       'Generate connector'
@@ -154,7 +154,9 @@ describe('BuildConnectorPage', () => {
   it('opens the empty form from Start from scratch', async () => {
     renderPage();
 
-    expect(await screen.findByRole('heading', { name: 'Build a connector' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: 'Connector type builder' })
+    ).toBeInTheDocument();
 
     const detailsStep = screen.getByTestId('build-connector-page-step-details');
     expect(detailsStep).toHaveTextContent('Connector details');
@@ -183,7 +185,7 @@ describe('BuildConnectorPage', () => {
       expect.objectContaining({ text: 'Build' }),
     ]);
     expect(useKibanaMock().services.chrome.docTitle.change).toHaveBeenCalledWith(
-      'Build a connector'
+      'Connector type builder'
     );
   });
 
@@ -285,7 +287,9 @@ describe('BuildConnectorPage', () => {
   it('renders the form fields, one empty action and the footer buttons', async () => {
     renderPage();
 
-    expect(await screen.findByRole('heading', { name: 'Build a connector' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: 'Connector type builder' })
+    ).toBeInTheDocument();
     expect(screen.queryByTestId('build-connector-start')).not.toBeInTheDocument();
     expect(screen.getByTestId('buildConnectorNameInput')).toBeInTheDocument();
     expect(screen.getByTestId('buildConnectorIdInput')).toBeInTheDocument();
@@ -788,7 +792,7 @@ describe('BuildConnectorPage', () => {
       await openAiPanel();
       expect(screen.getByTestId('build-connector-ai-url')).toBeInTheDocument();
       expect(
-        screen.getByText('Generates a draft that you can review before saving.')
+        screen.getByText('Enter a public API documentation URL. Review the draft before saving.')
       ).toBeInTheDocument();
     });
 

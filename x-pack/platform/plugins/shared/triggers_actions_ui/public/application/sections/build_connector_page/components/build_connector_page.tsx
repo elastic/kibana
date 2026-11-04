@@ -43,7 +43,7 @@ export interface BuildConnectorPageLocationState {
 }
 
 const TITLE = i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.title', {
-  defaultMessage: 'Build a connector',
+  defaultMessage: 'Connector type builder',
 });
 
 const STEP_TITLES = {
@@ -177,10 +177,7 @@ export const BuildConnectorPage: React.FC = () => {
                 defaultMessage:
                   'Define a custom HTTP connector type from its configuration, authentication and actions.',
               })
-            : i18n.translate(
-                'xpack.triggersActionsUI.sections.buildConnectorPage.startDescription',
-                { defaultMessage: 'Generate a connector type from API documentation.' }
-              )
+            : undefined
         }
         back={{
           href: history.createHref({ pathname: routeToConnectors }),

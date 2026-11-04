@@ -96,10 +96,6 @@ const AiAssistantPanelComponent: React.FC<Props> = ({ onApply, isDisabled = fals
           'xpack.triggersActionsUI.sections.buildConnectorPage.aiUrlFieldLabel',
           { defaultMessage: 'Documentation URL' }
         )}
-        helpText={i18n.translate(
-          'xpack.triggersActionsUI.sections.buildConnectorPage.aiUrlFieldHelpText',
-          { defaultMessage: 'Generates a draft that you can review before saving.' }
-        )}
         fullWidth
         isInvalid={urlIsInvalid}
         error={

@@ -84,8 +84,20 @@ describe('Elasticsearch solution navigation tree', () => {
       location: createLocation(builderPath),
       prepend: (path: string) => path,
     };
+    const home = stackManagement?.children?.find((item) => item.id === 'stack_management_home')
+      ?.children?.[0];
+    const rules = children.find((item) => item.link === 'management:triggersActions');
+    expect(home?.getIsActive?.(activeParams)).toBe(false);
+    expect(rules?.getIsActive?.(activeParams)).toBe(false);
     expect(children[connectorsIndex].getIsActive?.(activeParams)).toBe(false);
     expect(children[connectorsIndex + 1].getIsActive?.(activeParams)).toBe(true);
+
+    const homePath = '/app/management';
+    expect(home?.getIsActive?.({ ...activeParams, pathNameSerialized: homePath })).toBe(true);
+    const rulesPath = '/app/management/insightsAndAlerting/triggersActions';
+    expect(
+      rules?.getIsActive?.({ ...activeParams, pathNameSerialized: `${rulesPath}/rules` })
+    ).toBe(true);
   });
 
   it('hides the connector type builder when saving is not allowed', async () => {

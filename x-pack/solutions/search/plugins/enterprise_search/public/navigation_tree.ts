@@ -31,8 +31,13 @@ const title = i18n.translate(
   }
 );
 const icon = 'logoElasticsearch';
+const stackManagementHomePath = '/app/management';
+const rulesManagementPath = '/app/management/insightsAndAlerting/triggersActions';
 const connectorsManagementPath = '/app/management/insightsAndAlerting/triggersActionsConnectors';
 const connectorTypeBuilderPath = `${connectorsManagementPath}/connectors/build`;
+
+const isAtOrBelowPath = (currentPath: string, path: string): boolean =>
+  currentPath === path || currentPath.startsWith(`${path}/`) || currentPath.startsWith(`${path}#`);
 
 /**
  * CONTEXT: After restructuring Dashboards to integrate the Visualize library,
@@ -239,6 +244,14 @@ export const getNavigationTreeDefinition = ({
                       // https://github.com/elastic/kibana/issues/240275
                       breadcrumbStatus: 'hidden',
                       link: 'management',
+                      getIsActive: ({ pathNameSerialized, prepend }) => {
+                        const homePath = prepend(stackManagementHomePath);
+                        return (
+                          pathNameSerialized === homePath ||
+                          pathNameSerialized === `${homePath}/` ||
+                          pathNameSerialized.startsWith(`${homePath}#`)
+                        );
+                      },
                       title: i18n.translate('xpack.enterpriseSearch.searchNav.management.home', {
                         defaultMessage: 'Home',
                       }),
@@ -259,12 +272,16 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     { link: 'management:triggersActionsAlerts' },
-                    { link: 'management:triggersActions' },
+                    {
+                      link: 'management:triggersActions',
+                      getIsActive: ({ pathNameSerialized, prepend }) =>
+                        isAtOrBelowPath(pathNameSerialized, prepend(rulesManagementPath)),
+                    },
                     {
                       link: 'management:triggersActionsConnectors',
                       getIsActive: ({ pathNameSerialized, prepend }) =>
-                        pathNameSerialized.startsWith(prepend(connectorsManagementPath)) &&
-                        !pathNameSerialized.startsWith(prepend(connectorTypeBuilderPath)),
+                        isAtOrBelowPath(pathNameSerialized, prepend(connectorsManagementPath)) &&
+                        !isAtOrBelowPath(pathNameSerialized, prepend(connectorTypeBuilderPath)),
                     },
                     ...(core.application.capabilities.actions?.save
                       ? [
@@ -282,7 +299,10 @@ export const getNavigationTreeDefinition = ({
                               pathNameSerialized,
                               prepend,
                             }: Parameters<NonNullable<NodeDefinition['getIsActive']>>[0]) =>
-                              pathNameSerialized.startsWith(prepend(connectorTypeBuilderPath)),
+                              isAtOrBelowPath(
+                                pathNameSerialized,
+                                prepend(connectorTypeBuilderPath)
+                              ),
                           },
                         ]
                       : []),

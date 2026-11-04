@@ -41,26 +41,20 @@ export const BuildConnectorStart: React.FC<Props> = ({ onApply, onStartFromScrat
         <EuiTitle size="m">
           <h2>
             {i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.aiTitle', {
-              defaultMessage: 'Build a connector from its documentation',
+              defaultMessage: 'Generate with AI',
             })}
           </h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">
           {i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.aiIntro', {
-            defaultMessage: 'Enter a public API documentation URL to generate an editable draft.',
+            defaultMessage: 'Enter a public API documentation URL. Review the draft before saving.',
           })}
         </EuiText>
         <EuiSpacer size="l" />
         <AiAssistantPanel onApply={onApply} />
       </EuiPanel>
       <EuiHorizontalRule margin="l" />
-      <EuiText size="s" color="subdued">
-        {i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.otherWays', {
-          defaultMessage: 'Other ways to start',
-        })}
-      </EuiText>
-      <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
