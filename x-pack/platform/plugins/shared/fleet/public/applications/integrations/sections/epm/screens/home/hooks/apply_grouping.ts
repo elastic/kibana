@@ -20,6 +20,7 @@ interface ApplyGroupingParams {
   getAbsolutePath: (path: string) => string;
   addBasePath: (url: string) => string;
   packageVerificationKeyId?: string;
+  canAddIntegration?: boolean;
 }
 
 interface ApplyGroupingResult {
@@ -36,6 +37,7 @@ export const applyGrouping = ({
   getAbsolutePath,
   addBasePath,
   packageVerificationKeyId,
+  canAddIntegration,
 }: ApplyGroupingParams): ApplyGroupingResult => {
   const byGroup = new Map<string, PackageListItem[]>();
   const ungroupedItems: Array<PackageListItem | CustomIntegration> = [];
@@ -77,7 +79,14 @@ export const applyGrouping = ({
     const groupConfig = INTEGRATION_GROUPS[groupId];
 
     const memberCards = representativeItems.map((item) => ({
-      ...mapToCard({ getAbsolutePath, getHref, item, addBasePath, packageVerificationKeyId }),
+      ...mapToCard({
+        getAbsolutePath,
+        getHref,
+        item,
+        addBasePath,
+        packageVerificationKeyId,
+        canAddIntegration,
+      }),
       fromCollection: { groupId, title: groupConfig.title },
     }));
 
@@ -99,7 +108,9 @@ export const applyGrouping = ({
       title: groupConfig.title,
       description: groupConfig.description,
       icons: groupConfig.icons,
-      url: getHref('integration_collection', { groupId }),
+      // Point to the browse page: the collection detail route has been removed and both browse
+      // pages override onCardClick to open the flyout. This URL acts as a safe fallback.
+      url: getHref('integrations_all'),
       integration: '',
       version: '',
       categories,

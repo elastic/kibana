@@ -7,7 +7,7 @@
 
 import { I18nProvider } from '@kbn/i18n-react';
 import React from 'react';
-import { Router } from 'react-router-dom-v5-compat';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 
 interface WrapperProps {
   location: string;
@@ -18,17 +18,7 @@ export const Wrapper =
   ({ children }) => {
     return (
       <I18nProvider>
-        <Router
-          location={props.location}
-          navigator={{
-            createHref: jest.fn(),
-            go: jest.fn(),
-            push: jest.fn(),
-            replace: jest.fn(),
-          }}
-        >
-          {children}
-        </Router>
+        <MemoryRouter initialEntries={[props.location]}>{children}</MemoryRouter>
       </I18nProvider>
     );
   };

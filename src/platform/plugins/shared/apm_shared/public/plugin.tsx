@@ -8,6 +8,7 @@
  */
 
 import React, { Suspense } from 'react';
+import type { Subscription } from 'rxjs';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { APMClientV2 } from '@kbn/apm-api-shared';
 import type { FocusedTraceWaterfallProps, FullTraceWaterfallProps } from '@kbn/apm-types';
@@ -50,6 +51,8 @@ const LoadingFallback = () => (
 export class ApmSharedPlugin
   implements Plugin<ApmSharedPluginSetup, ApmSharedPluginStart, {}, ApmSharedPluginStartDeps>
 {
+  private cpsEnabledSubscription?: Subscription;
+
   public setup(core: CoreSetup): ApmSharedPluginSetup {
     // Loaded lazily to keep `@kbn/apm-ui-shared` out of the page load bundle.
     import('@kbn/apm-ui-shared')
@@ -63,20 +66,30 @@ export class ApmSharedPlugin
   }
 
   public start(core: CoreStart, { cps }: ApmSharedPluginStartDeps): ApmSharedPluginStart {
-    const isCpsEnabled = core.featureFlags.getBooleanValue(
-      OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
-      OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
-    );
-
     // lazy proxy: APMClientV2 already returns a Promise, so this is type-compatible
     let _api: APMClientV2 | undefined;
+    let isCpsEnabled = OBSERVABILITY_APM_CPS_ENABLED_DEFAULT;
+
+    // Dropping the memoized client lets the next call rebuild it with the CPS wiring the flag now asks for.
+    this.cpsEnabledSubscription = core.featureFlags
+      .getBooleanValue$(
+        OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+        OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
+      )
+      .subscribe((enabled) => {
+        isCpsEnabled = enabled;
+        _api = undefined;
+      });
+
     const callApmApi: APMClientV2 = ((endpoint: any, options: any) => {
       if (_api) return _api(endpoint, options);
       return import('@kbn/apm-api-shared').then(({ createCallApmApiV2 }) => {
-        _api = createCallApmApiV2(core, {
+        // Read through a local so a flag change while the import is in flight cannot clear it mid-call.
+        const api = createCallApmApiV2(core, {
           cpsManager: isCpsEnabled ? cps?.cpsManager : undefined,
         });
-        return _api(endpoint, options);
+        _api = api;
+        return api(endpoint, options);
       });
     }) as APMClientV2;
 
@@ -106,5 +119,7 @@ export class ApmSharedPlugin
     };
   }
 
-  public stop() {}
+  public stop() {
+    this.cpsEnabledSubscription?.unsubscribe();
+  }
 }

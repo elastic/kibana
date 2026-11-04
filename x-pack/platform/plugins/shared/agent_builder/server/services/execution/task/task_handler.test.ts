@@ -19,14 +19,13 @@ import { AgentExecutionMode } from '@kbn/agent-builder-common/agents';
 import { createTaskHandler } from './task_handler';
 import type { CallbackDeliveryService } from '../callback/callback_delivery_service';
 import { deliverCallbackEvents } from '../callback/deliver_callback_events';
-import {
-  collectAndWriteEvents,
-  handleAgentExecution,
-  serializeExecutionError,
-} from '../execution_runner';
+import { collectAndWriteEvents, handleAgentExecution } from '../execution_runner';
+import { serializeExecutionError } from '../utils/serialize_execution_error';
 import { createAgentExecutionClient } from '../persistence';
+import { createConversationClientMock } from '../../../test_utils/conversations';
 
 jest.mock('../execution_runner');
+jest.mock('../utils/serialize_execution_error');
 jest.mock('../persistence');
 jest.mock('../callback/deliver_callback_events');
 
@@ -104,6 +103,11 @@ describe('TaskHandler event streaming and finalization', () => {
   };
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let callbackDeliveryService: jest.Mocked<CallbackDeliveryService>;
+  const surfacesService = {};
+  const conversationClient = createConversationClientMock();
+  const conversationService = {
+    getScopedClientAsUser: jest.fn().mockResolvedValue(conversationClient),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -116,6 +120,7 @@ describe('TaskHandler event streaming and finalization', () => {
       updateHeartbeat: jest.fn().mockResolvedValue(undefined),
     };
     createAgentExecutionClientMock.mockReturnValue(executionClient as never);
+    conversationService.getScopedClientAsUser.mockResolvedValue(conversationClient);
     handleAgentExecutionMock.mockResolvedValue(of(...events));
     collectAndWriteEventsMock.mockImplementation(async ({ events$ }) => {
       await firstValueFrom(events$.pipe(toArray()));
@@ -131,12 +136,16 @@ describe('TaskHandler event streaming and finalization', () => {
       logger,
       elasticsearch: { client: { asInternalUser: {} } },
       callbackDeliveryService,
+      surfacesService,
+      conversationService,
     } as never);
+
+  const fakeRequest = httpServerMock.createKibanaRequest();
 
   const run = () =>
     createHandler().run({
       executionId: 'execution-1',
-      fakeRequest: httpServerMock.createKibanaRequest(),
+      fakeRequest,
     });
 
   /**
@@ -165,6 +174,16 @@ describe('TaskHandler event streaming and finalization', () => {
     };
   };
 
+  it('records a task_manager abort reason when Task Manager cancels the task', async () => {
+    await createHandler().cancel({ executionId: 'execution-1' });
+
+    expect(executionClient.updateStatus).toHaveBeenCalledWith(
+      'execution-1',
+      ExecutionStatus.aborted,
+      { abortReason: { source: 'task_manager' } }
+    );
+  });
+
   it('passes the same shared event stream to persistence and callback delivery', async () => {
     await run();
 
@@ -172,7 +191,9 @@ describe('TaskHandler event streaming and finalization', () => {
     expect(deliverCallbackEventsMock).toHaveBeenCalledWith({
       execution,
       events$: expect.anything(),
+      request: fakeRequest,
       callbackDeliveryService,
+      surfacesService,
       logger: expect.anything(),
     });
     expect(collectAndWriteEventsMock).toHaveBeenCalledTimes(1);
@@ -235,7 +256,7 @@ describe('TaskHandler event streaming and finalization', () => {
     expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
       'execution-1',
       ExecutionStatus.failed,
-      { code: 'internal_error', message: 'setup failed' }
+      { error: { code: 'internal_error', message: 'setup failed' } }
     );
   });
 
@@ -247,7 +268,7 @@ describe('TaskHandler event streaming and finalization', () => {
     expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
       'execution-1',
       ExecutionStatus.failed,
-      { code: 'internal_error', message: 'agent failed' }
+      { error: { code: 'internal_error', message: 'agent failed' } }
     );
   });
 
@@ -261,7 +282,7 @@ describe('TaskHandler event streaming and finalization', () => {
     expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
       'execution-1',
       ExecutionStatus.aborted,
-      { code: 'internal_error', message: 'Converse request was aborted' }
+      { error: { code: 'internal_error', message: 'Converse request was aborted' } }
     );
   });
 
@@ -273,7 +294,7 @@ describe('TaskHandler event streaming and finalization', () => {
     expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
       'execution-1',
       ExecutionStatus.failed,
-      undefined
+      { error: undefined }
     );
   });
 
@@ -308,6 +329,210 @@ describe('TaskHandler event streaming and finalization', () => {
 
     expect(logger.error).toHaveBeenCalledWith(
       'Failed to update status for execution execution-1: status update failed'
+    );
+  });
+
+  describe('an execution aborted before it started', () => {
+    const owner = { id: 'user-1', username: 'elastic' };
+
+    const runAborted = (overrides: Record<string, unknown> = {}) => {
+      executionClient.get.mockResolvedValue({
+        ...execution,
+        status: ExecutionStatus.aborted,
+        owner,
+        ...overrides,
+      });
+
+      return run();
+    };
+
+    it('releases the conversation without running the agent', async () => {
+      await runAborted();
+
+      expect(handleAgentExecutionMock).not.toHaveBeenCalled();
+      expect(conversationService.getScopedClientAsUser).toHaveBeenCalledWith({
+        request: fakeRequest,
+        user: { ...owner, isAdmin: false },
+      });
+      expect(conversationClient.update).toHaveBeenCalledWith(
+        { id: 'conversation-1' },
+        {
+          source: 'execution',
+          access: 'converse',
+          retryOnConflict: true,
+          activeExecution: { action: 'release', executionId: 'execution-1' },
+        }
+      );
+    });
+
+    it('releases nothing when the execution stores no conversation', async () => {
+      await runAborted({
+        agentParams: { ...execution.agentParams, storeConversation: false },
+      });
+
+      expect(conversationClient.update).not.toHaveBeenCalled();
+    });
+
+    it('releases nothing for a standalone execution', async () => {
+      await runAborted({
+        executionMode: AgentExecutionMode.standalone,
+        agentParams: { nextInput: { message: 'hello' } },
+      });
+
+      expect(conversationClient.update).not.toHaveBeenCalled();
+    });
+
+    it('logs and still skips the run when the release fails', async () => {
+      conversationClient.update.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(runAborted()).resolves.toBeUndefined();
+
+      expect(handleAgentExecutionMock).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Failed to release conversation conversation-1 after execution execution-1 was aborted before it started: boom'
+      );
+    });
+  });
+});
+
+describe('TaskHandler running as a bound service account', () => {
+  const boundExecution = {
+    executionId: 'execution-1',
+    '@timestamp': '2026-01-01T00:00:00.000Z',
+    status: ExecutionStatus.scheduled,
+    agentId: 'agent-1',
+    spaceId: 'default',
+    eventCount: 0,
+    events: [],
+    executionMode: AgentExecutionMode.conversation,
+    runAs: { type: 'service_account', serviceAccountId: 'sa-1' },
+    agentParams: { conversationId: 'conversation-1', nextInput: { message: 'hello' } },
+  } as const;
+  let executionClient: { get: jest.Mock; updateStatus: jest.Mock; updateHeartbeat: jest.Mock };
+  const scopedRequest = httpServerMock.createKibanaRequest();
+  const boundConversationClient = createConversationClientMock();
+  const boundConversationService = {
+    getScopedClientAsUser: jest.fn().mockResolvedValue(boundConversationClient),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    deliverCallbackEventsMock.mockResolvedValue(undefined);
+    executionClient = {
+      get: jest.fn().mockResolvedValue(boundExecution),
+      updateStatus: jest.fn().mockResolvedValue(undefined),
+      updateHeartbeat: jest.fn().mockResolvedValue(undefined),
+    };
+    createAgentExecutionClientMock.mockReturnValue(executionClient as never);
+    handleAgentExecutionMock.mockResolvedValue(of());
+    collectAndWriteEventsMock.mockImplementation(async ({ events$ }) => {
+      await firstValueFrom(events$.pipe(toArray()));
+    });
+    serializeExecutionErrorMock.mockImplementation((error: unknown) => ({
+      code: 'internal_error' as never,
+      message: error instanceof Error ? error.message : String(error),
+    }));
+  });
+
+  const createHandler = () =>
+    createTaskHandler({
+      logger: loggingSystemMock.createLogger(),
+      elasticsearch: { client: { asInternalUser: {} } },
+      callbackDeliveryService: {} as never,
+      surfacesService: {},
+      conversationService: boundConversationService,
+    } as never);
+
+  it('releases an execution aborted before it started through the account credential', async () => {
+    const owner = { id: 'user-1', username: 'elastic' };
+    executionClient.get.mockResolvedValue({
+      ...boundExecution,
+      status: ExecutionStatus.aborted,
+      owner,
+    });
+    const withScopedRequest = jest.fn(async (fn: (request: unknown) => Promise<unknown>) =>
+      fn(scopedRequest)
+    );
+
+    await createHandler().run({
+      executionId: 'execution-1',
+      runAs: { withScopedRequest } as never,
+    });
+
+    expect(handleAgentExecutionMock).not.toHaveBeenCalled();
+    expect(withScopedRequest).toHaveBeenCalledWith(expect.any(Function), {
+      expectedServiceAccountId: 'sa-1',
+    });
+    expect(boundConversationService.getScopedClientAsUser).toHaveBeenCalledWith({
+      request: scopedRequest,
+      user: { ...owner, isAdmin: false },
+      runAs: 'sa-1',
+    });
+    expect(boundConversationClient.update).toHaveBeenCalledWith(
+      { id: 'conversation-1' },
+      expect.objectContaining({
+        activeExecution: { action: 'release', executionId: 'execution-1' },
+      })
+    );
+  });
+
+  it('runs the whole execution inside the service account credential, pinned to the account', async () => {
+    const withScopedRequest = jest.fn(async (fn: (request: unknown) => Promise<unknown>) =>
+      fn(scopedRequest)
+    );
+
+    await createHandler().run({
+      executionId: 'execution-1',
+      runAs: { withScopedRequest } as never,
+    });
+
+    expect(withScopedRequest).toHaveBeenCalledWith(expect.any(Function), {
+      expectedServiceAccountId: 'sa-1',
+    });
+    expect(handleAgentExecutionMock).toHaveBeenCalledWith(
+      expect.objectContaining({ request: scopedRequest, execution: boundExecution })
+    );
+    expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
+      'execution-1',
+      ExecutionStatus.completed
+    );
+  });
+
+  it('records a credential failure that names the agent and the account', async () => {
+    const withScopedRequest = jest
+      .fn()
+      .mockRejectedValue(new Error('No service account is bound to workload [agent/agent-1]'));
+
+    await createHandler().run({
+      executionId: 'execution-1',
+      runAs: { withScopedRequest } as never,
+    });
+
+    expect(handleAgentExecutionMock).not.toHaveBeenCalled();
+    expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
+      'execution-1',
+      ExecutionStatus.failed,
+      {
+        error: {
+          code: 'internal_error',
+          message:
+            'Agent "agent-1" cannot run as service account "sa-1": No service account is bound to workload [agent/agent-1]',
+        },
+      }
+    );
+  });
+
+  it('fails a bound execution whose task carries no service account credential', async () => {
+    await createHandler().run({
+      executionId: 'execution-1',
+      fakeRequest: httpServerMock.createKibanaRequest(),
+    });
+
+    expect(handleAgentExecutionMock).not.toHaveBeenCalled();
+    expect(executionClient.updateStatus).toHaveBeenCalledWith(
+      'execution-1',
+      ExecutionStatus.failed,
+      { error: expect.objectContaining({ message: expect.stringContaining('sa-1') }) }
     );
   });
 });

@@ -36,7 +36,9 @@
       "unifiedSearch",
       "esUiShared",
       "workflowsExtensions",
-      "searchInferenceEndpoints"
+      "searchInferenceEndpoints",
+      "files",
+      "isomer"
     ],
     "requiredBundles": [
       "kibanaReact",

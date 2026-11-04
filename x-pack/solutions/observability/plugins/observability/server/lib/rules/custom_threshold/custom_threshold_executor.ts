@@ -13,6 +13,7 @@ import {
   ALERT_REASON,
   ALERT_GROUP,
   ALERT_GROUPING,
+  ALERT_RULE_PARAMETERS,
   ALERT_SEVERITY,
   ALERT_SEVERITY_CRITICAL,
   ALERT_SEVERITY_WARNING,
@@ -31,6 +32,7 @@ import { getEsQueryConfig } from '../../../utils/get_es_query_config';
 import type { AlertsLocatorParams } from '../../../../common';
 import { getAlertDetailsUrl } from '../../../../common';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
+import { getDataViewId } from '../../../../common/custom_threshold_rule/helpers/get_data_view_id';
 import type { ObservabilityConfig } from '../../..';
 import { getEvaluationValues, getThreshold } from './lib/get_values';
 import {
@@ -62,6 +64,7 @@ import { formatAlertResult, getLabel } from './lib/format_alert_result';
 import type { EvaluatedRuleParams } from './lib/evaluate_rule';
 import { evaluateRule } from './lib/evaluate_rule';
 import type { MissingGroupsRecord } from './lib/check_missing_group';
+import { shouldTrackMissingGroups } from './lib/should_track_missing_groups';
 
 export interface CustomThresholdLocators {
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;
@@ -129,9 +132,10 @@ export const createCustomThresholdExecutor = ({
       alertOnGroupDisappear: boolean | undefined;
     };
 
-    // For backwards-compatibility, interpret undefined alertOnGroupDisappear as true
-    const alertOnGroupDisappear =
-      _alertOnGroupDisappear !== false && params.noDataBehavior !== 'recover';
+    const alertOnGroupDisappear = shouldTrackMissingGroups(
+      params.noDataBehavior,
+      _alertOnGroupDisappear
+    );
     const compositeSize = config.customThresholdRule.groupByPageSize;
     const queryIsSame = isEqual(
       state.searchConfiguration?.query.query,
@@ -335,10 +339,7 @@ export const createCustomThresholdExecutor = ({
 
         const indexedStartedAt = start ?? startedAt.toISOString();
         scheduledActionsCount++;
-        const dataViewIdTitle =
-          typeof params.searchConfiguration?.index === 'string'
-            ? params.searchConfiguration?.index
-            : params.searchConfiguration?.index?.title;
+        const dataViewIdTitle = getDataViewId(params.searchConfiguration);
         const singleCriterion = alertResults.length === 1 ? alertResults[0][group] : undefined;
         alertsClient.setAlertData({
           id: `${group}`,
@@ -361,7 +362,7 @@ export const createCustomThresholdExecutor = ({
               dataViewId: dataViewIdTitle ?? dataViewId,
               groups,
               logsLocator,
-              metrics: singleCriterion?.metrics ?? [],
+              metrics: params.criteria.flatMap((criterion) => criterion.metrics ?? []),
               searchConfiguration: params.searchConfiguration,
               startedAt: indexedStartedAt,
               spaceId,
@@ -385,6 +386,12 @@ export const createCustomThresholdExecutor = ({
       const grouping = recoveredAlert.hit?.[ALERT_GROUPING];
       const alertHits = recoveredAlert.hit;
       const additionalContext = getContextForRecoveredAlerts(alertHits);
+      const recoveredParams = alertHits?.[ALERT_RULE_PARAMETERS] as
+        | CustomThresholdRuleTypeParams
+        | undefined;
+      const recoveredSearchConfiguration = recoveredParams?.searchConfiguration;
+      const recoveredCriteria = recoveredParams?.criteria ?? params.criteria;
+      const recoveredDataViewIdTitle = getDataViewId(recoveredSearchConfiguration);
 
       const context = {
         alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),
@@ -392,14 +399,15 @@ export const createCustomThresholdExecutor = ({
         grouping,
         timestamp: startedAt.toISOString(),
         viewInAppUrl: getViewInAppUrl({
-          dataViewId,
+          dataViewId: recoveredDataViewIdTitle ?? dataViewId,
           groups: group,
           logsLocator,
-          metrics: params.criteria[0]?.metrics,
-          searchConfiguration: params.searchConfiguration,
+          metrics: recoveredCriteria.flatMap((criterion) => criterion.metrics ?? []),
+          searchConfiguration: recoveredSearchConfiguration ?? params.searchConfiguration,
           startedAt: indexedStartedAt,
-          timeSize: params.criteria[0]?.timeSize,
-          timeUnit: params.criteria[0]?.timeUnit,
+          spaceId,
+          timeSize: recoveredCriteria[0]?.timeSize,
+          timeUnit: recoveredCriteria[0]?.timeUnit,
         }),
         reason: alertHits?.[ALERT_REASON],
         ...additionalContext,

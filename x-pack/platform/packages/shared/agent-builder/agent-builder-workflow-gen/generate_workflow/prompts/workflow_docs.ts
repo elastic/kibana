@@ -171,6 +171,20 @@ Use double curly braces for variable substitution:
 "{{ variable.path }}"
 \`\`\`
 
+\`{{ }}\` always renders a **string**. To pass a value with its original type
+(object, array, number, boolean), use \`\${{ }}\` as the whole field value:
+
+\`\`\`yaml
+with:
+  query: \${{ inputs.query_params }}   # object stays an object
+  size: \${{ inputs.limit }}           # number stays a number
+  ids: \${{ steps.search.output.ids }} # array stays an array
+\`\`\`
+
+Never write \`"{{ inputs.some_object }}"\` for a field typed as object, array,
+number, or boolean: the step receives the string \`"{...}"\` and fails at run time
+with \`expected record, received string\` (or similar).
+
 ### Variable Contexts
 
 | Context | Description | Example |
@@ -181,6 +195,10 @@ Use double curly braces for variable substitution:
 | \`foreach\` | Loop context | \`{{ foreach.item }}\` |
 | \`env\` | Environment | \`{{ env.HOME }}\` |
 | \`now\` | Current timestamp | \`{{ now }}\` |
+
+\`now\` is a date object. Bare \`{{ now }}\` renders a human-readable form
+(\`Tue Sep 15 2026 18:47:47 GMT+0400 (Georgia Standard Time)\`) — fine in a log
+message, wrong for a machine-readable field. See [Date Filters](#date-filters).
 
 ### String Operations
 
@@ -270,10 +288,10 @@ short_desc: "{{ description | truncate: 50 }}"
 
 | Filter | Description | Example |
 |--------|-------------|---------|
-| \`date\` | Format date | \`{{ "now" \\| date: "%Y-%m-%d" }}\` → \`2024-01-15\` |
-| \`date_to_string\` | Human-readable date | \`{{ date \\| date_to_string }}\` |
-| \`date_to_rfc822\` | RFC822 format | \`{{ date \\| date_to_rfc822 }}\` |
-| \`date_to_xmlschema\` | ISO 8601 format | \`{{ date \\| date_to_xmlschema }}\` |
+| \`date\` | Format date | \`{{ now \\| date: "%Y-%m-%d" }}\` → \`2026-09-15\` |
+| \`date_to_string\` | Human-readable date | \`{{ now \\| date_to_string }}\` |
+| \`date_to_rfc822\` | RFC822 format | \`{{ now \\| date_to_rfc822 }}\` |
+| \`date_to_xmlschema\` | ISO 8601 with offset | \`{{ now \\| date_to_xmlschema }}\` → \`2026-09-15T18:47:47+04:00\` |
 
 **Common date format codes:**
 
@@ -285,6 +303,23 @@ short_desc: "{{ description | truncate: 50 }}"
 | \`%H\` | Hour (00-23) | \`14\` |
 | \`%M\` | Minute (00-59) | \`30\` |
 | \`%S\` | Second (00-59) | \`45\` |
+
+**Timestamps in Elasticsearch documents:** add a time field only when the document
+records something that happened at a point in time (a poll result, a measurement, an
+alert) — not for static or reference data. Name it \`@timestamp\` and render it with
+\`date_to_xmlschema\` so dynamic mapping maps it as \`date\`:
+
+\`\`\`yaml
+document:
+  "@timestamp": "{{ now | date_to_xmlschema }}"
+  host: "{{ steps.fetch.output.data.hostname }}"
+  status: "{{ steps.fetch.output.data.status }}"
+  latency_ms: "{{ steps.fetch.output.data.latency }}"
+\`\`\`
+
+Never hardcode a \`Z\` suffix (\`date: "%Y-%m-%dT%H:%M:%SZ"\`) — the \`date\` filter
+formats in the server's local time zone, so \`Z\` labels a local time as UTC and
+records the wrong instant. For a custom layout, end it with \`%z\`.
 
 #### Encoding Filters
 
@@ -452,6 +487,27 @@ url: |
   {%- assign limit = inputs.limit | default: 100 -%}
   {{ base }}/search?q={{ query }}&limit={{ limit }}
 \`\`\`
+
+#### HTTP Request Through a Connector
+
+Default to \`connector-id\` for \`http\` steps: the connector stores the base URL
+and secrets (tokens, API keys, passwords), so they never appear in the YAML.
+Put the route in \`path\` (not \`url\`), and pass query parameters as an object
+in \`query\`:
+
+\`\`\`yaml
+- name: call_api
+  type: http
+  connector-id: my-api-connector
+  with:
+    method: GET
+    path: "{{ inputs.path }}"
+    query: \${{ inputs.query_params }}
+\`\`\`
+
+Omit \`connector-id\` only for public endpoints that need no auth, or when the
+user asks for it. Then set an absolute \`url\` instead of \`path\`. Never put
+secrets in \`headers\`, \`query\`, \`url\`, or \`consts\`.
 
 #### Conditional API Parameters
 

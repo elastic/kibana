@@ -16,6 +16,8 @@ import type { Cluster } from '../../../common/lib';
 
 import { EuiPaginationTestHarness, EuiTableTestHarness } from '@kbn/test-eui-helpers';
 import { getRandomString } from '@kbn/test-jest-helpers';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 
 import { RemoteClusterList } from '../../../public/application/sections/remote_cluster_list';
 import { setupEnvironment } from '../helpers/setup_environment';
@@ -219,7 +221,10 @@ describe('<RemoteClusterList />', () => {
 
     test('should have link to documentation', async () => {
       renderList();
-      expect(await screen.findByTestId('documentationLink')).toBeInTheDocument();
+      await openAppMenuOverflow();
+      expect(
+        await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)
+      ).toBeInTheDocument();
     });
 
     test('should list the remote clusters in the table', async () => {

@@ -58,9 +58,9 @@ describe('partiallyUpdateRule', () => {
       test('should handle SO errors', async () => {
         soClient.update.mockRejectedValueOnce(new Error('wops'));
 
-        await expect(
-          partiallyUpdateRule(soClient, MockRuleId, DefaultAttributes)
-        ).rejects.toThrowError('wops');
+        await expect(partiallyUpdateRule(soClient, MockRuleId, DefaultAttributes)).rejects.toThrow(
+          'wops'
+        );
       });
 
       test('should handle the version option', async () => {
@@ -148,7 +148,7 @@ describe('partiallyUpdateRuleWithEs', () => {
 
     await expect(
       partiallyUpdateRuleWithEs(esClient, MockRuleId, DefaultAttributes)
-    ).rejects.toThrowError('wops');
+    ).rejects.toThrow('wops');
   });
 
   test('should handle the version option', async () => {
@@ -300,7 +300,7 @@ describe('atomicRemoveSnoozedInstancesWithEs', () => {
       atomicRemoveSnoozedInstancesWithEs(esClient, MockRuleId, [
         { instanceId: 'alert-1', snoozedAt: '2024-01-01T00:00:00.000Z' },
       ])
-    ).rejects.toThrowError('es error');
+    ).rejects.toThrow('es error');
   });
 
   test('script params only include the original snoozedAt — re-created snooze with a newer snoozedAt is not targeted', async () => {

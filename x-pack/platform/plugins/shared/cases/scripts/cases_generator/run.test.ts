@@ -55,9 +55,8 @@ describe('buildExecutionPlan', () => {
       );
       expect(countedCases).toBe(baseConfig.count);
 
-      const nonObservabilityCases =
-        (onlySpace.ownerCaseCounts.securitySolution ?? 0) + (onlySpace.ownerCaseCounts.cases ?? 0);
-      expect(onlySpace.eventDocsToIndex).toBe(nonObservabilityCases * baseConfig.events);
+      const securityCases = onlySpace.ownerCaseCounts.securitySolution ?? 0;
+      expect(onlySpace.eventDocsToIndex).toBe(securityCases * baseConfig.events);
 
       const alertDocsCounted = Object.values(onlySpace.alertDocsToIndexByOwner).reduce(
         (sum, value) => sum + value,
@@ -107,17 +106,16 @@ describe('buildExecutionPlan', () => {
     }
   });
 
-  it('counts attachments as comments + alerts + events_for_non_observability per space', () => {
+  it('counts attachments as comments + alerts + events_for_security per space', () => {
     const restore = installSeededRandom('attachments-seed');
     try {
       const plan = buildExecutionPlan(baseConfig, ['only-space']);
       const spacePlan = plan.spacePlans[0];
-      const nonObsCount =
-        (spacePlan.ownerCaseCounts.securitySolution ?? 0) + (spacePlan.ownerCaseCounts.cases ?? 0);
+      const securityCount = spacePlan.ownerCaseCounts.securitySolution ?? 0;
       const expectedAttachments =
         baseConfig.comments * baseConfig.count +
         baseConfig.alerts * baseConfig.count +
-        baseConfig.events * nonObsCount;
+        baseConfig.events * securityCount;
       expect(spacePlan.totalAttachments).toBe(expectedAttachments);
     } finally {
       restore();
@@ -157,19 +155,19 @@ describe('buildExecutionPlan', () => {
     }
   });
 
-  it('reports zero events when every case is owned by observability', () => {
-    const restore = installSeededRandom('all-observability-seed');
+  it('reports zero events when no case is owned by securitySolution', () => {
+    const restore = installSeededRandom('no-security-seed');
     try {
       const plan = buildExecutionPlan(
         {
           ...baseConfig,
-          owners: ['observability'],
+          owners: ['observability', 'cases'],
           ownerDistribution: null,
         },
-        ['obs-space']
+        ['non-security-space']
       );
       const spacePlan = plan.spacePlans[0];
-      expect(spacePlan.ownerCaseCounts.observability).toBe(baseConfig.count);
+      expect(spacePlan.ownerCaseCounts.securitySolution).toBeUndefined();
       expect(spacePlan.eventDocsToIndex).toBe(0);
       expect(plan.totals.eventDocsToIndex).toBe(0);
     } finally {

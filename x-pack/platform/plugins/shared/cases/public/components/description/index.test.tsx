@@ -27,7 +27,6 @@ const defaultProps = {
   isLoadingDescription: false,
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/185879
 describe('Description', () => {
   const onUpdateField = jest.fn();
 
@@ -48,10 +47,14 @@ describe('Description', () => {
     await userEvent.click(await screen.findByTestId('description-collapse-icon'));
 
     await waitFor(() => {
-      expect(screen.queryByText('Security banana Issue')).not.toBeInTheDocument();
+      expect(screen.getByTestId('description-preview')).toHaveTextContent('Security banana Issue');
     });
 
     await userEvent.click(await screen.findByTestId('description-collapse-icon'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('description-preview')).not.toBeInTheDocument();
+    });
 
     expect(await screen.findByText('Security banana Issue')).toBeInTheDocument();
   });

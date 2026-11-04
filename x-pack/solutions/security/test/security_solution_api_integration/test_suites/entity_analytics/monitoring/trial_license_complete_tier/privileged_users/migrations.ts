@@ -20,7 +20,6 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
-  const entityAnalyticsRoutes = entityAnalyticsRouteHelpersFactory(supertest, log);
   const entityAnalyticsApi = getService('entityAnalyticsApi');
   const spacesService = getService('spaces');
 
@@ -95,6 +94,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     SPACES.forEach((namespace) => {
+      const entityAnalyticsRoutes = entityAnalyticsRouteHelpersFactory(supertest, log, namespace);
+
       describe(`source_index migration for space ${namespace}`, () => {
         it(`should run the migration when users have source_index field`, async () => {
           const indexPattern = 'INDEX1';

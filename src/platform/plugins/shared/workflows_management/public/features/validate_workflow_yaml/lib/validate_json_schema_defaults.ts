@@ -18,8 +18,8 @@ import {
   normalizeFieldsToJsonSchema,
   resolveRef,
 } from '@kbn/workflows/spec/lib/field_conversion';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { getPathFromAncestors } from '../../../../common/lib/yaml';
-import type { YamlValidationResult } from '../model/types';
 
 /**
  * Validates that default values in JSON Schema inputs match their property constraints
@@ -278,6 +278,7 @@ export function validateJsonSchemaDefaults(
       message: `Invalid default value for ${propertyName}: ${errorMessage}`,
       severity: 'error',
       owner: 'json-schema-default-validation',
+      ruleId: 'invalidDefaultValue',
       hoverMessage: `Default value does not match the property's constraints (type: ${
         schema.type
       }, format: ${schema.format || 'none'}, pattern: ${schema.pattern || 'none'})`,

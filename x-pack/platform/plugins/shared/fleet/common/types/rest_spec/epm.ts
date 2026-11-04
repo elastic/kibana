@@ -211,6 +211,7 @@ export interface BulkUpgradePackagesRequest {
   upgrade_package_policies?: boolean;
   force?: boolean;
   prerelease?: boolean;
+  acknowledge_breaking_changes?: boolean;
 }
 
 export interface BulkUninstallPackagesRequest {
@@ -265,8 +266,8 @@ export interface GetBulkAssetsRequest {
   };
 }
 
-export interface GetBulkAssetsResponse {
-  items: Array<SimpleSOAssetType & { appLink?: string }>;
+export interface GetBulkAssetsResponse<TAsset extends SimpleSOAssetType = SimpleSOAssetType> {
+  items: Array<TAsset & { appLink?: string }>;
 }
 
 export interface GetInputsTemplatesRequest {

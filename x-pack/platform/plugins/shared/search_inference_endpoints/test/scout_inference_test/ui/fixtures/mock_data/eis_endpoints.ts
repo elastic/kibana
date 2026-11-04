@@ -125,4 +125,14 @@ export const eisEndpointsMockData = [
       display: { name: 'OpenAI Davinci', model_creator: 'OpenAI' },
     },
   },
+  {
+    inference_id: '.mock-elastic-preview-chat_completion',
+    task_type: 'chat_completion',
+    service: 'elastic',
+    service_settings: { model_id: 'elastic-preview-model' },
+    metadata: {
+      heuristics: { properties: ['multilingual'], status: 'preview' },
+      display: { name: 'Elastic Preview Model', model_creator: 'Elastic' },
+    },
+  },
 ];

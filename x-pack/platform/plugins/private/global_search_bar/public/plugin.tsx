@@ -18,7 +18,6 @@ import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-p
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { SearchBar } from './components/search_bar';
 import type { GlobalSearchBarConfigType } from './types';
 import { EventReporter, eventTypes } from './telemetry';
 import type { SearchProps } from './components/types';
@@ -48,14 +47,13 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
 
   public start(core: CoreStart, startDeps: GlobalSearchBarPluginStartDeps) {
     const { globalSearch, savedObjectsTagging, usageCollection } = startDeps;
-    const { application, http } = core;
+    const { application } = core;
     const reportEvent = new EventReporter({ analytics: core.analytics, usageCollection });
 
     const searchProps: SearchProps = {
       globalSearch: { ...globalSearch, searchCharLimit: this.config.input_max_limit },
       navigateToUrl: application.navigateToUrl,
       taggingApi: savedObjectsTagging,
-      basePathUrl: http.basePath.prepend('/plugins/globalSearchBar/assets/'),
       reportEvent,
     };
 
@@ -115,15 +113,8 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
       });
     };
 
-    if (core.chrome.next.isEnabled) {
-      core.chrome.next.globalSearch.set({
-        onClick: toggleSearchModal,
-      });
-    }
-
-    core.chrome.navControls.registerCenter({
-      order: 1000,
-      content: <SearchBar {...searchProps} chromeStyle$={core.chrome.getChromeStyle$()} />,
+    core.chrome.controls.globalSearch.set({
+      onClick: toggleSearchModal,
     });
 
     return {};

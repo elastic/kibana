@@ -25,7 +25,16 @@ export const evaluate = base.extend<
   ],
   evaluateDataset: [
     (
-      { chatClient, evaluators, executorClient, inferenceClient, esClient, traceEsClient, log },
+      {
+        chatClient,
+        evaluators,
+        executorClient,
+        inferenceClient,
+        evaluationConnector,
+        esClient,
+        traceEsClient,
+        log,
+      },
       use
     ) => {
       use(
@@ -33,7 +42,7 @@ export const evaluate = base.extend<
           chatClient,
           evaluators,
           executorClient,
-          inferenceClient,
+          inferenceClient: inferenceClient.bindTo({ connectorId: evaluationConnector.id }),
           esClient,
           traceEsClient,
           log,

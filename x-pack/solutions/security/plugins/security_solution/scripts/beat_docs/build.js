@@ -8,7 +8,7 @@
 require('@kbn/setup-node-env');
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-const extract = require('extract-zip');
+const AdmZip = require('adm-zip');
 const fs = require('fs');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const { parse } = require('yaml');
@@ -21,7 +21,13 @@ const tar = require('tar');
 const zlib = require('zlib');
 
 const OUTPUT_DIRECTORY = resolve('scripts', 'beat_docs');
-const OUTPUT_SERVER_DIRECTORY = resolve('../timelines', 'server', 'utils', 'beat_schema');
+const OUTPUT_SERVER_DIRECTORY = resolve(
+  'server',
+  'lib',
+  'timelines_server',
+  'utils',
+  'beat_schema'
+);
 const BEATS_VERSION = '8.0.0-rc1';
 
 const beats = [
@@ -136,7 +142,8 @@ const convertSchemaToHash = (schema, beatFields) => {
 
 const manageZipFields = async (beat, filePath, beatFields) => {
   try {
-    await extract(filePath, { dir: beat.outputDir });
+    const zip = new AdmZip(filePath);
+    await zip.extractAllToAsync(beat.outputDir);
     console.log('building fields', beat.index);
     const obj = parse(
       fs.readFileSync(`${beat.outputDir}/winlogbeat-${BEATS_VERSION}-windows-x86_64/fields.yml`, {

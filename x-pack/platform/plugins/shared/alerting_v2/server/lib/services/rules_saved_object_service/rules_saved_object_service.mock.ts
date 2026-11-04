@@ -36,12 +36,14 @@ export function createRulesSavedObjectServiceMock(): RulesSavedObjectServiceMock
     findByIds: jest.fn().mockResolvedValue([]),
     update: jest.fn().mockResolvedValue({ id: 'rule-id-default' }),
     bulkUpdate: jest.fn().mockResolvedValue([]),
+    bulkCreate: jest.fn().mockResolvedValue([]),
     delete: jest.fn().mockResolvedValue(undefined),
     bulkDelete: jest.fn().mockResolvedValue([]),
-    find: jest.fn().mockResolvedValue({ saved_objects: [], total: 0 }),
+    find: jest.fn().mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 20 }),
     getRuleIdsByQuery: jest.fn().mockResolvedValue([]),
     countByQuery: jest.fn().mockResolvedValue(0),
     findTags: jest.fn().mockResolvedValue([]),
+    countByTemplateIds: jest.fn().mockResolvedValue({}),
     getTotalScheduledPerMinute: jest.fn().mockResolvedValue(0),
   };
 }

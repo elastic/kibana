@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { UrlTemplateEditorVariable, UrlTemplateEditorProps } from './url_template_editor';
-export { UrlTemplateEditor } from './url_template_editor';
-
 export type { KibanaReactContext, KibanaReactContextValue, KibanaServices } from './context';
 export {
   context,

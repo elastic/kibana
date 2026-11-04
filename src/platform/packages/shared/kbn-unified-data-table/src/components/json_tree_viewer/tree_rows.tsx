@@ -11,7 +11,7 @@
  * This file contains the presentational layer of the JSON tree: one component per row kind
  * (`NodeRowView`, `ClosingBracketRow`,`PagerRowView`). These hold no state.
  */
-import React, { memo, useEffect, useRef, useState } from 'react';
+import React, { Children, memo, useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -20,10 +20,10 @@ import {
   EuiIcon,
   EuiToolTip,
   copyToClipboard,
+  useEuiMemoizedStyles,
   useEuiTheme,
   type UseEuiTheme,
 } from '@elastic/eui';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import {
   CHILDREN_INCREMENT,
   CLOSE_BRACKET,
@@ -33,11 +33,20 @@ import {
   type CollectionNode,
   type CollectionType,
   type FormatValue,
+  type GetLeafActions,
   type JsonPrimitive,
+  type JsonTreeRowAction,
   type NodeRow,
   type PagerRow,
   type PrimitiveType,
 } from './tree_model';
+
+const LABEL_TEXT_CLASS = 'jsonTreeViewerLabelText';
+const LEAF_LABEL_CLASS = 'jsonTreeViewerLeafLabel';
+const VALUE_CLASS = 'jsonTreeViewerValue';
+
+// After this many lines, the value will be truncated.
+const MAX_WRAP_VALUE_LINES = 100;
 
 // ---- Row view components (one per render-row kind) ----
 
@@ -51,8 +60,9 @@ interface FocusableRowProps {
 
 interface NodeRowViewProps extends FocusableRowProps {
   row: NodeRow;
-  onActivate: () => void;
+  onActivate: (event: React.MouseEvent) => void;
   formatValue?: FormatValue;
+  getLeafActions?: GetLeafActions;
 }
 export const NodeRowView = memo(function NodeRowView({
   row,
@@ -62,10 +72,15 @@ export const NodeRowView = memo(function NodeRowView({
   onFocus,
   onKeyDown,
   formatValue,
+  getLeafActions,
 }: NodeRowViewProps) {
-  const styles = useMemoCss(treeStyles);
+  const styles = useEuiMemoizedStyles(treeStyles);
   const { euiTheme } = useEuiTheme();
   const { node, hasChildren, isExpanded } = row;
+  // The row's action buttons (copy, filter) mount only while the row is active or hovered,
+  // so a large tree doesn't flood the document with focusable elements (which makes focus-trap /
+  // tabbable scans dominate page load time). A reserved slot keeps that mount from shifting layout.
+  const [isHovered, setIsHovered] = useState(false);
   return (
     <div
       ref={rowRef}
@@ -80,6 +95,8 @@ export const NodeRowView = memo(function NodeRowView({
       style={{ paddingInlineStart: rowPaddingInlineStart(euiTheme, row.depth) }}
       onClick={onActivate}
       onFocus={onFocus}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       onKeyDown={onKeyDown}
       data-test-subj={`jsonTreeViewerRow-${node.id}`}
     >
@@ -94,7 +111,12 @@ export const NodeRowView = memo(function NodeRowView({
       ) : (
         <span css={styles.caret} aria-hidden />
       )}
-      <NodeLabel row={row} formatValue={formatValue} />
+      <NodeLabel
+        row={row}
+        showActions={isActive || isHovered}
+        formatValue={formatValue}
+        getLeafActions={getLeafActions}
+      />
     </div>
   );
 });
@@ -113,13 +135,17 @@ export const PagerRowView = memo(function PagerRowView({
   onShowMore,
   onShowFewer,
 }: PagerRowViewProps) {
-  const styles = useMemoCss(treeStyles);
+  const styles = useEuiMemoizedStyles(treeStyles);
   const { euiTheme } = useEuiTheme();
   const showMore = row.hiddenCount > 0;
 
   // The primary control shows more while items remain, otherwise it collapses back ("show fewer").
   const primaryLabel = showMore
-    ? showMoreLabel(row.collectionType, Math.min(CHILDREN_INCREMENT, row.hiddenCount))
+    ? showMoreLabel(
+        row.collectionType,
+        Math.min(CHILDREN_INCREMENT, row.hiddenCount),
+        row.totalCount
+      )
     : showFewerLabel(row.collectionType);
 
   // "Show fewer" unmounts the focused button — move focus to the pager row first so it isn't lost.
@@ -157,6 +183,7 @@ export const PagerRowView = memo(function PagerRowView({
             : clickShowFewer
         }
         onKeyDown={pagerButtonKeyDown}
+        onMouseDown={(event: React.MouseEvent) => event.preventDefault()}
         data-test-subj={
           showMore
             ? `jsonTreeViewerMore-${row.collectionId}`
@@ -173,6 +200,7 @@ export const PagerRowView = memo(function PagerRowView({
           iconType="minus"
           onClick={clickShowFewer}
           onKeyDown={pagerButtonKeyDown}
+          onMouseDown={(event: React.MouseEvent) => event.preventDefault()}
           data-test-subj={`jsonTreeViewerFewer-${row.collectionId}`}
         >
           {showFewerLabel(row.collectionType)}
@@ -183,7 +211,7 @@ export const PagerRowView = memo(function PagerRowView({
 });
 
 export const ClosingBracketRow = memo(function ClosingBracketRow({ row }: { row: ClosingRow }) {
-  const styles = useMemoCss(treeStyles);
+  const styles = useEuiMemoizedStyles(treeStyles);
   const { euiTheme } = useEuiTheme();
   return (
     <div
@@ -210,49 +238,87 @@ const KeyPrefix = memo(function KeyPrefix({
   name: string;
   isArrayItem: boolean;
 }) {
-  const styles = useMemoCss(treeStyles);
+  const styles = useEuiMemoizedStyles(treeStyles);
   if (isArrayItem) return null;
   return (
-    <>
+    <span css={styles.keyPrefix}>
       <span css={styles.punctuation}>{'"'}</span>
       <span css={styles.key}>{name}</span>
       <span css={styles.punctuation}>{'"'}</span>
       <span css={styles.punctuation}>:</span>{' '}
-    </>
+    </span>
   );
+});
+
+const Comma = memo(function Comma() {
+  const styles = useEuiMemoizedStyles(treeStyles);
+  return <span css={styles.punctuation}>,</span>;
 });
 
 const PrimitiveValue = memo(function PrimitiveValue({
   primitiveType,
   value,
   formatted,
+  trailingComma,
 }: {
   primitiveType: PrimitiveType;
   value: JsonPrimitive;
   formatted?: React.ReactNode;
+  trailingComma: boolean;
 }) {
-  const styles = useMemoCss(treeStyles);
+  const styles = useEuiMemoizedStyles(treeStyles);
+  const comma = trailingComma ? <Comma /> : null;
   if (primitiveType === 'string') {
     return (
-      <span css={[styles.value, styles.valueString]}>
+      <span className={VALUE_CLASS} css={[styles.value, styles.valueString]}>
         {'"'}
         {formatted ?? String(value)}
         {'"'}
+        {comma}
       </span>
     );
   }
   if (primitiveType === 'number' || primitiveType === 'boolean') {
-    return <span css={[styles.value, styles.valueScalar]}>{formatted ?? String(value)}</span>;
+    return (
+      <span className={VALUE_CLASS} css={[styles.value, styles.valueScalar]}>
+        {formatted ?? String(value)}
+        {comma}
+      </span>
+    );
   }
-  return <span css={[styles.value, styles.valueNull]}>null</span>;
-});
-
-const Comma = memo(function Comma() {
-  const styles = useMemoCss(treeStyles);
-  return <span css={styles.punctuation}>,</span>;
+  return (
+    <span className={VALUE_CLASS} css={[styles.value, styles.valueNull]}>
+      null
+      {comma}
+    </span>
+  );
 });
 
 const COPIED_FEEDBACK_DURATION = 1200;
+
+const copiedLabel = () =>
+  i18n.translate('unifiedDataTable.jsonTreeViewer.copied', { defaultMessage: 'Copied' });
+
+const useCopyWithFeedback = (getText: () => string, label: string) => {
+  const [copied, setCopied] = useState(false);
+  const resetTimer = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => () => clearTimeout(resetTimer.current), []);
+
+  const copy = () => {
+    copyToClipboard(getText());
+    setCopied(true);
+    clearTimeout(resetTimer.current);
+    resetTimer.current = setTimeout(() => setCopied(false), COPIED_FEEDBACK_DURATION);
+  };
+
+  return {
+    copy,
+    iconType: copied ? 'check' : 'copy',
+    color: copied ? 'success' : 'text',
+    displayedLabel: copied ? copiedLabel() : label,
+  } as const;
+};
+
 const CopyButton = function CopyButton({
   getText,
   label,
@@ -262,35 +328,26 @@ const CopyButton = function CopyButton({
   label: string;
   nodeId: string;
 }) {
-  const styles = useMemoCss(treeStyles);
-  const [copied, setCopied] = useState(false);
-  const resetTimer = useRef<ReturnType<typeof setTimeout>>();
-  useEffect(() => () => clearTimeout(resetTimer.current), []);
-
-  const copiedLabel = i18n.translate('unifiedDataTable.jsonTreeViewer.copied', {
-    defaultMessage: 'Copied',
-  });
-
-  const displayedLabel = copied ? copiedLabel : label;
+  const styles = useEuiMemoizedStyles(treeStyles);
+  const { copy, iconType, color, displayedLabel } = useCopyWithFeedback(getText, label);
 
   return (
     <EuiToolTip content={displayedLabel} disableScreenReaderOutput>
       <EuiButtonIcon
         aria-label={displayedLabel}
-        className="jsonTreeViewerCopyButton"
-        color={copied ? 'success' : 'text'}
-        css={styles.copyButton}
+        className="jsonTreeViewerCopyButton jsonTreeViewerRowAction"
+        color={color}
+        css={styles.rowActionButton}
         data-test-subj={`jsonTreeViewerCopy-${nodeId}`}
         iconSize="s"
-        iconType={copied ? 'check' : 'copy'}
+        iconType={iconType}
         onClick={(event: React.MouseEvent) => {
           event.stopPropagation();
-          copyToClipboard(getText());
-          setCopied(true);
-          clearTimeout(resetTimer.current);
-          resetTimer.current = setTimeout(() => setCopied(false), COPIED_FEEDBACK_DURATION);
+          copy();
         }}
-        onKeyDown={nestedControlKeyDown}
+        // Prevent focusing the Datagrid cell so it does not scroll to the top of it.
+        onMouseDown={(event: React.MouseEvent) => event.preventDefault()}
+        onKeyDown={rowActionKeyDown}
         size="xs"
       />
     </EuiToolTip>
@@ -330,30 +387,124 @@ const SubtreeCopyButton = memo(function SubtreeCopyButton({ node }: { node: Coll
   return <CopyButton getText={() => nodeToJsonString(node)} label={label} nodeId={node.id} />;
 });
 
+// Copies the whole document as pretty-printed JSON.
+export const CopyAllButton = memo(function CopyAllButton({
+  getText,
+  onKeyDown,
+  buttonRef,
+}: {
+  getText: () => string;
+  onKeyDown?: (event: React.KeyboardEvent<HTMLButtonElement>) => void;
+  buttonRef?: React.Ref<HTMLButtonElement>;
+}) {
+  const { copy, iconType, color, displayedLabel } = useCopyWithFeedback(
+    getText,
+    i18n.translate('unifiedDataTable.jsonTreeViewer.copyAll', { defaultMessage: 'Copy all' })
+  );
+
+  return (
+    <EuiButtonEmpty
+      buttonRef={buttonRef}
+      className="jsonTreeViewerHeaderControl"
+      color={color}
+      data-test-subj="jsonTreeViewerCopyAll"
+      flush="left"
+      iconSize="s"
+      iconType={iconType}
+      onClick={() => copy()}
+      onKeyDown={onKeyDown}
+      size="xs"
+    >
+      {displayedLabel}
+    </EuiButtonEmpty>
+  );
+});
+
+const RowActions = memo(function RowActions({
+  nodeId,
+  show,
+  children,
+}: {
+  nodeId: string;
+  show: boolean;
+  children: React.ReactNode;
+}) {
+  const styles = useEuiMemoizedStyles(treeStyles);
+  const { euiTheme } = useEuiTheme();
+  return (
+    <span
+      className="jsonTreeViewerRowActions"
+      css={styles.actions}
+      style={{ minInlineSize: rowActionsMinInlineSize(euiTheme, Children.count(children)) }}
+      data-test-subj={`jsonTreeViewerRowActions-${nodeId}`}
+    >
+      {show ? children : null}
+    </span>
+  );
+});
+
+// A host-defined trailing action on a leaf row.
+const RowActionButton = memo(function RowActionButton({ action }: { action: JsonTreeRowAction }) {
+  const styles = useEuiMemoizedStyles(treeStyles);
+  return (
+    <EuiToolTip content={action.label} disableScreenReaderOutput>
+      <EuiButtonIcon
+        aria-label={action.label}
+        className="jsonTreeViewerRowAction"
+        color="text"
+        css={styles.rowActionButton}
+        data-test-subj={action['data-test-subj']}
+        iconSize="s"
+        iconType={action.iconType}
+        onClick={(event: React.MouseEvent) => {
+          event.stopPropagation();
+          action.onClick();
+        }}
+        // Prevent focusing the Datagrid cell so it does not scroll to the top of it.
+        onMouseDown={(event: React.MouseEvent) => event.preventDefault()}
+        onKeyDown={rowActionKeyDown}
+        size="xs"
+      />
+    </EuiToolTip>
+  );
+});
+
 // The body of a node row: key prefix + value/brackets + comma.
 const NodeLabel = memo(function NodeLabel({
   row,
+  showActions,
   formatValue,
+  getLeafActions,
 }: {
   row: NodeRow;
+  showActions: boolean;
   formatValue?: FormatValue;
+  getLeafActions?: GetLeafActions;
 }) {
-  const styles = useMemoCss(treeStyles);
+  const styles = useEuiMemoizedStyles(treeStyles);
   const { node, isExpanded, hasChildren, trailingComma } = row;
 
   if (node.kind === 'leaf') {
+    const leafActions = getLeafActions
+      ? getLeafActions({ value: node.value, path: node.path, isArrayItem: node.isArrayItem })
+      : [];
     return (
       <span css={styles.label}>
-        <span css={styles.labelText}>
+        <span className={`${LABEL_TEXT_CLASS} ${LEAF_LABEL_CLASS}`} css={styles.labelText}>
           <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
           <PrimitiveValue
             primitiveType={node.primitiveType}
             value={node.value}
             formatted={formatValue?.({ value: node.value, path: node.path })}
+            trailingComma={trailingComma}
           />
-          {trailingComma && <Comma />}
         </span>
-        <ValueCopyButton nodeId={node.id} value={node.value} />
+        <RowActions nodeId={node.id} show={showActions}>
+          <ValueCopyButton nodeId={node.id} value={node.value} />
+          {leafActions.map((action) => (
+            <RowActionButton key={action.id} action={action} />
+          ))}
+        </RowActions>
       </span>
     );
   }
@@ -365,7 +516,7 @@ const NodeLabel = memo(function NodeLabel({
   if (!hasChildren) {
     return (
       <span css={styles.label}>
-        <span css={styles.labelText}>
+        <span className={LABEL_TEXT_CLASS} css={styles.labelText}>
           <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
           <span css={styles.bracket}>{`${open}${close}`}</span>
           {trailingComma && <Comma />}
@@ -379,11 +530,13 @@ const NodeLabel = memo(function NodeLabel({
   if (isExpanded) {
     return (
       <span css={styles.label}>
-        <span css={styles.labelText}>
+        <span className={LABEL_TEXT_CLASS} css={styles.labelText}>
           <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
           <span css={styles.bracket}>{open}</span>
         </span>
-        <SubtreeCopyButton node={node} />
+        <RowActions nodeId={node.id} show={showActions}>
+          <SubtreeCopyButton node={node} />
+        </RowActions>
       </span>
     );
   }
@@ -391,15 +544,45 @@ const NodeLabel = memo(function NodeLabel({
   // Collapsed: a one-line preview, e.g. `"user": { 2 fields }`.
   return (
     <span css={styles.label}>
-      <span css={styles.labelText}>
+      <span className={LABEL_TEXT_CLASS} css={styles.labelText}>
         <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
         <span css={styles.bracket}>{open}</span>
-        <span css={styles.count}>{collectionCountLabel(node)}</span>
+        <span css={styles.count}>
+          {collectionCountLabel(node.collectionType, node.children.length)}
+        </span>
         <span css={styles.bracket}>{close}</span>
         {trailingComma && <Comma />}
       </span>
-      <SubtreeCopyButton node={node} />
+      <RowActions nodeId={node.id} show={showActions}>
+        <SubtreeCopyButton node={node} />
+      </RowActions>
     </span>
+  );
+});
+
+/** Root placeholder when the document has no visible fields (e.g. hide-nulls left an empty object). */
+export const EmptyRootPlaceholder = memo(function EmptyRootPlaceholder({
+  collectionType,
+}: {
+  collectionType: CollectionType;
+}) {
+  const styles = useEuiMemoizedStyles(treeStyles);
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      css={styles.row}
+      style={{ paddingInlineStart: rowPaddingInlineStart(euiTheme, 0) }}
+      data-test-subj="jsonTreeViewerEmpty"
+    >
+      <span css={styles.caret} aria-hidden />
+      <span css={styles.label}>
+        <span className={LABEL_TEXT_CLASS} css={styles.labelText}>
+          <span css={styles.bracket}>{OPEN_BRACKET[collectionType]}</span>
+          <span css={styles.count}>{collectionCountLabel(collectionType, 0)}</span>
+          <span css={styles.bracket}>{CLOSE_BRACKET[collectionType]}</span>
+        </span>
+      </span>
+    </div>
   );
 });
 
@@ -412,6 +595,25 @@ const nestedControlKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
   } else if (event.key === 'Enter' || event.key === ' ') {
     event.stopPropagation();
   }
+};
+
+// Accessibility handling for leaf node actions.
+const rowActionKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+  if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+    const container = event.currentTarget.closest<HTMLElement>('.jsonTreeViewerRowActions');
+    const buttons = container
+      ? Array.from(container.querySelectorAll<HTMLElement>('.jsonTreeViewerRowAction'))
+      : [];
+    const index = buttons.indexOf(event.currentTarget);
+    const next = event.key === 'ArrowRight' ? buttons[index + 1] : buttons[index - 1];
+    if (next) {
+      event.preventDefault();
+      event.stopPropagation();
+      next.focus();
+      return;
+    }
+  }
+  nestedControlKeyDown(event);
 };
 
 // Accesibility handling for the pager buttons.
@@ -432,9 +634,8 @@ const pagerButtonKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
 };
 
 // ---- i18n labels ----
-const collectionCountLabel = (node: CollectionNode) => {
-  const count = node.children.length;
-  return node.collectionType === 'array'
+const collectionCountLabel = (collectionType: CollectionType, count: number) =>
+  collectionType === 'array'
     ? i18n.translate('unifiedDataTable.jsonTreeViewer.itemCount', {
         defaultMessage: '{count, plural, one {# item} other {# items}}',
         values: { count },
@@ -443,17 +644,16 @@ const collectionCountLabel = (node: CollectionNode) => {
         defaultMessage: '{count, plural, one {# field} other {# fields}}',
         values: { count },
       });
-};
 
-const showMoreLabel = (collectionType: CollectionType, count: number) =>
+const showMoreLabel = (collectionType: CollectionType, count: number, total: number) =>
   collectionType === 'array'
     ? i18n.translate('unifiedDataTable.jsonTreeViewer.showMoreItems', {
-        defaultMessage: 'Show {count} more {count, plural, one {item} other {items}}',
-        values: { count },
+        defaultMessage: 'Show {count} more of {total} {total, plural, one {item} other {items}}',
+        values: { count, total },
       })
     : i18n.translate('unifiedDataTable.jsonTreeViewer.showMoreFields', {
-        defaultMessage: 'Show {count} more {count, plural, one {field} other {fields}}',
-        values: { count },
+        defaultMessage: 'Show {count} more of {total} {total, plural, one {field} other {fields}}',
+        values: { count, total },
       });
 
 const showFewerLabel = (collectionType: CollectionType) =>
@@ -466,81 +666,113 @@ const showFewerLabel = (collectionType: CollectionType) =>
       });
 
 // ---- Styles ----
-const treeStyles = {
-  wrapper: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      fontFamily: euiTheme.font.familyCode,
-      fontSize: euiTheme.font.scale.xs * euiTheme.base,
-      margin: 0,
-      padding: 0,
-    }),
-  row: ({ euiTheme }: UseEuiTheme) =>
-    css({
+const treeStyles = ({ euiTheme }: UseEuiTheme) => ({
+  wrapper: css({
+    fontFamily: euiTheme.font.familyCode,
+    fontSize: euiTheme.font.scale.xs * euiTheme.base,
+    margin: 0,
+    padding: 0,
+  }),
+  row: css({
+    display: 'flex',
+    alignItems: 'center',
+    gap: euiTheme.size.xs,
+    minHeight: euiTheme.size.base,
+    paddingInlineEnd: euiTheme.size.xs,
+    borderRadius: euiTheme.border.radius.small,
+    cursor: 'default',
+    // Skip layout/paint of off-screen rows so large documents (e.g. indices-stats) stay cheap
+    // without giving each cell its own scrollbar. Rows stay in the DOM, so keyboard navigation,
+    // find-in-page, and assistive tech still reach them; `auto` remembers each row's real height, so
+    // the intrinsic size is only an estimate until a row has been shown once.
+    contentVisibility: 'auto',
+    containIntrinsicBlockSize: `auto ${euiTheme.size.base}`,
+    '&:hover': {
+      backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
+    },
+    '&:focus-visible': {
+      outline: `${euiTheme.focus.width} solid ${euiTheme.colors.primary}`,
+      outlineOffset: `-${euiTheme.focus.width}`,
+    },
+    '&:hover .jsonTreeViewerRowAction, &:focus-within .jsonTreeViewerRowAction': {
+      opacity: 1,
+    },
+  }),
+  expandableRow: css({ cursor: 'pointer' }),
+  pagerRow: css({ '&:hover': { backgroundColor: 'transparent' } }),
+  pagerButton: css({
+    blockSize: euiTheme.size.base,
+    minBlockSize: euiTheme.size.base,
+    margin: `${euiTheme.size.xs} 0`,
+  }),
+  closingRow: css({
+    display: 'flex',
+    alignItems: 'center',
+    gap: euiTheme.size.xs,
+    minHeight: euiTheme.size.base,
+    // See `row`: skip off-screen layout/paint while keeping the closing bracket in the DOM.
+    contentVisibility: 'auto',
+    containIntrinsicBlockSize: `auto ${euiTheme.size.base}`,
+  }),
+  caret: css({
+    flexShrink: 0,
+    width: euiTheme.size.base,
+    display: 'inline-flex',
+    justifyContent: 'center',
+    color: euiTheme.colors.textSubdued,
+  }),
+  label: css({ display: 'flex', alignItems: 'center', minWidth: 0 }),
+  labelText: css({ minWidth: 0 }),
+  keyPrefix: css({ flexShrink: 0 }),
+  key: css({ color: euiTheme.colors.textPrimary }),
+  punctuation: css({ color: euiTheme.colors.textSubdued }),
+  bracket: css({ color: euiTheme.colors.textParagraph }),
+  count: css({ color: euiTheme.colors.textSubdued, marginInline: euiTheme.size.xs }),
+  actions: css({ display: 'flex', alignItems: 'center', flexShrink: 0 }),
+  rowActionButton: css({
+    blockSize: euiTheme.size.base,
+    inlineSize: euiTheme.size.base,
+    flexShrink: 0,
+    opacity: 0,
+    marginInlineStart: euiTheme.size.xs,
+    '&:focus-visible': { opacity: 1 },
+  }),
+  value: css({ minWidth: 0, overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }),
+  wrap: css({
+    [`& .${LEAF_LABEL_CLASS}`]: {
       display: 'flex',
-      alignItems: 'center',
-      gap: euiTheme.size.xs,
-      minHeight: euiTheme.size.base,
-      paddingInlineEnd: euiTheme.size.xs,
-      borderRadius: euiTheme.border.radius.small,
-      cursor: 'default',
-      '&:hover': {
-        backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
-      },
-      '&:focus-visible': {
-        outline: `${euiTheme.focus.width} solid ${euiTheme.colors.primary}`,
-        outlineOffset: `-${euiTheme.focus.width}`,
-      },
-      '&:hover .jsonTreeViewerCopyButton, &:focus-within .jsonTreeViewerCopyButton': {
-        opacity: 1,
-      },
-    }),
-  expandableRow: () => css({ cursor: 'pointer' }),
-  pagerRow: () => css({ '&:hover': { backgroundColor: 'transparent' } }),
-  pagerButton: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      blockSize: euiTheme.size.base,
-      minBlockSize: euiTheme.size.base,
-      margin: `${euiTheme.size.xs} 0`,
-    }),
-  closingRow: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      display: 'flex',
-      alignItems: 'center',
-      gap: euiTheme.size.xs,
-      minHeight: euiTheme.size.base,
-    }),
-  caret: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      flexShrink: 0,
-      width: euiTheme.size.base,
-      display: 'inline-flex',
-      justifyContent: 'center',
-      color: euiTheme.colors.textSubdued,
-    }),
-  label: () => css({ display: 'flex', alignItems: 'center', minWidth: 0 }),
-  labelText: () => css({ minWidth: 0 }),
-  key: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textPrimary }),
-  punctuation: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textSubdued }),
-  bracket: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textParagraph }),
-  count: ({ euiTheme }: UseEuiTheme) =>
-    css({ color: euiTheme.colors.textSubdued, marginInline: euiTheme.size.xs }),
-  copyButton: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      blockSize: euiTheme.size.base,
-      inlineSize: euiTheme.size.base,
-      flexShrink: 0,
-      opacity: 0,
-      marginInlineStart: euiTheme.size.xs,
-      '&:focus-visible': { opacity: 1 },
-    }),
-  value: () => css({ minWidth: 0, overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }),
-  valueString: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textDanger }),
-  valueScalar: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textAccent }),
-  valueNull: ({ euiTheme }: UseEuiTheme) =>
-    css({ color: euiTheme.colors.textSubdued, fontStyle: 'italic' }),
-};
+      minWidth: 0,
+      alignItems: 'flex-start',
+    },
+    [`& .${VALUE_CLASS}`]: css`
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: ${MAX_WRAP_VALUE_LINES};
+      overflow: hidden;
+      min-width: 0;
+      flex: 0 1 auto;
+    `,
+  }),
+  noWrap: css({
+    [`& .${LABEL_TEXT_CLASS}`]: {
+      display: 'block',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    },
+    [`& .${VALUE_CLASS}`]: {
+      whiteSpace: 'nowrap',
+    },
+  }),
+  valueString: css({ color: euiTheme.colors.textDanger }),
+  valueScalar: css({ color: euiTheme.colors.textAccent }),
+  valueNull: css({ color: euiTheme.colors.textSubdued, fontStyle: 'italic' }),
+});
 
 const rowPaddingInlineStart = (euiTheme: UseEuiTheme['euiTheme'], depth: number) =>
   `calc(${euiTheme.size.s} + ${depth} * ${euiTheme.size.base})`;
+
+const rowActionsMinInlineSize = (euiTheme: UseEuiTheme['euiTheme'], count: number) =>
+  `calc(${count} * (${euiTheme.size.base} + ${euiTheme.size.xs}))`;
 
 export { treeStyles };

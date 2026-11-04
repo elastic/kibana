@@ -8,7 +8,25 @@
 import { createSelector } from 'reselect-v4';
 import { isPipelineProcessorStep } from '../../types';
 import { isStepUnderEdit } from '../steps_state_machine';
+import type { InteractiveModeSnapshot } from './interactive_mode_machine';
 import type { InteractiveModeContext } from './types';
+
+/**
+ * Selects whether the pipeline suggestion flow has replaced the steps list in the editor.
+ *
+ * The `pipelineSuggestion` and `steps` regions run in parallel, so the steps region can still
+ * accept `step.addProcessor` while the steps list itself is not on screen.
+ */
+export const selectIsSuggestionVisible = (snapshot: InteractiveModeSnapshot): boolean =>
+  snapshot.matches({ pipelineSuggestion: 'generatingSuggestion' }) ||
+  snapshot.matches({ pipelineSuggestion: 'viewingSuggestion' }) ||
+  snapshot.matches({ pipelineSuggestion: 'noSuggestionsFound' });
+
+/**
+ * Selects whether the editor has any step to render, as opposed to the empty prompt.
+ */
+export const selectHasSteps = (snapshot: InteractiveModeSnapshot): boolean =>
+  snapshot.context.stepRefs.length > 0;
 
 /**
  * Selects the processor marked as the draft processor.

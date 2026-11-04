@@ -207,7 +207,7 @@ export class SampleTaskManagerFixturePlugin
       sampleTaskAuthenticatingWithItsOwnCredential: {
         title: 'Sample Task Authenticating With Its Own Credential',
         description:
-          'Calls Elasticsearch through a client scoped to the task fake request, i.e. with the credential Task Manager persisted for the task, and records whether it authenticated. Used to verify end-to-end that stored task API keys (ES or UIAM, granted or provisioned) are presented in a shape Elasticsearch accepts.',
+          'Calls Elasticsearch through a client scoped to the task fake request, i.e. with the credential Task Manager persisted for the task, and records whether it authenticated. Used to verify end-to-end that stored task API keys (ES or UIAM) are presented in a shape Elasticsearch accepts.',
         timeout: '1m',
         maxAttempts: 1,
         stateSchemaByVersion: {
@@ -587,7 +587,7 @@ export class SampleTaskManagerFixturePlugin
       },
       lowPriorityTask: {
         title: 'Task used for testing priority claiming',
-        priority: TaskPriority.Low,
+        priority: TaskPriority.Maintenance,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
           async run() {
             const { state, schedule } = taskInstance;
@@ -617,7 +617,7 @@ export class SampleTaskManagerFixturePlugin
       },
       normalLongRunningPriorityTask: {
         title: 'Task used for testing long running priority claiming',
-        priority: TaskPriority.Low,
+        priority: TaskPriority.Maintenance,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
           async run() {
             const { state, schedule } = taskInstance;
@@ -631,6 +631,36 @@ export class SampleTaskManagerFixturePlugin
               body: {
                 type: 'task',
                 taskType: 'normalLongRunningPriorityTask',
+                taskId: taskInstance.id,
+                state: JSON.stringify(state),
+                ranAt: new Date(),
+              },
+              refresh: true,
+            });
+
+            return {
+              state: { count },
+              schedule,
+            };
+          },
+        }),
+      },
+      userInteractivePriorityTask: {
+        title: 'Task used for testing user interactive priority claiming',
+        priority: TaskPriority.UserInteractive,
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+          async run() {
+            const { state, schedule } = taskInstance;
+            const prevState = state || { count: 0 };
+
+            const count = (prevState.count || 0) + 1;
+
+            const [{ elasticsearch }] = await core.getStartServices();
+            await elasticsearch.client.asInternalUser.index({
+              index: '.kibana_task_manager_test_result',
+              body: {
+                type: 'task',
+                taskType: 'userInteractivePriorityTask',
                 taskId: taskInstance.id,
                 state: JSON.stringify(state),
                 ranAt: new Date(),

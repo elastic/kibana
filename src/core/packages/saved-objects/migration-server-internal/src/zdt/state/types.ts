@@ -94,6 +94,12 @@ export interface OutdatedDocumentsSearchState extends PostDocInitState {
   readonly transformErrors: TransformErrorObjects[];
   readonly progress: Progress;
   readonly hasTransformedDocs: boolean;
+  /**
+   * Number of documents to request in the current PIT search. Starts at the
+   * configured `migrations.batchSize` and is halved when a search response
+   * exceeds the Elasticsearch client max response size.
+   */
+  readonly batchSize: number;
 }
 
 export interface CreateTargetIndexState extends BaseState {

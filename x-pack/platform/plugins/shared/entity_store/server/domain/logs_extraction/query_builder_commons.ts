@@ -20,24 +20,21 @@ import { castEntityField, castField } from '../../../common/esql/cast';
 import { recentData } from '../../../common/domain/definitions/esql';
 import type {
   EntityDefinition,
+  ExtractedEntityDefinition,
   FieldValueSchema,
+  GatedEntityDefinition,
   SetFieldsByCondition,
 } from '../../../common/domain/definitions/entity_schema';
 import { escapeEsqlStringLiteral } from '../../../common/esql/strings';
-import {
-  type EntityField,
-  type EntityType,
-} from '../../../common/domain/definitions/entity_schema';
+import { type EntityField } from '../../../common/domain/definitions/entity_schema';
 import {
   getEuidEsqlDocumentsContainsIdFilter,
-  getFieldEvaluationsEsqlFromDefinition,
+  getFieldEvaluationsEsql,
 } from '../../../common/domain/euid/esql';
-import { getFieldEvaluationsFromDefinition } from '../../../common/domain/euid/field_evaluations';
+import { getFieldEvaluations } from '../../../common/domain/euid/field_evaluations';
 
 export const MAX_COLLECTED_VALUES_PER_FIELD = 50;
 
-export const ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD =
-  'entity.EngineMetadata.FirstSeenLogInPage';
 export const ENGINE_METADATA_UNTYPED_ID_FIELD = 'entity.EngineMetadata.UntypedId';
 export const ENGINE_METADATA_TYPE_FIELD = 'entity.EngineMetadata.Type';
 
@@ -48,8 +45,9 @@ export const TIMESTAMP_FIELD = '@timestamp';
 
 export const NULLIFY_UNMAPPED_FIELDS_SETTING = 'SET unmapped_fields="nullify";';
 
+/** Entity-page cursor within a log slice. The entity id is derived purely from identity fields,
+ * so it is stable across query re-executions; the slice time bounds are owned by the probe. */
 export interface PaginationParams {
-  timestampCursor: string;
   idCursor: string;
 }
 
@@ -59,8 +57,6 @@ export interface LogSlicePaginationParams {
 }
 
 export interface PaginationFields {
-  // Timestamp to sort and paginate on
-  timestampField: string;
   // Intermediate id field used in the query for pagination
   idFieldInQuery: string;
   // Final id field kept in the result
@@ -69,7 +65,9 @@ export interface PaginationFields {
 
 export interface LogPageProbeSourceClauseParams {
   indexPatterns: string[];
-  type: EntityType;
+  /** Resolved extraction variant: the probe and the extraction query must share one definition,
+   * so both scan the same document population. */
+  entityDefinition: GatedEntityDefinition;
   fromDateISO: string;
   toDateISO: string;
   /** Inclusive lower bound on @timestamp for log-slice pagination within the time window. */
@@ -82,13 +80,19 @@ export type ExtractionSourceClauseParams = LogPageProbeSourceClauseParams & {
 };
 
 export function buildLogPageProbeSourceClause(params: LogPageProbeSourceClauseParams): string {
-  const { indexPatterns, type, fromDateISO, toDateISO, logsPageCursorStart } = params;
+  const { indexPatterns, entityDefinition, fromDateISO, toDateISO, logsPageCursorStart } = params;
+
+  // Omitted entirely when the definition carries no gate, so a single-process definition renders
+  // the same clause it always has.
+  const extractionGateFilter = entityDefinition.extractionGate
+    ? `\n      AND (${conditionToESQL(entityDefinition.extractionGate)})`
+    : '';
 
   const baseWhere = `FROM ${indexPatterns.join(', ')}
   | WHERE
       ${TIMESTAMP_FIELD} >= TO_DATETIME("${fromDateISO}")
       AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")
-      AND (${getEuidEsqlDocumentsContainsIdFilter(type)})`;
+      AND (${getEuidEsqlDocumentsContainsIdFilter(entityDefinition)})${extractionGateFilter}`;
 
   if (!logsPageCursorStart) {
     return baseWhere;
@@ -169,25 +173,14 @@ export function extractPaginationParams(
     return undefined;
   }
 
-  const { timestampField, finalIdField: idField } = paginationFields;
-  const columns = esqlResponse.columns;
-  const timestampFieldIdx = columns.findIndex(({ name }) => name === timestampField);
-  if (timestampFieldIdx === -1) {
-    throw new Error(`${timestampField} not found in esql response, internal logic error`);
-  }
-
-  const idFieldIdx = columns.findIndex(({ name }) => name === idField);
+  const { finalIdField: idField } = paginationFields;
+  const idFieldIdx = esqlResponse.columns.findIndex(({ name }) => name === idField);
   if (idFieldIdx === -1) {
     throw new Error(`${idField} not found in esql response, internal logic error`);
   }
 
   const lastResult = esqlResponse.values[esqlResponse.values.length - 1];
-  const timestampCursor = lastResult[timestampFieldIdx] as string;
-  const idCursor = lastResult[idFieldIdx] as string;
-  return {
-    timestampCursor,
-    idCursor,
-  };
+  return { idCursor: lastResult[idFieldIdx] as string };
 }
 
 /**
@@ -195,7 +188,7 @@ export function extractPaginationParams(
  * Returns empty string when there are no field evaluations.
  */
 export function buildFieldEvaluations(entityDefinition: EntityDefinition): string {
-  const fieldEvaluationsEsql = getFieldEvaluationsEsqlFromDefinition(entityDefinition);
+  const fieldEvaluationsEsql = getFieldEvaluationsEsql(entityDefinition);
   if (fieldEvaluationsEsql === undefined || fieldEvaluationsEsql === '') {
     return '';
   }
@@ -310,9 +303,9 @@ export function statsFieldDestinations(fields: EntityField[]): Set<string> {
  */
 export function mapPostAggFilterFieldsToRecentForEsql(
   postAggFilter: Condition,
-  entityDefinition: Pick<EntityDefinition, 'fields'>
+  entityDefinition: Pick<ExtractedEntityDefinition, 'extraction'>
 ): Condition {
-  const destinations = statsFieldDestinations(entityDefinition.fields);
+  const destinations = statsFieldDestinations(entityDefinition.extraction.fields);
 
   const mapNode = (node: Condition): Condition => {
     if (isAlwaysCondition(node) || isNeverCondition(node)) {
@@ -417,56 +410,22 @@ function fieldValueToEsqlExpressionAfterStats(
 }
 
 export function buildPaginationSection(
-  fromDateISO: string,
   docsLimit: number,
   paginationFields: PaginationFields,
-  pagination?: PaginationParams,
-  recoveryId?: string
+  pagination?: PaginationParams
 ): string[] {
   const parts = [];
-  parts.push(
-    `| SORT ${paginationFields.timestampField} ASC, ${paginationFields.idFieldInQuery} ASC`
-  );
+  parts.push(`| SORT ${paginationFields.idFieldInQuery} ASC`);
 
   if (pagination) {
-    if (!recoveryId) {
-      parts.push(getPaginationWhereClause(paginationFields, pagination));
-    } else {
-      parts.push(
-        getPaginationWhereClause(paginationFields, pagination, { fromDateISO, recoveryId })
-      );
-    }
+    const escapedId = escapeEsqlStringLiteral(pagination.idCursor);
+    parts.push(`| WHERE ${paginationFields.idFieldInQuery} > "${escapedId}"`);
   }
 
   parts.push(`| LIMIT ${docsLimit}`);
   return parts;
 }
 
-function getPaginationWhereClause(
-  paginationFields: PaginationFields,
-  pagination: PaginationParams,
-  paginationRecovery?: { fromDateISO: string; recoveryId: string }
-): string {
-  if (paginationRecovery) {
-    return buildPaginationWhereClause(
-      { timestampCursor: paginationRecovery.fromDateISO, idCursor: paginationRecovery.recoveryId },
-      paginationFields
-    );
-  }
-
-  return buildPaginationWhereClause(pagination, paginationFields);
-}
-
-function buildPaginationWhereClause(
-  { timestampCursor, idCursor }: PaginationParams,
-  { timestampField, idFieldInQuery: idFieldExprForWhere }: PaginationFields
-): string {
-  const escapedId = escapeEsqlStringLiteral(idCursor);
-  return `| WHERE ${timestampField} > TO_DATETIME("${timestampCursor}") 
-            OR (${timestampField} == TO_DATETIME("${timestampCursor}") 
-                AND ${idFieldExprForWhere} > "${escapedId}")`;
-}
-
 export function hasFieldEvaluations(entityDefinition: EntityDefinition): boolean {
-  return getFieldEvaluationsFromDefinition(entityDefinition).length > 0;
+  return getFieldEvaluations(entityDefinition).length > 0;
 }

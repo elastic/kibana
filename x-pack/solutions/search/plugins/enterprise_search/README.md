@@ -56,8 +56,8 @@ Jest tests can be run from the root kibana directory, however, since the tests t
 - `x-pack/solutions/search/plugins/enterprise_search/server/jest.config.js`
 
 ```bash
-yarn test:jest --config {YOUR_JEST_CONFIG_FILE}
-yarn test:jest --config {YOUR_JEST_CONFIG_FILE} --watch
+pnpm test:jest --config {YOUR_JEST_CONFIG_FILE}
+pnpm test:jest --config {YOUR_JEST_CONFIG_FILE} --watch
 ```
 
 Unfortunately coverage collection does not work as automatically, and requires using our handy jest.sh script if you want to run tests on a specific file or folder and only get coverage numbers for that file or folder:

@@ -307,8 +307,15 @@ export class Session {
    * Updates session value for the specified request.
    * @param request Request instance to set session value for.
    * @param sessionValue Session value parameters.
+   * @param options Session update options.
+   * @param options.extend Whether to extend the idle timeout. Defaults to true. When false, preserves
+   * the idle and lifespan deadlines from the current session cookie while persisting updated state.
    */
-  async update(request: KibanaRequest, sessionValue: Readonly<SessionValue>) {
+  async update(
+    request: KibanaRequest,
+    sessionValue: Readonly<SessionValue>,
+    { extend = true }: { extend?: boolean } = {}
+  ) {
     const sessionCookieValue = await this.options.sessionCookie.get(request);
     const sessionLogger = this.getLoggerForSID(sessionValue.sid);
     if (!sessionCookieValue) {
@@ -316,10 +323,13 @@ export class Session {
       return null;
     }
 
-    const sessionExpirationInfo = this.calculateExpiry(
-      sessionValue.provider,
-      sessionCookieValue.lifespanExpiration
-    );
+    // Persisting refreshed credentials need not count as activity. The cookie has the latest expiry.
+    const sessionExpirationInfo = extend
+      ? this.calculateExpiry(sessionValue.provider, sessionCookieValue.lifespanExpiration)
+      : {
+          idleTimeoutExpiration: sessionCookieValue.idleTimeoutExpiration,
+          lifespanExpiration: sessionCookieValue.lifespanExpiration,
+        };
     // We filter out the `createdAt` field and rely on the one stored in `metadata.index` since it isn't
     // supposed to be updated after it was initially set during creation.
     const { username, userProfileId, state, metadata, createdAt, ...publicSessionInfo } =

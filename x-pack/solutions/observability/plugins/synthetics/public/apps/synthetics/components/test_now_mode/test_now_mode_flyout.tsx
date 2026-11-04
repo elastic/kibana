@@ -9,7 +9,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
-  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -17,6 +18,7 @@ import {
   EuiLoadingSpinner,
   EuiTitle,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
@@ -67,9 +69,15 @@ export function TestNowModeFlyout({
       <EuiFlyoutBody>
         <KibanaSectionErrorBoundary sectionName="xpack.synthetics.monitorManagement.testNowFlyout.body">
           {isPushing && (
-            <EuiCallOut announceOnMount color="primary">
-              {PushingLabel} <EuiLoadingSpinner />
-            </EuiCallOut>
+            <KbnInfoCallout
+              announceOnMount
+              title={
+                <EuiFlexGroup css={{ display: 'inline-flex' }} alignItems="center" gutterSize="s">
+                  <EuiFlexItem grow={false}>{PushingLabel}</EuiFlexItem>
+                  <EuiLoadingSpinner />
+                </EuiFlexGroup>
+              }
+            />
           )}
           {testRun ? (
             <TestNowMode

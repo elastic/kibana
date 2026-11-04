@@ -25,7 +25,7 @@ import {
 } from '../stream_management/data_management/stream_detail_pipeline_processing/page_content';
 import { loadProcessing } from '../stream_management/data_management/stream_detail_pipeline_processing/processing_persistence_adapter';
 
-export function StreamProcessing({ name }: StreamFlyoutProps) {
+export function StreamProcessing({ name, refreshStreams }: StreamFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const {
     core,
@@ -79,14 +79,14 @@ export function StreamProcessing({ name }: StreamFlyoutProps) {
       definition={value.definition}
       pipeline={value.pipeline}
       processingPersistenceAdapter={value.processingPersistenceAdapter}
-      refreshDefinition={refresh}
+      refreshDefinition={refreshStreams ?? refresh}
     >
       <EuiFlyoutBody
         css={css`
           .euiFlyoutBody__overflowContent {
             box-sizing: border-box;
             height: 100%;
-            padding: ${euiTheme.size.l};
+            padding: ${euiTheme.size.xxs};
           }
 
           .euiFlyoutBody__overflowContent > div {

@@ -9,15 +9,6 @@
 
 export { AutocompleteType } from './constants';
 export {
-  getRequestStartLineNumber,
-  getRequestEndLineNumber,
-  replaceRequestVariables,
-  getCurlRequest,
-  trackSentRequests,
-  getAutoIndentedRequests,
-  getRequestFromEditor,
-} from './requests_utils';
-export {
   getDocumentationLinkFromAutocomplete,
   getMethodCompletionItems,
   getUrlPathCompletionItems,

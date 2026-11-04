@@ -9,21 +9,17 @@ import type { BaseMessageLike } from '@langchain/core/messages';
 import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 
-// Vega-specific ES|QL guidance; see issue #275519 for the time-filtering quirk.
+// Vega-specific ES|QL guidance; see issue #275519 for why the time field must be a source field.
 export const vegaEsqlAdditionalInstructions = `
-## Vega time-range filtering (required)
+## Time field for Vega
 
-This query feeds a Vega chart, whose ES|QL data source only respects the time picker when the query filters rows on the raw source time field. Passing \`?_tstart\`/\`?_tend\` to \`BUCKET(...)\` alone sets the bucket extent but does NOT drop rows outside the selected range.
-
-Therefore, for EVERY time-based chart — time series AND plain metrics/categorical:
-- Always add an explicit row filter on the raw source time field: \`WHERE <time field> >= ?_tstart AND <time field> < ?_tend\`.
-- Use the RAW source time field (e.g. \`@timestamp\`) directly in both that WHERE filter and any \`BUCKET(...)\`. Never filter or bucket on a field produced by \`RENAME\` or \`EVAL\`; the time filter must reference the original source field so Kibana can bind the range to it.
+This query feeds a Vega chart. Its ES|QL data source applies the time picker like Lens does, so follow the time guidance above: no time filter on \`@timestamp\` or on top of a time bucket, but keep the \`WHERE\` it requires on any other date field. Kibana applies the time range to the source time field the query filters or buckets on, so never filter or bucket on a field produced by \`RENAME\` or \`EVAL\`.
 
 ## Field names for Vega
 
 Vega interprets a dot in a field name as a nested-object path, but ES|QL result columns are flat, so a column whose name contains a dot (e.g. \`host.name\`) is misread and renders as "undefined".
 - RENAME every such column to a readable, dotless alias in the query, e.g. \`RENAME host.name AS host\` or \`RENAME geo.dest AS destination\`, and reference the alias in the spec. Prefer this over leaving dotted names for the renderer to escape.
-- This applies to dimension/metric columns only. Do NOT rename the time field this way — keep filtering and bucketing on the raw source time field exactly as required above.`;
+- This applies to dimension/metric columns only. Do NOT rename the time field (see above).`;
 
 const formatColumns = (columns: EsqlEsqlColumnInfo[] | undefined): string => {
   if (!columns || columns.length === 0) {
@@ -40,7 +36,6 @@ export const createAuthorVegaSpecPrompt = ({
   existingSpec,
   chartType,
   referenceExamples,
-  additionalContext,
 }: {
   nlQuery: string;
   esqlQuery: string;
@@ -49,7 +44,6 @@ export const createAuthorVegaSpecPrompt = ({
   chartType?: SupportedChartType;
   /** Pre-selected, pre-loaded reference-example block (see `reference_examples`). */
   referenceExamples?: string;
-  additionalContext?: string;
 }): BaseMessageLike[] => {
   const esqlQueryJson = JSON.stringify(esqlQuery);
   const chartTypeHint = chartType
@@ -75,7 +69,7 @@ ${existingSpec}
 DATA SOURCE RULES:
 1. Bind the data with Kibana's inline ES|QL source: a top-level "data": { "url": { "%type%": "esql", "query": <the exact query below> } }. Use the query verbatim — do not modify it; the system re-binds and validates it.
 2. The spec is built around this ES|QL query; its result columns are the only fields you may reference in encodings: ${esqlQueryJson}
-3. Reference each column by its exact name as produced by the query. If the query uses the time-picker params (?_tstart / ?_tend), add "%timefield%": "@timestamp" to the url so Kibana binds the time range.
+3. Reference each column by its exact name as produced by the query.
 
 Columns available in the data (reference these EXACT names):
 <columns>
@@ -134,9 +128,7 @@ IMPORTANT: Return ONLY a JSON object wrapped in a markdown code block. Use this 
     // Vega-Lite v6 specification
   }
 }
-\`\`\`
-
-${additionalContext ?? ''}`,
+\`\`\``,
     ],
     // Human message required for Bedrock to work properly
     ['human', 'Author the visualization specification.'],

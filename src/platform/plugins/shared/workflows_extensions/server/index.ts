@@ -77,3 +77,5 @@ export { TriggerRegistry } from './trigger_registry';
 
 export { WORKFLOW_EXECUTION_FAILED_TRIGGER_ID } from './triggers';
 export type { WorkflowExecutionFailedEvent } from './triggers';
+
+export { createWorkflowTriggerForwarder } from './create_workflow_trigger_forwarder';

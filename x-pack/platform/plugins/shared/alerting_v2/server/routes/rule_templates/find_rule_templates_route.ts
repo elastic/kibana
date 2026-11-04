@@ -31,6 +31,7 @@ export const toFindRuleTemplatesArgs = ({
   sort_field: sortField,
   sort_order: sortOrder,
   tags,
+  excluded_tags: excludedTags,
   ...rest
 }: FindRuleTemplatesRequest): Complete<FindRuleTemplatesArgs> => {
   assertAllFieldsMapped(rest);
@@ -41,6 +42,7 @@ export const toFindRuleTemplatesArgs = ({
     sortField,
     sortOrder,
     tags,
+    excludedTags,
   };
 };
 

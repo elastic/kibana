@@ -16,19 +16,23 @@ import {
 } from '@kbn/as-code-shared-schemas';
 
 const dataViewsMetaSchema = asCodeMetaSchema.extend({
-  namespaces: z.array(z.string().max(1000)).max(100).optional(),
+  spaces: z
+    .array(z.string().max(1000))
+    .max(100)
+    .optional()
+    .meta({ description: 'The IDs of the spaces where the data view is available.' }),
 });
 
 export const asCodeResponseSchema = z
   .object({
-    id: z.string().max(1000),
-    data: savedDataViewSpecSchema,
-    meta: dataViewsMetaSchema,
+    id: z.string().max(1000).meta({ description: 'The ID of the data view.' }),
+    data: savedDataViewSpecSchema.meta({ description: 'The data view definition.' }),
+    meta: dataViewsMetaSchema.meta({ description: 'Metadata about the data view.' }),
   })
   .strict();
 
 export const asCodeMinimalResponseSchema = z.object({
-  id: z.string().max(1000),
+  id: z.string().max(1000).meta({ description: 'The ID of the data view.' }),
   data: savedDataViewSpecSchema.pick({
     name: true,
     index_pattern: true,

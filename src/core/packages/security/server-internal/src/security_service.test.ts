@@ -18,6 +18,8 @@ import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import { SecurityService } from './security_service';
+import { WorkloadTypeRegistry } from './workload_type_registry';
+import { convertSecurityApi as actualConvertSecurityApi } from './utils/convert_security_api';
 import { configServiceMock } from '@kbn/config-mocks';
 import { getFips } from 'crypto';
 
@@ -59,6 +61,75 @@ describe('SecurityService', function () {
         expect(() => registerSecurityDelegate(contract)).toThrowErrorMatchingInlineSnapshot(
           `"security API can only be registered once"`
         );
+      });
+
+      it('returns the names of workload types, including ones registered later', () => {
+        const setup = service.setup();
+        const { serviceAccounts } = setup.registerSecurityDelegate(createStubInternalContract());
+
+        expect(serviceAccounts.getWorkloadTypeName('workflows', 'workflow')).toBeUndefined();
+
+        setup.serviceAccounts.registerWorkloadType('workflows', {
+          type: 'workflow',
+          name: 'Workflow',
+        });
+
+        expect(serviceAccounts.getWorkloadTypeName('workflows', 'workflow')).toBe('Workflow');
+        expect(serviceAccounts.getWorkloadTypeName('alerting', 'workflow')).toBeUndefined();
+      });
+
+      it('resolves bound workloads through their workload type', async () => {
+        const setup = service.setup();
+        const { serviceAccounts } = setup.registerSecurityDelegate(createStubInternalContract());
+        setup.serviceAccounts.registerWorkloadType('workflows', {
+          type: 'workflow',
+          name: 'Workflow',
+          resolveWorkloads: async (workloads) =>
+            workloads.map(({ workloadId }) => ({
+              title: `Workflow ${workloadId}`,
+              path: `/app/workflows/${workloadId}`,
+            })),
+        });
+
+        await expect(
+          serviceAccounts.resolveBoundWorkloads([
+            {
+              pluginId: 'workflows',
+              workloadType: 'workflow',
+              workloadId: 'w-1',
+              spaceId: 'marketing',
+            },
+          ])
+        ).resolves.toEqual([{ title: 'Workflow w-1', href: '/s/marketing/app/workflows/w-1' }]);
+      });
+
+      it('builds links under the configured base path', async () => {
+        configService = configServiceMock.create({
+          getConfig$: {
+            server: { basePath: '/kbn' },
+            xpack: { security: { fipsMode: { enabled: !!getFips() } } },
+          },
+        });
+        service = new SecurityService(mockCoreContext.create({ configService }));
+        const setup = service.setup();
+        const { serviceAccounts } = setup.registerSecurityDelegate(createStubInternalContract());
+        setup.serviceAccounts.registerWorkloadType('workflows', {
+          type: 'workflow',
+          name: 'Workflow',
+          resolveWorkloads: async (workloads) =>
+            workloads.map(({ workloadId }) => ({ path: `/app/workflows/${workloadId}` })),
+        });
+
+        await expect(
+          serviceAccounts.resolveBoundWorkloads([
+            {
+              pluginId: 'workflows',
+              workloadType: 'workflow',
+              workloadId: 'w-1',
+              spaceId: 'default',
+            },
+          ])
+        ).resolves.toEqual([{ href: '/kbn/app/workflows/w-1' }]);
       });
     });
 
@@ -121,6 +192,79 @@ describe('SecurityService', function () {
           profileId: 'u_test_profile_123',
           username: 'jdoe',
         });
+      });
+    });
+
+    describe('#serviceAccounts.registerWorkloadType', () => {
+      it('records the workload type for the plugin', () => {
+        const setup = service.setup();
+
+        expect(() =>
+          setup.serviceAccounts.registerWorkloadType('alerting', {
+            type: 'rule',
+            name: 'Alerting rule',
+          })
+        ).not.toThrow();
+      });
+
+      it('rejects an invalid type', () => {
+        expect(() =>
+          service.setup().serviceAccounts.registerWorkloadType('alerting', {
+            type: 'Alerting.Rule',
+            name: 'Alerting rule',
+          })
+        ).toThrow(/only lowercase letters, digits and underscores are allowed/);
+      });
+
+      it('rejects a duplicate type from the same plugin', () => {
+        const setup = service.setup();
+        setup.serviceAccounts.registerWorkloadType('alerting', { type: 'rule', name: 'Rule' });
+
+        expect(() =>
+          setup.serviceAccounts.registerWorkloadType('alerting', { type: 'rule', name: 'Rule' })
+        ).toThrow(
+          /Service account workload type \[rule\] has already been registered by plugin \[alerting\]/
+        );
+      });
+
+      it('lets different plugins register the same type', () => {
+        const setup = service.setup();
+        setup.serviceAccounts.registerWorkloadType('alerting', { type: 'rule', name: 'Rule' });
+
+        expect(() =>
+          setup.serviceAccounts.registerWorkloadType('workflows', { type: 'rule', name: 'Rule' })
+        ).not.toThrow();
+      });
+
+      it('hands the registrations to the start contract', async () => {
+        convertSecurityApiMock.mockImplementation(actualConvertSecurityApi);
+        const setup = service.setup();
+        setup.serviceAccounts.registerWorkloadType('alerting', { type: 'rule', name: 'Rule' });
+
+        const serviceAccounts = {
+          isEnabled: jest.fn(),
+          create: jest.fn(),
+          getWorkloadBinding: jest.fn().mockResolvedValue(null),
+          bindWorkload: jest.fn(),
+          unbindWorkload: jest.fn(),
+          withScopedRequestForWorkload: jest.fn(),
+        };
+        setup.registerSecurityDelegate({
+          authc: { apiKeys: {} },
+          serviceAccounts,
+        } as unknown as CoreSecurityDelegateContract);
+
+        const start = service.start();
+        const params = { workloadType: 'rule', workloadId: 'rule-id', spaceId: 'default' };
+
+        await start.serviceAccounts.asScopedToPlugin('alerting').getWorkloadBinding(params);
+        expect(serviceAccounts.getWorkloadBinding).toHaveBeenCalledWith('alerting', params);
+
+        await expect(
+          start.serviceAccounts.asScopedToPlugin('workflows').getWorkloadBinding(params)
+        ).rejects.toThrow(
+          /Plugin \[workflows\] has not registered service account workload type \[rule\]/
+        );
       });
     });
 
@@ -195,7 +339,10 @@ describe('SecurityService', function () {
       service.start();
 
       expect(convertSecurityApiMock).toHaveBeenCalledTimes(1);
-      expect(convertSecurityApiMock).toHaveBeenCalledWith(contract);
+      expect(convertSecurityApiMock).toHaveBeenCalledWith(
+        contract,
+        expect.any(WorkloadTypeRegistry)
+      );
     });
 
     it('calls convertSecurityApi with the default implementation when no API was registered', () => {
@@ -206,7 +353,10 @@ describe('SecurityService', function () {
       service.start();
 
       expect(convertSecurityApiMock).toHaveBeenCalledTimes(1);
-      expect(convertSecurityApiMock).toHaveBeenCalledWith(contract);
+      expect(convertSecurityApiMock).toHaveBeenCalledWith(
+        contract,
+        expect.any(WorkloadTypeRegistry)
+      );
     });
 
     it('returns the result of convertSecurityApi as contract', () => {

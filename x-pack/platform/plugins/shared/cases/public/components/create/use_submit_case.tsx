@@ -17,6 +17,7 @@ import type { CaseAttachmentsWithoutOwner } from '../../types';
 import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_cases_transactions';
 import { useApplication } from '../../common/lib/kibana/use_application';
 import { useAttachEventsEBT } from '../../analytics/use_attach_events_ebt';
+import { useTemplateAppliedOnCreateEBT } from '../../analytics/templates/use_template_apply_ebt';
 
 export interface UseSubmitCaseProps {
   afterCaseCreated?: (
@@ -25,11 +26,17 @@ export interface UseSubmitCaseProps {
   ) => Promise<void>;
   onSuccess?: (theCase: CaseUI) => void;
   attachments?: CaseAttachmentsWithoutOwner;
+  getAttachments?: (owner: string) => CaseAttachmentsWithoutOwner;
 }
 
 export type UseSubmitCaseValue = ReturnType<typeof useSubmitCase>;
 
-export const useSubmitCase = ({ attachments, afterCaseCreated, onSuccess }: UseSubmitCaseProps) => {
+export const useSubmitCase = ({
+  attachments,
+  getAttachments,
+  afterCaseCreated,
+  onSuccess,
+}: UseSubmitCaseProps) => {
   const { appId } = useApplication();
   const { mutateAsync: postCase, isLoading: isPostingCase } = usePostCase();
   const { mutateAsync: createAttachments, isLoading: isCreatingAttachments } =
@@ -38,24 +45,38 @@ export const useSubmitCase = ({ attachments, afterCaseCreated, onSuccess }: UseS
     usePostPushToService();
   const { startTransaction } = useCreateCaseWithAttachmentsTransaction();
   const trackAttachEvents = useAttachEventsEBT();
+  const reportTemplateAppliedOnCreate = useTemplateAppliedOnCreateEBT();
 
   const submitCase = useCallback(
     async (data: CasePostRequest, isValid: boolean) => {
       if (isValid) {
-        startTransaction({ appId, attachments });
-
         const theCase = await postCase({
           request: data,
         });
 
-        if (theCase && Array.isArray(attachments) && attachments.length > 0) {
-          await createAttachments({
-            caseId: theCase.id,
-            caseOwner: theCase.owner,
-            attachments,
-          });
+        if (theCase) {
+          // Read the template off the created case, not off the request, so the event reflects what
+          // the server stored. Reported before the attachment and connector work, because the case
+          // already exists and a later attachment failure must not lose the event.
+          if (theCase.template) {
+            reportTemplateAppliedOnCreate({ entryPoint: 'create_form' });
+          }
 
-          trackAttachEvents(window.location.pathname, attachments);
+          const resolvedAttachments = getAttachments
+            ? getAttachments(theCase.owner)
+            : attachments ?? [];
+
+          startTransaction({ appId, attachments: resolvedAttachments });
+
+          if (resolvedAttachments.length > 0) {
+            await createAttachments({
+              caseId: theCase.id,
+              caseOwner: theCase.owner,
+              attachments: resolvedAttachments,
+            });
+
+            trackAttachEvents(window.location.pathname, resolvedAttachments);
+          }
         }
 
         if (afterCaseCreated && theCase) {
@@ -86,11 +107,13 @@ export const useSubmitCase = ({ attachments, afterCaseCreated, onSuccess }: UseS
       startTransaction,
       appId,
       attachments,
+      getAttachments,
       postCase,
       afterCaseCreated,
       onSuccess,
       createAttachments,
       trackAttachEvents,
+      reportTemplateAppliedOnCreate,
       pushCaseToExternalService,
     ]
   );

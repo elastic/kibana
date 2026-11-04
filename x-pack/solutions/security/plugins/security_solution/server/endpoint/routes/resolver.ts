@@ -15,10 +15,13 @@ import {
 import { handleTree } from './resolver/tree/handler';
 import { handleEntities } from './resolver/entity/handler';
 import { handleEvents } from './resolver/events';
+import type { GetResolverClusterClient } from './resolver/utils/scoped_client';
+import { getResolverClusterClient } from './resolver/utils/scoped_client';
 
 export const registerResolverRoutes = (
   router: SecuritySolutionPluginRouter,
-  startServices: StartServicesAccessor<StartPlugins>
+  startServices: StartServicesAccessor<StartPlugins>,
+  platformCpsEnabled: boolean
 ) => {
   const getRuleRegistry = async () => {
     const [, { ruleRegistry }] = await startServices();
@@ -30,6 +33,16 @@ export const registerResolverRoutes = (
     return licensing;
   };
 
+  const getClusterClient = async () => {
+    const [coreStart] = await startServices();
+    return coreStart.elasticsearch.client;
+  };
+
+  // Bound here so the handlers own no CPS wiring: they just ask for a client and get told whether
+  // the read fanned out across projects.
+  const getResolverClient: GetResolverClusterClient = (context, request) =>
+    getResolverClusterClient({ context, request, getClusterClient, platformCpsEnabled });
+
   router.post(
     {
       path: '/api/endpoint/resolver/tree',
@@ -40,7 +53,7 @@ export const registerResolverRoutes = (
       },
       validate: validateTree,
     },
-    handleTree(getRuleRegistry, getLicensing)
+    handleTree(getRuleRegistry, getLicensing, getResolverClient)
   );
 
   router.post(
@@ -53,7 +66,7 @@ export const registerResolverRoutes = (
       },
       validate: validateEvents,
     },
-    handleEvents(getRuleRegistry)
+    handleEvents(getRuleRegistry, getResolverClient)
   );
 
   /**
@@ -69,6 +82,6 @@ export const registerResolverRoutes = (
       },
       validate: validateEntities,
     },
-    handleEntities()
+    handleEntities(getResolverClient)
   );
 };

@@ -77,6 +77,13 @@ export const integrationKnowledgeTool = (
     id: platformCoreTools.integrationKnowledge,
     type: ToolType.builtin,
     description: `Search and retrieve knowledge from Fleet-installed integrations. This includes information on how to configure and use integrations for data ingestion into Elasticsearch.`,
+    annotations: {
+      title: 'Search Fleet Integration Knowledge',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema: integrationKnowledgeSchema,
     handler: async ({ query, max = 5 }, { esClient, logger }) => {
       try {

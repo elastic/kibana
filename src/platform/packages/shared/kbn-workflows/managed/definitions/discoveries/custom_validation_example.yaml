@@ -65,6 +65,14 @@ triggers:
           default: true
           description: Enable field rendering in UI
           type: boolean
+        generation_source:
+          description: >
+            Identifies the producer of these attacks. Contributes to the attack
+            hash, so attacks from one producer never deduplicate against another
+            producer's attacks built from the same alerts. Omit for Kibana
+            Attack Discovery.
+          maxLength: 256
+          type: string
         generation_uuid:
           description: Generation execution UUID for tracking
           type: string
@@ -133,6 +141,7 @@ steps:
       attack_discoveries: ${{ steps.transform_discoveries.output }}
       connector_name: ${{ inputs.connector_name }}
       enable_field_rendering: ${{ inputs.enable_field_rendering }}
+      generation_source: ${{ inputs.generation_source }}
       generation_uuid: ${{ inputs.generation_uuid }}
       replacements: ${{ inputs.replacements }}
       source: ${{ inputs.source }}

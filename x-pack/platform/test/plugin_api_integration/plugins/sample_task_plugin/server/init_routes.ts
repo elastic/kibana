@@ -125,10 +125,7 @@ export function initRoutes(
       validate: {
         body: schema.object({
           task: innerTaskSchema,
-          /**
-           * Grants only an Elasticsearch API key, skipping UIAM. Lets a test create a task in the
-           * pre-UIAM state so the UIAM provisioning task has something to convert.
-           */
+          /** Grants only an Elasticsearch API key, skipping UIAM. */
           onEsKey: schema.maybe(schema.boolean()),
         }),
       },
@@ -309,6 +306,7 @@ export function initRoutes(
             }),
           ]),
           regenerateApiKey: schema.maybe(schema.boolean({ defaultValue: false })),
+          includeRunningTasks: schema.maybe(schema.boolean({ defaultValue: false })),
         }),
       },
     },
@@ -318,11 +316,12 @@ export function initRoutes(
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       const taskManager = await taskManagerStart;
-      const { taskIds, schedule, regenerateApiKey } = req.body;
+      const { taskIds, schedule, regenerateApiKey, includeRunningTasks } = req.body;
 
       const taskResult = await taskManager.bulkUpdateSchedules(taskIds, schedule, {
         request: req,
         regenerateApiKey,
+        includeRunningTasks,
       });
 
       return res.ok({ body: taskResult });
@@ -548,6 +547,7 @@ export function initRoutes(
               }),
             }),
           ]),
+          includeRunningTasks: schema.maybe(schema.boolean({ defaultValue: false })),
         }),
       },
     },
@@ -556,10 +556,12 @@ export function initRoutes(
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
     ) {
-      const { taskIds, schedule } = req.body;
+      const { taskIds, schedule, includeRunningTasks } = req.body;
       try {
         const taskManager = await taskManagerStart;
-        return res.ok({ body: await taskManager.bulkUpdateSchedules(taskIds, schedule) });
+        return res.ok({
+          body: await taskManager.bulkUpdateSchedules(taskIds, schedule, { includeRunningTasks }),
+        });
       } catch (err) {
         return res.ok({ body: { taskIds, error: `${err}` } });
       }
@@ -601,6 +603,49 @@ export function initRoutes(
 
         const taskManager = await taskManagerStart;
         const taskResult = await taskManager.ensureScheduled(task, { req });
+
+        return res.ok({ body: taskResult });
+      } catch (err) {
+        return res.ok({ body: err });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: `/api/sample_tasks/ensure_scheduled_with_api_key`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        body: schema.object({
+          task: schema.object({
+            taskType: schema.string(),
+            params: schema.object({}),
+            state: schema.maybe(schema.object({})),
+            id: schema.maybe(schema.string()),
+            schedule: schema.maybe(schema.object({ interval: schema.string() })),
+          }),
+        }),
+      },
+    },
+    async function (
+      _: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      try {
+        const { task: taskFields } = req.body;
+        const task = {
+          ...taskFields,
+          scope: [scope],
+        };
+
+        const taskManager = await taskManagerStart;
+        const taskResult = await taskManager.ensureScheduled(task, { request: req });
 
         return res.ok({ body: taskResult });
       } catch (err) {

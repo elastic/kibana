@@ -1175,6 +1175,7 @@ exports[`XYChart component it renders area 1`] = `
               renderComplete={[Function]}
             />
           }
+          onAnnotationClick={[Function]}
           onBrushEnd={[Function]}
           onElementClick={[Function]}
           onPointerUpdate={[Function]}
@@ -2651,6 +2652,7 @@ exports[`XYChart component it renders bar 1`] = `
               renderComplete={[Function]}
             />
           }
+          onAnnotationClick={[Function]}
           onBrushEnd={[Function]}
           onElementClick={[Function]}
           onPointerUpdate={[Function]}
@@ -4127,6 +4129,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               renderComplete={[Function]}
             />
           }
+          onAnnotationClick={[Function]}
           onBrushEnd={[Function]}
           onElementClick={[Function]}
           onPointerUpdate={[Function]}
@@ -5603,6 +5606,7 @@ exports[`XYChart component it renders line 1`] = `
               renderComplete={[Function]}
             />
           }
+          onAnnotationClick={[Function]}
           onBrushEnd={[Function]}
           onElementClick={[Function]}
           onPointerUpdate={[Function]}
@@ -7079,6 +7083,7 @@ exports[`XYChart component it renders stacked area 1`] = `
               renderComplete={[Function]}
             />
           }
+          onAnnotationClick={[Function]}
           onBrushEnd={[Function]}
           onElementClick={[Function]}
           onPointerUpdate={[Function]}
@@ -8555,6 +8560,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
               renderComplete={[Function]}
             />
           }
+          onAnnotationClick={[Function]}
           onBrushEnd={[Function]}
           onElementClick={[Function]}
           onPointerUpdate={[Function]}
@@ -10031,6 +10037,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               renderComplete={[Function]}
             />
           }
+          onAnnotationClick={[Function]}
           onBrushEnd={[Function]}
           onElementClick={[Function]}
           onPointerUpdate={[Function]}
@@ -11526,6 +11533,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
               renderComplete={[Function]}
             />
           }
+          onAnnotationClick={[Function]}
           onBrushEnd={[Function]}
           onElementClick={[Function]}
           onPointerUpdate={[Function]}
@@ -13092,6 +13100,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               renderComplete={[Function]}
             />
           }
+          onAnnotationClick={[Function]}
           onBrushEnd={[Function]}
           onElementClick={[Function]}
           onPointerUpdate={[Function]}
@@ -14651,6 +14660,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               renderComplete={[Function]}
             />
           }
+          onAnnotationClick={[Function]}
           onBrushEnd={[Function]}
           onElementClick={[Function]}
           onPointerUpdate={[Function]}

@@ -8,13 +8,18 @@
 import React, { useCallback, useMemo } from 'react';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { TableId } from '@kbn/securitysolution-data-table';
-import type { IndexPattern } from '@kbn/kubernetes-security-plugin/public/types';
+import type {
+  IndexPattern,
+  KubernetesPageHeaderProps,
+} from '@kbn/kubernetes-security-plugin/public/types';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
+import { SecurityAppHeader } from '../../common/components/app_header';
+import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { useKibana } from '../../common/lib/kibana';
 import { SecurityPageName } from '../../../common/constants';
+import { DASHBOARDS, KUBERNETES } from '../../app/translations';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { FiltersGlobal } from '../../common/components/filters_global';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { inputsSelectors } from '../../common/store';
 import { useGlobalTime } from '../../common/containers/use_global_time';
@@ -82,14 +87,35 @@ export const KubernetesContainer = React.memo(() => {
     [dataView]
   );
 
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+  const back = useMemo(
+    () => ({
+      href: getSecuritySolutionUrl({ deepLinkId: SecurityPageName.dashboards }),
+      label: DASHBOARDS,
+    }),
+    [getSecuritySolutionUrl]
+  );
+
+  const renderHeader = useCallback(
+    ({ description, menu }: KubernetesPageHeaderProps) => (
+      <SecurityAppHeader
+        title={KUBERNETES}
+        spacing="largeBleed"
+        back={back}
+        description={description}
+        menu={menu}
+      />
+    ),
+    [back]
+  );
+
   return (
     <SecuritySolutionPageWrapper noPadding>
       {kubernetesSecurity.getKubernetesPage({
         filter: (
-          <FiltersGlobal>
-            <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
-          </FiltersGlobal>
+          <SiemSearchBar dataView={dataView} displayStyle="inPage" id={InputsModelId.global} />
         ),
+        renderHeader,
         indexPattern,
         globalFilter: {
           filterQuery,

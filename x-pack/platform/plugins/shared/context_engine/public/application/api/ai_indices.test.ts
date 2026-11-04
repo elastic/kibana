@@ -6,7 +6,7 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { AI_INDEX_API_VERSION, aiIndexPath } from '../../../common/constants';
+import { AI_INDEX_API_VERSION, AI_INDEX_PATH } from '../../../common/constants';
 import type { AiIndexProperties, ListAiIndexResponse } from '../../../common/http_api/ai_indices';
 import { createAiIndex, listAiIndices, putAiIndex } from './ai_indices';
 
@@ -14,6 +14,7 @@ const properties: AiIndexProperties = {
   dest: { type: 'index', value: 'ai-index-idx-support' },
   automations: [],
   sources: [],
+  traces: [],
 };
 
 describe('listAiIndices', () => {
@@ -26,7 +27,7 @@ describe('listAiIndices', () => {
 
     const result = await listAiIndices(http);
 
-    expect(http.get).toHaveBeenCalledWith(aiIndexPath, { version: AI_INDEX_API_VERSION });
+    expect(http.get).toHaveBeenCalledWith(AI_INDEX_PATH, { version: AI_INDEX_API_VERSION });
     expect(result).toBe(response);
   });
 
@@ -37,7 +38,7 @@ describe('listAiIndices', () => {
 
     await listAiIndices(http, { signal });
 
-    expect(http.get).toHaveBeenCalledWith(aiIndexPath, {
+    expect(http.get).toHaveBeenCalledWith(AI_INDEX_PATH, {
       version: AI_INDEX_API_VERSION,
       signal,
     });
@@ -49,7 +50,7 @@ describe('listAiIndices', () => {
 
     await listAiIndices(http);
 
-    expect(http.get).toHaveBeenCalledWith(aiIndexPath, { version: AI_INDEX_API_VERSION });
+    expect(http.get).toHaveBeenCalledWith(AI_INDEX_PATH, { version: AI_INDEX_API_VERSION });
   });
 });
 
@@ -60,7 +61,7 @@ describe('createAiIndex', () => {
 
     await createAiIndex(http, { aiIndexId: 'support', properties });
 
-    expect(http.post).toHaveBeenCalledWith(aiIndexPath, {
+    expect(http.post).toHaveBeenCalledWith(AI_INDEX_PATH, {
       version: AI_INDEX_API_VERSION,
       body: JSON.stringify({ id: 'support', ...properties }),
     });

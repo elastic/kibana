@@ -1,0 +1,51 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { z } from '@kbn/zod/v4';
+import { MAX_KEYWORD_LENGTH } from '../../common';
+import { createNightshiftInvestigationsServerRoute } from './create_server_route';
+import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
+
+export const ensureInvestigationRoute = createNightshiftInvestigationsServerRoute({
+  endpoint: 'POST /internal/nightshift/investigations/{id}/_ensure',
+  options: {
+    access: 'internal',
+    summary: 'Ensure the investigation conversation for a workflow run exists',
+    description:
+      'Gets or creates the investigation (an Agent Builder `investigation` conversation whose id ' +
+      'is the investigation id) for a live run of the investigation workflow and records the ' +
+      "run's subjects on it, reopening a closed investigation. Called by the investigation " +
+      'workflow, so every write happens as the identity the workflow runs as. The run must name ' +
+      'this investigation: as its `investigation_id` input, or as its own execution id when it ' +
+      'was started without one. Returns the conversation the agent step continues.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: ['agentBuilder:write'],
+    },
+  },
+  params: z.object({
+    path: z.object({
+      id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
+    }),
+    body: z
+      .object({
+        /** The calling run's own execution; it differs from the ID when the run continues one. */
+        execution_id: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
+      })
+      .nullish(),
+  }),
+  handler: async ({ request, params, getInvestigationsClient }) => {
+    const client = getInvestigationsClient(request);
+    try {
+      const conversationId = await client.ensureOrCreate(params.path.id, params.body?.execution_id);
+      return { acknowledged: true, conversation_id: conversationId };
+    } catch (error) {
+      rethrowInvestigationClientError(error);
+    }
+  },
+});

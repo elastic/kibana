@@ -11,20 +11,16 @@ import {
   LAUNCHPAD_PANEL_BTN,
   LAUNCHPAD_TRANSLATED_RULES_PAGE,
 } from '../screens/security_header';
-import {
-  FOOTER_LAUNCHPAD,
-  openNavigationPanel,
-  RULES_PANEL_BTN as RULES_PANEL_BTN_SERVERLESS,
-  TRANSLATED_RULES_PAGE as TRANSLATED_RULES_PAGE_SERVERLESS,
-} from '../screens/serverless_security_header';
+import { openNavigationPanel } from '../screens/serverless_security_header';
 import * as SELECTORS from '../screens/siem_migrations';
+import { TRANSLATED_RULES_PAGE_URL } from '../urls/navigation';
+import { visit } from './navigation';
 import { bedrockConnectorAPIPayload } from './api_calls/connectors';
+import { setCodeEditorValue } from './common/monaco';
 
 export const navigateToTranslatedRulesPage = (isClassicNavUpdateEnabled: boolean) => {
   if (Cypress.env('IS_SERVERLESS')) {
-    openNavigationPanel(RULES_PANEL_BTN_SERVERLESS);
-    cy.get(FOOTER_LAUNCHPAD).click();
-    cy.get(TRANSLATED_RULES_PAGE_SERVERLESS).click();
+    visit(TRANSLATED_RULES_PAGE_URL);
   } else if (isClassicNavUpdateEnabled) {
     // ESS with classic nav: navigate through Launchpad group to reach Migrations
     openNavigationPanel(LAUNCHPAD_PANEL_BTN);
@@ -139,12 +135,12 @@ export const updateTranslatedRuleQuery = (newQuery: string) => {
   cy.get(SELECTORS.TRANSLATED_RULE_EDIT_BTN).click();
   cy.get(SELECTORS.TRANSLATED_RULE_SAVE_BTN).should('be.visible');
 
-  cy.get(SELECTORS.TRANSLATED_RULE_QUERY_EDITOR_INPUT).type(
-    Cypress.platform === 'darwin' ? '{cmd+a}' : '{ctrl+a}',
-    { force: true }
+  setCodeEditorValue(
+    SELECTORS.TRANSLATED_RULE_QUERY_EDITOR_PARENT,
+    Cypress.platform === 'darwin' ? '{cmd+a}' : '{ctrl+a}'
   );
 
-  cy.get(SELECTORS.TRANSLATED_RULE_QUERY_EDITOR_INPUT).type(newQuery, { force: true });
+  setCodeEditorValue(SELECTORS.TRANSLATED_RULE_QUERY_EDITOR_PARENT, newQuery);
 };
 
 export const editTranslatedRuleByRow = (rowNum: number) => {

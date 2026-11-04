@@ -131,11 +131,11 @@ elasticsearch.hosts: ["https://localhost:9200"]
 elasticsearch.ssl.verificationMode: none
 ```
 
-then `yarn start`. A local Kibana running at http://localhost:5602 will talk to the elastic-package system, allowing local changes to Kibana to interact with data ingested by integrations.
+then `pnpm start`. A local Kibana running at http://localhost:5602 will talk to the elastic-package system, allowing local changes to Kibana to interact with data ingested by integrations.
 
 Note that the local kibana is not able to interact with the local package-registry when running http, this means we have to do all integration-related interaction on the kibana run by elastic-package (at https://localhost:5601).
 
-To enable ssl we can point the local kibana configuration to the certificates used by elastic-package (under ~/.elastic-package/profiles/{profile}/certs), then start the process with `NODE_EXTRA_CA_CERTS=~/.elastic-package/profiles/{profile}/certs/ca-cert.pem yarn start`.
+To enable ssl we can point the local kibana configuration to the certificates used by elastic-package (under ~/.elastic-package/profiles/{profile}/certs), then start the process with `NODE_EXTRA_CA_CERTS=~/.elastic-package/profiles/{profile}/certs/ca-cert.pem pnpm start`.
 
 ## Testing strategy
 

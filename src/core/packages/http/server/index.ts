@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import './src/hapi_request_refs';
+
 export {
   OnPreRoutingResultType,
   AuthResultType,
@@ -168,6 +170,16 @@ export type { GetAuthState, IsAuthenticated } from './src/auth_state';
 export { AuthStatus } from './src/auth_state';
 
 export type { IAuthHeadersStorage, SetAuthHeaders, GetAuthHeaders } from './src/auth_headers';
+
+export type {
+  HttpSelfUnauthorizedErrorHandler,
+  HttpSelfUnauthorizedErrorHandlerOptions,
+  HttpSelfUnauthorizedErrorHandlerNotHandledResult,
+  HttpSelfUnauthorizedErrorHandlerResult,
+  HttpSelfUnauthorizedErrorHandlerRetryParams,
+  HttpSelfUnauthorizedErrorHandlerRetryResult,
+  HttpSelfUnauthorizedErrorHandlerToolkit,
+} from './src/self_client_unauthorized_error_handler';
 
 export type {
   HttpAuth,

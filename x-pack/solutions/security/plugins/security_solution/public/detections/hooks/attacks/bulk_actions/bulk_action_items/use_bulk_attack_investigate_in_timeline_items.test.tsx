@@ -8,6 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { useBulkAttackInvestigateInTimelineItems } from './use_bulk_attack_investigate_in_timeline_items';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useInvestigateInTimeline } from '../../../../../common/hooks/timeline/use_investigate_in_timeline';
@@ -97,6 +98,79 @@ describe('useBulkAttackInvestigateInTimelineItems', () => {
 
     expect(investigateInTimeline).toHaveBeenCalledTimes(1);
     expect(closePopover).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens timeline on a range wide enough to hold the alerts behind every selected attack', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2024-05-02T12:00:00.000Z'));
+
+    const investigateInTimeline = jest.fn();
+    mockUseInvestigateInTimeline.mockReturnValue({
+      investigateInTimeline,
+    } as unknown as ReturnType<typeof useInvestigateInTimeline>);
+
+    const { result } = renderHook(() => useBulkAttackInvestigateInTimelineItems(), { wrapper });
+    await result.current.items[0]?.onClick?.(
+      [
+        {
+          _id: 'attack-1',
+          data: [
+            { field: ALERT_ATTACK_DISCOVERY_ALERT_IDS, value: ['alert-1'] },
+            { field: TIMESTAMP, value: ['2024-05-02T09:00:00.000Z'] },
+          ],
+          ecs: { _id: 'attack-1' },
+        },
+        {
+          _id: 'attack-2',
+          data: [
+            { field: ALERT_ATTACK_DISCOVERY_ALERT_IDS, value: ['alert-2'] },
+            { field: TIMESTAMP, value: ['2024-04-28T06:00:00.000Z'] },
+          ],
+          ecs: { _id: 'attack-2' },
+        },
+      ],
+      false,
+      jest.fn(),
+      jest.fn(),
+      jest.fn()
+    );
+
+    expect(investigateInTimeline).toHaveBeenCalledWith(
+      expect.objectContaining({
+        timeRange: {
+          kind: 'absolute',
+          from: '2024-04-27T06:00:00.000Z',
+          to: '2024-05-02T12:00:00.000Z',
+        },
+      })
+    );
+
+    jest.useRealTimers();
+  });
+
+  it('leaves the range to the time picker when no selected attack carries a timestamp', async () => {
+    const investigateInTimeline = jest.fn();
+    mockUseInvestigateInTimeline.mockReturnValue({
+      investigateInTimeline,
+    } as unknown as ReturnType<typeof useInvestigateInTimeline>);
+
+    const { result } = renderHook(() => useBulkAttackInvestigateInTimelineItems(), { wrapper });
+    await result.current.items[0]?.onClick?.(
+      [
+        {
+          _id: 'attack-1',
+          data: [{ field: ALERT_ATTACK_DISCOVERY_ALERT_IDS, value: ['alert-1'] }],
+          ecs: { _id: 'attack-1' },
+        },
+      ],
+      false,
+      jest.fn(),
+      jest.fn(),
+      jest.fn()
+    );
+
+    expect(investigateInTimeline).toHaveBeenCalledWith(
+      expect.objectContaining({ timeRange: undefined })
+    );
   });
 
   it('should report TimelineInvestigationOpened event on click', async () => {

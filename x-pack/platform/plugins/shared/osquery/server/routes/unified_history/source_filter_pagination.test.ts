@@ -33,7 +33,6 @@ jest.mock('../../lib/get_result_counts_for_actions', () => ({
 }));
 
 const mockOsqueryContext = {
-  cpsEnabled: false,
   getStartServices: jest
     .fn()
     .mockResolvedValue([{ elasticsearch: { client: { asInternalUser: {} } } }]),
@@ -151,7 +150,7 @@ const fetchPage = async (
     liveHits,
     osqueryContext: mockOsqueryContext,
     request: mockRequest,
-    spaceId: 'default',
+    cpsActive: false,
     logger: mockLogger,
   });
 

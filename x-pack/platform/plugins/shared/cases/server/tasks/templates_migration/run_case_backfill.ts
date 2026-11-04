@@ -7,11 +7,16 @@
 
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { ISavedObjectsRepository, Logger, SavedObject } from '@kbn/core/server';
-import { isSavedObjectErrorResult } from '@kbn/core/server';
+import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { CASE_CONFIGURE_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
 import type { CasePersistedAttributes } from '../../common/types/case';
+import {
+  buildFieldLinkIndexes,
+  resolveDefinitionForLegacyField,
+} from '../../common/utils/field_link_resolution';
 import { buildExtendedFieldsBackfill } from './build_case_extended_fields';
+import { findFieldDefinitionsForOwner } from './migrate_configuration';
 import {
   CASE_BACKFILL_PAGE_SIZE,
   CASE_BACKFILL_PIT_KEEP_ALIVE,
@@ -34,22 +39,41 @@ const safeClosePit = async (
   }
 };
 
-/** Records the completion marker on the space's configure SO once its backfill is complete. */
+/**
+ * Records the completion marker on the space's configure SO once its backfill is complete.
+ * Guarded with the SO version read at the start of this run's pass: a concurrent configure
+ * write (e.g. a custom field added mid-backfill) must not be silently marked migrated. A
+ * version conflict here just skips the flag — `configureNeedsCaseBackfill` re-evaluates the
+ * space fresh on the next run against the now-current configuration.
+ */
 const setCasesMigratedFlag = async (
   repo: ISavedObjectsRepository,
-  so: SavedObject<ConfigurationPersistedAttributes>
+  so: SavedObject<ConfigurationPersistedAttributes>,
+  log: Logger,
+  executionId: string
 ): Promise<void> => {
   if (so.attributes.legacyCasesMigrated) {
     return;
   }
   const namespace = so.namespaces?.[0] ?? 'default';
   const nsOption = namespace === 'default' ? undefined : namespace;
-  await repo.update<ConfigurationPersistedAttributes>(
-    CASE_CONFIGURE_SAVED_OBJECT,
-    so.id,
-    { legacyCasesMigrated: true },
-    { ...(nsOption ? { namespace: nsOption } : {}), refresh: false }
-  );
+  try {
+    await repo.update<ConfigurationPersistedAttributes>(
+      CASE_CONFIGURE_SAVED_OBJECT,
+      so.id,
+      { legacyCasesMigrated: true },
+      { ...(nsOption ? { namespace: nsOption } : {}), version: so.version, refresh: false }
+    );
+  } catch (err) {
+    if (SavedObjectsErrorHelpers.isConflictError(err as Error)) {
+      log.debug(
+        `[${executionId}] Configure SO ${so.id} changed concurrently while flagging ` +
+          `legacyCasesMigrated — skipping; the space is re-evaluated fresh next run`
+      );
+      return;
+    }
+    throw err;
+  }
 };
 
 /**
@@ -57,7 +81,7 @@ const setCasesMigratedFlag = async (
  * subject to the from/size result-window limit that breaks past ~10k docs). Fills only the
  * `extended_fields` keys a case does not have at all (absent or `null` — never overwriting any
  * existing entry, including an explicit `''` clear) and stops when the space is exhausted, the
- * per-run scan budget is hit, or the task is cancelled — returning where to resume in each of
+ * per-run scan budget is hit, or `shouldPause` goes true — returning where to resume in each of
  * those cases.
  */
 const backfillCasesForSpace = async (
@@ -65,7 +89,7 @@ const backfillCasesForSpace = async (
   so: SavedObject<ConfigurationPersistedAttributes>,
   resumeCursor: CaseBackfillCursor | undefined,
   scanBudget: number,
-  signal: AbortSignal,
+  shouldPause: () => boolean,
   executionId: string,
   log: Logger
 ): Promise<SpaceBackfillResult> => {
@@ -74,6 +98,19 @@ const backfillCasesForSpace = async (
   const nsOption = namespace === 'default' ? undefined : namespace;
   const namespaces = nsOption ? [nsOption] : ['default'];
   const filter = `${CASE_SAVED_OBJECT}.attributes.owner: "${owner}"`;
+
+  // Loaded once per space (not per case/page): resolves each legacy customField to its linked
+  // definition's storage key (`${name}_as_${type}`), the same derivation the live pairing path
+  // and the field-definitions migration phase use — never the raw v1 key. A field with no
+  // resolvable link is skipped (undefined), matching the rest of the migration's "never guess"
+  // philosophy; the reconciliation phase re-reports it.
+  const linkIndexes = buildFieldLinkIndexes(
+    await findFieldDefinitionsForOwner(repo, owner, nsOption)
+  );
+  const resolveStorageKey = (cf: { key: string; type: string }): string | undefined => {
+    const resolution = resolveDefinitionForLegacyField(cf, linkIndexes);
+    return resolution.status === 'resolved' ? resolution.storageKey : undefined;
+  };
 
   const openPit = async () =>
     (
@@ -150,7 +187,11 @@ const backfillCasesForSpace = async (
   };
 
   while (true) {
-    if (signal.aborted) {
+    if (shouldPause()) {
+      if (hadFailures) {
+        await safeClosePit(repo, cursor.pitId, log);
+        return { outcome: 'failed', scanned, backfilled, cursor: undefined };
+      }
       return { outcome: 'paused', scanned, backfilled, cursor: makeCursor() };
     }
 
@@ -162,7 +203,8 @@ const backfillCasesForSpace = async (
     const updates = cases.flatMap((caseSO) => {
       const additions = buildExtendedFieldsBackfill(
         caseSO.attributes.customFields,
-        caseSO.attributes.extended_fields
+        caseSO.attributes.extended_fields,
+        resolveStorageKey
       );
       if (Object.keys(additions).length === 0) {
         return [];
@@ -240,7 +282,8 @@ const backfillCasesForSpace = async (
     }
 
     // Per-run scan budget hit. If a page failed, report `failed` (retry the space fresh — its cases
-    // are idempotent); otherwise `paused` with the PIT cursor so the next run resumes where we left off.
+    // are idempotent); otherwise `paused` with the PIT cursor so the next run resumes where we left
+    // off. The run budget is handled by `shouldPause` at the top of the next iteration.
     if (scanned >= scanBudget) {
       if (hadFailures) {
         await safeClosePit(repo, cursor.pitId, log);
@@ -253,18 +296,24 @@ const backfillCasesForSpace = async (
 };
 
 /**
- * Whether a single space still needs its existing cases backfilled: it has legacy custom fields
- * AND it has never been flagged `legacyCasesMigrated`. A flagged space is never rescanned — its
- * `extended_fields` may have been deliberately edited (including cleared to `''`) since its
- * migration, and rerunning the backfill would silently restore stale legacy values over those
- * edits. Spaces with no custom fields are never backfilled (there is nothing to derive
- * `extended_fields` from), so they are never "pending". Exported so the task runner counts a
- * space as "skipped" from the same source of truth.
+ * Whether a single space still needs its existing cases backfilled: it has legacy custom fields,
+ * has never been flagged `legacyCasesMigrated`, AND its field-definitions + templates phases have
+ * already completed (`legacyCustomFieldsMigrated && legacyTemplatesMigrated`). The backfill
+ * resolves each custom field's storage key through its linked field definition — running it
+ * before that link exists would have nothing to resolve against. A flagged space is never
+ * rescanned — its `extended_fields` may have been deliberately edited (including cleared to
+ * `''`) since its migration, and rerunning the backfill would silently restore stale legacy
+ * values over those edits. Spaces with no custom fields are never backfilled (there is nothing to
+ * derive `extended_fields` from), so they are never "pending". Exported so the task runner counts
+ * a space as "skipped" from the same source of truth.
  */
 export const configureNeedsCaseBackfill = (
   so: SavedObject<ConfigurationPersistedAttributes>
 ): boolean =>
-  (so.attributes.customFields?.length ?? 0) > 0 && so.attributes.legacyCasesMigrated !== true;
+  (so.attributes.customFields?.length ?? 0) > 0 &&
+  so.attributes.legacyCasesMigrated !== true &&
+  so.attributes.legacyCustomFieldsMigrated === true &&
+  so.attributes.legacyTemplatesMigrated === true;
 
 /**
  * Whether ANY space still needs its existing cases backfilled — the exact predicate
@@ -288,7 +337,7 @@ export const runCaseBackfillPhase = async (
   repo: ISavedObjectsRepository,
   configures: Array<SavedObject<ConfigurationPersistedAttributes>>,
   resumeCursor: CaseBackfillCursor | undefined,
-  signal: AbortSignal,
+  shouldPause: () => boolean,
   executionId: string,
   log: Logger
 ): Promise<CaseBackfillPhaseResult> => {
@@ -317,7 +366,7 @@ export const runCaseBackfillPhase = async (
   let hadFailures = false;
 
   for (const so of ordered) {
-    if (signal.aborted) {
+    if (shouldPause()) {
       return { complete: false, backfilled, hadFailures, nextCursor: undefined };
     }
 
@@ -335,7 +384,7 @@ export const runCaseBackfillPhase = async (
       so,
       cursorForSpace,
       budgetLeft,
-      signal,
+      shouldPause,
       executionId,
       log
     );
@@ -343,12 +392,13 @@ export const runCaseBackfillPhase = async (
     backfilled += result.backfilled;
 
     if (result.outcome === 'paused') {
-      // Budget hit or cancelled on this space — stop and resume it (via its cursor) next run.
+      // Scan budget, run budget, or cancellation on this space — stop and resume it (via its
+      // cursor) next run.
       return { complete: false, backfilled, hadFailures, nextCursor: result.cursor };
     }
 
     if (result.outcome === 'complete') {
-      await setCasesMigratedFlag(repo, so);
+      await setCasesMigratedFlag(repo, so, log, executionId);
     } else {
       // 'failed' — leave the space unflagged and keep going, so one bad space doesn't starve the
       // rest. It is retried on a later run; the run reports hadFailures so the runner can give up.

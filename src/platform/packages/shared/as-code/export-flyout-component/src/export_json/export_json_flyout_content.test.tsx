@@ -37,7 +37,7 @@ describe('ExportJsonFlyoutContent', () => {
     );
 
     expect(getExportJson).toHaveBeenCalledWith();
-    expect(screen.getByRole('heading', { name: 'Export object as JSON' })).toHaveAttribute(
+    expect(screen.getByRole('heading', { name: 'Export Object as JSON' })).toHaveAttribute(
       'id',
       'exportJsonTitle'
     );
@@ -58,7 +58,6 @@ describe('ExportJsonFlyoutContent', () => {
         dataTestSubjPrefix="test"
         downloadExportJson={jest.fn()}
         getExportJson={() => ({ title: 'My object' })}
-        isTechnicalPreview={false}
         prepareExportJson={async (state) => ({ data: state, warnings: [] })}
       />
     );

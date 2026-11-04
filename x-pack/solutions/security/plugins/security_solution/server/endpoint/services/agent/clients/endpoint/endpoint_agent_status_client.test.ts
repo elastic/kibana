@@ -92,7 +92,7 @@ describe('EndpointAgentStatusClient', () => {
 
   it('should forward the request so the metadata read can fan out under CPS', async () => {
     const request = httpServerMock.createKibanaRequest();
-    const scoped = constructorOptions.endpointService.asScoped(request);
+    const scoped = await constructorOptions.endpointService.asScoped(request);
     const clientWithRequest = new EndpointAgentStatusClient({ ...constructorOptions, scoped });
     const metadataClient = constructorOptions.endpointService.getEndpointMetadataService();
     jest.spyOn(metadataClient, 'getHostMetadataList');

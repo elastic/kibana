@@ -19,6 +19,7 @@ import {
   PolicyOperatingSystem,
   ProtectionModes,
 } from '../../../../../../../../common/endpoint/types';
+import { POLICY_PROTECTION_FAMILY_TITLES } from '../../../../../../../../common/endpoint/models/policy_settings_ui_labels';
 import type { RansomwareProtectionOSes } from '../../../../types';
 import { useLicense } from '../../../../../../../common/hooks/use_license';
 import { SettingLockedCard } from '../setting_locked_card';
@@ -67,9 +68,7 @@ export const RansomwareProtectionCard = React.memo<RansomwareProtectionCardProps
 
     return (
       <SettingCard
-        type={i18n.translate('xpack.securitySolution.endpoint.policy.details.ransomware', {
-          defaultMessage: 'Ransomware',
-        })}
+        type={POLICY_PROTECTION_FAMILY_TITLES.ransomware}
         supportedOss={[OperatingSystem.WINDOWS]}
         dataTestSubj={getTestId()}
         selected={selected}

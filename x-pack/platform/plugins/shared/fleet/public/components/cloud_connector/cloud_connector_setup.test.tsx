@@ -362,7 +362,6 @@ describe('CloudConnectorSetup', () => {
         cloudProvider: AWS_PROVIDER,
         accountType: SINGLE_ACCOUNT,
         packageName: mockPackageInfo.name,
-        policyTemplate: defaultProps.templateName,
       });
     });
 
@@ -375,7 +374,6 @@ describe('CloudConnectorSetup', () => {
         cloudProvider: AWS_PROVIDER,
         accountType: SINGLE_ACCOUNT,
         packageName: mockPackageInfo.name,
-        policyTemplate: defaultProps.templateName,
       });
     });
 
@@ -388,7 +386,6 @@ describe('CloudConnectorSetup', () => {
         cloudProvider: AWS_PROVIDER,
         accountType: ORGANIZATION_ACCOUNT,
         packageName: mockPackageInfo.name,
-        policyTemplate: defaultProps.templateName,
       });
     });
 
@@ -546,7 +543,6 @@ describe('CloudConnectorSetup', () => {
         cloudProvider: AZURE_PROVIDER,
         accountType: SINGLE_ACCOUNT,
         packageName: mockPackageInfo.name,
-        policyTemplate: defaultProps.templateName,
       });
     });
 
@@ -625,7 +621,6 @@ describe('CloudConnectorSetup', () => {
         cloudProvider: AWS_PROVIDER,
         accountType: SINGLE_ACCOUNT,
         packageName: mockPackageInfo.name,
-        policyTemplate: defaultProps.templateName,
       });
     });
 

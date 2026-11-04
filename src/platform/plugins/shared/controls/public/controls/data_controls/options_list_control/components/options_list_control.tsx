@@ -255,7 +255,6 @@ export const OptionsListControl = ({
         className={'kbnGridLayout--hideDragHandle'}
         css={optionListControlStyles.filterGroup}
         data-control-id={componentApi.uuid}
-        data-shared-item={isPinned ? undefined : true}
       >
         <EuiInputPopover
           id={popoverId}

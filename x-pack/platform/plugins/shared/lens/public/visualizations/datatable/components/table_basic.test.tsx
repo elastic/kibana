@@ -157,6 +157,7 @@ describe('DatatableComponent', () => {
       paletteService: chartPluginMock.createPaletteRegistry(),
       theme: setUpMockTheme,
       interactive: true,
+      viewMode: 'view',
       syncColors: false,
       renderComplete,
       ...propsOverrides,
@@ -320,6 +321,72 @@ describe('DatatableComponent', () => {
     renderDatatableComponent({ columnFilterable: [true, true, true], interactive: false });
     await userEvent.hover(screen.getAllByTestId('dataGridRowCell')[0]);
     expect(screen.queryByTestId('lensDatatableFilterOut')).not.toBeInTheDocument();
+  });
+
+  describe('non-interactive viewMode', () => {
+    const urlFormatFactory = () =>
+      ({
+        convertToText: (x: unknown) => String(x),
+        convertToReact: (x: unknown, options?: { isInteractive?: boolean }) =>
+          options?.isInteractive ? (
+            <a href="https://example.com">{String(x)}</a>
+          ) : (
+            <span>{String(x)}</span>
+          ),
+      } as unknown as IFieldFormat);
+
+    test('it hides the header action button (hide, reset, sort)', () => {
+      renderDatatableComponent({ viewMode: 'non-interactive' });
+      expect(screen.queryByTestId('dataGridHeaderCellActionButton-a')).not.toBeInTheDocument();
+    });
+
+    test('it disables column resizing', () => {
+      renderDatatableComponent({ viewMode: 'non-interactive' });
+      expect(screen.queryAllByTestId('dataGridColumnResizer')).toHaveLength(0);
+    });
+
+    test('it disables sorting even when a sort order is configured', () => {
+      renderDatatableComponent({
+        viewMode: 'non-interactive',
+        args: { ...args, sortingColumnId: 'b', sortingDirection: 'desc' },
+      });
+      expect(screen.queryByTestId('dataGridHeaderCellSortingIcon-b')).not.toBeInTheDocument();
+    });
+
+    test('it renders URL-formatted cell content without a link', () => {
+      renderDatatableComponent({ viewMode: 'non-interactive', formatFactory: urlFormatFactory });
+      expect(screen.queryByRole('link')).not.toBeInTheDocument();
+      expect(screen.getByText('shoes')).toBeInTheDocument();
+    });
+
+    test('is distinct from interactive: false, which leaves these gates untouched', async () => {
+      renderDatatableComponent({
+        interactive: false,
+        formatFactory: urlFormatFactory,
+        args: { ...args, sortingColumnId: 'b', sortingDirection: 'desc' },
+      });
+
+      // header actions (reset, sort) are still available; "Hide" is separately gated
+      // by the `interactive` prop (see onColumnHide in table_basic.tsx), so it is absent here
+      await userEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-a'));
+      const actionPopover = screen.getByRole('dialog');
+      const actions = within(actionPopover)
+        .getAllByRole('button')
+        .map((button) => button.textContent);
+      expect(actions).toEqual(['Sort ascending', 'Sort descending', 'Reset width']);
+
+      // column resizing is still available
+      expect(screen.queryAllByTestId('dataGridColumnResizer').length).toBeGreaterThan(0);
+
+      // the configured sort order indicator is still shown
+      expect(screen.getByTestId('dataGridHeaderCellSortingIcon-b')).toHaveAttribute(
+        'data-euiicon-type',
+        'sortDown'
+      );
+
+      // URL-formatted cell content is still rendered as a link
+      expect(screen.getAllByRole('link').length).toBeGreaterThan(0);
+    });
   });
 
   test('it shows emptyPlaceholder for undefined bucketed data', () => {
@@ -792,7 +859,7 @@ describe('DatatableComponent', () => {
 
           renderDatatableComponent();
 
-          expect(getCellColorFn).toBeCalledTimes(2); // 2 initial renders of table
+          expect(getCellColorFn).toHaveBeenCalledTimes(2); // 2 initial renders of table
         });
 
         test('caches getCellColorFn by columnId with transpose columns', () => {
@@ -819,7 +886,7 @@ describe('DatatableComponent', () => {
             },
           });
 
-          expect(getCellColorFn).toBeCalledTimes(2); // 2 initial renders of table
+          expect(getCellColorFn).toHaveBeenCalledTimes(2); // 2 initial renders of table
         });
       });
 
@@ -861,6 +928,27 @@ describe('DatatableComponent', () => {
           ['1588024800000', ''],
           ['3', 'red'],
         ]);
+      });
+
+      test('should build the default palette with percent stop bounds instead of data bounds', () => {
+        args.columns[2].colorMode = 'cell';
+        data.rows = [150, 300, 450].map((c) => ({ a: 'shoes', b: 1588024800000, c }));
+
+        renderDatatableComponent({ getType: jest.fn().mockReturnValue({ type: 'metrics' }) });
+
+        expect(getCellColorFn).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          { type: 'ranges', bins: 0, min: 150, max: 450 },
+          false,
+          false,
+          false,
+          expect.objectContaining({
+            name: 'custom',
+            params: expect.objectContaining({ range: 'percent', rangeMin: 0, rangeMax: 100 }),
+          }),
+          undefined
+        );
       });
     });
   });

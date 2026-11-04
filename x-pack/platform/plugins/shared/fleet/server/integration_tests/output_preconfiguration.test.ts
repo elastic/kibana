@@ -14,7 +14,7 @@ import {
   createTestServers,
 } from '@kbn/core-test-helpers-kbn-server';
 
-import type { OutputSOAttributes } from '../types';
+import type { OutputSOAttributes, OutputSoKafkaAttributes } from '../types';
 
 import { useDockerRegistry, waitForFleetSetup } from './helpers';
 
@@ -186,7 +186,7 @@ describe('Fleet preconfigured outputs', () => {
         expect(kafkaOutput).toBeDefined();
         expect(kafkaOutput!.attributes.type).toBe('kafka');
         // proxy_id must be cleared — Kafka does not support proxies (#267281)
-        expect(kafkaOutput!.attributes.proxy_id).toBeNull();
+        expect((kafkaOutput!.attributes as OutputSoKafkaAttributes).proxy_id).toBeNull();
 
         // Capture version to detect spurious updates on the next boot
         versionAfterFirstBoot = kafkaOutput!.version!;

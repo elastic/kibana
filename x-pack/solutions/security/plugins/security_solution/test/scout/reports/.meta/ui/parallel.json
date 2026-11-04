@@ -1,8 +1,7 @@
 {
-  "sha1": "586d6de663b6abfd58e055f33854607a0c314fbd",
+  "sha1": "b94e9e325ba5eddc014befc36445712a0a336bcc",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -22,15 +21,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-serverless-security_ease",
-        "@cloud-serverless-security_ease"
+        "@local-serverless-security_ease"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/reports/ui/parallel_tests/ai_value_report.spec.ts",
-        "line": 23,
+        "line": 24,
         "column": 27
       }
     },
@@ -40,15 +36,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-serverless-security_ease",
-        "@cloud-serverless-security_ease"
+        "@local-serverless-security_ease"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/reports/ui/parallel_tests/ai_value_report.spec.ts",
-        "line": 30,
+        "line": 31,
         "column": 85
       }
     },
@@ -58,15 +51,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-serverless-security_ease",
-        "@cloud-serverless-security_ease"
+        "@local-serverless-security_ease"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/reports/ui/parallel_tests/ai_value_report.spec.ts",
-        "line": 39,
+        "line": 40,
         "column": 50
       }
     },

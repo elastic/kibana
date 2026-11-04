@@ -430,7 +430,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // Filter bar uses the field's customLabel in the DataView
         await filterBar.addFilter({ field: 'rule.name', operation: 'is', value: ruleName1 });
-        expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
+        await filterBar.expectFilter('rule.name', ruleName1);
 
         const grouping = await findings.findingsGrouping();
 
@@ -447,7 +447,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('remove filter', async () => {
         await filterBar.removeFilter('rule.name');
 
-        expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(false);
+        await filterBar.expectNoFilter('rule.name', ruleName1);
 
         const grouping = await findings.findingsGrouping();
         const groupCount = await grouping.getGroupCount();

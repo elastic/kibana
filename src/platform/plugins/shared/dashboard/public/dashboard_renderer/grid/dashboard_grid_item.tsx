@@ -96,7 +96,7 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
       'dshDashboardGrid__item--blurred': blurPanel,
       'dshDashboardGrid__item--selected': isIndicatingRelatedPanels,
       'dshDashboardGrid__item--hideHoverActions': blurPanel || focusedForEdit,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+      // eslint-disable-next-line @kbn/compat/typescript-naming-convention
       printViewport__vis: viewMode === 'print',
     });
 
@@ -136,6 +136,7 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
 
     const renderedEmbeddable = useMemo(() => {
       const panelProps = {
+        isSharedItem: true,
         showBadges: true,
         showBorder,
         showShadow: false,

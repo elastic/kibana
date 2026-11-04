@@ -26,3 +26,12 @@ export {
   getDataStreamMappings,
   updateIndexTemplateMappings,
 } from './data_streams';
+export {
+  CLOUD_REPOSITORY_NAME,
+  LOCAL_REPOSITORY_NAME,
+  RESPONSE_KEYS_WITHOUT_DEFAULT,
+  clearDefaultRepository,
+  createLocalRepository,
+  deleteAllRepositories,
+  setDefaultRepository,
+} from './snapshot_repositories';

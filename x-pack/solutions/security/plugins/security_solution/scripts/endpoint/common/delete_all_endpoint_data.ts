@@ -65,6 +65,9 @@ export const deleteAllEndpointData = async (
         url: esUrl,
         username: unrestrictedUser.username,
         password: unrestrictedUser.password,
+        // Serverless ES is HTTPS with the dev CA. Without this, the new client
+        // rejects the certificate and cleanup cannot delete endpoint data.
+        useCertForSsl: true,
       });
     }
   }

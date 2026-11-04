@@ -513,8 +513,21 @@
                   "properties": {
                     "resolved_to": {
                       "type": "keyword"
+                    },
+                    "risk": {
+                      "properties": {
+                        "calculated_level": {
+                          "type": "keyword"
+                        },
+                        "calculated_score": {
+                          "type": "float"
+                        },
+                        "calculated_score_norm": {
+                          "type": "float"
+                        }
+                      }
                     }
-                  }
+                }
                 },
                 "supervises": {
                   "properties": {

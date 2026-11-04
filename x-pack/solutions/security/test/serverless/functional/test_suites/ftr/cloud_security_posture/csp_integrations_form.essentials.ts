@@ -27,6 +27,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('[Essentials PLI] Integration installation form should be available with Essentials or Complete PLI', async () => {
       await pageObjects.header.waitUntilLoadingHasFinished();
+      await cisIntegration.waitForCreateIntegrationForm();
       const pliBlockExists = await cisIntegration.checkIntegrationPliAuthBlockExists();
 
       expect(pliBlockExists).to.be(false);

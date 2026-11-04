@@ -7,10 +7,23 @@
 
 import { syntheticsEditMonitorLocatorID } from '@kbn/observability-plugin/common';
 
-async function navigate({ configId, spaceId }: { configId: string; spaceId?: string }) {
+async function navigate({
+  configId,
+  spaceId,
+  packagePolicyId,
+}: {
+  configId: string;
+  spaceId?: string;
+  packagePolicyId?: string;
+}) {
+  const query = new URLSearchParams({
+    ...(spaceId ? { spaceId } : {}),
+    ...(packagePolicyId ? { packagePolicyId } : {}),
+  }).toString();
+
   return {
     app: 'synthetics',
-    path: `/edit-monitor/${configId}` + (spaceId ? `?spaceId=${spaceId}` : ''),
+    path: `/edit-monitor/${configId}` + (query ? `?${query}` : ''),
     state: {},
   };
 }

@@ -6,29 +6,29 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export const MinAgentVersionCallout: React.FC<{ minVersion: string }> = ({ minVersion }) => {
   return (
     <>
       <EuiSpacer size="m" />
-      <EuiCallOut
-        color="warning"
-        iconType="warning"
+      <KbnWarningCallout
         title={
           <FormattedMessage
             id="xpack.fleet.agentEnrollment.minAgentVersionCallout.title"
             defaultMessage="Agent version requirement"
           />
         }
-      >
-        <FormattedMessage
-          id="xpack.fleet.agentEnrollment.minAgentVersionCallout.body"
-          defaultMessage="This policy contains integrations that require Elastic Agent {minVersion} or later. Enrolling an agent on an earlier version can result in unexpected or broken functionality."
-          values={{ minVersion }}
-        />
-      </EuiCallOut>
+        text={
+          <FormattedMessage
+            id="xpack.fleet.agentEnrollment.minAgentVersionCallout.body"
+            defaultMessage="This policy contains integrations that require Elastic Agent {minVersion} or later. Enrolling an agent on an earlier version can result in unexpected or broken functionality."
+            values={{ minVersion }}
+          />
+        }
+      />
     </>
   );
 };

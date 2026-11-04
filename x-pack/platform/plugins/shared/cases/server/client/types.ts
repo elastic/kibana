@@ -33,6 +33,8 @@ import type { NotificationService } from '../services/notifications/types';
 import type { User } from '../common/types/user';
 import type { ConfigType } from '../config';
 import type { CasesEventBus } from '../events/event_bus';
+import type { ActionSource } from '../../common/types/domain';
+import type { CasesClient } from './client';
 
 export interface CasesServices {
   alertsService: AlertService;
@@ -99,3 +101,12 @@ export type CasesClientSource =
   | 'workflow'
   | 'agent_builder'
   | 'plugin_contract';
+
+export interface GetCasesClientOptions {
+  actionSource?: ActionSource;
+}
+
+export type GetCasesClientFn = (
+  request: KibanaRequest,
+  options?: GetCasesClientOptions
+) => Promise<CasesClient>;

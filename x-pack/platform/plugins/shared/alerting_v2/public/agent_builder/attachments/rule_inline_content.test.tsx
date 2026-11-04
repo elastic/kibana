@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { RuleInlineContent } from './rule_inline_content';
 
@@ -21,8 +22,7 @@ const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}
     metadata: { name: 'My Rule', tags: ['tag1', 'tag2'], description: 'A test rule' },
     schedule: { every: '5m' },
     time_field: '@timestamp',
-    query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
-    state_transition: null,
+    query: { base: 'FROM logs-*' },
     enabled: overrides.enabled,
   } as any,
 });
@@ -35,25 +35,26 @@ describe('RuleInlineContent', () => {
     expect(queryByText('My Rule')).toBeNull();
   });
 
-  it('renders the kind badge', () => {
+  it('renders the outcome badge for the rule kind', () => {
     const { getByText } = render(
       <RuleInlineContent attachment={createAttachment()} isSidebar={false} />
     );
-    expect(getByText('signal')).toBeDefined();
+    expect(getByText('Outcome')).toBeDefined();
+    expect(getByText(RULE_KIND_LABELS.signal)).toBeDefined();
   });
 
   it('shows draft status when no origin', () => {
     const { getByText } = render(
       <RuleInlineContent attachment={createAttachment()} isSidebar={false} />
     );
-    expect(getByText('draft')).toBeDefined();
+    expect(getByText('Draft')).toBeDefined();
   });
 
   it('shows enabled status when origin is set and enabled is undefined (server default)', () => {
     const { getByText } = render(
       <RuleInlineContent attachment={createAttachment({ origin: 'rule-123' })} isSidebar={false} />
     );
-    expect(getByText('enabled')).toBeDefined();
+    expect(getByText('Enabled')).toBeDefined();
   });
 
   it('shows enabled status when origin is set and enabled is true', () => {
@@ -63,7 +64,7 @@ describe('RuleInlineContent', () => {
         isSidebar={false}
       />
     );
-    expect(getByText('enabled')).toBeDefined();
+    expect(getByText('Enabled')).toBeDefined();
   });
 
   it('shows disabled status when origin is set and enabled is false', () => {
@@ -73,14 +74,14 @@ describe('RuleInlineContent', () => {
         isSidebar={false}
       />
     );
-    expect(getByText('disabled')).toBeDefined();
+    expect(getByText('Disabled')).toBeDefined();
   });
 
   it('shows the schedule interval', () => {
     const { getByText } = render(
       <RuleInlineContent attachment={createAttachment()} isSidebar={false} />
     );
-    expect(getByText('Every 5m')).toBeDefined();
+    expect(getByText('Every 5 min')).toBeDefined();
   });
 
   it('shows the description', () => {
@@ -116,6 +117,13 @@ describe('RuleInlineContent', () => {
     const attachment = createAttachment();
     attachment.data.schedule = undefined;
     const { queryByText } = render(<RuleInlineContent attachment={attachment} isSidebar={false} />);
-    expect(queryByText('Every 5m')).toBeNull();
+    expect(queryByText('Every 5 min')).toBeNull();
+  });
+
+  it('falls back to the raw interval when its unit is not supported by formatDuration', () => {
+    const attachment = createAttachment();
+    attachment.data.schedule = { every: '250ms' };
+    const { getByText } = render(<RuleInlineContent attachment={attachment} isSidebar={false} />);
+    expect(getByText('Every 250ms')).toBeDefined();
   });
 });

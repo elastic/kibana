@@ -746,6 +746,28 @@ describe('Fleet - validatePackagePolicy()', () => {
         expect(result.inputs?.foo?.streams?.foo?.condition!.length).toBeGreaterThan(0);
         expect(validationHasErrors(result)).toBe(true);
       });
+
+      it('does not throw and returns no condition errors for a boolean condition', () => {
+        // Handlebars can coerce 'true'/'false' text to boolean; validateCondition must not
+        // call .trim() on the raw boolean value.
+        const result = validatePackagePolicy(
+          { ...validPackagePolicy, condition: true as any },
+          mockPackage,
+          deps
+        );
+        expect(result.condition).toBeNull();
+        expect(validationHasErrors(result)).toBe(false);
+      });
+
+      it('does not throw and returns no condition errors for boolean false condition', () => {
+        const result = validatePackagePolicy(
+          { ...validPackagePolicy, condition: false as any },
+          mockPackage,
+          deps
+        );
+        expect(result.condition).toBeNull();
+        expect(validationHasErrors(result)).toBe(false);
+      });
     });
   });
 
@@ -2218,11 +2240,80 @@ describe('Fleet - validatePackagePolicyConfig', () => {
       expect(res).toEqual(null);
     });
 
-    it('should not return an error message if the package is not input type', () => {
+    it('should return an error message for integration packages with invalid dataset', () => {
       const res = validatePackagePolicyConfig(
         {
           type: 'text',
           value: { dataset: 'Test', package: 'log' },
+        },
+        {
+          name: 'data_stream.dataset',
+          type: 'text',
+        },
+        'data_stream.dataset',
+        parse,
+        'integration'
+      );
+
+      expect(res).toEqual(['Dataset must be lowercase']);
+    });
+
+    describe('agent variable placeholders', () => {
+      const validateRaw = (value: unknown, packageType: string) =>
+        validatePackagePolicyConfig(
+          { type: 'text', value } as any,
+          { name: 'data_stream.dataset', type: 'text' },
+          'data_stream.dataset',
+          parse,
+          packageType
+        );
+
+      it.each([
+        '${env.LOGS_DATASET}',
+        'logs-${env.LOGS_TARGET}',
+        '${env.A}-x-${env.B}',
+        '${kubernetes.namespace}',
+        "${env.LOGS_DATASET|'default'}",
+      ])('should skip validation for integration packages with placeholder %s', (dataset) => {
+        expect(validateRaw(dataset, 'integration')).toEqual(null);
+        expect(validateRaw({ dataset, package: 'kubernetes' }, 'integration')).toEqual(null);
+      });
+
+      it('should still validate integration datasets without a placeholder', () => {
+        expect(validateRaw('Test', 'integration')).toEqual(['Dataset must be lowercase']);
+        expect(validateRaw('logs-${env.x', 'integration')).toEqual([
+          'Dataset contains invalid characters',
+        ]);
+      });
+
+      it('should keep validating placeholders for input packages', () => {
+        expect(validateRaw('${env.LOGS_DATASET}', 'input')).toEqual(['Dataset must be lowercase']);
+      });
+    });
+
+    it('should return an error message for integration packages with hyphens in dataset', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: { dataset: 'gew-audit-logs', package: 'aws_logs' },
+        },
+        {
+          name: 'data_stream.dataset',
+          type: 'text',
+        },
+        'data_stream.dataset',
+        parse,
+        'integration'
+      );
+
+      expect(res).toEqual(['Dataset contains invalid characters']);
+    });
+
+    it('should not return an error message for integration packages with valid dataset', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: { dataset: 'aws_logs.audit', package: 'aws_logs' },
         },
         {
           name: 'data_stream.dataset',

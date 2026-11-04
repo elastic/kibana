@@ -12,6 +12,7 @@ import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { TemplateBody } from '@kbn/workflows-library';
+import type { TemplateInstallStep } from './template_install_section';
 import { TemplateInstallSection } from './template_install_section';
 import { createMockWorkflowApi } from '../../../api/workflows_api.mock';
 import { testQueryClientConfig } from '../../../test_utils';
@@ -36,6 +37,16 @@ jest.mock('./connector_field', () => ({
     'data-test-subj'?: string;
   }) => (
     <button type="button" data-test-subj={dataTestSubj} onClick={() => onChange('connector-1')} />
+  ),
+}));
+
+// Same for the requirements summary (it resolves connector labels through the
+// services provider); its own test covers the rendering.
+jest.mock('./template_requirements', () => ({
+  TemplateRequirements: ({ fields }: { fields: Array<{ name: string }> }) => (
+    <div data-test-subj="workflowLibraryTemplateRequirements">
+      {fields.map((field) => field.name).join(',')}
+    </div>
   ),
 }));
 
@@ -71,6 +82,7 @@ describe('TemplateInstallSection', () => {
   let navigateToApp: jest.Mock;
   let addSuccessToast: jest.Mock;
   let onPreviewValuesChange: jest.Mock;
+  let onStepChange: jest.Mock;
 
   const setCapabilities = (canCreate: boolean) => {
     mockUseKibana.mockReturnValue({
@@ -86,11 +98,17 @@ describe('TemplateInstallSection', () => {
 
   const PREVIEW_YAML = 'name: Demo Template\nsteps:\n  - name: demo_step\n    type: demo.run\n';
 
-  const renderSection = (template: TemplateBody = TEMPLATE) =>
+  // Most assertions target the install form, so the setup step is the default.
+  const renderSection = ({
+    template = TEMPLATE,
+    step = 'setup',
+  }: { template?: TemplateBody; step?: TemplateInstallStep } = {}) =>
     render(
       <QueryClientProvider client={queryClient}>
         <TemplateInstallSection
           template={template}
+          step={step}
+          onStepChange={onStepChange}
           onPreviewValuesChange={onPreviewValuesChange}
           previewYaml={PREVIEW_YAML}
         />
@@ -103,10 +121,11 @@ describe('TemplateInstallSection', () => {
     navigateToApp = jest.fn();
     addSuccessToast = jest.fn();
     onPreviewValuesChange = jest.fn();
+    onStepChange = jest.fn();
     setCapabilities(true);
   });
 
-  it('should render the form fields and the Remix with AI action', () => {
+  it('should render the form fields and the Remix with AI action on the setup step', () => {
     renderSection();
 
     expect(screen.getByTestId('workflowLibraryInstallForm')).toBeInTheDocument();
@@ -114,6 +133,24 @@ describe('TemplateInstallSection', () => {
       screen.getByTestId('workflowLibraryInstallForm-field-demo-connector')
     ).toBeInTheDocument();
     expect(screen.getByTestId('workflowLibraryTemplateRemixButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('workflowLibraryTemplateRequirements')).toBeNull();
+    expect(screen.queryByTestId('workflowLibraryTemplateSetupButton')).toBeNull();
+  });
+
+  it('should render the requirements summary and the setup action on the details step', () => {
+    renderSection({ step: 'details' });
+
+    expect(screen.getByTestId('workflowLibraryTemplateRequirements')).toHaveTextContent(
+      'demo-connector,max-age'
+    );
+    expect(screen.queryByTestId('workflowLibraryInstallForm')).toBeNull();
+    // Install is only reachable through setup while there are fields to fill.
+    expect(screen.queryByTestId('workflowLibraryTemplateInstallButton')).toBeNull();
+    expect(screen.getByTestId('workflowLibraryTemplateRemixButton')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('workflowLibraryTemplateSetupButton'));
+
+    expect(onStepChange).toHaveBeenCalledWith('setup');
   });
 
   it('should open the editor with the previewed YAML as history state on Remix with AI', () => {
@@ -189,13 +226,16 @@ describe('TemplateInstallSection', () => {
     expect(screen.getByText('Expected a connector ID.')).toBeInTheDocument();
   });
 
-  it('should render only the actions block for templates without an install form', () => {
+  it('should install straight from the details step for templates without an install form', () => {
     renderSection({
-      ...TEMPLATE,
-      metadata: { ...TEMPLATE.metadata, install: undefined },
+      template: { ...TEMPLATE, metadata: { ...TEMPLATE.metadata, install: undefined } },
+      step: 'details',
     });
 
     expect(screen.queryByTestId('workflowLibraryInstallForm')).toBeNull();
+    // Nothing to configure, so there is no setup step to send the user to.
+    expect(screen.queryByTestId('workflowLibraryTemplateRequirements')).toBeNull();
+    expect(screen.queryByTestId('workflowLibraryTemplateSetupButton')).toBeNull();
     expect(screen.getByTestId('workflowLibraryTemplateInstallButton')).toBeEnabled();
   });
 

@@ -11,10 +11,27 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../../common/lib/kibana';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 import { useLeadGenerationPrivileges } from '../../../api/hooks/use_lead_generation_privileges';
 import { fromApiLead } from './types';
 import * as i18n from './translations';
 import { MAX_RECENT_LEADS } from './utils';
+
+const LEADS_LIST_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.THREAT_HUNTING_LEADS,
+  'leads_list'
+);
+const LEADS_GENERATE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.THREAT_HUNTING_LEADS,
+  'leads_generate'
+);
+const LEADS_GENERATION_STATUS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.THREAT_HUNTING_LEADS,
+  'leads_generation_status'
+);
 
 const HUNTING_LEADS_QUERY_KEY = 'hunting-leads';
 const LEAD_SCHEDULE_QUERY_KEY = 'lead-generation-status';
@@ -134,7 +151,8 @@ export const useHuntingLeads = (
     refetch,
   } = useQuery({
     queryKey: [HUNTING_LEADS_QUERY_KEY],
-    queryFn: ({ signal }) => fetchLeads({ signal, ...FETCH_LEADS_PARAMS }),
+    queryFn: ({ signal }) =>
+      fetchLeads({ signal, ...FETCH_LEADS_PARAMS, context: LEADS_LIST_CONTEXT }),
     enabled: isEnabled,
     onError: (error: Error) => {
       if (isPermissionDenied(error)) {
@@ -152,13 +170,20 @@ export const useHuntingLeads = (
         await delay(POLL_INTERVAL_MS);
         if (signal.aborted) return 'timeout';
 
-        const status = await fetchLeadGenerationStatus({ signal });
+        const status = await fetchLeadGenerationStatus({
+          signal,
+          context: LEADS_GENERATION_STATUS_CONTEXT,
+        });
         if (status.lastExecutionUuid === executionUuid) {
           if (status.lastError) {
             throw new Error(status.lastError);
           }
 
-          const result = await fetchLeads({ ...FETCH_LEADS_PARAMS, signal });
+          const result = await fetchLeads({
+            ...FETCH_LEADS_PARAMS,
+            signal,
+            context: LEADS_LIST_CONTEXT,
+          });
           queryClient.setQueryData([HUNTING_LEADS_QUERY_KEY], result);
           queryClient.setQueryData([LEAD_SCHEDULE_QUERY_KEY], status);
           return 'success';
@@ -170,8 +195,8 @@ export const useHuntingLeads = (
       // isGenerating flips to false, preventing a spurious empty-state flash.
       if (!signal.aborted) {
         const [finalResult, finalStatus] = await Promise.all([
-          fetchLeads({ ...FETCH_LEADS_PARAMS, signal }),
-          fetchLeadGenerationStatus({ signal }),
+          fetchLeads({ ...FETCH_LEADS_PARAMS, signal, context: LEADS_LIST_CONTEXT }),
+          fetchLeadGenerationStatus({ signal, context: LEADS_GENERATION_STATUS_CONTEXT }),
         ]);
         queryClient.setQueryData([HUNTING_LEADS_QUERY_KEY], finalResult);
         queryClient.setQueryData([LEAD_SCHEDULE_QUERY_KEY], finalStatus);
@@ -187,7 +212,11 @@ export const useHuntingLeads = (
       const { signal } = abortCtrl.current;
 
       telemetry.reportEvent(EntityEventTypes.LeadGenerationGenerateClicked, {});
-      const { executionUuid } = await generateLeadsApi({ params: { connectorId }, signal });
+      const { executionUuid } = await generateLeadsApi({
+        params: { connectorId },
+        signal,
+        context: LEADS_GENERATE_CONTEXT,
+      });
       writeInFlightGeneration(spaceId, { executionUuid, startedAt: Date.now() });
       return pollForCompletion(executionUuid, signal);
     },
@@ -213,7 +242,8 @@ export const useHuntingLeads = (
 
   const { data: statusData, isLoading: isStatusLoading } = useQuery({
     queryKey: [LEAD_SCHEDULE_QUERY_KEY],
-    queryFn: ({ signal }) => fetchLeadGenerationStatus({ signal }),
+    queryFn: ({ signal }) =>
+      fetchLeadGenerationStatus({ signal, context: LEADS_GENERATION_STATUS_CONTEXT }),
     enabled: isEnabled,
     onError: (error: Error) => {
       if (isPermissionDenied(error)) {

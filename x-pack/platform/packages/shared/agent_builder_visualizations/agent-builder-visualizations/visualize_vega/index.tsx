@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { css } from '@emotion/react';
 import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
@@ -27,15 +26,8 @@ import {
   type VegaConfig,
 } from '@kbn/agent-builder-visualizations-common';
 import type { VisualizationServices } from '../services';
-import {
-  visualizationWrapperStyles,
-  visualizationEmbeddableStyles,
-  visualizationHeaderStyles,
-  visualizationTimePickerContainerClassName,
-} from '../shared/styles';
-import { DEFAULT_VISUALIZATION_HEIGHT } from '../shared/get_visualization_dimensions';
-import { FallbackVisualizationActions } from '../shared/visualization_actions';
 import { useVisPreviewUnifiedSearch } from '../shared/use_vis_preview_unified_search';
+import { VisualizationPreviewShell } from '../shared/visualization_preview_shell';
 
 const saveButtonLabel = i18n.translate('xpack.agentBuilder.visualization.vega.saveToDashboard', {
   defaultMessage: 'Save to dashboard',
@@ -79,7 +71,6 @@ export function VisualizeVega({
     [visualization]
   );
   const { application, unifiedSearch, embeddable } = services;
-  const SearchBar = unifiedSearch.ui.SearchBar;
   const canWriteDashboards = application?.capabilities.dashboard_v2?.showWriteControls === true;
 
   const { searchBarProps, effectiveTimeRange } = useVisPreviewUnifiedSearch({ timeRange });
@@ -138,16 +129,6 @@ export function VisualizeVega({
     [vegaConfig, embeddable]
   );
 
-  // The tool-result / markdown surface has no attachment header to host buttons,
-  // so fall back to rendering them locally (matching the Lens renderer).
-  const [localActionButtons, setLocalActionButtons] = useState<ActionButton[]>([]);
-  const registerLocalActionButtons = useCallback(
-    (buttons: ActionButton[]) => setLocalActionButtons(buttons),
-    []
-  );
-  const register = registerActionButtons ?? registerLocalActionButtons;
-  const shouldRenderLocalActionButtons = !registerActionButtons && localActionButtons.length > 0;
-
   const actionButtons = useMemo<ActionButton[]>(
     () => [
       {
@@ -162,29 +143,21 @@ export function VisualizeVega({
     [canWriteDashboards, openSaveModal]
   );
 
-  useEffect(() => {
-    register(actionButtons);
-    return () => register([]);
-  }, [actionButtons, register]);
-
   return (
-    <div data-test-subj="agentBuilderVegaVisualization" css={visualizationWrapperStyles}>
-      {shouldRenderLocalActionButtons && (
-        <FallbackVisualizationActions buttons={localActionButtons} />
-      )}
-      <div css={visualizationHeaderStyles} className={visualizationTimePickerContainerClassName}>
-        <SearchBar {...searchBarProps} />
-      </div>
-
-      <div
-        css={[visualizationEmbeddableStyles(DEFAULT_VISUALIZATION_HEIGHT), css({ width: '100%' })]}
+    <>
+      <VisualizationPreviewShell
+        unifiedSearch={unifiedSearch}
+        searchBarProps={searchBarProps}
+        actionButtons={actionButtons}
+        registerActionButtons={registerActionButtons}
+        dataTestSubj="agentBuilderVegaVisualization"
       >
         <EmbeddableRenderer
           type={VISUALIZE_EMBEDDABLE_TYPE}
           getParentApi={getParentApi}
           hidePanelChrome
         />
-      </div>
+      </VisualizationPreviewShell>
 
       {isSaveModalOpen && (
         <SavedObjectSaveModalDashboard
@@ -195,6 +168,6 @@ export function VisualizeVega({
           onSave={onSaveToDashboard}
         />
       )}
-    </div>
+    </>
   );
 }

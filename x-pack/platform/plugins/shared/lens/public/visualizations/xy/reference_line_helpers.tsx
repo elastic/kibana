@@ -31,6 +31,7 @@ import {
 } from './visualization_helpers';
 import { generateId } from '../../id_generator';
 import { defaultReferenceLineColor } from './color_assignment';
+import { isEsqlChart } from '../../utils';
 
 export interface ReferenceLineBase {
   label: 'x' | 'yRight' | 'yLeft';
@@ -450,6 +451,10 @@ export const getReferenceConfiguration = ({
     frame.activeData
   );
   const isHorizontal = isHorizontalChart(state.layers);
+  // Static reference layers reuse the form-based datasource without exposing DSL operations.
+  const staticValueOnly =
+    isEsqlChart(frame.datasourceLayers) &&
+    !frame.datasourceLayers[layer.layerId]?.isTextBasedLanguage();
   return {
     // Each reference lines layer panel will have sections for each available axis
     // (horizontal axis, vertical axis left, vertical axis right).
@@ -472,6 +477,7 @@ export const getReferenceConfiguration = ({
       requiredMinDimensionCount: 0,
       enableDimensionEditor: true,
       supportStaticValue: true,
+      staticValueOnly,
       paramEditorCustomProps: {
         labels: [
           i18n.translate('xpack.lens.indexPattern.staticValue.label', {

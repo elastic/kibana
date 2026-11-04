@@ -7,6 +7,7 @@
 
 import type { DefaultEvaluators } from '@kbn/evals';
 import { createAttackDiscoveryRubricEvaluator } from './attack_discovery_rubric_evaluator';
+import { EMPTY_RETRIEVAL_EVIDENCE } from '../types';
 import type {
   AttackDiscovery,
   AttackDiscoveryAgentBuilderExample,
@@ -35,8 +36,10 @@ const baseOutput = (insights: AttackDiscovery[] | null): AttackDiscoveryAgentBui
   workflow: {
     stages: [],
     retrievedAlertCount: null,
+    retrievedAlertCountSource: 'none',
     passedAlertCount: null,
     validatedDiscoveryCount: null,
+    retrievalEvidence: EMPTY_RETRIEVAL_EVIDENCE,
   },
 });
 
@@ -52,7 +55,12 @@ const expectedFor = (
 
 describe('createAttackDiscoveryRubricEvaluator', () => {
   const judge = jest.fn();
-  const criteria = jest.fn(() => ({ name: 'criteria', kind: 'LLM' as const, evaluate: judge }));
+  const criteria = jest.fn(() => ({
+    name: 'criteria',
+    kind: 'LLM' as const,
+    direction: 'maximize',
+    evaluate: judge,
+  }));
   const evaluators = { criteria } as unknown as DefaultEvaluators;
 
   const evaluate = (params: {

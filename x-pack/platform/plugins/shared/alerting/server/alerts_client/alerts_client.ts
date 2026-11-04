@@ -69,13 +69,14 @@ import {
   AlertBuilder,
 } from './lib';
 import { resolveAlertConflicts } from './lib/alert_conflict_resolver';
-import { getTrackedAlerts, createEmptyTrackedAlerts } from './lib/get_tracked_alerts';
+import { createEmptyTrackedAlerts } from './lib/get_tracked_alerts';
+import { reconcileTrackedAlertsWithState } from './lib/reconcile_tracked_alerts';
+import { getMaxAlertLimit } from '../../common';
 import {
   filterMaintenanceWindows,
   filterMaintenanceWindowsIds,
 } from '../task_runner/maintenance_windows';
 import { ErrorWithType } from '../lib/error_with_type';
-import { DEFAULT_MAX_ALERTS } from '../config';
 import { RUNTIME_MAINTENANCE_WINDOW_ID_FIELD } from './lib/get_summarized_alerts_query';
 import { retryTransientEsErrors } from '../lib/retry_transient_es_errors';
 
@@ -158,29 +159,44 @@ export class AlertsClient<
     if (runTimestamp) {
       this.runTimestampString = runTimestamp.toISOString();
     }
-    await this.legacyAlertsClient.initializeExecution(opts);
 
     // No need to fetch the tracked alerts for the non-lifecycle rules
-    if (this.ruleType.autoRecoverAlerts) {
-      try {
-        this.trackedAlerts = await getTrackedAlerts<AlertData>({
-          ruleId: this.options.rule.id,
-          lookBackWindow: opts.flappingSettings.lookBackWindow,
-          maxAlertLimit: this.legacyAlertsClient.getMaxAlertLimit() || DEFAULT_MAX_ALERTS,
-          activeAlertsFromState: opts.activeAlertsFromState,
-          recoveredAlertsFromState: opts.recoveredAlertsFromState,
-          search: (queryBody) => this.search(queryBody),
-          logger: this.options.logger,
-          ruleInfoMessage: this.ruleInfoMessage,
-          logTags: this.logTags,
-        });
-      } catch (err) {
-        this.options.logger.error(
-          `Error searching for tracked alerts by UUID ${this.ruleInfoMessage} - ${err.message}`,
-          this.logTags
-        );
-        throw err;
-      }
+    if (!this.ruleType.autoRecoverAlerts) {
+      await this.legacyAlertsClient.initializeExecution(opts);
+      return;
+    }
+
+    const { trackedAlerts, activeAlertsFromState, recoveredAlertsFromState } =
+      await this.reconcileTrackedAlerts(opts);
+    this.trackedAlerts = trackedAlerts;
+    await this.legacyAlertsClient.initializeExecution({
+      ...opts,
+      activeAlertsFromState,
+      recoveredAlertsFromState,
+    });
+  }
+
+  // Loads the tracked alert documents and makes them agree with the task state, so a run that
+  // persisted alerts and then failed before saving its state does not make this run create
+  // duplicate alert documents with new UUIDs.
+  private async reconcileTrackedAlerts(opts: InitializeExecutionOpts) {
+    try {
+      return await reconcileTrackedAlertsWithState<AlertData>({
+        ruleId: this.options.rule.id,
+        activeAlertsFromState: opts.activeAlertsFromState,
+        recoveredAlertsFromState: opts.recoveredAlertsFromState,
+        maxAlerts: getMaxAlertLimit(opts.maxAlerts),
+        search: (queryBody) => this.search(queryBody),
+        logger: this.options.logger,
+        ruleInfoMessage: this.ruleInfoMessage,
+        logTags: this.logTags,
+      });
+    } catch (err) {
+      this.options.logger.error(
+        `Error searching for tracked alerts by UUID ${this.ruleInfoMessage} - ${err.message}`,
+        this.logTags
+      );
+      throw err;
     }
   }
 
@@ -756,7 +772,7 @@ export class AlertsClient<
   }
 
   public getAlertsToUpdateWithLastScheduledActions(): AlertsToUpdateWithLastScheduledActions {
-    const { rawActiveAlerts } = this.getRawAlertInstancesForState(true);
+    const { rawActiveAlerts } = this.getRawAlertInstancesForState();
     const result: AlertsToUpdateWithLastScheduledActions = {};
     try {
       for (const key in rawActiveAlerts) {

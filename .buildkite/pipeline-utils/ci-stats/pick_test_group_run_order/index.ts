@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { pickTestGroupRunOrder } from './pick_test_group_run_order';
+export { pickTestGroupRunOrder } from './pick_test_group_run_order.ts';

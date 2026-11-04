@@ -18,9 +18,9 @@ export interface ProcessLiveHistoryParams {
   liveHits: LiveActionHit[];
   osqueryContext: OsqueryAppContext;
   request: KibanaRequest;
-  spaceId: string;
   integrationNamespaces?: readonly string[];
   ccsEnabled?: boolean;
+  cpsActive?: boolean;
   logger: Logger;
 }
 
@@ -40,9 +40,9 @@ export const processLiveHistory = async ({
   liveHits,
   osqueryContext,
   request,
-  spaceId,
   integrationNamespaces,
   ccsEnabled = false,
+  cpsActive = false,
   logger,
 }: ProcessLiveHistoryParams): Promise<ProcessLiveHistoryResult> => {
   const liveRows: LiveHistoryRow[] = liveHits.map(mapLiveHitToRow);
@@ -65,9 +65,9 @@ export const processLiveHistory = async ({
         liveRows,
         osqueryContext,
         request,
-        spaceId,
         integrationNamespaces,
-        ccsEnabled
+        ccsEnabled,
+        cpsActive
       );
     } catch (err) {
       logger.warn(`Failed to enrich live rows with result counts: ${(err as Error).message}`);
@@ -82,9 +82,9 @@ const enrichWithResultCounts = async (
   liveRows: LiveHistoryRow[],
   osqueryContext: OsqueryAppContext,
   request: KibanaRequest,
-  spaceId: string,
   integrationNamespaces: readonly string[] | undefined,
-  ccsEnabled: boolean
+  ccsEnabled: boolean,
+  cpsActive: boolean
 ): Promise<void> => {
   const allSubActionIds = liveHits.flatMap(collectSubActionIds);
   const uniqueActionIds = [...new Set(allSubActionIds)];
@@ -92,15 +92,10 @@ const enrichWithResultCounts = async (
   if (uniqueActionIds.length === 0) return;
 
   const [coreStart] = await osqueryContext.getStartServices();
-  const readEsClient = getReadEsClient(
-    coreStart.elasticsearch.client,
-    request,
-    osqueryContext.cpsEnabled
-  );
+  const readEsClient = getReadEsClient(coreStart.elasticsearch.client, request, cpsActive);
   const resultCountsMap = await getResultCountsForActions(
     readEsClient,
     uniqueActionIds,
-    spaceId,
     integrationNamespaces,
     ccsEnabled
   );

@@ -11,7 +11,12 @@ import dateMath from '@kbn/datemath';
 import type { RefreshInterval } from '@kbn/data-plugin/common';
 
 export function isTimeRangeValid(timeRange?: { from: string; to: string }): boolean {
-  if (!timeRange?.from || !timeRange?.to) {
+  if (
+    typeof timeRange?.from !== 'string' ||
+    typeof timeRange?.to !== 'string' ||
+    !timeRange.from ||
+    !timeRange.to
+  ) {
     return false;
   }
   const fromMoment = dateMath.parse(timeRange.from);

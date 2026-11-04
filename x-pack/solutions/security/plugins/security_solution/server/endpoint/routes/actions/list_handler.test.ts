@@ -94,7 +94,9 @@ describe('Action List Handler', () => {
     });
 
     it('should skip the index check under CPS, where the origin may hold no actions of its own', async () => {
-      (apiTestSetup.endpointAppContextMock.service.isCpsEnabled as jest.Mock).mockReturnValue(true);
+      (apiTestSetup.endpointAppContextMock.service.isCpsActive as jest.Mock).mockResolvedValue(
+        true
+      );
       mockDoesLogsEndpointActionsIndexExist.mockClear();
       mockDoesLogsEndpointActionsIndexExist.mockResolvedValue(false);
 
@@ -106,7 +108,7 @@ describe('Action List Handler', () => {
 
     it('should call `getActionListByStatus` when statuses filter values are provided', async () => {
       await actionListHandler({ ...defaultParams, statuses: ['failed', 'pending'] });
-      expect(mockGetActionListByStatus).toBeCalledWith(
+      expect(mockGetActionListByStatus).toHaveBeenCalledWith(
         expect.objectContaining({ statuses: ['failed', 'pending'] })
       );
     });
@@ -120,7 +122,7 @@ describe('Action List Handler', () => {
         statuses: 'failed',
         userIds: 'userX',
       });
-      expect(mockGetActionListByStatus).toBeCalledWith(
+      expect(mockGetActionListByStatus).toHaveBeenCalledWith(
         expect.objectContaining({
           agentTypes: ['endpoint'],
           withOutputs: ['actionX'],
@@ -140,7 +142,7 @@ describe('Action List Handler', () => {
         commands: ['isolate', 'kill-process'],
         userIds: ['userX', 'userY'],
       });
-      expect(mockGetActionList).toBeCalledWith(
+      expect(mockGetActionList).toHaveBeenCalledWith(
         expect.objectContaining({
           commands: ['isolate', 'kill-process'],
           userIds: ['userX', 'userY'],

@@ -341,6 +341,7 @@ const lensCreateRequestExamples = {
           empty_as_null: false,
         },
       ],
+      tags: [],
     } satisfies LensCreateRequestBody,
   },
   createXYVisualization: {
@@ -374,6 +375,7 @@ const lensCreateRequestExamples = {
           ],
         },
       ],
+      tags: [],
     } satisfies LensCreateRequestBody,
   },
   createPieVisualization: {
@@ -412,6 +414,7 @@ const lensCreateRequestExamples = {
           position: 'outside',
         },
       },
+      tags: [],
     } satisfies LensCreateRequestBody,
   },
   createDataTableVisualization: {
@@ -439,6 +442,7 @@ const lensCreateRequestExamples = {
           limit: 5,
         },
       ],
+      tags: [],
     } satisfies LensCreateRequestBody,
   },
   createDataViewReferenceVisualization: {
@@ -459,6 +463,7 @@ const lensCreateRequestExamples = {
           empty_as_null: false,
         },
       ],
+      tags: [],
     } satisfies LensCreateRequestBody,
   },
 };
@@ -499,6 +504,7 @@ const lensCreateResponseExamples = {
             },
           },
         },
+        tags: [],
       },
       meta: {
         created_at: '2026-04-13T10:00:00.000Z',
@@ -608,6 +614,7 @@ const lensCreateResponseExamples = {
             },
           },
         },
+        tags: [],
       },
       meta: {
         created_at: '2026-04-13T10:05:00.000Z',
@@ -665,6 +672,7 @@ const lensCreateResponseExamples = {
             position: 'outside',
           },
         },
+        tags: [],
       },
       meta: {
         created_at: '2026-04-13T10:10:00.000Z',
@@ -708,6 +716,7 @@ const lensCreateResponseExamples = {
             },
           },
         ],
+        tags: [],
       },
       meta: {
         created_at: '2026-04-13T10:15:00.000Z',
@@ -751,6 +760,7 @@ const lensCreateResponseExamples = {
             },
           },
         },
+        tags: [],
       },
       meta: {
         created_at: '2026-04-13T10:20:00.000Z',
@@ -800,6 +810,7 @@ const lensSearchResponseExamples = {
                 },
               },
             },
+            tags: [],
           },
           meta: {
             created_at: '2026-04-13T10:00:00.000Z',
@@ -904,6 +915,7 @@ const lensSearchResponseExamples = {
                 },
               },
             },
+            tags: [],
           },
           meta: {
             created_at: '2026-04-13T10:05:00.000Z',
@@ -957,6 +969,7 @@ const lensGetResponseExamples = {
             },
           },
         },
+        tags: [],
       },
       meta: {
         created_at: '2026-04-13T10:00:00.000Z',
@@ -988,6 +1001,7 @@ const lensUpdateRequestExamples = {
           empty_as_null: false,
         },
       ],
+      tags: [],
     } satisfies LensUpdateRequestBody,
   },
 };
@@ -1028,6 +1042,7 @@ const lensUpdateResponseExamples = {
             },
           },
         },
+        tags: [],
       },
       meta: {
         created_at: '2026-04-13T11:00:00.000Z',
@@ -1075,6 +1090,7 @@ const lensUpsertResponseExamples = {
             },
           },
         },
+        tags: [],
       },
       meta: {
         created_at: '2026-04-13T11:00:00.000Z',

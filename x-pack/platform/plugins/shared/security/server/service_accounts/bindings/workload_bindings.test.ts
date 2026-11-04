@@ -1,0 +1,1085 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import Boom from '@hapi/boom';
+
+import type { KibanaRequest } from '@kbn/core/server';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { ServiceAccountWorkloadBinding } from '@kbn/core-security-server';
+import type { MockedLogger } from '@kbn/logging-mocks';
+
+import type { WorkloadBindingStore } from './workload_binding_store';
+import { ServiceAccountWorkloadBindings } from './workload_bindings';
+import { licenseMock } from '../../../common/licensing/index.mock';
+import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
+import { auditLoggerMock, auditServiceMock } from '../../audit/mocks';
+import type { ServiceAccountMintInterceptor } from '../fake_requests';
+import { ServiceAccountTokenExchangeError } from '../token_exchange_error';
+import type { ServiceAccountsBackend } from '../types';
+
+const PLUGIN_ID = 'alerting';
+// What a mutation names: the space is taken from the request, not the caller.
+const WORKLOAD = { workloadType: 'rule', workloadId: 'rule-id' };
+// What a read or an execution names: there is no request, so the space is explicit.
+const WORKLOAD_IN_SPACE = { ...WORKLOAD, spaceId: 'default' };
+const COORDINATES = { pluginId: PLUGIN_ID, ...WORKLOAD_IN_SPACE };
+// The same workload as an audit event names it.
+const AUDIT_WORKLOAD = { plugin_id: PLUGIN_ID, type: 'rule', id: 'rule-id' };
+
+const binding = (
+  overrides: Partial<ServiceAccountWorkloadBinding> = {}
+): ServiceAccountWorkloadBinding => ({
+  ...COORDINATES,
+  serviceAccountId: 'service-account-id',
+  boundBy: { type: 'user', userProfileId: 'profile-uid', username: 'elastic' },
+  boundAt: '2026-08-21T00:00:00.000Z',
+  ...overrides,
+});
+
+describe('ServiceAccountWorkloadBindings', () => {
+  let store: jest.Mocked<WorkloadBindingStore>;
+  let backend: jest.Mocked<ServiceAccountsBackend>;
+  let license: ReturnType<typeof licenseMock.create>;
+  let checkPrivileges: jest.Mock;
+  let getCurrentUser: jest.Mock;
+  let getCurrentUserProfileId: jest.Mock;
+  let getSpaceId: jest.Mock;
+  let logger: MockedLogger;
+  let audit: ReturnType<typeof auditServiceMock.create>;
+  let auditLogger: ReturnType<typeof auditLoggerMock.create>;
+  let mintedRequest: KibanaRequest;
+  let bindings: ServiceAccountWorkloadBindings;
+
+  const build = (overrides: Partial<Record<string, unknown>> = {}) =>
+    new ServiceAccountWorkloadBindings({
+      logger,
+      license,
+      store,
+      backend,
+      checkPrivilegesWithRequest: jest.fn().mockReturnValue({ globally: checkPrivileges }),
+      audit,
+      getCurrentUser,
+      getCurrentUserProfileId,
+      getSpaceId,
+      canEncrypt: true,
+      ...overrides,
+    } as never);
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+    store = {
+      set: jest.fn().mockImplementation(async (attributes) => binding(attributes)),
+      delete: jest.fn().mockResolvedValue(true),
+      getVerified: jest.fn().mockResolvedValue(binding()),
+      findByServiceAccountId: jest.fn().mockResolvedValue([]),
+    } as unknown as jest.Mocked<WorkloadBindingStore>;
+
+    mintedRequest = httpServerMock.createFakeKibanaRequest({
+      headers: { authorization: 'Bearer essu_token' },
+    });
+
+    backend = {
+      create: jest.fn(),
+      list: jest.fn(),
+      get: jest.fn(),
+      createFakeRequest: jest.fn().mockResolvedValue(mintedRequest),
+      reauthenticateFakeRequest: jest.fn(),
+      releaseFakeRequest: jest.fn(),
+      getFakeRequestPrincipal: jest.fn(),
+      delete: jest.fn(),
+    };
+
+    license = licenseMock.create();
+    license.isEnabled.mockReturnValue(true);
+    checkPrivileges = jest.fn().mockResolvedValue({ hasAllRequested: true });
+    getCurrentUser = jest
+      .fn()
+      .mockReturnValue(mockAuthenticatedUser({ username: 'elastic', profile_uid: 'profile-uid' }));
+    getCurrentUserProfileId = jest.fn().mockResolvedValue('profile-uid');
+    getSpaceId = jest.fn().mockReturnValue('default');
+    auditLogger = auditLoggerMock.create();
+    audit = auditServiceMock.create();
+    audit.asScoped.mockReturnValue(auditLogger);
+
+    bindings = build();
+  });
+
+  describe('#bindWorkload', () => {
+    it('stores the binding in the space of the request, not one the caller names', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      getSpaceId.mockReturnValue('marketing');
+
+      await bindings.bindWorkload(PLUGIN_ID, request, {
+        serviceAccountId: 'service-account-id',
+        ...WORKLOAD,
+        // A consumer forwarding an attacker-controlled space must not be able to reach it: the
+        // privilege gate is a cluster privilege and grants no access to any particular space.
+        spaceId: 'another-space',
+      } as never);
+
+      expect(getSpaceId).toHaveBeenCalledWith(request);
+      expect(store.set).toHaveBeenCalledWith(
+        expect.objectContaining({ ...COORDINATES, spaceId: 'marketing' })
+      );
+    });
+
+    it('records the binding for the acting user', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      const result = await bindings.bindWorkload(PLUGIN_ID, request, {
+        serviceAccountId: 'service-account-id',
+        ...WORKLOAD,
+      });
+
+      expect(store.set).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ...COORDINATES,
+          serviceAccountId: 'service-account-id',
+          boundBy: { type: 'user', userProfileId: 'profile-uid', username: 'elastic' },
+        })
+      );
+      expect(result.serviceAccountId).toBe('service-account-id');
+    });
+
+    it('generates an independent canary per bind, so no two generations share one', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const params = { serviceAccountId: 'service-account-id', ...WORKLOAD };
+
+      await bindings.bindWorkload(PLUGIN_ID, request, params);
+      await bindings.bindWorkload(PLUGIN_ID, request, params);
+
+      const [[first], [second]] = store.set.mock.calls;
+      expect(first.canary).not.toBe(second.canary);
+    });
+
+    it('requires the `manage_security` cluster privilege', async () => {
+      checkPrivileges.mockResolvedValue({ hasAllRequested: false });
+
+      await expect(
+        bindings.bindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), {
+          serviceAccountId: 'service-account-id',
+          ...WORKLOAD,
+        })
+      ).rejects.toMatchObject({
+        message:
+          'Cannot bind a service account to a workload: missing `manage_security` cluster privilege',
+        output: { statusCode: 403 },
+      });
+
+      expect(checkPrivileges).toHaveBeenCalledWith({
+        elasticsearch: { cluster: ['manage_security'], index: {} },
+      });
+      expect(store.set).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Refused to bind a service account to a workload: missing `manage_security` cluster privilege'
+      );
+    });
+
+    it('refuses an unauthenticated request', async () => {
+      getCurrentUser.mockReturnValue(null);
+
+      await expect(
+        bindings.bindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), {
+          serviceAccountId: 'service-account-id',
+          ...WORKLOAD,
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 401 } });
+      expect(store.set).not.toHaveBeenCalled();
+    });
+
+    describe('audit', () => {
+      const bindEvent = (outcome: 'unknown' | 'failure') =>
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'service_account_workload_bind',
+            category: ['iam'],
+            type: ['user', 'change'],
+            outcome,
+          }),
+          user: { target: { id: 'service-account-id' } },
+          kibana: { workload: AUDIT_WORKLOAD },
+        });
+
+      it('logs the intent, scoped to the request, before the binding is written', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        store.set.mockImplementation(async (attributes) => {
+          expect(auditLogger.log).toHaveBeenCalledWith(bindEvent('unknown'));
+          return binding(attributes);
+        });
+
+        await bindings.bindWorkload(PLUGIN_ID, request, {
+          serviceAccountId: 'service-account-id',
+          ...WORKLOAD,
+        });
+
+        expect(audit.asScoped).toHaveBeenCalledWith(request);
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message:
+              'User is binding service account [id=service-account-id] to workload [alerting/rule/rule-id]',
+          })
+        );
+      });
+
+      it('logs a failure when the caller is not authorized', async () => {
+        checkPrivileges.mockResolvedValue({ hasAllRequested: false });
+
+        await expect(
+          bindings.bindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), {
+            serviceAccountId: 'service-account-id',
+            ...WORKLOAD,
+          })
+        ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(bindEvent('failure'));
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            error: {
+              code: 'Error',
+              message:
+                'Cannot bind a service account to a workload: missing `manage_security` cluster privilege',
+            },
+          })
+        );
+        expect(store.set).not.toHaveBeenCalled();
+      });
+
+      it('logs an unbind of the previous account first when the workload is rebound', async () => {
+        store.getVerified.mockResolvedValue(binding({ serviceAccountId: 'previous-account-id' }));
+
+        await bindings.bindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), {
+          serviceAccountId: 'service-account-id',
+          ...WORKLOAD,
+        });
+
+        expect(store.getVerified).toHaveBeenCalledWith(COORDINATES);
+        expect(auditLogger.log).toHaveBeenCalledTimes(2);
+        expect(auditLogger.log).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            event: expect.objectContaining({
+              action: 'service_account_workload_unbind',
+              outcome: 'unknown',
+            }),
+            user: { target: { id: 'previous-account-id' } },
+            kibana: { workload: AUDIT_WORKLOAD },
+          })
+        );
+        expect(auditLogger.log).toHaveBeenNthCalledWith(2, bindEvent('unknown'));
+      });
+
+      it('logs one bind event when the workload is rebound to the same account', async () => {
+        store.getVerified.mockResolvedValue(binding({ serviceAccountId: 'service-account-id' }));
+
+        await bindings.bindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), {
+          serviceAccountId: 'service-account-id',
+          ...WORKLOAD,
+        });
+
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(bindEvent('unknown'));
+      });
+
+      it('logs one bind event when the workload was not bound', async () => {
+        store.getVerified.mockResolvedValue(null);
+
+        await bindings.bindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), {
+          serviceAccountId: 'service-account-id',
+          ...WORKLOAD,
+        });
+
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(bindEvent('unknown'));
+      });
+
+      it('rebinds without naming a previous account that failed integrity verification', async () => {
+        store.getVerified.mockRejectedValue(
+          Boom.forbidden(
+            'The service account binding for this workload failed integrity verification.'
+          )
+        );
+
+        await bindings.bindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), {
+          serviceAccountId: 'service-account-id',
+          ...WORKLOAD,
+        });
+
+        expect(store.set).toHaveBeenCalled();
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(bindEvent('unknown'));
+      });
+
+      it('propagates a failure to read the previous binding without writing', async () => {
+        store.getVerified.mockRejectedValue(new Error('store unavailable'));
+
+        await expect(
+          bindings.bindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), {
+            serviceAccountId: 'service-account-id',
+            ...WORKLOAD,
+          })
+        ).rejects.toThrow('store unavailable');
+
+        expect(store.set).not.toHaveBeenCalled();
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+
+      it('logs nothing for an unauthenticated request', async () => {
+        getCurrentUser.mockReturnValue(null);
+
+        await expect(
+          bindings.bindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), {
+            serviceAccountId: 'service-account-id',
+            ...WORKLOAD,
+          })
+        ).rejects.toMatchObject({ output: { statusCode: 401 } });
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+
+      it('logs nothing when the privilege check itself fails', async () => {
+        checkPrivileges.mockRejectedValue(new Error('cluster unavailable'));
+
+        await expect(
+          bindings.bindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), {
+            serviceAccountId: 'service-account-id',
+            ...WORKLOAD,
+          })
+        ).rejects.toThrow('cluster unavailable');
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+
+      it('logs nothing when security features are disabled', async () => {
+        license.isEnabled.mockReturnValue(false);
+
+        await expect(
+          bindings.bindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), {
+            serviceAccountId: 'service-account-id',
+            ...WORKLOAD,
+          })
+        ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('#unbindWorkload', () => {
+    it('removes the binding behind the same privilege gate as bindWorkload', async () => {
+      await expect(
+        bindings.unbindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), WORKLOAD)
+      ).resolves.toBe(true);
+
+      expect(checkPrivileges).toHaveBeenCalledWith({
+        elasticsearch: { cluster: ['manage_security'], index: {} },
+      });
+      expect(store.delete).toHaveBeenCalledWith(COORDINATES);
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('removes the binding in the space of the request, not one the caller names', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      getSpaceId.mockReturnValue('marketing');
+
+      await bindings.unbindWorkload(PLUGIN_ID, request, {
+        ...WORKLOAD,
+        spaceId: 'another-space',
+      } as never);
+
+      expect(getSpaceId).toHaveBeenCalledWith(request);
+      expect(store.delete).toHaveBeenCalledWith({ ...COORDINATES, spaceId: 'marketing' });
+    });
+
+    it('requires the `manage_security` cluster privilege', async () => {
+      checkPrivileges.mockResolvedValue({ hasAllRequested: false });
+
+      await expect(
+        bindings.unbindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), WORKLOAD)
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+      expect(store.delete).not.toHaveBeenCalled();
+    });
+
+    it('reports, rather than fails, when there was no binding to remove', async () => {
+      store.delete.mockResolvedValue(false);
+      getSpaceId.mockReturnValue('marketing');
+
+      await expect(
+        bindings.unbindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), WORKLOAD)
+      ).resolves.toBe(false);
+      // Names the space: the likeliest cause is a workload deleted from a different one.
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Unbinding matched no binding for workload [rule/rule-id] of plugin [alerting] in space [marketing]'
+      );
+    });
+
+    describe('audit', () => {
+      const unbindEvent = (outcome: 'unknown' | 'failure') =>
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'service_account_workload_unbind',
+            category: ['iam'],
+            type: ['user', 'change'],
+            outcome,
+          }),
+          kibana: { workload: AUDIT_WORKLOAD },
+        });
+
+      it('logs the intent, naming the verified bound account, before the binding is removed', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        store.delete.mockImplementation(async () => {
+          expect(auditLogger.log).toHaveBeenCalledWith(unbindEvent('unknown'));
+          return true;
+        });
+
+        await bindings.unbindWorkload(PLUGIN_ID, request, WORKLOAD);
+
+        expect(audit.asScoped).toHaveBeenCalledWith(request);
+        expect(store.getVerified).toHaveBeenCalledWith(COORDINATES);
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            user: { target: { id: 'service-account-id' } },
+            message:
+              'User is unbinding service account [id=service-account-id] from workload [alerting/rule/rule-id]',
+          })
+        );
+      });
+
+      it('logs the intent without a target when there was no binding to remove', async () => {
+        store.getVerified.mockResolvedValue(null);
+        store.delete.mockResolvedValue(false);
+
+        await expect(
+          bindings.unbindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), WORKLOAD)
+        ).resolves.toBe(false);
+
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(unbindEvent('unknown'));
+        expect(auditLogger.log.mock.calls[0][0]).not.toHaveProperty('user');
+      });
+
+      it('removes a binding that failed integrity verification without naming its account', async () => {
+        store.getVerified.mockRejectedValue(
+          Boom.forbidden(
+            'The service account binding for this workload failed integrity verification.'
+          )
+        );
+
+        await expect(
+          bindings.unbindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), WORKLOAD)
+        ).resolves.toBe(true);
+
+        expect(store.delete).toHaveBeenCalledWith(COORDINATES);
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log.mock.calls[0][0]).not.toHaveProperty('user');
+      });
+
+      it('propagates a failure to read the binding without deleting', async () => {
+        store.getVerified.mockRejectedValue(new Error('store unavailable'));
+
+        await expect(
+          bindings.unbindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), WORKLOAD)
+        ).rejects.toThrow('store unavailable');
+
+        expect(store.delete).not.toHaveBeenCalled();
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+
+      it('logs a failure when the caller is not authorized', async () => {
+        checkPrivileges.mockResolvedValue({ hasAllRequested: false });
+
+        await expect(
+          bindings.unbindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), WORKLOAD)
+        ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(unbindEvent('failure'));
+        expect(auditLogger.log.mock.calls[0][0]).not.toHaveProperty('user');
+        expect(store.delete).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('#getBinding', () => {
+    it('scopes the lookup to the plugin Core supplied', async () => {
+      await expect(bindings.getBinding(PLUGIN_ID, WORKLOAD_IN_SPACE)).resolves.toEqual(binding());
+      expect(store.getVerified).toHaveBeenCalledWith(COORDINATES);
+    });
+
+    it('keys the lookup by the space it was given', async () => {
+      await bindings.getBinding(PLUGIN_ID, { ...WORKLOAD_IN_SPACE, spaceId: 'marketing' });
+      expect(store.getVerified).toHaveBeenCalledWith({ ...COORDINATES, spaceId: 'marketing' });
+    });
+
+    it('reports an unbound workload as null rather than an error', async () => {
+      store.getVerified.mockResolvedValue(null);
+      await expect(bindings.getBinding(PLUGIN_ID, WORKLOAD_IN_SPACE)).resolves.toBeNull();
+    });
+  });
+
+  describe('#withScopedRequest', () => {
+    it('rejects a rebind between the consumer lookup and credential creation', async () => {
+      const original = await bindings.getBinding(PLUGIN_ID, WORKLOAD_IN_SPACE);
+      store.getVerified.mockResolvedValue({ ...binding(), serviceAccountId: 'another-account' });
+      const execute = jest.fn();
+
+      await expect(
+        bindings.withScopedRequest(
+          PLUGIN_ID,
+          { ...WORKLOAD_IN_SPACE, expectedServiceAccountId: original?.serviceAccountId },
+          execute
+        )
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+      expect(backend.createFakeRequest).not.toHaveBeenCalled();
+      expect(execute).not.toHaveBeenCalled();
+    });
+
+    it('mints the expected account when the binding matches', async () => {
+      const execute = jest.fn().mockResolvedValue('executed');
+      await expect(
+        bindings.withScopedRequest(
+          PLUGIN_ID,
+          { ...WORKLOAD_IN_SPACE, expectedServiceAccountId: 'service-account-id' },
+          execute
+        )
+      ).resolves.toBe('executed');
+      expect(backend.createFakeRequest).toHaveBeenCalledWith(
+        expect.objectContaining({ serviceAccountId: 'service-account-id' })
+      );
+    });
+
+    it('runs the callback with a request bound to the workload’s service account', async () => {
+      const result = await bindings.withScopedRequest(
+        PLUGIN_ID,
+        WORKLOAD_IN_SPACE,
+        async (request) => {
+          expect(request).toBe(mintedRequest);
+          return 'executed';
+        }
+      );
+
+      expect(result).toBe('executed');
+      expect(backend.createFakeRequest).toHaveBeenCalledWith(
+        expect.objectContaining({ serviceAccountId: 'service-account-id', spaceId: 'default' })
+      );
+    });
+
+    it('tells the backend when the workload was bound', async () => {
+      await bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined);
+
+      expect(backend.createFakeRequest).toHaveBeenCalledWith(
+        expect.objectContaining({ boundAt: '2026-08-21T00:00:00.000Z' })
+      );
+    });
+
+    it('opts out of the time-based lease in favour of per-mint binding checks', async () => {
+      await bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined);
+
+      const [[params]] = backend.createFakeRequest.mock.calls;
+      expect(params.maxLifetimeMs).toBe(Number.POSITIVE_INFINITY);
+      expect(params.mintInterceptor).toEqual(expect.any(Function));
+    });
+
+    it('releases the request when the callback resolves, ending credential replacement', async () => {
+      await bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined);
+      expect(backend.releaseFakeRequest).toHaveBeenCalledWith(mintedRequest);
+    });
+
+    it('releases the request when the callback throws', async () => {
+      await expect(
+        bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => {
+          throw new Error('execution failed');
+        })
+      ).rejects.toThrowError('execution failed');
+
+      expect(backend.releaseFakeRequest).toHaveBeenCalledWith(mintedRequest);
+    });
+
+    it('refuses to start when the workload has no binding', async () => {
+      store.getVerified.mockResolvedValue(null);
+
+      await expect(
+        bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined)
+      ).rejects.toMatchObject({ output: { statusCode: 404 } });
+      expect(backend.createFakeRequest).not.toHaveBeenCalled();
+    });
+
+    it('propagates a failed integrity check instead of executing', async () => {
+      store.getVerified.mockRejectedValue(new Error('failed integrity verification'));
+
+      await expect(
+        bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined)
+      ).rejects.toThrowError('failed integrity verification');
+      expect(backend.createFakeRequest).not.toHaveBeenCalled();
+    });
+
+    describe('the mint interceptor', () => {
+      const captureInterceptor = async (): Promise<ServiceAccountMintInterceptor> => {
+        await bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined);
+        const [[params]] = backend.createFakeRequest.mock.calls;
+        return params.mintInterceptor!;
+      };
+
+      // The registry invokes the interceptor once for the initial mint, before any refresh.
+      const captureRefreshInterceptor = async (): Promise<ServiceAccountMintInterceptor> => {
+        const interceptor = await captureInterceptor();
+        await interceptor(jest.fn().mockResolvedValue('essu_initial'));
+        store.getVerified.mockClear();
+        return interceptor;
+      };
+
+      it('lets the initial mint through on the strength of the verification just made', async () => {
+        const interceptor = await captureInterceptor();
+        expect(store.getVerified).toHaveBeenCalledTimes(1);
+        const mint = jest.fn().mockResolvedValue('essu_initial');
+
+        await expect(interceptor(mint)).resolves.toBe('essu_initial');
+        expect(store.getVerified).toHaveBeenCalledTimes(1);
+        expect(mint).toHaveBeenCalledTimes(1);
+      });
+
+      it('re-reads the binding before allowing a re-mint', async () => {
+        const interceptor = await captureRefreshInterceptor();
+        const mint = jest.fn().mockResolvedValue('essu_fresh');
+
+        await expect(interceptor(mint)).resolves.toBe('essu_fresh');
+        expect(store.getVerified).toHaveBeenCalledWith(COORDINATES);
+        expect(mint).toHaveBeenCalledTimes(1);
+      });
+
+      it('permits a same-account replacement binding that changed between checks', async () => {
+        const interceptor = await captureRefreshInterceptor();
+        store.getVerified.mockResolvedValue(binding({ boundAt: '2026-09-23T12:00:00Z' }));
+        const mint = jest.fn().mockResolvedValue('fresh-token');
+        await expect(interceptor(mint)).resolves.toBe('fresh-token');
+      });
+
+      it('allows an exchange already started before unbinding to finish', async () => {
+        const interceptor = await captureRefreshInterceptor();
+        let finishMint: (token: string) => void = () => {
+          throw new Error('Mint has not started');
+        };
+        const mint = jest.fn(
+          () =>
+            new Promise<string>((resolve) => {
+              finishMint = resolve;
+            })
+        );
+        const inflight = interceptor(mint);
+        // Let the binding read complete and the exchange begin before removing the binding.
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(mint).toHaveBeenCalledTimes(1);
+        store.getVerified.mockResolvedValue(null);
+        finishMint('issued-token');
+        await expect(inflight).resolves.toBe('issued-token');
+        await expect(interceptor(mint)).rejects.toMatchObject({ output: { statusCode: 404 } });
+      });
+
+      it('refuses to re-mint once the workload has been unbound, and says so', async () => {
+        const interceptor = await captureRefreshInterceptor();
+        store.getVerified.mockResolvedValue(null);
+        const mint = jest.fn();
+
+        await expect(interceptor(mint)).rejects.toMatchObject({ output: { statusCode: 404 } });
+        expect(mint).not.toHaveBeenCalled();
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringMatching(
+            /^Refusing to re-mint a credential for workload \[rule\/rule-id\] of plugin \[alerting\]: .*No service account is bound/
+          )
+        );
+      });
+
+      it('refuses to re-mint when the binding no longer verifies', async () => {
+        const interceptor = await captureRefreshInterceptor();
+        store.getVerified.mockRejectedValue(new Error('failed integrity verification'));
+        const mint = jest.fn();
+
+        await expect(interceptor(mint)).rejects.toThrowError('failed integrity verification');
+        expect(mint).not.toHaveBeenCalled();
+      });
+
+      it('refuses to re-mint when the workload was re-bound to a different service account', async () => {
+        const interceptor = await captureRefreshInterceptor();
+        store.getVerified.mockResolvedValue(binding({ serviceAccountId: 'a-different-account' }));
+        const mint = jest.fn();
+
+        await expect(interceptor(mint)).rejects.toMatchObject({
+          message:
+            'The workload was bound to a different service account; refusing to mint a credential for the previous one.',
+          output: { statusCode: 403 },
+        });
+        expect(mint).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('audit', () => {
+      const assumeEvent = (outcome: 'success' | 'failure') => ({
+        event: {
+          action: 'service_account_assume',
+          category: ['authentication'],
+          type: ['start'],
+          outcome,
+        },
+      });
+      const assumedAccount = (serviceAccountId: string) => ({
+        id: serviceAccountId,
+        name: serviceAccountId,
+      });
+
+      it('logs `success` on the minted request before the callback runs', async () => {
+        const execute = jest.fn(async () => {
+          expect(auditLogger.log).toHaveBeenCalledTimes(1);
+          return 'executed';
+        });
+
+        await expect(
+          bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, execute)
+        ).resolves.toBe('executed');
+
+        expect(audit.asScoped).toHaveBeenCalledTimes(1);
+        expect(audit.asScoped).toHaveBeenCalledWith(mintedRequest);
+        expect(auditLogger.log).toHaveBeenCalledWith({
+          ...assumeEvent('success'),
+          message:
+            'Workload [alerting/rule/rule-id] is executing as service account [id=service-account-id]',
+          user: assumedAccount('service-account-id'),
+          kibana: { workload: AUDIT_WORKLOAD },
+          error: undefined,
+        });
+        expect(audit.withoutRequest.log).not.toHaveBeenCalled();
+      });
+
+      it('names the run on every event when the caller supplies an execution id', async () => {
+        const params = { ...WORKLOAD_IN_SPACE, executionId: 'execution-id' };
+        const workload = { ...AUDIT_WORKLOAD, execution_id: 'execution-id' };
+
+        await bindings.withScopedRequest(PLUGIN_ID, params, async () => undefined);
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ...assumeEvent('success'),
+            message:
+              'Workload [alerting/rule/rule-id] [executionId=execution-id] is executing as service account [id=service-account-id]',
+            kibana: { workload },
+          })
+        );
+
+        backend.createFakeRequest.mockRejectedValueOnce(Boom.notFound('missing stored credential'));
+        await expect(
+          bindings.withScopedRequest(PLUGIN_ID, params, async () => undefined)
+        ).rejects.toMatchObject({ output: { statusCode: 404 } });
+        expect(audit.withoutRequest.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ...assumeEvent('failure'),
+            kibana: { workload, space_id: 'default' },
+          })
+        );
+      });
+
+      it('logs no second event when the callback throws', async () => {
+        await expect(
+          bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => {
+            throw new Error('execution failed');
+          })
+        ).rejects.toThrowError('execution failed');
+
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining(assumeEvent('success'))
+        );
+      });
+
+      it('logs nothing when the workload has no binding', async () => {
+        store.getVerified.mockResolvedValue(null);
+
+        await expect(
+          bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined)
+        ).rejects.toMatchObject({ output: { statusCode: 404 } });
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+        expect(audit.withoutRequest.log).not.toHaveBeenCalled();
+      });
+
+      it('logs `failure` without naming an account when the binding fails integrity verification', async () => {
+        store.getVerified.mockRejectedValue(
+          Boom.forbidden(
+            'The service account binding for this workload failed integrity verification.'
+          )
+        );
+
+        await expect(
+          bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined)
+        ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+        expect(audit.asScoped).not.toHaveBeenCalled();
+        expect(audit.withoutRequest.log).toHaveBeenCalledTimes(1);
+        expect(audit.withoutRequest.log).toHaveBeenCalledWith({
+          ...assumeEvent('failure'),
+          message: 'Workload [alerting/rule/rule-id] failed to execute as its service account',
+          kibana: { workload: AUDIT_WORKLOAD, space_id: 'default' },
+          error: {
+            code: 'Error',
+            message: 'The service account binding for this workload failed integrity verification.',
+          },
+        });
+      });
+
+      it('logs nothing when the binding cannot be read', async () => {
+        store.getVerified.mockRejectedValue(new Error('saved objects unavailable'));
+
+        await expect(
+          bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined)
+        ).rejects.toThrowError('saved objects unavailable');
+
+        expect(audit.withoutRequest.log).not.toHaveBeenCalled();
+      });
+
+      it('logs `failure` naming the bound account when it is not the one the caller expected', async () => {
+        store.getVerified.mockResolvedValue(binding({ serviceAccountId: 'another-account' }));
+
+        await expect(
+          bindings.withScopedRequest(
+            PLUGIN_ID,
+            { ...WORKLOAD_IN_SPACE, expectedServiceAccountId: 'service-account-id' },
+            async () => undefined
+          )
+        ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+        expect(audit.withoutRequest.log).toHaveBeenCalledTimes(1);
+        expect(audit.withoutRequest.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ...assumeEvent('failure'),
+            user: assumedAccount('another-account'),
+            kibana: { workload: AUDIT_WORKLOAD, space_id: 'default' },
+          })
+        );
+      });
+
+      // The shapes the backends really reject with: the exchange's own failures are wrapped, and
+      // the Elasticsearch backend's refusals of a stored credential are not.
+      const exchangeFailure = (retryable: boolean, statusCode?: number) =>
+        new ServiceAccountTokenExchangeError(
+          new Error('Service account token exchange failed for [service-account-id].'),
+          { retryable, statusCode }
+        );
+
+      it.each([
+        [
+          'the account is gone',
+          exchangeFailure(false, 404),
+          {
+            code: 'ServiceAccountTokenExchangeError',
+            message: 'Error occurred during service account token exchange (status 404).',
+          },
+        ],
+        [
+          'the account was created after the workload was bound',
+          Boom.forbidden(
+            'The workload was bound to an earlier service account with the same name.'
+          ),
+          {
+            code: 'Error',
+            message: 'The workload was bound to an earlier service account with the same name.',
+          },
+        ],
+      ])('logs `failure` without a request when %s', async (_name, error, auditedError) => {
+        backend.createFakeRequest.mockRejectedValue(error);
+        const execute = jest.fn();
+
+        await expect(
+          bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, execute)
+        ).rejects.toBe(error);
+
+        expect(execute).not.toHaveBeenCalled();
+        expect(audit.asScoped).not.toHaveBeenCalled();
+        expect(audit.withoutRequest.log).toHaveBeenCalledTimes(1);
+        expect(audit.withoutRequest.log).toHaveBeenCalledWith({
+          ...assumeEvent('failure'),
+          message:
+            'Workload [alerting/rule/rule-id] failed to execute as service account [id=service-account-id]',
+          user: assumedAccount('service-account-id'),
+          kibana: { workload: AUDIT_WORKLOAD, space_id: 'default' },
+          error: auditedError,
+        });
+      });
+
+      it.each([
+        ['an unavailable exchange', exchangeFailure(true, 503)],
+        ['a transport failure', exchangeFailure(true)],
+      ])('logs nothing when the exchange fails with %s', async (_name, error) => {
+        backend.createFakeRequest.mockRejectedValue(error);
+
+        await expect(
+          bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined)
+        ).rejects.toBe(error);
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+        expect(audit.withoutRequest.log).not.toHaveBeenCalled();
+      });
+
+      describe('on a re-mint', () => {
+        const captureRefreshInterceptor = async (): Promise<ServiceAccountMintInterceptor> => {
+          await bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined);
+          const [[params]] = backend.createFakeRequest.mock.calls;
+          await params.mintInterceptor!(jest.fn().mockResolvedValue('essu_initial'));
+          audit.asScoped.mockClear();
+          auditLogger.log.mockClear();
+          return params.mintInterceptor!;
+        };
+
+        it.each([
+          ['the workload was re-bound', () => binding({ serviceAccountId: 'a-different-account' })],
+          ['the workload was unbound', () => null],
+        ])('logs `failure` on the minted request when %s', async (_name, current) => {
+          const interceptor = await captureRefreshInterceptor();
+          store.getVerified.mockResolvedValue(current());
+
+          await expect(interceptor(jest.fn())).rejects.toBeDefined();
+
+          expect(audit.asScoped).toHaveBeenCalledWith(mintedRequest);
+          expect(auditLogger.log).toHaveBeenCalledTimes(1);
+          expect(auditLogger.log).toHaveBeenCalledWith(
+            expect.objectContaining({
+              ...assumeEvent('failure'),
+              user: assumedAccount('service-account-id'),
+              kibana: { workload: AUDIT_WORKLOAD },
+            })
+          );
+          expect(audit.withoutRequest.log).not.toHaveBeenCalled();
+        });
+
+        it.each([
+          ['the account is gone', exchangeFailure(false, 404)],
+          [
+            'the account was created after the workload was bound',
+            Boom.forbidden(
+              'The workload was bound to an earlier service account with the same name.'
+            ),
+          ],
+        ])(
+          'logs `failure` on the minted request when the binding holds but %s',
+          async (_name, error) => {
+            const interceptor = await captureRefreshInterceptor();
+
+            await expect(interceptor(jest.fn().mockRejectedValue(error))).rejects.toBe(error);
+
+            expect(audit.asScoped).toHaveBeenCalledWith(mintedRequest);
+            expect(auditLogger.log).toHaveBeenCalledTimes(1);
+            expect(auditLogger.log).toHaveBeenCalledWith(
+              expect.objectContaining({
+                ...assumeEvent('failure'),
+                user: assumedAccount('service-account-id'),
+                kibana: { workload: AUDIT_WORKLOAD },
+                error: { code: error.name, message: error.message },
+              })
+            );
+            expect(audit.withoutRequest.log).not.toHaveBeenCalled();
+          }
+        );
+
+        it('logs nothing when the binding holds but the exchange is unavailable', async () => {
+          const interceptor = await captureRefreshInterceptor();
+          const error = exchangeFailure(true, 503);
+
+          await expect(interceptor(jest.fn().mockRejectedValue(error))).rejects.toBe(error);
+
+          expect(auditLogger.log).not.toHaveBeenCalled();
+          expect(audit.withoutRequest.log).not.toHaveBeenCalled();
+        });
+
+        it.each([
+          ['an unavailable store', Boom.serverUnavailable('saved objects unavailable')],
+          ['a rate limit', Boom.tooManyRequests('slow down')],
+          ['an unexpected exception', new Error('boom')],
+        ])('logs nothing for %s, which the registry retries', async (_name, error) => {
+          const interceptor = await captureRefreshInterceptor();
+          store.getVerified.mockRejectedValue(error);
+
+          await expect(interceptor(jest.fn())).rejects.toBe(error);
+
+          expect(auditLogger.log).not.toHaveBeenCalled();
+          expect(audit.withoutRequest.log).not.toHaveBeenCalled();
+        });
+
+        it('logs one `failure` without a request when the refusal comes before the request exists', async () => {
+          store.getVerified
+            .mockResolvedValueOnce(binding())
+            .mockResolvedValueOnce(binding({ serviceAccountId: 'a-different-account' }));
+          backend.createFakeRequest.mockImplementation(async ({ mintInterceptor }) => {
+            await mintInterceptor!(jest.fn().mockResolvedValue('essu_initial'));
+            await mintInterceptor!(jest.fn());
+            return mintedRequest;
+          });
+
+          await expect(
+            bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined)
+          ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+          expect(audit.withoutRequest.log).toHaveBeenCalledTimes(1);
+          expect(audit.withoutRequest.log).toHaveBeenCalledWith(
+            expect.objectContaining({
+              ...assumeEvent('failure'),
+              user: assumedAccount('service-account-id'),
+              kibana: { workload: AUDIT_WORKLOAD, space_id: 'default' },
+            })
+          );
+          expect(audit.asScoped).not.toHaveBeenCalled();
+        });
+      });
+    });
+  });
+
+  describe('availability', () => {
+    it.each([
+      [
+        'bindWorkload',
+        (api: ServiceAccountWorkloadBindings) =>
+          api.bindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), {
+            serviceAccountId: 'sa',
+            ...WORKLOAD,
+          }),
+      ],
+      [
+        'unbindWorkload',
+        (api: ServiceAccountWorkloadBindings) =>
+          api.unbindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), WORKLOAD),
+      ],
+      [
+        'getBinding',
+        (api: ServiceAccountWorkloadBindings) => api.getBinding(PLUGIN_ID, WORKLOAD_IN_SPACE),
+      ],
+      [
+        'withScopedRequest',
+        (api: ServiceAccountWorkloadBindings) =>
+          api.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined),
+      ],
+    ])('fails %s closed when saved object encryption is unavailable', async (_name, invoke) => {
+      const withoutEncryption = build({ canEncrypt: false });
+
+      await expect(invoke(withoutEncryption)).rejects.toMatchObject({
+        message:
+          'Cannot use service account workload bindings: saved object encryption is not available. Set `xpack.encryptedSavedObjects.encryptionKey`.',
+        output: { statusCode: 403 },
+      });
+      expect(store.set).not.toHaveBeenCalled();
+      expect(store.delete).not.toHaveBeenCalled();
+      expect(store.getVerified).not.toHaveBeenCalled();
+    });
+
+    it('fails closed when security features are disabled in Elasticsearch', async () => {
+      license.isEnabled.mockReturnValue(false);
+
+      await expect(bindings.getBinding(PLUGIN_ID, WORKLOAD_IN_SPACE)).rejects.toMatchObject({
+        message:
+          'Cannot use service account workload bindings: security features are disabled in Elasticsearch',
+        output: { statusCode: 403 },
+      });
+    });
+  });
+});

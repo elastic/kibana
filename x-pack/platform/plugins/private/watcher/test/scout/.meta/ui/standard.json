@@ -1,5 +1,8 @@
 {
   "sha1": "588a387939b9c065dd2f87da5d4029f0b07a9cbc",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "75f320392561787-ae6625e2421c358",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/watcher/test/scout/ui/tests/watch_crud.spec.ts",
-        "line": 28,
-        "column": 7
+        "line": 22,
+        "column": 59
       }
     }
   ]

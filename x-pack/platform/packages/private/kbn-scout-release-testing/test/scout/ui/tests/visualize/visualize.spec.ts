@@ -185,7 +185,7 @@ test.describe('Visualize app', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('save map to library', async () => {
-      await pageObjects.maps.saveButton.click();
+      await pageObjects.maps.clickSaveButton();
       await pageObjects.visualize.saveToLibrary(visName);
       await expect(page.testSubj.locator('breadcrumb last')).toHaveText(visName);
     });

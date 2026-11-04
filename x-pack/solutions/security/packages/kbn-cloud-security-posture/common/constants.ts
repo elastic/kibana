@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EntityStoreEuid } from '@kbn/entity-store/common/euid_helpers';
+import type { EntityStoreEuidApi } from '@kbn/entity-store/common/euid_helpers';
 import type { VulnSeverity } from './types/vulnerabilities';
 import type { MisconfigurationEvaluationStatus } from './types/misconfigurations';
 
@@ -165,17 +165,43 @@ export const GRAPH_TARGET_ENTITY_FIELDS = [
   'entity.target.id',
 ] as const;
 /**
+ * Fields read by the `entity.namespace` field evaluation rather than by EUID composition.
+ * They are namespace-agnostic (never rewritten to a `.target.` form) and are carried in the
+ * `all` bucket so `euid.kql.getEuidFilterBasedOnDocument` can reproduce the entity's namespace
+ * clause: without them a filter for `user:alice@example.com@gcp` also matches the `@okta` and
+ * `@entra_id` entities with the same email, which are distinct entities.
+ *
+ * `event.module` / `data_stream.dataset` drive the `sourceMatchesAny` lists; `event.kind` and
+ * `cloud.provider` drive the condition-based branches (local namespace, asset-discovery
+ * provider mapping) — see `entity_store/common/domain/definitions/user.ts`.
+ */
+const ENTITY_NAMESPACE_SOURCE_FIELDS = [
+  'event.dataset',
+  'event.module',
+  'data_stream.dataset',
+  'event.kind',
+  'cloud.provider',
+];
+
+/**
  * Raw source fields used to compute actor EUIDs in entity store v2.
  * These mirror the identity fields from Entity Store definitions.
  * Server-side code derives these dynamically via euid.getEuidSourceFields().
  */
-export const getGraphActorEuidSourceFields = (euid: EntityStoreEuid) => {
+export const getGraphActorEuidSourceFields = ({
+  euid,
+  getBuiltInEntityDefinition,
+}: EntityStoreEuidApi) => {
   return {
-    user: [...euid.getEuidSourceFields('user').identitySourceFields],
-    host: [...euid.getEuidSourceFields('host').identitySourceFields],
-    service: [...euid.getEuidSourceFields('service').identitySourceFields],
-    generic: [...euid.getEuidSourceFields('generic').identitySourceFields],
-    all: ['event.dataset', 'event.module', 'data_stream.dataset'],
+    user: [...euid.getEuidSourceFields(getBuiltInEntityDefinition('user')).identitySourceFields],
+    host: [...euid.getEuidSourceFields(getBuiltInEntityDefinition('host')).identitySourceFields],
+    service: [
+      ...euid.getEuidSourceFields(getBuiltInEntityDefinition('service')).identitySourceFields,
+    ],
+    generic: [
+      ...euid.getEuidSourceFields(getBuiltInEntityDefinition('generic')).identitySourceFields,
+    ],
+    all: [...ENTITY_NAMESPACE_SOURCE_FIELDS],
   };
 };
 
@@ -187,13 +213,34 @@ function toTargetField(field: string): string {
  * Raw source fields used to compute target EUIDs in entity store v2.
  * Target-namespace equivalents of GRAPH_ACTOR_EUID_SOURCE_FIELDS.
  */
-export const getGraphTargetEuidSourceFields = (euid: EntityStoreEuid) => {
+export const getGraphTargetEuidSourceFields = ({
+  euid,
+  getBuiltInEntityDefinition,
+}: EntityStoreEuidApi) => {
   return {
-    user: [...euid.getEuidSourceFields('user').identitySourceFields.map(toTargetField)],
-    host: [...euid.getEuidSourceFields('host').identitySourceFields.map(toTargetField)],
-    service: [...euid.getEuidSourceFields('service').identitySourceFields.map(toTargetField)],
-    generic: [...euid.getEuidSourceFields('generic').identitySourceFields.map(toTargetField)],
-    all: ['event.dataset', 'event.module', 'data_stream.dataset'],
+    user: [
+      ...euid
+        .getEuidSourceFields(getBuiltInEntityDefinition('user'))
+        .identitySourceFields.map(toTargetField),
+    ],
+    host: [
+      ...euid
+        .getEuidSourceFields(getBuiltInEntityDefinition('host'))
+        .identitySourceFields.map(toTargetField),
+    ],
+    service: [
+      ...euid
+        .getEuidSourceFields(getBuiltInEntityDefinition('service'))
+        .identitySourceFields.map(toTargetField),
+    ],
+    generic: [
+      ...euid
+        .getEuidSourceFields(getBuiltInEntityDefinition('generic'))
+        .identitySourceFields.map(toTargetField),
+    ],
+    // Namespace sources describe the event, not the actor/target side, so they are not
+    // rewritten to the `.target.` namespace.
+    all: [...ENTITY_NAMESPACE_SOURCE_FIELDS],
   };
 };
 

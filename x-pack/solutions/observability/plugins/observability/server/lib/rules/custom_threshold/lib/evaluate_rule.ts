@@ -120,7 +120,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         }
       }
 
-      // When getData returns the global '*' no-data entry (e.g. 0 composite buckets) and
+      // When getData returns the global '*' no-data entry (e.g. all shards unavailable) and
       // checkMissingGroups reinjected per-group entries, drop the redundant '*' so the
       // executor doesn't emit a duplicate ungrouped alert alongside per-group ones.
       const keys = Object.keys(currentValues);

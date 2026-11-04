@@ -7,6 +7,7 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import pRetry from 'p-retry';
 
 export interface ConverseStep {
@@ -37,6 +38,15 @@ export interface AgentBuilderConverseParams {
    * instead of sending a new free-text message via {@link input}.
    */
   promptResponses?: Record<string, unknown>;
+  /** Attachments sent with this turn, e.g. a by-value dashboard the agent should act on. */
+  attachments?: AgentBuilderConverseAttachment[];
+}
+
+export interface AgentBuilderConverseAttachment {
+  type: string;
+  data: Record<string, unknown>;
+  /** Attachment id; lets the caller find the attachment on the conversation afterwards. */
+  id?: string;
 }
 
 export interface AgentBuilderClientResponse {
@@ -53,12 +63,27 @@ export interface AgentBuilderClientResponse {
    * or `confirmation`). Empty when the agent did not ask any prompts.
    */
   prompts: unknown[];
+  /** Token counts for this round, summed across all LLM calls. */
+  tokensUsed?: ChatCompletionTokenCount;
+}
+
+export interface CreateAgentBuilderConversationParams {
+  agentId: string;
+  title: string;
+}
+
+interface RoundModelUsage {
+  input_tokens: number;
+  output_tokens: number;
+  cached_input_tokens?: number;
 }
 
 interface AgentBuilderConverseApiResponse {
   conversation_id?: string;
-  trace_id?: string;
+  /** An array when a prompt response resumed the round: one trace per execution, in order. */
+  trace_id?: string | string[];
   steps?: ConverseStep[];
+  model_usage?: RoundModelUsage;
   response?: { message?: string; structured_output?: unknown; prompts?: unknown[] };
 }
 
@@ -66,6 +91,7 @@ const RETRIES = 2;
 const MIN_TIMEOUT_MS = 2000;
 
 export interface AgentBuilderClient {
+  createConversation(params: CreateAgentBuilderConversationParams): Promise<{ id: string }>;
   converse(params: AgentBuilderConverseParams): Promise<AgentBuilderClientResponse>;
   /**
    * Loads a persisted conversation by id. Useful for evaluators that need the
@@ -106,6 +132,7 @@ export function createAgentBuilderClient({
     input,
     conversationId,
     promptResponses,
+    attachments,
   }: AgentBuilderConverseParams): Promise<AgentBuilderClientResponse> => {
     const call = async (): Promise<AgentBuilderClientResponse> => {
       const response = await fetch<AgentBuilderConverseApiResponse>('/api/agent_builder/converse', {
@@ -124,20 +151,47 @@ export function createAgentBuilderClient({
           // against the default cluster with no `TRACING_ES_URL` (matching the inferenceClient path).
           _execution_mode: 'local',
           ...(conversationId ? { conversation_id: conversationId } : {}),
+          ...(attachments ? { attachments } : {}),
         }),
       });
 
+      const { model_usage } = response;
       return {
         message: response.response?.message ?? '',
         steps: response.steps ?? [],
         structuredOutput: response.response?.structured_output,
         conversationId: response.conversation_id,
-        traceId: response.trace_id,
+        traceId: Array.isArray(response.trace_id) ? response.trace_id.at(-1) : response.trace_id,
         prompts: response.response?.prompts ?? [],
+        tokensUsed: model_usage
+          ? {
+              prompt: model_usage.input_tokens,
+              completion: model_usage.output_tokens,
+              total: model_usage.input_tokens + model_usage.output_tokens,
+              cached: model_usage.cached_input_tokens,
+            }
+          : undefined,
       };
     };
 
     return retryOnFail(`converse(${agentId})`, call);
+  };
+
+  const createConversation = ({
+    agentId,
+    title,
+  }: CreateAgentBuilderConversationParams): Promise<{ id: string }> => {
+    return retryOnFail(`createConversation(${agentId})`, () =>
+      fetch<{ id: string }>('/api/agent_builder/conversations', {
+        method: 'POST',
+        version: '2023-10-31',
+        body: JSON.stringify({
+          agent_id: agentId,
+          title,
+          access_control: { access_mode: 'private' },
+        }),
+      })
+    );
   };
 
   const getConversation = <T = unknown>(conversationId: string): Promise<T> => {
@@ -149,5 +203,5 @@ export function createAgentBuilderClient({
     });
   };
 
-  return { converse, getConversation };
+  return { createConversation, converse, getConversation };
 }

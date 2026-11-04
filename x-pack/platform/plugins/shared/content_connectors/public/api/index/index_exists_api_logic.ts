@@ -23,7 +23,7 @@ export const fetchIndexExists = async ({
   indexName,
   http,
 }: IndexExistsApiParams): Promise<IndexExistsApiResponse | undefined> => {
-  const route = `/internal/content_connectors/indices/${indexName}/exists`;
+  const route = `/internal/content_connectors/indices/${encodeURIComponent(indexName)}/exists`;
 
   if (http) {
     const { exists } = await http.get<{ exists: boolean }>(route);

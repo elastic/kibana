@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+  Logger,
+} from '@kbn/core/server';
 import { differenceBy, chunk } from 'lodash';
 
 import type { SavedObject } from '@kbn/core/server';
@@ -41,6 +46,7 @@ import type {
 import { deletePipeline } from '../elasticsearch/ingest_pipeline';
 import { removeUnusedIndexPatterns } from '../kibana/index_pattern/install';
 import { deleteTransforms } from '../elasticsearch/transform/remove';
+
 import { deleteMlModel } from '../elasticsearch/ml_model';
 import { packagePolicyService, appContextService } from '../..';
 import { deletePackageCache } from '../archive';
@@ -54,6 +60,9 @@ import { FleetError, PackageRemovalError } from '../../../errors';
 import { populatePackagePolicyAssignedAgentsCount } from '../../package_policies/populate_package_policy_assigned_agents_count';
 import { deleteEsqlViews } from '../elasticsearch/esql_views/remove';
 import type { PackageSpecConditions } from '../../../../common';
+
+import { isTrustedInstallSource } from './install_source';
+import { assertUninstallAuthorizedForAffectedSpaces } from './uninstall_authz';
 
 import { getInstallation, getPackageInfo, kibanaSavedObjectTypes } from '.';
 import { updateUninstallFailedAttempts } from './uninstall_errors_helpers';
@@ -119,7 +128,8 @@ export async function cleanupDependenciesStep(options: {
         continue;
       }
       appContextService.getLogger().info(`Removing dependency ${dep.name}@${dep.version}`);
-      // If this was the last dependency, remove the package
+      // If this was the last dependency, remove the package. No request is passed here —
+      // authz over the full dependency closure was already verified at the top-level call.
       await removeInstallation({
         savedObjectsClient,
         pkgName: dep.name,
@@ -139,11 +149,45 @@ export async function removeInstallation(options: {
   esClient: ElasticsearchClient;
   force?: boolean;
   installSource?: InstallSource;
+  request?: KibanaRequest;
 }): Promise<AssetReference[]> {
   const { savedObjectsClient, pkgName, pkgVersion, esClient } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) {
     throw new PackageRemovalError(`${pkgName} is not installed`);
+  }
+
+  // Fetch package policies before cleanupDependenciesStep so we can run authz check
+  const { total, items } = await packagePolicyService.list(
+    appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+    {
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+      spaceId: '*',
+    }
+  );
+
+  // Check that the caller has privileges in all spaces affected by this uninstall,
+  // including the full dependency closure. collectSpacesForUninstallClosure walks
+  // the dependency tree before any removal starts, so a later authz failure cannot
+  // leave earlier dependencies already deleted.
+  if (options.request) {
+    // Fail closed if SO_SEARCH_LIMIT was reached for the root package — there may be
+    // policies in spaces we haven't enumerated yet. Dep truncation is handled inside
+    // collectSpacesForUninstallClosure.
+    if (items.length < total) {
+      throw new PackageRemovalError(
+        `Unable to verify uninstall authorization for package ${pkgName}: too many package policies to enumerate`
+      );
+    }
+    await assertUninstallAuthorizedForAffectedSpaces({
+      request: options.request,
+      pkgName,
+      installation,
+      packagePolicies: items,
+      savedObjectsClient,
+    });
   }
 
   await cleanupDependenciesStep({
@@ -154,16 +198,6 @@ export async function removeInstallation(options: {
     force: options.force,
     installSource: options.installSource,
   });
-
-  const { total, items } = await packagePolicyService.list(
-    appContextService.getInternalUserSOClientWithoutSpaceExtension(),
-    {
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
-      page: 1,
-      perPage: SO_SEARCH_LIMIT,
-      spaceId: '*',
-    }
-  );
 
   if (!options.force) {
     await populatePackagePolicyAssignedAgentsCount(esClient, items);
@@ -387,10 +421,16 @@ export async function deletePrerequisiteAssets(
     indexAssets,
     transformAssets,
     indexTemplatesAndPipelines,
+    installSource,
   }: {
     indexAssets: EsAssetReference[];
     transformAssets: EsAssetReference[];
     indexTemplatesAndPipelines: EsAssetReference[];
+    /**
+     * Where the package came from. Decides whether the transform destination indices are
+     * deleted along with the transforms; omitted means untrusted, which is the safe default.
+     */
+    installSource?: InstallSource;
   },
   esClient: ElasticsearchClient
 ) {
@@ -412,10 +452,20 @@ export async function deletePrerequisiteAssets(
     );
 
     // in case transform's destination index contains any pipeline,
-    // we should delete the transforms first
-    await pMap(transformAssets, (transformAsset) => deleteESAsset(transformAsset, esClient), {
-      concurrency: MAX_CONCURRENT_ES_ASSETS_OPERATIONS,
-    });
+    // we should delete the transforms first.
+    //
+    // `delete_dest_index` is authorized by Elasticsearch against the identity stored on the
+    // transform, not against this client. For a caller-authored package that identity is the
+    // uploader's API key, which typically holds no `delete_index` privilege — asking for it
+    // would fail the whole delete and strand the transform. Deleting the destination index
+    // with Kibana's own privileges instead is not an option: `dest.index` is attacker-chosen,
+    // so that would let an upload name any index and have uninstall drop it. Leaving the index
+    // behind is the safe failure; the transform itself is always removed.
+    await deleteTransforms(
+      esClient,
+      transformAssets.map((asset) => asset.id),
+      isTrustedInstallSource(installSource)
+    );
 
     // then delete index templates and pipelines
     await pMap(indexTemplatesAndPipelines, (asset) => deleteESAsset(asset, esClient), {
@@ -452,6 +502,7 @@ async function deleteAssets(
       indexAssets,
       transformAssets,
       indexTemplatesAndPipelines,
+      installSource,
     },
     esClient
   );

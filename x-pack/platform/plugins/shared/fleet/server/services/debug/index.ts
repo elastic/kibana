@@ -7,13 +7,17 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
+import { AGENT_ACTIONS_INDEX } from '../../../common';
+
 import { escapeSearchQueryPhrase } from '../saved_object';
 
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
+  AGENTS_INDEX,
   ASSETS_SAVED_OBJECT_TYPE,
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+  ENROLLMENT_API_KEYS_INDEX,
   FLEET_PROXY_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
   FLEET_SETUP_LOCK_TYPE,
@@ -29,8 +33,19 @@ import {
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '../../constants';
 
-/** Indices supported by the Fleet debug index route use this prefix. */
-const FLEET_DEBUG_INDEX_PREFIX = '.fleet-';
+import { addNamespaceFilteringToQuery } from '../spaces/query_namespaces_filtering';
+
+/**
+ * Explicit allowlist of indices the Fleet debug index route may access.
+ * These are the same three indices offered in the Fleet debug UI.
+ * Using an allowlist rather than a prefix check limits the attack surface
+ * independently of any caller-space scoping.
+ */
+const FLEET_DEBUG_ALLOWED_INDICES = new Set([
+  AGENTS_INDEX,
+  AGENT_ACTIONS_INDEX,
+  ENROLLMENT_API_KEYS_INDEX,
+]);
 
 /** Fleet-owned saved object types supported by the Fleet debug saved_objects routes. */
 const FLEET_DEBUG_ALLOWED_SO_TYPES = new Set([
@@ -54,12 +69,7 @@ const FLEET_DEBUG_ALLOWED_SO_TYPES = new Set([
 ]);
 
 export function isIndexAllowedForDebug(index: string): boolean {
-  const segments = index
-    .split(',')
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0);
-  const allAllowed = segments.every((segment) => segment.startsWith(FLEET_DEBUG_INDEX_PREFIX));
-  return allAllowed && segments.length > 0;
+  return FLEET_DEBUG_ALLOWED_INDICES.has(index.trim());
 }
 
 export function isSavedObjectTypeAllowedForDebug(type: string): boolean {
@@ -70,12 +80,14 @@ export type DebugResult<T> = { ok: true; body: T } | { ok: false; body: { messag
 
 export async function fetchIndex(
   esClient: ElasticsearchClient,
-  index: string
+  index: string,
+  spaceId?: string
 ): Promise<DebugResult<Awaited<ReturnType<ElasticsearchClient['search']>>>> {
   if (!isIndexAllowedForDebug(index)) {
     return { ok: false, body: { message: 'Index not allowed for debug.' } };
   }
-  const body = await esClient.search({ index });
+  const query = await addNamespaceFilteringToQuery({ bool: {} }, spaceId);
+  const body = await esClient.search({ index, query });
   return { ok: true, body };
 }
 

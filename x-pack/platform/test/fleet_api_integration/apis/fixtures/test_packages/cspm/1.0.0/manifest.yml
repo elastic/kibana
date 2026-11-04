@@ -1,0 +1,31 @@
+format_version: 3.0.0
+name: cspm
+title: 'Test CSPM'
+version: 1.0.0
+description: 'Test package for cloud connector integration tests'
+type: integration
+categories: []
+conditions:
+  kibana:
+    version: '^9.0.0'
+  elastic:
+    subscription: 'basic'
+owner:
+  github: elastic/fleet
+  type: elastic
+policy_templates:
+  - name: cis_aws
+    title: CIS AWS
+    description: CIS AWS compliance
+    deployment_modes:
+      default:
+        enabled: false
+      agentless:
+        enabled: true
+        organization: security
+        division: engineering
+        team: security-service-integrations
+    inputs:
+      - type: cloudbeat/cis_aws
+        title: CIS AWS
+        description: Cloudbeat CIS AWS input

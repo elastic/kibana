@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { MockedLogger } from '@kbn/logging-mocks';
@@ -24,6 +25,7 @@ import { ActionExecutor, TaskRunnerFactory, asHttpRequestExecutionSource } from 
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { getActionsConfigurationUtilities } from '../actions_config';
+import { defaultInboundEventsLimitConfigs } from '../config';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import {
@@ -41,12 +43,14 @@ import { actionsAuthorizationMock } from '../authorization/actions_authorization
 import { ConnectorTokenClient } from '../lib/connector_token_client';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import type { SavedObject } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { connectorTokenClientMock } from '../lib/connector_token_client.mock';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
 import { getOAuthClientCredentialsAccessToken } from '../lib/get_oauth_client_credentials_access_token';
 import type { OAuthParams } from '../routes/get_oauth_access_token';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
+import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 import type { GetGlobalExecutionKPIParams, GetGlobalExecutionLogParams } from '../../common';
 import type { estypes } from '@elastic/elasticsearch';
 import { ConnectorRateLimiter } from '../lib/connector_rate_limiter';
@@ -54,6 +58,8 @@ import { getConnectorType } from '../fixtures';
 import { createMockInMemoryConnector } from '../application/connector/mocks';
 import { authTypeRegistryMock } from '../auth_types/auth_type_registry.mock';
 import type { AuthTypeRegistry } from '../auth_types/auth_type_registry';
+import { securityServiceMock } from '@kbn/core/server/mocks';
+import { encodeApiKey } from '../inbound/event_identity/encode_api_key';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -104,6 +110,7 @@ let actionTypeRegistryParams: ActionTypeRegistryOpts;
 let authTypeRegistry: AuthTypeRegistry;
 const connectorTokenClient = connectorTokenClientMock.create();
 const inMemoryMetrics = inMemoryMetricsMock.create();
+const securityService = securityServiceMock.createStart();
 
 const actionTypeIdFromSavedObjectMock = (actionTypeId = 'my-connector-type') => {
   return {
@@ -117,6 +124,9 @@ let logger: MockedLogger;
 
 beforeEach(() => {
   jest.resetAllMocks();
+  authorization.getFindAuthorizationFilter.mockResolvedValue({
+    filter: fromKueryExpression('*'),
+  });
   logger = loggerMock.create();
   mockedLicenseState = licenseStateMock.create();
   actionTypeRegistryParams = {
@@ -156,6 +166,7 @@ beforeEach(() => {
     encryptedSavedObjectsClient,
     isESOCanEncrypt,
     getAxiosInstanceWithAuth,
+    securityService,
   });
   (getOAuthJwtAccessToken as jest.Mock).mockResolvedValue(`Bearer jwttokentokentoken`);
   (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValue(
@@ -365,6 +376,7 @@ describe('create()', () => {
         Object {
           "actionTypeId": "my-connector-type",
           "config": Object {},
+          "hasInboundEventIdentity": false,
           "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},
@@ -512,6 +524,7 @@ describe('create()', () => {
             "b": true,
             "c": true,
           },
+          "hasInboundEventIdentity": false,
           "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},
@@ -552,7 +565,10 @@ describe('create()', () => {
       inboundEvents: {
         enabled: false,
         maxBodyBytes: new ByteSizeValue(1024 * 1024),
+        maxEmitted: 25,
+        ...defaultInboundEventsLimitConfigs,
       },
+      connectorSigningKeys: { enabled: false },
     });
 
     const localActionTypeRegistryParams = {
@@ -1882,6 +1898,12 @@ describe('delete()', () => {
       },
       references: [],
     });
+    unsecuredSavedObjectsClient.find.mockResolvedValue({
+      saved_objects: [],
+      total: 0,
+      page: 1,
+      per_page: 10,
+    } as never);
   });
 
   describe('authorization', () => {
@@ -1920,6 +1942,80 @@ describe('delete()', () => {
       await actionsClient.delete({ id: '1' });
 
       expect(callOrder).toEqual(['deleteConnectorTokens', 'soDelete']);
+    });
+
+    test('does not delete a signing key record when connector signing keys are disabled', async () => {
+      await actionsClient.delete({ id: '1' });
+
+      expect(unsecuredSavedObjectsClient.delete).not.toHaveBeenCalledWith(
+        'connector_signing_key',
+        '1'
+      );
+    });
+
+    test('deletes any signing key record when connector signing keys are enabled, also when the stored type does not publish keys', async () => {
+      const client = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        inMemoryConnectors: [],
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        connectorTokenClient,
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+        connectorSigningKeysEnabled: true,
+      });
+      unsecuredSavedObjectsClient.delete.mockImplementation(async (type, id) => {
+        if (type === 'connector_signing_key') {
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+        }
+        return {};
+      });
+
+      await client.delete({ id: '1' });
+
+      expect(unsecuredSavedObjectsClient.delete.mock.calls).toEqual([
+        ['action', '1'],
+        ['connector_signing_key', '1'],
+      ]);
+    });
+
+    test('keeps the signing key when the connector delete fails', async () => {
+      const client = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        inMemoryConnectors: [],
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        connectorTokenClient,
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+        connectorSigningKeysEnabled: true,
+      });
+      unsecuredSavedObjectsClient.delete.mockRejectedValueOnce(new Error('delete failed'));
+
+      await expect(client.delete({ id: '1' })).rejects.toThrow('delete failed');
+
+      expect(unsecuredSavedObjectsClient.delete).not.toHaveBeenCalledWith(
+        'connector_signing_key',
+        '1'
+      );
     });
 
     describe('when connector has authMode per-user', () => {
@@ -2228,14 +2324,79 @@ describe('delete()', () => {
       `Failed fetching action type from registry: Action type \"unregistered-action-type-id\" is not registered. - deletion will proceed.`
     );
 
-    // deletion is called with the right params
-    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "action",
-        "2",
-      ]
-    `);
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('action', '2');
+  });
+
+  test('invalidates the last-saver API key before deleting an inbound connector', async () => {
+    const expectedResult = Symbol();
+    unsecuredSavedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
+    unsecuredSavedObjectsClient.get.mockReset();
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: 'inbound-1',
+      type: 'action',
+      attributes: {
+        actionTypeId: '.inboundWebhook',
+        isMissingSecrets: false,
+        config: {},
+        secrets: {},
+      },
+      references: [],
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: 'inbound-1',
+      type: 'action',
+      attributes: {
+        actionTypeId: '.inboundWebhook',
+        name: 'ingress',
+        isMissingSecrets: false,
+        config: {},
+        secrets: {},
+        apiKey: encodeApiKey('old-id', 'old-secret'),
+      },
+      references: [],
+    } as never);
+    securityService.authc.apiKeys.invalidateAsInternalUser.mockResolvedValue({
+      invalidated_api_keys: ['old-id'],
+      previously_invalidated_api_keys: [],
+      error_count: 0,
+    });
+
+    const result = await actionsClient.delete({ id: 'inbound-1' });
+
+    expect(result).toEqual(expectedResult);
+    expect(securityService.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledWith({
+      ids: ['old-id'],
+    });
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('action', 'inbound-1');
+  });
+
+  test('does not delete the connector when ingest credential cleanup fails', async () => {
+    unsecuredSavedObjectsClient.find.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'cred-1',
+          type: 'connector_ingress_credential',
+          attributes: {
+            connectorId: '1',
+            ingestTokenHash: 'a'.repeat(64),
+            createdAt: '2026-01-01T00:00:00.000Z',
+          },
+          references: [],
+        },
+      ],
+      total: 1,
+      page: 1,
+      per_page: 10,
+    } as never);
+    unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+      statuses: [{ id: 'cred-1', type: 'connector_ingress_credential', success: false }],
+    } as never);
+
+    await expect(actionsClient.delete({ id: '1' })).rejects.toThrow(
+      'Failed to delete 1 ingest credential(s) for connector "1"'
+    );
+    expect(unsecuredSavedObjectsClient.delete).not.toHaveBeenCalled();
   });
 });
 
@@ -2469,6 +2630,7 @@ describe('update()', () => {
         Object {
           "actionTypeId": "my-connector-type",
           "config": Object {},
+          "hasInboundEventIdentity": false,
           "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},
@@ -2538,6 +2700,7 @@ describe('update()', () => {
         Object {
           "actionTypeId": "my-connector-type",
           "config": Object {},
+          "hasInboundEventIdentity": false,
           "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},
@@ -2694,6 +2857,7 @@ describe('update()', () => {
             "b": true,
             "c": true,
           },
+          "hasInboundEventIdentity": false,
           "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},
@@ -3210,7 +3374,7 @@ describe('bulkEnqueueExecution()', () => {
         {
           id: uuidv4(),
           params: {},
-          spaceId: 'default',
+          spaceId: DEFAULT_SPACE_ID,
           executionId: '123abc',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
@@ -3219,7 +3383,7 @@ describe('bulkEnqueueExecution()', () => {
         {
           id: uuidv4(),
           params: {},
-          spaceId: 'default',
+          spaceId: DEFAULT_SPACE_ID,
           executionId: '456def',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
@@ -3242,7 +3406,7 @@ describe('bulkEnqueueExecution()', () => {
           {
             id: uuidv4(),
             params: {},
-            spaceId: 'default',
+            spaceId: DEFAULT_SPACE_ID,
             executionId: '123abc',
             apiKey: null,
             source: asHttpRequestExecutionSource(request),
@@ -3251,7 +3415,7 @@ describe('bulkEnqueueExecution()', () => {
           {
             id: uuidv4(),
             params: {},
-            spaceId: 'default',
+            spaceId: DEFAULT_SPACE_ID,
             executionId: '456def',
             apiKey: null,
             source: asHttpRequestExecutionSource(request),
@@ -3271,7 +3435,7 @@ describe('bulkEnqueueExecution()', () => {
       {
         id: uuidv4(),
         params: {},
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         executionId: '123abc',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
@@ -3280,7 +3444,7 @@ describe('bulkEnqueueExecution()', () => {
       {
         id: uuidv4(),
         params: {},
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         executionId: '456def',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
@@ -3517,12 +3681,18 @@ describe('isSystemAction()', () => {
 });
 
 describe('getGlobalExecutionLogWithAuth()', () => {
+  const executionNamespaces = ['space-1', 'space-2'];
+  const executionAuthorizationFilter = nodeBuilder.or([
+    nodeBuilder.is('kibana.space_ids', 'space-1'),
+    nodeBuilder.is('kibana.space_ids', 'space-2'),
+  ]);
   const opts: GetGlobalExecutionLogParams = {
     dateStart: '2023-01-09T08:55:56-08:00',
     dateEnd: '2023-01-10T08:55:56-08:00',
     page: 1,
     perPage: 50,
     sort: [{ timestamp: { order: 'desc' } }],
+    namespaces: executionNamespaces,
   };
   const results = {
     aggregations: {
@@ -3541,22 +3711,35 @@ describe('getGlobalExecutionLogWithAuth()', () => {
       hits: [],
     } as estypes.SearchHitsMetadata<unknown>,
   };
+
+  beforeEach(() => {
+    authorization.getFindAuthorizationFilter.mockResolvedValue({
+      filter: executionAuthorizationFilter,
+    });
+  });
+
   describe('authorization', () => {
     test('ensures user is authorised to access logs', async () => {
       eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue(results);
 
       await actionsClient.getGlobalExecutionLogWithAuth(opts);
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
+      expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
+        namespaces: executionNamespaces,
+      });
     });
 
     test('throws when user is not authorised to access logs', async () => {
-      authorization.ensureAuthorized.mockRejectedValue(new Error(`Unauthorized to access logs`));
+      authorization.getFindAuthorizationFilter.mockRejectedValue(
+        new Error(`Unauthorized to access logs`)
+      );
 
       await expect(actionsClient.getGlobalExecutionLogWithAuth(opts)).rejects.toMatchInlineSnapshot(
         `[Error: Unauthorized to access logs]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
+      expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
+        namespaces: executionNamespaces,
+      });
     });
   });
 
@@ -3569,14 +3752,26 @@ describe('getGlobalExecutionLogWithAuth()', () => {
         "total": 5,
       }
     `);
-    expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalled();
+    expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
+      'action',
+      executionAuthorizationFilter,
+      expect.any(Object),
+      executionNamespaces,
+      true
+    );
   });
 });
 
 describe('getGlobalExecutionKpiWithAuth()', () => {
+  const executionNamespaces = ['space-1', 'space-2'];
+  const executionAuthorizationFilter = nodeBuilder.or([
+    nodeBuilder.is('kibana.space_ids', 'space-1'),
+    nodeBuilder.is('kibana.space_ids', 'space-2'),
+  ]);
   const opts: GetGlobalExecutionKPIParams = {
     dateStart: '2023-01-09T08:55:56-08:00',
     dateEnd: '2023-01-10T08:55:56-08:00',
+    namespaces: executionNamespaces,
   };
   const results = {
     aggregations: {
@@ -3594,22 +3789,35 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
       hits: [],
     } as estypes.SearchHitsMetadata<unknown>,
   };
+
+  beforeEach(() => {
+    authorization.getFindAuthorizationFilter.mockResolvedValue({
+      filter: executionAuthorizationFilter,
+    });
+  });
+
   describe('authorization', () => {
     test('ensures user is authorised to access kpi', async () => {
       eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue(results);
 
       await actionsClient.getGlobalExecutionKpiWithAuth(opts);
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
+      expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
+        namespaces: executionNamespaces,
+      });
     });
 
     test('throws when user is not authorised to access kpi', async () => {
-      authorization.ensureAuthorized.mockRejectedValue(new Error(`Unauthorized to access kpi`));
+      authorization.getFindAuthorizationFilter.mockRejectedValue(
+        new Error(`Unauthorized to access kpi`)
+      );
 
       await expect(actionsClient.getGlobalExecutionKpiWithAuth(opts)).rejects.toMatchInlineSnapshot(
         `[Error: Unauthorized to access kpi]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
+      expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
+        namespaces: executionNamespaces,
+      });
     });
   });
 
@@ -3624,6 +3832,12 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
         "warning": 0,
       }
     `);
-    expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalled();
+    expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
+      'action',
+      executionAuthorizationFilter,
+      expect.any(Object),
+      executionNamespaces,
+      true
+    );
   });
 });

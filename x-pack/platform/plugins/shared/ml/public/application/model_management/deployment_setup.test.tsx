@@ -25,6 +25,7 @@ const cloudInfo: CloudInfo = {
   deploymentId: null,
   cloudUrl: null,
   isMlAutoscalingEnabled: false,
+  isMlCpsEnabled: false,
 };
 
 const deploymentParamsMapper = {

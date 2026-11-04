@@ -1,0 +1,246 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
+import type { StreamsUnit } from '@kbn/streams-schema';
+import { disconnectRouteFromTarget } from './unit_connections';
+import { createDefaultUnit, createUnitRepository } from './unit_repository';
+
+const createNotFoundError = (): Error =>
+  Object.assign(new Error('Streams unit [default] not found.'), {
+    request: {},
+    body: { statusCode: 404, message: 'Streams unit [default] not found.', error: 'Not Found' },
+  });
+
+const storedUnit: StreamsUnit.GetResponse = {
+  unit: {
+    sources: [
+      {
+        id: 'otlp-input',
+        name: 'Production OTLP',
+        type: 'otlp',
+        supported_telemetry: ['logs', 'traces'],
+      },
+      {
+        id: 'file-drop',
+        type: 'file',
+        supported_telemetry: ['logs'],
+      },
+    ],
+    processors: [{ id: 'add-env', type: 'add_fields', supported_telemetry: ['logs'] }],
+    destinations: [{ id: 'es-prod', type: 'debug', supported_telemetry: ['logs'] }],
+    pipelines: [
+      {
+        id: 'main',
+        supported_telemetry: ['logs', 'traces'],
+        config: [
+          { name: 'sources', value: ['otlp-input'] },
+          { name: 'processors', value: ['add-env'] },
+          { name: 'destinations', value: ['es-prod'] },
+        ],
+      },
+    ],
+  },
+  ui_metadata: { nodes: { 'add-env': { x: 1, y: 2 } } },
+};
+
+describe('unit repository', () => {
+  it('loads a default unit when none is stored', async () => {
+    const fetch = jest.fn().mockRejectedValue(createNotFoundError());
+    const repository = createUnitRepository({
+      streamsRepositoryClient: { fetch } as never,
+    });
+
+    await expect(repository.load()).resolves.toEqual(createDefaultUnit());
+    expect(fetch).toHaveBeenCalledWith('GET /internal/streams/unit/{id}', {
+      params: { path: { id: STREAMS_DEFAULT_UNIT_ID } },
+      signal: null,
+    });
+  });
+
+  it('puts the unit as the request body', async () => {
+    const fetch = jest.fn().mockResolvedValue({ acknowledged: true });
+    const repository = createUnitRepository({
+      streamsRepositoryClient: { fetch } as never,
+    });
+
+    await expect(repository.persist(storedUnit)).resolves.toEqual(storedUnit);
+
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(fetch).toHaveBeenCalledWith('PUT /internal/streams/unit/{id}', {
+      params: {
+        path: { id: STREAMS_DEFAULT_UNIT_ID },
+        body: storedUnit,
+      },
+      signal: null,
+    });
+  });
+
+  it('drops unconnected routing rules before saving', async () => {
+    const fetch = jest.fn().mockResolvedValue({ acknowledged: true });
+    const repository = createUnitRepository({ streamsRepositoryClient: { fetch } as never });
+    const routedUnit: StreamsUnit.GetResponse = {
+      ...storedUnit,
+      unit: {
+        ...storedUnit.unit,
+        pipelines: [
+          {
+            id: 'main',
+            supported_telemetry: ['logs'],
+            config: [
+              { name: 'sources', value: ['otlp-input'] },
+              {
+                name: 'routes',
+                value: [{ when: 'true', destinations: [] }, { destinations: ['es-prod'] }],
+              },
+            ],
+          },
+        ],
+      },
+    };
+    const savedUnit: StreamsUnit.GetResponse = {
+      ...routedUnit,
+      unit: {
+        ...routedUnit.unit,
+        pipelines: [
+          {
+            id: 'main',
+            supported_telemetry: ['logs'],
+            config: [
+              { name: 'sources', value: ['otlp-input'] },
+              { name: 'routes', value: [{ destinations: ['es-prod'] }] },
+            ],
+          },
+        ],
+      },
+    };
+
+    await expect(repository.persist(routedUnit)).resolves.toEqual(savedUnit);
+    expect(fetch).toHaveBeenCalledWith('PUT /internal/streams/unit/{id}', {
+      params: { path: { id: STREAMS_DEFAULT_UNIT_ID }, body: savedUnit },
+      signal: null,
+    });
+  });
+
+  it('narrows a routing pipeline to the signals of its remaining routes when a disconnected rule is saved', async () => {
+    const fetch = jest.fn().mockResolvedValue({ acknowledged: true });
+    const repository = createUnitRepository({ streamsRepositoryClient: { fetch } as never });
+    const routedUnit: StreamsUnit.GetResponse = {
+      ...storedUnit,
+      unit: {
+        ...storedUnit.unit,
+        destinations: [
+          { id: 'es-prod', type: 'debug', supported_telemetry: ['logs'] },
+          { id: 'es-traces', type: 'debug', supported_telemetry: ['traces'] },
+        ],
+        pipelines: [
+          {
+            id: 'main',
+            supported_telemetry: ['logs', 'traces'],
+            config: [
+              { name: 'sources', value: ['otlp-input'] },
+              {
+                name: 'routes',
+                value: [
+                  { telemetry: ['traces'], destinations: ['es-traces'] },
+                  { telemetry: ['logs'], destinations: ['es-prod'] },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    };
+    const staged = disconnectRouteFromTarget(
+      routedUnit,
+      { pipelineId: 'main', ruleIndex: 0 },
+      { kind: 'destination', id: 'es-traces' }
+    );
+    expect(staged.unit.pipelines[0]?.supported_telemetry).toEqual(['logs', 'traces']);
+
+    const saved = await repository.persist(staged);
+
+    expect(saved.unit.pipelines).toEqual([
+      {
+        id: 'main',
+        supported_telemetry: ['logs'],
+        config: [
+          { name: 'sources', value: ['otlp-input'] },
+          { name: 'routes', value: [{ telemetry: ['logs'], destinations: ['es-prod'] }] },
+        ],
+      },
+    ]);
+    expect(fetch).toHaveBeenCalledWith('PUT /internal/streams/unit/{id}', {
+      params: { path: { id: STREAMS_DEFAULT_UNIT_ID }, body: saved },
+      signal: null,
+    });
+  });
+
+  it('warns when API keys for removed components may still be active', async () => {
+    const addWarning = jest.fn();
+    const fetch = jest
+      .fn()
+      .mockResolvedValueOnce({ acknowledged: true })
+      .mockResolvedValueOnce({ acknowledged: true, api_keys_may_remain: true });
+    const repository = createUnitRepository({
+      streamsRepositoryClient: { fetch } as never,
+      toasts: { addWarning } as never,
+    });
+
+    await repository.persist(storedUnit);
+    expect(addWarning).not.toHaveBeenCalled();
+
+    await repository.persist(storedUnit);
+    expect(addWarning).toHaveBeenCalledTimes(1);
+  });
+
+  it('sends secrets in the PUT envelope when given', async () => {
+    const fetch = jest.fn().mockResolvedValue({ acknowledged: true });
+    const repository = createUnitRepository({ streamsRepositoryClient: { fetch } as never });
+    const secrets = { 'es-prod-api-key': 'plaintext' };
+
+    await expect(repository.persist(storedUnit, secrets)).resolves.toEqual(storedUnit);
+    expect(fetch).toHaveBeenCalledWith('PUT /internal/streams/unit/{id}', {
+      params: { path: { id: STREAMS_DEFAULT_UNIT_ID }, body: { ...storedUnit, secrets } },
+      signal: null,
+    });
+  });
+
+  it('wires a source, destination, and pipeline in the temporary default unit', () => {
+    expect(createDefaultUnit()).toEqual({
+      unit: {
+        sources: [
+          {
+            id: 'nop-input',
+            name: 'Nop',
+            type: 'nop',
+            supported_telemetry: ['logs', 'metrics', 'traces'],
+          },
+        ],
+        destinations: [
+          {
+            id: 'debug-out',
+            name: 'Debug',
+            type: 'debug',
+            supported_telemetry: ['logs', 'metrics', 'traces'],
+          },
+        ],
+        pipelines: [
+          {
+            id: 'main',
+            supported_telemetry: ['logs', 'metrics', 'traces'],
+            config: [
+              { name: 'sources', value: ['nop-input'] },
+              { name: 'destinations', value: ['debug-out'] },
+            ],
+          },
+        ],
+      },
+      ui_metadata: {},
+    });
+  });
+});

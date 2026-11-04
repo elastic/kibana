@@ -5,20 +5,28 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useIndicatorById } from './use_indicator_by_id';
-import { TestProvidersComponent } from '../../../../threat_intelligence/mocks/test_providers';
 import { createFetchIndicatorById } from '../services/fetch_indicator_by_id';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 
 jest.mock('../services/fetch_indicator_by_id');
+jest.mock('../../../../common/lib/kibana');
 
 const indicatorByIdQueryResult = { _id: 'testId' } as unknown as Indicator;
+
+const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+const wrapper = ({ children }: PropsWithChildren) => (
+  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+);
 
 const renderUseIndicatorById = (initialProps = { indicatorId: 'testId' }) =>
   renderHook((props) => useIndicatorById(props.indicatorId), {
     initialProps,
-    wrapper: TestProvidersComponent,
+    wrapper,
   });
 
 describe('useIndicatorById()', () => {

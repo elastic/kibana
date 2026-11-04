@@ -116,6 +116,33 @@ describe('When on the endpoint exceptions page', () => {
         ).toBeNull();
       });
     });
+
+    describe('READ privilege', () => {
+      beforeEach(() => {
+        exceptionsListAllHttpMocks(mockedContext.coreStart.http);
+        mockUserPrivileges.mockReturnValue({
+          endpointPrivileges: getEndpointAuthzInitialStateMock({
+            canWriteAdminData: false,
+            canWriteEndpointExceptions: false,
+          }),
+        });
+        mockCanCreateEndpointExceptions = false;
+      });
+
+      it('should disable modifying/deleting entries', async () => {
+        render();
+
+        await waitFor(() =>
+          expect(
+            renderResult.getAllByTestId('endpointExceptionsListPage-card').length
+          ).toBeGreaterThan(0)
+        );
+
+        expect(
+          renderResult.queryByTestId('endpointExceptionsListPage-card-header-actions-button')
+        ).toBeNull();
+      });
+    });
   });
 
   describe('When opting in to per-policy Endpoint exceptions', () => {

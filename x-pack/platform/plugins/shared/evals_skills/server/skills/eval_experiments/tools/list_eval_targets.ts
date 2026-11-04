@@ -9,8 +9,8 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { MAX_NAME_LENGTH } from '@kbn/evals-plugin/common';
-import { errorResult, evalsTools, otherResult, toErrorResult } from './common';
-import { hasReadEvalsPrivilege } from './check_privileges';
+import { errorResult, evalsExperimentTools, otherResult, toErrorResult } from './tool_utils';
+import { hasReadEvalsPrivilege } from '../../common/check_privileges';
 import type { EvalExperimentsToolDeps } from './deps';
 
 const schema = z.object({
@@ -42,7 +42,7 @@ const matches = (search: string | undefined, ...fields: Array<string | undefined
 export const listEvalTargetsTool = (
   deps: EvalExperimentsToolDeps
 ): BuiltinSkillBoundedTool<typeof schema> => ({
-  id: evalsTools.listTargets,
+  id: evalsExperimentTools.listTargets,
   type: ToolType.builtin,
   description:
     'List the Agent Builder agents that can be evaluated. Returns agent_id values (with names and descriptions) to use as the experiment target.',

@@ -1,8 +1,7 @@
 {
-  "sha1": "1249c0d8a98ee6d30603e1b8d1d584e62ae200d9",
+  "sha1": "57c4e7d2ee465aae56464128402b2994460742ac",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -75,6 +74,34 @@
       }
     },
     {
+      "id": "405128a68c1c281-d1349f6c1402fdd",
+      "title": "Integration tile navigation clicking a tile with data streams opens the add-integration page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/integration_tile_navigation.spec.ts",
+        "line": 21,
+        "column": 45
+      }
+    },
+    {
+      "id": "405128a68c1c281-77486d9fb19bffd",
+      "title": "Integration tile navigation clicking a tile as a user without integrations write privileges opens the overview page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/integration_tile_navigation.spec.ts",
+        "line": 33,
+        "column": 9
+      }
+    },
+    {
       "id": "4a58981d560e8cb-5923c1d64841ce8",
       "title": "When the user has Editor built-in role It should not show a callout if fleet server is setup",
       "expectedStatus": "passed",
@@ -121,12 +148,13 @@
       "title": "When the user has Fleet Agents Read built-in role is accessible but user cannot perform any write actions on agent tabs",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_agents_read_integrations_none.spec.ts",
-        "line": 15,
-        "column": 3
+        "line": 14,
+        "column": 14
       }
     },
     {
@@ -134,12 +162,13 @@
       "title": "When the user has Fleet Agents Read built-in role is accessible and user only see agents tab",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_agents_read_integrations_none.spec.ts",
-        "line": 26,
-        "column": 23
+        "line": 27,
+        "column": 24
       }
     },
     {
@@ -147,11 +176,12 @@
       "title": "When the user has All privilege for Fleet but None for integrations Fleet is accessible",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_all_integrations_none.spec.ts",
-        "line": 13,
+        "line": 14,
         "column": 14
       }
     },
@@ -165,7 +195,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_all_integrations_read.spec.ts",
-        "line": 35,
+        "line": 38,
         "column": 7
       }
     },
@@ -179,7 +209,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_all_integrations_read.spec.ts",
-        "line": 51,
+        "line": 54,
         "column": 24
       }
     },

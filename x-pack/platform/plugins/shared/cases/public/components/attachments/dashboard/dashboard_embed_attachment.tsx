@@ -16,7 +16,7 @@ import type {
   DashboardAttachmentData,
   DashboardAttachmentMetadata,
   DashboardConfig,
-} from '../../../../common/types/domain_zod/attachment/dashboard/v2';
+} from '../../../../common/types/domain/attachment/dashboard/v2';
 import type { UnifiedReferenceAttachmentViewProps } from '../../../client/attachment_framework/types';
 
 type DashboardViewProps = UnifiedReferenceAttachmentViewProps<
@@ -29,7 +29,7 @@ type DashboardViewProps = UnifiedReferenceAttachmentViewProps<
  * Compile-time tripwire: if the upstream `DashboardAttachmentApiData` shape
  * drops or renames any of the fields our local `DashboardConfigSchema`
  * declares, this `Pick` assignment fails typecheck and forces us to sync the
- * inline schema in `common/types/domain_zod/attachment/dashboard/v2.ts`. The
+ * inline schema in `common/types/domain/attachment/dashboard/v2.ts`. The
  * local schema is intentionally loose (most fields typed as `unknown`) so
  * shape evolution within an existing field is allowed; only field
  * presence/renames trigger the tripwire.
@@ -58,7 +58,7 @@ export type DashboardConfigMatchesAttachmentData = (
  * `React.lazy` boundary so the cost is deferred until a dashboard attachment
  * is actually rendered.
  *
- * Caller (`getDashboardAttachmentViewObject`) only mounts this when `data` is
+ * Caller (`getDashboardCreationActivity`) only mounts this when `data` is
  * present; with the schema-level requirement `data.config` is then guaranteed,
  * so we destructure directly without a narrowing helper.
  */

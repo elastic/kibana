@@ -7,53 +7,56 @@
 
 import { useCallback } from 'react';
 import type { Alert } from '@kbn/alerting-types';
-import type { CasesService } from '../types';
+import type { CasesOwner, CasesService } from '../types';
 
 export const useCaseActions = ({
   alerts,
   cases,
+  owner,
   onAddToCase,
 }: {
   alerts: Alert[];
   cases?: CasesService;
+  owner: CasesOwner[];
   onAddToCase?: (opts: { isNewCase: boolean }) => void;
 }) => {
   const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal({
-    onSuccess: () => onAddToCase?.({ isNewCase: false }),
+    onSuccess: (_, isNewCase) => onAddToCase?.({ isNewCase }),
   });
 
-  const createCaseFlyout = cases?.hooks.useCasesAddToNewCaseFlyout({
-    onSuccess: () => onAddToCase?.({ isNewCase: true }),
-  });
+  const [defaultOwner] = owner;
 
-  const getCaseAttachments = useCallback(() => {
-    return alerts.map((alert) => ({
-      alertId: alert?._id ?? '',
-      index: alert?._index ?? '',
-      type: 'alert' as const,
-      rule: cases?.helpers.getRuleIdFromEvent({
-        ecs: {
-          _id: alert?._id ?? '',
-          _index: alert?._index ?? '',
-        },
-        data: Object.entries(alert ?? {}).reduce<Array<{ field: string; value: string[] }>>(
-          (acc, [field, value]) => [...acc, { field, value: value as string[] }],
-          []
-        ),
-      }) ?? { id: '', name: '' },
-    }));
-  }, [alerts, cases?.helpers]);
+  const getCaseAttachments = useCallback(
+    (caseOwner?: string) => {
+      const attachmentOwner = caseOwner ?? defaultOwner;
+      if (!cases || !attachmentOwner) {
+        return [];
+      }
 
-  const handleAddToNewCaseClick = useCallback(() => {
-    createCaseFlyout?.open({ attachments: getCaseAttachments() });
-  }, [createCaseFlyout, getCaseAttachments]);
+      return cases.helpers.groupAlertsByRule(
+        alerts.map((alert) => ({
+          ecs: {
+            _id: alert._id ?? '',
+            _index: alert._index ?? '',
+          },
+          data: Object.entries(alert).reduce<Array<{ field: string; value: string[] }>>(
+            (acc, [field, value]) => [...acc, { field, value: value as string[] }],
+            []
+          ),
+        })),
+        attachmentOwner
+      );
+    },
+    [alerts, cases, defaultOwner]
+  );
 
-  const handleAddToExistingCaseClick = useCallback(() => {
-    selectCaseModal?.open({ getAttachments: () => getCaseAttachments() });
+  const handleAddToCaseClick = useCallback(() => {
+    selectCaseModal?.open({
+      getAttachments: ({ theCase }) => getCaseAttachments(theCase?.owner),
+    });
   }, [selectCaseModal, getCaseAttachments]);
 
   return {
-    handleAddToExistingCaseClick,
-    handleAddToNewCaseClick,
+    handleAddToCaseClick,
   };
 };

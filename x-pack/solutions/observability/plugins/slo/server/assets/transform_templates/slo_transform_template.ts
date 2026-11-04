@@ -13,7 +13,6 @@ import type {
   TransformTimeSync,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import { PROJECT_ROUTING_ORIGIN } from '@kbn/cps-server-utils';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { SLO_RESOURCES_VERSION } from '../../../common/constants';
 import type { SLODefinition } from '../../domain/models';
@@ -33,9 +32,9 @@ export const getSLOTransformTemplate = (
   aggregations: TransformPivot['aggregations'] = {},
   settings: TransformSettings,
   slo: SLODefinition,
-  applyProjectRouting: boolean = false
+  projectRouting?: string
 ): TransformPutTransformRequest => {
-  const formattedSource = buildSourceWithFilters(source, slo, applyProjectRouting);
+  const formattedSource = buildSourceWithFilters(source, slo, projectRouting);
   return {
     transform_id: transformId,
     description,
@@ -75,15 +74,13 @@ const buildGroupingFilters = (slo: SLODefinition): QueryDslQueryContainer[] => {
 const buildSourceWithFilters = (
   source: TransformSource,
   slo: SLODefinition,
-  applyProjectRouting: boolean
+  projectRouting?: string
 ): TransformSource => {
   const groupingFilters = buildGroupingFilters(slo);
   const sourceFilters = [source.query?.bool?.filter].flat().filter(Boolean);
   return {
     ...source,
-    ...(applyProjectRouting && slo.settings.preventCrossProjectSearch
-      ? { project_routing: PROJECT_ROUTING_ORIGIN }
-      : {}),
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
     query: {
       ...source.query,
       bool: {

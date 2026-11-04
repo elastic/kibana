@@ -9,11 +9,11 @@
 
 import type { LineCounter } from 'yaml';
 import { DEFAULT_PARALLEL_MAX_FAN_OUT } from '@kbn/workflows';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import {
   getValueFromValueNode,
   type WorkflowLookup,
 } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
-import type { YamlValidationResult } from '../model/types';
 
 const PARALLEL_STEP_TYPE = 'parallel';
 
@@ -58,6 +58,7 @@ export function validateParallelFanOut(
       results.push({
         id: `parallel-fan-out-${step.stepId}-${startPos.line}-${startPos.col}`,
         owner: 'parallel-fan-out-validation',
+        ruleId: 'unboundedParallelFanOut',
         severity: 'warning',
         message:
           `Parallel step "${step.stepId}" has no "concurrency" limit. ` +
@@ -93,6 +94,7 @@ export function validateParallelFanOut(
         results.push({
           id: `parallel-fan-out-size-${step.stepId}-${startPos.line}-${startPos.col}`,
           owner: 'parallel-fan-out-validation',
+          ruleId: 'parallelFanOutExceedsLimit',
           severity: 'warning',
           message:
             `Parallel step "${step.stepId}" fans out over ${foreachValue.length} items, ` +

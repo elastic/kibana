@@ -15,6 +15,7 @@ import type {
 import type {
   AnyArtifact,
   ArtifactEntryCardDecoratorProps,
+  ArtifactEntryCardProps,
 } from '../../../../../components/artifact_entry_card';
 import { ArtifactEntryCardMinified } from '../../../../../components/artifact_entry_card';
 
@@ -29,10 +30,20 @@ export interface PolicyArtifactsAssignableListProps {
   selectedArtifactsUpdated: (id: string, selected: boolean) => void;
   isListLoading: boolean;
   CardDecorator: React.ComponentType<ArtifactEntryCardDecoratorProps> | undefined;
+  CriteriaComponent?: ArtifactEntryCardProps['CriteriaComponent'];
+  showEnabledColumn?: boolean;
 }
 
 export const PolicyArtifactsAssignableList = React.memo<PolicyArtifactsAssignableListProps>(
-  ({ artifacts, isListLoading, selectedArtifactIds, selectedArtifactsUpdated, CardDecorator }) => {
+  ({
+    artifacts,
+    isListLoading,
+    selectedArtifactIds,
+    selectedArtifactsUpdated,
+    CardDecorator,
+    CriteriaComponent,
+    showEnabledColumn = false,
+  }) => {
     const selectedArtifactIdsByKey = useMemo(
       () =>
         selectedArtifactIds.reduce(
@@ -56,11 +67,20 @@ export const PolicyArtifactsAssignableList = React.memo<PolicyArtifactsAssignabl
                 selectedArtifactsUpdated(artifact.id, selected)
               }
               Decorator={CardDecorator}
+              CriteriaComponent={CriteriaComponent}
+              showEnabledColumn={showEnabledColumn}
             />
           ))}
         </div>
       );
-    }, [CardDecorator, artifacts, selectedArtifactIdsByKey, selectedArtifactsUpdated]);
+    }, [
+      CardDecorator,
+      CriteriaComponent,
+      showEnabledColumn,
+      artifacts,
+      selectedArtifactIdsByKey,
+      selectedArtifactsUpdated,
+    ]);
 
     return (
       <>

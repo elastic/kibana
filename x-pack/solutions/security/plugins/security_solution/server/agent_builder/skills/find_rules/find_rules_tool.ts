@@ -80,17 +80,20 @@ export const findRulesSchema = z
       .describe('Exclude rules with any of these tags.'),
     mitreTechnique: z
       .string()
-      .regex(/^T\d{4}(\.\d{3})?$/i)
+      .regex(/^(AML\.)?T\d{4}(\.\d{3})?$/i)
       .max(MAX_STRING_LENGTH)
       .optional()
-      .describe('MITRE technique ID, e.g. "T1059" or "T1059.001".'),
+      .describe(
+        'MITRE technique ID, e.g. "T1059", "T1059.001" (ATT&CK) or "AML.T0044", "AML.T0024.002" (ATLAS).'
+      ),
     mitreTactic: z
       .string()
       .min(1)
       .max(MAX_STRING_LENGTH)
       .optional()
       .describe(
-        'MITRE tactic, either ID (e.g. "TA0001") or display name (e.g. "Initial Access"). ' +
+        'MITRE tactic, either ID (e.g. "TA0001" for ATT&CK or "AML.TA0000" for ATLAS) or display name (e.g. "Initial Access"). ' +
+          'Display-name queries match both ATT&CK and ATLAS (they share several tactic names); use an ID to target one framework. ' +
           'Queries the structured `threat.tactic` field so it finds rules whose tactic is in ' +
           'rule metadata even when no "Tactic: X" tag is present. Prefer over tags for tactic queries.'
       ),
@@ -167,14 +170,14 @@ export function buildToolFilter(params: FilterInput): string | undefined {
   }
 
   if (params.mitreTechnique) {
-    const field = params.mitreTechnique.includes('.')
+    const field = /^(AML\.)?T\d{4}\.\d{3}$/i.test(params.mitreTechnique)
       ? RULE_PARAMS_FIELDS.SUBTECHNIQUE_ID
       : RULE_PARAMS_FIELDS.TECHNIQUE_ID;
     extra.push(`${field}: ${prepareKQLStringParam(params.mitreTechnique)}`);
   }
 
   if (params.mitreTactic) {
-    const field = /^TA\d{4}$/i.test(params.mitreTactic)
+    const field = /^(AML\.)?TA\d{4}$/i.test(params.mitreTactic)
       ? RULE_PARAMS_FIELDS.TACTIC_ID
       : RULE_PARAMS_FIELDS.TACTIC_NAME;
     extra.push(`${field}: ${prepareKQLStringParam(params.mitreTactic)}`);
@@ -209,6 +212,13 @@ function summarizeRule(rule: RuleFromFind) {
     id: rule.id,
     ruleId: params.rule_id ?? params.ruleId,
     name: rule.name,
+    description: params.description,
+    query: params.query,
+    // The match rubric requires the same data source, so the index patterns are evidence,
+    // not decoration: without them a Windows-endpoint rule can be judged to cover a Linux
+    // or cloud behaviour that shares its technique.
+    index: params.index,
+    dataViewId: params.data_view_id,
     tags: rule.tags,
     enabled: rule.enabled,
     severity: params.severity,

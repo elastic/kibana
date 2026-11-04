@@ -12,6 +12,7 @@ import type { HttpSetup } from '@kbn/core/public';
 
 import type { ApplicationStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
@@ -91,10 +92,12 @@ export const WithAppDependencies =
     apiService.setup(httpSetup, uiMetricService);
 
     return (
-      <I18nProvider>
-        <KibanaContextProvider services={appServices}>
-          <Comp {...(props as React.JSX.IntrinsicAttributes & P)} />
-        </KibanaContextProvider>
-      </I18nProvider>
+      <MockAppHeaderProvider>
+        <I18nProvider>
+          <KibanaContextProvider services={appServices}>
+            <Comp {...(props as React.JSX.IntrinsicAttributes & P)} />
+          </KibanaContextProvider>
+        </I18nProvider>
+      </MockAppHeaderProvider>
     );
   };

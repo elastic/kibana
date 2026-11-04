@@ -8,21 +8,34 @@
 import pMap from 'p-map';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { syntheticsMonitorSavedObjectType } from '../../../../common/types/saved_objects';
 import { validatePermissions } from '../edit_monitor';
+import { assertCanPerformMonitorBulkActionInAllSpaces } from '../monitor_locations_utils';
 import type {
   EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
   SyntheticsMonitor,
   SyntheticsMonitorWithId,
 } from '../../../../common/runtime_types';
-import { ConfigKey } from '../../../../common/runtime_types';
+import { ConfigKey, MonitorTypeEnum, SourceType } from '../../../../common/runtime_types';
 import {
   formatTelemetryDeleteEvent,
   sendErrorTelemetryEvents,
   sendTelemetryEvents,
 } from '../../telemetry/monitor_upgrade_sender';
 import type { RouteContext } from '../../types';
+
+type MonitorSavedObject = SavedObject<SyntheticsMonitor | EncryptedSyntheticsMonitorAttributes>;
+
+// `source.inline.script` is encrypted, so a plain read never returns it. Browser and API monitors must
+// carry a script, and only project monitors keep theirs elsewhere (`source.project.content`), so the
+// telemetry flag can be derived from attributes that are stored in the clear.
+const hasInlineScript = (attributes: Partial<MonitorFields>) => {
+  const type = attributes[ConfigKey.MONITOR_TYPE];
+  return (
+    (type === MonitorTypeEnum.BROWSER || type === MonitorTypeEnum.API) &&
+    attributes[ConfigKey.MONITOR_SOURCE_TYPE] !== SourceType.PROJECT
+  );
+};
 
 export class DeleteMonitorAPI {
   routeContext: RouteContext;
@@ -32,7 +45,7 @@ export class DeleteMonitorAPI {
   }
 
   async getMonitorsToDelete(monitorIds: string[]) {
-    const result: Array<SavedObject<SyntheticsMonitor | EncryptedSyntheticsMonitorAttributes>> = [];
+    const result: MonitorSavedObject[] = [];
     await pMap(
       monitorIds,
       async (monitorId) => {
@@ -49,11 +62,11 @@ export class DeleteMonitorAPI {
   }
 
   async getMonitorToDelete(monitorId: string) {
-    const { spaceId, savedObjectsClient, server, monitorConfigRepository } = this.routeContext;
+    const { server, monitorConfigRepository } = this.routeContext;
     try {
-      const { normalizedMonitor } = await monitorConfigRepository.getDecrypted(monitorId, spaceId);
-
-      return normalizedMonitor;
+      // Deleting needs the monitor's id, type, locations and spaces, none of which are secret,
+      // so the saved object is read as is instead of being decrypted.
+      return await monitorConfigRepository.get(monitorId);
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         this.result.push({
@@ -61,30 +74,37 @@ export class DeleteMonitorAPI {
           deleted: false,
           error: `Monitor id ${monitorId} not found!`,
         });
-      } else {
-        server.logger.error(`Failed to decrypt monitor to delete, monitor id: ${monitorId}`, {
-          error: e,
-        });
-        sendErrorTelemetryEvents(server.logger, server.telemetry, {
-          reason: `Failed to decrypt monitor to delete ${monitorId}`,
-          message: e?.message,
-          type: 'deletionError',
-          code: e?.code,
-          status: e.status,
-          stackVersion: server.stackVersion,
-        });
-        return await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
-          syntheticsMonitorSavedObjectType,
-          monitorId
-        );
+        return;
       }
+
+      server.logger.error(`Failed to read monitor to delete, monitor id: ${monitorId}`, {
+        error: e,
+      });
+      sendErrorTelemetryEvents(server.logger, server.telemetry, {
+        reason: `Failed to read monitor to delete ${monitorId}`,
+        message: e?.message,
+        type: 'deletionError',
+        code: e?.code,
+        status: e.status,
+        stackVersion: server.stackVersion,
+      });
+      throw e;
     }
   }
 
   async execute({ monitorIds }: { monitorIds: string[] }) {
+    const monitors = await this.getMonitorsToDelete(monitorIds);
+
+    return this.executeWithMonitors({ monitors });
+  }
+
+  async executeWithMonitors({ monitors }: { monitors: MonitorSavedObject[] }) {
     const { response, server } = this.routeContext;
 
-    const monitors = await this.getMonitorsToDelete(monitorIds);
+    // Dedup the per-space privilege check across monitors that share the same
+    // saved-object type and space set, so a bulk delete issues one privilege
+    // round-trip per distinct (type, spaces) combination instead of one per monitor.
+    const checkedSpaceKeys = new Set<string>();
     for (const monitor of monitors) {
       const err = await validatePermissions(this.routeContext, monitor.attributes.locations);
       if (err) {
@@ -95,6 +115,24 @@ export class DeleteMonitorAPI {
             },
           }),
         };
+      }
+
+      // Use the saved object's authoritative `namespaces` rather than the
+      // denormalized `spaces` attribute, which can drift (e.g. when a monitor
+      // is shared via the generic saved-objects share API).
+      const monitorSpaces = monitor.namespaces ?? [];
+      const spaceKey = `${monitor.type}::${[...new Set(monitorSpaces)].sort().join(',')}`;
+      if (!checkedSpaceKeys.has(spaceKey)) {
+        checkedSpaceKeys.add(spaceKey);
+        const spaceAuthError = await assertCanPerformMonitorBulkActionInAllSpaces(
+          this.routeContext,
+          monitorSpaces,
+          monitor.type,
+          'bulk_delete'
+        );
+        if (spaceAuthError) {
+          return { res: spaceAuthError };
+        }
       }
     }
 
@@ -119,11 +157,7 @@ export class DeleteMonitorAPI {
     }
   }
 
-  async deleteMonitorBulk({
-    monitors,
-  }: {
-    monitors: Array<SavedObject<SyntheticsMonitor | EncryptedSyntheticsMonitorAttributes>>;
-  }) {
+  async deleteMonitorBulk({ monitors }: { monitors: MonitorSavedObject[] }) {
     const { server, spaceId, syntheticsMonitorClient } = this.routeContext;
     const { logger, telemetry, stackVersion } = server;
 
@@ -150,7 +184,7 @@ export class DeleteMonitorAPI {
             monitor,
             stackVersion,
             new Date().toISOString(),
-            Boolean((monitor.attributes as MonitorFields)[ConfigKey.SOURCE_INLINE]),
+            hasInlineScript(monitor.attributes as Partial<MonitorFields>),
             errors
           )
         );

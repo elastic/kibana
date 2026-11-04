@@ -37,7 +37,7 @@ describe('Privileges', () => {
     });
 
     test('renders not authorized message', () => {
-      expect(screen.queryByTestId('overviewPageHeader')).toBeNull();
+      expect(screen.queryByTestId('overview')).toBeNull();
       expect(screen.getByTestId('missingKibanaPrivilegesMessage')).toBeInTheDocument();
     });
   });

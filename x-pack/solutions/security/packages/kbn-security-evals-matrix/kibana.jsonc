@@ -1,0 +1,7 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/security-evals-matrix",
+  "owner": "@elastic/security-generative-ai",
+  "group": "security",
+  "visibility": "private"
+}

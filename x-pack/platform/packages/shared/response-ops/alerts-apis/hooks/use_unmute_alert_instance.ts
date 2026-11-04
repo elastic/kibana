@@ -14,7 +14,7 @@ import { mutationKeys } from '../mutation_keys';
 import type { ServerError, ToggleAlertParams } from '../types';
 import { unmuteAlertInstance } from '../apis/unmute_alert_instance';
 
-const ERROR_TITLE = i18n.translate('alertsApis.unmuteAlert.error', {
+const ERROR_TITLE = i18n.translate('xpack.responseOpsAlertsApis.unmuteAlert.error', {
   defaultMessage: 'Error unmuting alert',
 });
 

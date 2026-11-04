@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { isAllowedBuiltinAttachment } from '@kbn/agent-builder-server/allow_lists';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentService } from './attachment_service';
@@ -51,6 +52,63 @@ describe('AttachmentService', () => {
         "Built-in attachment with id \\"test-attachment\\" is not in the list of allowed built-in attachments.
                      Please add it to the list of allowed built-in attachments in the \\"@kbn/agent-builder-server/allow_lists.ts\\" file."
       `);
+    });
+  });
+
+  describe('#start', () => {
+    it('validates and normalizes an attachment input', async () => {
+      isAllowedBuiltinAttachmentMock.mockReturnValue(true);
+
+      const serviceSetup = service.setup();
+      serviceSetup.registerType({
+        id: 'test-attachment',
+        validate: () => ({ valid: true, data: { text: 'validated' } }),
+        format: () => ({ getRepresentation: () => ({ type: 'text', value: 'test' }) }),
+      });
+
+      const serviceStart = service.start({
+        savedObjects: savedObjectsServiceMock.createStartContract(),
+      });
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(
+        serviceStart.validateAttachmentInputs(
+          [
+            {
+              type: 'test-attachment',
+              data: { text: 'user message' },
+              description: 'User message attachment',
+              hidden: true,
+              origin: 'saved-object:1',
+              group_id: 'group-1',
+            },
+          ],
+          request
+        )
+      ).resolves.toEqual([
+        {
+          id: expect.any(String),
+          type: 'test-attachment',
+          data: { text: 'validated' },
+          description: 'User message attachment',
+          hidden: true,
+          origin: 'saved-object:1',
+          group_id: 'group-1',
+        },
+      ]);
+    });
+
+    it('rejects unknown attachment types', async () => {
+      const serviceStart = service.start({
+        savedObjects: savedObjectsServiceMock.createStartContract(),
+      });
+
+      await expect(
+        serviceStart.validateAttachmentInputs(
+          [{ type: 'bad', data: {} }],
+          httpServerMock.createKibanaRequest()
+        )
+      ).rejects.toThrow('Attachment validation failed: Unknown attachment type: bad');
     });
   });
 });

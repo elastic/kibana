@@ -24,24 +24,20 @@ export class DirectorStep implements RuleExecutionStep {
       const logger = state.logger.withLabels({ step: step.name });
 
       if (rule.kind !== 'alert') {
-        logger.debug({
-          message: `[${step.name}] Skipping episode tracking for signal rule ${input.ruleId}`,
-        });
+        logger.debug({ message: 'Skipping episode tracking for signal rule' });
 
         yield { type: 'continue', state };
         return;
       }
 
       if (alertEventsBatch.length === 0) {
-        logger.debug({
-          message: `[${step.name}] No alert events to process for rule ${input.ruleId}`,
-        });
+        logger.debug({ message: 'No alert events to process' });
 
         yield { type: 'continue', state };
         return;
       }
 
-      const { alertEvents, stats } = await step.director.run({
+      const { alertEvents, stats, previousAlertStateByGroupHash } = await step.director.run({
         rule,
         executionContext: input.executionContext,
         alertEvents: alertEventsBatch,
@@ -50,7 +46,13 @@ export class DirectorStep implements RuleExecutionStep {
 
       yield {
         type: 'continue',
-        state: { ...state, alertEventsBatch: alertEvents, newEpisodeIds: stats.newEpisodeIds },
+        state: {
+          ...state,
+          alertEventsBatch: alertEvents,
+          newEpisodeIds: stats.newEpisodeIds,
+          alertStatusTransitions: stats.statusTransitions,
+          previousAlertStateByGroupHash,
+        },
       };
     });
   }

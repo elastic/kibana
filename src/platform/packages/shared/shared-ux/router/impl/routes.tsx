@@ -7,69 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { replace } from 'lodash';
-import React, { Children } from 'react';
+import React from 'react';
 // eslint-disable-next-line no-restricted-imports
-import { Switch, useRouteMatch } from 'react-router-dom';
-import { Routes as ReactRouterRoutes, Route } from 'react-router-dom-v5-compat';
-import { Route as LegacyRoute, MatchPropagator } from './route';
+import { Switch } from 'react-router-dom';
 import { SharedUXRoutesContext } from './routes_context';
 
-type RouterElementChildren = Array<
-  React.ReactElement<
-    {
-      path: string;
-      render: Function;
-      children: RouterElementChildren;
-      component: React.ComponentType;
-    },
-    string | React.JSXElementConstructor<unknown>
-  >
->;
-
 export const Routes = ({
-  legacySwitch = true,
   enableExecutionContextTracking = false,
   children,
 }: {
-  legacySwitch?: boolean;
   enableExecutionContextTracking?: boolean;
   children: React.ReactNode;
 }) => {
-  const match = useRouteMatch();
-
-  return legacySwitch ? (
+  return (
     <SharedUXRoutesContext.Provider value={{ enableExecutionContextTracking }}>
       <Switch>{children}</Switch>
-    </SharedUXRoutesContext.Provider>
-  ) : (
-    <SharedUXRoutesContext.Provider value={{ enableExecutionContextTracking }}>
-      <ReactRouterRoutes>
-        {Children.map(children as RouterElementChildren, (child) => {
-          if (React.isValidElement(child) && child.type === LegacyRoute) {
-            const path = replace(child?.props.path, match.url + '/', '');
-            const renderFunction =
-              typeof child?.props.children === 'function'
-                ? child?.props.children
-                : child?.props.render;
-            return (
-              <Route
-                path={path}
-                element={
-                  <>
-                    {enableExecutionContextTracking && <MatchPropagator />}
-                    {(child?.props?.component && <child.props.component />) ||
-                      (renderFunction && renderFunction()) ||
-                      children}
-                  </>
-                }
-              />
-            );
-          } else {
-            return child;
-          }
-        })}
-      </ReactRouterRoutes>
     </SharedUXRoutesContext.Provider>
   );
 };

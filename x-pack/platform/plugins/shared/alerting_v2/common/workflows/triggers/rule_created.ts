@@ -26,7 +26,7 @@ export const ruleCreatedTriggerCommonDefinition: CommonTriggerDefinition<
   documentation: {
     details: i18n.translate('xpack.alertingV2.workflowTriggers.ruleCreated.documentation.details', {
       defaultMessage:
-        'Emitted after rule creation. The payload includes event.rule with ruleId and spaceId. Use KQL on event.rule.* for trigger conditions.',
+        'Emitted after rule creation. The payload includes event.rule with ruleId, spaceId, and tags. Use KQL on event.rule.* for trigger conditions.',
     }),
     examples: [
       i18n.translate('xpack.alertingV2.workflowTriggers.ruleCreated.documentation.example', {
@@ -39,7 +39,20 @@ triggers:
 \`\`\``,
         values: { triggerId: RuleCreatedTriggerId },
       }),
+      i18n.translate(
+        'xpack.alertingV2.workflowTriggers.ruleCreated.documentation.tagConditionExample',
+        {
+          defaultMessage: `## Run for rules with a tag
+\`\`\`yaml
+triggers:
+  - type: {triggerId}
+    on:
+      condition: 'event.rule.tags: "critical"'
+\`\`\``,
+          values: { triggerId: RuleCreatedTriggerId },
+        }
+      ),
     ],
   },
-  snippets: { condition: 'event.rule.ruleId: "my-rule-id"' },
+  snippets: { condition: 'event.rule.tags: "my-tag"' },
 };

@@ -92,12 +92,12 @@ function createEvaluateEsqlDataset({
 
 const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
   evaluateDataset: [
-    async ({ chatClient, executorClient, inferenceClient, log }, use) => {
+    async ({ chatClient, executorClient, inferenceClient, evaluationConnector, log }, use) => {
       await use(
         createEvaluateEsqlDataset({
           chatClient,
           executorClient,
-          inferenceClient,
+          inferenceClient: inferenceClient.bindTo({ connectorId: evaluationConnector.id }),
           log,
         })
       );

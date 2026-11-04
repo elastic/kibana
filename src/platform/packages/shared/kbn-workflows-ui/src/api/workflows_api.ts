@@ -43,12 +43,14 @@ import type {
   GetCatalogResponse,
   GetExecutionLogsParams,
   GetExecutionParams,
+  GetExecutionStepsParams,
   GetLibraryHealthResponse,
   GetSchemaParams,
   GetWorkflowExecutionsParams,
   GetWorkflowStepExecutionsParams,
   InstallTemplateResponse,
   MgetWorkflowsParams,
+  ReadableWorkflowIdsResponse,
   RestoreWorkflowVersionParams,
   RestoreWorkflowVersionResponseDto,
   ResumeExecutionParams,
@@ -274,6 +276,16 @@ export class WorkflowApi {
     });
   }
 
+  async getExecutionSteps(
+    executionId: string,
+    params?: GetExecutionStepsParams
+  ): Promise<WorkflowStepExecutionListDto> {
+    return this.http.get(`${BASE}/executions/${encodeURIComponent(executionId)}/steps`, {
+      query: params as HttpFetchQuery,
+      version: API_VERSION,
+    });
+  }
+
   async cancelExecution(executionId: string): Promise<void> {
     return this.http.post(`${BASE}/executions/${encodeURIComponent(executionId)}/cancel`, {
       version: API_VERSION,
@@ -298,9 +310,15 @@ export class WorkflowApi {
     );
   }
 
-  async resumeExecution(executionId: string, { input }: ResumeExecutionParams): Promise<void> {
+  async resumeExecution(
+    executionId: string,
+    { input, stepExecutionId }: ResumeExecutionParams
+  ): Promise<void> {
     return this.http.post(`${BASE}/executions/${encodeURIComponent(executionId)}/resume`, {
-      body: JSON.stringify({ input }),
+      body: JSON.stringify({
+        input,
+        ...(stepExecutionId ? { stepExecutionId } : {}),
+      }),
       version: API_VERSION,
     });
   }
@@ -331,6 +349,12 @@ export class WorkflowApi {
     });
   }
 
+  async getReadableWorkflowIds(): Promise<ReadableWorkflowIdsResponse> {
+    return this.http.get(`${INTERNAL_BASE}/readable_workflow_ids`, {
+      version: INTERNAL_API_VERSION,
+    });
+  }
+
   async searchTriggerEvents(
     params: SearchTriggerEventLogParams
   ): Promise<SearchTriggerEventLogResult> {
@@ -341,7 +365,7 @@ export class WorkflowApi {
   }
 
   // ---------------------------------------------------------------------------
-  // Workflow Template Library
+  // Workflow Template library
   // ---------------------------------------------------------------------------
 
   async getCatalog(params: GetCatalogParams = {}): Promise<GetCatalogResponse> {

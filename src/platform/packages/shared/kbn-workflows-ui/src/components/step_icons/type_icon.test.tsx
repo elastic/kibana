@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import type {
@@ -35,6 +36,12 @@ const iconType = (container: HTMLElement) =>
 
 const dataUrlIcon = (container: HTMLElement) =>
   container.querySelector('[data-test-subj="workflowTypeIconDataUrl"]');
+
+const hoverTooltipAnchor = async (container: HTMLElement) => {
+  const user = userEvent.setup();
+  await user.hover(container.querySelector('[tabindex="0"]') as HTMLElement);
+  return screen.findByRole('tooltip');
+};
 
 describe('TypeIcon', () => {
   describe('kind="trigger"', () => {
@@ -67,6 +74,16 @@ describe('TypeIcon', () => {
           ? 'workflowTypeIconDataUrl'
           : HardcodedIcons.trigger
       );
+    });
+
+    it('shows a capitalized display label in the tooltip for a known trigger type', async () => {
+      const { container } = render(<TypeIcon type="manual" kind="trigger" />);
+      expect(await hoverTooltipAnchor(container)).toHaveTextContent('Manual');
+    });
+
+    it('falls back to the raw type as the tooltip label for an unknown trigger type', async () => {
+      const { container } = render(<TypeIcon type="custom-trigger" kind="trigger" />);
+      expect(await hoverTooltipAnchor(container)).toHaveTextContent('custom-trigger');
     });
   });
 
@@ -108,6 +125,11 @@ describe('TypeIcon', () => {
     it('falls back to "plugs" for an unrecognized step type', () => {
       const { container } = render(<TypeIcon type="unknown_connector.doThing" kind="step" />);
       expect(iconType(container)).toBe('plugs');
+    });
+
+    it('shows the raw type as the tooltip label', async () => {
+      const { container } = render(<TypeIcon type="abuseipdb.checkIp" kind="step" />);
+      expect(await hoverTooltipAnchor(container)).toHaveTextContent('abuseipdb.checkIp');
     });
   });
 });

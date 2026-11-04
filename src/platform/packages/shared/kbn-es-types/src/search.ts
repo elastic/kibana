@@ -658,12 +658,14 @@ export interface ESQLColumn {
   name: string;
   type: string;
   original_types?: string[];
+  suggested_cast?: string;
   _meta?: estypes.Metadata;
 }
 
 export type ESQLRow = unknown[];
 
 export interface ESQLSearchResponse {
+  approximation_applied?: boolean;
   columns: ESQLColumn[];
   // In case of ?drop_null_columns in the query, then
   // all_columns will have available and empty fields

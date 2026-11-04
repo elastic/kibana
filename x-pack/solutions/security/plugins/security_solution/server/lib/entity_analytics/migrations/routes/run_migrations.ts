@@ -30,7 +30,7 @@ export const entityAnalyticsRunMigrationsRoute = (
       path: ENTITY_ANALYTICS_INTERNAL_RUN_MIGRATIONS_ROUTE,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics-manage`],
         },
       },
     })
@@ -41,7 +41,9 @@ export const entityAnalyticsRunMigrationsRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
+          const spaceId = securitySolution.getSpaceId();
           await scheduleEntityAnalyticsMigration({
+            spaceId,
             /*
              * We cannot provide task manager here because the migrations require
              * the setup contract and we can only access the start contract.

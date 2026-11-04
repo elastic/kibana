@@ -39,6 +39,40 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 % BREAKING CHANGES
 % Paste in breaking-changes.md
 
+## 9.6.0 [kibana-9.6.0-breaking-changes]
+
+$$$kibana-285645$$$
+::::{dropdown} Workflow execution detail routes now require the `read` privilege in addition to `readExecution`
+**Details**<br> The following Workflows API routes previously accepted callers holding only the `workflowsManagement:readExecution` privilege (the **Read Workflow Execution** sub-feature privilege, `workflow_execution_read`). Execution documents include a YAML snapshot of the workflow definition, so those callers could retrieve a workflow definition without holding the `workflowsManagement:read` privilege (**Read**, `workflow_read`). Reading execution data now requires both privileges. This applies to every execution read route, including the list and search routes:
+
+- `GET /api/workflows/executions/{executionId}`
+- `GET /api/workflows/executions/{executionId}/step/{stepExecutionId}`
+- `GET /api/workflows/executions/{executionId}/logs`
+- `GET /api/workflows/executions/{executionId}/children`
+- `GET /api/workflows/workflow/{workflowId}/executions`
+- `GET /api/workflows/workflow/{workflowId}/executions/steps`
+- `GET /api/workflows/workflow/executions`
+
+**Impact**<br> API callers or custom Kibana roles that grant `workflow_execution_read` without `workflow_read` receive HTTP 403 on the routes listed above.
+
+**Action**<br> In any role that customizes Workflows sub-feature privileges, add **Read** (`workflow_read`) under **Analytics → Workflows → Workflows Actions** alongside **Read Workflow Execution** (`workflow_execution_read`). Roles that grant `All` or `Read` on **Analytics → Workflows** already include both privileges and need no change.
+
+View [#285645]({{kib-pull}}285645).
+::::
+
+## 9.5.2 [kibana-9.5.2-breaking-changes]
+
+$$$kibana-283150$$$
+::::{dropdown} Update HTTPS proxy TLS settings if the email connector fails after upgrade
+**Details**<br> {{kib}} now ships nodemailer 9, which validates the proxy server's TLS certificate when the email connector sends mail through an HTTPS proxy. Earlier versions skipped that check, so a proxy with a self-signed, expired, or hostname-mismatched certificate now causes sending to fail. Hosted and cloud SMTP with public certificate authorities is unaffected.
+
+**Impact**<br> Self-managed deployments that route email through an HTTPS proxy with a certificate that isn't trusted by default can no longer send email until TLS verification is updated.
+
+**Action**<br> Trust the proxy certificate, or set `xpack.actions.ssl.proxyVerificationMode: none` to restore the previous behavior. Note that `certificate` behaves the same as `full` on the proxy connection: a custom CA or relaxed hostname check does not apply there.
+
+View [#283150]({{kib-pull}}283150).
+::::
+
 ## 9.5.1 [kibana-9.5.1-breaking-changes]
 
 $$$kibana-282404$$$
@@ -53,6 +87,28 @@ View [#282404]({{kib-pull}}282404).
 ::::
 
 ## 9.5.0 [kibana-9.5.0-breaking-changes]
+
+$$$kibana-275996$$$
+::::{dropdown} Kibana now displays in the browser's preferred language by default
+**Details**<br> {{kib}} now uses the browser's `Accept-Language` preferences to choose the interface language. This applies on all deployment types when a user hasn't set a language in their profile and has no `KBN_LOCALE` cookie. If the browser's preferred language is German, French, Japanese, or Simplified Chinese and is listed in `i18n.locales`, {{kib}} displays in that language instead of English. All bundled locales are listed by default. {{kib}} then saves the resolved language in the `KBN_LOCALE` cookie, so it stays in place on later visits. Setting `i18n.defaultLocale: en` doesn't stop this, because the browser preference is only skipped when `i18n.defaultLocale` is set to a value other than `en`. Refer to [Resolution priority](/reference/configuration-reference/internationalization-settings.md#resolution-priority).
+
+**Impact**<br> After upgrading, some users may see {{kib}} in a language other than English without changing anything themselves. This is most likely in organizations that manage browser language settings centrally. Internal runbooks, screenshots, and training based on the English UI may no longer match what users see.
+
+**Action**<br> Users can change their language at any time from the user menu or their profile page.
+
+To keep English as the default for everyone while still letting users choose another language, upgrade to 9.5.6 or later and set the following settings in `kibana.yml`:
+
+```yaml
+i18n.detectBrowserLocale: false
+i18n.allowLocaleCookie: false
+```
+
+`i18n.detectBrowserLocale: false` stops {{kib}} from reading the browser's language. `i18n.allowLocaleCookie: false` stops existing `KBN_LOCALE` cookies, which might already hold the detected language, from overriding the default. Users who already saved a language in their profile keep it.
+
+If you can't upgrade to the latest 9.5.x patch yet, set `i18n.locales: ["en"]` to restore the previous English-only behavior. This also turns off per-user language selection.
+
+View [#275996]({{kib-pull}}275996) and [#295756]({{kib-pull}}295756).
+::::
 
 $$$kibana-274792$$$
 ::::{dropdown} Update Dashboards and Visualizations API requests to use short-hand duration units

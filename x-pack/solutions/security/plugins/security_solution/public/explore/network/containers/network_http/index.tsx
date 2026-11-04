@@ -26,8 +26,17 @@ import * as i18n from './translations';
 import type { InspectResponse } from '../../../../types';
 
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 
 export const ID = 'networkHttpQuery';
+
+const NETWORK_HTTP_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_NETWORK_PAGE,
+  'network_http'
+);
 
 export interface NetworkHttpArgs {
   id: string;
@@ -104,6 +113,7 @@ export const useNetworkHttp = ({
     },
     errorMessage: i18n.FAIL_NETWORK_HTTP,
     abort: skip,
+    executionContext: NETWORK_HTTP_CONTEXT,
   });
 
   const networkHttpResponse = useMemo(

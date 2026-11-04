@@ -26,6 +26,7 @@ interface Props {
   onRenderComplete?: () => void;
   reloadSubject: Subject<FetchContext>;
   onEdit: () => void;
+  isInteractive?: boolean;
 }
 
 export function SloAlertsWrapper({
@@ -35,6 +36,7 @@ export function SloAlertsWrapper({
   onRenderComplete,
   reloadSubject,
   onEdit,
+  isInteractive = true,
 }: Props) {
   const {
     application: { navigateToUrl },
@@ -101,7 +103,6 @@ export function SloAlertsWrapper({
       `}
     >
       <EuiFlexGroup
-        data-shared-item=""
         justifyContent="flexEnd"
         wrap
         css={css`
@@ -114,6 +115,7 @@ export function SloAlertsWrapper({
               onEdit();
             }}
             data-test-subj="o11ySloAlertsWrapperSlOsIncludedLink"
+            disabled={!isInteractive}
           >
             {showInstanceCountBreakdown ? (
               <SloIncludedCount slos={slos} />
@@ -128,17 +130,19 @@ export function SloAlertsWrapper({
             )}
           </EuiLink>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink
-            data-test-subj="o11ySloAlertsWrapperGoToAlertsLink"
-            onClick={handleGoToAlertsClick}
-          >
-            <FormattedMessage
-              id="xpack.slo.sloAlertsWrapper.goToAlertsFlexItemLabel"
-              defaultMessage="Go to alerts"
-            />
-          </EuiLink>
-        </EuiFlexItem>
+        {isInteractive && (
+          <EuiFlexItem grow={false}>
+            <EuiLink
+              data-test-subj="o11ySloAlertsWrapperGoToAlertsLink"
+              onClick={handleGoToAlertsClick}
+            >
+              <FormattedMessage
+                id="xpack.slo.sloAlertsWrapper.goToAlertsFlexItemLabel"
+                defaultMessage="Go to alerts"
+              />
+            </EuiLink>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
 
       <EuiFlexGroup direction="column" style={{ margin: '10px' }} responsive={true}>
@@ -157,6 +161,7 @@ export function SloAlertsWrapper({
             timeRange={timeRange}
             onLoaded={() => setIsTableLoaded(true)}
             lastReloadRequestTime={lastRefreshTime}
+            isInteractive={isInteractive}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -16,6 +16,8 @@ import {
   CASES_TELEMETRY_TASK_NAME,
 } from '@kbn/cases-plugin/common/constants';
 import { CAI_SCHEDULER_TASK_ID } from '@kbn/cases-plugin/server/cases_analytics/tasks/scheduler_task/constants';
+import { toLegacyAttachmentResponse } from '@kbn/cases-plugin/server/common/attachments';
+import type { CasesByAttachmentIDsRequest } from '@kbn/cases-plugin/server/client/cases/get';
 import type { FixtureStartDeps } from './plugin';
 
 const hashParts = (parts: string[]): string => {
@@ -120,8 +122,11 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
         const [_, { cases }] = await core.getStartServices();
         const client = await cases.getCasesClientWithRequest(request);
 
+        // Client is unified-only now; project back to this fixture's legacy shape.
+        const attachments = await client.attachments.getAll({ caseID: request.params.id });
+
         return response.ok({
-          body: await client.attachments.getAll({ caseID: request.params.id }),
+          body: attachments.map(toLegacyAttachmentResponse),
         });
       } catch (error) {
         if (error.isBoom && error.output.statusCode === 403) {
@@ -130,6 +135,48 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
 
         logger.error(`Error : ${error}`);
         throw error;
+      }
+    }
+  );
+
+  /**
+   * Exposes the cases client's getCasesByAttachmentIDs, which has no public route.
+   */
+  router.post(
+    {
+      path: '/api/cases_fixture/cases:getCasesByAttachmentIds',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        body: schema.object({}, { unknowns: 'allow' }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const [_, { cases }] = await core.getStartServices();
+        const client = await cases.getCasesClientWithRequest(request);
+
+        return response.ok({
+          body: await client.cases.getCasesByAttachmentIDs(
+            request.body as CasesByAttachmentIDsRequest
+          ),
+        });
+      } catch (error) {
+        logger.error(`Error : ${error}`);
+
+        const boom = new Boom.Boom(error.message, {
+          statusCode: error.wrappedError?.output?.statusCode ?? 500,
+        });
+
+        return response.customError({
+          body: boom,
+          headers: boom.output.headers as { [key: string]: string },
+          statusCode: boom.output.statusCode,
+        });
       }
     }
   );

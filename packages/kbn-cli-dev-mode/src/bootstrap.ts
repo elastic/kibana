@@ -30,7 +30,7 @@ export async function bootstrapDevMode({ configs, cliArgs, applyConfigOverrides 
   // an environment variable (the child reads it in serve.js).
   if (cliArgs.eis) {
     const { discoverEisConnectors } = await import('./eis_dev_orchestrator');
-    const result = await discoverEisConnectors(log);
+    const result = await discoverEisConnectors(log, { serverless: !!cliArgs.serverless });
     process.env.KBN_EIS_CONNECTORS = JSON.stringify(result.preconfiguredConnectors);
   }
 

@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { calculateDomain } from './calculate_domain';
+import { applyHeadroomToDomain, applyYAxisModeToDomain, calculateDomain } from './calculate_domain';
 import type { MetricsExplorerSeries } from '../../../../../../common/http_api/metrics_explorer';
-import type { MetricsExplorerOptionsMetric } from '../../hooks/use_metrics_explorer_options';
+import {
+  MetricsExplorerYAxisMode,
+  type MetricsExplorerOptionsMetric,
+} from '../../../../../../common/metrics_explorer_views';
 import { Color } from '../../../../../../common/color_palette';
+
 describe('calculateDomain()', () => {
   const series: MetricsExplorerSeries = {
     id: 'test-01',
@@ -43,5 +47,103 @@ describe('calculateDomain()', () => {
   });
   it('should return the min and combined max across 2 metrics with 10% head room when stacked', () => {
     expect(calculateDomain(series, metrics, true)).toEqual({ min: 0.01, max: 1.4300000000000002 });
+  });
+
+  it('should return an ordered domain for negative values', () => {
+    const negativeSeries: MetricsExplorerSeries = {
+      ...series,
+      rows: [
+        { timestamp: 1562860500000, metric_0: -2, metric_1: -3 },
+        { timestamp: 1562860600000, metric_0: -4, metric_1: -1 },
+      ],
+    };
+
+    expect(calculateDomain(negativeSeries, metrics)).toEqual({ min: -4, max: -1 });
+    expect(calculateDomain(negativeSeries, metrics, true)).toEqual({ min: -5.5, max: -3 });
+  });
+
+  it('should include zero values in the domain', () => {
+    const seriesWithZero: MetricsExplorerSeries = {
+      ...series,
+      rows: [{ timestamp: 1562860500000, metric_0: 0, metric_1: 2 }],
+    };
+
+    expect(calculateDomain(seriesWithZero, metrics)).toEqual({ min: 0, max: 2 });
+  });
+
+  it('should return an ordered domain for a constant negative series', () => {
+    const constantNegativeSeries: MetricsExplorerSeries = {
+      ...series,
+      rows: [
+        { timestamp: 1562860500000, metric_0: -5, metric_1: -5 },
+        { timestamp: 1562860600000, metric_0: -5, metric_1: -5 },
+      ],
+    };
+
+    expect(calculateDomain(constantNegativeSeries, metrics)).toEqual({ min: -5, max: -5 });
+    expect(calculateDomain(constantNegativeSeries, metrics, true)).toEqual({
+      min: -11,
+      max: -5,
+    });
+  });
+});
+
+describe('applyYAxisModeToDomain()', () => {
+  it.each([
+    [
+      { min: 1, max: 5 },
+      { min: 0, max: 5 },
+    ],
+    [
+      { min: -5, max: -1 },
+      { min: -5, max: 0 },
+    ],
+    [
+      { min: -5, max: 5 },
+      { min: -5, max: 5 },
+    ],
+    [
+      { min: 0, max: 0 },
+      { min: 0, max: 0 },
+    ],
+  ])('should include zero in a %j domain', (domain, expectedDomain) => {
+    expect(applyYAxisModeToDomain(domain, MetricsExplorerYAxisMode.fromZero)).toEqual(
+      expectedDomain
+    );
+  });
+
+  it('should leave the domain unchanged in automatic mode', () => {
+    const domain = { min: -5, max: 5 };
+
+    expect(applyYAxisModeToDomain(domain, MetricsExplorerYAxisMode.auto)).toBe(domain);
+  });
+});
+
+describe('applyHeadroomToDomain()', () => {
+  it('should add 10% headroom above a positive max', () => {
+    expect(applyHeadroomToDomain({ min: 1, max: 10 })).toEqual({ min: 1, max: 11 });
+  });
+
+  it('should keep min less than or equal to max for an all-negative range', () => {
+    expect(applyHeadroomToDomain({ min: -10, max: -1 })).toEqual({ min: -10, max: -1.1 });
+  });
+
+  it('should keep min less than or equal to max for a constant negative domain', () => {
+    expect(applyHeadroomToDomain({ min: -5, max: -5 })).toEqual({ min: -5.5, max: -5 });
+  });
+
+  it('should add 10% headroom above a mixed-sign max', () => {
+    expect(applyHeadroomToDomain({ min: -4, max: 2 })).toEqual({ min: -4, max: 2.2 });
+  });
+
+  it('should apply custom min and max factors without inverting the domain', () => {
+    expect(applyHeadroomToDomain({ min: 1, max: 10 }, { min: 0.9, max: 1.1 })).toEqual({
+      min: 0.9,
+      max: 11,
+    });
+    expect(applyHeadroomToDomain({ min: -10, max: -1 }, { min: 0.9, max: 1.1 })).toEqual({
+      min: -9,
+      max: -1.1,
+    });
   });
 });

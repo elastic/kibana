@@ -51,6 +51,10 @@ describe('similar', () => {
       per_page: 10,
       total: 0,
     });
+
+    jest
+      .mocked(mockClientArgs.services.attachmentService.getter.getCaseAttatchmentStats)
+      .mockResolvedValue(new Map());
   });
 
   afterEach(() => {
@@ -151,8 +155,83 @@ describe('similar', () => {
           ],
           "search": "-\\"cases:mock-id\\"",
           "sortField": "created_at",
+          "sortOrder": undefined,
         }
       `);
+  });
+
+  describe('attachment totals', () => {
+    const similarSavedObjects = [mockCases[0], mockCases[1]].map((so) => ({ ...so, score: 0 }));
+
+    beforeEach(() => {
+      mockClientArgs.services.caseService.findCases.mockResolvedValue({
+        page: 1,
+        per_page: 10,
+        total: similarSavedObjects.length,
+        saved_objects: similarSavedObjects,
+      });
+    });
+
+    it('should return the attachment totals of each similar case', async () => {
+      jest
+        .mocked(mockClientArgs.services.attachmentService.getter.getCaseAttatchmentStats)
+        .mockResolvedValue(
+          new Map([
+            [mockCases[0].id, { alerts: 3, userComments: 5, events: 2 }],
+            [mockCases[1].id, { alerts: 7, userComments: 1, events: 4 }],
+          ])
+        );
+
+      const res = await similar(
+        mockCase.id,
+        { page: 1, perPage: 10 },
+        mockClientArgs,
+        mockCasesClient
+      );
+
+      expect(
+        mockClientArgs.services.attachmentService.getter.getCaseAttatchmentStats
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        mockClientArgs.services.attachmentService.getter.getCaseAttatchmentStats
+      ).toHaveBeenCalledWith({ caseIds: [mockCases[0].id, mockCases[1].id] });
+      expect(
+        res.cases.map(({ id, totalAlerts, totalComment, totalEvents }) => ({
+          id,
+          totalAlerts,
+          totalComment,
+          totalEvents,
+        }))
+      ).toEqual([
+        { id: mockCases[0].id, totalAlerts: 3, totalComment: 5, totalEvents: 2 },
+        { id: mockCases[1].id, totalAlerts: 7, totalComment: 1, totalEvents: 4 },
+      ]);
+    });
+
+    it('should return zero totals for a similar case that has no attachment stats', async () => {
+      jest
+        .mocked(mockClientArgs.services.attachmentService.getter.getCaseAttatchmentStats)
+        .mockResolvedValue(new Map([[mockCases[0].id, { alerts: 3, userComments: 5, events: 2 }]]));
+
+      const res = await similar(
+        mockCase.id,
+        { page: 1, perPage: 10 },
+        mockClientArgs,
+        mockCasesClient
+      );
+
+      expect(
+        res.cases.map(({ id, totalAlerts, totalComment, totalEvents }) => ({
+          id,
+          totalAlerts,
+          totalComment,
+          totalEvents,
+        }))
+      ).toEqual([
+        { id: mockCases[0].id, totalAlerts: 3, totalComment: 5, totalEvents: 2 },
+        { id: mockCases[1].id, totalAlerts: 0, totalComment: 0, totalEvents: 0 },
+      ]);
+    });
   });
 
   it('should throw an error if license is not platinum', async () => {
@@ -232,5 +311,40 @@ describe('similar', () => {
       mockCasesClient
     );
     expect(mockClientArgs.services.caseService.findCases).not.toHaveBeenCalled();
+  });
+
+  it('should forward explicit sort params to caseService.findCases', async () => {
+    await similar(
+      mockCase.id,
+      {
+        page: 1,
+        perPage: 10,
+        sortField: 'createdAt',
+        sortOrder: 'asc',
+      },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(mockClientArgs.services.caseService.findCases).toHaveBeenCalledWith(
+      expect.objectContaining({ sortField: 'created_at', sortOrder: 'asc' })
+    );
+  });
+
+  it('should use defaultSortField and leave the order unset when no sort params are provided', async () => {
+    await similar(
+      mockCase.id,
+      {
+        page: 1,
+        perPage: 10,
+      },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    const findCasesArgs = mockClientArgs.services.caseService.findCases.mock.calls[0][0];
+
+    expect(findCasesArgs).toEqual(expect.objectContaining({ sortField: 'created_at' }));
+    expect(findCasesArgs?.sortOrder).toBeUndefined();
   });
 });

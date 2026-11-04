@@ -18,8 +18,9 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/connector_events_bridge
 dependsOn:
   - '@kbn/core'
+  - '@kbn/actions-plugin'
   - '@kbn/workflows-extensions'
-  - '@kbn/core-http-server-utils'
+  - '@kbn/core-http-server-mocks'
   - '@kbn/core-spaces-common'
 tags:
   - plugin
@@ -31,6 +32,4 @@ fileGroups:
   src:
     - server/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

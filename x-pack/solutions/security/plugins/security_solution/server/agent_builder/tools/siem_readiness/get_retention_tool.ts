@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -25,7 +25,7 @@ import {
 } from '../../../lib/siem_readiness/fetchers';
 import { SIEM_READINESS_RETENTION_TOOL_ID } from './tool_ids';
 
-const schema = z.object({});
+const schema = lazySchema(() => z.object({}));
 
 export const getRetentionTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,

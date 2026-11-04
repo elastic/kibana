@@ -11,8 +11,7 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { UserToolTip } from './user_tooltip';
 
-// FLAKY: https://github.com/elastic/kibana/issues/213408
-describe.skip('UserToolTip', () => {
+describe('UserToolTip', () => {
   it('renders the tooltip when hovering', async () => {
     const profile: UserProfileWithAvatar = {
       uid: '1',

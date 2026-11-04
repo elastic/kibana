@@ -35,7 +35,7 @@ describe('GlobalSearchBarPlugin', () => {
       );
     };
 
-    it('registers nav controls', async () => {
+    it('registers globalSearch', () => {
       const coreSetup = coreMock.createSetup();
 
       const service = createPlugin();
@@ -44,28 +44,7 @@ describe('GlobalSearchBarPlugin', () => {
 
       const coreStart = coreMock.createStart();
 
-      const navControlsRegisterSpy = jest.spyOn(coreStart.chrome.navControls, 'registerCenter');
-
-      const start = service.start(coreStart, {
-        globalSearch: globalSearchPluginMock.createStartContract(),
-      });
-
-      expect(start).toEqual({});
-
-      expect(navControlsRegisterSpy).toHaveBeenCalled();
-    });
-
-    it('registers Chrome Next globalSearch when next is enabled', () => {
-      const coreSetup = coreMock.createSetup();
-
-      const service = createPlugin();
-
-      service.setup(coreSetup);
-
-      const coreStart = coreMock.createStart();
-      jest.spyOn(coreStart.chrome.next, 'isEnabled', 'get').mockReturnValue(true);
-
-      const setSpy = jest.spyOn(coreStart.chrome.next.globalSearch, 'set');
+      const setSpy = jest.spyOn(coreStart.chrome.controls.globalSearch, 'set');
 
       service.start(coreStart, {
         globalSearch: globalSearchPluginMock.createStartContract(),
@@ -80,7 +59,6 @@ describe('GlobalSearchBarPlugin', () => {
       service.setup(coreSetup);
 
       const coreStart = coreMock.createStart();
-      jest.spyOn(coreStart.chrome.next, 'isEnabled', 'get').mockReturnValue(true);
 
       let resolveClose: () => void = () => {};
       const onClosePromise = new Promise<void>((resolve) => {
@@ -101,7 +79,7 @@ describe('GlobalSearchBarPlugin', () => {
         globalSearch: globalSearchPluginMock.createStartContract(),
       });
 
-      const onClick = (coreStart.chrome.next.globalSearch.set as jest.Mock).mock.calls[0][0]
+      const onClick = (coreStart.chrome.controls.globalSearch.set as jest.Mock).mock.calls[0][0]
         .onClick as () => void;
       onClick();
 

@@ -41,6 +41,16 @@ describe('CuratedTileCard', () => {
     expect(onClick).toHaveBeenCalled();
   });
 
+  it('renders the host-provided badge inside the card', () => {
+    render(
+      <CuratedTileCard
+        tile={{ ...baseTile, badge: <span data-test-subj="tileBadge">2 variants</span> }}
+      />
+    );
+    const card = screen.getByTestId('observabilityOnboardingIntegrationTile-kubernetes');
+    expect(card).toContainElement(screen.getByTestId('tileBadge'));
+  });
+
   it('reserves two description lines so a short description still fills the tile', () => {
     render(
       <CuratedTileCard

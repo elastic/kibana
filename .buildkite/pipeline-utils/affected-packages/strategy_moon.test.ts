@@ -9,11 +9,11 @@
 
 jest.mock('child_process');
 jest.mock('fs');
-jest.mock('../utils', () => ({ getKibanaDir: () => '/repo' }));
+jest.mock('../utils.ts', () => ({ getKibanaDir: () => '/repo' }));
 
 import { execSync } from 'child_process';
 import { existsSync } from 'fs';
-import { getAffectedProjectsMoon } from './strategy_moon';
+import { getAffectedProjectsMoon } from './strategy_moon.ts';
 
 const mockExecSync = execSync as jest.Mock;
 const mockExistsSync = existsSync as jest.Mock;
@@ -36,7 +36,9 @@ describe('getAffectedProjectsMoon', () => {
     expect(result).toEqual(new Set(['@kbn/foo']));
     expect(mockExecSync).toHaveBeenCalledWith(
       expect.stringContaining('/repo/node_modules/.bin/moon'),
-      expect.objectContaining({ env: expect.objectContaining({ MOON_BASE: 'resolved-sha' }) })
+      expect.objectContaining({
+        env: expect.objectContaining({ MOON_BASE: 'resolved-sha', MOON_HEAD: 'HEAD' }),
+      })
     );
   });
 
@@ -58,16 +60,20 @@ describe('getAffectedProjectsMoon', () => {
     );
   });
 
-  it('falls back to `yarn which moon` when node_modules/.bin/moon is missing', () => {
+  it('falls back to `pnpm exec which moon` when node_modules/.bin/moon is missing', () => {
     mockExistsSync.mockReturnValue(false);
     mockExecSync
       .mockReturnValueOnce('resolved-sha\n') // git merge-base
-      .mockReturnValueOnce('/resolved/moon\n') // yarn which moon
+      .mockReturnValueOnce('/resolved/moon\n') // pnpm exec which moon
       .mockReturnValueOnce(moonResponse); // moon query
 
     getAffectedProjectsMoon('main', false);
 
-    expect(mockExecSync).toHaveBeenNthCalledWith(2, 'yarn --silent which moon', expect.anything());
+    expect(mockExecSync).toHaveBeenNthCalledWith(
+      2,
+      'pnpm --silent exec which moon',
+      expect.anything()
+    );
     expect(mockExecSync).toHaveBeenNthCalledWith(
       3,
       expect.stringContaining('/resolved/moon'),

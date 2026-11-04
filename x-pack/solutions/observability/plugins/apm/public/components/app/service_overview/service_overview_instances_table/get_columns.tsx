@@ -10,6 +10,7 @@ import { EuiButtonIcon, EuiScreenReaderOnly, EuiToolTip, RIGHT_ALIGNMENT } from 
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React from 'react';
+import { isFinite } from 'lodash';
 import { ActionMenu } from '@kbn/observability-shared-plugin/public';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import type { APIReturnType } from '@kbn/apm-api-shared';
@@ -19,9 +20,11 @@ import { isTimeComparison } from '../../../shared/time_comparison/get_comparison
 import type { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getServiceNodeName, SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
 import {
+  asDecimalOrInteger,
   asMillisecondDuration,
   asPercent,
   asTransactionRate,
+  asTransactionValue,
 } from '../../../../../common/utils/formatters';
 import { MetricOverviewLink } from '../../../shared/links/apm/metric_overview_link';
 import { ListMetric } from '../../../shared/list_metric';
@@ -35,6 +38,45 @@ type ServiceInstanceMainStatistics =
 type MainStatsServiceInstanceItem = ServiceInstanceMainStatistics['currentPeriod'][0];
 type ServiceInstanceDetailedStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
+
+const withScreenReaderLabel = (visibleLabel: string, screenReaderLabel: string): ReactNode => (
+  <>
+    <span aria-hidden="true">{visibleLabel}</span>
+    <EuiScreenReaderOnly>
+      <span>{screenReaderLabel}</span>
+    </EuiScreenReaderOnly>
+  </>
+);
+
+const getLatencyValueLabel = (latency: MainStatsServiceInstanceItem['latency']): ReactNode => {
+  const visibleLabel = asMillisecondDuration(latency);
+  if (latency === undefined || !isFinite(latency)) {
+    return visibleLabel;
+  }
+  return withScreenReaderLabel(
+    visibleLabel,
+    i18n.translate('xpack.apm.serviceOverview.instancesTable.latencyScreenReaderLabel', {
+      defaultMessage: '{value} milliseconds',
+      values: { value: asDecimalOrInteger(latency / 1000) },
+    })
+  );
+};
+
+const getThroughputValueLabel = (
+  throughput: MainStatsServiceInstanceItem['throughput']
+): ReactNode => {
+  const visibleLabel = asTransactionRate(throughput);
+  if (throughput === undefined || !isFinite(throughput)) {
+    return visibleLabel;
+  }
+  return withScreenReaderLabel(
+    visibleLabel,
+    i18n.translate('xpack.apm.serviceOverview.instancesTable.throughputScreenReaderLabel', {
+      defaultMessage: '{value} transactions per minute',
+      values: { value: asTransactionValue(throughput) },
+    })
+  );
+};
 
 export function getColumns({
   serviceName,
@@ -111,7 +153,7 @@ export function getColumns({
         return (
           <ListMetric
             color={currentPeriodColor}
-            valueLabel={asMillisecondDuration(latency)}
+            valueLabel={getLatencyValueLabel(latency)}
             hideSeries={!shouldShowSparkPlots}
             isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
@@ -145,7 +187,7 @@ export function getColumns({
             compact
             color={currentPeriodColor}
             hideSeries={!shouldShowSparkPlots}
-            valueLabel={asTransactionRate(throughput)}
+            valueLabel={getThroughputValueLabel(throughput)}
             isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={

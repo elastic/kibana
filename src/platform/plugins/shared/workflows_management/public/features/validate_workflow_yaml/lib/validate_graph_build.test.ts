@@ -63,6 +63,7 @@ describe('validateGraphBuild', () => {
     expect(results).toEqual([
       expect.objectContaining({
         owner: 'graph-build-validation',
+        ruleId: 'graphBuildError',
         severity: 'error',
         startLineNumber: 11,
         endLineNumber: 21,
@@ -88,6 +89,7 @@ describe('validateGraphBuild', () => {
     expect(results[0]).toEqual(
       expect.objectContaining({
         owner: 'graph-build-validation',
+        ruleId: 'graphBuildError',
         severity: 'error',
         startLineNumber: 7,
         endLineNumber: 7,
@@ -105,6 +107,7 @@ describe('validateGraphBuild', () => {
     expect(results[0]).toEqual(
       expect.objectContaining({
         owner: 'graph-build-validation',
+        ruleId: 'graphBuildError',
         severity: 'error',
         startLineNumber: 1,
         startColumn: 1,

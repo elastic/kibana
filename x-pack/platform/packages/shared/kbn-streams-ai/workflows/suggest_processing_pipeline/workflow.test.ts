@@ -121,6 +121,7 @@ describe('suggestProcessingPipeline workflow', () => {
         },
       ],
       input: [{ role: MessageRole.Assistant, content: '', toolCalls: [] }],
+      diagnostics: { externalContentToolContinuations: 0 },
     });
 
     await suggestProcessingPipeline({
@@ -157,6 +158,7 @@ describe('suggestProcessingPipeline workflow', () => {
         },
       ],
       input: [{ role: MessageRole.Assistant, content: '', toolCalls: [] }],
+      diagnostics: { externalContentToolContinuations: 0 },
     });
 
     await suggestProcessingPipeline({
@@ -210,6 +212,7 @@ describe('suggestProcessingPipeline workflow', () => {
         },
       ],
       input: [{ role: MessageRole.Assistant, content: '', toolCalls: [] }],
+      diagnostics: { externalContentToolContinuations: 0 },
     });
 
     const result = await suggestProcessingPipeline({
@@ -246,6 +249,7 @@ describe('suggestProcessingPipeline workflow', () => {
         },
       ],
       input: [{ role: MessageRole.Assistant, content: '', toolCalls: [] }],
+      diagnostics: { externalContentToolContinuations: 0 },
     });
 
     const result = await suggestProcessingPipeline({
@@ -309,6 +313,7 @@ describe('suggestProcessingPipeline workflow', () => {
           },
         ],
         input: [{ role: MessageRole.Assistant, content: '', toolCalls: [] }],
+        diagnostics: { externalContentToolContinuations: 0 },
       };
     });
 
@@ -385,6 +390,7 @@ describe('suggestProcessingPipeline workflow', () => {
           },
         ],
         input: [{ role: MessageRole.Assistant, content: '', toolCalls: [] }],
+        diagnostics: { externalContentToolContinuations: 0 },
       };
     });
 
@@ -428,6 +434,7 @@ describe('suggestProcessingPipeline workflow', () => {
           },
         ],
         input: [{ role: MessageRole.Assistant, content: '', toolCalls: [] }],
+        diagnostics: { externalContentToolContinuations: 0 },
       };
     });
 

@@ -22,11 +22,11 @@ export const WatchlistCsvUploadResponseItem = lazySchema(() =>
     /**
      * Number of entities matched for this row
      */
-    matchedEntities: z.number().int(),
+    matchedEntities: z.number().int().describe('Number of entities matched for this row'),
     /**
      * Error message if the row failed to process
      */
-    error: z.string().optional(),
+    error: z.string().optional().describe('Error message if the row failed to process'),
   })
 );
 export type WatchlistCsvUploadResponseItem = z.infer<typeof WatchlistCsvUploadResponseItem>;
@@ -36,7 +36,7 @@ export const UploadWatchlistCsvRequestParams = lazySchema(() =>
     /**
      * The ID of the watchlist to add entities to
      */
-    watchlist_id: z.string(),
+    watchlist_id: z.string().describe('The ID of the watchlist to add entities to'),
   })
 );
 export type UploadWatchlistCsvRequestParams = z.infer<typeof UploadWatchlistCsvRequestParams>;
@@ -47,19 +47,19 @@ export const UploadWatchlistCsvResponse = lazySchema(() =>
     /**
      * Number of rows that matched at least one entity
      */
-    successful: z.number().int(),
+    successful: z.number().int().describe('Number of rows that matched at least one entity'),
     /**
      * Number of rows that failed to process
      */
-    failed: z.number().int(),
+    failed: z.number().int().describe('Number of rows that failed to process'),
     /**
      * Total number of rows processed
      */
-    total: z.number().int(),
+    total: z.number().int().describe('Total number of rows processed'),
     /**
      * Number of rows that matched no entities
      */
-    unmatched: z.number().int(),
+    unmatched: z.number().int().describe('Number of rows that matched no entities'),
     items: z.array(WatchlistCsvUploadResponseItem),
   })
 );

@@ -37,7 +37,7 @@ import { useDataSource } from '../../../../contexts/ml';
 import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
 import type { ExistingJobsAndGroups } from '../../../../services/job_service';
 import { useNewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
-import { getNewJobDefaults } from '../../../../services/ml_server_info';
+import { getIsMlCpsEnabled, getNewJobDefaults } from '../../../../services/ml_server_info';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { MlAppHeader, useAnomalyDetectionJobsBack } from '../../../../components/ml_app_header';
 
@@ -59,7 +59,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const mlApi = useMlApi();
   const newJobCapsService = useNewJobCapsService();
   const anomalyDetectionJobsBack = useAnomalyDetectionJobsBack();
-
+  const isMlCpsEnabled = getIsMlCpsEnabled();
   const chartInterval = useTimeBuckets(uiSettings);
 
   const jobCreator = useMemo(
@@ -154,7 +154,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
   if (dataSourceContext.projectRouting) {
     jobCreator.projectRouting = dataSourceContext.projectRouting;
-  } else if (cps?.cpsManager && jobCreator.projectRouting === null) {
+  } else if (isMlCpsEnabled && cps?.cpsManager && jobCreator.projectRouting === null) {
     jobCreator.projectRouting = cps.cpsManager.getDefaultProjectRouting() ?? null;
   }
 
@@ -219,15 +219,13 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const jobCreatorTitle = getJobCreatorTitle(jobCreator);
 
   return (
-    <>
-      <div data-test-subj={`mlPageJobWizardHeader-${jobCreator.type}`}>
-        <MlAppHeader
-          title={`${i18n.translate('xpack.ml.newJob.page.createJob', {
-            defaultMessage: 'Create job',
-          })}: ${jobCreatorTitle}`}
-          back={anomalyDetectionJobsBack}
-        />
-      </div>
+    <div data-test-subj={`mlPageJobWizardHeader-${jobCreator.type}`}>
+      <MlAppHeader
+        title={`${i18n.translate('xpack.ml.newJob.page.createJob', {
+          defaultMessage: 'Create job',
+        })}: ${jobCreatorTitle}`}
+        back={anomalyDetectionJobsBack}
+      />
 
       <div style={{ backgroundColor: 'inherit' }} data-test-subj={`mlPageJobWizard ${jobType}`}>
         <EuiText size={'s'}>
@@ -264,6 +262,6 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
           firstWizardStep={firstWizardStep}
         />
       </div>
-    </>
+    </div>
   );
 };

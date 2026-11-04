@@ -12,6 +12,7 @@ import { TASK_TYPE, type SetupTaskParams } from './utils';
 const DEFAULT_SETUP_TASKS: SetupTaskParams[] = [
   { type: 'backportPackagePolicyInputId' },
   { type: 'migrateComponentTemplateILMs' },
+  { type: 'backfillPolicyBaseId' },
 ];
 
 /**
@@ -28,8 +29,9 @@ export async function scheduleSetupTask(
 
   for (let i = 0; i < tasksToSchedule.length; i++) {
     const params = tasksToSchedule[i];
+    const taskId = `${TASK_TYPE}:${params.type}`;
     await taskManagerStart.ensureScheduled({
-      id: `${TASK_TYPE}:${params.type}`,
+      id: taskId,
       scope: ['fleet'],
       params,
       taskType: TASK_TYPE,

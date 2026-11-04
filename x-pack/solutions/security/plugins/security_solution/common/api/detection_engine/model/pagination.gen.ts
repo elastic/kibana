@@ -35,7 +35,7 @@ export const PaginationResult = lazySchema(() =>
     /**
      * Total number of items
      */
-    total: z.number().int().min(0),
+    total: z.number().int().min(0).describe('Total number of items'),
   })
 );
 export type PaginationResult = z.infer<typeof PaginationResult>;

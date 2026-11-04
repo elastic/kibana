@@ -66,9 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('DataView mode', () => {
       it('should have correct list of columns', async () => {
-        await PageObjects.common.navigateToActualUrl('discover', undefined, {
-          ensureCurrentUrl: false,
-        });
+        await PageObjects.discover.navigateToApp({ queryMode: 'classic' });
 
         await PageObjects.discover.selectIndexPattern(SECURITY_SOLUTION_DATA_VIEW);
 

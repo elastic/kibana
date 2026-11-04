@@ -8,9 +8,9 @@
  */
 
 import { stringify } from 'yaml';
-import type { BuildkiteAgentTargetingRule } from './buildkite';
-import { BuildkiteClient } from './buildkite';
-import { FIPS_VERSION, prHasFIPSLabel } from './pr_labels';
+import type { BuildkiteAgentTargetingRule } from './buildkite/index.ts';
+import { BuildkiteClient } from './buildkite/index.ts';
+import { FIPS_VERSION, prHasFIPSLabel } from './pr_labels.ts';
 
 export const ELASTIC_IMAGES_QA_PROJECT = 'elastic-images-qa';
 export const USE_QA_IMAGE_GH_LABEL = 'ci:use-qa-image';
@@ -23,7 +23,9 @@ export const DEFAULT_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
   provider: 'gcp',
   image: 'family/kibana-ubuntu-2404',
   imageProject: ELASTIC_IMAGES_PROD_PROJECT,
-  diskSizeGb: 130,
+  // Boot disk (GB). Without it the agent manager provisions 100 GB. PR jobs peak at ~66 GB, so
+  // 85 GB leaves ample headroom. Steps that need more set their own `diskSizeGb`.
+  diskSizeGb: 85,
 };
 
 const getFIPSImage = () => {
@@ -41,6 +43,8 @@ const getFIPSImage = () => {
   return {
     ...DEFAULT_AGENT_IMAGE_CONFIG,
     image,
+    // FIPS image disk usage has not been measured; keep the agent manager default.
+    diskSizeGb: undefined,
   };
 };
 

@@ -25,7 +25,7 @@ const testProps = {
     },
     { title: "IP's:", badge: { value: 1 } },
     { title: 'Rules:', badge: { value: 2 } },
-    { title: 'Alerts:', badge: { value: 2, width: 50, color: '#a83632' } },
+    { title: 'Alerts:', badge: { value: 2, color: '#a83632' } },
   ],
   getActionItems: () => (
     <EuiContextMenu

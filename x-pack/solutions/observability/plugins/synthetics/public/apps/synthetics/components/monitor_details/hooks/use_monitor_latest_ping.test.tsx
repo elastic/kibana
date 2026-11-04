@@ -9,7 +9,12 @@ import { renderHook } from '@testing-library/react';
 import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import * as reactRedux from 'react-redux-v7';
 import { useMonitorLatestPing } from './use_monitor_latest_ping';
-import { ConfigKey, MonitorTypeEnum, type Ping } from '../../../../../../common/runtime_types';
+import {
+  ConfigKey,
+  HEARTBEAT_UNMAPPED_LOCATION_LABEL,
+  MonitorTypeEnum,
+  type Ping,
+} from '../../../../../../common/runtime_types';
 import { getMonitorLastRunAction } from '../../../state';
 import { fetchLatestTestRun } from '../../../state/monitor_details/api';
 
@@ -38,6 +43,11 @@ jest.mock('../../../contexts', () => ({
 const mockUrlParams = jest.fn();
 jest.mock('../../../hooks', () => ({
   useGetUrlParams: () => mockUrlParams(),
+}));
+
+const mockUseParams = jest.fn();
+jest.mock('react-router-dom', () => ({
+  useParams: () => mockUseParams(),
 }));
 
 const mockUseSelectedMonitor = jest.fn();
@@ -90,6 +100,7 @@ const remoteMonitor = {
 describe('useMonitorLatestPing', () => {
   beforeEach(() => {
     mockUrlParams.mockReturnValue({});
+    mockUseParams.mockReturnValue({ monitorId: 'url-config-id' });
     mockUseSelectedLocation.mockReturnValue({ label: 'US East' });
     mockLatestPingState.mockReturnValue({ data: undefined, loading: false, loaded: false });
     useFetcherMock.mockReturnValue({
@@ -142,6 +153,33 @@ describe('useMonitorLatestPing', () => {
       const { result } = renderHook(() => useMonitorLatestPing());
 
       expect(result.current.latestPing).toBe(ping);
+    });
+
+    it('accepts a location-less ping when the selected location is the Heartbeat placeholder', () => {
+      mockUseSelectedLocation.mockReturnValue({ label: HEARTBEAT_UNMAPPED_LOCATION_LABEL });
+      mockUseSelectedMonitor.mockReturnValue({ monitor: localMonitor });
+      const ping = {
+        monitor: { id: 'local-monitor-id' },
+      } as unknown as Ping;
+      mockLatestPingState.mockReturnValue({ data: ping, loading: false, loaded: true });
+
+      const { result } = renderHook(() => useMonitorLatestPing());
+
+      expect(result.current.latestPing).toBe(ping);
+    });
+
+    it('rejects a located ping when the selected location is the Heartbeat placeholder', () => {
+      mockUseSelectedLocation.mockReturnValue({ label: HEARTBEAT_UNMAPPED_LOCATION_LABEL });
+      mockUseSelectedMonitor.mockReturnValue({ monitor: localMonitor });
+      const ping = {
+        monitor: { id: 'local-monitor-id' },
+        observer: { geo: { name: 'US East' } },
+      } as unknown as Ping;
+      mockLatestPingState.mockReturnValue({ data: ping, loading: false, loaded: true });
+
+      const { result } = renderHook(() => useMonitorLatestPing());
+
+      expect(result.current.latestPing).toBeUndefined();
     });
 
     it('returns undefined latestPing when the Redux ping is for a different location', () => {
@@ -240,24 +278,33 @@ describe('useMonitorLatestPing', () => {
       expect(result.current.loaded).toBe(true);
     });
 
-    it('keeps loaded=false while useSelectedMonitor has not yet resolved the remote monitor', () => {
-      mockUseSelectedMonitor.mockReturnValue({ monitor: undefined });
-
-      const { result } = renderHook(() => useMonitorLatestPing());
-
-      expect(result.current.loading).toBe(true);
-      expect(result.current.loaded).toBe(false);
-      expect(result.current.latestPing).toBeUndefined();
-    });
-
-    it('does not call the route when the monitor has not yet been resolved', () => {
+    it('queries the route with the URL monitorId before the synthesized monitor resolves', () => {
       mockUseSelectedMonitor.mockReturnValue({ monitor: undefined });
 
       renderHook(() => useMonitorLatestPing());
 
       const fetchCallback = useFetcherMock.mock.calls[0][0];
       fetchCallback();
-      expect(fetchLatestTestRunMock).not.toHaveBeenCalled();
+      expect(fetchLatestTestRunMock).toHaveBeenCalledWith({
+        monitorId: 'url-config-id',
+        locationLabel: 'US East',
+        remoteName: 'remote-a',
+      });
+    });
+
+    it('marks the remote probe loaded once the route settles even if the monitor is still unresolved', () => {
+      mockUseSelectedMonitor.mockReturnValue({ monitor: undefined });
+      useFetcherMock.mockReturnValue({
+        data: { ping: undefined },
+        status: FETCH_STATUS.SUCCESS,
+        loading: false,
+      });
+
+      const { result } = renderHook(() => useMonitorLatestPing());
+
+      expect(result.current.loaded).toBe(true);
+      expect(result.current.loading).toBe(false);
+      expect(result.current.latestPing).toBeUndefined();
     });
 
     it('propagates loading=true from the fetcher', () => {

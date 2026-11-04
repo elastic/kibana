@@ -172,12 +172,27 @@ export class EntityFlyoutAnomaliesPage {
     return this.page.testSubj.locator(`${ANOMALIES_TABLE_ROW_ACTION_TEST_ID_PREFIX}${actionKey}`);
   }
 
+  /**
+   * Click a row-actions menu item. dispatchEvent bypasses Playwright's obstruction
+   * check: the URL change from openRowActionsMenu re-renders the flyout and transiently
+   * repositions the popover, covering the menu item's center point. The click event
+   * source is EuiContextMenuItem (SecuritySolution/public/entity_analytics/components/anomalies).
+   */
+  async clickRowAction(actionKey: string) {
+    await this.getRowAction(actionKey).dispatchEvent('click');
+  }
+
   async selectMitreTactic(tactic: string) {
-    await this.getMitreTacticDot(tactic).click();
+    // dispatchEvent bypasses Playwright's obstruction check: the tactic dot is briefly
+    // occluded after scrollIntoView by the adjacent MitreTacticDotV3 hover chip overlay
+    // (SecuritySolution/public/entity_analytics/components/anomalies/MitreTacticDot).
+    await this.getMitreTacticDot(tactic).dispatchEvent('click');
   }
 
   async clearMitreTacticFilter() {
-    await this.mitreTacticClearChip.click();
+    // dispatchEvent: same occlusion race as selectMitreTactic — the hover chip is
+    // briefly covered after scroll by the MitreTacticDotV3 overlay.
+    await this.mitreTacticClearChip.dispatchEvent('click');
   }
 
   async expandAnomalyRow() {
@@ -187,10 +202,10 @@ export class EntityFlyoutAnomaliesPage {
 
   async openRowActionsMenu() {
     await this.anomaliesTabTableGrid.waitFor({ state: 'visible' });
-    // noWaitAfter: true skips Playwright's post-click navigation wait — opening the popover
-    // triggers a URL update from the flyout's state management that Playwright misidentifies
-    // as a pending navigation. The caller's getRowAction assertions are the real check.
-    await this.rowActionsButton.click({ noWaitAfter: true });
+    // dispatchEvent: the row-actions button sits inside the anomalies table grid; after scroll
+    // it is transiently covered by an adjacent element. Also avoids noWaitAfter — the URL
+    // update from the flyout's state management is not awaited by dispatchEvent anyway.
+    await this.rowActionsButton.dispatchEvent('click');
   }
 
   /**

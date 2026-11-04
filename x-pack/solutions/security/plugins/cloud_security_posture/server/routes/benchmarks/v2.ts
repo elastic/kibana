@@ -17,10 +17,47 @@ import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS } from '@kbn/cloud-secu
 import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '../../../common/constants';
 
 import type { Benchmark } from '../../../common/types/latest';
-import { getClusters } from '../compliance_dashboard/get_clusters';
 import { getStats } from '../compliance_dashboard/get_stats';
 import { getSafePostureTypeRuntimeMapping } from '../../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
+import { getIdentifierRuntimeMapping } from '../../../common/runtime_mappings/get_identifier_runtime_mapping';
 import { getMutedRulesFilterQuery } from '../benchmark_rules/get_states/v1';
+
+/**
+ * Counts the distinct assets evaluated for a benchmark using a cardinality aggregation.
+ * The benchmarks page only needs the count, so this avoids the expensive per-asset
+ * terms + top_hits aggregation used by the compliance dashboard (getClusters), whose
+ * response size grows with the number and size of findings and can exceed the ES
+ * client's 100MB response limit. It is also not capped at 500 assets like getClusters.
+ */
+const getBenchmarkEvaluationCount = async (
+  esClient: ElasticsearchClient,
+  query: QueryDslQueryContainer,
+  pit: OpenPointInTimeResponse,
+  runtimeMappings: MappingRuntimeFields
+): Promise<number> => {
+  const result = await esClient.search<unknown, { asset_count: { value: number } }>({
+    size: 0,
+    // `asset_identifier` is a runtime field; `safe_posture_type` is used by the query filter
+    runtime_mappings: { ...runtimeMappings, ...getIdentifierRuntimeMapping() },
+    query,
+    aggs: {
+      asset_count: {
+        cardinality: {
+          field: 'asset_identifier',
+        },
+      },
+    },
+    pit: {
+      id: pit.id,
+    },
+  });
+
+  if (result.pit_id) {
+    pit.id = result.pit_id;
+  }
+
+  return result.aggregations?.asset_count?.value ?? 0;
+};
 
 export const getBenchmarksData = async (
   soClient: SavedObjectsClientContract,
@@ -67,41 +104,52 @@ export const getBenchmarksData = async (
   // For each Benchmark entry : Calculate Score, Get amount of enrolled agents
   const result: Benchmark[] = [];
 
-  for (const benchmark of benchmarkAgg.benchmark_id.buckets) {
-    const benchmarkId = benchmark.key;
-    const benchmarkName = benchmark.name.buckets[0].key;
-    const versions = benchmark?.name?.buckets[0]?.version?.buckets ?? [];
+  try {
+    for (const benchmark of benchmarkAgg.benchmark_id.buckets) {
+      const benchmarkId = benchmark.key;
+      const benchmarkName = benchmark.name.buckets[0].key;
+      const versions = benchmark?.name?.buckets[0]?.version?.buckets ?? [];
 
-    for (const benchmarkObj of versions) {
-      const benchmarkVersion = benchmarkObj.key;
-      const postureType = benchmarkId === 'cis_eks' || benchmarkId === 'cis_k8s' ? 'kspm' : 'cspm';
-      const runtimeMappings: MappingRuntimeFields = getSafePostureTypeRuntimeMapping();
-      const query: QueryDslQueryContainer = {
-        bool: {
-          filter: [
-            { term: { 'rule.benchmark.id': benchmarkId } },
-            { term: { 'rule.benchmark.version': benchmarkVersion } },
-            { term: { safe_posture_type: postureType } },
-          ],
-          must_not: rulesFilter,
-        },
-      };
-      const benchmarkScore = await getStats(esClient, query, pit, runtimeMappings, logger);
-      const benchmarkEvaluation = await getClusters(esClient, query, pit, runtimeMappings, logger);
+      for (const benchmarkObj of versions) {
+        const benchmarkVersion = benchmarkObj.key;
+        const postureType =
+          benchmarkId === 'cis_eks' || benchmarkId === 'cis_k8s' ? 'kspm' : 'cspm';
+        const runtimeMappings: MappingRuntimeFields = getSafePostureTypeRuntimeMapping();
+        const query: QueryDslQueryContainer = {
+          bool: {
+            filter: [
+              { term: { 'rule.benchmark.id': benchmarkId } },
+              { term: { 'rule.benchmark.version': benchmarkVersion } },
+              { term: { safe_posture_type: postureType } },
+            ],
+            must_not: rulesFilter,
+          },
+        };
+        const benchmarkScore = await getStats(esClient, query, pit, runtimeMappings, logger);
+        const benchmarkEvaluation = await getBenchmarkEvaluationCount(
+          esClient,
+          query,
+          pit,
+          runtimeMappings
+        );
 
-      result.push({
-        id: benchmarkId,
-        name: benchmarkName,
-        version: benchmarkVersion.replace('v', ''),
-        score: benchmarkScore,
-        evaluation: benchmarkEvaluation.length,
-      });
+        result.push({
+          id: benchmarkId,
+          name: benchmarkName,
+          version: benchmarkVersion.replace('v', ''),
+          score: benchmarkScore,
+          evaluation: benchmarkEvaluation,
+        });
+      }
     }
+  } finally {
+    // Always close the PIT regardless of success or failure to prevent resource leaks.
+    // Without this, a failed query would leave the PIT open until keep_alive expires,
+    // causing accumulated leaked PITs on serverless where open PIT limits are stricter.
+    esClient.closePointInTime(pit).catch((err) => {
+      logger.warn(`Could not close PIT for benchmarks endpoint: ${err}`);
+    });
   }
-
-  esClient.closePointInTime(pit).catch((err) => {
-    logger.warn(`Could not close PIT for benchmarks endpoint: ${err}`);
-  });
 
   return result;
 };

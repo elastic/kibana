@@ -16,8 +16,6 @@ import type { InternalThemeServiceStart } from '@kbn/core-theme-browser-internal
 import { BehaviorSubject } from 'rxjs';
 import { type DeveloperToolbarItemProps } from '@kbn/developer-toolbar';
 
-import { NEXT_CHROME_FEATURE_FLAG_KEY } from '@kbn/core-chrome-feature-flags';
-
 export type UnregisterItemFn = () => void;
 export interface DeveloperToolbarItemRegistry {
   registerItem: (item: DeveloperToolbarItemProps) => UnregisterItemFn;
@@ -35,6 +33,12 @@ const LazyColorThemeToggle = lazy(() =>
 const LazyMeasureButton = lazy(() =>
   import('@kbn/design-tools').then(({ MeasureButton }) => ({
     default: MeasureButton,
+  }))
+);
+
+const LazyFontInspectButton = lazy(() =>
+  import('@kbn/design-tools').then(({ FontInspectButton }) => ({
+    default: FontInspectButton,
   }))
 );
 
@@ -84,6 +88,15 @@ export class DeveloperToolbarPlugin
     });
 
     this.registerItem({
+      id: 'Inspect Font',
+      children: (
+        <Suspense fallback={null}>
+          <LazyFontInspectButton />
+        </Suspense>
+      ),
+    });
+
+    this.registerItem({
       id: 'Design Tools',
       children: (
         <Suspense fallback={null}>
@@ -91,16 +104,6 @@ export class DeveloperToolbarPlugin
         </Suspense>
       ),
     });
-
-    if (core.featureFlags.getBooleanValue(NEXT_CHROME_FEATURE_FLAG_KEY, true)) {
-      import('@kbn/core-chrome-feature-flags/chrome_next_toggle').then(({ ChromeNextToggle }) => {
-        this.registerItem({
-          id: 'Chrome Next',
-          children: <ChromeNextToggle featureFlags={core.featureFlags} />,
-          priority: 1,
-        });
-      });
-    }
 
     return {
       registerItem: this.registerItem.bind(this),

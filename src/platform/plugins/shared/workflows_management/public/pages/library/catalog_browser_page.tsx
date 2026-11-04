@@ -21,29 +21,24 @@ import { WorkflowsPageName } from '../../deep_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 
-const libraryPageTitle = i18n.translate('workflowsManagement.libraryPage.pageTitle', {
-  defaultMessage: 'Template Library',
+const libraryPageTitle = i18n.translate('workflows.libraryPage.pageTitle', {
+  defaultMessage: 'Template library',
 });
 
-const experimentalBadgeLabel = i18n.translate('workflowsManagement.libraryPage.experimentalBadge', {
+const experimentalBadgeLabel = i18n.translate('workflows.libraryPage.experimentalBadge', {
   defaultMessage: 'Experimental',
 });
 
-const contributeLinkLabel = i18n.translate('workflowsManagement.libraryPage.contributeLink', {
+const contributeLinkLabel = i18n.translate('workflows.libraryPage.contributeLink', {
   defaultMessage: 'Contribute a template',
 });
 
-const createFromFileLabel = i18n.translate('workflowsManagement.libraryPage.createFromFile', {
+const createFromFileLabel = i18n.translate('workflows.libraryPage.createFromFile', {
   defaultMessage: 'Import template',
 });
 
-// The Workflow Template Library ships from `elastic/workflows`; the header
-// link takes users to the repo home so they can orient themselves before
-// opening an issue or PR (per Tinsae's feedback on the PR).
-const CONTRIBUTE_TEMPLATE_URL = 'https://github.com/elastic/workflows';
-
 /**
- * Workflow Template Library catalog page (`/app/workflows/library`). The
+ * Workflow Template library catalog page (`/app/workflows/library`). The
  * browse UI itself lives in `@kbn/workflows-ui` (`<CatalogBrowser>`) so it can
  * be reused from other plugins later; this page only wires navigation. The
  * route is always registered (see `routes.tsx`); this page redirects to the
@@ -71,20 +66,29 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
 
   const headerMenu = useMemo<AppHeaderMenu>(
     () => ({
-      primaryActionItem: {
-        id: 'contributeTemplate',
-        order: 1,
-        label: contributeLinkLabel,
-        iconType: 'logoGithub',
-        href: CONTRIBUTE_TEMPLATE_URL,
-        target: '_blank',
-        testId: 'workflowLibraryContributeLink',
-      },
       items: [
+        {
+          id: 'requestTemplate',
+          label: i18n.translate('workflows.libraryPage.requestTemplateButtonLabel', {
+            defaultMessage: 'Request a template',
+          }),
+          iconType: 'logoGithub',
+          href: 'https://github.com/elastic/workflows/issues/new?template=template_request.yml',
+          target: '_blank',
+          testId: 'workflowLibraryRequestLink',
+        },
+        {
+          id: 'contributeTemplate',
+          label: contributeLinkLabel,
+          iconType: 'logoGithub',
+          href: 'https://github.com/elastic/workflows/issues/new?template=template_contribution.yml',
+          target: '_blank',
+          testId: 'workflowLibraryContributeLink',
+        },
         {
           id: 'createFromFile',
           label: createFromFileLabel,
-          iconType: 'importAction',
+          iconType: 'download',
           overflow: true,
           run: openUploadFlyout,
           testId: 'workflowLibraryCreateFromFileButton',
@@ -132,7 +136,12 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
       data-test-subj="workflowLibraryCatalogBrowserPage"
       restrictWidth={false}
     >
-      <AppHeader title={libraryPageTitle} badges={headerBadges} menu={headerMenu} />
+      <AppHeader
+        title={libraryPageTitle}
+        badges={headerBadges}
+        menu={headerMenu}
+        spacing="compact"
+      />
       <EuiPageTemplate.Section paddingSize="m" grow>
         <CatalogBrowser onSelect={handleSelect} />
       </EuiPageTemplate.Section>

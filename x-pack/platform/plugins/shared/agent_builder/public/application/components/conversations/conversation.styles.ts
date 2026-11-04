@@ -8,7 +8,7 @@
 import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 
-export const headerHeight = 64;
+export const headerHeight = 56;
 
 const maxConversationWidthStyles = css`
   max-width: 800px;

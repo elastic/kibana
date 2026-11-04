@@ -16,8 +16,8 @@ import {
   buildJestStep,
   registerCancelKeys,
   sortFunctionalGroups,
-} from './steps';
-import type { FunctionalGroup } from './types';
+} from './steps.ts';
+import type { FunctionalGroup } from './types.ts';
 
 describe('buildJestStep', () => {
   const baseOpts = {
@@ -25,7 +25,6 @@ describe('buildJestStep', () => {
     label: 'Jest Tests',
     parallelism: 4,
     key: 'jest' as const,
-    agentDiskSize: 110,
     envFromLabels: { FOO: 'bar' },
     dependsOn: ['build'],
     retryCount: 2,

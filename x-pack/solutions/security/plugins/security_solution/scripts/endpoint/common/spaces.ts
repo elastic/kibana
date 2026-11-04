@@ -11,7 +11,7 @@ import type { Space } from '@kbn/spaces-plugin/common';
 import { DEFAULT_SPACE_ID, getSpaceIdFromPath } from '@kbn/core-spaces-common';
 import { memoize } from 'lodash';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
-import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
+import { catchHttpErrorFormatAndThrow } from '../../../common/endpoint/format_http_error';
 
 /**
  * Check that a given space id exists in Kibana and created it if not.
@@ -43,7 +43,7 @@ export const ensureSpaceIdExists = async (
 
       throw err;
     })
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 
   if (!alreadyExists) {
     log.info(`Creating space id [${spaceId}]`);
@@ -58,7 +58,7 @@ export const ensureSpaceIdExists = async (
           id: spaceId,
         },
       })
-      .catch(catchAxiosErrorFormatAndThrow)
+      .catch(catchHttpErrorFormatAndThrow)
       .then((response) => {
         log.verbose(`space created:\n${JSON.stringify(response.data, null, 2)}`);
       });
@@ -79,7 +79,7 @@ export const fetchActiveSpace = memoize(async (kbnClient: KbnClient): Promise<Sp
       method: 'GET',
       path: `/internal/spaces/_active_space`,
     })
-    .catch(catchAxiosErrorFormatAndThrow)
+    .catch(catchHttpErrorFormatAndThrow)
     .then((response) => response.data);
 });
 

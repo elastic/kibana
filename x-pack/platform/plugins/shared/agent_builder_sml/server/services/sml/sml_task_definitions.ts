@@ -27,17 +27,29 @@ import type { SmlService } from './types';
  * The crawler indexes ALL content across ALL spaces into the SML system index.
  * Access control is enforced at **query time**, not index time:
  *
- *  1. `searchSml` filters results to the requesting user's current space.
- *  2. `filterResultsByPermissions` batch-checks the user's Kibana privileges
- *     against each result's `permissions` array.
- *  3. `checkItemsAccess` (used by `sml_attach`) performs the same privilege
- *     check before allowing attachment resolution.
+ *  1. `searchSml` enforces authorization via a `nested` Query DSL filter pushed
+ *     into the ES|QL `_query` API's `filter` parameter. `permissions.kibana.privileges`
+ *     is a `nested` field holding one element per space (`{ space, name[], count }`),
+ *     so a single filter covers both dimensions: the element's `space` term scopes
+ *     it, and a `terms_set` against that element's own `count` requires ALL of its
+ *     actions. Nesting is what keeps the two bound together — matches cannot
+ *     accumulate across spaces.
+ *  2. `autocompleteSml` applies the same filter in the Elasticsearch `_search`
+ *     query. Both paths read as `asInternalUser` (ES DLS does not apply);
+ *     authorization is application-side. ES-side DLS (elasticsearch#156990)
+ *     protects direct ES access by third parties using the same semantics.
+ *  3. `checkItemsAccess` (used by `sml_attach`) applies the same rule in memory
+ *     — existential across a document's space elements, universal within one —
+ *     before allowing attachment resolution.
  *
- * When the security plugin is absent (development/testing), all results are
- * returned unfiltered, following the standard Kibana open-access convention.
+ * When the security plugin is absent (development/testing), privilege enforcement
+ * is skipped following the standard Kibana open-access convention. However,
+ * search/autocomplete still push the space-scoping half of the filter — Spaces are
+ * available without security, so space isolation doesn't have to depend on the plugin.
  *
- * SML type implementers are responsible for setting correct `permissions`
- * arrays in their `getSmlEntry` hook (see `SmlTypeDefinition`).
+ * SML type implementers are responsible for returning the correct actions from
+ * their `getPermissions` hook (see `SmlTypeDefinition`); the indexer groups them
+ * by space into the stored shape.
  */
 export const SML_CRAWLER_TASK_TYPE = 'agent_builder_sml:sml_crawler';
 
@@ -69,7 +81,7 @@ export const registerSmlCrawlerTaskDefinition = ({
       title: 'Agent Builder SML Crawler',
       timeout: '10m',
       maxAttempts: 3,
-      priority: TaskPriority.Low,
+      priority: TaskPriority.Maintenance,
       createTaskRunner: (context) => {
         const { taskInstance, signal } = context;
         const { attachmentType } = (taskInstance.params ?? {}) as Partial<SmlCrawlerTaskParams>;

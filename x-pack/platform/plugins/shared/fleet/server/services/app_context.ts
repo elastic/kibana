@@ -26,6 +26,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { Logger } from '@kbn/logging';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { LockManagerService } from '@kbn/lock-manager';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { ReportingStart } from '@kbn/reporting-plugin/server';
@@ -93,6 +94,8 @@ class AppContextService {
     KibanaSavedObjectType.sloTemplate,
   ];
   private reportingStart: ReportingStart | undefined;
+  private featureFlags: FeatureFlagsStart | undefined;
+  private isFipsEnabled: boolean = false;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
@@ -122,6 +125,8 @@ class AppContextService {
     this.lockManagerService = appContext.lockManagerService;
     this.alertingStart = appContext.alertingStart;
     this.reportingStart = appContext.reportingStart;
+    this.featureFlags = appContext.featureFlags;
+    this.isFipsEnabled = appContext.isFipsEnabled;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -163,6 +168,10 @@ class AppContextService {
 
   public getSecurityLicense() {
     return this.securitySetup!.license;
+  }
+
+  public getIsFipsEnabled() {
+    return this.isFipsEnabled;
   }
 
   public getCloud() {
@@ -352,6 +361,10 @@ class AppContextService {
 
   public getReportingStart() {
     return this.reportingStart;
+  }
+
+  public getFeatureFlags() {
+    return this.featureFlags;
   }
 }
 

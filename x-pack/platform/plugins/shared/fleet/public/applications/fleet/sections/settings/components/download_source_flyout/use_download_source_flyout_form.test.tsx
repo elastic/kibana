@@ -42,7 +42,7 @@ describe('useDowloadSourceFlyoutForm SSL certificate path validation', () => {
 
     await testRenderer.waitFor(() => {
       expect(result.current.inputs.sslCertificateInput.errors).toBeDefined();
-      expect(onSuccess).not.toBeCalled();
+      expect(onSuccess).not.toHaveBeenCalled();
       expect(result.current.isDisabled).toBeTruthy();
     });
   });
@@ -64,7 +64,7 @@ describe('useDowloadSourceFlyoutForm SSL certificate path validation', () => {
 
     await testRenderer.waitFor(() => {
       expect(result.current.inputs.sslKeyInput.errors).toBeDefined();
-      expect(onSuccess).not.toBeCalled();
+      expect(onSuccess).not.toHaveBeenCalled();
       expect(result.current.isDisabled).toBeTruthy();
     });
   });
@@ -88,7 +88,7 @@ describe('useDowloadSourceFlyoutForm SSL certificate path validation', () => {
 
     await testRenderer.waitFor(() => {
       expect(result.current.inputs.sslCertificateAuthoritiesInput.props.errors).toBeDefined();
-      expect(onSuccess).not.toBeCalled();
+      expect(onSuccess).not.toHaveBeenCalled();
       expect(result.current.isDisabled).toBeTruthy();
     });
   });
@@ -111,7 +111,7 @@ describe('useDowloadSourceFlyoutForm SSL certificate path validation', () => {
 
     await act(() => result.current.submit());
 
-    await testRenderer.waitFor(() => expect(onSuccess).toBeCalled());
+    await testRenderer.waitFor(() => expect(onSuccess).toHaveBeenCalled());
   });
 
   it('should block submission when username contains only spaces', async () => {
@@ -133,7 +133,7 @@ describe('useDowloadSourceFlyoutForm SSL certificate path validation', () => {
 
     await testRenderer.waitFor(() => {
       expect(result.current.inputs.usernameInput.errors).toEqual(['Username is required']);
-      expect(onSuccess).not.toBeCalled();
+      expect(onSuccess).not.toHaveBeenCalled();
       expect(result.current.isDisabled).toBeTruthy();
     });
   });

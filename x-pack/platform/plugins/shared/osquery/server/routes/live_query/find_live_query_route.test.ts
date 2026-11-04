@@ -61,7 +61,7 @@ describe('findLiveQueryRoute', () => {
     jest.clearAllMocks();
 
     mockOsqueryContext = {
-      cpsEnabled: false,
+      isCpsActive: jest.fn().mockResolvedValue(false),
       service: {
         getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
       },
@@ -161,7 +161,6 @@ describe('findLiveQueryRoute', () => {
     expect(getResultCountsForActions).toHaveBeenCalledWith(
       mockEsClient,
       ['query-1'],
-      'default',
       undefined,
       false
     );
@@ -325,7 +324,6 @@ describe('findLiveQueryRoute', () => {
     expect(getResultCountsForActions).toHaveBeenCalledWith(
       mockEsClient,
       ['query-1'],
-      'custom-space',
       undefined,
       false
     );
@@ -380,7 +378,6 @@ describe('findLiveQueryRoute', () => {
     expect(getResultCountsForActions).toHaveBeenCalledWith(
       mockEsClient,
       ['query-1'],
-      'custom-space',
       ['team.a'],
       false
     );
@@ -437,7 +434,6 @@ describe('findLiveQueryRoute', () => {
     expect(getResultCountsForActions).toHaveBeenCalledWith(
       mockEsClient,
       ['query-1'],
-      'production',
       ['prod'],
       false
     );
@@ -482,7 +478,7 @@ describe('findLiveQueryRoute', () => {
     beforeEach(() => {
       mockOsqueryContext = {
         ...mockOsqueryContext,
-        cpsEnabled: true,
+        isCpsActive: jest.fn().mockResolvedValue(true),
         getStartServices: jest.fn().mockResolvedValue([
           { elasticsearch: { client: { asInternalUser: mockEsClient } } },
           {
@@ -565,7 +561,6 @@ describe('findLiveQueryRoute', () => {
       expect(getResultCountsForActions).toHaveBeenCalledWith(
         mockScopedEsClient,
         ['query-1'],
-        'default',
         undefined,
         false
       );

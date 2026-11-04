@@ -36,7 +36,7 @@ const externalResumeParamsSchema = schema.object({
 });
 
 export function registerExternalResumeExecutionPostRoute(deps: RouteDependencies) {
-  const { router, api, spaces, audit, logger } = deps;
+  const { router, api, spaces, logger } = deps;
 
   router.versioned
     .post({
@@ -68,38 +68,33 @@ export function registerExternalResumeExecutionPostRoute(deps: RouteDependencies
           },
         },
       },
-      withAvailabilityCheck(async (context, request, response) => {
-        try {
-          const { executionId, stepId } = request.params;
-          const { token } = resolveExternalResumeCredentials(request.query);
-          const spaceId = spaces.getSpaceId(request);
-          const { resumedBy } = await api.resumeWorkflowExecutionExternallyWithInput({
-            token,
-            executionId,
-            stepId,
-            spaceId,
-            input: request.body as Record<string, unknown>,
-          });
+      withAvailabilityCheck(
+        async (context, request, response) => {
+          try {
+            const { executionId, stepId } = request.params;
+            const { token } = resolveExternalResumeCredentials(request.query);
+            const spaceId = spaces.getSpaceId(request);
+            await api.resumeWorkflowExecutionExternallyWithInput({
+              token,
+              executionId,
+              stepId,
+              spaceId,
+              input: request.body as Record<string, unknown>,
+              request,
+            });
 
-          audit.logExecutionResumed(request, {
-            executionId,
-            resumedBy,
-          });
-
-          return htmlSuccess(response);
-        } catch (error) {
-          audit.logExecutionResumed(request, {
-            executionId: request.params.executionId,
-            error,
-          });
-          return handleExternalResumeError(response, error, logger);
-        }
-      })
+            return htmlSuccess(response);
+          } catch (error) {
+            return handleExternalResumeError(response, error, logger);
+          }
+        },
+        { bootstrapExecutionDataViews: false }
+      )
     );
 }
 
 export function registerExternalResumeExecutionGetRoute(deps: RouteDependencies) {
-  const { router, api, spaces, audit, logger } = deps;
+  const { router, api, spaces, logger } = deps;
 
   router.versioned
     .get({
@@ -147,31 +142,26 @@ export function registerExternalResumeExecutionGetRoute(deps: RouteDependencies)
           },
         },
       },
-      withAvailabilityCheck(async (context, request, response) => {
-        try {
-          const { executionId, stepId } = request.params;
-          const { token } = resolveExternalResumeCredentials(request.query);
-          const { resumedBy } = await api.resumeWorkflowExecutionExternallyViaGet({
-            token,
-            executionId,
-            stepId,
-            spaceId: spaces.getSpaceId(request),
-            query: request.query as Record<string, unknown>,
-          });
+      withAvailabilityCheck(
+        async (context, request, response) => {
+          try {
+            const { executionId, stepId } = request.params;
+            const { token } = resolveExternalResumeCredentials(request.query);
+            await api.resumeWorkflowExecutionExternallyViaGet({
+              token,
+              executionId,
+              stepId,
+              spaceId: spaces.getSpaceId(request),
+              query: request.query as Record<string, unknown>,
+              request,
+            });
 
-          audit.logExecutionResumed(request, {
-            executionId,
-            resumedBy,
-          });
-
-          return htmlSuccess(response);
-        } catch (error) {
-          audit.logExecutionResumed(request, {
-            executionId: request.params.executionId,
-            error,
-          });
-          return handleExternalResumeError(response, error, logger);
-        }
-      })
+            return htmlSuccess(response);
+          } catch (error) {
+            return handleExternalResumeError(response, error, logger);
+          }
+        },
+        { bootstrapExecutionDataViews: false }
+      )
     );
 }

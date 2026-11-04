@@ -12,10 +12,24 @@ import type {
   StrategyResponseType,
 } from '../../../../common/search_strategy/osquery';
 
+/**
+ * Server-internal request passed to factory `buildDsl` / `parse`.
+ * `matchActionDataSpaceId` is set by the search strategy from
+ * `ID_BOUND_FACTORY_QUERY_TYPES`; it is not a public request field.
+ *
+ * `skipSpaceFilter` is written only by the search strategy, after it has itself
+ * found the Kibana-written action document for the request's `actionId` in the
+ * active space. It MUST NOT be copied from an incoming request.
+ */
+export type OsqueryFactoryRequest<T extends FactoryQueryTypes> = StrategyRequestType<T> & {
+  matchActionDataSpaceId?: boolean;
+  skipSpaceFilter?: boolean;
+};
+
 export interface OsqueryFactory<T extends FactoryQueryTypes> {
-  buildDsl: (options: StrategyRequestType<T>) => ISearchRequestParams;
+  buildDsl: (options: OsqueryFactoryRequest<T>) => ISearchRequestParams;
   parse: (
-    options: StrategyRequestType<T>,
+    options: OsqueryFactoryRequest<T>,
     response: IEsSearchResponse
   ) => Promise<StrategyResponseType<T>>;
 }

@@ -61,6 +61,10 @@ jest.mock('../../widgets/workflow_search_field/ui/workflow_search_field', () => 
   ),
 }));
 
+jest.mock('../../features/workflow_executions_stats/ui', () => ({
+  WorkflowExecutionStatsBar: () => <div data-test-subj="mockWorkflowExecutionStatsBar" />,
+}));
+
 const mockUseWorkflows = useWorkflows as jest.MockedFunction<typeof useWorkflows>;
 const mockUseShowManagedWorkflowsSetting = useShowManagedWorkflowsSetting as jest.MockedFunction<
   typeof useShowManagedWorkflowsSetting
@@ -69,6 +73,7 @@ const mockUseWorkflowFiltersOptions = useWorkflowFiltersOptions as jest.MockedFu
   typeof useWorkflowFiltersOptions
 >;
 let mockNavigateToApp: jest.Mock;
+let isExecutionStatsBarEnabled = false;
 
 const emptyWorkflowsResult = {
   data: { results: [], total: 0 },
@@ -133,7 +138,7 @@ function mockCapabilities(
         navigateToApp: mockNavigateToApp,
       },
       featureFlags: {
-        getBooleanValue: () => false,
+        useBooleanValue: () => isExecutionStatsBarEnabled,
       },
     },
   } as ReturnType<typeof useKibana>);
@@ -142,6 +147,7 @@ function mockCapabilities(
 describe('WorkflowsPage authorization', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    isExecutionStatsBarEnabled = false;
     mockUseWorkflows.mockReturnValue(emptyWorkflowsResult as any);
     mockUseShowManagedWorkflowsSetting.mockReturnValue(false);
     mockUseWorkflowFiltersOptions.mockReturnValue({
@@ -351,5 +357,30 @@ describe('WorkflowsPage authorization', () => {
         'all'
       );
     });
+  });
+
+  it('hides the execution stats bar when the feature flag is disabled', () => {
+    mockCapabilities(true, true);
+    mockUseWorkflows.mockReturnValue({
+      ...emptyWorkflowsResult,
+      data: { results: [{}], total: 1 },
+    } as any);
+
+    renderPage();
+
+    expect(screen.queryByTestId('mockWorkflowExecutionStatsBar')).not.toBeInTheDocument();
+  });
+
+  it('shows the execution stats bar when the feature flag is enabled', () => {
+    isExecutionStatsBarEnabled = true;
+    mockCapabilities(true, true);
+    mockUseWorkflows.mockReturnValue({
+      ...emptyWorkflowsResult,
+      data: { results: [{}], total: 1 },
+    } as any);
+
+    renderPage();
+
+    expect(screen.getByTestId('mockWorkflowExecutionStatsBar')).toBeInTheDocument();
   });
 });

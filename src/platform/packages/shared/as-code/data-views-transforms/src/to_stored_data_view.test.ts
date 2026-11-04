@@ -15,7 +15,7 @@ import {
   type AsCodeSavedDataView,
 } from '@kbn/as-code-data-views-schema';
 import { toStoredDataView } from './to_stored_data_view';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-types';
 
 describe('toStoredDataView', () => {
   it('converts data_view_reference data_source to string id', () => {
@@ -94,6 +94,31 @@ describe('toStoredDataView', () => {
     };
     const result = toStoredDataView(dataView);
     expect(result).not.toHaveProperty('name');
+  });
+
+  it('maps field_filters to sourceFilters', () => {
+    const dataView: AsCodeDataViewSpec = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      field_filters: ['field_a', 'field_b'],
+    };
+
+    const result = toStoredDataView(dataView);
+    expect(result).toEqual(
+      expect.objectContaining({
+        sourceFilters: [{ value: 'field_a' }, { value: 'field_b' }],
+      })
+    );
+  });
+
+  it('omits sourceFilters when field_filters is undefined', () => {
+    const dataView: AsCodeDataViewSpec = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+    };
+
+    const result = toStoredDataView(dataView);
+    expect((result as DataViewSpec).sourceFilters).toBeUndefined();
   });
 
   it('converts index-pattern data_source without runtime fields', () => {

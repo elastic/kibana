@@ -9,6 +9,7 @@
 
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
+import { isResumeTaskSchedulingError } from './resume_task_scheduling_error';
 import type { WorkflowExecutionLoopParams } from './types';
 import type { NodeWithErrorCatching } from '../step/node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
@@ -72,6 +73,10 @@ export async function catchError(
     return;
   }
 
+  // A failed resume-task schedule leaves nothing that can advance the execution, so it
+  // still fails every enclosing scope but must not be recovered by on-failure handlers.
+  const isUnrecoverable = isResumeTaskSchedulingError(workflowExecutionCursor.error);
+
   try {
     // Loop through nested scopes in reverse order to handle errors at each level.
     // The loop continues while:
@@ -79,7 +84,11 @@ export async function catchError(
     // 2. There are items in the execution stack
     // 3. The top stack entry has nested scopes to process
     // This allows error handling to bubble up through the scope hierarchy.
-    if (failedStepExecutionRuntime.stepExecutionExists() && failedStepExecutionRuntime.error) {
+    if (
+      !isUnrecoverable &&
+      failedStepExecutionRuntime.stepExecutionExists() &&
+      failedStepExecutionRuntime.error
+    ) {
       workflowExecutionCursor.captureError(failedStepExecutionRuntime.error);
     } else if (failedStepExecutionRuntime.stepExecutionExists()) {
       const stepExecution = failedStepExecutionRuntime.stepExecution;
@@ -124,7 +133,7 @@ export async function catchError(
       });
       const stepImplementation = nodesFactory.create(stepExecutionRuntime);
 
-      if ((stepImplementation as unknown as NodeWithErrorCatching).catchError) {
+      if (!isUnrecoverable && (stepImplementation as unknown as NodeWithErrorCatching).catchError) {
         const stepErrorCatcher = stepImplementation as unknown as NodeWithErrorCatching;
         const failedContext = stepExecutionRuntimeFactory.createStepExecutionRuntime({
           nodeId: currentNode.id,

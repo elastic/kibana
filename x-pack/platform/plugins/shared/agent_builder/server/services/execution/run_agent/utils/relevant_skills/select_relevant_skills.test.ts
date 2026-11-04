@@ -229,6 +229,28 @@ describe('buildRecentContext', () => {
     expect(result).toContain('User: q2');
   });
 
+  it('omits the assistant line for a message that triggered no response', () => {
+    const rounds = [
+      { input: { message: 'q1' }, response: { message: 'a1' } },
+      { input: { message: 'posted without triggering' } },
+    ];
+    const result = buildRecentContext(rounds, { maxRounds: 2 });
+    expect(result).toContain('User: posted without triggering');
+    expect(result.match(/Assistant: /g)).toHaveLength(1);
+  });
+
+  it('spends the freed response budget on the remaining messages', () => {
+    const answered = buildRecentContext(
+      [{ input: { message: 'a'.repeat(100) }, response: { message: 'b'.repeat(100) } }],
+      { maxChars: 60 }
+    );
+    const unanswered = buildRecentContext([{ input: { message: 'a'.repeat(100) } }], {
+      maxChars: 60,
+    });
+    expect(unanswered.length).toBeGreaterThan(answered.indexOf('\nAssistant'));
+    expect(unanswered).not.toContain('Assistant');
+  });
+
   it('keeps only the most recent rounds', () => {
     const rounds = [
       { input: { message: 'old' }, response: { message: 'x' } },

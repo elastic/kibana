@@ -33,7 +33,7 @@ describe('interpreter/functions#metricVis', () => {
     valueFontSize: 'default',
     density: 'compact',
     primaryPosition: 'bottom',
-    secondaryLabelPosition: 'before',
+    secondaryNameVisibility: 'before',
     applyColorTo: 'background',
   };
 

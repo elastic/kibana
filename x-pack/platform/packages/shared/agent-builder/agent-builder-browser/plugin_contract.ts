@@ -6,6 +6,7 @@
  */
 
 import type { ComponentType, RefAttributes } from 'react';
+import type { EuiFlyoutMenuAction } from '@elastic/eui';
 import type {
   AttachmentInput,
   ConversationAttachment,
@@ -15,16 +16,24 @@ import type { BrowserApiToolDefinition } from './tools/browser_api_tool';
 import type {
   AgentsServiceStartContract,
   AttachmentServiceStartContract,
+  ConversationsServiceStartContract,
+  ConversationEventsServiceStartContract,
   RendererServiceStartContract,
   EventsServiceStartContract,
   ToolServiceStartContract,
 } from '.';
+import type { ConversationTemplateServiceStartContract } from './templates';
 
 /**
  * Props for the embeddable conversation component.
  * Configures conversation behavior when embedded in the sidebar or other host.
  */
 export interface EmbeddableConversationProps {
+  /**
+   * Called when the user submits a prompt, immediately before the conversation starts streaming.
+   */
+  onSubmit?: () => void;
+
   /**
    * Force starting a new conversation, ignoring any stored conversation IDs.
    * When true, a fresh conversation is always created.
@@ -135,6 +144,14 @@ export interface PublicEmbeddableConversationInputProps {
    * Agent the input is bound to. Defaults to `agentBuilderDefaultAgentId` when omitted.
    */
   agentId?: string;
+  /**
+   * Optional override for the submit action. When provided, submitting the
+   * input calls this handler with the message and its attachments (e.g. pasted
+   * images) instead of navigating to the Agent Builder app. Use this when
+   * embedding the input in a host UI that handles the message locally (e.g.
+   * via `openChat`).
+   */
+  onSubmit?: (message: string, attachments: ConversationAttachment[]) => void;
 }
 
 /**
@@ -142,6 +159,20 @@ export interface PublicEmbeddableConversationInputProps {
  */
 export interface OpenConversationSidebarOptions extends EmbeddableConversationProps {
   onClose?: () => void;
+  /**
+   * Conversation id to restore when the sidebar opens.
+   */
+  conversationId?: string;
+}
+
+/**
+ * Options passed when opening conversation details.
+ */
+export interface OpenConversationDetailsOptions {
+  conversationId: string;
+  onClose?: () => void;
+  /** Icon buttons rendered in the flyout menu bar, before the close button (e.g. copy link). */
+  trailingActions?: EuiFlyoutMenuAction[];
 }
 
 /**
@@ -187,6 +218,11 @@ export interface AgentBuilderPluginStart {
    */
   renderers: RendererServiceStartContract;
   /**
+   * Conversation template service contract, can be used to register and retrieve
+   * per-template UI definitions (reusable tabs, and which tabs each template shows).
+   */
+  conversationTemplates: ConversationTemplateServiceStartContract;
+  /**
    * Tool service contract, can be used to list or execute tools.
    */
   tools: ToolServiceStartContract;
@@ -194,6 +230,12 @@ export interface AgentBuilderPluginStart {
    * Events service contract, can be used to listen to chat events.
    */
   events: EventsServiceStartContract;
+  /** Browser-side UI registry for custom conversation events. */
+  conversationEvents: ConversationEventsServiceStartContract;
+  /**
+   * Conversations service contract, can be used to append events to conversations.
+   */
+  conversations: ConversationsServiceStartContract;
   /**
    * Resolves Agent Builder access (enterprise license, LLM connector). Callers must
    * also require `application.capabilities.agentBuilder.show === true` before
@@ -233,6 +275,13 @@ export interface AgentBuilderPluginStart {
    * @param attachment - The attachment to add
    */
   addAttachment: (attachment: AttachmentInput) => void;
+  /**
+   * Removes a staged attachment from the active conversation sidebar by its id.
+   * If no sidebar is open or the id is not found, the call is a no-op.
+   *
+   * @param attachmentId - The id of the attachment to remove
+   */
+  removeAttachment: (attachmentId: string) => void;
   /**
    * Updates the origin of an attachment in a conversation.
    * Use this after saving a by-value attachment to link it to its persistent store.
@@ -284,4 +333,9 @@ export interface AgentBuilderPluginStart {
   EmbeddableConversationInput: ComponentType<
     PublicEmbeddableConversationInputProps & RefAttributes<EmbeddableConversationInputRef>
   >;
+  /**
+   * Opens the conversation details flyout. Flyouts opened from its content stack on top of it with
+   * a Back button when opened with `session: 'start'` and `CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY`.
+   */
+  openConversationDetails: (options: OpenConversationDetailsOptions) => Promise<() => void>;
 }

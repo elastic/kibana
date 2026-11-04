@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/expression-heatmap-plugin",
   "owner": [
-    "@elastic/kibana-visualizations"
+    "@elastic/kibana-dashboards"
   ],
   "group": "platform",
   "visibility": "shared",

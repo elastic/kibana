@@ -11,5 +11,6 @@
   ],
   "kbn_references": [
     "@kbn/tooling-log",
+    "@kbn/std",
   ]
 }

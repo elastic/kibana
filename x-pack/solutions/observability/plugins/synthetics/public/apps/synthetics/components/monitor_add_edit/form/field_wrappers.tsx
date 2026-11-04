@@ -44,6 +44,7 @@ import type { SourceFieldProps } from '../fields/source_field';
 import { SourceField } from '../fields/source_field';
 import type { FormattedComboBoxProps as DefaultFormattedComboBoxProps } from '../fields/combo_box';
 import { FormattedComboBox as DefaultFormattedComboBox } from '../fields/combo_box';
+import { MonitorTagsComboBox as DefaultMonitorTagsComboBox } from '../fields/monitor_tags_combo_box';
 import type { CodeEditorProps as DefaultCodeEditorProps } from '../fields/code_editor';
 import { JSONEditor as DefaultJSONEditor } from '../fields/code_editor';
 import type { MonitorTypeRadioGroupProps } from '../fields/monitor_type_radio_group';
@@ -116,6 +117,10 @@ export const ButtonGroup = React.forwardRef<unknown, EuiButtonGroupProps>((props
 
 export const FormattedComboBox = React.forwardRef<unknown, DefaultFormattedComboBoxProps>(
   (props, _ref) => <DefaultFormattedComboBox {...props} />
+);
+
+export const MonitorTagsComboBox = React.forwardRef<unknown, DefaultFormattedComboBoxProps>(
+  (props, _ref) => <DefaultMonitorTagsComboBox {...props} />
 );
 
 export const ComboBox = React.forwardRef<unknown, EuiComboBoxProps<unknown>>((props, _ref) => (

@@ -40,8 +40,8 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
       });
       await testSubjects.click('configure-case-button');
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await retry.waitFor('cases-redesign-settings-panel exist', async () => {
-        return await testSubjects.exists('cases-redesign-settings-panel');
+      await retry.waitFor('cases-settings-panel exist', async () => {
+        return await testSubjects.exists('cases-settings-panel');
       });
       await svlCommonScreenshots.takeScreenshot('security-cases-settings', screenshotDirectories);
 

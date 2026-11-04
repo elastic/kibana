@@ -8,6 +8,7 @@
 import type { EntityAnalyticsMigrationsParams } from '.';
 import { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import { buildScopedInternalSavedObjectsClientUnsafe } from '../risk_score/tasks/helpers';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../execution_context';
 
 const TASK_TYPE = 'security-solution-ea-risk-score-copy-timestamp-to-event-ingested';
 const TASK_ID = `${TASK_TYPE}-task-id`;
@@ -67,27 +68,34 @@ export const createMigrationTask =
     return {
       run: async () => {
         const [coreStart] = await getStartServices();
-        const esClient = coreStart.elasticsearch.client.asInternalUser;
-        const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace: '*' });
+        return coreStart.executionContext.withContext(
+          buildEaExecutionContext(EA_EXECUTION_CONTEXT_NAMES.RISK_SCORE_MIGRATION, TASK_ID),
+          async () => {
+            const esClient = coreStart.elasticsearch.client.asInternalUser;
+            const soClient = buildScopedInternalSavedObjectsClientUnsafe({
+              coreStart,
+              namespace: '*',
+            });
 
-        const riskScoreClient = new RiskScoreDataClient({
-          esClient,
-          logger,
-          auditLogger,
-          namespace: '*',
-          soClient,
-          kibanaVersion: '*',
-        });
-        const riskScoreResponse = await riskScoreClient.copyTimestampToEventIngestedForRiskScore(
-          signal
-        );
-        const failures = riskScoreResponse.failures?.map((failure) => failure.cause);
-        const hasFailures = failures && failures?.length > 0;
+            const riskScoreClient = new RiskScoreDataClient({
+              esClient,
+              logger,
+              auditLogger,
+              namespace: '*',
+              soClient,
+              kibanaVersion: '*',
+            });
+            const riskScoreResponse =
+              await riskScoreClient.copyTimestampToEventIngestedForRiskScore(signal);
+            const failures = riskScoreResponse.failures?.map((failure) => failure.cause);
+            const hasFailures = failures && failures?.length > 0;
 
-        logger.info(
-          `Task "${TASK_TYPE}" finished. Updated documents: ${
-            riskScoreResponse.updated
-          }, failures: ${hasFailures ? failures.join('\n') : 0}`
+            logger.info(
+              `Task "${TASK_TYPE}" finished. Updated documents: ${
+                riskScoreResponse.updated
+              }, failures: ${hasFailures ? failures.join('\n') : 0}`
+            );
+          }
         );
       },
 

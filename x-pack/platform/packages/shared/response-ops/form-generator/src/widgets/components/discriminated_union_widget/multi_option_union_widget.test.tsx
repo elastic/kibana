@@ -608,7 +608,7 @@ describe('MultiOptionUnionWidget', () => {
     });
   });
 
-  describe('legacy options', () => {
+  describe('legacy and Kibana-managed options', () => {
     const renderOptions = (
       options: Array<z.ZodObject<z.ZodRawShape>>,
       fieldConfig: Record<string, unknown> = {}
@@ -666,6 +666,37 @@ describe('MultiOptionUnionWidget', () => {
 
       expect(screen.getByText('Bearer (legacy)')).toBeInTheDocument();
       expect(screen.getByLabelText('Legacy Token', { selector: 'input' })).toBeInTheDocument();
+    });
+
+    const kibanaManagedRelay = () =>
+      z
+        .object({
+          type: z.literal('relay'),
+          tenantKey: z.string().meta({ label: 'Tenant Key' }),
+        })
+        .meta({ label: 'Elastic app', isKibanaManaged: true });
+
+    it('does not render a Kibana-managed option that is not selected', () => {
+      renderOptions([ears(), kibanaManagedRelay()]);
+
+      expect(screen.getByText('Quick Connect')).toBeInTheDocument();
+      expect(screen.queryByText('Elastic app')).toBeNull();
+    });
+
+    it('skips Kibana-managed options when picking the default', () => {
+      // Kibana-managed option listed FIRST — default selection should still land on the other option
+      renderOptions([kibanaManagedRelay(), ears()]);
+
+      expect(screen.getByLabelText('Quick Token', { selector: 'input' })).toBeInTheDocument();
+      expect(screen.queryByText('Elastic app')).toBeNull();
+    });
+
+    it('renders a Kibana-managed option when it is the active selection (e.g. provisioned connector)', () => {
+      renderOptions([ears(), kibanaManagedRelay()], {
+        defaultValue: { type: 'relay', tenantKey: 'tenant-A' },
+      });
+
+      expect(screen.getByText('Elastic app')).toBeInTheDocument();
     });
   });
 

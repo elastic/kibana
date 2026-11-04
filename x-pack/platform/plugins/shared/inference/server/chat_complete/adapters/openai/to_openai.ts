@@ -15,8 +15,10 @@ import type {
   ChatCompletionToolMessageParam,
   ChatCompletionUserMessageParam,
 } from 'openai/resources';
+import type { Logger } from '@kbn/logging';
 import type { Message, ToolOptions, InferenceConnector } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
+import { resolveToolChoice } from '../../utils/forced_tool_choice';
 import { OpenAiProviderType } from './types';
 
 /** Non-empty stand-in when an assistant turn has no text and no tool calls. */
@@ -78,9 +80,21 @@ export function toolsToOpenAI(
 }
 
 export function toolChoiceToOpenAI(
-  toolChoice: ToolOptions['toolChoice'],
-  context?: { connector?: InferenceConnector; tools?: ToolOptions['tools'] }
+  requestedToolChoice: ToolOptions['toolChoice'],
+  context?: {
+    connector?: InferenceConnector;
+    tools?: ToolOptions['tools'];
+    // When set, forced tool choice is downgraded to `auto` for models that reject it.
+    modelId?: string;
+    logger?: Logger;
+  }
 ): OpenAI.ChatCompletionCreateParams['tool_choice'] {
+  const toolChoice = resolveToolChoice({
+    toolChoice: requestedToolChoice,
+    modelId: context?.modelId,
+    logger: context?.logger,
+  });
+
   // Base mapping
   const mapped =
     typeof toolChoice === 'string'
@@ -178,10 +192,13 @@ export function messagesToOpenAI({
               ? message.content
               : message.content.map((contentPart) => {
                   if (contentPart.type === 'image') {
+                    const { data, mimeType } = contentPart.source;
                     return {
                       type: 'image_url',
                       image_url: {
-                        url: contentPart.source.data,
+                        // The OpenAI-compatible API expects a data URL, not raw base64. Callers
+                        // that already pass a full URL leave mimeType empty, so keep those as-is.
+                        url: mimeType ? `data:${mimeType};base64,${data}` : data,
                       },
                     } satisfies ChatCompletionContentPartImage;
                   }

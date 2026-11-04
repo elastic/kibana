@@ -44,7 +44,7 @@ export interface NotificationCallbacks {
 }
 
 export interface OneConsoleProps {
-  lang?: 'en' | 'fr-FR' | 'ja-JP' | 'zh-CN';
+  lang?: 'en' | 'fr-FR' | 'ja-JP' | 'zh-CN' | 'de-DE' | 'pt-BR';
   http?: Partial<HttpSetup>;
   notifications: NotificationCallbacks;
   /**

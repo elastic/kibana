@@ -19,6 +19,7 @@ import { HostIsolationExceptionsApiClient } from '../../../../host_isolation_exc
 import { BlocklistsApiClient } from '../../../../blocklist/services';
 import { EndpointExceptionsApiClient } from '../../../../endpoint_exceptions/service/api_client';
 import { TrustedDevicesApiClient } from '../../../../trusted_devices/service/api_client';
+import { CustomYaraSignaturesApiClient } from '../../../../custom_yara_signatures/service/api_client';
 import { FleetArtifactsCard } from './components/fleet_artifacts_card';
 import {
   getBlocklistsListPath,
@@ -27,6 +28,7 @@ import {
   getTrustedAppsListPath,
   getTrustedDevicesListPath,
   getEndpointExceptionsListPath,
+  getCustomYaraSignaturesListPath,
 } from '../../../../../common/routing';
 import {
   BLOCKLISTS_LABELS,
@@ -35,6 +37,7 @@ import {
   TRUSTED_APPS_LABELS,
   TRUSTED_DEVICES_LABELS,
   ENDPOINT_EXCEPTIONS_LABELS,
+  CUSTOM_YARA_SIGNATURES_LABELS,
 } from './translations';
 import { useLicense } from '../../../../../../common/hooks/use_license';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
@@ -151,6 +154,25 @@ const BlockListArtifactCard = memo<PackageCustomExtensionComponentProps>((props)
 });
 BlockListArtifactCard.displayName = 'BlockListArtifactCard';
 
+const CustomYaraSignaturesArtifactCard = memo<PackageCustomExtensionComponentProps>((props) => {
+  const http = useHttp();
+  const customYaraSignaturesApiClientInstance = useMemo(
+    () => CustomYaraSignaturesApiClient.getInstance(http),
+    [http]
+  );
+
+  return (
+    <FleetArtifactsCard
+      {...props}
+      artifactApiClientInstance={customYaraSignaturesApiClientInstance}
+      getArtifactsPath={getCustomYaraSignaturesListPath}
+      labels={CUSTOM_YARA_SIGNATURES_LABELS}
+      data-test-subj="customYaraSignatures"
+    />
+  );
+});
+CustomYaraSignaturesArtifactCard.displayName = 'CustomYaraSignaturesArtifactCard';
+
 /**
  * The UI displayed in Fleet's Endpoint integration page, under the `Advanced` tab
  */
@@ -164,6 +186,7 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
       canReadHostIsolationExceptions,
       canReadTrustedDevices,
       canReadEndpointExceptions,
+      canReadCustomYaraSignatures,
     } = useUserPrivileges().endpointPrivileges;
 
     const userCanAccessContent = useCanAccessSomeArtifacts();
@@ -173,6 +196,8 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
     const endpointExceptionsVisible =
       useIsExperimentalFeatureEnabled('endpointExceptionsMovedUnderManagement') &&
       canReadEndpointExceptions;
+    const customYaraSignaturesVisible =
+      useIsExperimentalFeatureEnabled('customYaraSignaturesEnabled') && canReadCustomYaraSignatures;
 
     const artifactCards: ReactElement = useMemo(() => {
       if (loading) {
@@ -220,7 +245,14 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
             </>
           )}
 
-          {canReadBlocklist && <BlockListArtifactCard {...props} />}
+          {canReadBlocklist && (
+            <>
+              <BlockListArtifactCard {...props} />
+              <EuiSpacer />
+            </>
+          )}
+
+          {customYaraSignaturesVisible && <CustomYaraSignaturesArtifactCard {...props} />}
         </div>
       );
     }, [
@@ -233,6 +265,7 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
       endpointExceptionsVisible,
       canReadHostIsolationExceptions,
       canReadBlocklist,
+      customYaraSignaturesVisible,
     ]);
 
     if (loading) {

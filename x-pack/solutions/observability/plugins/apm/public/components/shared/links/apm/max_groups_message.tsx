@@ -9,10 +9,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 export const OTHER_SERVICE_NAME = '_other';
 
 export function MaxGroupsMessage() {
+  const { docLinks } = useApmPluginContext().core;
+
   return (
     <FormattedMessage
       defaultMessage="The cardinality of APM data being collected is too high. Please review {apmServerDocs} to mitigate the situation."
@@ -21,9 +24,7 @@ export function MaxGroupsMessage() {
         apmServerDocs: (
           <EuiLink
             data-test-subj="apmMaxGroupsMessageDocsLink"
-            href={
-              'https://www.elastic.co/guide/en/kibana/8.7/troubleshooting.html#troubleshooting-too-many-transactions'
-            }
+            href={docLinks.links.apm.troubleshootingTooManyTransactions}
             target="_blank"
           >
             {i18n.translate('xpack.apm.tooltip.link.apmServerDocs', {

@@ -48,6 +48,7 @@ import type {
   FilterEvent,
   GetCompatibleCellValueActions,
   MultiFilterEvent,
+  AnnotationClickEvent,
   StartServices,
 } from '../types';
 
@@ -232,6 +233,9 @@ export const getXyChartRenderer = ({
     const onSelectRange = (data: BrushEvent['data']) => {
       handlers.event({ name: 'brush', data });
     };
+    const onAnnotationClick = (data: AnnotationClickEvent['data']) => {
+      handlers.event({ name: 'annotationClick', data });
+    };
     const onClickMultiValue = (data: MultiFilterEvent['data']) => {
       handlers.event({ name: 'multiFilter', data });
     };
@@ -301,6 +305,7 @@ export const getXyChartRenderer = ({
             onCreateAlertRule={onCreateAlertRule}
             layerCellValueActions={layerCellValueActions}
             onSelectRange={onSelectRange}
+            onAnnotationClick={onAnnotationClick}
             renderMode={handlers.getRenderMode()}
             syncColors={config.syncColors}
             syncTooltips={config.syncTooltips}

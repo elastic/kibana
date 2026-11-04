@@ -12,7 +12,9 @@ import React from 'react';
 import { ExecutionStatus, type WorkflowExecutionListItemDto } from '@kbn/workflows';
 import {
   WorkflowExecutionDurationCell,
+  WorkflowExecutionRunNameCell,
   WorkflowExecutionStartedAtCell,
+  WorkflowExecutionTagsCell,
   WorkflowExecutionWorkflowCell,
 } from './workflow_executions_table_cells';
 import { getTestProvider } from '../../shared/mocks/test_providers';
@@ -39,6 +41,27 @@ const createExecution = (
   ...overrides,
 });
 
+describe('WorkflowExecutionRunNameCell', () => {
+  it('renders the execution name', () => {
+    render(
+      <WorkflowExecutionRunNameCell execution={createExecution({ runName: 'Deploy staging' })} />,
+      {
+        wrapper: getTestProvider({}),
+      }
+    );
+
+    expect(screen.getByTestId('executionsTableRunName')).toHaveTextContent('Deploy staging');
+  });
+
+  it('renders nothing for unnamed runs, like the other empty cells', () => {
+    render(<WorkflowExecutionRunNameCell execution={createExecution({ runName: undefined })} />, {
+      wrapper: getTestProvider({}),
+    });
+
+    expect(screen.queryByTestId('executionsTableRunName')).not.toBeInTheDocument();
+  });
+});
+
 describe('WorkflowExecutionWorkflowCell', () => {
   const onOpen = jest.fn();
 
@@ -61,6 +84,7 @@ describe('WorkflowExecutionWorkflowCell', () => {
     expect(screen.getByTestId('workflowExecutionWorkflowLink')).toHaveTextContent(
       'OpenAI entity extraction'
     );
+    expect(screen.getByTestId('executionsTableWorkflowName')).toBeInTheDocument();
   });
 
   it('opens execution details when workflow link is clicked', () => {
@@ -75,6 +99,19 @@ describe('WorkflowExecutionWorkflowCell', () => {
 
     fireEvent.click(screen.getByTestId('workflowExecutionWorkflowLink'));
     expect(onOpen).toHaveBeenCalledWith(execution);
+  });
+
+  it('shows only the workflow name in the workflow column', () => {
+    render(
+      <WorkflowExecutionWorkflowCell
+        execution={createExecution({ workflowName: 'Deploy', runName: 'Deploy staging' })}
+        onOpen={onOpen}
+      />,
+      { wrapper: getTestProvider({}) }
+    );
+
+    expect(screen.getByTestId('workflowExecutionWorkflowLink')).toHaveTextContent('Deploy');
+    expect(screen.queryByText('Deploy staging')).not.toBeInTheDocument();
   });
 
   it('renders action required badge when status is WAITING_FOR_INPUT', () => {
@@ -173,5 +210,43 @@ describe('WorkflowExecutionDurationCell', () => {
     );
 
     expect(container).toBeEmptyDOMElement();
+  });
+});
+
+describe('WorkflowExecutionTagsCell', () => {
+  it('shows two badges and an overflow control for five tags', () => {
+    render(
+      <WorkflowExecutionTagsCell
+        execution={createExecution({
+          tags: ['alpha', 'bravo', 'charlie', 'delta', 'echo'],
+        })}
+      />,
+      { wrapper: getTestProvider({}) }
+    );
+
+    expect(screen.getByText('alpha')).toBeInTheDocument();
+    expect(screen.getByText('bravo')).toBeInTheDocument();
+    expect(screen.queryByText('charlie')).not.toBeInTheDocument();
+    expect(screen.getByTestId('executionsTableTagsOverflow')).toHaveTextContent('+3');
+  });
+
+  it('opens a popover with all tags when overflow is clicked', () => {
+    render(
+      <WorkflowExecutionTagsCell
+        execution={createExecution({
+          tags: ['alpha', 'bravo', 'charlie', 'delta', 'echo'],
+        })}
+      />,
+      { wrapper: getTestProvider({}) }
+    );
+
+    fireEvent.click(screen.getByTestId('executionsTableTagsOverflow'));
+
+    expect(screen.getByText('charlie')).toBeInTheDocument();
+    expect(screen.getByText('delta')).toBeInTheDocument();
+    expect(screen.getByText('echo')).toBeInTheDocument();
+    // Visible + popover copies: all five names appear at least once.
+    expect(screen.getAllByText('alpha').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('bravo').length).toBeGreaterThanOrEqual(1);
   });
 });

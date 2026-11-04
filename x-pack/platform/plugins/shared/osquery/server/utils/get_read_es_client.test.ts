@@ -19,7 +19,16 @@ describe('getReadEsClient', () => {
     jest.clearAllMocks();
   });
 
-  it('returns asInternalUser when CPS is disabled', () => {
+  it('returns asInternalUser when CPS is not active', () => {
+    const client = getReadEsClient(clusterClient, request, false);
+
+    expect(client).toBe(clusterClient.asInternalUser);
+    expect(clusterClient.asScoped).not.toHaveBeenCalled();
+  });
+
+  it('returns asInternalUser when the experimental flag and deployment capability are on but no linked projects are visible', () => {
+    // Callers pass false when no linked projects are visible to the principal,
+    // even if the deployment capability and experimental flag are on.
     const client = getReadEsClient(clusterClient, request, false);
 
     expect(client).toBe(clusterClient.asInternalUser);

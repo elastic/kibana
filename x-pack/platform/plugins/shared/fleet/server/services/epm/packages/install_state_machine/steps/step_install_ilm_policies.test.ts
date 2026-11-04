@@ -129,8 +129,8 @@ describe('stepInstallILMPolicies', () => {
       spaceId: DEFAULT_SPACE_ID,
     });
 
-    expect(installILMPolicy).not.toBeCalled();
-    expect(installIlmForDataStream).not.toBeCalled();
+    expect(installILMPolicy).not.toHaveBeenCalled();
+    expect(installIlmForDataStream).not.toHaveBeenCalled();
   });
 
   it('should not install ILM policies if disabled in config and should return esReferences form installedPkg', async () => {
@@ -178,8 +178,8 @@ describe('stepInstallILMPolicies', () => {
       spaceId: DEFAULT_SPACE_ID,
     });
 
-    expect(installILMPolicy).not.toBeCalled();
-    expect(installIlmForDataStream).not.toBeCalled();
+    expect(installILMPolicy).not.toHaveBeenCalled();
+    expect(installIlmForDataStream).not.toHaveBeenCalled();
     expect(res?.esReferences).toEqual([
       {
         id: 'metrics-endpoint.policy-0.1.0-dev.0',
@@ -464,8 +464,9 @@ describe('cleanupILMPoliciesStep', () => {
       initialState: 'install_ilm_policies' as any,
     });
 
-    expect(mockDeletePrerequisiteAssets).toBeCalledWith(
+    expect(mockDeletePrerequisiteAssets).toHaveBeenCalledWith(
       {
+        installSource: 'registry',
         indexAssets: [
           {
             id: '.metrics-endpoint.metadata_united_default',
@@ -496,7 +497,7 @@ describe('cleanupILMPoliciesStep', () => {
       },
       esClient
     );
-    expect(mockDeleteILMPolicies).toBeCalledWith(installedEs, esClient);
+    expect(mockDeleteILMPolicies).toHaveBeenCalledWith(installedEs, esClient);
   });
 
   it('should not clean up assets if force is passed', async () => {
@@ -523,8 +524,8 @@ describe('cleanupILMPoliciesStep', () => {
       initialState: 'install_ilm_policies' as any,
     });
 
-    expect(mockDeleteILMPolicies).not.toBeCalled();
-    expect(mockDeletePrerequisiteAssets).not.toBeCalled();
+    expect(mockDeleteILMPolicies).not.toHaveBeenCalled();
+    expect(mockDeletePrerequisiteAssets).not.toHaveBeenCalled();
   });
 
   it('should not clean up assets if retryFromLastState is not passed', async () => {
@@ -549,8 +550,8 @@ describe('cleanupILMPoliciesStep', () => {
       initialState: 'install_ilm_policies' as any,
     });
 
-    expect(mockDeleteILMPolicies).not.toBeCalled();
-    expect(mockDeletePrerequisiteAssets).not.toBeCalled();
+    expect(mockDeleteILMPolicies).not.toHaveBeenCalled();
+    expect(mockDeletePrerequisiteAssets).not.toHaveBeenCalled();
   });
 
   it('should not clean up assets if initialState != install_ilm_policies', async () => {
@@ -576,8 +577,8 @@ describe('cleanupILMPoliciesStep', () => {
       initialState: 'create_restart_install' as any,
     });
 
-    expect(mockDeleteILMPolicies).not.toBeCalled();
-    expect(mockDeletePrerequisiteAssets).not.toBeCalled();
+    expect(mockDeleteILMPolicies).not.toHaveBeenCalled();
+    expect(mockDeletePrerequisiteAssets).not.toHaveBeenCalled();
   });
 
   it('should not clean up assets if attributes are not present', async () => {
@@ -598,7 +599,7 @@ describe('cleanupILMPoliciesStep', () => {
       initialState: 'install_ilm_policies' as any,
     });
 
-    expect(mockDeleteILMPolicies).not.toBeCalled();
-    expect(mockDeletePrerequisiteAssets).not.toBeCalled();
+    expect(mockDeleteILMPolicies).not.toHaveBeenCalled();
+    expect(mockDeletePrerequisiteAssets).not.toHaveBeenCalled();
   });
 });

@@ -16,11 +16,11 @@ mkdir -p "$HOME/.claude"
 # Bootstrap dependencies, unless the caller already owns that step. In Ona the
 # `install-deps` automation runs bootstrap (and the ES/Kibana services depend on
 # it), so the wrapper sets SKIP_BOOTSTRAP=true to avoid a second concurrent
-# `yarn kbn bootstrap` racing the task and corrupting node_modules.
+# `pnpm kbn bootstrap` racing the task and corrupting node_modules.
 if [ "${SKIP_BOOTSTRAP:-}" != "true" ]; then
   # If FIPS mode is enabled, there can be issues installing some dependencies due to invalid algorithms.
   # So override the NODE_OPTIONS environment variable to disable FIPS mode.
-  NODE_OPTIONS='' yarn kbn bootstrap
+  NODE_OPTIONS='' pnpm kbn bootstrap
 fi
 
 Xvfb :99 -screen 0 1920x1080x24 &

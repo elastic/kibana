@@ -10,15 +10,18 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { useWorkflowExecutionRerun } from './use_workflow_executions_bulk_actions';
 import { useWorkflowExecutionsPageFilters } from './use_workflow_executions_page_filters';
 import { WorkflowExecutionDetailFlyout } from './workflow_execution_detail_flyout';
 import { createWorkflowExecutionsDataView } from './workflow_executions_data_view';
 import { WorkflowExecutionsFilters } from './workflow_executions_filters';
 import { WorkflowExecutionsSearchBar } from './workflow_executions_search_bar';
+import { isUnsupportedFilter } from './workflow_executions_search_query';
 import { WorkflowExecutionsTable } from './workflow_executions_table';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSpaceId } from '../../hooks/use_space_id';
+import { useTelemetry } from '../../hooks/use_telemetry';
 import { useWorkflowUrlState } from '../../hooks/use_workflow_url_state';
 
 const DEFAULT_TIME_RANGE: TimeRange = {
@@ -33,6 +36,11 @@ const DEFAULT_QUERY: Query = {
 
 const DEFAULT_REFRESH_INTERVAL_MS = 5_000;
 
+/**
+ * Deselecting is a consequence of the filter change, not a navigation the user asked for, and the
+ * filters themselves are not in the URL — so it must replace, or Back restores the execution
+ * against filters that no longer match it.
+ */
 const clearSelectedExecutionIfChanged = (
   previousKeyRef: React.MutableRefObject<string | null>,
   nextKey: string,
@@ -45,8 +53,9 @@ const clearSelectedExecutionIfChanged = (
 };
 
 export const WorkflowExecutionsPageContent = React.memo(() => {
-  const { fieldFormats } = useKibana().services;
+  const { fieldFormats, notifications } = useKibana().services;
   const spaceId = useSpaceId();
+  const telemetry = useTelemetry();
   const dataView = useMemo(() => createWorkflowExecutionsDataView(fieldFormats), [fieldFormats]);
 
   const [query, setQuery] = useState<Query>(DEFAULT_QUERY);
@@ -90,39 +99,85 @@ export const WorkflowExecutionsPageContent = React.memo(() => {
   const handleQuerySubmit = useCallback(
     ({ query: nextQuery, dateRange }: { query?: Query; dateRange: TimeRange }) => {
       const nextQueryState = nextQuery ?? query;
+      const prevKey = previousSubmittedSearchKey.current;
+      const nextKey = JSON.stringify({ query: nextQueryState, dateRange });
+
       if (nextQuery) {
         setQuery(nextQuery);
         setSubmittedQuery(nextQuery);
       }
       setTimeRange(dateRange);
 
-      clearSelectedExecutionIfChanged(
-        previousSubmittedSearchKey,
-        JSON.stringify({ query: nextQueryState, dateRange }),
-        () => setSelectedExecution(null)
+      if (prevKey !== nextKey) {
+        const filterTypes: string[] = [];
+        const queryString = String(nextQueryState?.query ?? '');
+        if (queryString) {
+          filterTypes.push('query');
+        }
+        if (dateRange.from !== DEFAULT_TIME_RANGE.from || dateRange.to !== DEFAULT_TIME_RANGE.to) {
+          filterTypes.push('timeRange');
+        }
+        telemetry.reportWorkflowExecutionsFilterApplied({ filterTypes });
+
+        if (queryString) {
+          telemetry.reportWorkflowExecutionsSearchUsed({ hasQuery: true });
+        }
+      }
+
+      clearSelectedExecutionIfChanged(previousSubmittedSearchKey, nextKey, () =>
+        setSelectedExecution(null, { replace: true })
       );
     },
-    [query, setSelectedExecution]
+    [query, setSelectedExecution, telemetry]
   );
 
   const handleControlFiltersChange = useCallback(
     (filters: Filter[]) => {
       setControlFilters(filters);
-      clearSelectedExecutionIfChanged(previousControlFiltersKey, JSON.stringify(filters), () =>
-        setSelectedExecution(null)
+      const nextKey = JSON.stringify(filters);
+      if (previousControlFiltersKey.current !== nextKey && filters.length > 0) {
+        const filterTypes = filters
+          .map((f) => (f.meta?.key as string | undefined) ?? 'unknown')
+          .filter(Boolean);
+        telemetry.reportWorkflowExecutionsFilterApplied({ filterTypes });
+      }
+      clearSelectedExecutionIfChanged(previousControlFiltersKey, nextKey, () =>
+        setSelectedExecution(null, { replace: true })
       );
     },
-    [setSelectedExecution]
+    [setSelectedExecution, telemetry]
   );
 
   const handleSearchBarFiltersUpdated = useCallback(
-    (filters: Filter[]) => {
+    (updatedFilters: Filter[]) => {
+      // Filters that cannot be sent to the API are disabled so the pill does not claim to narrow the table.
+      const hasUnsupported = updatedFilters.some(isUnsupportedFilter);
+      const filters = hasUnsupported
+        ? updatedFilters.map((f) =>
+            isUnsupportedFilter(f) ? { ...f, meta: { ...f.meta, disabled: true } } : f
+          )
+        : updatedFilters;
+      if (hasUnsupported) {
+        notifications.toasts.addWarning(
+          i18n.translate('workflows.executionsPage.unsupportedFilterWarning', {
+            defaultMessage:
+              'Some filters cannot be applied to the executions list and were disabled. Use a KQL query instead.',
+          })
+        );
+      }
       setSearchBarFilters(filters);
-      clearSelectedExecutionIfChanged(previousSearchBarFiltersKey, JSON.stringify(filters), () =>
-        setSelectedExecution(null)
+      const nextKey = JSON.stringify(filters);
+      if (previousSearchBarFiltersKey.current !== nextKey && filters.length > 0) {
+        const filterTypes = filters
+          .map((f) => (f.meta?.key as string | undefined) ?? 'unknown')
+          .filter(Boolean);
+        telemetry.reportWorkflowExecutionsFilterApplied({ filterTypes });
+      }
+      clearSelectedExecutionIfChanged(previousSearchBarFiltersKey, nextKey, () =>
+        setSelectedExecution(null, { replace: true })
       );
     },
-    [setSelectedExecution]
+    [notifications.toasts, setSelectedExecution, telemetry]
   );
 
   const handleCloseExecution = useCallback(() => {
@@ -132,10 +187,32 @@ export const WorkflowExecutionsPageContent = React.memo(() => {
   const handleViewAllExecutionsForWorkflow = useCallback(
     (workflowId: string) => {
       applyWorkflowIdFilter(workflowId);
-      setSelectedExecution(null);
+      setSelectedExecution(null, { replace: true });
     },
     [applyWorkflowIdFilter, setSelectedExecution]
   );
+
+  const handleTimeRangeLinkClick = useCallback(() => {
+    // Prefer focusing the date-range toggle so the user can narrow the window.
+    // Fallbacks cover unified-search markup differences across versions.
+    const datePickerTrigger =
+      document.querySelector<HTMLElement>(
+        '[data-test-subj="workflowExecutionsSearchBar"] [data-test-subj="superDatePickerToggleQuickMenuButton"]'
+      ) ??
+      document.querySelector<HTMLElement>(
+        '[data-test-subj="workflowExecutionsSearchBar"] [data-test-subj="superDatePickerShowDatesButton"]'
+      ) ??
+      document.querySelector<HTMLElement>(
+        '[data-test-subj="workflowExecutionsSearchBar"] [data-test-subj="superDatePickerstartDatePopoverButton"]'
+      );
+
+    if (datePickerTrigger) {
+      datePickerTrigger.focus();
+      datePickerTrigger.click();
+    }
+
+    // TODO: Wire a SearchBar/date-picker ref API when available instead of DOM query.
+  }, []);
 
   return (
     <div data-test-subj="workflowExecutionsPageContent">
@@ -170,6 +247,7 @@ export const WorkflowExecutionsPageContent = React.memo(() => {
           }
           onReRunExecution={rerunExecution}
           onViewAllExecutionsForWorkflow={handleViewAllExecutionsForWorkflow}
+          onTimeRangeLinkClick={handleTimeRangeLinkClick}
           query={submittedQuery}
           spaceId={spaceId}
           timeRange={timeRange}

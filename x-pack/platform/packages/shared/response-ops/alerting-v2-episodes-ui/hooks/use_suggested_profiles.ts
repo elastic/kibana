@@ -13,7 +13,7 @@ import { queryKeys } from '../query_keys';
 
 export interface UseSuggestedProfilesParams {
   userProfile: UserProfileService;
-  /** Search string; the query runs only when the trimmed value is non-empty. */
+  /** Search string. An empty value lists profiles unfiltered rather than skipping the query. */
   searchTerm: string;
   toasts: {
     addError: (error: Error, options: { title: string }) => void;
@@ -23,6 +23,7 @@ export interface UseSuggestedProfilesParams {
 
 /**
  * Suggests user profiles via UserProfileService.suggest with shared caching and error handling.
+ * Runs with an empty search term too, so callers can show an initial list of users.
  */
 export function useSuggestedProfiles({
   userProfile,
@@ -40,7 +41,6 @@ export function useSuggestedProfiles({
         name: trimmedSearch,
         size: 20,
       }) as Promise<UserProfileWithAvatar[]>,
-    enabled: trimmedSearch.length > 0,
     retry: 1,
     onError: (err: unknown) => {
       toasts.addError(err instanceof Error ? err : new Error(String(err)), {

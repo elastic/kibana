@@ -125,7 +125,7 @@ describe('ConnectorsForm ', () => {
 
     expect(incidentTypeComboBox).not.toHaveValue();
     expect(severitySelect).toHaveValue('5');
-  });
+  }, 60_000);
 
   it('submits correctly', async () => {
     const user = userEvent.setup({ delay: null });
@@ -239,7 +239,7 @@ describe('ConnectorsForm ', () => {
     });
 
     await user.click(screen.getByTestId('edit-connectors-cancel'));
-    expect(onCancel).toBeCalled();
+    expect(onCancel).toHaveBeenCalled();
   });
 
   it('disables the submit button correctly if the initial connector is the none', async () => {

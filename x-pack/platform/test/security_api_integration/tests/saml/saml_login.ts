@@ -6,7 +6,7 @@
  */
 
 import { resolve } from 'path';
-import { stringify } from 'query-string';
+import queryString from 'query-string';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { Cookie } from 'tough-cookie';
 import url from 'url';
@@ -35,7 +35,12 @@ export default function ({ getService }: FtrProviderContext) {
 
   function createSAMLResponse(options = {}) {
     return getSAMLResponse({
-      destination: `${kibanaServerConfig.protocol}://localhost:${kibanaServerConfig.port}/api/security/saml/callback`,
+      destination: url.format({
+        protocol: kibanaServerConfig.protocol,
+        hostname: kibanaServerConfig.hostname,
+        port: kibanaServerConfig.port,
+        pathname: '/api/security/saml/callback',
+      }),
       sessionIndex: String(randomness.naturalNumber()),
       ...options,
     });
@@ -43,7 +48,12 @@ export default function ({ getService }: FtrProviderContext) {
 
   function createLogoutRequest(options: { sessionIndex: string }) {
     return getLogoutRequest({
-      destination: `${kibanaServerConfig.protocol}://localhost:${kibanaServerConfig.port}/logout`,
+      destination: url.format({
+        protocol: kibanaServerConfig.protocol,
+        hostname: kibanaServerConfig.hostname,
+        port: kibanaServerConfig.port,
+        pathname: '/logout',
+      }),
       ...options,
     });
   }
@@ -406,7 +416,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should invalidate access token on IdP initiated logout', async () => {
         const logoutRequest = await createLogoutRequest({ sessionIndex: idpSessionIndex });
         const logoutResponse = await supertest
-          .get(`/api/security/logout?${stringify(logoutRequest, { sort: false })}`)
+          .get(`/api/security/logout?${queryString.stringify(logoutRequest, { sort: false })}`)
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
@@ -434,7 +444,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should invalidate access token on IdP initiated logout even if there is no Kibana session', async () => {
         const logoutRequest = await createLogoutRequest({ sessionIndex: idpSessionIndex });
         const logoutResponse = await supertest
-          .get(`/api/security/logout?${stringify(logoutRequest, { sort: false })}`)
+          .get(`/api/security/logout?${queryString.stringify(logoutRequest, { sort: false })}`)
           .expect(302);
 
         expect(logoutResponse.headers['set-cookie']).to.be(undefined);
@@ -854,8 +864,10 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
-        await logFile.isWritten();
-        const auditEvents = await logFile.readJSON();
+        const auditEvents = await logFile.waitForAuditEvents([
+          { event: { action: 'user_login', outcome: 'success' } },
+          { event: { action: 'user_logout', outcome: 'unknown' } },
+        ]);
 
         expect(auditEvents).to.have.length(2);
 
@@ -892,8 +904,9 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(401);
 
-        await logFile.isWritten();
-        const auditEvents = await logFile.readJSON();
+        const auditEvents = await logFile.waitForAuditEvents([
+          { event: { action: 'user_login', outcome: 'failure' } },
+        ]);
 
         expect(auditEvents).to.have.length(1);
         expect(auditEvents[0]).to.be.ok();

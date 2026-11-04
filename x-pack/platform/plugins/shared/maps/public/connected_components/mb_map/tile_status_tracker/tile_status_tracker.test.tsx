@@ -8,6 +8,7 @@
 // eslint-disable-next-line max-classes-per-file
 import React from 'react';
 import { mount } from 'enzyme';
+import { waitFor } from '@testing-library/react';
 import type { Map as MbMap, MapSourceDataEvent } from '@kbn/mapbox-gl';
 import type { TileError, TileMetaFeature } from '../../../../common/descriptor_types';
 import { TileStatusTracker } from './tile_status_tracker';
@@ -121,14 +122,6 @@ function createSourceDataEvent(mbSourceId: string, canonical: { x: number; y: nu
   };
 }
 
-async function sleep(timeout: number) {
-  return await new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(true);
-    }, timeout);
-  });
-}
-
 describe('TileStatusTracker', () => {
   const AU55_CANONICAL_TILE = { x: 6, y: 12, z: 5 };
   const AV55_CANONICAL_TILE = { x: 7, y: 12, z: 5 };
@@ -162,11 +155,11 @@ describe('TileStatusTracker', () => {
 
     mockMbMap.emit('sourcedata', createSourceDataEvent('foosource', AU55_CANONICAL_TILE));
 
-    // simulate delay. Cache-checking is debounced.
-    await sleep(300);
-
-    expect(loadedMap.get('foo')).toBe(true);
-    expect(loadedMap.get('bar')).toBe(false); // still outstanding tile requests
+    // Cache-checking is debounced.
+    await waitFor(() => {
+      expect(loadedMap.get('foo')).toBe(true);
+      expect(loadedMap.get('bar')).toBe(false); // still outstanding tile requests
+    });
     expect(loadedMap.has('foobar')).toBe(false); // never received tile requests, status should not have been reported for layer
 
     (au55BarTile.tile as MapSourceDataEvent['tile'])!.aborted = true; // abort tile
@@ -179,11 +172,11 @@ describe('TileStatusTracker', () => {
       },
     });
 
-    // simulate delay. Cache-checking is debounced.
-    await sleep(300);
-
-    expect(loadedMap.get('foo')).toBe(false); // still outstanding tile requests
-    expect(loadedMap.get('bar')).toBe(true); // tiles were aborted or errored
+    // Cache-checking is debounced.
+    await waitFor(() => {
+      expect(loadedMap.get('foo')).toBe(false); // still outstanding tile requests
+      expect(loadedMap.get('bar')).toBe(true); // tiles were aborted or errored
+    });
     expect(loadedMap.has('foobar')).toBe(false); // never received tile requests, status should not have been reported for layer
 
     component.unmount();
@@ -239,13 +232,14 @@ describe('TileStatusTracker', () => {
         },
       });
 
-      // simulate delay. Cache-checking is debounced.
-      await sleep(300);
-
-      expect(tileErrorsMap.get('layer1')?.length).toBe(1);
-      expect(tileErrorsMap.get('layer1')?.[0]).toEqual({
-        message: 'simulated error',
-        tileKey: '5/6/12',
+      // Cache-checking is debounced.
+      await waitFor(() => {
+        expect(tileErrorsMap.get('layer1')).toEqual([
+          {
+            message: 'simulated error',
+            tileKey: '5/6/12',
+          },
+        ]);
       });
       expect(tileErrorsMap.get('layer2')).toBeUndefined();
 
@@ -254,10 +248,10 @@ describe('TileStatusTracker', () => {
         createSourceDataEvent('layer1Source', IN_VIEW_CANONICAL_TILE)
       );
 
-      // simulate delay. Cache-checking is debounced.
-      await sleep(300);
-
-      expect(tileErrorsMap.get('layer1')).toBeUndefined();
+      // Cache-checking is debounced.
+      await waitFor(() => {
+        expect(tileErrorsMap.get('layer1')).toBeUndefined();
+      });
       expect(tileErrorsMap.get('layer2')).toBeUndefined();
     });
 
@@ -284,10 +278,10 @@ describe('TileStatusTracker', () => {
         },
       });
 
-      // simulate delay. Cache-checking is debounced.
-      await sleep(300);
-
-      expect(tileErrorsMap.get('layer1')?.length).toBe(1);
+      // Cache-checking is debounced.
+      await waitFor(() => {
+        expect(tileErrorsMap.get('layer1')?.length).toBe(1);
+      });
 
       const geojsonLayer1 = createMockLayer('layer1', 'layer1Source');
       geojsonLayer1.getSource = () => {
@@ -299,10 +293,10 @@ describe('TileStatusTracker', () => {
       };
       wrapper.setProps({ layerList: [geojsonLayer1] });
 
-      // simulate delay. Cache-checking is debounced.
-      await sleep(300);
-
-      expect(tileErrorsMap.get('layer1')).toBeUndefined();
+      // Cache-checking is debounced.
+      await waitFor(() => {
+        expect(tileErrorsMap.get('layer1')).toBeUndefined();
+      });
     });
 
     test('should only return tile errors within map zoom', async () => {
@@ -331,9 +325,10 @@ describe('TileStatusTracker', () => {
         },
       });
 
-      // simulate delay. Cache-checking is debounced.
-      await sleep(300);
-
+      // Cache-checking is debounced. 'layer1' is keyed once status is reported, with or without errors.
+      await waitFor(() => {
+        expect(tileErrorsMap.has('layer1')).toBe(true);
+      });
       expect(tileErrorsMap.get('layer1')).toBeUndefined();
     });
 
@@ -363,9 +358,10 @@ describe('TileStatusTracker', () => {
         },
       });
 
-      // simulate delay. Cache-checking is debounced.
-      await sleep(300);
-
+      // Cache-checking is debounced. 'layer1' is keyed once status is reported, with or without errors.
+      await waitFor(() => {
+        expect(tileErrorsMap.has('layer1')).toBe(true);
+      });
       expect(tileErrorsMap.get('layer1')).toBeUndefined();
     });
 
@@ -398,13 +394,13 @@ describe('TileStatusTracker', () => {
         },
       });
 
-      // simulate delay. Cache-checking is debounced.
-      await sleep(300);
-
-      expect(tileErrorsMap.get('layer1')?.[0]).toEqual({
-        message: 'simulated error',
-        tileKey: '5/6/12',
-        error: mockESErrorCause,
+      // Cache-checking is debounced and 'error' is only reported after the response body is read.
+      await waitFor(() => {
+        expect(tileErrorsMap.get('layer1')?.[0]).toEqual({
+          message: 'simulated error',
+          tileKey: '5/6/12',
+          error: mockESErrorCause,
+        });
       });
     });
 
@@ -433,12 +429,12 @@ describe('TileStatusTracker', () => {
         },
       });
 
-      // simulate delay. Cache-checking is debounced.
-      await sleep(300);
-
-      expect(tileErrorsMap.get('layer1')?.[0]).toEqual({
-        message: 'simulated error',
-        tileKey: '5/6/12',
+      // Cache-checking is debounced.
+      await waitFor(() => {
+        expect(tileErrorsMap.get('layer1')?.[0]).toEqual({
+          message: 'simulated error',
+          tileKey: '5/6/12',
+        });
       });
     });
   });

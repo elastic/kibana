@@ -14,11 +14,13 @@ import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 
 import { CalendarPanel } from './calendar_panel';
 import { DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW, DATE_TYPE_RELATIVE } from '../constants';
-import { formatDateRange } from '../utils';
+import { formatDateRange, formatInputDateRange } from '../utils';
 import { textToTimeRange } from '../parse';
+import moment from 'moment-timezone';
 
 const mockUseDateRangePickerContext = jest.fn();
 const mockCalendarRangeSpy = jest.fn();
+const mockCalendarTimeZoneSpy = jest.fn();
 
 jest.mock('../date_range_picker_context', () => ({
   useDateRangePickerContext: () => mockUseDateRangePickerContext(),
@@ -56,22 +58,27 @@ jest.mock('../date_range_picker_panel_ui', () => ({
 /**
  * Calendar mock: renders numbered day buttons for February 2026 (days 1-28).
  * Clicking a day simulates DayPicker's range selection state machine using the
- * current `range` prop.
+ * current `range` prop, and mirrors how DayPicker types the dates it emits:
+ * a `TZDate` when a time zone is configured, a local `Date` otherwise.
  */
 jest.mock('../calendar', () => {
   const mockReact = jest.requireActual('react');
+  const { TZDate: MockTZDate } = jest.requireActual('react-day-picker');
 
   function MockCalendar({
     range,
     onRangeChange,
+    timeZone,
   }: {
     range: { from?: Date; to?: Date } | undefined;
     onRangeChange: (r: { from?: Date; to?: Date } | undefined) => void;
+    timeZone?: string;
   }) {
     mockCalendarRangeSpy(range);
+    mockCalendarTimeZoneSpy(timeZone);
 
     const handleClick = (day: number) => {
-      const date = new Date(2026, 1, day);
+      const date = timeZone ? new MockTZDate(2026, 1, day, timeZone) : new Date(2026, 1, day);
 
       if (range?.from && !range.to) {
         onRangeChange({ from: range.from, to: date });
@@ -160,9 +167,14 @@ describe('CalendarPanel', () => {
     onPresetSave.mockClear();
     setText.mockClear();
     mockCalendarRangeSpy.mockClear();
+    mockCalendarTimeZoneSpy.mockClear();
     mockUseDateRangePickerContext.mockReturnValue(
       makeContext([DATE_TYPE_ABSOLUTE, DATE_TYPE_ABSOLUTE])
     );
+  });
+
+  afterEach(() => {
+    moment.tz.setDefault();
   });
 
   describe('initialization', () => {
@@ -170,7 +182,7 @@ describe('CalendarPanel', () => {
       renderWithEuiTheme(<CalendarPanel />);
 
       expect(setText).toHaveBeenCalledWith(
-        formatDateRange(feb2026(1, 10, 15, 30, 500), feb2026(2, 12, 45, 0, 0))
+        formatInputDateRange(feb2026(1, 10, 15, 30, 500), feb2026(2, 12, 45, 0, 0))
       );
     });
 
@@ -197,7 +209,7 @@ describe('CalendarPanel', () => {
       await clickDay(15);
 
       expect(setText).toHaveBeenLastCalledWith(
-        formatDateRange(feb2026(10, 0, 0, 0, 0), feb2026(15, 23, 59, 59, 999))
+        formatInputDateRange(feb2026(10, 0, 0, 0, 0), feb2026(15, 23, 59, 59, 999))
       );
     });
 
@@ -209,7 +221,50 @@ describe('CalendarPanel', () => {
       await clickDay(10);
 
       expect(setText).toHaveBeenLastCalledWith(
-        formatDateRange(feb2026(10, 0, 0, 0, 0), feb2026(10, 23, 59, 59, 999))
+        formatInputDateRange(feb2026(10, 0, 0, 0, 0), feb2026(10, 23, 59, 59, 999))
+      );
+    });
+
+    it('uses the configured time zone for the selected day boundaries and displayed range', async () => {
+      moment.tz.setDefault('Japan');
+
+      mockUseDateRangePickerContext.mockReturnValue({
+        ...makeContextNoDates(),
+        timeZone: 'Japan',
+      });
+
+      renderWithEuiTheme(<CalendarPanel />);
+
+      await clickDay(10);
+
+      expect(mockCalendarTimeZoneSpy).toHaveBeenLastCalledWith('Japan');
+
+      expect(setText).toHaveBeenLastCalledWith(
+        'Feb 10, 2026, 00:00:00.000 to Feb 10, 2026, 23:59:59.999'
+      );
+
+      const expectedStart = new Date('2026-02-10T00:00:00.000+09:00');
+      const expectedEnd = new Date('2026-02-10T23:59:59.999+09:00');
+
+      const { startDate, endDate } = mockUseDateRangePickerContext().timeRange;
+
+      expect(startDate?.getTime()).toBe(expectedStart.getTime());
+      expect(endDate?.getTime()).toBe(expectedEnd.getTime());
+    });
+
+    it('treats the Browser time zone as no time zone', async () => {
+      mockUseDateRangePickerContext.mockReturnValue({
+        ...makeContextNoDates(),
+        timeZone: 'Browser',
+      });
+
+      renderWithEuiTheme(<CalendarPanel />);
+
+      await clickDay(10);
+
+      expect(mockCalendarTimeZoneSpy).toHaveBeenLastCalledWith(undefined);
+      expect(setText).toHaveBeenLastCalledWith(
+        formatInputDateRange(feb2026(10, 0, 0, 0, 0), feb2026(10, 23, 59, 59, 999))
       );
     });
   });
@@ -222,7 +277,7 @@ describe('CalendarPanel', () => {
       await clickDay(10);
 
       expect(setText).toHaveBeenCalledWith(
-        formatDateRange(feb2026(10, 0, 0), feb2026(10, 23, 59, 59, 999))
+        formatInputDateRange(feb2026(10, 0, 0), feb2026(10, 23, 59, 59, 999))
       );
     });
 
@@ -234,7 +289,7 @@ describe('CalendarPanel', () => {
       await clickDay(15);
 
       expect(setText).toHaveBeenLastCalledWith(
-        formatDateRange(feb2026(10, 0, 0), feb2026(15, 23, 59, 59, 999))
+        formatInputDateRange(feb2026(10, 0, 0), feb2026(15, 23, 59, 59, 999))
       );
     });
 
@@ -251,7 +306,42 @@ describe('CalendarPanel', () => {
       await clickDay(20);
 
       expect(setText).toHaveBeenCalledWith(
-        formatDateRange(feb2026(20, 0, 0), feb2026(20, 23, 59, 59, 999))
+        formatInputDateRange(feb2026(20, 0, 0), feb2026(20, 23, 59, 59, 999))
+      );
+    });
+  });
+
+  describe('timePrecision', () => {
+    it.each(['none', 's'] as const)(
+      'keeps the full day up to 23:59:59.999 when the display precision is %s',
+      async (timePrecision) => {
+        mockUseDateRangePickerContext.mockReturnValue({
+          ...makeContextNoDates(),
+          transformOptions: { ...defaultTransformOptions, timePrecision },
+        });
+        renderWithEuiTheme(<CalendarPanel />);
+
+        await clickDay(10);
+        await clickDay(15);
+
+        expect(setText).toHaveBeenLastCalledWith(
+          formatInputDateRange(feb2026(10, 0, 0), feb2026(15, 23, 59, 59, 999))
+        );
+        expect(mockUseDateRangePickerContext().timeRange.endDate).toEqual(
+          feb2026(15, 23, 59, 59, 999)
+        );
+      }
+    );
+
+    it('does not truncate the existing range when converting to absolute text on mount', () => {
+      mockUseDateRangePickerContext.mockReturnValue({
+        ...makeContext([DATE_TYPE_ABSOLUTE, DATE_TYPE_ABSOLUTE]),
+        transformOptions: { ...defaultTransformOptions, timePrecision: 'none' },
+      });
+      renderWithEuiTheme(<CalendarPanel />);
+
+      expect(setText).toHaveBeenCalledWith(
+        formatInputDateRange(feb2026(1, 10, 15, 30, 500), feb2026(2, 12, 45, 0, 0))
       );
     });
   });

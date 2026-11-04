@@ -10,6 +10,7 @@ import { useService, CoreStart } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { ActionPoliciesApi } from '../services/action_policies_api';
+import { invalidateMatchedActionPolicies } from './invalidate_matched_action_policies';
 import { actionPolicyKeys } from './query_key_factory';
 
 export const useUnsnoozeActionPolicy = () => {
@@ -22,6 +23,7 @@ export const useUnsnoozeActionPolicy = () => {
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: actionPolicyKeys.lists(), exact: false });
       queryClient.invalidateQueries({ queryKey: actionPolicyKeys.detail(id) });
+      invalidateMatchedActionPolicies(queryClient);
       toasts.addSuccess(
         i18n.translate('xpack.alertingV2.actionPolicy.unsnoozeSuccess', {
           defaultMessage: 'Snooze cancelled',

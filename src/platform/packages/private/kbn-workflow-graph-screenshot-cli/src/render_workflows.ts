@@ -146,14 +146,14 @@ export const renderWorkflows = async (options: RenderOptions): Promise<void> => 
       playwright = await import('playwright');
     } catch {
       throw new Error(
-        "Unable to import 'playwright'. Make sure dependencies are bootstrapped (`yarn kbn bootstrap`)."
+        "Unable to import 'playwright'. Make sure dependencies are bootstrapped (`pnpm kbn bootstrap`)."
       );
     }
 
     // With no --chrome-executable override, Playwright launches the managed
-    // Chromium build it downloads during `yarn kbn bootstrap` (no system Chrome
+    // Chromium build it downloads during `pnpm kbn bootstrap` (no system Chrome
     // detection needed). If that download is missing, Playwright's own launch
-    // error already explains how to fetch it (`npx playwright install chromium`).
+    // error already explains how to fetch it (`node scripts/playwright install chromium`).
     log.debug(
       chromeExecutable
         ? `Using Chrome at: ${chromeExecutable}`

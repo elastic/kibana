@@ -14,16 +14,20 @@ import type {
 } from './types';
 import { AssetManagerClient } from './domain/asset_manager';
 import { EntityMaintainersClient } from './domain/entity_maintainers';
-import { FeatureFlags } from './infra/feature_flags';
+import {
+  FeatureFlags,
+  getLegacySecurityAssetsMigrationFlag,
+  isDualProcessEnabled,
+} from './infra/feature_flags';
 import { EngineDescriptorClient, EntityStoreGlobalStateClient } from './domain/saved_objects';
 import { LogsExtractionClient } from './domain/logs_extraction';
-import { createRemoteLogsExtractionClient } from './domain/logs_extraction/remote';
 import { HistorySnapshotClient } from './domain/history_snapshot';
 import { CRUDClient } from './domain/crud';
 import { EntityMetadataClient } from './domain/entity_metadata';
 import { RelationshipsClient } from './domain/relationships';
 import { ResolutionClient } from './domain/resolution';
 import { ResolutionRulesClient } from './domain/resolution/rules';
+import { CustomResolutionRulesClient } from './domain/resolution/rules';
 import type { TelemetryReporter } from './telemetry/events';
 import { createWorkflowTriggerEmitter } from './workflow/create_workflow_trigger_emitter';
 
@@ -89,31 +93,22 @@ export async function createRequestHandlerContext({
     esClient: core.elasticsearch.client.asInternalUser,
     namespace,
   });
-  const { client: remoteLogsExtractionClient, stateClient: remoteLogExtractionStateClient } =
-    createRemoteLogsExtractionClient({
-      logger,
-      namespace,
-      soClient: core.savedObjects.client,
-      esClient,
-      cpsClient,
-      isServerless,
-    });
-
   const logsExtractionClient = new LogsExtractionClient({
     logger,
     namespace,
-    esClient,
+    esClient: isServerless ? cpsClient : esClient,
     dataViewsService,
     engineDescriptorClient,
     globalStateClient,
-    remoteLogsExtractionClient,
   });
 
   const historySnapshotClient = new HistorySnapshotClient({
     logger,
     esClient,
+    internalEsClient: core.elasticsearch.client.asInternalUser,
     namespace,
     globalStateClient,
+    taskManager: taskManagerStart,
   });
 
   return {
@@ -126,13 +121,15 @@ export async function createRequestHandlerContext({
       taskManager: taskManagerStart,
       engineDescriptorClient,
       globalStateClient,
-      remoteLogExtractionStateClient,
       namespace,
       isServerless,
       logsExtractionClient,
       security: startPlugins.security,
       analytics,
       savedObjectsClient: core.savedObjects.client,
+      isLegacySecurityAssetsMigrationEnabled: () =>
+        getLegacySecurityAssetsMigrationFlag(coreStart.featureFlags),
+      isDualProcessEnabled: () => isDualProcessEnabled(coreStart.featureFlags),
     }),
     entityMaintainersClient: new EntityMaintainersClient({
       logger,
@@ -153,14 +150,21 @@ export async function createRequestHandlerContext({
       logger,
       esClient: core.elasticsearch.client.asCurrentUser,
       namespace,
+      analytics,
     }),
     entityResolutionRuleClient: new ResolutionRulesClient(
       core.savedObjects.client,
       namespace,
       logger
     ),
-    remoteLogsExtractionClient,
+    customResolutionRulesClient: new CustomResolutionRulesClient({
+      soClient: core.savedObjects.client,
+      esClient: core.elasticsearch.client.asCurrentUser,
+      spaceId: namespace,
+      logger,
+    }),
     featureFlags: new FeatureFlags(core.uiSettings.client),
+    isDualProcessEnabled: () => isDualProcessEnabled(coreStart.featureFlags),
     logsExtractionClient,
     historySnapshotClient,
     security: startPlugins.security,

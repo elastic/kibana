@@ -86,7 +86,6 @@ export const AssetDocumentTab: FC<Partial<AssetDocumentPanelProps>> = memo(() =>
   return (
     <>
       <EuiButtonGroup
-        color="primary"
         name="coarsness"
         legend={i18n.translate(
           'xpack.securitySolution.flyout.entityDetails.userDetails.tabsLegend',

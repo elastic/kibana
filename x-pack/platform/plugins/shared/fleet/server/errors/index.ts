@@ -11,6 +11,7 @@ import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 import { isObjectLike } from 'lodash';
 
 import type { RegistryConnectionErrorType } from '../../common/types';
+import type { BreakingChangesLog } from '../../common/services/changelog_utils';
 
 import { FleetError } from '../../common/errors';
 
@@ -74,7 +75,17 @@ export class RegistryResponseError extends RegistryError {
 // Package errors
 
 export class PackageInvalidDeploymentMode extends FleetError {}
+export class PackageFipsIncompatibleError extends FleetError {}
 export class PackageOutdatedError extends FleetError {}
+export class PackageBreakingChangesNotAcknowledgedError extends FleetError {
+  constructor(message: string, breakingChanges: BreakingChangesLog) {
+    super(message);
+    this.attributes = {
+      type: 'breaking_changes_not_acknowledged',
+      breaking_changes: breakingChanges,
+    };
+  }
+}
 export class PackageFailedVerificationError extends FleetError {
   constructor(pkgName: string, pkgVersion: string) {
     super(`${pkgName}-${pkgVersion} failed signature verification.`);
@@ -191,23 +202,24 @@ export class IacProvisionerConfigError extends FleetError {
 }
 
 /**
- * The IaC Provisioner rejected the render request (4xx). `errorCodes` carries the
- * provider's `errors[].code` values (e.g. `render.blueprint_not_found`) so the
+ * The IaC Provisioner rejected the request (4xx). `errorCodes` carries the
+ * provider's `errors[].code` values (e.g. `render.unknown_blueprint`) so the
  * route can decide whether the caller may fall back to the static template.
  */
-export class IacProvisionerRenderError extends FleetError {
+export class IacProvisionerRequestError extends FleetError {
   constructor(
     message: string,
     public readonly statusCode: number,
     public readonly errorCodes: string[] = []
   ) {
-    super(`Error rendering IaC template, ${message}`);
+    super(`Error calling IaC Provisioner, ${message}`);
   }
 }
 
 /**
- * The IaC Provisioner could not be reached or returned a 5xx — a retryable
- * availability problem rather than a contract rejection.
+ * The IaC Provisioner could not be reached, returned a 5xx, or responded
+ * without the expected payload — a retryable availability problem rather
+ * than a contract rejection.
  */
 export class IacProvisionerUnavailableError extends FleetError {
   constructor(message: string, public readonly statusCode?: number) {
@@ -217,6 +229,7 @@ export class IacProvisionerUnavailableError extends FleetError {
 
 export class AgentPolicyNameExistsError extends AgentPolicyError {}
 export class AgentReassignmentError extends FleetError {}
+export class AgentAlreadyAssignedError extends AgentReassignmentError {}
 export class AgentRollbackError extends FleetError {
   constructor(message: string) {
     super(`Error rolling back agent in Fleet: ${message}`);
@@ -247,6 +260,13 @@ export class HostedAgentPolicyRestrictionRelatedError extends FleetError {
     );
   }
 }
+export class AgentlessAgentRestrictionError extends FleetError {
+  constructor(message = 'Cannot perform that action') {
+    super(
+      `${message} in Fleet because managed agents are managed by Elastic and do not support this action.`
+    );
+  }
+}
 export class PackagePolicyRestrictionRelatedError extends FleetError {
   constructor(message = 'Cannot perform that action') {
     super(
@@ -262,6 +282,7 @@ export class FleetNotFoundError<TMeta = unknown> extends FleetError<TMeta> {}
 export class FleetTooManyRequestsError extends FleetError {}
 
 export class OutputUnauthorizedError extends FleetError {}
+export class FleetServerHostInvalidError extends FleetError {}
 export class OutputLicenceError extends FleetError {}
 export class DownloadSourceError extends FleetError {}
 export class DeleteUnenrolledAgentsPreconfiguredError extends FleetError {}

@@ -3,9 +3,8 @@
   "body": [
     {
       "id": "security_solution_home",
-      "icon": "logoSecurity",
-      "renderAs": "home",
-      "title": "Security",
+      "icon": "home",
+      "title": "Home",
       "href": "/jom/app/security/get_started",
       "path": "security_solution_home",
       "deepLink": {},
@@ -166,7 +165,7 @@
               "id": "coverage-overview",
               "href": "/jom/app/security/rules_coverage_overview",
               "path": "securityGroup:rules.node-1.coverage-overview",
-              "title": "MITRE ATT&CK® Coverage",
+              "title": "MITRE coverage",
               "deepLink": {},
               "isExternalLink": false,
               "sideNavStatus": "visible"

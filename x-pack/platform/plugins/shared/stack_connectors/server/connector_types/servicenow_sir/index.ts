@@ -27,6 +27,7 @@ import type {
   ServiceNowPublicConfigurationBaseType,
   ServiceNowSecretConfigurationType,
   ExecutorSubActionGetChoicesParams,
+  ExecutorSubActionGetIncidentParams,
   ExecutorSubActionCommonFieldsParams,
   ServiceNowPublicConfigurationType,
 } from '@kbn/connector-schemas/servicenow';
@@ -178,6 +179,15 @@ async function executor(
     data = await api.getChoices({
       externalService,
       params: getChoicesParams,
+      logger,
+    });
+  }
+
+  if (subAction === 'getIncident') {
+    const getIncidentParams = subActionParams as ExecutorSubActionGetIncidentParams;
+    data = await api.getIncident({
+      externalService,
+      params: getIncidentParams,
       logger,
     });
   }

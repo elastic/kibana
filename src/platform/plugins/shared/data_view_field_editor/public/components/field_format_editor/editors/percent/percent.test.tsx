@@ -14,7 +14,7 @@ import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public/contex
 import { formatId } from './constants';
 import { PercentFormatEditor } from './percent';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   context: jest.requireActual('@kbn/kibana-react-plugin/public/context').context,
@@ -79,5 +79,15 @@ describe('PercentFormatEditor', () => {
     );
     expect(screen.getByText('0.1')).toBeVisible();
     expect(screen.getByText('0.2')).toBeVisible();
+  });
+
+  it('should fire change with the new pattern when the pattern input changes', () => {
+    renderPercentFormatEditor();
+
+    fireEvent.change(screen.getByTestId('numberEditorFormatPattern'), {
+      target: { value: '0.0%' },
+    });
+
+    expect(onChange).toHaveBeenLastCalledWith({ pattern: '0.0%' });
   });
 });

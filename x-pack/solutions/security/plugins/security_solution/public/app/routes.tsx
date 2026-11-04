@@ -24,7 +24,6 @@ import { NotFoundPage } from './404';
 import { HomePage } from './home';
 import { AlertDetailsRedirect } from '../detections/pages/alerts/alert_details_redirect';
 import { AttackDetailsRedirect } from '../detections/pages/attacks/attack_details_redirect';
-import { CASES_FEATURES } from '../cases';
 
 interface RouterProps {
   children: React.ReactNode;
@@ -61,11 +60,7 @@ const PageRouterComponent: FC<RouterProps> = ({ children, history }) => {
               component={AttackDetailsRedirect}
             />
             <Route path="/">
-              <CasesContext
-                owner={[APP_ID]}
-                permissions={userCasesPermissions}
-                features={CASES_FEATURES}
-              >
+              <CasesContext owner={[APP_ID]} permissions={userCasesPermissions}>
                 <HomePage>{children}</HomePage>
               </CasesContext>
             </Route>

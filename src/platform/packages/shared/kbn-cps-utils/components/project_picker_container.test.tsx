@@ -59,6 +59,14 @@ describe('ProjectPickerContainer', () => {
       hasLinkedProjects: jest.fn(() => true),
       updateDefaultProjectRouting: jest.fn(),
       registerAppAccess: jest.fn(),
+      getConfigurationLinks: jest.fn(() => ({
+        currentSpace: {
+          icon: 'controls',
+          label: 'Adjust space defaults',
+          testSubj: 'adjustSpaceDefaultsMenuItem',
+          href: 'https://example.com',
+        },
+      })),
       ...props.cpsManager,
     };
     return await act(async () => {
@@ -78,19 +86,21 @@ describe('ProjectPickerContainer', () => {
   describe('rendering conditions', () => {
     it('should render when all required props and services are available', async () => {
       await renderProjectPicker();
-      expect(screen.getByTestId('project-picker-button')).toBeInTheDocument();
+      expect(screen.getByTestId('cps-project-picker-button')).toBeInTheDocument();
     });
 
-    it('should call fetchProjects when component mounts', async () => {
+    it('should call fetchProjects with the full catalog routing on mount', async () => {
+      const fetchProjects = jest.fn().mockResolvedValue({
+        origin: mockOriginProject,
+        linkedProjects: mockLinkedProjects,
+      });
       await renderProjectPicker({
         cpsManager: {
-          fetchProjects: jest.fn().mockResolvedValue({
-            origin: mockOriginProject,
-            linkedProjects: mockLinkedProjects,
-          }),
+          fetchProjects,
         },
       });
-      expect(screen.queryByTestId('project-picker-button')).toBeInTheDocument();
+      expect(screen.queryByTestId('cps-project-picker-button')).toBeInTheDocument();
+      expect(fetchProjects).toHaveBeenCalledWith(PROJECT_ROUTING.ALL);
     });
 
     it('should not render when there is no origin project', async () => {
@@ -103,7 +113,7 @@ describe('ProjectPickerContainer', () => {
         },
       });
 
-      expect(screen.queryByTestId('project-picker-button')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('cps-project-picker-button')).not.toBeInTheDocument();
     });
 
     it('should not render when there are no linked projects', async () => {
@@ -116,7 +126,7 @@ describe('ProjectPickerContainer', () => {
           getTotalProjectCount: jest.fn(() => 1),
         },
       });
-      expect(screen.queryByTestId('project-picker-button')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('cps-project-picker-button')).not.toBeInTheDocument();
     });
   });
 
@@ -129,20 +139,26 @@ describe('ProjectPickerContainer', () => {
           ),
         },
       });
-      const button = screen.getByTestId('project-picker-button');
+      const button = screen.getByTestId('cps-project-picker-button');
       expect(button).not.toHaveAttribute('disabled');
     });
 
     it('should have DISABLED access when on a different app', async () => {
+      const fetchProjects = jest.fn().mockResolvedValue({
+        origin: mockOriginProject,
+        linkedProjects: mockLinkedProjects,
+      });
       await renderProjectPicker({
         cpsManager: {
+          fetchProjects,
           getProjectPickerAccess$: jest.fn(
             () => new BehaviorSubject(ProjectRoutingAccess.DISABLED)
           ),
         },
       });
-      const button = screen.getByTestId('project-picker-button-disabled');
+      const button = screen.getByTestId('cps-project-picker-button-disabled');
       expect(button).toHaveAttribute('disabled');
+      expect(fetchProjects).not.toHaveBeenCalled();
     });
 
     it('should have READONLY access when on Lens editor page', async () => {
@@ -153,7 +169,7 @@ describe('ProjectPickerContainer', () => {
           ),
         },
       });
-      const button = screen.getByTestId('project-picker-button');
+      const button = screen.getByTestId('cps-project-picker-button');
       // Button should not be disabled but should be in readonly mode
       expect(button).not.toHaveAttribute('disabled');
     });

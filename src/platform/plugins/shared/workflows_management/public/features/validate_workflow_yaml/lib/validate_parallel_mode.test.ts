@@ -66,6 +66,7 @@ describe('validateParallelMode', () => {
     expect(results[0]).toEqual(
       expect.objectContaining({
         owner: 'parallel-mode-validation',
+        ruleId: 'invalidParallelMode',
         severity: 'error',
         message: PARALLEL_MODE_REFINEMENT_MESSAGE,
       })

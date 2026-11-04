@@ -3,7 +3,7 @@
 exports[`setupMode SetupModeBadge internal collection should render each product consistently 1`] = `
 <EuiBadge
   color="danger"
-  iconType="flag"
+  iconType="pencil"
   onClick={[Function]}
   onClickAriaLabel="Monitor with Metricbeat"
 >
@@ -14,7 +14,7 @@ exports[`setupMode SetupModeBadge internal collection should render each product
 exports[`setupMode SetupModeBadge metricbeat collection should render each product consistently 1`] = `
 <EuiBadge
   color="primary"
-  iconType="flag"
+  iconType="pencil"
 >
   Monitored with Metricbeat
 </EuiBadge>
@@ -23,7 +23,7 @@ exports[`setupMode SetupModeBadge metricbeat collection should render each produ
 exports[`setupMode SetupModeBadge net new user should render each product consistently 1`] = `
 <EuiBadge
   color="danger"
-  iconType="flag"
+  iconType="pencil"
   onClick={[Function]}
   onClickAriaLabel="Monitor with Metricbeat"
 >
@@ -34,7 +34,7 @@ exports[`setupMode SetupModeBadge net new user should render each product consis
 exports[`setupMode SetupModeBadge partially migrated should render each product consistently 1`] = `
 <EuiBadge
   color="warning"
-  iconType="flag"
+  iconType="pencil"
   onClick={[Function]}
   onClickAriaLabel="Disable self monitoring"
 >
@@ -46,7 +46,7 @@ exports[`setupMode SetupModeBadge should use a text status if internal collectio
 <Fragment>
   <EuiIcon
     aria-hidden={true}
-    type="flag"
+    type="pencil"
   />
    
   <EuiTextColor
@@ -60,7 +60,7 @@ exports[`setupMode SetupModeBadge should use a text status if internal collectio
 exports[`setupMode SetupModeBadge unknown should render each product consistently 1`] = `
 <EuiBadge
   color="danger"
-  iconType="flag"
+  iconType="pencil"
 >
   N/A
 </EuiBadge>

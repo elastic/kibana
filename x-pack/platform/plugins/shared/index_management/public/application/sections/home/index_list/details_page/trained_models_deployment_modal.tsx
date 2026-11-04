@@ -7,7 +7,6 @@
 import {
   EuiHealth,
   EuiButton,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -26,6 +25,7 @@ import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import { isSemanticTextField } from '../../../../components/mappings_editor/lib/utils';
 import { deNormalize } from '../../../../components/mappings_editor/lib';
@@ -172,26 +172,22 @@ export function TrainedModelsDeploymentModal({
           )}
         </ul>
         <EuiSpacer />
-        <EuiCallOut
+        <KbnWarningCallout
           announceOnMount
-          iconType="warning"
-          color="warning"
           title={i18n.translate(
             'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.forceSaveMappingsConfirmLabel',
             {
               defaultMessage: 'Saving mappings without a deployed model may cause errors',
             }
           )}
-        >
-          {i18n.translate(
+          text={i18n.translate(
             'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.forceSaveMappingsDescription',
             {
               defaultMessage:
-                'Saving a semantic text field referencing a model that is not running will break ingesting documents and searching over documents using or referencing that field.',
+                'Saving a semantic text or semantic field referencing a model that is not running will break ingesting documents and searching over documents using or referencing that field.',
             }
           )}
-
-          <EuiSpacer size="s" />
+        >
           <EuiCheckbox
             data-test-subj="allowForceSaveMappingsCheckbox"
             id="allowForceSaveMappings"
@@ -200,11 +196,11 @@ export function TrainedModelsDeploymentModal({
             label={i18n.translate(
               'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.allowForceSaveMappingsLabel',
               {
-                defaultMessage: 'Allow semantic text mapping updates without a deployed model',
+                defaultMessage: 'Allow mapping updates without a deployed model',
               }
             )}
           />
-        </EuiCallOut>
+        </KbnWarningCallout>
       </EuiModalBody>
       <EuiModalFooter>
         <EuiFlexGroup alignItems="center" justifyContent="flexEnd">

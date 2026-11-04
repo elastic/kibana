@@ -2,16 +2,9 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "react",
-      "@kbn/ambient-ui-types",
-      "@testing-library/jest-dom"
-    ]
+    "types": ["node"]
   },
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": ["**/*.ts"],
   "exclude": ["target/**/*"],
-  "kbn_references": [
-    "@kbn/i18n"
-  ]
+  "kbn_references": ["@kbn/ui-ai-components"]
 }

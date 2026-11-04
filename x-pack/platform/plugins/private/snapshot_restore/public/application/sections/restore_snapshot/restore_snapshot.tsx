@@ -6,17 +6,19 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { i18n as i18nLib } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
-import { EuiPageSection, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { EuiPageSection, EuiSpacer } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
 
 import type { SnapshotDetails, RestoreSettings } from '../../../../common/types';
 import type { Error } from '../../../shared_imports';
 import { SectionError, PageError } from '../../../shared_imports';
 import { BASE_PATH } from '../../constants';
 import { PageLoading, RestoreSnapshotForm } from '../../components';
-import { useServices } from '../../app_context';
-import { breadcrumbService, docTitleService } from '../../services/navigation';
+import { useCore, useServices } from '../../app_context';
+import { breadcrumbService, docTitleService, linkToSnapshots } from '../../services/navigation';
 import { useLoadSnapshot, executeRestore } from '../../services/http';
 import { useDecodedParams } from '../../lib';
 
@@ -29,7 +31,28 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
   history,
 }) => {
   const { i18n } = useServices();
+  const { docLinks } = useCore();
   const { repositoryName, snapshotId } = useDecodedParams<MatchParams>();
+  const pageTitle = i18nLib.translate('xpack.snapshotRestore.restoreSnapshotTitle', {
+    defaultMessage: "Restore ''{snapshot}''",
+    values: { snapshot: snapshotId },
+  });
+  const header = (
+    <>
+      <AppHeader
+        title={pageTitle}
+        back={{
+          href: history.createHref({ pathname: linkToSnapshots() }),
+          label: i18nLib.translate('xpack.snapshotRestore.home.snapshotsTabTitle', {
+            defaultMessage: 'Snapshots',
+          }),
+        }}
+        docLink={docLinks.links.snapshotRestore.guide}
+        spacing="bleed"
+      />
+      <EuiSpacer size="l" />
+    </>
+  );
 
   // Set breadcrumb and page title
   useEffect(() => {
@@ -139,36 +162,35 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
   };
 
   if (loadingSnapshot) {
-    return renderLoading();
+    return (
+      <>
+        {header}
+        {renderLoading()}
+      </>
+    );
   }
 
   if (snapshotError) {
-    return renderError();
+    return (
+      <>
+        {header}
+        {renderError()}
+      </>
+    );
   }
 
   return (
-    <EuiPageSection restrictWidth style={{ width: '100%' }}>
-      <EuiPageHeader
-        pageTitle={
-          <span data-test-subj="pageTitle">
-            <FormattedMessage
-              id="xpack.snapshotRestore.restoreSnapshotTitle"
-              defaultMessage="Restore ''{snapshot}''"
-              values={{ snapshot: snapshotId }}
-            />
-          </span>
-        }
-      />
-
-      <EuiSpacer size="l" />
-
-      <RestoreSnapshotForm
-        snapshotDetails={snapshotDetails as SnapshotDetails}
-        isSaving={isSaving}
-        saveError={renderSaveError()}
-        clearSaveError={clearSaveError}
-        onSave={onSave}
-      />
-    </EuiPageSection>
+    <>
+      {header}
+      <EuiPageSection restrictWidth style={{ width: '100%' }}>
+        <RestoreSnapshotForm
+          snapshotDetails={snapshotDetails as SnapshotDetails}
+          isSaving={isSaving}
+          saveError={renderSaveError()}
+          clearSaveError={clearSaveError}
+          onSave={onSave}
+        />
+      </EuiPageSection>
+    </>
   );
 };

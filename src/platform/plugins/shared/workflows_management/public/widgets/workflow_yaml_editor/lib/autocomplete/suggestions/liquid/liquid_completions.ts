@@ -67,6 +67,13 @@ export const LIQUID_FILTERS = [
     example: '{{ 1.2 | ceil }} => 2',
   },
   {
+    name: 'chunk',
+    description:
+      'Splits an array into consecutive groups of at most N items, so a foreach can iterate batches instead of single items',
+    insertText: 'chunk: ${1:size}',
+    example: '{{ [1, 2, 3, 4, 5] | chunk: 2 }} => [[1, 2], [3, 4], [5]]',
+  },
+  {
     name: 'compact',
     description: 'Removes any null values from an array',
     insertText: 'compact',

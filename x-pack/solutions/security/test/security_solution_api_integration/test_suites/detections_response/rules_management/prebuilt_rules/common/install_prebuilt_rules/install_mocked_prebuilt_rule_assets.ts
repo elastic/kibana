@@ -24,11 +24,14 @@ import {
   initializeSecuritySolution,
 } from '../../../../utils';
 
+const DETECTION_RULE_INSTALL_EVENT = 'detection_rule_install';
+
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
   const detectionsApi = getService('detectionsApi');
+  const ebtServer = getService('kibana_ebt_server');
 
   describe('@ess @serverless @skipInServerlessMKI Install from mocked prebuilt rule assets', () => {
     beforeEach(async () => {
@@ -46,13 +49,33 @@ export default ({ getService }: FtrProviderContext): void => {
       ];
       const RULES_COUNT = getRuleAssetSavedObjects().length;
 
-      it('installs prebuilt rules', async () => {
+      it('installs prebuilt rules and emits telemetry', async () => {
+        await ebtServer.setOptIn(true);
+        const fromTimestamp = new Date().toISOString();
         await createPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
         const body = await installPrebuiltRules(es, supertest);
+        const events = await ebtServer.getEvents(RULES_COUNT, {
+          eventTypes: [DETECTION_RULE_INSTALL_EVENT],
+          fromTimestamp,
+          withTimeoutMs: 10_000,
+        });
 
         expect(body.summary.succeeded).toBe(RULES_COUNT);
         expect(body.summary.failed).toBe(0);
         expect(body.summary.skipped).toBe(0);
+        expect(events).toHaveLength(RULES_COUNT);
+        expect(events.map(({ properties }) => properties)).toEqual(
+          expect.arrayContaining(
+            body.results.created.map(({ id }) =>
+              expect.objectContaining({
+                ruleId: id,
+                ruleType: 'query',
+                isPrebuilt: true,
+                isCustomized: false,
+              })
+            )
+          )
+        );
       });
 
       it('installs correct prebuilt rule versions', async () => {

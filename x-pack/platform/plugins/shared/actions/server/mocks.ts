@@ -35,21 +35,18 @@ const createSetupMock = () => {
     registerSubActionConnectorType: jest.fn(),
     getAxiosInstanceWithAuth: jest.fn(),
     getCredential: jest.fn(),
+    getConnectorJwtSigner: jest.fn(),
     getClientLeasePool: jest.fn(),
     isPreconfiguredConnector: jest.fn(),
     getSubActionConnectorClass: jest.fn(),
     getCaseConnectorClass: jest.fn(),
     getActionsHealth: jest.fn(),
-    getActionsConfigurationUtilities: jest.fn().mockReturnValue({
-      getAwsSesConfig: jest.fn(),
-      getWebhookSettings: jest.fn(),
-      getEarsUrl: jest.fn(),
-      getRelaySSLSettings: jest.fn(),
-    }),
+    getActionsConfigurationUtilities: jest.fn().mockReturnValue(actionsConfigMock.create()),
     getRelayClient: jest.fn(),
     setEnabledConnectorTypes: jest.fn(),
     isActionTypeEnabled: jest.fn(),
     registerConnectorLifecycleListener: jest.fn(),
+    registerConnectorEventEmitter: jest.fn(),
   });
   return mock;
 };
@@ -72,6 +69,7 @@ const createStartMock = () => {
     registerDynamicConnector: jest.fn(),
     unregisterDynamicConnector: jest.fn(),
     getRelayClient: jest.fn(),
+    getUsableUserOAuthConnectorIds: jest.fn().mockResolvedValue(new Set<string>()),
   });
 
   return mock;

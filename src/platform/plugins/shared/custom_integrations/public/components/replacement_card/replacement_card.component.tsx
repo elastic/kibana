@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** @jsxRuntime classic */
-/** @jsx jsx */
-
-import { css, jsx } from '@emotion/react';
+import React from 'react';
+import { css } from '@emotion/react';
 
 import {
   htmlIdGenerator,
@@ -83,9 +81,6 @@ export const ReplacementCard = ({ replacements }: Props) => {
   return (
     <div
       css={css`
-        & .euiAccordion__button {
-          color: ${euiTheme.colors.link};
-        }
         & .euiAccordion-isOpen .euiAccordion__childWrapper {
           margin-top: ${euiTheme.size.m};
         }

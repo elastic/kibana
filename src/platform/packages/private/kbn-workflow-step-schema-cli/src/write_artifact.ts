@@ -10,7 +10,46 @@
 import fs from 'fs';
 import Path from 'path';
 import { sha256Hex, stableStringify } from './hash';
-import type { IndexManifest, JsonObject, VariantManifest, VariantName } from './types';
+import { isObject } from './schema_helpers';
+import type { IndexManifest, JsonObject, JsonValue, VariantManifest, VariantName } from './types';
+
+/**
+ * Recursively sort the members of order-insensitive JSON Schema array keywords
+ * (`anyOf`, `oneOf`, `required`) by their stable-stringified content.
+ *
+ * This is a belt-and-braces pass: the primary determinism guarantee comes from
+ * sorting the connector/trigger arrays before `z.toJSONSchema` runs (which pins
+ * `__schemaN` definition numbering). This pass catches any remaining order
+ * instability in the final document.
+ *
+ * Intentionally NOT sorted:
+ * - `enum` — member order is curated (e.g. `["CRITICAL","HIGH","MEDIUM","LOW"]`);
+ *   alphabetizing it would reorder autocomplete suggestions in external editors.
+ * - `allOf` — no determinism benefit in this schema; sorting would cause churn.
+ * - `items` / `prefixItems` — tuple semantics; order is load-bearing.
+ */
+const canonicalizeUnions = (value: JsonValue): JsonValue => {
+  if (Array.isArray(value)) {
+    return value.map(canonicalizeUnions);
+  }
+  if (!isObject(value)) {
+    return value;
+  }
+  const result: JsonObject = {};
+  for (const key of Object.keys(value)) {
+    const child = value[key];
+    if ((key === 'anyOf' || key === 'oneOf' || key === 'required') && Array.isArray(child)) {
+      // Sort members by stable-stringified content so the same set of members
+      // always yields the same byte sequence regardless of source order.
+      result[key] = [...child]
+        .map(canonicalizeUnions)
+        .sort((a, b) => stableStringify(a).localeCompare(stableStringify(b)));
+    } else {
+      result[key] = canonicalizeUnions(child);
+    }
+  }
+  return result;
+};
 
 export interface WriteVariantOptions {
   /** Absolute bundle directory: `<output-dir>/<kibanaVersion>/<channel>`. */
@@ -26,8 +65,12 @@ export interface WriteVariantOptions {
  */
 export const writeVariant = ({ bundleDir, variant, doc }: WriteVariantOptions): VariantManifest => {
   const relativePath = `${variant}/schema.json`;
+  // Canonicalize order-insensitive union arrays (anyOf/oneOf/required) before
+  // hashing so that runs with different async step-loader resolution order
+  // produce byte-identical output for the same schema content.
+  const canonical = canonicalizeUnions(doc) as JsonObject;
   // Minified + key-sorted: this is exactly what is written and served.
-  const serialized = stableStringify(doc, false);
+  const serialized = stableStringify(canonical, false);
   const absolutePath = Path.join(bundleDir, relativePath);
   fs.mkdirSync(Path.dirname(absolutePath), { recursive: true });
   fs.writeFileSync(absolutePath, serialized);

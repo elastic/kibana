@@ -20,6 +20,7 @@ import {
   getEuidEsqlEvaluation,
   getFieldEvaluationsEsql,
 } from '@kbn/entity-store/common/domain/euid';
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import {
   concatJsonObjectPropertyEsqlExprSafe,
   JSON_OBJECT_START,
@@ -234,7 +235,7 @@ const buildV2ActorResolution = (): string => {
 
   // Combine field evaluations (entity.namespace) and user EUID into a single EVAL
   // to prevent the ES|QL optimizer from pruning the intermediate entity.namespace column.
-  const userFieldEvaluationsEsql = getFieldEvaluationsEsql('user');
+  const userFieldEvaluationsEsql = getFieldEvaluationsEsql(getBuiltInEntityDefinition('user'));
 
   // Compute EUIDs for typed entity types (excludes generic — falls back to entity.id)
   const typedEntityTypes = ALL_ENTITY_TYPES.filter((t) => t !== 'generic');
@@ -244,7 +245,7 @@ const buildV2ActorResolution = (): string => {
     evalParts.push(userFieldEvaluationsEsql);
   }
   typedEntityTypes.forEach((type) => {
-    evalParts.push(getEuidEsqlEvaluation(type, `_actor_${type}_euid`));
+    evalParts.push(getEuidEsqlEvaluation(getBuiltInEntityDefinition(type), `_actor_${type}_euid`));
   });
 
   // Use raw entity.id directly (not saved variable) since buildSaveSourceFieldsEsql
@@ -507,7 +508,7 @@ ${buildPinnedEsql(['_id', 'actorEntityId', 'targetEntityId'], pinnedIds)}
 // are NOT used here as group keys — IDs are collected via VALUES() and type/sub-type
 // are not available (entity-store join is CPS-unsafe). The follow-up enrichment query
 // supplies type/sub-type and regroupEvents performs the final type-level merge in TypeScript.
-| STATS badge = COUNT(*),
+| STATS badge = COUNT_DISTINCT(_id),
   isAlert = MV_MAX(VALUES(isAlert)),
   docs = VALUES(docData),
   docIds = VALUES(_id),

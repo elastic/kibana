@@ -1,0 +1,22 @@
+{
+  "esql.test_data_source_connection": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_query/data_source/_test"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-data-source-test-connection",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-esql-data-source-test-connection",
+    "availability": {
+      "stack": false,
+      "serverless": false
+    }
+  }
+}

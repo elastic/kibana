@@ -10,6 +10,51 @@
 import { DurationFormat } from './duration';
 import { expectReactElementWithNull, expectReactElementAsArray } from '../test_utils';
 import { asPrettyString } from '../utils';
+import {
+  getDurationUnitFromOutputFormat,
+  getDurationUnitInSeconds,
+} from '../constants/duration_formats';
+
+describe('getDurationUnitInSeconds', () => {
+  it.each([
+    ['picoseconds', 0.000000000001],
+    ['nanoseconds', 0.000000001],
+    ['microseconds', 0.000001],
+    ['milliseconds', 0.001],
+    ['seconds', 1],
+    ['minutes', 60],
+    ['hours', 3600],
+    ['days', 86400],
+    ['weeks', 604800],
+    ['months', 2592000],
+    ['years', 31536000],
+  ])('returns the number of seconds in %s', (unit, seconds) => {
+    expect(getDurationUnitInSeconds(unit)).toBe(seconds);
+  });
+
+  it('returns undefined for unsupported units', () => {
+    expect(getDurationUnitInSeconds('fortnights')).toBeUndefined();
+  });
+
+  it.each([
+    ['humanize', 'seconds'],
+    ['humanizePrecise', 'seconds'],
+    ['asMilliseconds', 'milliseconds'],
+    ['asSeconds', 'seconds'],
+    ['asMinutes', 'minutes'],
+    ['asHours', 'hours'],
+    ['asDays', 'days'],
+    ['asWeeks', 'weeks'],
+    ['asMonths', 'months'],
+    ['asYears', 'years'],
+  ])('maps output format %s to coordinate unit %s', (outputFormat, unit) => {
+    expect(getDurationUnitFromOutputFormat(outputFormat)).toBe(unit);
+  });
+
+  it('returns undefined for an unsupported output format', () => {
+    expect(getDurationUnitFromOutputFormat('asFortnights')).toBeUndefined();
+  });
+});
 
 describe('Duration Format', () => {
   test('handles missing values', () => {

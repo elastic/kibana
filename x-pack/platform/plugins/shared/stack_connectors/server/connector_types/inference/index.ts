@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import {
-  GenerativeAIForSearchPlaygroundConnectorFeatureId,
   GenerativeAIForSecurityConnectorFeatureId,
   WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
@@ -25,7 +24,9 @@ import {
   SUB_ACTION,
 } from '@kbn/connector-schemas/inference';
 import type { Config, Secrets } from '@kbn/connector-schemas/inference';
-import { InferenceConnector } from './inference';
+import { InferenceConnector, type InferenceConnectorDependencies } from './inference';
+
+export type { InferenceConnectorDependencies };
 import { unflattenObject } from '../lib/unflatten_object';
 
 const deleteInferenceEndpoint = async (
@@ -50,10 +51,12 @@ const deleteInferenceEndpoint = async (
   }
 };
 
-export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => ({
+export const getConnectorType = (
+  dependencies: InferenceConnectorDependencies = {}
+): SubActionConnectorType<Config, Secrets> => ({
   id: CONNECTOR_ID,
   name: CONNECTOR_NAME,
-  getService: (params) => new InferenceConnector(params),
+  getService: (params) => new InferenceConnector(params, dependencies),
   schema: {
     config: ConfigSchema,
     secrets: SecretsSchema,
@@ -61,7 +64,6 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
   validators: [{ type: ValidatorType.CONFIG, validator: configValidator }],
   supportedFeatureIds: [
     GenerativeAIForSecurityConnectorFeatureId,
-    GenerativeAIForSearchPlaygroundConnectorFeatureId,
     GenerativeAIForObservabilityConnectorFeatureId,
     WorkflowsConnectorFeatureId,
   ],

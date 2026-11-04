@@ -1,8 +1,7 @@
 {
-  "sha1": "ced47ddfa9cfe6cbc92c73894a2a76996867826e",
+  "sha1": "8065d9e1b4f8c9d580c9553383e5d9c61a3c56a0",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -11,6 +10,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -18,7 +18,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/create_calendars.spec.ts",
-        "line": 51,
+        "line": 49,
         "column": 38
       }
     },
@@ -28,6 +28,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -35,7 +36,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/create_calendars.spec.ts",
-        "line": 62,
+        "line": 60,
         "column": 16
       }
     },
@@ -45,6 +46,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -52,7 +54,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/create_calendars.spec.ts",
-        "line": 81,
+        "line": 79,
         "column": 74
       }
     },
@@ -62,6 +64,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -69,8 +72,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/delete_calendars.spec.ts",
-        "line": 44,
-        "column": 13
+        "line": 42,
+        "column": 63
       }
     },
     {
@@ -79,6 +82,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -86,8 +90,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/delete_calendars.spec.ts",
-        "line": 48,
-        "column": 23
+        "line": 47,
+        "column": 9
       }
     },
     {
@@ -96,6 +100,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -103,8 +108,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/delete_calendars.spec.ts",
-        "line": 59,
-        "column": 37
+        "line": 57,
+        "column": 42
       }
     },
     {
@@ -113,6 +118,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -120,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/delete_calendars.spec.ts",
-        "line": 73,
-        "column": 40
+        "line": 71,
+        "column": 55
       }
     },
     {
@@ -130,6 +136,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -137,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/get_all_calendars.spec.ts",
-        "line": 71,
-        "column": 23
+        "line": 70,
+        "column": 9
       }
     },
     {
@@ -147,6 +154,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -154,8 +162,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/get_all_calendars.spec.ts",
-        "line": 89,
-        "column": 18
+        "line": 87,
+        "column": 35
       }
     },
     {
@@ -164,6 +172,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -171,8 +180,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/get_all_calendars.spec.ts",
-        "line": 100,
-        "column": 100
+        "line": 99,
+        "column": 13
       }
     },
     {
@@ -181,6 +190,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -188,8 +198,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/get_calendar_by_id.spec.ts",
-        "line": 53,
-        "column": 25
+        "line": 51,
+        "column": 27
       }
     },
     {
@@ -198,6 +208,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -205,7 +216,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/get_calendar_by_id.spec.ts",
-        "line": 63,
+        "line": 62,
         "column": 21
       }
     },
@@ -215,6 +226,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -222,8 +234,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/get_calendar_by_id.spec.ts",
-        "line": 75,
-        "column": 25
+        "line": 74,
+        "column": 11
       }
     },
     {
@@ -232,6 +244,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -239,8 +252,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/get_calendar_by_id.spec.ts",
-        "line": 87,
-        "column": 99
+        "line": 86,
+        "column": 13
       }
     },
     {
@@ -249,6 +262,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -256,8 +270,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/update_calendars.spec.ts",
-        "line": 61,
-        "column": 17
+        "line": 59,
+        "column": 49
       }
     },
     {
@@ -266,6 +280,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -273,8 +288,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/update_calendars.spec.ts",
-        "line": 86,
-        "column": 25
+        "line": 84,
+        "column": 38
       }
     },
     {
@@ -283,6 +298,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -290,8 +306,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/update_calendars.spec.ts",
-        "line": 105,
-        "column": 29
+        "line": 94,
+        "column": 9
       }
     },
     {
@@ -300,6 +316,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -307,8 +324,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/update_calendars.spec.ts",
-        "line": 108,
-        "column": 42
+        "line": 106,
+        "column": 64
       }
     }
   ]
