@@ -24,14 +24,14 @@ export const RESET_TO_DEFAULT_LABEL = i18n.translate(
 
 export const getTruncationTitle = ({ returned, total }: { returned: number; total: number }) =>
   i18n.translate('xpack.entityInventoryApp.entityTable.truncation.title', {
-    defaultMessage: 'Showing the {returned} most recently seen of {total} entities',
+    defaultMessage: 'Showing the {returned, number} most recently seen of {total, number} entities',
     values: { returned, total },
   });
 
 export const getTruncationTotalUnknownTitle = ({ returned }: { returned: number }) =>
   i18n.translate('xpack.entityInventoryApp.entityTable.truncation.totalUnknownTitle', {
     defaultMessage:
-      'Showing the {returned} most recently seen entities. The total could not be counted.',
+      'Showing the {returned, number} most recently seen entities. The total could not be counted.',
     values: { returned },
   });
 

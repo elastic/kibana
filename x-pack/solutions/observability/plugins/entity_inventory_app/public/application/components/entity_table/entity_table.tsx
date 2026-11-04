@@ -44,6 +44,9 @@ const GRID_STYLE: EuiDataGridStyle = {
   cellPadding: 'm',
 };
 
+/** Wide enough for the full timestamp, which the grid would otherwise truncate. */
+const LAST_SEEN_COLUMN_WIDTH = 230;
+
 export interface EntityTableProps {
   entityType: InventoryEntityType;
   list: InventoryListResponse;
@@ -74,18 +77,19 @@ export const EntityTable = ({ entityType, list }: EntityTableProps) => {
     reset,
   } = useEntityTableState({ defaultVisibleColumns, rows: list.rows });
 
+  const columnKinds = useMemo(
+    () => new Map(list.columns.map(({ name, kind }) => [name, kind])),
+    [list.columns]
+  );
   const columns = useMemo<EuiDataGridColumn[]>(
     () =>
       [NAME_COLUMN_ID, ...list.columns.map(({ name }) => name)].map((id) => ({
         id,
         displayAsText: getColumnLabel(id),
         isSortable: true,
+        initialWidth: columnKinds.get(id) === 'last_seen' ? LAST_SEEN_COLUMN_WIDTH : undefined,
       })),
-    [list.columns]
-  );
-  const columnKinds = useMemo(
-    () => new Map(list.columns.map(({ name, kind }) => [name, kind])),
-    [list.columns]
+    [list.columns, columnKinds]
   );
 
   const getSortValue = useCallback(

@@ -51,7 +51,11 @@ export const EntityTableDiagnosticsCallout = ({
   errors: readonly InventorySourceError[];
   unavailableColumns: readonly InventoryUnavailableColumn[];
 }) => {
-  if (errors.length === 0 && unavailableColumns.length === 0) {
+  const messages = [
+    ...errors.map(getSourceErrorText),
+    ...unavailableColumns.map(getUnavailableColumnText),
+  ];
+  if (messages.length === 0) {
     return null;
   }
 
@@ -59,17 +63,13 @@ export const EntityTableDiagnosticsCallout = ({
     <KbnWarningCallout
       size="s"
       title={DIAGNOSTICS_TITLE}
-      text={
-        <ul>
-          {errors.map((error, index) => (
-            <li key={`error-${index}`}>{getSourceErrorText(error)}</li>
-          ))}
-          {unavailableColumns.map((unavailableColumn, index) => (
-            <li key={`column-${index}`}>{getUnavailableColumnText(unavailableColumn)}</li>
-          ))}
-        </ul>
-      }
       data-test-subj="entityInventoryDiagnosticsCallout"
-    />
+    >
+      <ul>
+        {messages.map((message, index) => (
+          <li key={index}>{message}</li>
+        ))}
+      </ul>
+    </KbnWarningCallout>
   );
 };

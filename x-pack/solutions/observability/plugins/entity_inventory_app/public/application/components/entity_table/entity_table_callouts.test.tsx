@@ -29,6 +29,20 @@ describe('EntityTableTruncationCallout', () => {
     expect(callout).toHaveTextContent(TRUNCATION_BODY);
   });
 
+  it('separates the thousands in the counts', () => {
+    render(<EntityTableTruncationCallout returned={2_500} total={12_345} />);
+
+    const callout = screen.getByTestId('entityInventoryTruncationCallout');
+    expect(callout).toHaveTextContent('2,500');
+    expect(callout).toHaveTextContent('12,345');
+  });
+
+  it('separates the thousands in the count when the total is unknown', () => {
+    render(<EntityTableTruncationCallout returned={2_500} total={null} />);
+
+    expect(screen.getByTestId('entityInventoryTruncationCallout')).toHaveTextContent('2,500');
+  });
+
   it('says the total is unknown when the count failed', () => {
     render(<EntityTableTruncationCallout returned={250} total={null} />);
 
