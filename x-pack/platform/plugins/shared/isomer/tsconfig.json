@@ -21,6 +21,7 @@
     "@kbn/palettes",
     "@kbn/core-ui-settings-server-internal",
     "@kbn/data-views-plugin",
-    "@kbn/field-formats-common"
+    "@kbn/field-formats-common",
+    "@kbn/datemath"
   ]
 }

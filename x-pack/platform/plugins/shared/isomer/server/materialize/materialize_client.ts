@@ -175,6 +175,7 @@ export const createScopedMaterializeClient = ({
           materialize: (nestedInput, nestedContext) =>
             materializeAt(nestedInput, nestedContext, depth + 1),
           validate,
+          getTimeZone: async () => (await kitServices()).settings.dateFormatTz,
           createKit: async (kitContext) => createMaterializeKit(await kitServices(), kitContext),
           kibanaVersion,
           now,
